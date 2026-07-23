@@ -84,12 +84,8 @@ class CrowdinSync extends Command
      *
      * @var array|string[]
      */
-    protected array $customMap = [
-        'pt' => 'pt-PT',
-        'es' => 'es-ES',
-        'sv' => 'sv-SE',
-        'nb' => 'no',//挪威
-    ];
+    protected array $customMap = [];
+
 
     /**
      * Execute the console command.
@@ -574,21 +570,26 @@ class CrowdinSync extends Command
     protected function getLanguages()
     {
         $languages = $this->option('lang');
+        $allowed = \App\Models\Language::listAvailable();
 
-        // If no languages specified, get all project languages
-        if (empty($languages) || in_array($languages, ['all', '*'])) {
-            return $this->getAllProjectLanguages();
+        // If no languages specified, use the configured available languages
+        if (empty($languages)) {
+            return array_map(fn ($lang) => str_replace('_', '-', $lang), $allowed);
         }
+
         $result = [];
         foreach ($languages as $language) {
-            if (empty(trim($language))) {
+            if (empty(trim($language)) || in_array($language, ['all', '*'])) {
                 continue;
             }
             if (isset($this->customMap[$language])) {
                 $language = $this->customMap[$language];
             }
             //crowdin use -
-            $result[] = str_replace('_', '-', $language);
+            $crowdinLang = str_replace('_', '-', $language);
+            if (in_array($language, $allowed) || in_array($crowdinLang, $allowed)) {
+                $result[] = $crowdinLang;
+            }
         }
         return $result;
     }

@@ -11,12 +11,12 @@ parked();
 
 $lang = get_langfolder_cookie();
 $localesMap = [
-    'en' => 'en-us',
-    'chs' => 'zh-cn',
-    'cht' => 'zh-tw',
+    'en' => null,
 ];
-$localeJs = $localesMap[$lang] ?? 'en-us';
-\Nexus\Nexus::js("vendor/fullcalendar-5.10.2/locales/{$localeJs}.js", 'footer', true);
+$localeJs = $localesMap[$lang] ?? null;
+if ($localeJs !== null) {
+    \Nexus\Nexus::js("vendor/fullcalendar-5.10.2/locales/{$localeJs}.js", 'footer', true);
+}
 
 $today = \Carbon\Carbon::today();
 $tomorrow = \Carbon\Carbon::tomorrow();

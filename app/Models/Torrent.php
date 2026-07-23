@@ -13,7 +13,7 @@ class Torrent extends NexusModel
         'name', 'filename', 'save_as', 'small_descr',
         'category', 'source', 'medium', 'codec', 'standard', 'processing', 'team', 'audiocodec',
         'size', 'added', 'type', 'numfiles', 'owner', 'nfo', 'sp_state', 'promotion_time_type',
-        'promotion_until', 'anonymous', 'url', 'pos_state', 'cache_stamp', 'picktype', 'picktime',
+        'promotion_until', 'anonymous', 'url', 'pos_state', 'cache_stamp',
         'last_reseed', 'leechers', 'seeders', 'cover', 'last_action', 'info_hash', 'pieces_hash',
         'times_completed', 'approval_status', 'banned', 'visible', 'pos_state_until', 'price',
         'hr',
@@ -42,7 +42,7 @@ class Torrent extends NexusModel
 
     public static $commentFields = [
         'id', 'name', 'added', 'visible', 'banned', 'owner', 'sp_state', 'promotion_time_type', 'promotion_until', 'pos_state',
-        'hr', 'picktype', 'picktime', 'last_action', 'leechers', 'seeders', 'times_completed', 'views', 'size', 'cover', 'anonymous',
+        'hr', 'last_action', 'leechers', 'seeders', 'times_completed', 'views', 'size', 'cover', 'anonymous',
         'approval_status', 'pos_state_until', 'category', 'source', 'medium', 'codec', 'standard', 'processing', 'team', 'audiocodec',
         'price',
     ];
@@ -127,18 +127,6 @@ class Torrent extends NexusModel
         ],
     ];
 
-    const PICK_NORMAL = 'normal';
-    const PICK_HOT = 'hot';
-    const PICK_CLASSIC = 'classic';
-    const PICK_RECOMMENDED = 'recommended';
-
-    public static array $pickTypes = [
-        self::PICK_NORMAL => ['text' => self::PICK_NORMAL, 'color' => ''],
-        self::PICK_HOT => ['text' => self::PICK_HOT, 'color' => '#e78d0f'],
-        self::PICK_CLASSIC => ['text' => self::PICK_CLASSIC, 'color' => '#77b300'],
-        self::PICK_RECOMMENDED => ['text' => self::PICK_RECOMMENDED, 'color' => '#820084'],
-    ];
-
     const PROMOTION_TIME_TYPE_GLOBAL = 0;
     const PROMOTION_TIME_TYPE_PERMANENT = 1;
     const PROMOTION_TIME_TYPE_DEADLINE = 2;
@@ -218,15 +206,6 @@ class Torrent extends NexusModel
         )->shouldCache();
     }
 
-    public function getPickInfoAttribute()
-    {
-        $info = self::$pickTypes[$this->picktype] ?? null;
-        if ($info) {
-            $info['text'] = nexus_trans('torrent.pick_info.' . $this->picktype);
-            return $info;
-        }
-    }
-
     public function getPromotionInfoAttribute()
     {
         return self::$promotionTypes[$this->sp_state_real] ?? null;
@@ -288,7 +267,7 @@ class Torrent extends NexusModel
 
     public static function getFieldsForList($appendTableName = false): array|bool
     {
-        $fields = 'id, sp_state, promotion_time_type, promotion_until, banned, picktype, pos_state, category, source, medium, codec, standard, processing, team, audiocodec, leechers, seeders, name, small_descr, times_completed, size, added, comments,anonymous,owner,url,cache_stamp, hr, approval_status, cover, price';
+        $fields = 'id, sp_state, promotion_time_type, promotion_until, banned, pos_state, category, source, medium, codec, standard, processing, team, audiocodec, leechers, seeders, name, small_descr, times_completed, size, added, comments,anonymous,owner,url,cache_stamp, hr, approval_status, cover, price';
         $fields = preg_split('/[,\s]+/', $fields);
         if ($appendTableName) {
             foreach ($fields as &$value) {
@@ -331,21 +310,6 @@ class Torrent extends NexusModel
     public static function listPromotionTimeTypes($onlyKeyValue = false, $valueField = 'text'): array
     {
         return self::listStaticProps(self::$promotionTimeTypes, 'torrent.promotion_time_types', $onlyKeyValue, $valueField);
-    }
-
-    public static function listPickInfo($onlyKeyValue = false, $valueField = 'text'): array
-    {
-        $result = self::$pickTypes;
-        $keyValue = [];
-        foreach ($result as $status => &$info) {
-            $text = nexus_trans('torrent.pick_info.' . $status);
-            $info['text'] = $text;
-            $keyValue[$status] = $info[$valueField];
-        }
-        if ($onlyKeyValue) {
-            return $keyValue;
-        }
-        return $result;
     }
 
     public function getHrRealAttribute(): string

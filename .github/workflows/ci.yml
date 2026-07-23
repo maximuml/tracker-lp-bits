@@ -27,6 +27,10 @@ jobs:
       - name: Validate composer.json and composer.lock
         run: composer validate
 
+      - name: Audit composer dependencies
+        run: composer audit
+        continue-on-error: true
+
       - name: Install dependencies
         run: composer install --prefer-dist --no-progress --no-interaction --ignore-platform-reqs --no-scripts
 

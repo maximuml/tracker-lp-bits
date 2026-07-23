@@ -16,7 +16,7 @@ if (!mkglobal("id:name:descr:type")){
 //check max price
 $maxPrice = get_setting("torrent.max_price");
 $paidTorrentEnabled = get_setting("torrent.paid_torrent_enabled") == "yes";
-if ($maxPrice > 0 && $_POST['price'] > $maxPrice && $paidTorrentEnabled) {
+if ($maxPrice > 0 && ($_POST['price'] ?? 0) > $maxPrice && $paidTorrentEnabled) {
     bark('price too much');
 }
 
@@ -25,7 +25,7 @@ if (!$id)
 	die();
 
 
-$res = sql_query("SELECT id, category, owner, filename, save_as, anonymous, picktype, picktime, added, banned FROM torrents WHERE id = ".mysql_real_escape_string($id));
+$res = sql_query("SELECT id, category, owner, filename, save_as, anonymous, added, banned FROM torrents WHERE id = ".mysql_real_escape_string($id));
 $row = mysql_fetch_array($res);
 $torrentAddedTimeString = $row['added'];
 if (!$row)
@@ -127,9 +127,6 @@ if(user_can('torrentsticky'))
 
 }
 
-$pick_info = "";
-$place_info = "";
-
 /**
  * get cover
  * @since 1.7.8
@@ -182,16 +179,16 @@ if($CURUSER["id"] == $row["owner"])
 {
 	if ($row["anonymous"]=='yes')
 	{
-		write_log("Torrent $id ($name) was edited by Anonymous" . $pick_info . $place_info);
+		write_log("Torrent $id ($name) was edited by Anonymous");
 	}
 	else
 	{
-		write_log("Torrent $id ($name) was edited by {$CURUSER['username']}" . $pick_info . $place_info);
+		write_log("Torrent $id ($name) was edited by {$CURUSER['username']}");
 	}
 }
 else
 {
-	write_log("Torrent $id ($name) was edited by {$CURUSER['username']}, Mod Edit" . $pick_info . $place_info);
+	write_log("Torrent $id ($name) was edited by {$CURUSER['username']}, Mod Edit");
 }
 
 $searchRep = new \App\Repositories\SearchRepository();

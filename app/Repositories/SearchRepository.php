@@ -664,7 +664,6 @@ class SearchRepository extends BaseRepository
         foreach ($response['hits']['hits'] as $value) {
             $torrentIdArr[] = $value['_source']['torrent_id'];
         }
-//        $fieldStr = 'id, sp_state, promotion_time_type, promotion_until, banned, picktype, pos_state, category, source, medium, codec, standard, processing, team, audiocodec, leechers, seeders, name, small_descr, times_completed, size, added, comments,anonymous,owner,url,cache_stamp, pt_gen, hr';
         $fields = Torrent::getFieldsForList();
         $idStr = implode(',', $torrentIdArr);
         $result['data'] = Torrent::query()

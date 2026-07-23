@@ -55,8 +55,6 @@ class CreateTorrentsTable extends Migration
             $table->unsignedInteger('url')->nullable()->index();
             $table->string('pos_state', 32)->default('normal');
             $table->unsignedTinyInteger('cache_stamp')->default(0);
-            $table->enum('picktype', ['hot', 'classic', 'recommended', 'normal'])->default('normal');
-            $table->dateTime('picktime')->nullable();
             $table->dateTime('last_reseed')->nullable();
             $table->text('technical_info')->nullable();
             $table->index(['visible', 'pos_state', 'id'] );

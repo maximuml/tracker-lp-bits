@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  push:
+    branches: ["php8"]
+  pull_request:
+    branches: ["php8"]
+
+jobs:
+  lint-and-validate:
+    name: Lint PHP and validate composer
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: bcmath, curl, gd, gmp, intl, json, mbstring, mysqli, pdo, redis, sqlite3, xml, zip
+          coverage: none
+
+      - name: Validate composer.json and composer.lock
+        run: composer validate
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress --no-interaction --ignore-platform-reqs --no-scripts
+
+      - name: Dump autoload
+        run: composer dump-autoload --no-interaction --no-scripts
+
+      - name: Run PHP syntax lint
+        run: |
+          find . -type f -name '*.php' \
+            -not -path './vendor/*' \
+            -not -path './node_modules/*' \
+            -not -path './.docker/*' \
+            -not -path './public/vendor/*' \
+            -not -path './storage/*' \
+            -print0 | xargs -0 -n1 -P4 php -l

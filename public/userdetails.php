@@ -52,17 +52,6 @@ $forumposts = \App\Models\Post::query()->where('userid', $user['id'])->count();
 	$arr = get_country_row($user['country']);
 	$country = "<img src=\"pic/flag/".$arr['flagpic']."\" alt=\"".$arr['name']."\" style='margin-left: 8pt' />";
 
-	$arr = (array)get_downloadspeed_row($user['download']);
-	$name = $arr['name'] ?? '';
-	$download = "<img class=\"speed_down\" src=\"pic/trans.gif\" alt=\"Downstream Rate\" title=\"".$lang_userdetails['title_download'].$name."\" /> ".$name;
-
-	$arr = (array)get_uploadspeed_row($user['upload']);
-    $name = $arr['name'] ?? '';
-	$upload = "<img class=\"speed_up\" src=\"pic/trans.gif\" alt=\"Upstream Rate\" title=\"".$lang_userdetails['title_upload'].$name."\" /> ".$name;
-
-	$arr = get_isp_row($user['isp']);
-    $name = $arr['name'] ?? '';
-	$isp = $name;
 
 if ($user["gender"] == "Male")
 $gender = "<img class='male' src='pic/trans.gif' alt='Male' title='".$lang_userdetails['title_male']."' style='margin-left: 4pt' />";
@@ -300,8 +289,6 @@ $slt = "<tr><td class=\"embedded\"><strong>" . $lang_userdetails['text_seeding_t
 
 	tr_small($lang_userdetails['row_sltime'], "<table border=\"0\" cellspacing=\"0\" cellpadding=\"0\">" . ($slr ?? '') . $slt . "</table>", 1);
 
-if ($user["download"] && $user["upload"])
-tr_small($lang_userdetails['row_internet_speed'], $download."&nbsp;&nbsp;&nbsp;&nbsp;".$upload."&nbsp;&nbsp;&nbsp;&nbsp;".$isp, 1);
 tr_small($lang_userdetails['row_gender'], $gender, 1);
 
 if (($user['donated'] > 0 || $user['donated_cny'] > 0 )&& (user_can('userprofile') || $CURUSER["id"] == $user["id"]))

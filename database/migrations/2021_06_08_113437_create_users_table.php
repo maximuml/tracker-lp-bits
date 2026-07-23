@@ -92,9 +92,6 @@ class CreateUsersTable extends Migration
             $table->string('signature', 800)->default('');
             $table->unsignedSmallInteger('lang')->default(6);
             $table->smallInteger('cheat')->default(0)->index();
-            $table->unsignedInteger('download')->default(0);
-            $table->unsignedInteger('upload')->default(0);
-            $table->unsignedTinyInteger('isp')->default(0);
             $table->unsignedSmallInteger('invites')->default(0);
             $table->unsignedMediumInteger('invited_by')->default(0);
             $table->enum('gender', ['Male', 'Female', 'N/A'])->default('N/A');

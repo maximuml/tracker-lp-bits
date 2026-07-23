@@ -93,9 +93,6 @@ if ($action){
 				$commentpm = $_POST["commentpm"];
 				$gender = $_POST["gender"];
 				$country = $_POST["country"];
-				$download = $_POST["download"];
-				$upload = $_POST["upload"];
-				$isp = $_POST["isp"];
 				//	$tzoffset = $_POST["tzoffset"];
 				if ( $_POST["avatar"] == '' )
 				$avatar=$_POST["savatar"];
@@ -116,12 +113,6 @@ if ($action){
 				$updateset[] = "gender = " . sqlesc($gender);
 				if (is_valid_id($country))
 				$updateset[] = "country = " . sqlesc($country);
-				if (is_valid_id($download))
-				$updateset[] = "download =  " . sqlesc($download);
-				if (is_valid_id($upload))
-				$updateset[] = "upload =  " . sqlesc($upload);
-				if (is_valid_id($isp))
-				$updateset[] = "isp =  " . sqlesc($isp);
 				//	$updateset[] = "tzoffset = " . sqlesc($tzoffset);
 
 				$updateset[] = "info = " . sqlesc($info);
@@ -161,20 +152,6 @@ if ($action){
             foreach ($trackerUrlList as $item) {
                 $trackerUrls .= "<option value=".htmlspecialchars($item->id)."" . (htmlspecialchars($CURUSER["tracker_url_id"]) == htmlspecialchars($item->id) ? " selected" : "") . ">".htmlspecialchars($item->url)."</option>\n";
             }
-            $isplist = "<option value=0>---- ".$lang_usercp['select_none_selected']." ----</option>\n";
-			$isp_r = sql_query("SELECT id,name FROM isp ORDER BY id ASC") or die;
-			while ($isp_a = mysql_fetch_array($isp_r))
-			$isplist .= "<option value=".htmlspecialchars($isp_a['id'])."" . (htmlspecialchars($CURUSER["isp"]) == htmlspecialchars($isp_a['id']) ? " selected" : "") . ">".htmlspecialchars($isp_a['name'])."</option>\n";
-
-            $downloadspeed = "<option value=0>---- ".$lang_usercp['select_none_selected']." ----</option>\n";
-			$ds_a = sql_query("SELECT id,name FROM downloadspeed ORDER BY id") or die;
-			while ($ds_b = mysql_fetch_array($ds_a))
-			$downloadspeed .= "<option value=".htmlspecialchars($ds_b['id'])."" . (htmlspecialchars($CURUSER["download"]) == htmlspecialchars($ds_b['id']) ? " selected" : "") . ">".htmlspecialchars($ds_b['name'])."</option>\n";
-
-			$uploadspeed = "<option value=0>---- ".$lang_usercp['select_none_selected']." ----</option>\n";
-			$us_a = sql_query("SELECT id,name FROM uploadspeed ORDER BY id") or die;
-			while ($us_b = mysql_fetch_array($us_a))
-			$uploadspeed .= "<option value=".htmlspecialchars($us_b['id'])."" . (htmlspecialchars($CURUSER["upload"]) == htmlspecialchars($us_b['id']) ? " selected" : "") . ">".htmlspecialchars($us_b['name'])."</option>\n";
 			$ra=sql_query("SELECT * FROM bitbucket WHERE public = '1'");
 			$options='';
 			$text = '';
@@ -207,7 +184,6 @@ if ($action){
 <input type=radio name=gender" . ($CURUSER["gender"] == "Male" ? " checked" : "") . " value=Male>".$lang_usercp['radio_male']."<input type=radio name=gender" .  ($CURUSER["gender"] == "Female" ? " checked" : "") . " value=Female>".$lang_usercp['radio_female'],1);
             tr_small($lang_usercp['row_tracker_url'], "<select name=tracker_url_id>\n$trackerUrls\n</select>" . "<br /><font class=small size=1>".$lang_usercp['row_tracker_url_help']."</font>",1);
             tr_small($lang_usercp['row_country'], "<select name=country>\n$countries\n</select>",1);
-			tr_small($lang_usercp['row_network_bandwidth'], "<b>".$lang_usercp['text_downstream_rate']. "</b>: <select name=download>".$downloadspeed."</select>&nbsp;&nbsp;<b>".$lang_usercp['text_upstream_rate']."</b>: <select name=upload>".$uploadspeed."</select>&nbsp;&nbsp;<b>".$lang_usercp['text_isp']."</b>: <select name=isp>".$isplist."</select>",1);
 			tr_small($lang_usercp['row_avatar_url'], "<img src=".($CURUSER["avatar"] ? "'$CURUSER[avatar]'" : "'" . get_protocol_prefix() . $BASEURL . "/pic/default_avatar.png'")." name='avatarimg'><br />
   <select name=savatar OnChange=\"document.forms[0].avatarimg.src=this.value;this.form.avatar.value=this.value;\">
   <option value='$CURUSER[avatar]'>".$lang_usercp['select_choose_avatar']."</option>

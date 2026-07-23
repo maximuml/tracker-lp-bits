@@ -23,9 +23,7 @@ class DatabaseSeeder extends Seeder
         $this->call(CaticonsTableSeeder::class);
         $this->call(CodecsTableSeeder::class);
         $this->call(CountriesTableSeeder::class);
-        $this->call(DownloadspeedTableSeeder::class);
         $this->call(FaqTableSeeder::class);
-        $this->call(IspTableSeeder::class);
         $this->call(LanguageTableSeeder::class);
         $this->call(MediaTableSeeder::class);
         $this->call(ModpanelTableSeeder::class);
@@ -39,7 +37,6 @@ class DatabaseSeeder extends Seeder
         $this->call(SysoppanelTableSeeder::class);
         $this->call(TeamsTableSeeder::class);
         $this->call(TorrentsStateTableSeeder::class);
-        $this->call(UploadspeedTableSeeder::class);
         $this->call(TagsTableSeeder::class);
     }
 }

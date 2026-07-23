@@ -29,14 +29,6 @@ return [
         'text' => 'News Management',
         'desc' => 'Add new, edit, delete news',
     ],
-    'newfunitem' => [
-        'text' => 'Post funbox item',
-        'desc' => "Post new funbox items and edit own's funbox items",
-    ],
-    'funmanage' => [
-        'text' => 'Funbox Management',
-        'desc' => "Edit, delete, ban anyone's funbox items",
-    ],
     'sbmanage' => [
         'text' => 'Shoutbox Management',
         'desc' => 'Delete messages in shoutbox and helpbox',

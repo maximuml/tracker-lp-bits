@@ -38,12 +38,7 @@ return [
         'classic' => 'Classic',
         'recommended' => 'Recommend',
     ],
-    'claim_already' => 'Claimed already',
     'no_snatch' => 'Never download this torrent yet',
-    'can_no_be_claimed_yet' => 'Can not be claimed yet',
-    'claim_number_reach_user_maximum' => 'The maximum number of user is reached',
-    'claim_number_reach_torrent_maximum' => 'The maximum number of torrent is reached',
-    'claim_disabled' => 'Claim is disabled',
     'operation_log' => [
         \App\Models\TorrentOperationLog::ACTION_TYPE_APPROVAL_DENY => [
             'type_text' => 'Allowed',

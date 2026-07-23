@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class RulesTableSeeder extends Seeder
 {
@@ -16,9 +17,9 @@ class RulesTableSeeder extends Seeder
     {
         
 
-        \DB::table('rules')->delete();
+        DB::table('rules')->delete();
         
-        \DB::table('rules')->insert(array (
+        DB::table('rules')->insert(array (
               0 => 
               array (
                 'id' => 21,
@@ -45,24 +46,6 @@ class RulesTableSeeder extends Seeder
                 'text' => '[*]Always respect uploaders no matter what!
             [*]All rules of forum posting apply to commenting, too.
             [*]Do not post negative comments about torrents that you don\'t plan to download.',
-              ),
-              2 => 
-              array (
-                'id' => 27,
-                'lang_id' => 6,
-                'title' => 'Funbox Rules - <font class=striking>Get bonus with fun!</font>',
-                'text' => '[*]Users can submit anything funny (e.g. stories, pictures, flash, video) except things that is pornographic, taboo, political sensitive or forbidden by local laws.
-            [*]Normally a newly-submitted funbox item would be outdated after 24 hours. However, if there are 20 or more votes on a funbox item, among which votes for \'funny\' is less than 25%, the funbox item would be outdated ahead of its due time.
-            [*]New funbox item can be submitted [b]only[/b] when the old one is outdated.
-            [*]User, whose funbox item is voted as [b]funny[/b], would be rewarded based on the following rules:
-            [*]More than 25 votes, among which votes for [i]funny[/i] exceed 50%. User gets 5 bonus.
-            [*]More than 50 votes, among which votes for [i]funny[/i] exceed 50%. User gets another 5 bonus.
-            [*]More than 100 votes, among which votes for [i]funny[/i] exceed 50%. User gets another 5 bonus.
-            [*]More than 200 votes, among which votes for [i]funny[/i] exceed 50%. User gets another 5 bonus.
-            [*]More than 25 votes, among which votes for [i]funny[/i] exceed 75%. User gets 10 bonus.
-            [*]More than 50 votes, among which votes for [i]funny[/i] exceed 75%. User gets another 10 bonus.
-            [*]More than 100 votes, among which votes for [i]funny[/i] exceed 75%. User gets another 10 bonus.
-            [*]More than 200 votes, among which votes for [i]funny[/i] exceed 75%. User gets another 10 bonus.',
               ),
               3 => 
               array (

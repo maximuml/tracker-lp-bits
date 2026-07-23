@@ -13,6 +13,7 @@ use App\Models\User;
 use App\Repositories\TorrentRepository;
 use App\Repositories\UploadRepository;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Auth;
@@ -70,8 +71,7 @@ class TorrentController extends Controller
         if ($this->hasExtraField('bonus_reward_values')) {
             $additional['bonus_reward_values'] = Setting::getBonusRewardOptions();
         }
-        $extraSettingsNames = ['torrent.claim_torrent_user_counts_up_limit'];
-        $this->appendExtraSettings($additional, $extraSettingsNames);
+        $this->appendExtraSettings($additional, []);
         $resource->additional($additional);
         do_log("controller torrent show prepare resource");
         return $this->success($resource);
@@ -86,7 +86,7 @@ class TorrentController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        return new Response('', 204);
     }
 
     /**
@@ -97,7 +97,7 @@ class TorrentController extends Controller
      */
     public function destroy($id)
     {
-        //
+        return new Response('', 204);
     }
 
     public function searchBox()

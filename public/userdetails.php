@@ -385,10 +385,7 @@ if ($user["id"] == $CURUSER["id"] || user_can('viewhistory')) {
         $hrStatus = (new \App\Repositories\HitAndRunRepository())->getStatusStats($user['id']);
         tr_small('H&R', sprintf('<a href="myhr.php?userid=%s" target="_blank">%s</a>', $user['id'], $hrStatus), 1);
     }
-    if (\App\Models\Claim::getConfigIsEnabled()) {
-        $states = (new \App\Repositories\ClaimRepository())->getStats($user['id']);
-        tr_small($lang_functions['menu_claim'], sprintf('<a href="claim.php?uid=%s" target="_blank">%s</a>', $user['id'], $states), 1);
-    }
+
     $bonusLogText = sprintf('&nbsp;&nbsp;<a href="bonus-log.php?uid=%s" target="_blank" class="altlink">[%s]</a>', $user['id'], nexus_trans("bonus-log.view_detail"));
     tr_small($lang_userdetails['row_karma_points'], number_format($user['seedbonus'], 1) . $bonusLogText, 1);
     tr_small($lang_functions['text_seed_points'], number_format($user['seed_points'], 1) . "&nbsp;&nbsp;<span class='text-muted'>(" . nexus_trans('label.updated_at') . ": " . $user['seed_points_updated_at'] . ")</span>", 1);
@@ -600,8 +597,6 @@ JS;
 	tr($lang_userdetails['row_forum_post_possible'], "<input type=\"radio\" name=\"forumpost\" value=\"yes\"" .($user["forumpost"]=="yes" ? " checked=\"checked\"" : "") . " />".$lang_userdetails['radio_yes']."<input type=\"radio\" name=\"forumpost\" value=\"no\"" .($user["forumpost"]=="no" ? " checked=\"checked\"" : "") . " />".$lang_userdetails['radio_no'], 1);
 	tr($lang_userdetails['row_upload_possible'], "<input type=\"radio\" name=\"uploadpos\" value=\"yes\"" .($user["uploadpos"]=="yes" ? " checked=\"checked\"" : "") . " />".$lang_userdetails['radio_yes']."<input type=\"radio\" name=\"uploadpos\" value=\"no\"" .($user["uploadpos"]=="no" ? " checked=\"checked\"" : "") . " />".$lang_userdetails['radio_no'], 1);
 	tr($lang_userdetails['row_download_possible'], "<input type=\"radio\" name=\"downloadpos\" value=\"yes\"" .($user["downloadpos"]=="yes" ? " checked=\"checked\"" : "") . " />".$lang_userdetails['radio_yes']."<input type=\"radio\" name=\"downloadpos\" value=\"no\"" .($user["downloadpos"]=="no" ? " checked=\"checked\"" : "") . " />".$lang_userdetails['radio_no'], 1);
-	tr($lang_userdetails['row_show_ad'], "<input type=\"radio\" name=\"noad\" value=\"no\"" .($user["noad"]=="no" ? " checked=\"checked\"" : "") . " />".$lang_userdetails['radio_yes']."<input type=\"radio\" name=\"noad\" value=\"yes\"" .($user["noad"]=="yes" ? " checked=\"checked\"" : "") . " />".$lang_userdetails['radio_no'], 1);
-	tr($lang_userdetails['row_no_ad_until'], "<input type=\"text\" name=\"noaduntil\" value=\"".htmlspecialchars($user["noaduntil"])."\" /> ".$lang_userdetails['text_no_ad_until_note'], 1);
 	if (user_can('cruprfmanage'))
 	{
 		tr($lang_userdetails['row_change_username'], "<input type=\"text\" size=\"25\" name=\"username\" value=\"" . htmlspecialchars($user['username']) . "\" />", 1);

@@ -526,16 +526,6 @@ class Torrent extends NexusModel
         return $this->belongsTo(AudioCodec::class, 'audiocodec');
     }
 
-    public function claim_users(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
-    {
-        return $this->belongsToMany(User::class, 'claims', 'torrent_id');
-    }
-
-    public function claims()
-    {
-        return $this->hasMany(Claim::class, 'torrent_id');
-    }
-
     public function scopeVisible($query, $visible = self::VISIBLE_YES)
     {
         $query->where('visible', $visible);

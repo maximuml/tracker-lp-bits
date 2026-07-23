@@ -485,10 +485,11 @@ class NexusDB
             foreach ($columns as $columnName) {
                 if (in_array($columnName, $index['columns'])) {
                     $indexesNames[] = $index['name'];
+                    break;
                 }
             }
         }
-        return $indexesNames;
+        return array_values(array_unique($indexesNames));
     }
 
     public static function getDatabaseVersionInfo(): array

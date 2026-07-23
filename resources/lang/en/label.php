@@ -270,7 +270,6 @@ return [
         'codec' => 'Codec',
         'audiocodec' => 'Audio codec',
         'medium' => 'Medium',
-        'team' => 'Team',
         'processing' => 'Processing',
         'standard' => 'Standard',
         'promotion_time_type' => 'Promotion type time',

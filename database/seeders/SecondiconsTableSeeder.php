@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class SecondiconsTableSeeder extends Seeder
 {
@@ -16,9 +17,9 @@ class SecondiconsTableSeeder extends Seeder
     {
         
 
-        \DB::table('secondicons')->delete();
+        DB::table('secondicons')->delete();
         
-        \DB::table('secondicons')->insert(array (
+        DB::table('secondicons')->insert(array (
             0 => 
             array (
                 'id' => 1,
@@ -27,7 +28,6 @@ class SecondiconsTableSeeder extends Seeder
                 'codec' => 1,
                 'standard' => 0,
                 'processing' => 0,
-                'team' => 0,
                 'audiocodec' => 0,
                 'name' => 'Blu-ray/H.264',
                 'class_name' => NULL,
@@ -41,7 +41,6 @@ class SecondiconsTableSeeder extends Seeder
                 'codec' => 2,
                 'standard' => 0,
                 'processing' => 0,
-                'team' => 0,
                 'audiocodec' => 0,
                 'name' => 'Blu-ray/VC-1',
                 'class_name' => NULL,
@@ -55,7 +54,6 @@ class SecondiconsTableSeeder extends Seeder
                 'codec' => 4,
                 'standard' => 0,
                 'processing' => 0,
-                'team' => 0,
                 'audiocodec' => 0,
                 'name' => 'Blu-ray/MPEG-2',
                 'class_name' => NULL,
@@ -69,7 +67,6 @@ class SecondiconsTableSeeder extends Seeder
                 'codec' => 1,
                 'standard' => 0,
                 'processing' => 0,
-                'team' => 0,
                 'audiocodec' => 0,
                 'name' => 'HD DVD/H.264',
                 'class_name' => NULL,
@@ -83,7 +80,6 @@ class SecondiconsTableSeeder extends Seeder
                 'codec' => 2,
                 'standard' => 0,
                 'processing' => 0,
-                'team' => 0,
                 'audiocodec' => 0,
                 'name' => 'HD DVD/VC-1',
                 'class_name' => NULL,
@@ -97,7 +93,6 @@ class SecondiconsTableSeeder extends Seeder
                 'codec' => 4,
                 'standard' => 0,
                 'processing' => 0,
-                'team' => 0,
                 'audiocodec' => 0,
                 'name' => 'HD DVD/MPEG-2',
                 'class_name' => NULL,
@@ -111,7 +106,6 @@ class SecondiconsTableSeeder extends Seeder
                 'codec' => 1,
                 'standard' => 0,
                 'processing' => 0,
-                'team' => 0,
                 'audiocodec' => 0,
                 'name' => 'Remux/H.264',
                 'class_name' => NULL,
@@ -125,7 +119,6 @@ class SecondiconsTableSeeder extends Seeder
                 'codec' => 2,
                 'standard' => 0,
                 'processing' => 0,
-                'team' => 0,
                 'audiocodec' => 0,
                 'name' => 'Remux/VC-1',
                 'class_name' => NULL,
@@ -139,7 +132,6 @@ class SecondiconsTableSeeder extends Seeder
                 'codec' => 4,
                 'standard' => 0,
                 'processing' => 0,
-                'team' => 0,
                 'audiocodec' => 0,
                 'name' => 'Remux/MPEG-2',
                 'class_name' => NULL,
@@ -153,7 +145,6 @@ class SecondiconsTableSeeder extends Seeder
                 'codec' => 0,
                 'standard' => 0,
                 'processing' => 0,
-                'team' => 0,
                 'audiocodec' => 0,
                 'name' => 'AVCHD',
                 'class_name' => NULL,
@@ -167,7 +158,6 @@ class SecondiconsTableSeeder extends Seeder
                 'codec' => 1,
                 'standard' => 0,
                 'processing' => 0,
-                'team' => 0,
                 'audiocodec' => 0,
                 'name' => 'HDTV/H.264',
                 'class_name' => NULL,
@@ -181,7 +171,6 @@ class SecondiconsTableSeeder extends Seeder
                 'codec' => 4,
                 'standard' => 0,
                 'processing' => 0,
-                'team' => 0,
                 'audiocodec' => 0,
                 'name' => 'HDTV/MPEG-2',
                 'class_name' => NULL,
@@ -195,7 +184,6 @@ class SecondiconsTableSeeder extends Seeder
                 'codec' => 0,
                 'standard' => 0,
                 'processing' => 0,
-                'team' => 0,
                 'audiocodec' => 0,
                 'name' => 'DVDR',
                 'class_name' => NULL,
@@ -209,7 +197,6 @@ class SecondiconsTableSeeder extends Seeder
                 'codec' => 1,
                 'standard' => 0,
                 'processing' => 0,
-                'team' => 0,
                 'audiocodec' => 0,
                 'name' => 'Rip/H.264',
                 'class_name' => NULL,
@@ -223,7 +210,6 @@ class SecondiconsTableSeeder extends Seeder
                 'codec' => 3,
                 'standard' => 0,
                 'processing' => 0,
-                'team' => 0,
                 'audiocodec' => 0,
                 'name' => 'Rip/Xvid',
                 'class_name' => NULL,
@@ -237,7 +223,6 @@ class SecondiconsTableSeeder extends Seeder
                 'codec' => 5,
                 'standard' => 0,
                 'processing' => 0,
-                'team' => 0,
                 'audiocodec' => 0,
                 'name' => 'CD/FLAC',
                 'class_name' => NULL,
@@ -251,7 +236,6 @@ class SecondiconsTableSeeder extends Seeder
                 'codec' => 6,
                 'standard' => 0,
                 'processing' => 0,
-                'team' => 0,
                 'audiocodec' => 0,
                 'name' => 'CD/APE',
                 'class_name' => NULL,
@@ -265,7 +249,6 @@ class SecondiconsTableSeeder extends Seeder
                 'codec' => 7,
                 'standard' => 0,
                 'processing' => 0,
-                'team' => 0,
                 'audiocodec' => 0,
                 'name' => 'CD/DTS',
                 'class_name' => NULL,
@@ -279,7 +262,6 @@ class SecondiconsTableSeeder extends Seeder
                 'codec' => 9,
                 'standard' => 0,
                 'processing' => 0,
-                'team' => 0,
                 'audiocodec' => 0,
                 'name' => 'CD/Other',
                 'class_name' => NULL,
@@ -293,7 +275,6 @@ class SecondiconsTableSeeder extends Seeder
                 'codec' => 5,
                 'standard' => 0,
                 'processing' => 0,
-                'team' => 0,
                 'audiocodec' => 0,
                 'name' => 'Extract/FLAC',
                 'class_name' => NULL,
@@ -307,7 +288,6 @@ class SecondiconsTableSeeder extends Seeder
                 'codec' => 7,
                 'standard' => 0,
                 'processing' => 0,
-                'team' => 0,
                 'audiocodec' => 0,
                 'name' => 'Extract/DTS',
                 'class_name' => NULL,
@@ -321,7 +301,6 @@ class SecondiconsTableSeeder extends Seeder
                 'codec' => 8,
                 'standard' => 0,
                 'processing' => 0,
-                'team' => 0,
                 'audiocodec' => 0,
                 'name' => 'Extract/AC-3',
                 'class_name' => NULL,

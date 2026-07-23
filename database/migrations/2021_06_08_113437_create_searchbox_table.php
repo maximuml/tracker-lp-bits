@@ -25,7 +25,6 @@ class CreateSearchboxTable extends Migration
             $table->smallInteger('showcodec')->default(0);
             $table->smallInteger('showstandard')->default(0);
             $table->smallInteger('showprocessing')->default(0);
-            $table->smallInteger('showteam')->default(0);
             $table->smallInteger('showaudiocodec')->default(0);
             $table->unsignedSmallInteger('catsperrow')->default(7);
             $table->unsignedSmallInteger('catpadding')->default(25);

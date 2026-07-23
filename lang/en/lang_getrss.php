@@ -21,7 +21,6 @@ $lang_getrss = array
 	'text_standard' => "Standard",
 	'text_processing' => "Processing",
 	'text_medium' => "Medium",
-	'text_team' => "Team",
 	'text_audio_codec' => "Audio Codec",
 	'row_item_title_type' => "Title display format",
 	'text_item_category' => "[Category] + ",

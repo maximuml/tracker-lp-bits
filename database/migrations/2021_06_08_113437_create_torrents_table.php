@@ -31,7 +31,6 @@ class CreateTorrentsTable extends Migration
             $table->unsignedTinyInteger('codec')->default(0);
             $table->unsignedTinyInteger('standard')->default(0);
             $table->unsignedTinyInteger('processing')->default(0);
-            $table->unsignedTinyInteger('team')->default(0);
             $table->unsignedTinyInteger('audiocodec')->default(0);
             $table->unsignedBigInteger('size')->default(0);
             $table->dateTime('added')->nullable();

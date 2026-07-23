@@ -103,7 +103,6 @@ class UploadRepository extends BaseRepository
             'audiocodec' => $subCategoriesAngTags['subCategories']['audiocodec'],
             'standard' => $subCategoriesAngTags['subCategories']['standard'],
             'processing' => $subCategoriesAngTags['subCategories']['processing'],
-            'team' => $subCategoriesAngTags['subCategories']['team'],
             'save_as' => $dname,
             'sp_state' => $this->getSpState($fileListInfo['totalLength']),
             'added' => $nowStr,

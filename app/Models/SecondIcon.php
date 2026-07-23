@@ -13,7 +13,7 @@ class SecondIcon extends NexusModel
 
     protected $fillable = [
         'name', 'class_name', 'image', 'mode',
-        'source', 'medium', 'codec', 'audiocodec', 'standard', 'processing', 'team'
+        'source', 'medium', 'codec', 'audiocodec', 'standard', 'processing'
     ];
 
     public static function formatFormData(array $data): array

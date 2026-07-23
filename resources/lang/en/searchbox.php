@@ -5,7 +5,6 @@ return [
     'sub_category_source_label' => 'Source',
     'sub_category_medium_label' => 'Media',
     'sub_category_standard_label' => 'Standard',
-    'sub_category_team_label' => 'Team',
     'sub_category_processing_label' => 'Processing',
     'sub_category_codec_label' => 'Codec',
     'sub_category_audiocodec_label' => 'AudioCodec',

@@ -24,7 +24,6 @@ use App\Models\Snatch;
 use App\Models\Source;
 use App\Models\StaffMessage;
 use App\Models\Standard;
-use App\Models\Team;
 use App\Models\Torrent;
 use App\Models\TorrentBuyLog;
 use App\Models\TorrentOperationLog;
@@ -65,8 +64,7 @@ class TorrentRepository extends BaseRepository
     private static array $defaultLoadRelationships = [
         'basic_category', 'basic_category.search_box',
         'basic_audiocodec', 'basic_codec', 'basic_medium',
-        'basic_source', 'basic_processing', 'basic_standard', 'basic_team',
-    ];
+        'basic_source', 'basic_processing', 'basic_standard', ];
 
     private static array $allowIncludes = ['user', 'extra', 'tags'];
 
@@ -78,7 +76,7 @@ class TorrentRepository extends BaseRepository
     ];
 
     private static array  $allowFilters = [
-        'title', 'category', 'source', 'medium', 'codec', 'audiocodec', 'standard', 'processing', 'team',
+        'title', 'category', 'source', 'medium', 'codec', 'audiocodec', 'standard', 'processing',
         'owner', 'visible', 'added', 'size', 'sp_state', 'leechers', 'seeders', 'times_completed',
         'bookmark',
     ];
@@ -276,10 +274,6 @@ class TorrentRepository extends BaseRepository
             if ($searchBox->showprocessing) {
                 $processing = Processing::query()->orderBy('sort_index')->orderBy('id')->get();
                 $modalRows[] = $this->formatRow(Processing::getLabelName(), $processing, 'processing');
-            }
-            if ($searchBox->showteam) {
-                $team = Team::query()->orderBy('sort_index')->orderBy('id')->get();
-                $modalRows[] = $this->formatRow(Team::getLabelName(), $team, 'team');
             }
             if ($searchBox->showaudiocodec) {
                 $audioCodec = AudioCodec::query()->orderBy('sort_index')->orderBy('id')->get();

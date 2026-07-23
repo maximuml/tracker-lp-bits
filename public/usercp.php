@@ -248,7 +248,6 @@ if ($action){
 				browsecheck("codecs", "cod", $notifs);
 				browsecheck("standards", "sta", $notifs);
 				browsecheck("processings", "pro", $notifs);
-				browsecheck("teams", "tea", $notifs);
 				browsecheck("audiocodecs", "aud", $notifs);
 				$incldead = $_POST["incldead"];
 				if (isset($incldead) && $incldead != 1) {
@@ -378,7 +377,6 @@ $showmedium = (get_searchbox_value($brsectiontype, 'showmedium') || ($allowspeci
 $showcodec = (get_searchbox_value($brsectiontype, 'showcodec') || ($allowspecial && get_searchbox_value($spsectiontype, 'showcodec'))); //whether show codecs or not
 $showstandard = (get_searchbox_value($brsectiontype, 'showstandard') || ($allowspecial && get_searchbox_value($spsectiontype, 'showstandard'))); //whether show standards or not
 $showprocessing = (get_searchbox_value($brsectiontype, 'showprocessing') || ($allowspecial && get_searchbox_value($spsectiontype, 'showprocessing'))); //whether show processings or not
-$showteam = (get_searchbox_value($brsectiontype, 'showteam') || ($allowspecial && get_searchbox_value($spsectiontype, 'showteam'))); //whether show teams or not
 $showaudiocodec = (get_searchbox_value($brsectiontype, 'showaudiocodec') || ($allowspecial && get_searchbox_value($spsectiontype, 'showaudiocodec'))); //whether show audio codecs or not
 $brcatsperror = (int)get_searchbox_value($brsectiontype, 'catsperrow');
 $catsperrow = (int)get_searchbox_value($spsectiontype, 'catsperrow');
@@ -397,7 +395,6 @@ if ($showmedium) $media = searchbox_item_list("media");
 if ($showcodec) $codecs = searchbox_item_list("codecs");
 if ($showstandard) $standards = searchbox_item_list("standards");
 if ($showprocessing) $processings = searchbox_item_list("processings");
-if ($showteam) $teams = searchbox_item_list("teams");
 if ($showaudiocodec) $audiocodecs = searchbox_item_list("audiocodecs");
 }
 */
@@ -505,17 +502,6 @@ if ($showaudiocodec) $audiocodecs = searchbox_item_list("audiocodecs");
 				{
 					$categories .= ($i && $i % $catsperrow == 0) ? "</tr><tr>" : "";
 					$categories .= "<td align=left class=bottom style=\"padding-bottom: 4px;padding-left: ".$catpadding."px\"><input class=checkbox name=pro{$processing['id']} type=\"checkbox\" " . (strpos($CURUSER['notifs'], "[pro".$processing['id']."]") !== false ? " checked" : "") . " value='yes'>{$processing['name']}</td>\n";
-					$i++;
-				}
-				$categories .= "</tr>";
-				}
-				if ($showteam){
-				$categories .= "<tr><td class=embedded align=left><b>".$lang_usercp['text_team']."</b></td></tr><tr>";
-				$i = 0;
-				foreach ($teams as $team)
-				{
-					$categories .= ($i && $i % $catsperrow == 0) ? "</tr><tr>" : "";
-					$categories .= "<td align=left class=bottom style=\"padding-bottom: 4px;padding-left: ".$catpadding."px\"><input class=checkbox name=tea{$team['id']} type=\"checkbox\" " . (strpos($CURUSER['notifs'], "[tea".$team['id']."]") !== false ? " checked" : "") . " value='yes'>{$team['name']}</td>\n";
 					$i++;
 				}
 				$categories .= "</tr>";

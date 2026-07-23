@@ -35,7 +35,6 @@ class DatabaseSeeder extends Seeder
         $this->call(StandardsTableSeeder::class);
         $this->call(StylesheetsTableSeeder::class);
         $this->call(SysoppanelTableSeeder::class);
-        $this->call(TeamsTableSeeder::class);
         $this->call(TorrentsStateTableSeeder::class);
         $this->call(TagsTableSeeder::class);
     }

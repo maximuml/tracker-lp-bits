@@ -145,7 +145,6 @@ get_where("media", "medium", "med");
 get_where("codecs", "codec", "cod");
 get_where("standards", "standard", "sta");
 get_where("processings", "processing", "pro");
-get_where("teams", "team", "tea");
 get_where("audiocodecs", "audiocodec", "aud");
 
 $hasStickyFirst = $hasStickySecond = $hasStickyNormal = $noNormalResults = false;

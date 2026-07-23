@@ -85,7 +85,7 @@ class SearchRepository extends BaseRepository
         ],
     ];
 
-    //cat401=1&source1=1&medium1=1&codec1=1&audiocodec1=1&standard1=1&processing1=1&team1=1&incldead=1&spstate=2&inclbookmarked=1&search=tr&search_area=1&search_mode=1
+    //cat401=1&source1=1&medium1=1&codec1=1&audiocodec1=1&standard1=1&processing1=1&incldead=1&spstate=2&inclbookmarked=1&search=tr&search_area=1&search_mode=1
     private static array $queryFieldToTorrentFieldMaps = [
         'cat' => 'category',
         'source' => 'source',
@@ -94,7 +94,6 @@ class SearchRepository extends BaseRepository
         'audiocodec' => 'audiocodec',
         'standard' => 'standard',
         'processing' => 'processing',
-        'team' => 'team',
     ];
 
     private static array $sortFieldMaps = [
@@ -144,7 +143,6 @@ class SearchRepository extends BaseRepository
             'codec' => ['type' => 'long', ],
             'standard' => ['type' => 'long', ],
             'processing' => ['type' => 'long', ],
-            'team' => ['type' => 'long', ],
             'audiocodec' => ['type' => 'long', ],
             'size' => ['type' => 'long', ],
             'added' => ['type' => 'date', 'format' => 'yyyy-MM-dd HH:mm:ss'],
@@ -424,7 +422,7 @@ class SearchRepository extends BaseRepository
      *
      * @param array $params
      * @param $user
-     * @param string $queryString cat401=1&cat404=1&source2=1&medium2=1&medium3=1&codec3=1&audiocodec3=1&standard2=1&standard3=1&processing2=1&team3=1&team4=1&incldead=1&spstate=0&inclbookmarked=0&search=&search_area=0&search_mode=0
+     * @param string $queryString cat401=1&cat404=1&source2=1&medium2=1&medium3=1&codec3=1&audiocodec3=1&standard2=1&standard3=1&processing2=1&incldead=1&spstate=0&inclbookmarked=0&search=&search_area=0&search_mode=0
      * @return array
      */
     public function buildQuery(array $params, $user, string $queryString)

@@ -224,7 +224,6 @@ $lang_usercp = array
 	'text_go_to_last_page' => "go to last page",
 	'select_half_down' => "50% down",
 	'row_category_icons' => "Category Icons",
-	'text_team' => "Group",
 	'text_audio_codec' => "Audio Codec",
 	'text_sub_category' => "Subcategories",
 	'select_medium' => "Medium",

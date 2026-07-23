@@ -42,7 +42,6 @@ $showmedium = (get_searchbox_value($sectionmode, 'showmedium') || ($allowmove &&
 $showcodec = (get_searchbox_value($sectionmode, 'showcodec') || ($allowmove && get_searchbox_value($othermode, 'showcodec'))); //whether show codecs or not
 $showstandard = (get_searchbox_value($sectionmode, 'showstandard') || ($allowmove && get_searchbox_value($othermode, 'showstandard'))); //whether show standards or not
 $showprocessing = (get_searchbox_value($sectionmode, 'showprocessing') || ($allowmove && get_searchbox_value($othermode, 'showprocessing'))); //whether show processings or not
-$showteam = (get_searchbox_value($sectionmode, 'showteam') || ($allowmove && get_searchbox_value($othermode, 'showteam'))); //whether show teams or not
 $showaudiocodec = (get_searchbox_value($sectionmode, 'showaudiocodec') || ($allowmove && get_searchbox_value($othermode, 'showaudiocodec'))); //whether show audio codecs or not
 */
 $settingMain = get_setting('main');
@@ -142,14 +141,6 @@ else {
 		tr($lang_edit['row_quality'], $source_select . $medium_select . $codec_select . $audiocodec_select. $standard_select . $processing_select, 1);
 	}
 
-	if ($showteam){
-		if ($showteam){
-			$team_select = torrent_selection($lang_edit['text_team'],"team_sel","teams",$row["team"]);
-		}
-		else $showteam = "";
-
-		tr($lang_edit['row_content'],$team_select,1);
-	}
 */
 
     $sectionCurrent = $searchBoxRep->renderTaxonomySelect($sectionmode, $row);

@@ -158,9 +158,7 @@ class SectionResource extends Resource
                 BooleanColumn::make('showmedium'),
                 BooleanColumn::make('showcodec'),
                 BooleanColumn::make('showstandard'),
-                BooleanColumn::make('showprocessing'),
-                BooleanColumn::make('showteam'),
-                BooleanColumn::make('showaudiocodec'),
+                BooleanColumn::make('showprocessing'),                BooleanColumn::make('showaudiocodec'),
             ])
             ->filters([
                 //

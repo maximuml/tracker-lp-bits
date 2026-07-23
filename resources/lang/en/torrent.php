@@ -16,7 +16,6 @@ return [
         'basic_media' => 'Media',
         'basic_source' => 'Source',
         'basic_standard' => 'Standard',
-        'basic_team' => 'Team',
         'size' => 'Size',
         'comments_label' => 'Comments',
         'times_completed_label' => 'Snatched',

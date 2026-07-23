@@ -14,7 +14,6 @@ $lang_catmanage = array
 	'text_codecs' => "Codecs",
 	'text_standards' => "Standards",
 	'text_processings' => "Processings",
-	'text_teams' => "Teams",
 	'text_audio_codecs' => "Audio Codecs",
 	'std_error' => "Error",
 	'std_invalid_type' => "Invalid type.",

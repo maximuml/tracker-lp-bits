@@ -34,7 +34,6 @@ $lang_upload = array
 	'text_to_special_section' => "or <b>Special</b> section ",
 	'text_type_note' => "&nbsp;&nbsp; <font class=\"small\">Choose <b>only</b> either of the two</font>",
 	'text_medium' => "Medium:",
-	'text_team' => "Group:",
 	'text_audio_codec' => "Audio Codec:",
 	'row_content' => "Content",
 	'text_chinese_title' => "Chinese Name:",

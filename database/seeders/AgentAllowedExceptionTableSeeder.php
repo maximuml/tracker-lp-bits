@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class AgentAllowedExceptionTableSeeder extends Seeder
 {
@@ -16,9 +17,9 @@ class AgentAllowedExceptionTableSeeder extends Seeder
     {
         
 
-        \DB::table('agent_allowed_exception')->delete();
+        DB::table('agent_allowed_exception')->delete();
         
-        \DB::table('agent_allowed_exception')->insert(array (
+        DB::table('agent_allowed_exception')->insert(array (
             0 => 
             array (
                 'family_id' => 16,

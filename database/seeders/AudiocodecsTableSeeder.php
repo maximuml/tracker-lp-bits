@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class AudiocodecsTableSeeder extends Seeder
 {
@@ -16,9 +17,9 @@ class AudiocodecsTableSeeder extends Seeder
     {
         
 
-        \DB::table('audiocodecs')->delete();
+        DB::table('audiocodecs')->delete();
         
-        \DB::table('audiocodecs')->insert(array (
+        DB::table('audiocodecs')->insert(array (
             0 => 
             array (
                 'id' => 1,

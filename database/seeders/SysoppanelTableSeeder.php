@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class SysoppanelTableSeeder extends Seeder
 {
@@ -16,9 +17,9 @@ class SysoppanelTableSeeder extends Seeder
     {
 
 
-        \DB::table('sysoppanel')->delete();
+        DB::table('sysoppanel')->delete();
 
-        \DB::table('sysoppanel')->insert(array (
+        DB::table('sysoppanel')->insert(array (
 //            0 =>
 //            array (
 //                'id' => 1,

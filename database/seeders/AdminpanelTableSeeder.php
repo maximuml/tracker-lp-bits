@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class AdminpanelTableSeeder extends Seeder
 {
@@ -16,9 +17,9 @@ class AdminpanelTableSeeder extends Seeder
     {
 
 
-        \DB::table('adminpanel')->delete();
+        DB::table('adminpanel')->delete();
 
-        \DB::table('adminpanel')->insert(array (
+        DB::table('adminpanel')->insert(array (
             0 =>
             array (
                 'id' => 1,

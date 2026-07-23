@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class AgentAllowedFamilyTableSeeder extends Seeder
 {
@@ -15,9 +16,9 @@ class AgentAllowedFamilyTableSeeder extends Seeder
     public function run()
     {
 
-        \DB::table('agent_allowed_family')->delete();
+        DB::table('agent_allowed_family')->delete();
 
-        \DB::table('agent_allowed_family')->insert(array (
+        DB::table('agent_allowed_family')->insert(array (
             0 =>
             array (
                 'id' => 1,

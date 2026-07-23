@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class TagsTableSeeder extends Seeder
 {
@@ -16,9 +17,9 @@ class TagsTableSeeder extends Seeder
     {
         
 
-        \DB::table('tags')->delete();
+        DB::table('tags')->delete();
         
-        \DB::table('tags')->insert(array (
+        DB::table('tags')->insert(array (
             0 => 
             array (
                 'id' => 1,

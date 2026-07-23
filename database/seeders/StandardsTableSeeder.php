@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class StandardsTableSeeder extends Seeder
 {
@@ -16,9 +17,9 @@ class StandardsTableSeeder extends Seeder
     {
         
 
-        \DB::table('standards')->delete();
+        DB::table('standards')->delete();
         
-        \DB::table('standards')->insert(array (
+        DB::table('standards')->insert(array (
             0 => 
             array (
                 'id' => 1,

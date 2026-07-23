@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class StylesheetsTableSeeder extends Seeder
 {
@@ -16,9 +17,9 @@ class StylesheetsTableSeeder extends Seeder
     {
         
 
-        \DB::table('stylesheets')->delete();
+        DB::table('stylesheets')->delete();
         
-        \DB::table('stylesheets')->insert(array (
+        DB::table('stylesheets')->insert(array (
             0 => 
             array (
                 'id' => 2,

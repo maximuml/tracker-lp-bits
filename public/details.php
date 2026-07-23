@@ -101,25 +101,12 @@ if (!$row) {
 		}
 		$editlink = "a title=\"".$lang_details['title_edit_torrent']."\" href=\"$url\"";
 
-		// ------------- start upped by block ------------------//
-		if($row['anonymous'] == 'yes') {
-			if (!user_can('viewanonymous') && $row['owner'] != $CURUSER['id'])
-			$uprow = "<i>".$lang_details['text_anonymous']."</i>";
-			else
-			$uprow = "<i>".$lang_details['text_anonymous']."</i> (" . get_username($row['owner'], false, true, true, false, false, true) . ")";
-		}
-		else {
-			$uprow = (isset($row['owner']) ? get_username($row['owner'], false, true, true, false, false, true) : "<i>".$lang_details['text_unknown']."</i>");
-		}
 		if ($CURUSER["id"] == $row["owner"])
 			$CURUSER["downloadpos"] = "yes";
 		if ($CURUSER["downloadpos"] != "no")
 		{
 			print("<tr><td class=\"rowhead\" width=\"13%\">".$lang_details['row_download']."</td><td class=\"rowfollow\" width=\"87%\" align=\"left\">");
-			if ($CURUSER['timetype'] != 'timealive')
-				$uploadtime = $lang_details['text_at'].$row['added'];
-			else $uploadtime = $lang_details['text_blank'].gettime($row['added'],true,false);
-			print("<a class=\"index\" href=\"download.php?id=$id\">" . htmlspecialchars($torrentnameprefix ."." .$row["save_as"]) . ".torrent</a>&nbsp;&nbsp;<a id=\"bookmark0\" href=\"javascript: bookmark(".$row['id'].",0);\">".get_torrent_bookmark_state($CURUSER['id'], $row['id'], false)."</a>&nbsp;&nbsp;&nbsp;".$lang_details['row_upped_by']."&nbsp;".$uprow.$uploadtime);
+			print("<a class=\"index\" href=\"download.php?id=$id\">" . htmlspecialchars($torrentnameprefix ."." .$row["save_as"]) . ".torrent</a>&nbsp;&nbsp;<a id=\"bookmark0\" href=\"javascript: bookmark(".$row['id'].",0);\">".get_torrent_bookmark_state($CURUSER['id'], $row['id'], false)."</a>");
 			print("</td></tr>");
 		}
 		else

@@ -5051,44 +5051,6 @@ function get_country_row($id)
 	else return $row;
 }
 
-function get_downloadspeed_row($id)
-{
-	global $Cache;
-	if (!$row = $Cache->get_value('downloadspeed_'.$id.'_content')){
-		$res = sql_query("SELECT * FROM downloadspeed WHERE id=".sqlesc($id)." LIMIT 1") or sqlerr(__FILE__,__LINE__);
-		$row = mysql_fetch_array($res);
-		$Cache->cache_value('downloadspeed_'.$id.'_content', $row, 86400);
-	}
-	if (!$row)
-		return false;
-	else return $row;
-}
-
-function get_uploadspeed_row($id)
-{
-	global $Cache;
-	if (!$row = $Cache->get_value('uploadspeed_'.$id.'_content')){
-		$res = sql_query("SELECT * FROM uploadspeed WHERE id=".sqlesc($id)." LIMIT 1") or sqlerr(__FILE__,__LINE__);
-		$row = mysql_fetch_array($res);
-		$Cache->cache_value('uploadspeed_'.$id.'_content', $row, 86400);
-	}
-	if (!$row)
-		return false;
-	else return $row;
-}
-
-function get_isp_row($id)
-{
-	global $Cache;
-	if (!$row = $Cache->get_value('isp_'.$id.'_content')){
-		$res = sql_query("SELECT * FROM isp WHERE id=".sqlesc($id)." LIMIT 1") or sqlerr(__FILE__,__LINE__);
-		$row = mysql_fetch_array($res);
-		$Cache->cache_value('isp_'.$id.'_content', $row, 86400);
-	}
-	if (!$row)
-		return false;
-	else return $row;
-}
 
 function valid_file_name($filename)
 {

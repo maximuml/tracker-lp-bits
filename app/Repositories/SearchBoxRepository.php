@@ -88,8 +88,6 @@ class SearchBoxRepository extends BaseRepository
                         'torrent_field' => $torrentField,
                         'display_text' => [
                             'en' => nexus_trans("searchbox.sub_category_{$torrentField}_label", [], Locale::$languageMaps['en']),
-                            'chs' => nexus_trans("searchbox.sub_category_{$torrentField}_label", [], Locale::$languageMaps['chs']),
-                            'cht' => nexus_trans("searchbox.sub_category_{$torrentField}_label", [], Locale::$languageMaps['cht']),
                         ],
                     ];
                 }

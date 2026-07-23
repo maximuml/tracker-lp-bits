@@ -14,8 +14,6 @@ class Locale
 {
     public static array $languageMaps = [
         'en' => 'en',
-        'chs' => 'zh_CN',
-        'cht' => 'zh_TW',
     ];
 
     /**
@@ -56,13 +54,14 @@ class Locale
             $log = "Cookie::get(): $lang";
         }
         do_log($log);
-        return self::$languageMaps[$lang] ?? $lang;
+        $lang = $lang ?: 'en';
+        return self::$languageMaps[$lang] ?? 'en';
     }
 
     public static function getDefault()
     {
         $defaultLang = get_setting("main.defaultlang");
-        return self::$languageMaps[$defaultLang] ?? $defaultLang;
+        return self::$languageMaps[$defaultLang] ?? 'en';
     }
 
 }

@@ -311,8 +311,8 @@ class User extends Authenticatable implements FilamentUser, HasName
             $log .= ", locale from cookie: $locale";
         }
         if (!$locale) {
-            $lang = $this->language?->site_lang_folder ?? null;
-            $locale = Locale::$languageMaps[$lang] ?? $lang;
+            $lang = $this->language?->site_lang_folder ?: 'en';
+            $locale = Locale::$languageMaps[$lang] ?? 'en';
             $log .= ", [NO_DATA_FROM_COOKIE], lang from database: $lang, locale: $locale";
         }
         do_log($log);
@@ -321,10 +321,6 @@ class User extends Authenticatable implements FilamentUser, HasName
 
     public function getSiteLangFolderAttribute()
     {
-        $result = optional($this->language)->site_lang_folder;
-        if ($result && in_array($result, ['en', 'chs', 'cht'])) {
-            return $result;
-        }
         return 'en';
     }
 

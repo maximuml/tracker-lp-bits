@@ -42,6 +42,8 @@ class SettingPolicy extends BasePolicy
     public function create(User $user)
     {
         //
+    
+        return false;
     }
 
     /**
@@ -66,6 +68,8 @@ class SettingPolicy extends BasePolicy
     public function delete(User $user, Setting $setting)
     {
 
+    
+        return false;
     }
 
     /**
@@ -78,6 +82,8 @@ class SettingPolicy extends BasePolicy
     public function restore(User $user, Setting $setting)
     {
         //
+    
+        return false;
     }
 
     /**
@@ -90,6 +96,8 @@ class SettingPolicy extends BasePolicy
     public function forceDelete(User $user, Setting $setting)
     {
         //
+    
+        return false;
     }
 
     private function can(User $user)

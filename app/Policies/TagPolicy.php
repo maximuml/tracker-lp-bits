@@ -78,6 +78,8 @@ class TagPolicy extends BasePolicy
     public function restore(User $user, Tag $tag)
     {
         //
+    
+        return false;
     }
 
     /**
@@ -90,6 +92,8 @@ class TagPolicy extends BasePolicy
     public function forceDelete(User $user, Tag $tag)
     {
         //
+    
+        return false;
     }
 
     private function can(User $user)

@@ -61,6 +61,7 @@ class TrackerRepository extends BaseRepository
          * Note: In Octane this class will be reused, use variable is better !!!
          */
         $userUpdates = [];
+        $user = null;
         try {
             throw new TrackerException("Deprecated! Please announce to: " . getSchemeAndHttpHost() . DEFAULT_TRACKER_URI);
             $withPeers = false;
@@ -1007,6 +1008,7 @@ class TrackerRepository extends BaseRepository
          * Note: In Octane this class will be reused, use variable is better !!!
          */
         $userUpdates = [];
+        $user = null;
         try {
             throw new TrackerException("Deprecated! Please announce to: " . getSchemeAndHttpHost() . DEFAULT_TRACKER_URI);
             $infoHashArr = $this->checkScrapeFields($request);

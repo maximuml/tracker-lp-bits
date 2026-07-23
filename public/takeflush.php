@@ -1,10 +1,11 @@
 <?php
 require_once("../include/bittorrent.php");
 dbconn();
-require_once(get_langfile_path());
+require_once __DIR__ . '/../lang/en/lang_takeflush.php';
 loggedinorreturn();
 function bark($msg)
 {
+   global $lang_takeflush;
    stdhead();
    stdmsg($lang_takeflush['std_failed'], $msg);
    stdfoot();

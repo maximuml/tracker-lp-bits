@@ -82,6 +82,8 @@ class CommentController extends Controller
     public function show($id)
     {
         //
+    
+        return new \Illuminate\Http\Response('');
     }
 
     /**
@@ -94,6 +96,8 @@ class CommentController extends Controller
     public function update(Request $request, $id)
     {
         //
+    
+        return new \Illuminate\Http\Response('');
     }
 
     /**
@@ -105,5 +109,7 @@ class CommentController extends Controller
     public function destroy($id)
     {
         //
+    
+        return new \Illuminate\Http\Response('');
     }
 }

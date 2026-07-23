@@ -78,6 +78,8 @@ class ExamPolicy extends BasePolicy
     public function restore(User $user, Exam $exam)
     {
         //
+    
+        return false;
     }
 
     /**
@@ -90,6 +92,8 @@ class ExamPolicy extends BasePolicy
     public function forceDelete(User $user, Exam $exam)
     {
         //
+    
+        return false;
     }
 
     private function can(User $user)

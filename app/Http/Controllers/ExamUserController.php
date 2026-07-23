@@ -66,6 +66,8 @@ class ExamUserController extends Controller
     public function show($id)
     {
 
+    
+        return [];
     }
 
     /**
@@ -78,6 +80,8 @@ class ExamUserController extends Controller
     public function update(Request $request, $id)
     {
 
+    
+        return [];
     }
 
     /**

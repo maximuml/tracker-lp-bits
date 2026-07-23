@@ -493,19 +493,6 @@ JS;
         return $result;
     }
 
-    public function prepareTorrents(array $torrentIdArr)
-    {
-        $customFieldValues = $this->listTorrentCustomField($torrentIdArr);
-        $result = [];
-        foreach ($customFieldValues as $tid => &$customFields) {
-            foreach ($customFields as &$field) {
-                $field['custom_field_value_formatted'] = $this->formatCustomFieldValue($field);
-                $result[$tid][$field['name']] = $field;
-            }
-        }
-        $this->preparedTorrentCustomFieldValues = $result;
-    }
-
     public function getPreparedTorrent($torrentId = null, $fieldName = null)
     {
         if (is_null($torrentId)) {

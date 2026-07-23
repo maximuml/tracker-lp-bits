@@ -78,7 +78,7 @@ class Hook
     public function dump()
     {
         echo '<pre>';
-        var_dump(self::$callbacks);
+        echo print_r(self::$callbacks, true);
         echo '</pre>';
     }
 }

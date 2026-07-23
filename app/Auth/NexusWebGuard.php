@@ -88,11 +88,15 @@ class NexusWebGuard implements StatefulGuard
     public function attempt(array $credentials = [], $remember = false)
     {
         // TODO: Implement attempt() method.
+    
+        return false;
     }
 
     public function once(array $credentials = [])
     {
         // TODO: Implement once() method.
+    
+        return false;
     }
 
     public function login(Authenticatable $user, $remember = false)
@@ -103,15 +107,21 @@ class NexusWebGuard implements StatefulGuard
     public function loginUsingId($id, $remember = false)
     {
         // TODO: Implement loginUsingId() method.
+    
+        return false;
     }
 
     public function onceUsingId($id)
     {
         // TODO: Implement onceUsingId() method.
+    
+        return false;
     }
 
     public function viaRemember()
     {
         // TODO: Implement viaRemember() method.
+    
+        return false;
     }
 }

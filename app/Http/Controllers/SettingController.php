@@ -55,6 +55,8 @@ class SettingController extends Controller
     public function show($id)
     {
 
+    
+        return [];
     }
 
     /**
@@ -67,6 +69,8 @@ class SettingController extends Controller
     public function update(Request $request, $id)
     {
 
+    
+        return [];
     }
 
     /**
@@ -78,6 +82,8 @@ class SettingController extends Controller
     public function destroy($id)
     {
 
+    
+        return [];
     }
 
     private function getRules($prefix): array

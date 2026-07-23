@@ -1,7 +1,7 @@
 <?php
 require_once("../include/bittorrent.php");
 dbconn();
-require_once(get_langfile_path());
+require_once __DIR__ . '/../lang/en/lang_takeinvite.php';
 loggedinorreturn();
 $id = $CURUSER['id'];
 $lockName = sprintf("takeinvite:%s", $id);
@@ -18,6 +18,7 @@ try {
     stderr($lang_takeinvite['std_error'], $exception->getMessage());
 }
 function bark($msg) {
+  global $lang_takeinvite;
   stdhead();
 	stdmsg($lang_takeinvite['head_invitation_failed'], $msg);
   stdfoot();
@@ -136,6 +137,3 @@ if ($sendResult === true) {
 $lock->release();
 header("Location: invite.php?id=".htmlspecialchars($id)."&sent=1");
 ?>
-
-
-

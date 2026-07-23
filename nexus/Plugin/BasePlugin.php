@@ -6,6 +6,9 @@ use Illuminate\Support\Facades\Artisan;
 
 abstract class BasePlugin extends BaseRepository
 {
+    const ID = '';
+    const VERSION = '';
+
     abstract function install();
 
     abstract function boot();

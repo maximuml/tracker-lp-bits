@@ -79,6 +79,8 @@ class CodecPolicy extends BasePolicy
     public function restore(User $user, NexusModel $codec)
     {
 
+    
+        return false;
     }
 
     /**
@@ -91,6 +93,8 @@ class CodecPolicy extends BasePolicy
     public function forceDelete(User $user, NexusModel $codec)
     {
         //
+    
+        return false;
     }
 
     private function can(User $user)

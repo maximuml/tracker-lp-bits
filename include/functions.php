@@ -218,10 +218,6 @@ function addTempCode($value) {
 	return $return;
 }
 
-function formatAdUrl($adid, $url, $content, $newWindow=true)
-{
-	return formatUrl("adredir.php?id=".$adid."&amp;url=".rawurlencode($url), $newWindow, $content);
-}
 function formatUrl($url, $newWindow = false, $text = '', $linkClass = '') {
 	if (!$text) {
 		$text = $url;
@@ -351,7 +347,7 @@ function format_urls($text, $newWindow = false) {
 	    return formatUrl($matches[1], $newWindow, '', 'faqlink');
     }, $text);
 }
-function format_comment($text, $strip_html = true, $xssclean = false, $newtab = true, $imageresizer = true, $image_max_width = 700, $enableimage = true, $enableflash = true , $imagenum = -1, $image_max_height = 0, $adid = 0)
+function format_comment($text, $strip_html = true, $xssclean = false, $newtab = true, $imageresizer = true, $image_max_width = 700, $enableimage = true, $enableflash = true , $imagenum = -1, $image_max_height = 0)
 {
 	global $lang_functions;
 	global $CURUSER, $SITENAME, $BASEURL;
@@ -428,17 +424,9 @@ function format_comment($text, $strip_html = true, $xssclean = false, $newtab = 
     }
 
 	// [url=http://www.example.com]Text[/url]
-	if ($adid) {
-//		$s = preg_replace("/\[url=([^\[\s]+?)\](.+?)\[\/url\]/ei", "formatAdUrl(".$adid." ,'\\1', '\\2', ".($newtab==true ? 1 : 0).", 'faqlink')", $s);
-		$s = preg_replace_callback("/\[url=([^\[\s]+?)\](.+?)\[\/url\]/i", function ($matches) use ($adid, $newtab) {
-		    return formatAdUrl($adid ,$matches[1], $matches[2], ".($newtab==true ? 1 : 0).", 'faqlink');
-        }, $s);
-	} else {
-//		$s = preg_replace("/\[url=([^\[\s]+?)\](.+?)\[\/url\]/ei", "formatUrl('\\1', ".($newtab==true ? 1 : 0).", '\\2', 'faqlink')", $s);
-		$s = preg_replace_callback("/\[url=([^\[\s]+?)\](.+?)\[\/url\]/i", function ($matches) use ($newtab) {
-		    return formatUrl($matches[1], $newtab, $matches[2], 'faqlink');
-        }, $s);
-	}
+	$s = preg_replace_callback("/\[url=([^\[\s]+?)\](.+?)\[\/url\]/i", function ($matches) use ($newtab) {
+	    return formatUrl($matches[1], $newtab, $matches[2], 'faqlink');
+    }, $s);
 
 	// [url]http://www.example.com[/url]
 //	$s = preg_replace("/\[url\]([^\[\s]+?)\[\/url\]/ei", "formatUrl('\\1', ".($newtab==true ? 1 : 0).", '', 'faqlink')", $s);
@@ -2473,11 +2461,9 @@ function stdhead($title = "", $msgalert = true, $script = "", $place = "")
 	global $CURUSER, $CURLANGDIR, $USERUPDATESET, $iplog1, $oldip, $SITE_ONLINE, $FUNDS, $SITENAME, $SLOGAN, $logo_main, $BASEURL, $offlinemsg,$enabledonation, $staffmem_class, $titlekeywords_tweak, $metakeywords_tweak, $metadescription_tweak, $cssdate_tweak, $deletenotransfertwo_account, $neverdelete_account, $iniupload_main;
 	global $tstart;
 	global $Cache;
-	global $Advertisement;
 
 	$Cache->setLanguage($CURLANGDIR);
 
-	$Advertisement = new ADVERTISEMENT($CURUSER['id'] ?? 0);
 	$cssupdatedate = $cssdate_tweak;
 	// Variable for Start Time
 	$tstart = getmicrotime(); // Start time
@@ -2602,13 +2588,7 @@ else
 ?>
 		</td>
 		<td class="clear nowrap" align="right" valign="middle">
-<?php if ($Advertisement->enable_ad()){
-		$headerad=$Advertisement->get_ad('header');
-		if ($headerad){
-			echo "<span>".$headerad[0]."</span>";
-		}
-}
-if ($enabledonation == 'yes'){?>
+<?php if ($enabledonation == 'yes'){?>
 			<a href="donate.php"><img src="<?php echo get_forum_pic_folder()?>/donate.gif" alt="Make a donation" style="margin-left: 5px; margin-top: 50px;" /></a>
 <?php
 }
@@ -2705,7 +2685,6 @@ else {
                 <font class='color_active'><?php echo $lang_functions['text_active_torrents'] ?></font> <img class="arrowup" alt="Torrents seeding" title="<?php echo $lang_functions['title_torrents_seeding'] ?>" src="pic/trans.gif" /><?php echo $activeseed?>  <img class="arrowdown" alt="Torrents leeching" title="<?php echo $lang_functions['title_torrents_leeching'] ?>" src="pic/trans.gif" /><?php echo $activeleech?>&nbsp;&nbsp;
                 <font class='color_connectable'><?php echo $lang_functions['text_connectable'] ?></font><?php echo $connectable?> <?php echo maxslots();?>
                 <?php if(\App\Models\HitAndRun::getIsEnabled()) { ?><font class='color_bonus'>H&R: </font> <?php echo sprintf('[<a href="myhr.php">%s</a>]', (new \App\Repositories\HitAndRunRepository())->getStatusStats($CURUSER['id']))?><?php }?>
-                <?php if(\App\Models\Claim::getConfigIsEnabled()) { ?><font class='color_bonus'><?php echo $lang_functions['menu_claim']?></font> <?php echo sprintf('[<a href="claim.php?uid=%s">%s</a>]', $CURUSER['id'], (new \App\Repositories\ClaimRepository())->getStats($CURUSER['id']))?><?php }?>
             </span>
         </td>
                 <?php if(SearchBox::isSpecialEnabled() && get_setting('main.enable_global_search') == 'yes'){?>
@@ -2772,11 +2751,6 @@ print '<br/>';
 
 <tr><td id="outer" align="center" class="outer" style="padding-top: 20px; padding-bottom: 20px">
 <?php
-	if ($Advertisement->enable_ad()){
-			$belownavad=$Advertisement->get_ad('belownav');
-			if ($belownavad)
-			echo "<div align=\"center\" style=\"margin-bottom: 10px\" id=\"\">".$belownavad[0]."</div>";
-	}
 if ($msgalert)
 {
     $timeline = \App\Models\TorrentState::resolveTimeline();
@@ -2961,15 +2935,10 @@ if ($msgalert)
 
 
 function stdfoot() {
-	global $SITENAME,$BASEURL,$Cache,$datefounded,$tstart,$icplicense_main,$add_key_shortcut,$query_name, $USERUPDATESET, $CURUSER, $enablesqldebug_tweak, $sqldebug_tweak, $Advertisement, $analyticscode_tweak;
+	global $SITENAME,$BASEURL,$Cache,$datefounded,$tstart,$icplicense_main,$add_key_shortcut,$query_name, $USERUPDATESET, $CURUSER, $enablesqldebug_tweak, $sqldebug_tweak, $analyticscode_tweak;
 	global $hook;
 	print("</td></tr></table>");
 	print("<div id=\"footer\">");
-	if ($Advertisement && $Advertisement->enable_ad()){
-			$footerad=$Advertisement->get_ad('footer');
-			if ($footerad)
-			echo "<div align=\"center\" style=\"margin-top: 10px\" id=\"\">".$footerad[0]."</div>";
-	}
 	print("<div style=\"margin-top: 10px; margin-bottom: 30px;\" align=\"center\">");
 	if ($CURUSER) {
         if (count($USERUPDATESET)) {
@@ -3290,16 +3259,11 @@ function commenttable($rows, $type, $parent_id, $review = false)
 {
 	global $lang_functions;
 	global $CURUSER, $commanage_class;
-	global $Advertisement;
 	begin_main_frame();
 	begin_frame();
 
-	$count = 0;
-	if ($Advertisement->enable_ad())
-		$commentad = $Advertisement->get_ad('comment');
-
 	$uidArr = array_unique(array_column($rows, 'user'));
-    $neededColumns = array('id', 'noad', 'class', 'enabled', 'privacy', 'avatar', 'signature', 'uploaded', 'downloaded', 'last_access', 'username', 'donor', 'leechwarn', 'warned', 'title');
+    $neededColumns = array('id', 'class', 'enabled', 'privacy', 'avatar', 'signature', 'uploaded', 'downloaded', 'last_access', 'username', 'donor', 'leechwarn', 'warned', 'title');
 	$userInfoArr = \App\Models\User::query()->find($uidArr, $neededColumns)->keyBy('id');
 
 	foreach ($rows as $row)
@@ -3307,13 +3271,6 @@ function commenttable($rows, $type, $parent_id, $review = false)
 //		$userRow = get_user_row($row['user']);
         $userInfo = $userInfoArr->get($row['user'], \App\Models\User::defaultUser());
 		$userRow = $userInfo->toArray();
-		if ($count>=1)
-		{
-			if ($Advertisement->enable_ad()){
-				if (!empty($commentad[$count-1]))
-				echo "<div align=\"center\" style=\"margin-top: 10px\" id=\"\">".$commentad[$count-1]."</div>";
-			}
-		}
 		print("<div style=\"margin-top: 8pt; margin-bottom: 8pt;\"><table id=\"cid".$row["id"]."\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\" width=\"100%\"><tr><td class=\"embedded\" width=\"99%\">#" . $row["id"] . "&nbsp;&nbsp;<font color=\"gray\">".$lang_functions['text_by']."</font>");
 		print(get_username($row["user"],false,true,true,false,false,true));
 		print("&nbsp;&nbsp;<font color=\"gray\">".$lang_functions['text_at']."</font>".gettime($row["added"]).
@@ -3340,7 +3297,6 @@ function commenttable($rows, $type, $parent_id, $review = false)
 		print("<tr><td class=\"toolbox\"> ".("'".$userRow['last_access']."'"> $dt ? "<img class=\"f_online\" src=\"pic/trans.gif\" alt=\"Online\" title=\"".$lang_functions['title_online']."\" />":"<img class=\"f_offline\" src=\"pic/trans.gif\" alt=\"Offline\" title=\"".$lang_functions['title_offline']."\" />" )."<a href=\"sendmessage.php?receiver=".htmlspecialchars(trim($row["user"]))."\"><img class=\"f_pm\" src=\"pic/trans.gif\" alt=\"PM\" title=\"".$lang_functions['title_send_message_to'].htmlspecialchars($userRow["username"])."\" /></a><a href=\"report.php?commentid=".htmlspecialchars(trim($row["id"]))."\"><img class=\"f_report\" src=\"pic/trans.gif\" alt=\"Report\" title=\"".$lang_functions['title_report_this_comment']."\" /></a></td><td class=\"toolbox\" align=\"right\">".$actionbar."</td>");
 
 		print("</tr></table>\n");
-		$count++;
 	}
 	end_frame();
 	end_main_frame();

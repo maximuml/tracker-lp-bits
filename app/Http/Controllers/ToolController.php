@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Jobs\SettleClaim;
 use App\Models\PluginStore;
 use App\Models\Setting;
 use App\Repositories\TokenRepository;

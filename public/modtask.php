@@ -6,6 +6,7 @@ loggedinorreturn();
 
 function puke()
 {
+	global $CURUSER;
 	$msg = "User ".$CURUSER["username"]." (id: ".$CURUSER["id"].") is hacking user's profile. IP : ".getip();
 	write_log($msg,'mod');
 	stderr("Error", "Permission denied. For security reason, we logged this action");
@@ -45,8 +46,6 @@ if ($action == "edituser")
 	$enabled = $_POST["enabled"];
 	$uploadpos = $_POST["uploadpos"];
 	$downloadpos = $_POST["downloadpos"];
-	$noad = $_POST["noad"];
-	$noaduntil = $_POST["noaduntil"];
 	$privacy = $_POST["privacy"];
 	$forumpost = $_POST["forumpost"];
 	$chpassword = $_POST["chpassword"];
@@ -350,16 +349,6 @@ if ($action == "edituser")
 //            ];
 //		}
 //	}
-	if ($arr['noad'] != $noad){
-		$updateset[]='noad = '.sqlesc($noad);
-//		$modcomment = date("Y-m-d") . " - No Ad set to ".$noad." by ". $CURUSER['username']. ".\n". $modcomment;
-        $userModifyLogs[] = "No Ad set to ".$noad." by ". $CURUSER['username'];
-	}
-	if ($arr['noaduntil'] != $noaduntil){
-		$updateset[]='noaduntil = '.sqlesc($noaduntil);
-//		$modcomment = date("Y-m-d") . " - No Ad Until set to ".$noaduntil." by ". $CURUSER['username']. ".\n". $modcomment;
-        $userModifyLogs[] = "No Ad Until set to ".$noaduntil." by ". $CURUSER['username'];
-	}
 	if ($privacy == "low" OR $privacy == "normal" OR $privacy == "strong")
 		$updateset[] = "privacy = " . sqlesc($privacy);
 

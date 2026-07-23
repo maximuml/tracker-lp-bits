@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class ModpanelTableSeeder extends Seeder
 {
@@ -16,9 +17,9 @@ class ModpanelTableSeeder extends Seeder
     {
 
 
-        \DB::table('modpanel')->delete();
+        DB::table('modpanel')->delete();
 
-        \DB::table('modpanel')->insert(array (
+        DB::table('modpanel')->insert(array (
             0 =>
             array (
                 'id' => 1,
@@ -39,13 +40,6 @@ class ModpanelTableSeeder extends Seeder
             'name' => 'All Clients (currently)',
                 'url' => 'allagents.php',
             'info' => 'Show All Clients (currently downloading/uploading/seeding)',
-            ),
-            3 =>
-            array (
-                'id' => 4,
-                'name' => 'Ad management',
-                'url' => 'admanage.php',
-                'info' => 'Manage ads at your site',
             ),
             4 =>
             array (

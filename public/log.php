@@ -17,13 +17,10 @@ function permissiondeny(){
 
 function logmenu($selected = "dailylog"){
 		global $lang_log;
-		global $showfunbox_main;
 		begin_main_frame();
 		print ("<div id=\"lognav\"><ul id=\"logmenu\" class=\"menu\">");
 		print ("<li" . ($selected == "dailylog" ? " class=selected" : "") . "><a href=\"?action=dailylog\">".$lang_log['text_daily_log']."</a></li>");
 		print ("<li" . ($selected == "chronicle" ? " class=selected" : "") . "><a href=\"?action=chronicle\">".$lang_log['text_chronicle']."</a></li>");
-		if ($showfunbox_main == 'yes')
-			print ("<li" . ($selected == "funbox" ? " class=selected" : "") . "><a href=\"?action=funbox\">".$lang_log['text_funbox']."</a></li>");
 		print ("<li" . ($selected == "news" ? " class=selected" : "") . "><a href=\"?action=news\">".$lang_log['text_news']."</a></li>");
 		print ("<li" . ($selected == "poll" ? " class=selected" : "") . "><a href=\"?action=poll\">".$lang_log['text_poll']."</a></li>");
 		print ("</ul></div>");
@@ -76,7 +73,7 @@ function edititem($title, $action, $id){
 }
 
 $action = isset($_POST['action']) ? htmlspecialchars($_POST['action']) : (isset($_GET['action']) ? htmlspecialchars($_GET['action']) : '');
-$allowed_actions = array("dailylog","chronicle","funbox","news","poll");
+$allowed_actions = array("dailylog","chronicle","news","poll");
 if (!$action)
 	$action='dailylog';
 if (!in_array($action, $allowed_actions))
@@ -227,51 +224,6 @@ else {
 
 		print($lang_log['time_zone_note']);
 
-		stdfoot();
-		die;
-		break;
-	case "funbox":
-		stdhead($lang_log['head_funbox']);
-		$query = mysql_real_escape_string($q);
-		$search = $_GET["search"] ?? '';
-		if($query){
-			switch ($search){
-				case "title": $wherea=" WHERE title LIKE '%$query%' AND status != 'banned'"; break;
-				case "body": $wherea=" WHERE body LIKE '%$query%' AND status != 'banned'"; break;
-				case "both": $wherea=" WHERE (body LIKE '%$query%' or title LIKE '%$query%') AND status != 'banned'" ; break;
-				}
-			$addparam = "search=".rawurlencode($search)."&query=".rawurlencode($query)."&";
-			}
-		else{
-		$wherea=" WHERE status != 'banned'";
-		$addparam = "";
-		}
-		logmenu("funbox");
-		$opt = array ('title' => $lang_log['text_title'], 'body' => $lang_log['text_body'], 'both' => $lang_log['text_both']);
-		searchtable($lang_log['text_search_funbox'], 'funbox', $opt);
-		$res = sql_query("SELECT COUNT(*) FROM fun ".$wherea);
-		$row = mysql_fetch_array($res);
-		$count = $row[0];
-
-		$perpage = 10;
-		list($pagertop, $pagerbottom, $limit) = pager($perpage, $count, "log.php?action=funbox&".$addparam);
-		$res = sql_query("SELECT added, body, title, status FROM fun $wherea ORDER BY added DESC $limit") or sqlerr(__FILE__, __LINE__);
-		if (mysql_num_rows($res) == 0)
-			print($lang_log['text_funbox_empty']);
-		else
-		{
-
-		//echo $pagertop;
-			while ($arr = mysql_fetch_assoc($res)){
-				$date = gettime($arr['added'],true,false);
-			print("<table width=940 border=1 cellspacing=0 cellpadding=5>\n");
-			print("<tr><td class=rowhead width='10%'>".$lang_log['col_title']."</td><td class=rowfollow align=left>".$arr["title"]." - <b>".$arr["status"]."</b></td></tr><tr><td class=rowhead width='10%'>".$lang_log['col_date']."</td><td class=rowfollow align=left>".$date."</td></tr><tr><td class=rowhead width='10%'>".$lang_log['col_body']."</td><td class=rowfollow align=left>".format_comment($arr["body"],false,false,true)."</td></tr>\n");
-			print("</table><br />");
-			}
-			echo $pagerbottom;
-		}
-
-		print($lang_log['time_zone_note']);
 		stdfoot();
 		die;
 		break;

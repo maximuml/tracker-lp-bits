@@ -11,7 +11,6 @@ use App\Http\Resources\TorrentResource;
 use App\Models\AudioCodec;
 use App\Models\Bookmark;
 use App\Models\Category;
-use App\Models\Claim;
 use App\Models\Codec;
 use App\Models\HitAndRun;
 use App\Models\Media;
@@ -71,10 +70,10 @@ class TorrentRepository extends BaseRepository
 
     private static array $allowIncludes = ['user', 'extra', 'tags'];
 
-    private static array $allowIncludeCounts = ['thank_users', 'reward_logs', 'claims'];
+    private static array $allowIncludeCounts = ['thank_users', 'reward_logs'];
 
     private static array $allowIncludeFields = [
-        'has_bookmarked', 'has_claimed', 'has_thanked', 'has_rewarded',
+        'has_bookmarked', 'has_thanked', 'has_rewarded',
         'description', 'download_url', 'active_status'
     ];
 
@@ -182,16 +181,13 @@ class TorrentRepository extends BaseRepository
 
     private function appendIncludeFields(ApiQueryBuilder $apiQueryBuilder, Authenticatable $user, $torrentList)
     {
-        $torrentIdArr = $bookmarkData = $claimData = $thankData = $rewardData = $activeData = [];
+        $torrentIdArr = $bookmarkData = $thankData = $rewardData = $activeData = [];
         foreach ($torrentList as $torrent) {
             $torrentIdArr[] = $torrent->id;
         }
         unset($torrent);
         if ($hasFieldHasBookmarked = $apiQueryBuilder->hasIncludeField('has_bookmarked')) {
             $bookmarkData = $user->bookmarks()->whereIn('torrentid', $torrentIdArr)->get()->keyBy('torrentid');
-        }
-        if ($hasFieldHasClaimed = $apiQueryBuilder->hasIncludeField('has_claimed')) {
-            $claimData = $user->claims()->whereIn('torrent_id', $torrentIdArr)->get()->keyBy('torrent_id');
         }
         if ($hasFieldHasThanked = $apiQueryBuilder->hasIncludeField('has_thanked')) {
             $thankData = $user->thank_torrent_logs()->whereIn('torrentid', $torrentIdArr)->get()->keyBy('torrentid');
@@ -209,9 +205,6 @@ class TorrentRepository extends BaseRepository
             $id = $torrent->id;
             if ($hasFieldHasBookmarked) {
                 $torrent->has_bookmarked = $bookmarkData->has($id);
-            }
-            if ($hasFieldHasClaimed) {
-                $torrent->has_claimed = $claimData->has($id);
             }
             if ($hasFieldHasThanked) {
                 $torrent->has_thanked = $thankData->has($id);

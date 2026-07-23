@@ -1283,12 +1283,6 @@ if ($allTags->isNotEmpty()) {
 	</form>
 <?php
 }
-	if ($Advertisement->enable_ad()){
-        $belowsearchboxad = $Advertisement->get_ad('belowsearchbox');
-        if (!empty($belowsearchboxad[0])) {
-            echo "<div align=\"center\" style=\"margin-top: 10px\" id=\"\">".$belowsearchboxad[0]."</div>";
-        }
-	}
 if($inclbookmarked == 1)
 {
 	print("<h1 align=\"center\">" . get_username($CURUSER['id']) . $lang_torrents['text_s_bookmarked_torrent'] . "</h1>");

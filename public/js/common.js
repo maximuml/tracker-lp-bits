@@ -314,19 +314,6 @@ function SetChecked(chkName,ctrlName,checkall_name,uncheckall_name,start,count) 
 	}
 }
 
-// funvote.js
-function funvote(funid,yourvote)
-{
-var result=ajax.gets('fun.php?action=vote&id='+funid+"&yourvote="+yourvote);
-voteaccept(yourvote);
-}
-function voteaccept(yourvote)
-{
-	if (yourvote=="fun" || yourvote=="dull"){
-		document.getElementById("funvote").style.display = 'none';
-		document.getElementById("voteaccept").style.display = 'block';
-	}
-}
 
 // in upload.php
 function getname()

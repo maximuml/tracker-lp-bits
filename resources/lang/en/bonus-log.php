@@ -12,7 +12,6 @@ return [
         \App\Models\BonusLogs::BUSINESS_TYPE_CUSTOM_TITLE => 'Custom title',
         \App\Models\BonusLogs::BUSINESS_TYPE_BUY_VIP => 'Buy VIP',
         \App\Models\BonusLogs::BUSINESS_TYPE_GIFT_TO_SOMEONE => 'Gift to someone',
-        \App\Models\BonusLogs::BUSINESS_TYPE_NO_AD => 'Cancel ad',
         \App\Models\BonusLogs::BUSINESS_TYPE_GIFT_TO_LOW_SHARE_RATIO => 'Gift to low share ratio',
         \App\Models\BonusLogs::BUSINESS_TYPE_LUCKY_DRAW => 'Lucky draw',
         \App\Models\BonusLogs::BUSINESS_TYPE_EXCHANGE_DOWNLOAD => 'Exchange downloaded',
@@ -24,7 +23,6 @@ return [
         \App\Models\BonusLogs::BUSINESS_TYPE_TASK_PASS_REWARD => 'Task finished reward',
         \App\Models\BonusLogs::BUSINESS_TYPE_TASK_NOT_PASS_DEDUCT => 'Task unfinished deduct',
         \App\Models\BonusLogs::BUSINESS_TYPE_REWARD_TORRENT => 'Reward torrent',
-        \App\Models\BonusLogs::BUSINESS_TYPE_CLAIMED_UNREACHED => 'Claimed torrent unreached',
         \App\Models\BonusLogs::BUSINESS_TYPE_SELF_ENABLE => 'Self enable',
 
         \App\Models\BonusLogs::BUSINESS_TYPE_ROLE_WORK_SALARY => 'Role work salary',
@@ -33,7 +31,6 @@ return [
         \App\Models\BonusLogs::BUSINESS_TYPE_RECEIVE_GIFT => 'Receive gift',
         \App\Models\BonusLogs::BUSINESS_TYPE_UPLOAD_TORRENT => 'Upload torrent',
         \App\Models\BonusLogs::BUSINESS_TYPE_TORRENT_BE_REWARD => 'Torrent receive reward',
-        \App\Models\BonusLogs::BUSINESS_TYPE_CLAIMED_REACHED => 'Claimed torrent reached reward',
 
         \App\Models\BonusLogs::BUSINESS_TYPE_SEEDING_BASIC => 'Seeding basic',
         \App\Models\BonusLogs::BUSINESS_TYPE_SEEDING_DONOR_ADDITION => 'Seeding donor addition',

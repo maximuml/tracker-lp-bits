@@ -318,13 +318,6 @@ return [
         'peer_id' => 'Peer ID starts',
         'agent' => 'Agent',
     ],
-    'claim' => [
-        'label' => 'User claim',
-        'last_settle_at' => 'Last settle at',
-        'seed_time_this_month' => 'St. this month',
-        'uploaded_this_month' => 'Up. this month',
-        'is_reached_this_month' => 'Reached',
-    ],
     'torrent_state' => [
         'label' => 'Global promotion',
         'global_sp_state' => 'Global promotion state',

@@ -3,7 +3,7 @@
 if(!defined('IN_TRACKER'))
 die('Hacking attempt!');
 /*
-$CONFIGURATIONS = array('ACCOUNT', 'ADVERTISEMENT', 'ATTACHMENT', 'AUTHORITY', 'BASIC', 'BONUS', 'CODE', 'MAIN', 'SECURITY', 'SMTP', 'TORRENT', 'TWEAK');
+$CONFIGURATIONS = array('ACCOUNT', 'ATTACHMENT', 'AUTHORITY', 'BASIC', 'BONUS', 'CODE', 'MAIN', 'SECURITY', 'SMTP', 'TORRENT', 'TWEAK');
 
 function ReadConfig ($configname = NULL) {
 	global $CONFIGURATIONS;
@@ -114,7 +114,6 @@ $showlastxforumposts_main = $MAIN['showlastxforumposts'];
 $showlastxtorrents_main = $MAIN['showlastxtorrents'];
 $showtrackerload = $MAIN['showtrackerload'];
 $showshoutbox_main = $MAIN['showshoutbox'];
-$showfunbox_main = $MAIN['showfunbox'];
 $enableoffer = $MAIN['showoffer'];
 $sptime = $MAIN['sptime'];
 $showhelpbox_main = $MAIN['showhelpbox'];
@@ -163,8 +162,6 @@ $nodetect_security = $SECURITY['nodetect'];
 $defaultclass_class = isset(\App\Models\User::$classes[$AUTHORITY['defaultclass']]) ? $AUTHORITY['defaultclass'] : \App\Models\User::CLASS_USER;
 $staffmem_class = $AUTHORITY['staffmem'];
 $newsmanage_class = $AUTHORITY['newsmanage'];
-$newfunitem_class = $AUTHORITY['newfunitem'];
-$funmanage_class = $AUTHORITY['funmanage'];
 $sbmanage_class = $AUTHORITY['sbmanage'];
 $pollmanage_class = $AUTHORITY['pollmanage'];
 $applylink_class = $AUTHORITY['applylink'];
@@ -253,14 +250,6 @@ $altthumbwidth_attachment = $ATTACHMENT['altthumbwidth'];
 $altthumbheight_attachment = $ATTACHMENT['altthumbheight'];
 
 
-$enablead_advertisement = $ADVERTISEMENT['enablead'];
-$enablenoad_advertisement = $ADVERTISEMENT['enablenoad'];
-$noad_advertisement = $ADVERTISEMENT['noad'];
-$enablebonusnoad_advertisement = $ADVERTISEMENT['enablebonusnoad'];
-$bonusnoad_advertisement = $ADVERTISEMENT['bonusnoad'];
-$bonusnoadpoint_advertisement = $ADVERTISEMENT['bonusnoadpoint'];
-$bonusnoadtime_advertisement = $ADVERTISEMENT['bonusnoadtime'];
-$adclickbonus_advertisement = $ADVERTISEMENT['adclickbonus'];
 
 $mainversion_code = $CODE['mainversion'];
 $subversion_code = $CODE['subversion'];
@@ -280,10 +269,8 @@ $makepost_bonus = $BONUS['makepost'];
 $addcomment_bonus = $BONUS['addcomment'];
 $pollvote_bonus = $BONUS['pollvote'];
 $offervote_bonus = $BONUS['offervote'];
-$funboxvote_bonus = $BONUS['funboxvote'];
 $saythanks_bonus = $BONUS['saythanks'];
 $receivethanks_bonus = $BONUS['receivethanks'];
-$funboxreward_bonus = $BONUS['funboxreward'];
 $onegbupload_bonus = $BONUS['onegbupload'];
 $fivegbupload_bonus = $BONUS['fivegbupload'];
 $tengbupload_bonus = $BONUS['tengbupload'];

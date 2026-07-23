@@ -95,7 +95,7 @@ class UploadRepository extends BaseRepository
             'size' => $fileListInfo['totalLength'],
             'numfiles' => count($fileListInfo['fileList']),
             'type' => $fileListInfo['type'],
-            'url' => parse_imdb_id($request->url ?? ''),
+            'url' => null,
             'small_descr' => $request->small_descr ?? '',
             'category' => $category->id,
             'source' => $subCategoriesAngTags['subCategories']['source'],
@@ -126,7 +126,6 @@ class UploadRepository extends BaseRepository
             'media_info' => $request->technical_info ?? '',
             'nfo' => $this->getNfoContent($request),
             'created_at' => $nowStr,
-            'pt_gen' => $request->pt_gen ?? '',
         ];
         $newTorrent = DB::transaction(function () use ($torrentInsert, $extraInsert, $fileListInfo, $subCategoriesAngTags, $dict, $torrentSavePath) {
             $newTorrent = Torrent::query()->create($torrentInsert);

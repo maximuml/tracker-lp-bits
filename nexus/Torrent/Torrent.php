@@ -2,11 +2,7 @@
 
 namespace Nexus\Torrent;
 
-use App\Models\Setting;
-use App\Models\TorrentExtra;
 use Nexus\Database\NexusDB;
-use Nexus\Imdb\Imdb;
-use Nexus\PTGen\PTGen;
 
 class Torrent
 {
@@ -70,19 +66,6 @@ class Torrent
             $activeStatus . " $progress", $progress, $color
         );
         return $result;
-    }
-
-    public function renderTorrentsPageAverageRating(array $torrentInfo, array|string $ptGenInfo): string
-    {
-        static $ptGen;
-        if (is_null($ptGen)) {
-            $ptGen = new PTGen();
-        }
-        $log = "torrent: " . $torrentInfo['id'];
-        $siteIdAndRating = $ptGen->listRatings(is_array($ptGenInfo) && count($ptGenInfo) ? $ptGenInfo : [], $torrentInfo['url']);
-        $log .= ", siteIdAndRating: " . json_encode($siteIdAndRating);
-        do_log($log);
-        return $ptGen->buildRatingSpan($siteIdAndRating);
     }
 
 }

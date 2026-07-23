@@ -66,13 +66,7 @@ stdhead($lang_upload['head_upload']);
 				if ($smalldescription_main == 'yes')
 				tr($lang_upload['row_small_description'], "<input type=\"text\" style=\"width: 99%;\" name=\"small_descr\" /><br /><font class=\"medium\">".$lang_upload['text_small_description_note']."</font>", 1);
 				get_external_tr();
-				if ($settingMain['enable_pt_gen_system'] == 'yes') {
-                    $ptGen = new \Nexus\PTGen\PTGen();
-                    echo $ptGen->renderUploadPageFormInput("");
-                }
-				if ($enablenfo_main=='yes') {
-                    tr($lang_upload['row_nfo_file'], "<input type=\"file\" class=\"file\" name=\"nfo\" /><br /><font class=\"medium\">".$lang_upload['text_only_viewed_by'].get_user_class_name($viewnfo_class,false,true,true).$lang_upload['text_or_above']."</font>", 1);
-                }
+
                 //price
                 if (user_can('torrent-set-price') && get_setting("torrent.paid_torrent_enabled") == "yes") {
                     $maxPrice = get_setting("torrent.max_price");

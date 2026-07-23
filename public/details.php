@@ -12,7 +12,7 @@ die();
 
 $taxonomyFields = "sources.name AS source_name, media.name AS medium_name, codecs.name AS codec_name, standards.name AS standard_name, processings.name AS processing_name, teams.name AS team_name, audiocodecs.name AS audiocodec_name";
 $extraFields = "torrent_extras.descr, torrent_extras.nfo, LENGTH(torrent_extras.nfo) AS nfosz, torrent_extras.media_info as technical_info";
-$res = sql_query("SELECT torrents.cache_stamp, torrents.sp_state, torrents.url, torrents.small_descr, torrents.seeders, torrents.banned, torrents.leechers, torrents.info_hash, torrents.filename, torrents.last_action, torrents.name, torrents.owner, torrents.save_as, torrents.visible, torrents.size, torrents.added, torrents.views, torrents.hits, torrents.times_completed, torrents.id, torrents.type, torrents.numfiles, torrents.anonymous, torrents.hr, torrents.promotion_until, torrents.promotion_time_type, torrents.approval_status, torrents.price,
+$res = sql_query("SELECT torrents.cache_stamp, torrents.sp_state, torrents.small_descr, torrents.seeders, torrents.banned, torrents.leechers, torrents.info_hash, torrents.filename, torrents.last_action, torrents.name, torrents.owner, torrents.save_as, torrents.visible, torrents.size, torrents.added, torrents.views, torrents.hits, torrents.times_completed, torrents.id, torrents.type, torrents.numfiles, torrents.anonymous, torrents.hr, torrents.promotion_until, torrents.promotion_time_type, torrents.approval_status, torrents.price,
        categories.name AS cat_name, categories.mode as search_box_id, $taxonomyFields, $extraFields
 FROM torrents LEFT JOIN categories ON torrents.category = categories.id
     LEFT JOIN sources ON torrents.source = sources.id
@@ -49,12 +49,6 @@ if (!$row) {
 	if (!empty($_GET["hit"])) {
         $torrentUpdate[] = 'views = views + 1';
 	}
-
-    $imdb_id = parse_imdb_id($row["url"]);
-    if ($imdb_id && $showextinfo['imdb'] == 'yes') {
-        $imdb = new \Nexus\Imdb\Imdb();
-        $movie = $imdb->getMovie($imdb_id);
-    }
 
 	if (!isset($_GET["cmtpage"])) {
 		stdhead($lang_details['head_details_for_torrent']. "\"" . $row["name"] . "\"");
@@ -250,52 +244,7 @@ JS;
 
         tr($lang_details['torrent_dl_url'],sprintf('<a title="%s" href="%s">%s</a>',$lang_details['torrent_dl_url_notice'], $torrentRep->getDownloadUrl($id, $CURUSER), $lang_details['torrent_dl_url_text']),1);
 
-		// ---------------- start subtitle block -------------------//
-        $subTorrentIdArr = [$row['id']];
-        $otherCopiesIdArr = [];
-        if ($imdb_id) {
-            $otherCopiesIdArr = \App\Models\Torrent::query()->where('url', $imdb_id)->where('id', '!=', $row['id'])->pluck('id')->toArray();
-//            $subTorrentIdArr = array_merge($subTorrentIdArr, $otherCopiesIdArr);
-        }
-		$r = sql_query("SELECT subs.*, language.flagpic, language.lang_name FROM subs LEFT JOIN language ON subs.lang_id=language.id WHERE torrent_id in(" . implode(',', $subTorrentIdArr). ") ORDER BY subs.lang_id ASC") or sqlerr(__FILE__, __LINE__);
-		print("<tr><td class=\"rowhead\" valign=\"top\">".$lang_details['row_subtitles']."</td>");
-		print("<td class=\"rowfollow\" align=\"left\" valign=\"top\">");
-		print("<table border=\"0\" cellspacing=\"0\">");
-		if (mysql_num_rows($r) > 0)
-		{
-			while($a = mysql_fetch_assoc($r))
-			{
-				$lang = "<tr><td class=\"embedded\"><img border=\"0\" src=\"pic/flag/". $a["flagpic"] . "\" alt=\"" . $a["lang_name"] . "\" title=\"" . $a["lang_name"] . "\" style=\"padding-bottom: 4px\" /></td>";
-				$lang .= "<td class=\"embedded\">&nbsp;&nbsp;<a href=\"downloadsubs.php?torrentid=".$a['torrent_id']."&subid=".$a['id']."\"><u>". htmlspecialchars($a["title"]) . "</u></a>".(user_can('submanage') || (user_can('delownsub') && $a["uppedby"] == $CURUSER["id"]) ? " <font class=\"small\"><a href=\"subtitles.php?delete=".$a['id']."\">[".$lang_details['text_delete']."</a>]</font>" : "")."</td><td class=\"embedded\">&nbsp;&nbsp;".($a["anonymous"] == 'yes' ? $lang_details['text_anonymous'] . (user_can('viewanonymous') ? get_username($a['uppedby'],false,true,true,false,true) : "") : get_username($a['uppedby']))."</td></tr>";
-				print($lang);
-			}
-		}
-		else
-			print("<tr><td class=\"embedded\">".$lang_details['text_no_subtitles']."</td></tr>");
-		print("</table>");
-		print("<table border=\"0\" cellspacing=\"0\"><tr>");
-		if($CURUSER['id']==$row['owner']  ||  user_can('uploadsub'))
-		{
-			print("<td class=\"embedded\"><form method=\"post\" action=\"subtitles.php\"><input type=\"hidden\" name=\"torrent_name\" value=\"" . $row["name"]. "\" /><input type=\"hidden\" name=\"detail_torrent_id\" value=\"" . $row["id"]. "\" /><input type=\"hidden\" name=\"in_detail\" value=\"in_detail\" /><input type=\"submit\" value=\"".$lang_details['submit_upload_subtitles']."\" /></form></td>");
-		}
-		$moviename = "";
-		if ($imdb_id && $showextinfo['imdb'] == 'yes')
-		{
-			$thenumbers = $imdb_id;
-			if (!$moviename = $Cache->get_value('imdb_id_'.$thenumbers.'_movie_name')){
-				switch ($imdb->getCacheStatus($imdb_id)){
-					case "1":{
-						$moviename = $movie->title (); break;
-						$Cache->cache_value('imdb_id_'.$thenumbers.'_movie_name', $moviename, 1296000);
-					}
-					default: break;
-				}
-			}
-		}
-		print("<td class=\"embedded\"><form method=\"get\" action=\"https://assrt.net/sub/\" target=\"_blank\"><input type=\"text\" name=\"searchword\" id=\"keyword\" style=\"width: 250px\" value=\"".$moviename."\" /><input type=\"submit\" value=\"".$lang_details['submit_search_at_shooter']."\" /></form></td><td class=\"embedded\"><form method=\"get\" action=\"https://www.opensubtitles.org/en/search2/\" target=\"_blank\"><input type=\"hidden\" id=\"moviename\" name=\"MovieName\" /><input type=\"hidden\" name=\"action\" value=\"search\" /><input type=\"hidden\" name=\"SubLanguageID\" value=\"all\" /><input onclick=\"document.getElementById('moviename').value=document.getElementById('keyword').value;\" type=\"submit\" value=\"".$lang_details['submit_search_at_opensubtitles']."\" /></form></td>\n");
-		print("</tr></table>");
-		print("</td></tr>\n");
-		// ---------------- end subtitle block -------------------//
+
 
         //hook before desc
         do_action('torrent_detail_before_desc', $row['id'], $CURUSER['id']);
@@ -342,143 +291,7 @@ JS;
             tr("<a href=\"javascript: klappe_news('descr')\"><span class=\"nowrap\"><img class=\"minus\" src=\"pic/trans.gif\" alt=\"Show/Hide\" id=\"picdescr\" title=\"".($lang_details['title_show_or_hide'] ?? '')."\" /> ".$lang_details['row_description']."</span></a>", "<div id='kdescr'>".($Advertisement->enable_ad() && $torrentdetailad ? "<div align=\"left\" style=\"margin-bottom: 10px\" id=\"\">".$torrentdetailad[0]."</div>" : "").$desc."</div>", 1);
 		}
 
-		if (user_can('viewnfo') && $CURUSER['shownfo'] != 'no' && $row["nfosz"] > 0){
-			if (!$nfo = $Cache->get_value('nfo_block_torrent_id_'.$id)){
-				$nfo = code_new($row["nfo"], get_setting('torrent.nfo_view_style_default'));
-				$Cache->cache_value('nfo_block_torrent_id_'.$id, $nfo, 604800);
-			}
-			tr("<a href=\"javascript: klappe_news('nfo')\"><img class=\"plus\" src=\"pic/trans.gif\" alt=\"Show/Hide\" id=\"picnfo\" title=\"".$lang_details['title_show_or_hide']."\" /> ".$lang_details['text_nfo']."</a><br /><a href=\"viewnfo.php?id=".$row['id']."\" class=\"sublink\">". $lang_details['text_view_nfo']. "</a>", "<div id='knfo' style=\"display: none;\"><pre style=\"font-size:10pt; font-family: 'Courier New', monospace;white-space: break-spaces\">".$nfo."</pre></div>\n", 1);
-		}
 
-	if ($imdb_id && $showextinfo['imdb'] == 'yes' && $CURUSER['showimdb'] != 'no')
-	{
-		$thenumbers = $imdb_id;
-		$Cache->new_page('imdb_id_'.$thenumbers.'_large', 3600*24, true);
-		if (!$Cache->get_page()){
-			switch ($imdb->getCacheStatus($imdb_id))
-			{
-				case "0" : //cache is not ready, try to
-				{
-					if($row['cache_stamp']==0 || ($row['cache_stamp'] != 0 && (time()-$row['cache_stamp']) > 120))	//not exist or timed out
-						tr($lang_details['text_imdb'] . $lang_details['row_info'] , $lang_details['text_imdb'] . $lang_details['text_not_ready']."<a href=\"retriver.php?id=". $id ."&amp;type=1&amp;siteid=1\">".$lang_details['text_here_to_retrieve'] . $lang_details['text_imdb'],1);
-					else
-						tr($lang_details['text_imdb'] . $lang_details['row_info'] , "<img src=\"pic/progressbar.gif\" alt=\"\" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" . $lang_details['text_someone_has_requested'].min(max(time()-$row['cache_stamp'],0),120) . $lang_details['text_please_be_patient'],1);
-					break;
-				}
-				case "1" :
-					{
-						reset_cachetimestamp($row['id']);
-                        if (($photo_url = $movie->photo() ) != FALSE)
-                            $smallth = "<img src=\"".$photo_url. "\" width=\"105\" onclick=\"Preview(this);\" alt=\"poster\" />";
-                        else
-                            $smallth = "<img src=\"pic/imdb_pic/nophoto.gif\" alt=\"no poster\" />";
-
-                        $autodata = $imdb->renderDetailsPageDescription($row['id'], $imdb_id);
-                        $cache_time = $imdb->getCachedAt($imdb_id);
-                        $Cache->add_whole_row();
-                        print("<tr>");
-                        print("<td class=\"rowhead\"><a href=\"javascript: klappe_ext('imdb')\"><span class=\"nowrap\"><img class=\"minus\" src=\"pic/trans.gif\" alt=\"Show/Hide\" id=\"picimdb\" title=\"".$lang_details['title_show_or_hide']."\" /> ".$lang_details['text_imdb'] . $lang_details['row_info'] ."</span></a><div id=\"posterimdb\">".  $smallth."</div></td>");
-                        $Cache->end_whole_row();
-                        $Cache->add_row();
-                        $Cache->add_part();
-                        print("<td class=\"rowfollow\" align=\"left\"><div id='kimdb'>".$autodata);
-                        $Cache->end_part();
-                        $Cache->add_part();
-                        print($lang_details['text_information_updated_at'] . date("Y-m-d H:i:s", $cache_time) . $lang_details['text_might_be_outdated']."<a href=\"".htmlspecialchars("retriver.php?id=". $id ."&type=2&siteid=1")."\">".$lang_details['text_here_to_update']);
-                        $Cache->end_part();
-                        $Cache->end_row();
-                        $Cache->add_whole_row();
-                        print("</div></td></tr>");
-                        $Cache->end_whole_row();
-                        $Cache->cache_page();
-                        echo $Cache->next_row();
-                        $Cache->next_row();
-                        echo $Cache->next_part();
-                        if (user_can('updateextinfo'))
-                            echo $Cache->next_part();
-                        echo $Cache->next_row();
-                        break;
-					}
-				case "2" :
-					{
-						tr($lang_details['text_imdb'] . $lang_details['row_info'] ,$lang_details['text_network_error'],1);
-						break;
-					}
-				case "3" :// not a valid imdb url
-				{
-					break;
-				}
-			}
-		}
-		else{
-				echo $Cache->next_row();
-				$Cache->next_row();
-				echo $Cache->next_part();
-				if (user_can('updateextinfo')){
-					echo $Cache->next_part();
-				}
-				echo $Cache->next_row();
-		}
-	}
-		if (!empty($otherCopiesIdArr))
-		{
-//			$where_area = " url = " . sqlesc((int)$imdb_id) ." AND torrents.id != ".sqlesc($id);
-			$where_area = sprintf('torrents.id in (%s)', implode(',', $otherCopiesIdArr));
-			$copies_res = sql_query("SELECT torrents.id, torrents.name, torrents.sp_state, torrents.size, torrents.added, torrents.seeders, torrents.leechers, torrents.hr,categories.id AS catid, categories.name AS catname, categories.image AS catimage, $taxonomyFields, categories.mode as search_box_id FROM torrents
-    LEFT JOIN categories ON torrents.category=categories.id
-    LEFT JOIN sources ON torrents.source = sources.id
-    LEFT JOIN media ON torrents.medium = media.id
-    LEFT JOIN codecs ON torrents.codec = codecs.id
-    LEFT JOIN standards ON torrents.standard = standards.id
-    LEFT JOIN teams ON torrents.team = teams.id
-    LEFT JOIN audiocodecs ON torrents.audiocodec = audiocodecs.id
-    LEFT JOIN processings ON torrents.processing = processings.id
-WHERE " . $where_area . " ORDER BY torrents.id DESC") or sqlerr(__FILE__, __LINE__);
-
-			$copies_count = mysql_num_rows($copies_res);
-			if($copies_count > 0)
-			{
-				$s = "<table border=\"1\" cellspacing=\"0\" cellpadding=\"5\">\n";
-				$s.="<tr><td class=\"colhead\" style=\"padding: 0px; text-align:center;\">".$lang_details['col_type']."</td><td class=\"colhead\" align=\"left\">".$lang_details['col_name']."</td><td class=\"colhead\" align=\"center\">".$lang_details['col_quality']."</td><td class=\"colhead\" align=\"center\"><img class=\"size\" src=\"pic/trans.gif\" alt=\"size\" title=\"".$lang_details['title_size']."\" /></td><td class=\"colhead\" align=\"center\"><img class=\"time\" src=\"pic/trans.gif\" alt=\"time added\" title=\"".$lang_details['title_time_added']."\" /></td><td class=\"colhead\" align=\"center\"><img class=\"seeders\" src=\"pic/trans.gif\" alt=\"seeders\" title=\"".$lang_details['title_seeders']."\" /></td><td class=\"colhead\" align=\"center\"><img class=\"leechers\" src=\"pic/trans.gif\" alt=\"leechers\" title=\"".$lang_details['title_leechers']."\" /></td></tr>\n";
-				while ($copy_row = mysql_fetch_assoc($copies_res))
-				{
-					$dispname = htmlspecialchars(trim($copy_row["name"]));
-					$count_dispname=strlen($dispname);
-					$max_lenght_of_torrent_name="80"; // maximum lenght
-					if($count_dispname > $max_lenght_of_torrent_name)
-					{
-						$dispname=substr($dispname, 0, $max_lenght_of_torrent_name) . "..";
-					}
-//                    $other_source_info = $other_medium_info = $other_codec_info = $other_standard_info = $other_processing_info = '';
-//					if (isset($copy_row["source_name"]))
-//						$other_source_info = $copy_row['source_name'].", ";
-//					if (isset($copy_row["medium_name"]))
-//						$other_medium_info = $copy_row['medium_name'].", ";
-//					if (isset($copy_row["codec_name"]))
-//						$other_codec_info = $copy_row['codec_name'].", ";
-//					if (isset($copy_row["standard_name"]))
-//						$other_standard_info = $copy_row['standard_name'].", ";
-//					if (isset($copy_row["processing_name"]))
-//						$other_processing_info = $copy_row['processing_name'].", ";
-
-                    $taxonomyInfo = $searchBoxRep->listTaxonomyInfo($copy_row['search_box_id'], $copy_row);
-                    $taxonomyValues = array_column($taxonomyInfo, 'value');
-					$sphighlight = get_torrent_bg_color($copy_row['sp_state']);
-					$sp_info = get_torrent_promotion_append($copy_row['sp_state'], '', false, '', 0, '', $copy_row['__ignore_global_sp_state'] ?? false);
-					$hrImg = get_hr_img($copy_row, $copy_row['search_box_id']);
-
-					$s .= "<tr". $sphighlight."><td class=\"rowfollow nowrap\" valign=\"middle\" style='padding: 0px'>".return_category_image($copy_row["catid"], "torrents.php?allsec=1&amp;")."</td><td class=\"rowfollow\" align=\"left\"><a href=\"" . htmlspecialchars(get_protocol_prefix() . $BASEURL . "/details.php?id=" . $copy_row["id"]. "&hit=1")."\">" . $dispname ."</a>". $sp_info. $hrImg ."</td>" .
-					"<td class=\"rowfollow\" align=\"left\">" .implode(', ', $taxonomyValues). "</td>" .
-					"<td class=\"rowfollow\" align=\"center\">" . mksize($copy_row["size"]) . "</td>" .
-					"<td class=\"rowfollow nowrap\" align=\"center\">" . str_replace("&nbsp;", "<br />", gettime($copy_row["added"],false)). "</td>" .
-					"<td class=\"rowfollow\" align=\"center\">" . $copy_row["seeders"] . "</td>" .
-					"<td class=\"rowfollow\" align=\"center\">" . $copy_row["leechers"] . "</td>" .
-					"</tr>\n";
-				}
-				$s .= "</table>\n";
-				tr("<a href=\"javascript: klappe_news('othercopy')\"><span class=\"nowrap\"><img class=\"".($copies_count > 5 ? "plus" : "minus")."\" src=\"pic/trans.gif\" alt=\"Show/Hide\" id=\"picothercopy\" title=\"".$lang_details['title_show_or_hide']."\" /> ".$lang_details['row_other_copies']."</span></a>", "<b>".$copies_count.$lang_details['text_other_copies']." </b><br /><div id='kothercopy' style=\"".($copies_count > 5 ? "display: none;" : "display: block;")."\">".$s."</div>",1);
-			}
-		}
 
 		if ($row["type"] == "multi")
 		{

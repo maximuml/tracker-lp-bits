@@ -26,19 +26,6 @@ class AjaxInterface{
         return $rep->retroactive($CURUSER['id'], $params['date']);
     }
 
-    public static function getPtGen($params)
-    {
-        $rep = new Nexus\PTGen\PTGen();
-        $result = $rep->generate($params['url']);
-        if ($rep->isRawPTGen($result)) {
-            return $result;
-        } elseif ($rep->isIyuu($result)) {
-            return $result['data'];
-        } else {
-            return '';
-        }
-    }
-
     public static function addClaim($params)
     {
         global $CURUSER;

@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('torrents', function (Blueprint $table) {
-            foreach (["ori_descr", "descr", "nfo", "technical_info", "pt_gen"] as $field) {
+            foreach (["ori_descr", "descr", "nfo", "technical_info"] as $field) {
                 if (Schema::hasColumn('torrents', $field)) {
                     $table->dropColumn($field);
                 }

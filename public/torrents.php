@@ -724,10 +724,6 @@ if (isset($searchstr))
 	}
 
 	$search_area = intval($_GET["search_area"] ?? 0) ;
-
-	if ($search_area == 4) {
-		$searchstr = (int)parse_imdb_id($searchstr);
-	}
 	$like_expression_array =array();
 	unset($like_expression_array);
 
@@ -808,11 +804,6 @@ if (isset($searchstr))
 			}
 			break;
 		}
-		case 4  :  //imdb url
-			foreach ($like_expression_array as &$like_expression_array_element)
-			$like_expression_array_element = "torrents.url". $like_expression_array_element;
-			$wherea[] =  implode($ANDOR,  $like_expression_array);
-			break;
 		default :	// unkonwn
 		{
 			$search_area = 0;
@@ -1024,7 +1015,7 @@ elseif ($sectiontype == $browsecatmode)
 else stdhead($lang_torrents['head_special']);
 print("<table width=\"97%\" class=\"main\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\"><tr><td class=\"embedded\">");
 
-displayHotAndClassic();
+
 $searchBoxRightTdStyle = 'padding: 1px;padding-left: 10px;white-space: nowrap';
 if ($allsec != 1 || $enablespecial != 'yes'){ //do not print searchbox if showing bookmarked torrents from all sections;
 ?>
@@ -1239,7 +1230,6 @@ if ($allsec != 1 || $enablespecial != 'yes'){ //do not print searchbox if showin
 								}*/
 								?>
 								<option value="3"<?php print(isset($_GET["search_area"]) && $_GET["search_area"] == 3 ? " selected=\"selected\"" : ""); ?>><?php echo $lang_torrents['select_uploader'] ?></option>
-								<option value="4"<?php print(isset($_GET["search_area"]) && $_GET["search_area"] == 4 ? " selected=\"selected\"" : ""); ?>><?php echo $lang_torrents['select_imdb_url'] ?></option>
 							</select>
 
 							<?php echo $lang_torrents['text_with'] ?>

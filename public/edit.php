@@ -8,7 +8,7 @@ $id = intval($_GET['id'] ?? 0);
 if (!$id)
 	die();
 
-$res = sql_query("SELECT torrents.*, categories.mode as cat_mode, torrent_extras.media_info as technical_info, torrent_extras.descr, torrent_extras.pt_gen FROM torrents LEFT JOIN categories ON category = categories.id left join torrent_extras on torrents.id = torrent_extras.torrent_id WHERE torrents.id = $id");
+$res = sql_query("SELECT torrents.*, categories.mode as cat_mode, torrent_extras.media_info as technical_info, torrent_extras.descr FROM torrents LEFT JOIN categories ON category = categories.id left join torrent_extras on torrents.id = torrent_extras.torrent_id WHERE torrents.id = $id");
 $row = mysql_fetch_assoc($res);
 if (!$row) die();
 
@@ -64,15 +64,6 @@ else {
 		tr($lang_edit['row_small_description'], "<input type=\"text\" style=\"width: 99%;\" name=\"small_descr\" value=\"" . htmlspecialchars($row["small_descr"]) . "\" />", 1);
 
 	get_external_tr($row["url"]);
-    if ($settingMain['enable_pt_gen_system'] == 'yes') {
-        $ptGen = new \Nexus\PTGen\PTGen();
-        echo $ptGen->renderUploadPageFormInput($row['pt_gen']);
-    }
-
-	if ($enablenfo_main=='yes')
-		tr($lang_edit['row_nfo_file'], "<font class=\"medium\"><input type=\"radio\" name=\"nfoaction\" value=\"keep\" checked=\"checked\" />".$lang_edit['radio_keep_current'].
-	"<input type=\"radio\" name=\"nfoaction\" value=\"remove\" />".$lang_edit['radio_remove'].
-	"<input id=\"nfoupdate\" type=\"radio\" name=\"nfoaction\" value=\"update\" />".$lang_edit['radio_update']."</font><br /><input type=\"file\" name=\"nfo\" onchange=\"document.getElementById('nfoupdate').checked=true\" />", 1);
 
     //price
     if (user_can('torrent-set-price') && get_setting("torrent.paid_torrent_enabled") == "yes") {

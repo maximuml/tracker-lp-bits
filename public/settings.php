@@ -37,11 +37,11 @@ if ($action == 'savesettings_main')	// save main
 		'minoffervotes','offervotetimeout','offeruptimeout','maxsubsize','postsperpage', 'topicsperpage', 'torrentsperpage', 'maxnewsnum',
 		'max_dead_torrent_time','maxusers','torrent_dir', 'iniupload','SITEEMAIL', 'ACCOUNTANTID', 'ALIPAYACCOUNT', 'PAYPALACCOUNT', 'SLOGAN',
 		'icplicense', 'autoclean_interval_one', 'autoclean_interval_two', 'autoclean_interval_three','autoclean_interval_four', 'autoclean_interval_five',
-		'reportemail','invitesystem','registration','showhotmovies','showclassicmovies','showimdbinfo', 'enable_pt_gen_system', 'pt_gen_api_point', 'enablenfo', 'enableschool','restrictemail',
+		'reportemail','invitesystem','registration','enablenfo','restrictemail',
 		'showpolls','showstats','showlastxtorrents', 'showtrackerload','showshoutbox','showfunbox','showoffer','sptime','showhelpbox','enablebitbucket',
-		'smalldescription','altname','extforum','extforumurl','defaultlang','defstylesheet', 'donation','spsct','browsecat','specialcat','waitsystem',
+		'smalldescription','altname','defaultlang','defstylesheet', 'donation','spsct','browsecat','specialcat','waitsystem',
 		'maxdlsystem','bitbucket','torrentnameprefix', 'showforumstats','verification','invite_count','invite_timeout', 'seeding_leeching_time_calc_start',
-		'startsubid', 'logo', 'showlastxforumposts', 'enable_technical_info', 'site_language_enabled', 'show_top_uploader', 'imdb_language', 'offer_skip_approved_count',
+		'startsubid', 'logo', 'showlastxforumposts', 'enable_technical_info', 'site_language_enabled', 'show_top_uploader', 'offer_skip_approved_count',
         'upload_deny_approval_deny_count', 'enable_global_search', 'tmp_invite_count', 'complain_enabled'
 	);
 	GetVar($validConfig);
@@ -94,7 +94,7 @@ elseif ($action == 'savesettings_bonus') 	// save bonus
 {
 	stdhead($lang_settings['head_save_bonus_settings']);
 	$validConfig = array(
-	    'donortimes','perseeding','maxseeding','tzero','nzero','bzero','l', 'uploadtorrent','uploadsubtitle','starttopic','makepost',
+	    'donortimes','perseeding','maxseeding','tzero','nzero','bzero','l', 'uploadtorrent','starttopic','makepost',
         'addcomment','pollvote','offervote', 'funboxvote','saythanks','receivethanks','funboxreward','onegbupload','fivegbupload',
         'tengbupload', 'ratiolimit','dlamountlimit','oneinvite','customtitle','vipstatus','bonusgift', 'basictax', 'taxpercentage',
         'prolinkpoint', 'prolinktime', 'attendance_initial', 'attendance_step', 'attendance_max', 'cancel_hr', 'attendance_card',
@@ -592,7 +592,6 @@ elseif ($action == 'bonussettings'){
 
 	print("<tr><td colspan=2 align=center><b>".$lang_settings['text_misc_ways_get_bonus']."</b></td></tr>");
 	tr($lang_settings['row_uploading_torrent'],$lang_settings['text_user_would_get']."<input type='text' style=\"width: 50px\" name=uploadtorrent value='".(isset($BONUS["uploadtorrent"]) ? $BONUS["uploadtorrent"] : 15 )."'>".$lang_settings['text_uploading_torrent_note'], 1);
-	tr($lang_settings['row_uploading_subtitle'],$lang_settings['text_user_would_get']."<input type='text' style=\"width: 50px\" name=uploadsubtitle value='".(isset($BONUS["uploadsubtitle"]) ? $BONUS["uploadsubtitle"] : 5 )."'>".$lang_settings['text_uploading_subtitle_note'], 1);
 	tr($lang_settings['row_starting_topic'],$lang_settings['text_user_would_get']."<input type='text' style=\"width: 50px\" name=starttopic value='".(isset($BONUS["starttopic"]) ? $BONUS["starttopic"] : 2 )."'>".$lang_settings['text_starting_topic_note'], 1);
 	tr($lang_settings['row_making_post'],$lang_settings['text_user_would_get']."<input type='text' style=\"width: 50px\" name=makepost value='".(isset($BONUS["makepost"]) ? $BONUS["makepost"] : 1 )."'>".$lang_settings['text_making_post_note'], 1);
 	tr($lang_settings['row_adding_comment'],$lang_settings['text_user_would_get']."<input type='text' style=\"width: 50px\" name=addcomment value='".(isset($BONUS["addcomment"]) ? $BONUS["addcomment"] : 1 )."'>".$lang_settings['text_adding_comment_note'], 1);
@@ -814,23 +813,9 @@ elseif ($action == 'mainsettings')	// main settings
 	yesorno($lang_settings['row_show_last_torrents'],'showlastxtorrents', $MAIN['showlastxtorrents'], $lang_settings['text_show_last_torrents_note']);
 	yesorno($lang_settings['row_show_server_load'],'showtrackerload', $MAIN['showtrackerload'], $lang_settings['text_show_server_load_note']);
 	yesorno($lang_settings['row_show_forum_stats'],'showforumstats', $MAIN['showforumstats'], $lang_settings['text_show_forum_stats_note']);
-	yesorno($lang_settings['row_show_hot'],'showhotmovies', $MAIN['showhotmovies'], $lang_settings['text_show_hot_note']);
-	yesorno($lang_settings['row_show_classic'],'showclassicmovies', $MAIN['showclassicmovies'], $lang_settings['text_show_classic_note']);
 	yesorno($lang_settings['row_show_top_uploader'],'show_top_uploader', $MAIN['show_top_uploader'], $lang_settings['text_show_top_uploader_note']);
-	yesorno($lang_settings['row_enable_imdb_system'],'showimdbinfo', $MAIN['showimdbinfo'], $lang_settings['text_imdb_system_note']);
-
-    $imdbLanguages = "<select name=imdb_language>";
-    foreach (\Nexus\Imdb\Imdb::listSupportLanguages() as $key => $value) {
-        $imdbLanguages .= sprintf('<option value="%s"%s>%s</option>', $key, $key == $MAIN['imdb_language'] ? ' selected' : '', $value);
-    }
-    $imdbLanguages .= "</select>";
-    tr($lang_settings['row_imdb_language'], $imdbLanguages."<br />".$lang_settings['text_imdb_language_note'], 1);
-
-	yesorno($lang_settings['row_enable_pt_gen_system'],'enable_pt_gen_system', $MAIN['enable_pt_gen_system'], $lang_settings['text_enable_pt_gen_system_note']);
-	tr($lang_settings['row_pt_gen_api_point'],"<input type='text' name=\"pt_gen_api_point\" style=\"width: 300px\" value={$MAIN['pt_gen_api_point']}> ".$lang_settings['text_pt_gen_api_point_note'], 1);
 	yesorno($lang_settings['row_enable_nfo'],'enablenfo', $MAIN['enablenfo'], $lang_settings['text_enable_nfo_note']);
 	yesorno($lang_settings['row_enable_technical_info'],'enable_technical_info', $MAIN['enable_technical_info'], $lang_settings['text_enable_technical_info']);
-	yesorno($lang_settings['row_enable_school_system'],'enableschool', $MAIN['enableschool'], $lang_settings['text_school_system_note']);
 	yesorno($lang_settings['row_enable_global_search_system'],'enable_global_search', $MAIN['enable_global_search'], $lang_settings['text_global_search_system_note']);
 	yesorno($lang_settings['row_restrict_email_domain'],'restrictemail', $MAIN['restrictemail'], $lang_settings['text_restrict_email_domain_note']);
 	yesorno($lang_settings['row_show_shoutbox'],'showshoutbox', $MAIN['showshoutbox'], $lang_settings['text_show_shoutbox_note']);
@@ -842,8 +827,6 @@ elseif ($action == 'mainsettings')	// main settings
 	yesorno($lang_settings['row_enable_bitbucket'],'enablebitbucket', $MAIN['enablebitbucket'], $lang_settings['text_bitbucket_note']);
 	yesorno($lang_settings['row_enable_small_description'],'smalldescription', $MAIN['smalldescription'], $lang_settings['text_small_description_note']);
 	yesorno($lang_settings['row_ptshow_naming_style'],'altname', $MAIN['altname'], $lang_settings['text_ptshow_naming_style_note']);
-	yesorno($lang_settings['row_use_external_forum'],'extforum', $MAIN['extforum'], $lang_settings['text_use_external_forum_note']);
-	tr($lang_settings['row_external_forum_url'],"<input type='text' style=\"width: 300px\" name=extforumurl value='".($MAIN["extforumurl"] ? $MAIN["extforumurl"] : "")."'> ".$lang_settings['text_external_forum_url_note'], 1);
     yesorno($lang_settings['row_show_special_section'],'spsct', $MAIN['spsct'], $lang_settings['text_show_special_section_note']);
 	$res = sql_query("SELECT id, name FROM searchbox") or sqlerr(__FILE__, __LINE__);
 	$catlist = "";

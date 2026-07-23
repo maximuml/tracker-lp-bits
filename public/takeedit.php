@@ -42,51 +42,9 @@ $extraUpdate = [];
 //$shortfname = $matches[1];
 //$dname = $row["save_as"];
 
-$url = parse_imdb_id($_POST['url'] ?? '');
-/**
- * add PT-Gen
- * @since 1.6
- *
- */
-if (!empty($_POST['pt_gen'])) {
-    $postPtGen = $_POST['pt_gen'];
-    $existsPtGenInfo = json_decode($row['pt_gen'], true) ?? [];
-    $ptGen = new \Nexus\PTGen\PTGen();
-    if ($postPtGen != $ptGen->getLink($existsPtGenInfo)) {
-//        $updateset[] = "pt_gen = " . sqlesc($postPtGen);
-        $extraUpdate["pt_gen"] = $postPtGen;
-    }
-} else {
-//    $updateset[] = "pt_gen = ''";
-    $extraUpdate["pt_gen"] = "";
-}
-
-//$updateset[] = "technical_info = " . sqlesc($_POST['technical_info'] ?? '');
+$url = null;
 $extraUpdate["media_info"] = $_POST['technical_info'] ?? '';
 $torrentOperationLog = [];
-
-
-if ($enablenfo_main=='yes'){
-$nfoaction = $_POST['nfoaction'];
-if ($nfoaction == "update")
-{
-	$nfofile = $_FILES['nfo'];
-	if (!$nfofile) die("No data " . var_dump($_FILES));
-	if ($nfofile['size'] > 65535)
-		bark($lang_takeedit['std_nfo_too_big']);
-	$nfofilename = $nfofile['tmp_name'];
-	if (@is_uploaded_file($nfofilename) && @filesize($nfofilename) > 0) {
-//        $updateset[] = "nfo = " . sqlesc(str_replace("\x0d\x0d\x0a", "\x0d\x0a", file_get_contents($nfofilename)));
-        $extraUpdate["nfo"] = str_replace("\x0d\x0d\x0a", "\x0d\x0a", file_get_contents($nfofilename));
-    }
-
-	$Cache->delete_value('nfo_block_torrent_id_'.$id);
-}
-elseif ($nfoaction == "remove"){
-    $extraUpdate["nfo"] = "";
-	$Cache->delete_value('nfo_block_torrent_id_'.$id);
-}
-}
 
 $catid = intval($type ?? 0);
 if (!is_valid_id($catid))

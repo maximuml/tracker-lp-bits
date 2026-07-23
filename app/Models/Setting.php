@@ -123,11 +123,6 @@ class Setting extends NexusModel
         return self::get("main.defaultlang");
     }
 
-    public static function getIsPTGenEnabled(): bool
-    {
-        return self::get("main.enable_pt_gen_system") == "yes";
-    }
-
     public static function getIsUseChallengeResponseAuthentication(): bool
     {
         return self::get("security.use_challenge_response_authentication") == "yes";
@@ -328,11 +323,6 @@ class Setting extends NexusModel
     public static function getIsRecordSeedingBonusLog(): bool
     {
         return self::get('system.is_record_seeding_bonus_log') == 'yes';
-    }
-
-    public static function getIsImdbEnabled(): bool
-    {
-        return self::get('main.showimdbinfo') == 'yes';
     }
 
     public static function getSelfEnableBonus(): int

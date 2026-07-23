@@ -109,14 +109,6 @@ $ct_r = sql_query("SELECT id,name FROM countries ORDER BY name") or die;
 while ($ct_a = mysql_fetch_array($ct_r))
 $countries .= "<option value=$ct_a[id]" . ($ct_a['id'] == 8 ? " selected" : "") . ">$ct_a[name]</option>n";
 tr($lang_signup['row_country'], "<select name=country>n$countries</select>", 1);
-//School select
-if ($showschool == 'yes'){
-$schools = "<option value=35>---- ".$lang_signup['select_none_selected']." ----</option>n";
-$sc_r = sql_query("SELECT id,name FROM schools ORDER BY name") or die;
-while ($sc_a = mysql_fetch_array($sc_r))
-$schools .= "<option value=$sc_a[id]" . ($sc_a['id'] == 35 ? " selected" : "") . ">$sc_a[name]</option>n";
-tr($lang_signup['row_school'], "<select name=school>$schools</select>", 1);
-}
 ?>
 <tr><td class=rowhead><?php echo $lang_signup['row_gender'] ?></td><td class=rowfollow align=left>
 <input type=radio name=gender value=Male><?php echo $lang_signup['radio_male'] ?><input type=radio name=gender value=Female><?php echo $lang_signup['radio_female'] ?></td></tr>

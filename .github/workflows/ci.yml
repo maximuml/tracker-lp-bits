@@ -1,0 +1,63 @@
+name: CI
+
+on:
+  push:
+    branches: ["php8"]
+  pull_request:
+    branches: ["php8"]
+
+jobs:
+  lint-and-validate:
+    name: Lint PHP and validate composer
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: bcmath, curl, gd, gmp, intl, json, mbstring, mysqli, pdo, redis, sqlite3, xml, zip
+          coverage: none
+
+      - name: Validate composer.json and composer.lock
+        run: composer validate
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress --no-interaction --ignore-platform-reqs --no-scripts
+
+      - name: Dump autoload
+        run: composer dump-autoload --no-interaction --no-scripts
+
+      - name: Run PHP syntax lint
+        run: |
+          find . -type f -name '*.php' \
+            -not -path './vendor/*' \
+            -not -path './node_modules/*' \
+            -not -path './.docker/*' \
+            -not -path './public/vendor/*' \
+            -not -path './storage/*' \
+            -print0 | xargs -0 -n1 -P4 php -l
+
+      - name: Determine changed PHP files
+        id: changed
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            base="origin/${{ github.base_ref }}"
+            git fetch origin "${{ github.base_ref }}" --depth=1 || true
+          else
+            base="${{ github.event.before }}"
+          fi
+          files=$(git diff --name-only --diff-filter=ACM "$base" HEAD | grep '\.php$' | tr '\n' ' ' || true)
+          echo "files=$files" >> "$GITHUB_OUTPUT"
+
+      - name: Run PHPStan on changed files
+        if: steps.changed.outputs.files != ''
+        run: vendor/bin/phpstan analyse --no-progress --memory-limit=2G ${{ steps.changed.outputs.files }}
+
+      - name: Run PHPUnit unit tests
+        run: vendor/bin/phpunit --testsuite Unit --no-coverage

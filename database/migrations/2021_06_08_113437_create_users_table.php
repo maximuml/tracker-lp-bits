@@ -76,8 +76,6 @@ class CreateUsersTable extends Migration
             $table->enum('clicktopic', ['firstpage', 'lastpage'])->default('firstpage');
             $table->enum('deletepms', ['yes', 'no'])->default('yes');
             $table->enum('savepms', ['yes', 'no'])->default('no');
-            $table->enum('showhot', ['yes', 'no'])->default('yes');
-            $table->enum('showclassic', ['yes', 'no'])->default('yes');
             $table->enum('support', ['yes', 'no'])->default('no');
             $table->enum('picker', ['yes', 'no'])->default('no');
             $table->string('stafffor')->default('');
@@ -133,7 +131,6 @@ class CreateUsersTable extends Migration
             $table->enum('showlastcom', ['yes', 'no'])->nullable()->default('no');
             $table->enum('showlastpost', ['yes', 'no'])->default('no');
             $table->unsignedTinyInteger('pmnum')->default(10);
-            $table->unsignedSmallInteger('school')->default(35);
             $table->enum('showfb', ['yes', 'no'])->default('yes');
             $table->string('page')->nullable()->default('');
             $table->index(['status', 'added']);

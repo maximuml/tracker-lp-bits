@@ -93,10 +93,6 @@ if ($action){
 				$commentpm = $_POST["commentpm"];
 				$gender = $_POST["gender"];
 				$country = $_POST["country"];
-				if ($showschool = 'yes'){
-					$school = $_POST["school"];
-					$updateset[] = "school = ".sqlesc($school);
-					}
 				$download = $_POST["download"];
 				$upload = $_POST["upload"];
 				$isp = $_POST["isp"];
@@ -211,14 +207,6 @@ if ($action){
 <input type=radio name=gender" . ($CURUSER["gender"] == "Male" ? " checked" : "") . " value=Male>".$lang_usercp['radio_male']."<input type=radio name=gender" .  ($CURUSER["gender"] == "Female" ? " checked" : "") . " value=Female>".$lang_usercp['radio_female'],1);
             tr_small($lang_usercp['row_tracker_url'], "<select name=tracker_url_id>\n$trackerUrls\n</select>" . "<br /><font class=small size=1>".$lang_usercp['row_tracker_url_help']."</font>",1);
             tr_small($lang_usercp['row_country'], "<select name=country>\n$countries\n</select>",1);
-		//School select
-if ($showschool == 'yes'){
-$schools = "<option value=35>---- ".$lang_usercp['select_none_selected']." ----</option>n";
-$sc_r = sql_query("SELECT id,name FROM schools ORDER BY name") or die;
-while ($sc_a = mysql_fetch_array($sc_r))
-$schools .= "<option value={$sc_a['id']}" . ($sc_a['id'] == $CURUSER['school'] ? " selected" : "") . ">{$sc_a['name']}</option>n";
-tr($lang_usercp['row_school'], "<select name=school>$schools</select>", 1);
-}
 			tr_small($lang_usercp['row_network_bandwidth'], "<b>".$lang_usercp['text_downstream_rate']. "</b>: <select name=download>".$downloadspeed."</select>&nbsp;&nbsp;<b>".$lang_usercp['text_upstream_rate']."</b>: <select name=upload>".$uploadspeed."</select>&nbsp;&nbsp;<b>".$lang_usercp['text_isp']."</b>: <select name=isp>".$isplist."</select>",1);
 			tr_small($lang_usercp['row_avatar_url'], "<img src=".($CURUSER["avatar"] ? "'$CURUSER[avatar]'" : "'" . get_protocol_prefix() . $BASEURL . "/pic/default_avatar.png'")." name='avatarimg'><br />
   <select name=savatar OnChange=\"document.forms[0].avatarimg.src=this.value;this.form.avatar.value=this.value;\">
@@ -332,14 +320,6 @@ tr($lang_usercp['row_school'], "<select name=school>$schools</select>", 1);
 				}
 
 				$updateset[] = "torrentsperpage = " . min(100, intval($_POST["torrentsperpage"] ?? 0));
-				if ($showmovies['hot'] == "yes"){
-					$showhot = $_POST["show_hot"];
-					$updateset[] = "showhot = " . sqlesc($showhot);
-					}
-				if ($showmovies['classic'] == "yes"){
-					$showclassic = $_POST["show_classic"];
-					$updateset[] = "showclassic = " . sqlesc($showclassic);
-					}
 				if ($showtooltipsetting){
 					$tooltip = $_POST['tooltip'];
 					$updateset[] = "tooltip = " . sqlesc($tooltip);
@@ -383,20 +363,11 @@ tr($lang_usercp['row_school'], "<select name=school>$schools</select>", 1);
 					$hidehb = 'yes';
 				else $hidehb = 'no';
 				$updateset[] = "hidehb = " . sqlesc($hidehb);
-				if ($showextinfo['imdb'] == 'yes'){if ($_POST["showimdb"] == 'yes')
-					$showimdb = 'yes';
-				else $showimdb = 'no';
-				$updateset[] = "showimdb = " . sqlesc($showimdb);}
 				if ($_POST["showdescription"] == 'yes')
 					$showdescription = 'yes';
 				else $showdescription = 'no';
 				$updateset[] = "showdescription = " . sqlesc($showdescription);
-				if ($enablenfo_main == 'yes'){
-				if (isset($_POST["shownfo"]) && $_POST["shownfo"] == 'yes')
-					$shownfo = 'yes';
-				else $shownfo = 'no';
-				$updateset[] = "shownfo = " . sqlesc($shownfo);
-				}
+	
 				if ($_POST["smalldescr"] == 'yes')
 					$showsmalldescr = 'yes';
 				else $showsmalldescr = 'no';
@@ -645,15 +616,13 @@ if ($showaudiocodec) $audiocodecs = searchbox_item_list("audiocodecs");
 
 			tr_small($lang_usercp['row_site_language'], $s,1);
 
-			if($showmovies['hot'] == "yes" || $showmovies['classic'] == "yes")
-			tr_small($lang_usercp['row_recommended_movies'], ($showmovies['hot'] == "yes" ? "<input type=checkbox name=show_hot" . ($CURUSER["showhot"] == "yes" ? " checked" : "") . " value=yes>".$lang_usercp['checkbox_show_hot']. "&nbsp;" : "") . ($showmovies['classic'] == "yes" ? "<input type=checkbox name=show_classic" . ($CURUSER["showclassic"] == "yes" ? " checked" : "") . " value=yes>".$lang_usercp['checkbox_show_classic']."&nbsp;" : ""),1);
 			tr_small($lang_usercp['row_pm_boxes'], $lang_usercp['text_show']."<input type=text name=pmnum size=5 value=".$CURUSER['pmnum']." >".$lang_usercp['text_pms_per_page'], 1);
 if ($showshoutbox_main == "yes") //system side setting for shoutbox
 			tr_small($lang_usercp['row_shoutbox'], $lang_usercp['text_show_last']."<input type=text name=sbnum size=5 value=".$CURUSER['sbnum']." >".$lang_usercp['text_messages_at_shoutbox']."<br />".$lang_usercp['text_refresh_shoutbox_every']."<input type=text name=sbrefresh size=5 value=".$CURUSER['sbrefresh']." >".$lang_usercp['text_seconds'].($showhelpbox_main == 'yes' ? "<br /><input type=checkbox name=hidehb".($CURUSER["hidehb"] == "yes" ? " checked" : "") ." value=yes>".$lang_usercp['text_hide_helpbox_messages'] : ""), 1);
 if ($showfunbox_main == 'yes') //siteside setting for funbox
 tr_small($lang_usercp['row_funbox'],"<input type=checkbox name=showfb".($CURUSER["showfb"] == "yes" ? " checked" : "") ." value=yes>".$lang_usercp['text_show_funbox'] , 1);
 
-			tr_small($lang_usercp['row_torrent_detail'], "<input type=checkbox name=showdescription".($CURUSER["showdescription"] == "yes" ? " checked" : "") ." value=yes>".$lang_usercp['text_show_description']."<br />".($enablenfo_main == 'yes' && get_user_class() >= UC_POWER_USER ? "<input type=checkbox name=shownfo".($CURUSER["shownfo"] == "yes" ? " checked" : "") ." value=yes>".$lang_usercp['text_show_nfo']."<br />" : "").($showextinfo['imdb'] == 'yes' ? "<input type=checkbox name=showimdb".($CURUSER["showimdb"] == "yes" ? " checked" : "") ." value=yes>".$lang_usercp['text_show_imdb_info'] : ""),1);
+			tr_small($lang_usercp['row_torrent_detail'], "<input type=checkbox name=showdescription".($CURUSER["showdescription"] == "yes" ? " checked" : "") ." value=yes>".$lang_usercp['text_show_description'],1);
 			tr_small($lang_usercp['row_discuss'],"<input type=checkbox name=showcomment".($CURUSER["showcomment"] == "yes" ? " checked" : "") ." value=yes>".$lang_usercp['text_show_comments'], 1);
 			if ($enablead_advertisement == 'yes'){
 				tr_small($lang_usercp['row_show_advertisements'],"<input type=\"checkbox\" name=\"showad\"".($CURUSER["noad"] == "yes" ? "" : " checked=\"checked\"") .($showaddisabled ? " disabled=\"disabled\"" : ""). " value=\"yes\" />".$lang_usercp['text_show_advertisement_note'].($enablenoad_advertisement == 'yes' ? "<br />".get_user_class_name($noad_advertisement,false,true,true).$lang_usercp['text_can_turn_off_advertisement'] : "").($enablebonusnoad_advertisement == 'yes' ? "<br />".get_user_class_name($bonusnoad_advertisement,false,true,true).$lang_usercp['text_buy_no_advertisement']."<a href=\"mybonus.php\"><b>".$lang_usercp['text_bonus_center']."</b></a>" : ""), 1);
@@ -662,7 +631,7 @@ tr_small($lang_usercp['row_funbox'],"<input type=checkbox name=showfb".($CURUSER
 			//Setting for browse page
 			tr_small($lang_usercp['row_browse_page'], $lang_usercp['text_browse_setting_warning']."
 		<br /><b>".$lang_usercp['row_torrent_page'].": </b><br />".$lang_usercp['text_show']."<input type=text size=5 name=torrentsperpage value=".$CURUSER['torrentsperpage']."> ".$lang_usercp['text_torrents_per_page'].$lang_usercp['text_zero_equals_default']."<br />".
-		($showtooltipsetting ? "<b>".$lang_usercp['text_tooltip_type']."</b>: <br />".($showextinfo['imdb'] == 'yes' ? "<input type=radio name=tooltip ".($CURUSER['tooltip'] == 'minorimdb' ? " checked" : "")." value=minorimdb>".$lang_usercp['text_minor_imdb_info']."<br /><input type=radio name=tooltip ".($CURUSER['tooltip'] == 'medianimdb' ? " checked" : "")." value=medianimdb>".$lang_usercp['text_median_imdb_info']. "<br />" : "")."<input type=radio name=tooltip ".($CURUSER['tooltip'] == 'off' ? " checked" : "")." value=off>".$lang_usercp['text_off']."<br />" : "").
+		($showtooltipsetting ? "<b>".$lang_usercp['text_tooltip_type']."</b>: <br /><input type=radio name=tooltip ".($CURUSER['tooltip'] == 'off' ? " checked" : "")." value=off>".$lang_usercp['text_off']."<br />" : "").
 		"<b>".$lang_usercp['text_append_words_to_torrents'].": </b><br /><input type=checkbox name=appendsticky ".($CURUSER['appendsticky'] == 'yes' ? " checked" : "")." value=yes>".$lang_usercp['text_append_sticky']."<br /><input type=checkbox name=appendnew ".($CURUSER['appendnew'] == 'yes' ? " checked" : "")." value=yes>".$lang_usercp['text_append_new']."<br />".$lang_usercp['text_torrents_on_promotion']."<input type=radio name=appendpromotion ".($CURUSER['appendpromotion'] == 'highlight' ? " checked" : "")." value='highlight'>".$lang_usercp['text_highlight']."<input type=radio name=appendpromotion ".($CURUSER['appendpromotion'] == 'word' ? " checked" : "")." value='word'>".$lang_usercp['text_append_words']."<input type=radio name=appendpromotion ".($CURUSER['appendpromotion'] == 'icon' ? " checked" : "")." value='icon'>".$lang_usercp['text_append_icon']."<input type=radio name=appendpromotion ".($CURUSER['appendpromotion'] == 'off' ? " checked" : "")." value='off'>".$lang_usercp['text_no_mark']."<br /><input type=checkbox name=appendpicked ".($CURUSER['appendpicked'] == 'yes' ? " checked" : "")." value=yes>".$lang_usercp['text_append_picked']."<br />
 		<b>".$lang_usercp['text_show_title'].": </b><br />"."<input type=checkbox name=smalldescr ".($CURUSER['showsmalldescr'] == 'yes' ? " checked" : "")." value=yes>".$lang_usercp['text_show_small_description']."<br />
 		<b>".$lang_usercp['text_show_action_icons'].": </b><br />"."<input type=checkbox name=dlicon ".($CURUSER['dlicon'] == 'yes' ? " checked" : "")." value=yes>".$lang_usercp['text_show_download_icon']." <img class=\"download\" src=\"pic/trans.gif\"  alt=\"Download\" /><br /><input type=checkbox name=bmicon ".($CURUSER['bmicon'] == 'yes' ? " checked" : "")." value=yes>".$lang_usercp['text_show_bookmark_icon']." <img class=\"bookmark\" src=\"pic/trans.gif\" alt=\"Bookmark\" /><br />

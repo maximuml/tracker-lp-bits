@@ -31,7 +31,6 @@ class DatabaseSeeder extends Seeder
         $this->call(ModpanelTableSeeder::class);
         $this->call(ProcessingsTableSeeder::class);
         $this->call(RulesTableSeeder::class);
-        $this->call(SchoolsTableSeeder::class);
         $this->call(SearchboxTableSeeder::class);
         $this->call(SecondiconsTableSeeder::class);
         $this->call(SourcesTableSeeder::class);

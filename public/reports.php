@@ -123,19 +123,6 @@ while ($row = mysql_fetch_array($reportres))
 			}
 			break;
 		}
-		case "subtitle":
-		{
-			$type = $lang_reports['text_subtitle'];
-			$res = sql_query("SELECT id, torrent_id, title FROM subs WHERE id=".sqlesc($row['reportid']));
-			if (mysql_num_rows($res) == 0)
-				$reporting = $lang_reports['text_subtitle_does_not_exist'];
-			else
-			{
-				$arr = mysql_fetch_array($res);
-				$reporting = "<a href=\"downloadsubs.php?torrentid=" . $arr['torrent_id'] ."&subid=" .$arr['id']."\">".htmlspecialchars($arr['title'])."</a>".$lang_reports['text_for_torrent_id']."<a href=\"details.php?id=" . $arr['torrent_id'] ."\">".$arr['torrent_id']."</a>";
-			}
-			break;
-		}
 		default:
 		{
 			break;

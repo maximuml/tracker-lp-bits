@@ -108,10 +108,6 @@ class TorrentResource extends Resource
                     }),
                 TextColumn::make('posStateText')->label(__('label.torrent.pos_state')),
                 TextColumn::make('spStateText')->label(__('label.torrent.sp_state')),
-                TextColumn::make('pickInfoText')
-                    ->label(__('label.torrent.picktype'))
-                    ->formatStateUsing(fn ($record) => $record->pickInfo['text'])
-                ,
                 IconColumn::make('hr')
                     ->label(__('label.torrent.hr'))
                     ->boolean()
@@ -221,34 +217,6 @@ class TorrentResource extends Resource
                     } catch (Exception $exception) {
                         do_log($exception->getMessage() . $exception->getTraceAsString(), 'error');
                         Filament::notify('danger', $exception->getMessage());
-                    }
-                })
-                ->deselectRecordsAfterCompletion();
-        }
-
-        if (user_can('torrentmanage') && ($user->picker == 'yes' || $user->class >= User::CLASS_SYSOP)) {
-            $actions[] = BulkAction::make('recommend')
-                ->label(__('admin.resources.torrent.bulk_action_recommend'))
-                ->form([
-                    Radio::make('picktype')
-                        ->label(__('admin.resources.torrent.bulk_action_recommend'))
-                        ->inline()
-                        ->options(Torrent::listPickInfo(true))
-                        ->required(),
-
-                ])
-                ->icon('heroicon-o-fire')
-                ->action(function (Collection $records, array $data) {
-                    if (empty($data['picktype'])) {
-                        return;
-                    }
-                    $idArr = $records->pluck('id')->toArray();
-                    try {
-                        $torrentRep = new TorrentRepository();
-                        $torrentRep->setPickType($idArr, $data['picktype']);
-                    } catch (Exception $exception) {
-                        do_log($exception->getMessage() . $exception->getTraceAsString(), 'error');
-                        Filament::notify('danger', class_basename($exception));
                     }
                 })
                 ->deselectRecordsAfterCompletion();
@@ -450,12 +418,6 @@ class TorrentResource extends Resource
             SelectFilter::make('sp_state')
                 ->options(Torrent::listPromotionTypes(true))
                 ->label(__('label.torrent.sp_state'))
-                ->multiple()
-            ,
-
-            SelectFilter::make('picktype')
-                ->options(Torrent::listPickInfo(true))
-                ->label(__('label.torrent.picktype'))
                 ->multiple()
             ,
 

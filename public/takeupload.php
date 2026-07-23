@@ -327,16 +327,6 @@ if(user_can('torrentsticky')) {
         $insert['pos_state_until'] = $posStateUntil;
     }
 }
-if(user_can('torrentmanage') && ($CURUSER['picker'] == 'yes' || get_user_class() >= \App\Models\User::CLASS_SYSOP)) {
-    if (isset($_POST['picktype']) && isset(\App\Models\Torrent::$pickTypes[$_POST['picktype']])) {
-        $insert['picktype'] = $_POST['picktype'];
-        if ($insert['picktype'] == \App\Models\Torrent::PICK_NORMAL) {
-            $insert['picktime'] = null;
-        } else {
-            $insert['picktime'] = now()->toDateTimeString();
-        }
-    }
-}
 if (user_can('torrent-approval-allow-automatic')) {
     $insert['approval_status'] = \App\Models\Torrent::APPROVAL_STATUS_ALLOW;
 }

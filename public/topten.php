@@ -168,25 +168,6 @@ function bonustable($res, $frame_caption)
 	end_frame();
 }
 
-function prolinkclicktable($res, $frame_caption)
-{
-	global $lang_topten;
-	begin_frame($frame_caption, true);
-	begin_table();
-
-	print("<tr><td class=\"colhead\">".$lang_topten['col_rank']."</td><td class=\"colhead\">".$lang_topten['col_username']."</td><td class=\"colhead\">".$lang_topten['col_clicks']."</td></tr>");
-
-	$n = 1;
-	while ($arr = mysql_fetch_assoc($res))
-	{
-		//die();
-		print("<tr><td class=\"rowfollow\" align=\"center\">$n</td><td class=\"rowfollow\" align=\"left\">" . get_username($arr["userid"]) . "</td><td class=\"rowfollow\" align=\"right\">" . number_format($arr["count"]) . "</td></tr>\n");
-		$n++;
-	}
-
-	end_table();
-	end_frame();
-}
 
 function charityTable($res, $frame_caption)
 {
@@ -672,14 +653,6 @@ elseif ($type == 6)
 		$r = sql_query("SELECT * FROM users ORDER BY seedbonus DESC LIMIT $limit") or sqlerr();
 		bonustable($r, $lang_topten['text_top']."$limit ".$lang_topten['text_most_bonuses'] . ($limit == 10 ? " <font class=\"small\"> - [<a class=\"altlink\" href=\"topten.php?type=$type&amp;lim=100&amp;subtype=bo\">".$lang_topten['text_one_hundred']."</a>] - [<a class=\"altlink\" href=\"topten.php?type=$type&amp;lim=250&amp;subtype=bo\">".$lang_topten['text_top_250']."</a>]</font>" : ""));
 	}
-
-if ($prolinkpoint_bonus){
-	if ($limit == 10 || $subtype == "pl")
-	{
-		$r = sql_query("SELECT userid, COUNT(id) AS count FROM prolinkclicks GROUP BY userid ORDER BY count DESC LIMIT $limit") or sqlerr();
-		prolinkclicktable($r, $lang_topten['text_top']."$limit ".$lang_topten['text_most_clicks'] . ($limit == 10 ? " <font class=\"small\"> - [<a class=\"altlink\" href=\"topten.php?type=$type&amp;lim=100&amp;subtype=pl\">".$lang_topten['text_one_hundred']."</a>] - [<a class=\"altlink\" href=\"topten.php?type=$type&amp;lim=250&amp;subtype=pl\">".$lang_topten['text_top_250']."</a>]</font>" : ""));
-	}
-}
 
 	if ($limit == 10 || $subtype == "charity")
 	{

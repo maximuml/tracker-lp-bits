@@ -108,8 +108,6 @@ $lang_topten = array
 	'text_top' => "Top ",
 	'text_one_hundred' => "Top 100",
 	'text_top_250' => "Top 250",
-	'col_clicks' => "Clicks",
-	'text_most_clicks' => "Promotion Link Owners",
 	'text_charity_giver' => "Charity Givers"
 );
 

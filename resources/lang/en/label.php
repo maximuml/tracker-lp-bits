@@ -273,7 +273,6 @@ return [
         'team' => 'Team',
         'processing' => 'Processing',
         'standard' => 'Standard',
-        'picktype' => 'Recommend',
         'promotion_time_type' => 'Promotion type time',
         'hr' => 'H&R',
         'added_begin' => 'Added greater than',

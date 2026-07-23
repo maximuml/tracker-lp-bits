@@ -206,19 +206,10 @@ JS;
                 {
                     $options = [];
                     foreach (\App\Models\Torrent::listPosStates() as $key => $value) {
-                        $options[] = "<option" . (($row["pos_state"] == $key) ? " selected=\"selected\"" : "" ) . " value=\"" . $key . "\">".$value['text']."</option>";
+                        $options[] = "<option value=\"" . $key . "\">".$value['text']."</option>";
                     }
                     $pickcontent .= "<b>".$lang_edit['row_torrent_position'].":&nbsp;</b>"."<select name=\"pos_state\" style=\"width: 100px;\">" . implode('', $options) . "</select>&nbsp;&nbsp;&nbsp;";
                     $pickcontent .= datetimepicker_input('pos_state_until', '', nexus_trans('label.deadline') . ":&nbsp;", ['require_files' => true]);
-                }
-                if(user_can('torrentmanage') && ($CURUSER["picker"] == 'yes' || get_user_class() >= \App\Models\User::CLASS_SYSOP))
-                {
-                    if ($pickcontent) $pickcontent .= '<br />';
-                    $pickcontent .= "<b>".$lang_edit['row_recommended_movie'].":&nbsp;</b>"."<select name=\"picktype\" style=\"width: 100px;\">";
-                    foreach (\App\Models\Torrent::listPickInfo(true) as $_pick_type => $_pick_type_text) {
-                        $pickcontent .= sprintf('<option value="%s">%s</option>', $_pick_type, $_pick_type_text);
-                    }
-                    $pickcontent .= '</select>';
                 }
                 if ($pickcontent) {
                     tr($lang_edit['row_pick'], $pickcontent, 1);

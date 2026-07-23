@@ -74,7 +74,6 @@ class UploadRepository extends BaseRepository
         $subCategoriesAngTags = $this->getSubCategoriesAndTags($request, $category);
         $fileListInfo = $this->getFileListInfo($info, $dname);
         $posStateInfo = $this->getPosStateInfo($request);
-        $pickInfo = $this->getPickInfo($request);
         $anonymous = "no";
         $uploaderUsername = $user->username;
         if ($request->uplver == 'yes') {
@@ -116,8 +115,6 @@ class UploadRepository extends BaseRepository
             'hr' => $this->getHitAndRun($request),
             'pos_state' => $posStateInfo['posState'],
             'pos_state_until' => $posStateInfo['posStateUntil'],
-            'picktype' => $pickInfo['pickType'],
-            'picktime' => $pickInfo['pickTime'],
             'approval_status' => $this->getApprovalStatus($request),
             'price' => $this->getPrice($request),
         ];
@@ -278,22 +275,6 @@ class UploadRepository extends BaseRepository
             throw new NexusException(nexus_trans('upload.invalid_pos_state_until'));
         }
         return compact('posState', 'posStateUntil');
-    }
-
-    private function getPickInfo(Request $request): array
-    {
-        $pickType = $request->pick_type ?: Torrent::PICK_NORMAL;
-        $pickTime = null;
-        if ($pickType != Torrent::PICK_NORMAL) {
-            if (!isset(Torrent::$pickTypes[$pickType])) {
-                throw new NexusException(nexus_trans('upload.invalid_pick_type', ['pick_type' => $pickType]));
-            }
-            if (!Permission::canPickTorrent()) {
-                throw new NexusException("upload.no_permission_to_pick_torrent");
-            }
-            $pickTime = Carbon::now();
-        }
-        return compact('pickType', 'pickTime');
     }
 
     private function checkTorrentDict($dict, $key, $type = null)

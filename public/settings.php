@@ -97,7 +97,7 @@ elseif ($action == 'savesettings_bonus') 	// save bonus
 	    'donortimes','perseeding','maxseeding','tzero','nzero','bzero','l', 'uploadtorrent','starttopic','makepost',
         'addcomment','pollvote','offervote','saythanks','receivethanks','onegbupload','fivegbupload',
         'tengbupload', 'ratiolimit','dlamountlimit','oneinvite','customtitle','vipstatus','bonusgift', 'basictax', 'taxpercentage',
-        'prolinkpoint', 'prolinktime', 'attendance_initial', 'attendance_step', 'attendance_max', 'cancel_hr', 'attendance_card',
+        'attendance_initial', 'attendance_step', 'attendance_max', 'cancel_hr', 'attendance_card',
         'harem_addition', 'hundredgbupload', 'tengbdownload', 'hundredgbdownload', 'official_addition', 'official_tag', 'zero_bonus_tag', 'zero_bonus_factor',
         'one_tmp_invite', 'rainbow_id', 'change_username_card', 'min_size', 'self_enable'
     );
@@ -244,7 +244,7 @@ elseif ($action == 'savesettings_authority') 	// save user authority
 elseif ($action == 'savesettings_tweak')	// save tweak
 {
 	stdhead($lang_settings['head_save_tweak_settings']);
-	$validConfig = array('where','iplog1','bonus','datefounded', 'enablelocation', 'titlekeywords', 'metakeywords', 'metadescription', 'enablesqldebug', 'sqldebug', 'cssdate', 'enabletooltip', 'prolinkimg', 'analyticscode');
+	$validConfig = array('where','iplog1','bonus','datefounded', 'enablelocation', 'titlekeywords', 'metakeywords', 'metadescription', 'enablesqldebug', 'sqldebug', 'cssdate', 'enabletooltip', 'analyticscode');
 	GetVar($validConfig);
 	$TWEAK = [];
 	foreach($validConfig as $config) {
@@ -299,7 +299,6 @@ elseif ($action == 'tweaksettings')		// tweak settings
 	yesorno($lang_settings['row_enable_location'], 'enablelocation', $TWEAK["enablelocation"], $lang_settings['text_enable_location_note']);
 	yesorno($lang_settings['row_enable_tooltip'], 'enabletooltip', $TWEAK["enabletooltip"], $lang_settings['text_enable_tooltip_note']);
 	tr($lang_settings['row_title_keywords'],"<input type='text' style=\"width: 300px\" name='titlekeywords' value='".($TWEAK["titlekeywords"] ? $TWEAK["titlekeywords"] : '')."' /> <br />".$lang_settings['text_title_keywords_note'], 1);
-	tr($lang_settings['row_promotion_link_example_image'],"<input type='text' style=\"width: 300px\" name='prolinkimg' value='".($TWEAK["prolinkimg"] ? $TWEAK["prolinkimg"] : 'pic/prolink.png')."' /> <br />".$lang_settings['text_promotion_link_example_note'], 1);
 	tr($lang_settings['row_meta_keywords'],"<input type='text' style=\"width: 300px\" name='metakeywords' value='".($TWEAK["metakeywords"] ? $TWEAK["metakeywords"] : '')."' /> <br />".$lang_settings['text_meta_keywords_note'], 1);
 	tr($lang_settings['row_meta_description'],"<textarea cols=\"100\" style=\"width: 450px;\" rows=\"5\" name='metadescription'>".($TWEAK["metadescription"] ? $TWEAK["metadescription"] : '')."</textarea> <br />".$lang_settings['text_meta_description_note'], 1);
 	tr($lang_settings['row_web_analytics_code'],"<textarea cols=\"100\" style=\"width: 450px;\" rows=\"5\" name='analyticscode'>".($TWEAK["analyticscode"] ? $TWEAK["analyticscode"] : '')."</textarea> <br />".$lang_settings['text_web_analytics_code_note'], 1);
@@ -566,7 +565,6 @@ elseif ($action == 'bonussettings'){
 	tr($lang_settings['row_voting_on_poll'],$lang_settings['text_user_would_get']."<input type='text' style=\"width: 50px\" name=pollvote value='".(isset($BONUS["pollvote"]) ? $BONUS["pollvote"] : 1 )."'>".$lang_settings['text_voting_on_poll_note'], 1);
 	tr($lang_settings['row_voting_on_offer'],$lang_settings['text_user_would_get']."<input type='text' style=\"width: 50px\" name=offervote value='".(isset($BONUS["offervote"]) ? $BONUS["offervote"] : 1 )."'>".$lang_settings['text_voting_on_offer_note'], 1);
 	tr($lang_settings['row_saying_thanks'], $lang_settings['text_giver_and_receiver_get']."<input type='text' style=\"width: 50px\" name=saythanks value='".(isset($BONUS["saythanks"]) ? $BONUS["saythanks"] : 0.5 )."'>".$lang_settings['text_saying_thanks_and']."<input type='text' style=\"width: 50px\" name=receivethanks value='".(isset($BONUS["receivethanks"]) ? $BONUS["receivethanks"] : 0 )."'>".$lang_settings['text_saying_thanks_default'], 1);
-	tr($lang_settings['row_promotion_link_click'],$lang_settings['text_user_would_get']."<input type='text' style=\"width: 50px\" name=prolinkpoint value='".(isset($BONUS["prolinkpoint"]) ? $BONUS["prolinkpoint"] : 0 )."'>".$lang_settings['text_promotion_link_note_one']."<input type='text' style=\"width: 50px\" name=prolinktime value='".(isset($BONUS["prolinktime"]) ? $BONUS["prolinktime"] : 600 )."'>".$lang_settings['text_promotion_link_note_two'], 1);
 	tr($lang_settings['row_harem_addition'],$lang_settings['text_user_would_get_by_harem']."<input type='text' style=\"width: 50px\" name=harem_addition value='".(isset($BONUS["harem_addition"]) ? $BONUS["harem_addition"] : 0 )."'>".$lang_settings['text_harem_addition_note'], 1);
 	tr($lang_settings['row_official_addition'],$lang_settings['text_user_would_get_by_official']."<input type='text' style=\"width: 50px\" name=official_addition value='".(isset($BONUS["official_addition"]) ? $BONUS["official_addition"] : 0.5 )."'>".$lang_settings['text_addition_addition_note'], 1);
 

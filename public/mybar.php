@@ -106,4 +106,3 @@ $Cache->cache_value('userbar_'.$_SERVER['REQUEST_URI'], $my_img_string, 300);
 header("Content-type: image/png");
 echo gzinflate($my_img_string);
 ?>
-

@@ -42,6 +42,8 @@ class TorrentPolicy extends BasePolicy
     public function create(User $user)
     {
         //
+    
+        return false;
     }
 
     /**
@@ -54,6 +56,8 @@ class TorrentPolicy extends BasePolicy
     public function update(User $user, Torrent $torrent)
     {
         //
+    
+        return false;
     }
 
     /**
@@ -66,6 +70,8 @@ class TorrentPolicy extends BasePolicy
     public function delete(User $user, Torrent $torrent)
     {
         //
+    
+        return false;
     }
 
     /**
@@ -78,6 +84,8 @@ class TorrentPolicy extends BasePolicy
     public function restore(User $user, Torrent $torrent)
     {
         //
+    
+        return false;
     }
 
     /**
@@ -90,6 +98,8 @@ class TorrentPolicy extends BasePolicy
     public function forceDelete(User $user, Torrent $torrent)
     {
         //
+    
+        return false;
     }
 
     private function can(User $user)

@@ -78,6 +78,8 @@ class AgentAllowPolicy extends BasePolicy
     public function restore(User $user, AgentAllow $agentAllow)
     {
         //
+    
+        return false;
     }
 
     /**
@@ -90,6 +92,8 @@ class AgentAllowPolicy extends BasePolicy
     public function forceDelete(User $user, AgentAllow $agentAllow)
     {
         //
+    
+        return false;
     }
 
     private function can(User $user)

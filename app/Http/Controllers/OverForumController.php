@@ -28,6 +28,8 @@ class OverForumController extends Controller
     public function create()
     {
         //
+    
+        return new \Illuminate\Http\Response('');
     }
 
     /**
@@ -39,6 +41,8 @@ class OverForumController extends Controller
     public function store(Request $request)
     {
         //
+    
+        return new \Illuminate\Http\Response('');
     }
 
     /**
@@ -50,6 +54,8 @@ class OverForumController extends Controller
     public function show(OverForum $overForum)
     {
         //
+    
+        return new \Illuminate\Http\Response('');
     }
 
     /**
@@ -61,6 +67,8 @@ class OverForumController extends Controller
     public function edit(OverForum $overForum)
     {
         //
+    
+        return new \Illuminate\Http\Response('');
     }
 
     /**
@@ -73,6 +81,8 @@ class OverForumController extends Controller
     public function update(Request $request, OverForum $overForum)
     {
         //
+    
+        return new \Illuminate\Http\Response('');
     }
 
     /**
@@ -84,5 +94,7 @@ class OverForumController extends Controller
     public function destroy(OverForum $overForum)
     {
         //
+    
+        return new \Illuminate\Http\Response('');
     }
 }

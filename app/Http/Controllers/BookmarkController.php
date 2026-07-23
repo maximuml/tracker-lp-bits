@@ -46,6 +46,8 @@ class BookmarkController extends Controller
      */
     public function show($id)
     {
+    
+        return new \Illuminate\Http\Response('');
     }
 
     /**
@@ -58,6 +60,8 @@ class BookmarkController extends Controller
     public function update(Request $request, $id)
     {
         //
+    
+        return new \Illuminate\Http\Response('');
     }
 
     /**

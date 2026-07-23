@@ -48,5 +48,7 @@ class BackupAll extends Command
         );
         $this->info($log);
         do_log($log);
+    
+        return 0;
     }
 }

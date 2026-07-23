@@ -78,6 +78,8 @@ class HitAndRunPolicy extends BasePolicy
     public function restore(User $user, HitAndRun $hitAndRun)
     {
         //
+    
+        return false;
     }
 
     /**
@@ -90,6 +92,8 @@ class HitAndRunPolicy extends BasePolicy
     public function forceDelete(User $user, HitAndRun $hitAndRun)
     {
         //
+    
+        return false;
     }
 
     private function can(User $user)

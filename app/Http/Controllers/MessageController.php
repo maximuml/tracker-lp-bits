@@ -40,6 +40,8 @@ class MessageController extends Controller
     public function store(Request $request)
     {
         //
+    
+        return new \Illuminate\Http\Response('');
     }
 
     /**
@@ -70,6 +72,8 @@ class MessageController extends Controller
     public function update(Request $request, $id)
     {
         //
+    
+        return new \Illuminate\Http\Response('');
     }
 
     /**
@@ -81,6 +85,8 @@ class MessageController extends Controller
     public function destroy($id)
     {
         //
+    
+        return new \Illuminate\Http\Response('');
     }
 
     public function listUnread(Request $request): array

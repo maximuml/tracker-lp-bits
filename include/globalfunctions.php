@@ -158,9 +158,9 @@ function printLine($line, $exist = false)
 function nexus_dd($vars)
 {
     echo '<pre>';
-    array_map(function ($var) {
-        var_dump($var);
-    }, func_get_args());
+    foreach (func_get_args() as $var) {
+        echo print_r($var, true);
+    }
     echo '</pre>';
     exit(0);
 }

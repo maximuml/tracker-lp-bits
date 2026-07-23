@@ -86,6 +86,8 @@ class UserController extends Controller
     public function update(Request $request, $id)
     {
         //
+    
+        return new \Illuminate\Http\Response('');
     }
 
     /**
@@ -97,6 +99,8 @@ class UserController extends Controller
     public function destroy($id)
     {
         //
+    
+        return new \Illuminate\Http\Response('');
     }
 
     public function resetPassword(Request $request)

@@ -50,5 +50,7 @@ class UserResetPassword extends Command
         $log = sprintf('[%s], %s, result: %s', nexus()->getRequestId(), __METHOD__, var_export($result, true));
         $this->info($log);
         do_log($log);
+    
+        return 0;
     }
 }

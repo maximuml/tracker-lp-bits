@@ -78,6 +78,8 @@ class MedalPolicy extends BasePolicy
     public function restore(User $user, Medal $medal)
     {
         //
+    
+        return false;
     }
 
     /**
@@ -90,6 +92,8 @@ class MedalPolicy extends BasePolicy
     public function forceDelete(User $user, Medal $medal)
     {
         //
+    
+        return false;
     }
 
     private function can(User $user)

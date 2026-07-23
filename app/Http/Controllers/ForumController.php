@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\ForumResource;
 use App\Models\Forum;
+use App\Models\OverForum;
 use Illuminate\Http\Request;
 
 class ForumController extends Controller
@@ -33,6 +34,8 @@ class ForumController extends Controller
     public function create()
     {
         //
+    
+        return new \Illuminate\Http\Response('');
     }
 
     /**
@@ -44,6 +47,8 @@ class ForumController extends Controller
     public function store(Request $request)
     {
         //
+    
+        return new \Illuminate\Http\Response('');
     }
 
     /**
@@ -55,6 +60,8 @@ class ForumController extends Controller
     public function show(OverForum $overForum)
     {
         //
+    
+        return new \Illuminate\Http\Response('');
     }
 
     /**
@@ -66,6 +73,8 @@ class ForumController extends Controller
     public function edit(OverForum $overForum)
     {
         //
+    
+        return new \Illuminate\Http\Response('');
     }
 
     /**
@@ -78,6 +87,8 @@ class ForumController extends Controller
     public function update(Request $request, OverForum $overForum)
     {
         //
+    
+        return new \Illuminate\Http\Response('');
     }
 
     /**
@@ -89,5 +100,7 @@ class ForumController extends Controller
     public function destroy(OverForum $overForum)
     {
         //
+    
+        return new \Illuminate\Http\Response('');
     }
 }

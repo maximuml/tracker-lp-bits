@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\SearchBox;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class SearchboxTableSeeder extends Seeder
 {
@@ -17,9 +18,9 @@ class SearchboxTableSeeder extends Seeder
     {
 
 
-        \DB::table('searchbox')->delete();
+        DB::table('searchbox')->delete();
 
-        \DB::table('searchbox')->insert(array (
+        DB::table('searchbox')->insert(array (
             0 =>
             array (
                 'id' => 4,
@@ -30,7 +31,6 @@ class SearchboxTableSeeder extends Seeder
                 'showcodec' => 1,
                 'showstandard' => 1,
                 'showprocessing' => 0,
-                'showteam' => 1,
                 'showaudiocodec' => 0,
                 'catsperrow' => 10,
                 'catpadding' => 7,

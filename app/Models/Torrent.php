@@ -11,7 +11,7 @@ class Torrent extends NexusModel
 {
     protected $fillable = [
         'name', 'filename', 'save_as', 'small_descr',
-        'category', 'source', 'medium', 'codec', 'standard', 'processing', 'team', 'audiocodec',
+        'category', 'source', 'medium', 'codec', 'standard', 'processing', 'audiocodec',
         'size', 'added', 'type', 'numfiles', 'owner', 'nfo', 'sp_state', 'promotion_time_type',
         'promotion_until', 'anonymous', 'url', 'pos_state', 'cache_stamp',
         'last_reseed', 'leechers', 'seeders', 'cover', 'last_action', 'info_hash', 'pieces_hash',
@@ -43,14 +43,13 @@ class Torrent extends NexusModel
     public static $commentFields = [
         'id', 'name', 'added', 'visible', 'banned', 'owner', 'sp_state', 'promotion_time_type', 'promotion_until', 'pos_state',
         'hr', 'last_action', 'leechers', 'seeders', 'times_completed', 'views', 'size', 'cover', 'anonymous',
-        'approval_status', 'pos_state_until', 'category', 'source', 'medium', 'codec', 'standard', 'processing', 'team', 'audiocodec',
+        'approval_status', 'pos_state_until', 'category', 'source', 'medium', 'codec', 'standard', 'processing', 'audiocodec',
         'price',
     ];
 
     public static $basicRelations = [
         'basic_category', 'basic_audio_codec', 'basic_codec', 'basic_media',
-        'basic_source', 'basic_standard', 'basic_team',
-    ];
+        'basic_source', 'basic_standard', ];
 
     const POS_STATE_STICKY_NONE = 'normal';
     const POS_STATE_STICKY_FIRST = 'sticky';
@@ -267,7 +266,7 @@ class Torrent extends NexusModel
 
     public static function getFieldsForList($appendTableName = false): array|bool
     {
-        $fields = 'id, sp_state, promotion_time_type, promotion_until, banned, pos_state, category, source, medium, codec, standard, processing, team, audiocodec, leechers, seeders, name, small_descr, times_completed, size, added, comments,anonymous,owner,url,cache_stamp, hr, approval_status, cover, price';
+        $fields = 'id, sp_state, promotion_time_type, promotion_until, banned, pos_state, category, source, medium, codec, standard, processing, audiocodec, leechers, seeders, name, small_descr, times_completed, size, added, comments,anonymous,owner,url,cache_stamp, hr, approval_status, cover, price';
         $fields = preg_split('/[,\s]+/', $fields);
         if ($appendTableName) {
             foreach ($fields as &$value) {
@@ -478,11 +477,6 @@ class Torrent extends NexusModel
     public function basic_processing()
     {
         return $this->belongsTo(Processing::class, 'processing');
-    }
-
-    public function basic_team()
-    {
-        return $this->belongsTo(Team::class, 'team');
     }
 
     public function basic_audiocodec()

@@ -23,7 +23,7 @@ class Install
     protected $initializeTables = [
         'adminpanel', 'agent_allowed_exception', 'agent_allowed_family', 'allowedemails', 'audiocodecs', 'bannedemails', 'categories',
         'caticons', 'codecs', 'countries', 'faq', 'language', 'media', 'modpanel', 'processings', 'rules',
-        'searchbox', 'secondicons', 'sources', 'standards', 'stylesheets', 'sysoppanel', 'teams', 'torrents_state',
+        'searchbox', 'secondicons', 'sources', 'standards', 'stylesheets', 'sysoppanel', 'torrents_state',
     ];
 
     protected $envNames = [

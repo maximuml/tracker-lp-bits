@@ -27,7 +27,6 @@ $showmedium = (($allowtorrents && get_searchbox_value($brsectiontype, 'showmediu
 $showcodec = (($allowtorrents && get_searchbox_value($brsectiontype, 'showcodec')) || ($allowspecial && get_searchbox_value($spsectiontype, 'showcodec'))); //whether show codecs or not
 $showstandard = (($allowtorrents && get_searchbox_value($brsectiontype, 'showstandard')) || ($allowspecial && get_searchbox_value($spsectiontype, 'showstandard'))); //whether show standards or not
 $showprocessing = (($allowtorrents && get_searchbox_value($brsectiontype, 'showprocessing')) || ($allowspecial && get_searchbox_value($spsectiontype, 'showprocessing'))); //whether show processings or not
-$showteam = (($allowtorrents && get_searchbox_value($brsectiontype, 'showteam')) || ($allowspecial && get_searchbox_value($spsectiontype, 'showteam'))); //whether show teams or not
 $showaudiocodec = (($allowtorrents && get_searchbox_value($brsectiontype, 'showaudiocodec')) || ($allowspecial && get_searchbox_value($spsectiontype, 'showaudiocodec'))); //whether show languages or not
 */
 $settingMain = get_setting('main');
@@ -139,14 +138,6 @@ stdhead($lang_upload['head_upload']);
 					tr($lang_upload['row_quality'], $source_select . $medium_select. $codec_select . $audiocodec_select. $standard_select . $processing_select, 1 );
 				}
 
-				if ($showteam){
-					if ($showteam){
-						$team_select = torrent_selection($lang_upload['text_team'],"team_sel","teams");
-					}
-					else $showteam = "";
-
-					tr($lang_upload['row_content'],$team_select,1);
-				}
 */
                 $customField = new \Nexus\Field\Field();
                 $hitAndRunRep = new \App\Repositories\HitAndRunRepository();

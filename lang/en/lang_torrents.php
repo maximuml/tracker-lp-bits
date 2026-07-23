@@ -52,7 +52,6 @@ $lang_torrents = array
 	'text_games_and_appz' => "Games & Appz:",
 	'text_others' => "Others:",
 	'text_medium' => "Medium:",
-	'text_team' => "Team:",
 	'text_audio_codec' => "Audio Codec:",
 	'text_video' => "Video:",
 	'text_tv' => "TV:",

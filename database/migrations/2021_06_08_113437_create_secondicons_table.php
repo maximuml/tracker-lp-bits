@@ -23,7 +23,6 @@ class CreateSecondiconsTable extends Migration
             $table->unsignedTinyInteger('codec')->default(0);
             $table->unsignedTinyInteger('standard')->default(0);
             $table->unsignedTinyInteger('processing')->default(0);
-            $table->unsignedTinyInteger('team')->default(0);
             $table->unsignedTinyInteger('audiocodec')->default(0);
             $table->string('name', 30)->default('');
             $table->string('class_name')->nullable();

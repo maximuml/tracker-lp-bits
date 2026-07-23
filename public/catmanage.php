@@ -31,9 +31,6 @@ function return_category_db_table_name($type)
 		case 'processing':
 			$dbtablename = 'processings';
 			break;
-		case 'team':
-			$dbtablename = 'teams';
-			break;
 		case 'audiocodec':
 			$dbtablename = 'audiocodecs';
 			break;
@@ -103,9 +100,6 @@ function return_type_name($type)
 		case 'processing':
 			$name = $lang_catmanage['text_processings'];
 			break;
-		case 'team':
-			$name = $lang_catmanage['text_teams'];
-			break;
 		case 'audiocodec':
 			$name = $lang_catmanage['text_audio_codecs'];
 			break;
@@ -134,7 +128,6 @@ function print_type_list($type){
 <li><a href="?action=view&amp;type=codec"><?php echo $lang_catmanage['text_codecs']?></a></li>
 <li><a href="?action=view&amp;type=standard"><?php echo $lang_catmanage['text_standards']?></a></li>
 <li><a href="?action=view&amp;type=processing"><?php echo $lang_catmanage['text_processings']?></a></li>
-<li><a href="?action=view&amp;type=team"><?php echo $lang_catmanage['text_teams']?></a></li>
 <li><a href="?action=view&amp;type=audiocodec"><?php echo $lang_catmanage['text_audio_codecs']?></a></li>
 </ul>
 </div>
@@ -149,7 +142,7 @@ function print_type_list($type){
 function check_valid_type($type)
 {
 	global $lang_catmanage;
-	$validtype=array('searchbox', 'caticon', 'secondicon', 'category', 'source', 'medium', 'codec', 'standard', 'processing', 'team', 'audiocodec');
+	$validtype=array('searchbox', 'caticon', 'secondicon', 'category', 'source', 'medium', 'codec', 'standard', 'processing', 'audiocodec');
 	if (!in_array($type, $validtype))
 		stderr($lang_catmanage['std_error'], $lang_catmanage['std_invalid_type']);
 }
@@ -214,7 +207,7 @@ function print_category_editor($type, $row='')
 				$showcodec = $row['showcodec'];
 				$showstandard = $row['showstandard'];
 				$showprocessing = $row['showprocessing'];
-				$showteam = $row['showteam'];
+				$showteam = $row['showteam'] ?? 0;
 				$showaudiocodec = $row['showaudiocodec'];
 				$catsperrow = $row['catsperrow'];
 				$catpadding = $row['catpadding'];
@@ -236,7 +229,7 @@ function print_category_editor($type, $row='')
 				$catpadding = 3;
 			}
 			tr($lang_catmanage['row_searchbox_name']."<font color=\"red\">*</font>", "<input type=\"text\" name=\"name\" value=\"".htmlspecialchars($name)."\" style=\"width: 300px\" /> " . $lang_catmanage['text_searchbox_name_note'], 1);
-			tr($lang_catmanage['row_show_sub_category'], "<input type=\"checkbox\" name=\"showsource\" value=\"1\"".($showsource ? " checked=\"checked\"" : "")." /> " . $lang_catmanage['text_sources'] . "<input type=\"checkbox\" name=\"showmedium\" value=\"1\"".($showmedium ? " checked=\"checked\"" : "")." /> " . $lang_catmanage['text_media'] . "<input type=\"checkbox\" name=\"showcodec\" value=\"1\"".($showcodec ? " checked=\"checked\"" : "")." /> " . $lang_catmanage['text_codecs'] . "<input type=\"checkbox\" name=\"showstandard\" value=\"1\"".($showstandard ? " checked=\"checked\"" : "")." /> " . $lang_catmanage['text_standards'] . "<input type=\"checkbox\" name=\"showprocessing\" value=\"1\"".($showprocessing ? " checked=\"checked\"" : "")." /> " . $lang_catmanage['text_processings'] . "<input type=\"checkbox\" name=\"showteam\" value=\"1\"".($showteam ? " checked=\"checked\"" : "")." /> " . $lang_catmanage['text_teams'] . "<input type=\"checkbox\" name=\"showaudiocodec\" value=\"1\"".($showaudiocodec ? " checked=\"checked\"" : "")." /> " . $lang_catmanage['text_audio_codecs']."<br />".$lang_catmanage['text_show_sub_category_note'], 1);
+			tr($lang_catmanage['row_show_sub_category'], "<input type=\"checkbox\" name=\"showsource\" value=\"1\"".($showsource ? " checked=\"checked\"" : "")." /> " . $lang_catmanage['text_sources'] . "<input type=\"checkbox\" name=\"showmedium\" value=\"1\"".($showmedium ? " checked=\"checked\"" : "")." /> " . $lang_catmanage['text_media'] . "<input type=\"checkbox\" name=\"showcodec\" value=\"1\"".($showcodec ? " checked=\"checked\"" : "")." /> " . $lang_catmanage['text_codecs'] . "<input type=\"checkbox\" name=\"showstandard\" value=\"1\"".($showstandard ? " checked=\"checked\"" : "")." /> " . $lang_catmanage['text_standards'] . "<input type=\"checkbox\" name=\"showprocessing\" value=\"1\"".($showprocessing ? " checked=\"checked\"" : "")." /> " . $lang_catmanage['text_processings'] . "<input type=\"checkbox\" name=\"showaudiocodec\" value=\"1\"".($showaudiocodec ? " checked=\"checked\"" : "")." /> " . $lang_catmanage['text_audio_codecs']."<br />".$lang_catmanage['text_show_sub_category_note'], 1);
 
 			//extra
             $extraCheckbox = "";
@@ -301,7 +294,7 @@ function print_category_editor($type, $row='')
 				$codec = $row['codec'];
 				$standard = $row['standard'];
 				$processing = $row['processing'];
-				$team = $row['team'];
+				$team = 0;
 				$audiocodec = $row['audiocodec'];
 			}
 			else
@@ -314,13 +307,12 @@ function print_category_editor($type, $row='')
 				$codec = 0;
 				$standard = 0;
 				$processing = 0;
-				$team = 0;
 				$audiocodec = 0;
 			}
 			tr($lang_catmanage['col_name']."<font color=\"red\">*</font>", "<input type=\"text\" name=\"name\" value=\"".htmlspecialchars($name)."\" style=\"width: 300px\" /> " . $lang_catmanage['text_second_icon_name_note'], 1);
 			tr($lang_catmanage['col_image']."<font color=\"red\">*</font>", "<input type=\"text\" name=\"image\" value=\"".htmlspecialchars($image)."\" style=\"width: 300px\" /><br />" . $lang_catmanage['text_image_note'], 1);
 			tr($lang_catmanage['text_class_name'], "<input type=\"text\" name=\"class_name\" value=\"".htmlspecialchars($class_name)."\" style=\"width: 300px\" /><br />" . $lang_catmanage['text_class_name_note'], 1);
-			tr($lang_catmanage['row_selections']."<font color=\"red\">*</font>", torrent_selection(return_type_name('source'), 'source', return_category_db_table_name('source'), $source) . torrent_selection(return_type_name('medium'), 'medium', return_category_db_table_name('medium'), $medium) . torrent_selection(return_type_name('codec'), 'codec', return_category_db_table_name('codec'), $codec) . torrent_selection(return_type_name('standard'), 'standard', return_category_db_table_name('standard'), $standard) . torrent_selection(return_type_name('processing'), 'processing', return_category_db_table_name('processing'), $processing) . torrent_selection(return_type_name('team'), 'team', return_category_db_table_name('team'), $team) . torrent_selection(return_type_name('audiocodec'), 'audiocodec', return_category_db_table_name('audiocodec'), $audiocodec)."<br />".$lang_catmanage['text_selections_note'], 1);
+			tr($lang_catmanage['row_selections']."<font color=\"red\">*</font>", torrent_selection(return_type_name('source'), 'source', return_category_db_table_name('source'), $source) . torrent_selection(return_type_name('medium'), 'medium', return_category_db_table_name('medium'), $medium) . torrent_selection(return_type_name('codec'), 'codec', return_category_db_table_name('codec'), $codec) . torrent_selection(return_type_name('standard'), 'standard', return_category_db_table_name('standard'), $standard) . torrent_selection(return_type_name('processing'), 'processing', return_category_db_table_name('processing'), $processing) . torrent_selection(return_type_name('audiocodec'), 'audiocodec', return_category_db_table_name('audiocodec'), $audiocodec)."<br />".$lang_catmanage['text_selections_note'], 1);
 		}
 		elseif ($type=='category')
 		{
@@ -387,7 +379,7 @@ tr($lang_catmanage['col_order'], "<input type=\"text\" name=\"sort_index\" value
 <?php
 }
 
-$validsubcattype=array('source', 'medium', 'codec', 'standard', 'processing', 'team', 'audiocodec');
+$validsubcattype=array('source', 'medium', 'codec', 'standard', 'processing', 'audiocodec');
 $type = $_GET['type'] ?? '';
 if ($type == '')
 	$type = 'searchbox';
@@ -425,7 +417,6 @@ if ($action == 'view')
 <td class="colhead"><?php echo $lang_catmanage['text_codecs']?></td>
 <td class="colhead"><?php echo $lang_catmanage['text_standards']?></td>
 <td class="colhead"><?php echo $lang_catmanage['text_processings']?></td>
-<td class="colhead"><?php echo $lang_catmanage['text_teams']?></td>
 <td class="colhead"><?php echo $lang_catmanage['text_audio_codecs']?></td>
 <td class="colhead"><?php echo $lang_catmanage['text_per_row']?></td>
 <td class="colhead"><?php echo $lang_catmanage['text_padding']?></td>
@@ -444,7 +435,6 @@ if ($action == 'view')
 <td class="colfollow"><?php echo $row['showcodec'] ? "<font color=\"green\">".$lang_catmanage['text_enabled']."</font>" : "<font color=\"red\">".$lang_catmanage['text_disabled']."</font>"?></td>
 <td class="colfollow"><?php echo $row['showstandard'] ? "<font color=\"green\">".$lang_catmanage['text_enabled']."</font>" : "<font color=\"red\">".$lang_catmanage['text_disabled']."</font>"?></td>
 <td class="colfollow"><?php echo $row['showprocessing'] ? "<font color=\"green\">".$lang_catmanage['text_enabled']."</font>" : "<font color=\"red\">".$lang_catmanage['text_disabled']."</font>"?></td>
-<td class="colfollow"><?php echo $row['showteam'] ? "<font color=\"green\">".$lang_catmanage['text_enabled']."</font>" : "<font color=\"red\">".$lang_catmanage['text_disabled']."</font>"?></td>
 <td class="colfollow"><?php echo $row['showaudiocodec'] ? "<font color=\"green\">".$lang_catmanage['text_enabled']."</font>" : "<font color=\"red\">".$lang_catmanage['text_disabled']."</font>"?></td>
 <td class="colfollow"><?php echo $row['catsperrow']?></td>
 <td class="colfollow"><?php echo $row['catpadding']?></td>
@@ -510,8 +500,7 @@ print($pagerbottom);
 	    $allCodec = \App\Models\Codec::query()->get()->keyBy('id');
 	    $allStandard = \App\Models\Standard::query()->get()->keyBy('id');
 	    $allProcessing = \App\Models\Processing::query()->get()->keyBy('id');
-	    $allTeam = \App\Models\Team::query()->get()->keyBy('id');
-	    $allAudioCodec = \App\Models\AudioCodec::query()->get()->keyBy('id');
+		    $allAudioCodec = \App\Models\AudioCodec::query()->get()->keyBy('id');
 	$dbtablename=return_category_db_table_name($type);
 	$num = get_row_count($dbtablename);
 	if (!$num)
@@ -531,7 +520,6 @@ print($pagerbottom);
 <td class="colhead"><?php echo $lang_catmanage['text_codecs']?></td>
 <td class="colhead"><?php echo $lang_catmanage['text_standards']?></td>
 <td class="colhead"><?php echo $lang_catmanage['text_processings']?></td>
-<td class="colhead"><?php echo $lang_catmanage['text_teams']?></td>
 <td class="colhead"><?php echo $lang_catmanage['text_audio_codecs']?></td>
 <td class="colhead"><?php echo $lang_catmanage['col_action']?></td>
 </tr>
@@ -549,7 +537,6 @@ print($pagerbottom);
 <td class="colfollow"><?php echo optional($allCodec->get($row['codec']))->name?></td>
 <td class="colfollow"><?php echo optional($allStandard->get($row['standard']))->name?></td>
 <td class="colfollow"><?php echo optional($allProcessing->get($row['processing']))->name?></td>
-<td class="colfollow"><?php echo optional($allTeam->get($row['team']))->name?></td>
 <td class="colfollow"><?php echo optional($allAudioCodec->get($row['audiocodec']))->name?></td>
 <td class="colfollow"><a href="javascript:confirm_delete('<?php echo $row['id']?>', '<?php echo $lang_catmanage['js_sure_to_delete_this']?>', 'type=<?php echo $type?>');"><?php echo $lang_catmanage['text_delete']?></a> | <a href="?action=edit&amp;type=<?php echo $type?>&amp;id=<?php echo $row['id']?>"><?php echo $lang_catmanage['text_edit']?></a></td>
 </tr>
@@ -629,7 +616,7 @@ elseif($action == 'del')
 		elseif ($type=='caticon')
 			$Cache->delete_value('category_icon_content');
 		elseif ($type=='secondicon')
-			$Cache->delete_value('secondicon_'.$row['source'].'_'.$row['medium'].'_'.$row['codec'].'_'.$row['standard'].'_'.$row['processing'].'_'.$row['team'].'_'.$row['audiocodec'].'_content');
+			$Cache->delete_value('secondicon_'.$row['source'].'_'.$row['medium'].'_'.$row['codec'].'_'.$row['standard'].'_'.$row['processing'].'_'.$row['audiocodec'].'_content');
 		elseif ($type=='category'){
 			$Cache->delete_value('category_content');
 			$Cache->delete_value('category_list_mode_'.$row['mode']);
@@ -712,7 +699,6 @@ elseif($action == 'submit')
 		$showcodec = intval($_POST['showcodec'] ?? 0);
 		$showstandard = intval($_POST['showstandard'] ?? 0);
 		$showprocessing = intval($_POST['showprocessing'] ?? 0);
-		$showteam = intval($_POST['showteam'] ?? 0);
 		$showaudiocodec = intval($_POST['showaudiocodec'] ?? 0);
 		$updateset[] = "catsperrow=".sqlesc($catsperrow);
 		$updateset[] = "catpadding=".sqlesc($catpadding);
@@ -722,14 +708,13 @@ elseif($action == 'submit')
 		$updateset[] = "showcodec=".sqlesc($showcodec);
 		$updateset[] = "showstandard=".sqlesc($showstandard);
 		$updateset[] = "showprocessing=".sqlesc($showprocessing);
-		$updateset[] = "showteam=".sqlesc($showteam);
 		$updateset[] = "showaudiocodec=".sqlesc($showaudiocodec);
 		$updateset[] = "custom_fields=" . sqlesc(implode(',', $_POST['custom_fields'] ?? []));
 		$updateset[] = "custom_fields_display_name=" . sqlesc($_POST['custom_fields_display_name'] ?? '');
 		$updateset[] = "custom_fields_display=" . sqlesc($_POST['custom_fields_display'] ?? '');
 		$updateset[] = "extra=" . sqlesc(json_encode($_POST['extra'] ?? []));
 
-		if ($showsource || $showmedium || $showcodec || $showstandard || $showprocessing || $showteam || $showaudiocodec)
+		if ($showsource || $showmedium || $showcodec || $showstandard || $showprocessing || $showaudiocodec)
 			$updateset[] = "showsubcat=1";
 		else
 			$updateset[] = "showsubcat=0";
@@ -769,7 +754,6 @@ elseif($action == 'submit')
 		$codec = intval($_POST['codec'] ?? 0);
 		$standard = intval($_POST['standard'] ?? 0);
 		$processing = intval($_POST['processing'] ?? 0);
-		$team = intval($_POST['team'] ?? 0);
 		$audiocodec = intval($_POST['audiocodec'] ?? 0);
 		if (!$name || !$image)
 			stderr($lang_catmanage['std_error'], $lang_catmanage['std_missing_form_data']);
@@ -777,7 +761,7 @@ elseif($action == 'submit')
 			stderr($lang_catmanage['std_error'], $lang_catmanage['std_invalid_character_in_filename'].htmlspecialchars($image));
 		if ($class_name && !valid_class_name($class_name))
 			stderr($lang_catmanage['std_error'], $lang_catmanage['std_invalid_character_in_filename'].htmlspecialchars($class_name));
-		if (!$source && !$medium && !$codec && !$standard && !$processing && !$team && !$audiocodec)
+		if (!$source && !$medium && !$codec && !$standard && !$processing && !$audiocodec)
 			stderr($lang_catmanage['std_error'], $lang_catmanage['std_must_define_one_selection']);
 		$updateset[] = "name=".sqlesc($name);
 		$updateset[] = "image=".sqlesc($image);
@@ -787,16 +771,15 @@ elseif($action == 'submit')
 		$updateset[] = "codec=".sqlesc($codec);
 		$updateset[] = "standard=".sqlesc($standard);
 		$updateset[] = "processing=".sqlesc($processing);
-		$updateset[] = "team=".sqlesc($team);
 		$updateset[] = "audiocodec=".sqlesc($audiocodec);
 		if($_POST['isedit']){
 			$res2=sql_query("SELECT * FROM secondicons WHERE id=".sqlesc($id)." LIMIT 1");
 			if ($row2=mysql_fetch_array($res))
 			{
-				$Cache->delete_value('secondicon_'.$row2['source'].'_'.$row2['medium'].'_'.$row2['codec'].'_'.$row2['standard'].'_'.$row2['processing'].'_'.$row2['team'].'_'.$row2['audiocodec'].'_content');
+				$Cache->delete_value('secondicon_'.$row2['source'].'_'.$row2['medium'].'_'.$row2['codec'].'_'.$row2['standard'].'_'.$row2['processing'].'_'.$row2['audiocodec'].'_content');
 			}
 		}
-		$Cache->delete_value('secondicon_'.$source.'_'.$medium.'_'.$codec.'_'.$standard.'_'.$processing.'_'.$team.'_'.$audiocodec.'_content');
+		$Cache->delete_value('secondicon_'.$source.'_'.$medium.'_'.$codec.'_'.$standard.'_'.$processing.'_'.$audiocodec.'_content');
 	}
 	elseif ($type=='category'){
 		$name = $_POST['name'];

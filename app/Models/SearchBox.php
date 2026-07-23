@@ -23,7 +23,7 @@ class SearchBox extends NexusModel
 
     protected $fillable = [
         'name', 'catsperrow', 'catpadding', 'showsubcat', 'section_name', 'is_default',
-        'showsource', 'showmedium', 'showcodec', 'showstandard', 'showprocessing', 'showteam', 'showaudiocodec',
+        'showsource', 'showmedium', 'showcodec', 'showstandard', 'showprocessing', 'showaudiocodec',
         'custom_fields', 'custom_fields_display_name', 'custom_fields_display',
         'extra->' . self::EXTRA_TAXONOMY_LABELS,
         'extra->' . self::EXTRA_DISPLAY_COVER_ON_TORRENT_LIST,
@@ -64,7 +64,6 @@ class SearchBox extends NexusModel
         'audiocodec' => ['table' => 'audiocodecs', 'model' => AudioCodec::class],
         'standard' => ['table' => 'standards', 'model' => Standard::class],
         'processing' => ['table' => 'processings', 'model' => Processing::class],
-        'team' => ['table' => 'teams', 'model' => Team::class]
     ];
 
     public static array $extras = [
@@ -181,6 +180,7 @@ class SearchBox extends NexusModel
         if (!is_array($value)) {
             return explode(',', $value);
         }
+        return $value;
     }
 
     public function setCustomFieldsAttribute($value)
@@ -282,11 +282,6 @@ class SearchBox extends NexusModel
     public function taxonomy_audiocodec(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(AudioCodec::class, 'mode');
-    }
-
-    public function taxonomy_team(): \Illuminate\Database\Eloquent\Relations\HasMany
-    {
-        return $this->hasMany(Team::class, 'mode');
     }
 
     public function taxonomy_processing(): \Illuminate\Database\Eloquent\Relations\HasMany

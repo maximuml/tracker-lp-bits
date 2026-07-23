@@ -38,7 +38,6 @@ $showmedium = get_searchbox_value($sectiontype, 'showmedium'); //whether show me
 $showcodec = get_searchbox_value($sectiontype, 'showcodec'); //whether show codecs or not
 $showstandard = get_searchbox_value($sectiontype, 'showstandard'); //whether show standards or not
 $showprocessing = get_searchbox_value($sectiontype, 'showprocessing'); //whether show processings or not
-$showteam = get_searchbox_value($sectiontype, 'showteam'); //whether show teams or not
 $showaudiocodec = get_searchbox_value($sectiontype, 'showaudiocodec'); //whether show audio codec or not
 $catsperrow = get_searchbox_value($sectiontype, 'catsperrow'); //show how many cats per line in search box
 $catpadding = get_searchbox_value($sectiontype, 'catpadding'); //padding space between categories in pixel
@@ -50,7 +49,6 @@ if ($showsubcat){
 	if ($showcodec) $codecs = searchbox_item_list("codecs", $sectiontype);
 	if ($showstandard) $standards = searchbox_item_list("standards", $sectiontype);
 	if ($showprocessing) $processings = searchbox_item_list("processings", $sectiontype);
-	if ($showteam) $teams = searchbox_item_list("teams", $sectiontype);
 	if ($showaudiocodec) $audiocodecs = searchbox_item_list("audiocodecs", $sectiontype);
 }
 
@@ -114,7 +112,6 @@ $wheremediumina = array();
 $wherecodecina = array();
 $wherestandardina = array();
 $whereprocessingina = array();
-$whereteamina = array();
 $whereaudiocodecina = array();
 $whereothera = [];
 //----------------- start whether show torrents from all sections---------------------//
@@ -326,14 +323,13 @@ elseif ($special_state == 7)	//30% down
 }
 
 $category_get = intval($_GET["cat"] ?? 0);
-$source_get = $medium_get = $codec_get = $standard_get = $processing_get = $team_get = $audiocodec_get = 0;
+$source_get = $medium_get = $codec_get = $standard_get = $processing_get = $audiocodec_get = 0;
 if ($showsubcat){
 if ($showsource) $source_get = intval($_GET["source"] ?? 0);
 if ($showmedium) $medium_get = intval($_GET["medium"] ?? 0);
 if ($showcodec) $codec_get = intval($_GET["codec"] ?? 0);
 if ($showstandard) $standard_get = intval($_GET["standard"] ?? 0);
 if ($showprocessing) $processing_get = intval($_GET["processing"] ?? 0);
-if ($showteam) $team_get = intval($_GET["team"] ?? 0);
 if ($showaudiocodec) $audiocodec_get = intval($_GET["audiocodec"] ?? 0);
 }
 
@@ -452,24 +448,6 @@ if (!$all)
 				$addparam .= "processing{$processing['id']}=1&";
 			}
 		}
-		if ($showteam)
-		foreach ($teams as $team)
-		{
-			$all &= $team['id'];
-			$mystring = $CURUSER['notifs'];
-			$findme  = '[tea'.$team['id'].']';
-			$search = strpos($mystring, $findme);
-			if ($search === false)
-			$teamcheck = false;
-			else
-			$teamcheck = true;
-
-			if ($teamcheck)
-			{
-				$whereteamina[] = $team['id'];
-				$addparam .= "team{$team['id']}=1&";
-			}
-		}
 		if ($showaudiocodec)
 		foreach ($audiocodecs as $audiocodec)
 		{
@@ -526,12 +504,6 @@ if (!$all)
 		int_check($processing_get,true,true,true);
 		$whereprocessingina[] = $processing_get;
 		$addparam .= "processing=$processing_get&";
-	}
-	elseif ($team_get)
-	{
-		int_check($team_get,true,true,true);
-		$whereteamina[] = $team_get;
-		$addparam .= "team=$team_get&";
 	}
 	elseif ($audiocodec_get)
 	{
@@ -608,17 +580,6 @@ if (!$all)
 				$addparam .= "processing{$processing['id']}=1&";
 			}
 		}
-		if ($showteam)
-		foreach ($teams as $team)
-		{
-            $__is = (isset($_GET["team{$team['id']}"]) && $_GET["team{$team['id']}"]);
-            $all &= $__is;
-            if ($__is)
-			{
-				$whereteamina[] = $team['id'];
-				$addparam .= "team{$team['id']}=1&";
-			}
-		}
 		if ($showaudiocodec)
 		foreach ($audiocodecs as $audiocodec)
 		{
@@ -644,12 +605,11 @@ if ($all)
 	$wherecodecina = array();
 	$wherestandardina = array();
 	$whereprocessingina = array();
-	$whereteamina = array();
 	$whereaudiocodecina = array();}
 	$addparam .= "";
 }
 //stderr("", count($wherecatina)."-". count($wheresourceina));
-$wherecatin = $wheresourcein = $wheremediumin = $wherecodecin = $wherestandardin = $whereprocessingin = $whereteamin = $whereaudiocodecin = '';
+$wherecatin = $wheresourcein = $wheremediumin = $wherecodecin = $wherestandardin = $whereprocessingin = $whereaudiocodecin = '';
 if (empty($wherecatina) && !(in_array($inclbookmarked, [1, 2]) && $allsec == 1)) {
     //require limit in some category
     $wherecatina = $allCategoryId;
@@ -690,11 +650,6 @@ $whereprocessingin = implode(",",$whereprocessingina);
 elseif (count($whereprocessingina) == 1)
 $wherea[] = "processing = $whereprocessingina[0]";}
 }
-if ($showteam){
-if (count($whereteamina) > 1)
-$whereteamin = implode(",",$whereteamina);
-elseif (count($whereteamina) == 1)
-$wherea[] = "team = $whereteamina[0]";}
 
 if ($showaudiocodec){
 if (count($whereaudiocodecina) > 1)
@@ -898,8 +853,6 @@ if ($wherestandardin)
 $where .= ($where ? " AND " : "") . "standard IN(" . $wherestandardin . ")";
 if ($whereprocessingin)
 $where .= ($where ? " AND " : "") . "processing IN(" . $whereprocessingin . ")";
-if ($whereteamin)
-$where .= ($where ? " AND " : "") . "team IN(" . $whereteamin . ")";
 if ($whereaudiocodecin)
 $where .= ($where ? " AND " : "") . "audiocodec IN(" . $whereaudiocodecin . ")";
 }
@@ -1062,8 +1015,6 @@ if ($allsec != 1 || $enablespecial != 'yes'){ //do not print searchbox if showin
 //							printcat($lang_torrents['text_standard'], $standards, "standard", $wherestandardina, "standard_check");
 //						if ($showprocessing)
 //							printcat($lang_torrents['text_processing'], $processings, "processing", $whereprocessingina, "processing_check");
-//						if ($showteam)
-//							printcat($lang_torrents['text_team'], $teams, "team", $whereteamina, "team_check");
 //					}
 //					?>
 <!--				</table>-->

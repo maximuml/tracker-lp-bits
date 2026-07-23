@@ -4233,12 +4233,11 @@ function get_second_icon($row) //for CHDBits
 	$codec=$row['codec'];
 	$standard=$row['standard'];
 	$processing=$row['processing'];
-	$team=$row['team'];
 	$audiocodec=$row['audiocodec'];
 	$mode = $row['search_box_id'];
-	$cacheKey = 'secondicon_'.$source.'_'.$medium.'_'.$codec.'_'.$standard.'_'.$processing.'_'.$team.'_'.$audiocodec.'_content';
+	$cacheKey = 'secondicon_'.$source.'_'.$medium.'_'.$codec.'_'.$standard.'_'.$processing.'_'.$audiocodec.'_content';
 	if (!$sirow = $Cache->get_value($cacheKey)){
-		$res = sql_query("SELECT * FROM secondicons WHERE (mode = ".sqlesc($mode)." OR mode = 0) AND (source = ".sqlesc($source)." OR source=0) AND (medium = ".sqlesc($medium)." OR medium=0) AND (codec = ".sqlesc($codec)." OR codec = 0) AND (standard = ".sqlesc($standard)." OR standard = 0) AND (processing = ".sqlesc($processing)." OR processing = 0) AND (team = ".sqlesc($team)." OR team = 0) AND (audiocodec = ".sqlesc($audiocodec)." OR audiocodec = 0) LIMIT 1");
+		$res = sql_query("SELECT * FROM secondicons WHERE (mode = ".sqlesc($mode)." OR mode = 0) AND (source = ".sqlesc($source)." OR source=0) AND (medium = ".sqlesc($medium)." OR medium=0) AND (codec = ".sqlesc($codec)." OR codec = 0) AND (standard = ".sqlesc($standard)." OR standard = 0) AND (processing = ".sqlesc($processing)." OR processing = 0) AND (audiocodec = ".sqlesc($audiocodec)." OR audiocodec = 0) LIMIT 1");
 		$sirow = mysql_fetch_array($res);
 		if (!$sirow)
 			$sirow = 'not allowed';

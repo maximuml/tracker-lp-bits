@@ -213,7 +213,6 @@ $lang_details = array
 	'text_artist' => " Artist",
 	'text_artist_name' => "Artist: ",
 	'text_medium' => "Medium:",
-	'text_team' => "Team:",
 	'text_audio_codec' => "Audio Codec:",
 	'text_delete' => "Delete",
 	'text_other_copies' => " Other Copies",

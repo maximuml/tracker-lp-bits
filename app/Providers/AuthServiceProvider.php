@@ -15,7 +15,6 @@ use App\Models\SearchBox;
 use App\Models\SecondIcon;
 use App\Models\Source;
 use App\Models\Standard;
-use App\Models\Team;
 use App\Models\TorrentCustomField;
 use App\Models\User;
 use App\Policies\CodecPolicy;
@@ -41,9 +40,7 @@ class AuthServiceProvider extends ServiceProvider
         AudioCodec::class => CodecPolicy::class,
         Source::class => CodecPolicy::class,
         Media::class => CodecPolicy::class,
-        Standard::class => CodecPolicy::class,
-        Team::class => CodecPolicy::class,
-        Processing::class => CodecPolicy::class,
+        Standard::class => CodecPolicy::class,        Processing::class => CodecPolicy::class,
 
         Plugin::class => CodecPolicy::class,
     ];

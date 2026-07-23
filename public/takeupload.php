@@ -61,7 +61,6 @@ $mediumid = intval($_POST["medium_sel"][$catmod] ?? 0);
 $codecid = intval($_POST["codec_sel"][$catmod] ?? 0);
 $standardid = intval($_POST["standard_sel"][$catmod] ?? 0);
 $processingid = intval($_POST["processing_sel"][$catmod] ?? 0);
-$teamid = intval($_POST["team_sel"][$catmod] ?? 0);
 $audiocodecid = intval($_POST["audiocodec_sel"][$catmod] ?? 0);
 
 if (!is_valid_id($catid))
@@ -287,7 +286,6 @@ $insert = [
     'audiocodec' => $audiocodecid,
     'standard' => $standardid,
     'processing' => $processingid,
-    'team' => $teamid,
     'save_as' => $dname,
     'sp_state' => $sp_state,
     'added' => $dateTimeStringNow,

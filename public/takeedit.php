@@ -70,7 +70,6 @@ $updateset[] = "medium = " . sqlesc(intval($_POST["medium_sel"][$newcatmode] ?? 
 $updateset[] = "codec = " . sqlesc(intval($_POST["codec_sel"][$newcatmode] ?? 0));
 $updateset[] = "standard = " . sqlesc(intval($_POST["standard_sel"][$newcatmode] ?? 0));
 $updateset[] = "processing = " . sqlesc(intval($_POST["processing_sel"][$newcatmode] ?? 0));
-$updateset[] = "team = " . sqlesc(intval($_POST["team_sel"][$newcatmode] ?? 0));
 $updateset[] = "audiocodec = " . sqlesc(intval($_POST["audiocodec_sel"][$newcatmode] ?? 0));
 if (user_can('torrentmanage')) {
     $updateset[] = "visible = '" . (isset($_POST["visible"]) && $_POST["visible"] ? "yes" : "no") . "'";

@@ -15,7 +15,6 @@ $showmedium = (get_searchbox_value($brsectiontype, 'showmedium') || ($allowspeci
 $showcodec = (get_searchbox_value($brsectiontype, 'showcodec') || ($allowspecial && get_searchbox_value($spsectiontype, 'showcodec'))); //whether show codecs or not
 $showstandard = (get_searchbox_value($brsectiontype, 'showstandard') || ($allowspecial && get_searchbox_value($spsectiontype, 'showstandard'))); //whether show standards or not
 $showprocessing = (get_searchbox_value($brsectiontype, 'showprocessing') || ($allowspecial && get_searchbox_value($spsectiontype, 'showprocessing'))); //whether show processings or not
-$showteam = (get_searchbox_value($brsectiontype, 'showteam') || ($allowspecial && get_searchbox_value($spsectiontype, 'showteam'))); //whether show teams or not
 $showaudiocodec = (get_searchbox_value($brsectiontype, 'showaudiocodec') || ($allowspecial && get_searchbox_value($spsectiontype, 'showaudiocodec'))); //whether show audio codecs or not
 $brcatsperror = (int)get_searchbox_value($brsectiontype, 'catsperrow');
 $catsperrow = (int)get_searchbox_value($spsectiontype, 'catsperrow');
@@ -34,7 +33,6 @@ if ($showmedium) $media = searchbox_item_list("media", $brsectiontype);
 if ($showcodec) $codecs = searchbox_item_list("codecs", $brsectiontype);
 if ($showstandard) $standards = searchbox_item_list("standards", $brsectiontype);
 if ($showprocessing) $processings = searchbox_item_list("processings", $brsectiontype);
-if ($showteam) $teams = searchbox_item_list("teams", $brsectiontype);
 if ($showaudiocodec) $audiocodecs = searchbox_item_list("audiocodecs", $brsectiontype);
 }
 stdhead($lang_getrss['head_rss_feeds']);
@@ -111,14 +109,6 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
 			if (!empty($_POST["pro{$processing['id']}"]))
 			{
 				$query[] = "pro{$processing['id']}=1";
-			}
-		}
-		if ($showteam)
-		foreach ($teams as $team)
-		{
-			if (!empty($_POST["tea{$team['id']}"]))
-			{
-				$query[] = "tea{$team['id']}=1";
 			}
 		}
 		if ($showaudiocodec)
@@ -292,17 +282,6 @@ if ($allowspecial) //print category list of Special section
 				{
 					$categories .= ($i && $i % $catsperrow == 0) ? "</tr><tr>" : "";
 					$categories .= "<td align=\"left\" class=\"bottom\" style=\"padding-bottom: 4px;padding-left: ".$catpadding."px\"><input name=\"pro".$processing['id']."\" type=\"checkbox\" " . (strpos($CURUSER['notifs'], "[pro".$processing['id']."]") !== false ? " checked=\"checked\"" : "") . " value='yes' />".$processing['name']."</td>\n";
-					$i++;
-				}
-				$categories .= "</tr>";
-				}
-				if ($showteam){
-				$categories .= "<tr><td class=\"embedded\" align=\"left\"><b>".$lang_getrss['text_team']."</b></td></tr><tr>";
-				$i = 0;
-				foreach ($teams as $team)
-				{
-					$categories .= ($i && $i % $catsperrow == 0) ? "</tr><tr>" : "";
-					$categories .= "<td align=\"left\" class=\"bottom\" style=\"padding-bottom: 4px;padding-left: ".$catpadding."px\"><input name=\"tea".$team['id']."\" type=\"checkbox\" " . (strpos($CURUSER['notifs'], "[tea".$team['id']."]") !== false ? " checked=\"checked\"" : "") . " value='yes' />".$team['name']."</td>\n";
 					$i++;
 				}
 				$categories .= "</tr>";

@@ -162,7 +162,6 @@ class SearchRepository extends BaseRepository
             'sp_state' => ['type' => 'long', ],
             'url' => ['type' => 'text', 'analyzer' => 'ik_max_word', 'fields' => ['keyword' => ['type' => 'keyword', 'ignore_above' => 256]]],
             'pos_state' => ['type' => 'keyword', ],
-            'picktype' => ['type' => 'keyword', ],
             'hr' => ['type' => 'long', ],
         ];
     }

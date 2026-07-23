@@ -546,19 +546,6 @@ function docleanup($forceAll = 0, $printProgress = false) {
     }
 
 
-	//automatically pick hot
-	if ($hotdays_torrent)
-	{
-		$secs = (int)($hotdays_torrent * 86400); //XX days
-		$dt = sqlesc(date("Y-m-d H:i:s",(TIMENOW - ($secs))));
-		sql_query("UPDATE torrents SET picktype = 'hot' WHERE added > $dt AND picktype = 'normal' AND seeders > ".sqlesc($hotseeder_torrent)) or sqlerr(__FILE__, __LINE__);
-	}
-	if ($printProgress) {
-		$log = "automatically pick hot";
-		do_log($log);
-		printProgress($log);
-	}
-
 
 //Priority Class 4: cleanup every 24 hours
 	$res = sql_query("SELECT value_u FROM avps WHERE arg = 'lastcleantime4'");

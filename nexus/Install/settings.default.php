@@ -60,6 +60,7 @@ return array (
     'showhelpbox' => 'no',
     'enablebitbucket' => 'yes',
     'smalldescription' => 'yes',
+    'altname' => '',
     'defaultlang' => 'en',
     'defstylesheet' => '3',
     'donation' => 'yes',

@@ -3607,15 +3607,6 @@ foreach ($rows as $row)
     }
 
 	print("<td class=\"rowfollow\" width=\"100%\" align=\"left\" style='padding: 0px'><table class=\"torrentname\" width=\"100%\"><tr" . $sphighlight . ">$tdCover<td class=\"embedded\" style='padding-left: 5px'>".$stickyicon."<a $short_torrent_name_alt $mouseovertorrent href=\"details.php?id=".$id."&amp;hit=1\"><b>".htmlspecialchars($dispname)."</b></a>");
-	$picked_torrent = "";
-	if ($CURUSER['appendpicked'] != 'no'){
-	if($row['picktype']=="hot")
-	$picked_torrent = " <b>[<font class='hot'>".$lang_functions['text_hot']."</font>]</b>";
-	elseif($row['picktype']=="classic")
-	$picked_torrent = " <b>[<font class='classic'>".$lang_functions['text_classic']."</font>]</b>";
-	elseif($row['picktype']=="recommended")
-	$picked_torrent = " <b>[<font class='recommended'>".$lang_functions['text_recommended']."</font>]</b>";
-	}
 	if ($CURUSER['appendnew'] != 'no' && strtotime($row["added"]) >= $last_browse)
 		print("<b> (<font class='new'>".$lang_functions['text_new_uppercase']."</font>)</b>");
 
@@ -3628,7 +3619,7 @@ foreach ($rows as $row)
         $seedBoxIcon = '';
     }
     $paidIcon = $torrentRep->getPaidIcon($row);
-	$titleSuffix = $banned_torrent.$paidIcon.$picked_torrent.$sp_torrent.$sp_torrent_sub. $hrImg . $seedBoxIcon . $approvalStatusIcon;
+	$titleSuffix = $banned_torrent.$paidIcon.$sp_torrent.$sp_torrent_sub. $hrImg . $seedBoxIcon . $approvalStatusIcon;
 	$titleSuffix = apply_filter('torrent_title_suffix', $titleSuffix, $row);
 	print($titleSuffix);
     /**

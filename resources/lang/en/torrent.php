@@ -32,12 +32,6 @@ return [
         'thanks_yes_label' => 'Thanked',
         'thanks_no_label' => 'Thank',
     ],
-    'pick_info' => [
-        'normal' => 'Normal',
-        'hot' => 'Hot',
-        'classic' => 'Classic',
-        'recommended' => 'Recommend',
-    ],
     'no_snatch' => 'Never download this torrent yet',
     'operation_log' => [
         \App\Models\TorrentOperationLog::ACTION_TYPE_APPROVAL_DENY => [

@@ -10,7 +10,7 @@ class UpgradeRepository extends BaseRepository
         'peers' => ['last_action', 'prev_action'],
         'posts' => ['editdate'],
         'snatched' => ['last_action', 'completedat'],
-        'torrents' => ['last_action', 'promotion_until', 'picktime', 'last_reseed'],
+        'torrents' => ['last_action', 'promotion_until', 'last_reseed'],
         'users' => [
             'last_login', 'last_access', 'last_home', 'last_offer', 'forum_access', 'last_staffmsg',
             'last_pm', 'last_comment', 'last_post', 'donoruntil', 'warneduntil', 'noaduntil', 'vip_until',

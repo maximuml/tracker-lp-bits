@@ -773,20 +773,6 @@ class TorrentRepository extends BaseRepository
         return Torrent::query()->whereIn('id', $idArr)->update($update);
     }
 
-    public function setPickType($id, $pickType): int
-    {
-        user_can('torrentmanage', true);
-        if (!isset(Torrent::$pickTypes[$pickType])) {
-            throw new \InvalidArgumentException("Invalid pickType: $pickType");
-        }
-        $update = [
-            'picktype' => $pickType,
-            'picktime' => now(),
-        ];
-        $idArr = Arr::wrap($id);
-        return Torrent::query()->whereIn('id', $idArr)->update($update);
-    }
-
     public function setHr($id, $hrStatus): int
     {
         user_can('torrentmanage', true);

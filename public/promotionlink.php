@@ -2,8 +2,8 @@
 require "../include/bittorrent.php";
 dbconn();
 require_once(get_langfile_path());
-$key=$_GET['key'];
-$updatekey=$_GET['updatekey'];
+$key=$_GET['key'] ?? null;
+$updatekey=$_GET['updatekey'] ?? null;
 if ($key)
 {
 	if (!$CURUSER)
@@ -30,7 +30,7 @@ if ($key)
 }
 elseif(($updatekey || !$CURUSER['promotion_link']) && $CURUSER)
 {
-	$promotionkey=md5($CURUSER['email'].date("Y-m-d H:i:s").$CURUSER['passhash']);
+	$promotionkey=md5($CURUSER['email'].date("Y-m-d H:i:s").($CURUSER['passhash'] ?? $CURUSER['secret'] ?? ''));
 	sql_query("UPDATE users SET promotion_link=".sqlesc($promotionkey)." WHERE id=".sqlesc($CURUSER['id']));
 	header("Location: " . get_protocol_prefix() . $BASEURL."/promotionlink.php");
 }

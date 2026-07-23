@@ -93,10 +93,6 @@ if ($action){
 				$commentpm = $_POST["commentpm"];
 				$gender = $_POST["gender"];
 				$country = $_POST["country"];
-				if ($showschool = 'yes'){
-					$school = $_POST["school"];
-					$updateset[] = "school = ".sqlesc($school);
-					}
 				$download = $_POST["download"];
 				$upload = $_POST["upload"];
 				$isp = $_POST["isp"];
@@ -211,14 +207,6 @@ if ($action){
 <input type=radio name=gender" . ($CURUSER["gender"] == "Male" ? " checked" : "") . " value=Male>".$lang_usercp['radio_male']."<input type=radio name=gender" .  ($CURUSER["gender"] == "Female" ? " checked" : "") . " value=Female>".$lang_usercp['radio_female'],1);
             tr_small($lang_usercp['row_tracker_url'], "<select name=tracker_url_id>\n$trackerUrls\n</select>" . "<br /><font class=small size=1>".$lang_usercp['row_tracker_url_help']."</font>",1);
             tr_small($lang_usercp['row_country'], "<select name=country>\n$countries\n</select>",1);
-		//School select
-if ($showschool == 'yes'){
-$schools = "<option value=35>---- ".$lang_usercp['select_none_selected']." ----</option>n";
-$sc_r = sql_query("SELECT id,name FROM schools ORDER BY name") or die;
-while ($sc_a = mysql_fetch_array($sc_r))
-$schools .= "<option value={$sc_a['id']}" . ($sc_a['id'] == $CURUSER['school'] ? " selected" : "") . ">{$sc_a['name']}</option>n";
-tr($lang_usercp['row_school'], "<select name=school>$schools</select>", 1);
-}
 			tr_small($lang_usercp['row_network_bandwidth'], "<b>".$lang_usercp['text_downstream_rate']. "</b>: <select name=download>".$downloadspeed."</select>&nbsp;&nbsp;<b>".$lang_usercp['text_upstream_rate']."</b>: <select name=upload>".$uploadspeed."</select>&nbsp;&nbsp;<b>".$lang_usercp['text_isp']."</b>: <select name=isp>".$isplist."</select>",1);
 			tr_small($lang_usercp['row_avatar_url'], "<img src=".($CURUSER["avatar"] ? "'$CURUSER[avatar]'" : "'" . get_protocol_prefix() . $BASEURL . "/pic/default_avatar.png'")." name='avatarimg'><br />
   <select name=savatar OnChange=\"document.forms[0].avatarimg.src=this.value;this.form.avatar.value=this.value;\">

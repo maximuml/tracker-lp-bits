@@ -1,0 +1,19 @@
+parameters:
+    level: 0
+    paths:
+        - app
+        - nexus
+        - public
+        - config
+        - include
+        - database
+    excludePaths:
+        analyse:
+            - .docker
+            - storage
+            - bootstrap/cache
+            - node_modules (?)
+            - public/vendor (?)
+    scanDirectories:
+        - vendor
+        - classes

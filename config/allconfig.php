@@ -232,7 +232,6 @@ $MAIN=array(
 	'registration' => 'yes',
 
 	'enablenfo' => 'yes',
-	'enableschool' => 'no',
 	'restrictemail' => 'no',
 	'showpolls' => 'yes',
 	'showstats' => 'yes',
@@ -246,8 +245,6 @@ $MAIN=array(
 	'enablebitbucket' => 'yes',
 	'smalldescription' => 'yes',
 	'altname' => NULL,
-	'extforum' => 'no',
-	'extforumurl' => 'http://www.cc98.org',
 	'defaultlang' => 'en',
 	'defstylesheet' => '3',
 	'donation' => 'yes',

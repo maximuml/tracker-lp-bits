@@ -49,7 +49,6 @@ return array (
     'registration' => 'yes',
 
     'enablenfo' => 'yes',
-    'enableschool' => 'no',
     'restrictemail' => 'no',
     'showpolls' => 'yes',
     'showstats' => 'yes',
@@ -62,9 +61,6 @@ return array (
     'showhelpbox' => 'no',
     'enablebitbucket' => 'yes',
     'smalldescription' => 'yes',
-    'altname' => 'no',
-    'extforum' => 'no',
-    'extforumurl' => 'http://www.cc98.org',
     'defaultlang' => 'en',
     'defstylesheet' => '3',
     'donation' => 'yes',

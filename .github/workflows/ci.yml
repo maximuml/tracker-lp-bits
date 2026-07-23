@@ -14,6 +14,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -40,3 +42,22 @@ jobs:
             -not -path './public/vendor/*' \
             -not -path './storage/*' \
             -print0 | xargs -0 -n1 -P4 php -l
+
+      - name: Determine changed PHP files
+        id: changed
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            base="origin/${{ github.base_ref }}"
+            git fetch origin "${{ github.base_ref }}" --depth=1 || true
+          else
+            base="${{ github.event.before }}"
+          fi
+          files=$(git diff --name-only --diff-filter=ACM "$base" HEAD | grep '\.php$' | tr '\n' ' ' || true)
+          echo "files=$files" >> "$GITHUB_OUTPUT"
+
+      - name: Run PHPStan on changed files
+        if: steps.changed.outputs.files != ''
+        run: vendor/bin/phpstan analyse --no-progress --memory-limit=2G ${{ steps.changed.outputs.files }}
+
+      - name: Run PHPUnit unit tests
+        run: vendor/bin/phpunit --testsuite Unit --no-coverage

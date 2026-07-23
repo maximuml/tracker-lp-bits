@@ -2312,7 +2312,7 @@ function get_if_restricted_is_open()
 function menu ($selected = "home") {
 	global $lang_functions;
 	global $BASEURL,$CURUSER;
-	global $enableoffer, $enablespecial, $enableextforum, $extforumurl, $where_tweak;
+	global $enableoffer, $enablespecial, $where_tweak;
 	global $USERUPDATESET;
 	//no this option in config.php
     $enablerequest = 'yes';
@@ -2355,10 +2355,7 @@ function menu ($selected = "home") {
         $specialSectionName = get_searchbox_value(get_setting('main.specialcat'), 'section_name');
         print ("<ul id=\"mainmenu\" class=\"menu\">");
         print ("<li" . ($selected == "home" ? " class=\"selected\"" : "") . "><a href=\"index.php\">" . $lang_functions['text_home'] . "</a></li>");
-        if ($enableextforum != 'yes')
-            print ("<li" . ($selected == "forums" ? " class=\"selected\"" : "") . "><a href=\"forums.php\">".$lang_functions['text_forums']."</a></li>");
-        else
-            print ("<li" . ($selected == "forums" ? " class=\"selected\"" : "") . "><a href=\"" . $extforumurl."\" target=\"_blank\">".$lang_functions['text_forums']."</a></li>");
+        print ("<li" . ($selected == "forums" ? " class=\"selected\"" : "") . "><a href=\"forums.php\">".$lang_functions['text_forums']."</a></li>");
         print ("<li" . ($selected == "torrents" ? " class=\"selected\"" : "") . "><a href=\"torrents.php\" rel='sub-menu'>".($normalSectionName[$lang] ?? $lang_functions['text_torrents'])."</a></li>");
         if ($enablespecial == 'yes' && user_can('view_special_torrent'))
             print ("<li" . ($selected == "special" ? " class=\"selected\"" : "") . "><a href=\"special.php\">".($specialSectionName[$lang] ?? $lang_functions['text_special'])."</a></li>");
@@ -3620,24 +3617,8 @@ foreach ($rows as $row)
 
 	//torrent name
 	$dispname = trim($row["name"]);
-	$short_torrent_name_alt = "";
+	$short_torrent_name_alt = "title=\"".htmlspecialchars($dispname)."\"";
 	$mouseovertorrent = "";
-	$tooltipblock = "";
-	$has_tooltip = false;
-	if ($enabletooltip_tweak == 'yes')
-		$tooltiptype = $CURUSER['tooltip'];
-	else
-		$tooltiptype = 'off';
-	switch ($tooltiptype){
-		case 'off' :  break;
-	}
-	if (!$has_tooltip)
-		$short_torrent_name_alt = "title=\"".htmlspecialchars($dispname)."\"";
-	else{
-	$torrent_tooltip[$counter]['id'] = "torrent_" . $counter;
-	$torrent_tooltip[$counter]['content'] = "";
-	$mouseovertorrent = "onmouseover=\"get_ext_info_ajax('".$torrent_tooltip[$counter]['id']."','".$url."','".$cache."','".$type."'); domTT_activate(this, event, 'content', document.getElementById('" . $torrent_tooltip[$counter]['id'] . "'), 'trail', false, 'delay',600,'lifetime',6000,'fade','both','styleClass','niceTitle', 'fadeMax',87, 'maxWidth', 500);\"";
-	}
 	$count_dispname=mb_strlen($dispname,"UTF-8");
 	if (!$displaysmalldescr || $row["small_descr"] == "")// maximum length of torrent name
 		$max_length_of_torrent_name = 200;

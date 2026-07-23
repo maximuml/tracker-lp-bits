@@ -44,6 +44,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Hashids\Hashids;
 use Nexus\Database\NexusDB;
 
 use Rhilip\Bencode\Bencode;
@@ -993,7 +994,7 @@ HTML;
      * @param $torrentId
      * @return string
      */
-    public function getBoughtUserCacheKey($torrentId, $userId): string
+    public function getBoughtUserCacheKey($torrentId, $userId = ''): string
     {
         return  sprintf("%s:%s:%s", self::BOUGHT_USER_CACHE_KEY_PREFIX, $torrentId, $userId);
     }
@@ -1134,9 +1135,11 @@ HTML;
         if (!empty($specificSubCategoryAndTags['category']) && !in_array($specificSubCategoryAndTags['category'], $validCategoryIdArr)) {
             throw new NexusException(nexus_trans('upload.invalid_category'));
         }
+        $categoryId = $specificSubCategoryAndTags['category'] ?? 0;
+        $category = Category::query()->find($categoryId);
         $baseUpdateQuery = Torrent::query()->whereIn('id', $torrentIdArr);
         $updateCategoryQuery = $baseUpdateQuery->clone();
-        if (!empty($validCategoryId)) {
+        if (!empty($validCategoryIdArr)) {
             $updateCategoryQuery->whereNotIn('category', $validCategoryIdArr);
         }
         $updateCategoryResult = $updateCategoryQuery->update(['category' => 0]);
@@ -1165,7 +1168,7 @@ HTML;
         foreach ($torrents as $torrent) {
             $siteLogArr[] = [
                 'added' => now(),
-                'txt' => sprintf("torrent: %s category was set to: %s(%s)", $torrent->id, $category->name, $category->id),
+                'txt' => sprintf("torrent: %s category was set to: %s(%s)", $torrent->id, $category?->name ?? 'unknown', $category?->id ?? 0),
                 'uid' => $operatorId,
             ];
         }

@@ -70,6 +70,8 @@ class Test extends Command
         $rep = new RequireSeedTorrentRepository();
 //        $rep->doRemove(Torrent::query()->whereIn('id', [58])->get());
         $rep->autoAddToListCronjob();
+
+        return 0;
     }
 
 }

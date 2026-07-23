@@ -701,12 +701,10 @@ if ($action == "viewtopic")
     }
     $uidArr = array_keys($uidArr);
     unset($arr);
-    $neededColumns = array('id', 'noad', 'class', 'enabled', 'privacy', 'avatar', 'signature', 'uploaded', 'downloaded', 'last_access', 'username', 'donor', 'leechwarn', 'warned', 'title');
+    $neededColumns = array('id', 'class', 'enabled', 'privacy', 'avatar', 'signature', 'uploaded', 'downloaded', 'last_access', 'username', 'donor', 'leechwarn', 'warned', 'title');
     $userInfoArr = \App\Models\User::query()->find($uidArr, $neededColumns)->keyBy('id');
 	$pn = 0;
 	$lpr = get_last_read_post_id($topicid);
-	if ($Advertisement->enable_ad())
-		$forumpostad=$Advertisement->get_ad('forumpost');
 
 	//check if privacy protection enabled in this forum
 //	$protected_forums = Nexus\Database\NexusDB::remember("setting_protected_forum", 600, function () {
@@ -721,13 +719,6 @@ if ($action == "viewtopic")
 
 	foreach ($allPosts as $arr)
 	{
-		if ($pn>=1)
-		{
-			if ($Advertisement->enable_ad()){
-				if (!empty($forumpostad[$pn-1]))
-				echo "<div align=\"center\" style=\"margin-top: 10px\" id=\"\">".$forumpostad[$pn-1]."</div>";
-			}
-		}
 		++$pn;
 
 		$postid = $arr["id"];
@@ -1541,19 +1532,10 @@ if (!$overforums = $Cache->get_value('overforums_list')){
 		$overforums[] = $row;
 	$Cache->cache_value('overforums_list', $overforums, 86400);
 }
-$count=0;
-if ($Advertisement->enable_ad())
-	$interoverforumsad=$Advertisement->get_ad('interoverforums');
-
 foreach ($overforums as $a)
 {
 	if (get_user_class() < $a["minclassview"])
 		continue;
-	if ($count>=1)
-	if ($Advertisement->enable_ad()){
-		if (!empty($interoverforumsad[$count-1]))
-			echo "<tr><td colspan=\"5\" align=\"center\" id=\"\">".$interoverforumsad[$count-1]."</td></tr>";
-	}
 	$forid = $a["id"];
 	$overforumname = $a["name"];
 
@@ -1632,7 +1614,6 @@ foreach ($overforums as $a)
 		"<br />".$forumdescription."</td></tr></table></td><td class=\"rowfollow\" align=\"center\" width=\"1%\">".$topiccount."</td><td class=\"rowfollow\" align=\"center\" width=\"1%\">".$postcount."</td>" .
 		"<td class=\"rowfollow nowrap\" align=\"left\">".$lastpost."</td><td class=\"rowfollow\" align=\"left\">".$forummoderators."</td></tr>\n");
 	}
-	$count++;
 }
 // End Table Mod
 print("</table>");

@@ -7,7 +7,7 @@ loggedinorreturn();
 parked();
 
 function bonusarray($option = 0){
-	global $onegbupload_bonus,$fivegbupload_bonus,$tengbupload_bonus,$oneinvite_bonus,$customtitle_bonus,$vipstatus_bonus, $basictax_bonus, $taxpercentage_bonus, $bonusnoadpoint_advertisement, $bonusnoadtime_advertisement;
+	global $onegbupload_bonus,$fivegbupload_bonus,$tengbupload_bonus,$oneinvite_bonus,$customtitle_bonus,$vipstatus_bonus, $basictax_bonus, $taxpercentage_bonus;
 	global $lang_mybonus;
 
 	$results = [];
@@ -122,14 +122,6 @@ function bonusarray($option = 0){
     $results[] = $bonus;
 
 
-    //No ad for 15 days
-    $bonus = array();
-    $bonus['points'] = $bonusnoadpoint_advertisement;
-    $bonus['art'] = 'noad';
-    $bonus['menge'] = $bonusnoadtime_advertisement * 86400;
-    $bonus['name'] = $bonusnoadtime_advertisement.$lang_mybonus['text_no_advertisements'];
-    $bonus['description'] = $lang_mybonus['text_no_advertisements_note'];
-    $results[] = $bonus;
 
     //Attendance card
     $bonus = array();
@@ -262,14 +254,6 @@ function bonusarray($option = 0){
 //				}
 //			break;
 //			}
-//		case 8: {
-//			$bonus['points'] = $bonusnoadpoint_advertisement;
-//			$bonus['art'] = 'noad';
-//			$bonus['menge'] = $bonusnoadtime_advertisement * 86400;
-//			$bonus['name'] = $bonusnoadtime_advertisement.$lang_mybonus['text_no_advertisements'];
-//			$bonus['description'] = $lang_mybonus['text_no_advertisements_note'];
-//			break;
-//			}
 //		case 9: {
 //			$bonus['points'] = 1000;
 //			$bonus['art'] = 'gift_2';
@@ -320,8 +304,6 @@ if (isset($do)) {
 	$msg = sprintf($lang_mybonus['text_success_custom_title'], $CURUSER['title']);
 	elseif ($do == "transfer")
 	$msg =  $lang_mybonus['text_success_gift'];
-	elseif ($do == "noad")
-	$msg =  $lang_mybonus['text_success_no_ad'];
 	elseif ($do == "charity")
 	$msg =  $lang_mybonus['text_success_charity'];
     elseif ($do == "cancel_hr")
@@ -364,7 +346,6 @@ for ($i=0; $i < count($allBonus); $i++)
 	$bonusarray = $allBonus[$i];
 	if (
 	    ($bonusarray['art'] == 'gift_1' && $bonusgift_bonus == 'no')
-        || ($bonusarray['art'] == 'noad' && ($enablead_advertisement == 'no' || $bonusnoad_advertisement == 'no'))
         || ($bonusarray['art'] == 'cancel_hr' && !\App\Models\HitAndRun::getIsEnabled())
     ) {
         continue;
@@ -395,16 +376,6 @@ for ($i=0; $i < count($allBonus); $i++)
 	    $permission = 'sendinvite';
 		if ($bonusarray['art'] == 'gift_1'){
 			print("<td class=\"rowfollow\" align=\"center\"><input type=\"submit\" name=\"submit\" value=\"".$lang_mybonus['submit_karma_gift']."\" /></td>");
-		}
-		elseif ($bonusarray['art'] == 'noad'){
-			if ($enablenoad_advertisement == 'yes' && get_user_class() >= $noad_advertisement)
-				print("<td class=\"rowfollow\" align=\"center\"><input type=\"submit\" name=\"submit\" value=\"".$lang_mybonus['submit_class_above_no_ad']."\" disabled=\"disabled\" /></td>");
-			elseif (!empty($CURUSER['noaduntil']) && strtotime($CURUSER['noaduntil']) >= TIMENOW)
-				print("<td class=\"rowfollow\" align=\"center\"><input type=\"submit\" name=\"submit\" value=\"".$lang_mybonus['submit_already_disabled']."\" disabled=\"disabled\" /></td>");
-			elseif (get_user_class() < $bonusnoad_advertisement)
-				print("<td class=\"rowfollow\" align=\"center\"><input type=\"submit\" name=\"submit\" value=\"".get_user_class_name($bonusnoad_advertisement,false,false,true).$lang_mybonus['text_plus_only']."\" disabled=\"disabled\" /></td>");
-			else
-				print("<td class=\"rowfollow\" align=\"center\"><input type=\"submit\" name=\"submit\" value=\"".$lang_mybonus['submit_exchange']."\" /></td>");
 		}
 		elseif ($bonusarray['art'] == 'gift_2'){
 			print("<td class=\"rowfollow\" align=\"center\"><input type=\"submit\" name=\"submit\" value=\"".$lang_mybonus['submit_charity_giving']."\" /></td>");
@@ -552,18 +523,12 @@ if ($pollvote_bonus > 0)
 	print("<li>".$lang_mybonus['text_poll_vote'].$pollvote_bonus.$lang_mybonus['text_point'].add_s($pollvote_bonus)."</li>");
 if ($offervote_bonus > 0)
 	print("<li>".$lang_mybonus['text_offer_vote'].$offervote_bonus.$lang_mybonus['text_point'].add_s($offervote_bonus)."</li>");
-if ($funboxvote_bonus > 0)
-	print("<li>".$lang_mybonus['text_funbox_vote'].$funboxvote_bonus.$lang_mybonus['text_point'].add_s($funboxvote_bonus)."</li>");
 if ($saythanks_bonus > 0)
 	print("<li>".$lang_mybonus['text_say_thanks'].$saythanks_bonus.$lang_mybonus['text_point'].add_s($saythanks_bonus)."</li>");
 if ($receivethanks_bonus > 0)
 	print("<li>".$lang_mybonus['text_receive_thanks'].$receivethanks_bonus.$lang_mybonus['text_point'].add_s($receivethanks_bonus)."</li>");
-if ($adclickbonus_advertisement > 0)
-	print("<li>".$lang_mybonus['text_click_on_ad'].$adclickbonus_advertisement.$lang_mybonus['text_point'].add_s($adclickbonus_advertisement)."</li>");
 if ($prolinkpoint_bonus > 0)
 	print("<li>".$lang_mybonus['text_promotion_link_clicked'].$prolinkpoint_bonus.$lang_mybonus['text_point'].add_s($prolinkpoint_bonus)."</li>");
-if ($funboxreward_bonus > 0)
-	print("<li>".$lang_mybonus['text_funbox_reward']."</li>");
 print($lang_mybonus['text_howto_get_karma_four']);
 if ($ratiolimit_bonus > 0)
 	print("<li>".$lang_mybonus['text_user_with_ratio_above'].$ratiolimit_bonus.$lang_mybonus['text_and_uploaded_amount_above'].$dlamountlimit_bonus.$lang_mybonus['text_cannot_exchange_uploading']."</li>");
@@ -681,17 +646,6 @@ if ($action == "exchange") {
 //			sql_query("UPDATE users SET title = ".sqlesc($title).", seedbonus = seedbonus - $points, bonuscomment = ".sqlesc($bonuscomment)." WHERE id = ".sqlesc($userid)) or sqlerr(__FILE__, __LINE__);
             $bonusRep->consumeUserBonus($CURUSER['id'], $points, \App\Models\BonusLogs::BUSINESS_TYPE_CUSTOM_TITLE, $points. " Points for custom title. Old title is ".htmlspecialchars(trim($CURUSER["title"]))." and new title is $title.", ['title' => $title, ]);
 			nexus_redirect("" . get_protocol_prefix() . "$BASEURL/mybonus.php?do=title");
-		}
-		elseif($art == "noad" && $enablead_advertisement == 'yes' && $enablebonusnoad_advertisement == 'yes') {
-			if (($enablenoad_advertisement == 'yes' && get_user_class() >= $noad_advertisement) || strtotime($CURUSER['noaduntil']) >= TIMENOW || get_user_class() < $bonusnoad_advertisement)
-				die($lang_mybonus['text_cheat_alert']);
-			else{
-				$noaduntil = date("Y-m-d H:i:s",(TIMENOW + $bonusarray['menge']));
-//				$bonuscomment = date("Y-m-d") . " - " .$points. " Points for ".$bonusnoadtime_advertisement." days without ads.\n " .htmlspecialchars($bonuscomment);
-//				sql_query("UPDATE users SET noad='yes', noaduntil='".$noaduntil."', seedbonus = seedbonus - $points, bonuscomment = ".sqlesc($bonuscomment)." WHERE id=".sqlesc($userid));
-                $bonusRep->consumeUserBonus($CURUSER['id'], $points, \App\Models\BonusLogs::BUSINESS_TYPE_NO_AD, $points. " Points for ".$bonusnoadtime_advertisement." days without ads.", ['noad' => 'yes', 'noaduntil' => $noaduntil]);
-				nexus_redirect("" . get_protocol_prefix() . "$BASEURL/mybonus.php?do=noad");
-			}
 		}
 		elseif($art == 'gift_2') // charity giving
 		{

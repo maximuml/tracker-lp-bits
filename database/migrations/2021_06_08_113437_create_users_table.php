@@ -128,7 +128,6 @@ class CreateUsersTable extends Migration
             $table->enum('showlastcom', ['yes', 'no'])->nullable()->default('no');
             $table->enum('showlastpost', ['yes', 'no'])->default('no');
             $table->unsignedTinyInteger('pmnum')->default(10);
-            $table->enum('showfb', ['yes', 'no'])->default('yes');
             $table->string('page')->nullable()->default('');
             $table->index(['status', 'added']);
 

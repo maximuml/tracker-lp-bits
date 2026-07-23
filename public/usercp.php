@@ -198,12 +198,6 @@ if ($action){
   die;
   break;
 		case "tracker":
-			$showaddisabled = true;
-			if ($enablead_advertisement == 'yes'){
-				if (get_user_class() >= $noad_advertisement || ($enablebonusnoad_advertisement == 'yes' && !empty($CURUSER['noaduntil']) && strtotime($CURUSER['noaduntil']) >= TIMENOW)){
-					$showaddisabled = false;
-				}
-			}
 			if ($enabletooltip_tweak == 'yes')
 				$showtooltipsetting = true;
 			else
@@ -300,10 +294,6 @@ if ($action){
 					$tooltip = $_POST['tooltip'];
 					$updateset[] = "tooltip = " . sqlesc($tooltip);
 				}
-				if ($enablead_advertisement == 'yes' && !$showaddisabled){
-					$noad = ($_POST['showad'] == 'yes' ? "no" : "yes");
-					$updateset[] = "noad = " . sqlesc($noad);
-				}
 				$timetype = $_POST['timetype'];
 				$updateset[] = "timetype = " . sqlesc($timetype);
 
@@ -328,8 +318,6 @@ if ($action){
 				}
 				$pmnum = ($_POST["pmnum"] < 1 || $_POST["pmnum"] > 100 ? 20 : floor($_POST["pmnum"]));
 				$updateset[] = "pmnum = " . $pmnum;
-				if ($showfunbox_main == 'yes'){$showfb = ($_POST["showfb"] == 'yes' ? "yes" : "no");
-				$updateset[] = "showfb = " . sqlesc($showfb);}
 				$sbnum = ($_POST["sbnum"] ? max(10, min(500, intval($_POST["sbnum"] ?? 0))) : 70);
 				$updateset[] = "sbnum = " . $sbnum;
 				$sbrefresh = ($_POST["sbrefresh"] ? max(10, min(3600, intval($_POST["sbrefresh"] ?? 0))) : 120);
@@ -595,14 +583,9 @@ if ($showaudiocodec) $audiocodecs = searchbox_item_list("audiocodecs");
 			tr_small($lang_usercp['row_pm_boxes'], $lang_usercp['text_show']."<input type=text name=pmnum size=5 value=".$CURUSER['pmnum']." >".$lang_usercp['text_pms_per_page'], 1);
 if ($showshoutbox_main == "yes") //system side setting for shoutbox
 			tr_small($lang_usercp['row_shoutbox'], $lang_usercp['text_show_last']."<input type=text name=sbnum size=5 value=".$CURUSER['sbnum']." >".$lang_usercp['text_messages_at_shoutbox']."<br />".$lang_usercp['text_refresh_shoutbox_every']."<input type=text name=sbrefresh size=5 value=".$CURUSER['sbrefresh']." >".$lang_usercp['text_seconds'].($showhelpbox_main == 'yes' ? "<br /><input type=checkbox name=hidehb".($CURUSER["hidehb"] == "yes" ? " checked" : "") ." value=yes>".$lang_usercp['text_hide_helpbox_messages'] : ""), 1);
-if ($showfunbox_main == 'yes') //siteside setting for funbox
-tr_small($lang_usercp['row_funbox'],"<input type=checkbox name=showfb".($CURUSER["showfb"] == "yes" ? " checked" : "") ." value=yes>".$lang_usercp['text_show_funbox'] , 1);
 
 			tr_small($lang_usercp['row_torrent_detail'], "<input type=checkbox name=showdescription".($CURUSER["showdescription"] == "yes" ? " checked" : "") ." value=yes>".$lang_usercp['text_show_description'],1);
 			tr_small($lang_usercp['row_discuss'],"<input type=checkbox name=showcomment".($CURUSER["showcomment"] == "yes" ? " checked" : "") ." value=yes>".$lang_usercp['text_show_comments'], 1);
-			if ($enablead_advertisement == 'yes'){
-				tr_small($lang_usercp['row_show_advertisements'],"<input type=\"checkbox\" name=\"showad\"".($CURUSER["noad"] == "yes" ? "" : " checked=\"checked\"") .($showaddisabled ? " disabled=\"disabled\"" : ""). " value=\"yes\" />".$lang_usercp['text_show_advertisement_note'].($enablenoad_advertisement == 'yes' ? "<br />".get_user_class_name($noad_advertisement,false,true,true).$lang_usercp['text_can_turn_off_advertisement'] : "").($enablebonusnoad_advertisement == 'yes' ? "<br />".get_user_class_name($bonusnoad_advertisement,false,true,true).$lang_usercp['text_buy_no_advertisement']."<a href=\"mybonus.php\"><b>".$lang_usercp['text_bonus_center']."</b></a>" : ""), 1);
-			}
 			tr_small($lang_usercp['row_time_type'], "<input type=radio name=timetype ".($CURUSER['timetype'] == 'timeadded' ? " checked" : "")." value=timeadded>".$lang_usercp['text_time_added']."&nbsp;&nbsp;<input type=radio name=timetype ".($CURUSER['timetype'] == 'timealive' ? " checked" : "")." value=timealive>".$lang_usercp['text_time_elapsed']."<br />", 1);
 			//Setting for browse page
 			tr_small($lang_usercp['row_browse_page'], $lang_usercp['text_browse_setting_warning']."

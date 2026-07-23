@@ -204,44 +204,6 @@ JS;
         $actions[] = "<a title=\"".$lang_details['title_report_torrent']."\" href=\"report.php?torrent=$id\"><img class=\"dt_report\" src=\"pic/trans.gif\" alt=\"report\" />&nbsp;<b><font class=\"small\">".$lang_details['text_report_torrent']."</font></b></a>";
 		tr($lang_details['row_action'], implode('&nbsp;|&nbsp;', $actions), 1);
 
-        // ------------- start claim block ------------------//
-        $claimTorrentTTL = \App\Models\Claim::getConfigTorrentTTL();
-        if (\App\Models\Claim::getConfigIsEnabled() && \Carbon\Carbon::parse($row['added'])->addDays($claimTorrentTTL)->lte(\Carbon\Carbon::now())) {
-            $baseClaimQuery = \App\Models\Claim::query()->where('torrent_id', $id);
-            $claimCounts = (clone $baseClaimQuery)->count();
-            $isClaimed = (clone $baseClaimQuery)->where('uid', $CURUSER['id'])->exists();
-            if ($isClaimed) {
-                $inputValue = $lang_details['claim_already'];
-                $disabled = ' disabled';
-            } else {
-                $inputValue = $lang_details['claim_now'];
-                $disabled = '';
-                $claimJs = <<<JS
-jQuery('#add-claim').on('click', function () {
-    if (!window.confirm('{$lang_details['claim_confirm']}')) {
-        return
-    }
-    let params = {action: "addClaim", params: {"torrent_id": jQuery(this).attr('data-torrent_id')}}
-    jQuery.post("ajax.php", params, function (response) {
-        console.log(response)
-        if (response.ret != 0) {
-            alert(response.msg)
-        } else {
-            window.location.reload()
-        }
-    }, 'json')
-})
-JS;
-                \Nexus\Nexus::js($claimJs, 'footer', false);
-            }
-            $maxUserCounts = get_setting('torrent.claim_torrent_user_counts_up_limit', \App\Models\Claim::USER_UP_LIMIT);
-            $y = sprintf('<input type="button" value="%s" id="add-claim" data-torrent_id="%s"%s>', $inputValue, $id, $disabled);
-            $y .= sprintf('&nbsp;' . $lang_details['claim_info'], $claimCounts, bcsub($maxUserCounts, $claimCounts));
-            $y .= sprintf('&nbsp;<b><a href="claim.php?torrent_id=%s">'.$lang_details['claim_detail'].'</a></b>', $id);
-            tr($lang_details['claim_label'], $y, 1);
-        }
-        // ------------- end claim block ------------------//
-
         tr($lang_details['torrent_dl_url'],sprintf('<a title="%s" href="%s">%s</a>',$lang_details['torrent_dl_url_notice'], $torrentRep->getDownloadUrl($id, $CURUSER), $lang_details['torrent_dl_url_text']),1);
 
 
@@ -285,10 +247,9 @@ JS;
         }
 
 		if ($CURUSER['showdescription'] != 'no' && !empty($row["descr"])){
-            $torrentdetailad=$Advertisement->get_ad('torrentdetail');
             $desc = format_comment($row['descr']);
             $desc = apply_filter('torrent_detail_description', $desc, $row['id'], $CURUSER['id']);
-            tr("<a href=\"javascript: klappe_news('descr')\"><span class=\"nowrap\"><img class=\"minus\" src=\"pic/trans.gif\" alt=\"Show/Hide\" id=\"picdescr\" title=\"".($lang_details['title_show_or_hide'] ?? '')."\" /> ".$lang_details['row_description']."</span></a>", "<div id='kdescr'>".($Advertisement->enable_ad() && $torrentdetailad ? "<div align=\"left\" style=\"margin-bottom: 10px\" id=\"\">".$torrentdetailad[0]."</div>" : "").$desc."</div>", 1);
+            tr("<a href=\"javascript: klappe_news('descr')\"><span class=\"nowrap\"><img class=\"minus\" src=\"pic/trans.gif\" alt=\"Show/Hide\" id=\"picdescr\" title=\"".($lang_details['title_show_or_hide'] ?? '')."\" /> ".$lang_details['row_description']."</span></a>", "<div id='kdescr'>".$desc."</div>", 1);
 		}
 
 

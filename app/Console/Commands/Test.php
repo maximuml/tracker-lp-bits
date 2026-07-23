@@ -3,7 +3,6 @@
 namespace App\Console\Commands;
 
 use App\Jobs\CheckQueueFailedJobs;
-use App\Jobs\SettleClaim;
 use App\Jobs\UpdateUserDownloadPrivilege;
 use App\Models\ExamUser;
 use App\Models\Language;
@@ -12,7 +11,6 @@ use App\Models\PersonalAccessToken;
 use App\Models\Torrent;
 use App\Models\TorrentExtra;
 use App\Models\User;
-use App\Repositories\ClaimRepository;
 use App\Repositories\ExamRepository;
 use App\Repositories\RequireSeedTorrentRepository;
 use App\Repositories\SeedBoxRepository;

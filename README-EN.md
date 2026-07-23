@@ -12,7 +12,6 @@ Welcome to participate in internationalization work, click [here](https://github
 - Subtitle
 - Exam
 - H&R
-- Claim  
 - Approval  
 - Attendance
 - Retroactive attendance card  

@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class FaqTableSeeder extends Seeder
 {
@@ -16,9 +17,9 @@ class FaqTableSeeder extends Seeder
     {
         
 
-        \DB::table('faq')->delete();
+        DB::table('faq')->delete();
         
-        \DB::table('faq')->insert(array (
+        DB::table('faq')->insert(array (
               0 => 
               array (
                 'id' => 401,
@@ -276,7 +277,7 @@ class FaqTableSeeder extends Seeder
             <tr>
             <td class="embedded" width="200" valign="top">&nbsp; <b class="Peasant_Name">Peasant</b></td>
             <td class="embedded" width="5">&nbsp;</td>
-            <td class="embedded"> Demoted users. They must improve their ratio within 30 days or they will be banned. Cannot post funbox item, apply for links or upload subtitles.
+            <td class="embedded"> Demoted users. They must improve their ratio within 30 days or they will be banned. Cannot apply for links or upload subtitles.
             </td>
             </tr>
             <tr>
@@ -352,7 +353,7 @@ class FaqTableSeeder extends Seeder
             <tr>
             <td class="embedded" valign="top">&nbsp; <b  class="Moderator_Name">Moderator</b></td>
             <td class="embedded">&nbsp;</td>
-            <td class="embedded" valign="top">Can view staffbox and reportbox, manage funbox and polls, edit and delete any uploaded torrent, manage offers, manage forum posts and user comments, view confidential logs, delete any uploaded subtitle, manage code updates and chronicles at logs, view users\' invitation history, change general user account information. <b>Cannot</b> manage links,recent news or forums. <b>Cannot</b> set torrents sticky or on promotion.<b>Cannot</b> view users\' confidential information (e.g. IP address and Email address). <b>Cannot</b> delete user account.</td>
+            <td class="embedded" valign="top">Can view staffbox and reportbox, manage polls, edit and delete any uploaded torrent, manage offers, manage forum posts and user comments, view confidential logs, delete any uploaded subtitle, manage code updates and chronicles at logs, view users\' invitation history, change general user account information. <b>Cannot</b> manage links,recent news or forums. <b>Cannot</b> set torrents sticky or on promotion.<b>Cannot</b> view users\' confidential information (e.g. IP address and Email address). <b>Cannot</b> delete user account.</td>
             </tr>
             <tr>
             <td class="embedded" valign="top">&nbsp; <b  class="Administrator_Name">Administrator</b></td>

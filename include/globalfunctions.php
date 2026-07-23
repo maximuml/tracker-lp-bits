@@ -781,7 +781,7 @@ function get_user_row($id)
     static $userRows = [];
     static $curuserRowUpdated = false;
     static $neededColumns = array(
-        'id', 'noad', 'class', 'enabled', 'privacy', 'avatar', 'signature', 'uploaded', 'downloaded', 'last_access', 'username', 'donor',
+        'id', 'class', 'enabled', 'privacy', 'avatar', 'signature', 'uploaded', 'downloaded', 'last_access', 'username', 'donor',
         'donoruntil', 'leechwarn', 'warned', 'title', 'downloadpos', 'parked', 'clientselect', 'showclienterror',
     );
     if (isset($userRows[$id])) return $userRows[$id];

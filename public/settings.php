@@ -219,7 +219,7 @@ elseif ($action == 'savesettings_authority') 	// save user authority
 {
 	stdhead($lang_settings['head_save_authority_settings']);
 	$validConfig = array(
-	    'defaultclass','staffmem','newsmanage','sbmanage','pollmanage','applylink', 'linkmanage', 'postmanage',
+	    'defaultclass','staffmem','newsmanage','sbmanage','pollmanage','postmanage',
         'commanage','forummanage','viewuserlist','torrentmanage','torrentsticky', 'torrentonpromotion', 'torrent_hr', 'askreseed', 'viewnfo',
         'torrentstructure','sendinvite','viewhistory','topten','log','confilog','userprofile', 'torrenthistory','prfmanage', 'cruprfmanage',
         'uploadsub','delownsub','submanage','updateextinfo', 'viewanonymous','beanonymous','addoffer','offermanage', 'upload','uploadspecial',
@@ -422,8 +422,6 @@ elseif ($action == 'authoritysettings')	//Authority settings
 	tr($lang_settings['row_news_management'], $lang_settings['text_minimum_class'].classlist('newsmanage',$maxclass,$AUTHORITY['newsmanage'],0,true).$lang_settings['text_default'].get_user_class_name(UC_ADMINISTRATOR,false,true,true).$lang_settings['text_news_management_note'],1);
 	tr($lang_settings['row_shoutbox_management'], $lang_settings['text_minimum_class']. classlist('sbmanage',$maxclass,$AUTHORITY['sbmanage'],0,true).$lang_settings['text_default'].get_user_class_name(UC_MODERATOR,false,true,true).$lang_settings['text_shoutbox_management_note'],1);
 	tr($lang_settings['row_poll_management'], $lang_settings['text_minimum_class'].classlist('pollmanage',$maxclass,$AUTHORITY['pollmanage'],0,true).$lang_settings['text_default'].get_user_class_name(UC_ADMINISTRATOR,false,true,true).$lang_settings['text_poll_management_note'],1);
-	tr($lang_settings['row_apply_for_links'], $lang_settings['text_minimum_class'].classlist('applylink',$maxclass,$AUTHORITY['applylink'],0,true).$lang_settings['text_default'].get_user_class_name(UC_USER,false,true,true).$lang_settings['text_apply_for_links_note'],1);
-	tr($lang_settings['row_link_management'], $lang_settings['text_minimum_class'].classlist('linkmanage',$maxclass,$AUTHORITY['linkmanage'],0,true).$lang_settings['text_default'].get_user_class_name(UC_ADMINISTRATOR,false,true,true).$lang_settings['text_link_management_note'],1);
 	tr($lang_settings['row_forum_post_management'], $lang_settings['text_minimum_class'].classlist('postmanage',$maxclass,$AUTHORITY['postmanage'],0,true).$lang_settings['text_default'].get_user_class_name(UC_MODERATOR,false,true,true).$lang_settings['text_forum_post_management_note'],1);
 	tr($lang_settings['row_comment_management'], $lang_settings['text_minimum_class'].classlist('commanage',$maxclass,$AUTHORITY['commanage'],0,true).$lang_settings['text_default'].get_user_class_name(UC_MODERATOR,false,true,true).$lang_settings['text_comment_management_note'],1);
 	tr($lang_settings['row_forum_management'], $lang_settings['text_minimum_class'].classlist('forummanage',$maxclass,$AUTHORITY['forummanage'],0,true).$lang_settings['text_default'].get_user_class_name(UC_ADMINISTRATOR,false,true,true).$lang_settings['text_forum_management_note'],1);

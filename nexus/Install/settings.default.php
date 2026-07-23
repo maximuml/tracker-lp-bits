@@ -191,7 +191,6 @@ return array (
     'sqldebug' => '13',
     'cssdate' => '',
     'enabletooltip' => 'yes',
-    'prolinkimg' => 'pic/prolink.png',
     'analyticscode' => '',
   ),
   'bonus' =>
@@ -222,8 +221,6 @@ return array (
     'bonusgift' => 'yes',
     'basictax' => '4',
     'taxpercentage' => '10',
-    'prolinkpoint' => '1',
-    'prolinktime' => '600',
       'cancel_hr' => BonusLogs::DEFAULT_BONUS_CANCEL_ONE_HIT_AND_RUN,
       'attendance_card' => BonusLogs::DEFAULT_BONUS_BUY_ATTENDANCE_CARD,
       'harem_addition' => 0,

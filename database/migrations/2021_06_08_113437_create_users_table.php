@@ -83,7 +83,6 @@ class CreateUsersTable extends Migration
             $table->string('pickfor')->default('');
             $table->string('supportlang', 50)->default('');
             $table->string('passkey', 32)->default('')->index();
-            $table->string('promotion_link', 32)->nullable();
             $table->enum('uploadpos', ['yes', 'no'])->default('yes');
             $table->enum('forumpost', ['yes', 'no'])->default('yes');
             $table->enum('downloadpos', ['yes', 'no'])->default('yes');

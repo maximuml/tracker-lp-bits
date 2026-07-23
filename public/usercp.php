@@ -936,12 +936,6 @@ tr_small($lang_usercp['row_passkey'], hide_text($CURUSER["passkey"]), 1);
 if (get_setting('security.login_type') == 'passkey' && get_setting('security.login_secret_deadline') > date('Y-m-d H:i:s')) {
     tr_small($lang_usercp['row_passkey_login_url'], sprintf('%s/%s/%s', getSchemeAndHttpHost(), get_setting('security.login_secret'), $CURUSER['passkey']), 1);
 }
-if ($prolinkpoint_bonus)
-{
-	$prolinkclick=get_row_count("prolinkclicks", "WHERE userid=".$CURUSER['id']);
-	tr_small($lang_usercp['row_promotion_link'], $prolinkclick. " [<a href=\"promotionlink.php\">".$lang_usercp['text_read_more']."</a>]", 1);
-	//tr_small($lang_usercp['row_promotion_link'], $prolinkclick. " [<a href=\"promotionlink.php?updatekey=1\">".$lang_usercp['text_update_promotion_link']."</a>] [<a href=\"promotionlink.php\">".$lang_usercp['text_read_more']."</a>]", 1);
-}
 tr_small($lang_usercp['row_invitations'],$CURUSER['invites']." [<a href=\"invite.php?id=".$CURUSER['id']."\" title=\"".$lang_usercp['link_send_invitation']."\">".$lang_usercp['text_send']."</a>]",1);
 tr_small($lang_usercp['row_karma_points'], $CURUSER['seedbonus']." [<a href=\"mybonus.php\" title=\"".$lang_usercp['link_use_karma_points']."\">".$lang_usercp['text_use']."</a>]", 1);
 tr_small($lang_usercp['row_written_comments'], $commentcount." [<a href=\"userhistory.php?action=viewcomments&id=".$CURUSER['id']."\" title=\"".$lang_usercp['link_view_comments']."\">".$lang_usercp['text_view']."</a>]", 1);

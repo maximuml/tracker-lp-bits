@@ -215,7 +215,6 @@ $enablesqldebug_tweak = $TWEAK['enablesqldebug'];
 $sqldebug_tweak = $TWEAK['sqldebug'];
 $cssdate_tweak = $TWEAK['cssdate'];
 $enabletooltip_tweak = $TWEAK['enabletooltip'];
-$prolinkimg = $TWEAK['prolinkimg'];
 $analyticscode_tweak = $TWEAK['analyticscode'];
 
 $enableattach_attachment = $ATTACHMENT['enableattach'];
@@ -282,8 +281,6 @@ $vipstatus_bonus = $BONUS['vipstatus'];
 $bonusgift_bonus = $BONUS['bonusgift'];
 $basictax_bonus = $BONUS['basictax'];
 $taxpercentage_bonus = $BONUS['taxpercentage'];
-$prolinkpoint_bonus = $BONUS['prolinkpoint'];
-$prolinktime_bonus = $BONUS['prolinktime'];
 $attendance_initial_bonus = isset($BONUS['attendance_initial']) ? (int) $BONUS['attendance_initial'] : \App\Models\Attendance::INITIAL_BONUS;
 $attendance_step_bonus = isset($BONUS['attendance_step']) ? (int) $BONUS['attendance_step'] : \App\Models\Attendance::STEP_BONUS;
 $attendance_max_bonus = isset($BONUS['attendance_max']) ? (int) $BONUS['attendance_max'] : \App\Models\Attendance::MAX_BONUS;

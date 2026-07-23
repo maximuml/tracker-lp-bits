@@ -172,8 +172,6 @@ $BONUS=array(
 	'bonusgift' => 'yes',
 	'basictax' => '4',
 	'taxpercentage' => '10',
-	'prolinkpoint' => '1',
-	'prolinktime' => '600',
 );
 $CODE=array(
 	'mainversion' => 'NexusPHP',
@@ -308,6 +306,5 @@ $TWEAK=array(
 	'sqldebug' => '13',
 	'cssdate' => '',
 	'enabletooltip' => 'yes',
-	'prolinkimg' => 'pic/prolink.png',
 	'analyticscode' => '',
 );

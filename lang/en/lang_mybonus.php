@@ -109,7 +109,6 @@ where<ul><li><b>A</b> is an intermediate variable</li><li><b>Ti</b> is the <b>i<
 	'text_percent_of_transfered_amount' => "% of the transfered amount",
 	'text_as_tax' => " as tax. For example, the receiver only gets ",
 	'text_tax_example_note' => " points when you send him 100 bonus points as a gift.",
-	'text_promotion_link_clicked' => "promotion link gets clicked (each IP only counts once) = ",
 	'text_charity_giving' => "Charity Giving",
 	'text_charity_giving_note' => "Charity goes directly to those in need. And it's absolutely up to you to decide who shall benefit from your generosity.",
 	'text_ratio_below' => "Give to those with ratio below ",

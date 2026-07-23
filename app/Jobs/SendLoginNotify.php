@@ -53,7 +53,7 @@ class SendLoginNotify implements ShouldQueue
             do_log("$log, no last login log");
             return;
         }
-        $log .= sprintf(", last login: ", $lastLoginLog->toJson());
+        $log .= sprintf(", last login: %s", $lastLoginLog->toJson());
         if (!$lastLoginLog->country || !$lastLoginLog->city) {
             do_log("$log, last login log no country or city");
             return;

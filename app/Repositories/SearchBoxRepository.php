@@ -19,6 +19,8 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Nexus\Database\NexusDB;
 use Filament\Forms;
+use Filament\Schemas\Components\Fieldset;
+use Filament\Schemas\Components\Section;
 
 class SearchBoxRepository extends BaseRepository
 {
@@ -254,11 +256,11 @@ class SearchBoxRepository extends BaseRepository
         return $searchBoxList;
     }
 
-    public function buildSearchBoxFormSchema(SearchBox $searchBox, string $namePrefix): Forms\Components\Section
+    public function buildSearchBoxFormSchema(SearchBox $searchBox, string $namePrefix): Section
     {
         $lang = get_langfolder_cookie();
         $heading = $searchBox->section_name[$lang] ?? nexus_trans('searchbox.sections.browse');
-        return Forms\Components\Section::make($heading)
+        return Section::make($heading)
             ->schema($this->buildCategoryTaxonomyTagSchema($searchBox, false, $namePrefix));
     }
 
@@ -279,7 +281,7 @@ class SearchBoxRepository extends BaseRepository
                 ->columns(6);
         }
 
-        $fieldset = Forms\Components\Fieldset::make(nexus_trans('searchbox.sub_categories_label'));
+        $fieldset = Fieldset::make(nexus_trans('searchbox.sub_categories_label'));
         $fieldsetSchema = [];
         //Keep the order
         if (!empty($searchBox->extra[SearchBox::EXTRA_TAXONOMY_LABELS])) {

@@ -20,8 +20,7 @@ use Laravel\Sanctum\HasApiTokens;
 use Nexus\Database\NexusDB;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Models\Contracts\HasName;
-use NexusPlugin\Permission\Models\Role;
-use NexusPlugin\Permission\Models\UserPermission;
+
 
 class User extends Authenticatable implements FilamentUser, HasName
 {
@@ -266,9 +265,9 @@ class User extends Authenticatable implements FilamentUser, HasName
         ];
     }
 
-    public static function defaultUser(): static
+    public static function defaultUser(): self
     {
-        return new static(self::getDefaultUserAttributes());
+        return new self(self::getDefaultUserAttributes());
     }
 
     public static function getClassName($class, $compact = false, $b_colored = false, $I18N = false)
@@ -534,16 +533,6 @@ class User extends Authenticatable implements FilamentUser, HasName
         return $this->hasMany(UsernameChangeLog::class, 'uid');
     }
 
-    public function roles()
-    {
-        return $this->belongsToMany(Role::class, 'user_roles', 'uid', 'role_id')->withTimestamps();
-    }
-
-    public function directPermissions()
-    {
-        return $this->hasMany(UserPermission::class, 'uid');
-    }
-
     public function examAndTasks(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
     {
         return $this->belongsToMany(Exam::class, "exam_users", "uid", "exam_id");
@@ -557,11 +546,6 @@ class User extends Authenticatable implements FilamentUser, HasName
     public function modifyLogs(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(UserModifyLog::class, "user_id");
-    }
-
-    public function claims(): \Illuminate\Database\Eloquent\Relations\HasMany
-    {
-        return $this->hasMany(Claim::class, 'uid');
     }
 
     public function getAvatarAttribute($value)

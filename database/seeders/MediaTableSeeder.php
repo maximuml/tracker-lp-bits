@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class MediaTableSeeder extends Seeder
 {
@@ -16,9 +17,9 @@ class MediaTableSeeder extends Seeder
     {
         
 
-        \DB::table('media')->delete();
+        DB::table('media')->delete();
         
-        \DB::table('media')->insert(array (
+        DB::table('media')->insert(array (
             0 => 
             array (
                 'id' => 1,

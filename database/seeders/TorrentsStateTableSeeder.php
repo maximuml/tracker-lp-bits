@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class TorrentsStateTableSeeder extends Seeder
 {
@@ -16,9 +17,9 @@ class TorrentsStateTableSeeder extends Seeder
     {
         
 
-        \DB::table('torrents_state')->delete();
+        DB::table('torrents_state')->delete();
         
-        \DB::table('torrents_state')->insert(array (
+        DB::table('torrents_state')->insert(array (
             0 => 
             array (
                 'global_sp_state' => 1,

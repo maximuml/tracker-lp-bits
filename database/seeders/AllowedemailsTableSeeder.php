@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class AllowedemailsTableSeeder extends Seeder
 {
@@ -16,9 +17,9 @@ class AllowedemailsTableSeeder extends Seeder
     {
         
 
-        \DB::table('allowedemails')->delete();
+        DB::table('allowedemails')->delete();
         
-        \DB::table('allowedemails')->insert(array (
+        DB::table('allowedemails')->insert(array (
             0 => 
             array (
                 'id' => 1,

@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class ProcessingsTableSeeder extends Seeder
 {
@@ -16,9 +17,9 @@ class ProcessingsTableSeeder extends Seeder
     {
         
 
-        \DB::table('processings')->delete();
+        DB::table('processings')->delete();
         
-        \DB::table('processings')->insert(array (
+        DB::table('processings')->insert(array (
             0 => 
             array (
                 'id' => 1,

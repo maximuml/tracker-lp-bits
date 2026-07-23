@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class CaticonsTableSeeder extends Seeder
 {
@@ -16,9 +17,9 @@ class CaticonsTableSeeder extends Seeder
     {
         
 
-        \DB::table('caticons')->delete();
+        DB::table('caticons')->delete();
         
-        \DB::table('caticons')->insert(array (
+        DB::table('caticons')->insert(array (
             0 => 
             array (
                 'id' => 1,

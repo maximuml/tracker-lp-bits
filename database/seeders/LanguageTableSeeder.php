@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class LanguageTableSeeder extends Seeder
 {
@@ -16,9 +17,9 @@ class LanguageTableSeeder extends Seeder
     {
         
 
-        \DB::table('language')->delete();
+        DB::table('language')->delete();
         
-        \DB::table('language')->insert(array (
+        DB::table('language')->insert(array (
             0 => 
             array (
                 'id' => 6,

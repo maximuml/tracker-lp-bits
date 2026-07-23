@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class CountriesTableSeeder extends Seeder
 {
@@ -16,9 +17,9 @@ class CountriesTableSeeder extends Seeder
     {
         
 
-        \DB::table('countries')->delete();
+        DB::table('countries')->delete();
         
-        \DB::table('countries')->insert(array (
+        DB::table('countries')->insert(array (
             0 => 
             array (
                 'id' => 1,

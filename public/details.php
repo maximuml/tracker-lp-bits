@@ -39,10 +39,6 @@ if (!$row) {
     permissiondenied();
 } else {
     $row = apply_filter('torrent_detail', $row);
-    $owner = \App\Models\User::query()->find($row['owner']);
-    if (!$owner) {
-        $owner = \App\Models\User::defaultUser();
-    }
     $torrentRep = new \App\Repositories\TorrentRepository();
     $searchBoxRep = new \App\Repositories\SearchBoxRepository();
     $torrentUpdate = [];

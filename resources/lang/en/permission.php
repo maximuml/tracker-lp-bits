@@ -37,14 +37,6 @@ return [
         'text' => 'Poll Management',
         'desc' => 'Add new, edit, delete polls',
     ],
-    'applylink' => [
-        'text' => 'Apply for Links',
-        'desc' => 'Apply for links on main page',
-    ],
-    'linkmanage' => [
-        'text' => 'Link Management',
-        'desc' => ' Add new, edit, delete links',
-    ],
     'postmanage' => [
         'text' => 'Forum Post Management',
         'desc' => 'Edit, delete, move, stick, lock forum posts',

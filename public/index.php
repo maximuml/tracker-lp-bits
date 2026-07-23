@@ -574,35 +574,6 @@ if ($showtrackerload == "yes") {
   <?php echo sprintf($lang_index['text_disclaimer_content'], \App\Models\Setting::getSiteName(), \App\Models\Setting::getSiteName()) ?></td></tr></table>
 <?php
 // ------------- end: disclaimer ------------------//
-// ------------- start: links ------------------//
-	print("<h2>".$lang_index['text_links']);
-	if (user_can('applylink'))
-		print("<font class=\"small\"> - [<a class=\"altlink\" href=\"linksmanage.php?action=apply\"><b>".$lang_index['text_apply_for_link']."</b></a>]</font>");
-	if (user_can('linkmanage'))
-	{
-		print("<font class=\"small\">");
-		print(" - [<a class=\"altlink\" href=\"linksmanage.php\"><b>".$lang_index['text_manage_links']."</b></a>]\n");
-		print("</font>");
-	}
-	print("</h2>");
-	$Cache->new_page('links', 86400, false);
-	if (!$Cache->get_page()){
-	$Cache->add_whole_row();
-	$res = sql_query("SELECT * FROM links ORDER BY id ASC") or sqlerr(__FILE__, __LINE__);
-	if (mysql_num_rows($res) > 0)
-	{
-		$links = "";
-		while($array = mysql_fetch_array($res))
-		{
-			$links .= "<a href=\"" . $array['url'] . "\" title=\"" . $array['title'] . "\" target=\"_blank\">" . $array['name'] . "</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
-		}
-		print("<table width=\"100%\"><tr><td class=\"text\">".trim($links)."</td></tr></table>");
-	}
-	$Cache->end_whole_row();
-	$Cache->cache_page();
-	}
-	echo $Cache->next_row();
-// ------------- end: links ------------------//
 // ------------- start: browser, client and code note ------------------//
 ?>
 <table width="100%" class="main" border="0" cellspacing="0" cellpadding="0"><tr><td class="embedded">

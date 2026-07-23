@@ -12,10 +12,9 @@ class Comment extends NexusModel
         'editdate' => 'datetime',
     ];
 
-    protected $fillable = ['user', 'torrent', 'added', 'text', 'ori_text', 'editedby', 'editdate', 'offer', 'request', 'anonymous'];
+    protected $fillable = ['user', 'torrent', 'added', 'text', 'ori_text', 'editedby', 'editdate', 'offer', 'anonymous'];
 
     const TYPE_TORRENT = 'torrent';
-    const TYPE_REQUEST = 'request';
     const TYPE_OFFER = 'offer';
 
     const TYPE_MAPS = [
@@ -24,12 +23,6 @@ class Comment extends NexusModel
             'foreign_key' => 'torrent',
             'target_name_field' => 'name',
             'target_script' => 'details.php?id=%s'
-        ],
-        self::TYPE_REQUEST => [
-            'model' => Request::class,
-            'foreign_key' => 'request',
-            'target_name_field' => 'request',
-            'target_script' => 'viewrequests.php?id=%s&req_details=1'
         ],
         self::TYPE_OFFER => [
             'model' => Offer::class,

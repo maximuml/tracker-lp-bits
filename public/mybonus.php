@@ -541,8 +541,7 @@ print("<h1>".$lang_mybonus['text_other_things_get_bonus']."</h1>");
 print("<ul>");
 if ($uploadtorrent_bonus > 0)
 	print("<li>".$lang_mybonus['text_upload_torrent'].$uploadtorrent_bonus.$lang_mybonus['text_point'].add_s($uploadtorrent_bonus)."</li>");
-if ($uploadsubtitle_bonus > 0)
-	print("<li>".$lang_mybonus['text_upload_subtitle'].$uploadsubtitle_bonus.$lang_mybonus['text_point'].add_s($uploadsubtitle_bonus)."</li>");
+
 if ($starttopic_bonus > 0)
 	print("<li>".$lang_mybonus['text_start_topic'].$starttopic_bonus.$lang_mybonus['text_point'].add_s($starttopic_bonus)."</li>");
 if ($makepost_bonus > 0)

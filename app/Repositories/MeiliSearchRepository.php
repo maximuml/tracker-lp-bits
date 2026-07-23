@@ -24,13 +24,11 @@ class MeiliSearchRepository extends BaseRepository
     const SEARCH_AREA_TITLE = '0';
     const SEARCH_AREA_DESC = '1';
     const SEARCH_AREA_OWNER = '3';
-    const SEARCH_AREA_IMDB = '4';
 
     private static array $searchAreas = [
         self::SEARCH_AREA_TITLE => ['text' => 'title'],
         self::SEARCH_AREA_DESC => ['text' => 'desc'],
         self::SEARCH_AREA_OWNER => ['text' => 'owner'],
-        self::SEARCH_AREA_IMDB => ['text' => 'imdb'],
     ];
 
     private static array $queryFieldToTorrentFieldMaps = [

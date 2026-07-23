@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "5b47efd58770c5bf618a2e898044ad08",
+    "content-hash": "d777abb88f4d731b6f0297d442ae455b",
     "packages": [
         {
             "name": "anourvalar/eloquent-serialize",
@@ -2722,54 +2722,6 @@
                 }
             ],
             "time": "2025-08-22T14:27:06+00:00"
-        },
-        {
-            "name": "imdbphp/imdbphp",
-            "version": "v8.3.1",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/tboothman/imdbphp.git",
-                "reference": "ec21f17959c32c401635834499f93a60fdb3124a"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/tboothman/imdbphp/zipball/ec21f17959c32c401635834499f93a60fdb3124a",
-                "reference": "ec21f17959c32c401635834499f93a60fdb3124a",
-                "shasum": ""
-            },
-            "require": {
-                "ext-curl": "*",
-                "ext-dom": "*",
-                "ext-json": "*",
-                "ext-libxml": "*",
-                "ext-simplexml": "*",
-                "php": ">=5.6",
-                "psr/log": "^1.0 || ^2.0",
-                "psr/simple-cache": "^1.0"
-            },
-            "require-dev": {
-                "cache/array-adapter": "^1.2",
-                "mockery/mockery": "^1.6",
-                "php-cs-fixer/shim": "^3.9",
-                "phpstan/phpstan": "^2.1",
-                "phpunit/phpunit": "^9.6"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "Imdb\\": "src/Imdb"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "GPL-2.0-or-later"
-            ],
-            "description": "Library for retrieving film and tv information from IMDb",
-            "support": {
-                "issues": "https://github.com/tboothman/imdbphp/issues",
-                "source": "https://github.com/tboothman/imdbphp/tree/v8.3.1"
-            },
-            "time": "2025-12-22T10:34:50+00:00"
         },
         {
             "name": "irazasyed/telegram-bot-sdk",
@@ -14028,7 +13980,8 @@
         "ext-sqlite3": "*",
         "ext-xml": "*",
         "ext-zend-opcache": "*",
-        "ext-zip": "*"
+        "ext-zip": "*",
+        "ext-pdo": "*"
     },
     "platform-dev": {},
     "plugin-api-version": "2.9.0"

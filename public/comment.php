@@ -13,7 +13,7 @@ parked();
 
 function check_comment_type($type)
 {
-	if($type != "torrent" && $type != "request" && $type != "offer")
+	if($type != "torrent" && $type != "offer")
 	stderr($lang_comment['std_error'],$lang_comment['std_error']);
 }
 

@@ -37,13 +37,10 @@ class SearchRepository extends BaseRepository
     const SEARCH_AREA_TITLE = '0';
     const SEARCH_AREA_DESC = '1';
     const SEARCH_AREA_OWNER = '3';
-    const SEARCH_AREA_IMDB = '4';
-
     const SEARCH_AREAS = [
         self::SEARCH_AREA_TITLE => ['text' => 'title'],
         self::SEARCH_AREA_DESC => ['text' => 'desc'],
         self::SEARCH_AREA_OWNER => ['text' => 'owner'],
-        self::SEARCH_AREA_IMDB => ['text' => 'imdb'],
     ];
 
 
@@ -552,11 +549,6 @@ class SearchRepository extends BaseRepository
                         $must[] = ['match' => ["descr{$keywordFlag}" => $keyword]];
                         do_log("get must [SEARCH_MODE_AND + SEARCH_MODE_EXACT] for descr match '$keyword' through search");
                     }
-                } elseif ($searchArea == self::SEARCH_AREA_IMDB) {
-                    foreach ($keywordsArr as $keyword) {
-                        $must[] = ['match' => ["url{$keywordFlag}" => $keyword]];
-                        do_log("get must [SEARCH_MODE_AND + SEARCH_MODE_EXACT] for url match '$keyword' through search");
-                    }
                 } elseif ($searchArea == self::SEARCH_AREA_OWNER) {
                     foreach ($keywordsArr as $keyword) {
                         $must[] = ['has_parent' => ['parent_type' => 'user', 'query' => ['match' => ["username{$keywordFlag}" => $keyword]]]];
@@ -577,13 +569,6 @@ class SearchRepository extends BaseRepository
                     foreach ($keywordsArr as $keyword) {
                         $tmpMustBoolShould[] = ['match' => ['descr' => $keyword]];
                         do_log("get must bool should [SEARCH_MODE_OR] for descr match '$keyword' through search");
-                    }
-                    $must[]['bool']['should'] = $tmpMustBoolShould;
-                } elseif ($searchArea == self::SEARCH_AREA_IMDB) {
-                    $tmpMustBoolShould = [];
-                    foreach ($keywordsArr as $keyword) {
-                        $tmpMustBoolShould[] = ['match' => ['url' => $keyword]];
-                        do_log("get must bool should [SEARCH_MODE_OR] for url match '$keyword' through search");
                     }
                     $must[]['bool']['should'] = $tmpMustBoolShould;
                 } elseif ($searchArea == self::SEARCH_AREA_OWNER) {

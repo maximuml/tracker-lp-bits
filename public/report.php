@@ -6,12 +6,10 @@ loggedinorreturn();
 parked();
 
 $reportofferid = $_GET["reportofferid"];
-$reportrequestid = $_GET["reportrequestid"];
 $user = $_GET["user"];
 $commentid = $_GET["commentid"];
 $torrent = $_GET["torrent"];
 $forumpost = $_GET["forumpost"];
-$subtitle = $_GET["subtitle"];
 
 $takeuser = $_POST["takeuser"];
 $takecommentid = $_POST["takecommentid"];
@@ -19,8 +17,6 @@ $taketorrent = $_POST["taketorrent"];
 $takeforumpost = $_POST["takeforumpost"];
 $takereason = $_POST["reason"];
 $takereportofferid = $_POST["takereportofferid"];
-$takerequestid = $_POST["takerequestid"];
-$takesubtitleid = $_POST["takesubtitleid"];
 
 function takereport($reportid, $type, $reason)
 {
@@ -56,13 +52,6 @@ if (isset($takereportofferid) && isset($takereason))
 }
 //////////OFFER #1 END//////////
 
-//////////REQUEST #1 START//////////
-elseif ((isset($takerequestid)) && (isset($takereason)))
-{
-	takereport($takerequestid, 'request', $takereason);
-}
-//////////REQUEST #1 END//////////
-
 //////////USER #1 START//////////
 elseif ((isset($takeuser)) && (isset($takereason)))
 {
@@ -90,13 +79,6 @@ elseif ((isset($takecommentid)) && (isset($takereason)))
 	takereport($takecommentid, 'comment', $takereason);
 }
 //////////COMMENT #1 END//////////
-
-//////////SUBTITLE #1 START//////////
-elseif ((isset($takesubtitleid)) && (isset($takereason)))
-{
-	takereport($takesubtitleid, 'subtitle', $takereason);
-}
-//////////SUBTITLE #1 END//////////
 
 //////////USER #2 START//////////
 elseif (isset($user))
@@ -178,11 +160,6 @@ elseif (isset($commentid))
 		$url = "offers.php?id=".$arr['offer']."&off_details=1#".$commentid;
 		$of = $lang_report['text_of_offer'];
 	}
-	/*elseif ($arr['request']){ //Comment of request
-		$name = get_single_value("requests","request","WHERE id=".sqlesc($arr['request']));
-		$url = "viewrequests.php?id=".$arr['request']."&req_details=1#".$commentid;
-		$of = $lang_report['text_of_request'];
-	}*/
 	else //Comment belongs to no one
 		stderr($lang_report['std_error'], $lang_report['std_orphaned_comment']);
 
@@ -203,34 +180,6 @@ elseif (isset($reportofferid))
 	stderr($lang_report['std_are_you_sure'], $lang_report['text_are_you_sure_offer']."<a href=\"offers.php?id=".$arr['id']."&off_details=1\"><b>".htmlspecialchars($arr['name'])."</b></a>".$lang_report['text_to_staff']."<br />".$lang_report['text_reason_note']."<br /><form method=post action=report.php><input type=hidden name=takereportofferid value=\"".htmlspecialchars($reportofferid)."\">".$lang_report['text_reason_is']."<input type=text style=\"width: 200px\" name=reason><input type=submit value=\"".$lang_report['submit_confirm']."\"></form>", false);
 }
 //////////OFFERT #2 END//////////
-
-//////////REQUEST #2 START//////////
-elseif (isset($reportrequestid))
-{
-	int_check($reportrequestid);
-	$res = sql_query("SELECT id,request FROM requests WHERE id=".sqlesc($reportrequestid));
-	if (mysql_num_rows($res) == 0)
-	{
-		stderr($lang_report['std_error'],$lang_report['std_invalid_request_id']);
-	}
-	$arr = mysql_fetch_array($res);
-	stderr($lang_report['std_are_you_sure'], $lang_report['text_are_you_sure_request']."<a href=\"viewrequests.php?id=".$arr['id']."&req_details=1\"><b>".htmlspecialchars($arr['request'])."</b></a>".$lang_report['text_to_staff']."<br />".$lang_report['text_reason_note']."<br /><form method=post action=report.php><input type=hidden name=takerequestid value=\"".htmlspecialchars($reportrequestid)."\">".$lang_report['text_reason_is']."<input type=text style=\"width: 200px\" name=reason><input type=submit value=\"".$lang_report['submit_confirm']."\"></form>", false);
-}
-//////////REQUEST #2 END//////////
-
-//////////SUBTITLE #2 START//////////
-elseif (isset($subtitle))
-{
-	int_check($subtitle);
-	$res = sql_query("SELECT id, torrent_id, title FROM subs WHERE id=".sqlesc($subtitle));
-	if (mysql_num_rows($res) == 0)
-	{
-		stderr($lang_report['std_error'],$lang_report['std_invalid_subtitle_id']);
-	}
-	$arr = mysql_fetch_array($res);
-	stderr($lang_report['std_are_you_sure'], $lang_report['text_are_you_sure_subtitle']."<a href=\"downloadsubs.php?torrentid=" . $arr['torrent_id'] ."&subid=" .$arr['id']."\"><b>".htmlspecialchars($arr['title'])."</b></a>".$lang_report['text_to_staff']."<br />".$lang_report['text_reason_note']."<br /><form method=post action=report.php><input type=hidden name=takesubtitleid value=\"".htmlspecialchars($subtitle)."\">".$lang_report['text_reason_is']."<input type=text style=\"width: 200px\" name=reason><input type=submit value=\"".$lang_report['submit_confirm']."\"></form>", false);
-}
-//////////SUBTITLE #2 END//////////
 
 else // unknown action
 	stderr($lang_report['std_error'],$lang_report['std_invalid_action']);

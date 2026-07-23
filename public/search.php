@@ -77,11 +77,6 @@ if ($search) {
                 $q = "%{$queryString}%";
                 $torrentQuery->where("$tableUser.username", "like", $q);
             }
-        } elseif ($searchArea == \App\Repositories\SearchRepository::SEARCH_AREA_IMDB) {
-            foreach ($searchArr as $queryString) {
-                $q = "%{$queryString}%";
-                $torrentQuery->where("$tableTorrent.url", "like", $q);
-            }
         } else {
             foreach ($searchArr as $queryString) {
                 $q = "%{$queryString}%";

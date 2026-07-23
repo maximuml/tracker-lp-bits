@@ -1237,17 +1237,7 @@ function insert_suggest($keyword, $userid, $pre_escaped = true)
 
 function get_external_tr($imdb_url = "")
 {
-	global $lang_functions;
-	global $showextinfo;
-	if ($showextinfo['imdb'] != 'yes') {
-	    return '';
-    }
-	$ptGen = new Nexus\PTGen\PTGen();
-	$imdbNumber = parse_imdb_id($imdb_url);
-    $y = $ptGen->buildInput("url", $imdbNumber ? "https://www.imdb.com/title/tt".parse_imdb_id($imdb_url) : "", $lang_functions['text_imdb_url_note'], nexus_trans('ptgen.btn_get_desc'));
-    return tr($lang_functions['row_imdb_url'], $y, 1);
-
-//	($showextinfo['imdb'] == 'yes' ? tr($lang_functions['row_imdb_url'],  "<input type=\"text\" style=\"width: 99%;\" name=\"url\" value=\"".($imdbNumber ? "https://www.imdb.com/title/tt".parse_imdb_id($imdb_url) : "")."\" /><br /><font class=\"medium\">".$lang_functions['text_imdb_url_note']."</font>", 1) : "");
+    return '';
 }
 
 function get_torrent_extinfo_identifier($torrentid)
@@ -2337,12 +2327,8 @@ function menu ($selected = "home") {
 		$selected = "special";
 	}elseif (preg_match("/offers/i", $script_name) OR preg_match("/offcomment/i", $script_name)) {
 		$selected = "offers";
-    }elseif (preg_match("/requests/i", $script_name)) {
-        $selected = "requests";
 	}elseif (preg_match("/upload/i", $script_name)) {
 		$selected = "upload";
-	}elseif (preg_match("/subtitles/i", $script_name)) {
-		$selected = "subtitles";
 	}elseif (preg_match("/usercp/i", $script_name)) {
 		$selected = "usercp";
 	}elseif (preg_match("/topten/i", $script_name)) {
@@ -2378,10 +2364,7 @@ function menu ($selected = "home") {
             print ("<li" . ($selected == "special" ? " class=\"selected\"" : "") . "><a href=\"special.php\">".($specialSectionName[$lang] ?? $lang_functions['text_special'])."</a></li>");
         if ($enableoffer == 'yes')
             print ("<li" . ($selected == "offers" ? " class=\"selected\"" : "") . "><a href=\"offers.php\">".$lang_functions['text_offers']."</a></li>");
-        if ($enablerequest == 'yes')
-            print ("<li" . ($selected == "requests" ? " class=\"selected\"" : "") . "><a href=\"viewrequests.php\">".$lang_functions['text_request']."</a></li>");
         print ("<li" . ($selected == "upload" ? " class=\"selected\"" : "") . "><a href=\"upload.php\">".$lang_functions['text_upload']."</a></li>");
-        print ("<li" . ($selected == "subtitles" ? " class=\"selected\"" : "") . "><a href=\"subtitles.php\">".$lang_functions['text_subtitles']."</a></li>");
         //	print ("<li" . ($selected == "usercp" ? " class=\"selected\"" : "") . "><a href=\"usercp.php\">".$lang_functions['text_user_cp']."</a></li>");
         if (user_can('topten')) {
             print ("<li" . ($selected == "topten" ? " class=\"selected\"" : "") . "><a href=\"topten.php\">".$lang_functions['text_top_ten']."</a></li>");
@@ -3480,13 +3463,11 @@ function torrenttable($rows, $variant = "torrent", $searchBoxId = 0) {
 	global $Cache;
 	global $lang_functions;
 	global $CURUSER, $waitsystem;
-	global $showextinfo;
 	global $torrentmanage_class, $smalldescription_main, $enabletooltip_tweak, $staffmem_class;
 	global $CURLANGDIR;
 
 	$torrent = new Nexus\Torrent\Torrent();
 	$torrentRep = new \App\Repositories\TorrentRepository();
-    $imdb = new \Nexus\Imdb\Imdb();
 	$torrentIdArr = $ownerIdArr = [];
 	foreach($rows as $row) {
 	    $torrentIdArr[] = $row['id'];
@@ -3494,11 +3475,7 @@ function torrenttable($rows, $variant = "torrent", $searchBoxId = 0) {
     }
 	unset($row);
 
-    $enableImdb = get_setting("main.showimdbinfo") == 'yes';
-    $enablePtGen = get_setting('main.enable_pt_gen_systemyes') == 'yes';
-
 	$torrentSeedingLeechingStatus = $torrent->listLeechingSeedingStatus($CURUSER['id'], $torrentIdArr);
-    $ptGenInfo = TorrentExtra::query()->whereIn('torrent_id', $torrentIdArr)->pluck('pt_gen', 'torrent_id')->toArray();
     $tagRep = new \App\Repositories\TagRepository();
 	$torrentTagCollection = \App\Models\TorrentTag::query()->whereIn('torrent_id', $torrentIdArr)->get();
 	$torrentTagResult = $torrentTagCollection->groupBy('torrent_id');
@@ -3652,27 +3629,6 @@ foreach ($rows as $row)
 	else
 		$tooltiptype = 'off';
 	switch ($tooltiptype){
-		case 'minorimdb' : {
-			if ($showextinfo['imdb'] == 'yes' && $row["url"])
-				{
-				$url = $row['url'];
-				$cache = $row['cache_stamp'];
-				$type = 'minor';
-				$has_tooltip = true;
-				}
-			break;
-			}
-		case 'medianimdb' :
-			{
-			if ($showextinfo['imdb'] == 'yes' && $row["url"])
-				{
-				$url = $row['url'];
-				$cache = $row['cache_stamp'];
-				$type = 'median';
-				$has_tooltip = true;
-				}
-			break;
-			}
 		case 'off' :  break;
 	}
 	if (!$has_tooltip)
@@ -3709,12 +3665,6 @@ foreach ($rows as $row)
     if ($showCover) {
         if (!empty($row['cover'])) {
             $coverSrc = $row['cover'];
-        }
-        if (empty($coverSrc) && !empty($row['url'])) {
-            $imdb_id = parse_imdb_id($row["url"]);
-            if ($imdb_id) {
-                $coverSrc = $imdb->getMovieCover($imdb_id);
-            }
         }
         $tdCover = sprintf('<td class="embedded" style="text-align: center;width: 46px;height: 46px"><img src="pic/misc/spinner.svg" data-src="%s" class="nexus-lazy-load" style="max-height: 46px;max-width: 46px" /></td>', $coverSrc);
     }
@@ -3774,9 +3724,6 @@ foreach ($rows as $row)
     }
 	print("</td>");
 
-    if ($enableImdb || $enablePtGen) {
-        echo $torrent->renderTorrentsPageAverageRating($row, $ptGenInfo[$row['id']] ?? []);
-    }
 		$act = "";
 		if ($CURUSER["dlicon"] != 'no' && $CURUSER["downloadpos"] != "no")
 		$act .= "<a href=\"download.php?id=".$id."\"><img class=\"download\" src=\"pic/trans.gif\" style='padding-bottom: 2px;' alt=\"download\" title=\"".$lang_functions['title_download_torrent']."\" /></a>" ;
@@ -4223,136 +4170,6 @@ function create_tooltip_container($id_content_arr, $width = 400)
 	}
 }
 
-function getimdb($imdb_id, $cache_stamp, $mode = 'minor')
-{
-	global $lang_functions;
-	global $showextinfo;
-	$thenumbers = $imdb_id;
-	$imdb = new Nexus\Imdb\Imdb();
-	$movie = $imdb->getMovie($imdb_id);
-	$movieid = $thenumbers;
-//	$movie->setid ($movieid);
-
-	$target = array('Title', 'Credits', 'Plot');
-	switch ($imdb->getCacheStatus($imdb_id))
-	{
-		case "0": //cache is not ready
-			{
-			return false;
-			break;
-			}
-		case "1": //normal
-			{
-				$title = $movie->title ();
-				$year = $movie->year ();
-				$country = $movie->country ();
-				$countries = "";
-				$temp = "";
-				for ($i = 0; $i < count ($country); $i++)
-				{
-					$temp .="$country[$i], ";
-				}
-				$countries = rtrim(trim($temp), ",");
-
-				$director = $movie->director();
-				$director_or_creator = "";
-				if ($director)
-				{
-					$temp = "";
-					for ($i = 0; $i < count ($director); $i++)
-					{
-						$temp .= $director[$i]["name"].", ";
-					}
-					$director_or_creator = "<strong><font color=\"DarkRed\">".$lang_functions['text_director'].": </font></strong>".rtrim(trim($temp), ",");
-				}
-				else { //for tv series
-					$creator = $movie->creator();
-                    $names = array_column($creator, "name");
-					$director_or_creator = "<strong><font color=\"DarkRed\">".$lang_functions['text_creator'].": </font></strong>".implode(", ", $names);
-				}
-				$cast = $movie->cast();
-				$temp = "";
-				for ($i = 0; $i < count ($cast); $i++) //get names of first three casts
-				{
-					if ($i > 2)
-					{
-						break;
-					}
-					$temp .= $cast[$i]["name"].", ";
-				}
-				$casts = rtrim(trim($temp), ",");
-				$gen = $movie->genres();
-				$genres = $gen[0].(count($gen) > 1 ? ", ".$gen[1] : ""); //get first two genres;
-				$rating = $movie->rating ();
-				$votes = $movie->votes ();
-				if ($votes)
-					$imdbrating = "<b>".$rating."</b>/10 (".$votes.$lang_functions['text_votes'].")";
-				else $imdbrating = $lang_functions['text_awaiting_five_votes'];
-
-				$tagline = $movie->tagline ();
-				switch ($mode)
-				{
-				case 'minor' :
-					{
-					$autodata = "<font class=\"big\"><b>".$title."</b></font> (".$year.") <br /><strong><font color=\"DarkRed\">".$lang_functions['text_imdb'].": </font></strong>".$imdbrating." <strong><font color=\"DarkRed\">".$lang_functions['text_country'].": </font></strong>".$countries." <strong><font color=\"DarkRed\">".$lang_functions['text_genres'].": </font></strong>".$genres."<br />".$director_or_creator."<strong><font color=\"DarkRed\"> ".$lang_functions['text_starring'].": </font></strong>".$casts."<br /><p><strong>".$tagline."</strong></p>";
-					break;
-					}
-				case 'median':
-					{
-					if (($photo_url = $movie->photo() ) != FALSE)
-						$smallth = "<img src=\"".$photo_url. "\" width=\"105\" alt=\"poster\" />";
-					else $smallth = "";
-					$runtime = $movie->runtime ();
-					$language = $movie->language ();
-					$plot = $movie->plot ();
-					$plots = "";
-					if(count($plot) != 0){ //get plots from plot page
-							$plots .= "<font color=\"DarkRed\">*</font> ".strip_tags($plot[0], '<br /><i>');
-							$plots = mb_substr($plots,0,300,"UTF-8") . (mb_strlen($plots,"UTF-8") > 300 ? " ..." : "" );
-							$plots .= (strpos($plots,"<i>") == true && strpos($plots,"</i>") == false ? "</i>" : "");//sometimes <i> is open and not ended because of mb_substr;
-							$plots = "<font class=\"small\">".$plots."</font>";
-						}
-					elseif ($plotoutline = $movie->plotoutline ()){ //get plot from title page
-						$plots .= "<font color=\"DarkRed\">*</font> ".strip_tags($plotoutline, '<br /><i>');
-						$plots = mb_substr($plots,0,300,"UTF-8") . (mb_strlen($plots,"UTF-8") > 300 ? " ..." : "" );
-						$plots .= (strpos($plots,"<i>") == true && strpos($plots,"</i>") == false ? "</i>" : "");//sometimes <i> is open and not ended because of mb_substr;
-						$plots = "<font class=\"small\">".$plots."</font>";
-						}
-					$autodata = "<table style=\"background-color: transparent;\" border=\"0\" cellspacing=\"0\" cellpadding=\"3\">
-".($smallth ? "<td class=\"clear\" valign=\"top\" align=\"right\">
-$smallth
-</td>" : "")
-."<td class=\"clear\" valign=\"top\" align=\"left\">
-<table style=\"background-color: transparent;\" border=\"0\" cellspacing=\"0\" cellpadding=\"3\" width=\"350\">
-<tr><td class=\"clear\" colspan=\"2\"><img class=\"imdb\" src=\"pic/trans.gif\" alt=\"imdb\" /> <font class=\"big\"><b>".$title."</b></font> (".$year.") </td></tr>
-<tr><td class=\"clear\"><strong><font color=\"DarkRed\">".$lang_functions['text_imdb'].": </font></strong>".$imdbrating."</td>
-".( $runtime ? "<td class=\"clear\"><strong><font color=\"DarkRed\">".$lang_functions['text_runtime'].": </font></strong>".$runtime.$lang_functions['text_min']."</td>" : "<td class=\"clear\"></td>")."</tr>
-<tr><td class=\"clear\"><strong><font color=\"DarkRed\">".$lang_functions['text_country'].": </font></strong>".$countries."</td>
-".( $language ? "<td class=\"clear\"><strong><font color=\"DarkRed\">".$lang_functions['text_language'].": </font></strong>".$language."</td>" : "<td class=\"clear\"></td>")."</tr>
-<tr><td class=\"clear\">".$director_or_creator."</td>
-<td class=\"clear\"><strong><font color=\"DarkRed\">".$lang_functions['text_genres'].": </font></strong>".$genres."</td></tr>
-<tr><td class=\"clear\" colspan=\"2\"><strong><font color=\"DarkRed\">".$lang_functions['text_starring'].": </font></strong>".$casts."</td></tr>
-".( $plots ? "<tr><td class=\"clear\" colspan=\"2\">".$plots."</td></tr>" : "")."
-</table>
-</td>
-</table>";
-					break;
-					}
-				}
-				return $autodata;
-			}
-			case "2" :
-			{
-				return false;
-				break;
-			}
-			case "3" :
-			{
-				return false;
-				break;
-			}
-	}
-}
 
 function quickreply($formname, $taname,$submit){
 	print("<textarea name='".$taname."' cols=\"100\" rows=\"8\" style=\"width: 450px\" onkeydown=\"ctrlenter(event,'compose','qr')\"></textarea>");
@@ -5340,19 +5157,6 @@ function return_category_image($categoryid, $link="")
 
 /******************************************** bellow functioons avaliable since v1.6 ***********************************************************/
 
-function get_requestcount()
-{
-    global $CURUSER, $Cache;
-    //return;
-    $CURUSERID = 0 + $CURUSER['id'];
-    if (!$count = $Cache->get_value($CURUSERID . '_get_requestcount')) {
-        $row = @mysql_fetch_array(sql_query(" SELECT count(*) FROM requests LEFT JOIN resreq ON reqid=requests.id WHERE reqid>0 and finish = 'no' and userid= " . $CURUSERID));
-        $count = ($row[0] ? " style='background: none red;' " : " style='' ");
-        $Cache->cache_value($CURUSERID . '_get_requestcount', $count, 120);
-    }
-    return $count;
-}
-
 function torrentTags($tags = 0, $type = 'checkbox')
 {
     global $lang_functions;
@@ -5526,85 +5330,6 @@ function canDoLogin()
         return false;
     }
     return true;
-}
-
-function displayHotAndClassic()
-{
-    global $showextinfo, $showmovies, $Cache, $lang_functions, $browsecatmode, $specialcatmode;
-
-    if ($showmovies['hot'] == "yes" || $showmovies['classic'] == "yes")
-    {
-        if (nexus()->getScript() == 'special') {
-            $mode = $specialcatmode;
-        } else {
-            $mode = $browsecatmode;
-        }
-        $imdb = new \Nexus\Imdb\Imdb();
-        $type = array('hot', 'classic');
-        foreach($type as $type_each)
-        {
-            if($showmovies[$type_each] == 'yes' && (!isset($CURUSER) || $CURUSER['show' . $type_each] == 'yes'))
-            {
-                $Cache->new_page("{$type_each}_{$mode}_resources", 900, true);
-                if (!$Cache->get_page())
-                {
-                    $Cache->add_whole_row();
-
-                    $res = sql_query("SELECT torrents.sp_state, torrents.url, torrents.id, torrents.name, torrents.small_descr, torrents.cover FROM torrents LEFT JOIN categories ON torrents.category = categories.id WHERE categories.mode = $mode AND picktype = " . sqlesc($type_each) . " AND seeders > 0 AND (url != '' OR cover != '') ORDER BY id DESC LIMIT 30") or sqlerr(__FILE__, __LINE__);
-                    if (mysql_num_rows($res) > 0)
-                    {
-                        $movies_list = "";
-                        $count = 0;
-                        $allImdb = array();
-                        $width = 101;
-                        $height = 140;
-                        while($array = mysql_fetch_array($res))
-                        {
-                            $pro_torrent = get_torrent_promotion_append($array['sp_state'],'word', false, '', 0, '', $array['__ignore_global_sp_state'] ?? false);
-                            $photo_url = '';
-                            if ($imdb_id = parse_imdb_id($array["url"])) {
-                                if (array_search($imdb_id, $allImdb) !== false) { //a torrent with the same IMDb url already exists
-                                    continue;
-                                }
-                                $allImdb[]=$imdb_id;
-                                try {
-                                    $photo_url = $imdb->getMovie($imdb_id)->photo(true);
-                                    if (empty($photo_url)) {
-                                        do_log("torrent: {$array['id']}, url: {$array['url']}, imdb_id: $imdb_id can not get photo", 'error');
-                                    }
-                                } catch (\Exception $exception) {
-                                    do_log($exception->getMessage() . "\n[stacktrace]\n" . $exception->getTraceAsString(), 'error');
-                                }
-                            }
-                            if (empty($photo_url) && !empty($array['cover'])) {
-                                $photo_url = $array['cover'];
-                            }
-                            if (empty($photo_url)) {
-                                continue;
-                            }
-
-                            $thumbnail = "<img width=\"{$width}\" height=\"{$height}\" src=\"".$photo_url."\" border=\"0\" alt=\"poster\" />";
-
-                            $thumbnail = "<a style=\"margin-right: 2px\" href=\"details.php?id=" . $array['id'] . "&amp;hit=1\" onmouseover=\"domTT_activate(this, event, 'content', '" . htmlspecialchars("<font class=\'big\'><b>" . (addslashes($array['name'] . $pro_torrent)) . "</b></font><br /><font class=\'medium\'>".(addslashes($array['small_descr'])) ."</font>"). "', 'trail', true, 'delay', 0,'lifetime',5000,'styleClass','niceTitle','maxWidth', 600);\">" . $thumbnail . "</a>";
-                            $movies_list .= $thumbnail;
-                            $count++;
-                            if ($count >= 10)
-                                break;
-                        }
-                        ?>
-                        <h2><?php echo $lang_functions['text_' . $type_each] ?></h2>
-                        <table width="100%" border="1" cellspacing="0" cellpadding="5"><tr><td class="text nowrap" align="center">
-                                    <?php echo $movies_list ?></td></tr></table>
-                        <?php
-                    }
-                    $Cache->end_whole_row();
-                    $Cache->cache_page();
-                }
-                echo $Cache->next_row();
-            }
-        }
-    }
-
 }
 
 function build_table(array $header, array $rows, array $options = [])

@@ -42,27 +42,8 @@ else {
 	$anon = $CURUSER["username"];
 }
 
-$url = parse_imdb_id($_POST['url'] ?? '');
-
+$url = null;
 $nfo = '';
-if ($enablenfo_main=='yes'){
-$nfofile = $_FILES['nfo'] ?? [];
-if (!empty($nfofile['name'])) {
-
-	if ($nfofile['size'] == 0)
-	bark($lang_takeupload['std_zero_byte_nfo']);
-
-	if ($nfofile['size'] > 65535)
-	bark($lang_takeupload['std_nfo_too_big']);
-
-	$nfofilename = $nfofile['tmp_name'];
-
-	if (@!is_uploaded_file($nfofilename))
-	bark($lang_takeupload['std_nfo_upload_failed']);
-	$nfo = str_replace("\x0d\x0d\x0a", "\x0d\x0a", @file_get_contents($nfofilename));
-}
-}
-
 
 $small_descr = unesc($_POST["small_descr"] ?? '');
 
@@ -327,7 +308,6 @@ $extra = [
     'descr' => $descr,
     'media_info' => $_POST['technical_info'] ?? '',
     'nfo' => $nfo,
-    'pt_gen' => $_POST['pt_gen'] ?? '',
 ];
 if (isset($_POST['hr'][$catmod]) && isset(\App\Models\Torrent::$hrStatus[$_POST['hr'][$catmod]]) && user_can('torrent_hr')) {
     $insert['hr'] = $_POST['hr'][$catmod];

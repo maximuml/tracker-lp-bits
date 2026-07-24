@@ -69,6 +69,22 @@ final class Locale
     }
 
     /**
+     * Return the `site_lang_folder` for the given language id, or
+     * `$default` when the id is unknown.
+     *
+     * Mirrors `validlang()`.
+     */
+    public static function folderForId(int|string $langId, string $default = 'en'): string
+    {
+        $result = NexusDB::getInstance()->query(
+            'SELECT site_lang_folder FROM language WHERE site_lang = 1 AND id = ' . sqlesc($langId) . ' LIMIT 1'
+        );
+        $row = NexusDB::getInstance()->fetchAssoc($result);
+
+        return $row['site_lang_folder'] ?? $default;
+    }
+
+    /**
      * Build the relative language file path.
      *
      * Mirrors `get_langfile_path()` without mutating `$CURLANGDIR`.
@@ -83,4 +99,33 @@ final class Locale
         return 'lang/' . $folder . '/lang_' . $scriptName;
     }
 
+    /**
+     * Set the `c_lang_folder` cookie.
+     *
+     * Mirrors `set_langfolder_cookie()`.
+     */
+    public static function setFolderCookie(string $folder, int $expires = 0x7fffffff): void
+    {
+        if ($expires !== 0x7fffffff) {
+            $expires = time() + $expires;
+        }
+
+        setcookie('c_lang_folder', $folder, $expires, '/', '', false, true);
+    }
+
+    /**
+     * Return the language id for the given folder name.
+     *
+     * Mirrors `get_langid_from_langcookie()`.
+     */
+    public static function idFromFolder(string $lang): int
+    {
+        $row = Language::query()
+            ->where('site_lang', 1)
+            ->where('site_lang_folder', $lang)
+            ->orderBy('id')
+            ->first();
+
+        return (int) ($row->id ?? 0);
+    }
 }

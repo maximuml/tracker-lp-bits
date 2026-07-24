@@ -690,12 +690,7 @@ function end_compose()
 
 function insert_suggest($keyword, $userid, $pre_escaped = true)
 {
-	if(mb_strlen($keyword,"UTF-8") >= 2)
-	{
-		$userid = intval($userid ?? 0);
-		if($userid)
-		sql_query("INSERT INTO suggest(keywords, userid, adddate) VALUES (" . ($pre_escaped == true ? "'" . $keyword . "'" : sqlesc($keyword)) . "," . sqlesc($userid) . ", NOW())") or sqlerr(__FILE__,__LINE__);
-	}
+	\App\Support\SearchSuggest::add((string) $keyword, $userid, (bool) $pre_escaped);
 }
 
 
@@ -1079,13 +1074,7 @@ function in_ip_range($long, $targetip, $ip_one, $ip_two=false) {
 
 function validip_format($ip)
 {
-	$ipPattern =
-	'/\b(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.' .
-	'(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.' .
-	'(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.' .
-	'(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b/';
-
-	return preg_match($ipPattern, $ip);
+	return \App\Support\Network::isValidIpv4Format((string) $ip);
 }
 
 function maxslots () {
@@ -1193,11 +1182,6 @@ function autoclean($printProgress = false) {
 	return docleanup(0, $printProgress);
 }
 
-function unesc($x) {
-	return $x;
-}
-
-
 function getsize_int($amount, $unit = "G")
 {
 	return \App\Support\Format::bytesFromUnit((float)$amount, $unit);
@@ -1234,17 +1218,11 @@ function mkprettytime($s) {
 }
 
 function mkglobal($vars) {
-	if (!is_array($vars))
-	$vars = explode(":", $vars);
-	foreach ($vars as $v) {
-		if (isset($_GET[$v]))
-		$GLOBALS[$v] = unesc($_GET[$v]);
-		elseif (isset($_POST[$v]))
-		$GLOBALS[$v] = unesc($_POST[$v]);
-		else
-		return 0;
-	}
-	return 1;
+	return \App\Support\Input::globalize($vars, $_GET, $_POST);
+}
+
+function unesc($x) {
+	return \App\Support\Input::unescape($x);
 }
 
 function tr($x,$y,$noesc=0,$relation='', $return = false) {
@@ -1277,143 +1255,47 @@ function validemail($email) {
 
 function validlang($langid) {
 	global $deflang;
-	$langid = intval($langid ?? 0);
-	$res = sql_query("SELECT * FROM language WHERE site_lang = 1 AND id = " . sqlesc($langid)) or sqlerr(__FILE__, __LINE__);
-	if(mysql_num_rows($res) == 1)
-	{
-		$arr = mysql_fetch_array($res)  or sqlerr(__FILE__, __LINE__);
-		return $arr['site_lang_folder'];
-	}
-	else return $deflang;
+	return \App\Support\Locale::folderForId($langid, (string) $deflang);
 }
 
 function get_if_restricted_is_open()
 {
-	// it's sunday
-	if(\App\Models\Setting::getIsUploadOpenAtWeekend() && (date("w",time()) == '0' || (date("w",time()) == 6) && (date("G",time()) >=12 && date("G",time()) <=23)))
-	{
-		return true;
-	}
-	else
-	return false;
+	return \App\Support\Time::isWeekendUploadOpen(\App\Models\Setting::getIsUploadOpenAtWeekend(), time());
 }
 
 function menu ($selected = "home") {
-	global $lang_functions;
-	global $BASEURL,$CURUSER;
-	global $enableoffer, $enablespecial, $where_tweak;
-	global $USERUPDATESET;
-	//no this option in config.php
-    $enablerequest = 'yes';
-	$script_name = $_SERVER["SCRIPT_NAME"];
-	if (preg_match("/index/i", $script_name)) {
-		$selected = "home";
-	}elseif (preg_match("/forums/i", $script_name)) {
-		$selected = "forums";
-	}elseif (preg_match("/torrents/i", $script_name)) {
-		$selected = "torrents";
-	}elseif (preg_match("/special/i", $script_name)) {
-		$selected = "special";
-	}elseif (preg_match("/offers/i", $script_name) OR preg_match("/offcomment/i", $script_name)) {
-		$selected = "offers";
-	}elseif (preg_match("/upload/i", $script_name)) {
-		$selected = "upload";
-	}elseif (preg_match("/usercp/i", $script_name)) {
-		$selected = "usercp";
-	}elseif (preg_match("/topten/i", $script_name)) {
-		$selected = "topten";
-	}elseif (preg_match("/log/i", $script_name)) {
-		$selected = "log";
-	}elseif (preg_match("/rules/i", $script_name)) {
-		$selected = "rules";
-	}elseif (preg_match("/faq/i", $script_name)) {
-		$selected = "faq";
-    }elseif (preg_match("/contactstaff/i", $script_name)) {
-        $selected = "contactstaff";
-    }elseif (preg_match("/staff/i", $script_name)) {
-        $selected = "staff";
-	}else
-	$selected = "";
-	$menu = apply_filter('nexus_menu');
-	print ("<div id=\"nav\">");
-	if ($menu) {
-	    print $menu;
-    } else {
-	    $lang = get_langfolder_cookie();
-        $normalSectionName = get_searchbox_value(get_setting('main.browsecat'), 'section_name');
-        $specialSectionName = get_searchbox_value(get_setting('main.specialcat'), 'section_name');
-        print ("<ul id=\"mainmenu\" class=\"menu\">");
-        print ("<li" . ($selected == "home" ? " class=\"selected\"" : "") . "><a href=\"index.php\">" . $lang_functions['text_home'] . "</a></li>");
-        print ("<li" . ($selected == "forums" ? " class=\"selected\"" : "") . "><a href=\"forums.php\">".$lang_functions['text_forums']."</a></li>");
-        print ("<li" . ($selected == "torrents" ? " class=\"selected\"" : "") . "><a href=\"torrents.php\" rel='sub-menu'>".($normalSectionName[$lang] ?? $lang_functions['text_torrents'])."</a></li>");
-        if ($enablespecial == 'yes' && user_can('view_special_torrent'))
-            print ("<li" . ($selected == "special" ? " class=\"selected\"" : "") . "><a href=\"special.php\">".($specialSectionName[$lang] ?? $lang_functions['text_special'])."</a></li>");
-        if ($enableoffer == 'yes')
-            print ("<li" . ($selected == "offers" ? " class=\"selected\"" : "") . "><a href=\"offers.php\">".$lang_functions['text_offers']."</a></li>");
-        print ("<li" . ($selected == "upload" ? " class=\"selected\"" : "") . "><a href=\"upload.php\">".$lang_functions['text_upload']."</a></li>");
-        //	print ("<li" . ($selected == "usercp" ? " class=\"selected\"" : "") . "><a href=\"usercp.php\">".$lang_functions['text_user_cp']."</a></li>");
-        if (user_can('topten')) {
-            print ("<li" . ($selected == "topten" ? " class=\"selected\"" : "") . "><a href=\"topten.php\">".$lang_functions['text_top_ten']."</a></li>");
-        }
-        if (user_can('log')) {
-            print ("<li" . ($selected == "log" ? " class=\"selected\"" : "") . "><a href=\"log.php\">".$lang_functions['text_log']."</a></li>");
-        }
-        print ("<li" . ($selected == "rules" ? " class=\"selected\"" : "") . "><a href=\"rules.php\">".$lang_functions['text_rules']."</a></li>");
-        print ("<li" . ($selected == "faq" ? " class=\"selected\"" : "") . "><a href=\"faq.php\">".$lang_functions['text_faq']."</a></li>");
-        if (user_can('staffmem')) {
-            print ("<li" . ($selected == "staff" ? " class=\"selected\"" : "") . "><a href=\"staff.php\">".$lang_functions['text_staff']."</a></li>");
-        }
-        print ("<li" . ($selected == "contactstaff" ? " class=\"selected\"" : "") . "><a href=\"contactstaff.php\">".$lang_functions['text_contactstaff']."</a></li>");
-        print ("</ul>");
-    }
-	print ("</div>");
-	if ($CURUSER){
-		if ($where_tweak == 'yes')
-			$USERUPDATESET[] = "page = ".sqlesc($selected);
+	global $lang_functions, $CURUSER, $enableoffer, $enablespecial, $where_tweak, $USERUPDATESET;
+	$result = \App\Support\Menu::render(
+		$_SERVER['SCRIPT_NAME'] ?? '',
+		(array) $lang_functions,
+		(string) $enableoffer,
+		(string) $enablespecial,
+		(string) apply_filter('nexus_menu'),
+	);
+	echo $result['html'];
+	if ($CURUSER && $where_tweak == 'yes') {
+		$USERUPDATESET[] = "page = ".sqlesc($result['selected']);
 	}
 }
 function get_css_row() {
 	global $CURUSER, $defcss, $Cache;
-	static $rows;
-	$cssid = $CURUSER ? $CURUSER["stylesheet"] : $defcss;
-	if (!$rows && !$rows = $Cache->get_value('stylesheet_content')){
-		$rows = array();
-		$res = sql_query("SELECT * FROM stylesheets ORDER BY id ASC");
-		while($row = mysql_fetch_array($res)) {
-			$rows[$row['id']] = $row;
-		}
-		$Cache->cache_value('stylesheet_content', $rows, 95400);
-	}
-	return $rows[$cssid] ?? $rows[$defcss];
+	return \App\Support\Style::cssRow($Cache, $CURUSER ? $CURUSER["stylesheet"] : $defcss, $defcss);
 }
 function get_css_uri($file = "")
 {
-    global $defcss;
-	$cssRow = get_css_row();
-	$ss_uri = $cssRow['uri'];
-	if (!$ss_uri)
-		$ss_uri = get_single_value("stylesheets","uri","WHERE id=".sqlesc($defcss));
-	if ($file == "")
-		return $ss_uri;
-	else return $ss_uri.$file;
+    global $defcss, $Cache, $CURUSER;
+	return \App\Support\Style::cssUri($Cache, $CURUSER ? $CURUSER["stylesheet"] : $defcss, $defcss, (string) $file);
 }
 
 function get_font_css_uri(){
 	global $CURUSER;
-    $file = 'mediumfont.css';
-    if ($CURUSER && isset($CURUSER['fontsize'])) {
-        if ($CURUSER['fontsize'] == 'large')
-            $file = 'largefont.css';
-        elseif ($CURUSER['fontsize'] == 'small')
-            $file = 'smallfont.css';
-    }
-	return "styles/".$file;
+	return \App\Support\Style::fontCssUri($CURUSER['fontsize'] ?? null);
 }
 
 function get_style_addicode()
 {
-	$cssRow = get_css_row();
-	return $cssRow['addicode'];
+	global $defcss, $Cache, $CURUSER;
+	return \App\Support\Style::addiCode($Cache, $CURUSER ? $CURUSER["stylesheet"] : $defcss, $defcss);
 }
 
 function get_cat_folder($cat = 101)
@@ -1437,18 +1319,7 @@ function get_cat_folder($cat = 101)
 function get_style_highlight()
 {
 	global $CURUSER;
-	if ($CURUSER)
-	{
-		$ss_a = @mysql_fetch_array(@sql_query("select hltr from stylesheets where id=" . $CURUSER["stylesheet"]));
-		if ($ss_a) $hltr = $ss_a["hltr"];
-	}
-	if (!$hltr)
-	{
-		$r = sql_query("SELECT hltr FROM stylesheets WHERE id=5");
-		$a = mysql_fetch_array($r);
-		$hltr = $a["hltr"];
-	}
-	return $hltr;
+	return \App\Support\Style::highlightColor($CURUSER ? (int) $CURUSER["stylesheet"] : null);
 }
 
 function stdhead($title = "", $msgalert = true, $script = "", $place = "")
@@ -1464,11 +1335,7 @@ function stdfoot()
 
 
 function genbark($x,$y) {
-	stdhead($y);
-	print("<h1>" . htmlspecialchars($y) . "</h1>\n");
-	print("<p>" . htmlspecialchars($x) . "</p>\n");
-	stdfoot();
-	exit();
+	\App\Support\LegacyResponse::bark((string) $y, (string) $x);
 }
 
 function mksecret($len = 20) {
@@ -1476,9 +1343,7 @@ function mksecret($len = 20) {
 }
 
 function httperr($code = 404) {
-	header("HTTP/1.1 404 Not found");
-	print("<h1>Not Found</h1>\n");
-	exit();
+	\App\Support\LegacyResponse::notFound();
 }
 
 function logincookie($id, $authKey, $duration = 0)
@@ -1488,10 +1353,7 @@ function logincookie($id, $authKey, $duration = 0)
 
 function set_langfolder_cookie($folder, $expires = 0x7fffffff)
 {
-	if ($expires != 0x7fffffff)
-	$expires = time()+$expires;
-
-	setcookie("c_lang_folder", $folder, $expires, "/", "", false, true);
+	\App\Support\Locale::setFolderCookie((string) $folder, (int) $expires);
 }
 
 function get_protocol_prefix() {
@@ -1503,10 +1365,7 @@ function get_langid_from_langcookie($lang = '')
     if (empty($lang)) {
         $lang = get_langfolder_cookie();
     }
-    $row = \App\Models\Language::query()->where('site_lang', 1)->where("site_lang_folder", $lang)->orderBy("id")->first();
-    return $row->id ?? 0;
-//	$row = mysql_fetch_array(sql_query("SELECT id FROM language WHERE site_lang = 1 AND site_lang_folder = " . sqlesc($lang) . "ORDER BY id ASC")) or sqlerr(__FILE__, __LINE__);
-//	return $row['id'];
+    return \App\Support\Locale::idFromFolder((string) $lang);
 }
 
 function make_folder($pre, $folder_name)
@@ -1547,12 +1406,7 @@ function cover_thumb_url($url, $maxWidth = 240, $maxHeight = 360, $quality = 82)
 	);
 }
 function logoutcookie() {
-//	setcookie("c_secure_uid", "", 0x7fffffff, "/", "", false, true);
-	setcookie("c_secure_pass", "", 0x7fffffff, "/", "", isHttps(), true);
-// setcookie("c_secure_ssl", "", 0x7fffffff, "/", "", false, true);
-//	setcookie("c_secure_tracker_ssl", "", 0x7fffffff, "/", "", false, true);
-//	setcookie("c_secure_login", "", 0x7fffffff, "/", "", false, true);
-//	setcookie("c_lang_folder", "", 0x7fffffff, "/", "", false, true);
+	\App\Support\AuthCookie::clear();
 }
 
 function base64 ($string, $encode=true) {
@@ -1560,24 +1414,7 @@ function base64 ($string, $encode=true) {
 }
 
 function loggedinorreturn($mainpage = false) {
-	global $CURUSER,$BASEURL;
-    $script = nexus()->getScript();
-	if (!$CURUSER) {
-	    if ($script == 'ajax') {
-	        exit(fail('Not login!', $_POST));
-        }
-		if ($mainpage) {
-            nexus_redirect("login.php");
-        } else {
-			$to = $_SERVER["REQUEST_URI"];
-			$to = basename($to);
-            nexus_redirect("login.php?returnto=" . rawurlencode($to));
-		}
-		exit();
-	}
-    if ($CURUSER['enabled'] != 'yes' && $script != 'self-enable') {
-        nexus_redirect('self-enable.php');
-    }
+	\App\Support\LegacyAuth::requireLogin((bool) $mainpage);
 }
 
 function deletetorrent($id, $notify = false) {
@@ -2337,10 +2174,7 @@ function create_tooltip_container($id_content_arr, $width = 400)
 
 
 function quickreply($formname, $taname,$submit){
-	print("<textarea name='".$taname."' cols=\"100\" rows=\"8\" style=\"width: 450px\" onkeydown=\"ctrlenter(event,'compose','qr')\"></textarea>");
-	print(smile_row($formname, $taname));
-	print("<br />");
- 	print("<input type=\"submit\" id=\"qr\" class=\"btn\" value=\"".$submit."\" />");
+	echo \App\Support\Html::quickReply((string) $formname, (string) $taname, (string) $submit);
 }
 
 function smile_row($formname, $taname){
@@ -3119,20 +2953,7 @@ function torrentTags($tags = 0, $type = 'checkbox')
 
 function saveSetting(string $prefix, array $nameAndValue, string $autoload = 'yes'): void
 {
-    $prefix = strtolower($prefix);
-    $datetimeNow = date('Y-m-d H:i:s');
-    $sql = "insert into settings (name, value, created_at, updated_at, autoload) values ";
-    $data = [];
-    foreach ($nameAndValue as $name => $value) {
-        if (is_array($value)) {
-            $value = json_encode($value);
-        }
-        $data[] = sprintf("(%s, %s, %s, %s, '%s')", sqlesc("$prefix.$name"), sqlesc($value), sqlesc($datetimeNow), sqlesc($datetimeNow), $autoload);
-    }
-    $sql .= implode(",", $data) . " " . \Nexus\Database\NexusDB::upsertField(['name'], ['value']);
-    \Nexus\Database\NexusDB::statement($sql);
-    clear_setting_cache();
-    do_action("nexus_setting_update");
+    \App\Support\Settings::saveBatch($prefix, $nameAndValue, $autoload);
 }
 
 function getFullDirectory($dir)
@@ -3142,92 +2963,17 @@ function getFullDirectory($dir)
 
 function checkGuestVisit()
 {
-    if (userlogin()) {
-        //already login
-        return;
-    }
-    $setting = get_setting('security');
-    //all type: normal, static_page, custom_content, redirect
-    $guestVisitType = $setting['guest_visit_type'] ?? '';
-    if (empty($guestVisitType) || $guestVisitType == 'normal') {
-        return;
-    }
-
-    if (in_array(nexus()->getScript(), ['login', 'takelogin', 'image']) && canDoLogin()) {
-        return;
-    }
-
-    $valueKey = "guest_visit_value_$guestVisitType";
-    if (empty($setting[$valueKey])) {
-        do_log("setting: security.$valueKey empty");
-        die(0);
-    }
-    $guestVisitValue = $setting[$valueKey];
-    if ($guestVisitType == 'static_page') {
-        $pageFile = ROOT_PATH . 'resources/static-pages/' . $guestVisitValue;
-        if (!file_exists($pageFile) || !is_readable($pageFile)) {
-            do_log("pageFile: $pageFile is not exists or readable");
-            die(0);
-        }
-        $content = file_get_contents($pageFile);
-        die($content);
-    }
-    if ($guestVisitType == 'custom_content') {
-        $content = format_comment($guestVisitValue);
-        render('resources/templates/guest-visit-custom-content', ['content' => $content]);
-    }
-    if ($guestVisitType == 'redirect') {
-        header('Location: ' . $guestVisitValue);
-        die(0);
-    }
-
+    \App\Support\SiteAccess::checkGuestVisit();
 }
 
 function render($view, $data = [], $return = false)
 {
-    extract($data);
-    if (!file_exists($view)) {
-        $view = ROOT_PATH . $view;
-    }
-    if (substr($view, -4) !== '.php') {
-        $view .= ".php";
-    }
-    ob_start();
-    ob_implicit_flush(0);
-    require $view;
-    $result = ob_get_clean();
-    if ($return) {
-        return $result;
-    }
-    die($result);
+    return \App\Support\View::render((string) $view, (array) $data, (bool) $return, ROOT_PATH);
 }
 
 function canDoLogin()
 {
-    $setting = get_setting('security');
-    if (empty($setting['login_type']) || $setting['login_type'] == 'normal') {
-        return true;
-    }
-    $loginType = $setting['login_type'];
-    if ($loginType == 'secret') {
-        if (empty($_REQUEST['secret'])) {
-            do_log("no secret");
-            return false;
-        }
-        if ($_REQUEST['secret'] != $setting['login_secret']) {
-            do_log("invlaid secret: " . $_REQUEST['secret']);
-            return false;
-        }
-        if ($setting['login_secret_deadline'] < date('Y-m-d H:i:s')) {
-            do_log("secret: {$_REQUEST['secret']} expires(deadline: {$setting['login_secret_deadline']})");
-            return false;
-        }
-        return true;
-    }
-    if ($loginType == 'passkey') {
-        return false;
-    }
-    return true;
+    return \App\Support\SiteAccess::canDoLogin();
 }
 
 function build_table(array $header, array $rows, array $options = [])

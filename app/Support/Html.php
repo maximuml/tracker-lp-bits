@@ -17,6 +17,21 @@ final class Html
      * returns the bare `<tr></tr>` (with no trailing newline) when no
      * cells are supplied; that bare-row contract is preserved.
      */
+    /**
+     * Build the quick-reply textarea + smiley row + submit button.
+     *
+     * Mirrors `quickreply()`.
+     */
+    public static function quickReply(string $formName, string $textareaName, string $submitLabel): string
+    {
+        $html = "<textarea name='" . $textareaName . "' cols=\"100\" rows=\"8\" style=\"width: 450px\" onkeydown=\"ctrlenter(event,'compose','qr')\"></textarea>";
+        $html .= \App\Support\Smilies::quickRow($formName, $textareaName);
+        $html .= '<br />';
+        $html .= '<input type="submit" id="qr" class="btn" value="' . $submitLabel . '" />';
+
+        return $html;
+    }
+
     public static function tableRow(string $class, string ...$cells): string
     {
         if (count($cells) === 0) {

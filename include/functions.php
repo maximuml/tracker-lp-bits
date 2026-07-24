@@ -4790,30 +4790,11 @@ function format_description($description)
 
 function get_image_from_description(array $descriptionArr, $first = false, $useDefault = true)
 {
-    $imageType = ['attachment', 'image'];
-    $images = [];
-    foreach ($descriptionArr as $value) {
-        if (!in_array($value['type'], $imageType)) {
-            continue;
-        }
-        $url = $value['data']['url'] ?? '';
-        if (!$url) {
-            continue;
-        }
-        if ($first) {
-            return $url;
-        } else {
-            $images[] = $url;
-        }
-    }
-    if ($first) {
-        if ($useDefault) {
-            return getSchemeAndHttpHost() . "/pic/imdb_pic/nophoto.gif";
-        } else {
-            return '';
-        }
-    }
-    return $images;
+	if ($first) {
+		$defaultUrl = $useDefault ? getSchemeAndHttpHost() . "/pic/imdb_pic/nophoto.gif" : '';
+		return \App\Support\Description::firstImageUrl($descriptionArr, $defaultUrl);
+	}
+	return \App\Support\Description::imageUrls($descriptionArr);
 }
 
 function resize_image($url, $with = null, $height = null, $fit = "cover")

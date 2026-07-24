@@ -809,104 +809,36 @@ function check_email ($email) {
 }
 
 function sent_mail($to,$fromname,$fromemail,$subject,$body,$type = "confirmation",$showmsg=true,$multiple=false,$multiplemail='',$hdr_encoding = 'UTF-8', $specialcase = '') {
-    do_log("to: $to, fromname: $fromname, fromemail: $fromemail, subject: $subject, body: $body. type: $type");
-	global $lang_functions;
-	global $rootpath,$SITENAME,$SITEEMAIL,$smtptype,$smtp,$smtp_host,$smtp_port,$smtp_from,$smtpaddress,$smtpport,$accountname,$accountpassword;
-	# Is the OS Windows or Mac or Linux?
-	if (strtoupper(substr(PHP_OS,0,3)=='WIN')) {
-		$eol="\r\n";
-		$windows = true;
-	}
-	elseif (strtoupper(substr(PHP_OS,0,3)=='MAC'))
-		$eol="\r";
-	else
-		$eol="\n";
-	if ($smtptype == 'none')
-		return false;
-	if ($smtptype == 'default') {
-		@mail($to, "=?".$hdr_encoding."?B?".base64_encode($subject)."?=", $body, "From: ".$SITEEMAIL.$eol."Content-type: text/html; charset=".$hdr_encoding.$eol, "-f$SITEEMAIL") or stderr($lang_functions['std_error'], $lang_functions['text_unable_to_send_mail']);
-	}
-	elseif ($smtptype == 'advanced') {
-		$mid = md5(getip() . $fromname);
-		$name = $_SERVER["SERVER_NAME"];
-        $headers = '';
-		$headers .= "From: $fromname <$fromemail>".$eol;
-		$headers .= "Reply-To: $fromname <$fromemail>".$eol;
-		$headers .= "Return-Path: $fromname <$fromemail>".$eol;
-		$headers .= "Message-ID: <$mid thesystem@$name>".$eol;
-		$headers .= "X-Mailer: PHP v".phpversion().$eol;
-		$headers .= "MIME-Version: 1.0".$eol;
-		$headers .= "Content-type: text/html; charset=".$hdr_encoding.$eol;
-		$headers .= "X-Sender: PHP".$eol;
-		if ($multiple)
-		{
-			$bcc_multiplemail = "";
-			foreach ($multiplemail as $toemail)
-			$bcc_multiplemail = $bcc_multiplemail . ( $bcc_multiplemail != "" ? "," : "") . $toemail;
-
-			$headers .= "Bcc: $multiplemail.$eol";
-		}
-		if ($smtp == "yes") {
-			ini_set('SMTP', $smtp_host);
-			ini_set('smtp_port', $smtp_port);
-			if ($windows)
-			ini_set('sendmail_from', $smtp_from);
-		}
-
-		@mail($to,"=?".$hdr_encoding."?B?".base64_encode($subject)."?=",$body,$headers) or stderr($lang_functions['std_error'], $lang_functions['text_unable_to_send_mail']);
-
-		ini_restore('SMTP');
-		ini_restore('smtp_port');
-		if ($windows)
-		ini_restore('sendmail_from');
-	}
-	elseif ($smtptype == 'external') {
-	    /*
-		require_once ($rootpath . 'include/smtp/smtp.lib.php');
-		$mail = new smtp($hdr_encoding,'eYou');
-		$mail->debug(true);
-		$mail->open($smtpaddress, $smtpport);
-		$mail->auth($accountname, $accountpassword);
-		//	$mail->bcc($multiplemail);
-		$mail->from($SITEEMAIL);
-		if ($multiple)
-		{
-			$mail->multi_to_head($to);
-			foreach ($multiplemail as $toemail)
-			$mail->multi_to($toemail);
-		}
-		else
-		$mail->to($to);
-		$mail->mime_content_transfer_encoding();
-		$mail->mime_charset('text/html', $hdr_encoding);
-		$mail->subject($subject);
-		$mail->body($body);
-		$mail->send() or stderr($lang_functions['std_error'], $lang_functions['text_unable_to_send_mail']);
-		$mail->close();
-	    */
-
-        /**
-         * use Symfony Mailer instead
-         *
-         * @since 1.7
-         * @author xiaomlove<1939737565@qq.com>
-         */
-
-        $toolRep = new \App\Repositories\ToolRepository();
-        $sendResult = $toolRep->sendMail($to, $subject, $body);
-        if ($sendResult === false) {
-            stderr($lang_functions['std_error'], $lang_functions['text_unable_to_send_mail']);
-        }
-	}
-	if ($showmsg) {
-		if ($type == "confirmation")
-		stderr($lang_functions['std_success'], $lang_functions['std_confirmation_email_sent']."<b>". htmlspecialchars($to) ."</b>.\n" .
-		$lang_functions['std_please_wait'],false);
-		elseif ($type == "details")
-		stderr($lang_functions['std_success'], $lang_functions['std_account_details_sent']."<b>". htmlspecialchars($to) ."</b>.\n" .
-		$lang_functions['std_please_wait'],false);
-	}else
-	return true;
+	global $lang_functions, $SITENAME, $SITEEMAIL, $smtptype, $smtp, $smtp_host, $smtp_port, $smtp_from;
+	return \App\Support\Mail::sent(
+		(string) $to,
+		(string) $fromname,
+		(string) $fromemail,
+		(string) $subject,
+		(string) $body,
+		(string) $type,
+		(bool) $showmsg,
+		(bool) $multiple,
+		(string) (is_array($multiplemail) ? implode(',', $multiplemail) : $multiplemail),
+		(string) $hdr_encoding,
+		[
+			'site_name' => (string) $SITENAME,
+			'site_email' => (string) $SITEEMAIL,
+			'smtp_type' => (string) $smtptype,
+			'smtp' => (string) $smtp,
+			'smtp_host' => (string) $smtp_host,
+			'smtp_port' => (string) $smtp_port,
+			'smtp_from' => (string) $smtp_from,
+		],
+		[
+			'error' => $lang_functions['std_error'] ?? 'Error',
+			'success' => $lang_functions['std_success'] ?? 'Success',
+			'unable_to_send_mail' => $lang_functions['text_unable_to_send_mail'] ?? 'Unable to send mail',
+			'confirmation_email_sent' => $lang_functions['std_confirmation_email_sent'] ?? 'Confirmation email sent to ',
+			'account_details_sent' => $lang_functions['std_account_details_sent'] ?? 'Account details sent to ',
+			'please_wait' => $lang_functions['std_please_wait'] ?? 'Please wait...',
+		]
+	);
 }
 
 function failedloginscheck ($type = 'Login') {

@@ -702,54 +702,7 @@ function insert_suggest($keyword, $userid, $pre_escaped = true)
 // it's a stub implemetation here, we need more acurate regression analysis to complete our algorithm
 function get_torrent_2_user_value($user_snatched_arr)
 {
-	// check if it's current user's torrent
-	$torrent_2_user_value = 1.0;
-
-	$torrent_res = sql_query("SELECT * FROM torrents WHERE id = " . $user_snatched_arr['torrentid']) or sqlerr(__FILE__, __LINE__);
-	if(mysql_num_rows($torrent_res) == 1)	// torrent still exists
-	{
-		$torrent_arr = mysql_fetch_array($torrent_res) or sqlerr(__FILE__, __LINE__);
-		if($torrent_arr['owner'] == $user_snatched_arr['userid'])	// owner's torrent
-		{
-			$torrent_2_user_value *= 0.7;	// owner's torrent
-			$torrent_2_user_value += ($user_snatched_arr['uploaded'] / $torrent_arr['size'] ) -1 > 0 ? 0.2 - exp(-(($user_snatched_arr['uploaded'] / $torrent_arr['size'] ) -1)) : ($user_snatched_arr['uploaded'] / $torrent_arr['size'] ) -1;
-			$torrent_2_user_value += min(0.1 , ($user_snatched_arr['seedtime'] / 37*60*60 ) * 0.1);
-		}
-		else
-		{
-			if($user_snatched_arr['finished'] == 'yes')
-			{
-				$torrent_2_user_value *= 0.5;
-				$torrent_2_user_value += ($user_snatched_arr['uploaded'] / $torrent_arr['size'] ) -1 > 0 ? 0.4 - exp(-(($user_snatched_arr['uploaded'] / $torrent_arr['size'] ) -1)) : ($user_snatched_arr['uploaded'] / $torrent_arr['size'] ) -1;
-				$torrent_2_user_value += min(0.1, ($user_snatched_arr['seedtime'] / 22*60*60 ) * 0.1);
-			}
-			else
-			{
-				$torrent_2_user_value *= 0.2;
-				$torrent_2_user_value += min(0.05, ($user_snatched_arr['leechtime'] / 24*60*60 ) * 0.1);	// usually leechtime could not explain much
-			}
-		}
-	}
-	else	// torrent already deleted, half blind guess, be conservative
-	{
-
-		if($user_snatched_arr['finished'] == 'no' && $user_snatched_arr['uploaded'] > 0 && $user_snatched_arr['downloaded'] == 0)	// possibly owner
-		{
-			$torrent_2_user_value *= 0.55;	//conservative
-			$torrent_2_user_value += min(0.05, ($user_snatched_arr['leechtime'] / 31*60*60 ) * 0.1);
-			$torrent_2_user_value += min(0.1, ($user_snatched_arr['seedtime'] / 31*60*60 ) * 0.1);
-		}
-		else if($user_snatched_arr['downloaded'] > 0)	// possibly leecher
-		{
-			$torrent_2_user_value *= 0.38;	//conservative
-			$torrent_2_user_value *= min(0.22, 0.1 * $user_snatched_arr['uploaded'] / $user_snatched_arr['downloaded']);	// 0.3 for conservative
-			$torrent_2_user_value += min(0.05, ($user_snatched_arr['leechtime'] / 22*60*60 ) * 0.1);
-			$torrent_2_user_value += min(0.12, ($user_snatched_arr['seedtime'] / 22*60*60 ) * 0.1);
-		}
-		else
-			$torrent_2_user_value *= 0.0;
-	}
-	return $torrent_2_user_value;
+	return \App\Support\TorrentOps::userValue((array) $user_snatched_arr);
 }
 
 function cur_user_check()
@@ -1581,40 +1534,7 @@ function loggedinorreturn($mainpage = false) {
 }
 
 function deletetorrent($id, $notify = false) {
-    $idArr = is_array($id) ? $id : [$id];
-    $torrentInfo = \App\Models\Torrent::query()
-        ->whereIn("id", $idArr)
-        ->get()
-        ->KeyBy("id")
-    ;
-    $torrentRep = new \App\Repositories\TorrentRepository();
-	$idStr = implode(', ', $idArr ?: [0]);
-	$torrent_dir = get_setting('main.torrent_dir');
-    \Nexus\Database\NexusDB::statement("DELETE FROM torrents WHERE id in ($idStr)");
-    \Nexus\Database\NexusDB::statement("DELETE FROM torrent_extras WHERE torrent_id in ($idStr)");
-    //delete by torrent, make sure user is deleted
-    \Nexus\Database\NexusDB::statement("DELETE FROM snatched WHERE torrentid in ($idStr) and not exists (select 1 from users where id = snatched.userid)");
-	foreach(array("peers", "files", "comments") as $x) {
-        \Nexus\Database\NexusDB::statement("DELETE FROM $x WHERE torrent in ($idStr)");
-	}
-    \Nexus\Database\NexusDB::statement("DELETE FROM hit_and_runs WHERE torrent_id in ($idStr)");
-    foreach ($torrentInfo as $_id => $info) {
-        if ($torrentInfo->has($_id)) {
-            $torrentRep->delPiecesHashCache($torrentInfo->get($_id)->pieces_hash);
-        }
-        do_log("delete torrent: $_id", "error");
-        unlink(getFullDirectory("$torrent_dir/$_id.torrent"));
-        \App\Models\TorrentOperationLog::add([
-            'torrent_id' => $_id,
-            'uid' => get_user_id(),
-            'action_type' => \App\Models\TorrentOperationLog::ACTION_TYPE_DELETE,
-            'comment' => '',
-        ], $notify);
-        do_action("torrent_delete", $_id);
-        fire_event("torrent_deleted", $torrentInfo->get($_id));
-    }
-    $meiliSearchRep = new \App\Repositories\MeiliSearchRepository();
-    $meiliSearchRep->deleteDocuments($idArr);
+    \App\Support\TorrentOps::deleteTorrents($id, (bool) $notify);
 }
 
 function pager($rpp, $count, $href, $opts = array(), $pagename = "page") {

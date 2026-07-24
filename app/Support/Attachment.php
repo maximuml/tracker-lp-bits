@@ -69,6 +69,82 @@ final class Attachment
         return '<div class="attach">'.$icon.'&nbsp;&nbsp;<a href="'.$href.'" target="_blank" id="attach'.$id.'" onmouseover="domTT_activate(this, event, \'content\', \''.$tooltip.'\', \'styleClass\', \'attach\', \'x\', findPosition(this)[0], \'y\', findPosition(this)[1]-58);">'.$filenameHtml.'</a>&nbsp;&nbsp;<font class="size">('.$sizeText.')</font></div>';
     }
 
+    /**
+     * Extract the storage key from an attachment URL.
+     *
+     * Mirrors `attachmentKey()`.
+     */
+    public static function keyFromUrl(string $url): string
+    {
+        if (! filter_var($url, FILTER_VALIDATE_URL)) {
+            throw new \InvalidArgumentException("URL: '$url' invalid.");
+        }
+
+        $parsed = parse_url($url);
+        $driver = config('admin.upload.disk');
+
+        return match ($driver) {
+            'qiniu' => trim($parsed['path'] ?? '', '/'),
+            'cloudinary' => (function () use ($parsed) {
+                $parts = explode('/', $parsed['path'] ?? '');
+                $key = end($parts);
+                if (\Illuminate\Support\Str::contains($key, '.')) {
+                    $key = strstr($key, '.', true);
+                }
+                return $key;
+            })(),
+            default => throw new \RuntimeException('不支持的云盘驱动'),
+        };
+    }
+
+    /**
+     * Build the public URL for an attachment location.
+     *
+     * Mirrors `attachmentUrl()`.
+     */
+    public static function publicUrl(string $location): string
+    {
+        return sprintf('%s/attachments/%s', \getSchemeAndHttpHost(), trim($location, '/'));
+    }
+
+    /**
+     * Replace `[attach]dlkey[/attach]` tags with `[img]url[/img]` tags.
+     *
+     * Mirrors `bbcode_attach_to_img()`.
+     */
+    public static function bbcodeToImg(string $text): string
+    {
+        $pattern = '/\[attach\]([0-9a-zA-z][0-9a-zA-z]*)\[\/attach\]/is';
+
+        return preg_replace_callback($pattern, function ($matches) {
+            $dlkey = $matches[1];
+            $httpdirectory = \get_setting('attachment.httpdirectory');
+            $row = \Nexus\Database\NexusDB::remember('attachment_' . $dlkey . '_content', 86400, function () use ($dlkey) {
+                $record = \App\Models\Attachment::query()->where('dlkey', $dlkey)->first();
+
+                return $record ? $record->toArray() : [];
+            });
+
+            if (empty($row) || ($row['isimage'] ?? 0) != 1) {
+                \do_log(sprintf('dlkey: %s get attachment %s not exists or not image', $dlkey, json_encode($row)));
+                return $matches[0];
+            }
+
+            $driver = $row['driver'] ?? 'local';
+            if ($driver === 'local') {
+                $url = $httpdirectory . '/' . $row['location'];
+                if (($row['thumb'] ?? 0) == 1) {
+                    $url .= '.thumb.jpg';
+                }
+                $url = sprintf('%s/%s', \getSchemeAndHttpHost(true), trim($url, '/'));
+            } else {
+                $url = \Nexus\Attachment\Storage::getDriver($driver)->getImageUrl($row['location']);
+            }
+
+            return '[img]' . $url . '[/img]';
+        }, $text, 20);
+    }
+
     private static function iconForFileType(string $filetype): string
     {
         return match ($filetype) {

@@ -697,54 +697,7 @@ function insert_suggest($keyword, $userid, $pre_escaped = true)
 // it's a stub implemetation here, we need more acurate regression analysis to complete our algorithm
 function get_torrent_2_user_value($user_snatched_arr)
 {
-	// check if it's current user's torrent
-	$torrent_2_user_value = 1.0;
-
-	$torrent_res = sql_query("SELECT * FROM torrents WHERE id = " . $user_snatched_arr['torrentid']) or sqlerr(__FILE__, __LINE__);
-	if(mysql_num_rows($torrent_res) == 1)	// torrent still exists
-	{
-		$torrent_arr = mysql_fetch_array($torrent_res) or sqlerr(__FILE__, __LINE__);
-		if($torrent_arr['owner'] == $user_snatched_arr['userid'])	// owner's torrent
-		{
-			$torrent_2_user_value *= 0.7;	// owner's torrent
-			$torrent_2_user_value += ($user_snatched_arr['uploaded'] / $torrent_arr['size'] ) -1 > 0 ? 0.2 - exp(-(($user_snatched_arr['uploaded'] / $torrent_arr['size'] ) -1)) : ($user_snatched_arr['uploaded'] / $torrent_arr['size'] ) -1;
-			$torrent_2_user_value += min(0.1 , ($user_snatched_arr['seedtime'] / 37*60*60 ) * 0.1);
-		}
-		else
-		{
-			if($user_snatched_arr['finished'] == 'yes')
-			{
-				$torrent_2_user_value *= 0.5;
-				$torrent_2_user_value += ($user_snatched_arr['uploaded'] / $torrent_arr['size'] ) -1 > 0 ? 0.4 - exp(-(($user_snatched_arr['uploaded'] / $torrent_arr['size'] ) -1)) : ($user_snatched_arr['uploaded'] / $torrent_arr['size'] ) -1;
-				$torrent_2_user_value += min(0.1, ($user_snatched_arr['seedtime'] / 22*60*60 ) * 0.1);
-			}
-			else
-			{
-				$torrent_2_user_value *= 0.2;
-				$torrent_2_user_value += min(0.05, ($user_snatched_arr['leechtime'] / 24*60*60 ) * 0.1);	// usually leechtime could not explain much
-			}
-		}
-	}
-	else	// torrent already deleted, half blind guess, be conservative
-	{
-
-		if($user_snatched_arr['finished'] == 'no' && $user_snatched_arr['uploaded'] > 0 && $user_snatched_arr['downloaded'] == 0)	// possibly owner
-		{
-			$torrent_2_user_value *= 0.55;	//conservative
-			$torrent_2_user_value += min(0.05, ($user_snatched_arr['leechtime'] / 31*60*60 ) * 0.1);
-			$torrent_2_user_value += min(0.1, ($user_snatched_arr['seedtime'] / 31*60*60 ) * 0.1);
-		}
-		else if($user_snatched_arr['downloaded'] > 0)	// possibly leecher
-		{
-			$torrent_2_user_value *= 0.38;	//conservative
-			$torrent_2_user_value *= min(0.22, 0.1 * $user_snatched_arr['uploaded'] / $user_snatched_arr['downloaded']);	// 0.3 for conservative
-			$torrent_2_user_value += min(0.05, ($user_snatched_arr['leechtime'] / 22*60*60 ) * 0.1);
-			$torrent_2_user_value += min(0.12, ($user_snatched_arr['seedtime'] / 22*60*60 ) * 0.1);
-		}
-		else
-			$torrent_2_user_value *= 0.0;
-	}
-	return $torrent_2_user_value;
+	return \App\Support\TorrentOps::userValue((array) $user_snatched_arr);
 }
 
 function cur_user_check()
@@ -1418,40 +1371,7 @@ function loggedinorreturn($mainpage = false) {
 }
 
 function deletetorrent($id, $notify = false) {
-    $idArr = is_array($id) ? $id : [$id];
-    $torrentInfo = \App\Models\Torrent::query()
-        ->whereIn("id", $idArr)
-        ->get()
-        ->KeyBy("id")
-    ;
-    $torrentRep = new \App\Repositories\TorrentRepository();
-	$idStr = implode(', ', $idArr ?: [0]);
-	$torrent_dir = get_setting('main.torrent_dir');
-    \Nexus\Database\NexusDB::statement("DELETE FROM torrents WHERE id in ($idStr)");
-    \Nexus\Database\NexusDB::statement("DELETE FROM torrent_extras WHERE torrent_id in ($idStr)");
-    //delete by torrent, make sure user is deleted
-    \Nexus\Database\NexusDB::statement("DELETE FROM snatched WHERE torrentid in ($idStr) and not exists (select 1 from users where id = snatched.userid)");
-	foreach(array("peers", "files", "comments") as $x) {
-        \Nexus\Database\NexusDB::statement("DELETE FROM $x WHERE torrent in ($idStr)");
-	}
-    \Nexus\Database\NexusDB::statement("DELETE FROM hit_and_runs WHERE torrent_id in ($idStr)");
-    foreach ($torrentInfo as $_id => $info) {
-        if ($torrentInfo->has($_id)) {
-            $torrentRep->delPiecesHashCache($torrentInfo->get($_id)->pieces_hash);
-        }
-        do_log("delete torrent: $_id", "error");
-        unlink(getFullDirectory("$torrent_dir/$_id.torrent"));
-        \App\Models\TorrentOperationLog::add([
-            'torrent_id' => $_id,
-            'uid' => get_user_id(),
-            'action_type' => \App\Models\TorrentOperationLog::ACTION_TYPE_DELETE,
-            'comment' => '',
-        ], $notify);
-        do_action("torrent_delete", $_id);
-        fire_event("torrent_deleted", $torrentInfo->get($_id));
-    }
-    $meiliSearchRep = new \App\Repositories\MeiliSearchRepository();
-    $meiliSearchRep->deleteDocuments($idArr);
+    \App\Support\TorrentOps::deleteTorrents($id, (bool) $notify);
 }
 
 function pager($rpp, $count, $href, $opts = array(), $pagename = "page") {
@@ -2210,69 +2130,24 @@ function gettime($time, $withago = true, $twoline = false, $forceago = false, $o
 
 function get_forum_pic_folder(){
 	global $CURLANGDIR;
-	return "pic/forum_pic/".$CURLANGDIR;
+	return \App\Support\Forum::picFolder((string) $CURLANGDIR);
 }
 
 function get_category_icon_row($typeid)
 {
 	global $Cache;
-	static $rows;
-	if (!$typeid) {
-		$typeid=1;
-	}
-	if (!$rows && !$rows = $Cache->get_value('category_icon_content')){
-		$rows = array();
-		$res = sql_query("SELECT * FROM caticons ORDER BY id ASC");
-		while($row = mysql_fetch_array($res)) {
-			$rows[$row['id']] = $row;
-		}
-		$Cache->cache_value('category_icon_content', $rows, 156400);
-	}
-	return $rows[$typeid];
+	return \App\Support\Category::iconRow($Cache, $typeid);
 }
 function get_category_row($catid = NULL)
 {
 	global $Cache;
-	static $rows;
-	if (!$rows && !$rows = $Cache->get_value('category_content')){
-        $rows = [];
-		$res = sql_query("SELECT categories.*, searchbox.name AS catmodename FROM categories LEFT JOIN searchbox ON categories.mode=searchbox.id");
-		while($row = mysql_fetch_array($res)) {
-			$rows[$row['id']] = $row;
-		}
-		$Cache->cache_value('category_content', $rows, 126400);
-	}
-	if ($catid) {
-		return $rows[$catid];
-	} else {
-		return $rows;
-	}
+	return \App\Support\Category::row($Cache, $catid);
 }
 
 function get_second_icon($row) //for CHDBits
 {
-	global $CURUSER, $Cache;
-	$source=$row['source'];
-	$medium=$row['medium'];
-	$codec=$row['codec'];
-	$standard=$row['standard'];
-	$processing=$row['processing'];
-	$audiocodec=$row['audiocodec'];
-	$mode = $row['search_box_id'];
-	$cacheKey = 'secondicon_'.$source.'_'.$medium.'_'.$codec.'_'.$standard.'_'.$processing.'_'.$audiocodec.'_content';
-	if (!$sirow = $Cache->get_value($cacheKey)){
-		$res = sql_query("SELECT * FROM secondicons WHERE (mode = ".sqlesc($mode)." OR mode = 0) AND (source = ".sqlesc($source)." OR source=0) AND (medium = ".sqlesc($medium)." OR medium=0) AND (codec = ".sqlesc($codec)." OR codec = 0) AND (standard = ".sqlesc($standard)." OR standard = 0) AND (processing = ".sqlesc($processing)." OR processing = 0) AND (audiocodec = ".sqlesc($audiocodec)." OR audiocodec = 0) LIMIT 1");
-		$sirow = mysql_fetch_array($res);
-		if (!$sirow)
-			$sirow = 'not allowed';
-		$Cache->cache_value($cacheKey, $sirow, 600);
-	}
-	$catimgurl = get_cat_folder($row['category']);
-	if ($sirow == 'not allowed')
-		return "<img src=\"pic/cattrans.gif\" style=\"background-image: url(pic/". $catimgurl. "/additional/notallowed.png);\" title=\"Not Allowed\" alt=\"Not Allowed\" />";
-	else {
-		return "<img".($sirow['class_name'] ? " class=\"".$sirow['class_name']."\"" : "")." src=\"pic/cattrans.gif\" style=\"background-image: url(pic/". $catimgurl. "/additional/". $sirow['image'].");\" alt=\"" . $sirow["name"] . "\" title=\"".$sirow['name']."\" />";
-	}
+	global $Cache;
+	return \App\Support\Category::secondIcon($Cache, (array) $row, get_cat_folder($row['category']));
 }
 
 function get_torrent_bg_color($promotion = 1, $posState = "", array $torrent = [])
@@ -2648,100 +2523,29 @@ function get_hr_img(array $torrent, $searchBoxId)
 }
 
 function get_user_id_from_name($username){
-	global $lang_functions;
-	$res = sql_query("SELECT id FROM users WHERE LOWER(username)=LOWER(" . sqlesc($username).")");
-	$arr = mysql_fetch_array($res);
-	if (!$arr){
-		stderr($lang_functions['std_error'],$lang_functions['std_no_user_named']."'".$username."'");
-	}
-	else return $arr['id'];
+	return \App\Support\LegacyAuth::userIdFromName((string) $username);
 }
 
 function is_forum_moderator($id, $in = 'post'){
-	global $CURUSER;
-	switch($in){
-		case 'post':{
-			$res = sql_query("SELECT topicid FROM posts WHERE id=$id") or sqlerr(__FILE__, __LINE__);
-			if ($arr = mysql_fetch_array($res)){
-				if (is_forum_moderator($arr['topicid'],'topic'))
-					return true;
-			}
-			return false;
-			break;
-		}
-		case 'topic':{
-			$modcount = sql_query("SELECT COUNT(forummods.userid) FROM forummods LEFT JOIN topics ON forummods.forumid = topics.forumid WHERE topics.id=$id AND forummods.userid=".sqlesc($CURUSER['id'])) or sqlerr(__FILE__, __LINE__);
-			$arr = mysql_fetch_array($modcount);
-			if ($arr[0])
-				return true;
-			else return false;
-			break;
-		}
-		case 'forum':{
-			$modcount = get_row_count("forummods","WHERE forumid=$id AND userid=".sqlesc($CURUSER['id']));
-			if ($modcount)
-				return true;
-			else return false;
-			break;
-		}
-		default: {
-		return false;
-		}
-	}
+	return \App\Support\Forum::isModerator($id, (string) $in);
 }
 
 function get_guest_lang_id(){
 	global $CURLANGDIR;
-	$langfolder=$CURLANGDIR;
-	$res = sql_query("SELECT id FROM language WHERE site_lang_folder=".sqlesc($langfolder)." AND site_lang=1");
-	$row = mysql_fetch_array($res);
-	if ($row){
-		return $row['id'];
-	}
-	else return 6;//return English
+	return \App\Support\Locale::guestId((string) $CURLANGDIR);
 }
 
 function set_forum_moderators($name, $forumid, $limit=3){
-	$name = rtrim(trim($name), ",");
-	$users = explode(",", $name);
-	$userids = array();
-	foreach ($users as $user){
-		$userids[]=get_user_id_from_name(trim($user));
-	}
-	$max = count($userids);
-	sql_query("DELETE FROM forummods WHERE forumid=".sqlesc($forumid)) or sqlerr(__FILE__, __LINE__);
-	for($i=0; $i < $limit && $i < $max; $i++){
-		sql_query("INSERT INTO forummods (forumid, userid) VALUES (".sqlesc($forumid).",".sqlesc($userids[$i]).")") or sqlerr(__FILE__, __LINE__);
-	}
+	\App\Support\Forum::setModerators((string) $name, $forumid, (int) $limit);
 }
 
 function get_plain_username($id){
-	$row = get_user_row($id);
-	if ($row)
-		$username = $row['username'];
-	else $username = "";
-	return $username;
+	return \App\Support\UserDisplay::plainUsername((int) $id);
 }
 
 function get_searchbox_value($mode = 1, $item = 'showsubcat'){
 	global $Cache;
-	static $rows;
-	$cacheKey = "search_box_content";
-	if (!$rows && !$rows = $Cache->get_value($cacheKey)){
-		$rows = array();
-		$res = sql_query("SELECT * FROM searchbox ORDER BY id ASC");
-		while ($row = mysql_fetch_array($res)) {
-		    if (isset($row['extra'])) {
-		        $row['extra'] = json_decode($row['extra'], true);
-            }
-            if (isset($row['section_name'])) {
-                $row['section_name'] = json_decode($row['section_name'], true);
-            }
-			$rows[$row['id']] = $row;
-		}
-		$Cache->cache_value($cacheKey, $rows, 100500);
-	}
-	return $rows[$mode][$item] ?? '';
+	return \App\Support\SearchBox::value($Cache, $mode, (string) $item);
 }
 
 function get_ratio($userid, $html = true){
@@ -2798,26 +2602,7 @@ function get_hl_color($color=0)
 function get_forum_moderators($forumid, $plaintext = true)
 {
 	global $Cache;
-	static $moderatorsArray;
-
-	if (!$moderatorsArray && !$moderatorsArray = $Cache->get_value('forum_moderator_array')) {
-		$moderatorsArray = array();
-		$res = sql_query("SELECT forumid, userid FROM forummods ORDER BY forumid ASC") or sqlerr(__FILE__, __LINE__);
-		while ($row = mysql_fetch_array($res)) {
-			$moderatorsArray[$row['forumid']][] = $row['userid'];
-		}
-		$Cache->cache_value('forum_moderator_array', $moderatorsArray, 86200);
-	}
-	$ret = $moderatorsArray[$forumid] ?? [];
-
-	$moderators = "";
-	foreach($ret as $userid) {
-		if ($plaintext)
-			$moderators .= get_plain_username($userid).", ";
-		else $moderators .= get_username($userid).", ";
-	}
-	$moderators = rtrim(trim($moderators), ",");
-	return $moderators;
+	return \App\Support\Forum::moderators($Cache, $forumid, (bool) $plaintext);
 }
 function key_shortcut($page=1,$pages=1)
 {
@@ -2841,27 +2626,13 @@ function promotion_selection($selected = 0, $hide = 0)
 function get_post_row($postid)
 {
 	global $Cache;
-	if (!$row = $Cache->get_value('post_'.$postid.'_content')){
-		$res = sql_query("SELECT * FROM posts WHERE id=".sqlesc($postid)." LIMIT 1") or sqlerr(__FILE__,__LINE__);
-		$row = mysql_fetch_array($res);
-		$Cache->cache_value('post_'.$postid.'_content', $row, 7200);
-	}
-	if (!$row)
-		return false;
-	else return $row;
+	return \App\Support\Forum::postRow($Cache, $postid);
 }
 
 function get_country_row($id)
 {
 	global $Cache;
-	if (!$row = $Cache->get_value('country_'.$id.'_content')){
-		$res = sql_query("SELECT * FROM countries WHERE id=".sqlesc($id)." LIMIT 1") or sqlerr(__FILE__,__LINE__);
-		$row = mysql_fetch_array($res);
-		$Cache->cache_value('country_'.$id.'_content', $row, 86400);
-	}
-	if (!$row)
-		return false;
-	else return $row;
+	return \App\Support\Country::row($Cache, $id);
 }
 
 
@@ -2878,22 +2649,11 @@ function valid_class_name($filename)
 function return_avatar_image($url)
 {
 	global $CURLANGDIR;
-	return "<img src=\"".$url."\" alt=\"avatar\" width=\"150px\" onload=\"check_avatar(this, '".$CURLANGDIR."');\" />";
+	return \App\Support\UserDisplay::avatarImage((string) $url, (string) $CURLANGDIR);
 }
 function return_category_image($categoryid, $link="")
 {
-	static $catImg = array();
-	if (isset($catImg[$categoryid])) {
-		$catimg = $catImg[$categoryid];
-	} else {
-		$categoryrow = get_category_row($categoryid);
-		$catimgurl = get_cat_folder($categoryid);
-		$catImg[$categoryid] = $catimg = "<img".($categoryrow['class_name'] ? " class=\"".$categoryrow['class_name']."\"" : "")." src=\"pic/cattrans.gif\" alt=\"" . $categoryrow["name"] . "\" title=\"" .$categoryrow["name"]. "\" style=\"background-image: url(pic/" . $catimgurl . '/' . $categoryrow["image"].");\" />";
-	}
-	if ($link) {
-		$catimg = "<a href=\"".$link."cat=" . $categoryid . "\">".$catimg."</a>";
-	}
-	return $catimg;
+	return \App\Support\Category::imageTag((int) $categoryid, (string) $link);
 }
 
 /******************************************** bellow functioons avaliable since v1.6 ***********************************************************/
@@ -2989,26 +2749,7 @@ function build_table(array $header, array $rows, array $options = [])
  */
 function attachmentKey($url)
 {
-    if (!filter_var($url, FILTER_VALIDATE_URL))
-    {
-        throw new \InvalidArgumentException("URL: '$url' invalid.");
-    }
-    $parsed = parse_url($url);
-    $driver = config('admin.upload.disk');
-    if ($driver == 'qiniu') {
-        return trim($parsed['path'], "/");
-    } elseif ($driver == 'cloudinary') {
-        $parts = explode('/', $parsed['path']);
-        $key = end($parts);
-        if (\Illuminate\Support\Str::contains($key,'.')) {
-            $key = strstr($key, '.', true);
-        }
-        return $key;
-
-    } else {
-        throw new \RuntimeException('不支持的云盘驱动');
-    }
-
+    return \App\Support\Attachment::keyFromUrl((string) $url);
 }
 
 /**
@@ -3022,7 +2763,7 @@ function attachmentKey($url)
  */
 function attachmentUrl($location, $width = null, $height = null, $options = [])
 {
-    return sprintf('%s/attachments/%s', getSchemeAndHttpHost(), trim($location, '/'));
+    return \App\Support\Attachment::publicUrl((string) $location);
 }
 
 
@@ -3225,29 +2966,7 @@ function list_require_search_box_id()
 
 function can_access_torrent($torrent, $uid)
 {
-    global $specialcatmode;
-    if (get_setting('main.spsct') != 'yes') {
-        return true;
-    }
-    if (is_array($torrent) && isset($torrent['search_box_id'])) {
-        $searchBoxId = $torrent['search_box_id'];
-    } elseif (is_numeric($torrent)) {
-        $torrent = \App\Models\Torrent::query()->findOrFail(intval($torrent), ['id', 'category']);
-        $searchBoxId = $torrent->basic_category->mode ?? 0;
-        if ($searchBoxId == 0) {
-            do_log("[INVALID_CATEGORY], torrent: " . $torrent->id, 'error');
-            return false;
-        }
-    } else {
-        throw new \InvalidArgumentException("Unsupported argument: " . json_encode($torrent));
-    }
-    if ($searchBoxId != $specialcatmode) {
-        return true;
-    }
-    if (user_can('view_special_torrent', false, $uid)) {
-        return true;
-    }
-    return false;
+    return \App\Support\TorrentAccess::canAccess($torrent, $uid);
 }
 
 function get_ip_location_from_geoip($ip): bool|array
@@ -3727,76 +3446,17 @@ function build_search_area($searchArea, array $options = [])
 
 function torrent_name_for_admin(\App\Models\Torrent|null $torrent, $withTags = false, $length = 40)
 {
-    if (empty($torrent)) {
-        return '';
-    }
-    $name = sprintf(
-        '<div class="fi-color fi-color-primary fi-text-color-600 dark:fi-text-color-300 fi-link fi-size-sm fi-ac-link-action"><a href="/details.php?id=%s" target="_blank" title="%s">%s</a></div>',
-        $torrent->id, $torrent->name, Str::limit($torrent->name, $length)
-    );
-    $tags = '';
-    if ($withTags) {
-        $tags = sprintf('&nbsp;<div>%s</div>', $torrent->tagsFormatted);
-    }
-    return new HtmlString('<div style="display:flex">' . $name . $tags . '</div>');
+    return \App\Support\TorrentAccess::adminName($torrent, (bool) $withTags, (int) $length);
 }
 
 function username_for_admin(int $id)
 {
-    if (empty($id)) {
-        return '';
-    }
-    return new HtmlString(get_username($id, false, true, true, true));
+    return \App\Support\UserDisplay::adminUsername($id);
 }
 
 function can_view_post($uid, $post)
 {
-    static $topics = [];
-    static $protectedForumIdArr;
-    static $forumMods;
-    if (!is_array($post)) {
-        $post = \App\Models\Post::query()->findOrFail(intval($post))->toArray();
-    }
-    $topicId = $post['topicid'];
-    if (!isset($topics[$topicId])) {
-        $topics[$topicId] = \App\Models\Topic::query()->findOrFail($topicId);
-    }
-    /** @var \App\Models\Topic $topicInfo */
-    $topicInfo = $topics[$topicId];
-
-    $forumId = $topicInfo->forumid;
-
-    if (is_null($protectedForumIdArr)) {
-        $protectedForumIdArr = [];
-        $protectedForumIds = \Nexus\Database\NexusDB::remember("setting_protected_forum", 600, function () {
-            return \App\Models\Setting::getByName('misc.protected_forum');
-        });
-        $protectedForumIdArr = $protectedForumIds ? preg_split("/[,\s]+/", $protectedForumIds) : [];
-    }
-    if (is_null($forumMods)) {
-        $forumMods = [];
-        $results = \App\Models\ForumMod::query()->get();
-        foreach ($results as $item) {
-            $forumMods[$item->forumid] = $item->userid;
-        }
-    }
-    $isForumMod = isset($forumMods[$forumId]) && $forumMods[$forumId] == $uid;
-    $log = sprintf(
-        "uid: $uid, class: %s,  post: {$post['id']}, forumId: $forumId, protectedForumIdArr: %s, forumMods: %s, isForumMod: %s",
-        get_user_class(), json_encode($protectedForumIdArr), json_encode($forumMods), $isForumMod
-    );
-    if (
-        in_array($forumId, $protectedForumIdArr)
-        && get_user_class() < \App\Models\User::CLASS_ADMINISTRATOR
-        && $uid != $post['userid']
-        && $uid != $topicInfo->userid
-        && !$isForumMod
-    ) {
-        do_log("$log, FALSE");
-        return false;
-    }
-    do_log("$log, TRUE");
-    return true;
+    return \App\Support\Forum::canViewPost($uid, $post);
 }
 
 function hide_text($text) {
@@ -3808,34 +3468,7 @@ function make_content_disposition(string $filename, string $disposition = 'attac
 }
 
 function bbcode_attach_to_img(string $text) {
-    $pattern = "/\[attach\]([0-9a-zA-z][0-9a-zA-z]*)\[\/attach\]/is";
-    return preg_replace_callback($pattern, function ($matches) {
-        $dlkey = $matches[1];
-        $httpdirectory_attachment = get_setting('attachment.httpdirectory');
-        $row = \Nexus\Database\NexusDB::remember('attachment_'.$dlkey.'_content', 86400, function() use ($dlkey) {
-            $record =  \App\Models\Attachment::query()->where("dlkey", $dlkey)->first();
-            if ($record) {
-                return $record->toArray();
-            }
-            return [];
-        });
-        if (empty($row) || $row['isimage'] != 1) {
-            do_log(sprintf("dlkey: %s get attachment %s not exists or not image", $dlkey, json_encode($row)));
-            return $matches[0];
-        }
-        $driver = $row['driver'] ?? 'local';
-        if ($driver == "local") {
-            if ($row['thumb'] == 1){
-                $url = $httpdirectory_attachment."/".$row['location'].".thumb.jpg";
-            } else {
-                $url = $httpdirectory_attachment."/".$row['location'];
-            }
-            $url = sprintf("%s/%s", getSchemeAndHttpHost(true), trim($url, "/"));
-        } else {
-            $url = \Nexus\Attachment\Storage::getDriver($driver)->getImageUrl($row['location']);
-        }
-        return "[img]" . $url . "[/img]";
-    }, $text, 20);
+    return \App\Support\Attachment::bbcodeToImg($text);
 }
 
 ?>

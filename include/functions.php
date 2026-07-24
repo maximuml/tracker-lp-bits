@@ -2206,10 +2206,7 @@ function create_tooltip_container($id_content_arr, $width = 400)
 
 
 function quickreply($formname, $taname,$submit){
-	print("<textarea name='".$taname."' cols=\"100\" rows=\"8\" style=\"width: 450px\" onkeydown=\"ctrlenter(event,'compose','qr')\"></textarea>");
-	print(smile_row($formname, $taname));
-	print("<br />");
- 	print("<input type=\"submit\" id=\"qr\" class=\"btn\" value=\"".$submit."\" />");
+	echo \App\Support\Html::quickReply((string) $formname, (string) $taname, (string) $submit);
 }
 
 function smile_row($formname, $taname){
@@ -2988,20 +2985,7 @@ function torrentTags($tags = 0, $type = 'checkbox')
 
 function saveSetting(string $prefix, array $nameAndValue, string $autoload = 'yes'): void
 {
-    $prefix = strtolower($prefix);
-    $datetimeNow = date('Y-m-d H:i:s');
-    $sql = "insert into settings (name, value, created_at, updated_at, autoload) values ";
-    $data = [];
-    foreach ($nameAndValue as $name => $value) {
-        if (is_array($value)) {
-            $value = json_encode($value);
-        }
-        $data[] = sprintf("(%s, %s, %s, %s, '%s')", sqlesc("$prefix.$name"), sqlesc($value), sqlesc($datetimeNow), sqlesc($datetimeNow), $autoload);
-    }
-    $sql .= implode(",", $data) . " " . \Nexus\Database\NexusDB::upsertField(['name'], ['value']);
-    \Nexus\Database\NexusDB::statement($sql);
-    clear_setting_cache();
-    do_action("nexus_setting_update");
+    \App\Support\Settings::saveBatch($prefix, $nameAndValue, $autoload);
 }
 
 function getFullDirectory($dir)
@@ -3011,92 +2995,17 @@ function getFullDirectory($dir)
 
 function checkGuestVisit()
 {
-    if (userlogin()) {
-        //already login
-        return;
-    }
-    $setting = get_setting('security');
-    //all type: normal, static_page, custom_content, redirect
-    $guestVisitType = $setting['guest_visit_type'] ?? '';
-    if (empty($guestVisitType) || $guestVisitType == 'normal') {
-        return;
-    }
-
-    if (in_array(nexus()->getScript(), ['login', 'takelogin', 'image']) && canDoLogin()) {
-        return;
-    }
-
-    $valueKey = "guest_visit_value_$guestVisitType";
-    if (empty($setting[$valueKey])) {
-        do_log("setting: security.$valueKey empty");
-        die(0);
-    }
-    $guestVisitValue = $setting[$valueKey];
-    if ($guestVisitType == 'static_page') {
-        $pageFile = ROOT_PATH . 'resources/static-pages/' . $guestVisitValue;
-        if (!file_exists($pageFile) || !is_readable($pageFile)) {
-            do_log("pageFile: $pageFile is not exists or readable");
-            die(0);
-        }
-        $content = file_get_contents($pageFile);
-        die($content);
-    }
-    if ($guestVisitType == 'custom_content') {
-        $content = format_comment($guestVisitValue);
-        render('resources/templates/guest-visit-custom-content', ['content' => $content]);
-    }
-    if ($guestVisitType == 'redirect') {
-        header('Location: ' . $guestVisitValue);
-        die(0);
-    }
-
+    \App\Support\SiteAccess::checkGuestVisit();
 }
 
 function render($view, $data = [], $return = false)
 {
-    extract($data);
-    if (!file_exists($view)) {
-        $view = ROOT_PATH . $view;
-    }
-    if (substr($view, -4) !== '.php') {
-        $view .= ".php";
-    }
-    ob_start();
-    ob_implicit_flush(0);
-    require $view;
-    $result = ob_get_clean();
-    if ($return) {
-        return $result;
-    }
-    die($result);
+    return \App\Support\View::render((string) $view, (array) $data, (bool) $return, ROOT_PATH);
 }
 
 function canDoLogin()
 {
-    $setting = get_setting('security');
-    if (empty($setting['login_type']) || $setting['login_type'] == 'normal') {
-        return true;
-    }
-    $loginType = $setting['login_type'];
-    if ($loginType == 'secret') {
-        if (empty($_REQUEST['secret'])) {
-            do_log("no secret");
-            return false;
-        }
-        if ($_REQUEST['secret'] != $setting['login_secret']) {
-            do_log("invlaid secret: " . $_REQUEST['secret']);
-            return false;
-        }
-        if ($setting['login_secret_deadline'] < date('Y-m-d H:i:s')) {
-            do_log("secret: {$_REQUEST['secret']} expires(deadline: {$setting['login_secret_deadline']})");
-            return false;
-        }
-        return true;
-    }
-    if ($loginType == 'passkey') {
-        return false;
-    }
-    return true;
+    return \App\Support\SiteAccess::canDoLogin();
 }
 
 function build_table(array $header, array $rows, array $options = [])

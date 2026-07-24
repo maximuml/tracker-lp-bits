@@ -3056,85 +3056,40 @@ function deletetorrent($id, $notify = false) {
 }
 
 function pager($rpp, $count, $href, $opts = array(), $pagename = "page") {
-	global $lang_functions,$add_key_shortcut;
-	$pages = ceil($count / $rpp);
+	global $lang_functions, $add_key_shortcut;
 
-	if (empty($opts["lastpagedefault"]))
-	$pagedefault = 0;
-	else {
-		$pagedefault = floor(($count - 1) / $rpp);
-		if ($pagedefault < 0)
-		$pagedefault = 0;
-	}
+	$pages = (int) ceil($count / $rpp);
+	$page = \App\Support\Pagination::resolvePage(
+		$_GET[$pagename] ?? null,
+		(int) $count,
+		(int) $rpp,
+		!empty($opts['lastpagedefault']),
+	);
 
-	if (isset($_GET[$pagename])) {
-		$page = intval($_GET[$pagename] ?? 0);
-		if ($page < 0)
-		$page = $pagedefault;
-	}
-	else
-	$page = $pagedefault;
+	$isPresto = isset($_SERVER['HTTP_USER_AGENT']) && str_contains($_SERVER['HTTP_USER_AGENT'], 'Presto');
+	$labels = [
+		'prev' => $lang_functions['text_prev'] ?? '',
+		'next' => $lang_functions['text_next'] ?? '',
+		'alt_prev_title' => $lang_functions['text_alt_pageup_shortcut'] ?? '',
+		'alt_next_title' => $lang_functions['text_alt_pagedown_shortcut'] ?? '',
+		'shift_prev_title' => $lang_functions['text_shift_pageup_shortcut'] ?? '',
+		'shift_next_title' => $lang_functions['text_shift_pagedown_shortcut'] ?? '',
+	];
 
-	$pager = "";
-	$mp = $pages - 1;
+	$result = \App\Support\Pagination::render(
+		(int) $rpp,
+		(int) $count,
+		(string) $href,
+		$page,
+		$pages,
+		$labels,
+		(string) $pagename,
+		$isPresto,
+	);
 
-	//Opera (Presto) doesn't know about event.altKey
-	$is_presto = strpos($_SERVER['HTTP_USER_AGENT'], 'Presto');
-	$as = "<b title=\"".($is_presto ? $lang_functions['text_shift_pageup_shortcut'] : $lang_functions['text_alt_pageup_shortcut'])."\">&lt;&lt;&nbsp;".$lang_functions['text_prev']."</b>";
-	if ($page >= 1) {
-		$pager .= "<a href=\"".htmlspecialchars($href.$pagename."=" . ($page - 1) ). "\">";
-		$pager .= $as;
-		$pager .= "</a>";
-	}
-	else
-	$pager .= "<font class=\"gray\">".$as."</font>";
-	$pager .= "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
-	$as = "<b title=\"".($is_presto ? $lang_functions['text_shift_pagedown_shortcut'] : $lang_functions['text_alt_pagedown_shortcut'])."\">".$lang_functions['text_next']."&nbsp;&gt;&gt;</b>";
-	if ($page < $mp && $mp >= 0) {
-		$pager .= "<a href=\"".htmlspecialchars($href.$pagename."=" . ($page + 1) ). "\">";
-		$pager .= $as;
-		$pager .= "</a>";
-	}
-	else
-	$pager .= "<font class=\"gray\">".$as."</font>";
+	$add_key_shortcut = key_shortcut((int) $page, (int) ($pages - 1));
 
-	if ($count) {
-		$pagerarr = array();
-		$dotted = 0;
-		$dotspace = 3;
-		$dotend = $pages - $dotspace;
-		$curdotend = $page - $dotspace;
-		$curdotstart = $page + $dotspace;
-		for ($i = 0; $i < $pages; $i++) {
-			if (($i >= $dotspace && $i <= $curdotend) || ($i >= $curdotstart && $i < $dotend)) {
-				if (!$dotted)
-				$pagerarr[] = "...";
-				$dotted = 1;
-				continue;
-			}
-			$dotted = 0;
-			$start = $i * $rpp + 1;
-			$end = $start + $rpp - 1;
-			if ($end > $count)
-			$end = $count;
-			$text = "$start&nbsp;-&nbsp;$end";
-			if ($i != $page)
-			$pagerarr[] = "<a href=\"".htmlspecialchars($href.$pagename."=".$i)."\"><b>$text</b></a>";
-			else
-			$pagerarr[] = "<font class=\"gray\"><b>$text</b></font>";
-		}
-		$pagerstr = join(" | ", $pagerarr);
-		$pagertop = "<p align=\"center\" class='nexus-pagination'>$pager<br />$pagerstr</p>\n";
-		$pagerbottom = "<p align=\"center\" class='nexus-pagination'>$pagerstr<br />$pager</p>\n";
-	}
-	else {
-		$pagertop = "<p align=\"center\" class='nexus-pagination'>$pager</p>\n";
-		$pagerbottom = $pagertop;
-	}
-
-	$start = $page * $rpp;
-	$add_key_shortcut = key_shortcut($page,$pages-1);
-	return array($pagertop, $pagerbottom, "limit $rpp offset $start", $start, $rpp, $page);
+	return $result;
 }
 
 function commenttable($rows, $type, $parent_id, $review = false)

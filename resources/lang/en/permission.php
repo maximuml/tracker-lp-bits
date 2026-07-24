@@ -143,7 +143,7 @@ return [
     ],
     'updateextinfo' => [
         'text' => 'Update External Info',
-        'desc' => 'Update outdated external infomation, e.g. IMDb info',
+        'desc' => 'Update outdated external infomation, e.g. external info',
     ],
     'viewanonymous' => [
         'text' => 'View Anonymous',

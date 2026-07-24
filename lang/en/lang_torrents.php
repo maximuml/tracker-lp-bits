@@ -33,7 +33,6 @@ $lang_torrents = array
 	'select_description' => "Description",
 	'select_small_description' => "Small Description",
 	'select_uploader' => "Uploader",
-	'select_imdb_url' => "IMDb URL",
 	'select_and' => "AND",
 	'select_or' => "OR",
 	'select_exact' => "Exact",

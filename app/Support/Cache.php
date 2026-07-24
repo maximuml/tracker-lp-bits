@@ -35,7 +35,7 @@ namespace App\Support;
  *
  * Lives under `App\Support` (not `App\Services`) because every method
  * takes its inputs explicitly — no DI, no DB, no config, no global
- * state. Same convention as {@see Imdb}, {@see Ratio}, {@see Validators},
+ * state. Same convention as {@see Ratio}, {@see Validators},
  * {@see Format}, {@see Strings}, {@see Time}, {@see Codec},
  * {@see BBCode}.
  */

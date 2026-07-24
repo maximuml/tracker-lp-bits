@@ -15,7 +15,7 @@ namespace App\Support;
  *
  * Lives under `App\Support` (not `App\Services`) because the method is
  * pure — no DI, no DB, no config, no global state. Same convention as
- * {@see Ratio} and {@see Imdb}.
+ * {@see Ratio}.
  */
 final class Slots
 {

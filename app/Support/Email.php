@@ -27,7 +27,7 @@ namespace App\Support;
  * as {@see Email::isWellFormed()}; the DB half stays in the legacy
  * proxy so this class remains free of DI, DB, and configuration —
  * matching the convention used by every other class under
- * `App\Support` ({@see Imdb}, {@see Ratio}, {@see Validators},
+ * `App\Support` ({@see Ratio}, {@see Validators},
  * {@see Format}, {@see Strings}, {@see Time}, {@see Codec},
  * {@see BBCode}, {@see Cache}).
  *

@@ -30,7 +30,7 @@ namespace App\Support;
  *
  * Lives under `App\Support` (not `App\Services`) because every method
  * is pure — no DI, no DB, no config, no global state. Same convention
- * as {@see Imdb}, {@see Ratio}, and {@see Validators}.
+ * as {@see Ratio}, and {@see Validators}.
  */
 final class Format
 {

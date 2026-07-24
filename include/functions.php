@@ -1278,7 +1278,17 @@ function check_email ($email) {
 	}
 	$bannedEmails = \Nexus\Database\NexusDB::select('select * from bannedemails');
 	$bannedValue = $bannedEmails[0]['value'] ?? '';
-	return !\App\Support\Email::matchesSuffixList((string) $email, (string) $bannedValue);
+	if (\App\Support\Email::matchesSuffixList((string) $email, (string) $bannedValue)) {
+		$bannedEmailsArr = array_filter(preg_split('/[\s]+/', $bannedValue));
+		foreach ($bannedEmailsArr as $ban) {
+			if (str_ends_with((string) $email, (string) $ban)) {
+				do_log("[BANNED_EMAIL] email: $email is banned by record: $ban");
+				break;
+			}
+		}
+		return false;
+	}
+	return true;
 }
 
 function sent_mail($to,$fromname,$fromemail,$subject,$body,$type = "confirmation",$showmsg=true,$multiple=false,$multiplemail='',$hdr_encoding = 'UTF-8', $specialcase = '') {

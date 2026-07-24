@@ -573,14 +573,7 @@ function end_table() {
 function insert_smilies_frame()
 {
 	global $lang_functions;
-	begin_frame($lang_functions['text_smilies'], true);
-	begin_table(false, 5);
-	print("<tr><td class=\"colhead\">".$lang_functions['col_type_something']."</td><td class=\"colhead\">".$lang_functions['col_to_make_a']."</td></tr>\n");
-	for ($i=1; $i<192; $i++) {
-		print("<tr><td>[em$i]</td><td><img src=\"pic/smilies/".$i.".gif\" alt=\"[em$i]\" /></td></tr>\n");
-	}
-	end_table();
-	end_frame();
+	echo \App\Support\Smilies::framedTable($lang_functions['text_smilies'], $lang_functions['col_type_something'], $lang_functions['col_to_make_a']);
 }
 
 function get_ratio_color($ratio)
@@ -3629,16 +3622,10 @@ function quickreply($formname, $taname,$submit){
 }
 
 function smile_row($formname, $taname){
-	$quickSmilesNumbers = array(4, 5, 39, 25, 11, 8, 10, 15, 27, 57, 42, 122, 52, 28, 29, 30, 176);
-	$smilerow = "<div align=\"center\">";
-	foreach ($quickSmilesNumbers as $smilyNumber) {
-		$smilerow .= getSmileIt($formname, $taname, $smilyNumber);
-	}
-	$smilerow .= "</div>";
-	return $smilerow;
+	return \App\Support\Smilies::quickRow($formname, $taname);
 }
 function getSmileIt($formname, $taname, $smilyNumber) {
-	return "<a href=\"javascript: SmileIT('[em$smilyNumber]','".$formname."','".$taname."')\"  onmouseover=\"domTT_activate(this, event, 'content', '".htmlspecialchars("<table><tr><td><img src=\'pic/smilies/$smilyNumber.gif\' alt=\'\' /></td></tr></table>")."', 'trail', false, 'delay', 0,'lifetime',10000,'styleClass','smilies','maxWidth', 400);\"><img style=\"max-width: 25px;\" src=\"pic/smilies/$smilyNumber.gif\" alt=\"\" /></a>";
+	return \App\Support\Smilies::link($formname, $taname, (int) $smilyNumber);
 }
 
 function classlist($selectname,$maxclass, $selected, $minClass = 0, $includeNoClass = false, $disabled = false){
@@ -5034,17 +5021,7 @@ function insert_torrent_tags($torrentId, $tagIdArr, $sync = false)
 
 function get_smile($num)
 {
-    static $all;
-    if (is_null($all)) {
-        $all = [];
-        $prefix = getFullDirectory('public');
-        foreach (glob(getFullDirectory('public/pic/smilies') . '/*') as $value) {
-            $subPath = substr($value, strlen($prefix));
-            $basename = basename($subPath);
-            $all[strstr($basename, '.', true)] = $subPath;
-        }
-    }
-    return $all[$num] ?? null;
+	return \App\Support\Smilies::pathFor((int) $num);
 }
 
 function get_filament_class_alias($class): string

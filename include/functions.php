@@ -1943,46 +1943,23 @@ function mkglobal($vars) {
 }
 
 function tr($x,$y,$noesc=0,$relation='', $return = false) {
-	if ($noesc)
-	$a = $y;
-	else {
-		$a = htmlspecialchars($y);
-		$a = str_replace("\n", "<br />\n", $a);
-	}
-//	$result = ("<tr".( $relation ? " relation = \"$relation\"" : "")."><td class=\"rowhead nowrap\" valign=\"top\" align=\"right\">$x</td><td class=\"rowfollow\" valign=\"top\" align=\"left\">".$a."</td></tr>\n");
-	$result = sprintf(
-	        '<tr%s><td class="rowhead nowrap" valign="top" align="right">%s</td><td class="rowfollow" valign="top" align="left">%s</td></tr>',
-            $relation ? sprintf(' relation="%s" class="%s"', $relation, $relation) : '',
-            $x, $a
-    );
+	$result = \App\Support\Html::settingsRow($x, $y, !$noesc, $relation);
 	if ($return) {
-	    return $result;
-    }
+		return $result;
+	}
 	print $result;
 }
 
 function tr_small($x,$y,$noesc=0,$relation='',$return = false) {
-	if ($noesc)
-	$a = $y;
-	else {
-		$a = htmlspecialchars($y);
-		//$a = str_replace("\n", "<br />\n", $a);
-	}
-	$result = "<tr".( $relation ? " relation = \"$relation\"" : "")."><td width=\"1%\" class=\"rowhead nowrap\" valign=\"top\" align=\"right\">".$x."</td><td width=\"99%\" class=\"rowfollow\" valign=\"top\" align=\"left\">".$a."</td></tr>";
+	$result = \App\Support\Html::settingsRowSmall($x, $y, !$noesc, $relation);
 	if ($return) {
-	    return $result;
-    }
+		return $result;
+	}
 	print($result);
 }
 
 function twotd($x,$y,$nosec=0){
-	if ($nosec)
-	$a = $y;
-	else {
-		$a = htmlspecialchars($y);
-		$a = str_replace("\n", "<br />\n", $a);
-	}
-	print("<td class=\"rowhead\">".$x."</td><td class=\"rowfollow\">".$y."</td>");
+	echo \App\Support\Html::settingsCells($x, $y);
 }
 
 function validfilename($name) {
@@ -3677,16 +3654,7 @@ function code_new($ibm_437, $view)
 //Tooltip container for hot movie, classic movie, etc
 function create_tooltip_container($id_content_arr, $width = 400)
 {
-	if(count($id_content_arr))
-	{
-		$result = "<div style=\"display: none\">";
-		foreach($id_content_arr as $id_content_arr_each)
-		{
-			$result .= "<div id=\"" . $id_content_arr_each['id'] . "\">" . $id_content_arr_each['content'] . "</div>";
-		}
-		$result .= "</div>";
-		print($result);
-	}
+	echo \App\Support\Html::tooltipContainer($id_content_arr);
 }
 
 
@@ -4345,12 +4313,8 @@ function user_can_upload($where = "torrents"){
 function torrent_selection($name,$selname,$listname,$selectedid = 0, $mode = 0)
 {
 	global $lang_functions;
-	$selection = "<b>".$name."</b>&nbsp;<select name=\"".$selname."\">\n<option value=\"0\">".$lang_functions['select_choose_one']."</option>\n";
-	$listarray = searchbox_item_list($listname, $mode);
-	foreach ($listarray as $row)
-		$selection .= "<option value=\"" . $row["id"] . "\"". ($row["id"]==$selectedid ? " selected=\"selected\"" : "").">" . htmlspecialchars($row["name"]) . "</option>\n";
-	$selection .= "</select>&nbsp;&nbsp;&nbsp;\n";
-	return $selection;
+	$items = searchbox_item_list($listname, $mode);
+	return \App\Support\Html::torrentSelect($name, $selname, $lang_functions['select_choose_one'] ?? '', (int) $selectedid, $items);
 }
 
 function get_hl_color($color=0)
@@ -4427,30 +4391,21 @@ function get_forum_moderators($forumid, $plaintext = true)
 }
 function key_shortcut($page=1,$pages=1)
 {
-	$currentpage = "var currentpage=".$page.";";
-	$maxpage = "var maxpage=".$pages.";";
-	$key_shortcut_block = "\n<script type=\"text/javascript\">\n//<![CDATA[\n".$maxpage."\n".$currentpage."\n//]]>\n</script>\n";
-	return $key_shortcut_block;
+	return \App\Support\Html::keyShortcutScript((int) $page, (int) $pages);
 }
 function promotion_selection($selected = 0, $hide = 0)
 {
 	global $lang_functions;
-	$selection = "";
-	if ($hide != 1)
-		$selection .= "<option value=\"1\"".($selected == 1 ? " selected=\"selected\"" : "").">".$lang_functions['text_normal']."</option>";
-	if ($hide != 2)
-		$selection .= "<option value=\"2\"".($selected == 2 ? " selected=\"selected\"" : "").">".$lang_functions['text_free']."</option>";
-	if ($hide != 3)
-		$selection .= "<option value=\"3\"".($selected == 3 ? " selected=\"selected\"" : "").">".$lang_functions['text_two_times_up']."</option>";
-	if ($hide != 4)
-		$selection .= "<option value=\"4\"".($selected == 4 ? " selected=\"selected\"" : "").">".$lang_functions['text_free_two_times_up']."</option>";
-	if ($hide != 5)
-		$selection .= "<option value=\"5\"".($selected == 5 ? " selected=\"selected\"" : "").">".$lang_functions['text_half_down']."</option>";
-	if ($hide != 6)
-		$selection .= "<option value=\"6\"".($selected == 6 ? " selected=\"selected\"" : "").">".$lang_functions['text_half_down_two_up']."</option>";
-	if ($hide != 7)
-		$selection .= "<option value=\"7\"".($selected == 7 ? " selected=\"selected\"" : "").">".$lang_functions['text_thirty_percent_down']."</option>";
-	return $selection;
+	$labels = [
+		'normal' => $lang_functions['text_normal'] ?? '',
+		'free' => $lang_functions['text_free'] ?? '',
+		'two_times_up' => $lang_functions['text_two_times_up'] ?? '',
+		'free_two_times_up' => $lang_functions['text_free_two_times_up'] ?? '',
+		'half_down' => $lang_functions['text_half_down'] ?? '',
+		'half_down_two_up' => $lang_functions['text_half_down_two_up'] ?? '',
+		'thirty_percent_down' => $lang_functions['text_thirty_percent_down'] ?? '',
+	];
+	return \App\Support\Html::promotionSelectOptions((int) $selected, (int) $hide, $labels);
 }
 
 function get_post_row($postid)
@@ -4681,24 +4636,7 @@ function canDoLogin()
 
 function build_table(array $header, array $rows, array $options = [])
 {
-    $table = '<table border="1" cellspacing="0" cellpadding="5" width="100%"><thead><tr>';
-    foreach ($header as $key => $value) {
-        $table .= sprintf('<td class="colhead">%s</td>', $value);
-    }
-    $table .= '</tr></thead><tbody>';
-    $tdClass = '';
-    if (isset($options['td-center']) && $options['td-center']) {
-        $tdClass = 'colfollow';
-    }
-    foreach ($rows as $row) {
-        $table .= '<tr>';
-        foreach ($header as $headerKey => $headerValue) {
-            $table .= sprintf('<td class="%s">%s</td>', $tdClass, $row[$headerKey] ?? '');
-        }
-        $table .= '</tr>';
-    }
-    $table .= '</tbody></table>';
-    return $table;
+	return \App\Support\Html::buildTable($header, $rows, $options);
 }
 
 /**
@@ -4938,14 +4876,12 @@ function get_share_ratio($uploaded, $downloaded)
 }
 
 function EchoRow($class = ''){
-    if(func_num_args() < 2) return '<tr></tr>';
-    $args = func_get_args();
-    $cells = array_splice($args, 1);
-    $class = empty($class) ? '' : sprintf(' class="%s"', $class);
-    $s = '<tr>';
-    foreach($cells as $cell) $s .= sprintf('<td%s>%s</td>', $class, $cell);
-    $s .= "</tr>\n";
-    return $s;
+	$args = func_get_args();
+	$class = array_shift($args);
+	if (count($args) === 0) {
+		return \App\Support\Html::tableRow('');
+	}
+	return \App\Support\Html::tableRow((string) $class, ...$args);
 }
 
 function list_require_search_box_id()
@@ -5062,13 +4998,7 @@ function get_ip_location_from_geoip($ip): bool|array
 
 function msgalert($url, $text, $bgcolor = "red")
 {
-    print("<table border=\"0\" cellspacing=\"0\" cellpadding=\"10\" style=\"margin: 0 auto;\"><tr><td style='border: none; padding: 10px; background: ".$bgcolor."; text-align: center;'>\n");
-    if (!empty($url)) {
-        print("<b><a href=\"".$url."\" target='_blank'><font color=\"white\">".$text."</font></a></b>");
-    } else {
-        print("<b><font color=\"white\">".$text."</font></b>");
-    }
-    print("</td></tr></table><br />");
+	echo \App\Support\Html::messageAlert($url, $text, $bgcolor);
 }
 
 function build_medal_image(\Illuminate\Support\Collection $medals, $maxHeight = 200, $withActions = false): string

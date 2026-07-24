@@ -491,7 +491,7 @@ else
 		if (isset($CURUSER) && $CURUSER['timetype'] != 'timealive')
 			$time = (new DateTime())->setTimestamp($arr["date"])->format('m.d H:i');
 		else $time = get_elapsed_time($arr["date"]).$lang_shoutbox['text_ago'];
-		$message = format_comment($arr["text"],true,false,true,true,600,false,false);
+		$message = format_comment($arr["text"],true,false,true,true,600,true,false);
 		$mentionsMe = false;
 		$message = shoutbox_render_mentions($message, $mentionsMe);
 		$message = shoutbox_render_torrents($message);

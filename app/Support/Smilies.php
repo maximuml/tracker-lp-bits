@@ -32,7 +32,7 @@ final class Smilies
     public static function link(string $formname, string $taname, int $smilyNumber): string
     {
         $tooltipBody = htmlspecialchars(
-            "<table><tr><td><img src='pic/smilies/$smilyNumber.gif' alt='' /></td></tr></table>"
+            "<table><tr><td><img src=\\'pic/smilies/$smilyNumber.gif\\' alt=\\'\\' /></td></tr></table>"
         );
 
         return '<a href="javascript: SmileIT(\'[em'.$smilyNumber.']\',\''.$formname.'\',\''.$taname.'\')"  '

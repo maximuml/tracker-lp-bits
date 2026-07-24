@@ -14,7 +14,7 @@ final class SmiliesTest extends TestCase
         // Legacy quirk: the format string concatenates `"\")\"  onmouseover=..."`
         // with two spaces between the closing quote of `href` and `onmouseover`.
         // Preserved bit-for-bit.
-        $escaped = '&lt;table&gt;&lt;tr&gt;&lt;td&gt;&lt;img src=&#039;pic/smilies/4.gif&#039; alt=&#039;&#039; /&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;';
+        $escaped = '&lt;table&gt;&lt;tr&gt;&lt;td&gt;&lt;img src=\\&#039;pic/smilies/4.gif\\&#039; alt=\\&#039;\\&#039; /&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;';
         $expected = '<a href="javascript: SmileIT(\'[em4]\',\'myform\',\'myta\')"  '
             .'onmouseover="domTT_activate(this, event, \'content\', \''.$escaped.'\', '
             .'\'trail\', false, \'delay\', 0,\'lifetime\',10000,\'styleClass\',\'smilies\',\'maxWidth\', 400);">'

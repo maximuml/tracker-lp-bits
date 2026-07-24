@@ -499,102 +499,13 @@ function format_comment($text, $strip_html = true, $xssclean = false, $newtab = 
 
 function highlight($search,$subject,$hlstart='<b><font class="striking">',$hlend="</font></b>")
 {
-
-	$srchlen=strlen($search);    // lenght of searched string
-	if ($srchlen==0) return $subject;
-	$find = $subject;
-	while ($find = stristr($find,$search)) {    // find $search text in $subject -case insensitiv
-		$srchtxt = substr($find,0,$srchlen);    // get new search text
-		$find=substr($find,$srchlen);
-		$subject = str_replace($srchtxt,"$hlstart$srchtxt$hlend",$subject);    // highlight founded case insensitive search text
-	}
-	return $subject;
+	return \App\Support\Strings::highlight((string)$search, (string)$subject, $hlstart, $hlend);
 }
 
 
 function get_user_class_name($class, $compact = false, $b_colored = false, $I18N = false, array $options = [])
 {
-    if (!IN_NEXUS) {
-        return \App\Models\User::getClassName($class, $compact, $b_colored, $I18N);
-    }
-    global $SITENAME;
-	static $en_lang_functions;
-	static $current_user_lang_functions;
-	static $settingAccount;
-	if (!$en_lang_functions) {
-		require(get_langfile_path("functions.php",false,"en"));
-		$en_lang_functions = $lang_functions;
-	}
-	if (!$settingAccount) {
-	    $settingAccount = get_setting('account');
-    }
-
-	if(!$I18N) {
-		$this_lang_functions = $en_lang_functions;
-	} else {
-		if (!$current_user_lang_functions) {
-			require(get_langfile_path("functions.php"));
-			$current_user_lang_functions = $lang_functions;
-		}
-		$this_lang_functions = $current_user_lang_functions;
-	}
-
-	$class_name = "";
-	switch ($class)
-	{
-		case UC_PEASANT: {$class_name = $this_lang_functions['text_peasant']; break;}
-		case UC_USER: {$class_name = $this_lang_functions['text_user']; break;}
-		case UC_POWER_USER: {$class_name = $this_lang_functions['text_power_user']; break;}
-		case UC_ELITE_USER: {$class_name = $this_lang_functions['text_elite_user']; break;}
-		case UC_CRAZY_USER: {$class_name = $this_lang_functions['text_crazy_user']; break;}
-		case UC_INSANE_USER: {$class_name = $this_lang_functions['text_insane_user']; break;}
-		case UC_VETERAN_USER: {$class_name = $this_lang_functions['text_veteran_user']; break;}
-		case UC_EXTREME_USER: {$class_name = $this_lang_functions['text_extreme_user']; break;}
-		case UC_ULTIMATE_USER: {$class_name = $this_lang_functions['text_ultimate_user']; break;}
-		case UC_NEXUS_MASTER: {$class_name = $this_lang_functions['text_nexus_master']; break;}
-		case UC_VIP: {$class_name = $this_lang_functions['text_vip']; break;}
-		case UC_UPLOADER: {$class_name = $this_lang_functions['text_uploader']; break;}
-		case UC_RETIREE: {$class_name = $this_lang_functions['text_retiree']; break;}
-		case UC_MODERATOR: {$class_name = $this_lang_functions['text_moderators']; break;}
-		case UC_ADMINISTRATOR: {$class_name = $this_lang_functions['text_administrators']; break;}
-		case UC_SYSOP: {$class_name = $this_lang_functions['text_sysops']; break;}
-		case UC_STAFFLEADER: {$class_name = $this_lang_functions['text_staff_leader']; break;}
-	}
-	if (isset($options['with_alias']) && $options['with_alias'] && $class < UC_VIP && isset($settingAccount["{$class}_alias"])) {
-	    $alias = trim($settingAccount["{$class}_alias"]);
-	    if (!empty($alias)) {
-	        $class_name = sprintf('%s(%s)', $class_name, $alias);
-        }
-    }
-
-	switch ($class)
-	{
-		case UC_PEASANT: {$class_name_color = $en_lang_functions['text_peasant']; break;}
-		case UC_USER: {$class_name_color = $en_lang_functions['text_user']; break;}
-		case UC_POWER_USER: {$class_name_color = $en_lang_functions['text_power_user']; break;}
-		case UC_ELITE_USER: {$class_name_color = $en_lang_functions['text_elite_user']; break;}
-		case UC_CRAZY_USER: {$class_name_color = $en_lang_functions['text_crazy_user']; break;}
-		case UC_INSANE_USER: {$class_name_color = $en_lang_functions['text_insane_user']; break;}
-		case UC_VETERAN_USER: {$class_name_color = $en_lang_functions['text_veteran_user']; break;}
-		case UC_EXTREME_USER: {$class_name_color = $en_lang_functions['text_extreme_user']; break;}
-		case UC_ULTIMATE_USER: {$class_name_color = $en_lang_functions['text_ultimate_user']; break;}
-		case UC_NEXUS_MASTER: {$class_name_color = $en_lang_functions['text_nexus_master']; break;}
-		case UC_VIP: {$class_name_color = $en_lang_functions['text_vip']; break;}
-		case UC_UPLOADER: {$class_name_color = $en_lang_functions['text_uploader']; break;}
-		case UC_RETIREE: {$class_name_color = $en_lang_functions['text_retiree']; break;}
-		case UC_MODERATOR: {$class_name_color = $en_lang_functions['text_moderators']; break;}
-		case UC_ADMINISTRATOR: {$class_name_color = $en_lang_functions['text_administrators']; break;}
-		case UC_SYSOP: {$class_name_color = $en_lang_functions['text_sysops']; break;}
-		case UC_STAFFLEADER: {$class_name_color = $en_lang_functions['text_staff_leader']; break;}
-	}
-	$class_name = ( $compact == true ? str_replace(" ", "",$class_name) : $class_name);
-	if (isset($options['uid'], $options['with_role'])) {
-        $class_name = implode('&nbsp;|&nbsp;', apply_filter('user_class_name', [$class_name], $options['uid']));
-    }
-	if ($class_name && $b_colored) {
-        $class_name = "<b class='" . str_replace(" ", "",$class_name_color) . "_Name'>" . $class_name . "</b>";
-    }
-	return $class_name;
+	return \App\Support\UserClass::name($class, $compact, $b_colored, $I18N, $options);
 }
 
 function is_valid_user_class($class)
@@ -759,27 +670,19 @@ function write_log($text, $security = "normal")
 function get_elapsed_time($ts,$shortunit = false)
 {
 	global $lang_functions;
-	$mins = floor(abs(TIMENOW - $ts) / 60);
-	$hours = floor($mins / 60);
-	$mins -= $hours * 60;
-	$days = floor($hours / 24);
-	$hours -= $days * 24;
-	$months = floor($days / 30);
-	$days2 = $days - $months * 30;
-	$years = floor($days / 365);
-	$months -= $years * 12;
-	$t = "";
-	if ($years > 0)
-	return $years.($shortunit ? $lang_functions['text_short_year'] : $lang_functions['text_year'] . add_s($years)) ."&nbsp;".$months.($shortunit ? $lang_functions['text_short_month'] : $lang_functions['text_month'] . add_s($months));
-	if ($months > 0)
-	return $months.($shortunit ?  $lang_functions['text_short_month'] : $lang_functions['text_month'] . add_s($months)) ."&nbsp;".$days2.($shortunit ? $lang_functions['text_short_day'] : $lang_functions['text_day'] . add_s($days2));
-	if ($days > 0)
-	return $days.($shortunit ? $lang_functions['text_short_day'] : $lang_functions['text_day'] . add_s($days))."&nbsp;".$hours.($shortunit ? $lang_functions['text_short_hour'] : $lang_functions['text_hour'] . add_s($hours));
-	if ($hours > 0)
-	return $hours.($shortunit ? $lang_functions['text_short_hour'] : $lang_functions['text_hour'] . add_s($hours))."&nbsp;".$mins.($shortunit ? $lang_functions['text_short_min'] : $lang_functions['text_min'] . add_s($mins));
-	if ($mins > 0)
-	return $mins.($shortunit ? $lang_functions['text_short_min'] : $lang_functions['text_min'] . add_s($mins));
-	return "&lt; 1".($shortunit ? $lang_functions['text_short_min'] : $lang_functions['text_min']);
+	return \App\Support\Time::elapsedSince((int)$ts, TIMENOW, [
+		'year' => $lang_functions['text_year'] ?? '',
+		'year_short' => $lang_functions['text_short_year'] ?? '',
+		'month' => $lang_functions['text_month'] ?? '',
+		'month_short' => $lang_functions['text_short_month'] ?? '',
+		'day' => $lang_functions['text_day'] ?? '',
+		'day_short' => $lang_functions['text_short_day'] ?? '',
+		'hour' => $lang_functions['text_hour'] ?? '',
+		'hour_short' => $lang_functions['text_short_hour'] ?? '',
+		'min' => $lang_functions['text_min'] ?? '',
+		'min_short' => $lang_functions['text_short_min'] ?? '',
+		'plural_suffix' => $lang_functions['text_s'] ?? '',
+	], (bool)$shortunit);
 }
 
 function textbbcode($form,$text,$content="",$hastitle=false, $col_num = 130, $withPreview = false)
@@ -1341,7 +1244,7 @@ function KPS($type = "+", $point = "1.0", $id = "") {
 
 function get_agent($peer_id, $agent)
 {
-	return substr($agent, 0, (strpos($agent, ";") == false ? strlen($agent) : strpos($agent, ";")));
+	return \App\Support\Strings::userAgentClient((string)$agent);
 }
 
 function EmailBanned($newEmail)
@@ -1735,14 +1638,7 @@ function registration_check($type = "invitesystem", $maxuserscheck = true, $ipch
 
 function random_str($length="6")
 {
-	$set = array("A","B","C","D","E","F","G","H","P","R","M","N","1","2","3","4","5","6","7","8","9");
-	$str = '';
-	for($i=1;$i<=$length;$i++)
-	{
-		$ch = rand(0, count($set)-1);
-		$str .= $set[$ch];
-	}
-	return $str;
+	return \App\Support\Strings::randomCode((int)$length);
 }
 function captcha_manager(): \App\Services\Captcha\CaptchaManager
 {
@@ -2104,109 +2000,37 @@ function unesc($x) {
 
 function getsize_int($amount, $unit = "G")
 {
-	if ($unit == "B")
-	return floor($amount);
-	elseif ($unit == "K")
-	return floor($amount * 1024);
-	elseif ($unit == "M")
-	return floor($amount * 1048576);
-	elseif ($unit == "G")
-	return floor($amount * 1073741824);
-	elseif($unit == "T")
-	return floor($amount * 1099511627776);
-	elseif($unit == "P")
-	return floor($amount * 1125899906842624);
+	return \App\Support\Format::bytesFromUnit((float)$amount, $unit);
 }
 
 function mksize_compact($bytes)
 {
-	if ($bytes < 1000 * 1024)
-	return number_format($bytes / 1024, 2) . "<br />KB";
-	elseif ($bytes < 1000 * 1048576)
-	return number_format($bytes / 1048576, 2) . "<br />MB";
-	elseif ($bytes < 1000 * 1073741824)
-	return number_format($bytes / 1073741824, 2) . "<br />GB";
-	elseif ($bytes < 1000 * 1099511627776)
-	return number_format($bytes / 1099511627776, 3) . "<br />TB";
-	else
-	return number_format($bytes / 1125899906842624, 3) . "<br />PB";
+	return \App\Support\Format::sizeCompact((float)$bytes);
 }
 
 function mksize_loose($bytes)
 {
-	if ($bytes < 1000 * 1024)
-	return number_format($bytes / 1024, 2) . "&nbsp;KB";
-	elseif ($bytes < 1000 * 1048576)
-	return number_format($bytes / 1048576, 2) . "&nbsp;MB";
-	elseif ($bytes < 1000 * 1073741824)
-	return number_format($bytes / 1073741824, 2) . "&nbsp;GB";
-	elseif ($bytes < 1000 * 1099511627776)
-	return number_format($bytes / 1099511627776, 3) . "&nbsp;TB";
-	else
-	return number_format($bytes / 1125899906842624, 3) . "&nbsp;PB";
+	return \App\Support\Format::sizeLoose((float)$bytes);
 }
 
 function mksize($bytes)
 {
-	if ($bytes < 1000 * 1024)
-	return number_format($bytes / 1024, 2) . " KB";
-	elseif ($bytes < 1000 * 1048576)
-	return number_format($bytes / 1048576, 2) . " MB";
-	elseif ($bytes < 1000 * 1073741824)
-	return number_format($bytes / 1073741824, 2) . " GB";
-	elseif ($bytes < 1000 * 1099511627776)
-	return number_format($bytes / 1099511627776, 3) . " TB";
-	else
-	return number_format($bytes / 1125899906842624, 3) . " PB";
+	return \App\Support\Format::size((float)$bytes);
 }
 
 
 function mksizeint($bytes)
 {
-	$bytes = max(0, $bytes);
-	if ($bytes < 1000)
-	return floor($bytes) . " B";
-	elseif ($bytes < 1000 * 1024)
-	return floor($bytes / 1024) . " kB";
-	elseif ($bytes < 1000 * 1048576)
-	return floor($bytes / 1048576) . " MB";
-	elseif ($bytes < 1000 * 1073741824)
-	return floor($bytes / 1073741824) . " GB";
-	elseif ($bytes < 1000 * 1099511627776)
-	return floor($bytes / 1099511627776) . " TB";
-	else
-	return floor($bytes / 1125899906842624) . " PB";
+	return \App\Support\Format::sizeInt((float)$bytes);
 }
 
 function deadtime() {
-    $anninterthree = (int)get_setting("main.anninterthree");
-	return time() - floor($anninterthree * 1.3);
+	return \App\Support\Time::deadThreshold((int)get_setting("main.anninterthree"));
 }
 
 function mkprettytime($s) {
 	global $lang_functions;
-	if ($s < 0)
-	$s = 0;
-	$t = array();
-    $s = round($s);
-	foreach (array("60:sec","60:min","24:hour","0:day") as $x) {
-		$y = explode(":", $x);
-		if ($y[0] > 1) {
-			$v = $s % $y[0];
-			$s = floor($s / $y[0]);
-		}
-		else
-		$v = $s;
-		$t[$y[1]] = $v;
-	}
-
-	if ($t["day"])
-	return $t["day"] . ($lang_functions['text_day'] ?? 'day(s)') . sprintf("%02d:%02d:%02d", $t["hour"], $t["min"], $t["sec"]);
-	if ($t["hour"])
-	return sprintf("%d:%02d:%02d", $t["hour"], $t["min"], $t["sec"]);
-	//    if ($t["min"])
-	return sprintf("%d:%02d", $t["min"], $t["sec"]);
-	//    return $t["sec"] . " secs";
+	return \App\Support\Format::prettyTime((float)$s, $lang_functions['text_day'] ?? 'day(s)');
 }
 
 function mkglobal($vars) {
@@ -3396,7 +3220,7 @@ function commenttable($rows, $type, $parent_id, $review = false)
 }
 
 function searchfield($s) {
-	return preg_replace(array('/[^a-z0-9]/si', '/^\s*/s', '/\s*$/s', '/\s+/s'), array(" ", "", "", " "), $s);
+	return \App\Support\Strings::normalizeSearchTerm((string)$s);
 }
 
 function genrelist($catmode = 1) {
@@ -4003,14 +3827,7 @@ function GetVar ($name) {
 }
 
 function ssr ($arg) {
-	if (is_array($arg)) {
-		foreach ($arg as $key=>$arg_bit) {
-			$arg[$key] = ssr($arg_bit);
-		}
-	} else {
-		$arg = stripslashes($arg);
-	}
-	return $arg;
+	return \App\Support\Strings::stripSlashesDeep(is_array($arg) ? $arg : (string)$arg);
 }
 
 function parked()
@@ -4238,43 +4055,7 @@ function permissiondenied($allowMinimumClass = null){
 }
 
 function gettime($time, $withago = true, $twoline = false, $forceago = false, $oneunit = false, $isfuturetime = false){
-    if (empty($time)) {
-        return null;
-    }
-	if (!IN_NEXUS) {
-        try {
-            return \Carbon\Carbon::parse($time)->diffForHumans();
-        } catch (\Exception $e) {
-            do_log($e->getMessage() . $e->getTraceAsString(), 'error');
-            return $time;
-        }
-    }
-    global $lang_functions, $CURUSER;
-	if (isset($CURUSER) && $CURUSER['timetype'] != 'timealive' && !$forceago){
-		$newtime = $time;
-		if ($twoline){
-		$newtime = str_replace(" ", "<br />", $newtime);
-		}
-	}
-	else{
-		$timestamp = strtotime($time);
-		if ($isfuturetime && $timestamp < TIMENOW)
-			$newtime = false;
-		else
-		{
-			$newtime = get_elapsed_time($timestamp,$oneunit).($withago ? $lang_functions['text_ago'] : "");
-			if($twoline){
-				$newtime = str_replace("&nbsp;", "<br />", $newtime);
-			}
-			elseif($oneunit){
-				if ($length = strpos($newtime, "&nbsp;"))
-					$newtime = substr($newtime,0,$length);
-			}
-			else $newtime = str_replace("&nbsp;", $lang_functions['text_space'], $newtime);
-			$newtime = "<span title=\"".$time."\">".$newtime."</span>";
-		}
-	}
-	return $newtime;
+	return \App\Support\Time::format($time, $withago, $twoline, $forceago, $oneunit, $isfuturetime);
 }
 
 function get_forum_pic_folder(){
@@ -4874,51 +4655,21 @@ function get_ratio($userid, $html = true){
 function add_s($num, $es = false)
 {
 	global $lang_functions;
-	return ($num > 1 ? ($es ? ($lang_functions['text_es'] ?? '') : $lang_functions['text_s']) : "");
+	return \App\Support\Strings::pluralize((float)$num, '', $es ? ($lang_functions['text_es'] ?? '') : ($lang_functions['text_s'] ?? ''));
 }
 
 function is_or_are($num)
 {
 	global $lang_functions;
-	return ($num > 1 ? $lang_functions['text_are'] : $lang_functions['text_is']);
+	return \App\Support\Strings::pluralize((float)$num, $lang_functions['text_is'] ?? '', $lang_functions['text_are'] ?? '');
 }
 
 function getmicrotime(){
-	list($usec, $sec) = explode(" ",microtime());
-	return ((float)$usec + (float)$sec);
+	return \App\Support\Time::microtimeFloat();
 }
 
 function get_user_class_image($class){
-	$UC = array(
-		"Staff Leader" => "pic/staffleader.gif",
-		"SysOp" => "pic/sysop.gif",
-		"Administrator" => "pic/administrator.gif",
-		"Moderator" => "pic/moderator.gif",
-		"Forum Moderator" => "pic/forummoderator.gif",
-		"Uploader" => "pic/uploader.gif",
-		"Retiree" => "pic/retiree.gif",
-		"VIP" => "pic/vip.gif",
-		"Nexus Master" => "pic/nexus.gif",
-		"Ultimate User" => "pic/ultimate.gif",
-		"Extreme User" => "pic/extreme.gif",
-		"Veteran User" => "pic/veteran.gif",
-		"Insane User" => "pic/insane.gif",
-		"Crazy User" => "pic/crazy.gif",
-		"Elite User" => "pic/elite.gif",
-		"Power User" => "pic/power.gif",
-		"User" => "pic/user.gif",
-		"Peasant" => "pic/peasant.gif"
-	);
-	if (isset($class)) {
-        $className = get_user_class_name($class,false,false,false);
-	    if (str_contains($className, '(')) {
-            $className = strstr($className, '(', true);
-        }
-        $uclass = $UC[$className];
-    } else {
-        $uclass = "pic/banned.gif";
-    }
-	return $uclass;
+	return \App\Support\UserClass::imagePath($class ?? null);
 }
 
 function user_can_upload($where = "torrents"){
@@ -6328,7 +6079,7 @@ function can_view_post($uid, $post)
 }
 
 function hide_text($text) {
-    return '<span class="hidden-text">' . $text . '</span>';
+	return \App\Support\Strings::hidden((string)$text);
 }
 
 function make_content_disposition(string $filename, string $disposition = 'attachment'): string {

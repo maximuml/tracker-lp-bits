@@ -1187,83 +1187,22 @@ function get_agent($peer_id, $agent)
 
 function EmailBanned($newEmail)
 {
-	$newEmail = trim(strtolower($newEmail));
+	$newEmail = trim(strtolower((string) $newEmail));
 	$sql = sql_query("SELECT * FROM bannedemails") or sqlerr(__FILE__, __LINE__);
 	$list = mysql_fetch_array($sql);
-	$addresses = explode(' ', preg_replace("/[[:space:]]+/", " ", trim($list['value'])) );
-
-	if(count($addresses) > 0)
-	{
-		foreach ( $addresses as $email )
-		{
-			$email = trim(strtolower(preg_replace('/\./', '\\.', $email)));
-			if(strstr($email, "@"))
-			{
-				if(preg_match('/^@/', $email))
-				{// Any user @host?
-					// Expand the match expression to catch hosts and
-					// sub-domains
-					$email = preg_replace('/^@/', '[@\\.]', $email);
-					if(preg_match("/".$email."$/", $newEmail))
-					return true;
-				}
-			}
-			elseif(preg_match('/@$/', $email))
-			{    // User at any host?
-				if(preg_match("/^".$email."/", $newEmail))
-				return true;
-			}
-			else
-			{                // User@host
-				if(strtolower($email) == $newEmail)
-				return true;
-			}
-		}
-	}
-
-	return false;
+	return \App\Support\Email::matchesRegexList($newEmail, (string) ($list['value'] ?? ''));
 }
 
 function EmailAllowed($newEmail)
 {
-global $restrictemaildomain;
-if ($restrictemaildomain == 'yes'){
-	$newEmail = trim(strtolower($newEmail));
+	global $restrictemaildomain;
+	if ($restrictemaildomain != 'yes') {
+		return true;
+	}
+	$newEmail = trim(strtolower((string) $newEmail));
 	$sql = sql_query("SELECT * FROM allowedemails") or sqlerr(__FILE__, __LINE__);
 	$list = mysql_fetch_array($sql);
-	$addresses = explode(' ', preg_replace("/[[:space:]]+/", " ", trim($list['value'])) );
-
-	if(count($addresses) > 0)
-	{
-		foreach ( $addresses as $email )
-		{
-			$email = trim(strtolower(preg_replace('/\./', '\\.', $email)));
-			if(strstr($email, "@"))
-			{
-				if(preg_match('/^@/', $email))
-				{// Any user @host?
-					// Expand the match expression to catch hosts and
-					// sub-domains
-					$email = preg_replace('/^@/', '[@\\.]', $email);
-					if(preg_match('/'.$email.'$/', $newEmail))
-					return true;
-				}
-			}
-			elseif(preg_match('/@$/', $email))
-			{    // User at any host?
-				if(preg_match("/^".$email."/", $newEmail))
-				return true;
-			}
-			else
-			{                // User@host
-				if(strtolower($email) == $newEmail)
-				return true;
-			}
-		}
-	}
-	return false;
-}
-else return true;
+	return \App\Support\Email::matchesRegexList($newEmail, (string) ($list['value'] ?? ''));
 }
 
 function allowedemails()
@@ -1321,43 +1260,25 @@ function cache_save  ($file = 'cachefile') {
 
 function get_email_encode($lang)
 {
-	if($lang == 'chs' || $lang == 'cht')
-	return "gbk";
-	else
-	return "utf-8";
+	return \App\Support\Email::charsetFor((string) $lang);
 }
 
 function change_email_encode($lang, $content)
 {
-	return iconv("utf-8", get_email_encode($lang) . "//IGNORE", $content);
+	return \App\Support\Email::convertCharset((string) $lang, (string) $content);
 }
 
 function safe_email($email) {
-	$email = str_replace("<","",$email);
-	$email = str_replace(">","",$email);
-	$email = str_replace("\'","",$email);
-	$email = str_replace('\"',"",$email);
-	$email = str_replace("\\\\","",$email);
-
-	return $email;
+	return \App\Support\Email::sanitizeForDisplay((string) $email);
 }
 
 function check_email ($email) {
-	if(!preg_match('/^[A-Za-z0-9][A-Za-z0-9_.+\-]*@[A-Za-z0-9][A-Za-z0-9_+\-]*(\.[A-Za-z0-9][A-Za-z0-9_+\-]*)+$/', $email)) {
-        return false;
-    }
-    $bannedEmails = \Nexus\Database\NexusDB::select('select * from bannedemails');
-    $bannedEmailsArr = array_filter(preg_split('/[\s]+/', $bannedEmails[0]['value'] ?? ''));
-    if (empty($bannedEmailsArr)) {
-        return true;
-    }
-    foreach ($bannedEmailsArr as $ban) {
-        if (str_ends_with($email, $ban)) {
-            do_log("[BANNED_EMAIL] email: $email is banned by record: $ban");
-            return false;
-        }
-    }
-	return true;
+	if (!\App\Support\Email::isWellFormed((string) $email)) {
+		return false;
+	}
+	$bannedEmails = \Nexus\Database\NexusDB::select('select * from bannedemails');
+	$bannedValue = $bannedEmails[0]['value'] ?? '';
+	return !\App\Support\Email::matchesSuffixList((string) $email, (string) $bannedValue);
 }
 
 function sent_mail($to,$fromname,$fromemail,$subject,$body,$type = "confirmation",$showmsg=true,$multiple=false,$multiplemail='',$hdr_encoding = 'UTF-8', $specialcase = '') {

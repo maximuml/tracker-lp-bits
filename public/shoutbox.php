@@ -224,7 +224,7 @@ function shoutAttachToggleHandler() {
 //]]>
 </script>
 </head>
-<body class='inframe' <?php if (isset($_GET["type"]) && $_GET["type"] != "helpbox"){?> onload="<?php echo $startcountdown?>shoutAttachToggleHandler();" <?php } else {?> onload="hbquota();shoutAttachToggleHandler();" <?php } ?>>
+<body class='inframe' <?php if (isset($_GET["type"]) && $_GET["type"] != "helpbox"){?> onload="<?php echo $startcountdown?>shoutAttachToggleHandler();" <?php } else {?> onload="hbquota();shoutAttachToggleHandler();schedulePoll();" <?php } ?>>
 <?php
 endif; // if (!$isAjax)
 ?>

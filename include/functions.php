@@ -2923,14 +2923,15 @@ function make_folder($pre, $folder_name)
 }
 
 /**
- * Resize a cover image (remote URL or local path) to fit within $maxWidth x $maxHeight,
- * persist the JPEG thumbnail under "<attachments>/covers/" and return its public HTTP URL.
+ * Resize a cover image (remote URL or local path) to fit within $maxWidth x $maxHeight
+ * and persist the JPEG thumbnail under "<attachments>/covers/".
  *
- * Idempotent: when the cached thumbnail already exists for the given source URL + dimensions,
- * the file is reused. On any failure (download/decode/save) the function returns the
- * original $url unchanged so the caller can still render something.
+ * For remote URLs the download/resizing is dispatched to a queue job so that the
+ * homepage render is never blocked on a slow or unreachable cover host. While the
+ * thumbnail is being generated the original $url is returned, so the caller can
+ * still render something. When the cached thumbnail exists it is returned instead.
  *
- * @param string $url        Cover image URL (http/https) or path
+ * @param string $url        Cover image URL (http/https) or local path
  * @param int    $maxWidth   Maximum thumbnail width in pixels
  * @param int    $maxHeight  Maximum thumbnail height in pixels
  * @param int    $quality    JPEG quality (1-100)
@@ -2958,35 +2959,25 @@ function cover_thumb_url($url, $maxWidth = 240, $maxHeight = 360, $quality = 82)
 	if (is_file($absolutePath) && filesize($absolutePath) > 0) {
 		return $publicUrl;
 	}
-	$data = false;
+
+	// Remote covers are thumbnailed asynchronously. The heavy lifting
+	// (SSRF-safe validation, fetch, resize) is done in the queue job so the
+	// homepage render never blocks on a slow or unreachable cover host.
+	// A cheap cache lock prevents duplicate dispatches for the same thumbnail.
 	if (preg_match('#^https?://#i', $url)) {
-		if (function_exists('curl_init')) {
-			$ch = curl_init($url);
-			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-			curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-			curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
-			curl_setopt($ch, CURLOPT_TIMEOUT, 15);
-			curl_setopt($ch, CURLOPT_USERAGENT, 'NexusPHP/cover-thumb');
-			curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-			curl_setopt($ch, CURLOPT_MAXREDIRS, 3);
-			$data = curl_exec($ch);
-			$httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-			curl_close($ch);
-			if ($httpCode < 200 || $httpCode >= 400) {
-				$data = false;
-			}
-		} else {
-			$ctx = stream_context_create([
-				'http' => ['timeout' => 15, 'follow_location' => 1],
-				'ssl'  => ['verify_peer' => false, 'verify_peer_name' => false],
-			]);
-			$data = @file_get_contents($url, false, $ctx);
+		$lockKey = 'cover_thumb:' . $absolutePath;
+		if (\app('cache')->add($lockKey, 1, 300)) {
+			\App\Jobs\GenerateCoverThumbnail::dispatch($url, $absolutePath, (int)$maxWidth, (int)$maxHeight, (int)$quality);
 		}
-	} else {
-		$localPath = ROOT_PATH . ltrim($url, '/');
-		if (is_file($localPath)) {
-			$data = @file_get_contents($localPath);
-		}
+
+		return $url;
+	}
+
+	// Local paths are processed synchronously.
+	$data = false;
+	$localPath = ROOT_PATH . ltrim($url, '/');
+	if (is_file($localPath)) {
+		$data = @file_get_contents($localPath);
 	}
 	if (!$data) {
 		return $url;

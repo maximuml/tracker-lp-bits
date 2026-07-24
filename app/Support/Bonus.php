@@ -29,6 +29,10 @@ class Bonus
      * @param  array<string, mixed>  $settingBonus  The `bonus` setting group.
      * @param  array<int|string, array<int|string, int>>  $tagGrouped
      *                                                                 Map of torrent_id => [tag_id => 1].
+     * @param  \Closure(array<string, mixed>, float, float, float, float, float): void|null  $debugLog
+     *                                                                 Optional callback invoked for each torrent with the
+     *                                                                 per-torrent debug values used by the legacy
+     *                                                                 `calculate_seed_bonus()` diagnostic log line.
      * @return array<string, mixed>
      */
     public static function aggregateSeedBonus(
@@ -40,6 +44,7 @@ class Bonus
         mixed $zeroBonusFactor,
         float $medalAdditionalFactor,
         mixed $officialAdditionalFactor,
+        ?\Closure $debugLog = null,
     ): array {
         $donortimes_bonus = $settingBonus['donortimes'];
         $perseeding_bonus = $settingBonus['perseeding'];
@@ -72,7 +77,8 @@ class Bonus
             }
             $size = bcadd((string) $size, (string) $torrent['size']);
             $weeks_alive = ($timenow - strtotime($torrent['added'])) / $sectoweek;
-            $gb_size = $torrent['size'] / 1073741824;
+            $gb_size_raw = $torrent['size'] / 1073741824;
+            $gb_size = $gb_size_raw;
             if ($zeroBonusTag && isset($tagGrouped[$torrent['id']][$zeroBonusTag]) && is_numeric($zeroBonusFactor)) {
                 $gb_size = $gb_size * $zeroBonusFactor;
             }
@@ -87,6 +93,10 @@ class Bonus
                 $official_size = bcadd((string) $official_size, (string) $torrent['size']);
             }
             $official_a += $officialAIncrease;
+
+            if ($debugLog) {
+                $debugLog($torrent, $weeks_alive, $gb_size_raw, $gb_size, $temp, $officialAIncrease);
+            }
         }
 
         if ($count > $maxseeding_bonus) {

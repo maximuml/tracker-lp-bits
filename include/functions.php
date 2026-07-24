@@ -4954,6 +4954,12 @@ function calculate_seed_bonus($uid, $torrentIdArr = null): array
         $zeroBonusFactor,
         $medalAdditionalFactor,
         $officialAdditionalFactor,
+        function ($torrent, $weeks_alive, $gb_size_raw, $gb_size, $temp, $officialAIncrease) use ($logPrefix) {
+            do_log(sprintf(
+                "$logPrefix, torrent: %s, peer ID: %s, weeks: %s, size_raw: %s GB, size: %s GB, increase A: %s, increase official A: %s",
+                $torrent['id'], $torrent['peerID'] ?? '', $weeks_alive, $gb_size_raw, $gb_size, $temp, $officialAIncrease
+            ), "debug");
+        },
     );
     do_log("$logPrefix, result: " . json_encode($result));
 

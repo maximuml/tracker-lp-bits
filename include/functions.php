@@ -1296,77 +1296,17 @@ function get_if_restricted_is_open()
 }
 
 function menu ($selected = "home") {
-	global $lang_functions;
-	global $BASEURL,$CURUSER;
-	global $enableoffer, $enablespecial, $where_tweak;
-	global $USERUPDATESET;
-	//no this option in config.php
-    $enablerequest = 'yes';
-	$script_name = $_SERVER["SCRIPT_NAME"];
-	if (preg_match("/index/i", $script_name)) {
-		$selected = "home";
-	}elseif (preg_match("/forums/i", $script_name)) {
-		$selected = "forums";
-	}elseif (preg_match("/torrents/i", $script_name)) {
-		$selected = "torrents";
-	}elseif (preg_match("/special/i", $script_name)) {
-		$selected = "special";
-	}elseif (preg_match("/offers/i", $script_name) OR preg_match("/offcomment/i", $script_name)) {
-		$selected = "offers";
-	}elseif (preg_match("/upload/i", $script_name)) {
-		$selected = "upload";
-	}elseif (preg_match("/usercp/i", $script_name)) {
-		$selected = "usercp";
-	}elseif (preg_match("/topten/i", $script_name)) {
-		$selected = "topten";
-	}elseif (preg_match("/log/i", $script_name)) {
-		$selected = "log";
-	}elseif (preg_match("/rules/i", $script_name)) {
-		$selected = "rules";
-	}elseif (preg_match("/faq/i", $script_name)) {
-		$selected = "faq";
-    }elseif (preg_match("/contactstaff/i", $script_name)) {
-        $selected = "contactstaff";
-    }elseif (preg_match("/staff/i", $script_name)) {
-        $selected = "staff";
-	}else
-	$selected = "";
-	$menu = apply_filter('nexus_menu');
-	print ("<div id=\"nav\">");
-	if ($menu) {
-	    print $menu;
-    } else {
-	    $lang = get_langfolder_cookie();
-        $normalSectionName = get_searchbox_value(get_setting('main.browsecat'), 'section_name');
-        $specialSectionName = get_searchbox_value(get_setting('main.specialcat'), 'section_name');
-        print ("<ul id=\"mainmenu\" class=\"menu\">");
-        print ("<li" . ($selected == "home" ? " class=\"selected\"" : "") . "><a href=\"index.php\">" . $lang_functions['text_home'] . "</a></li>");
-        print ("<li" . ($selected == "forums" ? " class=\"selected\"" : "") . "><a href=\"forums.php\">".$lang_functions['text_forums']."</a></li>");
-        print ("<li" . ($selected == "torrents" ? " class=\"selected\"" : "") . "><a href=\"torrents.php\" rel='sub-menu'>".($normalSectionName[$lang] ?? $lang_functions['text_torrents'])."</a></li>");
-        if ($enablespecial == 'yes' && user_can('view_special_torrent'))
-            print ("<li" . ($selected == "special" ? " class=\"selected\"" : "") . "><a href=\"special.php\">".($specialSectionName[$lang] ?? $lang_functions['text_special'])."</a></li>");
-        if ($enableoffer == 'yes')
-            print ("<li" . ($selected == "offers" ? " class=\"selected\"" : "") . "><a href=\"offers.php\">".$lang_functions['text_offers']."</a></li>");
-        print ("<li" . ($selected == "upload" ? " class=\"selected\"" : "") . "><a href=\"upload.php\">".$lang_functions['text_upload']."</a></li>");
-        //	print ("<li" . ($selected == "usercp" ? " class=\"selected\"" : "") . "><a href=\"usercp.php\">".$lang_functions['text_user_cp']."</a></li>");
-        if (user_can('topten')) {
-            print ("<li" . ($selected == "topten" ? " class=\"selected\"" : "") . "><a href=\"topten.php\">".$lang_functions['text_top_ten']."</a></li>");
-        }
-        if (user_can('log')) {
-            print ("<li" . ($selected == "log" ? " class=\"selected\"" : "") . "><a href=\"log.php\">".$lang_functions['text_log']."</a></li>");
-        }
-        print ("<li" . ($selected == "rules" ? " class=\"selected\"" : "") . "><a href=\"rules.php\">".$lang_functions['text_rules']."</a></li>");
-        print ("<li" . ($selected == "faq" ? " class=\"selected\"" : "") . "><a href=\"faq.php\">".$lang_functions['text_faq']."</a></li>");
-        if (user_can('staffmem')) {
-            print ("<li" . ($selected == "staff" ? " class=\"selected\"" : "") . "><a href=\"staff.php\">".$lang_functions['text_staff']."</a></li>");
-        }
-        print ("<li" . ($selected == "contactstaff" ? " class=\"selected\"" : "") . "><a href=\"contactstaff.php\">".$lang_functions['text_contactstaff']."</a></li>");
-        print ("</ul>");
-    }
-	print ("</div>");
-	if ($CURUSER){
-		if ($where_tweak == 'yes')
-			$USERUPDATESET[] = "page = ".sqlesc($selected);
+	global $lang_functions, $CURUSER, $enableoffer, $enablespecial, $where_tweak, $USERUPDATESET;
+	$result = \App\Support\Menu::render(
+		$_SERVER['SCRIPT_NAME'] ?? '',
+		(array) $lang_functions,
+		(string) $enableoffer,
+		(string) $enablespecial,
+		(string) apply_filter('nexus_menu'),
+	);
+	echo $result['html'];
+	if ($CURUSER && $where_tweak == 'yes') {
+		$USERUPDATESET[] = "page = ".sqlesc($result['selected']);
 	}
 }
 function get_css_row() {
@@ -1445,10 +1385,7 @@ function logincookie($id, $authKey, $duration = 0)
 
 function set_langfolder_cookie($folder, $expires = 0x7fffffff)
 {
-	if ($expires != 0x7fffffff)
-	$expires = time()+$expires;
-
-	setcookie("c_lang_folder", $folder, $expires, "/", "", false, true);
+	\App\Support\Locale::setFolderCookie((string) $folder, (int) $expires);
 }
 
 function get_protocol_prefix() {
@@ -1460,10 +1397,7 @@ function get_langid_from_langcookie($lang = '')
     if (empty($lang)) {
         $lang = get_langfolder_cookie();
     }
-    $row = \App\Models\Language::query()->where('site_lang', 1)->where("site_lang_folder", $lang)->orderBy("id")->first();
-    return $row->id ?? 0;
-//	$row = mysql_fetch_array(sql_query("SELECT id FROM language WHERE site_lang = 1 AND site_lang_folder = " . sqlesc($lang) . "ORDER BY id ASC")) or sqlerr(__FILE__, __LINE__);
-//	return $row['id'];
+    return \App\Support\Locale::idFromFolder((string) $lang);
 }
 
 function make_folder($pre, $folder_name)
@@ -1504,12 +1438,7 @@ function cover_thumb_url($url, $maxWidth = 240, $maxHeight = 360, $quality = 82)
 	);
 }
 function logoutcookie() {
-//	setcookie("c_secure_uid", "", 0x7fffffff, "/", "", false, true);
-	setcookie("c_secure_pass", "", 0x7fffffff, "/", "", isHttps(), true);
-// setcookie("c_secure_ssl", "", 0x7fffffff, "/", "", false, true);
-//	setcookie("c_secure_tracker_ssl", "", 0x7fffffff, "/", "", false, true);
-//	setcookie("c_secure_login", "", 0x7fffffff, "/", "", false, true);
-//	setcookie("c_lang_folder", "", 0x7fffffff, "/", "", false, true);
+	\App\Support\AuthCookie::clear();
 }
 
 function base64 ($string, $encode=true) {
@@ -1517,24 +1446,7 @@ function base64 ($string, $encode=true) {
 }
 
 function loggedinorreturn($mainpage = false) {
-	global $CURUSER,$BASEURL;
-    $script = nexus()->getScript();
-	if (!$CURUSER) {
-	    if ($script == 'ajax') {
-	        exit(fail('Not login!', $_POST));
-        }
-		if ($mainpage) {
-            nexus_redirect("login.php");
-        } else {
-			$to = $_SERVER["REQUEST_URI"];
-			$to = basename($to);
-            nexus_redirect("login.php?returnto=" . rawurlencode($to));
-		}
-		exit();
-	}
-    if ($CURUSER['enabled'] != 'yes' && $script != 'self-enable') {
-        nexus_redirect('self-enable.php');
-    }
+	\App\Support\LegacyAuth::requireLogin((bool) $mainpage);
 }
 
 function deletetorrent($id, $notify = false) {

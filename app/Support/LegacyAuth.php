@@ -288,6 +288,37 @@ final class LegacyAuth
     }
 
     /**
+     * Legacy login guard: if no current user, redirect to login.php
+     * (with returnto for non-main pages, or just login.php for main
+     * pages). For ajax calls, return a JSON `fail()` response. If the
+     * user is disabled and the current script is not self-enable, redirect
+     * to self-enable.php.
+     *
+     * Mirrors `loggedinorreturn()`.
+     */
+    public static function requireLogin(bool $mainPage = false): void
+    {
+        $CURUSER = $GLOBALS['CURUSER'] ?? null;
+
+        if (! $CURUSER) {
+            if (nexus()->getScript() === 'ajax') {
+                exit(fail('Not login!', $_POST));
+            }
+
+            if ($mainPage) {
+                nexus_redirect('login.php');
+            } else {
+                nexus_redirect('login.php?returnto=' . rawurlencode(basename($_SERVER['REQUEST_URI'] ?? '')));
+            }
+            exit;
+        }
+
+        if (($CURUSER['enabled'] ?? '') !== 'yes' && nexus()->getScript() !== 'self-enable') {
+            nexus_redirect('self-enable.php');
+        }
+    }
+
+    /**
      * Look up a user id by username (case-insensitive). Aborts on failure.
      */
     public static function userIdFromName(string $username): int

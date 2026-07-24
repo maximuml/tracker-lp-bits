@@ -99,4 +99,33 @@ final class Locale
         return 'lang/' . $folder . '/lang_' . $scriptName;
     }
 
+    /**
+     * Set the `c_lang_folder` cookie.
+     *
+     * Mirrors `set_langfolder_cookie()`.
+     */
+    public static function setFolderCookie(string $folder, int $expires = 0x7fffffff): void
+    {
+        if ($expires !== 0x7fffffff) {
+            $expires = time() + $expires;
+        }
+
+        setcookie('c_lang_folder', $folder, $expires, '/', '', false, true);
+    }
+
+    /**
+     * Return the language id for the given folder name.
+     *
+     * Mirrors `get_langid_from_langcookie()`.
+     */
+    public static function idFromFolder(string $lang): int
+    {
+        $row = Language::query()
+            ->where('site_lang', 1)
+            ->where('site_lang_folder', $lang)
+            ->orderBy('id')
+            ->first();
+
+        return (int) ($row->id ?? 0);
+    }
 }

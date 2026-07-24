@@ -1105,38 +1105,6 @@ function maxslots () {
 	}
 }
 
-function WriteConfig ($configname = NULL, $config = NULL) {
-	global $lang_functions, $CONFIGURATIONS;
-
-	if (file_exists('config/allconfig.php')) {
-		require('config/allconfig.php');
-	}
-	if ($configname) {
-		$$configname=$config;
-	}
-	$path = './config/allconfig.php';
-	if (!file_exists($path) || !is_writable ($path)) {
-		stdmsg($lang_functions['std_error'], $lang_functions['std_cannot_read_file']."[<b>".htmlspecialchars($path)."</b>]".$lang_functions['std_access_permission_note']);
-	}
-	$data = "<?php\n";
-	foreach ($CONFIGURATIONS as $CONFIGURATION) {
-		$data .= "\$$CONFIGURATION=".getExportedValue($$CONFIGURATION).";\n";
-	}
-	$fp = @fopen ($path, 'w');
-	if (!$fp) {
-		stdmsg($lang_functions['std_error'], $lang_functions['std_cannot_open_file']."[<b>".htmlspecialchars($path)."</b>]".$lang_functions['std_to_save_info'].$lang_functions['std_access_permission_note']);
-	}
-	$Res = @fwrite($fp, $data);
-	if (empty($Res)) {
-		stdmsg($lang_functions['std_error'], $lang_functions['text_cannot_save_info_in']."[<b>".htmlspecialchars($path)."</b>]".$lang_functions['std_access_permission_note']);
-	}
-	fclose($fp);
-	return true;
-}
-
-function getExportedValue($input,$t = null) {
-	return \App\Support\Codec::phpExport($input, $t);
-}
 
 function dbconn($autoclean = false, $doLogin = true)
 {

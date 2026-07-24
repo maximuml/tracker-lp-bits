@@ -306,12 +306,7 @@ function get_slr_color($ratio)
 
 function write_log($text, $security = "normal")
 {
-    \App\Models\SiteLog::query()->insert([
-        'added' => now(),
-        'txt' => $text,
-        'security_level' => $security,
-        'uid' => get_user_id(),
-    ]);
+    \App\Support\Log::write((string) $text, (string) $security, get_user_id());
 }
 
 
@@ -807,9 +802,7 @@ function get_agent($peer_id, $agent)
 function EmailBanned($newEmail)
 {
 	$newEmail = trim(strtolower((string) $newEmail));
-	$sql = sql_query("SELECT * FROM bannedemails") or sqlerr(__FILE__, __LINE__);
-	$list = mysql_fetch_array($sql);
-	return \App\Support\Email::matchesRegexList($newEmail, (string) ($list['value'] ?? ''));
+	return \App\Support\Email::matchesRegexList($newEmail, \App\Support\EmailDomain::banned());
 }
 
 function EmailAllowed($newEmail)
@@ -819,16 +812,12 @@ function EmailAllowed($newEmail)
 		return true;
 	}
 	$newEmail = trim(strtolower((string) $newEmail));
-	$sql = sql_query("SELECT * FROM allowedemails") or sqlerr(__FILE__, __LINE__);
-	$list = mysql_fetch_array($sql);
-	return \App\Support\Email::matchesRegexList($newEmail, (string) ($list['value'] ?? ''));
+	return \App\Support\Email::matchesRegexList($newEmail, \App\Support\EmailDomain::allowed());
 }
 
 function allowedemails()
 {
-	$sql = sql_query("SELECT * FROM allowedemails") or sqlerr(__FILE__, __LINE__);
-	$list = mysql_fetch_array($sql);
-	return $list['value'];
+	return \App\Support\EmailDomain::allowed();
 }
 
 function nexus_redirect($url)

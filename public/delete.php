@@ -33,23 +33,23 @@ $rt = intval($_POST["reasontype"] ?? 0);
 if (!is_int($rt) || $rt < 1 || $rt > 5)
 	bark($lang_delete['std_invalid_reason']."$rt.");
 
-$reason = $_POST["reason"];
+$reason = $_POST["reason"] ?? [];
 
 if ($rt == 1)
 	$reasonstr = "Dead: 0 seeders, 0 leechers = 0 peers total";
 elseif ($rt == 2)
-	$reasonstr = "Dupe" . ($reason[0] ? (": " . trim($reason[0])) : "!");
+	$reasonstr = "Dupe" . (!empty($reason[0]) ? (": " . trim($reason[0])) : "!");
 elseif ($rt == 3)
-	$reasonstr = "Nuked" . ($reason[1] ? (": " . trim($reason[1])) : "!");
+	$reasonstr = "Nuked" . (!empty($reason[1]) ? (": " . trim($reason[1])) : "!");
 elseif ($rt == 4)
 {
-	if (!$reason[2])
+	if (empty($reason[2]))
 		bark($lang_delete['std_describe_violated_rule']);
   $reasonstr = $SITENAME." rules broken: " . trim($reason[2]);
 }
 else
 {
-	if (!$reason[3])
+	if (empty($reason[3]))
 		bark($lang_delete['std_enter_reason']);
   $reasonstr = trim($reason[3]);
 }

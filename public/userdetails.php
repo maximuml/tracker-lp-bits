@@ -451,19 +451,19 @@ if (user_can('prfmanage') && $user["class"] < get_user_class())
 	print("<input type=\"hidden\" name=\"userid\" value=\"".$id."\" />");
 	print("<input type=\"hidden\" name=\"returnto\" value=\"".htmlspecialchars("userdetails.php?id=$id")."\" />");
 	print("<table width=\"100%\" class=\"main\" border=\"1\" cellspacing=\"0\" cellpadding=\"5\">\n");
-	tr($lang_userdetails['row_title'], "<input type=\"text\" size=\"60\" name=\"title\" value=\"" . htmlspecialchars(trim($user['title'])) . "\" />", 1);
-	$avatar = htmlspecialchars(trim($user["avatar"]));
+	tr($lang_userdetails['row_title'], "<input type=\"text\" size=\"60\" name=\"title\" value=\"" . htmlspecialchars(trim((string)$user['title'])) . "\" />", 1);
+	$avatar = htmlspecialchars(trim((string)$user["avatar"]));
 
 	tr($lang_userdetails['row_privacy_level'], "<input type=\"radio\" name=\"privacy\" value=\"low\"".($user["privacy"] == "low" ? " checked=\"checked\"" : "")." />".$lang_userdetails['radio_low']."<input type=\"radio\" name=\"privacy\" value=\"normal\"".($user["privacy"] == "normal" ? " checked=\"checked\"" : "")." />".$lang_userdetails['radio_normal']."<input type=\"radio\" name=\"privacy\" value=\"strong\"".($user["privacy"] == "strong" ? " checked=\"checked\"" : "")." />".$lang_userdetails['radio_strong'], 1);
 	tr($lang_userdetails['row_avatar_url'], "<input type=\"text\" size=\"60\" name=\"avatar\" value=\"".$avatar."\" />", 1);
-	$signature = trim($user["signature"]);
+	$signature = trim((string)$user["signature"]);
 	tr($lang_userdetails['row_signature'], "<textarea cols=\"60\" rows=\"6\" name=\"signature\">".$signature."</textarea>", 1);
 
 	if (get_user_class() == UC_STAFFLEADER)
 	{
 		tr($lang_userdetails['row_donor_status'], "<input type=\"radio\" name=\"donor\" value=\"yes\"" .($user["donor"] == "yes" ? " checked=\"checked\"" : "")." />".$lang_userdetails['radio_yes']." <input type=\"radio\" name=\"donor\" value=\"no\"" .($user["donor"] == "no" ? " checked=\"checked\"" : "").">".$lang_userdetails['radio_no'], 1);
-		tr($lang_userdetails['row_donated'], "USD: <input type=\"text\" size=\"5\" name=\"donated\" value=\"" . htmlspecialchars($user['donated']) . "\" />&nbsp;&nbsp;&nbsp;&nbsp;CNY: <input type=\"text\" size=\"5\" name=\"donated_cny\" value=\"" . htmlspecialchars($user['donated_cny']) . "\" />" . $lang_userdetails['text_transaction_memo'] . "<input type=\"text\" size=\"50\" name=\"donation_memo\" />", 1);
-        tr($lang_userdetails['row_donoruntil'], "<input type=\"text\" name=\"donoruntil\" value=\"".htmlspecialchars($user["donoruntil"])."\" /> ".$lang_userdetails['text_donoruntil_note'], 1);
+		tr($lang_userdetails['row_donated'], "USD: <input type=\"text\" size=\"5\" name=\"donated\" value=\"" . htmlspecialchars((string)$user['donated']) . "\" />&nbsp;&nbsp;&nbsp;&nbsp;CNY: <input type=\"text\" size=\"5\" name=\"donated_cny\" value=\"" . htmlspecialchars((string)$user['donated_cny']) . "\" />" . $lang_userdetails['text_transaction_memo'] . "<input type=\"text\" size=\"50\" name=\"donation_memo\" />", 1);
+        tr($lang_userdetails['row_donoruntil'], "<input type=\"text\" name=\"donoruntil\" value=\"".htmlspecialchars((string)$user["donoruntil"])."\" /> ".$lang_userdetails['text_donoruntil_note'], 1);
 	}
 	if (user_can('user-change-class')) {
         $maxclass = get_user_class() - 1;
@@ -471,11 +471,11 @@ if (user_can('prfmanage') && $user["class"] < get_user_class())
         tr($lang_userdetails['row_class'], $classselect . $migratedHelp, 1);
     }
 	tr($lang_userdetails['row_vip_by_bonus'], "<input type=\"radio\" name=\"vip_added\" value=\"yes\"" .($user["vip_added"] == "yes" ? " checked=\"checked\"" : "")." disabled='disabled'/>".$lang_userdetails['radio_yes']." <input type=\"radio\" name=\"vip_added\" value=\"no\"" .($user["vip_added"] == "no" ? " checked=\"checked\"" : "")." disabled='disabled'/>".$lang_userdetails['radio_no'].$migratedHelp, 1);
-	tr($lang_userdetails['row_vip_until'], "<input type=\"text\" name=\"vip_until\" value=\"".htmlspecialchars($user["vip_until"])."\" disabled='disabled'/> ".$lang_userdetails['text_vip_until_note']. $migratedHelp, 1);
-	$supportlang = htmlspecialchars($user["supportlang"]);
-	$supportfor = htmlspecialchars($user["supportfor"]);
-	$pickfor = htmlspecialchars($user["pickfor"]);
-	$staffduties = htmlspecialchars($user["stafffor"]);
+	tr($lang_userdetails['row_vip_until'], "<input type=\"text\" name=\"vip_until\" value=\"".htmlspecialchars((string)$user["vip_until"])."\" disabled='disabled'/> ".$lang_userdetails['text_vip_until_note']. $migratedHelp, 1);
+	$supportlang = htmlspecialchars((string)$user["supportlang"]);
+	$supportfor = htmlspecialchars((string)$user["supportfor"]);
+	$pickfor = htmlspecialchars((string)$user["pickfor"]);
+	$staffduties = htmlspecialchars((string)$user["stafffor"]);
 
 	tr($lang_userdetails['row_staff_duties'], "<textarea cols=\"60\" rows=\"6\" name=\"staffduties\">".$staffduties."</textarea>", 1);
 	tr($lang_userdetails['row_support_language'], "<input type=\"text\" name=\"supportlang\" value=\"".$supportlang."\" />", 1);
@@ -537,7 +537,7 @@ if (user_can('prfmanage') && $user["class"] < get_user_class())
 	}
 
 
-	$elapsedlw = get_elapsed_time(strtotime($user["lastwarned"]));
+	$elapsedlw = $user["lastwarned"] ? get_elapsed_time(strtotime($user["lastwarned"])) : '';
 	print("<tr><td align=\"left\" class=\"rowfollow\">".$lang_userdetails['text_times_warned']."</td><td align=\"left\" class=\"rowfollow\">".$user['timeswarned']."</td></tr>\n");
 
 	if ($user["timeswarned"] == 0)
@@ -590,7 +590,7 @@ JS;
 		}
 		print("</td></tr>");
 	}else{
-		print("<td class=\"rowfollow\">".$lang_userdetails['text_no_warned']."</td></tr>\n");
+		print("<td class=\"rowfollow\">".$lang_userdetails['text_not_warned']."</td></tr>\n");
 	}
 	print("</table></td></tr>");
 	tr($lang_userdetails['row_enabled'], $migratedHelp, 1);

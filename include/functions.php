@@ -4784,16 +4784,22 @@ function build_search_box_category_table($mode, $checkboxValue, $categoryHrefPre
                     }
                 }
                 $icon = $item->icon;
-                $iconFolder = trim($icon->folder, '/');
-                $langAndFile = sprintf('%s%s',  $icon->multilang == 'yes' ? "$lang/" : "", $item->image);
-                if (file_exists(getFullDirectory("pic/category/$iconFolder/$langAndFile"))) {
-                    $backgroundImagePath = "pic/category/$iconFolder/$langAndFile";
+                if ($icon) {
+                    $iconFolder = trim($icon->folder, '/');
+                    $langAndFile = sprintf('%s%s',  $icon->multilang == 'yes' ? "$lang/" : "", $item->image);
+                    if (file_exists(getFullDirectory("pic/category/$iconFolder/$langAndFile"))) {
+                        $backgroundImagePath = "pic/category/$iconFolder/$langAndFile";
+                    } else {
+                        $backgroundImagePath = "pic/category/{$searchBox->name}/$iconFolder/$langAndFile";
+                    }
+                    $styleAttr = "background-image: url({$backgroundImagePath})";
                 } else {
-                    $backgroundImagePath = "pic/category/{$searchBox->name}/$iconFolder/$langAndFile";
+                    $styleAttr = '';
                 }
+                $style = $styleAttr ? " style=\"{$styleAttr}\"" : '';
                 $tdContent = <<<TDCONTENT
 <input type="checkbox" id="cat{$item->id}" name="cat{$item->id}" value="{$checkboxValue}"{$checked} />
-<a href="{$categoryHrefPrefix}cat={$item->id}"><img src="pic/cattrans.gif" class="{$item->class_name}" alt="{$item->name}" title="{$item->name}" style="background-image: url({$backgroundImagePath})" /></a>
+<a href="{$categoryHrefPrefix}cat={$item->id}"><img src="pic/cattrans.gif" class="{$item->class_name}" alt="{$item->name}" title="{$item->name}"{$style} /></a>
 TDCONTENT;
             } else {
                 $tdContent = sprintf(

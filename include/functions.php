@@ -2161,20 +2161,15 @@ function get_cat_folder($cat = 101)
 		global $CURUSER, $CURLANGDIR;
         $catrow = get_category_row($cat);
 		$catmode = $catrow['catmodename'];
-//		$caticonrow = get_category_icon_row($CURUSER['caticon']);
-        /**
-         * @since v1.6
-         * use setting, not user's caticon, that field make no sense!
-         */
 		$caticonrow = get_category_icon_row($catrow['icon_id'] ?: 1);
-		$path = sprintf('category/%s/%s', trim($catmode, '/'), trim($caticonrow['folder'], '/'));
-		if ($caticonrow['multilang'] == 'yes') {
-		    $path .= '/' . trim($CURLANGDIR, '/');
-        }
-		do_log("cat: $cat, path: $path", 'debug');
-        $catPath[$cat] = $path;
+		$catPath[$cat] = \App\Support\Path::categoryFolder(
+			$catmode,
+			$caticonrow['folder'],
+			($caticonrow['multilang'] ?? '') == 'yes',
+			$CURLANGDIR
+		);
 	}
-	return $catPath[$cat] ?? '';
+	return $catPath[$cat];
 }
 
 function get_style_highlight()
@@ -2825,11 +2820,8 @@ function get_langid_from_langcookie($lang = '')
 
 function make_folder($pre, $folder_name)
 {
-	$path = $pre . $folder_name;
-	$path = ROOT_PATH . ltrim($path, './');
+	$path = \App\Support\Path::makeFolder($pre, $folder_name, ROOT_PATH);
 	do_log($path);
-	if(!is_dir($path))
-	mkdir($path,0777,true);
 	return $path;
 }
 
@@ -4760,16 +4752,7 @@ function saveSetting(string $prefix, array $nameAndValue, string $autoload = 'ye
 
 function getFullDirectory($dir)
 {
-    if (is_file($dir) && file_exists($dir)) {
-        return $dir;
-    }
-    if (!is_dir($dir)) {
-        $dir = ROOT_PATH . $dir;
-    }
-    if (is_dir($dir)) {
-        return realpath($dir);
-    }
-    return $dir;
+	return \App\Support\Path::resolve($dir, ROOT_PATH);
 }
 
 function checkGuestVisit()

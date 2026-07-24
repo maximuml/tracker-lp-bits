@@ -3036,7 +3036,6 @@ function deletetorrent($id, $notify = false) {
         \Nexus\Database\NexusDB::statement("DELETE FROM $x WHERE torrent in ($idStr)");
 	}
     \Nexus\Database\NexusDB::statement("DELETE FROM hit_and_runs WHERE torrent_id in ($idStr)");
-    \Nexus\Database\NexusDB::statement("DELETE FROM claims WHERE torrent_id in ($idStr)");
     foreach ($torrentInfo as $_id => $info) {
         if ($torrentInfo->has($_id)) {
             $torrentRep->delPiecesHashCache($torrentInfo->get($_id)->pieces_hash);

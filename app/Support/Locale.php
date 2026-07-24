@@ -83,4 +83,19 @@ final class Locale
         return 'lang/' . $folder . '/lang_' . $scriptName;
     }
 
+    /**
+     * Return the language id for the current language folder, defaulting
+     * to English (6) if none is found.
+     *
+     * Mirrors `get_guest_lang_id()`.
+     */
+    public static function guestId(string $langFolder): int
+    {
+        $result = NexusDB::getInstance()->query(
+            'SELECT id FROM language WHERE site_lang_folder=' . sqlesc($langFolder) . ' AND site_lang=1'
+        );
+        $row = NexusDB::getInstance()->fetchAssoc($result);
+
+        return $row['id'] ?? 6;
+    }
 }

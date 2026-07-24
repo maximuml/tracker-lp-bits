@@ -72,10 +72,7 @@ function stdmsg($heading, $text, $htmlstrip = false) {
 
 function stderr($heading, $text, $htmlstrip = true, $head = true, $foot = true, $die = true)
 {
-	if ($head) stdhead();
-	stdmsg($heading, $text, $htmlstrip);
-	if ($foot) stdfoot();
-	if ($die) die;
+	\App\Support\LegacyResponse::abort($heading, $text, $htmlstrip, $head, $foot, $die);
 }
 
 function sqlerr($file = '', $line = '')
@@ -505,35 +502,7 @@ function is_valid_user_class($class)
 }
 
 function int_check($value,$stdhead = false, $stdfood = true, $die = true, $log = true) {
-	global $lang_functions;
-	global $CURUSER;
-	if (is_array($value))
-	{
-		foreach ($value as $val) int_check ($val);
-	}
-	else
-	{
-		if (!is_valid_id($value)) {
-			$msg = "Invalid ID Attempt: Username: ".$CURUSER["username"]." - UserID: ".$CURUSER["id"]." - UserIP : ".getip();
-			if ($log) {
-                write_log($msg,'mod');
-            }
-            do_log($msg, 'error');
-			if ($stdhead)
-				stderr($lang_functions['std_error'],$lang_functions['std_invalid_id']);
-			else
-			{
-				print ("<h2>".$lang_functions['std_error']."</h2><table width=\"100%\" border=\"1\" cellspacing=\"0\" cellpadding=\"10\"><tr><td class=\"text\">");
-				print ($lang_functions['std_invalid_id']."</td></tr></table>");
-			}
-			if ($stdfood)
-				stdfoot();
-			if ($die)
-				die;
-		}
-		else
-			return true;
-	}
+	return \App\Support\LegacyResponse::assertId($value, $stdhead, $stdfood, $die, $log);
 }
 
 function is_valid_id($id)
@@ -3658,12 +3627,7 @@ function classlist($selectname,$maxclass, $selected, $minClass = 0, $includeNoCl
 }
 
 function permissiondenied($allowMinimumClass = null){
-	global $lang_functions;
-	if ($allowMinimumClass === null) {
-        stderr($lang_functions['std_error'], $lang_functions['std_permission_denied']);
-    } else {
-        stderr($lang_functions['std_sorry'],$lang_functions['std_permission_denied_only'].get_user_class_name($allowMinimumClass,false,true,true).sprintf($lang_functions['std_or_above_can_view'], \App\Models\Setting::getSiteName()),false);
-    }
+	\App\Support\LegacyResponse::permissionDenied($allowMinimumClass);
 }
 
 function gettime($time, $withago = true, $twoline = false, $forceago = false, $oneunit = false, $isfuturetime = false){
@@ -4242,35 +4206,7 @@ function get_user_class_image($class){
 }
 
 function user_can_upload($where = "torrents"){
-	global $CURUSER,$upload_class,$enablespecial,$uploadspecial_class, $lang_functions;
-	if ($CURUSER["uploadpos"] != 'yes') {
-        return false;
-    }
-    $uploadDenyApprovalDenyCount = get_setting('main.upload_deny_approval_deny_count');
-    $approvalDenyCount = \App\Models\Torrent::query()->where('owner', $CURUSER['id'])
-        ->where('approval_status', \App\Models\Torrent::APPROVAL_STATUS_DENY)
-        ->count()
-    ;
-    if ($uploadDenyApprovalDenyCount > 0 && $approvalDenyCount >= $uploadDenyApprovalDenyCount) {
-        stderr($lang_functions['std_sorry'], sprintf($lang_functions['approval_deny_reach_upper_limit'], $uploadDenyApprovalDenyCount),false);
-    }
-	if ($where == "torrents")
-	{
-        $offerSkipApprovedCount = get_setting('main.offer_skip_approved_count');
-        if ($CURUSER['offer_allowed_count'] >= $offerSkipApprovedCount) {
-            return true;
-        }
-		if (user_can('upload'))
-			return true;
-		if (get_if_restricted_is_open())
-			return true;
-	}
-	if ($where == "music")
-	{
-		if ($enablespecial == 'yes' && user_can('uploadspecial'))
-			return true;
-	}
-	return false;
+	return \App\Support\LegacyResponse::canUpload($where);
 }
 
 function torrent_selection($name,$selname,$listname,$selectedid = 0, $mode = 0)

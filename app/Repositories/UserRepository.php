@@ -686,7 +686,6 @@ class UserRepository extends BaseRepository
         $tables = [
             'users' => 'id',
             'hit_and_runs' => 'uid',
-            'claims' => 'uid',
             'exam_users' => 'uid',
             'exam_progress' => 'uid',
             'user_metas' => 'uid',

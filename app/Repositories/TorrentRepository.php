@@ -839,7 +839,6 @@ HTML;
     {
         $size = 500;
         $page = 1;
-        $key = $this->getBoughtUserCacheKey($torrentId);
         $redis = NexusDB::redis();
         $total = 0;
         while (true) {
@@ -848,16 +847,14 @@ HTML;
                 break;
             }
             foreach ($list as $item) {
-                $redis->hSet($key, $item->uid, 1);
+                $key = $this->getBoughtUserCacheKey($torrentId, $item->uid);
+                $redis->set($key, 1, ['EX' => 86400*30]);
                 $total += 1;
-                do_log(sprintf("hset %s %s 1", $key, $item->uid));
+                do_log(sprintf("set %s 1", $key));
             }
             $page++;
         }
         do_log("torrent_purchasers:$torrentId LOAD DONE, total: $total");
-        if ($total > 0) {
-            $redis->expire($key, 86400*30);
-        }
         return $total;
     }
 
@@ -967,7 +964,7 @@ HTML;
      * @param $torrentId
      * @return string
      */
-    public function getBoughtUserCacheKey($torrentId, $userId = ''): string
+    public function getBoughtUserCacheKey($torrentId, $userId): string
     {
         return  sprintf("%s:%s:%s", self::BOUGHT_USER_CACHE_KEY_PREFIX, $torrentId, $userId);
     }

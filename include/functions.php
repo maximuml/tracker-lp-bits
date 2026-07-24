@@ -1710,25 +1710,20 @@ function validip_format($ip)
 }
 
 function maxslots () {
-	global $lang_functions;
-	global $CURUSER, $maxdlsystem;
-	$gigs = $CURUSER["uploaded"] / (1024*1024*1024);
-	$ratio = (($CURUSER["downloaded"] > 0) ? ($CURUSER["uploaded"] / $CURUSER["downloaded"]) : 1);
-	if ($ratio < 0.5 || $gigs < 5) $max = 1;
-	elseif ($ratio < 0.65 || $gigs < 6.5) $max = 2;
-	elseif ($ratio < 0.8 || $gigs < 8) $max = 3;
-	elseif ($ratio < 0.95 || $gigs < 9.5) $max = 4;
-	else $max = 0;
+	global $lang_functions, $CURUSER, $maxdlsystem;
+	$max = \App\Support\Slots::maxDownloadSlots((float) $CURUSER["uploaded"], (float) $CURUSER["downloaded"]);
 	if ($maxdlsystem == "yes") {
 		if (get_user_class() < UC_VIP) {
 			if ($max > 0)
-			print ("<font class='color_slots'>".$lang_functions['text_slots']."</font><a href=\"faq.php#id215\">$max</a>");
+				print ("<font class='color_slots'>".$lang_functions['text_slots']."</font><a href='faq.php#id215'>$max</a>");
 			else
+				print ("<font class='color_slots'>".$lang_functions['text_slots']."</font>".$lang_functions['text_unlimited']);
+		} else {
 			print ("<font class='color_slots'>".$lang_functions['text_slots']."</font>".$lang_functions['text_unlimited']);
-		}else
+		}
+	} else {
 		print ("<font class='color_slots'>".$lang_functions['text_slots']."</font>".$lang_functions['text_unlimited']);
-	}else
-	print ("<font class='color_slots'>".$lang_functions['text_slots']."</font>".$lang_functions['text_unlimited']);
+	}
 }
 
 function WriteConfig ($configname = NULL, $config = NULL) {

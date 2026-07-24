@@ -37,5 +37,6 @@ class DatabaseSeeder extends Seeder
         $this->call(SysoppanelTableSeeder::class);
         $this->call(TorrentsStateTableSeeder::class);
         $this->call(TagsTableSeeder::class);
+        $this->call(SettingsTableSeeder::class);
     }
 }

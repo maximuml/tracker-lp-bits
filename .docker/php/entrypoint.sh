@@ -61,6 +61,10 @@ VENDOR_AUTOLOAD_FILE="${ROOT_PATH}/vendor/autoload.php"
 
 chown -R www-data:www-data $ROOT_PATH
 
+# Ensure attachment storage directory exists (matches attachment.savedirectory)
+mkdir -p ${ROOT_PATH}/attachments
+chown -R www-data:www-data ${ROOT_PATH}/attachments
+
 if [ "$SERVICE_NAME" = "php" ]; then
     if [ ! -f "$ENV_FILE" ] || [ ! -f "$VENDOR_AUTOLOAD_FILE" ]; then
       echo_info ".env file: $ENV_FILE or vendor autoload file: $VENDOR_AUTOLOAD_FILE not exists, copy $SOURCE_DIR to $TARGET_DIR ..."

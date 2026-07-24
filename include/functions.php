@@ -77,9 +77,7 @@ function stderr($heading, $text, $htmlstrip = true, $head = true, $foot = true, 
 
 function sqlerr($file = '', $line = '')
 {
-	print("<table border=\"0\" bgcolor=\"blue\" align=\"left\" cellspacing=\"0\" cellpadding=\"10\" style=\"background: blue;\">" .
-	"<tr><td class=\"embedded\"><font color=\"white\"><h1>SQL Error</h1>\n" .
-	"<b>" . mysql_error() . ($file != '' && $line != '' ? "<p>in $file, line $line</p>" : "") . "</b></font></td></tr></table>");
+	print(\App\Support\Frame::sqlError(mysql_error(), (string) $file, (string) $line));
 	die;
 }
 
@@ -217,11 +215,9 @@ function formatTextAlign($text, $align): string
 }
 
 
-function format_urls($text, $newWindow = false) {
-//	return preg_replace("/((https?|ftp|gopher|news|telnet|mms|rtsp):\/\/[^()\[\]<>\s]+)/ei", "formatUrl('\\1', ".($newWindow==true ? 1 : 0).", '', 'faqlink')", $text);
-	return preg_replace_callback("/((https?|ftp|gopher|news|telnet|mms|rtsp):\/\/[^()\[\]<>\s]+)/i", function ($matches) use ($newWindow) {
-	    return formatUrl($matches[1], $newWindow, '', 'faqlink');
-    }, $text);
+function format_urls($text, $newWindow = false)
+{
+	return \App\Support\BBCode::formatUrls((string) $text, (bool) $newWindow);
 }
 function format_comment($text, $strip_html = true, $xssclean = false, $newtab = true, $imageresizer = true, $image_max_width = 700, $enableimage = true, $enableflash = true , $imagenum = -1, $image_max_height = 0)
 {
@@ -716,57 +712,17 @@ foreach ($quickSmilies as $smily) {
 <?php
 }
 
-function begin_compose($title = "",$type="new", $body="", $hassubject=true, $subject="", $maxsubjectlength=100){
+function begin_compose($title = "", $type = "new", $body = "", $hassubject = true, $subject = "", $maxsubjectlength = 100)
+{
 	global $lang_functions;
-	if ($title)
-		print("<h1 align=\"center\">".$title."</h1>");
-	switch ($type){
-		case 'new':
-		{
-			$framename = $lang_functions['text_new'];
-			break;
-		}
-		case 'reply':
-		{
-			$framename = $lang_functions['text_reply'];
-			break;
-		}
-		case 'quote':
-		{
-			$framename = $lang_functions['text_quote'];
-			break;
-		}
-		case 'edit':
-		{
-			$framename = $lang_functions['text_edit'];
-			break;
-		}
-		default:
-		{
-			$framename = $lang_functions['text_new'];
-			break;
-		}
-	}
-	begin_frame($framename, true);
-	print("<table class=\"main\" width=\"100%\" border=\"1\" cellspacing=\"0\" cellpadding=\"5\">\n");
-	if ($hassubject)
-		print("<tr><td class=\"rowhead\">".$lang_functions['row_subject']."</td>" .
-"<td class=\"rowfollow\" align=\"left\"><input type=\"text\" style=\"width: 99%;\" name=\"subject\" maxlength=\"".$maxsubjectlength."\" value=\"".htmlspecialchars($subject)."\" /></td></tr>\n");
-	print("<tr><td class=\"rowhead\" valign=\"top\">".$lang_functions['row_body']."</td><td class=\"rowfollow\" align=\"left\"><span style=\"display: none;\" id=\"previewouter\"></span><div id=\"editorouter\">");
-	textbbcode("compose","body", $body, false);
-	print("</div></td></tr>");
+	print(\App\Support\Frame::composeOpen((string) $title, (string) $type, (bool) $hassubject, (string) $subject, (int) $maxsubjectlength, (array) $lang_functions));
+	textbbcode("compose", "body", $body, false);
 }
 
-function end_compose(){
+function end_compose()
+{
 	global $lang_functions;
-	print("<tr><td colspan=\"2\" align=\"center\"><table><tr><td class=\"embedded\"><input id=\"qr\" type=\"submit\" class=\"btn\" value=\"".$lang_functions['submit_submit']."\" /></td><td class=\"embedded\">");
-	print("<input type=\"button\" class=\"btn2\" name=\"previewbutton\" id=\"previewbutton\" value=\"".$lang_functions['submit_preview']."\" onclick=\"javascript:preview(this.parentNode);\" />");
-	print("<input type=\"button\" class=\"btn2\" style=\"display: none;\" name=\"unpreviewbutton\" id=\"unpreviewbutton\" value=\"".$lang_functions['submit_edit']."\" onclick=\"javascript:unpreview(this.parentNode);\" />");
-	print("</td></tr></table>");
-	print("</td></tr>");
-	print("</table>\n");
-	end_frame();
-	print("<p align=\"center\"><a href=\"tags.php\" target=\"_blank\">".$lang_functions['text_tags']."</a> | <a href=\"smilies.php\" target=\"_blank\">".$lang_functions['text_smilies']."</a></p>\n");
+	print(\App\Support\Frame::composeClose((array) $lang_functions));
 }
 
 function insert_suggest($keyword, $userid, $pre_escaped = true)

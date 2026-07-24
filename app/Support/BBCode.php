@@ -62,6 +62,23 @@ final class BBCode
     }
 
     /**
+     * Turn plain URLs in text into clickable links.
+     *
+     * Mirrors the legacy `format_urls()` regex and delegates each
+     * matched URL to {@see url} wrapped with a temp-code placeholder.
+     */
+    public static function formatUrls(string $text, bool $newWindow = false): string
+    {
+        return (string) preg_replace_callback(
+            "/((https?|ftp|gopher|news|telnet|mms|rtsp):\/\/[^()\[\]<>\s]+)/i",
+            function (array $matches) use ($newWindow): string {
+                return Comment::addTempCode(self::url($matches[1], $newWindow, '', 'faqlink'));
+            },
+            $text,
+        );
+    }
+
+    /**
      * Render an ad-tracking redirect link. Wraps the destination URL
      * in `adredir.php?id=…&amp;url=…` (rawurlencoded) and delegates
      * to {@see url} for the actual anchor.

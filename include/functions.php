@@ -690,12 +690,7 @@ function end_compose()
 
 function insert_suggest($keyword, $userid, $pre_escaped = true)
 {
-	if(mb_strlen($keyword,"UTF-8") >= 2)
-	{
-		$userid = intval($userid ?? 0);
-		if($userid)
-		sql_query("INSERT INTO suggest(keywords, userid, adddate) VALUES (" . ($pre_escaped == true ? "'" . $keyword . "'" : sqlesc($keyword)) . "," . sqlesc($userid) . ", NOW())") or sqlerr(__FILE__,__LINE__);
-	}
+	\App\Support\SearchSuggest::add((string) $keyword, $userid, (bool) $pre_escaped);
 }
 
 
@@ -1225,11 +1220,6 @@ function autoclean($printProgress = false) {
 	return docleanup(0, $printProgress);
 }
 
-function unesc($x) {
-	return $x;
-}
-
-
 function getsize_int($amount, $unit = "G")
 {
 	return \App\Support\Format::bytesFromUnit((float)$amount, $unit);
@@ -1266,17 +1256,11 @@ function mkprettytime($s) {
 }
 
 function mkglobal($vars) {
-	if (!is_array($vars))
-	$vars = explode(":", $vars);
-	foreach ($vars as $v) {
-		if (isset($_GET[$v]))
-		$GLOBALS[$v] = unesc($_GET[$v]);
-		elseif (isset($_POST[$v]))
-		$GLOBALS[$v] = unesc($_POST[$v]);
-		else
-		return 0;
-	}
-	return 1;
+	return \App\Support\Input::globalize($vars, $_GET, $_POST);
+}
+
+function unesc($x) {
+	return \App\Support\Input::unescape($x);
 }
 
 function tr($x,$y,$noesc=0,$relation='', $return = false) {
@@ -1309,25 +1293,12 @@ function validemail($email) {
 
 function validlang($langid) {
 	global $deflang;
-	$langid = intval($langid ?? 0);
-	$res = sql_query("SELECT * FROM language WHERE site_lang = 1 AND id = " . sqlesc($langid)) or sqlerr(__FILE__, __LINE__);
-	if(mysql_num_rows($res) == 1)
-	{
-		$arr = mysql_fetch_array($res)  or sqlerr(__FILE__, __LINE__);
-		return $arr['site_lang_folder'];
-	}
-	else return $deflang;
+	return \App\Support\Locale::folderForId($langid, (string) $deflang);
 }
 
 function get_if_restricted_is_open()
 {
-	// it's sunday
-	if(\App\Models\Setting::getIsUploadOpenAtWeekend() && (date("w",time()) == '0' || (date("w",time()) == 6) && (date("G",time()) >=12 && date("G",time()) <=23)))
-	{
-		return true;
-	}
-	else
-	return false;
+	return \App\Support\Time::isWeekendUploadOpen(\App\Models\Setting::getIsUploadOpenAtWeekend(), time());
 }
 
 function menu ($selected = "home") {
@@ -1496,11 +1467,7 @@ function stdfoot()
 
 
 function genbark($x,$y) {
-	stdhead($y);
-	print("<h1>" . htmlspecialchars($y) . "</h1>\n");
-	print("<p>" . htmlspecialchars($x) . "</p>\n");
-	stdfoot();
-	exit();
+	\App\Support\LegacyResponse::bark((string) $y, (string) $x);
 }
 
 function mksecret($len = 20) {
@@ -1508,9 +1475,7 @@ function mksecret($len = 20) {
 }
 
 function httperr($code = 404) {
-	header("HTTP/1.1 404 Not found");
-	print("<h1>Not Found</h1>\n");
-	exit();
+	\App\Support\LegacyResponse::notFound();
 }
 
 function logincookie($id, $authKey, $duration = 0)

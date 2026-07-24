@@ -69,6 +69,22 @@ final class Locale
     }
 
     /**
+     * Return the `site_lang_folder` for the given language id, or
+     * `$default` when the id is unknown.
+     *
+     * Mirrors `validlang()`.
+     */
+    public static function folderForId(int|string $langId, string $default = 'en'): string
+    {
+        $result = NexusDB::getInstance()->query(
+            'SELECT site_lang_folder FROM language WHERE site_lang = 1 AND id = ' . sqlesc($langId) . ' LIMIT 1'
+        );
+        $row = NexusDB::getInstance()->fetchAssoc($result);
+
+        return $row['site_lang_folder'] ?? $default;
+    }
+
+    /**
      * Build the relative language file path.
      *
      * Mirrors `get_langfile_path()` without mutating `$CURLANGDIR`.

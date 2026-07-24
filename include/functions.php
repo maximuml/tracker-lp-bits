@@ -1288,61 +1288,20 @@ function sent_mail($to,$fromname,$fromemail,$subject,$body,$type = "confirmation
 }
 
 function failedloginscheck ($type = 'Login') {
-	global $lang_functions;
-	global $maxloginattempts;
-	$total = 0;
-	$ip = sqlesc(getip());
-	$Query = sql_query("SELECT SUM(attempts) FROM loginattempts WHERE ip=$ip") or sqlerr(__FILE__, __LINE__);
-	list($total) = mysql_fetch_array($Query);
-	if ($total >= $maxloginattempts) {
-		sql_query("UPDATE loginattempts SET banned = 'yes' WHERE ip=$ip") or sqlerr(__FILE__, __LINE__);
-		stderr($type.$lang_functions['std_locked'].$maxloginattempts.$lang_functions['std_attempts_reached'], $lang_functions['std_your_ip_banned'], true, true);
-	}
+    \App\Support\LegacyAuth::failedLoginsCheck((string) $type);
 }
+
 function failedlogins ($type = 'login', $recover = false, $head = true)
 {
-	global $lang_functions;
-	$ip = sqlesc(getip());
-	$added = sqlesc(date("Y-m-d H:i:s"));
-	$a = (@mysql_fetch_row(@sql_query("select count(*) from loginattempts where ip=$ip"))) or sqlerr(__FILE__, __LINE__);
-	if ($a[0] == 0)
-	sql_query("INSERT INTO loginattempts (ip, added, attempts) VALUES ($ip, $added, 1)") or sqlerr(__FILE__, __LINE__);
-	else
-	sql_query("UPDATE loginattempts SET attempts = attempts + 1 where ip=$ip") or sqlerr(__FILE__, __LINE__);
-	if ($recover)
-	sql_query("UPDATE loginattempts SET type = 'recover' WHERE ip = $ip") or sqlerr(__FILE__, __LINE__);
-	if ($type == 'silent')
-	return;
-	elseif ($type == 'login')
-	{
-		stderr($lang_functions['std_login_failed'],$lang_functions['std_login_failed_note'],false);
-	}
-	else
-	stderr($lang_functions['std_failed'],$type,false, $head);
-
+    \App\Support\LegacyAuth::failedLogins((string) $type, (bool) $recover, (bool) $head);
 }
+
 
 function login_failedlogins($type = 'login', $recover = false, $head = true)
 {
-	global $lang_functions;
-	$ip = sqlesc(getip());
-	$added = sqlesc(date("Y-m-d H:i:s"));
-	$a = (@mysql_fetch_row(@sql_query("select count(*) from loginattempts where ip=$ip"))) or sqlerr(__FILE__, __LINE__);
-	if ($a[0] == 0)
-	sql_query("INSERT INTO loginattempts (ip, added, attempts) VALUES ($ip, $added, 1)") or sqlerr(__FILE__, __LINE__);
-	else
-	sql_query("UPDATE loginattempts SET attempts = attempts + 1 where ip=$ip") or sqlerr(__FILE__, __LINE__);
-	if ($recover)
-	sql_query("UPDATE loginattempts SET type = 'recover' WHERE ip = $ip") or sqlerr(__FILE__, __LINE__);
-	if ($type == 'silent')
-	return;
-	elseif ($type == 'login')
-	{
-		stderr($lang_functions['std_login_failed'],$lang_functions['std_login_failed_note'],false);
-	}
-	else
-	stderr($lang_functions['std_recover_failed'],$type,false, $head);
+    \App\Support\LegacyAuth::loginFailedLogins((string) $type, (bool) $recover, (bool) $head);
 }
+
 
 function remaining ($type = 'login') {
 	global $maxloginattempts;
@@ -1360,35 +1319,9 @@ function remaining ($type = 'login') {
 }
 
 function registration_check($type = "invitesystem", $maxuserscheck = true, $ipcheck = true) {
-	global $lang_functions;
-	global $invitesystem, $registration, $maxusers, $SITENAME, $maxip;
-	if ($type == "invitesystem") {
-		if ($invitesystem == "no") {
-			stderr($lang_functions['std_oops'], $lang_functions['std_invite_system_disabled'], 0, true);
-		}
-	}
-
-	if ($type == "normal") {
-		if ($registration == "no") {
-			stderr($lang_functions['std_sorry'], $lang_functions['std_open_registration_disabled'], 0, true);
-		}
-	}
-
-	if ($maxuserscheck) {
-		$res = sql_query("SELECT COUNT(*) FROM users") or sqlerr(__FILE__, __LINE__);
-		$arr = mysql_fetch_row($res);
-		if ($arr[0] >= $maxusers)
-		stderr($lang_functions['std_sorry'], $lang_functions['std_account_limit_reached'], 0, true);
-	}
-
-	if ($ipcheck) {
-		$ip = getip () ;
-		$a = (@mysql_fetch_row(@sql_query("select count(*) from users where ip='" . mysql_real_escape_string($ip) . "'"))) or sqlerr(__FILE__, __LINE__);
-		if ($a[0] > $maxip)
-		stderr($lang_functions['std_sorry'], $lang_functions['std_the_ip']."<b>" . htmlspecialchars($ip) ."</b>". sprintf($lang_functions['std_used_many_times'], \App\Models\Setting::getSiteName()),false, true);
-	}
-	return true;
+    return \App\Support\LegacyAuth::registrationCheck((string) $type, (bool) $maxuserscheck, (bool) $ipcheck);
 }
+
 
 function random_str($length="6")
 {
@@ -1416,54 +1349,9 @@ function image_code () {
 }
 
 function check_code ($imagehash, $imagestring, $where = 'signup.php', $maxattemptlog = false, $head = true) {
-    global $lang_functions;
-    global $iv;
-
-    if ($iv !== 'yes') {
-        return true;
-    }
-
-    $manager = captcha_manager();
-
-    if (!$manager->isEnabled()) {
-        return true;
-    }
-
-    $payload = [
-        'imagehash' => $imagehash,
-        'imagestring' => $imagestring,
-        'request' => array_merge($_POST ?? [], $_GET ?? []),
-    ];
-
-    $context = [
-        'where' => $where,
-        'maxattemptlog' => $maxattemptlog,
-        'head' => $head,
-        'ip' => getip(),
-    ];
-
-    try {
-        if ($manager->verify($payload, $context)) {
-            return true;
-        }
-    } catch (\App\Services\Captcha\Exceptions\CaptchaValidationException $exception) {
-        $message = $exception->getMessage();
-
-        $defaultMessage = $lang_functions['std_invalid_image_code'] . "<a href=\"" . htmlspecialchars($where) . "\">" . $lang_functions['std_here_to_request_new'];
-
-        if ($message === '' || $message === 'Invalid captcha response.' || $message === 'Missing captcha parameters.') {
-            $message = $defaultMessage;
-        }
-
-        if (!$maxattemptlog) {
-            stderr('Error', $message, false);
-        } else {
-            failedlogins($message, true, $head);
-        }
-    }
-
-    return false;
+    return \App\Support\LegacyAuth::checkCode((string) $imagehash, (string) $imagestring, (string) $where, (bool) $maxattemptlog, (bool) $head);
 }
+
 
 function show_image_code () {
     global $lang_functions;
@@ -3375,11 +3263,9 @@ function ssr ($arg) {
 
 function parked()
 {
-	global $lang_functions;
-	global $CURUSER;
-	if ($CURUSER["parked"] == "yes")
-	stderr($lang_functions['std_access_denied'], $lang_functions['std_your_account_parked']);
+    \App\Support\LegacyAuth::parked();
 }
+
 
 function validusername($username)
 {

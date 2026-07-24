@@ -3059,8 +3059,12 @@ function pager($rpp, $count, $href, $opts = array(), $pagename = "page") {
 	global $lang_functions, $add_key_shortcut;
 
 	$pages = (int) ceil($count / $rpp);
+	$rawPage = $_GET[$pagename] ?? null;
+	if (!is_scalar($rawPage)) {
+		$rawPage = null;
+	}
 	$page = \App\Support\Pagination::resolvePage(
-		$_GET[$pagename] ?? null,
+		$rawPage,
 		(int) $count,
 		(int) $rpp,
 		!empty($opts['lastpagedefault']),

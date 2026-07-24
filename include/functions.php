@@ -1869,88 +1869,7 @@ create_tooltip_container($torrent_tooltip, 500);
 
 function get_username($id, $big = false, $link = true, $bold = true, $target = false, $bracket = false, $withtitle = false, $link_ext = "", $underline = false)
 {
-	static $usernameArray = array();
-	$id = (int)$id;
-
-	if (func_num_args() == 1 && isset($usernameArray[$id])) {  //One argument=is default display of username. Get it directly from static array if available
-		return $usernameArray[$id];
-	}
-	$arr = get_user_row($id);
-	if ($arr){
-		if ($big)
-		{
-			$donorpic = "starbig";
-			$leechwarnpic = "leechwarnedbig";
-			$warnedpic = "warnedbig";
-			$disabledpic = "disabledbig";
-			$marginLeft = '4pt';
-			$medalSize = '16px';
-			$medalClass = 'nexus-username-medal-big';
-			$style = "style='margin-left: $marginLeft'";
-		}
-		else
-		{
-			$donorpic = "star";
-			$leechwarnpic = "leechwarned";
-			$warnedpic = "warned";
-			$disabledpic = "disabled";
-            $marginLeft = '2pt';
-            $medalSize = '11px';
-            $medalClass = 'nexus-username-medal';
-			$style = "style='margin-left: $marginLeft'";
-		}
-		$pics = $arr["donor"] == "yes" && ($arr['donoruntil'] === null || $arr['donoruntil'] < '1970' || $arr['donoruntil'] >= date('Y-m-d H:i:s')) ? "<img class=\"".$donorpic."\" src=\"/pic/trans.gif\" alt=\"Donor\" ".$style." />" : "";
-
-		if ($arr["enabled"] == "yes")
-			$pics .= ($arr["leechwarn"] == "yes" ? "<img class=\"".$leechwarnpic."\" src=\"/pic/trans.gif\" alt=\"Leechwarned\" ".$style." />" : "") . ($arr["warned"] == "yes" ? "<img class=\"".$warnedpic."\" src=\"/pic/trans.gif\" alt=\"Warned\" ".$style." />" : "");
-		else
-			$pics .= "<img class=\"".$disabledpic."\" src=\"/pic/trans.gif\" alt=\"Disabled\" ".$style." />\n";
-
-		//Rainbow effect
-		$username = $arr['username'];
-		$rainbow = "";
-		$hasSetRainbow = false;
-		if (isset($arr['__is_rainbow']) && $arr['__is_rainbow']) {
-		    $rainbow = ' class="rainbow"';
-        }
-		if ($underline) {
-		    $hasSetRainbow = true;
-		    $username = "<u{$rainbow}>{$username}</u>";
-        }
-		if ($bold) {
-		    if ($hasSetRainbow) {
-		        $username = "<b>{$username}</b>";
-            } else {
-                $hasSetRainbow = true;
-		        $username = "<b{$rainbow}>{$username}</b>";
-            }
-        }
-//        $username = ($underline == true ? "<u>" . $arr['username'] . "</u>" : $arr['username']);
-//        $username = ($bold == true ? "<b>" . $username . "</b>" : $username);
-
-        //medal
-        $medalHtml = '';
-		foreach ($arr['wearing_medals'] ?? [] as $medal) {
-            $medalHtml .= sprintf(
-                '<img src="%s" title="%s" class="%s preview" style="max-height: %s;max-width: %s;margin-left: %s"/>',
-                $medal['image_large'], $medal['name'], $medalClass, $medalSize, $medalSize, $marginLeft
-            );
-        }
-
-		$href = getSchemeAndHttpHost() . "/userdetails.php?id=$id";
-		$username = ($link == true ? "<a ". $link_ext . " href=\"" . $href . "\"" . ($target == true ? " target=\"_blank\"" : "") . " class='". get_user_class_name($arr['class'],true, false, false) . "_Name'>" . $username . "</a>" : $username) . $pics . ($withtitle == true ? " (" . ($arr['title'] == "" ?  get_user_class_name($arr['class'],false,true,true, ['with_alias' => true]) : "<span class='".get_user_class_name($arr['class'],true, false, false) . "_Name'><b>".htmlspecialchars($arr['title'])) . "</b></span>)" : "");
-
-		$username = "<span class=\"nowrap\">" . ( $bracket == true ? "(" . $username . ")" : $username) . "$medalHtml</span>";
-	}
-	else
-	{
-		$username = "<i>".nexus_trans('nexus.user_not_exists')."</i>";
-		$username = "<span class=\"nowrap\">" . ( $bracket == true ? "(" . $username . ")" : $username) . "</span>";
-	}
-	if (func_num_args() == 1) { //One argument=is default display of username, save it in static array
-		$usernameArray[$id] = $username;
-	}
-	return $username;
+	return \App\Support\UserDisplay::username($id, $big, $link, $bold, $target, $bracket, $withtitle, $link_ext, $underline);
 }
 
 function get_percent_completed_image($p) {
@@ -2085,21 +2004,7 @@ function get_second_icon($row) //for CHDBits
 function get_torrent_bg_color($promotion = 1, $posState = "", array $torrent = [])
 {
 	global $CURUSER;
-	$sphighlight = null;
-	if ($CURUSER['appendpromotion'] == 'highlight') {
-		$global_promotion_state = get_global_sp_state();
-		$code = ($global_promotion_state == 1) ? $promotion : $global_promotion_state;
-		$sphighlight = \App\Support\Promotion::backgroundClass((int) $code);
-	}
-	if (is_null($sphighlight)) {
-        $torrentSettings = get_setting('torrent');
-	    if ($posState == \App\Models\Torrent::POS_STATE_STICKY_FIRST && !empty($torrentSettings['sticky_first_level_background_color'])) {
-	        $sphighlight = sprintf(' style="background-color: %s"', $torrentSettings['sticky_first_level_background_color']);
-        } elseif ($posState == \App\Models\Torrent::POS_STATE_STICKY_SECOND && !empty($torrentSettings['sticky_second_level_background_color'])) {
-            $sphighlight = sprintf(' style="background-color: %s"', $torrentSettings['sticky_second_level_background_color']);
-        }
-    }
-	return apply_filter('torrent_background_color', (string)$sphighlight, $torrent);
+	return \App\Support\Promotion::backgroundStyle((int) $promotion, (string) $posState, $torrent, (string) $CURUSER['appendpromotion']);
 }
 
 function get_torrent_promotion_append($promotion = 1,$forcemode = "",$showtimeleft = false, $added = "", $promotionTimeType = 0, $promotionUntil = '', $ignoreGlobal = false){
@@ -2446,12 +2351,7 @@ function get_torrent_promotion_append_sub($promotion = 1,$forcemode = "",$showti
 
 function get_hr_img(array $torrent, $searchBoxId)
 {
-    $mode = \App\Models\HitAndRun::getConfig('mode', $searchBoxId);
-    $result = '';
-    if ($mode == \App\Models\HitAndRun::MODE_GLOBAL || ($mode == \App\Models\HitAndRun::MODE_MANUAL && isset($torrent['hr']) && $torrent['hr'] == \App\Models\Torrent::HR_YES)) {
-        $result = '<img class="hitandrun" src="pic/trans.gif" alt="H&R" title="H&R" />';
-    }
-    return $result;
+    return \App\Support\TorrentAccess::hrImage($torrent, $searchBoxId);
 }
 
 function get_user_id_from_name($username){

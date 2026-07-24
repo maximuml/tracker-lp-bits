@@ -38,4 +38,34 @@ final class Promotion
             default => null,
         };
     }
+
+    /**
+     * Build the row background style for a torrent list row.
+     *
+     * Mirrors `get_torrent_bg_color()`.
+     */
+    public static function backgroundStyle(
+        int $promotion,
+        string $posState,
+        array $torrent,
+        string $appendPromotion,
+    ): string {
+        $sphighlight = null;
+        if ($appendPromotion === 'highlight') {
+            $globalPromotionState = \get_global_sp_state();
+            $code = ($globalPromotionState == 1) ? $promotion : $globalPromotionState;
+            $sphighlight = self::backgroundClass((int) $code);
+        }
+
+        if (is_null($sphighlight)) {
+            $torrentSettings = \get_setting('torrent');
+            if ($posState === \App\Models\Torrent::POS_STATE_STICKY_FIRST && ! empty($torrentSettings['sticky_first_level_background_color'])) {
+                $sphighlight = sprintf(' style="background-color: %s"', $torrentSettings['sticky_first_level_background_color']);
+            } elseif ($posState === \App\Models\Torrent::POS_STATE_STICKY_SECOND && ! empty($torrentSettings['sticky_second_level_background_color'])) {
+                $sphighlight = sprintf(' style="background-color: %s"', $torrentSettings['sticky_second_level_background_color']);
+            }
+        }
+
+        return (string) \apply_filter('torrent_background_color', (string) $sphighlight, $torrent);
+    }
 }

@@ -3957,37 +3957,11 @@ function get_second_icon($row) //for CHDBits
 function get_torrent_bg_color($promotion = 1, $posState = "", array $torrent = [])
 {
 	global $CURUSER;
-    $sphighlight = null;
-	if ($CURUSER['appendpromotion'] == 'highlight'){
+	$sphighlight = null;
+	if ($CURUSER['appendpromotion'] == 'highlight') {
 		$global_promotion_state = get_global_sp_state();
-		if ($global_promotion_state == 1){
-			if($promotion==1)
-				$sphighlight = "";
-			elseif($promotion==2)
-				$sphighlight = " class='free_bg'";
-			elseif($promotion==3)
-				$sphighlight = " class='twoup_bg'";
-			elseif($promotion==4)
-				$sphighlight = " class='twoupfree_bg'";
-			elseif($promotion==5)
-				$sphighlight = " class='halfdown_bg'";
-			elseif($promotion==6)
-				$sphighlight = " class='twouphalfdown_bg'";
-			elseif($promotion==7)
-				$sphighlight = " class='thirtypercentdown_bg'";
-		}
-		elseif($global_promotion_state == 2)
-			$sphighlight = " class='free_bg'";
-		elseif($global_promotion_state == 3)
-			$sphighlight = " class='twoup_bg'";
-		elseif($global_promotion_state == 4)
-			$sphighlight = " class='twoupfree_bg'";
-		elseif($global_promotion_state == 5)
-			$sphighlight = " class='halfdown_bg'";
-		elseif($global_promotion_state == 6)
-			$sphighlight = " class='twouphalfdown_bg'";
-		elseif($global_promotion_state == 7)
-			$sphighlight = " class='thirtypercentdown_bg'";
+		$code = ($global_promotion_state == 1) ? $promotion : $global_promotion_state;
+		$sphighlight = \App\Support\Promotion::backgroundClass((int) $code);
 	}
 	if (is_null($sphighlight)) {
         $torrentSettings = get_setting('torrent');

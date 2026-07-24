@@ -1,7 +1,11 @@
 <?php
 require_once("../include/bittorrent.php");
 dbconn();
-require_once __DIR__ . '/../lang/en/lang_takeinvite.php';
+$langFile = get_langfile_path();
+if (!is_file(__DIR__ . '/../' . $langFile)) {
+	$langFile = __DIR__ . '/../lang/en/lang_takeinvite.php';
+}
+require_once $langFile;
 loggedinorreturn();
 $id = $CURUSER['id'];
 $lockName = sprintf("takeinvite:%s", $id);

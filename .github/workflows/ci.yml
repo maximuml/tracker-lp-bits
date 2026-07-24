@@ -27,14 +27,14 @@ jobs:
       - name: Validate composer.json and composer.lock
         run: composer validate
 
-      - name: Audit composer dependencies
-        run: composer audit
-
       - name: Install dependencies
         run: composer install --prefer-dist --no-progress --no-interaction --ignore-platform-reqs --no-scripts
 
       - name: Dump autoload
         run: composer dump-autoload --no-interaction --no-scripts
+
+      - name: Audit composer dependencies
+        run: composer audit
 
       - name: Run PHP syntax lint
         run: |

@@ -7,6 +7,7 @@ use App\Models\Torrent;
 use App\Models\User;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\Response;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 
 /**
  * Temporary Phase 5 migration shim for legacy error / gate helpers.
@@ -201,5 +202,28 @@ final class LegacyResponse
         }
 
         return false;
+    }
+
+    /**
+     * Legacy redirect helper. Prepend scheme/host to relative URLs and
+     * exit (or throw an HttpResponseException in Laravel context).
+     */
+    public static function redirect(string $url): void
+    {
+        if (substr($url, 0, 4) != 'http') {
+            $url = \getSchemeAndHttpHost() . '/' . trim($url, '/');
+        }
+
+        if (headers_sent()) {
+            echo "<script type=\"text/javascript\">window.location.href = '" . htmlspecialchars($url, ENT_QUOTES) . "';</script>";
+            exit;
+        }
+
+        if (! (defined('IN_NEXUS') && IN_NEXUS)) {
+            throw new HttpResponseException(new RedirectResponse($url));
+        }
+
+        header("Location: $url", true, 302);
+        exit;
     }
 }

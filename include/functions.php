@@ -1371,46 +1371,23 @@ function menu ($selected = "home") {
 }
 function get_css_row() {
 	global $CURUSER, $defcss, $Cache;
-	static $rows;
-	$cssid = $CURUSER ? $CURUSER["stylesheet"] : $defcss;
-	if (!$rows && !$rows = $Cache->get_value('stylesheet_content')){
-		$rows = array();
-		$res = sql_query("SELECT * FROM stylesheets ORDER BY id ASC");
-		while($row = mysql_fetch_array($res)) {
-			$rows[$row['id']] = $row;
-		}
-		$Cache->cache_value('stylesheet_content', $rows, 95400);
-	}
-	return $rows[$cssid] ?? $rows[$defcss];
+	return \App\Support\Style::cssRow($Cache, $CURUSER ? $CURUSER["stylesheet"] : $defcss, $defcss);
 }
 function get_css_uri($file = "")
 {
-    global $defcss;
-	$cssRow = get_css_row();
-	$ss_uri = $cssRow['uri'];
-	if (!$ss_uri)
-		$ss_uri = get_single_value("stylesheets","uri","WHERE id=".sqlesc($defcss));
-	if ($file == "")
-		return $ss_uri;
-	else return $ss_uri.$file;
+    global $defcss, $Cache, $CURUSER;
+	return \App\Support\Style::cssUri($Cache, $CURUSER ? $CURUSER["stylesheet"] : $defcss, $defcss, (string) $file);
 }
 
 function get_font_css_uri(){
 	global $CURUSER;
-    $file = 'mediumfont.css';
-    if ($CURUSER && isset($CURUSER['fontsize'])) {
-        if ($CURUSER['fontsize'] == 'large')
-            $file = 'largefont.css';
-        elseif ($CURUSER['fontsize'] == 'small')
-            $file = 'smallfont.css';
-    }
-	return "styles/".$file;
+	return \App\Support\Style::fontCssUri($CURUSER['fontsize'] ?? null);
 }
 
 function get_style_addicode()
 {
-	$cssRow = get_css_row();
-	return $cssRow['addicode'];
+	global $defcss, $Cache, $CURUSER;
+	return \App\Support\Style::addiCode($Cache, $CURUSER ? $CURUSER["stylesheet"] : $defcss, $defcss);
 }
 
 function get_cat_folder($cat = 101)
@@ -1434,18 +1411,7 @@ function get_cat_folder($cat = 101)
 function get_style_highlight()
 {
 	global $CURUSER;
-	if ($CURUSER)
-	{
-		$ss_a = @mysql_fetch_array(@sql_query("select hltr from stylesheets where id=" . $CURUSER["stylesheet"]));
-		if ($ss_a) $hltr = $ss_a["hltr"];
-	}
-	if (!$hltr)
-	{
-		$r = sql_query("SELECT hltr FROM stylesheets WHERE id=5");
-		$a = mysql_fetch_array($r);
-		$hltr = $a["hltr"];
-	}
-	return $hltr;
+	return \App\Support\Style::highlightColor($CURUSER ? (int) $CURUSER["stylesheet"] : null);
 }
 
 function stdhead($title = "", $msgalert = true, $script = "", $place = "")

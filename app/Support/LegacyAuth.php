@@ -268,6 +268,26 @@ final class LegacyAuth
     }
 
     /**
+     * Remaining login attempts for the current IP.
+     *
+     * Mirrors the legacy `remaining()` helper: counts the `attempts`
+     * column in `loginattempts`, subtracts from `$maxAttempts`, and
+     * returns a small red/green HTML fragment.
+     */
+    public static function remainingAttempts(string $type, int $maxAttempts, string $ip): string
+    {
+        $total = (int) NexusDB::table('loginattempts')
+            ->where('ip', $ip)
+            ->sum('attempts');
+
+        $remaining = $maxAttempts - $total;
+
+        return $remaining <= 2
+            ? '<font color="red" size="2">['.$remaining.']</font>'
+            : '<font color="green" size="2">['.$remaining.']</font>';
+    }
+
+    /**
      * Look up a user id by username (case-insensitive). Aborts on failure.
      */
     public static function userIdFromName(string $username): int

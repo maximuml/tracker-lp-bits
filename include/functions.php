@@ -874,25 +874,15 @@ function get_torrent_2_user_value($user_snatched_arr)
 	return $torrent_2_user_value;
 }
 
-function cur_user_check () {
-	global $lang_functions;
-	global $CURUSER;
-	if ($CURUSER)
-	{
-		sql_query("UPDATE users SET lang=" . get_langid_from_langcookie() . " WHERE id = ". $CURUSER['id']);
-		stderr ($lang_functions['std_permission_denied'], $lang_functions['std_already_logged_in']);
-	}
+function cur_user_check()
+{
+	\App\Support\LegacyAuth::currentUserCheck();
 }
 
-function KPS($type = "+", $point = "1.0", $id = "") {
+function KPS($type = "+", $point = "1.0", $id = "")
+{
 	global $bonus_tweak;
-	if ($point != 0){
-		$point = sqlesc($point);
-		if ($bonus_tweak == "enable" || $bonus_tweak == "disablesave"){
-			sql_query("UPDATE users SET seedbonus = seedbonus$type$point WHERE id = ".sqlesc($id)) or sqlerr(__FILE__, __LINE__);
-		}
-	}
-	else return;
+	\App\Support\Bonus::updatePoints((string) $type, (float) $point, $id, (string) $bonus_tweak);
 }
 
 function get_agent($peer_id, $agent)
@@ -1115,19 +1105,10 @@ function login_failedlogins($type = 'login', $recover = false, $head = true)
 }
 
 
-function remaining ($type = 'login') {
+function remaining($type = 'login')
+{
 	global $maxloginattempts;
-	$total = 0;
-	$ip = sqlesc(getip());
-	$Query = sql_query("SELECT SUM(attempts) FROM loginattempts WHERE ip=$ip") or sqlerr(__FILE__, __LINE__);
-	list($total) = mysql_fetch_array($Query);
-	$remaining = $maxloginattempts - $total;
-	if ($remaining <= 2 )
-	$remaining = "<font color=\"red\" size=\"2\">[".$remaining."]</font>";
-	else
-	$remaining = "<font color=\"green\" size=\"2\">[".$remaining."]</font>";
-
-	return $remaining;
+	return \App\Support\LegacyAuth::remainingAttempts((string) $type, (int) $maxloginattempts, \getip());
 }
 
 function registration_check($type = "invitesystem", $maxuserscheck = true, $ipcheck = true) {

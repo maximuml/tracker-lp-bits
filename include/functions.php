@@ -874,23 +874,11 @@ function random_str($length="6")
 }
 function captcha_manager(): \App\Services\Captcha\CaptchaManager
 {
-    static $manager;
-
-    if (!$manager) {
-        $manager = new \App\Services\Captcha\CaptchaManager();
-    }
-
-    return $manager;
+    return \App\Support\Captcha::manager();
 }
 
 function image_code () {
-    $driver = captcha_manager()->driver('image');
-
-    if (!method_exists($driver, 'issue')) {
-        throw new \RuntimeException('Image captcha driver is unavailable.');
-    }
-
-    return $driver->issue();
+    return \App\Support\Captcha::imageCode();
 }
 
 function check_code ($imagehash, $imagestring, $where = 'signup.php', $maxattemptlog = false, $head = true) {
@@ -899,37 +887,12 @@ function check_code ($imagehash, $imagestring, $where = 'signup.php', $maxattemp
 
 
 function show_image_code () {
-    global $lang_functions;
-    global $iv;
-
-    if ($iv !== 'yes') {
-        return;
-    }
-
-    $manager = captcha_manager();
-    $driver = $manager->driver();
-
-    if (!$driver->isEnabled()) {
-        return;
-    }
-
-    $labelKey = $driver instanceof \App\Services\Captcha\Drivers\ImageCaptchaDriver
-        ? 'row_security_image'
-        : 'row_security_challenge';
-
-    $labels = [
-        'image' => $lang_functions[$labelKey] ?? $lang_functions['row_security_image'],
-        'code' => $lang_functions['row_security_code'],
-    ];
-
-    $markup = $driver->render([
-        'labels' => $labels,
-        'secret' => $_GET['secret'] ?? '',
+    global $lang_functions, $iv;
+    \App\Support\Captcha::render((string) $iv, [
+        'row_security_image' => $lang_functions['row_security_image'] ?? '',
+        'row_security_challenge' => $lang_functions['row_security_challenge'] ?? '',
+        'row_security_code' => $lang_functions['row_security_code'] ?? '',
     ]);
-
-    if ($markup !== '') {
-        echo $markup;
-    }
 }
 
 function get_ip_location($ip)
@@ -1400,52 +1363,16 @@ function searchfield($s) {
 
 function genrelist($catmode = 1) {
 	global $Cache;
-	if (!$ret = $Cache->get_value('category_list_mode_'.$catmode)){
-		$ret = array();
-		$res = sql_query("SELECT id, mode, name, image FROM categories WHERE mode = ".sqlesc($catmode)." ORDER BY sort_index desc");
-		while ($row = mysql_fetch_array($res))
-			$ret[] = $row;
-		$Cache->cache_value('category_list_mode_'.$catmode, $ret, 3600);
-	}
-	return $ret;
+	return \App\Support\Category::listByMode($Cache, $catmode);
 }
 
 function searchbox_item_list(string $table, int $mode){
 	global $Cache;
-	$cacheKey = "{$table}_list_mode_{$mode}";
-	if (!$ret = $Cache->get_value($cacheKey)){
-		$ret = array();
-		$sql = "SELECT * FROM $table";
-		if ($mode > 0) {
-		    $sql .= " where (mode = '$mode' or mode = 0)";
-        }
-		$sql .= " ORDER BY sort_index, id";
-		$res = sql_query($sql);
-		while ($row = mysql_fetch_array($res))
-			$ret[] = $row;
-		$Cache->cache_value($cacheKey, $ret, 3600);
-	}
-	return $ret;
+	return \App\Support\SearchBox::itemList($Cache, $table, $mode);
 }
 
 function langlist($type, $enabled = null) {
-	global $Cache;
-	$cacheKey = $type.'_lang_list';
-	return  \Nexus\Database\NexusDB::remember($cacheKey, 600, function () use ($type, $enabled) {
-        $query = \App\Models\Language::query()->where($type, 1);
-        if ($enabled !== null) {
-            $query->whereIn('site_lang_folder', \App\Models\Language::listEnabled(true));
-        }
-        return $query->get()->toArray();
-    });
-//    if (!$ret = $Cache->get_value($type.'_lang_list')){
-//        $ret = array();
-//        $res = sql_query("SELECT id, lang_name, flagpic, site_lang_folder FROM language WHERE ". $type ."=1 ORDER BY site_lang DESC, id ASC");
-//        while ($row = mysql_fetch_array($res))
-//            $ret[] = $row;
-//        $Cache->cache_value($type.'_lang_list', $ret, 152800);
-//    }
-//	return $ret;
+	return \App\Support\Locale::languageList($type, $enabled);
 }
 
 function linkcolor($num) {
@@ -1469,35 +1396,15 @@ function writecomment($userid, $comment, $oldModcomment = null) {
 function return_torrent_bookmark_array($userid)
 {
 	global $Cache;
-	static $ret;
-	if (!$ret){
-		if (!$ret = $Cache->get_value('user_'.$userid.'_bookmark_array')){
-			$ret = array();
-			$res = sql_query("SELECT * FROM bookmarks WHERE userid=" . sqlesc($userid));
-			if (mysql_num_rows($res) != 0){
-				while ($row = mysql_fetch_array($res))
-					$ret[] = $row['torrentid'];
-				$Cache->cache_value('user_'.$userid.'_bookmark_array', $ret, 132800);
-			} else {
-				$Cache->cache_value('user_'.$userid.'_bookmark_array', array(0), 132800);
-                $ret[] = 0;
-			}
-		}
-	}
-	return $ret;
+	return \App\Support\TorrentBookmark::bookmarkArray($Cache, $userid);
 }
 function get_torrent_bookmark_state($userid, $torrentid, $text = false)
 {
-	global $lang_functions;
-	$userid = intval($userid ?? 0);
-	$torrentid = intval($torrentid ?? 0);
-	$ret = array();
-	$ret = return_torrent_bookmark_array($userid);
-	if (!count($ret) || !in_array($torrentid, $ret, false)) // already bookmarked
-		$act = ($text == true ?  $lang_functions['title_bookmark_torrent']  : "<img class=\"delbookmark\" src=\"pic/trans.gif\" alt=\"Unbookmarked\" title=\"".$lang_functions['title_bookmark_torrent']."\" />");
-	else
-		$act = ($text == true ? $lang_functions['title_delbookmark_torrent'] : "<img class=\"bookmark\" src=\"pic/trans.gif\" alt=\"Bookmarked\" title=\"".$lang_functions['title_delbookmark_torrent']."\" />");
-	return $act;
+	global $Cache, $lang_functions;
+	return \App\Support\TorrentBookmark::stateMarkup($Cache, $userid, $torrentid, (bool) $text, [
+		'title_bookmark_torrent' => $lang_functions['title_bookmark_torrent'] ?? '',
+		'title_delbookmark_torrent' => $lang_functions['title_delbookmark_torrent'] ?? '',
+	]);
 }
 
 function torrenttable($rows, $variant = "torrent", $searchBoxId = 0) {
@@ -1954,14 +1861,7 @@ function get_username($id, $big = false, $link = true, $bold = true, $target = f
 }
 
 function get_percent_completed_image($p) {
-	$maxpx = "45"; // Maximum amount of pixels for the progress bar
-
-	if ($p == 0) $progress = "<img class=\"progbarrest\" src=\"pic/trans.gif\" style=\"width: " . ($maxpx) . "px;\" alt=\"\" />";
-	if ($p == 100) $progress = "<img class=\"progbargreen\" src=\"pic/trans.gif\" style=\"width: " . ($maxpx) . "px;\" alt=\"\" />";
-	if ($p >= 1 && $p <= 30) $progress = "<img class=\"progbarred\" src=\"pic/trans.gif\" style=\"width: " . ($p*($maxpx/100)) . "px;\" alt=\"\" /><img class=\"progbarrest\" src=\"pic/trans.gif\" style=\"width: " . ((100-$p)*($maxpx/100)) . "px;\" alt=\"\" />";
-	if ($p >= 31 && $p <= 65) $progress = "<img class=\"progbaryellow\" src=\"pic/trans.gif\" style=\"width: " . ($p*($maxpx/100)) . "px;\" alt=\"\" /><img class=\"progbarrest\" src=\"pic/trans.gif\" style=\"width: " . ((100-$p)*($maxpx/100)) . "px;\" alt=\"\" />";
-	if ($p >= 66 && $p <= 99) $progress = "<img class=\"progbargreen\" src=\"pic/trans.gif\" style=\"width: " . ($p*($maxpx/100)) . "px;\" alt=\"\" /><img class=\"progbarrest\" src=\"pic/trans.gif\" style=\"width: " . ((100-$p)*($maxpx/100)) . "px;\" alt=\"\" />";
-	return "<img class=\"bar_left\" src=\"pic/trans.gif\" alt=\"\" />" . $progress ."<img class=\"bar_right\" src=\"pic/trans.gif\" alt=\"\" />";
+	return \App\Support\Progress::percentImage($p);
 }
 
 function get_ratio_img($ratio)
@@ -1970,14 +1870,7 @@ function get_ratio_img($ratio)
 }
 
 function GetVar ($name) {
-	if ( is_array($name) ) {
-		foreach ($name as $var) GetVar ($var);
-	} else {
-		if ( !isset($_REQUEST[$name]) )
-		return false;
-		$GLOBALS[$name] = $_REQUEST[$name];
-		return $GLOBALS[$name];
-	}
+	return \App\Support\Input::getVar($name);
 }
 
 function ssr ($arg) {
@@ -2038,18 +1931,15 @@ function getSmileIt($formname, $taname, $smilyNumber) {
 
 function classlist($selectname,$maxclass, $selected, $minClass = 0, $includeNoClass = false, $disabled = false){
     global $lang_functions;
-    $disabledText = '';
-    if ($disabled) {
-        $disabledText = ' disabled = "disabled"';
-    }
-	$list = "<select name=\"".$selectname."\"$disabledText>";
-	if ($includeNoClass) {
-        $list .= sprintf('<option value="%s">%s</option>', \App\Models\Setting::PERMISSION_NO_CLASS, $lang_functions['select_an_user_class']);
-    }
-	for ($i = $minClass; $i <= $maxclass; $i++)
-		$list .= "<option value=\"".$i."\"" . ($selected == $i ? " selected=\"selected\"" : "") . ">" . get_user_class_name($i,false,false,true) . "</option>\n";
-	$list .= "</select>";
-	return $list;
+    return \App\Support\UserClass::classSelect(
+        (string) $selectname,
+        (int) $maxclass,
+        $selected,
+        (int) $minClass,
+        (bool) $includeNoClass,
+        (bool) $disabled,
+        ['select_an_user_class' => $lang_functions['select_an_user_class'] ?? '---']
+    );
 }
 
 function permissiondenied($allowMinimumClass = null){
@@ -2593,54 +2483,15 @@ function return_category_image($categoryid, $link="")
 function torrentTags($tags = 0, $type = 'checkbox')
 {
     global $lang_functions;
-    $tagsOptions = [
-        [
-            'text' => $lang_functions['text_tag_no_release_to_any_other'],
-            'color' => '#ff0000',
-        ],
-        [
-            'text' => $lang_functions['text_tag_first_release'],
-            'color' => '#8F77B5',
-        ],
-        [
-            'text' => $lang_functions['text_tag_official'],
-            'color' => '#0000ff',
-        ],
-        [
-            'text' => $lang_functions['text_tag_diy'],
-            'color' => '#46d5ff',
-        ],
-        [
-            'text' => $lang_functions['text_tag_mother_language'],
-            'color' => '#6a3906',
-        ],
-        [
-            'text' => $lang_functions['text_tag_mother_language_subtitle'],
-            'color' => '#006400',
-        ],
-        [
-            'text' => $lang_functions['text_tag_hdr'],
-            'color' => '#38b03f',
-        ],
-    ];
-    $html = '';
-    foreach ($tagsOptions as $key => $value) {
-        $currentValue = pow(2, $key);
-        if ($type == 'checkbox') {
-            $checked = '';
-            if ($currentValue & $tags) {
-                $checked = 'checked';
-            }
-            $html .= sprintf(
-                '<label><input type="checkbox" name="tags[]" value="%s" %s />%s</label>',
-                $currentValue, $checked, $value['text']
-            );
-        }
-        if ($type == 'span' && ($currentValue & $tags)) {
-            $html .= "<span style=\"background-color:{$value['color']};color:white;border-radius:15%\">{$value['text']}</span> ";
-        }
-    }
-    return $html;
+    return \App\Support\TorrentTags::render($tags, $type, [
+        'text_tag_no_release_to_any_other' => $lang_functions['text_tag_no_release_to_any_other'] ?? '',
+        'text_tag_first_release' => $lang_functions['text_tag_first_release'] ?? '',
+        'text_tag_official' => $lang_functions['text_tag_official'] ?? '',
+        'text_tag_diy' => $lang_functions['text_tag_diy'] ?? '',
+        'text_tag_mother_language' => $lang_functions['text_tag_mother_language'] ?? '',
+        'text_tag_mother_language_subtitle' => $lang_functions['text_tag_mother_language_subtitle'] ?? '',
+        'text_tag_hdr' => $lang_functions['text_tag_hdr'] ?? '',
+    ]);
 }
 
 function saveSetting(string $prefix, array $nameAndValue, string $autoload = 'yes'): void
@@ -2977,70 +2828,12 @@ function msgalert($url, $text, $bgcolor = "red")
 
 function build_medal_image(\Illuminate\Support\Collection $medals, $maxHeight = 200, $withActions = false): string
 {
-    $medalImages = [];
-    $wrapBefore = '<form><div style="display: flex;flex-wrap: wrap;justify-content: center;margin-top: 10px;">';
-    $wrapAfter = '</div></form>';
-    foreach ($medals as $medal) {
-        $html = sprintf('<div style="display: flex;flex-direction: column;justify-content: space-between;margin-right: 10px"><div><img src="%s" title="%s" class="preview" style="max-height: %spx;max-width: %spx"/></div>', $medal->image_large, $medal->name, $maxHeight, $maxHeight);
-        if ($withActions) {
-            $html .= sprintf(
-                '<div style="display: flex;flex-direction: column;align-items:flex-start"><span>%s: %s</span><span>%s: %s</span><span>%s: %s</span><label>%s: <input type="number" name="priority_%s" value="%s" style="width: 50px" placeholder="%s"></label>',
-                nexus_trans('label.expire_at'),
-                $medal->pivot->expire_at ? format_datetime($medal->pivot->expire_at) : nexus_trans('label.permanent'),
-                nexus_trans('medal.fields.bonus_addition_factor'),
-                $medal->bonus_addition_factor ?? 0,
-                nexus_trans('medal.bonus_addition_expire_at'),
-                $medal->pivot->bonus_addition_expire_at ? format_datetime($medal->pivot->bonus_addition_expire_at) : nexus_trans('label.permanent'),
-                nexus_trans('label.priority'),
-                $medal->pivot->id,
-                $medal->pivot->priority ?? 0,
-                nexus_trans('label.priority_help')
-            );
-            $checked = '';
-            if ($medal->pivot->status == \App\Models\UserMedal::STATUS_WEARING) {
-                $checked = ' checked';
-            }
-            $html .= sprintf('<label>%s<input type="checkbox" name="status_%s" value="1"%s></label>', nexus_trans('medal.action_wearing'), $medal->pivot->id, $checked);
-            $html .= '</div>';
-        }
-        $html .= '</div>';
-        $medalImages[] = $html;
-    }
-    if ($withActions) {
-        $medalImages[] = sprintf('<div style="display: flex;flex-direction: column;justify-content: space-between;margin-right: 10px"><div></div><div><input type="button" id="save-user-medal-btn" value="%s"/></div></div>', nexus_trans('label.save'));
-    }
-    return $wrapBefore . implode('', $medalImages) . $wrapAfter;
+    return \App\Support\Medal::buildImages($medals, $maxHeight, (bool) $withActions);
 }
 
 function insert_torrent_tags($torrentId, $tagIdArr, $sync = false)
 {
-    $specialTags = \App\Models\Tag::listSpecial();
-    $canSetSpecialTag = \App\Auth\Permission::canSetTorrentSpecialTag();
-    $dateTimeStringNow = date('Y-m-d H:i:s');
-    if ($sync) {
-        $delQuery = \App\Models\TorrentTag::query()->where("torrent_id", $torrentId);
-        if (!$canSetSpecialTag) {
-            $delQuery->whereNotIn("tag_id", $specialTags);
-        }
-        $delQuery->delete();
-    }
-    if (empty($tagIdArr)) {
-        return;
-    }
-    $insertTagsSql = 'insert into torrent_tags (torrent_id, tag_id, created_at, updated_at) values ';
-    $values = [];
-    foreach ($tagIdArr as $tagId) {
-        if (in_array($tagId, $specialTags) && !$canSetSpecialTag) {
-            do_log("special tag: $tagId, and user no permission");
-            continue;
-        }
-        if (!isset($values[$tagId])) {
-            $values[$tagId] = sprintf("(%s, %s, '%s', '%s')", $torrentId, $tagId, $dateTimeStringNow, $dateTimeStringNow);
-        }
-    }
-    $insertTagsSql .= implode(', ', $values);
-    do_log("[INSERT_TAGS], torrent: $torrentId with tags: " . nexus_json_encode($tagIdArr));
-    \Nexus\Database\NexusDB::statement($insertTagsSql);
+    \App\Support\TorrentTags::insert($torrentId, $tagIdArr, (bool) $sync);
 }
 
 function get_smile($num)
@@ -3067,275 +2860,34 @@ function get_filament_class_alias($class): string
  */
 function calculate_seed_bonus($uid, $torrentIdArr = null): array
 {
-    $settingBonus = \App\Models\Setting::get('bonus');
-    $minSize = $settingBonus['min_size'] ?? 0;
-    $nowStr = date('Y-m-d H:i:s');
-    $logPrefix = "[CALCULATE_SEED_BONUS], uid: $uid, torrentIdArr: " . json_encode($torrentIdArr);
-    if ($torrentIdArr !== null) {
-        if (empty($torrentIdArr)) {
-            $torrentIdArr = [-1];
-        }
-        $idStr = implode(',', \Illuminate\Support\Arr::wrap($torrentIdArr));
-        $sql = "select torrents.id, torrents.added, torrents.size, torrents.seeders, 'NO_PEER_ID' as peerID, '' as last_action, '' as ip from torrents  WHERE id in ($idStr) and size >= $minSize";
-    } else {
-        $sql = "select torrents.id, torrents.added, torrents.size, torrents.seeders, peers.id as peerID, peers.last_action, peers.ip from torrents LEFT JOIN peers ON peers.torrent = torrents.id WHERE peers.userid = $uid AND peers.seeder ='yes' and torrents.size > $minSize group by torrents.id, peers.id";
-    }
-    $tagGrouped = [];
-    $torrentResult = \Nexus\Database\NexusDB::select($sql);
-    if (!empty($torrentResult)) {
-        $torrentIdArrReal = array_column($torrentResult, 'id');
-        $tagResult = \Nexus\Database\NexusDB::select(sprintf("select torrent_id, tag_id from torrent_tags where torrent_id in (%s)", implode(',', $torrentIdArrReal)));
-        foreach ($tagResult as $tagItem) {
-            $tagGrouped[$tagItem['torrent_id']][$tagItem['tag_id']] = 1;
-        }
-    }
-    $officialTag = \App\Models\Setting::get('bonus.official_tag');
-    $officialAdditionalFactor = \App\Models\Setting::get('bonus.official_addition');
-    $zeroBonusTag = \App\Models\Setting::get('bonus.zero_bonus_tag');
-    $zeroBonusFactor = \App\Models\Setting::get('bonus.zero_bonus_factor');
-    if (\Nexus\Database\NexusDB::isMysql()) {
-        $factorField = "round(sum(bonus_addition_factor), 5)";
-    } elseif (\Nexus\Database\NexusDB::isPgsql()) {
-        $factorField = "round(sum(bonus_addition_factor)::numeric, 5)";
-    } else {
-        throw new \RuntimeException("Not supported database");
-    }
-    $userMedalResult = \Nexus\Database\NexusDB::select("select $factorField as factor from medals where id in (select medal_id from user_medals where uid = $uid and (expire_at is null or expire_at > '$nowStr') and (bonus_addition_expire_at is null or bonus_addition_expire_at > '$nowStr'))");
-    $medalAdditionalFactor = floatval($userMedalResult[0]['factor'] ?? 0);
-    do_log("$logPrefix, sql: $sql, count: " . count($torrentResult) . ", officialTag: $officialTag, officialAdditionalFactor: $officialAdditionalFactor, zeroBonusTag: $zeroBonusTag, zeroBonusFactor: $zeroBonusFactor, medalAdditionalFactor: $medalAdditionalFactor");
-
-    $result = \App\Support\Bonus::aggregateSeedBonus(
-        $torrentResult,
-        $settingBonus,
-        $tagGrouped,
-        $officialTag,
-        $zeroBonusTag,
-        $zeroBonusFactor,
-        $medalAdditionalFactor,
-        $officialAdditionalFactor,
-        function ($torrent, $weeks_alive, $gb_size_raw, $gb_size, $temp, $officialAIncrease) use ($logPrefix) {
-            do_log(sprintf(
-                "$logPrefix, torrent: %s, peer ID: %s, weeks: %s, size_raw: %s GB, size: %s GB, increase A: %s, increase official A: %s",
-                $torrent['id'], $torrent['peerID'] ?? '', $weeks_alive, $gb_size_raw, $gb_size, $temp, $officialAIncrease
-            ), "debug");
-        },
-    );
-    do_log("$logPrefix, result: " . json_encode($result));
-
-    return $result;
+    return \App\Support\Bonus::calculateForUser($uid, $torrentIdArr);
 }
 
 
 function calculate_harem_addition($uid)
 {
-//    $harems = \App\Models\User::query()
-//        ->where('invited_by', $uid)
-//        ->where('status', \App\Models\User::STATUS_CONFIRMED)
-//        ->where('enabled', \App\Models\User::ENABLED_YES)
-//        ->get(['id']);
-//    $addition = 0;
-//    $haremsCount = $harems->count();
-//    foreach ($harems as $harem) {
-//        $result = calculate_seed_bonus($harem->id);
-//        $addition += $result['seed_points'];
-//    }
-//    do_log("[HAREM_ADDITION], user: $uid, haremsCount: $haremsCount ,addition: $addition");
-
-    $addition = \Nexus\Database\NexusDB::table("users")
-        ->where("invited_by", $uid)
-        ->where('status', \App\Models\User::STATUS_CONFIRMED)
-        ->where('enabled', \App\Models\User::ENABLED_YES)
-        ->sum("seed_points_per_hour")
-    ;
-    do_log("[HAREM_ADDITION], user: $uid, addition: $addition");
-    return $addition;
+    return \App\Support\Bonus::haremAddition($uid);
 }
 
 
 function build_search_box_category_table($mode, $checkboxValue, $categoryHrefPrefix, $taxonomyHrefPrefix, $taxonomyNameLength, $checkedValues = '', array $options = [])
 {
-    parse_str($checkedValues, $checkedValuesArr);
-    $searchBox = \App\Models\SearchBox::query()->with(['categories', 'categories.icon'])->findOrFail($mode);
-    $lang = get_langfolder_cookie();
-    $withTaxonomies = [];
-    if ($searchBox->showsubcat) {
-        //Keep the order
-        if (!empty($searchBox->extra[SearchBox::EXTRA_TAXONOMY_LABELS])) {
-            foreach ($searchBox->extra[SearchBox::EXTRA_TAXONOMY_LABELS] as $taxonomyLabelInfo) {
-                $torrentField = $taxonomyLabelInfo["torrent_field"];
-                $showField = "show" . $torrentField;
-                if ($searchBox->{$showField}) {
-                    $withTaxonomies[$torrentField] = \App\Models\SearchBox::$taxonomies[$torrentField]['table'];
-                }
-            }
-        } else {
-            foreach (\App\Models\SearchBox::$taxonomies as $torrentField => $taxonomyTableModel) {
-                $showField = "show" . $torrentField;
-                if ($searchBox->{$showField}) {
-                    $withTaxonomies[$torrentField] = $taxonomyTableModel['table'];
-                }
-            }
-        }
-    }
-    $html = '<table>';
-    if (!empty($options['section_name'])) {
-        $html .= sprintf('<caption><font class="big">%s</font></caption>', $searchBox->section_name[$lang] ?? '');
-    }
-    //Category
-    $html .= sprintf('<tr><td class="embedded" align="left">%s</td></tr>', nexus_trans('label.search_box.category'));
-    /** @var \Illuminate\DataBase\Eloquent\Collection $categoryCollection */
-    $categoryCollection = $searchBox->categories()->with('icon')->orderBy('sort_index', 'desc')->get();
-    if (!empty($options['select_unselect'])) {
-        $categoryCollection->push(new \App\Models\Category(['mode' => -1]));
-    }
-    $categoryChunks = $categoryCollection->chunk($searchBox->catsperrow);
-    $checkPrefix = 'cat';
-    foreach ($categoryChunks as $chunk) {
-        $html .= '<tr>';
-        foreach ($chunk as $item) {
-            if ($item->mode != -1) {
-                $checked = '';
-                if ($checkedValues) {
-                    if (
-                        str_contains($checkedValues, "[cat{$item->id}]")
-                        || (isset($checkedValuesArr["cat{$item->id}"]) && $checkedValuesArr["cat{$item->id}"] == 1)
-                        || (isset($checkedValuesArr["cat"]) && $checkedValuesArr["cat"] == $item->id)
-                    ) {
-                        $checked = " checked";
-                    }
-                } elseif (!empty($options['user_notifs'])) {
-                    $userNotifsKey = sprintf('[%s%s]', 'cat', $item->id);
-                    if (str_contains($options['user_notifs'], $userNotifsKey)) {
-                        $checked = ' checked';
-                    }
-                }
-                $icon = $item->icon;
-                if ($icon) {
-                    $iconFolder = trim($icon->folder, '/');
-                    $langAndFile = sprintf('%s%s',  $icon->multilang == 'yes' ? "$lang/" : "", $item->image);
-                    if (file_exists(getFullDirectory("pic/category/$iconFolder/$langAndFile"))) {
-                        $backgroundImagePath = "pic/category/$iconFolder/$langAndFile";
-                    } else {
-                        $backgroundImagePath = "pic/category/{$searchBox->name}/$iconFolder/$langAndFile";
-                    }
-                    $styleAttr = "background-image: url({$backgroundImagePath})";
-                } else {
-                    $styleAttr = '';
-                }
-                $style = $styleAttr ? " style=\"{$styleAttr}\"" : '';
-                $tdContent = <<<TDCONTENT
-<input type="checkbox" id="cat{$item->id}" name="cat{$item->id}" value="{$checkboxValue}"{$checked} />
-<a href="{$categoryHrefPrefix}cat={$item->id}"><img src="pic/cattrans.gif" class="{$item->class_name}" alt="{$item->name}" title="{$item->name}"{$style} /></a>
-TDCONTENT;
-            } else {
-                $tdContent = sprintf(
-                    "<input name=\"%s_check\" value=\"%s\" class=\"btn medium\" type=\"button\" onclick=\"javascript:SetChecked('%s','%s_check','%s','%s',-1,10)\">",
-                    $checkPrefix, nexus_trans('nexus.select_all'), $checkPrefix, $checkPrefix, nexus_trans('nexus.select_all'), nexus_trans('nexus.unselect_all')
-                );
-            }
-            $td = <<<TD
-<td align="left" class="bottom" style="padding-bottom: 4px;padding-left: {$searchBox->catpadding}px">
-    $tdContent
-</td>
-TD;
-            $html .= $td;
-        }
-        $html .= '</tr>';
-    }
-    //Taxonomy
-    foreach ($withTaxonomies as $torrentField => $tableName) {
-        if ($taxonomyNameLength > 0) {
-            $namePrefix = substr($torrentField, 0, $taxonomyNameLength);
-        } else {
-            $namePrefix = $torrentField;
-        }
-        $html .= sprintf('<tr><td class="embedded" align="left">%s</td></tr>', $searchBox->getTaxonomyLabel($torrentField));
-        /** @var \Illuminate\DataBase\Eloquent\Collection $taxonomyCollection */
-        $taxonomyCollection = \Nexus\Database\NexusDB::table($tableName)
-            ->where(function (\Illuminate\Database\Query\Builder $query) use ($mode) {
-                return $query->whereIn('mode', [$mode, 0]);
-            })
-            ->orderBy('sort_index', 'desc')
-            ->get()
-        ;
-        $modelName = \App\Models\SearchBox::$taxonomies[$torrentField]['model'];
-        $checkPrefix = $torrentField;
-        if (!empty($options['select_unselect'])) {
-            $taxonomyCollection->push(new $modelName(['mode' => -1]));
-        }
-        $taxonomyChunks = $taxonomyCollection->chunk($searchBox->catsperrow);
-        foreach ($taxonomyChunks as $chunk) {
-            $html .= '<tr>';
-            foreach ($chunk as $item) {
-                if ($item->mode != -1) {
-                    if ($taxonomyHrefPrefix) {
-                        $afterInput = sprintf('<a href="%s%s=%s">%s</a>', $taxonomyHrefPrefix, $namePrefix, $item->id, $item->name);
-                    } else {
-                        $afterInput = $item->name;
-                    }
-                    $checked = '';
-                    do_log("toCheck: $checkedValues, $namePrefix - {$item->id}", 'debug');
-                    if ($checkedValues) {
-                        if (
-                            str_contains($checkedValues, "[{$namePrefix}{$item->id}]")
-                            || (isset($checkedValuesArr["{$namePrefix}{$item->id}"]) && $checkedValuesArr["{$namePrefix}{$item->id}"] == 1)
-                            || (isset($checkedValuesArr[$namePrefix]) && $checkedValuesArr[$namePrefix] == $item->id)
-                        ) {
-                            $checked = ' checked';
-                        }
-                    } elseif (!empty($options['user_notifs'])) {
-                        $userNotifsKey = sprintf('[%s%s]', substr($torrentField, 0, 3), $item->id);
-                        if (str_contains($options['user_notifs'], $userNotifsKey)) {
-                            $checked = ' checked';
-                        }
-                    }
-                    $tdContent = <<<TDCONTENT
-<label><input type="checkbox" id="{$namePrefix}{$item->id}" name="{$namePrefix}{$item->id}" value="{$checkboxValue}"{$checked} />$afterInput</label>
-TDCONTENT;
-                } else {
-                    $tdContent = sprintf(
-                        "<input name=\"%s_check\" value=\"%s\" class=\"btn medium\" type=\"button\" onclick=\"javascript:SetChecked('%s','%s_check','%s','%s',-1,10)\">",
-                        $checkPrefix, nexus_trans('nexus.select_all'), $checkPrefix, $checkPrefix, nexus_trans('nexus.select_all'), nexus_trans('nexus.unselect_all')
-                    );
-                }
-                $td = <<<TD
-<td align="left" class="bottom" style="padding-bottom: 4px;padding-left: {$searchBox->catpadding}px">
-    $tdContent
-</td>
-TD;
-                $html .= $td;
-            }
-            $html .= '</tr>';
-        }
-        $html .= '</tr>';
-    }
-    $html .= '</table>';
-    return $html;
+    global $Cache;
+    return \App\Support\SearchBox::buildCategoryTable(
+        $Cache,
+        $mode,
+        $checkboxValue,
+        $categoryHrefPrefix,
+        $taxonomyHrefPrefix,
+        $taxonomyNameLength,
+        $checkedValues,
+        $options,
+    );
 }
 
 function datetimepicker_input($name, $value = '', $label = '', array $options = [])
 {
-    $lang = get_langfolder_cookie(true);
-    if ($lang == 'zh_CN') {
-        $lang = 'zh';
-    }
-    $lang = str_replace('_', '-', $lang);
-    $js = '';
-    if (!empty($options['require_files'])) {
-        \Nexus\Nexus::css('vendor/jquery-datetimepicker/jquery.datetimepicker.min.css', 'footer', true);
-        \Nexus\Nexus::js('vendor/jquery-datetimepicker/jquery.datetimepicker.full.min.js', 'footer', true);
-        $js = "jQuery.datetimepicker.setLocale('{$lang}');";
-    }
-    $id = "datetime-picker-$name";
-    $input = sprintf('%s<input type="text" id="%s" name="%s" value="%s" autocomplete="off" style="%s">', $label, $id, $name, $value, $options['style'] ?? '');
-    $format = $options['format'] ?? 'Y-m-d H:i';
-    $js .= <<<JS
-jQuery("#{$id}").datetimepicker({
-    format: '{$format}'
-})
-JS;
-    \Nexus\Nexus::js($js, 'footer', false);
-    return $input;
+    return \App\Support\Form::datetimepickerInput($name, $value, $label, $options);
 }
 
 function build_bonus_table(array $user, array $bonusResult = [], array $options = [])
@@ -3365,15 +2917,7 @@ function build_bonus_table(array $user, array $bonusResult = [], array $options 
 
 function build_search_area($searchArea, array $options = [])
 {
-    $result = sprintf('<select name="search_area" style="%s">', $options['style'] ?? '');
-    foreach ([0, 1, 3] as $item) {
-        $result .= sprintf(
-            '<option value="%s"%s>%s</option>',
-            $item, $item == $searchArea ? ' selected' : '', nexus_trans("search.search_area_options.$item")
-        );
-    }
-    $result .= '</select>';
-    return $result;
+    return \App\Support\SearchBox::areaSelect($searchArea, $options);
 }
 
 function torrent_name_for_admin(\App\Models\Torrent|null $torrent, $withTags = false, $length = 40)

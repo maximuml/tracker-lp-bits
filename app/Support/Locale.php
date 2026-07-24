@@ -130,6 +130,28 @@ final class Locale
     }
 
     /**
+     * Return the list of languages usable for a given scope.
+     *
+     * Mirrors `langlist($type, $enabled)`.
+     *
+     * @param  string  $type  e.g. 'rule_lang', 'site_lang'
+     * @return array<int, array<string, mixed>>
+     */
+    public static function languageList(string $type, ?bool $enabled = null): array
+    {
+        $cacheKey = $type . '_lang_list';
+
+        return NexusDB::remember($cacheKey, 600, function () use ($type, $enabled) {
+            $query = Language::query()->where($type, 1);
+            if ($enabled !== null) {
+                $query->whereIn('site_lang_folder', Language::listEnabled(true));
+            }
+
+            return $query->get()->toArray();
+        });
+    }
+
+    /**
      * Return the language id for the current language folder, defaulting
      * to English (6) if none is found.
      *

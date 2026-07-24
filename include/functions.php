@@ -4773,27 +4773,8 @@ function get_filament_class_alias($class): string
 function calculate_seed_bonus($uid, $torrentIdArr = null): array
 {
     $settingBonus = \App\Models\Setting::get('bonus');
-    $donortimes_bonus = $settingBonus['donortimes'];
-    $perseeding_bonus = $settingBonus['perseeding'];
-    $maxseeding_bonus = $settingBonus['maxseeding'];
-    $tzero_bonus = $settingBonus['tzero'];
-    $nzero_bonus = $settingBonus['nzero'];
-    $bzero_bonus = $settingBonus['bzero'];
-    $l_bonus = $settingBonus['l'];
     $minSize = $settingBonus['min_size'] ?? 0;
-
-    $sqrtof2 = sqrt(2);
-    $logofpointone = log(0.1);
-    $valueone = $logofpointone / $tzero_bonus;
-    $pi = 3.141592653589793;
-    $valuetwo = $bzero_bonus * ( 2 / $pi);
-    $valuethree = $logofpointone / ($nzero_bonus - 1);
-    $timenow = time();
     $nowStr = date('Y-m-d H:i:s');
-    $sectoweek = 7*24*60*60;
-
-    $A = $official_a = $size = $official_size = 0;
-    $count = $torrent_peer_count = $official_torrent_peer_count = 0;
     $logPrefix = "[CALCULATE_SEED_BONUS], uid: $uid, torrentIdArr: " . json_encode($torrentIdArr);
     if ($torrentIdArr !== null) {
         if (empty($torrentIdArr)) {
@@ -4827,55 +4808,28 @@ function calculate_seed_bonus($uid, $torrentIdArr = null): array
     $userMedalResult = \Nexus\Database\NexusDB::select("select $factorField as factor from medals where id in (select medal_id from user_medals where uid = $uid and (expire_at is null or expire_at > '$nowStr') and (bonus_addition_expire_at is null or bonus_addition_expire_at > '$nowStr'))");
     $medalAdditionalFactor = floatval($userMedalResult[0]['factor'] ?? 0);
     do_log("$logPrefix, sql: $sql, count: " . count($torrentResult) . ", officialTag: $officialTag, officialAdditionalFactor: $officialAdditionalFactor, zeroBonusTag: $zeroBonusTag, zeroBonusFactor: $zeroBonusFactor, medalAdditionalFactor: $medalAdditionalFactor");
-    $last_action = "";
-    $ip_arr = [];
-    foreach ($torrentResult as $torrent)
-    {
-        if ($torrent['last_action'] > $last_action) {
-            $last_action = $torrent['last_action'];
-        }
-        if (!empty($torrent['ip']) && !isset($ip_arr[$torrent['ip']])) {
-            $ip_arr[$torrent['ip']] = $torrent['ip'];
-        }
-        $size = bcadd($size, $torrent['size']);
-        $weeks_alive = ($timenow - strtotime($torrent['added'])) / $sectoweek;
-        $gb_size = $gb_size_raw = $torrent['size'] / 1073741824;
-        if ($zeroBonusTag && isset($tagGrouped[$torrent['id']][$zeroBonusTag]) && is_numeric($zeroBonusFactor)) {
-            $gb_size = $gb_size * $zeroBonusFactor;
-        }
-        $temp = (1 - exp($valueone * $weeks_alive)) * $gb_size * (1 + $sqrtof2 * exp($valuethree * ($torrent['seeders'] - 1)));
-        $A += $temp;
-        $count++;
-        $torrent_peer_count++;
-        $officialAIncrease = 0;
-        if ($officialTag && isset($tagGrouped[$torrent['id']][$officialTag])) {
-            $officialAIncrease = $temp;
-            $official_torrent_peer_count++;
-            $official_size = bcadd($official_size, $torrent['size']);
-        }
-        $official_a += $officialAIncrease;
-        do_log(sprintf(
-            "$logPrefix, torrent: %s, peer ID: %s, weeks: %s, size_raw: %s GB, size: %s GB, increase A: %s, increase official A: %s",
-            $torrent['id'], $torrent['peerID'], $weeks_alive, $gb_size_raw, $gb_size, $temp, $officialAIncrease
-        ), "debug");
-    }
-    if ($count > $maxseeding_bonus)
-        $count = $maxseeding_bonus;
-    $seed_bonus = $seed_points = $valuetwo * atan($A / $l_bonus) + ($perseeding_bonus * $count);
-    //Official addition don't think about the minimum value
-    $official_bonus =  $valuetwo * atan($official_a / $l_bonus);
-    $medal_bonus = $valuetwo * atan($A / $l_bonus);
-    $result = compact(
-        'seed_points','seed_bonus', 'A', 'count', 'torrent_peer_count', 'size', 'last_action',
-        'official_bonus', 'official_a', 'official_torrent_peer_count', 'official_size', 'medal_bonus',
+
+    $result = \App\Support\Bonus::aggregateSeedBonus(
+        $torrentResult,
+        $settingBonus,
+        $tagGrouped,
+        $officialTag,
+        $zeroBonusTag,
+        $zeroBonusFactor,
+        $medalAdditionalFactor,
+        $officialAdditionalFactor,
+        function ($torrent, $weeks_alive, $gb_size_raw, $gb_size, $temp, $officialAIncrease) use ($logPrefix) {
+            do_log(sprintf(
+                "$logPrefix, torrent: %s, peer ID: %s, weeks: %s, size_raw: %s GB, size: %s GB, increase A: %s, increase official A: %s",
+                $torrent['id'], $torrent['peerID'] ?? '', $weeks_alive, $gb_size_raw, $gb_size, $temp, $officialAIncrease
+            ), "debug");
+        },
     );
-    $result['donor_times'] = $donortimes_bonus;
-    $result['official_additional_factor'] = $officialAdditionalFactor;
-    $result['medal_additional_factor'] = $medalAdditionalFactor;
-    $result['ip_arr'] = array_keys($ip_arr);
     do_log("$logPrefix, result: " . json_encode($result));
+
     return $result;
 }
+
 
 function calculate_harem_addition($uid)
 {
@@ -5094,107 +5048,19 @@ function build_bonus_table(array $user, array $bonusResult = [], array $options 
     $haremAddition = calculate_harem_addition($user['id']);
     $isDonor = is_donor($user);
     $donortimes_bonus = get_setting('bonus.donortimes');
-    $baseBonusFactor = 1;
-    if ($isDonor && $donortimes_bonus != 0) {
-        $baseBonusFactor = $donortimes_bonus;
-    }
-    $baseBonus = $bonusResult['seed_bonus'] * $baseBonusFactor;
-    $totalBonus = $baseBonus;
 
-    $rowSpan = 1;
-    $hasHaremAddition = $hasOfficialAddition = $hasMedalAddition = false;
-    if ($haremFactor > 0) {
-        $rowSpan++;
-        $hasHaremAddition = true;
-        $totalBonus +=  $haremAddition * $haremFactor;
-    }
-    if ($officialAdditionalFactor > 0 && $officialTag) {
-        $rowSpan++;
-        $hasOfficialAddition = true;
-        $totalBonus += $bonusResult['official_bonus'] * $officialAdditionalFactor;
-    }
-    if ($bonusResult['medal_additional_factor'] > 0) {
-        $rowSpan++;
-        $hasMedalAddition = true;
-        $totalBonus += $bonusResult['medal_bonus'] * $bonusResult['medal_additional_factor'];
-    }
-
-    $table = sprintf('<table cellpadding="5" style="%s">', $options['table_style'] ?? '');
-    $table .= '<tr>';
-    $table .= sprintf('<td class="colhead">%s</td>', nexus_trans('bonus.table_thead.reward_type'));
-    $table .= sprintf('<td class="colhead">%s</td>', nexus_trans('bonus.table_thead.count'));
-    $table .= sprintf('<td class="colhead">%s</td>', nexus_trans('bonus.table_thead.size'));
-    $table .= sprintf('<td class="colhead">%s</td>', nexus_trans('bonus.table_thead.a_value'));
-    $table .= sprintf('<td class="colhead">%s</td>', nexus_trans('bonus.table_thead.bonus_base'));
-    $table .= sprintf('<td class="colhead">%s</td>', nexus_trans('bonus.table_thead.factor'));
-    $table .= sprintf('<td class="colhead">%s</td>', nexus_trans('bonus.table_thead.got_bonus'));
-    $table .= sprintf('<td class="colhead">%s</td>', nexus_trans('bonus.table_thead.total'));
-    $table .= '</tr>';
-
-    $table .= sprintf(
-        '<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td rowspan="%s">%s</td></tr>',
-        nexus_trans('bonus.reward_types.basic'),
-        $bonusResult['torrent_peer_count'],
-        mksize($bonusResult['size']),
-        number_format($bonusResult['A'], 3),
-        number_format($bonusResult['seed_bonus'],3),
-        $baseBonusFactor,
-        number_format($baseBonus,3),
-        $rowSpan,
-        number_format($totalBonus, 3)
+    return \App\Support\Bonus::buildBonusTable(
+        $bonusResult,
+        $isDonor,
+        $donortimes_bonus,
+        $officialTag,
+        $officialAdditionalFactor,
+        $haremFactor,
+        $haremAddition,
+        $options,
     );
-    if ($hasMedalAddition) {
-        $table .= sprintf(
-            '<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>',
-            nexus_trans('bonus.reward_types.medal_addition'),
-            $bonusResult['torrent_peer_count'],
-            mksize($bonusResult['size']),
-            number_format($bonusResult['A'], 3),
-            number_format($bonusResult['medal_bonus'], 3),
-            number_format($bonusResult['medal_additional_factor'], 3),
-            number_format($bonusResult['medal_bonus'] * $bonusResult['medal_additional_factor'], 3)
-        );
-    }
-
-    if ($hasOfficialAddition) {
-        $table .= sprintf(
-            '<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>',
-            nexus_trans('bonus.reward_types.official_addition'),
-            $bonusResult['official_torrent_peer_count'],
-            mksize($bonusResult['official_size']),
-            number_format($bonusResult['official_a'], 3),
-            number_format($bonusResult['official_bonus'], 3),
-            number_format($officialAdditionalFactor, 3),
-            number_format($bonusResult['official_bonus'] * $officialAdditionalFactor, 3)
-        );
-    }
-
-    if ($hasHaremAddition) {
-        $table .= sprintf(
-            '<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>',
-            nexus_trans('bonus.reward_types.harem_addition'),
-            '--',
-            '--',
-            '--',
-            number_format($haremAddition, 3),
-            number_format($haremFactor, 3),
-            number_format($haremAddition * $haremFactor, 3)
-        );
-    }
-
-    $table .= '</table>';
-
-    return [
-        'table' => $table,
-        'has_harem_addition' => $hasHaremAddition,
-        'harem_addition_factor' => $haremFactor,
-        'has_official_addition' => $hasOfficialAddition,
-        'official_addition_factor' => $officialAdditionalFactor,
-        'has_medal_addition' => $hasMedalAddition,
-        'medal_addition_factor' => $bonusResult['medal_additional_factor'],
-    ];
-
 }
+
 
 function build_search_area($searchArea, array $options = [])
 {

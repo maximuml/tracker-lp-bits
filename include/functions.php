@@ -2507,29 +2507,7 @@ function httperr($code = 404) {
 
 function logincookie($id, $authKey, $duration = 0)
 {
-    if (empty($authKey)) {
-        throw new \RuntimeException("auth_key is empty");
-    }
-    if ($duration <= 0) {
-        $duration = get_setting('system.cookie_valid_days', 365) * 86400;
-    }
-	$expires = time() + $duration;
-    $tokenData = [
-        'user_id' => $id,
-        'expires' => $expires,
-    ];
-    $tokenJson = json_encode($tokenData);
-    $signature = hash_hmac('sha256', $tokenJson, $authKey);
-    $authToken = base64_encode($tokenJson . '.' . $signature);
-	setcookie("c_secure_pass", $authToken, $expires, "/", "", isHttps(), true);
-    $update = [
-        'last_login' => now(),
-    ];
-    $langId = get_langid_from_langcookie();
-    if ($langId > 0) {
-        $update['lang'] = $langId;
-    }
-	\App\Models\User::query()->where("id", $id)->update($update);
+    \App\Support\AuthCookie::setLoginCookie((int) $id, (string) $authKey, (int) $duration);
 }
 
 function set_langfolder_cookie($folder, $expires = 0x7fffffff)

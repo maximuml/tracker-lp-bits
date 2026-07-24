@@ -27,15 +27,14 @@ jobs:
       - name: Validate composer.json and composer.lock
         run: composer validate
 
-      - name: Audit composer dependencies
-        run: composer audit
-        continue-on-error: true
-
       - name: Install dependencies
         run: composer install --prefer-dist --no-progress --no-interaction --ignore-platform-reqs --no-scripts
 
       - name: Dump autoload
         run: composer dump-autoload --no-interaction --no-scripts
+
+      - name: Audit composer dependencies
+        run: composer audit
 
       - name: Run PHP syntax lint
         run: |
@@ -47,21 +46,59 @@ jobs:
             -not -path './storage/*' \
             -print0 | xargs -0 -n1 -P4 php -l
 
-      - name: Determine changed PHP files
-        id: changed
-        run: |
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
-            base="origin/${{ github.base_ref }}"
-            git fetch origin "${{ github.base_ref }}" --depth=1 || true
-          else
-            base="${{ github.event.before }}"
-          fi
-          files=$(git diff --name-only --diff-filter=ACM "$base" HEAD | grep '\.php$' | tr '\n' ' ' || true)
-          echo "files=$files" >> "$GITHUB_OUTPUT"
-
-      - name: Run PHPStan on changed files
-        if: steps.changed.outputs.files != ''
-        run: vendor/bin/phpstan analyse --no-progress --memory-limit=2G ${{ steps.changed.outputs.files }}
+      - name: Run PHPStan on all PHP files
+        run: vendor/bin/phpstan analyse --no-progress --memory-limit=2G
 
       - name: Run PHPUnit unit tests
         run: vendor/bin/phpunit --testsuite Unit --no-coverage
+
+  smoke-test:
+    name: Docker smoke test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: bcmath, curl, gd, gmp, intl, json, mbstring, mysqli, pdo, redis, sqlite3, xml, zip
+          coverage: none
+
+      - name: Prepare environment
+        run: |
+          cp .env.example .env
+          sed -i 's|DB_HOST=127.0.0.1|DB_HOST=mysql|g' .env
+          sed -i 's|REDIS_HOST=127.0.0.1|REDIS_HOST=redis|g' .env
+          sed -i 's|LOG_FILE=.*|LOG_FILE=php://stdout|g' .env
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress --no-interaction --ignore-platform-reqs --no-scripts
+
+      - name: Dump autoload
+        run: composer dump-autoload --no-interaction --no-scripts
+
+      - name: Start Docker Compose
+        run: docker compose up -d --build
+
+      - name: Wait for services
+        run: |
+          for i in $(seq 1 60); do
+            docker compose exec -T php php -v >/dev/null 2>&1 || { sleep 2; continue; }
+            docker compose exec -T php php -r "new PDO('mysql:host=mysql;port=3306;dbname=nexusphp','nexusphp','nexusphp');" >/dev/null 2>&1 || { sleep 2; continue; }
+            docker compose exec -T php php -r '$r = new Redis(); $r->connect("redis", 6379);' >/dev/null 2>&1 && break
+            sleep 2
+          done
+
+      - name: Install database
+        run: docker compose exec -T php php artisan migrate:fresh --seed --force
+
+      - name: Smoke test public pages
+        run: |
+          set -e
+          for page in /index.php /login.php /signup.php /torrents.php /topten.php; do
+            echo "Testing $page"
+            curl -sfL --max-time 10 "http://localhost$page" -o /dev/null
+          done

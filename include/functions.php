@@ -838,11 +838,11 @@ function nexus_redirect($url)
 
 function set_cachetimestamp($id, $field = "cache_stamp")
 {
-	sql_query("UPDATE torrents SET $field = " . time() . " WHERE id = " . sqlesc($id)) or sqlerr(__FILE__, __LINE__);
+	\App\Support\Cache::touchTorrent($id, $field);
 }
 function reset_cachetimestamp($id, $field = "cache_stamp")
 {
-	sql_query("UPDATE torrents SET $field = 0 WHERE id = " . sqlesc($id)) or sqlerr(__FILE__, __LINE__);
+	\App\Support\Cache::resetTorrent($id, $field);
 }
 
 function cache_check ($file = 'cachefile',$endpage = true, $cachetime = 600) {

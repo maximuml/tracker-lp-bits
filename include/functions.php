@@ -315,7 +315,6 @@ function write_log($text, $security = "normal")
 }
 
 
-
 function get_elapsed_time($ts,$shortunit = false)
 {
 	global $lang_functions;
@@ -735,47 +734,6 @@ function insert_suggest($keyword, $userid, $pre_escaped = true)
 	}
 }
 
-function get_external_tr($imdb_url = "")
-{
-    return '';
-}
-
-function get_torrent_extinfo_identifier($torrentid)
-{
-	$torrentid = intval($torrentid ?? 0);
-
-	$result = array('imdb_id');
-	unset($result);
-
-	if($torrentid)
-	{
-		$res = sql_query("SELECT url FROM torrents WHERE id=" . $torrentid) or sqlerr(__FILE__,__LINE__);
-		if(mysql_num_rows($res) == 1)
-		{
-			$arr = mysql_fetch_array($res) or sqlerr(__FILE__,__LINE__);
-
-			$imdb_id = parse_imdb_id($arr["url"]);
-			$result['imdb_id'] = $imdb_id;
-		}
-	}
-	return $result;
-}
-
-function parse_imdb_id($url)
-{
-    if ($url && is_numeric($url) && strlen($url) < 7) {
-        $url = str_pad($url, 7, '0', STR_PAD_LEFT);
-    }
-	if ($url != "" && preg_match("/[0-9]+/i", $url, $matches)) {
-		return intval($matches[0]);
-	}
-	return null;
-}
-
-function build_imdb_url($imdb_id)
-{
-	return $imdb_id == "" ? "" : "https://www.imdb.com/title/tt" . $imdb_id . "/";
-}
 
 // it's a stub implemetation here, we need more acurate regression analysis to complete our algorithm
 function get_torrent_2_user_value($user_snatched_arr)
@@ -830,25 +788,15 @@ function get_torrent_2_user_value($user_snatched_arr)
 	return $torrent_2_user_value;
 }
 
-function cur_user_check () {
-	global $lang_functions;
-	global $CURUSER;
-	if ($CURUSER)
-	{
-		sql_query("UPDATE users SET lang=" . get_langid_from_langcookie() . " WHERE id = ". $CURUSER['id']);
-		stderr ($lang_functions['std_permission_denied'], $lang_functions['std_already_logged_in']);
-	}
+function cur_user_check()
+{
+	\App\Support\LegacyAuth::currentUserCheck();
 }
 
-function KPS($type = "+", $point = "1.0", $id = "") {
+function KPS($type = "+", $point = "1.0", $id = "")
+{
 	global $bonus_tweak;
-	if ($point != 0){
-		$point = sqlesc($point);
-		if ($bonus_tweak == "enable" || $bonus_tweak == "disablesave"){
-			sql_query("UPDATE users SET seedbonus = seedbonus$type$point WHERE id = ".sqlesc($id)) or sqlerr(__FILE__, __LINE__);
-		}
-	}
-	else return;
+	\App\Support\Bonus::updatePoints((string) $type, (float) $point, $id, (string) $bonus_tweak);
 }
 
 function get_agent($peer_id, $agent)
@@ -1071,19 +1019,10 @@ function login_failedlogins($type = 'login', $recover = false, $head = true)
 }
 
 
-function remaining ($type = 'login') {
+function remaining($type = 'login')
+{
 	global $maxloginattempts;
-	$total = 0;
-	$ip = sqlesc(getip());
-	$Query = sql_query("SELECT SUM(attempts) FROM loginattempts WHERE ip=$ip") or sqlerr(__FILE__, __LINE__);
-	list($total) = mysql_fetch_array($Query);
-	$remaining = $maxloginattempts - $total;
-	if ($remaining <= 2 )
-	$remaining = "<font color=\"red\" size=\"2\">[".$remaining."]</font>";
-	else
-	$remaining = "<font color=\"green\" size=\"2\">[".$remaining."]</font>";
-
-	return $remaining;
+	return \App\Support\LegacyAuth::remainingAttempts((string) $type, (int) $maxloginattempts, \getip());
 }
 
 function registration_check($type = "invitesystem", $maxuserscheck = true, $ipcheck = true) {
@@ -1592,13 +1531,10 @@ function stdhead($title = "", $msgalert = true, $script = "", $place = "")
 }
 
 
-
-
 function stdfoot()
 {
     \App\Support\PageLayout::footer();
 }
-
 
 
 function genbark($x,$y) {
@@ -3562,7 +3498,7 @@ function format_description($description)
 function get_image_from_description(array $descriptionArr, $first = false, $useDefault = true)
 {
 	if ($first) {
-		$defaultUrl = $useDefault ? getSchemeAndHttpHost() . "/pic/imdb_pic/nophoto.gif" : '';
+		$defaultUrl = $useDefault ? getSchemeAndHttpHost() . "/pic/nophoto.gif" : '';
 		return \App\Support\Description::firstImageUrl($descriptionArr, $defaultUrl);
 	}
 	return \App\Support\Description::imageUrls($descriptionArr);
@@ -4107,7 +4043,7 @@ function build_bonus_table(array $user, array $bonusResult = [], array $options 
 function build_search_area($searchArea, array $options = [])
 {
     $result = sprintf('<select name="search_area" style="%s">', $options['style'] ?? '');
-    foreach ([0, 1, 3, 4] as $item) {
+    foreach ([0, 1, 3] as $item) {
         $result .= sprintf(
             '<option value="%s"%s>%s</option>',
             $item, $item == $searchArea ? ' selected' : '', nexus_trans("search.search_area_options.$item")

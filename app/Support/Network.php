@@ -17,7 +17,7 @@ namespace App\Support;
  *
  * Lives under `App\Support` (not `App\Services`) because every method
  * is pure — no DI, no DB, no config, no global state. Same convention
- * as {@see Imdb}, {@see Ratio}, {@see Validators}, {@see Strings}.
+ * as {@see Ratio}, {@see Validators}, {@see Strings}.
  *
  * Every method's contract is pinned by a unit test in
  * `tests/Unit/Support/NetworkTest.php`.

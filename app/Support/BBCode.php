@@ -30,7 +30,7 @@ namespace App\Support;
  *
  * Keeping `addTempCode()` and `filter_src()` in the proxy layer
  * means this class stays pure: no DI, no DB, no global state. Same
- * convention as {@see Imdb}, {@see Ratio}, {@see Validators},
+ * convention as {@see Ratio}, {@see Validators},
  * {@see Format}, {@see Strings}, {@see Time}, {@see Codec}.
  */
 final class BBCode

@@ -64,7 +64,6 @@ stdhead($lang_upload['head_upload']);
 
 				if ($smalldescription_main == 'yes')
 				tr($lang_upload['row_small_description'], "<input type=\"text\" style=\"width: 99%;\" name=\"small_descr\" /><br /><font class=\"medium\">".$lang_upload['text_small_description_note']."</font>", 1);
-				get_external_tr();
 
                 //price
                 if (user_can('torrent-set-price') && get_setting("torrent.paid_torrent_enabled") == "yes") {

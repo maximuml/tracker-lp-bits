@@ -8,7 +8,6 @@ return [
         '0' => 'Title',
         '1' => 'Description',
         '3' => 'Uploader',
-        '4' => 'IMDB URL'
     ],
     'search_modes' => [
         'and' => 'And',

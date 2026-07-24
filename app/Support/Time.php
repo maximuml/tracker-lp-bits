@@ -23,7 +23,7 @@ use Carbon\Carbon;
  *
  * Lives under `App\Support` (not `App\Services`) because every method
  * is pure — no DI, no DB, no config, no global state. Same convention
- * as {@see Imdb}, {@see Ratio}, {@see Validators}, {@see Format},
+ * as {@see Ratio}, {@see Validators}, {@see Format},
  * {@see Strings}.
  */
 final class Time

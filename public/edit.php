@@ -62,8 +62,6 @@ else {
 	if ($smalldescription_main == 'yes')
 		tr($lang_edit['row_small_description'], "<input type=\"text\" style=\"width: 99%;\" name=\"small_descr\" value=\"" . htmlspecialchars($row["small_descr"]) . "\" />", 1);
 
-	get_external_tr($row["url"]);
-
     //price
     if (user_can('torrent-set-price') && get_setting("torrent.paid_torrent_enabled") == "yes") {
         $maxPrice = get_setting("torrent.max_price");

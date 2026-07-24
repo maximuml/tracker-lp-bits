@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Support;
 
+use Nexus\Database\NexusDB;
+
 /**
  * Pure seeding-bonus math, drained out of `include/functions.php`
  * (`calculate_seed_bonus()`) as part of Phase 5 of the legacy migration.
@@ -242,5 +244,31 @@ class Bonus
             'has_medal_addition' => $hasMedalAddition,
             'medal_addition_factor' => $bonusResult['medal_additional_factor'],
         ];
+    }
+
+    /**
+     * Add or subtract seed-bonus points from a single user.
+     *
+     * Mirrors the legacy `KPS()` helper: only executes when the
+     * `bonus` tweak is set to `enable` or `disablesave`, and only
+     * if the point value is non-zero.
+     */
+    public static function updatePoints(string $type, float $point, int|string $id, string $bonusTweak): void
+    {
+        if ($point == 0) {
+            return;
+        }
+
+        if ($bonusTweak !== 'enable' && $bonusTweak !== 'disablesave') {
+            return;
+        }
+
+        $op = $type === '-' ? '-' : '+';
+
+        NexusDB::table('users')
+            ->where('id', $id)
+            ->update([
+                'seedbonus' => NexusDB::raw('seedbonus '.$op.' '.$point),
+            ]);
     }
 }

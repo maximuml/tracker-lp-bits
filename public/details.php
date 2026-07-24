@@ -52,7 +52,6 @@ if (!$row) {
 			print("<h1 align=\"center\">".$lang_details['text_successfully_uploaded']."</h1>");
 			print("<p>".$lang_details['text_redownload_torrent_note']."</p>");
 			header("refresh: 1; url=download.php?id=$id");
-			//header("refresh: 1; url=getimdb.php?id=$id&type=1");
 		}
 		elseif (!empty($_GET["edited"])) {
 			print("<h1 align=\"center\">".$lang_details['text_successfully_edited']."</h1>");

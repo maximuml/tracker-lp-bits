@@ -177,8 +177,6 @@ return [
         App\Providers\Filament\AppPanelProvider::class,
         App\Providers\RouteServiceProvider::class,
 
-//        App\Providers\GoogleDriveServiceProvider::class,
-
     ],
 
     /*

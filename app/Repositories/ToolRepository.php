@@ -231,9 +231,6 @@ class ToolRepository extends BaseRepository
         if (empty($setting)) {
             $setting = Setting::get('backup');
         }
-        $saveResult = $this->saveToGoogleDrive($setting, $filename);
-        do_log("[BACKUP_GOOGLE_DRIVE]: $saveResult");
-        $result['google_drive'] = $saveResult;
 
         $saveResult = $this->saveToFtp($setting, $filename);
         do_log("[BACKUP_FTP]: $saveResult");
@@ -243,38 +240,6 @@ class ToolRepository extends BaseRepository
         do_log("[BACKUP_SFTP]: $saveResult");
         $result['sftp'] = $saveResult;
         return $result;
-    }
-
-    private function saveToGoogleDrive(array $setting, $filename): bool|string
-    {
-        $clientId = $setting['google_drive_client_id'] ?? '';
-        $clientSecret = $setting['google_drive_client_secret'] ?? '';
-        $refreshToken = $setting['google_drive_refresh_token'] ?? '';
-        $folderId = $setting['google_drive_folder_id'] ?? '';
-
-        if (empty($clientId)) {
-            do_log("No google_drive_client_id, won't do upload.");
-            return false;
-        }
-        if (empty($clientSecret)) {
-            do_log("No google_drive_client_secret, won't do upload.");
-            return false;
-        }
-        if (empty($refreshToken)) {
-            do_log("No google_drive_refresh_token, won't do upload.");
-            return false;
-        }
-        do_log("Google drive info: clientId: $clientId, clientSecret: $clientSecret, refreshToken: $refreshToken, folderId: $folderId");
-
-        $client = new \Google\Client();
-        $client->setClientId($clientId);
-        $client->setClientSecret($clientSecret);
-        $client->refreshToken($refreshToken);
-        $service = new \Google\Service\Drive($client);
-        $adapter = new \Masbug\Flysystem\GoogleDriveAdapter($service, $folderId);
-        $filesystem = new \League\Flysystem\Filesystem($adapter);
-        $disk = new \Illuminate\Filesystem\FilesystemAdapter($filesystem, $adapter);
-        return $this->doTransfer($disk, $filename);
     }
 
     private function saveToFtp(array $setting, $filename): bool|string

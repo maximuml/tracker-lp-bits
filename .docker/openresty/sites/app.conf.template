@@ -37,6 +37,11 @@ server {
         fastcgi_param REQUEST_ID $request_id;
     }
 
+    # Static attachments outside the public root (matches attachment.savedirectory = ./attachments)
+    location /attachments/ {
+        alias /var/www/html/attachments/;
+    }
+
     location ~ \.php$ {
         fastcgi_pass php:9000;
         fastcgi_index index.php;

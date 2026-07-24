@@ -2755,11 +2755,7 @@ function genbark($x,$y) {
 }
 
 function mksecret($len = 20) {
-//	$ret = "";
-//	for ($i = 0; $i < $len; $i++)
-//	$ret .= chr(mt_rand(100, 120));
-//	return $ret;
-    return bin2hex(random_bytes($len));
+	return \App\Support\Token::randomHex((int) $len);
 }
 
 function httperr($code = 404) {

@@ -92,90 +92,45 @@ function format_quotes($s)
 function print_attachment($dlkey, $enableimage = true, $imageresizer = true)
 {
 	$httpdirectory_attachment = get_setting('attachment.httpdirectory');
-	if (strlen($dlkey) == 32){
-	if (!$row = \Nexus\Database\NexusDB::cache_get('attachment_'.$dlkey.'_content')){
-		$res = sql_query("SELECT * FROM attachments WHERE dlkey=".sqlesc($dlkey)." LIMIT 1") or sqlerr(__FILE__,__LINE__);
-		$row = mysql_fetch_array($res);
-        \Nexus\Database\NexusDB::cache_put('attachment_'.$dlkey.'_content', $row, 86400);
+	if (strlen($dlkey) == 32) {
+		if (!$row = \Nexus\Database\NexusDB::cache_get('attachment_'.$dlkey.'_content')) {
+			$res = sql_query("SELECT * FROM attachments WHERE dlkey=".sqlesc($dlkey)." LIMIT 1") or sqlerr(__FILE__,__LINE__);
+			$row = mysql_fetch_array($res);
+			\Nexus\Database\NexusDB::cache_put('attachment_'.$dlkey.'_content', $row, 86400);
+		}
 	}
-	}
-	if (!$row)
-	{
+	if (!$row) {
 		return "<div style=\"text-decoration: line-through; font-size: 7pt\">".nexus_trans('attachment.text_key').$dlkey.nexus_trans('attachment.not_found')."</div>";
 	}
-	else{
-	$id = $row['id'];
-	if ($row['isimage'] == 1)
-	{
-		if ($enableimage){
-            $driver = $row['driver'] ?? 'local';
-            if ($driver == "local") {
-                if ($row['thumb'] == 1){
-                    $url = $httpdirectory_attachment."/".$row['location'].".thumb.jpg";
-                } else {
-                    $url = $httpdirectory_attachment."/".$row['location'];
-                }
-            } else {
-                $url = \Nexus\Attachment\Storage::getDriver($driver)->getImageUrl($row['location']);
-            }
-            do_log(sprintf("driver: %s, location: %s, url: %s", $driver, $row['location'], $url));
-			if($imageresizer == true)
-				$onclick = " data-zoomable data-zoom-src=\"".$url."\"";
-			else $onclick = "";
-			$return = "<img id=\"attach".$id."\" style=\"max-width: 700px\" alt=\"".htmlspecialchars($row['filename'])."\" src=\"".$url."\"". $onclick .  " onmouseover=\"domTT_activate(this, event, 'content', '".htmlspecialchars("<strong>".nexus_trans('attachment.size')."</strong>: ".mksize($row['filesize'])."<br />".gettime($row['added']))."', 'styleClass', 'attach', 'x', findPosition(this)[0], 'y', findPosition(this)[1]-58);\" />";
-		}
-		else $return = "";
-	}
-	else
-	{
-		switch($row['filetype'])
-		{
-			case 'application/x-bittorrent': {
-				$icon = "<img alt=\"torrent\" src=\"pic/attachicons/torrent.gif\" />";
-				break;
-			}
-			case 'application/zip':{
-				$icon = "<img alt=\"zip\" src=\"pic/attachicons/archive.gif\" />";
-				break;
-			}
-			case 'application/rar':{
-				$icon = "<img alt=\"rar\" src=\"pic/attachicons/archive.gif\" />";
-				break;
-			}
-			case 'application/x-7z-compressed':{
-				$icon = "<img alt=\"7z\" src=\"pic/attachicons/archive.gif\" />";
-				break;
-			}
-			case 'application/x-gzip':{
-				$icon = "<img alt=\"gzip\" src=\"pic/attachicons/archive.gif\" />";
-				break;
-			}
-			case 'audio/mpeg':{
-			}
-			case 'audio/ogg':{
-				$icon = "<img alt=\"audio\" src=\"pic/attachicons/audio.gif\" />";
-				break;
-			}
-			case 'video/x-flv':{
-				$icon = "<img alt=\"flv\" src=\"pic/attachicons/flv.gif\" />";
-				break;
-			}
-			default: {
-				$icon = "<img alt=\"other\" src=\"pic/attachicons/common.gif\" />";
-			}
-		}
-		$return = "<div class=\"attach\">".$icon."&nbsp;&nbsp;<a href=\"".htmlspecialchars("getattachment.php?id=".$id."&dlkey=".$dlkey)."\" target=\"_blank\" id=\"attach".$id."\" onmouseover=\"domTT_activate(this, event, 'content', '".htmlspecialchars("<strong>".nexus_trans('attachment.downloads')."</strong>: ".number_format($row['downloads'])."<br />".gettime($row['added']))."', 'styleClass', 'attach', 'x', findPosition(this)[0], 'y', findPosition(this)[1]-58);\">".htmlspecialchars($row['filename'])."</a>&nbsp;&nbsp;<font class=\"size\">(".mksize($row['filesize']).")</font></div>";
-	}
-	return $return;
-	}
-}
 
+	$driver = $row['driver'] ?? 'local';
+	if ($driver == "local") {
+		if ($row['thumb'] == 1) {
+			$url = $httpdirectory_attachment."/".$row['location'].".thumb.jpg";
+		} else {
+			$url = $httpdirectory_attachment."/".$row['location'];
+		}
+	} else {
+		$url = \Nexus\Attachment\Storage::getDriver($driver)->getImageUrl($row['location']);
+	}
+	do_log(sprintf("driver: %s, location: %s, url: %s", $driver, $row['location'], $url));
+
+	return \App\Support\Attachment::render(
+		$row,
+		$dlkey,
+		(bool) $enableimage,
+		(bool) $imageresizer,
+		(string) $url,
+		mksize($row['filesize']),
+		gettime($row['added']),
+		[
+			'size' => nexus_trans('attachment.size'),
+			'downloads' => nexus_trans('attachment.downloads'),
+		]
+	);
+}
 function addTempCode($value) {
-	global $tempCode, $tempCodeCount;
-	$tempCode[$tempCodeCount] = $value;
-	$return = "<tempCode_$tempCodeCount>";
-	$tempCodeCount++;
-	return $return;
+	return \App\Support\Comment::addTempCode((string) $value);
 }
 
 function formatUrl($url, $newWindow = false, $text = '', $linkClass = '') {
@@ -270,154 +225,19 @@ function format_urls($text, $newWindow = false) {
 }
 function format_comment($text, $strip_html = true, $xssclean = false, $newtab = true, $imageresizer = true, $image_max_width = 700, $enableimage = true, $enableflash = true , $imagenum = -1, $image_max_height = 0)
 {
-	global $lang_functions;
-	global $CURUSER, $SITENAME, $BASEURL;
-	global $tempCode, $tempCodeCount;
-    if ($text == '') {
-        return "";
-    }
-    $enableattach_attachment = get_setting('attachment.enableattach');
-	$tempCode = array();
-	$tempCodeCount = 0;
-	$imageresizer = $imageresizer ? 1 : 0;
-	$s = $text;
-
-	if ($strip_html) {
-		$s = htmlspecialchars($s);
-	}
-
-	if (strpos($s,"[code]") !== false && strpos($s,"[/code]") !== false) {
-//		$s = preg_replace("/\[code\](.+?)\[\/code\]/eis","formatCode('\\1')", $s);
-		$s = preg_replace_callback("/\[code\](.+?)\[\/code\]/is",function ($matches) {
-		    return formatCode($matches[1]);
-        }, $s);
-	}
-
-    if (strpos($s,"[raw]") !== false && strpos($s,"[/raw]") !== false) {
-        $s = preg_replace_callback("/\[raw\](.+?)\[\/raw\]/is",function ($matches) {
-            return addTempCode($matches[1]);
-        }, $s);
-    }
-
-    // Linebreaks
-    $s = nl2br($s);
-
-	$originalBbTagArray = array('[siteurl]', '[site]','[*]', '[b]', '[/b]', '[i]', '[/i]', '[u]', '[/u]', '[s]', '[/s]', '[pre]', '[/pre]', '[/color]', '[/font]', '[/size]', '[hr]', "  ");
-	$replaceXhtmlTagArray = array(get_protocol_prefix().get_setting('basic.BASEURL'), get_setting('basic.SITENAME'), '&#x2022; ', '<b>', '</b>', '<i>', '</i>', '<u>', '</u>', '<s>', '</s>', '<pre>', '</pre>', '</span>', '</font>', '</font>', '<hr>', ' &nbsp;');
-	$s = str_replace($originalBbTagArray, $replaceXhtmlTagArray, $s);
-
-	$originalBbTagArray = array("/\[font=([^\[\(&\\;]+?)\]/is", "/\[color=([#0-9a-z]{1,15})\]/is", "/\[color=([a-z]+)\]/is", "/\[size=([1-7])\]/is");
-	$replaceXhtmlTagArray = array("<font face=\"\\1\">", "<span style=\"color: \\1;word-break: break-word\">", "<span style=\"color: \\1;word-break: break-word\">", "<font size=\"\\1\">");
-	$s = preg_replace($originalBbTagArray, $replaceXhtmlTagArray, $s);
-
-
-	if ($enableimage) {
-//		$s = preg_replace("/\[img\]([^\<\r\n\"']+?)\[\/img\]/ei", "formatImg('\\1',".$imageresizer.",".$image_max_width.",".$image_max_height.")", $s, $imagenum, $imgReplaceCount);
-		$s = preg_replace_callback("/\[img\]([^\<\r\n\"']+?)\[\/img\]/i", function ($matches) use ($imageresizer, $image_max_width, $image_max_height) {
-		    return formatImg($matches[1],$imageresizer,$image_max_width,$image_max_height);
-        }, $s, $imagenum, $imgReplaceCount);
-
-//		$s = preg_replace("/\[img=([^\<\r\n\"']+?)\]/ei", "formatImg('\\1',".$imageresizer.",".$image_max_width.",".$image_max_height.")", $s, ($imagenum != -1 ? max($imagenum-$imgReplaceCount, 0) : -1));
-		$s = preg_replace_callback("/\[img=([^\<\r\n\"']+?)\]/i", function ($matches) use ($imageresizer, $image_max_width, $image_max_height) {
-		    return formatImg($matches[1],$imageresizer,$image_max_width,$image_max_height);
-        }, $s, ($imagenum != -1 ? max($imagenum-$imgReplaceCount, 0) : -1));
-	} else {
-		$s = preg_replace("/\[img\]([^\<\r\n\"']+?)\[\/img\]/i", '', $s, -1);
-		$s = preg_replace("/\[img=([^\<\r\n\"']+?)\]/i", '', $s, -1);
-	}
-
-    //[youtube,560,315]https://www.youtube.com/watch?v=DWDL3VTCcCg&ab_channel=ESPNMMA[/youtube]
-	if (str_contains($s, '[youtube') && str_contains($s, 'v=')) {
-        $s = preg_replace_callback("/\[youtube(\,([1-9][0-9]*)\,([1-9][0-9]*))?\]((http|https):\/\/[^\s'\"<>]+)\[\/youtube\]/i", function ($matches) {
-            return formatYoutube($matches[4], $matches[2], $matches[3]);
-        }, $s);
-    }
-    if (str_contains($s, "[video")) {
-        $s = preg_replace_callback("/\[video(\,([1-9][0-9]*)\,([1-9][0-9]*))?\]((http|https):\/\/[^\s'\"<>]+)\[\/video\]/i", function ($matches) {
-            return formatVideo($matches[4], $matches[2], $matches[3]);
-        }, $s);
-    }
-    if (str_contains($s, "[audio")) {
-        $s = preg_replace_callback("/\[audio\]((http|https):\/\/[^\s'\"<>]+)\[\/audio\]/i", function ($matches) {
-            return formatAudio($matches[1]);
-        }, $s);
-
-    }
-
-	// [url=http://www.example.com]Text[/url]
-	$s = preg_replace_callback("/\[url=([^\[\s]+?)\](.+?)\[\/url\]/i", function ($matches) use ($newtab) {
-	    return formatUrl($matches[1], $newtab, $matches[2], 'faqlink');
-    }, $s);
-
-	// [url]http://www.example.com[/url]
-//	$s = preg_replace("/\[url\]([^\[\s]+?)\[\/url\]/ei", "formatUrl('\\1', ".($newtab==true ? 1 : 0).", '', 'faqlink')", $s);
-	$s = preg_replace_callback("/\[url\]([^\[\s]+?)\[\/url\]/i", function ($matches) use ($newtab) {
-	    return formatUrl($matches[1], $newtab, '', 'faqlink');
-    }, $s);
-
-    // [left]Left text[/left]
-    $s = preg_replace_callback("/\[left\](.*)\[\/left\]/isU", function ($matches) {
-        return formatTextAlign($matches[1], 'left');
-    }, $s);
-
-    // [center]Center text[/center]
-    $s = preg_replace_callback("/\[center\](.*)\[\/center\]/isU", function ($matches) {
-        return formatTextAlign($matches[1], 'center');
-    }, $s);
-
-    // [right]Right text[/right]
-    $s = preg_replace_callback("/\[right\](.*)\[\/right\]/isU", function ($matches) {
-        return formatTextAlign($matches[1], 'right');
-    }, $s);
-
-    // [hide]Hidden text[/hide]
-    $s = preg_replace_callback("/\[hide\](.*)\[\/hide\]/isU", function ($matches) {
-        return formatHidden($matches[1]);
-    }, $s);
-
-
-	$s = format_urls($s, $newtab);
-	// Quotes
-	if (strpos($s,"[quote") !== false && strpos($s,"[/quote]") !== false) { //format_quote is kind of slow. Better check if [quote] exists beforehand
-		$s = format_quotes($s);
-	}
-
-//	$s = preg_replace("/\[em([1-9][0-9]*)\]/ie", "(\\1 < 192 ? '<img src=\"pic/smilies/\\1.gif\" alt=\"[em\\1]\" />' : '[em\\1]')", $s);
-	$s = preg_replace_callback("/\[em([1-9][0-9]*)\]/i", function ($matches) {
-	    $smile = get_smile($matches[1]);
-	    return $smile ? '<img src="'.$smile.'" alt="[em' . $matches[1] . ']" />' : '[em' . $matches[1] . ']';
-    }, $s);
-
-    //[spoiler=What happens to the hero?]The hero dies at the end![/spoiler]
-    if (str_contains($s, '[spoiler')) {
-        $s = preg_replace_callback("/\[spoiler(=(.*))?\](.*)\[\/spoiler\]/isU", function ($matches) {
-            return formatSpoiler($matches[3], $matches[2], nexus()->getScript() != 'preview');
-        }, $s);
-    }
-
-    if ($enableattach_attachment == 'yes' && $imagenum != 1){
-        $limit = 20;
-//		$s = preg_replace("/\[attach\]([0-9a-zA-z][0-9a-zA-z]*)\[\/attach\]/ies", "print_attachment('\\1', ".($enableimage ? 1 : 0).", ".($imageresizer ? 1 : 0).")", $s, $limit);
-        $s = preg_replace_callback("/\[attach\]([0-9a-zA-z][0-9a-zA-z]*)\[\/attach\]/is", function ($matches) use ($enableimage, $imageresizer) {
-            return print_attachment($matches[1], ".($enableimage ? 1 : 0).", ".($imageresizer ? 1 : 0).");
-        }, $s, $limit);
-    }
-
-	reset($tempCode);
-	$j = $i = 0;
-	while(count($tempCode) || $j > 5) {
-		foreach($tempCode as $key=>$code) {
-			$s = str_replace("<tempCode_$key>", $code, $s, $count);
-			if ($count) {
-				unset($tempCode[$key]);
-				$i = $i+$count;
-			}
-		}
-		$j++;
-	}
-    return str_replace('', '', $s);
+	return \App\Support\Comment::format(
+		(string) $text,
+		(bool) $strip_html,
+		(bool) $xssclean,
+		(bool) $newtab,
+		(bool) $imageresizer,
+		(int) $image_max_width,
+		(bool) $enableimage,
+		(bool) $enableflash,
+		(int) $imagenum,
+		(int) $image_max_height,
+	);
 }
-
 function highlight($search,$subject,$hlstart='<b><font class="striking">',$hlend="</font></b>")
 {
 	return \App\Support\Strings::highlight((string)$search, (string)$subject, $hlstart, $hlend);
@@ -1109,15 +929,7 @@ function allowedemails()
 
 function nexus_redirect($url)
 {
-    if (substr($url, 0, 4) != 'http') {
-        $url = getSchemeAndHttpHost() . '/' . trim($url, '/');
-    }
-	if(!headers_sent()){
-	    header("Location: $url", true, 302);
-	} else {
-        echo "<script type=\"text/javascript\">window.location.href = '$url';</script>";
-    }
-	exit;
+    \App\Support\LegacyResponse::redirect((string) $url);
 }
 
 function set_cachetimestamp($id, $field = "cache_stamp")
@@ -2446,77 +2258,18 @@ function make_folder($pre, $folder_name)
  */
 function cover_thumb_url($url, $maxWidth = 240, $maxHeight = 360, $quality = 82)
 {
-	global $savedirectory_attachment, $httpdirectory_attachment;
-	$url = trim((string)$url);
-	if ($url === '') {
-		return '';
-	}
-	if (!extension_loaded('gd')) {
-		return $url;
-	}
-	$saveDir = $savedirectory_attachment ?: 'attachments';
-	$httpDir = $httpdirectory_attachment ?: 'attachments';
-	$key = md5($url . '|' . (int)$maxWidth . 'x' . (int)$maxHeight);
-	$relativeDir = 'covers/' . substr($key, 0, 2);
-	$filename = $key . '.jpg';
-	$absoluteDir = make_folder($saveDir . '/', $relativeDir);
-	$absolutePath = rtrim($absoluteDir, '/') . '/' . $filename;
-	$publicUrl = $httpDir . '/' . $relativeDir . '/' . $filename;
-	if (is_file($absolutePath) && filesize($absolutePath) > 0) {
-		return $publicUrl;
-	}
-
-	// Remote covers are thumbnailed asynchronously. The heavy lifting
-	// (SSRF-safe validation, fetch, resize) is done in the queue job so the
-	// homepage render never blocks on a slow or unreachable cover host.
-	// A cheap cache lock prevents duplicate dispatches for the same thumbnail.
-	if (preg_match('#^https?://#i', $url)) {
-		global $Cache;
-		$lockKey = 'cover_thumb:' . $absolutePath;
-		$lockSet = false;
-		if (isset($Cache) && is_object($Cache) && property_exists($Cache, 'redis')) {
-			$lockSet = (bool) $Cache->redis->set($lockKey, 1, ['nx', 'ex' => 300]);
-		}
-		if ($lockSet) {
-			\Nexus\Nexus::dispatchQueueJob(new \App\Jobs\GenerateCoverThumbnail($url, $absolutePath, (int)$maxWidth, (int)$maxHeight, (int)$quality));
-		}
-
-		return $url;
-	}
-
-	// Local paths are processed synchronously.
-	$data = false;
-	$localPath = ROOT_PATH . ltrim($url, '/');
-	if (is_file($localPath)) {
-		$data = @file_get_contents($localPath);
-	}
-	if (!$data) {
-		return $url;
-	}
-	$src = @imagecreatefromstring($data);
-	if (!$src) {
-		return $url;
-	}
-	$srcWidth  = imagesx($src);
-	$srcHeight = imagesy($src);
-	if ($srcWidth <= 0 || $srcHeight <= 0) {
-		imagedestroy($src);
-		return $url;
-	}
-	$scale = min(1.0, $maxWidth / $srcWidth, $maxHeight / $srcHeight);
-	$dstWidth  = max(1, (int) floor($srcWidth * $scale));
-	$dstHeight = max(1, (int) floor($srcHeight * $scale));
-	$dst = imagecreatetruecolor($dstWidth, $dstHeight);
-	imagecopyresampled($dst, $src, 0, 0, 0, 0, $dstWidth, $dstHeight, $srcWidth, $srcHeight);
-	$ok = @imagejpeg($dst, $absolutePath, max(1, min(100, (int)$quality)));
-	imagedestroy($src);
-	imagedestroy($dst);
-	if (!$ok) {
-		return $url;
-	}
-	return $publicUrl;
+	global $savedirectory_attachment, $httpdirectory_attachment, $Cache;
+	return \App\Support\CoverThumb::url(
+		(string) $url,
+		(int) $maxWidth,
+		(int) $maxHeight,
+		(int) $quality,
+		(string) ($savedirectory_attachment ?: 'attachments'),
+		(string) ($httpdirectory_attachment ?: 'attachments'),
+		ROOT_PATH,
+		$Cache ?? null,
+	);
 }
-
 function logoutcookie() {
 //	setcookie("c_secure_uid", "", 0x7fffffff, "/", "", false, true);
 	setcookie("c_secure_pass", "", 0x7fffffff, "/", "", isHttps(), true);

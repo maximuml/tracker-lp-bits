@@ -105,7 +105,7 @@ final class LegacyResponse
     ): bool {
         if (is_array($value)) {
             foreach ($value as $val) {
-                self::assertId($val, $stdhead, $stdfoot, $die, false);
+                self::assertId($val, $stdhead, $stdfoot, $die, $log);
             }
 
             return true;
@@ -122,13 +122,11 @@ final class LegacyResponse
             .' - UserID: '.($CURUSER['id'] ?? '')
             .' - UserIP : '.(\function_exists('getip') ? \getip() : '');
 
-        if ($log) {
-            if (\function_exists('write_log')) {
-                \write_log($msg, 'mod');
-            }
-            if (\function_exists('do_log')) {
-                \do_log($msg, 'error');
-            }
+        if ($log && \function_exists('write_log')) {
+            \write_log($msg, 'mod');
+        }
+        if (\function_exists('do_log')) {
+            \do_log($msg, 'error');
         }
 
         if ($stdhead) {

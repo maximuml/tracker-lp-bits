@@ -84,6 +84,9 @@ class GenerateCoverThumbnail implements ShouldQueue
     /**
      * Reject URLs that point to non-HTTP schemes, loopback, link-local,
      * private ranges, or metadata services.
+     *
+     * Handles both plain IPv4 addresses and bracketed IPv6 literals
+     * (e.g. `[::1]`, `[fc00::1]`, `[::ffff:169.254.169.254]`).
      */
     public static function isAllowedUrl(string $url): bool
     {
@@ -102,26 +105,56 @@ class GenerateCoverThumbnail implements ShouldQueue
             return false;
         }
 
+        // Strip brackets from IPv6 literals: `[::1]` -> `::1`.
+        $host = trim($host, '[]');
+        if ($host === '') {
+            return false;
+        }
+
         // Reject hostname-based localhost / internal names.
         $lowerHost = strtolower($host);
-        $blockedNames = ['localhost', '127.0.0.1', '0.0.0.0', '[::1]', '::1', 'metadata.google.internal'];
+        $blockedNames = ['localhost', 'metadata.google.internal'];
         if (in_array($lowerHost, $blockedNames, true)) {
             return false;
         }
 
-        // Reject IP addresses in private/reserved/link-local ranges.
-        if (filter_var($host, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) !== false) {
-            // Public-looking IP; still reject loopback explicitly (FILTER_FLAG_NO_RES_RANGE may not catch 127).
-            if (str_starts_with($host, '127.')) {
-                return false;
-            }
-
-            return true;
+        // Literal IP address (IPv4 or IPv6): reject private/reserved/link-local.
+        if (filter_var($host, FILTER_VALIDATE_IP) !== false) {
+            return self::isPublicIp($host);
         }
 
         // For hostnames, resolve DNS and check all returned IPs.
         // This prevents trivial DNS-rebinding to internal addresses. A small TTL
         // window remains, but it closes the most common SSRF vector.
+        $records = @dns_get_record($host, DNS_A | DNS_AAAA);
+        if ($records !== false) {
+            $found = false;
+            foreach ($records as $record) {
+                $type = $record['type'] ?? '';
+                if ($type === 'A') {
+                    $ip = $record['ip'] ?? '';
+                } elseif ($type === 'AAAA') {
+                    $ip = $record['ipv6'] ?? '';
+                } else {
+                    continue;
+                }
+
+                if ($ip === '') {
+                    continue;
+                }
+
+                $found = true;
+                if (! self::isPublicIp($ip)) {
+                    return false;
+                }
+            }
+
+            if ($found) {
+                return true;
+            }
+        }
+
+        // Fallback for environments without dns_get_record support.
         $ipv4s = gethostbynamel($host);
         if ($ipv4s !== false) {
             foreach ($ipv4s as $ip) {
@@ -133,37 +166,26 @@ class GenerateCoverThumbnail implements ShouldQueue
             return true;
         }
 
-        $records = @dns_get_record($host, DNS_AAAA);
-        if ($records !== false) {
-            foreach ($records as $record) {
-                $ip = $record['ipv6'] ?? '';
-                if ($ip !== '' && ! self::isPublicIp($ip)) {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        // No DNS records found; allow the URL and let the fetch fail cleanly.
-        return true;
+        // No resolvable public records; block to avoid DNS-rebinding to internal addresses.
+        return false;
     }
 
     /**
-     * @param string $ip IPv4 or IPv6 address.
+     * @param string $ip IPv4 or IPv6 address (must not be bracketed).
      */
     private static function isPublicIp(string $ip): bool
     {
-        if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) === false) {
-            return false;
+        // filter_var flags do not always reject IPv4-mapped IPv6 addresses
+        // (e.g. `::ffff:127.0.0.1`), so validate the embedded IPv4 explicitly.
+        $lower = strtolower($ip);
+        if (str_starts_with($lower, '::ffff:')) {
+            $ipv4 = substr($ip, 7);
+            if (filter_var($ipv4, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE | FILTER_FLAG_IPV4) === false) {
+                return false;
+            }
         }
 
-        // filter_var NO_RES_RANGE may still allow some loopback literals.
-        if (str_starts_with($ip, '127.')) {
-            return false;
-        }
-
-        return true;
+        return filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) !== false;
     }
 
     /**

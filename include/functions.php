@@ -2960,14 +2960,14 @@ function cover_thumb_url($url, $maxWidth = 240, $maxHeight = 360, $quality = 82)
 		return $publicUrl;
 	}
 
-	// Remote covers are thumbnailed asynchronously. The URL is validated before
-	// dispatch and the job enforces no-follow / SSL-verified / size-limited fetches.
+	// Remote covers are thumbnailed asynchronously. The heavy lifting
+	// (SSRF-safe validation, fetch, resize) is done in the queue job so the
+	// homepage render never blocks on a slow or unreachable cover host.
+	// A cheap cache lock prevents duplicate dispatches for the same thumbnail.
 	if (preg_match('#^https?://#i', $url)) {
-		if (\App\Jobs\GenerateCoverThumbnail::isAllowedUrl($url)) {
-			$lockKey = 'cover_thumb:' . $absolutePath;
-			if (\app('cache')->add($lockKey, 1, 300)) {
-				\App\Jobs\GenerateCoverThumbnail::dispatch($url, $absolutePath, (int)$maxWidth, (int)$maxHeight, (int)$quality);
-			}
+		$lockKey = 'cover_thumb:' . $absolutePath;
+		if (\app('cache')->add($lockKey, 1, 300)) {
+			\App\Jobs\GenerateCoverThumbnail::dispatch($url, $absolutePath, (int)$maxWidth, (int)$maxHeight, (int)$quality);
 		}
 
 		return $url;

@@ -1333,36 +1333,26 @@ function reset_cachetimestamp($id, $field = "cache_stamp")
 }
 
 function cache_check ($file = 'cachefile',$endpage = true, $cachetime = 600) {
-	global $lang_functions;
-	global $rootpath,$cache,$CURLANGDIR;
-	$cachefile = $rootpath.$cache ."/" . $CURLANGDIR .'/'.$file.'.html';
-	// Serve from the cache if it is younger than $cachetime
-	if (file_exists($cachefile) && (time() - $cachetime < filemtime($cachefile)))
-	{
+	global $lang_functions, $rootpath, $cache, $CURLANGDIR;
+	$cachefile = \App\Support\Cache::path($rootpath, $cache, $CURLANGDIR, $file);
+	if (\App\Support\Cache::isFresh($cachefile, $cachetime)) {
 		include($cachefile);
-		if ($endpage)
-		{
-			print("<p align=\"center\"><font class=\"small\">".$lang_functions['text_page_last_updated'].date('Y-m-d H:i:s', filemtime($cachefile))."</font></p>");
+		if ($endpage) {
+			echo "<p align=\"center\"><font class=\"small\">" . $lang_functions['text_page_last_updated'] . date('Y-m-d H:i:s', filemtime($cachefile)) . "</font></p>";
 			end_main_frame();
 			stdfoot();
 			exit;
 		}
 		return false;
 	}
-  	ob_start();
+	ob_start();
 	return true;
 }
 
 function cache_save  ($file = 'cachefile') {
-	global $rootpath,$cache;
-	global $CURLANGDIR;
-	$cachefile = $rootpath.$cache ."/" . $CURLANGDIR . '/'.$file.'.html';
-	$fp = fopen($cachefile, 'w');
-	// save the contents of output buffer to the file
-	fwrite($fp, ob_get_contents());
-	// close the file
-	fclose($fp);
-	// Send the output to the browser
+	global $rootpath, $cache, $CURLANGDIR;
+	$cachefile = \App\Support\Cache::path($rootpath, $cache, $CURLANGDIR, $file);
+	\App\Support\Cache::writeBuffer($cachefile, ob_get_contents());
 	ob_end_flush();
 }
 

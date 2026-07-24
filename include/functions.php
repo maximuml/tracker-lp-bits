@@ -1723,75 +1723,25 @@ function show_image_code () {
 function get_ip_location($ip)
 {
 	global $lang_functions;
-	global $Cache;
 
 	static $locations;
 	if (isset($locations[$ip])) {
-	    return $locations[$ip];
-    }
-    /**
-     * @since 1.7.4
-     */
-	$arr = get_ip_location_from_geoip($ip);
-	$result = [];
-	if ($arr) {
-	    $result[] = $arr['name'];
-    } else {
-	    $result[] = $lang_functions['text_unknown'];
-    }
-	$result[] = $lang_functions['text_user_ip'] . ":&nbsp;" . trim($ip, ',');
+		return $locations[$ip];
+	}
+
+	$geoName = get_ip_location_from_geoip($ip)['name'] ?? null;
+	$result = \App\Support\Network::ipLocationLabels(
+		$geoName,
+		$ip,
+		$lang_functions['text_unknown'] ?? '',
+		$lang_functions['text_user_ip'] ?? 'User IP'
+	);
+
 	return $locations[$ip] = $result;
-
-	$cacheKey = "location_$ip";
-	if (!$ret = $Cache->get_value($cacheKey)){
-		$ret = array();
-
-//		$res = sql_query("SELECT * FROM locations") or sqlerr(__FILE__, __LINE__);
-//		while ($row = mysql_fetch_array($res))
-//			$ret[] = $row;
-
-        //get from geoip2
-        $row = get_ip_location_from_geoip($ip);
-        if ($row) {
-            $ret[] = $row;
-        }
-		$Cache->cache_value($cacheKey, $ret, 152800);
-	}
-	$location = array($lang_functions['text_unknown'],"");
-
-	foreach($ret AS $arr)
-	{
-        $location = array($arr["name"], $lang_functions['text_user_ip'] . ":&nbsp;" . $ip);
-        break;
-//		if(in_ip_range(false, $ip, $arr["start_ip"], $arr["end_ip"]))
-//		{
-//			$location = array($arr["name"], $lang_functions['text_user_ip'].":&nbsp;" . $ip . ($arr["location_main"] != "" ? "&nbsp;".$lang_functions['text_location_main'].":&nbsp;" . $arr["location_main"] : ""). ($arr["location_sub"] != "" ? "&nbsp;".$lang_functions['text_location_sub'].":&nbsp;" . $arr["location_sub"] : "") . "&nbsp;".$lang_functions['text_ip_range'].":&nbsp;" . $arr["start_ip"] . "&nbsp;~&nbsp;". $arr["end_ip"]);
-//			break;
-//		}
-	}
-	return $location;
 }
 
-function in_ip_range($long, $targetip, $ip_one, $ip_two=false)
-{
-	// if only one ip, check if is this ip
-	if($ip_two===false){
-		if(($long ? (long2ip($ip_one) == $targetip) : ( $ip_one == $targetip))){
-			$ip=true;
-		}
-		else{
-			$ip=false;
-		}
-	}
-	else{
-		if($long ? ($ip_one<=ip2long($targetip) && $ip_two>=ip2long($targetip)) : (ip2long($ip_one)<=ip2long($targetip) && ip2long($ip_two)>=ip2long($targetip))){
-			$ip=true;
-		}
-		else{
-			$ip=false;
-		}
-	}
-	return $ip;
+function in_ip_range($long, $targetip, $ip_one, $ip_two=false) {
+	return \App\Support\Network::ipInRange($long, $targetip, $ip_one, $ip_two);
 }
 
 
@@ -2868,12 +2818,8 @@ function set_langfolder_cookie($folder, $expires = 0x7fffffff)
 	setcookie("c_lang_folder", $folder, $expires, "/", "", false, true);
 }
 
-function get_protocol_prefix()
-{
-	if (isHttps()) {
-        return "https://";
-    }
-	return 'http://';
+function get_protocol_prefix() {
+	return \App\Support\Http::protocolPrefix(isHttps());
 }
 
 function get_langid_from_langcookie($lang = '')
@@ -5977,8 +5923,7 @@ function hide_text($text) {
 }
 
 function make_content_disposition(string $filename, string $disposition = 'attachment'): string {
-    $filenameFallback = str_replace('%', '', Str::ascii($filename));
-    return \Symfony\Component\HttpFoundation\HeaderUtils::makeDisposition($disposition, $filename, $filenameFallback);
+	return \App\Support\Http::contentDisposition($filename, $disposition);
 }
 
 function bbcode_attach_to_img(string $text) {

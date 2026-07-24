@@ -2,6 +2,8 @@
 
 namespace App\Support;
 
+use Nexus\Database\NexusDB;
+
 /**
  * Stateless filesystem-cache helpers extracted from `include/functions.php`.
  *
@@ -33,11 +35,11 @@ namespace App\Support;
  * (`end_main_frame`, `stdfoot`, `$lang_functions`) and defeat the point
  * of an `App\Support` extraction.
  *
- * Lives under `App\Support` (not `App\Services`) because every method
- * takes its inputs explicitly — no DI, no DB, no config, no global
- * state. Same convention as {@see Ratio}, {@see Validators},
- * {@see Format}, {@see Strings}, {@see Time}, {@see Codec},
- * {@see BBCode}.
+ * The torrent cache-stamp methods (`touchTorrent`, `resetTorrent`) are a
+ * small exception: they talk to the `torrents` table through `NexusDB`
+ * because they back the legacy `set_cachetimestamp()` /
+ * `reset_cachetimestamp()` helpers. They are kept here rather than in a
+ * dedicated service to avoid a one-method class.
  */
 final class Cache
 {
@@ -113,5 +115,29 @@ final class Cache
         fclose($fp);
 
         return $written;
+    }
+
+    /**
+     * Touch the cache timestamp on a torrent row.
+     *
+     * Mirrors the legacy `set_cachetimestamp($id, $field)` helper.
+     */
+    public static function touchTorrent(int|string $torrentId, string $field = 'cache_stamp'): void
+    {
+        NexusDB::table('torrents')
+            ->where('id', $torrentId)
+            ->update([$field => time()]);
+    }
+
+    /**
+     * Reset the cache timestamp on a torrent row to zero.
+     *
+     * Mirrors the legacy `reset_cachetimestamp($id, $field)` helper.
+     */
+    public static function resetTorrent(int|string $torrentId, string $field = 'cache_stamp'): void
+    {
+        NexusDB::table('torrents')
+            ->where('id', $torrentId)
+            ->update([$field => 0]);
     }
 }

@@ -7,34 +7,12 @@ use Illuminate\Support\Str;
 
 function get_langfolder_cookie($transToLocale = false)
 {
-    $deflang = \App\Models\Setting::getDefaultLang();
-	$lang = "";
-	if (!isset($_COOKIE["c_lang_folder"])) {
-		$lang = $deflang;
-	} else {
-		$langfolder_array = get_langfolder_list();
-		$enabled = \App\Models\Language::listEnabled();
-		foreach($langfolder_array as $lf)
-		{
-			if($lf == $_COOKIE["c_lang_folder"] && in_array($lf, $enabled)) {
-                $lang = $_COOKIE["c_lang_folder"];
-                break;
-            }
-		}
-	}
-	if (!$lang) {
-	    $lang = $deflang;
-    }
-	if (!$transToLocale) {
-	    return $lang;
-    }
-	return \App\Http\Middleware\Locale::$languageMaps[$lang] ?? 'en';
+	return \App\Support\Locale::folderFromCookie($_COOKIE["c_lang_folder"] ?? null, (bool) $transToLocale);
 }
 
 function get_user_lang($user_id)
 {
-	$lang = mysql_fetch_assoc(sql_query("SELECT site_lang_folder FROM language LEFT JOIN users ON language.id = users.lang WHERE language.site_lang=1 AND users.id= ". sqlesc($user_id) ." LIMIT 1"));
-	return $lang['site_lang_folder'] ?: 'en';
+	return \App\Support\Locale::userFolder($user_id);
 }
 
 function get_langfile_path($script_name ="", $target = false, $lang_folder = "")
@@ -45,25 +23,16 @@ function get_langfile_path($script_name ="", $target = false, $lang_folder = "")
 	{
 		$lang_folder = $CURLANGDIR;
 	}
-	$result = "lang/" . ($target == false ? $lang_folder : "_target") ."/lang_". ( $script_name == "" ? substr(strrchr($_SERVER['SCRIPT_NAME'],'/'),1) : $script_name);
-    return $result;
+    return \App\Support\Locale::filePath($lang_folder, (string) $script_name, $_SERVER['SCRIPT_NAME'] ?? '', (bool) $target);
 }
 
 function get_row_sum($table, $field, $suffix = "")
 {
-	$r = sql_query("SELECT SUM($field) FROM $table $suffix") or sqlerr(__FILE__, __LINE__);
-	$a = mysql_fetch_row($r);
-	return $a[0];
+	return \App\Support\LegacyDb::sum((string) $table, (string) $field, (string) $suffix);
 }
 
 function get_single_value($table, $field, $suffix = ""){
-	$r = sql_query("SELECT $field FROM $table $suffix LIMIT 1") or sqlerr(__FILE__, __LINE__);
-	$a = mysql_fetch_row($r);
-	if ($a) {
-		return $a[0];
-	} else {
-		return false;
-	}
+	return \App\Support\LegacyDb::singleValue((string) $table, (string) $field, (string) $suffix);
 }
 
 function stdmsg($heading, $text, $htmlstrip = false) {
@@ -306,12 +275,7 @@ function get_slr_color($ratio)
 
 function write_log($text, $security = "normal")
 {
-    \App\Models\SiteLog::query()->insert([
-        'added' => now(),
-        'txt' => $text,
-        'security_level' => $security,
-        'uid' => get_user_id(),
-    ]);
+    \App\Support\Log::write((string) $text, (string) $security, get_user_id());
 }
 
 
@@ -807,9 +771,7 @@ function get_agent($peer_id, $agent)
 function EmailBanned($newEmail)
 {
 	$newEmail = trim(strtolower((string) $newEmail));
-	$sql = sql_query("SELECT * FROM bannedemails") or sqlerr(__FILE__, __LINE__);
-	$list = mysql_fetch_array($sql);
-	return \App\Support\Email::matchesRegexList($newEmail, (string) ($list['value'] ?? ''));
+	return \App\Support\Email::matchesRegexList($newEmail, \App\Support\EmailDomain::banned());
 }
 
 function EmailAllowed($newEmail)
@@ -819,16 +781,12 @@ function EmailAllowed($newEmail)
 		return true;
 	}
 	$newEmail = trim(strtolower((string) $newEmail));
-	$sql = sql_query("SELECT * FROM allowedemails") or sqlerr(__FILE__, __LINE__);
-	$list = mysql_fetch_array($sql);
-	return \App\Support\Email::matchesRegexList($newEmail, (string) ($list['value'] ?? ''));
+	return \App\Support\Email::matchesRegexList($newEmail, \App\Support\EmailDomain::allowed());
 }
 
 function allowedemails()
 {
-	$sql = sql_query("SELECT * FROM allowedemails") or sqlerr(__FILE__, __LINE__);
-	$list = mysql_fetch_array($sql);
-	return $list['value'];
+	return \App\Support\EmailDomain::allowed();
 }
 
 function nexus_redirect($url)

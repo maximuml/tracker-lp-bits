@@ -1074,13 +1074,7 @@ function in_ip_range($long, $targetip, $ip_one, $ip_two=false) {
 
 function validip_format($ip)
 {
-	$ipPattern =
-	'/\b(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.' .
-	'(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.' .
-	'(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.' .
-	'(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b/';
-
-	return preg_match($ipPattern, $ip);
+	return \App\Support\Network::isValidIpv4Format((string) $ip);
 }
 
 function maxslots () {

@@ -243,7 +243,7 @@ final class Time
         }
 
         $lang_functions = $GLOBALS['lang_functions'] ?? [];
-        $CURUSER = $GLOBALS['CURUSER'] ?? [];
+        $CURUSER = $GLOBALS['CURUSER'] ?? null;
         $TIMENOW = defined('TIMENOW') ? (int) TIMENOW : time();
 
         if (isset($CURUSER) && ($CURUSER['timetype'] ?? '') != 'timealive' && ! $forceago) {

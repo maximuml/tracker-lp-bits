@@ -240,9 +240,12 @@ class StringsTest extends TestCase
         );
     }
 
-    public function test_user_agent_client_returns_empty_when_string_starts_with_semicolon(): void
+    public function test_user_agent_client_returns_full_string_when_string_starts_with_semicolon(): void
     {
-        $this->assertSame('', Strings::userAgentClient(';tail'));
+        // Legacy `get_agent()` used `strpos(..., ';') == false`, so a
+        // leading semicolon is treated as "no semicolon" and the whole
+        // string is returned.
+        $this->assertSame(';tail', Strings::userAgentClient(';tail'));
     }
 
     // ---------- stripSlashesDeep() ----------

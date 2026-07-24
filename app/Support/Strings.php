@@ -162,7 +162,10 @@ final class Strings
     {
         $semicolon = strpos($agent, ';');
 
-        return $semicolon === false
+        // Legacy `get_agent()` used `== false` (loose), so a leading
+        // semicolon (strpos returns 0) falls through and returns the
+        // whole string rather than an empty substring.
+        return $semicolon == false
             ? $agent
             : substr($agent, 0, $semicolon);
     }

@@ -158,6 +158,9 @@ class SearchBox extends NexusModel
         if (!$searchBox instanceof self) {
             $searchBox = self::get(intval($searchBox));
         }
+        if (!isset(self::$taxonomies[$torrentField])) {
+            return collect();
+        }
         $table = self::$taxonomies[$torrentField]['table'];
         return NexusDB::table($table)->where(function (Builder $query) use ($searchBox) {
             return $query->whereIn('mode', [$searchBox->id, 0]);

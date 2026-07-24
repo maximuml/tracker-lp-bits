@@ -154,6 +154,9 @@ class SearchBoxRepository extends BaseRepository
 
     private function getTaxonomyInfo(SearchBox $searchBox, array $torrentWithTaxonomy, $torrentField)
     {
+        if (!isset(SearchBox::$taxonomies[$torrentField])) {
+            return null;
+        }
         $searchBoxField = "show" . $torrentField;
         $torrentTaxonomyField = $torrentField . "_name";
         if ($searchBox->showsubcat && $searchBox->{$searchBoxField} && !empty($torrentWithTaxonomy[$torrentTaxonomyField])) {
@@ -167,6 +170,9 @@ class SearchBoxRepository extends BaseRepository
 
     private function buildTaxonomySelect(SearchBox $searchBox, $torrentField, array $torrentInfo)
     {
+        if (!isset(SearchBox::$taxonomies[$torrentField])) {
+            return '';
+        }
         $searchBoxId = $searchBox->id;
         $searchBoxField = "show" . $torrentField;
         if ($searchBox->showsubcat && $searchBox->{$searchBoxField}) {
@@ -216,6 +222,9 @@ class SearchBoxRepository extends BaseRepository
 
     private function buildTaxonomyFormSchema(SearchBox $searchBox, $torrentField)
     {
+        if (!isset(SearchBox::$taxonomies[$torrentField])) {
+            return null;
+        }
         $searchBoxId = $searchBox->id;
         $searchBoxField = "show" . $torrentField;
         $name = sprintf('%s.%s', $torrentField, $searchBoxId);
@@ -288,7 +297,7 @@ class SearchBoxRepository extends BaseRepository
             foreach ($searchBox->extra[SearchBox::EXTRA_TAXONOMY_LABELS] as $taxonomy) {
                 $torrentField = $taxonomy['torrent_field'];
                 $showField = "show" . $torrentField;
-                if ($searchBox->showsubcat && $searchBox->{$showField}) {
+                if ($searchBox->showsubcat && $searchBox->{$showField} && isset(SearchBox::$taxonomies[$torrentField])) {
                     if ($multiple) {
                         $fieldsetSchema[] = Forms\Components\CheckboxList::make("$namePrefix.$torrentField")
                             ->options($this->listTaxonomies($torrentField, $mode))
@@ -332,6 +341,9 @@ class SearchBoxRepository extends BaseRepository
 
     private function listTaxonomies($torrentField, $mode)
     {
+        if (!isset(SearchBox::$taxonomies[$torrentField])) {
+            return collect();
+        }
         $tableName = SearchBox::$taxonomies[$torrentField]['table'];
         return NexusDB::table($tableName)
             ->where(function (\Illuminate\Database\Query\Builder $query) use ($mode) {

@@ -2382,63 +2382,18 @@ function get_forum_pic_folder(){
 function get_category_icon_row($typeid)
 {
 	global $Cache;
-	static $rows;
-	if (!$typeid) {
-		$typeid=1;
-	}
-	if (!$rows && !$rows = $Cache->get_value('category_icon_content')){
-		$rows = array();
-		$res = sql_query("SELECT * FROM caticons ORDER BY id ASC");
-		while($row = mysql_fetch_array($res)) {
-			$rows[$row['id']] = $row;
-		}
-		$Cache->cache_value('category_icon_content', $rows, 156400);
-	}
-	return $rows[$typeid];
+	return \App\Support\Category::iconRow($Cache, $typeid);
 }
 function get_category_row($catid = NULL)
 {
 	global $Cache;
-	static $rows;
-	if (!$rows && !$rows = $Cache->get_value('category_content')){
-        $rows = [];
-		$res = sql_query("SELECT categories.*, searchbox.name AS catmodename FROM categories LEFT JOIN searchbox ON categories.mode=searchbox.id");
-		while($row = mysql_fetch_array($res)) {
-			$rows[$row['id']] = $row;
-		}
-		$Cache->cache_value('category_content', $rows, 126400);
-	}
-	if ($catid) {
-		return $rows[$catid];
-	} else {
-		return $rows;
-	}
+	return \App\Support\Category::row($Cache, $catid);
 }
 
 function get_second_icon($row) //for CHDBits
 {
-	global $CURUSER, $Cache;
-	$source=$row['source'];
-	$medium=$row['medium'];
-	$codec=$row['codec'];
-	$standard=$row['standard'];
-	$processing=$row['processing'];
-	$audiocodec=$row['audiocodec'];
-	$mode = $row['search_box_id'];
-	$cacheKey = 'secondicon_'.$source.'_'.$medium.'_'.$codec.'_'.$standard.'_'.$processing.'_'.$audiocodec.'_content';
-	if (!$sirow = $Cache->get_value($cacheKey)){
-		$res = sql_query("SELECT * FROM secondicons WHERE (mode = ".sqlesc($mode)." OR mode = 0) AND (source = ".sqlesc($source)." OR source=0) AND (medium = ".sqlesc($medium)." OR medium=0) AND (codec = ".sqlesc($codec)." OR codec = 0) AND (standard = ".sqlesc($standard)." OR standard = 0) AND (processing = ".sqlesc($processing)." OR processing = 0) AND (audiocodec = ".sqlesc($audiocodec)." OR audiocodec = 0) LIMIT 1");
-		$sirow = mysql_fetch_array($res);
-		if (!$sirow)
-			$sirow = 'not allowed';
-		$Cache->cache_value($cacheKey, $sirow, 600);
-	}
-	$catimgurl = get_cat_folder($row['category']);
-	if ($sirow == 'not allowed')
-		return "<img src=\"pic/cattrans.gif\" style=\"background-image: url(pic/". $catimgurl. "/additional/notallowed.png);\" title=\"Not Allowed\" alt=\"Not Allowed\" />";
-	else {
-		return "<img".($sirow['class_name'] ? " class=\"".$sirow['class_name']."\"" : "")." src=\"pic/cattrans.gif\" style=\"background-image: url(pic/". $catimgurl. "/additional/". $sirow['image'].");\" alt=\"" . $sirow["name"] . "\" title=\"".$sirow['name']."\" />";
-	}
+	global $Cache;
+	return \App\Support\Category::secondIcon($Cache, (array) $row, get_cat_folder($row['category']));
 }
 
 function get_torrent_bg_color($promotion = 1, $posState = "", array $torrent = [])
@@ -3048,18 +3003,7 @@ function return_avatar_image($url)
 }
 function return_category_image($categoryid, $link="")
 {
-	static $catImg = array();
-	if (isset($catImg[$categoryid])) {
-		$catimg = $catImg[$categoryid];
-	} else {
-		$categoryrow = get_category_row($categoryid);
-		$catimgurl = get_cat_folder($categoryid);
-		$catImg[$categoryid] = $catimg = "<img".($categoryrow['class_name'] ? " class=\"".$categoryrow['class_name']."\"" : "")." src=\"pic/cattrans.gif\" alt=\"" . $categoryrow["name"] . "\" title=\"" .$categoryrow["name"]. "\" style=\"background-image: url(pic/" . $catimgurl . '/' . $categoryrow["image"].");\" />";
-	}
-	if ($link) {
-		$catimg = "<a href=\"".$link."cat=" . $categoryid . "\">".$catimg."</a>";
-	}
-	return $catimg;
+	return \App\Support\Category::imageTag((int) $categoryid, (string) $link);
 }
 
 /******************************************** bellow functioons avaliable since v1.6 ***********************************************************/

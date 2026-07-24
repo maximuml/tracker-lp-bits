@@ -205,6 +205,33 @@ final class LegacyResponse
     }
 
     /**
+     * Render a legacy "bark" page — stdhead, a heading, a paragraph,
+     * stdfoot, then exit.
+     *
+     * Mirrors `genbark($x, $y)`.
+     */
+    public static function bark(string $title, string $message): void
+    {
+        \stdhead($title);
+        echo '<h1>' . \htmlspecialchars($title) . "</h1>\n";
+        echo '<p>' . \htmlspecialchars($message) . "</p>\n";
+        \stdfoot();
+        exit;
+    }
+
+    /**
+     * Emit a 404 Not Found response and exit.
+     *
+     * Mirrors `httperr()`.
+     */
+    public static function notFound(): void
+    {
+        header('HTTP/1.1 404 Not found');
+        echo "<h1>Not Found</h1>\n";
+        exit;
+    }
+
+    /**
      * Legacy redirect helper. Prepend scheme/host to relative URLs and
      * exit (or throw an HttpResponseException in Laravel context).
      */

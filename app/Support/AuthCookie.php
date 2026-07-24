@@ -163,4 +163,14 @@ final class AuthCookie
 
         User::query()->where('id', $userId)->update($update);
     }
+
+    /**
+     * Clear the legacy auth cookie.
+     *
+     * Mirrors `logoutcookie()`.
+     */
+    public static function clear(): void
+    {
+        setcookie(self::COOKIE_NAME, '', 0x7fffffff, '/', '', isHttps(), true);
+    }
 }

@@ -67,6 +67,22 @@ final class Network
     }
 
     /**
+     * Legacy IPv4 format check used by the signup / invite flows.
+     *
+     * Returns `1` for a valid dotted-quad IPv4, `0` or `false` otherwise,
+     * matching the legacy `preg_match()` return value.
+     */
+    public static function isValidIpv4Format(string $ip): int|false
+    {
+        $pattern = '/\b(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.'
+            . '(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.'
+            . '(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.'
+            . '(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b/';
+
+        return preg_match($pattern, $ip);
+    }
+
+    /**
      * Build the two-line IP-location label drained out of
      * get_ip_location(): the resolved geo name (or a fallback "unknown"
      * label) plus the formatted "user IP" line.

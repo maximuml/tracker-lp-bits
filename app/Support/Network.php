@@ -249,6 +249,74 @@ final class Network
     }
 
     /**
+     * Check whether an IP address belongs to a known seed-box ASN.
+     *
+     * Mirrors `isIPSeedBoxFromASN()`. Uses the GeoIP2 ASN database and
+     * Redis caching; may throw `SeedBoxYesException` when
+     * `$exceptionWhenYes` is true and a match is found.
+     */
+    public static function isSeedBoxFromASN(string $ip, bool $exceptionWhenYes = false): bool
+    {
+        $redis = \Nexus\Database\NexusDB::redis();
+        $key = 'nexus_asn';
+        $notFoundCacheValue = '__NOT_FOUND__';
+        $row = null;
+
+        try {
+            $database = \nexus_env('GEOIP2_ASN_DATABASE');
+            if (!file_exists($database) || !is_readable($database)) {
+                \do_log("GEOIP2_ASN_DATABASE: $database not exists or not readable", 'debug');
+                return false;
+            }
+
+            static $reader;
+            if (is_null($reader)) {
+                $reader = new \GeoIp2\Database\Reader($database);
+            }
+
+            $asnObj = $reader->asn($ip);
+            $asn = $asnObj->autonomousSystemNumber;
+            if ($asn <= 0) {
+                return false;
+            }
+
+            $cacheResult = $redis->hGet($key, $asn);
+            if ($cacheResult !== false) {
+                return $cacheResult !== $notFoundCacheValue;
+            }
+
+            $row = \Nexus\Database\NexusDB::getOne('seed_box_records', "asn = $asn", 'id');
+            if (!empty($row)) {
+                $redis->hSet($key, $asn, $row['id']);
+            } else {
+                $redis->hSet($key, $asn, $notFoundCacheValue);
+            }
+        } catch (\Throwable $throwable) {
+            \do_log("ip: $ip, " . $throwable->getMessage());
+            if (isset($asn)) {
+                $redis->hSet($key, $asn, $notFoundCacheValue);
+            }
+        }
+
+        $result = !empty($row);
+        if ($result && $exceptionWhenYes) {
+            throw new \App\Exceptions\SeedBoxYesException($row['id']);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Check whether an IP is a registered seed-box for a given user.
+     *
+     * Mirrors `isIPSeedBox()`.
+     */
+    public static function isSeedBox(string $ip, int $uid): bool
+    {
+        return \App\Repositories\SeedBoxRepository::isSeedBoxFromUserRecords($uid, $ip)['result'];
+    }
+
+    /**
      * Resolve an IP to a two-element location label array, with an
      * in-request static cache.
      *

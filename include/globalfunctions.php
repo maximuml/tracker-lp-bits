@@ -233,141 +233,23 @@ function command_exists($command): bool
 
 function get_tracker_schema_and_host($trackerUrlId, $combine = false): array|string
 {
-    /*
-    global $https_announce_urls, $announce_urls;
-    $httpsAnnounceUrls = array_filter($https_announce_urls);
-    $log = "cookie: " . json_encode($_COOKIE) . ", https_announce_urls: " . json_encode($httpsAnnounceUrls);
-    if (
-        (isset($_COOKIE["c_secure_tracker_ssl"]) && $_COOKIE["c_secure_tracker_ssl"] == base64("yeah"))
-        || !empty($httpsAnnounceUrls)
-        || isHttps()
-    ) {
-        $log .= ", c_secure_tracker_ssl = base64('yeah'): " . base64("yeah") . ", or not empty https_announce_urls, or isHttps()";
-        $tracker_ssl = true;
-    }  else {
-        $tracker_ssl = false;
-    }
-    $log .= ", tracker_ssl: $tracker_ssl";
-
-    if ($tracker_ssl == true){
-        $ssl_torrent = "https://";
-        if ($https_announce_urls[0] != "") {
-            $log .= ", https_announce_urls not empty, use it";
-            $base_announce_url = $https_announce_urls[0];
-        } else {
-            $log .= ", https_announce_urls empty, use announce_urls[0]";
-            $base_announce_url = $announce_urls[0];
-        }
-    } else {
-        $ssl_torrent = "http://";
-        $base_announce_url = $announce_urls[0];
-    }
-    do_log($log);
-    if ($combine) {
-        return $ssl_torrent . $base_announce_url;
-    }
-    */
-    $log = "tracker_url_id: $trackerUrlId, combine: $combine";
-    $url = \App\Models\TrackerUrl::getById($trackerUrlId);
-    if (empty($url)) {
-        $ssl_torrent = isHttps() ? 'https://' : 'http://';
-        $base_announce_url = sprintf(
-            "%s/%s",
-            trim(\App\Models\Setting::getBaseUrl(), '/'), trim(DEFAULT_TRACKER_URI, '/')
-        );
-        $log .= ", ById no value";
-    } else {
-        $ssl_torrent = parse_url($url, PHP_URL_SCHEME) . "://" ;
-        $base_announce_url = substr($url, strlen($ssl_torrent));
-        $log .= ", ById has value";
-    }
-    do_log("$log, ssl_torrent: $ssl_torrent, base_announce_url: $base_announce_url");
-    if ($combine) {
-        return $ssl_torrent .  $base_announce_url;
-    }
-    return compact('ssl_torrent', 'base_announce_url');
+    return \App\Support\Tracker::schemaAndHost((int) $trackerUrlId, (bool) $combine);
 }
 
 
 function get_hr_ratio($uped, $downed)
 {
-    if ($downed > 0) {
-        $ratio = $uped / $downed;
-        $color = get_ratio_color($ratio);
-        if ($ratio > 10000) $ratio = 'Inf.';
-        else
-            $ratio = number_format($ratio, 3);
-
-        if ($color)
-            $ratio = "<font color=\"" . $color . "\">" . $ratio . "</font>";
-    } elseif ($uped > 0)
-        $ratio = 'Inf.';
-    else
-        $ratio = "---";
-
-    return $ratio;
+    return \App\Support\Ratio::hr($uped, $downed);
 }
 
 function get_row_count($table, $suffix = "")
 {
-    $r = sql_query("SELECT COUNT(*) FROM $table $suffix") or sqlerr(__FILE__, __LINE__);
-    $a = mysql_fetch_row($r);
-    return $a[0];
+    return \App\Support\LegacyDb::count($table, $suffix);
 }
 
 function get_user_row($id)
 {
-    global $Cache, $CURUSER;
-    static $userRows = [];
-    static $curuserRowUpdated = false;
-    static $neededColumns = array(
-        'id', 'class', 'enabled', 'privacy', 'avatar', 'signature', 'uploaded', 'downloaded', 'last_access', 'username', 'donor',
-        'donoruntil', 'leechwarn', 'warned', 'title', 'downloadpos', 'parked', 'clientselect', 'showclienterror',
-    );
-    if (isset($userRows[$id])) return $userRows[$id];
-    $cacheKey = 'user_'.$id.'_content';
-    $row = \Nexus\Database\NexusDB::remember($cacheKey, 3600, function () use ($id, $neededColumns) {
-        $user = \App\Models\User::query()->with([
-            'wearing_medals' => function ($query) {
-                $query->orderBy('user_medals.priority', 'desc')
-                    ->orderBy('user_medals.id', 'desc')
-                    ->limit(get_setting('system.maximum_number_of_medals_can_be_worn', 3));
-            }
-        ])->find($id, $neededColumns);
-        if (!$user) {
-            return null;
-        }
-        $arr = $user->toArray();
-        //Rainbow ID
-        $userRep = new \App\Repositories\UserRepository();
-        $metas = $userRep->listMetas($id, \App\Models\UserMeta::META_KEY_PERSONALIZED_USERNAME);
-        if ($metas->isNotEmpty()) {
-            $arr['__is_rainbow'] = 1;
-        } else {
-            $arr['__is_rainbow'] = 0;
-        }
-        $arr['__is_donor'] = is_donor($arr);
-        return apply_filter("user_row", $arr);
-    });
-
-//	if ($CURUSER && $id == $CURUSER['id']) {
-//		$row = array();
-//		foreach($neededColumns as $column) {
-//			$row[$column] = $CURUSER[$column];
-//		}
-//		if (!$curuserRowUpdated) {
-//			$Cache->cache_value('user_'.$CURUSER['id'].'_content', $row, 900);
-//			$curuserRowUpdated = true;
-//		}
-//	} elseif (!$row = $Cache->get_value('user_'.$id.'_content')){
-//		$res = sql_query("SELECT ".implode(',', $neededColumns)." FROM users WHERE id = ".sqlesc($id)) or sqlerr(__FILE__,__LINE__);
-//		$row = mysql_fetch_array($res);
-//		$Cache->cache_value('user_'.$id.'_content', $row, 900);
-//	}
-
-    if (!$row)
-        return false;
-    else return $userRows[$id] = $row;
+    return \App\Support\UserDisplay::row($id);
 }
 
 function get_user_class()
@@ -438,223 +320,17 @@ function do_action($name, ...$args)
 
 function isIPSeedBoxFromASN($ip, $exceptionWhenYes = false): bool
 {
-    $redis = \Nexus\Database\NexusDB::redis();
-    $key = "nexus_asn";
-    $notFoundCacheValue = "__NOT_FOUND__";
-   try {
-       static $reader;
-       $database = nexus_env('GEOIP2_ASN_DATABASE');
-       if (!file_exists($database) || !is_readable($database)) {
-           do_log("GEOIP2_ASN_DATABASE: $database not exists or not readable", "debug");
-           return false;
-       }
-       if (is_null($reader)) {
-           $reader = new \GeoIp2\Database\Reader($database);
-       }
-       $asnObj = $reader->asn($ip);
-       $asn = $asnObj->autonomousSystemNumber;
-       if ($asn <= 0) {
-           return false;
-       }
-       $cacheResult = $redis->hGet($key, $asn);
-       if ($cacheResult !== false) {
-           if ($cacheResult === $notFoundCacheValue) {
-               return false;
-           } else {
-               return true;
-           }
-       }
-       $row = \Nexus\Database\NexusDB::getOne("seed_box_records", "asn = $asn", "id");
-       if (!empty($row)) {
-           $redis->hSet($key, $asn, $row['id']);
-       } else {
-           $redis->hSet($key, $asn, $notFoundCacheValue);
-       }
-   } catch (\Throwable $throwable) {
-       do_log("ip: $ip, " . $throwable->getMessage());
-       $redis->hSet($key, $asn, $notFoundCacheValue);
-   }
-   $result = !empty($row);
-   if ($result && $exceptionWhenYes) {
-       throw new \App\Exceptions\SeedBoxYesException($row['id']);
-   }
-   return $result;
+    return \App\Support\Network::isSeedBoxFromASN($ip, (bool) $exceptionWhenYes);
 }
 
 function isIPSeedBox($ip, $uid): bool
 {
-    return \App\Repositories\SeedBoxRepository::isSeedBoxFromUserRecords($uid, $ip)['result'];
-
-    /*
-    $key = "nexus_is_ip_seed_box:ip:$ip:uid:$uid";
-    $cacheData = \Nexus\Database\NexusDB::cache_get($key);
-    if (in_array($cacheData, [0, 1, '0', '1'], true) && !$withoutCache) {
-        do_log("$key, get result from cache: $cacheData(" . gettype($cacheData) . ")");
-        return (bool)$cacheData;
-    }
-    //check from asn
-    $res = isIPSeedBoxFromASN($ip, $exceptionWhenYes);
-    if (!empty($res)) {
-        \Nexus\Database\NexusDB::cache_put($key, 1, 300);
-        do_log("$key, get result from asn, true");
-        return true;
-    }
-
-    $ipObject = \PhpIP\IP::create($ip);
-    $ipNumeric = $ipObject->numeric();
-    $ipVersion = $ipObject->getVersion();
-    //check allow list first, not consider specific user
-    $checkSeedBoxAllowedSql = sprintf(
-        'select id from seed_box_records where `ip_begin_numeric` <= "%s" and `ip_end_numeric` >= "%s" and `version` = %s and `status` = %s and `is_allowed` = 1 and asn = 0 limit 1',
-        $ipNumeric, $ipNumeric, $ipVersion, \App\Models\SeedBoxRecord::STATUS_ALLOWED
-    );
-    $res = \Nexus\Database\NexusDB::select($checkSeedBoxAllowedSql);
-    if (!empty($res)) {
-        \Nexus\Database\NexusDB::cache_put($key, 0, 300);
-        do_log("$key, get result from database, is_allowed = 1, false");
-        return false;
-    }
-    $checkSeedBoxAdminSql = sprintf(
-        'select id from seed_box_records where `ip_begin_numeric` <= "%s" and `ip_end_numeric` >= "%s" and `type` = %s and `version` = %s and `status` = %s and `is_allowed` = 0 and asn = 0 limit 1',
-        $ipNumeric, $ipNumeric, \App\Models\SeedBoxRecord::TYPE_ADMIN, $ipVersion, \App\Models\SeedBoxRecord::STATUS_ALLOWED
-    );
-    $res = \Nexus\Database\NexusDB::select($checkSeedBoxAdminSql);
-    if (!empty($res)) {
-        \Nexus\Database\NexusDB::cache_put($key, 1, 300);
-        do_log("$key, get result from admin, true");
-        if ($exceptionWhenYes) {
-            throw new \App\Exceptions\SeedBoxYesException($res[0]['id']);
-        }
-        return true;
-    }
-    if ($uid !== null) {
-        $checkSeedBoxUserSql = sprintf(
-            'select id from seed_box_records where `ip_begin_numeric` <= "%s" and `ip_end_numeric` >= "%s" and `uid` = %s and `type` = %s and `version` = %s and `status` = %s and `is_allowed` = 0 and asn = 0  limit 1',
-            $ipNumeric, $ipNumeric, $uid, \App\Models\SeedBoxRecord::TYPE_USER, $ipVersion, \App\Models\SeedBoxRecord::STATUS_ALLOWED
-        );
-        $res = \Nexus\Database\NexusDB::select($checkSeedBoxUserSql);
-        if (!empty($res)) {
-            \Nexus\Database\NexusDB::cache_put($key, 1, 300);
-            do_log("$key, get result from user, true");
-            if ($exceptionWhenYes) {
-                throw new \App\Exceptions\SeedBoxYesException($res[0]['id']);
-            }
-            return true;
-        }
-    }
-    \Nexus\Database\NexusDB::cache_put($key, 0, 300);
-    do_log("$key, no result, false");
-    return false;
-    */
+    return \App\Support\Network::isSeedBox($ip, (int) $uid);
 }
 
 function getDataTraffic(array $torrent, array $queries, array $user, $peer, $snatch, $promotionInfo)
 {
-    if (!isset($user['__is_donor'])) {
-        throw new \InvalidArgumentException("user no '__is_donor' field");
-    }
-    $log = sprintf(
-        "torrent: %s, owner: %s, user: %s, peerUploaded: %s, peerDownloaded: %s, queriesUploaded: %s, queriesDownloaded: %s",
-        $torrent['id'], $torrent['owner'], $user['id'], $peer['uploaded'] ?? '', $peer['downloaded'] ?? '', $queries['uploaded'], $queries['downloaded']
-    );
-    if (!empty($peer)) {
-        $realUploaded = max(bcsub($queries['uploaded'], $peer['uploaded']), 0);
-        $realDownloaded = max(bcsub($queries['downloaded'], $peer['downloaded']), 0);
-        $log .= ", [PEER_EXISTS], realUploaded: $realUploaded, realDownloaded: $realDownloaded, [SP_STATE]";
-        $spStateGlobal = get_global_sp_state();
-        $spStateNormal = \App\Models\Torrent::PROMOTION_NORMAL;
-        if (!empty($promotionInfo) && isset($promotionInfo['__ignore_global_sp_state'])) {
-            $log .= ', use promotionInfo';
-            $spStateReal = $promotionInfo['sp_state'];
-        } elseif ($spStateGlobal != $spStateNormal) {
-            $log .= ", use global";
-            $spStateReal = $spStateGlobal;
-        } else {
-            $log .= ", use torrent individual";
-            $spStateReal = $torrent['sp_state'];
-        }
-        if (!isset(\App\Models\Torrent::$promotionTypes[$spStateReal])) {
-            $log .= ", spStateReal = $spStateReal, invalid, reset to: $spStateNormal";
-            $spStateReal = $spStateNormal;
-        }
-        $uploaderRatio = get_setting('torrent.uploaderdouble');
-        $log .= ", uploaderRatio: $uploaderRatio";
-        if ($torrent['owner'] == $user['id'] && $uploaderRatio != 1) {
-            //uploader, use the bigger one
-            $upRatio = max($uploaderRatio, \App\Models\Torrent::$promotionTypes[$spStateReal]['up_multiplier']);
-            $log .= ", [IS_UPLOADER] && uploaderRatio != 1, upRatio: $upRatio";
-        } else {
-            $upRatio = \App\Models\Torrent::$promotionTypes[$spStateReal]['up_multiplier'];
-            $log .= ", [IS_NOT_UPLOADER] || uploaderRatio == 1, upRatio: $upRatio";
-        }
-        /**
-         * VIP do not calculate downloaded
-         * @since 1.7.13
-         */
-        if ($user['class'] == \App\Models\User::CLASS_VIP) {
-            $downRatio = 0;
-            $log .= ", [IS_VIP], downRatio: $downRatio";
-        } else {
-            $downRatio = \App\Models\Torrent::$promotionTypes[$spStateReal]['down_multiplier'];
-            $log .= ", [IS_NOT_VIP], downRatio: $downRatio";
-        }
-    } else {
-        $realUploaded = $queries['uploaded'];
-        $realDownloaded = $queries['downloaded'];
-        /**
-         * If peer not exits, user increment = 0;
-         */
-        $upRatio = 0;
-        $downRatio = 0;
-        $log .= ", [PEER_NOT_EXISTS], realUploaded: $realUploaded, realDownloaded: $realDownloaded, upRatio: $upRatio, downRatio: $downRatio";
-    }
-    $uploadedIncrementForUser = $realUploaded * $upRatio;
-    $downloadedIncrementForUser = $realDownloaded * $downRatio;
-    $log .= ", uploadedIncrementForUser: $uploadedIncrementForUser, downloadedIncrementForUser: $downloadedIncrementForUser";
-
-    /**
-     * check seed box rule
-     */
-    $isSeedBoxRuleEnabled = get_setting('seed_box.enabled') == 'yes';
-    $log .= ", isSeedBoxRuleEnabled: $isSeedBoxRuleEnabled, user class: {$user['class']}, __is_donor: {$user['__is_donor']}";
-    if ($isSeedBoxRuleEnabled && $torrent['owner'] != $user['id'] && !($user['class'] >= \App\Models\User::CLASS_VIP || $user['__is_donor'])) {
-        $isIPSeedBox = isIPSeedBox($queries['ip'], $user['id']);
-        $log .= ", isIPSeedBox: $isIPSeedBox";
-        if ($isIPSeedBox) {
-            $isSeedBoxNoPromotion = get_setting('seed_box.no_promotion') == 'yes';
-            $log .= ", isSeedBoxNoPromotion: $isSeedBoxNoPromotion";
-            if ($isSeedBoxNoPromotion) {
-                $uploadedIncrementForUser = $realUploaded;
-                $downloadedIncrementForUser = $realDownloaded;
-                $log .= ", isIPSeedBox && isSeedBoxNoPromotion, increment for user = real";
-            }
-            $maxUploadedTimes = get_setting('seed_box.max_uploaded');
-            $maxUploadedDurationSeconds = get_setting('seed_box.max_uploaded_duration', 0) * 3600;
-            $torrentTTL = time() - strtotime($torrent['added']);
-            $timeRangeValid = ($maxUploadedDurationSeconds == 0) || ($torrentTTL < $maxUploadedDurationSeconds);
-            $log .= ", maxUploadedTimes: $maxUploadedTimes, maxUploadedDurationSeconds: $maxUploadedDurationSeconds, timeRangeValid: $timeRangeValid";
-            if ($maxUploadedTimes > 0 && $timeRangeValid) {
-                $log .= ", [LIMIT_UPLOADED]";
-                if (!empty($snatch) && isset($torrent['size']) && $snatch['uploaded'] >= $torrent['size'] * $maxUploadedTimes) {
-                    $log .= ", snatchUploaded({$snatch['uploaded']}) >= torrentSize({$torrent['size']}) * times($maxUploadedTimes), uploadedIncrementForUser = 0";
-                    $uploadedIncrementForUser = 0;
-                } else {
-                    $log .= ", snatchUploaded({$snatch['uploaded']}) < torrentSize({$torrent['size']}) * times($maxUploadedTimes), uploadedIncrementForUser do not change to 0";
-                }
-            } else {
-                $log .= ", [NOT_LIMIT_UPLOADED]";
-            }
-        }
-    }
-
-    $result = [
-        'uploaded_increment' => $realUploaded,
-        'uploaded_increment_for_user' => $uploadedIncrementForUser,
-        'downloaded_increment' => $realDownloaded,
-        'downloaded_increment_for_user' => $downloadedIncrementForUser,
-    ];
-    do_log("$log, result: " . json_encode($result), 'info');
-    return $result;
+    return \App\Support\TorrentOps::dataTraffic($torrent, $queries, $user, $peer, $snatch, $promotionInfo);
 }
 
 function clear_user_cache($uid, $passkey = '')
@@ -773,69 +449,19 @@ function clear_torrent_cache($infoHash)
 
 function user_can($permission, $fail = false, $uid = 0): bool
 {
-    $log = "permission: $permission, fail: $fail, user: $uid";
-    static $userCanCached = [];
-    static $sequence = 0;
-    if ($uid == 0) {
-        $uid = get_user_id();
-        $log .= ", set current uid: $uid";
-    }
-    if ($uid <= 0) {
-        if ($fail) {
-            goto FAIL;
-        }
-        do_log("$log, unauthenticated, false");
-        return false;
-    }
-    if (!$fail && isset($userCanCached[$permission][$uid])) {
-        return $userCanCached[$permission][$uid];
-    }
-    $userInfo = get_user_row($uid);
-    $class = $userInfo['class'];
-    $log .= ", userClass: $class";
-    if ($class == \App\Models\User::CLASS_STAFF_LEADER) {
-        do_log("$log, CLASS_STAFF_LEADER, true");
-        $userCanCached[$permission][$uid] = true;
-        return true;
-    }
-    $userAllPermissions = \App\Repositories\ToolRepository::listUserAllPermissions($uid);
-    $result = isset($userAllPermissions[$permission]);
-    if ($sequence == 0) {
-        $sequence++;
-        $log .= ", userAllPermissions: " . json_encode($userAllPermissions);
-    }
-    $log .= ", result: $result";
-    if (!$fail || $result) {
-        do_log($log);
-        $userCanCached[$permission][$uid] = $result;
-        return $result;
-    }
-    FAIL:
-    do_log("$log, [FAIL]");
-    if (IN_NEXUS && !IN_TRACKER) {
-        global $lang_functions;
-        $requireClass = get_setting("authority.$permission");
-        if (isset(\App\Models\User::$classes[$requireClass])) {
-            stderr($lang_functions['std_sorry'],$lang_functions['std_permission_denied_only'].get_user_class_name($requireClass,false,true,true).sprintf($lang_functions['std_or_above_can_view'], \App\Models\Setting::getSiteName()),false);
-        } else {
-            stderr($lang_functions['std_error'], $lang_functions['std_permission_denied']);
-        }
-    }
-    throw new \App\Exceptions\InsufficientPermissionException();
+    return \App\Support\Permissions::userCan($permission, (bool) $fail, (int) $uid);
 }
 
 function assert_has_permission(bool $permissionCheckResult): void
 {
-    if (!$permissionCheckResult) {
-        throw new \App\Exceptions\InsufficientPermissionException();
-    }
+    \App\Support\Permissions::assertHasPermission($permissionCheckResult);
 }
 
 
 
 function is_donor(array $userInfo): bool
 {
-    return $userInfo['donor'] == 'yes' && ($userInfo['donoruntil'] === null || $userInfo['donoruntil'] == '0000-00-00 00:00:00' || $userInfo['donoruntil'] >= date('Y-m-d H:i:s'));
+    return \App\Support\UserDisplay::isDonor($userInfo);
 }
 
 /**
@@ -893,53 +519,18 @@ function executeCommand($command, $format = 'string', $artisan = false, $excepti
 
 function has_role_work_seeding($uid)
 {
-    $result = apply_filter('user_has_role_work_seeding', false, $uid);
-    do_log("uid: $uid, result: $result");
-    return $result;
+    return \App\Support\Permissions::hasRoleWorkSeeding((int) $uid);
 }
 
 function filter_src($src)
 {
-    $path = parse_url($src, PHP_URL_PATH);
-    if (empty($path)) {
-        return $src;
-    }
-    $host = parse_url($src, PHP_URL_HOST);
-    $currentHost = parse_url(getSchemeAndHttpHost(), PHP_URL_HOST);
-    if (!empty($host) && $host != $currentHost) {
-        return $src;
-    }
-    if (isset($_SERVER['DOCUMENT_ROOT'])) {
-        $guessScriptFilename = sprintf("%s/%s", $_SERVER['DOCUMENT_ROOT'], trim($path, '/'));
-        if (!file_exists($guessScriptFilename)) {
-            return $src;
-        }
-    }
-    //only allow these
-    $imgExtensions = implode("|", \App\Models\Attachment::IMG_EXTENSIONS);
-    $allowSuffixPattern = "/\.($imgExtensions)/i";
-    if (preg_match($allowSuffixPattern, $path)) {
-        return $src;
-    }
-    $allowScriptPattern = "/(forums|details|offers)\.php/i";
-    if (preg_match($allowScriptPattern, $path)) {
-        return $src;
-    }
-    //log danger, deny directly
-    $dangerScriptsPattern = "/(logout|login|ajax|announce|scrape|adduser|modtask|docleanup|freeleech|take.*)\.php/i";
-    if (preg_match($dangerScriptsPattern, $path)) {
-        $msg = sprintf( "[DANGER_URL]: $src [%s]", nexus()->getRequestId());
-        do_log($msg, "alert");
-        write_log($msg, "mod");
-    }
-    do_log("[NOT_ALLOW_SRC]: $src with path: $path");
-    return "";
+    return \App\Support\Security::filterSrc($src);
 }
 
 //here must retrieve the real time info, no cache!!!
 function get_snatch_info($torrentId, $userId)
 {
-    return mysql_fetch_assoc(sql_query(sprintf('select * from snatched where torrentid = %s and userid = %s order by id desc limit 1', $torrentId, $userId)));
+    return \App\Support\LegacyDb::snatchInfo($torrentId, $userId);
 }
 
 /**
@@ -1019,7 +610,7 @@ function send_admin_fail_notification(string $msg = ""): void {
 }
 
 function ability(\App\Enums\Permission\RoutePermissionEnum $permission): string {
-    return sprintf("ability:%s", $permission->value);
+    return \App\Support\Permissions::abilityLabel($permission);
 }
 
 function get_challenge_key(string $challenge): string {

@@ -8,9 +8,14 @@ $id = intval($_GET['id'] ?? 0);
 if (!$id)
 	die();
 
-$res = sql_query("SELECT torrents.*, categories.mode as cat_mode, torrent_extras.media_info as technical_info, torrent_extras.descr FROM torrents LEFT JOIN categories ON category = categories.id left join torrent_extras on torrents.id = torrent_extras.torrent_id WHERE torrents.id = $id");
-$row = mysql_fetch_assoc($res);
+$row = \Nexus\Database\NexusDB::table('torrents')
+    ->leftJoin('categories', 'torrents.category', '=', 'categories.id')
+    ->leftJoin('torrent_extras', 'torrents.id', '=', 'torrent_extras.torrent_id')
+    ->where('torrents.id', $id)
+    ->select('torrents.*', 'categories.mode as cat_mode', 'torrent_extras.media_info as technical_info', 'torrent_extras.descr')
+    ->first();
 if (!$row) die();
+$row = (array) $row;
 
 /**
  * custom fields

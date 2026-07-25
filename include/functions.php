@@ -1897,346 +1897,56 @@ function get_torrent_bg_color($promotion = 1, $posState = "", array $torrent = [
 	return \App\Support\Promotion::backgroundStyle((int) $promotion, (string) $posState, $torrent, (string) $CURUSER['appendpromotion']);
 }
 
-function get_torrent_promotion_append($promotion = 1,$forcemode = "",$showtimeleft = false, $added = "", $promotionTimeType = 0, $promotionUntil = '', $ignoreGlobal = false){
-	global $CURUSER,$lang_functions;
+function get_torrent_promotion_append($promotion = 1, $forcemode = "", $showtimeleft = false, $added = "", $promotionTimeType = 0, $promotionUntil = '', $ignoreGlobal = false)
+{
+	global $CURUSER, $lang_functions;
 	global $expirehalfleech_torrent, $expirefree_torrent, $expiretwoup_torrent, $expiretwoupfree_torrent, $expiretwouphalfleech_torrent, $expirethirtypercentleech_torrent;
 
-	$globalSpState = get_global_sp_state();
-	$sp_torrent = "";
-	$onmouseover = "";
-	$log = "[GET_PROMOTION], promotion: $promotion, forcemode: $forcemode, showtimeleft: $showtimeleft, added: $added, promotionTimeType: $promotionTimeType, promotionUntil: $promotionUntil";
-    if ($ignoreGlobal) {
-        $globalSpState = 1;
-        $log .= ", [IGNORE_GLOBAL]";
-    }
-	$log .= ", globalSpState == " . $globalSpState;
-	if ($globalSpState == 1) {
-	switch ($promotion){
-		case 2:
-		{
-			if ($showtimeleft && (($expirefree_torrent && $promotionTimeType == 0) || $promotionTimeType == 2))
-			{
-				if ($promotionTimeType == 2) {
-					$futuretime = strtotime($promotionUntil);
-				} else {
-					$futuretime = strtotime($added) + $expirefree_torrent * 86400;
-				}
-				$timeout = gettime(date("Y-m-d H:i:s", $futuretime), false, false, true, false, true);
-				if ($timeout)
-				$onmouseover = " onmouseover=\"domTT_activate(this, event, 'content', '".htmlspecialchars("<b><font class=\"free\">".$lang_functions['text_free']."</font></b>".$lang_functions['text_will_end_in']."<b>".$timeout."</b>")."', 'trail', false, 'delay',500,'lifetime',3000,'fade','both','styleClass','niceTitle', 'fadeMax',87, 'maxWidth', 300);\"";
-				else $promotion = 1;
-			}
-			break;
-		}
-		case 3:
-		{
-			if ($showtimeleft && (($expiretwoup_torrent && $promotionTimeType == 0) || $promotionTimeType == 2))
-			{
-				if ($promotionTimeType == 2) {
-					$futuretime = strtotime($promotionUntil);
-				} else {
-					$futuretime = strtotime($added) + $expiretwoup_torrent * 86400;
-				}
-				$timeout = gettime(date("Y-m-d H:i:s", $futuretime), false, false, true, false, true);
-				if ($timeout)
-				$onmouseover = " onmouseover=\"domTT_activate(this, event, 'content', '".htmlspecialchars("<b><font class=\"twoup\">".$lang_functions['text_two_times_up']."</font></b>".$lang_functions['text_will_end_in']."<b>".$timeout."</b>")."', 'trail', false, 'delay',500,'lifetime',3000,'fade','both','styleClass','niceTitle', 'fadeMax',87, 'maxWidth', 300);\"";
-				else $promotion = 1;
-			}
-			break;
-		}
-		case 4:
-		{
-			if ($showtimeleft && (($expiretwoupfree_torrent && $promotionTimeType == 0) || $promotionTimeType == 2))
-			{
-				if ($promotionTimeType == 2) {
-					$futuretime = strtotime($promotionUntil);
-				} else {
-					$futuretime = strtotime($added) + $expiretwoupfree_torrent * 86400;
-				}
-				$timeout = gettime(date("Y-m-d H:i:s", $futuretime), false, false, true, false, true);
-				if ($timeout)
-				$onmouseover = " onmouseover=\"domTT_activate(this, event, 'content', '".htmlspecialchars("<b><font class=\"twoupfree\">".$lang_functions['text_free_two_times_up']."</font></b>".$lang_functions['text_will_end_in']."<b>".$timeout."</b>")."', 'trail', false, 'delay',500,'lifetime',3000,'fade','both','styleClass','niceTitle', 'fadeMax',87, 'maxWidth', 300);\"";
-				else $promotion = 1;
-			}
-			break;
-		}
-		case 5:
-		{
-			if ($showtimeleft && (($expirehalfleech_torrent && $promotionTimeType == 0) || $promotionTimeType == 2))
-			{
-				if ($promotionTimeType == 2) {
-					$futuretime = strtotime($promotionUntil);
-				} else {
-					$futuretime = strtotime($added) + $expirehalfleech_torrent * 86400;
-				}
-				$timeout = gettime(date("Y-m-d H:i:s", $futuretime), false, false, true, false, true);
-				if ($timeout)
-				$onmouseover = " onmouseover=\"domTT_activate(this, event, 'content', '".htmlspecialchars("<b><font class=\"halfdown\">".$lang_functions['text_half_down']."</font></b>".$lang_functions['text_will_end_in']."<b>".$timeout."</b>")."', 'trail', false, 'delay',500,'lifetime',3000,'fade','both','styleClass','niceTitle', 'fadeMax',87, 'maxWidth', 300);\"";
-				else $promotion = 1;
-			}
-			break;
-		}
-		case 6:
-		{
-			if ($showtimeleft && (($expiretwouphalfleech_torrent && $promotionTimeType == 0) || $promotionTimeType == 2))
-			{
-				if ($promotionTimeType == 2) {
-					$futuretime = strtotime($promotionUntil);
-				} else {
-					$futuretime = strtotime($added) + $expiretwouphalfleech_torrent * 86400;
-				}
-				$timeout = gettime(date("Y-m-d H:i:s", $futuretime), false, false, true, false, true);
-				if ($timeout)
-				$onmouseover = " onmouseover=\"domTT_activate(this, event, 'content', '".htmlspecialchars("<b><font class=\"twouphalfdown\">".$lang_functions['text_half_down_two_up']."</font></b>".$lang_functions['text_will_end_in']."<b>".$timeout."</b>")."', 'trail', false, 'delay',500,'lifetime',3000,'fade','both','styleClass','niceTitle', 'fadeMax',87, 'maxWidth', 300);\"";
-				else $promotion = 1;
-			}
-			break;
-		}
-		case 7:
-		{
-			if ($showtimeleft && (($expirethirtypercentleech_torrent && $promotionTimeType == 0) || $promotionTimeType == 2))
-			{
-				if ($promotionTimeType == 2) {
-					$futuretime = strtotime($promotionUntil);
-				} else {
-					$futuretime = strtotime($added) + $expirethirtypercentleech_torrent * 86400;
-				}
-				$timeout = gettime(date("Y-m-d H:i:s", $futuretime), false, false, true, false, true);
-				if ($timeout)
-				$onmouseover = " onmouseover=\"domTT_activate(this, event, 'content', '".htmlspecialchars("<b><font class=\"thirtypercent\">".$lang_functions['text_thirty_percent_down']."</font></b>".$lang_functions['text_will_end_in']."<b>".$timeout."</b>")."', 'trail', false, 'delay',500,'lifetime',3000,'fade','both','styleClass','niceTitle', 'fadeMax',87, 'maxWidth', 300);\"";
-				else $promotion = 1;
-			}
-			break;
-		}
-	}
-	}
-	if (($CURUSER['appendpromotion'] == 'word' && $forcemode == "" ) || $forcemode == 'word'){
-        $log .= ", user appendpromotion = word";
-		if(($promotion==2 && $globalSpState == 1) || $globalSpState == 2){
-		    $log .= ", promotion or global_sp_state = 2";
-			$sp_torrent = " <b>[<font class='free' ".$onmouseover.">".$lang_functions['text_free']."</font>]</b>";
-		}
-		elseif(($promotion==3 && $globalSpState == 1) || $globalSpState == 3){
-            $log .= ", promotion or global_sp_state = 3";
-			$sp_torrent = " <b>[<font class='twoup' ".$onmouseover.">".$lang_functions['text_two_times_up']."</font>]</b>";
-		}
-		elseif(($promotion==4 && $globalSpState == 1) || $globalSpState == 4){
-            $log .= ", promotion or global_sp_state = 4";
-			$sp_torrent = " <b>[<font class='twoupfree' ".$onmouseover.">".$lang_functions['text_free_two_times_up']."</font>]</b>";
-		}
-		elseif(($promotion==5 && $globalSpState == 1) || $globalSpState == 5){
-            $log .= ", promotion or global_sp_state = 5";
-			$sp_torrent = " <b>[<font class='halfdown' ".$onmouseover.">".$lang_functions['text_half_down']."</font>]</b>";
-		}
-		elseif(($promotion==6 && $globalSpState == 1) || $globalSpState == 6){
-            $log .= ", promotion or global_sp_state = 6";
-			$sp_torrent = " <b>[<font class='twouphalfdown' ".$onmouseover.">".$lang_functions['text_half_down_two_up']."</font>]</b>";
-		}
-		elseif(($promotion==7 && $globalSpState == 1) || $globalSpState == 7){
-            $log .= ", promotion or global_sp_state = 7";
-			$sp_torrent = " <b>[<font class='thirtypercent' ".$onmouseover.">".$lang_functions['text_thirty_percent_down']."</font>]</b>";
-		}
-	}
-	elseif (($CURUSER['appendpromotion'] == 'icon' && $forcemode == "") || $forcemode == 'icon'){
-        $log .= ", user appendpromotion = icon";
-		if(($promotion==2 && $globalSpState == 1) || $globalSpState == 2) {
-            $log .= ", promotion or global_sp_state = 2";
-            $sp_torrent = " <img class=\"pro_free\" src=\"pic/trans.gif\" alt=\"Free\" ".($onmouseover ? $onmouseover : "title=\"".$lang_functions['text_free']."\"")." />";
-        }
-		elseif(($promotion==3 && $globalSpState == 1) || $globalSpState == 3) {
-            $log .= ", promotion or global_sp_state = 3";
-            $sp_torrent = " <img class=\"pro_2up\" src=\"pic/trans.gif\" alt=\"2X\" ".($onmouseover ? $onmouseover : "title=\"".$lang_functions['text_two_times_up']."\"")." />";
-        }
-		elseif(($promotion==4 && $globalSpState == 1) || $globalSpState == 4) {
-            $log .= ", promotion or global_sp_state = 4";
-            $sp_torrent = " <img class=\"pro_free2up\" src=\"pic/trans.gif\" alt=\"2X Free\" ".($onmouseover ? $onmouseover : "title=\"".$lang_functions['text_free_two_times_up']."\"")." />";
-        }
-		elseif(($promotion==5 && $globalSpState == 1) || $globalSpState == 5) {
-            $log .= ", promotion or global_sp_state = 5";
-            $sp_torrent = " <img class=\"pro_50pctdown\" src=\"pic/trans.gif\" alt=\"50%\" ".($onmouseover ? $onmouseover : "title=\"".$lang_functions['text_half_down']."\"")." />";
-        }
-		elseif(($promotion==6 && $globalSpState == 1) || $globalSpState == 6) {
-            $log .= ", promotion or global_sp_state = 6";
-            $sp_torrent = " <img class=\"pro_50pctdown2up\" src=\"pic/trans.gif\" alt=\"2X 50%\" ".($onmouseover ? $onmouseover : "title=\"".$lang_functions['text_half_down_two_up']."\"")." />";
-        }
-		elseif(($promotion==7 && $globalSpState == 1) || $globalSpState == 7) {
-            $log .= ", promotion or global_sp_state = 7";
-            $sp_torrent = " <img class=\"pro_30pctdown\" src=\"pic/trans.gif\" alt=\"30%\" ".($onmouseover ? $onmouseover : "title=\"".$lang_functions['text_thirty_percent_down']."\"")." />";
-        }
-	}
-	do_log("$log, sp_torrent: $sp_torrent");
-	return $sp_torrent;
+	return \App\Support\Promotion::append(
+		(int) $promotion,
+		(string) $forcemode,
+		(bool) $showtimeleft,
+		(string) $added,
+		(int) $promotionTimeType,
+		(string) $promotionUntil,
+		(bool) $ignoreGlobal,
+		(string) $CURUSER['appendpromotion'],
+		$lang_functions,
+		[
+			'expirefree_torrent' => $expirefree_torrent,
+			'expiretwoup_torrent' => $expiretwoup_torrent,
+			'expiretwoupfree_torrent' => $expiretwoupfree_torrent,
+			'expirehalfleech_torrent' => $expirehalfleech_torrent,
+			'expiretwouphalfleech_torrent' => $expiretwouphalfleech_torrent,
+			'expirethirtypercentleech_torrent' => $expirethirtypercentleech_torrent,
+		]
+	);
 }
 
-function get_torrent_promotion_append_sub($promotion = 1,$forcemode = "",$showtimeleft = false, $added = "", $promotionTimeType = 0, $promotionUntil = '', $ignoreGlobal = false){
-	global $CURUSER,$lang_functions;
+function get_torrent_promotion_append_sub($promotion = 1, $forcemode = "", $showtimeleft = false, $added = "", $promotionTimeType = 0, $promotionUntil = '', $ignoreGlobal = false)
+{
+	global $CURUSER, $lang_functions;
 	global $expirehalfleech_torrent, $expirefree_torrent, $expiretwoup_torrent, $expiretwoupfree_torrent, $expiretwouphalfleech_torrent, $expirethirtypercentleech_torrent;
 
-    $globalSpState = get_global_sp_state();
-	$sp_torrent = "";
-	$onmouseover = "";
-	$log = "[GET_PROMOTION], promotion: $promotion, forcemode: $forcemode, showtimeleft: $showtimeleft, added: $added, promotionTimeType: $promotionTimeType, promotionUntil: $promotionUntil";
-    if ($ignoreGlobal) {
-        $globalSpState = 1;
-        $log .= ", [IGNORE_GLOBAL]";
-    }
-	$log .= ", globalSpState == " . $globalSpState;
-	if ($globalSpState == 1) {
-	switch ($promotion){
-		case 2:
-		{
-			if ($showtimeleft && (($expirefree_torrent && $promotionTimeType == 0) || $promotionTimeType == 2))
-			{
-				if ($promotionTimeType == 2) {
-					$futuretime = strtotime($promotionUntil);
-				} else {
-					$futuretime = strtotime($added) + $expirefree_torrent * 86400;
-				}
-				$timeout = gettime(date("Y-m-d H:i:s", $futuretime), false, false, true, false, true);
-				if ($timeout)
-				$onmouseover = " <font color='#0000FF'>".$lang_functions['text_will_end_in'].$timeout."</font>"; //free类型字符显示为蓝色，可以更改它
-				else $promotion = 1;
-			}
-			break;
-		}
-		case 3:
-		{
-			if ($showtimeleft && (($expiretwoup_torrent && $promotionTimeType == 0) || $promotionTimeType == 2))
-			{
-				if ($promotionTimeType == 2) {
-					$futuretime = strtotime($promotionUntil);
-				} else {
-					$futuretime = strtotime($added) + $expiretwoup_torrent * 86400;
-				}
-				$timeout = gettime(date("Y-m-d H:i:s", $futuretime), false, false, true, false, true);
-				if ($timeout)
-				$onmouseover = " ".$lang_functions['text_will_end_in'].$timeout;
-				else $promotion = 1;
-			}
-			break;
-		}
-		case 4:
-		{
-			if ($showtimeleft && (($expiretwoupfree_torrent && $promotionTimeType == 0) || $promotionTimeType == 2))
-			{
-				if ($promotionTimeType == 2) {
-					$futuretime = strtotime($promotionUntil);
-				} else {
-					$futuretime = strtotime($added) + $expiretwoupfree_torrent * 86400;
-				}
-				$timeout = gettime(date("Y-m-d H:i:s", $futuretime), false, false, true, false, true);
-				if ($timeout)
-				$onmouseover = " <font color='#00CC66'>".$lang_functions['text_will_end_in'].$timeout."</font>"; //2XFree 显示为青色，可以更改它
-				else $promotion = 1;
-			}
-			break;
-		}
-		case 5:
-		{
-			if ($showtimeleft && (($expirehalfleech_torrent && $promotionTimeType == 0) || $promotionTimeType == 2))
-			{
-				if ($promotionTimeType == 2) {
-					$futuretime = strtotime($promotionUntil);
-				} else {
-					$futuretime = strtotime($added) + $expirehalfleech_torrent * 86400;
-				}
-				$timeout = gettime(date("Y-m-d H:i:s", $futuretime), false, false, true, false, true);
-				if ($timeout)
-				$onmouseover = " ".$lang_functions['text_will_end_in'].$timeout;
-				else $promotion = 1;
-			}
-			break;
-		}
-		case 6:
-		{
-			if ($showtimeleft && (($expiretwouphalfleech_torrent && $promotionTimeType == 0) || $promotionTimeType == 2))
-			{
-				if ($promotionTimeType == 2) {
-					$futuretime = strtotime($promotionUntil);
-				} else {
-					$futuretime = strtotime($added) + $expiretwouphalfleech_torrent * 86400;
-				}
-				$timeout = gettime(date("Y-m-d H:i:s", $futuretime), false, false, true, false, true);
-				if ($timeout)
-				$onmouseover = " ".$lang_functions['text_will_end_in'].$timeout;
-				else $promotion = 1;
-			}
-			break;
-		}
-		case 7:
-		{
-			if ($showtimeleft && (($expirethirtypercentleech_torrent && $promotionTimeType == 0) || $promotionTimeType == 2))
-			{
-				if ($promotionTimeType == 2) {
-					$futuretime = strtotime($promotionUntil);
-				} else {
-					$futuretime = strtotime($added) + $expirethirtypercentleech_torrent * 86400;
-				}
-				$timeout = gettime(date("Y-m-d H:i:s", $futuretime), false, false, true, false, true);
-				if ($timeout)
-				$onmouseover = " ".$lang_functions['text_will_end_in'].$timeout;
-				else $promotion = 1;
-			}
-			break;
-		}
-	}
-	}
-	if (($CURUSER['appendpromotion'] == 'word' && $forcemode == "" ) || $forcemode == 'word'){
-        $log .= ", user appendpromotion = word";
-		if(($promotion==2 && $globalSpState == 1) || $globalSpState == 2){
-		    $log .= ", promotion or global_sp_state = 2";
-			$sp_torrent = $onmouseover;
-		}
-		elseif(($promotion==3 && $globalSpState == 1) || $globalSpState == 3){
-            $log .= ", promotion or global_sp_state = 3";
-			$sp_torrent = $onmouseover;
-		}
-		elseif(($promotion==4 && $globalSpState == 1) || $globalSpState == 4){
-            $log .= ", promotion or global_sp_state = 4";
-			$sp_torrent = $onmouseover;
-		}
-		elseif(($promotion==5 && $globalSpState == 1) || $globalSpState == 5){
-            $log .= ", promotion or global_sp_state = 5";
-			$sp_torrent = $onmouseover;
-		}
-		elseif(($promotion==6 && $globalSpState == 1) || $globalSpState == 6){
-            $log .= ", promotion or global_sp_state = 6";
-			$sp_torrent = $onmouseover;
-		}
-		elseif(($promotion==7 && $globalSpState == 1) || $globalSpState == 7){
-            $log .= ", promotion or global_sp_state = 7";
-			$sp_torrent = $onmouseover;
-		}
-	}
-	elseif (($CURUSER['appendpromotion'] == 'icon' && $forcemode == "") || $forcemode == 'icon'){
-        $log .= ", user appendpromotion = icon";
-		if(($promotion==2 && $globalSpState == 1) || $globalSpState == 2) {
-            $log .= ", promotion or global_sp_state = 2";
-            $sp_torrent = $onmouseover;
-        }
-		elseif(($promotion==3 && $globalSpState == 1) || $globalSpState == 3) {
-            $log .= ", promotion or global_sp_state = 3";
-            $sp_torrent = $onmouseover;
-        }
-		elseif(($promotion==4 && $globalSpState == 1) || $globalSpState == 4) {
-            $log .= ", promotion or global_sp_state = 4";
-            $sp_torrent = $onmouseover;
-        }
-		elseif(($promotion==5 && $globalSpState == 1) || $globalSpState == 5) {
-            $log .= ", promotion or global_sp_state = 5";
-            $sp_torrent = $onmouseover;
-        }
-		elseif(($promotion==6 && $globalSpState == 1) || $globalSpState == 6) {
-            $log .= ", promotion or global_sp_state = 6";
-            $sp_torrent = $onmouseover;
-        }
-		elseif(($promotion==7 && $globalSpState == 1) || $globalSpState == 7) {
-            $log .= ", promotion or global_sp_state = 7";
-            $sp_torrent = $onmouseover;
-        }
-	}
-	do_log("$log, sp_torrent: $sp_torrent");
-	return $sp_torrent;
+	return \App\Support\Promotion::appendSub(
+		(int) $promotion,
+		(string) $forcemode,
+		(bool) $showtimeleft,
+		(string) $added,
+		(int) $promotionTimeType,
+		(string) $promotionUntil,
+		(bool) $ignoreGlobal,
+		(string) $CURUSER['appendpromotion'],
+		$lang_functions,
+		[
+			'expirefree_torrent' => $expirefree_torrent,
+			'expiretwoup_torrent' => $expiretwoup_torrent,
+			'expiretwoupfree_torrent' => $expiretwoupfree_torrent,
+			'expirehalfleech_torrent' => $expirehalfleech_torrent,
+			'expiretwouphalfleech_torrent' => $expiretwouphalfleech_torrent,
+			'expirethirtypercentleech_torrent' => $expirethirtypercentleech_torrent,
+		]
+	);
 }
 
 function get_hr_img(array $torrent, $searchBoxId)

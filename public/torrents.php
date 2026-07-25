@@ -829,12 +829,14 @@ if (isset($_GET['times_completed_end']) && ctype_digit($_GET['times_completed_en
     $addparam .= "times_completed_end=" . intval($_GET['times_completed_end']) . "&";
 }
 
+$quote = fn ($value) => \Nexus\Database\NexusDB::table('torrents')->getConnection()->getPdo()->quote($value);
+
 if (isset($_GET['added_begin']) && !empty($_GET['added_begin'])) {
-    $wherea[] = "torrents.added >= " . sqlesc($_GET['added_begin']);
+    $wherea[] = "torrents.added >= " . $quote($_GET['added_begin']);
     $addparam .= "added_begin=" . $_GET['added_begin'] . "&";
 }
 if (isset($_GET['added_end']) && !empty($_GET['added_end'])) {
-    $wherea[] = "torrents.added <= " . sqlesc(\Carbon\Carbon::parse($_GET['added_end'])->endOfDay()->toDateTimeString());
+    $wherea[] = "torrents.added <= " . $quote(\Carbon\Carbon::parse($_GET['added_end'])->endOfDay()->toDateTimeString());
     $addparam .= "added_end=" . $_GET['added_end'] . "&";
 }
 

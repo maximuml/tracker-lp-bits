@@ -10,24 +10,7 @@ int_check($id, true);
 if (!isset($id) || !$id)
 die();
 
-$taxonomyFields = "sources.name AS source_name, media.name AS medium_name, codecs.name AS codec_name, standards.name AS standard_name, processings.name AS processing_name, audiocodecs.name AS audiocodec_name";
-$extraFields = "torrent_extras.descr, torrent_extras.nfo, LENGTH(torrent_extras.nfo) AS nfosz, torrent_extras.media_info as technical_info";
-$res = sql_query("SELECT torrents.cache_stamp, torrents.sp_state, torrents.seeders, torrents.banned, torrents.leechers, torrents.info_hash, torrents.filename, torrents.last_action, torrents.name, torrents.owner, torrents.save_as, torrents.visible, torrents.size, torrents.added, torrents.views, torrents.hits, torrents.times_completed, torrents.id, torrents.type, torrents.numfiles, torrents.anonymous, torrents.hr, torrents.promotion_until, torrents.promotion_time_type, torrents.approval_status, torrents.price,
-       categories.name AS cat_name, categories.mode as search_box_id, $taxonomyFields, $extraFields
-FROM torrents LEFT JOIN categories ON torrents.category = categories.id
-    LEFT JOIN sources ON torrents.source = sources.id
-    LEFT JOIN media ON torrents.medium = media.id
-    LEFT JOIN codecs ON torrents.codec = codecs.id
-    LEFT JOIN standards ON torrents.standard = standards.id
-    LEFT JOIN processings ON torrents.processing = processings.id
-    LEFT JOIN audiocodecs ON torrents.audiocodec = audiocodecs.id
-    LEFT JOIN torrent_extras ON torrents.id = torrent_extras.torrent_id
-WHERE torrents.id = $id LIMIT 1")
-or sqlerr();
-$row = mysql_fetch_array($res);
-if (user_can('torrentmanage') || $CURUSER["id"] == $row["owner"])
-$owned = 1;
-else $owned = 0;
+$row = \App\Repositories\TorrentDetailRepository::getTorrent($id);
 $settingMain = get_setting('main');
 if (!$row) {
     stderr($lang_details['std_error'], $lang_details['std_no_torrent_id']);
@@ -38,11 +21,13 @@ if (!$row) {
     permissiondenied();
 } else {
     $row = apply_filter('torrent_detail', $row);
+    if (user_can('torrentmanage') || $CURUSER["id"] == $row["owner"])
+    $owned = 1;
+    else $owned = 0;
     $torrentRep = new \App\Repositories\TorrentRepository();
     $searchBoxRep = new \App\Repositories\SearchBoxRepository();
-    $torrentUpdate = [];
 	if (!empty($_GET["hit"])) {
-        $torrentUpdate[] = 'views = views + 1';
+        \App\Repositories\TorrentDetailRepository::incrementViews($id);
 	}
 
 	if (!isset($_GET["cmtpage"])) {
@@ -264,58 +249,6 @@ JS;
         tr($lang_details['row_torrent_info'], "<table><tr>" . implode("", $infoTds) . "</tr></table><span id='filelist'></span>",1);
 		tr($lang_details['row_hot_meter'], "<table><tr><td class=\"no_border_wide\"><b>" . $lang_details['text_views']."</b>". $row["views"] . "</td><td class=\"no_border_wide\"><b>" . $lang_details['text_hits']. "</b>" . $row["hits"] . "</td><td class=\"no_border_wide\"><b>" .$lang_details['text_snatched'] . "</b><a href=\"viewsnatches.php?id=".$id."\"><b>" . $row["times_completed"]. $lang_details['text_view_snatches'] . "</td><td class=\"no_border_wide\"><b>" . $lang_details['row_last_seeder']. "</b>" . gettime($row["last_action"]) . "</td></tr></table>",1);
 
-		/*
-		// Health
-		$seedersTmp = $row['seeders'];
-		$leechersTmp = $row['leechers'];
-		if ($leechersTmp >= 1)	// it is possible that there's traffic while have no seeders
-		{
-			$progressPerTorrent = 0;
-			$i = 0;
-			$subres = sql_query("SELECT seeder, finishedat, downloadoffset, uploadoffset, ip, port, uploaded, downloaded, to_go, UNIX_TIMESTAMP(started) AS st, connectable, agent, peer_id, UNIX_TIMESTAMP(last_action) AS la, userid FROM peers WHERE torrent = $row[id]") or sqlerr();
-
-			while ($subrow = mysql_fetch_array($subres)) {
-				$progressPerTorrent += sprintf("%.2f", 100 * (1 - ($subrow["to_go"] / $row["size"])));
-				$i++;
-				if ($subrow["seeder"] == "yes")
-				$seeders[] = $subrow;
-				else
-				$downloaders[] = $subrow;
-			}
-			if ($i == 0)
-				$i = 1;
-			$progressTotal = sprintf("%.2f", $progressPerTorrent / $i);
-
-			$totalspeed = 0;
-
-			if($seedersTmp >=1)
-			{
-				if ($seeders) {
-					foreach($seeders as $e) {
-						$totalspeed = $totalspeed + ($e["uploaded"] - $e["uploadoffset"]) / max(1, ($e["la"] - $e["st"]));
-						$totalspeed = $totalspeed + ($e["downloaded"] - $e["downloadoffset"]) / max(1, $e["finishedat"] - $e[st]);
-					}
-				}
-			}
-
-			if ($downloaders) {
-				foreach($downloaders as $e) {
-					$totalspeed = $totalspeed + ($e["uploaded"] - $e["uploadoffset"]) / max(1, ($e["la"] - $e["st"]));
-					$totalspeed = $totalspeed + ($e["downloaded"] - $e["downloadoffset"]) / max(1, ($e["la"] - $e["st"]));
-				}
-			}
-
-			$avgspeed = $lang_details['text_average_speed']."<b>" . mksize($totalspeed/($seedersTmp+$leechersTmp)) . "/s</b>";
-			$totalspeed = $lang_details['text_total_speed']."<b>" . mksize($totalspeed) . "/s</b> ".$lang_details['text_health_note'];
-			$health = $lang_details['text_avprogress'] . get_percent_completed_image(floor($progressTotal))." (".round($progressTotal)."%)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>".$lang_details['text_traffic']."</b>" . $avgspeed ."&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;". $totalspeed;
-		}
-		else
-			$health = "<b>".$lang_details['text_traffic']. "</b>" . $lang_details['text_no_traffic'];
-
-		if ($row["visible"] == "no")
-			$health = "<b>".$lang_details['text_status']."</b>" . $lang_details['text_dead'] ."&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;". $health;
-
-		tr($lang_details['row_health'], $health, 1);*/
 		tr("<span id=\"seeders\"></span><span id=\"leechers\"></span>".$lang_details['row_peers']."<br /><span id=\"showpeer\"><a href=\"javascript: viewpeerlist(".$row['id'].");\" class=\"sublink\">".$lang_details['text_see_full_list']."</a></span><span id=\"hidepeer\" style=\"display: none;\"><a href=\"javascript: hidepeerlist();\" class=\"sublink\">".$lang_details['text_hide_list']."</a></span>", "<div id=\"peercount\"><b>".$row['seeders'].$lang_details['text_seeders'].add_s($row['seeders'])."</b> | <b>".$row['leechers'].$lang_details['text_leechers'].add_s($row['leechers'])."</b></div><div id=\"peerlist\"></div>" , 1);
 		if (isset($_GET['dllist']) && $_GET['dllist'] == 1)
 		{
@@ -379,26 +312,18 @@ echo "</script>";
         $no_give = "";
         $add_value ="";
 
-        $tempresult = sql_query ("SELECT count( DISTINCT userid ) as count FROM magic WHERE torrentid=".sqlesc($id));
-        $count_user = mysql_fetch_array($tempresult);
-        $count_user_number = $count_user['count'];
-
-        $give_value_sql = sql_query("SELECT userid,value FROM magic WHERE torrentid=".sqlesc($id)." ORDER BY id DESC");
-
-        $give_value_count = get_row_count("magic", "WHERE torrentid=".sqlesc($id));
-        $give_value_all = mysql_num_rows($give_value_sql);
-        $sum_value = 0;
-        if ($give_value_all) {
-            while($rows_t = mysql_fetch_array($give_value_sql)) {
-                $give_value_userid = $rows_t["userid"];
-                $sum_value += $rows_t["value"]*1;
-                if ($give_value_userid == $CURUSER['id']) {
-                    $whether_have_give_value = 1;
-                    $add_value = $rows_t["value"];
-                }
-                $give_value[] = get_username($give_value_userid)." ";
-            }
-        }else $no_give = $lang_details['text_no_magic_added'];
+        $magicInfo = \App\Repositories\TorrentDetailRepository::getMagicInfo($id, (int) $CURUSER['id']);
+        $count_user_number = $magicInfo['count_user_number'];
+        $sum_value = $magicInfo['sum_value'];
+        $whether_have_give_value = $magicInfo['whether_have_give_value'];
+        $add_value = $magicInfo['add_value'];
+        foreach ($magicInfo['givers'] as $giver) {
+            $give_value_userid = $giver->userid;
+            $give_value[] = get_username($give_value_userid)." ";
+        }
+        if ($magicInfo['givers']->isEmpty()) {
+            $no_give = $lang_details['text_no_magic_added'];
+        }
 
         if(isset($bonus_has) && isset($arr_temp) && intval($bonus_has) < intval($arr_temp[0])){
 
@@ -454,24 +379,22 @@ echo "</script>";
 		$thanksby = "";
 		$nothanks = "";
 		$thanks_said = 0;
-		$thanks_sql = sql_query("SELECT userid FROM thanks WHERE torrentid=".sqlesc($torrentid)." ORDER BY id DESC LIMIT 20");
-		$thanksCount = get_row_count("thanks", "WHERE torrentid=".sqlesc($torrentid));
-		$thanks_all = mysql_num_rows($thanks_sql);
-		if ($thanks_all) {
-			while($rows_t = mysql_fetch_array($thanks_sql)) {
-				$thanks_userid = $rows_t["userid"];
-				if ($rows_t["userid"] == $CURUSER['id']) {
-					$thanks_said = 1;
-				} else {
-					$thanksby .= get_username($thanks_userid)." ";
-				}
+
+		$thanksInfo = \App\Repositories\TorrentDetailRepository::getThanksInfo($torrentid, (int) $CURUSER['id']);
+		$thanksCount = $thanksInfo['count'];
+		$thanks_all = $thanksInfo['thanks']->count();
+		foreach ($thanksInfo['thanks'] as $t) {
+			$thanks_userid = $t->userid;
+			if ((int) $t->userid == $CURUSER['id']) {
+				$thanks_said = 1;
+			} else {
+				$thanksby .= get_username($thanks_userid)." ";
 			}
 		}
-		else $nothanks = $lang_details['text_no_thanks_added'];
-
-		if (!$thanks_said) {
-			$thanks_said = get_row_count("thanks", "WHERE torrentid=$torrentid AND userid=".sqlesc($CURUSER['id']));
+		if ($thanks_all == 0) {
+			$nothanks = $lang_details['text_no_thanks_added'];
 		}
+		$thanks_said = $thanksInfo['has_thanked'] ? 1 : 0;
 		if ($thanks_said == 0) {
 			$buttonvalue = " value=\"".$lang_details['submit_say_thanks']."\"";
 		} else {
@@ -488,24 +411,16 @@ echo "</script>";
 		stdhead($lang_details['head_comments_for_torrent']."\"" . $row["name"] . "\"");
 		print("<h1 id=\"top\">".$lang_details['text_comments_for']."<a href=\"details.php?id=".$id."\">" . htmlspecialchars($row["name"]) . "</a></h1>\n");
 	}
-	if (!empty($torrentUpdate)) {
-        sql_query("UPDATE torrents SET " . join(",", $torrentUpdate) . " WHERE id = $id") or sqlerr(__FILE__, __LINE__);
-    }
-
 	// -----------------COMMENT SECTION ---------------------//
 if ($CURUSER['showcomment'] != 'no'){
-	$count = get_row_count("comments","WHERE torrent=".sqlesc($id));
+	$count = \App\Repositories\TorrentDetailRepository::getCommentCount($id);
 	if ($count)
 	{
 		print("<br /><br />");
 		print("<h1 align=\"center\" id=\"startcomments\">" .$lang_details['h1_user_comments'] . "</h1>\n");
-		list($pagertop, $pagerbottom, $limit) = pager(10, $count, "details.php?id=$id&cmtpage=1&", array('lastpagedefault' => 1), "page");
+		list($pagertop, $pagerbottom, $limit, $offset, $rpp) = pager(10, $count, "details.php?id=$id&cmtpage=1&", array('lastpagedefault' => 1), "page");
 
-		$subres = sql_query("SELECT id, text, user, added, editedby, editdate FROM comments WHERE torrent = $id ORDER BY id $limit") or sqlerr(__FILE__, __LINE__);
-		$allrows = array();
-		while ($subrow = mysql_fetch_array($subres)) {
-			$allrows[] = $subrow;
-		}
+		$allrows = \App\Repositories\TorrentDetailRepository::getComments($id, (int) $offset, (int) $rpp);
 		print($pagertop);
 		commenttable($allrows,"torrent",$id);
 		print($pagerbottom);

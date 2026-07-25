@@ -83,7 +83,7 @@ if ($action){
 	switch ($action) {
 		case "personal":
 			if ($type == 'save') {
-				$updateset = array();
+				$data = [];
 				$parked = $_POST["parked"];
 				if ($parked != 'yes')
 					$parked = 'no';
@@ -100,23 +100,22 @@ if ($action){
 				$avatar = $_POST["avatar"];
 
 				if(preg_match("/^https?:\/\/[^\s'\"<>]+\.(jpg|gif|png|jpeg)$/i", $avatar) && !preg_match("/\.php/i",$avatar) && !preg_match("/\.js/i",$avatar) && !preg_match("/\.cgi/i",$avatar)) {
-					$avatar = htmlspecialchars( trim( $avatar ) );
-					$updateset[] = "avatar = " . sqlesc($avatar);
+					$data['avatar'] = htmlspecialchars( trim( $avatar ) );
 				}
 				$info = htmlspecialchars(trim($_POST["info"]));
 
-				$updateset[] = "parked = " . sqlesc($parked);
-				$updateset[] = "acceptpms = " . sqlesc($acceptpms);
-				$updateset[] = "deletepms = " . sqlesc($deletepms);
-				$updateset[] = "savepms = " . sqlesc($savepms);
-				$updateset[] = "commentpm = " . sqlesc($commentpm);
-				$updateset[] = "gender = " . sqlesc($gender);
+				$data['parked'] = $parked;
+				$data['acceptpms'] = $acceptpms;
+				$data['deletepms'] = $deletepms;
+				$data['savepms'] = $savepms;
+				$data['commentpm'] = $commentpm;
+				$data['gender'] = $gender;
 				if (is_valid_id($country))
-				$updateset[] = "country = " . sqlesc($country);
-				//	$updateset[] = "tzoffset = " . sqlesc($tzoffset);
+					$data['country'] = (int)$country;
+				//	$data['tzoffset'] = $tzoffset;
 
-				$updateset[] = "info = " . sqlesc($info);
-				$updateset[] = "tracker_url_id = " . sqlesc($_POST["tracker_url_id"]);
+				$data['info'] = $info;
+				$data['tracker_url_id'] = $_POST["tracker_url_id"];
 
 				//notifs
                 if (!empty($_POST['notifs'])) {
@@ -129,35 +128,30 @@ if ($action){
                             unset($notifsArr[$option]);
                         }
                     }
-                    $updateset[] = "notifs = " . sqlesc('[' . implode('][', array_keys($notifsArr)) . ']');
+                    $data['notifs'] = '[' . implode('][', array_keys($notifsArr)) . ']';
                 }
-				$query = "UPDATE users SET " . implode(",", $updateset) . " WHERE id = ".sqlesc($CURUSER["id"]);
-				$result = sql_query($query);
-				if (!$result) {
-                    sqlerr(__FILE__,__LINE__);
-                } else {
-                    clear_user_cache($CURUSER["id"], $CURUSER['passkey']);
-                    header("Location: usercp.php?action=personal&type=saved");
-                }
+				\App\Models\User::query()->where('id', $CURUSER["id"])->update($data);
+				clear_user_cache($CURUSER["id"], $CURUSER['passkey']);
+				header("Location: usercp.php?action=personal&type=saved");
 			}
 			stdhead($lang_usercp['head_control_panel'].$lang_usercp['head_personal_settings'],true);
 
 			$countries = "<option value=0>---- ".$lang_usercp['select_none_selected']." ----</option>\n";
-			$ct_r = sql_query("SELECT id,name FROM countries ORDER BY name") or die;
-			while ($ct_a = mysql_fetch_array($ct_r))
-			$countries .= "<option value=".htmlspecialchars($ct_a['id'])."" . (htmlspecialchars($CURUSER["country"]) == htmlspecialchars($ct_a['id']) ? " selected" : "") . ">".htmlspecialchars($ct_a['name'])."</option>\n";
+			$countryRows = \Nexus\Database\NexusDB::table('countries')->orderBy('name')->get(['id','name']);
+			foreach ($countryRows as $ct_a)
+			$countries .= "<option value=".htmlspecialchars($ct_a->id)."" . (htmlspecialchars($CURUSER["country"]) == htmlspecialchars($ct_a->id) ? " selected" : "") . ">".htmlspecialchars($ct_a->name)."</option>\n";
 
             $trackerUrls = "<option value=0>---- ".$lang_usercp['select_none_selected']." ----</option>\n";
             $trackerUrlList = \App\Models\TrackerUrl::listAll();
             foreach ($trackerUrlList as $item) {
                 $trackerUrls .= "<option value=".htmlspecialchars($item->id)."" . (htmlspecialchars($CURUSER["tracker_url_id"]) == htmlspecialchars($item->id) ? " selected" : "") . ">".htmlspecialchars($item->url)."</option>\n";
             }
-			$ra=sql_query("SELECT * FROM bitbucket WHERE public = '1'");
+			$bitbucketRows = \Nexus\Database\NexusDB::table('bitbucket')->where('public', '1')->get();
 			$options='';
 			$text = '';
-			while ($sor=mysql_fetch_array($ra))
+			foreach ($bitbucketRows as $sor)
 			{
-				$text.='<option value="'. get_protocol_prefix() . $BASEURL .'/bitbucket/'.$sor["name"].'">'.$sor["name"].'</option>';
+				$text.='<option value="'. get_protocol_prefix() . $BASEURL .'/bitbucket/'.$sor->name.'">'.$sor->name.'</option>';
 			}
 
 			usercpmenu ("personal");
@@ -203,7 +197,7 @@ if ($action){
 			else
 				$showtooltipsetting = false;
 			if ($type == 'save') {
-				$updateset = array();
+				$data = [];
 				$pmnotif = $_POST["pmnotif"] ?? '';
 				$emailnotif = $_POST["emailnotif"] ?? '';
 
@@ -229,19 +223,15 @@ if ($action){
                 }
 
 			function browsecheck($dbtable, $cbname, array &$result){
-				global $_POST;
-				$r = sql_query("SELECT id FROM ".$dbtable) or sqlerr();
-				$rows = mysql_num_rows($r);
-				for ($i = 0; $i < $rows; ++$i)
-					{
-						$a = mysql_fetch_assoc($r);
-						if (isset($_POST[$cbname.$a['id']]) && $_POST[$cbname.$a['id']] == 'yes') {
-						    $result[$cbname.$a['id']] = 1;
-                        } else {
-						    unset($result[$cbname.$a['id']]);
-                        }
-					}
+				$ids = \Nexus\Database\NexusDB::table($dbtable)->pluck('id');
+				foreach ($ids as $id) {
+					if (isset($_POST[$cbname.$id]) && $_POST[$cbname.$id] == 'yes') {
+					    $result[$cbname.$id] = 1;
+                    } else {
+					    unset($result[$cbname.$id]);
+                    }
 				}
+			}
                 browsecheck("categories", "cat", $notifs);
 				browsecheck("sources", "sou", $notifs);
 				browsecheck("media", "med", $notifs);
@@ -265,17 +255,14 @@ if ($action){
 //				$caticon = $_POST["caticon"];
 				$sitelanguage = $_POST["sitelanguage"];
 				$fontsize = $_POST["fontsize"];
-				if ($fontsize == 'large')
-					$updateset[] = "fontsize = 'large'";
-				elseif ($fontsize == 'small')
-					$updateset[] = "fontsize = 'small'";
-				else $updateset[] = "fontsize = 'medium'";
-				$updateset[] = "notifs = " . sqlesc('[' . implode('][', array_keys($notifs)) . ']');
+				if ($fontsize == 'large' || $fontsize == 'small')
+					$data['fontsize'] = $fontsize;
+				else
+					$data['fontsize'] = 'medium';
+				$data['notifs'] = '[' . implode('][', array_keys($notifs)) . ']';
 
 				if (is_valid_id($stylesheet))
-				$updateset[] = "stylesheet = " . sqlesc($stylesheet);
-//				if (is_valid_id($caticon))
-//				$updateset[] = "caticon = " . sqlesc($caticon);
+					$data['stylesheet'] = (int)$stylesheet;
 
 				if (is_valid_id($sitelanguage))
 				{
@@ -285,64 +272,49 @@ if ($action){
 						set_langfolder_cookie($lang_folder);
 						header("Location: " . $_SERVER['PHP_SELF']);
 					}
-					$updateset[] = "lang = " . sqlesc($sitelanguage);
+					$data['lang'] = (int)$sitelanguage;
 				}
 
-				$updateset[] = "torrentsperpage = " . min(100, intval($_POST["torrentsperpage"] ?? 0));
+				$data['torrentsperpage'] = min(100, intval($_POST["torrentsperpage"] ?? 0));
 				if ($showtooltipsetting){
-					$tooltip = $_POST['tooltip'];
-					$updateset[] = "tooltip = " . sqlesc($tooltip);
+					$data['tooltip'] = $_POST['tooltip'];
 				}
-				$timetype = $_POST['timetype'];
-				$updateset[] = "timetype = " . sqlesc($timetype);
+				$data['timetype'] = $_POST['timetype'];
 
-				$appendsticky = ($_POST["appendsticky"] == 'yes' ? "yes" : "no");
-				$updateset[] = "appendsticky = " . sqlesc($appendsticky);
-				$appendnew = ($_POST["appendnew"] == 'yes' ? "yes" : "no");
-				$updateset[] = "appendnew = " . sqlesc($appendnew);
-				$appendpromotion = $_POST["appendpromotion"];
-				$updateset[] = "appendpromotion = " . sqlesc($appendpromotion);
-				$appendpicked = ($_POST["appendpicked"] == 'yes' ? "yes" : "no");
-				$updateset[] = "appendpicked = " . sqlesc($appendpicked);
-				$dlicon = ($_POST['dlicon'] == 'yes' ? "yes" : "no");
-				$updateset[] = "dlicon = " . sqlesc($dlicon);
-				$bmicon = ($_POST['bmicon'] == 'yes' ? "yes" : "no");
-				$updateset[] = "bmicon = " . sqlesc($bmicon);
+				$data['appendsticky'] = ($_POST["appendsticky"] == 'yes' ? "yes" : "no");
+				$data['appendnew'] = ($_POST["appendnew"] == 'yes' ? "yes" : "no");
+				$data['appendpromotion'] = $_POST["appendpromotion"];
+				$data['appendpicked'] = ($_POST["appendpicked"] == 'yes' ? "yes" : "no");
+				$data['dlicon'] = ($_POST['dlicon'] == 'yes' ? "yes" : "no");
+				$data['bmicon'] = ($_POST['bmicon'] == 'yes' ? "yes" : "no");
 
-				$showcomnum = ($_POST["showcomnum"] == 'yes' ? "yes" : "no");
-				$updateset[] = "showcomnum = " . sqlesc($showcomnum);
+				$data['showcomnum'] = ($_POST["showcomnum"] == 'yes' ? "yes" : "no");
 				if ($showtooltipsetting){
-					$showlastcom = ($_POST["showlastcom"] == 'yes' ? "yes" : "no");
-					$updateset[] = "showlastcom = " . sqlesc($showlastcom);
+					$data['showlastcom'] = ($_POST["showlastcom"] == 'yes' ? "yes" : "no");
 				}
-				$pmnum = ($_POST["pmnum"] < 1 || $_POST["pmnum"] > 100 ? 20 : floor($_POST["pmnum"]));
-				$updateset[] = "pmnum = " . $pmnum;
-				$sbnum = ($_POST["sbnum"] ? max(10, min(500, intval($_POST["sbnum"] ?? 0))) : 70);
-				$updateset[] = "sbnum = " . $sbnum;
-				$sbrefresh = ($_POST["sbrefresh"] ? max(10, min(3600, intval($_POST["sbrefresh"] ?? 0))) : 120);
-				$updateset[] = "sbrefresh = " . $sbrefresh;
+				$data['pmnum'] = ($_POST["pmnum"] < 1 || $_POST["pmnum"] > 100 ? 20 : floor($_POST["pmnum"]));
+				$data['sbnum'] = ($_POST["sbnum"] ? max(10, min(500, intval($_POST["sbnum"] ?? 0))) : 70);
+				$data['sbrefresh'] = ($_POST["sbrefresh"] ? max(10, min(3600, intval($_POST["sbrefresh"] ?? 0))) : 120);
 
 				if (isset($_POST["hidehb"]) && $_POST["hidehb"] == 'yes')
-					$hidehb = 'yes';
-				else $hidehb = 'no';
-				$updateset[] = "hidehb = " . sqlesc($hidehb);
+					$data['hidehb'] = 'yes';
+				else
+					$data['hidehb'] = 'no';
 				if ($_POST["showdescription"] == 'yes')
-					$showdescription = 'yes';
-				else $showdescription = 'no';
-				$updateset[] = "showdescription = " . sqlesc($showdescription);
-	
-				if ($_POST["smalldescr"] == 'yes')
-					$showsmalldescr = 'yes';
-				else $showsmalldescr = 'no';
-				$updateset[] = "showsmalldescr = " . sqlesc($showsmalldescr);
-				if ($_POST["showcomment"] == 'yes')
-					$showcomment = 'yes';
-				else $showcomment = 'no';
-				$updateset[] = "showcomment = " . sqlesc($showcomment);
+					$data['showdescription'] = 'yes';
+				else
+					$data['showdescription'] = 'no';
 
-				$query = "UPDATE users SET " . implode(",", $updateset) . " WHERE id =".sqlesc($CURUSER["id"]);
-				//stderr("",$query);
-				$result = sql_query($query) or sqlerr(__FILE__,__LINE__);
+				if ($_POST["smalldescr"] == 'yes')
+					$data['showsmalldescr'] = 'yes';
+				else
+					$data['showsmalldescr'] = 'no';
+				if ($_POST["showcomment"] == 'yes')
+					$data['showcomment'] = 'yes';
+				else
+					$data['showcomment'] = 'no';
+
+				\App\Models\User::query()->where('id', $CURUSER["id"])->update($data);
 				header("Location: usercp.php?action=tracker&type=saved");
 			}
 			stdhead($lang_usercp['head_control_panel'].$lang_usercp['head_tracker_settings']);
@@ -522,16 +494,11 @@ if ($showaudiocodec) $audiocodecs = searchbox_item_list("audiocodecs");
             }
             $categories .= $delimiter . "<table><caption><font class='big'>{$lang_usercp['text_additional_selection']}</font></caption><tr><td class=bottom><b>".$lang_usercp['text_show_dead_active']."</b><br /><select name=\"incldead\"><option value=\"0\" ".(strpos($CURUSER['notifs'], "[incldead=0]") !== false ? " selected" : "").">".$lang_usercp['select_including_dead']."</option><option value=\"1\" ".(strpos($CURUSER['notifs'], "[incldead=1]") !== false ||  strpos($CURUSER['notifs'], "incldead") == false ? " selected" : "").">".$lang_usercp['select_active']."</option><option value=\"2\" ".(strpos($CURUSER['notifs'], "[incldead=2]") !== false  ? " selected" : "").">".$lang_usercp['select_dead']."</option></select></td><td class=bottom align=left><b>".$lang_usercp['text_show_special_torrents']."</b><br /><select name=\"spstate\"><option value=\"0\" ".($special_state == 0 ? " selected" : "").">".$lang_usercp['select_all']."</option>".promotion_selection($special_state)."</select></td><td class=bottom><b>".$lang_usercp['text_show_bookmarked']."</b><br /><select name=\"inclbookmarked\"><option value=\"0\" ".(strpos($CURUSER['notifs'], "[inclbookmarked=0]") !== false ? " selected" : "").">".$lang_usercp['select_all']."</option><option value=\"1\" ".(strpos($CURUSER['notifs'], "[inclbookmarked=1]") !== false ? " selected" : "")." >".$lang_usercp['select_bookmarked']."</option><option value=\"2\" ".(strpos($CURUSER['notifs'], "[inclbookmarked=2]") !== false ? " selected" : "").">".$lang_usercp['select_bookmarked_exclude']."</option></select></td></tr></table>";
             tr_small($lang_usercp['row_browse_default_categories'], $categories,1);
-			$ss_r = sql_query("SELECT * FROM stylesheets") or die;
-			$ss_sa = array();
-			while ($ss_a = mysql_fetch_array($ss_r))
-			{
-				$ss_id = $ss_a["id"];
-				$ss_name = $ss_a["name"];
-				$ss_sa[$ss_name] = $ss_id;
-			}
+			$ss_sa = \Nexus\Database\NexusDB::table('stylesheets')
+			    ->orderBy('name')
+			    ->pluck('id', 'name')
+			    ->all();
 			ksort($ss_sa);
-			reset($ss_sa);
             $stylesheets = $categoryicons = '';
 //			while (list($ss_name, $ss_id) = each($ss_sa))
             foreach ($ss_sa as $ss_name => $ss_id)
@@ -592,27 +559,18 @@ if ($showshoutbox_main == "yes") //system side setting for shoutbox
 			else
 				$showtooltipsetting = false;
 			if ($type == 'save') {
-				$updateset = array();
-				$avatars = ($_POST["avatars"] != "" ? "yes" : "no");
-				$ttlastpost = ($_POST["ttlastpost"] != "" ? "yes" : "no");
-				$signatures = ($_POST["signatures"] != "" ? "yes" : "no");
-				$signature = htmlspecialchars( trim($_POST["signature"]) );
-
-				$updateset[] = "topicsperpage = " . min(100, intval($_POST["topicsperpage"] ?? 0));
-				$updateset[] = "postsperpage = " . min(100, intval($_POST["postsperpage"] ?? 0));
-				$updateset[] = "avatars = " . sqlesc($avatars);
+				$data = [
+				    'topicsperpage' => min(100, intval($_POST["topicsperpage"] ?? 0)),
+				    'postsperpage' => min(100, intval($_POST["postsperpage"] ?? 0)),
+				    'avatars' => ($_POST["avatars"] != "" ? "yes" : "no"),
+				    'signatures' => ($_POST["signatures"] != "" ? "yes" : "no"),
+				    'clicktopic' => $_POST["clicktopic"],
+				    'signature' => htmlspecialchars(trim($_POST["signature"])),
+                ];
 				if ($showtooltipsetting)
-					$updateset[] = "showlastpost = " . sqlesc($ttlastpost);
-				$updateset[] = "signatures = " . sqlesc($signatures);
-				$clicktopic = $_POST["clicktopic"];
-				$updateset[] = "clicktopic = ".sqlesc($clicktopic);
-				$updateset[] = "signature = " . sqlesc($signature);
+					$data['showlastpost'] = ($_POST["ttlastpost"] != "" ? "yes" : "no");
 
-				$query = "UPDATE users SET " . implode(",", $updateset) . " WHERE id =".sqlesc($CURUSER["id"]);
-				$result = sql_query($query);
-				if (!$result)
-				sqlerr(__FILE__,__LINE__);
-				else
+				\App\Models\User::query()->where('id', $CURUSER["id"])->update($data);
 				header("Location: usercp.php?action=forum&type=saved");
 			}
 			stdhead($lang_usercp['head_control_panel'].$lang_usercp['head_forum_settings'],true);
@@ -651,12 +609,12 @@ if ($showshoutbox_main == "yes") //system side setting for shoutbox
                     stderr($lang_usercp['std_error'], $lang_usercp['std_wrong_password_note'].goback(), 0);
                 }
 
-				$updateset = array();
+				$data = [];
 				$changedemail = 0;
 				$passupdated = 0;
 				$privacyupdated = 0;
 				$resetpasskey = $_POST["resetpasskey"];
-				$email = mysql_real_escape_string( htmlspecialchars( trim($_POST["email"]) ));
+				$email = htmlspecialchars(trim($_POST["email"]));
 				$chpassword = $_POST["chpassword"];
 //				$passagain = $_POST["passagain"];
 				$privacy = $_POST["privacy"];
@@ -668,11 +626,11 @@ if ($showshoutbox_main == "yes") //system side setting for shoutbox
 				    if (empty($CURUSER['two_step_secret'])) {
 				        //do bind
                         $secretToVerify = $twoStepSecret;
-                        $updateset[] = "two_step_secret = " . sqlesc($twoStepSecret);
+                        $data['two_step_secret'] = $twoStepSecret;
                     } else {
 				        //unbind
                         $secretToVerify = $CURUSER['two_step_secret'];
-                        $updateset[] = "two_step_secret = ''";
+                        $data['two_step_secret'] = '';
                     }
                     if (!$ga->verifyCode($secretToVerify, $twoStepSecretHash)) {
                         stderr($lang_usercp['std_error'], 'Invalid two step code'.goback("-2"), 0);
@@ -681,30 +639,12 @@ if ($showshoutbox_main == "yes") //system side setting for shoutbox
                 }
 
 				if ($chpassword != "") {
-//					if ($chpassword == $CURUSER["username"]) {
-//						stderr($lang_usercp['std_error'], $lang_usercp['std_password_equals_username'].goback("-2"), 0);
-//						die;
-//					}
-//					if (strlen($chpassword) > 40) {
-//						stderr($lang_usercp['std_error'], $lang_usercp['std_password_too_long'].goback("-2"), 0);
-//						die;
-//					}
-//					if (strlen($chpassword) < 6) {
-//						stderr($lang_usercp['std_error'], $lang_usercp['std_password_too_short'].goback("-2"), 0);
-//						die;
-//					}
-//					if ($chpassword != $passagain) {
-//						stderr($lang_usercp['std_error'], $lang_usercp['std_passwords_unmatched'].goback("-2"), 0);
-//						die;
-//					}
-
 					$sec = mksecret();
-//					$passhash = md5($sec . $chpassword . $sec);
 					$passhash = hash('sha256', $sec . $chpassword);
-					$updateset[] = "secret = " . sqlesc($sec);
-					$updateset[] = "passhash = " . sqlesc($passhash);
+					$data['secret'] = $sec;
+					$data['passhash'] = $passhash;
                     $authKey = mksecret();
-					$updateset[] = "auth_key = " . sqlesc($authKey);
+					$data['auth_key'] = $authKey;
 
 					logincookie($CURUSER["id"], $authKey);
 					$passupdated = 1;
@@ -722,8 +662,7 @@ if ($showshoutbox_main == "yes") //system side setting for shoutbox
 						stderr($lang_usercp['std_error'], $lang_usercp['std_wrong_email_address_format'].goback("-2"), 0);
 						die;
 					}
-					$r = sql_query("SELECT id FROM users WHERE email=" . sqlesc($email)) or sqlerr();
-					if (mysql_num_rows($r) > 0){
+					if (\App\Models\User::query()->where('email', $email)->where('id', '!=', $CURUSER['id'])->exists()){
 						stderr($lang_usercp['std_error'], $lang_usercp['std_email_in_use'].goback("-2"), 0);
 						die;
 					}
@@ -731,13 +670,13 @@ if ($showshoutbox_main == "yes") //system side setting for shoutbox
 				}
 				if ($resetpasskey == 1) {
 					$passkey = md5($CURUSER['username'].date("Y-m-d H:i:s").$CURUSER['passhash']);
-					$updateset[] = "passkey = " . sqlesc($passkey);
+					$data['passkey'] = $passkey;
 				}
 				if ($changedemail == 1) {
 					$sec = mksecret();
 					$hash = md5($sec . $email . $sec);
 					$obemail = rawurlencode($email);
-					$updateset[] = "editsecret = " . sqlesc($sec);
+					$data['editsecret'] = $sec;
 					$subject = "$SITENAME".$lang_usercp['mail_profile_change_confirmation'];
                     $changeEmailOne = sprintf($lang_usercp['mail_change_email_one'], $siteName);
                     $changeEmailNine = sprintf($lang_usercp['mail_change_email_nine'], $siteName);
@@ -761,17 +700,16 @@ EOD;
 				if ($privacy != "normal" && $privacy != "low" && $privacy != "strong")
 				die("whoops");
 
-				$updateset[] = "privacy = " . sqlesc($privacy);
+				$data['privacy'] = $privacy;
 				if ($CURUSER['privacy'] != $privacy) $privacyupdated = 1;
 
-				$user = $CURUSER["id"];
-                \Nexus\Database\NexusDB::transaction(function () use ($user, $updateset) {
-                    $query = sprintf("UPDATE users SET " . implode(",", $updateset) . " WHERE id ='%s'", mysql_real_escape_string($user));
-                    sql_query($query);
+				$userId = $CURUSER["id"];
+                \Nexus\Database\NexusDB::transaction(function () use ($userId, $data) {
+                    \App\Models\User::query()->where('id', $userId)->update($data);
                     if (!empty($_REQUEST['resetauthkey']) && $_REQUEST['resetauthkey'] == 1) {
                         //reset authkey
                         $torrentRep = new \App\Repositories\TorrentRepository();
-                        $torrentRep->resetTrackerReportAuthKeySecret($user);
+                        $torrentRep->resetTrackerReportAuthKeySecret($userId);
                     }
                     do_action("usercp_security_update", $_POST);
                 });
@@ -796,7 +734,7 @@ EOD;
 //				print("<form method=post action=usercp.php><input type=hidden name=action value=security><input type=hidden name=type value=confirm>");
 				$resetpasskey = $_POST["resetpasskey"];
 				$resetauthkey = $_POST["resetauthkey"];
-				$email = mysql_real_escape_string( htmlspecialchars( trim($_POST["email"]) ));
+				$email = htmlspecialchars(trim($_POST["email"]));
 				$chpassword = $_POST["chpassword"];
 				$passagain = $_POST["passagain"];
 				$privacy = $_POST["privacy"];
@@ -875,7 +813,7 @@ stdhead($lang_usercp['head_control_panel'].$lang_usercp['head_home']);
 \Nexus\Nexus::js('vendor/jquery-loading/jquery.loading.min.js', 'footer', true);
 usercpmenu ();
 //Comment Results
-$commentcount = get_row_count("comments", "WHERE user=" . sqlesc($CURUSER["id"]));
+$commentcount = \App\Models\Comment::query()->where('user', $CURUSER["id"])->count();
 
 //Join Date
 if ($CURUSER['added'] == "0000-00-00 00:00:00" || $CURUSER['added'] == null)
@@ -885,7 +823,7 @@ else
 
 //Forum Posts
 if (!$forumposts = $Cache->get_value('user_'.$CURUSER['id'].'_post_count')){
-	$forumposts = get_row_count("posts","WHERE userid=".$CURUSER['id']);
+	$forumposts = \App\Models\Post::query()->where('userid', $CURUSER['id'])->count();
 	$Cache->cache_value('user_'.$CURUSER['id'].'_post_count', $forumposts, 3600);
 }
 $dayposts = 0;
@@ -897,7 +835,7 @@ if ($forumposts)
 		$dayposts  = round(($forumposts / $days), 1);
 	}
 	if (!$postcount = $Cache->get_value('total_posts_count')){
-		$postcount = get_row_count("posts");
+		$postcount = \App\Models\Post::query()->count();
 		$Cache->cache_value('total_posts_count', $postcount, 96400);
 	}
 	$percentages = round($forumposts*100/$postcount, 3)."%";
@@ -1129,24 +1067,29 @@ print("<table border=0 cellspacing=0 cellpadding=3 width=".CONTENT_WIDTH."><tr>"
 "<td class=colhead align=center>".$lang_usercp['col_topic_starter']."</td>".
 "<td class=colhead align=center width=20%>".$lang_usercp['col_last_post']."</td>".
 "</tr>");
-$res_topics = sql_query("SELECT * FROM readposts INNER JOIN topics ON topics.id = readposts.topicid WHERE readposts.userid = ".$CURUSER['id']." ORDER BY readposts.id DESC LIMIT 5") or sqlerr();
-while ($topicarr = mysql_fetch_assoc($res_topics))
+$topicRows = \Nexus\Database\NexusDB::table('readposts')
+    ->join('topics', 'topics.id', '=', 'readposts.topicid')
+    ->where('readposts.userid', $CURUSER['id'])
+    ->orderByDesc('readposts.id')
+    ->limit(5)
+    ->get();
+foreach ($topicRows as $topicarr)
 {
-	$topicid = $topicarr["id"];
-	$topic_title = $topicarr["subject"];
-	$topic_userid = $topicarr["userid"];
-	$topic_views = $topicarr["views"];
+	$topicid = $topicarr->id;
+	$topic_title = $topicarr->subject;
+	$topic_userid = $topicarr->userid;
+	$topic_views = $topicarr->views;
 	$views = number_format($topic_views);
 
 	/// GETTING TOTAL NUMBER OF POSTS ///
 	if (!$posts = $Cache->get_value('topic_'.$topicid.'_post_count')){
-		$posts = get_row_count("posts","WHERE topicid=".sqlesc($topicid));
+		$posts = \App\Models\Post::query()->where('topicid', $topicid)->count();
 		$Cache->cache_value('topic_'.$topicid.'_post_count', $posts, 3600);
 	}
 	$replies = max(0, $posts - 1);
 
 	/// GETTING USERID AND DATE OF LAST POST ///
-	$arr = get_post_row($topicarr['lastpost']);
+	$arr = get_post_row($topicarr->lastpost);
 	$postid = intval($arr["id"] ?? 0);
 	$userid = intval($arr["userid"] ?? 0);
 	$added = gettime($arr['added'],true,false);
@@ -1156,7 +1099,7 @@ while ($topicarr = mysql_fetch_assoc($res_topics))
 
 	/// GET NAME OF THE AUTHOR ///
 	$author = get_username($topic_userid);
-	$subject = "<a href=forums.php?action=viewtopic&topicid=$topicid><b>" . htmlspecialchars($topicarr["subject"]) . "</b></a>";
+	$subject = "<a href=forums.php?action=viewtopic&topicid=$topicid><b>" . htmlspecialchars($topicarr->subject) . "</b></a>";
 
 	print("<tr class=tableb><td style='padding-left: 10px' align=left class=rowfollow>$subject</td>".
 	"<td align=center class=rowfollow>".$replies."/".$views."</td>" .

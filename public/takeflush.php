@@ -23,8 +23,7 @@ if (get_user_class() >= UC_MODERATOR || $CURUSER['id'] == "$id")
 {
    $deadtime = deadtime();
    $lastAction = date("Y-m-d H:i:s", $deadtime);
-   sql_query("DELETE FROM peers WHERE last_action < '$lastAction' AND userid=" . sqlesc($id));
-   $effected = mysql_affected_rows();
+   $effected = \App\Models\Peer::query()->where('last_action', '<', $lastAction)->where('userid', $id)->delete();
 
    stderr($lang_takeflush['std_success'], "$effected ".$lang_takeflush['std_ghost_torrents_cleaned']);
 }

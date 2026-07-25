@@ -161,7 +161,7 @@ final class Network
             return $info;
         });
 
-        \do_log('ip: ' . $ip . ', result: ' . \nexus_json_encode($locationInfo));
+        \do_log('ip: ' . $ip . ', result: ' . Json::encode($locationInfo));
 
         if ($locationInfo === false) {
             return false;

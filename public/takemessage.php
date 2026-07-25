@@ -14,10 +14,14 @@ if ($_SERVER["REQUEST_METHOD"] != "POST")
 	{
 		if (!$origmsg)
 			stderr($lang_takemessage['std_error'], $lang_takemessage['std_invalid_id']);
-		$res = sql_query("SELECT * FROM messages WHERE id=" . sqlesc($origmsg) . " AND (receiver=" . sqlesc($CURUSER['id']) . " OR sender=" . sqlesc($CURUSER['id']) .") LIMIT 1") or sqlerr(__FILE__,__LINE__);
-		$origmsgrow = mysql_fetch_assoc($res);
-		if (!$origmsgrow)
+		$origmsgRecord = \App\Models\Message::query()->where('id', $origmsg)
+		    ->where(function ($query) {
+		        $query->where('receiver', $GLOBALS['CURUSER']['id'])
+		              ->orWhere('sender', $GLOBALS['CURUSER']['id']);
+		    })->first();
+		if (!$origmsgRecord)
 			stderr($lang_takemessage['std_error'], $lang_takemessage['std_no_permission_forwarding']);
+		$origmsgrow = $origmsgRecord->toArray();
 		if(!$_POST['to'])
 			stderr($lang_takemessage['std_error'], $lang_takemessage['std_must_enter_username']);
 		$receiver = get_user_id_from_name(trim($_POST['to']));
@@ -60,10 +64,13 @@ if ($_SERVER["REQUEST_METHOD"] != "POST")
 	$save = ($save == 'yes') ? "yes" : "no";
 	// End of Change
 
-	$res = sql_query("SELECT id,username,parked,email,acceptpms, notifs, ".\Nexus\Database\NexusDB::unixTimestampField("last_access")." as la FROM users WHERE id=".$receiver) or sqlerr(__FILE__, __LINE__);
-	$user = mysql_fetch_assoc($res);
+	$user = \Nexus\Database\NexusDB::table('users')
+	    ->where('id', $receiver)
+	    ->select('id', 'username', 'parked', 'email', 'acceptpms', 'notifs', \Nexus\Database\NexusDB::raw(\Nexus\Database\NexusDB::unixTimestampField('last_access') . ' as la'))
+	    ->first();
 	if (!$user)
 		stderr($lang_takemessage['std_error'], $lang_takemessage['std_user_not_exist']);
+	$user = (array) $user;
 
 	//Make sure recipient wants this message
 	if (!user_can('staffmem'))
@@ -72,14 +79,20 @@ if ($_SERVER["REQUEST_METHOD"] != "POST")
 		stderr($lang_takemessage['std_refused'], $lang_takemessage['std_account_parked']);
 		if ($user["acceptpms"] == "yes")
 		{
-			$res2 = sql_query("SELECT * FROM blocks WHERE userid=".sqlesc($receiver)." AND blockid=" . sqlesc($CURUSER["id"])) or sqlerr(__FILE__, __LINE__);
-			if (mysql_num_rows($res2) == 1)
+			$blocked = \Nexus\Database\NexusDB::table('blocks')
+			    ->where('userid', $receiver)
+			    ->where('blockid', $CURUSER["id"])
+			    ->count() > 0;
+			if ($blocked)
 			stderr($lang_takemessage['std_refused'], $lang_takemessage['std_user_blocks_your_pms']);
 		}
 		elseif ($user["acceptpms"] == "friends")
 		{
-			$res2 = sql_query("SELECT * FROM friends WHERE userid=".sqlesc($receiver)." AND friendid=" . sqlesc($CURUSER["id"])) or sqlerr(__FILE__, __LINE__);
-			if (mysql_num_rows($res2) != 1)
+			$isFriend = \Nexus\Database\NexusDB::table('friends')
+			    ->where('userid', $receiver)
+			    ->where('friendid', $CURUSER["id"])
+			    ->count() > 0;
+			if (!$isFriend)
 			stderr($lang_takemessage['std_refused'], $lang_takemessage['std_user_accepts_friends_pms']);
 		}
 		elseif ($user["acceptpms"] == "no")
@@ -103,7 +116,7 @@ if ($_SERVER["REQUEST_METHOD"] != "POST")
 	$msgid=$messageRecord->id;
 	$date=date("Y-m-d H:i:s");
 	// Update Last PM sent...
-	sql_query("UPDATE users SET last_pm = NOW() WHERE id = ".sqlesc($CURUSER['id'])) or sqlerr(__FILE__, __LINE__);
+	\App\Models\User::query()->where('id', $CURUSER['id'])->update(['last_pm' => date("Y-m-d H:i:s")]);
 
 	// Send notification email.
 if ($emailnotify_smtp=='yes' && $smtptype != 'none'){
@@ -161,16 +174,15 @@ EOD;
 		if ($delete == "yes")
 		{
 			// Make sure receiver of $origmsg is current user
-			$res = sql_query("SELECT * FROM messages WHERE id=$origmsg") or sqlerr(__FILE__, __LINE__);
-			if (mysql_num_rows($res) == 1)
+			$orig = \App\Models\Message::query()->find($origmsg);
+			if ($orig)
 			{
-				$arr = mysql_fetch_assoc($res);
-				if ($arr["receiver"] != $CURUSER["id"])
+				if ($orig->receiver != $CURUSER["id"])
 				stderr("w00t","This shouldn't happen.");
-				if ($arr["saved"] == "no")
-				sql_query("DELETE FROM messages WHERE id=$origmsg") or sqlerr(__FILE__, __LINE__);
-				elseif ($arr["saved"] == "yes")
-				sql_query("UPDATE messages SET location = '0' WHERE id=$origmsg") or sqlerr(__FILE__, __LINE__);
+				if ($orig->saved == "no")
+				$orig->delete();
+				elseif ($orig->saved == "yes")
+				$orig->update(['location' => '0']);
 
 			}
 		}

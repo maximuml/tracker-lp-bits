@@ -55,13 +55,11 @@ $inviter =  $_POST["inviter"];
 $code = unesc($_POST["hash"]);
 
 //check invite code
-	$sq = sprintf("SELECT * FROM invites WHERE valid = %s and hash ='%s'", \App\Models\Invite::VALID_YES, mysql_real_escape_string($code));
-	$res = sql_query($sq) or sqlerr(__FILE__, __LINE__);
-	$inv = mysql_fetch_assoc($res);
+	$inv = \App\Models\Invite::query()->where('valid', \App\Models\Invite::VALID_YES)->where('hash', $code)->first();
 	if (!$inv)
 		bark('invalid invite code');
-	if ($inv['inviter'] != $inviter) {
-        \App\Models\Invite::query()->where('id', $inv['id'])->update(['valid' => \App\Models\Invite::VALID_NO]);
+	if ($inv->inviter != $inviter) {
+        \App\Models\Invite::query()->where('id', $inv->id)->update(['valid' => \App\Models\Invite::VALID_NO]);
         stderr(nexus_trans('nexus.invalid_argument'), nexus_trans('invite.invalid_inviter'));
         exit();
     }
@@ -69,9 +67,7 @@ $code = unesc($_POST["hash"]);
 $ip = getip();
 
 
-$res = sql_query("SELECT username FROM users WHERE id = $inviter") or sqlerr(__FILE__, __LINE__);
-$arr = mysql_fetch_assoc($res);
-$invusername = $arr['username'];
+$invusername = \App\Models\User::query()->where('id', $inviter)->value('username') ?? '';
 }
 if (!mkglobal("wantusername:wantpassword:email")) {
     die();
@@ -130,18 +126,9 @@ if ($_POST["rulesverify"] != "yes" || $_POST["faqverify"] != "yes" || $_POST["ag
 	stderr($lang_takesignup['std_signup_failed'], $lang_takesignup['std_unqualified']);
 
 // check if email addy is already in use
-$a = (@mysql_fetch_row(@sql_query("select count(*) from users where BINARY email='".mysql_real_escape_string($email)."'"))) or sqlerr(__FILE__, __LINE__);
-if ($a[0] != 0)
+if (\App\Models\User::query()->where('email', $email)->count() > 0)
   bark($lang_takesignup['std_email_address'].$email.$lang_takesignup['std_in_use']);
 
-/*
-// do simple proxy check
-if (isproxy())
-	bark("You appear to be connecting through a proxy server. Your organization or ISP may use a transparent caching HTTP proxy. Please try and access the site on <a href="." . get_protocol_prefix() . "$BASEURL.":81/signup.php>port 81</a> (this should bypass the proxy server). <p><b>Note:</b> if you run an Internet-accessible web server on the local machine you need to shut it down until the sign-up is complete.");
-
-$res = sql_query("SELECT COUNT(*) FROM users") or sqlerr(__FILE__, __LINE__);
-$arr = mysql_fetch_row($res);
-*/
 
 $secret = mksecret();
 //$wantpasshash = md5($secret . $wantpassword . $secret);
@@ -150,23 +137,39 @@ $editsecret = ($verification == 'admin' ? '' : $secret);
 $invite_count = (int) $invite_count;
 $passkey = md5($wantusername.date("Y-m-d H:i:s").$wantpasshash);
 
-$wantusername = sqlesc($wantusername);
-$wantpasshash = sqlesc($wantpasshash);
-$secret = sqlesc($secret);
-$editsecret = sqlesc($editsecret);
 $send_email = $email;
-$email = sqlesc($email);
-$country = sqlesc($country);
-$gender = sqlesc($gender);
-$sitelangid = sqlesc(get_langid_from_langcookie());
-$authKey = sqlesc(mksecret());
-$res_check_user = sql_query("SELECT * FROM users WHERE username = " . $wantusername);
+$country = (int)$country;
+$gender = htmlspecialchars(trim($_POST["gender"]));
+$sitelangid = (int)get_langid_from_langcookie();
+$authKey = mksecret();
 
-if(mysql_num_rows($res_check_user) == 1)
+if (\App\Models\User::query()->where('username', $wantusername)->exists())
   bark($lang_takesignup['std_username_exists']);
 
-$ret = sql_query("INSERT INTO users (username, passhash, passkey, secret, auth_key, editsecret, email, country, gender, status, class, invites, ".($type == 'invite' ? "invited_by," : "")." added, last_access, lang, stylesheet, uploaded) VALUES (" . $wantusername . "," . $wantpasshash . "," . sqlesc($passkey) . "," . $secret . "," . $authKey. "," . $editsecret . "," . $email . "," . $country . "," . $gender . ", 'pending', ".$defaultclass_class.",". $invite_count .", ".($type == 'invite' ? "'$inviter'," : "") ." '". date("Y-m-d H:i:s") ."' , " . " '". date("Y-m-d H:i:s") ."' , ".$sitelangid . ",".$defcss.",".($iniupload_main > 0 ? $iniupload_main : 0).")") or sqlerr(__FILE__, __LINE__);
-$id = mysql_insert_id();
+$userData = [
+    'username' => $wantusername,
+    'passhash' => $wantpasshash,
+    'passkey' => $passkey,
+    'secret' => $secret,
+    'auth_key' => $authKey,
+    'editsecret' => $editsecret,
+    'email' => $email,
+    'country' => $country,
+    'gender' => $gender,
+    'status' => 'pending',
+    'class' => $defaultclass_class,
+    'invites' => $invite_count,
+    'added' => date("Y-m-d H:i:s"),
+    'last_access' => date("Y-m-d H:i:s"),
+    'lang' => $sitelangid,
+    'stylesheet' => $defcss,
+    'uploaded' => ($iniupload_main > 0 ? $iniupload_main : 0),
+];
+if ($type == 'invite') {
+    $userData['invited_by'] = (int)$inviter;
+}
+
+$id = \App\Models\User::query()->insertGetId($userData);
 $userInfo = \App\Models\User::query()->find($id, \App\Models\User::$commonFields);
 fire_event("user_created", $userInfo);
 $tmpInviteCount = get_setting('main.tmp_invite_count');
@@ -191,9 +194,9 @@ if (empty($msg)) {
 ]);
 
 //write_log("User account $id ($wantusername) was created");
-$res = sql_query("SELECT passhash, secret, editsecret, status FROM users WHERE id = ".sqlesc($id)) or sqlerr(__FILE__, __LINE__);
-$row = mysql_fetch_assoc($res);
-$psecret = md5($row['secret']);
+$row = \App\Models\User::query()->find($id, ['passhash', 'secret', 'editsecret', 'status']);
+$row = $row ? $row->toArray() : [];
+$psecret = md5($row['secret'] ?? '');
 $ip = getip();
 $usern = htmlspecialchars($wantusername);
 $title = $SITENAME.$lang_takesignup['mail_title'];

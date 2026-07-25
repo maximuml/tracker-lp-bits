@@ -40,10 +40,8 @@ if ($type == 'invite')
 	$dom = $tldm[2];
 	}
 
-	$sq = sprintf("SELECT * FROM invites WHERE valid = %s and hash ='%s'", \App\Models\Invite::VALID_YES, mysql_real_escape_string($code));
-	$res = sql_query($sq) or sqlerr(__FILE__, __LINE__);
-	$inv = mysql_fetch_assoc($res);
-	$inviter = htmlspecialchars($inv["inviter"]);
+	$inv = \App\Models\Invite::query()->where('valid', \App\Models\Invite::VALID_YES)->where('hash', $code)->first();
+	$inviter = $inv ? (int)$inv->inviter : 0;
 	if (!$inv)
 		stderr($lang_signup['std_error'], $lang_signup['std_uninvited'], 0);
 	stdhead($lang_signup['head_invite_signup']);
@@ -105,9 +103,9 @@ show_image_code ();
 </font></td></tr></table>
 </td></tr>
 <?php $countries = "<option value=\"8\">---- ".$lang_signup['select_none_selected']." ----</option>n";
-$ct_r = sql_query("SELECT id,name FROM countries ORDER BY name") or die;
-while ($ct_a = mysql_fetch_array($ct_r))
-$countries .= "<option value=$ct_a[id]" . ($ct_a['id'] == 8 ? " selected" : "") . ">$ct_a[name]</option>n";
+$countryRows = \Nexus\Database\NexusDB::table('countries')->orderBy('name')->get(['id','name']);
+foreach ($countryRows as $ct_a)
+$countries .= "<option value=" . $ct_a->id . ($ct_a->id == 8 ? " selected" : "") . ">" . htmlspecialchars($ct_a->name) . "</option>n";
 tr($lang_signup['row_country'], "<select name=country>n$countries</select>", 1);
 ?>
 <tr><td class=rowhead><?php echo $lang_signup['row_gender'] ?></td><td class=rowfollow align=left>

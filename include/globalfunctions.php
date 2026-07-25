@@ -17,45 +17,19 @@ function getip($real = true) {
 
 function sql_query($query)
 {
-	$begin = microtime(true);
-	global $query_name;
-	$result = mysql_query($query);
-	$end = microtime(true);
-	$query_name[] = [
-		'query' => $query,
-		'time' => sprintf('%.2f ms', ($end - $begin) * 1000),
-	];
-	return $result;
+    return \App\Support\LegacyDb::query($query);
 }
 
 function sqlesc($value) {
-	if (is_null($value)) {
-		return 'null';
-	}
-	$value = "'" . mysql_real_escape_string($value) . "'";
-	return $value;
+    return \App\Support\LegacyDb::escape($value);
 }
 
 function hash_pad($hash) {
-    if (is_resource($hash)) {
-        rewind($hash);
-        $hash = stream_get_contents($hash);
-    }
-    return str_pad($hash, 20);
+    return \App\Support\Strings::padHash($hash);
 }
 
 function hash_where($name, $hash) {
-//	$shhash = preg_replace('/ *$/s', "", $hash);
-//	return "($name = " . sqlesc($hash) . " OR $name = " . sqlesc($shhash) . ")";
-//	return sprintf("$name in (%s, %s)", sqlesc($hash), sqlesc($shhash));
-    if (\Nexus\Database\NexusDB::isMysql()) {
-        return "$name = " . sqlesc($hash);
-    } elseif (Nexus\Database\NexusDB::isPgsql()) {
-        return "$name = decode(bin2hex('$hash'), 'hex')";
-    } else {
-        throw new \RuntimeException("Not supported database");
-    }
-
+    return \App\Support\LegacyDb::hashWhere($name, $hash);
 }
 
 //no need any more...
@@ -129,31 +103,7 @@ function getLogFile($append = '')
 
 function nexus_config($key, $default = null)
 {
-    if (!IN_NEXUS) {
-        return config($key, $default);
-    }
-    static $configs;
-    if (is_null($configs)) {
-        //get all configuration from config file
-//		$files = glob(ROOT_PATH . 'config/*.php');
-        $files = [
-            ROOT_PATH . 'config/nexus.php',
-            ROOT_PATH . 'config/emoji.php',
-            ROOT_PATH . 'config/captcha.php',
-            ROOT_PATH . 'config/clickhouse.php',
-        ];
-        foreach ($files as $file) {
-            $basename = basename($file);
-            if ($basename == 'allconfig.php') {
-                //exclude the NexusPHP default config file
-                continue;
-            }
-            $values = require $file;
-            $configPrefix = strstr($basename, '.php', true);
-            $configs[$configPrefix] = $values;
-        }
-    }
-    return arr_get($configs, $key, $default);
+    return \App\Support\Config::get($key, $default);
 }
 
 
@@ -167,17 +117,7 @@ function nexus_config($key, $default = null)
  */
 function get_setting(?string $name = null, mixed $default = null): mixed
 {
-	static $settings;
-	if (is_null($settings)) {
-        $settings = \Nexus\Database\NexusDB::remember("nexus_settings_in_nexus", 600, function () {
-            //get all settings from database
-            return \App\Models\Setting::getFromDb();
-        });
-	}
-	if (is_null($name)) {
-	    return $settings;
-    }
-    return arr_get($settings, $name, $default);
+    return \App\Support\Settings::get($name, $default);
 }
 
 /**
@@ -189,14 +129,7 @@ function get_setting(?string $name = null, mixed $default = null): mixed
  */
 function get_setting_from_db(?string $name = null, mixed $default = null): mixed
 {
-    static $final;
-    if (is_null($final)) {
-        $final = \App\Models\Setting::getFromDb();
-    }
-    if (is_null($name)) {
-        return $final;
-    }
-    return arr_get($final, $name, $default);
+    return \App\Support\Settings::fromDb($name, $default);
 }
 
 
@@ -270,30 +203,7 @@ function fail(...$args)
 
 function last_query($all = false, $format = 'json')
 {
-    static $connection;
-    if (is_null($connection)) {
-        $connectionName = \Nexus\Database\NexusDB::getConnectionName();
-        if (IN_NEXUS) {
-            $connection = \Illuminate\Database\Capsule\Manager::connection($connectionName);
-        } else {
-            $connection = \Illuminate\Support\Facades\DB::connection($connectionName);
-        }
-    }
-    if ($all === 'COUNT') {
-        return count($connection->getQueryLog());
-    }
-    $queries = $connection->getRawQueryLog();
-    if ($all) {
-        return $queries;
-    }
-    if (empty($queries)) {
-        return '';
-    }
-    $last = last($queries);
-    if ($format === 'json') {
-        return nexus_json_encode($last);
-    }
-    return $last;
+    return \App\Support\LegacyDb::lastQuery($all, $format);
 }
 
 function format_datetime($datetime, $format = 'Y-m-d H:i')

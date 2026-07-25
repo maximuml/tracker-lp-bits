@@ -58,8 +58,8 @@ function additem($title, $action){
 
 function edititem($title, $action, $id){
 		global $lang_log;
-		$result = sql_query ("SELECT * FROM ".$action." where id = ".sqlesc($id)) or sqlerr(__FILE__, __LINE__);
-		if ($row = mysql_fetch_array($result)) {
+		$row = \App\Repositories\LogRepository::getGenericById($action, $id);
+		if ($row) {
 		print("<table border=1 cellspacing=0 width=940 cellpadding=5>\n");
 		print("<tr><td class=colhead align=left>".$title."</td></tr>\n");
 		print("<tr><td class=toolbox align=left><form method=\"post\" action='" . $_SERVER['REQUEST_URI'] . "'>\n");
@@ -83,43 +83,32 @@ else {
 	case "dailylog":
 		stdhead($lang_log['head_site_log']);
 
-		$query = mysql_real_escape_string($q);
 		$search = $_GET["search"] ?? '';
 
 		$addparam = "";
-		$wherea = "";
 		if (user_can('confilog')){
-			switch ($search)
-			{
-				case "mod": $wherea=" WHERE security_level = 'mod'"; break;
-				case "normal": $wherea=" WHERE security_level = 'normal'"; break;
-				case "all": break;
+			if (in_array($search, ['mod', 'normal', 'all'])) {
+				$addparam = "search=".rawurlencode($search)."&";
 			}
-			$addparam = ($wherea ? "search=".rawurlencode($search)."&" : "");
-		}
-		else{
-			$wherea=" WHERE security_level = 'normal'";
 		}
 
-		if($query){
-				$wherea .= ($wherea ? " AND " : " WHERE ")." txt LIKE '%$query%' ";
-				$addparam .= "query=".rawurlencode($query)."&";
+		if($q){
+				$addparam .= "query=".rawurlencode($q)."&";
 		}
 
 		logmenu('dailylog');
 		$opt = array ('all' => $lang_log['text_all'], 'normal' => $lang_log['text_normal'], 'mod' => $lang_log['text_mod']);
 		searchtable($lang_log['text_search_log'], 'dailylog',$opt);
 
-		$res = sql_query("SELECT COUNT(*) FROM sitelog".$wherea);
-		$row = mysql_fetch_array($res);
-		$count = $row[0];
+		$filters = ['search' => $search, 'query' => $q];
+		$count = \App\Repositories\LogRepository::countSiteLog($filters);
 
 		$perpage = 50;
 
-		list($pagertop, $pagerbottom, $limit) = pager($perpage, $count, "log.php?action=dailylog&".$addparam);
+		list($pagertop, $pagerbottom, $limit, $offset) = pager($perpage, $count, "log.php?action=dailylog&".$addparam);
 
-		$res = sql_query("SELECT * FROM sitelog $wherea ORDER BY added DESC $limit") or sqlerr(__FILE__, __LINE__);
-		if (mysql_num_rows($res) == 0)
+		$logRows = \App\Repositories\LogRepository::getSiteLog($filters, (int)$offset, $perpage);
+		if (empty($logRows))
 		print($lang_log['text_log_empty']);
 		else
 		{
@@ -132,7 +121,7 @@ else {
                 print("<td class=colhead align=left>".$lang_log['col_user']."</td>");
             }
             print("</td></tr>\n");
-			while ($arr = mysql_fetch_assoc($res))
+			foreach ($logRows as $arr)
 			{
 				$color = "";
 				if (strpos($arr['txt'],'was uploaded by')) $color = "green";
@@ -158,15 +147,7 @@ else {
 		break;
 	case "chronicle":
 		stdhead($lang_log['head_chronicle']);
-		$query = mysql_real_escape_string($q);
-		if($query){
-		$wherea=" WHERE txt LIKE '%$query%' ";
-		$addparam = "query=".rawurlencode($query)."&";
-		}
-		else{
-		$wherea="";
-		$addparam = "";
-		}
+		$addparam = $q ? "query=".rawurlencode($q)."&" : "";
 		logmenu("chronicle");
 		searchtable($lang_log['text_search_chronicle'], 'chronicle');
 		if (user_can('chrmanage'))
@@ -182,29 +163,27 @@ else {
             if (get_user_class() < $chrmanage_class)
                 permissiondeny();
 			elseif (isset($_POST['do']) && $_POST['do'] == "add")
-					sql_query ("INSERT INTO chronicle (userid,added, txt) VALUES ('".$CURUSER["id"]."', now(), ".sqlesc($txt).")") or sqlerr(__FILE__, __LINE__);
+					\App\Repositories\LogRepository::addChronicle((int)$CURUSER["id"], $txt);
 			elseif (isset($_POST['do'] ) && $_POST['do'] == "update"){
 				$id = intval($_POST['id'] ?? 0);
 				if (!$id) { header("Location: log.php?action=chronicle"); die();}
-				else sql_query ("UPDATE chronicle SET txt=".sqlesc($txt)." WHERE id=".$id) or sqlerr(__FILE__, __LINE__);}
+				else \App\Repositories\LogRepository::updateChronicle($id, $txt);}
 			else {$id = (intval($_GET['id'] ?? 0));
 				if (!$id) { header("Location: log.php?action=chronicle"); die();}
 				elseif ($_GET['do'] == "del")
-					sql_query ("DELETE FROM chronicle where id = '".$id."'") or sqlerr(__FILE__, __LINE__);
+					\App\Repositories\LogRepository::deleteChronicle($id);
 				elseif (isset($_GET['do']) && $_GET['do'] == "edit")
 					edititem($lang_log['text_edit_chronicle'],'chronicle', $id);
 				}
 		}
 
-		$res = sql_query("SELECT COUNT(*) FROM chronicle".$wherea);
-		$row = mysql_fetch_array($res);
-		$count = $row[0];
+		$count = \App\Repositories\LogRepository::countChronicle($q);
 
 		$perpage = 50;
 
-		list($pagertop, $pagerbottom, $limit) = pager($perpage, $count, "log.php?action=chronicle&".$addparam);
-		$res = sql_query("SELECT id, added, txt FROM chronicle $wherea ORDER BY added DESC $limit") or sqlerr(__FILE__, __LINE__);
-		if (mysql_num_rows($res) == 0)
+		list($pagertop, $pagerbottom, $limit, $offset) = pager($perpage, $count, "log.php?action=chronicle&".$addparam);
+		$chronicleRows = \App\Repositories\LogRepository::getChronicle($q, (int)$offset, $perpage);
+		if (empty($chronicleRows))
 		print($lang_log['text_chronicle_empty']);
 		else
 		{
@@ -213,7 +192,7 @@ else {
 
 			print("<table width=940 border=1 cellspacing=0 cellpadding=5>\n");
 			print("<tr><td class=colhead align=center>".$lang_log['col_date']."</td><td class=colhead align=left>".$lang_log['col_event']."</td>".(user_can('chrmanage') ? "<td class=colhead align=center>".$lang_log['col_modify']."</td>" : "")."</tr>\n");
-			while ($arr = mysql_fetch_assoc($res))
+			foreach ($chronicleRows as $arr)
 			{
 				$date = gettime($arr['added'],true,false);
 				print("<tr><td class=rowfollow align=center><nobr>$date</nobr></td><td class=rowfollow align=left>".format_comment($arr["txt"],true,false,true)."</td>".(user_can('chrmanage') ? "<td align=center nowrap><b><a href=\"?action=chronicle&do=edit&id=".$arr["id"]."\">".$lang_log['text_edit']."</a>&nbsp;|&nbsp;<a href=\"?action=chronicle&do=del&id=".$arr["id"]."\"><font color=red>".$lang_log['text_delete']."</font></a></b></td>" : "")."</tr>\n");
@@ -229,39 +208,26 @@ else {
 		break;
 	case "news":
 		stdhead($lang_log['head_news']);
-		$query = mysql_real_escape_string($q);
 		$search = $_GET["search"] ?? '';
-		if($query){
-			switch ($search){
-				case "title": $wherea=" WHERE title LIKE '%$query%' "; break;
-				case "body": $wherea=" WHERE body LIKE '%$query%' "; break;
-				case "both": $wherea=" WHERE body LIKE '%$query%' or title LIKE '%$query%'" ; break;
-				}
-			$addparam = "search=".rawurlencode($search)."&query=".rawurlencode($query)."&";
-		}
-		else{
-		$wherea= "";
-		$addparam = "";
-		}
+		$addparam = $q ? "search=".rawurlencode($search)."&query=".rawurlencode($q)."&" : "";
 		logmenu("news");
 		$opt = array ('title' => $lang_log['text_title'], 'body' => $lang_log['text_body'], 'both' => $lang_log['text_both']);
 		searchtable($lang_log['text_search_news'], 'news', $opt);
 
-		$res = sql_query("SELECT COUNT(*) FROM news".$wherea);
-		$row = mysql_fetch_array($res);
-		$count = $row[0];
+		$filters = ['search' => $search, 'query' => $q];
+		$count = \App\Repositories\LogRepository::countNews($filters);
 
 		$perpage = 20;
 
-		list($pagertop, $pagerbottom, $limit) = pager($perpage, $count, "log.php?action=news&".$addparam);
-		$res = sql_query("SELECT id, added, body, title FROM news $wherea ORDER BY added DESC $limit") or sqlerr(__FILE__, __LINE__);
-		if (mysql_num_rows($res) == 0)
+		list($pagertop, $pagerbottom, $limit, $offset) = pager($perpage, $count, "log.php?action=news&".$addparam);
+		$newsRows = \App\Repositories\LogRepository::getNews($filters, (int)$offset, $perpage);
+		if (empty($newsRows))
 		print($lang_log['text_news_empty']);
 		else
 		{
 
 		//echo $pagertop;
-			while ($arr = mysql_fetch_assoc($res)){
+			foreach ($newsRows as $arr){
 				$date = gettime($arr['added'],true,false);
 			print("<table width=940 border=1 cellspacing=0 cellpadding=5>\n");
 			print("<tr><td class=rowhead width='10%'>".$lang_log['col_title']."</td><td class=rowfollow align=left>".$arr["title"]."</td></tr><tr><td class=rowhead width='10%'>".$lang_log['col_date']."</td><td class=rowfollow align=left>".$date."</td></tr><tr><td class=rowhead width='10%'>".$lang_log['col_body']."</td><td class=rowfollow align=left>".format_comment($arr["body"],false,false,true)."</td></tr>\n");
@@ -291,8 +257,7 @@ else {
     		stderr($lang_log['std_delete_poll'],$lang_log['std_delete_poll_confirmation'] .
     		"<a href=?action=poll&do=delete&pollid=$pollid&returnto=$returnto&sure=1>".$lang_log['std_here_if_sure'],false);
 
-		sql_query("DELETE FROM pollanswers WHERE pollid = $pollid") or sqlerr();
-		sql_query("DELETE FROM polls WHERE id = $pollid") or sqlerr();
+		\App\Repositories\LogRepository::deletePoll($pollid);
 		$Cache->delete_value('current_poll_content');
 		$Cache->delete_value('current_poll_result', true);
 		if ($returnto == "main")
@@ -302,12 +267,10 @@ else {
 		die;
   }
 
-  $rows = sql_query("SELECT COUNT(*) FROM polls") or sqlerr();
-  $row = mysql_fetch_row($rows);
-  $pollcount = $row[0];
+  $pollcount = \App\Repositories\LogRepository::getPollCount();
   if ($pollcount == 0)
   	stderr($lang_log['std_sorry'], $lang_log['std_no_polls']);
-  $polls = sql_query("SELECT * FROM polls ORDER BY id DESC LIMIT 1," . ($pollcount - 1 )) or sqlerr();
+  $polls = \App\Repositories\LogRepository::getPollsExceptFirst();
   stdhead($lang_log['head_previous_polls']);
   		logmenu("poll");
   		print("<table border=1 cellspacing=0 width=940 cellpadding=5>\n");
@@ -320,7 +283,7 @@ else {
       return 0;
     }
 
-  while ($poll = mysql_fetch_assoc($polls))
+  foreach ($polls as $poll)
   {
     $o = array($poll["option0"], $poll["option1"], $poll["option2"], $poll["option3"], $poll["option4"],
     $poll["option5"], $poll["option6"], $poll["option7"], $poll["option8"], $poll["option9"],
@@ -336,11 +299,11 @@ else {
 
     if (user_can('pollmanage'))
     {
-    	print(" - [<a href=makepoll.php?action=edit&pollid=$poll[id]><b>".$lang_log['text_edit']."</b></a>]\n");
-			print(" - [<a href=?action=poll&do=delete&pollid=$poll[id]><b>".$lang_log['text_delete']."</b></a>]\n");
+    	print(" - [<a href=makepoll.php?action=edit&pollid={$poll['id']}><b>".$lang_log['text_edit']."</b></a>]\n");
+			print(" - [<a href=?action=poll&do=delete&pollid={$poll['id']}><b>".$lang_log['text_delete']."</b></a>]\n");
 		}
 
-		print("<a name=$poll[id]>");
+		print("<a name={$poll['id']}>");
 
 		print("</p>\n");
 
@@ -348,25 +311,12 @@ else {
 
     print("<p align=center><b>" . $poll["question"] . "</b></p>");
 
-    $pollanswers = sql_query("SELECT selection FROM pollanswers WHERE pollid=" . $poll["id"] . " AND  selection < 20") or sqlerr();
+    $vs = \App\Repositories\LogRepository::getPollVoteCounts((int)$poll['id']);
 
-    $tvotes = mysql_num_rows($pollanswers);
+    $tvotes = array_sum($vs);
 
-    $vs = array(); // count for each option ([0]..[19])
     $os = array(); // votes and options: array(array(123, "Option 1"), array(45, "Option 2"))
 
-    // Count votes
-    while ($pollanswer = mysql_fetch_row($pollanswers)) {
-    	if (isset($pollanswer[0])) {
-    		if (!isset($vs[$pollanswer[0]])) {
-				$vs[$pollanswer[0]] = 0;
-			}
-			$vs[$pollanswer[0]] += 1;
-		}
-	}
-
-
-    reset($o);
     for ($i = 0; $i < count($o); ++$i)
 		if ($o[$i])
 			$os[$i] = array($vs[$i] ?? 0, $o[$i]);

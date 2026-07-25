@@ -58,43 +58,7 @@ function format_quotes($s)
 
 function print_attachment($dlkey, $enableimage = true, $imageresizer = true)
 {
-	$httpdirectory_attachment = get_setting('attachment.httpdirectory');
-	if (strlen($dlkey) == 32) {
-		if (!$row = \Nexus\Database\NexusDB::cache_get('attachment_'.$dlkey.'_content')) {
-			$res = sql_query("SELECT * FROM attachments WHERE dlkey=".sqlesc($dlkey)." LIMIT 1") or sqlerr(__FILE__,__LINE__);
-			$row = mysql_fetch_array($res);
-			\Nexus\Database\NexusDB::cache_put('attachment_'.$dlkey.'_content', $row, 86400);
-		}
-	}
-	if (!$row) {
-		return "<div style=\"text-decoration: line-through; font-size: 7pt\">".nexus_trans('attachment.text_key').$dlkey.nexus_trans('attachment.not_found')."</div>";
-	}
-
-	$driver = $row['driver'] ?? 'local';
-	if ($driver == "local") {
-		if ($row['thumb'] == 1) {
-			$url = $httpdirectory_attachment."/".$row['location'].".thumb.jpg";
-		} else {
-			$url = $httpdirectory_attachment."/".$row['location'];
-		}
-	} else {
-		$url = \Nexus\Attachment\Storage::getDriver($driver)->getImageUrl($row['location']);
-	}
-	do_log(sprintf("driver: %s, location: %s, url: %s", $driver, $row['location'], $url));
-
-	return \App\Support\Attachment::render(
-		$row,
-		$dlkey,
-		(bool) $enableimage,
-		(bool) $imageresizer,
-		(string) $url,
-		mksize($row['filesize']),
-		gettime($row['added']),
-		[
-			'size' => nexus_trans('attachment.size'),
-			'downloads' => nexus_trans('attachment.downloads'),
-		]
-	);
+	return \App\Support\Attachment::renderByKey((string) $dlkey, (bool) $enableimage, (bool) $imageresizer);
 }
 function addTempCode($value) {
 	return \App\Support\Comment::addTempCode((string) $value);
@@ -418,22 +382,7 @@ function safe_email($email) {
 }
 
 function check_email ($email) {
-	if (!\App\Support\Email::isWellFormed((string) $email)) {
-		return false;
-	}
-	$bannedEmails = \Nexus\Database\NexusDB::select('select * from bannedemails');
-	$bannedValue = $bannedEmails[0]['value'] ?? '';
-	if (\App\Support\Email::matchesSuffixList((string) $email, (string) $bannedValue)) {
-		$bannedEmailsArr = array_filter(preg_split('/[\s]+/', $bannedValue));
-		foreach ($bannedEmailsArr as $ban) {
-			if (str_ends_with((string) $email, (string) $ban)) {
-				do_log("[BANNED_EMAIL] email: $email is banned by record: $ban");
-				break;
-			}
-		}
-		return false;
-	}
-	return true;
+	return \App\Support\Email::check((string) $email);
 }
 
 function sent_mail($to,$fromname,$fromemail,$subject,$body,$type = "confirmation",$showmsg=true,$multiple=false,$multiplemail='',$hdr_encoding = 'UTF-8', $specialcase = '') {
@@ -527,20 +476,11 @@ function get_ip_location($ip)
 {
 	global $lang_functions;
 
-	static $locations;
-	if (isset($locations[$ip])) {
-		return $locations[$ip];
-	}
-
-	$geoName = get_ip_location_from_geoip($ip)['name'] ?? null;
-	$result = \App\Support\Network::ipLocationLabels(
-		$geoName,
-		$ip,
-		$lang_functions['text_unknown'] ?? '',
-		$lang_functions['text_user_ip'] ?? 'User IP'
+	return \App\Support\Network::ipLocation(
+		(string) $ip,
+		(string) ($lang_functions['text_unknown'] ?? ''),
+		(string) ($lang_functions['text_user_ip'] ?? 'User IP')
 	);
-
-	return $locations[$ip] = $result;
 }
 
 function in_ip_range($long, $targetip, $ip_one, $ip_two=false) {
@@ -555,20 +495,17 @@ function validip_format($ip)
 
 function maxslots () {
 	global $lang_functions, $CURUSER, $maxdlsystem;
-	$max = \App\Support\Slots::maxDownloadSlots((float) $CURUSER["uploaded"], (float) $CURUSER["downloaded"]);
-	if ($maxdlsystem == "yes") {
-		if (get_user_class() < UC_VIP) {
-			if ($max > 0)
-				print ("<font class='color_slots'>".$lang_functions['text_slots']."</font><a href='faq.php#id215'>$max</a>");
-			else
-				print ("<font class='color_slots'>".$lang_functions['text_slots']."</font>".$lang_functions['text_unlimited']);
-		} else {
-			print ("<font class='color_slots'>".$lang_functions['text_slots']."</font>".$lang_functions['text_unlimited']);
-		}
-	} else {
-		print ("<font class='color_slots'>".$lang_functions['text_slots']."</font>".$lang_functions['text_unlimited']);
-	}
+	echo \App\Support\Slots::display(
+		(float) $CURUSER["uploaded"],
+		(float) $CURUSER["downloaded"],
+		(string) $maxdlsystem,
+		(int) \get_user_class(),
+		(int) UC_VIP,
+		(string) ($lang_functions['text_slots'] ?? ''),
+		(string) ($lang_functions['text_unlimited'] ?? '')
+	);
 }
+
 
 
 function dbconn($autoclean = false, $doLogin = true)
@@ -702,20 +639,9 @@ function get_style_addicode()
 
 function get_cat_folder($cat = 101)
 {
-	static $catPath = array();
-	if (!isset($catPath[$cat])) {
-		global $CURUSER, $CURLANGDIR;
-        $catrow = get_category_row($cat);
-		$catmode = $catrow['catmodename'];
-		$caticonrow = get_category_icon_row($catrow['icon_id'] ?: 1);
-		$catPath[$cat] = \App\Support\Path::categoryFolder(
-			$catmode,
-			$caticonrow['folder'],
-			($caticonrow['multilang'] ?? '') == 'yes',
-			$CURLANGDIR
-		);
-	}
-	return $catPath[$cat];
+	global $CURLANGDIR;
+
+	return \App\Support\Path::categoryFolderForId($cat, (string) $CURLANGDIR);
 }
 
 function get_style_highlight()
@@ -1122,18 +1048,7 @@ function get_searchbox_value($mode = 1, $item = 'showsubcat'){
 }
 
 function get_ratio($userid, $html = true){
-	$row = get_user_row($userid);
-    if (empty($row)) {
-        return "---";
-    }
-	$uped = (float)($row['uploaded'] ?? 0);
-	$downed = (float)($row['downloaded'] ?? 0);
-
-	if ($html) {
-		return \App\Support\Ratio::userRatioHtml($uped, $downed, nexus_trans("label.ratio"), nexus_trans("label.infinite"));
-	}
-
-	return \App\Support\Ratio::userRatioNumeric($uped, $downed);
+	return \App\Support\Ratio::forUserId($userid, (bool) $html);
 }
 
 function add_s($num, $es = false)

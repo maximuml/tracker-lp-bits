@@ -70,6 +70,69 @@ final class Attachment
     }
 
     /**
+     * Fetch an attachment row by dlkey (with one-hour file cache) and
+     * return the public URL for its content/thumbnail.
+     */
+    public static function rowAndUrlByKey(string $dlkey): array
+    {
+        $httpdirectory = \get_setting('attachment.httpdirectory');
+        $row = \Nexus\Database\NexusDB::cache_get('attachment_' . $dlkey . '_content');
+
+        if (empty($row) && strlen($dlkey) == 32) {
+            $result = \Nexus\Database\NexusDB::select('SELECT * FROM attachments WHERE dlkey = ' . \sqlesc($dlkey) . ' LIMIT 1');
+            $row = $result[0] ?? null;
+            \Nexus\Database\NexusDB::cache_put('attachment_' . $dlkey . '_content', $row, 86400);
+        }
+
+        if (empty($row)) {
+            return [null, ''];
+        }
+
+        $driver = $row['driver'] ?? 'local';
+        if ($driver == 'local') {
+            if (($row['thumb'] ?? 0) == 1) {
+                $url = $httpdirectory . '/' . $row['location'] . '.thumb.jpg';
+            } else {
+                $url = $httpdirectory . '/' . $row['location'];
+            }
+        } else {
+            $url = \Nexus\Attachment\Storage::getDriver($driver)->getImageUrl($row['location']);
+        }
+
+        \do_log(sprintf('driver: %s, location: %s, url: %s', $driver, $row['location'], $url));
+
+        return [$row, $url];
+    }
+
+    /**
+     * Full `print_attachment()` flow: lookup by dlkey, build the public
+     * URL and render the HTML fragment. Returns a not-found marker when
+     * the key is invalid.
+     */
+    public static function renderByKey(string $dlkey, bool $enableImage = true, bool $imageResizer = true): string
+    {
+        [$row, $url] = self::rowAndUrlByKey($dlkey);
+
+        if (empty($row)) {
+            return '<div style="text-decoration: line-through; font-size: 7pt">' . \nexus_trans('attachment.text_key') . $dlkey . \nexus_trans('attachment.not_found') . '</div>';
+        }
+
+        return self::render(
+            $row,
+            $dlkey,
+            $enableImage,
+            $imageResizer,
+            $url,
+            \mksize($row['filesize']),
+            \gettime($row['added']),
+            [
+                'size' => \nexus_trans('attachment.size'),
+                'downloads' => \nexus_trans('attachment.downloads'),
+            ]
+        );
+    }
+
+    /**
      * Extract the storage key from an attachment URL.
      *
      * Mirrors `attachmentKey()`.

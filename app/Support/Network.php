@@ -182,4 +182,25 @@ final class Network
             'continent_en' => $locationInfo['continent_en'],
         ];
     }
+
+    /**
+     * Resolve an IP to a two-element location label array, with an
+     * in-request static cache.
+     *
+     * Mirrors `get_ip_location()`.
+     *
+     * @return array{0:string,1:string}
+     */
+    public static function ipLocation(string $ip, string $unknownLabel, string $userIpLabel): array
+    {
+        static $locations = [];
+
+        if (isset($locations[$ip])) {
+            return $locations[$ip];
+        }
+
+        $geoName = self::geoIpInfo($ip)['name'] ?? null;
+
+        return $locations[$ip] = self::ipLocationLabels($geoName, $ip, $unknownLabel, $userIpLabel);
+    }
 }

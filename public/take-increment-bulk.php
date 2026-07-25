@@ -11,7 +11,7 @@ if (get_user_class() < UC_SYSOP)
 
 $validTypeMap = $lang_incrementbulk['types'];
 $sender_id = ($_POST['sender'] == 'system' ? 0 : (int)$CURUSER['id']);
-$dt = sqlesc(date("Y-m-d H:i:s"));
+$added = date("Y-m-d H:i:s");
 $msg = trim($_POST['msg']);
 $amount = $_POST['amount'];
 $type = $_POST['type'] ?? '';
@@ -23,7 +23,7 @@ if (!isset($validTypeMap[$type])) {
     stderr("Error","Invalid type");
 }
 if ($type == 'uploaded') {
-    $amount = sqlesc(getsize_int($amount,"G"));
+    $amount = getsize_int($amount,"G");
 }
 $isTypeTmpInvite = $type == 'tmp_invites';
 $subject = trim($_POST['subject']);
@@ -47,13 +47,25 @@ if ($isTypeTmpInvite) {
 }
 $whereStr = implode(' OR ', $conditions);
 while (true) {
-    $msgValues = $idArr = [];
+    $msgRows = $idArr = [];
     $offset = ($page - 1) * $size;
-    $query = sql_query("SELECT id FROM users WHERE ($whereStr) and `enabled` = 'yes' and `status` = 'confirmed' limit $offset, $size");
-    while($dat=mysql_fetch_assoc($query))
-    {
-        $idArr[] = $dat['id'];
-        $msgValues[] = sprintf('(%s, %s, %s, %s, %s)', $sender_id, $dat['id'], $dt, sqlesc($subject), sqlesc($msg));
+    $users = \Nexus\Database\NexusDB::table('users')
+        ->whereRaw("($whereStr)")
+        ->where('enabled', 'yes')
+        ->where('status', 'confirmed')
+        ->offset($offset)
+        ->limit($size)
+        ->get(['id']);
+    foreach ($users as $userRow) {
+        $id = $userRow->id;
+        $idArr[] = $id;
+        $msgRows[] = [
+            'sender' => $sender_id,
+            'receiver' => $id,
+            'added' => $added,
+            'subject' => $subject,
+            'msg' => $msg,
+        ];
     }
     if (empty($idArr)) {
         break;
@@ -69,10 +81,11 @@ while (true) {
         $output = executeCommand($command, 'string', true);
         do_log(sprintf('command: %s, output: %s', $command, $output));
     } else {
-        sql_query("UPDATE users SET $type = $type + $amount WHERE id in ($idStr)");
+        \Nexus\Database\NexusDB::table('users')->whereIn('id', $idArr)->increment($type, $amount);
     }
-    $sql = "INSERT INTO messages (sender, receiver, added,  subject, msg) VALUES " . implode(', ', $msgValues);
-    sql_query($sql);
+    if (!empty($msgRows)) {
+        \Nexus\Database\NexusDB::table('messages')->insert($msgRows);
+    }
     $page++;
 }
 

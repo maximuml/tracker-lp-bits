@@ -14,8 +14,9 @@ $redis = $Cache->getRedis();
 $passkeyInvalidKey = "passkey_invalid";
 // check passkey
 if (!$az = $Cache->get_value('user_passkey_'.$passkey.'_content')){
-    $res = sql_query("SELECT id, username, downloadpos, enabled, uploaded, downloaded, class, parked, clientselect, showclienterror, passkey, donor, donoruntil, seedbonus, tracker_url_id FROM users WHERE passkey=". sqlesc($passkey)." LIMIT 1");
-    $az = mysql_fetch_array($res);
+    $az = (array) \Nexus\Database\NexusDB::table('users')
+        ->where('passkey', $passkey)
+        ->first(['id', 'username', 'downloadpos', 'enabled', 'uploaded', 'downloaded', 'class', 'parked', 'clientselect', 'showclienterror', 'passkey', 'donor', 'donoruntil', 'seedbonus', 'tracker_url_id']);
     do_log("[check passkey], currentUser: " . nexus_json_encode($az));
     $Cache->cache_value('user_passkey_'.$passkey.'_content', $az, 3600);
 }
@@ -39,11 +40,8 @@ $fields = "info_hash, times_completed, seeders, leechers";
 
 if (count($info_hash_array[1]) < 1) {
     warn("Require info_hash.", 86400);
-//	$query = "SELECT $fields FROM torrents ORDER BY id";
 }
-else {
-	$query = "SELECT $fields FROM torrents WHERE " . hash_where_arr('info_hash', $info_hash_array[1]);
-}
+$infoHashes = array_map('urldecode', $info_hash_array[1]);
 
 $cacheKey = md5(http_build_query($info_hash_array[1]));
 $cacheData = \Nexus\Database\NexusDB::cache_get($cacheKey);
@@ -53,14 +51,19 @@ if ($cacheData) {
     exit(0);
 }
 
-$res = sql_query($query);
+$torrentRows = \Nexus\Database\NexusDB::table('torrents')
+    ->when(!empty($infoHashes), function ($q) use ($infoHashes) {
+        $q->whereIn('info_hash', $infoHashes);
+    })
+    ->get(['info_hash', 'times_completed', 'seeders', 'leechers']);
 
-if (mysql_num_rows($res) < 1){
+if ($torrentRows->isEmpty()){
     warn("Torrent not registered with this tracker.", 86400);
 }
 
 $torrent_details = [];
-while ($row = mysql_fetch_assoc($res)) {
+foreach ($torrentRows as $torrentRow) {
+    $row = (array) $torrentRow;
     $torrent_details[$row['info_hash']] = [
         'complete' => (int)$row['seeders'],
         'downloaded' => (int)$row['times_completed'],

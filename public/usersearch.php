@@ -247,6 +247,10 @@ function haswildcard($text){
   	return True;
 }
 
+function nexus_quote($s) {
+	return "'" . \Nexus\Database\NexusDB::getInstance()->escapeString($s) . "'";
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 $q = '';
 if (count($_GET) > 0 && !$_GET['h'])
@@ -272,11 +276,11 @@ if (count($_GET) > 0 && !$_GET['h'])
 	    foreach($names_inc as $name)
 	    {
       	if (!haswildcard($name))
-	        $name_is .= (isset($name_is)?" OR ":"")."u.username = ".sqlesc($name);
+	        $name_is .= (isset($name_is)?" OR ":"")."u.username = ".nexus_quote($name);
 	      else
 	      {
 	        $name = str_replace(array('?','*'), array('_','%'), $name);
-	        $name_is .= (isset($name_is)?" OR ":"")."u.username LIKE ".sqlesc($name);
+	        $name_is .= (isset($name_is)?" OR ":"")."u.username LIKE ".nexus_quote($name);
 	      }
 	    }
       $where_is .= $name_is.")";
@@ -289,11 +293,11 @@ if (count($_GET) > 0 && !$_GET['h'])
 	    foreach($names_exc as $name)
 	    {
 	    	if (!haswildcard($name))
-	      	$name_is .= (isset($name_is)?" OR ":"")."u.username = ".sqlesc($name);
+	      	$name_is .= (isset($name_is)?" OR ":"")."u.username = ".nexus_quote($name);
 	      else
 	      {
 	      	$name = str_replace(array('?','*'), array('_','%'), $name);
-	        $name_is .= (isset($name_is)?" OR ":"")."u.username LIKE ".sqlesc($name);
+	        $name_is .= (isset($name_is)?" OR ":"")."u.username LIKE ".nexus_quote($name);
 	      }
 	    }
       $where_is .= $name_is.")";
@@ -317,12 +321,12 @@ if (count($_GET) > 0 && !$_GET['h'])
 	        stdfoot();
 	      	die();
 	      }
-	      $email_is .= (isset($email_is)?" OR ":"")."u.email =".sqlesc($email);
+	      $email_is .= (isset($email_is)?" OR ":"")."u.email =".nexus_quote($email);
       }
       else
       {
 	    	$sql_email = str_replace(array('?','*'), array('_','%'), $email);
-	      $email_is .= (isset($email_is)?" OR ":"")."u.email LIKE ".sqlesc($sql_email);
+	      $email_is .= (isset($email_is)?" OR ":"")."u.email LIKE ".nexus_quote($sql_email);
 	    }
     }
 		$where_is .= $email_is.")";
@@ -456,11 +460,11 @@ if (count($_GET) > 0 && !$_GET['h'])
 	    foreach($comments_inc as $comment)
 	    {
 	    	if (!haswildcard($comment))
-		    	$comment_is .= (isset($comment_is)?" OR ":"")."u.modcomment LIKE ".sqlesc("%".$comment."%");
+		    	$comment_is .= (isset($comment_is)?" OR ":"")."u.modcomment LIKE ".nexus_quote("%".$comment."%");
         else
         {
 	      	$comment = str_replace(array('?','*'), array('_','%'), $comment);
-	        $comment_is .= (isset($comment_is)?" OR ":"")."u.modcomment LIKE ".sqlesc($comment);
+	        $comment_is .= (isset($comment_is)?" OR ":"")."u.modcomment LIKE ".nexus_quote($comment);
         }
       }
       $where_is .= $comment_is.")";
@@ -473,11 +477,11 @@ if (count($_GET) > 0 && !$_GET['h'])
 	    foreach($comments_exc as $comment)
 	    {
 	    	if (!haswildcard($comment))
-		    	$comment_is .= (isset($comment_is)?" OR ":"")."u.modcomment LIKE ".sqlesc("%".$comment."%");
+		    	$comment_is .= (isset($comment_is)?" OR ":"")."u.modcomment LIKE ".nexus_quote("%".$comment."%");
         else
         {
 	      	$comment = str_replace(array('?','*'), array('_','%'), $comment);
-	        $comment_is .= (isset($comment_is)?" OR ":"")."u.modcomment LIKE ".sqlesc($comment);
+	        $comment_is .= (isset($comment_is)?" OR ":"")."u.modcomment LIKE ".nexus_quote($comment);
 	      }
       }
       $where_is .= $comment_is.")";
@@ -732,7 +736,7 @@ if (count($_GET) > 0 && !$_GET['h'])
   $from_is = "users AS u".$join_is;
   $distinct = isset($distinct)?$distinct:"";
 
-  $queryc = "SELECT COUNT(".$distinct."u.id) FROM ".$from_is.
+  $queryc = "SELECT COUNT(".$distinct."u.id) AS count FROM ".$from_is.
   		(($where_is == "")?"":" WHERE $where_is ");
 
   $querypm = "FROM ".$from_is.(($where_is == "")?" ":" WHERE $where_is ");
@@ -742,9 +746,9 @@ if (count($_GET) > 0 && !$_GET['h'])
 
   $query = "SELECT ".$distinct." ".$select_is." ".$querypm;
 
-  $res = sql_query($queryc) or sqlerr();
-  $arr = mysql_fetch_row($res);
-  $count = $arr[0];
+  $res = \Nexus\Database\NexusDB::select($queryc);
+  $arr = (array) $res[0];
+  $count = $arr['count'] ?? 0;
 
   $q = isset($q)?($q."&"):"";
 
@@ -754,9 +758,9 @@ if (count($_GET) > 0 && !$_GET['h'])
 
   $query .= $limit;
 
-  $res = sql_query($query) or sqlerr();
+  $res = \Nexus\Database\NexusDB::select($query);
 
-  if (mysql_num_rows($res) == 0)
+  if (count($res) == 0)
   	stdmsg("Warning","No user was found.");
   else
   {
@@ -775,8 +779,7 @@ if (count($_GET) > 0 && !$_GET['h'])
         "<td class=colhead>pUL</td>".
         "<td class=colhead>pDL</td>".
         "<td class=colhead>History</td></tr>";
-    while ($user = mysql_fetch_array($res))
-    {
+    foreach ($res as $user) { $user = (array) $user;
     	if ($user['added'] == '0000-00-00 00:00:00' || $user['added'] == null)
       	$user['added'] = '---';
       if ($user['last_access'] == '0000-00-00 00:00:00' || $user['last_access'] == null)
@@ -786,33 +789,33 @@ if (count($_GET) > 0 && !$_GET['h'])
           $ipstr = $user['ip'];
           if (filter_var($user['ip'], FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
               $nip = ip2long($user['ip']);
-              $auxres = sql_query("SELECT COUNT(*) FROM bans WHERE $nip >= first AND $nip <= last") or sqlerr(__FILE__, __LINE__);
-              $array = mysql_fetch_row($auxres);
-              if ($array[0] > 0) {
+              $auxres = \Nexus\Database\NexusDB::select("SELECT COUNT(*) AS count FROM bans WHERE $nip >= first AND $nip <= last");
+              $array = (array) $auxres[0];
+              if ($array['count'] > 0) {
                   $ipstr = "<a href='testip.php?ip=" . $user['ip'] . "'><font color='#FF0000'><b>" . $user['ip'] . "</b></font></a>";
               }
           }
       } else {
           $ipstr = "---";
       }
-      $auxres = sql_query("SELECT SUM(uploaded) AS pul, SUM(downloaded) AS pdl FROM peers WHERE userid = " . $user['id']) or sqlerr(__FILE__, __LINE__);
-      $array = mysql_fetch_array($auxres);
+      $auxres = \Nexus\Database\NexusDB::select("SELECT SUM(uploaded) AS pul, SUM(downloaded) AS pdl FROM peers WHERE userid = " . $user['id']);
+      $array = (array) $auxres[0];
 
       $pul = $array['pul'];
       $pdl = $array['pdl'];
 
-      $auxres = sql_query("SELECT COUNT(DISTINCT p.id) FROM posts AS p LEFT JOIN topics as t ON p.topicid = t.id
+      $auxres = \Nexus\Database\NexusDB::select("SELECT COUNT(DISTINCT p.id) AS count FROM posts AS p LEFT JOIN topics as t ON p.topicid = t.id
       	LEFT JOIN forums AS f ON t.forumid = f.id WHERE p.userid = " . $user['id'] . " AND f.minclassread <= " .
-      	$CURUSER['class']) or sqlerr(__FILE__, __LINE__);
+      	$CURUSER['class']);
 
-      $n = mysql_fetch_row($auxres);
-      $n_posts = $n[0];
+      $n = (array) $auxres[0];
+      $n_posts = $n['count'];
 
-      $auxres = sql_query("SELECT COUNT(id) FROM comments WHERE user = ".$user['id']) or sqlerr(__FILE__, __LINE__);
+      $auxres = \Nexus\Database\NexusDB::select("SELECT COUNT(id) AS count FROM comments WHERE user = ".$user['id']);
 			// Use LEFT JOIN to exclude orphan comments
       // $auxres = sql_query("SELECT COUNT(c.id) FROM comments AS c LEFT JOIN torrents as t ON c.torrent = t.id WHERE c.user = '".$user['id']."'") or sqlerr(__FILE__, __LINE__);
-      $n = mysql_fetch_row($auxres);
-      $n_comments = $n[0];
+      $n = (array) $auxres[0];
+      $n_comments = $n['count'];
 
     	echo "<tr><td>" .
       		get_username($user['id']) . "</td>" .

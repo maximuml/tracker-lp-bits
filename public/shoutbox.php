@@ -8,7 +8,7 @@ if (isset($_GET['del']))
 	{
 		if(user_can('sbmanage'))
 		{
-			sql_query("DELETE FROM shoutbox WHERE id=".mysql_real_escape_string($_GET['del']));
+			\Nexus\Database\NexusDB::table('shoutbox')->where('id', (int)$_GET['del'])->delete();
 		}
 	}
 }
@@ -256,7 +256,7 @@ else
 			$type ='hb';
 		else $type = 'sb';
 	}
-	$date=sqlesc(time());
+	$date=time();
 	$text=trim($_GET["shbox_text"]);
     if (isset($userid) && $userid > 0) {
         $lock = new \Nexus\Database\NexusLock("shoutbox:$userid", 60);
@@ -266,21 +266,25 @@ else
     if (!$lock->acquire()) {
         die($lang_shoutbox['speaking_too_often']);
     }
-	sql_query("INSERT INTO shoutbox (userid, date, text, type) VALUES (" . sqlesc($userid) . ", $date, " . sqlesc($text) . ", ".sqlesc($type).")") or sqlerr(__FILE__, __LINE__);
+	\Nexus\Database\NexusDB::table('shoutbox')->insert([
+	    'userid' => $userid,
+	    'date' => $date,
+	    'text' => $text,
+	    'type' => $type,
+	]);
 	print "<script type=\"text/javascript\">parent.document.forms['shbox'].shbox_text.value='';</script>";
 }
 }
 
 $limit = ($CURUSER['sbnum'] ?? 70);
+$query = \Nexus\Database\NexusDB::table('shoutbox')->orderByDesc('date')->limit($limit);
 if ($where == "helpbox" && $showhelpbox_main == 'yes') {
     //request helpbox, not require login
-    $sql = "SELECT * FROM shoutbox WHERE type='hb' ORDER BY date DESC LIMIT ".$limit;
+    $query->where('type', 'hb');
 } elseif ($where == "shoutbox" && isset($CURUSER) && ($CURUSER['hidehb'] == 'yes' || $showhelpbox_main != 'yes')) {
     //request shoutbox, exclude helpbox content, require login
-    $sql = "SELECT * FROM shoutbox WHERE type='sb' ORDER BY date DESC LIMIT ".$limit;
-} elseif (isset($CURUSER)) {
-    $sql = "SELECT * FROM shoutbox ORDER BY date DESC LIMIT ".$limit;
-} else {
+    $query->where('type', 'sb');
+} elseif (!isset($CURUSER)) {
     die("<h1>".$lang_shoutbox['std_access_denied']."</h1>"."<p>".$lang_shoutbox['std_access_denied_note']."</p></body></html>");
 }
 /**
@@ -336,8 +340,7 @@ function shoutbox_render_torrents($html)
 				return $m[0];
 			}
 			if (!array_key_exists($id, $cache)) {
-				$res = sql_query("SELECT id FROM torrents WHERE id=" . $id . " LIMIT 1");
-				$cache[$id] = ($res && mysql_fetch_assoc($res));
+				$cache[$id] = \App\Models\Torrent::query()->where('id', $id)->exists();
 			}
 			if (!$cache[$id]) {
 				return $m[0];
@@ -375,9 +378,8 @@ function shoutbox_render_mentions($html, &$mentionsMe = false)
 			}
 			$key = strtolower($nick);
 			if (!array_key_exists($key, $cache)) {
-				$res = sql_query("SELECT id, username FROM users WHERE LOWER(username) = LOWER(" . sqlesc($nick) . ") LIMIT 1");
-				$row = $res ? mysql_fetch_assoc($res) : false;
-				$cache[$key] = $row ? ['id' => (int)$row['id'], 'name' => $row['username']] : false;
+				$row = \Nexus\Database\NexusDB::table('users')->whereRaw('LOWER(username) = LOWER(?)', [$nick])->first(['id', 'username']);
+				$cache[$key] = $row ? ['id' => (int)$row->id, 'name' => $row->username] : false;
 			}
 			if (!$cache[$key]) {
 				return $m[0];
@@ -405,11 +407,12 @@ function shoutbox_render_mentions($html, &$mentionsMe = false)
 	);
 }
 
-$res = sql_query($sql) or sqlerr(__FILE__, __LINE__);
-if (mysql_num_rows($res) == 0)
+$rows = $query->get();
+if ($rows->isEmpty())
 print("\n");
 else
 {
+	$rows = $rows->map(fn ($r) => (array) $r);
 	$showAvatars = isset($CURUSER['avatars']) && $CURUSER['avatars'] === 'yes';
 	$tooltipAvatar = $lang_shoutbox['tooltip_avatar'] ?? 'Open profile';
 	$tooltipReply = $lang_shoutbox['tooltip_nick_reply'] ?? 'Reply via @';
@@ -426,8 +429,9 @@ else
 	}
 	print("<table border='0' cellspacing='0' cellpadding='2' width='100%' align='left'>\n");
 
-	while ($arr = mysql_fetch_assoc($res))
+	foreach ($rows as $arr)
 	{
+		$arr = (array) $arr;
 		$currUserId = (int)$arr["userid"];
 		$currDate = (int)$arr["date"];
 		// Iteration is DESC (newest first), so the previous row is newer in time.

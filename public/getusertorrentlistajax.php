@@ -18,7 +18,7 @@ if (!in_array($type,array('uploaded','seeding','leeching','completed','incomplet
 if(!user_can('torrenthistory') && $id != $CURUSER["id"])
     permissiondenied();
 
-function maketable($res, $mode = 'seeding')
+function maketable($rows, $mode = 'seeding')
 {
 	global $lang_getusertorrentlistajax,$CURUSER,$lang_functions, $id;
 	global $torrentRep, $seedBoxRep;
@@ -108,7 +108,8 @@ function maketable($res, $mode = 'seeding')
 	    $shouldShowClient = true;
     }
 	$results = $torrentIdArr = [];
-	while ($row = mysql_fetch_assoc($res)) {
+	foreach ($rows as $row) {
+	    $row = (array) $row;
 	    $results[] = $row;
 	    $torrentIdArr[] = $row['torrent'];
     }
@@ -217,87 +218,139 @@ function maketable($res, $mode = 'seeding')
 }
 $count = 0;
 $torrentlist = $pagertop = $pagerbottom = "";
+$query = null;
 switch ($type)
 {
 	case 'uploaded':
 	{
-//		$res = sql_query("SELECT torrents.id AS torrent, torrents.name as torrentname, seeders, leechers, anonymous, torrents.banned, torrents.approval_status, categories.name AS catname, categories.image, category, sp_state, size, torrents.hr, snatched.seedtime, snatched.uploaded FROM torrents LEFT JOIN snatched ON torrents.id = snatched.torrentid LEFT JOIN categories ON torrents.category = categories.id WHERE torrents.owner=$id AND snatched.userid=$id " . (($CURUSER["id"] != $id)?((get_user_class() < $viewanonymous_class) ? " AND anonymous = 'no'":""):"") ." ORDER BY torrents.added DESC") or sqlerr(__FILE__, __LINE__);
-//		$res = sql_query("SELECT torrents.id AS torrent, torrents.name as torrentname, seeders, leechers, anonymous, torrents.banned, torrents.approval_status, categories.name AS catname, categories.image, category, sp_state, size, torrents.hr, torrents.added FROM torrents LEFT JOIN categories ON torrents.category = categories.id WHERE torrents.owner=$id " . (($CURUSER["id"] != $id)?((!user_can('viewanonymous')) ? " AND anonymous = 'no'":""):"") ." ORDER BY torrents.id DESC") or sqlerr(__FILE__, __LINE__);
-		$fields = "torrents.id AS torrent, torrents.name as torrentname, seeders, leechers, anonymous, torrents.banned, torrents.approval_status, categories.name AS catname, categories.image, category, sp_state, size, torrents.hr, torrents.added,torrents.owner as userid, categories.mode as search_box_id";
-		$tableWhere = "torrents LEFT JOIN categories ON torrents.category = categories.id WHERE torrents.owner=$id";
+		$query = \Nexus\Database\NexusDB::table('torrents')
+		    ->leftJoin('categories', 'torrents.category', '=', 'categories.id')
+		    ->where('torrents.owner', $id)
+		    ->select([
+		        'torrents.id as torrent', 'torrents.name as torrentname', 'torrents.seeders', 'torrents.leechers',
+		        'torrents.anonymous', 'torrents.banned', 'torrents.approval_status', 'categories.name as catname',
+		        'categories.image', 'torrents.category', 'torrents.sp_state', 'torrents.size', 'torrents.hr',
+		        'torrents.added', 'torrents.owner as userid', 'categories.mode as search_box_id'
+		    ]);
 		if ($CURUSER['id'] != $id && !user_can('viewanonymous')) {
-		    $tableWhere .= " AND anonymous = 'no'";
+		    $query->where('torrents.anonymous', 'no');
         }
-		$order = "torrents.id DESC";
+		$query->orderByDesc('torrents.id');
 		break;
 	}
 
 	// Current Seeding
 	case 'seeding':
 	{
-//		$res = sql_query("SELECT torrent,added,snatched.uploaded,snatched.downloaded,torrents.name as torrentname, torrents.sp_state, torrents.banned, torrents.approval_status, categories.name as catname,size,torrents.hr,image,category,seeders,leechers FROM peers LEFT JOIN torrents ON peers.torrent = torrents.id LEFT JOIN categories ON torrents.category = categories.id LEFT JOIN snatched ON torrents.id = snatched.torrentid WHERE peers.userid=$id AND snatched.userid = $id AND peers.seeder='yes' ORDER BY torrents.id DESC") or sqlerr();
-		$fields = "torrent,added,snatched.uploaded,snatched.downloaded,snatched.seedtime,torrents.name as torrentname, torrents.sp_state, torrents.banned, torrents.approval_status, categories.name as catname,size,torrents.hr,image,category,seeders,leechers,snatched.userid, categories.mode as search_box_id, peers.peer_id, peers.agent, peers.port, peers.ipv4, peers.ipv6";
-		$tableWhere = "peers LEFT JOIN torrents ON peers.torrent = torrents.id LEFT JOIN categories ON torrents.category = categories.id LEFT JOIN snatched ON torrents.id = snatched.torrentid WHERE peers.userid=$id AND snatched.userid = $id AND peers.seeder='yes'";
-		$order = "peers.id DESC";
+		$query = \Nexus\Database\NexusDB::table('peers')
+		    ->leftJoin('torrents', 'peers.torrent', '=', 'torrents.id')
+		    ->leftJoin('categories', 'torrents.category', '=', 'categories.id')
+		    ->leftJoin('snatched', 'torrents.id', '=', 'snatched.torrentid')
+		    ->where('peers.userid', $id)
+		    ->where('snatched.userid', $id)
+		    ->where('peers.seeder', 'yes')
+		    ->select([
+		        'peers.torrent', 'peers.added', 'snatched.uploaded', 'snatched.downloaded', 'snatched.seedtime',
+		        'torrents.name as torrentname', 'torrents.sp_state', 'torrents.banned', 'torrents.approval_status',
+		        'categories.name as catname', 'torrents.size', 'torrents.hr', 'categories.image',
+		        'torrents.category', 'torrents.seeders', 'torrents.leechers', 'snatched.userid',
+		        'categories.mode as search_box_id', 'peers.peer_id', 'peers.agent', 'peers.port', 'peers.ipv4', 'peers.ipv6'
+		    ])
+		    ->orderByDesc('peers.id');
 		break;
 	}
 
 	// Current Leeching
 	case 'leeching':
 	{
-//		$res = sql_query("SELECT torrent,snatched.uploaded,snatched.downloaded,torrents.name as torrentname, torrents.sp_state, torrents.banned, torrents.approval_status, categories.name as catname,size,torrents.hr,image,category,seeders,leechers, torrents.added FROM peers LEFT JOIN torrents ON peers.torrent = torrents.id LEFT JOIN categories ON torrents.category = categories.id LEFT JOIN snatched ON torrents.id = snatched.torrentid WHERE peers.userid=$id AND snatched.userid = $id AND peers.seeder='no' ORDER BY torrents.id DESC") or sqlerr();
-		$fields = "torrent,snatched.uploaded,snatched.downloaded,snatched.seedtime,torrents.name as torrentname, torrents.sp_state, torrents.banned, torrents.approval_status, categories.name as catname,size,torrents.hr,image,category,seeders,leechers, torrents.added,snatched.userid, categories.mode as search_box_id, peers.peer_id, peers.agent, peers.port, peers.ipv4, peers.ipv6";
-		$tableWhere = "peers LEFT JOIN torrents ON peers.torrent = torrents.id LEFT JOIN categories ON torrents.category = categories.id LEFT JOIN snatched ON torrents.id = snatched.torrentid WHERE peers.userid=$id AND snatched.userid = $id AND peers.seeder='no'";
-        $order = "peers.id DESC";
+		$query = \Nexus\Database\NexusDB::table('peers')
+		    ->leftJoin('torrents', 'peers.torrent', '=', 'torrents.id')
+		    ->leftJoin('categories', 'torrents.category', '=', 'categories.id')
+		    ->leftJoin('snatched', 'torrents.id', '=', 'snatched.torrentid')
+		    ->where('peers.userid', $id)
+		    ->where('snatched.userid', $id)
+		    ->where('peers.seeder', 'no')
+		    ->select([
+		        'peers.torrent', 'snatched.uploaded', 'snatched.downloaded', 'snatched.seedtime',
+		        'torrents.name as torrentname', 'torrents.sp_state', 'torrents.banned', 'torrents.approval_status',
+		        'categories.name as catname', 'torrents.size', 'torrents.hr', 'categories.image',
+		        'torrents.category', 'torrents.seeders', 'torrents.leechers', 'torrents.added',
+		        'snatched.userid', 'categories.mode as search_box_id', 'peers.peer_id', 'peers.agent',
+		        'peers.port', 'peers.ipv4', 'peers.ipv6'
+		    ])
+		    ->orderByDesc('peers.id');
 		break;
 	}
 
 	// Completed torrents
 	case 'completed':
 	{
-//		$res = sql_query("SELECT torrents.id AS torrent, torrents.name AS torrentname, categories.name AS catname, torrents.banned, torrents.approval_status, categories.image, category, sp_state, size, torrents.hr, torrents.added,snatched.uploaded, snatched.seedtime, snatched.leechtime, snatched.completedat FROM torrents LEFT JOIN snatched ON torrents.id = snatched.torrentid LEFT JOIN categories on torrents.category = categories.id WHERE snatched.finished='yes' AND torrents.owner != $id AND userid=$id ORDER BY snatched.id DESC") or sqlerr();
-		$fields = "torrents.id AS torrent, torrents.name AS torrentname, categories.name AS catname, torrents.banned, torrents.approval_status, categories.image, category, sp_state, size, torrents.hr, torrents.added,snatched.uploaded, snatched.seedtime,snatched.uploaded, snatched.leechtime, snatched.completedat,snatched.userid, categories.mode as search_box_id";
-		$tableWhere = "torrents LEFT JOIN snatched ON torrents.id = snatched.torrentid LEFT JOIN categories on torrents.category = categories.id WHERE snatched.finished='yes' AND userid=$id AND torrents.owner != $id";
-		$order = "snatched.id DESC";
+		$query = \Nexus\Database\NexusDB::table('torrents')
+		    ->leftJoin('snatched', 'torrents.id', '=', 'snatched.torrentid')
+		    ->leftJoin('categories', 'torrents.category', '=', 'categories.id')
+		    ->where('snatched.finished', 'yes')
+		    ->where('snatched.userid', $id)
+		    ->where('torrents.owner', '!=', $id)
+		    ->select([
+		        'torrents.id as torrent', 'torrents.name as torrentname', 'categories.name as catname',
+		        'torrents.banned', 'torrents.approval_status', 'categories.image', 'torrents.category',
+		        'torrents.sp_state', 'torrents.size', 'torrents.hr', 'torrents.added', 'snatched.uploaded',
+		        'snatched.seedtime', 'snatched.leechtime', 'snatched.completedat', 'snatched.userid',
+		        'categories.mode as search_box_id'
+		    ])
+		    ->orderByDesc('snatched.id');
 		break;
 	}
 
 	// Incomplete torrents
 	case 'incomplete':
 	{
-//		$res = sql_query("SELECT torrents.id AS torrent, torrents.name AS torrentname, torrents.banned, torrents.approval_status, categories.name AS catname, categories.image, category, sp_state, size, torrents.hr, torrents.added,snatched.uploaded, snatched.downloaded, snatched.leechtime FROM torrents LEFT JOIN snatched ON torrents.id = snatched.torrentid LEFT JOIN categories on torrents.category = categories.id WHERE snatched.finished='no' AND userid=$id AND torrents.owner != $id ORDER BY snatched.id DESC") or sqlerr();
-		$fields = "torrents.id AS torrent, torrents.name AS torrentname, torrents.banned, torrents.approval_status, categories.name AS catname, categories.image, category, sp_state, size, torrents.hr, torrents.added,snatched.uploaded, snatched.downloaded, snatched.leechtime,snatched.seedtime,snatched.userid, categories.mode as search_box_id";
-		$tableWhere = "torrents LEFT JOIN snatched ON torrents.id = snatched.torrentid LEFT JOIN categories on torrents.category = categories.id WHERE snatched.finished='no' AND userid=$id AND torrents.owner != $id";
-		$order = "snatched.id DESC";
+		$query = \Nexus\Database\NexusDB::table('torrents')
+		    ->leftJoin('snatched', 'torrents.id', '=', 'snatched.torrentid')
+		    ->leftJoin('categories', 'torrents.category', '=', 'categories.id')
+		    ->where('snatched.finished', 'no')
+		    ->where('snatched.userid', $id)
+		    ->where('torrents.owner', '!=', $id)
+		    ->select([
+		        'torrents.id as torrent', 'torrents.name as torrentname', 'torrents.banned',
+		        'torrents.approval_status', 'categories.name as catname', 'categories.image',
+		        'torrents.category', 'torrents.sp_state', 'torrents.size', 'torrents.hr', 'torrents.added',
+		        'snatched.uploaded', 'snatched.downloaded', 'snatched.leechtime', 'snatched.seedtime',
+		        'snatched.userid', 'categories.mode as search_box_id'
+		    ])
+		    ->orderByDesc('snatched.id');
 		break;
 	}
 }
 
-if (isset($tableWhere)) {
+if ($query) {
     $cacheKey = sprintf('user:%s:type:%s:total_size', $id, $type);
-    $page = $_GET['page'] ?? 0;
-    $sumSql = "select count(*) as count, sum(torrents.size) as total_size from $tableWhere limit 1";
+    $page = (int)($_GET['page'] ?? 0);
     if ($page == 0) {
-        $sumRes = mysql_fetch_assoc(sql_query($sumSql));
+        $sumRes = [
+            'count' => (clone $query)->count(),
+            'total_size' => (clone $query)->sum('torrents.size'),
+        ];
         \Nexus\Database\NexusDB::cache_put($cacheKey, $sumRes);
     } else {
-        $sumRes = \Nexus\Database\NexusDB::remember($cacheKey, 3600, function () use ($sumSql) {
-            return mysql_fetch_assoc(sql_query($sumSql));
+        $sumRes = \Nexus\Database\NexusDB::remember($cacheKey, 3600, function () use ($query) {
+            return [
+                'count' => (clone $query)->count(),
+                'total_size' => (clone $query)->sum('torrents.size'),
+            ];
         });
     }
-
-    $count = $sumRes['count'];
-    $total_size = $sumRes['total_size'];
+    $count = $sumRes['count'] ?? 0;
+    $total_size = $sumRes['total_size'] ?? 0;
 }
 
-if ($count > 0 && isset($tableWhere, $fields, $order))
+if ($count > 0 && $query)
 {
     $pageSize = 100;
-    list($pagertop, $pagerbottom, $limit) = pager($pageSize, $count, "getusertorrentlistajax.php?");
-    $sql = "select $fields from $tableWhere order by $order $limit";
-    do_log("count: $count, list sql: $sql");
-    $res = sql_query($sql);
-    list($torrentlist, $total_size_this_page) = maketable ( $res, $type);
+    list($pagertop, $pagerbottom, $limit, $offset) = pager($pageSize, $count, "getusertorrentlistajax.php?");
+    $rows = $query->offset($offset)->limit($pageSize)->get()->map(fn ($r) => (array) $r)->all();
+    do_log("count: $count, type: $type");
+    list($torrentlist, $total_size_this_page) = maketable($rows, $type);
 }
 
 $table = $pagertop . $torrentlist . $pagerbottom;

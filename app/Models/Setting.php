@@ -27,11 +27,11 @@ class Setting extends NexusModel
     /**
      * get setting autoload = yes with cache
      *
-     * @param null $name
-     * @param null $default
+     * @param string|null $name
+     * @param mixed $default
      * @return mixed
      */
-    public static function get($name = null, $default = null): mixed
+    public static function get(?string $name = null, mixed $default = null): mixed
     {
         static $settings = null;
         if (is_null($settings)) {
@@ -48,11 +48,11 @@ class Setting extends NexusModel
     /**
      * get setting autoload = yes without cache
      *
-     * @param null $name
-     * @param null $default
+     * @param string|null $name
+     * @param mixed $default
      * @return mixed
      */
-    public static function getFromDb($name = null, $default = null): mixed
+    public static function getFromDb(?string $name = null, mixed $default = null): mixed
     {
         $rows = self::query()->where('autoload', 'yes')->get(['name', 'value']);
         $result = [];
@@ -69,11 +69,11 @@ class Setting extends NexusModel
     /**
      * get from db by name, generally used for `autoload` = 'no'
      *
-     * @param $name
-     * @param null $default
+     * @param string $name
+     * @param mixed $default
      * @return mixed
      */
-    public static function getByName($name, $default = null): mixed
+    public static function getByName(string $name, mixed $default = null): mixed
     {
         $result = self::query()->where('name', $name)->first();
         if ($result) {

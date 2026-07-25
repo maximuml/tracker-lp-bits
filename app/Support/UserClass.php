@@ -166,7 +166,7 @@ final class UserClass
             return self::BANNED_IMAGE;
         }
 
-        if (is_int($class) || (is_string($class) && ctype_digit($class))) {
+        if (is_int($class) || ctype_digit($class)) {
             $className = self::name((int) $class, false, false, false);
         } else {
             $className = $class;
@@ -217,6 +217,7 @@ final class UserClass
         static $enLangFunctions = null;
         static $currentLangFunctions = null;
         static $settingAccount = null;
+        $lang_functions = [];
 
         if ($enLangFunctions === null) {
             require \get_langfile_path('functions.php', false, 'en');

@@ -333,11 +333,11 @@ function nexus_config($key, $default = null)
  * get setting for given name and prefix
  *
  * @date 2021/1/11
- * @param null $name
- * @param null $default
+ * @param string|null $name
+ * @param mixed $default
  * @return mixed
  */
-function get_setting($name = null, $default = null): mixed
+function get_setting(?string $name = null, mixed $default = null): mixed
 {
 	static $settings;
 	if (is_null($settings)) {
@@ -352,7 +352,14 @@ function get_setting($name = null, $default = null): mixed
     return arr_get($settings, $name, $default);
 }
 
-function get_setting_from_db($name = null, $default = null)
+/**
+ * get setting autoload = yes without cache
+ *
+ * @param string|null $name
+ * @param mixed $default
+ * @return mixed
+ */
+function get_setting_from_db(?string $name = null, mixed $default = null): mixed
 {
     static $final;
     if (is_null($final)) {

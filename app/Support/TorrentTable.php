@@ -264,7 +264,7 @@ foreach ($rows as $row)
 		$elapsed = floor((TIMENOW - strtotime($row["added"])) / 3600);
 		if ($elapsed < $wait)
 		{
-			$color = dechex(floor(127*($wait - $elapsed)/48 + 128)*65536);
+			$color = dechex((int) (floor(127*($wait - $elapsed)/48 + 128)*65536));
 			print("<td class=\"rowfollow nowrap\"><a href=\"faq.php#id46\"><font color=\"".$color."\">" . number_format($wait - $elapsed) . $lang_functions['text_h']."</font></a></td>\n");
 		}
 		else
@@ -291,6 +291,7 @@ foreach ($rows as $row)
 			}
 			$timestamp = strtotime($lastcom["added"]);
 			$hasnewcom = ($lastcom['user'] != $CURUSER['id'] && $timestamp >= $last_browse);
+			$onmouseover = '';
 			if ($lastcom)
 			{
 				if ($CURUSER['timetype'] != 'timealive')

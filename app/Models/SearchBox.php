@@ -7,10 +7,18 @@ use App\Http\Middleware\Locale;
 use App\Models\Traits\NexusActivityLogTrait;
 use App\Repositories\TagRepository;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Str;
 use Nexus\Database\NexusDB;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property string|null $name
+ * @property int $catsperrow
+ * @property bool $showsubcat
+ */
 class SearchBox extends NexusModel
 {
     use NexusActivityLogTrait;
@@ -257,7 +265,10 @@ class SearchBox extends NexusModel
     }
 
 
-    public function categories(): \Illuminate\Database\Eloquent\Relations\HasMany
+    /**
+     * @return HasMany<Category, $this>
+     */
+    public function categories(): HasMany
     {
         return $this->hasMany(Category::class, 'mode');
     }
@@ -310,7 +321,10 @@ class SearchBox extends NexusModel
         }
     }
 
-    public function tags(): \Illuminate\Database\Eloquent\Relations\HasMany
+    /**
+     * @return HasMany<Tag, $this>
+     */
+    public function tags(): HasMany
     {
         return $this->hasMany(Tag::class, 'mode');
     }

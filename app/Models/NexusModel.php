@@ -7,6 +7,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Nexus\Database\NexusDB;
 
+/**
+ * @property int $id
+ */
 class NexusModel extends Model
 {
     use HasFactory;

@@ -4,7 +4,13 @@ namespace App\Models;
 
 use App\Models\Traits\NexusActivityLogTrait;
 use App\Repositories\ExamRepository;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @property-read Exam $exam
+ * @property-read User $user
+ */
 class ExamUser extends NexusModel
 {
     protected $fillable = ['exam_id', 'uid', 'status', 'progress', 'begin', 'end', 'is_done'];
@@ -111,17 +117,26 @@ class ExamUser extends NexusModel
     }
 
 
-    public function exam(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    /**
+     * @return BelongsTo<Exam, $this>
+     */
+    public function exam(): BelongsTo
     {
         return $this->belongsTo(Exam::class, 'exam_id');
     }
 
-    public function user(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    /**
+     * @return BelongsTo<User, $this>
+     */
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'uid');
     }
 
-    public function progresses(): \Illuminate\Database\Eloquent\Relations\HasMany
+    /**
+     * @return HasMany<ExamProgress, $this>
+     */
+    public function progresses(): HasMany
     {
         return $this->hasMany(ExamProgress::class, 'exam_user_id');
     }

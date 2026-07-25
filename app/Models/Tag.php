@@ -4,6 +4,17 @@ namespace App\Models;
 
 use App\Models\Traits\NexusActivityLogTrait;
 
+/**
+ * @property int $id
+ * @property string $name
+ * @property string|null $color
+ * @property string|null $font_color
+ * @property string|null $font_size
+ * @property string|null $padding
+ * @property string|null $margin
+ * @property string|null $border_radius
+ * @property int $mode
+ */
 class Tag extends NexusModel
 {
     use NexusActivityLogTrait;

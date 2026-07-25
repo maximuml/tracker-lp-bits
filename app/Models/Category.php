@@ -4,7 +4,17 @@ namespace App\Models;
 
 
 use App\Models\Traits\NexusActivityLogTrait;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property int $mode
+ * @property string $name
+ * @property string|null $class_name
+ * @property string|null $image
+ * @property-read Icon|null $icon
+ * @property-read SearchBox|null $search_box
+ */
 class Category extends NexusModel
 {
     use NexusActivityLogTrait;
@@ -18,12 +28,18 @@ class Category extends NexusModel
         return nexus_trans('searchbox.category_label');
     }
 
-    public function icon(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    /**
+     * @return BelongsTo<Icon, $this>
+     */
+    public function icon(): BelongsTo
     {
         return $this->belongsTo(Icon::class, 'icon_id');
     }
 
-    public function search_box()
+    /**
+     * @return BelongsTo<SearchBox, $this>
+     */
+    public function search_box(): BelongsTo
     {
         return $this->belongsTo(SearchBox::class, 'mode', 'id');
     }

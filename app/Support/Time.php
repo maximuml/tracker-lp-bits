@@ -96,7 +96,7 @@ final class Time
         $dayOfWeek = (int) date('w', $timestamp);
         $hour = (int) date('G', $timestamp);
 
-        return $enabled && ($dayOfWeek === 0 || ($dayOfWeek === 6 && $hour >= 12 && $hour <= 23));
+        return $enabled && ($dayOfWeek === 0 || ($dayOfWeek === 6 && $hour >= 12));
     }
 
     /**

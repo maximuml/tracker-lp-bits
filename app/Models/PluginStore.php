@@ -13,6 +13,12 @@ use Nexus\Database\NexusDB;
 use Sushi\Sushi;
 use Nexus\Plugin\Plugin;
 
+/**
+ * @property int $post_id
+ * @property string $plugin_id
+ * @property string $version
+ * @property string $installed_version
+ */
 class PluginStore extends Model
 {
     use Sushi;
@@ -117,8 +123,8 @@ class PluginStore extends Model
     {
         try {
             $response = Http::get(self::PLUGIN_LIST_API);
-            if ($response->getStatusCode() != 200) {
-                do_log(sprintf("status code: %d, body: %s", $response->getStatusCode(), $response->getBody()), 'error');
+            if ($response->status() != 200) {
+                do_log(sprintf("status code: %d, body: %s", $response->status(), $response->body()), 'error');
                 return [];
             }
             $list = $response->json();

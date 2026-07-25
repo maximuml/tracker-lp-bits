@@ -149,7 +149,6 @@ final class SearchBox
 
         $html .= sprintf('<tr><td class="embedded" align="left">%s</td></tr>', nexus_trans('label.search_box.category'));
 
-        /** @var \Illuminate\Database\Eloquent\Collection $categoryCollection */
         $categoryCollection = $searchBox->categories()->with('icon')->orderBy('sort_index', 'desc')->get();
         if (! empty($options['select_unselect'])) {
             $categoryCollection->push(new \App\Models\Category(['mode' => -1]));

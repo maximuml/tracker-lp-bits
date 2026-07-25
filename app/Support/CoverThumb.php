@@ -99,11 +99,6 @@ final class CoverThumb
 
         $srcWidth = imagesx($src);
         $srcHeight = imagesy($src);
-        if ($srcWidth <= 0 || $srcHeight <= 0) {
-            imagedestroy($src);
-
-            return $url;
-        }
 
         $scale = min(1.0, $maxWidth / $srcWidth, $maxHeight / $srcHeight);
         $dstWidth = max(1, (int) floor($srcWidth * $scale));

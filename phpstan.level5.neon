@@ -1,0 +1,28 @@
+includes:
+    - vendor/larastan/larastan/extension.neon
+
+parameters:
+    level: 5
+    paths:
+        - app/Support
+        - app/Models
+
+    bootstrapFiles:
+        - tests/phpstan/bootstrap.php
+        - tests/phpstan/constants.stub.php
+        - bootstrap/app.php
+
+    scanFiles:
+        - include/globalfunctions.php
+        - include/functions.php
+        - include/constants.php
+        - include/cleanup.php
+        - nexus/Database/helpers.php
+
+    scanDirectories:
+        - vendor
+        - classes
+
+    dynamicConstantNames:
+        - IN_NEXUS
+        - IN_TRACKER

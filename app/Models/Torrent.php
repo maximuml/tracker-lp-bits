@@ -5,8 +5,20 @@ namespace App\Models;
 use App\Repositories\TagRepository;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Nexus\Database\NexusDB;
 
+/**
+ * @property int $id
+ * @property int $category
+ * @property int $hr
+ * @property string $name
+ * @property-read Category $basic_category
+ * @property-read User $user
+ * @property-read Tag[]|\Illuminate\Database\Eloquent\Collection<int, Tag> $tags
+ */
 class Torrent extends NexusModel
 {
     protected $fillable = [
@@ -311,7 +323,7 @@ class Torrent extends NexusModel
         return self::listStaticProps(self::$promotionTimeTypes, 'torrent.promotion_time_types', $onlyKeyValue, $valueField);
     }
 
-    public function getHrRealAttribute(): string
+    public function getHrRealAttribute(): int
     {
         $searchBoxId = $this->basic_category->mode ?? 0;
         if ($searchBoxId == 0) {
@@ -389,12 +401,18 @@ class Torrent extends NexusModel
         return $this->basic_category->search_box->getTaxonomyLabel($field);
     }
 
-    public function bookmarks(): \Illuminate\Database\Eloquent\Relations\HasMany
+    /**
+     * @return HasMany<Bookmark, $this>
+     */
+    public function bookmarks(): HasMany
     {
         return $this->hasMany(Bookmark::class, 'torrentid');
     }
 
-    public function user()
+    /**
+     * @return BelongsTo<User, $this>
+     */
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'owner')->withDefault(User::getDefaultUserAttributes());
     }
@@ -444,12 +462,18 @@ class Torrent extends NexusModel
         return $this->peers()->where('finishedat', '>', 0);
     }
 
-    public function files()
+    /**
+     * @return HasMany<File, $this>
+     */
+    public function files(): HasMany
     {
         return $this->hasMany(File::class, 'torrent');
     }
 
-    public function basic_category()
+    /**
+     * @return BelongsTo<Category, $this>
+     */
+    public function basic_category(): BelongsTo
     {
         return $this->belongsTo(Category::class, 'category');
     }
@@ -499,7 +523,10 @@ class Torrent extends NexusModel
         return $this->hasMany(TorrentTag::class, 'torrent_id');
     }
 
-    public function tags(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    /**
+     * @return BelongsToMany<Tag, $this>
+     */
+    public function tags(): BelongsToMany
     {
         $idsString = TagRepository::getOrderByFieldIdString();
         if (NexusDB::isPgsql()) {

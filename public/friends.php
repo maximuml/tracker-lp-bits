@@ -177,19 +177,23 @@ else
 {
 	ob_start(); // start the output buffer
 
-	$user_snatched = sql_query("SELECT * FROM snatched WHERE userid = $CURUSER[id]") or sqlerr(__FILE__, __LINE__);
-	if(mysql_num_rows($user_snatched) == 0)
+	$userSnatchedRows = \Nexus\Database\NexusDB::table('snatched')->where('userid', $CURUSER['id'])->get()->map(fn ($r) => (array) $r);
+	if($userSnatchedRows->isEmpty())
 	$neighbors_info = $lang_friends['text_neighbors_empty'];
 	else
 	{
-		while ($user_snatched_arr = mysql_fetch_array($user_snatched))
+		foreach ($userSnatchedRows as $user_snatched_arr)
 		{
 			$torrent_2_user_value = get_torrent_2_user_value($user_snatched_arr);
 
-			$user_snatched_res_target = sql_query("SELECT * FROM snatched WHERE torrentid = " . $user_snatched_arr['torrentid'] . " AND userid != " . $user_snatched_arr['userid']) or sqlerr(__FILE__, __LINE__);	//
-			if(mysql_num_rows($user_snatched_res_target)>0)	// have other peole snatched this torrent
+			$targetRows = \Nexus\Database\NexusDB::table('snatched')
+			    ->where('torrentid', $user_snatched_arr['torrentid'])
+			    ->where('userid', '!=', $user_snatched_arr['userid'])
+			    ->get()
+			    ->map(fn ($r) => (array) $r);
+			if($targetRows->count() > 0)	// have other peole snatched this torrent
 			{
-				while($user_snatched_arr_target = mysql_fetch_array($user_snatched_res_target))	// find target user's current analyzing torrent's snatch info
+				foreach ($targetRows as $user_snatched_arr_target)	// find target user's current analyzing torrent's snatch info
 				{
 					$torrent_2_user_value_target = get_torrent_2_user_value($user_snatched_arr_target);	//get this torrent to target user's value
 
@@ -204,16 +208,15 @@ else
 		arsort($other_user_2_curuser_value,SORT_NUMERIC);
 		$counter = 0;
 		$total_user = count($other_user_2_curuser_value);
-		while(1)
+		foreach ($other_user_2_curuser_value as $other_user_2_curuser_value_key => $other_user_2_curuser_value_val)
 		{
-			list($other_user_2_curuser_value_key, $other_user_2_curuser_value_val) = each($other_user_2_curuser_value);
 			//print(" userid: " . $other_user_2_curuser_value_key . " value: " . $other_user_2_curuser_value_val . "<br />");
 
 
-			$neighbors_res = sql_query("SELECT * FROM users WHERE id = " . intval($other_user_2_curuser_value_key)) or sqlerr(__FILE__, __LINE__);
-			if(mysql_num_rows($neighbors_res) == 1)
+			$neighborsUser = \App\Models\User::query()->where('id', (int)$other_user_2_curuser_value_key)->first();
+			if($neighborsUser)
 			{
-				$neighbors_arr = mysql_fetch_array($neighbors_res) or sqlerr(__FILE__, __LINE__);
+				$neighbors_arr = $neighborsUser->toArray();
 				if($neighbors_arr['enabled'] == 'yes')
 				{
 					$title = $neighbors_arr["title"];

@@ -17,9 +17,9 @@ $offlineimg = "<img class=\"button_offline\" src=\"pic/trans.gif\" alt=\"offline
 $sendpmimg = "<img class=\"button_pm\" src=\"pic/trans.gif\" alt=\"pm\" />";
 //--------------------- FIRST LINE SUPPORT SECTION ---------------------------//
 $ppl = '';
-$res = sql_query("SELECT * FROM users WHERE users.support='yes' AND users.status='confirmed' ORDER BY users.username") or sqlerr();
-while ($arr = mysql_fetch_assoc($res))
-{
+$supportUsers = \App\Models\User::query()->where('support', 'yes')->where('status', 'confirmed')->orderBy('username')->get(['id', 'country', 'last_access', 'supportlang', 'supportfor']);
+foreach ($supportUsers as $userRow) {
+	$arr = $userRow->toArray();
 	$countryrow = get_country_row($arr['country']);
 	$ppl .= "<tr><td class=embedded>". get_username($arr['id']) ."</td><td class=embedded><img width=24 height=15 src=\"pic/flag/".$countryrow['flagpic']."\" title=\"".$countryrow['name']."\" style=\"padding-bottom:1px;\"></td>
  <td class=embedded> ".(strtotime($arr['last_access']) > $dt ? $onlineimg : $offlineimg)."</td>".
@@ -55,9 +55,9 @@ end_frame();
 
 //--------------------- film critics section ---------------------------//
 $ppl = '';
-$res = sql_query("SELECT * FROM users WHERE users.picker='yes' AND users.status='confirmed' ORDER BY users.username") or sqlerr();
-while ($arr = mysql_fetch_assoc($res))
-{
+$pickerUsers = \App\Models\User::query()->where('picker', 'yes')->where('status', 'confirmed')->orderBy('username')->get(['id', 'country', 'last_access', 'pickfor']);
+foreach ($pickerUsers as $userRow) {
+	$arr = $userRow->toArray();
 	$countryrow = get_country_row($arr['country']);
 	$ppl .= "<tr height=15><td class=embedded>". get_username($arr['id']) ."</td><td class=embedded ><img width=24 height=15 src=\"pic/flag/".$countryrow['flagpic']."\" title=\"".$countryrow['name']."\" style=\"padding-bottom:1px;\"></td>
  <td class=embedded> ".(strtotime($arr['last_access']) > $dt ? $onlineimg : $offlineimg)."</td>".
@@ -91,14 +91,24 @@ end_frame();
 
 //--------------------- forum moderators section ---------------------------//
 $ppl = '';
-$res = sql_query("SELECT forummods.userid AS userid, users.last_access, users.country FROM forummods LEFT JOIN users ON forummods.userid = users.id GROUP BY userid,users.last_access, users.country,forummods.forumid, forummods.userid ORDER BY forummods.forumid, forummods.userid") or sqlerr();
-while ($arr = mysql_fetch_assoc($res))
-{
+$forumMods = \Nexus\Database\NexusDB::table('forummods')
+    ->leftJoin('users', 'forummods.userid', '=', 'users.id')
+    ->orderBy('forummods.forumid')
+    ->orderBy('forummods.userid')
+    ->get(['forummods.userid AS userid', 'users.last_access', 'users.country'])
+    ->unique('userid')
+    ->values();
+foreach ($forumMods as $modRow) {
+	$arr = (array) $modRow;
 	$countryrow = get_country_row($arr['country']);
 	$forums = "";
-	$forumres = sql_query("SELECT forums.id, forums.name FROM forums LEFT JOIN forummods ON forums.id = forummods.forumid WHERE forummods.userid = ".sqlesc($arr['userid']));
-	while ($forumrow = mysql_fetch_array($forumres)){
-		$forums .= "<a href=forums.php?action=viewforum&forumid=".$forumrow['id'].">".$forumrow['name']."</a>, ";
+	$forumRows = \Nexus\Database\NexusDB::table('forums as f')
+	    ->leftJoin('forummods as fm', 'f.id', '=', 'fm.forumid')
+	    ->where('fm.userid', $arr['userid'])
+	    ->get(['f.id', 'f.name']);
+	foreach ($forumRows as $forumRow) {
+	$forumrow = (array) $forumRow;
+		$forums .= "<a href=forums.php?action=viewforum&forumid=".$forumRow['id'].">".$forumRow['name']."</a>, ";
 	}
 	$forums = rtrim(trim($forums),",");
 	$ppl .= "<tr height=15><td class=embedded>". get_username($arr['userid']) ."</td><td class=embedded ><img width=24 height=15 src=\"pic/flag/".$countryrow['flagpic']."\" title=\"".$countryrow['name']."\" style=\"padding-bottom:1px;\"></td>
@@ -133,10 +143,10 @@ end_frame();
 
 //--------------------- general staff section ---------------------------//
 $ppl = '';
-$res = sql_query("SELECT * FROM users WHERE class > ".UC_VIP." AND status='confirmed' ORDER BY class DESC, username") or sqlerr();
+$staffUsers = \App\Models\User::query()->where('class', '>', UC_VIP)->where('status', 'confirmed')->orderByDesc('class')->orderBy('username')->get();
 $curr_class = '';
-while ($arr = mysql_fetch_assoc($res))
-{
+foreach ($staffUsers as $userRow) {
+	$arr = $userRow->toArray();
 	if($curr_class != $arr['class'])
 	{
 		$curr_class = $arr['class'];
@@ -175,9 +185,9 @@ end_frame();
 //--------------------- VIP section ---------------------------//
 
 $ppl = '';
-$res = sql_query("SELECT * FROM users WHERE class=".UC_VIP." AND status='confirmed' ORDER BY username") or sqlerr();
-while ($arr = mysql_fetch_assoc($res))
-{
+$vipUsers = \App\Models\User::query()->where('class', UC_VIP)->where('status', 'confirmed')->orderBy('username')->get();
+foreach ($vipUsers as $userRow) {
+	$arr = $userRow->toArray();
 	$countryrow = get_country_row($arr['country']);
 	$ppl .= "<tr><td class=embedded>". get_username($arr['id']) ."</td><td class=embedded><img width=24 height=15 src=\"pic/flag/".$countryrow['flagpic']."\" title=\"".$countryrow['name']."\" style=\"padding-bottom:1px;\"></td>
  <td class=embedded> ".(strtotime($arr['last_access']) > $dt ? $onlineimg : $offlineimg)."</td>".

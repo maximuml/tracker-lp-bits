@@ -28,16 +28,28 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
             if (!$user) {
                 stderr($lang_functions['std_error'], $lang_complains['text_new_failure']);
             }
-            sql_query(sprintf('INSERT INTO complains (uuid, email, body, added, ip) VALUES (UUID(), %s, %s, NOW(), %s)', sqlesc($email), sqlesc($body), sqlesc(getip()))) or sqlerr(__FILE__, __LINE__);
+            $complainId = \Nexus\Database\NexusDB::table('complains')->insertGetId([
+                'uuid' => \Nexus\Database\NexusDB::raw('UUID()'),
+                'email' => $email,
+                'body' => $body,
+                'added' => date('Y-m-d H:i:s'),
+                'ip' => getip(),
+            ]);
             $Cache->delete_value('COMPLAINTS_COUNT_CACHE');
-            nexus_redirect(sprintf('complains.php?action=view&id=%s', get_single_value('complains', 'uuid', 'WHERE id = ' . mysql_insert_id())));
+            nexus_redirect(sprintf('complains.php?action=view&id=%s', \Nexus\Database\NexusDB::table('complains')->where('id', $complainId)->value('uuid')));
             break;
         case 'reply':
             $id = filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT);
             $body = filter_input(INPUT_POST, 'body', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
             $complain = \App\Models\Complain::query()->findOrFail($id);
             if(empty($id) || empty($body)) stderr($lang_functions['std_error'], $lang_complains['text_new_failure']);
-            sql_query(sprintf('INSERT INTO complain_replies (complain, userid, added, body, ip) VALUES (%u, %u, NOW(), %s, %s)', $id, $uid, sqlesc($body), sqlesc(getip()))) or sqlerr(__FILE__, __LINE__);
+            \Nexus\Database\NexusDB::table('complain_replies')->insert([
+                'complain' => $id,
+                'userid' => $uid,
+                'added' => date('Y-m-d H:i:s'),
+                'body' => $body,
+                'ip' => getip(),
+            ]);
             if ($uid > 0) {
                 try {
                     $toolRep = new \App\Repositories\ToolRepository();
@@ -53,7 +65,9 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
             if(!$isAdmin) permissiondenied();
             $id = filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT);
             if(!$id) permissiondenied();
-            sql_query(sprintf('UPDATE complains SET answered = %u WHERE id = %u', $action == 'answered' ? 1 : 0, $id)) or sqlerr(__FILE__, __LINE__);
+            \Nexus\Database\NexusDB::table('complains')->where('id', $id)->update([
+                'answered' => $action == 'answered' ? 1 : 0,
+            ]);
             $Cache->delete_value('COMPLAINTS_COUNT_CACHE');
             nexus_redirect($_SERVER['HTTP_REFERER']);
             break;
@@ -64,11 +78,12 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
     switch (filter_input(INPUT_GET, 'action', FILTER_SANITIZE_FULL_SPECIAL_CHARS)){
         case 'list':
             if(!$isAdmin) permissiondenied();
-            $showTable = function($res){
+            $showTable = function($rows){
                 global $lang_complains;
                 echo '<table width="100%">';
                 echo EchoRow('colhead', $lang_complains['th_complain_at'], $lang_complains['th_complain_account'], $lang_complains['th_action_view']);
-                while($row = mysql_fetch_assoc($res)){
+                foreach ($rows as $r) {
+                    $row = (array) $r;
                     echo EchoRow('rowfollow', gettime($row['added']), htmlspecialchars($row['email']), sprintf('<a href="?action=view&id=%s" class="faqlink">%s</a>', $row['uuid'], $lang_complains['th_action_view']));
                 }
                 echo '</table>';
@@ -76,21 +91,26 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
             stdhead($lang_complains['text_complain']);
             begin_main_frame();
             if(!isset($_GET['page'])){
-                $res = sql_query('SELECT added, uuid, email FROM complains WHERE answered = 0 ORDER BY id DESC') or sqlerr(__FILE__, __LINE__);
+                $pendingRows = \Nexus\Database\NexusDB::table('complains')->where('answered', 0)->orderByDesc('id')->get(['added', 'uuid', 'email']);
                 begin_frame($lang_complains['pending_complaints']);
-                if(mysql_num_rows($res)){
-                    $showTable($res);
+                if($pendingRows->count()){
+                    $showTable($pendingRows);
                 }else{
                     echo $lang_complains['no_pending_complaints'];
                 }
                 end_frame();
             }
             begin_frame($lang_complains['complaints_processed']);
-            list($pagertop, $pagerbottom, $limit) = pager(20, get_row_count('complains', 'WHERE answered = 1'), '?action=list&');
-            $res = sql_query('SELECT added, uuid, email FROM complains WHERE answered = 1 ORDER BY id DESC ' . $limit) or sqlerr(__FILE__, __LINE__);
-            if(mysql_num_rows($res)){
+            list($pagertop, $pagerbottom, , $offset, $rpp) = pager(20, get_row_count('complains', 'WHERE answered = 1'), '?action=list&');
+            $processedRows = \Nexus\Database\NexusDB::table('complains')
+                ->where('answered', 1)
+                ->orderByDesc('id')
+                ->offset($offset)
+                ->limit($rpp)
+                ->get(['added', 'uuid', 'email']);
+            if($processedRows->count()){
                 echo $pagertop;
-                $showTable($res);
+                $showTable($processedRows);
                 echo $pagerbottom;
             }else{
                 echo $lang_complains['no_complaints_have_been_processed'];
@@ -102,8 +122,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
         case 'view':
             $uuid = filter_input(INPUT_GET, 'id', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
             if(strlen($uuid) != 36) permissiondenied();
-            $res = sql_query(sprintf('SELECT * FROM complains WHERE uuid = %s', sqlesc($uuid))) or sqlerr(__FILE__, __LINE__);
-            $complain = mysql_fetch_assoc($res);
+            $complain = (array) \Nexus\Database\NexusDB::table('complains')->where('uuid', $uuid)->first();
             if(!$complain) permissiondenied();
             $user = \App\Models\User::query()->where('email', $complain['email'])->first();
             stdhead($lang_complains['text_complain']);
@@ -128,9 +147,10 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
             end_frame();
             // REPLIES
             begin_frame($lang_complains['text_replies']);
-            $res = sql_query(sprintf('SELECT * FROM `complain_replies` WHERE complain = %u ORDER BY id DESC', $complain['id'])) or sqlerr(__FILE__, __LINE__);
-            if(mysql_num_rows($res)){
-                while($row = mysql_fetch_assoc($res)){
+            $replyRows = \Nexus\Database\NexusDB::table('complain_replies')->where('complain', $complain['id'])->orderByDesc('id')->get();
+            if($replyRows->count()){
+                foreach ($replyRows as $r) {
+                    $row = (array) $r;
                     printf('<b>%s @ %s', $row['userid'] ? get_plain_username($row['userid']) : $lang_complains['text_complainer'], gettime($row['added']));
                     if ($isAdmin) {
                         printf(' (%s)', htmlspecialchars($row['ip']));
@@ -179,3 +199,4 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
             stdfoot();
     }
 }
+?>

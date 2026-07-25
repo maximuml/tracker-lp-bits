@@ -1178,18 +1178,18 @@ if ($action == "viewforum")
 
 	$forumname = $row['name'];
 	$forummoderators = get_forum_moderators($forumid,false);
-	$search = mysql_real_escape_string(trim($_GET["search"] ?? ''));
+	$search = trim($_GET["search"] ?? '');
+	$topicQuery = \App\Models\Topic::query()->where('forumid', $forumid);
 	if ($search){
-		$wherea = " AND subject LIKE '%$search%'";
+		$topicQuery->where('subject', 'like', '%'.$search.'%');
 		$addparam .= "&search=".rawurlencode($search);
 	}
 	else{
-		$wherea = "";
 		$addparam = "";
 	}
-	$num = get_row_count("topics","WHERE forumid=".sqlesc($forumid).$wherea);
+	$num = $topicQuery->count();
 
-	list($pagertop, $pagerbottom, $limit) = pager($topicsperpage, $num, "?"."action=viewforum&forumid=".$forumid.$addparam."&");
+	[$pagertop, $pagerbottom, , $offset, $perpage, ] = pager($topicsperpage, $num, "?"."action=viewforum&forumid=".$forumid.$addparam."&");
 	if (isset($_GET["sort"])){
 		switch ($_GET["sort"]){
 			case 'firstpostasc':
@@ -1223,8 +1223,9 @@ if ($action == "viewforum")
 		$orderby = "lastpost DESC";
 	}
 	//------ Get topics data
-	$topicsres = sql_query("SELECT * FROM topics WHERE forumid=".sqlesc($forumid).$wherea." ORDER BY sticky DESC,".$orderby." ".$limit) or sqlerr(__FILE__, __LINE__);
-	$numtopics = mysql_num_rows($topicsres);
+	$orderParts = explode(' ', $orderby);
+	$topicRows = (clone $topicQuery)->orderBy('sticky', 'desc')->orderBy($orderParts[0], $orderParts[1] ?? 'desc')->offset($offset)->limit($perpage)->get();
+	$numtopics = $topicRows->count();
 	stdhead($lang_forums['head_forum']." ".$forumname);
 	begin_main_frame("",true);
 	print("<h1 align=\"center\"><a class=\"faqlink\" href=\"forums.php\">".$SITENAME."&nbsp;".$lang_forums['text_forums'] ."</a>--><a class=\"faqlink\" href=\"".htmlspecialchars("forums.php?action=viewforum&forumid=".$forumid)."\">".$forumname."</a></h1>\n");
@@ -1252,8 +1253,9 @@ if ($action == "viewforum")
 		print("</tr>\n");
 		$counter = 0;
 
-		while ($topicarr = mysql_fetch_assoc($topicsres))
+		foreach ($topicRows as $topic)
 		{
+			$topicarr = $topic->toArray();
 			$topicid = $topicarr["id"];
 
 			$topic_userid = $topicarr["userid"];
@@ -1270,7 +1272,7 @@ if ($action == "viewforum")
 
 			//---- Get reply count
 			if (!$posts = $Cache->get_value('topic_'.$topicid.'_post_count')){
-				$posts = get_row_count("posts","WHERE topicid=".sqlesc($topicid));
+				$posts = \App\Models\Post::query()->where('topicid', $topicid)->count();
 				$Cache->cache_value('topic_'.$topicid.'_post_count', $posts, 3600);
 			}
 
@@ -1391,7 +1393,12 @@ if ($action == "viewunread")
 
 	$beforepostid = intval($_GET['beforepostid'] ?? 0);
 	$maxresults = 25;
-	$res = sql_query("SELECT id, forumid, subject, lastpost, hlcolor FROM topics WHERE lastpost > ".$CURUSER['last_catchup'].($beforepostid ? " AND lastpost < ".sqlesc($beforepostid) : "")." ORDER BY lastpost DESC LIMIT 100") or sqlerr(__FILE__, __LINE__);
+	$unreadQuery = \App\Models\Topic::query()
+		->where('lastpost', '>', $CURUSER['last_catchup']);
+	if ($beforepostid) {
+		$unreadQuery->where('lastpost', '<', $beforepostid);
+	}
+	$unreadTopics = $unreadQuery->orderByDesc('lastpost')->limit(100)->get();
 
 	stdhead($lang_forums['head_view_unread']);
 	print("<h1 align=\"center\"><a class=\"faqlink\" href=\"forums.php\">".$SITENAME."&nbsp;".$lang_forums['text_forums']."</a>-->".$lang_forums['text_topics_with_unread_posts']."</h1>");
@@ -1399,8 +1406,9 @@ if ($action == "viewunread")
 	$n = 0;
 	$uc = get_user_class();
 
-	while ($arr = mysql_fetch_assoc($res))
+	foreach ($unreadTopics as $topic)
 	{
+		$arr = $topic->toArray();
 		$topiclastpost = $arr['lastpost'];
 		$topicid = $arr['id'];
 
@@ -1454,11 +1462,17 @@ if ($action == "search")
 	$keywords = htmlspecialchars(trim($_GET["keywords"]));
 	if ($keywords != "")
 	{
-		$extraSql 	= " LIKE '%".mysql_real_escape_string($keywords)."%'";
-
-		$res = sql_query("SELECT COUNT(posts.id) FROM posts LEFT JOIN topics ON posts.topicid = topics.id LEFT JOIN forums ON topics.forumid = forums.id WHERE forums.minclassread <= ".sqlesc(get_user_class())." AND ((topics.subject $extraSql AND posts.id=topics.firstpost) OR posts.body $extraSql)") or sqlerr(__FILE__, __LINE__);
-		$arr = mysql_fetch_row($res);
-		$hits = intval($arr[0] ?? 0);
+		$term = '%'.$keywords.'%';
+		$searchQuery = \Nexus\Database\NexusDB::table('posts')
+			->leftJoin('topics', 'posts.topicid', '=', 'topics.id')
+			->leftJoin('forums', 'topics.forumid', '=', 'forums.id')
+			->where('forums.minclassread', '<=', get_user_class())
+			->where(function ($q) use ($term) {
+				$q->where(function ($sub) use ($term) {
+					$sub->where('topics.subject', 'like', $term)->whereColumn('posts.id', 'topics.firstpost');
+				})->orWhere('posts.body', 'like', $term);
+			});
+		$hits = $searchQuery->count('posts.id');
 		if ($hits){
 			$error = false;
 			$found = "[<b><font class=\"striking\"> ".$lang_forums['text_found'].$hits.$lang_forums['text_num_posts']." </font></b>]";
@@ -1515,15 +1529,21 @@ if ($action == "search")
 	if (!$error)
 	{
 		$perpage = $topicsperpage;
-		list($pagertop, $pagerbottom, $limit) = pager($perpage, $hits, "forums.php?action=search&keywords=".rawurlencode($keywords)."&");
-		$res = sql_query("SELECT posts.id, posts.topicid, posts.userid, posts.added, topics.subject, topics.hlcolor, forums.id AS forumid, forums.name AS forumname FROM posts LEFT JOIN topics ON posts.topicid = topics.id LEFT JOIN forums ON topics.forumid = forums.id WHERE forums.minclassread <= ".sqlesc(get_user_class())." AND ((topics.subject $extraSql AND posts.id=topics.firstpost) OR posts.body $extraSql) ORDER BY posts.id DESC $limit") or sqlerr(__FILE__, __LINE__);
+		[$pagertop, $pagerbottom, , $offset, $perpage, ] = pager($perpage, $hits, "forums.php?action=search&keywords=".rawurlencode($keywords)."&");
+		$posts = (clone $searchQuery)
+			->select('posts.id', 'posts.topicid', 'posts.userid', 'posts.added', 'topics.subject', 'topics.hlcolor', 'forums.id AS forumid', 'forums.name AS forumname')
+			->orderByDesc('posts.id')
+			->offset($offset)
+			->limit($perpage)
+			->get();
 
 		print($pagertop);
 		print("<table border=\"1\" cellspacing=\"0\" cellpadding=\"5\" width=\"97%\">\n");
 		print("<tr><td class=\"colhead\" align=\"center\">".$lang_forums['col_post']."</td><td class=\"colhead\" align=\"center\" width=\"70%\">".$lang_forums['col_topic']."</td><td class=\"colhead\" align=\"left\">".$lang_forums['col_forum']."</td><td class=\"colhead\" align=\"left\">".$lang_forums['col_posted_by']."</td></tr>\n");
 
-		while ($post = mysql_fetch_array($res))
+		foreach ($posts as $post)
 		{
+			$post = (array) $post;
 			print("<tr><td class=\"rowfollow\" align=\"center\" width=\"1%\">".$post['id']."</td><td class=\"rowfollow\" align=\"left\"><a href=\"".htmlspecialchars("?action=viewtopic&topicid=".$post['topicid']."&highlight=".rawurlencode($keywords)."&page=p".$post['id']."#pid".$post['id'])."\">" . highlight_topic(highlight($keywords,htmlspecialchars($post['subject'])), $post['hlcolor']) . "</a></td><td class=\"rowfollow nowrap\" align=\"left\"><a href=\"".htmlspecialchars("?action=viewforum&forumid=".$post['forumid'])."\"><b>" . htmlspecialchars($post["forumname"]) . "</b></a></td><td class=\"rowfollow nowrap\" align=\"left\">" . gettime($post['added'],true,false) . "&nbsp;|&nbsp;". get_username($post['userid']) ."</td></tr>\n");
 		}
 
@@ -1546,7 +1566,7 @@ if ($action != "")
 
 //-------- Get forums
 if ($CURUSER)
-	$USERUPDATESET[] = "forum_access = ".sqlesc(date("Y-m-d H:i:s"));
+	\App\Models\User::query()->where('id', $CURUSER['id'])->update(['forum_access' => date("Y-m-d H:i:s")]);
 
 stdhead($lang_forums['head_forums']);
 begin_main_frame();
@@ -1555,10 +1575,7 @@ print("<p align=\"center\"><a href=\"?action=search\"><b>".$lang_forums['text_se
 print("<table border=\"1\" cellspacing=\"0\" cellpadding=\"5\" width=\"100%\">\n");
 
 if (!$overforums = $Cache->get_value('overforums_list')){
-	$overforums = array();
-	$res = sql_query("SELECT * FROM overforums ORDER BY sort ASC") or sqlerr(__FILE__, __LINE__);
-	while ($row = mysql_fetch_array($res))
-		$overforums[] = $row;
+	$overforums = \App\Models\OverForum::query()->orderBy('sort')->get()->toArray();
 	$Cache->cache_value('overforums_list', $overforums, 86400);
 }
 foreach ($overforums as $a)
@@ -1594,8 +1611,8 @@ foreach ($overforums as $a)
 		// Find last post ID
 		//Returns the ID of the last post of a forum
 		if (!$arr = $Cache->get_value('forum_'.$forumid.'_last_replied_topic_content')){
-			$res = sql_query("SELECT * FROM topics WHERE forumid=".sqlesc($forumid)." ORDER BY lastpost DESC LIMIT 1") or sqlerr(__FILE__, __LINE__);
-			$arr = mysql_fetch_array($res);
+			$lastTopic = \App\Models\Topic::query()->where('forumid', $forumid)->orderByDesc('lastpost')->first();
+			$arr = $lastTopic ? $lastTopic->toArray() : false;
 			$Cache->cache_value('forum_'.$forumid.'_last_replied_topic_content', $arr, 900);
 		}
 
@@ -1631,9 +1648,11 @@ foreach ($overforums as $a)
 		}
 		$posttodaycount = $Cache->get_value('forum_'.$forumid.'_post_'.$today_date.'_count');
 		if ($posttodaycount == ""){
-			$res3 = sql_query("SELECT COUNT(posts.id) FROM posts LEFT JOIN topics ON posts.topicid = topics.id WHERE posts.added > ".sqlesc(date("Y-m-d"))." AND topics.forumid=".sqlesc($forumid)) or sqlerr(__FILE__, __LINE__);
-			$row3 = mysql_fetch_row($res3);
-			$posttodaycount = $row3[0];
+			$posttodaycount = \Nexus\Database\NexusDB::table('posts')
+				->leftJoin('topics', 'posts.topicid', '=', 'topics.id')
+				->where('posts.added', '>', date("Y-m-d"))
+				->where('topics.forumid', $forumid)
+				->count('posts.id');
 			$Cache->cache_value('forum_'.$forumid.'_post_'.$today_date.'_count', $posttodaycount, 1800);
 		}
 		if ($posttodaycount > 0)

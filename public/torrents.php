@@ -861,48 +861,24 @@ if (!empty($whereothera)) {
     $where .= ($where ? " AND " : "") . implode(" AND ", $whereothera);
 }
 
-$tagFilter = "";
 $tagId = intval($_REQUEST['tag_id'] ?? 0);
 if ($tagId > 0) {
-    $tagFilter = " inner join torrent_tags on torrents.id = torrent_tags.torrent_id and torrent_tags.tag_id = $tagId ";
     $addparam .= "tag_id={$tagId}&";
 }
-$torrentExtraFilter = "";
-if ($search_area == 1) {
-    $torrentExtraFilter = " inner join torrent_extras on torrents.id = torrent_extras.torrent_id ";
-}
-if ($allsec == 1 || $enablespecial != 'yes')
-{
-	if ($where != "")
-		$where = "WHERE $where ";
-	else $where = "";
-	$sql = "SELECT COUNT(*) FROM torrents " . ($search_area == 3 || $column == "owner" ? "LEFT JOIN users ON torrents.owner = users.id " : "") . $tagFilter . $torrentExtraFilter . $where;
-}
-else
-{
-//	if ($where != "")
-//		$where = "WHERE $where AND categories.mode = '$sectiontype'";
-//	else $where = "WHERE categories.mode = '$sectiontype'";
-
-    if ($where != "")
-        $where = "WHERE $where";
-    else $where = "";
-//	$sql = "SELECT COUNT(*), categories.mode FROM torrents LEFT JOIN categories ON category = categories.id " . ($search_area == 3 || $column == "owner" ? "LEFT JOIN users ON torrents.owner = users.id " : "") . $tagFilter . $where . " GROUP BY categories.mode";
-	$sql = "SELECT COUNT(*) FROM torrents " . ($search_area == 3 || $column == "owner" ? "LEFT JOIN users ON torrents.owner = users.id " : "") . $tagFilter . $torrentExtraFilter . $where;
-}
+$listingOptions = [
+    'where' => $where,
+    'join_users' => ($search_area == 3 || $column == "owner"),
+    'join_torrent_tags' => $tagId > 0,
+    'tag_id' => $tagId,
+    'join_torrent_extras' => $search_area == 1,
+];
 
 if ($shouldUseMeili) {
     $searchRep = new \App\Repositories\MeiliSearchRepository();
     $resultFromSearchRep = $searchRep->search($searchParams, $CURUSER['id']);
     $count = $resultFromSearchRep['total'];
 } else {
-    do_log("[BEFORE_TORRENT_COUNT_SQL]", 'debug');
-    $res = sql_query($sql);
-    do_log("[AFTER_TORRENT_COUNT_SQL] $sql", 'debug');
-    $count = 0;
-    while($row = mysql_fetch_array($res)) {
-        $count += $row[0];
-    }
+    $count = \App\Repositories\TorrentListingRepository::getCount($listingOptions);
 }
 $maxPageSize = 100;
 if (!empty($_GET['pageSize'])) {
@@ -944,21 +920,6 @@ if ($count)
 	//echo $addparam;
 
 	list($pagertop, $pagerbottom, $limit, $offset, $size, $page) = pager($torrentsperpage, $count, "?" . $addparam);
-	$fieldsStr = implode(', ', \App\Models\Torrent::getFieldsForList(true));
-//    if ($allsec == 1 || $enablespecial != 'yes') {
-//        $query = "SELECT $fieldsStr FROM torrents ".($search_area == 3 || $column == "owner" ? "LEFT JOIN users ON torrents.owner = users.id " : "")." $tagFilter $where $orderby $limit";
-//    } else {
-//        $query = "SELECT $fieldsStr, categories.mode as search_box_id FROM torrents ".($search_area == 3 || $column == "owner" ? "LEFT JOIN users ON torrents.owner = users.id " : "")." LEFT JOIN categories ON torrents.category=categories.id $tagFilter $where $orderby $limit";
-        $query = "SELECT $fieldsStr, $sectiontype as search_box_id FROM torrents ".($search_area == 3 || $column == "owner" ? "LEFT JOIN users ON torrents.owner = users.id " : "")."$tagFilter $torrentExtraFilter $where $orderby $limit";
-//    }
-
-    if (!$shouldUseMeili) {
-        do_log("[BEFORE_TORRENT_LIST_SQL]", 'debug');
-        $res = sql_query($query);
-        do_log("[AFTER_TORRENT_LIST_SQL] $query", 'debug');
-    }
-} else {
-    unset($res);
 }
 
 if (isset($searchstr))
@@ -1188,25 +1149,22 @@ if ($allsec != 1 || $enablespecial != 'yes'){ //do not print searchbox if showin
 <?php
 $Cache->new_page('hot_search', 3670, true);
 if (!$Cache->get_page()){
-	$secs = 3*24*60*60;
-	$dt = sqlesc(date("Y-m-d H:i:s",(TIMENOW - $secs)));
-	$dt2 = sqlesc(date("Y-m-d H:i:s",(TIMENOW - $secs*2)));
-	sql_query("DELETE FROM suggest WHERE adddate <" . $dt2) or sqlerr();
-	$searchres = sql_query("SELECT keywords, COUNT(DISTINCT userid) as count FROM suggest WHERE adddate >" . $dt . " GROUP BY keywords ORDER BY count DESC LIMIT 15") or sqlerr();
-	$hotcount = 0;
-	$hotsearch = "";
-	while ($searchrow = mysql_fetch_assoc($searchres))
-	{
-		$hotsearch .= "<a href=\"".htmlspecialchars("?search=" . rawurlencode($searchrow["keywords"]) . "&notnewword=1")."\"><u>" . htmlspecialchars($searchrow["keywords"]) . "</u></a>&nbsp;&nbsp;";
-		$hotcount += mb_strlen($searchrow["keywords"],"UTF-8");
-		if ($hotcount > 60)
-			break;
-	}
-	$Cache->add_whole_row();
-	if ($hotsearch)
-	print("<tr><td class=\"embedded\" colspan=\"3\">&nbsp;&nbsp;".$hotsearch."</td></tr>");
-	$Cache->end_whole_row();
-	$Cache->cache_page();
+    \App\Repositories\TorrentListingRepository::cleanupSuggest();
+    $searchres = \App\Repositories\TorrentListingRepository::getHotSearch();
+    $hotcount = 0;
+    $hotsearch = "";
+    foreach ($searchres as $searchrow)
+    {
+        $hotsearch .= "<a href=\"".htmlspecialchars("?search=" . rawurlencode($searchrow["keywords"]) . "&notnewword=1")."\"><u>" . htmlspecialchars($searchrow["keywords"]) . "</u></a>&nbsp;&nbsp;";
+        $hotcount += mb_strlen($searchrow["keywords"],"UTF-8");
+        if ($hotcount > 60)
+            break;
+    }
+    $Cache->add_whole_row();
+    if ($hotsearch)
+    print("<tr><td class=\"embedded\" colspan=\"3\">&nbsp;&nbsp;".$hotsearch."</td></tr>");
+    $Cache->end_whole_row();
+    $Cache->cache_page();
 }
 echo $Cache->next_row();
 
@@ -1241,9 +1199,14 @@ if ($count) {
     if ($shouldUseMeili) {
         $rows = $resultFromSearchRep['list'];
     } else {
-        while ($row = mysql_fetch_assoc($res)) {
-            $rows[] = $row;
-        }
+        $fieldsArr = \App\Models\Torrent::getFieldsForList(true);
+        $rows = \App\Repositories\TorrentListingRepository::getList(array_merge($listingOptions, [
+            'fields' => $fieldsArr,
+            'search_box_id' => $sectiontype,
+            'order_by' => $orderby,
+            'offset' => $offset,
+            'limit' => $size,
+        ]));
     }
     $rows = apply_filter('torrent_list', $rows, $page, $sectiontype, $_GET['search'] ?? '');
 	print($pagertop);

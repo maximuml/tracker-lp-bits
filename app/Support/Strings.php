@@ -171,6 +171,38 @@ final class Strings
     }
 
     /**
+     * Remove BBCode tags and HTML tags from `$text`, leaving plain text.
+     *
+     * Mirrors `strip_all_tags()`: strips parameter-less BBCode tags,
+     * strips parameterised BBCode tags (including their attributes),
+     * expands `[emNN]` emoji references to the configured emoji value,
+     * and finally calls PHP's `strip_tags()` and `trim()`.
+     */
+    public static function stripAllTags(string $text): string
+    {
+        $bbTags = [
+            '[*]', '[b]', '[/b]', '[i]', '[/i]', '[u]', '[/u]', '[s]', '[/s]', '[pre]', '[/pre]', '[quote]', '[/quote]',
+            '[/color]', '[/font]', '[/size]', '[/url]', '[/youtube]', '[/spoiler]',
+        ];
+        $text = str_replace($bbTags, '', $text);
+
+        $pattern = '/\[url=.*\]|\[color=.*\]|\[font=.*\]|\[size=.*\]|\[youtube.*\]|\[spoiler.*\]/isU';
+        $text = (string) preg_replace($pattern, '', $text);
+
+        static $emoji = null;
+        if (is_null($emoji)) {
+            $emoji = nexus_config('emoji');
+        }
+        $text = (string) preg_replace_callback('/\[em([1-9][0-9]*)\]/isU', function ($matches) use ($emoji) {
+            return $emoji[$matches[1]] ?? '';
+        }, $text);
+
+        $text = strip_tags($text);
+
+        return trim($text);
+    }
+
+    /**
      * Recursively `stripslashes()` a string or (arbitrarily nested)
      * array, preserving array keys. Backs the legacy `ssr()` helper
      * that was applied to whole request payloads to undo the

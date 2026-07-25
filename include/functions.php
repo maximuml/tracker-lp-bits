@@ -2452,28 +2452,7 @@ function attachmentUrl($location, $width = null, $height = null, $options = [])
 
 function strip_all_tags($text)
 {
-    //替换掉无参数标签
-    $bbTags = [
-        '[*]', '[b]', '[/b]', '[i]', '[/i]', '[u]', '[/u]', '[s]', '[/s]', '[pre]', '[/pre]', '[quote]', '[/quote]',
-        '[/color]', '[/font]', '[/size]', '[/url]', '[/youtube]', '[/spoiler]',
-    ];
-    $text = str_replace($bbTags, '', $text);
-    //替换掉有参数标签
-    $pattern = '/\[url=.*\]|\[color=.*\]|\[font=.*\]|\[size=.*\]|\[youtube.*\]|\[spoiler.*\]/isU';
-    $text = preg_replace($pattern, "", $text);
-    //去掉表情
-    static $emoji = null;
-    if (is_null($emoji)) {
-        $emoji = nexus_config('emoji');
-    }
-//    $text = preg_replace("/\[em([1-9][0-9]*)\]/isU", "", $text);
-    $text = preg_replace_callback("/\[em([1-9][0-9]*)\]/isU", function ($matches) use ($emoji) {
-        return $emoji[$matches[1]] ?? '';
-    }, $text);
-
-    $text = strip_tags($text);
-
-    return trim($text);
+	return \App\Support\Strings::stripAllTags((string) $text);
 }
 
 function format_description($description)

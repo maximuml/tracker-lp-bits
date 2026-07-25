@@ -120,6 +120,36 @@ final class Category
     }
 
     /**
+     * Return the category list for a search mode.
+     *
+     * Mirrors `genrelist()`.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public static function listByMode($cache, int|string $catmode = 1): array
+    {
+        $catmode = (int) $catmode;
+        $cacheKey = 'category_list_mode_' . $catmode;
+
+        if (method_exists($cache, 'get_value')) {
+            $ret = $cache->get_value($cacheKey);
+            if ($ret !== false && is_array($ret)) {
+                return $ret;
+            }
+        }
+
+        $ret = NexusDB::select(
+            'SELECT id, mode, name, image FROM categories WHERE mode = ' . sqlesc($catmode) . ' ORDER BY sort_index DESC'
+        );
+
+        if (method_exists($cache, 'cache_value')) {
+            $cache->cache_value($cacheKey, $ret, 3600);
+        }
+
+        return $ret;
+    }
+
+    /**
      * Build the category image tag for a category id.
      *
      * Mirrors `return_category_image()`.

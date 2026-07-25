@@ -2,6 +2,7 @@
 
 namespace App\Support;
 
+use App\Models\Setting;
 use App\Models\User;
 
 /**
@@ -258,5 +259,42 @@ final class UserClass
         }
 
         return $className;
+    }
+
+    /**
+     * Build a `<select>` of user-class tiers.
+     *
+     * Mirrors `classlist()`.
+     *
+     * @param  array<string, string>  $labels  Current language labels; must contain
+     *                                         `select_an_user_class` when `$includeNoClass` is true.
+     */
+    public static function classSelect(
+        string $selectName,
+        int $maxClass,
+        int|string $selected,
+        int $minClass = 0,
+        bool $includeNoClass = false,
+        bool $disabled = false,
+        array $labels = [],
+    ): string {
+        $disabledText = $disabled ? ' disabled = "disabled"' : '';
+        $list = "<select name=\"" . $selectName . "\"" . $disabledText . ">";
+
+        if ($includeNoClass) {
+            $list .= sprintf(
+                '<option value="%s">%s</option>',
+                Setting::PERMISSION_NO_CLASS,
+                $labels['select_an_user_class'] ?? '---'
+            );
+        }
+
+        for ($i = $minClass; $i <= $maxClass; $i++) {
+            $selectedAttr = (int) $selected === $i ? ' selected="selected"' : '';
+            $list .= "<option value=\"" . $i . "\"" . $selectedAttr . ">" . self::name($i, false, false, true) . "</option>\n";
+        }
+
+        $list .= "</select>";
+        return $list;
     }
 }

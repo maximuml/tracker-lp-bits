@@ -28,6 +28,27 @@ final class Input
      *
      * @param  string|array<int|string, string>  $vars
      */
+    /**
+     * Import `$_REQUEST` keys into `$GLOBALS`.
+     *
+     * Mirrors `GetVar()`.
+     */
+    public static function getVar(string|array $name): mixed
+    {
+        if (is_array($name)) {
+            foreach ($name as $var) {
+                self::getVar($var);
+            }
+            return null;
+        }
+
+        if (! isset($_REQUEST[$name])) {
+            return false;
+        }
+
+        return $GLOBALS[$name] = $_REQUEST[$name];
+    }
+
     public static function globalize(string|array $vars, array $get, array $post): int
     {
         if (! is_array($vars)) {

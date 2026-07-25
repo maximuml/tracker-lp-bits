@@ -7,20 +7,97 @@ namespace App\Support;
 use Nexus\Database\NexusDB;
 
 /**
- * Pure seeding-bonus math, drained out of `include/functions.php`
- * (`calculate_seed_bonus()`) as part of Phase 5 of the legacy migration.
+ * Seeding-bonus helpers drained out of `include/functions.php` as part of
+ * Phase 5 of the legacy migration.
  *
- * This class owns ONLY the deterministic computation: given the already
- * fetched torrent rows, the resolved `bonus` settings, tag groupings and
- * the medal additional factor, it reproduces — bit for bit — the formula
- * the legacy function ran inline. All database access, settings lookups
- * and logging stay in the `calculate_seed_bonus()` wrapper so this class
- * is trivially unit-testable.
+ * {@see aggregateSeedBonus()} owns the deterministic math: given already
+ * fetched torrent rows and resolved settings, it reproduces the legacy
+ * formula bit for bit.
+ *
+ * {@see calculateForUser()} keeps the database / settings lookup half of
+ * `calculate_seed_bonus()` so the wrapper in `include/functions.php` stays
+ * a one-liner.
  *
  * @see \calculate_seed_bonus()
  */
 class Bonus
 {
+    /**
+     * Fetch data and compute a user's per-hour seed bonus.
+     *
+     * Mirrors the non-deterministic half of `calculate_seed_bonus()`.
+     *
+     * @param  array<int>|null  $torrentIdArr
+     * @return array<string, mixed>
+     */
+    public static function calculateForUser(int|string $uid, ?array $torrentIdArr = null): array
+    {
+        $uid = (int) $uid;
+        $settingBonus = \App\Models\Setting::get('bonus');
+        $minSize = $settingBonus['min_size'] ?? 0;
+        $nowStr = date('Y-m-d H:i:s');
+        $logPrefix = "[CALCULATE_SEED_BONUS], uid: $uid, torrentIdArr: " . json_encode($torrentIdArr);
+
+        if ($torrentIdArr !== null) {
+            if (empty($torrentIdArr)) {
+                $torrentIdArr = [-1];
+            }
+            $idStr = implode(',', \Illuminate\Support\Arr::wrap($torrentIdArr));
+            $sql = "select torrents.id, torrents.added, torrents.size, torrents.seeders, 'NO_PEER_ID' as peerID, '' as last_action, '' as ip from torrents WHERE id in ($idStr) and size >= $minSize";
+        } else {
+            $sql = "select torrents.id, torrents.added, torrents.size, torrents.seeders, peers.id as peerID, peers.last_action, peers.ip from torrents LEFT JOIN peers ON peers.torrent = torrents.id WHERE peers.userid = $uid AND peers.seeder ='yes' and torrents.size > $minSize group by torrents.id, peers.id";
+        }
+
+        $tagGrouped = [];
+        $torrentResult = NexusDB::select($sql);
+        if (! empty($torrentResult)) {
+            $torrentIdArrReal = array_column($torrentResult, 'id');
+            $tagResult = NexusDB::select(sprintf('select torrent_id, tag_id from torrent_tags where torrent_id in (%s)', implode(',', $torrentIdArrReal)));
+            foreach ($tagResult as $tagItem) {
+                $tagGrouped[$tagItem['torrent_id']][$tagItem['tag_id']] = 1;
+            }
+        }
+
+        $officialTag = \App\Models\Setting::get('bonus.official_tag');
+        $officialAdditionalFactor = \App\Models\Setting::get('bonus.official_addition');
+        $zeroBonusTag = \App\Models\Setting::get('bonus.zero_bonus_tag');
+        $zeroBonusFactor = \App\Models\Setting::get('bonus.zero_bonus_factor');
+
+        if (NexusDB::isMysql()) {
+            $factorField = 'round(sum(bonus_addition_factor), 5)';
+        } elseif (NexusDB::isPgsql()) {
+            $factorField = 'round(sum(bonus_addition_factor)::numeric, 5)';
+        } else {
+            throw new \RuntimeException('Not supported database');
+        }
+
+        $userMedalResult = NexusDB::select("select $factorField as factor from medals where id in (select medal_id from user_medals where uid = $uid and (expire_at is null or expire_at > '$nowStr') and (bonus_addition_expire_at is null or bonus_addition_expire_at > '$nowStr'))");
+        $medalAdditionalFactor = floatval($userMedalResult[0]['factor'] ?? 0);
+
+        \do_log("$logPrefix, sql: $sql, count: " . count($torrentResult) . ", officialTag: $officialTag, officialAdditionalFactor: $officialAdditionalFactor, zeroBonusTag: $zeroBonusTag, zeroBonusFactor: $zeroBonusFactor, medalAdditionalFactor: $medalAdditionalFactor");
+
+        $result = self::aggregateSeedBonus(
+            $torrentResult,
+            $settingBonus,
+            $tagGrouped,
+            $officialTag,
+            $zeroBonusTag,
+            $zeroBonusFactor,
+            $medalAdditionalFactor,
+            $officialAdditionalFactor,
+            function ($torrent, $weeks_alive, $gb_size_raw, $gb_size, $temp, $officialAIncrease) use ($logPrefix) {
+                \do_log(sprintf(
+                    "$logPrefix, torrent: %s, peer ID: %s, weeks: %s, size_raw: %s GB, size: %s GB, increase A: %s, increase official A: %s",
+                    $torrent['id'], $torrent['peerID'] ?? '', $weeks_alive, $gb_size_raw, $gb_size, $temp, $officialAIncrease
+                ), 'debug');
+            },
+        );
+
+        \do_log("$logPrefix, result: " . json_encode($result));
+
+        return $result;
+    }
+
     /**
      * Aggregate the per-torrent seeding contributions into the bonus
      * result array consumed by callers (CalculateUserSeedBonus job,
@@ -244,6 +321,24 @@ class Bonus
             'has_medal_addition' => $hasMedalAddition,
             'medal_addition_factor' => $bonusResult['medal_additional_factor'],
         ];
+    }
+
+    /**
+     * Compute the harem seed-bonus addition for a user.
+     *
+     * Mirrors `calculate_harem_addition()`.
+     */
+    public static function haremAddition(int|string $uid): float|int|string
+    {
+        $addition = \Nexus\Database\NexusDB::table('users')
+            ->where('invited_by', $uid)
+            ->where('status', \App\Models\User::STATUS_CONFIRMED)
+            ->where('enabled', \App\Models\User::ENABLED_YES)
+            ->sum('seed_points_per_hour');
+
+        \do_log("[HAREM_ADDITION], user: $uid, addition: $addition");
+
+        return $addition;
     }
 
     /**

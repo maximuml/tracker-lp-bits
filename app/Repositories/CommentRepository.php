@@ -1,112 +1,161 @@
 <?php
+
 namespace App\Repositories;
 
 use App\Models\Comment;
-use App\Models\Message;
-use App\Models\NexusModel;
-use App\Models\Setting;
+use App\Models\Offer;
 use App\Models\Torrent;
 use App\Models\User;
 use Carbon\Carbon;
-use Hamcrest\Core\Set;
-use Illuminate\Contracts\Auth\Authenticatable;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Nexus\Database\NexusDB;
 
-class CommentRepository extends BaseRepository
+class CommentRepository
 {
-    public function getList(Request $request, Authenticatable $user)
+    public static function getParent(int $parentId, string $type): ?array
     {
-        $query = Comment::query()->with(['create_user', 'update_user']);
-        if (!empty($request->torrent_id)) {
-            $query->where('torrent', $request->torrent_id);
-        }
-        if (!empty($request->offer_id)) {
-            $query->where('offer', $request->offer_id);
-        }
-        if (!empty($request->request_id)) {
-            $query->where('request', $request->request_id);
-        }
-        $query->orderBy('id', 'asc');
-        return $query->paginate($this->getPerPageFromRequest($request));
+        $row = match ($type) {
+            'torrent' => Torrent::query()->where('id', $parentId)->select(['name', 'owner'])->first(),
+            'offer' => Offer::query()->where('id', $parentId)->select(['name', 'userid as owner'])->first(),
+            default => NexusDB::table('requests')->where('id', $parentId)->selectRaw('request as name, userid as owner')->first(),
+        };
+
+        return $row === null ? null : (array) $row;
     }
 
-    public function store(array $params, User $user)
+    public static function getQuote(int $commentId): ?array
     {
-        $type = $params['type'];
-        $modelName = Comment::TYPE_MAPS[$params['type']]['model'];
-        /**
-         * @var NexusModel $model
-         */
-        $model = new $modelName;
-        $target = $model->newQuery()->with('user')->find($params[$type]);
-        return DB::transaction(function () use ($params, $user, $target) {
-            $params['added'] = Carbon::now();
-            $comment = $user->comments()->create($params);
-            $commentCount = Comment::query()->type($params['type'], $params[$params['type']])->count();
-            $target->comments = $commentCount;
-            $target->save();
+        $row = NexusDB::table('comments')
+            ->leftJoin('users', 'comments.user', '=', 'users.id')
+            ->where('comments.id', $commentId)
+            ->select('comments.text', 'users.username')
+            ->first();
 
-            $userUpdate = [
-                'seedbonus' => NexusDB::raw('seedbonus + ' . Setting::get('bonus.addcomment')),
-                'last_comment' => Carbon::now(),
-            ];
-            $user->update($userUpdate);
+        return $row === null ? null : (array) $row;
+    }
 
-            //message
-            if ($target->user->commentpm == 'yes' && $user->id != $target->user->id) {
-                $messageInfo = $this->getNoticeMessage($target, $params['type']);
-                $insert = [
-                    'sender' => 0,
-                    'receiver' => $target->user->id,
-                    'subject' => $messageInfo['subject'],
-                    'msg' => $messageInfo['body'],
-                    'added' => $params['added'],
-                ];
-                Message::query()->insert($insert);
-                NexusDB::cache_del('user_'.$target->user->id.'_unread_message_count');
-                NexusDB::cache_del('user_'.$target->user->id.'_inbox_count');
+    public static function getForEdit(int $commentId, string $type): ?array
+    {
+        $query = NexusDB::table('comments as c');
+
+        if ($type == 'torrent') {
+            $query = $query->join('torrents as t', 'c.torrent', '=', 't.id')
+                ->where('c.id', $commentId)
+                ->select('c.*', 't.name', 't.id as parent_id');
+        } elseif ($type == 'offer') {
+            $query = $query->join('offers as o', 'c.offer', '=', 'o.id')
+                ->where('c.id', $commentId)
+                ->select('c.*', 'o.name', 'o.id as parent_id');
+        } else {
+            $query = $query->join('requests as r', 'c.request', '=', 'r.id')
+                ->where('c.id', $commentId)
+                ->select('c.*', 'r.request as name', 'r.id as parent_id');
+        }
+
+        $row = $query->first();
+
+        return $row === null ? null : (array) $row;
+    }
+
+    public static function getForDelete(int $commentId, string $type): ?array
+    {
+        $row = NexusDB::table('comments')
+            ->where('id', $commentId)
+            ->selectRaw("{$type} as pid, user")
+            ->first();
+
+        return $row === null ? null : (array) $row;
+    }
+
+    public static function getForViewOriginal(int $commentId, string $type): ?array
+    {
+        $query = NexusDB::table('comments as c');
+
+        if ($type == 'torrent') {
+            $query = $query->join('torrents as t', 'c.torrent', '=', 't.id')
+                ->where('c.id', $commentId)
+                ->select('c.*', 't.name');
+        } elseif ($type == 'offer') {
+            $query = $query->join('offers as o', 'c.offer', '=', 'o.id')
+                ->where('c.id', $commentId)
+                ->select('c.*', 'o.name');
+        } else {
+            $query = $query->join('requests as r', 'c.request', '=', 'r.id')
+                ->where('c.id', $commentId)
+                ->select('c.*', 'r.request as name');
+        }
+
+        $row = $query->first();
+
+        return $row === null ? null : (array) $row;
+    }
+
+    public static function getCommentPmSetting(int $userId): ?string
+    {
+        return User::query()->where('id', $userId)->value('commentpm');
+    }
+
+    public static function create(int $parentId, string $type, string $text, int $userId): int
+    {
+        $now = Carbon::now();
+
+        if ($type == 'torrent') {
+            $comment = Comment::create([
+                'user' => $userId,
+                'torrent' => $parentId,
+                'added' => $now,
+                'text' => $text,
+                'ori_text' => $text,
+            ]);
+            Torrent::query()->where('id', $parentId)->increment('comments');
+        } elseif ($type == 'offer') {
+            $comment = Comment::create([
+                'user' => $userId,
+                'offer' => $parentId,
+                'added' => $now,
+                'text' => $text,
+                'ori_text' => $text,
+            ]);
+            Offer::query()->where('id', $parentId)->increment('comments');
+        } else {
+            $id = (int) NexusDB::table('comments')->insertGetId([
+                'user' => $userId,
+                'request' => $parentId,
+                'added' => $now->toDateTimeString(),
+                'text' => $text,
+                'ori_text' => $text,
+            ]);
+            NexusDB::table('requests')->where('id', $parentId)->increment('comments');
+            $comment = (object) ['id' => $id];
+        }
+
+        User::query()->where('id', $userId)->update(['last_comment' => $now]);
+
+        return (int) $comment->id;
+    }
+
+    public static function update(int $commentId, string $text, int $editedBy): void
+    {
+        Comment::query()->where('id', $commentId)->update([
+            'text' => $text,
+            'editdate' => Carbon::now(),
+            'editedby' => $editedBy,
+        ]);
+    }
+
+    public static function delete(int $commentId, string $type, int $parentId): bool
+    {
+        $deleted = Comment::query()->where('id', $commentId)->delete();
+
+        if ($deleted) {
+            if ($type == 'torrent') {
+                Torrent::query()->where('id', $parentId)->decrement('comments');
+            } elseif ($type == 'offer') {
+                Offer::query()->where('id', $parentId)->decrement('comments');
+            } else {
+                NexusDB::table('requests')->where('id', $parentId)->decrement('comments');
             }
+        }
 
-            return $comment;
-        });
-    }
-
-    public function update(array $params, $id)
-    {
-        $model = Comment::query()->findOrFail($id);
-        $model->update($params);
-        return $model;
-    }
-
-    public function getDetail($id)
-    {
-        $model = Comment::query()->findOrFail($id);
-        return $model;
-    }
-
-    public function delete($id)
-    {
-        $model = Comment::query()->findOrFail($id);
-        $result = $model->delete();
-        return $result;
-    }
-
-    private function getNoticeMessage($target, $type): array
-    {
-        $allTrans = require_once base_path('lang/_target/lang_comment.php');
-        $lang = $target->user->language->site_lang_folder ?? 'en';
-        $trans = $allTrans[$lang];
-        $subject = $trans['msg_new_comment'];
-        $targetScript = Comment::TYPE_MAPS[$type]['target_script'];
-        $targetNameField = Comment::TYPE_MAPS[$type]['target_name_field'];
-        $body = sprintf(
-            '%s [url=%s]%s[/url]',
-            $trans['msg_torrent_receive_comment'],
-            sprintf($targetScript, $target->id),
-            $target->{$targetNameField}
-        );
-        return compact('subject', 'body');
+        return (bool) $deleted;
     }
 }

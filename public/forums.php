@@ -14,7 +14,7 @@ function forum_stats ()
 	if (!$activeforumuser_num = $Cache->get_value('active_forum_user_count')){
 		$secs = 900;
 		$dt = date("Y-m-d H:i:s",(TIMENOW - $secs));
-		$activeforumuser_num = get_row_count("users","WHERE forum_access >= ".sqlesc($dt));
+		$activeforumuser_num = \App\Models\User::query()->where('forum_access', '>=', $dt)->count();
 		$Cache->cache_value('active_forum_user_count', $activeforumuser_num, 300);
 	}
 	if ($activeforumuser_num){
@@ -27,15 +27,15 @@ function forum_stats ()
 <table width="100%"><tr><td class="text">
 <?php
 	if (!$postcount = $Cache->get_value('total_posts_count')){
-		$postcount = get_row_count("posts");
+		$postcount = \App\Models\Post::query()->count();
 		$Cache->cache_value('total_posts_count', $postcount, 96400);
 	}
 	if (!$topiccount = $Cache->get_value('total_topics_count')){
-		$topiccount = get_row_count("topics");
+		$topiccount = \App\Models\Topic::query()->count();
 		$Cache->cache_value('total_topics_count', $topiccount, 96500);
 	}
 	if (!$todaypostcount = $Cache->get_value('today_'.$today_date.'_posts_count')) {
-		$todaypostcount = get_row_count("posts", "WHERE added > ".sqlesc(date("Y-m-d")));
+		$todaypostcount = \App\Models\Post::query()->where('added', '>', date("Y-m-d"))->count();
 		$Cache->cache_value('today_'.$today_date.'_posts_count', $todaypostcount, 700);
 	}
 	print($lang_forums['text_our_members_have'] ."<b>".$postcount."</b>". $lang_forums['text_posts_in_topics']."<b>".$topiccount."</b>".$lang_forums['text_in_topics']."<b><font class=\"new\">".$todaypostcount."</font></b>".$lang_forums['text_new_post'].add_s($todaypostcount).$lang_forums['text_posts_today']."<br /><br />");
@@ -52,12 +52,12 @@ function catch_up()
 
 	if (!$CURUSER)
 		die;
-	sql_query("DELETE FROM readposts WHERE userid=".sqlesc($CURUSER['id']));
+	\Nexus\Database\NexusDB::table('readposts')->where('userid', $CURUSER['id'])->delete();
 	$Cache->delete_value('user_'.$CURUSER['id'].'_last_read_post_list');
-	$lastpostid=get_single_value("posts","id","ORDER BY id DESC");
+	$lastpostid = \App\Models\Post::query()->orderByDesc('id')->value('id');
 	if ($lastpostid){
 		$CURUSER['last_catchup'] = $lastpostid;
-		sql_query("UPDATE users SET last_catchup = ".sqlesc($lastpostid)." WHERE id=".sqlesc($CURUSER['id']));
+		\App\Models\User::query()->where('id', $CURUSER['id'])->update(['last_catchup' => $lastpostid]);
 	}
 }
 
@@ -98,27 +98,24 @@ function check_whether_exist($id, $place='forum'){
 	switch ($place){
 		case 'forum':
 		{
-			$count = get_row_count("forums","WHERE id=".sqlesc($id));
-			if (!$count)
+			if (!\App\Models\Forum::query()->where('id', $id)->exists())
 				stderr($lang_forums['std_error'],$lang_forums['std_no_forum_id']);
 			break;
 		}
 		case 'topic':
 		{
-			$count = get_row_count("topics","WHERE id=".sqlesc($id));
-			if (!$count)
+			$topic = \App\Models\Topic::query()->where('id', $id)->first(['forumid']);
+			if (!$topic)
 				stderr($lang_forums['std_error'],$lang_forums['std_bad_topic_id']);
-			$forumid = get_single_value("topics","forumid","WHERE id=".sqlesc($id));
-			check_whether_exist($forumid, 'forum');
+			check_whether_exist($topic->forumid, 'forum');
 			break;
 		}
 		case 'post':
 		{
-			$count = get_row_count("posts","WHERE id=".sqlesc($id));
-			if (!$count)
+			$post = \App\Models\Post::query()->where('id', $id)->first(['topicid']);
+			if (!$post)
 				stderr($lang_forums['std_error'],$lang_forums['std_no_post_id']);
-			$topicid = get_single_value("posts","topicid","WHERE id=".sqlesc($id));
-			check_whether_exist($topicid, 'topic');
+			check_whether_exist($post->topicid, 'topic');
 			break;
 		}
 	}
@@ -128,35 +125,33 @@ function check_whether_exist($id, $place='forum'){
 function update_topic_last_post($topicid)
 {
 	global $lang_forums;
-	$res = sql_query("SELECT id FROM posts WHERE topicid=".sqlesc($topicid)." ORDER BY id DESC LIMIT 1") or sqlerr(__FILE__, __LINE__);
-	$arr = mysql_fetch_row($res) or die($lang_forums['std_no_post_found']);
-	$postid = $arr[0];
-	sql_query("UPDATE topics SET lastpost=".sqlesc($postid)." WHERE id=".sqlesc($topicid)) or sqlerr(__FILE__, __LINE__);
+	$postid = \App\Models\Post::query()->where('topicid', $topicid)->orderByDesc('id')->value('id');
+	if (!$postid) {
+		die($lang_forums['std_no_post_found']);
+	}
+	\App\Models\Topic::query()->where('id', $topicid)->update(['lastpost' => $postid]);
 }
 
 function get_forum_row($forumid = 0)
 {
 	global $Cache;
 	if (!$forums = $Cache->get_value('forums_list')){
-		$forums = array();
-		$res2 = sql_query("SELECT * FROM forums ORDER BY forid ASC, sort ASC") or sqlerr(__FILE__, __LINE__);
-		while ($row2 = mysql_fetch_array($res2))
-			$forums[$row2['id']] = $row2;
+		$forums = \App\Models\Forum::query()->orderBy('forid')->orderBy('sort')->get()->keyBy('id')->map(fn($f) => $f->toArray())->all();
 		$Cache->cache_value('forums_list', $forums, 86400);
 	}
 	if (!$forumid)
 		return $forums;
-	else return $forums[$forumid];
+	else return $forums[$forumid] ?? null;
 }
 function get_last_read_post_id($topicid) {
 	global $CURUSER, $Cache;
 	static $ret;
 	if (!$ret && !$ret = $Cache->get_value('user_'.$CURUSER['id'].'_last_read_post_list')){
-		$ret = array();
-		$res = sql_query("SELECT * FROM readposts WHERE userid=" . sqlesc($CURUSER['id']));
-		if (mysql_num_rows($res) != 0){
-			while ($row = mysql_fetch_array($res))
-			$ret[$row['topicid']] = $row['lastpostread'];
+		$ret = [];
+		$rows = \Nexus\Database\NexusDB::table('readposts')->where('userid', $CURUSER['id'])->get(['topicid', 'lastpostread']);
+		if ($rows->isNotEmpty()){
+			foreach ($rows as $row)
+				$ret[$row->topicid] = $row->lastpostread;
 			$Cache->cache_value('user_'.$CURUSER['id'].'_last_read_post_list', $ret, 900);
 		}
 		else $Cache->cache_value('user_'.$CURUSER['id'].'_last_read_post_list', 'no record', 900);
@@ -181,44 +176,48 @@ function insert_compose_frame($id, $type = 'new')
 	switch ($type){
 		case 'new':
 		{
-			$forumname = get_single_value("forums","name","WHERE id=".sqlesc($id));
+			$forum = \App\Models\Forum::query()->where('id', $id)->first(['name']);
+			$forumname = $forum ? $forum->name : '';
 			$title = $lang_forums['text_new_topic_in']." <a href=\"".htmlspecialchars("?action=viewforum&forumid=".$id)."\">".htmlspecialchars($forumname)."</a> ".$lang_forums['text_forum'];
 			$hassubject = true;
 			break;
 		}
 		case 'reply':
 		{
-			$topicname = get_single_value("topics","subject","WHERE id=".sqlesc($id));
+			$topic = \App\Models\Topic::query()->where('id', $id)->first(['subject']);
+			$topicname = $topic ? $topic->subject : '';
 			$title = $lang_forums['text_reply_to_topic']." <a href=\"".htmlspecialchars("?action=viewtopic&topicid=".$id)."\">".htmlspecialchars($topicname)."</a> ";
 			break;
 		}
 		case 'quote':
 		{
-			$topicid=get_single_value("posts","topicid","WHERE id=".sqlesc($id));
-			$topicname = get_single_value("topics","subject","WHERE id=".sqlesc($topicid));
-			$title = $lang_forums['text_reply_to_topic']." <a href=\"".htmlspecialchars("?action=viewtopic&topicid=".$topicid)."\">".htmlspecialchars($topicname)."</a> ";
-			$res = sql_query("SELECT posts.body, users.username FROM posts LEFT JOIN users ON posts.userid = users.id WHERE posts.id=$id") or sqlerr(__FILE__, __LINE__);
-			if (mysql_num_rows($res) != 1)
+			$post = \App\Models\Post::query()->where('id', $id)->first(['topicid', 'body', 'userid']);
+			if (!$post)
 				stderr($lang_forums['std_error'], $lang_forums['std_no_post_id']);
-			$arr = mysql_fetch_assoc($res);
-			$body = "[quote=".htmlspecialchars($arr["username"])."]".htmlspecialchars(unesc($arr["body"]))."[/quote]";
-			$postid = $id;
+			$topicid = $post->topicid;
+			$topic = \App\Models\Topic::query()->where('id', $topicid)->first(['subject']);
+			$topicname = $topic ? $topic->subject : '';
+			$title = $lang_forums['text_reply_to_topic']." <a href=\"".htmlspecialchars("?action=viewtopic&topicid=".$topicid)."\">".htmlspecialchars($topicname)."</a> ";
+			$username = \App\Models\User::query()->where('id', $post->userid)->value('username');
+			$body = "[quote=".htmlspecialchars($username)."]".htmlspecialchars(unesc($post->body))."[/quote]";
+			print("<input type=\"hidden\" name=\"postid\" value=\"".$id."\" />");
 			$id = $topicid;
 			$type = 'reply';
-			print("<input type=\"hidden\" name=\"postid\" value=\"".$postid."\" />");
 			break;
 		}
 		case 'edit':
 		{
-			$res = sql_query("SELECT topicid, body FROM posts WHERE id=".sqlesc($id)." LIMIT 1") or sqlerr(__FILE__, __LINE__);
-			$row = mysql_fetch_array($res);
-			$topicid=$row['topicid'];
-			$firstpost = get_single_value("posts","MIN(id)", "WHERE topicid=".sqlesc($topicid));
+			$post = \App\Models\Post::query()->where('id', $id)->first(['topicid', 'body']);
+			if (!$post)
+				die;
+			$topicid = $post->topicid;
+			$firstpost = \App\Models\Post::query()->where('topicid', $topicid)->min('id');
 			if ($firstpost == $id){
-				$subject = get_single_value("topics","subject","WHERE id=".sqlesc($topicid));
+				$topic = \App\Models\Topic::query()->where('id', $topicid)->first(['subject']);
+				$subject = $topic ? $topic->subject : '';
 				$hassubject = true;
 			}
-			$body = htmlspecialchars(unesc($row["body"]));
+			$body = htmlspecialchars(unesc($post->body));
 			$title = $lang_forums['text_edit_post'];
 			break;
 		}

@@ -200,17 +200,11 @@ function do_log($log, $level = 'info', $echo = false)
 }
 
 function getDtMillis($withTimeZone = false): string {
-    $dt = DateTime::createFromFormat('U.u', sprintf('%.6f', microtime(true)));
-    $dt->setTimezone(new DateTimeZone(nexus_env('TIMEZONE', 'UTC')));
-    $format = $withTimeZone ? 'Y-m-d\TH:i:s.vP' : 'Y-m-d H:i:s.v';
-    return $dt->format($format);
+    return \App\Support\Time::millis((bool) $withTimeZone);
 }
 
 function getDtMicro($withTimeZone = false): string {
-    $dt = DateTime::createFromFormat('U.u', sprintf('%.6f', microtime(true)));
-    $dt->setTimezone(new DateTimeZone(nexus_env('TIMEZONE', 'UTC')));
-    $format = $withTimeZone ? 'Y-m-d\TH:i:s.uP' : 'Y-m-d H:i:s.u';
-    return $dt->format($format);
+    return \App\Support\Time::micro((bool) $withTimeZone);
 }
 
 function getLogFile($append = '')
@@ -333,137 +327,33 @@ function get_setting_from_db(?string $name = null, mixed $default = null): mixed
 
 function nexus_env($key = null, $default = null)
 {
-    static $env;
-    if (is_null($env)) {
-        $envFile = dirname(__DIR__) . '/.env';
-        $env = readEnvFile($envFile);
-    }
-    if (is_null($key)) {
-        return $env;
-    }
-    return $env[$key] ?? $default;
+    return \App\Support\Env::get($key, $default);
 }
 
 function readEnvFile($envFile)
 {
-    if (!file_exists($envFile)) {
-        if (php_sapi_name() == 'cli') {
-            return [];
-        }
-        throw new \RuntimeException("env file : $envFile is not exists in the root path.");
-    }
-    $env = [];
-    $fp = fopen($envFile, 'r');
-    if ($fp === false) {
-        throw new \RuntimeException(".env file: $envFile is not readable.");
-    }
-    while (($line = fgets($fp)) !== false) {
-        $line = trim($line);
-        if (empty($line)) {
-            continue;
-        }
-        $pos = strpos($line, '=');
-        if ($pos <= 0) {
-            continue;
-        }
-        if (mb_substr($line, 0, 1, 'utf-8') == '#') {
-            continue;
-        }
-        $lineKey = normalize_env(mb_substr($line, 0, $pos, 'utf-8'));
-        $lineValue = normalize_env(mb_substr($line, $pos + 1, null, 'utf-8'));
-        $env[$lineKey] = $lineValue;
-    }
-    return $env;
+    return \App\Support\Env::load($envFile);
 }
 
 function normalize_env($value)
 {
-	$value = trim($value);
-	$toStrip = ['\'', '"'];
-	if (in_array(mb_substr($value, 0, 1, 'utf-8'), $toStrip)) {
-		$value = mb_substr($value, 1, null, 'utf-8');
-	}
-	if (in_array(mb_substr($value, -1, null,'utf-8'), $toStrip)) {
-		$value = mb_substr($value, 0, -1, 'utf-8');
-	}
-	switch (strtolower($value)) {
-		case 'true':
-			return true;
-		case 'false':
-			return false;
-		case 'null':
-			return null;
-		default:
-			return $value;
-	}
+    $normalized = \App\Support\Env::normalize($value);
+    return match (strtolower($normalized)) {
+        'true' => true,
+        'false' => false,
+        'null' => null,
+        default => $normalized,
+    };
 }
 
-/**
- * Get an item from an array using "dot" notation.
- *
- * reference to Laravel
- *
- * @date 2021/1/14
- * @param $array
- * @param $key
- * @param null $default
- * @return mixed|null
- */
 function arr_get($array, $key, $default = null)
 {
-	if (strpos($key, '.') === false) {
-		return $array[$key] ?? $default;
-	}
-	foreach (explode('.', $key) as $segment) {
-		if (isset($array[$segment])) {
-			$array = $array[$segment];
-		} else {
-			return $default;
-		}
-	}
-	return $array;
+    return \App\Support\Arrays::get($array, $key, $default);
 }
 
-/**
- * From Laravel
- *
- * Set an array item to a given value using "dot" notation.
- *
- * If no key is given to the method, the entire array will be replaced.
- *
- * @param  array  $array
- * @param  string|null  $key
- * @param  mixed  $value
- * @return array
- */
 function arr_set(&$array, $key, $value)
 {
-    if (is_null($key)) {
-        return $array = $value;
-    }
-
-    $keys = explode('.', $key);
-
-    foreach ($keys as $i => $key) {
-        if (count($keys) === 1) {
-            break;
-        }
-
-        unset($keys[$i]);
-
-        // If the key doesn't exist at this depth, we will just create an empty array
-        // to hold the next value, allowing us to create the arrays to hold final
-        // values at the correct depth. Then we'll keep digging into the array.
-        if (! isset($array[$key]) || ! is_array($array[$key])) {
-            $array[$key] = [];
-        }
-
-        $array = &$array[$key];
-    }
-
-    $array[array_shift($keys)] = $value;
-
-    return $array;
+    return \App\Support\Arrays::set($array, $key, $value);
 }
 
 function isHttps(): bool
@@ -485,7 +375,7 @@ function getBaseUrl()
 
 function nexus_json_encode($data)
 {
-    return json_encode($data, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
+    return \App\Support\Json::encode($data);
 }
 
 function api(...$args)
@@ -601,21 +491,12 @@ function last_query($all = false, $format = 'json')
 
 function format_datetime($datetime, $format = 'Y-m-d H:i')
 {
-    if (empty($datetime)) {
-        return null;
-    }
-    try {
-        $carbonTime = \Carbon\Carbon::parse($datetime);
-        return $carbonTime->format($format);
-    } catch (\Exception) {
-        do_log("Invalid datetime: $datetime", 'error');
-        return $datetime;
-    }
+    return \App\Support\Time::formatDateTime($datetime, $format);
 }
 
 function nexus_trans($key, $replace = [], $locale = null)
 {
-    return \Nexus\Nexus::trans($key, $replace, $locale);
+    return \App\Support\Locale::trans($key, $replace, $locale);
 }
 
 function isRunningInConsole(): bool

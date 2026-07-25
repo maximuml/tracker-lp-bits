@@ -12,7 +12,7 @@ final class TorrentTable
 	global $Cache;
 	global $lang_functions;
 	global $CURUSER, $waitsystem;
-	global $torrentmanage_class, $smalldescription_main, $enabletooltip_tweak, $staffmem_class;
+	global $torrentmanage_class, $enabletooltip_tweak, $staffmem_class;
 	global $CURLANGDIR;
 
 	$torrent = new \Nexus\Torrent\Torrent();
@@ -144,9 +144,6 @@ if ($caticonrow['secondicon'] == 'yes')
 $has_secondicon = true;
 else $has_secondicon = false;
 $counter = 0;
-if ($smalldescription_main == 'no' || $CURUSER['showsmalldescr'] == 'no')
-	$displaysmalldescr = false;
-else $displaysmalldescr = true;
 //while ($row = mysql_fetch_assoc($res))
 $lastcom_tooltip = [];
 $torrent_tooltip = [];
@@ -172,13 +169,7 @@ foreach ($rows as $row)
 	$short_torrent_name_alt = "title=\"".htmlspecialchars($dispname)."\"";
 	$mouseovertorrent = "";
 	$count_dispname=mb_strlen($dispname,"UTF-8");
-	if (!$displaysmalldescr || $row["small_descr"] == "")// maximum length of torrent name
-		$max_length_of_torrent_name = 200;
-	elseif ($CURUSER['fontsize'] == 'large')
-		$max_length_of_torrent_name = 120;
-	elseif ($CURUSER['fontsize'] == 'small')
-		$max_length_of_torrent_name = 160;
-	else $max_length_of_torrent_name = 140;
+	$max_length_of_torrent_name = 200;
 
 	if($count_dispname > $max_length_of_torrent_name)
 		$dispname=mb_substr($dispname, 0, $max_length_of_torrent_name-2,"UTF-8") . "..";
@@ -228,20 +219,7 @@ foreach ($rows as $row)
         $tags = '';
     }
 
-	if ($displaysmalldescr){
-		//small descr
-		$dissmall_descr = trim($row["small_descr"]);
-		$count_dissmall_descr=mb_strlen($dissmall_descr,"UTF-8");
-		$max_lenght_of_small_descr=$max_length_of_torrent_name; // maximum length
-		if($count_dissmall_descr > $max_lenght_of_small_descr)
-		{
-			$dissmall_descr=mb_substr($dissmall_descr, 0, $max_lenght_of_small_descr-2,"UTF-8") . "..";
-		}
-		$dissmall_descr = $tags . htmlspecialchars($dissmall_descr);
-		print($dissmall_descr == "" ? "" : "<br />".$dissmall_descr);
-	} else {
-	    print($tags ? "<br />$tags" : "");
-    }
+	print($tags ? "<br />$tags" : "");
 	//progress bar
 	if (isset($torrentSeedingLeechingStatus[$row['id']])) {
 	    echo $torrent->renderProgressBar($torrentSeedingLeechingStatus[$row['id']]['active_status'], $torrentSeedingLeechingStatus[$row['id']]['progress']);

@@ -159,7 +159,7 @@ if ($showlastxtorrents_main == "yes") {
 		$ltCacheTtl = 120;
 		$ltHtml = $Cache->get_value($ltCacheKey);
 		if ($ltHtml === false || $ltHtml === null || $ltHtml === '') {
-			$result = sql_query("SELECT t.id, t.name, t.small_descr, t.leechers, t.seeders, t.size, t.owner, t.anonymous, t.cover, c.name AS cat_name FROM torrents t LEFT JOIN categories c ON t.category = c.id WHERE t.visible='yes' ORDER BY t.id DESC LIMIT 9") or sqlerr(__FILE__, __LINE__);
+			$result = sql_query("SELECT t.id, t.name, t.leechers, t.seeders, t.size, t.owner, t.anonymous, t.cover, c.name AS cat_name FROM torrents t LEFT JOIN categories c ON t.category = c.id WHERE t.visible='yes' ORDER BY t.id DESC LIMIT 9") or sqlerr(__FILE__, __LINE__);
 			if (mysql_num_rows($result) != 0) {
 				ob_start();
 				?>

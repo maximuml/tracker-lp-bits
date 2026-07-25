@@ -62,7 +62,6 @@ $updateset[] = "name = " . sqlesc($name);
 //$updateset[] = "descr = " . sqlesc($descr);
 $extraUpdate["descr"] = $descr;
 $updateset[] = "url = " . sqlesc($url);
-$updateset[] = "small_descr = " . sqlesc($_POST["small_descr"] ?? '');
 //$updateset[] = "ori_descr = " . sqlesc($descr);
 $updateset[] = "category = " . sqlesc($catid);
 $updateset[] = "source = " . sqlesc(intval($_POST["source_sel"][$newcatmode] ?? 0));

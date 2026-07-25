@@ -718,7 +718,7 @@ if (isset($searchstr))
 		case 0   :	// torrent name
 		{
 			foreach ($like_expression_array as &$like_expression_array_element)
-			$like_expression_array_element = "(torrents.name" . $like_expression_array_element." OR torrents.small_descr". $like_expression_array_element.")";
+			$like_expression_array_element = "(torrents.name" . $like_expression_array_element.")";
 			$wherea[] =  implode($ANDOR, $like_expression_array);
 			break;
 		}
@@ -1173,13 +1173,6 @@ if ($allsec != 1 || $enablespecial != 'yes'){ //do not print searchbox if showin
 							<select name="search_area">
 								<option value="0"><?php echo $lang_torrents['select_title'] ?></option>
 								<option value="1"<?php print(isset($_GET["search_area"]) && $_GET["search_area"] == 1 ? " selected=\"selected\"" : ""); ?>><?php echo $lang_torrents['select_description'] ?></option>
-								<?php
-								/*if ($smalldescription_main == 'yes'){
-								?>
-								<option value="2"<?php print($_GET["search_area"] == 2 ? " selected=\"selected\"" : ""); ?>><?php echo $lang_torrents['select_small_description'] ?></option>
-								<?php
-								}*/
-								?>
 								<option value="3"<?php print(isset($_GET["search_area"]) && $_GET["search_area"] == 3 ? " selected=\"selected\"" : ""); ?>><?php echo $lang_torrents['select_uploader'] ?></option>
 							</select>
 

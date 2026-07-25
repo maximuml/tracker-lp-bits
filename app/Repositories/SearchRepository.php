@@ -136,7 +136,6 @@ class SearchRepository extends BaseRepository
         return [
             'name' => ['type' => 'text', 'analyzer' => 'ik_max_word', 'fields' => ['keyword' => ['type' => 'keyword', 'ignore_above' => 256]]],
             'descr' => ['type' => 'text', 'analyzer' => 'ik_max_word', 'fields' => ['keyword' => ['type' => 'keyword', 'ignore_above' => 256]]],
-            'small_descr' => ['type' => 'text', 'analyzer' => 'ik_max_word', 'fields' => ['keyword' => ['type' => 'keyword', 'ignore_above' => 256]]],
             'category' => ['type' => 'long', ],
             'source' => ['type' => 'long', ],
             'medium' => ['type' => 'long', ],
@@ -535,11 +534,8 @@ class SearchRepository extends BaseRepository
                 $keywordFlag = $searchMode == self::SEARCH_MODE_EXACT ? ".keyword" : "";
                 if ($searchArea == self::SEARCH_AREA_TITLE) {
                     foreach ($keywordsArr as $keyword) {
-                        $tmpMustBoolShould = [];
-                        $tmpMustBoolShould[] = ['match' => ["name{$keywordFlag}" => $keyword]];
-                        $tmpMustBoolShould[] = ['match' => ["small_descr{$keywordFlag}" => $keyword]];
-                        $must[]['bool']['should'] = $tmpMustBoolShould;
-                        do_log("get must bool should [SEARCH_MODE_AND + SEARCH_MODE_EXACT] for name+small_descr match '$keyword' through search");
+                        $must[] = ['match' => ["name{$keywordFlag}" => $keyword]];
+                        do_log("get must [SEARCH_MODE_AND + SEARCH_MODE_EXACT] for name match '$keyword' through search");
                     }
                 } elseif ($searchArea == self::SEARCH_AREA_DESC) {
                     foreach ($keywordsArr as $keyword) {
@@ -557,8 +553,7 @@ class SearchRepository extends BaseRepository
                     $tmpMustBoolShould = [];
                     foreach ($keywordsArr as $keyword) {
                         $tmpMustBoolShould[] = ['match' => ['name' => $keyword]];
-                        $tmpMustBoolShould[] = ['match' => ['small_descr' => $keyword]];
-                        do_log("get must bool should [SEARCH_MODE_OR] for name+small_descr match '$keyword' through search");
+                        do_log("get must bool should [SEARCH_MODE_OR] for name match '$keyword' through search");
                     }
                     $must[]['bool']['should'] = $tmpMustBoolShould;
                 } elseif ($searchArea == self::SEARCH_AREA_DESC) {
@@ -623,7 +618,7 @@ class SearchRepository extends BaseRepository
             'sort' => $sort,
             'from' => $offset,
             'size' => $size,
-            '_source' => ['torrent_id', 'name', 'small_descr', 'owner']
+            '_source' => ['torrent_id', 'name', 'owner']
         ];
         do_log(sprintf(
             "params: %s, user: %s, queryString: %s, result: %s",

@@ -26,6 +26,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 /**
  * @property int $id
  * @property string|null $username
+ * @property int|string|null $class
+ * @property string|null $passkey
  * @property-read Language|null $language
  */
 class User extends Authenticatable implements FilamentUser, HasName

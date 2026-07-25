@@ -25,7 +25,11 @@ final class UserDisplay
             return $CURUSER['class'] ?? '';
         }
 
-        return auth()->user()?->class ?? '';
+        if (! auth()->check()) {
+            return '';
+        }
+
+        return auth()->user()->class ?? '';
     }
 
     /**
@@ -40,7 +44,11 @@ final class UserDisplay
             return (int) ($CURUSER['id'] ?? 0);
         }
 
-        return (int) (auth()->user()?->id ?? 0);
+        if (! auth()->check()) {
+            return 0;
+        }
+
+        return (int) (auth()->user()->id ?? 0);
     }
 
     /**
@@ -55,7 +63,11 @@ final class UserDisplay
             return $CURUSER['passkey'] ?? '';
         }
 
-        return auth()->user()?->passkey ?? '';
+        if (! auth()->check()) {
+            return '';
+        }
+
+        return (string) (auth()->user()->passkey ?? '');
     }
 
     /**
@@ -70,7 +82,11 @@ final class UserDisplay
             return $CURUSER['username'] ?? '';
         }
 
-        return auth()->user()?->username ?? '';
+        if (! auth()->check()) {
+            return '';
+        }
+
+        return (string) (auth()->user()->username ?? '');
     }
 
     /**

@@ -20,10 +20,10 @@ $id = intval($id ?? 0);
 if (!$id)
 	die();
 
-$res = sql_query("SELECT name,owner,seeders,anonymous FROM torrents WHERE id = ".sqlesc($id));
-$row = mysql_fetch_array($res);
-if (!$row)
+$torrent = \App\Models\Torrent::query()->select('name', 'owner', 'seeders', 'anonymous')->where('id', $id)->first();
+if (!$torrent)
 	die();
+$row = $torrent->toArray();
 
 if ($CURUSER["id"] != $row["owner"] && !user_can('torrentmanage'))
 	bark($lang_delete['std_not_owner']);

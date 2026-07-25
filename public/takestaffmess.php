@@ -9,7 +9,7 @@ if (get_user_class() < UC_ADMINISTRATOR)
 	stderr("Sorry", "Permission denied.");
 
 $sender_id = ($_POST['sender'] == 'system' ? 0 : (int)$CURUSER['id']);
-$dt = sqlesc(date("Y-m-d H:i:s"));
+$dt = date("Y-m-d H:i:s");
 $msg = trim($_POST['msg']);
 if (!$msg)
 	stderr("Error","Don't leave any fields blank.");
@@ -30,7 +30,8 @@ $page = 1;
 set_time_limit(300);
 $conditions = [];
 if (!empty($_POST['classes'])) {
-    $conditions[] = "class IN (" . implode(', ', $_POST['classes']) . ")";
+    $classIds = array_map('intval', $_POST['classes']);
+    $conditions[] = "class IN (" . implode(', ', $classIds) . ")";
 }
 $conditions = apply_filter("role_query_conditions", $conditions, $_POST);
 if (empty($conditions)) {
@@ -38,18 +39,29 @@ if (empty($conditions)) {
 }
 $whereStr = implode(' OR ', $conditions);
 while (true) {
-    $msgValues = [];
+    $msgRecords = [];
     $offset = ($page - 1) * $size;
-    $query = sql_query("SELECT id FROM users WHERE ($whereStr) and `enabled` = 'yes' and `status` = 'confirmed' limit $offset, $size");
-    while($dat=mysql_fetch_assoc($query))
+    $rows = \Nexus\Database\NexusDB::table('users')
+        ->whereRaw("($whereStr)")
+        ->where('enabled', 'yes')
+        ->where('status', 'confirmed')
+        ->offset($offset)
+        ->limit($size)
+        ->get(['id']);
+    foreach ($rows as $dat)
     {
-        $msgValues[] = sprintf('(%s, %s, %s, %s, %s)', $sender_id, $dat['id'], $dt, sqlesc($subject), sqlesc($msg));
+        $msgRecords[] = [
+            'sender' => $sender_id,
+            'receiver' => $dat->id,
+            'added' => $dt,
+            'subject' => $subject,
+            'msg' => $msg,
+        ];
     }
-    if (empty($msgValues)) {
+    if (empty($msgRecords)) {
         break;
     }
-    $sql = "INSERT INTO messages (sender, receiver, added,  subject, msg) VALUES " . implode(', ', $msgValues);
-    sql_query($sql);
+    \App\Models\Message::query()->insert($msgRecords);
     $page++;
 }
 

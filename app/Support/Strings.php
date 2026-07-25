@@ -239,4 +239,19 @@ final class Strings
 
         return stripslashes($value);
     }
+
+    /**
+     * Convert a fully-qualified class name into a Filament alias.
+     *
+     * Mirrors `get_filament_class_alias()`: replaces directory separators
+     * with dots, then kebab-cases each segment.
+     */
+    public static function filamentAlias(string $class): string
+    {
+        return \Illuminate\Support\Str::of($class)
+            ->replace(['/', '\\'], '.')
+            ->explode('.')
+            ->map([\Illuminate\Support\Str::class, 'kebab'])
+            ->implode('.');
+    }
 }

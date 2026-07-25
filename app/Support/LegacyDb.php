@@ -136,4 +136,35 @@ final class LegacyDb
 
         return $row ? $row[0] : false;
     }
+
+    /**
+     * Return the row count of `SELECT COUNT(*) FROM $table $suffix`.
+     *
+     * Mirrors `get_row_count()`.
+     */
+    public static function count(string $table, string $suffix = ''): int
+    {
+        $result = self::query("SELECT COUNT(*) FROM $table $suffix");
+        $row = NexusDB::getInstance()->fetchRow($result);
+
+        return (int) ($row[0] ?? 0);
+    }
+
+    /**
+     * Fetch the most recent snatched row for a torrent/user pair.
+     *
+     * Mirrors `get_snatch_info()`.
+     *
+     * @return array<string, mixed>|false
+     */
+    public static function snatchInfo(int|string $torrentId, int|string $userId): array|false
+    {
+        $sql = sprintf(
+            'SELECT * FROM snatched WHERE torrentid = %s AND userid = %s ORDER BY id DESC LIMIT 1',
+            (int) $torrentId,
+            (int) $userId,
+        );
+
+        return NexusDB::getInstance()->fetchAssoc(self::query($sql));
+    }
 }

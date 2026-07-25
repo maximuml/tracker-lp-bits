@@ -118,4 +118,131 @@ final class TorrentOps
 
         return (float) $torrent2UserValue;
     }
+
+    /**
+     * Compute the upload/download increments for a peer announce.
+     *
+     * Mirrors `getDataTraffic()`. Applies global/torrent promotion multipliers,
+     * VIP download exemption, and seed-box rules.
+     *
+     * @param  array<string, mixed>  $torrent
+     * @param  array<string, mixed>  $queries
+     * @param  array<string, mixed>  $user
+     * @param  array<string, mixed>  $peer
+     * @param  array<string, mixed>  $snatch
+     * @param  array<string, mixed>  $promotionInfo
+     * @return array<string, mixed>
+     */
+    public static function dataTraffic(
+        array $torrent,
+        array $queries,
+        array $user,
+        $peer,
+        $snatch,
+        $promotionInfo,
+    ): array {
+        if (!isset($user['__is_donor'])) {
+            throw new \InvalidArgumentException("user no '__is_donor' field");
+        }
+
+        $log = sprintf(
+            'torrent: %s, owner: %s, user: %s, peerUploaded: %s, peerDownloaded: %s, queriesUploaded: %s, queriesDownloaded: %s',
+            $torrent['id'], $torrent['owner'], $user['id'], $peer['uploaded'] ?? '', $peer['downloaded'] ?? '', $queries['uploaded'], $queries['downloaded'],
+        );
+
+        if (!empty($peer)) {
+            $realUploaded = max((int) \bcsub($queries['uploaded'], $peer['uploaded']), 0);
+            $realDownloaded = max((int) \bcsub($queries['downloaded'], $peer['downloaded']), 0);
+            $log .= ", [PEER_EXISTS], realUploaded: $realUploaded, realDownloaded: $realDownloaded, [SP_STATE]";
+
+            $spStateGlobal = \get_global_sp_state();
+            $spStateNormal = \App\Models\Torrent::PROMOTION_NORMAL;
+            if (!empty($promotionInfo) && isset($promotionInfo['__ignore_global_sp_state'])) {
+                $log .= ', use promotionInfo';
+                $spStateReal = $promotionInfo['sp_state'];
+            } elseif ($spStateGlobal != $spStateNormal) {
+                $log .= ', use global';
+                $spStateReal = $spStateGlobal;
+            } else {
+                $log .= ', use torrent individual';
+                $spStateReal = $torrent['sp_state'];
+            }
+
+            if (!isset(\App\Models\Torrent::$promotionTypes[$spStateReal])) {
+                $log .= ", spStateReal = $spStateReal, invalid, reset to: $spStateNormal";
+                $spStateReal = $spStateNormal;
+            }
+
+            $uploaderRatio = \get_setting('torrent.uploaderdouble');
+            $log .= ", uploaderRatio: $uploaderRatio";
+            if ($torrent['owner'] == $user['id'] && $uploaderRatio != 1) {
+                $upRatio = max($uploaderRatio, \App\Models\Torrent::$promotionTypes[$spStateReal]['up_multiplier']);
+                $log .= ", [IS_UPLOADER] && uploaderRatio != 1, upRatio: $upRatio";
+            } else {
+                $upRatio = \App\Models\Torrent::$promotionTypes[$spStateReal]['up_multiplier'];
+                $log .= ", [IS_NOT_UPLOADER] || uploaderRatio == 1, upRatio: $upRatio";
+            }
+
+            if ($user['class'] == \App\Models\User::CLASS_VIP) {
+                $downRatio = 0;
+                $log .= ", [IS_VIP], downRatio: $downRatio";
+            } else {
+                $downRatio = \App\Models\Torrent::$promotionTypes[$spStateReal]['down_multiplier'];
+                $log .= ", [IS_NOT_VIP], downRatio: $downRatio";
+            }
+        } else {
+            $realUploaded = $queries['uploaded'];
+            $realDownloaded = $queries['downloaded'];
+            $upRatio = 0;
+            $downRatio = 0;
+            $log .= ", [PEER_NOT_EXISTS], realUploaded: $realUploaded, realDownloaded: $realDownloaded, upRatio: $upRatio, downRatio: $downRatio";
+        }
+
+        $uploadedIncrementForUser = $realUploaded * $upRatio;
+        $downloadedIncrementForUser = $realDownloaded * $downRatio;
+        $log .= ", uploadedIncrementForUser: $uploadedIncrementForUser, downloadedIncrementForUser: $downloadedIncrementForUser";
+
+        $isSeedBoxRuleEnabled = \get_setting('seed_box.enabled') == 'yes';
+        $log .= ", isSeedBoxRuleEnabled: $isSeedBoxRuleEnabled, user class: {$user['class']}, __is_donor: {$user['__is_donor']}";
+        if ($isSeedBoxRuleEnabled && $torrent['owner'] != $user['id'] && !($user['class'] >= \App\Models\User::CLASS_VIP || $user['__is_donor'])) {
+            $isIPSeedBox = \isIPSeedBox($queries['ip'], $user['id']);
+            $log .= ", isIPSeedBox: " . ($isIPSeedBox ? 'true' : 'false');
+            if ($isIPSeedBox) {
+                $isSeedBoxNoPromotion = \get_setting('seed_box.no_promotion') == 'yes';
+                $log .= ", isSeedBoxNoPromotion: " . ($isSeedBoxNoPromotion ? 'true' : 'false');
+                if ($isSeedBoxNoPromotion) {
+                    $uploadedIncrementForUser = $realUploaded;
+                    $downloadedIncrementForUser = $realDownloaded;
+                    $log .= ', isIPSeedBox && isSeedBoxNoPromotion, increment for user = real';
+                }
+
+                $maxUploadedTimes = \get_setting('seed_box.max_uploaded');
+                $maxUploadedDurationSeconds = \get_setting('seed_box.max_uploaded_duration', 0) * 3600;
+                $torrentTTL = time() - strtotime($torrent['added']);
+                $timeRangeValid = ($maxUploadedDurationSeconds == 0) || ($torrentTTL < $maxUploadedDurationSeconds);
+                $log .= ", maxUploadedTimes: $maxUploadedTimes, maxUploadedDurationSeconds: $maxUploadedDurationSeconds, timeRangeValid: " . ($timeRangeValid ? 'true' : 'false');
+                if ($maxUploadedTimes > 0 && $timeRangeValid) {
+                    $log .= ', [LIMIT_UPLOADED]';
+                    if (!empty($snatch) && isset($torrent['size']) && $snatch['uploaded'] >= $torrent['size'] * $maxUploadedTimes) {
+                        $log .= ", snatchUploaded({$snatch['uploaded']}) >= torrentSize({$torrent['size']}) * times($maxUploadedTimes), uploadedIncrementForUser = 0";
+                        $uploadedIncrementForUser = 0;
+                    } else {
+                        $log .= ", snatchUploaded({$snatch['uploaded']}) < torrentSize({$torrent['size']}) * times($maxUploadedTimes), uploadedIncrementForUser do not change to 0";
+                    }
+                } else {
+                    $log .= ', [NOT_LIMIT_UPLOADED]';
+                }
+            }
+        }
+
+        $result = [
+            'uploaded_increment' => $realUploaded,
+            'uploaded_increment_for_user' => $uploadedIncrementForUser,
+            'downloaded_increment' => $realDownloaded,
+            'downloaded_increment_for_user' => $downloadedIncrementForUser,
+        ];
+        \do_log("$log, result: " . \nexus_json_encode($result), 'info');
+
+        return $result;
+    }
 }

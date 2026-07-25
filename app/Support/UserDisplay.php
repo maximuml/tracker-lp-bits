@@ -90,6 +90,68 @@ final class UserDisplay
     }
 
     /**
+     * Fetch a user row with the legacy common columns and in-request cache.
+     *
+     * Mirrors `get_user_row()`.
+     *
+     * @return array<string, mixed>|false
+     */
+    public static function row(int|string $id): array|false
+    {
+        static $userRows = [];
+
+        if (isset($userRows[$id])) {
+            return $userRows[$id];
+        }
+
+        $neededColumns = [
+            'id', 'class', 'enabled', 'privacy', 'avatar', 'signature', 'uploaded', 'downloaded',
+            'last_access', 'username', 'donor', 'donoruntil', 'leechwarn', 'warned', 'title',
+            'downloadpos', 'parked', 'clientselect', 'showclienterror',
+        ];
+
+        $row = \Nexus\Database\NexusDB::remember("user_{$id}_content", 3600, function () use ($id, $neededColumns) {
+            $user = \App\Models\User::query()
+                ->with([
+                    'wearing_medals' => function ($query) {
+                        $query->orderBy('user_medals.priority', 'desc')
+                            ->orderBy('user_medals.id', 'desc')
+                            ->limit((int) \get_setting('system.maximum_number_of_medals_can_be_worn', 3));
+                    },
+                ])
+                ->find($id, $neededColumns);
+
+            if (!$user) {
+                return null;
+            }
+
+            $arr = $user->toArray();
+            $metas = (new \App\Repositories\UserRepository())->listMetas($id, \App\Models\UserMeta::META_KEY_PERSONALIZED_USERNAME);
+            $arr['__is_rainbow'] = $metas->isNotEmpty() ? 1 : 0;
+            $arr['__is_donor'] = self::isDonor($arr);
+
+            return \apply_filter('user_row', $arr);
+        });
+
+        return $userRows[$id] = ($row ?: false);
+    }
+
+    /**
+     * Check whether the user is a donor with an active donoruntil window.
+     *
+     * Mirrors `is_donor()`.
+     */
+    public static function isDonor(array $userInfo): bool
+    {
+        $donorUntil = $userInfo['donoruntil'] ?? null;
+
+        return $userInfo['donor'] == 'yes'
+            && ($donorUntil === null
+                || $donorUntil == '0000-00-00 00:00:00'
+                || $donorUntil >= date('Y-m-d H:i:s'));
+    }
+
+    /**
      * Return the raw username for a user id.
      *
      * Mirrors `get_plain_username()`.

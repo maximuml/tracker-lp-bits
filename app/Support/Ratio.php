@@ -246,6 +246,31 @@ final class Ratio
     }
 
     /**
+     * Render the hit-and-run ratio as an HTML fragment.
+     *
+     * Mirrors `get_hr_ratio()`: computes `$uped / $downed`, wraps the
+     * value in the colour from {@see color()}, and caps very large
+     * ratios at the literal `Inf.`.
+     */
+    public static function hr(int|float $uped, int|float $downed): string
+    {
+        if ($downed > 0) {
+            $ratio = $uped / $downed;
+            $color = self::color($ratio);
+            $ratio = $ratio > 10000 ? 'Inf.' : number_format($ratio, 3);
+            if ($color) {
+                $ratio = '<font color="'.$color.'">'.$ratio.'</font>';
+            }
+        } elseif ($uped > 0) {
+            $ratio = 'Inf.';
+        } else {
+            $ratio = '---';
+        }
+
+        return $ratio;
+    }
+
+    /**
      * User ratio by id — fetches the user row and renders the numeric
      * or HTML form. Mirrors `get_ratio()`.
      */

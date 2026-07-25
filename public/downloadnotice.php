@@ -13,14 +13,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST")
 	elseif ($type == 'firsttime')
 	{
 		if ($hidenotice){
-			sql_query("UPDATE users SET showdlnotice=0 WHERE id=".sqlesc($CURUSER['id']));
+			\App\Models\User::query()->where('id', $CURUSER['id'])->update(['showdlnotice' => 0]);
 		}
 		nexus_redirect(getSchemeAndHttpHost(). "/download.php?id=".$torrentid."&letdown=1");
 	}
 	elseif ($type == 'client')
 	{
 		if ($hidenotice){
-			sql_query("UPDATE users SET showclienterror='no' WHERE id=".sqlesc($CURUSER['id']));
+			\App\Models\User::query()->where('id', $CURUSER['id'])->update(['showclienterror' => 'no']);
 		}
         nexus_redirect(getSchemeAndHttpHost() . "/download.php?id=".$torrentid."&letdown=1");
 	}

@@ -13,8 +13,14 @@ begin_main_frame();
 print("<h1 align=\"center\">FAQ Management</h1>");
 
 // make the array that has all the faq in a nice structured
-$res = sql_query("SELECT faq.id, faq.link_id, faq.lang_id, lang_name, faq.question, faq.flag, faq.order FROM faq LEFT JOIN language on faq.lang_id = language.id WHERE type='categ' ORDER BY lang_name, `order` ASC");
-while ($arr = mysql_fetch_array($res, MYSQLI_BOTH)) {
+$categRows = \Nexus\Database\NexusDB::table('faq')
+    ->leftJoin('language', 'faq.lang_id', '=', 'language.id')
+    ->where('faq.type', 'categ')
+    ->orderBy('language.lang_name')
+    ->orderBy('faq.order')
+    ->get(['faq.id', 'faq.link_id', 'faq.lang_id', 'language.lang_name', 'faq.question', 'faq.flag', 'faq.order']);
+foreach ($categRows as $row) {
+	$arr = (array) $row;
 	$faq_categ[$arr['lang_id']][$arr['link_id']]['title'] = $arr['question'];
 	$faq_categ[$arr['lang_id']][$arr['link_id']]['flag'] = $arr['flag'];
 	$faq_categ[$arr['lang_id']][$arr['link_id']]['order'] = $arr['order'];
@@ -22,8 +28,12 @@ while ($arr = mysql_fetch_array($res, MYSQLI_BOTH)) {
 	$faq_categ[$arr['lang_id']][$arr['link_id']]['lang_name'] = $arr['lang_name'];
 }
 
-$res = sql_query("SELECT faq.id, faq.question, faq.lang_id, faq.flag, faq.categ, faq.order FROM faq WHERE type='item' ORDER BY `order` ASC");
-while ($arr = mysql_fetch_array($res)) {
+$itemRows = \Nexus\Database\NexusDB::table('faq')
+    ->where('type', 'item')
+    ->orderBy('order')
+    ->get(['id', 'question', 'lang_id', 'flag', 'categ', 'order']);
+foreach ($itemRows as $row) {
+	$arr = (array) $row;
 	$faq_categ[$arr['lang_id']][$arr['categ']]['items'][$arr['id']]['question'] = $arr['question'];
 	$faq_categ[$arr['lang_id']][$arr['categ']]['items'][$arr['id']]['flag'] = $arr['flag'];
 	$faq_categ[$arr['lang_id']][$arr['categ']]['items'][$arr['id']]['order'] = $arr['order'];

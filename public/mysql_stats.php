@@ -131,21 +131,18 @@ echo '<h1 align=center>' . "\n"
 /**
  * Sends the query and buffers the result
  */
-$res = @sql_query('SHOW STATUS') or Die(mysql_error());
-	while ($row = mysql_fetch_row($res)) {
-		$serverStatus[$row[0]] = $row[1];
-	}
-@mysql_free_result($res);
-unset($res);
-unset($row);
+$statusRows = \Nexus\Database\NexusDB::select('SHOW STATUS');
+foreach ($statusRows as $row) {
+	$serverStatus[$row['Variable_name']] = $row['Value'];
+}
 
 
 /**
  * Displays the page
  */
 //Uptime calculation
-$res = @sql_query('SELECT UNIX_TIMESTAMP() - ' . $serverStatus['Uptime']);
-$row = mysql_fetch_row($res);
+$uptimeRow = \Nexus\Database\NexusDB::select('SELECT UNIX_TIMESTAMP() - ' . (int)$serverStatus['Uptime'] . ' AS uptime')[0] ?? [];
+$row = [$uptimeRow['uptime'] ?? 0];
 //echo sprintf("Server Status Uptime", timespanFormat($serverStatus['Uptime']), localisedDate($row[0])) . "\n";
 ?>
 

@@ -34,9 +34,7 @@ if ($action == 'view') {
     if ($id == 0) {
         stderr($lang_fields['field_management'], "Invalid id");
     }
-    $sql = "select * from torrents_custom_fields where id = $id";
-    $res = sql_query($sql);
-    $row = mysql_fetch_assoc($res);
+    $row = (array) \Nexus\Database\NexusDB::table('torrents_custom_fields')->where('id', $id)->first();
     if (empty($row)) {
         stderr('', 'Invalid id');
     }
@@ -48,8 +46,7 @@ if ($action == 'view') {
     if ($id == 0) {
         stderr($lang_fields['field_management'], "Invalid id");
     }
-    $sql = "delete from torrents_custom_fields where id = $id";
-    $res = sql_query($sql);
+    \Nexus\Database\NexusDB::table('torrents_custom_fields')->where('id', $id)->delete();
     nexus_redirect('fields.php?action=view');
 }
 

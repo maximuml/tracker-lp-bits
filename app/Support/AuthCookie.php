@@ -173,4 +173,141 @@ final class AuthCookie
     {
         setcookie(self::COOKIE_NAME, '', 0x7fffffff, '/', '', isHttps(), true);
     }
+
+    /**
+     * Resolve a tracker-report authkey to the user's passkey.
+     *
+     * Mirrors `get_passkey_by_authkey()`. The result is cached for 24h.
+     */
+    public static function passkeyByAuthkey(string $authkey): string
+    {
+        return \Nexus\Database\NexusDB::remember("authkey2passkey:$authkey", 3600 * 24, function () use ($authkey) {
+            $arr = explode('|', $authkey);
+            if (count($arr) !== 3) {
+                throw new \InvalidArgumentException("Invalid authkey: $authkey, format error");
+            }
+            $uid = $arr[1];
+            $decrypted = (new \App\Repositories\TorrentRepository())->checkTrackerReportAuthKey($authkey);
+            if (empty($decrypted)) {
+                throw new \InvalidArgumentException("Invalid authkey: $authkey");
+            }
+            $userInfo = \Nexus\Database\NexusDB::remember("announce_user_passkey_$uid", 3600, function () use ($uid) {
+                return \App\Models\User::query()->where('id', $uid)->first(['id', 'passkey']);
+            });
+
+            return $userInfo === null ? '' : $userInfo->passkey;
+        });
+    }
+
+    /**
+     * Decode the signed user cookie value (c_secure_pass).
+     *
+     * Mirrors `get_user_id_and_signature_from_cookie()`.
+     *
+     * @return array{user_id: int, token_json: string, signature: string}|null
+     */
+    public static function decodeCookie(array $cookie): ?array
+    {
+        $log = 'cookie: ' . json_encode($cookie);
+        if (empty($cookie[self::COOKIE_NAME])) {
+            \do_log("$log, param not enough");
+            return null;
+        }
+
+        $base64Decoded = base64_decode($cookie[self::COOKIE_NAME]);
+        if (empty($base64Decoded)) {
+            \do_log("$log, invalid c_secure_pass");
+            return null;
+        }
+
+        $log .= ", base64 decoded: $base64Decoded";
+        $tokenJsonAndSignature = explode('.', $base64Decoded);
+        if (count($tokenJsonAndSignature) !== 2) {
+            \do_log("$log, invalid c_secure_pass base64_decoded");
+            return null;
+        }
+
+        $tokenJson = $tokenJsonAndSignature[0];
+        $signature = $tokenJsonAndSignature[1];
+        if (empty($tokenJson) || empty($signature)) {
+            \do_log("$log, no tokenJson or signature");
+            return null;
+        }
+
+        $tokenData = json_decode($tokenJson, true);
+        if (!isset($tokenData['user_id'])) {
+            \do_log("$log, no user_id");
+            return null;
+        }
+        if (!isset($tokenData['expires']) || $tokenData['expires'] < time()) {
+            \do_log("$log, signature expired");
+            return null;
+        }
+
+        return [
+            'user_id' => (int) $tokenData['user_id'],
+            'token_json' => $tokenJson,
+            'signature' => $signature,
+        ];
+    }
+
+    /**
+     * Look up the user from the legacy auth cookie.
+     *
+     * Mirrors `get_user_from_cookie()`. When `$isArray` is true the row is
+     * returned as an array, otherwise an Eloquent User model is returned.
+     *
+     * @return array<string, mixed>|\App\Models\User|null
+     */
+    public static function userFromCookie(array $cookie, bool $isArray = true): array|\App\Models\User|null
+    {
+        $log = 'cookie: ' . json_encode($cookie);
+        $result = self::decodeCookie($cookie);
+        if (empty($result)) {
+            return null;
+        }
+
+        $id = $result['user_id'];
+        $tokenJson = $result['token_json'];
+        $signature = $result['signature'];
+        $log .= ", uid = $id";
+        $isAjax = \nexus()->isAjax();
+        $selfEnableBonus = \App\Models\Setting::getSelfEnableBonus();
+        $shouldIgnoreEnabled = defined('IN_NEXUS') && IN_NEXUS && !$isAjax && $selfEnableBonus > 0;
+
+        if ($isArray) {
+            $whereStr = sprintf("id = %d and status = 'confirmed'", $id);
+            if (!$shouldIgnoreEnabled) {
+                $whereStr .= " and enabled = 'yes'";
+            }
+            $res = \sql_query("SELECT * FROM users WHERE $whereStr LIMIT 1");
+            $row = \mysql_fetch_array($res);
+            if (!$row) {
+                \do_log("$log, user not exists");
+                return null;
+            }
+            $authKey = $row['auth_key'];
+            unset($row['auth_key'], $row['passhash']);
+        } else {
+            $row = \App\Models\User::query()->find($id);
+            if (!$row) {
+                \do_log("$log, user not exists");
+                return null;
+            }
+            $checkFields = ['status'];
+            if (!$shouldIgnoreEnabled) {
+                $checkFields[] = 'enabled';
+            }
+            $row->checkIsNormal($checkFields);
+            $authKey = $row->auth_key;
+        }
+
+        $expectedSignature = hash_hmac('sha256', $tokenJson, $authKey);
+        if (!hash_equals($expectedSignature, $signature)) {
+            \do_log("$log, !hash_equals, expectedSignature: $expectedSignature, actualSignature: $signature");
+            return null;
+        }
+
+        return $row;
+    }
 }

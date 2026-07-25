@@ -44,4 +44,14 @@ final class Token
     {
         return bin2hex(random_bytes($bytes));
     }
+
+    /**
+     * Build the cache key for an authentication challenge.
+     *
+     * Mirrors `get_challenge_key()`.
+     */
+    public static function challengeKey(string $challenge): string
+    {
+        return 'challenge:' . $challenge;
+    }
 }

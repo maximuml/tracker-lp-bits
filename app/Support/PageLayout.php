@@ -237,7 +237,7 @@ class PageLayout
             }
             if (!$connect = $Cache->get_value('user_' . $CURUSER["id"] . '_connect')) {
                 $res3 = \Nexus\Database\NexusDB::select("SELECT connectable FROM peers WHERE userid=" . \App\Support\LegacyDb::escape($CURUSER["id"]) . " order by id desc LIMIT 1");
-                if ($row = mysql_fetch_row($res3)) {
+                if ($row = ($res3 ? array_values((array) $res3[0]) : null)) {
                     $connect = $row[0];
                 } else {
                     $connect = 'unknown';

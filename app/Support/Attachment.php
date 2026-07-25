@@ -79,7 +79,7 @@ final class Attachment
         $row = \Nexus\Database\NexusDB::cache_get('attachment_' . $dlkey . '_content');
 
         if (empty($row) && strlen($dlkey) == 32) {
-            $result = \Nexus\Database\NexusDB::select('SELECT * FROM attachments WHERE dlkey = ' . \sqlesc($dlkey) . ' LIMIT 1');
+            $result = \Nexus\Database\NexusDB::select('SELECT * FROM attachments WHERE dlkey = ' . \App\Support\LegacyDb::escape($dlkey) . ' LIMIT 1');
             $row = $result[0] ?? null;
             \Nexus\Database\NexusDB::cache_put('attachment_' . $dlkey . '_content', $row, 86400);
         }

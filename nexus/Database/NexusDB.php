@@ -161,6 +161,14 @@ class NexusDB
         return $this->isConnected;
     }
 
+    private static function quote($value): string
+    {
+        if (is_null($value)) {
+            return 'null';
+        }
+        return "'" . self::getInstance()->escapeString((string) $value) . "'";
+    }
+
     public static function insert($table, $data)
     {
         if (empty($table) || empty($data) || !is_array($data)) {
@@ -170,10 +178,10 @@ class NexusDB
             return DB::table($table)->insertGetId($data);
         }
         $fields = array_map(function ($value) {return "$value";}, array_keys($data));
-        $values = array_map(function ($value) {return sqlesc($value);}, array_values($data));
+        $values = array_map(function ($value) {return self::quote($value);}, array_values($data));
         $sql = sprintf("insert into %s (%s) values (%s)", $table, implode(', ', $fields), implode(', ', $values));
-        sql_query($sql);
-        return mysql_insert_id();
+        self::getInstance()->query($sql);
+        return self::getInstance()->lastInsertId();
     }
 
     public static function update($table, $data, $whereStr)
@@ -183,11 +191,11 @@ class NexusDB
         }
         $updateArr = [];
         foreach ($data as $field => $value) {
-            $updateArr[] = "`$field` = " . sqlesc($value);
+            $updateArr[] = "`$field` = " . self::quote($value);
         }
         $sql = sprintf("update `%s` set %s where %s", $table, implode(', ', $updateArr), $whereStr);
-        sql_query($sql);
-        return mysql_affected_rows();
+        self::getInstance()->query($sql);
+        return self::getInstance()->affectedRows();
     }
 
     public static function delete($table, $whereStr, $limit = null)
@@ -203,8 +211,8 @@ class NexusDB
         if (!is_null($limit)) {
             $sql .= " limit $limit";
         }
-        sql_query($sql);
-        return mysql_affected_rows();
+        self::getInstance()->query($sql);
+        return self::getInstance()->affectedRows();
     }
 
     public static function getOne($table, $whereStr, $fields = '*')
@@ -223,8 +231,8 @@ class NexusDB
             throw new DatabaseException("empty fields.");
         }
         $sql = "select $fields from $table where $whereStr limit 1";
-        $res = sql_query($sql);
-        return mysql_fetch_assoc($res);
+        $res = self::select($sql);
+        return $res[0] ?? null;
     }
 
     public static function getAll($table, $whereStr, $fields = '*')
@@ -255,9 +263,9 @@ class NexusDB
             $result = DB::select($sql);
             return json_decode(json_encode($result), true);
         }
-        $res = sql_query($sql);
+        $res = self::getInstance()->query($sql);
         $result = [];
-        while ($row = mysql_fetch_assoc($res)) {
+        while ($row = self::getInstance()->fetchAssoc($res)) {
             $result[] = $row;
         }
         return $result;
@@ -318,7 +326,7 @@ class NexusDB
     public static function statement($value)
     {
         if (IN_NEXUS) {
-            return sql_query($value);
+            return self::getInstance()->query($value);
         }
         return DB::statement($value);
     }

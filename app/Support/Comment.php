@@ -305,7 +305,7 @@ final class Comment
 
             $html .= '<table class="main" width="100%" border="0" cellspacing="0" cellpadding="5">' . "\n";
             $secs = 900;
-            $dt = \sqlesc(date('Y-m-d H:i:s', TIMENOW - $secs));
+            $dt = \App\Support\LegacyDb::escape(date('Y-m-d H:i:s', TIMENOW - $secs));
             $html .= '<tr>' . "\n";
             $html .= '<td class="rowfollow" width="150" valign="top" style="padding: 0px;">' . \return_avatar_image($avatar) . '</td>' . "\n";
             $html .= '<td class="rowfollow word-break-all" valign="top"><br />' . $text . $textEditby . '</td>' . "\n";

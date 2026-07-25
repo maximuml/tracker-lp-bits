@@ -24,9 +24,9 @@ if (get_user_class() >= UC_SYSOP) {
 	print("<br />");
 	print("<table width=80% border=1 cellspacing=0 cellpadding=5 align=center>");
 	echo("<td class=colhead align=left>" . ($lang_staffpanel["Option Name"] ?? 'Option Name') . "</td><td class=colhead align=left>" . ($lang_staffpanel["Info"] ?? 'Info') . "</td>");
-	$query = "SELECT * FROM sysoppanel";
-	$sql = sql_query($query);
-	while ($row = mysql_fetch_array($sql)) {
+	$sysopPanels = \Nexus\Database\NexusDB::table('sysoppanel')->get();
+	foreach ($sysopPanels as $panelRow) {
+		$row = (array) $panelRow;
 		$id = $row['id'];
 		$name = $lang_staffpanel[$row['name']] ?? $row['name'];
 		$url = $row['url'];
@@ -45,9 +45,9 @@ if (get_user_class() >= UC_ADMINISTRATOR) {
 	print("<br />");
 	print("<table width=80% border=1 cellspacing=0 cellpadding=5 align=center>");
 	echo("<td class=colhead align=left>" . ($lang_staffpanel["Option Name"] ?? 'Option Name') . "</td><td class=colhead align=left>" . ($lang_staffpanel["Info"] ?? 'Info') . "</td>");
-	$query = "SELECT * FROM adminpanel";
-	$sql = sql_query($query);
-	while ($row = mysql_fetch_array($sql)) {
+	$adminPanels = \Nexus\Database\NexusDB::table('adminpanel')->get();
+	foreach ($adminPanels as $panelRow) {
+		$row = (array) $panelRow;
 		$id = $row['id'];
 		$name =  $lang_staffpanel[$row['name']] ?? $row['name'];
 		$url = $row['url'];
@@ -66,9 +66,9 @@ if (get_user_class() >= UC_MODERATOR) {
 	print("<br />");
 	print("<table width=80% border=1 cellspacing=0 cellpadding=5 align=center>");
 	echo("<td class=colhead align=left>" . ($lang_staffpanel["Option Name"] ?? 'Option Name') . "</td><td class=colhead align=left>" . ($lang_staffpanel["Info"] ?? 'Info') . "</td>");
-	$query = "SELECT * FROM modpanel";
-	$sql = sql_query($query);
-	while ($row = mysql_fetch_array($sql)) {
+	$modPanels = \Nexus\Database\NexusDB::table('modpanel')->get();
+	foreach ($modPanels as $panelRow) {
+		$row = (array) $panelRow;
 		$id = $row['id'];
 		$name =  $lang_staffpanel[$row['name']] ?? $row['name'];
 		$url = $row['url'];

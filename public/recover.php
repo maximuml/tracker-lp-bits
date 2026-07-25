@@ -35,15 +35,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST")
 	failedlogins($lang_recover['std_missing_email_address'],true);
 	if (!check_email($email))
 	failedlogins($lang_recover['std_invalid_email_address'],true);
-	$res = sql_query("SELECT * FROM users WHERE BINARY email=" . sqlesc($email) . " LIMIT 1") or sqlerr(__FILE__, __LINE__);
-	$arr = mysql_fetch_assoc($res);
+	$arr = (array) \Nexus\Database\NexusDB::table('users')->whereRaw('BINARY email = ?', [$email])->first();
 	if (!$arr) failedlogins($lang_recover['std_email_not_in_database'],true);
 	if ($arr['status'] == "pending") failedlogins($lang_recover['std_user_account_unconfirmed'],true);
 
 	$sec = mksecret();
 
-	sql_query("UPDATE users SET editsecret=" . sqlesc($sec) . " WHERE id=" . sqlesc($arr["id"])) or sqlerr(__FILE__, __LINE__);
-	if (!mysql_affected_rows())
+	$affected = \App\Models\User::query()->where('id', $arr['id'])->update(['editsecret' => $sec]);
+	if (!$affected)
 	stderr($lang_recover['std_error'], $lang_recover['std_database_error']);
 
 	$hash = md5($sec . $email . $arr["passhash"] . $sec);
@@ -75,8 +74,9 @@ elseif($_SERVER["REQUEST_METHOD"] == "GET" && $take_recover && isset($_GET["id"]
         do_log("secret: $md5 is expired", "error");
         httperr();
     }
-	$res = sql_query("SELECT username, email, passhash, editsecret FROM users WHERE id = " . sqlesc($id)) or sqlerr(__FILE__, __LINE__);
-	$arr = mysql_fetch_array($res) or httperr();
+	$user = \App\Models\User::query()->find($id, ['username', 'email', 'passhash', 'editsecret']);
+	if (!$user) httperr();
+	$arr = $user->toArray();
 
 	$email = $arr["email"];
 	$sec = hash_pad($arr["editsecret"]);
@@ -97,9 +97,14 @@ elseif($_SERVER["REQUEST_METHOD"] == "GET" && $take_recover && isset($_GET["id"]
 	$newpasshash = hash('sha256', $sec.hash('sha256', $newpassword));
     $authKey = mksecret();
 
-	sql_query("UPDATE users SET secret=" . sqlesc($sec) . ", editsecret='', passhash=" . sqlesc($newpasshash) . ", auth_key=". sqlesc($authKey) . " WHERE id=" . sqlesc($id)." AND editsecret=" . sqlesc($arr["editsecret"])) or sqlerr(__FILE__, __LINE__);
+	$affected = \App\Models\User::query()->where('id', $id)->where('editsecret', $arr['editsecret'])->update([
+	    'secret' => $sec,
+	    'editsecret' => '',
+	    'passhash' => $newpasshash,
+	    'auth_key' => $authKey,
+	]);
 
-	if (!mysql_affected_rows())
+	if (!$affected)
 	stderr($lang_recover['std_error'], $lang_recover['std_unable_updating_user_data']);
 	$title = $SITENAME.$lang_recover['mail_two_title'];
 	$body = <<<EOD

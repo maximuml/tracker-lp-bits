@@ -69,9 +69,8 @@ UNION SELECT u.id FROM users AS u RIGHT JOIN iplog ON u.id = iplog.userid WHERE 
 GROUP BY u.id
 ) AS ipsearch";
 
-	$res = sql_query($queryc) or sqlerr(__FILE__, __LINE__);
-	$row = mysql_fetch_array($res);
-	$count = $row[0];
+	$countRes = \Nexus\Database\NexusDB::select($queryc);
+	$count = (int)($countRes[0]['c'] ?? 0);
 
 	if ($count == 0)
 	{
@@ -85,7 +84,7 @@ GROUP BY u.id
 	$page = intval($_GET["page"] ?? 0);
 	$perpage = 20;
 
-	list($pagertop, $pagerbottom, $limit) = pager($perpage, $count, "{$_SERVER['PHP_SELF']}?ip=$ip&mask=$mask&order=$order&");
+	list($pagertop, $pagerbottom, , $offset, $rpp) = pager($perpage, $count, "{$_SERVER['PHP_SELF']}?ip=$ip&mask=$mask&order=$order&");
 
 	if ($order == "added")
 		$orderby = "added DESC";
@@ -111,9 +110,9 @@ WHERE $where2
 GROUP BY u.id ) as ipsearch
 GROUP BY id
 ORDER BY $orderby
-$limit";
+LIMIT $rpp OFFSET $offset";
 
-	$res = sql_query($query) or sqlerr(__FILE__, __LINE__);
+	$users = \Nexus\Database\NexusDB::select($query);
 
 	print("<h1 align=\"center\">".$count.$lang_ipsearch['text_users_used_the_ip'].$ip."</h1>");
 
@@ -126,8 +125,8 @@ $limit";
 "<td class=colhead align=center><a class=colhead href=\"?ip=$ip&mask=$mask&order=added\">".$lang_ipsearch['col_added']."</a></td>".
 "<td class=colhead align=center>".$lang_ipsearch['col_invited_by']."</td>");
 
-	while ($user = mysql_fetch_array($res))
-	{
+	foreach ($users as $user) {
+	    $user = (array) $user;
 		if ($user['added'] == '0000-00-00 00:00:00' || $user['added'] == null)
 			$added = $lang_ipsearch['text_not_available'];
 		else $added = gettime($user['added']);
@@ -140,8 +139,7 @@ $limit";
 		else
 			$ipstr = $lang_ipsearch['text_not_available'];
 
-		$resip = sql_query("SELECT ip FROM iplog WHERE userid=" . sqlesc($user['id']) . " GROUP BY iplog.ip") or sqlerr(__FILE__, __LINE__);
-$iphistory = mysql_num_rows($resip);
+		$iphistory = \Nexus\Database\NexusDB::table('iplog')->where('userid', $user['id'])->distinct('ip')->count('ip');
 
 		if ($user["invited_by"] > 0)
 		{

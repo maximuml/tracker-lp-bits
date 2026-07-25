@@ -431,4 +431,123 @@ foreach ($quickSmilies as $smily) {
 
         return ob_get_clean();
     }
+
+    /**
+     * Render the client-side password hashing JS for a login/signup form.
+     *
+     * Mirrors `render_password_hash_js()`.
+     */
+    public static function passwordHashJs(
+        string $formId,
+        string $passwordOriginalClass,
+        string $passwordHashedName,
+        bool $passwordRequired,
+        string $passwordConfirmClass = 'password_confirmation',
+        string $usernameName = 'username',
+    ): void {
+        $tipTooShort = \nexus_trans('signup.password_too_short');
+        $tipTooLong = \nexus_trans('signup.password_too_long');
+        $tipEqualUsername = \nexus_trans('signup.password_equals_username');
+        $tipNotMatch = \nexus_trans('signup.passwords_unmatched');
+        $passwordValidateJS = '';
+
+        if ($passwordRequired) {
+            $passwordValidateJS = <<<JS
+if (password.length < 6) {
+    layer.alert("$tipTooShort")
+    return
+}
+if (password.length > 40) {
+    layer.alert("$tipTooLong")
+    return
+}
+JS;
+        }
+
+        $formVar = 'jqForm' . md5($formId);
+        $js = <<<JS
+var $formVar = jQuery("#{$formId}");
+$formVar.on("click", "input[type=button]", function() {
+    let jqUsername = $formVar.find("[name={$usernameName}]")
+    let jqPassword = $formVar.find(".{$passwordOriginalClass}")
+    let jqPasswordConfirm = $formVar.find(".{$passwordConfirmClass}")
+    let password = jqPassword.val()
+    $passwordValidateJS
+    if (jqUsername.length > 0 && jqUsername.val() === password) {
+        layer.alert("$tipEqualUsername")
+        return
+    }
+    if (jqPasswordConfirm.length > 0 && password !== jqPasswordConfirm.val()) {
+        layer.alert("$tipNotMatch")
+        return
+    }
+    if (password !== "") {
+        const passwordHashed = sha256(password)
+        $formVar.find("input[name={$passwordHashedName}]").val(passwordHashed)
+        $formVar.submit()
+    } else {
+        $formVar.submit()
+    }
+})
+JS;
+        \Nexus\Nexus::js('js/crypto-js.js', 'footer', true);
+        \Nexus\Nexus::js($js, 'footer', false);
+    }
+
+    /**
+     * Render the challenge-response login JS for a form.
+     *
+     * Mirrors `render_password_challenge_js()`.
+     */
+    public static function passwordChallengeJs(string $formId, string $usernameName, string $passwordOriginalClass): void
+    {
+        $formVar = 'jqForm' . md5($formId);
+        $js = <<<JS
+var $formVar = jQuery("#{$formId}");
+$formVar.on("click", "input[type=button]", function() {
+    let useChallengeResponseAuthentication = $formVar.find("input[name=response]").length > 0
+    if (!useChallengeResponseAuthentication) {
+        return $formVar.submit()
+    }
+    let jqUsername = $formVar.find("[name={$usernameName}]")
+    let jqPassword = $formVar.find(".{$passwordOriginalClass}")
+    let username = jqUsername.val()
+    let password = jqPassword.val()
+    login(username, password, $formVar)
+})
+async function login(username, password, jqForm) {
+    try {
+        jQuery('body').loading({stoppable: false});
+        const challengeResponse = await fetch('/api/challenge', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ username: username })
+        });
+        jQuery('body').loading('stop');
+
+        const challengeData = await challengeResponse.json();
+        if (challengeData.ret !== 0) {
+            layer.alert(challengeData.msg)
+            return
+        }
+
+        const clientHashedPassword = sha256(password);
+
+        const serverSideHash = sha256(challengeData.data.secret + clientHashedPassword);
+
+        const clientResponse = hmacSha256(challengeData.data.challenge, serverSideHash);
+        jqForm.find("input[name=response]").val(clientResponse)
+        jqForm.submit()
+    } catch (error) {
+        console.error(error);
+        layer.alert(error.toString())
+    }
+}
+JS;
+        \Nexus\Nexus::js('vendor/jquery-loading/jquery.loading.min.js', 'footer', true);
+        \Nexus\Nexus::js('js/crypto-js.js', 'footer', true);
+        \Nexus\Nexus::js($js, 'footer', false);
+    }
 }

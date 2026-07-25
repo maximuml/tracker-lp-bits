@@ -288,4 +288,15 @@ final class Strings
 
         return htmlspecialchars($data, ENT_QUOTES, 'UTF-8');
     }
+
+    /**
+     * Convert a PHP class namespace to a dot-snake representation.
+     *
+     * Mirrors `convertNamespaceToSnake()`: backslashes and `::` become
+     * underscores and dots.
+     */
+    public static function namespaceToSnake(string $str): string
+    {
+        return str_replace(['\\', '::'], ['_', '.'], $str);
+    }
 }

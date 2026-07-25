@@ -420,48 +420,12 @@ function is_donor(array $userInfo): bool
  */
 function get_passkey_by_authkey($authkey)
 {
-    return \Nexus\Database\NexusDB::remember("authkey2passkey:$authkey", 3600*24, function () use ($authkey) {
-        $arr = explode('|', $authkey);
-        if (count($arr) != 3) {
-            throw new \InvalidArgumentException("Invalid authkey: $authkey, format error");
-        }
-        $uid = $arr[1];
-        $torrentRep = new \App\Repositories\TorrentRepository();
-        $decrypted = $torrentRep->checkTrackerReportAuthKey($authkey);
-        if (empty($decrypted)) {
-            throw new \InvalidArgumentException("Invalid authkey: $authkey");
-        }
-        $userInfo = \Nexus\Database\NexusDB::remember("announce_user_passkey_$uid", 3600, function () use ($uid) {
-            return \App\Models\User::query()->where('id', $uid)->first(['id', 'passkey']);
-        });
-        return $userInfo->passkey;
-    });
+    return \App\Support\AuthCookie::passkeyByAuthkey($authkey);
 }
 
 function executeCommand($command, $format = 'string', $artisan = false, $exception = true): string|array
 {
-    $append = " 2>&1";
-    if (!str_ends_with($command, $append)) {
-        $command .= $append;
-    }
-    if ($artisan) {
-        $phpPath = nexus_env('PHP_PATH') ?: 'php';
-        $webRoot = rtrim(ROOT_PATH, '/');
-        $command = "$phpPath $webRoot/artisan $command";
-    }
-    do_log("command: $command");
-    $result = exec($command, $output, $result_code);
-    $outputString = implode("\n", $output);
-    $log = sprintf('result_code: %s, result: %s, output: %s', $result_code, $result, $outputString);
-    if ($result_code != 0) {
-        do_log($log, "error");
-        if ($exception) {
-            throw new \RuntimeException($outputString);
-        }
-    } else {
-        do_log($log);
-    }
-    return $format == 'string' ? $outputString : $output;
+    return \App\Support\Environment::run($command, $format, (bool) $artisan, (bool) $exception);
 }
 
 function has_role_work_seeding($uid)
@@ -485,39 +449,7 @@ function get_snatch_info($torrentId, $userId)
  */
 function fire_event(string $name, \Illuminate\Database\Eloquent\Model $model, ?\Illuminate\Database\Eloquent\Model $oldModel = null): void
 {
-    if (!isset(\App\Enums\ModelEventEnum::$eventMaps[$name])) {
-        throw new \InvalidArgumentException("Event $name is not a valid event enumeration");
-    }
-    if (IN_NEXUS) {
-        $prefix = "fire_event:";
-        $idKey = $prefix . \Illuminate\Support\Str::random();
-        $idKeyOld = "";
-        \Nexus\Database\NexusDB::cache_put($idKey, serialize($model->toArray()), 3600*24*30);
-        if ($oldModel) {
-            $idKeyOld = $prefix . \Illuminate\Support\Str::random();
-            \Nexus\Database\NexusDB::cache_put($idKeyOld, serialize($oldModel->toArray()), 3600*24*30);
-        }
-//        executeCommand("event:fire --name=$name --idKey=$idKey --idKeyOld=$idKeyOld", "string", true, false);
-        \Nexus\Nexus::dispatchQueueJob(new \App\Jobs\FireEvent($name, $idKey, $idKeyOld));
-        do_log("success fire_event in nexus, name: $name, idKey: $idKey, idKeyOld: $idKeyOld");
-    } else {
-        $eventClass = \App\Enums\ModelEventEnum::$eventMaps[$name]['event'];
-        if (str_ends_with($name, '_deleted')) {
-            //if deleted from database, can not pass model instance, use array
-            $params = [$model->toArray()];
-            if ($oldModel) {
-                $params[] = $oldModel->toArray();
-            }
-        } else {
-            $params = [$model];
-            if ($oldModel) {
-                $params[] = $oldModel;
-            }
-        }
-        call_user_func_array([$eventClass, "dispatch"], $params);
-        publish_model_event($name, $model->id, $model->toJson());
-        do_log("success fire_event in laravel, name: $name, id: $model->id, oldId: " . ($oldModel ? $oldModel->id : ""));
-    }
+    \App\Support\Events::fire($name, $model, $oldModel);
 }
 
 /**
@@ -525,35 +457,25 @@ function fire_event(string $name, \Illuminate\Database\Eloquent\Model $model, ?\
  */
 function publish_model_event(string $event, int $id, string $json = ""): void
 {
-    $channel = nexus_env("CHANNEL_NAME_MODEL_EVENT");
-    if (!empty($channel)) {
-        \Nexus\Database\NexusDB::redis()->publish($channel, json_encode(["event" => $event, "id" => $id, "json" => $json]));
-    } else {
-        do_log("event: $event, id: $id, channel: $channel, channel is empty!", "error");
-    }
+    \App\Support\Events::publishModel($event, $id, $json);
 }
 
 function convertNamespaceToSnake(string $str): string
 {
-    return str_replace(["\\", "::"], ["_", "."], $str);
+    return \App\Support\Strings::namespaceToSnake($str);
 }
 
 function get_user_locale(int $uid): string
 {
-    $sql = "select language.site_lang_folder from users inner join language on users.lang = language.id where users.id = $uid limit 1";
-    $result = \Nexus\Database\NexusDB::select($sql);
-    if (empty($result) || empty($result[0]['site_lang_folder'])) {
-        return "en";
-    }
-    return \App\Http\Middleware\Locale::$languageMaps[$result[0]['site_lang_folder']] ?? $result[0]['site_lang_folder'];
+    return \App\Support\Locale::userLocale($uid);
 }
 
 function send_admin_success_notification(string $msg = ""): void {
-    \Filament\Notifications\Notification::make()->success()->title($msg ?: "Success!")->send();
+    \App\Support\Admin::successNotification($msg);
 }
 
 function send_admin_fail_notification(string $msg = ""): void {
-    \Filament\Notifications\Notification::make()->danger()->title($msg ?: "Fail!")->send();
+    \App\Support\Admin::failNotification($msg);
 }
 
 function ability(\App\Enums\Permission\RoutePermissionEnum $permission): string {
@@ -561,194 +483,24 @@ function ability(\App\Enums\Permission\RoutePermissionEnum $permission): string 
 }
 
 function get_challenge_key(string $challenge): string {
-    return "challenge:".$challenge;
+    return \App\Support\Token::challengeKey($challenge);
 }
 
 function get_user_from_cookie(array $cookie, $isArray = true): array|\App\Models\User|null {
-    $log = "cookie: " . json_encode($cookie);
-    $result = get_user_id_and_signature_from_cookie($cookie);
-    if (empty($result)) {
-        return null;
-    }
-    $id = $result['user_id'];
-    $tokenJson = $result['token_json'];
-    $signature = $result['signature'];
-    $log .= ", uid = $id";
-    $isAjax = nexus()->isAjax();
-    $selfEnableBonus = \App\Models\Setting::getSelfEnableBonus();
-    //only in nexus web can self-enable, and require bonus > 0
-    $shouldIgnoreEnabled = IN_NEXUS && !$isAjax && $selfEnableBonus > 0;
-    if ($isArray) {
-        $whereStr = sprintf("id = %d and status = 'confirmed'", $id);
-        if (!$shouldIgnoreEnabled) {
-            $whereStr .= " and enabled = 'yes'";
-        }
-        $res = sql_query("SELECT * FROM users WHERE $whereStr LIMIT 1");
-        $row = mysql_fetch_array($res);
-        if (!$row) {
-            do_log("$log, user not exists");
-            return null;
-        }
-        $authKey = $row["auth_key"];
-        unset($row['auth_key'], $row['passhash']);
-    } else {
-        $row = \App\Models\User::query()->find($id);
-        if (!$row) {
-            do_log("$log, user not exists");
-            return null;
-        }
-        $checkFields = ['status'];
-        if (!$shouldIgnoreEnabled) {
-            $checkFields[] = 'enabled';
-        }
-        $row->checkIsNormal($checkFields);
-        $authKey = $row->auth_key;
-    }
-    $expectedSignature = hash_hmac('sha256', $tokenJson, $authKey);
-    if (!hash_equals($expectedSignature, $signature)) {
-        do_log("$log, !hash_equals, expectedSignature: $expectedSignature, actualSignature: $signature");
-        return null;
-    }
-    return $row;
+    return \App\Support\AuthCookie::userFromCookie($cookie, (bool) $isArray);
 }
 
 function get_user_id_and_signature_from_cookie(array $cookie): array|null
 {
-    $log = "cookie: " . json_encode($cookie);
-    if (empty($cookie["c_secure_pass"])) {
-        do_log("$log, param not enough");
-        return null;
-    }
-    $base64Decoded = base64_decode($cookie["c_secure_pass"]);
-    if (empty($base64Decoded)) {
-        do_log("$log, invalid c_secure_pass");
-        return null;
-    }
-    $log .= ", base64 decoded: " . $base64Decoded;
-    $tokenJsonAndSignature = explode(".", $base64Decoded);
-    if (count($tokenJsonAndSignature) != 2) {
-        do_log("$log, invalid c_secure_pass base64_decoded");
-        return null;
-    }
-    $tokenJson = $tokenJsonAndSignature[0];
-    $signature = $tokenJsonAndSignature[1];
-    if (empty($tokenJson) || empty($signature)) {
-        do_log("$log, no tokenJson or signature");
-        return null;
-    }
-    $tokenData = json_decode($tokenJson, true);
-    if (!isset($tokenData['user_id'])) {
-        do_log("$log, no user_id");
-        return null;
-    }
-    if (!isset($tokenData['expires']) || $tokenData['expires'] < time()) {
-        do_log("$log, signature expired");
-        return null;
-    }
-    return [
-        "user_id" => $tokenData['user_id'],
-        'token_json' => $tokenJson,
-        'signature' => $signature,
-    ];
+    return \App\Support\AuthCookie::decodeCookie($cookie);
 }
 
 function render_password_hash_js(string $formId, string $passwordOriginalClass, string $passwordHashedName, bool $passwordRequired, string $passwordConfirmClass = "password_confirmation", string $usernameName = "username"): void {
-    $tipTooShort = nexus_trans('signup.password_too_short');
-    $tipTooLong = nexus_trans('signup.password_too_long');
-    $tipEqualUsername = nexus_trans('signup.password_equals_username');
-    $tipNotMatch = nexus_trans('signup.passwords_unmatched');
-    $passwordValidateJS = "";
-    if ($passwordRequired) {
-        $passwordValidateJS = <<<JS
-if (password.length < 6) {
-    layer.alert("$tipTooShort")
-    return
-}
-if (password.length > 40) {
-    layer.alert("$tipTooLong")
-    return
-}
-JS;
-    }
-    $formVar = "jqForm" . md5($formId);
-    $js = <<<JS
-var $formVar = jQuery("#{$formId}");
-$formVar.on("click", "input[type=button]", function() {
-    let jqUsername = $formVar.find("[name={$usernameName}]")
-    let jqPassword = $formVar.find(".{$passwordOriginalClass}")
-    let jqPasswordConfirm = $formVar.find(".{$passwordConfirmClass}")
-    let password = jqPassword.val()
-    $passwordValidateJS
-    if (jqUsername.length > 0 && jqUsername.val() === password) {
-        layer.alert("$tipEqualUsername")
-        return
-    }
-    if (jqPasswordConfirm.length > 0 && password !== jqPasswordConfirm.val()) {
-        layer.alert("$tipNotMatch")
-        return
-    }
-    if (password !== "") {
-        const passwordHashed = sha256(password)
-        $formVar.find("input[name={$passwordHashedName}]").val(passwordHashed)
-        $formVar.submit()
-    } else {
-        $formVar.submit()
-    }
-})
-JS;
-    \Nexus\Nexus::js("js/crypto-js.js", 'footer', true);
-    \Nexus\Nexus::js($js, 'footer', false);
+    \App\Support\Form::passwordHashJs($formId, $passwordOriginalClass, $passwordHashedName, $passwordRequired, $passwordConfirmClass, $usernameName);
 }
 
 function render_password_challenge_js(string $formId, string $usernameName, string $passwordOriginalClass): void {
-    $formVar = "jqForm" . md5($formId);
-    $js = <<<JS
-var $formVar = jQuery("#{$formId}");
-$formVar.on("click", "input[type=button]", function() {
-    let useChallengeResponseAuthentication = $formVar.find("input[name=response]").length > 0
-    if (!useChallengeResponseAuthentication) {
-        return $formVar.submit()
-    }
-    let jqUsername = $formVar.find("[name={$usernameName}]")
-    let jqPassword = $formVar.find(".{$passwordOriginalClass}")
-    let username = jqUsername.val()
-    let password = jqPassword.val()
-    login(username, password, $formVar)
-})
-async function login(username, password, jqForm) {
-    try {
-        jQuery('body').loading({stoppable: false});
-        const challengeResponse = await fetch('/api/challenge', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ username: username })
-        });
-        jQuery('body').loading('stop');
-
-        const challengeData = await challengeResponse.json();
-        if (challengeData.ret !== 0) {
-            layer.alert(challengeData.msg)
-            return
-        }
-
-        const clientHashedPassword = sha256(password);
-
-        const serverSideHash = sha256(challengeData.data.secret + clientHashedPassword);
-
-        const clientResponse = hmacSha256(challengeData.data.challenge, serverSideHash);
-        jqForm.find("input[name=response]").val(clientResponse)
-        jqForm.submit()
-    } catch (error) {
-        console.error(error);
-        layer.alert(error.toString())
-    }
-}
-JS;
-    \Nexus\Nexus::js("vendor/jquery-loading/jquery.loading.min.js", 'footer', true);
-    \Nexus\Nexus::js("js/crypto-js.js", 'footer', true);
-    \Nexus\Nexus::js($js, 'footer', false);
+    \App\Support\Form::passwordChallengeJs($formId, $usernameName, $passwordOriginalClass);
 }
 
 function nexus_escape($data): array|string

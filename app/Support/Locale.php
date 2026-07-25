@@ -186,4 +186,21 @@ final class Locale
     {
         return \Nexus\Nexus::trans($key, $replace, $locale);
     }
+
+    /**
+     * Return the locale (e.g. `zh-CN`, `en`) for the given user id.
+     *
+     * Mirrors `get_user_locale()`.
+     */
+    public static function userLocale(int $uid): string
+    {
+        $sql = 'select language.site_lang_folder from users inner join language on users.lang = language.id where users.id = ' . $uid . ' limit 1';
+        $result = NexusDB::getInstance()->select($sql);
+
+        if (empty($result) || empty($result[0]['site_lang_folder'])) {
+            return 'en';
+        }
+
+        return LocaleMiddleware::$languageMaps[$result[0]['site_lang_folder']] ?? $result[0]['site_lang_folder'];
+    }
 }

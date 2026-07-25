@@ -69,4 +69,20 @@ final class TorrentAccess
 
         return new HtmlString('<div style="display:flex">' . $name . $tags . '</div>');
     }
+
+    /**
+     * Build the H&R icon for a torrent row, if applicable.
+     *
+     * Mirrors `get_hr_img()`.
+     */
+    public static function hrImage(array $torrent, int|string $searchBoxId): string
+    {
+        $mode = \App\Models\HitAndRun::getConfig('mode', $searchBoxId);
+
+        if ($mode == \App\Models\HitAndRun::MODE_GLOBAL || ($mode == \App\Models\HitAndRun::MODE_MANUAL && isset($torrent['hr']) && $torrent['hr'] == \App\Models\Torrent::HR_YES)) {
+            return '<img class="hitandrun" src="pic/trans.gif" alt="H&R" title="H&R" />';
+        }
+
+        return '';
+    }
 }

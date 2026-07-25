@@ -16,9 +16,12 @@ $month=date('m');
 $order=$_GET['order'] ?? '';
 if (!in_array($order, array('username', 'torrent_size', 'torrent_count')))
 	$order='username';
-if ($order=='username')
-	$order .=' ASC';
-else $order .= ' DESC';
+$sortColumn = match ($order) {
+    'torrent_size' => \Nexus\Database\NexusDB::raw('SUM(torrents.size)'),
+    'torrent_count' => \Nexus\Database\NexusDB::raw('COUNT(torrents.id)'),
+    default => 'users.username',
+};
+$sortDirection = $order === 'username' ? 'ASC' : 'DESC';
 stdhead($lang_uploaders['head_uploaders']);
 begin_main_frame();
 ?>
@@ -55,9 +58,7 @@ $monthselection.="</select>";
 </div>
 
 <?php
-$numres = sql_query("SELECT COUNT(users.id) FROM users WHERE class >= ".UC_UPLOADER) or sqlerr(__FILE__, __LINE__);
-$numrow = mysql_fetch_array($numres);
-$num=$numrow[0];
+$num = \App\Models\User::query()->where('class', '>=', UC_UPLOADER)->count();
 if (!$num)
 	print("<p align=\"center\">".$lang_uploaders['text_no_uploaders_yet']."</p>");
 else{
@@ -71,12 +72,19 @@ else{
 	print("<td class=\"colhead\">".$lang_uploaders['col_last_upload_time']."</td>");
 	print("<td class=\"colhead\">".$lang_uploaders['col_last_upload']."</td>");
 	print("</tr>");
-	$res = sql_query("SELECT users.id AS userid, users.username AS username, COUNT(torrents.id) AS torrent_count, SUM(torrents.size) AS torrent_size FROM torrents LEFT JOIN users ON torrents.owner=users.id WHERE users.class >= ".UC_UPLOADER." AND torrents.added > ".sqlesc($sqlstarttime)." AND torrents.added < ".sqlesc($sqlendtime)." GROUP BY userid ORDER BY ".$order);
+	$uploaders = \Nexus\Database\NexusDB::table('torrents')
+	    ->leftJoin('users', 'torrents.owner', '=', 'users.id')
+	    ->where('users.class', '>=', UC_UPLOADER)
+	    ->where('torrents.added', '>', $sqlstarttime)
+	    ->where('torrents.added', '<', $sqlendtime)
+	    ->groupBy('users.id', 'users.username')
+	    ->orderBy($sortColumn, $sortDirection)
+	    ->get(['users.id AS userid', 'users.username AS username', \Nexus\Database\NexusDB::raw('COUNT(torrents.id) AS torrent_count'), \Nexus\Database\NexusDB::raw('SUM(torrents.size) AS torrent_size')]);
 	$hasupuserid=array();
-	while($row = mysql_fetch_array($res))
-	{
-		$res2 = sql_query("SELECT torrents.id, torrents.name, torrents.added FROM torrents WHERE owner=".$row['userid']." ORDER BY id DESC LIMIT 1");
-		$row2 = mysql_fetch_array($res2);
+	foreach ($uploaders as $uploader) {
+		$row = (array) $uploader;
+		$lastTorrent = \Nexus\Database\NexusDB::table('torrents')->where('owner', $row['userid'])->orderByDesc('id')->first(['id', 'name', 'added']);
+		$row2 = $lastTorrent ? (array) $lastTorrent : [];
 		print("<tr>");
 		print("<td class=\"colfollow\">".get_username($row['userid'], false, true, true, false, false, true)."</td>");
 		print("<td class=\"colfollow\">".($row['torrent_size'] ? mksize($row['torrent_size']) : "0")."</td>");
@@ -85,14 +93,19 @@ else{
 		print("<td class=\"colfollow\">".($row2['name'] ? "<a href=\"details.php?id=".$row2['id']."\">".htmlspecialchars($row2['name'])."</a>" : $lang_uploaders['text_not_available'])."</td>");
 		print("</tr>");
 		$hasupuserid[]=$row['userid'];
-		unset($row2);
 	}
-	$res3=sql_query("SELECT users.id AS userid, users.username AS username, 0 AS torrent_count, 0 AS torrent_size FROM users WHERE class >= ".UC_UPLOADER.(count($hasupuserid) ? " AND users.id NOT IN (".implode(",",$hasupuserid).")" : "")." ORDER BY username ASC") or sqlerr(__FILE__, __LINE__);
+	$nonUploaders = \App\Models\User::query()
+	    ->where('class', '>=', UC_UPLOADER)
+	    ->when(!empty($hasupuserid), function ($q) use ($hasupuserid) {
+	        $q->whereNotIn('id', $hasupuserid);
+	    })
+	    ->orderBy('username')
+	    ->get(['id AS userid', 'username']);
     $count = 0;
-	while($row = mysql_fetch_array($res3))
-	{
-		$res2 = sql_query("SELECT torrents.id, torrents.name, torrents.added FROM torrents WHERE owner=".$row['userid']." ORDER BY id DESC LIMIT 1");
-		$row2 = mysql_fetch_array($res2);
+	foreach ($nonUploaders as $nonUploader) {
+		$row = $nonUploader->toArray();
+		$lastTorrent = \Nexus\Database\NexusDB::table('torrents')->where('owner', $row['userid'])->orderByDesc('id')->first(['id', 'name', 'added']);
+		$row2 = $lastTorrent ? (array) $lastTorrent : [];
 		print("<tr>");
 		print("<td class=\"colfollow\">".get_username($row['userid'], false, true, true, false, false, true)."</td>");
 		print("<td class=\"colfollow\">".($row['torrent_size'] ? mksize($row['torrent_size']) : "0")."</td>");

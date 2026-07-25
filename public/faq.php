@@ -18,7 +18,7 @@ echo sprintf($lang_faq['text_welcome_content_one'].sprintf($lang_faq['text_welco
 end_frame();
 
 $lang_id = get_guest_lang_id();
-$is_rulelang = get_single_value("language","rule_lang","WHERE id = ".sqlesc($lang_id));
+$is_rulelang = \Nexus\Database\NexusDB::table('language')->where('id', $lang_id)->value('rule_lang');
 if (!$is_rulelang){
 	$lang_id = 6; //English
 }

@@ -91,4 +91,28 @@ final class Path
 
         return $path;
     }
+
+    /**
+     * Resolve a category id to its icon folder path with a per-request
+     * static cache. Mirrors `get_cat_folder()`.
+     */
+    public static function categoryFolderForId(int|string $cat, string $langDir): string
+    {
+        static $catPath = [];
+        $cat = (int) $cat;
+
+        if (isset($catPath[$cat])) {
+            return $catPath[$cat];
+        }
+
+        $catrow = \get_category_row($cat);
+        $caticonrow = \get_category_icon_row($catrow['icon_id'] ?: 1);
+
+        return $catPath[$cat] = self::categoryFolder(
+            $catrow['catmodename'],
+            $caticonrow['folder'],
+            ($caticonrow['multilang'] ?? '') == 'yes',
+            $langDir,
+        );
+    }
 }

@@ -211,4 +211,33 @@ final class Email
 
         return false;
     }
+
+    /**
+     * Legacy `check_email()` in one call: regex, DB banlist lookup and audit
+     * logging. Mirrors the original behavior, including the per-matching-entry
+     * `do_log()` and `false` return for a banned or malformed address.
+     */
+    public static function check(string $email): bool
+    {
+        $email = (string) $email;
+        if (! self::isWellFormed($email)) {
+            return false;
+        }
+
+        $bannedEmails = \Nexus\Database\NexusDB::select('select * from bannedemails');
+        $bannedValue = $bannedEmails[0]['value'] ?? '';
+        if (self::matchesSuffixList($email, (string) $bannedValue)) {
+            $bannedEmailsArr = array_filter(preg_split('/[\s]+/', $bannedValue));
+            foreach ($bannedEmailsArr as $ban) {
+                if (str_ends_with($email, (string) $ban)) {
+                    \do_log("[BANNED_EMAIL] email: $email is banned by record: $ban");
+                    break;
+                }
+            }
+
+            return false;
+        }
+
+        return true;
+    }
 }

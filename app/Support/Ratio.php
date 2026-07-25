@@ -195,9 +195,7 @@ final class Ratio
     /**
      * Numeric `$uploaded / $downloaded` user-ratio, falling back to
      * `1` when the user has never downloaded. Backs the non-HTML
-     * branch of legacy `get_ratio($userid, false)`. The DB lookup
-     * for `$row['uploaded']` / `$row['downloaded']` stays in the
-     * proxy because it goes through `get_user_row()`.
+     * branch of legacy `get_ratio($userid, false)`.
      */
     public static function userRatioNumeric(int|float $uploaded, int|float $downloaded): int|float
     {
@@ -245,5 +243,26 @@ final class Ratio
         }
 
         return '---';
+    }
+
+    /**
+     * User ratio by id — fetches the user row and renders the numeric
+     * or HTML form. Mirrors `get_ratio()`.
+     */
+    public static function forUserId(int|string $userId, bool $html = true): string|int|float
+    {
+        $row = \get_user_row($userId);
+        if (empty($row)) {
+            return '---';
+        }
+
+        $uped = (float) ($row['uploaded'] ?? 0);
+        $downed = (float) ($row['downloaded'] ?? 0);
+
+        if ($html) {
+            return self::userRatioHtml($uped, $downed, \nexus_trans('label.ratio'), \nexus_trans('label.infinite'));
+        }
+
+        return self::userRatioNumeric($uped, $downed);
     }
 }

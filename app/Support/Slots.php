@@ -67,4 +67,33 @@ final class Slots
 
         return 0;
     }
+
+    /**
+     * Return the legacy `<font class="color_slots">` HTML fragment for
+     * a user's max-slots line. Mirrors `maxslots()`.
+     *
+     * @param int $vipClass The UC_VIP constant value; injected so the
+     *                      helper does not depend on `uc.php`.
+     */
+    public static function display(
+        int|float $uploaded,
+        int|float $downloaded,
+        string $maxdlsystem,
+        int $userClass,
+        int $vipClass,
+        string $slotsLabel,
+        string $unlimitedLabel,
+    ): string {
+        if ($maxdlsystem != 'yes' || $userClass >= $vipClass) {
+            return "<font class='color_slots'>{$slotsLabel}</font>{$unlimitedLabel}";
+        }
+
+        $max = self::maxDownloadSlots($uploaded, $downloaded);
+
+        if ($max > 0) {
+            return "<font class='color_slots'>{$slotsLabel}</font><a href='faq.php#id215'>{$max}</a>";
+        }
+
+        return "<font class='color_slots'>{$slotsLabel}</font>{$unlimitedLabel}";
+    }
 }

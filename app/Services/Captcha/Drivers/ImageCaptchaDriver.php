@@ -47,12 +47,12 @@ class ImageCaptchaDriver implements CaptchaDriverInterface
 
         $query = sprintf(
             "SELECT dateline FROM regimages WHERE imagehash='%s' AND imagestring='%s'",
-            mysql_real_escape_string($imagehash),
-            mysql_real_escape_string($imagestring)
+            \Nexus\Database\NexusDB::getInstance()->escapeString($imagehash),
+            \Nexus\Database\NexusDB::getInstance()->escapeString($imagestring)
         );
 
-        $sql = sql_query($query);
-        $imgcheck = mysql_fetch_array($sql);
+        $sql = \Nexus\Database\NexusDB::select($query);
+        $imgcheck = $sql ? array_merge((array) $sql[0], array_values((array) $sql[0])) : null;
 
         $this->deleteByHash($imagehash);
 
@@ -80,11 +80,11 @@ class ImageCaptchaDriver implements CaptchaDriverInterface
     {
         $query = sprintf(
             "SELECT imagestring FROM regimages WHERE imagehash=%s",
-            sqlesc($imagehash)
+            \App\Support\LegacyDb::escape($imagehash)
         );
 
-        $sql = sql_query($query);
-        $regimage = mysql_fetch_array($sql);
+        $sql = \Nexus\Database\NexusDB::select($query);
+        $regimage = $sql ? array_merge((array) $sql[0], array_values((array) $sql[0])) : null;
         $imagestring = $regimage['imagestring'] ?? '';
 
         if ($imagestring === '') {
@@ -139,10 +139,10 @@ class ImageCaptchaDriver implements CaptchaDriverInterface
 
         $delete = sprintf(
             "DELETE FROM regimages WHERE imagehash='%s'",
-            mysql_real_escape_string($imagehash)
+            \Nexus\Database\NexusDB::getInstance()->escapeString($imagehash)
         );
 
-        sql_query($delete);
+        \Nexus\Database\NexusDB::getInstance()->query($delete);
     }
 
     protected function renderFallback(): void

@@ -280,8 +280,8 @@ final class AuthCookie
             if (!$shouldIgnoreEnabled) {
                 $whereStr .= " and enabled = 'yes'";
             }
-            $res = \sql_query("SELECT * FROM users WHERE $whereStr LIMIT 1");
-            $row = \mysql_fetch_array($res);
+            $res = \Nexus\Database\NexusDB::select("SELECT * FROM users WHERE $whereStr LIMIT 1");
+            $row = $res ? array_merge((array) $res[0], array_values((array) $res[0])) : null;
             if (!$row) {
                 \do_log("$log, user not exists");
                 return null;

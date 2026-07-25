@@ -30,10 +30,10 @@ final class SearchSuggest
             return;
         }
 
-        $value = $preEscaped ? "'" . $keyword . "'" : sqlesc($keyword);
+        $value = $preEscaped ? "'" . $keyword . "'" : \App\Support\LegacyDb::escape($keyword);
         NexusDB::getInstance()->query(
             'INSERT INTO suggest(keywords, userid, adddate) VALUES ('
-            . $value . ', ' . sqlesc($userId) . ', NOW())'
+            . $value . ', ' . \App\Support\LegacyDb::escape($userId) . ', NOW())'
         );
     }
 }

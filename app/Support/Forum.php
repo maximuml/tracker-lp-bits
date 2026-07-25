@@ -71,9 +71,9 @@ final class Forum
         }
 
         $max = count($userIds);
-        NexusDB::getInstance()->query('DELETE FROM forummods WHERE forumid=' . sqlesc($forumId));
+        NexusDB::getInstance()->query('DELETE FROM forummods WHERE forumid=' . \App\Support\LegacyDb::escape($forumId));
         for ($i = 0; $i < $limit && $i < $max; $i++) {
-            NexusDB::getInstance()->query('INSERT INTO forummods (forumid, userid) VALUES (' . sqlesc($forumId) . ',' . sqlesc($userIds[$i]) . ')');
+            NexusDB::getInstance()->query('INSERT INTO forummods (forumid, userid) VALUES (' . \App\Support\LegacyDb::escape($forumId) . ',' . \App\Support\LegacyDb::escape($userIds[$i]) . ')');
         }
     }
 
@@ -105,7 +105,7 @@ final class Forum
                 return $count > 0;
 
             case 'forum':
-                $count = (int) \get_row_count('forummods', 'WHERE forumid=' . (int) $id . ' AND userid=' . sqlesc($CURUSER['id'] ?? 0));
+                $count = (int) \get_row_count('forummods', 'WHERE forumid=' . (int) $id . ' AND userid=' . \App\Support\LegacyDb::escape($CURUSER['id'] ?? 0));
                 return $count > 0;
 
             default:
@@ -188,7 +188,7 @@ final class Forum
         $row = method_exists($cache, 'get_value') ? $cache->get_value($cacheKey) : false;
 
         if ($row === false) {
-            $result = NexusDB::getInstance()->query('SELECT * FROM posts WHERE id=' . sqlesc($postId) . ' LIMIT 1');
+            $result = NexusDB::getInstance()->query('SELECT * FROM posts WHERE id=' . \App\Support\LegacyDb::escape($postId) . ' LIMIT 1');
             $row = NexusDB::getInstance()->fetchAssoc($result);
             if (method_exists($cache, 'cache_value')) {
                 $cache->cache_value($cacheKey, $row, 7200);

@@ -566,22 +566,24 @@ if ($action == "viewtopic")
 	int_check($topicid,true);
 	$page = $_GET["page"] ?? 0;
 	$authorid = intval($_GET["authorid"] ?? 0);
+	$postQuery = \App\Models\Post::query()->where('topicid', $topicid);
 	if ($authorid)
 	{
-		$where = "WHERE topicid=".sqlesc($topicid)." AND userid=".sqlesc($authorid);
+		$postQuery->where('userid', $authorid);
 		$addparam = "action=viewtopic&topicid=".$topicid."&authorid=".$authorid;
 	}
 	else
 	{
-		$where = "WHERE topicid=".sqlesc($topicid);
 		$addparam = "action=viewtopic&topicid=".$topicid;
 	}
 	$userid = $CURUSER["id"];
 
 	//------ Get topic info
 
-	$res = sql_query("SELECT * FROM topics WHERE id=".sqlesc($topicid)." LIMIT 1") or sqlerr(__FILE__, __LINE__);
-	$arr = mysql_fetch_assoc($res) or stderr($lang_forums['std_forum_error'], $lang_forums['std_topic_not_found']);
+	$topic = \App\Models\Topic::query()->where('id', $topicid)->first();
+	if (!$topic)
+		stderr($lang_forums['std_forum_error'], $lang_forums['std_topic_not_found']);
+	$arr = $topic->toArray();
 
 	$forumid = $arr['forumid'];
 	$locked = $arr['locked'] == "yes";
@@ -608,10 +610,10 @@ if ($action == "viewtopic")
 	else $maypost = false;
 
 	//------ Update hits column
-	sql_query("UPDATE topics SET views = views + 1 WHERE id=$topicid") or sqlerr(__FILE__, __LINE__);
+	\App\Models\Topic::query()->where('id', $topicid)->increment('views');
 
 	//------ Get post count
-	$postcount = get_row_count("posts",$where);
+	$postcount = (clone $postQuery)->count();
 	if (!$authorid)
 		$Cache->cache_value('topic_'.$topicid.'_post_count', $postcount, 3600);
 
@@ -626,14 +628,10 @@ if ($action == "viewtopic")
 	if (isset($page[0]) && $page[0] == "p")
 	{
 		$findpost = substr($page, 1);
-		$res = sql_query("SELECT id FROM posts $where ORDER BY added") or sqlerr(__FILE__, __LINE__);
-		$i = 0;
-		while ($arr = mysql_fetch_row($res))
-		{
-			if ($arr[0] == $findpost)
-			break;
-			++$i;
-		}
+		$postIds = (clone $postQuery)->orderBy('added')->pluck('id')->all();
+		$i = array_search($findpost, $postIds);
+		if ($i === false)
+			$i = 0;
 		$page = floor($i / $perpage);
 	}
 	if ($page === "last"){
@@ -690,7 +688,17 @@ if ($action == "viewtopic")
 	$pagerbottom = "<p align=\"center\">".$pagerstr."<br />".$pager."</p>\n";
 	//------ Get posts
 
-	$res = sql_query("SELECT * FROM posts $where ORDER BY id LIMIT $perpage offset $offset") or sqlerr(__FILE__, __LINE__);
+	$postRows = (clone $postQuery)->orderBy('id')->offset($offset)->limit($perpage)->get();
+	$pc = $postRows->count();
+	$allPosts = [];
+	$uidArr = [];
+	foreach ($postRows as $postObj) {
+		$arr = $postObj->toArray();
+		$allPosts[] = $arr;
+		$uidArr[$arr['userid']] = 1;
+	}
+	$uidArr = array_keys($uidArr);
+	unset($arr);
 
 	stdhead($lang_forums['head_view_topic']." \"".$orgsubject."\"");
 	begin_main_frame("",true);
@@ -714,15 +722,7 @@ if ($action == "viewtopic")
 	print("</tr></table>\n");
 	begin_frame();
 
-	$pc = mysql_num_rows($res);
-	$allPosts = $uidArr = [];
-    while ($arr = mysql_fetch_assoc($res)) {
-        $allPosts[] = $arr;
-        $uidArr[$arr['userid']] = 1;
-    }
-    $uidArr = array_keys($uidArr);
-    unset($arr);
-    $neededColumns = array('id', 'class', 'enabled', 'privacy', 'avatar', 'signature', 'uploaded', 'downloaded', 'last_access', 'username', 'donor', 'leechwarn', 'warned', 'title');
+	$neededColumns = array('id', 'class', 'enabled', 'privacy', 'avatar', 'signature', 'uploaded', 'downloaded', 'last_access', 'username', 'donor', 'leechwarn', 'warned', 'title');
     $userInfoArr = \App\Models\User::query()->find($uidArr, $neededColumns)->keyBy('id');
 	$pn = 0;
 	$lpr = get_last_read_post_id($topicid);
@@ -759,7 +759,7 @@ if ($action == "viewtopic")
 		$ratio = get_ratio($arr2['id']);
 
 		if (!$forumposts = $Cache->get_value('user_'.$posterid.'_post_count')){
-			$forumposts = get_row_count("posts","WHERE userid=".$posterid);
+			$forumposts = \App\Models\Post::query()->where('userid', $posterid)->count();
 			$Cache->cache_value('user_'.$posterid.'_post_count', $forumposts, 3600);
 		}
 
@@ -776,10 +776,22 @@ if ($action == "viewtopic")
 		{
 			print("<span id=\"last\"></span>\n");
 			if ($postid > $lpr){
-				if ($lpr == $CURUSER['last_catchup']) // There is no record of this topic
-					sql_query("INSERT INTO readposts(userid, topicid, lastpostread) VALUES (".$userid.", ".$topicid.", ".$postid.")") or sqlerr(__FILE__, __LINE__);
-				elseif ($lpr > $CURUSER['last_catchup']) //There is record of this topic
-					sql_query("UPDATE readposts SET lastpostread=$postid WHERE userid=$userid AND topicid=$topicid") or sqlerr(__FILE__, __LINE__);
+				$readPost = \Nexus\Database\NexusDB::table('readposts')
+					->where('userid', $userid)
+					->where('topicid', $topicid)
+					->first();
+				if (!$readPost) { // There is no record of this topic
+					\Nexus\Database\NexusDB::table('readposts')->insert([
+						'userid' => $userid,
+						'topicid' => $topicid,
+						'lastpostread' => $postid,
+					]);
+				} elseif ($lpr > $CURUSER['last_catchup']) { //There is record of this topic
+					\Nexus\Database\NexusDB::table('readposts')
+						->where('userid', $userid)
+						->where('topicid', $topicid)
+						->update(['lastpostread' => $postid]);
+				}
 				$Cache->delete_value('user_'.$CURUSER['id'].'_last_read_post_list');
 			}
 		}
@@ -828,8 +840,9 @@ if ($action == "viewtopic")
 		print("<tr><td class=\"rowfollow\" width=\"150\" valign=\"top\" align=\"left\" style='padding: 0px'>" .
 		return_avatar_image($avatar). "<br /><br /><br />&nbsp;&nbsp;<img alt=\"".get_user_class_name($arr2["class"],false,false,true)."\" title=\"".get_user_class_name($arr2["class"],false,false,true)."\" src=\"".$uclass."\" />".$stats."</td><td class=\"rowfollow\" valign=\"top\"><br />".$body."</td></tr>\n");
 		$secs = 900;
-		$dt = sqlesc(date("Y-m-d H:i:s",(TIMENOW - $secs))); // calculate date.
-		print("<tr><td class=\"rowfollow\" align=\"center\" valign=\"middle\">".("'".$arr2['last_access']."'">$dt?"<img class=\"f_online\" src=\"pic/trans.gif\" alt=\"Online\" title=\"".$lang_forums['title_online']."\" />":"<img class=\"f_offline\" src=\"pic/trans.gif\" alt=\"Offline\" title=\"".$lang_forums['title_offline']."\" />" )."<a href=\"sendmessage.php?receiver=".htmlspecialchars(trim($arr2["id"]))."\"><img class=\"f_pm\" src=\"pic/trans.gif\" alt=\"PM\" title=\"".$lang_forums['title_send_message_to'].htmlspecialchars($arr2["username"])."\" /></a><a href=\"report.php?forumpost=$postid\"><img class=\"f_report\" src=\"pic/trans.gif\" alt=\"Report\" title=\"".$lang_forums['title_report_this_post']."\" /></a></td>");
+		$dt = date("Y-m-d H:i:s", TIMENOW - $secs); // calculate date.
+		$online = $arr2['last_access'] > $dt;
+		print("<tr><td class=\"rowfollow\" align=\"center\" valign=\"middle\">".($online?"<img class=\"f_online\" src=\"pic/trans.gif\" alt=\"Online\" title=\"".$lang_forums['title_online']."\" />":"<img class=\"f_offline\" src=\"pic/trans.gif\" alt=\"Offline\" title=\"".$lang_forums['title_offline']."\" />" )."<a href=\"sendmessage.php?receiver=".htmlspecialchars(trim($arr2["id"]))."\"><img class=\"f_pm\" src=\"pic/trans.gif\" alt=\"PM\" title=\"".$lang_forums['title_send_message_to'].htmlspecialchars($arr2["username"])."\" /></a><a href=\"report.php?forumpost=$postid\"><img class=\"f_report\" src=\"pic/trans.gif\" alt=\"Report\" title=\"".$lang_forums['title_report_this_post']."\" /></a></td>");
 		print("<td class=\"toolbox\" align=\"right\">");
 
 		do_action('post_toolbox', $arr, $allPosts, $CURUSER['id']);

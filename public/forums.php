@@ -301,15 +301,15 @@ if ($action == "editpost")
 	$postid = intval($_GET["postid"] ?? 0);
 	check_whether_exist($postid, 'post');
 
-	$res = sql_query("SELECT userid, topicid FROM posts WHERE id=".sqlesc($postid)) or sqlerr(__FILE__, __LINE__);
-	$arr = mysql_fetch_assoc($res);
+	$post = \App\Models\Post::query()->where('id', $postid)->first(['userid', 'topicid']);
+	if (!$post)
+		stderr($lang_forums['std_error'], $lang_forums['std_no_post_id']);
 
-	$res2 = sql_query("SELECT locked FROM topics WHERE id = " . $arr["topicid"]) or sqlerr(__FILE__, __LINE__);
-	$arr2 = mysql_fetch_assoc($res2);
-	$locked = ($arr2["locked"] == 'yes');
+	$topic = \App\Models\Topic::query()->where('id', $post->topicid)->first(['locked']);
+	$locked = $topic && ($topic->locked == 'yes');
 
 	$ismod = is_forum_moderator($postid, 'post');
-	if (($CURUSER["id"] != $arr["userid"] || $locked) && !user_can('postmanage') && !$ismod)
+	if (($CURUSER["id"] != $post->userid || $locked) && !user_can('postmanage') && !$ismod)
 		permissiondenied();
 
 	stdhead($lang_forums['text_edit_post']);
@@ -345,18 +345,19 @@ if ($action == "post")
 		{
 			check_whether_exist($id, 'topic');
 			$topicid = $id;
-			$forumid = get_single_value("topics", "forumid", "WHERE id=".sqlesc($topicid));
+			$forumid = \App\Models\Topic::query()->where('id', $topicid)->value('forumid');
 			$quotepostid = $_POST["postid"];
 			break;
 		}
 		case 'edit':
 		{
 			check_whether_exist($id, 'post');
-			$res = sql_query("SELECT topicid FROM posts WHERE id=".sqlesc($id)." LIMIT 1") or sqlerr(__FILE__, __LINE__);
-			$row = mysql_fetch_array($res);
-			$topicid=$row['topicid'];
-			$forumid = get_single_value("topics", "forumid", "WHERE id=".sqlesc($topicid));
-			$firstpost = get_single_value("posts","MIN(id)", "WHERE topicid=".sqlesc($topicid));
+			$post = \App\Models\Post::query()->where('id', $id)->first(['topicid']);
+			if (!$post) die;
+			$topicid = $post->topicid;
+			$forum = \App\Models\Topic::query()->where('id', $topicid)->first(['forumid']);
+			$forumid = $forum ? $forum->forumid : 0;
+			$firstpost = \App\Models\Post::query()->where('topicid', $topicid)->min('id');
 			if ($firstpost == $id){
 				$hassubject = true;
 			}
@@ -395,9 +396,10 @@ if ($action == "post")
 	if ($type != 'new'){
 		//---- Make sure topic is unlocked
 
-		$res = sql_query("SELECT locked FROM topics WHERE id=$topicid") or sqlerr(__FILE__, __LINE__);
-		$arr = mysql_fetch_assoc($res) or die("Topic id n/a");
-		if ($arr["locked"] == 'yes' && !user_can('postmanage') && !is_forum_moderator($topicid, 'topic'))
+		$topicLocked = \App\Models\Topic::query()->where('id', $topicid)->value('locked');
+		if ($topicLocked === null)
+			die("Topic id n/a");
+		if ($topicLocked == 'yes' && !user_can('postmanage') && !is_forum_moderator($topicid, 'topic'))
 			stderr($lang_forums['std_error'], $lang_forums['std_topic_locked']);
 	}
 
@@ -410,12 +412,12 @@ if ($action == "post")
             permissiondenied();
         }
 		if ($hassubject){
-			sql_query("UPDATE topics SET subject=".sqlesc($subject)." WHERE id=".sqlesc($topicid)) or sqlerr(__FILE__, __LINE__);
+			\App\Models\Topic::query()->where('id', $topicid)->update(['subject' => $subject]);
 			$forum_last_replied_topic_row = $Cache->get_value('forum_'.$forumid.'_last_replied_topic_content');
-			if ($forum_last_replied_topic_row && $forum_last_replied_topic_row['id'] == $topicid)
+			if (is_array($forum_last_replied_topic_row) && ($forum_last_replied_topic_row['id'] ?? null) == $topicid)
 				$Cache->delete_value('forum_'.$forumid.'_last_replied_topic_content');
 		}
-		sql_query("UPDATE posts SET body=".sqlesc($body).", editdate=".sqlesc($date).", editedby=".sqlesc($CURUSER['id'])." WHERE id=".sqlesc($id)) or sqlerr(__FILE__, __LINE__);
+		\App\Models\Post::query()->where('id', $id)->update(['body' => $body, 'editdate' => $date, 'editedby' => $CURUSER['id']]);
 		$Cache->delete_value('post_'.$postid.'_content');
         //send pm
         $postUrl = sprintf('[url=forums.php?action=viewtopic&topicid=%s&page=p%s#pid%s]%s[/url]', $topicid, $id, $id, $topicInfo->subject);
@@ -451,19 +453,39 @@ if ($action == "post")
 			KPS("+",$starttopic_bonus,$userid);
 
 			//---- Create topic
-			sql_query("INSERT INTO topics (userid, forumid, subject) VALUES($userid, $forumid, ".sqlesc($subject).")") or sqlerr(__FILE__, __LINE__);
-			$topicid = mysql_insert_id() or stderr($lang_forums['std_error'],$lang_forums['std_no_topic_id_returned']);
-			sql_query("UPDATE forums SET topiccount=topiccount+1, postcount=postcount+1 WHERE id=".sqlesc($forumid));
+			$topic = \App\Models\Topic::create([
+				'userid' => $userid,
+				'forumid' => $forumid,
+				'subject' => $subject,
+				'locked' => 'no',
+				'sticky' => 'no',
+				'hlcolor' => 0,
+				'views' => 0,
+				'firstpost' => 0,
+				'lastpost' => 0,
+			]);
+			$topicid = $topic ? $topic->id : 0;
+			if (!$topicid)
+				stderr($lang_forums['std_error'],$lang_forums['std_no_topic_id_returned']);
+			\App\Models\Forum::query()->where('id', $forumid)->increment('topiccount');
+			\App\Models\Forum::query()->where('id', $forumid)->increment('postcount');
 		}
 		else // new post
 		{
 			//add bonus
 			KPS("+",$makepost_bonus,$userid);
-			sql_query("UPDATE forums SET postcount=postcount+1 WHERE id=".sqlesc($forumid));
+			\App\Models\Forum::query()->where('id', $forumid)->increment('postcount');
 		}
 
-		sql_query("INSERT INTO posts (topicid, userid, added, body, ori_body) VALUES ($topicid, $userid, ".sqlesc($date).", ".sqlesc($body).", ".sqlesc($body).")") or sqlerr(__FILE__, __LINE__);
-		$postid = mysql_insert_id() or die($lang_forums['std_post_id_not_available']);
+		$postid = \Nexus\Database\NexusDB::table('posts')->insertGetId([
+			'topicid' => $topicid,
+			'userid' => $userid,
+			'added' => $date,
+			'body' => $body,
+			'ori_body' => $body,
+		]);
+		if (!$postid)
+			die($lang_forums['std_post_id_not_available']);
 		//send pm
         $topicInfo = \App\Models\Topic::query()->findOrFail($topicid);
         $postUrl = sprintf('[url=forums.php?action=viewtopic&topicid=%s&page=p%s#pid%s]%s[/url]', $topicid, $postid, $postid, $topicInfo->subject);
@@ -514,13 +536,13 @@ if ($action == "post")
 		if ($type == 'new')
 		{
 			// update the first post of topic
-			sql_query("UPDATE topics SET firstpost=$postid, lastpost=$postid WHERE id=".sqlesc($topicid)) or sqlerr(__FILE__, __LINE__);
+			\App\Models\Topic::query()->where('id', $topicid)->update(['firstpost' => $postid, 'lastpost' => $postid]);
 		}
 		else
 		{
-			sql_query("UPDATE topics SET lastpost=$postid WHERE id=".sqlesc($topicid)) or sqlerr(__FILE__, __LINE__);
+			\App\Models\Topic::query()->where('id', $topicid)->update(['lastpost' => $postid]);
 		}
-		sql_query("UPDATE users SET last_post=".sqlesc($date)." WHERE id=".sqlesc($CURUSER['id'])) or sqlerr(__FILE__, __LINE__);
+		\App\Models\User::query()->where('id', $CURUSER['id'])->update(['last_post' => $date]);
 	}
 
 	//------ All done, redirect user to the post
@@ -934,38 +956,33 @@ if ($action == "movetopic")
 
 	// Make sure topic and forum is valid
 
-	$res = @sql_query("SELECT minclasswrite FROM forums WHERE id=$forumid") or sqlerr(__FILE__, __LINE__);
+	$forum = \App\Models\Forum::query()->where('id', $forumid)->first(['minclasswrite']);
 
-	if (mysql_num_rows($res) != 1)
+	if (!$forum)
 	stderr($lang_forums['std_error'], $lang_forums['std_forum_not_found']);
 
-	$arr = mysql_fetch_row($res);
-
-	if (get_user_class() < $arr[0])
+	if (get_user_class() < $forum->minclasswrite)
 		permissiondenied();
 
-	$res = @sql_query("SELECT forumid FROM topics WHERE id=$topicid") or sqlerr(__FILE__, __LINE__);
-	if (mysql_num_rows($res) != 1)
+	$topic = \App\Models\Topic::query()->where('id', $topicid)->first(['forumid']);
+	if (!$topic)
 		stderr($lang_forums['std_error'], $lang_forums['std_topic_not_found']);
-	$arr = mysql_fetch_row($res);
-	$old_forumid=$arr[0];
+	$old_forumid = $topic->forumid;
 
 	// get posts count
-	$res = sql_query("SELECT COUNT(id) AS nb_posts FROM posts WHERE topicid=$topicid") or sqlerr(__FILE__, __LINE__);
-	if (mysql_num_rows($res) != 1)
-	stderr($lang_forums['std_error'], $lang_forums['std_cannot_get_posts_count']);
-	$arr = mysql_fetch_row($res);
-	$nb_posts = $arr[0];
+	$nb_posts = \App\Models\Post::query()->where('topicid', $topicid)->count();
 
 	// move topic
 	if ($old_forumid != $forumid)
 	{
-		@sql_query("UPDATE topics SET forumid=$forumid WHERE id=$topicid") or sqlerr(__FILE__, __LINE__);
+		\App\Models\Topic::query()->where('id', $topicid)->update(['forumid' => $forumid]);
 		// update counts
-		@sql_query("UPDATE forums SET topiccount=topiccount-1, postcount=postcount-$nb_posts WHERE id=$old_forumid") or sqlerr(__FILE__, __LINE__);
+		\App\Models\Forum::query()->where('id', $old_forumid)->decrement('topiccount');
+		\App\Models\Forum::query()->where('id', $old_forumid)->decrement('postcount', $nb_posts);
 		$Cache->delete_value('forum_'.$old_forumid.'_post_'.$today_date.'_count');
 		$Cache->delete_value('forum_'.$old_forumid.'_last_replied_topic_content');
-		@sql_query("UPDATE forums SET topiccount=topiccount+1, postcount=postcount+$nb_posts WHERE id=$forumid") or sqlerr(__FILE__, __LINE__);
+		\App\Models\Forum::query()->where('id', $forumid)->increment('topiccount');
+		\App\Models\Forum::query()->where('id', $forumid)->increment('postcount', $nb_posts);
 		$Cache->delete_value('forum_'.$forumid.'_post_'.$today_date.'_count');
 		$Cache->delete_value('forum_'.$forumid.'_last_replied_topic_content');
 	}
@@ -982,14 +999,13 @@ if ($action == "movetopic")
 if ($action == "deletetopic")
 {
 	$topicid = intval($_GET["topicid"] ?? 0);
-	$res1 = sql_query("SELECT forumid, userid FROM topics WHERE id=".sqlesc($topicid)." LIMIT 1") or sqlerr(__FILE__, __LINE__);
-	$row1 = mysql_fetch_array($res1);
-	if (!$row1){
+	$topic = \App\Models\Topic::query()->where('id', $topicid)->first(['forumid', 'userid']);
+	if (!$topic){
 		die;
 	}
 	else {
-		$forumid = $row1['forumid'];
-		$userid = $row1['userid'];
+		$forumid = $topic->forumid;
+		$userid = $topic->userid;
 	}
 	$ismod = is_forum_moderator($topicid,'topic');
 	if (!is_valid_id($topicid) || (!user_can('postmanage') && !$ismod))
@@ -1002,12 +1018,13 @@ if ($action == "deletetopic")
 		"<a class=altlink href=?action=deletetopic&topicid=$topicid&sure=1>".$lang_forums['std_here_if_sure'],false);
 	}
 
-	$postcount = get_row_count("posts","WHERE topicid=".sqlesc($topicid));
+	$postcount = \App\Models\Post::query()->where('topicid', $topicid)->count();
 
-	sql_query("DELETE FROM topics WHERE id=$topicid") or sqlerr(__FILE__, __LINE__);
-	sql_query("DELETE FROM posts WHERE topicid=$topicid") or sqlerr(__FILE__, __LINE__);
-	sql_query("DELETE FROM readposts WHERE topicid=$topicid") or sqlerr(__FILE__, __LINE__);
-	@sql_query("UPDATE forums SET topiccount=topiccount-1, postcount=postcount-$postcount WHERE id=".sqlesc($forumid)) or sqlerr(__FILE__, __LINE__);
+	\App\Models\Topic::query()->where('id', $topicid)->delete();
+	\App\Models\Post::query()->where('topicid', $topicid)->delete();
+	\Nexus\Database\NexusDB::table('readposts')->where('topicid', $topicid)->delete();
+	\App\Models\Forum::query()->where('id', $forumid)->decrement('topiccount');
+	\App\Models\Forum::query()->where('id', $forumid)->decrement('postcount', $postcount);
 	$Cache->delete_value('forum_'.$forumid.'_post_'.$today_date.'_count');
 	$forum_last_replied_topic_row = $Cache->get_value('forum_'.$forumid.'_last_replied_topic_content');
 	if ($forum_last_replied_topic_row && $forum_last_replied_topic_row['id'] == $topicid)
@@ -1033,20 +1050,20 @@ if ($action == "deletepost")
 		permissiondenied();
 
 	//------- Get topic id
-	$res = sql_query("SELECT topicid, userid FROM posts WHERE id=$postid") or sqlerr(__FILE__, __LINE__);
-	$arr = mysql_fetch_array($res) or stderr($lang_forums['std_error'], $lang_forums['std_post_not_found']);
-	$topicid = $arr['topicid'];
-	$userid = $arr['userid'];
+	$post = \App\Models\Post::query()->where('id', $postid)->first(['topicid', 'userid']);
+	if (!$post)
+		stderr($lang_forums['std_error'], $lang_forums['std_post_not_found']);
+	$topicid = $post->topicid;
+	$userid = $post->userid;
 
 	//------- Get the id of the last post before the one we're deleting
-	$res = sql_query("SELECT id FROM posts WHERE topicid=$topicid AND id < $postid ORDER BY id DESC LIMIT 1") or sqlerr(__FILE__, __LINE__);
-	if (mysql_num_rows($res) == 0) // This is the first post of a topic
+	$prevPostId = \App\Models\Post::query()->where('topicid', $topicid)->where('id', '<', $postid)->orderByDesc('id')->value('id');
+	if (!$prevPostId) // This is the first post of a topic
 		stderr($lang_forums['std_error'], $lang_forums['std_cannot_delete_post'] .
 	"<a class=altlink href=?action=deletetopic&topicid=$topicid&sure=1>".$lang_forums['std_delete_topic_instead'],false);
 	else
 	{
-		$arr = mysql_fetch_row($res);
-		$redirtopost = "&page=p$arr[0]#pid$arr[0]";
+		$redirtopost = "&page=p$prevPostId#pid$prevPostId";
 	}
 
 	//------- Make sure we know what we do :-)
@@ -1057,15 +1074,15 @@ if ($action == "deletepost")
 	}
 
 	//------- Delete post
-	sql_query("DELETE FROM posts WHERE id=$postid") or sqlerr(__FILE__, __LINE__);
+	\App\Models\Post::query()->where('id', $postid)->delete();
 	$Cache->delete_value('user_'.$userid.'_post_count');
 	$Cache->delete_value('topic_'.$topicid.'_post_count');
 	// update forum
-	$forumid = get_single_value("topics","forumid","WHERE id=".sqlesc($topicid));
+	$forumid = \App\Models\Topic::query()->where('id', $topicid)->value('forumid');
 	if (!$forumid)
 		die();
 	else{
-		sql_query("UPDATE forums SET postcount=postcount-1 WHERE id=".sqlesc($forumid));
+		\App\Models\Forum::query()->where('id', $forumid)->decrement('postcount');
 	}
 	$forum_last_replied_topic_row = $Cache->get_value('forum_'.$forumid.'_last_replied_topic_content');
 	if ($forum_last_replied_topic_row && $forum_last_replied_topic_row['lastpost'] == $postid)
@@ -1089,8 +1106,8 @@ if ($action == "setlocked")
 	if (!$topicid || (!user_can('postmanage') && !$ismod))
 		permissiondenied();
 
-	$locked = sqlesc($_POST["locked"]);
-	sql_query("UPDATE topics SET locked=$locked WHERE id=$topicid") or sqlerr(__FILE__, __LINE__);
+	$locked = $_POST["locked"];
+	\App\Models\Topic::query()->where('id', $topicid)->update(['locked' => $locked]);
 
 	header("Location: $_POST[returnto]");
 	die;
@@ -1102,11 +1119,11 @@ if ($action == 'hltopic')
 	$ismod = is_forum_moderator($topicid,'topic');
 	if (!$topicid || (!user_can('postmanage') && !$ismod))
 		permissiondenied();
-	$color = $_POST["color"];
+	$color = intval($_POST["color"]);
 	if ($color==0 || get_hl_color($color))
-		sql_query("UPDATE topics SET hlcolor=".sqlesc($color)." WHERE id=".sqlesc($topicid)) or sqlerr(__FILE__, __LINE__);
+		\App\Models\Topic::query()->where('id', $topicid)->update(['hlcolor' => $color]);
 
-	$forumid = get_single_value("topics","forumid","WHERE id=".sqlesc($topicid));
+	$forumid = \App\Models\Topic::query()->where('id', $topicid)->value('forumid');
 	$forum_last_replied_topic_row = $Cache->get_value('forum_'.$forumid.'_last_replied_topic_content');
 	if ($forum_last_replied_topic_row && $forum_last_replied_topic_row['id'] == $topicid)
 		$Cache->delete_value('forum_'.$forumid.'_last_replied_topic_content');
@@ -1123,8 +1140,8 @@ if ($action == "setsticky")
 	if (!$topicid || (!user_can('postmanage') && !$ismod))
 		permissiondenied();
 
-	$sticky = sqlesc($_POST["sticky"]);
-	sql_query("UPDATE topics SET sticky=$sticky WHERE id=$topicid") or sqlerr(__FILE__, __LINE__);
+	$sticky = $_POST["sticky"];
+	\App\Models\Topic::query()->where('id', $topicid)->update(['sticky' => $sticky]);
 
 	header("Location: $_POST[returnto]");
 	die;

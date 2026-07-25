@@ -2,12 +2,15 @@
 
 namespace App\Support;
 
+use Illuminate\Database\Capsule\Manager as Capsule;
+use Illuminate\Support\Facades\DB;
 use Nexus\Database\NexusDB;
 
 /**
  * Generic legacy DB helpers extracted from `include/functions.php`.
  *
- * Backs the `get_row_sum()` and `get_single_value()` procedural wrappers.
+ * Backs the `sql_query()`, `sqlesc()`, `last_query()`, `hash_where()`,
+ * `get_row_sum()` and `get_single_value()` procedural wrappers.
  *
  * These methods deliberately accept raw `$suffix` SQL because the legacy
  * callers pass unparameterised `WHERE`/`GROUP BY` fragments. The support
@@ -16,6 +19,95 @@ use Nexus\Database\NexusDB;
  */
 final class LegacyDb
 {
+    /**
+     * Execute a legacy query, timing it and recording it in `$query_name`.
+     *
+     * Mirrors `sql_query()`.
+     */
+    public static function query(string $query): mixed
+    {
+        $begin = microtime(true);
+        $result = NexusDB::getInstance()->query($query);
+        $end = microtime(true);
+
+        global $query_name;
+        $query_name[] = [
+            'query' => $query,
+            'time' => sprintf('%.2f ms', ($end - $begin) * 1000),
+        ];
+
+        return $result;
+    }
+
+    /**
+     * Escape and quote a scalar value for legacy SQL interpolation.
+     *
+     * Mirrors `sqlesc()`. Prefer prepared statements in new code.
+     */
+    public static function escape(mixed $value): string
+    {
+        if (is_null($value)) {
+            return 'null';
+        }
+
+        return "'" . NexusDB::getInstance()->escapeString((string) $value) . "'";
+    }
+
+    /**
+     * Return the raw query log, either the whole list or the last entry.
+     *
+     * Mirrors `last_query()`. `$all` may be the boolean `true` or the
+     * literal string `'COUNT'` for the query-log count.
+     */
+    public static function lastQuery(bool|string $all = false, string $format = 'json'): mixed
+    {
+        static $connection;
+        if (is_null($connection)) {
+            $connectionName = NexusDB::getConnectionName();
+            if (defined('IN_NEXUS') && IN_NEXUS) {
+                $connection = Capsule::connection($connectionName);
+            } else {
+                $connection = DB::connection($connectionName);
+            }
+        }
+
+        if ($all === 'COUNT') {
+            return count($connection->getQueryLog());
+        }
+
+        $queries = $connection->getRawQueryLog();
+        if ($all) {
+            return $queries;
+        }
+        if (empty($queries)) {
+            return '';
+        }
+
+        $last = last($queries);
+        if ($format === 'json') {
+            return Json::encode($last);
+        }
+
+        return $last;
+    }
+
+    /**
+     * Build a WHERE clause fragment for a torrent info-hash.
+     *
+     * Mirrors `hash_where()`.
+     */
+    public static function hashWhere(string $name, string $hash): string
+    {
+        if (NexusDB::isMysql()) {
+            return "$name = " . self::escape($hash);
+        }
+        if (NexusDB::isPgsql()) {
+            return "$name = decode(bin2hex('$hash'), 'hex')";
+        }
+
+        throw new \RuntimeException('Not supported database');
+    }
+
     /**
      * Return the scalar result of `SELECT SUM($field) FROM $table $suffix`.
      *

@@ -254,4 +254,20 @@ final class Strings
             ->map([\Illuminate\Support\Str::class, 'kebab'])
             ->implode('.');
     }
+
+    /**
+     * Pad a binary info-hash to 20 bytes.
+     *
+     * Mirrors `hash_pad()`: reads the value from a stream resource if
+     * necessary, then applies `str_pad($hash, 20)`.
+     */
+    public static function padHash(mixed $hash): string
+    {
+        if (is_resource($hash)) {
+            rewind($hash);
+            $hash = stream_get_contents($hash);
+        }
+
+        return str_pad((string) $hash, 20);
+    }
 }

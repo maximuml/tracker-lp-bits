@@ -33,7 +33,6 @@ class TorrentResource extends BaseResource
             'filename' => $this->filename,
             'hash' => preg_replace_callback('/./s', [$this, "hex_esc"], $this->info_hash),
             'cover' => $this->cover,
-            'small_descr' => $this->small_descr,
             'category' => $this->category,
             'category_info' => new CategoryResource($this->whenLoaded('basic_category')),
             'size' => $this->size,

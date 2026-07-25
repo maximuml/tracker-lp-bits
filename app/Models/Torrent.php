@@ -22,7 +22,7 @@ use Nexus\Database\NexusDB;
 class Torrent extends NexusModel
 {
     protected $fillable = [
-        'name', 'filename', 'save_as', 'small_descr',
+        'name', 'filename', 'save_as',
         'category', 'source', 'medium', 'codec', 'standard', 'processing', 'audiocodec',
         'size', 'added', 'type', 'numfiles', 'owner', 'nfo', 'sp_state', 'promotion_time_type',
         'promotion_until', 'anonymous', 'url', 'pos_state', 'cache_stamp',
@@ -278,7 +278,7 @@ class Torrent extends NexusModel
 
     public static function getFieldsForList($appendTableName = false): array|bool
     {
-        $fields = 'id, sp_state, promotion_time_type, promotion_until, banned, pos_state, category, source, medium, codec, standard, processing, audiocodec, leechers, seeders, name, small_descr, times_completed, size, added, comments,anonymous,owner,url,cache_stamp, hr, approval_status, cover, price';
+        $fields = 'id, sp_state, promotion_time_type, promotion_until, banned, pos_state, category, source, medium, codec, standard, processing, audiocodec, leechers, seeders, name, times_completed, size, added, comments,anonymous,owner,url,cache_stamp, hr, approval_status, cover, price';
         $fields = preg_split('/[,\s]+/', $fields);
         if ($appendTableName) {
             foreach ($fields as &$value) {

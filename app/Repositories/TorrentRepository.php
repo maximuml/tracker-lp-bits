@@ -123,8 +123,7 @@ class TorrentRepository extends BaseRepository
                         }
                         $titlePart = trim($titlePart);
                         $query->where(function (Builder $query) use ($titlePart) {
-                            $query->where('name', 'like', '%' . $titlePart . '%')
-                                ->orWhere('small_descr', 'like', '%' . $titlePart . '%');
+                            $query->where('name', 'like', '%' . $titlePart . '%');
                         });
                         $keywordCount++;
                     }

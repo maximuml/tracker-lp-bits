@@ -12,7 +12,7 @@ die();
 
 $taxonomyFields = "sources.name AS source_name, media.name AS medium_name, codecs.name AS codec_name, standards.name AS standard_name, processings.name AS processing_name, audiocodecs.name AS audiocodec_name";
 $extraFields = "torrent_extras.descr, torrent_extras.nfo, LENGTH(torrent_extras.nfo) AS nfosz, torrent_extras.media_info as technical_info";
-$res = sql_query("SELECT torrents.cache_stamp, torrents.sp_state, torrents.small_descr, torrents.seeders, torrents.banned, torrents.leechers, torrents.info_hash, torrents.filename, torrents.last_action, torrents.name, torrents.owner, torrents.save_as, torrents.visible, torrents.size, torrents.added, torrents.views, torrents.hits, torrents.times_completed, torrents.id, torrents.type, torrents.numfiles, torrents.anonymous, torrents.hr, torrents.promotion_until, torrents.promotion_time_type, torrents.approval_status, torrents.price,
+$res = sql_query("SELECT torrents.cache_stamp, torrents.sp_state, torrents.seeders, torrents.banned, torrents.leechers, torrents.info_hash, torrents.filename, torrents.last_action, torrents.name, torrents.owner, torrents.save_as, torrents.visible, torrents.size, torrents.added, torrents.views, torrents.hits, torrents.times_completed, torrents.id, torrents.type, torrents.numfiles, torrents.anonymous, torrents.hr, torrents.promotion_until, torrents.promotion_time_type, torrents.approval_status, torrents.price,
        categories.name AS cat_name, categories.mode as search_box_id, $taxonomyFields, $extraFields
 FROM torrents LEFT JOIN categories ON torrents.category = categories.id
     LEFT JOIN sources ON torrents.source = sources.id
@@ -118,9 +118,6 @@ if (!$row) {
 		}
 		else
 			tr($lang_details['row_download'], $lang_details['text_downloading_not_allowed']);
-		if ($smalldescription_main == 'yes')
-			tr($lang_details['row_small_description'],htmlspecialchars(trim($row["small_descr"])),true);
-
 		//tag
         $torrentTags = \App\Models\TorrentTag::query()->where('torrent_id', $row['id'])->get();
         if ($torrentTags->isNotEmpty()) {

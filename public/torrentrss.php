@@ -85,7 +85,7 @@ if (isset($searchstr)){
 
 	$ANDOR = ($search_mode == 0 ? " AND " : " OR ");	// only affects mode 0 and mode 1
 	foreach ($like_expression_array as &$like_expression_array_element)
-		$like_expression_array_element = "(torrents.name" . $like_expression_array_element . (isset($_GET['ismalldescr']) && $_GET['ismalldescr'] ? " OR torrents.small_descr" . $like_expression_array_element : "") . ")";
+		$like_expression_array_element = "(torrents.name" . $like_expression_array_element . ")";
 	$wherea[] = implode($ANDOR, $like_expression_array);
 	$where .= ($where ? " AND " : "") . implode(" AND ", $wherea);
 }
@@ -183,7 +183,7 @@ if ($where) {
     }
 }
 $sort = "id desc";
-$fieldStr = "torrents.id, torrents.category, torrents.name, torrents.small_descr, torrent_extras.descr, torrents.info_hash, torrents.size, torrents.added, torrents.anonymous, torrents.owner, categories.name AS category_name";
+$fieldStr = "torrents.id, torrents.category, torrents.name, torrent_extras.descr, torrents.info_hash, torrents.size, torrents.added, torrents.anonymous, torrents.owner, categories.name AS category_name";
 if (!$noNormalResults) {
     $query = "SELECT $fieldStr FROM torrents LEFT JOIN categories ON torrents.category = categories.id left join torrent_extras on torrent_extras.torrent_id = torrents.id $normalWhere ORDER BY $sort LIMIT $limit";
     $normalRows = \Nexus\Database\NexusDB::remember(sprintf("nexus_rss:normal:%s", md5($query)), 300, function () use ($query) {
@@ -260,7 +260,6 @@ foreach ($list as $row)
 	else $itemdlurl = $url."/download.php?id=".$row['id'];
 	if (!empty($_GET['icat'])) $title .= "[".$row['category_name']."]";
 	$title .= $row['name'];
-	if (!empty($_GET['ismalldescr']) && !empty($row['small_descr'])) $title .= "[".$row['small_descr']."]";
 	if (!empty($_GET['isize'])) $title .= "[".mksize($row['size'])."]";
 	if (!empty($_GET['iuplder'])) $title .= "[".$author."]";
 	$content = format_comment($row['descr'], true, false, false, false);

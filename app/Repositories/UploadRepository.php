@@ -95,7 +95,6 @@ class UploadRepository extends BaseRepository
             'numfiles' => count($fileListInfo['fileList']),
             'type' => $fileListInfo['type'],
             'url' => null,
-            'small_descr' => $request->small_descr ?? '',
             'category' => $category->id,
             'source' => $subCategoriesAngTags['subCategories']['source'],
             'medium' => $subCategoriesAngTags['subCategories']['medium'],

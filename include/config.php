@@ -118,7 +118,6 @@ $enableoffer = $MAIN['showoffer'];
 $sptime = $MAIN['sptime'];
 $showhelpbox_main = $MAIN['showhelpbox'];
 $enablebitbucket_main = $MAIN['enablebitbucket'];
-$smalldescription_main = $MAIN['smalldescription'];
 $altname_main = $MAIN['altname'] ?? '';
 $deflang = $MAIN['defaultlang'];
 $defcss = $MAIN['defstylesheet'];

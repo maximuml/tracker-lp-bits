@@ -45,8 +45,6 @@ else {
 $url = null;
 $nfo = '';
 
-$small_descr = unesc($_POST["small_descr"] ?? '');
-
 $descr = unesc($_POST["descr"]);
 if (!$descr)
 bark($lang_takeupload['std_blank_description']);
@@ -276,7 +274,6 @@ $insert = [
     'numfiles' => count($filelist),
     'type' => $type,
     'url' => $url,
-    'small_descr' => $small_descr,
 //    'descr' => $descr,
 //    'ori_descr' => $descr,
     'category' => $catid,

@@ -63,7 +63,7 @@ if ($search) {
             foreach ($searchArr as $queryString) {
                 $q = "%{$queryString}%";
                 $torrentQuery->where(function (\Illuminate\Database\Query\Builder $query) use ($q, $tableTorrent) {
-                    return $query->where("$tableTorrent.name", 'like', $q)->orWhere("$tableTorrent.small_descr", "like", $q);
+                    return $query->where("$tableTorrent.name", 'like', $q);
                 });
             }
         } elseif ($searchArea == \App\Repositories\SearchRepository::SEARCH_AREA_DESC) {

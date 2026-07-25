@@ -554,7 +554,7 @@ class MeiliSearchRepository extends BaseRepository
 
     private function getSearchableAttributes(): array
     {
-        $attributes = ["name", "small_descr", "url"];
+        $attributes = ["name", "url"];
         if (Setting::get("meilisearch.search_description") == 'yes') {
             $attributes[] = "descr";
         }

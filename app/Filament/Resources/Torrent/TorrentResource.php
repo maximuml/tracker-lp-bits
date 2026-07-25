@@ -104,7 +104,7 @@ class TorrentResource extends Resource
                 TextColumn::make('name')->formatStateUsing(fn ($record) => torrent_name_for_admin($record, true))
                     ->label(__('label.name'))
                     ->searchable(query: function (Builder $query, string $search) {
-                        return $query->where("name", "like", "%{$search}%")->orWhere("small_descr", "like", "%{$search}%");
+                        return $query->where("name", "like", "%{$search}%");
                     }),
                 TextColumn::make('posStateText')->label(__('label.torrent.pos_state')),
                 TextColumn::make('spStateText')->label(__('label.torrent.sp_state')),

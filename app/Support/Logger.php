@@ -21,20 +21,18 @@ final class Logger
     public static function write(string $log, string $level = 'info', bool $echo = false): void
     {
         if (self::$logLevel === null) {
-            self::$logLevel = nexus_env('LOG_LEVEL', 'debug');
+            self::$logLevel = (string) Env::get('LOG_LEVEL', 'debug');
         }
         if (self::$appEnv === null) {
-            self::$appEnv = nexus_env('APP_ENV', 'production');
+            self::$appEnv = (string) Env::get('APP_ENV', 'production');
         }
 
-        $logLevels = ['debug', 'info', 'notice', 'warning', 'error', 'critical', 'alert', 'emergency'];
-        $logLevelKeys = array_flip($logLevels);
-        $setLogLevelKey = isset($logLevelKeys[self::$logLevel]) ? $logLevelKeys[self::$logLevel] : false;
-        $currentLogLevelKey = isset($logLevelKeys[$level]) ? $logLevelKeys[$level] : false;
+        $setLogLevelKey = self::logLevelIndex(self::$logLevel);
+        $currentLogLevelKey = self::logLevelIndex($level);
         if ($currentLogLevelKey === false) {
             $level = 'error';
             $log = "[ERROR_LOG_LEVEL] $log";
-            $currentLogLevelKey = isset($logLevelKeys[$level]) ? $logLevelKeys[$level] : false;
+            $currentLogLevelKey = self::logLevelIndex($level);
         }
         if ($setLogLevelKey === false || $currentLogLevelKey === false || $currentLogLevelKey < $setLogLevelKey) {
             return;
@@ -66,7 +64,7 @@ final class Logger
         $nexus = \Nexus\Nexus::instance();
         $content = sprintf(
             "[%s] [%s] [%s] [%s] [%s] [%s] %s.%s %s:%s %s%s%s %s%s",
-            \getDtMillis(true),
+            Time::millis(true),
             $nexus ? $nexus->getRequestId() : 'NO_REQUEST_ID',
             $nexus ? $nexus->getLogSequence() : 0,
             sprintf('%.3f', microtime(true) - ($nexus ? $nexus->getStartTimestamp() : 0)),
@@ -99,7 +97,7 @@ final class Logger
         }
 
         $std = ['php://stdout', 'php://stderr'];
-        $logFileFromDotEnv = nexus_env('LOG_FILE');
+        $logFileFromDotEnv = Env::get('LOG_FILE');
         if ($logFileFromDotEnv && in_array($logFileFromDotEnv, $std, true)) {
             return self::$filePaths[$append] = $logFileFromDotEnv;
         }
@@ -134,7 +132,7 @@ final class Logger
             $name .= "-$append";
         }
 
-        if (isRunningInConsole()) {
+        if (Environment::isConsole()) {
             $scriptUserInfo = posix_getpwuid(posix_getuid());
             $name .= sprintf("-cli-%s", $scriptUserInfo['name'] ?? 'unknown');
         }
@@ -142,5 +140,23 @@ final class Logger
         $name .= '-' . date('Y-m-d');
 
         return self::$filePaths[$append] = $name . $suffix;
+    }
+
+    /**
+     * Map a log-level string to its numeric severity, or false when unknown.
+     */
+    private static function logLevelIndex(string $level): int|false
+    {
+        return match ($level) {
+            'debug' => 0,
+            'info' => 1,
+            'notice' => 2,
+            'warning' => 3,
+            'error' => 4,
+            'critical' => 5,
+            'alert' => 6,
+            'emergency' => 7,
+            default => false,
+        };
     }
 }

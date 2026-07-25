@@ -19,52 +19,11 @@ function get_global_sp_state()
 // IP Validation
 function validip($ip)
 {
-	if (!ip2long($ip)) //IPv6
-		return true;
-	if (!empty($ip) && $ip == long2ip(ip2long($ip)))
-	{
-		// reserved IANA IPv4 addresses
-		// http://www.iana.org/assignments/ipv4-address-space
-		$reserved_ips = array (
-		array('192.0.2.0','192.0.2.255'),
-		array('192.168.0.0','192.168.255.255'),
-		array('255.255.255.0','255.255.255.255')
-		);
-
-		foreach ($reserved_ips as $r)
-		{
-			$min = ip2long($r[0]);
-			$max = ip2long($r[1]);
-			if ((ip2long($ip) >= $min) && (ip2long($ip) <= $max)) return false;
-		}
-		return true;
-	}
-	else return false;
+	return \App\Support\Network::isValid($ip);
 }
 
 function getip($real = true) {
-	if (isset($_SERVER)) {
-		if (isset($_SERVER['HTTP_X_FORWARDED_FOR']) && validip($_SERVER['HTTP_X_FORWARDED_FOR'])) {
-			$ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
-		} elseif (isset($_SERVER['HTTP_CLIENT_IP']) && validip($_SERVER['HTTP_CLIENT_IP'])) {
-			$ip = $_SERVER['HTTP_CLIENT_IP'];
-		} else {
-			$ip = $_SERVER['REMOTE_ADDR'] ?? '';
-		}
-	} else {
-		if (getenv('HTTP_X_FORWARDED_FOR') && validip(getenv('HTTP_X_FORWARDED_FOR'))) {
-			$ip = getenv('HTTP_X_FORWARDED_FOR');
-		} elseif (getenv('HTTP_CLIENT_IP') && validip(getenv('HTTP_CLIENT_IP'))) {
-			$ip = getenv('HTTP_CLIENT_IP');
-		} else {
-			$ip = getenv('REMOTE_ADDR') ?? '';
-		}
-	}
-    $ip = trim(trim($ip), ",");
-    if ($real && str_contains($ip, ",")) {
-        return strstr($ip, ",", true);
-    }
-	return $ip;
+	return \App\Support\Network::clientIp((bool) $real);
 }
 
 function sql_query($query)
@@ -509,42 +468,18 @@ function arr_set(&$array, $key, $value)
 
 function isHttps(): bool
 {
-    if (isRunningInConsole()) {
-        $securityLogin = get_setting("security.securelogin");
-        if ($securityLogin != "no") {
-            return true;
-        }
-        return false;
-    }
-    return nexus()->getRequestSchema() == 'https';
+    return \App\Support\Url::isSecure();
 }
 
 
 function getSchemeAndHttpHost(bool $fromConfig = false): string
 {
-    if (isRunningInConsole() || $fromConfig) {
-        $host = get_setting("basic.BASEURL");
-    } else {
-        $host = nexus()->getRequestHost();
-    }
-    $isHttps = isHttps();
-    $protocol = $isHttps ? 'https' : 'http';
-    return "$protocol://" . $host;
+    return \App\Support\Url::schemeAndHost($fromConfig);
 }
 
 function getBaseUrl()
 {
-    $url = getSchemeAndHttpHost();
-    if (!isRunningInConsole()) {
-        $requestUri = $_SERVER['REQUEST_URI'];
-        $pos = strpos($requestUri, '?');
-        if ($pos !== false) {
-            $url .= substr($requestUri, 0, $pos);
-        } else {
-            $url .= $requestUri;
-        }
-    }
-    return trim($url, '/');
+    return \App\Support\Url::baseUrl();
 }
 
 
@@ -685,12 +620,12 @@ function nexus_trans($key, $replace = [], $locale = null)
 
 function isRunningInConsole(): bool
 {
-    return !RUNNING_IN_OCTANE && php_sapi_name() == 'cli';
+    return \App\Support\Environment::isConsole();
 }
 
 function isRunningOnWindows(): bool
 {
-    return !RUNNING_IN_OCTANE && strtoupper(substr(PHP_OS, 0, 3)) === 'WIN';
+    return \App\Support\Environment::isWindows();
 }
 
 function command_exists($command): bool
@@ -890,12 +825,12 @@ function site_info()
 
 function isIPV4 ($ip)
 {
-    return filter_var($ip,FILTER_VALIDATE_IP, FILTER_FLAG_IPV4);
+    return \App\Support\Network::isIpv4($ip);
 }
 
 function isIPV6 ($ip)
 {
-    return filter_var($ip,FILTER_VALIDATE_IP, FILTER_FLAG_IPV6);
+    return \App\Support\Network::isIpv6($ip);
 }
 
 function add_filter($name, $function, $priority = 10, $argc = 1)

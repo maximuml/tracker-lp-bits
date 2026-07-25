@@ -63,15 +63,10 @@ if ($isPreRegisterEmailAndUsername) {
 
 
 // check if email addy is already in use
-$a = (@mysql_fetch_row(@sql_query("select count(*) from users where email=".sqlesc($email))));
-if ($a[0] != 0)
+if (\App\Models\User::query()->where('email', $email)->count() > 0)
   bark($lang_takeinvite['std_email_address'].htmlspecialchars($email).$lang_takeinvite['std_is_in_use']);
-$b = (@mysql_fetch_row(@sql_query("select count(*) from invites where invitee=".sqlesc($email))));
-if ($b[0] != 0)
+if (\App\Models\Invite::query()->where('invitee', $email)->count() > 0)
   bark($lang_takeinvite['std_invitation_already_sent_to'].htmlspecialchars($email).$lang_takeinvite['std_await_user_registeration']);
-
-$ret = sql_query("SELECT username FROM users WHERE id = ".sqlesc($id)) or sqlerr();
-$arr = mysql_fetch_assoc($ret);
 
 if (empty($_POST['hash'])) {
     bark($lang_takeinvite['std_must_select_invite']);
@@ -100,10 +95,10 @@ $mailTwo = sprintf($lang_takeinvite['mail_two'], $siteName, $siteName);
 $mailFour = sprintf($lang_takeinvite['mail_four'], $siteName);
 $mailSix = sprintf($lang_takeinvite['mail_six'], $REPORTMAIL, $siteName);
 $message = <<<EOD
-{$lang_takeinvite['mail_one']}{$arr['username']}{$mailTwo}
+{$lang_takeinvite['mail_one']}{$CURUSER['username']}{$mailTwo}
 <b><a href="javascript:void(null)" onclick="window.open($signupUrl)">{$lang_takeinvite['mail_here']}</a></b><br />
 $signupUrl
-<br />{$lang_takeinvite['mail_three']}$invite_timeout{$mailFour}{$arr['username']}{$lang_takeinvite['mail_five']}<br />
+<br />{$lang_takeinvite['mail_three']}$invite_timeout{$mailFour}{$CURUSER['username']}{$lang_takeinvite['mail_five']}<br />
 $body
 <br /><br />{$mailSix}
 EOD;
@@ -135,7 +130,7 @@ if ($sendResult === true) {
         }
         \App\Models\Invite::query()->insert($insert);
 //        sql_query("INSERT INTO invites (inviter, invitee, hash, time_invited) VALUES ('".mysql_real_escape_string($id)."', '".mysql_real_escape_string($email)."', '".mysql_real_escape_string($hash)."', " . sqlesc(date("Y-m-d H:i:s")) . ")");
-        sql_query("UPDATE users SET invites = invites - 1 WHERE id = ".mysql_real_escape_string($id)) or sqlerr(__FILE__, __LINE__);
+        \App\Models\User::query()->where('id', $id)->decrement('invites');
     }
 }
 $lock->release();

@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\Support;
 
+use App\Models\Torrent;
+use App\Models\TorrentState;
+
 /**
  * Pure promotion (special-state) presentation helpers, drained out of
  * include/functions.php as part of Phase 5.
@@ -185,5 +188,25 @@ final class Promotion
         \do_log("$log, sp_torrent: $spTorrent");
 
         return $spTorrent;
+    }
+
+    /**
+     * Return the active global special-state promotion code.
+     *
+     * Mirrors `get_global_sp_state()`.
+     */
+    public static function globalSpecialState(): int
+    {
+        static $state;
+        if ($state === null) {
+            $timeline = TorrentState::resolveTimeline();
+            $current = $timeline['current'] ?? null;
+
+            $state = is_array($current) && isset($current['global_sp_state'])
+                ? (int) $current['global_sp_state']
+                : Torrent::PROMOTION_NORMAL;
+        }
+
+        return $state;
     }
 }

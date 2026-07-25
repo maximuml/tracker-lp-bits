@@ -270,4 +270,22 @@ final class Strings
 
         return str_pad((string) $hash, 20);
     }
+
+    /**
+     * Recursively escape a scalar or array for safe HTML output.
+     *
+     * Mirrors `nexus_escape()`: `htmlspecialchars(..., ENT_QUOTES, 'UTF-8')`
+     * on every string leaf.
+     *
+     * @param  string|array<array-key, mixed>  $data
+     * @return string|array<array-key, string>
+     */
+    public static function escapeHtml(array|string $data): array|string
+    {
+        if (is_array($data)) {
+            return array_map(self::escapeHtml(...), $data);
+        }
+
+        return htmlspecialchars($data, ENT_QUOTES, 'UTF-8');
+    }
 }

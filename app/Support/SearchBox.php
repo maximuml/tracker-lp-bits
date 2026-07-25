@@ -295,4 +295,29 @@ TD;
 
         return $html;
     }
+
+    /**
+     * Return the search-box IDs that must be loaded for the current script.
+     *
+     * Mirrors `list_require_search_box_id()`.
+     *
+     * @return list<int>
+     */
+    public static function requiredIds(): array
+    {
+        $setting = \get_setting('main');
+        $maps = [
+            'torrents' => [$setting['browsecat']],
+            'special' => [$setting['specialcat']],
+            'usercp' => [$setting['browsecat'], $setting['specialcat']],
+            'getrss' => [$setting['browsecat'], $setting['specialcat']],
+            'userdetails' => [$setting['browsecat'], $setting['specialcat']],
+            'offers' => [$setting['browsecat'], $setting['specialcat']],
+            'details' => [$setting['browsecat'], $setting['specialcat']],
+            'search' => [$setting['browsecat'], $setting['specialcat']],
+        ];
+        $script = \nexus()->getScript();
+
+        return array_map('intval', \Illuminate\Support\Arr::wrap($maps[$script] ?? []));
+    }
 }

@@ -3,24 +3,17 @@
 namespace App\Support;
 
 /**
- * Stateless IPv4 arithmetic helpers extracted from
- * `include/functions.php`.
+ * IP helpers extracted from `include/functions.php`.
  *
  * Phase 5 of the legacy migration — see
  * `docs/legacy-strategy.md` § "Phase 5 — drain `include/functions.php`".
- * The legacy procedural helper
+ * The legacy procedural helpers
  *
  *   - `in_ip_range($long, $targetip, $ip_one, $ip_two = false)`
+ *   - `get_ip_location_from_geoip($ip)`
  *
- * collapses into the static method below. The legacy function now
- * proxies here.
- *
- * Lives under `App\Support` (not `App\Services`) because every method
- * is pure — no DI, no DB, no config, no global state. Same convention
- * as {@see Ratio}, {@see Validators}, {@see Strings}.
- *
- * Every method's contract is pinned by a unit test in
- * `tests/Unit/Support/NetworkTest.php`.
+ * collapse into the static methods below. The legacy functions now
+ * proxy here.
  */
 final class Network
 {
@@ -98,6 +91,95 @@ final class Network
         return [
             ($geoName !== null && $geoName !== '') ? $geoName : $unknownLabel,
             $ipLabelPrefix.':&nbsp;'.trim($ip, ','),
+        ];
+    }
+
+    /**
+     * Resolve GeoIP2 data for an IP address.
+     *
+     * Mirrors `get_ip_location_from_geoip()`. The result is cached for
+     * 10 days via `NexusDB::remember()`. Returns `false` when the GeoIP2
+     * database is missing/unreadable.
+     *
+     * @return array<string, mixed>|false
+     */
+    public static function geoIpInfo(string $ip): array|false
+    {
+        $locationInfo = \Nexus\Database\NexusDB::remember("locations_{$ip}", 864000, function () use ($ip) {
+            $lang = \get_langfolder_cookie();
+            $langMap = [
+                'chs' => 'zh-CN',
+                'cht' => 'zh-CN',
+                'en' => 'en',
+            ];
+            $locale = $langMap[$lang] ?? $lang;
+            $info = [
+                'ip' => $ip,
+                'version' => '',
+                'country' => '',
+                'city' => '',
+                'country_en' => '',
+                'city_en' => '',
+                'continent_en' => '',
+            ];
+
+            try {
+                $database = \nexus_env('GEOIP2_DATABASE');
+                if (empty($database)) {
+                    \do_log('no geoip2 database.');
+
+                    return false;
+                }
+                if (! is_readable($database)) {
+                    \do_log("geoip2 database: $database is not readable.");
+
+                    return false;
+                }
+
+                $reader = new \GeoIp2\Database\Reader($database);
+                $record = $reader->city($ip);
+                $countryName = $record->country->names[$locale] ?? $record->country->names['en'] ?? '';
+                $cityName = $record->city->names[$locale] ?? $record->city->names['en'] ?? '';
+                $continentName = $record->continent->names[$locale] ?? $record->continent->names['en'] ?? '';
+
+                if (\isIPV4($ip)) {
+                    $info['version'] = 4;
+                } elseif (\isIPV6($ip)) {
+                    $info['version'] = 6;
+                }
+
+                $info['country'] = $countryName;
+                $info['country_en'] = $record->country->names['en'] ?? '';
+                $info['city'] = $cityName;
+                $info['city_en'] = $record->city->names['en'] ?? '';
+                $info['continent'] = $continentName;
+                $info['continent_en'] = $record->continent->names['en'] ?? '';
+            } catch (\Exception $exception) {
+                \do_log($exception->getMessage() . ', trace: ' . $exception->getTraceAsString(), 'error');
+            }
+
+            return $info;
+        });
+
+        \do_log('ip: ' . $ip . ', result: ' . \nexus_json_encode($locationInfo));
+
+        if ($locationInfo === false) {
+            return false;
+        }
+
+        $name = sprintf('%s[v%s]', $locationInfo['city'] ? ($locationInfo['city'] . '·' . $locationInfo['country']) : $locationInfo['country'], $locationInfo['version']);
+
+        return [
+            'name' => $name,
+            'location_main' => '',
+            'location_sub' => '',
+            'flagpic' => '',
+            'start_ip' => $ip,
+            'end_ip' => $ip,
+            'ip_version' => $locationInfo['version'],
+            'country_en' => $locationInfo['country_en'],
+            'city_en' => $locationInfo['city_en'],
+            'continent_en' => $locationInfo['continent_en'],
         ];
     }
 }

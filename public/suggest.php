@@ -13,10 +13,18 @@ if (isset($_GET['q']) && $_GET['q'] != '')
 {
 	$searchstr = unesc(trim($_GET['q']));
 	
-	$suggest_query = sql_query("SELECT keywords AS suggest, COUNT(*) AS count FROM suggest WHERE keywords LIKE " . sqlesc($searchstr . "%")." GROUP BY keywords ORDER BY count DESC, keywords DESC LIMIT 10") or sqlerr(__FILE__,__LINE__);
+	$suggestRows = \Nexus\Database\NexusDB::table('suggest')
+	    ->selectRaw('keywords AS suggest, COUNT(*) AS count')
+	    ->where('keywords', 'like', $searchstr . '%')
+	    ->groupBy('keywords')
+	    ->orderByDesc('count')
+	    ->orderByDesc('keywords')
+	    ->limit(10)
+	    ->get();
 	$result = "";
 	$i = 0;
-	while($suggest = mysql_fetch_array($suggest_query)){
+	foreach ($suggestRows as $suggest){
+		$suggest = (array) $suggest;
 		if (strlen($suggest['suggest']) > 25) continue;
 		$result .= ($result == "" ? "" : "\r\n" ). $suggest['suggest'] . "\r\n" . $suggest['count'];
 		$i++;

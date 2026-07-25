@@ -31,8 +31,8 @@ $dllink = false;
 $where = "";
 if ($passkey){
     $user = \Nexus\Database\NexusDB::remember('user_passkey_'.$passkey.'_rss', 3600, function () use ($passkey) {
-        $res = sql_query("SELECT id, enabled, parked, passkey FROM users WHERE passkey=". sqlesc($passkey)." LIMIT 1");
-        return mysql_fetch_array($res);
+        $row = \Nexus\Database\NexusDB::table('users')->where('passkey', $passkey)->first(['id', 'enabled', 'parked', 'passkey']);
+        return $row ? (array) $row : [];
     });
 	if (!$user)
 		die("invalid passkey");

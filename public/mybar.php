@@ -8,15 +8,15 @@ if (!$userid)
 if (!preg_match("/.*userid=([0-9]+)\.png$/i", $_SERVER['REQUEST_URI']))
 	die;
 if (!$my_img_string = $Cache->get_value('userbar_'.$_SERVER['REQUEST_URI'])){
-$res = sql_query("SELECT username, uploaded, downloaded, class, privacy FROM users WHERE id=".sqlesc($userid)." LIMIT 1");
-$row = mysql_fetch_array($res);
-if (!$row)
+$rowObj = \App\Models\User::query()->where('id', $userid)->first(['username', 'uploaded', 'downloaded', 'class', 'privacy']);
+if (!$rowObj)
 	die;
-elseif($row['privacy'] == 'strong')
+elseif($rowObj->privacy == 'strong')
 	die;
-elseif($row['class'] < $userbar_class)
+elseif($rowObj->class < $userbar_class)
 	die;
 else{
+	$row = $rowObj->toArray();
 	$username = $row['username'];
 	$uploaded = mksize($row['uploaded']);
 	$downloaded = mksize($row['downloaded']);

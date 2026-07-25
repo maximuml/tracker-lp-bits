@@ -59,29 +59,29 @@ echo '</tr><tr><td colspan="4"><input name="submit" type="submit"></td></tr>';
 end_table();
 echo '</form>';
 
-$query = 'WHERE enabled = 1 AND downloaded > 0 AND uploaded > 0';
-//' AND cheat >= '.$min
-if ($class>2) $query .= ' AND class < '.($class - 1);
-if ($ratio>1) $query .= ' AND (uploaded / downloaded) > '.($ratio - 1);
+$baseQuery = \Nexus\Database\NexusDB::table('users')
+    ->where('enabled', 1)
+    ->where('downloaded', '>', 0)
+    ->where('uploaded', '>', 0);
+if ($class>2) $baseQuery->where('class', '<', ($class - 1));
+if ($ratio>1) $baseQuery->whereRaw('(uploaded / downloaded) > ?', [($ratio - 1)]);
 
-$res = sql_query("SELECT COUNT(*),MIN(cheat),MAX(cheat) FROM users $query") or sqlerr();
-$arr = mysql_fetch_row($res);
-$top = MIN($top, $arr[0]);
-$min = $arr[1];
-$max = $arr[2];
+$agg = (clone $baseQuery)->selectRaw('COUNT(*) as cnt, MIN(cheat) as minc, MAX(cheat) as maxc')->first();
+$top = MIN($top, (int)($agg->cnt ?? 0));
+$min = $agg->minc ?? 0;
+$max = $agg->maxc ?? 0;
 
 $pages = ceil($top / 20);
 if ($page < 1) $page = 1;
 elseif ($page > $pages) $page = $pages;
 
-list($pagertop, $pagerbottom, $limit) = pager(20, $top, "cheaters.php?");
-
 echo $pagertop;
 begin_table();
 print("<tr><th class=\"left\">User name</th><th>Registered</th><th>Uploaded</th><th>Downloaded</th><th>Ratio</th><th>Cheat Value</th><th>Cheat Spread</th></tr>\n");
 
-$res = sql_query("SELECT * FROM users $query ORDER BY cheat DESC $limit") or sqlerr();
-while ($arr = mysql_fetch_assoc($res))
+list($pagertop, $pagerbottom, , $offset, $rpp) = pager(20, $top, "cheaters.php?");
+$rows = $baseQuery->orderByDesc('cheat')->offset($offset)->limit($rpp)->get()->map(fn ($r) => (array) $r)->all();
+foreach ($rows as $arr)
 {
   if ($arr['added'] == "0000-00-00 00:00:00" || $arr['added'] == null) $joindate = 'N/A';
   else $joindate = get_elapsed_time(strtotime($arr['added'])).' ago';

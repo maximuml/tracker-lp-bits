@@ -14,7 +14,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST")
     if (!in_array($or, ["<", ">", "=", "<=", ">="], true)) {
         stderr("Error", "Invalid symbol!");
     }
-$res = sql_query("SELECT id, username, email FROM users WHERE class $or ".mysql_real_escape_string($class)) or sqlerr(__FILE__, __LINE__);
+$rows = \App\Models\User::query()->where('class', $or, $class)->get(['id', 'username', 'email']);
 
 $subject = substr(htmlspecialchars(trim($_POST["subject"])), 0, 80);
 if ($subject == "") $subject = "(no subject)";
@@ -23,8 +23,8 @@ $subject = "Fw: $subject";
 $message1 = htmlspecialchars(trim($_POST["message"]));
 if ($message1 == "") stderr("Error", "Empty message!");
 
-while($arr=mysql_fetch_array($res)){
-
+foreach ($rows as $userRow) {
+$arr = (array) $userRow;
 $to = $arr["email"];
 
 

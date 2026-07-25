@@ -29,11 +29,11 @@ if ($useChallengeResponse) {
     }
 }
 
-$res = sql_query("SELECT id, passhash, secret, auth_key, enabled, status, two_step_secret, lang FROM users WHERE username = " . sqlesc($username));
-$row = mysql_fetch_array($res);
+$user = \App\Models\User::query()->where('username', $username)->first(['id', 'passhash', 'secret', 'auth_key', 'enabled', 'status', 'two_step_secret', 'lang']);
+if (!$user)
+    failedlogins();
+$row = $user->toArray();
 
-if (!$row)
-	failedlogins();
 if ($row['status'] == 'pending')
 	failedlogins($lang_takelogin['std_user_account_unconfirmed']);
 if ($row["enabled"] == "no" && \App\Models\Setting::getSelfEnableBonus() <= 0) {

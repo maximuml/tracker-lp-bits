@@ -9,8 +9,8 @@ $status = $_GET['status'];
 	if ($status)
 		int_check($status,true);
 		
-$res = sql_query("SELECT * FROM users WHERE status='pending' ORDER BY username" ) or sqlerr();
-if( mysql_num_rows($res) != 0 )
+$rows = \App\Models\User::query()->where('status', 'pending')->orderBy('username')->get();
+if( $rows->isNotEmpty() )
 {
 	stdhead("Unconfirmed Users");
 	begin_main_frame();
@@ -25,8 +25,9 @@ print'<td class=rowhead><center>Added</center></td>';
 print'<td class=rowhead><center>Set Status</center></td>';
 print'<td class=rowhead><center>Confirm</center></td>';
 print'</tr>';
-while( $row = mysql_fetch_assoc($res) )
+foreach ($rows as $userRow)
 {
+$row = (array) $userRow;
 $id = $row['id'];
 print'<tr><form method=post action=modtask.php>';
 print'<input type=hidden name=\'action\' value=\'confirmuser\'>';

@@ -30,7 +30,7 @@ if (get_user_class() < UC_MODERATOR) {
 }
 \App\Models\StaffMessage::add($userid, $subject, $msg);
 // Update Last PM sent...
-sql_query("UPDATE users SET last_staffmsg = NOW() WHERE id = ".sqlesc($CURUSER['id'])) or sqlerr(__FILE__, __LINE__);
+\App\Models\User::query()->where('id', $CURUSER['id'])->update(['last_staffmsg' => date('Y-m-d H:i:s')]);
 $Cache->delete_value('staff_message_count');
 $Cache->delete_value('staff_new_message_count');
 clear_staff_message_cache();

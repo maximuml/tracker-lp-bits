@@ -19,10 +19,10 @@ $id = intval($id ?? 0);
 int_check($id);
 $sure = $_GET["sure"];
 
-$res = sql_query("SELECT name,owner,seeders,anonymous FROM torrents WHERE id = $id");
-$row = mysql_fetch_array($res);
-if (!$row)
+$torrent = \App\Models\Torrent::query()->where('id', $id)->first(['name', 'owner', 'seeders', 'anonymous']);
+if (!$torrent)
     die();
+$row = $torrent->toArray();
 
 if (!user_can('torrentmanage') || !user_can('torrent-delete'))
     bark($lang_fastdelete['text_no_permission']);

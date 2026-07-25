@@ -196,7 +196,6 @@ JS;
                         $options[] = "<option value=\"" . $key . "\">".$value['text']."</option>";
                     }
                     $pickcontent .= "<b>".$lang_edit['row_torrent_position'].":&nbsp;</b>"."<select name=\"pos_state\" style=\"width: 100px;\">" . implode('', $options) . "</select>&nbsp;&nbsp;&nbsp;";
-                    $pickcontent .= datetimepicker_input('pos_state_until', '', nexus_trans('label.deadline') . ":&nbsp;", ['require_files' => true]);
                 }
                 if ($pickcontent) {
                     tr($lang_edit['row_pick'], $pickcontent, 1);

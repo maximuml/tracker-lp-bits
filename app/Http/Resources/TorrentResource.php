@@ -47,8 +47,6 @@ class TorrentResource extends BaseResource
             'hits' => $this->hits ?: 0,
             'comments' => $this->comments ?: 0,
             'pos_state' => $this->pos_state,
-            'pos_state_until' => format_datetime($this->pos_state_until),
-            'pos_state_until_human' => gettime($this->pos_state_until),
             'sp_state' => $this->sp_state,
             'sp_state_real' => $this->sp_state_real,
             'promotion_info' => $this->promotionInfo,

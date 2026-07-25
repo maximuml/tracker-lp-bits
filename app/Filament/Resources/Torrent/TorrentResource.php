@@ -11,7 +11,6 @@ use App\Filament\Resources\Torrent\TorrentResource\Pages\CreateTorrent;
 use App\Filament\Resources\Torrent\TorrentResource\Pages\EditTorrent;
 use Filament\Actions\BulkAction;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\DateTimePicker;
 use Exception;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Checkbox;
@@ -172,16 +171,13 @@ class TorrentResource extends Resource
                         ->options(Torrent::listPosStates(true))
                         ->required()
                     ,
-                    DateTimePicker::make('pos_state_until')
-                        ->label(__('label.deadline'))
-                    ,
                 ])
                 ->icon('heroicon-o-arrow-up-circle')
                 ->action(function (Collection $records, array $data) {
                     $idArr = $records->pluck('id')->toArray();
                     try {
                         $torrentRep = new TorrentRepository();
-                        $torrentRep->setPosState($idArr, $data['pos_state'], $data['pos_state_until']);
+                        $torrentRep->setPosState($idArr, $data['pos_state']);
                     } catch (Exception $exception) {
                         do_log($exception->getMessage() . $exception->getTraceAsString(), 'error');
                         Filament::notify('danger', class_basename($exception));
@@ -199,21 +195,13 @@ class TorrentResource extends Resource
                         ->options(Torrent::listPromotionTypes(true))
                         ->required()
                     ,
-                    Select::make('promotion_time_type')
-                        ->label(__('label.torrent.promotion_time_type'))
-                        ->options(Torrent::listPromotionTimeTypes(true))
-                        ->required()
-                    ,
-                    DateTimePicker::make('promotion_until')
-                        ->label(__('label.deadline'))
-                    ,
                 ])
                 ->icon('heroicon-o-megaphone')
                 ->action(function (Collection $records, array $data) {
                     $idArr = $records->pluck('id')->toArray();
                     try {
                         $torrentRep = new TorrentRepository();
-                        $torrentRep->setSpState($idArr, $data['sp_state'], $data['promotion_time_type'], $data['promotion_until']);
+                        $torrentRep->setSpState($idArr, $data['sp_state']);
                     } catch (Exception $exception) {
                         do_log($exception->getMessage() . $exception->getTraceAsString(), 'error');
                         Filament::notify('danger', $exception->getMessage());

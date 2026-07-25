@@ -309,17 +309,7 @@ if (isset($_POST['hr'][$catmod]) && isset(\App\Models\Torrent::$hrStatus[$_POST[
 }
 if(user_can('torrentsticky')) {
     if (isset($_POST['pos_state']) && isset(\App\Models\Torrent::$posStates[$_POST['pos_state']])) {
-        $posStateUntil = $_POST['pos_state_until'] ?: null;
-        $posState = $_POST['pos_state'];
-        if ($posState == \App\Models\Torrent::POS_STATE_STICKY_NONE) {
-            $posStateUntil = null;
-        }
-        if ($posStateUntil && \Carbon\Carbon::parse($posStateUntil)->lte(now())) {
-            $posState = \App\Models\Torrent::POS_STATE_STICKY_NONE;
-            $posStateUntil = null;
-        }
-        $insert['pos_state'] = $posState;
-        $insert['pos_state_until'] = $posStateUntil;
+        $insert['pos_state'] = $_POST['pos_state'];
     }
 }
 if (user_can('torrent-approval-allow-automatic')) {

@@ -112,7 +112,6 @@ class UploadRepository extends BaseRepository
             'cache_stamp' => time(),
             'hr' => $this->getHitAndRun($request),
             'pos_state' => $posStateInfo['posState'],
-            'pos_state_until' => $posStateInfo['posStateUntil'],
             'approval_status' => $this->getApprovalStatus($request),
             'price' => $this->getPrice($request),
         ];
@@ -257,7 +256,6 @@ class UploadRepository extends BaseRepository
     private function getPosStateInfo(Request $request): array
     {
         $posState = $request->pos_state ?: Torrent::POS_STATE_STICKY_NONE;
-        $posStateUntil = $request->pos_state_until ?: null;
         if ($posState !== Torrent::POS_STATE_STICKY_NONE) {
             if (!Permission::canSetTorrentPosState()) {
                 throw new NexusException("upload.no_permission_to_set_torrent_pos_state");
@@ -266,13 +264,7 @@ class UploadRepository extends BaseRepository
                 throw new NexusException(nexus_trans('upload.invalid_pos_state', ['pos_state' => $posState]));
             }
         }
-        if ($posState == Torrent::POS_STATE_STICKY_NONE) {
-            $posStateUntil = null;
-        }
-        if ($posStateUntil && Carbon::parse($posStateUntil)->lt(Carbon::now())) {
-            throw new NexusException(nexus_trans('upload.invalid_pos_state_until'));
-        }
-        return compact('posState', 'posStateUntil');
+        return ['posState' => $posState, 'posStateUntil' => null];
     }
 
     private function checkTorrentDict($dict, $key, $type = null)

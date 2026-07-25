@@ -296,4 +296,12 @@ class StringsTest extends TestCase
     {
         $this->assertSame([], Strings::stripSlashesDeep([]));
     }
+
+    // ---------- padHash() ----------
+
+    public function test_pad_hash_pads_to_20_bytes(): void
+    {
+        $this->assertSame('12345678901234567890', Strings::padHash('12345678901234567890'));
+        $this->assertSame('short               ', Strings::padHash('short'));
+    }
 }

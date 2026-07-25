@@ -1,0 +1,162 @@
+<?php
+
+namespace App\Support;
+
+use Illuminate\Support\Facades\Auth;
+
+/**
+ * Legacy file-log helpers extracted from `include/globalfunctions.php`.
+ *
+ * Phase 5 of the legacy migration. Mirrors `do_log()` and `getLogFile()`,
+ * keeping the per-request static caches and the log-level filtering.
+ */
+final class Logger
+{
+    private static ?string $logLevel = null;
+    private static ?string $appEnv = null;
+
+    /** @var array<string, string> */
+    private static array $filePaths = [];
+
+    public static function write(string $log, string $level = 'info', bool $echo = false): void
+    {
+        if (self::$logLevel === null) {
+            self::$logLevel = (string) Env::get('LOG_LEVEL', 'debug');
+        }
+        if (self::$appEnv === null) {
+            self::$appEnv = (string) Env::get('APP_ENV', 'production');
+        }
+
+        $setLogLevelKey = self::logLevelIndex(self::$logLevel);
+        $currentLogLevelKey = self::logLevelIndex($level);
+        if ($currentLogLevelKey === false) {
+            $level = 'error';
+            $log = "[ERROR_LOG_LEVEL] $log";
+            $currentLogLevelKey = self::logLevelIndex($level);
+        }
+        if ($setLogLevelKey === false || $currentLogLevelKey === false || $currentLogLevelKey < $setLogLevelKey) {
+            return;
+        }
+
+        $logFile = self::filePath();
+        if (($fd = fopen($logFile, 'a')) === false) {
+            $log .= "--------Can not open $logFile";
+            $fd = fopen(sys_get_temp_dir() . '/nexus.log', 'a');
+        }
+
+        $uid = 0;
+        $passkey = '';
+        if (defined('IN_NEXUS') && IN_NEXUS) {
+            global $CURUSER;
+            $uid = $CURUSER['id'] ?? 0;
+            $passkey = $CURUSER['passkey'] ?? $_REQUEST['passkey'] ?? $_REQUEST['authkey'] ?? '';
+        } else {
+            try {
+                $user = Auth::user();
+                $uid = $user->id ?? 0;
+                $passkey = $user->passkey ?? request('passkey', request('authkey', ''));
+            } catch (\Throwable $exception) {
+                $passkey = "!IN_NEXUS:" . $exception->getMessage();
+            }
+        }
+
+        $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
+        $nexus = \Nexus\Nexus::instance();
+        $content = sprintf(
+            "[%s] [%s] [%s] [%s] [%s] [%s] %s.%s %s:%s %s%s%s %s%s",
+            Time::millis(true),
+            $nexus ? $nexus->getRequestId() : 'NO_REQUEST_ID',
+            $nexus ? $nexus->getLogSequence() : 0,
+            sprintf('%.3f', microtime(true) - ($nexus ? $nexus->getStartTimestamp() : 0)),
+            $uid,
+            $passkey,
+            self::$appEnv,
+            strtoupper($level),
+            $backtrace[0]['file'] ?? '',
+            $backtrace[0]['line'] ?? '',
+            $backtrace[1]['class'] ?? '',
+            $backtrace[1]['type'] ?? '',
+            $backtrace[1]['function'] ?? '',
+            $log,
+            PHP_EOL
+        );
+        fwrite($fd, $content);
+        fclose($fd);
+        if ($echo) {
+            echo $content . PHP_EOL;
+        }
+        if ($nexus) {
+            $nexus->incrementLogSequence();
+        }
+    }
+
+    public static function filePath(string $append = ''): string
+    {
+        if (isset(self::$filePaths[$append])) {
+            return self::$filePaths[$append];
+        }
+
+        $std = ['php://stdout', 'php://stderr'];
+        $logFileFromDotEnv = Env::get('LOG_FILE');
+        if ($logFileFromDotEnv && in_array($logFileFromDotEnv, $std, true)) {
+            return self::$filePaths[$append] = $logFileFromDotEnv;
+        }
+
+        $path = getenv('NEXUS_LOG_DIR', true);
+        if (in_array($path, $std, true)) {
+            return self::$filePaths[$append] = $path;
+        }
+
+        $fromEnv = true;
+        if ($path === false) {
+            $fromEnv = false;
+            $path = sys_get_temp_dir();
+        }
+
+        $logFile = rtrim($path, '/') . '/nexus.log';
+        if (!$fromEnv && $logFileFromDotEnv) {
+            $logFile = $logFileFromDotEnv;
+        }
+
+        $lastDotPos = strrpos($logFile, '.');
+        if ($lastDotPos !== false) {
+            $prefix = substr($logFile, 0, $lastDotPos);
+            $suffix = substr($logFile, $lastDotPos);
+        } else {
+            $prefix = $logFile;
+            $suffix = '';
+        }
+
+        $name = $prefix;
+        if ($append !== '') {
+            $name .= "-$append";
+        }
+
+        if (Environment::isConsole()) {
+            $scriptUserInfo = posix_getpwuid(posix_getuid());
+            $name .= sprintf("-cli-%s", $scriptUserInfo['name'] ?? 'unknown');
+        }
+
+        $name .= '-' . date('Y-m-d');
+
+        return self::$filePaths[$append] = $name . $suffix;
+    }
+
+    /**
+     * Map a log-level string to its numeric severity, or false when unknown.
+     */
+    private static function logLevelIndex(string $level): int|false
+    {
+        return match ($level) {
+            'debug' => 0,
+            'info' => 1,
+            'notice' => 2,
+            'warning' => 3,
+            'error' => 4,
+            'critical' => 5,
+            'alert' => 6,
+            'emergency' => 7,
+            default => false,
+        };
+    }
+}

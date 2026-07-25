@@ -132,71 +132,7 @@ function nexus_dd($vars)
  */
 function do_log($log, $level = 'info', $echo = false)
 {
-    static $env, $setLogLevel;
-    if (is_null($setLogLevel)) {
-        $setLogLevel = nexus_env('LOG_LEVEL', 'debug');
-    }
-    if (is_null($env)) {
-        $env = nexus_env('APP_ENV', 'production');
-    }
-    $logLevels = ['debug', 'info', 'notice', 'warning', 'error', 'critical', 'alert', 'emergency'];
-    $setLogLevelKey = array_search($setLogLevel, $logLevels);
-    $currentLogLevelKey = array_search($level, $logLevels);
-    if ($currentLogLevelKey === false) {
-        $level = 'error';
-        $log = "[ERROR_LOG_LEVEL] $log";
-        $currentLogLevelKey = array_search($level, $logLevels);
-    }
-    if ($currentLogLevelKey < $setLogLevelKey) {
-        return;
-    }
-
-    $logFile = getLogFile();
-	if (($fd = fopen($logFile, 'a')) === false) {
-	    $log .= "--------Can not open $logFile";
-        $fd = fopen(sys_get_temp_dir() . '/nexus.log', 'a');
-	}
-	$uid = 0;
-    if (IN_NEXUS) {
-        global $CURUSER;
-        $user = $CURUSER;
-        $uid = $user['id'] ?? 0;
-        $passkey = $user['passkey'] ?? $_REQUEST['passkey'] ?? $_REQUEST['authkey'] ?? '';
-    } else {
-        try {
-            $user = \Illuminate\Support\Facades\Auth::user();
-            $uid = $user->id ?? 0;
-            $passkey = $user->passkey ?? request('passkey', request('authkey', ''));
-        } catch (\Throwable $exception) {
-            $passkey = "!IN_NEXUS:" . $exception->getMessage();
-        }
-    }
-    $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
-    $content = sprintf(
-        "[%s] [%s] [%s] [%s] [%s] [%s] %s.%s %s:%s %s%s%s %s%s",
-        getDtMillis(true),
-        nexus() ? nexus()->getRequestId() : 'NO_REQUEST_ID',
-        nexus() ? nexus()->getLogSequence() : 0,
-        sprintf('%.3f', microtime(true) - (nexus() ? nexus()->getStartTimestamp() : 0)),
-        $uid,
-        $passkey,
-        $env, strtoupper($level),
-        $backtrace[0]['file'] ?? '',
-        $backtrace[0]['line'] ?? '',
-        $backtrace[1]['class'] ?? '',
-        $backtrace[1]['type'] ?? '',
-        $backtrace[1]['function'] ?? '',
-        $log,
-        PHP_EOL
-    );
-    fwrite($fd, $content);
-    fclose($fd);
-    if (is_bool($echo) && $echo) {
-        echo $content . PHP_EOL;
-    }
-    if (nexus()) {
-        nexus()->incrementLogSequence();
-    }
+    \App\Support\Logger::write($log, $level, (bool) $echo);
 }
 
 function getDtMillis($withTimeZone = false): string {
@@ -209,47 +145,7 @@ function getDtMicro($withTimeZone = false): string {
 
 function getLogFile($append = '')
 {
-    static $logFiles = [];
-    if (isset($logFiles[$append])) {
-        return $logFiles[$append];
-    }
-    $std = ["php://stdout", "php://stderr"];
-    $logFileFromDotEnv = nexus_env('LOG_FILE');
-    if ($logFileFromDotEnv && in_array($logFileFromDotEnv, $std)) {
-        return $logFiles[$append] = $logFileFromDotEnv;
-    }
-    $path = getenv('NEXUS_LOG_DIR', true);
-    if (in_array($path, $std)) {
-        return $logFiles[$append] = $path;
-    }
-    $fromEnv = true;
-    if ($path === false) {
-        $fromEnv = false;
-        $path = sys_get_temp_dir();
-    }
-    $logFile = rtrim($path, '/') . '/nexus.log';
-    if (!$fromEnv && $logFileFromDotEnv) {
-        $logFile = $logFileFromDotEnv;
-    }
-    $lastDotPos = strrpos($logFile, '.');
-    if ($lastDotPos !== false) {
-        $prefix = substr($logFile, 0, $lastDotPos);
-        $suffix = substr($logFile, $lastDotPos);
-    } else {
-        $prefix = $logFile;
-        $suffix = '';
-    }
-    $name = $prefix;
-    if ($append) {
-        $name .= "-$append";
-    }
-    if (isRunningInConsole()) {
-        $scriptUserInfo = posix_getpwuid(posix_getuid());
-        $name .= sprintf("-cli-%s", $scriptUserInfo['name']);
-    }
-    $name .= "-" . date('Y-m-d');
-    return $logFiles[$append] = $name . $suffix;
-
+    return \App\Support\Logger::filePath($append);
 }
 
 function nexus_config($key, $default = null)

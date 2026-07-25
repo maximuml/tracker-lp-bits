@@ -136,7 +136,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
 	{
 		$query[] = "iuplder=1";
 	}
-	$searchstr = mysql_real_escape_string(trim($_POST["search"] ?? ''));
+	$searchstr = \Nexus\Database\NexusDB::getInstance()->escapeString(trim($_POST["search"] ?? ''));
 //	if (empty($searchstr))
 //		unset($searchstr);
 	if ($searchstr)

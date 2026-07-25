@@ -19,4 +19,14 @@ final class Environment
     {
         return (!defined('RUNNING_IN_OCTANE') || !RUNNING_IN_OCTANE) && strtoupper(substr(PHP_OS, 0, 3)) === 'WIN';
     }
+
+    public static function isFpm(): bool
+    {
+        return php_sapi_name() === 'fpm-fcgi';
+    }
+
+    public static function commandExists(string $command): bool
+    {
+        return trim((string) exec("command -v $command")) !== '';
+    }
 }

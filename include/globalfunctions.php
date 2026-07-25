@@ -228,7 +228,7 @@ function isRunningOnWindows(): bool
 
 function command_exists($command): bool
 {
-    return !(trim(exec("command -v $command")) == '');
+    return \App\Support\Environment::commandExists($command);
 }
 
 function get_tracker_schema_and_host($trackerUrlId, $combine = false): array|string
@@ -412,28 +412,22 @@ function isIPV6 ($ip)
 
 function add_filter($name, $function, $priority = 10, $argc = 1)
 {
-    global $hook;
-    $hook->addFilter($name, $function, $priority, $argc);
+    \App\Support\Hooks::addFilter($name, $function, (int) $priority, (int) $argc);
 }
 
 function apply_filter($name, ...$args)
 {
-    global $hook;
-//    do_log("[APPLY_FILTER]: $name");
-    return $hook->applyFilter(...func_get_args());
+    return \App\Support\Hooks::applyFilter($name, ...$args);
 }
 
 function add_action($name, $function, $priority = 10, $argc = 1)
 {
-    global $hook;
-    $hook->addAction($name, $function, $priority, $argc);
+    \App\Support\Hooks::addAction($name, $function, (int) $priority, (int) $argc);
 }
 
 function do_action($name, ...$args)
 {
-    global $hook;
-//    do_log("[DO_ACTION]: $name");
-    return $hook->doAction(...func_get_args());
+    return \App\Support\Hooks::doAction($name, ...$args);
 }
 
 function isIPSeedBoxFromASN($ip, $exceptionWhenYes = false): bool
@@ -659,33 +653,12 @@ function getDataTraffic(array $torrent, array $queries, array $user, $peer, $sna
 
 function clear_user_cache($uid, $passkey = '')
 {
-    do_log("clear_user_cache, uid: $uid, passkey: $passkey");
-    \Nexus\Database\NexusDB::cache_del("user_{$uid}_content");
-    \Nexus\Database\NexusDB::cache_del("user_{$uid}_roles");
-    \Nexus\Database\NexusDB::cache_del("announce_user_passkey_$uid");//announce.php
-    \Nexus\Database\NexusDB::cache_del(\App\Models\Setting::DIRECT_PERMISSION_CACHE_KEY_PREFIX . $uid);
-    \Nexus\Database\NexusDB::cache_del("user_role_ids:$uid");
-    \Nexus\Database\NexusDB::cache_del("direct_permissions:$uid");
-    if ($passkey) {
-        \Nexus\Database\NexusDB::cache_del('user_passkey_'.$passkey.'_content');//announce.php
-        \Nexus\Database\NexusDB::cache_del('user_passkey_'.$passkey.'_rss');//torrentrss.php
-    }
-    $userInfo = \App\Models\User::query()->find($uid, \App\Models\User::$commonFields);
-    if ($userInfo) {
-        fire_event("user_updated", $userInfo);
-    }
+    \App\Support\Cache::clearUser($uid, $passkey);
 }
 
 function clear_setting_cache()
 {
-    do_log("clear_setting_cache");
-    \Nexus\Database\NexusDB::cache_del('nexus_settings_in_laravel');
-    \Nexus\Database\NexusDB::cache_del('nexus_settings_in_nexus');
-    \Nexus\Database\NexusDB::cache_del('setting_protected_forum');
-    $channel = nexus_env("CHANNEL_NAME_SETTING");
-    if (!empty($channel)) {
-        \Nexus\Database\NexusDB::redis()->publish($channel, "update");
-    }
+    \App\Support\Cache::clearSettings();
 }
 
 /**
@@ -693,13 +666,7 @@ function clear_setting_cache()
  */
 function clear_category_cache()
 {
-    do_log("clear_category_cache");
-    \Nexus\Database\NexusDB::cache_del('category_content');
-    $searchBoxList = \App\Models\SearchBox::query()->get(['id']);
-    foreach ($searchBoxList as $item) {
-        \Nexus\Database\NexusDB::cache_del("category_list_mode_{$item->id}");
-    }
-
+    \App\Support\Cache::clearCategory();
 }
 
 /**
@@ -707,18 +674,12 @@ function clear_category_cache()
  */
 function clear_taxonomy_cache($table)
 {
-    do_log("clear_taxonomy_cache: $table");
-    $list = \App\Models\SearchBox::query()->get(['id']);
-    foreach ($list as $item) {
-        \Nexus\Database\NexusDB::cache_del("{$table}_list_mode_{$item->id}");
-    }
-    \Nexus\Database\NexusDB::cache_del("{$table}_list_mode_0");
+    \App\Support\Cache::clearTaxonomy($table);
 }
 
 function clear_staff_message_cache()
 {
-    do_log("clear_staff_message_cache");
-    \App\Repositories\MessageRepository::updateStaffMessageCountCache(false);
+    \App\Support\Cache::clearStaffMessage();
 }
 
 /**
@@ -726,8 +687,7 @@ function clear_staff_message_cache()
  */
 function clear_search_box_cache()
 {
-    do_log("clear_search_box_cache");
-    \Nexus\Database\NexusDB::cache_del("search_box_content");
+    \App\Support\Cache::clearSearchBox();
 }
 
 /**
@@ -735,28 +695,17 @@ function clear_search_box_cache()
  */
 function clear_icon_cache()
 {
-    do_log("clear_icon_cache");
-    \Nexus\Database\NexusDB::cache_del("category_icon_content");
+    \App\Support\Cache::clearIcon();
 }
 
 function clear_inbox_count_cache($uid)
 {
-    do_log("clear_inbox_count_cache");
-    foreach (\Illuminate\Support\Arr::wrap($uid) as $id) {
-        \Nexus\Database\NexusDB::cache_del('user_'.$id.'_inbox_count');
-        \Nexus\Database\NexusDB::cache_del('user_'.$id.'_unread_message_count');
-    }
+    \App\Support\Cache::clearInboxCount($uid);
 }
 
 function clear_agent_allow_deny_cache()
 {
-    do_log("clear_agent_allow_deny_cache");
-    $allowCacheKey = nexus_env("CACHE_KEY_AGENT_ALLOW", "all_agent_allows");
-    $denyCacheKey = nexus_env("CACHE_KEY_AGENT_DENY", "all_agent_denies");
-    foreach (["", ":php", ":go"] as $suffix) {
-        \Nexus\Database\NexusDB::cache_del($allowCacheKey . $suffix);
-        \Nexus\Database\NexusDB::cache_del($denyCacheKey . $suffix);
-    }
+    \App\Support\Cache::clearAgentAllowDeny();
 }
 
 /**
@@ -766,9 +715,7 @@ function clear_agent_allow_deny_cache()
  */
 function clear_torrent_cache($infoHash)
 {
-    do_log("clear_torrent_cache");
-    \Nexus\Database\NexusDB::cache_del('torrent_hash_'.$infoHash.'_content');
-    \Nexus\Database\NexusDB::cache_del("torrent_not_exists:$infoHash");
+    \App\Support\Cache::clearTorrent($infoHash);
 }
 
 function user_can($permission, $fail = false, $uid = 0): bool
@@ -1215,13 +1162,10 @@ JS;
 
 function nexus_escape($data): array|string
 {
-    if (is_array($data)) {
-        return array_map('nexus_escape', $data);
-    }
-    return htmlspecialchars($data, ENT_QUOTES, 'UTF-8');
+    return \App\Support\Strings::escapeHtml($data);
 }
 
 function is_fpm_mode(): bool
 {
-    return php_sapi_name() === 'fpm-fcgi';
+    return \App\Support\Environment::isFpm();
 }

@@ -140,4 +140,105 @@ final class Cache
             ->where('id', $torrentId)
             ->update([$field => 0]);
     }
+
+    public static function clearUser(int|string $uid, string $passkey = ''): void
+    {
+        \do_log("clear_user_cache, uid: $uid, passkey: $passkey");
+        NexusDB::cache_del("user_{$uid}_content");
+        NexusDB::cache_del("user_{$uid}_roles");
+        NexusDB::cache_del("announce_user_passkey_$uid");
+        NexusDB::cache_del(\App\Models\Setting::DIRECT_PERMISSION_CACHE_KEY_PREFIX . $uid);
+        NexusDB::cache_del("user_role_ids:$uid");
+        NexusDB::cache_del("direct_permissions:$uid");
+
+        if ($passkey) {
+            NexusDB::cache_del('user_passkey_'.$passkey.'_content');
+            NexusDB::cache_del('user_passkey_'.$passkey.'_rss');
+        }
+
+        $userInfo = \App\Models\User::query()->find($uid, \App\Models\User::$commonFields);
+        if ($userInfo) {
+            \fire_event('user_updated', $userInfo);
+        }
+    }
+
+    public static function clearSettings(): void
+    {
+        \do_log('clear_setting_cache');
+        NexusDB::cache_del('nexus_settings_in_laravel');
+        NexusDB::cache_del('nexus_settings_in_nexus');
+        NexusDB::cache_del('setting_protected_forum');
+        $channel = \App\Support\Env::get('CHANNEL_NAME_SETTING');
+        if (!empty($channel)) {
+            NexusDB::redis()->publish($channel, 'update');
+        }
+    }
+
+    public static function clearCategory(): void
+    {
+        \do_log('clear_category_cache');
+        NexusDB::cache_del('category_content');
+        $searchBoxList = \App\Models\SearchBox::query()->get(['id']);
+        foreach ($searchBoxList as $item) {
+            NexusDB::cache_del("category_list_mode_{$item->id}");
+        }
+    }
+
+    public static function clearTaxonomy(string $table): void
+    {
+        \do_log("clear_taxonomy_cache: $table");
+        $list = \App\Models\SearchBox::query()->get(['id']);
+        foreach ($list as $item) {
+            NexusDB::cache_del("{$table}_list_mode_{$item->id}");
+        }
+        NexusDB::cache_del("{$table}_list_mode_0");
+    }
+
+    public static function clearStaffMessage(): void
+    {
+        \do_log('clear_staff_message_cache');
+        \App\Repositories\MessageRepository::updateStaffMessageCountCache(false);
+    }
+
+    public static function clearSearchBox(): void
+    {
+        \do_log('clear_search_box_cache');
+        NexusDB::cache_del('search_box_content');
+    }
+
+    public static function clearIcon(): void
+    {
+        \do_log('clear_icon_cache');
+        NexusDB::cache_del('category_icon_content');
+    }
+
+    /**
+     * @param  int|int[]  $uid
+     */
+    public static function clearInboxCount($uid): void
+    {
+        \do_log('clear_inbox_count_cache');
+        foreach (\Illuminate\Support\Arr::wrap($uid) as $id) {
+            NexusDB::cache_del('user_'.$id.'_inbox_count');
+            NexusDB::cache_del('user_'.$id.'_unread_message_count');
+        }
+    }
+
+    public static function clearAgentAllowDeny(): void
+    {
+        \do_log('clear_agent_allow_deny_cache');
+        $allowCacheKey = \App\Support\Env::get('CACHE_KEY_AGENT_ALLOW', 'all_agent_allows');
+        $denyCacheKey = \App\Support\Env::get('CACHE_KEY_AGENT_DENY', 'all_agent_denies');
+        foreach (['', ':php', ':go'] as $suffix) {
+            NexusDB::cache_del($allowCacheKey . $suffix);
+            NexusDB::cache_del($denyCacheKey . $suffix);
+        }
+    }
+
+    public static function clearTorrent(string $infoHash): void
+    {
+        \do_log('clear_torrent_cache');
+        NexusDB::cache_del('torrent_hash_'.$infoHash.'_content');
+        NexusDB::cache_del("torrent_not_exists:$infoHash");
+    }
 }

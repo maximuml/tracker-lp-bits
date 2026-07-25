@@ -166,4 +166,14 @@ final class Locale
 
         return $row['id'] ?? 6;
     }
+
+    /**
+     * Legacy `nexus_trans()` helper. Delegates to the Nexus translator.
+     *
+     * @param  array<string, string>  $replace
+     */
+    public static function trans(string $key, array $replace = [], ?string $locale = null): string
+    {
+        return \Nexus\Nexus::trans($key, $replace, $locale);
+    }
 }

@@ -286,4 +286,49 @@ final class Time
             (string) ($lang_functions['text_ago'] ?? ''),
         );
     }
+
+    /**
+     * Legacy `format_datetime()` helper. Returns `null` for empty input,
+     * otherwise parses with Carbon and formats with the supplied pattern.
+     * On parse failure the original value is returned (and logged).
+     */
+    public static function formatDateTime(mixed $datetime, string $format = 'Y-m-d H:i'): ?string
+    {
+        if (empty($datetime)) {
+            return null;
+        }
+
+        try {
+            return Carbon::parse($datetime)->format($format);
+        } catch (\Exception) {
+            if (\function_exists('do_log')) {
+                \do_log("Invalid datetime: $datetime", 'error');
+            }
+
+            return (string) $datetime;
+        }
+    }
+
+    /**
+     * Legacy `getDtMillis()` / `getDtMicro()` helpers. Return the current
+     * wall-clock time with millisecond / microsecond precision, optionally
+     * including the timezone offset.
+     */
+    public static function millis(bool $withTimeZone = false): string
+    {
+        $dt = \DateTime::createFromFormat('U.u', sprintf('%.6f', microtime(true)));
+        $dt->setTimezone(new \DateTimeZone(Env::get('TIMEZONE', 'UTC')));
+        $format = $withTimeZone ? 'Y-m-d\\TH:i:s.vP' : 'Y-m-d H:i:s.v';
+
+        return $dt->format($format);
+    }
+
+    public static function micro(bool $withTimeZone = false): string
+    {
+        $dt = \DateTime::createFromFormat('U.u', sprintf('%.6f', microtime(true)));
+        $dt->setTimezone(new \DateTimeZone(Env::get('TIMEZONE', 'UTC')));
+        $format = $withTimeZone ? 'Y-m-d\\TH:i:s.uP' : 'Y-m-d H:i:s.u';
+
+        return $dt->format($format);
+    }
 }

@@ -422,4 +422,19 @@ class TimeTest extends TestCase
     {
         $this->assertSame('not-a-date', Time::format('not-a-date'));
     }
+
+    // ---------- formatDateTime() / millis() / micro() ----------
+
+    public function test_format_date_time_parses_and_formats(): void
+    {
+        $this->assertSame('2026-07-22 09:00', Time::formatDateTime('2026-07-22 09:00:00'));
+        $this->assertNull(Time::formatDateTime(''));
+        $this->assertNull(Time::formatDateTime(0));
+    }
+
+    public function test_millis_and_micro_match_expected_patterns(): void
+    {
+        $this->assertMatchesRegularExpression('/^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}\\.\\d{3}$/', Time::millis());
+        $this->assertMatchesRegularExpression('/^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}\\.\\d{6}$/', Time::micro());
+    }
 }

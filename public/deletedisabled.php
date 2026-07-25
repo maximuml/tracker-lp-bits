@@ -12,8 +12,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST")
 {
 	if ($_POST['sure'])
 	{
-		$res=sql_query("DELETE FROM users WHERE enabled='no'");
-		$deletecount=mysql_affected_rows();
+		$deletecount = \App\Models\User::query()->where('enabled', 'no')->delete();
 		$shownotice=true;
 	}
 }

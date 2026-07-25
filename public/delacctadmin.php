@@ -11,10 +11,10 @@ $userid = trim($_POST["userid"]);
 if (!$userid)
   stderr("Error", "Please fill out the form correctly.");
 
-$res = sql_query("SELECT * FROM users WHERE id=" . sqlesc($userid)) or sqlerr();
-if (mysql_num_rows($res) != 1)
+$user = \App\Models\User::query()->where('id', $userid)->first();
+if (!$user)
   stderr("Error", "Bad user id or password. Please verify that all entered information is correct.");
-$arr = mysql_fetch_assoc($res);
+$arr = $user->toArray();
 
 $id = $arr['id'];
 $name = $arr['username'];

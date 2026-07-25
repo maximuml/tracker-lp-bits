@@ -45,12 +45,11 @@ $id = (int)$_GET["id"];
 if (!$id)
 	httperr();
 
-$res = sql_query("SELECT name FROM torrents WHERE id = ".sqlesc($id)) or sqlerr(__FILE__, __LINE__);
-$row = mysql_fetch_assoc($res);
+$torrentName = \App\Models\Torrent::query()->where('id', $id)->value('name');
 
 $fn = getFullDirectory("$torrent_dir/$id.torrent");
 
-if (!$row || !is_file($fn) || !is_readable($fn))
+if (!$torrentName || !is_file($fn) || !is_readable($fn))
 	httperr();
 
 
@@ -87,7 +86,7 @@ begin_main_frame();
 
 
 $dict = \Rhilip\Bencode\Bencode::load($fn);
-print("<div align=center><h1>$row[name]</h1>");  // Heading
+print("<div align=center><h1>$torrentName</h1>");  // Heading
 print("<table width=750 border=1 cellspacing=0 cellpadding=5><td>");  // Start table
 echo "<ul id='torrent-structure'>";
 echo torrent_structure_builder(['root' => $dict]);

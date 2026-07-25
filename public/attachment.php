@@ -250,7 +250,19 @@ if ($Attach->enable_attachment())
 			if (!$warning) //insert into database and add code to editor
 			{
 				$dlkey = md5($location . microtime(true));
-				sql_query("INSERT INTO attachments (userid, width, added, filename, filetype, filesize, location, dlkey, isimage, thumb, driver) VALUES (".$CURUSER['id'].", ".$width.", ".sqlesc(date("Y-m-d H:i:s")).", ".sqlesc($origfilename).", ".sqlesc($filetype).", ".$filesize.", ".sqlesc($location).", ".sqlesc($dlkey).", ".($isimage ? 1 : 0).", ".($hasthumb ? 1 : 0). "," .sqlesc($storageDriver) . ")") or sqlerr(__FILE__, __LINE__);
+				\Nexus\Database\NexusDB::table('attachments')->insert([
+				    'userid' => $CURUSER['id'],
+				    'width' => $width,
+				    'added' => date("Y-m-d H:i:s"),
+				    'filename' => $origfilename,
+				    'filetype' => $filetype,
+				    'filesize' => $filesize,
+				    'location' => $location,
+				    'dlkey' => $dlkey,
+				    'isimage' => $isimage ? 1 : 0,
+				    'thumb' => $hasthumb ? 1 : 0,
+				    'driver' => $storageDriver,
+				]);
 				$count_left--;
 				if (!empty($_REQUEST['callback_func']) && preg_match('/^preview_custom_field_image_\d+$/', $_REQUEST['callback_func'])) {
                     echo sprintf('<script type="text/javascript">parent.%s("%s", "%s")</script>', $_REQUEST['callback_func'], $dlkey, $url);

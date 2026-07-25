@@ -83,9 +83,10 @@ if(isset($CURUSER))
 	$s  = $css;
 	$s .= "<table class=\"main\" border=\"1\" cellspacing=0 cellpadding=\"5\">\n";
 
-	$subres = sql_query("SELECT * FROM files WHERE torrent = ".sqlesc($id)." ORDER BY id");
+	$files = \Nexus\Database\NexusDB::table('files')->where('torrent', $id)->orderBy('id')->get();
 	$s.="<tr><td class=colhead>".$lang_viewfilelist['col_path']."</td><td class=colhead align=center><img class=\"size\" src=\"pic/trans.gif\" alt=\"size\" /></td></tr>\n";
-	while ($subrow = mysql_fetch_array($subres)) {
+	foreach ($files as $fileRow) {
+		$subrow = (array) $fileRow;
 		$badge = viewfilelist_render_badge((string)$subrow["filename"]);
 		$s .= "<tr><td class=rowfollow>" . $badge . htmlspecialchars($subrow["filename"]) . "</td><td class=rowfollow align=\"right\">" . mksize($subrow["size"]) . "</td></tr>\n";
 	}

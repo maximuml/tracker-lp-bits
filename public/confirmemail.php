@@ -14,11 +14,10 @@ if (!$id)
 	httperr();
 dbconn();
 
-$res = sql_query("SELECT editsecret FROM users WHERE id = $id");
-$row = mysql_fetch_array($res);
-
-if (!$row)
+$user = \App\Models\User::query()->where('id', $id)->first(['editsecret']);
+if (!$user)
 	httperr();
+$row = $user->toArray();
 
 $sec = hash_pad($row["editsecret"]);
 if (preg_match('/^ *$/s', $sec))
@@ -26,9 +25,9 @@ if (preg_match('/^ *$/s', $sec))
 if ($md5 != md5($sec . $email . $sec))
 	httperr();
 
-sql_query("UPDATE users SET editsecret='', email=" . sqlesc($email) . " WHERE id=$id AND editsecret=" . sqlesc($row["editsecret"]));
+$affected = \App\Models\User::query()->where('id', $id)->where('editsecret', $row['editsecret'])->update(['editsecret' => '', 'email' => $email]);
 
-if (!mysql_affected_rows())
+if (!$affected)
 	httperr();
 
 header("Location: " . get_protocol_prefix() . "$BASEURL/usercp.php?action=security&type=saved");

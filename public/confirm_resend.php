@@ -40,8 +40,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST")
 
 	if (!check_email($email))
 	failedlogins($lang_confirm_resend['std_invalid_email_address'],true);
-	$res = sql_query("SELECT * FROM users WHERE email=" . sqlesc($email) . " LIMIT 1") or sqlerr(__FILE__, __LINE__);
-	$arr = mysql_fetch_assoc($res) or failedlogins($lang_confirm_resend['std_email_not_found'],true);
+	$user = \App\Models\User::query()->where('email', $email)->first();
+	if (!$user) failedlogins($lang_confirm_resend['std_email_not_found'],true);
+	$arr = $user->toArray();
 	if($arr["status"] != "pending") failedlogins($lang_confirm_resend['std_user_already_confirm'],true);
 
 	if ($wantpassword != $passagain)
@@ -60,9 +61,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST")
 	$wantpasshash = md5($secret . $wantpassword . $secret);
 	$editsecret = ($verification == 'admin' ? '' : $secret);
 
-	sql_query("UPDATE users SET passhash=" .sqlesc($wantpasshash) . ",secret=" . sqlesc($secret) . ",editsecret=" . sqlesc($editsecret) . " WHERE id=" . sqlesc($arr["id"])) or sqlerr(__FILE__, __LINE__);
+	$affected = \App\Models\User::query()->where('id', $arr['id'])->update([
+	    'passhash' => $wantpasshash,
+	    'secret' => $secret,
+	    'editsecret' => $editsecret,
+	]);
 
-	if (!mysql_affected_rows())
+	if (!$affected)
 	stderr($lang_confirm_resend['std_error'], $lang_confirm_resend['std_database_error']);
 
 	$psecret = md5($editsecret);

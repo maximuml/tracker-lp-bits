@@ -118,9 +118,6 @@ if (!$row) {
 		}
 		else
 			tr($lang_details['row_download'], $lang_details['text_downloading_not_allowed']);
-		if ($smalldescription_main == 'yes')
-			tr($lang_details['row_small_description'],htmlspecialchars(trim($row["small_descr"])),true);
-
 		//tag
         $torrentTags = \App\Models\TorrentTag::query()->where('torrent_id', $row['id'])->get();
         if ($torrentTags->isNotEmpty()) {

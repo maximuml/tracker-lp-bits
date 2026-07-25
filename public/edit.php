@@ -59,8 +59,6 @@ else {
 	print("<table border=\"1\" cellspacing=\"0\" cellpadding=\"5\" width=\"97%\">\n");
 	print("<tr><td class='colhead' colspan='2' align='center'>".htmlspecialchars($row["name"])."</td></tr>");
 	tr($lang_edit['row_torrent_name']."<font color=\"red\">*</font>", "<input type=\"text\" style=\"width: 99%;\" name=\"name\" value=\"" . htmlspecialchars($row["name"]) . "\" />", 1);
-	if ($smalldescription_main == 'yes')
-		tr($lang_edit['row_small_description'], "<input type=\"text\" style=\"width: 99%;\" name=\"small_descr\" value=\"" . htmlspecialchars($row["small_descr"]) . "\" />", 1);
 
     //price
     if (user_can('torrent-set-price') && get_setting("torrent.paid_torrent_enabled") == "yes") {
@@ -171,13 +169,7 @@ else {
 
         if(user_can('torrentonpromotion'))
         {
-            $pickcontent .= "<b>".$lang_edit['row_special_torrent'].":&nbsp;</b>"."<select name=\"sel_spstate\" style=\"width: 100px;\">" .promotion_selection($row["sp_state"], 0). "</select>&nbsp;&nbsp;&nbsp;".'<select name="promotion_time_type" onchange="if (this.value == \'2\') {document.getElementById(\'promotion_until_note\').style.display = \'\';} else {document.getElementById(\'promotion_until_note\').style.display = \'none\';}"><option value="0"'.($row['promotion_time_type'] == 0 ? ' selected="selected"' : '').'>'.$lang_edit['select_use_global_setting'].'</option><option value="1"'.($row['promotion_time_type'] == 1 ? ' selected="selected"' : '').'>'.$lang_edit['select_forever'].'</option><option value="2"'.($row['promotion_time_type'] == 2 ? ' selected="selected"' : '').'>'.$lang_edit['select_until'].'</option></select><span id="promotion_until_note"'.($row['promotion_time_type'] == 2 ? '' : ' style="display: none;"').'>';
-            $pickcontent .= '<input type="text" id="promotionuntiltime" name="promotionuntil" style="width: 120px;" value="'.($row['promotion_until'] > $row['added'] ? $row['promotion_until'] : '').'" />';
-            $pickcontent .= '&nbsp;('.$lang_edit['text_ie_for'].'<select name="promotionaddedtime" onchange="document.getElementById(\'promotionuntiltime\').value=this.value;"><option value="'.($row['promotion_until'] > $row['added'] ? $row['promotion_until'] : '').'">'.$lang_edit['text_keep_current'].'</option>';
-            foreach (array(900, 1800, 3600, 5400, 7200, 14400, 21600, 28800, 43200, 64800, 86400, 129600, 259200, 604800, 1296000, 2592000, 7776000, 15552000, 31104000) as $seconds) {
-                $pickcontent .= getAddedTimeOption(strtotime($row['added']), $seconds);
-            }
-            $pickcontent .= '</select>)&nbsp;'.$lang_edit['text_promotion_until_note'].'</span>&nbsp;&nbsp;';
+            $pickcontent .= "<b>".$lang_edit['row_special_torrent'].":&nbsp;</b>" . "<select name=\"sel_spstate\" style=\"width: 100px;\">" . promotion_selection($row["sp_state"], 0) . "</select>&nbsp;&nbsp;&nbsp;";
         }
 		if(user_can('torrentsticky'))
 		{
@@ -189,7 +181,6 @@ else {
                 $options[] = "<option" . (($row["pos_state"] == $key) ? " selected=\"selected\"" : "" ) . " value=\"" . $key . "\">".$value['text']."</option>";
             }
 			$pickcontent .= "<b>".$lang_edit['row_torrent_position'].":&nbsp;</b>"."<select name=\"pos_state\" style=\"width: 100px;\">" . implode('', $options) . "</select>&nbsp;&nbsp;&nbsp;";
-            $pickcontent .= datetimepicker_input('pos_state_until', $row['pos_state_until'], nexus_trans('label.deadline') . ":&nbsp;", ['require_files' => true]);
 		}
 		tr($lang_edit['row_pick'], $pickcontent, 1);
 	}

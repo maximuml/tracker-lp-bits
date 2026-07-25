@@ -62,7 +62,6 @@ $updateset[] = "name = " . sqlesc($name);
 //$updateset[] = "descr = " . sqlesc($descr);
 $extraUpdate["descr"] = $descr;
 $updateset[] = "url = " . sqlesc($url);
-$updateset[] = "small_descr = " . sqlesc($_POST["small_descr"] ?? '');
 //$updateset[] = "ori_descr = " . sqlesc($descr);
 $updateset[] = "category = " . sqlesc($catid);
 $updateset[] = "source = " . sqlesc(intval($_POST["source_sel"][$newcatmode] ?? 0));
@@ -91,37 +90,15 @@ if(user_can('torrentonpromotion'))
 	elseif(intval($_POST["sel_spstate"] ?? 0) == 7)
 		$updateset[] = "sp_state = 7";
 
-	//promotion expiration type
-	if(!isset($_POST["promotion_time_type"]) || $_POST["promotion_time_type"] == 0) {
-		$updateset[] = "promotion_time_type = 0";
-		$updateset[] = "promotion_until = null";
-	} elseif ($_POST["promotion_time_type"] == 1) {
-		$updateset[] = "promotion_time_type = 1";
-		$updateset[] = "promotion_until = null";
-	} elseif ($_POST["promotion_time_type"] == 2) {
-		if ($_POST["promotionuntil"] && strtotime($torrentAddedTimeString) <= strtotime($_POST["promotionuntil"])) {
-			$updateset[] = "promotion_time_type = 2";
-			$updateset[] = "promotion_until = ".sqlesc($_POST["promotionuntil"]);
-		} else {
-			$updateset[] = "promotion_time_type = 0";
-			$updateset[] = "promotion_until = null";
-		}
-	}
+	$updateset[] = "promotion_time_type = 0";
+	$updateset[] = "promotion_until = null";
 }
 if(user_can('torrentsticky'))
 {
     if (isset($_POST['pos_state']) && isset(\App\Models\Torrent::$posStates[$_POST['pos_state']])) {
-        $posStateUntil = $_POST['pos_state_until'] ?: null;
         $posState = $_POST['pos_state'];
-        if ($posState == \App\Models\Torrent::POS_STATE_STICKY_NONE) {
-            $posStateUntil = null;
-        }
-        if ($posStateUntil && \Carbon\Carbon::parse($posStateUntil)->lte(now())) {
-            $posState = \App\Models\Torrent::POS_STATE_STICKY_NONE;
-            $posStateUntil = null;
-        }
         $updateset[] = sprintf("pos_state = %s", sqlesc($posState));
-        $updateset[] = sprintf("pos_state_until = %s", sqlesc($posStateUntil));
+        $updateset[] = "pos_state_until = null";
     }
 
 }

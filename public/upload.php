@@ -62,9 +62,6 @@ stdhead($lang_upload['head_upload']);
                     tr($lang_upload['row_torrent_name'], $nameInput, 1);
                 }
 
-				if ($smalldescription_main == 'yes')
-				tr($lang_upload['row_small_description'], "<input type=\"text\" style=\"width: 99%;\" name=\"small_descr\" /><br /><font class=\"medium\">".$lang_upload['text_small_description_note']."</font>", 1);
-
                 //price
                 if (user_can('torrent-set-price') && get_setting("torrent.paid_torrent_enabled") == "yes") {
                     $maxPrice = get_setting("torrent.max_price");
@@ -199,7 +196,6 @@ JS;
                         $options[] = "<option value=\"" . $key . "\">".$value['text']."</option>";
                     }
                     $pickcontent .= "<b>".$lang_edit['row_torrent_position'].":&nbsp;</b>"."<select name=\"pos_state\" style=\"width: 100px;\">" . implode('', $options) . "</select>&nbsp;&nbsp;&nbsp;";
-                    $pickcontent .= datetimepicker_input('pos_state_until', '', nexus_trans('label.deadline') . ":&nbsp;", ['require_files' => true]);
                 }
                 if ($pickcontent) {
                     tr($lang_edit['row_pick'], $pickcontent, 1);

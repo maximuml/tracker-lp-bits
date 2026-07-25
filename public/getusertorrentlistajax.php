@@ -155,19 +155,8 @@ function maketable($res, $mode = 'seeding')
 		$max_lenght_of_torrent_name=($CURUSER['fontsize'] == 'large' ? 70 : 80);
 		if($count_dispname > $max_lenght_of_torrent_name)
 			$dispname=mb_substr($dispname, 0, $max_lenght_of_torrent_name,"UTF-8") . "..";
-		if ($smalldescription_main == 'yes'){
-			//small description
-			$dissmall_descr = htmlspecialchars(trim($arr["small_descr"]));
-			$count_dissmall_descr=mb_strlen($dissmall_descr,"UTF-8");
-			$max_lenght_of_small_descr=80; // maximum length
-			if($count_dissmall_descr > $max_lenght_of_small_descr)
-			{
-				$dissmall_descr=mb_substr($dissmall_descr, 0, $max_lenght_of_small_descr,"UTF-8") . "..";
-			}
-		}
-		else $dissmall_descr == "";
 		$ret .= "<tr" .  $sphighlight  . "><td class=\"rowfollow nowrap\" valign=\"middle\" style='padding: 0px'>".return_category_image($arr['category'], "torrents.php?allsec=1&amp;")."</td>\n" .
-		"<td class=\"rowfollow\" width=\"100%\" align=\"left\"><a href=\"".htmlspecialchars("details.php?id=".$arr['torrent']."&hit=1")."\" title=\"".$nametitle."\"><b>" . $dispname . "</b></a>". $banned_torrent . $sp_torrent . $hrImg . $approvalStatusIcon .($dissmall_descr == "" ? "" : "<br />" . $dissmall_descr) . "</td>";
+		"<td class=\"rowfollow\" width=\"100%\" align=\"left\"><a href=\"".htmlspecialchars("details.php?id=".$arr['torrent']."&hit=1")."\" title=\"".$nametitle."\"><b>" . $dispname . "</b></a>". $banned_torrent . $sp_torrent . $hrImg . $approvalStatusIcon  . "</td>";
 		$ret .= sprintf('<td class="rowfollow nowrap" align="center">%s<br/>%s</td>', substr($arr['added'], 0, 10), substr($arr['added'], 11));
 		//size
 		if ($showsize)

@@ -50,20 +50,24 @@ function return_category_db_table_name($type)
 }
 function return_category_mode_selection($selname, $selectedid)
 {
-	$res = sql_query("SELECT * FROM searchbox ORDER BY id ASC");
+	$rows = \Nexus\Database\NexusDB::table('searchbox')->orderBy('id')->get(['id','name']);
 	$selection = "<select name=\"".$selname."\">";
-	while ($row = mysql_fetch_array($res))
+	foreach ($rows as $row) {
+		$row = (array) $row;
 		$selection .= "<option value=\"" . $row["id"] . "\"". ($row["id"]==$selectedid ? " selected=\"selected\"" : "").">" . htmlspecialchars($row["name"]) . "</option>\n";
+	}
 	$selection .= "</select>";
 	return $selection;
 }
 
 function category_icon_selection($iconId = 0)
 {
-    $res = sql_query("SELECT * FROM caticons ORDER BY id ASC");
+    $rows = \Nexus\Database\NexusDB::table('caticons')->orderBy('id')->get(['id','name']);
     $selection = "<select name=\"icon_id\">";
-    while ($row = mysql_fetch_array($res))
+    foreach ($rows as $row) {
+        $row = (array) $row;
         $selection .= "<option value=\"" . $row["id"] . "\"". ($row["id"]==$iconId ? " selected=\"selected\"" : "").">" . htmlspecialchars($row["name"]) . "</option>\n";
+    }
     $selection .= "</select>";
     return $selection;
 }
@@ -154,8 +158,8 @@ function print_sub_category_list($type)
 	if (!$num)
 		print("<p align=\"center\">".$lang_catmanage['text_no_record_yet']."</p>");
 	else{
-		list($pagertop, $pagerbottom, $limit) = pager($perpage, $num, $pagerParam);
-		$res = sql_query("SELECT * FROM ".$dbtablename." ORDER BY id DESC ".$limit) or sqlerr(__FILE__, __LINE__);
+		[$pagertop, $pagerbottom, , $offset, $perpage, ] = pager($perpage, $num, $pagerParam);
+		$rows = \Nexus\Database\NexusDB::table($dbtablename)->orderByDesc('id')->offset($offset)->limit($perpage)->get();
 ?>
 <table border="1" cellspacing="0" cellpadding="5" width="97%">
 <tr>
@@ -165,8 +169,8 @@ function print_sub_category_list($type)
 <td class="colhead"><?php echo $lang_catmanage['col_action']?></td>
 </tr>
 <?php
-		while ($row = mysql_fetch_array($res))
-		{
+		foreach ($rows as $row) {
+			$row = (array) $row;
 ?>
 <tr>
 <td class="colfollow"><?php echo $row['id']?></td>
@@ -404,8 +408,8 @@ if ($action == 'view')
 	if (!$num)
 		print("<p align=\"center\">".$lang_catmanage['text_no_record_yet']."</p>");
 	else{
-		list($pagertop, $pagerbottom, $limit) = pager($perpage, $num, $pagerParam);
-		$res = sql_query("SELECT * FROM ".$dbtablename." ORDER BY id ASC ".$limit) or sqlerr(__FILE__, __LINE__);
+		[$pagertop, $pagerbottom, , $offset, $perpage, ] = pager($perpage, $num, $pagerParam);
+		$rows = \Nexus\Database\NexusDB::table($dbtablename)->orderBy('id')->offset($offset)->limit($perpage)->get();
 ?>
 <table border="1" cellspacing="0" cellpadding="5" width="97%">
 <tr>
@@ -423,8 +427,8 @@ if ($action == 'view')
 <td class="colhead"><?php echo $lang_catmanage['col_action']?></td>
 </tr>
 <?php
-		while ($row = mysql_fetch_array($res))
-		{
+		foreach ($rows as $row) {
+			$row = (array) $row;
 ?>
 <tr>
 <td class="colfollow"><?php echo $row['id']?></td>
@@ -455,8 +459,8 @@ print($pagerbottom);
 	if (!$num)
 		print("<p align=\"center\">".$lang_catmanage['text_no_record_yet']."</p>");
 	else{
-		list($pagertop, $pagerbottom, $limit) = pager($perpage, $num, $pagerParam);
-		$res = sql_query("SELECT * FROM ".$dbtablename." ORDER BY id ASC ".$limit) or sqlerr(__FILE__, __LINE__);
+		[$pagertop, $pagerbottom, , $offset, $perpage, ] = pager($perpage, $num, $pagerParam);
+		$rows = \Nexus\Database\NexusDB::table($dbtablename)->orderBy('id')->offset($offset)->limit($perpage)->get();
 ?>
 <table border="1" cellspacing="0" cellpadding="5" width="97%">
 <tr>
@@ -471,8 +475,8 @@ print($pagerbottom);
 <td class="colhead"><?php echo $lang_catmanage['col_action']?></td>
 </tr>
 <?php
-		while ($row = mysql_fetch_array($res))
-		{
+		foreach ($rows as $row) {
+			$row = (array) $row;
 ?>
 <tr>
 <td class="colfollow"><?php echo $row['id']?></td>
@@ -506,8 +510,8 @@ print($pagerbottom);
 	if (!$num)
 		print("<p align=\"center\">".$lang_catmanage['text_no_record_yet']."</p>");
 	else{
-		list($pagertop, $pagerbottom, $limit) = pager($perpage, $num, $pagerParam);
-		$res = sql_query("SELECT * FROM ".$dbtablename." ORDER BY id ASC ".$limit) or sqlerr(__FILE__, __LINE__);
+		[$pagertop, $pagerbottom, , $offset, $perpage, ] = pager($perpage, $num, $pagerParam);
+		$rows = \Nexus\Database\NexusDB::table($dbtablename)->orderBy('id')->offset($offset)->limit($perpage)->get();
 ?>
 <table border="1" cellspacing="0" cellpadding="5" width="97%">
 <tr>
@@ -524,8 +528,8 @@ print($pagerbottom);
 <td class="colhead"><?php echo $lang_catmanage['col_action']?></td>
 </tr>
 <?php
-		while ($row = mysql_fetch_array($res))
-		{
+		foreach ($rows as $row) {
+			$row = (array) $row;
 ?>
 <tr>
 <td class="colfollow"><?php echo $row['id']?></td>
@@ -555,8 +559,16 @@ print($pagerbottom);
 	if (!$num)
 		print("<p align=\"center\">".$lang_catmanage['text_no_record_yet']."</p>");
 	else{
-		list($pagertop, $pagerbottom, $limit) = pager($perpage, $num, $pagerParam);
-        $res = sql_query("SELECT ".$dbtablename.".*, searchbox.name AS catmodename, caticons.name as icon_name FROM ".$dbtablename." LEFT JOIN searchbox ON ".$dbtablename.".mode=searchbox.id left join caticons on caticons.id = $dbtablename.icon_id ORDER BY ".$dbtablename.".mode ASC, ".$dbtablename.".id ASC ".$limit) or sqlerr(__FILE__, __LINE__);
+		[$pagertop, $pagerbottom, , $offset, $perpage, ] = pager($perpage, $num, $pagerParam);
+		$rows = \Nexus\Database\NexusDB::table($dbtablename)
+			->select([$dbtablename.'.*', 'searchbox.name as catmodename', 'caticons.name as icon_name'])
+			->leftJoin('searchbox', $dbtablename.'.mode', '=', 'searchbox.id')
+			->leftJoin('caticons', 'caticons.id', '=', $dbtablename.'.icon_id')
+			->orderBy($dbtablename.'.mode')
+			->orderBy($dbtablename.'.id')
+			->offset($offset)
+			->limit($perpage)
+			->get();
 
 ?>
 <table border="1" cellspacing="0" cellpadding="5" width="97%">
@@ -571,8 +583,8 @@ print($pagerbottom);
 <td class="colhead"><?php echo $lang_catmanage['col_action']?></td>
 </tr>
 <?php
-		while ($row = mysql_fetch_array($res))
-		{
+		foreach ($rows as $row) {
+			$row = (array) $row;
 ?>
 <tr>
 <td class="colfollow"><?php echo $row['id']?></td>
@@ -606,9 +618,10 @@ elseif($action == 'del')
 		stderr($lang_catmanage['std_error'], $lang_catmanage['std_invalid_id']);
 	}
 	$dbtablename=return_category_db_table_name($type);
-	$res = sql_query ("SELECT * FROM ".$dbtablename." WHERE id = ".sqlesc($id)." LIMIT 1");
-	if ($row = mysql_fetch_array($res)){
-		sql_query("DELETE FROM ".$dbtablename." WHERE id = ".sqlesc($row['id'])) or sqlerr(__FILE__, __LINE__);
+	$row = \Nexus\Database\NexusDB::table($dbtablename)->where('id', $id)->first();
+	if ($row) {
+		$row = (array) $row;
+		\Nexus\Database\NexusDB::table($dbtablename)->where('id', $row['id'])->delete();
 		if(in_array($type, $validsubcattype))
 			$Cache->delete_value($dbtablename.'_list');
 		elseif ($type=='searchbox')
@@ -635,8 +648,8 @@ elseif($action == 'edit')
 	else
 	{
 		$dbtablename=return_category_db_table_name($type);
-		$res = sql_query ("SELECT * FROM ".$dbtablename." WHERE id = ".sqlesc($id)." LIMIT 1");
-		if (!$row = mysql_fetch_array($res))
+		$row = (array) \Nexus\Database\NexusDB::table($dbtablename)->where('id', $id)->first();
+		if (!$row)
 			stderr($lang_catmanage['std_error'], $lang_catmanage['std_invalid_id']);
 		else
 		{
@@ -664,156 +677,5 @@ elseif($action == 'add')
 elseif($action == 'submit')
 {
     die("This method is deprecated! This method is no longer available in 1.8, it does not save data correctly, please go to the management system!");
-	$dbtablename=return_category_db_table_name($type);
-	if ($_POST['isedit']){
-		$id = intval($_POST['id'] ?? 0);
-		if (!$id)
-		{
-			stderr($lang_catmanage['std_error'], $lang_catmanage['std_invalid_id']);
-		}
-		else
-		{
-			$res = sql_query("SELECT * FROM ".$dbtablename." WHERE id = ".sqlesc($id)." LIMIT 1");
-			if (!$row = mysql_fetch_array($res))
-				stderr($lang_catmanage['std_error'], $lang_catmanage['std_invalid_id']);
-		}
-	}
-	$updateset = array();
-	if (in_array($type, $validsubcattype)){
-		$name = $_POST['name'];
-		if (!$name)
-			stderr($lang_catmanage['std_error'], $lang_catmanage['std_missing_form_data']);
-		$updateset[] = "name=".sqlesc($name);
-		$sort_index = intval($_POST['sort_index'] ?? 0);
-		$updateset[] = "sort_index=".sqlesc($sort_index);
-		$Cache->delete_value($dbtablename.'_list');
-	}
-	elseif ($type=='searchbox'){
-		$name = $_POST['name'];
-		$catsperrow = intval($_POST['catsperrow'] ?? 0);
-		$catpadding = intval($_POST['catpadding'] ?? 0);
-		if (!$name || !$catsperrow || !$catpadding)
-			stderr($lang_catmanage['std_error'], $lang_catmanage['std_missing_form_data']);
-		$showsource = intval($_POST['showsource'] ?? 0);
-		$showmedium = intval($_POST['showmedium'] ?? 0);
-		$showcodec = intval($_POST['showcodec'] ?? 0);
-		$showstandard = intval($_POST['showstandard'] ?? 0);
-		$showprocessing = intval($_POST['showprocessing'] ?? 0);
-		$showaudiocodec = intval($_POST['showaudiocodec'] ?? 0);
-		$updateset[] = "catsperrow=".sqlesc($catsperrow);
-		$updateset[] = "catpadding=".sqlesc($catpadding);
-		$updateset[] = "name=".sqlesc($name);
-		$updateset[] = "showsource=".sqlesc($showsource);
-		$updateset[] = "showmedium=".sqlesc($showmedium);
-		$updateset[] = "showcodec=".sqlesc($showcodec);
-		$updateset[] = "showstandard=".sqlesc($showstandard);
-		$updateset[] = "showprocessing=".sqlesc($showprocessing);
-		$updateset[] = "showaudiocodec=".sqlesc($showaudiocodec);
-		$updateset[] = "custom_fields=" . sqlesc(implode(',', $_POST['custom_fields'] ?? []));
-		$updateset[] = "custom_fields_display_name=" . sqlesc($_POST['custom_fields_display_name'] ?? '');
-		$updateset[] = "custom_fields_display=" . sqlesc($_POST['custom_fields_display'] ?? '');
-		$updateset[] = "extra=" . sqlesc(json_encode($_POST['extra'] ?? []));
-
-		if ($showsource || $showmedium || $showcodec || $showstandard || $showprocessing || $showaudiocodec)
-			$updateset[] = "showsubcat=1";
-		else
-			$updateset[] = "showsubcat=0";
-		if($_POST['isedit'])
-			$Cache->delete_value('searchbox_content');
-	}
-	elseif ($type=='caticon'){
-		$name = $_POST['name'];
-		$folder = trim($_POST['folder']);
-		$cssfile = trim($_POST['cssfile']);
-		$multilang = ($_POST['multilang'] == 'yes' ? 'yes' : 'no');
-		$secondicon = ($_POST['secondicon'] == 'yes' ? 'yes' : 'no');
-		$designer = $_POST['designer'];
-		$comment = $_POST['comment'];
-		if (!$name || !$folder)
-			stderr($lang_catmanage['std_error'], $lang_catmanage['std_missing_form_data']);
-		if (!valid_file_name($folder))
-			stderr($lang_catmanage['std_error'], $lang_catmanage['std_invalid_character_in_filename'].htmlspecialchars($folder));
-		if ($cssfile && !valid_file_name($cssfile))
-			stderr($lang_catmanage['std_error'], $lang_catmanage['std_invalid_character_in_filename'].htmlspecialchars($cssfile));
-		$updateset[] = "name=".sqlesc($name);
-		$updateset[] = "folder=".sqlesc($folder);
-		$updateset[] = "multilang=".sqlesc($multilang);
-		$updateset[] = "secondicon=".sqlesc($secondicon);
-		$updateset[] = "cssfile=".sqlesc($cssfile);
-		$updateset[] = "designer=".sqlesc($designer);
-		$updateset[] = "comment=".sqlesc($comment);
-		if($_POST['isedit'])
-			$Cache->delete_value('category_icon_content');
-	}
-	elseif ($type=='secondicon'){
-		$name = $_POST['name'];
-		$image = trim($_POST['image']);
-		$class_name = trim($_POST['class_name']);
-		$source = intval($_POST['source'] ?? 0);
-		$medium = intval($_POST['medium'] ?? 0);
-		$codec = intval($_POST['codec'] ?? 0);
-		$standard = intval($_POST['standard'] ?? 0);
-		$processing = intval($_POST['processing'] ?? 0);
-		$audiocodec = intval($_POST['audiocodec'] ?? 0);
-		if (!$name || !$image)
-			stderr($lang_catmanage['std_error'], $lang_catmanage['std_missing_form_data']);
-		if (!valid_file_name($image))
-			stderr($lang_catmanage['std_error'], $lang_catmanage['std_invalid_character_in_filename'].htmlspecialchars($image));
-		if ($class_name && !valid_class_name($class_name))
-			stderr($lang_catmanage['std_error'], $lang_catmanage['std_invalid_character_in_filename'].htmlspecialchars($class_name));
-		if (!$source && !$medium && !$codec && !$standard && !$processing && !$audiocodec)
-			stderr($lang_catmanage['std_error'], $lang_catmanage['std_must_define_one_selection']);
-		$updateset[] = "name=".sqlesc($name);
-		$updateset[] = "image=".sqlesc($image);
-		$updateset[] = "class_name=".sqlesc($class_name);
-		$updateset[] = "source=".sqlesc($source);
-		$updateset[] = "medium=".sqlesc($medium);
-		$updateset[] = "codec=".sqlesc($codec);
-		$updateset[] = "standard=".sqlesc($standard);
-		$updateset[] = "processing=".sqlesc($processing);
-		$updateset[] = "audiocodec=".sqlesc($audiocodec);
-		if($_POST['isedit']){
-			$res2=sql_query("SELECT * FROM secondicons WHERE id=".sqlesc($id)." LIMIT 1");
-			if ($row2=mysql_fetch_array($res))
-			{
-				$Cache->delete_value('secondicon_'.$row2['source'].'_'.$row2['medium'].'_'.$row2['codec'].'_'.$row2['standard'].'_'.$row2['processing'].'_'.$row2['audiocodec'].'_content');
-			}
-		}
-		$Cache->delete_value('secondicon_'.$source.'_'.$medium.'_'.$codec.'_'.$standard.'_'.$processing.'_'.$audiocodec.'_content');
-	}
-	elseif ($type=='category'){
-		$name = $_POST['name'];
-		$image = trim($_POST['image']);
-		$mode = intval($_POST['mode'] ?? 0);
-		$class_name = trim($_POST['class_name']);
-		$sort_index = intval($_POST['sort_index'] ?? 0);
-		if (!$name || !$image)
-			stderr($lang_catmanage['std_error'], $lang_catmanage['std_missing_form_data']);
-		if (!valid_file_name($image))
-			stderr($lang_catmanage['std_error'], $lang_catmanage['std_invalid_character_in_filename'].htmlspecialchars($image));
-		if ($class_name && !valid_class_name($class_name))
-			stderr($lang_catmanage['std_error'], $lang_catmanage['std_invalid_character_in_filename'].htmlspecialchars($class_name));
-		if (!$mode)
-			stderr($lang_catmanage['std_error'], $lang_catmanage['std_invalid_mode_id']);
-		$updateset[] = "name=".sqlesc($name);
-		$updateset[] = "image=".sqlesc($image);
-		$updateset[] = "mode=".sqlesc($mode);
-		$updateset[] = "class_name=".sqlesc($class_name);
-		$updateset[] = "sort_index=".sqlesc($sort_index);
-		$updateset[] = "icon_id=".sqlesc(intval($_POST['icon_id'] ?? 0));
-		if($_POST['isedit']){
-			$Cache->delete_value('category_content');
-		}
-		$Cache->delete_value('category_list_mode_'.$mode);
-	}
-	if ($_POST['isedit'])
-	{
-		sql_query("UPDATE ".$dbtablename." SET " . join(",", $updateset) . " WHERE id = ".sqlesc($id)) or sqlerr(__FILE__, __LINE__);
-	}
-	else
-	{
-		sql_query("INSERT INTO ".$dbtablename." SET " . join(",", $updateset) ) or sqlerr(__FILE__, __LINE__);
-	}
-	header("Location: ".get_protocol_prefix() . $BASEURL."/catmanage.php?action=view&type=".$type);
 }
 ?>

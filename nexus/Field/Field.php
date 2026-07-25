@@ -136,7 +136,7 @@ HTML;
         $total = get_row_count('torrents_custom_fields');
         list($paginationTop, $paginationBottom, $limit) = pager($perPage, $total, "?");
         $sql = "select * from torrents_custom_fields order by priority desc $limit";
-        $res = sql_query($sql);
+        $res = \Nexus\Database\NexusDB::select($sql);
         $header = [
             'id' => $lang_fields['col_id'],
             'name' => $lang_fields['col_name'],
@@ -148,7 +148,7 @@ HTML;
             'action' => $lang_fields['col_action'],
         ];
         $rows = [];
-        while ($row = mysql_fetch_assoc($res)) {
+        foreach ($res as $row) { $row = (array) $row;
             $row['required_text'] = $row['required'] ? $lang_functions['text_yes'] : $lang_functions['text_no'];
             $row['is_single_row_text'] = $row['is_single_row'] ? $lang_functions['text_yes'] : $lang_functions['text_no'];
             $row['type_text'] = sprintf('%s(%s)', $this->getTypeHuman($row['type']), $row['type']);
@@ -219,7 +219,7 @@ HEAD;
         $attributes['updated_at'] = $now;
         $table = 'torrents_custom_fields';
         if (!empty($data['id'])) {
-            $result = NexusDB::update($table, $attributes, "id = " . sqlesc($data['id']));
+            $result = NexusDB::update($table, $attributes, "id = " . \App\Support\LegacyDb::escape($data['id']));
         } else {
             $attributes['created_at'] = $now;
             $result = NexusDB::insert($table, $attributes);
@@ -248,12 +248,12 @@ HEAD;
     public function buildFieldCheckbox($name, $current = [])
     {
         $sql = 'select * from torrents_custom_fields';
-        $res = sql_query($sql);
+        $res = \Nexus\Database\NexusDB::select($sql);
         if (!is_array($current)) {
             $current = explode(',', $current);
         }
         $checkbox = '';
-        while ($row = mysql_fetch_assoc($res)) {
+        foreach ($res as $row) { $row = (array) $row;
             $checkbox .= sprintf(
                 '<label style="margin-right: 4px;"><input type="checkbox" name="%s" value="%s"%s>%s</label>',
                 $name, $row['id'], in_array($row['id'], $current) ? ' checked' : '', "{$row['name']}[{$row['label']}]"
@@ -272,9 +272,9 @@ HEAD;
         }
         $customValues = $this->listTorrentCustomField($torrentId, $searchBoxId);
         $sql = sprintf('select * from torrents_custom_fields where id in (%s) order by priority desc', $searchBox['custom_fields'] ?: 0);
-        $res = sql_query($sql);
+        $res = \Nexus\Database\NexusDB::select($sql);
         $html = '';
-        while ($row = mysql_fetch_assoc($res)) {
+        foreach ($res as $row) { $row = (array) $row;
             $name = "custom_fields[$searchBoxId][{$row['id']}]";
             $currentValue = $customValues[$row['id']]['custom_field_value'] ?? '';
             $requireText = '';
@@ -391,10 +391,10 @@ JS;
         } else {
             throw new \RuntimeException("Not supported database");
         }
-        $res = sql_query("select f.*, v.custom_field_value, v.torrent_id from torrents_custom_field_values v inner join torrents_custom_fields f on v.custom_field_id = f.id inner join searchbox box on box.id = $searchBoxId and $customFieldStr where torrent_id in ($torrentIdStr) order by f.priority desc");
+        $res = \Nexus\Database\NexusDB::select("select f.*, v.custom_field_value, v.torrent_id from torrents_custom_field_values v inner join torrents_custom_fields f on v.custom_field_id = f.id inner join searchbox box on box.id = $searchBoxId and $customFieldStr where torrent_id in ($torrentIdStr) order by f.priority desc");
         $values = [];
         $result = [];
-        while ($row = mysql_fetch_assoc($res)) {
+        foreach ($res as $row) { $row = (array) $row;
             $typeInfo = self::$types[$row['type']];
             if ($typeInfo['has_option']) {
                 $options = preg_split('/[\r\n]+/', trim($row['options']));

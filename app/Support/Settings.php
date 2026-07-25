@@ -72,10 +72,10 @@ final class Settings
             }
             $data[] = sprintf(
                 "(%s, %s, %s, %s, '%s')",
-                \sqlesc("$prefix.$name"),
-                \sqlesc($value),
-                \sqlesc($datetimeNow),
-                \sqlesc($datetimeNow),
+                \App\Support\LegacyDb::escape("$prefix.$name"),
+                \App\Support\LegacyDb::escape($value),
+                \App\Support\LegacyDb::escape($datetimeNow),
+                \App\Support\LegacyDb::escape($datetimeNow),
                 $autoload
             );
         }

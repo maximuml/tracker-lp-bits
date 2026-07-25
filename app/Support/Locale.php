@@ -71,7 +71,7 @@ final class Locale
     {
         $result = NexusDB::getInstance()->query(
             'SELECT site_lang_folder FROM language LEFT JOIN users ON language.id = users.lang '
-            . 'WHERE language.site_lang = 1 AND users.id = ' . sqlesc($userId) . ' LIMIT 1'
+            . 'WHERE language.site_lang = 1 AND users.id = ' . \App\Support\LegacyDb::escape($userId) . ' LIMIT 1'
         );
         $row = NexusDB::getInstance()->fetchAssoc($result);
 
@@ -87,7 +87,7 @@ final class Locale
     public static function folderForId(int|string $langId, string $default = 'en'): string
     {
         $result = NexusDB::getInstance()->query(
-            'SELECT site_lang_folder FROM language WHERE site_lang = 1 AND id = ' . sqlesc($langId) . ' LIMIT 1'
+            'SELECT site_lang_folder FROM language WHERE site_lang = 1 AND id = ' . \App\Support\LegacyDb::escape($langId) . ' LIMIT 1'
         );
         $row = NexusDB::getInstance()->fetchAssoc($result);
 
@@ -170,7 +170,7 @@ final class Locale
     public static function guestId(string $langFolder): int
     {
         $result = NexusDB::getInstance()->query(
-            'SELECT id FROM language WHERE site_lang_folder=' . sqlesc($langFolder) . ' AND site_lang=1'
+            'SELECT id FROM language WHERE site_lang_folder=' . \App\Support\LegacyDb::escape($langFolder) . ' AND site_lang=1'
         );
         $row = NexusDB::getInstance()->fetchAssoc($result);
 

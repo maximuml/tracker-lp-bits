@@ -91,8 +91,8 @@ final class TorrentTable
 $count_get = 0;
 $oldlink = "";
 foreach ($_GET as $get_name => $get_value) {
-	$get_name = mysql_real_escape_string(strip_tags(str_replace(array("\"","'"),array("",""),$get_name)));
-	$get_value = mysql_real_escape_string(strip_tags(str_replace(array("\"","'"),array("",""),$get_value)));
+	$get_name = \Nexus\Database\NexusDB::getInstance()->escapeString(strip_tags(str_replace(array("\"","'"),array("",""),$get_name)));
+	$get_value = \Nexus\Database\NexusDB::getInstance()->escapeString(strip_tags(str_replace(array("\"","'"),array("",""),$get_value)));
 
 	if ($get_name != "sort" && $get_name != "type") {
 		if ($count_get > 0) {
@@ -263,8 +263,8 @@ foreach ($rows as $row)
 		if ($enabletooltip_tweak == 'yes' && $CURUSER['showlastcom'] != 'no')
 		{
 			if (!$lastcom = $Cache->get_value('torrent_'.$id.'_last_comment_content')){
-				$res2 = sql_query("SELECT user, added, text FROM comments WHERE torrent = $id ORDER BY id DESC LIMIT 1");
-				$lastcom = mysql_fetch_array($res2);
+				$res2 = \Nexus\Database\NexusDB::select("SELECT user, added, text FROM comments WHERE torrent = $id ORDER BY id DESC LIMIT 1");
+				$lastcom = $res2 ? array_merge((array) $res2[0], array_values((array) $res2[0])) : null;
 				$Cache->cache_value('torrent_'.$id.'_last_comment_content', $lastcom, 1855);
 			}
 			$timestamp = strtotime($lastcom["added"]);

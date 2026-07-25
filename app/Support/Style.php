@@ -54,7 +54,7 @@ final class Style
     public static function cssUri($cache, int|string $cssId, int|string $defaultId, string $file = ''): string
     {
         $row = self::cssRow($cache, $cssId, $defaultId);
-        $uri = $row['uri'] ?? LegacyDb::singleValue('stylesheets', 'uri', 'WHERE id=' . sqlesc($defaultId));
+        $uri = $row['uri'] ?? LegacyDb::singleValue('stylesheets', 'uri', 'WHERE id=' . \App\Support\LegacyDb::escape($defaultId));
 
         return $file === '' ? (string) $uri : (string) $uri . $file;
     }
@@ -96,7 +96,7 @@ final class Style
     public static function highlightColor(?int $userStyleId): string
     {
         if ($userStyleId !== null && $userStyleId > 0) {
-            $result = NexusDB::getInstance()->query('SELECT hltr FROM stylesheets WHERE id=' . sqlesc($userStyleId));
+            $result = NexusDB::getInstance()->query('SELECT hltr FROM stylesheets WHERE id=' . \App\Support\LegacyDb::escape($userStyleId));
             $row = NexusDB::getInstance()->fetchAssoc($result);
             if (! empty($row['hltr'])) {
                 return (string) $row['hltr'];

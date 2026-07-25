@@ -35,7 +35,7 @@ class ATTACHMENT{
 	{
 		$userid = $this->userid;
 		$now = date("Y-m-d H:i:s", TIMENOW-86400);
-		$countsofar = get_row_count("attachments", "WHERE userid=".sqlesc($userid)." AND added > ".sqlesc($now));
+		$countsofar = get_row_count("attachments", "WHERE userid=".\App\Support\LegacyDb::escape($userid)." AND added > ".\App\Support\LegacyDb::escape($now));
 		$this->countsofar = $countsofar;
 	}
 

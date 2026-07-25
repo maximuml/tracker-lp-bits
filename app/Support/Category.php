@@ -95,13 +95,13 @@ final class Category
 
         if ($sirow === false) {
             $result = NexusDB::getInstance()->query(
-                'SELECT * FROM secondicons WHERE (mode = ' . sqlesc($mode) . ' OR mode = 0) '
-                . 'AND (source = ' . sqlesc($source) . ' OR source=0) '
-                . 'AND (medium = ' . sqlesc($medium) . ' OR medium=0) '
-                . 'AND (codec = ' . sqlesc($codec) . ' OR codec = 0) '
-                . 'AND (standard = ' . sqlesc($standard) . ' OR standard = 0) '
-                . 'AND (processing = ' . sqlesc($processing) . ' OR processing = 0) '
-                . 'AND (audiocodec = ' . sqlesc($audiocodec) . ' OR audiocodec = 0) LIMIT 1'
+                'SELECT * FROM secondicons WHERE (mode = ' . \App\Support\LegacyDb::escape($mode) . ' OR mode = 0) '
+                . 'AND (source = ' . \App\Support\LegacyDb::escape($source) . ' OR source=0) '
+                . 'AND (medium = ' . \App\Support\LegacyDb::escape($medium) . ' OR medium=0) '
+                . 'AND (codec = ' . \App\Support\LegacyDb::escape($codec) . ' OR codec = 0) '
+                . 'AND (standard = ' . \App\Support\LegacyDb::escape($standard) . ' OR standard = 0) '
+                . 'AND (processing = ' . \App\Support\LegacyDb::escape($processing) . ' OR processing = 0) '
+                . 'AND (audiocodec = ' . \App\Support\LegacyDb::escape($audiocodec) . ' OR audiocodec = 0) LIMIT 1'
             );
             $sirow = NexusDB::getInstance()->fetchAssoc($result);
             if (! $sirow) {
@@ -139,7 +139,7 @@ final class Category
         }
 
         $ret = NexusDB::select(
-            'SELECT id, mode, name, image FROM categories WHERE mode = ' . sqlesc($catmode) . ' ORDER BY sort_index DESC'
+            'SELECT id, mode, name, image FROM categories WHERE mode = ' . \App\Support\LegacyDb::escape($catmode) . ' ORDER BY sort_index DESC'
         );
 
         if (method_exists($cache, 'cache_value')) {

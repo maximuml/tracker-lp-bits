@@ -13,8 +13,8 @@ class Attendance
     {
         global $Cache;
         if($flush || ($row = $Cache->get_value($this->cachename)) === false){
-            $res = sql_query(sprintf('SELECT * FROM `attendance` WHERE `uid` = %u AND DATE(`added`) = %s', $this->userid, sqlesc($this->curdate.' 00:00:00'))) or sqlerr(__FILE__,__LINE__);
-            $row = mysql_num_rows($res) ? mysql_fetch_assoc($res) : array();
+            $res = \Nexus\Database\NexusDB::select(sprintf('SELECT * FROM `attendance` WHERE `uid` = %u AND DATE(`added`) = %s', $this->userid, \App\Support\LegacyDb::escape($this->curdate.' 00:00:00')));
+            $row = count($res) ? mysql_fetch_assoc($res) : array();
             $Cache->cache_value($this->cachename, $row, 600);
         }
         return empty($row) ? false : $row;
@@ -24,10 +24,10 @@ class Attendance
     {
         do_log(json_encode(func_get_args()));
         if($this->check(true)) return false;
-        $res = sql_query(sprintf('SELECT id, DATEDIFF(%s, `added`) AS diff, `days`, `total_days` FROM `attendance` WHERE `uid` = %u ORDER BY `id` DESC LIMIT 1', sqlesc($this->curdate), $this->userid)) or sqlerr(__FILE__,__LINE__);
-        $doUpdate = mysql_num_rows($res);
+        $res = \Nexus\Database\NexusDB::select(sprintf('SELECT id, DATEDIFF(%s, `added`) AS diff, `days`, `total_days` FROM `attendance` WHERE `uid` = %u ORDER BY `id` DESC LIMIT 1', \App\Support\LegacyDb::escape($this->curdate), $this->userid));
+        $doUpdate = count($res);
         if ($doUpdate) {
-            $row = mysql_fetch_row($res);
+            $row = $res ? array_values((array) $res[0]) : null;
             do_log("uid: {$this->userid}, row: " . json_encode($row));
         } else {
             $row = [0, 0, 0, 0];
@@ -48,16 +48,16 @@ class Attendance
         if ($doUpdate) {
             $sql = sprintf(
                 'UPDATE `attendance` set added = %s, points = %s, days = %s, total_days= %s where id = %s limit 1',
-                sqlesc(date('Y-m-d H:i:s')), $points, $cdays, $totalDays + 1, $id
+                \App\Support\LegacyDb::escape(date('Y-m-d H:i:s')), $points, $cdays, $totalDays + 1, $id
             );
         } else {
             $sql = sprintf(
                 'INSERT INTO `attendance` (`uid`, `added`, `points`, `days`, `total_days`) VALUES (%u, %s, %u, %u, %u)',
-                $this->userid, sqlesc(date('Y-m-d H:i:s')), $points, $cdays, $totalDays + 1
+                $this->userid, \App\Support\LegacyDb::escape(date('Y-m-d H:i:s')), $points, $cdays, $totalDays + 1
             );
         }
         do_log(sprintf('uid: %s, date: %s, doUpdate: %s, sql: %s', $this->userid, $this->curdate, $doUpdate, $sql), 'notice');
-        sql_query($sql) or sqlerr(__FILE__, __LINE__);
+        \Nexus\Database\NexusDB::getInstance()->query($sql);
         KPS('+', $points, $this->userid);
         global $Cache;
         $Cache->delete_value($this->cachename);

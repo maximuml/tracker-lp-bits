@@ -180,8 +180,13 @@ function dltable($name, $arr, $torrent, &$isSeedBoxCaseWhens)
     } else {
         $startedField = \Nexus\Database\NexusDB::unixTimestampField('started');
         $lastActionField = \Nexus\Database\NexusDB::unixTimestampField('last_action');
-        $subres = sql_query("SELECT id, seeder, finishedat, downloadoffset, uploadoffset, ip, ipv4, ipv6, port, uploaded, downloaded, to_go, $startedField AS st, connectable, agent, peer_id, $lastActionField AS la, userid FROM peers WHERE torrent = $id") or sqlerr();
-        while ($subrow = mysql_fetch_array($subres)) {
+        $peerRows = \Nexus\Database\NexusDB::table('peers')
+            ->where('torrent', $id)
+            ->selectRaw("id, seeder, finishedat, downloadoffset, uploadoffset, ip, ipv4, ipv6, port, uploaded, downloaded, to_go, $startedField AS st, connectable, agent, peer_id, $lastActionField AS la, userid")
+            ->get()
+            ->map(fn ($r) => (array) $r)
+            ->all();
+        foreach ($peerRows as $subrow) {
             if ($subrow["seeder"] == "yes")
                 $seeders[] = $subrow;
             else
@@ -217,8 +222,7 @@ function dltable($name, $arr, $torrent, &$isSeedBoxCaseWhens)
 			return 1;
 		return -1;
 	}
-	$res = sql_query("SELECT torrents.id, torrents.owner, torrents.size, torrents.anonymous FROM torrents WHERE torrents.id = $id LIMIT 1") or sqlerr();
-	$row = mysql_fetch_array($res);
+	$row = \App\Models\Torrent::query()->findOrFail($id, ['id', 'owner', 'size', 'anonymous'])->toArray();
 	usort($seeders, "seed_sort");
 	usort($downloaders, "leech_sort");
 
@@ -227,12 +231,14 @@ function dltable($name, $arr, $torrent, &$isSeedBoxCaseWhens)
     $leecherTable = dltable($lang_viewpeerlist['text_leechers'], $downloaders, $row, $isSeedBoxCaseWhens);
     //update peer is_seed_box
     if (!empty($isSeedBoxCaseWhens) && get_setting('seed_box.enabled') == 'yes') {
-        $sql = sprintf(
-            "update peers set is_seed_box = case id %s end where id in (%s)",
-            implode(' ', array_values($isSeedBoxCaseWhens)), implode(',', array_keys($isSeedBoxCaseWhens))
+        $caseSql = sprintf(
+            "case id %s end",
+            implode(' ', array_values($isSeedBoxCaseWhens))
         );
-        do_log("[IS_SEED_BOX], $sql");
-        sql_query($sql);
+        do_log("[IS_SEED_BOX], caseSql: $caseSql, ids: " . implode(',', array_keys($isSeedBoxCaseWhens)));
+        \Nexus\Database\NexusDB::table('peers')
+            ->whereIn('id', array_keys($isSeedBoxCaseWhens))
+            ->update(['is_seed_box' => \Nexus\Database\NexusDB::raw($caseSql)]);
     }
     print $seederTable . $leecherTable;
 }

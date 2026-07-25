@@ -12,20 +12,20 @@ parked();
 	if ($replyto && !is_valid_id($replyto))
 		stderr($lang_sendmessage['std_error'],$lang_sendmessage['std_permission_denied']);
 
-	$res = sql_query("SELECT * FROM users WHERE id=$receiver");
-	$user = mysql_fetch_assoc($res);
+	$user = \App\Models\User::query()->find($receiver);
 	if (!$user)
 		stderr($lang_sendmessage['std_error'],$lang_sendmessage['std_no_user_id']);
 	$subject = "";
 	$body = "";
 	if ($replyto)
 	{
-		$res = sql_query("SELECT * FROM messages WHERE id=$replyto") or sqlerr();
-		$msga = mysql_fetch_assoc($res);
+		$msg = \App\Models\Message::query()->find($replyto);
+		if (!$msg)
+			stderr($lang_sendmessage['std_error'],$lang_sendmessage['std_permission_denied']);
+		$msga = $msg->toArray();
 		if ($msga["receiver"] != $CURUSER["id"])
 			stderr($lang_sendmessage['std_error'],$lang_sendmessage['std_permission_denied']);
-		$res = sql_query("SELECT username FROM users WHERE id=" . $msga["sender"]) or sqlerr();
-		$usra = mysql_fetch_assoc($res);
+		$senderName = \App\Models\User::query()->where('id', $msga['sender'])->value('username');
 		$body .= $msga['msg']."\n\n-------- [url=userdetails.php?id=".$CURUSER["id"]."]".$CURUSER["username"]."[/url][i] Wrote at ".date("Y-m-d H:i:s").":[/i] --------\n";
 		$subject = $msga['subject'];
 		if (preg_match('/^Re:\s/', $subject))

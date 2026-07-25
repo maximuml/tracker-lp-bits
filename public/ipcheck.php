@@ -24,7 +24,15 @@ begin_table();
 
 if (get_user_class() >= UC_MODERATOR || $CURUSER["guard"] == "yes")
 {
- $res = sql_query("SELECT count(*) AS dupl, ip FROM users WHERE enabled = 'yes' AND ip <> '' AND ip <> '127.0.0.0' GROUP BY ip ORDER BY dupl DESC, ip") or sqlerr();
+ $res = \Nexus\Database\NexusDB::table('users')
+     ->selectRaw('ip, count(*) AS dupl')
+     ->where('enabled', 'yes')
+     ->where('ip', '!=', '')
+     ->where('ip', '!=', '127.0.0.0')
+     ->groupBy('ip')
+     ->orderByDesc('dupl')
+     ->orderBy('ip')
+     ->get();
   print("<tr align=center><td class=colhead width=90>User</td>
  <td class=colhead width=70>Email</td>
  <td class=colhead width=70>Registered</td>
@@ -36,19 +44,21 @@ if (get_user_class() >= UC_MODERATOR || $CURUSER["guard"] == "yes")
  <td class=colhead width=40>Peer</td></tr>\n");
  $uc = 0;
  $ip = '';
-  while($ras = mysql_fetch_assoc($res))
-  {
+  foreach ($res as $row) {
+	$ras = (array) $row;
 	if ($ras["dupl"] <= 1)
 	  break;
 	if ($ip <> $ras['ip'])
     {
-	  $ros = sql_query("SELECT  id, username, email, added, last_access, downloaded, uploaded, ip, warned, donor, enabled FROM users WHERE ip='".$ras['ip']."' ORDER BY id") or sqlerr();
-	  $num2 = mysql_num_rows($ros);
-	  if ($num2 > 1)
+	  $users = \App\Models\User::query()
+	      ->where('ip', $ras['ip'])
+	      ->orderBy('id')
+	      ->get(['id', 'username', 'email', 'added', 'last_access', 'downloaded', 'uploaded', 'ip', 'warned', 'donor', 'enabled']);
+	  if ($users->count() > 1)
 	  {
 		$uc++;
-	    while($arr = mysql_fetch_assoc($ros))
-		{
+	    foreach ($users as $userRow) {
+	        $arr = $userRow->toArray();
 		  if ($arr['added'] == '0000-00-00 00:00:00' || $arr['added'] == null)
 			$arr['added'] = '-';
 		  if ($arr['last_access'] == '0000-00-00 00:00:00' || $arr['last_access'] == null)
@@ -68,8 +78,7 @@ if (get_user_class() >= UC_MODERATOR || $CURUSER["guard"] == "yes")
 		  else
 			$utc = " bgcolor=\"ECE9D8\"";
 
-			$peer_res = sql_query("SELECT count(*) FROM peers WHERE ip = " . sqlesc($ras['ip']) . " AND userid = " . $arr['id']);
-			$peer_row = mysql_fetch_row($peer_res);
+			$peer_count = \Nexus\Database\NexusDB::table('peers')->where('ip', $ras['ip'])->where('userid', $arr['id'])->count();
 		  print("<tr$utc><td align=left>" . get_username($arr["id"])."</td>
 				  <td align=center>$arr[email]</td>
 				  <td align=center>$added</td>
@@ -78,7 +87,7 @@ if (get_user_class() >= UC_MODERATOR || $CURUSER["guard"] == "yes")
 				  <td align=center>$uploaded</td>
 				  <td align=center>$ratio</td>
 				  <td align=center><a href=\"http://www.whois.sc/$arr[ip]\" target=\"_blank\">$arr[ip]</a></td>\n<td align=center>" .
-				  ($peer_row[0] ? "ja" : "nein") . "</td></tr>\n");
+				  ($peer_count ? "ja" : "nein") . "</td></tr>\n");
 		  $ip = $arr["ip"];
 		}
 	  }

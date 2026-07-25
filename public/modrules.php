@@ -38,13 +38,17 @@ elseif (isset($_GET["act"]) && $_GET["act"]=="addsect"){
 	$title = $_POST["title"];
 	$text = $_POST["text"];
 	$language = $_POST["language"];
-	sql_query("insert into rules (title, text, lang_id) values(".sqlesc($title).", ".sqlesc($text).", ".sqlesc($language).")") or sqlerr(__FILE__,__LINE__);
+	\Nexus\Database\NexusDB::table('rules')->insert([
+	    'title' => $title,
+	    'text' => $text,
+	    'lang_id' => $language,
+	]);
     clear_rules_cache();
 	header("Location: modrules.php");
 }
 elseif (isset($_GET["act"]) && $_GET["act"] == "edit"){
 	$id = intval($_GET["id"]);
-	$res = @mysql_fetch_array(@sql_query("select * from rules where id='$id'"));
+	$res = (array) \Nexus\Database\NexusDB::table('rules')->where('id', $id)->first();
 	stdhead("Edit rules");
 	//print("<td valign=top style=\"padding: 10px;\" colspan=2 align=center>");
 	//begin_main_frame();
@@ -72,7 +76,11 @@ elseif (isset($_GET["act"]) && $_GET["act"]=="edited"){
 	$title = $_POST["title"];
 	$text = $_POST["text"];
 	$language = $_POST["language"];
-	sql_query("update rules set title=".sqlesc($title).", text=".sqlesc($text).", lang_id = ".sqlesc($language)." where id=".sqlesc($id)) or sqlerr(__FILE__,__LINE__);
+	\Nexus\Database\NexusDB::table('rules')->where('id', $id)->update([
+	    'title' => $title,
+	    'text' => $text,
+	    'lang_id' => $language,
+	]);
     clear_rules_cache();
 	header("Location: modrules.php");
 }
@@ -83,18 +91,23 @@ elseif (isset($_GET["act"]) && $_GET["act"]=="del"){
 	{
 		stderr("Delete Rule","You are about to delete a rule. Click <a class=altlink href=?act=del&id=$id&sure=1>here</a> if you are sure.",false);
 	}
-	sql_query("DELETE FROM rules WHERE id=".sqlesc($id)) or sqlerr(__FILE__, __LINE__);
+	\Nexus\Database\NexusDB::table('rules')->where('id', $id)->delete();
     clear_rules_cache();
 	header("Location: modrules.php");
 }
 else{
-	$res = sql_query("select rules.*, lang_name from rules left join language on rules.lang_id = language.id order by lang_name, id");
+	$rules = \Nexus\Database\NexusDB::table('rules')
+	    ->leftJoin('language', 'rules.lang_id', '=', 'language.id')
+	    ->orderBy('lang_name')
+	    ->orderBy('rules.id')
+	    ->get(['rules.*', 'language.lang_name'])
+	    ->map(fn ($r) => (array) $r);
 	stdhead("Rules Manangement");
 	//print("<td valign=top style=\"padding: 10px;\" colspan=2 align=center>");
 	print("<h1 align=center>Rules Manangement</h1>");
 	print("<br /><table width=940 border=0 cellspacing=0 cellpadding=5>");
 	print("<tr><td align=center><a href=modrules.php?act=newsect>Add Section</a></td></tr></table>\n");
-	while ($arr=mysql_fetch_assoc($res)){
+	foreach ($rules as $arr){
 		print("<br /><table width=940 border=1 cellspacing=0 cellpadding=5>");
 		print("<tr><td class=colhead>$arr[title] - $arr[lang_name]</td></tr>\n");
 		print("<tr><td align=left>" . format_comment($arr["text"])."</td></tr>");

@@ -36,7 +36,9 @@ function clear_faq_cache()
 
 // ACTION: reorder - reorder sections and items
 if (isset($_GET['action']) && $_GET['action'] == "reorder") {
-	foreach($_POST['order'] as $id => $position) sql_query("UPDATE `faq` SET `order`=".sqlesc($position)." WHERE id=".sqlesc($id)) or sqlerr();
+	foreach($_POST['order'] as $id => $position) {
+		\Nexus\Database\NexusDB::table('faq')->where('id', (int)$id)->update(['order' => (int)$position]);
+	}
 	header("Location: " . get_protocol_prefix() . "$BASEURL/faqmanage.php");
 	die;
 }
@@ -47,8 +49,9 @@ elseif (isset($_GET['action']) && $_GET['action'] == "edit" && isset($_GET['id']
 	begin_main_frame();
 	print("<h1 align=\"center\">Edit Section or Item</h1>");
 
-	$res = sql_query("SELECT * FROM faq WHERE id=".sqlesc($_GET['id'])." LIMIT 1");
-	while ($arr = mysql_fetch_array($res, MYSQLI_BOTH)) {
+	$row = \Nexus\Database\NexusDB::table('faq')->where('id', (int)$_GET['id'])->first();
+	if ($row) {
+		$arr = (array) $row;
 		$arr['question'] = htmlspecialchars($arr['question']);
 		$arr['answer'] = htmlspecialchars($arr['answer']);
 		if ($arr['type'] == "item") {
@@ -63,8 +66,13 @@ elseif (isset($_GET['action']) && $_GET['action'] == "edit" && isset($_GET['id']
 			elseif ($arr['flag'] == "3") print("<tr><td>Status:</td><td><select name=\"flag\" style=\"width: 110px;\"><option value=\"0\" style=\"color: #FF0000;\">Hidden</option><option value=\"1\" style=\"color: #000000;\">Normal</option><option value=\"2\" style=\"color: #0000FF;\">Updated</option><option value=\"3\" style=\"color: #008000;\" selected=\"selected\">New</option></select></td></tr>");
 			else print("<tr><td>Status:</td><td><select name=\"flag\" style=\"width: 110px;\"><option value=\"0\" style=\"color: #FF0000;\">Hidden</option><option value=\"1\" style=\"color: #000000;\" selected=\"selected\">Normal</option><option value=\"2\" style=\"color: #0000FF;\">Updated</option><option value=\"3\" style=\"color: #008000;\">New</option></select></td></tr>");
 			print("<tr><td>Category:</td><td><select style=\"width: 400px;\" name=\"categ\" />");
-			$res2 = sql_query("SELECT `id`, `question`, `link_id` FROM `faq` WHERE `type`='categ' AND `lang_id` = ".sqlesc($lang_id)." ORDER BY `order` ASC");
-			while ($arr2 = mysql_fetch_array($res2, MYSQLI_BOTH)) {
+			$rows2 = \Nexus\Database\NexusDB::table('faq')
+			    ->where('type', 'categ')
+			    ->where('lang_id', $lang_id)
+			    ->orderBy('order')
+			    ->get(['id', 'question', 'link_id']);
+			foreach ($rows2 as $row2) {
+				$arr2 = (array) $row2;
 				$selected = ($arr2['link_id'] == $arr['categ']) ? " selected=\"selected\"" : "";
 				print("<option value=\"{$arr2['link_id']}\"". $selected .">{$arr2['question']}</option>");
 			}
@@ -73,9 +81,7 @@ elseif (isset($_GET['action']) && $_GET['action'] == "edit" && isset($_GET['id']
 			print("</table>");
 		}
 		elseif ($arr['type'] == "categ") {
-			$lang_res = sql_query("SELECT lang_name FROM language WHERE id=".sqlesc($arr['lang_id'])." LIMIT 1");
-			if ($lang_arr = mysql_fetch_array($lang_res))
-				$lang_name = $lang_arr['lang_name'];
+			$lang_name = \Nexus\Database\NexusDB::table('language')->where('id', $arr['lang_id'])->value('lang_name') ?? '';
 			print("<form method=\"post\" action=\"faqactions.php?action=editsect\">");
 			print("<table border=\"1\" cellspacing=\"0\" cellpadding=\"10\" align=\"center\">\n");
 			print("<tr><td>ID:</td><td>{$arr['id']} <input type=\"hidden\" name=\"id\" value=\"{$arr['id']}\" /></td></tr>\n");
@@ -96,7 +102,12 @@ elseif (isset($_GET['action']) && $_GET['action'] == "edit" && isset($_GET['id']
 elseif (isset($_GET['action']) && $_GET['action'] == "edititem" && $_POST['id'] != NULL && $_POST['question'] != NULL && $_POST['answer'] != NULL && $_POST['flag'] != NULL && $_POST['categ'] != NULL) {
 	$question = $_POST['question'];
 	$answer = $_POST['answer'];
-	sql_query("UPDATE `faq` SET `question`=".sqlesc($question).", `answer`=".sqlesc($answer).", `flag`=".sqlesc($_POST['flag']).", `categ`=".sqlesc($_POST['categ'])." WHERE id=".sqlesc($_POST['id'])) or sqlerr();
+	\Nexus\Database\NexusDB::table('faq')->where('id', (int)$_POST['id'])->update([
+	    'question' => $question,
+	    'answer' => $answer,
+	    'flag' => (int)$_POST['flag'],
+	    'categ' => (int)$_POST['categ'],
+	]);
     clear_faq_cache();
 	header("Location: " . get_protocol_prefix() . "$BASEURL/faqmanage.php");
 	die;
@@ -105,7 +116,12 @@ elseif (isset($_GET['action']) && $_GET['action'] == "edititem" && $_POST['id'] 
 // subACTION: editsect - edit a section
 elseif (isset($_GET['action']) && $_GET['action'] == "editsect" && $_POST['id'] != NULL && $_POST['title'] != NULL && $_POST['flag'] != NULL) {
 	$title = $_POST['title'];
-	sql_query("UPDATE `faq` SET `question`=".sqlesc($title).", `answer`='', `flag`=".sqlesc($_POST['flag']).", `categ`='0' WHERE id=".sqlesc($_POST['id'])) or sqlerr();
+	\Nexus\Database\NexusDB::table('faq')->where('id', (int)$_POST['id'])->update([
+	    'question' => $title,
+	    'answer' => '',
+	    'flag' => (int)$_POST['flag'],
+	    'categ' => 0,
+	]);
     clear_faq_cache();
 	header("Location: " . get_protocol_prefix() . "$BASEURL/faqmanage.php");
 	die;
@@ -114,7 +130,7 @@ elseif (isset($_GET['action']) && $_GET['action'] == "editsect" && $_POST['id'] 
 // ACTION: delete - delete a section or item
 elseif (isset($_GET['action']) && $_GET['action'] == "delete" && isset($_GET['id'])) {
 	if ($_GET['confirm'] == "yes") {
-		sql_query("DELETE FROM `faq` WHERE `id`=".sqlesc(intval($_GET['id'] ?? 0))." LIMIT 1") or sqlerr();
+		\Nexus\Database\NexusDB::table('faq')->where('id', (int)($_GET['id'] ?? 0))->delete();
 		header("Location: " . get_protocol_prefix() . "$BASEURL/faqmanage.php");
 		die;
 	}
@@ -177,13 +193,30 @@ elseif (isset($_GET['action']) && $_GET['action'] == "addnewitem" && $_POST['que
 	$answer = $_POST['answer'];
 	$categ = intval($_POST['categ'] ?? 0);
 	$langid = intval($_POST['langid'] ?? 0);
-	$res = sql_query("SELECT MAX(`order`) AS maxorder, MAX(`link_id`) AS maxlinkid FROM `faq` WHERE `type`='item' AND `categ`=".sqlesc($categ)." AND lang_id=".sqlesc($langid));
-	while ($arr = mysql_fetch_array($res, MYSQLI_BOTH))
-	{
-		$order = $arr['maxorder'] + 1;
-		$link_id = $arr['maxlinkid']+1;
+	$maxRow = \Nexus\Database\NexusDB::table('faq')
+	    ->where('type', 'item')
+	    ->where('categ', $categ)
+	    ->where('lang_id', $langid)
+	    ->selectRaw('MAX(`order`) AS maxorder, MAX(`link_id`) AS maxlinkid')
+	    ->first();
+	if ($maxRow) {
+		$arr = (array) $maxRow;
+		$order = ($arr['maxorder'] ?? 0) + 1;
+		$link_id = ($arr['maxlinkid'] ?? 0) + 1;
+	} else {
+		$order = 1;
+		$link_id = 1;
 	}
-	sql_query("INSERT INTO `faq` (`link_id`, `type`, `lang_id`, `question`, `answer`, `flag`, `categ`, `order`) VALUES ('$link_id', 'item', ".sqlesc($langid).", ".sqlesc($question).", ".sqlesc($answer).", " . sqlesc(intval($_POST['flag'] ?? 0)) . ", ".sqlesc($categ).", ".sqlesc($order).")") or sqlerr();
+	\Nexus\Database\NexusDB::table('faq')->insert([
+	    'link_id' => $link_id,
+	    'type' => 'item',
+	    'lang_id' => $langid,
+	    'question' => $question,
+	    'answer' => $answer,
+	    'flag' => (int)($_POST['flag'] ?? 0),
+	    'categ' => $categ,
+	    'order' => $order,
+	]);
     clear_faq_cache();
 	header("Location: " . get_protocol_prefix() . "$BASEURL/faqmanage.php");
 	die;
@@ -193,9 +226,29 @@ elseif (isset($_GET['action']) && $_GET['action'] == "addnewitem" && $_POST['que
 elseif (isset($_GET['action']) && $_GET['action'] == "addnewsect" && $_POST['title'] != NULL && $_POST['flag'] != NULL) {
 	$title = $_POST['title'];
 	$language = intval($_POST['language'] ?? 0);
-	$res = sql_query("SELECT MAX(`order`) AS maxorder, MAX(`link_id`) AS maxlinkid FROM `faq` WHERE `type`='categ' AND `lang_id` = ".sqlesc($language));
-	while ($arr = mysql_fetch_array($res, MYSQLI_BOTH)) {$order = $arr['maxorder'] + 1;$link_id = $arr['maxlinkid']+1;}
-	sql_query("INSERT INTO `faq` (`link_id`,`type`,`lang_id`, `question`, `answer`, `flag`, `categ`, `order`) VALUES (".sqlesc($link_id).",'categ', ".sqlesc($language).", ".sqlesc($title).", '', ".sqlesc($_POST['flag']).", '0', ".sqlesc($order).")") or sqlerr();
+	$maxRow = \Nexus\Database\NexusDB::table('faq')
+	    ->where('type', 'categ')
+	    ->where('lang_id', $language)
+	    ->selectRaw('MAX(`order`) AS maxorder, MAX(`link_id`) AS maxlinkid')
+	    ->first();
+	if ($maxRow) {
+		$arr = (array) $maxRow;
+		$order = ($arr['maxorder'] ?? 0) + 1;
+		$link_id = ($arr['maxlinkid'] ?? 0) + 1;
+	} else {
+		$order = 1;
+		$link_id = 1;
+	}
+	\Nexus\Database\NexusDB::table('faq')->insert([
+	    'link_id' => $link_id,
+	    'type' => 'categ',
+	    'lang_id' => $language,
+	    'question' => $title,
+	    'answer' => '',
+	    'flag' => (int)($_POST['flag'] ?? 0),
+	    'categ' => 0,
+	    'order' => $order,
+	]);
     clear_faq_cache();
 	header("Location: " . get_protocol_prefix() . "$BASEURL/faqmanage.php");
 	die;

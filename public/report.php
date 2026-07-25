@@ -27,12 +27,20 @@ function takereport($reportid, $type, $reason)
 		stderr($lang_report['std_error'],$lang_report['std_missing_reason']);
 		die();
 	}
-	$res = sql_query("SELECT id FROM reports WHERE addedby = ".sqlesc($CURUSER['id'])." AND reportid= ".sqlesc($reportid)." AND type = ".sqlesc($type)) or sqlerr(__FILE__,__LINE__);
-	if (mysql_num_rows($res) == 0)
+	$existing = \Nexus\Database\NexusDB::table('reports')
+	    ->where('addedby', $CURUSER['id'])
+	    ->where('reportid', $reportid)
+	    ->where('type', $type)
+	    ->exists();
+	if (!$existing)
 	{
-		$date = sqlesc(date("Y-m-d H:i:s"));
-
-		sql_query("INSERT into reports (addedby,reportid,type,reason,added) VALUES (".sqlesc($CURUSER['id']).",".sqlesc($reportid).",".sqlesc($type).", ".sqlesc(trim($reason)).",".$date.")") or sqlerr(__FILE__,__LINE__);
+		\Nexus\Database\NexusDB::table('reports')->insert([
+		    'addedby' => $CURUSER['id'],
+		    'reportid' => $reportid,
+		    'type' => $type,
+		    'reason' => trim($reason),
+		    'added' => date("Y-m-d H:i:s"),
+		]);
 		$Cache->delete_value('staff_report_count');
 		$Cache->delete_value('staff_new_report_count');
 		stderr($lang_report['std_message'],$lang_report['std_successfully_reported']);
@@ -88,14 +96,14 @@ elseif (isset($user))
 		stderr($lang_report['std_sorry'],$lang_report['std_cannot_report_oneself']);
 		die;
 	}
-	$res = sql_query("SELECT username, class FROM users WHERE id=".sqlesc($user)) or sqlerr(__FILE__,__LINE__);
-	if (mysql_num_rows($res) == 0)
+	$userRow = \App\Models\User::query()->where('id', $user)->first(['username', 'class']);
+	if (!$userRow)
 	{
 		stderr($lang_report['std_error'],$lang_report['std_invalid_user_id']);
 		die();
 	}
 
-	$arr = mysql_fetch_assoc($res);
+	$arr = $userRow->toArray();
 	if ($arr["class"] >= $staffmem_class)
 	{
 		stderr($lang_report['std_sorry'],$lang_report['std_cannot_report'].get_user_class_name($arr["class"],false,true,true), false);
@@ -113,14 +121,14 @@ elseif (isset($user))
 elseif (isset($torrent))
 {
 	int_check($torrent);
-	$res = sql_query("SELECT name FROM torrents WHERE id=".sqlesc($torrent));
+	$name = \App\Models\Torrent::query()->where('id', $torrent)->value('name');
 
-	if (mysql_num_rows($res) == 0)
+	if (!$name)
 	{
 		stderr($lang_report['std_error'],$lang_report['std_invalid_torrent_id']);
 		die();
 	}
-	$arr = mysql_fetch_array($res);
+	$arr = ['name' => $name];
 	stderr($lang_report['std_are_you_sure'], $lang_report['text_are_you_sure_torrent']."<a href=details.php?id=".htmlspecialchars($torrent)."><b>".htmlspecialchars($arr['name'])."</b></a>".$lang_report['text_to_staff']."<br />".$lang_report['text_reason_note']."<br /><form method=post action=report.php><input type=hidden name=taketorrent value=\"".htmlspecialchars($torrent)."\">".$lang_report['text_reason_is']."<input type=text style=\"width: 200px\" name=reason><input type=submit value=\"".$lang_report['submit_confirm']."\"></form>", false);
 }
 //////////TORRENT #2 END//////////
@@ -129,13 +137,15 @@ elseif (isset($torrent))
 elseif (isset($forumpost))
 {
 	int_check($forumpost);
-	$res = sql_query("SELECT topics.id AS topicid, topics.subject AS subject, posts.userid AS postuserid FROM topics LEFT JOIN posts ON posts.topicid = topics.id WHERE posts.id=".sqlesc($forumpost));
+	$arr = (array) \Nexus\Database\NexusDB::table('topics')
+	    ->leftJoin('posts', 'posts.topicid', '=', 'topics.id')
+	    ->where('posts.id', $forumpost)
+	    ->first(['topics.id AS topicid', 'topics.subject AS subject', 'posts.userid AS postuserid']);
 
-	if (mysql_num_rows($res) == 0)
+	if (empty($arr))
 	{
 		stderr($lang_report['std_error'],$lang_report['std_invalid_post_id']);
 	}
-	$arr = mysql_fetch_array($res);
 	stderr($lang_report['std_are_you_sure'], $lang_report['text_are_you_sure_post'].$forumpost.$lang_report['text_of_topic']."<a href=\"forums.php?action=viewtopic&topicid=".$arr['topicid']."&page=p".htmlspecialchars($forumpost)."#".htmlspecialchars($forumpost)."\"><b>".htmlspecialchars($arr['subject'])."</b></a>".$lang_report['text_by'].get_username($arr['postuserid']).$lang_report['text_to_staff']."<br />".$lang_report['text_reason_note']."<br /><form method=post action=report.php><input type=hidden name=takeforumpost value=\"".htmlspecialchars($forumpost)."\">".$lang_report['text_reason_is']."<input type=text style=\"width: 200px\" name=reason><input type=submit value=\"".$lang_report['submit_confirm']."\"></form>", false);
 }
 //////////FORUM POST #2 END//////////
@@ -144,19 +154,19 @@ elseif (isset($forumpost))
 elseif (isset($commentid))
 {
 	int_check($commentid);
-	$res = sql_query("SELECT id, user, torrent, request, offer FROM comments WHERE id=".sqlesc($commentid));
-	if (mysql_num_rows($res) == 0)
+	$comment = \App\Models\Comment::query()->where('id', $commentid)->first(['id', 'user', 'torrent', 'request', 'offer']);
+	if (!$comment)
 	{
 		stderr($lang_report['std_error'],$lang_report['std_invalid_comment_id']);
 	}
-	$arr = mysql_fetch_array($res);
+	$arr = $comment->toArray();
 	if ($arr['torrent']){ //Comment of torrent. BTW, this is shitty code!
-		$name = get_single_value("torrents","name","WHERE id=".sqlesc($arr['torrent']));
+		$name = \App\Models\Torrent::query()->where('id', $arr['torrent'])->value('name');
 		$url = "details.php?id=".$arr['torrent']."#".$commentid;
 		$of = $lang_report['text_of_torrent'];
 	}
 	elseif ($arr['offer']){ //Comment of offer
-		$name = get_single_value("offers","name","WHERE id=".sqlesc($arr['offer']));
+		$name = \App\Models\Offer::query()->where('id', $arr['offer'])->value('name');
 		$url = "offers.php?id=".$arr['offer']."&off_details=1#".$commentid;
 		$of = $lang_report['text_of_offer'];
 	}
@@ -171,12 +181,12 @@ elseif (isset($commentid))
 elseif (isset($reportofferid))
 {
 	int_check($reportofferid);
-	$res = sql_query("SELECT id,name FROM offers WHERE id=".sqlesc($reportofferid));
-	if (mysql_num_rows($res) == 0)
+	$offer = \App\Models\Offer::query()->where('id', $reportofferid)->first(['id', 'name']);
+	if (!$offer)
 	{
 		stderr($lang_report['std_error'],$lang_report['std_invalid_offer_id']);
 	}
-	$arr = mysql_fetch_array($res);
+	$arr = $offer->toArray();
 	stderr($lang_report['std_are_you_sure'], $lang_report['text_are_you_sure_offer']."<a href=\"offers.php?id=".$arr['id']."&off_details=1\"><b>".htmlspecialchars($arr['name'])."</b></a>".$lang_report['text_to_staff']."<br />".$lang_report['text_reason_note']."<br /><form method=post action=report.php><input type=hidden name=takereportofferid value=\"".htmlspecialchars($reportofferid)."\">".$lang_report['text_reason_is']."<input type=text style=\"width: 200px\" name=reason><input type=submit value=\"".$lang_report['submit_confirm']."\"></form>", false);
 }
 //////////OFFERT #2 END//////////

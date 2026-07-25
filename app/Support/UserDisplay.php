@@ -13,6 +13,83 @@ use Illuminate\Support\HtmlString;
 final class UserDisplay
 {
     /**
+     * Return the current user's class value, or '' in the legacy context
+     * when the user is not loaded.
+     *
+     * Mirrors `get_user_class()`.
+     */
+    public static function currentClass(): string|int
+    {
+        if (defined('IN_NEXUS') && IN_NEXUS) {
+            global $CURUSER;
+            return $CURUSER['class'] ?? '';
+        }
+
+        if (! auth()->check()) {
+            return '';
+        }
+
+        return auth()->user()->class ?? '';
+    }
+
+    /**
+     * Return the current user's id, or 0 when not authenticated.
+     *
+     * Mirrors `get_user_id()`.
+     */
+    public static function currentId(): int
+    {
+        if (defined('IN_NEXUS') && IN_NEXUS) {
+            global $CURUSER;
+            return (int) ($CURUSER['id'] ?? 0);
+        }
+
+        if (! auth()->check()) {
+            return 0;
+        }
+
+        return (int) (auth()->user()->id ?? 0);
+    }
+
+    /**
+     * Return the current user's passkey, or '' when not available.
+     *
+     * Mirrors `get_user_passkey()`.
+     */
+    public static function currentPasskey(): string
+    {
+        if (defined('IN_NEXUS') && IN_NEXUS) {
+            global $CURUSER;
+            return $CURUSER['passkey'] ?? '';
+        }
+
+        if (! auth()->check()) {
+            return '';
+        }
+
+        return (string) (auth()->user()->passkey ?? '');
+    }
+
+    /**
+     * Return the current user's raw username, or '' when not available.
+     *
+     * Mirrors `get_pure_username()`.
+     */
+    public static function currentUsername(): string
+    {
+        if (defined('IN_NEXUS') && IN_NEXUS) {
+            global $CURUSER;
+            return $CURUSER['username'] ?? '';
+        }
+
+        if (! auth()->check()) {
+            return '';
+        }
+
+        return (string) (auth()->user()->username ?? '');
+    }
+
+    /**
      * Return the raw username for a user id.
      *
      * Mirrors `get_plain_username()`.

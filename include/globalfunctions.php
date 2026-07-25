@@ -2,18 +2,7 @@
 
 function get_global_sp_state()
 {
-	static $global_promotion_state;
-	if (is_null($global_promotion_state)) {
-        $timeline = \App\Models\TorrentState::resolveTimeline();
-        $current = $timeline['current'] ?? null;
-
-        if (is_array($current) && isset($current['global_sp_state'])) {
-            $global_promotion_state = $current['global_sp_state'];
-        } else {
-            $global_promotion_state = \App\Models\Torrent::PROMOTION_NORMAL;
-        }
-	}
-	return $global_promotion_state;
+    return \App\Support\Promotion::globalSpecialState();
 }
 
 // IP Validation
@@ -75,27 +64,17 @@ if (function_exists('get_magic_quotes_gpc') && get_magic_quotes_gpc())
 
 function get_langfolder_list()
 {
-	//do not access db for speed up, or for flexibility
-//	return array("en", "chs", "cht", "ko", "ja");
-    return \App\Models\Language::listAvailable();
+    return \App\Support\Locale::available();
 }
 
 function printLine($line, $exist = false)
 {
-	echo "[" . date('Y-m-d H:i:s') . "] $line<br />";
-	if ($exist) {
-		exit(0);
-	}
+    \App\Support\Debug::printLine($line, (bool) $exist);
 }
 
 function nexus_dd($vars)
 {
-    echo '<pre>';
-    foreach (func_get_args() as $var) {
-        echo print_r($var, true);
-    }
-    echo '</pre>';
-    exit(0);
+    \App\Support\Debug::dumpAndExit(...func_get_args());
 }
 
 /**
@@ -209,85 +188,17 @@ function nexus_json_encode($data)
 
 function api(...$args)
 {
-    do_log("api begin");
-    if (func_num_args() < 3) {
-        //参数少于3个时，默认为错误状态。
-        $ret = -1;
-        $msg = isset($args[0]) ? $args[0] : 'ERROR';
-        $data = isset($args[1]) ? $args[1] : [];
-    } else {
-        $ret = $args[0];
-        $msg = $args[1];
-        $data = $args[2];
-    }
-    if ($data instanceof \Illuminate\Http\Resources\Json\JsonResource) {
-        $data = $data->response()->getData(true);
-    }
-    do_log("api after prepare data");
-//    dd($data);
-    $time = (float)number_format(microtime(true) - nexus()->getStartTimestamp(), 3);
-    $count = null;
-    $resultKey = 'ret';
-    $msgKey = 'msg';
-    $format = $_REQUEST['__format'] ?? '';
-    if (in_array($format, ['layui-table', 'data-table'])) {
-        $resultKey = 'code';
-        $count = $data['meta']['total'] ?? 0;
-        if (isset($data['data'])) {
-            $data = $data['data'];
-        }
-    }
-    $results = [
-        $resultKey => (int)$ret,
-        $msgKey => (string)$msg,
-        'data' => $data,
-        'time' => $time,
-        'rid' => nexus()->getRequestId(),
-    ];
-    if ($format == 'layui-table') {
-        $results['count'] = $count;
-    }
-    if ($format == 'data-table') {
-        $results['draw'] = intval($_REQUEST['draw'] ?? 1);
-        $results['recordsTotal'] = $count;
-        $results['recordsFiltered'] = $count;
-    }
-    if (!IN_NEXUS && config('app.debug')) {
-        $results['queries'] = last_query(true);
-    }
-    do_log("api end");
-    return $results;
+    return \App\Support\Api::call(...$args);
 }
 
 function success(...$args)
 {
-    $ret = 0;
-    $msg = 'OK';
-    $data = [];
-    $argumentCount = func_num_args();
-    if ($argumentCount == 1) {
-        $data = $args[0];
-    } elseif ($argumentCount == 2) {
-        $msg = $args[0];
-        $data = $args[1];
-    }
-    do_log("success before api");
-    return api($ret, $msg, $data);
+    return \App\Support\Api::success(...$args);
 }
 
 function fail(...$args)
 {
-    $ret = -1;
-    $msg = 'ERROR';
-    $data = [];
-    $argumentCount = func_num_args();
-    if ($argumentCount == 1) {
-        $data = $args[0];
-    } elseif ($argumentCount == 2) {
-        $msg = $args[0];
-        $data = $args[1];
-    }
-    return api($ret, $msg, $data);
+    return \App\Support\Api::fail(...$args);
 }
 
 function last_query($all = false, $format = 'json')
@@ -461,38 +372,22 @@ function get_user_row($id)
 
 function get_user_class()
 {
-    if (IN_NEXUS) {
-        global $CURUSER;
-        return $CURUSER["class"] ?? '';
-    }
-    return auth()->user()->class;
+    return \App\Support\UserDisplay::currentClass();
 }
 
 function get_user_id()
 {
-    if (IN_NEXUS) {
-        global $CURUSER;
-        return $CURUSER["id"] ?? 0;
-    }
-    return auth()->user()->id ?? 0;
+    return \App\Support\UserDisplay::currentId();
 }
 
 function get_user_passkey()
 {
-    if (IN_NEXUS) {
-        global $CURUSER;
-        return $CURUSER["passkey"] ?? "";
-    }
-    return auth()->user()->passkey ?? "";
+    return \App\Support\UserDisplay::currentPasskey();
 }
 
 function get_pure_username()
 {
-    if (IN_NEXUS) {
-        global $CURUSER;
-        return $CURUSER["username"] ?? "";
-    }
-    return auth()->user()->username ?? "";
+    return \App\Support\UserDisplay::currentUsername();
 }
 
 function nexus()
@@ -502,12 +397,7 @@ function nexus()
 
 function site_info()
 {
-    $setting = \App\Models\Setting::get('basic');
-    $siteInfo = [
-        'site_name' => $setting['SITENAME'],
-        'base_url' => getSchemeAndHttpHost(),
-    ];
-    return $siteInfo;
+    return \App\Support\Site::info();
 }
 
 function isIPV4 ($ip)

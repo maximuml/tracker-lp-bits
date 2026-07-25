@@ -23,6 +23,16 @@ final class Locale
      *
      * Mirrors `get_langfolder_cookie()`.
      */
+    /**
+     * Return the list of available language folders.
+     *
+     * Mirrors `get_langfolder_list()`.
+     */
+    public static function available(): array
+    {
+        return Language::listAvailable();
+    }
+
     public static function folderFromCookie(?string $cookieValue, bool $transToLocale = false): string
     {
         $default = Setting::getDefaultLang();

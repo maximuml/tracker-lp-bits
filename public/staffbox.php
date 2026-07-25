@@ -20,10 +20,6 @@ function can_access_staff_message($msg)
     }
 }
 
-///////////////////////////
-//        SHOW PM'S        //
-/////////////////////////
-
 if (!$action) {
 	stdhead($lang_staffbox['head_staff_pm']);
 	$url = $_SERVER['PHP_SELF']."?";
@@ -75,16 +71,11 @@ if (!$action) {
 	stdfoot();
 }
 
-         //////////////////////////
-        //        VIEW PM'S        //
-       //////////////////////////
-
 if ($action == "viewpm")
 {
 $pmid = intval($_GET["pmid"] ?? 0);
 
-$ress4 = sql_query("SELECT * FROM staffmessages WHERE id=".sqlesc($pmid));
-$arr4 = mysql_fetch_assoc($ress4);
+$arr4 = \App\Models\StaffMessage::query()->findOrFail($pmid)->toArray();
 can_access_staff_message($arr4);
 $answeredby = get_username($arr4["answeredby"]);
 
@@ -130,9 +121,6 @@ print("</td></tr>");
 print("</table>");
 stdfoot();
 }
-         //////////////////////////
-        //        ANSWER MESSAGE        //
-       //////////////////////////
 
 if ($action == "answermessage") {
         $answeringto = intval($_GET["answeringto"] ?? 0);
@@ -140,14 +128,12 @@ if ($action == "answermessage") {
 
         int_check($receiver,true);
 
-        $res = sql_query("SELECT * FROM users WHERE id=" . sqlesc($receiver));
-        $user = mysql_fetch_assoc($res);
+        $user = \App\Models\User::query()->find($receiver);
 
         if (!$user)
-   		stderr($lang_staffbox['std_error'], $lang_staffbox['std_no_user_id']);
+  	 	stderr($lang_staffbox['std_error'], $lang_staffbox['std_no_user_id']);
 
-        $res2 = sql_query("SELECT * FROM staffmessages WHERE id=" . sqlesc($answeringto));
-        $staffmsg = mysql_fetch_assoc($res2);
+        $staffmsg = \App\Models\StaffMessage::query()->findOrFail($answeringto)->toArray();
 
         can_access_staff_message($staffmsg);
 
@@ -169,9 +155,6 @@ if ($action == "answermessage") {
 	stdfoot();
 }
 
-         //////////////////////////
-        //        TAKE ANSWER        //
-       //////////////////////////
 if ($action == "takeanswer") {
   if ($_SERVER["REQUEST_METHOD"] != "POST")
     die();
@@ -183,19 +166,15 @@ if ($action == "takeanswer") {
 
           $userid = $CURUSER["id"];
 
-   			$msg = trim($_POST["body"]);
-
-          $message = sqlesc($msg);
-
-          $added = "'" . date("Y-m-d H:i:s") . "'";
+  			$msg = trim($_POST["body"]);
 
    if (!$msg)
      stderr($lang_staffbox['std_error'], $lang_staffbox['std_body_is_empty']);
 
     can_access_staff_message($answeringto);
 
-$subject = \App\Models\StaffMessage::query()->findOrFail($answeringto)->toArray()['subject'];
-    
+$subject = \App\Models\StaffMessage::query()->findOrFail($answeringto)->value('subject');
+
 \App\Models\Message::add([
     'sender' => $userid,
     'receiver' => $receiver,
@@ -204,16 +183,12 @@ $subject = \App\Models\StaffMessage::query()->findOrFail($answeringto)->toArray(
     'msg' => $msg,
 ]);
 
-sql_query("UPDATE staffmessages SET answer=$message, answered='1', answeredby='$userid' WHERE id=$answeringto") or sqlerr(__FILE__, __LINE__);
+\App\Models\StaffMessage::query()->where('id', $answeringto)->update(['answer' => $msg, 'answered' => 1, 'answeredby' => $userid]);
 $Cache->delete_value('staff_new_message_count');
 clear_staff_message_cache();
         header("Location: staffbox.php?action=viewpm&pmid=$answeringto");
         die;
 }
-         //////////////////////////
-        // DELETE STAFF MESSAGE        //
-       //////////////////////////
-
 if ($action == "deletestaffmessage") {
 
    $id = intval($_GET["id"] ?? 0);
@@ -222,31 +197,23 @@ if ($action == "deletestaffmessage") {
     die;
 
     can_access_staff_message($id);
-    sql_query("DELETE FROM staffmessages WHERE id=" . sqlesc($id)) or die();
+    \App\Models\StaffMessage::query()->where('id', $id)->delete();
 $Cache->delete_value('staff_message_count');
 $Cache->delete_value('staff_new_message_count');
 clear_staff_message_cache();
   header("Location: " . get_protocol_prefix() . "$BASEURL/staffbox.php");
 }
 
-         //////////////////////////
-        // MARK AS ANSWERED        //
-       //////////////////////////
-
 if ($action == "setanswered") {
 
 
 $id = intval($_GET["id"] ?? 0);
     can_access_staff_message($id);
-sql_query ("UPDATE staffmessages SET answered=1, answeredby = {$CURUSER['id']} WHERE id = $id") or sqlerr();
+\App\Models\StaffMessage::query()->where('id', $id)->update(['answered' => 1, 'answeredby' => $CURUSER['id']]);
 $Cache->delete_value('staff_new_message_count');
     clear_staff_message_cache();
 header("Location: staffbox.php" . (!empty($_GET['return']) ? "?" . $_GET['return'] : ''));
 }
-
-         //////////////////////////
-        // MARK AS ANSWERED #2        //
-       //////////////////////////
 
 if ($action == "takecontactanswered") {
     if (empty($_POST['setanswered'])) {
@@ -254,17 +221,17 @@ if ($action == "takecontactanswered") {
     }
 
 if ($_POST['setdealt']){
-	$res = sql_query ("SELECT * FROM staffmessages WHERE answered=0 AND id IN (" . implode(", ", $_POST['setanswered']) . ")");
-	while ($arr = mysql_fetch_assoc($res)) {
-	    can_access_staff_message($arr);
-        sql_query ("UPDATE staffmessages SET answered=1, answeredby = {$CURUSER['id']} WHERE id = {$arr['id']}") or sqlerr();
+	$messages = \App\Models\StaffMessage::query()->where('answered', 0)->whereIn('id', $_POST['setanswered'])->get();
+	foreach ($messages as $message) {
+	    can_access_staff_message($message->toArray());
+        $message->update(['answered' => 1, 'answeredby' => $CURUSER['id']]);
     }
 }
 elseif ($_POST['delete']){
-	$res = sql_query ("SELECT * FROM staffmessages WHERE id IN (" . implode(", ", $_POST['setanswered']) . ")");
-	while ($arr = mysql_fetch_assoc($res)) {
-        can_access_staff_message($arr);
-        sql_query ("DELETE FROM staffmessages WHERE id = {$arr['id']}") or sqlerr();
+	$messages = \App\Models\StaffMessage::query()->whereIn('id', $_POST['setanswered'])->get();
+	foreach ($messages as $message) {
+        can_access_staff_message($message->toArray());
+        $message->delete();
     }
 }
 $Cache->delete_value('staff_new_message_count');

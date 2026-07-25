@@ -31,11 +31,11 @@ function inviteMenu ($selected = "invitee") {
     end_main_frame();
 }
 
-$res = sql_query("SELECT * FROM users WHERE id = ".mysql_real_escape_string($id)) or sqlerr();
-$user =  mysql_fetch_assoc($res);
+$user = \App\Models\User::query()->find($id);
 if (!$user) {
     stderr($lang_invite['std_sorry'], 'Invalid id');
 }
+$user = $user->toArray();
 stdhead($lang_invite['head_invites']);
 print("<table width=100% class=main border=0 cellspacing=0 cellpadding=0><tr><td class=embedded>");
 
@@ -100,16 +100,11 @@ if ($type == 'new'){
 } else {
     inviteMenu($menuSelected);
     if ($menuSelected == 'invitee') {
-        $whereStr = "u.invited_by = " . sqlesc($id);
-        if (!empty($_GET['status'])) {
-            $whereStr .= " and u.status = " . sqlesc($_GET['status']);
-        }
-        if (!empty($_GET['enabled'])) {
-            $whereStr .= " and u.enabled = " . sqlesc($_GET['enabled']);
-        }
-        $rel = sql_query("SELECT COUNT(*) FROM users u WHERE $whereStr") or sqlerr(__FILE__, __LINE__);
-        $arro = mysql_fetch_row($rel);
-        $number = $arro[0];
+        $filters = [
+            'status' => $_GET['status'] ?? '',
+            'enabled' => $_GET['enabled'] ?? '',
+        ];
+        $number = \App\Repositories\InviteRepository::countInvitees($id, $filters);
         $textSelectOnePlease = nexus_trans('nexus.select_one_please');
         $enabledOptions = $statusOptions = '';
         foreach (['yes', 'no'] as $item) {
@@ -162,10 +157,9 @@ JS;
         if(!$number){
             print("<tr><td colspan=7 align=center>".$lang_invite['text_no_invites']."</tr>");
         } else {
-            list($pagertop, $pagerbottom, $limit) = pager($pageSize, $number, "?id=$id&menu=$menuSelected&");
+            list($pagertop, $pagerbottom, $limit, $offset) = pager($pageSize, $number, "?id=$id&menu=$menuSelected&");
             $haremAdditionFactor = (float)get_setting('bonus.harem_addition');
-            $ret = sql_query("SELECT u.id, u.username, u.email, u.uploaded, u.downloaded, u.status, u.warned, u.enabled, u.donor, u.email, u.seed_points_per_hour, u.seeding_torrent_count, u.seeding_torrent_size, u.last_announce_at, COUNT(t.id) AS torrent_count FROM users u LEFT JOIN torrents t ON t.owner = u.id WHERE $whereStr GROUP BY u.id $limit") or sqlerr();
-            $num = mysql_num_rows($ret);
+            $inviteRows = \App\Repositories\InviteRepository::getInvitees($id, $filters, (int)$offset, $pageSize);
 
             print("<tr>
 <td class=colhead><b>".$lang_invite['text_username']."</b></td>
@@ -190,10 +184,8 @@ JS;
             }
 
             print("</tr>");
-            for ($i = 0; $i < $num; ++$i)
+            foreach ($inviteRows as $arr)
             {
-                $arr = mysql_fetch_assoc($ret);
-
                 if ($arr["downloaded"] > 0) {
                     $ratio = number_format($arr["uploaded"] / $arr["downloaded"], 3);
                     $ratio = "<font color=" . get_ratio_color($ratio) . ">$ratio</font>";
@@ -240,7 +232,7 @@ JS;
 
         if ($CURUSER['id'] == $id || get_user_class() >= UC_SYSOP)
         {
-            $pendingcount = number_format(get_row_count("users", "WHERE  status='pending' AND invited_by={$CURUSER['id']}"));
+            $pendingcount = number_format(\App\Repositories\InviteRepository::countPendingInvitees((int)$CURUSER['id']));
             $colSpan = 12;
             if (isset($haremAdditionFactor) && $haremAdditionFactor > 0) {
                 $colSpan += 1;
@@ -254,24 +246,15 @@ JS;
         print("</table>");
         print("</td></tr></table>" . ($pagertop ?? ''));
     } elseif (in_array($menuSelected, ['sent', 'tmp'])) {
-        $whereStr = "inviter = " . sqlesc($id);
-        if ($menuSelected == 'sent') {
-            $whereStr .= " and invitee != ''";
-        } elseif ($menuSelected == 'tmp') {
-            $whereStr .= " and invitee = '' and expired_at is not null";
-        }
-        $rul = sql_query("SELECT COUNT(*) FROM invites WHERE $whereStr");
-        $arre = mysql_fetch_row($rul);
-        $number1 = $arre[0];
+        $number1 = \App\Repositories\InviteRepository::countInvites($id, $menuSelected);
         print("<table border=1 width=100% cellspacing=0 cellpadding=5>");
 
         if(!$number1){
             print("<tr align=center><td colspan=6>".$lang_functions['text_none']."</tr>");
         } else {
-            list($pagertop, $pagerbottom, $limit) = pager($pageSize, $number1, "?id=$id&menu=$menuSelected&");
+            list($pagertop, $pagerbottom, $limit, $offset) = pager($pageSize, $number1, "?id=$id&menu=$menuSelected&");
 
-            $rer = sql_query("SELECT * FROM invites WHERE $whereStr $limit") or sqlerr();
-            $num1 = mysql_num_rows($rer);
+            $inviteRows = \App\Repositories\InviteRepository::getInvites($id, $menuSelected, (int)$offset, $pageSize);
 
             print("<tr><td class=colhead>".$lang_invite['text_email']."</td><td class=colhead>".$lang_invite['text_hash']."</td><td class=colhead>".$lang_invite['text_send_date']."</td>");
             if ($menuSelected == 'sent') {
@@ -283,9 +266,8 @@ JS;
                 print("<td class='colhead'>".nexus_trans('label.created_at')."</td>");
             }
             print("</tr>");
-            for ($i = 0; $i < $num1; ++$i)
+            foreach ($inviteRows as $arr1)
             {
-                $arr1 = mysql_fetch_assoc($rer);
                 $isHashValid = $arr1['valid'] == \App\Models\Invite::VALID_YES;
                 $registerLink = '';
                 if ($isHashValid) {

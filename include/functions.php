@@ -613,7 +613,7 @@ function menu ($selected = "home") {
 	);
 	echo $result['html'];
 	if ($CURUSER && $where_tweak == 'yes') {
-		$USERUPDATESET[] = "page = ".sqlesc($result['selected']);
+		$USERUPDATESET[] = "page = ".\App\Support\LegacyDb::escape($result['selected']);
 	}
 }
 function get_css_row() {

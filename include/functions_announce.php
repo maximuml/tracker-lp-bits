@@ -4,6 +4,10 @@
 if(!defined('IN_TRACKER'))
 	die('Hacking attempt!');
 
+function nexus_quote($s) {
+    return "'" . \Nexus\Database\NexusDB::getInstance()->escapeString($s) . "'";
+}
+
 function dbconn_announce() {
 
 	\Nexus\Database\NexusDB::getInstance()->autoConnect();
@@ -12,7 +16,7 @@ function dbconn_announce() {
 function hash_where_arr($name, $hash_arr) {
 	$new_hash_arr = Array();
 	foreach ($hash_arr as $hash) {
-		$new_hash_arr[] = sqlesc((urldecode($hash)));
+		$new_hash_arr[] = nexus_quote((urldecode($hash)));
 	}
 	return $name." IN ( ".implode(", ",$new_hash_arr)." )";
 }
@@ -123,8 +127,8 @@ function check_cheater($userid, $torrentid, $uploaded, $downloaded, $anctime, $s
 	if ($uploaded > 1073741824 && $upspeed > ($mustBeCheaterSpeed/$cheaterdet_security)) //Uploaded more than 1 GB with uploading rate higher than 100 MByte/S (For Consertive level). This is no doubt cheating.
 	{
 		$comment = "User account was automatically disabled by system";
-		mysql_query("INSERT INTO cheaters (added, userid, torrentid, uploaded, downloaded, anctime, seeders, leechers, comment) VALUES (".sqlesc($time).", $userid, $torrentid, $uploaded, $downloaded, $anctime, $seeders, $leechers, ".sqlesc($comment).")") or err("Tracker error 51");
-		mysql_query("UPDATE users SET enabled = 'no' WHERE id=$userid") or err("Tracker error 50"); //automatically disable user account;
+		\Nexus\Database\NexusDB::getInstance()->query("INSERT INTO cheaters (added, userid, torrentid, uploaded, downloaded, anctime, seeders, leechers, comment) VALUES (".nexus_quote($time).", $userid, $torrentid, $uploaded, $downloaded, $anctime, $seeders, $leechers, ".nexus_quote($comment).")");
+		\Nexus\Database\NexusDB::getInstance()->query("UPDATE users SET enabled = 'no' WHERE id=$userid"); //automatically disable user account;
         $userBanLog = [
             'uid' => $userid,
             'username' => $CURUSER['username'],
@@ -137,16 +141,16 @@ function check_cheater($userid, $torrentid, $uploaded, $downloaded, $anctime, $s
 	if ($uploaded > 1073741824 && $upspeed > ($mayBeCheaterSpeed/$cheaterdet_security)) //Uploaded more than 1 GB with uploading rate higher than 25 MByte/S (For Consertive level). This is likely cheating.
 	{
 		$secs = 24*60*60; //24 hours
-		$dt = sqlesc(date("Y-m-d H:i:s",(strtotime(date("Y-m-d H:i:s")) - $secs))); // calculate date.
-		$countres = mysql_query("SELECT id FROM cheaters WHERE userid=$userid AND torrentid=$torrentid AND added > $dt");
-		if (mysql_num_rows($countres) == 0)
+		$dt = nexus_quote(date("Y-m-d H:i:s",(strtotime(date("Y-m-d H:i:s")) - $secs))); // calculate date.
+		$countres = \Nexus\Database\NexusDB::select("SELECT id FROM cheaters WHERE userid=$userid AND torrentid=$torrentid AND added > $dt");
+		if (count($countres) == 0)
 		{
 			$comment = "Abnormally high uploading rate";
-			mysql_query("INSERT INTO cheaters (added, userid, torrentid, uploaded, downloaded, anctime, seeders, leechers, hit, comment) VALUES (".sqlesc($time).", $userid, $torrentid, $uploaded, $downloaded, $anctime, $seeders, $leechers, 1,".sqlesc($comment).")") or err("Tracker error 52");
+			\Nexus\Database\NexusDB::getInstance()->query("INSERT INTO cheaters (added, userid, torrentid, uploaded, downloaded, anctime, seeders, leechers, hit, comment) VALUES (".nexus_quote($time).", $userid, $torrentid, $uploaded, $downloaded, $anctime, $seeders, $leechers, 1,".nexus_quote($comment).")");
 		}
 		else{
-			$row = mysql_fetch_row($countres);
-			mysql_query("UPDATE cheaters SET hit=hit+1, dealtwith = 0 WHERE id=".$row[0]);
+			$row = (array) $countres[0];
+			\Nexus\Database\NexusDB::getInstance()->query("UPDATE cheaters SET hit=hit+1, dealtwith = 0 WHERE id=".$row['id']);
 		}
 		//mysql_query("UPDATE users SET downloadpos = 'no' WHERE id=$userid") or err("Tracker error 53"); //automatically remove user's downloading privileges;
 		return false;
@@ -155,17 +159,17 @@ if ($cheaterdet_security > 1){// do not check this with consertive level
 	if ($uploaded > 1073741824 && $upspeed > 1048576 && $leechers < (2 * $cheaterdet_security)) //Uploaded more than 1 GB with uploading rate higher than 1 MByte/S when there is less than 8 leechers (For Consertive level). This is likely cheating.
 	{
 		$secs = 24*60*60; //24 hours
-		$dt = sqlesc(date("Y-m-d H:i:s",(strtotime(date("Y-m-d H:i:s")) - $secs))); // calculate date.
-		$countres = mysql_query("SELECT id FROM cheaters WHERE userid=$userid AND torrentid=$torrentid AND added > $dt");
-		if (mysql_num_rows($countres) == 0)
+		$dt = nexus_quote(date("Y-m-d H:i:s",(strtotime(date("Y-m-d H:i:s")) - $secs))); // calculate date.
+		$countres = \Nexus\Database\NexusDB::select("SELECT id FROM cheaters WHERE userid=$userid AND torrentid=$torrentid AND added > $dt");
+		if (count($countres) == 0)
 		{
 			$comment = "User is uploading fast when there is few leechers";
-			mysql_query("INSERT INTO cheaters (added, userid, torrentid, uploaded, downloaded, anctime, seeders, leechers, comment) VALUES (".sqlesc($time).", $userid, $torrentid, $uploaded, $downloaded, $anctime, $seeders, $leechers, ".sqlesc($comment).")") or err("Tracker error 52");
+			\Nexus\Database\NexusDB::getInstance()->query("INSERT INTO cheaters (added, userid, torrentid, uploaded, downloaded, anctime, seeders, leechers, comment) VALUES (".nexus_quote($time).", $userid, $torrentid, $uploaded, $downloaded, $anctime, $seeders, $leechers, ".nexus_quote($comment).")");
 		}
 		else
 		{
-			$row = mysql_fetch_row($countres);
-			mysql_query("UPDATE cheaters SET hit=hit+1, dealtwith = 0 WHERE id=".$row[0]);
+			$row = (array) $countres[0];
+			\Nexus\Database\NexusDB::getInstance()->query("UPDATE cheaters SET hit=hit+1, dealtwith = 0 WHERE id=".$row['id']);
 		}
 		//mysql_query("UPDATE users SET downloadpos = 'no' WHERE id=$userid") or err("Tracker error 53"); //automatically remove user's downloading privileges;
 		return false;
@@ -173,17 +177,17 @@ if ($cheaterdet_security > 1){// do not check this with consertive level
 	if ($uploaded > 10485760 && $upspeed > 102400 && $leechers == 0) //Uploaded more than 10 MB with uploading speed faster than 100 KByte/S when there is no leecher. This is likely cheating.
 	{
 		$secs = 24*60*60; //24 hours
-		$dt = sqlesc(date("Y-m-d H:i:s",(strtotime(date("Y-m-d H:i:s")) - $secs))); // calculate date.
-		$countres = mysql_query("SELECT id FROM cheaters WHERE userid=$userid AND torrentid=$torrentid AND added > $dt");
-		if (mysql_num_rows($countres) == 0)
+		$dt = nexus_quote(date("Y-m-d H:i:s",(strtotime(date("Y-m-d H:i:s")) - $secs))); // calculate date.
+		$countres = \Nexus\Database\NexusDB::select("SELECT id FROM cheaters WHERE userid=$userid AND torrentid=$torrentid AND added > $dt");
+		if (count($countres) == 0)
 		{
 			$comment = "User is uploading when there is no leecher";
-			mysql_query("INSERT INTO cheaters (added, userid, torrentid, uploaded, downloaded, anctime, seeders, leechers, comment) VALUES (".sqlesc($time).", $userid, $torrentid, $uploaded, $downloaded, $anctime, $seeders, $leechers, ".sqlesc($comment).")") or err("Tracker error 52");
+			\Nexus\Database\NexusDB::getInstance()->query("INSERT INTO cheaters (added, userid, torrentid, uploaded, downloaded, anctime, seeders, leechers, comment) VALUES (".nexus_quote($time).", $userid, $torrentid, $uploaded, $downloaded, $anctime, $seeders, $leechers, ".nexus_quote($comment).")");
 		}
 		else
 		{
-			$row = mysql_fetch_row($countres);
-			mysql_query("UPDATE cheaters SET hit=hit+1, dealtwith = 0 WHERE id=".$row[0]);
+			$row = (array) $countres[0];
+			\Nexus\Database\NexusDB::getInstance()->query("UPDATE cheaters SET hit=hit+1, dealtwith = 0 WHERE id=".$row['id']);
 		}
 		//mysql_query("UPDATE users SET downloadpos = 'no' WHERE id=$userid") or err("Tracker error 53"); //automatically remove user's downloading privileges;
 		return false;
@@ -220,9 +224,11 @@ function check_client($peer_id, $agent, &$agent_familyid)
 
 	if (!$clients = $Cache->get_value('allowed_client_list')){
 		$clients = array();
-		$res = mysql_query("SELECT * FROM agent_allowed_family ORDER BY hits DESC") or err("check err");
-		while ($row = mysql_fetch_array($res))
+		$res = \Nexus\Database\NexusDB::select("SELECT * FROM agent_allowed_family ORDER BY hits DESC");
+		foreach ($res as $row) {
+			$row = (array) $row;
 			$clients[] = $row;
+		}
 		$Cache->cache_value('allowed_client_list', $clients, 86400);
 	}
 	foreach ($clients as $row_allowed_ua)
@@ -353,9 +359,11 @@ function check_client($peer_id, $agent, &$agent_familyid)
 		{
 			if (!$clients_exp = $Cache->get_value('allowed_client_exception_family_'.$family_id.'_list')){
 				$clients_exp = array();
-				$res = mysql_query("SELECT * FROM agent_allowed_exception WHERE family_id = $family_id") or err("check err");
-				while ($row = mysql_fetch_array($res))
+				$res = \Nexus\Database\NexusDB::select("SELECT * FROM agent_allowed_exception WHERE family_id = $family_id");
+				foreach ($res as $row) {
+					$row = (array) $row;
 					$clients_exp[] = $row;
+				}
 				$Cache->cache_value('allowed_client_exception_family_'.$family_id.'_list', $clients_exp, 86400);
 			}
 			if($clients_exp)

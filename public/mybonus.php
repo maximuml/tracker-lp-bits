@@ -662,12 +662,20 @@ if ($action == "exchange") {
 			if($CURUSER['seedbonus'] >= $points) {
 				$points2= number_format($points,1);
 //				$bonuscomment = date("Y-m-d") . " - " .$points2. " Points as charity to users with ratio below ".htmlspecialchars(trim($ratiocharity)).".\n " .htmlspecialchars($bonuscomment);
-				$charityReceiverCount = get_row_count("users", "WHERE enabled='yes' AND 10737418240 < downloaded AND $ratiocharity > uploaded/downloaded");
+				$charityReceiverCount = \App\Models\User::query()
+				    ->where('enabled', 'yes')
+				    ->whereRaw('downloaded > 10737418240')
+				    ->whereRaw('? > uploaded/downloaded', [$ratiocharity])
+				    ->count();
 				if ($charityReceiverCount) {
 //					sql_query("UPDATE users SET seedbonus = seedbonus - $points, charity = charity + $points, bonuscomment = ".sqlesc($bonuscomment)." WHERE id = ".sqlesc($userid)) or sqlerr(__FILE__, __LINE__);
                     $bonusRep->consumeUserBonus($CURUSER['id'], $points, \App\Models\BonusLogs::BUSINESS_TYPE_GIFT_TO_LOW_SHARE_RATIO, $points. " Points as charity to users with ratio below ".htmlspecialchars(trim($ratiocharity)).".", ['charity' => \Nexus\Database\NexusDB::raw("charity + $points"), ]);
 					$charityPerUser = $points/$charityReceiverCount;
-					sql_query("UPDATE users SET seedbonus = seedbonus + $charityPerUser WHERE enabled='yes' AND 10737418240 < downloaded AND $ratiocharity > uploaded/downloaded") or sqlerr(__FILE__, __LINE__);
+					\App\Models\User::query()
+				    ->where('enabled', 'yes')
+				    ->whereRaw('downloaded > 10737418240')
+				    ->whereRaw('? > uploaded/downloaded', [$ratiocharity])
+				    ->increment('seedbonus', $charityPerUser);
 					nexus_redirect("" . get_protocol_prefix() . "$BASEURL/mybonus.php?do=charity");
 				}
 				else
@@ -683,9 +691,9 @@ if ($action == "exchange") {
 			$points = $_POST["bonusgift"];
 			$message = $_POST["message"];
 			//==gift for peeps with no more options
-			$usernamegift = sqlesc(trim($_POST["username"]));
-			$res = sql_query("SELECT id, seedbonus FROM users WHERE username=" . $usernamegift);
-			$arr = mysql_fetch_assoc($res);
+			$usernamegift = trim($_POST["username"]);
+			$receiver = \App\Models\User::query()->where('username', $usernamegift)->first(['id', 'seedbonus']);
+			$arr = $receiver ? $receiver->toArray() : [];
             if (empty($arr)) {
                 stdmsg($lang_mybonus['text_error'], $lang_mybonus['text_receiver_not_exists'], 0);
                 stdfoot();
@@ -720,13 +728,12 @@ if ($action == "exchange") {
 
 //				sql_query("UPDATE users SET seedbonus = seedbonus - $points, bonuscomment = ".sqlesc($bonuscomment)." WHERE id = ".sqlesc($userid)) or sqlerr(__FILE__, __LINE__);
                 $bonusRep->consumeUserBonus($CURUSER['id'], $points, \App\Models\BonusLogs::BUSINESS_TYPE_GIFT_TO_SOMEONE, $points2 . " Points as gift to ".htmlspecialchars(trim($_POST["username"])));
-				sql_query("UPDATE users SET seedbonus = seedbonus + $aftertaxpoint WHERE id = ".sqlesc($useridgift));
+				\App\Models\User::query()->where('id', $useridgift)->increment('seedbonus', $aftertaxpoint);
                 \App\Models\BonusLogs::add($useridgift, $userseedbonus, $aftertaxpoint, $userseedbonus + $aftertaxpoint, " + " .$points2receiver. " Points (after tax) as a gift from ".($CURUSER["username"]), \App\Models\BonusLogs::BUSINESS_TYPE_RECEIVE_GIFT);
 
 				//===send message
                 $locale = get_user_locale($useridgift);
 				$subject = nexus_trans("bonus.msg_someone_loves_you", [], $locale);
-				$added = sqlesc(date("Y-m-d H:i:s"));
 				$msg = nexus_trans("bonus.msg_you_have_been_given", [], $locale).$points2.nexus_trans("bonus.msg_after_tax", [], $locale).$points2receiver.nexus_trans("bonus.msg_karma_points_by", [], $locale).$CURUSER['username'];
 				if ($message)
 				{

@@ -220,7 +220,7 @@ final class Comment
         if (str_contains($s, '[spoiler')) {
             $s = (string) preg_replace_callback(
                 '/\[spoiler(=(.*))?\](.*)\[\/spoiler\]/isU',
-                function (array $m) use ($lang_functions): string {
+                function (array $m): string {
                     return \formatSpoiler(
                         $m[3],
                         $m[2],

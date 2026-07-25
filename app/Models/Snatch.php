@@ -7,6 +7,10 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use JetBrains\PhpStorm\Pure;
 
+/**
+ * @property int $id
+ * @property int $seedtime
+ */
 class Snatch extends NexusModel
 {
     protected $table = 'snatched';

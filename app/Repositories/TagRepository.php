@@ -4,6 +4,7 @@ namespace App\Repositories;
 use App\Models\Tag;
 use App\Models\Torrent;
 use App\Models\TorrentTag;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Collection;
 use Nexus\Database\NexusDB;
 
@@ -11,6 +12,7 @@ class TagRepository extends BaseRepository
 {
     private static $orderByFieldIdString;
 
+    /** @var \Illuminate\Database\Eloquent\Collection<int, Tag>|null */
     private static $allTags;
 
     public function getList(array $params)
@@ -149,16 +151,20 @@ class TagRepository extends BaseRepository
         return self::$orderByFieldIdString;
     }
 
-    public static function listAll(int $searchBoxId = 0): \Illuminate\Database\Eloquent\Collection|array
+    /**
+     * @return EloquentCollection<int, Tag>
+     */
+    public static function listAll(int $searchBoxId = 0): EloquentCollection
     {
         if (empty(self::$allTags)) {
             self::$allTags = self::createBasicQuery()->get();
         }
         if ($searchBoxId > 0) {
-            return self::$allTags->filter(fn ($d) => in_array($d->mode, [0, $searchBoxId]));
+            return self::$allTags->filter(fn (Tag $d) => in_array($d->mode, [0, $searchBoxId]));
         }
         return self::$allTags;
     }
+
 
     public function buildSelect(int $searchBoxId, $name, $value): string
     {

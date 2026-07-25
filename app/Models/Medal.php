@@ -5,6 +5,10 @@ namespace App\Models;
 use App\Models\Traits\NexusActivityLogTrait;
 use Carbon\Carbon;
 
+/**
+ * @property int|null $inventory
+ * @property int|null $duration
+ */
 class Medal extends NexusModel
 {
     use NexusActivityLogTrait;
@@ -53,13 +57,13 @@ class Medal extends NexusModel
 
     public function getInventoryTextAttribute(): string
     {
-        return $this->inventory ?? nexus_trans("label.infinite");
+        return $this->inventory !== null ? (string) $this->inventory : nexus_trans("label.infinite");
     }
 
     public function getDurationTextAttribute($value): string
     {
         if ($this->duration > 0) {
-            return $this->duration;
+            return (string) $this->duration;
         }
         return nexus_trans("label.permanent");
     }

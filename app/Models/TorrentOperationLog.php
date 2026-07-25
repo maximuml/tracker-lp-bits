@@ -2,8 +2,13 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Nexus\Database\NexusDB;
 
+/**
+ * @property-read Torrent $torrent
+ * @property-read User $user
+ */
 class TorrentOperationLog extends NexusModel
 {
     protected $table = 'torrent_operation_logs';
@@ -31,12 +36,18 @@ class TorrentOperationLog extends NexusModel
         return nexus_trans("torrent.operation_log.{$this->action_type}.type_text");
     }
 
-    public function user()
+    /**
+     * @return BelongsTo<User, $this>
+     */
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'uid')->select(User::$commonFields);
     }
 
-    public function torrent()
+    /**
+     * @return BelongsTo<Torrent, $this>
+     */
+    public function torrent(): BelongsTo
     {
         return $this->belongsTo(Torrent::class, 'torrent_id')->select(Torrent::$commentFields);
     }

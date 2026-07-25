@@ -7,6 +7,9 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @property int $duration
+ */
 class Exam extends NexusModel
 {
     use NexusActivityLogTrait;
@@ -76,7 +79,7 @@ class Exam extends NexusModel
 
     protected static function booted()
     {
-        static::saving(function (Model $model) {
+        static::saving(function (self $model) {
             $model->duration = (int)$model->duration;
         });
     }

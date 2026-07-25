@@ -5,8 +5,14 @@ namespace App\Models;
 use App\Enums\ModelEventEnum;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Nexus\Database\NexusDB;
 
+/**
+ * @property-read Torrent $torrent
+ * @property-read Snatch|null $snatch
+ * @property-read User $user
+ */
 class HitAndRun extends NexusModel
 {
     protected $table = 'hit_and_runs';
@@ -190,17 +196,26 @@ class HitAndRun extends NexusModel
         return $enableSpecialSection && apply_filter("hit_and_run_diff_in_section", false);
     }
 
-    public function torrent(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    /**
+     * @return BelongsTo<Torrent, $this>
+     */
+    public function torrent(): BelongsTo
     {
         return $this->belongsTo(Torrent::class, 'torrent_id');
     }
 
-    public function snatch(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    /**
+     * @return BelongsTo<Snatch, $this>
+     */
+    public function snatch(): BelongsTo
     {
         return $this->belongsTo(Snatch::class, 'snatched_id');
     }
 
-    public function user(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    /**
+     * @return BelongsTo<User, $this>
+     */
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'uid');
     }

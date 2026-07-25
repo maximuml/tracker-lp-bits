@@ -4,6 +4,11 @@ namespace App\Models;
 
 use Nexus\Database\NexusDB;
 
+/**
+ * @property int $id
+ * @property string $lang_name
+ * @property string $site_lang_folder
+ */
 class Language extends NexusModel
 {
     const DEFAULT_ENABLED = ['en'];
@@ -30,13 +35,7 @@ class Language extends NexusModel
 
     public static function listAvailable(): array
     {
-        $result = [];
-        foreach (self::CONFIG as $locale => $info) {
-            if ($info['trans_state'] != self::TRANS_STATE_UNAVAILABLE) {
-                $result[] = $locale;
-            }
-        }
-        return $result;
+        return array_keys(self::CONFIG);
     }
 
 

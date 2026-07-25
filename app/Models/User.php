@@ -20,8 +20,14 @@ use Laravel\Sanctum\HasApiTokens;
 use Nexus\Database\NexusDB;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Models\Contracts\HasName;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
-
+/**
+ * @property int $id
+ * @property string|null $username
+ * @property-read Language|null $language
+ */
 class User extends Authenticatable implements FilamentUser, HasName
 {
     use HasFactory, Notifiable, HasApiTokens, NexusActivityLogTrait;
@@ -191,7 +197,7 @@ class User extends Authenticatable implements FilamentUser, HasName
     /**
      * The attributes that are mass assignable.
      *
-     * @var array
+     * @var list<string>
      */
     protected $fillable = [
         'username', 'email', 'passhash', 'secret', 'stylesheet', 'editsecret', 'added', 'enabled', 'status',
@@ -203,7 +209,7 @@ class User extends Authenticatable implements FilamentUser, HasName
     /**
      * The attributes that should be hidden for arrays.
      *
-     * @var array
+     * @var list<string>
      */
     protected $hidden = [
         'secret', 'passhash', 'passkey', 'auth_key'
@@ -212,7 +218,7 @@ class User extends Authenticatable implements FilamentUser, HasName
     /**
      * The attributes that should be cast to native types.
      *
-     * @var array
+     * @var array<string, string>
      */
     protected $casts = [
         'added' => 'datetime',
@@ -376,7 +382,10 @@ class User extends Authenticatable implements FilamentUser, HasName
         return $this->hasMany(ExamUser::class, 'uid');
     }
 
-    public function language()
+    /**
+     * @return BelongsTo<Language, $this>
+     */
+    public function language(): BelongsTo
     {
         return $this->belongsTo(Language::class, 'lang');
     }
@@ -626,15 +635,13 @@ class User extends Authenticatable implements FilamentUser, HasName
             $lockKey = "$cacheKey:lock";
             if ($redis->set($lockKey, 1, ['nx', 'ex' => 5])) {
                 try {
-                    if (!$redis->exists($cacheKey)) {
-                        $abilities = TokenRepository::listUserTokenPermissions(false);
-                        do_log("load user token permissions: " . json_encode($abilities), 'alert');
-                        if (!empty($abilities)) {
-                            $redis->sadd($cacheKey, ...$abilities);
-                        } else {
-                            $redis->sadd($cacheKey, "__NO_USER_TOKEN_PERMISSION__");
-                            $redis->expire($cacheKey, 900);
-                        }
+                            $abilities = TokenRepository::listUserTokenPermissions(false);
+                    do_log("load user token permissions: " . json_encode($abilities), 'alert');
+                    if (!empty($abilities)) {
+                        $redis->sadd($cacheKey, ...$abilities);
+                    } else {
+                        $redis->sadd($cacheKey, "__NO_USER_TOKEN_PERMISSION__");
+                        $redis->expire($cacheKey, 900);
                     }
                 } catch (\Throwable $throwable) {
                     do_log($throwable->getMessage(), 'error');
@@ -644,7 +651,7 @@ class User extends Authenticatable implements FilamentUser, HasName
             }
         }
         return $redis->sismember($cacheKey, $ability)
-            && $this->accessToken && $this->accessToken->can($ability);
+            && $this->accessToken->can($ability);
     }
 
 }

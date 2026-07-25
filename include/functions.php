@@ -1331,7 +1331,7 @@ function build_search_box_category_table($mode, $checkboxValue, $categoryHrefPre
 
 function datetimepicker_input($name, $value = '', $label = '', array $options = [])
 {
-    return \App\Support\Form::datetimepickerInput($name, $value, $label, $options);
+    return \App\Support\Form::datetimepickerInput($name, (string) $value, $label, $options);
 }
 
 function build_bonus_table(array $user, array $bonusResult = [], array $options = [])

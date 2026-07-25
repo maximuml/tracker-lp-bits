@@ -5,13 +5,15 @@ require_once(get_langfile_path());
 loggedinorreturn();
 parked();
 user_can('viewuserlist', true);
-$search = trim($_GET['search']);
-$class = $_GET['class'];
+$search = trim($_GET['search'] ?? '');
+$class = $_GET['class'] ?? '-';
 $country = intval($_GET['country'] ?? 0);
-$letter = trim($_GET["letter"]);
+$letter = trim($_GET["letter"] ?? '');
 
 if (strlen($letter) > 1)
 	die;
+
+$q = '';
 
 if(!is_valid_user_class($class))
 	$class = '-';

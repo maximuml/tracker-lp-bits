@@ -38,26 +38,26 @@ if ($action == "edituser")
 
 	$warned = $_POST["warned"] ?? '';
 	$warnlength = intval($_POST["warnlength"] ?? 0);
-	$warnpm = $_POST["warnpm"];
-	$title = $_POST["title"];
-	$avatar = $_POST["avatar"];
-	$signature = $_POST["signature"];
+	$warnpm = $_POST["warnpm"] ?? '';
+	$title = $_POST["title"] ?? '';
+	$avatar = $_POST["avatar"] ?? '';
+	$signature = $_POST["signature"] ?? '';
 
-	$enabled = $_POST["enabled"];
-	$uploadpos = $_POST["uploadpos"];
-	$downloadpos = $_POST["downloadpos"];
-	$privacy = $_POST["privacy"];
-	$forumpost = $_POST["forumpost"];
-	$chpassword = $_POST["chpassword"];
-	$passagain = $_POST["passagain"];
+	$enabled = $_POST["enabled"] ?? 'yes';
+	$uploadpos = $_POST["uploadpos"] ?? 'yes';
+	$downloadpos = $_POST["downloadpos"] ?? 'yes';
+	$privacy = $_POST["privacy"] ?? 'normal';
+	$forumpost = $_POST["forumpost"] ?? 'yes';
+	$chpassword = $_POST["chpassword"] ?? '';
+	$passagain = $_POST["passagain"] ?? '';
 
-	$supportlang = $_POST["supportlang"];
-	$support = $_POST["support"];
-	$supportfor = $_POST["supportfor"];
+	$supportlang = $_POST["supportlang"] ?? '';
+	$support = $_POST["support"] ?? 'no';
+	$supportfor = $_POST["supportfor"] ?? '';
 
-	$moviepicker = $_POST["moviepicker"];
-	$pickfor = $_POST["pickfor"];
-	$stafffor = $_POST["staffduties"];
+	$moviepicker = $_POST["moviepicker"] ?? 'no';
+	$pickfor = $_POST["pickfor"] ?? '';
+	$stafffor = $_POST["staffduties"] ?? '';
 
 	if (!is_valid_id($userid) || !is_valid_user_class($class))
 		stderr("Error", "Bad user ID or class ID.");
@@ -98,16 +98,16 @@ if ($action == "edituser")
 //	}
 	if(user_can('cruprfmanage'))
 	{
-		$email = $_POST["email"];
-		$username = $_POST["username"];
-		$modcomment = $_POST["modcomment"];
-		$downloaded = $_POST["downloaded"];
-		$ori_downloaded = $_POST["ori_downloaded"];
-		$uploaded = $_POST["uploaded"];
-		$ori_uploaded = $_POST["ori_uploaded"];
-		$bonus = $_POST["bonus"];
-		$ori_bonus = $_POST["ori_bonus"];
-		$invites = $_POST["invites"];
+		$email = $_POST["email"] ?? '';
+		$username = $_POST["username"] ?? '';
+		$modcomment = $_POST["modcomment"] ?? '';
+		$downloaded = $_POST["downloaded"] ?? 0;
+		$ori_downloaded = $_POST["ori_downloaded"] ?? 0;
+		$uploaded = $_POST["uploaded"] ?? 0;
+		$ori_uploaded = $_POST["ori_uploaded"] ?? 0;
+		$bonus = $_POST["bonus"] ?? 0;
+		$ori_bonus = $_POST["ori_bonus"] ?? 0;
+		$invites = $_POST["invites"] ?? 0;
 		$added = sqlesc(date("Y-m-d H:i:s"));
 		if ($arr['email'] != $email){
 			$updateset[] = "email = " . sqlesc($email);

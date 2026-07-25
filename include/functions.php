@@ -945,89 +945,15 @@ function maxslots () {
 
 function dbconn($autoclean = false, $doLogin = true)
 {
-    global $useCronTriggerCleanUp;
-    \Nexus\Database\NexusDB::getInstance()->autoConnect();
-	if ($doLogin) {
-        userlogin();
-    }
-	if (!$useCronTriggerCleanUp && $autoclean) {
-		register_shutdown_function("autoclean");
-	}
+    \App\Support\Bootstrap::connect((bool) $autoclean, (bool) $doLogin);
 }
 
 function userlogin() {
-    static $loginResult;
-    if (!is_null($loginResult)) {
-        return $loginResult;
-    }
-	global $lang_functions;
-	global $Cache;
-	global $SITE_ONLINE, $oldip;
-	global $enablesqldebug_tweak, $sqldebug_tweak;
-	unset($GLOBALS["CURUSER"]);
-
-	$ip = getip();
-	$nip = ip2long($ip);
-	if ($nip) //$nip would be false for IPv6 address
-	{
-		$res = sql_query("SELECT * FROM bans WHERE first <= $nip AND last >= $nip") or sqlerr(__FILE__, __LINE__);
-        if (mysql_num_rows($res) > 0)
-		{
-			header("HTTP/1.1 403 Forbidden");
-			print("<html><head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"></head><body>".$lang_functions['text_unauthorized_ip']."</body></html>\n");
-			die;
-		}
-	}
-
-	$row = get_user_from_cookie($_COOKIE);
-    if (empty($row)) {
-        return $loginResult = false;
-    }
-	if (!$row["passkey"]){
-		$passkey = md5($row['username'].date("Y-m-d H:i:s").$row['passhash']);
-		sql_query("UPDATE users SET passkey = ".sqlesc($passkey)." WHERE id=" . sqlesc($row["id"]));
-	}
-
-	$oldip = $row['ip'];
-	$row['ip'] = $ip;
-    $row['seedbonus'] = floatval($row['seedbonus']);
-	$GLOBALS["CURUSER"] = $row;
-	if (isset($_GET['clearcache']) && $_GET['clearcache'] && get_user_class() >= UC_MODERATOR) {
-	    $Cache->setClearCache(1);
-	}
-    /**
-     * no need any more, already set in core.php
-     * @since v1.6
-     */
-//	if ($enablesqldebug_tweak == 'yes' && get_user_class() >= $sqldebug_tweak) {
-//		error_reporting(E_ALL & ~E_NOTICE);
-//		error_reporting(-1);
-//	}
-    return $loginResult = true;
+	return \App\Support\LegacyAuth::loginFromCookie();
 }
 
 function autoclean($printProgress = false) {
-	global $autoclean_interval_one, $rootpath;
-	$now = TIMENOW;
-	$res = sql_query("SELECT value_u FROM avps WHERE arg = 'lastcleantime'");
-	$row = mysql_fetch_array($res);
-	if (!$row) {
-	    do_log("SELECT value_u FROM avps WHERE arg = 'lastcleantime', empty");
-		sql_query("INSERT INTO avps (arg, value_u) VALUES ('lastcleantime',$now)") or sqlerr(__FILE__, __LINE__);
-		return false;
-	}
-	$ts = $row[0];
-	if ($ts + $autoclean_interval_one > $now) {
-	    do_log("ts: {$ts} + autoclean_interval_one: $autoclean_interval_one > now: $now");
-		return false;
-	}
-	sql_query("UPDATE avps SET value_u=$now WHERE arg='lastcleantime' AND value_u = $ts") or sqlerr(__FILE__, __LINE__);
-	if (!mysql_affected_rows()) {
-	    do_log("UPDATE avps SET value_u=$now WHERE arg='lastcleantime' AND value_u = $ts, affectedRows = 0");
-		return false;
-	}
-	require_once($rootpath . 'include/cleanup.php');
-	return docleanup(0, $printProgress);
+	return \App\Support\Bootstrap::autoClean((bool) $printProgress);
 }
 
 function getsize_int($amount, $unit = "G")
@@ -1380,17 +1306,7 @@ function linkcolor($num) {
 }
 
 function writecomment($userid, $comment, $oldModcomment = null) {
-    \App\Models\UserModifyLog::query()->create(['user_id' => $userid, 'content' => $comment]);
-//    if (is_null($oldModcomment)) {
-//        $res = sql_query("SELECT modcomment FROM users WHERE id = '$userid'") or sqlerr(__FILE__, __LINE__);
-//        $arr = mysql_fetch_assoc($res);
-//        $modcomment = date("Y-m-d") . " - " . $comment . "" . ($arr['modcomment'] != "" ? "\n" : "") . $arr['modcomment'];
-//    } else {
-//        $modcomment = date("Y-m-d") . " - " . $comment . "" . ($oldModcomment != "" ? "\n" : "") .$oldModcomment;
-//    }
-//	$modcom = sqlesc($modcomment);
-//    do_log("update user: $userid prepend modcomment: $comment, with oldModcomment: $oldModcomment");
-//	return sql_query("UPDATE users SET modcomment = $modcom WHERE id = '$userid'") or sqlerr(__FILE__, __LINE__);
+    \App\Support\UserOps::logModify($userid, (string) $comment);
 }
 
 function return_torrent_bookmark_array($userid)
@@ -2235,11 +2151,7 @@ function get_smile($num)
 
 function get_filament_class_alias($class): string
 {
-    return Str::of($class)
-        ->replace(['/', '\\'], '.')
-        ->explode('.')
-        ->map([Str::class, 'kebab'])
-        ->implode('.');
+    return \App\Support\Strings::filamentAlias((string) $class);
 }
 
 /**

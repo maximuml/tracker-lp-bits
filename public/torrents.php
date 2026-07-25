@@ -53,7 +53,7 @@ if ($showsubcat){
 }
 
 $searchstr_ori = htmlspecialchars(trim($_GET["search"] ?? ''));
-$searchstr = mysql_real_escape_string(trim($_GET["search"] ?? ''));
+$searchstr = \Nexus\Database\NexusDB::getInstance()->escapeString(trim($_GET["search"] ?? ''));
 if (empty($searchstr)) {
     unset($searchstr);
 }

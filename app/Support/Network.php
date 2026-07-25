@@ -18,6 +18,71 @@ namespace App\Support;
 final class Network
 {
     /**
+     * Legacy `validip()` check. IPv6 addresses are considered valid,
+     * IPv4 addresses must not fall inside the legacy reserved IANA ranges.
+     */
+    public static function isValid(?string $ip): bool
+    {
+        $ip = (string) $ip;
+        if (!ip2long($ip)) {
+            return true;
+        }
+        if (!empty($ip) && $ip == long2ip(ip2long($ip))) {
+            $reservedIps = [
+                ['192.0.2.0', '192.0.2.255'],
+                ['192.168.0.0', '192.168.255.255'],
+                ['255.255.255.0', '255.255.255.255'],
+            ];
+            $ipLong = ip2long($ip);
+            foreach ($reservedIps as $r) {
+                $min = ip2long($r[0]);
+                $max = ip2long($r[1]);
+                if ($ipLong >= $min && $ipLong <= $max) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Legacy `getip()` resolver. Picks the first valid IP from
+     * `HTTP_X_FORWARDED_FOR`, `HTTP_CLIENT_IP` or `REMOTE_ADDR`,
+     * then optionally trims to the first comma-separated value.
+     */
+    public static function clientIp(bool $real = true): string
+    {
+        if (($forwarded = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? getenv('HTTP_X_FORWARDED_FOR')) && self::isValid($forwarded)) {
+            $ip = $forwarded;
+        } elseif (($client = $_SERVER['HTTP_CLIENT_IP'] ?? getenv('HTTP_CLIENT_IP')) && self::isValid($client)) {
+            $ip = $client;
+        } else {
+            $ip = $_SERVER['REMOTE_ADDR'] ?? getenv('REMOTE_ADDR') ?: '';
+        }
+
+        $ip = trim(trim((string) $ip), ',');
+        if ($real && str_contains($ip, ',')) {
+            return (string) strstr($ip, ',', true);
+        }
+
+        return $ip;
+    }
+
+    /**
+     * Legacy `isIPV4()` / `isIPV6()` checks using `filter_var()`.
+     */
+    public static function isIpv4(?string $ip): bool
+    {
+        return (bool) filter_var((string) $ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4);
+    }
+
+    public static function isIpv6(?string $ip): bool
+    {
+        return (bool) filter_var((string) $ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6);
+    }
+
+    /**
      * Test whether an IPv4 address falls inside an IP range.
      *
      * Two calling conventions:
@@ -142,9 +207,9 @@ final class Network
                 $cityName = $record->city->names[$locale] ?? $record->city->names['en'] ?? '';
                 $continentName = $record->continent->names[$locale] ?? $record->continent->names['en'] ?? '';
 
-                if (\isIPV4($ip)) {
+                if (self::isIpv4($ip)) {
                     $info['version'] = 4;
-                } elseif (\isIPV6($ip)) {
+                } elseif (self::isIpv6($ip)) {
                     $info['version'] = 6;
                 }
 

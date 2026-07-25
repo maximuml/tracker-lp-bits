@@ -50,7 +50,7 @@ if (!$descr)
 bark($lang_takeupload['std_blank_description']);
 
 $catid = intval($_POST["type"] ?? 0);
-$catmod = get_single_value("categories","mode","WHERE id=".sqlesc($catid));
+$catmod = \App\Repositories\TorrentUploadRepository::getCategoryMode($catid);
 if (!$catmod) {
     bark('Invalid category');
 }
@@ -135,10 +135,9 @@ if ($browsecatmode != $specialcatmode && $catmod == $specialcatmode){//upload to
 }
 elseif($catmod == $browsecatmode){//upload to torrents section
  	if ($offerid){//it is a offer
-		$allowed_offer_count = get_row_count("offers","WHERE allowed='allowed' AND userid=".sqlesc($CURUSER["id"]));
+		$allowed_offer_count = \App\Repositories\TorrentUploadRepository::allowedOfferCount((int)$CURUSER["id"]);
 		if ($allowed_offer_count && $enableoffer == 'yes'){
-				$allowed_offer = get_row_count("offers","WHERE id=".sqlesc($offerid)." AND allowed='allowed' AND userid=".sqlesc($CURUSER["id"]));
-				if ($allowed_offer != 1)//user uploaded torrent that is not an allowed offer
+				if (!\App\Repositories\TorrentUploadRepository::isAllowedOffer($offerid, (int)$CURUSER["id"]))//user uploaded torrent that is not an allowed offer
 					bark($lang_takeupload['std_uploaded_not_offered']);
 				else $is_offer = true;
 		}
@@ -344,7 +343,7 @@ $id = \App\Models\Torrent::query()->insertGetId($insert);
 $torrentFilePath = "$torrentSavePath/$id.torrent";
 $saveResult = $dict->dump($torrentFilePath);
 if ($saveResult === false) {
-    sql_query("delete from torrents where id = $id limit 1");
+    \App\Repositories\TorrentUploadRepository::rollbackTorrent($id);
     bark("save torrent to $torrentFilePath fail.");
 }
 //remove announce info_hash not exists cache
@@ -370,10 +369,7 @@ if (!empty($tagIdArr)) {
     insert_torrent_tags($id, $tagIdArr);
 }
 
-@sql_query("DELETE FROM files WHERE torrent = $id");
-foreach ($filelist as $file) {
-	@sql_query("INSERT INTO files (torrent, filename, size) VALUES ($id, ".sqlesc($file['path']).",".$file['size'].")");
-}
+\App\Repositories\TorrentUploadRepository::syncFiles($id, $filelist);
 $extra['torrent_id'] = $id;
 \App\Models\TorrentExtra::query()->create($extra);
 
@@ -398,36 +394,24 @@ fire_event(\App\Enums\ModelEventEnum::TORRENT_CREATED, \App\Models\Torrent::quer
 //===notify people who voted on offer thanks CoLdFuSiOn :)
 if ($is_offer)
 {
-	$res = sql_query("SELECT userid FROM offervotes WHERE userid != " . $CURUSER["id"] . " AND offerid = ". sqlesc($offerid)." AND vote = 'yeah'") or sqlerr(__FILE__, __LINE__);
+    $voterIds = \App\Repositories\TorrentUploadRepository::getOfferVoterIds($offerid, (int)$CURUSER["id"]);
 
-	while($row = mysql_fetch_assoc($res))
+	foreach ($voterIds as $voterId)
 	{
-        $locale = get_user_locale($row['userid']);
+        $locale = get_user_locale($voterId);
 		$pn_msg = nexus_trans("torrent.msg_offer_you_voted", [], $locale).$torrent.nexus_trans("torrent.msg_was_uploaded_by", [], $locale). $CURUSER["username"] .nexus_trans("torrent.msg_you_can_download", [], $locale) ."[url=" . get_protocol_prefix() . "$BASEURL/details.php?id=$id&hit=1]".nexus_trans("torrent.msg_here", [], $locale)."[/url]";
 
-		//=== use this if you DO have subject in your PMs
 		$subject = nexus_trans("torrent.msg_offer", [], $locale).$torrent.nexus_trans("torrent.msg_was_just_uploaded", [], $locale);
-		//=== use this if you DO NOT have subject in your PMs
-		//$some_variable .= "(0, $row[userid], '" . date("Y-m-d H:i:s") . "', " . sqlesc($pn_msg) . ")";
 
-		//=== use this if you DO have subject in your PMs
 		\App\Models\Message::add([
 			'sender' => 0,
 			'subject' => $subject,
-			'receiver' => $row['userid'],
+			'receiver' => $voterId,
 			'added' => now(),
 			'msg' => $pn_msg,
 		]);
-		//=== use this if you do NOT have subject in your PMs
-		//sql_query("INSERT INTO messages (sender, receiver, added, msg) VALUES ".$some_variable."") or sqlerr(__FILE__, __LINE__);
-		//===end
 	}
-	//=== delete all offer stuff
-	sql_query("DELETE FROM offers WHERE id = ". $offerid);
-	sql_query("DELETE FROM offervotes WHERE offerid = ". $offerid);
-	sql_query("DELETE FROM comments WHERE offer = ". $offerid);
-	//increment user offer_allowed_count
-    sql_query("update users set offer_allowed_count = offer_allowed_count + 1 where id = " . $CURUSER["id"]);
+	\App\Repositories\TorrentUploadRepository::finalizeOffer($offerid, (int)$CURUSER["id"]);
 }
 //=== end notify people who voted on offer
 

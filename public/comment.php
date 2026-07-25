@@ -38,14 +38,7 @@ if ($action == "add")
 		$parent_id = intval($_POST["pid"] ?? 0);
 		int_check($parent_id,true);
 
-		if($type == "torrent")
-			$res = sql_query("SELECT name, owner FROM torrents WHERE id = $parent_id") or sqlerr(__FILE__,__LINE__);
-		else if($type == "offer")
-			$res = sql_query("SELECT name, userid as owner FROM offers WHERE id = $parent_id") or sqlerr(__FILE__,__LINE__);
-		else if($type == "request")
-			$res = sql_query("SELECT requests.request as name, userid as owner FROM requests WHERE id = $parent_id") or sqlerr(__FILE__,__LINE__);
-
-		$arr = mysql_fetch_array($res);
+		$arr = \App\Repositories\CommentRepository::getParent($parent_id, $type);
 		if (!$arr)
 			stderr($lang_comment['std_error'], $lang_comment['std_no_torrent_id']);
 
@@ -53,28 +46,15 @@ if ($action == "add")
 		if (!$text)
 			stderr($lang_comment['std_error'], $lang_comment['std_comment_body_empty']);
 
+		$newid = \App\Repositories\CommentRepository::create($parent_id, $type, $text, (int)$CURUSER["id"]);
 		if($type == "torrent"){
-			sql_query("INSERT INTO comments (user, torrent, added, text, ori_text) VALUES (" .$CURUSER["id"] . ",$parent_id, '" . date("Y-m-d H:i:s") . "', " . sqlesc($text) . "," . sqlesc($text) . ")");
 			$Cache->delete_value('torrent_'.$parent_id.'_last_comment_content');
 		}
 		elseif($type == "offer"){
-			sql_query("INSERT INTO comments (user, offer, added, text, ori_text) VALUES (" .$CURUSER["id"] . ",$parent_id, '" . date("Y-m-d H:i:s") . "', " . sqlesc($text) . "," . sqlesc($text) . ")");
 			$Cache->delete_value('offer_'.$parent_id.'_last_comment_content');
 		}
-		elseif($type == "request")
-			sql_query("INSERT INTO comments (user, request, added, text, ori_text) VALUES (" .$CURUSER["id"] . ",$parent_id, '" . date("Y-m-d H:i:s") . "', " . sqlesc($text) . "," . sqlesc($text) . ")");
 
-		$newid = mysql_insert_id();
-
-		if($type == "torrent")
-			sql_query("UPDATE torrents SET comments = comments + 1 WHERE id = $parent_id");
-		else if($type == "offer")
-			sql_query("UPDATE offers SET comments = comments + 1 WHERE id = $parent_id");
-		else if($type == "request")
-			sql_query("UPDATE requests SET comments = comments + 1 WHERE id = $parent_id");
-
-		$ras = sql_query("SELECT commentpm FROM users WHERE id = $arr[owner]") or sqlerr(__FILE__,__LINE__);
-		$arg = mysql_fetch_array($ras);
+		$arg = ['commentpm' => \App\Repositories\CommentRepository::getCommentPmSetting((int)$arr["owner"])];
 
 		if($arg["commentpm"] == 'yes' && $CURUSER['id'] != $arr["owner"])
 		{
@@ -98,9 +78,6 @@ if ($action == "add")
 
 		KPS("+",$addcomment_bonus,$CURUSER["id"]);
 
-		// Update Last comment sent...
-		sql_query("UPDATE users SET last_comment = NOW() WHERE id = ".sqlesc($CURUSER['id'])) or sqlerr(__FILE__, __LINE__);
-
 		if($type == "torrent")
 			header("Location: details.php?id=$parent_id#$newid");
 		else if($type == "offer")
@@ -118,29 +95,23 @@ if ($action == "add")
 		$commentid = intval($_GET["cid"] ?? 0);
 		int_check($commentid,true);
 
-		$res2 = sql_query("SELECT comments.text, users.username FROM comments LEFT JOIN users ON comments.user = users.id WHERE comments.id=$commentid") or sqlerr(__FILE__, __LINE__);
-
-		if (mysql_num_rows($res2) != 1)
+		$arr2 = \App\Repositories\CommentRepository::getQuote($commentid);
+		if (!$arr2)
 			stderr($lang_comment['std_error'], $lang_comment['std_no_comment_id']);
-
-		$arr2 = mysql_fetch_assoc($res2);
 	}
 
+	$arr = \App\Repositories\CommentRepository::getParent($parent_id, $type);
+	if (!$arr)
+		stderr($lang_comment['std_error'], $lang_comment['std_no_torrent_id']);
 	if($type == "torrent"){
-		$res = sql_query("SELECT name, owner FROM torrents WHERE id = $parent_id") or sqlerr(__FILE__,__LINE__);
 		$url="details.php?id=$parent_id";
 	}
 	else if($type == "offer"){
-		$res = sql_query("SELECT name, userid as owner FROM offers WHERE id = $parent_id") or sqlerr(__FILE__,__LINE__);
 		$url="offers.php?id=$parent_id&off_details=1";
 	}
 	else if($type == "request"){
-		$res = sql_query("SELECT requests.request as name, userid as owner FROM requests WHERE id = $parent_id") or sqlerr(__FILE__,__LINE__);
 		$url="viewrequests.php?id=$parent_id&req_details=1";
 	}
-	$arr = mysql_fetch_array($res);
-	if (!$arr)
-		stderr($lang_comment['std_error'], $lang_comment['std_no_torrent_id']);
 
 	stdhead($lang_comment['head_add_comment_to']. $arr["name"]);
 	begin_main_frame();
@@ -159,14 +130,7 @@ elseif ($action == "edit")
 		$commentid = intval($_GET["cid"] ?? 0);
 		int_check($commentid,true);
 
-		if($type == "torrent")
-			$res = sql_query("SELECT c.*, t.name, t.id AS parent_id FROM comments AS c JOIN torrents AS t ON c.torrent = t.id WHERE c.id=$commentid") or sqlerr(__FILE__,__LINE__);
-		else if($type == "offer")
-			$res = sql_query("SELECT c.*, o.name, o.id AS parent_id FROM comments AS c JOIN offers AS o ON c.offer = o.id WHERE c.id=$commentid") or sqlerr(__FILE__,__LINE__);
-		else if($type == "request")
-			$res = sql_query("SELECT c.*, r.request as name, r.id AS parent_id FROM comments AS c JOIN requests AS r ON c.request = r.id WHERE c.id=$commentid") or sqlerr(__FILE__,__LINE__);
-
-		$arr = mysql_fetch_array($res);
+		$arr = \App\Repositories\CommentRepository::getForEdit($commentid, $type);
 		if (!$arr)
 		stderr($lang_comment['std_error'], $lang_comment['std_invalid_id']);
 
@@ -180,10 +144,8 @@ elseif ($action == "edit")
 
 			if ($text == "")
 				stderr($lang_comment['std_error'], $lang_comment['std_comment_body_empty']);
-			$text = sqlesc($text);
-			$editdate = sqlesc(date("Y-m-d H:i:s"));
 
-			sql_query("UPDATE comments SET text=$text, editdate=$editdate, editedby=$CURUSER[id] WHERE id=".sqlesc($commentid)) or sqlerr(__FILE__, __LINE__);
+			\App\Repositories\CommentRepository::update($commentid, $text, (int)$CURUSER["id"]);
 			if($type == "torrent")
 				$Cache->delete_value('torrent_'.$arr['parent_id'].'_last_comment_content');
 			elseif ($type == "offer")
@@ -229,35 +191,17 @@ elseif ($action == "delete")
 		int_check($sure,true);
 
 
-		if($type == "torrent")
-		$res = sql_query("SELECT torrent as pid,user FROM comments WHERE id=$commentid")  or sqlerr(__FILE__,__LINE__);
-		else if($type == "offer")
-		$res = sql_query("SELECT offer as pid,user FROM comments WHERE id=$commentid")  or sqlerr(__FILE__,__LINE__);
-		else if($type == "request")
-		$res = sql_query("SELECT request as pid,user FROM comments WHERE id=$commentid")  or sqlerr(__FILE__,__LINE__);
+		$arr = \App\Repositories\CommentRepository::getForDelete($commentid, $type);
+		if (!$arr)
+			stderr($lang_comment['std_error'], $lang_comment['std_invalid_id']);
+		$parent_id = $arr["pid"];
+		$userpostid = $arr["user"];
 
-		$arr = mysql_fetch_array($res);
-		if ($arr)
-		{
-			$parent_id = $arr["pid"];
-			$userpostid = $arr["user"];
-		}
-		else
-		stderr($lang_comment['std_error'], $lang_comment['std_invalid_id']);
-
-		sql_query("DELETE FROM comments WHERE id=$commentid") or sqlerr(__FILE__,__LINE__);
-		if ($type == "torrent")
-			$Cache->delete_value('torrent_'.$arr['pid'].'_last_comment_content');
-		elseif ($type == "offer")
-			$Cache->delete_value('offer_'.$arr['pid'].'_last_comment_content');
-		if ($parent_id && mysql_affected_rows() > 0)
-		{
+		if (\App\Repositories\CommentRepository::delete($commentid, $type, $parent_id)) {
 			if($type == "torrent")
-			sql_query("UPDATE torrents SET comments = comments - 1 WHERE id = $parent_id") or sqlerr(__FILE__,__LINE__);
-			else if($type == "offer")
-			sql_query("UPDATE offers SET comments = comments - 1 WHERE id = $parent_id") or sqlerr(__FILE__,__LINE__);
-			else if($type == "request")
-			sql_query("UPDATE requests SET comments = comments - 1 WHERE id = $parent_id") or sqlerr(__FILE__,__LINE__);
+				$Cache->delete_value('torrent_'.$arr['pid'].'_last_comment_content');
+			elseif($type == "offer")
+				$Cache->delete_value('offer_'.$arr['pid'].'_last_comment_content');
 		}
 
 		KPS("-",$addcomment_bonus,$userpostid);
@@ -276,14 +220,7 @@ elseif ($action == "vieworiginal")
 		$commentid = intval($_GET["cid"] ?? 0);
 		int_check($commentid,true);
 
-		if($type == "torrent")
-		$res = sql_query("SELECT c.*, t.name FROM comments AS c JOIN torrents AS t ON c.torrent = t.id WHERE c.id=$commentid") or sqlerr(__FILE__,__LINE__);
-		else if($type == "offer")
-		$res = sql_query("SELECT c.*, o.name FROM comments AS c JOIN offers AS o ON c.offer = o.id WHERE c.id=$commentid") or sqlerr(__FILE__,__LINE__);
-		else if($type == "request")
-		$res = sql_query("SELECT c.*, r.request as name FROM comments AS c JOIN requests AS r ON c.request = r.id WHERE c.id=$commentid") or sqlerr(__FILE__,__LINE__);
-
-		$arr = mysql_fetch_array($res);
+		$arr = \App\Repositories\CommentRepository::getForViewOriginal($commentid, $type);
 		if (!$arr)
 		stderr($lang_comment['std_error'], $lang_comment['std_invalid_id']);
 

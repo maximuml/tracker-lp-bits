@@ -20,15 +20,6 @@ function get_langfile_path($script_name ="", $target = false, $lang_folder = "")
 	return \App\Support\Locale::scriptFilePath((string) $script_name, (bool) $target, (string) $lang_folder);
 }
 
-function get_row_sum($table, $field, $suffix = "")
-{
-	return \App\Support\LegacyDb::sum((string) $table, (string) $field, (string) $suffix);
-}
-
-function get_single_value($table, $field, $suffix = ""){
-	return \App\Support\LegacyDb::singleValue((string) $table, (string) $field, (string) $suffix);
-}
-
 function stdmsg($heading, $text, $htmlstrip = false) {
 	echo \App\Support\Frame::stdMessage($heading, $text, $htmlstrip);
 }

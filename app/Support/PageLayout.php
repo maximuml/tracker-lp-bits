@@ -414,12 +414,12 @@ class PageLayout
             if (user_can('staffmem')) {
                 $totalreports = $Cache->get_value('staff_report_count');
                 if ($totalreports == "") {
-                    $totalreports = get_row_count("reports");
+                    $totalreports = NexusDB::table('reports')->count();
                     $Cache->cache_value('staff_report_count', $totalreports, 900);
                 }
                 $totalcheaters = $Cache->get_value('staff_cheater_count');
                 if ($totalcheaters == "") {
-                    $totalcheaters = get_row_count("cheaters");
+                    $totalcheaters = NexusDB::table('cheaters')->count();
                     $Cache->cache_value('staff_cheater_count', $totalcheaters, 900);
                 }
                 print "<a href=\"cheaterbox.php\"><img class=\"cheaterbox\" alt=\"cheaterbox\" title=\"" . $lang_functions['title_cheaterbox'] . "\" src=\"pic/trans.gif\" />  </a>" . $totalcheaters . "  <a href=\"reports.php\"><img class=\"reportbox\" alt=\"reportbox\" title=\"" . $lang_functions['title_reportbox'] . "\" src=\"pic/trans.gif\" />  </a>" . $totalreports;
@@ -549,7 +549,7 @@ class PageLayout
                     $cacheKey = 'TORRENT_APPROVAL_NONE';
                     $toApprovalCounts = $Cache->get_value($cacheKey);
                     if ($toApprovalCounts === false) {
-                        $toApprovalCounts = get_row_count('torrents', 'where approval_status = 0');
+                        $toApprovalCounts = NexusDB::table('torrents')->where('approval_status', 0)->count();
                         $Cache->cache_value($cacheKey, $toApprovalCounts, 60);
                     }
                     if ($toApprovalCounts) {
@@ -561,7 +561,7 @@ class PageLayout
                     $cacheKey = \App\Repositories\SeedBoxRepository::APPROVAL_COUNT_CACHE_KEY;
                     $toApprovalCounts = $Cache->get_value($cacheKey);
                     if ($toApprovalCounts === false) {
-                        $toApprovalCounts = get_row_count('seed_box_records', 'where status = 0');
+                        $toApprovalCounts = NexusDB::table('seed_box_records')->where('status', 0)->count();
                         $Cache->cache_value($cacheKey, $toApprovalCounts, 60);
                     }
                     if ($toApprovalCounts) {
@@ -570,7 +570,7 @@ class PageLayout
                 }
                 if (user_can('staffmem')) {
                     if (($complaints = $Cache->get_value('COMPLAINTS_COUNT_CACHE')) === false) {
-                        $complaints = get_row_count('complains', 'WHERE answered = 0');
+                        $complaints = NexusDB::table('complains')->where('answered', 0)->count();
                         $Cache->cache_value('COMPLAINTS_COUNT_CACHE', $complaints, 600);
                     }
                     if ($complaints) {
@@ -578,7 +578,7 @@ class PageLayout
                     }
                     $numreports = $Cache->get_value('staff_new_report_count');
                     if ($numreports == "") {
-                        $numreports = get_row_count("reports", "WHERE dealtwith=0");
+                        $numreports = NexusDB::table('reports')->where('dealtwith', 0)->count();
                         $Cache->cache_value('staff_new_report_count', $numreports, 900);
                     }
                     if ($numreports) {
@@ -587,7 +587,7 @@ class PageLayout
                     }
                     $numcheaters = $Cache->get_value('staff_new_cheater_count');
                     if ($numcheaters == "") {
-                        $numcheaters = get_row_count("cheaters", "WHERE dealtwith=0");
+                        $numcheaters = NexusDB::table('cheaters')->where('dealtwith', 0)->count();
                         $Cache->cache_value('staff_new_cheater_count', $numcheaters, 900);
                     }
                     if ($numcheaters) {

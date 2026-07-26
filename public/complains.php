@@ -101,7 +101,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
                 end_frame();
             }
             begin_frame($lang_complains['complaints_processed']);
-            list($pagertop, $pagerbottom, , $offset, $rpp) = pager(20, get_row_count('complains', 'WHERE answered = 1'), '?action=list&');
+            list($pagertop, $pagerbottom, , $offset, $rpp) = pager(20, \Nexus\Database\NexusDB::table('complains')->where('answered', 1)->count(), '?action=list&');
             $processedRows = \Nexus\Database\NexusDB::table('complains')
                 ->where('answered', 1)
                 ->orderByDesc('id')

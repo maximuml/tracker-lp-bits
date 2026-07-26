@@ -39,24 +39,28 @@ final class TorrentTags
             return;
         }
 
-        $values = [];
+        $records = [];
         foreach ($tagIdArr as $tagId) {
             if (in_array($tagId, $specialTags) && ! $canSetSpecialTag) {
                 \do_log("special tag: $tagId, and user no permission");
                 continue;
             }
-            if (! isset($values[$tagId])) {
-                $values[$tagId] = sprintf("(%s, %s, '%s', '%s')", $torrentId, $tagId, $dateTimeStringNow, $dateTimeStringNow);
+            if (! isset($records[$tagId])) {
+                $records[$tagId] = [
+                    'torrent_id' => $torrentId,
+                    'tag_id' => $tagId,
+                    'created_at' => $dateTimeStringNow,
+                    'updated_at' => $dateTimeStringNow,
+                ];
             }
         }
 
-        if (empty($values)) {
+        if (empty($records)) {
             return;
         }
 
-        $insertTagsSql = 'insert into torrent_tags (torrent_id, tag_id, created_at, updated_at) values ' . implode(', ', $values);
         \do_log("[INSERT_TAGS], torrent: $torrentId with tags: " . nexus_json_encode($tagIdArr));
-        NexusDB::statement($insertTagsSql);
+        TorrentTag::query()->insert(array_values($records));
     }
 
     /**

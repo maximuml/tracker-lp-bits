@@ -63,25 +63,24 @@ final class Settings
     {
         $prefix = strtolower($prefix);
         $datetimeNow = date('Y-m-d H:i:s');
-        $sql = 'INSERT INTO settings (name, value, created_at, updated_at, autoload) VALUES ';
-        $data = [];
+        $records = [];
 
         foreach ($nameAndValue as $name => $value) {
             if (is_array($value)) {
                 $value = json_encode($value);
             }
-            $data[] = sprintf(
-                "(%s, %s, %s, %s, '%s')",
-                \App\Support\LegacyDb::escape("$prefix.$name"),
-                \App\Support\LegacyDb::escape($value),
-                \App\Support\LegacyDb::escape($datetimeNow),
-                \App\Support\LegacyDb::escape($datetimeNow),
-                $autoload
-            );
+            $records[] = [
+                'name' => "$prefix.$name",
+                'value' => $value,
+                'created_at' => $datetimeNow,
+                'updated_at' => $datetimeNow,
+                'autoload' => $autoload,
+            ];
         }
 
-        $sql .= implode(',', $data) . ' ' . NexusDB::upsertField(['name'], ['value']);
-        NexusDB::statement($sql);
+        if (! empty($records)) {
+            Setting::query()->upsert($records, ['name'], ['value', 'updated_at']);
+        }
         \clear_setting_cache();
         \do_action('nexus_setting_update');
     }

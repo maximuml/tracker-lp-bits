@@ -41,26 +41,27 @@ final class Bootstrap
         global $autoclean_interval_one, $rootpath;
 
         $now = TIMENOW;
-        $res = \Nexus\Database\NexusDB::select("SELECT value_u FROM avps WHERE arg = 'lastcleantime'");
-        $row = $res ? array_merge((array) $res[0], array_values((array) $res[0])) : null;
+        $ts = (int) \Nexus\Database\NexusDB::table('avps')->where('arg', 'lastcleantime')->value('value_u');
 
-        if (! $row) {
+        if ($ts === 0) {
             \do_log("SELECT value_u FROM avps WHERE arg = 'lastcleantime', empty");
-            \Nexus\Database\NexusDB::getInstance()->query("INSERT INTO avps (arg, value_u) VALUES ('lastcleantime',$now)");
+            \Nexus\Database\NexusDB::table('avps')->insert(['arg' => 'lastcleantime', 'value_u' => $now]);
 
             return false;
         }
 
-        $ts = $row[0];
         if ($ts + $autoclean_interval_one > $now) {
             \do_log("ts: {$ts} + autoclean_interval_one: $autoclean_interval_one > now: $now");
 
             return false;
         }
 
-        \Nexus\Database\NexusDB::getInstance()->query("UPDATE avps SET value_u=$now WHERE arg='lastcleantime' AND value_u = $ts");
+        $updated = \Nexus\Database\NexusDB::table('avps')
+            ->where('arg', 'lastcleantime')
+            ->where('value_u', $ts)
+            ->update(['value_u' => $now]);
 
-        if (! \Nexus\Database\NexusDB::getInstance()->affectedRows()) {
+        if (! $updated) {
             \do_log("UPDATE avps SET value_u=$now WHERE arg='lastcleantime' AND value_u = $ts, affectedRows = 0");
 
             return false;

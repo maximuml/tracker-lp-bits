@@ -1,5 +1,17 @@
 <?php
 
+/**
+ * @property int $id
+ * @property int $sort
+ * @property string $name
+ * @property string $description
+ * @property int $minclassread
+ * @property int $minclasswrite
+ * @property int $postcount
+ * @property int $topiccount
+ * @property int $minclasscreate
+ * @property int $forid
+ */
 namespace App\Models;
 
 

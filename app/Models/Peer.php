@@ -1,5 +1,29 @@
 <?php
 
+/**
+ * @property int $id
+ * @property int $torrent
+ * @property string $peer_id
+ * @property string $ip
+ * @property int $port
+ * @property int $uploaded
+ * @property int $downloaded
+ * @property int $to_go
+ * @property string $seeder
+ * @property string|null $started
+ * @property string|null $last_action
+ * @property string|null $prev_action
+ * @property string $connectable
+ * @property int $userid
+ * @property string $agent
+ * @property int $finishedat
+ * @property int $downloadoffset
+ * @property int $uploadoffset
+ * @property string $passkey
+ * @property string $ipv4
+ * @property string $ipv6
+ * @property int $is_seed_box
+ */
 namespace App\Models;
 
 

@@ -1,5 +1,24 @@
 <?php
 
+/**
+ * @property int $id
+ * @property int $type
+ * @property int $uid
+ * @property int $status
+ * @property string|null $operator
+ * @property int|null $bandwidth
+ * @property string|null $ip
+ * @property string|null $ip_begin
+ * @property string|null $ip_end
+ * @property string $ip_begin_numeric
+ * @property string $ip_end_numeric
+ * @property int $version
+ * @property string|null $comment
+ * @property string|null $created_at
+ * @property string|null $updated_at
+ * @property int $is_allowed
+ * @property int $asn
+ */
 namespace App\Models;
 
 use App\Enums\SeedBoxRecord\IpAsnEnum;

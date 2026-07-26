@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * @property int $id
+ * @property int $torrent_id
+ * @property string $descr
+ * @property string|null $media_info
+ * @property string|null $nfo
+ * @property string|null $pt_gen
+ * @property string|null $created_at
+ * @property string|null $updated_at
+ */
 namespace App\Models;
 
 use Nexus\Database\NexusDB;

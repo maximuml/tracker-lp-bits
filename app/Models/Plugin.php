@@ -1,5 +1,17 @@
 <?php
 
+/**
+ * @property int $id
+ * @property string|null $display_name
+ * @property string $package_name
+ * @property string|null $remote_url
+ * @property string|null $installed_version
+ * @property string|null $description
+ * @property int $status
+ * @property string|null $status_result
+ * @property string|null $created_at
+ * @property string|null $updated_at
+ */
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Casts\Attribute;

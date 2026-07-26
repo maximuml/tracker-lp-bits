@@ -1,5 +1,11 @@
 <?php
 
+/**
+ * @property int $id
+ * @property int $pollid
+ * @property int $userid
+ * @property int $selection
+ */
 namespace App\Models;
 
 

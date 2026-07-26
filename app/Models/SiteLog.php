@@ -1,5 +1,12 @@
 <?php
 
+/**
+ * @property int $id
+ * @property string|null $added
+ * @property string $txt
+ * @property string $security_level
+ * @property int $uid
+ */
 namespace App\Models;
 
 

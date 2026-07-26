@@ -1,5 +1,24 @@
 <?php
 
+/**
+ * @property int $id
+ * @property int $torrentid
+ * @property int $userid
+ * @property string $ip
+ * @property int $port
+ * @property int $uploaded
+ * @property int $downloaded
+ * @property int $to_go
+ * @property int $seedtime
+ * @property int $leechtime
+ * @property string|null $last_action
+ * @property string|null $startdat
+ * @property string|null $completedat
+ * @property string $finished
+ * @property int $hit_and_run_id
+ * @property int $buy_log_id
+ * @property int $leech_time_no_seeder
+ */
 namespace App\Models;
 
 

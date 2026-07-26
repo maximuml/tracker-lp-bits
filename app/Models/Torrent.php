@@ -1,5 +1,48 @@
 <?php
 
+/**
+ * @property int $id
+ * @property string|null $info_hash
+ * @property string $name
+ * @property string $filename
+ * @property string $save_as
+ * @property string $cover
+ * @property string $small_descr
+ * @property int $category
+ * @property int $source
+ * @property int $medium
+ * @property int $codec
+ * @property int $standard
+ * @property int $processing
+ * @property int $audiocodec
+ * @property int $size
+ * @property string|null $added
+ * @property string $type
+ * @property int $numfiles
+ * @property int $comments
+ * @property int $views
+ * @property int $hits
+ * @property int $times_completed
+ * @property int $leechers
+ * @property int $seeders
+ * @property string|null $last_action
+ * @property string $visible
+ * @property string $banned
+ * @property int $owner
+ * @property int $sp_state
+ * @property int $promotion_time_type
+ * @property string|null $promotion_until
+ * @property string $anonymous
+ * @property int|null $url
+ * @property string $pos_state
+ * @property string|null $pos_state_until
+ * @property int $cache_stamp
+ * @property string|null $last_reseed
+ * @property int $hr
+ * @property int $approval_status
+ * @property int $price
+ * @property string $pieces_hash
+ */
 namespace App\Models;
 
 use App\Repositories\TagRepository;

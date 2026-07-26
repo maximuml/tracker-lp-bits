@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * @property int $id
+ * @property int $uid
+ * @property string $operator
+ * @property int $change_type
+ * @property string $username_old
+ * @property string $username_new
+ * @property string|null $created_at
+ * @property string|null $updated_at
+ */
 namespace App\Models;
 
 class UsernameChangeLog extends NexusModel

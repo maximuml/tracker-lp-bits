@@ -1,5 +1,25 @@
 <?php
 
+/**
+ * @property int $id
+ * @property string $name
+ * @property int $get_type
+ * @property string|null $description
+ * @property string|null $image_large
+ * @property string|null $image_small
+ * @property int $price
+ * @property int $display_on_medal_page
+ * @property int|null $duration
+ * @property string|null $created_at
+ * @property string|null $updated_at
+ * @property string|null $sale_begin_time
+ * @property string|null $sale_end_time
+ * @property int|null $inventory
+ * @property float $bonus_addition_factor
+ * @property int $bonus_addition_duration
+ * @property float $gift_fee_factor
+ * @property int $priority
+ */
 namespace App\Models;
 
 use App\Models\Traits\NexusActivityLogTrait;

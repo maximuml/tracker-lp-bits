@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * @property int $id
+ * @property string $lang_name
+ * @property string $flagpic
+ * @property int $sub_lang
+ * @property int $rule_lang
+ * @property int $site_lang
+ * @property string $site_lang_folder
+ * @property string $trans_state
+ */
 namespace App\Models;
 
 use Nexus\Database\NexusDB;

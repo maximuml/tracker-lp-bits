@@ -1,5 +1,16 @@
 <?php
 
+/**
+ * @property int $id
+ * @property int $uid
+ * @property int $medal_id
+ * @property string|null $expire_at
+ * @property string|null $bonus_addition_expire_at
+ * @property string|null $created_at
+ * @property string|null $updated_at
+ * @property int $status
+ * @property int $priority
+ */
 namespace App\Models;
 
 /**

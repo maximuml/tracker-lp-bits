@@ -1,5 +1,16 @@
 <?php
 
+/**
+ * @property int $id
+ * @property int $uid
+ * @property int $torrent_id
+ * @property int $snatched_id
+ * @property int $status
+ * @property string $comment
+ * @property string $created_at
+ * @property string $updated_at
+ * @property int $leech_time_no_seeder_begin
+ */
 namespace App\Models;
 
 use App\Enums\ModelEventEnum;

@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * @property int $id
+ * @property int $user_id
+ * @property string|null $aaguid
+ * @property string $credential_id
+ * @property string $public_key
+ * @property int|null $counter
+ * @property string|null $created_at
+ * @property string|null $updated_at
+ */
 namespace App\Models;
 
 /**

@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * @property int $id
+ * @property string $name
+ * @property string $folder
+ * @property string|null $cssfile
+ * @property string $multilang
+ * @property string $secondicon
+ * @property string|null $designer
+ * @property string|null $comment
+ */
 namespace App\Models;
 
 

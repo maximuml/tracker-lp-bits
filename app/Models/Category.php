@@ -1,5 +1,14 @@
 <?php
 
+/**
+ * @property int $id
+ * @property int $mode
+ * @property string|null $class_name
+ * @property string $name
+ * @property string|null $image
+ * @property int $sort_index
+ * @property int $icon_id
+ */
 namespace App\Models;
 
 

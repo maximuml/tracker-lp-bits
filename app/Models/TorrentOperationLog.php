@@ -1,5 +1,14 @@
 <?php
 
+/**
+ * @property int $id
+ * @property int $torrent_id
+ * @property int $uid
+ * @property string $action_type
+ * @property string $comment
+ * @property string|null $created_at
+ * @property string|null $updated_at
+ */
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Relations\BelongsTo;

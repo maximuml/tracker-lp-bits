@@ -1,5 +1,24 @@
 <?php
 
+/**
+ * @property int $id
+ * @property string $uuid
+ * @property string $name
+ * @property string $client_id
+ * @property string $client_secret
+ * @property string $authorization_endpoint_url
+ * @property string $token_endpoint_url
+ * @property string $user_info_endpoint_url
+ * @property string $id_claim
+ * @property string|null $username_claim
+ * @property string|null $email_claim
+ * @property string|null $level_claim
+ * @property string|null $level_limit
+ * @property int $enabled
+ * @property int $priority
+ * @property string|null $created_at
+ * @property string|null $updated_at
+ */
 namespace App\Models;
 
 use App\Models\Traits\NexusActivityLogTrait;

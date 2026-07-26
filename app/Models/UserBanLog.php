@@ -1,5 +1,14 @@
 <?php
 
+/**
+ * @property int $id
+ * @property int $uid
+ * @property string $username
+ * @property int $operator
+ * @property string|null $reason
+ * @property string|null $created_at
+ * @property string|null $updated_at
+ */
 namespace App\Models;
 
 class UserBanLog extends NexusModel

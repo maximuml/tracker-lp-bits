@@ -163,14 +163,10 @@ class Install
         } else {
             throw new \RuntimeException('Invalid DB_CONNECTION');
         }
-        $sql =  "SELECT table_name FROM information_schema.tables WHERE table_schema = '$schema'";
-        $res = \Nexus\Database\NexusDB::select($sql);
-        $data = [];
-        foreach ($res as $row) {
-            $row = (array) $row;
-            $data[] = $row['table_name'];
-        }
-        return $data;
+        return \Nexus\Database\NexusDB::table('information_schema.tables')
+            ->where('table_schema', $schema)
+            ->pluck('table_name')
+            ->all();
     }
 
     public function listRequirementTableRows()

@@ -247,11 +247,7 @@ function haswildcard($text){
   	return True;
 }
 
-function nexus_quote($s) {
-	return "'" . \Nexus\Database\NexusDB::getInstance()->escapeString($s) . "'";
-}
-
-///////////////////////////////////////////////////////////////////////////////
+$userQuery = \Nexus\Database\NexusDB::table('users as u');
 $q = '';
 if (count($_GET) > 0 && !$_GET['h'])
 {
@@ -259,48 +255,57 @@ if (count($_GET) > 0 && !$_GET['h'])
   $names = explode(' ',trim($_GET['n']));
   if ($names[0] !== "")
   {
+		$names_inc = [];
+		$names_exc = [];
 		foreach($names as $name)
 		{
 	  	if (substr($name,0,1) == '~')
 	  	{
       	if ($name == '~') continue;
-   	    $names_exc[] = substr($name,1);
+    	    $names_exc[] = substr($name,1);
       }
 	    else
 	    	$names_inc[] = $name;
 	  }
 
-    if (is_array($names_inc))
+    if (!empty($names_inc))
     {
-	  	$where_is .= isset($where_is)?" AND (":"(";
-	    foreach($names_inc as $name)
-	    {
-      	if (!haswildcard($name))
-	        $name_is .= (isset($name_is)?" OR ":"")."u.username = ".nexus_quote($name);
+	  	$userQuery->where(function ($query) use ($names_inc) {
+	  		$first = true;
+		    foreach($names_inc as $name)
+		    {
+      		if (!haswildcard($name))
+	        {
+	        	$method = $first ? 'where' : 'orWhere';
+	        	$query->$method('u.username', $name);
+	        }
 	      else
 	      {
 	        $name = str_replace(array('?','*'), array('_','%'), $name);
-	        $name_is .= (isset($name_is)?" OR ":"")."u.username LIKE ".nexus_quote($name);
+	        $method = $first ? 'where' : 'orWhere';
+	        $query->$method('u.username', 'like', $name);
 	      }
+	      $first = false;
 	    }
-      $where_is .= $name_is.")";
-      unset($name_is);
+	  	});
 	  }
 
-    if (is_array($names_exc))
+    if (!empty($names_exc))
     {
-	  	$where_is .= isset($where_is)?" AND NOT (":" NOT (";
-	    foreach($names_exc as $name)
-	    {
-	    	if (!haswildcard($name))
-	      	$name_is .= (isset($name_is)?" OR ":"")."u.username = ".nexus_quote($name);
+	  	$userQuery->where(function ($query) use ($names_exc) {
+		    foreach($names_exc as $name)
+		    {
+	    		if (!haswildcard($name))
+	    		{
+	      		$query->where('u.username', '!=', $name);
+	      }
 	      else
 	      {
 	      	$name = str_replace(array('?','*'), array('_','%'), $name);
-	        $name_is .= (isset($name_is)?" OR ":"")."u.username LIKE ".nexus_quote($name);
+	        $query->where('u.username', 'not like', $name);
 	      }
 	    }
-      $where_is .= $name_is.")";
+	  	});
 	  }
 	  $q .= ($q ? "&" : "") . "n=".rawurlencode(trim($_GET['n']));
   }
@@ -309,7 +314,8 @@ if (count($_GET) > 0 && !$_GET['h'])
   $emaila = explode(' ', trim($_GET['em']));
   if ($emaila[0] !== "")
   {
-  	$where_is .= isset($where_is)?" AND (":"(";
+  	$userQuery->where(function ($query) use ($emaila) {
+  		$first = true;
     foreach($emaila as $email)
     {
 	  	if (strpos($email,'*') === False && strpos($email,'?') === False
@@ -321,16 +327,19 @@ if (count($_GET) > 0 && !$_GET['h'])
 	        stdfoot();
 	      	die();
 	      }
-	      $email_is .= (isset($email_is)?" OR ":"")."u.email =".nexus_quote($email);
+	      $method = $first ? 'where' : 'orWhere';
+	      $query->$method('u.email', $email);
       }
       else
       {
-	    	$sql_email = str_replace(array('?','*'), array('_','%'), $email);
-	      $email_is .= (isset($email_is)?" OR ":"")."u.email LIKE ".nexus_quote($sql_email);
-	    }
+    		$sql_email = str_replace(array('?','*'), array('_','%'), $email);
+    		$method = $first ? 'where' : 'orWhere';
+        $query->$method('u.email', 'like', $sql_email);
+    	}
+    	$first = false;
     }
-		$where_is .= $email_is.")";
-    $q .= ($q ? "&" : "") . "em=".rawurlencode(trim($_GET['em']));
+  	});
+	$q .= ($q ? "&" : "") . "em=".rawurlencode(trim($_GET['em']));
   }
 
   //class
@@ -338,7 +347,7 @@ if (count($_GET) > 0 && !$_GET['h'])
   $class = $_GET['c'] - 2;
 	if (is_valid_id($class + 1))
 	{
-  	$where_is .= (isset($where_is)?" AND ":"")."u.class=$class";
+  	$userQuery->where('u.class', $class);
     $q .= ($q ? "&" : "") . "c=".($class+2);
   }
 
@@ -346,17 +355,17 @@ if (count($_GET) > 0 && !$_GET['h'])
   $ip = trim($_GET['ip']);
   if ($ip)
   {
-  	$regex = "/^(((1?\d{1,2})|(2[0-4]\d)|(25[0-5]))(\.\b|$)){4}$/";
+  	$regex = "/^(((1?\\d{1,2})|(2[0-4]\\d)|(25[0-5]))(\\.\\b|$)){4}$/";
   	if (!filter_var($ip, FILTER_VALIDATE_IP))
     {
     	stdmsg("Error", "Bad IP.");
     	stdfoot();
-    	die();
+      die();
     }
 
     $mask = trim($_GET['ma']);
     if ($mask == "" || $mask == "255.255.255.255")
-    	$where_is .= (isset($where_is)?" AND ":"")."u.ip = '$ip'";
+    	$userQuery->where('u.ip', $ip);
     else
     {
     	if (substr($mask,0,1) == "/")
@@ -377,7 +386,7 @@ if (count($_GET) > 0 && !$_GET['h'])
 				stdfoot();
 	      die();
       }
-      $where_is .= (isset($where_is)?" AND ":"")."INET_ATON(u.ip) & INET_ATON('$mask') = INET_ATON('$ip') & INET_ATON('$mask')";
+      $userQuery->whereRaw("INET_ATON(u.ip) & INET_ATON(?) = INET_ATON(?) & INET_ATON(?)", [$mask, $ip, $mask]);
       $q .= ($q ? "&" : "") . "ma=$mask";
     }
     $q .= ($q ? "&" : "") . "ip=$ip";
@@ -389,28 +398,23 @@ if (count($_GET) > 0 && !$_GET['h'])
   {
   	if ($ratio == '---')
   	{
-    	$ratio2 = "";
-      $where_is .= isset($where_is)?" AND ":"";
-      $where_is .= " u.uploaded = 0 and u.downloaded = 0";
+      $userQuery->where('u.uploaded', 0)->where('u.downloaded', 0);
     }
     elseif (strtolower(substr($ratio,0,3)) == 'inf')
     {
-    	$ratio2 = "";
-      $where_is .= isset($where_is)?" AND ":"";
-      $where_is .= " u.uploaded > 0 and u.downloaded = 0";
+    	$userQuery->where('u.uploaded', '>', 0)->where('u.downloaded', 0);
     }
     else
     {
     	if (!is_numeric($ratio) || $ratio < 0)
-    	{
+      {
       	stdmsg("Error", "Bad ratio.");
       	stdfoot();
         die();
       }
-      $where_is .= isset($where_is)?" AND ":"";
-      $where_is .= " (u.uploaded/u.downloaded)";
       $ratiotype = $_GET['rt'];
       $q .= ($q ? "&" : "") . "rt=$ratiotype";
+      $userQuery->where('u.downloaded', '>', 0);
       if ($ratiotype == "3")
       {
       	$ratio2 = trim($_GET['r2']);
@@ -426,15 +430,15 @@ if (count($_GET) > 0 && !$_GET['h'])
         	stdfoot();
         	die();
         }
-        $where_is .= " BETWEEN $ratio and $ratio2";
+        $userQuery->whereRaw('(u.uploaded/u.downloaded) BETWEEN ? AND ?', [(float)$ratio, (float)$ratio2]);
         $q .= ($q ? "&" : "") . "r2=$ratio2";
       }
       elseif ($ratiotype == "2")
-      	$where_is .= " < $ratio";
+      	$userQuery->whereRaw('(u.uploaded/u.downloaded) < ?', [(float)$ratio]);
       elseif ($ratiotype == "1")
-      	$where_is .= " > $ratio";
+      	$userQuery->whereRaw('(u.uploaded/u.downloaded) > ?', [(float)$ratio]);
       else
-      	$where_is .= " BETWEEN ($ratio - 0.004) and ($ratio + 0.004)";
+      	$userQuery->whereRaw('(u.uploaded/u.downloaded) BETWEEN ? AND ?', [max(0, (float)$ratio - 0.004), (float)$ratio + 0.004]);
     }
     $q .= ($q ? "&" : "") . "r=$ratio";
   }
@@ -443,48 +447,57 @@ if (count($_GET) > 0 && !$_GET['h'])
   $comments = explode(' ',trim($_GET['co']));
   if ($comments[0] !== "")
   {
+		$comments_inc = [];
+		$comments_exc = [];
 		foreach($comments as $comment)
 		{
 	    if (substr($comment,0,1) == '~')
 	    {
       	if ($comment == '~') continue;
-   	    $comments_exc[] = substr($comment,1);
+    	    $comments_exc[] = substr($comment,1);
       }
       else
-	    	$comments_inc[] = $comment;
+    		$comments_inc[] = $comment;
 	  }
 
-    if (is_array($comments_inc))
+    if (!empty($comments_inc))
     {
-	  	$where_is .= isset($where_is)?" AND (":"(";
-	    foreach($comments_inc as $comment)
-	    {
-	    	if (!haswildcard($comment))
-		    	$comment_is .= (isset($comment_is)?" OR ":"")."u.modcomment LIKE ".nexus_quote("%".$comment."%");
+	  	$userQuery->where(function ($query) use ($comments_inc) {
+	  		$first = true;
+		    foreach($comments_inc as $comment)
+		    {
+	    		if (!haswildcard($comment))
+			    {
+		    		$method = $first ? 'where' : 'orWhere';
+				    $query->$method('u.modcomment', 'like', '%'.$comment.'%');
+		    	}
         else
         {
-	      	$comment = str_replace(array('?','*'), array('_','%'), $comment);
-	        $comment_is .= (isset($comment_is)?" OR ":"")."u.modcomment LIKE ".nexus_quote($comment);
-        }
-      }
-      $where_is .= $comment_is.")";
-      unset($comment_is);
+	      		$comment = str_replace(array('?','*'), array('_','%'), $comment);
+	      		$method = $first ? 'where' : 'orWhere';
+	        $query->$method('u.modcomment', 'like', $comment);
+	      }
+	      $first = false;
+	    }
+	  	});
     }
 
-    if (is_array($comments_exc))
+    if (!empty($comments_exc))
     {
-	  	$where_is .= isset($where_is)?" AND NOT (":" NOT (";
-	    foreach($comments_exc as $comment)
-	    {
-	    	if (!haswildcard($comment))
-		    	$comment_is .= (isset($comment_is)?" OR ":"")."u.modcomment LIKE ".nexus_quote("%".$comment."%");
+	  	$userQuery->where(function ($query) use ($comments_exc) {
+		    foreach($comments_exc as $comment)
+		    {
+	    		if (!haswildcard($comment))
+	    		{
+	      		$query->where('u.modcomment', 'not like', '%'.$comment.'%');
+        }
         else
         {
-	      	$comment = str_replace(array('?','*'), array('_','%'), $comment);
-	        $comment_is .= (isset($comment_is)?" OR ":"")."u.modcomment LIKE ".nexus_quote($comment);
+	      		$comment = str_replace(array('?','*'), array('_','%'), $comment);
+	        $query->where('u.modcomment', 'not like', $comment);
 	      }
-      }
-      $where_is .= $comment_is.")";
+	    }
+	  	});
 	  }
     $q .= ($q ? "&" : "") . "co=".rawurlencode(trim($_GET['co']));
   }
@@ -501,8 +514,6 @@ if (count($_GET) > 0 && !$_GET['h'])
     	stdfoot();
       die();
     }
-    $where_is .= isset($where_is)?" AND ":"";
-    $where_is .= " u.uploaded ";
     $ultype = $_GET['ult'];
     $q .= ($q ? "&" : "") . "ult=$ultype";
     if ($ultype == "3")
@@ -520,15 +531,15 @@ if (count($_GET) > 0 && !$_GET['h'])
       	stdfoot();
         die();
       }
-      $where_is .= " BETWEEN ".$ul*$unit." and ".$ul2*$unit;
+      $userQuery->whereBetween('u.uploaded', [(float)$ul*$unit, (float)$ul2*$unit]);
       $q .= ($q ? "&" : "") . "ul2=$ul2";
     }
     elseif ($ultype == "2")
-    	$where_is .= " < ".$ul*$unit;
+    	$userQuery->where('u.uploaded', '<', (float)$ul*$unit);
     elseif ($ultype == "1")
-    	$where_is .= " >". $ul*$unit;
+    	$userQuery->where('u.uploaded', '>', (float)$ul*$unit);
     else
-    	$where_is .= " BETWEEN ".($ul - 0.004)*$unit." and ".($ul + 0.004)*$unit;
+    	$userQuery->whereBetween('u.uploaded', [max(0, ((float)$ul - 0.004)*$unit), ((float)$ul + 0.004)*$unit]);
     $q .= ($q ? "&" : "") . "ul=$ul";
   }
 
@@ -542,8 +553,6 @@ if (count($_GET) > 0 && !$_GET['h'])
     	stdfoot();
       die();
     }
-    $where_is .= isset($where_is)?" AND ":"";
-    $where_is .= " u.downloaded ";
     $dltype = $_GET['dlt'];
     $q .= ($q ? "&" : "") . "dlt=$dltype";
     if ($dltype == "3")
@@ -561,15 +570,15 @@ if (count($_GET) > 0 && !$_GET['h'])
       	stdfoot();
         die();
       }
-      $where_is .= " BETWEEN ".$dl*$unit." and ".$dl2*$unit;
+      $userQuery->whereBetween('u.downloaded', [(float)$dl*$unit, (float)$dl2*$unit]);
       $q .= ($q ? "&" : "") . "dl2=$dl2";
     }
     elseif ($dltype == "2")
-    	$where_is .= " < ".$dl*$unit;
+    	$userQuery->where('u.downloaded', '<', (float)$dl*$unit);
     elseif ($dltype == "1")
-     	$where_is .= " > ".$dl*$unit;
+      	$userQuery->where('u.downloaded', '>', (float)$dl*$unit);
     else
-     	$where_is .= " BETWEEN ".($dl - 0.004)*$unit." and ".($dl + 0.004)*$unit;
+      	$userQuery->whereBetween('u.downloaded', [max(0, ((float)$dl - 0.004)*$unit), ((float)$dl + 0.004)*$unit]);
     $q .= ($q ? "&" : "") . "dl=$dl";
   }
 
@@ -587,26 +596,18 @@ if (count($_GET) > 0 && !$_GET['h'])
     $datetype = $_GET['dt'];
 		$q .= ($q ? "&" : "") . "dt=$datetype";
     if ($datetype == "0")
-    // For mySQL 4.1.1 or above use instead
-    // $where_is .= (isset($where_is)?" AND ":"")."DATE(added) = DATE('$date')";
-    $where_is .= (isset($where_is)?" AND ":"").
-    		"(UNIX_TIMESTAMP(added) - UNIX_TIMESTAMP('$date')) BETWEEN 0 and 86400";
+    {
+    	$userQuery->whereBetween('u.added', [$date, date('Y-m-d H:i:s', strtotime($date) + 86400)]);
+    }
     else
     {
-      $where_is .= (isset($where_is)?" AND ":"")."u.added ";
       if ($datetype == "3")
       {
         $date2 = mkdate(trim($_GET['d2']));
         if ($date2)
         {
-          if (!$date = mkdate($date))
-          {
-            stdmsg("Error", "Invalid date.");
-            stdfoot();
-            die();
-          }
           $q .= ($q ? "&" : "") . "d2=$date2";
-          $where_is .= " BETWEEN '$date' and '$date2'";
+          $userQuery->whereBetween('u.added', [$date, $date2]);
         }
         else
         {
@@ -616,9 +617,9 @@ if (count($_GET) > 0 && !$_GET['h'])
         }
       }
       elseif ($datetype == "1")
-        $where_is .= "< '$date'";
+        $userQuery->where('u.added', '<', $date);
       elseif ($datetype == "2")
-        $where_is .= "> '$date'";
+        $userQuery->where('u.added', '>', $date);
     }
   }
 
@@ -636,20 +637,18 @@ if (count($_GET) > 0 && !$_GET['h'])
     $lasttype = $_GET['lst'];
     $q .= ($q ? "&" : "") . "lst=$lasttype";
     if ($lasttype == "0")
-    // For mySQL 4.1.1 or above use instead
-    // $where_is .= (isset($where_is)?" AND ":"")."DATE(added) = DATE('$date')";
-    	$where_is .= (isset($where_is)?" AND ":"").
-      		"(UNIX_TIMESTAMP(last_access) - UNIX_TIMESTAMP('$last')) BETWEEN 0 and 86400";
+    {
+    	$userQuery->whereBetween('u.last_access', [$last, date('Y-m-d H:i:s', strtotime($last) + 86400)]);
+    }
     else
     {
-    	$where_is .= (isset($where_is)?" AND ":"")."u.last_access ";
       if ($lasttype == "3")
       {
       	$last2 = mkdate(trim($_GET['ls2']));
         if ($last2)
         {
-        	$where_is .= " BETWEEN '$last' and '$last2'";
-	        $q .= ($q ? "&" : "") . "ls2=$last2";
+        	$q .= ($q ? "&" : "") . "ls2=$last2";
+          $userQuery->whereBetween('u.last_access', [$last, $last2]);
         }
         else
         {
@@ -659,9 +658,9 @@ if (count($_GET) > 0 && !$_GET['h'])
         }
       }
       elseif ($lasttype == "1")
-    		$where_is .= "< '$last'";
+    		$userQuery->where('u.last_access', '<', $last);
       elseif ($lasttype == "2")
-      	$where_is .= "> '$last'";
+      	$userQuery->where('u.last_access', '>', $last);
     }
   }
 
@@ -669,11 +668,7 @@ if (count($_GET) > 0 && !$_GET['h'])
   $status = $_GET['st'];
   if ($status)
   {
-  	$where_is .= ((isset($where_is))?" AND ":"");
-    if ($status == "1")
-    	$where_is .= "u.status = 'confirmed'";
-    else
-    	$where_is .= "u.status = 'pending'";
+  	$userQuery->where('u.status', $status == "1" ? 'confirmed' : 'pending');
     $q .= ($q ? "&" : "") . "st=$status";
   }
 
@@ -681,11 +676,7 @@ if (count($_GET) > 0 && !$_GET['h'])
   $accountstatus = $_GET['as'];
   if ($accountstatus)
   {
-  	$where_is .= (isset($where_is))?" AND ":"";
-    if ($accountstatus == "1")
-    	$where_is .= " u.enabled = 'yes'";
-    else
-    	$where_is .= " u.enabled = 'no'";
+  	$userQuery->where('u.enabled', $accountstatus == "1" ? 'yes' : 'no');
     $q .= ($q ? "&" : "") . "as=$accountstatus";
   }
 
@@ -693,11 +684,7 @@ if (count($_GET) > 0 && !$_GET['h'])
 	$donor = $_GET['do'];
   if ($donor)
   {
-		$where_is .= (isset($where_is))?" AND ":"";
-    if ($donor == 1)
-    	$where_is .= " u.donor = 'yes'";
-    else
-    	$where_is .= " u.donor = 'no'";
+		$userQuery->where('u.donor', $donor == 1 ? 'yes' : 'no');
     $q .= ($q ? "&" : "") . "do=$donor";
   }
 
@@ -705,11 +692,7 @@ if (count($_GET) > 0 && !$_GET['h'])
 	$warned = $_GET['w'];
   if ($warned)
   {
-		$where_is .= (isset($where_is))?" AND ":"";
-    if ($warned == 1)
-    	$where_is .= " u.warned = 'yes'";
-    else
-    	$where_is .= " u.warned = 'no'";
+		$userQuery->where('u.warned', $warned == 1 ? 'yes' : 'no');
     $q .= ($q ? "&" : "") . "w=$warned";
   }
 
@@ -717,9 +700,7 @@ if (count($_GET) > 0 && !$_GET['h'])
   $disabled = $_GET['dip'];
   if ($disabled)
   {
-  	$distinct = "DISTINCT ";
-    $join_is .= " LEFT JOIN users AS u2 ON u.ip = u2.ip";
-		$where_is .= ((isset($where_is))?" AND ":"")."u2.enabled = 'no'";
+    $userQuery->leftJoin('users as u2', 'u.ip', '=', 'u2.ip')->where('u2.enabled', 'no');
     $q .= ($q ? "&" : "") . "dip=$disabled";
   }
 
@@ -727,38 +708,22 @@ if (count($_GET) > 0 && !$_GET['h'])
   $active = $_GET['ac'];
   if ($active == "1")
   {
-  	$distinct = "DISTINCT ";
-    $join_is .= " LEFT JOIN peers AS p ON u.id = p.userid";
+    $userQuery->leftJoin('peers as p', 'u.id', '=', 'p.userid');
     $q .= ($q ? "&" : "") . "ac=$active";
   }
 
+$select_is = "u.id, u.username, u.email, u.status, u.added, u.last_access, u.ip,
+	u.class, u.uploaded, u.downloaded, u.donor, u.modcomment, u.enabled, u.warned";
 
-  $from_is = "users AS u".$join_is;
-  $distinct = isset($distinct)?$distinct:"";
+$count = (int) (clone $userQuery)->selectRaw('count(distinct u.id) as count')->value('count');
 
-  $queryc = "SELECT COUNT(".$distinct."u.id) AS count FROM ".$from_is.
-  		(($where_is == "")?"":" WHERE $where_is ");
+$q = isset($q)?($q."&"):"";
 
-  $querypm = "FROM ".$from_is.(($where_is == "")?" ":" WHERE $where_is ");
+$perpage = 30;
 
-  $select_is = "u.id, u.username, u.email, u.status, u.added, u.last_access, u.ip,
-  	u.class, u.uploaded, u.downloaded, u.donor, u.modcomment, u.enabled, u.warned";
+list($pagertop, $pagerbottom, , $offset, $rpp, ) = pager($perpage, $count, $_SERVER["REQUEST_URI"]."?".$q);
 
-  $query = "SELECT ".$distinct." ".$select_is." ".$querypm;
-
-  $res = \Nexus\Database\NexusDB::select($queryc);
-  $arr = (array) $res[0];
-  $count = $arr['count'] ?? 0;
-
-  $q = isset($q)?($q."&"):"";
-
-  $perpage = 30;
-
-  list($pagertop, $pagerbottom, $limit) = pager($perpage, $count, $_SERVER["REQUEST_URI"]."?".$q);
-
-  $query .= $limit;
-
-  $res = \Nexus\Database\NexusDB::select($query);
+$res = (clone $userQuery)->distinct()->selectRaw($select_is)->offset($offset)->limit($rpp)->get()->map(fn ($row) => (array)$row)->all();
 
   if (count($res) == 0)
   	stdmsg("Warning","No user was found.");

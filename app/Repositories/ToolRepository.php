@@ -30,6 +30,11 @@ class ToolRepository extends BaseRepository
 
     const BACKUP_RETENTION_COUNT_DEFAULT = 10;
 
+    /**
+     * @param  mixed  $method
+     * @param  mixed  $transfer
+     * @return  array<int|string, mixed>
+     */
     public function backupWeb($method = null, $transfer = false): array
     {
         $webRoot = base_path();
@@ -88,6 +93,10 @@ class ToolRepository extends BaseRepository
         return $this->transfer($filename, $result_code);
     }
 
+    /**
+     * @param  mixed  $transfer
+     * @return  array<int|string, mixed>
+     */
     public function backupDatabase($transfer = false): array
     {
         $connectionName = config('database.default');
@@ -115,6 +124,11 @@ class ToolRepository extends BaseRepository
         return $this->transfer($filename, $result_code);
     }
 
+    /**
+     * @param  mixed  $method
+     * @param  mixed  $transfer
+     * @return  array<int|string, mixed>
+     */
     public function backupAll($method = null, $transfer = false): array
     {
         $backupWeb = $this->backupWeb($method);
@@ -177,8 +191,8 @@ class ToolRepository extends BaseRepository
 
     /**
      * do backup cronjob
-     *
-     * @return array|false
+     * @param  mixed  $force
+     * @return  bool|array<int|string, mixed>
      */
     public function cronjobBackup($force = false): bool|array
     {
@@ -222,6 +236,12 @@ class ToolRepository extends BaseRepository
         return $backupResult;
     }
 
+    /**
+     * @param  mixed  $filename
+     * @param  mixed  $result_code
+     * @param  mixed  $setting
+     * @return  array<int|string, mixed>
+     */
     public function transfer($filename, $result_code, $setting = null): array
     {
         if ($result_code != 0) {
@@ -242,6 +262,10 @@ class ToolRepository extends BaseRepository
         return $result;
     }
 
+    /**
+     * @param  array<int|string, mixed>  $setting
+     * @param  mixed  $filename
+     */
     private function saveToFtp(array $setting, $filename): bool|string
     {
         if ($setting['via_ftp'] !== 'yes') {
@@ -264,6 +288,10 @@ class ToolRepository extends BaseRepository
 
     }
 
+    /**
+     * @param  array<int|string, mixed>  $setting
+     * @param  mixed  $filename
+     */
     public function saveToSftp(array $setting, $filename): bool|string
     {
         if ($setting['via_sftp'] !== 'yes') {
@@ -285,6 +313,10 @@ class ToolRepository extends BaseRepository
         return $this->doTransfer($disk, $filename);
     }
 
+    /**
+     * @param  \Illuminate\Filesystem\FilesystemAdapter  $remoteFilesystem
+     * @param  mixed  $filename
+     */
     private function doTransfer(\Illuminate\Filesystem\FilesystemAdapter $remoteFilesystem, $filename): bool|string
     {
         $localAdapter = new \League\Flysystem\Local\LocalFilesystemAdapter('/');
@@ -303,6 +335,7 @@ class ToolRepository extends BaseRepository
         }
     }
 
+    /** @param  mixed  $basename */
     private function cleanupBackupFiles($basename): void
     {
         $nameParts = explode('.', $basename);
@@ -332,10 +365,11 @@ class ToolRepository extends BaseRepository
     }
 
     /**
-     * @param $to
-     * @param $subject
-     * @param $body
-     * @return bool
+     * @param  mixed  $to
+     * @param  mixed  $subject
+     * @param  mixed  $body
+     * @param  mixed  $exception
+     * @return  bool
      */
     public function sendMail($to, $subject, $body, $exception = false): bool
     {
@@ -384,6 +418,10 @@ class ToolRepository extends BaseRepository
         }
     }
 
+    /**
+     * @param  \App\Models\User  $user
+     * @return  array<int|string, mixed>
+     */
     public function getNotificationCount(User $user): array
     {
         $result = [];
@@ -408,6 +446,10 @@ class ToolRepository extends BaseRepository
         return $result;
     }
 
+    /**
+     * @param  mixed  $class
+     * @return  array<int|string, mixed>
+     */
     public static function listUserClassPermissions($class): array
     {
         $settings = Setting::get('authority');
@@ -420,6 +462,10 @@ class ToolRepository extends BaseRepository
         return $result;
     }
 
+    /**
+     * @param  mixed  $uid
+     * @return  array<int|string, mixed>
+     */
     public static function listUserAllPermissions($uid): array
     {
         static $uidPermissionsCached = [];
@@ -446,6 +492,13 @@ class ToolRepository extends BaseRepository
         return $result;
     }
 
+    /**
+     * @param  array<int|string, mixed>  $hashArr
+     * @param  int  $total
+     * @param  int  $left
+     * @param  int  $deep
+     * @return  array<int|string, mixed>
+     */
     public function generateUniqueInviteHash(array $hashArr, int $total, int $left, int $deep = 0): array
     {
         do_log("total: $total, left: $left, deep: $deep");
@@ -467,6 +520,7 @@ class ToolRepository extends BaseRepository
 
     }
 
+    /** @return  mixed */
     public function removeDuplicateSnatch()
     {
         $size = 2000;
@@ -511,6 +565,7 @@ class ToolRepository extends BaseRepository
         }
     }
 
+    /** @return  mixed */
     public function removeDuplicatePeer()
     {
         $size = 2000;
@@ -541,6 +596,12 @@ class ToolRepository extends BaseRepository
         }
     }
 
+    /**
+     * @param  string  $subjectTransKey
+     * @param  array<int|string, mixed>  $subjectTransContext
+     * @param  string  $msgTransKey
+     * @param  array<int|string, mixed>  $msgTransContext
+     */
     public function sendAlarmEmail(string $subjectTransKey, array $subjectTransContext, string $msgTransKey, array $msgTransContext): void
     {
         $receiverUid = get_setting("system.alarm_email_receiver");

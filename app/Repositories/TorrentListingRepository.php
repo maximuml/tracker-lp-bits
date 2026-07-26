@@ -7,9 +7,7 @@ use Nexus\Database\NexusDB;
 
 class TorrentListingRepository
 {
-    /**
-     * @param array{where: string, join_users: bool, join_torrent_tags: bool, tag_id: int|null, join_torrent_extras: bool} $options
-     */
+    /** @param  array<int|string, mixed>  $options */
     public static function getCount(array $options): int
     {
         $query = self::buildBaseQuery($options);
@@ -18,8 +16,8 @@ class TorrentListingRepository
     }
 
     /**
-     * @param array{where: string, join_users: bool, join_torrent_tags: bool, tag_id: int|null, join_torrent_extras: bool, fields: array<int, string>, search_box_id: int, order_by: string, offset: int, limit: int} $options
-     * @return array<int, array<string, mixed>>
+     * @param  array<int|string, mixed>  $options
+     * @return  array<int|string, mixed>
      */
     public static function getList(array $options): array
     {
@@ -37,8 +35,8 @@ class TorrentListingRepository
     }
 
     /**
-     * @param array{where?: string, join_users?: bool, join_torrent_tags?: bool, tag_id?: int|null, join_torrent_extras?: bool, fields?: array<int, string>} $options
-     * @return \Illuminate\Database\Query\Builder
+     * @param  array<int|string, mixed>  $options
+     * @return  \Illuminate\Database\Query\Builder
      */
     private static function buildBaseQuery(array $options): \Illuminate\Database\Query\Builder
     {
@@ -69,7 +67,8 @@ class TorrentListingRepository
     }
 
     /**
-     * @return array<int, array{keywords: mixed, count: mixed}>
+     * @param  int  $secondsBack
+     * @return  array<int|string, mixed>
      */
     public static function getHotSearch(int $secondsBack = 259200): array
     {
@@ -85,6 +84,7 @@ class TorrentListingRepository
             ->all();
     }
 
+    /** @param  int  $secondsBack */
     public static function cleanupSuggest(int $secondsBack = 518400): void
     {
         NexusDB::table('suggest')

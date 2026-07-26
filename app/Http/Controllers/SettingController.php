@@ -12,8 +12,13 @@ use Illuminate\Validation\Rule;
 
 class SettingController extends Controller
 {
+    /** @var  mixed */
     private $repository;
 
+    /**
+     * @param  \App\Repositories\SettingRepository  $repository
+     * @return  mixed
+     */
     public function __construct(SettingRepository $repository)
     {
         $this->repository = $repository;
@@ -21,9 +26,8 @@ class SettingController extends Controller
 
     /**
      * Display a listing of the resource.
-     *
-     * @param Request $request
-     * @return array
+     * @param  \Illuminate\Http\Request  $request
+     * @return  array<string, mixed>
      */
     public function index(Request $request)
     {
@@ -33,9 +37,8 @@ class SettingController extends Controller
 
     /**
      * Store a newly created resource in storage.
-     *
      * @param  \Illuminate\Http\Request  $request
-     * @return array
+     * @return  array<string, mixed>
      */
     public function store(Request $request)
     {
@@ -48,9 +51,8 @@ class SettingController extends Controller
 
     /**
      * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return array
+     * @param  mixed  $id
+     * @return  array<int|string, mixed>
      */
     public function show($id)
     {
@@ -61,10 +63,9 @@ class SettingController extends Controller
 
     /**
      * Update the specified resource in storage.
-     *
      * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return array
+     * @param  mixed  $id
+     * @return  array<int|string, mixed>
      */
     public function update(Request $request, $id)
     {
@@ -75,9 +76,8 @@ class SettingController extends Controller
 
     /**
      * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return array
+     * @param  mixed  $id
+     * @return  array<int|string, mixed>
      */
     public function destroy($id)
     {
@@ -86,6 +86,10 @@ class SettingController extends Controller
         return [];
     }
 
+    /**
+     * @param  mixed  $prefix
+     * @return  array<int|string, mixed>
+     */
     private function getRules($prefix): array
     {
         $allRules = [

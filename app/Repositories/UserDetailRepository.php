@@ -8,7 +8,8 @@ use Nexus\Database\NexusDB;
 class UserDetailRepository
 {
     /**
-     * @return array<string, mixed>|null
+     * @param  int  $id
+     * @return  ?array<int|string, mixed>
      */
     public static function getUser(int $id): ?array
     {
@@ -17,6 +18,10 @@ class UserDetailRepository
         return $user === null ? null : $user->toArray();
     }
 
+    /**
+     * @param  int  $userId
+     * @param  int  $friendId
+     */
     public static function isFriend(int $userId, int $friendId): bool
     {
         return NexusDB::table('friends')
@@ -25,6 +30,10 @@ class UserDetailRepository
             ->exists();
     }
 
+    /**
+     * @param  int  $userId
+     * @param  int  $blockId
+     */
     public static function isBlocked(int $userId, int $blockId): bool
     {
         return NexusDB::table('blocks')
@@ -33,6 +42,7 @@ class UserDetailRepository
             ->exists();
     }
 
+    /** @param  int  $userId */
     public static function getIplogCount(int $userId): int
     {
         return NexusDB::table('iplog')
@@ -42,7 +52,8 @@ class UserDetailRepository
     }
 
     /**
-     * @return array<int, array<string, mixed>>
+     * @param  int  $userId
+     * @return  array<int|string, mixed>
      */
     public static function getPeers(int $userId): array
     {
@@ -56,7 +67,8 @@ class UserDetailRepository
     }
 
     /**
-     * @return array{uploaded: int, downloaded: int}
+     * @param  int  $userId
+     * @return  array<int|string, mixed>
      */
     public static function getTrueTraffic(int $userId): array
     {
@@ -77,7 +89,8 @@ class UserDetailRepository
     }
 
     /**
-     * @return array{id: int, username: string}|null
+     * @param  int  $warnedBy
+     * @return  ?array<int|string, mixed>
      */
     public static function getWarnedBy(int $warnedBy): ?array
     {

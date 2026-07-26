@@ -19,13 +19,17 @@ class TorrentResource extends BaseResource
 {
     const NAME = 'torrent';
 
+    /** @var  TorrentRepository */
+    /** @var  TorrentRepository */
+    /** @var  TorrentRepository */
+    /** @var  TorrentRepository */
+    /** @var  TorrentRepository */
     protected static TorrentRepository $torrentRep;
 
     /**
      * Transform the resource into an array.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return array
+     * @param  mixed  $request
+     * @return  array<int|string, mixed>
      */
     public function toArray($request)
     {
@@ -94,6 +98,10 @@ class TorrentResource extends BaseResource
         return self::NAME;
     }
 
+    /**
+     * @param  mixed  $matches
+     * @return  mixed
+     */
     protected function hex_esc($matches) {
         return sprintf("%02x", ord($matches[0]));
     }

@@ -12,6 +12,11 @@ use Illuminate\Validation\UnauthorizedException;
 
 class AuthenticateRepository extends BaseRepository
 {
+    /**
+     * @param  mixed  $username
+     * @param  mixed  $password
+     * @return  mixed
+     */
     public function login($username, $password)
     {
         $user = User::query()
@@ -35,6 +40,10 @@ class AuthenticateRepository extends BaseRepository
         return $result;
     }
 
+    /**
+     * @param  mixed  $id
+     * @return  mixed
+     */
     public function logout($id)
     {
         $user = User::query()->findOrFail($id, ['id']);
@@ -42,6 +51,10 @@ class AuthenticateRepository extends BaseRepository
         return $result;
     }
 
+    /**
+     * @param  string  $json
+     * @return  mixed
+     */
     public function nasToolsApprove(string $json)
     {
         $key = config('nexus.nas_tools_key');
@@ -63,6 +76,12 @@ class AuthenticateRepository extends BaseRepository
         return $user;
     }
 
+    /**
+     * @param  mixed  $token
+     * @param  mixed  $id
+     * @param  mixed  $verity
+     * @return  mixed
+     */
     public function iyuuApprove($token, $id, $verity)
     {
         $secret = config('nexus.iyuu_secret');
@@ -75,6 +94,10 @@ class AuthenticateRepository extends BaseRepository
         return true;
     }
 
+    /**
+     * @param  \Illuminate\Http\Request  $request
+     * @return  mixed
+     */
     public function ammdsApprove(Request $request)
     {
         $now = Carbon::now();

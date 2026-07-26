@@ -10,23 +10,37 @@ use Nexus\Database\NexusDB;
 
 class TagRepository extends BaseRepository
 {
+    /** @var  mixed */
     private static $orderByFieldIdString;
 
     /** @var \Illuminate\Database\Eloquent\Collection<int, Tag>|null */
     private static $allTags;
 
+    /**
+     * @param  array<int|string, mixed>  $params
+     * @return  mixed
+     */
     public function getList(array $params)
     {
         $query = $this->createBasicQuery();
         return $query->paginate();
     }
 
+    /**
+     * @param  array<int|string, mixed>  $params
+     * @return  mixed
+     */
     public function store(array $params)
     {
         $model = Tag::query()->create($params);
         return $model;
     }
 
+    /**
+     * @param  array<int|string, mixed>  $params
+     * @param  mixed  $id
+     * @return  mixed
+     */
     public function update(array $params, $id)
     {
         $model = Tag::query()->findOrFail($id);
@@ -34,12 +48,20 @@ class TagRepository extends BaseRepository
         return $model;
     }
 
+    /**
+     * @param  mixed  $id
+     * @return  mixed
+     */
     public function getDetail($id)
     {
         $model = Tag::query()->findOrFail($id);
         return $model;
     }
 
+    /**
+     * @param  mixed  $id
+     * @return  mixed
+     */
     public function delete($id)
     {
         $model = Tag::query()->findOrFail($id);
@@ -47,11 +69,17 @@ class TagRepository extends BaseRepository
         return $result;
     }
 
+    /** @return  mixed */
     public static function createBasicQuery()
     {
         return Tag::query()->orderBy('priority', 'desc')->orderBy('id', 'desc');
     }
 
+    /**
+     * @param  int  $searchBoxId
+     * @param  array<int|string, mixed>  $checked
+     * @param  mixed  $ignorePermission
+     */
     public function renderCheckbox(int $searchBoxId, array $checked = [], $ignorePermission = false): string
     {
         $html = '';
@@ -69,6 +97,11 @@ class TagRepository extends BaseRepository
         return $html;
     }
 
+    /**
+     * @param  int  $searchBoxId
+     * @param  array<int|string, mixed>  $renderIdArr
+     * @param  mixed  $withFilterLink
+     */
     public function renderSpan(int $searchBoxId, array $renderIdArr = [], $withFilterLink = false): string
     {
         $html = '';
@@ -89,6 +122,7 @@ class TagRepository extends BaseRepository
         return $html;
     }
 
+    /** @return  mixed */
     public function migrateTorrentTag()
     {
         $page = 1;
@@ -150,7 +184,8 @@ class TagRepository extends BaseRepository
     }
 
     /**
-     * @return EloquentCollection<int, Tag>
+     * @param  int  $searchBoxId
+     * @return  \Illuminate\Database\Eloquent\Collection<int, Tag>
      */
     public static function listAll(int $searchBoxId = 0): EloquentCollection
     {
@@ -164,6 +199,11 @@ class TagRepository extends BaseRepository
     }
 
 
+    /**
+     * @param  int  $searchBoxId
+     * @param  mixed  $name
+     * @param  mixed  $value
+     */
     public function buildSelect(int $searchBoxId, $name, $value): string
     {
         $list = $this->listAll($searchBoxId);

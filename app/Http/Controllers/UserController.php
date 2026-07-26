@@ -19,8 +19,13 @@ use League\OAuth2\Server\Grant\AuthCodeGrant;
 
 class UserController extends Controller
 {
+    /** @var  mixed */
     private $repository;
 
+    /**
+     * @param  \App\Repositories\UserRepository  $repository
+     * @return  mixed
+     */
     public function __construct(UserRepository $repository)
     {
         $this->repository = $repository;
@@ -28,9 +33,8 @@ class UserController extends Controller
 
     /**
      * Display a listing of the resource.
-     *
-     * @param Request $request
-     * @return array
+     * @param  \Illuminate\Http\Request  $request
+     * @return  array<string, mixed>
      */
     public function index(Request $request)
     {
@@ -41,9 +45,8 @@ class UserController extends Controller
 
     /**
      * Store a newly created resource in storage.
-     *
      * @param  \Illuminate\Http\Request  $request
-     * @return array
+     * @return  array<string, mixed>
      */
     public function store(Request $request)
     {
@@ -61,9 +64,8 @@ class UserController extends Controller
 
     /**
      * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return array
+     * @param  mixed  $id
+     * @return  array<string, mixed>
      */
     public function show($id = null)
     {
@@ -78,10 +80,9 @@ class UserController extends Controller
 
     /**
      * Update the specified resource in storage.
-     *
      * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @param  mixed  $id
+     * @return  \Illuminate\Http\Response
      */
     public function update(Request $request, $id)
     {
@@ -92,9 +93,8 @@ class UserController extends Controller
 
     /**
      * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @param  mixed  $id
+     * @return  \Illuminate\Http\Response
      */
     public function destroy($id)
     {
@@ -103,6 +103,10 @@ class UserController extends Controller
         return new \Illuminate\Http\Response('');
     }
 
+    /**
+     * @param  \Illuminate\Http\Request  $request
+     * @return  array<string, mixed>
+     */
     public function resetPassword(Request $request)
     {
         $rules = [
@@ -115,12 +119,14 @@ class UserController extends Controller
         return $this->success($result, 'Reset password success!');
     }
 
+    /** @return  array<string, mixed> */
     public function classes()
     {
         $result = $this->repository->listClass();
         return $this->success($result);
     }
 
+    /** @return  array<string, mixed> */
     public function base()
     {
         $id = Auth::id();
@@ -129,6 +135,10 @@ class UserController extends Controller
         return $this->success($resource);
     }
 
+    /**
+     * @param  \Illuminate\Http\Request  $request
+     * @return  array<string, mixed>
+     */
     public function matchExams(Request $request)
     {
         $request->validate([
@@ -140,6 +150,10 @@ class UserController extends Controller
         return $this->success($resource);
     }
 
+    /**
+     * @param  \Illuminate\Http\Request  $request
+     * @return  array<string, mixed>
+     */
     public function disable(Request $request)
     {
         $request->validate([
@@ -150,6 +164,10 @@ class UserController extends Controller
         return $this->success($result, 'Disable user success!');
     }
 
+    /**
+     * @param  \Illuminate\Http\Request  $request
+     * @return  array<string, mixed>
+     */
     public function enable(Request $request)
     {
         $request->validate([
@@ -159,6 +177,10 @@ class UserController extends Controller
         return $this->success($result, 'Enable user success!');
     }
 
+    /**
+     * @param  \Illuminate\Http\Request  $request
+     * @return  array<string, mixed>
+     */
     public function inviteInfo(Request $request)
     {
         $request->validate([
@@ -169,6 +191,10 @@ class UserController extends Controller
         return $this->success($resource);
     }
 
+    /**
+     * @param  \Illuminate\Http\Request  $request
+     * @return  array<string, mixed>
+     */
     public function modComment(Request $request)
     {
         $request->validate([
@@ -178,6 +204,7 @@ class UserController extends Controller
         return $this->success($result);
     }
 
+    /** @return  array<string, mixed> */
     public function me()
     {
         $user = Auth::user();
@@ -204,6 +231,10 @@ class UserController extends Controller
         return $this->success($resource);
     }
 
+    /**
+     * @param  mixed  $id
+     * @return  mixed
+     */
     private function getUserProfile($id)
     {
         $user = User::query()->withCount([
@@ -216,6 +247,10 @@ class UserController extends Controller
         return $resource;
     }
 
+    /**
+     * @param  \Illuminate\Http\Request  $request
+     * @return  mixed
+     */
     public function publishTorrent(Request $request)
     {
         $user = Auth::user();
@@ -228,6 +263,10 @@ class UserController extends Controller
 
     }
 
+    /**
+     * @param  \Illuminate\Http\Request  $request
+     * @return  mixed
+     */
     public function seedingTorrent(Request $request)
     {
         $user = Auth::user();
@@ -240,6 +279,10 @@ class UserController extends Controller
 
     }
 
+    /**
+     * @param  \Illuminate\Http\Request  $request
+     * @return  mixed
+     */
     public function LeechingTorrent(Request $request)
     {
         $user = Auth::user();
@@ -252,6 +295,10 @@ class UserController extends Controller
 
     }
 
+    /**
+     * @param  \Illuminate\Http\Request  $request
+     * @return  mixed
+     */
     public function finishedTorrent(Request $request)
     {
         $user = Auth::user();
@@ -268,6 +315,10 @@ class UserController extends Controller
 
     }
 
+    /**
+     * @param  \Illuminate\Http\Request  $request
+     * @return  mixed
+     */
     public function notFinishedTorrent(Request $request)
     {
         $user = Auth::user();
@@ -284,6 +335,10 @@ class UserController extends Controller
 
     }
 
+    /**
+     * @param  \Illuminate\Http\Request  $request
+     * @return  array<int|string, mixed>
+     */
     public function incrementDecrement(Request $request): array
     {
         $user = Auth::user();
@@ -297,6 +352,10 @@ class UserController extends Controller
         return $this->success(['success' => $result]);
     }
 
+    /**
+     * @param  \Illuminate\Http\Request  $request
+     * @return  array<int|string, mixed>
+     */
     public function removeTwoStepAuthentication(Request $request): array
     {
         $user = Auth::user();

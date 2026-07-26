@@ -5,6 +5,12 @@ use App\Models\Plugin;
 
 class PluginRepository extends BaseRepository
 {
+    /**
+     * @param  mixed  $action
+     * @param  mixed  $id
+     * @param  mixed  $force
+     * @return  mixed
+     */
     public function cronjob($action = null, $id = null, $force = false)
     {
         if ($action == 'install' || $action === null) {
@@ -18,6 +24,14 @@ class PluginRepository extends BaseRepository
         }
     }
 
+    /**
+     * @param  mixed  $action
+     * @param  mixed  $id
+     * @param  mixed  $force
+     * @param  mixed  $preStatus
+     * @param  mixed  $doingStatus
+     * @return  void
+     */
     private function doCronjob($action, $id, $force, $preStatus, $doingStatus)
     {
         $query = Plugin::query();
@@ -44,6 +58,10 @@ class PluginRepository extends BaseRepository
         }
     }
 
+    /**
+     * @param  \App\Models\Plugin  $plugin
+     * @return  mixed
+     */
     public function doInstall(Plugin $plugin)
     {
         $plugin->update(['status' => Plugin::STATUS_INSTALLING]);
@@ -71,6 +89,10 @@ class PluginRepository extends BaseRepository
 
     }
 
+    /**
+     * @param  \App\Models\Plugin  $plugin
+     * @return  mixed
+     */
     public function doDelete(Plugin $plugin)
     {
         $plugin->update(['status' => Plugin::STATUS_DELETING]);
@@ -101,6 +123,10 @@ class PluginRepository extends BaseRepository
 
     }
 
+    /**
+     * @param  \App\Models\Plugin  $plugin
+     * @return  mixed
+     */
     public function doUpdate(Plugin $plugin)
     {
         $plugin->update(['status' => Plugin::STATUS_UPDATING]);
@@ -127,11 +153,19 @@ class PluginRepository extends BaseRepository
 
     }
 
+    /**
+     * @param  \App\Models\Plugin  $plugin
+     * @return  mixed
+     */
     private function getRepositoryKey(Plugin $plugin)
     {
         return str_replace("xiaomlove/nexusphp-", "", $plugin->package_name);
     }
 
+    /**
+     * @param  \App\Models\Plugin  $plugin
+     * @return  mixed
+     */
     private function execComposerConfig(Plugin $plugin)
     {
         $command = sprintf("composer config repositories.%s git %s", $this->getRepositoryKey($plugin), $plugin->remote_url);
@@ -139,6 +173,10 @@ class PluginRepository extends BaseRepository
         return $this->executeCommand($command);
     }
 
+    /**
+     * @param  \App\Models\Plugin  $plugin
+     * @return  mixed
+     */
     private function execComposerRequire(Plugin $plugin)
     {
         $command = sprintf("composer require %s", $plugin->package_name);
@@ -146,6 +184,10 @@ class PluginRepository extends BaseRepository
         return $this->executeCommand($command);
     }
 
+    /**
+     * @param  \App\Models\Plugin  $plugin
+     * @return  mixed
+     */
     private function execComposerRemove(Plugin $plugin)
     {
         $command = sprintf("composer remove %s", $plugin->package_name);
@@ -153,6 +195,10 @@ class PluginRepository extends BaseRepository
         return $this->executeCommand($command);
     }
 
+    /**
+     * @param  \App\Models\Plugin  $plugin
+     * @return  mixed
+     */
     private function execComposerUpdate(Plugin $plugin)
     {
         $command = sprintf("composer update %s", $plugin->package_name);
@@ -160,6 +206,10 @@ class PluginRepository extends BaseRepository
         return $this->executeCommand($command);
     }
 
+    /**
+     * @param  \App\Models\Plugin  $plugin
+     * @return  mixed
+     */
     private function execPluginInstall(Plugin $plugin)
     {
         $command = sprintf("php artisan plugin install %s", $plugin->package_name);
@@ -167,6 +217,11 @@ class PluginRepository extends BaseRepository
         return $this->executeCommand($command);
     }
 
+    /**
+     * @param  \App\Models\Plugin  $plugin
+     * @param  array<int|string, mixed>  $update
+     * @return  mixed
+     */
     private function updateResult(Plugin $plugin, array $update)
     {
         $update['status_result'] = $update['status_result'] . "\n\nREQUEST_ID: " . nexus()->getRequestId();
@@ -174,6 +229,10 @@ class PluginRepository extends BaseRepository
         $plugin->update($update);
     }
 
+    /**
+     * @param  mixed  $packageName
+     * @return  mixed
+     */
     public function getInstalledVersion($packageName)
     {
         $command = sprintf('composer info |grep -E %s', $packageName);

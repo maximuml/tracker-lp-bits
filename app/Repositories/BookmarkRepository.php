@@ -9,6 +9,11 @@ use App\Models\User;
 
 class BookmarkRepository extends BaseRepository
 {
+    /**
+     * @param  \App\Models\User  $user
+     * @param  mixed  $torrentId
+     * @return  mixed
+     */
     public function add(User $user, $torrentId)
     {
         $torrent = Torrent::query()->find($torrentId);
@@ -24,6 +29,11 @@ class BookmarkRepository extends BaseRepository
         return $result;
     }
 
+    /**
+     * @param  \App\Models\User  $user
+     * @param  mixed  $torrentId
+     * @return  mixed
+     */
     public function remove(User $user, $torrentId)
     {
         /**

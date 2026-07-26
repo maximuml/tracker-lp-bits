@@ -8,6 +8,10 @@ use Illuminate\Support\Facades\DB;
 
 class PollRepository extends BaseRepository
 {
+    /**
+     * @param  array<int|string, mixed>  $params
+     * @return  mixed
+     */
     public function getList(array $params)
     {
         $query = Poll::query();
@@ -16,6 +20,12 @@ class PollRepository extends BaseRepository
         return $query->paginate();
     }
 
+    /**
+     * @param  mixed  $torrentId
+     * @param  mixed  $value
+     * @param  \App\Models\User  $user
+     * @return  mixed
+     */
     public function store($torrentId, $value, User $user)
     {
         if ($user->seedbonus < $value) {
@@ -45,6 +55,11 @@ class PollRepository extends BaseRepository
         });
     }
 
+    /**
+     * @param  array<int|string, mixed>  $params
+     * @param  mixed  $id
+     * @return  mixed
+     */
     public function update(array $params, $id)
     {
         $model = Poll::query()->findOrFail($id);
@@ -52,12 +67,20 @@ class PollRepository extends BaseRepository
         return $model;
     }
 
+    /**
+     * @param  mixed  $id
+     * @return  mixed
+     */
     public function getDetail($id)
     {
         $model = Poll::query()->findOrFail($id);
         return $model;
     }
 
+    /**
+     * @param  mixed  $id
+     * @return  mixed
+     */
     public function delete($id)
     {
         $model = Poll::query()->findOrFail($id);
@@ -65,6 +88,11 @@ class PollRepository extends BaseRepository
         return $result;
     }
 
+    /**
+     * @param  mixed  $selection
+     * @param  \App\Models\User  $user
+     * @return  mixed
+     */
     public function vote($selection, User $user)
     {
 

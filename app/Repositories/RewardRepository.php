@@ -9,6 +9,10 @@ use Illuminate\Support\Facades\DB;
 
 class RewardRepository extends BaseRepository
 {
+    /**
+     * @param  array<int|string, mixed>  $params
+     * @return  mixed
+     */
     public function getList(array $params)
     {
         $query = Reward::query()->with(['user']);
@@ -20,6 +24,12 @@ class RewardRepository extends BaseRepository
         return $query->paginate();
     }
 
+    /**
+     * @param  mixed  $torrentId
+     * @param  mixed  $value
+     * @param  \App\Models\User  $user
+     * @return  mixed
+     */
     public function store($torrentId, $value, User $user)
     {
         if ($user->seedbonus < $value) {
@@ -60,6 +70,11 @@ class RewardRepository extends BaseRepository
         });
     }
 
+    /**
+     * @param  array<int|string, mixed>  $params
+     * @param  mixed  $id
+     * @return  mixed
+     */
     public function update(array $params, $id)
     {
         $model = Reward::query()->findOrFail($id);
@@ -67,12 +82,20 @@ class RewardRepository extends BaseRepository
         return $model;
     }
 
+    /**
+     * @param  mixed  $id
+     * @return  mixed
+     */
     public function getDetail($id)
     {
         $model = Reward::query()->findOrFail($id);
         return $model;
     }
 
+    /**
+     * @param  mixed  $id
+     * @return  mixed
+     */
     public function delete($id)
     {
         $model = Reward::query()->findOrFail($id);

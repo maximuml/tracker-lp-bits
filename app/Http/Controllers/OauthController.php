@@ -17,10 +17,9 @@ class OauthController extends Controller
 {
     /**
      * client redirect to authorization server, use oauth_providers config
-     *
-     * @param Request $request
-     * @param string $uuid
-     * @return \Illuminate\Foundation\Application|\Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
+     * @param  \Illuminate\Http\Request  $request
+     * @param  string  $uuid
+     * @return  \Illuminate\Foundation\Application|\Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
      */
     public function redirect(Request $request, string $uuid)
     {
@@ -45,6 +44,7 @@ class OauthController extends Controller
 
     }
 
+    /** @param  \App\Models\OauthProvider  $provider */
     private function getCallbackUrl(OauthProvider $provider): string
     {
         return OauthProvider::getCallbackUrl($provider->uuid);
@@ -53,10 +53,9 @@ class OauthController extends Controller
     /**
      * authorization server redirect to this url with auth code after user authorized
      * and then use auth code to request to authorization server token endpoint url to get access token
-     *
-     * @param Request $request
-     * @param string $uuid
-     * @return array|mixed
+     * @param  \Illuminate\Http\Request  $request
+     * @param  string  $uuid
+     * @return  array<int|string, mixed>|mixed
      * @throws \Illuminate\Http\Client\ConnectionException
      * @throws \Throwable
      */
@@ -143,6 +142,11 @@ class OauthController extends Controller
         return redirect($homeUrl);
     }
 
+    /**
+     * @param  mixed  $username
+     * @param  mixed  $email
+     * @param  mixed  $providerId
+     */
     private function createUser($username, $email, $providerId): User
     {
         if ($username) {
@@ -173,12 +177,17 @@ class OauthController extends Controller
         throw new NexusException("Unable to create user");
     }
 
+    /**
+     * @param  \Illuminate\Http\Request  $request
+     * @return  mixed
+     */
     public function debug(Request $request)
     {
         dd($request->all());
     }
 
 
+    /** @return  array<int|string, mixed> */
     public function userInfo(): array
     {
         $user = Auth::user();

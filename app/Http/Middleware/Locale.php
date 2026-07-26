@@ -12,13 +12,17 @@ use Illuminate\Support\Facades\Cookie;
 
 class Locale
 {
+    /** @var  array<int|string, mixed> */
+    /** @var  array<int|string, mixed> */
+    /** @var  array<int|string, mixed> */
+    /** @var  array<int|string, mixed> */
+    /** @var  array<int|string, mixed> */
     public static array $languageMaps = [
         'en' => 'en',
     ];
 
     /**
      * Handle an incoming request.
-     *
      * @param  \Illuminate\Http\Request  $request
      * @param  \Closure  $next
      * @return mixed
@@ -44,6 +48,7 @@ class Locale
         return $response;
     }
 
+    /** @return  mixed */
     public static function getLocaleFromCookie()
     {
         if (IN_NEXUS) {
@@ -58,6 +63,7 @@ class Locale
         return self::$languageMaps[$lang] ?? 'en';
     }
 
+    /** @return  mixed */
     public static function getDefault()
     {
         $defaultLang = get_setting("main.defaultlang");

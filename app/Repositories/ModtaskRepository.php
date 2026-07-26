@@ -8,6 +8,10 @@ use Nexus\Database\NexusDB;
 
 class ModtaskRepository
 {
+    /**
+     * @param  int  $userId
+     * @param  string  $status
+     */
     public static function confirmUser(int $userId, string $status): void
     {
         User::query()->where('id', $userId)->update([
@@ -17,7 +21,8 @@ class ModtaskRepository
     }
 
     /**
-     * @return array<string, mixed>|null
+     * @param  int  $userId
+     * @return  ?array<int|string, mixed>
      */
     public static function getUserArray(int $userId): ?array
     {
@@ -26,6 +31,12 @@ class ModtaskRepository
         return $user === null ? null : $user->toArray();
     }
 
+    /**
+     * @param  int  $userId
+     * @param  float  $usd
+     * @param  float  $cny
+     * @param  string  $memo
+     */
     public static function addFund(int $userId, float $usd, float $cny, string $memo): void
     {
         NexusDB::table('funds')->insert([
@@ -38,7 +49,8 @@ class ModtaskRepository
     }
 
     /**
-     * @param array<string, mixed> $data
+     * @param  int  $userId
+     * @param  array<int|string, mixed>  $data
      */
     public static function updateUser(int $userId, array $data): int
     {
@@ -46,7 +58,8 @@ class ModtaskRepository
     }
 
     /**
-     * @param array<string, mixed> $extra
+     * @param  int  $userId
+     * @param  array<int|string, mixed>  $extra
      */
     public static function addWarning(int $userId, array $extra): void
     {

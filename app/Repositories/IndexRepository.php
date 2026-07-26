@@ -14,8 +14,8 @@ class IndexRepository
 {
     /**
      * Fetch the latest visible torrents with their category.
-     *
-     * @return Collection<int, Torrent>
+     * @param  int  $limit
+     * @return  \Illuminate\Database\Eloquent\Collection<int, Torrent>
      */
     public static function getLatestTorrents(int $limit = 9): Collection
     {
@@ -28,8 +28,9 @@ class IndexRepository
 
     /**
      * Fetch top uploaders ordered by uploaded torrent count.
-     *
-     * @return Collection<int, User>
+     * @param  int  $limit
+     * @param  ?int  $days
+     * @return  \Illuminate\Database\Eloquent\Collection<int, User>
      */
     public static function getTopUploaders(int $limit = 10, ?int $days = null): Collection
     {
@@ -50,9 +51,7 @@ class IndexRepository
         return $query->get(['id', 'username']);
     }
 
-    /**
-     * @return array<string, int>
-     */
+    /** @return  array<int|string, mixed> */
     public static function getUserStats(): array
     {
         $cutoffDay = Carbon::now()->subDay()->format('Y-m-d H:i:s');
@@ -72,9 +71,7 @@ class IndexRepository
         ];
     }
 
-    /**
-     * @return array<string, int|float>
-     */
+    /** @return  array<int|string, mixed> */
     public static function getTorrentStats(): array
     {
         $seeders = Peer::where('seeder', Peer::SEEDER_YES)->count();
@@ -97,9 +94,7 @@ class IndexRepository
         ];
     }
 
-    /**
-     * @return array<int, int>
-     */
+    /** @return  array<int|string, mixed> */
     public static function getClassStats(): array
     {
         return [
@@ -116,9 +111,7 @@ class IndexRepository
         ];
     }
 
-    /**
-     * @return array<string, mixed>|null
-     */
+    /** @return  ?array<int|string, mixed> */
     public static function getCurrentPoll(): ?array
     {
         $poll = Poll::query()->orderByDesc('id')->first();
@@ -126,11 +119,19 @@ class IndexRepository
         return $poll ? $poll->toArray() : null;
     }
 
+    /**
+     * @param  int  $pollId
+     * @param  int  $userId
+     */
     public static function hasVoted(int $pollId, int $userId): bool
     {
         return PollAnswer::where('pollid', $pollId)->where('userid', $userId)->exists();
     }
 
+    /**
+     * @param  int  $pollId
+     * @param  int  $userId
+     */
     public static function getUserVote(int $pollId, int $userId): ?int
     {
         $selection = PollAnswer::where('pollid', $pollId)->where('userid', $userId)->value('selection');
@@ -138,6 +139,11 @@ class IndexRepository
         return $selection === null ? null : (int) $selection;
     }
 
+    /**
+     * @param  int  $pollId
+     * @param  int  $userId
+     * @param  int  $choice
+     */
     public static function recordPollVote(int $pollId, int $userId, int $choice): bool
     {
         PollAnswer::create([
@@ -150,7 +156,8 @@ class IndexRepository
     }
 
     /**
-     * @return array<int, array{count: int, option: string, index: int}>
+     * @param  int  $pollId
+     * @return  array<int|string, mixed>
      */
     public static function getPollResults(int $pollId): array
     {

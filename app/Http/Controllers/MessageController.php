@@ -11,9 +11,8 @@ class MessageController extends Controller
 {
     /**
      * message list
-     *
-     * @param Request $request
-     * @return array
+     * @param  \Illuminate\Http\Request  $request
+     * @return  array<string, mixed>
      */
     public function index(Request $request)
     {
@@ -33,9 +32,8 @@ class MessageController extends Controller
 
     /**
      * Store a newly created resource in storage.
-     *
      * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @return  \Illuminate\Http\Response
      */
     public function store(Request $request)
     {
@@ -46,9 +44,8 @@ class MessageController extends Controller
 
     /**
      * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return array
+     * @param  mixed  $id
+     * @return  array<string, mixed>
      */
     public function show($id)
     {
@@ -64,10 +61,9 @@ class MessageController extends Controller
 
     /**
      * Update the specified resource in storage.
-     *
      * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @param  mixed  $id
+     * @return  \Illuminate\Http\Response
      */
     public function update(Request $request, $id)
     {
@@ -78,9 +74,8 @@ class MessageController extends Controller
 
     /**
      * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @param  mixed  $id
+     * @return  \Illuminate\Http\Response
      */
     public function destroy($id)
     {
@@ -89,6 +84,10 @@ class MessageController extends Controller
         return new \Illuminate\Http\Response('');
     }
 
+    /**
+     * @param  \Illuminate\Http\Request  $request
+     * @return  array<int|string, mixed>
+     */
     public function listUnread(Request $request): array
     {
         $user = Auth::user();
@@ -105,6 +104,7 @@ class MessageController extends Controller
         return $this->success($resource);
     }
 
+    /** @return  array<string, mixed> */
     public function countUnread()
     {
         $user = Auth::user();

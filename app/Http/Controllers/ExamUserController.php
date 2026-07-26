@@ -13,8 +13,13 @@ use Illuminate\Support\Facades\Auth;
 
 class ExamUserController extends Controller
 {
+    /** @var  mixed */
     private $repository;
 
+    /**
+     * @param  \App\Repositories\ExamRepository  $repository
+     * @return  mixed
+     */
     public function __construct(ExamRepository $repository)
     {
         $this->repository = $repository;
@@ -22,9 +27,8 @@ class ExamUserController extends Controller
 
     /**
      * Display a listing of the resource.
-     *
-     * @param Request $request
-     * @return array
+     * @param  \Illuminate\Http\Request  $request
+     * @return  array<string, mixed>
      */
     public function index(Request $request)
     {
@@ -38,9 +42,8 @@ class ExamUserController extends Controller
 
     /**
      * Store a newly created resource in storage.
-     *
      * @param  \Illuminate\Http\Request  $request
-     * @return array
+     * @return  array<string, mixed>
      */
     public function store(Request $request)
     {
@@ -59,9 +62,8 @@ class ExamUserController extends Controller
 
     /**
      * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return array
+     * @param  mixed  $id
+     * @return  array<int|string, mixed>
      */
     public function show($id)
     {
@@ -72,10 +74,9 @@ class ExamUserController extends Controller
 
     /**
      * Update the specified resource in storage.
-     *
      * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return array
+     * @param  mixed  $id
+     * @return  array<int|string, mixed>
      */
     public function update(Request $request, $id)
     {
@@ -86,9 +87,8 @@ class ExamUserController extends Controller
 
     /**
      * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return array
+     * @param  mixed  $id
+     * @return  array<string, mixed>
      */
     public function destroy($id)
     {
@@ -96,6 +96,10 @@ class ExamUserController extends Controller
         return $this->success($result, 'Remove user exam success!');
     }
 
+    /**
+     * @param  \Illuminate\Http\Request  $request
+     * @return  array<string, mixed>
+     */
     public function avoid(Request $request)
     {
         $request->validate(['id' => 'required']);
@@ -103,6 +107,10 @@ class ExamUserController extends Controller
         return $this->success($result, 'Avoid user exam success!');
     }
 
+    /**
+     * @param  \Illuminate\Http\Request  $request
+     * @return  array<string, mixed>
+     */
     public function recover(Request $request)
     {
         $request->validate(['id' => 'required']);
@@ -110,12 +118,20 @@ class ExamUserController extends Controller
         return $this->success($result, 'Recover user exam success!');
     }
 
+    /**
+     * @param  \Illuminate\Http\Request  $request
+     * @return  array<int|string, mixed>
+     */
     public function bulkAvoid(Request $request): array
     {
         $result = $this->repository->avoidExamUserBulk($request->all(), Auth::user());
         return $this->success(['result' => $result],"Affected: " . intval($result));
     }
 
+    /**
+     * @param  \Illuminate\Http\Request  $request
+     * @return  array<int|string, mixed>
+     */
     public function bulkDelete(Request $request): array
     {
         $result = $this->repository->removeExamUserBulk($request->all(), Auth::user());

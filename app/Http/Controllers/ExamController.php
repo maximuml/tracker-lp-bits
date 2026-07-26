@@ -15,8 +15,13 @@ use Illuminate\Validation\Rule;
 
 class ExamController extends Controller
 {
+    /** @var  mixed */
     private $repository;
 
+    /**
+     * @param  \App\Repositories\ExamRepository  $repository
+     * @return  mixed
+     */
     public function __construct(ExamRepository $repository)
     {
         $this->repository = $repository;
@@ -24,9 +29,8 @@ class ExamController extends Controller
 
     /**
      * Display a listing of the resource.
-     *
-     * @param Request $request
-     * @return array
+     * @param  \Illuminate\Http\Request  $request
+     * @return  array<string, mixed>
      */
     public function index(Request $request)
     {
@@ -40,9 +44,8 @@ class ExamController extends Controller
 
     /**
      * Store a newly created resource in storage.
-     *
      * @param  \Illuminate\Http\Request  $request
-     * @return array
+     * @return  array<string, mixed>
      */
     public function store(Request $request)
     {
@@ -62,9 +65,8 @@ class ExamController extends Controller
 
     /**
      * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return array
+     * @param  mixed  $id
+     * @return  array<string, mixed>
      */
     public function show($id)
     {
@@ -75,10 +77,9 @@ class ExamController extends Controller
 
     /**
      * Update the specified resource in storage.
-     *
      * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return array
+     * @param  mixed  $id
+     * @return  array<string, mixed>
      */
     public function update(Request $request, $id)
     {
@@ -98,9 +99,8 @@ class ExamController extends Controller
 
     /**
      * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return array
+     * @param  mixed  $id
+     * @return  array<string, mixed>
      */
     public function destroy($id)
     {
@@ -108,12 +108,14 @@ class ExamController extends Controller
         return $this->success($result, 'Delete exam success!');
     }
 
+    /** @return  array<string, mixed> */
     public function indexes()
     {
         $result = $this->repository->listIndexes();
         return $this->success($result);
     }
 
+    /** @return  array<string, mixed> */
     public function all()
     {
         $result = Exam::query()->orderBy('id', 'desc')->get();

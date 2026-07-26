@@ -20,13 +20,23 @@ use Illuminate\Support\Facades\Auth;
 
 class TorrentController extends Controller
 {
+    /** @var  mixed */
     private $repository;
 
+    /**
+     * @param  \App\Repositories\TorrentRepository  $repository
+     * @return  mixed
+     */
     public function __construct(TorrentRepository $repository)
     {
         $this->repository = $repository;
     }
 
+    /**
+     * @param  \Illuminate\Http\Request  $request
+     * @param  string  $section
+     * @return  array<string, mixed>
+     */
     public function index(Request $request, string $section = null)
     {
         do_log("controller torrent index entry");
@@ -39,9 +49,8 @@ class TorrentController extends Controller
 
     /**
      * Store a newly created resource in storage.
-     *
      * @param  \Illuminate\Http\Request  $request
-     * @return array
+     * @return  array<string, mixed>
      */
     public function store(Request $request)
     {
@@ -53,9 +62,8 @@ class TorrentController extends Controller
 
     /**
      * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return array
+     * @param  mixed  $id
+     * @return  array<string, mixed>
      */
     public function show($id)
     {
@@ -79,10 +87,9 @@ class TorrentController extends Controller
 
     /**
      * Update the specified resource in storage.
-     *
      * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @param  mixed  $id
+     * @return  \Illuminate\Http\Response
      */
     public function update(Request $request, $id)
     {
@@ -91,15 +98,15 @@ class TorrentController extends Controller
 
     /**
      * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @param  mixed  $id
+     * @return  \Illuminate\Http\Response
      */
     public function destroy($id)
     {
         return new Response('', 204);
     }
 
+    /** @return  array<string, mixed> */
     public function searchBox()
     {
         $result = $this->repository->getSearchBox();
@@ -107,6 +114,10 @@ class TorrentController extends Controller
         return $this->success($result);
     }
 
+    /**
+     * @param  \Illuminate\Http\Request  $request
+     * @return  mixed
+     */
     public function approvalPage(Request $request)
     {
         user_can('torrent-approval', true);
@@ -117,6 +128,10 @@ class TorrentController extends Controller
         return view('torrent/approval', compact('torrent', 'denyReasons'));
     }
 
+    /**
+     * @param  \Illuminate\Http\Request  $request
+     * @return  array<string, mixed>
+     */
     public function approvalLogs(Request $request)
     {
         user_can('torrent-approval', true);
@@ -139,6 +154,10 @@ class TorrentController extends Controller
         return $this->success($resource);
     }
 
+    /**
+     * @param  \Illuminate\Http\Request  $request
+     * @return  array<string, mixed>
+     */
     public function approval(Request $request)
     {
         user_can('torrent-approval', true);
@@ -151,6 +170,10 @@ class TorrentController extends Controller
         return $this->success($params);
     }
 
+    /**
+     * @param  \Illuminate\Http\Request  $request
+     * @return  array<string, mixed>
+     */
     public function queryByPiecesHash(Request $request)
     {
         $request->validate([

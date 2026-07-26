@@ -17,6 +17,7 @@ use Nexus\Database\NexusDB;
 
 class MeiliSearchRepository extends BaseRepository
 {
+    /** @var  mixed */
     private static $client;
 
     const INDEX_NAME = 'torrents';
@@ -25,12 +26,22 @@ class MeiliSearchRepository extends BaseRepository
     const SEARCH_AREA_DESC = '1';
     const SEARCH_AREA_OWNER = '3';
 
+    /** @var  array<int|string, mixed> */
+    /** @var  array<int|string, mixed> */
+    /** @var  array<int|string, mixed> */
+    /** @var  array<int|string, mixed> */
+    /** @var  array<int|string, mixed> */
     private static array $searchAreas = [
         self::SEARCH_AREA_TITLE => ['text' => 'title'],
         self::SEARCH_AREA_DESC => ['text' => 'desc'],
         self::SEARCH_AREA_OWNER => ['text' => 'owner'],
     ];
 
+    /** @var  array<int|string, mixed> */
+    /** @var  array<int|string, mixed> */
+    /** @var  array<int|string, mixed> */
+    /** @var  array<int|string, mixed> */
+    /** @var  array<int|string, mixed> */
     private static array $queryFieldToTorrentFieldMaps = [
         'cat' => 'category',
         'source' => 'source',
@@ -41,6 +52,11 @@ class MeiliSearchRepository extends BaseRepository
         'processing' => 'processing',
     ];
 
+    /** @var  array<int|string, mixed> */
+    /** @var  array<int|string, mixed> */
+    /** @var  array<int|string, mixed> */
+    /** @var  array<int|string, mixed> */
+    /** @var  array<int|string, mixed> */
     private static array $sortFieldMaps = [
         '1' => 'name',
 //        '2' => 'numfiles',
@@ -54,23 +70,48 @@ class MeiliSearchRepository extends BaseRepository
     ];
 
 
+    /** @var  array<int|string, mixed> */
+    /** @var  array<int|string, mixed> */
+    /** @var  array<int|string, mixed> */
+    /** @var  array<int|string, mixed> */
+    /** @var  array<int|string, mixed> */
     private static array $filterableAttributes = [
         "id", "category", "source", "medium", "codec", "standard", "processing", "audiocodec", "owner",
         "sp_state", "visible", "banned", "approval_status", "size", "leechers", "seeders", "times_completed", "added",
     ];
 
+    /** @var  array<int|string, mixed> */
+    /** @var  array<int|string, mixed> */
+    /** @var  array<int|string, mixed> */
+    /** @var  array<int|string, mixed> */
+    /** @var  array<int|string, mixed> */
     private static array $sortableAttributes = [
         "id", "name", "comments", "added", "size", "leechers", "seeders", "times_completed", "owner",
         "pos_state", "anonymous"
     ];
 
+    /** @var  array<int|string, mixed> */
+    /** @var  array<int|string, mixed> */
+    /** @var  array<int|string, mixed> */
+    /** @var  array<int|string, mixed> */
+    /** @var  array<int|string, mixed> */
     private static array $intFields = [
         "id", "category", "source", "medium", "codec", "standard", "processing", "audiocodec", "owner",
         "sp_state", "approval_status", "size", "leechers", "seeders", "times_completed", "url", "comments",
     ];
 
+    /** @var  array<int|string, mixed> */
+    /** @var  array<int|string, mixed> */
+    /** @var  array<int|string, mixed> */
+    /** @var  array<int|string, mixed> */
+    /** @var  array<int|string, mixed> */
     private static array $timestampFields = ['added'];
 
+    /** @var  array<int|string, mixed> */
+    /** @var  array<int|string, mixed> */
+    /** @var  array<int|string, mixed> */
+    /** @var  array<int|string, mixed> */
+    /** @var  array<int|string, mixed> */
     private static array $yesOrNoFields = ['visible', 'anonymous', 'banned'];
 
 
@@ -91,6 +132,7 @@ class MeiliSearchRepository extends BaseRepository
         return Setting::get('meilisearch.enabled') == 'yes';
     }
 
+    /** @return  mixed */
     public function import()
     {
         if (!$this->isEnabled()) {
@@ -136,6 +178,10 @@ class MeiliSearchRepository extends BaseRepository
         }
     }
 
+    /**
+     * @param  mixed  $indexName
+     * @return  mixed
+     */
     private function createIndex($indexName)
     {
         $client = $this->getClient();
@@ -165,6 +211,7 @@ class MeiliSearchRepository extends BaseRepository
 
     }
 
+    /** @return  array<int|string, mixed> */
     public function getRequiredFields(): array
     {
         return array_values(array_unique(array_merge(
@@ -172,6 +219,11 @@ class MeiliSearchRepository extends BaseRepository
         )));
     }
 
+    /**
+     * @param  mixed  $id
+     * @param  mixed  $index
+     * @return  mixed
+     */
     public function doImportFromDatabase($id = null, $index = null)
     {
         if (!$this->isEnabled() && $index === null) {
@@ -215,6 +267,11 @@ class MeiliSearchRepository extends BaseRepository
         return $total;
     }
 
+    /**
+     * @param  array<int|string, mixed>  $params
+     * @param  mixed  $user
+     * @return  mixed
+     */
     public function search(array $params, $user)
     {
         $results['total'] = 0;
@@ -282,9 +339,9 @@ class MeiliSearchRepository extends BaseRepository
     }
 
     /**
-     * @param array $params
-     * @param User $user
-     * @return array
+     * @param  array<int|string, mixed>  $params
+     * @param  \App\Models\User  $user
+     * @return  array<int|string, mixed>
      */
     private function getFilters(array $params, User $user): array
     {
@@ -460,6 +517,7 @@ class MeiliSearchRepository extends BaseRepository
         return $filters;
     }
 
+    /** @param  array<int|string, mixed>  $params */
     private function getQuery(array $params): string
     {
         $q = trim($params['search']);
@@ -474,6 +532,10 @@ class MeiliSearchRepository extends BaseRepository
         return sprintf('"%s"', $q);
     }
 
+    /**
+     * @param  array<int|string, mixed>  $params
+     * @return  mixed
+     */
     private function getSearchArea(array $params)
     {
         if (isset($params['search_area'], self::$searchAreas[$params['search_area']])) {
@@ -487,6 +549,10 @@ class MeiliSearchRepository extends BaseRepository
         return $this->getClient()->index(self::INDEX_NAME);
     }
 
+    /**
+     * @param  array<int|string, mixed>  $params
+     * @return  array<int|string, mixed>
+     */
     private function getSort(array $params): array
     {
         if (!isset($params['sort']) || !isset($params['type'])) {
@@ -513,6 +579,10 @@ class MeiliSearchRepository extends BaseRepository
         return ["$sortField:$sortType"];
     }
 
+    /**
+     * @param  \App\Models\User  $user
+     * @return  mixed
+     */
     private function getPerPage(User $user)
     {
         if ($user->torrentsperpage) {
@@ -525,6 +595,11 @@ class MeiliSearchRepository extends BaseRepository
         return intval(min($size, 200));
     }
 
+    /**
+     * @param  mixed  $field
+     * @param  mixed  $value
+     * @return  mixed
+     */
     private function formatValueForMeili($field, $value)
     {
         if (in_array($field, self::$intFields)) {
@@ -539,6 +614,10 @@ class MeiliSearchRepository extends BaseRepository
         return strval($value);
     }
 
+    /**
+     * @param  mixed  $id
+     * @return  mixed
+     */
     public function deleteDocuments($id)
     {
         if ($this->isEnabled()) {
@@ -546,6 +625,7 @@ class MeiliSearchRepository extends BaseRepository
         }
     }
 
+    /** @return  array<int|string, mixed> */
     private function getAttributesToRetrieve(): array
     {
         if (nexus_env("APP_ENV") == 'production') {
@@ -554,6 +634,7 @@ class MeiliSearchRepository extends BaseRepository
         return ['*'];
     }
 
+    /** @return  array<int|string, mixed> */
     private function getSearchableAttributes(): array
     {
         $attributes = ["name", "url"];

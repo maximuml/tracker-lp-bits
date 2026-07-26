@@ -20,15 +20,24 @@ class Controller extends BaseController
 {
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
 
+    /** @var  ?array<int|string, mixed> */
+    /** @var  ?array<int|string, mixed> */
+    /** @var  ?array<int|string, mixed> */
+    /** @var  ?array<int|string, mixed> */
+    /** @var  ?array<int|string, mixed> */
     protected ?array $extraFields = null;
+    /** @var  ?array<int|string, mixed> */
+    /** @var  ?array<int|string, mixed> */
+    /** @var  ?array<int|string, mixed> */
+    /** @var  ?array<int|string, mixed> */
+    /** @var  ?array<int|string, mixed> */
     protected ?array $extraSettingNames = null;
 
     /**
      * 返回成功信息
-     *
-     * @param $data
-     * @param $msg
-     * @return array
+     * @param  mixed  $data
+     * @param  mixed  $msg
+     * @return  array<int|string, mixed>
      */
     public function success($data, $msg = null): array
     {
@@ -42,11 +51,10 @@ class Controller extends BaseController
 
     /**
      * 返回成功信息，对于不是 JsonResource 的数据，进行包装。返回的数据在 data.data 中
-     *
+     * @param  mixed  $data
+     * @param  mixed  $msg
+     * @return  array<int|string, mixed>
      * @deprecated 没有必要，已经在 api() 中添加 data 包裹，使用 success() 即可
-     * @param $data
-     * @param $msg
-     * @return array
      */
     public function successJsonResource($data, $msg = null): array
     {
@@ -64,10 +72,9 @@ class Controller extends BaseController
 
     /**
      * 返回失败信息，目前对于失败信息不需要包装
-     *
-     * @param $data
-     * @param $msg
-     * @return array
+     * @param  mixed  $data
+     * @param  mixed  $msg
+     * @return  array<int|string, mixed>
      */
     public function fail($data, $msg = null)
     {
@@ -79,6 +86,10 @@ class Controller extends BaseController
         return fail($msg, $data);
     }
 
+    /**
+     * @param  array<int|string, mixed>  $backtrace
+     * @return  mixed
+     */
     protected function getReturnMsg(array $backtrace)
     {
         $title = $this->title ?? '';
@@ -101,6 +112,7 @@ class Controller extends BaseController
         return Str::slug("$title.$action", '.');
     }
 
+    /** @return  array<int|string, mixed> */
     protected function getPaginationParameters(): array
     {
         $request = request();
@@ -115,6 +127,7 @@ class Controller extends BaseController
         return [$perPage, ['*'], 'page', $page];
     }
 
+    /** @param  mixed  $field */
     protected function hasExtraField($field): bool
     {
         if ($this->extraFields === null) {
@@ -125,6 +138,10 @@ class Controller extends BaseController
         return in_array($field, $this->extraFields);
     }
 
+    /**
+     * @param  array<int|string, mixed>  $additional
+     * @param  array<int|string, mixed>  $names
+     */
     protected function appendExtraSettings(array &$additional, array $names): void
     {
         if ($this->extraSettingNames === null) {

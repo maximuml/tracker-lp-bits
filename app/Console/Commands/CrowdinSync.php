@@ -25,12 +25,37 @@ class CrowdinSync extends Command
     const RUN_ENV_NEXUS = 'nexus';
     const RUN_ENV_LARAVEL = 'laravel';
 
+    /** @var  string */
+    /** @var  string */
+    /** @var  string */
+    /** @var  string */
+    /** @var  string */
     protected string $runEnv = self::RUN_ENV_LARAVEL;
 
+    /** @var  string */
+    /** @var  string */
+    /** @var  string */
+    /** @var  string */
+    /** @var  string */
     protected string $mtType = "crowdin";
+    /** @var  array<int|string, mixed>|null */
+    /** @var  array<int|string, mixed>|null */
+    /** @var  array<int|string, mixed>|null */
+    /** @var  array<int|string, mixed>|null */
+    /** @var  array<int|string, mixed>|null */
     protected array|null $mtInfo = null;
 
+    /** @var  bool */
+    /** @var  bool */
+    /** @var  bool */
+    /** @var  bool */
+    /** @var  bool */
     protected bool $noPreTrans = true;
+    /** @var  bool */
+    /** @var  bool */
+    /** @var  bool */
+    /** @var  bool */
+    /** @var  bool */
     protected bool $debug = false;
 
     /**
@@ -75,6 +100,11 @@ class CrowdinSync extends Command
      */
     protected $translationsDir;
 
+    /** @var  array<int|string, mixed> */
+    /** @var  array<int|string, mixed> */
+    /** @var  array<int|string, mixed> */
+    /** @var  array<int|string, mixed> */
+    /** @var  array<int|string, mixed> */
     protected array $languages;
 
     /**
@@ -84,11 +114,17 @@ class CrowdinSync extends Command
      *
      * @var array|string[]
      */
+    /** @var  array<int|string, mixed> */
+    /** @var  array<int|string, mixed> */
+    /** @var  array<int|string, mixed> */
+    /** @var  array<int|string, mixed> */
+    /** @var  array<int|string, mixed> */
     protected array $customMap = [];
 
 
     /**
      * Execute the console command.
+     * @return  int
      */
     public function handle()
     {
@@ -147,6 +183,7 @@ class CrowdinSync extends Command
 
     /**
      * Upload source files to Crowdin
+     * @return  mixed
      */
     protected function uploadSourceFiles()
     {
@@ -187,6 +224,9 @@ class CrowdinSync extends Command
 
     /**
      * Upload a single file to Crowdin
+     * @param  mixed  $filePath
+     * @param  mixed  $relativePath
+     * @return  mixed
      */
     protected function uploadFile($filePath, $relativePath)
     {
@@ -237,6 +277,8 @@ class CrowdinSync extends Command
 
     /**
      * Upload file to Crowdin storage
+     * @param  mixed  $filePath
+     * @return  mixed
      */
     protected function uploadToStorage($filePath)
     {
@@ -256,6 +298,7 @@ class CrowdinSync extends Command
 
     /**
      * Download translations from Crowdin
+     * @return  mixed
      */
     protected function downloadTranslations()
     {
@@ -361,6 +404,7 @@ class CrowdinSync extends Command
 
     /**
      * Get all project languages
+     * @return  array<int|string, mixed>
      */
     protected function getAllProjectLanguages()
     {
@@ -393,6 +437,8 @@ class CrowdinSync extends Command
 
     /**
      * Get file ID by filename, if filename is empty, get all files
+     * @param  mixed  $fileName
+     * @return  array<int|string, mixed>
      */
     protected function listFileIds($fileName): array
     {
@@ -425,6 +471,8 @@ class CrowdinSync extends Command
 
     /**
      * Move translations from extracted ZIP to the proper directories
+     * @param  mixed  $extractPath
+     * @return  mixed
      */
     protected function moveTranslations($extractPath)
     {
@@ -477,6 +525,7 @@ class CrowdinSync extends Command
         }
     }
 
+    /** @return  mixed */
     protected function getDirectoryId()
     {
         $url = $this->getProjectApiEndpoint("directories?filter=$this->runEnv");
@@ -496,6 +545,7 @@ class CrowdinSync extends Command
         return Http::withToken($this->token);
     }
 
+    /** @param  mixed  $path */
     protected function getProjectApiEndpoint($path = ""): string
     {
         $result = sprintf(
@@ -509,6 +559,11 @@ class CrowdinSync extends Command
         return $result;
     }
 
+    /**
+     * @param  mixed  $fileIds
+     * @param  mixed  $languages
+     * @return  mixed
+     */
     protected function doMachineTranslate($fileIds, $languages)
     {
         $engineInfo = $this->getMachineTranslationEngine();
@@ -526,6 +581,7 @@ class CrowdinSync extends Command
         return $response->json('data.identifier');
     }
 
+    /** @return  mixed */
     protected function getMachineTranslationEngine()
     {
         if (!is_null($this->mtInfo)) {
@@ -542,6 +598,10 @@ class CrowdinSync extends Command
         throw new \RuntimeException("can not get machine-translation id for mtType: $this->mtType, data: " . json_encode($data));
     }
 
+    /**
+     * @param  callable  $callback
+     * @return  mixed
+     */
     protected function wait(callable $callback)
     {
         $maxAttempts = 60;
@@ -558,6 +618,7 @@ class CrowdinSync extends Command
         }
     }
 
+    /** @return  mixed */
     protected function getFileName()
     {
         $fileName = $this->option('file');
@@ -567,6 +628,7 @@ class CrowdinSync extends Command
         return $fileName;
     }
 
+    /** @return  mixed */
     protected function getLanguages()
     {
         $languages = $this->option('lang');

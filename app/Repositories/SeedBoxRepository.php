@@ -23,8 +23,17 @@ class SeedBoxRepository extends BaseRepository
 
     const APPROVAL_COUNT_CACHE_KEY = "SEED_BOX_RECORD_APPROVAL_NONE";
 
+    /** @var  ?Reader */
+    /** @var  ?Reader */
+    /** @var  ?Reader */
+    /** @var  ?Reader */
+    /** @var  ?Reader */
     private static ?Reader $asnReader = null;
 
+    /**
+     * @param  array<int|string, mixed>  $params
+     * @return  mixed
+     */
     public function getList(array $params)
     {
         $query = Poll::query();
@@ -34,8 +43,8 @@ class SeedBoxRepository extends BaseRepository
     }
 
     /**
-     * @param array $params
-     * @return SeedBoxRecord
+     * @param  array<int|string, mixed>  $params
+     * @return  SeedBoxRecord
      */
     public function store(array $params)
     {
@@ -46,6 +55,10 @@ class SeedBoxRepository extends BaseRepository
         return $seedBoxRecord;
     }
 
+    /**
+     * @param  array<int|string, mixed>  $params
+     * @return  array<int|string, mixed>
+     */
     private function formatParams(array $params): array
     {
         $params = array_filter($params);
@@ -105,6 +118,11 @@ class SeedBoxRepository extends BaseRepository
         return $params;
     }
 
+    /**
+     * @param  array<int|string, mixed>  $params
+     * @param  mixed  $id
+     * @return  mixed
+     */
     public function update(array $params, $id)
     {
         $model = SeedBoxRecord::query()->findOrFail($id);
@@ -115,12 +133,21 @@ class SeedBoxRepository extends BaseRepository
         return $model;
     }
 
+    /**
+     * @param  mixed  $id
+     * @return  mixed
+     */
     public function getDetail($id)
     {
         $model = Poll::query()->findOrFail($id);
         return $model;
     }
 
+    /**
+     * @param  mixed  $id
+     * @param  mixed  $uid
+     * @return  mixed
+     */
     public function delete($id, $uid)
     {
         $baseQuery =  SeedBoxRecord::query()->whereIn('id', Arr::wrap($id))->where('uid', $uid);
@@ -136,6 +163,12 @@ class SeedBoxRepository extends BaseRepository
         return true;
     }
 
+    /**
+     * @param  \App\Models\SeedBoxRecord  $seedBoxRecord
+     * @param  mixed  $status
+     * @param  mixed  $reason
+     * @return  mixed
+     */
     public function updateStatus(SeedBoxRecord $seedBoxRecord, $status, $reason = '')
     {
         if (Auth::user()->class < User::CLASS_ADMINISTRATOR) {
@@ -167,6 +200,10 @@ class SeedBoxRepository extends BaseRepository
         });
     }
 
+    /**
+     * @param  mixed  $ipArr
+     * @param  mixed  $uid
+     */
     public function renderIcon($ipArr, $uid): string
     {
         static $enableSeedBox;
@@ -181,6 +218,7 @@ class SeedBoxRepository extends BaseRepository
         return '';
     }
 
+    /** @param  mixed  $isSeedBox */
     public function getSeedBoxIcon($isSeedBox = true): string
     {
         if (!$isSeedBox) {
@@ -194,6 +232,10 @@ class SeedBoxRepository extends BaseRepository
         NexusDB::cache_del(self::APPROVAL_COUNT_CACHE_KEY);
     }
 
+    /**
+     * @param  \App\Enums\SeedBoxRecord\IsAllowedEnum  $isAllowed
+     * @param  \App\Enums\SeedBoxRecord\IpAsnEnum  $field
+     */
     public function updateUserCacheCronjob(IsAllowedEnum $isAllowed, IpAsnEnum $field): void
     {
         $size = 1000;
@@ -222,6 +264,10 @@ class SeedBoxRepository extends BaseRepository
         do_log("$logPrefix, all done!");
     }
 
+    /**
+     * @param  \App\Enums\SeedBoxRecord\IsAllowedEnum  $isAllowed
+     * @param  \App\Enums\SeedBoxRecord\IpAsnEnum  $field
+     */
     public function updateAdminCacheCronjob(IsAllowedEnum $isAllowed, IpAsnEnum $field): void
     {
         $size = 1000;
@@ -243,6 +289,13 @@ class SeedBoxRepository extends BaseRepository
         do_log("$logPrefix, all done!");
     }
 
+    /**
+     * @param  int  $userId
+     * @param  \App\Enums\SeedBoxRecord\TypeEnum  $type
+     * @param  \App\Enums\SeedBoxRecord\IsAllowedEnum  $isAllowed
+     * @param  \App\Enums\SeedBoxRecord\IpAsnEnum  $field
+     * @param  string  $ipOrAsnStr
+     */
     public static function updateCache(int $userId, TypeEnum $type, IsAllowedEnum $isAllowed, IpAsnEnum $field, string $ipOrAsnStr = null): void
     {
         if (!is_null($ipOrAsnStr)) {
@@ -268,6 +321,11 @@ class SeedBoxRepository extends BaseRepository
         }
     }
 
+    /**
+     * @param  int  $userId
+     * @param  string  $ip
+     * @return  array<int|string, mixed>
+     */
     public static function isSeedBoxFromUserRecords(int $userId, string $ip): array
     {
         $logPrefix = "userId: $userId, ip: $ip";
@@ -311,6 +369,11 @@ class SeedBoxRepository extends BaseRepository
         return self::buildCheckResult(false, "not match any record, result: false");
     }
 
+    /**
+     * @param  bool  $isSeedBox
+     * @param  string  $desc
+     * @return  array<int|string, mixed>
+     */
     private static function buildCheckResult(bool $isSeedBox, string $desc): array
     {
         $result = [
@@ -321,6 +384,7 @@ class SeedBoxRepository extends BaseRepository
         return $result;
     }
 
+    /** @param  string  $ip */
     public static function getAsnFromIp(string $ip): int
     {
         //虽然 ip 对应的 asn 相对固定，但不宜设置较大的缓存时间，IP 地址较多，容易引起内存膨胀
@@ -340,16 +404,15 @@ class SeedBoxRepository extends BaseRepository
     }
 
     /**
-     *  IS_SEED_BOX_FROM_USER_RECORD:IP:INCLUDES:USER:10001
-     *  IS_SEED_BOX_FROM_USER_RECORD:IP:EXCLUDES:USER:10001
-     *  IS_SEED_BOX_FROM_USER_RECORD:ASN:INCLUDES:USER:10001
-     *  IS_SEED_BOX_FROM_USER_RECORD:ASN:EXCLUDES:USER:10001
-     *  IS_SEED_BOX_FROM_USER_RECORD:ASN:EXCLUDES:ADMIN
-     *
-     * @param int $userId
-     * @param IpAsnEnum $field
-     * @param IsAllowedEnum $isAllowed
-     * @return string
+     * IS_SEED_BOX_FROM_USER_RECORD:IP:INCLUDES:USER:10001
+     * IS_SEED_BOX_FROM_USER_RECORD:IP:EXCLUDES:USER:10001
+     * IS_SEED_BOX_FROM_USER_RECORD:ASN:INCLUDES:USER:10001
+     * IS_SEED_BOX_FROM_USER_RECORD:ASN:EXCLUDES:USER:10001
+     * IS_SEED_BOX_FROM_USER_RECORD:ASN:EXCLUDES:ADMIN
+     * @param  int  $userId
+     * @param  \App\Enums\SeedBoxRecord\IsAllowedEnum  $isAllowed
+     * @param  \App\Enums\SeedBoxRecord\IpAsnEnum  $field
+     * @return  string
      */
     private static function getCacheKey(int $userId, IsAllowedEnum $isAllowed, IpAsnEnum $field): string
     {
@@ -367,9 +430,7 @@ class SeedBoxRepository extends BaseRepository
         return $key;
     }
 
-    /**
-     * @throws InvalidDatabaseException
-     */
+    /** @throws InvalidDatabaseException */
     private static function getAsnReader(): ?Reader
     {
         if (is_null(self::$asnReader)) {

@@ -6,6 +6,9 @@ parameters:
     paths:
         - app/Support
         - app/Models
+        - app/Console
+        - app/Http
+        - app/Repositories
 
     bootstrapFiles:
         - tests/phpstan/bootstrap.php

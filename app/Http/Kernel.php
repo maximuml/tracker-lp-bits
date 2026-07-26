@@ -60,10 +60,8 @@ class Kernel extends HttpKernel
 
     /**
      * The application's route middleware.
-     *
      * These middleware may be assigned to groups or used individually.
-     *
-     * @var array<string, string>
+     * @var  array<string, string>
      */
     protected $routeMiddleware = [
         'auth' => \App\Http\Middleware\Authenticate::class,
@@ -80,6 +78,7 @@ class Kernel extends HttpKernel
         'checkUserStatus' => \App\Http\Middleware\CheckUserStatus::class,
     ];
 
+    /** @var  array<string, string> */
     protected $middlewareAliases = [
         'abilities' => \Laravel\Sanctum\Http\Middleware\CheckAbilities::class,
         'ability' => \Laravel\Sanctum\Http\Middleware\CheckForAnyAbility::class,

@@ -44,8 +44,7 @@ if (!empty($row['two_step_secret'])) {
     if (empty($_POST['two_step_code'])) {
         failedlogins($lang_takelogin['std_require_two_step_code']);
     }
-    $ga = new \PHPGangsta_GoogleAuthenticator();
-    if (!$ga->verifyCode($row['two_step_secret'], $_POST['two_step_code'])) {
+    if (!\App\Support\TwoFactorAuthHelper::verifyCode($row['two_step_secret'], $_POST['two_step_code'])) {
         failedlogins($lang_takelogin['std_invalid_two_step_code']);
     }
 }

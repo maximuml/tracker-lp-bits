@@ -1,5 +1,12 @@
 <?php
 
+namespace App\Models;
+
+use App\Models\Traits\NexusActivityLogTrait;
+use Illuminate\Contracts\Auth\Authenticatable;
+use Illuminate\Support\Str;
+use Laravel\Passport\Client;
+
 /**
  * @property int $id
  * @property int|null $user_id
@@ -14,12 +21,6 @@
  * @property string|null $updated_at
  * @property int $skips_authorization
  */
-namespace App\Models;
-
-use App\Models\Traits\NexusActivityLogTrait;
-use Illuminate\Support\Str;
-use Laravel\Passport\Client;
-
 class OauthClient extends Client
 {
     use NexusActivityLogTrait;
@@ -30,7 +31,7 @@ class OauthClient extends Client
             $model->secret = Str::random(40);
         });
     }
-    public function skipsAuthorization(): bool
+    public function skipsAuthorization(?Authenticatable $user = null, array $scopes = []): bool
     {
         return (bool)$this->skips_authorization;
     }

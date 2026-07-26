@@ -22,7 +22,6 @@
 namespace App\Models;
 
 use App\Models\Traits\NexusActivityLogTrait;
-use Laravel\Passport\Client;
 use Nexus\Database\NexusDB;
 use Ramsey\Uuid;
 

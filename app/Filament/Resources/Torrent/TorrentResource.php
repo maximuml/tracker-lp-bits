@@ -37,7 +37,6 @@ use App\Models\User;
 use App\Repositories\SearchBoxRepository;
 use App\Repositories\TagRepository;
 use App\Repositories\TorrentRepository;
-use Elasticsearch\Endpoints\Search;
 use Filament\Facades\Filament;
 use Filament\Forms;
 use Filament\Pages\Actions\Action;

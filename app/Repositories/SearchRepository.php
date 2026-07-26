@@ -6,8 +6,8 @@ use App\Models\Setting;
 use App\Models\Torrent;
 use App\Models\TorrentTag;
 use App\Models\User;
-use Elasticsearch\Client;
-use Elasticsearch\ClientBuilder;
+use Elastic\Elasticsearch\Client;
+use Elastic\Elasticsearch\ClientBuilder;
 use Illuminate\Support\Arr;
 use Nexus\Database\NexusDB;
 
@@ -148,13 +148,49 @@ class SearchRepository extends BaseRepository
     {
         if (is_null($this->es)) {
             $config = nexus_config('nexus.elasticsearch');
-            $builder = ClientBuilder::create()->setHosts($config['hosts']);
-            if (!empty($config['ssl_verification'])) {
-                $builder->setSSLVerification($config['ssl_verification']);
+            $hosts = array_map([$this, 'buildEsHost'], $config['hosts']);
+            $builder = ClientBuilder::create()->setHosts($hosts);
+            $sslVerification = $config['ssl_verification'] ?? '';
+            if ($sslVerification !== '') {
+                $bool = filter_var($sslVerification, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+                if ($bool === false) {
+                    $builder->setSSLVerification(false);
+                } elseif ($bool === true) {
+                    $builder->setSSLVerification(true);
+                } elseif (is_string($sslVerification) && file_exists($sslVerification)) {
+                    $builder->setCABundle($sslVerification);
+                }
             }
             $this->es = $builder->build();
         }
         return $this->es;
+    }
+
+    /**
+     * @param array<string, mixed> $hostConfig
+     */
+    private function buildEsHost(array $hostConfig): string
+    {
+        $scheme = $hostConfig['scheme'] ?? 'https';
+        $host = $hostConfig['host'] ?? 'localhost';
+        $port = $hostConfig['port'] ?? 9200;
+        $user = $hostConfig['user'] ?? '';
+        $pass = $hostConfig['pass'] ?? '';
+
+        $url = $scheme . '://';
+        if ($user !== '') {
+            $url .= rawurlencode($user);
+            if ($pass !== '') {
+                $url .= ':' . rawurlencode($pass);
+            }
+            $url .= '@';
+        }
+        $url .= $host;
+        if ($port) {
+            $url .= ':' . $port;
+        }
+
+        return $url;
     }
 
     /** @return  array<int|string, mixed> */
@@ -190,8 +226,7 @@ class SearchRepository extends BaseRepository
         ];
     }
 
-    /** @return  callable|array<int|string, mixed> */
-    public function getEsInfo(): callable|array
+    public function getEsInfo(): mixed
     {
         return $this->getEs()->info();
     }

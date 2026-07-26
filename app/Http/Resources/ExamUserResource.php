@@ -7,6 +7,9 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+/**
+ * @mixin \App\Models\ExamUser
+ */
 class ExamUserResource extends JsonResource
 {
     public $preserveKeys = true;
@@ -24,8 +27,8 @@ class ExamUserResource extends JsonResource
             'status' => $this->status,
             'status_text' => $this->statusText,
             'created_at' => format_datetime($this->created_at),
-            'progress' => $this->when($this->progress, $this->progress),
-            'progress_formatted' => $this->when($this->progress_formatted, $this->progress_formatted),
+            'progress' => $this->when(!empty($this->progress), $this->progress),
+            'progress_formatted' => $this->when(!empty($this->progress_formatted), $this->progress_formatted),
             'begin' => format_datetime($this->begin),
             'end' => format_datetime($this->end),
             'uid' => $this->uid,

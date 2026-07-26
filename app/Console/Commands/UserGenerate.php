@@ -29,7 +29,7 @@ class UserGenerate extends Command
      */
     public function handle()
     {
-        $num = $this->option("num");
+        $num = (int) $this->option("num");
         $log = "num: $num";
         if (!$num) {
             $this->error("$log, no num!");

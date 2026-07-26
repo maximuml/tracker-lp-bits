@@ -2,6 +2,15 @@
 
 namespace App\Models;
 
+/**
+ * @property int $id
+ * @property int $user_id
+ * @property string|null $aaguid
+ * @property string $credential_id
+ * @property string $public_key
+ * @property int|null $counter
+ * @property-read User $user
+ */
 class Passkey extends NexusModel
 {
     protected $table = 'user_passkeys';
@@ -12,7 +21,10 @@ class Passkey extends NexusModel
         'id', 'user_id', 'aaguid', 'credential_id', 'public_key', 'counter',
     ];
 
-    public function user()
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<User, $this>
+     */
+    public function user(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
     }

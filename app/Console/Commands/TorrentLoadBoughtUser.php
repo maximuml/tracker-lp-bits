@@ -29,7 +29,7 @@ class TorrentLoadBoughtUser extends Command
      */
     public function handle()
     {
-        $torrentId = $this->argument('torrent_id');
+        $torrentId = (int) $this->argument('torrent_id');
         LoadTorrentBoughtUsers::dispatch($torrentId);
         do_log("torrentId: $torrentId");
         return Command::SUCCESS;

@@ -16,7 +16,6 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Nexus\Database\NexusDB;
 
@@ -262,7 +261,7 @@ class ExamRepository extends BaseRepository
      * list valid exams
      *
      * @param null $excludeId
-     * @return \Illuminate\Database\Eloquent\Builder[]|\Illuminate\Database\Eloquent\Collection
+     * @return \Illuminate\Database\Eloquent\Collection<int, Exam>
      */
     public function listValid($excludeId = null, $isDiscovered = null, $type = null)
     {
@@ -289,7 +288,8 @@ class ExamRepository extends BaseRepository
             });
 
         if (!is_null($excludeId)) {
-            $query->whereNotIn('id', Arr::wrap($excludeId));
+            $excludeIds = is_array($excludeId) ? $excludeId : [$excludeId];
+            $query->whereNotIn('id', $excludeIds);
         }
         if (!is_null($isDiscovered)) {
             $query->where('is_discovered', $isDiscovered);
@@ -305,7 +305,7 @@ class ExamRepository extends BaseRepository
      * list user match exams
      *
      * @param $uid
-     * @return \Illuminate\Database\Eloquent\Builder[]|\Illuminate\Database\Eloquent\Collection
+     * @return \Illuminate\Database\Eloquent\Collection<int, Exam>
      */
     public function listMatchExam($uid)
     {
@@ -352,7 +352,7 @@ class ExamRepository extends BaseRepository
 
         $filter = Exam::FILTER_USER_REGISTER_TIME_RANGE;
         $filterValues = $filters[$filter] ?? [];
-        $added = $user->added->toDateTimeString();
+        $added = Carbon::parse($user->added)->toDateTimeString();
         $registerTimeBegin = isset($filterValues[0]) ? Carbon::parse($filterValues[0])->toDateTimeString() : '';
         $registerTimeEnd = isset($filterValues[1]) ? Carbon::parse($filterValues[1])->toDateTimeString() : '';
         if (!empty($registerTimeBegin) && $added < $registerTimeBegin) {
@@ -366,7 +366,7 @@ class ExamRepository extends BaseRepository
 
         $filter = Exam::FILTER_USER_REGISTER_DAYS_RANGE;
         $filterValues = $filters[$filter] ?? [];
-        $value = $user->added->diffInDays(now(), true);
+        $value = Carbon::parse($user->added)->diffInDays(now(), true);
         $begin = $filterValues[0] ?? null;
         $end = $filterValues[1] ?? null;
         if ($begin !== null && $value < $begin) {
@@ -604,10 +604,10 @@ class ExamRepository extends BaseRepository
      * new version：progress = exam_progress.value - exam_progress.init_value
      *
      * @param $examUser
-     * @param null $user
+     * @param User|null $user
      * @return ExamUser|bool
      */
-    public function updateProgress($examUser, $user = null): ExamUser|bool
+    public function updateProgress($examUser, ?User $user = null): ExamUser|bool
     {
         $beginTimestamp = microtime(true);
         if (!$examUser instanceof ExamUser) {
@@ -615,16 +615,11 @@ class ExamRepository extends BaseRepository
             $examUser = ExamUser::query()
                 ->where('uid', $uid)
                 ->where('status', ExamUser::STATUS_NORMAL)
-                ->get();
-            if ($examUser->isEmpty()) {
+                ->first();
+            if (!$examUser instanceof ExamUser) {
                 do_log("user: $uid no exam.");
                 return false;
             }
-            if ($examUser->count() > 1) {
-                do_log("user: $uid more than one active exam.");
-                return false;
-            }
-            $examUser = $examUser->first();
         }
         if ($examUser->status != ExamUser::STATUS_NORMAL) {
             do_log("examUser: {$examUser->id} status not normal, won't update progress.");
@@ -656,9 +651,6 @@ class ExamRepository extends BaseRepository
         if (empty($end)) {
             throw new \InvalidArgumentException("$logPrefix, exam: {$examUser->id} no end.");
         }
-        /**
-         * @var $progressGrouped Collection
-         */
         $progressGrouped = $examUser->progresses->keyBy("index");
         $examUserProgressFieldData = [];
         $now = now();
@@ -722,7 +714,7 @@ class ExamRepository extends BaseRepository
                     $torrentCounts = 1;
                     do_log("torrent count is 0, use 1");
                 }
-                $examUserProgressFieldData[$index['index']] = bcdiv(bcsub($attributes['value'], $attributes['init_value']), $torrentCounts);
+                $examUserProgressFieldData[$index['index']] = bcdiv((string)bcsub($attributes['value'], $attributes['init_value']), (string)$torrentCounts);
                 do_log(sprintf(
                     "torrentCounts > 0, examUserProgress: (total(%s) - init_value(%s)) / %s = %s",
                     $attributes['value'], $attributes['init_value'], $torrentCounts, $examUserProgressFieldData[$index['index']]
@@ -1104,7 +1096,7 @@ class ExamRepository extends BaseRepository
             $query->where('exam_id', $exam->id);
         });
         //Does not has any other normal exam
-        $baseQuery->whereDoesntHave('exams', function (Builder $query) use ($exam) {
+        $baseQuery->whereDoesntHave('exams', function (Builder $query) {
             $query->where('status',ExamUser::STATUS_NORMAL);
         });
 

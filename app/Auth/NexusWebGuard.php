@@ -24,7 +24,6 @@ class NexusWebGuard implements StatefulGuard
     /**
      * Create a new authentication guard.
      *
-     * @param  callable  $callback
      * @param  \Illuminate\Http\Request  $request
      * @param  \Illuminate\Contracts\Auth\UserProvider|null  $provider
      * @return void
@@ -38,27 +37,23 @@ class NexusWebGuard implements StatefulGuard
     /**
      * Get the currently authenticated user.
      *
-     * @return \Illuminate\Contracts\Auth\Authenticatable|null
+     * @return User|null
      */
-    public function user()
+    public function user(): ?User
     {
-        if (! is_null($this->user)) {
+        if ($this->user instanceof User) {
             return $this->user;
         }
         $credentials = $this->request->cookie();
         if ($this->validate($credentials)) {
-            /**
-             * @var User $user
-             */
             $user = $this->provider->retrieveByCredentials($credentials);
-            if (empty($user)) {
-                return null;
-            }
-            if ($this->provider->validateCredentials($user, $credentials)) {
+            if ($user instanceof User && $this->provider->validateCredentials($user, $credentials)) {
                 $user->checkIsNormal();
-                return $this->user = $user;
+                $this->user = $user;
+                return $user;
             }
         }
+        return null;
     }
 
 
@@ -78,10 +73,10 @@ class NexusWebGuard implements StatefulGuard
         return true;
     }
 
-    public function logout()
+    public function logout(): void
     {
         logoutcookie();
-        return nexus_redirect('login.php');
+        nexus_redirect('login.php');
     }
 
 

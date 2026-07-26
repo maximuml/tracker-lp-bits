@@ -97,7 +97,7 @@ class SearchBoxRepository extends BaseRepository
             if (!empty($taxonomies)) {
                 $searchBox->update(["extra->" . SearchBox::EXTRA_TAXONOMY_LABELS => $taxonomies]);
             }
-            clear_search_box_cache($searchBox->id);
+            clear_search_box_cache();
         }
     }
 

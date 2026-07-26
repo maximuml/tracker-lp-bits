@@ -9,13 +9,6 @@ use Illuminate\Support\Facades\Auth;
 
 class TokenController extends Controller
 {
-    private $repository;
-
-    public function __construct(TokenRepository $repository)
-    {
-        $this->repository = $repository;
-    }
-
     public function addToken(Request $request)
     {
         try {

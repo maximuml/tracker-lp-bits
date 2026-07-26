@@ -12,6 +12,7 @@ use Nexus\Database\NexusDB;
  * @property-read Torrent $torrent
  * @property-read Snatch|null $snatch
  * @property-read User $user
+ * @property int $leech_time_no_seeder_begin
  */
 class HitAndRun extends NexusModel
 {

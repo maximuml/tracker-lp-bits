@@ -41,7 +41,7 @@ class Plugin
         return self::$plugins[$id] ?? null;
     }
 
-    public function getMainClass($name)
+    public function getMainClass($name): ?BasePlugin
     {
         if (isset(self::$providers[$name]['providers'][0])) {
             $className = self::$providers[$name]['providers'][0];
@@ -50,6 +50,7 @@ class Plugin
                 return new $className;
             }
         }
+        return null;
     }
 
     private function bootPlugins()

@@ -13,13 +13,19 @@ class Bookmark extends NexusModel
     const FILTER_INCLUDE = '1';
     const FILTER_EXCLUDE = '2';
 
-    public function torrent()
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<Torrent, $this>
+     */
+    public function torrent(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(Torrent::class, 'torrentid');
     }
 
-    public function user()
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<User, $this>
+     */
+    public function user(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
-        return $this->belongsTo(Torrent::class, 'userid');
+        return $this->belongsTo(User::class, 'userid');
     }
 }

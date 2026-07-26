@@ -422,10 +422,10 @@ class UploadRepository extends BaseRepository
         if (!$sections->has($category->mode)) {
             throw new NexusException(nexus_trans('upload.invalid_section'));
         }
-        /**
-         * @var $section SearchBox
-         */
         $section = $sections->get($category->mode);
+        if (!$section instanceof SearchBox) {
+            throw new NexusException(nexus_trans('upload.invalid_section'));
+        }
         $this->canUploadToSection($section);
 
         $sectionResource = new SearchBoxResource($section);

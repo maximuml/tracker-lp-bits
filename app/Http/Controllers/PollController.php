@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\PollResource;
 use App\Models\Poll;
+use App\Models\PollAnswer;
 use App\Repositories\PollRepository;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -46,7 +47,7 @@ class PollController extends Controller
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @return array
      */
     public function store(Request $request)
     {
@@ -117,7 +118,7 @@ class PollController extends Controller
                     $options[$i] = $value;
                 }
             }
-            if ($answer) {
+            if ($answer instanceof PollAnswer) {
                 $selection = $answer->selection;
             } else {
                 $options["255"] = "弃权(我想偷看结果！)";

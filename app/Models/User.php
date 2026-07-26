@@ -26,8 +26,68 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 /**
  * @property int $id
  * @property string|null $username
- * @property int|string|null $class
+ * @property string|null $passhash
+ * @property string|null $secret
+ * @property string|null $email
+ * @property string|null $added
+ * @property string|null $last_login
+ * @property string|null $last_access
+ * @property string|null $last_home
+ * @property string|null $last_offer
+ * @property string|null $forum_access
+ * @property string|null $last_staffmsg
+ * @property string|null $last_pm
+ * @property string|null $last_comment
+ * @property string|null $last_post
+ * @property int|null $last_browse
+ * @property int|null $last_music
+ * @property int|null $last_catchup
+ * @property string|null $editsecret
+ * @property int|null $stylesheet
+ * @property int|null $caticon
+ * @property string|null $info
+ * @property string|null $ip
+ * @property int|null $class
+ * @property int|null $max_class_once
+ * @property string|null $avatar
+ * @property int|null $uploaded
+ * @property int|null $downloaded
+ * @property int|null $seedtime
+ * @property int|null $leechtime
+ * @property string|null $title
+ * @property int|null $country
+ * @property string|null $notifs
+ * @property string|null $modcomment
+ * @property string|null $donated
+ * @property string|null $donated_cny
+ * @property Carbon|null $donoruntil
+ * @property string|null $warneduntil
+ * @property string|null $noaduntil
+ * @property int|null $torrentsperpage
+ * @property int|null $topicsperpage
+ * @property int|null $postsperpage
+ * @property string|null $stafffor
+ * @property string|null $supportfor
+ * @property string|null $pickfor
+ * @property string|null $supportlang
  * @property string|null $passkey
+ * @property int|null $clientselect
+ * @property string|null $signature
+ * @property int|null $lang
+ * @property int|null $cheat
+ * @property int|null $invites
+ * @property int|null $invited_by
+ * @property string|null $vip_until
+ * @property string|null $bonuscomment
+ * @property string|null $leechwarnuntil
+ * @property string|null $lastwarned
+ * @property int|null $timeswarned
+ * @property int|null $warnedby
+ * @property int|null $sbnum
+ * @property int|null $sbrefresh
+ * @property int|null $showdlnotice
+ * @property int|null $pmnum
+ * @property string|null $page
  * @property-read Language|null $language
  */
 class User extends Authenticatable implements FilamentUser, HasName
@@ -379,7 +439,10 @@ class User extends Authenticatable implements FilamentUser, HasName
         });
     }
 
-    public function exams()
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany<ExamUser, $this>
+     */
+    public function exams(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(ExamUser::class, 'uid');
     }
@@ -439,7 +502,10 @@ class User extends Authenticatable implements FilamentUser, HasName
         return $this->hasMany(Post::class, 'userid');
     }
 
-    public function torrents()
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany<Torrent, $this>
+     */
+    public function torrents(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(Torrent::class, 'owner');
     }
@@ -498,6 +564,9 @@ class User extends Authenticatable implements FilamentUser, HasName
         return $this->hasMany(HitAndRun::class, 'uid');
     }
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany<Medal, $this>
+     */
     public function medals(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
     {
         return $this->belongsToMany(Medal::class, 'user_medals', 'uid', 'medal_id')
@@ -507,6 +576,9 @@ class User extends Authenticatable implements FilamentUser, HasName
             ;
     }
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany<Medal, $this>
+     */
     public function valid_medals(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
     {
         return $this->medals()->where(function ($query) {
@@ -514,6 +586,9 @@ class User extends Authenticatable implements FilamentUser, HasName
         });
     }
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany<Medal, $this>
+     */
     public function wearing_medals(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
     {
         return $this->valid_medals()->where('user_medals.status', UserMedal::STATUS_WEARING);

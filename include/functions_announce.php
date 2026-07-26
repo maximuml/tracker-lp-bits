@@ -100,8 +100,8 @@ function get_resp_dict_from_global() {
     } else {
         $torrent = $GLOBALS['torrent'] ?? [];
         $d = [
-            "interval" => (int)\App\Repositories\TrackerRepository::MIN_ANNOUNCE_WAIT_SECOND,
-            "min interval" => (int)\App\Repositories\TrackerRepository::MIN_ANNOUNCE_WAIT_SECOND,
+            "interval" => (int) MIN_ANNOUNCE_WAIT_SECOND,
+            "min interval" => (int) MIN_ANNOUNCE_WAIT_SECOND,
             "complete" => intval($torrent['seeders'] ?? 0),
             "incomplete" => intval($torrent['leechers'] ?? 0),
             "peers" => [],

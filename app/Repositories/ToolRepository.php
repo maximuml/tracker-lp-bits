@@ -245,7 +245,7 @@ class ToolRepository extends BaseRepository
     private function saveToFtp(array $setting, $filename): bool|string
     {
         if ($setting['via_ftp'] !== 'yes') {
-            do_log("via_ftp !== 'yes', via_ftp: " . $setting['via_ftp'] ?? '');
+            do_log("via_ftp !== 'yes', via_ftp: " . ($setting['via_ftp'] ?? ''));
             return false;
         }
         $config = config('filesystems.disks.ftp');
@@ -267,7 +267,7 @@ class ToolRepository extends BaseRepository
     public function saveToSftp(array $setting, $filename): bool|string
     {
         if ($setting['via_sftp'] !== 'yes') {
-            do_log("via_sftp !== 'yes', via_sftp: " . $setting['via_sftp'] ?? '');
+            do_log("via_sftp !== 'yes', via_sftp: " . ($setting['via_sftp'] ?? ''));
             return false;
         }
         $config = config('filesystems.disks.sftp');
@@ -293,7 +293,7 @@ class ToolRepository extends BaseRepository
         try {
             $remoteFilesystem->writeStream(basename($filename), $localFilesystem->readStream($filename));
             $speed = !(float)abs($start->diffInSeconds()) ? 0 :filesize($filename) / (float)abs($start->diffInSeconds());
-            $log =  'Elapsed time: '.$start->diffForHumans(null, true);
+            $log =  'Elapsed time: '.$start->diffForHumans(null, \Carbon\CarbonInterface::DIFF_ABSOLUTE);
             $log .= ', Speed: '. number_format($speed/1024,2) . ' KB/s';
             do_log($log);
             return true;

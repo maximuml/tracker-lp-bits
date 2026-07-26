@@ -33,13 +33,11 @@ use App\Models\User;
 use App\Utils\ApiQueryBuilder;
 use Carbon\Carbon;
 use Elasticsearch\Endpoints\Search;
-use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Hashids\Hashids;
@@ -86,7 +84,7 @@ class TorrentRepository extends BaseRepository
     /**
      *  fetch torrent list
      */
-    public function getList(Request $request, Authenticatable $user, string $sectionName = null)
+    public function getList(Request $request, User $user, string $sectionName = null)
     {
         if (empty($sectionName)) {
             $sectionId = SearchBox::getBrowseMode();
@@ -141,7 +139,7 @@ class TorrentRepository extends BaseRepository
                     });
                 }
             })
-            ->registerCustomFilter('visible', function (Builder $query, Request $request) use ($user) {
+            ->registerCustomFilter('visible', function (Builder $query, Request $request) {
                 $filterVisible = $request->input(ApiQueryBuilder::PARAM_NAME_FILTER.".visible", Torrent::FILTER_VISIBLE_YES);
                 if ($filterVisible === Torrent::FILTER_VISIBLE_YES) {
                     $query->where('visible', Torrent::VISIBLE_YES);
@@ -160,7 +158,7 @@ class TorrentRepository extends BaseRepository
         return $this->appendIncludeFields($apiQueryBuilder, $user, $torrents);
     }
 
-    public function getDetail($id, Authenticatable $user)
+    public function getDetail($id, User $user)
     {
         //query this info default
         $query = Torrent::query()->with(self::$defaultLoadRelationships);
@@ -176,7 +174,7 @@ class TorrentRepository extends BaseRepository
         return $torrentList[0];
     }
 
-    private function appendIncludeFields(ApiQueryBuilder $apiQueryBuilder, Authenticatable $user, $torrentList)
+    private function appendIncludeFields(ApiQueryBuilder $apiQueryBuilder, User $user, $torrentList)
     {
         $torrentIdArr = $bookmarkData = $thankData = $rewardData = $activeData = [];
         foreach ($torrentList as $torrent) {
@@ -234,22 +232,12 @@ class TorrentRepository extends BaseRepository
         );
     }
 
-    private function handleGetListSort(Builder $query, array $params)
-    {
-        if (empty($params['sort_field']) && empty($params['sort_type'])) {
-            //the default torrent list sort
-            return $query->orderBy('pos_state', 'desc')->orderBy('id', 'desc');
-        }
-        list($sortField, $sortType) = $this->getSortFieldAndType($params);
-        return $query->orderBy($sortField, $sortType);
-    }
-
-    public function getSearchBox($id = null)
+    public function getSearchBox(?int $id = null)
     {
         if (is_null($id)) {
             $id = Setting::get('main.browsecat');
         }
-        $searchBox = SearchBox::query()->findOrFail($id);
+        $searchBox = SearchBox::query()->findOrFail((int)$id);
         $category = $searchBox->categories()->orderBy('sort_index')->orderBy('id')->get();
         $modalRows = [];
         $modalRows[] = $categoryFormatted = $this->formatRow(Category::getLabelName(), $category, 'category');
@@ -258,7 +246,7 @@ class TorrentRepository extends BaseRepository
                 $source = Source::query()->orderBy('sort_index')->orderBy('id')->get();
                 $modalRows[] = $this->formatRow(Source::getLabelName(), $source, 'source');
             }
-            if ($searchBox->showmedia) {
+            if ($searchBox->showmedium) {
                 $media = Media::query()->orderBy('sort_index')->orderBy('id')->get();
                 $modalRows[] = $this->formatRow(Media::getLabelName(), $media, 'medium');
             }
@@ -557,7 +545,8 @@ class TorrentRepository extends BaseRepository
             'torrent_id' => $torrentId,
         ];
         if ($torrentId > 0) {
-            return TorrentSecret::query()->insert($insert);
+            TorrentSecret::query()->insert($insert);
+            return $insert['secret'];
         }
 
         TorrentSecret::query()->where('uid', $uid)->delete();
@@ -677,10 +666,8 @@ class TorrentRepository extends BaseRepository
 
         NexusDB::transaction(function () use ($torrent, $torrentOperationLog, $torrentUpdate, $notifyUser) {
             $log = "torrent: " . $torrent->id;
-            if (!empty($torrentUpdate)) {
-                $log .= ", [UPDATE_TORRENT]: " . nexus_json_encode($torrentUpdate);
-                $torrent->update($torrentUpdate);
-            }
+            $log .= ", [UPDATE_TORRENT]: " . nexus_json_encode($torrentUpdate);
+            $torrent->update($torrentUpdate);
             if (!empty($torrentOperationLog)) {
                 $log .= ", [ADD_TORRENT_OPERATION_LOG]: " . nexus_json_encode($torrentOperationLog);
                 TorrentOperationLog::add($torrentOperationLog, $notifyUser);
@@ -1096,10 +1083,10 @@ HTML;
         if (!$sections->has($sectionId)) {
             throw new NexusException(nexus_trans('upload.invalid_section'));
         }
-        /**
-         * @var $section SearchBox
-         */
         $section = $sections->get($sectionId);
+        if (!$section instanceof SearchBox) {
+            throw new NexusException(nexus_trans('upload.invalid_section'));
+        }
         $validCategoryIdArr = $section->categories->pluck('id')->toArray();
         if (!empty($specificSubCategoryAndTags['category']) && !in_array($specificSubCategoryAndTags['category'], $validCategoryIdArr)) {
             throw new NexusException(nexus_trans('upload.invalid_category'));
@@ -1137,7 +1124,7 @@ HTML;
         foreach ($torrents as $torrent) {
             $siteLogArr[] = [
                 'added' => now(),
-                'txt' => sprintf("torrent: %s category was set to: %s(%s)", $torrent->id, $category?->name ?? 'unknown', $category?->id ?? 0),
+                'txt' => sprintf("torrent: %s category was set to: %s(%s)", $torrent->id, $category ? $category->name : 'unknown', $category ? $category->id : 0),
                 'uid' => $operatorId,
             ];
         }

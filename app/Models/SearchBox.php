@@ -18,6 +18,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string|null $name
  * @property int $catsperrow
  * @property bool $showsubcat
+ * @property bool $showsource
+ * @property bool $showmedium
+ * @property bool $showcodec
+ * @property bool $showstandard
+ * @property bool $showprocessing
+ * @property bool $showaudiocodec
  */
 class SearchBox extends NexusModel
 {

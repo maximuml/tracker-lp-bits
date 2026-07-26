@@ -28,9 +28,9 @@ class InviteAddTemporary extends Command
      */
     public function handle()
     {
-        $idRedisKey = $this->argument('idRedisKey');
-        $days = $this->argument('days');
-        $count = $this->argument('count');
+        $idRedisKey = (string) $this->argument('idRedisKey');
+        $days = (int) $this->argument('days');
+        $count = (int) $this->argument('count');
         $log = "idRedisKey: $idRedisKey, days: $days, count: $count";
         $this->info($log);
         do_log($log);

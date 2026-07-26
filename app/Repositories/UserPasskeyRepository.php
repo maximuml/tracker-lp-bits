@@ -106,6 +106,9 @@ class UserPasskeyRepository extends BaseRepository
         $challenge = self::getChallenge($challengeId);
         $clientDataJSON = !empty($clientDataJSON) ? base64_decode($clientDataJSON) : null;
         $id = !empty($id) ? base64_decode($id) : null;
+        if (!is_string($id) || $id === '') {
+            throw new RuntimeException(nexus_trans('passkey.passkey_invalid'));
+        }
         $authenticatorData = !empty($authenticatorData) ? base64_decode($authenticatorData) : null;
         $signature = !empty($signature) ? base64_decode($signature) : null;
         $userHandle = !empty($userHandle) ? base64_decode($userHandle) : null;
@@ -117,7 +120,7 @@ class UserPasskeyRepository extends BaseRepository
             throw new RuntimeException(nexus_trans('passkey.passkey_unknown'));
         }
 
-        if ($userHandle !== bin2hex($passkey->user_id)) {
+        if ($userHandle !== bin2hex((string)$passkey->user_id)) {
             throw new RuntimeException(nexus_trans('passkey.passkey_invalid'));
         }
 

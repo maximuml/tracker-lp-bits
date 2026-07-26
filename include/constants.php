@@ -10,6 +10,7 @@ defined('THISTRACKER') || define("THISTRACKER","General");
 defined('CONTENT_WIDTH') || define("CONTENT_WIDTH", 1200);
 defined('ROOT_PATH') || define('ROOT_PATH', dirname(__DIR__) . '/');
 defined('DEFAULT_TRACKER_URI') || define('DEFAULT_TRACKER_URI', '/announce.php');
+defined('MIN_ANNOUNCE_WAIT_SECOND') || define('MIN_ANNOUNCE_WAIT_SECOND', 300);
 if (!defined('RUNNING_IN_OCTANE')) {
     $runningInOctane = false;
     foreach (($_SERVER['argv'] ?? []) as $command) {

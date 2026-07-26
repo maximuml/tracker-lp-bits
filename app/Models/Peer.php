@@ -6,6 +6,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Cache;
 
+/**
+ * @property int $counts
+ */
 class Peer extends NexusModel
 {
     protected $fillable = [
@@ -69,12 +72,12 @@ class Peer extends NexusModel
         return $this->seeder == self::SEEDER_NO;
     }
 
-    public function user()
+    public function user(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(User::class, 'userid');
     }
 
-    public function relative_torrent()
+    public function relative_torrent(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(Torrent::class, 'torrent');
     }

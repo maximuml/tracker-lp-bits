@@ -454,10 +454,9 @@ class SearchRepository extends BaseRepository
                 $pattern = sprintf("/\[%s([\d]+)\]/", substr($queryField, 0, 3));
                 if (preg_match($pattern, $userSetting, $matches)) {
                     if (count($matches) == 2 && !empty($matches[1])) {
-                        foreach ($matches[1] as $match) {
-                            $mustBoolShould[$torrentField][] = ['match' => [$torrentField => $match]];
-                            do_log("get mustBoolShould for $torrentField from user setting through $queryField: $match");
-                        }
+                        $match = $matches[1];
+                        $mustBoolShould[$torrentField][] = ['match' => [$torrentField => $match]];
+                        do_log("get mustBoolShould for $torrentField from user setting through $queryField: $match");
                     }
                 }
             }

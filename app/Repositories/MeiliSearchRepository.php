@@ -199,8 +199,11 @@ class MeiliSearchRepository extends BaseRepository
             do_log(sprintf('importing page: %s with id: %s, %s records...', $page, $id, $count));
             $data = [];
             foreach ($torrents as $torrent) {
+                if (!$torrent instanceof Torrent) {
+                    continue;
+                }
                 $row = [];
-                foreach ($torrent as $field => $value) {
+                foreach ($torrent->getAttributes() as $field => $value) {
                     $row[$field] = $this->formatValueForMeili($field, $value);
                 }
                 $data[] = $row;
@@ -312,10 +315,9 @@ class MeiliSearchRepository extends BaseRepository
                 $pattern = sprintf("/\[%s([\d]+)\]/", substr($queryField, 0, 3));
                 if (preg_match($pattern, $userSetting, $matches)) {
                     if (count($matches) == 2 && !empty($matches[1])) {
-                        foreach ($matches[1] as $match) {
-                            $taxonomies[$torrentField][] = $match;
-                            do_log("$torrentField from user setting through $queryField: $match");
-                        }
+                        $match = $matches[1];
+                        $taxonomies[$torrentField][] = $match;
+                        do_log("$torrentField from user setting through $queryField: $match");
                     }
                 }
             }

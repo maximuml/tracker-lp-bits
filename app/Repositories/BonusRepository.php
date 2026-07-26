@@ -293,7 +293,7 @@ class BonusRepository extends BaseRepository
                     'uid' => $owner->id,
                     'old_total_value' => $owner->seedbonus,
                     'value' => $increaseBonus,
-                    'new_total_value' => bcadd($owner->seedbonus, $increaseBonus),
+                    'new_total_value' => bcadd((string)$owner->seedbonus, (string)$increaseBonus),
                     'comment' => sprintf('[%s] %s', BonusLogs::$businessTypes[$businessType]['text'], $comment),
                     'created_at' => $nowStr,
                     'updated_at' => $nowStr,
@@ -334,7 +334,7 @@ class BonusRepository extends BaseRepository
         }
         NexusDB::transaction(function () use ($user, $requireBonus, $logBusinessType, $logComment, $userUpdates) {
             $oldUserBonus = $user->seedbonus;
-            $newUserBonus = bcsub($oldUserBonus, $requireBonus);
+            $newUserBonus = bcsub((string)$oldUserBonus, (string)$requireBonus);
             $log = "user: {$user->id}, requireBonus: $requireBonus, oldUserBonus: $oldUserBonus, newUserBonus: $newUserBonus, logBusinessType: $logBusinessType, logComment: $logComment";
             do_log($log);
             $userUpdates['seedbonus'] = $newUserBonus;

@@ -233,7 +233,7 @@ if ($newnumpeers > $rsize)
 	$limit = " ORDER BY RAND() LIMIT $rsize";
 else $limit = "";
 
-$announce_wait = \App\Repositories\TrackerRepository::MIN_ANNOUNCE_WAIT_SECOND;
+$announce_wait = MIN_ANNOUNCE_WAIT_SECOND;
 $lastActionField = \Nexus\Database\NexusDB::unixTimestampField('last_action');
 $prevActionField = \Nexus\Database\NexusDB::unixTimestampField('prev_action');
 $fields = "id, seeder, peer_id, ip, ipv4, ipv6, port, uploaded, downloaded, userid, last_action, $lastActionField as last_action_unix_timestamp, prev_action, (".TIMENOW." - $lastActionField) AS announcetime, $prevActionField AS prevts";

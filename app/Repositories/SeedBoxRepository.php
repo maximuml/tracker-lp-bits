@@ -35,7 +35,7 @@ class SeedBoxRepository extends BaseRepository
 
     /**
      * @param array $params
-     * @return \Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Eloquent\Model
+     * @return SeedBoxRecord
      */
     public function store(array $params)
     {
@@ -347,8 +347,8 @@ class SeedBoxRepository extends BaseRepository
      *  IS_SEED_BOX_FROM_USER_RECORD:ASN:EXCLUDES:ADMIN
      *
      * @param int $userId
-     * @param int $isAllowed
-     * @param string $field
+     * @param IpAsnEnum $field
+     * @param IsAllowedEnum $isAllowed
      * @return string
      */
     private static function getCacheKey(int $userId, IsAllowedEnum $isAllowed, IpAsnEnum $field): string

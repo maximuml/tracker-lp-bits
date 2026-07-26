@@ -2,6 +2,9 @@
 
 namespace App\Models;
 
+/**
+ * @property int $id
+ */
 class UserMedal extends NexusModel
 {
     protected $fillable = ['uid', 'medal_id', 'expire_at', 'status', 'bonus_addition_expire_at'];

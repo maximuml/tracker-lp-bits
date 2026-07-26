@@ -39,8 +39,8 @@ class ExamAssign extends Command
     public function handle()
     {
         $examRep = new ExamRepository();
-        $uid = $this->option('uid');
-        $examId = $this->option('exam_id');
+        $uid = (int) $this->option('uid');
+        $examId = (int) $this->option('exam_id');
         $begin = $this->option('begin');
         $end = $this->option('end');
         $this->info(sprintf('uid: %s, examId: %s, begin: %s, end: %s', $uid, $examId, $begin, $end));

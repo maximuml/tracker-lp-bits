@@ -67,7 +67,7 @@ class BookmarkController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
+     * @param  \Illuminate\Http\Request  $request
      * @return array
      */
     public function destroy(Request $request)

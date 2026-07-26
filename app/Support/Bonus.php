@@ -237,11 +237,11 @@ class Bonus
     public static function buildBonusTable(
         array $bonusResult,
         bool $isDonor,
-        $donortimesBonus,
-        $officialTag,
-        $officialAdditionalFactor,
-        $haremFactor,
-        $haremAddition,
+        float $donortimesBonus,
+        string $officialTag,
+        float $officialAdditionalFactor,
+        float $haremFactor,
+        float $haremAddition,
         array $options = []
     ): array {
         $baseBonusFactor = 1;

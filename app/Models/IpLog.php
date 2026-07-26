@@ -1,5 +1,13 @@
 <?php
 
+/**
+ * @property int $id
+ * @property string $ip
+ * @property int $userid
+ * @property string|null $access
+ * @property string|null $uri
+ * @property int $count
+ */
 namespace App\Models;
 
 

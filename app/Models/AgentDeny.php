@@ -1,5 +1,13 @@
 <?php
 
+/**
+ * @property int $family_id
+ * @property string $name
+ * @property string $peer_id
+ * @property string $agent
+ * @property string|null $comment
+ * @property int $id
+ */
 namespace App\Models;
 
 use App\Enums\ModelEventEnum;

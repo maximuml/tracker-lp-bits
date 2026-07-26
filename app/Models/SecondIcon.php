@@ -1,5 +1,18 @@
 <?php
 
+/**
+ * @property int $id
+ * @property int $source
+ * @property int $medium
+ * @property int $codec
+ * @property int $standard
+ * @property int $processing
+ * @property int $audiocodec
+ * @property string $name
+ * @property string|null $class_name
+ * @property string $image
+ * @property int $mode
+ */
 namespace App\Models;
 
 

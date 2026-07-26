@@ -1,5 +1,23 @@
 <?php
 
+/**
+ * @property int $id
+ * @property string|null $name
+ * @property array|null $section_name
+ * @property int $showsubcat
+ * @property int $showsource
+ * @property int $showmedium
+ * @property int $showcodec
+ * @property int $showstandard
+ * @property int $showprocessing
+ * @property int $showaudiocodec
+ * @property int $catsperrow
+ * @property int $catpadding
+ * @property string|null $custom_fields
+ * @property string|null $custom_fields_display_name
+ * @property string|null $custom_fields_display
+ * @property array|null $extra
+ */
 namespace App\Models;
 
 use App\Auth\Permission;

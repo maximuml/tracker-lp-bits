@@ -1,5 +1,30 @@
 <?php
 
+/**
+ * @property int $id
+ * @property string|null $added
+ * @property string $question
+ * @property string $option0
+ * @property string $option1
+ * @property string $option2
+ * @property string $option3
+ * @property string $option4
+ * @property string $option5
+ * @property string $option6
+ * @property string $option7
+ * @property string $option8
+ * @property string $option9
+ * @property string $option10
+ * @property string $option11
+ * @property string $option12
+ * @property string $option13
+ * @property string $option14
+ * @property string $option15
+ * @property string $option16
+ * @property string $option17
+ * @property string $option18
+ * @property string $option19
+ */
 namespace App\Models;
 
 

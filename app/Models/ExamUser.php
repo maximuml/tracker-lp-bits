@@ -1,5 +1,17 @@
 <?php
 
+/**
+ * @property int $id
+ * @property int $uid
+ * @property int $exam_id
+ * @property int $status
+ * @property string|null $begin
+ * @property string|null $end
+ * @property string|null $progress
+ * @property int $is_done
+ * @property string|null $created_at
+ * @property string|null $updated_at
+ */
 namespace App\Models;
 
 use App\Models\Traits\NexusActivityLogTrait;

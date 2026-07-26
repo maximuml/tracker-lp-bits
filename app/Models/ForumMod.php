@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * @property int $id
+ * @property int $forumid
+ * @property int $userid
+ */
 namespace App\Models;
 class ForumMod extends NexusModel
 {

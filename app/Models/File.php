@@ -1,5 +1,11 @@
 <?php
 
+/**
+ * @property int $id
+ * @property int $torrent
+ * @property string $filename
+ * @property int $size
+ */
 namespace App\Models;
 
 

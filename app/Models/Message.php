@@ -1,5 +1,16 @@
 <?php
 
+/**
+ * @property int $id
+ * @property int $sender
+ * @property int $receiver
+ * @property string|null $added
+ * @property string $subject
+ * @property string $msg
+ * @property string $unread
+ * @property int $location
+ * @property string $saved
+ */
 namespace App\Models;
 
 use App\Enums\ModelEventEnum;

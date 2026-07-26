@@ -1,5 +1,20 @@
 <?php
 
+/**
+ * @property int $id
+ * @property string $name
+ * @property string $color
+ * @property int $priority
+ * @property string|null $created_at
+ * @property string|null $updated_at
+ * @property string $padding
+ * @property string $margin
+ * @property string $border_radius
+ * @property string $font_size
+ * @property string $font_color
+ * @property string|null $description
+ * @property int $mode
+ */
 namespace App\Models;
 
 use App\Models\Traits\NexusActivityLogTrait;

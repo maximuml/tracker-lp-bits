@@ -12,7 +12,9 @@ use Nexus\Database\NexusDB;
  */
 final class Category
 {
+    /** @var array<int, array<string, mixed>>|null */
     private static ?array $iconRows = null;
+    /** @var array<int, array<string, mixed>>|null */
     private static ?array $categoryRows = null;
 
     /**
@@ -20,7 +22,11 @@ final class Category
      *
      * Mirrors `get_category_icon_row()`.
      */
-    public static function iconRow($cache, int|string $typeId): ?array
+    /**
+     * @param  mixed  $cache
+     * @return array<string, mixed>|null
+     */
+    public static function iconRow(mixed $cache, int|string $typeId): ?array
     {
         $typeId = (int) $typeId ?: 1;
 
@@ -48,9 +54,10 @@ final class Category
      *
      * Mirrors `get_category_row($catid)`.
      *
+     * @param  mixed  $cache
      * @return array<string, mixed>|null
      */
-    public static function row($cache, int|string|null $catId = null): ?array
+    public static function row(mixed $cache, int|string|null $catId = null): ?array
     {
         if (self::$categoryRows === null) {
             $cached = method_exists($cache, 'get_value') ? $cache->get_value('category_content') : false;
@@ -80,7 +87,11 @@ final class Category
      *
      * Mirrors `get_second_icon()`.
      */
-    public static function secondIcon($cache, array $row, string $catFolder): string
+    /**
+     * @param  mixed  $cache
+     * @param  array<string, mixed>  $row
+     */
+    public static function secondIcon(mixed $cache, array $row, string $catFolder): string
     {
         $source = $row['source'] ?? '';
         $medium = $row['medium'] ?? '';
@@ -141,7 +152,11 @@ final class Category
      *
      * @return array<int, array<string, mixed>>
      */
-    public static function listByMode($cache, int|string $catmode = 1): array
+    /**
+     * @param  mixed  $cache
+     * @return array<int, array<string, mixed>>
+     */
+    public static function listByMode(mixed $cache, int|string $catmode = 1): array
     {
         $catmode = (int) $catmode;
         $cacheKey = 'category_list_mode_' . $catmode;

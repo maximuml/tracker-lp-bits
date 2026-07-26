@@ -1,5 +1,11 @@
 <?php
 
+/**
+ * @property int $id
+ * @property string $imagehash
+ * @property string $imagestring
+ * @property int $dateline
+ */
 namespace App\Models;
 
 

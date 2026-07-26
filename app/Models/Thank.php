@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * @property int $id
+ * @property int $torrentid
+ * @property int $userid
+ */
 namespace App\Models;
 
 

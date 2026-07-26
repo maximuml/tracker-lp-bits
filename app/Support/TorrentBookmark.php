@@ -16,9 +16,10 @@ final class TorrentBookmark
      *
      * Mirrors `return_torrent_bookmark_array()`.
      *
+     * @param  mixed  $cache
      * @return array<int, int>
      */
-    public static function bookmarkArray($cache, int|string $userId): array
+    public static function bookmarkArray(mixed $cache, int|string $userId): array
     {
         $userId = (int) $userId;
         $cacheKey = 'user_' . $userId . '_bookmark_array';
@@ -49,7 +50,11 @@ final class TorrentBookmark
      *
      * Mirrors `get_torrent_bookmark_state()`.
      */
-    public static function stateMarkup($cache, int|string $userId, int|string $torrentId, bool $text = false, array $labels = []): string
+    /**
+     * @param  mixed  $cache
+     * @param  array<string, string>  $labels
+     */
+    public static function stateMarkup(mixed $cache, int|string $userId, int|string $torrentId, bool $text = false, array $labels = []): string
     {
         $userId = (int) $userId;
         $torrentId = (int) $torrentId;

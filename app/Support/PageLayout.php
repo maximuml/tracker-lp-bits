@@ -6,7 +6,14 @@ use App\Models\SearchBox;
 use Nexus\Database\NexusDB;
 class PageLayout
 {
-    public static function header($title = "", $msgalert = true, $script = "", $place = "")
+    /**
+     * @param  string  $title
+     * @param  bool  $msgalert
+     * @param  string  $script
+     * @param  string  $place
+     * @return void
+     */
+    public static function header(string $title = "", bool $msgalert = true, string $script = "", string $place = "")
     {
         global $lang_functions;
         global $CURUSER, $CURLANGDIR, $USERUPDATESET, $iplog1, $oldip, $SITE_ONLINE, $FUNDS, $SITENAME, $SLOGAN, $logo_main, $BASEURL, $offlinemsg, $enabledonation, $staffmem_class, $titlekeywords_tweak, $metakeywords_tweak, $metadescription_tweak, $cssdate_tweak, $deletenotransfertwo_account, $neverdelete_account, $iniupload_main;
@@ -609,7 +616,10 @@ class PageLayout
             }
         }
     }
-    public static function footer()
+    /**
+     * @return void
+     */
+    public static function footer(): void
     {
         global $SITENAME, $BASEURL, $Cache, $datefounded, $tstart, $icplicense_main, $add_key_shortcut, $query_name, $USERUPDATESET, $CURUSER, $enablesqldebug_tweak, $sqldebug_tweak, $analyticscode_tweak;
         global $hook;

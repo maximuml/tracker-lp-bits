@@ -1,5 +1,22 @@
 <?php
 
+/**
+ * @property int $id
+ * @property string $family
+ * @property string $start_name
+ * @property string $peer_id_pattern
+ * @property int $peer_id_match_num
+ * @property string $peer_id_matchtype
+ * @property string $peer_id_start
+ * @property string $agent_pattern
+ * @property int $agent_match_num
+ * @property string $agent_matchtype
+ * @property string $agent_start
+ * @property string $exception
+ * @property string $allowhttps
+ * @property string|null $comment
+ * @property int $hits
+ */
 namespace App\Models;
 
 use App\Enums\ModelEventEnum;

@@ -205,6 +205,7 @@ final class AuthCookie
      *
      * Mirrors `get_user_id_and_signature_from_cookie()`.
      *
+     * @param  array<string, mixed>  $cookie
      * @return array{user_id: int, token_json: string, signature: string}|null
      */
     public static function decodeCookie(array $cookie): ?array
@@ -258,6 +259,7 @@ final class AuthCookie
      * Mirrors `get_user_from_cookie()`. When `$isArray` is true the row is
      * returned as an array, otherwise an Eloquent User model is returned.
      *
+     * @param  array<string, mixed>  $cookie
      * @return array<string, mixed>|\App\Models\User|null
      */
     public static function userFromCookie(array $cookie, bool $isArray = true): array|\App\Models\User|null

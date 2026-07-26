@@ -58,6 +58,8 @@ final class Settings
      * Persist a batch of settings under the given `$prefix`.
      *
      * Mirrors `saveSetting($prefix, $nameAndValue, $autoload)`.
+     *
+     * @param  array<string, mixed>  $nameAndValue
      */
     public static function saveBatch(string $prefix, array $nameAndValue, string $autoload = 'yes'): void
     {

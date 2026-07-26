@@ -1,5 +1,16 @@
 <?php
 
+/**
+ * @property int $id
+ * @property int $business_type
+ * @property int $uid
+ * @property float $old_total_value
+ * @property float $value
+ * @property float $new_total_value
+ * @property string|null $comment
+ * @property string $created_at
+ * @property string $updated_at
+ */
 namespace App\Models;
 
 

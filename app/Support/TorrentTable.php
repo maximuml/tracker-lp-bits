@@ -4,6 +4,9 @@ namespace App\Support;
 
 final class TorrentTable
 {
+    /**
+     * @param  array<int, array<string, mixed>>  $rows
+     */
     public static function render(array $rows, string $variant = 'torrent', int $searchBoxId = 0): string
     {
         ob_start();

@@ -93,6 +93,9 @@ final class Frame
      * textarea.  Callers echo this, then call `textbbcode()`, then echo
      * `composeClose()`.
      */
+    /**
+     * @param  array<string, string>  $lang
+     */
     public static function composeOpen(
         string $title,
         string $type,
@@ -133,6 +136,9 @@ final class Frame
      * Closes the `editorouter` div/body row, renders the submit/preview
      * buttons, closes the inner table and the outer frame, and appends
      * the tags/smilies links.
+     */
+    /**
+     * @param  array<string, string>  $lang
      */
     public static function composeClose(array $lang): string
     {

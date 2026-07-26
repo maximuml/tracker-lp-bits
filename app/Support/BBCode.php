@@ -342,6 +342,9 @@ final class BBCode
      * lookup). Finally, `strip_tags()` strips any remaining HTML and
      * the result is `trim()`'d.
      */
+    /**
+     * @param  array<int, string>  $emojiMap
+     */
     public static function stripAll(string $text, array $emojiMap): string
     {
         $literalTags = [

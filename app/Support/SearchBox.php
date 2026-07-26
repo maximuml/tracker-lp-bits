@@ -11,6 +11,7 @@ use Nexus\Database\NexusDB;
  */
 final class SearchBox
 {
+    /** @var array<int, array<string, mixed>>|null */
     private static ?array $rows = null;
 
     /**
@@ -18,7 +19,10 @@ final class SearchBox
      *
      * Mirrors `get_searchbox_value($mode, $item)`.
      */
-    public static function value($cache, int|string $mode, string $item): mixed
+    /**
+     * @param  mixed  $cache
+     */
+    public static function value(mixed $cache, int|string $mode, string $item): mixed
     {
         if (self::$rows === null) {
             $cached = method_exists($cache, 'get_value') ? $cache->get_value('search_box_content') : false;
@@ -50,9 +54,10 @@ final class SearchBox
      *
      * Mirrors `searchbox_item_list()`.
      *
+     * @param  mixed  $cache
      * @return array<int, array<string, mixed>>
      */
-    public static function itemList($cache, string $table, int|string $mode): array
+    public static function itemList(mixed $cache, string $table, int|string $mode): array
     {
         $mode = (int) $mode;
         $cacheKey = "{$table}_list_mode_{$mode}";
@@ -84,6 +89,9 @@ final class SearchBox
      *
      * Mirrors `build_search_area()`.
      */
+    /**
+     * @param  array<string, mixed>  $options
+     */
     public static function areaSelect(int|string $searchArea, array $options = []): string
     {
         $result = sprintf('<select name="search_area" style="%s">', $options['style'] ?? '');
@@ -105,8 +113,12 @@ final class SearchBox
      *
      * Mirrors `build_search_box_category_table()`.
      */
+    /**
+     * @param  mixed  $cache
+     * @param  array<string, mixed>  $options
+     */
     public static function buildCategoryTable(
-        $cache,
+        mixed $cache,
         int|string $mode,
         int|string $checkboxValue,
         string $categoryHrefPrefix,

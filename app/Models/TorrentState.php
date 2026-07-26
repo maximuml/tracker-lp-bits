@@ -1,5 +1,13 @@
 <?php
 
+/**
+ * @property int $global_sp_state
+ * @property int $id
+ * @property string|null $deadline
+ * @property string|null $remark
+ * @property int $notice_days
+ * @property string|null $begin
+ */
 namespace App\Models;
 
 

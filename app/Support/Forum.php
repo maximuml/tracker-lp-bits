@@ -27,7 +27,10 @@ final class Forum
      *
      * Mirrors `get_forum_moderators()`.
      */
-    public static function moderators($cache, int|string $forumId, bool $plainText = true): string
+    /**
+     * @param  mixed  $cache
+     */
+    public static function moderators(mixed $cache, int|string $forumId, bool $plainText = true): string
     {
         static $moderatorsArray = null;
 
@@ -124,10 +127,16 @@ final class Forum
      *
      * Mirrors `can_view_post()`.
      */
+    /**
+     * @param  array<string, mixed>|int|string  $post
+     */
     public static function canViewPost(int|string $uid, array|int|string $post): bool
     {
+        /** @var array<int, \App\Models\Topic> $topics */
         static $topics = [];
+        /** @var array<int, string>|null $protectedForumIds */
         static $protectedForumIds = null;
+        /** @var array<int, int>|null $forumMods */
         static $forumMods = null;
 
         if (! is_array($post)) {
@@ -188,7 +197,11 @@ final class Forum
      *
      * Mirrors `get_post_row()`.
      */
-    public static function postRow($cache, int|string $postId): ?array
+    /**
+     * @param  mixed  $cache
+     * @return array<string, mixed>|null
+     */
+    public static function postRow(mixed $cache, int|string $postId): ?array
     {
         $cacheKey = 'post_' . $postId . '_content';
         $row = method_exists($cache, 'get_value') ? $cache->get_value($cacheKey) : false;

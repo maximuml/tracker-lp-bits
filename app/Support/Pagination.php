@@ -160,6 +160,10 @@ final class Pagination
      *
      * Backs the `pager()` helper.
      */
+    /**
+     * @param  array<string, mixed>  $opts
+     * @return array{0: string, 1: string, 2: string, 3: int, 4: int, 5: int}
+     */
     public static function pager(int $rpp, int $count, string $href, array $opts = [], string $pagename = 'page'): array
     {
         $pages = (int) ceil($count / $rpp);

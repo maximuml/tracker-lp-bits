@@ -1,5 +1,17 @@
 <?php
 
+/**
+ * @property int $id
+ * @property int $userid
+ * @property string $subject
+ * @property string $locked
+ * @property int $forumid
+ * @property int $firstpost
+ * @property int $lastpost
+ * @property string $sticky
+ * @property int $hlcolor
+ * @property int $views
+ */
 namespace App\Models;
 
 

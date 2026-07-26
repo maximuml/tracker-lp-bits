@@ -12,6 +12,9 @@ use App\Models\Setting;
  */
 final class Site
 {
+    /**
+     * @return array<string, string>
+     */
     public static function info(): array
     {
         $setting = Setting::get('basic');

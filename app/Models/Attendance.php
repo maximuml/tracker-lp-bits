@@ -1,5 +1,13 @@
 <?php
 
+/**
+ * @property int $id
+ * @property int $uid
+ * @property string $added
+ * @property int $points
+ * @property int $days
+ * @property int $total_days
+ */
 namespace App\Models;
 
 /**

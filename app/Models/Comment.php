@@ -1,5 +1,18 @@
 <?php
 
+/**
+ * @property int $id
+ * @property int $user
+ * @property int $torrent
+ * @property string|null $added
+ * @property string|null $text
+ * @property string|null $ori_text
+ * @property int $editedby
+ * @property string|null $editdate
+ * @property int $offer
+ * @property int $request
+ * @property string $anonymous
+ */
 namespace App\Models;
 
 

@@ -1,5 +1,26 @@
 <?php
 
+/**
+ * @property int $id
+ * @property string $name
+ * @property string|null $description
+ * @property string|null $begin
+ * @property string|null $end
+ * @property int $duration
+ * @property string|null $filters
+ * @property string $indexes
+ * @property int $status
+ * @property int $is_discovered
+ * @property int $priority
+ * @property string|null $created_at
+ * @property string|null $updated_at
+ * @property string|null $recurring
+ * @property int $type
+ * @property int $success_reward_bonus
+ * @property int $fail_deduct_bonus
+ * @property int $max_user_count
+ * @property string $background_color
+ */
 namespace App\Models;
 
 use App\Models\Traits\NexusActivityLogTrait;

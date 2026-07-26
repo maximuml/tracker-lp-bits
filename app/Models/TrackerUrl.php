@@ -1,5 +1,14 @@
 <?php
 
+/**
+ * @property int $id
+ * @property string $url
+ * @property int $enabled
+ * @property int $is_default
+ * @property int $priority
+ * @property string|null $created_at
+ * @property string|null $updated_at
+ */
 namespace App\Models;
 
 use App\Models\Traits\NexusActivityLogTrait;

@@ -203,8 +203,12 @@ final class UserClass
      * packs, applies class aliases, and optionally wraps the name in
      * the coloured `<b class="..._Name">` tag.
      */
+    /**
+     * @param  int|string  $class
+     * @param  array<string, mixed>  $options
+     */
     public static function name(
-        $class,
+        int|string $class,
         bool $compact = false,
         bool $b_colored = false,
         bool $I18N = false,

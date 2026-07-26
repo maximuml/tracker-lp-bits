@@ -141,6 +141,9 @@ final class UserDisplay
      *
      * Mirrors `is_donor()`.
      */
+    /**
+     * @param  array<string, mixed>  $userInfo
+     */
     public static function isDonor(array $userInfo): bool
     {
         $donorUntil = $userInfo['donoruntil'] ?? null;

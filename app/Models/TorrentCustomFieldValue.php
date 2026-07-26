@@ -1,5 +1,13 @@
 <?php
 
+/**
+ * @property int $id
+ * @property int $torrent_id
+ * @property int $custom_field_id
+ * @property string|null $custom_field_value
+ * @property string $created_at
+ * @property string $updated_at
+ */
 namespace App\Models;
 
 use Nexus\Database\NexusDB;

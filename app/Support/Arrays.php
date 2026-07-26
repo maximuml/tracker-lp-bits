@@ -15,13 +15,17 @@ use Illuminate\Support\Arr;
 final class Arrays
 {
     /**
-     * @param  array<mixed, mixed>|ArrayAccess  $array
+     * @param  array<mixed, mixed>|ArrayAccess<mixed, mixed>  $array
      */
     public static function get(array|ArrayAccess $array, int|string|null $key, mixed $default = null): mixed
     {
         return Arr::get($array, $key, $default);
     }
 
+    /**
+     * @param  array<mixed, mixed>  $array
+     * @return array<mixed, mixed>
+     */
     public static function set(array &$array, int|string|null $key, mixed $value): array
     {
         return Arr::set($array, $key, $value);

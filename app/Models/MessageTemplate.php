@@ -1,5 +1,13 @@
 <?php
 
+/**
+ * @property int $id
+ * @property string $name
+ * @property int $language_id
+ * @property string $content
+ * @property string|null $created_at
+ * @property string|null $updated_at
+ */
 namespace App\Models;
 
 use App\Enums\MessageTemplateNameEnum;

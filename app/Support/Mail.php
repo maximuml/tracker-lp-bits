@@ -68,6 +68,10 @@ final class Mail
      *
      * Mirrors `sent_mail()`.
      */
+    /**
+     * @param  array<string, mixed>  $mailConfig
+     * @param  array<string, string>  $labels
+     */
     public static function sent(
         string $to,
         string $fromName,

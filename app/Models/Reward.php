@@ -1,5 +1,13 @@
 <?php
 
+/**
+ * @property int $id
+ * @property int $torrentid
+ * @property int $userid
+ * @property int $value
+ * @property string $created_at
+ * @property string $updated_at
+ */
 namespace App\Models;
 
 

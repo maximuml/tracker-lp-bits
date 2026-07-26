@@ -20,16 +20,9 @@ namespace App\Support;
  *                              `chs`/`cht`, utf-8 otherwise)
  *   - `change_email_encode()`  (`iconv` from utf-8 to the legacy
  *                              charset, ignoring un-mappable chars)
+ *   - `check_email()`          (pure regex validation)
  *
- * collapse into the static methods below. The fourth member of the
- * cluster, `check_email()`, has TWO responsibilities: a pure regex
- * check AND a `bannedemails` DB lookup. The regex half moves here
- * as {@see Email::isWellFormed()}; the DB half stays in the legacy
- * proxy so this class remains free of DI, DB, and configuration —
- * matching the convention used by every other class under
- * `App\Support` ({@see Ratio}, {@see Validators},
- * {@see Format}, {@see Strings}, {@see Time}, {@see Codec},
- * {@see BBCode}, {@see Cache}).
+ * collapse into the static methods below.
  *
  * The contract is pinned by `tests/Unit/Support/EmailTest.php`,
  * including the legacy quirks deliberately preserved:
@@ -141,9 +134,7 @@ final class Email
 
     /**
      * Return true if `$email` matches the legacy `check_email()`
-     * regex (see {@see WELL_FORMED_PATTERN}). Does NOT consult the
-     * `bannedemails` table — that lookup stays in the legacy
-     * `check_email()` proxy so this class remains DB-free.
+     * regex (see {@see WELL_FORMED_PATTERN}).
      *
      * Empty string → false. Anything that fails the regex →
      * false. The regex is stricter than RFC 5322 by design.
@@ -151,113 +142,5 @@ final class Email
     public static function isWellFormed(string $email): bool
     {
         return preg_match(self::WELL_FORMED_PATTERN, $email) === 1;
-    }
-
-    /**
-     * Regex matcher used by legacy `EmailBanned()` / `EmailAllowed()`.
-     * `@host` entries become subdomain-accepting regexes (`@` rewritten
-     * to `[@\.]`); naked entries match by exact equality.
-     *
-     * Two legacy branches are unreachable and intentionally preserved:
-     * entries containing `@` but not starting with one (e.g. `user@host`),
-     * and entries with a trailing `@` (e.g. `user@`) — both are pinned.
-     */
-    public static function matchesRegexList(string $email, string $listValue): bool
-    {
-        $needle = trim(strtolower($email));
-        $normalised = preg_replace('/[[:space:]]+/', ' ', trim($listValue));
-        if ($normalised === null || $normalised === '') {
-            return false;
-        }
-        foreach (explode(' ', $normalised) as $entry) {
-            $entry = trim(strtolower((string) preg_replace('/\./', '\\.', $entry)));
-
-            if (strstr($entry, '@')) {
-                if (preg_match('/^@/', $entry)) {
-                    $rewritten = preg_replace('/^@/', '[@\\.]', $entry);
-                    if (preg_match('/'.$rewritten.'$/', $needle)) {
-                        return true;
-                    }
-                }
-                // Legacy quirk: "user@host" and "user@" entries are unreachable.
-            } elseif (preg_match('/@$/', $entry)) {
-                if (preg_match('/^'.$entry.'/', $needle)) {
-                    return true;
-                }
-            } else {
-                if ($entry === $needle) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * Plain case-sensitive `str_ends_with()` matcher used by legacy
-     * `check_email()`. Diverges from {@see matchesRegexList()} in case
-     * sensitivity and lack of subdomain expansion; same banlist can yield
-     * different verdicts depending on which entry point a call site uses.
-     */
-    public static function matchesSuffixList(string $email, string $listValue): bool
-    {
-        $entries = array_filter(preg_split('/[\s]+/', $listValue) ?: []);
-        foreach ($entries as $entry) {
-            if (str_ends_with($email, (string) $entry)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * Mirrors the legacy `EmailBanned($newEmail)` helper.
-     */
-    public static function isBanned(string $email): bool
-    {
-        return self::matchesRegexList(trim(strtolower($email)), EmailDomain::banned());
-    }
-
-    /**
-     * Mirrors the legacy `EmailAllowed($newEmail)` helper.
-     */
-    public static function isAllowed(string $email): bool
-    {
-        if (\get_setting('restrictemaildomain') !== 'yes') {
-            return true;
-        }
-
-        return self::matchesRegexList(trim(strtolower($email)), EmailDomain::allowed());
-    }
-
-    /**
-     * Legacy `check_email()` in one call: regex, DB banlist lookup and audit
-     * logging. Mirrors the original behavior, including the per-matching-entry
-     * `do_log()` and `false` return for a banned or malformed address.
-     */
-    public static function check(string $email): bool
-    {
-        $email = (string) $email;
-        if (! self::isWellFormed($email)) {
-            return false;
-        }
-
-        $bannedEmails = \Nexus\Database\NexusDB::select('select * from bannedemails');
-        $bannedValue = $bannedEmails[0]['value'] ?? '';
-        if (self::matchesSuffixList($email, (string) $bannedValue)) {
-            $bannedEmailsArr = array_filter(preg_split('/[\s]+/', $bannedValue));
-            foreach ($bannedEmailsArr as $ban) {
-                if (str_ends_with($email, (string) $ban)) {
-                    \do_log("[BANNED_EMAIL] email: $email is banned by record: $ban");
-                    break;
-                }
-            }
-
-            return false;
-        }
-
-        return true;
     }
 }

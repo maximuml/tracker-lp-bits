@@ -81,12 +81,6 @@ $email = safe_email($email);
 if (!check_email($email))
 	bark($lang_takesignup['std_invalid_email_address']);
 
-if(EmailBanned($email))
-    bark($lang_takesignup['std_email_address_banned']);
-
-if(!EmailAllowed($email))
-    bark($lang_takesignup['std_wrong_email_address_domains'].allowedemails());
-
 $country = $_POST["country"];
 	int_check($country);
 

@@ -49,7 +49,6 @@ return array (
     'registration' => 'yes',
 
     'enablenfo' => 'yes',
-    'restrictemail' => 'no',
     'showpolls' => 'yes',
     'showstats' => 'yes',
     'showlastxtorrents' => 'no',

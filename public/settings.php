@@ -37,7 +37,7 @@ if ($action == 'savesettings_main')	// save main
 		'minoffervotes','offervotetimeout','offeruptimeout','maxsubsize','postsperpage', 'topicsperpage', 'torrentsperpage', 'maxnewsnum',
 		'max_dead_torrent_time','maxusers','torrent_dir', 'iniupload','SITEEMAIL', 'ACCOUNTANTID', 'ALIPAYACCOUNT', 'PAYPALACCOUNT', 'SLOGAN',
 		'icplicense', 'autoclean_interval_one', 'autoclean_interval_two', 'autoclean_interval_three','autoclean_interval_four', 'autoclean_interval_five',
-		'reportemail','invitesystem','registration','enablenfo','restrictemail',
+		'reportemail','invitesystem','registration','enablenfo',
 		'showpolls','showstats','showlastxtorrents', 'showtrackerload','showshoutbox','showoffer','sptime','showhelpbox','enablebitbucket',
 		'smalldescription','altname','defaultlang','defstylesheet', 'donation','spsct','browsecat','specialcat','waitsystem',
 		'maxdlsystem','bitbucket','torrentnameprefix', 'showforumstats','verification','invite_count','invite_timeout', 'seeding_leeching_time_calc_start',
@@ -769,7 +769,6 @@ elseif ($action == 'mainsettings')	// main settings
 	yesorno($lang_settings['row_enable_nfo'],'enablenfo', $MAIN['enablenfo'], $lang_settings['text_enable_nfo_note']);
 	yesorno($lang_settings['row_enable_technical_info'],'enable_technical_info', $MAIN['enable_technical_info'], $lang_settings['text_enable_technical_info']);
 	yesorno($lang_settings['row_enable_global_search_system'],'enable_global_search', $MAIN['enable_global_search'], $lang_settings['text_global_search_system_note']);
-	yesorno($lang_settings['row_restrict_email_domain'],'restrictemail', $MAIN['restrictemail'], $lang_settings['text_restrict_email_domain_note']);
 	yesorno($lang_settings['row_show_shoutbox'],'showshoutbox', $MAIN['showshoutbox'], $lang_settings['text_show_shoutbox_note']);
 	yesorno($lang_settings['row_enable_offer_section'],'showoffer', $MAIN['showoffer'], $lang_settings['text_offer_section_note']);
 	yesorno($lang_settings['row_show_donation'],'donation', $MAIN['donation'], $lang_settings['text_show_donation_note']);

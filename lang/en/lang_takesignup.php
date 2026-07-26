@@ -4,8 +4,6 @@ $lang_takesignup = array
 (
 	'std_signup_failed' => "Signup Failed! (See Below)",
 	'std_invalid_email_address' => "Invalid email address!",
-	'std_email_address_banned' => "This email address is banned!",
-	'std_wrong_email_address_domains' => "This email address is not allowed! You could only signup with email from those domains: ",
 	'std_invalid_gender' => "Invalid Gender!",
 	'std_blank_field' => "Don't leave any fields blank.",
 	'std_hintanswer_too_short' => "Sorry, Hintanswer is too short (min is 6 chars)",

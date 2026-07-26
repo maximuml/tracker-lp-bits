@@ -21,7 +21,7 @@ class Install
     protected $steps = ['Env check', 'Create .env', 'Create tables', 'Import data', 'Create administrator'];
 
     protected $initializeTables = [
-        'adminpanel', 'agent_allowed_exception', 'agent_allowed_family', 'allowedemails', 'audiocodecs', 'bannedemails', 'categories',
+        'adminpanel', 'agent_allowed_exception', 'agent_allowed_family', 'audiocodecs', 'categories',
         'caticons', 'codecs', 'countries', 'faq', 'language', 'media', 'modpanel', 'processings', 'rules',
         'searchbox', 'secondicons', 'sources', 'standards', 'stylesheets', 'sysoppanel', 'torrents_state',
     ];

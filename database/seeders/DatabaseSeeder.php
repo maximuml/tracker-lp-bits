@@ -16,9 +16,7 @@ class DatabaseSeeder extends Seeder
         $this->call(AdminpanelTableSeeder::class);
         $this->call(AgentAllowedExceptionTableSeeder::class);
         $this->call(AgentAllowedFamilyTableSeeder::class);
-        $this->call(AllowedemailsTableSeeder::class);
         $this->call(AudiocodecsTableSeeder::class);
-        $this->call(BannedemailsTableSeeder::class);
         $this->call(CategoriesTableSeeder::class);
         $this->call(CaticonsTableSeeder::class);
         $this->call(CodecsTableSeeder::class);

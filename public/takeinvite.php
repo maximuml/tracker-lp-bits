@@ -38,11 +38,6 @@ if (!$email)
     bark($lang_takeinvite['std_must_enter_email']);
 if (!check_email($email))
 	bark($lang_takeinvite['std_invalid_email_address']);
-if(EmailBanned($email))
-    bark($lang_takeinvite['std_email_address_banned']);
-
-if(!EmailAllowed($email))
-    bark($lang_takeinvite['std_wrong_email_address_domains'].allowedemails());
 
 $body = str_replace("<br />", "<br />", nl2br(trim(strip_tags($_POST["body"]))));
 if(!$body)

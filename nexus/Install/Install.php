@@ -674,7 +674,7 @@ class Install
                 continue;
             }
             $this->doLog("[IMPORT DATA] $table, $sql");
-            \Nexus\Database\NexusDB::getInstance()->query("truncate table $table");
+            \Nexus\Database\NexusDB::table($table)->truncate();
             \Nexus\Database\NexusDB::getInstance()->query($sql);
         }
         return true;

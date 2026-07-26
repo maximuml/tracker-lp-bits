@@ -86,7 +86,7 @@ final class Menu
 
         $CURUSER = $GLOBALS['CURUSER'] ?? null;
         if ($CURUSER && ($GLOBALS['where_tweak'] ?? '') === 'yes') {
-            $GLOBALS['USERUPDATESET'][] = 'page = ' . \App\Support\LegacyDb::escape($result['selected']);
+            $GLOBALS['USERUPDATESET']['page'] = $result['selected'];
         }
 
         return $result['html'];

@@ -305,7 +305,7 @@ final class Comment
 
             $html .= '<table class="main" width="100%" border="0" cellspacing="0" cellpadding="5">' . "\n";
             $secs = 900;
-            $dt = \App\Support\LegacyDb::escape(date('Y-m-d H:i:s', TIMENOW - $secs));
+            $dt = date('Y-m-d H:i:s', TIMENOW - $secs);
             $html .= '<tr>' . "\n";
             $html .= '<td class="rowfollow" width="150" valign="top" style="padding: 0px;">' . \return_avatar_image($avatar) . '</td>' . "\n";
             $html .= '<td class="rowfollow word-break-all" valign="top"><br />' . $text . $textEditby . '</td>' . "\n";
@@ -316,7 +316,7 @@ final class Comment
                 . (\user_can('commanage') ? '<a href="comment.php?action=delete&amp;cid=' . $row['id'] . '&amp;type=' . $type . '"><img class="f_delete" src="pic/trans.gif" alt="Delete" title="' . ($lang_functions['title_delete'] ?? '') . '" /></a>' : '')
                 . (($row['user'] == $CURUSER['id'] || \get_user_class() >= $commanage_class) ? '<a href="comment.php?action=edit&amp;cid=' . $row['id'] . '&amp;type=' . $type . '"><img class="f_edit" src="pic/trans.gif" alt="Edit" title="' . ($lang_functions['title_edit'] ?? '') . '" /></a>' : '');
 
-            $onlineIcon = ("'" . $userRow['last_access'] . "'" > $dt)
+            $onlineIcon = ($userRow['last_access'] > $dt)
                 ? '<img class="f_online" src="pic/trans.gif" alt="Online" title="' . ($lang_functions['title_online'] ?? '') . '" />'
                 : '<img class="f_offline" src="pic/trans.gif" alt="Offline" title="' . ($lang_functions['title_offline'] ?? '') . '" />';
 

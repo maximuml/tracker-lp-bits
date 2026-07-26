@@ -502,15 +502,10 @@ class NexusDB
 
     public static function getDatabaseVersionInfo(): array
     {
+        $version = DB::connection()->getPdo()->getAttribute(\PDO::ATTR_SERVER_VERSION);
         if (self::isMysql()) {
-            $sql = 'select version() as v';
-            $result = NexusDB::select($sql);
-            $version = $result[0]['v'];
             $minVersion = '5.7.8';
-        } else if (self::isPgsql()) {
-            $sql = 'SHOW server_version;';
-            $result = NexusDB::select($sql);
-            $version = $result[0]['server_version'];
+        } elseif (self::isPgsql()) {
             $minVersion = '16.0';
         } else {
             throw new \RuntimeException('Not supported database.');

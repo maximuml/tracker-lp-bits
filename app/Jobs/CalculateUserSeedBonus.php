@@ -88,8 +88,13 @@ class CalculateUserSeedBonus implements ShouldQueue
             do_log("$logPrefix, no idStr or idRedisKey", "error");
             return;
         }
-        $sql = sprintf("select %s from users where id in (%s)", implode(',', User::$commonFields), $idStr);
-        $results = NexusDB::select($sql);
+        $idArr = array_filter(array_map('intval', explode(',', $idStr)));
+        $results = NexusDB::table('users')
+            ->whereIn('id', $idArr)
+            ->select(User::$commonFields)
+            ->get()
+            ->map(fn ($row) => (array) $row)
+            ->all();
         if (empty($results)) {
             do_log("$logPrefix, no data from idStr: $idStr", "error");
             return;

@@ -35,7 +35,10 @@ class ATTACHMENT{
 	{
 		$userid = $this->userid;
 		$now = date("Y-m-d H:i:s", TIMENOW-86400);
-		$countsofar = get_row_count("attachments", "WHERE userid=".\App\Support\LegacyDb::escape($userid)." AND added > ".\App\Support\LegacyDb::escape($now));
+		$countsofar = \Nexus\Database\NexusDB::table('attachments')
+			->where('userid', $userid)
+			->where('added', '>', $now)
+			->count();
 		$this->countsofar = $countsofar;
 	}
 

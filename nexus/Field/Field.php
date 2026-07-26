@@ -272,7 +272,7 @@ HEAD;
             throw new \RuntimeException("Invalid search box: $searchBoxId");
         }
         $customValues = $this->listTorrentCustomField($torrentId, $searchBoxId);
-        $customFieldIds = array_filter(array_map('intval', explode(',', $searchBox->custom_fields ?? '')));
+        $customFieldIds = array_filter(array_map('intval', is_array($searchBox->custom_fields) ? $searchBox->custom_fields : explode(',', $searchBox->custom_fields ?? '')));
         $res = NexusDB::table('torrents_custom_fields')
             ->whereIn('id', $customFieldIds)
             ->orderBy('priority', 'desc')
@@ -391,7 +391,7 @@ JS;
         if (empty($searchBox)) {
             throw new \RuntimeException("Invalid search box: $searchBoxId");
         }
-        $customFieldIds = array_filter(array_map('intval', explode(',', $searchBox->custom_fields ?? '')));
+        $customFieldIds = array_filter(array_map('intval', is_array($searchBox->custom_fields) ? $searchBox->custom_fields : explode(',', $searchBox->custom_fields ?? '')));
         if (empty($customFieldIds)) {
             return [];
         }

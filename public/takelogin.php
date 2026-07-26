@@ -32,7 +32,7 @@ if ($useChallengeResponse) {
 $user = \App\Models\User::query()->where('username', $username)->first(['id', 'passhash', 'secret', 'auth_key', 'enabled', 'status', 'two_step_secret', 'lang']);
 if (!$user)
     failedlogins();
-$row = $user->toArray();
+$row = $user->makeVisible(['passhash', 'secret', 'auth_key'])->toArray();
 
 if ($row['status'] == 'pending')
 	failedlogins($lang_takelogin['std_user_account_unconfirmed']);

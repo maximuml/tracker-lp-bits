@@ -84,12 +84,12 @@ if (isIPV6($ip)) {
 } elseif (isset($_GET['ipv6']) && isIPV6($_GET['ipv6'])) {
     $ipv6 = $_GET['ipv6'];
 }
-$peerIPV46 = "";
+$peerIPUpdate = [];
 if ($ipv4) {
-    $peerIPV46 .= ", ipv4 = " . nexus_quote($ipv4);
+    $peerIPUpdate['ipv4'] = $ipv4;
 }
 if ($ipv6) {
-    $peerIPV46 .= ", ipv6 = " . nexus_quote($ipv6);
+    $peerIPUpdate['ipv6'] = $ipv6;
 }
 
 // check port and connectable
@@ -113,11 +113,15 @@ $seeder = ($left == 0) ? "yes" : "no";
 
 // check passkey
 if (!$az = $Cache->get_value('user_passkey_'.$passkey.'_content')){
-	$res = \Nexus\Database\NexusDB::select("SELECT id, username, downloadpos, enabled, uploaded, downloaded, class, parked, clientselect, showclienterror, passkey, donor, donoruntil, seedbonus, tracker_url_id FROM users WHERE passkey=". nexus_quote($passkey)." LIMIT 1");
-	$az = (array) $res[0];
+    $user = \App\Models\User::query()
+        ->select('id', 'username', 'downloadpos', 'enabled', 'uploaded', 'downloaded', 'class', 'parked', 'clientselect', 'showclienterror', 'passkey', 'donor', 'donoruntil', 'seedbonus', 'tracker_url_id')
+        ->where('passkey', $passkey)
+        ->first();
+    $az = $user ? $user->toArray() : [];
 	do_log("[check passkey], currentUser: " . nexus_json_encode($az));
 	$Cache->cache_value('user_passkey_'.$passkey.'_content', $az, 3600);
 }
+$userUpdate = [];
 if (!$az) {
     $redis->set("$passkeyInvalidKey:$passkey", TIMENOW, ['ex' => 24*3600]);
     err("Invalid passkey! Re-download the .torrent from $BASEURL");
@@ -162,25 +166,25 @@ try {
 if($clicheck_res){
 	if ($az['showclienterror'] == 'no')
 	{
-		\Nexus\Database\NexusDB::getInstance()->query("UPDATE users SET showclienterror = 'yes' WHERE id = ".nexus_quote($userid));
+		\App\Models\User::query()->where('id', $userid)->update(['showclienterror' => 'yes']);
 		$Cache->delete_value('user_passkey_'.$passkey.'_content');
 	}
 	err($clicheck_res);
 }
 elseif ($az['showclienterror'] == 'yes'){
-	$USERUPDATESET[] = "showclienterror = 'no'";
+	$userUpdate['showclienterror'] = 'no';
 	$Cache->delete_value('user_passkey_'.$passkey.'_content');
 }
 
 // check torrent based on info_hash
 $tsField = \Nexus\Database\NexusDB::unixTimestampField('added');
-$infoHashField = \Nexus\Database\NexusDB::binaryField('info_hash');
-$infoHashFieldBindValue = \Nexus\Database\NexusDB::binaryFieldBindValue($info_hash);
-$checkTorrentSql = "SELECT torrents.id, size, owner, sp_state, seeders, leechers, times_completed, $tsField AS ts, added, banned, hr, approval_status, price, categories.mode FROM torrents left join categories on torrents.category = categories.id WHERE $infoHashField limit 1";
 if (!$torrent = $Cache->get_value('torrent_hash_'.$info_hash.'_content')){
-    $res = \Nexus\Database\NexusDB::getInstance()->prepare($checkTorrentSql);
-    $res->execute(['info_hash' => $infoHashFieldBindValue]);
-	$torrent = \Nexus\Database\NexusDB::getInstance()->fetchArray($res);
+    $torrent = \Nexus\Database\NexusDB::table('torrents')
+        ->leftJoin('categories', 'torrents.category', '=', 'categories.id')
+        ->select('torrents.id', 'torrents.size', 'torrents.owner', 'torrents.sp_state', 'torrents.seeders', 'torrents.leechers', 'torrents.times_completed', \Nexus\Database\NexusDB::raw("$tsField AS ts"), 'torrents.added', 'torrents.banned', 'torrents.hr', 'torrents.approval_status', 'torrents.price', 'categories.mode')
+        ->where('torrents.info_hash', $info_hash)
+        ->first();
+    $torrent = $torrent ? (array) $torrent : null;
     $Cache->cache_value('torrent_hash_'.$info_hash.'_content', $torrent, 350);
 }
 if (!$torrent) {
@@ -189,7 +193,7 @@ if (!$torrent) {
     $start = strpos($queryString, $firstNeedle) + strlen($firstNeedle);
     $end = strpos($queryString, "&", $start);
     $infoHashUrlEncode = substr($queryString, $start, $end - $start);
-    do_log("[TORRENT NOT EXISTS] $checkTorrentSql, params: $queryString, infoHashUrlEncode: $infoHashUrlEncode");
+    do_log("[TORRENT NOT EXISTS] info_hash: $infoHashUrlEncode, params: $queryString");
     $redis->set("$torrentNotExistsKey:$info_hash", TIMENOW, ['ex' => 24*3600]);
     err("torrent not registered with this tracker");
 }
@@ -233,13 +237,10 @@ else $limit = "";
 $announce_wait = MIN_ANNOUNCE_WAIT_SECOND;
 $lastActionField = \Nexus\Database\NexusDB::unixTimestampField('last_action');
 $prevActionField = \Nexus\Database\NexusDB::unixTimestampField('prev_action');
-$fields = "id, seeder, peer_id, ip, ipv4, ipv6, port, uploaded, downloaded, userid, last_action, $lastActionField as last_action_unix_timestamp, prev_action, (".TIMENOW." - $lastActionField) AS announcetime, $prevActionField AS prevts";
-//$peerlistsql = "SELECT ".$fields." FROM peers WHERE torrent = ".$torrentid." AND connectable = 'yes' ".$only_leech_query.$limit;
-/**
- * return all peers,include connectable no
- * @since 1.6.0-beta12
- */
-$peerlistsql = "SELECT ".$fields." FROM peers WHERE torrent = " . $torrentid . $only_leech_query . $limit;
+$peerSelectRaw = "id, seeder, peer_id, ip, ipv4, ipv6, port, uploaded, downloaded, userid, last_action, $lastActionField as last_action_unix_timestamp, prev_action, (".TIMENOW." - $lastActionField) AS announcetime, $prevActionField AS prevts";
+$peerListBuilder = \Nexus\Database\NexusDB::table('peers')
+    ->selectRaw($peerSelectRaw)
+    ->where('torrent', $torrentid);
 
 $announce_one_begin = (0+$announce_interval)/2;
 $announce_one_end = ($announce_interval+$annintertwo)/2;
@@ -271,12 +272,20 @@ if ($isReAnnounce) {
 }
 $log .= ", [NO_RE_ANNOUNCE]";
 unset($self);
-$res = \Nexus\Database\NexusDB::select($peerlistsql);
+$peerListBuilderClone = clone $peerListBuilder;
+if ($seeder == 'yes') {
+    $peerListBuilderClone->where('seeder', 'no');
+}
+if ($newnumpeers > $rsize) {
+    $peerListBuilderClone->inRandomOrder()->limit($rsize);
+}
+$res = $peerListBuilderClone->get();
 if (isset($event) && $event == "stopped") {
     // Don't fetch peers for stopped event
 } else {
     // bencoding the peers info get for this announce
     foreach ($res as $row) {
+        $row = (array) $row;
         $row["peer_id"] = hash_pad($row["peer_id"]);
 
         // $peer_id is the announcer's peer_id while $row["peer_id"] is randomly selected from the peers table
@@ -293,18 +302,13 @@ if (isset($event) && $event == "stopped") {
         }
     }
 }
-$peerIdField = \Nexus\Database\NexusDB::binaryField('peer_id');
-$peerIdFieldBindValue = \Nexus\Database\NexusDB::binaryFieldBindValue($peer_id);
-$selfwhere = "torrent = $torrentid AND $peerIdField AND userid = $userid";
 //no found in the above random selection
 if (!isset($self))
 {
-	$res = \Nexus\Database\NexusDB::getInstance()->prepare("SELECT $fields FROM peers WHERE $selfwhere LIMIT 1");
-    $res->execute(['peer_id' => $peerIdFieldBindValue]);
-	$row = \Nexus\Database\NexusDB::getInstance()->fetchAssoc($res);
-	if ($row)
+	$selfRecord = $peerListBuilder->where('peer_id', $peer_id)->where('userid', $userid)->first();
+	if ($selfRecord)
 	{
-		$self = $row;
+		$self = (array) $selfRecord;
 	}
 }
 if (isset($self)) {
@@ -378,18 +382,23 @@ if (
     }
 }
 
-$leechTimeNoSeeder = "";
+$leechTimeNoSeederIncrement = 0;
 
 // current peer_id, or you could say session with tracker not found in table peers
 if (!isset($self))
 {
-    $sameIPRes = \Nexus\Database\NexusDB::select("select id from peers where torrent = $torrentid and userid = $userid and ip = '$ip' limit 1");
-    $sameIPRecord = $sameIPRes ? (array) $sameIPRes[0] : null;
+    $sameIPRecord = \Nexus\Database\NexusDB::table('peers')
+        ->where('torrent', $torrentid)
+        ->where('userid', $userid)
+        ->where('ip', $ip)
+        ->value('id');
     if (!empty($sameIPRecord) && $seeder == 'yes') {
         warn("You cannot seed the same torrent in the same location from more than 1 client.", 300);
     }
-	$validRes = \Nexus\Database\NexusDB::select("SELECT COUNT(*) AS count FROM peers WHERE torrent=$torrentid AND userid=" . nexus_quote($userid));
-	$valid = $validRes[0]['count'] ?? 0;
+	$valid = \Nexus\Database\NexusDB::table('peers')
+        ->where('torrent', $torrentid)
+        ->where('userid', $userid)
+        ->count();
 	if ($valid >= 1 && $seeder == 'no') err("You already are downloading the same torrent. You may only leech from one location at a time.", 300);
 	if ($valid >= 3 && $seeder == 'yes') err("You cannot seed the same torrent from more than 3 locations.", 300);
 
@@ -422,9 +431,11 @@ if (!isset($self))
 			else $max = 0;
 			if ($max > 0)
 			{
-				$res = \Nexus\Database\NexusDB::select("SELECT COUNT(*) AS num FROM peers WHERE userid='$userid' AND seeder='no'");
-				$row = $res ? (array) $res[0] : [];
-				if (($row['num'] ?? 0) >= $max) err("Your slot limit is reached! You may at most download $max torrents at the same time, please read $BASEURL/faq.php#id66 for details");
+				$leechingCount = \Nexus\Database\NexusDB::table('peers')
+                    ->where('userid', $userid)
+                    ->where('seeder', 'no')
+                    ->count();
+				if ($leechingCount >= $max) err("Your slot limit is reached! You may at most download $max torrents at the same time, please read $BASEURL/faq.php#id66 for details");
 			}
 		}
 	}
@@ -433,7 +444,8 @@ else // continue an existing session
 {
 	$upthis = $trueupthis = max(0, $uploaded - $self["uploaded"]);
 	$downthis = $truedownthis = max(0, $downloaded - $self["downloaded"]);
-	$announcetime = ($self["seeder"] == "yes" ? "seedtime = seedtime + {$self['announcetime']}" : "leechtime = leechtime + {$self['announcetime']}");
+	$snatchTimeColumn = $self["seeder"] == "yes" ? 'seedtime' : 'leechtime';
+	$snatchTimeIncrement = max(0, (int) $self['announcetime']);
 	$is_cheater = false;
     if ($self['announcetime'] > 0 && $isSeedBoxRuleEnabled && !($az['class'] >= \App\Models\User::CLASS_VIP || $isDonor) && !$isIPSeedBox) {
         $notSeedBoxMaxSpeedMbps = get_setting('seed_box.not_seed_box_max_speed');
@@ -453,58 +465,101 @@ else // continue an existing session
 		}
 	}
 
-	do_log("upthis: $upthis, downthis: $downthis, announcetime: $announcetime, is_cheater: $is_cheater");
+	do_log("upthis: $upthis, downthis: $downthis, snatchTime: $snatchTimeColumn, snatchTimeIncrement: $snatchTimeIncrement, is_cheater: $is_cheater");
     if (!isset($snatchInfo)) {
         $snatchInfo = get_snatch_info($torrentid, $userid);
     }
 	if (!$is_cheater && ($trueupthis > 0 || $truedownthis > 0))
 	{
         $dataTraffic = getDataTraffic($torrent, $_GET, $az, $self, $snatchInfo, apply_filter('torrent_promotion', $torrent));
-        $USERUPDATESET[] = "uploaded = uploaded + " . $dataTraffic['uploaded_increment_for_user'];
-        $USERUPDATESET[] = "downloaded = downloaded + " . $dataTraffic['downloaded_increment_for_user'];
+        $userUpdate['uploaded'] = \Nexus\Database\NexusDB::raw('uploaded + ' . (int) $dataTraffic['uploaded_increment_for_user']);
+        $userUpdate['downloaded'] = \Nexus\Database\NexusDB::raw('downloaded + ' . (int) $dataTraffic['downloaded_increment_for_user']);
 	}
     if ($torrent['seeders'] <= 0 && $seeder == 'no' && $self['announcetime'] > 0) {
-        $leechTimeNoSeeder = ", leech_time_no_seeder = leech_time_no_seeder + {$self['announcetime']}";
+        $leechTimeNoSeederIncrement = (int) $self['announcetime'];
     }
 }
 
-$dt = nexus_quote(date("Y-m-d H:i:s"));
-$updateset = array();
+$dt = date("Y-m-d H:i:s");
+$torrentUpdate = [];
 $hasChangeSeederLeecher = false;
 // set non-type event
 if (!isset($event))
 	$event = "";
 if (isset($self) && $event == "stopped")
 {
-	\Nexus\Database\NexusDB::getInstance()->query("DELETE FROM peers WHERE id = {$self['id']}");
-	if (\Nexus\Database\NexusDB::getInstance()->affectedRows() && !empty($snatchInfo))
+    if (!isset($snatchInfo)) {
+        $snatchInfo = get_snatch_info($torrentid, $userid);
+    }
+    $snatchUpdate = [
+        'uploaded' => \Nexus\Database\NexusDB::raw('uploaded + ' . (int) $trueupthis),
+        'downloaded' => \Nexus\Database\NexusDB::raw('downloaded + ' . (int) $truedownthis),
+        'to_go' => $left,
+        $snatchTimeColumn => \Nexus\Database\NexusDB::raw("$snatchTimeColumn + " . $snatchTimeIncrement),
+        'last_action' => $dt,
+    ];
+    if ($leechTimeNoSeederIncrement > 0) {
+        $snatchUpdate['leech_time_no_seeder'] = \Nexus\Database\NexusDB::raw('leech_time_no_seeder + ' . $leechTimeNoSeederIncrement);
+    }
+	$deleted = \Nexus\Database\NexusDB::table('peers')->where('id', $self['id'])->delete();
+	if ($deleted)
 	{
-		$updateset[] = ($self["seeder"] == "yes" ? "seeders = seeders - 1" : "leechers = leechers - 1");
+		$torrentUpdate[$self["seeder"] == "yes" ? 'seeders' : 'leechers'] = \Nexus\Database\NexusDB::raw($self["seeder"] == "yes" ? 'seeders - 1' : 'leechers - 1');
         $hasChangeSeederLeecher = true;
-		\Nexus\Database\NexusDB::getInstance()->query("UPDATE snatched SET uploaded = uploaded + $trueupthis, downloaded = downloaded + $truedownthis, to_go = $left, $announcetime $leechTimeNoSeeder, last_action = ".$dt." WHERE id = {$snatchInfo['id']}");
+		if (!empty($snatchInfo)) {
+			\Nexus\Database\NexusDB::table('snatched')->where('id', $snatchInfo['id'])->update($snatchUpdate);
+		}
 	}
 }
 elseif(isset($self))
 {
-	$finished = $finished_snatched = '';
+	$peerUpdate = [
+        'ip' => $ip,
+        'port' => $port,
+        'uploaded' => $uploaded,
+        'downloaded' => $downloaded,
+        'to_go' => $left,
+        'prev_action' => \Nexus\Database\NexusDB::raw('last_action'),
+        'last_action' => $dt,
+        'seeder' => $seeder,
+        'agent' => $agent,
+        'is_seed_box' => (int) $isIPSeedBox,
+    ];
+    $snatchUpdate = [
+        'uploaded' => \Nexus\Database\NexusDB::raw('uploaded + ' . (int) $trueupthis),
+        'downloaded' => \Nexus\Database\NexusDB::raw('downloaded + ' . (int) $truedownthis),
+        'to_go' => $left,
+        $snatchTimeColumn => \Nexus\Database\NexusDB::raw("$snatchTimeColumn + " . $snatchTimeIncrement),
+        'last_action' => $dt,
+    ];
+    if ($leechTimeNoSeederIncrement > 0) {
+        $snatchUpdate['leech_time_no_seeder'] = \Nexus\Database\NexusDB::raw('leech_time_no_seeder + ' . $leechTimeNoSeederIncrement);
+    }
 	if ($event == "completed")
 	{
-		//sql_query("UPDATE snatched SET  finished  = 'yes', completedat = $dt WHERE torrentid = $torrentid AND userid = $userid");
-		$finished .= ", finishedat = ".TIMENOW;
-		$finished_snatched = ", completedat = ".$dt . ", finished  = 'yes'";
-		$updateset[] = "times_completed = times_completed + 1";
+		$peerUpdate['finishedat'] = TIMENOW;
+		$snatchUpdate['completedat'] = $dt;
+		$snatchUpdate['finished'] = 'yes';
+		$torrentUpdate['times_completed'] = \Nexus\Database\NexusDB::raw('times_completed + 1');
 	}
+    $peerUpdate = array_merge($peerUpdate, $peerIPUpdate);
 
-	\Nexus\Database\NexusDB::getInstance()->query("UPDATE peers SET ip = ".nexus_quote($ip).", port = $port, uploaded = $uploaded, downloaded = $downloaded, to_go = $left, prev_action = last_action, last_action = $dt, seeder = '$seeder', agent = ".nexus_quote($agent).", is_seed_box = ". intval($isIPSeedBox) . " $finished $peerIPV46 WHERE id = {$self['id']}");
+	$peerAffected = \Nexus\Database\NexusDB::table('peers')->where('id', $self['id'])->update($peerUpdate);
 
-	if (\Nexus\Database\NexusDB::getInstance()->affectedRows())
+	if ($peerAffected > 0)
 	{
 		if ($seeder <> $self["seeder"]) {
-            $updateset[] = ($seeder == "yes" ? "seeders = seeders + 1, leechers = leechers - 1" : "seeders = seeders - 1, leechers = leechers + 1");
+            if ($seeder == "yes") {
+                $torrentUpdate['seeders'] = \Nexus\Database\NexusDB::raw('seeders + 1');
+                $torrentUpdate['leechers'] = \Nexus\Database\NexusDB::raw('leechers - 1');
+            } else {
+                $torrentUpdate['seeders'] = \Nexus\Database\NexusDB::raw('seeders - 1');
+                $torrentUpdate['leechers'] = \Nexus\Database\NexusDB::raw('leechers + 1');
+            }
             $hasChangeSeederLeecher = true;
         }
 		if (!empty($snatchInfo)) {
-            \Nexus\Database\NexusDB::getInstance()->query("UPDATE snatched SET uploaded = uploaded + $trueupthis, downloaded = downloaded + $truedownthis, to_go = $left, $announcetime, last_action = ".$dt." $finished_snatched $leechTimeNoSeeder WHERE id = {$snatchInfo['id']}");
+            \Nexus\Database\NexusDB::table('snatched')->where('id', $snatchInfo['id'])->update($snatchUpdate);
             do_action('snatched_saved', $torrent, $snatchInfo);
         }
 	}
@@ -512,33 +567,68 @@ elseif(isset($self))
 else
 {
     if ($event != 'stopped') {
-        $stmt = \Nexus\Database\NexusDB::getInstance()->prepare("select id from peers where $selfwhere limit 1");
-        $stmt->execute(['peer_id' => bin2hex($peer_id)]);
-        $isPeerExistResultSet = \Nexus\Database\NexusDB::getInstance()->fetchAssoc($stmt);
-        if (empty($isPeerExistResultSet)) {
+        $isPeerExist = \Nexus\Database\NexusDB::table('peers')
+            ->where('torrent', $torrentid)
+            ->where('peer_id', $peer_id)
+            ->where('userid', $userid)
+            ->exists();
+        if (! $isPeerExist) {
             $connectable = "yes";
-            $insertPeerSql = "INSERT INTO peers (torrent, userid, peer_id, ip, port, connectable, uploaded, downloaded, to_go, started, last_action, seeder, agent, downloadoffset, uploadoffset, passkey, ipv4, ipv6, is_seed_box) VALUES ($torrentid, $userid, ".nexus_quote($peer_id).", ".nexus_quote($ip).", $port, '$connectable', $uploaded, $downloaded, $left, $dt, $dt, '$seeder', ".nexus_quote($agent).", $downloaded, $uploaded, ".nexus_quote($passkey).", ".nexus_quote($ipv4).", ".nexus_quote($ipv6).", ".intval($isIPSeedBox).")";
-            do_log("[INSERT PEER] peer not exists for $selfwhere, do insert with $insertPeerSql");
+            $peerInsert = [
+                'torrent' => $torrentid,
+                'userid' => $userid,
+                'peer_id' => $peer_id,
+                'ip' => $ip,
+                'port' => $port,
+                'connectable' => $connectable,
+                'uploaded' => $uploaded,
+                'downloaded' => $downloaded,
+                'to_go' => $left,
+                'started' => $dt,
+                'last_action' => $dt,
+                'seeder' => $seeder,
+                'agent' => $agent,
+                'downloadoffset' => $downloaded,
+                'uploadoffset' => $uploaded,
+                'passkey' => $passkey,
+                'ipv4' => $ipv4,
+                'ipv6' => $ipv6,
+                'is_seed_box' => (int) $isIPSeedBox,
+            ];
+            do_log("[INSERT PEER] peer not exists for torrent: $torrentid, user: $userid, peer_id: " . bin2hex($peer_id));
 
             try {
-                \Nexus\Database\NexusDB::getInstance()->query($insertPeerSql);
-                if (\Nexus\Database\NexusDB::getInstance()->affectedRows())
-                {
-                    $updateset[] = ($seeder == "yes" ? "seeders = seeders + 1" : "leechers = leechers + 1");
-                    $hasChangeSeederLeecher = true;
-//                    $check = @mysql_fetch_row(@sql_query("SELECT COUNT(*) FROM snatched WHERE torrentid = $torrentid AND userid = $userid"));
-                    $checkSnatchedResTmp = \Nexus\Database\NexusDB::select("SELECT id FROM snatched WHERE torrentid = $torrentid AND userid = $userid limit 1");
-                    $checkSnatchedRes = $checkSnatchedResTmp ? (array) $checkSnatchedResTmp[0] : [];
-                    if (empty($checkSnatchedRes['id']))
-                        \Nexus\Database\NexusDB::getInstance()->query("INSERT INTO snatched (torrentid, userid, ip, port, uploaded, downloaded, to_go, startdat, last_action) VALUES ($torrentid, $userid, ".nexus_quote($ip).", $port, $uploaded, $downloaded, $left, $dt, $dt)");
-                    else
-                        \Nexus\Database\NexusDB::getInstance()->query("UPDATE snatched SET to_go = $left, last_action = ".$dt ." WHERE id = {$checkSnatchedRes['id']}");
+                \Nexus\Database\NexusDB::table('peers')->insert($peerInsert);
+                $torrentUpdate[$seeder == "yes" ? 'seeders' : 'leechers'] = \Nexus\Database\NexusDB::raw($seeder == "yes" ? 'seeders + 1' : 'leechers + 1');
+                $hasChangeSeederLeecher = true;
+
+                $existingSnatchId = \Nexus\Database\NexusDB::table('snatched')
+                    ->where('torrentid', $torrentid)
+                    ->where('userid', $userid)
+                    ->value('id');
+                if ($existingSnatchId) {
+                    \Nexus\Database\NexusDB::table('snatched')->where('id', $existingSnatchId)->update([
+                        'to_go' => $left,
+                        'last_action' => $dt,
+                    ]);
+                } else {
+                    \Nexus\Database\NexusDB::table('snatched')->insert([
+                        'torrentid' => $torrentid,
+                        'userid' => $userid,
+                        'ip' => $ip,
+                        'port' => $port,
+                        'uploaded' => $uploaded,
+                        'downloaded' => $downloaded,
+                        'to_go' => $left,
+                        'startdat' => $dt,
+                        'last_action' => $dt,
+                    ]);
                 }
             } catch (\Exception $exception) {
                 do_log("[INSERT PEER] error: " . $exception->getMessage());
             }
         } else {
-            do_log("[INSERT PEER] peer already exists for $selfwhere.");
+            do_log("[INSERT PEER] peer already exists for torrent: $torrentid, user: $userid.");
         }
     } else {
         do_log("[INSERT PEER] event = 'stopped', ignore.");
@@ -573,16 +663,18 @@ if (($left > 0 || $event == "completed") && $az['class'] < \App\Models\HitAndRun
             $requiredDownloaded = $torrent['size'] * $includeRate;
             if ($snatchInfo['downloaded'] >= $requiredDownloaded) {
                 $nowStr = date('Y-m-d H:i:s');
-                $sql = sprintf(
-                    "insert into hit_and_runs (uid, torrent_id, snatched_id, created_at, updated_at) values (%d, %d, %d, '%s', '%s') %s",
-                    $userid, $torrentid, $snatchInfo['id'], $nowStr, $nowStr, \Nexus\Database\NexusDB::upsertField(['uid', 'torrent_id'], ['updated_at'])
-                );
-                \Nexus\Database\NexusDB::getInstance()->query($sql);
-                $affectedRows = \Nexus\Database\NexusDB::getInstance()->affectedRows();
-                $hitAndRunId = \Nexus\Database\NexusDB::getInstance()->lastInsertId();
-                do_log("$hrLog, total downloaded: {$snatchInfo['downloaded']} >= required: $requiredDownloaded, [INSERT_H&R], sql: $sql, affectedRows: $affectedRows, hitAndRunId: $hitAndRunId");
+                $hrRecord = [
+                    'uid' => $userid,
+                    'torrent_id' => $torrentid,
+                    'snatched_id' => $snatchInfo['id'],
+                    'created_at' => $nowStr,
+                    'updated_at' => $nowStr,
+                ];
+                $affectedRows = \Nexus\Database\NexusDB::table('hit_and_runs')->insertOrIgnore($hrRecord);
+                $hitAndRunId = (int) \Nexus\Database\NexusDB::getInstance()->lastInsertId();
+                do_log("$hrLog, total downloaded: {$snatchInfo['downloaded']} >= required: $requiredDownloaded, [INSERT_H&R], affectedRows: $affectedRows, hitAndRunId: $hitAndRunId");
                 if ($hitAndRunId > 0) {
-                    \Nexus\Database\NexusDB::getInstance()->query("update snatched set hit_and_run_id = $hitAndRunId where id = {$snatchInfo['id']}");
+                    \Nexus\Database\NexusDB::table('snatched')->where('id', $snatchInfo['id'])->update(['hit_and_run_id' => $hitAndRunId]);
                     $hitAndRunRecord = \App\Models\HitAndRun::query()->where("uid", $userid)->where("torrent_id", $torrentid)->first();
                     fire_event(\App\Enums\ModelEventEnum::HIT_AND_RUN_CREATED, $hitAndRunRecord);
                 }
@@ -603,35 +695,29 @@ if (($left > 0 || $event == "completed") && $az['class'] < \App\Models\HitAndRun
 //    $updateset[] = 'leechers = ' . get_row_count("peers", "where torrent = $torrentid and to_go > 0");
 //}
 
-if (count($updateset) || $hasChangeSeederLeecher) // Update only when there is change in peer counts
+if (! empty($torrentUpdate) || $hasChangeSeederLeecher) // Update only when there is change in peer counts
 {
-	$updateset[] = "visible = 'yes'";
-	$updateset[] = "last_action = $dt";
-	$sql = "UPDATE torrents SET " . join(",", $updateset) . " WHERE id = $torrentid";
-	\Nexus\Database\NexusDB::getInstance()->query($sql);
-	do_log("[ANNOUNCE_UPDATE_TORRENT], $sql");
+	$torrentUpdate['visible'] = 'yes';
+	$torrentUpdate['last_action'] = $dt;
+	\Nexus\Database\NexusDB::table('torrents')->where('id', $torrentid)->update($torrentUpdate);
+	do_log("[ANNOUNCE_UPDATE_TORRENT], " . nexus_json_encode($torrentUpdate));
 }
 
 if($client_familyid != 0 && $client_familyid != $az['clientselect']) {
-    $USERUPDATESET[] = "clientselect = ".nexus_quote($client_familyid);
+    $userUpdate['clientselect'] = $client_familyid;
 }
-$USERUPDATESET[] = "last_announce_at = $dt";
+$userUpdate['last_announce_at'] = $dt;
 /**
  * VIP do not calculate downloaded
  * @since 1.7.13
  */
 if ($az['class'] == UC_VIP) {
-    foreach ($USERUPDATESET as $key => $value) {
-        if (str_contains($value, 'downloaded')) {
-            unset($USERUPDATESET[$key]);
-        }
-    }
+    unset($userUpdate['downloaded']);
 }
-if(count($USERUPDATESET) && $userid)
+if (! empty($userUpdate) && $userid)
 {
-    $sql = "UPDATE users SET " . join(",", $USERUPDATESET) . " WHERE id = ".$userid;
-    \Nexus\Database\NexusDB::getInstance()->query($sql);
-    do_log("[ANNOUNCE_UPDATE_USER], $sql");
+    \App\Models\User::query()->where('id', $userid)->update($userUpdate);
+    do_log("[ANNOUNCE_UPDATE_USER], " . nexus_json_encode($userUpdate));
 }
 $lockKey = sprintf("record_batch_lock:%s:%s", $userid, $torrentid);
 if ($redis->set($lockKey, TIMENOW, ['nx', 'ex' => $autoclean_interval_one])) {

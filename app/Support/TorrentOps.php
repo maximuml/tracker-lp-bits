@@ -25,7 +25,6 @@ final class TorrentOps
     public static function deleteTorrents($id, bool $notify = false): void
     {
         $idArr = is_array($id) ? $id : [$id];
-        $idStr = implode(', ', $idArr ?: [0]);
 
         $torrentInfo = Torrent::query()
             ->whereIn('id', $idArr)
@@ -35,15 +34,20 @@ final class TorrentOps
         $torrentRep = new TorrentRepository();
         $torrentDir = get_setting('main.torrent_dir');
 
-        NexusDB::statement("DELETE FROM torrents WHERE id in ($idStr)");
-        NexusDB::statement("DELETE FROM torrent_extras WHERE torrent_id in ($idStr)");
-        NexusDB::statement("DELETE FROM snatched WHERE torrentid in ($idStr) and not exists (select 1 from users where id = snatched.userid)");
+        NexusDB::table('torrents')->whereIn('id', $idArr)->delete();
+        NexusDB::table('torrent_extras')->whereIn('torrent_id', $idArr)->delete();
+        NexusDB::table('snatched')
+            ->whereIn('torrentid', $idArr)
+            ->whereNotExists(function ($query) {
+                $query->selectRaw('1')->from('users')->whereColumn('users.id', '=', 'snatched.userid');
+            })
+            ->delete();
 
         foreach (['peers', 'files', 'comments'] as $x) {
-            NexusDB::statement("DELETE FROM $x WHERE torrent in ($idStr)");
+            NexusDB::table($x)->whereIn('torrent', $idArr)->delete();
         }
 
-        NexusDB::statement("DELETE FROM hit_and_runs WHERE torrent_id in ($idStr)");
+        NexusDB::table('hit_and_runs')->whereIn('torrent_id', $idArr)->delete();
 
         foreach ($idArr as $_id) {
             if ($torrentInfo->has($_id)) {
@@ -79,8 +83,7 @@ final class TorrentOps
     {
         $torrent2UserValue = 1.0;
 
-        $result = NexusDB::getInstance()->query('SELECT * FROM torrents WHERE id = ' . (int) ($userSnatched['torrentid'] ?? 0));
-        $torrentArr = NexusDB::getInstance()->fetchAssoc($result);
+        $torrentArr = Torrent::query()->find($userSnatched['torrentid'] ?? 0)?->toArray();
 
         if ($torrentArr) {
             if ($torrentArr['owner'] == $userSnatched['userid']) {

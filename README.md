@@ -1,67 +1,64 @@
-中文 | [English](/README-EN.md)
+# NexusPHP
 
-完整的 PT 建站解决方案。基于 NexusPHP + Laravel + FilamentPHP。
+A private BitTorrent tracker solution built on **NexusPHP**, modernised with **Laravel** and **FilamentPHP**.
 
-欢迎参与国际化工作，点击 [这里](https://github.com/xiaomlove/nexusphp/discussions/193) 了解详情
+This is a streamlined fork focused on the core tracker/forum/community experience.
 
-## 功能特性
-- 发种
-- 特别区  
-- 求种
-- 字幕
-- 考核
-- H&R
-- 认领
-- 审核  
-- 签到
-- 补签卡  
-- 勋章
-- 道具 
-- 自定义标签
-- 第三方全文搜索
-- 盒子规则  
-- 论坛 
-- 申诉  
-- 多语言
-- 自动备份
-- 插件支持  
-- 管理后台  
-- Json API
-- ....
+## Features
 
-#### 以下功能由插件提供
-- 帖子点赞
-- 帖子奖励
-- 置顶促销
-- 自定义菜单
-- 幸运大转盘
-- 自定义角色权限
-- 分区 H&R
-- TGBot
+- **BitTorrent tracker** — announce/scrape, peer/seed/leech handling, torrent upload/edit/delete/download
+- **Torrent catalog** — categories, sources, media, codecs, custom tags, search and global search
+- **User system** — classes, invites, ratio, seed bonus, passkeys, profile/settings
+- **Community** — forum, shoutbox, private messages, polls, news, FAQ, rules
+- **Moderation** — reports, complains, warnings, IP bans, failed-login monitoring, IP history
+- **Automation** — H&R (hit-and-run), exams/attendance, medals/user meta, SeedBox rules
+- **Admin panel** — Filament-based backend plus legacy admin pages
+- **Plugin support** — manage installed plugins
+- **API / RSS** — tracker announce endpoint and RSS feeds
 
-## 系统要求
-- PHP: 8.2|8.3|8.4|8.5，必须扩展：bcmath, ctype, curl, fileinfo, json, mbstring, openssl, pdo_mysql, tokenizer, xml, mysqli, gd, redis, pcntl, sockets, posix, gmp, zend opcache, zip, intl, pdo_sqlite, sqlite3, pdo_pgsql
-- Database: MySQL 5.7 最新版或以上版本/PostgreSQL 16 或以上版本
-- Redis：4.0.0 或以上版本
-- 其他：supervisor, rsync
+> Note: this fork intentionally removes several upstream features (non-English languages, subtitle/request/IMDb/PTGen, Hot/Classic picks, NFO, advertisements, torrent claim, funbox, Team, link exchange, upload/download speed and ISP display, small description and deadline fields, plugin marketplace, and the email-domain allowlist/blocklist). The UI is English-only.
 
-## 快速开始
-安装 docker。  
-其中 DOMAIN 是你要使用的域名，先做好解析。 没有域名使用 IP 亦可。   
-端口按需要指定，如果本地 80 端口已经使用，请更换，保证端口对外开放。  
-第 2 步创建 .env 选择正确的时区 TIMEZONE，其他默认即可。
+## System Requirements
+
+- **PHP** 8.2 / 8.3 / 8.4 / 8.5
+  - Required extensions: `bcmath`, `ctype`, `curl`, `fileinfo`, `json`, `mbstring`, `openssl`, `pdo_mysql`, `tokenizer`, `xml`, `mysqli`, `gd`, `redis`, `pcntl`, `sockets`, `posix`, `gmp`, `opcache`, `zip`, `intl`, `pdo_sqlite`, `sqlite3`, `pdo_pgsql`
+- **Database** — MySQL 5.7+ or PostgreSQL 16+
+- **Redis** — 4.0+
+- **Other** — supervisor, cron, rsync
+
+## Quick Start with Docker
+
+```bash
+cp .env.example .env
+# Edit .env so DB_HOST=mysql and REDIS_HOST=redis match docker-compose.yml
+docker compose up -d
 ```
-docker pull xiaomlove/nexusphp:latest
-docker run --name my-nexusphp -e DOMAIN=xxx.com -p 80:80 xiaomlove/nexusphp:latest
+
+After the containers start, complete the web installer at `http://<your-domain>/install` (or run `php artisan migrate --seed` and create an admin user if you prefer the CLI).
+
+Run the queue worker, scheduler and cleanup workers via the containers started by `docker compose` (see `docker-compose.yml`).
+
+## Local Development
+
+```bash
+composer install
+npm install
+npm run dev
+php artisan key:generate
+php artisan migrate --seed
+php artisan serve
 ```
-**生产环境建议参考文档实机安装。**
 
-## AD-服务器推荐
-|服务商| 推广地址 |优惠码|
-|---|---|---|
-|[七七云](https://www.vps77.com/aff.php?aff=167&gid=1)   |https://www.vps77.com/aff.php?aff=167&gid=1|xiaomlove|
+## Testing
 
-## 更多信息
-博客：[https://nexusphp.org](http://nexusphp.org/)  
-文档：[https://doc.nexusphp.org](http://doc.nexusphp.org/)  
-Telegram: [https://t.me/nexusphp_dev](https://t.me/nexusphp_dev)  
+```bash
+vendor/bin/phpunit
+vendor/bin/phpstan analyse
+composer audit
+```
+
+CI also runs a Docker smoke test against the application.
+
+## License
+
+This project is based on NexusPHP. See the upstream repository for license details.

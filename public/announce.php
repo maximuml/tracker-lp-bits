@@ -2,9 +2,6 @@
 require '../include/bittorrent_announce.php';
 require ROOT_PATH . 'include/core.php';
 
-function nexus_quote($s) {
-    return "'" . \Nexus\Database\NexusDB::getInstance()->escapeString($s) . "'";
-}
 //do_log(nexus_json_encode($_SERVER));
 //1. BLOCK ACCESS WITH WEB BROWSERS AND CHEATS!
 $agent = $_SERVER["HTTP_USER_AGENT"] ?? '';

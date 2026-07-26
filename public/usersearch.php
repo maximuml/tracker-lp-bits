@@ -789,8 +789,10 @@ if (count($_GET) > 0 && !$_GET['h'])
           $ipstr = $user['ip'];
           if (filter_var($user['ip'], FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
               $nip = ip2long($user['ip']);
-              $auxres = \Nexus\Database\NexusDB::select("SELECT COUNT(*) AS count FROM bans WHERE $nip >= first AND $nip <= last");
-              $array = (array) $auxres[0];
+              $array = (array) \Nexus\Database\NexusDB::table('bans')
+                  ->where('first', '<=', $nip)
+                  ->where('last', '>=', $nip)
+                  ->first(['count' => \Nexus\Database\NexusDB::raw('COUNT(*)')]);
               if ($array['count'] > 0) {
                   $ipstr = "<a href='testip.php?ip=" . $user['ip'] . "'><font color='#FF0000'><b>" . $user['ip'] . "</b></font></a>";
               }
@@ -798,24 +800,29 @@ if (count($_GET) > 0 && !$_GET['h'])
       } else {
           $ipstr = "---";
       }
-      $auxres = \Nexus\Database\NexusDB::select("SELECT SUM(uploaded) AS pul, SUM(downloaded) AS pdl FROM peers WHERE userid = " . $user['id']);
-      $array = (array) $auxres[0];
+      $array = (array) (\Nexus\Database\NexusDB::table('peers')
+          ->where('userid', $user['id'])
+          ->selectRaw('SUM(uploaded) AS pul, SUM(downloaded) AS pdl')
+          ->first() ?? []);
 
-      $pul = $array['pul'];
-      $pdl = $array['pdl'];
+      $pul = $array['pul'] ?? 0;
+      $pdl = $array['pdl'] ?? 0;
 
-      $auxres = \Nexus\Database\NexusDB::select("SELECT COUNT(DISTINCT p.id) AS count FROM posts AS p LEFT JOIN topics as t ON p.topicid = t.id
-      	LEFT JOIN forums AS f ON t.forumid = f.id WHERE p.userid = " . $user['id'] . " AND f.minclassread <= " .
-      	$CURUSER['class']);
+      $n = (array) \Nexus\Database\NexusDB::table('posts as p')
+          ->leftJoin('topics as t', 'p.topicid', '=', 't.id')
+          ->leftJoin('forums as f', 't.forumid', '=', 'f.id')
+          ->where('p.userid', $user['id'])
+          ->where('f.minclassread', '<=', $CURUSER['class'])
+          ->selectRaw('COUNT(DISTINCT p.id) AS count')
+          ->first();
 
-      $n = (array) $auxres[0];
-      $n_posts = $n['count'];
+      $n_posts = $n['count'] ?? 0;
 
-      $auxres = \Nexus\Database\NexusDB::select("SELECT COUNT(id) AS count FROM comments WHERE user = ".$user['id']);
-			// Use LEFT JOIN to exclude orphan comments
-      // $auxres = sql_query("SELECT COUNT(c.id) FROM comments AS c LEFT JOIN torrents as t ON c.torrent = t.id WHERE c.user = '".$user['id']."'") or sqlerr(__FILE__, __LINE__);
-      $n = (array) $auxres[0];
-      $n_comments = $n['count'];
+      $n = (array) \Nexus\Database\NexusDB::table('comments')
+          ->where('user', $user['id'])
+          ->selectRaw('COUNT(id) AS count')
+          ->first();
+      $n_comments = $n['count'] ?? 0;
 
     	echo "<tr><td>" .
       		get_username($user['id']) . "</td>" .

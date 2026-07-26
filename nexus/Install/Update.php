@@ -372,7 +372,6 @@ class Update extends Install
         if (!Schema::hasTable("tracker_urls")) {
             $this->runMigrate("database/migrations/2025_06_19_194137_create_tracker_urls_table.php");
             $this->initTrackerUrl('update');
-            NexusDB::cache_del("nexus_plugin_store_all");
         }
     }
 

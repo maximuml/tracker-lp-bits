@@ -15,15 +15,6 @@ function getip($real = true) {
 	return \App\Support\Network::clientIp((bool) $real);
 }
 
-function sql_query($query)
-{
-    return \App\Support\LegacyDb::query($query);
-}
-
-function sqlesc($value) {
-    return \App\Support\LegacyDb::escape($value);
-}
-
 function hash_pad($hash) {
     return \App\Support\Strings::padHash($hash);
 }

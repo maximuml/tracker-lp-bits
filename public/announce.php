@@ -181,7 +181,7 @@ $infoHashField = \Nexus\Database\NexusDB::binaryField('info_hash');
 $infoHashFieldBindValue = \Nexus\Database\NexusDB::binaryFieldBindValue($info_hash);
 $checkTorrentSql = "SELECT torrents.id, size, owner, sp_state, seeders, leechers, times_completed, $tsField AS ts, added, banned, hr, approval_status, price, categories.mode FROM torrents left join categories on torrents.category = categories.id WHERE $infoHashField limit 1";
 if (!$torrent = $Cache->get_value('torrent_hash_'.$info_hash.'_content')){
-    $res = mysql_prepare($checkTorrentSql);
+    $res = \Nexus\Database\NexusDB::getInstance()->prepare($checkTorrentSql);
     $res->execute(['info_hash' => $infoHashFieldBindValue]);
 	$torrent = \Nexus\Database\NexusDB::getInstance()->fetchArray($res);
     $Cache->cache_value('torrent_hash_'.$info_hash.'_content', $torrent, 350);

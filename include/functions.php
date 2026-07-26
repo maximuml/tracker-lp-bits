@@ -46,7 +46,7 @@ function stderr($heading, $text, $htmlstrip = true, $head = true, $foot = true, 
 
 function sqlerr($file = '', $line = '')
 {
-	print(\App\Support\Frame::sqlError(mysql_error(), (string) $file, (string) $line));
+	print(\App\Support\Frame::sqlError(\Nexus\Database\NexusDB::getInstance()->error(), (string) $file, (string) $line));
 	die;
 }
 

@@ -6,7 +6,6 @@ define('NEXUS_START', microtime(true));
 require ROOT_PATH . 'include/globalfunctions.php';
 require ROOT_PATH . 'include/functions.php';
 require ROOT_PATH . 'vendor/autoload.php';
-require ROOT_PATH . 'nexus/Database/helpers.php';
 require ROOT_PATH . 'include/constants.php';
 $withLaravel = false;
 if (file_exists(ROOT_PATH . '.env')) {

@@ -14,7 +14,7 @@ class Attendance
         global $Cache;
         if($flush || ($row = $Cache->get_value($this->cachename)) === false){
             $res = \Nexus\Database\NexusDB::select(sprintf('SELECT * FROM `attendance` WHERE `uid` = %u AND DATE(`added`) = %s', $this->userid, \App\Support\LegacyDb::escape($this->curdate.' 00:00:00')));
-            $row = count($res) ? mysql_fetch_assoc($res) : array();
+            $row = count($res) ? (array) $res[0] : array();
             $Cache->cache_value($this->cachename, $row, 600);
         }
         return empty($row) ? false : $row;

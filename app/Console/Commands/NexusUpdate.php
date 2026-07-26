@@ -42,7 +42,6 @@ class NexusUpdate extends Command
     public function handle()
     {
         define('WITH_LARAVEL', true);
-        require ROOT_PATH . 'nexus/Database/helpers.php';
         $tag = $this->option('tag');
         $branch = $this->option('branch');
         $keepTmp = $this->option('keep_tmp');

@@ -164,9 +164,10 @@ class Install
             throw new \RuntimeException('Invalid DB_CONNECTION');
         }
         $sql =  "SELECT table_name FROM information_schema.tables WHERE table_schema = '$schema'";
-        $res = sql_query($sql);
+        $res = \Nexus\Database\NexusDB::select($sql);
         $data = [];
-        while ($row = mysql_fetch_assoc($res)) {
+        foreach ($res as $row) {
+            $row = (array) $row;
             $data[] = $row['table_name'];
         }
         return $data;
@@ -562,7 +563,7 @@ class Install
         $this->doLog("[CREATE ENV] final newData: " . json_encode($newData));
         unset($key, $value);
         //check
-        mysql_connect($newData['DB_HOST'], $newData['DB_USERNAME'], $newData['DB_PASSWORD'], $newData['DB_DATABASE'], (int)$newData['DB_PORT'], $newData['DB_CONNECTION']);
+        \Nexus\Database\NexusDB::getInstance()->connect($newData['DB_HOST'], $newData['DB_USERNAME'], $newData['DB_PASSWORD'], $newData['DB_DATABASE'], (int)$newData['DB_PORT'], $newData['DB_CONNECTION']);
         $redis = new \Redis();
         $redis->connect($newData['REDIS_HOST'], $newData['REDIS_PORT'] ?: 6379);
         if (!empty($data['REDIS_PASSWORD'])) {
@@ -606,7 +607,7 @@ class Install
     {
         foreach ($createTable as $table => $sql) {
             $this->doLog("[CREATE TABLE] $table \n $sql");
-            sql_query($sql);
+            \Nexus\Database\NexusDB::getInstance()->query($sql);
         }
         return true;
     }
@@ -673,8 +674,8 @@ class Install
                 continue;
             }
             $this->doLog("[IMPORT DATA] $table, $sql");
-            sql_query("truncate table $table");
-            sql_query($sql);
+            \Nexus\Database\NexusDB::getInstance()->query("truncate table $table");
+            \Nexus\Database\NexusDB::getInstance()->query($sql);
         }
         return true;
     }

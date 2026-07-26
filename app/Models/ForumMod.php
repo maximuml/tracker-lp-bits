@@ -8,8 +8,10 @@
 namespace App\Models;
 class ForumMod extends NexusModel
 {
+    /** @var  string */
     protected $table = 'forummods';
 
+    /** @var  list<string> */
     protected $fillable = ['forumid', 'userid'];
 
 }

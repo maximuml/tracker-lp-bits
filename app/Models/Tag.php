@@ -34,8 +34,10 @@ class Tag extends NexusModel
 {
     use NexusActivityLogTrait;
 
+    /** @var  bool */
     public $timestamps = true;
 
+    /** @var  list<string> */
     protected $fillable = [
         'id', 'name', 'color', 'priority', 'created_at', 'updated_at',
         'font_size', 'font_color', 'padding', 'margin', 'border_radius',
@@ -80,6 +82,7 @@ class Tag extends NexusModel
         ],
     ];
 
+    /** @return  array<int|string, mixed> */
     public static function listSpecial(): array
     {
         return array_filter([
@@ -88,16 +91,19 @@ class Tag extends NexusModel
         ]);
     }
 
+    /** @return  \Illuminate\Database\Eloquent\Relations\BelongsToMany<Torrent, $this> */
     public function torrents(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
     {
         return $this->belongsToMany(Torrent::class, 'torrent_tags', 'tag_id', 'torrent_id');
     }
 
+    /** @return  \Illuminate\Database\Eloquent\Relations\HasMany<TorrentTag, $this> */
     public function torrent_tags(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(TorrentTag::class, 'tag_id');
     }
 
+    /** @return  \Illuminate\Database\Eloquent\Relations\BelongsTo<SearchBox, $this> */
     public function search_box(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(SearchBox::class, 'mode', 'id');

@@ -18,6 +18,7 @@ namespace App\Models;
  */
 class UserMedal extends NexusModel
 {
+    /** @var  list<string> */
     protected $fillable = ['uid', 'medal_id', 'expire_at', 'status', 'bonus_addition_expire_at'];
 
     const STATUS_NOT_WEARING = 0;
@@ -28,6 +29,7 @@ class UserMedal extends NexusModel
         return nexus_trans("medal.wearing_status_text." . $this->status);
     }
 
+    /** @return  array<int|string, mixed> */
     public static function listWearingStatusLabels(): array
     {
         return [
@@ -36,11 +38,13 @@ class UserMedal extends NexusModel
         ];
     }
 
+    /** @return  \Illuminate\Database\Eloquent\Relations\BelongsTo<Medal, $this> */
     public function medal()
     {
         return $this->belongsTo(Medal::class, 'medal_id');
     }
 
+    /** @return  \Illuminate\Database\Eloquent\Relations\BelongsTo<User, $this> */
     public function user()
     {
         return $this->belongsTo(User::class, 'uid');

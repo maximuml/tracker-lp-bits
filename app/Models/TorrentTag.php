@@ -11,8 +11,10 @@ namespace App\Models;
 
 class TorrentTag extends NexusModel
 {
+    /** @var  bool */
     public $timestamps = true;
 
+    /** @var  list<string> */
     protected $fillable = [
         'torrent_id', 'tag_id', 'priority'
     ];

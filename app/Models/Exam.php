@@ -35,13 +35,16 @@ class Exam extends NexusModel
 {
     use NexusActivityLogTrait;
 
+    /** @var  list<string> */
     protected $fillable = [
         'name', 'description', 'begin', 'end', 'duration', 'status', 'is_discovered', 'filters', 'indexes', 'priority',
         'recurring', 'type', 'success_reward_bonus', 'fail_deduct_bonus', 'max_user_count', 'background_color',
     ];
 
+    /** @var  bool */
     public $timestamps = true;
 
+    /** @var  array<string, string> */
     protected $casts = [
         'filters' => 'array',
         'indexes' => 'array',
@@ -50,6 +53,7 @@ class Exam extends NexusModel
     const STATUS_ENABLED = 0;
     const STATUS_DISABLED = 1;
 
+    /** @var  array<int|string, mixed> */
     public static $status = [
         self::STATUS_ENABLED => ['text' => 'Enabled'],
         self::STATUS_DISABLED => ['text' => 'Disabled'],
@@ -58,6 +62,7 @@ class Exam extends NexusModel
     const DISCOVERED_YES = 1;
     const DISCOVERED_NO = 0;
 
+    /** @var  array<int|string, mixed> */
     public static $discovers = [
         self::DISCOVERED_NO => ['text' => 'No'],
         self::DISCOVERED_YES => ['text' => 'Yes'],
@@ -70,6 +75,7 @@ class Exam extends NexusModel
     const INDEX_SEED_POINTS = 5;
     const INDEX_UPLOAD_TORRENT_COUNT = 6;
 
+    /** @var  array<int|string, mixed> */
     public static array $indexes = [
         self::INDEX_UPLOADED => ['name' => 'Uploaded', 'unit' => 'GB', 'source_user_field' => 'uploaded'],
         self::INDEX_DOWNLOADED => ['name' => 'Downloaded', 'unit' => 'GB', 'source_user_field' => 'downloaded'],
@@ -84,6 +90,7 @@ class Exam extends NexusModel
     const FILTER_USER_DONATE = 'donate_status';
     const FILTER_USER_REGISTER_DAYS_RANGE = 'register_days_range';
 
+    /** @var  array<int|string, mixed> */
     public static $filters = [
         self::FILTER_USER_CLASS => ['name' => 'User class'],
         self::FILTER_USER_REGISTER_TIME_RANGE => ['name' => 'User register time range'],
@@ -98,6 +105,7 @@ class Exam extends NexusModel
     const TYPE_EXAM = 1;
     const TYPE_TASK = 2;
 
+    /** @return  mixed */
     protected static function booted()
     {
         static::saving(function (self $model) {
@@ -105,6 +113,10 @@ class Exam extends NexusModel
         });
     }
 
+    /**
+     * @param  mixed  $onlyKeyValue
+     * @return  array<int|string, mixed>
+     */
     public static function listIndex($onlyKeyValue = false): array
     {
         $result = self::$indexes;
@@ -120,6 +132,7 @@ class Exam extends NexusModel
         return $result;
     }
 
+    /** @return  array<int|string, mixed> */
     public static function listRecurringOptions(): array
     {
         return [
@@ -129,6 +142,7 @@ class Exam extends NexusModel
         ];
     }
 
+    /** @return  array<int|string, mixed> */
     public static function listTypeOptions(): array
     {
         return [
@@ -137,6 +151,7 @@ class Exam extends NexusModel
         ];
     }
 
+    /** @return  mixed */
     public function getTypeTextAttribute()
     {
         return self::listTypeOptions()[$this->type] ?? "";
@@ -257,6 +272,7 @@ class Exam extends NexusModel
         throw new \RuntimeException(nexus_trans("exam.time_condition_invalid"));
     }
 
+    /** @param  Carbon  $time */
     public function getRecurringBegin(Carbon $time): Carbon
     {
         $time = $time->copy();
@@ -271,6 +287,7 @@ class Exam extends NexusModel
         throw new \RuntimeException("Invalid recurring: $recurring");
     }
 
+    /** @param  Carbon  $time */
     public function getRecurringEnd(Carbon $time): Carbon
     {
         $time = $time->copy();
@@ -285,6 +302,7 @@ class Exam extends NexusModel
         throw new \RuntimeException("Invalid recurring: $recurring");
     }
 
+    /** @param  string  $result */
     public function getMessageSubjectTransKey(string $result): string
     {
         return match ($this->type) {
@@ -294,6 +312,7 @@ class Exam extends NexusModel
         };
     }
 
+    /** @param  string  $result */
     public function getMessageContentTransKey(string $result): string
     {
         return match ($this->type) {
@@ -303,6 +322,7 @@ class Exam extends NexusModel
         };
     }
 
+    /** @param  string  $result */
     public function getPassResultTransKey(string $result): string
     {
         return match ($this->type) {
@@ -322,11 +342,13 @@ class Exam extends NexusModel
         return $this->type == self::TYPE_TASK;
     }
 
+    /** @return  \Illuminate\Database\Eloquent\Relations\BelongsToMany<User, $this> */
     public function users()
     {
         return $this->belongsToMany(User::class, "exam_users", "exam_id", "uid");
     }
 
+    /** @return  mixed */
     public function onGoingUsers()
     {
         return $this->users()->wherePivot("status", ExamUser::STATUS_NORMAL);

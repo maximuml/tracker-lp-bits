@@ -14,28 +14,34 @@ namespace App\Models;
 
 class UsernameChangeLog extends NexusModel
 {
+    /** @var  list<string> */
     protected $fillable = ['uid', 'username_old', 'username_new', 'operator', 'change_type'];
 
+    /** @var  bool */
     public $timestamps = true;
 
     const CHANGE_TYPE_USER = 1;
     const CHANGE_TYPE_ADMIN = 2;
 
+    /** @var  array<int|string, mixed> */
     public static array $changeTypes = [
         self::CHANGE_TYPE_USER => ['text' => 'User'],
         self::CHANGE_TYPE_ADMIN => ['text' => 'Administrator'],
     ];
 
+    /** @return  mixed */
     public function getChangeTypeTextAttribute()
     {
         return nexus_trans('username-change-log.change_type.' . $this->change_type);
     }
 
+    /** @return  \Illuminate\Database\Eloquent\Relations\BelongsTo<User, $this> */
     public function user()
     {
         return $this->belongsTo(User::class, 'uid');
     }
 
+    /** @return  mixed */
     public static function listChangeType()
     {
         $result = [];

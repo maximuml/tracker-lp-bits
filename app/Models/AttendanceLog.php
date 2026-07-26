@@ -13,10 +13,13 @@ namespace App\Models;
 
 class AttendanceLog extends NexusModel
 {
+    /** @var  string */
     protected $table = 'attendance_logs';
 
+    /** @var  list<string> */
     protected $fillable = ['uid', 'points', 'date', 'is_retroactive'];
 
+    /** @var  bool */
     public $timestamps = true;
 
 }

@@ -16,5 +16,6 @@ namespace App\Models;
 
 class Faq extends NexusModel
 {
+    /** @var  string */
     protected $table = 'faq';
 }

@@ -11,5 +11,6 @@ namespace App\Models;
 
 class File extends NexusModel
 {
+    /** @var  string */
     protected $table = 'files';
 }

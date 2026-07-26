@@ -15,10 +15,13 @@ namespace App\Models;
  */
 class Attendance extends NexusModel
 {
+    /** @var  string */
     protected $table = 'attendance';
 
+    /** @var  list<string> */
     protected $fillable = ['uid', 'added', 'points', 'days', 'total_days'];
 
+    /** @var  array<string, string> */
     protected $casts = [
         'added' => 'datetime',
     ];
@@ -35,6 +38,7 @@ class Attendance extends NexusModel
     const MAX_RETROACTIVE_DAYS = 30;
 
 
+    /** @return  \Illuminate\Database\Eloquent\Relations\HasMany<AttendanceLog, $this> */
     public function logs(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(AttendanceLog::class, 'uid', 'uid');

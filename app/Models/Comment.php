@@ -20,11 +20,13 @@ use Illuminate\Database\Eloquent\Builder;
 
 class Comment extends NexusModel
 {
+    /** @var  array<string, string> */
     protected $casts = [
         'added' => 'datetime',
         'editdate' => 'datetime',
     ];
 
+    /** @var  list<string> */
     protected $fillable = ['user', 'torrent', 'added', 'text', 'ori_text', 'editedby', 'editdate', 'offer', 'anonymous'];
 
     const TYPE_TORRENT = 'torrent';
@@ -45,6 +47,12 @@ class Comment extends NexusModel
         ],
     ];
 
+    /**
+     * @param  \Illuminate\Database\Eloquent\Builder<Comment>  $query
+     * @param  string  $type
+     * @param  int  $typeValue
+     * @return  mixed
+     */
     public function scopeType(Builder $query, string $type, int $typeValue)
     {
         foreach (self::TYPE_MAPS as $key => $value) {
@@ -57,16 +65,19 @@ class Comment extends NexusModel
         return $query;
     }
 
+    /** @return  \Illuminate\Database\Eloquent\Relations\BelongsTo<Torrent, $this> */
     public function related_torrent()
     {
         return $this->belongsTo(Torrent::class, 'torrent');
     }
 
+    /** @return  \Illuminate\Database\Eloquent\Relations\BelongsTo<User, $this> */
     public function create_user()
     {
         return $this->belongsTo(User::class, 'user')->withDefault(User::getDefaultUserAttributes());
     }
 
+    /** @return  \Illuminate\Database\Eloquent\Relations\BelongsTo<User, $this> */
     public function update_user()
     {
         return $this->belongsTo(User::class, 'editedby')->withDefault(User::getDefaultUserAttributes());

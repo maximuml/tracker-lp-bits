@@ -47,12 +47,16 @@ class SearchBox extends NexusModel
 {
     use NexusActivityLogTrait;
 
+    /** @var  array<int|string, mixed> */
     private static array $instances = [];
 
+    /** @var  array<int|string, mixed> */
     private static array $modeOptions = [];
 
+    /** @var  string */
     protected $table = 'searchbox';
 
+    /** @var  list<string> */
     protected $fillable = [
         'name', 'catsperrow', 'catpadding', 'showsubcat', 'section_name', 'is_default',
         'showsource', 'showmedium', 'showcodec', 'showstandard', 'showprocessing', 'showaudiocodec',
@@ -62,6 +66,7 @@ class SearchBox extends NexusModel
         'extra->' . self::EXTRA_DISPLAY_SEED_BOX_ICON_ON_TORRENT_LIST,
     ];
 
+    /** @var  array<string, string> */
     protected $casts = [
         'extra' => 'array',
         'is_default' => 'boolean',
@@ -72,6 +77,7 @@ class SearchBox extends NexusModel
     const SEARCH_MODE_AND = '0';
     const SEARCH_MODE_EXACT = '2';
 
+    /** @var  array<int|string, mixed> */
     public static array $searchModes = [
         self::SEARCH_MODE_AND => ['text' => 'and'],
         self::SEARCH_MODE_EXACT => ['text' => 'exact'],
@@ -81,6 +87,7 @@ class SearchBox extends NexusModel
     const SECTION_BROWSE = 'browse';
     const SECTION_SPECIAL = 'special';
 
+    /** @var  array<int|string, mixed> */
     public static array $sections = [
         self::SECTION_BROWSE => ['text' => 'Browse'],
         self::SECTION_SPECIAL => ['text' => 'Special'],
@@ -89,6 +96,7 @@ class SearchBox extends NexusModel
     const EXTRA_DISPLAY_COVER_ON_TORRENT_LIST = 'display_cover_on_torrent_list';
     const EXTRA_DISPLAY_SEED_BOX_ICON_ON_TORRENT_LIST = 'display_seed_box_icon_on_torrent_list';
 
+    /** @var  array<int|string, mixed> */
     public static array $taxonomies = [
         'source' => ['table' => 'sources', 'model' => Source::class],
         'medium' => ['table' => 'media', 'model' => Media::class],
@@ -98,11 +106,16 @@ class SearchBox extends NexusModel
         'processing' => ['table' => 'processings', 'model' => Processing::class],
     ];
 
+    /** @var  array<int|string, mixed> */
     public static array $extras = [
         self::EXTRA_DISPLAY_COVER_ON_TORRENT_LIST => ['text' => 'Display cover on torrent list'],
         self::EXTRA_DISPLAY_SEED_BOX_ICON_ON_TORRENT_LIST => ['text' => 'Display seed box icon on torrent list'],
     ];
 
+    /**
+     * @param  mixed  $fullName
+     * @return  array<int|string, mixed>
+     */
     public static function listExtraText($fullName = false): array
     {
         $result = [];
@@ -117,6 +130,10 @@ class SearchBox extends NexusModel
         return $result;
     }
 
+    /**
+     * @param  array<int|string, mixed>  $data
+     * @return  array<int|string, mixed>
+     */
     public static function formatTaxonomyExtra(array $data): array
     {
         do_log("data: " . json_encode($data));
@@ -136,6 +153,10 @@ class SearchBox extends NexusModel
         return $data;
     }
 
+    /**
+     * @param  mixed  $torrentField
+     * @return  mixed
+     */
     public function getTaxonomyLabel($torrentField)
     {
         $lang = get_langfolder_cookie();
@@ -149,6 +170,7 @@ class SearchBox extends NexusModel
         return nexus_trans("searchbox.sub_category_{$torrentField}_label") ?: ucfirst($torrentField);
     }
 
+    /** @return  \Illuminate\Database\Eloquent\Casts\Attribute<mixed, mixed> */
     protected function customFields(): Attribute
     {
         return new Attribute(
@@ -157,11 +179,16 @@ class SearchBox extends NexusModel
         );
     }
 
+    /** @return  array<int|string, mixed> */
     public static function getSubCatOptions(): array
     {
         return array_combine(array_keys(self::$taxonomies), array_keys(self::$taxonomies));
     }
 
+    /**
+     * @param  mixed  $field
+     * @return  array<int|string, mixed>
+     */
     public static function listSections($field = null): array
     {
         $result = [];
@@ -177,6 +204,10 @@ class SearchBox extends NexusModel
         return $result;
     }
 
+    /**
+     * @param  int  $id
+     * @return  mixed
+     */
     public static function get(int $id)
     {
         if (!isset(self::$instances[$id])) {
@@ -185,6 +216,11 @@ class SearchBox extends NexusModel
         return self::$instances[$id];
     }
 
+    /**
+     * @param  mixed  $searchBox
+     * @param  mixed  $torrentField
+     * @return  \Illuminate\Support\Collection<int, \stdClass>
+     */
     public static function listTaxonomyItems($searchBox, $torrentField): \Illuminate\Support\Collection
     {
         if (!$searchBox instanceof self) {
@@ -199,6 +235,7 @@ class SearchBox extends NexusModel
         })->orderBy('sort_index', 'desc')->orderBy('id', 'desc')->get();
     }
 
+    /** @return  array<int|string, mixed> */
     public static function listModeOptions(): array
     {
         if (!empty(self::$modeOptions)) {
@@ -210,6 +247,10 @@ class SearchBox extends NexusModel
         return self::$modeOptions;
     }
 
+    /**
+     * @param  mixed  $value
+     * @return  array<int|string, mixed>
+     */
     public function getCustomFieldsAttribute($value): array
     {
         if (!is_array($value)) {
@@ -218,6 +259,10 @@ class SearchBox extends NexusModel
         return $value;
     }
 
+    /**
+     * @param  mixed  $value
+     * @return  mixed
+     */
     public function setCustomFieldsAttribute($value)
     {
         if (is_array($value)) {
@@ -225,6 +270,7 @@ class SearchBox extends NexusModel
         }
     }
 
+    /** @return  mixed */
     public function getDisplaySectionNameAttribute()
     {
         $locale = Locale::getDefault();
@@ -244,6 +290,7 @@ class SearchBox extends NexusModel
         return $this->name;
     }
 
+    /** @return  array<int|string, mixed> */
     public static function listSearchModes(): array
     {
         $result = [];
@@ -258,21 +305,25 @@ class SearchBox extends NexusModel
         return Setting::getIsSpecialSectionEnabled();
     }
 
+    /** @return  mixed */
     public static function getBrowseMode()
     {
         return Setting::get('main.browsecat');
     }
 
+    /** @return  mixed */
     public static function getBrowseSearchBox()
     {
         return self::query()->find(self::getBrowseMode());
     }
 
+    /** @return  mixed */
     public static function getSpecialMode()
     {
         return Setting::get('main.specialcat');
     }
 
+    /** @return  mixed */
     public static function getSpecialSearchBox()
     {
         return self::query()->find(self::getSpecialMode());
@@ -289,39 +340,43 @@ class SearchBox extends NexusModel
     }
 
 
-    /**
-     * @return HasMany<Category, $this>
-     */
+    /** @return  \Illuminate\Database\Eloquent\Relations\HasMany<Category, $this> */
     public function categories(): HasMany
     {
         return $this->hasMany(Category::class, 'mode');
     }
 
+    /** @return  \Illuminate\Database\Eloquent\Relations\HasMany<Source, $this> */
     public function taxonomy_source(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(Source::class, 'mode');
     }
 
+    /** @return  \Illuminate\Database\Eloquent\Relations\HasMany<Media, $this> */
     public function taxonomy_medium(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(Media::class, 'mode');
     }
 
+    /** @return  \Illuminate\Database\Eloquent\Relations\HasMany<Standard, $this> */
     public function taxonomy_standard(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(Standard::class, 'mode');
     }
 
+    /** @return  \Illuminate\Database\Eloquent\Relations\HasMany<Codec, $this> */
     public function taxonomy_codec(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(Codec::class, 'mode');
     }
 
+    /** @return  \Illuminate\Database\Eloquent\Relations\HasMany<AudioCodec, $this> */
     public function taxonomy_audiocodec(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(AudioCodec::class, 'mode');
     }
 
+    /** @return  \Illuminate\Database\Eloquent\Relations\HasMany<Processing, $this> */
     public function taxonomy_processing(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(Processing::class, 'mode');
@@ -345,9 +400,7 @@ class SearchBox extends NexusModel
         }
     }
 
-    /**
-     * @return HasMany<Tag, $this>
-     */
+    /** @return  \Illuminate\Database\Eloquent\Relations\HasMany<Tag, $this> */
     public function tags(): HasMany
     {
         return $this->hasMany(Tag::class, 'mode');
@@ -363,6 +416,7 @@ class SearchBox extends NexusModel
         $this->setRelation("tags", $allTags);
     }
 
+    /** @return  mixed */
     public static function getDefaultSearchMode()
     {
         $meiliConf = get_setting("meilisearch");
@@ -373,6 +427,7 @@ class SearchBox extends NexusModel
         }
     }
 
+    /** @param  mixed  $selectedValue */
     public static function listSelectModeOptions($selectedValue): string
     {
         $options = [];
@@ -390,6 +445,11 @@ class SearchBox extends NexusModel
         return implode('', $options);
     }
 
+    /**
+     * @param  mixed  $searchBoxId
+     * @param  mixed  $glue
+     * @return  array<int|string, mixed>|string|null
+     */
     public static function listCategoryId($searchBoxId, $glue = null): array|string|null
     {
         static $results = null;
@@ -406,6 +466,7 @@ class SearchBox extends NexusModel
         return $results;
     }
 
+    /** @return  array<int|string, mixed> */
     public static function listAuthorizedSectionId(): array
     {
         $modeIds = [self::getBrowseMode()];
@@ -415,6 +476,7 @@ class SearchBox extends NexusModel
         return $modeIds;
     }
 
+    /** @return  array<int|string, mixed> */
     public static function listAllSectionId(): array
     {
         $modeIds = [self::getBrowseMode()];

@@ -35,6 +35,7 @@ use Illuminate\Support\Facades\Cache;
  */
 class Peer extends NexusModel
 {
+    /** @var  list<string> */
     protected $fillable = [
         'torrent', 'peer_id', 'ip', 'port', 'uploaded', 'downloaded', 'to_go', 'seeder', 'started', 'last_action',
         'prev_action', 'connectable', 'userid', 'agent', 'finishedat', 'downloadoffset', 'uploadedoffset', 'passkey',
@@ -45,6 +46,7 @@ class Peer extends NexusModel
 
     const CONNECTABLE_NO = 'no';
 
+    /** @var  array<string, string> */
     protected $casts = [
         'started' => 'datetime',
         'last_action' => 'datetime',
@@ -52,6 +54,7 @@ class Peer extends NexusModel
         'finishedat' => 'datetime:U',
     ];
 
+    /** @var  array<int|string, mixed> */
     public static $connectableText = [
         self::CONNECTABLE_YES => '是',
         self::CONNECTABLE_NO => '否',
@@ -61,6 +64,7 @@ class Peer extends NexusModel
 
     const SEEDER_NO = 'no';
 
+    /** @var  array<int|string, mixed> */
     public static $cardTitles = [
         'upload_text' => '上传',
         'download_text' => '下载',
@@ -71,36 +75,49 @@ class Peer extends NexusModel
 
     ];
 
+    /** @return  mixed */
     public function getConnectableTextAttribute()
     {
         return self::$connectableText[$this->connectable] ?? '';
     }
 
+    /**
+     * @param  \Illuminate\Database\Eloquent\Builder<Peer>  $builder
+     * @return  mixed
+     */
     public function scopeIsSeeder(Builder $builder)
     {
         return $builder->where('seeder', self::SEEDER_YES);
     }
 
+    /**
+     * @param  \Illuminate\Database\Eloquent\Builder<Peer>  $builder
+     * @return  mixed
+     */
     public function scopeIsNotSeeder(Builder $builder)
     {
         return $builder->where('seeder', self::SEEDER_NO);
     }
 
+    /** @return  mixed */
     public function isSeeder()
     {
         return $this->seeder == self::SEEDER_YES;
     }
 
+    /** @return  mixed */
     public function isNotSeeder()
     {
         return $this->seeder == self::SEEDER_NO;
     }
 
+    /** @return  \Illuminate\Database\Eloquent\Relations\BelongsTo<User, $this> */
     public function user(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(User::class, 'userid');
     }
 
+    /** @return  \Illuminate\Database\Eloquent\Relations\BelongsTo<Torrent, $this> */
     public function relative_torrent(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(Torrent::class, 'torrent');

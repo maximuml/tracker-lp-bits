@@ -64,6 +64,7 @@ use Nexus\Database\NexusDB;
  */
 class Torrent extends NexusModel
 {
+    /** @var  list<string> */
     protected $fillable = [
         'name', 'filename', 'save_as',
         'category', 'source', 'medium', 'codec', 'standard', 'processing', 'audiocodec',
@@ -84,6 +85,7 @@ class Torrent extends NexusModel
     const BANNED_YES = 'yes';
     const BANNED_NO = 'no';
 
+    /** @var  array<string, string> */
     protected $casts = [
         'added' => 'datetime',
         'promotion_until' => 'datetime',
@@ -91,10 +93,12 @@ class Torrent extends NexusModel
         'last_action' => 'datetime',
     ];
 
+    /** @var  list<string> */
     protected $hidden = [
         'info_hash',
     ];
 
+    /** @var  array<int|string, mixed> */
     public static $commentFields = [
         'id', 'name', 'added', 'visible', 'banned', 'owner', 'sp_state', 'promotion_time_type', 'promotion_until', 'pos_state',
         'hr', 'last_action', 'leechers', 'seeders', 'times_completed', 'views', 'size', 'cover', 'anonymous',
@@ -102,6 +106,7 @@ class Torrent extends NexusModel
         'price',
     ];
 
+    /** @var  array<int|string, mixed> */
     public static $basicRelations = [
         'basic_category', 'basic_audio_codec', 'basic_codec', 'basic_media',
         'basic_source', 'basic_standard', ];
@@ -114,6 +119,7 @@ class Torrent extends NexusModel
      */
     const POS_STATE_STICKY_SECOND = 'r_sticky';
 
+    /** @var  array<int|string, mixed> */
     public static $posStates = [
         self::POS_STATE_STICKY_NONE => ['text' => 'Normal', 'icon_counts' => 0],
         self::POS_STATE_STICKY_SECOND => ['text' => 'Sticky second', 'icon_counts' => 1],
@@ -123,6 +129,7 @@ class Torrent extends NexusModel
     const HR_YES = 1;
     const HR_NO = 0;
 
+    /** @var  array<int|string, mixed> */
     public static $hrStatus = [
         self::HR_NO => ['text' => 'NO'],
         self::HR_YES => ['text' => 'YES'],
@@ -136,6 +143,7 @@ class Torrent extends NexusModel
     const PROMOTION_HALF_DOWN_TWO_TIMES_UP = 6;
     const PROMOTION_ONE_THIRD_DOWN = 7;
 
+    /** @var  array<int|string, mixed> */
     public static array $promotionTypes = [
         self::PROMOTION_NORMAL => [
             'text' => 'Normal',
@@ -185,6 +193,7 @@ class Torrent extends NexusModel
     const PROMOTION_TIME_TYPE_PERMANENT = 1;
     const PROMOTION_TIME_TYPE_DEADLINE = 2;
 
+    /** @var  array<int|string, mixed> */
     public static array $promotionTimeTypes = [
         self::PROMOTION_TIME_TYPE_GLOBAL => ['text' => 'Global'],
         self::PROMOTION_TIME_TYPE_PERMANENT => ['text' => 'Permanent'],
@@ -197,6 +206,7 @@ class Torrent extends NexusModel
     const APPROVAL_STATUS_ALLOW = 1;
     const APPROVAL_STATUS_DENY = 2;
 
+    /** @var  array<int|string, mixed> */
     public static array $approvalStatus = [
         self::APPROVAL_STATUS_NONE => [
             'text' => 'None',
@@ -224,11 +234,17 @@ class Torrent extends NexusModel
     const REQUIRE_SEED_SECTION_TORRENT_ON_LIST_CACHE_KEY = "REQUIRE_SEED_SECTION_TORRENT_ON_LIST_CACHE";
     const REQUIRE_SEED_SECTION_TORRENT_USER_CACHE_KEY = "REQUIRE_SEED_SECTION_TORRENT_USER_CACHE";
 
+    /** @var  array<int|string, mixed> */
     public static array $nfoViewStyles = [
         self::NFO_VIEW_STYLE_DOS => ['text' => 'DOS-vy'],
         self::NFO_VIEW_STYLE_WINDOWS => ['text' => 'Windows-vy'],
     ];
 
+    /**
+     * @param  mixed  $query
+     * @param  string  $binaryHash
+     * @return  mixed
+     */
     public function scopeWhereInfoHash($query, string $binaryHash)
     {
         if (NexusDB::isPgsql()) {
@@ -245,6 +261,7 @@ class Torrent extends NexusModel
     /**
      * 重写获取 info_hash 的方法，确保从数据库读出时是正确的格式
      * 注意：不要使用 getInfoHashAttribute()，不带缓存，第1次有值，第2次指针到头，数据是空！！！
+     * @return  \Illuminate\Database\Eloquent\Casts\Attribute<mixed, mixed>
      */
     public function infoHash(): Attribute
     {
@@ -260,17 +277,20 @@ class Torrent extends NexusModel
         )->shouldCache();
     }
 
+    /** @return  mixed */
     public function getPromotionInfoAttribute()
     {
         return self::$promotionTypes[$this->sp_state_real] ?? null;
     }
 
+    /** @return  mixed */
     public function getSpStateRealTextAttribute()
     {
         $spStateReal = $this->sp_state_real;
         return self::$promotionTypes[$spStateReal]['text'] ?? '';
     }
 
+    /** @return  mixed */
     public function getSpStateRealAttribute()
     {
         if ($this->getRawOriginal('sp_state') === null) {
@@ -291,6 +311,7 @@ class Torrent extends NexusModel
         return $spState;
     }
 
+    /** @return  mixed */
     protected function getPosStateTextAttribute()
     {
         $text = nexus_trans('torrent.pos_state_' . $this->pos_state);
@@ -305,6 +326,7 @@ class Torrent extends NexusModel
         return $text;
     }
 
+    /** @return  \Illuminate\Database\Eloquent\Casts\Attribute<mixed, mixed> */
     protected function approvalStatusText(): Attribute
     {
         return new Attribute(
@@ -312,6 +334,7 @@ class Torrent extends NexusModel
         );
     }
 
+    /** @return  \Illuminate\Database\Eloquent\Casts\Attribute<mixed, mixed> */
     protected function spStateText(): Attribute
     {
         return new Attribute(
@@ -319,6 +342,10 @@ class Torrent extends NexusModel
         );
     }
 
+    /**
+     * @param  mixed  $appendTableName
+     * @return  array<int|string, mixed>|bool
+     */
     public static function getFieldsForList($appendTableName = false): array|bool
     {
         $fields = 'id, sp_state, promotion_time_type, promotion_until, banned, pos_state, category, source, medium, codec, standard, processing, audiocodec, leechers, seeders, name, times_completed, size, added, comments,anonymous,owner,url,cache_stamp, hr, approval_status, cover, price';
@@ -331,6 +358,11 @@ class Torrent extends NexusModel
         return $fields;
     }
 
+    /**
+     * @param  mixed  $onlyKeyValue
+     * @param  mixed  $valueField
+     * @return  array<int|string, mixed>
+     */
     public static function listApprovalStatus($onlyKeyValue = false, $valueField = 'text'): array
     {
         $result = self::$approvalStatus;
@@ -346,6 +378,11 @@ class Torrent extends NexusModel
         return $result;
     }
 
+    /**
+     * @param  mixed  $onlyKeyValue
+     * @param  mixed  $valueField
+     * @return  array<int|string, mixed>
+     */
     public static function listPromotionTypes($onlyKeyValue = false, $valueField = 'text'): array
     {
         $result = self::$promotionTypes;
@@ -361,6 +398,11 @@ class Torrent extends NexusModel
         return $result;
     }
 
+    /**
+     * @param  mixed  $onlyKeyValue
+     * @param  mixed  $valueField
+     * @return  array<int|string, mixed>
+     */
     public static function listPromotionTimeTypes($onlyKeyValue = false, $valueField = 'text'): array
     {
         return self::listStaticProps(self::$promotionTimeTypes, 'torrent.promotion_time_types', $onlyKeyValue, $valueField);
@@ -383,6 +425,7 @@ class Torrent extends NexusModel
         return $this->getRawOriginal('hr');
     }
 
+    /** @return  mixed */
     public function getHrTextAttribute()
     {
         return self::$hrStatus[$this->hr] ?? '';
@@ -400,6 +443,11 @@ class Torrent extends NexusModel
         return implode('', $html);
     }
 
+    /**
+     * @param  mixed  $onlyKeyValue
+     * @param  mixed  $valueField
+     * @return  array<int|string, mixed>
+     */
     public static function listPosStates($onlyKeyValue = false, $valueField = 'text'): array
     {
         $result = self::$posStates;
@@ -414,6 +462,7 @@ class Torrent extends NexusModel
         return $result;
     }
 
+    /** @return  array<int|string, mixed> */
     public static function getFieldLabels(): array
     {
         $fields = [
@@ -427,6 +476,10 @@ class Torrent extends NexusModel
         return $result;
     }
 
+    /**
+     * @param  array<int|string, mixed>  $fields
+     * @return  mixed
+     */
     public function checkIsNormal(array $fields = ['visible', 'banned'])
     {
         if (in_array('visible', $fields) && $this->getAttribute('visible') != self::VISIBLE_YES) {
@@ -439,32 +492,31 @@ class Torrent extends NexusModel
         return true;
     }
 
+    /** @param  mixed  $field */
     public function getSubCategoryLabel($field): string
     {
         return $this->basic_category->search_box->getTaxonomyLabel($field);
     }
 
-    /**
-     * @return HasMany<Bookmark, $this>
-     */
+    /** @return  \Illuminate\Database\Eloquent\Relations\HasMany<Bookmark, $this> */
     public function bookmarks(): HasMany
     {
         return $this->hasMany(Bookmark::class, 'torrentid');
     }
 
-    /**
-     * @return BelongsTo<User, $this>
-     */
+    /** @return  \Illuminate\Database\Eloquent\Relations\BelongsTo<User, $this> */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'owner')->withDefault(User::getDefaultUserAttributes());
     }
 
+    /** @return  \Illuminate\Database\Eloquent\Relations\HasMany<Thank, $this> */
     public function thanks()
     {
         return $this->hasMany(Thank::class, 'torrentid');
     }
 
+    /** @return  \Illuminate\Database\Eloquent\Relations\BelongsToMany<User, $this> */
     public function thank_users()
     {
         return $this->belongsToMany(User::class, 'thanks', 'torrentid', 'userid');
@@ -472,8 +524,7 @@ class Torrent extends NexusModel
 
     /**
      * 同伴
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @return  \Illuminate\Database\Eloquent\Relations\HasMany<Peer, $this>
      */
     public function peers()
     {
@@ -482,96 +533,105 @@ class Torrent extends NexusModel
 
     /**
      * 完成情况
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @return  \Illuminate\Database\Eloquent\Relations\HasMany<Snatch, $this>
      */
     public function snatches()
     {
         return $this->hasMany(Snatch::class, 'torrentid');
     }
 
+    /** @return  mixed */
     public function upload_peers()
     {
         return $this->peers()->where('seeder', Peer::SEEDER_YES);
     }
 
+    /** @return  mixed */
     public function download_peers()
     {
         return $this->peers()->where('seeder', Peer::SEEDER_NO);
     }
 
+    /** @return  mixed */
     public function finish_peers()
     {
         return $this->peers()->where('finishedat', '>', 0);
     }
 
-    /**
-     * @return HasMany<File, $this>
-     */
+    /** @return  \Illuminate\Database\Eloquent\Relations\HasMany<File, $this> */
     public function files(): HasMany
     {
         return $this->hasMany(File::class, 'torrent');
     }
 
-    /**
-     * @return BelongsTo<Category, $this>
-     */
+    /** @return  \Illuminate\Database\Eloquent\Relations\BelongsTo<Category, $this> */
     public function basic_category(): BelongsTo
     {
         return $this->belongsTo(Category::class, 'category');
     }
 
+    /** @return  \Illuminate\Database\Eloquent\Relations\BelongsTo<Source, $this> */
     public function basic_source()
     {
         return $this->belongsTo(Source::class, 'source');
     }
 
+    /** @return  \Illuminate\Database\Eloquent\Relations\BelongsTo<Media, $this> */
     public function basic_medium()
     {
         return $this->belongsTo(Media::class, 'medium');
     }
 
+    /** @return  \Illuminate\Database\Eloquent\Relations\BelongsTo<Codec, $this> */
     public function basic_codec()
     {
         return $this->belongsTo(Codec::class, 'codec');
     }
 
+    /** @return  \Illuminate\Database\Eloquent\Relations\BelongsTo<Standard, $this> */
     public function basic_standard()
     {
         return $this->belongsTo(Standard::class, 'standard');
     }
 
+    /** @return  \Illuminate\Database\Eloquent\Relations\BelongsTo<Processing, $this> */
     public function basic_processing()
     {
         return $this->belongsTo(Processing::class, 'processing');
     }
 
+    /** @return  \Illuminate\Database\Eloquent\Relations\BelongsTo<AudioCodec, $this> */
     public function basic_audiocodec()
     {
         return $this->belongsTo(AudioCodec::class, 'audiocodec');
     }
 
+    /**
+     * @param  mixed  $query
+     * @param  mixed  $visible
+     * @return  mixed
+     */
     public function scopeVisible($query, $visible = self::VISIBLE_YES)
     {
         $query->where('visible', $visible);
     }
 
+    /**
+     * @param  mixed  $query
+     * @return  mixed
+     */
     public function scopeNormal($query)
     {
         $query->where('visible', self::VISIBLE_YES)->where('banned', self::BANNED_NO);
     }
 
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany<TorrentTag, $this>
-     */
+    /** @return  \Illuminate\Database\Eloquent\Relations\HasMany<TorrentTag, $this> */
     public function torrent_tags(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(TorrentTag::class, 'torrent_id');
     }
 
-    /**
-     * @return BelongsToMany<Tag, $this>
-     */
+    /** @return  \Illuminate\Database\Eloquent\Relations\BelongsToMany<Tag, $this> */
     public function tags(): BelongsToMany
     {
         $idsString = TagRepository::getOrderByFieldIdString();
@@ -586,19 +646,19 @@ class Torrent extends NexusModel
             ->orderByRaw($orderByRaw);
     }
 
+    /** @return  \Illuminate\Database\Eloquent\Relations\HasMany<Reward, $this> */
     public function reward_logs(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(Reward::class, 'torrentid');
     }
 
+    /** @return  \Illuminate\Database\Eloquent\Relations\HasMany<TorrentOperationLog, $this> */
     public function operationLogs(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(TorrentOperationLog::class, 'torrent_id');
     }
 
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasOne<TorrentExtra, $this>
-     */
+    /** @return  \Illuminate\Database\Eloquent\Relations\HasOne<TorrentExtra, $this> */
     public function extra(): \Illuminate\Database\Eloquent\Relations\HasOne
     {
         return $this->hasOne(TorrentExtra::class, 'torrent_id');

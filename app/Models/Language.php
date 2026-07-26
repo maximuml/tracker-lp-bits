@@ -37,18 +37,25 @@ class Language extends NexusModel
         ],
     ];
 
+    /** @var  string */
     protected $table = 'language';
 
+    /** @var  list<string> */
     protected $fillable = [
         'lang_name', 'site_lang_folder',
     ];
 
+    /** @return  array<int|string, mixed> */
     public static function listAvailable(): array
     {
         return array_keys(self::CONFIG);
     }
 
 
+    /**
+     * @param  mixed  $withoutCache
+     * @return  mixed
+     */
     public static function listEnabled($withoutCache = false)
     {
         if ($withoutCache) {

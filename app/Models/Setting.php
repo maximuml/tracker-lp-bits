@@ -18,12 +18,15 @@ class Setting extends NexusModel
 {
     use NexusActivityLogTrait;
 
+    /** @var  list<string> */
     protected $fillable = ['name', 'value', 'autoload'];
 
+    /** @var  bool */
     public $timestamps = true;
 
     const PERMISSION_NO_CLASS = 100;
 
+    /** @var  array<int|string, mixed> */
     public static array $permissionMustHaveClass = ['defaultclass', 'staffmem'];
 
     const DIRECT_PERMISSION_CACHE_KEY_PREFIX = 'nexus_direct_permissions_';
@@ -34,10 +37,8 @@ class Setting extends NexusModel
 
     /**
      * get setting autoload = yes with cache
-     *
-     * @param string|null $name
-     * @param mixed $default
-     * @return mixed
+     * @param  ?string  $name
+     * @param  mixed  $default
      */
     public static function get(?string $name = null, mixed $default = null): mixed
     {
@@ -55,10 +56,8 @@ class Setting extends NexusModel
 
     /**
      * get setting autoload = yes without cache
-     *
-     * @param string|null $name
-     * @param mixed $default
-     * @return mixed
+     * @param  ?string  $name
+     * @param  mixed  $default
      */
     public static function getFromDb(?string $name = null, mixed $default = null): mixed
     {
@@ -76,10 +75,8 @@ class Setting extends NexusModel
 
     /**
      * get from db by name, generally used for `autoload` = 'no'
-     *
-     * @param string $name
-     * @param mixed $default
-     * @return mixed
+     * @param  string  $name
+     * @param  mixed  $default
      */
     public static function getByName(string $name, mixed $default = null): mixed
     {
@@ -90,6 +87,10 @@ class Setting extends NexusModel
         return $default;
     }
 
+    /**
+     * @param  mixed  $whereRaw
+     * @return  array<int|string, mixed>
+     */
     public static function getByWhereRaw($whereRaw): array
     {
         $result = [];
@@ -100,6 +101,10 @@ class Setting extends NexusModel
         return $result;
     }
 
+    /**
+     * @param  Setting  $setting
+     * @return  mixed
+     */
     public static function normalizeValue(Setting $setting)
     {
         $value = $setting->value;
@@ -112,6 +117,7 @@ class Setting extends NexusModel
         return $value;
     }
 
+    /** @param  array<int|string, mixed>  $allowed */
     public static function updateUserTokenPermissionAllowedCache(array $allowed = []): void
     {
         $redis = NexusDB::redis();
@@ -249,6 +255,7 @@ class Setting extends NexusModel
         return self::get("smtp.smtptype");
     }
 
+    /** @return  array<int|string, mixed> */
     public static function getPermissionUserTokenAllowed(): array
     {
         return self::get("permission.user_token_allowed");
@@ -294,6 +301,7 @@ class Setting extends NexusModel
         return self::get("require_seed_section.bonus_addition_factor", Torrent::REQUIRE_SEED_SECTION_DEFAULT_BONUS_ADDITION_FACTOR);
     }
 
+    /** @return  array<int|string, mixed> */
     public static function getRequireSeedSectionTags(): array
     {
         return self::get("require_seed_section.require_tags", []);
@@ -309,6 +317,7 @@ class Setting extends NexusModel
         return (int)self::get("bonus.min_size");
     }
 
+    /** @return  array<int|string, mixed> */
     public static function getBonusRewardOptions(): array
     {
         $result = self::get("torrent.reward_bonus_options");

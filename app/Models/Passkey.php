@@ -23,17 +23,18 @@ namespace App\Models;
  */
 class Passkey extends NexusModel
 {
+    /** @var  string */
     protected $table = 'user_passkeys';
 
+    /** @var  bool */
     public $timestamps = true;
 
+    /** @var  list<string> */
     protected $fillable = [
         'id', 'user_id', 'aaguid', 'credential_id', 'public_key', 'counter',
     ];
 
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<User, $this>
-     */
+    /** @return  \Illuminate\Database\Eloquent\Relations\BelongsTo<User, $this> */
     public function user(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');

@@ -12,5 +12,6 @@ namespace App\Models;
 
 class TorrentSecret extends NexusModel
 {
+    /** @var  list<string> */
     protected $fillable = ['uid', 'torrent_id', 'secret'];
 }

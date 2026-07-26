@@ -20,10 +20,13 @@ use Nexus\Database\NexusDB;
  */
 class TorrentOperationLog extends NexusModel
 {
+    /** @var  string */
     protected $table = 'torrent_operation_logs';
 
+    /** @var  bool */
     public $timestamps = true;
 
+    /** @var  list<string> */
     protected $fillable = ['uid', 'torrent_id', 'action_type', 'comment'];
 
     const ACTION_TYPE_APPROVAL_NONE = 'approval_none';
@@ -32,6 +35,7 @@ class TorrentOperationLog extends NexusModel
     const ACTION_TYPE_EDIT = 'edit';
     const ACTION_TYPE_DELETE = 'delete';
 
+    /** @var  array<int|string, mixed> */
     public static array $actionTypes = [
         self::ACTION_TYPE_APPROVAL_NONE => ['text' => 'Approval none'],
         self::ACTION_TYPE_APPROVAL_ALLOW => ['text' => 'Approval allow'],
@@ -40,28 +44,30 @@ class TorrentOperationLog extends NexusModel
         self::ACTION_TYPE_DELETE => ['text' => 'Delete'],
     ];
 
+    /** @return  mixed */
     public function getActionTypeTextAttribute()
     {
         return nexus_trans("torrent.operation_log.{$this->action_type}.type_text");
     }
 
-    /**
-     * @return BelongsTo<User, $this>
-     */
+    /** @return  \Illuminate\Database\Eloquent\Relations\BelongsTo<User, $this> */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'uid')->select(User::$commonFields);
     }
 
-    /**
-     * @return BelongsTo<Torrent, $this>
-     */
+    /** @return  \Illuminate\Database\Eloquent\Relations\BelongsTo<Torrent, $this> */
     public function torrent(): BelongsTo
     {
         return $this->belongsTo(Torrent::class, 'torrent_id')->select(Torrent::$commentFields);
     }
 
 
+    /**
+     * @param  array<int|string, mixed>  $params
+     * @param  mixed  $notifyUser
+     * @return  mixed
+     */
     public static function add(array $params, $notifyUser = false)
     {
         $log = self::query()->create($params);
@@ -71,6 +77,10 @@ class TorrentOperationLog extends NexusModel
         return $log;
     }
 
+    /**
+     * @param  self  $torrentOperationLog
+     * @return  mixed
+     */
     private static function notifyUser(self $torrentOperationLog)
     {
         $actionType = $torrentOperationLog->action_type;

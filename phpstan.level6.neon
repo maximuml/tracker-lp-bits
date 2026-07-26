@@ -5,6 +5,7 @@ parameters:
     level: 6
     paths:
         - app/Support
+        - app/Models
 
     bootstrapFiles:
         - tests/phpstan/bootstrap.php

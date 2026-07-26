@@ -213,6 +213,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 class User extends Authenticatable implements FilamentUser, HasName
 {
+    /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable, HasApiTokens, NexusActivityLogTrait;
 
     public $timestamps = false;
@@ -243,6 +244,7 @@ class User extends Authenticatable implements FilamentUser, HasName
     const CLASS_SYSOP = "15";
     const CLASS_STAFF_LEADER = "16";
 
+    /** @var array<int|string, array<string, mixed>> */
     public static array $classes = [
         self::CLASS_PEASANT => ['text' => 'Peasant'],
         self::CLASS_USER => ['text' => 'User', 'min_seed_points' => 0],
@@ -266,7 +268,8 @@ class User extends Authenticatable implements FilamentUser, HasName
     const DONATE_YES = 'yes';
     const DONATE_NO = 'no';
 
-    public static $donateStatus = [
+    /** @var array<string, array<string, string>> */
+    public static array $donateStatus = [
         self::DONATE_YES => ['text' => 'Yes'],
         self::DONATE_NO => ['text' => 'No'],
     ];
@@ -275,12 +278,14 @@ class User extends Authenticatable implements FilamentUser, HasName
     const GENDER_MALE = 'Male';
     const GENDER_UNKNOWN = 'N/A';
 
+    /** @var array<string, string> */
     public static array $genders = [
         self::GENDER_MALE => 'Male',
         self::GENDER_FEMALE => 'Female',
         self::GENDER_UNKNOWN => 'N/A',
     ];
 
+    /** @var array<string, string> */
     public static array $cardTitles = [
         'uploaded_human' => '上传量',
         'downloaded_human' => '下载量',
@@ -291,9 +296,12 @@ class User extends Authenticatable implements FilamentUser, HasName
         'invites' => '邀请',
     ];
 
+    /** @var list<string> */
     public static array $notificationOptions = ['topic_reply', 'hr_reached'];
 
     private const USER_ENABLE_LATELY = "user_enable_lately:%s";
+
+    /** @return string */
 
     public function getConnectionName()
     {
@@ -309,6 +317,11 @@ class User extends Authenticatable implements FilamentUser, HasName
     {
         return self::getClassText($this->class);
     }
+
+    /**
+     * @param  int|string  $class
+     * @return string
+     */
 
     public static function getClassText($class)
     {
@@ -327,6 +340,12 @@ class User extends Authenticatable implements FilamentUser, HasName
         return $classText;
     }
 
+    /**
+     * @param  int|string  $min
+     * @param  int|string  $max
+     * @return array<int|string, string>
+     */
+
     public static function listClass($min = self::CLASS_PEASANT, $max = self::CLASS_STAFF_LEADER): array
     {
         $result = [];
@@ -337,6 +356,10 @@ class User extends Authenticatable implements FilamentUser, HasName
         }
         return $result;
     }
+
+    /**
+     * @param  int|string  $id
+     */
 
     public static function exists($id): bool
     {
@@ -425,6 +448,7 @@ class User extends Authenticatable implements FilamentUser, HasName
         'leechwarnuntil' => 'datetime',
     ];
 
+    /** @var list<string> */
     public static array $commonFields = [
         'id', 'username', 'email', 'class', 'status', 'added', 'avatar', 'passkey',
         'uploaded', 'downloaded', 'seedbonus', 'seedtime', 'leechtime',
@@ -433,6 +457,8 @@ class User extends Authenticatable implements FilamentUser, HasName
         'downloadpos', 'vip_added', 'vip_until', 'title', 'invites', 'attendance_card',
         'seed_points_per_hour'
     ];
+
+    /** @return array<string, mixed> */
 
     public static function getDefaultUserAttributes(): array
     {
@@ -459,6 +485,14 @@ class User extends Authenticatable implements FilamentUser, HasName
         return new self(self::getDefaultUserAttributes());
     }
 
+    /**
+     * @param  int|string  $class
+     * @param  bool  $compact
+     * @param  bool  $b_colored
+     * @param  bool  $I18N
+     * @return string
+     */
+
     public static function getClassName($class, $compact = false, $b_colored = false, $I18N = false)
     {
         $class_name = self::$classes[$class]['text'] ?? '';
@@ -475,6 +509,10 @@ class User extends Authenticatable implements FilamentUser, HasName
         return $class_name;
     }
 
+    /**
+     * @param  list<string>  $fields
+     */
+
     public function checkIsNormal(array $fields = ['status', 'enabled']): bool
     {
         $params = [
@@ -489,6 +527,8 @@ class User extends Authenticatable implements FilamentUser, HasName
         }
         return true;
     }
+
+    /** @return string */
 
     public function getLocaleAttribute()
     {
@@ -507,10 +547,14 @@ class User extends Authenticatable implements FilamentUser, HasName
         return $locale;
     }
 
+    /** @return string */
+
     public function getSiteLangFolderAttribute()
     {
         return 'en';
     }
+
+    /** @return \Illuminate\Database\Eloquent\Casts\Attribute<string, mixed> */
 
     protected function uploadedText(): Attribute
     {
@@ -519,12 +563,16 @@ class User extends Authenticatable implements FilamentUser, HasName
         );
     }
 
+    /** @return \Illuminate\Database\Eloquent\Casts\Attribute<string, mixed> */
+
     protected function downloadedText(): Attribute
     {
         return new Attribute(
             get: fn($value, $attributes) => mksize($attributes['downloaded'])
         );
     }
+
+    /** @return \Illuminate\Database\Eloquent\Casts\Attribute<string, mixed> */
 
     protected function genderText(): Attribute
     {
@@ -538,6 +586,11 @@ class User extends Authenticatable implements FilamentUser, HasName
         return $this->two_step_secret != "" ? "yes" : "no";
     }
 
+    /**
+     * @param  int|string  $class
+     * @return int|float|false
+     */
+
     public static function getMinSeedPoints($class)
     {
         $setting = Setting::get("account.{$class}_min_seed_points");
@@ -547,10 +600,20 @@ class User extends Authenticatable implements FilamentUser, HasName
         return self::$classes[$class]['min_seed_points'] ?? false;
     }
 
+    /**
+     * @param  \Illuminate\Database\Eloquent\Builder<User>  $query
+     * @return \Illuminate\Database\Eloquent\Builder<User>
+     */
+
     public function scopeNormal(Builder $query): Builder
     {
         return $query->where('status', self::STATUS_CONFIRMED)->where('enabled', self::ENABLED_YES);
     }
+
+    /**
+     * @param  \Illuminate\Database\Eloquent\Builder<User>  $query
+     * @return \Illuminate\Database\Eloquent\Builder<User>
+     */
 
     public function scopeDonating(Builder $query): Builder
     {
@@ -576,15 +639,21 @@ class User extends Authenticatable implements FilamentUser, HasName
         return $this->belongsTo(Language::class, 'lang');
     }
 
+    /** @return \Illuminate\Database\Eloquent\Relations\HasOne<Invite, $this> */
+
     public function invitee_code()
     {
         return $this->hasOne(Invite::class, 'invitee_register_uid');
     }
 
+    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<User, $this> */
+
     public function inviter()
     {
         return $this->belongsTo(User::class, 'invited_by');
     }
+
+    /** @return \Illuminate\Database\Eloquent\Relations\HasMany<Invite, $this> */
 
     public function temporary_invites()
     {
@@ -595,29 +664,29 @@ class User extends Authenticatable implements FilamentUser, HasName
         ;
     }
 
+    /** @return \Illuminate\Database\Eloquent\Relations\HasMany<Message, $this> */
+
     public function send_messages()
     {
         return $this->hasMany(Message::class, 'sender');
     }
+
+    /** @return \Illuminate\Database\Eloquent\Relations\HasMany<Message, $this> */
 
     public function receive_messages()
     {
         return $this->hasMany(Message::class, 'receiver');
     }
 
-    /**
-     * torrent comments
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-     */
+    /** @return \Illuminate\Database\Eloquent\Relations\HasMany<Comment, $this> */
+
     public function comments()
     {
         return $this->hasMany(Comment::class, 'user');
     }
 
-    /**
-     * forum posts
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-     */
+    /** @return \Illuminate\Database\Eloquent\Relations\HasMany<Post, $this> */
+
     public function posts()
     {
         return $this->hasMany(Post::class, 'userid');
@@ -631,12 +700,15 @@ class User extends Authenticatable implements FilamentUser, HasName
         return $this->hasMany(Torrent::class, 'owner');
     }
 
+    /** @return \Illuminate\Database\Eloquent\Relations\HasMany<Bookmark, $this> */
+
     public function bookmarks(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(Bookmark::class, 'userid');
     }
 
 
+    /** @return \Illuminate\Database\Eloquent\Relations\HasManyThrough<Torrent, Peer, $this> */
     public function peers_torrents()
     {
         return $this->hasManyThrough(
@@ -648,6 +720,7 @@ class User extends Authenticatable implements FilamentUser, HasName
             'torrent');
     }
 
+    /** @return \Illuminate\Database\Eloquent\Relations\HasManyThrough<Torrent, Snatch, $this> */
     public function snatched_torrents()
     {
         return $this->hasManyThrough(
@@ -659,25 +732,32 @@ class User extends Authenticatable implements FilamentUser, HasName
             'torrentid');
     }
 
+    /** @return \Illuminate\Database\Eloquent\Relations\HasManyThrough<Torrent, Peer, $this> */
     public function seeding_torrents()
     {
         return $this->peers_torrents()->where('peers.seeder', Peer::SEEDER_YES);
     }
 
+    /** @return \Illuminate\Database\Eloquent\Relations\HasManyThrough<Torrent, Peer, $this> */
     public function leeching_torrents()
     {
         return $this->peers_torrents()->where('peers.seeder', Peer::SEEDER_NO);
     }
 
+    /** @return \Illuminate\Database\Eloquent\Relations\HasManyThrough<Torrent, Snatch, $this> */
     public function completed_torrents()
     {
         return $this->snatched_torrents()->where('snatched.finished', Snatch::FINISHED_YES);
     }
 
+    /** @return \Illuminate\Database\Eloquent\Relations\HasManyThrough<Torrent, Snatch, $this> */
     public function incomplete_torrents()
     {
         return $this->snatched_torrents()->where('snatched.finished', Snatch::FINISHED_NO);
     }
+
+
+    /** @return \Illuminate\Database\Eloquent\Relations\HasMany<HitAndRun, $this> */
 
 
     public function hitAndRuns(): \Illuminate\Database\Eloquent\Relations\HasMany
@@ -715,45 +795,66 @@ class User extends Authenticatable implements FilamentUser, HasName
         return $this->valid_medals()->where('user_medals.status', UserMedal::STATUS_WEARING);
     }
 
+    /** @return \Illuminate\Database\Eloquent\Relations\HasMany<Reward, $this> */
+
     public function reward_torrent_logs(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(Reward::class, 'userid');
     }
+
+    /** @return \Illuminate\Database\Eloquent\Relations\HasMany<Thank, $this> */
 
     public function thank_torrent_logs(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(Thank::class, 'userid');
     }
 
+    /** @return \Illuminate\Database\Eloquent\Relations\HasMany<PollAnswer, $this> */
+
     public function poll_answers(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(PollAnswer::class, 'userid');
     }
+
+    /** @return \Illuminate\Database\Eloquent\Relations\HasMany<UserMeta, $this> */
 
     public function metas()
     {
         return $this->hasMany(UserMeta::class, 'uid');
     }
 
+    /** @return \Illuminate\Database\Eloquent\Relations\HasMany<UsernameChangeLog, $this> */
+
     public function usernameChangeLogs()
     {
         return $this->hasMany(UsernameChangeLog::class, 'uid');
     }
+
+    /** @return \Illuminate\Database\Eloquent\Relations\BelongsToMany<Exam, $this> */
 
     public function examAndTasks(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
     {
         return $this->belongsToMany(Exam::class, "exam_users", "uid", "exam_id");
     }
 
+    /** @return \Illuminate\Database\Eloquent\Relations\BelongsToMany<Exam, $this> */
+
     public function onGoingExamAndTasks(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
     {
         return $this->examAndTasks()->wherePivot("status", ExamUser::STATUS_NORMAL);
     }
 
+    /** @return \Illuminate\Database\Eloquent\Relations\HasMany<UserModifyLog, $this> */
+
     public function modifyLogs(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(UserModifyLog::class, "user_id");
     }
+
+    /**
+     * @param  mixed  $value
+     * @return string
+     */
 
     public function getAvatarAttribute($value)
     {
@@ -769,10 +870,21 @@ class User extends Authenticatable implements FilamentUser, HasName
 
     }
 
+    /**
+     * @param  array<string, mixed>  $update
+     * @param  string  $modComment
+     */
+
     public function updateWithModComment(array $update, $modComment): bool
     {
         return $this->updateWithComment($update, $modComment, 'modcomment');
     }
+
+    /**
+     * @param  array<string, mixed>  $update
+     * @param  string  $comment
+     * @param  string  $commentField
+     */
 
     public function updateWithComment(array $update, $comment, $commentField): bool
     {
@@ -803,6 +915,8 @@ class User extends Authenticatable implements FilamentUser, HasName
         return true;
     }
 
+    /** @return int|string */
+
     public static function getAccessAdminClassMin()
     {
         return Setting::get("system.access_admin_class_min") ?: User::CLASS_ADMINISTRATOR;
@@ -819,6 +933,8 @@ class User extends Authenticatable implements FilamentUser, HasName
         }
         return false;
     }
+
+    /** @param string $name */
 
     public function acceptNotification($name): bool
     {

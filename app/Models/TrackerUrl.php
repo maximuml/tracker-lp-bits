@@ -18,8 +18,10 @@ class TrackerUrl extends NexusModel
 {
     use NexusActivityLogTrait;
 
+    /** @var  list<string> */
     protected $fillable = ['url', 'enabled', 'is_default', 'priority'];
 
+    /** @var  bool */
     public $timestamps = true;
 
     const TRACKER_URL_CACHE_KEY = "TRACKER_URL";
@@ -60,6 +62,7 @@ class TrackerUrl extends NexusModel
         }
     }
 
+    /** @return  mixed */
     public static function listAll()
     {
         return self::query()
@@ -69,6 +72,10 @@ class TrackerUrl extends NexusModel
             ->get();
     }
 
+    /**
+     * @param  int  $trackerUrlId
+     * @return  mixed
+     */
     public static function getById(int $trackerUrlId)
     {
         $redis = NexusDB::redis();
@@ -84,6 +91,13 @@ class TrackerUrl extends NexusModel
         return self::getFromRedisWithRetry($redis, 'get', [self::TRACKER_URL_DEFAULT_CACHE_KEY], $notFoundFlagKey);
     }
 
+    /**
+     * @param  \Redis  $redis
+     * @param  string  $command
+     * @param  array<int|string, mixed>  $params
+     * @param  string  $notFoundFlagKey
+     * @return  mixed
+     */
     private static function getFromRedisWithRetry(\Redis $redis, string $command, array $params, string $notFoundFlagKey)
     {
         $result = call_user_func_array([$redis, $command], $params);

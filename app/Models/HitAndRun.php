@@ -27,10 +27,13 @@ use Nexus\Database\NexusDB;
  */
 class HitAndRun extends NexusModel
 {
+    /** @var  string */
     protected $table = 'hit_and_runs';
 
+    /** @var  list<string> */
     protected $fillable = ['uid', 'snatch_id', 'torrent_id', 'status', 'comment'];
 
+    /** @var  bool */
     public $timestamps = true;
 
     const STATUS_INSPECTING = 1;
@@ -38,6 +41,7 @@ class HitAndRun extends NexusModel
     const STATUS_UNREACHED = 3;
     const STATUS_PARDONED = 4;
 
+    /** @var  array<int|string, mixed> */
     public static array $status = [
         self::STATUS_INSPECTING => ['text' => 'Inspecting'],
         self::STATUS_REACHED => ['text' => 'Reached'],
@@ -54,6 +58,7 @@ class HitAndRun extends NexusModel
     const MODE_MANUAL = 'manual';
     const MODE_GLOBAL = 'global';
 
+    /** @var  array<int|string, mixed> */
     public static $modes = [
         self::MODE_DISABLED => ['text' => 'Disabled'],
         self::MODE_MANUAL => ['text' => 'Manual'],
@@ -62,6 +67,7 @@ class HitAndRun extends NexusModel
 
     const MINIMUM_IGNORE_USER_CLASS = User::CLASS_VIP;
 
+    /** @return  mixed */
     protected static function booted()
     {
         static::saved(function ($model) {
@@ -72,11 +78,19 @@ class HitAndRun extends NexusModel
         });
     }
 
+    /**
+     * @param  int  $userId
+     * @param  int  $torrentId
+     */
     public static function getCacheKey(int $userId, int $torrentId): string
     {
         return sprintf("hit_and_run:user:%d:torrent:%d", $userId, $torrentId);
     }
 
+    /**
+     * @param  HitAndRun  $hitAndRun
+     * @param  string  $event
+     */
     public static function clearCache(HitAndRun $hitAndRun, string $event = ModelEventEnum::HIT_AND_RUN_UPDATED): void
     {
         NexusDB::cache_del(self::getCacheKey($hitAndRun->uid, $hitAndRun->torrent_id));
@@ -87,6 +101,7 @@ class HitAndRun extends NexusModel
         ));
     }
 
+    /** @return  \Illuminate\Database\Eloquent\Casts\Attribute<mixed, mixed> */
     protected function seedTimeRequired(): Attribute
     {
         return new Attribute(
@@ -94,6 +109,7 @@ class HitAndRun extends NexusModel
         );
     }
 
+    /** @return  \Illuminate\Database\Eloquent\Casts\Attribute<mixed, mixed> */
     protected function inspectTimeLeft(): Attribute
     {
         return new Attribute(
@@ -140,11 +156,16 @@ class HitAndRun extends NexusModel
         return mkprettytime($diffInSeconds);
     }
 
+    /** @return  mixed */
     public function getStatusTextAttribute()
     {
         return nexus_trans('hr.status_' . $this->status);
     }
 
+    /**
+     * @param  mixed  $onlyKeyValue
+     * @return  array<int|string, mixed>
+     */
     public static function listStatus($onlyKeyValue = false): array
     {
         $result = self::$status;
@@ -160,6 +181,10 @@ class HitAndRun extends NexusModel
         return $result;
     }
 
+    /**
+     * @param  mixed  $onlyKeyValue
+     * @return  array<int|string, mixed>
+     */
     public static function listModes($onlyKeyValue = false): array
     {
         $result = self::$modes;
@@ -191,6 +216,11 @@ class HitAndRun extends NexusModel
         return $result;
     }
 
+    /**
+     * @param  mixed  $name
+     * @param  mixed  $searchBoxId
+     * @return  mixed
+     */
     public static function getConfig($name, $searchBoxId)
     {
         if ($name == '*') {
@@ -208,25 +238,19 @@ class HitAndRun extends NexusModel
         return $enableSpecialSection && apply_filter("hit_and_run_diff_in_section", false);
     }
 
-    /**
-     * @return BelongsTo<Torrent, $this>
-     */
+    /** @return  \Illuminate\Database\Eloquent\Relations\BelongsTo<Torrent, $this> */
     public function torrent(): BelongsTo
     {
         return $this->belongsTo(Torrent::class, 'torrent_id');
     }
 
-    /**
-     * @return BelongsTo<Snatch, $this>
-     */
+    /** @return  \Illuminate\Database\Eloquent\Relations\BelongsTo<Snatch, $this> */
     public function snatch(): BelongsTo
     {
         return $this->belongsTo(Snatch::class, 'snatched_id');
     }
 
-    /**
-     * @return BelongsTo<User, $this>
-     */
+    /** @return  \Illuminate\Database\Eloquent\Relations\BelongsTo<User, $this> */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'uid');

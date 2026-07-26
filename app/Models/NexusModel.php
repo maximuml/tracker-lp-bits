@@ -12,17 +12,22 @@ use Nexus\Database\NexusDB;
  */
 class NexusModel extends Model
 {
+    /** @use \Illuminate\Database\Eloquent\Factories\HasFactory<\Illuminate\Database\Eloquent\Factories\Factory> */
     use HasFactory;
 
+    /** @var  bool */
     public $timestamps = false;
 
+    /** @var  int */
     protected $perPage = 50;
 
+    /** @return  string */
     public function getConnectionName()
     {
         return NexusDB::getConnectionName();
     }
 
+    /** @return  \Illuminate\Database\Eloquent\Casts\Attribute<mixed, mixed> */
     protected function usernameForAdmin(): Attribute
     {
         return Attribute::make(
@@ -31,9 +36,8 @@ class NexusModel extends Model
     }
 
     /**
-     *
      * @param  \DateTimeInterface  $date
-     * @return string
+     * @return  string
      */
     protected function serializeDate(\DateTimeInterface $date)
     {
@@ -42,11 +46,10 @@ class NexusModel extends Model
 
     /**
      * Check is valid date string
-     *
+     * @param  mixed  $name
+     * @param  mixed  $format
+     * @return  bool
      * @see https://stackoverflow.com/questions/19271381/correctly-determine-if-date-string-is-a-valid-date-in-that-format
-     * @param $name
-     * @param string $format
-     * @return bool
      */
     public function isValidDate($name, $format = 'Y-m-d H:i:s'): bool
     {
@@ -56,6 +59,10 @@ class NexusModel extends Model
         return $d && $d->format($format) === $date;
     }
 
+    /**
+     * @param  mixed  $field
+     * @return  mixed
+     */
     public function getDeadlineText($field = 'deadline')
     {
         $raw = $this->getRawOriginal($field);
@@ -65,6 +72,13 @@ class NexusModel extends Model
         return sprintf('%s: %s', nexus_trans('label.deadline'), $raw);
     }
 
+    /**
+     * @param  mixed  $dataSource
+     * @param  mixed  $textTransPrefix
+     * @param  mixed  $onlyKeyValue
+     * @param  mixed  $valueField
+     * @return  array<int|string, mixed>
+     */
     public static function listStaticProps($dataSource, $textTransPrefix, $onlyKeyValue = false, $valueField = 'text'): array
     {
         $result = $dataSource;

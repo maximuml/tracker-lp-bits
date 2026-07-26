@@ -19,10 +19,6 @@ function hash_pad($hash) {
     return \App\Support\Strings::padHash($hash);
 }
 
-function hash_where($name, $hash) {
-    return \App\Support\LegacyDb::hashWhere($name, $hash);
-}
-
 function get_langfolder_list()
 {
     return \App\Support\Locale::available();
@@ -199,7 +195,7 @@ function get_hr_ratio($uped, $downed)
 
 function get_row_count($table, $suffix = "")
 {
-    return \App\Support\LegacyDb::count($table, $suffix);
+    return (int) \Nexus\Database\NexusDB::table($table)->count();
 }
 
 function get_user_row($id)

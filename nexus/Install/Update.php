@@ -117,7 +117,7 @@ class Update extends Install
         //custom field menu
         $url = 'fields.php';
         $table = 'adminpanel';
-        $count = get_row_count($table, "where url = " . \App\Support\LegacyDb::escape($url));
+        $count = NexusDB::table($table)->where('url', $url)->count();
         if ($count == 0) {
             $insert = [
                 'name' => 'Custom Field Manage',
@@ -222,7 +222,7 @@ class Update extends Install
         ];
         $table = 'modpanel';
         foreach ($menus as $menu) {
-            $count = get_row_count($table, "where url = " . \App\Support\LegacyDb::escape($menu['url']));
+            $count = NexusDB::table($table)->where('url', $menu['url'])->count();
             if ($count == 0) {
                 $id = NexusDB::insert($table, $menu);
                 $this->doLog("[ADD MENU] insert: " . json_encode($menu) . " to table: $table, id: $id");
@@ -402,7 +402,7 @@ class Update extends Install
     private function addMenu($table, array $menus)
     {
         foreach ($menus as $menu) {
-            $count = get_row_count($table, "where url = " . \App\Support\LegacyDb::escape($menu['url']));
+            $count = NexusDB::table($table)->where('url', $menu['url'])->count();
             if ($count == 0) {
                 $id = NexusDB::insert($table, $menu);
                 $this->doLog("[ADD MENU] insert: " . json_encode($menu) . " to table: $table, id: $id");

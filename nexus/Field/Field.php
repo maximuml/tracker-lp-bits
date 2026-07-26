@@ -133,7 +133,7 @@ HTML;
     {
         global $lang_fields, $lang_functions;
         $perPage = 10;
-        $total = get_row_count('torrents_custom_fields');
+        $total = NexusDB::table('torrents_custom_fields')->count();
         list($paginationTop, $paginationBottom, , $offset, $rpp) = pager($perPage, $total, "?");
         $res = NexusDB::table('torrents_custom_fields')
             ->orderBy('priority', 'desc')

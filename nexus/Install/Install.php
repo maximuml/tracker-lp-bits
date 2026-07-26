@@ -504,7 +504,7 @@ class Install
     public function createAdministrator($username, $email, $password, $confirmPassword)
     {
         $class = User::CLASS_STAFF_LEADER;
-        $count = get_row_count('users', 'where class = ' . $class);
+        $count = User::query()->where('class', $class)->count();
         if ($count > 0) {
             throw new \InvalidArgumentException("Administrator already exists");
         }
@@ -668,7 +668,7 @@ class Install
                 continue;
             }
             //if table not empty, skip
-            $count = get_row_count($table);
+            $count = NexusDB::table($table)->count();
             if ($count > 0) {
                 $this->doLog("[IMPORT DATA] $table, not empty, skip");
                 continue;

@@ -154,7 +154,7 @@ function print_sub_category_list($type)
 {
 	global $lang_catmanage, $perpage, $pagerParam;
 	$dbtablename = return_category_db_table_name($type);
-	$num = get_row_count($dbtablename);
+	$num = \Nexus\Database\NexusDB::table($dbtablename)->count();
 	if (!$num)
 		print("<p align=\"center\">".$lang_catmanage['text_no_record_yet']."</p>");
 	else{
@@ -404,7 +404,7 @@ if ($action == 'view')
 	elseif ($type=='searchbox')
 	{
 	$dbtablename=return_category_db_table_name($type);
-	$num = get_row_count($dbtablename);
+	$num = \Nexus\Database\NexusDB::table($dbtablename)->count();
 	if (!$num)
 		print("<p align=\"center\">".$lang_catmanage['text_no_record_yet']."</p>");
 	else{
@@ -455,7 +455,7 @@ print($pagerbottom);
 	elseif($type=='caticon')
 	{
 	$dbtablename=return_category_db_table_name($type);
-	$num = get_row_count($dbtablename);
+	$num = \Nexus\Database\NexusDB::table($dbtablename)->count();
 	if (!$num)
 		print("<p align=\"center\">".$lang_catmanage['text_no_record_yet']."</p>");
 	else{
@@ -506,7 +506,7 @@ print($pagerbottom);
 	    $allProcessing = \App\Models\Processing::query()->get()->keyBy('id');
 		    $allAudioCodec = \App\Models\AudioCodec::query()->get()->keyBy('id');
 	$dbtablename=return_category_db_table_name($type);
-	$num = get_row_count($dbtablename);
+	$num = \Nexus\Database\NexusDB::table($dbtablename)->count();
 	if (!$num)
 		print("<p align=\"center\">".$lang_catmanage['text_no_record_yet']."</p>");
 	else{
@@ -555,7 +555,7 @@ print($pagerbottom);
 	elseif($type=='category')
 	{
 	$dbtablename=return_category_db_table_name($type);
-	$num = get_row_count($dbtablename);
+	$num = \Nexus\Database\NexusDB::table($dbtablename)->count();
 	if (!$num)
 		print("<p align=\"center\">".$lang_catmanage['text_no_record_yet']."</p>");
 	else{

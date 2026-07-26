@@ -7,55 +7,23 @@ use Illuminate\Support\Facades\DB;
 use Nexus\Database\NexusDB;
 
 /**
- * Generic legacy DB helpers extracted from `include/functions.php`.
+ * Generic legacy DB helpers extracted from `include/functions.php` and
+ * `include/globalfunctions.php`.
  *
- * Backs the `sql_query()`, `sqlesc()`, `last_query()`, `hash_where()`,
- * `get_row_sum()` and `get_single_value()` procedural wrappers.
- *
- * These methods deliberately accept raw `$suffix` SQL because the legacy
- * callers pass unparameterised `WHERE`/`GROUP BY` fragments. The support
- * class only centralises the query shape and result extraction; the
- * wrappers remain responsible for any legacy sanitisation they already did.
+ * Backs `last_query()` and `get_snatch_info()`. All raw-query helpers
+ * (`sql_query`, `sqlesc`, `get_row_count`, etc.) have been replaced by
+ * `NexusDB` QueryBuilder calls.
  */
 final class LegacyDb
 {
     /**
-     * Execute a legacy query, timing it and recording it in `$query_name`.
+     * Return the last database error message.
      *
-     * Mirrors `sql_query()`.
+     * Mirrors `mysql_error()`.
      */
     public static function error(): string
     {
         return (string) NexusDB::getInstance()->error();
-    }
-
-    public static function query(string $query): mixed
-    {
-        $begin = microtime(true);
-        $result = NexusDB::getInstance()->query($query);
-        $end = microtime(true);
-
-        global $query_name;
-        $query_name[] = [
-            'query' => $query,
-            'time' => sprintf('%.2f ms', ($end - $begin) * 1000),
-        ];
-
-        return $result;
-    }
-
-    /**
-     * Escape and quote a scalar value for legacy SQL interpolation.
-     *
-     * Mirrors `sqlesc()`. Prefer prepared statements in new code.
-     */
-    public static function escape(mixed $value): string
-    {
-        if (is_null($value)) {
-            return 'null';
-        }
-
-        return "'" . NexusDB::getInstance()->escapeString((string) $value) . "'";
     }
 
     /**
@@ -94,65 +62,6 @@ final class LegacyDb
         }
 
         return $last;
-    }
-
-    /**
-     * Build a WHERE clause fragment for a torrent info-hash.
-     *
-     * Mirrors `hash_where()`.
-     */
-    public static function hashWhere(string $name, string $hash): string
-    {
-        if (NexusDB::isMysql()) {
-            return "$name = " . self::escape($hash);
-        }
-        if (NexusDB::isPgsql()) {
-            return "$name = decode(bin2hex('$hash'), 'hex')";
-        }
-
-        throw new \RuntimeException('Not supported database');
-    }
-
-    /**
-     * Return the scalar result of `SELECT SUM($field) FROM $table $suffix`.
-     *
-     * Mirrors `get_row_sum()`.
-     */
-    public static function sum(string $table, string $field, string $suffix = ''): mixed
-    {
-        $sql = "SELECT SUM($field) FROM $table $suffix";
-        $result = NexusDB::getInstance()->query($sql);
-        $row = NexusDB::getInstance()->fetchRow($result);
-
-        return $row[0] ?? null;
-    }
-
-    /**
-     * Return the first column of `SELECT $field FROM $table $suffix LIMIT 1`
-     * or `false` if no row was found.
-     *
-     * Mirrors `get_single_value()`.
-     */
-    public static function singleValue(string $table, string $field, string $suffix = ''): mixed
-    {
-        $sql = "SELECT $field FROM $table $suffix LIMIT 1";
-        $result = NexusDB::getInstance()->query($sql);
-        $row = NexusDB::getInstance()->fetchRow($result);
-
-        return $row ? $row[0] : false;
-    }
-
-    /**
-     * Return the row count of `SELECT COUNT(*) FROM $table $suffix`.
-     *
-     * Mirrors `get_row_count()`.
-     */
-    public static function count(string $table, string $suffix = ''): int
-    {
-        $result = self::query("SELECT COUNT(*) FROM $table $suffix");
-        $row = NexusDB::getInstance()->fetchRow($result);
-
-        return (int) ($row[0] ?? 0);
     }
 
     /**

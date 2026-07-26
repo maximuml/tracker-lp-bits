@@ -14,7 +14,7 @@ if($value > $CURUSER['seedbonus']) exit(json_encode(fail('You do not have such b
 $torrentowner = \App\Models\Torrent::query()->where('id', $torrentid)->value('owner');
 if (!$torrentowner) exit(json_encode(fail("Invalid torrent id!", $_POST)));
 if($torrentowner == $userid) exit(json_encode(fail('You are giving magic to yourself.', $_POST)));
-$t_ab = get_row_count("magic", "WHERE torrentid=$torrentid and userid=$userid");
+$t_ab = \Nexus\Database\NexusDB::table('magic')->where('torrentid', $torrentid)->where('userid', $userid)->count();
 if ($t_ab != 0) exit(json_encode(fail("You already gave the magic value!", $_POST)));
 $todayStr = now()->startOfDay();
 $todayCount = \App\Models\Reward::query()

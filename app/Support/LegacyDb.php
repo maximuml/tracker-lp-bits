@@ -164,12 +164,12 @@ final class LegacyDb
      */
     public static function snatchInfo(int|string $torrentId, int|string $userId): array|false
     {
-        $sql = sprintf(
-            'SELECT * FROM snatched WHERE torrentid = %s AND userid = %s ORDER BY id DESC LIMIT 1',
-            (int) $torrentId,
-            (int) $userId,
-        );
+        $record = NexusDB::table('snatched')
+            ->where('torrentid', (int) $torrentId)
+            ->where('userid', (int) $userId)
+            ->orderBy('id', 'desc')
+            ->first();
 
-        return NexusDB::getInstance()->fetchAssoc(self::query($sql));
+        return $record ? (array) $record : false;
     }
 }

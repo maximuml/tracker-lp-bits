@@ -6,9 +6,7 @@ use Nexus\Database\NexusDB;
 
 class UserListingRepository
 {
-    /**
-     * @return array<int, array<string, mixed>>
-     */
+    /** @return  array<int|string, mixed> */
     public static function getCountries(): array
     {
         return NexusDB::table('countries')
@@ -19,13 +17,17 @@ class UserListingRepository
             ->all();
     }
 
+    /** @param  array<int|string, mixed>  $filters */
     public static function countUsers(array $filters): int
     {
         return self::buildUserQuery($filters)->count();
     }
 
     /**
-     * @return array<int, array<string, mixed>>
+     * @param  array<int|string, mixed>  $filters
+     * @param  int  $offset
+     * @param  int  $perPage
+     * @return  array<int|string, mixed>
      */
     public static function listUsers(array $filters, int $offset, int $perPage): array
     {
@@ -40,6 +42,10 @@ class UserListingRepository
         return $query->get()->map(fn ($row) => (array) $row)->all();
     }
 
+    /**
+     * @param  array<int|string, mixed>  $filters
+     * @return  \Illuminate\Database\Query\Builder
+     */
     private static function buildUserQuery(array $filters): \Illuminate\Database\Query\Builder
     {
         $search = trim($filters['search'] ?? '');

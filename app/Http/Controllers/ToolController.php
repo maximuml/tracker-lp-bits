@@ -16,13 +16,19 @@ use Telegram\Bot\Commands\HelpCommand;
 
 class ToolController extends Controller
 {
+    /** @var  mixed */
     private $repository;
 
+    /**
+     * @param  \App\Repositories\ToolRepository  $repository
+     * @return  mixed
+     */
     public function __construct(ToolRepository $repository)
     {
         $this->repository = $repository;
     }
 
+    /** @return  array<int|string, mixed> */
     public function notifications(): array
     {
         $user = Auth::user();
@@ -30,6 +36,10 @@ class ToolController extends Controller
         return $this->success($result);
     }
 
+    /**
+     * @param  \Illuminate\Http\Request  $request
+     * @return  mixed
+     */
     public function error(Request $request)
     {
         return view('error', ['error' => $request->query('error')]);

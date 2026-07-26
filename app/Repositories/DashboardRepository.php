@@ -13,6 +13,7 @@ use Nexus\Database\NexusDB;
 
 class DashboardRepository extends BaseRepository
 {
+    /** @return  array<int|string, mixed> */
     public function getSystemInfo(): array
     {
         $result = [];
@@ -82,6 +83,7 @@ class DashboardRepository extends BaseRepository
         return $result;
     }
 
+    /** @return  array<int|string, mixed> */
     public function getStatData()
     {
         return [
@@ -104,6 +106,7 @@ class DashboardRepository extends BaseRepository
         ];
     }
 
+    /** @return  mixed */
     public function statUserClass()
     {
         $userClasses = User::query()
@@ -125,6 +128,7 @@ class DashboardRepository extends BaseRepository
         return $result;
     }
 
+    /** @return  mixed */
     public function statUsers()
     {
         $result = [];
@@ -200,6 +204,7 @@ class DashboardRepository extends BaseRepository
         return $result;
     }
 
+    /** @return  mixed */
     public function statTorrents()
     {
         $now = now();
@@ -289,11 +294,13 @@ class DashboardRepository extends BaseRepository
         return $result;
     }
 
+    /** @return  mixed */
     public function latestUser()
     {
         return User::query()->orderBy('id', 'desc')->limit(10)->get(User::$commonFields);
     }
 
+    /** @return  mixed */
     public function latestTorrent()
     {
         return Torrent::query()->with(['user'])->orderBy('id', 'desc')->limit(5)->get(Torrent::$commentFields);

@@ -11,7 +11,6 @@ class CheckUserStatus
 {
     /**
      * Handle an incoming request.
-     *
      * @param  \Illuminate\Http\Request  $request
      * @param  \Closure  $next
      * @return mixed
@@ -26,10 +25,9 @@ class CheckUserStatus
 
     /**
      * 在响应发送到浏览器后处理任务。
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Illuminate\Http\Response  $response
-     * @return void
+     * @param  mixed  $request
+     * @param  mixed  $response
+     * @return  void
      */
     public function terminate($request, $response)
     {

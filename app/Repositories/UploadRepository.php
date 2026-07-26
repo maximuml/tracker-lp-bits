@@ -25,6 +25,8 @@ use Rhilip\Bencode\ParseException;
 class UploadRepository extends BaseRepository
 {
     /**
+     * @param  \Illuminate\Http\Request  $request
+     * @return  mixed
      * @throws NexusException
      */
     public function upload(Request $request)
@@ -156,6 +158,7 @@ class UploadRepository extends BaseRepository
         return $newTorrent;
     }
 
+    /** @param  \Illuminate\Http\Request  $request */
     private function getTorrentFile(Request $request): UploadedFile
     {
         $file = $request->file('file');
@@ -189,6 +192,7 @@ class UploadRepository extends BaseRepository
         return $file;
     }
 
+    /** @param  \Illuminate\Http\Request  $request */
     private function getNfoContent(Request $request): string
     {
         $enableNfo = get_setting("main.enablenfo") == "yes";
@@ -212,6 +216,7 @@ class UploadRepository extends BaseRepository
         return str_replace("\x0d\x0d\x0a", "\x0d\x0a", $file->getContent());
     }
 
+    /** @param  \Illuminate\Http\Request  $request */
     private function getApprovalStatus(Request $request): int
     {
         if (Permission::canTorrentApprovalAllowAutomatic()) {
@@ -220,6 +225,7 @@ class UploadRepository extends BaseRepository
         return Torrent::APPROVAL_STATUS_NONE;
     }
 
+    /** @param  \Illuminate\Http\Request  $request */
     private function getPrice(Request $request): int
     {
         $price =  $request->price ?: 0;
@@ -242,6 +248,7 @@ class UploadRepository extends BaseRepository
         return intval($price);
     }
 
+    /** @param  \Illuminate\Http\Request  $request */
     private function getHitAndRun(Request $request): int
     {
         $hr = $request->hr ?? 0;
@@ -254,6 +261,10 @@ class UploadRepository extends BaseRepository
         return intval($hr);
     }
 
+    /**
+     * @param  \Illuminate\Http\Request  $request
+     * @return  array<int|string, mixed>
+     */
     private function getPosStateInfo(Request $request): array
     {
         $posState = $request->pos_state ?: Torrent::POS_STATE_STICKY_NONE;
@@ -275,6 +286,12 @@ class UploadRepository extends BaseRepository
         return compact('posState', 'posStateUntil');
     }
 
+    /**
+     * @param  mixed  $dict
+     * @param  mixed  $key
+     * @param  mixed  $type
+     * @return  mixed
+     */
     private function checkTorrentDict($dict, $key, $type = null)
     {
         if (!is_array($dict)) {
@@ -294,6 +311,9 @@ class UploadRepository extends BaseRepository
     }
 
     /**
+     * @param  array<int|string, mixed>  $info
+     * @param  string  $dname
+     * @return  array<int|string, mixed>
      * @throws NexusException
      */
     private function getFileListInfo(array $info, string $dname): array
@@ -339,6 +359,7 @@ class UploadRepository extends BaseRepository
         ];
     }
 
+    /** @param  \App\Models\SearchBox  $section */
     private function canUploadToSection(SearchBox $section): bool
     {
         $user = Auth::user();
@@ -374,6 +395,7 @@ class UploadRepository extends BaseRepository
         throw new NexusException(nexus_trans('upload.invalid_section'));
     }
 
+    /** @param  mixed  $torrentSize */
     private function getSpState($torrentSize): int
     {
         $largeTorrentSize = Setting::getLargeTorrentSize();
@@ -413,6 +435,9 @@ class UploadRepository extends BaseRepository
     }
 
     /**
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Models\Category  $category
+     * @return  array<int|string, mixed>
      * @throws NexusException
      */
     private function getSubCategoriesAndTags(Request $request, Category $category): array
@@ -466,6 +491,7 @@ class UploadRepository extends BaseRepository
         return compact('subCategories', 'tags');
     }
 
+    /** @param  \Illuminate\Http\Request  $request */
     private function getCover(Request $request):string
     {
         $descr = $request->descr ?? '';
@@ -490,6 +516,7 @@ class UploadRepository extends BaseRepository
         return $torrentSavePath;
     }
 
+    /** @param  mixed  $torrentId */
     private function sendReward($torrentId): void
     {
         $user = Auth::user();
@@ -505,6 +532,10 @@ class UploadRepository extends BaseRepository
         }
     }
 
+    /**
+     * @param  \App\Models\Torrent  $torrent
+     * @param  mixed  $userId
+     */
     public function sendEmailNotification(Torrent $torrent, $userId = 0): int
     {
         $logMsg = sprintf("torrent: %s, category: %s", $torrent->id, $torrent->category);

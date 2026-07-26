@@ -15,8 +15,8 @@ class ThankController extends Controller
 {
     /**
      * Display a listing of the resource.
-     *
-     * @return array
+     * @param  \Illuminate\Http\Request  $request
+     * @return  array<string, mixed>
      */
     public function index(Request $request)
     {
@@ -36,9 +36,8 @@ class ThankController extends Controller
 
     /**
      * Store a newly created resource in storage.
-     *
      * @param  \Illuminate\Http\Request  $request
-     * @return array
+     * @return  array<string, mixed>
      */
     public function store(Request $request)
     {
@@ -88,9 +87,8 @@ class ThankController extends Controller
 
     /**
      * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @param  mixed  $id
+     * @return  \Illuminate\Http\Response
      */
     public function show($id)
     {
@@ -101,10 +99,9 @@ class ThankController extends Controller
 
     /**
      * Update the specified resource in storage.
-     *
      * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @param  mixed  $id
+     * @return  \Illuminate\Http\Response
      */
     public function update(Request $request, $id)
     {
@@ -115,9 +112,8 @@ class ThankController extends Controller
 
     /**
      * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @param  mixed  $id
+     * @return  \Illuminate\Http\Response
      */
     public function destroy($id)
     {

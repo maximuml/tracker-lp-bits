@@ -9,6 +9,14 @@ class AnnounceLogRepository extends BaseRepository
 {
     const TABLE = 'announce_logs';
 
+    /**
+     * @param  array<int|string, mixed>  $filters
+     * @param  int  $page
+     * @param  int  $perPage
+     * @param  ?string  $sortColumn
+     * @param  ?string  $sortDirection
+     * @return  array<int|string, mixed>
+     */
     public function listAll(array $filters, int $page, int $perPage, ?string $sortColumn, ?string $sortDirection)
     {
         $beginTimestamp = microtime(true);
@@ -57,6 +65,7 @@ class AnnounceLogRepository extends BaseRepository
         return app(Client::class);
     }
 
+    /** @param  ?string  $id */
     public function getById(?string $id): ?AnnounceLog
     {
         if (empty($id)) {
@@ -68,6 +77,10 @@ class AnnounceLogRepository extends BaseRepository
         return $arr ? new AnnounceLog($arr) : null;
     }
 
+    /**
+     * @param  int  $hours
+     * @return  mixed
+     */
     public function listMaxUploadedUser(int $hours)
     {
         $sql = sprintf(

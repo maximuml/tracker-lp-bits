@@ -24,8 +24,7 @@ class AttendanceCleanup extends Command
 
     /**
      * Create a new command instance.
-     *
-     * @return void
+     * @return  void
      */
     public function __construct()
     {
@@ -34,6 +33,7 @@ class AttendanceCleanup extends Command
 
     /**
      * Execute the console command.
+     * @return  mixed
      */
     public function handle()
     {

@@ -9,6 +9,10 @@ use Illuminate\Support\Facades\Auth;
 
 class TokenController extends Controller
 {
+    /**
+     * @param  \Illuminate\Http\Request  $request
+     * @return  array<string, mixed>
+     */
     public function addToken(Request $request)
     {
         try {
@@ -36,6 +40,10 @@ class TokenController extends Controller
         }
     }
 
+    /**
+     * @param  \Illuminate\Http\Request  $request
+     * @return  array<string, mixed>
+     */
     public function delToken(Request $request)
     {
         try {

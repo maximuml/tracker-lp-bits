@@ -14,6 +14,10 @@ class MessageRepository extends BaseRepository
 
     const STAFF_MESSAGE_NEW_CACHE_KEY = 'staff_new_message_count';
 
+    /**
+     * @param  array<int|string, mixed>  $params
+     * @return  mixed
+     */
     public function getList(array $params)
     {
         $query = Message::query();
@@ -22,12 +26,21 @@ class MessageRepository extends BaseRepository
         return $query->paginate();
     }
 
+    /**
+     * @param  array<int|string, mixed>  $params
+     * @return  mixed
+     */
     public function store(array $params)
     {
         $model = Message::query()->create($params);
         return $model;
     }
 
+    /**
+     * @param  array<int|string, mixed>  $params
+     * @param  mixed  $id
+     * @return  mixed
+     */
     public function update(array $params, $id)
     {
         $model = Message::query()->findOrFail($id);
@@ -35,12 +48,20 @@ class MessageRepository extends BaseRepository
         return $model;
     }
 
+    /**
+     * @param  mixed  $id
+     * @return  mixed
+     */
     public function getDetail($id)
     {
         $model = Message::query()->findOrFail($id);
         return $model;
     }
 
+    /**
+     * @param  mixed  $id
+     * @return  mixed
+     */
     public function delete($id)
     {
         $model = Message::query()->findOrFail($id);
@@ -48,11 +69,20 @@ class MessageRepository extends BaseRepository
         return $result;
     }
 
+    /**
+     * @param  mixed  $uid
+     * @param  mixed  $answered
+     */
     public static function countStaffMessage($uid, $answered = null): int
     {
         return self::buildStaffMessageQuery($uid, $answered)->count();
     }
 
+    /**
+     * @param  mixed  $uid
+     * @param  mixed  $answered
+     * @return  \Illuminate\Database\Eloquent\Builder<StaffMessage>
+     */
     public static function buildStaffMessageQuery($uid, $answered = null): \Illuminate\Database\Eloquent\Builder
     {
         $query = StaffMessage::query();
@@ -67,6 +97,12 @@ class MessageRepository extends BaseRepository
         return $query;
     }
 
+    /**
+     * @param  mixed  $uid
+     * @param  mixed  $type
+     * @param  mixed  $value
+     * @return  mixed
+     */
     public static function updateStaffMessageCountCache($uid = 0, $type = '', $value = '')
     {
         if ($uid === false) {
@@ -82,6 +118,11 @@ class MessageRepository extends BaseRepository
         }
     }
 
+    /**
+     * @param  mixed  $uid
+     * @param  mixed  $type
+     * @return  mixed
+     */
     public static function getStaffMessageCountCache($uid = 0, $type = '')
     {
         $redis = NexusDB::redis();

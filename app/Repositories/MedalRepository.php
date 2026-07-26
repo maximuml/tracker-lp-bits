@@ -13,6 +13,10 @@ use Nexus\Database\NexusDB;
 
 class MedalRepository extends BaseRepository
 {
+    /**
+     * @param  array<int|string, mixed>  $params
+     * @return  \Illuminate\Contracts\Pagination\LengthAwarePaginator<int, Medal>
+     */
     public function getList(array $params): \Illuminate\Contracts\Pagination\LengthAwarePaginator
     {
         $query = Medal::query();
@@ -21,11 +25,20 @@ class MedalRepository extends BaseRepository
         return $query->paginate();
     }
 
+    /**
+     * @param  array<int|string, mixed>  $params
+     * @return  mixed
+     */
     public function store(array $params)
     {
         return Medal::query()->create($params);
     }
 
+    /**
+     * @param  array<int|string, mixed>  $params
+     * @param  mixed  $id
+     * @return  mixed
+     */
     public function update(array $params, $id)
     {
         $medal = Medal::query()->findOrFail($id);
@@ -34,6 +47,10 @@ class MedalRepository extends BaseRepository
     }
 
 
+    /**
+     * @param  mixed  $id
+     * @return  mixed
+     */
     public function getDetail($id)
     {
         return Medal::query()->findOrFail($id);
@@ -41,9 +58,8 @@ class MedalRepository extends BaseRepository
 
     /**
      * delete a medal, also will delete all user medal.
-     *
-     * @param $id
-     * @return bool
+     * @param  mixed  $id
+     * @return  bool
      */
     public function delete($id): bool
     {
@@ -57,6 +73,12 @@ class MedalRepository extends BaseRepository
         return true;
     }
 
+    /**
+     * @param  int  $uid
+     * @param  int  $medalId
+     * @param  mixed  $duration
+     * @return  mixed
+     */
     public function  grantToUser(int $uid, int $medalId, $duration = null)
     {
         $user = User::query()->findOrFail($uid, User::$commonFields);
@@ -72,6 +94,10 @@ class MedalRepository extends BaseRepository
         $this->userAttachMedal($user, $medal);
     }
 
+    /**
+     * @param  \App\Models\User  $user
+     * @param  \App\Models\Medal  $medal
+     */
     public function userAttachMedal(User $user, Medal $medal): void
     {
         $expireAt = null;
@@ -92,6 +118,11 @@ class MedalRepository extends BaseRepository
         clear_user_cache($user->id);
     }
 
+    /**
+     * @param  mixed  $id
+     * @param  mixed  $userId
+     * @return  mixed
+     */
     public function toggleUserMedalStatus($id, $userId)
     {
         $userMedal = UserMedal::query()->findOrFail($id);
@@ -115,6 +146,11 @@ class MedalRepository extends BaseRepository
         return $userMedal;
     }
 
+    /**
+     * @param  int  $userId
+     * @param  array<int|string, mixed>  $userMedalData
+     * @return  mixed
+     */
     public function saveUserMedal(int $userId, array $userMedalData)
     {
         $user = User::query()->findOrFail($userId);
@@ -149,6 +185,11 @@ class MedalRepository extends BaseRepository
         return NexusDB::statement($sql);
     }
 
+    /**
+     * @param  \Illuminate\Support\Collection<int, mixed>  $collection
+     * @param  string  $field
+     * @param  int  $duration
+     */
     public function increaseExpireAt(Collection $collection, string $field, int $duration): void
     {
         $this->checkExpireField($field);
@@ -163,6 +204,11 @@ class MedalRepository extends BaseRepository
         ));
     }
 
+    /**
+     * @param  \Illuminate\Support\Collection<int, mixed>  $collection
+     * @param  string  $field
+     * @param  \Carbon\Carbon  $expireAt
+     */
     public function updateExpireAt(Collection $collection, string $field, Carbon $expireAt): void
     {
         $this->checkExpireField($field);
@@ -176,6 +222,10 @@ class MedalRepository extends BaseRepository
         ));
     }
 
+    /**
+     * @param  \Illuminate\Support\Collection<int, mixed>  $collection
+     * @param  string  $field
+     */
     public function cancelExpireAt(Collection $collection, string $field): void
     {
         $this->checkExpireField($field);
@@ -189,6 +239,7 @@ class MedalRepository extends BaseRepository
         ));
     }
 
+    /** @param  string  $field */
     private function checkExpireField(string $field): void
     {
         if (!in_array($field, ['expire_at', 'bonus_addition_expire_at'])) {

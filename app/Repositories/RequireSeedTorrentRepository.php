@@ -11,6 +11,7 @@ use Nexus\Database\NexusDB;
 
 class RequireSeedTorrentRepository extends BaseRepository
 {
+    /** @return  void */
     public function autoAddToListCronjob(): void
     {
         $logPrefix = "[RequireSeedTorrentRepository.autoAddToListCronjob]";
@@ -64,6 +65,7 @@ class RequireSeedTorrentRepository extends BaseRepository
         do_log("$logPrefix, success inserted: " . count($data));
     }
 
+    /** @return  void */
     public function autoRemoveFromListCronjob(): void
     {
         $idArr = RequireSeedTorrent::query()->pluck('torrent_id')->toArray();
@@ -91,6 +93,7 @@ class RequireSeedTorrentRepository extends BaseRepository
         }
     }
 
+    /** @param  \Illuminate\Support\Collection<int, mixed>  $torrents */
     public function doRemove(Collection $torrents): void
     {
         $idArr = [];
@@ -116,11 +119,17 @@ class RequireSeedTorrentRepository extends BaseRepository
         return Torrent::REQUIRE_SEED_SECTION_TORRENT_ON_LIST_CACHE_KEY;
     }
 
+    /** @param  mixed  $torrentId */
     private static function getTorrentUserCacheKey($torrentId): string
     {
         return sprintf("%s:%s", Torrent::REQUIRE_SEED_SECTION_TORRENT_USER_CACHE_KEY, $torrentId);
     }
 
+    /**
+     * @param  \Redis  $redis
+     * @param  mixed  $userId
+     * @param  mixed  $torrentId
+     */
     public static function shouldRecordUser(\Redis $redis, $userId, $torrentId): bool
     {
         $logPrefix = "userId: $userId, torrentId: $torrentId";
@@ -144,6 +153,12 @@ class RequireSeedTorrentRepository extends BaseRepository
         return true;
     }
 
+    /**
+     * @param  \Redis  $redis
+     * @param  mixed  $userId
+     * @param  mixed  $torrentId
+     * @param  array<int|string, mixed>  $snatchedInfo
+     */
     public static function recordUser(\Redis $redis, $userId, $torrentId, array $snatchedInfo): void
     {
         $torrentUserCacheKey = self::getTorrentUserCacheKey($torrentId);

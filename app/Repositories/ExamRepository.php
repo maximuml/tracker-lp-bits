@@ -21,6 +21,10 @@ use Nexus\Database\NexusDB;
 
 class ExamRepository extends BaseRepository
 {
+    /**
+     * @param  array<int|string, mixed>  $params
+     * @return  mixed
+     */
     public function getList(array $params)
     {
         $query = Exam::query();
@@ -28,6 +32,10 @@ class ExamRepository extends BaseRepository
         return $query->paginate();
     }
 
+    /**
+     * @param  array<int|string, mixed>  $params
+     * @return  mixed
+     */
     public function store(array $params)
     {
         $diffInHours = $this->checkBeginEnd($params);
@@ -45,6 +53,11 @@ class ExamRepository extends BaseRepository
         return $exam;
     }
 
+    /**
+     * @param  array<int|string, mixed>  $params
+     * @param  mixed  $id
+     * @return  mixed
+     */
     public function update(array $params, $id)
     {
         $diffInHours = $this->checkBeginEnd($params);
@@ -63,6 +76,10 @@ class ExamRepository extends BaseRepository
         return $exam;
     }
 
+    /**
+     * @param  array<int|string, mixed>  $params
+     * @return  array<int|string, mixed>
+     */
     private function formatParams(array $params): array
     {
         if (isset($params['begin']) && $params['begin'] == '') {
@@ -75,6 +92,10 @@ class ExamRepository extends BaseRepository
         return $params;
     }
 
+    /**
+     * @param  array<int|string, mixed>  $params
+     * @param  float  $examDuration
+     */
     private function checkIndexes(array $params, float $examDuration): bool
     {
         if (empty($params['indexes'])) {
@@ -111,8 +132,8 @@ class ExamRepository extends BaseRepository
 
     /**
      * check if begin/end valid, if yes, return diff in hours, else throw InvalidArgumentException
-     * @param array $params
-     * @return float
+     * @param  array<int|string, mixed>  $params
+     * @return  float
      */
     private function checkBeginEnd(array $params): float
     {
@@ -148,6 +169,10 @@ class ExamRepository extends BaseRepository
         throw new \InvalidArgumentException(nexus_trans("exam.time_condition_invalid"));
     }
 
+    /**
+     * @param  array<int|string, mixed>  $params
+     * @return  mixed
+     */
     private function checkFilters(array $params)
     {
         $filters = $params['filters'];
@@ -220,6 +245,10 @@ class ExamRepository extends BaseRepository
         return true;
     }
 
+    /**
+     * @param  mixed  $id
+     * @return  mixed
+     */
     public function getDetail($id)
     {
         $exam = Exam::query()->findOrFail($id);
@@ -228,9 +257,8 @@ class ExamRepository extends BaseRepository
 
     /**
      * delete an exam task, also will delete all exam user and progress.
-     *
-     * @param $id
-     * @return bool
+     * @param  mixed  $id
+     * @return  bool
      */
     public function delete($id)
     {
@@ -247,6 +275,7 @@ class ExamRepository extends BaseRepository
         return true;
     }
 
+    /** @return  mixed */
     public function listIndexes()
     {
         $out = [];
@@ -259,9 +288,10 @@ class ExamRepository extends BaseRepository
 
     /**
      * list valid exams
-     *
-     * @param null $excludeId
-     * @return \Illuminate\Database\Eloquent\Collection<int, Exam>
+     * @param  mixed  $excludeId
+     * @param  mixed  $isDiscovered
+     * @param  mixed  $type
+     * @return  \Illuminate\Database\Eloquent\Collection<int, Exam>
      */
     public function listValid($excludeId = null, $isDiscovered = null, $type = null)
     {
@@ -303,9 +333,8 @@ class ExamRepository extends BaseRepository
 
     /**
      * list user match exams
-     *
-     * @param $uid
-     * @return \Illuminate\Database\Eloquent\Collection<int, Exam>
+     * @param  mixed  $uid
+     * @return  \Illuminate\Database\Eloquent\Collection<int, Exam>
      */
     public function listMatchExam($uid)
     {
@@ -313,12 +342,21 @@ class ExamRepository extends BaseRepository
         return $this->filterForUser($exams, $uid);
     }
 
+    /**
+     * @param  mixed  $uid
+     * @return  mixed
+     */
     public function listMatchTask($uid)
     {
         $exams = $this->listValid(null, null, Exam::TYPE_TASK);
         return $this->filterForUser($exams, $uid);
     }
 
+    /**
+     * @param  \Illuminate\Support\Collection<int, mixed>  $exams
+     * @param  mixed  $uid
+     * @return  \Illuminate\Support\Collection<int, mixed>
+     */
     private function filterForUser(Collection $exams, $uid): Collection
     {
         $userInfo = User::query()->findOrFail($uid, User::$commonFields);
@@ -328,6 +366,10 @@ class ExamRepository extends BaseRepository
     }
 
 
+    /**
+     * @param  \App\Models\Exam  $exam
+     * @param  mixed  $user
+     */
     private function isExamMatchUser(Exam $exam, $user): bool
     {
         if (!$user instanceof User) {
@@ -390,11 +432,10 @@ class ExamRepository extends BaseRepository
 
     /**
      * assign exam to user
-     *
-     * @param int $uid
-     * @param int $examId
-     * @param null $begin
-     * @param null $end
+     * @param  int  $uid
+     * @param  int  $examId
+     * @param  mixed  $begin
+     * @param  mixed  $end
      * @return mixed
      */
     public function assignToUser(int $uid, int $examId, $begin = null, $end = null)
@@ -473,6 +514,10 @@ class ExamRepository extends BaseRepository
         return $examUser;
     }
 
+    /**
+     * @param  array<int|string, mixed>  $params
+     * @return  mixed
+     */
     public function listUser(array $params)
     {
         $query = ExamUser::query();
@@ -496,11 +541,11 @@ class ExamRepository extends BaseRepository
     }
 
     /**
+     * @param  int  $uid
+     * @param  int  $torrentId
+     * @param  array<int|string, mixed>  $indexAndValue
+     * @return  bool
      * @deprecated old version used
-     * @param int $uid
-     * @param int $torrentId
-     * @param array $indexAndValue
-     * @return bool
      * @throws NexusException
      */
     public function addProgress(int $uid, int $torrentId, array $indexAndValue)
@@ -598,14 +643,12 @@ class ExamRepository extends BaseRepository
      * in exam_progress table
      * old version: value is an increment
      * new version: both value and init_value are cumulative, increment = value - init_value
-     *
      * in exam_users table, progress field always is increment
      * old version: progress = sum(exam_progress.value)
      * new version：progress = exam_progress.value - exam_progress.init_value
-     *
-     * @param $examUser
-     * @param User|null $user
-     * @return ExamUser|bool
+     * @param  mixed  $examUser
+     * @param  ?\App\Models\User  $user
+     * @return  ExamUser|bool
      */
     public function updateProgress($examUser, ?User $user = null): ExamUser|bool
     {
@@ -745,6 +788,12 @@ class ExamRepository extends BaseRepository
         return $examUser;
     }
 
+    /**
+     * @param  \App\Models\User  $user
+     * @param  int  $index
+     * @param  \App\Models\ExamUser  $examUser
+     * @return  mixed
+     */
     private function getProgressValue(User $user, int $index, ExamUser $examUser)
     {
         if ($index == Exam::INDEX_UPLOADED) {
@@ -771,10 +820,9 @@ class ExamRepository extends BaseRepository
 
     /**
      * get user exam status
-     *
-     * @param $uid
-     * @param null $status
-     * @return mixed|null
+     * @param  mixed  $uid
+     * @param  mixed  $status
+     * @return  mixed|null
      */
     public function getUserExamProgress($uid, $status = null)
     {
@@ -813,10 +861,10 @@ class ExamRepository extends BaseRepository
     }
 
     /**
+     * @param  \App\Models\ExamUser  $examUser
+     * @param  bool  $allSum
+     * @return  array<int|string, mixed>|null
      * @deprecated
-     * @param ExamUser $examUser
-     * @param bool $allSum
-     * @return array|null
      */
     public function calculateProgress(ExamUser $examUser, bool $allSum = false)
     {
@@ -863,6 +911,12 @@ class ExamRepository extends BaseRepository
 
     }
 
+    /**
+     * @param  \App\Models\Exam  $exam
+     * @param  array<int|string, mixed>  $progress
+     * @param  mixed  $locale
+     * @return  mixed
+     */
     public function getProgressFormatted(Exam $exam, array $progress, $locale = null)
     {
         $result = [];
@@ -903,6 +957,10 @@ class ExamRepository extends BaseRepository
     }
 
 
+    /**
+     * @param  int  $examUserId
+     * @return  mixed
+     */
     public function removeExamUser(int $examUserId)
     {
         $examUser = ExamUser::query()->findOrFail($examUserId);
@@ -915,6 +973,10 @@ class ExamRepository extends BaseRepository
         return $result;
     }
 
+    /**
+     * @param  int  $examUserId
+     * @return  mixed
+     */
     public function avoidExamUser(int $examUserId)
     {
         $examUser = ExamUser::query()->where('status',ExamUser::STATUS_NORMAL)->findOrFail($examUserId);
@@ -922,6 +984,12 @@ class ExamRepository extends BaseRepository
         return $result;
     }
 
+    /**
+     * @param  \App\Models\ExamUser  $examUser
+     * @param  \Carbon\Carbon  $end
+     * @param  string  $reason
+     * @return  mixed
+     */
     public function updateExamUserEnd(ExamUser $examUser, Carbon $end, string $reason = "")
     {
         if ($end->isBefore($examUser->begin)) {
@@ -951,6 +1019,11 @@ class ExamRepository extends BaseRepository
         $examUser->update(['end' => $end]);
     }
 
+    /**
+     * @param  array<int|string, mixed>  $params
+     * @param  \App\Models\User  $user
+     * @return  mixed
+     */
     public function removeExamUserBulk(array $params, User $user)
     {
         $result = $this->getExamUserBulkQuery($params)->delete();
@@ -961,6 +1034,10 @@ class ExamRepository extends BaseRepository
         return $result;
     }
 
+    /**
+     * @param  array<int|string, mixed>  $params
+     * @param  \App\Models\User  $user
+     */
     public function avoidExamUserBulk(array $params, User $user): int
     {
         $query = $this->getExamUserBulkQuery($params)->where('status', ExamUser::STATUS_NORMAL);
@@ -975,6 +1052,10 @@ class ExamRepository extends BaseRepository
         return $affected;
     }
 
+    /**
+     * @param  array<int|string, mixed>  $params
+     * @return  \Illuminate\Database\Eloquent\Builder<ExamUser>
+     */
     private function getExamUserBulkQuery(array $params): Builder
     {
         $query = ExamUser::query();
@@ -992,6 +1073,10 @@ class ExamRepository extends BaseRepository
         return $query;
     }
 
+    /**
+     * @param  int  $examUserId
+     * @return  mixed
+     */
     public function recoverExamUser(int $examUserId)
     {
         $examUser = ExamUser::query()->where('status',ExamUser::STATUS_AVOIDED)->findOrFail($examUserId);
@@ -999,6 +1084,7 @@ class ExamRepository extends BaseRepository
         return $result;
     }
 
+    /** @return  mixed */
     public function cronjonAssign()
     {
         $exams = $this->listValid(null, Exam::DISCOVERED_YES, Exam::TYPE_EXAM);
@@ -1030,6 +1116,7 @@ class ExamRepository extends BaseRepository
 
     }
 
+    /** @param  \App\Models\Exam  $exam */
     public function fetchUserAndDoAssign(Exam $exam): bool|int
     {
         $filters = $exam->filters;
@@ -1134,6 +1221,7 @@ class ExamRepository extends BaseRepository
         return $result;
     }
 
+    /** @param  mixed  $ignoreTimeRange */
     public function cronjobCheckout($ignoreTimeRange = false): int
     {
         $now = Carbon::now(); // 保持 Carbon 对象即可，Laravel 会自动序列化
@@ -1344,6 +1432,7 @@ class ExamRepository extends BaseRepository
         return $result;
     }
 
+    /** @return  array<int|string, mixed> */
     public function updateProgressBulk(): array
     {
         $query = ExamUser::query()

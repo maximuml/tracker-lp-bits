@@ -14,9 +14,8 @@ class ExamResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return array
+     * @param  mixed  $request
+     * @return  array<int|string, mixed>
      */
     public function toArray($request)
     {
@@ -40,6 +39,10 @@ class ExamResource extends JsonResource
         ];
     }
 
+    /**
+     * @param  \App\Models\Exam  $exam
+     * @return  mixed
+     */
     private function normalizeFilters(Exam $exam)
     {
         $filters = $exam->filters;

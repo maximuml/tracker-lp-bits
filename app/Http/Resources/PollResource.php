@@ -9,12 +9,12 @@ use Illuminate\Http\Resources\Json\JsonResource;
  */
 class PollResource extends JsonResource
 {
+    /** @var  bool */
     public $preserveKeys = true;
     /**
      * Transform the resource into an array.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return array
+     * @param  mixed  $request
+     * @return  array<int|string, mixed>
      */
     public function toArray($request)
     {

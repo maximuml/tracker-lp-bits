@@ -17,6 +17,10 @@ use Nexus\Database\NexusDB;
 
 class HitAndRunRepository extends BaseRepository
 {
+    /**
+     * @param  array<int|string, mixed>  $params
+     * @return  mixed
+     */
     public function getList(array $params)
     {
         $query = HitAndRun::query()->with(['user', 'torrent', 'snatch']);
@@ -38,12 +42,21 @@ class HitAndRunRepository extends BaseRepository
         return $query->paginate();
     }
 
+    /**
+     * @param  array<int|string, mixed>  $params
+     * @return  mixed
+     */
     public function store(array $params)
     {
         $model = HitAndRun::query()->create($params);
         return $model;
     }
 
+    /**
+     * @param  array<int|string, mixed>  $params
+     * @param  mixed  $id
+     * @return  mixed
+     */
     public function update(array $params, $id)
     {
         $model = HitAndRun::query()->findOrFail($id);
@@ -51,12 +64,20 @@ class HitAndRunRepository extends BaseRepository
         return $model;
     }
 
+    /**
+     * @param  mixed  $id
+     * @return  mixed
+     */
     public function getDetail($id)
     {
         $model = HitAndRun::query()->with(['user', 'torrent', 'snatch'])->findOrFail($id);
         return $model;
     }
 
+    /**
+     * @param  mixed  $id
+     * @return  mixed
+     */
     public function delete($id)
     {
         $model = HitAndRun::query()->findOrFail($id);
@@ -65,6 +86,11 @@ class HitAndRunRepository extends BaseRepository
         return $result;
     }
 
+    /**
+     * @param  array<int|string, mixed>  $params
+     * @param  \App\Models\User  $user
+     * @return  mixed
+     */
     public function bulkDelete(array $params, User $user)
     {
         $baseQuery = $this->getBulkQuery($params);
@@ -88,6 +114,10 @@ class HitAndRunRepository extends BaseRepository
         return $result;
     }
 
+    /**
+     * @param  array<int|string, mixed>  $params
+     * @return  \Illuminate\Database\Eloquent\Builder<HitAndRun>
+     */
     private function getBulkQuery(array $params): Builder
     {
         $query = HitAndRun::query();
@@ -105,6 +135,12 @@ class HitAndRunRepository extends BaseRepository
         return $query;
     }
 
+    /**
+     * @param  mixed  $uid
+     * @param  mixed  $torrentId
+     * @param  mixed  $ignoreTime
+     * @return  mixed
+     */
     public function cronjobUpdateStatus($uid = null, $torrentId = null, $ignoreTime = false)
     {
         $diffInSection = HitAndRun::diffInSection();
@@ -128,6 +164,13 @@ class HitAndRunRepository extends BaseRepository
         }
     }
 
+    /**
+     * @param  array<int|string, mixed>  $setting
+     * @param  mixed  $uid
+     * @param  mixed  $torrentId
+     * @param  mixed  $ignoreTime
+     * @return  mixed
+     */
     private function doCronjobUpdateStatus(array $setting, $uid = null, $torrentId = null, $ignoreTime = false)
     {
         do_log("setting: " . json_encode($setting) . ", uid: $uid, torrentId: $torrentId, ignoreTime: " . var_export($ignoreTime, true));
@@ -259,6 +302,10 @@ class HitAndRunRepository extends BaseRepository
         return $successCounts;
     }
 
+    /**
+     * @param  \App\Models\HitAndRun  $hitAndRun
+     * @return  array<int|string, mixed>
+     */
     private function geReachedMessage(HitAndRun $hitAndRun): array
     {
         $snatched = $hitAndRun->snatch;
@@ -274,6 +321,10 @@ class HitAndRunRepository extends BaseRepository
         ];
     }
 
+    /**
+     * @param  \App\Models\HitAndRun  $hitAndRun
+     * @param  array<int|string, mixed>  $setting
+     */
     private function reachedByShareRatio(HitAndRun $hitAndRun, array $setting): bool
     {
         do_log(__METHOD__);
@@ -290,6 +341,10 @@ class HitAndRunRepository extends BaseRepository
         return $this->inspectingToReached($hitAndRun, $update, __FUNCTION__);
     }
 
+    /**
+     * @param  \App\Models\HitAndRun  $hitAndRun
+     * @param  array<int|string, mixed>  $setting
+     */
     private function reachedBySeedTime(HitAndRun $hitAndRun, array $setting): bool
     {
         do_log(__METHOD__);
@@ -304,6 +359,10 @@ class HitAndRunRepository extends BaseRepository
         return $this->inspectingToReached($hitAndRun, $update, __FUNCTION__);
     }
 
+    /**
+     * @param  \App\Models\HitAndRun  $hitAndRun
+     * @param  array<int|string, mixed>  $setting
+     */
     private function reachedByLeechTime(HitAndRun $hitAndRun, array $setting): bool
     {
         do_log(__METHOD__);
@@ -318,6 +377,7 @@ class HitAndRunRepository extends BaseRepository
         return $this->inspectingToReached($hitAndRun, $update, __FUNCTION__);
     }
 
+    /** @param  \App\Models\HitAndRun  $hitAndRun */
     private function reachedBySpecialUserClass(HitAndRun $hitAndRun): bool
     {
         do_log(__METHOD__);
@@ -330,6 +390,11 @@ class HitAndRunRepository extends BaseRepository
         return $this->inspectingToReached($hitAndRun, $update, __FUNCTION__);
     }
 
+    /**
+     * @param  \App\Models\HitAndRun  $hitAndRun
+     * @param  array<int|string, mixed>  $update
+     * @param  string  $logPrefix
+     */
     private function inspectingToReached(HitAndRun $hitAndRun, array $update, string $logPrefix = ''): bool
     {
         $update['status'] = HitAndRun::STATUS_REACHED;
@@ -352,6 +417,11 @@ class HitAndRunRepository extends BaseRepository
         return true;
     }
 
+    /**
+     * @param  \App\Models\HitAndRun  $hitAndRun
+     * @param  array<int|string, mixed>  $setting
+     * @param  mixed  $disableUser
+     */
     private function unreached(HitAndRun $hitAndRun, array $setting, $disableUser = true): bool
     {
         do_log(sprintf('hitAndRun: %s, disableUser: %s', $hitAndRun->toJson(), var_export($disableUser, true)));
@@ -391,6 +461,7 @@ class HitAndRunRepository extends BaseRepository
         return true;
     }
 
+    /** @param  array<int|string, mixed>  $setting */
     private function checkAndDisableUser(array $setting): void
     {
         $logPrefix = "setting: " . json_encode($setting);
@@ -446,6 +517,11 @@ class HitAndRunRepository extends BaseRepository
         }
     }
 
+    /**
+     * @param  mixed  $uid
+     * @param  mixed  $formatted
+     * @return  mixed
+     */
     public function getStatusStats($uid, $formatted = true)
     {
         $diffInSection = HitAndRun::diffInSection();
@@ -503,6 +579,7 @@ class HitAndRunRepository extends BaseRepository
 
 
 
+    /** @return  array<int|string, mixed> */
     public function listStatus(): array
     {
         $results = [];
@@ -512,6 +589,10 @@ class HitAndRunRepository extends BaseRepository
         return $results;
     }
 
+    /**
+     * @param  mixed  $id
+     * @param  \App\Models\User  $user
+     */
     public function pardon($id, User $user): bool
     {
         $model = HitAndRun::query()->findOrFail($id);
@@ -524,6 +605,10 @@ class HitAndRunRepository extends BaseRepository
         return true;
     }
 
+    /**
+     * @param  array<int|string, mixed>  $params
+     * @param  \App\Models\User  $user
+     */
     public function bulkPardon(array $params, User $user): int
     {
         $baseQuery = $this->getBulkQuery($params)->whereIn('status', $this->getCanPardonStatus());
@@ -551,16 +636,25 @@ class HitAndRunRepository extends BaseRepository
         return $affected;
     }
 
+    /**
+     * @param  mixed  $comment
+     * @return  \Illuminate\Database\Query\Expression<string>
+     */
     private function getCommentUpdateRaw($comment): \Illuminate\Database\Query\Expression
     {
         return NexusDB::raw(sprintf("if (comment = '', '%s', concat('\n', '%s', comment))", $comment, $comment));
     }
 
+    /** @return  array<int|string, mixed> */
     private function getCanPardonStatus(): array
     {
         return HitAndRun::CAN_PARDON_STATUS;
     }
 
+    /**
+     * @param  mixed  $value
+     * @param  mixed  $searchBoxId
+     */
     public function renderOnUploadPage($value, $searchBoxId): string
     {
         if (HitAndRun::getConfig('mode', $searchBoxId) == \App\Models\HitAndRun::MODE_MANUAL && user_can('torrent_hr')) {

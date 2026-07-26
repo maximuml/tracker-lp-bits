@@ -14,13 +14,19 @@ use Nexus\Database\NexusDB;
 
 class NewsController extends Controller
 {
+    /** @var  mixed */
     private $repository;
 
+    /**
+     * @param  \App\Repositories\NewsRepository  $repository
+     * @return  mixed
+     */
     public function __construct(NewsRepository $repository)
     {
         $this->repository = $repository;
     }
 
+    /** @return  array<int|string, mixed> */
     private function getRules(): array
     {
         return [
@@ -34,8 +40,8 @@ class NewsController extends Controller
     }
     /**
      * Display a listing of the resource.
-     *
-     * @return array
+     * @param  \Illuminate\Http\Request  $request
+     * @return  array<string, mixed>
      */
     public function index(Request $request)
     {
@@ -46,9 +52,8 @@ class NewsController extends Controller
 
     /**
      * Store a newly created resource in storage.
-     *
      * @param  \Illuminate\Http\Request  $request
-     * @return array
+     * @return  array<string, mixed>
      */
     public function store(Request $request)
     {
@@ -60,9 +65,8 @@ class NewsController extends Controller
 
     /**
      * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return array
+     * @param  mixed  $id
+     * @return  array<string, mixed>
      */
     public function show($id)
     {
@@ -73,10 +77,9 @@ class NewsController extends Controller
 
     /**
      * Update the specified resource in storage.
-     *
      * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return array
+     * @param  mixed  $id
+     * @return  array<string, mixed>
      */
     public function update(Request $request, $id)
     {
@@ -88,9 +91,8 @@ class NewsController extends Controller
 
     /**
      * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return array
+     * @param  mixed  $id
+     * @return  array<string, mixed>
      */
     public function destroy($id)
     {
@@ -98,9 +100,7 @@ class NewsController extends Controller
         return $this->success($result);
     }
 
-    /**
-     * @return array
-     */
+    /** @return  array<string, mixed> */
     public function latest()
     {
         $user = Auth::user();

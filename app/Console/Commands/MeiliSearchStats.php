@@ -23,8 +23,7 @@ class MeiliSearchStats extends Command
 
     /**
      * Execute the console command.
-     *
-     * @return int
+     * @return  int
      */
     public function handle()
     {

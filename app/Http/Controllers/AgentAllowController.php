@@ -10,13 +10,19 @@ use Illuminate\Validation\Rule;
 
 class AgentAllowController extends Controller
 {
+    /** @var  mixed */
     private $repository;
 
+    /**
+     * @param  \App\Repositories\AgentAllowRepository  $repository
+     * @return  mixed
+     */
     public function __construct(AgentAllowRepository $repository)
     {
         $this->repository = $repository;
     }
 
+    /** @return  array<int|string, mixed> */
     private function getRules(): array
     {
         return [
@@ -39,8 +45,8 @@ class AgentAllowController extends Controller
     }
     /**
      * Display a listing of the resource.
-     *
-     * @return array
+     * @param  \Illuminate\Http\Request  $request
+     * @return  array<string, mixed>
      */
     public function index(Request $request)
     {
@@ -51,9 +57,8 @@ class AgentAllowController extends Controller
 
     /**
      * Store a newly created resource in storage.
-     *
      * @param  \Illuminate\Http\Request  $request
-     * @return array
+     * @return  array<string, mixed>
      */
     public function store(Request $request)
     {
@@ -65,9 +70,8 @@ class AgentAllowController extends Controller
 
     /**
      * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return array
+     * @param  mixed  $id
+     * @return  array<string, mixed>
      */
     public function show($id)
     {
@@ -78,10 +82,9 @@ class AgentAllowController extends Controller
 
     /**
      * Update the specified resource in storage.
-     *
      * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return array
+     * @param  mixed  $id
+     * @return  array<string, mixed>
      */
     public function update(Request $request, $id)
     {
@@ -93,9 +96,8 @@ class AgentAllowController extends Controller
 
     /**
      * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return array
+     * @param  mixed  $id
+     * @return  array<string, mixed>
      */
     public function destroy($id)
     {
@@ -103,6 +105,7 @@ class AgentAllowController extends Controller
         return $this->success($result);
     }
 
+    /** @return  array<string, mixed> */
     public function all()
     {
         $result = AgentAllow::query()->orderBy('id', 'desc')->get();
@@ -110,6 +113,10 @@ class AgentAllowController extends Controller
         return $this->success($resource);
     }
 
+    /**
+     * @param  \Illuminate\Http\Request  $request
+     * @return  array<string, mixed>
+     */
     public function check(Request $request)
     {
         $request->validate([

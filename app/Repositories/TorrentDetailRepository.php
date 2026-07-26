@@ -9,6 +9,10 @@ use Nexus\Database\NexusDB;
 
 class TorrentDetailRepository
 {
+    /**
+     * @param  int  $id
+     * @return  ?array<int|string, mixed>
+     */
     public static function getTorrent(int $id): ?array
     {
         $torrent = NexusDB::table('torrents')
@@ -44,6 +48,11 @@ class TorrentDetailRepository
         return (array) $torrent;
     }
 
+    /**
+     * @param  int  $torrentId
+     * @param  int  $currentUserId
+     * @return  array<int|string, mixed>
+     */
     public static function getMagicInfo(int $torrentId, int $currentUserId): array
     {
         $givers = NexusDB::table('magic')
@@ -74,6 +83,11 @@ class TorrentDetailRepository
         ];
     }
 
+    /**
+     * @param  int  $torrentId
+     * @param  int  $currentUserId
+     * @return  array<int|string, mixed>
+     */
     public static function getThanksInfo(int $torrentId, int $currentUserId): array
     {
         $thanks = NexusDB::table('thanks')
@@ -104,13 +118,17 @@ class TorrentDetailRepository
         ];
     }
 
+    /** @param  int  $torrentId */
     public static function getCommentCount(int $torrentId): int
     {
         return Comment::query()->where('torrent', $torrentId)->count();
     }
 
     /**
-     * @return array<int, array<string, mixed>>
+     * @param  int  $torrentId
+     * @param  int  $offset
+     * @param  int  $limit
+     * @return  array<int|string, mixed>
      */
     public static function getComments(int $torrentId, int $offset, int $limit): array
     {
@@ -123,6 +141,7 @@ class TorrentDetailRepository
             ->toArray();
     }
 
+    /** @param  int  $id */
     public static function incrementViews(int $id): void
     {
         Torrent::query()->where('id', $id)->increment('views');

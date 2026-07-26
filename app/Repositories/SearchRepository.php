@@ -13,8 +13,18 @@ use Nexus\Database\NexusDB;
 
 class SearchRepository extends BaseRepository
 {
+    /** @var  ?Client */
+    /** @var  ?Client */
+    /** @var  ?Client */
+    /** @var  ?Client */
+    /** @var  ?Client */
     private ?Client $es = null;
 
+    /** @var  bool */
+    /** @var  bool */
+    /** @var  bool */
+    /** @var  bool */
+    /** @var  bool */
     private bool $enabled = false;
 
     const INDEX_NAME = 'nexus_torrents';
@@ -45,6 +55,11 @@ class SearchRepository extends BaseRepository
 
 
 
+    /** @var  array<int|string, mixed> */
+    /** @var  array<int|string, mixed> */
+    /** @var  array<int|string, mixed> */
+    /** @var  array<int|string, mixed> */
+    /** @var  array<int|string, mixed> */
     private array $indexSetting = [
         'index' => self::INDEX_NAME,
         'body' => [
@@ -86,6 +101,11 @@ class SearchRepository extends BaseRepository
     ];
 
     //cat401=1&source1=1&medium1=1&codec1=1&audiocodec1=1&standard1=1&processing1=1&incldead=1&spstate=2&inclbookmarked=1&search=tr&search_area=1&search_mode=1
+    /** @var  array<int|string, mixed> */
+    /** @var  array<int|string, mixed> */
+    /** @var  array<int|string, mixed> */
+    /** @var  array<int|string, mixed> */
+    /** @var  array<int|string, mixed> */
     private static array $queryFieldToTorrentFieldMaps = [
         'cat' => 'category',
         'source' => 'source',
@@ -96,6 +116,11 @@ class SearchRepository extends BaseRepository
         'processing' => 'processing',
     ];
 
+    /** @var  array<int|string, mixed> */
+    /** @var  array<int|string, mixed> */
+    /** @var  array<int|string, mixed> */
+    /** @var  array<int|string, mixed> */
+    /** @var  array<int|string, mixed> */
     private static array $sortFieldMaps = [
         '1' => 'name',
         '2' => 'numfiles',
@@ -108,6 +133,7 @@ class SearchRepository extends BaseRepository
         '9' => 'owner',
     ];
 
+    /** @return  mixed */
     public function __construct()
     {
         $elasticsearchEnabled = nexus_env('ELASTICSEARCH_ENABLED');
@@ -131,6 +157,7 @@ class SearchRepository extends BaseRepository
         return $this->es;
     }
 
+    /** @return  array<int|string, mixed> */
     private function getTorrentRawMappingFields(): array
     {
         return [
@@ -163,11 +190,13 @@ class SearchRepository extends BaseRepository
         ];
     }
 
+    /** @return  callable|array<int|string, mixed> */
     public function getEsInfo(): callable|array
     {
         return $this->getEs()->info();
     }
 
+    /** @return  mixed */
     public function createIndex()
     {
         $params = $this->indexSetting;
@@ -177,12 +206,17 @@ class SearchRepository extends BaseRepository
         return $this->getEs()->indices()->create($params);
     }
 
+    /** @return  mixed */
     public function deleteIndex()
     {
         $params = ['index' => self::INDEX_NAME];
         return $this->getEs()->indices()->delete($params);
     }
 
+    /**
+     * @param  mixed  $torrentId
+     * @return  mixed
+     */
     public function import($torrentId = null)
     {
         $page = 1;
@@ -250,6 +284,11 @@ class SearchRepository extends BaseRepository
         }
     }
 
+    /**
+     * @param  \App\Models\User  $user
+     * @param  bool  $underlinePrefix
+     * @return  mixed
+     */
     private function buildUserBody(User $user, bool $underlinePrefix = false)
     {
         $docType = self::DOC_TYPE_USER;
@@ -276,6 +315,11 @@ class SearchRepository extends BaseRepository
     }
 
 
+    /**
+     * @param  mixed  $torrent
+     * @param  bool  $underlinePrefix
+     * @return  array<int|string, mixed>
+     */
     private function buildTorrentBody($torrent, bool $underlinePrefix = false): array
     {
         $baseFields = $this->getTorrentBaseFields();
@@ -313,6 +357,12 @@ class SearchRepository extends BaseRepository
 
 
 
+    /**
+     * @param  \App\Models\Torrent  $torrent
+     * @param  \App\Models\TorrentTag  $torrentTag
+     * @param  bool  $underlinePrefix
+     * @return  mixed
+     */
     private function buildTorrentTagBody(Torrent $torrent, TorrentTag $torrentTag, bool $underlinePrefix = false)
     {
         $docType = self::DOC_TYPE_TAG;
@@ -339,6 +389,12 @@ class SearchRepository extends BaseRepository
         return compact('index', 'body');
     }
 
+    /**
+     * @param  \App\Models\Torrent  $torrent
+     * @param  \App\Models\Bookmark  $bookmark
+     * @param  bool  $underlinePrefix
+     * @return  mixed
+     */
     private function buildBookmarkBody(Torrent $torrent, Bookmark $bookmark, bool $underlinePrefix = false)
     {
         $docType = self::DOC_TYPE_BOOKMARK;
@@ -366,6 +422,11 @@ class SearchRepository extends BaseRepository
     }
 
 
+    /**
+     * @param  mixed  $msg
+     * @param  mixed  $response
+     * @return  mixed
+     */
     private function logEsResponse($msg, $response)
     {
         if (isset($response['errors']) && $response['errors'] == true) {
@@ -374,21 +435,25 @@ class SearchRepository extends BaseRepository
         do_log($msg, 'info', isRunningInConsole());
     }
 
+    /** @param  mixed  $id */
     private function getTorrentId($id): string
     {
         return "torrent_" . intval($id);
     }
 
+    /** @param  mixed  $id */
     private function getTorrentTagId($id): string
     {
         return "torrent_tag_" . intval($id);
     }
 
+    /** @param  mixed  $id */
     private function getUserId($id): string
     {
         return "user_" . intval($id);
     }
 
+    /** @param  mixed  $id */
     private function getBookmarkId($id): string
     {
         return "bookmark_" . intval($id);
@@ -396,9 +461,8 @@ class SearchRepository extends BaseRepository
 
     /**
      * detect elastic response has error or not
-     *
-     * @param $esResponse
-     * @return bool
+     * @param  mixed  $esResponse
+     * @return  bool
      */
     private function isEsResponseError($esResponse)
     {
@@ -418,11 +482,10 @@ class SearchRepository extends BaseRepository
 
     /**
      * build es query
-     *
-     * @param array $params
-     * @param $user
-     * @param string $queryString cat401=1&cat404=1&source2=1&medium2=1&medium3=1&codec3=1&audiocodec3=1&standard2=1&standard3=1&processing2=1&incldead=1&spstate=0&inclbookmarked=0&search=&search_area=0&search_mode=0
-     * @return array
+     * @param  array<int|string, mixed>  $params
+     * @param  mixed  $user
+     * @param  string  $queryString
+     * @return  array<int|string, mixed>
      */
     public function buildQuery(array $params, $user, string $queryString)
     {
@@ -627,6 +690,12 @@ class SearchRepository extends BaseRepository
 
     }
 
+    /**
+     * @param  array<int|string, mixed>  $params
+     * @param  mixed  $user
+     * @param  string  $queryString
+     * @return  mixed
+     */
     public function listTorrentFromEs(array $params, $user, string $queryString)
     {
         $query = $this->buildQuery($params, $user, $queryString);
@@ -671,11 +740,13 @@ class SearchRepository extends BaseRepository
 
     }
 
+    /** @return  mixed */
     private function getTorrentBaseFields()
     {
         return array_keys($this->getTorrentRawMappingFields());
     }
 
+    /** @param  int  $id */
     public function updateTorrent(int $id): bool
     {
         if (!$this->enabled) {
@@ -707,6 +778,7 @@ class SearchRepository extends BaseRepository
         return $this->syncTorrentTags($torrent);
     }
 
+    /** @param  int  $id */
     public function addTorrent(int $id): bool
     {
         if (!$this->enabled) {
@@ -729,6 +801,10 @@ class SearchRepository extends BaseRepository
         return $this->syncTorrentTags($torrent);
     }
 
+    /**
+     * @param  mixed  $id
+     * @return  callable|bool|array<int|string, mixed>
+     */
     public function getTorrent($id): callable|bool|array
     {
         if (!$this->enabled) {
@@ -741,6 +817,7 @@ class SearchRepository extends BaseRepository
         return $this->getEs()->get($params);
     }
 
+    /** @param  int  $id */
     public function deleteTorrent(int $id): bool
     {
         if (!$this->enabled) {
@@ -761,6 +838,10 @@ class SearchRepository extends BaseRepository
         return $this->syncTorrentTags($id, true);
     }
 
+    /**
+     * @param  mixed  $torrent
+     * @param  mixed  $onlyDelete
+     */
     public function syncTorrentTags($torrent, $onlyDelete = false): bool
     {
         if (!$this->enabled) {
@@ -815,6 +896,7 @@ class SearchRepository extends BaseRepository
         return true;
     }
 
+    /** @param  mixed  $user */
     public function updateUser($user): bool
     {
         if (!$this->enabled) {
@@ -836,6 +918,7 @@ class SearchRepository extends BaseRepository
         return true;
     }
 
+    /** @param  mixed  $bookmark */
     public function addBookmark($bookmark): bool
     {
         if (!$this->enabled) {
@@ -860,6 +943,7 @@ class SearchRepository extends BaseRepository
         return true;
     }
 
+    /** @param  int  $id */
     public function deleteBookmark(int $id): bool
     {
         if (!$this->enabled) {

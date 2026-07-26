@@ -11,30 +11,44 @@ use Stichoza\GoogleTranslate\GoogleTranslate;
  */
 class TranslateLang extends Command
 {
+    /** @var  string */
     protected $signature = 'lang:translate {runEnv} {source} {target}
                             {filename? : Optional file to translate (php file or json)}
                             {--dry-run : Only print translations without writing files}
                             {--ignore= : Comma-separated keys to ignore (e.g. key1,key2)}
                             {--json : Also translate JSON language files}';
 
+    /** @var  string */
     protected $description = 'Translate Laravel language files (PHP or JSON) using Google Translate';
 
+    /** @var  mixed */
     protected $tr;
+    /** @var  array<int|string, mixed> */
     protected $ignoreKeys = [];
+    /** @var  array<int|string, mixed> */
     protected $cache = [];
+    /** @var  mixed */
     protected $cachePath;
+    /** @var  mixed */
     protected $langPath;
 
+    /** @var  mixed */
     protected $runEnv;
 
     const RUN_ENV_NEXUS = 'nexus';
     const RUN_ENV_LARAVEL = 'laravel';
 
+    /** @var  array<int|string, mixed> */
+    /** @var  array<int|string, mixed> */
+    /** @var  array<int|string, mixed> */
+    /** @var  array<int|string, mixed> */
+    /** @var  array<int|string, mixed> */
     private static array $runEnvToLangPathMaps = [
         self::RUN_ENV_NEXUS => ROOT_PATH . "lang",
         self::RUN_ENV_LARAVEL => ROOT_PATH . "resources/lang",
     ];
 
+    /** @return  int */
     public function handle()
     {
         $source = $this->argument('source');
@@ -100,6 +114,12 @@ class TranslateLang extends Command
         return 0;
     }
 
+    /**
+     * @param  mixed  $sourceFile
+     * @param  mixed  $sourceLang
+     * @param  mixed  $targetLang
+     * @return  mixed
+     */
     protected function translatePhpFile($sourceFile, $sourceLang, $targetLang)
     {
         $relativePath = basename($sourceFile);
@@ -132,6 +152,12 @@ class TranslateLang extends Command
         }
     }
 
+    /**
+     * @param  mixed  $jsonFile
+     * @param  mixed  $sourceLang
+     * @param  mixed  $targetLang
+     * @return  mixed
+     */
     protected function translateJsonFile($jsonFile, $sourceLang, $targetLang)
     {
 //        $targetFile = resource_path("lang/{$targetLang}.json");
@@ -158,6 +184,10 @@ class TranslateLang extends Command
         }
     }
 
+    /**
+     * @param  array<int|string, mixed>  $data
+     * @return  mixed
+     */
     protected function translateArray(array $data)
     {
         $result = [];
@@ -176,6 +206,7 @@ class TranslateLang extends Command
         return $result;
     }
 
+    /** @param  string  $text */
     protected function translateText(string $text): string
     {
         if (isset($this->cache[$text])) {
@@ -194,6 +225,12 @@ class TranslateLang extends Command
         }
     }
 
+    /**
+     * @param  mixed  $filename
+     * @param  mixed  $source
+     * @param  mixed  $target
+     * @return  mixed
+     */
     protected function translateSpecificFile($filename, $source, $target)
     {
         $langPath = $this->langPath;
@@ -223,6 +260,7 @@ class TranslateLang extends Command
         }
     }
 
+    /** @return  mixed */
     protected function loadCache()
     {
         if (file_exists($this->cachePath)) {
@@ -230,6 +268,7 @@ class TranslateLang extends Command
         }
     }
 
+    /** @return  mixed */
     protected function saveCache()
     {
         if (!$this->option('dry-run')) {
@@ -237,6 +276,10 @@ class TranslateLang extends Command
         }
     }
 
+    /**
+     * @param  mixed  $data
+     * @param  int  $indentSize
+     */
     protected function json_encode_pretty($data, int $indentSize = 4): string
     {
         // 默认格式化（PHP 默认是 2 空格）
@@ -254,6 +297,7 @@ class TranslateLang extends Command
         return $formatted;
     }
 
+    /** @param  mixed  $lang */
     private function langToDirName($lang): string
     {
         $map = [
@@ -263,6 +307,7 @@ class TranslateLang extends Command
         return $map[$lang] ?? $lang;
     }
 
+    /** @param  mixed  $runEnv */
     private function getLangPath($runEnv): string
     {
         if (isset(self::$runEnvToLangPathMaps[$runEnv])) {

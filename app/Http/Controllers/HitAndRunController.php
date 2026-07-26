@@ -12,13 +12,19 @@ use Illuminate\Validation\Rule;
 
 class HitAndRunController extends Controller
 {
+    /** @var  mixed */
     private $repository;
 
+    /**
+     * @param  \App\Repositories\HitAndRunRepository  $repository
+     * @return  mixed
+     */
     public function __construct(HitAndRunRepository $repository)
     {
         $this->repository = $repository;
     }
 
+    /** @return  array<int|string, mixed> */
     private function getRules(): array
     {
         return [
@@ -32,8 +38,8 @@ class HitAndRunController extends Controller
     }
     /**
      * Display a listing of the resource.
-     *
-     * @return array
+     * @param  \Illuminate\Http\Request  $request
+     * @return  array<string, mixed>
      */
     public function index(Request $request)
     {
@@ -44,9 +50,8 @@ class HitAndRunController extends Controller
 
     /**
      * Store a newly created resource in storage.
-     *
      * @param  \Illuminate\Http\Request  $request
-     * @return array
+     * @return  array<string, mixed>
      */
     public function store(Request $request)
     {
@@ -58,9 +63,8 @@ class HitAndRunController extends Controller
 
     /**
      * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return array
+     * @param  mixed  $id
+     * @return  array<string, mixed>
      */
     public function show($id)
     {
@@ -71,10 +75,9 @@ class HitAndRunController extends Controller
 
     /**
      * Update the specified resource in storage.
-     *
      * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return array
+     * @param  mixed  $id
+     * @return  array<string, mixed>
      */
     public function update(Request $request, $id)
     {
@@ -86,9 +89,8 @@ class HitAndRunController extends Controller
 
     /**
      * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return array
+     * @param  mixed  $id
+     * @return  array<string, mixed>
      */
     public function destroy($id)
     {
@@ -96,24 +98,37 @@ class HitAndRunController extends Controller
         return $this->success($result);
     }
 
+    /** @return  array<int|string, mixed> */
     public function listStatus(): array
     {
         $result = $this->repository->listStatus();
         return $this->success($result);
     }
 
+    /**
+     * @param  mixed  $id
+     * @return  array<int|string, mixed>
+     */
     public function pardon($id): array
     {
         $result = $this->repository->pardon($id, Auth::user());
         return $this->success($result);
     }
 
+    /**
+     * @param  \Illuminate\Http\Request  $request
+     * @return  array<int|string, mixed>
+     */
     public function bulkPardon(Request $request): array
     {
         $result = $this->repository->bulkPardon($request->all(), Auth::user());
         return $this->success(['result' => $result],"Affected: " . intval($result));
     }
 
+    /**
+     * @param  \Illuminate\Http\Request  $request
+     * @return  array<int|string, mixed>
+     */
     public function bulkDelete(Request $request): array
     {
         $result = $this->repository->bulkDelete($request->all(), Auth::user());

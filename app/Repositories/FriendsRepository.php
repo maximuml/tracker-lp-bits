@@ -6,6 +6,10 @@ use Nexus\Database\NexusDB;
 
 class FriendsRepository
 {
+    /**
+     * @param  int  $userId
+     * @return  array<int|string, mixed>
+     */
     public static function getFriends(int $userId): array
     {
         return NexusDB::table('friends as f')
@@ -18,6 +22,10 @@ class FriendsRepository
             ->all();
     }
 
+    /**
+     * @param  int  $userId
+     * @return  array<int|string, mixed>
+     */
     public static function getBlocks(int $userId): array
     {
         return NexusDB::table('blocks')
@@ -29,6 +37,11 @@ class FriendsRepository
             ->all();
     }
 
+    /**
+     * @param  int  $userId
+     * @param  string  $type
+     * @param  int  $targetId
+     */
     public static function exists(int $userId, string $type, int $targetId): bool
     {
         [$table, $field] = self::resolveTable($type);
@@ -39,6 +52,11 @@ class FriendsRepository
             ->exists();
     }
 
+    /**
+     * @param  int  $userId
+     * @param  string  $type
+     * @param  int  $targetId
+     */
     public static function add(int $userId, string $type, int $targetId): void
     {
         [$table, $field] = self::resolveTable($type);
@@ -49,6 +67,11 @@ class FriendsRepository
         ]);
     }
 
+    /**
+     * @param  int  $userId
+     * @param  string  $type
+     * @param  int  $targetId
+     */
     public static function delete(int $userId, string $type, int $targetId): int
     {
         [$table, $field] = self::resolveTable($type);
@@ -60,7 +83,8 @@ class FriendsRepository
     }
 
     /**
-     * @return array{0: string, 1: string}
+     * @param  string  $type
+     * @return  array<int|string, mixed>
      */
     private static function resolveTable(string $type): array
     {

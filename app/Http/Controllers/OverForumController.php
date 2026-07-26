@@ -10,8 +10,7 @@ class OverForumController extends Controller
 {
     /**
      * Display a listing of the resource.
-     *
-     * @return array
+     * @return  array<string, mixed>
      */
     public function index()
     {
@@ -22,8 +21,7 @@ class OverForumController extends Controller
 
     /**
      * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
+     * @return  \Illuminate\Http\Response
      */
     public function create()
     {
@@ -34,9 +32,8 @@ class OverForumController extends Controller
 
     /**
      * Store a newly created resource in storage.
-     *
      * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @return  \Illuminate\Http\Response
      */
     public function store(Request $request)
     {
@@ -47,9 +44,8 @@ class OverForumController extends Controller
 
     /**
      * Display the specified resource.
-     *
      * @param  \App\Models\OverForum  $overForum
-     * @return \Illuminate\Http\Response
+     * @return  \Illuminate\Http\Response
      */
     public function show(OverForum $overForum)
     {
@@ -60,9 +56,8 @@ class OverForumController extends Controller
 
     /**
      * Show the form for editing the specified resource.
-     *
      * @param  \App\Models\OverForum  $overForum
-     * @return \Illuminate\Http\Response
+     * @return  \Illuminate\Http\Response
      */
     public function edit(OverForum $overForum)
     {
@@ -73,10 +68,9 @@ class OverForumController extends Controller
 
     /**
      * Update the specified resource in storage.
-     *
      * @param  \Illuminate\Http\Request  $request
      * @param  \App\Models\OverForum  $overForum
-     * @return \Illuminate\Http\Response
+     * @return  \Illuminate\Http\Response
      */
     public function update(Request $request, OverForum $overForum)
     {
@@ -87,9 +81,8 @@ class OverForumController extends Controller
 
     /**
      * Remove the specified resource from storage.
-     *
      * @param  \App\Models\OverForum  $overForum
-     * @return \Illuminate\Http\Response
+     * @return  \Illuminate\Http\Response
      */
     public function destroy(OverForum $overForum)
     {

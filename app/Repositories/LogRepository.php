@@ -10,9 +10,7 @@ use Nexus\Database\NexusDB;
 
 class LogRepository
 {
-    /**
-     * @param array{search?: string, query?: string} $filters
-     */
+    /** @param  array<int|string, mixed>  $filters */
     public static function countSiteLog(array $filters): int
     {
         $query = self::buildSiteLogQuery($filters);
@@ -21,8 +19,10 @@ class LogRepository
     }
 
     /**
-     * @param array{search?: string, query?: string} $filters
-     * @return array<int, array<string, mixed>>
+     * @param  array<int|string, mixed>  $filters
+     * @param  int  $offset
+     * @param  int  $perPage
+     * @return  array<int|string, mixed>
      */
     public static function getSiteLog(array $filters, int $offset, int $perPage): array
     {
@@ -36,7 +36,8 @@ class LogRepository
     }
 
     /**
-     * @param array{search?: string, query?: string} $filters
+     * @param  array<int|string, mixed>  $filters
+     * @return  \Illuminate\Database\Query\Builder
      */
     private static function buildSiteLogQuery(array $filters): \Illuminate\Database\Query\Builder
     {
@@ -57,6 +58,7 @@ class LogRepository
         return $query;
     }
 
+    /** @param  string  $queryString */
     public static function countChronicle(string $queryString): int
     {
         $query = NexusDB::table('chronicle');
@@ -68,7 +70,10 @@ class LogRepository
     }
 
     /**
-     * @return array<int, array<string, mixed>>
+     * @param  string  $queryString
+     * @param  int  $offset
+     * @param  int  $perPage
+     * @return  array<int|string, mixed>
      */
     public static function getChronicle(string $queryString, int $offset, int $perPage): array
     {
@@ -87,6 +92,10 @@ class LogRepository
             ->all();
     }
 
+    /**
+     * @param  int  $id
+     * @return  ?array<int|string, mixed>
+     */
     public static function getChronicleById(int $id): ?array
     {
         $row = NexusDB::table('chronicle')->where('id', $id)->first();
@@ -94,6 +103,10 @@ class LogRepository
         return $row === null ? null : (array) $row;
     }
 
+    /**
+     * @param  int  $userId
+     * @param  string  $txt
+     */
     public static function addChronicle(int $userId, string $txt): void
     {
         NexusDB::table('chronicle')->insert([
@@ -103,16 +116,26 @@ class LogRepository
         ]);
     }
 
+    /**
+     * @param  int  $id
+     * @param  string  $txt
+     */
     public static function updateChronicle(int $id, string $txt): int
     {
         return NexusDB::table('chronicle')->where('id', $id)->update(['txt' => $txt]);
     }
 
+    /** @param  int  $id */
     public static function deleteChronicle(int $id): int
     {
         return NexusDB::table('chronicle')->where('id', $id)->delete();
     }
 
+    /**
+     * @param  string  $table
+     * @param  int  $id
+     * @return  ?array<int|string, mixed>
+     */
     public static function getGenericById(string $table, int $id): ?array
     {
         $row = NexusDB::table($table)->where('id', $id)->first();
@@ -120,9 +143,7 @@ class LogRepository
         return $row === null ? null : (array) $row;
     }
 
-    /**
-     * @param array{search?: string, query?: string} $filters
-     */
+    /** @param  array<int|string, mixed>  $filters */
     public static function countNews(array $filters): int
     {
         $query = News::query();
@@ -148,8 +169,10 @@ class LogRepository
     }
 
     /**
-     * @param array{search?: string, query?: string} $filters
-     * @return array<int, array<string, mixed>>
+     * @param  array<int|string, mixed>  $filters
+     * @param  int  $offset
+     * @param  int  $perPage
+     * @return  array<int|string, mixed>
      */
     public static function getNews(array $filters, int $offset, int $perPage): array
     {
@@ -187,9 +210,7 @@ class LogRepository
         return (int) Poll::query()->count();
     }
 
-    /**
-     * @return array<int, array<string, mixed>>
-     */
+    /** @return  array<int|string, mixed> */
     public static function getPollsExceptFirst(): array
     {
         $count = self::getPollCount();
@@ -206,6 +227,7 @@ class LogRepository
             ->all();
     }
 
+    /** @param  int  $pollId */
     public static function deletePoll(int $pollId): void
     {
         PollAnswer::query()->where('pollid', $pollId)->delete();
@@ -213,7 +235,8 @@ class LogRepository
     }
 
     /**
-     * @return array<int, int>
+     * @param  int  $pollId
+     * @return  array<int|string, mixed>
      */
     public static function getPollVoteCounts(int $pollId): array
     {

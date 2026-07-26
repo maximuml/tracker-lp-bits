@@ -3,27 +3,36 @@
 
 if(!defined('IN_TRACKER'))
 	die('Hacking attempt!');
-
+/**
+ * @return void
+ */
 function dbconn_announce() {
 
 	\Nexus\Database\NexusDB::getInstance()->autoConnect();
 }
-
+/**
+ * @return array<string, string>
+ */
 function emu_getallheaders() {
+	$headers = [];
 	foreach($_SERVER as $name => $value)
 		if(substr($name, 0, 5) == 'HTTP_')
 			$headers[str_replace(' ', '-', ucwords(strtolower(str_replace('_', ' ', substr($name, 5)))))] = $value;
 	return $headers;
 }
-
+/**
+ * @return void
+ */
 function block_browser()
 {
 	$agent = $_SERVER["HTTP_USER_AGENT"] ?? '';
 	if (preg_match("/^Mozilla/", $agent) || preg_match("/^Opera/", $agent) || preg_match("/^Links/", $agent) || preg_match("/^Lynx/", $agent) )
 		err("Browser access blocked!");
 // check headers
+	$headers = [];
 	if (function_exists('getallheaders')){ //getallheaders() is only supported when PHP is installed as an Apache module
 		$headers = getallheaders();
+	}
 	//else
 	//	$headers = emu_getallheaders();
 
@@ -32,9 +41,11 @@ function block_browser()
 		if (isset($headers["Cookie"]) || isset($headers["Accept-Language"]) || isset($headers["Accept-Charset"]))
 			err("Anti-Cheater: You cannot use this agent");
 	}
-	}
 }
-
+/**
+ * @param mixed $d
+ * @return void
+ */
 function benc_resp($d)
 {
     $logData = $d;
@@ -42,6 +53,10 @@ function benc_resp($d)
     do_log(nexus_json_encode($logData));
     benc_resp_raw(\Rhilip\Bencode\Bencode::encode($d));
 }
+/**
+ * @param mixed $x
+ * @return mixed
+ */
 function benc_resp_raw($x) {
 	header("Content-Type: text/plain; charset=utf-8");
 	header("Pragma: no-cache");
@@ -50,7 +65,7 @@ function benc_resp_raw($x) {
 
 /**
  * client will retry, keep the event param
- * @param $msg
+ * @param string $msg
  * @return void
  */
 function err($msg)
@@ -61,9 +76,9 @@ function err($msg)
 
 /**
  * client will not retry, think about success with warning message
- * @param $msg
+ * @param string $msg
  * @param int $interval
- * @return void|null
+ * @return void
  */
 function warn($msg, int $interval = 7200)
 {
@@ -81,7 +96,9 @@ function warn($msg, int $interval = 7200)
     benc_resp($d);
     exit();
 }
-
+/**
+ * @return mixed
+ */
 function get_resp_dict_from_global() {
     if (isset($GLOBALS['rep_dict'])) {
         $d = $GLOBALS['rep_dict'];
@@ -101,7 +118,16 @@ function get_resp_dict_from_global() {
     }
     return $d;
 }
-
+/**
+ * @param int $userid
+ * @param int $torrentid
+ * @param int|float $uploaded
+ * @param int|float $downloaded
+ * @param int|float $anctime
+ * @param int $seeders
+ * @param int $leechers
+ * @return bool
+ */
 function check_cheater($userid, $torrentid, $uploaded, $downloaded, $anctime, $seeders=0, $leechers=0){
 	global $cheaterdet_security,$nodetect_security, $CURUSER;
 
@@ -242,6 +268,10 @@ if ($cheaterdet_security > 1){// do not check this with consertive level
 }
 	return false;
 }
+/**
+ * @param mixed $port
+ * @return mixed
+ */
 function portblacklisted($port)
 {
 	// direct connect
@@ -258,16 +288,35 @@ function portblacklisted($port)
 	if ($port == 6699) return true;
 	return false;
 }
-
+/**
+ * @param mixed $ip
+ * @param mixed $port
+ * @return mixed
+ */
 function ipv4_to_compact($ip, $port)
 {
 	$compact = pack("Nn", sprintf("%d",ip2long($ip)), $port);
 	return $compact;
 }
-
+/**
+ * @param string $peer_id
+ * @param string $agent
+ * @param int|null $agent_familyid
+ * @return int|string
+ */
 function check_client($peer_id, $agent, &$agent_familyid)
 {
 	global $BASEURL, $Cache;
+
+	$allowed_flag_peer_id = false;
+	$allowed_flag_agent = false;
+	$version_low_peer_id = false;
+	$version_low_agent = false;
+	$low_version = '';
+	$exception = 'no';
+	$family_id = 0;
+	$allow_https = 'no';
+	$row_allowed_ua = [];
 
 	if (!$clients = $Cache->get_value('allowed_client_list')){
 		$clients = \Nexus\Database\NexusDB::table('agent_allowed_family')
@@ -444,7 +493,10 @@ function check_client($peer_id, $agent, &$agent_familyid)
 		return "Banned Client, Please goto $BASEURL/faq.php#id29 for a list of acceptable clients";
 	}
 }
-
+/**
+ * @param mixed $api
+ * @return mixed
+ */
 function request_local_api($api)
 {
     $start = microtime(true);

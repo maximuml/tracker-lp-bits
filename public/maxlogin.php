@@ -11,9 +11,7 @@ $update = isset($_POST['update']) ? htmlspecialchars($_POST['update']) : (isset(
 
 function check ($id) {
 	if (!is_valid_id($id))
-		return stderr("Error","Invalid ID");
-	else
-		return true;
+		stderr("Error","Invalid ID");
 }
 function searchform () {
 ?>

@@ -6,12 +6,20 @@ use Nexus\Database\NexusDB;
 
 if(!defined('IN_TRACKER'))
 die('Hacking attempt!');
-
+/**
+ * @param mixed $msg
+ * @return mixed
+ */
 function printProgress($msg) {
     $br = php_sapi_name() == 'cli' ? "\n" : "<br />";
  	echo sprintf("[%s] [%s] %s ... done!%s", date('Y-m-d H:i:s'), nexus()->getRequestId(), $msg, $br);
 }
-
+/**
+ * @param mixed $days
+ * @param mixed $type
+ * @param mixed $targettype
+ * @return mixed
+ */
 function torrent_promotion_expire($days, $type = 2, $targettype = 1){
 	$secs = (int)($days * 86400);
 	$dt = date("Y-m-d H:i:s", TIMENOW - $secs);
@@ -37,7 +45,9 @@ function torrent_promotion_expire($days, $type = 2, $targettype = 1){
 		else write_log("Promotion type for torrent {$arr['id']} ({$arr['name']}) is changed to ".$become." (time expired)",'normal');
 	}
 }
-
+/**
+ * @return mixed
+ */
 function torrent_promotion_individual_expire() {
     $res = NexusDB::table('torrents')
         ->where('promotion_time_type', 2)
@@ -52,7 +62,12 @@ function torrent_promotion_individual_expire() {
         publish_model_event(ModelEventEnum::TORRENT_UPDATED, $arr['id']);
     }
 }
-
+/**
+ * @param mixed $down_floor_gb
+ * @param mixed $down_roof_gb
+ * @param mixed $minratio
+ * @return mixed
+ */
 function peasant_to_user($down_floor_gb, $down_roof_gb, $minratio){
 	if ($down_floor_gb){
 		$downlimit_floor = $down_floor_gb*1024*1024*1024;
@@ -86,7 +101,14 @@ function peasant_to_user($down_floor_gb, $down_roof_gb, $minratio){
 		}
 	}
 }
-
+/**
+ * @param mixed $class
+ * @param mixed $down_floor_gb
+ * @param mixed $minratio
+ * @param mixed $time_week
+ * @param mixed $addinvite
+ * @return void
+ */
 function promotion($class, $down_floor_gb, $minratio, $time_week, $addinvite = 0){
 	$oriclass = $class - 1;
 
@@ -138,7 +160,11 @@ function promotion($class, $down_floor_gb, $minratio, $time_week, $addinvite = 0
 		}
 	}
 }
-
+/**
+ * @param mixed $class
+ * @param mixed $deratio
+ * @return mixed
+ */
 function demotion($class,$deratio){
 	$newclass = $class - 1;
     $res = NexusDB::table('users')
@@ -168,7 +194,11 @@ function demotion($class,$deratio){
 		}
 	}
 }
-
+/**
+ * @param mixed $down_floor_gb
+ * @param mixed $minratio
+ * @return mixed
+ */
 function user_to_peasant($down_floor_gb, $minratio){
 	global $deletepeasant_account;
 
@@ -206,7 +236,9 @@ function user_to_peasant($down_floor_gb, $minratio){
 		}
 	}
 }
-
+/**
+ * @return list<int>
+ */
 function ban_user_with_leech_warning_expired()
 {
     $dt = date("Y-m-d H:i:s"); // take date time
@@ -248,7 +280,11 @@ function ban_user_with_leech_warning_expired()
     return $uidArr;
 }
 
-
+/**
+ * @param \Illuminate\Database\Eloquent\Builder<\App\Models\User> $query
+ * @param string $reasonKey
+ * @return list<int>
+ */
 function disable_user(\Illuminate\Database\Eloquent\Builder $query, $reasonKey)
 {
     $results = $query->where('enabled', \App\Models\User::ENABLED_YES)->get(['id', 'username', 'lang']);
@@ -292,7 +328,11 @@ function disable_user(\Illuminate\Database\Eloquent\Builder $query, $reasonKey)
     }
     return $uidArr;
 }
-
+/**
+ * @param int $forceAll
+ * @param bool $printProgress
+ * @return string
+ */
 function docleanup($forceAll = 0, $printProgress = false) {
 	//require_once(get_langfile_path("cleanup.php",true));
 	global $torrent_dir, $signup_timeout, $max_dead_torrent_time, $autoclean_interval_one, $autoclean_interval_two, $autoclean_interval_three, $autoclean_interval_four, $autoclean_interval_five, $SITENAME,$bonus,$invite_timeout,$offervotetimeout_main,$offeruptimeout_main, $iniupload_main;
@@ -304,7 +344,7 @@ function docleanup($forceAll = 0, $printProgress = false) {
     $requestId = nexus()->getRequestId();
 //	require_once($rootpath . '/lang/_target/lang_cleanup.php');
 	set_time_limit(0);
-	ignore_user_abort(1);
+	ignore_user_abort(true);
 	$now = time();
     $carbonNow = \Carbon\Carbon::now();
 	$nowStr = $carbonNow->toDateTimeString();

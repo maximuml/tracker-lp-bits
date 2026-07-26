@@ -1,4 +1,7 @@
 <?php
+/**
+ * @var string $rootpath
+ */
 ini_set('error_reporting', E_ALL);
 ini_set('display_errors', 0);
 require_once __DIR__ . '/constants.php';
@@ -50,7 +53,7 @@ define ("UC_MODERATOR",13);
 define ("UC_ADMINISTRATOR",14);
 define ("UC_SYSOP",15);
 define ("UC_STAFFLEADER",16);
-ignore_user_abort(1);
+ignore_user_abort(true);
 @set_time_limit(60);
 
 $hook = new \Nexus\Plugin\Hook();

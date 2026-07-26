@@ -388,8 +388,6 @@ $lang_settings = array
 	'text_pt_gen_api_point_note' => "Default '', when required, reference to <b><a href=\"https://github.com/Rhilip/pt-gen-cfworker\">Documatation</a></b> to build yourself",
 	'row_enable_school_system' => "Enable school system",
 	'text_school_system_note' => "Default 'no'. <font class=striking><b>DO NOT</b></font> enable this unless you know what you are doing!",
-	'row_restrict_email_domain' => "Restrict Email Domain",
-	'text_restrict_email_domain_note' => "Default 'no'. Set it to 'yes' to only allow certain email domains to register. See <a href='allowedemails.php'><b>here</b></a>.",
 	'row_show_shoutbox' => "Show Shoutbox",
 	'text_show_shoutbox_note' => "Default 'yes'. Show shoutbox on main page.",
 	'row_enable_offer_section' => "Enable Offer Section",

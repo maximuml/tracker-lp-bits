@@ -652,12 +652,6 @@ if ($showshoutbox_main == "yes") //system side setting for shoutbox
 
 				if ($disableemailchange != 'no' && $smtptype != 'none' && $email != $CURUSER["email"])
 				{
-					if(EmailBanned($email))
-					bark($lang_usercp['std_email_address_banned']);
-
-					if(!EmailAllowed($email))
-					bark($lang_usercp['std_wrong_email_address_domains'].allowedemails());
-
 					if (!validemail($email)){
 						stderr($lang_usercp['std_error'], $lang_usercp['std_wrong_email_address_format'].goback("-2"), 0);
 						die;

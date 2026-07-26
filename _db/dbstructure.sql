@@ -130,25 +130,6 @@ INSERT INTO `agent_allowed_family` (`id`, `family`, `start_name`, `peer_id_patte
 -- --------------------------------------------------------
 
 --
--- Table structure for table `allowedemails`
---
-
-CREATE TABLE IF NOT EXISTS `allowedemails` (
-  `id` int(10) NOT NULL AUTO_INCREMENT,
-  `value` mediumtext NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=2 ;
-
---
--- Dumping data for table `allowedemails`
---
-
-INSERT INTO `allowedemails` (`id`, `value`) VALUES
-(1, '@st.zju.edu.cn @gstu.zju.edu.cn @fa.zju.edu.cn @zuaa.zju.edu.cn');
-
--- --------------------------------------------------------
-
---
 -- Table structure for table `attachments`
 --
 
@@ -227,25 +208,6 @@ INSERT INTO `avps` (`arg`, `value_s`, `value_i`, `value_u`) VALUES
 ('lastcleantime3', '', 0, 1274101801),
 ('lastcleantime4', '', 0, 1274079901),
 ('lastcleantime5', '', 0, 1273652875);
-
--- --------------------------------------------------------
-
---
--- Table structure for table `bannedemails`
---
-
-CREATE TABLE IF NOT EXISTS `bannedemails` (
-  `id` int(10) NOT NULL AUTO_INCREMENT,
-  `value` mediumtext NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=2 ;
-
---
--- Dumping data for table `bannedemails`
---
-
-INSERT INTO `bannedemails` (`id`, `value`) VALUES
-(1, '@test.com');
 
 -- --------------------------------------------------------
 
@@ -2095,8 +2057,6 @@ INSERT INTO `sysoppanel` (`id`, `name`, `url`, `info`) VALUES
 (6, 'Ban System', 'bans.php', 'Ban / Unban IP'),
 (7, 'Failed Logins', 'maxlogin.php', 'Show Failed Login Attempts'),
 (8, 'Bitbucket', 'bitbucketlog.php', 'Bitbucket Log'),
-(9, 'Ban EMAIL address', 'bannedemails.php', 'Ban EMAILs stop registration.'),
-(10, 'Allow EMAIL address', 'allowedemails.php', 'Allow EMAIL registration.'),
 (11, 'Location', 'location.php', 'Manage location and location speed'),
 (12, 'Add Upload', 'amountupload.php', 'Add upload to certain classes');
 

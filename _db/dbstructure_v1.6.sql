@@ -168,30 +168,6 @@ INSERT INTO `agent_allowed_family` VALUES (1,'Azureus 2.5.0.4','Azureus 2.5.0.4'
 UNLOCK TABLES;
 
 --
--- Table structure for table `allowedemails`
---
-
-DROP TABLE IF EXISTS `allowedemails`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `allowedemails` (
-  `id` int(10) NOT NULL AUTO_INCREMENT,
-  `value` mediumtext NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `allowedemails`
---
-
-LOCK TABLES `allowedemails` WRITE;
-/*!40000 ALTER TABLE `allowedemails` DISABLE KEYS */;
-INSERT INTO `allowedemails` VALUES (1,'@st.zju.edu.cn @gstu.zju.edu.cn @fa.zju.edu.cn @zuaa.zju.edu.cn');
-/*!40000 ALTER TABLE `allowedemails` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `attachments`
 --
 
@@ -303,30 +279,6 @@ CREATE TABLE `avps` (
 LOCK TABLES `avps` WRITE;
 /*!40000 ALTER TABLE `avps` DISABLE KEYS */;
 /*!40000 ALTER TABLE `avps` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `bannedemails`
---
-
-DROP TABLE IF EXISTS `bannedemails`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `bannedemails` (
-  `id` int(10) NOT NULL AUTO_INCREMENT,
-  `value` mediumtext NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `bannedemails`
---
-
-LOCK TABLES `bannedemails` WRITE;
-/*!40000 ALTER TABLE `bannedemails` DISABLE KEYS */;
-INSERT INTO `bannedemails` VALUES (1,'@test.com');
-/*!40000 ALTER TABLE `bannedemails` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -2275,7 +2227,7 @@ CREATE TABLE `sysoppanel` (
 
 LOCK TABLES `sysoppanel` WRITE;
 /*!40000 ALTER TABLE `sysoppanel` DISABLE KEYS */;
-INSERT INTO `sysoppanel` VALUES (1,'Delete disabled users','deletedisabled.php','Delete all disabled users'),(2,'Manage tracker forum','forummanage.php','Edit/Delete forum'),(3,'MySQL Stats','mysql_stats.php','See MySql stats'),(4,'Mass mailer','massmail.php','Send e-mail to all users on the tracker'),(5,'Do cleanup','docleanup.php','Do cleanup functions'),(6,'Ban System','bans.php','Ban / Unban IP'),(7,'Failed Logins','maxlogin.php','Show Failed Login Attempts'),(8,'Bitbucket','bitbucketlog.php','Bitbucket Log'),(9,'Ban EMAIL address','bannedemails.php','Ban EMAILs stop registration.'),(10,'Allow EMAIL address','allowedemails.php','Allow EMAIL registration.'),(11,'Location','location.php','Manage location and location speed'),(12,'Add Upload','amountupload.php','Add upload to certain classes');
+INSERT INTO `sysoppanel` VALUES (1,'Delete disabled users','deletedisabled.php','Delete all disabled users'),(2,'Manage tracker forum','forummanage.php','Edit/Delete forum'),(3,'MySQL Stats','mysql_stats.php','See MySql stats'),(4,'Mass mailer','massmail.php','Send e-mail to all users on the tracker'),(5,'Do cleanup','docleanup.php','Do cleanup functions'),(6,'Ban System','bans.php','Ban / Unban IP'),(7,'Failed Logins','maxlogin.php','Show Failed Login Attempts'),(8,'Bitbucket','bitbucketlog.php','Bitbucket Log'),(11,'Location','location.php','Manage location and location speed'),(12,'Add Upload','amountupload.php','Add upload to certain classes');
 /*!40000 ALTER TABLE `sysoppanel` ENABLE KEYS */;
 UNLOCK TABLES;
 

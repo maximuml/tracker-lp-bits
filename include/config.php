@@ -107,7 +107,6 @@ $REPORTMAIL = $MAIN['reportemail'];
 $invitesystem = $MAIN['invitesystem'];
 $registration = $MAIN['registration'];
 $enablenfo_main = $MAIN['enablenfo'];
-$restrictemaildomain = $MAIN['restrictemail'];
 $showpolls_main = $MAIN['showpolls'];
 $showstats_main = $MAIN['showstats'];
 $showlastxforumposts_main = $MAIN['showlastxforumposts'];

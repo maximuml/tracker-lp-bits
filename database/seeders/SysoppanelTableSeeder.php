@@ -78,20 +78,6 @@ class SysoppanelTableSeeder extends Seeder
             ),
             8 =>
             array (
-                'id' => 9,
-                'name' => 'Ban EMAIL address',
-                'url' => 'bannedemails.php',
-                'info' => 'Ban EMAILs stop registration.',
-            ),
-            9 =>
-            array (
-                'id' => 10,
-                'name' => 'Allow EMAIL address',
-                'url' => 'allowedemails.php',
-                'info' => 'Allow EMAIL registration.',
-            ),
-            10 =>
-            array (
                 'id' => 11,
                 'name' => 'Location',
                 'url' => 'location.php',

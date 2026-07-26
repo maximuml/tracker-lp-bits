@@ -269,21 +269,6 @@ function get_agent($peer_id, $agent)
 	return \App\Support\Strings::userAgentClient((string)$agent);
 }
 
-function EmailBanned($newEmail)
-{
-	return \App\Support\Email::isBanned((string) $newEmail);
-}
-
-function EmailAllowed($newEmail)
-{
-	return \App\Support\Email::isAllowed((string) $newEmail);
-}
-
-function allowedemails()
-{
-	return \App\Support\EmailDomain::allowed();
-}
-
 function nexus_redirect($url)
 {
     \App\Support\LegacyResponse::redirect((string) $url);
@@ -321,7 +306,7 @@ function safe_email($email) {
 }
 
 function check_email ($email) {
-	return \App\Support\Email::check((string) $email);
+	return \App\Support\Email::isWellFormed((string) $email);
 }
 
 function sent_mail($to,$fromname,$fromemail,$subject,$body,$type = "confirmation",$showmsg=true,$multiple=false,$multiplemail='',$hdr_encoding = 'UTF-8', $specialcase = '') {

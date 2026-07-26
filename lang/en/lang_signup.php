@@ -13,7 +13,6 @@ $lang_signup = array
 	'row_enter_hint_answer' => "Enter hint answer",
 	'text_hint_note' => "This answer will be used to reset your password in case you forget it.<br /> Minimum is 6 characters.",
 	'row_email_address' => "Email address",
-	'text_email_note' => "you could only signup with email from those domains: ",
 	'row_country' => "Country",
 	'row_gender' => "Gender",
 	'radio_male' => "Male ",

@@ -17,7 +17,6 @@ parameters:
         - include/functions.php
         - include/constants.php
         - include/cleanup.php
-        - nexus/Database/helpers.php
 
     scanDirectories:
         - vendor

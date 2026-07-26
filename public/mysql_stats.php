@@ -155,8 +155,6 @@ print("This MySQL server has been running for ". timespanFormat($serverStatus['U
 	</td></tr></table>
 
 <?php
-mysql_free_result($res);
-unset($res);
 unset($row);
 //Get query statistics
 $queryStats = array();

@@ -28,8 +28,22 @@ function hex_esc($matches) {
 }
 $dllink = false;
 
-$where = "";
-if ($passkey){
+$showrows = intval($_GET['rows'] ?? 0);
+if ($showrows < 1 || $showrows > 50) {
+    $showrows = 50;
+}
+
+$paidFilter = '0';
+if (isset($_GET['paid']) && in_array($_GET['paid'], ['0', '1', '2'], true)) {
+    $paidFilter = $_GET['paid'];
+}
+
+$baseQuery = \Nexus\Database\NexusDB::table('torrents')
+    ->leftJoin('categories', 'torrents.category', '=', 'categories.id')
+    ->leftJoin('torrent_extras', 'torrents.id', '=', 'torrent_extras.torrent_id')
+    ->select('torrents.id', 'torrents.category', 'torrents.name', 'torrent_extras.descr', 'torrents.info_hash', 'torrents.size', 'torrents.added', 'torrents.anonymous', 'torrents.owner', 'categories.name as category_name');
+
+if ($passkey) {
     $user = \Nexus\Database\NexusDB::remember('user_passkey_'.$passkey.'_rss', 3600, function () use ($passkey) {
         $row = \Nexus\Database\NexusDB::table('users')->where('passkey', $passkey)->first(['id', 'enabled', 'parked', 'passkey']);
         return $row ? (array) $row : [];
@@ -40,112 +54,57 @@ if ($passkey){
 		die("account disabed or parked");
 	elseif (isset($_GET['linktype']) && $_GET['linktype'] == 'dl')
 		$dllink = true;
-	$inclbookmarked=intval($_GET['inclbookmarked'] ?? 0);
-	if($inclbookmarked == 1)
-	{
-		$bookmarkarray = return_torrent_bookmark_array($user['id']);
-		if ($bookmarkarray){
-			$whereidin = implode(",", $bookmarkarray);
-			$where .= ($where ? " AND " : "") . "torrents.id IN(" . $whereidin . ")";
-		}
-	}
-}
-//$searchstr = mysql_real_escape_string(trim($_GET["search"] ?? ''));
-$searchstr = null;//don't support search, use client self filter instead
-if (empty($searchstr))
-	unset($searchstr);
-if (isset($searchstr)){
-	$search_mode = intval($_GET["search_mode"] ?? 0);
-	if (!in_array($search_mode,array(0,2)))
-	{
-		$search_mode = 0;
-	}
-	switch ($search_mode)
-	{
-		case 0:	// AND, OR
-		case 1	:
-			$searchstr = str_replace(".", " ", $searchstr);
-			$searchstr_exploded = explode(" ", $searchstr);
-			$searchstr_exploded_count= 0;
-			foreach ($searchstr_exploded as $searchstr_element)
-			{
-				$searchstr_element = trim($searchstr_element);	// furthur trim to ensure that multi space seperated words still work
-				$searchstr_exploded_count++;
-				if ($searchstr_exploded_count > 10)	// maximum 10 keywords
-					break;
-				$like_expression_array[] = " LIKE '%" . $searchstr_element. "%'";
-			}
-			break;
-		case 2	:	// exact
-		{
-			$like_expression_array[] = " LIKE '%" . $searchstr. "%'";
-			break;
-		}
-	}
 
-	$ANDOR = ($search_mode == 0 ? " AND " : " OR ");	// only affects mode 0 and mode 1
-	foreach ($like_expression_array as &$like_expression_array_element)
-		$like_expression_array_element = "(torrents.name" . $like_expression_array_element . ")";
-	$wherea[] = implode($ANDOR, $like_expression_array);
-	$where .= ($where ? " AND " : "") . implode(" AND ", $wherea);
-}
-$limit = "";
-$showrows = intval($_GET['rows'] ?? 0);
-if($showrows < 1 || $showrows > 50) {
-    $showrows = 50;
-}
-$limit .= $showrows;
+    $inclbookmarked = intval($_GET['inclbookmarked'] ?? 0);
+    if ($inclbookmarked == 1) {
+        $bookmarkarray = return_torrent_bookmark_array($user['id']);
+        if (!empty($bookmarkarray)) {
+            $baseQuery->whereIn('torrents.id', $bookmarkarray);
+        }
+    }
 
-//approval status
-$approvalStatusNoneVisible = get_setting('torrent.approval_status_none_visible');
-if ($approvalStatusNoneVisible == 'no' && !user_can('staffmem', false, $user['id'])) {
-    $where .= ($where ? " AND " : "") . "torrents.approval_status = " . \App\Models\Torrent::APPROVAL_STATUS_ALLOW;
+    $approvalStatusNoneVisible = get_setting('torrent.approval_status_none_visible');
+    if ($approvalStatusNoneVisible == 'no' && !user_can('staffmem', false, $user['id'])) {
+        $baseQuery->where('torrents.approval_status', \App\Models\Torrent::APPROVAL_STATUS_ALLOW);
+    }
+
+    $browseMode = get_setting('main.browsecat');
+    $onlyBrowseSection = get_setting('main.spsct') != 'yes' || !user_can('view_special_torrent', false, $user['id']);
+    if ($onlyBrowseSection) {
+        $allBrowseCategoryId = \App\Models\SearchBox::listCategoryId($browseMode);
+        $baseQuery->whereIn('torrents.category', $allBrowseCategoryId);
+    }
 }
-//check special section permission
-$browseMode = get_setting('main.browsecat');
-$onlyBrowseSection = get_setting('main.spsct') != 'yes' || !user_can('view_special_torrent', false, $user['id']);
-if ($onlyBrowseSection) {
-    $allBrowseCategoryId = \App\Models\SearchBox::listCategoryId($browseMode);
-    $where .= ($where ? " AND " : "") . sprintf("torrents.category in (%s)", implode(",", $allBrowseCategoryId));
-}
-//visible
-$where .= ($where ? " AND " : "") . "torrents.visible = 'yes'";
-//check price
-if (isset($_GET['paid']) && in_array($_GET['paid'], ['0', '1', '2'], true)) {
-    $paidFilter = $_GET['paid'];
-} else {
-    $paidFilter = '0';
-}
+
+$baseQuery->where('torrents.visible', 'yes');
+
 if ($paidFilter === '0') {
-    $where .= ($where ? " AND " : "") . "torrents.price = 0";
+    $baseQuery->where('torrents.price', 0);
 } elseif ($paidFilter === '1') {
-    $where .= ($where ? " AND " : "") . "torrents.price > 0";
+    $baseQuery->where('torrents.price', '>', 0);
 }
 
-function get_where($tablename = "sources", $itemname = "source", $getname = "sou")
+function applyRssFilter($query, $tablename = "sources", $itemname = "source", $getname = "sou")
 {
-	global $where;
-	$items = searchbox_item_list($tablename, 0);
-	$whereitemina = array();
-	foreach ($items as $item)
-	{
-		if (!empty($_GET[$getname.$item['id']]))
-		{
-			$whereitemina[] = $item['id'];
-		}
-	}
-	if (count($whereitemina) >= 1){
-		$whereitemin = implode(",",$whereitemina);
-		$where .= ($where ? " AND " : "") . $itemname." IN(" . $whereitemin . ")";
-	}
+    $items = searchbox_item_list($tablename, 0);
+    $ids = [];
+    foreach ($items as $item) {
+        if (!empty($_GET[$getname.$item['id']])) {
+            $ids[] = $item['id'];
+        }
+    }
+    if (!empty($ids)) {
+        $query->whereIn($itemname, $ids);
+    }
 }
-get_where("categories", "category", "cat");
-get_where("sources", "source", "sou");
-get_where("media", "medium", "med");
-get_where("codecs", "codec", "cod");
-get_where("standards", "standard", "sta");
-get_where("processings", "processing", "pro");
-get_where("audiocodecs", "audiocodec", "aud");
+
+applyRssFilter($baseQuery, "categories", "category", "cat");
+applyRssFilter($baseQuery, "sources", "source", "sou");
+applyRssFilter($baseQuery, "media", "medium", "med");
+applyRssFilter($baseQuery, "codecs", "codec", "cod");
+applyRssFilter($baseQuery, "standards", "standard", "sta");
+applyRssFilter($baseQuery, "processings", "processing", "pro");
+applyRssFilter($baseQuery, "audiocodecs", "audiocodec", "aud");
 
 $hasStickyFirst = $hasStickySecond = $hasStickyNormal = $noNormalResults = false;
 $prependIdArr = $prependRows = $normalRows = [];
@@ -176,25 +135,24 @@ if ($hasStickyNormal) {
     $noNormalResults = true;
 }
 
-if ($where) {
-    $normalWhere = "WHERE ".$where;
-    if ($stickyWhere) {
-        $normalWhere .= " and $stickyWhere";
-    }
-}
-$sort = "id desc";
-$fieldStr = "torrents.id, torrents.category, torrents.name, torrent_extras.descr, torrents.info_hash, torrents.size, torrents.added, torrents.anonymous, torrents.owner, categories.name AS category_name";
 if (!$noNormalResults) {
-    $query = "SELECT $fieldStr FROM torrents LEFT JOIN categories ON torrents.category = categories.id left join torrent_extras on torrent_extras.torrent_id = torrents.id $normalWhere ORDER BY $sort LIMIT $limit";
-    $normalRows = \Nexus\Database\NexusDB::remember(sprintf("nexus_rss:normal:%s", md5($query)), 300, function () use ($query) {
-        return \Nexus\Database\NexusDB::select($query);
+    $normalQuery = clone $baseQuery;
+    if ($hasStickyNormal) {
+        $normalQuery->where('torrents.pos_state', \App\Models\Torrent::POS_STATE_STICKY_NONE);
+    }
+    $normalSql = $normalQuery->toSql();
+    $normalCacheKey = sprintf("nexus_rss:normal:%s", md5($normalSql . ':' . $showrows));
+    $normalRows = \Nexus\Database\NexusDB::remember($normalCacheKey, 300, function () use ($normalQuery, $showrows) {
+        return $normalQuery->orderBy('torrents.id', 'desc')->limit($showrows)->get()->map(fn ($row) => (array) $row)->all();
     });
 }
 if (!empty($prependIdArr)) {
-    $prependIdStr = implode(',', $prependIdArr);
-    $query = "SELECT $fieldStr FROM torrents LEFT JOIN categories ON torrents.category = categories.id left join torrent_extras on torrent_extras.torrent_id = torrents.id where torrents.id in ($prependIdStr) and $where ORDER BY field(torrents.id, $prependIdStr)";
-    $prependRows = \Nexus\Database\NexusDB::remember(sprintf("nexus_rss:prepend:%s", md5($query)), 300, function () use ($query) {
-        return \Nexus\Database\NexusDB::select($query);
+    $prependIdStr = implode(',', array_map('intval', $prependIdArr));
+    $prependQuery = clone $baseQuery;
+    $prependQuery->whereIn('torrents.id', $prependIdArr);
+    $prependCacheKey = sprintf("nexus_rss:prepend:%s", md5($prependQuery->toSql() . ':' . $prependIdStr));
+    $prependRows = \Nexus\Database\NexusDB::remember($prependCacheKey, 300, function () use ($prependQuery, $prependIdStr) {
+        return $prependQuery->orderByRaw('FIELD(torrents.id, ' . $prependIdStr . ')')->get()->map(fn ($row) => (array) $row)->all();
     });
 }
 $list = [];

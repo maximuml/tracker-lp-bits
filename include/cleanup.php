@@ -466,20 +466,16 @@ function docleanup($forceAll = 0, $printProgress = false) {
 	}
 
 	//12. update forum post/topic count
-	$forums = \Nexus\Database\NexusDB::select("select id from forums");
-	foreach ($forums as $forum) {
-		$forum = (array) $forum;
+	$forums = NexusDB::table('forums')->pluck('id');
+	foreach ($forums as $forumId) {
 		$postcount = 0;
 		$topiccount = 0;
-		$topics = \Nexus\Database\NexusDB::select("select id from topics where forumid={$forum['id']}");
-		foreach ($topics as $topic) {
-			$topic = (array) $topic;
-			$res = \Nexus\Database\NexusDB::select("select count(*) from posts where topicid={$topic['id']}");
-			$arr = $res ? array_values((array) $res[0]) : null;
-			$postcount += $arr[0];
+		$topics = NexusDB::table('topics')->where('forumid', $forumId)->pluck('id');
+		foreach ($topics as $topicId) {
+			$postcount += (int) NexusDB::table('posts')->where('topicid', $topicId)->count();
 			++$topiccount;
 		}
-		\Nexus\Database\NexusDB::getInstance()->query("update forums set postcount=$postcount, topiccount=$topiccount where id={$forum['id']}");
+		NexusDB::table('forums')->where('id', $forumId)->update(['postcount' => $postcount, 'topiccount' => $topiccount]);
 	}
 	$Cache->delete_value('forums_list');
 	$log = "update forum post/topic count";
@@ -490,14 +486,20 @@ function docleanup($forceAll = 0, $printProgress = false) {
 	//14.cleanup offers
 	//Delete offers if not voted on after some time
 	if($offervotetimeout_main){
-		$secs = (int)$offervotetimeout_main;
-		$dt = nexus_quote(date("Y-m-d H:i:s",(TIMENOW - ($offervotetimeout_main))));
-		$res = \Nexus\Database\NexusDB::select("SELECT id, name FROM offers WHERE added < $dt AND allowed <> 'allowed'");
-		foreach ($res as $arr) { $arr = (array) $arr;
-		\Nexus\Database\NexusDB::getInstance()->query("DELETE FROM offers WHERE id={$arr['id']}");
-		\Nexus\Database\NexusDB::getInstance()->query("DELETE FROM offervotes WHERE offerid={$arr['id']}");
-		\Nexus\Database\NexusDB::getInstance()->query("DELETE FROM comments WHERE offer={$arr['id']}");
-		write_log("Offer {$arr['id']} ({$arr['name']}) was deleted by system (vote timeout)",'normal');
+		$dt = date("Y-m-d H:i:s",(TIMENOW - $offervotetimeout_main));
+		$offerIds = NexusDB::table('offers')
+			->where('added', '<', $dt)
+			->where('allowed', '<>', 'allowed')
+			->pluck('id', 'name')
+			->all();
+		if (!empty($offerIds)) {
+			$ids = array_keys($offerIds);
+			NexusDB::table('offervotes')->whereIn('offerid', $ids)->delete();
+			NexusDB::table('comments')->whereIn('offer', $ids)->delete();
+			NexusDB::table('offers')->whereIn('id', $ids)->delete();
+			foreach ($offerIds as $name => $id) {
+				write_log("Offer {$id} ({$name}) was deleted by system (vote timeout)",'normal');
+			}
 		}
 	}
 	$log = "delete offers if not voted on after some time";
@@ -508,14 +510,20 @@ function docleanup($forceAll = 0, $printProgress = false) {
 
 	//Delete offers if not uploaded after being voted on for some time.
 	if($offeruptimeout_main){
-		$secs = (int)$offeruptimeout_main;
-		$dt = nexus_quote(date("Y-m-d H:i:s",(TIMENOW - ($secs))));
-		$res = \Nexus\Database\NexusDB::select("SELECT id, name FROM offers WHERE allowedtime < $dt AND allowed = 'allowed'");
-		foreach ($res as $arr) { $arr = (array) $arr;
-		\Nexus\Database\NexusDB::getInstance()->query("DELETE FROM offers WHERE id={$arr['id']}");
-		\Nexus\Database\NexusDB::getInstance()->query("DELETE FROM offervotes WHERE offerid={$arr['id']}");
-		\Nexus\Database\NexusDB::getInstance()->query("DELETE FROM comments WHERE offer={$arr['id']}");
-		write_log("Offer {$arr['id']} ({$arr['name']}) was deleted by system (upload timeout)",'normal');
+		$dt = date("Y-m-d H:i:s",(TIMENOW - $offeruptimeout_main));
+		$offerIds = NexusDB::table('offers')
+			->where('allowedtime', '<', $dt)
+			->where('allowed', 'allowed')
+			->pluck('id', 'name')
+			->all();
+		if (!empty($offerIds)) {
+			$ids = array_keys($offerIds);
+			NexusDB::table('offervotes')->whereIn('offerid', $ids)->delete();
+			NexusDB::table('comments')->whereIn('offer', $ids)->delete();
+			NexusDB::table('offers')->whereIn('id', $ids)->delete();
+			foreach ($offerIds as $name => $id) {
+				write_log("Offer {$id} ({$name}) was deleted by system (upload timeout)",'normal');
+			}
 		}
 	}
 	$log = "delete offers if not uploaded after being voted on for some time.";
@@ -969,8 +977,15 @@ function docleanup($forceAll = 0, $printProgress = false) {
 	if ($deldeadtorrent_torrent > 0){
 		$length = $deldeadtorrent_torrent*86400;
 		$until = date("Y-m-d H:i:s",(TIMENOW - $length));
-		$dt = nexus_quote(date("Y-m-d H:i:s"));
-		$res = \Nexus\Database\NexusDB::select("SELECT torrents.id, torrents.name, torrents.owner, users.id as uid FROM torrents left join users on torrents.owner = users.id WHERE torrents.visible = 'no' AND torrents.last_action < ".nexus_quote($until)." AND torrents.seeders = 0 AND torrents.leechers = 0");
+		$dt = date('Y-m-d H:i:s');
+		$res = NexusDB::table('torrents as t')
+			->leftJoin('users as u', 't.owner', '=', 'u.id')
+			->where('t.visible', 'no')
+			->where('t.last_action', '<', $until)
+			->where('t.seeders', 0)
+			->where('t.leechers', 0)
+			->select('t.id', 't.name', 't.owner', 'u.id as uid')
+			->get();
 		foreach ($res as $arr) {
 			$arr = (array) $arr;
 			deletetorrent($arr['id']);
@@ -978,7 +993,13 @@ function docleanup($forceAll = 0, $printProgress = false) {
                 $locale = get_user_locale($arr['owner']);
                 $subject = nexus_trans("cleanup.msg_your_torrent_deleted", [], $locale);
                 $msg = nexus_trans("cleanup.msg_your_torrent", [], $locale)."[i]".$arr['name']."[/i]".nexus_trans("cleanup.msg_was_deleted_because_dead", [], $locale);
-                \Nexus\Database\NexusDB::getInstance()->query("INSERT INTO messages (sender, receiver, added, subject, msg) VALUES(0, {$arr['owner']}, $dt, ".nexus_quote($subject).", ".nexus_quote($msg).")");
+                NexusDB::table('messages')->insert([
+					'sender' => 0,
+					'receiver' => $arr['owner'],
+					'added' => $dt,
+					'subject' => $subject,
+					'msg' => $msg,
+				]);
                 write_log("Torrent {$arr['id']} ({$arr['name']}) is deleted by system because of being dead for a long time.",'normal');
             }
 		}
@@ -992,7 +1013,7 @@ function docleanup($forceAll = 0, $printProgress = false) {
     //delete old ip log
     $length = 90*86400; //90 days
     $until = date("Y-m-d H:i:s",(TIMENOW - $length));
-    \Nexus\Database\NexusDB::getInstance()->query("DELETE FROM iplog WHERE access < ".nexus_quote($until));
+    NexusDB::table('iplog')->where('access', '<', $until)->delete();
     $log = "delete old ip log";
     do_log($log);
     if ($printProgress) {
@@ -1002,7 +1023,7 @@ function docleanup($forceAll = 0, $printProgress = false) {
     //delete failed jobs
     $length = 10*86400; //10 days
     $until = date("Y-m-d H:i:s",(TIMENOW - $length));
-    \Nexus\Database\NexusDB::getInstance()->query("DELETE FROM failed_jobs WHERE failed_at < ".nexus_quote($until));
+    NexusDB::table('failed_jobs')->where('failed_at', '<', $until)->delete();
     $log = "delete failed jobs";
     do_log($log);
     if ($printProgress) {
@@ -1024,28 +1045,27 @@ function docleanup($forceAll = 0, $printProgress = false) {
 //    }
 
 //Priority Class 5: cleanup every 15 days
-	$res = \Nexus\Database\NexusDB::select("SELECT value_u FROM avps WHERE arg = 'lastcleantime5'");
-	$row = $res ? array_values((array) $res[0]) : null;
-	if (!$row && !$forceAll) {
-		\Nexus\Database\NexusDB::getInstance()->query("INSERT INTO avps (arg, value_u) VALUES ('lastcleantime5',$now)");
+	$ts = NexusDB::table('avps')->where('arg', 'lastcleantime5')->value('value_u');
+	if (!$ts && !$forceAll) {
+		NexusDB::table('avps')->insert(['arg' => 'lastcleantime5', 'value_u' => $now]);
 		$log = "no value for arg: 'lastcleantime5', return";
 		do_log($log);
 		return $log;
 	}
-	$ts = $row[0] ?? 0;
+	$ts = $ts ?? 0;
 	if ($ts + $autoclean_interval_five > $now && !$forceAll) {
 		$log = 'Cleanup ends at Priority Class 4';
 		do_log($log . ", $ts + $autoclean_interval_five > $now");
 		return $log;
 	} else {
-		\Nexus\Database\NexusDB::getInstance()->query("UPDATE avps SET value_u = ".nexus_quote($now)." WHERE arg='lastcleantime5'");
+		NexusDB::table('avps')->where('arg', 'lastcleantime5')->update(['value_u' => $now]);
 	}
 
 	//update clients' popularity
-	$res = \Nexus\Database\NexusDB::select("SELECT id FROM agent_allowed_family");
-	foreach ($res as $row) { $row = (array) $row;
-		$count = get_row_count("users","WHERE clientselect=".nexus_quote($row['id']));
-		\Nexus\Database\NexusDB::getInstance()->query("UPDATE agent_allowed_family SET hits=".nexus_quote($count)." WHERE id=".nexus_quote($row['id']));
+	$clientIds = NexusDB::table('agent_allowed_family')->pluck('id');
+	foreach ($clientIds as $clientId) {
+		$count = NexusDB::table('users')->where('clientselect', $clientId)->count();
+		NexusDB::table('agent_allowed_family')->where('id', $clientId)->update(['hits' => $count]);
 	}
 	$log = "update clients' popularity";
 	do_log($log);
@@ -1056,7 +1076,7 @@ function docleanup($forceAll = 0, $printProgress = false) {
 	//delete old messages sent by system
 	$length = 180*86400; //half a year
 	$until = date("Y-m-d H:i:s",(TIMENOW - $length));
-	\Nexus\Database\NexusDB::getInstance()->query("DELETE FROM messages WHERE sender = 0 AND added < ".nexus_quote($until));
+	NexusDB::table('messages')->where('sender', 0)->where('added', '<', $until)->delete();
 	$log = "delete old messages sent by system";
 	do_log($log);
 	if ($printProgress) {
@@ -1066,10 +1086,10 @@ function docleanup($forceAll = 0, $printProgress = false) {
 	//delete old readpost records
 	$length = 180*86400; //half a year
 	$until = date("Y-m-d H:i:s",(TIMENOW - $length));
-	$postIdHalfYearAgo = get_single_value('posts', 'id', 'WHERE added < ' . nexus_quote($until).' ORDER BY added DESC');
+	$postIdHalfYearAgo = NexusDB::table('posts')->where('added', '<', $until)->orderBy('added', 'desc')->value('id');
 	if ($postIdHalfYearAgo) {
-		\Nexus\Database\NexusDB::getInstance()->query("UPDATE users SET last_catchup = ".nexus_quote($postIdHalfYearAgo)." WHERE last_catchup < ".nexus_quote($postIdHalfYearAgo));
-		\Nexus\Database\NexusDB::getInstance()->query("DELETE FROM readposts WHERE lastpostread < ".nexus_quote($postIdHalfYearAgo));
+		NexusDB::table('users')->where('last_catchup', '<', $postIdHalfYearAgo)->update(['last_catchup' => $postIdHalfYearAgo]);
+		NexusDB::table('readposts')->where('lastpostread', '<', $postIdHalfYearAgo)->delete();
 	}
 	$log = "delete old readpost records";
 	do_log($log);
@@ -1079,7 +1099,7 @@ function docleanup($forceAll = 0, $printProgress = false) {
 
     //delete old cheaters
     $until = date("Y-m-d H:i:s",(TIMENOW - $length));
-    \Nexus\Database\NexusDB::getInstance()->query("DELETE FROM cheaters WHERE added < ".nexus_quote($until));
+    NexusDB::table('cheaters')->where('added', '<', $until)->delete();
     $log = "delete old cheaters";
     do_log($log);
     if ($printProgress) {
@@ -1088,7 +1108,7 @@ function docleanup($forceAll = 0, $printProgress = false) {
 
     //delete old shoutbox
     $until = TIMENOW - $length;
-    \Nexus\Database\NexusDB::getInstance()->query("DELETE FROM shoutbox WHERE date < $until");
+    NexusDB::table('shoutbox')->where('date', '<', $until)->delete();
     $log = "delete old shoutbox";
     do_log($log);
     if ($printProgress) {
@@ -1097,7 +1117,7 @@ function docleanup($forceAll = 0, $printProgress = false) {
 
 	//delete old general log
 	$until = date("Y-m-d H:i:s",(TIMENOW - $length));
-	\Nexus\Database\NexusDB::getInstance()->query("DELETE FROM sitelog WHERE added < " . nexus_quote($until));
+	NexusDB::table('sitelog')->where('added', '<', $until)->delete();
 	$log = "delete old general log";
 	do_log($log);
 	if ($printProgress) {
@@ -1176,10 +1196,14 @@ function docleanup($forceAll = 0, $printProgress = false) {
 
 	//8.lock topics where last post was made more than x days ago
 	$secs = 365*24*60*60;
-    $postAddedField = \Nexus\Database\NexusDB::unixTimestampField('posts.added');
+    $postAddedField = NexusDB::unixTimestampField('posts.added');
     $diff = TIMENOW - $secs;
-//	sql_query("UPDATE topics, posts SET topics.locked='yes' WHERE topics.lastpost = posts.id AND topics.sticky = 'no' AND $postAddedField < ".TIMENOW." - $secs") or sqlerr(__FILE__, __LINE__);
-	\Nexus\Database\NexusDB::getInstance()->query("UPDATE topics SET locked='yes' WHERE sticky = 'no' AND lastpost in (select id from posts where $postAddedField < $diff)");
+    NexusDB::table('topics')
+        ->where('sticky', 'no')
+        ->whereIn('lastpost', function ($query) use ($postAddedField, $diff) {
+            $query->select('id')->from('posts')->whereRaw("$postAddedField < ?", [$diff]);
+        })
+        ->update(['locked' => 'yes']);
 
 	$log = "lock topics where last post was made more than x days ago";
 	do_log($log);
@@ -1189,8 +1213,8 @@ function docleanup($forceAll = 0, $printProgress = false) {
 
 	//9.delete report items older than four week
 	$secs = 4*7*24*60*60;
-	$dt = nexus_quote(date("Y-m-d H:i:s",(TIMENOW - $secs)));
-	\Nexus\Database\NexusDB::getInstance()->query("DELETE FROM reports WHERE dealtwith=1 AND added < $dt");
+	$dt = date("Y-m-d H:i:s",(TIMENOW - $secs));
+	NexusDB::table('reports')->where('dealtwith', 1)->where('added', '<', $dt)->delete();
 	$log = "delete report items older than four week";
 	do_log($log);
 	if ($printProgress) {
@@ -1206,21 +1230,21 @@ function docleanup($forceAll = 0, $printProgress = false) {
 //        printProgress($log);
 //    }
 
-    \Nexus\Database\NexusDB::getInstance()->query("delete from oauth_auth_codes where expires_at <= '$nowStr'");
+    NexusDB::table('oauth_auth_codes')->where('expires_at', '<=', $nowStr)->delete();
     $log = "delete oauth auth code expired";
     do_log($log);
     if ($printProgress) {
         printProgress($log);
     }
 
-    \Nexus\Database\NexusDB::getInstance()->query("delete from oauth_access_tokens where expires_at <= '$nowStr'");
+    NexusDB::table('oauth_access_tokens')->where('expires_at', '<=', $nowStr)->delete();
     $log = "delete oauth access token expired";
     do_log($log);
     if ($printProgress) {
         printProgress($log);
     }
 
-    \Nexus\Database\NexusDB::getInstance()->query("delete from oauth_refresh_tokens where expires_at <= '$nowStr'");
+    NexusDB::table('oauth_refresh_tokens')->where('expires_at', '<=', $nowStr)->delete();
     $log = "delete oauth refresh token expired";
     do_log($log);
     if ($printProgress) {

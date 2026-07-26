@@ -21,6 +21,13 @@ class ListAnnounceLogs extends PageListSingle
 
     public function getTableRecords(): Collection|Paginator|CursorPaginator
     {
+        if (config('clickhouse.connection.host') == '') {
+            $request = request();
+            $page = $request->get('page', 1);
+            $perPage = $request->get('per_page', 10);
+            return new LengthAwarePaginator([], 0, $perPage, $page);
+        }
+
         $filterableColumns = [
             'user_id' => 'is_numeric',
             'torrent_id'=> 'is_numeric',
@@ -159,6 +166,9 @@ class ListAnnounceLogs extends PageListSingle
 
     protected function resolveTableRecord(?string $key): ?Model
     {
+        if (config('clickhouse.connection.host') == '') {
+            return null;
+        }
         $rep = new AnnounceLogRepository();
         return $rep->getById($key);
     }

@@ -7,10 +7,7 @@ use Nexus\Database\NexusDB;
 /**
  * Legacy search-suggestion helper extracted from `include/functions.php`.
  *
- * Backs `insert_suggest()`. The raw SQL is preserved because the
- * `$pre_escaped` flag controls whether the keyword has already been
- * escaped by the caller; moving to a prepared statement would change
- * the stored value for the `pre_escaped = true` legacy path.
+ * Backs `insert_suggest()`.
  */
 final class SearchSuggest
 {
@@ -30,10 +27,10 @@ final class SearchSuggest
             return;
         }
 
-        $value = $preEscaped ? "'" . $keyword . "'" : \App\Support\LegacyDb::escape($keyword);
-        NexusDB::getInstance()->query(
-            'INSERT INTO suggest(keywords, userid, adddate) VALUES ('
-            . $value . ', ' . \App\Support\LegacyDb::escape($userId) . ', NOW())'
-        );
+        NexusDB::table('suggest')->insert([
+            'keywords' => $preEscaped ? stripslashes($keyword) : $keyword,
+            'userid' => $userId,
+            'adddate' => date('Y-m-d H:i:s'),
+        ]);
     }
 }

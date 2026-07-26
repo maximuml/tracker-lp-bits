@@ -32,8 +32,8 @@ final class Style
                 self::$stylesheetRows = is_array($cached) ? $cached : [];
             } else {
                 self::$stylesheetRows = [];
-                $result = NexusDB::getInstance()->query('SELECT * FROM stylesheets ORDER BY id ASC');
-                while ($row = NexusDB::getInstance()->fetchAssoc($result)) {
+                foreach (NexusDB::table('stylesheets')->orderBy('id')->get() as $row) {
+                    $row = (array) $row;
                     self::$stylesheetRows[$row['id']] = $row;
                 }
                 if (method_exists($cache, 'cache_value')) {
@@ -54,7 +54,7 @@ final class Style
     public static function cssUri($cache, int|string $cssId, int|string $defaultId, string $file = ''): string
     {
         $row = self::cssRow($cache, $cssId, $defaultId);
-        $uri = $row['uri'] ?? LegacyDb::singleValue('stylesheets', 'uri', 'WHERE id=' . \App\Support\LegacyDb::escape($defaultId));
+        $uri = $row['uri'] ?? NexusDB::table('stylesheets')->where('id', $defaultId)->value('uri');
 
         return $file === '' ? (string) $uri : (string) $uri . $file;
     }
@@ -96,16 +96,12 @@ final class Style
     public static function highlightColor(?int $userStyleId): string
     {
         if ($userStyleId !== null && $userStyleId > 0) {
-            $result = NexusDB::getInstance()->query('SELECT hltr FROM stylesheets WHERE id=' . \App\Support\LegacyDb::escape($userStyleId));
-            $row = NexusDB::getInstance()->fetchAssoc($result);
-            if (! empty($row['hltr'])) {
-                return (string) $row['hltr'];
+            $hltr = NexusDB::table('stylesheets')->where('id', $userStyleId)->value('hltr');
+            if (! empty($hltr)) {
+                return (string) $hltr;
             }
         }
 
-        $result = NexusDB::getInstance()->query('SELECT hltr FROM stylesheets WHERE id=5');
-        $row = NexusDB::getInstance()->fetchAssoc($result);
-
-        return (string) ($row['hltr'] ?? '');
+        return (string) (NexusDB::table('stylesheets')->where('id', 5)->value('hltr') ?? '');
     }
 }

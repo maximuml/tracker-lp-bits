@@ -360,8 +360,7 @@ final class LegacyAuth
         $nip = ip2long($ip);
 
         if ($nip) {
-            $res = \Nexus\Database\NexusDB::select("SELECT * FROM bans WHERE first <= $nip AND last >= $nip");
-            if (count($res) > 0) {
+            if (NexusDB::table('bans')->where('first', '<=', $nip)->where('last', '>=', $nip)->exists()) {
                 header('HTTP/1.1 403 Forbidden');
                 print('<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"></head><body>' . ($lang_functions['text_unauthorized_ip'] ?? '') . "</body></html>\n");
                 die;
@@ -375,7 +374,7 @@ final class LegacyAuth
 
         if (! $row['passkey']) {
             $passkey = md5($row['username'] . date('Y-m-d H:i:s') . $row['passhash']);
-            \Nexus\Database\NexusDB::getInstance()->query('UPDATE users SET passkey = ' . \App\Support\LegacyDb::escape($passkey) . ' WHERE id=' . \App\Support\LegacyDb::escape($row['id']));
+            NexusDB::table('users')->where('id', $row['id'])->update(['passkey' => $passkey]);
         }
 
         $GLOBALS['oldip'] = $row['ip'];

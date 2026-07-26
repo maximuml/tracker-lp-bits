@@ -3,6 +3,7 @@
 namespace App\Support;
 
 use App\Models\User;
+use Nexus\Database\NexusDB;
 
 /**
  * Auth-cookie helpers extracted from `include/functions.php` (Phase 5
@@ -276,12 +277,14 @@ final class AuthCookie
         $shouldIgnoreEnabled = defined('IN_NEXUS') && IN_NEXUS && !$isAjax && $selfEnableBonus > 0;
 
         if ($isArray) {
-            $whereStr = sprintf("id = %d and status = 'confirmed'", $id);
+            $query = NexusDB::table('users')
+                ->where('id', $id)
+                ->where('status', 'confirmed');
             if (!$shouldIgnoreEnabled) {
-                $whereStr .= " and enabled = 'yes'";
+                $query->where('enabled', 'yes');
             }
-            $res = \Nexus\Database\NexusDB::select("SELECT * FROM users WHERE $whereStr LIMIT 1");
-            $row = $res ? array_merge((array) $res[0], array_values((array) $res[0])) : null;
+            $result = $query->first();
+            $row = $result ? array_merge((array) $result, array_values((array) $result)) : null;
             if (!$row) {
                 \do_log("$log, user not exists");
                 return null;

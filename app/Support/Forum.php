@@ -37,8 +37,8 @@ final class Forum
                 $moderatorsArray = $cached;
             } else {
                 $moderatorsArray = [];
-                $result = NexusDB::getInstance()->query('SELECT forumid, userid FROM forummods ORDER BY forumid ASC');
-                while ($row = NexusDB::getInstance()->fetchAssoc($result)) {
+                foreach (NexusDB::table('forummods')->orderBy('forumid')->get(['forumid', 'userid']) as $row) {
+                    $row = (array) $row;
                     $moderatorsArray[$row['forumid']][] = $row['userid'];
                 }
                 if (method_exists($cache, 'cache_value')) {
@@ -71,9 +71,13 @@ final class Forum
         }
 
         $max = count($userIds);
-        NexusDB::getInstance()->query('DELETE FROM forummods WHERE forumid=' . \App\Support\LegacyDb::escape($forumId));
+        \App\Models\ForumMod::query()->where('forumid', $forumId)->delete();
+        $records = [];
         for ($i = 0; $i < $limit && $i < $max; $i++) {
-            NexusDB::getInstance()->query('INSERT INTO forummods (forumid, userid) VALUES (' . \App\Support\LegacyDb::escape($forumId) . ',' . \App\Support\LegacyDb::escape($userIds[$i]) . ')');
+            $records[] = ['forumid' => $forumId, 'userid' => $userIds[$i]];
+        }
+        if (! empty($records)) {
+            \App\Models\ForumMod::query()->insert($records);
         }
     }
 
@@ -89,9 +93,9 @@ final class Forum
 
         switch ($in) {
             case 'post':
-                $result = NexusDB::getInstance()->query('SELECT topicid FROM posts WHERE id=' . (int) $id);
-                if ($row = NexusDB::getInstance()->fetchAssoc($result)) {
-                    return self::isModerator($row['topicid'], 'topic');
+                $topicId = \App\Models\Post::query()->where('id', $id)->value('topicid');
+                if ($topicId) {
+                    return self::isModerator($topicId, 'topic');
                 }
                 return false;
 
@@ -105,8 +109,10 @@ final class Forum
                 return $count > 0;
 
             case 'forum':
-                $count = (int) \get_row_count('forummods', 'WHERE forumid=' . (int) $id . ' AND userid=' . \App\Support\LegacyDb::escape($CURUSER['id'] ?? 0));
-                return $count > 0;
+                return \App\Models\ForumMod::query()
+                    ->where('forumid', $id)
+                    ->where('userid', $CURUSER['id'] ?? 0)
+                    ->exists();
 
             default:
                 return false;
@@ -188,8 +194,8 @@ final class Forum
         $row = method_exists($cache, 'get_value') ? $cache->get_value($cacheKey) : false;
 
         if ($row === false) {
-            $result = NexusDB::getInstance()->query('SELECT * FROM posts WHERE id=' . \App\Support\LegacyDb::escape($postId) . ' LIMIT 1');
-            $row = NexusDB::getInstance()->fetchAssoc($result);
+            $result = \App\Models\Post::query()->where('id', $postId)->first();
+            $row = $result ? $result->toArray() : null;
             if (method_exists($cache, 'cache_value')) {
                 $cache->cache_value($cacheKey, $row, 7200);
             }

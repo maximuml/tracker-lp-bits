@@ -30,7 +30,7 @@ final class TorrentBookmark
             }
         }
 
-        $rows = NexusDB::select('SELECT * FROM bookmarks WHERE userid = ' . \App\Support\LegacyDb::escape($userId));
+        $rows = NexusDB::table('bookmarks')->where('userid', $userId)->get()->map(fn ($row) => (array) $row)->all();
         if (empty($rows)) {
             $ret = [0];
         } else {

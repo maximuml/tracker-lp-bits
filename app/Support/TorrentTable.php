@@ -263,8 +263,8 @@ foreach ($rows as $row)
 		if ($enabletooltip_tweak == 'yes' && $CURUSER['showlastcom'] != 'no')
 		{
 			if (!$lastcom = $Cache->get_value('torrent_'.$id.'_last_comment_content')){
-				$res2 = \Nexus\Database\NexusDB::select("SELECT user, added, text FROM comments WHERE torrent = $id ORDER BY id DESC LIMIT 1");
-				$lastcom = $res2 ? array_merge((array) $res2[0], array_values((array) $res2[0])) : null;
+				$lastcom = \Nexus\Database\NexusDB::table('comments')->where('torrent', $id)->orderBy('id', 'desc')->first();
+				$lastcom = $lastcom ? array_merge((array) $lastcom, array_values((array) $lastcom)) : null;
 				$Cache->cache_value('torrent_'.$id.'_last_comment_content', $lastcom, 1855);
 			}
 			$timestamp = strtotime($lastcom["added"]);

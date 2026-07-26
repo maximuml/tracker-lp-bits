@@ -30,8 +30,8 @@ final class Category
                 self::$iconRows = $cached;
             } else {
                 self::$iconRows = [];
-                $result = NexusDB::getInstance()->query('SELECT * FROM caticons ORDER BY id ASC');
-                while ($row = NexusDB::getInstance()->fetchAssoc($result)) {
+                foreach (NexusDB::table('caticons')->orderBy('id')->get() as $row) {
+                    $row = (array) $row;
                     self::$iconRows[$row['id']] = $row;
                 }
                 if (method_exists($cache, 'cache_value')) {
@@ -58,8 +58,8 @@ final class Category
                 self::$categoryRows = $cached;
             } else {
                 self::$categoryRows = [];
-                $result = NexusDB::getInstance()->query('SELECT categories.*, searchbox.name AS catmodename FROM categories LEFT JOIN searchbox ON categories.mode=searchbox.id');
-                while ($row = NexusDB::getInstance()->fetchAssoc($result)) {
+                foreach (NexusDB::table('categories')->leftJoin('searchbox', 'categories.mode', '=', 'searchbox.id')->select('categories.*', 'searchbox.name as catmodename')->get() as $row) {
+                    $row = (array) $row;
                     self::$categoryRows[$row['id']] = $row;
                 }
                 if (method_exists($cache, 'cache_value')) {
@@ -94,18 +94,33 @@ final class Category
         $sirow = method_exists($cache, 'get_value') ? $cache->get_value($cacheKey) : false;
 
         if ($sirow === false) {
-            $result = NexusDB::getInstance()->query(
-                'SELECT * FROM secondicons WHERE (mode = ' . \App\Support\LegacyDb::escape($mode) . ' OR mode = 0) '
-                . 'AND (source = ' . \App\Support\LegacyDb::escape($source) . ' OR source=0) '
-                . 'AND (medium = ' . \App\Support\LegacyDb::escape($medium) . ' OR medium=0) '
-                . 'AND (codec = ' . \App\Support\LegacyDb::escape($codec) . ' OR codec = 0) '
-                . 'AND (standard = ' . \App\Support\LegacyDb::escape($standard) . ' OR standard = 0) '
-                . 'AND (processing = ' . \App\Support\LegacyDb::escape($processing) . ' OR processing = 0) '
-                . 'AND (audiocodec = ' . \App\Support\LegacyDb::escape($audiocodec) . ' OR audiocodec = 0) LIMIT 1'
-            );
-            $sirow = NexusDB::getInstance()->fetchAssoc($result);
+            $sirow = NexusDB::table('secondicons')
+                ->where(function ($query) use ($mode) {
+                    $query->where('mode', $mode)->orWhere('mode', 0);
+                })
+                ->where(function ($query) use ($source) {
+                    $query->where('source', $source)->orWhere('source', 0);
+                })
+                ->where(function ($query) use ($medium) {
+                    $query->where('medium', $medium)->orWhere('medium', 0);
+                })
+                ->where(function ($query) use ($codec) {
+                    $query->where('codec', $codec)->orWhere('codec', 0);
+                })
+                ->where(function ($query) use ($standard) {
+                    $query->where('standard', $standard)->orWhere('standard', 0);
+                })
+                ->where(function ($query) use ($processing) {
+                    $query->where('processing', $processing)->orWhere('processing', 0);
+                })
+                ->where(function ($query) use ($audiocodec) {
+                    $query->where('audiocodec', $audiocodec)->orWhere('audiocodec', 0);
+                })
+                ->first();
             if (! $sirow) {
                 $sirow = 'not allowed';
+            } else {
+                $sirow = (array) $sirow;
             }
             if (method_exists($cache, 'cache_value')) {
                 $cache->cache_value($cacheKey, $sirow, 600);
@@ -138,9 +153,12 @@ final class Category
             }
         }
 
-        $ret = NexusDB::select(
-            'SELECT id, mode, name, image FROM categories WHERE mode = ' . \App\Support\LegacyDb::escape($catmode) . ' ORDER BY sort_index DESC'
-        );
+        $ret = NexusDB::table('categories')
+            ->where('mode', $catmode)
+            ->orderBy('sort_index', 'desc')
+            ->get()
+            ->map(fn ($row) => (array) $row)
+            ->all();
 
         if (method_exists($cache, 'cache_value')) {
             $cache->cache_value($cacheKey, $ret, 3600);

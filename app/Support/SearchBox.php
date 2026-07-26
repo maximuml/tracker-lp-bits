@@ -26,8 +26,8 @@ final class SearchBox
                 self::$rows = $cached;
             } else {
                 self::$rows = [];
-                $result = NexusDB::getInstance()->query('SELECT * FROM searchbox ORDER BY id ASC');
-                while ($row = NexusDB::getInstance()->fetchAssoc($result)) {
+                foreach (NexusDB::table('searchbox')->orderBy('id')->get() as $row) {
+                    $row = (array) $row;
                     if (isset($row['extra'])) {
                         $row['extra'] = json_decode($row['extra'], true);
                     }
@@ -64,12 +64,13 @@ final class SearchBox
             }
         }
 
-        $sql = "SELECT * FROM {$table}";
+        $query = NexusDB::table($table);
         if ($mode > 0) {
-            $sql .= " WHERE (mode = {$mode} OR mode = 0)";
+            $query->where(function ($query) use ($mode) {
+                $query->where('mode', $mode)->orWhere('mode', 0);
+            });
         }
-        $sql .= ' ORDER BY sort_index, id';
-        $ret = NexusDB::select($sql);
+        $ret = $query->orderBy('sort_index')->orderBy('id')->get()->map(fn ($row) => (array) $row)->all();
 
         if (method_exists($cache, 'cache_value')) {
             $cache->cache_value($cacheKey, $ret, 3600);

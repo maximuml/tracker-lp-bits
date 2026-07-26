@@ -69,13 +69,14 @@ final class Locale
      */
     public static function userFolder(int|string $userId): string
     {
-        $result = NexusDB::getInstance()->query(
-            'SELECT site_lang_folder FROM language LEFT JOIN users ON language.id = users.lang '
-            . 'WHERE language.site_lang = 1 AND users.id = ' . \App\Support\LegacyDb::escape($userId) . ' LIMIT 1'
-        );
-        $row = NexusDB::getInstance()->fetchAssoc($result);
+        $folder = \App\Models\Language::query()
+            ->select('language.site_lang_folder')
+            ->leftJoin('users', 'language.id', '=', 'users.lang')
+            ->where('language.site_lang', 1)
+            ->where('users.id', $userId)
+            ->value('site_lang_folder');
 
-        return $row['site_lang_folder'] ?? 'en';
+        return $folder ?? 'en';
     }
 
     /**
@@ -86,12 +87,10 @@ final class Locale
      */
     public static function folderForId(int|string $langId, string $default = 'en'): string
     {
-        $result = NexusDB::getInstance()->query(
-            'SELECT site_lang_folder FROM language WHERE site_lang = 1 AND id = ' . \App\Support\LegacyDb::escape($langId) . ' LIMIT 1'
-        );
-        $row = NexusDB::getInstance()->fetchAssoc($result);
-
-        return $row['site_lang_folder'] ?? $default;
+        return \App\Models\Language::query()
+            ->where('site_lang', 1)
+            ->where('id', $langId)
+            ->value('site_lang_folder') ?? $default;
     }
 
     /**
@@ -199,12 +198,10 @@ final class Locale
      */
     public static function guestId(string $langFolder): int
     {
-        $result = NexusDB::getInstance()->query(
-            'SELECT id FROM language WHERE site_lang_folder=' . \App\Support\LegacyDb::escape($langFolder) . ' AND site_lang=1'
-        );
-        $row = NexusDB::getInstance()->fetchAssoc($result);
-
-        return $row['id'] ?? 6;
+        return (int) (\App\Models\Language::query()
+            ->where('site_lang_folder', $langFolder)
+            ->where('site_lang', 1)
+            ->value('id') ?? 6);
     }
 
     /**
@@ -224,13 +221,16 @@ final class Locale
      */
     public static function userLocale(int $uid): string
     {
-        $sql = 'select language.site_lang_folder from users inner join language on users.lang = language.id where users.id = ' . $uid . ' limit 1';
-        $result = NexusDB::getInstance()->select($sql);
+        $folder = \App\Models\Language::query()
+            ->select('language.site_lang_folder')
+            ->join('users', 'users.lang', '=', 'language.id')
+            ->where('users.id', $uid)
+            ->value('site_lang_folder');
 
-        if (empty($result) || empty($result[0]['site_lang_folder'])) {
+        if (empty($folder)) {
             return 'en';
         }
 
-        return LocaleMiddleware::$languageMaps[$result[0]['site_lang_folder']] ?? $result[0]['site_lang_folder'];
+        return LocaleMiddleware::$languageMaps[$folder] ?? $folder;
     }
 }

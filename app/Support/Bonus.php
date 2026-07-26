@@ -42,19 +42,31 @@ class Bonus
             if (empty($torrentIdArr)) {
                 $torrentIdArr = [-1];
             }
-            $idStr = implode(',', \Illuminate\Support\Arr::wrap($torrentIdArr));
-            $sql = "select torrents.id, torrents.added, torrents.size, torrents.seeders, 'NO_PEER_ID' as peerID, '' as last_action, '' as ip from torrents WHERE id in ($idStr) and size >= $minSize";
+            $torrentQuery = NexusDB::table('torrents')
+                ->whereIn('id', $torrentIdArr)
+                ->where('size', '>=', $minSize)
+                ->select('id', 'added', 'size', 'seeders', NexusDB::raw("'NO_PEER_ID' as peerID"), NexusDB::raw("'' as last_action"), NexusDB::raw("'' as ip"));
         } else {
-            $sql = "select torrents.id, torrents.added, torrents.size, torrents.seeders, peers.id as peerID, peers.last_action, peers.ip from torrents LEFT JOIN peers ON peers.torrent = torrents.id WHERE peers.userid = $uid AND peers.seeder ='yes' and torrents.size > $minSize group by torrents.id, peers.id";
+            $torrentQuery = NexusDB::table('torrents')
+                ->leftJoin('peers', 'peers.torrent', '=', 'torrents.id')
+                ->where('peers.userid', $uid)
+                ->where('peers.seeder', 'yes')
+                ->where('torrents.size', '>', $minSize)
+                ->groupBy('torrents.id', 'peers.id')
+                ->select('torrents.id', 'torrents.added', 'torrents.size', 'torrents.seeders', 'peers.id as peerID', 'peers.last_action', 'peers.ip');
         }
+        $sql = $torrentQuery->toSql();
 
         $tagGrouped = [];
-        $torrentResult = NexusDB::select($sql);
+        $torrentResult = $torrentQuery->get()->map(fn ($row) => (array) $row)->all();
         if (! empty($torrentResult)) {
             $torrentIdArrReal = array_column($torrentResult, 'id');
-            $tagResult = NexusDB::select(sprintf('select torrent_id, tag_id from torrent_tags where torrent_id in (%s)', implode(',', $torrentIdArrReal)));
+            $tagResult = NexusDB::table('torrent_tags')
+                ->whereIn('torrent_id', $torrentIdArrReal)
+                ->select('torrent_id', 'tag_id')
+                ->get();
             foreach ($tagResult as $tagItem) {
-                $tagGrouped[$tagItem['torrent_id']][$tagItem['tag_id']] = 1;
+                $tagGrouped[$tagItem->torrent_id][$tagItem->tag_id] = 1;
             }
         }
 
@@ -63,16 +75,26 @@ class Bonus
         $zeroBonusTag = \App\Models\Setting::get('bonus.zero_bonus_tag');
         $zeroBonusFactor = \App\Models\Setting::get('bonus.zero_bonus_factor');
 
+        $medalQuery = NexusDB::table('medals')
+            ->whereIn('id', function ($query) use ($uid, $nowStr) {
+                $query->select('medal_id')
+                    ->from('user_medals')
+                    ->where('uid', $uid)
+                    ->where(function ($q) use ($nowStr) {
+                        $q->whereNull('expire_at')->orWhere('expire_at', '>', $nowStr);
+                    })
+                    ->where(function ($q) use ($nowStr) {
+                        $q->whereNull('bonus_addition_expire_at')->orWhere('bonus_addition_expire_at', '>', $nowStr);
+                    });
+            });
         if (NexusDB::isMysql()) {
-            $factorField = 'round(sum(bonus_addition_factor), 5)';
+            $medalQuery->selectRaw('round(sum(bonus_addition_factor), 5) as factor');
         } elseif (NexusDB::isPgsql()) {
-            $factorField = 'round(sum(bonus_addition_factor)::numeric, 5)';
+            $medalQuery->selectRaw('round(sum(bonus_addition_factor)::numeric, 5) as factor');
         } else {
             throw new \RuntimeException('Not supported database');
         }
-
-        $userMedalResult = NexusDB::select("select $factorField as factor from medals where id in (select medal_id from user_medals where uid = $uid and (expire_at is null or expire_at > '$nowStr') and (bonus_addition_expire_at is null or bonus_addition_expire_at > '$nowStr'))");
-        $medalAdditionalFactor = floatval($userMedalResult[0]['factor'] ?? 0);
+        $medalAdditionalFactor = floatval($medalQuery->value('factor') ?? 0);
 
         \do_log("$logPrefix, sql: $sql, count: " . count($torrentResult) . ", officialTag: $officialTag, officialAdditionalFactor: $officialAdditionalFactor, zeroBonusTag: $zeroBonusTag, zeroBonusFactor: $zeroBonusFactor, medalAdditionalFactor: $medalAdditionalFactor");
 

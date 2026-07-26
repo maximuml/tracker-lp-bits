@@ -29,7 +29,7 @@ class UserLoginNotify extends Command
      */
     public function handle()
     {
-        $thisId = $this->option('this_id');
+        $thisId = (int) $this->option('this_id');
         $this->info("thisId: $thisId");
         if (!$thisId) {
             $this->error("require option --this_id=?");

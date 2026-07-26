@@ -17,12 +17,12 @@ class Message extends NexusModel
         'added' => 'datetime',
     ];
 
-    public function send_user()
+    public function send_user(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(User::class, 'sender')->withDefault(['id' => 0, 'username' => 'System']);
     }
 
-    public function receive_user()
+    public function receive_user(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(User::class, 'receiver');
     }

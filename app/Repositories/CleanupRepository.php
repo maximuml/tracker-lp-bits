@@ -35,7 +35,7 @@ class CleanupRepository extends BaseRepository
 
     private static int $totalTask = 3;
 
-    private static int $oneTaskSeconds = 0;
+    private static float|int $oneTaskSeconds = 0;
 
     private static int $scanSize = 500;
 
@@ -261,15 +261,17 @@ LUA;
             return;
         }
         foreach ($arvToLevel as $arg => $level) {
-            /** @var NexusModel $value */
             $value = $avps->get($arg);
+            if (!$value instanceof Avp) {
+                continue;
+            }
             $interval = self::getInterval($level);
             if ($interval <= 0) {
                 do_log(sprintf("level: %s not set cleanup interval", $level), "error");
                 continue;
             }
             $lastTime = 0;
-            if ($value && $value->value_u) {
+            if ($value->value_u) {
                 $lastTime = $value->value_u;
             }
             if ($timestamp < $lastTime + $interval * 2) {

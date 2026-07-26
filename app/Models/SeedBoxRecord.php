@@ -10,6 +10,11 @@ use App\Repositories\SeedBoxRepository;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Nexus\Database\NexusDB;
 
+/**
+ * @property string $typeText
+ * @property string $ipRange
+ * @property string $statusText
+ */
 class SeedBoxRecord extends NexusModel
 {
     use NexusActivityLogTrait;

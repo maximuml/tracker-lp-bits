@@ -5,6 +5,10 @@ namespace App\Models;
 
 use App\Models\Traits\NexusActivityLogTrait;
 
+/**
+ * @property int $answers_count
+ * @property array $options
+ */
 class Poll extends NexusModel
 {
     use NexusActivityLogTrait;
@@ -17,7 +21,10 @@ class Poll extends NexusModel
 
     const MAX_OPTION_INDEX = 19;
 
-    public function answers()
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany<PollAnswer, $this>
+     */
+    public function answers(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(PollAnswer::class, 'pollid');
     }

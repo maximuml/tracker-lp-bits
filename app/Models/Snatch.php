@@ -10,6 +10,8 @@ use JetBrains\PhpStorm\Pure;
 /**
  * @property int $id
  * @property int $seedtime
+ * @property int $counts
+ * @property int $leech_time_no_seeder
  */
 class Snatch extends NexusModel
 {
@@ -124,12 +126,12 @@ class Snatch extends NexusModel
         return $builder->where('finished', self::FINISHED_NO);
     }
 
-    public function torrent()
+    public function torrent(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(Torrent::class, 'torrentid');
     }
 
-    public function user()
+    public function user(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(User::class, 'userid');
     }

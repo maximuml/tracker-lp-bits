@@ -7,18 +7,14 @@ use App\Http\Resources\SearchBoxResource;
 use App\Http\Resources\TorrentResource;
 use App\Models\SearchBox;
 use App\Repositories\SearchBoxRepository;
-use App\Repositories\UploadRepository;
 use Illuminate\Http\Request;
 
 class UploadController extends Controller
 {
-    private $repository;
-
     private $searchBoxRepository;
 
-    public function __construct(UploadRepository $repository, SearchBoxRepository $searchBoxRepository)
+    public function __construct(SearchBoxRepository $searchBoxRepository)
     {
-        $this->repository = $repository;
         $this->searchBoxRepository = $searchBoxRepository;
     }
 

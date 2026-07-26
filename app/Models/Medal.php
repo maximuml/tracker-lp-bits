@@ -8,6 +8,7 @@ use Carbon\Carbon;
 /**
  * @property int|null $inventory
  * @property int|null $duration
+ * @property-read UserMedal $pivot
  */
 class Medal extends NexusModel
 {

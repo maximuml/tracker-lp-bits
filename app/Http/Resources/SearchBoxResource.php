@@ -6,6 +6,9 @@ use App\Models\SearchBox;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+/**
+ * @mixin \App\Models\SearchBox
+ */
 class SearchBoxResource extends JsonResource
 {
     /**
@@ -15,8 +18,10 @@ class SearchBoxResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        /** @var SearchBox $resource */
         $searchBox = $this->resource;
+        if (!$searchBox instanceof SearchBox) {
+            return [];
+        }
         $out = [
             'id' => $this->id,
             'name' => $this->name,

@@ -31,12 +31,12 @@ class Cleanup extends Command
     public function handle()
     {
         $action = $this->option('action');
-        $beginId = $this->option('begin_id');
-        $endId = $this->option('end_id');
-        $idStr = $this->option('id_str') ?: "";
-        $idRedisKey = $this->option('id_redis_key') ?: "";
-        $commentRequestId = $this->option('request_id');
-        $delay = intval($this->option('delay') ?: 0);
+        $beginId = (int) $this->option('begin_id');
+        $endId = (int) $this->option('end_id');
+        $idStr = (string) ($this->option('id_str') ?: "");
+        $idRedisKey = (string) ($this->option('id_redis_key') ?: "");
+        $commentRequestId = (string) ($this->option('request_id') ?: "");
+        $delay = (int) ($this->option('delay') ?: 0);
         $this->info("beginId: $beginId, endId: $endId, idStr: $idStr, idRedisKey: $idRedisKey, commentRequestId: $commentRequestId, delay: $delay, action: $action");
         if ($action == 'seed_bonus') {
             CalculateUserSeedBonus::dispatch($beginId, $endId, $idStr, $idRedisKey, $commentRequestId)->delay($delay);

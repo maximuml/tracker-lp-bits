@@ -13,6 +13,9 @@ use Illuminate\Support\Facades\Auth;
 use Nexus\Nexus;
 use Illuminate\Http\Request;
 
+/**
+ * @mixin \App\Models\Torrent
+ */
 class TorrentResource extends BaseResource
 {
     const NAME = 'torrent';

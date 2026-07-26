@@ -79,6 +79,9 @@ class HitAndRunRepository extends BaseRepository
         ), 'alert');
         if ($result) {
             foreach ($list as $record) {
+                if (!$record instanceof HitAndRun) {
+                    continue;
+                }
                 HitAndRun::clearCache($record, ModelEventEnum::HIT_AND_RUN_DELETED);
             }
         }
@@ -204,7 +207,7 @@ class HitAndRunRepository extends BaseRepository
 
                 //check seed time
                 $targetSeedTime = $row->snatch->seedtime;
-                $requireSeedTime = bcmul($setting['seed_time_minimum'], 3600);
+                $requireSeedTime = bcmul((string)$setting['seed_time_minimum'], '3600');
                 do_log("$currentLog, targetSeedTime: $targetSeedTime, requireSeedTime: $requireSeedTime");
                 if ($targetSeedTime >= $requireSeedTime) {
                     $result = $this->reachedBySeedTime($row, $setting);
@@ -218,7 +221,7 @@ class HitAndRunRepository extends BaseRepository
                 if (isset($setting['leech_time_minimum']) && $setting['leech_time_minimum'] > 0) {
                     //use diff, other index should do also, update later @todo
                     $targetLeechTime = $row->snatch->leech_time_no_seeder - $row->leech_time_no_seeder_begin;
-                    $requireLeechTime = bcmul($setting['leech_time_minimum'], 3600);
+                    $requireLeechTime = bcmul((string)$setting['leech_time_minimum'], '3600');
                     do_log("$currentLog, targetLeechTime: $targetLeechTime, requireLeechTime: $requireLeechTime");
                     if ($targetLeechTime >= $requireLeechTime) {
                         $result = $this->reachedByLeechTime($row, $setting);
@@ -230,7 +233,7 @@ class HitAndRunRepository extends BaseRepository
                 }
 
                 //check share ratio
-                $targetShareRatio = bcdiv($row->snatch->uploaded, $row->torrent->size, 4);
+                $targetShareRatio = bcdiv((string)$row->snatch->uploaded, (string)$row->torrent->size, 4);
                 $requireShareRatio = $setting['ignore_when_ratio_reach'];
                 do_log("$currentLog, targetShareRatio: $targetShareRatio, requireShareRatio: $requireShareRatio");
                 if ($targetShareRatio >= $requireShareRatio) {
@@ -277,7 +280,7 @@ class HitAndRunRepository extends BaseRepository
         $comment = nexus_trans('hr.reached_by_share_ratio_comment', [
             'now' => Carbon::now()->toDateTimeString(),
             'seed_time_minimum' => $setting['seed_time_minimum'],
-            'seed_time' => bcdiv($hitAndRun->snatch->seedtime, 3600, 1),
+            'seed_time' => bcdiv((string)$hitAndRun->snatch->seedtime, '3600', 1),
             'share_ratio' => get_hr_ratio($hitAndRun->snatch->uploaded, $hitAndRun->snatch->downloaded),
             'ignore_when_ratio_reach' => $setting['ignore_when_ratio_reach'],
         ], $hitAndRun->user->locale);
@@ -292,7 +295,7 @@ class HitAndRunRepository extends BaseRepository
         do_log(__METHOD__);
         $comment = nexus_trans('hr.reached_by_seed_time_comment', [
             'now' => Carbon::now()->toDateTimeString(),
-            'seed_time' => bcdiv($hitAndRun->snatch->seedtime, 3600, 1),
+            'seed_time' => bcdiv((string)$hitAndRun->snatch->seedtime, '3600', 1),
             'seed_time_minimum' => $setting['seed_time_minimum'],
         ], $hitAndRun->user->locale);
         $update = [
@@ -306,7 +309,7 @@ class HitAndRunRepository extends BaseRepository
         do_log(__METHOD__);
         $comment = nexus_trans('hr.reached_by_leech_time_comment', [
             'now' => Carbon::now()->toDateTimeString(),
-            'leech_time' => bcdiv($hitAndRun->snatch->leech_time_no_seeder - $hitAndRun->leech_time_no_seeder_begin, 3600, 1),
+            'leech_time' => bcdiv((string)($hitAndRun->snatch->leech_time_no_seeder - $hitAndRun->leech_time_no_seeder_begin), '3600', 1),
             'leech_time_minimum' => $setting['leech_time_minimum'],
         ], $hitAndRun->user->locale);
         $update = [
@@ -354,7 +357,7 @@ class HitAndRunRepository extends BaseRepository
         do_log(sprintf('hitAndRun: %s, disableUser: %s', $hitAndRun->toJson(), var_export($disableUser, true)));
         $comment = nexus_trans('hr.unreached_comment', [
             'now' => Carbon::now()->toDateTimeString(),
-            'seed_time' => bcdiv($hitAndRun->snatch->seedtime, 3600, 1),
+            'seed_time' => bcdiv((string)$hitAndRun->snatch->seedtime, '3600', 1),
             'seed_time_minimum' => $setting['seed_time_minimum'],
             'share_ratio' => get_hr_ratio($hitAndRun->snatch->uploaded, $hitAndRun->snatch->downloaded),
             'torrent_size' => mksize($hitAndRun->torrent->size),
@@ -531,6 +534,9 @@ class HitAndRunRepository extends BaseRepository
         ), 'alert');
         if ($affected) {
             foreach ($list as $item) {
+                if (!$item instanceof HitAndRun) {
+                    continue;
+                }
                 HitAndRun::clearCache($item);
             }
         }

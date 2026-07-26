@@ -208,7 +208,7 @@ class UserController extends Controller
     {
         $user = User::query()->withCount([
             'comments', 'posts', 'seeding_torrents', 'leeching_torrents',
-            'torrents' => function ($query) use ($id) {$query->whereHas('snatches');},
+            'torrents' => function ($query) {$query->whereHas('snatches');},
             'completed_torrents' => function ($query) use ($id) {$query->where('torrents.owner', '!=', $id);},
             'incomplete_torrents' => function ($query) use ($id) {$query->where('torrents.owner', '!=', $id);},
         ])->findOrFail($id);

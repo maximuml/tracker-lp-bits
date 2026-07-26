@@ -5,6 +5,9 @@ namespace App\Models;
 use Nexus\Database\NexusDB;
 use Nexus\Torrent\TechnicalInformation;
 
+/**
+ * @property string|null $descr
+ */
 class TorrentExtra extends NexusModel
 {
     public $timestamps = true;

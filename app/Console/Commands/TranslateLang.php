@@ -104,6 +104,7 @@ class TranslateLang extends Command
     {
         $relativePath = basename($sourceFile);
         $targetFile = $this->langPath . "/{$targetLang}/{$relativePath}";
+        $var = '';
         if ($this->runEnv == self::RUN_ENV_LARAVEL) {
             $data = require $sourceFile;
         } else {

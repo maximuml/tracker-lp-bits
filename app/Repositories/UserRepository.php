@@ -275,7 +275,7 @@ class UserRepository extends BaseRepository
         return $user->invitee_code()->with('inviter_user')->first();
     }
 
-    public function getModComment($id)
+    public function getModComment(int $id)
     {
         $user = User::query()->findOrFail($id, ['modcomment']);
         return $user->modcomment;
@@ -343,7 +343,7 @@ class UserRepository extends BaseRepository
             'msg' => $msg,
             'added' => Carbon::now(),
         ];
-        NexusDB::transaction(function () use ($uid, $sourceField, $old, $new, $update, $message, $modCommentText) {
+        NexusDB::transaction(function () use ($uid, $sourceField, $old, $update, $message, $modCommentText) {
             $affectedRows = User::query()
                 ->where('id', $uid)
                 ->where($sourceField, $old)
@@ -517,7 +517,7 @@ class UserRepository extends BaseRepository
             'username_old' => $targetUser->username,
             'username_new' => $newUsername
         ];
-        NexusDB::transaction(function () use ($operator, $changeType,$targetUser, $changeLog) {
+        NexusDB::transaction(function () use ($targetUser, $changeLog) {
             $targetUser->usernameChangeLogs()->create($changeLog);
             $targetUser->username = $changeLog['username_new'];
             $targetUser->save();

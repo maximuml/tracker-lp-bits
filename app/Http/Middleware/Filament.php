@@ -12,7 +12,7 @@ class Filament extends Authenticate
      * @param  \Illuminate\Http\Request  $request
      * @return string|null
      */
-    protected function redirectTo($request): string
+    protected function redirectTo($request): ?string
     {
         return getSchemeAndHttpHost() . '/login.php';
     }

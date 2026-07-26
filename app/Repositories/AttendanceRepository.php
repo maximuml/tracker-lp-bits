@@ -227,7 +227,7 @@ class AttendanceRepository extends BaseRepository
             }
             foreach ($result as $row) {
                 $interval =\DateInterval::createFromDateString("-1 day");
-                $period = new \DatePeriod($row->added->addDay(1), $interval, $row->days, \DatePeriod::EXCLUDE_START_DATE);
+                $period = new \DatePeriod($row->added->addDays(1), $interval, $row->days, \DatePeriod::EXCLUDE_START_DATE);
                 $i = 0;
                 foreach ($period as $periodValue) {
                     $insert[] = sprintf(
@@ -265,7 +265,7 @@ class AttendanceRepository extends BaseRepository
             return 0;
         }
         $interval =\DateInterval::createFromDateString("-1 day");
-        $period = new \DatePeriod($start->clone()->addDay(1), $interval, $counts, \DatePeriod::EXCLUDE_START_DATE);
+        $period = new \DatePeriod($start->clone()->addDays(1), $interval, $counts, \DatePeriod::EXCLUDE_START_DATE);
         $days = 0;
         foreach ($period as $value) {
             $checkDate = $value->format('Y-m-d');

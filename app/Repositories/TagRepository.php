@@ -75,16 +75,14 @@ class TagRepository extends BaseRepository
         foreach ($this->listAll($searchBoxId) as $value) {
             if (in_array($value->id, $renderIdArr) || (isset($renderIdArr[0]) && $renderIdArr[0] == '*')) {
                 $tagId = $value->id;
-                if ($value) {
-                    $item = sprintf(
-                        "<span style=\"background-color:%s;color:%s;border-radius:%s;font-size:%s;margin:%s;padding:%s\" title=\"%s\">%s</span>",
-                        $value->color, $value->font_color, $value->border_radius, $value->font_size, $value->margin, $value->padding, $value->description, $value->name
-                    );
-                    if ($withFilterLink) {
-                        $html .= sprintf('<a href="?tag_id=%s">%s</a>', $tagId, $item);
-                    } else {
-                        $html .= $item;
-                    }
+                $item = sprintf(
+                    "<span style=\"background-color:%s;color:%s;border-radius:%s;font-size:%s;margin:%s;padding:%s\" title=\"%s\">%s</span>",
+                    $value->color, $value->font_color, $value->border_radius, $value->font_size, $value->margin, $value->padding, $value->description, $value->name
+                );
+                if ($withFilterLink) {
+                    $html .= sprintf('<a href="?tag_id=%s">%s</a>', $tagId, $item);
+                } else {
+                    $html .= $item;
                 }
             }
         }
@@ -127,7 +125,7 @@ class TagRepository extends BaseRepository
             foreach ($results as $torrent) {
                 foreach ($tags as $key => $tag) {
                     $currentValue = pow(2, $key);
-                    if ($currentValue & $torrent->tags) {
+                    if ($currentValue & $torrent->getAttributes()['tags']) {
                         //this torrent has this tag
                         $values[] = sprintf("(%d, %d, '%s', '%s')", $torrent->id, $tag->id, $dateTimeStringNow, $dateTimeStringNow);
                     }

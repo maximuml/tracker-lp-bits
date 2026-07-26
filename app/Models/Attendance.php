@@ -2,6 +2,9 @@
 
 namespace App\Models;
 
+/**
+ * @property int $max_id
+ */
 class Attendance extends NexusModel
 {
     protected $table = 'attendance';

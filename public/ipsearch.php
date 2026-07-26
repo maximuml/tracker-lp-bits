@@ -19,10 +19,9 @@ else
 	}
 
 	$mask = trim($_GET['mask'] ?? '');
-	if ($mask == "" || $mask == "255.255.255.255")
+	$singleIp = ($mask == "" || $mask == "255.255.255.255");
+	if ($singleIp)
 	{
-		$where1 = "u.ip = '$ip'";
-		$where2 = "iplog.ip = '$ip'";
 		$dom = @gethostbyaddr($ip);
 		if ($dom == $ip || @gethostbyname($dom) != $ip)
 			$addr = "";
@@ -45,10 +44,23 @@ else
 		{
 			stderr($lang_ipsearch['std_error'], $lang_ipsearch['std_invalid_subnet_mask']);
 		}
-		$where1 = "INET_ATON(u.ip) & INET_ATON('$mask') = INET_ATON('$ip') & INET_ATON('$mask')";
-		$where2 = "INET_ATON(iplog.ip) & INET_ATON('$mask') = INET_ATON('$ip') & INET_ATON('$mask')";
 		$addr = "Mask: $mask";
 	}
+
+	$applyUserIp = function ($query) use ($ip, $mask, $singleIp) {
+		if ($singleIp) {
+			$query->where('u.ip', $ip);
+		} else {
+			$query->whereRaw('INET_ATON(u.ip) & INET_ATON(?) = INET_ATON(?) & INET_ATON(?)', [$mask, $ip, $mask]);
+		}
+	};
+	$applyIplogIp = function ($query) use ($ip, $mask, $singleIp) {
+		if ($singleIp) {
+			$query->where('iplog.ip', $ip);
+		} else {
+			$query->whereRaw('INET_ATON(iplog.ip) & INET_ATON(?) = INET_ATON(?) & INET_ATON(?)', [$mask, $ip, $mask]);
+		}
+	};
 
 	stdhead($lang_ipsearch['head_search_ip_history']);
 	begin_main_frame();
@@ -62,15 +74,23 @@ else
 	print("</table></form>\n");
 	if ($ip)
 	{
-	$queryc = "SELECT COUNT(*) FROM
-(
-SELECT u.id FROM users AS u WHERE $where1
-UNION SELECT u.id FROM users AS u RIGHT JOIN iplog ON u.id = iplog.userid WHERE $where2
-GROUP BY u.id
-) AS ipsearch";
+	$columns = ['u.id', 'u.username', 'u.ip as ip', 'u.ip as last_ip', 'u.last_access', 'u.last_access as access', 'u.email', 'u.invited_by', 'u.added', 'u.class', 'u.uploaded', 'u.downloaded', 'u.donor', 'u.enabled', 'u.warned'];
+	$userQuery = \Nexus\Database\NexusDB::table('users as u')->select($columns);
+	$applyUserIp($userQuery);
 
-	$countRes = \Nexus\Database\NexusDB::select($queryc);
-	$count = (int)($countRes[0]['c'] ?? 0);
+	$iplogQuery = \Nexus\Database\NexusDB::table('users as u')
+		->rightJoin('iplog', 'u.id', '=', 'iplog.userid')
+		->select($columns);
+	$applyIplogIp($iplogQuery);
+	$iplogQuery->groupBy('u.id');
+
+	$union = $userQuery->union($iplogQuery);
+	$unionSql = $union->toSql();
+
+	$count = (int) \Nexus\Database\NexusDB::table(\Nexus\Database\NexusDB::raw("({$unionSql}) as ipsearch"))
+		->mergeBindings($union)
+		->selectRaw('count(DISTINCT id) as c')
+		->value('c');
 
 	if ($count == 0)
 	{
@@ -99,20 +119,14 @@ GROUP BY u.id
 	else
 		$orderby = "access DESC";
 
-	$query = "SELECT * FROM (
-SELECT u.id, u.username, u.ip AS ip, u.ip AS last_ip, u.last_access, u.last_access AS access, u.email, u.invited_by, u.added, u.class, u.uploaded, u.downloaded, u.donor, u.enabled, u.warned
-FROM users AS u
-WHERE $where1
-UNION SELECT u.id, u.username, iplog.ip AS ip, u.ip as last_ip, u.last_access, max(iplog.access) AS access, u.email, u.invited_by, u.added, u.class, u.uploaded, u.downloaded, u.donor, u.enabled, u.warned
-FROM users AS u
-RIGHT JOIN iplog ON u.id = iplog.userid
-WHERE $where2
-GROUP BY u.id ) as ipsearch
-GROUP BY id
-ORDER BY $orderby
-LIMIT $rpp OFFSET $offset";
-
-	$users = \Nexus\Database\NexusDB::select($query);
+	$users = \Nexus\Database\NexusDB::table(\Nexus\Database\NexusDB::raw("({$unionSql}) as ipsearch"))
+		->mergeBindings($union)
+		->select('*')
+		->groupBy('id')
+		->orderByRaw($orderby)
+		->limit($rpp)
+		->offset($offset)
+		->get();
 
 	print("<h1 align=\"center\">".$count.$lang_ipsearch['text_users_used_the_ip'].$ip."</h1>");
 

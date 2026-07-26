@@ -1,3 +1,3 @@
 <x-filament-panels::page>
-    @livewire('install-plugin-modal')
+    <p>{{ __('This page is no longer available.') }}</p>
 </x-filament-panels::page>

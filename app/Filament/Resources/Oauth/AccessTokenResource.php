@@ -50,7 +50,7 @@ class AccessTokenResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('id')->searchable(),
-                TextColumn::make('user.username')
+                TextColumn::make('user_id')
                     ->label(__('label.username'))
                     ->formatStateUsing(fn ($record) => username_for_admin($record->user_id)),
                 TextColumn::make('client.name')

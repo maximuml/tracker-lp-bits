@@ -10,5 +10,4 @@ class RunCommand extends Page
 
     protected string $view = 'filament.pages.run-command';
     protected static bool $shouldRegisterNavigation = false;
-
 }

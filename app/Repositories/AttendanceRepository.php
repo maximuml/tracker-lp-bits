@@ -219,8 +219,8 @@ class AttendanceRepository extends BaseRepository
 
         $page = 1;
         $size = 10000;
-        $insert = [];
-        $table = 'attendance_logs';
+        $rows = [];
+        $nowStr = now()->toDateTimeString();
         while (true) {
             $logPrefix = "[MIGRATE_ATTENDANCE_LOGS], page: $page, size: $size";
             $query = Attendance::query()
@@ -240,26 +240,25 @@ class AttendanceRepository extends BaseRepository
                 $period = new \DatePeriod($row->added->addDays(1), $interval, $row->days, \DatePeriod::EXCLUDE_START_DATE);
                 $i = 0;
                 foreach ($period as $periodValue) {
-                    $insert[] = sprintf(
-                        "(%d, %d, '%s')",
-                        $row->uid, $i == 0 ? $row->points : 0, $periodValue->format('Y-m-d')
-                    );
+                    $rows[] = [
+                        'uid' => (int) $row->uid,
+                        'points' => $i == 0 ? (int) $row->points : 0,
+                        'date' => $periodValue->format('Y-m-d'),
+                        'created_at' => $nowStr,
+                        'updated_at' => $nowStr,
+                    ];
                     $i++;
                 }
             }
             $page++;
         }
-        if (empty($insert)) {
+        if (empty($rows)) {
             do_log("no data to insert...", 'info', isRunningInConsole());
             return 0;
         }
-        $sql = sprintf(
-            'insert into %s (uid, points, "date") values %s %s',
-            $table, implode(',', $insert), NexusDB::upsertField(['uid'], ['uid'])
-        );
-        NexusDB::statement($sql);
-        $insertCount = count($insert);
-        do_log("[MIGRATE_ATTENDANCE_LOGS] DONE! insert sql: " . $sql, 'info', isRunningInConsole());
+        NexusDB::table('attendance_logs')->upsert($rows, ['uid', 'date'], ['points', 'updated_at']);
+        $insertCount = count($rows);
+        do_log("[MIGRATE_ATTENDANCE_LOGS] DONE! insert count: " . $insertCount, 'info', isRunningInConsole());
 
         return $insertCount;
     }

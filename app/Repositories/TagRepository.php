@@ -147,8 +147,7 @@ class TagRepository extends BaseRepository
         }
         do_log("insert default tags done!");
 
-        $sql = "insert into torrent_tags (torrent_id, tag_id, created_at, updated_at) values ";
-        $values = [];
+        $rows = [];
         while (true) {
             $logPrefix = "page: $page, size: $size";
             $results = (clone $baseQuery)->forPage($page, $size)->get();
@@ -161,17 +160,22 @@ class TagRepository extends BaseRepository
                     $currentValue = pow(2, $key);
                     if ($currentValue & $torrent->getAttributes()['tags']) {
                         //this torrent has this tag
-                        $values[] = sprintf("(%d, %d, '%s', '%s')", $torrent->id, $tag->id, $dateTimeStringNow, $dateTimeStringNow);
+                        $rows[] = [
+                            'torrent_id' => (int) $torrent->id,
+                            'tag_id' => (int) $tag->id,
+                            'created_at' => $dateTimeStringNow,
+                            'updated_at' => $dateTimeStringNow,
+                        ];
                     }
                 }
             }
             $page++;
         }
-        $sql .= sprintf("%s %s", implode(', ', $values), NexusDB::upsertField(['torrent_id', 'tag_id'], ['updated_at']));
-        do_log("migrate sql: $sql");
-        NexusDB::statement($sql);
+        if (!empty($rows)) {
+            NexusDB::table('torrent_tags')->upsert($rows, ['torrent_id', 'tag_id'], ['updated_at']);
+        }
         do_log("[MIGRATE_TORRENT_TAG] done!");
-        return count($values);
+        return count($rows);
     }
 
     public static function getOrderByFieldIdString(): string

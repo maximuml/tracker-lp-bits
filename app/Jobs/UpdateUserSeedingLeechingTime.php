@@ -42,16 +42,18 @@ class UpdateUserSeedingLeechingTime implements ShouldQueue
         $this->requestId = $requestId;
     }
 
+    /** @var int */
     public $tries = 1;
 
+    /** @var int */
     public $timeout = 3600;
 
     /**
      * 获取任务时，应该通过的中间件。
      *
-     * @return array
+     * @return array<int, \Illuminate\Queue\Middleware\WithoutOverlapping>
      */
-    public function middleware()
+    public function middleware(): array
     {
         return [new WithoutOverlapping($this->idRedisKey)];
     }
@@ -80,39 +82,49 @@ class UpdateUserSeedingLeechingTime implements ShouldQueue
             do_log("$logPrefix, no idStr or idRedisKey", "error");
             return;
         }
+        $userIdArr = array_filter(array_map('intval', explode(",", $idStr)));
+        if (empty($userIdArr)) {
+            do_log("$logPrefix, empty idStr", "error");
+            return;
+        }
         //批量取，简单化
 //        $res = sql_query("select userid, sum(seedtime) as seedtime_sum, sum(leechtime) as leechtime_sum from snatched group by userid where userid in ($idStr)");
         $res = NexusDB::table("snatched")
             ->selectRaw("userid, sum(seedtime) as seedtime_sum, sum(leechtime) as leechtime_sum")
-            ->whereRaw("userid in ($idStr)")
+            ->whereIn('userid', $userIdArr)
             ->groupBy("userid")
             ->get();
         if ($res->isEmpty()) {
             do_log("$logPrefix, no data from idStr: $idStr", "error");
             return;
         }
-        $seedtimeUpdates = $leechTimeUpdates = [];
-        $nowStr = now()->toDateTimeString();
-        $count = 0;
+        $snatchedMap = [];
         foreach ($res as $row) {
-            $count++;
-            $seedtimeUpdates[] = sprintf("when %d then %d", $row->userid, $row->seedtime_sum ?? 0);
-            $leechTimeUpdates[] = sprintf("when %d then %d", $row->userid, $row->leechtime_sum ?? 0);
+            $snatchedMap[(int) $row->userid] = [
+                'seedtime' => (int) ($row->seedtime_sum ?? 0),
+                'leechtime' => (int) ($row->leechtime_sum ?? 0),
+            ];
         }
-        $sql = sprintf(
-            "update users set seedtime = case id %s end, leechtime = case id %s end, seed_time_updated_at = '%s' where id in (%s)",
-            implode(" ", $seedtimeUpdates), implode(" ", $leechTimeUpdates), $nowStr, $idStr
-        );
-        $result = NexusDB::statement($sql);
+        $nowStr = now()->toDateTimeString();
+        $rows = [];
+        foreach ($userIdArr as $uid) {
+            $rows[] = [
+                'id' => $uid,
+                'seedtime' => $snatchedMap[$uid]['seedtime'] ?? 0,
+                'leechtime' => $snatchedMap[$uid]['leechtime'] ?? 0,
+                'seed_time_updated_at' => $nowStr,
+            ];
+        }
+        $result = NexusDB::table('users')->upsert($rows, ['id'], ['seedtime', 'leechtime', 'seed_time_updated_at']);
         if ($delIdRedisKey) {
             NexusDB::cache_del($this->idRedisKey);
         }
         $costTime = time() - $beginTimestamp;
         do_log(sprintf(
             "$logPrefix, [DONE], update user count: %s, result: %s, cost time: %s seconds",
-            $count, var_export($result, true), $costTime
+            count($rows), var_export($result, true), $costTime
         ));
-        do_log("$logPrefix, sql: $sql", "debug");
+        do_log("$logPrefix, upsert users seedtime/leechtime done", "debug");
     }
 
     /**

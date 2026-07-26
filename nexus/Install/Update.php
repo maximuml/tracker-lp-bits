@@ -70,11 +70,9 @@ class Update extends Install
 
     public function listTableFieldsFromDb($table)
     {
-        $sql = "desc $table";
-        $res = \Nexus\Database\NexusDB::select($sql);
         $data = [];
-        foreach ($res as $row) { $row = (array) $row;
-            $data[$row['Field']] = $row;
+        foreach (Schema::getColumns($table) as $column) {
+            $data[$column['name']] = $column;
         }
         return $data;
     }
@@ -569,10 +567,9 @@ class Update extends Install
 
     private function isSnatchedTableTorrentUserUnique(): bool
     {
-        $tableName = 'snatched';
-        $result = NexusDB::select('show index from ' . $tableName);
-        foreach ($result as $item) {
-            if (in_array($item['Column_name'], ['torrentid', 'userid']) && $item['Non_unique'] == 0) {
+        $indexes = Schema::getIndexes('snatched');
+        foreach ($indexes as $index) {
+            if (!empty($index['unique']) && in_array('torrentid', $index['columns']) && in_array('userid', $index['columns'])) {
                 return true;
             }
         }

@@ -24,6 +24,19 @@ jobs:
           extensions: bcmath, curl, gd, gmp, intl, json, mbstring, mysqli, pdo, redis, sqlite3, xml, zip
           coverage: none
 
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.composer/cache
+          key: ${{ runner.os }}-composer-${{ hashFiles('composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
       - name: Validate composer.json and composer.lock
         run: composer validate
 
@@ -58,6 +71,14 @@ jobs:
       - name: Run PHPStan level 6 on app/Support, app/Models, app/Console, app/Http, and app/Repositories
         run: vendor/bin/phpstan analyse -c phpstan.level6.neon --no-progress --memory-limit=2G
 
+      - name: Build frontend assets
+        run: |
+          npm ci
+          npm run build
+
+      - name: Audit npm dependencies
+        run: npm audit
+
       - name: Run PHPUnit unit tests
         run: vendor/bin/phpunit --testsuite Unit --no-coverage
 
@@ -83,26 +104,31 @@ jobs:
           sed -i 's|REDIS_HOST=127.0.0.1|REDIS_HOST=redis|g' .env
           sed -i 's|LOG_FILE=.*|LOG_FILE=php://stdout|g' .env
 
-      - name: Install dependencies
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.composer/cache
+          key: ${{ runner.os }}-composer-${{ hashFiles('composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      - name: Install PHP dependencies
         run: composer install --prefer-dist --no-progress --no-interaction --ignore-platform-reqs --no-scripts
 
       - name: Dump autoload
         run: composer dump-autoload --no-interaction --no-scripts
 
-      - name: Start Docker Compose
-        run: docker compose up -d --build
-
-      - name: Wait for services
-        run: |
-          for i in $(seq 1 60); do
-            docker compose exec -T php php -v >/dev/null 2>&1 || { sleep 2; continue; }
-            docker compose exec -T php php -r "new PDO('mysql:host=mysql;port=3306;dbname=nexusphp','nexusphp','nexusphp');" >/dev/null 2>&1 || { sleep 2; continue; }
-            docker compose exec -T php php -r '$r = new Redis(); $r->connect("redis", 6379);' >/dev/null 2>&1 && break
-            sleep 2
-          done
+      - name: Start Docker Compose and wait for services
+        run: docker compose up -d --build --wait
 
       - name: Install database
         run: docker compose exec -T php php artisan migrate:fresh --seed --force
+
+      - name: Wait for OpenResty to serve requests
+        run: |
+          for i in $(seq 1 60); do
+            curl -sfL --max-time 5 "http://localhost/login.php" -o /dev/null && break
+            sleep 2
+          done
 
       - name: Smoke test public pages
         run: |

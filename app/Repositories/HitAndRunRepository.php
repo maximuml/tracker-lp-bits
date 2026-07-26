@@ -450,12 +450,20 @@ class HitAndRunRepository extends BaseRepository
     {
         $diffInSection = HitAndRun::diffInSection();
         if ($diffInSection) {
-            $sql = "select hit_and_runs.status, categories.mode, count(*) as counts from hit_and_runs left join torrents on torrents.id = hit_and_runs.torrent_id left join categories on categories.id = torrents.category where hit_and_runs.uid = $uid group by hit_and_runs.status, categories.mode";
+            $query = NexusDB::table('hit_and_runs')
+                ->leftJoin('torrents', 'torrents.id', '=', 'hit_and_runs.torrent_id')
+                ->leftJoin('categories', 'categories.id', '=', 'torrents.category')
+                ->where('hit_and_runs.uid', $uid)
+                ->select('hit_and_runs.status', 'categories.mode', NexusDB::raw('count(*) as counts'))
+                ->groupBy('hit_and_runs.status', 'categories.mode');
         } else {
-            $sql = "select hit_and_runs.status, count(*) as counts from hit_and_runs where uid = $uid group by status";
+            $query = NexusDB::table('hit_and_runs')
+                ->where('uid', $uid)
+                ->select('status', NexusDB::raw('count(*) as counts'))
+                ->groupBy('status');
         }
-        $results = NexusDB::select($sql);
-        do_log("user: $uid, sql: $sql, results: " . json_encode($results));
+        $results = $query->get()->map(fn ($row) => (array) $row)->all();
+        do_log("user: $uid, sql: " . $query->toSql() . ", results: " . json_encode($results));
         if (!$formatted) {
             return $results;
         }

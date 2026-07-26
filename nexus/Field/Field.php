@@ -134,9 +134,12 @@ HTML;
         global $lang_fields, $lang_functions;
         $perPage = 10;
         $total = get_row_count('torrents_custom_fields');
-        list($paginationTop, $paginationBottom, $limit) = pager($perPage, $total, "?");
-        $sql = "select * from torrents_custom_fields order by priority desc $limit";
-        $res = \Nexus\Database\NexusDB::select($sql);
+        list($paginationTop, $paginationBottom, , $offset, $rpp) = pager($perPage, $total, "?");
+        $res = NexusDB::table('torrents_custom_fields')
+            ->orderBy('priority', 'desc')
+            ->offset($offset)
+            ->limit($rpp)
+            ->get();
         $header = [
             'id' => $lang_fields['col_id'],
             'name' => $lang_fields['col_name'],
@@ -219,7 +222,7 @@ HEAD;
         $attributes['updated_at'] = $now;
         $table = 'torrents_custom_fields';
         if (!empty($data['id'])) {
-            $result = NexusDB::update($table, $attributes, "id = " . \App\Support\LegacyDb::escape($data['id']));
+            $result = NexusDB::table($table)->where('id', (int) $data['id'])->update($attributes);
         } else {
             $attributes['created_at'] = $now;
             $result = NexusDB::insert($table, $attributes);
@@ -247,8 +250,7 @@ HEAD;
 
     public function buildFieldCheckbox($name, $current = [])
     {
-        $sql = 'select * from torrents_custom_fields';
-        $res = \Nexus\Database\NexusDB::select($sql);
+        $res = NexusDB::table('torrents_custom_fields')->orderBy('priority', 'desc')->get();
         if (!is_array($current)) {
             $current = explode(',', $current);
         }
@@ -266,13 +268,16 @@ HEAD;
 
     public function renderOnUploadPage($torrentId, $searchBoxId)
     {
-        $searchBox = NexusDB::getOne('searchbox', "id = $searchBoxId");
+        $searchBox = SearchBox::query()->find($searchBoxId);
         if (empty($searchBox)) {
             throw new \RuntimeException("Invalid search box: $searchBoxId");
         }
         $customValues = $this->listTorrentCustomField($torrentId, $searchBoxId);
-        $sql = sprintf('select * from torrents_custom_fields where id in (%s) order by priority desc', $searchBox['custom_fields'] ?: 0);
-        $res = \Nexus\Database\NexusDB::select($sql);
+        $customFieldIds = array_filter(array_map('intval', explode(',', $searchBox->custom_fields ?? '')));
+        $res = NexusDB::table('torrents_custom_fields')
+            ->whereIn('id', $customFieldIds)
+            ->orderBy('priority', 'desc')
+            ->get();
         $html = '';
         foreach ($res as $row) { $row = (array) $row;
             $name = "custom_fields[$searchBoxId][{$row['id']}]";
@@ -383,15 +388,23 @@ JS;
             $isArray = false;
             $torrentIdArr = [$torrentId];
         }
-        $torrentIdStr = implode(',', $torrentIdArr);
-        if (NexusDB::isMysql()) {
-            $customFieldStr = "find_in_set(f.id, box.custom_fields)";
-        } elseif (NexusDB::isPgsql()) {
-            $customFieldStr = "f.id = ANY(string_to_array(box.custom_fields, ',')::int[])";
-        } else {
-            throw new \RuntimeException("Not supported database");
+        $searchBox = SearchBox::query()->find($searchBoxId);
+        if (empty($searchBox)) {
+            throw new \RuntimeException("Invalid search box: $searchBoxId");
         }
-        $res = \Nexus\Database\NexusDB::select("select f.*, v.custom_field_value, v.torrent_id from torrents_custom_field_values v inner join torrents_custom_fields f on v.custom_field_id = f.id inner join searchbox box on box.id = $searchBoxId and $customFieldStr where torrent_id in ($torrentIdStr) order by f.priority desc");
+        $customFieldIds = array_filter(array_map('intval', explode(',', $searchBox->custom_fields ?? '')));
+        if (empty($customFieldIds)) {
+            return [];
+        }
+        $torrentIdArr = array_map('intval', $torrentIdArr);
+
+        $res = NexusDB::table('torrents_custom_field_values as v')
+            ->join('torrents_custom_fields as f', 'v.custom_field_id', '=', 'f.id')
+            ->whereIn('v.torrent_id', $torrentIdArr)
+            ->whereIn('f.id', $customFieldIds)
+            ->orderBy('f.priority', 'desc')
+            ->select('f.*', 'v.custom_field_value', 'v.torrent_id')
+            ->get();
         $values = [];
         $result = [];
         foreach ($res as $row) { $row = (array) $row;

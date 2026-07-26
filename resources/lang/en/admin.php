@@ -46,6 +46,7 @@ return [
         'message_templates' => 'Message templates',
         'tracker_url' => 'Tracker URL',
         'activity_logs' => 'Activity Logs',
+        'tracker_statistics' => 'Tracker Statistics',
     ],
     'resources' => [
         'agent_allow' => [

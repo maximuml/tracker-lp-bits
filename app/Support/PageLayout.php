@@ -3,6 +3,7 @@
 namespace App\Support;
 
 use App\Models\SearchBox;
+use Nexus\Database\NexusDB;
 class PageLayout
 {
     public static function header($title = "", $msgalert = true, $script = "", $place = "")
@@ -24,8 +25,8 @@ class PageLayout
             //		}
             //record always
             \App\Repositories\IpLogRepository::saveToCache($CURUSER['id']);
-            $USERUPDATESET[] = "last_access = " . \App\Support\LegacyDb::escape(date("Y-m-d H:i:s"));
-            $USERUPDATESET[] = "ip = " . \App\Support\LegacyDb::escape($CURUSER['ip']);
+            $USERUPDATESET['last_access'] = date("Y-m-d H:i:s");
+            $USERUPDATESET['ip'] = $CURUSER['ip'];
         }
         header("Content-Type: text/html; charset=utf-8; Cache-control:private");
         //header("Pragma: No-cache");
@@ -227,21 +228,16 @@ class PageLayout
             //// check every 15 minutes //////////////////
             $messages = $Cache->get_value('user_' . $CURUSER["id"] . '_inbox_count');
             if ($messages == "") {
-                $messages = get_row_count("messages", "WHERE receiver=" . \App\Support\LegacyDb::escape($CURUSER["id"]) . " AND location<>0");
+                $messages = NexusDB::table('messages')->where('receiver', $CURUSER["id"])->where('location', '<>', 0)->count();
                 $Cache->cache_value('user_' . $CURUSER["id"] . '_inbox_count', $messages, 900);
             }
             $outmessages = $Cache->get_value('user_' . $CURUSER["id"] . '_outbox_count');
             if ($outmessages == "") {
-                $outmessages = get_row_count("messages", "WHERE sender=" . \App\Support\LegacyDb::escape($CURUSER["id"]) . " AND saved='yes'");
+                $outmessages = NexusDB::table('messages')->where('sender', $CURUSER["id"])->where('saved', 'yes')->count();
                 $Cache->cache_value('user_' . $CURUSER["id"] . '_outbox_count', $outmessages, 900);
             }
             if (!$connect = $Cache->get_value('user_' . $CURUSER["id"] . '_connect')) {
-                $res3 = \Nexus\Database\NexusDB::select("SELECT connectable FROM peers WHERE userid=" . \App\Support\LegacyDb::escape($CURUSER["id"]) . " order by id desc LIMIT 1");
-                if ($row = ($res3 ? array_values((array) $res3[0]) : null)) {
-                    $connect = $row[0];
-                } else {
-                    $connect = 'unknown';
-                }
+                $connect = NexusDB::table('peers')->where('userid', $CURUSER["id"])->orderBy('id', 'desc')->value('connectable') ?? 'unknown';
                 $Cache->cache_value('user_' . $CURUSER["id"] . '_connect', $connect, 900);
             }
             if ($connect == "yes") {
@@ -254,17 +250,17 @@ class PageLayout
             //// check every 60 seconds //////////////////
             $activeseed = $Cache->get_value('user_' . $CURUSER["id"] . '_active_seed_count');
             if ($activeseed == "") {
-                $activeseed = get_row_count("peers", "WHERE userid=" . \App\Support\LegacyDb::escape($CURUSER["id"]) . " AND seeder='yes'");
+                $activeseed = NexusDB::table('peers')->where('userid', $CURUSER["id"])->where('seeder', 'yes')->count();
                 $Cache->cache_value('user_' . $CURUSER["id"] . '_active_seed_count', $activeseed, 60);
             }
             $activeleech = $Cache->get_value('user_' . $CURUSER["id"] . '_active_leech_count');
             if ($activeleech == "") {
-                $activeleech = get_row_count("peers", "WHERE userid=" . \App\Support\LegacyDb::escape($CURUSER["id"]) . " AND seeder='no'");
+                $activeleech = NexusDB::table('peers')->where('userid', $CURUSER["id"])->where('seeder', 'no')->count();
                 $Cache->cache_value('user_' . $CURUSER["id"] . '_active_leech_count', $activeleech, 60);
             }
             $unread = $Cache->get_value('user_' . $CURUSER["id"] . '_unread_message_count');
             if ($unread == "") {
-                $unread = get_row_count("messages", "WHERE receiver=" . \App\Support\LegacyDb::escape($CURUSER["id"]) . " AND unread='yes'");
+                $unread = NexusDB::table('messages')->where('receiver', $CURUSER["id"])->where('unread', 'yes')->count();
                 $Cache->cache_value('user_' . $CURUSER["id"] . '_unread_message_count', $unread, 60);
             }
             $inboxpic = "<img class=\"" . ($unread ? "inboxnew" : "inbox") . "\" src=\"pic/trans.gif\" alt=\"inbox\" title=\"" . ($unread ? $lang_functions['title_inbox_new_messages'] : $lang_functions['title_inbox_no_new_messages']) . "\" />";
@@ -527,7 +523,7 @@ class PageLayout
                 if (!preg_match("/index/i", $settings_script_name)) {
                     $new_news = $Cache->get_value('user_' . $CURUSER["id"] . '_unread_news_count');
                     if ($new_news == "") {
-                        $new_news = get_row_count("news", "WHERE notify = 'yes' AND added > " . \App\Support\LegacyDb::escape($CURUSER['last_home']));
+                        $new_news = NexusDB::table('news')->where('notify', 'yes')->where('added', '>', $CURUSER['last_home'])->count();
                         $Cache->cache_value('user_' . $CURUSER["id"] . '_unread_news_count', $new_news, 300);
                     }
                     if ($new_news > 0) {
@@ -620,10 +616,8 @@ class PageLayout
         print "</td></tr></table>";
         print "<div id=\"footer\">";
         print "<div style=\"margin-top: 10px; margin-bottom: 30px;\" align=\"center\">";
-        if ($CURUSER) {
-            if (count($USERUPDATESET)) {
-                \Nexus\Database\NexusDB::getInstance()->query("UPDATE users SET " . join(",", $USERUPDATESET) . " WHERE id = " . $CURUSER['id']);
-            }
+        if ($CURUSER && !empty($USERUPDATESET)) {
+            NexusDB::table('users')->where('id', $CURUSER['id'])->update($USERUPDATESET);
         }
         // Variables for End Time
         $tend = microtime(true);

@@ -2,6 +2,7 @@
 # IMPORTANT: Do not edit below unless you know what you are doing!
 
 use App\Enums\ModelEventEnum;
+use Nexus\Database\NexusDB;
 
 if(!defined('IN_TRACKER'))
 die('Hacking attempt!');
@@ -12,56 +13,24 @@ function printProgress($msg) {
 }
 
 function torrent_promotion_expire($days, $type = 2, $targettype = 1){
-	$secs = (int)($days * 86400); //XX days
-	$dt = nexus_quote(date("Y-m-d H:i:s",(TIMENOW - ($secs))));
-	$res = \Nexus\Database\NexusDB::select("SELECT id, name FROM torrents WHERE added < $dt AND sp_state = ".nexus_quote($type).' AND promotion_time_type=0');
-	switch($targettype)
-	{
-		case 1: //normal
-		{
-			$sp_state = 1;
-			$become = "normal";
-			break;
-		}
-		case 2: //Free
-		{
-			$sp_state = 2;
-			$become = "Free";
-			break;
-		}
-		case 3: //2X
-		{
-			$sp_state = 3;
-			$become = "2X";
-			break;
-		}
-		case 4: //2X Free
-		{
-			$sp_state = 4;
-			$become = "2X Free";
-			break;
-		}
-		case 5: //Half Leech
-		{
-			$sp_state = 5;
-			$become = "50%";
-			break;
-		}
-		case 6: //2X Half Leech
-		{
-			$sp_state = 6;
-			$become = "2X 50%";
-			break;
-		}
-		default: //normal
-		{
-			$sp_state = 1;
-			$become = "normal";
-			break;
-		}
-	}
+	$secs = (int)($days * 86400);
+	$dt = date("Y-m-d H:i:s", TIMENOW - $secs);
+	$spStateMap = [
+		1 => 1, 2 => 2, 3 => 3, 4 => 4, 5 => 5, 6 => 6,
+	];
+	$sp_state = $spStateMap[$targettype] ?? 1;
+	$becomeMap = [
+		1 => 'normal', 2 => 'Free', 3 => '2X', 4 => '2X Free', 5 => '50%', 6 => '2X 50%',
+	];
+	$become = $becomeMap[$targettype] ?? 'normal';
+
+	$res = NexusDB::table('torrents')
+		->where('added', '<', $dt)
+		->where('sp_state', $type)
+		->where('promotion_time_type', 0)
+		->get(['id', 'name']);
 	foreach ($res as $arr) { $arr = (array) $arr;
-		\Nexus\Database\NexusDB::getInstance()->query("UPDATE torrents SET sp_state = ".nexus_quote($sp_state)." WHERE id={$arr['id']}");
+		NexusDB::table('torrents')->where('id', $arr['id'])->update(['sp_state' => $sp_state]);
         publish_model_event(ModelEventEnum::TORRENT_UPDATED, $arr['id']);
 		if ($sp_state == 1)
 			write_log("Torrent {$arr['id']} ({$arr['name']}) is no longer on promotion (time expired)",'normal');
@@ -70,30 +39,48 @@ function torrent_promotion_expire($days, $type = 2, $targettype = 1){
 }
 
 function torrent_promotion_individual_expire() {
-    $res = \Nexus\Database\NexusDB::select("select id from torrents  WHERE promotion_time_type=2 AND promotion_until < ".nexus_quote(date("Y-m-d H:i:s")));
+    $res = NexusDB::table('torrents')
+        ->where('promotion_time_type', 2)
+        ->where('promotion_until', '<', date('Y-m-d H:i:s'))
+        ->get(['id']);
     foreach ($res as $arr) { $arr = (array) $arr;
-        \Nexus\Database\NexusDB::getInstance()->query("update torrents set sp_state = 1, promotion_time_type=0, promotion_until=null where id=" . $arr['id']);
+        NexusDB::table('torrents')->where('id', $arr['id'])->update([
+            'sp_state' => 1,
+            'promotion_time_type' => 0,
+            'promotion_until' => null,
+        ]);
         publish_model_event(ModelEventEnum::TORRENT_UPDATED, $arr['id']);
     }
 }
 
 function peasant_to_user($down_floor_gb, $down_roof_gb, $minratio){
-
 	if ($down_floor_gb){
 		$downlimit_floor = $down_floor_gb*1024*1024*1024;
 		$downlimit_roof = $down_roof_gb*1024*1024*1024;
-		$res = \Nexus\Database\NexusDB::select("SELECT id FROM users WHERE class = 0 AND downloaded >= $downlimit_floor ".($downlimit_roof > $down_floor_gb ? " AND downloaded < $downlimit_roof" : "")." AND uploaded / downloaded >= $minratio");
+		$query = NexusDB::table('users')
+			->where('class', 0)
+			->where('downloaded', '>=', $downlimit_floor);
+		if ($downlimit_roof > $down_floor_gb) {
+			$query->where('downloaded', '<', $downlimit_roof);
+		}
+		$res = $query->whereRaw('uploaded / downloaded >= ?', [$minratio])->get(['id']);
 		if (count($res) > 0)
 		{
-			$dt = nexus_quote(date("Y-m-d H:i:s"));
+			$dt = date('Y-m-d H:i:s');
 			foreach ($res as $arr) {
 				$arr = (array) $arr;
                 $locale = get_user_locale($arr['id']);
-                $subject = nexus_quote(nexus_trans("cleanup.msg_low_ratio_warning_removed", [], $locale));
-                $msg = nexus_quote(nexus_trans("cleanup.msg_your_ratio_warning_removed", [], $locale));
+                $subject = nexus_trans("cleanup.msg_low_ratio_warning_removed", [], $locale);
+                $msg = nexus_trans("cleanup.msg_your_ratio_warning_removed", [], $locale);
 				writecomment($arr['id'],"Leech Warning removed by System.");
-				\Nexus\Database\NexusDB::getInstance()->query("UPDATE users SET class = 1, leechwarn = 'no', leechwarnuntil = null WHERE id = {$arr['id']}");
-				\Nexus\Database\NexusDB::getInstance()->query("INSERT INTO messages (sender, receiver, added, subject, msg) VALUES(0, {$arr['id']}, $dt, $subject, $msg)");
+				NexusDB::table('users')->where('id', $arr['id'])->update(['class' => 1, 'leechwarn' => 'no', 'leechwarnuntil' => null]);
+				NexusDB::table('messages')->insert([
+					'sender' => 0,
+					'receiver' => $arr['id'],
+					'added' => $dt,
+					'subject' => $subject,
+					'msg' => $msg,
+				]);
                 publish_model_event(ModelEventEnum::USER_UPDATED, $arr['id']);
 			}
 		}
@@ -110,27 +97,42 @@ function promotion($class, $down_floor_gb, $minratio, $time_week, $addinvite = 0
 		if ($minSeedPoints === false) {
 		    throw new \RuntimeException("class: $class can't get min seed points.");
         }
-		$sql = "SELECT id, max_class_once FROM users WHERE class = $oriclass AND downloaded >= $limit AND seed_points >= $minSeedPoints AND uploaded / downloaded >= $minratio AND added < ".nexus_quote($maxdt);
-		$res = \Nexus\Database\NexusDB::select($sql);
+		$res = NexusDB::table('users')
+			->where('class', $oriclass)
+			->where('downloaded', '>=', $limit)
+			->where('seed_points', '>=', $minSeedPoints)
+			->whereRaw('uploaded / downloaded >= ?', [$minratio])
+			->where('added', '<', $maxdt)
+			->get(['id','max_class_once']);
 		$matchUserCount = count($res);
-        do_log("sql: $sql, match user count: $matchUserCount");
+        do_log("match user count: $matchUserCount");
 		if ($matchUserCount > 0)
 		{
-			$dt = nexus_quote(date("Y-m-d H:i:s"));
+			$dt = date('Y-m-d H:i:s');
 			foreach ($res as $arr) {
 				$arr = (array) $arr;
 				$locale = get_user_locale($arr['id']);
-                $subject = nexus_quote(nexus_trans("cleanup.msg_promoted_to", [], $locale).get_user_class_name($class,false,false,false));
-                $msg = nexus_quote(nexus_trans("cleanup.msg_now_you_are", [], $locale).get_user_class_name($class,false,false,false).nexus_trans("cleanup.msg_see_faq", [], $locale));
+                $subject = nexus_trans("cleanup.msg_promoted_to", [], $locale).get_user_class_name($class,false,false,false);
+                $msg = nexus_trans("cleanup.msg_now_you_are", [], $locale).get_user_class_name($class,false,false,false).nexus_trans("cleanup.msg_see_faq", [], $locale);
 
                 if($class <= $arr['max_class_once']) {
                     do_log(sprintf('user: %s upgrade to class: %s', $arr['id'], $class));
-                    \Nexus\Database\NexusDB::getInstance()->query("UPDATE users SET class = $class WHERE id = {$arr['id']}");
+                    NexusDB::table('users')->where('id', $arr['id'])->update(['class' => $class]);
                 } else {
                     do_log(sprintf('user: %s upgrade to class: %s, and add invites: %s', $arr['id'], $class, $addinvite));
-                    \Nexus\Database\NexusDB::getInstance()->query("UPDATE users SET class = $class, max_class_once=$class, invites=invites+$addinvite WHERE id = {$arr['id']}");
+                    NexusDB::table('users')->where('id', $arr['id'])->update([
+						'class' => $class,
+						'max_class_once' => $class,
+						'invites' => NexusDB::raw('invites + ' . (int) $addinvite),
+					]);
                 }
-				\Nexus\Database\NexusDB::getInstance()->query("INSERT INTO messages (sender, receiver, added, subject, msg) VALUES(0, {$arr['id']}, $dt, $subject, $msg)");
+				NexusDB::table('messages')->insert([
+					'sender' => 0,
+					'receiver' => $arr['id'],
+					'added' => $dt,
+					'subject' => $subject,
+					'msg' => $msg,
+				]);
                 publish_model_event(ModelEventEnum::USER_UPDATED, $arr['id']);
 			}
 		}
@@ -139,22 +141,29 @@ function promotion($class, $down_floor_gb, $minratio, $time_week, $addinvite = 0
 
 function demotion($class,$deratio){
 	$newclass = $class - 1;
-//    $sql = "SELECT id FROM users WHERE class = $class AND uploaded / downloaded < $deratio";
-    $sql = "SELECT id FROM users WHERE class = $class AND uploaded < downloaded * $deratio";
-	$res = \Nexus\Database\NexusDB::select($sql);
+    $res = NexusDB::table('users')
+		->where('class', $class)
+		->whereRaw('uploaded < downloaded * ?', [$deratio])
+		->get(['id']);
     $matchUserCount = count($res);
-    do_log("sql: $sql, match user count: $matchUserCount");
+    do_log("match user count: $matchUserCount");
     if ($matchUserCount > 0)
 	{
-		$dt = nexus_quote(date("Y-m-d H:i:s"));
+		$dt = date('Y-m-d H:i:s');
 		foreach ($res as $arr) {
 			$arr = (array) $arr;
 			$locale = get_user_locale($arr['id']);
             $subject = nexus_trans("cleanup.msg_demoted_to", [], $locale).get_user_class_name($newclass,false,false,false);
             $msg = nexus_trans("cleanup.msg_demoted_from", [], $locale).get_user_class_name($class,false,false,false).nexus_trans("cleanup.msg_to", [], $locale).get_user_class_name($newclass,false,false,false).nexus_trans("cleanup.msg_because_ratio_drop_below", [], $locale).$deratio.".\n";
 
-            \Nexus\Database\NexusDB::getInstance()->query("UPDATE users SET class = $newclass WHERE id = {$arr['id']}");
-			\Nexus\Database\NexusDB::getInstance()->query("INSERT INTO messages (sender, receiver, added, subject, msg) VALUES(0, {$arr['id']}, $dt, ".nexus_quote($subject).", ".nexus_quote($msg).")");
+            NexusDB::table('users')->where('id', $arr['id'])->update(['class' => $newclass]);
+			NexusDB::table('messages')->insert([
+				'sender' => 0,
+				'receiver' => $arr['id'],
+				'added' => $dt,
+				'subject' => $subject,
+				'msg' => $msg,
+			]);
             publish_model_event(ModelEventEnum::USER_UPDATED, $arr['id']);
 		}
 	}
@@ -163,13 +172,17 @@ function demotion($class,$deratio){
 function user_to_peasant($down_floor_gb, $minratio){
 	global $deletepeasant_account;
 
-	$length = $deletepeasant_account*86400; // warn users until xxx days
+	$length = $deletepeasant_account*86400;
 	$until = date("Y-m-d H:i:s",(TIMENOW + $length));
 	$downlimit_floor = $down_floor_gb*1024*1024*1024;
-	$res = \Nexus\Database\NexusDB::select("SELECT id FROM users WHERE class = 1 AND downloaded > $downlimit_floor AND uploaded / downloaded < $minratio");
+	$res = NexusDB::table('users')
+		->where('class', 1)
+		->where('downloaded', '>', $downlimit_floor)
+		->whereRaw('uploaded / downloaded < ?', [$minratio])
+		->get(['id']);
 	if (count($res) > 0)
 	{
-		$dt = nexus_quote(date("Y-m-d H:i:s"));
+		$dt = date('Y-m-d H:i:s');
 		foreach ($res as $arr) {
 			$arr = (array) $arr;
             $locale = get_user_locale($arr['id']);
@@ -177,8 +190,18 @@ function user_to_peasant($down_floor_gb, $minratio){
             $msg = nexus_trans("cleanup.msg_must_fix_ratio_within", [], $locale).$deletepeasant_account.nexus_trans("cleanup.msg_days_or_get_banned", [], $locale);
 
             writecomment($arr['id'],"Leech Warned by System - Low Ratio.");
-			\Nexus\Database\NexusDB::getInstance()->query("UPDATE users SET class = 0 , leechwarn = 'yes', leechwarnuntil = ".nexus_quote($until)." WHERE id = {$arr['id']}");
-			\Nexus\Database\NexusDB::getInstance()->query("INSERT INTO messages (sender, receiver, added, subject, msg) VALUES(0, {$arr['id']}, $dt, ".nexus_quote($subject).", ".nexus_quote($msg).")");
+			NexusDB::table('users')->where('id', $arr['id'])->update([
+				'class' => 0,
+				'leechwarn' => 'yes',
+				'leechwarnuntil' => $until,
+			]);
+			NexusDB::table('messages')->insert([
+				'sender' => 0,
+				'receiver' => $arr['id'],
+				'added' => $dt,
+				'subject' => $subject,
+				'msg' => $msg,
+			]);
             publish_model_event(ModelEventEnum::USER_UPDATED, $arr['id']);
 		}
 	}
@@ -260,11 +283,7 @@ function disable_user(\Illuminate\Database\Eloquent\Builder $query, $reasonKey)
     if (empty($uidArr)) {
         return [];
     }
-    $sql = sprintf(
-        "update users set enabled = '%s' where id in (%s)",
-        \App\Models\User::ENABLED_NO, implode(', ', $uidArr)
-    );
-    \Nexus\Database\NexusDB::getInstance()->query($sql);
+    \App\Models\User::query()->whereIn('id', $uidArr)->update(['enabled' => \App\Models\User::ENABLED_NO]);
     \App\Models\UserBanLog::query()->insert($userBanLogData);
     \App\Models\UserModifyLog::query()->insert($userModifyLogs);
     do_log("[DISABLE_USER]($reasonKey): " . implode(', ', $uidArr));
@@ -295,7 +314,7 @@ function docleanup($forceAll = 0, $printProgress = false) {
 //2.update peer status
 	$deadtime = deadtime();
 	$deadtime = date("Y-m-d H:i:s",$deadtime);
-	\Nexus\Database\NexusDB::getInstance()->query("DELETE FROM peers WHERE last_action < ".nexus_quote($deadtime));
+	NexusDB::table('peers')->where('last_action', '<', $deadtime)->delete();
 	$log = 'update peer status';
 	do_log($log);
 	if ($printProgress) {
@@ -341,7 +360,12 @@ function docleanup($forceAll = 0, $printProgress = false) {
 
     //rest seed_points_per_hour
     $seedPointsUpdatedAtMin = $carbonNow->subSeconds(2*intval($autoclean_interval_one))->toDateTimeString();
-    \Nexus\Database\NexusDB::getInstance()->query("update users set seed_points_per_hour = 0, seed_bonus_per_hour = 0, seeding_torrent_count = 0, seeding_torrent_size = 0 where seed_points_updated_at < " . nexus_quote($seedPointsUpdatedAtMin));
+    NexusDB::table('users')->where('seed_points_updated_at', '<', $seedPointsUpdatedAtMin)->update([
+        'seed_points_per_hour' => 0,
+        'seed_bonus_per_hour' => 0,
+        'seeding_torrent_count' => 0,
+        'seeding_torrent_size' => 0,
+    ]);
 
 	\App\Repositories\CleanupRepository::runBatchJobCalculateUserSeedBonus($requestId);
 
@@ -352,27 +376,30 @@ function docleanup($forceAll = 0, $printProgress = false) {
 	}
 
 //Priority Class 2: cleanup every 30 mins
-	$res = \Nexus\Database\NexusDB::select("SELECT value_u FROM avps WHERE arg = 'lastcleantime2'");
-	$row = $res ? array_values((array) $res[0]) : null;
-	if (!$row && !$forceAll) {
-		\Nexus\Database\NexusDB::getInstance()->query("INSERT INTO avps (arg, value_u) VALUES ('lastcleantime2',".nexus_quote($now).")");
+	$ts = NexusDB::table('avps')->where('arg', 'lastcleantime2')->value('value_u');
+	if (!$ts && !$forceAll) {
+		NexusDB::table('avps')->insert(['arg' => 'lastcleantime2', 'value_u' => $now]);
 		$log = "no value for arg: 'lastcleantime2', return";
 		do_log($log);
 		return $log;
 	}
-	$ts = $row[0] ?? 0;
+	$ts = $ts ?? 0;
 	if ($ts + $autoclean_interval_two > $now && !$forceAll) {
 		$log = 'Cleanup ends at Priority Class 1';
 		do_log($log . ", $ts + $autoclean_interval_two > $now");
 		return $log;
 	} else {
-		\Nexus\Database\NexusDB::getInstance()->query("UPDATE avps SET value_u = ".nexus_quote($now)." WHERE arg='lastcleantime2'");
+		NexusDB::table('avps')->where('arg', 'lastcleantime2')->update(['value_u' => $now]);
 	}
 
 	//2.5.update torrents' visibility
 	$deadtime = deadtime() - $max_dead_torrent_time;
     $lastActionDeadTime = date("Y-m-d H:i:s",$deadtime);
-	\Nexus\Database\NexusDB::getInstance()->query("UPDATE torrents SET visible='no' WHERE visible='yes' AND last_action < '$lastActionDeadTime' AND seeders=0");
+	NexusDB::table('torrents')
+		->where('visible', 'yes')
+		->where('last_action', '<', $lastActionDeadTime)
+		->where('seeders', 0)
+		->update(['visible' => 'no']);
 	$log = "update torrents' visibility";
 	do_log($log);
 	if ($printProgress) {
@@ -380,21 +407,20 @@ function docleanup($forceAll = 0, $printProgress = false) {
 	}
 
 //Priority Class 3: cleanup every 60 mins
-	$res = \Nexus\Database\NexusDB::select("SELECT value_u FROM avps WHERE arg = 'lastcleantime3'");
-	$row = $res ? array_values((array) $res[0]) : null;
-	if (!$row && !$forceAll) {
-		\Nexus\Database\NexusDB::getInstance()->query("INSERT INTO avps (arg, value_u) VALUES ('lastcleantime3',$now)");
+	$ts = NexusDB::table('avps')->where('arg', 'lastcleantime3')->value('value_u');
+	if (!$ts && !$forceAll) {
+		NexusDB::table('avps')->insert(['arg' => 'lastcleantime3', 'value_u' => $now]);
 		$log = "no value for arg: 'lastcleantime3', return";
 		do_log($log);
 		return $log;
 	}
-	$ts = $row[0] ?? 0;
+	$ts = $ts ?? 0;
 	if ($ts + $autoclean_interval_three > $now && !$forceAll) {
 		$log = 'Cleanup ends at Priority Class 2';
 		do_log($log . ", $ts + $autoclean_interval_three > $now");
 		return $log;
 	} else {
-		\Nexus\Database\NexusDB::getInstance()->query("UPDATE avps SET value_u = ".nexus_quote($now)." WHERE arg='lastcleantime3'");
+		NexusDB::table('avps')->where('arg', 'lastcleantime3')->update(['value_u' => $now]);
 	}
 
 	//4.update count of seeders, leechers, comments for torrents
@@ -548,27 +574,30 @@ function docleanup($forceAll = 0, $printProgress = false) {
 
 
 //Priority Class 4: cleanup every 24 hours
-	$res = \Nexus\Database\NexusDB::select("SELECT value_u FROM avps WHERE arg = 'lastcleantime4'");
-	$row = $res ? array_values((array) $res[0]) : null;
-	if (!$row && !$forceAll) {
-		\Nexus\Database\NexusDB::getInstance()->query("INSERT INTO avps (arg, value_u) VALUES ('lastcleantime4',$now)");
+	$ts = NexusDB::table('avps')->where('arg', 'lastcleantime4')->value('value_u');
+	if (!$ts && !$forceAll) {
+		NexusDB::table('avps')->insert(['arg' => 'lastcleantime4', 'value_u' => $now]);
 		$log = "no value for arg: 'lastcleantime4', return";
 		do_log($log);
 		return $log;
 	}
-	$ts = $row[0] ?? 0;
+	$ts = $ts ?? 0;
 	if ($ts + $autoclean_interval_four > $now && !$forceAll) {
 		$log = 'Cleanup ends at Priority Class 3';
 		do_log($log . ", $ts + $autoclean_interval_four > $now");
 		return $log;
 	} else {
-		\Nexus\Database\NexusDB::getInstance()->query("UPDATE avps SET value_u = ".nexus_quote($now)." WHERE arg='lastcleantime4'");
+		NexusDB::table('avps')->where('arg', 'lastcleantime4')->update(['value_u' => $now]);
 	}
 
 	//3.delete unconfirmed accounts
 	$deadtime = time() - $signup_timeout;
-    $deadlineField = \Nexus\Database\NexusDB::fromUnixTimestampField($deadtime);
-	\Nexus\Database\NexusDB::getInstance()->query("DELETE FROM users WHERE status = 'pending' AND added < $deadlineField AND last_login < $deadlineField AND last_access < $deadlineField");
+    NexusDB::table('users')
+        ->where('status', 'pending')
+        ->whereRaw('added < FROM_UNIXTIME(?)', [$deadtime])
+        ->whereRaw('last_login < FROM_UNIXTIME(?)', [$deadtime])
+        ->whereRaw('last_access < FROM_UNIXTIME(?)', [$deadtime])
+        ->delete();
 //	$query = \App\Models\User::query()
 //        ->where('status', 'pending')
 //        ->whereRaw("added < FROM_UNIXTIME($deadtime)")
@@ -583,8 +612,8 @@ function docleanup($forceAll = 0, $printProgress = false) {
 
 	//5.delete old login attempts
 	$secs = 12*60*60; // Delete failed login attempts per half day.
-	$dt = nexus_quote(date("Y-m-d H:i:s",(TIMENOW - $secs))); // calculate date.
-	\Nexus\Database\NexusDB::getInstance()->query("DELETE FROM loginattempts WHERE banned='no' AND added < $dt");
+	$dt = date("Y-m-d H:i:s",(TIMENOW - $secs)); // calculate date.
+	NexusDB::table('loginattempts')->where('banned', 'no')->where('added', '<', $dt)->delete();
 	$log = "delete old login attempts";
 	do_log($log);
 	if ($printProgress) {
@@ -593,8 +622,15 @@ function docleanup($forceAll = 0, $printProgress = false) {
 
 	//6.delete old invite codes
 	$secs = $invite_timeout*24*60*60; // when?
-	$dt = nexus_quote(date("Y-m-d H:i:s",(TIMENOW - $secs))); // calculate date.
-	\Nexus\Database\NexusDB::getInstance()->query("DELETE FROM invites WHERE ((time_invited < $dt and time_invited is not null and invitee != '') or (invitee = '' and expired_at < '$nowStr' and expired_at is not null))");
+	$dt = date("Y-m-d H:i:s",(TIMENOW - $secs)); // calculate date.
+	NexusDB::table('invites')
+		->where(function ($query) use ($dt) {
+			$query->where('time_invited', '<', $dt)->whereNotNull('time_invited')->where('invitee', '!=', '');
+		})
+		->orWhere(function ($query) use ($nowStr) {
+			$query->where('invitee', '')->whereNotNull('expired_at')->where('expired_at', '<', $nowStr);
+		})
+		->delete();
 	$log = "delete old invite codes";
 	do_log($log);
 	if ($printProgress) {
@@ -602,7 +638,7 @@ function docleanup($forceAll = 0, $printProgress = false) {
 	}
 
 	//7.delete regimage codes
-	\Nexus\Database\NexusDB::getInstance()->query("TRUNCATE TABLE regimages");
+	NexusDB::table('regimages')->delete();
 	$log = "delete regimage codes";
 	do_log($log);
 	if ($printProgress) {

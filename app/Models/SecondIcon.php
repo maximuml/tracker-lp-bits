@@ -22,13 +22,19 @@ class SecondIcon extends NexusModel
 {
     use NexusActivityLogTrait;
 
+    /** @var  string */
     protected $table = 'secondicons';
 
+    /** @var  list<string> */
     protected $fillable = [
         'name', 'class_name', 'image', 'mode',
         'source', 'medium', 'codec', 'audiocodec', 'standard', 'processing'
     ];
 
+    /**
+     * @param  array<int|string, mixed>  $data
+     * @return  array<int|string, mixed>
+     */
     public static function formatFormData(array $data): array
     {
         foreach (SearchBox::$taxonomies as $torrentField => $taxonomyTableModel) {
@@ -45,6 +51,7 @@ class SecondIcon extends NexusModel
         return $data;
     }
 
+    /** @return  \Illuminate\Database\Eloquent\Relations\BelongsTo<SearchBox, $this> */
     public function search_box()
     {
         return $this->belongsTo(SearchBox::class, 'mode', 'id');

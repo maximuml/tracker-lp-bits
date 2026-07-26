@@ -13,7 +13,9 @@ use App\Models\Traits\NexusActivityLogTrait;
 
 class RegImage extends NexusModel
 {
+    /** @var  string */
     protected $table = 'regimages';
 
+    /** @var  list<string> */
     protected $fillable = ['imagehash', 'imagestring', 'dateline'];
 }

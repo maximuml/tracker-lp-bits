@@ -13,12 +13,16 @@ namespace App\Models;
 
 class UserBanLog extends NexusModel
 {
+    /** @var  string */
     protected $table = 'user_ban_logs';
 
+    /** @var  list<string> */
     protected $fillable = ['uid', 'username', 'operator', 'reason'];
 
+    /** @var  bool */
     public $timestamps = true;
 
+    /** @return  mixed */
     public static function clearUserBanLogDuplicate()
     {
         $lists = UserBanLog::query()

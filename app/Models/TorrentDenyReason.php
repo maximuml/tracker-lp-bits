@@ -17,10 +17,13 @@ class TorrentDenyReason extends NexusModel
 {
     use NexusActivityLogTrait;
 
+    /** @var  string */
     protected $table = 'torrent_deny_reasons';
 
+    /** @var  bool */
     public $timestamps = true;
 
+    /** @var  list<string> */
     protected $fillable = ['name', 'hits', 'priority',];
 
 }

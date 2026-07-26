@@ -18,14 +18,18 @@ class MessageTemplate extends NexusModel
 {
     use NexusActivityLogTrait;
 
+    /** @var  list<string> */
     protected $fillable = ['name', 'content', 'language_id'];
 
+    /** @var  bool */
     public $timestamps = true;
 
+    /** @var  array<string, string> */
     protected $casts = [
         'name' => MessageTemplateNameEnum::class,
     ];
 
+    /** @return  array<int|string, mixed> */
     public static function listAllNames(): array
     {
         $result = [];
@@ -35,11 +39,16 @@ class MessageTemplate extends NexusModel
         return $result;
     }
 
+    /** @return  \Illuminate\Database\Eloquent\Relations\BelongsTo<Language, $this> */
     public function language(): BelongsTo
     {
         return $this->belongsTo(Language::class);
     }
 
+    /**
+     * @param  mixed  $languageId
+     * @param  array<int|string, mixed>  $placeholders
+     */
     public static function forRegisterWelcome($languageId, array $placeholders): null|string
     {
         $result = self::query()->where("language_id", $languageId)
@@ -48,6 +57,10 @@ class MessageTemplate extends NexusModel
         return self::format($result, $placeholders);
     }
 
+    /**
+     * @param  self|null  $template
+     * @param  array<int|string, mixed>  $placeholders
+     */
     private static function format(self|null $template, array $placeholders): null|string
     {
         if ($template && $template->content) {

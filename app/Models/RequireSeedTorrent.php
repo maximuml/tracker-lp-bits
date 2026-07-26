@@ -12,7 +12,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class RequireSeedTorrent extends NexusModel
 {
+    /** @var  list<string> */
     protected $fillable = ['torrent_id'];
 
+    /** @var  bool */
     public $timestamps = true;
 }

@@ -17,26 +17,37 @@ use App\Enums\ModelEventEnum;
 
 class StaffMessage extends NexusModel
 {
+    /** @var  string */
     protected $table = 'staffmessages';
 
+    /** @var  list<string> */
     protected $fillable = [
         'sender', 'added', 'subject', 'msg', 'answeredby', 'answered', 'answer', 'permission',
     ];
 
+    /** @var  array<string, string> */
     protected $casts = [
         'added' => 'datetime',
     ];
 
+    /** @return  \Illuminate\Database\Eloquent\Relations\BelongsTo<User, $this> */
     public function send_user()
     {
         return $this->belongsTo(User::class, 'sender')->withDefault(['id' => 0, 'username' => 'System']);
     }
 
+    /** @return  \Illuminate\Database\Eloquent\Relations\BelongsTo<User, $this> */
     public function answer_user()
     {
         return $this->belongsTo(User::class, 'answeredby');
     }
 
+    /**
+     * @param  int  $sender
+     * @param  string  $subject
+     * @param  string  $msg
+     * @return  mixed
+     */
     public static function add(int $sender, string $subject, string $msg)
     {
         $record = self::query()->create([

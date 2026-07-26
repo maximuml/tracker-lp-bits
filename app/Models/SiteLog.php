@@ -12,10 +12,17 @@ namespace App\Models;
 
 class SiteLog extends NexusModel
 {
+    /** @var  string */
     protected $table = 'sitelog';
 
+    /** @var  list<string> */
     protected $fillable = ['added', 'txt', 'security_level', 'uid'];
 
+    /**
+     * @param  mixed  $uid
+     * @param  mixed  $content
+     * @param  mixed  $isMod
+     */
     public static function add($uid, $content, $isMod = false): void
     {
         self::query()->insert([

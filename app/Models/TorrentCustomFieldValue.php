@@ -14,12 +14,15 @@ use Nexus\Database\NexusDB;
 
 class TorrentCustomFieldValue extends NexusModel
 {
+    /** @var  string */
     protected $table = 'torrents_custom_field_values';
 
+    /** @var  list<string> */
     protected $fillable = [
         'torrent_id', 'custom_field_id', 'custom_field_value',
     ];
 
+    /** @var  bool */
     public $timestamps = true;
 
 }

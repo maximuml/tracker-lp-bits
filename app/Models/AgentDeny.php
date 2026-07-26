@@ -17,12 +17,15 @@ class AgentDeny extends NexusModel
 {
     use NexusActivityLogTrait;
 
+    /** @var  string */
     protected $table = 'agent_allowed_exception';
 
+    /** @var  list<string> */
     protected $fillable = [
         'family_id', 'name', 'peer_id', 'agent', 'comment'
     ];
 
+    /** @return  mixed */
     protected static function booted()
     {
         static::created(function ($model) {
@@ -36,6 +39,7 @@ class AgentDeny extends NexusModel
         });
     }
 
+    /** @return  \Illuminate\Database\Eloquent\Relations\BelongsTo<AgentAllow, $this> */
     public function family(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(AgentAllow::class, 'family_id');

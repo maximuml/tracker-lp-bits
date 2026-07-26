@@ -38,24 +38,32 @@ class Medal extends NexusModel
 
     const GET_TYPE_GRANT = 2;
 
+    /** @var  array<int|string, mixed> */
     public static array $getTypeText = [
         self::GET_TYPE_EXCHANGE => ['text' => 'Exchange'],
         self::GET_TYPE_GRANT => ['text' => 'Grant'],
     ];
 
+    /** @var  list<string> */
     protected $fillable = [
         'name', 'description', 'image_large', 'image_small', 'price', 'duration', 'get_type',
         'display_on_medal_page', 'sale_begin_time', 'sale_end_time', 'inventory', 'bonus_addition_factor',
         'gift_fee_factor', 'priority', 'bonus_addition_duration'
     ];
 
+    /** @var  bool */
     public $timestamps = true;
 
+    /** @var  array<string, string> */
     protected $casts = [
         'sale_begin_time' => 'datetime',
         'sale_end_time' => 'datetime',
     ];
 
+    /**
+     * @param  mixed  $onlyKeyValues
+     * @return  array<int|string, mixed>
+     */
     public static function listGetTypes($onlyKeyValues = false): array
     {
         $results = self::$getTypeText;
@@ -71,6 +79,7 @@ class Medal extends NexusModel
         return $results;
     }
 
+    /** @param  mixed  $value */
     public function getGetTypeTextAttribute($value): string
     {
         return nexus_trans("medal.get_types." . $this->get_type);
@@ -81,6 +90,7 @@ class Medal extends NexusModel
         return $this->inventory !== null ? (string) $this->inventory : nexus_trans("label.infinite");
     }
 
+    /** @param  mixed  $value */
     public function getDurationTextAttribute($value): string
     {
         if ($this->duration > 0) {
@@ -89,6 +99,7 @@ class Medal extends NexusModel
         return nexus_trans("label.permanent");
     }
 
+    /** @return  mixed */
     public function checkCanBeBuy()
     {
         if ($this->get_type == self::GET_TYPE_GRANT) {
@@ -106,11 +117,13 @@ class Medal extends NexusModel
         }
     }
 
+    /** @return  \Illuminate\Database\Eloquent\Relations\BelongsToMany<User, $this> */
     public function users(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
     {
         return $this->belongsToMany(User::class, 'user_medals', 'medal_id', 'uid')->withTimestamps();
     }
 
+    /** @return  \Illuminate\Database\Eloquent\Relations\BelongsToMany<User, $this> */
     public function valid_users(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
     {
         return $this->users()->where(function ($query) {

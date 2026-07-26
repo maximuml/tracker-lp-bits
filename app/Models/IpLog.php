@@ -15,10 +15,13 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 
 class IpLog extends NexusModel
 {
+    /** @var  string */
     protected $table = 'iplog';
 
+    /** @var  list<string> */
     protected $fillable = ['ip', 'userid', 'access', 'uri', 'count'];
 
+    /** @return  \Illuminate\Database\Eloquent\Casts\Attribute<mixed, mixed> */
     protected function ipLocation(): Attribute
     {
         return new Attribute(
@@ -26,6 +29,10 @@ class IpLog extends NexusModel
         );
     }
 
+    /**
+     * @param  string  $ip
+     * @return  mixed
+     */
     private function getIpLocation(string $ip)
     {
         $result = get_ip_location_from_geoip($ip);

@@ -38,15 +38,18 @@ class SeedBoxRecord extends NexusModel
 {
     use NexusActivityLogTrait;
 
+    /** @var  list<string> */
     protected $fillable = ['type', 'uid', 'status', 'operator', 'bandwidth', 'ip', 'ip_begin', 'ip_end', 'ip_begin_numeric', 'ip_end_numeric',
         'comment', 'version', 'is_allowed', 'asn'
     ];
 
+    /** @var  bool */
     public $timestamps = true;
 
     const TYPE_USER = 1;
     const TYPE_ADMIN = 2;
 
+    /** @var  array<int|string, mixed> */
     public static array $types = [
         self::TYPE_USER => ['text' => 'User'],
         self::TYPE_ADMIN => ['text' => 'Administrator'],
@@ -56,6 +59,7 @@ class SeedBoxRecord extends NexusModel
     const STATUS_ALLOWED = 1;
     const STATUS_DENIED = 2;
 
+    /** @var  array<int|string, mixed> */
     public static array $status = [
         self::STATUS_UNAUDITED => ['text' => 'Unaudited'],
         self::STATUS_ALLOWED => ['text' => 'Allowed'],
@@ -72,6 +76,7 @@ class SeedBoxRecord extends NexusModel
         });
     }
 
+    /** @param  SeedBoxRecord  $model */
     private static function updateCache(SeedBoxRecord $model): void
     {
         SeedBoxRepository::updateCache(
@@ -82,6 +87,12 @@ class SeedBoxRecord extends NexusModel
         );
     }
 
+    /**
+     * @param  TypeEnum  $type
+     * @param  IsAllowedEnum  $isAllowed
+     * @param  IpAsnEnum  $field
+     * @return  mixed
+     */
     public static function getValidQuery(TypeEnum $type, IsAllowedEnum $isAllowed, IpAsnEnum $field)
     {
         $query = self::query()
@@ -99,6 +110,7 @@ class SeedBoxRecord extends NexusModel
         return $query;
     }
 
+    /** @return  \Illuminate\Database\Eloquent\Casts\Attribute<mixed, mixed> */
     protected function typeText(): Attribute
     {
         return new Attribute(
@@ -106,6 +118,7 @@ class SeedBoxRecord extends NexusModel
         );
     }
 
+    /** @return  \Illuminate\Database\Eloquent\Casts\Attribute<mixed, mixed> */
     protected function ipRange(): Attribute
     {
         return new Attribute(
@@ -113,6 +126,7 @@ class SeedBoxRecord extends NexusModel
         );
     }
 
+    /** @return  \Illuminate\Database\Eloquent\Casts\Attribute<mixed, mixed> */
     protected function statusText(): Attribute
     {
         return new Attribute(
@@ -120,6 +134,10 @@ class SeedBoxRecord extends NexusModel
         );
     }
 
+    /**
+     * @param  mixed  $key
+     * @return  array<int|string, mixed>
+     */
     public static function listTypes($key = null): array
     {
         $result = self::$types;
@@ -133,6 +151,10 @@ class SeedBoxRecord extends NexusModel
         return $key === null ? $result : $keyValues;
     }
 
+    /**
+     * @param  mixed  $key
+     * @return  array<int|string, mixed>
+     */
     public static function listStatus($key = null): array
     {
         $result = self::$status;
@@ -146,6 +168,7 @@ class SeedBoxRecord extends NexusModel
         return $key === null ? $result : $keyValues;
     }
 
+    /** @return  \Illuminate\Database\Eloquent\Relations\BelongsTo<User, $this> */
     public function user(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(User::class, 'uid');

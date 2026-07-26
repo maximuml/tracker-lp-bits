@@ -34,19 +34,23 @@ use JetBrains\PhpStorm\Pure;
  */
 class Snatch extends NexusModel
 {
+    /** @var  string */
     protected $table = 'snatched';
 
+    /** @var  list<string> */
     protected $fillable = [
         'torrentid', 'userid', 'ip', 'port', 'uploaded', 'downloaded', 'to_go', 'seedtime', 'leechtime',
         'last_action', 'startdat', 'completedat', 'finished', 'hit_and_run_id', 'buy_log_id',
     ];
 
+    /** @var  array<string, string> */
     protected $casts = [
         'last_action' => 'datetime',
         'startdat' => 'datetime',
         'completedat' => 'datetime',
     ];
 
+    /** @var  array<int|string, mixed> */
     public static $cardTitles = [
         'upload_text' => '上传',
         'download_text' => '下载',
@@ -61,8 +65,8 @@ class Snatch extends NexusModel
     const FINISHED_NO = 'no';
 
     /**
+     * @return  \Illuminate\Database\Eloquent\Casts\Attribute<mixed, mixed>
      * @deprecated Use uploadedText instead
-     * @return Attribute
      */
     protected function uploadText(): Attribute
     {
@@ -72,8 +76,8 @@ class Snatch extends NexusModel
     }
 
     /**
+     * @return  \Illuminate\Database\Eloquent\Casts\Attribute<mixed, mixed>
      * @deprecated Use downloadedText instead
-     * @return Attribute
      */
     protected function downloadText(): Attribute
     {
@@ -82,6 +86,7 @@ class Snatch extends NexusModel
         );
     }
 
+    /** @return  \Illuminate\Database\Eloquent\Casts\Attribute<mixed, mixed> */
     protected function uploadedText(): Attribute
     {
         return new Attribute(
@@ -89,6 +94,7 @@ class Snatch extends NexusModel
         );
     }
 
+    /** @return  \Illuminate\Database\Eloquent\Casts\Attribute<mixed, mixed> */
     protected function downloadedText(): Attribute
     {
         return new Attribute(
@@ -96,6 +102,7 @@ class Snatch extends NexusModel
         );
     }
 
+    /** @return  \Illuminate\Database\Eloquent\Casts\Attribute<mixed, mixed> */
     protected function shareRatio(): Attribute
     {
         return new Attribute(
@@ -123,6 +130,7 @@ class Snatch extends NexusModel
         return "$speed/s";
     }
 
+    /** @return  mixed */
     public function getShareRatio()
     {
         if ($this->downloaded) {
@@ -135,21 +143,31 @@ class Snatch extends NexusModel
         return $ratio;
     }
 
+    /**
+     * @param  \Illuminate\Database\Eloquent\Builder<Snatch>  $builder
+     * @return  mixed
+     */
     public function scopeIsFinished(Builder $builder)
     {
         return $builder->where('finished', self::FINISHED_YES);
     }
 
+    /**
+     * @param  \Illuminate\Database\Eloquent\Builder<Snatch>  $builder
+     * @return  mixed
+     */
     public function scopeIsNotFinished(Builder $builder)
     {
         return $builder->where('finished', self::FINISHED_NO);
     }
 
+    /** @return  \Illuminate\Database\Eloquent\Relations\BelongsTo<Torrent, $this> */
     public function torrent(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(Torrent::class, 'torrentid');
     }
 
+    /** @return  \Illuminate\Database\Eloquent\Relations\BelongsTo<User, $this> */
     public function user(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(User::class, 'userid');

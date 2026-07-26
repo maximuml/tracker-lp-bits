@@ -19,10 +19,13 @@ use Illuminate\Support\Arr;
 
 class BonusLogs extends NexusModel
 {
+    /** @var  string */
     protected $table = 'bonus_logs';
 
+    /** @var  list<string> */
     protected $fillable = ['uid', 'business_type', 'old_total_value', 'value', 'new_total_value', 'comment', 'created_at', 'updated_at'];
 
+    /** @var  bool */
     public $timestamps = true;
     const CATEGORY_COMMON = 'common';
     const CATEGORY_SEEDING = 'seeding';
@@ -73,6 +76,7 @@ class BonusLogs extends NexusModel
     const BUSINESS_TYPE_SEEDING_HAREM_ADDITION = 10003;
     const BUSINESS_TYPE_SEEDING_MEDAL_ADDITION = 10004;
 
+    /** @var  array<int|string, mixed> */
     public static array $businessTypes = [
         self::BUSINESS_TYPE_CANCEL_HIT_AND_RUN => ['text' => 'Cancel H&R'],
         self::BUSINESS_TYPE_BUY_MEDAL => ['text' => 'Buy medal'],
@@ -110,6 +114,7 @@ class BonusLogs extends NexusModel
         self::BUSINESS_TYPE_SEEDING_MEDAL_ADDITION => ['text' => 'Seeding medal addition'],
     ];
 
+    /** @var  array<int|string, mixed> */
     public static array $businessTypeSeeding = [
         self::BUSINESS_TYPE_SEEDING_BASIC,
         self::BUSINESS_TYPE_SEEDING_DONOR_ADDITION,
@@ -118,6 +123,10 @@ class BonusLogs extends NexusModel
         self::BUSINESS_TYPE_SEEDING_MEDAL_ADDITION
     ];
 
+    /**
+     * @param  mixed  $category
+     * @return  array<int|string, mixed>
+     */
     public static function listBusinessTypeOptions($category = ''): array
     {
         $source = BonusLogs::$businessTypes;
@@ -129,6 +138,10 @@ class BonusLogs extends NexusModel
         return self::listStaticProps($source, 'bonus-log.business_types', true);
     }
 
+    /**
+     * @param  bool  $includeSeeding
+     * @return  array<int|string, mixed>
+     */
     public static function listCategoryOptions(bool $includeSeeding): array
     {
         $result = [
@@ -140,41 +153,56 @@ class BonusLogs extends NexusModel
         return $result;
     }
 
+    /** @return  mixed */
     public function getBusinessTypeTextAttribute()
     {
         return nexus_trans('bonus-log.business_types.' . $this->business_type);
     }
 
+    /** @return  mixed */
     public static function getBonusForCancelHitAndRun()
     {
         $result = Setting::get('bonus.cancel_hr');
         return $result ?? self::DEFAULT_BONUS_CANCEL_ONE_HIT_AND_RUN;
     }
 
+    /** @return  mixed */
     public static function getBonusForBuyAttendanceCard()
     {
         $result = Setting::get('bonus.attendance_card');
         return $result ?? self::DEFAULT_BONUS_BUY_ATTENDANCE_CARD;
     }
 
+    /** @return  mixed */
     public static function getBonusForBuyTemporaryInvite()
     {
         $result = Setting::get('bonus.one_tmp_invite');
         return $result ?? self::DEFAULT_BONUS_BUY_TEMPORARY_INVITE;
     }
 
+    /** @return  mixed */
     public static function getBonusForBuyRainbowId()
     {
         $result = Setting::get('bonus.rainbow_id');
         return $result ?? self::DEFAULT_BONUS_BUY_RAINBOW_ID;
     }
 
+    /** @return  mixed */
     public static function getBonusForBuyChangeUsernameCard()
     {
         $result = Setting::get('bonus.change_username_card');
         return $result ?? self::DEFAULT_BONUS_BUY_CHANGE_USERNAME_CARD;
     }
 
+    /**
+     * @param  int  $userId
+     * @param  float  $old
+     * @param  float  $delta
+     * @param  float  $new
+     * @param  string  $comment
+     * @param  int  $businessType
+     * @return  mixed
+     */
     public static function add(int $userId, float $old, float $delta, float $new, string $comment, int $businessType)
     {
         if (!isset(self::$businessTypes[$businessType])) {

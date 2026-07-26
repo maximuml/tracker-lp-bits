@@ -27,16 +27,20 @@ class TorrentState extends NexusModel
     public const NOTICE_NONE = 0;
     public const NOTICE_UNLIMITED = -1;
 
+    /** @var  list<string> */
     protected $fillable = ['global_sp_state', 'deadline', 'begin', 'remark', 'notice_days'];
 
+    /** @var  string */
     protected $table = 'torrents_state';
 
+    /** @var  array<string, string> */
     protected $casts = [
         'begin' => 'datetime',
         'deadline' => 'datetime',
         'notice_days' => 'integer',
     ];
 
+    /** @return  mixed */
     protected static function booted()
     {
         parent::booted();
@@ -55,6 +59,7 @@ class TorrentState extends NexusModel
         });
     }
 
+    /** @return  mixed */
     public function getGlobalSpStateTextAttribute()
     {
         return Torrent::$promotionTypes[$this->global_sp_state]['text'] ?? '';
@@ -65,6 +70,11 @@ class TorrentState extends NexusModel
         return self::noticeOptions()[$this->notice_days] ?? '';
     }
 
+    /**
+     * @param  \Illuminate\Database\Eloquent\Builder<TorrentState>  $query
+     * @param  ?Carbon  $moment
+     * @return  \Illuminate\Database\Eloquent\Builder<TorrentState>
+     */
     public function scopeActive(Builder $query, ?Carbon $moment = null): Builder
     {
         $moment = $moment ?? Carbon::now();
@@ -81,6 +91,11 @@ class TorrentState extends NexusModel
             ->orderBy('id');
     }
 
+    /**
+     * @param  \Illuminate\Database\Eloquent\Builder<TorrentState>  $query
+     * @param  ?Carbon  $moment
+     * @return  \Illuminate\Database\Eloquent\Builder<TorrentState>
+     */
     public function scopeUpcoming(Builder $query, ?Carbon $moment = null): Builder
     {
         $moment = $moment ?? Carbon::now();
@@ -93,16 +108,19 @@ class TorrentState extends NexusModel
             ->orderBy('id');
     }
 
+    /** @param  ?Carbon  $moment */
     public static function current(?Carbon $moment = null): ?self
     {
         return self::query()->active($moment)->first();
     }
 
+    /** @param  ?Carbon  $moment */
     public static function next(?Carbon $moment = null): ?self
     {
         return self::query()->upcoming($moment)->first();
     }
 
+    /** @return  array<int|string, mixed> */
     public static function cachedStates(): array
     {
         return NexusDB::remember(Setting::TORRENT_GLOBAL_STATE_CACHE_KEY, 600, function () {
@@ -124,6 +142,10 @@ class TorrentState extends NexusModel
         publish_model_event("global_promotion_state_updated", 0);
     }
 
+    /**
+     * @param  ?Carbon  $moment
+     * @return  array<int|string, mixed>
+     */
     public static function resolveTimeline(?Carbon $moment = null): array
     {
         $moment = $moment ?? Carbon::now();
@@ -184,6 +206,10 @@ class TorrentState extends NexusModel
         self::validateNoOverlap($this->attributesToArray(), $this->id);
     }
 
+    /**
+     * @param  TorrentState  $state
+     * @return  array<int|string, mixed>
+     */
     protected function getRangeForComparison(TorrentState $state): array
     {
         $min = Carbon::createFromTimestamp(0);
@@ -199,6 +225,7 @@ class TorrentState extends NexusModel
         ];
     }
 
+    /** @param  mixed  $value */
     protected static function parseDateTimeValue(mixed $value): ?Carbon
     {
         if ($value instanceof Carbon) {
@@ -212,6 +239,10 @@ class TorrentState extends NexusModel
         return Carbon::parse($value);
     }
 
+    /**
+     * @param  array<int|string, mixed>  $attributes
+     * @param  ?int  $ignoreId
+     */
     public static function validateNoOverlap(array $attributes, ?int $ignoreId = null): void
     {
         $globalState = (int) Arr::get($attributes, 'global_sp_state', Torrent::PROMOTION_NORMAL);
@@ -268,6 +299,10 @@ class TorrentState extends NexusModel
         }
     }
 
+    /**
+     * @param  array<int|string, mixed>  $attributes
+     * @return  array<int|string, mixed>
+     */
     protected static function getRangeForArray(array $attributes): array
     {
         $min = Carbon::createFromTimestamp(0);
@@ -282,6 +317,7 @@ class TorrentState extends NexusModel
         ];
     }
 
+    /** @param  string  $field */
     protected static function errorFieldKey(string $field): string
     {
         $prefix = 'mountedActions.0.data.';
@@ -289,6 +325,7 @@ class TorrentState extends NexusModel
         return $prefix . $field;
     }
 
+    /** @param  TorrentState  $conflict */
     protected static function buildOverlapMessage(TorrentState $conflict): string
     {
         $begin = self::parseDateTimeValue($conflict->begin);
@@ -304,6 +341,7 @@ class TorrentState extends NexusModel
         ]);
     }
 
+    /** @return  array<int|string, mixed> */
     public static function noticeOptions(): array
     {
         return [
@@ -317,6 +355,11 @@ class TorrentState extends NexusModel
         ];
     }
 
+    /**
+     * @param  ?Carbon  $begin
+     * @param  int  $noticeDays
+     * @param  Carbon  $now
+     */
     protected static function isWithinNoticeWindow(?Carbon $begin, int $noticeDays, Carbon $now): bool
     {
         if (!$begin) {

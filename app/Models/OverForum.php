@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class OverForum extends NexusModel
 {
+    /** @var  string */
     protected $table = "overforums";
 
 

@@ -18,26 +18,32 @@ use Nexus\Database\NexusDB;
 
 class Message extends NexusModel
 {
+    /** @var  string */
     protected $table = 'messages';
 
+    /** @var  list<string> */
     protected $fillable = [
         'sender', 'receiver', 'added', 'subject', 'msg', 'unread', 'location', 'saved'
     ];
 
+    /** @var  array<string, string> */
     protected $casts = [
         'added' => 'datetime',
     ];
 
+    /** @return  \Illuminate\Database\Eloquent\Relations\BelongsTo<User, $this> */
     public function send_user(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(User::class, 'sender')->withDefault(['id' => 0, 'username' => 'System']);
     }
 
+    /** @return  \Illuminate\Database\Eloquent\Relations\BelongsTo<User, $this> */
     public function receive_user(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(User::class, 'receiver');
     }
 
+    /** @param  array<int|string, mixed>  $data */
     public static function add(array $data): self
     {
         clear_inbox_count_cache($data["receiver"]);

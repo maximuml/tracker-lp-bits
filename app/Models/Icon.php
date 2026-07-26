@@ -24,7 +24,9 @@ class Icon extends NexusModel
 {
     use NexusActivityLogTrait;
 
+    /** @var  string */
     protected $table = 'caticons';
 
+    /** @var  list<string> */
     protected $fillable = ['name', 'folder', 'cssfile', 'multilang', 'secondicon', 'designer', 'comment'];
 }

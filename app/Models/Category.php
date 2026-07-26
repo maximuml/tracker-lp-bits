@@ -28,26 +28,25 @@ class Category extends NexusModel
 {
     use NexusActivityLogTrait;
 
+    /** @var  string */
     protected $table = 'categories';
 
+    /** @var  list<string> */
     protected $fillable = ['mode', 'name', 'class_name', 'image', 'sort_index', 'icon_id'];
 
+    /** @return  mixed */
     public static function getLabelName()
     {
         return nexus_trans('searchbox.category_label');
     }
 
-    /**
-     * @return BelongsTo<Icon, $this>
-     */
+    /** @return  \Illuminate\Database\Eloquent\Relations\BelongsTo<Icon, $this> */
     public function icon(): BelongsTo
     {
         return $this->belongsTo(Icon::class, 'icon_id');
     }
 
-    /**
-     * @return BelongsTo<SearchBox, $this>
-     */
+    /** @return  \Illuminate\Database\Eloquent\Relations\BelongsTo<SearchBox, $this> */
     public function search_box(): BelongsTo
     {
         return $this->belongsTo(SearchBox::class, 'mode', 'id');

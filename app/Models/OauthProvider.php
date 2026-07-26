@@ -30,16 +30,19 @@ class OauthProvider extends NexusModel
 {
     use NexusActivityLogTrait;
 
+    /** @var  list<string> */
     protected $fillable = [
         'uuid', 'name', 'client_id', 'client_secret', 'authorization_endpoint_url', 'token_endpoint_url',
         'user_info_endpoint_url', 'id_claim', 'username_claim', 'email_claim', 'enabled', 'priority',
         'level_claim', 'level_limit',
     ];
 
+    /** @var  bool */
     public $timestamps = true;
 
     const NEW_UUID_CACHE_KEY = 'new_oauth_provider_uuid';
 
+    /** @var  array<string, string> */
     protected $casts = [
         'enabled' => 'boolean',
     ];
@@ -53,6 +56,7 @@ class OauthProvider extends NexusModel
         });
     }
 
+    /** @param  string  $uuid */
     public static function getCallbackUrl(string $uuid): string
     {
         return sprintf("%s/oauth/callback/%s", getSchemeAndHttpHost(), $uuid);

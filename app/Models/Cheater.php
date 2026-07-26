@@ -20,6 +20,7 @@ namespace App\Models;
 
 class Cheater extends NexusModel
 {
+    /** @var  list<string> */
     protected $fillable = [
         'added', 'userid', 'torrentid', 'uploaded', 'downloaded', 'anctime', 'seeders', 'leechers', 'hit',
         'dealtby', 'dealtwith', 'comment',

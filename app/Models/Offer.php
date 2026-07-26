@@ -18,12 +18,15 @@ namespace App\Models;
 
 class Offer extends NexusModel
 {
+    /** @var  list<string> */
     protected $fillable = ['userid', 'name', 'descr', 'comments', 'added'];
 
+    /** @var  array<string, string> */
     protected $casts = [
         'added' => 'datetime'
     ];
 
+    /** @return  \Illuminate\Database\Eloquent\Relations\BelongsTo<User, $this> */
     public function user()
     {
         return $this->belongsTo(User::class, 'userid');

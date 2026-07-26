@@ -19,6 +19,7 @@ namespace App\Models;
 
 class Invite extends NexusModel
 {
+    /** @var  string */
     protected $table = 'invites';
 
     const VALID_YES = 1;
@@ -26,31 +27,37 @@ class Invite extends NexusModel
 
     const TEMPORARY_INVITE_VALID_DAYS = 7;
 
+    /** @var  array<string, string> */
     protected $casts = [
         'expired_at' => 'datetime',
     ];
 
+    /** @var  array<int|string, mixed> */
     public static $validInfo = [
         self::VALID_NO => ['text' => 'No'],
         self::VALID_YES => ['text' => 'Yes'],
     ];
 
+    /** @var  list<string> */
     protected $fillable = [
         'inviter', 'invitee', 'hash', 'time_invited', 'valid',
         'invitee_register_uid', 'invitee_register_email', 'invitee_register_username',
         'pre_register_email', 'pre_register_username',
     ];
 
+    /** @return  mixed */
     public function getValidTextAttribute()
     {
         return self::$validInfo[$this->valid]['text'] ?? '';
     }
 
+    /** @return  \Illuminate\Database\Eloquent\Relations\BelongsTo<User, $this> */
     public function inviter_user()
     {
         return $this->belongsTo(User::class, 'inviter');
     }
 
+    /** @return  \Illuminate\Database\Eloquent\Relations\BelongsTo<User, $this> */
     public function invitee_user()
     {
         return $this->belongsTo(User::class, 'invitee_register_uid');

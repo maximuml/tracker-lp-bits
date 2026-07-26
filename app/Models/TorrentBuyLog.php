@@ -15,15 +15,19 @@ use Nexus\Database\NexusDB;
 
 class TorrentBuyLog extends NexusModel
 {
+    /** @var  bool */
     public $timestamps = true;
 
+    /** @var  list<string> */
     protected $fillable = ['uid', 'torrent_id', 'price', 'channel'];
 
+    /** @return  \Illuminate\Database\Eloquent\Relations\BelongsTo<User, $this> */
     public function user()
     {
         return $this->belongsTo(User::class, 'uid');
     }
 
+    /** @return  \Illuminate\Database\Eloquent\Relations\BelongsTo<Torrent, $this> */
     public function torrent()
     {
         return $this->belongsTo(Torrent::class, 'torrent_id');

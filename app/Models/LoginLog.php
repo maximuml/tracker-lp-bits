@@ -14,8 +14,10 @@ namespace App\Models;
 
 class LoginLog extends NexusModel
 {
+    /** @var  bool */
     public $timestamps = true;
 
+    /** @var  list<string> */
     protected $fillable = [
         'uid', 'ip', 'country', 'city', 'client'
     ];

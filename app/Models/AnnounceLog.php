@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 
 class AnnounceLog extends NexusModel
 {
+    /** @var  list<string> */
     protected $fillable = [
         'timestamp', 'user_id', 'passkey', 'torrent_id', 'info_hash', 'torrent_size',
         'promotion_state', 'promotion_state_desc', 'up_factor', 'up_factor_desc', 'down_factor', 'down_factor_desc',
@@ -20,11 +21,15 @@ class AnnounceLog extends NexusModel
         'continent', 'country', 'city', 'request_id', 'batch_no'
     ];
 
+    /** @var  string */
     protected $table = null;
+    /** @var  string */
     protected $primaryKey = "request_id";
 
+    /** @var  string */
     protected $keyType = 'string';
 
+    /** @return  \Illuminate\Database\Eloquent\Casts\Attribute<mixed, mixed> */
     protected function timestamp(): Attribute
     {
         return Attribute::make(
@@ -34,6 +39,7 @@ class AnnounceLog extends NexusModel
         );
     }
 
+    /** @return  \Illuminate\Database\Eloquent\Casts\Attribute<mixed, mixed> */
     protected function started(): Attribute
     {
         return Attribute::make(
@@ -43,6 +49,7 @@ class AnnounceLog extends NexusModel
         );
     }
 
+    /** @return  \Illuminate\Database\Eloquent\Casts\Attribute<mixed, mixed> */
     protected function prevAction(): Attribute
     {
         return Attribute::make(
@@ -52,6 +59,7 @@ class AnnounceLog extends NexusModel
         );
     }
 
+    /** @return  \Illuminate\Database\Eloquent\Casts\Attribute<mixed, mixed> */
     protected function lastAction(): Attribute
     {
         return Attribute::make(
@@ -61,6 +69,10 @@ class AnnounceLog extends NexusModel
         );
     }
 
+    /**
+     * @param  ?string  $time
+     * @param  string  $format
+     */
     private function toLocaleTime(?string $time, string $format = "Y-m-d H:i:s"): ?string
     {
         static $fromTimezone;
@@ -82,6 +94,7 @@ class AnnounceLog extends NexusModel
         return $date->format($format);
     }
 
+    /** @return  array<int|string, mixed> */
     public static function listEvents(): array
     {
         $result = [];

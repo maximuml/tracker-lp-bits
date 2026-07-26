@@ -26,8 +26,10 @@ class AgentAllow extends NexusModel
 {
     use NexusActivityLogTrait;
 
+    /** @var  string */
     protected $table = 'agent_allowed_family';
 
+    /** @var  list<string> */
     protected $fillable = [
         'family', 'start_name', 'exception', 'allowhttps', 'comment',
         'peer_id_pattern', 'peer_id_match_num', 'peer_id_matchtype', 'peer_id_start',
@@ -37,11 +39,13 @@ class AgentAllow extends NexusModel
     const MATCH_TYPE_DEC = 'dec';
     const MATCH_TYPE_HEX = 'hex';
 
+    /** @var  array<int|string, mixed> */
     public static $matchTypes = [
         self::MATCH_TYPE_DEC => 'dec',
         self::MATCH_TYPE_HEX => 'hex',
     ];
 
+    /** @return  mixed */
     protected static function booted()
     {
         static::created(function ($model) {
@@ -55,6 +59,7 @@ class AgentAllow extends NexusModel
         });
     }
 
+    /** @return  \Illuminate\Database\Eloquent\Relations\HasMany<AgentDeny, $this> */
     public function denies(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(AgentDeny::class, 'family_id');

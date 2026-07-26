@@ -25,14 +25,17 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 class ExamUser extends NexusModel
 {
+    /** @var  list<string> */
     protected $fillable = ['exam_id', 'uid', 'status', 'progress', 'begin', 'end', 'is_done'];
 
+    /** @var  bool */
     public $timestamps = true;
 
     const STATUS_NORMAL = 0;
     const STATUS_FINISHED = 1;
     const STATUS_AVOIDED = -1;
 
+    /** @var  array<int|string, mixed> */
     public static array $status = [
         self::STATUS_NORMAL => ['text' => 'Normal'],
         self::STATUS_FINISHED => ['text' => 'Finished'],
@@ -42,12 +45,14 @@ class ExamUser extends NexusModel
     const IS_DONE_YES = 1;
     const IS_DONE_NO = 0;
 
+    /** @var  array<int|string, mixed> */
     public static array $isDoneInfo = [
         self::IS_DONE_YES => ['text' => 'Yes'],
         self::IS_DONE_NO => ['text' => 'No'],
     ];
 
 
+    /** @var  array<string, string> */
     protected $casts = [
         'progress' => 'json'
     ];
@@ -62,12 +67,17 @@ class ExamUser extends NexusModel
         return self::$isDoneInfo[$this->is_done]['text'] ?? '';
     }
 
+    /** @return  array<int|string, mixed> */
     public function getProgressFormattedAttribute(): array
     {
         $examRep = new ExamRepository();
         return $examRep->getProgressFormatted($this->exam, $this->progress);
     }
 
+    /**
+     * @param  mixed  $onlyKeyValue
+     * @return  array<int|string, mixed>
+     */
     public static function listStatus($onlyKeyValue = false): array
     {
         $result = self::$status;
@@ -83,6 +93,7 @@ class ExamUser extends NexusModel
         return $result;
     }
 
+    /** @return  mixed */
     public function getBeginAttribute()
     {
         $begin = $this->getRawOriginal('begin');
@@ -105,6 +116,7 @@ class ExamUser extends NexusModel
         return null;
     }
 
+    /** @return  mixed */
     public function getEndAttribute()
     {
         $end = $this->getRawOriginal('end');
@@ -129,25 +141,19 @@ class ExamUser extends NexusModel
     }
 
 
-    /**
-     * @return BelongsTo<Exam, $this>
-     */
+    /** @return  \Illuminate\Database\Eloquent\Relations\BelongsTo<Exam, $this> */
     public function exam(): BelongsTo
     {
         return $this->belongsTo(Exam::class, 'exam_id');
     }
 
-    /**
-     * @return BelongsTo<User, $this>
-     */
+    /** @return  \Illuminate\Database\Eloquent\Relations\BelongsTo<User, $this> */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'uid');
     }
 
-    /**
-     * @return HasMany<ExamProgress, $this>
-     */
+    /** @return  \Illuminate\Database\Eloquent\Relations\HasMany<ExamProgress, $this> */
     public function progresses(): HasMany
     {
         return $this->hasMany(ExamProgress::class, 'exam_user_id');

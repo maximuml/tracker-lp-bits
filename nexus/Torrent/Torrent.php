@@ -19,19 +19,22 @@ class Torrent
         if (empty($torrentIdArr)) {
             return [];
         }
-        $torrentIdStr = implode(',', $torrentIdArr);
         //seeding or leeching, from peers
-        $whereStr = sprintf("userid = %s and torrent in (%s)", $uid, $torrentIdStr);
-        $peerList = NexusDB::getAll('peers', $whereStr, 'torrent, to_go');
-        $peerList = array_column($peerList,'to_go', 'torrent');
+        $peerList = NexusDB::table('peers')
+            ->where('userid', $uid)
+            ->whereIn('torrent', $torrentIdArr)
+            ->pluck('to_go', 'torrent')
+            ->toArray();
         //download progress, from snatched
-        $sql = sprintf(
-            "select snatched.to_go, snatched.torrentid, torrents.size from snatched inner join torrents on snatched.torrentid = torrents.id where snatched.userid = %s and snatched.torrentid in (%s)",
-            $uid, $torrentIdStr
-        );
         $snatchedList = [];
-        $res = NexusDB::select($sql);
+        $res = NexusDB::table('snatched')
+            ->join('torrents', 'snatched.torrentid', '=', 'torrents.id')
+            ->select('snatched.to_go', 'snatched.torrentid', 'torrents.size')
+            ->where('snatched.userid', $uid)
+            ->whereIn('snatched.torrentid', $torrentIdArr)
+            ->get();
         foreach ($res as $row) {
+            $row = (array) $row;
             $id = $row['torrentid'];
             $activeStatus = 'inactivity';
             if (isset($peerList[$id])) {

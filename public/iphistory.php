@@ -22,12 +22,17 @@ $order = $_GET['order'] ?? '';
 
 list($pagertop, $pagerbottom, , $offset, $perpage) = pager($perpage, $countrows, "iphistory.php?id=$userid&order=$order&");
 
-$limit = "LIMIT $perpage OFFSET $offset";
-$query = "SELECT u.id, u.ip AS ip, last_access AS access FROM users as u WHERE u.id = $userid
-UNION DISTINCT SELECT u.id, iplog.ip as ip, iplog.access as access FROM users AS u
-RIGHT JOIN iplog on u.id = iplog.userid WHERE u.id = $userid ORDER BY access DESC $limit";
-
-$rows = \Nexus\Database\NexusDB::select($query);
+$userHistory = \Nexus\Database\NexusDB::table('users as u')
+    ->select('u.id', 'u.ip as ip', 'last_access as access')
+    ->where('u.id', $userid);
+$ipLogHistory = \Nexus\Database\NexusDB::table('iplog')
+    ->select('iplog.userid as id', 'iplog.ip as ip', 'iplog.access as access')
+    ->where('iplog.userid', $userid);
+$rows = $userHistory->union($ipLogHistory)
+    ->orderBy('access', 'desc')
+    ->limit($perpage)
+    ->offset($offset)
+    ->get();
 
 stdhead($lang_iphistory['head_ip_history_log_for'].$username);
 begin_main_frame();

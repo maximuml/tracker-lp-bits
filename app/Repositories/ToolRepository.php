@@ -478,7 +478,12 @@ class ToolRepository extends BaseRepository
         $hitAndRunTableExists = NexusDB::hasTable($hitAndRunTable);
         $idsField = NexusDB::groupConcatField('id');
         while (true) {
-            $snatchRes = NexusDB::select("select userid, torrentid, $idsField as ids from snatched group by userid, torrentid having(count(*)) > 1 limit $size");
+            $snatchRes = NexusDB::table('snatched')
+                ->select('userid', 'torrentid', NexusDB::raw("$idsField as ids"))
+                ->groupBy('userid', 'torrentid')
+                ->havingRaw('count(*) > 1')
+                ->limit($size)
+                ->get();
             if (empty($snatchRes)) {
                 break;
             }
@@ -489,17 +494,18 @@ class ToolRepository extends BaseRepository
                 $idArr = explode(',', $snatchRow['ids']);
                 sort($idArr, SORT_NUMERIC);
                 $remainId = array_pop($idArr);
-                $delIdStr = implode(',', $idArr);
-                do_log("[DELETE_DUPLICATED_SNATCH], torrent: $torrentId, user: $userId, snatchIdStr: $delIdStr");
-                NexusDB::statement("delete from snatched where id in ($delIdStr)");
+                do_log("[DELETE_DUPLICATED_SNATCH], torrent: $torrentId, user: $userId, snatchIdStr: " . implode(',', $idArr));
+                if (! empty($idArr)) {
+                    NexusDB::table('snatched')->whereIn('id', $idArr)->delete();
+                }
                 if ($claimTableExists) {
-                    NexusDB::statement("update $claimTable set snatched_id = $remainId where torrent_id = $torrentId and uid = $userId");
+                    NexusDB::table($claimTable)->where('torrent_id', $torrentId)->where('uid', $userId)->update(['snatched_id' => $remainId]);
                 }
                 if ($hitAndRunTableExists) {
-                    NexusDB::statement("update $hitAndRunTable set snatched_id = $remainId where torrent_id = $torrentId and uid = $userId");
+                    NexusDB::table($hitAndRunTable)->where('torrent_id', $torrentId)->where('uid', $userId)->update(['snatched_id' => $remainId]);
                 }
                 if ($stickyPromotionExists) {
-                    NexusDB::statement("update $stickyPromotionParticipatorsTable set snatched_id = $remainId where torrent_id = $torrentId and uid = $userId");
+                    NexusDB::table($stickyPromotionParticipatorsTable)->where('torrent_id', $torrentId)->where('uid', $userId)->update(['snatched_id' => $remainId]);
                 }
             }
         }
@@ -510,9 +516,14 @@ class ToolRepository extends BaseRepository
         $size = 2000;
         $idsField = NexusDB::groupConcatField('id');
         while (true) {
-            $results = NexusDB::select("select torrent, userid, $idsField as ids from peers group by torrent, peer_id, userid having(count(*)) > 1 limit $size");
+            $results = NexusDB::table('peers')
+                ->select('torrent', 'userid', NexusDB::raw("$idsField as ids"))
+                ->groupBy('torrent', 'peer_id', 'userid')
+                ->havingRaw('count(*) > 1')
+                ->limit($size)
+                ->get();
             if (empty($results)) {
-                do_log("[DELETE_DUPLICATED_PEERS], no data: ". last_query());
+                do_log("[DELETE_DUPLICATED_PEERS], no data");
                 break;
             }
             do_log("[DELETE_DUPLICATED_PEERS], count: " . count($results));
@@ -522,9 +533,10 @@ class ToolRepository extends BaseRepository
                 $idArr = explode(',', $row['ids']);
                 sort($idArr, SORT_NUMERIC);
                 $remainId = array_pop($idArr);
-                $delIdStr = implode(',', $idArr);
-                do_log("[DELETE_DUPLICATED_PEERS], torrent: $torrentId, user: $userId, snatchIdStr: $delIdStr");
-                NexusDB::statement("delete from peers where id in ($delIdStr)");
+                do_log("[DELETE_DUPLICATED_PEERS], torrent: $torrentId, user: $userId, snatchIdStr: " . implode(',', $idArr));
+                if (! empty($idArr)) {
+                    NexusDB::table('peers')->whereIn('id', $idArr)->delete();
+                }
             }
         }
     }

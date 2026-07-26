@@ -448,176 +448,59 @@ if ($showstats_main == "yes")
 ?>
 <h2><?php echo $lang_index['text_tracker_statistics'] ?></h2>
 <table width="100%"><tr><td class="text" align="center">
-<table width="60%" class="main" border="1" cellspacing="0" cellpadding="10">
 <?php
-	$Cache->new_page('stats_users', 3000, true);
+	$Cache->new_page('homepage_stats_grid', 1800, true);
 	if (!$Cache->get_page()){
 	$Cache->add_whole_row();
 	$userStats = \App\Repositories\IndexRepository::getUserStats();
-	$registered = number_format($userStats['registered']);
-	$unverified = number_format($userStats['unverified']);
-	$totalonlinetoday = number_format($userStats['totalonlinetoday']);
-	$totalonlineweek = number_format($userStats['totalonlineweek']);
-	$VIP = number_format($userStats['vip']);
-	$donated = number_format($userStats['donated']);
-	$warned = number_format($userStats['warned']);
-	$disabled = number_format($userStats['disabled']);
-	$registered_male = number_format($userStats['registered_male']);
-	$registered_female = number_format($userStats['registered_female']);
-?>
-<tr>
-<?php
-	twotd($lang_index['row_users_active_today'],$totalonlinetoday);
-	twotd($lang_index['row_users_active_this_week'],$totalonlineweek);
-?>
-</tr>
-<tr>
-<?php
-	twotd($lang_index['row_registered_users'],$registered." / ".number_format($maxusers));
-	twotd($lang_index['row_unconfirmed_users'],$unverified);
-?>
-</tr>
-<tr>
-<?php
-	twotd(get_user_class_name(UC_VIP,false,false,true),$VIP);
-	twotd($lang_index['row_donors']." <img class=\"star\" src=\"pic/trans.gif\" alt=\"Donor\" />",$donated);
-?>
-</tr>
-<tr>
-<?php
-	twotd($lang_index['row_warned_users']." <img class=\"warned\" src=\"pic/trans.gif\" alt=\"warned\" />",$warned);
-	twotd($lang_index['row_banned_users']." <img class=\"disabled\" src=\"pic/trans.gif\" alt=\"disabled\" />",$disabled);
-?>
-</tr>
-<tr>
-<?php
-	twotd($lang_index['row_male_users'],$registered_male);
-	twotd($lang_index['row_female_users'],$registered_female);
-?>
-</tr>
-<?php
-	$Cache->end_whole_row();
-	$Cache->cache_page();
-	}
-	echo $Cache->next_row();
-?>
-<tr><td colspan="4" class="rowhead">&nbsp;</td></tr>
-<?php
-	$Cache->new_page('stats_torrents', 1800, true);
-	if (!$Cache->get_page()){
-	$Cache->add_whole_row();
 	$torrentStats = \App\Repositories\IndexRepository::getTorrentStats();
-	$torrents = number_format($torrentStats['torrents']);
-	$dead = number_format($torrentStats['dead']);
-	$seeders = $torrentStats['seeders'];
-	$leechers = $torrentStats['leechers'];
-	$ratio = $torrentStats['ratio'];
-	$activewebusernow = number_format($torrentStats['activewebusernow']);
-	$activetrackerusernow = number_format($torrentStats['activetrackerusernow']);
-	$peers = number_format($torrentStats['peers']);
-	$seeders = number_format($seeders);
-	$leechers = number_format($leechers);
-	$totaltorrentssize = mksize($torrentStats['totaltorrentssize']);
-	$totaluploaded = $torrentStats['totaluploaded'];
-	$totaldownloaded = $torrentStats['totaldownloaded'];
-	$totaldata = $torrentStats['totaldata'];
-?>
-<tr>
-<?php
-	twotd($lang_index['row_torrents'],$torrents);
-	twotd($lang_index['row_dead_torrents'],$dead);
-?>
-</tr>
-<tr>
-<?php
-	twotd($lang_index['row_seeders'],$seeders);
-	twotd($lang_index['row_leechers'],$leechers);
-?>
-</tr>
-<tr>
-<?php
-	twotd($lang_index['row_peers'],$peers);
-	twotd($lang_index['row_seeder_leecher_ratio'],$ratio."%");
-?>
-</tr>
-<tr>
-<?php
-	twotd($lang_index['row_active_browsing_users'], $activewebusernow);
-	twotd($lang_index['row_tracker_active_users'], $activetrackerusernow);
-?>
-</tr>
-<tr>
-<?php
-	twotd($lang_index['row_total_size_of_torrents'],$totaltorrentssize);
-	twotd($lang_index['row_total_uploaded'],mksize($totaluploaded));
-?>
-</tr>
-<tr>
-<?php
-	twotd($lang_index['row_total_downloaded'],mksize($totaldownloaded));
-	twotd($lang_index['row_total_data'],mksize($totaldata));
-?>
-</tr>
-<?php
-	$Cache->end_whole_row();
-	$Cache->cache_page();
-	}
-	echo $Cache->next_row();
-?>
-<tr><td colspan="4" class="rowhead">&nbsp;</td></tr>
-<?php
-	$Cache->new_page('stats_classes', 4535, true);
-	if (!$Cache->get_page()){
-	$Cache->add_whole_row();
 	$classStats = \App\Repositories\IndexRepository::getClassStats();
-	$peasants =  number_format($classStats[UC_PEASANT]);
-	$users = number_format($classStats[UC_USER]);
-	$powerusers = number_format($classStats[UC_POWER_USER]);
-	$eliteusers = number_format($classStats[UC_ELITE_USER]);
-	$crazyusers = number_format($classStats[UC_CRAZY_USER]);
-	$insaneusers = number_format($classStats[UC_INSANE_USER]);
-	$veteranusers = number_format($classStats[UC_VETERAN_USER]);
-	$extremeusers = number_format($classStats[UC_EXTREME_USER]);
-	$ultimateusers = number_format($classStats[UC_ULTIMATE_USER]);
-	$nexusmasters = number_format($classStats[UC_NEXUS_MASTER]);
-?>
-<tr>
-<?php
-	twotd(get_user_class_name(UC_PEASANT,false,false,true)." <img class=\"leechwarned\" src=\"pic/trans.gif\" alt=\"leechwarned\" />",$peasants);
-	twotd(get_user_class_name(UC_USER,false,false,true),$users);
-?>
-</tr>
-<tr>
-<?php
-	twotd(get_user_class_name(UC_POWER_USER,false,false,true),$powerusers);
-	twotd(get_user_class_name(UC_ELITE_USER,false,false,true),$eliteusers);
-?>
-</tr>
-<tr>
-<?php
-	twotd(get_user_class_name(UC_CRAZY_USER,false,false,true),$crazyusers);
-	twotd(get_user_class_name(UC_INSANE_USER,false,false,true),$insaneusers);
-?>
-</tr>
-<tr>
-<?php
-	twotd(get_user_class_name(UC_VETERAN_USER,false,false,true),$veteranusers);
-	twotd(get_user_class_name(UC_EXTREME_USER,false,false,true),$extremeusers);
-?>
-</tr>
-<tr>
-<?php
-	twotd(get_user_class_name(UC_ULTIMATE_USER,false,false,true),$ultimateusers);
-	twotd(get_user_class_name(UC_NEXUS_MASTER,false,false,true),$nexusmasters);
-?>
-</tr>
-<?php
+	$sections = [
+		$lang_index['text_users'] ?? 'Users' => [
+			['label' => $lang_index['row_users_active_today'], 'value' => number_format($userStats['totalonlinetoday'])],
+			['label' => $lang_index['row_users_active_this_week'], 'value' => number_format($userStats['totalonlineweek'])],
+			['label' => $lang_index['row_registered_users'], 'value' => number_format($userStats['registered']) . ' / ' . number_format($maxusers)],
+			['label' => $lang_index['row_unconfirmed_users'], 'value' => number_format($userStats['unverified'])],
+			['label' => get_user_class_name(UC_VIP, false, false, true), 'value' => number_format($userStats['vip'])],
+			['label' => $lang_index['row_donors'] . ' <img class="star" src="pic/trans.gif" alt="Donor" />', 'value' => number_format($userStats['donated'])],
+			['label' => $lang_index['row_warned_users'] . ' <img class="warned" src="pic/trans.gif" alt="warned" />', 'value' => number_format($userStats['warned'])],
+			['label' => $lang_index['row_banned_users'] . ' <img class="disabled" src="pic/trans.gif" alt="disabled" />', 'value' => number_format($userStats['disabled'])],
+			['label' => $lang_index['row_male_users'], 'value' => number_format($userStats['registered_male'])],
+			['label' => $lang_index['row_female_users'], 'value' => number_format($userStats['registered_female'])],
+		],
+		$lang_index['text_torrents'] ?? 'Torrents' => [
+			['label' => $lang_index['row_torrents'], 'value' => number_format($torrentStats['torrents'])],
+			['label' => $lang_index['row_dead_torrents'], 'value' => number_format($torrentStats['dead'])],
+			['label' => $lang_index['row_seeders'], 'value' => number_format($torrentStats['seeders'])],
+			['label' => $lang_index['row_leechers'], 'value' => number_format($torrentStats['leechers'])],
+			['label' => $lang_index['row_peers'], 'value' => number_format($torrentStats['peers'])],
+			['label' => $lang_index['row_seeder_leecher_ratio'], 'value' => $torrentStats['ratio'] . '%'],
+			['label' => $lang_index['row_active_browsing_users'], 'value' => number_format($torrentStats['activewebusernow'])],
+			['label' => $lang_index['row_tracker_active_users'], 'value' => number_format($torrentStats['activetrackerusernow'])],
+			['label' => $lang_index['row_total_size_of_torrents'], 'value' => mksize($torrentStats['totaltorrentssize'])],
+			['label' => $lang_index['row_total_uploaded'], 'value' => mksize($torrentStats['totaluploaded'])],
+			['label' => $lang_index['row_total_downloaded'], 'value' => mksize($torrentStats['totaldownloaded'])],
+			['label' => $lang_index['row_total_data'], 'value' => mksize($torrentStats['totaldata'])],
+		],
+		$lang_index['text_user_classes'] ?? 'User Classes' => [
+			['label' => get_user_class_name(UC_PEASANT, false, false, true) . ' <img class="leechwarned" src="pic/trans.gif" alt="leechwarned" />', 'value' => number_format($classStats[UC_PEASANT])],
+			['label' => get_user_class_name(UC_USER, false, false, true), 'value' => number_format($classStats[UC_USER])],
+			['label' => get_user_class_name(UC_POWER_USER, false, false, true), 'value' => number_format($classStats[UC_POWER_USER])],
+			['label' => get_user_class_name(UC_ELITE_USER, false, false, true), 'value' => number_format($classStats[UC_ELITE_USER])],
+			['label' => get_user_class_name(UC_CRAZY_USER, false, false, true), 'value' => number_format($classStats[UC_CRAZY_USER])],
+			['label' => get_user_class_name(UC_INSANE_USER, false, false, true), 'value' => number_format($classStats[UC_INSANE_USER])],
+			['label' => get_user_class_name(UC_VETERAN_USER, false, false, true), 'value' => number_format($classStats[UC_VETERAN_USER])],
+			['label' => get_user_class_name(UC_EXTREME_USER, false, false, true), 'value' => number_format($classStats[UC_EXTREME_USER])],
+			['label' => get_user_class_name(UC_ULTIMATE_USER, false, false, true), 'value' => number_format($classStats[UC_ULTIMATE_USER])],
+			['label' => get_user_class_name(UC_NEXUS_MASTER, false, false, true), 'value' => number_format($classStats[UC_NEXUS_MASTER])],
+		],
+	];
+	require __DIR__ . '/../resources/views/partials/homepage-stats.php';
 	$Cache->end_whole_row();
 	$Cache->cache_page();
 	}
 	echo $Cache->next_row();
 ?>
-</table>
 </td></tr></table>
 <?php
 }

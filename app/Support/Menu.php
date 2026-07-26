@@ -15,6 +15,7 @@ final class Menu
     /**
      * Build the main menu.
      *
+     * @param  array<string, string>  $langFunctions
      * @return array{html: string, selected: string}
      */
     public static function render(

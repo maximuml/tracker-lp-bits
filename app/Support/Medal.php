@@ -16,6 +16,8 @@ final class Medal
      * Build the HTML for a collection of user medals.
      *
      * Mirrors `build_medal_image()`.
+     *
+     * @param  Collection<int, \App\Models\Medal>  $medals
      */
     public static function buildImages(Collection $medals, int|string $maxHeight = 200, bool $withActions = false): string
     {

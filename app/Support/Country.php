@@ -16,7 +16,11 @@ final class Country
      *
      * Mirrors `get_country_row()`.
      */
-    public static function row($cache, int|string $id): ?array
+    /**
+     * @param  mixed  $cache
+     * @return array<string, mixed>|null
+     */
+    public static function row(mixed $cache, int|string $id): ?array
     {
         $cacheKey = 'country_' . $id . '_content';
         $row = method_exists($cache, 'get_value') ? $cache->get_value($cacheKey) : false;

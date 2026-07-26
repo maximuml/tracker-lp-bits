@@ -16,6 +16,9 @@ final class View
      * Mirrors `render()`. If `$return` is true the buffered output is
      * returned; otherwise the script dies after printing it.
      */
+    /**
+     * @param  array<string, mixed>  $data
+     */
     public static function render(string $view, array $data, bool $return, string $rootPath): mixed
     {
         extract($data);

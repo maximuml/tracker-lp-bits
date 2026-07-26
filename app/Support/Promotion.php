@@ -47,6 +47,9 @@ final class Promotion
      *
      * Mirrors `get_torrent_bg_color()`.
      */
+    /**
+     * @param  array<string, mixed>  $torrent
+     */
     public static function backgroundStyle(
         int $promotion,
         string $posState,
@@ -86,6 +89,10 @@ final class Promotion
      *
      * Mirrors `get_torrent_promotion_append()`.
      */
+    /**
+     * @param  array<string, string>  $labels
+     * @param  array<string, int>  $expires
+     */
     public static function append(
         int $promotion,
         string $forceMode,
@@ -106,6 +113,10 @@ final class Promotion
      *
      * Mirrors `get_torrent_promotion_append_sub()`.
      */
+    /**
+     * @param  array<string, string>  $labels
+     * @param  array<string, int>  $expires
+     */
     public static function appendSub(
         int $promotion,
         string $forceMode,
@@ -121,6 +132,10 @@ final class Promotion
         return self::render($promotion, $forceMode, $showTimeLeft, $added, $promotionTimeType, $promotionUntil, $ignoreGlobal, $appendPromotion, $labels, $expires, true);
     }
 
+    /**
+     * @param  array<string, string>  $labels
+     * @param  array<string, int>  $expires
+     */
     private static function render(
         int $promotion,
         string $forceMode,

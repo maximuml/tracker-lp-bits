@@ -19,6 +19,9 @@ final class Api
      * Mirrors `api()`:
      *   - < 3 arguments: `ret = -1`, `$args[0]` is the message, `$args[1]` is data.
      *   - >= 3 arguments: `ret = $args[0]`, `msg = $args[1]`, `data = $args[2]`.
+     *
+     * @param mixed ...$args
+     * @return array<string, mixed>
      */
     public static function call(...$args): array
     {
@@ -88,6 +91,9 @@ final class Api
      * Mirrors `success()`:
      *   - 1 argument: data only.
      *   - 2 arguments: message and data.
+     *
+     * @param mixed ...$args
+     * @return array<string, mixed>
      */
     public static function success(...$args): array
     {
@@ -112,6 +118,9 @@ final class Api
      * Mirrors `fail()`:
      *   - 1 argument: data only.
      *   - 2 arguments: message and data.
+     *
+     * @param mixed ...$args
+     * @return array<string, mixed>
      */
     public static function fail(...$args): array
     {

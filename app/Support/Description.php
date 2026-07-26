@@ -40,6 +40,8 @@ final class Description
      * Mirrors `format_description()`: resolves `[attach]` tags to attachment
      * URLs, normalises `[quote=...]` to `[quote]`, collapses nested quotes,
      * then splits the description into attachment/image/url/quote/text nodes.
+     *
+     * @return array<int, array<string, mixed>>
      */
     public static function parse(string $description): array
     {
@@ -144,7 +146,8 @@ final class Description
      *
      * Backs the legacy `get_image_from_description()` helper.
      *
-     * @param  array<int|string, mixed>  $descriptionArr
+     * @param  array<int, array<string, mixed>>  $descriptionArr
+     * @return array<int, string>|string
      */
     public static function imageFromDescription(array $descriptionArr, bool $first = false, bool $useDefault = true): array|string
     {

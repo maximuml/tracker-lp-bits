@@ -16,6 +16,7 @@ use Nexus\Database\NexusDB;
  */
 final class Style
 {
+    /** @var array<int, array<string, mixed>>|null */
     private static ?array $stylesheetRows = null;
 
     /**
@@ -24,7 +25,11 @@ final class Style
      *
      * Mirrors `get_css_row()`.
      */
-    public static function cssRow($cache, int|string $cssId, int|string $defaultId): ?array
+    /**
+     * @param  mixed  $cache
+     * @return array<string, mixed>|null
+     */
+    public static function cssRow(mixed $cache, int|string $cssId, int|string $defaultId): ?array
     {
         if (self::$stylesheetRows === null) {
             $cached = method_exists($cache, 'get_value') ? $cache->get_value('stylesheet_content') : false;
@@ -51,7 +56,10 @@ final class Style
      *
      * Mirrors `get_css_uri()`.
      */
-    public static function cssUri($cache, int|string $cssId, int|string $defaultId, string $file = ''): string
+    /**
+     * @param  mixed  $cache
+     */
+    public static function cssUri(mixed $cache, int|string $cssId, int|string $defaultId, string $file = ''): string
     {
         $row = self::cssRow($cache, $cssId, $defaultId);
         $uri = $row['uri'] ?? NexusDB::table('stylesheets')->where('id', $defaultId)->value('uri');
@@ -80,7 +88,10 @@ final class Style
      *
      * Mirrors `get_style_addicode()`.
      */
-    public static function addiCode($cache, int|string $cssId, int|string $defaultId): string
+    /**
+     * @param  mixed  $cache
+     */
+    public static function addiCode(mixed $cache, int|string $cssId, int|string $defaultId): string
     {
         $row = self::cssRow($cache, $cssId, $defaultId);
 

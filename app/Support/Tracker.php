@@ -17,6 +17,9 @@ final class Tracker
      *
      * Mirrors `get_tracker_schema_and_host($trackerUrlId, $combine)`.
      */
+    /**
+     * @return array<string, string>|string
+     */
     public static function schemaAndHost(int $trackerUrlId, bool $combine = false): array|string
     {
         $log = "tracker_url_id: $trackerUrlId, combine: " . ($combine ? 'true' : 'false');

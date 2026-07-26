@@ -270,6 +270,9 @@ final class Comment
      *
      * Mirrors `commenttable()` from `include/functions.php`.
      */
+    /**
+     * @param  array<int, array<string, mixed>>  $rows
+     */
     public static function table(array $rows, string $type, int|string $parentId, bool $review = false): string
     {
         global $lang_functions, $CURUSER, $commanage_class;

@@ -27,6 +27,8 @@ final class Locale
      * Return the list of available language folders.
      *
      * Mirrors `get_langfolder_list()`.
+     *
+     * @return array<int, string>
      */
     public static function available(): array
     {

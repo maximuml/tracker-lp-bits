@@ -35,6 +35,8 @@ final class Environment
      *
      * Mirrors `executeCommand()`. When `$artisan` is true, the command is
      * prefixed with the configured PHP binary and `artisan`.
+     *
+     * @return string|array<int, string>
      */
     public static function run(string $command, string $format = 'string', bool $artisan = false, bool $exception = true): string|array
     {

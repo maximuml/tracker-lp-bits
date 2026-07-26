@@ -17,6 +17,9 @@ final class TorrentAccess
      *
      * Mirrors `can_access_torrent()`.
      */
+    /**
+     * @param  array<string, mixed>|int|string  $torrent
+     */
     public static function canAccess(array|int|string $torrent, int|string $uid): bool
     {
         $specialcatmode = $GLOBALS['specialcatmode'] ?? 0;
@@ -74,6 +77,9 @@ final class TorrentAccess
      * Build the H&R icon for a torrent row, if applicable.
      *
      * Mirrors `get_hr_img()`.
+     */
+    /**
+     * @param  array<string, mixed>  $torrent
      */
     public static function hrImage(array $torrent, int|string $searchBoxId): string
     {

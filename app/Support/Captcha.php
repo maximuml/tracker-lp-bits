@@ -49,6 +49,9 @@ final class Captcha
      *
      * Mirrors `show_image_code()`.
      */
+    /**
+     * @param  array<string, string>  $labels
+     */
     public static function render(string $enabledFlag, array $labels = []): void
     {
         if ($enabledFlag !== 'yes') {

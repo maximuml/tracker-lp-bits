@@ -14,6 +14,9 @@ final class Form
      *
      * Mirrors `datetimepicker_input()`.
      */
+    /**
+     * @param  array<string, mixed>  $options
+     */
     public static function datetimepickerInput(string $name, string $value = '', string $label = '', array $options = []): string
     {
         $lang = Locale::folderFromCookie($_COOKIE['c_lang_folder'] ?? null, true);

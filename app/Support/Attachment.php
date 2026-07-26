@@ -51,6 +51,9 @@ final class Attachment
         return '<img id="attach'.$id.'" style="max-width: 700px" alt="'.htmlspecialchars($filename).'" src="'.htmlspecialchars($url).'"'.$onclick.' onmouseover="domTT_activate(this, event, \'content\', \''.$tooltip.'\', \'styleClass\', \'attach\', \'x\', findPosition(this)[0], \'y\', findPosition(this)[1]-58);" />';
     }
 
+    /**
+     * @param  array<string, mixed>  $row
+     */
     private static function renderFile(
         array $row,
         int $id,
@@ -72,6 +75,8 @@ final class Attachment
     /**
      * Fetch an attachment row by dlkey (with one-hour file cache) and
      * return the public URL for its content/thumbnail.
+     *
+     * @return array{0: array<string, mixed>|null, 1: string}
      */
     public static function rowAndUrlByKey(string $dlkey): array
     {

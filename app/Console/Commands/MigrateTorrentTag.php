@@ -6,7 +6,6 @@ use App\Models\User;
 use App\Repositories\TagRepository;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
-use Laravel\Sanctum\PersonalAccessToken;
 
 class MigrateTorrentTag extends Command
 {

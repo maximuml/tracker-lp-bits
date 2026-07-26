@@ -48,6 +48,8 @@ class AppServiceProvider extends ServiceProvider
         }
         $this->customScheduleTask();
 
+        Passport::$clientUuids = false;
+
         Filament::serving(function () {
             Filament::registerNavigationGroups([
                 'User',

@@ -622,7 +622,6 @@ if ($showshoutbox_main == "yes") //system side setting for shoutbox
 				$twoStepSecretHash = $_POST['two_step_code'];
 
 				if (!empty($twoStepSecretHash)) {
-                    $ga = new \PHPGangsta_GoogleAuthenticator();
 				    if (empty($CURUSER['two_step_secret'])) {
 				        //do bind
                         $secretToVerify = $twoStepSecret;
@@ -632,7 +631,7 @@ if ($showshoutbox_main == "yes") //system side setting for shoutbox
                         $secretToVerify = $CURUSER['two_step_secret'];
                         $data['two_step_secret'] = '';
                     }
-                    if (!$ga->verifyCode($secretToVerify, $twoStepSecretHash)) {
+                    if (!\App\Support\TwoFactorAuthHelper::verifyCode($secretToVerify, $twoStepSecretHash)) {
                         stderr($lang_usercp['std_error'], 'Invalid two step code'.goback("-2"), 0);
                         die;
                     }
@@ -764,9 +763,8 @@ EOD;
             if (!empty($CURUSER['two_step_secret'])) {
                 tr_small($lang_usercp['row_two_step_secret'],"<input type=text name=two_step_code />".$lang_usercp['text_two_step_secret_unbind_note'], 1);
             } else {
-                $ga = new \PHPGangsta_GoogleAuthenticator();
-                $twoStepSecret = $ga->createSecret();
-                $twoStepQrCodeUrl = $ga->getQRCodeGoogleUrl(sprintf('%s(%s)', get_setting('basic.SITENAME'), $CURUSER['username']), $twoStepSecret);
+                $twoStepSecret = \App\Support\TwoFactorAuthHelper::createSecret();
+                $twoStepQrCodeUrl = \App\Support\TwoFactorAuthHelper::qrCodeUrl(sprintf('%s(%s)', get_setting('basic.SITENAME'), $CURUSER['username']), $twoStepSecret);
                 $twoStepY = '<div style="display: flex;align-items:center">';
                 $twoStepY .= sprintf('<div><img src="%s" /></div>', $twoStepQrCodeUrl);
                 $twoStepY .= sprintf(

@@ -12,8 +12,6 @@
  */
 namespace App\Models;
 
-use Laravel\Passport\Client;
-
 class SocialAccount extends NexusModel
 {
     /** @var  list<string> */

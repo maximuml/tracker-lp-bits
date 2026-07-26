@@ -32,7 +32,6 @@ use App\Models\TorrentTag;
 use App\Models\User;
 use App\Utils\ApiQueryBuilder;
 use Carbon\Carbon;
-use Elasticsearch\Endpoints\Search;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Http\Request;

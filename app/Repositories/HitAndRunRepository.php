@@ -9,7 +9,6 @@ use App\Models\Setting;
 use App\Models\User;
 use App\Models\UserBanLog;
 use Carbon\Carbon;
-use Elasticsearch\Endpoints\Search;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;

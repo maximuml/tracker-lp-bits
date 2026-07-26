@@ -7,7 +7,6 @@ use App\Models\SearchBox;
 use App\Models\Torrent;
 use App\Repositories\TorrentRepository;
 use Carbon\CarbonInterface;
-use Elasticsearch\Endpoints\Search;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Auth;
 use Nexus\Nexus;

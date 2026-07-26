@@ -13,7 +13,6 @@ use App\Models\SecondIcon;
 use App\Models\Setting;
 use App\Models\Torrent;
 use App\Models\User;
-use Elasticsearch\Endpoints\Search;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;

@@ -45,18 +45,14 @@ class ImageCaptchaDriver implements CaptchaDriverInterface
             throw new CaptchaValidationException('Missing captcha parameters.');
         }
 
-        $query = sprintf(
-            "SELECT dateline FROM regimages WHERE imagehash='%s' AND imagestring='%s'",
-            \Nexus\Database\NexusDB::getInstance()->escapeString($imagehash),
-            \Nexus\Database\NexusDB::getInstance()->escapeString($imagestring)
-        );
-
-        $sql = \Nexus\Database\NexusDB::select($query);
-        $imgcheck = $sql ? array_merge((array) $sql[0], array_values((array) $sql[0])) : null;
+        $dateline = RegImage::query()
+            ->where('imagehash', $imagehash)
+            ->where('imagestring', $imagestring)
+            ->value('dateline');
 
         $this->deleteByHash($imagehash);
 
-        if (empty($imgcheck['dateline'])) {
+        if (empty($dateline)) {
             throw new CaptchaValidationException('Invalid captcha response.');
         }
 
@@ -78,14 +74,9 @@ class ImageCaptchaDriver implements CaptchaDriverInterface
 
     public function outputImage(string $imagehash): void
     {
-        $query = sprintf(
-            "SELECT imagestring FROM regimages WHERE imagehash=%s",
-            \App\Support\LegacyDb::escape($imagehash)
-        );
-
-        $sql = \Nexus\Database\NexusDB::select($query);
-        $regimage = $sql ? array_merge((array) $sql[0], array_values((array) $sql[0])) : null;
-        $imagestring = $regimage['imagestring'] ?? '';
+        $imagestring = RegImage::query()
+            ->where('imagehash', $imagehash)
+            ->value('imagestring') ?? '';
 
         if ($imagestring === '') {
             $this->renderFallback();
@@ -137,12 +128,7 @@ class ImageCaptchaDriver implements CaptchaDriverInterface
             return;
         }
 
-        $delete = sprintf(
-            "DELETE FROM regimages WHERE imagehash='%s'",
-            \Nexus\Database\NexusDB::getInstance()->escapeString($imagehash)
-        );
-
-        \Nexus\Database\NexusDB::getInstance()->query($delete);
+        RegImage::query()->where('imagehash', $imagehash)->delete();
     }
 
     protected function renderFallback(): void

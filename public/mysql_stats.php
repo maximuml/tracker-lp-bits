@@ -140,9 +140,8 @@ foreach ($statusRows as $row) {
 /**
  * Displays the page
  */
-//Uptime calculation
-$uptimeRow = \Nexus\Database\NexusDB::select('SELECT UNIX_TIMESTAMP() - ' . (int)$serverStatus['Uptime'] . ' AS uptime')[0] ?? [];
-$row = [$uptimeRow['uptime'] ?? 0];
+//Uptime calculation (use PHP time instead of a raw SQL call)
+$row = [time() - (int) ($serverStatus['Uptime'] ?? 0)];
 //echo sprintf("Server Status Uptime", timespanFormat($serverStatus['Uptime']), localisedDate($row[0])) . "\n";
 ?>
 

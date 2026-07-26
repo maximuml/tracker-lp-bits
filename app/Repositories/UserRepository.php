@@ -700,7 +700,7 @@ class UserRepository extends BaseRepository
             'messages' => 'receiver',
         ];
         foreach ($tables as $table => $key) {
-            NexusDB::statement(sprintf("delete from `%s` where `%s` in (%s)", $table, $key, $uidStr));
+            NexusDB::table($table)->whereIn($key, $uidArr)->delete();
         }
         do_log("[DESTROY_USER]: " . json_encode($uidArr), 'error');
         $userBanLogs = [];
@@ -713,7 +713,12 @@ class UserRepository extends BaseRepository
         }
         UserBanLog::query()->insert($userBanLogs);
         //delete by user, make sure torrent is deleted
-        NexusDB::statement(sprintf('DELETE FROM snatched WHERE userid IN (%s) and not exists (select 1 from torrents where id = snatched.torrentid)', $uidStr));
+        NexusDB::table('snatched')
+            ->whereIn('userid', $uidArr)
+            ->whereNotExists(function ($query) {
+                $query->selectRaw('1')->from('torrents')->whereColumn('torrents.id', '=', 'snatched.torrentid');
+            })
+            ->delete();
         if (is_int($id)) {
             do_action("user_delete", $id);
             fire_event(ModelEventEnum::USER_DELETED, $users->first());
@@ -830,11 +835,16 @@ class UserRepository extends BaseRepository
     private function listUserSeedingLeechingData(array $userIdArr)
     {
         $minSize = get_setting('bonus.min_size', 0);
-        $idStr = implode(",", $userIdArr);
-        $sql = "select peers.userid, peers.seeder, torrents.size from torrents LEFT JOIN peers ON peers.torrent = torrents.id WHERE peers.userid in ($idStr) and torrents.size > $minSize group by peers.torrent, peers.peer_id, peers.userid, peers.seeder";
-        $data = NexusDB::select($sql);
+        $data = NexusDB::table('torrents')
+            ->leftJoin('peers', 'peers.torrent', '=', 'torrents.id')
+            ->select('peers.userid', 'peers.seeder', 'torrents.size')
+            ->whereIn('peers.userid', $userIdArr)
+            ->where('torrents.size', '>', $minSize)
+            ->groupBy('peers.torrent', 'peers.peer_id', 'peers.userid', 'peers.seeder')
+            ->get();
         $result = [];
         foreach ($data as $row) {
+            $row = (array) $row;
             if (!isset($result[$row['userid']])) {
                 $result[$row['userid']] = [
                     'seeding_count' => 0,

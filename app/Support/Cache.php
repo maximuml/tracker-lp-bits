@@ -105,6 +105,54 @@ final class Cache
      * or `fwrite` returned `false`. The legacy source ignores both
      * return values and trusts the open/write/close sequence.
      */
+    /**
+     * Legacy page-cache check. Returns true when the caller should
+     * generate and buffer the page; returns false and exits when a
+     * fresh cached file was served.
+     *
+     * Backs the legacy `cache_check()` helper.
+     */
+    public static function pageCheck(string $file = 'cachefile', bool $endpage = true, int $cachetime = 600): bool
+    {
+        $rootpath = $GLOBALS['rootpath'] ?? '';
+        $cacheDir = $GLOBALS['cache'] ?? '';
+        $langDir = $GLOBALS['CURLANGDIR'] ?? '';
+        $lang = $GLOBALS['lang_functions'] ?? [];
+
+        $cachefile = self::path($rootpath, $cacheDir, $langDir, $file);
+        if (self::isFresh($cachefile, $cachetime)) {
+            include $cachefile;
+            if ($endpage) {
+                echo '<p align="center"><font class="small">' . ($lang['text_page_last_updated'] ?? '') . date('Y-m-d H:i:s', filemtime($cachefile)) . '</font></p>';
+                \end_main_frame();
+                \stdfoot();
+                exit;
+            }
+
+            return false;
+        }
+        ob_start();
+
+        return true;
+    }
+
+    /**
+     * Write the current output buffer into the legacy page-cache file.
+     *
+     * Backs the legacy `cache_save()` helper.
+     */
+    public static function pageSave(string $file = 'cachefile'): void
+    {
+        $rootpath = $GLOBALS['rootpath'] ?? '';
+        $cacheDir = $GLOBALS['cache'] ?? '';
+        $langDir = $GLOBALS['CURLANGDIR'] ?? '';
+
+        $cachefile = self::path($rootpath, $cacheDir, $langDir, $file);
+        $contents = ob_get_contents();
+        self::writeBuffer($cachefile, (string) $contents);
+        ob_end_flush();
+    }
+
     public static function writeBuffer(string $cachefile, string $contents): int|false
     {
         $fp = @fopen($cachefile, 'w');

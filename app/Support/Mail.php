@@ -13,6 +13,57 @@ use App\Repositories\ToolRepository;
 final class Mail
 {
     /**
+     * Send a legacy mail using the configured transport, reading the
+     * site/smtp configuration from legacy globals.
+     *
+     * Backs the `sent_mail()` helper.
+     */
+    public static function sentLegacy(
+        string $to,
+        string $fromName,
+        string $fromEmail,
+        string $subject,
+        string $body,
+        string $type,
+        bool $showMsg,
+        bool $multiple,
+        string $multipleMail,
+        string $hdrEncoding,
+    ): bool {
+        $lang = $GLOBALS['lang_functions'] ?? [];
+
+        return self::sent(
+            $to,
+            $fromName,
+            $fromEmail,
+            $subject,
+            $body,
+            $type,
+            $showMsg,
+            $multiple,
+            $multipleMail,
+            $hdrEncoding,
+            [
+                'site_name' => (string) ($GLOBALS['SITENAME'] ?? ''),
+                'site_email' => (string) ($GLOBALS['SITEEMAIL'] ?? ''),
+                'smtp_type' => (string) ($GLOBALS['smtptype'] ?? ''),
+                'smtp' => (string) ($GLOBALS['smtp'] ?? ''),
+                'smtp_host' => (string) ($GLOBALS['smtp_host'] ?? ''),
+                'smtp_port' => (string) ($GLOBALS['smtp_port'] ?? ''),
+                'smtp_from' => (string) ($GLOBALS['smtp_from'] ?? ''),
+            ],
+            [
+                'error' => $lang['std_error'] ?? 'Error',
+                'success' => $lang['std_success'] ?? 'Success',
+                'unable_to_send_mail' => $lang['text_unable_to_send_mail'] ?? 'Unable to send mail',
+                'confirmation_email_sent' => $lang['std_confirmation_email_sent'] ?? 'Confirmation email sent to ',
+                'account_details_sent' => $lang['std_account_details_sent'] ?? 'Account details sent to ',
+                'please_wait' => $lang['std_please_wait'] ?? 'Please wait...',
+            ]
+        );
+    }
+
+    /**
      * Send a legacy mail using the configured transport.
      *
      * Mirrors `sent_mail()`.

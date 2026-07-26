@@ -97,6 +97,23 @@ final class Locale
     /**
      * Build the relative language file path.
      *
+     * Mirrors `get_langfile_path()`. Also mutates the legacy `$CURLANGDIR`
+     * global because callers rely on it being set as a side effect.
+     */
+    public static function scriptFilePath(string $scriptName = '', bool $target = false, string $langFolder = ''): string
+    {
+        global $CURLANGDIR;
+        $CURLANGDIR = self::folderFromCookie($_COOKIE['c_lang_folder'] ?? null);
+        if ($langFolder === '') {
+            $langFolder = $CURLANGDIR;
+        }
+
+        return self::filePath($langFolder, $scriptName, $_SERVER['SCRIPT_NAME'] ?? '', $target);
+    }
+
+    /**
+     * Build the relative language file path.
+     *
      * Mirrors `get_langfile_path()` without mutating `$CURLANGDIR`.
      */
     public static function filePath(string $langFolder, string $scriptName = '', string $serverScriptName = '', bool $target = false): string
@@ -124,9 +141,22 @@ final class Locale
     }
 
     /**
-     * Return the language id for the given folder name.
+     * Return the language id for the given folder name, falling back to
+     * the current cookie folder when none is provided.
      *
      * Mirrors `get_langid_from_langcookie()`.
+     */
+    public static function idFromCookie(string $lang = ''): int
+    {
+        if ($lang === '') {
+            $lang = self::folderFromCookie($_COOKIE['c_lang_folder'] ?? null);
+        }
+
+        return self::idFromFolder($lang);
+    }
+
+    /**
+     * Return the language id for the given folder name.
      */
     public static function idFromFolder(string $lang): int
     {

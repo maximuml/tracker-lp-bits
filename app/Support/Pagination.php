@@ -153,6 +153,39 @@ final class Pagination
      * @param  int  $rpp  Rows per page
      * @param  bool  $lastPageDefault  Whether to default to the last page
      */
+    /**
+     * Full legacy pager: resolve page from `$_GET`, build labels from
+     * legacy globals, set the `$add_key_shortcut` global and return the
+     * same array shape as the legacy `pager()` helper.
+     *
+     * Backs the `pager()` helper.
+     */
+    public static function pager(int $rpp, int $count, string $href, array $opts = [], string $pagename = 'page'): array
+    {
+        $pages = (int) ceil($count / $rpp);
+        $rawPage = $_GET[$pagename] ?? null;
+        if (! is_scalar($rawPage)) {
+            $rawPage = null;
+        }
+        $page = self::resolvePage($rawPage, $count, $rpp, ! empty($opts['lastpagedefault']));
+
+        $isPresto = isset($_SERVER['HTTP_USER_AGENT']) && str_contains((string) $_SERVER['HTTP_USER_AGENT'], 'Presto');
+        $lang = $GLOBALS['lang_functions'] ?? [];
+        $labels = [
+            'prev' => (string) ($lang['text_prev'] ?? ''),
+            'next' => (string) ($lang['text_next'] ?? ''),
+            'alt_prev_title' => (string) ($lang['text_alt_pageup_shortcut'] ?? ''),
+            'alt_next_title' => (string) ($lang['text_alt_pagedown_shortcut'] ?? ''),
+            'shift_prev_title' => (string) ($lang['text_shift_pageup_shortcut'] ?? ''),
+            'shift_next_title' => (string) ($lang['text_shift_pagedown_shortcut'] ?? ''),
+        ];
+
+        $result = self::render($rpp, $count, $href, $page, $pages, $labels, $pagename, $isPresto);
+        $GLOBALS['add_key_shortcut'] = Html::keyShortcutScript($page, $pages - 1);
+
+        return $result;
+    }
+
     public static function resolvePage(
         int|string|null $raw,
         int $count,

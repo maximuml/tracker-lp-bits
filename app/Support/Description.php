@@ -139,6 +139,25 @@ final class Description
     }
 
     /**
+     * Pick image URLs from a parsed description, optionally returning
+     * only the first one with a configured default fallback.
+     *
+     * Backs the legacy `get_image_from_description()` helper.
+     *
+     * @param  array<int|string, mixed>  $descriptionArr
+     */
+    public static function imageFromDescription(array $descriptionArr, bool $first = false, bool $useDefault = true): array|string
+    {
+        if ($first) {
+            $defaultUrl = $useDefault ? \getSchemeAndHttpHost() . '/pic/nophoto.gif' : '';
+
+            return self::firstImageUrl($descriptionArr, $defaultUrl);
+        }
+
+        return self::imageUrls($descriptionArr);
+    }
+
+    /**
      * Return the first non-empty image / attachment URL, or
      * `$defaultUrl` if none was found. Used as the torrent "cover".
      *

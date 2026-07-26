@@ -213,6 +213,26 @@ final class Email
     }
 
     /**
+     * Mirrors the legacy `EmailBanned($newEmail)` helper.
+     */
+    public static function isBanned(string $email): bool
+    {
+        return self::matchesRegexList(trim(strtolower($email)), EmailDomain::banned());
+    }
+
+    /**
+     * Mirrors the legacy `EmailAllowed($newEmail)` helper.
+     */
+    public static function isAllowed(string $email): bool
+    {
+        if (\get_setting('restrictemaildomain') !== 'yes') {
+            return true;
+        }
+
+        return self::matchesRegexList(trim(strtolower($email)), EmailDomain::allowed());
+    }
+
+    /**
      * Legacy `check_email()` in one call: regex, DB banlist lookup and audit
      * logging. Mirrors the original behavior, including the per-matching-entry
      * `do_log()` and `false` return for a banned or malformed address.

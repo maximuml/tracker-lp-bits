@@ -67,6 +67,31 @@ final class Menu
         return ['html' => $html, 'selected' => $selected];
     }
 
+    /**
+     * Build and emit the main menu, including the legacy `$USERUPDATESET`
+     * page-tracking side effect. Backs the `menu()` helper.
+     */
+    public static function renderPage(): string
+    {
+        $langFunctions = $GLOBALS['lang_functions'] ?? [];
+        $customMenu = (string) \apply_filter('nexus_menu');
+
+        $result = self::render(
+            (string) ($_SERVER['SCRIPT_NAME'] ?? ''),
+            (array) $langFunctions,
+            (string) ($GLOBALS['enableoffer'] ?? ''),
+            (string) ($GLOBALS['enablespecial'] ?? ''),
+            $customMenu !== '' ? $customMenu : null,
+        );
+
+        $CURUSER = $GLOBALS['CURUSER'] ?? null;
+        if ($CURUSER && ($GLOBALS['where_tweak'] ?? '') === 'yes') {
+            $GLOBALS['USERUPDATESET'][] = 'page = ' . \App\Support\LegacyDb::escape($result['selected']);
+        }
+
+        return $result['html'];
+    }
+
     private static function selectedItem(string $scriptName): string
     {
         return match (1) {

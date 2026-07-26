@@ -106,13 +106,7 @@ function readEnvFile($envFile)
 
 function normalize_env($value)
 {
-    $normalized = \App\Support\Env::normalize($value);
-    return match (strtolower($normalized)) {
-        'true' => true,
-        'false' => false,
-        'null' => null,
-        default => $normalized,
-    };
+    return \App\Support\Env::cast($value);
 }
 
 function arr_get($array, $key, $default = null)

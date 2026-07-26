@@ -32,6 +32,17 @@ final class LegacyResponse
      * in Laravel context it throws an HttpResponseException carrying the
      * rendered frame; in legacy context it `echo`s and `die`s.
      */
+    /**
+     * Print a legacy SQL error page and stop execution.
+     *
+     * Backs the `sqlerr()` helper.
+     */
+    public static function sqlError(string $file, string $line): void
+    {
+        echo \App\Support\Frame::sqlError(\App\Support\LegacyDb::error(), $file, $line);
+        exit;
+    }
+
     public static function abort(
         string $heading,
         string $text,

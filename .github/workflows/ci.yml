@@ -55,6 +55,9 @@ jobs:
       - name: Run PHPStan level 5 on app/Console, app/Http, and app/Repositories
         run: vendor/bin/phpstan analyse -c phpstan.level5.app.neon --no-progress --memory-limit=2G
 
+      - name: Run PHPStan level 6 on app/Support
+        run: vendor/bin/phpstan analyse -c phpstan.level6.neon --no-progress --memory-limit=2G
+
       - name: Run PHPUnit unit tests
         run: vendor/bin/phpunit --testsuite Unit --no-coverage
 

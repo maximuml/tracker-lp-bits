@@ -12,6 +12,12 @@ class IpLogRepository extends BaseRepository
 
     private const CACHE_TIME = 72 * 3600;
 
+    /**
+     * @param  mixed  $userId
+     * @param  mixed  $uri
+     * @param  mixed  $ipArr
+     * @return  void
+     */
     public static function saveToCache($userId, $uri = null, $ipArr = null): void
     {
         if (!is_numeric($userId) || $userId <= 0) {

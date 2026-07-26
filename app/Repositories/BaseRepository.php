@@ -11,6 +11,10 @@ use Illuminate\Support\Str;
 
 class BaseRepository
 {
+    /**
+     * @param  array<int|string, mixed>  $params
+     * @return  array<int|string, mixed>
+     */
     protected function getSortFieldAndType(array $params): array
     {
         $field = !empty($params['sort_field']) ? $params['sort_field'] : 'id';
@@ -21,6 +25,10 @@ class BaseRepository
         return [$field, $type];
     }
 
+    /**
+     * @param  \Illuminate\Http\Request  $request
+     * @return  mixed
+     */
     protected function getPerPageFromRequest(Request $request)
     {
         $perPage =  $request->get('per_page');
@@ -31,6 +39,13 @@ class BaseRepository
         return $perPage;
     }
 
+    /**
+     * @param  mixed  $username
+     * @param  mixed  $user
+     * @param  \App\Models\User  $authenticator
+     * @param  ?\App\Models\Torrent  $torrent
+     * @return  mixed
+     */
     protected function handleAnonymous($username, $user, User $authenticator, ?Torrent $torrent = null)
     {
         if (!$user) {
@@ -51,9 +66,9 @@ class BaseRepository
     }
 
     /**
-     * @param $user
-     * @param null $fields
-     * @return User|null
+     * @param  mixed  $user
+     * @param  mixed  $fields
+     * @return  User|null
      */
     protected function getUser($user, $fields = null): User|null
     {
@@ -69,6 +84,11 @@ class BaseRepository
         return User::query()->findOrFail(intval($user), $fields);
     }
 
+    /**
+     * @param  mixed  $command
+     * @param  mixed  $format
+     * @return  string|array<int|string, mixed>
+     */
     protected function executeCommand($command, $format = 'string'): string|array
     {
         return executeCommand($command, $format);

@@ -34,9 +34,28 @@ use Nexus\Database\NexusDB;
 
 class UserRepository extends BaseRepository
 {
+    /** @var  array<int|string, mixed> */
+    /** @var  array<int|string, mixed> */
+    /** @var  array<int|string, mixed> */
+    /** @var  array<int|string, mixed> */
+    /** @var  array<int|string, mixed> */
     private static array $allowIncludes = ['inviter', 'valid_medals'];
+    /** @var  array<int|string, mixed> */
+    /** @var  array<int|string, mixed> */
+    /** @var  array<int|string, mixed> */
+    /** @var  array<int|string, mixed> */
+    /** @var  array<int|string, mixed> */
     private static array $allowIncludeFields = ['seeding_leeching_data'];
+    /** @var  array<int|string, mixed> */
+    /** @var  array<int|string, mixed> */
+    /** @var  array<int|string, mixed> */
+    /** @var  array<int|string, mixed> */
+    /** @var  array<int|string, mixed> */
     private static array $allowIncludeCounts = [];
+    /**
+     * @param  array<int|string, mixed>  $params
+     * @return  mixed
+     */
     public function getList(array $params)
     {
         $query = User::query();
@@ -57,12 +76,21 @@ class UserRepository extends BaseRepository
         return $query->paginate();
     }
 
+    /**
+     * @param  mixed  $id
+     * @return  mixed
+     */
     public function getBase($id)
     {
         $user = User::query()->findOrFail($id, ['id', 'username', 'email', 'avatar']);
         return $user;
     }
 
+    /**
+     * @param  mixed  $id
+     * @param  \Illuminate\Contracts\Auth\Authenticatable  $currentUser
+     * @return  mixed
+     */
     public function getDetail($id, Authenticatable $currentUser)
     {
         //query this info default
@@ -79,6 +107,12 @@ class UserRepository extends BaseRepository
         return $userList[0];
     }
 
+    /**
+     * @param  \App\Utils\ApiQueryBuilder  $apiQueryBuilder
+     * @param  \Illuminate\Contracts\Auth\Authenticatable  $currentUser
+     * @param  mixed  $userList
+     * @return  mixed
+     */
     private function appendIncludeFields(ApiQueryBuilder $apiQueryBuilder, Authenticatable $currentUser, $userList)
     {
         $idArr = [];
@@ -99,9 +133,8 @@ class UserRepository extends BaseRepository
 
     /**
      * create user
-     *
-     * @param array $params must: username, email, password, password_confirmation. optional: id, class, provider_id
-     * @return User
+     * @param  array<int|string, mixed>  $params
+     * @return  User
      */
     public function store(array $params)
     {
@@ -178,6 +211,12 @@ class UserRepository extends BaseRepository
         return $user;
     }
 
+    /**
+     * @param  mixed  $id
+     * @param  mixed  $password
+     * @param  mixed  $passwordConfirmation
+     * @return  mixed
+     */
     public function resetPassword($id, $password, $passwordConfirmation)
     {
         if ($password != $passwordConfirmation) {
@@ -200,15 +239,20 @@ class UserRepository extends BaseRepository
     }
 
     /**
+     * @return  array<int|string, mixed>
      * @deprecated  use User::listClass() instead !
-     *
-     * @return array
      */
     public function listClass()
     {
         return User::listClass();
     }
 
+    /**
+     * @param  \App\Models\User  $operator
+     * @param  mixed  $uid
+     * @param  mixed  $reason
+     * @return  mixed
+     */
     public function disableUser(User $operator, $uid, $reason = '')
     {
         $targetUser = User::query()->findOrFail($uid, ['id', 'enabled', 'username', 'class']);
@@ -236,6 +280,12 @@ class UserRepository extends BaseRepository
         return true;
     }
 
+    /**
+     * @param  \App\Models\User  $operator
+     * @param  mixed  $uid
+     * @param  mixed  $reason
+     * @return  mixed
+     */
     public function enableUser(User $operator, $uid, $reason = '')
     {
         $targetUser = User::query()->findOrFail($uid, ['id', 'enabled', 'username', 'class']);
@@ -264,23 +314,40 @@ class UserRepository extends BaseRepository
         return true;
     }
 
+    /** @param  int  $userId */
     private function setEnableLatelyCache(int $userId): void
     {
         NexusDB::cache_put(User::getUserEnableLatelyCacheKey($userId), now()->toDateTimeString(), 86400);
     }
 
+    /**
+     * @param  mixed  $id
+     * @return  mixed
+     */
     public function getInviteInfo($id)
     {
         $user = User::query()->findOrFail($id, ['id']);
         return $user->invitee_code()->with('inviter_user')->first();
     }
 
+    /**
+     * @param  int  $id
+     * @return  mixed
+     */
     public function getModComment(int $id)
     {
         $user = User::query()->findOrFail($id, ['modcomment']);
         return $user->modcomment;
     }
 
+    /**
+     * @param  \App\Models\User  $operator
+     * @param  mixed  $uid
+     * @param  mixed  $action
+     * @param  mixed  $field
+     * @param  mixed  $value
+     * @param  mixed  $reason
+     */
     public function incrementDecrement(User $operator, $uid, $action, $field, $value, $reason = ''): bool
     {
         $fieldMap = [
@@ -364,6 +431,10 @@ class UserRepository extends BaseRepository
         return true;
     }
 
+    /**
+     * @param  mixed  $operator
+     * @param  mixed  $uid
+     */
     public function removeLeechWarn($operator, $uid): bool
     {
         $operator = $this->getUser($operator);
@@ -375,6 +446,10 @@ class UserRepository extends BaseRepository
         return $user->save();
     }
 
+    /**
+     * @param  mixed  $operator
+     * @param  mixed  $uid
+     */
     public function removeTwoStepAuthentication($operator, $uid): bool
     {
         if (!$operator->canAccessAdmin()) {
@@ -388,6 +463,13 @@ class UserRepository extends BaseRepository
     }
 
 
+    /**
+     * @param  mixed  $operator
+     * @param  mixed  $user
+     * @param  mixed  $status
+     * @param  mixed  $disableReasonKey
+     * @return  mixed
+     */
     public function updateDownloadPrivileges($operator, $user, $status, $disableReasonKey = null)
     {
         if (!in_array($status, ['yes', 'no'])) {
@@ -428,6 +510,12 @@ class UserRepository extends BaseRepository
     }
 
 
+    /**
+     * @param  mixed  $operator
+     * @param  \App\Models\User  $user
+     * @param  mixed  $minAuthClass
+     * @return  void
+     */
     private function checkPermission($operator, User $user, $minAuthClass = 'authority.prfmanage')
     {
         $operator = $this->getUser($operator);
@@ -440,11 +528,21 @@ class UserRepository extends BaseRepository
         }
     }
 
+    /**
+     * @param  \App\Models\User  $user
+     * @return  mixed
+     */
     private function clearCache(User $user)
     {
         clear_user_cache($user->id, $user->passkey);
     }
 
+    /**
+     * @param  mixed  $uid
+     * @param  mixed  $metaKeys
+     * @param  mixed  $valid
+     * @return  mixed
+     */
     public function listMetas($uid, $metaKeys = [], $valid = true)
     {
         $query = UserMeta::query()->where('uid', $uid);
@@ -459,6 +557,10 @@ class UserRepository extends BaseRepository
         return $query->get()->groupBy('meta_key');
     }
 
+    /**
+     * @param  mixed  $uid
+     * @param  array<int|string, mixed>  $params
+     */
     public function consumeBenefit($uid, array $params): bool
     {
         $metaKey = $params['meta_key'];
@@ -492,6 +594,13 @@ class UserRepository extends BaseRepository
         throw new \InvalidArgumentException("Invalid meta_key: $metaKey");
     }
 
+    /**
+     * @param  mixed  $operator
+     * @param  mixed  $changeType
+     * @param  mixed  $targetUser
+     * @param  mixed  $newUsername
+     * @param  mixed  $allowOutsideAlphabets
+     */
     private function changeUsername($operator, $changeType, $targetUser, $newUsername, $allowOutsideAlphabets = false): bool
     {
         $operator = $this->getUser($operator);
@@ -526,6 +635,13 @@ class UserRepository extends BaseRepository
         return true;
     }
 
+    /**
+     * @param  mixed  $operator
+     * @param  mixed  $targetUser
+     * @param  mixed  $newClass
+     * @param  mixed  $reason
+     * @param  array<int|string, mixed>  $extra
+     */
     public function changeClass($operator, $targetUser, $newClass, $reason = '', array $extra = []): bool
     {
         user_can('user-change-class', true);
@@ -587,6 +703,13 @@ class UserRepository extends BaseRepository
         return true;
     }
 
+    /**
+     * @param  mixed  $user
+     * @param  array<int|string, mixed>  $metaData
+     * @param  array<int|string, mixed>  $keyExistsUpdates
+     * @param  mixed  $notify
+     * @return  mixed
+     */
     public function addMeta($user, array $metaData, array $keyExistsUpdates = [], $notify = true)
     {
         $user = $this->getUser($user);
@@ -654,6 +777,7 @@ class UserRepository extends BaseRepository
         return $result;
     }
 
+    /** @param  mixed  $id */
     public function confirmUser($id): bool
     {
         $update = [
@@ -668,6 +792,11 @@ class UserRepository extends BaseRepository
         return true;
     }
 
+    /**
+     * @param  \Illuminate\Support\Collection<int, mixed>|int  $id
+     * @param  mixed  $reasonKey
+     * @return  mixed
+     */
     public function destroy(Collection|int $id, $reasonKey = 'user.destroy_by_admin')
     {
         if (!isRunningInConsole()) {
@@ -726,6 +855,15 @@ class UserRepository extends BaseRepository
         return true;
     }
 
+    /**
+     * @param  \App\Models\User|null  $operator
+     * @param  int  $uid
+     * @param  string  $action
+     * @param  int  $count
+     * @param  int|null  $days
+     * @param  string|null  $reason
+     * @return  mixed
+     */
     public function addTemporaryInvite(User|null $operator, int $uid, string $action, int $count, int|null $days, string|null $reason = '')
     {
         do_log("uid: $uid, action: $action, count: $count, days: $days, reason: $reason");
@@ -789,6 +927,10 @@ class UserRepository extends BaseRepository
         return true;
     }
 
+    /**
+     * @param  int  $uid
+     * @return  mixed
+     */
     public function getInviteBtnText(int $uid)
     {
         if (Setting::get('main.invitesystem') != 'yes') {
@@ -807,6 +949,13 @@ class UserRepository extends BaseRepository
         return nexus_trans('invite.send_allow_text');
     }
 
+    /**
+     * @param  int  $uid
+     * @param  string  $ip
+     * @param  string  $client
+     * @param  bool  $notify
+     * @return  mixed
+     */
     public function saveLoginLog(int $uid, string $ip,  string $client = '', bool $notify = false)
     {
         $locationInfo = get_ip_location_from_geoip($ip);
@@ -827,10 +976,9 @@ class UserRepository extends BaseRepository
 
     /**
      * get user seeding/leeching count and size
-     *
+     * @param  array<int|string, mixed>  $userIdArr
+     * @return  array<int|string, mixed>
      * @see calculate_seed_bonus()
-     * @param array $userIdArr
-     * @return array
      */
     private function listUserSeedingLeechingData(array $userIdArr)
     {

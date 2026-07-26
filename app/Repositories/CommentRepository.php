@@ -11,6 +11,11 @@ use Nexus\Database\NexusDB;
 
 class CommentRepository
 {
+    /**
+     * @param  int  $parentId
+     * @param  string  $type
+     * @return  ?array<int|string, mixed>
+     */
     public static function getParent(int $parentId, string $type): ?array
     {
         $row = match ($type) {
@@ -22,6 +27,10 @@ class CommentRepository
         return $row === null ? null : (array) $row;
     }
 
+    /**
+     * @param  int  $commentId
+     * @return  ?array<int|string, mixed>
+     */
     public static function getQuote(int $commentId): ?array
     {
         $row = NexusDB::table('comments')
@@ -33,6 +42,11 @@ class CommentRepository
         return $row === null ? null : (array) $row;
     }
 
+    /**
+     * @param  int  $commentId
+     * @param  string  $type
+     * @return  ?array<int|string, mixed>
+     */
     public static function getForEdit(int $commentId, string $type): ?array
     {
         $query = NexusDB::table('comments as c');
@@ -56,6 +70,11 @@ class CommentRepository
         return $row === null ? null : (array) $row;
     }
 
+    /**
+     * @param  int  $commentId
+     * @param  string  $type
+     * @return  ?array<int|string, mixed>
+     */
     public static function getForDelete(int $commentId, string $type): ?array
     {
         $row = NexusDB::table('comments')
@@ -66,6 +85,11 @@ class CommentRepository
         return $row === null ? null : (array) $row;
     }
 
+    /**
+     * @param  int  $commentId
+     * @param  string  $type
+     * @return  ?array<int|string, mixed>
+     */
     public static function getForViewOriginal(int $commentId, string $type): ?array
     {
         $query = NexusDB::table('comments as c');
@@ -89,11 +113,18 @@ class CommentRepository
         return $row === null ? null : (array) $row;
     }
 
+    /** @param  int  $userId */
     public static function getCommentPmSetting(int $userId): ?string
     {
         return User::query()->where('id', $userId)->value('commentpm');
     }
 
+    /**
+     * @param  int  $parentId
+     * @param  string  $type
+     * @param  string  $text
+     * @param  int  $userId
+     */
     public static function create(int $parentId, string $type, string $text, int $userId): int
     {
         $now = Carbon::now();
@@ -133,6 +164,11 @@ class CommentRepository
         return (int) $comment->id;
     }
 
+    /**
+     * @param  int  $commentId
+     * @param  string  $text
+     * @param  int  $editedBy
+     */
     public static function update(int $commentId, string $text, int $editedBy): void
     {
         Comment::query()->where('id', $commentId)->update([
@@ -142,6 +178,11 @@ class CommentRepository
         ]);
     }
 
+    /**
+     * @param  int  $commentId
+     * @param  string  $type
+     * @param  int  $parentId
+     */
     public static function delete(int $commentId, string $type, int $parentId): bool
     {
         $deleted = Comment::query()->where('id', $commentId)->delete();

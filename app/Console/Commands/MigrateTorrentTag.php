@@ -26,8 +26,7 @@ class MigrateTorrentTag extends Command
 
     /**
      * Create a new command instance.
-     *
-     * @return void
+     * @return  void
      */
     public function __construct()
     {
@@ -36,8 +35,7 @@ class MigrateTorrentTag extends Command
 
     /**
      * Execute the console command.
-     *
-     * @return int
+     * @return  int
      */
     public function handle()
     {

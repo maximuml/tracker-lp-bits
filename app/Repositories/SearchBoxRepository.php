@@ -24,6 +24,10 @@ use Filament\Schemas\Components\Section;
 
 class SearchBoxRepository extends BaseRepository
 {
+    /**
+     * @param  array<int|string, mixed>  $params
+     * @return  \Illuminate\Contracts\Pagination\LengthAwarePaginator<int, SearchBox>
+     */
     public function getList(array $params): \Illuminate\Contracts\Pagination\LengthAwarePaginator
     {
         $query = SearchBox::query();
@@ -32,12 +36,21 @@ class SearchBoxRepository extends BaseRepository
         return $query->paginate();
     }
 
+    /**
+     * @param  array<int|string, mixed>  $params
+     * @return  mixed
+     */
     public function store(array $params)
     {
         $result = SearchBox::query()->create($params);
         return $result;
     }
 
+    /**
+     * @param  array<int|string, mixed>  $params
+     * @param  mixed  $id
+     * @return  mixed
+     */
     public function update(array $params, $id)
     {
         $result = SearchBox::query()->findOrFail($id);
@@ -45,12 +58,20 @@ class SearchBoxRepository extends BaseRepository
         return $result;
     }
 
+    /**
+     * @param  mixed  $id
+     * @return  mixed
+     */
     public function getDetail($id)
     {
         $result = SearchBox::query()->findOrFail($id);
         return $result;
     }
 
+    /**
+     * @param  mixed  $id
+     * @return  mixed
+     */
     public function delete($id)
     {
         $result = SearchBox::query()->findOrFail($id);
@@ -58,6 +79,10 @@ class SearchBoxRepository extends BaseRepository
         return $success;
     }
 
+    /**
+     * @param  array<int|string, mixed>  $idArr
+     * @return  mixed
+     */
     public function listIcon(array $idArr)
     {
         $searchBoxList = SearchBox::query()->with('categories')->find($idArr);
@@ -76,8 +101,7 @@ class SearchBoxRepository extends BaseRepository
         return Icon::query()->find(array_keys($iconIdArr));
     }
 
-    /**
-     */
+    /** @return  mixed */
     public function migrateToModeRelated()
     {
         $searchBoxList = SearchBox::query()->get();
@@ -101,6 +125,10 @@ class SearchBoxRepository extends BaseRepository
         }
     }
 
+    /**
+     * @param  mixed  $searchBox
+     * @param  array<int|string, mixed>  $torrentInfo
+     */
     public function renderTaxonomySelect($searchBox, array $torrentInfo = []): string
     {
         if (!$searchBox instanceof SearchBox) {
@@ -127,6 +155,11 @@ class SearchBoxRepository extends BaseRepository
         return implode('&nbsp;&nbsp;', $results);
     }
 
+    /**
+     * @param  mixed  $searchBox
+     * @param  array<int|string, mixed>  $torrentWithTaxonomy
+     * @return  array<int|string, mixed>
+     */
     public function listTaxonomyInfo($searchBox, array $torrentWithTaxonomy): array
     {
         if (!$searchBox instanceof SearchBox) {
@@ -152,6 +185,12 @@ class SearchBoxRepository extends BaseRepository
         return $results;
     }
 
+    /**
+     * @param  \App\Models\SearchBox  $searchBox
+     * @param  array<int|string, mixed>  $torrentWithTaxonomy
+     * @param  mixed  $torrentField
+     * @return  array<int|string, mixed>|null
+     */
     private function getTaxonomyInfo(SearchBox $searchBox, array $torrentWithTaxonomy, $torrentField)
     {
         if (!isset(SearchBox::$taxonomies[$torrentField])) {
@@ -166,8 +205,15 @@ class SearchBoxRepository extends BaseRepository
                 'value' => $torrentWithTaxonomy[$torrentTaxonomyField],
             ];
         }
+        return null;
     }
 
+    /**
+     * @param  \App\Models\SearchBox  $searchBox
+     * @param  mixed  $torrentField
+     * @param  array<int|string, mixed>  $torrentInfo
+     * @return  mixed
+     */
     private function buildTaxonomySelect(SearchBox $searchBox, $torrentField, array $torrentInfo)
     {
         if (!isset(SearchBox::$taxonomies[$torrentField])) {
@@ -195,6 +241,10 @@ class SearchBoxRepository extends BaseRepository
         }
     }
 
+    /**
+     * @param  mixed  $searchBox
+     * @return  array<int|string, mixed>
+     */
     public function listTaxonomyFormSchema($searchBox): array
     {
         if (!$searchBox instanceof SearchBox) {
@@ -220,6 +270,11 @@ class SearchBoxRepository extends BaseRepository
         return $results;
     }
 
+    /**
+     * @param  \App\Models\SearchBox  $searchBox
+     * @param  mixed  $torrentField
+     * @return  mixed
+     */
     private function buildTaxonomyFormSchema(SearchBox $searchBox, $torrentField)
     {
         if (!isset(SearchBox::$taxonomies[$torrentField])) {
@@ -236,6 +291,10 @@ class SearchBoxRepository extends BaseRepository
         }
     }
 
+    /**
+     * @param  mixed  $id
+     * @return  mixed
+     */
     public function deleteCategory($id)
     {
         if (get_user_class() < User::CLASS_SYSOP) {
@@ -251,6 +310,11 @@ class SearchBoxRepository extends BaseRepository
         return Category::query()->whereIn('id', $idArr)->delete();
     }
 
+    /**
+     * @param  mixed  $id
+     * @param  mixed  $withCategoryAndTags
+     * @return  mixed
+     */
     public function listSections($id, $withCategoryAndTags = true)
     {
         $searchBoxList = SearchBox::query()->with($withCategoryAndTags ? ['categories'] : [])->find($id);
@@ -265,6 +329,10 @@ class SearchBoxRepository extends BaseRepository
         return $searchBoxList;
     }
 
+    /**
+     * @param  \App\Models\SearchBox  $searchBox
+     * @param  string  $namePrefix
+     */
     public function buildSearchBoxFormSchema(SearchBox $searchBox, string $namePrefix): Section
     {
         $lang = get_langfolder_cookie();
@@ -273,6 +341,12 @@ class SearchBoxRepository extends BaseRepository
             ->schema($this->buildCategoryTaxonomyTagSchema($searchBox, false, $namePrefix));
     }
 
+    /**
+     * @param  \App\Models\SearchBox  $searchBox
+     * @param  bool  $multiple
+     * @param  string  $namePrefix
+     * @return  array<int|string, mixed>
+     */
     public function buildCategoryTaxonomyTagSchema(SearchBox $searchBox, bool $multiple, string $namePrefix): array
     {
         $schema = [];
@@ -339,6 +413,11 @@ class SearchBoxRepository extends BaseRepository
         return $schema;
     }
 
+    /**
+     * @param  mixed  $torrentField
+     * @param  mixed  $mode
+     * @return  \Illuminate\Support\Collection<int, mixed>
+     */
     private function listTaxonomies($torrentField, $mode)
     {
         if (!isset(SearchBox::$taxonomies[$torrentField])) {

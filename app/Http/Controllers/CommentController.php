@@ -12,16 +12,21 @@ use Illuminate\Validation\Rule;
 
 class CommentController extends Controller
 {
+    /** @var  mixed */
     private $repository;
 
+    /**
+     * @param  \App\Repositories\CommentRepository  $repository
+     * @return  mixed
+     */
     public function __construct(CommentRepository $repository)
     {
         $this->repository = $repository;
     }
     /**
      * Display a listing of the resource.
-     *
-     * @return array
+     * @param  \Illuminate\Http\Request  $request
+     * @return  array<string, mixed>
      */
     public function index(Request $request)
     {
@@ -30,6 +35,10 @@ class CommentController extends Controller
         return $this->success($resource);
     }
 
+    /**
+     * @param  \Illuminate\Http\Request  $request
+     * @return  mixed
+     */
     private function prepareData(Request $request)
     {
         $allTypes = array_keys(Comment::TYPE_MAPS);
@@ -61,9 +70,8 @@ class CommentController extends Controller
 
     /**
      * Store a newly created resource in storage.
-     *
      * @param  \Illuminate\Http\Request  $request
-     * @return array
+     * @return  array<string, mixed>
      */
     public function store(Request $request)
     {
@@ -75,9 +83,8 @@ class CommentController extends Controller
 
     /**
      * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @param  mixed  $id
+     * @return  \Illuminate\Http\Response
      */
     public function show($id)
     {
@@ -88,10 +95,9 @@ class CommentController extends Controller
 
     /**
      * Update the specified resource in storage.
-     *
      * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @param  mixed  $id
+     * @return  \Illuminate\Http\Response
      */
     public function update(Request $request, $id)
     {
@@ -102,9 +108,8 @@ class CommentController extends Controller
 
     /**
      * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @param  mixed  $id
+     * @return  \Illuminate\Http\Response
      */
     public function destroy($id)
     {

@@ -9,25 +9,33 @@ use Illuminate\Http\Request;
 
 class DashboardController extends Controller
 {
+    /** @var  mixed */
     private $repository;
 
+    /**
+     * @param  \App\Repositories\DashboardRepository  $repository
+     * @return  mixed
+     */
     public function __construct(DashboardRepository $repository)
     {
         $this->repository = $repository;
     }
 
+    /** @return  array<string, mixed> */
     public function systemInfo()
     {
         $result = $this->repository->getSystemInfo();
         return $this->success($result);
     }
 
+    /** @return  array<string, mixed> */
     public function statData()
     {
         $result = $this->repository->getStatData();
         return $this->success($result);
     }
 
+    /** @return  array<string, mixed> */
     public function latestUser()
     {
         $result = $this->repository->latestUser();
@@ -38,6 +46,7 @@ class DashboardController extends Controller
         return $this->success($resource);
     }
 
+    /** @return  array<string, mixed> */
     public function latestTorrent()
     {
         $result = $this->repository->latestTorrent();

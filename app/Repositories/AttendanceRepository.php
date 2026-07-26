@@ -10,6 +10,10 @@ use Nexus\Database\NexusDB;
 
 class AttendanceRepository extends BaseRepository
 {
+    /**
+     * @param  mixed  $uid
+     * @return  mixed
+     */
     public function attend($uid)
     {
         $attendance = $this->getAttendance($uid);
@@ -80,6 +84,11 @@ class AttendanceRepository extends BaseRepository
 
     }
 
+    /**
+     * @param  mixed  $uid
+     * @param  mixed  $date
+     * @return  mixed
+     */
     public function getAttendance($uid, $date = '')
     {
         $query = Attendance::query()
@@ -92,6 +101,10 @@ class AttendanceRepository extends BaseRepository
         return $query->first();
     }
 
+    /**
+     * @param  mixed  $days
+     * @return  mixed
+     */
     public function getContinuousPoints($days)
     {
         $settings = Setting::get('bonus');
@@ -112,8 +125,7 @@ class AttendanceRepository extends BaseRepository
 
     /**
      * 将旧的 1 人 1 天 1 条迁移到新版 1 人一条
-     *
-     * @return int
+     * @return  int
      */
     public function migrateAttendance(): int
     {
@@ -161,8 +173,7 @@ class AttendanceRepository extends BaseRepository
 
     /**
      * 清理签到记录，每人只保留一条
-     *
-     * @return int
+     * @return  int
      */
     public function cleanup(): int
     {
@@ -198,9 +209,8 @@ class AttendanceRepository extends BaseRepository
 
     /**
      * 为 1.7 新的补签功能回写当前连续签到记录
-     *
-     * @param int $uid
-     * @return int
+     * @param  mixed  $uid
+     * @return  int
      */
     public function migrateAttendanceLogs($uid = 0): int
     {
@@ -254,6 +264,10 @@ class AttendanceRepository extends BaseRepository
         return $insertCount;
     }
 
+    /**
+     * @param  \App\Models\Attendance  $attendance
+     * @param  mixed  $start
+     */
     public function getContinuousDays(Attendance $attendance, $start): int
     {
         $start = Carbon::parse($start);
@@ -281,6 +295,11 @@ class AttendanceRepository extends BaseRepository
 
     }
 
+    /**
+     * @param  mixed  $user
+     * @param  mixed  $dateStr
+     * @return  mixed
+     */
     public function retroactive($user, $dateStr)
     {
         if (!$user instanceof User) {

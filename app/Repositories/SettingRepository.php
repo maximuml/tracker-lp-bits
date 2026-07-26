@@ -11,6 +11,10 @@ use Nexus\Database\NexusDB;
 
 class SettingRepository extends BaseRepository
 {
+    /**
+     * @param  array<int|string, mixed>  $params
+     * @return  array<int|string, mixed>
+     */
     public function getList(array $params)
     {
         $results = Setting::getFromDb();
@@ -21,6 +25,10 @@ class SettingRepository extends BaseRepository
         return $results;
     }
 
+    /**
+     * @param  array<int|string, mixed>  $params
+     * @return  mixed
+     */
     public function store(array $params)
     {
         $settingModel = new Setting();

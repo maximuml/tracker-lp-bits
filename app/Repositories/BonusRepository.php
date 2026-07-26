@@ -20,6 +20,10 @@ use Nexus\Database\NexusDB;
 
 class BonusRepository extends BaseRepository
 {
+    /**
+     * @param  mixed  $uid
+     * @param  mixed  $hitAndRunId
+     */
     public function consumeToCancelHitAndRun($uid, $hitAndRunId): bool
     {
         if (!HitAndRun::getIsEnabled()) {
@@ -53,6 +57,10 @@ class BonusRepository extends BaseRepository
     }
 
 
+    /**
+     * @param  mixed  $uid
+     * @param  mixed  $medalId
+     */
     public function consumeToBuyMedal($uid, $medalId): bool
     {
         $user = User::query()->findOrFail($uid);
@@ -90,6 +98,11 @@ class BonusRepository extends BaseRepository
 
     }
 
+    /**
+     * @param  mixed  $uid
+     * @param  mixed  $medalId
+     * @param  mixed  $toUid
+     */
     public function consumeToGiftMedal($uid, $medalId, $toUid): bool
     {
         $user = User::query()->findOrFail($uid);
@@ -151,6 +164,7 @@ class BonusRepository extends BaseRepository
 
     }
 
+    /** @param  mixed  $uid */
     public function consumeToBuyAttendanceCard($uid): bool
     {
         $user = User::query()->findOrFail($uid);
@@ -169,6 +183,10 @@ class BonusRepository extends BaseRepository
     }
 
 
+    /**
+     * @param  mixed  $uid
+     * @param  mixed  $count
+     */
     public function consumeToBuyTemporaryInvite($uid, $count = 1): bool
     {
         $requireBonus = BonusLogs::getBonusForBuyTemporaryInvite();
@@ -203,6 +221,10 @@ class BonusRepository extends BaseRepository
 
     }
 
+    /**
+     * @param  mixed  $uid
+     * @param  mixed  $duration
+     */
     public function consumeToBuyRainbowId($uid, $duration = 30): bool
     {
         $user = User::query()->findOrFail($uid);
@@ -226,6 +248,7 @@ class BonusRepository extends BaseRepository
 
     }
 
+    /** @param  mixed  $uid */
     public function consumeToBuyChangeUsernameCard($uid): bool
     {
         $user = User::query()->findOrFail($uid);
@@ -250,6 +273,11 @@ class BonusRepository extends BaseRepository
 
     }
 
+    /**
+     * @param  mixed  $uid
+     * @param  mixed  $torrentId
+     * @param  mixed  $channel
+     */
     public function consumeToBuyTorrent($uid, $torrentId, $channel = 'Web'): TorrentBuyLog
     {
         $torrent = Torrent::query()->findOrFail($torrentId, Torrent::$commentFields);
@@ -316,6 +344,14 @@ class BonusRepository extends BaseRepository
         });
     }
 
+    /**
+     * @param  mixed  $user
+     * @param  mixed  $requireBonus
+     * @param  mixed  $logBusinessType
+     * @param  mixed  $logComment
+     * @param  array<int|string, mixed>  $userUpdates
+     * @return  void
+     */
     public function consumeUserBonus($user, $requireBonus, $logBusinessType, $logComment = '', array $userUpdates = [])
     {
         if (!isset(BonusLogs::$businessTypes[$logBusinessType])) {
@@ -363,6 +399,11 @@ class BonusRepository extends BaseRepository
         });
     }
 
+    /**
+     * @param  string  $category
+     * @param  int  $userId
+     * @param  int  $businessType
+     */
     public function getCount(string $category = '', int $userId = 0, int $businessType = 0): int
     {
         if ($category == BonusLogs::CATEGORY_COMMON) {
@@ -375,6 +416,14 @@ class BonusRepository extends BaseRepository
         throw new \InvalidArgumentException("Invalid category: $category");
     }
 
+    /**
+     * @param  string  $category
+     * @param  int  $userId
+     * @param  int  $businessType
+     * @param  int  $page
+     * @param  int  $perPage
+     * @return  mixed
+     */
     public function getList(string $category = '', int $userId = 0, int $businessType = 0, int $page = 1, int $perPage = 50)
     {
         if ($category == BonusLogs::CATEGORY_COMMON) {
@@ -397,6 +446,11 @@ class BonusRepository extends BaseRepository
         throw new \InvalidArgumentException("Invalid category: $category");
     }
 
+    /**
+     * @param  int  $userId
+     * @param  int  $businessType
+     * @return  array<int|string, mixed>
+     */
     private function buildWhereStrAndBinds(int $userId = 0,  int $businessType = 0)
     {
         $whereArr = [];
@@ -417,6 +471,11 @@ class BonusRepository extends BaseRepository
         return [$whereStr, $binds];
     }
 
+    /**
+     * @param  int  $userId
+     * @param  int  $businessType
+     * @return  \Illuminate\Database\Eloquent\Builder<BonusLogs>
+     */
     private function buildQuery(int $userId = 0,  int $businessType = 0): Builder
     {
         $query = BonusLogs::query();

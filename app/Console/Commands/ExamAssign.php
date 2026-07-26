@@ -23,8 +23,7 @@ class ExamAssign extends Command
 
     /**
      * Create a new command instance.
-     *
-     * @return void
+     * @return  void
      */
     public function __construct()
     {
@@ -33,8 +32,7 @@ class ExamAssign extends Command
 
     /**
      * Execute the console command.
-     *
-     * @return int
+     * @return  int
      */
     public function handle()
     {

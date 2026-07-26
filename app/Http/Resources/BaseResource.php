@@ -8,11 +8,16 @@ abstract class BaseResource extends JsonResource
 {
     protected abstract function getResourceName(): string;
 
+    /** @param  mixed  $field */
     protected function whenIncludeField($field): bool
     {
         return $this->whenInclude($field, "include_fields");
     }
 
+    /**
+     * @param  mixed  $field
+     * @param  mixed  $prefix
+     */
     private function whenInclude($field, $prefix): bool
     {
         $fields = request()->input("$prefix." . $this->getResourceName());

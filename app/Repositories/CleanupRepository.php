@@ -18,6 +18,11 @@ class CleanupRepository extends BaseRepository
 
     const IDS_KEY_PREFIX = "cleanup_batch_job_ids:";
 
+    /** @var  array<int|string, mixed> */
+    /** @var  array<int|string, mixed> */
+    /** @var  array<int|string, mixed> */
+    /** @var  array<int|string, mixed> */
+    /** @var  array<int|string, mixed> */
     private static array $batchKeyActionsMap = [
         self::USER_SEED_BONUS_BATCH_KEY => [
             'action' => 'seed_bonus',
@@ -33,12 +38,33 @@ class CleanupRepository extends BaseRepository
         ],
     ];
 
+    /** @var  int */
+    /** @var  int */
+    /** @var  int */
+    /** @var  int */
+    /** @var  int */
     private static int $totalTask = 3;
 
+    /** @var  float|int */
+    /** @var  float|int */
+    /** @var  float|int */
+    /** @var  float|int */
+    /** @var  float|int */
     private static float|int $oneTaskSeconds = 0;
 
+    /** @var  int */
+    /** @var  int */
+    /** @var  int */
+    /** @var  int */
+    /** @var  int */
     private static int $scanSize = 500;
 
+    /**
+     * @param  \Redis  $redis
+     * @param  mixed  $uid
+     * @param  mixed  $torrentId
+     * @return  mixed
+     */
     public static function recordBatch(\Redis $redis, $uid, $torrentId)
     {
         $args = [
@@ -53,21 +79,38 @@ class CleanupRepository extends BaseRepository
         return $result;
     }
 
+    /**
+     * @param  string  $requestId
+     * @return  mixed
+     */
     public static function runBatchJobCalculateUserSeedBonus(string $requestId)
     {
         self::runBatchJob(self::USER_SEED_BONUS_BATCH_KEY, $requestId);
     }
 
+    /**
+     * @param  string  $requestId
+     * @return  mixed
+     */
     public static function runBatchJobUpdateUserSeedingLeechingTime(string $requestId)
     {
         self::runBatchJob(self::USER_SEEDING_LEECHING_TIME_BATCH_KEY, $requestId);
     }
 
+    /**
+     * @param  string  $requestId
+     * @return  mixed
+     */
     public static function runBatchJobUpdateTorrentSeedersEtc(string $requestId)
     {
         self::runBatchJob(self::TORRENT_SEEDERS_ETC_BATCH_KEY, $requestId);
     }
 
+    /**
+     * @param  mixed  $batchKey
+     * @param  mixed  $requestId
+     * @return  mixed
+     */
     private static function runBatchJob($batchKey, $requestId)
     {
         $redis = NexusDB::redis();
@@ -140,6 +183,11 @@ class CleanupRepository extends BaseRepository
 
 
 
+    /**
+     * @param  \Redis  $redis
+     * @param  mixed  $batchKey
+     * @return  mixed
+     */
     private static function getBatch(\Redis $redis, $batchKey)
     {
         $batch = $redis->get($batchKey);
@@ -157,8 +205,7 @@ class CleanupRepository extends BaseRepository
     /**
      * USER_SEED_BONUS, USER_SEEDING_LEECHING_TIME, TORRENT_SEEDERS_ETC,
      * uid, uid, torrentId, timeStr, cacheLifeTime, nowTimestamp
-     *
-     * @return string
+     * @return  string
      */
     private static function getAddRecordLuaScript(): string
     {
@@ -209,11 +256,17 @@ LUA;
         return self::$oneTaskSeconds;
     }
 
+    /** @param  mixed  $taskIndex */
     private static function getDelayBase($taskIndex): float|int
     {
         return self::getOneTaskSeconds() * $taskIndex;
     }
 
+    /**
+     * @param  int  $taskIndex
+     * @param  int  $length
+     * @param  int  $page
+     */
     private static function getDelay(int $taskIndex, int $length, int $page): float
     {
         //超始基数
@@ -238,12 +291,14 @@ LUA;
         return intval($four) + intval($three) + intval($one);
     }
 
+    /** @param  mixed  $level */
     private static function getInterval($level): int
     {
         $name = sprintf("main.autoclean_interval_%s", $level);
         return intval(get_setting($name));
     }
 
+    /** @return  void */
     public static function checkCleanup(): void
     {
         $now = Carbon::now();
@@ -299,11 +354,23 @@ LUA;
         }
     }
 
+    /**
+     * @param  string|null  $locale
+     * @return  mixed
+     */
     private static function getAlarmEmailSubjectForCleanup(string|null $locale = null)
     {
         return nexus_trans("cleanup.alarm_email_subject", ["site_name" => get_setting("basic.SITENAME")], $locale);
     }
 
+    /**
+     * @param  \Carbon\Carbon  $now
+     * @param  string  $level
+     * @param  int  $lastTime
+     * @param  int  $interval
+     * @param  string|null  $locale
+     * @return  mixed
+     */
     private static function getAlarmEmailBodyForCleanup(Carbon $now, string $level, int $lastTime, int $interval, string|null $locale = null)
     {
         return  nexus_trans("cleanup.alarm_email_body", [
@@ -317,6 +384,7 @@ LUA;
         ], $locale);
     }
 
+    /** @return  void */
     public static function checkQueueFailedJobs(): void
     {
         $now = Carbon::now();
@@ -348,11 +416,22 @@ LUA;
         }
     }
 
+    /**
+     * @param  string|null  $locale
+     * @return  mixed
+     */
     private static function getAlarmEmailSubjectForQueueFailedJobs(string|null $locale = null)
     {
         return nexus_trans("cleanup.alarm_email_subject_for_queue_failed_jobs", ["site_name" => get_setting("basic.SITENAME")], $locale);
     }
 
+    /**
+     * @param  string  $since
+     * @param  int  $count
+     * @param  string  $failedJobTable
+     * @param  string|null  $locale
+     * @return  mixed
+     */
     private static function getAlarmEmailBodyForQueueFailedJobs(string $since, int $count, string $failedJobTable, string|null $locale = null)
     {
         return  nexus_trans("cleanup.alarm_email_body_for_queue_failed_jobs", [

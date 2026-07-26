@@ -14,9 +14,8 @@ class UserResource extends JsonResource
     const NAME = 'user';
     /**
      * Transform the resource into an array.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return array
+     * @param  mixed  $request
+     * @return  array<int|string, mixed>
      */
     public function toArray($request)
     {

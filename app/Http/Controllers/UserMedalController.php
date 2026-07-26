@@ -10,8 +10,13 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class UserMedalController extends Controller
 {
+    /** @var  mixed */
     private $repository;
 
+    /**
+     * @param  \App\Repositories\MedalRepository  $repository
+     * @return  mixed
+     */
     public function __construct(MedalRepository $repository)
     {
         $this->repository = $repository;
@@ -19,9 +24,8 @@ class UserMedalController extends Controller
 
     /**
      * Display a listing of the resource.
-     *
-     * @param Request $request
-     * @return array
+     * @param  \Illuminate\Http\Request  $request
+     * @return  array<string, mixed>
      */
     public function index(Request $request)
     {
@@ -35,9 +39,8 @@ class UserMedalController extends Controller
 
     /**
      * Store a newly created resource in storage.
-     *
      * @param  \Illuminate\Http\Request  $request
-     * @return array
+     * @return  array<string, mixed>
      */
     public function store(Request $request)
     {
@@ -53,9 +56,8 @@ class UserMedalController extends Controller
 
     /**
      * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return array
+     * @param  mixed  $id
+     * @return  array<string, mixed>
      */
     public function show($id)
     {
@@ -66,10 +68,9 @@ class UserMedalController extends Controller
 
     /**
      * Update the specified resource in storage.
-     *
      * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return array
+     * @param  mixed  $id
+     * @return  array<string, mixed>
      */
     public function update(Request $request, $id)
     {
@@ -88,9 +89,8 @@ class UserMedalController extends Controller
 
     /**
      * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return array
+     * @param  mixed  $id
+     * @return  array<string, mixed>
      */
     public function destroy($id)
     {

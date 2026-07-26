@@ -59,30 +59,64 @@ class TorrentRepository extends BaseRepository
     const BUY_STATUS_NOT_YET = -1;
     const BUY_STATUS_UNKNOWN = -2;
 
+    /** @var  array<int|string, mixed> */
+    /** @var  array<int|string, mixed> */
+    /** @var  array<int|string, mixed> */
+    /** @var  array<int|string, mixed> */
+    /** @var  array<int|string, mixed> */
     private static array $defaultLoadRelationships = [
         'basic_category', 'basic_category.search_box',
         'basic_audiocodec', 'basic_codec', 'basic_medium',
         'basic_source', 'basic_processing', 'basic_standard', ];
 
+    /** @var  array<int|string, mixed> */
+    /** @var  array<int|string, mixed> */
+    /** @var  array<int|string, mixed> */
+    /** @var  array<int|string, mixed> */
+    /** @var  array<int|string, mixed> */
     private static array $allowIncludes = ['user', 'extra', 'tags'];
 
+    /** @var  array<int|string, mixed> */
+    /** @var  array<int|string, mixed> */
+    /** @var  array<int|string, mixed> */
+    /** @var  array<int|string, mixed> */
+    /** @var  array<int|string, mixed> */
     private static array $allowIncludeCounts = ['thank_users', 'reward_logs'];
 
+    /** @var  array<int|string, mixed> */
+    /** @var  array<int|string, mixed> */
+    /** @var  array<int|string, mixed> */
+    /** @var  array<int|string, mixed> */
+    /** @var  array<int|string, mixed> */
     private static array $allowIncludeFields = [
         'has_bookmarked', 'has_thanked', 'has_rewarded',
         'description', 'download_url', 'active_status'
     ];
 
+    /** @var  array<int|string, mixed> */
+    /** @var  array<int|string, mixed> */
+    /** @var  array<int|string, mixed> */
+    /** @var  array<int|string, mixed> */
+    /** @var  array<int|string, mixed> */
     private static array  $allowFilters = [
         'title', 'category', 'source', 'medium', 'codec', 'audiocodec', 'standard', 'processing',
         'owner', 'visible', 'added', 'size', 'sp_state', 'leechers', 'seeders', 'times_completed',
         'bookmark',
     ];
 
+    /** @var  array<int|string, mixed> */
+    /** @var  array<int|string, mixed> */
+    /** @var  array<int|string, mixed> */
+    /** @var  array<int|string, mixed> */
+    /** @var  array<int|string, mixed> */
     private static array $allowSorts = ['id', 'comments', 'size', 'seeders', 'leechers', 'times_completed'];
 
     /**
-     *  fetch torrent list
+     * fetch torrent list
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Models\User  $user
+     * @param  string  $sectionName
+     * @return  mixed
      */
     public function getList(Request $request, User $user, string $sectionName = null)
     {
@@ -158,6 +192,11 @@ class TorrentRepository extends BaseRepository
         return $this->appendIncludeFields($apiQueryBuilder, $user, $torrents);
     }
 
+    /**
+     * @param  mixed  $id
+     * @param  \App\Models\User  $user
+     * @return  mixed
+     */
     public function getDetail($id, User $user)
     {
         //query this info default
@@ -174,6 +213,12 @@ class TorrentRepository extends BaseRepository
         return $torrentList[0];
     }
 
+    /**
+     * @param  \App\Utils\ApiQueryBuilder  $apiQueryBuilder
+     * @param  \App\Models\User  $user
+     * @param  mixed  $torrentList
+     * @return  mixed
+     */
     private function appendIncludeFields(ApiQueryBuilder $apiQueryBuilder, User $user, $torrentList)
     {
         $torrentIdArr = $bookmarkData = $thankData = $rewardData = $activeData = [];
@@ -224,6 +269,10 @@ class TorrentRepository extends BaseRepository
         return $torrentList;
     }
 
+    /**
+     * @param  mixed  $id
+     * @param  array<int|string, mixed>|\App\Models\User  $user
+     */
     public function getDownloadUrl($id, array|User $user): string
     {
         return sprintf(
@@ -232,6 +281,10 @@ class TorrentRepository extends BaseRepository
         );
     }
 
+    /**
+     * @param  ?int  $id
+     * @return  mixed
+     */
     public function getSearchBox(?int $id = null)
     {
         if (is_null($id)) {
@@ -275,6 +328,12 @@ class TorrentRepository extends BaseRepository
         return $results;
     }
 
+    /**
+     * @param  mixed  $header
+     * @param  mixed  $items
+     * @param  mixed  $name
+     * @return  mixed
+     */
     private function formatRow($header, $items, $name)
     {
         $result['header'] = $header;
@@ -296,6 +355,10 @@ class TorrentRepository extends BaseRepository
         return $result;
     }
 
+    /**
+     * @param  mixed  $torrentId
+     * @return  array<int|string, mixed>
+     */
     public function listPeers($torrentId)
     {
         $seederList = $leecherList = collect();
@@ -337,6 +400,7 @@ class TorrentRepository extends BaseRepository
 
     }
 
+    /** @param  mixed  $peer */
     public function getPeerUploadSpeed($peer): string
     {
         $diff = $peer->uploaded - $peer->uploadoffset;
@@ -344,6 +408,7 @@ class TorrentRepository extends BaseRepository
         return mksize($diff / $seconds) . '/s';
     }
 
+    /** @param  mixed  $peer */
     public function getPeerDownloadSpeed($peer): string
     {
         $diff = $peer->downloaded - $peer->downloadoffset;
@@ -355,11 +420,16 @@ class TorrentRepository extends BaseRepository
         return mksize($diff / $seconds) . '/s';
     }
 
+    /** @param  mixed  $peer */
     public function getDownloadProgress($peer): string
     {
         return sprintf("%.2f%%", 100 * (1 - ($peer->to_go / $peer->relative_torrent->size)));
     }
 
+    /**
+     * @param  mixed  $peer
+     * @return  mixed
+     */
     public function getShareRatio($peer)
     {
         if ($peer->downloaded) {
@@ -373,6 +443,10 @@ class TorrentRepository extends BaseRepository
         return $ratio;
     }
 
+    /**
+     * @param  mixed  $peers
+     * @return  mixed
+     */
     private function formatPeers($peers)
     {
         foreach ($peers as &$item) {
@@ -388,6 +462,10 @@ class TorrentRepository extends BaseRepository
     }
 
 
+    /**
+     * @param  mixed  $torrentId
+     * @return  mixed
+     */
     public function listSnatches($torrentId)
     {
         $snatches = Snatch::query()
@@ -399,6 +477,10 @@ class TorrentRepository extends BaseRepository
         return $snatches;
     }
 
+    /**
+     * @param  mixed  $snatch
+     * @return  mixed
+     */
     public function getSnatchUploadSpeed($snatch)
     {
         if ($snatch->seedtime <= 0) {
@@ -409,6 +491,10 @@ class TorrentRepository extends BaseRepository
         return "$speed/s";
     }
 
+    /**
+     * @param  mixed  $snatch
+     * @return  mixed
+     */
     public function getSnatchDownloadSpeed($snatch)
     {
         if ($snatch->leechtime <= 0) {
@@ -419,6 +505,10 @@ class TorrentRepository extends BaseRepository
         return "$speed/s";
     }
 
+    /**
+     * @param  mixed  $id
+     * @param  mixed  $user
+     */
     public function encryptDownHash($id, $user): string
     {
         $key = $this->getEncryptDownHashKey($user);
@@ -429,6 +519,11 @@ class TorrentRepository extends BaseRepository
         return JWT::encode($payload, $key, 'HS256');
     }
 
+    /**
+     * @param  mixed  $downHash
+     * @param  mixed  $user
+     * @return  array<int|string, mixed>
+     */
     public function decryptDownHash($downHash, $user)
     {
         $key = $this->getEncryptDownHashKey($user);
@@ -437,10 +532,14 @@ class TorrentRepository extends BaseRepository
             return [$decoded->id];
         } catch (\Exception $e) {
             do_log("Invalid down hash: $downHash, " . $e->getMessage(), "error");
-            return '';
+            return [];
         }
     }
 
+    /**
+     * @param  mixed  $user
+     * @return  mixed
+     */
     private function getEncryptDownHashKey($user)
     {
         $passkey = "";
@@ -460,11 +559,11 @@ class TorrentRepository extends BaseRepository
     }
 
     /**
+     * @param  mixed  $id
+     * @param  mixed  $uid
+     * @param  mixed  $initializeIfNotExists
+     * @return  string
      * @deprecated
-     * @param $id
-     * @param $uid
-     * @param $initializeIfNotExists
-     * @return string
      * @throws NexusException
      */
     public function getTrackerReportAuthKey($id, $uid, $initializeIfNotExists = false): string
@@ -475,15 +574,13 @@ class TorrentRepository extends BaseRepository
     }
 
     /**
-     * @deprecated
-     *
      * check tracker report authkey
      * if valid, the result will be the date the key generate, else if will be empty string
-     *
+     * @param  mixed  $authKey
+     * @return  array<int|string, mixed>
+     * @deprecated
      * @date 2021/6/3
      * @time 20:29
-     * @param $authKey
-     * @return array
      * @throws NexusException
      */
     public function checkTrackerReportAuthKey($authKey)
@@ -499,6 +596,12 @@ class TorrentRepository extends BaseRepository
         return (new Hashids($key))->decode($hash);
     }
 
+    /**
+     * @param  mixed  $id
+     * @param  mixed  $uid
+     * @param  mixed  $initializeIfNotExists
+     * @return  mixed
+     */
     private function getTrackerReportAuthKeySecret($id, $uid, $initializeIfNotExists = false)
     {
         $secret = NexusDB::remember("torrent_secret_{$uid}_{$id}", 3600, function () use ($id, $uid) {
@@ -528,12 +631,10 @@ class TorrentRepository extends BaseRepository
 
     /**
      * reset user tracker report authkey secret
-     *
-     * @param $uid
-     * @param int $torrentId
-     * @return string
+     * @param  mixed  $uid
+     * @param  mixed  $torrentId
+     * @return  string
      * @todo wrap with transaction
-     *
      * @date 2021/6/3
      * @time 20:15
      */
@@ -555,6 +656,11 @@ class TorrentRepository extends BaseRepository
 
     }
 
+    /**
+     * @param  mixed  $user
+     * @param  mixed  $torrentId
+     * @return  array<int|string, mixed>
+     */
     public function buildApprovalModal($user, $torrentId)
     {
         $user = $this->getUser($user);
@@ -598,6 +704,11 @@ class TorrentRepository extends BaseRepository
 
     }
 
+    /**
+     * @param  mixed  $user
+     * @param  array<int|string, mixed>  $params
+     * @return  array<int|string, mixed>
+     */
     public function approval($user, array $params): array
     {
         $user = $this->getUser($user);
@@ -679,6 +790,10 @@ class TorrentRepository extends BaseRepository
 
     }
 
+    /**
+     * @param  mixed  $approvalStatus
+     * @param  mixed  $show
+     */
     public function renderApprovalStatus($approvalStatus, $show = null): string
     {
         if ($show === null) {
@@ -694,6 +809,7 @@ class TorrentRepository extends BaseRepository
         return '';
     }
 
+    /** @param  mixed  $approvalStatus */
     public function shouldShowApprovalStatusIcon($approvalStatus): bool
     {
         if (get_setting('torrent.approval_status_icon_enabled') == 'yes') {
@@ -710,6 +826,12 @@ class TorrentRepository extends BaseRepository
         return false;
     }
 
+    /**
+     * @param  mixed  $id
+     * @param  array<int|string, mixed>  $tagIdArr
+     * @param  mixed  $remove
+     * @return  mixed
+     */
     public function syncTags($id, array $tagIdArr = [], $remove = true)
     {
         user_can('torrentmanage', true);
@@ -735,6 +857,11 @@ class TorrentRepository extends BaseRepository
 
     }
 
+    /**
+     * @param  mixed  $id
+     * @param  mixed  $posState
+     * @param  mixed  $posStateUntil
+     */
     public function setPosState($id, $posState, $posStateUntil = null): int
     {
         user_can('torrentsticky', true);
@@ -753,6 +880,10 @@ class TorrentRepository extends BaseRepository
         return Torrent::query()->whereIn('id', $idArr)->update($update);
     }
 
+    /**
+     * @param  mixed  $id
+     * @param  mixed  $hrStatus
+     */
     public function setHr($id, $hrStatus): int
     {
         user_can('torrentmanage', true);
@@ -767,6 +898,12 @@ class TorrentRepository extends BaseRepository
         return Torrent::query()->whereIn('id', $idArr)->update($update);
     }
 
+    /**
+     * @param  mixed  $id
+     * @param  mixed  $spState
+     * @param  mixed  $promotionTimeType
+     * @param  mixed  $promotionUntil
+     */
     public function setSpState($id, $spState, $promotionTimeType, $promotionUntil = null): int
     {
         user_can('torrentonpromotion', true);
@@ -790,6 +927,12 @@ class TorrentRepository extends BaseRepository
         return Torrent::query()->whereIn('id', $idArr)->update($update);
     }
 
+    /**
+     * @param  mixed  $name
+     * @param  mixed  $value
+     * @param  mixed  $noteText
+     * @param  mixed  $btnText
+     */
     public function buildUploadFieldInput($name, $value, $noteText, $btnText): string
     {
         $btn = $note = '';
@@ -813,6 +956,12 @@ HTML;
 
 
 
+    /**
+     * @param  array<int|string, mixed>  $torrentInfo
+     * @param  mixed  $size
+     * @param  mixed  $verticalAlign
+     * @return  mixed
+     */
     public function getPaidIcon(array $torrentInfo, $size = 16, $verticalAlign = 'sub')
     {
         if (!isset($torrentInfo['price']) || $torrentInfo['price'] <= 0) {
@@ -821,6 +970,7 @@ HTML;
         return sprintf('<span title="%s" style="vertical-align: %s"><svg t="1676058062789" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="3406" width="%s" height="%s"><path d="M554.666667 810.666667v42.666666h-85.333334v-42.666666c-93.866667 0-170.666667-76.8-170.666666-170.666667h85.333333c0 46.933333 38.4 85.333333 85.333333 85.333333v-170.666666c-93.866667 0-170.666667-76.8-170.666666-170.666667s76.8-170.666667 170.666666-170.666667V170.666667h85.333334v42.666666c93.866667 0 170.666667 76.8 170.666666 170.666667h-85.333333c0-46.933333-38.4-85.333333-85.333333-85.333333v170.666666h17.066666c29.866667 0 68.266667 17.066667 98.133334 42.666667 34.133333 29.866667 59.733333 76.8 59.733333 128-4.266667 93.866667-81.066667 170.666667-174.933333 170.666667z m0-85.333334c46.933333 0 85.333333-38.4 85.333333-85.333333s-38.4-85.333333-85.333333-85.333333v170.666666zM469.333333 298.666667c-46.933333 0-85.333333 38.4-85.333333 85.333333s38.4 85.333333 85.333333 85.333333V298.666667z" fill="#CD7F32" p-id="3407"></path></svg></span>', nexus_trans('torrent.paid_torrent'), $verticalAlign, $size, $size);
     }
 
+    /** @param  mixed  $torrentId */
     public function loadBoughtUser($torrentId): int
     {
         $size = 500;
@@ -846,9 +996,10 @@ HTML;
 
     /**
      * 购买成功，缓存 30 天并更新到 snatched 上
-     * @param $uid
-     * @param $torrentId
-     * @return void
+     * @param  mixed  $uid
+     * @param  mixed  $torrentId
+     * @param  mixed  $buyLogId
+     * @return  void
      * @throws \RedisException
      */
     public function addBuySuccessCache($uid, $torrentId, $buyLogId): void
@@ -868,6 +1019,10 @@ HTML;
 
     }
 
+    /**
+     * @param  mixed  $uid
+     * @param  mixed  $torrentId
+     */
     public function hasBuySuccessCache($uid, $torrentId): bool
     {
         $key = $this->getBoughtUserCacheKey($torrentId, $uid);
@@ -877,6 +1032,10 @@ HTML;
         return false;
     }
 
+    /**
+     * @param  mixed  $uid
+     * @param  mixed  $torrentId
+     */
     public function hasBuySuccess($uid, $torrentId): bool
     {
         if ($this->hasBuySuccessCache($uid, $torrentId)) {
@@ -894,10 +1053,9 @@ HTML;
 
     /**
      * 获取购买种子的缓存状态
-     *
-     * @param $uid
-     * @param $torrentId
-     * @return int
+     * @param  mixed  $uid
+     * @param  mixed  $torrentId
+     * @return  int
      */
     public function getBuyStatus($uid, $torrentId): int
     {
@@ -917,9 +1075,9 @@ HTML;
 
     /**
      * 添加购买失败缓存, 结果累加
-     * @param $uid
-     * @param $torrentId
-     * @return void
+     * @param  mixed  $uid
+     * @param  mixed  $torrentId
+     * @return  void
      * @throws \RedisException
      */
     public function addBuyFailCache($uid, $torrentId): void
@@ -933,10 +1091,9 @@ HTML;
 
     /**
      * 获取失败缓存 ，结果是失败的次数
-     *
-     * @param $uid
-     * @param $torrentId
-     * @return int
+     * @param  mixed  $uid
+     * @param  mixed  $torrentId
+     * @return  int
      * @throws \RedisException
      */
     public function getBuyFailCache($uid, $torrentId): int
@@ -946,9 +1103,10 @@ HTML;
 
     /**
      * 购买成功缓存 key
+     * @param  mixed  $torrentId
+     * @param  mixed  $userId
+     * @return  string
      * @update 改为使用字符串判断键是否存在即可
-     * @param $torrentId
-     * @return string
      */
     public function getBoughtUserCacheKey($torrentId, $userId): string
     {
@@ -957,31 +1115,44 @@ HTML;
 
     /**
      * 购买失败缓存 key
-     * @param int $userId
-     * @param int $torrentId
-     * @return string
+     * @param  int  $userId
+     * @param  int  $torrentId
+     * @return  string
      */
     public function getBuyFailCacheKey(int $userId, int $torrentId): string
     {
         return sprintf("%s:%s:%s", self::BUY_FAIL_CACHE_KEY_PREFIX, $userId, $torrentId);
     }
 
+    /**
+     * @param  int  $torrentId
+     * @param  string  $piecesHash
+     */
     public function addPiecesHashCache(int $torrentId, string $piecesHash): bool|int|\Redis
     {
         $value = $this->buildPiecesHashCacheValue($torrentId, $piecesHash);
         return NexusDB::redis()->hSet(self::PIECES_HASH_CACHE_KEY, $piecesHash, $value);
     }
 
+    /**
+     * @param  int  $torrentId
+     * @param  string  $piecesHash
+     */
     private  function buildPiecesHashCacheValue(int $torrentId, string $piecesHash): bool|string
     {
         return  json_encode(['torrent_id' => $torrentId, 'pieces_hash' => $piecesHash]);
     }
 
+    /** @param  string  $piecesHash */
     public function delPiecesHashCache(string $piecesHash): bool|int|\Redis
     {
         return NexusDB::redis()->hDel(self::PIECES_HASH_CACHE_KEY, $piecesHash);
     }
 
+    /**
+     * @param  mixed  $piecesHash
+     * @return  array<int|string, mixed>
+     */
     public function getPiecesHashCache($piecesHash): array
     {
         if (!is_array($piecesHash)) {
@@ -1009,6 +1180,10 @@ HTML;
         return $out;
     }
 
+    /**
+     * @param  mixed  $id
+     * @return  array<int|string, mixed>
+     */
     public function loadPiecesHashCache($id = 0): array
     {
         $page = 1;
@@ -1068,6 +1243,12 @@ HTML;
     }
 
 
+    /**
+     * @param  \Illuminate\Support\Collection<int, mixed>  $torrents
+     * @param  int  $sectionId
+     * @param  array<int|string, mixed>  $specificSubCategoryAndTags
+     * @return  void
+     */
     public function changeCategory(Collection $torrents, int $sectionId, array $specificSubCategoryAndTags): void
     {
         assert_has_permission(Permission::canManageTorrent());

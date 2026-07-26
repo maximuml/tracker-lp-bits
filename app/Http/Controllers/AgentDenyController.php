@@ -10,13 +10,19 @@ use Illuminate\Validation\Rule;
 
 class AgentDenyController extends Controller
 {
+    /** @var  mixed */
     private $repository;
 
+    /**
+     * @param  \App\Repositories\AgentDenyRepository  $repository
+     * @return  mixed
+     */
     public function __construct(AgentDenyRepository $repository)
     {
         $this->repository = $repository;
     }
 
+    /** @return  array<int|string, mixed> */
     private function getRules(): array
     {
         return [
@@ -30,8 +36,8 @@ class AgentDenyController extends Controller
     }
     /**
      * Display a listing of the resource.
-     *
-     * @return array
+     * @param  \Illuminate\Http\Request  $request
+     * @return  array<string, mixed>
      */
     public function index(Request $request)
     {
@@ -42,9 +48,8 @@ class AgentDenyController extends Controller
 
     /**
      * Store a newly created resource in storage.
-     *
      * @param  \Illuminate\Http\Request  $request
-     * @return array
+     * @return  array<string, mixed>
      */
     public function store(Request $request)
     {
@@ -56,9 +61,8 @@ class AgentDenyController extends Controller
 
     /**
      * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return array
+     * @param  mixed  $id
+     * @return  array<string, mixed>
      */
     public function show($id)
     {
@@ -69,10 +73,9 @@ class AgentDenyController extends Controller
 
     /**
      * Update the specified resource in storage.
-     *
      * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return array
+     * @param  mixed  $id
+     * @return  array<string, mixed>
      */
     public function update(Request $request, $id)
     {
@@ -84,9 +87,8 @@ class AgentDenyController extends Controller
 
     /**
      * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return array
+     * @param  mixed  $id
+     * @return  array<string, mixed>
      */
     public function destroy($id)
     {

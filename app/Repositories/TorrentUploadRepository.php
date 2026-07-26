@@ -8,11 +8,13 @@ use Nexus\Database\NexusDB;
 
 class TorrentUploadRepository
 {
+    /** @param  int  $catId */
     public static function getCategoryMode(int $catId): ?string
     {
         return \App\Models\Category::query()->where('id', $catId)->value('mode');
     }
 
+    /** @param  int  $userId */
     public static function allowedOfferCount(int $userId): int
     {
         return NexusDB::table('offers')
@@ -21,6 +23,10 @@ class TorrentUploadRepository
             ->count();
     }
 
+    /**
+     * @param  int  $offerId
+     * @param  int  $userId
+     */
     public static function isAllowedOffer(int $offerId, int $userId): bool
     {
         return NexusDB::table('offers')
@@ -30,13 +36,15 @@ class TorrentUploadRepository
             ->exists();
     }
 
+    /** @param  int  $torrentId */
     public static function rollbackTorrent(int $torrentId): void
     {
         Torrent::query()->where('id', $torrentId)->delete();
     }
 
     /**
-     * @param array<int, array{path: string, size: int}> $fileList
+     * @param  int  $torrentId
+     * @param  array<int|string, mixed>  $fileList
      */
     public static function syncFiles(int $torrentId, array $fileList): void
     {
@@ -57,7 +65,9 @@ class TorrentUploadRepository
     }
 
     /**
-     * @return array<int, int>
+     * @param  int  $offerId
+     * @param  int  $uploaderId
+     * @return  array<int|string, mixed>
      */
     public static function getOfferVoterIds(int $offerId, int $uploaderId): array
     {
@@ -69,6 +79,10 @@ class TorrentUploadRepository
             ->all();
     }
 
+    /**
+     * @param  int  $offerId
+     * @param  int  $uploaderId
+     */
     public static function finalizeOffer(int $offerId, int $uploaderId): void
     {
         NexusDB::table('offers')->where('id', $offerId)->delete();

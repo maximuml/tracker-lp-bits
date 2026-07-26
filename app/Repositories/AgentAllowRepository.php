@@ -9,6 +9,10 @@ use Nexus\Database\NexusDB;
 
 class AgentAllowRepository extends BaseRepository
 {
+    /**
+     * @param  array<int|string, mixed>  $params
+     * @return  mixed
+     */
     public function getList(array $params)
     {
         $query = AgentAllow::query();
@@ -20,6 +24,10 @@ class AgentAllowRepository extends BaseRepository
         return $query->paginate();
     }
 
+    /**
+     * @param  array<int|string, mixed>  $params
+     * @return  mixed
+     */
     public function store(array $params)
     {
         $this->getPatternMatches($params['peer_id_pattern'], $params['peer_id_start'], $params['peer_id_match_num']);
@@ -28,6 +36,11 @@ class AgentAllowRepository extends BaseRepository
         return $model;
     }
 
+    /**
+     * @param  array<int|string, mixed>  $params
+     * @param  mixed  $id
+     * @return  mixed
+     */
     public function update(array $params, $id)
     {
         $this->getPatternMatches($params['peer_id_pattern'], $params['peer_id_start'], $params['peer_id_match_num']);
@@ -37,12 +50,20 @@ class AgentAllowRepository extends BaseRepository
         return $model;
     }
 
+    /**
+     * @param  mixed  $id
+     * @return  mixed
+     */
     public function getDetail($id)
     {
         $model = AgentAllow::query()->findOrFail($id);
         return $model;
     }
 
+    /**
+     * @param  mixed  $id
+     * @return  mixed
+     */
     public function delete($id)
     {
         $model = AgentAllow::query()->findOrFail($id);
@@ -51,6 +72,12 @@ class AgentAllowRepository extends BaseRepository
         return $result;
     }
 
+    /**
+     * @param  mixed  $pattern
+     * @param  mixed  $start
+     * @param  mixed  $matchNum
+     * @return  mixed
+     */
     public function getPatternMatches($pattern, $start, $matchNum)
     {
         if (!preg_match($pattern, $start, $matches)) {
@@ -65,10 +92,10 @@ class AgentAllowRepository extends BaseRepository
     }
 
     /**
-     * @param $peerId
-     * @param $agent
-     * @param false $debug
-     * @return \App\Models\NexusModel|mixed
+     * @param  mixed  $peerId
+     * @param  mixed  $agent
+     * @param  mixed  $debug
+     * @return  \App\Models\NexusModel|mixed
      * @throws ClientNotAllowedException
      */
     public function checkClient($peerId, $agent, $debug = false)
@@ -189,10 +216,16 @@ class AgentAllowRepository extends BaseRepository
 
     }
 
+    /**
+     * @param  mixed  $peerId
+     * @param  mixed  $agent
+     * @param  mixed  $familyId
+     * @return  mixed
+     */
     private function checkIsDenied($peerId, $agent, $familyId)
     {
         $cacheKey = nexus_env("CACHE_KEY_AGENT_DENY", "all_agent_denies") . ":php";
-        /** @var Collection $allDenies */
+        /** @var \Illuminate\Support\Collection<int, mixed> $allDenies */
         $allDenies = NexusDB::remember($cacheKey, 3600, function () {
             return AgentDeny::query()->get()->groupBy('family_id');
         });
@@ -206,19 +239,17 @@ class AgentAllowRepository extends BaseRepository
 
     /**
      * check peer_id or agent is allowed
-     *
      * 0: not allowed
      * 1: allowed
      * 2: version too low
-     *
-     * @param $pattern
-     * @param $start
-     * @param $matchNum
-     * @param $matchType
-     * @param $value
-     * @param bool $debug
-     * @param string $logPrefix
-     * @return int
+     * @param  mixed  $pattern
+     * @param  mixed  $start
+     * @param  mixed  $matchNum
+     * @param  mixed  $matchType
+     * @param  mixed  $value
+     * @param  mixed  $debug
+     * @param  mixed  $logPrefix
+     * @return  int
      * @throws ClientNotAllowedException
      */
     private function isAllowed($pattern, $start, $matchNum, $matchType, $value, $debug = false, $logPrefix = ''): int
@@ -266,6 +297,12 @@ class AgentAllowRepository extends BaseRepository
 
     }
 
+    /**
+     * @param  mixed  $peerId
+     * @param  mixed  $agent
+     * @param  mixed  $debug
+     * @return  mixed
+     */
     public function checkClientSimple($peerId, $agent, $debug = false)
     {
         //check from high version to low version, if high version allow, stop!

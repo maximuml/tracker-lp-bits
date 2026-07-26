@@ -11,10 +11,9 @@ class SnatchResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
+     * @param  mixed  $request
+     * @return  array<int|string, mixed>
      * @see viewsnatches.php
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return array
      */
     public function toArray($request)
     {

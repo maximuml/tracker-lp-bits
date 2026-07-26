@@ -21,12 +21,12 @@ class NexusUpdate extends Command
      */
     protected $description = 'Update nexusphp after code updated, remember run `composer update` first. Options: --tag=, --branch, --keep_tmp, --include_composer';
 
+    /** @var  mixed */
     private $update;
 
     /**
      * Create a new command instance.
-     *
-     * @return void
+     * @return  void
      */
     public function __construct()
     {
@@ -36,8 +36,7 @@ class NexusUpdate extends Command
 
     /**
      * Execute the console command.
-     *
-     * @return int
+     * @return  int
      */
     public function handle()
     {
@@ -155,6 +154,11 @@ class NexusUpdate extends Command
         return 0;
     }
 
+    /**
+     * @param  mixed  $log
+     * @param  string  $level
+     * @return  mixed
+     */
     private function doLog($log, string $level = 'info')
     {
         $this->update->doLog($log);

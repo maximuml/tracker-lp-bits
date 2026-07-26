@@ -20,13 +20,22 @@ use Nexus\Database\NexusDB;
 
 class AuthenticateController extends Controller
 {
+    /** @var  mixed */
     private $repository;
 
+    /**
+     * @param  \App\Repositories\AuthenticateRepository  $repository
+     * @return  mixed
+     */
     public function __construct(AuthenticateRepository $repository)
     {
         $this->repository = $repository;
     }
 
+    /**
+     * @param  \Illuminate\Http\Request  $request
+     * @return  array<string, mixed>
+     */
     public function login(Request $request)
     {
         $request->validate([
@@ -44,12 +53,20 @@ class AuthenticateController extends Controller
         return $this->success($result);
     }
 
+    /**
+     * @param  \Illuminate\Http\Request  $request
+     * @return  array<string, mixed>
+     */
     public function logout(Request $request)
     {
         $result = $this->repository->logout(Auth::id());
         return $this->success($result);
     }
 
+    /**
+     * @param  mixed  $passkey
+     * @return  mixed
+     */
     public function passkeyLogin($passkey)
     {
         $deadline = Setting::get('security.login_secret_deadline');
@@ -67,6 +84,10 @@ class AuthenticateController extends Controller
         return redirect('index.php');
     }
 
+    /**
+     * @param  \Illuminate\Http\Request  $request
+     * @return  array<string, mixed>
+     */
     public function nasToolsApprove(Request $request)
     {
         $request->validate([
@@ -85,6 +106,11 @@ class AuthenticateController extends Controller
         }
     }
 
+    /**
+     * @param  \Illuminate\Http\Resources\Json\JsonResource  $resource
+     * @param  \Illuminate\Http\Request  $request
+     * @return  mixed
+     */
     private function polyfillArray(JsonResource $resource, Request $request)
     {
         $data = $resource->response($request)->getData(true)['data'];
@@ -93,6 +119,10 @@ class AuthenticateController extends Controller
         return $result;
     }
 
+    /**
+     * @param  \Illuminate\Http\Request  $request
+     * @return  mixed
+     */
     public function iyuuApprove(Request $request)
     {
         try {
@@ -109,6 +139,10 @@ class AuthenticateController extends Controller
         }
     }
 
+    /**
+     * @param  \Illuminate\Http\Request  $request
+     * @return  array<string, mixed>
+     */
     public function ammdsApprove(Request $request)
     {
         try {
@@ -130,6 +164,10 @@ class AuthenticateController extends Controller
         }
     }
 
+    /**
+     * @param  \Illuminate\Http\Request  $request
+     * @return  array<string, mixed>
+     */
     public function challenge(Request $request)
     {
         try {

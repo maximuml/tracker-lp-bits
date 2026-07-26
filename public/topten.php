@@ -455,51 +455,44 @@ if ($type == 1)
     } else {
         throw new \RuntimeException('Not supported database.');
     }
-	$mainquery = "SELECT id as userid, username, added, uploaded, downloaded, $speedStr FROM users WHERE enabled = 'yes'";
+	$usersBase = \Nexus\Database\NexusDB::table('users')
+		->selectRaw("id as userid, username, added, uploaded, downloaded, $speedStr")
+		->where('enabled', 'yes');
 
 
 	if ($limit == 10 || $subtype == "ul")
 	{
-		$order = "uploaded DESC";
-		$r = \Nexus\Database\NexusDB::select($mainquery . " ORDER BY $order " . " LIMIT $limit");
+		$r = (clone $usersBase)->orderByRaw('uploaded DESC')->limit($limit)->get();
 		usershare_table($r, $lang_topten['text_top']."$limit ".$lang_topten['text_uploaders'] . ($limit == 10 ? " <font class=\"small\"> - [<a class=\"altlink\" href=\"topten.php?type=$type&amp;lim=100&amp;subtype=ul\">".$lang_topten['text_one_hundred']."</a>] - [<a class=\"altlink\" href=\"topten.php?type=$type&amp;lim=250&amp;subtype=ul\">".$lang_topten['text_top_250']."</a>]</font>" : ""));
 	}
 
 	if ($limit == 10 || $subtype == "dl")
 	{
-		$order = "downloaded DESC";
-		$r = \Nexus\Database\NexusDB::select($mainquery . " ORDER BY $order " . " LIMIT $limit");
+		$r = (clone $usersBase)->orderByRaw('downloaded DESC')->limit($limit)->get();
 		usershare_table($r, $lang_topten['text_top']."$limit ".$lang_topten['text_downloaders']  . ($limit == 10 ? " <font class=\"small\"> - [<a class=\"altlink\" href=\"topten.php?type=$type&amp;lim=100&amp;subtype=dl\">".$lang_topten['text_one_hundred']."</a>] - [<a class=\"altlink\" href=\"topten.php?type=$type&amp;lim=250&amp;subtype=dl\">".$lang_topten['text_top_250']."</a>]</font>" : ""));
 	}
 
 	if ($limit == 10 || $subtype == "uls")
 	{
-		$order = "upspeed DESC";
-		$extrawhere = " AND uploaded > 53687091200";
-		$r = \Nexus\Database\NexusDB::select($mainquery . $extrawhere . " ORDER BY $order " . " LIMIT $limit");
+		$r = (clone $usersBase)->where('uploaded', '>', 53687091200)->orderByRaw('upspeed DESC')->limit($limit)->get();
 		usershare_table($r, $lang_topten['text_top']."$limit ".$lang_topten['text_fastest_uploaders'] . "<font class=\"small\">".$lang_topten['text_fastest_up_note'] . "</font>" . ($limit == 10 ? " <font class=\"small\"> - [<a class=\"altlink\" href=\"topten.php?type=$type&amp;lim=100&amp;subtype=uls\">".$lang_topten['text_one_hundred']."</a>] - [<a class=\"altlink\" href=\"topten.php?type=$type&amp;lim=250&amp;subtype=uls\">".$lang_topten['text_top_250']."</a>]</font>" : ""));
 	}
 
 	if ($limit == 10 || $subtype == "dls")
 	{
-		$order = "downspeed DESC";
-		$r = \Nexus\Database\NexusDB::select($mainquery . " ORDER BY $order " . " LIMIT $limit");
+		$r = (clone $usersBase)->orderByRaw('downspeed DESC')->limit($limit)->get();
 		usershare_table($r, $lang_topten['text_top']."$limit ".$lang_topten['text_fastest_downloaders'] ."<font class=\"small\">" . $lang_topten['text_fastest_note'] . "</font>" . ($limit == 10 ? " <font class=\"small\"> - [<a class=\"altlink\" href=\"topten.php?type=$type&amp;lim=100&amp;subtype=dls\">".$lang_topten['text_one_hundred']."</a>] - [<a class=\"altlink\" href=\"topten.php?type=$type&amp;lim=250&amp;subtype=dls\">".$lang_topten['text_top_250']."</a>]</font>" : ""));
 	}
 
 	if ($limit == 10 || $subtype == "bsh")
 	{
-		$order = "uploaded / downloaded DESC";
-		$extrawhere = " AND downloaded > 53687091200";
-		$r = \Nexus\Database\NexusDB::select($mainquery . $extrawhere . " ORDER BY $order " . " LIMIT $limit");
+		$r = (clone $usersBase)->where('downloaded', '>', 53687091200)->orderByRaw('uploaded / downloaded DESC')->limit($limit)->get();
 		usershare_table($r, $lang_topten['text_top']."$limit ".$lang_topten['text_best_sharers'] ."<font class=\"small\">".$lang_topten['text_sharers_note']."</font>"  . ($limit == 10 ? " <font class=\"small\"> - [<a class=\"altlink\" href=\"topten.php?type=$type&amp;lim=100&amp;subtype=bsh\">".$lang_topten['text_one_hundred']."</a>] - [<a class=\"altlink\" href=\"topten.php?type=$type&amp;lim=250&amp;subtype=bsh\">".$lang_topten['text_top_250']."</a>]</font>" : ""));
 	}
 
 	if ($limit == 10 || $subtype == "wsh")
 	{
-		$order = "uploaded / downloaded ASC, downloaded DESC";
-		$extrawhere = " AND downloaded > 53687091200";
-		$r = \Nexus\Database\NexusDB::select($mainquery . $extrawhere . " ORDER BY $order " . " LIMIT $limit");
+		$r = (clone $usersBase)->where('downloaded', '>', 53687091200)->orderByRaw('uploaded / downloaded ASC, downloaded DESC')->limit($limit)->get();
 		usershare_table($r, $lang_topten['text_top']."$limit ".$lang_topten['text_worst_sharers'] .$lang_topten['text_sharers_note'] . ($limit == 10 ? " <font class=\"small\"> - [<a class=\"altlink\" href=\"topten.php?type=$type&amp;lim=100&amp;subtype=wsh\">".$lang_topten['text_one_hundred']."</a>] - [<a class=\"altlink\" href=\"topten.php?type=$type&amp;lim=250&amp;subtype=wsh\">".$lang_topten['text_top_250']."</a>]</font>" : ""));
 	}
 /*
@@ -520,31 +513,67 @@ elseif ($type == 2)
 {
 	if ($limit == 10 || $subtype == "act")
 	{
-		$r = \Nexus\Database\NexusDB::select("SELECT t.*, (t.size * t.times_completed + SUM(p.downloaded)) AS data FROM torrents AS t LEFT JOIN peers AS p ON t.id = p.torrent WHERE p.seeder = 'no' GROUP BY t.id ORDER BY seeders + leechers DESC, seeders DESC, added ASC LIMIT $limit");
+		$r = \Nexus\Database\NexusDB::table('torrents as t')
+			->leftJoin('peers as p', 't.id', '=', 'p.torrent')
+			->selectRaw('t.*, (t.size * t.times_completed + SUM(p.downloaded)) AS data')
+			->where('p.seeder', 'no')
+			->groupBy('t.id')
+			->orderByRaw('seeders + leechers DESC, seeders DESC, added ASC')
+			->limit($limit)
+			->get();
 		_torrenttable($r, $lang_topten['text_top']."$limit ".$lang_topten['text_most_active_torrents']. ($limit == 10 ? " <font class=\"small\"> - [<a class=\"altlink\" href=\"topten.php?type=$type&amp;lim=25&amp;subtype=act\">Top 25</a>] - [<a class=\"altlink\" href=\"topten.php?type=$type&amp;lim=50&amp;subtype=act\">Top 50</a>]</font>" : ""));
 	}
 
 	if ($limit == 10 || $subtype == "sna")
 	{
-		$r = \Nexus\Database\NexusDB::select("SELECT t.*, (t.size * t.times_completed + SUM(p.downloaded)) AS data FROM torrents AS t LEFT JOIN peers AS p ON t.id = p.torrent WHERE p.seeder = 'no' GROUP BY t.id ORDER BY times_completed DESC LIMIT $limit");
+		$r = \Nexus\Database\NexusDB::table('torrents as t')
+			->leftJoin('peers as p', 't.id', '=', 'p.torrent')
+			->selectRaw('t.*, (t.size * t.times_completed + SUM(p.downloaded)) AS data')
+			->where('p.seeder', 'no')
+			->groupBy('t.id')
+			->orderByRaw('times_completed DESC')
+			->limit($limit)
+			->get();
 		_torrenttable($r, $lang_topten['text_top']."$limit ".$lang_topten['text_most_snatched_torrents']. ($limit == 10 ? " <font class=\"small\"> - [<a class=\"altlink\" href=\"topten.php?type=$type&lim=25&subtype=sna\">Top 25</a>] - [<a class=\"altlink\" href=\"topten.php?type=$type&amp;lim=50&amp;subtype=sna\">Top 50</a>]</font>" : ""));
 	}
 
 	if ($limit == 10 || $subtype == "mdt")
 	{
-		$r = \Nexus\Database\NexusDB::select("SELECT t.*, (t.size * t.times_completed + SUM(p.downloaded)) AS data FROM torrents AS t LEFT JOIN peers AS p ON t.id = p.torrent WHERE p.seeder = 'no' AND times_completed > 0 GROUP BY t.id ORDER BY data DESC, added ASC LIMIT $limit");
+		$r = \Nexus\Database\NexusDB::table('torrents as t')
+			->leftJoin('peers as p', 't.id', '=', 'p.torrent')
+			->selectRaw('t.*, (t.size * t.times_completed + SUM(p.downloaded)) AS data')
+			->where('p.seeder', 'no')
+			->where('times_completed', '>', 0)
+			->groupBy('t.id')
+			->orderByRaw('data DESC, added ASC')
+			->limit($limit)
+			->get();
 		_torrenttable($r, $lang_topten['text_top']."$limit ".$lang_topten['text_most_data_transferred_torrents']. ($limit == 10 ? " <font class=\"small\"> - [<a class=\"altlink\" href=\"topten.php?type=$type&amp;lim=25&amp;subtype=mdt\">Top 25</a>] - [<a class=\"altlink\" href=\"topten.php?type=$type&amp;lim=50&amp;subtype=mdt\">Top 50</a>]</font>" : ""));
 	}
 
 	if ($limit == 10 || $subtype == "bse")
 	{
-		$r = \Nexus\Database\NexusDB::select("SELECT t.*, (t.size * t.times_completed + SUM(p.downloaded)) AS data FROM torrents AS t LEFT JOIN peers AS p ON t.id = p.torrent WHERE p.seeder = 'no' AND seeders >= 5 GROUP BY t.id ORDER BY seeders / leechers DESC, seeders DESC, added ASC LIMIT $limit");
+		$r = \Nexus\Database\NexusDB::table('torrents as t')
+			->leftJoin('peers as p', 't.id', '=', 'p.torrent')
+			->selectRaw('t.*, (t.size * t.times_completed + SUM(p.downloaded)) AS data')
+			->where('p.seeder', 'no')
+			->where('seeders', '>=', 5)
+			->groupBy('t.id')
+			->orderByRaw('seeders / leechers DESC, seeders DESC, added ASC')
+			->limit($limit)
+			->get();
 		_torrenttable($r, $lang_topten['text_top']."$limit ".$lang_topten['text_best_seeded_torrents']."<font class=\"small\">".$lang_topten['text_best_seeded_torrents_note']."</font>" . ($limit == 10 ? " <font class=\"small\"> - [<a class=\"altlink\" href=\"topten.php?type=$type&amp;lim=25&amp;subtype=bse\">Top 25</a>] - [<a class=\"altlink\" href=\"topten.php?type=$type&amp;lim=50&amp;subtype=bse\">Top 50</a>]</font>" : ""));
 	}
 
 	if ($limit == 10 || $subtype == "wse")
 	{
-		$r = \Nexus\Database\NexusDB::select("SELECT t.*, (t.size * t.times_completed) AS data FROM torrents AS t WHERE leechers > 0 AND times_completed > 0 ORDER BY seeders / leechers ASC, leechers DESC LIMIT $limit");
+		$r = \Nexus\Database\NexusDB::table('torrents as t')
+			->selectRaw('t.*, (t.size * t.times_completed) AS data')
+			->where('leechers', '>', 0)
+			->where('times_completed', '>', 0)
+			->orderByRaw('seeders / leechers ASC, leechers DESC')
+			->limit($limit)
+			->get();
 		_torrenttable($r, $lang_topten['text_top']."$limit ".$lang_topten['text_worst_seeded_torrents']."<font class=\"small\">" . $lang_topten['text_worst_seeded_torrents_note'] . "</font>" . ($limit == 10 ? " <font class=\"small\"> - [<a class=\"altlink\" href=\"topten.php?type=$type&amp;lim=25&amp;subtype=wse\">Top 25</a>] - [<a class=\"altlink\" href=\"topten.php?type=$type&amp;lim=50&amp;subtype=wse\">Top 50</a>]</font>" : ""));
 	}
 }
@@ -552,25 +581,54 @@ elseif ($type == 3)
 {
 	if ($limit == 10 || $subtype == "us")
 	{
-		$r = \Nexus\Database\NexusDB::select("SELECT name, flagpic, COUNT(users.country) as num FROM countries LEFT JOIN users ON users.country = countries.id GROUP BY name,flagpic ORDER BY num DESC LIMIT $limit");
+		$r = \Nexus\Database\NexusDB::table('countries')
+			->leftJoin('users', 'users.country', '=', 'countries.id')
+			->select('countries.name', 'countries.flagpic', \Nexus\Database\NexusDB::raw('COUNT(users.country) as num'))
+			->groupBy('countries.name', 'countries.flagpic')
+			->orderByRaw('num DESC')
+			->limit($limit)
+			->get();
 		countriestable($r, $lang_topten['text_top']."$limit ".$lang_topten['text_countries_users']. ($limit == 10 ? " <font class=\"small\"> - [<a class=\"altlink\" href=\"topten.php?type=$type&amp;lim=25&amp;subtype=us\">Top 25</a>]</font>" : ""),$lang_topten['col_users']);
 	}
 
 	if ($limit == 10 || $subtype == "ul")
 	{
-		$r = \Nexus\Database\NexusDB::select("SELECT c.name, c.flagpic, sum(u.uploaded) AS ul FROM users AS u LEFT JOIN countries AS c ON u.country = c.id WHERE u.enabled = 'yes' GROUP BY c.name ORDER BY ul DESC LIMIT $limit");
+		$r = \Nexus\Database\NexusDB::table('users as u')
+			->leftJoin('countries as c', 'u.country', '=', 'c.id')
+			->select('c.name', 'c.flagpic', \Nexus\Database\NexusDB::raw('sum(u.uploaded) AS ul'))
+			->where('u.enabled', 'yes')
+			->groupBy('c.name')
+			->orderByRaw('ul DESC')
+			->limit($limit)
+			->get();
 		countriestable($r, $lang_topten['text_top']."$limit ".$lang_topten['text_countries_uploaded']. ($limit == 10 ? " <font class=\"small\"> - [<a class=\"altlink\" href=\"topten.php?type=$type&amp;lim=25&amp;subtype=ul\">Top 25</a>]</font>" : ""),$lang_topten['col_uploaded']);
 	}
 
 	if ($limit == 10 || $subtype == "avg")
 	{
-		$r = \Nexus\Database\NexusDB::select("SELECT c.name, c.flagpic, sum(u.uploaded)/count(u.id) AS ul_avg FROM users AS u LEFT JOIN countries AS c ON u.country = c.id WHERE u.enabled = 'yes' GROUP BY c.name HAVING sum(u.uploaded) > 1099511627776 AND count(u.id) >= 100 ORDER BY ul_avg DESC LIMIT $limit");
+		$r = \Nexus\Database\NexusDB::table('users as u')
+			->leftJoin('countries as c', 'u.country', '=', 'c.id')
+			->select('c.name', 'c.flagpic', \Nexus\Database\NexusDB::raw('sum(u.uploaded)/count(u.id) AS ul_avg'))
+			->where('u.enabled', 'yes')
+			->groupBy('c.name')
+			->havingRaw('sum(u.uploaded) > 1099511627776 AND count(u.id) >= 100')
+			->orderByRaw('ul_avg DESC')
+			->limit($limit)
+			->get();
 		countriestable($r, $lang_topten['text_top']."$limit ".$lang_topten['text_countries_per_user']. ($limit == 10 ? " <font class=\"small\"> - [<a class=\"altlink\" href=\"topten.php?type=$type&amp;lim=25&amp;subtype=avg\">Top 25</a>]</font>" : ""),$lang_topten['col_average']);
 	}
 
 	if ($limit == 10 || $subtype == "r")
 	{
-		$r = \Nexus\Database\NexusDB::select("SELECT c.name, c.flagpic, sum(u.uploaded)/sum(u.downloaded) AS r FROM users AS u LEFT JOIN countries AS c ON u.country = c.id WHERE u.enabled = 'yes' GROUP BY c.name HAVING sum(u.uploaded) > 1099511627776 AND sum(u.downloaded) > 1099511627776 AND count(u.id) >= 100 ORDER BY r DESC LIMIT $limit");
+		$r = \Nexus\Database\NexusDB::table('users as u')
+			->leftJoin('countries as c', 'u.country', '=', 'c.id')
+			->select('c.name', 'c.flagpic', \Nexus\Database\NexusDB::raw('sum(u.uploaded)/sum(u.downloaded) AS r'))
+			->where('u.enabled', 'yes')
+			->groupBy('c.name')
+			->havingRaw('sum(u.uploaded) > 1099511627776 AND sum(u.downloaded) > 1099511627776 AND count(u.id) >= 100')
+			->orderByRaw('r DESC')
+			->limit($limit)
+			->get();
 		countriestable($r, $lang_topten['text_top']."$limit ".$lang_topten['text_countries_ratio']. ($limit == 10 ? " <font class=\"small\"> - [<a class=\"altlink\" href=\"topten.php?type=$type&amp;lim=25&amp;subtype=r\">Top 25</a>]</font>" : ""),$lang_topten['col_ratio']);
 	}
 }
@@ -601,31 +659,66 @@ elseif ($type == 5)
 {
 	if ($limit == 10 || $subtype == "mtop")
 	{
-		$r = \Nexus\Database\NexusDB::select( "SELECT users_topics.userid,  users_topics.usertopics, COUNT(posts.id) as userposts FROM (SELECT users.id as userid, COUNT(topics.id) as usertopics from users LEFT JOIN topics ON users.id = topics.userid GROUP BY users.id) as users_topics LEFT JOIN posts ON users_topics.userid = posts.userid GROUP BY users_topics.userid, users_topics.usertopics ORDER BY usertopics DESC LIMIT $limit");
+		$r = \Nexus\Database\NexusDB::table('users as u')
+			->leftJoin('topics', 'u.id', '=', 'topics.userid')
+			->leftJoin('posts', 'u.id', '=', 'posts.userid')
+			->select('u.id as userid', \Nexus\Database\NexusDB::raw('COUNT(DISTINCT topics.id) as usertopics'), \Nexus\Database\NexusDB::raw('COUNT(DISTINCT posts.id) as userposts'))
+			->groupBy('u.id')
+			->orderByRaw('usertopics DESC')
+			->limit($limit)
+			->get();
 		postable($r, $lang_topten['text_top']."$limit ".$lang_topten['text_most_topic'] . ($limit == 10 ? " <font class=\"small\"> - [<a class=\"altlink\" href=\"topten.php?type=$type&amp;lim=100&amp;subtype=mtop\">".$lang_topten['text_one_hundred']."</a>] - [<a class=\"altlink\" href=\"topten.php?type=$type&amp;lim=250&amp;subtype=mtop\">".$lang_topten['text_top_250']."</a>]</font>" : ""));
 	}
 
 	if ($limit == 10 || $subtype == "mpos")
 	{
-		$r = \Nexus\Database\NexusDB::select( "SELECT users_topics.userid,  users_topics.usertopics, COUNT(posts.id) as userposts FROM (SELECT users.id as userid, COUNT(topics.id) as usertopics from users LEFT JOIN topics ON users.id = topics.userid GROUP BY users.id) as users_topics LEFT JOIN posts ON users_topics.userid = posts.userid GROUP BY users_topics.userid, users_topics.usertopics ORDER BY userposts DESC LIMIT $limit");
+		$r = \Nexus\Database\NexusDB::table('users as u')
+			->leftJoin('topics', 'u.id', '=', 'topics.userid')
+			->leftJoin('posts', 'u.id', '=', 'posts.userid')
+			->select('u.id as userid', \Nexus\Database\NexusDB::raw('COUNT(DISTINCT topics.id) as usertopics'), \Nexus\Database\NexusDB::raw('COUNT(DISTINCT posts.id) as userposts'))
+			->groupBy('u.id')
+			->orderByRaw('userposts DESC')
+			->limit($limit)
+			->get();
 		postable($r, $lang_topten['text_top']."$limit ".$lang_topten['text_most_post'] . ($limit == 10 ? " <font class=\"small\"> - [<a class=\"altlink\" href=\"topten.php?type=$type&amp;lim=100&amp;subtype=mpos\">".$lang_topten['text_one_hundred']."</a>] - [<a class=\"altlink\" href=\"topten.php?type=$type&amp;lim=250&amp;subtype=mpos\">".$lang_topten['text_top_250']."</a>]</font>" : ""));
 	}
 
 	if ($reviewenabled == 'yes' && ($limit == 10 || $subtype == "mrev"))
 	{
-		$r = \Nexus\Database\NexusDB::select( "SELECT users.id as userid, COUNT(reviews.id) as num FROM users LEFT JOIN reviews ON users.id = reviews.user GROUP BY users.id ORDER BY num DESC LIMIT $limit");
+		$r = \Nexus\Database\NexusDB::table('users')
+			->leftJoin('reviews', 'users.id', '=', 'reviews.user')
+			->select('users.id as userid', \Nexus\Database\NexusDB::raw('COUNT(reviews.id) as num'))
+			->groupBy('users.id')
+			->orderByRaw('num DESC')
+			->limit($limit)
+			->get();
 		cmttable($r, $lang_topten['text_top']."$limit ".$lang_topten['text_most_reviewer'] . ($limit == 10 ? " <font class=\"small\"> - [<a class=\"altlink\" href=\"topten.php?type=$type&amp;lim=100&amp;subtype=mrev\">".$lang_topten['text_one_hundred']."</a>] - [<a class=\"altlink\" href=\"topten.php?type=$type&amp;lim=250&amp;subtype=mrev\">".$lang_topten['text_top_250']."</a>]</font>" : ""), $lang_topten['col_reviews']);
 	}
 
 	if ($limit == 10 || $subtype == "mcmt")
 	{
-		$r = \Nexus\Database\NexusDB::select( "SELECT users.id as userid, COUNT(comments.id) as num FROM users LEFT JOIN comments ON users.id = comments.user GROUP BY users.id ORDER BY num DESC LIMIT $limit");
+		$r = \Nexus\Database\NexusDB::table('users')
+			->leftJoin('comments', 'users.id', '=', 'comments.user')
+			->select('users.id as userid', \Nexus\Database\NexusDB::raw('COUNT(comments.id) as num'))
+			->groupBy('users.id')
+			->orderByRaw('num DESC')
+			->limit($limit)
+			->get();
 		cmttable($r, $lang_topten['text_top']."$limit ".$lang_topten['text_most_commenter'] . ($limit == 10 ? " <font class=\"small\"> - [<a class=\"altlink\" href=\"topten.php?type=$type&amp;lim=100&amp;subtype=mcmt\">".$lang_topten['text_one_hundred']."</a>] - [<a class=\"altlink\" href=\"topten.php?type=$type&amp;lim=250&amp;subtype=mcmt\">".$lang_topten['text_top_250']."</a>]</font>" : ""), $lang_topten['col_comments']);
 	}
 
 	if ($limit == 10 || $subtype == "btop")
 	{
-		$r = \Nexus\Database\NexusDB::select("SELECT topics_posts.topicid, topics_posts.topicsubject, topics_posts.postnum, forums.id as forumid FROM (SELECT topics.id as topicid, topics.subject as topicsubject, COUNT(posts.id) as postnum, topics.forumid FROM topics LEFT JOIN posts ON topics.id = posts.topicid GROUP BY topics.id) as topics_posts LEFT JOIN forums ON topics_posts.forumid = forums.id AND forums.minclassread <= 1 ORDER BY postnum DESC LIMIT $limit");
+		$r = \Nexus\Database\NexusDB::table('topics as tp')
+			->leftJoin('posts', 'tp.id', '=', 'posts.topicid')
+			->leftJoin('forums', 'tp.forumid', '=', 'forums.id')
+			->select('tp.id as topicid', 'tp.subject as topicsubject', \Nexus\Database\NexusDB::raw('COUNT(posts.id) as postnum'), 'tp.forumid', 'forums.id as forumid')
+			->where('forums.minclassread', '<=', 1)
+			->orWhereNull('forums.id')
+			->groupBy('tp.id', 'tp.subject', 'tp.forumid', 'forums.id')
+			->orderByRaw('postnum DESC')
+			->limit($limit)
+			->get();
 		bigtopic_table($r, $lang_topten['text_top']."$limit ".$lang_topten['text_biggest_topics'] . ($limit == 10 ? " <font class=\"small\"> - [<a class=\"altlink\" href=\"topten.php?type=$type&amp;lim=100&amp;subtype=btop\">".$lang_topten['text_one_hundred']."</a>] - [<a class=\"altlink\" href=\"topten.php?type=$type&amp;lim=250&amp;subtype=btop\">".$lang_topten['text_top_250']."</a>]</font>" : ""));
 	}
 }
@@ -633,26 +726,42 @@ elseif ($type == 6)
 {
 	if ($limit == 10 || $subtype == "bo")
 	{
-		$r = \Nexus\Database\NexusDB::select("SELECT * FROM users ORDER BY seedbonus DESC LIMIT $limit");
+		$r = \Nexus\Database\NexusDB::table('users')
+			->orderBy('seedbonus', 'desc')
+			->limit($limit)
+			->get();
 		bonustable($r, $lang_topten['text_top']."$limit ".$lang_topten['text_most_bonuses'] . ($limit == 10 ? " <font class=\"small\"> - [<a class=\"altlink\" href=\"topten.php?type=$type&amp;lim=100&amp;subtype=bo\">".$lang_topten['text_one_hundred']."</a>] - [<a class=\"altlink\" href=\"topten.php?type=$type&amp;lim=250&amp;subtype=bo\">".$lang_topten['text_top_250']."</a>]</font>" : ""));
 	}
 
 	if ($limit == 10 || $subtype == "charity")
 	{
-		$r = \Nexus\Database\NexusDB::select("SELECT * FROM users ORDER BY charity DESC LIMIT $limit");
+		$r = \Nexus\Database\NexusDB::table('users')
+			->orderBy('charity', 'desc')
+			->limit($limit)
+			->get();
 		charityTable($r, $lang_topten['text_top']."$limit ".$lang_topten['text_charity_giver'] . ($limit == 10 ? " <font class=\"small\"> - [<a class=\"altlink\" href=\"topten.php?type=$type&amp;lim=100&amp;subtype=charity\">".$lang_topten['text_one_hundred']."</a>] - [<a class=\"altlink\" href=\"topten.php?type=$type&amp;lim=250&amp;subtype=charity\">".$lang_topten['text_top_250']."</a>]</font>" : ""));
 	}
 
 if ($enabledonation == 'yes'){
 	if ($limit == 10 || $subtype == "do_usd")
 	{
-		$r = \Nexus\Database\NexusDB::select( "SELECT id, donated, donated_cny from users where donated > 0 ORDER BY donated DESC, donated_cny DESC LIMIT $limit");
+		$r = \Nexus\Database\NexusDB::table('users')
+			->select('id', 'donated', 'donated_cny')
+			->where('donated', '>', 0)
+			->orderByRaw('donated DESC, donated_cny DESC')
+			->limit($limit)
+			->get();
 		donortable($r, $lang_topten['text_top']."$limit ".$lang_topten['text_most_donated_USD'] . ($limit == 10 ? " <font class=\"small\"> - [<a class=\"altlink\" href=\"topten.php?type=$type&amp;lim=100&amp;subtype=do_usd\">".$lang_topten['text_one_hundred']."</a>] - [<a class=\"altlink\" href=\"topten.php?type=$type&amp;lim=250&amp;subtype=do_usd\">".$lang_topten['text_top_250']."</a>]</font>" : ""));
 	}
 
 	if ($limit == 10 || $subtype == "do_cny")
 	{
-		$r = \Nexus\Database\NexusDB::select( "SELECT id, donated, donated_cny from users where donated_cny > 0 ORDER BY donated DESC, donated_cny DESC LIMIT $limit");
+		$r = \Nexus\Database\NexusDB::table('users')
+			->select('id', 'donated', 'donated_cny')
+			->where('donated_cny', '>', 0)
+			->orderByRaw('donated DESC, donated_cny DESC')
+			->limit($limit)
+			->get();
 		donortable($r, $lang_topten['text_top']."$limit ".$lang_topten['text_most_donated_CNY'] . ($limit == 10 ? " <font class=\"small\"> - [<a class=\"altlink\" href=\"topten.php?type=$type&amp;lim=100&amp;subtype=do_cny\">".$lang_topten['text_one_hundred']."</a>] - [<a class=\"altlink\" href=\"topten.php?type=$type&amp;lim=250&amp;subtype=do_cny\">".$lang_topten['text_top_250']."</a>]</font>" : ""));
 	}
 }
@@ -667,17 +776,36 @@ if ($enabledonation == 'yes'){
 
 	if ($limit == 10 || $subtype == "mcli")
 	{
-		$r = \Nexus\Database\NexusDB::select( "SELECT agent_allowed_family.family as client_name, COUNT(users.id) as client_num from users RIGHT JOIN agent_allowed_family ON agent_allowed_family.id = users.clientselect GROUP BY clientselect, client_name ORDER BY client_num DESC LIMIT $limit");
+		$r = \Nexus\Database\NexusDB::table('users')
+			->rightJoin('agent_allowed_family', 'users.clientselect', '=', 'agent_allowed_family.id')
+			->select('agent_allowed_family.family as client_name', \Nexus\Database\NexusDB::raw('COUNT(users.id) as client_num'))
+			->groupBy('users.clientselect', 'agent_allowed_family.family')
+			->orderByRaw('client_num DESC')
+			->limit($limit)
+			->get();
 		clienttable($r, $lang_topten['text_top']."$limit ".$lang_topten['text_most_client'] . ($limit == 10 ? " <font class=\"small\"> - [<a class=\"altlink\" href=\"topten.php?type=$type&amp;lim=100&amp;subtype=mcli\">".$lang_topten['text_one_hundred']."</a>] - [<a class=\"altlink\" href=\"topten.php?type=$type&amp;lim=250&amp;subtype=mcli\">".$lang_topten['text_top_250']."</a>]</font>" : ""));
 	}
 	if ($limit == 10 || $subtype == "ss")
 	{
-		$r = \Nexus\Database\NexusDB::select( "SELECT stylesheets.name as stylesheet_name, COUNT(users.id) as stylesheet_num from users JOIN stylesheets ON stylesheets.id = users.stylesheet GROUP BY stylesheet, stylesheet_name ORDER BY stylesheet_num DESC LIMIT $limit");
+		$r = \Nexus\Database\NexusDB::table('users')
+			->join('stylesheets', 'users.stylesheet', '=', 'stylesheets.id')
+			->select('stylesheets.name as stylesheet_name', \Nexus\Database\NexusDB::raw('COUNT(users.id) as stylesheet_num'))
+			->groupBy('users.stylesheet', 'stylesheets.name')
+			->orderByRaw('stylesheet_num DESC')
+			->limit($limit)
+			->get();
 		stylesheettable($r, $lang_topten['text_top']."$limit ".$lang_topten['text_most_stylesheet'] . ($limit == 10 ? "<font class=\"small\"> - [<a class=\"altlink\" href=\"topten.php?type=$type&amp;lim=25&amp;subtype=ss\">Top 25</a>] - [<a class=\"altlink\" href=\"topten.php?type=$type&amp;lim=50&amp;subtype=ss\">Top 50</a>]</font>" : ""));
 	}
 	if ($limit == 10 || $subtype == "lang")
 	{
-		$r = \Nexus\Database\NexusDB::select( "SELECT language.lang_name as lang_name, COUNT(users.id) as lang_num from users JOIN language ON language.id = users.lang WHERE site_lang=1 GROUP BY lang, lang_name ORDER BY lang_num DESC LIMIT $limit");
+		$r = \Nexus\Database\NexusDB::table('users')
+			->join('language', 'users.lang', '=', 'language.id')
+			->select('language.lang_name as lang_name', \Nexus\Database\NexusDB::raw('COUNT(users.id) as lang_num'))
+			->where('language.site_lang', 1)
+			->groupBy('users.lang', 'language.lang_name')
+			->orderByRaw('lang_num DESC')
+			->limit($limit)
+			->get();
 		languagetable($r, $lang_topten['text_top']."$limit ".$lang_topten['text_most_language'] . ($limit == 10 ? "<font class=\"small\"> - [<a class=\"altlink\" href=\"topten.php?type=$type&amp;lim=25&amp;subtype=lang\">Top 25</a>]</font>" : ""));
 	}
 }

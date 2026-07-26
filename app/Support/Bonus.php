@@ -342,14 +342,55 @@ class Bonus
     }
 
     /**
+     * Build the seed-bonus breakdown table for a user, resolving all
+     * the legacy helper dependencies (`calculate_seed_bonus`,
+     * `calculate_harem_addition`, `is_donor`, settings) internally.
+     *
+     * Backs the `build_bonus_table()` helper.
+     *
+     * @param  array<string, mixed>  $user
+     * @param  array<string, mixed>  $bonusResult
+     * @param  array<string, mixed>  $options
+     * @return array<string, mixed>
+     */
+    public static function buildBonusTableForUser(array $user, array $bonusResult = [], array $options = []): array
+    {
+        if (empty($bonusResult)) {
+            $bonusResult = self::calculateForUser((int) ($user['id'] ?? 0));
+        }
+
+        $officialTag = \get_setting('bonus.official_tag');
+        $officialAdditionalFactor = \get_setting('bonus.official_addition', 0);
+        $haremFactor = \get_setting('bonus.harem_addition');
+        $haremAddition = self::haremAddition((int) ($user['id'] ?? 0));
+        $isDonor = \is_donor($user);
+        $donortimesBonus = \get_setting('bonus.donortimes');
+
+        return self::buildBonusTable(
+            $bonusResult,
+            $isDonor,
+            $donortimesBonus,
+            $officialTag,
+            $officialAdditionalFactor,
+            $haremFactor,
+            $haremAddition,
+            $options,
+        );
+    }
+
+    /**
      * Add or subtract seed-bonus points from a single user.
      *
      * Mirrors the legacy `KPS()` helper: only executes when the
      * `bonus` tweak is set to `enable` or `disablesave`, and only
      * if the point value is non-zero.
      */
-    public static function updatePoints(string $type, float $point, int|string $id, string $bonusTweak): void
+    public static function updatePoints(string $type, float $point, int|string $id, ?string $bonusTweak = null): void
     {
+        if ($bonusTweak === null) {
+            $bonusTweak = (string) ($GLOBALS['bonus_tweak'] ?? '');
+        }
+
         if ($point == 0) {
             return;
         }

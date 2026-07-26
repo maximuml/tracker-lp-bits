@@ -197,6 +197,45 @@ final class Html
     }
 
     /**
+     * Emit a settings row, returning it when `$return` is true or
+     * echoing it otherwise. Backs the legacy `tr()` helper.
+     */
+    public static function emitSettingsRow(
+        string $head,
+        string $follow,
+        bool $escape = true,
+        string $relation = '',
+        bool $return = false,
+    ): ?string {
+        $html = self::settingsRow($head, $follow, $escape, $relation);
+        if ($return) {
+            return $html;
+        }
+        echo $html;
+
+        return null;
+    }
+
+    /**
+     * Emit a narrow-label settings row. Backs the legacy `tr_small()` helper.
+     */
+    public static function emitSettingsRowSmall(
+        string $head,
+        string $follow,
+        bool $escape = true,
+        string $relation = '',
+        bool $return = false,
+    ): ?string {
+        $html = self::settingsRowSmall($head, $follow, $escape, $relation);
+        if ($return) {
+            return $html;
+        }
+        echo $html;
+
+        return null;
+    }
+
+    /**
      * Two bare `<td>` cells (no `<tr>` wrap) — the inner half of a
      * legacy `twotd()` call, used by `public/index.php`'s stats panel
      * to glue two cells into an already-open `<tr>`.
@@ -211,6 +250,38 @@ final class Html
     public static function settingsCells(string $head, string $follow): string
     {
         return '<td class="rowhead">'.$head.'</td><td class="rowfollow">'.$follow.'</td>';
+    }
+
+    /**
+     * Build a `<select>` for searchbox taxonomy items. Backs the legacy
+     * `torrent_selection()` helper.
+     */
+    public static function torrentSelection(string $name, string $selName, string $listName, int $selectedId = 0, int $mode = 0): string
+    {
+        $items = \App\Support\SearchBox::itemList($GLOBALS['Cache'] ?? null, $listName, $mode);
+        $chooseOne = $GLOBALS['lang_functions']['select_choose_one'] ?? '';
+
+        return self::torrentSelect($name, $selName, $chooseOne, $selectedId, $items);
+    }
+
+    /**
+     * Build a `<select>` of promotion types with localized labels.
+     * Backs the legacy `promotion_selection()` helper.
+     */
+    public static function promotionSelection(int $selected = 0, int $hide = 0): string
+    {
+        $lang = $GLOBALS['lang_functions'] ?? [];
+        $labels = [
+            'normal' => (string) ($lang['text_normal'] ?? ''),
+            'free' => (string) ($lang['text_free'] ?? ''),
+            'two_times_up' => (string) ($lang['text_two_times_up'] ?? ''),
+            'free_two_times_up' => (string) ($lang['text_free_two_times_up'] ?? ''),
+            'half_down' => (string) ($lang['text_half_down'] ?? ''),
+            'half_down_two_up' => (string) ($lang['text_half_down_two_up'] ?? ''),
+            'thirty_percent_down' => (string) ($lang['text_thirty_percent_down'] ?? ''),
+        ];
+
+        return self::promotionSelectOptions($selected, $hide, $labels);
     }
 
     /**
@@ -315,5 +386,117 @@ final class Html
         }
 
         return $table.'</tbody></table>';
+    }
+
+    /**
+     * Wrap a BBCode `[url]` tag in a temp-code placeholder.
+     *
+     * Backs the legacy `formatUrl()` helper.
+     */
+    public static function formatUrl(string $url, bool $newWindow = false, string $text = '', string $linkClass = ''): string
+    {
+        return \App\Support\Comment::addTempCode(\App\Support\BBCode::url($url, $newWindow, $text, $linkClass));
+    }
+
+    /**
+     * Filter and render a `[img]` tag with a temp-code placeholder.
+     *
+     * Backs the legacy `formatImg()` helper.
+     */
+    public static function formatImg(string $src, bool $enableResizer, int $maxWidth, int $maxHeight, string $imgId = ''): string
+    {
+        $src = \App\Support\Security::filterSrc($src);
+        if (empty($src)) {
+            return '';
+        }
+
+        return \App\Support\Comment::addTempCode(\App\Support\BBCode::img($src, $enableResizer, $maxWidth, $maxHeight, $imgId));
+    }
+
+    /**
+     * Filter and render a `[flash]` tag with a temp-code placeholder.
+     *
+     * Backs the legacy `formatFlash()` helper.
+     */
+    public static function formatFlash(string $src, int|string $width, int|string $height): string
+    {
+        $src = \App\Support\Security::filterSrc($src);
+        if (empty($src)) {
+            return '';
+        }
+
+        return \App\Support\Comment::addTempCode(\App\Support\BBCode::flash($src, $width, $height));
+    }
+
+    /**
+     * Filter and render a `[flv]` tag with a temp-code placeholder.
+     *
+     * Backs the legacy `formatFlv()` helper.
+     */
+    public static function formatFlv(string $src, int|string $width, int|string $height): string
+    {
+        $src = \App\Support\Security::filterSrc($src);
+        if (empty($src)) {
+            return '';
+        }
+
+        return \App\Support\Comment::addTempCode(\App\Support\BBCode::flv($src, $width, $height));
+    }
+
+    /**
+     * Filter and render a `[youtube]` tag with a temp-code placeholder.
+     *
+     * Backs the legacy `formatYoutube()` helper.
+     */
+    public static function formatYoutube(string $src, int|string $width = '', int|string $height = ''): string
+    {
+        $src = \App\Support\Security::filterSrc($src);
+        if (empty($src)) {
+            return '';
+        }
+
+        return \App\Support\Comment::addTempCode(\App\Support\BBCode::youtube($src, $width, $height));
+    }
+
+    /**
+     * Filter and render a `[video]` tag with a temp-code placeholder.
+     *
+     * Backs the legacy `formatVideo()` helper.
+     */
+    public static function formatVideo(string $src, int|string $width, int|string $height): string
+    {
+        $src = \App\Support\Security::filterSrc($src);
+        if (empty($src)) {
+            return '';
+        }
+
+        return \App\Support\Comment::addTempCode(\App\Support\BBCode::video($src, $width, $height));
+    }
+
+    /**
+     * Filter and render an `[audio]` tag with a temp-code placeholder.
+     *
+     * Backs the legacy `formatAudio()` helper.
+     */
+    public static function formatAudio(string $src): string
+    {
+        $src = \App\Support\Security::filterSrc($src);
+        if (empty($src)) {
+            return '';
+        }
+
+        return \App\Support\Comment::addTempCode(\App\Support\BBCode::audio($src));
+    }
+
+    /**
+     * Render a `[spoiler]` tag with a temp-code placeholder.
+     *
+     * Backs the legacy `formatSpoiler()` helper.
+     */
+    public static function formatSpoiler(string $content, string $title = '', bool $defaultCollapsed = true): string
+    {
+        $defaultTitle = $GLOBALS['lang_functions']['spoiler_default_title'] ?? '';
+
+        return \App\Support\Comment::addTempCode(\App\Support\BBCode::spoiler($content, $title, $defaultTitle, $defaultCollapsed));
     }
 }

@@ -79,4 +79,21 @@ final class Env
 
         return $value;
     }
+
+    /**
+     * Normalize a raw .env value and cast common boolean/null strings.
+     *
+     * Backs the `normalize_env()` helper.
+     */
+    public static function cast(mixed $value): mixed
+    {
+        $normalized = self::normalize((string) $value);
+
+        return match (strtolower($normalized)) {
+            'true' => true,
+            'false' => false,
+            'null' => null,
+            default => $normalized,
+        };
+    }
 }

@@ -17,13 +17,7 @@ function get_user_lang($user_id)
 
 function get_langfile_path($script_name ="", $target = false, $lang_folder = "")
 {
-	global $CURLANGDIR;
-	$CURLANGDIR = get_langfolder_cookie();
-	if($lang_folder == "")
-	{
-		$lang_folder = $CURLANGDIR;
-	}
-    return \App\Support\Locale::filePath($lang_folder, (string) $script_name, $_SERVER['SCRIPT_NAME'] ?? '', (bool) $target);
+	return \App\Support\Locale::scriptFilePath((string) $script_name, (bool) $target, (string) $lang_folder);
 }
 
 function get_row_sum($table, $field, $suffix = "")
@@ -46,8 +40,7 @@ function stderr($heading, $text, $htmlstrip = true, $head = true, $foot = true, 
 
 function sqlerr($file = '', $line = '')
 {
-	print(\App\Support\Frame::sqlError(\Nexus\Database\NexusDB::getInstance()->error(), (string) $file, (string) $line));
-	die;
+	\App\Support\LegacyResponse::sqlError((string) $file, (string) $line);
 }
 
 function format_quotes($s)
@@ -65,10 +58,7 @@ function addTempCode($value) {
 }
 
 function formatUrl($url, $newWindow = false, $text = '', $linkClass = '') {
-    if (! $text) {
-        $text = $url;
-    }
-    return addTempCode(\App\Support\BBCode::url((string) $url, (bool) $newWindow, (string) $text, (string) $linkClass));
+    return \App\Support\Html::formatUrl((string) $url, (bool) $newWindow, (string) $text, (string) $linkClass);
 }
 
 function formatCode($text) {
@@ -77,62 +67,37 @@ function formatCode($text) {
 
 
 function formatImg($src, $enableImageResizer, $image_max_width, $image_max_height, $imgId = "") {
-    $src = filter_src($src);
-    if (empty($src)) {
-        return "";
-    }
-    return addTempCode(\App\Support\BBCode::img((string) $src, (bool) $enableImageResizer, (int) $image_max_width, (int) $image_max_height, (string) $imgId));
+    return \App\Support\Html::formatImg((string) $src, (bool) $enableImageResizer, (int) $image_max_width, (int) $image_max_height, (string) $imgId);
 }
 
 
 function formatFlash($src, $width, $height) {
-    $src = filter_src($src);
-    if (empty($src)) {
-        return "";
-    }
-    return addTempCode(\App\Support\BBCode::flash((string) $src, $width, $height));
+    return \App\Support\Html::formatFlash((string) $src, $width, $height);
 }
 
 function formatFlv($src, $width, $height) {
-    $src = filter_src($src);
-    if (empty($src)) {
-        return "";
-    }
-    return addTempCode(\App\Support\BBCode::flv((string) $src, $width, $height));
+    return \App\Support\Html::formatFlv((string) $src, $width, $height);
 }
 
 function formatYoutube($src, $width = '', $height = ''): string
 {
-    $src = filter_src($src);
-    if (empty($src)) {
-        return "";
-    }
-    return addTempCode(\App\Support\BBCode::youtube((string) $src, $width, $height));
+    return \App\Support\Html::formatYoutube((string) $src, $width, $height);
 }
 
 
 function formatVideo($src, $width, $height) {
-    $src = filter_src($src);
-    if (empty($src)) {
-        return "";
-    }
-    return addTempCode(\App\Support\BBCode::video((string) $src, $width, $height));
+    return \App\Support\Html::formatVideo((string) $src, $width, $height);
 }
 
 
 function formatAudio($src) {
-    $src = filter_src($src);
-    if (empty($src)) {
-        return "";
-    }
-    return addTempCode(\App\Support\BBCode::audio((string) $src));
+    return \App\Support\Html::formatAudio((string) $src);
 }
 
 
 function formatSpoiler($content, $title = '', $defaultCollapsed = true): string
 {
-    global $lang_functions;
-    return addTempCode(\App\Support\BBCode::spoiler((string) $content, (string) $title, (string) ($lang_functions['spoiler_default_title'] ?? ''), (bool) $defaultCollapsed));
+    return \App\Support\Html::formatSpoiler((string) $content, (string) $title, (bool) $defaultCollapsed);
 }
 
 
@@ -269,15 +234,12 @@ function textbbcode($form, $text, $content = "", $hastitle = false, $col_num = 1
 
 function begin_compose($title = "", $type = "new", $body = "", $hassubject = true, $subject = "", $maxsubjectlength = 100)
 {
-	global $lang_functions;
-	print(\App\Support\Frame::composeOpen((string) $title, (string) $type, (bool) $hassubject, (string) $subject, (int) $maxsubjectlength, (array) $lang_functions));
-	textbbcode("compose", "body", $body, false);
+	echo \App\Support\Frame::composeBegin((string) $title, (string) $type, (string) $body, (bool) $hassubject, (string) $subject, (int) $maxsubjectlength);
 }
 
 function end_compose()
 {
-	global $lang_functions;
-	print(\App\Support\Frame::composeClose((array) $lang_functions));
+	echo \App\Support\Frame::composeEnd();
 }
 
 function insert_suggest($keyword, $userid, $pre_escaped = true)
@@ -299,8 +261,7 @@ function cur_user_check()
 
 function KPS($type = "+", $point = "1.0", $id = "")
 {
-	global $bonus_tweak;
-	\App\Support\Bonus::updatePoints((string) $type, (float) $point, $id, (string) $bonus_tweak);
+	\App\Support\Bonus::updatePoints((string) $type, (float) $point, $id);
 }
 
 function get_agent($peer_id, $agent)
@@ -310,18 +271,12 @@ function get_agent($peer_id, $agent)
 
 function EmailBanned($newEmail)
 {
-	$newEmail = trim(strtolower((string) $newEmail));
-	return \App\Support\Email::matchesRegexList($newEmail, \App\Support\EmailDomain::banned());
+	return \App\Support\Email::isBanned((string) $newEmail);
 }
 
 function EmailAllowed($newEmail)
 {
-	global $restrictemaildomain;
-	if ($restrictemaildomain != 'yes') {
-		return true;
-	}
-	$newEmail = trim(strtolower((string) $newEmail));
-	return \App\Support\Email::matchesRegexList($newEmail, \App\Support\EmailDomain::allowed());
+	return \App\Support\Email::isAllowed((string) $newEmail);
 }
 
 function allowedemails()
@@ -344,27 +299,11 @@ function reset_cachetimestamp($id, $field = "cache_stamp")
 }
 
 function cache_check ($file = 'cachefile',$endpage = true, $cachetime = 600) {
-	global $lang_functions, $rootpath, $cache, $CURLANGDIR;
-	$cachefile = \App\Support\Cache::path($rootpath, $cache, $CURLANGDIR, $file);
-	if (\App\Support\Cache::isFresh($cachefile, $cachetime)) {
-		include($cachefile);
-		if ($endpage) {
-			echo "<p align=\"center\"><font class=\"small\">" . $lang_functions['text_page_last_updated'] . date('Y-m-d H:i:s', filemtime($cachefile)) . "</font></p>";
-			end_main_frame();
-			stdfoot();
-			exit;
-		}
-		return false;
-	}
-	ob_start();
-	return true;
+	return \App\Support\Cache::pageCheck((string) $file, (bool) $endpage, (int) $cachetime);
 }
 
 function cache_save  ($file = 'cachefile') {
-	global $rootpath, $cache, $CURLANGDIR;
-	$cachefile = \App\Support\Cache::path($rootpath, $cache, $CURLANGDIR, $file);
-	\App\Support\Cache::writeBuffer($cachefile, ob_get_contents());
-	ob_end_flush();
+	\App\Support\Cache::pageSave((string) $file);
 }
 
 function get_email_encode($lang)
@@ -386,8 +325,7 @@ function check_email ($email) {
 }
 
 function sent_mail($to,$fromname,$fromemail,$subject,$body,$type = "confirmation",$showmsg=true,$multiple=false,$multiplemail='',$hdr_encoding = 'UTF-8', $specialcase = '') {
-	global $lang_functions, $SITENAME, $SITEEMAIL, $smtptype, $smtp, $smtp_host, $smtp_port, $smtp_from;
-	return \App\Support\Mail::sent(
+	return \App\Support\Mail::sentLegacy(
 		(string) $to,
 		(string) $fromname,
 		(string) $fromemail,
@@ -397,24 +335,7 @@ function sent_mail($to,$fromname,$fromemail,$subject,$body,$type = "confirmation
 		(bool) $showmsg,
 		(bool) $multiple,
 		(string) (is_array($multiplemail) ? implode(',', $multiplemail) : $multiplemail),
-		(string) $hdr_encoding,
-		[
-			'site_name' => (string) $SITENAME,
-			'site_email' => (string) $SITEEMAIL,
-			'smtp_type' => (string) $smtptype,
-			'smtp' => (string) $smtp,
-			'smtp_host' => (string) $smtp_host,
-			'smtp_port' => (string) $smtp_port,
-			'smtp_from' => (string) $smtp_from,
-		],
-		[
-			'error' => $lang_functions['std_error'] ?? 'Error',
-			'success' => $lang_functions['std_success'] ?? 'Success',
-			'unable_to_send_mail' => $lang_functions['text_unable_to_send_mail'] ?? 'Unable to send mail',
-			'confirmation_email_sent' => $lang_functions['std_confirmation_email_sent'] ?? 'Confirmation email sent to ',
-			'account_details_sent' => $lang_functions['std_account_details_sent'] ?? 'Account details sent to ',
-			'please_wait' => $lang_functions['std_please_wait'] ?? 'Please wait...',
-		]
+		(string) $hdr_encoding
 	);
 }
 
@@ -565,19 +486,11 @@ function unesc($x) {
 }
 
 function tr($x,$y,$noesc=0,$relation='', $return = false) {
-	$result = \App\Support\Html::settingsRow($x, $y, !$noesc, $relation);
-	if ($return) {
-		return $result;
-	}
-	print $result;
+	return \App\Support\Html::emitSettingsRow($x, $y, !$noesc, $relation, $return);
 }
 
 function tr_small($x,$y,$noesc=0,$relation='',$return = false) {
-	$result = \App\Support\Html::settingsRowSmall($x, $y, !$noesc, $relation);
-	if ($return) {
-		return $result;
-	}
-	print($result);
+	return \App\Support\Html::emitSettingsRowSmall($x, $y, !$noesc, $relation, $return);
 }
 
 function twotd($x,$y,$nosec=0){
@@ -603,18 +516,7 @@ function get_if_restricted_is_open()
 }
 
 function menu ($selected = "home") {
-	global $lang_functions, $CURUSER, $enableoffer, $enablespecial, $where_tweak, $USERUPDATESET;
-	$result = \App\Support\Menu::render(
-		$_SERVER['SCRIPT_NAME'] ?? '',
-		(array) $lang_functions,
-		(string) $enableoffer,
-		(string) $enablespecial,
-		(string) apply_filter('nexus_menu'),
-	);
-	echo $result['html'];
-	if ($CURUSER && $where_tweak == 'yes') {
-		$USERUPDATESET[] = "page = ".\App\Support\LegacyDb::escape($result['selected']);
-	}
+	echo \App\Support\Menu::renderPage();
 }
 function get_css_row() {
 	global $CURUSER, $defcss, $Cache;
@@ -690,17 +592,12 @@ function get_protocol_prefix() {
 
 function get_langid_from_langcookie($lang = '')
 {
-    if (empty($lang)) {
-        $lang = get_langfolder_cookie();
-    }
-    return \App\Support\Locale::idFromFolder((string) $lang);
+    return \App\Support\Locale::idFromCookie((string) $lang);
 }
 
 function make_folder($pre, $folder_name)
 {
-	$path = \App\Support\Path::makeFolder($pre, $folder_name, ROOT_PATH);
-	do_log($path);
-	return $path;
+	return \App\Support\Path::makeFolder($pre, $folder_name, ROOT_PATH);
 }
 
 /**
@@ -750,44 +647,7 @@ function deletetorrent($id, $notify = false) {
 }
 
 function pager($rpp, $count, $href, $opts = array(), $pagename = "page") {
-	global $lang_functions, $add_key_shortcut;
-
-	$pages = (int) ceil($count / $rpp);
-	$rawPage = $_GET[$pagename] ?? null;
-	if (!is_scalar($rawPage)) {
-		$rawPage = null;
-	}
-	$page = \App\Support\Pagination::resolvePage(
-		$rawPage,
-		(int) $count,
-		(int) $rpp,
-		!empty($opts['lastpagedefault']),
-	);
-
-	$isPresto = isset($_SERVER['HTTP_USER_AGENT']) && str_contains($_SERVER['HTTP_USER_AGENT'], 'Presto');
-	$labels = [
-		'prev' => $lang_functions['text_prev'] ?? '',
-		'next' => $lang_functions['text_next'] ?? '',
-		'alt_prev_title' => $lang_functions['text_alt_pageup_shortcut'] ?? '',
-		'alt_next_title' => $lang_functions['text_alt_pagedown_shortcut'] ?? '',
-		'shift_prev_title' => $lang_functions['text_shift_pageup_shortcut'] ?? '',
-		'shift_next_title' => $lang_functions['text_shift_pagedown_shortcut'] ?? '',
-	];
-
-	$result = \App\Support\Pagination::render(
-		(int) $rpp,
-		(int) $count,
-		(string) $href,
-		$page,
-		$pages,
-		$labels,
-		(string) $pagename,
-		$isPresto,
-	);
-
-	$add_key_shortcut = key_shortcut((int) $page, (int) ($pages - 1));
-
-	return $result;
+	return \App\Support\Pagination::pager((int) $rpp, (int) $count, (string) $href, (array) $opts, (string) $pagename);
 }
 
 function commenttable($rows, $type, $parent_id, $review = false)
@@ -1077,9 +937,7 @@ function user_can_upload($where = "torrents"){
 
 function torrent_selection($name,$selname,$listname,$selectedid = 0, $mode = 0)
 {
-	global $lang_functions;
-	$items = searchbox_item_list($listname, $mode);
-	return \App\Support\Html::torrentSelect($name, $selname, $lang_functions['select_choose_one'] ?? '', (int) $selectedid, $items);
+	return \App\Support\Html::torrentSelection((string) $name, (string) $selname, (string) $listname, (int) $selectedid, (int) $mode);
 }
 
 function get_hl_color($color=0)
@@ -1098,17 +956,7 @@ function key_shortcut($page=1,$pages=1)
 }
 function promotion_selection($selected = 0, $hide = 0)
 {
-	global $lang_functions;
-	$labels = [
-		'normal' => $lang_functions['text_normal'] ?? '',
-		'free' => $lang_functions['text_free'] ?? '',
-		'two_times_up' => $lang_functions['text_two_times_up'] ?? '',
-		'free_two_times_up' => $lang_functions['text_free_two_times_up'] ?? '',
-		'half_down' => $lang_functions['text_half_down'] ?? '',
-		'half_down_two_up' => $lang_functions['text_half_down_two_up'] ?? '',
-		'thirty_percent_down' => $lang_functions['text_thirty_percent_down'] ?? '',
-	];
-	return \App\Support\Html::promotionSelectOptions((int) $selected, (int) $hide, $labels);
+	return \App\Support\Html::promotionSelection((int) $selected, (int) $hide);
 }
 
 function get_post_row($postid)
@@ -1228,11 +1076,7 @@ function format_description($description)
 
 function get_image_from_description(array $descriptionArr, $first = false, $useDefault = true)
 {
-	if ($first) {
-		$defaultUrl = $useDefault ? getSchemeAndHttpHost() . "/pic/nophoto.gif" : '';
-		return \App\Support\Description::firstImageUrl($descriptionArr, $defaultUrl);
-	}
-	return \App\Support\Description::imageUrls($descriptionArr);
+	return \App\Support\Description::imageFromDescription($descriptionArr, (bool) $first, (bool) $useDefault);
 }
 
 function resize_image($url, $with = null, $height = null, $fit = "cover")
@@ -1245,13 +1089,8 @@ function get_share_ratio($uploaded, $downloaded)
     return \App\Support\Ratio::share((float)$uploaded, (float)$downloaded);
 }
 
-function EchoRow($class = ''){
-	$args = func_get_args();
-	$class = array_shift($args);
-	if (count($args) === 0) {
-		return \App\Support\Html::tableRow('');
-	}
-	return \App\Support\Html::tableRow((string) $class, ...$args);
+function EchoRow($class = '', ...$cells){
+	return \App\Support\Html::tableRow((string) $class, ...$cells);
 }
 
 function list_require_search_box_id()
@@ -1336,26 +1175,7 @@ function datetimepicker_input($name, $value = '', $label = '', array $options = 
 
 function build_bonus_table(array $user, array $bonusResult = [], array $options = [])
 {
-    if (empty($bonusResult)) {
-        $bonusResult = calculate_seed_bonus($user['id']);
-    }
-    $officialTag = get_setting('bonus.official_tag');
-    $officialAdditionalFactor = get_setting('bonus.official_addition', 0);
-    $haremFactor = get_setting('bonus.harem_addition');
-    $haremAddition = calculate_harem_addition($user['id']);
-    $isDonor = is_donor($user);
-    $donortimes_bonus = get_setting('bonus.donortimes');
-
-    return \App\Support\Bonus::buildBonusTable(
-        $bonusResult,
-        $isDonor,
-        $donortimes_bonus,
-        $officialTag,
-        $officialAdditionalFactor,
-        $haremFactor,
-        $haremAddition,
-        $options,
-    );
+    return \App\Support\Bonus::buildBonusTableForUser($user, $bonusResult, $options);
 }
 
 

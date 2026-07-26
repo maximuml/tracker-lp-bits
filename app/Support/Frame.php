@@ -147,6 +147,35 @@ final class Frame
             .'<p align="center"><a href="tags.php" target="_blank">'.($lang['text_tags'] ?? '').'</a> | <a href="smilies.php" target="_blank">'.($lang['text_smilies'] ?? '').'</a></p>'."\n";
     }
 
+    /**
+     * Full compose-form opening: chrome + BBCode editor.
+     *
+     * Backs the legacy `begin_compose()` helper.
+     */
+    public static function composeBegin(
+        string $title,
+        string $type,
+        string $body,
+        bool $hasSubject,
+        string $subject,
+        int $maxSubjectLength,
+    ): string {
+        $lang = $GLOBALS['lang_functions'] ?? [];
+
+        return self::composeOpen($title, $type, $hasSubject, $subject, $maxSubjectLength, $lang)
+            . \App\Support\Form::bbcodeEditor('compose', 'body', $body, false, 130, false);
+    }
+
+    /**
+     * Compose-form closing chrome.
+     *
+     * Backs the legacy `end_compose()` helper.
+     */
+    public static function composeEnd(): string
+    {
+        return self::composeClose($GLOBALS['lang_functions'] ?? []);
+    }
+
     public static function sqlError(string $error, string $file, string $line): string
     {
         // Legacy quirk preserved: original used `$file != '' && $line != ''`,

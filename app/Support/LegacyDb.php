@@ -24,6 +24,11 @@ final class LegacyDb
      *
      * Mirrors `sql_query()`.
      */
+    public static function error(): string
+    {
+        return (string) NexusDB::getInstance()->error();
+    }
+
     public static function query(string $query): mixed
     {
         $begin = microtime(true);

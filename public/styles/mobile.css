@@ -1,0 +1,33 @@
+/* Basic mobile-first responsiveness.
+ * Loaded on every page; rules only activate below 768px so the desktop
+ * experience is unchanged. */
+@media (max-width: 768px) {
+    body {
+        min-width: auto;
+    }
+
+    table,
+    .mainouter,
+    .head,
+    table.main,
+    table.embedded {
+        width: 100% !important;
+    }
+
+    td,
+    th,
+    .colhead,
+    .rowfollow,
+    .text {
+        word-break: break-word;
+    }
+
+    img {
+        max-width: 100%;
+        height: auto;
+    }
+
+    .nowrap {
+        white-space: normal;
+    }
+}

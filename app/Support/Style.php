@@ -19,6 +19,41 @@ final class Style
     /** @var array<int, array<string, mixed>>|null */
     private static ?array $stylesheetRows = null;
 
+    /** @var int|null */
+    private static ?int $darkStylesheetId = null;
+
+    /**
+     * Return whether the dark theme cookie is active.
+     */
+    public static function isDarkTheme(): bool
+    {
+        return ($_COOKIE['c_theme'] ?? '') === 'dark';
+    }
+
+    /**
+     * Return the stylesheet id to use when dark mode is requested.
+     */
+    public static function darkStylesheetId(): ?int
+    {
+        if (self::$darkStylesheetId === null) {
+            $id = (int) (NexusDB::table('stylesheets')->where('name', 'Dark Passion')->value('id') ?? 0);
+            self::$darkStylesheetId = $id > 0 ? $id : 0;
+        }
+
+        return self::$darkStylesheetId > 0 ? self::$darkStylesheetId : null;
+    }
+
+    /**
+     * Resolve the requested stylesheet id, applying the dark theme cookie override.
+     *
+     * @param  int|string  $cssId
+     * @return int|string
+     */
+    private static function resolveThemeId(int|string $cssId): int|string
+    {
+        return self::isDarkTheme() ? (self::darkStylesheetId() ?? $cssId) : $cssId;
+    }
+
     /**
      * Return the stylesheet row for the given id, falling back to
      * `$defaultId`.
@@ -31,6 +66,7 @@ final class Style
      */
     public static function cssRow(mixed $cache, int|string $cssId, int|string $defaultId): ?array
     {
+        $cssId = self::resolveThemeId($cssId);
         if (self::$stylesheetRows === null) {
             $cached = method_exists($cache, 'get_value') ? $cache->get_value('stylesheet_content') : false;
             if ($cached !== false) {
@@ -106,6 +142,7 @@ final class Style
      */
     public static function highlightColor(?int $userStyleId): string
     {
+        $userStyleId = self::darkStylesheetId() ?? $userStyleId;
         if ($userStyleId !== null && $userStyleId > 0) {
             $hltr = NexusDB::table('stylesheets')->where('id', $userStyleId)->value('hltr');
             if (! empty($hltr)) {

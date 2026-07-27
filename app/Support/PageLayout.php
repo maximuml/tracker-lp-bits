@@ -58,6 +58,7 @@ class PageLayout
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <?php 
         if ($metakeywords_tweak) {
             ?>
@@ -105,6 +106,9 @@ class PageLayout
         echo $css_uri . "DomTT.css" . $cssupdatedate;
         ?>" type="text/css" />
 <link rel="stylesheet" href="styles/nexus.css<?php 
+        echo $cssupdatedate;
+        ?>" type="text/css" />
+<link rel="stylesheet" href="styles/mobile.css<?php 
         echo $cssupdatedate;
         ?>" type="text/css" />
 <?php 
@@ -232,6 +236,9 @@ class PageLayout
             $datum["hours"] = sprintf("%02.0f", $datum["hours"]);
             $datum["minutes"] = sprintf("%02.0f", $datum["minutes"]);
             $ratio = get_ratio($CURUSER['id']);
+            $themeLabel = \App\Support\Style::isDarkTheme()
+                ? ($lang_functions['text_theme_light'] ?? 'Light')
+                : ($lang_functions['text_theme_dark'] ?? 'Dark');
             //// check every 15 minutes //////////////////
             $messages = $Cache->get_value('user_' . $CURUSER["id"] . '_inbox_count');
             if ($messages == "") {
@@ -288,6 +295,9 @@ class PageLayout
             ?>
                 [<a href="logout.php"><?php 
             echo $lang_functions['text_logout'];
+            ?></a>]
+                [<a href="themeswitch.php?mode=toggle"><?php 
+            echo $themeLabel;
             ?></a>]
                 [<a href="usercp.php"><?php 
             echo $lang_functions['text_user_cp'];

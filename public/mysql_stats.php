@@ -106,10 +106,52 @@ $timespanfmt = '%s days, %s hours, %s minutes and %s seconds';
             $timestamp = time();
         }
 
-        $date = preg_replace('@%[aA]@', $day_of_week[(int)strftime('%w', $timestamp)], $format);
-        $date = preg_replace('@%[bB]@', $month[(int)strftime('%m', $timestamp)-1], $date);
+        $dt = new DateTime();
+        $dt->setTimestamp($timestamp);
 
-        return strftime($date, $timestamp);
+        $handlers = [
+            'a' => fn() => $day_of_week[(int)$dt->format('w')],
+            'A' => fn() => $day_of_week[(int)$dt->format('w')],
+            'b' => fn() => $month[(int)$dt->format('n') - 1],
+            'B' => fn() => $month[(int)$dt->format('n') - 1],
+            'd' => fn() => $dt->format('d'),
+            'e' => fn() => str_pad((int)$dt->format('j'), 2, ' ', STR_PAD_LEFT),
+            'm' => fn() => $dt->format('m'),
+            'Y' => fn() => $dt->format('Y'),
+            'y' => fn() => $dt->format('y'),
+            'H' => fn() => $dt->format('H'),
+            'I' => fn() => $dt->format('h'),
+            'M' => fn() => $dt->format('i'),
+            'S' => fn() => $dt->format('s'),
+            'p' => fn() => $dt->format('A'),
+            'P' => fn() => $dt->format('a'),
+            'w' => fn() => $dt->format('w'),
+            'W' => fn() => $dt->format('W'),
+            'j' => fn() => str_pad((int)$dt->format('z') + 1, 3, '0', STR_PAD_LEFT),
+            'z' => fn() => $dt->format('O'),
+            'Z' => fn() => $dt->format('T'),
+            'c' => fn() => $dt->format('c'),
+            'r' => fn() => $dt->format('h:i:s A'),
+            'R' => fn() => $dt->format('H:i'),
+            'T' => fn() => $dt->format('H:i:s'),
+            'D' => fn() => $dt->format('m/d/y'),
+            'x' => fn() => $dt->format('Y-m-d'),
+            'X' => fn() => $dt->format('H:i:s'),
+            '%' => fn() => '%',
+        ];
+
+        $result = '';
+        $len = strlen($format);
+        for ($i = 0; $i < $len; $i++) {
+            if ($format[$i] === '%' && $i + 1 < $len && isset($handlers[$format[$i + 1]])) {
+                $result .= $handlers[$format[$i + 1]]();
+                $i++;
+            } else {
+                $result .= $format[$i];
+            }
+        }
+
+        return $result;
     } // end of the 'localisedDate()' function
     
 ////////////////////// END FUNCTION LIST /////////////////////////////////////

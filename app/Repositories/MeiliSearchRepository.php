@@ -336,6 +336,37 @@ class MeiliSearchRepository extends BaseRepository
     }
 
     /**
+     * Fast autocomplete over MeiliSearch index for search-as-you-type.
+     *
+     * @param  string  $query
+     * @param  int  $limit
+     * @return  array<int, array<string, mixed>>
+     */
+    public function autocomplete(string $query, int $limit = 10): array
+    {
+        if (!$this->isEnabled()) {
+            return [];
+        }
+
+        $index = $this->getIndex();
+        $result = $index->search($query, [
+            'limit' => $limit,
+            'attributesToRetrieve' => ['id', 'name'],
+            'filter' => 'visible = 1',
+        ]);
+
+        $torrents = [];
+        foreach ($result->getHits() as $hit) {
+            $torrents[] = [
+                'id' => (int) $hit['id'],
+                'name' => (string) $hit['name'],
+            ];
+        }
+
+        return $torrents;
+    }
+
+    /**
      * @param  array<int|string, mixed>  $params
      * @param  \App\Models\User  $user
      * @return  array<int|string, mixed>

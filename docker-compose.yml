@@ -156,9 +156,28 @@ services:
     networks:
       - appnet
 
+  meilisearch:
+    image: getmeili/meilisearch:v1.16
+    container_name: nexusphp-meilisearch
+    environment:
+      MEILI_NO_ANALYTICS: "true"
+      MEILI_ENV: development
+    volumes:
+      - meilisearch-data:/meili_data
+    ports:
+      - "${MEILISEARCH_PORT:-7700}:7700"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "1024m"
+        max-file: "3"
+    networks:
+      - appnet
+
 volumes:
   mysql-data:
   redis-data:
+  meilisearch-data:
 
 networks:
   appnet:

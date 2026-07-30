@@ -237,11 +237,11 @@ class MeiliSearchRepository extends BaseRepository
         }
         $total = 0;
         while (true) {
-            $query = NexusDB::table("torrents")->forPage($page, $size);
+            $query = Torrent::query()->select($this->getRequiredFields())->forPage($page, $size);
             if ($id) {
                 $query->whereIn("id", Arr::wrap($id));
             }
-            $torrents = $query->get($this->getRequiredFields());
+            $torrents = $query->get();
             $count = $torrents->count();
             $total += $count;
             if ($count == 0) {
@@ -251,9 +251,6 @@ class MeiliSearchRepository extends BaseRepository
             do_log(sprintf('importing page: %s with id: %s, %s records...', $page, $id, $count));
             $data = [];
             foreach ($torrents as $torrent) {
-                if (!$torrent instanceof Torrent) {
-                    continue;
-                }
                 $row = [];
                 foreach ($torrent->getAttributes() as $field => $value) {
                     $row[$field] = $this->formatValueForMeili($field, $value);
@@ -349,7 +346,7 @@ class MeiliSearchRepository extends BaseRepository
         $taxonomies = [];
         $categoryIdArr = [];
         //[cat401][cat404][sou1][med1][cod1][sta2][sta3][pro2][tea2][aud2][incldead=0][spstate=3][inclbookmarked=2]
-        $userSetting = $user->notifs;
+        $userSetting = (string) $user->notifs;
         //cat401=1&source2=1&medium10=1&codec2=1&audiocodec2=1&standard3=1&processing2=1&incldead=2&spstate=1&inclbookmarked=0&approval_status=&size_begin=&size_end=&seeders_begin=&seeders_end=&leechers_begin=&leechers_end=&times_completed_begin=&times_completed_end=&added_begin=&added_end=&search=a+b&search_area=0&search_mode=2
         $queryString = http_build_query($params);
         //section

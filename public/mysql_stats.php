@@ -14,11 +14,8 @@ if (get_user_class() < UC_SYSOP)
 
 $GLOBALS["byteUnits"] = array('Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB');
 
-$day_of_week = array('Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat');
-$month = array('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec');
-// See http://www.php.net/manual/en/function.strftime.php to define the
-// variable below
-$datefmt = '%B %d, %Y at %I:%M %p';
+// date() format for localisedDate()
+$datefmt = 'F d, Y \a\t h:i A';
 $timespanfmt = '%s days, %s hours, %s minutes and %s seconds';
 ////////////////// FUNCTION LIST /////////////////////////
     /**
@@ -96,7 +93,7 @@ $timespanfmt = '%s days, %s hours, %s minutes and %s seconds';
      */
     function localisedDate($timestamp = -1, $format = '')
     {
-        global $datefmt, $month, $day_of_week;
+        global $datefmt;
 
         if ($format == '') {
             $format = $datefmt;
@@ -106,10 +103,7 @@ $timespanfmt = '%s days, %s hours, %s minutes and %s seconds';
             $timestamp = time();
         }
 
-        $date = preg_replace('@%[aA]@', $day_of_week[(int)strftime('%w', $timestamp)], $format);
-        $date = preg_replace('@%[bB]@', $month[(int)strftime('%m', $timestamp)-1], $date);
-
-        return strftime($date, $timestamp);
+        return date($format, $timestamp);
     } // end of the 'localisedDate()' function
     
 ////////////////////// END FUNCTION LIST /////////////////////////////////////

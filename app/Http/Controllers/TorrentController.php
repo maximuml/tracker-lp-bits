@@ -37,7 +37,7 @@ class TorrentController extends Controller
      * @param  string  $section
      * @return  array<string, mixed>
      */
-    public function index(Request $request, string $section = null)
+    public function index(Request $request, ?string $section = null)
     {
         do_log("controller torrent index entry");
         $result = $this->repository->getList($request, Auth::user(), $section);

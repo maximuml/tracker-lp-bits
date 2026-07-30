@@ -28,7 +28,7 @@ class NexusWebGuard implements StatefulGuard
      * @param  \Illuminate\Contracts\Auth\UserProvider|null  $provider
      * @return void
      */
-    public function __construct(Request $request, UserProvider $provider = null)
+    public function __construct(Request $request, ?UserProvider $provider = null)
     {
         $this->request = $request;
         $this->provider = $provider;

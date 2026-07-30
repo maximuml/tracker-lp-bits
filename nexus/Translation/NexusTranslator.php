@@ -12,7 +12,7 @@ class NexusTranslator
     protected FileLoader $loader;
     protected Translator $translator;
 
-    public function __construct(string $defaultLocale = 'en', string $fallbackLocale = 'en', string $defaultPath = null)
+    public function __construct(string $defaultLocale = 'en', string $fallbackLocale = 'en', ?string $defaultPath = null)
     {
         $this->filesystem = new Filesystem();
         $this->loader = new FileLoader($this->filesystem, $defaultPath ?? ROOT_PATH . 'resources/lang');
@@ -37,12 +37,12 @@ class NexusTranslator
         $this->loader->addNamespace($namespace, $path);
     }
 
-    public function trans(string $key, array $replace = [], string $locale = null): string
+    public function trans(string $key, array $replace = [], ?string $locale = null): string
     {
         return $this->translator->get($key, $replace, $locale);
     }
 
-    public function has(string $key, string $locale = null): bool
+    public function has(string $key, ?string $locale = null): bool
     {
         return $this->translator->has($key, $locale);
     }

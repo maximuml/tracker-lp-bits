@@ -20,7 +20,7 @@ This is a streamlined fork focused on the core tracker/forum/community experienc
 
 ## System Requirements
 
-- **PHP** 8.2 / 8.3 / 8.4 / 8.5
+- **PHP** 8.4 / 8.5
   - Required extensions: `bcmath`, `ctype`, `curl`, `fileinfo`, `json`, `mbstring`, `openssl`, `pdo_mysql`, `tokenizer`, `xml`, `mysqli`, `gd`, `redis`, `pcntl`, `sockets`, `posix`, `gmp`, `opcache`, `zip`, `intl`, `pdo_sqlite`, `sqlite3`, `pdo_pgsql`
 - **Database** — MySQL 5.7+ or PostgreSQL 16+
 - **Redis** — 4.0+

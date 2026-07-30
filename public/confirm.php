@@ -12,7 +12,7 @@ dbconn();
 $user = \App\Models\User::query()->where('id', $id)->first(['passhash', 'secret', 'auth_key', 'editsecret', 'status']);
 if (!$user)
 	httperr();
-$row = $user->toArray();
+$row = $user->makeVisible(['secret', 'auth_key'])->toArray();
 
 if ($row["status"] != "pending") {
 	header("Location: ok.php?type=confirmed");

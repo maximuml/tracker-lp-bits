@@ -530,7 +530,7 @@ class PageLayout
                 if (!preg_match("/index/i", $settings_script_name)) {
                     $new_news = $Cache->get_value('user_' . $CURUSER["id"] . '_unread_news_count');
                     if ($new_news == "") {
-                        $new_news = NexusDB::table('news')->where('notify', 'yes')->where('added', '>', $CURUSER['last_home'])->count();
+                        $new_news = NexusDB::table('news')->where('notify', 'yes')->where('added', '>', $CURUSER['last_home'] ?? '1970-01-01 00:00:00')->count();
                         $Cache->cache_value('user_' . $CURUSER["id"] . '_unread_news_count', $new_news, 300);
                     }
                     if ($new_news > 0) {

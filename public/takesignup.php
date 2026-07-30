@@ -5,6 +5,7 @@ dbconn();
 cur_user_check ();
 //require_once(get_langfile_path("",true));
 require_once(get_langfile_path("", false, get_langfolder_cookie()));
+require_once(get_langfile_path("takeinvite.php", false, get_langfolder_cookie()));
 
 $isPreRegisterEmailAndUsername = get_setting("system.is_invite_pre_email_and_username") == "yes";
 
@@ -189,7 +190,7 @@ if (empty($msg)) {
 
 //write_log("User account $id ($wantusername) was created");
 $row = \App\Models\User::query()->find($id, ['passhash', 'secret', 'editsecret', 'status']);
-$row = $row ? $row->toArray() : [];
+$row = $row ? $row->makeVisible(['secret'])->toArray() : [];
 $psecret = md5($row['secret'] ?? '');
 $ip = getip();
 $usern = htmlspecialchars($wantusername);

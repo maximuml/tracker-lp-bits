@@ -431,7 +431,7 @@ class ToolRepository extends BaseRepository
         $result['attendance'] = $attendance ? 0 : 1;
 
         //unread news
-        $count = News::query()->where('added', '>', $user->last_home)->count();
+        $count = News::query()->where('added', '>', $user->last_home ?? '1970-01-01 00:00:00')->count();
         $result['news'] = $count;
 
         //unread messages

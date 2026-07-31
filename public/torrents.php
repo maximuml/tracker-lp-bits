@@ -876,9 +876,15 @@ $listingOptions = [
 ];
 
 if ($shouldUseMeili) {
-    $searchRep = new \App\Repositories\MeiliSearchRepository();
-    $resultFromSearchRep = $searchRep->search($searchParams, $CURUSER['id']);
-    $count = $resultFromSearchRep['total'];
+    try {
+        $searchRep = new \App\Repositories\MeiliSearchRepository();
+        $resultFromSearchRep = $searchRep->search($searchParams, $CURUSER['id']);
+        $count = $resultFromSearchRep['total'];
+    } catch (\Throwable $e) {
+        do_log('MeiliSearch search failed, falling back to SQL: ' . $e->getMessage(), 'error');
+        $shouldUseMeili = false;
+        $count = \App\Repositories\TorrentListingRepository::getCount($listingOptions);
+    }
 } else {
     $count = \App\Repositories\TorrentListingRepository::getCount($listingOptions);
 }
@@ -1121,11 +1127,8 @@ if ($allsec != 1 || $enablespecial != 'yes'){ //do not print searchbox if showin
 							<table>
 								<tr>
 									<td class="embedded">
-										<input id="searchinput" name="search" type="text" value="<?php echo  $searchstr_ori ?>" autocomplete="off" style="width: 200px" ondblclick="suggest(event.keyCode,this.value);" onkeyup="suggest(event.keyCode,this.value);" onkeypress="return noenter(event.keyCode);"/>
-										<script src="js/suggest.js" type="text/javascript"></script>
-										<div id="suggcontainer" style="text-align: left; width:100px;  display: none;">
-											<div id="suggestions" style="width:204px; border: 1px solid rgb(119, 119, 119); cursor: default; position: absolute; color: rgb(0,0,0); background-color: rgb(255, 255, 255);"></div>
-										</div>
+										<input id="searchinput" name="search" type="text" value="<?php echo  $searchstr_ori ?>" autocomplete="off" style="width: 200px" oninput="meiliSuggestInput(this.value)" onkeydown="meiliSuggestKey(event)"/>
+										<script src="js/meili_autocomplete.js" type="text/javascript"></script>
 									</td>
 								</tr>
 							</table>

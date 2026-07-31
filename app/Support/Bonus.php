@@ -381,12 +381,12 @@ class Bonus
             $bonusResult = self::calculateForUser((int) ($user['id'] ?? 0));
         }
 
-        $officialTag = \get_setting('bonus.official_tag');
-        $officialAdditionalFactor = \get_setting('bonus.official_addition', 0);
-        $haremFactor = \get_setting('bonus.harem_addition');
+        $officialTag = (string) \get_setting('bonus.official_tag');
+        $officialAdditionalFactor = (float) \get_setting('bonus.official_addition', 0);
+        $haremFactor = (float) \get_setting('bonus.harem_addition');
         $haremAddition = self::haremAddition((int) ($user['id'] ?? 0));
         $isDonor = \is_donor($user);
-        $donortimesBonus = \get_setting('bonus.donortimes');
+        $donortimesBonus = (float) \get_setting('bonus.donortimes');
 
         return self::buildBonusTable(
             $bonusResult,

@@ -117,7 +117,7 @@ class TorrentRepository extends BaseRepository
      * @param  string  $sectionName
      * @return  mixed
      */
-    public function getList(Request $request, User $user, string $sectionName = null)
+    public function getList(Request $request, User $user, ?string $sectionName = null)
     {
         if (empty($sectionName)) {
             $sectionId = SearchBox::getBrowseMode();

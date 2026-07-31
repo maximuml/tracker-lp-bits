@@ -9,24 +9,47 @@ if (! isset($CURUSER)) {
 
 $type = $_GET['type'] ?? 'shoutbox';
 $lastId = (int) ($_SERVER['HTTP_LAST_EVENT_ID'] ?? $_GET['last_id'] ?? 0);
-$maxLoops = 60; // 60 * 2s = 120s
 $userId = (int) ($CURUSER['id'] ?? 0);
 
-// Limit each user to one concurrent SSE stream so the PHP-FPM pool cannot be
-// exhausted by opening many connections. Advisory file locks are released
-// automatically when the script/connection ends.
-$lockFile = sys_get_temp_dir() . '/shoutbox_sse_' . $userId . '.lock';
-$lockHandle = @fopen($lockFile, 'c');
-if ($lockHandle !== false && ! flock($lockHandle, LOCK_EX | LOCK_NB)) {
+// Keep PHP-FPM worker time for a single stream short; browsers reconnect automatically.
+$maxLoops = 30; // 30 * 2s = 60s
+$ttl = $maxLoops * 2 + 10;
+
+$maxStreams = 30;
+$globalKey = 'shoutbox_sse_global';
+$redis = \Nexus\Database\NexusDB::redis();
+
+function sseShutdown(\Redis $redis, string $globalKey): void {
+    try {
+        $redis->decr($globalKey);
+    } catch (\Throwable $e) {
+    }
+}
+
+$active = (int) $redis->incr($globalKey);
+if ($active === 1) {
+    $redis->expire($globalKey, $ttl + 60);
+}
+if ($active > $maxStreams) {
+    sseShutdown($redis, $globalKey);
+    http_response_code(503);
+    exit;
+}
+// Limit each user to one concurrent SSE stream.
+$userLock = new \Nexus\Database\NexusLock('shoutbox_sse:' . $userId, $ttl);
+if (! $userLock->acquire()) {
+    sseShutdown($redis, $globalKey);
     http_response_code(429);
     exit;
 }
-if ($lockHandle !== false) {
-    register_shutdown_function(function () use ($lockHandle) {
-        @flock($lockHandle, LOCK_UN);
-        @fclose($lockHandle);
-    });
-}
+
+register_shutdown_function(function () use ($redis, $globalKey, $userLock) {
+    try {
+        $userLock->release();
+    } catch (\Throwable $e) {
+    }
+    sseShutdown($redis, $globalKey);
+});
 
 function buildShoutboxQuery(string $type, int $lastId): object
 {
@@ -35,6 +58,14 @@ function buildShoutboxQuery(string $type, int $lastId): object
         ->where('id', '>', $lastId);
     \App\Support\Shoutbox::applyTypeFilter($query, $type, $GLOBALS['CURUSER'] ?? null);
     return $query;
+}
+
+function flushOutput(): void
+{
+    if (ob_get_level()) {
+        ob_flush();
+    }
+    flush();
 }
 
 $query = buildShoutboxQuery($type, $lastId);
@@ -66,7 +97,6 @@ for ($i = 0; $i < $maxLoops; $i++) {
         echo "data: " . json_encode(['count' => $rows->count()]) . "\n\n";
         flushOutput();
         $lastId = $maxId;
-        // Re-bind the query for the next batch.
         $query = buildShoutboxQuery($type, $lastId);
     }
 
@@ -75,12 +105,4 @@ for ($i = 0; $i < $maxLoops; $i++) {
     flushOutput();
 
     sleep(2);
-}
-
-function flushOutput(): void
-{
-    if (ob_get_level()) {
-        ob_flush();
-    }
-    flush();
 }

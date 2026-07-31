@@ -19,23 +19,42 @@ final class Shoutbox
     public const REACTIONS = ['👍', '🔥', '❤️', '😂', '😮', '😢'];
 
     /**
-     * CSRF token for shoutbox actions. Uses the app key so no session is needed.
+     * CSRF token for shoutbox actions. Derived from the app key and a short
+     * rotating time window so a leaked token is only usable for ~1 hour.
      */
     public static function csrfToken(int $userId): string
     {
         $secret = function_exists('config') ? (string) config('app.key') : (string) (getenv('APP_KEY') ?: '');
         if ($secret === '') {
-            $secret = (string) (getenv('NEXUS_ENV') ?: 'default-secret');
+            throw new \RuntimeException('Shoutbox CSRF requires APP_KEY to be configured');
         }
-        return hash_hmac('sha256', 'shoutbox:' . $userId, $secret);
+        $window = (string) floor(time() / 3600);
+        $payload = 'shoutbox:' . $userId . ':' . $window;
+        return $window . ':' . hash_hmac('sha256', $payload, $secret);
     }
 
     /**
-     * Validate a shoutbox CSRF token.
+     * Validate a shoutbox CSRF token. Accepts the current and the previous
+     * hourly window so users on a stale page still work during a rollover.
      */
     public static function validateCsrfToken(int $userId, string $token): bool
     {
-        return hash_equals(self::csrfToken($userId), $token);
+        $secret = function_exists('config') ? (string) config('app.key') : (string) (getenv('APP_KEY') ?: '');
+        if ($secret === '') {
+            return false;
+        }
+        $parts = explode(':', $token, 2);
+        if (count($parts) !== 2 || !ctype_digit($parts[0])) {
+            return false;
+        }
+        $window = $parts[0];
+        $expected = $window . ':' . hash_hmac('sha256', 'shoutbox:' . $userId . ':' . $window, $secret);
+        if (hash_equals($expected, $token)) {
+            return true;
+        }
+        $previousWindow = (string) ($window - 1);
+        $previousExpected = $previousWindow . ':' . hash_hmac('sha256', 'shoutbox:' . $userId . ':' . $previousWindow, $secret);
+        return hash_equals($previousExpected, $token);
     }
 
     /**

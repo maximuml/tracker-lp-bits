@@ -8,7 +8,9 @@ if (isset($_GET['del']))
 	{
 		if(user_can('sbmanage'))
 		{
-			\Nexus\Database\NexusDB::table('shoutbox')->where('id', (int)$_GET['del'])->delete();
+			$delId = (int)$_GET['del'];
+			\Nexus\Database\NexusDB::table('shoutbox')->where('id', $delId)->delete();
+			\Nexus\Database\NexusDB::table('shoutbox_reactions')->where('shoutbox_id', $delId)->delete();
 		}
 	}
 }

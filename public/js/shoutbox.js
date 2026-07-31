@@ -229,8 +229,12 @@ function shoutboxInitSSE(type, lastId) {
         });
         shoutboxEventSource.addEventListener('ping', function () {});
         shoutboxEventSource.onerror = function () {
-            if (shoutboxEventSource) { shoutboxEventSource.close(); shoutboxEventSource = null; }
-            if (typeof schedulePoll === 'function') { schedulePoll(); }
+            if (!shoutboxEventSource) { return; }
+            if (shoutboxEventSource.readyState === EventSource.CLOSED) {
+                shoutboxEventSource.close();
+                shoutboxEventSource = null;
+                if (typeof schedulePoll === 'function') { schedulePoll(); }
+            }
         };
     } catch (err) {
         if (typeof schedulePoll === 'function') { schedulePoll(); }

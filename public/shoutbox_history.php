@@ -9,7 +9,6 @@ loggedinorreturn(true);
 
 stdhead($lang_shoutbox['text_history_title'] ?? 'Shoutbox history');
 begin_main_frame();
-echo '<script>var SHOUT_CSRF = \'' . htmlspecialchars(\App\Support\Shoutbox::csrfToken($currentUserId)) . '\';</script>';
 
 $perPage = 50;
 $page = max(1, (int) ($_GET['page'] ?? 1));
@@ -24,6 +23,7 @@ $filters = [
 ];
 
 $currentUserId = (int) ($CURUSER['id'] ?? 0);
+echo '<script>var SHOUT_CSRF = \'' . htmlspecialchars(\App\Support\Shoutbox::csrfToken($currentUserId)) . '\';</script>';
 $isStaff = user_can('sbmanage');
 $canViewHb = $isStaff || ($showhelpbox_main == 'yes' && ($CURUSER['hidehb'] ?? '') != 'yes');
 

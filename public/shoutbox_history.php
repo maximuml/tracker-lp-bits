@@ -9,6 +9,7 @@ loggedinorreturn(true);
 
 stdhead($lang_shoutbox['text_history_title'] ?? 'Shoutbox history');
 begin_main_frame();
+echo '<script>var SHOUT_CSRF = \'' . htmlspecialchars(\App\Support\Shoutbox::csrfToken($currentUserId)) . '\';</script>';
 
 $perPage = 50;
 $page = max(1, (int) ($_GET['page'] ?? 1));
@@ -85,7 +86,7 @@ if ($filters['search'] !== '') {
 $rows = $query->get()->map(fn ($r) => (array) $r)->all();
 $total = (int) $countQuery->count();
 
-$formAction = $_SERVER['PHP_SELF'];
+$formAction = 'shoutbox_history.php';
 $typeOptions = [
     '' => $lang_shoutbox['text_all_types'] ?? 'All',
     'sb' => $lang_shoutbox['text_type_shoutbox'] ?? 'Shoutbox',
@@ -126,9 +127,9 @@ foreach ($rows as $arr) {
     $reactions = \App\Support\Shoutbox::renderReactions(
         $shoutId,
         $currentUserId,
-        $reactionCounts[$shoutId] ?? null,
-        $reactionMine[$shoutId] ?? null,
-        $reactionUsers[$shoutId] ?? null
+        $reactionCounts[$shoutId] ?? [],
+        $reactionMine[$shoutId] ?? [],
+        $reactionUsers[$shoutId] ?? []
     );
     $mentionsMe = false;
     $message = \App\Support\Shoutbox::formatMessage($arr['text'], $currentUserId, $mentionsMe);

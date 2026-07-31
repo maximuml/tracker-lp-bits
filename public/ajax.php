@@ -9,6 +9,17 @@ if ($action != 'getPasskeyGetArgs' && $action != 'processPasskeyGet') {
     loggedinorreturn();
 }
 
+$shoutboxActions = ['shoutboxEdit', 'shoutboxDelete', 'shoutboxReact', 'clearShoutBox'];
+if (in_array($action, $shoutboxActions, true)) {
+    $token = is_array($params) ? (string) ($params['csrf'] ?? '') : '';
+    if (! \App\Support\Shoutbox::validateCsrfToken((int) ($CURUSER['id'] ?? 0), $token)) {
+        exit(json_encode(fail('Invalid CSRF token', $_POST)));
+    }
+    if (is_array($params)) {
+        unset($params['csrf']);
+    }
+}
+
 class AjaxInterface{
 
     public static function toggleUserMedalStatus($params)
@@ -105,6 +116,13 @@ class AjaxInterface{
         if ($id <= 0 || $text === '') {
             throw new \InvalidArgumentException('Invalid input');
         }
+        if (mb_strlen($text) > \App\Support\Shoutbox::MAX_MESSAGE_LENGTH) {
+            throw new \InvalidArgumentException('Message too long');
+        }
+        $editLock = new \Nexus\Database\NexusLock('shoutbox_edit:' . $CURUSER['id'], 10);
+        if (! $editLock->acquire()) {
+            throw new \RuntimeException('Editing too often');
+        }
         $msg = \Nexus\Database\NexusDB::table('shoutbox')->where('id', $id)->first();
         if (! $msg) {
             throw new \RuntimeException('Message not found');
@@ -129,6 +147,10 @@ class AjaxInterface{
     {
         global $CURUSER;
         $id = (int) ($params['id'] ?? 0);
+        $deleteLock = new \Nexus\Database\NexusLock('shoutbox_delete:' . $CURUSER['id'], 10);
+        if (! $deleteLock->acquire()) {
+            throw new \RuntimeException('Deleting too often');
+        }
         $msg = \Nexus\Database\NexusDB::table('shoutbox')->where('id', $id)->first();
         if (! $msg) {
             return true;
@@ -151,6 +173,10 @@ class AjaxInterface{
         global $CURUSER;
         $id = (int) ($params['id'] ?? 0);
         $reaction = (string) ($params['reaction'] ?? '');
+        $reactLock = new \Nexus\Database\NexusLock('shoutbox_react:' . $CURUSER['id'], 5);
+        if (! $reactLock->acquire()) {
+            throw new \RuntimeException('Reacting too often');
+        }
         if ($id <= 0 || ! in_array($reaction, \App\Support\Shoutbox::REACTIONS, true)) {
             throw new \InvalidArgumentException('Invalid reaction');
         }

@@ -8,7 +8,7 @@ if (! isset($CURUSER)) {
 }
 
 $type = $_GET['type'] ?? 'shoutbox';
-$lastId = (int) ($_GET['last_id'] ?? $_SERVER['HTTP_LAST_EVENT_ID'] ?? 0);
+$lastId = (int) ($_SERVER['HTTP_LAST_EVENT_ID'] ?? $_GET['last_id'] ?? 0);
 $maxLoops = 60; // 60 * 2s = 120s
 $userId = (int) ($CURUSER['id'] ?? 0);
 

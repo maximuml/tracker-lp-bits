@@ -23,11 +23,11 @@ if (!$isAjax):
 <link rel="stylesheet" href="<?php echo get_css_uri()."theme.css"?>" type="text/css">
 <link rel="stylesheet" href="styles/curtain_imageresizer.css" type="text/css">
 <link rel="stylesheet" href="styles/nexus.css" type="text/css">
-<script src="js/curtain_imageresizer.js" type="text/javascript"></script><script src="js/shoutbox.js" type="text/javascript"></script><link rel="stylesheet" href="styles/shoutbox.css" type="text/css">
+<script src="js/curtain_imageresizer.js" type="text/javascript"></script><script>var SHOUT_CSRF = '<?php echo htmlspecialchars(\App\Support\Shoutbox::csrfToken((int)($CURUSER['id'] ?? 0))); ?>';</script><script src="js/shoutbox.js" type="text/javascript"></script><link rel="stylesheet" href="styles/shoutbox.css" type="text/css">
 <?php
 print(get_style_addicode());
 $lastIdQuery = \Nexus\Database\NexusDB::table('shoutbox');
-\App\Support\Shoutbox::applyTypeFilter($lastIdQuery, $where, $CURUSER);
+\App\Support\Shoutbox::applyTypeFilter($lastIdQuery, $where, $CURUSER ?? null);
 $lastId = (int)$lastIdQuery->max('id');
 $startcountdown = "startcountdown(".$refresh.");shoutboxInitSSE(" . htmlspecialchars(json_encode($where, JSON_UNESCAPED_UNICODE), ENT_QUOTES, 'UTF-8') . "," . $lastId . ");shoutAttachToggleHandler();";
 ?>
@@ -175,6 +175,9 @@ else
 	}
 	$date=time();
 	$text=trim($_GET["shbox_text"]);
+	if (mb_strlen($text) > \App\Support\Shoutbox::MAX_MESSAGE_LENGTH) {
+		die($lang_shoutbox['text_message_too_long'] ?? 'Message too long');
+	}
     if (isset($userid) && $userid > 0) {
         $lock = new \Nexus\Database\NexusLock("shoutbox:$userid", 60);
     } else {
@@ -193,13 +196,13 @@ else
 }
 }
 
-if ($where === 'shoutbox' && !isset($CURUSER)) {
+if (!isset($CURUSER) && !($where === 'helpbox' && $showhelpbox_main == 'yes')) {
     die("<h1>".$lang_shoutbox['std_access_denied']."</h1>"."<p>".$lang_shoutbox['std_access_denied_note']."</p></body></html>");
 }
 
 $limit = ($CURUSER['sbnum'] ?? 70);
 $query = \Nexus\Database\NexusDB::table('shoutbox')->orderByDesc('date')->limit($limit);
-\App\Support\Shoutbox::applyTypeFilter($query, $where, $CURUSER);
+\App\Support\Shoutbox::applyTypeFilter($query, $where, $CURUSER ?? null);
 /**
  * Build a small role badge for staff/VIP-tier classes. Returns empty string for
  * regular users so the shoutbox doesn't get cluttered with badges on every row.
@@ -281,9 +284,9 @@ else
 		$reactions = \App\Support\Shoutbox::renderReactions(
 			$shoutId,
 			$currentUserId,
-			$reactionCounts[$shoutId] ?? null,
-			$reactionMine[$shoutId] ?? null,
-			$reactionUsers[$shoutId] ?? null
+			$reactionCounts[$shoutId] ?? [],
+			$reactionMine[$shoutId] ?? [],
+			$reactionUsers[$shoutId] ?? []
 		);
 		$editedNote = '';
 		if (!empty($arr['edited_at']) && (int)$arr['edited_at'] > 0) {

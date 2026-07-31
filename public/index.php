@@ -90,6 +90,7 @@ echo $Cache->next_row();
 // ------------- end: hot and classic movies ------------------//
 // ------------- start: shoutbox ------------------//
 if ($showshoutbox_main == "yes") {
+    \Nexus\Nexus::js("var SHOUT_CSRF = '" . addslashes(\App\Support\Shoutbox::csrfToken((int)($CURUSER['id'] ?? 0))) . "';", 'footer', false);
 ?>
     <h2>
         <?php echo $lang_index['text_shoutbox'] ?> - <font class="small"><?php echo $lang_index['text_auto_refresh_after']?></font>
@@ -101,7 +102,7 @@ if ($showshoutbox_main == "yes") {
             $clearShoutBoxJs = <<<JS
 jQuery('#clear-shout-box').on("click", function () {
     layer.confirm("{$lang_index['sure_to_clear_shout_box']}", {title: "Info", btn: ['Yes', "Cancel"], btnAlign: 'c'}, function (layerIndex) {
-        jQuery.post("ajax.php", {"action": "clearShoutBox"}, function (response) {
+        jQuery.post("ajax.php", {"action": "clearShoutBox", "params": {"csrf": (typeof SHOUT_CSRF !== 'undefined' ? SHOUT_CSRF : '')}}, function (response) {
             layer.close(layerIndex)
             if (response.ret != 0) {
                 layer.alert(response.msg, {title: "Info", btn: ['OK', 'Cancel'], btnAlign: 'c'})

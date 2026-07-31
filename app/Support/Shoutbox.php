@@ -13,9 +13,30 @@ use Nexus\Database\NexusDB;
 final class Shoutbox
 {
     public const EDIT_WINDOW = 120;
+    public const MAX_MESSAGE_LENGTH = 1000;
 
     /** @var list<string> */
     public const REACTIONS = ['👍', '🔥', '❤️', '😂', '😮', '😢'];
+
+    /**
+     * CSRF token for shoutbox actions. Uses the app key so no session is needed.
+     */
+    public static function csrfToken(int $userId): string
+    {
+        $secret = function_exists('config') ? (string) config('app.key') : (string) (getenv('APP_KEY') ?: '');
+        if ($secret === '') {
+            $secret = (string) (getenv('NEXUS_ENV') ?: 'default-secret');
+        }
+        return hash_hmac('sha256', 'shoutbox:' . $userId, $secret);
+    }
+
+    /**
+     * Validate a shoutbox CSRF token.
+     */
+    public static function validateCsrfToken(int $userId, string $token): bool
+    {
+        return hash_equals(self::csrfToken($userId), $token);
+    }
 
     /**
      * Apply the same type filter that public/shoutbox.php uses so the
@@ -219,9 +240,9 @@ final class Shoutbox
             return '';
         }
 
-        if ($countsMap !== null && $myReactionsMap !== null) {
-            $counts = $countsMap;
-            $myReactions = $myReactionsMap;
+        if ($countsMap !== null || $myReactionsMap !== null) {
+            $counts = $countsMap ?? [];
+            $myReactions = $myReactionsMap ?? [];
             $reactors = $reactorMap ?? [];
         } else {
             /** @var array<string, int> $counts */

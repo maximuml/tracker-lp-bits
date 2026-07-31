@@ -20,6 +20,9 @@ function shoutboxSerialize(obj, prefix) {
 }
 
 function shoutboxPost(action, params, onSuccess) {
+    if (typeof params === 'object' && params !== null && typeof SHOUT_CSRF !== 'undefined') {
+        params.csrf = SHOUT_CSRF;
+    }
     var cb = function (response) {
         if (response && response.ret === 0) {
             if (typeof onSuccess === 'function') { onSuccess(response); }
@@ -203,11 +206,9 @@ function shoutboxToggleReactionPicker(id) {
 
 function shoutboxRefresh() {
     var c = document.getElementById('shoutbox-content');
-    if (!c) { return; }
-    if (typeof shoutPoll === 'function') {
+    if (c && typeof shoutPoll === 'function') {
         shoutPoll();
     } else {
-        c.innerHTML = '<div style="text-align:center">Reloading…</div>';
         window.location.reload();
     }
 }

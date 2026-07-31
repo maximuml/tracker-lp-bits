@@ -9,6 +9,17 @@ if ($action != 'getPasskeyGetArgs' && $action != 'processPasskeyGet') {
     loggedinorreturn();
 }
 
+$shoutboxActions = ['shoutboxEdit', 'shoutboxDelete', 'shoutboxReact', 'clearShoutBox'];
+if (in_array($action, $shoutboxActions, true)) {
+    $token = is_array($params) ? (string) ($params['csrf'] ?? '') : '';
+    if (! \App\Support\Shoutbox::validateCsrfToken((int) ($CURUSER['id'] ?? 0), $token)) {
+        exit(json_encode(fail('Invalid CSRF token', $_POST)));
+    }
+    if (is_array($params)) {
+        unset($params['csrf']);
+    }
+}
+
 class AjaxInterface{
 
     public static function toggleUserMedalStatus($params)
@@ -94,7 +105,110 @@ class AjaxInterface{
         global $CURUSER;
         user_can('sbmanage', true);
         \Nexus\Database\NexusDB::table('shoutbox')->delete();
+        \Nexus\Database\NexusDB::table('shoutbox_reactions')->delete();
         return true;
+    }
+
+    public static function shoutboxEdit($params)
+    {
+        global $CURUSER;
+        $id = (int) ($params['id'] ?? 0);
+        $text = trim((string) ($params['text'] ?? ''));
+        if ($id <= 0 || $text === '') {
+            throw new \InvalidArgumentException('Invalid input');
+        }
+        if (mb_strlen($text) > \App\Support\Shoutbox::MAX_MESSAGE_LENGTH) {
+            throw new \InvalidArgumentException('Message too long');
+        }
+        $msg = \Nexus\Database\NexusDB::table('shoutbox')->where('id', $id)->first();
+        if (! $msg) {
+            throw new \RuntimeException('Message not found');
+        }
+        $msgUserId = (int) ($msg->userid ?? 0);
+        $msgDate = (int) ($msg->date ?? 0);
+        if ($msgUserId !== (int) $CURUSER['id'] && ! user_can('sbmanage')) {
+            throw new \RuntimeException('No permission');
+        }
+        if ((time() - $msgDate) > \App\Support\Shoutbox::EDIT_WINDOW && ! user_can('sbmanage')) {
+            throw new \RuntimeException('Edit window expired');
+        }
+        $editLock = new \Nexus\Database\NexusLock('shoutbox_edit:' . $CURUSER['id'], 10);
+        if (! $editLock->acquire()) {
+            throw new \RuntimeException('Editing too often');
+        }
+        try {
+            \Nexus\Database\NexusDB::table('shoutbox')->where('id', $id)->update([
+                'text' => $text,
+                'edited_by' => $CURUSER['id'],
+                'edited_at' => time(),
+            ]);
+            return true;
+        } finally {
+            $editLock->release();
+        }
+    }
+
+    public static function shoutboxDelete($params)
+    {
+        global $CURUSER;
+        $id = (int) ($params['id'] ?? 0);
+        if ($id <= 0) {
+            throw new \InvalidArgumentException('Invalid input');
+        }
+        $msg = \Nexus\Database\NexusDB::table('shoutbox')->where('id', $id)->first();
+        if (! $msg) {
+            return true;
+        }
+        $msgUserId = (int) ($msg->userid ?? 0);
+        $msgDate = (int) ($msg->date ?? 0);
+        if ($msgUserId !== (int) $CURUSER['id'] && ! user_can('sbmanage')) {
+            throw new \RuntimeException('No permission');
+        }
+        if ((time() - $msgDate) > \App\Support\Shoutbox::EDIT_WINDOW && ! user_can('sbmanage')) {
+            throw new \RuntimeException('Delete window expired');
+        }
+        $deleteLock = new \Nexus\Database\NexusLock('shoutbox_delete:' . $CURUSER['id'], 10);
+        if (! $deleteLock->acquire()) {
+            throw new \RuntimeException('Deleting too often');
+        }
+        try {
+            \Nexus\Database\NexusDB::table('shoutbox')->where('id', $id)->delete();
+            \Nexus\Database\NexusDB::table('shoutbox_reactions')->where('shoutbox_id', $id)->delete();
+            return true;
+        } finally {
+            $deleteLock->release();
+        }
+    }
+
+    public static function shoutboxReact($params)
+    {
+        global $CURUSER;
+        $id = (int) ($params['id'] ?? 0);
+        $reaction = (string) ($params['reaction'] ?? '');
+        if ($id <= 0 || ! in_array($reaction, \App\Support\Shoutbox::REACTIONS, true)) {
+            throw new \InvalidArgumentException('Invalid reaction');
+        }
+        $reactLock = new \Nexus\Database\NexusLock('shoutbox_react:' . $CURUSER['id'], 5);
+        if (! $reactLock->acquire()) {
+            throw new \RuntimeException('Reacting too often');
+        }
+        try {
+            $table = \Nexus\Database\NexusDB::table('shoutbox_reactions');
+            $existing = $table->where('shoutbox_id', $id)->where('user_id', $CURUSER['id'])->where('reaction', $reaction)->first();
+            if ($existing) {
+                $table->where('id', $existing->id)->delete();
+                return 'removed';
+            }
+            $table->insert([
+                'shoutbox_id' => $id,
+                'user_id' => $CURUSER['id'],
+                'reaction' => $reaction,
+                'created_at' => date('Y-m-d H:i:s'),
+            ]);
+            return 'added';
+        } finally {
+            $reactLock->release();
+        }
     }
 
     public static function buyMedal($params)

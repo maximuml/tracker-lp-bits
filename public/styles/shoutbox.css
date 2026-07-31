@@ -1,0 +1,228 @@
+body.inframe { overflow-y: scroll; overflow-x: hidden; }
+
+td.shoutrow .shout-avatar-link {
+    display: inline-block;
+    line-height: 0;
+    vertical-align: middle;
+}
+
+td.shoutrow .shout-avatar,
+td.shoutrow .shout-avatar-spacer {
+    width: 22px;
+    height: 22px;
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 4px;
+}
+
+td.shoutrow .shout-avatar {
+    border-radius: 50%;
+    object-fit: cover;
+    background: rgba(127,127,127,.15);
+}
+
+td.shoutrow.shout-row-grouped {
+    opacity: .92;
+}
+
+td.shoutrow.shout-row-grouped .shout-avatar-spacer {
+    background: transparent;
+}
+
+td.shoutrow .shout-mention {
+    background: rgba(64,128,255,.12);
+    border-radius: 3px;
+    padding: 0 3px;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+td.shoutrow .shout-mention.shout-mention-me {
+    background: rgba(255,196,0,.30);
+    color: inherit;
+    box-shadow: 0 0 0 1px rgba(255,196,0,.55) inset;
+}
+
+td.shoutrow.shoutrow-mentions-me {
+    background: rgba(255,196,0,.08);
+    border-left: 3px solid rgba(255,196,0,.65);
+    padding-left: 5px;
+}
+
+td.shoutrow .shout-nick-reply {
+    cursor: pointer;
+}
+
+td.shoutrow .shout-nick-reply:hover {
+    text-decoration: underline;
+}
+
+td.shoutrow .shout-torrent {
+    background: rgba(0,168,107,.14);
+    border-radius: 3px;
+    padding: 0 3px;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+td.shoutrow .shout-msg.shout-msg-clamped {
+    display: inline-block;
+    max-width: 100%;
+    max-height: 3.6em;
+    overflow: hidden;
+    vertical-align: top;
+}
+
+td.shoutrow .shout-msg-toggle {
+    font-size: 11px;
+    margin-left: 4px;
+    opacity: .65;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+td.shoutrow .shout-msg-toggle:hover {
+    opacity: 1;
+}
+
+td.shoutrow .shout-class-badge {
+    display: inline-block;
+    font-size: 9px;
+    line-height: 12px;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+    padding: 1px 4px;
+    border-radius: 3px;
+    margin-right: 3px;
+    text-transform: uppercase;
+    vertical-align: middle;
+    color: #fff !important;
+}
+
+.shout-actions {
+    font-size: 11px;
+    opacity: .7;
+    margin-right: 3px;
+    white-space: nowrap;
+}
+
+td.shoutrow:hover .shout-actions {
+    opacity: 1;
+}
+
+.shout-actions a {
+    text-decoration: none;
+}
+
+.shout-reactions {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    position: relative;
+    gap: 4px;
+    margin-left: 4px;
+    vertical-align: middle;
+}
+
+.shout-reaction {
+    border: 1px solid rgba(127,127,127,.35);
+    background: rgba(127,127,127,.08);
+    border-radius: 12px;
+    padding: 1px 6px;
+    font-size: 12px;
+    line-height: 1.4;
+    cursor: pointer;
+    color: inherit;
+    white-space: nowrap;
+}
+
+.shout-reaction.active {
+    background: rgba(64,128,255,.22);
+    border-color: rgba(64,128,255,.65);
+}
+
+.shout-reaction:hover {
+    background: rgba(64,128,255,.14);
+    border-color: rgba(64,128,255,.45);
+}
+
+.shout-reaction-add {
+    font-weight: bold;
+    min-width: 24px;
+    text-align: center;
+    padding: 1px 4px;
+}
+
+.shout-reaction-picker {
+    display: none;
+    position: absolute;
+    z-index: 100;
+    background: rgba(40,40,40,.95);
+    border: 1px solid rgba(127,127,127,.4);
+    border-radius: 16px;
+    padding: 4px 6px;
+    gap: 4px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.25);
+}
+
+.shout-reaction-picker .shout-reaction {
+    background: transparent;
+    border-color: transparent;
+    font-size: 14px;
+    padding: 2px 4px;
+}
+
+.shout-reaction-picker .shout-reaction:hover {
+    background: rgba(255,255,255,.15);
+}
+
+.shoutbox-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-bottom: 4px;
+}
+
+.shoutbox-toolbar .shoutbox-tool {
+    padding: 2px 8px;
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+.shoutbox-emoji-panel {
+    margin: 4px 0;
+    padding: 4px;
+    border: 1px solid rgba(127,127,127,.25);
+    border-radius: 4px;
+    background: rgba(127,127,127,.08);
+}
+
+.shoutbox-emoji-panel img {
+    max-width: 25px;
+    margin: 2px;
+    cursor: pointer;
+}
+
+.shoutbox-editing {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+}
+
+.shoutbox-editing input {
+    flex-grow: 1;
+    border: 1px solid gray;
+    padding: 2px;
+}
+
+.shoutbox-editing button {
+    padding: 2px 6px;
+    font-size: 12px;
+}
+
+.shout-edited-note {
+    font-size: 10px;
+    opacity: .65;
+    margin-left: 4px;
+    font-style: italic;
+}

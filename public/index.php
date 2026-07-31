@@ -32,6 +32,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST")
 		stderr($lang_index['std_error'], $lang_index['std_option_unselected']);
 	}
 }
+\Nexus\Nexus::css('styles/shoutbox.css', 'header', true);
+\Nexus\Nexus::js('js/shoutbox.js', 'footer', true);
 stdhead($lang_index['head_home']);
 begin_main_frame();
 
@@ -88,17 +90,19 @@ echo $Cache->next_row();
 // ------------- end: hot and classic movies ------------------//
 // ------------- start: shoutbox ------------------//
 if ($showshoutbox_main == "yes") {
+    \Nexus\Nexus::js("var SHOUT_CSRF = '" . addslashes(\App\Support\Shoutbox::csrfToken((int)($CURUSER['id'] ?? 0))) . "';", 'footer', false);
 ?>
     <h2>
         <?php echo $lang_index['text_shoutbox'] ?> - <font class="small"><?php echo $lang_index['text_auto_refresh_after']?></font>
         <font class='striking' id="countdown"></font><font class="small"><?php echo $lang_index['text_seconds']?></font>
+        - <a href="shoutbox_history.php" class="small"><?php echo $lang_index['text_shoutbox_history'] ?? 'History'; ?></a>
         <?php
         if (user_can('sbmanage')) {
             echo ' - <font class="small" id="clear-shout-box">[<a class="altlink" href="javascript:;"><b>'.$lang_index['clear_shout_box'].'</b></a>]</font>';
             $clearShoutBoxJs = <<<JS
 jQuery('#clear-shout-box').on("click", function () {
     layer.confirm("{$lang_index['sure_to_clear_shout_box']}", {title: "Info", btn: ['Yes', "Cancel"], btnAlign: 'c'}, function (layerIndex) {
-        jQuery.post("ajax.php", {"action": "clearShoutBox"}, function (response) {
+        jQuery.post("ajax.php", {"action": "clearShoutBox", "params": {"csrf": (typeof SHOUT_CSRF !== 'undefined' ? SHOUT_CSRF : '')}}, function (response) {
             layer.close(layerIndex)
             if (response.ret != 0) {
                 layer.alert(response.msg, {title: "Info", btn: ['OK', 'Cancel'], btnAlign: 'c'})
@@ -117,13 +121,13 @@ JS;
 	print("<table width=\"100%\"><tr><td class=\"text\">\n");
 	print("<iframe id='iframe-shout-box' src='shoutbox.php?type=shoutbox' width='100%' height='180' frameborder='0' name='sbox' marginwidth='0' marginheight='0'></iframe><br /><br />\n");
 	print("<form action='shoutbox.php' method='get' target='sbox' name='shbox'>\n");
+    print(\App\Support\Shoutbox::toolbar('shbox', 'shbox_text'));
     print('<div style="display: flex">');
 	print("<label for='shbox_text'>".$lang_index['text_message']."</label><input type='text' name='shbox_text' id='shbox_text' size='100' style='flex-grow: 1; border: 1px solid gray;' />  <input type='submit' id='hbsubmit' class='btn' name='shout' value=\"".$lang_index['sumbit_shout']."\" />");
 	if ($CURUSER['hidehb'] != 'yes' && $showhelpbox_main =='yes')
 		print("<input type='submit' class='btn' name='toguest' value=\"".$lang_index['sumbit_to_guest']."\" />");
 	print("<input type='reset' class='btn' value=\"".$lang_index['submit_clear']."\" /> <input type='hidden' name='sent' value='yes' /><input type='hidden' name='type' value='shoutbox' />");
 	print('</div>');
-    print(smile_row("shbox","shbox_text"));
 	print("</form></td></tr></table>");
 }
 // ------------- end: shoutbox ------------------//

@@ -97,10 +97,6 @@ final class Logger
         }
 
         $std = ['php://stdout', 'php://stderr'];
-        $logFileFromDotEnv = Env::get('LOG_FILE');
-        if ($logFileFromDotEnv && in_array($logFileFromDotEnv, $std, true)) {
-            return self::$filePaths[$append] = $logFileFromDotEnv;
-        }
 
         $path = getenv('NEXUS_LOG_DIR', true);
         if (in_array($path, $std, true)) {
@@ -111,6 +107,11 @@ final class Logger
         if ($path === false) {
             $fromEnv = false;
             $path = sys_get_temp_dir();
+        }
+
+        $logFileFromDotEnv = Env::get('LOG_FILE');
+        if (!$fromEnv && $logFileFromDotEnv && in_array($logFileFromDotEnv, $std, true)) {
+            return self::$filePaths[$append] = $logFileFromDotEnv;
         }
 
         $logFile = rtrim($path, '/') . '/nexus.log';

@@ -29,7 +29,7 @@ print(get_style_addicode());
 $lastIdQuery = \Nexus\Database\NexusDB::table('shoutbox');
 \App\Support\Shoutbox::applyTypeFilter($lastIdQuery, $where, $CURUSER);
 $lastId = (int)$lastIdQuery->max('id');
-$startcountdown = "startcountdown(".$refresh.");shoutboxInitSSE(" . json_encode($where, JSON_UNESCAPED_UNICODE) . "," . $lastId . ");shoutAttachToggleHandler();";
+$startcountdown = "startcountdown(".$refresh.");shoutboxInitSSE(" . htmlspecialchars(json_encode($where, JSON_UNESCAPED_UNICODE), ENT_QUOTES, 'UTF-8') . "," . $lastId . ");shoutAttachToggleHandler();";
 ?>
 <script type="text/javascript">
 //<![CDATA[

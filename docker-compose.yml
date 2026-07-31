@@ -7,6 +7,7 @@ services:
     environment:
       SERVICE_NAME: php
       MEILISEARCH_HOST: ${MEILISEARCH_HOST:-meilisearch}
+      MEILISEARCH_MASTER_KEY: ${MEILISEARCH_MASTER_KEY:-nexusphp_default_key}
     volumes:
       - .:/var/www/html
       - ${NP_BACKUP_EXPORT_PATH:-/tmp/nexusphp_backup}:${NP_BACKUP_EXPORT_PATH:-/tmp/nexusphp_backup}
@@ -27,6 +28,7 @@ services:
     environment:
       SERVICE_NAME: queue
       MEILISEARCH_HOST: ${MEILISEARCH_HOST:-meilisearch}
+      MEILISEARCH_MASTER_KEY: ${MEILISEARCH_MASTER_KEY:-nexusphp_default_key}
     volumes:
       - .:/var/www/html
     depends_on:
@@ -48,6 +50,7 @@ services:
     environment:
       SERVICE_NAME: scheduler
       MEILISEARCH_HOST: ${MEILISEARCH_HOST:-meilisearch}
+      MEILISEARCH_MASTER_KEY: ${MEILISEARCH_MASTER_KEY:-nexusphp_default_key}
     volumes:
       - .:/var/www/html
       - ${NP_BACKUP_EXPORT_PATH:-/tmp/nexusphp_backup}:${NP_BACKUP_EXPORT_PATH:-/tmp/nexusphp_backup}
@@ -70,6 +73,7 @@ services:
     environment:
       SERVICE_NAME: cleanup
       MEILISEARCH_HOST: ${MEILISEARCH_HOST:-meilisearch}
+      MEILISEARCH_MASTER_KEY: ${MEILISEARCH_MASTER_KEY:-nexusphp_default_key}
     volumes:
       - .:/var/www/html
     depends_on:
@@ -165,7 +169,8 @@ services:
     container_name: nexusphp-meilisearch
     environment:
       MEILI_NO_ANALYTICS: "true"
-      MEILI_ENV: development
+      MEILI_ENV: production
+      MEILI_MASTER_KEY: ${MEILISEARCH_MASTER_KEY:-nexusphp_default_key}
     volumes:
       - meilisearch-data:/meili_data
     ports:

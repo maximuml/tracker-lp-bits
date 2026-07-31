@@ -6,6 +6,8 @@ services:
     container_name: nexusphp-php
     environment:
       SERVICE_NAME: php
+      MEILISEARCH_HOST: ${MEILISEARCH_HOST:-meilisearch}
+      MEILISEARCH_MASTER_KEY: ${MEILISEARCH_MASTER_KEY:-nexusphp_default_key}
     volumes:
       - .:/var/www/html
       - ${NP_BACKUP_EXPORT_PATH:-/tmp/nexusphp_backup}:${NP_BACKUP_EXPORT_PATH:-/tmp/nexusphp_backup}
@@ -34,6 +36,8 @@ services:
     container_name: nexusphp-queue
     environment:
       SERVICE_NAME: queue
+      MEILISEARCH_HOST: ${MEILISEARCH_HOST:-meilisearch}
+      MEILISEARCH_MASTER_KEY: ${MEILISEARCH_MASTER_KEY:-nexusphp_default_key}
     volumes:
       - .:/var/www/html
     depends_on:
@@ -57,6 +61,8 @@ services:
     container_name: nexusphp-scheduler
     environment:
       SERVICE_NAME: scheduler
+      MEILISEARCH_HOST: ${MEILISEARCH_HOST:-meilisearch}
+      MEILISEARCH_MASTER_KEY: ${MEILISEARCH_MASTER_KEY:-nexusphp_default_key}
     volumes:
       - .:/var/www/html
       - ${NP_BACKUP_EXPORT_PATH:-/tmp/nexusphp_backup}:${NP_BACKUP_EXPORT_PATH:-/tmp/nexusphp_backup}
@@ -81,6 +87,8 @@ services:
     container_name: nexusphp-cleanup
     environment:
       SERVICE_NAME: cleanup
+      MEILISEARCH_HOST: ${MEILISEARCH_HOST:-meilisearch}
+      MEILISEARCH_MASTER_KEY: ${MEILISEARCH_MASTER_KEY:-nexusphp_default_key}
     volumes:
       - .:/var/www/html
     depends_on:
@@ -195,9 +203,29 @@ services:
     networks:
       - appnet
 
+  meilisearch:
+    image: getmeili/meilisearch:v1.16
+    container_name: nexusphp-meilisearch
+    environment:
+      MEILI_NO_ANALYTICS: "true"
+      MEILI_ENV: production
+      MEILI_MASTER_KEY: ${MEILISEARCH_MASTER_KEY:-nexusphp_default_key}
+    volumes:
+      - meilisearch-data:/meili_data
+    ports:
+      - "127.0.0.1:${MEILISEARCH_PORT:-7700}:7700"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "1024m"
+        max-file: "3"
+    networks:
+      - appnet
+
 volumes:
   mysql-data:
   redis-data:
+  meilisearch-data:
 
 networks:
   appnet:

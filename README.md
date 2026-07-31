@@ -20,7 +20,7 @@ This is a streamlined fork focused on the core tracker/forum/community experienc
 
 ## System Requirements
 
-- **PHP** 8.3 / 8.4 / 8.5
+- **PHP** 8.4 / 8.5
   - Required extensions: `bcmath`, `ctype`, `curl`, `fileinfo`, `json`, `mbstring`, `openssl`, `pdo_mysql`, `tokenizer`, `xml`, `mysqli`, `gd`, `redis`, `pcntl`, `sockets`, `posix`, `gmp`, `opcache`, `zip`, `intl`, `pdo_sqlite`, `sqlite3`, `pdo_pgsql`
 - **Database** — MySQL 5.7+ or PostgreSQL 16+
 - **Redis** — 4.0+
@@ -30,11 +30,15 @@ This is a streamlined fork focused on the core tracker/forum/community experienc
 
 ```bash
 cp .env.example .env
-# Edit .env so DB_HOST=mysql and REDIS_HOST=redis match docker-compose.yml
+# Edit .env so DB_HOST=mysql, REDIS_HOST=redis and MEILISEARCH_HOST=meilisearch match docker-compose.yml
 docker compose up -d
 ```
 
-After the containers start, complete the web installer at `http://<your-domain>/install` (or run `php artisan migrate --seed` and create an admin user if you prefer the CLI).
+After the containers start, complete the web installer at `http://<your-domain>/install` (or run `php artisan migrate --seed` and create an admin user if you prefer the CLI). Then populate the MeiliSearch index:
+
+```bash
+docker compose exec php php artisan meilisearch:import
+```
 
 Run the queue worker, scheduler and cleanup workers via the containers started by `docker compose` (see `docker-compose.yml`).
 

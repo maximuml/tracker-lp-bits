@@ -5,7 +5,7 @@ dbconn();
 cur_user_check ();
 //require_once(get_langfile_path("",true));
 require_once(get_langfile_path("", false, get_langfolder_cookie()));
-require_once(get_langfile_path("takeinvite.php"));
+
 
 $isPreRegisterEmailAndUsername = get_setting("system.is_invite_pre_email_and_username") == "yes";
 
@@ -202,8 +202,8 @@ $usern = htmlspecialchars($wantusername);
 $title = $SITENAME.$lang_takesignup['mail_title'];
 $confirmUrl = getSchemeAndHttpHost() . "/confirm.php?id=$id&secret=$psecret";
 $confirmResendUrl = getSchemeAndHttpHost() . "/confirm_resend.php";
-$mailTwo = sprintf($lang_takeinvite['mail_two'], $siteName);
-$mailFive = sprintf($lang_takeinvite['mail_five'], $siteName, $siteName, $REPORTMAIL, $siteName);
+$mailTwo = sprintf($lang_takesignup['mail_two'], $siteName);
+$mailFive = sprintf($lang_takesignup['mail_five'], $siteName, $siteName, $REPORTMAIL, $siteName);
 $body = <<<EOD
 {$lang_takesignup['mail_one']}$usern{$mailTwo}($email){$lang_takesignup['mail_three']}$ip{$lang_takesignup['mail_four']}
 <b><a href="javascript:void(null)" onclick="window.open($confirmUrl)">

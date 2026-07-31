@@ -296,7 +296,7 @@ class SeedBoxRepository extends BaseRepository
      * @param  \App\Enums\SeedBoxRecord\IpAsnEnum  $field
      * @param  string  $ipOrAsnStr
      */
-    public static function updateCache(int $userId, TypeEnum $type, IsAllowedEnum $isAllowed, IpAsnEnum $field, string $ipOrAsnStr = null): void
+    public static function updateCache(int $userId, TypeEnum $type, IsAllowedEnum $isAllowed, IpAsnEnum $field, ?string $ipOrAsnStr = null): void
     {
         if (!is_null($ipOrAsnStr)) {
             $list = explode(',', $ipOrAsnStr);

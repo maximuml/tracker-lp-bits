@@ -399,9 +399,9 @@ return array (
         'max_uploaded_duration' => 0,
     ],
     'meilisearch' => [
-        'enabled' => 'no',
+        'enabled' => 'yes',
         'search_description' => 'no',
-        'default_search_mode' => \App\Models\SearchBox::SEARCH_MODE_EXACT,
+        'default_search_mode' => \App\Models\SearchBox::SEARCH_MODE_AND,
     ],
     'system' => [
         'change_username_min_interval_in_days' => '365',

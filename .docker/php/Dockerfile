@@ -1,5 +1,5 @@
 # 👷‍♀️ 第一阶段：构建阶段，包含所有开发依赖
-FROM php:8.3-fpm-alpine AS builder
+FROM php:8.4-fpm-alpine AS builder
 
 RUN apk add --no-cache \
     $PHPIZE_DEPS \
@@ -39,7 +39,7 @@ RUN pecl channel-update pecl.php.net \
     && docker-php-ext-enable redis
 
 # 👨‍🍳 第二阶段：运行阶段，仅包含必要运行环境
-FROM php:8.3-fpm-alpine
+FROM php:8.4-fpm-alpine
 
 # 复制已构建的扩展
 COPY --from=builder /usr/local/lib/php/extensions /usr/local/lib/php/extensions

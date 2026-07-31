@@ -1,4 +1,4 @@
-body { overflow-y: scroll; overflow-x: hidden; }
+body.inframe { overflow-y: scroll; overflow-x: hidden; }
 
 td.shoutrow .shout-avatar-link {
     display: inline-block;

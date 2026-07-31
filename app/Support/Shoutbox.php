@@ -18,6 +18,28 @@ final class Shoutbox
     public const REACTIONS = ['👍', '🔥', '❤️', '😂', '😮', '😢'];
 
     /**
+     * Apply the same type filter that public/shoutbox.php uses so the
+     * SSE stream and the rendered list agree on which rows are visible.
+     *
+     * @param  \Illuminate\Database\Query\Builder  $query
+     * @param  string                                $type
+     * @param  array<string, mixed>|object|null      $user
+     */
+    public static function applyTypeFilter($query, string $type, $user = null): void
+    {
+        $showHelpbox = $GLOBALS['showhelpbox_main'] ?? 'no';
+        if ($type === 'helpbox' && $showHelpbox === 'yes') {
+            $query->where('type', 'hb');
+            return;
+        }
+
+        $hideHb = is_array($user) ? ($user['hidehb'] ?? '') : (is_object($user) ? ($user->hidehb ?? '') : '');
+        if ($type === 'shoutbox' && $user !== null && ($hideHb === 'yes' || $showHelpbox !== 'yes')) {
+            $query->where('type', 'sb');
+        }
+    }
+
+    /**
      * Build the message-formatting toolbar and emoji picker for the
      * shoutbox input form. Returns a small chunk of HTML that is
      * placed right above the input in public/index.php.
@@ -118,31 +140,81 @@ final class Shoutbox
     }
 
     /**
+     * Batch-fetch reaction counts for the given shout ids to avoid the
+     * N+1 query pattern when rendering a list of messages.
+     *
+     * @param  list<int>  $shoutIds
+     * @param  int        $currentUserId
+     * @return array{counts: array<int, array<string, int>>, mine: array<int, list<string>>}
+     */
+    public static function prefetchReactions(array $shoutIds, int $currentUserId): array
+    {
+        if ($shoutIds === []) {
+            return ['counts' => [], 'mine' => []];
+        }
+
+        $ids = array_map('intval', $shoutIds);
+
+        /** @var array<int, array<string, int>> $counts */
+        $counts = [];
+        $rawCounts = NexusDB::table('shoutbox_reactions')
+            ->select('shoutbox_id', 'reaction', NexusDB::raw('COUNT(*) as cnt'))
+            ->whereIn('shoutbox_id', $ids)
+            ->groupBy('shoutbox_id', 'reaction')
+            ->get();
+        foreach ($rawCounts as $row) {
+            $id = (int) $row->shoutbox_id;
+            $emoji = (string) $row->reaction;
+            $counts[$id][$emoji] = (int) $row->cnt;
+        }
+
+        /** @var array<int, list<string>> $mine */
+        $mine = [];
+        $rawMine = NexusDB::table('shoutbox_reactions')
+            ->whereIn('shoutbox_id', $ids)
+            ->where('user_id', $currentUserId)
+            ->get(['shoutbox_id', 'reaction']);
+        foreach ($rawMine as $row) {
+            $id = (int) $row->shoutbox_id;
+            $mine[$id][] = (string) $row->reaction;
+        }
+
+        return ['counts' => $counts, 'mine' => $mine];
+    }
+
+    /**
      * Build the reaction button bar for a message.
      *
-     * @param  int  $shoutId        Message id
-     * @param  int  $currentUserId  Id of the viewing user
+     * @param  int                           $shoutId        Message id
+     * @param  int                           $currentUserId    Id of the viewing user
+     * @param  array<string, int>|null       $countsMap      Reaction counts (from prefetchReactions)
+     * @param  list<string>|null             $myReactionsMap Current user's reactions
      */
-    public static function renderReactions(int $shoutId, int $currentUserId): string
+    public static function renderReactions(int $shoutId, int $currentUserId, ?array $countsMap = null, ?array $myReactionsMap = null): string
     {
         if ($shoutId <= 0) {
             return '';
         }
 
-        /** @var array<string, int> $counts */
-        $counts = NexusDB::table('shoutbox_reactions')
-            ->select('reaction', NexusDB::raw('COUNT(*) as cnt'))
-            ->where('shoutbox_id', $shoutId)
-            ->groupBy('reaction')
-            ->pluck('cnt', 'reaction')
-            ->toArray();
+        if ($countsMap !== null && $myReactionsMap !== null) {
+            $counts = $countsMap;
+            $myReactions = $myReactionsMap;
+        } else {
+            /** @var array<string, int> $counts */
+            $counts = NexusDB::table('shoutbox_reactions')
+                ->select('reaction', NexusDB::raw('COUNT(*) as cnt'))
+                ->where('shoutbox_id', $shoutId)
+                ->groupBy('reaction')
+                ->pluck('cnt', 'reaction')
+                ->toArray();
 
-        /** @var list<string> $myReactions */
-        $myReactions = NexusDB::table('shoutbox_reactions')
-            ->where('shoutbox_id', $shoutId)
-            ->where('user_id', $currentUserId)
-            ->pluck('reaction')
-            ->toArray();
+            /** @var list<string> $myReactions */
+            $myReactions = NexusDB::table('shoutbox_reactions')
+                ->where('shoutbox_id', $shoutId)
+                ->where('user_id', $currentUserId)
+                ->pluck('reaction')
+                ->toArray();
+        }
 
         $html = '<span class="shout-reactions">';
         foreach (self::REACTIONS as $emoji) {

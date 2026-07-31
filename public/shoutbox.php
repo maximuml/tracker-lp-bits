@@ -27,11 +27,7 @@ if (!$isAjax):
 <?php
 print(get_style_addicode());
 $lastIdQuery = \Nexus\Database\NexusDB::table('shoutbox');
-if ($where == "helpbox" && $showhelpbox_main == 'yes') {
-    $lastIdQuery->where('type', 'hb');
-} elseif ($where == "shoutbox" && isset($CURUSER) && ($CURUSER['hidehb'] == 'yes' || $showhelpbox_main != 'yes')) {
-    $lastIdQuery->where('type', 'sb');
-}
+\App\Support\Shoutbox::applyTypeFilter($lastIdQuery, $where, $CURUSER);
 $lastId = (int)$lastIdQuery->max('id');
 $startcountdown = "startcountdown(".$refresh.");shoutboxInitSSE(" . json_encode($where, JSON_UNESCAPED_UNICODE) . "," . $lastId . ");shoutAttachToggleHandler();";
 ?>
@@ -197,17 +193,13 @@ else
 }
 }
 
-$limit = ($CURUSER['sbnum'] ?? 70);
-$query = \Nexus\Database\NexusDB::table('shoutbox')->orderByDesc('date')->limit($limit);
-if ($where == "helpbox" && $showhelpbox_main == 'yes') {
-    //request helpbox, not require login
-    $query->where('type', 'hb');
-} elseif ($where == "shoutbox" && isset($CURUSER) && ($CURUSER['hidehb'] == 'yes' || $showhelpbox_main != 'yes')) {
-    //request shoutbox, exclude helpbox content, require login
-    $query->where('type', 'sb');
-} elseif (!isset($CURUSER)) {
+if ($where === 'shoutbox' && !isset($CURUSER)) {
     die("<h1>".$lang_shoutbox['std_access_denied']."</h1>"."<p>".$lang_shoutbox['std_access_denied_note']."</p></body></html>");
 }
+
+$limit = ($CURUSER['sbnum'] ?? 70);
+$query = \Nexus\Database\NexusDB::table('shoutbox')->orderByDesc('date')->limit($limit);
+\App\Support\Shoutbox::applyTypeFilter($query, $where, $CURUSER);
 /**
  * Build a small role badge for staff/VIP-tier classes. Returns empty string for
  * regular users so the shoutbox doesn't get cluttered with badges on every row.
@@ -258,6 +250,12 @@ else
 	$prevDate = 0;
 	$currentUserId = (int)($CURUSER['id'] ?? 0);
 	$isStaff = user_can('sbmanage');
+
+	$shoutIds = $rows->pluck('id')->map(fn ($id) => (int) $id)->all();
+	$reactionData = \App\Support\Shoutbox::prefetchReactions($shoutIds, $currentUserId);
+	$reactionCounts = $reactionData['counts'];
+	$reactionMine = $reactionData['mine'];
+
 	if (!$isAjax) {
 		print('<div id="shoutbox-content">');
 	}
@@ -278,7 +276,13 @@ else
 			&& abs($prevDate - $currDate) <= $groupWindowSec
 		);
 		$actions = \App\Support\Shoutbox::renderActions($arr, $currentUserId, $isStaff);
-		$reactions = \App\Support\Shoutbox::renderReactions((int)$arr['id'], $currentUserId);
+		$shoutId = (int) $arr['id'];
+		$reactions = \App\Support\Shoutbox::renderReactions(
+			$shoutId,
+			$currentUserId,
+			$reactionCounts[$shoutId] ?? null,
+			$reactionMine[$shoutId] ?? null
+		);
 		$editedNote = '';
 		if (!empty($arr['edited_at']) && (int)$arr['edited_at'] > 0) {
 			$editedNote = ' <span class="shout-edited-note">(' . htmlspecialchars((string) ($lang_shoutbox['text_edited'] ?? 'edited')) . ' ' . \App\Support\Shoutbox::formatTime((int)$arr['edited_at'], true) . ')</span>';
@@ -334,10 +338,11 @@ else
 		$plainLen = mb_strlen(strip_tags($message));
 		$isLong = $plainLen > 280;
 		$msgClass = $isLong ? 'shout-msg shout-msg-clamped' : 'shout-msg';
-		$messageHtml = '<span id="shout-msg-' . $arr['id'] . '" class="' . $msgClass . '" data-raw="' . htmlspecialchars((string) $arr['text'], ENT_QUOTES) . '">' . $message . '</span>' . $editedNote;
+		$messageHtml = '<span id="shout-msg-' . $arr['id'] . '" class="' . $msgClass . '" data-raw="' . htmlspecialchars((string) $arr['text'], ENT_QUOTES) . '">' . $message . '</span>';
 		if ($isLong) {
 			$messageHtml .= '<a class="shout-msg-toggle" href="javascript:void(0)" data-on="' . htmlspecialchars($labelLess, ENT_QUOTES) . '" data-off="' . htmlspecialchars($labelMore, ENT_QUOTES) . '">' . htmlspecialchars($labelMore) . '</a>';
 		}
+		$messageHtml .= $editedNote;
 		$rowClasses = ['shoutrow'];
 		if ($mentionsMe) {
 			$rowClasses[] = 'shoutrow-mentions-me';

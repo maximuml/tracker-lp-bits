@@ -10,13 +10,34 @@ if (! isset($CURUSER)) {
 $type = $_GET['type'] ?? 'shoutbox';
 $lastId = (int) ($_GET['last_id'] ?? $_SERVER['HTTP_LAST_EVENT_ID'] ?? 0);
 $maxLoops = 60; // 60 * 2s = 120s
+$userId = (int) ($CURUSER['id'] ?? 0);
 
-$query = \Nexus\Database\NexusDB::table('shoutbox')->orderBy('id')->where('id', '>', $lastId);
-if ($type == 'helpbox' && $showhelpbox_main == 'yes') {
-    $query->where('type', 'hb');
-} elseif ($type == 'shoutbox') {
-    $query->where('type', 'sb');
+// Limit each user to one concurrent SSE stream so the PHP-FPM pool cannot be
+// exhausted by opening many connections. Advisory file locks are released
+// automatically when the script/connection ends.
+$lockFile = sys_get_temp_dir() . '/shoutbox_sse_' . $userId . '.lock';
+$lockHandle = @fopen($lockFile, 'c');
+if ($lockHandle !== false && ! flock($lockHandle, LOCK_EX | LOCK_NB)) {
+    http_response_code(429);
+    exit;
 }
+if ($lockHandle !== false) {
+    register_shutdown_function(function () use ($lockHandle) {
+        @flock($lockHandle, LOCK_UN);
+        @fclose($lockHandle);
+    });
+}
+
+function buildShoutboxQuery(string $type, int $lastId): object
+{
+    $query = \Nexus\Database\NexusDB::table('shoutbox')
+        ->orderBy('id')
+        ->where('id', '>', $lastId);
+    \App\Support\Shoutbox::applyTypeFilter($query, $type, $GLOBALS['CURUSER'] ?? null);
+    return $query;
+}
+
+$query = buildShoutboxQuery($type, $lastId);
 
 @ini_set('zlib.output_compression', 'Off');
 while (ob_get_level()) {
@@ -30,8 +51,8 @@ header('Connection: keep-alive');
 header('X-Accel-Buffering: no');
 
 set_time_limit(0);
+ignore_user_abort(true);
 
-$start = time();
 for ($i = 0; $i < $maxLoops; $i++) {
     if (connection_aborted()) {
         break;
@@ -43,20 +64,23 @@ for ($i = 0; $i < $maxLoops; $i++) {
         echo "id: " . $maxId . "\n";
         echo "event: refresh\n";
         echo "data: " . json_encode(['count' => $rows->count()]) . "\n\n";
-        flush();
+        flushOutput();
         $lastId = $maxId;
         // Re-bind the query for the next batch.
-        $query = \Nexus\Database\NexusDB::table('shoutbox')->orderBy('id')->where('id', '>', $lastId);
-        if ($type == 'helpbox' && $showhelpbox_main == 'yes') {
-            $query->where('type', 'hb');
-        } elseif ($type == 'shoutbox') {
-            $query->where('type', 'sb');
-        }
+        $query = buildShoutboxQuery($type, $lastId);
     }
 
     echo "event: ping\n";
     echo "data: {}\n\n";
-    flush();
+    flushOutput();
 
     sleep(2);
+}
+
+function flushOutput(): void
+{
+    if (ob_get_level()) {
+        ob_flush();
+    }
+    flush();
 }

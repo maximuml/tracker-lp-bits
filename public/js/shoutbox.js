@@ -131,12 +131,6 @@ function shoutboxToggleEmoji(form, field) {
     panel.style.display = (panel.style.display === 'none' || panel.style.display === '') ? 'block' : 'none';
 }
 
-function shoutboxHtmlDecode(input) {
-    var e = document.createElement('textarea');
-    e.innerHTML = input;
-    return e.value;
-}
-
 function shoutboxEdit(id) {
     var row = document.getElementById('shout-msg-' + id);
     if (!row) { return; }
@@ -145,7 +139,7 @@ function shoutboxEdit(id) {
     row.setAttribute('data-original', row.innerHTML);
 
     var raw = row.getAttribute('data-raw');
-    var text = (raw !== null && raw !== '') ? shoutboxHtmlDecode(raw) : '';
+    var text = (raw !== null && raw !== '') ? raw : '';
     if (text === '') {
         var tmp = document.createElement('div');
         tmp.innerHTML = row.innerHTML;

@@ -4,6 +4,9 @@ dbconn();
 require_once(get_langfile_path('shoutbox.php'));
 loggedinorreturn(true);
 
+\Nexus\Nexus::css('styles/shoutbox.css', 'header', true);
+\Nexus\Nexus::js('js/shoutbox.js', 'footer', true);
+
 stdhead($lang_shoutbox['text_history_title'] ?? 'Shoutbox history');
 begin_main_frame();
 
@@ -19,15 +22,30 @@ $filters = [
     'type' => trim((string) ($_GET['type'] ?? '')),
 ];
 
+$currentUserId = (int) ($CURUSER['id'] ?? 0);
+$isStaff = user_can('sbmanage');
+$canViewHb = $isStaff || ($showhelpbox_main == 'yes' && ($CURUSER['hidehb'] ?? '') != 'yes');
+
+// A regular user who cannot see helpbox messages in the main shoutbox should
+// not be able to enumerate them through the history page either.
+$effectiveType = $filters['type'];
+if (! $canViewHb) {
+    if ($effectiveType === 'hb') {
+        $effectiveType = 'sb';
+    } elseif ($effectiveType === '') {
+        $effectiveType = 'sb';
+    }
+}
+
 $query = \Nexus\Database\NexusDB::table('shoutbox')
     ->orderByDesc('date')
     ->offset($offset)
     ->limit($perPage);
 $countQuery = \Nexus\Database\NexusDB::table('shoutbox');
 
-if ($filters['type'] === 'sb' || $filters['type'] === 'hb') {
-    $query->where('type', $filters['type']);
-    $countQuery->where('type', $filters['type']);
+if ($effectiveType === 'sb' || $effectiveType === 'hb') {
+    $query->where('type', $effectiveType);
+    $countQuery->where('type', $effectiveType);
 }
 
 if ($filters['user'] !== '') {
@@ -66,16 +84,16 @@ if ($filters['search'] !== '') {
 
 $rows = $query->get()->map(fn ($r) => (array) $r)->all();
 $total = (int) $countQuery->count();
-$currentUserId = (int) ($CURUSER['id'] ?? 0);
-$isStaff = user_can('sbmanage');
 
 $formAction = $_SERVER['PHP_SELF'];
 $typeOptions = [
     '' => $lang_shoutbox['text_all_types'] ?? 'All',
     'sb' => $lang_shoutbox['text_type_shoutbox'] ?? 'Shoutbox',
-    'hb' => $lang_shoutbox['text_type_helpbox'] ?? 'Helpbox',
 ];
-$selectedType = $filters['type'];
+if ($canViewHb) {
+    $typeOptions['hb'] = $lang_shoutbox['text_type_helpbox'] ?? 'Helpbox';
+}
+$selectedType = $canViewHb ? $filters['type'] : ($filters['type'] === 'hb' ? 'sb' : $filters['type']);
 
 echo '<h2>' . ($lang_shoutbox['text_history_title'] ?? 'Shoutbox history') . '</h2>';
 echo '<form action="' . htmlspecialchars($formAction) . '" method="get">';
@@ -92,19 +110,35 @@ echo '</select></td>';
 echo '<td colspan="2"><input type="submit" class="btn" value="' . htmlspecialchars($lang_shoutbox['text_filter'] ?? 'Filter') . '" /></td></tr>';
 echo '</table></form>';
 
-echo '<link rel="stylesheet" href="styles/shoutbox.css" type="text/css">';
-
 echo '<table border="0" cellspacing="0" cellpadding="2" width="100%">';
+
+$shoutIds = array_map(fn ($r) => (int) $r['id'], $rows);
+$reactionData = \App\Support\Shoutbox::prefetchReactions($shoutIds, $currentUserId);
+$reactionCounts = $reactionData['counts'];
+$reactionMine = $reactionData['mine'];
+
 foreach ($rows as $arr) {
     $time = \App\Support\Shoutbox::formatTime((int) $arr['date'], true);
     $username = $arr['userid'] ? get_username((int) $arr['userid'], false, true, true, true, false, false, '', true) : ($lang_shoutbox['text_guest'] ?? '<b>Guest</b>');
+    $shoutId = (int) $arr['id'];
     $actions = \App\Support\Shoutbox::renderActions($arr, $currentUserId, $isStaff);
-    $reactions = \App\Support\Shoutbox::renderReactions((int) $arr['id'], $currentUserId);
+    $reactions = \App\Support\Shoutbox::renderReactions(
+        $shoutId,
+        $currentUserId,
+        $reactionCounts[$shoutId] ?? null,
+        $reactionMine[$shoutId] ?? null
+    );
     $mentionsMe = false;
     $message = \App\Support\Shoutbox::formatMessage($arr['text'], $currentUserId, $mentionsMe);
-    echo '<tr><td class="shoutrow">';
+    $editedNote = '';
+    if (!empty($arr['edited_at']) && (int)$arr['edited_at'] > 0) {
+        $editedNote = ' <span class="shout-edited-note">(' . htmlspecialchars((string) ($lang_shoutbox['text_edited'] ?? 'edited')) . ' ' . \App\Support\Shoutbox::formatTime((int)$arr['edited_at'], true) . ')</span>';
+    }
+    $messageHtml = '<span id="shout-msg-' . $shoutId . '" class="shout-msg" data-raw="' . htmlspecialchars((string) $arr['text'], ENT_QUOTES) . '">' . $message . '</span>' . $editedNote;
+
+    echo '<tr><td class="shoutrow' . ($mentionsMe ? ' shoutrow-mentions-me' : '') . '">';
     echo '<span class="date">[' . $time . ']</span> ' . $actions . ' ' . $username . ' ' . $reactions;
-    echo '<div>' . $message . '</div>';
+    echo '<div>' . $messageHtml . '</div>';
     echo '</td></tr>';
 }
 echo '</table>';

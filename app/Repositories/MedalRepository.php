@@ -158,31 +158,34 @@ class MedalRepository extends BaseRepository
         if ($validMedals->isEmpty()) {
             return true;
         }
-        $statusCaseWhens = $priorityCaseWhens = $idArr = [];
+        $rows = [];
         $wearCount = 0;
+        $nowStr = now()->toDateTimeString();
         foreach ($validMedals as $medal) {
-            $id = $medal->pivot->id;
-            $idArr[] = $id;
+            $id = (int) $medal->pivot->id;
             if (isset($userMedalData[$id]['status'])) {
                 $status = UserMedal::STATUS_WEARING;
                 $wearCount++;
             } else {
                 $status = UserMedal::STATUS_NOT_WEARING;
             }
-            $statusCaseWhens[] = sprintf('when `id` = %s then %s', $id, $status);
-            $priorityCaseWhens[] = sprintf('when `id` = %s then %s', $id, $userMedalData[$id]['priority'] ?? 0);
+            $rows[] = [
+                'id' => $id,
+                'status' => $status,
+                'priority' => (int) ($userMedalData[$id]['priority'] ?? 0),
+                'created_at' => $nowStr,
+                'updated_at' => $nowStr,
+            ];
         }
         $maxWearAllow = Setting::get('system.maximum_number_of_medals_can_be_worn');
         if ($maxWearAllow && $wearCount > $maxWearAllow) {
             throw new NexusException(nexus_trans('medal.max_allow_wearing', ['count' => $maxWearAllow]));
         }
-        $sql = sprintf(
-            'update user_medals set `status` = case %s end, `priority` = case %s end where id in (%s)',
-            implode(' ', $statusCaseWhens), implode(' ', $priorityCaseWhens), implode(',', $idArr)
-        );
-        do_log("sql: $sql");
         clear_user_cache($userId);
-        return NexusDB::statement($sql);
+        if (empty($rows)) {
+            return 0;
+        }
+        return NexusDB::table('user_medals')->upsert($rows, ['id'], ['status', 'priority', 'updated_at']);
     }
 
     /**

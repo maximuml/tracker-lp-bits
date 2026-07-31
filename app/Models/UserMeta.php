@@ -56,7 +56,7 @@ class UserMeta extends NexusModel
     /** @return  mixed */
     public function getMetaKeyTextAttribute()
     {
-        return nexus_trans('label.user_meta.meta_keys.' . $this->meta_key) ?? '';
+        return nexus_trans('label.user_meta.meta_keys.' . $this->meta_key);
     }
 
     public function isValid(): bool

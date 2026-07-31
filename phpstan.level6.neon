@@ -9,10 +9,12 @@ parameters:
         - app/Console
         - app/Http
         - app/Repositories
+        - include
 
     bootstrapFiles:
         - tests/phpstan/bootstrap.php
         - tests/phpstan/constants.stub.php
+        - tests/phpstan/globals.stub.php
         - bootstrap/app.php
 
     scanFiles:

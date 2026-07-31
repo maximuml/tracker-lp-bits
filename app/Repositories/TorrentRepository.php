@@ -1208,7 +1208,7 @@ HTML;
                 break;
             }
             $pipe = NexusDB::redis()->multi(\Redis::PIPELINE);
-            $piecesHashCaseWhen = $updateIdArr = [];
+            $piecesHashRows = [];
             $currentCount = 0;
             foreach ($list as $item) {
                 $total++;
@@ -1218,8 +1218,10 @@ HTML;
                         $torrentFile = $torrentDir . $item->id . ".torrent";
                         $loadResult = Bencode::load($torrentFile);
                         $piecesHash = sha1($loadResult['info']['pieces']);
-                        $piecesHashCaseWhen[] = sprintf("when %s then '%s'", $item->id, $piecesHash);
-                        $updateIdArr[] = $item->id;
+                        $piecesHashRows[] = [
+                            'id' => (int) $item->id,
+                            'pieces_hash' => $piecesHash,
+                        ];
                         do_log(sprintf("torrent: %s no pieces hash, load from torrent file: %s, pieces hash: %s", $item->id, $torrentFile, $piecesHash));
                     }
                     $pipe->hSet(self::PIECES_HASH_CACHE_KEY, $piecesHash, $this->buildPiecesHashCacheValue($item->id, $piecesHash));
@@ -1230,13 +1232,8 @@ HTML;
                 }
             }
             $pipe->exec();
-            if (!empty($piecesHashCaseWhen)) {
-                $sql = sprintf(
-                    "update torrents set pieces_hash = case id %s end where id in (%s)",
-                    implode(' ', $piecesHashCaseWhen),
-                    implode(", ", $updateIdArr)
-                );
-                NexusDB::statement($sql);
+            if (!empty($piecesHashRows)) {
+                NexusDB::table('torrents')->upsert($piecesHashRows, ['id'], ['pieces_hash']);
             }
             do_log("success load page: $page, size: $size, count: $currentCount");
             $page++;

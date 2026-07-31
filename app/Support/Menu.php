@@ -41,6 +41,7 @@ final class Menu
         $items = [];
         $items[] = self::item($selected, 'home', 'index.php', $langFunctions['text_home'] ?? 'Home');
         $items[] = self::item($selected, 'forums', 'forums.php', $langFunctions['text_forums'] ?? 'Forums');
+        $items[] = self::item($selected, 'latestcomments', 'latestcomments.php', $langFunctions['text_latest_comments'] ?? 'Latest Comments');
         $items[] = self::item($selected, 'torrents', 'torrents.php', $normalSectionName[$lang] ?? ($langFunctions['text_torrents'] ?? 'Torrents'), "rel='sub-menu'");
 
         if ($enableSpecial === 'yes' && user_can('view_special_torrent')) {
@@ -98,6 +99,7 @@ final class Menu
         return match (1) {
             preg_match('/index/i', $scriptName) => 'home',
             preg_match('/forums/i', $scriptName) => 'forums',
+            preg_match('/latestcomments/i', $scriptName) => 'latestcomments',
             preg_match('/torrents/i', $scriptName) => 'torrents',
             preg_match('/special/i', $scriptName) => 'special',
             preg_match('/offers/i', $scriptName), preg_match('/offcomment/i', $scriptName) => 'offers',

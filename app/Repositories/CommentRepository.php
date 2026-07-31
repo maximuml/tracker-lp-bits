@@ -28,6 +28,30 @@ class CommentRepository
     }
 
     /**
+     * @param  int  $limit
+     * @param  int  $offset
+     * @return  array<int, array<string, mixed>>
+     */
+    public static function getLatest(int $limit, int $offset): array
+    {
+        return NexusDB::table('comments as c')
+            ->leftJoin('users as u', 'c.user', '=', 'u.id')
+            ->leftJoin('torrents as t', 'c.torrent', '=', 't.id')
+            ->leftJoin('offers as o', 'c.offer', '=', 'o.id')
+            ->orderByDesc('c.id')
+            ->offset($offset)
+            ->limit($limit)
+            ->selectRaw('c.*, u.username, COALESCE(t.name, o.name) as parent_name, CASE WHEN c.torrent > 0 THEN "torrent" WHEN c.offer > 0 THEN "offer" ELSE NULL END as parent_type, COALESCE(c.torrent, c.offer) as parent_id')
+            ->get()
+            ->toArray();
+    }
+
+    public static function countLatest(): int
+    {
+        return (int) NexusDB::table('comments')->count();
+    }
+
+    /**
      * @param  int  $commentId
      * @return  ?array<int|string, mixed>
      */

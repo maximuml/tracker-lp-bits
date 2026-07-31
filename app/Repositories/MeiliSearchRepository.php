@@ -232,12 +232,14 @@ class MeiliSearchRepository extends BaseRepository
         }
         $page = 1;
         $size = 1000;
-        if (!$index instanceof Indexes) {
+        $rebuild = $index instanceof Indexes;
+        if (!$rebuild) {
             $index = $this->getIndex();
         }
         $total = 0;
+        $tasks = [];
         while (true) {
-            $query = Torrent::query()->select($this->getRequiredFields())->forPage($page, $size);
+            $query = Torrent::query()->select($this->getRequiredFields())->orderBy('id')->forPage($page, $size);
             if ($id) {
                 $query->whereIn("id", Arr::wrap($id));
             }
@@ -257,9 +259,15 @@ class MeiliSearchRepository extends BaseRepository
                 }
                 $data[] = $row;
             }
-            $index->updateDocuments($data);
+            $result = $index->updateDocuments($data);
+            if (is_array($result) && isset($result['taskUid'])) {
+                $tasks[] = $result['taskUid'];
+            }
             do_log(sprintf('import page: %s with id: %s, %s records success.', $page, $id, $count));
             $page++;
+        }
+        if ($rebuild && !empty($tasks)) {
+            $this->getClient()->waitForTasks($tasks, 60000, 100);
         }
         return $total;
     }

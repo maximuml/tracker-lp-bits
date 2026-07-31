@@ -14,8 +14,10 @@ if (get_user_class() < UC_SYSOP)
 
 $GLOBALS["byteUnits"] = array('Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB');
 
-// date() format for localisedDate()
-$datefmt = 'F d, Y \a\t h:i A';
+$day_of_week = array('Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat');
+$month = array('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec');
+// Supported strftime-like placeholders: %a %A %b %B %h %d %e %m %Y %y %H %I %l %k %M %S %s %p %P %u %w %W %j %z %Z %c %r %R %T %F %D %x %X %n %t %%
+$datefmt = '%B %d, %Y at %I:%M %p';
 $timespanfmt = '%s days, %s hours, %s minutes and %s seconds';
 ////////////////// FUNCTION LIST /////////////////////////
     /**
@@ -93,7 +95,7 @@ $timespanfmt = '%s days, %s hours, %s minutes and %s seconds';
      */
     function localisedDate($timestamp = -1, $format = '')
     {
-        global $datefmt;
+        global $datefmt, $month, $day_of_week;
 
         if ($format == '') {
             $format = $datefmt;
@@ -103,7 +105,60 @@ $timespanfmt = '%s days, %s hours, %s minutes and %s seconds';
             $timestamp = time();
         }
 
-        return date($format, $timestamp);
+        $dt = new DateTime();
+        $dt->setTimestamp($timestamp);
+
+        $handlers = [
+            'a' => fn() => $day_of_week[(int)$dt->format('w')],
+            'A' => fn() => $day_of_week[(int)$dt->format('w')],
+            'b' => fn() => $month[(int)$dt->format('n') - 1],
+            'B' => fn() => $month[(int)$dt->format('n') - 1],
+            'h' => fn() => $month[(int)$dt->format('n') - 1],
+            'd' => fn() => $dt->format('d'),
+            'e' => fn() => str_pad((int)$dt->format('j'), 2, ' ', STR_PAD_LEFT),
+            'm' => fn() => $dt->format('m'),
+            'Y' => fn() => $dt->format('Y'),
+            'y' => fn() => $dt->format('y'),
+            'H' => fn() => $dt->format('H'),
+            'I' => fn() => $dt->format('h'),
+            'l' => fn() => str_pad((int)$dt->format('g'), 2, ' ', STR_PAD_LEFT),
+            'k' => fn() => str_pad((int)$dt->format('G'), 2, ' ', STR_PAD_LEFT),
+            'M' => fn() => $dt->format('i'),
+            'S' => fn() => $dt->format('s'),
+            's' => fn() => (string) $timestamp,
+            'p' => fn() => $dt->format('A'),
+            'P' => fn() => $dt->format('a'),
+            'u' => fn() => $dt->format('N'),
+            'w' => fn() => $dt->format('w'),
+            'W' => fn() => $dt->format('W'),
+            'j' => fn() => str_pad((int)$dt->format('z') + 1, 3, '0', STR_PAD_LEFT),
+            'z' => fn() => $dt->format('O'),
+            'Z' => fn() => $dt->format('T'),
+            'c' => fn() => $dt->format('c'),
+            'r' => fn() => $dt->format('h:i:s A'),
+            'R' => fn() => $dt->format('H:i'),
+            'T' => fn() => $dt->format('H:i:s'),
+            'F' => fn() => $dt->format('Y-m-d'),
+            'D' => fn() => $dt->format('m/d/y'),
+            'x' => fn() => $dt->format('Y-m-d'),
+            'X' => fn() => $dt->format('H:i:s'),
+            'n' => fn() => "\n",
+            't' => fn() => "\t",
+            '%' => fn() => '%',
+        ];
+
+        $result = '';
+        $len = strlen($format);
+        for ($i = 0; $i < $len; $i++) {
+            if ($format[$i] === '%' && $i + 1 < $len && isset($handlers[$format[$i + 1]])) {
+                $result .= $handlers[$format[$i + 1]]();
+                $i++;
+            } else {
+                $result .= $format[$i];
+            }
+        }
+
+        return $result;
     } // end of the 'localisedDate()' function
     
 ////////////////////// END FUNCTION LIST /////////////////////////////////////

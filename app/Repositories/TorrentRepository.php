@@ -938,8 +938,8 @@ class TorrentRepository extends BaseRepository
     {
         $btn = $note = '';
         if ($btnText) {
-            $idAttr = $btnId ? ' id="'.$btnId.'"' : '';
-            $onClickAttr = $btnOnClick ? ' onclick="'.$btnOnClick.'"' : '';
+            $idAttr = $btnId ? ' id="' . htmlspecialchars($btnId, ENT_QUOTES, 'UTF-8') . '"' : '';
+            $onClickAttr = $btnOnClick ? ' onclick="' . htmlspecialchars($btnOnClick, ENT_QUOTES, 'UTF-8') . '"' : '';
             $btn = '<div><input type="button" class="nexus-action-btn" value="'.$btnText.'"'.$idAttr.$onClickAttr.'></div>';
         }
         if ($noteText) {

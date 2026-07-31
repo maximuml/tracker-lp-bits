@@ -15,6 +15,11 @@ if (!$name && !$url) {
 
 try {
     if ($url) {
+        $host = parse_url($url, PHP_URL_HOST) ?: '';
+        if (!in_array(strtolower($host), ['www.setlist.fm', 'setlist.fm'], true)) {
+            echo json_encode(['success' => false, 'error' => 'Only setlist.fm URLs are allowed.']);
+            exit;
+        }
         $result = \App\Support\SetlistLookup::fromUrl($url);
     } else {
         $result = \App\Support\SetlistLookup::fromTorrentName($name);

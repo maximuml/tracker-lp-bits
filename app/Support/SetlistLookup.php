@@ -53,6 +53,11 @@ class SetlistLookup
      */
     public static function fromUrl(string $url, array $meta = []): array
     {
+        $host = strtolower(parse_url($url, PHP_URL_HOST) ?: '');
+        if (!in_array($host, ['www.setlist.fm', 'setlist.fm'], true)) {
+            return ['success' => false, 'error' => 'Only setlist.fm URLs are supported.'];
+        }
+
         $markdown = self::fetchSetlistMarkdown($url);
 
         if (empty($markdown)) {
@@ -113,17 +118,22 @@ class SetlistLookup
         }
 
         $date = $meta['date']; // YYYY-MM-DD
-        [$year, $month, $day] = explode('-', $date);
+        $parts = explode('-', $date);
+        if (count($parts) !== 3) {
+            return ['success' => false, 'error' => 'No full date for Linkinpedia lookup.'];
+        }
+        [$year, $month, $day] = $parts;
         $pageBase = $year . $month . $day;
 
         // Some dates have multiple shows (a, b, c...)
-        $suffixes = ['', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm'];
+        $suffixes = ['', 'a', 'b', 'c', 'd'];
 
         foreach ($suffixes as $suffix) {
             $page = 'Live:' . $pageBase . $suffix;
             $wikitext = self::fetchLinkinpediaWikitext($page);
             if ($wikitext === null) {
-                continue;
+                // Linkinpedia show pages are sequential; a missing page means no more shows.
+                break;
             }
 
             $tourdate = self::parseTemplate($wikitext, 'Tourdate');
@@ -150,8 +160,7 @@ class SetlistLookup
     {
         $url = self::LINKINPEDIA_API . '?action=parse&page=' . urlencode($page) . '&prop=wikitext&format=json';
         $ctx = stream_context_create([
-            'http' => ['timeout' => 30, 'follow_location' => true],
-            'ssl' => ['verify_peer' => false, 'verify_peer_name' => false],
+            'http' => ['timeout' => 5, 'follow_location' => true],
         ]);
 
         $json = @file_get_contents($url, false, $ctx);
@@ -179,8 +188,8 @@ class SetlistLookup
      */
     private static function artistsMatch(string $a, string $b): bool
     {
-        $a = strtolower(preg_replace('/[^a-z0-9]/', '', $a));
-        $b = strtolower(preg_replace('/[^a-z0-9]/', '', $b));
+        $a = preg_replace('/[^a-z0-9]/', '', strtolower($a));
+        $b = preg_replace('/[^a-z0-9]/', '', strtolower($b));
 
         if ($a === $b) {
             return true;
@@ -436,13 +445,14 @@ class SetlistLookup
     private static function isRelevantSetlistUrl(string $url, array $meta): bool
     {
         $path = parse_url($url, PHP_URL_PATH) ?? '';
-        $artist = strtolower(preg_replace('/[^a-z0-9]+/', '-', $meta['artist']));
-        $artistSlug = str_replace('-', '', $meta['artist']); // e.g. "juliank"
+        $artist = preg_replace('/[^a-z0-9]+/', '-', strtolower($meta['artist']));
+        $artist = trim($artist, '-');
+        $artistSlug = str_replace('-', '', $artist); // e.g. "julienk"
 
         // Artist slug must appear in path
         if (str_contains($path, '/' . $artist . '/') || str_contains($path, $artist . '/')) {
             // good
-        } elseif (str_contains($path, str_replace('-', '', $artist) . '/')) {
+        } elseif (str_contains($path, $artistSlug . '/')) {
             // e.g. "julienk/"
         } elseif ($meta['artist'] === 'Fort Minor' && str_contains($path, '/fort-minor/')) {
             // ok
@@ -476,13 +486,9 @@ class SetlistLookup
 
         $ctx = stream_context_create([
             'http' => [
-                'timeout' => 30,
+                'timeout' => 10,
                 'header' => "User-Agent: Mozilla/5.0 (compatible; tracker-lp-bits)\r\n",
                 'follow_location' => true,
-            ],
-            'ssl' => [
-                'verify_peer' => false,
-                'verify_peer_name' => false,
             ],
         ]);
 

@@ -117,8 +117,11 @@ jobs:
       - name: Dump autoload
         run: composer dump-autoload --no-interaction --no-scripts
 
+      - name: Build Docker images
+        run: docker compose build
+
       - name: Start Docker Compose and wait for services
-        run: docker compose up -d --build --wait
+        run: docker compose up -d --wait
 
       - name: Install database
         run: docker compose exec -T php php artisan migrate:fresh --seed --force

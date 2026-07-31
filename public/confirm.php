@@ -12,6 +12,7 @@ dbconn();
 $user = \App\Models\User::query()->where('id', $id)->first(['passhash', 'secret', 'auth_key', 'editsecret', 'status']);
 if (!$user)
 	httperr();
+$user->makeVisible(['secret', 'auth_key']);
 $row = $user->toArray();
 
 if ($row["status"] != "pending") {

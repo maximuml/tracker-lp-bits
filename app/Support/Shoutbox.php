@@ -186,9 +186,6 @@ final class Shoutbox
             '/(?<![\w\-\[\]\(\)])@([\w\-\[\]\(\)]{2,40})(?![\w\-\[\]\(\)])/u',
             function (array $m) use ($currentUserId, &$mentionsMe, &$cache): string {
                 $nick = $m[1];
-                if ($nick === '' || strlen($nick) < 2) {
-                    return $m[0];
-                }
                 $key = strtolower($nick);
                 if (! array_key_exists($key, $cache)) {
                     $row = User::query()->whereRaw('LOWER(username) = LOWER(?)', [$nick])->first(['id', 'username']);

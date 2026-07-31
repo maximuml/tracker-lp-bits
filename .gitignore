@@ -39,3 +39,4 @@ attachments
 bitbucket
 /public/attachments
 /public/bitbucket
+/torrents/*.torrent

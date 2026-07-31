@@ -1,4 +1,17 @@
 <?php
+/**
+ * @var array<string, mixed> $BASIC
+ * @var array<string, mixed> $MAIN
+ * @var array<string, mixed> $ACCOUNT
+ * @var array<string, mixed> $ATTACHMENT
+ * @var array<string, mixed> $AUTHORITY
+ * @var array<string, mixed> $BONUS
+ * @var array<string, mixed> $CODE
+ * @var array<string, mixed> $SECURITY
+ * @var array<string, mixed> $SMTP
+ * @var array<string, mixed> $TORRENT
+ * @var array<string, mixed> $TWEAK
+ */
 # IMPORTANT: Do not edit below unless you know what you are doing!
 if(!defined('IN_TRACKER'))
 die('Hacking attempt!');

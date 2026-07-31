@@ -61,5 +61,17 @@ return [
     'user_trend' => [
         'page_title' => 'User trend',
     ],
-
+    'tracker' => [
+        'overview' => 'Tracker overview',
+        'top_torrents' => 'Top torrents by peers',
+        'top_users' => 'Top users by uploaded',
+        'total_torrents' => 'Total torrents',
+        'total_peers' => 'Total peers',
+        'seeders' => 'Seeders',
+        'leechers' => 'Leechers',
+        'total_users' => 'Total users',
+        'users_online' => 'Users online (15 min)',
+        'total_uploaded' => 'Total uploaded',
+        'total_downloaded' => 'Total downloaded',
+    ],
 ];

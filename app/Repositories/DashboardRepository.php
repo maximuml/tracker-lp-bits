@@ -306,5 +306,56 @@ class DashboardRepository extends BaseRepository
         return Torrent::query()->with(['user'])->orderBy('id', 'desc')->limit(5)->get(Torrent::$commentFields);
     }
 
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    public function statTracker(): array
+    {
+        $now = Carbon::now();
+
+        $result = [];
+        $result[] = [
+            'name' => 'total_torrents',
+            'text' => __('dashboard.tracker.total_torrents'),
+            'value' => number_format(Torrent::query()->count()),
+        ];
+        $result[] = [
+            'name' => 'total_peers',
+            'text' => __('dashboard.tracker.total_peers'),
+            'value' => number_format(Peer::query()->count()),
+        ];
+        $result[] = [
+            'name' => 'seeders',
+            'text' => __('dashboard.tracker.seeders'),
+            'value' => number_format(Peer::query()->where('seeder', 'yes')->count()),
+        ];
+        $result[] = [
+            'name' => 'leechers',
+            'text' => __('dashboard.tracker.leechers'),
+            'value' => number_format(Peer::query()->where('seeder', 'no')->count()),
+        ];
+        $result[] = [
+            'name' => 'total_users',
+            'text' => __('dashboard.tracker.total_users'),
+            'value' => number_format(User::query()->count()),
+        ];
+        $result[] = [
+            'name' => 'users_online',
+            'text' => __('dashboard.tracker.users_online'),
+            'value' => number_format(User::query()->where('last_access', '>', $now->subSeconds(900))->count()),
+        ];
+        $result[] = [
+            'name' => 'total_uploaded',
+            'text' => __('dashboard.tracker.total_uploaded'),
+            'value' => mksize((float) User::query()->sum('uploaded')),
+        ];
+        $result[] = [
+            'name' => 'total_downloaded',
+            'text' => __('dashboard.tracker.total_downloaded'),
+            'value' => mksize((float) User::query()->sum('downloaded')),
+        ];
+
+        return $result;
+    }
 
 }

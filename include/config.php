@@ -68,7 +68,7 @@ foreach ($settings as $name => $value) {
 }
 
 $SITENAME = $BASIC['SITENAME'];
-$BASEURL = $BASIC['BASEURL'] ?: ($_SERVER['HTTP_HOST'] ?? '');
+$BASEURL = $BASIC['BASEURL'] ?: ($_SERVER['HTTP_HOST'] ?? 'localhost');
 $announce_urls = array();
 $announce_urls[] = $BASIC['announce_url'] ?: ($BASEURL . DEFAULT_TRACKER_URI);
 

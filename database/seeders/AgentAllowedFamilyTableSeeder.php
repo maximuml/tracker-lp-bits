@@ -82,7 +82,7 @@ class AgentAllowedFamilyTableSeeder extends Seeder
                    'peer_id_match_num' => 3,
                    'peer_id_matchtype' => 'dec',
                    'peer_id_start' => '-BI3000-',
-                   'agent_pattern' => '/^BiglyBT\\ /3\\.([0-9])\\.([0-9])\\.([0-9])/',
+                   'agent_pattern' => '/^BiglyBT\/3\\.([0-9])\\.([0-9])\\.([0-9])/',
                    'agent_match_num' => 3,
                    'agent_matchtype' => 'dec',
                    'agent_start' => 'BiglyBT/3.0.0.0',

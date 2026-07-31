@@ -237,6 +237,9 @@ class Setting extends NexusModel
     public static function getBaseUrl(): string
     {
         $result = self::get('basic.BASEURL', $_SERVER['HTTP_HOST'] ?? '');
+        if (empty($result)) {
+            $result = $_SERVER['HTTP_HOST'] ?? 'localhost';
+        }
         return rtrim($result, '/');
     }
 

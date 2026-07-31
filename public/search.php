@@ -37,20 +37,26 @@ if ($search) {
     $search = str_replace(".", " ", $search);
     $searchArr = preg_split("/[\s]+/", $search, 10,PREG_SPLIT_NO_EMPTY);
     if ($shouldUseMeili) {
-        $searchRep = new \App\Repositories\MeiliSearchRepository();
-        $searchParams = $_GET;
-        if ($approvalStatus != null) {
-            $searchParams['approval_status'] = $approvalStatus;
+        try {
+            $searchRep = new \App\Repositories\MeiliSearchRepository();
+            $searchParams = $_GET;
+            if ($approvalStatus != null) {
+                $searchParams['approval_status'] = $approvalStatus;
+            }
+            if ($banned != null) {
+                $searchParams['banned'] = $banned;
+            }
+            //Include dead
+            $searchParams['incldead'] = 0;
+            $searchParams['mode'] = $modeArr;
+            $resultFromSearchRep = $searchRep->search($searchParams, $CURUSER['id']);
+            $count = $resultFromSearchRep['total'];
+        } catch (\Throwable $e) {
+            do_log('MeiliSearch search failed, falling back to SQL: ' . $e->getMessage(), 'error');
+            $shouldUseMeili = false;
         }
-        if ($banned != null) {
-            $searchParams['banned'] = $banned;
-        }
-        //Include dead
-        $searchParams['incldead'] = 0;
-        $searchParams['mode'] = $modeArr;
-        $resultFromSearchRep = $searchRep->search($searchParams, $CURUSER['id']);
-        $count = $resultFromSearchRep['total'];
-    } else {
+    }
+    if (!$shouldUseMeili) {
         $tableTorrent = "torrents";
         $tableUser = "users";
         $tableCategory = "categories";

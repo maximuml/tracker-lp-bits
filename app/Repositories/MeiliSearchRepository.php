@@ -239,11 +239,11 @@ class MeiliSearchRepository extends BaseRepository
         $total = 0;
         $tasks = [];
         while (true) {
-            $query = Torrent::query()->orderBy('id')->forPage($page, $size);
+            $query = Torrent::query()->select($this->getRequiredFields())->orderBy('id')->forPage($page, $size);
             if ($id) {
                 $query->whereIn("id", Arr::wrap($id));
             }
-            $torrents = $query->get($this->getRequiredFields());
+            $torrents = $query->get();
             $count = $torrents->count();
             $total += $count;
             if ($count == 0) {
@@ -341,6 +341,47 @@ class MeiliSearchRepository extends BaseRepository
             $results['list'] = $list;
         }
         return $results;
+    }
+
+    /**
+     * Fast autocomplete over MeiliSearch index for search-as-you-type.
+     *
+     * @param  string  $query
+     * @param  int  $limit
+     * @param  User  $user
+     * @return  array<int, array<string, mixed>>
+     */
+    public function autocomplete(string $query, int $limit, User $user): array
+    {
+        if (!$this->isEnabled()) {
+            return [];
+        }
+
+        $params = ['mode' => SearchBox::listAuthorizedSectionId()];
+        if (!user_can('seebanned')) {
+            $params['banned'] = 'no';
+        }
+        if (get_setting('torrent.approval_status_none_visible') == 'no' && !user_can('torrent-approval')) {
+            $params['approval_status'] = Torrent::APPROVAL_STATUS_ALLOW;
+        }
+        $filters = $this->getFilters($params, $user);
+
+        $index = $this->getIndex();
+        $result = $index->search($query, [
+            'limit' => $limit,
+            'attributesToRetrieve' => ['id', 'name'],
+            'filter' => $filters,
+        ]);
+
+        $torrents = [];
+        foreach ($result->getHits() as $hit) {
+            $torrents[] = [
+                'id' => (int) $hit['id'],
+                'name' => (string) $hit['name'],
+            ];
+        }
+
+        return $torrents;
     }
 
     /**

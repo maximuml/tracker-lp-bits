@@ -94,15 +94,12 @@ if ($action){
 				$gender = $_POST["gender"];
 				$country = $_POST["country"];
 				//	$tzoffset = $_POST["tzoffset"];
-				if ( $_POST["avatar"] == '' )
-				$avatar=$_POST["savatar"];
-				else
-				$avatar = $_POST["avatar"];
+				$avatar = ($_POST["avatar"] ?? '') == '' ? ($_POST["savatar"] ?? '') : ($_POST["avatar"] ?? '');
 
 				if(preg_match("/^https?:\/\/[^\s'\"<>]+\.(jpg|gif|png|jpeg)$/i", $avatar) && !preg_match("/\.php/i",$avatar) && !preg_match("/\.js/i",$avatar) && !preg_match("/\.cgi/i",$avatar)) {
 					$data['avatar'] = htmlspecialchars( trim( $avatar ) );
 				}
-				$info = htmlspecialchars(trim($_POST["info"]));
+				$info = htmlspecialchars(trim($_POST["info"] ?? ''));
 
 				$data['parked'] = $parked;
 				$data['acceptpms'] = $acceptpms;
@@ -119,7 +116,7 @@ if ($action){
 
 				//notifs
                 if (!empty($_POST['notifs'])) {
-                    preg_match_all('/\[(.*)\]/Ui', $CURUSER['notifs'], $notifsArr);
+                    preg_match_all('/\[(.*)\]/Ui', (string) $CURUSER['notifs'], $notifsArr);
                     $notifsArr = array_fill_keys($notifsArr[1], 1);
                     foreach (\App\Models\User::$notificationOptions as $option) {
                         if (isset($_POST['notifs'][$option])) {
@@ -185,7 +182,7 @@ if ($action){
   $text
   </select><input type=text name=avatar style=\"width: 400px\" value=\"" . htmlspecialchars($CURUSER["avatar"] ?? '') .
   "\"><br />\n".$lang_usercp['text_avatar_note'].($enablebitbucket_main == 'yes' ? $lang_usercp['text_bitbucket_note'] : ""),1);
-  tr($lang_usercp['row_info'], "<textarea name=\"info\" style=\"width:700px\" rows=\"10\" >" . htmlspecialchars($CURUSER["info"]) . "</textarea><br />".$lang_usercp['text_info_note'], 1);
+  tr($lang_usercp['row_info'], "<textarea name=\"info\" style=\"width:700px\" rows=\"10\" >" . htmlspecialchars($CURUSER["info"] ?? '') . "</textarea><br />".$lang_usercp['text_info_note'], 1);
   submit();
   print("</table></form>");
   stdfoot();

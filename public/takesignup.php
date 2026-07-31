@@ -127,7 +127,7 @@ if (\App\Models\User::query()->where('email', $email)->count() > 0)
 
 $secret = mksecret();
 //$wantpasshash = md5($secret . $wantpassword . $secret);
-$wantpasshash = hash('sha256', $secret . $wantpassword);
+$wantpasshash = hash('sha256', $secret . hash('sha256', $wantpassword));
 $editsecret = ($verification == 'admin' ? '' : $secret);
 $invite_count = (int) $invite_count;
 $passkey = md5($wantusername.date("Y-m-d H:i:s").$wantpasshash);
@@ -189,8 +189,13 @@ if (empty($msg)) {
 ]);
 
 //write_log("User account $id ($wantusername) was created");
-$row = \App\Models\User::query()->find($id, ['passhash', 'secret', 'editsecret', 'status']);
-$row = $row ? $row->makeVisible(['secret'])->toArray() : [];
+$user = \App\Models\User::query()->find($id, ['passhash', 'secret', 'editsecret', 'status']);
+if ($user) {
+    $user->makeVisible(['secret']);
+    $row = $user->toArray();
+} else {
+    $row = [];
+}
 $psecret = md5($row['secret'] ?? '');
 $ip = getip();
 $usern = htmlspecialchars($wantusername);

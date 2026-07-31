@@ -45,16 +45,18 @@ class CalculateUserSeedBonus implements ShouldQueue
         $this->requestId = $requestId;
     }
 
+    /** @var int */
     public $tries = 1;
 
+    /** @var int */
     public $timeout = 120;
 
     /**
      * 获取任务时，应该通过的中间件。
      *
-     * @return array
+     * @return array<int, \Illuminate\Queue\Middleware\WithoutOverlapping>
      */
-    public function middleware()
+    public function middleware(): array
     {
         return [new WithoutOverlapping($this->idRedisKey)];
     }
@@ -102,8 +104,8 @@ class CalculateUserSeedBonus implements ShouldQueue
         $logFile = getLogFile("seed-bonus-points");
         do_log("$logPrefix, [GET_UID_REAL], count: " . count($results) . ", logFile: $logFile");
         $fd = fopen($logFile, 'a');
-        $seedPointsUpdates = $seedPointsPerHourUpdates = $seedBonusPerHourUpdates = $seedBonusUpdates = [];
-        $seedingTorrentCountUpdates = $seedingTorrentSizeUpdates = [];
+        $rows = [];
+        $nowStr = now()->toDateTimeString();
         $logStr = "";
         $bonusLogInsert = [];
         foreach ($results as $userInfo)
@@ -117,15 +119,6 @@ class CalculateUserSeedBonus implements ShouldQueue
             $bonusLog .= ", all_bonus: $all_bonus";
             $this->appendBonusLogInsert($bonusLogInsert, $uid, BonusLogs::BUSINESS_TYPE_SEEDING_BASIC, $oldValue, $basicBonus);
             $oldValue += $basicBonus;
-            /**
-             * BUG: can't add this, case when not include info in where condition $idStr will be reset to 0
-             * // BUG: 不能添加这部分，case when 不包含某些 uid 的数据，而 $idStr 里面又有，会被重置为 0
-             * // 而且 seed_points_per_hour, seeding count/size  这些也是要实时更新为0的，不能添加这个跳过。
-             */
-//            if ($all_bonus == 0) {
-//                do_log("$bonusLog, all_bonus is zero, skip");
-//                continue;
-//            }
             if ($isDonor && $donortimes_bonus != 0) {
                 $donorAddition = $basicBonus * $donortimes_bonus;
                 $all_bonus += $donorAddition;
@@ -159,16 +152,16 @@ class CalculateUserSeedBonus implements ShouldQueue
             $dividend = 3600 / $autoclean_interval_one;
             $all_bonus = $all_bonus / $dividend;
             $seed_points = $seedBonusResult['seed_points'] / $dividend;
-//            $updatedAt = now()->toDateTimeString();
-//            $sql = "update users set seed_points = ifnull(seed_points, 0) + $seed_points, seed_points_per_hour = {$seedBonusResult['seed_points']}, seedbonus = seedbonus + $all_bonus, seed_points_updated_at = '$updatedAt' where id = $uid limit 1";
-//            do_log("$bonusLog, query: $sql");
-//            NexusDB::statement($sql);
-            $seedPointsUpdates[] = sprintf("when %d then ifnull(seed_points, 0) + %f", $uid, $seed_points);
-            $seedPointsPerHourUpdates[] = sprintf("when %d then %f", $uid, $seedBonusResult['seed_points']);
-            $seedBonusPerHourUpdates[] = sprintf("when %d then %f", $uid, $seedBonusResult['seed_bonus']);
-            $seedingTorrentCountUpdates[] = sprintf("when %d then %f", $uid, $seedBonusResult['torrent_peer_count']);
-            $seedingTorrentSizeUpdates[] = sprintf("when %d then %f", $uid, $seedBonusResult['size']);
-            $seedBonusUpdates[] = sprintf("when %d then seedbonus + %f", $uid, $all_bonus);
+            $rows[] = [
+                'id' => $uid,
+                'seed_points' => (float) ($userInfo['seed_points'] ?? 0) + (float) $seed_points,
+                'seed_points_per_hour' => (float) $seedBonusResult['seed_points'],
+                'seed_bonus_per_hour' => (float) $seedBonusResult['seed_bonus'],
+                'seedbonus' => (float) ($userInfo['seedbonus'] ?? 0) + (float) $all_bonus,
+                'seeding_torrent_count' => (int) $seedBonusResult['torrent_peer_count'],
+                'seeding_torrent_size' => (float) $seedBonusResult['size'],
+                'seed_points_updated_at' => $nowStr,
+            ];
             if ($fd) {
                 $log = sprintf(
                     '%s|%s|%s|%s|%s|%s|%s|%s',
@@ -176,18 +169,12 @@ class CalculateUserSeedBonus implements ShouldQueue
                     $userInfo['seed_points'], number_format($seed_points, 1, '.', ''),  number_format($userInfo['seed_points'] + $seed_points, 1, '.', ''),
                     $userInfo['seedbonus'], number_format($all_bonus, 1, '.', ''),  number_format($userInfo['seedbonus'] + $all_bonus, 1, '.', '')
                 );
-//                fwrite($fd, $log . PHP_EOL);
                 $logStr .= $log . PHP_EOL;
             } else {
                 do_log("logFile: $logFile is not writeable!", 'error');
             }
         }
-        $nowStr = now()->toDateTimeString();
-        $sql = sprintf(
-            "update users set seed_points = case id %s end, seed_points_per_hour = case id %s end, seed_bonus_per_hour = case id %s end, seedbonus = case id %s end, seeding_torrent_count = case id %s end, seeding_torrent_size = case id %s end, seed_points_updated_at = '%s' where id in (%s)",
-            implode(" ", $seedPointsUpdates), implode(" ", $seedPointsPerHourUpdates), implode(" ", $seedBonusPerHourUpdates), implode(" ", $seedBonusUpdates), implode(" ", $seedingTorrentCountUpdates), implode(" ", $seedingTorrentSizeUpdates), $nowStr, $idStr
-        );
-        $result = NexusDB::statement($sql);
+        $result = NexusDB::table('users')->upsert($rows, ['id'], ['seed_points', 'seed_points_per_hour', 'seed_bonus_per_hour', 'seedbonus', 'seeding_torrent_count', 'seeding_torrent_size', 'seed_points_updated_at']);
         if ($delIdRedisKey) {
             NexusDB::cache_del($this->idRedisKey);
         }
@@ -201,9 +188,9 @@ class CalculateUserSeedBonus implements ShouldQueue
         $costTime = time() - $beginTimestamp;
         do_log(sprintf(
             "$logPrefix, [DONE], update user count: %s, result: %s, cost time: %s seconds",
-            count($seedPointsUpdates), var_export($result, true), $costTime
+            count($rows), var_export($result, true), $costTime
         ));
-        do_log("$logPrefix, sql: $sql", "debug");
+        do_log("$logPrefix, upsert users seed bonus done", "debug");
     }
 
     /**
@@ -217,6 +204,11 @@ class CalculateUserSeedBonus implements ShouldQueue
         do_log("failed: " . $exception->getMessage() . $exception->getTraceAsString(), 'error');
     }
 
+    /**
+     * @param  array<int, array<string, mixed>>  $bonusLogInsert
+     * @param  int|float  $oldValue
+     * @param  int|float  $delta
+     */
     private function appendBonusLogInsert(array &$bonusLogInsert, int $uid, int $businessType, $oldValue, $delta): void
     {
         if ($delta > 0) {
@@ -232,6 +224,9 @@ class CalculateUserSeedBonus implements ShouldQueue
         }
     }
 
+    /**
+     * @param  array<int, array<string, mixed>>  $bonusLogInsert
+     */
     private function insertIntoClickHouseBulk(array $bonusLogInsert): void
     {
         if (!Setting::getIsRecordSeedingBonusLog()) {

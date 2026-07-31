@@ -16,6 +16,7 @@ $lang_index = array
 	'text_two_times_up' => "2X",
 	'text_free_two_times_up' => "2X Free",
 	'text_shoutbox' => "Shoutbox",
+	'text_shoutbox_history' => "History",
 	'text_message' => "Message: ",
 	'sumbit_shout' => "shout",
 	'submit_clear' => "clear",

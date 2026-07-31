@@ -94,6 +94,7 @@ if ($showshoutbox_main == "yes") {
     <h2>
         <?php echo $lang_index['text_shoutbox'] ?> - <font class="small"><?php echo $lang_index['text_auto_refresh_after']?></font>
         <font class='striking' id="countdown"></font><font class="small"><?php echo $lang_index['text_seconds']?></font>
+        - <a href="shoutbox_history.php" class="small"><?php echo $lang_index['text_shoutbox_history'] ?? 'History'; ?></a>
         <?php
         if (user_can('sbmanage')) {
             echo ' - <font class="small" id="clear-shout-box">[<a class="altlink" href="javascript:;"><b>'.$lang_index['clear_shout_box'].'</b></a>]</font>';

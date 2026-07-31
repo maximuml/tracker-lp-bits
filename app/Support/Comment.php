@@ -115,8 +115,6 @@ final class Comment
         ];
         $s = (string) preg_replace($originalBbTagArray, $replaceXhtmlTagArray, $s);
 
-        $imageresizer = $imageresizer ? 1 : 0;
-
         if ($enableimage) {
             $imgReplaceCount = 0;
             $s = (string) preg_replace_callback(
@@ -211,7 +209,7 @@ final class Comment
         $s = (string) preg_replace_callback(
             '/\[em([1-9][0-9]*)\]/i',
             static function (array $m): string {
-                $smile = \get_smile($m[1]);
+                $smile = \get_smile((int) $m[1]);
                 return $smile ? '<img src="'.$smile.'" alt="[em'.$m[1].']" />' : '[em'.$m[1].']';
             },
             $s,
@@ -237,7 +235,7 @@ final class Comment
             $s = (string) preg_replace_callback(
                 '/\[attach\]([0-9a-zA-z][0-9a-zA-z]*)\[\/attach\]/is',
                 function (array $m) use ($enableimage, $imageresizer): string {
-                    return \print_attachment($m[1], $enableimage ? 1 : 0, $imageresizer ? 1 : 0);
+                    return \print_attachment($m[1], $enableimage, $imageresizer);
                 },
                 $s,
                 $limit,

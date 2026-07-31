@@ -1,4 +1,8 @@
 <?php
+/**
+ * @param mixed $obj
+ * @return mixed
+ */
 function benc($obj) {
 	if (!is_array($obj) || !isset($obj["type"]) || !isset($obj["value"]))
 		return;
@@ -16,12 +20,24 @@ function benc($obj) {
 			return;
 	}
 }
+/**
+ * @param mixed $s
+ * @return mixed
+ */
 function benc_str($s) {
 	return strlen($s) . ":$s";
 }
+/**
+ * @param mixed $i
+ * @return mixed
+ */
 function benc_int($i) {
 	return "i" . $i . "e";
 }
+/**
+ * @param mixed $a
+ * @return mixed
+ */
 function benc_list($a) {
 	$s = "l";
 	foreach ($a as $e) {
@@ -30,6 +46,10 @@ function benc_list($a) {
 	$s .= "e";
 	return $s;
 }
+/**
+ * @param mixed $d
+ * @return mixed
+ */
 function benc_dict($d) {
 	$s = "d";
 	$keys = array_keys($d);
@@ -42,6 +62,11 @@ function benc_dict($d) {
 	$s .= "e";
 	return $s;
 }
+/**
+ * @param mixed $f
+ * @param mixed $ms
+ * @return mixed
+ */
 function bdec_file($f, $ms) {
 	$fp = fopen($f, "rb");
 	if (!$fp)
@@ -50,10 +75,14 @@ function bdec_file($f, $ms) {
 	fclose($fp);
 	return bdec($e);
 }
+/**
+ * @param mixed $s
+ * @return mixed
+ */
 function bdec($s) {
 	if (preg_match('/^(\d+):/', $s, $m)) {
-		$l = $m[1];
-		$pl = strlen($l) + 1;
+		$l = (int) $m[1];
+		$pl = strlen($m[1]) + 1;
 		$v = substr($s, $pl, $l);
 		$ss = substr($s, 0, $pl + $l);
 		if (strlen($v) != $l)
@@ -78,6 +107,10 @@ function bdec($s) {
 			return;
 	}
 }
+/**
+ * @param mixed $s
+ * @return mixed
+ */
 function bdec_list($s) {
 	if ($s[0] != "l")
 		return;
@@ -100,6 +133,10 @@ function bdec_list($s) {
 	$ss .= "e";
 	return array('type' => "list", 'value' => $v, 'strlen' => strlen($ss), 'string' => $ss);
 }
+/**
+ * @param mixed $s
+ * @return mixed
+ */
 function bdec_dict($s) {
 	if ($s[0] != "d")
 		return;

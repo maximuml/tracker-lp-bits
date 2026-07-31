@@ -36,7 +36,7 @@ final class Bootstrap
      *
      * Mirrors `autoclean($printProgress)`.
      */
-    public static function autoClean(bool $printProgress = false): bool
+    public static function autoClean(bool $printProgress = false): string|bool
     {
         global $autoclean_interval_one, $rootpath;
 

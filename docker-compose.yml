@@ -6,12 +6,22 @@ services:
     container_name: nexusphp-php
     environment:
       SERVICE_NAME: php
+      MEILISEARCH_HOST: ${MEILISEARCH_HOST:-meilisearch}
+      MEILISEARCH_MASTER_KEY: ${MEILISEARCH_MASTER_KEY:-nexusphp_default_key}
     volumes:
       - .:/var/www/html
       - ${NP_BACKUP_EXPORT_PATH:-/tmp/nexusphp_backup}:${NP_BACKUP_EXPORT_PATH:-/tmp/nexusphp_backup}
     depends_on:
-      - mysql
-      - redis
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "test -S /run/php-fpm.sock || test -f /run/php-fpm.pid || nc -z 127.0.0.1 9000"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 30s
     logging:
       driver: "json-file"
       options:
@@ -19,18 +29,24 @@ services:
         max-file: "3"
     networks:
       - appnet
+    restart: unless-stopped
 
   queue:
     image: nexusphp_php
     container_name: nexusphp-queue
     environment:
       SERVICE_NAME: queue
+      MEILISEARCH_HOST: ${MEILISEARCH_HOST:-meilisearch}
+      MEILISEARCH_MASTER_KEY: ${MEILISEARCH_MASTER_KEY:-nexusphp_default_key}
     volumes:
       - .:/var/www/html
     depends_on:
-      - php
-      - redis
-      - mysql
+      php:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
     logging:
       driver: "json-file"
       options:
@@ -45,13 +61,18 @@ services:
     container_name: nexusphp-scheduler
     environment:
       SERVICE_NAME: scheduler
+      MEILISEARCH_HOST: ${MEILISEARCH_HOST:-meilisearch}
+      MEILISEARCH_MASTER_KEY: ${MEILISEARCH_MASTER_KEY:-nexusphp_default_key}
     volumes:
       - .:/var/www/html
       - ${NP_BACKUP_EXPORT_PATH:-/tmp/nexusphp_backup}:${NP_BACKUP_EXPORT_PATH:-/tmp/nexusphp_backup}
     depends_on:
-      - php
-      - redis
-      - mysql
+      php:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
     logging:
       driver: "json-file"
       options:
@@ -66,12 +87,17 @@ services:
     container_name: nexusphp-cleanup
     environment:
       SERVICE_NAME: cleanup
+      MEILISEARCH_HOST: ${MEILISEARCH_HOST:-meilisearch}
+      MEILISEARCH_MASTER_KEY: ${MEILISEARCH_MASTER_KEY:-nexusphp_default_key}
     volumes:
       - .:/var/www/html
     depends_on:
-      - php
-      - redis
-      - mysql
+      php:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
     logging:
       driver: "json-file"
       options:
@@ -96,11 +122,19 @@ services:
       - ./.docker/openresty/lua:/usr/local/openresty/lua
       - .:/var/www/html
     depends_on:
-      - php
-      - phpmyadmin
+      php:
+        condition: service_healthy
+      phpmyadmin:
+        condition: service_started
     command: ["/bin/sh", "/usr/local/bin/entrypoint.sh"]
     ports:
       - "${NP_PORT:-80}:${NP_PORT:-80}"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sfL http://127.0.0.1:${NP_PORT:-80}/login.php -o /dev/null"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
     logging:
       driver: "json-file"
       options:
@@ -115,6 +149,12 @@ services:
     command: redis-server
     volumes:
       - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
     logging:
       driver: "json-file"
       options:
@@ -133,6 +173,12 @@ services:
       MYSQL_PASSWORD: ${DB_PASSWORD:-nexusphp}
     volumes:
       - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-u", "root", "-p${DB_PASSWORD:-root}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
     logging:
       driver: "json-file"
       options:
@@ -147,7 +193,27 @@ services:
     environment:
       PMA_HOST: mysql
     depends_on:
-      - mysql
+      mysql:
+        condition: service_healthy
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "1024m"
+        max-file: "3"
+    networks:
+      - appnet
+
+  meilisearch:
+    image: getmeili/meilisearch:v1.16
+    container_name: nexusphp-meilisearch
+    environment:
+      MEILI_NO_ANALYTICS: "true"
+      MEILI_ENV: production
+      MEILI_MASTER_KEY: ${MEILISEARCH_MASTER_KEY:-nexusphp_default_key}
+    volumes:
+      - meilisearch-data:/meili_data
+    ports:
+      - "127.0.0.1:${MEILISEARCH_PORT:-7700}:7700"
     logging:
       driver: "json-file"
       options:
@@ -159,6 +225,7 @@ services:
 volumes:
   mysql-data:
   redis-data:
+  meilisearch-data:
 
 networks:
   appnet:

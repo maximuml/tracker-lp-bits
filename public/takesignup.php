@@ -6,6 +6,7 @@ cur_user_check ();
 //require_once(get_langfile_path("",true));
 require_once(get_langfile_path("", false, get_langfolder_cookie()));
 
+
 $isPreRegisterEmailAndUsername = get_setting("system.is_invite_pre_email_and_username") == "yes";
 
 function bark($msg) {
@@ -126,7 +127,7 @@ if (\App\Models\User::query()->where('email', $email)->count() > 0)
 
 $secret = mksecret();
 //$wantpasshash = md5($secret . $wantpassword . $secret);
-$wantpasshash = hash('sha256', $secret . $wantpassword);
+$wantpasshash = hash('sha256', $secret . hash('sha256', $wantpassword));
 $editsecret = ($verification == 'admin' ? '' : $secret);
 $invite_count = (int) $invite_count;
 $passkey = md5($wantusername.date("Y-m-d H:i:s").$wantpasshash);
@@ -188,16 +189,21 @@ if (empty($msg)) {
 ]);
 
 //write_log("User account $id ($wantusername) was created");
-$row = \App\Models\User::query()->find($id, ['passhash', 'secret', 'editsecret', 'status']);
-$row = $row ? $row->toArray() : [];
+$user = \App\Models\User::query()->find($id, ['passhash', 'secret', 'editsecret', 'status']);
+if ($user) {
+    $user->makeVisible(['secret']);
+    $row = $user->toArray();
+} else {
+    $row = [];
+}
 $psecret = md5($row['secret'] ?? '');
 $ip = getip();
 $usern = htmlspecialchars($wantusername);
 $title = $SITENAME.$lang_takesignup['mail_title'];
 $confirmUrl = getSchemeAndHttpHost() . "/confirm.php?id=$id&secret=$psecret";
 $confirmResendUrl = getSchemeAndHttpHost() . "/confirm_resend.php";
-$mailTwo = sprintf($lang_takeinvite['mail_two'], $siteName);
-$mailFive = sprintf($lang_takeinvite['mail_five'], $siteName, $siteName, $REPORTMAIL, $siteName);
+$mailTwo = sprintf($lang_takesignup['mail_two'], $siteName);
+$mailFive = sprintf($lang_takesignup['mail_five'], $siteName, $siteName, $REPORTMAIL, $siteName);
 $body = <<<EOD
 {$lang_takesignup['mail_one']}$usern{$mailTwo}($email){$lang_takesignup['mail_three']}$ip{$lang_takesignup['mail_four']}
 <b><a href="javascript:void(null)" onclick="window.open($confirmUrl)">

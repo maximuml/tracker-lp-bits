@@ -256,6 +256,7 @@ return [
         'ttl' => 'TTL',
         'seeders' => 'Seeders',
         'leechers' => 'Leechers',
+        'snatched' => 'Snatched',
         'times_completed' => 'Complete',
         'category' => 'Category',
         'approval_status' => 'Approval status',

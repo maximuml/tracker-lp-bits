@@ -68,8 +68,12 @@ final class TorrentOps
             \fire_event('torrent_deleted', $torrentInfo->get($_id));
         }
 
-        $meiliSearchRep = new MeiliSearchRepository();
-        $meiliSearchRep->deleteDocuments($idArr);
+        try {
+            $meiliSearchRep = new MeiliSearchRepository();
+            $meiliSearchRep->deleteDocuments($idArr);
+        } catch (\Throwable $e) {
+            \do_log('MeiliSearch delete on torrent delete failed: ' . $e->getMessage(), 'error');
+        }
     }
 
     /**

@@ -45,7 +45,7 @@ class ApiQueryBuilder
 
     public function __construct(protected Request $request, protected Builder $query, protected string $resourceName) {}
 
-    public static function for(string $resourceName, Builder $query, Request $request = null): self
+    public static function for(string $resourceName, Builder $query, ?Request $request = null): self
     {
         return new self($request ?? request(), $query, $resourceName);
     }
@@ -207,12 +207,12 @@ class ApiQueryBuilder
         }
     }
 
-    public function hasIncludeField(string $field = null): bool
+    public function hasIncludeField(?string $field = null): bool
     {
         return $this->hasBoth($this->allowedIncludeFields,  $this->requestIncludeFields, $field);
     }
 
-    public function hasInclude(string $name = null): bool
+    public function hasInclude(?string $name = null): bool
     {
         return $this->hasBoth($this->allowedIncludes,  $this->requestIncludes, $name);
     }

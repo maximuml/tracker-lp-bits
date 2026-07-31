@@ -59,11 +59,10 @@ TARGET_DIR="${ROOT_PATH}/public"
 ENV_FILE="${ROOT_PATH}/.env"
 VENDOR_AUTOLOAD_FILE="${ROOT_PATH}/vendor/autoload.php"
 
-chown -R www-data:www-data $ROOT_PATH
-
-# Ensure attachment storage directory exists (matches attachment.savedirectory)
-mkdir -p ${ROOT_PATH}/attachments
-chown -R www-data:www-data ${ROOT_PATH}/attachments
+# Ensure writable directories exist and are writable by PHP-FPM (www-data)
+mkdir -p ${ROOT_PATH}/attachments ${ROOT_PATH}/torrents ${ROOT_PATH}/storage/framework/views ${ROOT_PATH}/storage/logs ${ROOT_PATH}/storage/app ${ROOT_PATH}/bootstrap/cache
+chown -R www-data:www-data ${ROOT_PATH}/attachments ${ROOT_PATH}/torrents ${ROOT_PATH}/storage ${ROOT_PATH}/bootstrap/cache
+chmod -R 775 ${ROOT_PATH}/storage ${ROOT_PATH}/bootstrap/cache ${ROOT_PATH}/attachments ${ROOT_PATH}/torrents
 
 if [ "$SERVICE_NAME" = "php" ]; then
     if [ ! -f "$ENV_FILE" ] || [ ! -f "$VENDOR_AUTOLOAD_FILE" ]; then

@@ -70,6 +70,7 @@
  * @property string $signatures
  * @property string $signature
  * @property int $lang
+ * @property string $locale
  * @property int $cheat
  * @property int $invites
  * @property int $invited_by

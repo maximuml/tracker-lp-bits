@@ -97,6 +97,78 @@ class AjaxInterface{
         return true;
     }
 
+    public static function shoutboxEdit($params)
+    {
+        global $CURUSER;
+        $id = (int) ($params['id'] ?? 0);
+        $text = trim((string) ($params['text'] ?? ''));
+        if ($id <= 0 || $text === '') {
+            throw new \InvalidArgumentException('Invalid input');
+        }
+        $msg = \Nexus\Database\NexusDB::table('shoutbox')->where('id', $id)->first();
+        if (! $msg) {
+            throw new \RuntimeException('Message not found');
+        }
+        $msgUserId = (int) ($msg->userid ?? 0);
+        $msgDate = (int) ($msg->date ?? 0);
+        if ($msgUserId !== (int) $CURUSER['id'] && ! user_can('sbmanage')) {
+            throw new \RuntimeException('No permission');
+        }
+        if ((time() - $msgDate) > \App\Support\Shoutbox::EDIT_WINDOW && ! user_can('sbmanage')) {
+            throw new \RuntimeException('Edit window expired');
+        }
+        \Nexus\Database\NexusDB::table('shoutbox')->where('id', $id)->update([
+            'text' => $text,
+            'edited_by' => $CURUSER['id'],
+            'edited_at' => time(),
+        ]);
+        return true;
+    }
+
+    public static function shoutboxDelete($params)
+    {
+        global $CURUSER;
+        $id = (int) ($params['id'] ?? 0);
+        $msg = \Nexus\Database\NexusDB::table('shoutbox')->where('id', $id)->first();
+        if (! $msg) {
+            return true;
+        }
+        $msgUserId = (int) ($msg->userid ?? 0);
+        $msgDate = (int) ($msg->date ?? 0);
+        if ($msgUserId !== (int) $CURUSER['id'] && ! user_can('sbmanage')) {
+            throw new \RuntimeException('No permission');
+        }
+        if ((time() - $msgDate) > \App\Support\Shoutbox::EDIT_WINDOW && ! user_can('sbmanage')) {
+            throw new \RuntimeException('Delete window expired');
+        }
+        \Nexus\Database\NexusDB::table('shoutbox')->where('id', $id)->delete();
+        \Nexus\Database\NexusDB::table('shoutbox_reactions')->where('shoutbox_id', $id)->delete();
+        return true;
+    }
+
+    public static function shoutboxReact($params)
+    {
+        global $CURUSER;
+        $id = (int) ($params['id'] ?? 0);
+        $reaction = (string) ($params['reaction'] ?? '');
+        if ($id <= 0 || ! in_array($reaction, \App\Support\Shoutbox::REACTIONS, true)) {
+            throw new \InvalidArgumentException('Invalid reaction');
+        }
+        $table = \Nexus\Database\NexusDB::table('shoutbox_reactions');
+        $existing = $table->where('shoutbox_id', $id)->where('user_id', $CURUSER['id'])->where('reaction', $reaction)->first();
+        if ($existing) {
+            $table->where('id', $existing->id)->delete();
+            return 'removed';
+        }
+        $table->insert([
+            'shoutbox_id' => $id,
+            'user_id' => $CURUSER['id'],
+            'reaction' => $reaction,
+            'created_at' => date('Y-m-d H:i:s'),
+        ]);
+        return 'added';
+    }
+
     public static function buyMedal($params)
     {
         global $CURUSER;

@@ -23,96 +23,17 @@ if (!$isAjax):
 <link rel="stylesheet" href="<?php echo get_css_uri()."theme.css"?>" type="text/css">
 <link rel="stylesheet" href="styles/curtain_imageresizer.css" type="text/css">
 <link rel="stylesheet" href="styles/nexus.css" type="text/css">
-<script src="js/curtain_imageresizer.js" type="text/javascript"></script><style type="text/css">
-body {overflow-y:scroll; overflow-x: hidden}
-td.shoutrow .shout-avatar-link {
-	display: inline-block;
-	line-height: 0;
-	vertical-align: middle;
-}
-td.shoutrow .shout-avatar,
-td.shoutrow .shout-avatar-spacer {
-	width: 22px;
-	height: 22px;
-	display: inline-block;
-	vertical-align: middle;
-	margin-right: 4px;
-}
-td.shoutrow .shout-avatar {
-	border-radius: 50%;
-	object-fit: cover;
-	background: rgba(127,127,127,.15);
-}
-td.shoutrow.shout-row-grouped {
-	opacity: .92;
-}
-td.shoutrow.shout-row-grouped .shout-avatar-spacer {
-	background: transparent;
-}
-td.shoutrow .shout-mention {
-	background: rgba(64,128,255,.12);
-	border-radius: 3px;
-	padding: 0 3px;
-	text-decoration: none;
-	font-weight: bold;
-}
-td.shoutrow .shout-mention.shout-mention-me {
-	background: rgba(255,196,0,.30);
-	color: inherit;
-	box-shadow: 0 0 0 1px rgba(255,196,0,.55) inset;
-}
-td.shoutrow.shoutrow-mentions-me {
-	background: rgba(255,196,0,.08);
-	border-left: 3px solid rgba(255,196,0,.65);
-	padding-left: 5px;
-}
-td.shoutrow .shout-nick-reply {
-	cursor: pointer;
-}
-td.shoutrow .shout-nick-reply:hover {
-	text-decoration: underline;
-}
-td.shoutrow .shout-torrent {
-	background: rgba(0,168,107,.14);
-	border-radius: 3px;
-	padding: 0 3px;
-	text-decoration: none;
-	font-weight: bold;
-}
-td.shoutrow .shout-msg.shout-msg-clamped {
-	display: inline-block;
-	max-width: 100%;
-	max-height: 3.6em;
-	overflow: hidden;
-	vertical-align: top;
-}
-td.shoutrow .shout-msg-toggle {
-	font-size: 11px;
-	margin-left: 4px;
-	opacity: .65;
-	cursor: pointer;
-	white-space: nowrap;
-}
-td.shoutrow .shout-msg-toggle:hover {
-	opacity: 1;
-}
-td.shoutrow .shout-class-badge {
-	display: inline-block;
-	font-size: 9px;
-	line-height: 12px;
-	font-weight: bold;
-	letter-spacing: 0.5px;
-	padding: 1px 4px;
-	border-radius: 3px;
-	margin-right: 3px;
-	text-transform: uppercase;
-	vertical-align: middle;
-	color: #fff !important;
-}
-</style>
+<script src="js/curtain_imageresizer.js" type="text/javascript"></script><script src="js/shoutbox.js" type="text/javascript"></script><link rel="stylesheet" href="styles/shoutbox.css" type="text/css">
 <?php
 print(get_style_addicode());
-$startcountdown = "startcountdown(".$refresh.");schedulePoll();";
+$lastIdQuery = \Nexus\Database\NexusDB::table('shoutbox');
+if ($where == "helpbox" && $showhelpbox_main == 'yes') {
+    $lastIdQuery->where('type', 'hb');
+} elseif ($where == "shoutbox" && isset($CURUSER) && ($CURUSER['hidehb'] == 'yes' || $showhelpbox_main != 'yes')) {
+    $lastIdQuery->where('type', 'sb');
+}
+$lastId = (int)$lastIdQuery->max('id');
+$startcountdown = "startcountdown(".$refresh.");shoutboxInitSSE(" . json_encode($where, JSON_UNESCAPED_UNICODE) . "," . $lastId . ");shoutAttachToggleHandler();";
 ?>
 <script type="text/javascript">
 //<![CDATA[
@@ -224,7 +145,7 @@ function shoutAttachToggleHandler() {
 //]]>
 </script>
 </head>
-<body class='inframe' <?php if (isset($_GET["type"]) && $_GET["type"] != "helpbox"){?> onload="<?php echo $startcountdown?>shoutAttachToggleHandler();" <?php } else {?> onload="hbquota();shoutAttachToggleHandler();schedulePoll();" <?php } ?>>
+<body class='inframe' <?php if (isset($_GET["type"]) && $_GET["type"] != "helpbox"){?> onload="<?php echo $startcountdown?>" <?php } else {?> onload="hbquota();shoutAttachToggleHandler();shoutboxInitSSE('helpbox', <?php echo $lastId; ?>);" <?php } ?>>
 <?php
 endif; // if (!$isAjax)
 ?>
@@ -318,95 +239,6 @@ function shoutbox_class_badge($class)
 	return '<span class="shout-class-badge" style="background:' . $color . '" title="' . htmlspecialchars($tooltip, ENT_QUOTES) . '">' . $label . '</span>';
 }
 
-/**
- * Replace plain #1234 tokens with links to torrent details.
- * Runs over already-rendered HTML (output of format_comment). Tokens that don't
- * resolve to an existing torrent row are left as plain text, so we don't break
- * arbitrary `#fragment` URLs or the like.
- */
-function shoutbox_render_torrents($html)
-{
-	static $cache = [];
-	if ($html === '' || strpos($html, '#') === false) {
-		return $html;
-	}
-	// Negative lookbehind excludes word-chars and common URL/HTML separators so we
-	// don't match the `#` inside `https://x#1234`, `<a href="x#1234">`, etc.
-	return preg_replace_callback(
-		'/(?<![\w&"\/=])#(\d{1,9})(?!\w)/',
-		function ($m) use (&$cache) {
-			$id = (int)$m[1];
-			if ($id <= 0) {
-				return $m[0];
-			}
-			if (!array_key_exists($id, $cache)) {
-				$cache[$id] = \App\Models\Torrent::query()->where('id', $id)->exists();
-			}
-			if (!$cache[$id]) {
-				return $m[0];
-			}
-			return '<a class="shout-torrent" href="details.php?id=' . $id . '" target="_blank">#' . $id . '</a>';
-		},
-		$html
-	);
-}
-
-/**
- * Replace plain @username tokens with links to userdetails.
- * Runs over already-rendered HTML (output of format_comment). Negative-lookbehind
- * gives identifier-style word boundaries, and the match is dropped if the username
- * doesn't resolve to a real user, so false positives (emails, URL fragments) are
- * left untouched.
- */
-function shoutbox_render_mentions($html, &$mentionsMe = false)
-{
-	static $cache = [];
-	global $CURUSER;
-	$myId = (int)($CURUSER['id'] ?? 0);
-	if ($html === '' || strpos($html, '@') === false) {
-		return $html;
-	}
-	// Username charset is intentionally permissive to cover legacy nicknames that
-	// contain brackets/parens (e.g. "[LP-Bits]", "(Mod)Name"). The lookup-only-on-success
-	// behaviour below means false positives stay as plain text.
-	return preg_replace_callback(
-		'/(?<![\w\-\[\]\(\)])@([\w\-\[\]\(\)]{2,40})(?![\w\-\[\]\(\)])/u',
-		function ($m) use (&$cache, $myId, &$mentionsMe) {
-			$nick = $m[1];
-			if ($nick === '' || strlen($nick) < 2) {
-				return $m[0];
-			}
-			$key = strtolower($nick);
-			if (!array_key_exists($key, $cache)) {
-				$row = \Nexus\Database\NexusDB::table('users')->whereRaw('LOWER(username) = LOWER(?)', [$nick])->first(['id', 'username']);
-				$cache[$key] = $row ? ['id' => (int)$row->id, 'name' => $row->username] : false;
-			}
-			if (!$cache[$key]) {
-				return $m[0];
-			}
-			$isMe = $myId > 0 && $cache[$key]['id'] === $myId;
-			if ($isMe) {
-				$mentionsMe = true;
-			}
-			$cls = $isMe ? 'shout-mention shout-mention-me' : 'shout-mention';
-			// Click on @nick in a rendered message inserts "@nick, " into the shoutbox input,
-			// matching the click-on-nick behaviour. Falls back to userdetails for guests
-			// (no shoutbox input to type into) via href="userdetails.php?id=N".
-			$nick = $cache[$key]['name'];
-			$onclick = 'return shoutReply(' . htmlspecialchars(json_encode($nick, JSON_UNESCAPED_UNICODE), ENT_QUOTES) . ')';
-			$replyTitle = '';
-			if (isset($GLOBALS['lang_shoutbox']['tooltip_nick_reply'])) {
-				$replyTitle = ' title="' . htmlspecialchars($GLOBALS['lang_shoutbox']['tooltip_nick_reply'], ENT_QUOTES) . '"';
-			}
-			if ($myId > 0) {
-				return '<a class="' . $cls . '" href="userdetails.php?id=' . $cache[$key]['id'] . '" onclick="' . $onclick . '"' . $replyTitle . '>@' . htmlspecialchars($nick) . '</a>';
-			}
-			return '<a class="' . $cls . '" href="userdetails.php?id=' . $cache[$key]['id'] . '">@' . htmlspecialchars($nick) . '</a>';
-		},
-		$html
-	);
-}
-
 $rows = $query->get();
 if ($rows->isEmpty())
 print("\n");
@@ -424,6 +256,8 @@ else
 	$groupWindowSec = 120;
 	$prevUserId = 0;
 	$prevDate = 0;
+	$currentUserId = (int)($CURUSER['id'] ?? 0);
+	$isStaff = user_can('sbmanage');
 	if (!$isAjax) {
 		print('<div id="shoutbox-content">');
 	}
@@ -443,9 +277,11 @@ else
 			&& $prevDate > 0
 			&& abs($prevDate - $currDate) <= $groupWindowSec
 		);
-        $del = '';
-		if (user_can('sbmanage')) {
-			$del .= "[<a href=\"shoutbox.php?del=".$arr['id']."\">".$lang_shoutbox['text_del']."</a>]";
+		$actions = \App\Support\Shoutbox::renderActions($arr, $currentUserId, $isStaff);
+		$reactions = \App\Support\Shoutbox::renderReactions((int)$arr['id'], $currentUserId);
+		$editedNote = '';
+		if (!empty($arr['edited_at']) && (int)$arr['edited_at'] > 0) {
+			$editedNote = ' <span class="shout-edited-note">(' . htmlspecialchars((string) ($lang_shoutbox['text_edited'] ?? 'edited')) . ' ' . \App\Support\Shoutbox::formatTime((int)$arr['edited_at'], true) . ')</span>';
 		}
 		$avatarUrl = 'pic/default_avatar.png';
 		$nickReplyName = '';
@@ -492,20 +328,13 @@ else
 		} else {
 			$avatarHtml = $avatarImg;
 		}
-		if (isset($CURUSER) && $CURUSER['timetype'] != 'timealive')
-			$time = (new DateTime())->setTimestamp($arr["date"])->format('m.d H:i');
-		else $time = get_elapsed_time($arr["date"]).$lang_shoutbox['text_ago'];
-		$message = format_comment($arr["text"],true,false,true,true,600,true,false);
+		$time = \App\Support\Shoutbox::formatTime($currDate, true);
 		$mentionsMe = false;
-		$message = shoutbox_render_mentions($message, $mentionsMe);
-		$message = shoutbox_render_torrents($message);
-		// Heuristic for the "show more" toggle. The plain-text length lets us decide
-		// server-side without measuring layout, at the cost of some imprecision
-		// (a single very long word vs many short lines render to different heights).
+		$message = \App\Support\Shoutbox::formatMessage($arr["text"], $currentUserId, $mentionsMe);
 		$plainLen = mb_strlen(strip_tags($message));
 		$isLong = $plainLen > 280;
 		$msgClass = $isLong ? 'shout-msg shout-msg-clamped' : 'shout-msg';
-		$messageHtml = '<span class="' . $msgClass . '">' . $message . '</span>';
+		$messageHtml = '<span id="shout-msg-' . $arr['id'] . '" class="' . $msgClass . '" data-raw="' . htmlspecialchars((string) $arr['text'], ENT_QUOTES) . '">' . $message . '</span>' . $editedNote;
 		if ($isLong) {
 			$messageHtml .= '<a class="shout-msg-toggle" href="javascript:void(0)" data-on="' . htmlspecialchars($labelLess, ENT_QUOTES) . '" data-off="' . htmlspecialchars($labelMore, ENT_QUOTES) . '">' . htmlspecialchars($labelMore) . '</a>';
 		}
@@ -515,15 +344,13 @@ else
 		}
 		if ($isContinuation) {
 			$rowClasses[] = 'shout-row-grouped';
-			// Replace avatar+username (+badge) with a single 22px spacer so message text
-			// stays vertically aligned with the avatar column above.
 			$avatarHtml = '<span class="shout-avatar-spacer" aria-hidden="true"></span>';
 			$username = '';
 			$classBadge = '';
 		}
 		$rowClass = implode(' ', $rowClasses);
 		print("<tr><td class=\"".$rowClass."\"><span class='date'>[".$time."]</span> ".
-$del ." ". $avatarHtml . " " . $classBadge . $username." " . $messageHtml."
+$actions ." ". $avatarHtml . " " . $classBadge . $username." " . $reactions . " " . $messageHtml."
 </td></tr>\n");
 		$prevUserId = $currUserId;
 		$prevDate = $currDate;

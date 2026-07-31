@@ -427,18 +427,28 @@ function lookupSetlist() {
         alert('Enter the torrent name first.');
         return;
     }
-    var response = ajax.gets('setlist_lookup.php?name=' + encodeURIComponent(name));
-    try {
-        var data = JSON.parse(response);
-        if (data.success && data.text) {
-            var descr = document.getElementById('descr');
-            if (descr) {
-                descr.value = (descr.value ? descr.value + "\n\n" : "") + data.text;
-            }
-        } else {
-            alert(data.error || 'Setlist not found.');
-        }
-    } catch (e) {
-        alert('Setlist lookup failed.');
+    var btn = document.getElementById('setlistLookupBtn');
+    if (btn) {
+        btn.value = 'Loading...';
+        btn.disabled = true;
     }
+    ajax.get('setlist_lookup.php?name=' + encodeURIComponent(name), function (response) {
+        if (btn) {
+            btn.value = 'Fill setlist';
+            btn.disabled = false;
+        }
+        try {
+            var data = JSON.parse(response);
+            if (data.success && data.text) {
+                var descr = document.getElementById('descr');
+                if (descr) {
+                    descr.value = (descr.value ? descr.value + "\n\n" : "") + data.text;
+                }
+            } else {
+                alert(data.error || 'Setlist not found.');
+            }
+        } catch (e) {
+            alert('Setlist lookup failed.');
+        }
+    });
 }

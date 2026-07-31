@@ -185,6 +185,22 @@ function shoutboxReact(id, emoji) {
     shoutboxPost('shoutboxReact', { id: id, reaction: emoji }, true);
 }
 
+function shoutboxToggleReactionPicker(id) {
+    var picker = document.getElementById('shout-reaction-picker-' + id);
+    if (!picker) { return; }
+    var isHidden = picker.style.display === 'none' || picker.style.display === '';
+    if (isHidden) {
+        // Close any other open picker first.
+        var openPickers = document.querySelectorAll('.shout-reaction-picker');
+        for (var i = 0; i < openPickers.length; i++) {
+            openPickers[i].style.display = 'none';
+        }
+        picker.style.display = 'inline-flex';
+    } else {
+        picker.style.display = 'none';
+    }
+}
+
 function shoutboxRefresh() {
     var c = document.getElementById('shoutbox-content');
     if (!c) { return; }

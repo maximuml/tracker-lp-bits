@@ -255,6 +255,7 @@ else
 	$reactionData = \App\Support\Shoutbox::prefetchReactions($shoutIds, $currentUserId);
 	$reactionCounts = $reactionData['counts'];
 	$reactionMine = $reactionData['mine'];
+	$reactionUsers = $reactionData['users'];
 
 	if (!$isAjax) {
 		print('<div id="shoutbox-content">');
@@ -281,7 +282,8 @@ else
 			$shoutId,
 			$currentUserId,
 			$reactionCounts[$shoutId] ?? null,
-			$reactionMine[$shoutId] ?? null
+			$reactionMine[$shoutId] ?? null,
+			$reactionUsers[$shoutId] ?? null
 		);
 		$editedNote = '';
 		if (!empty($arr['edited_at']) && (int)$arr['edited_at'] > 0) {

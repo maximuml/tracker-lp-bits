@@ -116,6 +116,9 @@ td.shoutrow:hover .shout-actions {
 
 .shout-reactions {
     display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    position: relative;
     gap: 4px;
     margin-left: 4px;
     vertical-align: middle;
@@ -123,23 +126,54 @@ td.shoutrow:hover .shout-actions {
 
 .shout-reaction {
     border: 1px solid rgba(127,127,127,.35);
-    background: rgba(127,127,127,.12);
+    background: rgba(127,127,127,.08);
     border-radius: 12px;
     padding: 1px 6px;
     font-size: 12px;
     line-height: 1.4;
     cursor: pointer;
     color: inherit;
+    white-space: nowrap;
 }
 
 .shout-reaction.active {
-    background: rgba(64,128,255,.25);
-    border-color: rgba(64,128,255,.55);
+    background: rgba(64,128,255,.22);
+    border-color: rgba(64,128,255,.65);
 }
 
 .shout-reaction:hover {
-    background: rgba(64,128,255,.18);
+    background: rgba(64,128,255,.14);
     border-color: rgba(64,128,255,.45);
+}
+
+.shout-reaction-add {
+    font-weight: bold;
+    min-width: 24px;
+    text-align: center;
+    padding: 1px 4px;
+}
+
+.shout-reaction-picker {
+    display: none;
+    position: absolute;
+    z-index: 100;
+    background: rgba(40,40,40,.95);
+    border: 1px solid rgba(127,127,127,.4);
+    border-radius: 16px;
+    padding: 4px 6px;
+    gap: 4px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.25);
+}
+
+.shout-reaction-picker .shout-reaction {
+    background: transparent;
+    border-color: transparent;
+    font-size: 14px;
+    padding: 2px 4px;
+}
+
+.shout-reaction-picker .shout-reaction:hover {
+    background: rgba(255,255,255,.15);
 }
 
 .shoutbox-toolbar {

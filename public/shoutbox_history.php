@@ -116,6 +116,7 @@ $shoutIds = array_map(fn ($r) => (int) $r['id'], $rows);
 $reactionData = \App\Support\Shoutbox::prefetchReactions($shoutIds, $currentUserId);
 $reactionCounts = $reactionData['counts'];
 $reactionMine = $reactionData['mine'];
+$reactionUsers = $reactionData['users'];
 
 foreach ($rows as $arr) {
     $time = \App\Support\Shoutbox::formatTime((int) $arr['date'], true);
@@ -126,7 +127,8 @@ foreach ($rows as $arr) {
         $shoutId,
         $currentUserId,
         $reactionCounts[$shoutId] ?? null,
-        $reactionMine[$shoutId] ?? null
+        $reactionMine[$shoutId] ?? null,
+        $reactionUsers[$shoutId] ?? null
     );
     $mentionsMe = false;
     $message = \App\Support\Shoutbox::formatMessage($arr['text'], $currentUserId, $mentionsMe);

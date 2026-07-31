@@ -140,17 +140,17 @@ final class Shoutbox
     }
 
     /**
-     * Batch-fetch reaction counts for the given shout ids to avoid the
-     * N+1 query pattern when rendering a list of messages.
+     * Batch-fetch reaction counts and (for tooltips) a limited list of
+     * reactor names for each reaction to avoid the N+1 query pattern.
      *
      * @param  list<int>  $shoutIds
      * @param  int        $currentUserId
-     * @return array{counts: array<int, array<string, int>>, mine: array<int, list<string>>}
+     * @return array{counts: array<int, array<string, int>>, mine: array<int, list<string>>, users: array<int, array<string, list<string>>>}
      */
     public static function prefetchReactions(array $shoutIds, int $currentUserId): array
     {
         if ($shoutIds === []) {
-            return ['counts' => [], 'mine' => []];
+            return ['counts' => [], 'mine' => [], 'users' => []];
         }
 
         $ids = array_map('intval', $shoutIds);
@@ -179,18 +179,41 @@ final class Shoutbox
             $mine[$id][] = (string) $row->reaction;
         }
 
-        return ['counts' => $counts, 'mine' => $mine];
+        /** @var array<int, array<string, list<string>>> $users */
+        $users = [];
+        $rawUsers = NexusDB::table('shoutbox_reactions as sr')
+            ->select('sr.shoutbox_id', 'sr.reaction', 'u.username')
+            ->join('users as u', 'u.id', '=', 'sr.user_id')
+            ->whereIn('sr.shoutbox_id', $ids)
+            ->whereIn('sr.reaction', self::REACTIONS)
+            ->orderBy('sr.id')
+            ->limit(100 * count($ids))
+            ->get();
+        foreach ($rawUsers as $row) {
+            $id = (int) $row->shoutbox_id;
+            $emoji = (string) $row->reaction;
+            $name = (string) $row->username;
+            if (! isset($users[$id][$emoji])) {
+                $users[$id][$emoji] = [];
+            }
+            if (count($users[$id][$emoji]) < 20) {
+                $users[$id][$emoji][] = $name;
+            }
+        }
+
+        return ['counts' => $counts, 'mine' => $mine, 'users' => $users];
     }
 
     /**
-     * Build the reaction button bar for a message.
+     * Build the reaction button bar for a message (Discord/Slack style).
      *
      * @param  int                           $shoutId        Message id
      * @param  int                           $currentUserId    Id of the viewing user
      * @param  array<string, int>|null       $countsMap      Reaction counts (from prefetchReactions)
      * @param  list<string>|null             $myReactionsMap Current user's reactions
+     * @param  array<string, list<string>>|null $reactorMap  Reactor names per emoji
      */
-    public static function renderReactions(int $shoutId, int $currentUserId, ?array $countsMap = null, ?array $myReactionsMap = null): string
+    public static function renderReactions(int $shoutId, int $currentUserId, ?array $countsMap = null, ?array $myReactionsMap = null, ?array $reactorMap = null): string
     {
         if ($shoutId <= 0) {
             return '';
@@ -199,6 +222,7 @@ final class Shoutbox
         if ($countsMap !== null && $myReactionsMap !== null) {
             $counts = $countsMap;
             $myReactions = $myReactionsMap;
+            $reactors = $reactorMap ?? [];
         } else {
             /** @var array<string, int> $counts */
             $counts = NexusDB::table('shoutbox_reactions')
@@ -214,18 +238,59 @@ final class Shoutbox
                 ->where('user_id', $currentUserId)
                 ->pluck('reaction')
                 ->toArray();
+
+            $reactors = [];
         }
+
+        $lang = $GLOBALS['lang_shoutbox'] ?? [];
+        $titleReact = (string) ($lang['title_react'] ?? 'React');
+        $titleAdd = (string) ($lang['title_add_reaction'] ?? 'Add reaction');
+        $titleReacted = (string) ($lang['title_reacted_by'] ?? 'Reacted by');
 
         $html = '<span class="shout-reactions">';
         foreach (self::REACTIONS as $emoji) {
             $cnt = (int) ($counts[$emoji] ?? 0);
+            if ($cnt <= 0) {
+                continue;
+            }
             $active = in_array($emoji, $myReactions, true) ? ' active' : '';
             $encoded = json_encode($emoji, JSON_UNESCAPED_UNICODE);
-            $html .= '<button type="button" class="shout-reaction' . $active . '" onclick="shoutboxReact(' . $shoutId . ', ' . htmlspecialchars($encoded, ENT_QUOTES, 'UTF-8') . ')" title="' . htmlspecialchars((string) ($GLOBALS['lang_shoutbox']['title_react'] ?? 'React'), ENT_QUOTES) . '">' . $emoji . ' ' . $cnt . '</button>';
+            $title = self::buildReactorTooltip($cnt, $reactors[$emoji] ?? []);
+            $html .= '<button type="button" class="shout-reaction' . $active . '" onclick="shoutboxReact(' . $shoutId . ', ' . htmlspecialchars($encoded, ENT_QUOTES, 'UTF-8') . ')" title="' . htmlspecialchars($title, ENT_QUOTES, 'UTF-8') . '">' . $emoji . ' ' . $cnt . '</button>';
+        }
+
+        if ($currentUserId > 0) {
+            $html .= '<button type="button" class="shout-reaction shout-reaction-add" onclick="shoutboxToggleReactionPicker(' . $shoutId . ')" title="' . htmlspecialchars($titleAdd, ENT_QUOTES, 'UTF-8') . '">+</button>';
+            $html .= '<span class="shout-reaction-picker" id="shout-reaction-picker-' . $shoutId . '" style="display:none">';
+            foreach (self::REACTIONS as $emoji) {
+                $encoded = json_encode($emoji, JSON_UNESCAPED_UNICODE);
+                $html .= '<button type="button" class="shout-reaction" onclick="shoutboxReact(' . $shoutId . ', ' . htmlspecialchars($encoded, ENT_QUOTES, 'UTF-8') . '); shoutboxToggleReactionPicker(' . $shoutId . ')" title="' . htmlspecialchars($titleReact, ENT_QUOTES, 'UTF-8') . '">' . $emoji . '</button>';
+            }
+            $html .= '</span>';
         }
         $html .= '</span>';
 
         return $html;
+    }
+
+    /**
+     * Build a tooltip string for a reaction button.
+     *
+     * @param  int             $count
+     * @param  list<string>    $names
+     */
+    private static function buildReactorTooltip(int $count, array $names): string
+    {
+        $visible = array_slice($names, 0, 10);
+        $text = implode(', ', $visible);
+        $remaining = $count - count($visible);
+        if ($remaining > 0) {
+            $text .= ($text === '' ? '' : ', ') . '+' . $remaining . ' more';
+        }
+        if ($text === '') {
+            return (string) ($GLOBALS['lang_shoutbox']['title_react'] ?? 'React');
+        }
+        return ((string) ($GLOBALS['lang_shoutbox']['title_reacted_by'] ?? 'Reacted by')) . ': ' . $text;
     }
 
     /**

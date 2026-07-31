@@ -27,8 +27,12 @@ class SyncTorrentToMeilisearch implements ShouldQueue
             do_log("event: " . get_class($event) . " no model id", 'error');
             return;
         }
-        $meiliSearch = new MeiliSearchRepository();
-        $result = $meiliSearch->doImportFromDatabase($id);
-        do_log(sprintf("doImportFromDatabase: %s result: %s", $id, var_export($result, true)));
+        try {
+            $meiliSearch = new MeiliSearchRepository();
+            $result = $meiliSearch->doImportFromDatabase($id);
+            do_log(sprintf("doImportFromDatabase: %s result: %s", $id, var_export($result, true)));
+        } catch (\Throwable $e) {
+            do_log('MeiliSearch sync listener failed: ' . $e->getMessage(), 'error');
+        }
     }
 }

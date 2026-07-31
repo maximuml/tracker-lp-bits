@@ -340,19 +340,29 @@ class MeiliSearchRepository extends BaseRepository
      *
      * @param  string  $query
      * @param  int  $limit
+     * @param  User  $user
      * @return  array<int, array<string, mixed>>
      */
-    public function autocomplete(string $query, int $limit = 10): array
+    public function autocomplete(string $query, int $limit, User $user): array
     {
         if (!$this->isEnabled()) {
             return [];
         }
 
+        $params = ['mode' => SearchBox::listAuthorizedSectionId()];
+        if (!user_can('seebanned')) {
+            $params['banned'] = 'no';
+        }
+        if (get_setting('torrent.approval_status_none_visible') == 'no' && !user_can('torrent-approval')) {
+            $params['approval_status'] = Torrent::APPROVAL_STATUS_ALLOW;
+        }
+        $filters = $this->getFilters($params, $user);
+
         $index = $this->getIndex();
         $result = $index->search($query, [
             'limit' => $limit,
             'attributesToRetrieve' => ['id', 'name'],
-            'filter' => 'visible = 1',
+            'filter' => $filters,
         ]);
 
         $torrents = [];

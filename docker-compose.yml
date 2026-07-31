@@ -6,6 +6,7 @@ services:
     container_name: nexusphp-php
     environment:
       SERVICE_NAME: php
+      MEILISEARCH_HOST: ${MEILISEARCH_HOST:-meilisearch}
     volumes:
       - .:/var/www/html
       - ${NP_BACKUP_EXPORT_PATH:-/tmp/nexusphp_backup}:${NP_BACKUP_EXPORT_PATH:-/tmp/nexusphp_backup}
@@ -25,6 +26,7 @@ services:
     container_name: nexusphp-queue
     environment:
       SERVICE_NAME: queue
+      MEILISEARCH_HOST: ${MEILISEARCH_HOST:-meilisearch}
     volumes:
       - .:/var/www/html
     depends_on:
@@ -45,6 +47,7 @@ services:
     container_name: nexusphp-scheduler
     environment:
       SERVICE_NAME: scheduler
+      MEILISEARCH_HOST: ${MEILISEARCH_HOST:-meilisearch}
     volumes:
       - .:/var/www/html
       - ${NP_BACKUP_EXPORT_PATH:-/tmp/nexusphp_backup}:${NP_BACKUP_EXPORT_PATH:-/tmp/nexusphp_backup}
@@ -66,6 +69,7 @@ services:
     container_name: nexusphp-cleanup
     environment:
       SERVICE_NAME: cleanup
+      MEILISEARCH_HOST: ${MEILISEARCH_HOST:-meilisearch}
     volumes:
       - .:/var/www/html
     depends_on:
@@ -165,7 +169,7 @@ services:
     volumes:
       - meilisearch-data:/meili_data
     ports:
-      - "${MEILISEARCH_PORT:-7700}:7700"
+      - "127.0.0.1:${MEILISEARCH_PORT:-7700}:7700"
     logging:
       driver: "json-file"
       options:

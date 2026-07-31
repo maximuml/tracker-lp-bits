@@ -876,9 +876,15 @@ $listingOptions = [
 ];
 
 if ($shouldUseMeili) {
-    $searchRep = new \App\Repositories\MeiliSearchRepository();
-    $resultFromSearchRep = $searchRep->search($searchParams, $CURUSER['id']);
-    $count = $resultFromSearchRep['total'];
+    try {
+        $searchRep = new \App\Repositories\MeiliSearchRepository();
+        $resultFromSearchRep = $searchRep->search($searchParams, $CURUSER['id']);
+        $count = $resultFromSearchRep['total'];
+    } catch (\Throwable $e) {
+        do_log('MeiliSearch search failed, falling back to SQL: ' . $e->getMessage(), 'error');
+        $shouldUseMeili = false;
+        $count = \App\Repositories\TorrentListingRepository::getCount($listingOptions);
+    }
 } else {
     $count = \App\Repositories\TorrentListingRepository::getCount($listingOptions);
 }

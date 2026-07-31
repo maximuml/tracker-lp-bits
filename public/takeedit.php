@@ -209,8 +209,12 @@ if ($affectedRows == 1) {
             'comment' => '',
         ], true);
     }
-    $meiliSearch = new \App\Repositories\MeiliSearchRepository();
-    $meiliSearch->doImportFromDatabase($row['id']);
+    try {
+        $meiliSearch = new \App\Repositories\MeiliSearchRepository();
+        $meiliSearch->doImportFromDatabase($row['id']);
+    } catch (\Throwable $e) {
+        do_log('MeiliSearch update on edit failed: ' . $e->getMessage(), 'error');
+    }
 }
 
 $returl = "details.php?id=$id&edited=1";

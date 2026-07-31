@@ -4,6 +4,8 @@ var meiliAutoSelected = -1;
 var meiliAutoContainer = null;
 var meiliAutoList = null;
 var meiliAutoInput = null;
+var meiliAutoXhr = null;
+var meiliAutoQuery = '';
 
 function meiliAutoInit()
 {
@@ -36,6 +38,12 @@ function meiliAutoInit()
 function meiliSuggestInput(value)
 {
     clearTimeout(meiliAutoTimer);
+    if (meiliAutoXhr) {
+        try {
+            meiliAutoXhr.abort();
+        } catch (e) {}
+        meiliAutoXhr = null;
+    }
     var query = value.replace(/^\s+|\s+$/g, '');
     if (query.length < 2) {
         meiliAutoClose();
@@ -75,18 +83,32 @@ function meiliSuggestKey(e)
 
 function meiliAutoFetch(query)
 {
+    if (meiliAutoXhr) {
+        try {
+            meiliAutoXhr.abort();
+        } catch (e) {}
+    }
+    meiliAutoQuery = query;
     var xhr = new XMLHttpRequest();
+    meiliAutoXhr = xhr;
     xhr.open('GET', 'autocomplete_torrents.php?q=' + encodeURIComponent(query), true);
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4) {
+            if (meiliAutoXhr === xhr) {
+                meiliAutoXhr = null;
+            }
             if (xhr.status === 200) {
                 try {
                     var data = JSON.parse(xhr.responseText);
+                    var currentQuery = meiliAutoInput.value.replace(/^\s+|\s+$/g, '');
+                    if (query !== meiliAutoQuery && query !== currentQuery) {
+                        return;
+                    }
                     meiliAutoRender(data.torrents || []);
                 } catch (ex) {
                     meiliAutoClose();
                 }
-            } else {
+            } else if (xhr.status !== 0) {
                 meiliAutoClose();
             }
         }

@@ -14,8 +14,11 @@ $torrents = [];
 $query = trim($_GET['q'] ?? '');
 if ($query !== '' && strlen($query) >= 2 && get_setting('meilisearch.enabled') == 'yes') {
     try {
-        $rep = new \App\Repositories\MeiliSearchRepository();
-        $torrents = $rep->autocomplete($query, 10);
+        $user = \App\Models\User::query()->find($CURUSER['id']);
+        if ($user) {
+            $rep = new \App\Repositories\MeiliSearchRepository();
+            $torrents = $rep->autocomplete($query, 10, $user);
+        }
     } catch (\Throwable $e) {
         do_log('MeiliSearch autocomplete error: ' . $e->getMessage(), 'error');
     }

@@ -1,0 +1,26 @@
+<?php
+require_once("../include/bittorrent.php");
+dbconn();
+loggedinorreturn();
+
+header('Content-Type: application/json; charset=utf-8');
+
+$name = trim($_GET['name'] ?? $_POST['name'] ?? '');
+$url = trim($_GET['url'] ?? $_POST['url'] ?? '');
+
+if (!$name && !$url) {
+    echo json_encode(['success' => false, 'error' => 'Torrent name or setlist URL is required.']);
+    exit;
+}
+
+try {
+    if ($url) {
+        $result = \App\Support\SetlistLookup::fromUrl($url);
+    } else {
+        $result = \App\Support\SetlistLookup::fromTorrentName($name);
+    }
+    echo json_encode($result, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+} catch (\Throwable $e) {
+    do_log($e->getMessage() . "\n" . $e->getTraceAsString(), 'error');
+    echo json_encode(['success' => false, 'error' => 'Setlist lookup failed.']);
+}

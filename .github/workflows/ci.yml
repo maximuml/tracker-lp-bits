@@ -137,6 +137,9 @@ jobs:
             curl -sfL --max-time 10 "http://localhost$page" -o /dev/null
           done
 
+      - name: Clear any stale Laravel config cache
+        run: docker compose exec -T php php artisan config:clear
+
       - name: Run Feature tests
         run: |
           docker compose exec -T -e CRITICAL_PATH_BASE_URL=http://openresty php vendor/bin/phpunit --testsuite Feature --no-coverage

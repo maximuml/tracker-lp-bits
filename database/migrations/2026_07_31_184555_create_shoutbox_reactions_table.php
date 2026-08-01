@@ -15,7 +15,7 @@ class CreateShoutboxReactionsTable extends Migration
             $table->id();
             $table->unsignedInteger('shoutbox_id');
             $table->unsignedInteger('user_id');
-            $table->string('reaction', 16);
+            $table->string('reaction', 16)->charset('utf8mb4')->collation('utf8mb4_bin');
             $table->timestamp('created_at')->nullable();
 
             $table->unique(['shoutbox_id', 'user_id', 'reaction'], 'shoutbox_reactions_unique');

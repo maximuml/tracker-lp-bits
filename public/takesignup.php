@@ -127,7 +127,12 @@ if (\App\Models\User::query()->where('email', $email)->count() > 0)
 
 $secret = mksecret();
 //$wantpasshash = md5($secret . $wantpassword . $secret);
-$wantpasshash = hash('sha256', $secret . hash('sha256', $wantpassword));
+// signup.php passwordHashJs hashes the password in the browser and sets
+// wantpassword_hashed=1 so the server can use the value as-is. Plain
+// submissions (tests, curl, or JS-disabled clients) must be hashed here.
+$isClientHashed = ($_POST['wantpassword_hashed'] ?? '0') === '1';
+$clientHashedPassword = $isClientHashed ? $wantpassword : hash('sha256', $wantpassword);
+$wantpasshash = hash('sha256', $secret . $clientHashedPassword);
 $editsecret = ($verification == 'admin' ? '' : $secret);
 $invite_count = (int) $invite_count;
 $passkey = md5($wantusername.date("Y-m-d H:i:s").$wantpasshash);

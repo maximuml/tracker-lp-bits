@@ -18,7 +18,7 @@ final class TorrentDetails
     /**
      * @param  array<int|string, mixed>  $row
      */
-    public static function render(array $row): string
+    public static function render(array $row, ?string $returnto = null): string
     {
         global $CURUSER, $Cache, $lang_details, $lang_functions;
 
@@ -36,7 +36,7 @@ final class TorrentDetails
         $badges = self::badgesHtml($row, $torrentRep);
         $stats = self::statsHtml($row);
 
-        $toolbar = self::toolbarHtml($row, $owned, $canDownload, $torrentRep);
+        $toolbar = self::toolbarHtml($row, $owned, $canDownload, $torrentRep, $returnto);
         $sidebar = self::sidebarHtml($row, $torrentRep, $torrentService);
 
         $overview = self::overviewHtml($row, $searchBoxRep);
@@ -76,6 +76,9 @@ final class TorrentDetails
         <div class="d2-hero-main">
             <h1 class="d2-title"><?php echo htmlspecialchars($row['name']) ?></h1>
             <div class="d2-badges"><?php echo $badges ?></div>
+            <?php if ($tags !== '') { ?>
+            <div class="d2-tags"><?php echo $tags ?></div>
+            <?php } ?>
             <div class="d2-stats"><?php echo $stats ?></div>
             <?php echo $toolbar ?>
         </div>
@@ -209,7 +212,7 @@ final class TorrentDetails
     /**
      * @param  array<int|string, mixed>  $row
      */
-    private static function toolbarHtml(array $row, bool $owned, bool $canDownload, TorrentRepository $torrentRep): string
+    private static function toolbarHtml(array $row, bool $owned, bool $canDownload, TorrentRepository $torrentRep, ?string $returnto = null): string
     {
         global $CURUSER, $Cache, $lang_details, $lang_functions;
 
@@ -217,7 +220,16 @@ final class TorrentDetails
         $actions = [];
 
         if ($canDownload) {
-            $downloadText = $lang_details['text_download_torrent'] ?? 'Download torrent';
+            $hasBuy = ($row['price'] ?? 0) > 0
+                ? \App\Models\TorrentBuyLog::query()->where('uid', (int) $CURUSER['id'])->where('torrent_id', $id)->exists()
+                : true;
+            if (($row['price'] ?? 0) > 0) {
+                $downloadText = $hasBuy
+                    ? ($lang_details['text_download_bought_torrent'] ?? 'Download bought torrent')
+                    : sprintf($lang_details['text_download_paid_torrent'] ?? 'Buy for %s', number_format((int) $row['price']));
+            } else {
+                $downloadText = htmlspecialchars($GLOBALS['torrentnameprefix'] ?? '') . '.' . htmlspecialchars((string) ($row['save_as'] ?? 'torrent')) . '.torrent';
+            }
             $actions[] = '<a class="d2-btn d2-btn--primary" href="download.php?id=' . $id . '"><span class="d2-icon">&#x2193;</span> ' . $downloadText . '</a>';
             $actions[] = '<button type="button" class="d2-btn d2-btn--secondary" id="d2-copy-url">' . ($lang_details['text_copy_url'] ?? 'Copy URL') . '</button>';
         }
@@ -230,6 +242,9 @@ final class TorrentDetails
 
         if ($owned) {
             $editUrl = 'edit.php?id=' . $id;
+            if ($returnto !== null && $returnto !== '') {
+                $editUrl .= '&returnto=' . rawurlencode($returnto);
+            }
             $actions[] = '<a class="d2-btn d2-btn--secondary" href="' . htmlspecialchars($editUrl) . '"><span class="d2-icon">&#x270E;</span> ' . ($lang_details['text_edit_torrent'] ?? 'Edit') . '</a>';
             if (user_can('torrent-delete')) {
                 $actions[] = '<a class="d2-btn d2-btn--danger" href="' . htmlspecialchars('fastdelete.php?id=' . $id) . '" onclick="return confirm(\'' . addslashes($lang_functions['text_delete'] ?? 'Delete?') . '\')"><span class="d2-icon">&#x2715;</span> ' . ($lang_functions['text_delete'] ?? 'Delete') . '</a>';
@@ -248,6 +263,9 @@ final class TorrentDetails
 
         $torrentUrl = $torrentRep->getDownloadUrl($id, $CURUSER);
         $actions[] = '<button type="button" class="d2-btn d2-btn--secondary" id="d2-copy-hash" data-hash="' . htmlspecialchars(bin2hex(hash_pad($row['info_hash']))) . '"><span class="d2-icon">&#x2398;</span> Info hash</button>';
+
+        /** @var array<int, string> $actions */
+        $actions = apply_filter('torrent_detail_actions', $actions, $row);
 
         return '<div class="d2-toolbar" data-torrent-url="' . htmlspecialchars($torrentUrl) . '">' . implode('', $actions) . '</div>';
     }
@@ -279,7 +297,11 @@ final class TorrentDetails
         $rows[] = ['label' => $lang_details['text_size'] ?? 'Size', 'value' => mksize((float) $row['size'])];
         $rows[] = ['label' => $lang_details['text_added'] ?? 'Added', 'value' => gettime((string) $row['added'], false, true)];
         $rows[] = ['label' => $lang_details['row_last_seeder'] ?? 'Last active', 'value' => gettime((string) $row['last_action'])];
-        $rows[] = ['label' => $lang_details['row_info_hash'] ?? 'Info hash', 'value' => '<code id="d2-info-hash">' . htmlspecialchars($infoHash) . '</code> <button type="button" class="d2-btn d2-btn--small" id="d2-copy-hash-only">' . ($lang_functions['text_copy'] ?? 'Copy') . '</button>'];
+        $infoHashValue = '<code id="d2-info-hash">' . htmlspecialchars($infoHash) . '</code> <button type="button" class="d2-btn d2-btn--small" id="d2-copy-hash-only">' . ($lang_functions['text_copy'] ?? 'Copy') . '</button>';
+        if (user_can('torrentstructure')) {
+            $infoHashValue .= ' <a href="torrent_info.php?id=' . $id . '">' . ($lang_details['text_torrent_info_note'] ?? 'Torrent structure') . '</a>';
+        }
+        $rows[] = ['label' => $lang_details['row_info_hash'] ?? 'Info hash', 'value' => $infoHashValue];
 
         $progress = '';
         $status = $torrentService->listLeechingSeedingStatus((int) $CURUSER['id'], [$id])[$id] ?? null;
@@ -332,8 +354,14 @@ final class TorrentDetails
         }
 
         $description = '';
-        if ($CURUSER['showdescription'] !== 'no' && !empty($row['descr'])) {
-            $description = (string) format_comment($row['descr']);
+        if (($CURUSER['showdescription'] ?? 'yes') !== 'no' && !empty($row['descr'])) {
+            $description = (string) apply_filter('torrent_detail_description', format_comment($row['descr']), (int) $row['id'], (int) $CURUSER['id']);
+        }
+
+        $customFields = '';
+        if (class_exists(\Nexus\Field\Field::class)) {
+            $customField = new \Nexus\Field\Field();
+            $customFields = $customField->renderOnTorrentDetailsPage((int) $row['id'], (int) $row['search_box_id']);
         }
 
         $infoTds = [];
@@ -349,6 +377,8 @@ final class TorrentDetails
         <?php echo $taxonomyHtml ?>
         <?php echo implode('', $infoTds) ?>
     </div>
+    <?php echo $customFields ?>
+    <?php do_action('torrent_detail_before_desc', (int) $row['id'], (int) $CURUSER['id']); ?>
     <?php if ($description !== '') { ?>
     <div class="d2-description">
         <h3><?php echo $lang_details['row_description'] ?? 'Description' ?></h3>
@@ -426,28 +456,32 @@ final class TorrentDetails
     {
         global $lang_details, $CURUSER;
 
-        $count = TorrentDetailRepository::getCommentCount($id);
-        if ($count === 0) {
-            return '<p>' . ($lang_details['text_no_comments_yet'] ?? 'No comments yet.') . '</p>'
-                . self::quickCommentForm($id, $row);
+        $commentsList = '';
+        if (($CURUSER['showcomment'] ?? 'yes') !== 'no') {
+            $count = TorrentDetailRepository::getCommentCount($id);
+            if ($count === 0) {
+                $commentsList = '<p>' . ($lang_details['text_no_comments_yet'] ?? 'No comments yet.') . '</p>';
+            } else {
+                list($pagertop, $pagerbottom, $limit, $offset, $rpp) = pager(
+                    10,
+                    $count,
+                    'details2.php?id=' . $id . '&cmtpage=1&',
+                    ['lastpagedefault' => 1],
+                    'page'
+                );
+                $allrows = TorrentDetailRepository::getComments($id, (int) $offset, (int) $rpp);
+
+                ob_start();
+                echo $pagertop;
+                commenttable($allrows, 'torrent', $id);
+                echo $pagerbottom;
+                $commentsList = ob_get_clean();
+            }
+        } else {
+            $commentsList = '<p>' . ($lang_details['text_comments_hidden'] ?? 'Comments are hidden by your settings.') . '</p>';
         }
 
-        list($pagertop, $pagerbottom, $limit, $offset, $rpp) = pager(
-            10,
-            $count,
-            'details2.php?id=' . $id . '&cmtpage=1&',
-            ['lastpagedefault' => 1],
-            'page'
-        );
-        $allrows = TorrentDetailRepository::getComments($id, (int) $offset, (int) $rpp);
-
-        ob_start();
-        echo $pagertop;
-        commenttable($allrows, 'torrent', $id);
-        echo $pagerbottom;
-        $commentsTable = ob_get_clean();
-
-        return $commentsTable . self::quickCommentForm($id, $row);
+        return $commentsList . self::quickCommentForm($id, $row);
     }
 
     /**
@@ -521,27 +555,57 @@ final class TorrentDetails
         }
 
         $magicInfo = TorrentDetailRepository::getMagicInfo($id, (int) $CURUSER['id']);
-        if ($magicInfo['whether_have_give_value']) {
-            return '<p>' . sprintf($lang_details['magic_value_number'] ?? 'You have given %s bonus.', $magicInfo['add_value']) . '</p>';
-        }
+        $countUserNumber = $magicInfo['count_user_number'];
+        $sumValue = $magicInfo['sum_value'];
+        $whetherHaveGiveValue = $magicInfo['whether_have_give_value'];
+        $addValue = $magicInfo['add_value'];
 
         $options = \App\Models\Setting::getBonusRewardOptions();
         $bonus = (float) $CURUSER['seedbonus'];
         $min = !empty($options) ? (int) array_values($options)[0] : PHP_INT_MAX;
 
-        if ($bonus < $min) {
-            return '<p>' . ($lang_details['magic_have_no_enough_bonus_value'] ?? 'Not enough bonus.') . '</p>';
+        $givers = [];
+        foreach ($magicInfo['givers'] as $giver) {
+            $givers[] = get_username((int) $giver->userid, false, true, true, false, false, false);
         }
+
+        $newestLimit = 6;
+        $visibleGivers = array_slice($givers, 0, $newestLimit);
+        $hiddenGivers = array_slice($givers, $newestLimit);
 
         ob_start();
 ?>
 <div class="d2-bonus" data-torrent-id="<?php echo $id ?>">
+    <?php if (!$whetherHaveGiveValue && $bonus >= $min) { ?>
     <div class="d2-bonus-options">
         <?php foreach ($options as $key => $value) { $val = (int) $value; if ($val > 0 && $val <= $bonus) { ?>
         <button type="button" class="d2-btn d2-btn--small d2-give-bonus" data-value="<?php echo $val ?>">+<?php echo number_format($val) ?></button>
         <?php } } ?>
     </div>
-    <p class="d2-bonus-total"><?php echo $lang_details['magic_haveGotBonus'] ?? 'Total bonus received: <span id="d2-bonus-total">Number</span>' ?>: <?php echo number_format((int) $magicInfo['sum_value']) ?></p>
+    <?php } elseif ($whetherHaveGiveValue) { ?>
+    <p><?php echo sprintf($lang_details['magic_value_number'] ?? 'You have given %s bonus.', number_format((int) $addValue)) ?></p>
+    <?php } else { ?>
+    <p><?php echo $lang_details['magic_have_no_enough_bonus_value'] ?? 'Not enough bonus.' ?></p>
+    <?php } ?>
+    <p class="d2-bonus-total">
+        <?php
+            $gotBonus = $lang_details['magic_haveGotBonus'] ?? 'Total bonus received: Number';
+            echo str_replace('Number', '<span id="d2-bonus-total">' . number_format((int) $sumValue) . '</span>', $gotBonus);
+        ?>
+        <?php if ($countUserNumber > 0) { ?>
+        (<?php echo str_replace('Number', '<span id="d2-bonus-user-count">' . number_format((int) $countUserNumber) . '</span>', ($lang_details['magic_sum_user_give_number'] ?? 'Number users')) ?>)
+        <?php } ?>
+    </p>
+    <?php if (!empty($givers)) { ?>
+    <div class="d2-bonus-givers">
+        <strong><?php echo $lang_details['magic_newest_record'] ?? 'Newest givers' ?>:</strong>
+        <?php echo implode(' ', $visibleGivers) ?>
+        <?php if (!empty($hiddenGivers)) { ?>
+        <span class="d2-bonus-more" style="display:none"><?php echo implode(' ', $hiddenGivers) ?></span>
+        <a href="javascript:void(0)" class="d2-show-all-bonus"><?php echo $lang_details['magic_show_all_description'] ?? '[Show all]' ?></a>
+        <?php } ?>
+    </div>
+    <?php } ?>
 </div>
 <?php
         return ob_get_clean();
@@ -564,7 +628,7 @@ final class TorrentDetails
 
         $givers = [];
         foreach ($thanksInfo['thanks'] as $t) {
-            $givers[] = get_username((int) $t['userid'], false, true, true, false, false, false);
+            $givers[] = get_username((int) $t->userid, false, true, true, false, false, false);
         }
         $giversHtml = $givers ? implode(', ', $givers) : ($lang_details['text_no_thanks_added'] ?? 'No thanks added yet.');
 

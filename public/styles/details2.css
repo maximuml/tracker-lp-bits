@@ -68,6 +68,14 @@
     align-items: center;
 }
 
+.d2-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 16px;
+    font-size: 13px;
+}
+
 .d2-badges > * {
     display: inline-flex;
     align-items: center;
@@ -103,6 +111,18 @@
 .d2-badge--new {
     background: #dbeafe;
     color: #1e40af;
+}
+
+.d2-banner--success {
+    background: #d1fae5;
+    color: #065f46;
+    border: 1px solid #6ee7b7;
+}
+
+.d2-banner--warning {
+    background: #fef3c7;
+    color: #92400e;
+    border: 1px solid #fcd34d;
 }
 
 .d2-stats {
@@ -401,6 +421,16 @@
     font-size: 12px;
     color: #6b7280;
     margin: 0;
+}
+
+.d2-bonus-givers {
+    margin-top: 10px;
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+.d2-bonus-givers a {
+    margin-left: 6px;
 }
 
 .d2-thanks-list {

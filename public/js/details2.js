@@ -14,6 +14,8 @@
         initApproval(data.torrent_id);
         initLazyLoad('.d2-load-files', '.d2-files-content', 'viewfilelist.php?id=');
         initLazyLoad('.d2-load-peers', '.d2-peers-content', 'viewpeerlist.php?id=');
+        initBonusShowAll();
+        autoLoadPeers(data.torrent_id);
     }
 
     function initTabs() {
@@ -176,15 +178,35 @@
         if (!btn || typeof jQuery === 'undefined' || typeof layer === 'undefined') return;
 
         btn.addEventListener('click', function () {
-            jQuery('#d2-approve').on('click', function () {
-                layer.open({
-                    type: 2,
-                    title: 'Approval',
-                    area: ['60%', '600px'],
-                    content: '/web/torrent-approval-page?torrent_id=' + torrentId,
-                });
+            layer.open({
+                type: 2,
+                title: 'Approval',
+                area: ['60%', '600px'],
+                content: '/web/torrent-approval-page?torrent_id=' + torrentId,
             });
         });
+    }
+
+    function initBonusShowAll() {
+        const link = document.querySelector('.d2-show-all-bonus');
+        const more = document.querySelector('.d2-bonus-more');
+        if (!link || !more) return;
+
+        link.addEventListener('click', function (e) {
+            e.preventDefault();
+            const hidden = more.style.display === 'none';
+            more.style.display = hidden ? 'inline' : 'none';
+            link.innerText = hidden ? '[Hide]' : '[Show all]';
+        });
+    }
+
+    function autoLoadPeers(torrentId) {
+        if (new URLSearchParams(window.location.search).get('dllist') !== '1') return;
+        const peersTab = document.querySelector('.d2-tab[data-tab="peers"]');
+        const loadBtn = document.querySelector('.d2-load-peers');
+        if (!loadBtn) return;
+        if (peersTab) peersTab.click();
+        loadBtn.click();
     }
 
     function initLazyLoad(buttonSelector, contentSelector, urlPrefix) {

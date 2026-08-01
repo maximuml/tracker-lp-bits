@@ -37,5 +37,24 @@ $assetVersion = max(
 \Nexus\Nexus::css('styles/details2.css?v=' . $assetVersion, 'header', true);
 \Nexus\Nexus::js('js/details2.js?v=' . $assetVersion, 'footer', true);
 stdhead($lang_details['head_details_for_torrent'] . '"' . $row["name"] . '"');
-echo \App\Support\TorrentDetails::render($row);
+
+$returnto = isset($_GET['returnto']) ? htmlspecialchars($_GET['returnto']) : '';
+if (!empty($_GET['uploaded'])) {
+    echo '<div class="d2-banner d2-banner--success"><h1 align="center">' . $lang_details['text_successfully_uploaded'] . '</h1><p>' . $lang_details['text_redownload_torrent_note'] . '</p></div>';
+    echo '<meta http-equiv="refresh" content="1;url=download.php?id=' . $id . '">'; // fallback after body start may not send header, use meta
+} elseif (!empty($_GET['edited'])) {
+    echo '<div class="d2-banner d2-banner--success"><h1 align="center">' . $lang_details['text_successfully_edited'] . '</h1>';
+    if ($returnto) {
+        echo '<p><b>' . $lang_details['text_go_back'] . '<a href="' . $returnto . '">' . $lang_details['text_whence_you_came'] . '</a></b></p>';
+    }
+    echo '</div>';
+} elseif (!empty($_GET['existed'])) {
+    echo '<div class="d2-banner d2-banner--warning"><h1 align="center">' . $lang_details['torrent_existed'] . '</h1>';
+    if ($returnto) {
+        echo '<p><b>' . $lang_details['text_go_back'] . '<a href="' . $returnto . '">' . $lang_details['text_whence_you_came'] . '</a></b></p>';
+    }
+    echo '</div>';
+}
+
+echo \App\Support\TorrentDetails::render($row, $returnto);
 stdfoot();

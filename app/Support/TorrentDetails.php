@@ -509,6 +509,8 @@ final class TorrentDetails
      */
     private static function similarHtml(int $id, array $row): string
     {
+        global $CURUSER;
+
         if (empty($row['category'])) {
             return '';
         }
@@ -529,6 +531,9 @@ final class TorrentDetails
         $items = [];
         foreach ($torrents as $t) {
             $t = (array) $t;
+            if (!can_access_torrent((int) $t['id'], (int) $CURUSER['id'])) {
+                continue;
+            }
             $cover = $t['cover'] ? '<img src="' . htmlspecialchars($t['cover']) . '" alt="" loading="lazy" />' : '<div class="d2-no-cover"></div>';
             $items[] = '<a class="d2-similar" href="details2.php?id=' . (int) $t['id'] . '&hit=1">'
                 . $cover
@@ -539,7 +544,7 @@ final class TorrentDetails
                 . '</a>';
         }
 
-        return '<div class="d2-similar-list">' . implode('', $items) . '</div>';
+        return $items === [] ? '' : '<div class="d2-similar-list">' . implode('', $items) . '</div>';
     }
 
     /**

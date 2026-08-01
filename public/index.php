@@ -134,8 +134,6 @@ JS;
     print(\App\Support\Shoutbox::toolbar('shbox', 'shbox_text'));
     print('<div style="display: flex">');
 	print("<label for='shbox_text'>".$lang_index['text_message']."</label><input type='text' name='shbox_text' id='shbox_text' size='100' style='flex-grow: 1; border: 1px solid gray;' />  <input type='submit' id='hbsubmit' class='btn' name='shout' value=\"".$lang_index['sumbit_shout']."\" />");
-	if ($CURUSER['hidehb'] != 'yes' && $showhelpbox_main =='yes')
-		print("<input type='submit' class='btn' name='toguest' value=\"".$lang_index['sumbit_to_guest']."\" />");
 	print("<input type='reset' class='btn' value=\"".$lang_index['submit_clear']."\" /> <input type='hidden' name='sent' value='yes' /><input type='hidden' name='type' value='shoutbox' />");
 	print('</div>');
 	print("</form></td></tr></table>");

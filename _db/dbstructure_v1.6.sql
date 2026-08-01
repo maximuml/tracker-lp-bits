@@ -1961,7 +1961,7 @@ CREATE TABLE `shoutbox` (
   `userid` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `date` int(10) unsigned NOT NULL DEFAULT '0',
   `text` text NOT NULL,
-  `type` enum('sb','hb') NOT NULL DEFAULT 'sb',
+  `type` enum('sb') NOT NULL DEFAULT 'sb',
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -2655,7 +2655,6 @@ CREATE TABLE `users` (
   `warnedby` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `sbnum` smallint(5) unsigned NOT NULL DEFAULT '70',
   `sbrefresh` smallint(5) unsigned NOT NULL DEFAULT '120',
-  `hidehb` enum('yes','no') DEFAULT 'no',
   `showimdb` enum('yes','no') DEFAULT 'yes',
   `showdescription` enum('yes','no') DEFAULT 'yes',
   `showcomment` enum('yes','no') DEFAULT 'yes',

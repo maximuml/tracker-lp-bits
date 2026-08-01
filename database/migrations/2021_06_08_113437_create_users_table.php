@@ -107,7 +107,6 @@ class CreateUsersTable extends Migration
             $table->unsignedMediumInteger('warnedby')->default(0);
             $table->unsignedSmallInteger('sbnum')->default(70);
             $table->unsignedSmallInteger('sbrefresh')->default(120);
-            $table->enum('hidehb', ['yes', 'no'])->nullable()->default('no');
             $table->enum('showimdb', ['yes', 'no'])->nullable()->default('yes');
             $table->enum('showdescription', ['yes', 'no'])->nullable()->default('yes');
             $table->enum('showcomment', ['yes', 'no'])->nullable()->default('yes');

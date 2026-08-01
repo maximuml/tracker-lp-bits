@@ -293,10 +293,6 @@ if ($action){
 				$data['sbnum'] = ($_POST["sbnum"] ? max(10, min(500, intval($_POST["sbnum"] ?? 0))) : 70);
 				$data['sbrefresh'] = ($_POST["sbrefresh"] ? max(10, min(3600, intval($_POST["sbrefresh"] ?? 0))) : 120);
 
-				if (isset($_POST["hidehb"]) && $_POST["hidehb"] == 'yes')
-					$data['hidehb'] = 'yes';
-				else
-					$data['hidehb'] = 'no';
 				if ($_POST["showdescription"] == 'yes')
 					$data['showdescription'] = 'yes';
 				else
@@ -532,7 +528,7 @@ if ($showaudiocodec) $audiocodecs = searchbox_item_list("audiocodecs");
 
 			tr_small($lang_usercp['row_pm_boxes'], $lang_usercp['text_show']."<input type=text name=pmnum size=5 value=".$CURUSER['pmnum']." >".$lang_usercp['text_pms_per_page'], 1);
 if ($showshoutbox_main == "yes") //system side setting for shoutbox
-			tr_small($lang_usercp['row_shoutbox'], $lang_usercp['text_show_last']."<input type=text name=sbnum size=5 value=".$CURUSER['sbnum']." >".$lang_usercp['text_messages_at_shoutbox']."<br />".$lang_usercp['text_refresh_shoutbox_every']."<input type=text name=sbrefresh size=5 value=".$CURUSER['sbrefresh']." >".$lang_usercp['text_seconds'].($showhelpbox_main == 'yes' ? "<br /><input type=checkbox name=hidehb".($CURUSER["hidehb"] == "yes" ? " checked" : "") ." value=yes>".$lang_usercp['text_hide_helpbox_messages'] : ""), 1);
+			tr_small($lang_usercp['row_shoutbox'], $lang_usercp['text_show_last']."<input type=text name=sbnum size=5 value=".$CURUSER['sbnum']." >".$lang_usercp['text_messages_at_shoutbox']."<br />".$lang_usercp['text_refresh_shoutbox_every']."<input type=text name=sbrefresh size=5 value=".$CURUSER['sbrefresh']." >".$lang_usercp['text_seconds'], 1);
 
 			tr_small($lang_usercp['row_torrent_detail'], "<input type=checkbox name=showdescription".($CURUSER["showdescription"] == "yes" ? " checked" : "") ." value=yes>".$lang_usercp['text_show_description'],1);
 			tr_small($lang_usercp['row_discuss'],"<input type=checkbox name=showcomment".($CURUSER["showcomment"] == "yes" ? " checked" : "") ." value=yes>".$lang_usercp['text_show_comments'], 1);

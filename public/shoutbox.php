@@ -15,7 +15,7 @@ if (isset($_GET['del']))
 	}
 }
 $isAjax = !empty($_GET['ajax']);
-$where=$_GET["type"] ?? '';
+$where = 'shoutbox';
 $refresh = ($CURUSER['sbrefresh'] ?? 120);
 if (!$isAjax):
 ?>
@@ -47,36 +47,11 @@ time=time-1;
 t=setTimeout(function(){ startcountdown(time); },1000);
 }
 }
-function countdown(time)
-{
-	if (time <= 0){
-	parent.document.getElementById("hbtext").disabled=false;
-	parent.document.getElementById("hbsubmit").disabled=false;
-	parent.document.getElementById("hbsubmit").value=parent.document.getElementById("sbword").innerHTML;
-	}
-	else {
-	parent.document.getElementById("hbsubmit").value=time;
-	time=time-1;
-	setTimeout("countdown("+time+")", 1000);
-	}
-}
-function hbquota(){
-parent.document.getElementById("hbtext").disabled=true;
-parent.document.getElementById("hbsubmit").disabled=true;
-var time=10;
-countdown(time);
-//]]>
-}
 function shoutReply(nick) {
 	try {
 		var input = null;
-		if (parent && parent.document) {
-			if (parent.document.forms && parent.document.forms['shbox'] && parent.document.forms['shbox'].shbox_text) {
-				input = parent.document.forms['shbox'].shbox_text;
-			}
-			if (!input) {
-				input = parent.document.getElementById('hbtext');
-			}
+		if (parent && parent.document && parent.document.forms && parent.document.forms['shbox'] && parent.document.forms['shbox'].shbox_text) {
+			input = parent.document.forms['shbox'].shbox_text;
 		}
 		if (!input) { return false; }
 		var prefix = '@' + nick + ', ';
@@ -143,63 +118,38 @@ function shoutAttachToggleHandler() {
 //]]>
 </script>
 </head>
-<body class='inframe' <?php if (isset($_GET["type"]) && $_GET["type"] != "helpbox"){?> onload="<?php echo $startcountdown?>" <?php } else {?> onload="hbquota();shoutAttachToggleHandler();shoutboxInitSSE('helpbox', <?php echo $lastId; ?>);" <?php } ?>>
+<body class='inframe' onload="<?php echo $startcountdown?>">
 <?php
 endif; // if (!$isAjax)
 ?>
 <?php
-if(isset($_GET["sent"]) && $_GET["sent"]=="yes"){
-if(!isset($_GET["shbox_text"]) || !$_GET['shbox_text'])
-{
-	$userid=intval($CURUSER["id"] ?? 0);
-}
-else
-{
-	if($_GET["type"]=="helpbox")
-	{
-		if ($showhelpbox_main != 'yes'){
-            do_log("Someone is hacking shoutbox. helpbox_disabled - IP : ".getip());
-			die($lang_shoutbox['text_helpbox_disabled']);
-		}
-		$userid=0;
-		$type='hb';
-	}
-	elseif ($_GET["type"] == 'shoutbox')
-	{
-		$userid=intval($CURUSER["id"] ?? 0);
-		if (!$userid){
-            do_log("Someone is hacking shoutbox. no_permission_to_shoutbox - IP : ".getip());
-			die($lang_shoutbox['text_no_permission_to_shoutbox']);
-		}
-		if (!empty($_GET["toguest"]))
-			$type ='hb';
-		else $type = 'sb';
-	}
-	$date=time();
-	$text=trim($_GET["shbox_text"]);
-	if (mb_strlen($text) > \App\Support\Shoutbox::MAX_MESSAGE_LENGTH) {
-		die($lang_shoutbox['text_message_too_long'] ?? 'Message too long');
-	}
-    if (isset($userid) && $userid > 0) {
-        $lock = new \Nexus\Database\NexusLock("shoutbox:$userid", 60);
-    } else {
-        $lock = new \Nexus\Database\NexusLock("shoutbox:" . getip(), 60);
+if (isset($_GET['sent']) && $_GET['sent'] === 'yes' && !empty($_GET['shbox_text'])) {
+    $userid = (int) ($CURUSER['id'] ?? 0);
+    if (!$userid) {
+        do_log('Someone is hacking shoutbox. no_permission_to_shoutbox - IP : ' . getip());
+        die($lang_shoutbox['text_no_permission_to_shoutbox']);
     }
-    if (!$lock->acquire()) {
+    $type = 'sb';
+    $date = time();
+    $text = trim($_GET['shbox_text']);
+    if (mb_strlen($text) > \App\Support\Shoutbox::MAX_MESSAGE_LENGTH) {
+        die($lang_shoutbox['text_message_too_long'] ?? 'Message too long');
+    }
+    $lock = new \Nexus\Database\NexusLock("shoutbox:$userid", 60);
+    if (! $lock->acquire()) {
         die($lang_shoutbox['speaking_too_often']);
     }
-	\Nexus\Database\NexusDB::table('shoutbox')->insert([
-	    'userid' => $userid,
-	    'date' => $date,
-	    'text' => $text,
-	    'type' => $type,
-	]);
-	print "<script type=\"text/javascript\">parent.document.forms['shbox'].shbox_text.value='';</script>";
-}
+    \Nexus\Database\NexusDB::table('shoutbox')->insert([
+        'userid' => $userid,
+        'date' => $date,
+        'text' => $text,
+        'type' => $type,
+    ]);
+    print "<script type=\"text/javascript\">parent.document.forms['shbox'].shbox_text.value='';</script>";
 }
 
-if (!isset($CURUSER) && !($where === 'helpbox' && $showhelpbox_main == 'yes')) {
-    die("<h1>".$lang_shoutbox['std_access_denied']."</h1>"."<p>".$lang_shoutbox['std_access_denied_note']."</p></body></html>");
+if (!isset($CURUSER)) {
+    die('<h1>' . $lang_shoutbox['std_access_denied'] . '</h1><p>' . $lang_shoutbox['std_access_denied_note'] . '</p></body></html>');
 }
 
 $limit = ($CURUSER['sbnum'] ?? 70);
@@ -298,8 +248,6 @@ else
 		$nickReplyName = '';
 		if ($arr["userid"]) {
 			$username = get_username($arr["userid"],false,true,true,true,false,false,"",true);
-			if (isset($arr["type"]) && isset($_GET['type']) && $_GET["type"] != 'helpbox' && $arr["type"] == 'hb')
-				$username .= $lang_shoutbox['text_to_guest'];
 			$userRow = get_user_row((int)$arr["userid"]);
 			$nickReplyName = trim((string)($userRow["username"] ?? ''));
 			$classBadge = shoutbox_class_badge((int)($userRow["class"] ?? 0));

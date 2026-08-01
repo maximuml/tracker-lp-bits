@@ -31,7 +31,7 @@ return [
     ],
     'sbmanage' => [
         'text' => 'Shoutbox Management',
-        'desc' => 'Delete messages in shoutbox and helpbox',
+        'desc' => 'Delete messages in shoutbox',
     ],
     'pollmanage' => [
         'text' => 'Poll Management',

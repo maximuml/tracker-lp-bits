@@ -21,7 +21,7 @@ class CreateShoutboxTable extends Migration
             $table->unsignedMediumInteger('userid')->default(0);
             $table->unsignedInteger('date')->default(0);
             $table->text('text');
-            $table->enum('type', ['sb', 'hb'])->default('sb');
+            $table->enum('type', ['sb'])->default('sb');
         });
     }
 

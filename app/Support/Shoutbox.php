@@ -77,8 +77,8 @@ final class Shoutbox
     }
 
     /**
-     * Apply the same type filter that public/shoutbox.php uses so the
-     * SSE stream and the rendered list agree on which rows are visible.
+     * Only regular shoutbox messages are visible. Helpbox has been removed,
+     * so older rows with type 'hb' are always excluded from filters and streams.
      *
      * @param  \Illuminate\Database\Query\Builder  $query
      * @param  string                                $type
@@ -86,16 +86,7 @@ final class Shoutbox
      */
     public static function applyTypeFilter($query, string $type, $user = null): void
     {
-        $showHelpbox = $GLOBALS['showhelpbox_main'] ?? 'no';
-        if ($type === 'helpbox' && $showHelpbox === 'yes') {
-            $query->where('type', 'hb');
-            return;
-        }
-
-        $hideHb = is_array($user) ? ($user['hidehb'] ?? '') : (is_object($user) ? ($user->hidehb ?? '') : '');
-        if ($type === 'shoutbox' && $user !== null && ($hideHb === 'yes' || $showHelpbox !== 'yes')) {
-            $query->where('type', 'sb');
-        }
+        $query->where('type', 'sb');
     }
 
     /**

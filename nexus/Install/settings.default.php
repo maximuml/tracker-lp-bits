@@ -56,7 +56,6 @@ return array (
     'showshoutbox' => 'yes',
     'showoffer' => 'yes',
     'sptime' => 'no',
-    'showhelpbox' => 'no',
     'enablebitbucket' => 'yes',
     'smalldescription' => 'yes',
     'altname' => '',

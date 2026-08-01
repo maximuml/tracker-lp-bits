@@ -130,9 +130,14 @@
                 body: form.toString()
             })
                 .then(function (r) { return r.text(); })
-                .then(function () {
-                    btn.innerText = 'You said thanks';
-                    btn.disabled = true;
+                .then(function (text) {
+                    if (text.trim() === '') {
+                        btn.innerText = 'You said thanks';
+                        btn.disabled = true;
+                    } else {
+                        alert('Thanks failed');
+                        btn.disabled = false;
+                    }
                 })
                 .catch(function () {
                     alert('Thanks failed');

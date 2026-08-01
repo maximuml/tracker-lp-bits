@@ -494,7 +494,7 @@ final class TorrentDetails
 ?>
 <div class="d2-quick-comment">
     <h3><?php echo $lang_details['text_quick_comment'] ?? 'Quick comment' ?></h3>
-    <form id="d2-comment-form" name="comment" method="post" action="<?php echo htmlspecialchars('comment.php?action=add&type=torrent') ?>" onsubmit="return postvalid(this);">
+    <form id="compose" name="comment" method="post" action="<?php echo htmlspecialchars('comment.php?action=add&type=torrent') ?>" onsubmit="return postvalid(this);">
         <input type="hidden" name="pid" value="<?php echo $id ?>" />
         <?php quickreply('comment', 'body', $lang_details['submit_add_comment'] ?? 'Add comment') ?>
     </form>

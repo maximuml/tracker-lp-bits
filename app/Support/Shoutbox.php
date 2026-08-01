@@ -24,7 +24,7 @@ final class Shoutbox
      */
     public static function csrfToken(int $userId): string
     {
-        $secret = function_exists('config') ? (string) config('app.key') : (string) (getenv('APP_KEY') ?: '');
+        $secret = self::getAppKey();
         if ($secret === '') {
             throw new \RuntimeException('Shoutbox CSRF requires APP_KEY to be configured');
         }
@@ -39,7 +39,7 @@ final class Shoutbox
      */
     public static function validateCsrfToken(int $userId, string $token): bool
     {
-        $secret = function_exists('config') ? (string) config('app.key') : (string) (getenv('APP_KEY') ?: '');
+        $secret = self::getAppKey();
         if ($secret === '') {
             return false;
         }
@@ -55,6 +55,22 @@ final class Shoutbox
         $previousWindow = (string) ($window - 1);
         $previousExpected = $previousWindow . ':' . hash_hmac('sha256', 'shoutbox:' . $userId . ':' . $previousWindow, $secret);
         return hash_equals($previousExpected, $token);
+    }
+
+    /**
+     * Read the Laravel app key, falling back to the APP_KEY environment
+     * variable. Legacy/FPM bootstrap may not have loaded `config()` yet.
+     */
+    private static function getAppKey(): string
+    {
+        $secret = '';
+        if (function_exists('config')) {
+            $secret = (string) (config('app.key') ?: '');
+        }
+        if ($secret === '') {
+            $secret = (string) (getenv('APP_KEY') ?: '');
+        }
+        return $secret;
     }
 
     /**

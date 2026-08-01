@@ -127,7 +127,7 @@ if (\App\Models\User::query()->where('email', $email)->count() > 0)
 
 $secret = mksecret();
 //$wantpasshash = md5($secret . $wantpassword . $secret);
-$wantpasshash = hash('sha256', $secret . hash('sha256', $wantpassword));
+$wantpasshash = hash('sha256', $secret . $wantpassword);
 $editsecret = ($verification == 'admin' ? '' : $secret);
 $invite_count = (int) $invite_count;
 $passkey = md5($wantusername.date("Y-m-d H:i:s").$wantpasshash);

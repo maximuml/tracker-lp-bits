@@ -124,12 +124,13 @@ final class SearchBox
         string $categoryHrefPrefix,
         string $taxonomyHrefPrefix,
         int|string $taxonomyNameLength,
-        string $checkedValues = '',
+        ?string $checkedValues = '',
         array $options = [],
     ): string {
         $mode = (int) $mode;
         $checkboxValue = (int) $checkboxValue;
         $taxonomyNameLength = (int) $taxonomyNameLength;
+        $checkedValues = (string) $checkedValues;
 
         parse_str($checkedValues, $checkedValuesArr);
         $searchBox = \App\Models\SearchBox::query()->with(['categories', 'categories.icon'])->findOrFail($mode);

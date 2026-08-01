@@ -9,10 +9,12 @@ return new class extends Migration
     public function up(): void
     {
         // Clean up any leftover helpbox messages and their reactions.
-        if (Schema::hasTable('shoutbox') && Schema::hasTable('shoutbox_reactions')) {
+        if (Schema::hasTable('shoutbox')) {
             $hbIds = DB::table('shoutbox')->where('type', 'hb')->pluck('id')->all();
             if (! empty($hbIds)) {
-                DB::table('shoutbox_reactions')->whereIn('shoutbox_id', $hbIds)->delete();
+                if (Schema::hasTable('shoutbox_reactions')) {
+                    DB::table('shoutbox_reactions')->whereIn('shoutbox_id', $hbIds)->delete();
+                }
                 DB::table('shoutbox')->where('type', 'hb')->delete();
             }
         }

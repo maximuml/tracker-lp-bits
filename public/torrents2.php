@@ -24,6 +24,12 @@ $addparam = 'view=' . urlencode($view) . '&';
 $db = \Nexus\Database\NexusDB::getInstance();
 $wherea = ['torrents.visible = "yes"'];
 
+$genreList = genrelist($sectiontype);
+$allowedCategoryIds = array_map('intval', array_column($genreList, 'id'));
+if ($allowedCategoryIds !== []) {
+    $wherea[] = 'torrents.category IN (' . implode(',', $allowedCategoryIds) . ')';
+}
+
 if (!user_can('seebanned')) {
     $wherea[] = 'torrents.banned = "no"';
 }
@@ -34,9 +40,11 @@ if ($approvalStatusNoneVisible == 'no' && !user_can('torrent-approval')) {
 }
 
 $catId = intval($_GET['cat'] ?? 0);
-if ($catId > 0) {
+if ($catId > 0 && in_array($catId, $allowedCategoryIds, true)) {
     $wherea[] = 'torrents.category = ' . $catId;
     $addparam .= 'cat=' . $catId . '&';
+} else {
+    $catId = 0;
 }
 
 $tagId = intval($_GET['tag'] ?? 0);
@@ -46,7 +54,7 @@ if ($tagId > 0) {
 
 $searchstr = trim($_GET['search'] ?? '');
 if ($searchstr !== '') {
-    $safeSearch = $db->quote('%' . $searchstr . '%');
+    $safeSearch = "'" . $db->escapeString('%' . $searchstr . '%') . "'";
     $wherea[] = 'torrents.name LIKE ' . $safeSearch;
     $addparam .= 'search=' . urlencode($searchstr) . '&';
 }
@@ -105,7 +113,7 @@ $assetVersion = max(
 
 stdhead($lang_torrents['head_torrents'] ?? 'Torrents');
 
-$cats = genrelist($sectiontype);
+$cats = $genreList;
 ?>
 <div class="t2-wrap">
     <div class="t2-header">

@@ -128,8 +128,7 @@ final class TorrentGrid
             }
         }
 
-        $globalSpState = get_global_sp_state();
-        $effectiveCode = $globalSpState == 1 ? (int) ($row['sp_state'] ?? 1) : $globalSpState;
+        $effectiveCode = Promotion::effectiveCodeForTorrent($row, !empty($row['__ignore_global_sp_state']));
         if (isset(self::PROMOTION_BADGES[$effectiveCode])) {
             $config = self::PROMOTION_BADGES[$effectiveCode];
             $text = $langFunctions[$config['text_key']] ?? $config['class'];
@@ -147,7 +146,7 @@ final class TorrentGrid
     {
         if ($cover) {
             return sprintf(
-                '<a class="t2-cover" href="details2.php?id=%d&amp;hit=1"><img src="%s" alt="%s" loading="lazy" /></a>',
+                '<a class="t2-cover" href="details.php?id=%d&amp;hit=1"><img src="%s" alt="%s" loading="lazy" /></a>',
                 $id,
                 htmlspecialchars($cover),
                 $name
@@ -155,7 +154,7 @@ final class TorrentGrid
         }
 
         return sprintf(
-            '<a class="t2-cover t2-cover--placeholder" href="details2.php?id=%d&amp;hit=1">%s</a>',
+            '<a class="t2-cover t2-cover--placeholder" href="details.php?id=%d&amp;hit=1">%s</a>',
             $id,
             $categoryImage ?: '<span>' . $name . '</span>'
         );
@@ -167,7 +166,7 @@ final class TorrentGrid
         $html .= self::coverHtml($cover, $categoryImage, $name, $id);
         $html .= '<div class="t2-card-body">';
         $html .= $badges;
-        $html .= '<h3 class="t2-title"><a href="details2.php?id=' . $id . '&amp;hit=1">' . $name . '</a></h3>';
+        $html .= '<h3 class="t2-title"><a href="details.php?id=' . $id . '&amp;hit=1">' . $name . '</a></h3>';
         if ($tags) {
             $html .= '<div class="t2-tags">' . $tags . '</div>';
         }
@@ -181,7 +180,7 @@ final class TorrentGrid
         $html = '<article class="t2-card t2-card--compact">';
         $html .= self::coverHtml($cover, $categoryImage, $name, $id);
         $html .= '<div class="t2-card-body">';
-        $html .= '<h3 class="t2-title"><a href="details2.php?id=' . $id . '&amp;hit=1">' . $name . '</a></h3>';
+        $html .= '<h3 class="t2-title"><a href="details.php?id=' . $id . '&amp;hit=1">' . $name . '</a></h3>';
         $html .= $badges;
         if ($tags) {
             $html .= '<div class="t2-tags">' . $tags . '</div>';

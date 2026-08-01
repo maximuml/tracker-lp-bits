@@ -224,4 +224,51 @@ final class Promotion
 
         return $state;
     }
+
+    /**
+     * Return the effective promotion code for a torrent, taking the global
+     * special state and promotion expiry into account. Expired promotions are
+     * normalized to PROMOTION_NORMAL (1).
+     *
+     * @param  array<string, mixed>  $torrent
+     */
+    public static function effectiveCodeForTorrent(array $torrent, bool $ignoreGlobal = false): int
+    {
+        $promotion = (int) ($torrent['sp_state'] ?? Torrent::PROMOTION_NORMAL);
+        $globalSpState = $ignoreGlobal ? Torrent::PROMOTION_NORMAL : self::globalSpecialState();
+
+        if ($globalSpState != Torrent::PROMOTION_NORMAL) {
+            return $globalSpState;
+        }
+
+        if (!isset(self::PROMOTION_CONFIG[$promotion])) {
+            return Torrent::PROMOTION_NORMAL;
+        }
+
+        $promotionTimeType = (int) ($torrent['promotion_time_type'] ?? Torrent::PROMOTION_TIME_TYPE_GLOBAL);
+        $promotionUntil = (string) ($torrent['promotion_until'] ?? '');
+        $added = (string) ($torrent['added'] ?? '');
+
+        $torrentSettings = \get_setting('torrent');
+        $config = self::PROMOTION_CONFIG[$promotion];
+        $expire = (int) ($torrentSettings[$config['expire']] ?? 0);
+
+        if (
+            ($expire && $promotionTimeType == Torrent::PROMOTION_TIME_TYPE_GLOBAL)
+            || $promotionTimeType == Torrent::PROMOTION_TIME_TYPE_DEADLINE
+        ) {
+            $futureTime = $promotionTimeType == Torrent::PROMOTION_TIME_TYPE_DEADLINE
+                ? strtotime($promotionUntil)
+                : strtotime($added) + $expire * 86400;
+            if ($futureTime === false) {
+                return Torrent::PROMOTION_NORMAL;
+            }
+            $timeout = \gettime(date('Y-m-d H:i:s', $futureTime), false, false, true, false, true);
+            if (!$timeout) {
+                return Torrent::PROMOTION_NORMAL;
+            }
+        }
+
+        return $promotion;
+    }
 }

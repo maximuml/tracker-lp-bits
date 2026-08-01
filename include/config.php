@@ -128,7 +128,6 @@ $showtrackerload = $MAIN['showtrackerload'];
 $showshoutbox_main = $MAIN['showshoutbox'];
 $enableoffer = $MAIN['showoffer'];
 $sptime = $MAIN['sptime'];
-$showhelpbox_main = $MAIN['showhelpbox'];
 $enablebitbucket_main = $MAIN['enablebitbucket'];
 $altname_main = $MAIN['altname'] ?? '';
 $deflang = $MAIN['defaultlang'];

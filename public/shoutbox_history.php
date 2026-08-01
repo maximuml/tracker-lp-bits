@@ -19,35 +19,19 @@ $filters = [
     'from' => trim((string) ($_GET['from'] ?? '')),
     'to' => trim((string) ($_GET['to'] ?? '')),
     'search' => trim((string) ($_GET['search'] ?? '')),
-    'type' => trim((string) ($_GET['type'] ?? '')),
 ];
 
 $currentUserId = (int) ($CURUSER['id'] ?? 0);
 echo '<script>var SHOUT_CSRF = \'' . htmlspecialchars(\App\Support\Shoutbox::csrfToken($currentUserId)) . '\';</script>';
 $isStaff = user_can('sbmanage');
-$canViewHb = $isStaff || ($showhelpbox_main == 'yes' && ($CURUSER['hidehb'] ?? '') != 'yes');
 
-// A regular user who cannot see helpbox messages in the main shoutbox should
-// not be able to enumerate them through the history page either.
-$effectiveType = $filters['type'];
-if (! $canViewHb) {
-    if ($effectiveType === 'hb') {
-        $effectiveType = 'sb';
-    } elseif ($effectiveType === '') {
-        $effectiveType = 'sb';
-    }
-}
-
+// Helpbox has been removed; only regular shoutbox messages are shown.
 $query = \Nexus\Database\NexusDB::table('shoutbox')
+    ->where('type', 'sb')
     ->orderByDesc('date')
     ->offset($offset)
     ->limit($perPage);
-$countQuery = \Nexus\Database\NexusDB::table('shoutbox');
-
-if ($effectiveType === 'sb' || $effectiveType === 'hb') {
-    $query->where('type', $effectiveType);
-    $countQuery->where('type', $effectiveType);
-}
+$countQuery = \Nexus\Database\NexusDB::table('shoutbox')->where('type', 'sb');
 
 if ($filters['user'] !== '') {
     $userId = \Nexus\Database\NexusDB::table('users')
@@ -87,14 +71,6 @@ $rows = $query->get()->map(fn ($r) => (array) $r)->all();
 $total = (int) $countQuery->count();
 
 $formAction = 'shoutbox_history.php';
-$typeOptions = [
-    '' => $lang_shoutbox['text_all_types'] ?? 'All',
-    'sb' => $lang_shoutbox['text_type_shoutbox'] ?? 'Shoutbox',
-];
-if ($canViewHb) {
-    $typeOptions['hb'] = $lang_shoutbox['text_type_helpbox'] ?? 'Helpbox';
-}
-$selectedType = $canViewHb ? $filters['type'] : ($filters['type'] === 'hb' ? 'sb' : $filters['type']);
 
 echo '<h2>' . ($lang_shoutbox['text_history_title'] ?? 'Shoutbox history') . '</h2>';
 echo '<form action="' . htmlspecialchars($formAction) . '" method="get">';
@@ -103,12 +79,7 @@ echo '<tr><td>' . ($lang_shoutbox['text_username'] ?? 'Username') . '</td><td><i
 echo '<td>' . ($lang_shoutbox['text_from'] ?? 'From') . '</td><td><input type="date" name="from" value="' . htmlspecialchars($filters['from']) . '" /></td>';
 echo '<td>' . ($lang_shoutbox['text_to'] ?? 'To') . '</td><td><input type="date" name="to" value="' . htmlspecialchars($filters['to']) . '" /></td></tr>';
 echo '<tr><td>' . ($lang_shoutbox['text_search'] ?? 'Search') . '</td><td><input type="text" name="search" value="' . htmlspecialchars($filters['search']) . '" /></td>';
-echo '<td>' . ($lang_shoutbox['text_type'] ?? 'Type') . '</td><td><select name="type">';
-foreach ($typeOptions as $value => $label) {
-    echo '<option value="' . htmlspecialchars($value) . '"' . ($selectedType === $value ? ' selected' : '') . '>' . htmlspecialchars($label) . '</option>';
-}
-echo '</select></td>';
-echo '<td colspan="2"><input type="submit" class="btn" value="' . htmlspecialchars($lang_shoutbox['text_filter'] ?? 'Filter') . '" /></td></tr>';
+echo '<td colspan="4"><input type="submit" class="btn" value="' . htmlspecialchars($lang_shoutbox['text_filter'] ?? 'Filter') . '" /></td></tr>';
 echo '</table></form>';
 
 echo '<table border="0" cellspacing="0" cellpadding="2" width="100%">';

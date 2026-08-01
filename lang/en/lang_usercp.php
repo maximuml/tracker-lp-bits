@@ -155,7 +155,6 @@ $lang_usercp = array
 	'text_messages_at_shoutbox' => " messages at shoutbox (0=use default setting, min=10, max=500)",
 	'text_refresh_shoutbox_every' => "Refresh shoutbox every ",
 	'text_seconds' => " seconds (0=use default setting, min=10, max=3600)",
-	'text_hide_helpbox_messages' => "Hide messages from helpbox",
 	'row_torrent_detail' => "Torrent Detail Page",
 	'text_show_description' => "Show Description",
 	'text_show_nfo' => "Show NFO",

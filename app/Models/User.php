@@ -87,7 +87,6 @@
  * @property int $warnedby
  * @property int $sbnum
  * @property int $sbrefresh
- * @property string|null $hidehb
  * @property string|null $showimdb
  * @property string|null $showdescription
  * @property string|null $showcomment

@@ -85,7 +85,7 @@ final class ToastNotifications
      */
     private static function appendShoutboxMentions(int $userId, int $lastShoutId, array &$notifications): void
     {
-        $user = User::query()->find($userId, ['username', 'hidehb']);
+        $user = User::query()->find($userId, ['username']);
         if (!$user || $user->username === null || $user->username === '') {
             return;
         }
@@ -99,7 +99,7 @@ final class ToastNotifications
             ->where('shoutbox.id', '>', $lastShoutId)
             ->where('shoutbox.userid', '!=', $userId)
             ->whereRaw('LOWER(shoutbox.text) LIKE ?', [$like])
-            ->select('shoutbox.id', 'shoutbox.date', 'shoutbox.text', 'shoutbox.type', 'users.username as author_name')
+            ->select('shoutbox.id', 'shoutbox.date', 'shoutbox.text', 'users.username as author_name')
             ->orderBy('shoutbox.id')
             ->limit(self::LIMIT_SHOUT);
 

@@ -81,7 +81,6 @@ $lang_index = array
 	'p_critic_reviews' => "Film Critics' Reviews",
 	'p_user_reviews' => "Selected Users' Reviews",
 	'head_home' => "Home",
-	'sumbit_to_guest' => "to&nbsp;guest",
 	'text_ago' => " ago",
 	'text_auto_refresh_after' => "auto refresh after ",
 	'text_seconds' => " seconds",

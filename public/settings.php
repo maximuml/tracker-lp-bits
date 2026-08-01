@@ -38,7 +38,7 @@ if ($action == 'savesettings_main')	// save main
 		'max_dead_torrent_time','maxusers','torrent_dir', 'iniupload','SITEEMAIL', 'ACCOUNTANTID', 'ALIPAYACCOUNT', 'PAYPALACCOUNT', 'SLOGAN',
 		'icplicense', 'autoclean_interval_one', 'autoclean_interval_two', 'autoclean_interval_three','autoclean_interval_four', 'autoclean_interval_five',
 		'reportemail','invitesystem','registration','enablenfo',
-		'showpolls','showstats','showlastxtorrents', 'showtrackerload','showshoutbox','showoffer','sptime','showhelpbox','enablebitbucket',
+		'showpolls','showstats','showlastxtorrents', 'showtrackerload','showshoutbox','showoffer','sptime','enablebitbucket',
 		'smalldescription','altname','defaultlang','defstylesheet', 'donation','spsct','browsecat','specialcat','waitsystem',
 		'maxdlsystem','bitbucket','torrentnameprefix', 'showforumstats','verification','invite_count','invite_timeout', 'seeding_leeching_time_calc_start',
 		'startsubid', 'logo', 'showlastxforumposts', 'enable_technical_info', 'site_language_enabled', 'show_top_uploader', 'offer_skip_approved_count',
@@ -773,7 +773,6 @@ elseif ($action == 'mainsettings')	// main settings
 	yesorno($lang_settings['row_enable_offer_section'],'showoffer', $MAIN['showoffer'], $lang_settings['text_offer_section_note']);
 	yesorno($lang_settings['row_show_donation'],'donation', $MAIN['donation'], $lang_settings['text_show_donation_note']);
 	yesorno($lang_settings['row_weekend_free_uploading'],'sptime', $MAIN['sptime'], $lang_settings['text_weekend_free_uploading_note']);
-	yesorno($lang_settings['row_enable_helpbox'],'showhelpbox', $MAIN['showhelpbox'], $lang_settings['text_helpbox_note']);
 	yesorno($lang_settings['row_enable_bitbucket'],'enablebitbucket', $MAIN['enablebitbucket'], $lang_settings['text_bitbucket_note']);
 	yesorno($lang_settings['row_ptshow_naming_style'],'altname', $MAIN['altname'], $lang_settings['text_ptshow_naming_style_note']);
     yesorno($lang_settings['row_show_special_section'],'spsct', $MAIN['spsct'], $lang_settings['text_show_special_section_note']);

@@ -58,6 +58,10 @@ class CalculateUserSeedBonus implements ShouldQueue
      */
     public function middleware(): array
     {
+        if ($this->idRedisKey === '') {
+            return [];
+        }
+
         return [new WithoutOverlapping($this->idRedisKey)];
     }
 

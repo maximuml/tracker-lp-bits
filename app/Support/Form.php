@@ -487,6 +487,14 @@ $formVar.on("click", "input[type=button]", function() {
     if (password !== "") {
         const passwordHashed = sha256(password)
         $formVar.find("input[name={$passwordHashedName}]").val(passwordHashed)
+        const hashedMarkerName = "{$passwordHashedName}_hashed"
+        let jqHashedMarker = $formVar.find("input[name=" + hashedMarkerName + "]")
+        if (jqHashedMarker.length === 0) {
+            jqHashedMarker = jQuery('<input type="hidden" name="{$passwordHashedName}_hashed" value="1" />')
+            $formVar.append(jqHashedMarker)
+        } else {
+            jqHashedMarker.val("1")
+        }
         $formVar.submit()
     } else {
         $formVar.submit()

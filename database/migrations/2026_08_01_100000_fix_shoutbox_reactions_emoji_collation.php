@@ -18,10 +18,9 @@ class FixShoutboxReactionsEmojiCollation extends Migration
 
     public function down()
     {
-        if (\Nexus\Database\NexusDB::isMysql()) {
-            \Nexus\Database\NexusDB::statement(
-                "ALTER TABLE `shoutbox_reactions` MODIFY COLUMN `reaction` VARCHAR(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL"
-            );
-        }
+        // Reverting to a case-insensitive collation is unsafe once multiple
+        // distinct emoji reactions exist, because they would be treated as
+        // duplicates under utf8mb4_unicode_ci. Leave utf8mb4_bin in place;
+        // it is strictly safer and has no functional downside.
     }
 }

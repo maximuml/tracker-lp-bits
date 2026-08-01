@@ -127,13 +127,11 @@ if (\App\Models\User::query()->where('email', $email)->count() > 0)
 
 $secret = mksecret();
 //$wantpasshash = md5($secret . $wantpassword . $secret);
-// signup.php passwordHashJs sends sha256(password) as wantpassword; tests and
-// fallback plain submissions still need the client-side hash.
-if (preg_match('/^[a-f0-9]{64}$/i', $wantpassword) === 1) {
-    $clientHashedPassword = $wantpassword;
-} else {
-    $clientHashedPassword = hash('sha256', $wantpassword);
-}
+// signup.php passwordHashJs hashes the password in the browser and sets
+// wantpassword_hashed=1 so the server can use the value as-is. Plain
+// submissions (tests, curl, or JS-disabled clients) must be hashed here.
+$isClientHashed = ($_POST['wantpassword_hashed'] ?? '0') === '1';
+$clientHashedPassword = $isClientHashed ? $wantpassword : hash('sha256', $wantpassword);
 $wantpasshash = hash('sha256', $secret . $clientHashedPassword);
 $editsecret = ($verification == 'admin' ? '' : $secret);
 $invite_count = (int) $invite_count;

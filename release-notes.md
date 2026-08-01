@@ -51,6 +51,7 @@ This release ships the shoutbox modernization, MeiliSearch-by-default, setlist l
 
 ## Full Changelog
 
+- `devin/ci-docker-improvements` (#150) — Docker healthchecks, service dependencies, CI composer/npm cache, and frontend build verification.
 - `devin/bump-php-83` (#154) — PHP 8.4 target and `strftime()` replacement.
 - `devin/meilisearch-default` (#155) — MeiliSearch Docker service, production mode and default keys.
 - `devin/upload-setlist` (#157) — setlist.fm / Linkinpedia lookup on `upload.php`.

@@ -34,6 +34,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST")
 }
 \Nexus\Nexus::css('styles/shoutbox.css', 'header', true);
 \Nexus\Nexus::js('js/shoutbox.js', 'footer', true);
+$toastLang = json_encode([
+    'newMessage' => $lang_index['toast_new_message'] ?? 'New message',
+    'shoutboxMention' => $lang_index['toast_shoutbox_mention'] ?? 'Shoutbox mention',
+    'from' => $lang_index['toast_from'] ?? 'From',
+    'close' => $lang_index['toast_close'] ?? 'Close',
+], JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
+\Nexus\Nexus::js("window.TOAST_LANG = $toastLang;", 'footer', false, 'toast-lang');
+\Nexus\Nexus::css('styles/toast.css', 'header', true);
+\Nexus\Nexus::js('js/toast.js', 'footer', true);
 stdhead($lang_index['head_home']);
 begin_main_frame();
 

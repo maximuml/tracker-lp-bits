@@ -311,6 +311,19 @@ class AjaxInterface{
         $rep = new \App\Repositories\UserPasskeyRepository();
         return $rep->processGet($params['challengeId'], $params['id'], $params['clientDataJSON'], $params['authenticatorData'], $params['signature'], $params['userHandle']);
     }
+
+    public static function getToastNotifications($params)
+    {
+        global $CURUSER;
+        if (!is_array($params)) {
+            $params = [];
+        }
+        $lastPmId = (int) ($params['last_pm_id'] ?? 0);
+        $lastShoutId = (int) ($params['last_shout_id'] ?? 0);
+        $init = !empty($params['init']);
+
+        return \App\Support\ToastNotifications::get((int) $CURUSER['id'], $lastPmId, $lastShoutId, $init);
+    }
 }
 
 $class = 'AjaxInterface';

@@ -1,0 +1,87 @@
+#nexus-toast-container {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-width: 360px;
+    pointer-events: none;
+}
+
+#nexus-toast-container .nexus-toast {
+    pointer-events: auto;
+}
+
+.nexus-toast {
+    position: relative;
+    background: #2b2b2b;
+    color: #f0f0f0;
+    border-left: 4px solid #4caf50;
+    border-radius: 4px;
+    padding: 12px 30px 12px 14px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+    opacity: 0;
+    transform: translateX(120%);
+    animation: nexusToastSlide 0.3s forwards;
+    font-size: 13px;
+    line-height: 1.4;
+    cursor: default;
+}
+
+.nexus-toast-hide {
+    animation: nexusToastSlideOut 0.3s forwards;
+}
+
+.nexus-toast-title {
+    font-weight: bold;
+    margin-bottom: 4px;
+    padding-right: 8px;
+}
+
+.nexus-toast-body {
+    opacity: 0.9;
+    word-break: break-word;
+}
+
+.nexus-toast-close {
+    position: absolute;
+    top: 4px;
+    right: 6px;
+    background: transparent;
+    border: none;
+    color: #aaa;
+    font-size: 20px;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0 4px;
+}
+
+.nexus-toast-close:hover,
+.nexus-toast-close:focus {
+    color: #fff;
+    outline: none;
+}
+
+.nexus-toast-pm {
+    border-left-color: #2196f3;
+}
+
+.nexus-toast-shoutbox-mention {
+    border-left-color: #ff9800;
+}
+
+@keyframes nexusToastSlide {
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes nexusToastSlideOut {
+    to {
+        opacity: 0;
+        transform: translateX(120%);
+    }
+}

@@ -3,6 +3,7 @@ require "../include/bittorrent.php";
 dbconn();
 require_once(get_langfile_path());
 loggedinorreturn();
+$CURUSER['notifs'] = (string) ($CURUSER['notifs'] ?? '');
 $userInfo = \App\Models\User::query()->findOrFail($CURUSER["id"]);
 $siteName = \App\Models\Setting::getSiteName();
 function bark($msg) {

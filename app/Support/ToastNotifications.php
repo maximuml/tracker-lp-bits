@@ -5,6 +5,7 @@ namespace App\Support;
 use App\Models\Message;
 use App\Models\User;
 use Nexus\Database\NexusDB;
+use App\Support\Shoutbox;
 
 /**
  * Fetch lightweight real-time toast notifications for the current user.
@@ -84,7 +85,7 @@ final class ToastNotifications
      */
     private static function appendShoutboxMentions(int $userId, int $lastShoutId, array &$notifications): void
     {
-        $user = User::query()->find($userId, ['username']);
+        $user = User::query()->find($userId, ['username', 'hidehb']);
         if (!$user || $user->username === null || $user->username === '') {
             return;
         }
@@ -93,15 +94,17 @@ final class ToastNotifications
         $pattern = '/(?<![\w\-\[\]\(\)])@' . preg_quote($username, '/') . '(?![\w\-\[\]\(\)])/ui';
         $like = '%@' . strtolower($username) . '%';
 
-        $rows = NexusDB::table('shoutbox')
+        $query = NexusDB::table('shoutbox')
             ->leftJoin('users', 'shoutbox.userid', '=', 'users.id')
             ->where('shoutbox.id', '>', $lastShoutId)
             ->where('shoutbox.userid', '!=', $userId)
             ->whereRaw('LOWER(shoutbox.text) LIKE ?', [$like])
-            ->select('shoutbox.id', 'shoutbox.date', 'shoutbox.text', 'users.username as author_name')
+            ->select('shoutbox.id', 'shoutbox.date', 'shoutbox.text', 'shoutbox.type', 'users.username as author_name')
             ->orderBy('shoutbox.id')
-            ->limit(self::LIMIT_SHOUT)
-            ->get();
+            ->limit(self::LIMIT_SHOUT);
+
+        Shoutbox::applyTypeFilter($query, 'shoutbox', $user);
+        $rows = $query->get();
 
         foreach ($rows as $row) {
             $text = (string) ($row->text ?? '');

@@ -39,6 +39,7 @@ $toastLang = json_encode([
     'shoutboxMention' => $lang_index['toast_shoutbox_mention'] ?? 'Shoutbox mention',
     'from' => $lang_index['toast_from'] ?? 'From',
     'close' => $lang_index['toast_close'] ?? 'Close',
+    'userId' => (int) ($CURUSER['id'] ?? 0),
 ], JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
 \Nexus\Nexus::js("window.TOAST_LANG = $toastLang;", 'footer', false, 'toast-lang');
 \Nexus\Nexus::css('styles/toast.css', 'header', true);

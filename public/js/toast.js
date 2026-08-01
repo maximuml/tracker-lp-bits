@@ -1,11 +1,12 @@
 (function () {
     'use strict';
 
-    var LS_PM = 'toast_last_pm_id';
-    var LS_SHOUT = 'toast_last_shout_id';
+    var lang = window.TOAST_LANG || {};
+    var USER_ID = lang.userId || 0;
+    var LS_PM = 'toast_last_pm_id_' + USER_ID;
+    var LS_SHOUT = 'toast_last_shout_id_' + USER_ID;
     var INTERVAL = 30000;
     var CONTAINER_ID = 'nexus-toast-container';
-    var lang = window.TOAST_LANG || {};
 
     function t(key, fallback) {
         return lang[key] || fallback;
@@ -75,7 +76,13 @@
 
         var title = document.createElement('div');
         title.className = 'nexus-toast-title';
-        title.textContent = n.title || '';
+        if (n.type === 'pm') {
+            title.textContent = t('newMessage', n.title || 'New message');
+        } else if (n.type === 'shoutbox-mention') {
+            title.textContent = t('shoutboxMention', n.title || 'Shoutbox mention');
+        } else {
+            title.textContent = n.title || '';
+        }
 
         var body = document.createElement('div');
         body.className = 'nexus-toast-body';

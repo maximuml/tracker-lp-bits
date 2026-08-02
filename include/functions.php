@@ -62,6 +62,74 @@ function legacy_auth_context(): \App\Support\LegacyAuthContext
         script: $script,
     );
 }
+
+/**
+ * Assemble the legacy page-layout context from the current request/global state.
+ *
+ * This helper lives in the procedural wrapper layer so `App\Support\PageLayout`
+ * can stay free of `$GLOBALS` and super-globals.
+ */
+function page_layout_context(): \App\Support\PageLayoutContext
+{
+    $userUpdateSet = &$GLOBALS['USERUPDATESET'];
+    if (! is_array($userUpdateSet)) {
+        $userUpdateSet = [];
+    }
+
+    $script = '';
+    if (\function_exists('nexus')) {
+        $script = \nexus()->getScript();
+    } else {
+        $scriptFile = $_SERVER['SCRIPT_FILENAME'] ?? '';
+        $script = basename($scriptFile);
+        if (str_contains($script, '.')) {
+            $script = strstr($script, '.', true);
+        }
+    }
+
+    return new \App\Support\PageLayoutContext(
+        user: $GLOBALS['CURUSER'] ?? null,
+        lang: $GLOBALS['lang_functions'] ?? [],
+        cache: $GLOBALS['Cache'] ?? null,
+        defaultStylesheet: (int) ($GLOBALS['defcss'] ?? 0),
+        langDir: $GLOBALS['CURLANGDIR'] ?? '',
+        siteName: $GLOBALS['SITENAME'] ?? '',
+        slogan: $GLOBALS['SLOGAN'] ?? '',
+        logoMain: $GLOBALS['logo_main'] ?? '',
+        baseUrl: $GLOBALS['BASEURL'] ?? '',
+        siteOnline: $GLOBALS['SITE_ONLINE'] ?? 'yes',
+        enableDonation: $GLOBALS['enabledonation'] ?? 'no',
+        titleKeywordsTweak: $GLOBALS['titlekeywords_tweak'] ?? '',
+        metaKeywordsTweak: $GLOBALS['metakeywords_tweak'] ?? '',
+        metaDescriptionTweak: $GLOBALS['metadescription_tweak'] ?? '',
+        cssDateTweak: $GLOBALS['cssdate_tweak'] ?? '',
+        deleteNotTransferTwoAccount: (int) ($GLOBALS['deletenotransfertwo_account'] ?? 0),
+        neverDeleteAccount: (int) ($GLOBALS['neverdelete_account'] ?? 0),
+        iniUploadMain: (int) ($GLOBALS['iniupload_main'] ?? 0),
+        dateFounded: $GLOBALS['datefounded'] ?? '',
+        icpLicenseMain: $GLOBALS['icplicense_main'] ?? '',
+        addKeyShortcut: $GLOBALS['add_key_shortcut'] ?? '',
+        queryName: $GLOBALS['query_name'] ?? [],
+        enableSqlDebugTweak: $GLOBALS['enablesqldebug_tweak'] ?? 'no',
+        sqlDebugTweak: (int) ($GLOBALS['sqldebug_tweak'] ?? 0),
+        analyticsCodeTweak: $GLOBALS['analyticscode_tweak'] ?? '',
+        requestSearch: is_scalar($_GET['search'] ?? '') ? (string) ($_GET['search'] ?? '') : '',
+        requestSearchArea: is_scalar($_GET['search_area'] ?? '') ? (string) ($_GET['search_area'] ?? '') : '',
+        scriptFileName: $_SERVER['SCRIPT_FILENAME'] ?? '',
+        script: $script,
+        enableOffer: $GLOBALS['enableoffer'] ?? '',
+        enableSpecial: $GLOBALS['enablespecial'] ?? '',
+        customMenu: (string) \apply_filter('nexus_menu') ?: null,
+        maxdlSystem: $GLOBALS['maxdlsystem'] ?? '',
+        whereTweak: $GLOBALS['where_tweak'] ?? '',
+        adminClass: defined('UC_ADMINISTRATOR') ? (int) \constant('UC_ADMINISTRATOR') : 0,
+        moderatorClass: defined('UC_MODERATOR') ? (int) \constant('UC_MODERATOR') : 0,
+        sysopClass: defined('UC_SYSOP') ? (int) \constant('UC_SYSOP') : 0,
+        vipClass: defined('UC_VIP') ? (int) \constant('UC_VIP') : 0,
+        userUpdateSet: $userUpdateSet,
+    );
+}
+
 /**
  * @param string $script_name
  * @param bool $target
@@ -921,7 +989,26 @@ function get_if_restricted_is_open()
  * @return void
  */
 function menu ($selected = "home") {
-	echo \App\Support\Menu::renderPage();
+    $langFunctions = $GLOBALS['lang_functions'] ?? [];
+    $customMenu = (string) \apply_filter('nexus_menu');
+
+    $result = \App\Support\Menu::render(
+        \function_exists('nexus') ? \nexus()->getScript() : '',
+        (array) $langFunctions,
+        (string) ($GLOBALS['enableoffer'] ?? ''),
+        (string) ($GLOBALS['enablespecial'] ?? ''),
+        $customMenu !== '' ? $customMenu : null,
+        $GLOBALS['CURUSER'] ?? null,
+        $GLOBALS['Cache'] ?? null,
+        $GLOBALS['CURLANGDIR'] ?? '',
+    );
+
+    $CURUSER = $GLOBALS['CURUSER'] ?? null;
+    if ($CURUSER && ($GLOBALS['where_tweak'] ?? '') === 'yes') {
+        $GLOBALS['USERUPDATESET']['page'] = $result['selected'];
+    }
+
+    echo $result['html'];
 }
 /**
  * @return array<array-key, mixed>|null
@@ -981,6 +1068,8 @@ function get_style_highlight()
  */
 function stdhead($title = "", $msgalert = true, $script = "", $place = "")
 {
+    $context = page_layout_context();
+    \App\Support\PageLayout::setContext($context);
     \App\Support\PageLayout::header($title, $msgalert, $script, $place);
 }
 

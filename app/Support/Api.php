@@ -10,45 +10,40 @@ use Illuminate\Http\Resources\Json\JsonResource;
  * Backs `api()`, `success()` and `fail()`. Builds the standard response
  * envelope (`ret`/`msg`/`data`/`time`/`rid`) used by the legacy AJAX and
  * DataTable / LayuiTable endpoints.
+ *
+ * The request array (`$request`) is injected from the procedural wrapper
+ * layer so this class no longer reads `$_REQUEST` directly.
  */
 final class Api
 {
     /**
      * Build a standard API response envelope.
      *
-     * Mirrors `api()`:
-     *   - < 3 arguments: `ret = -1`, `$args[0]` is the message, `$args[1]` is data.
-     *   - >= 3 arguments: `ret = $args[0]`, `msg = $args[1]`, `data = $args[2]`.
+     * Mirrors `api($ret, $msg, $data)`:
+     *   - `ret` is the numeric result code,
+     *   - `msg` is a short human-readable string,
+     *   - `data` is the payload.
      *
-     * @param mixed ...$args
+     * @param  mixed  $data
+     * @param  array<string, mixed>  $request
      * @return array<string, mixed>
      */
-    public static function call(...$args): array
+    public static function call(int $ret, string $msg, mixed $data, array $request = []): array
     {
-        \do_log('api begin', 'info');
-
-        if (func_num_args() < 3) {
-            $ret = -1;
-            $msg = $args[0] ?? 'ERROR';
-            $data = $args[1] ?? [];
-        } else {
-            $ret = $args[0];
-            $msg = $args[1];
-            $data = $args[2];
-        }
+        Logger::write('api begin', 'info');
 
         if ($data instanceof JsonResource) {
             $data = $data->response()->getData(true);
         }
 
-        \do_log('api after prepare data', 'info');
+        Logger::write('api after prepare data', 'info');
 
         $nexus = \Nexus\Nexus::instance();
         $time = (float) number_format(microtime(true) - ($nexus ? $nexus->getStartTimestamp() : 0), 3);
         $count = null;
         $resultKey = 'ret';
         $msgKey = 'msg';
-        $format = $_REQUEST['__format'] ?? '';
+        $format = $request['__format'] ?? '';
 
         if (in_array($format, ['layui-table', 'data-table'], true)) {
             $resultKey = 'code';
@@ -71,7 +66,7 @@ final class Api
         }
 
         if ($format === 'data-table') {
-            $results['draw'] = (int) ($_REQUEST['draw'] ?? 1);
+            $results['draw'] = (int) ($request['draw'] ?? 1);
             $results['recordsTotal'] = $count;
             $results['recordsFiltered'] = $count;
         }
@@ -80,7 +75,7 @@ final class Api
             $results['queries'] = LegacyDb::lastQuery(true);
         }
 
-        \do_log('api end', 'info');
+        Logger::write('api end', 'info');
 
         return $results;
     }
@@ -88,52 +83,30 @@ final class Api
     /**
      * Convenience wrapper for a successful response.
      *
-     * Mirrors `success()`:
-     *   - 1 argument: data only.
-     *   - 2 arguments: message and data.
+     * Mirrors `success($msg = 'OK', $data = [])`.
      *
-     * @param mixed ...$args
+     * @param  mixed  $data
+     * @param  array<string, mixed>  $request
      * @return array<string, mixed>
      */
-    public static function success(...$args): array
+    public static function success(string $msg = 'OK', mixed $data = [], array $request = []): array
     {
-        $msg = 'OK';
-        $data = [];
-        $count = count($args);
-        if ($count === 1) {
-            $data = $args[0];
-        } elseif ($count === 2) {
-            $msg = $args[0];
-            $data = $args[1];
-        }
+        Logger::write('success before api', 'info');
 
-        \do_log('success before api', 'info');
-
-        return self::call(0, $msg, $data);
+        return self::call(0, $msg, $data, $request);
     }
 
     /**
      * Convenience wrapper for a failed response.
      *
-     * Mirrors `fail()`:
-     *   - 1 argument: data only.
-     *   - 2 arguments: message and data.
+     * Mirrors `fail($msg = 'ERROR', $data = [])`.
      *
-     * @param mixed ...$args
+     * @param  mixed  $data
+     * @param  array<string, mixed>  $request
      * @return array<string, mixed>
      */
-    public static function fail(...$args): array
+    public static function fail(string $msg = 'ERROR', mixed $data = [], array $request = []): array
     {
-        $msg = 'ERROR';
-        $data = [];
-        $count = count($args);
-        if ($count === 1) {
-            $data = $args[0];
-        } elseif ($count === 2) {
-            $msg = $args[0];
-            $data = $args[1];
-        }
-
-        return self::call(-1, $msg, $data);
+        return self::call(-1, $msg, $data, $request);
     }
 }

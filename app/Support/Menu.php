@@ -16,6 +16,8 @@ final class Menu
      * Build the main menu.
      *
      * @param  array<string, string>  $langFunctions
+     * @param  array<string, mixed>|null  $user
+     * @param  object|null  $cache
      * @return array{html: string, selected: string}
      */
     public static function render(
@@ -24,6 +26,9 @@ final class Menu
         string $enableOffer,
         string $enableSpecial,
         ?string $customMenu,
+        ?array $user = null,
+        ?object $cache = null,
+        string $langDir = '',
     ): array {
         $selected = self::selectedItem($scriptName);
 
@@ -34,32 +39,32 @@ final class Menu
             ];
         }
 
-        $lang = get_langfolder_cookie();
-        $normalSectionName = get_searchbox_value(get_setting('main.browsecat'), 'section_name');
-        $specialSectionName = get_searchbox_value(get_setting('main.specialcat'), 'section_name');
+        $userId = (int) ($user['id'] ?? 0);
+        $normalSectionName = SearchBox::value($cache, Settings::get('main.browsecat'), 'section_name');
+        $specialSectionName = SearchBox::value($cache, Settings::get('main.specialcat'), 'section_name');
 
         $items = [];
         $items[] = self::item($selected, 'home', 'index.php', $langFunctions['text_home'] ?? 'Home');
         $items[] = self::item($selected, 'forums', 'forums.php', $langFunctions['text_forums'] ?? 'Forums');
         $items[] = self::item($selected, 'latestcomments', 'latestcomments.php', $langFunctions['text_latest_comments'] ?? 'Latest Comments');
-        $items[] = self::item($selected, 'torrents', 'torrents.php', $normalSectionName[$lang] ?? ($langFunctions['text_torrents'] ?? 'Torrents'), "rel='sub-menu'");
+        $items[] = self::item($selected, 'torrents', 'torrents.php', $normalSectionName[$langDir] ?? ($langFunctions['text_torrents'] ?? 'Torrents'), "rel='sub-menu'");
 
-        if ($enableSpecial === 'yes' && user_can('view_special_torrent')) {
-            $items[] = self::item($selected, 'special', 'special.php', $specialSectionName[$lang] ?? ($langFunctions['text_special'] ?? 'Special'));
+        if ($enableSpecial === 'yes' && Permissions::userCan('view_special_torrent', false, $userId)) {
+            $items[] = self::item($selected, 'special', 'special.php', $specialSectionName[$langDir] ?? ($langFunctions['text_special'] ?? 'Special'));
         }
         if ($enableOffer === 'yes') {
             $items[] = self::item($selected, 'offers', 'offers.php', $langFunctions['text_offers'] ?? 'Offers');
         }
         $items[] = self::item($selected, 'upload', 'upload.php', $langFunctions['text_upload'] ?? 'Upload');
-        if (user_can('topten')) {
+        if (Permissions::userCan('topten', false, $userId)) {
             $items[] = self::item($selected, 'topten', 'topten.php', $langFunctions['text_top_ten'] ?? 'Top 10');
         }
-        if (user_can('log')) {
+        if (Permissions::userCan('log', false, $userId)) {
             $items[] = self::item($selected, 'log', 'log.php', $langFunctions['text_log'] ?? 'Log');
         }
         $items[] = self::item($selected, 'rules', 'rules.php', $langFunctions['text_rules'] ?? 'Rules');
         $items[] = self::item($selected, 'faq', 'faq.php', $langFunctions['text_faq'] ?? 'FAQ');
-        if (user_can('staffmem')) {
+        if (Permissions::userCan('staffmem', false, $userId)) {
             $items[] = self::item($selected, 'staff', 'staff.php', $langFunctions['text_staff'] ?? 'Staff');
         }
         $items[] = self::item($selected, 'contactstaff', 'contactstaff.php', $langFunctions['text_contactstaff'] ?? 'Contact Staff');
@@ -67,31 +72,6 @@ final class Menu
         $html = '<div id="nav"><ul id="mainmenu" class="menu">' . implode('', $items) . '</ul></div>';
 
         return ['html' => $html, 'selected' => $selected];
-    }
-
-    /**
-     * Build and emit the main menu, including the legacy `$USERUPDATESET`
-     * page-tracking side effect. Backs the `menu()` helper.
-     */
-    public static function renderPage(): string
-    {
-        $langFunctions = $GLOBALS['lang_functions'] ?? [];
-        $customMenu = (string) \apply_filter('nexus_menu');
-
-        $result = self::render(
-            (string) ($_SERVER['SCRIPT_NAME'] ?? ''),
-            (array) $langFunctions,
-            (string) ($GLOBALS['enableoffer'] ?? ''),
-            (string) ($GLOBALS['enablespecial'] ?? ''),
-            $customMenu !== '' ? $customMenu : null,
-        );
-
-        $CURUSER = $GLOBALS['CURUSER'] ?? null;
-        if ($CURUSER && ($GLOBALS['where_tweak'] ?? '') === 'yes') {
-            $GLOBALS['USERUPDATESET']['page'] = $result['selected'];
-        }
-
-        return $result['html'];
     }
 
     private static function selectedItem(string $scriptName): string

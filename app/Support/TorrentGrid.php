@@ -23,7 +23,7 @@ final class TorrentGrid
     /**
      * @param  array<int, array<string, mixed>>  $rows
      */
-    public static function render(array $rows, string $view = 'card', int $searchBoxId = 0): string
+    public static function render(array $rows, string $view = 'card', int $searchBoxId = 0, bool $forceShowCover = false): string
     {
         if (!in_array($view, self::VIEWS, true)) {
             $view = 'card';
@@ -41,9 +41,9 @@ final class TorrentGrid
         $torrentTagResult = $torrentTagCollection->groupBy('torrent_id');
 
         $showCover = false;
-        if ($searchBoxId) {
+        if ($forceShowCover || $searchBoxId) {
             $searchBoxExtra = get_searchbox_value($searchBoxId, 'extra');
-            $showCover = !empty($searchBoxExtra[SearchBox::EXTRA_DISPLAY_COVER_ON_TORRENT_LIST]);
+            $showCover = $forceShowCover || !empty($searchBoxExtra[SearchBox::EXTRA_DISPLAY_COVER_ON_TORRENT_LIST]);
         }
 
         $lastBrowse = $CURUSER['last_browse'] ?? 0;
@@ -53,6 +53,7 @@ final class TorrentGrid
 
         $items = [];
         foreach ($rows as $row) {
+            $row['search_box_id'] = (int) ($row['search_box_id'] ?? $searchBoxId);
             $items[] = self::renderItem($row, $view, $showCover, $lastBrowse, $torrentTagResult, $tagRep, $lang_functions);
         }
 

@@ -36,7 +36,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && $showpolls_main == "yes")
 \Nexus\Nexus::css('styles/index2.css', 'header', true);
 \Nexus\Nexus::css('styles/shoutbox.css', 'header', true);
 \Nexus\Nexus::css('styles/toast.css', 'header', true);
-\Nexus\Nexus::js('https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js', 'footer', true);
+\Nexus\Nexus::js('vendor/chart.js-4.4.3/chart.umd.min.js', 'footer', true);
 \Nexus\Nexus::js('js/shoutbox.js', 'footer', true);
 \Nexus\Nexus::js('js/toast.js', 'footer', true);
 
@@ -220,7 +220,10 @@ begin_main_frame();
                 <?php foreach ($dashboard['exams'] as $eu): ?>
                     <?php
                     $exam = $eu->exam;
-                    $progress = $eu->progress_formatted;
+                    if (!$exam) {
+                        continue;
+                    }
+                    $progress = (new \App\Repositories\ExamRepository())->getProgressFormatted($exam, (array)$eu->progress);
                     ?>
                     <li class="i2-exam">
                         <div class="i2-exam-name"><?php echo htmlspecialchars($exam->name ?? '') ?></div>

@@ -300,6 +300,15 @@ class IndexRepository
         /** @var mixed $cached */
         $cached = NexusDB::cache_get('index2_chart_data');
         if (is_array($cached)) {
+            $classLabels = [];
+            $classValues = [];
+            foreach ($cached['class_counts'] ?? [] as $class => $count) {
+                $classLabels[] = UserClass::name((int) $class, false, false, true);
+                $classValues[] = (int) $count;
+            }
+            $cached['class_labels'] = $classLabels;
+            $cached['class_values'] = $classValues;
+
             return $cached;
         }
 
@@ -309,14 +318,9 @@ class IndexRepository
         $classRows = User::query()
             ->selectRaw('class, count(*) as count')
             ->groupBy('class')
+            ->orderBy('class')
             ->pluck('count', 'class')
             ->toArray();
-        $classLabels = [];
-        $classValues = [];
-        foreach ($classRows as $class => $count) {
-            $classLabels[] = UserClass::name((int) $class, false, false, true);
-            $classValues[] = (int) $count;
-        }
 
         $seeders = Peer::query()->where('seeder', Peer::SEEDER_YES)->count();
         $leechers = Peer::query()->where('seeder', Peer::SEEDER_NO)->count();
@@ -343,8 +347,7 @@ class IndexRepository
         $totalDownloaded = (int) User::query()->sum('downloaded');
 
         $result = [
-            'class_labels' => $classLabels,
-            'class_values' => $classValues,
+            'class_counts' => $classRows,
             'seeders' => $seeders,
             'leechers' => $leechers,
             'monthly_users' => $userMonths,
@@ -357,6 +360,15 @@ class IndexRepository
         ];
 
         NexusDB::cache_put('index2_chart_data', $result, 3600);
+
+        $classLabels = [];
+        $classValues = [];
+        foreach ($classRows as $class => $count) {
+            $classLabels[] = UserClass::name((int) $class, false, false, true);
+            $classValues[] = (int) $count;
+        }
+        $result['class_labels'] = $classLabels;
+        $result['class_values'] = $classValues;
 
         return $result;
     }

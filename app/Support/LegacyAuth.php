@@ -9,33 +9,35 @@ use Nexus\Database\NexusDB;
 /**
  * Temporary Phase 5 migration shim for legacy authentication / captcha helpers.
  *
- * Collects the login-attempt tracking and image-code verification helpers
- * from `include/functions.php`. They will be dissolved into proper Form
- * Requests / services once the legacy bootstrap is gone.
+ * All methods now receive a {@see LegacyAuthContext} instead of reading
+ * `$GLOBALS` or super-globals directly. The procedural wrappers in
+ * `include/functions.php` still assemble the context from the legacy global
+ * state, which keeps `App\Support` free of `$_GET`/`$_POST`/`$_COOKIE`/`$_SERVER`
+ * and `$GLOBALS`.
  */
 final class LegacyAuth
 {
     /**
      * Legacy pre-login IP ban check.
      */
-    public static function failedLoginsCheck(string $type = 'Login'): void
+    public static function failedLoginsCheck(string $type, LegacyAuthContext $context): void
     {
-        $lang_functions = $GLOBALS['lang_functions'] ?? [];
-        $maxloginattempts = $GLOBALS['maxloginattempts'] ?? 0;
-        $ip = \function_exists('getip') ? \getip() : '';
+        $lang = $context->lang;
+        $maxAttempts = $context->maxLoginAttempts;
+        $ip = $context->ip;
 
         $total = (int) NexusDB::table('loginattempts')
             ->where('ip', $ip)
             ->sum('attempts');
 
-        if ($total >= $maxloginattempts) {
+        if ($total >= $maxAttempts) {
             NexusDB::table('loginattempts')
                 ->where('ip', $ip)
                 ->update(['banned' => 'yes']);
 
             LegacyResponse::abort(
-                $type.($lang_functions['std_locked'] ?? '').$maxloginattempts.($lang_functions['std_attempts_reached'] ?? ''),
-                (string) ($lang_functions['std_your_ip_banned'] ?? ''),
+                $type.($lang['std_locked'] ?? '').$maxAttempts.($lang['std_attempts_reached'] ?? ''),
+                (string) ($lang['std_your_ip_banned'] ?? ''),
                 true,
                 true,
             );
@@ -45,17 +47,17 @@ final class LegacyAuth
     /**
      * Record a failed login attempt and abort with the login-specific message.
      */
-    public static function failedLogins(string $type = 'login', bool $recover = false, bool $head = true): void
+    public static function failedLogins(string $type, bool $recover, bool $head, LegacyAuthContext $context): void
     {
-        self::recordFailedLogin($type, $recover, $head, 'std_failed');
+        self::recordFailedLogin($type, $recover, $head, 'std_failed', $context);
     }
 
     /**
      * Record a failed login/recover attempt and abort with the recover message.
      */
-    public static function loginFailedLogins(string $type = 'login', bool $recover = false, bool $head = true): void
+    public static function loginFailedLogins(string $type, bool $recover, bool $head, LegacyAuthContext $context): void
     {
-        self::recordFailedLogin($type, $recover, $head, 'std_recover_failed');
+        self::recordFailedLogin($type, $recover, $head, 'std_recover_failed', $context);
     }
 
     /**
@@ -64,18 +66,18 @@ final class LegacyAuth
     public static function checkCode(
         string $imagehash,
         string $imagestring,
-        string $where = 'signup.php',
-        bool $maxattemptlog = false,
-        bool $head = true,
+        string $where,
+        bool $maxattemptlog,
+        bool $head,
+        LegacyAuthContext $context,
     ): bool {
-        $lang_functions = $GLOBALS['lang_functions'] ?? [];
-        $iv = $GLOBALS['iv'] ?? '';
+        $lang = $context->lang;
 
-        if ($iv !== 'yes') {
+        if (! $context->captchaEnabled) {
             return true;
         }
 
-        $manager = \captcha_manager();
+        $manager = Captcha::manager();
 
         if (! $manager->isEnabled()) {
             return true;
@@ -84,26 +86,26 @@ final class LegacyAuth
         $payload = [
             'imagehash' => $imagehash,
             'imagestring' => $imagestring,
-            'request' => array_merge((array) $_POST, (array) $_GET),
+            'request' => $context->request,
         ];
 
-        $context = [
+        $captchaContext = [
             'where' => $where,
             'maxattemptlog' => $maxattemptlog,
             'head' => $head,
-            'ip' => \function_exists('getip') ? \getip() : '',
+            'ip' => $context->ip,
         ];
 
         try {
-            if ($manager->verify($payload, $context)) {
+            if ($manager->verify($payload, $captchaContext)) {
                 return true;
             }
         } catch (CaptchaValidationException $exception) {
             $message = $exception->getMessage();
 
-            $defaultMessage = ($lang_functions['std_invalid_image_code'] ?? '')
+            $defaultMessage = ($lang['std_invalid_image_code'] ?? '')
                 .'<a href="'.\htmlspecialchars($where).'">'
-                .($lang_functions['std_here_to_request_new'] ?? '');
+                .($lang['std_here_to_request_new'] ?? '');
 
             if ($message === '' || $message === 'Invalid captcha response.' || $message === 'Missing captcha parameters.') {
                 $message = $defaultMessage;
@@ -112,17 +114,22 @@ final class LegacyAuth
             if (! $maxattemptlog) {
                 LegacyResponse::abort('Error', $message, false);
             } else {
-                self::failedLogins($message, true, $head);
+                self::recordFailedLogin($message, true, $head, 'std_failed', $context);
             }
         }
 
         return false;
     }
 
-    private static function recordFailedLogin(string $type, bool $recover, bool $head, string $failedLangKey): void
-    {
-        $lang_functions = $GLOBALS['lang_functions'] ?? [];
-        $ip = \function_exists('getip') ? \getip() : '';
+    private static function recordFailedLogin(
+        string $type,
+        bool $recover,
+        bool $head,
+        string $failedLangKey,
+        LegacyAuthContext $context,
+    ): void {
+        $lang = $context->lang;
+        $ip = $context->ip;
 
         $count = (int) NexusDB::table('loginattempts')
             ->where('ip', $ip)
@@ -152,14 +159,14 @@ final class LegacyAuth
 
         if ($type === 'login') {
             LegacyResponse::abort(
-                (string) ($lang_functions['std_login_failed'] ?? ''),
-                (string) ($lang_functions['std_login_failed_note'] ?? ''),
+                (string) ($lang['std_login_failed'] ?? ''),
+                (string) ($lang['std_login_failed_note'] ?? ''),
                 false,
                 $head,
             );
         } else {
             LegacyResponse::abort(
-                (string) ($lang_functions[$failedLangKey] ?? ''),
+                (string) ($lang[$failedLangKey] ?? ''),
                 $type,
                 false,
                 $head,
@@ -170,19 +177,18 @@ final class LegacyAuth
     /**
      * Legacy "already logged in" guard.
      */
-    public static function currentUserCheck(): void
+    public static function currentUserCheck(LegacyAuthContext $context): void
     {
-        $lang_functions = $GLOBALS['lang_functions'] ?? [];
-        $CURUSER = $GLOBALS['CURUSER'] ?? [];
+        $lang = $context->lang;
 
-        if ($CURUSER) {
+        if ($context->isLoggedIn()) {
             NexusDB::table('users')
-                ->where('id', $CURUSER['id'] ?? 0)
-                ->update(['lang' => \function_exists('get_langid_from_langcookie') ? \get_langid_from_langcookie() : '']);
+                ->where('id', $context->user['id'] ?? 0)
+                ->update(['lang' => $context->langId()]);
 
             LegacyResponse::abort(
-                (string) ($lang_functions['std_permission_denied'] ?? ''),
-                (string) ($lang_functions['std_already_logged_in'] ?? ''),
+                (string) ($lang['std_permission_denied'] ?? ''),
+                (string) ($lang['std_already_logged_in'] ?? ''),
             );
         }
     }
@@ -190,15 +196,14 @@ final class LegacyAuth
     /**
      * Legacy "account parked" guard.
      */
-    public static function parked(): void
+    public static function parked(LegacyAuthContext $context): void
     {
-        $lang_functions = $GLOBALS['lang_functions'] ?? [];
-        $CURUSER = $GLOBALS['CURUSER'] ?? [];
+        $lang = $context->lang;
 
-        if (($CURUSER['parked'] ?? '') === 'yes') {
+        if (($context->user['parked'] ?? '') === 'yes') {
             LegacyResponse::abort(
-                (string) ($lang_functions['std_access_denied'] ?? ''),
-                (string) ($lang_functions['std_your_account_parked'] ?? ''),
+                (string) ($lang['std_access_denied'] ?? ''),
+                (string) ($lang['std_your_account_parked'] ?? ''),
             );
         }
     }
@@ -207,21 +212,19 @@ final class LegacyAuth
      * Legacy registration/invite system gate.
      */
     public static function registrationCheck(
-        string $type = 'invitesystem',
-        bool $maxuserscheck = true,
-        bool $ipcheck = true,
+        string $type,
+        bool $maxuserscheck,
+        bool $ipcheck,
+        LegacyAuthContext $context,
     ): bool {
-        $lang_functions = $GLOBALS['lang_functions'] ?? [];
-        $invitesystem = $GLOBALS['invitesystem'] ?? '';
-        $registration = $GLOBALS['registration'] ?? '';
-        $maxusers = $GLOBALS['maxusers'] ?? 0;
-        $maxip = $GLOBALS['maxip'] ?? 0;
+        $lang = $context->lang;
+        $settings = $context->registration;
 
         if ($type === 'invitesystem') {
-            if ($invitesystem === 'no') {
+            if ($settings['invitesystem'] === 'no') {
                 LegacyResponse::abort(
-                    (string) ($lang_functions['std_oops'] ?? ''),
-                    (string) ($lang_functions['std_invite_system_disabled'] ?? ''),
+                    (string) ($lang['std_oops'] ?? ''),
+                    (string) ($lang['std_invite_system_disabled'] ?? ''),
                     false,
                     true,
                 );
@@ -229,10 +232,10 @@ final class LegacyAuth
         }
 
         if ($type === 'normal') {
-            if ($registration === 'no') {
+            if ($settings['registration'] === 'no') {
                 LegacyResponse::abort(
-                    (string) ($lang_functions['std_sorry'] ?? ''),
-                    (string) ($lang_functions['std_open_registration_disabled'] ?? ''),
+                    (string) ($lang['std_sorry'] ?? ''),
+                    (string) ($lang['std_open_registration_disabled'] ?? ''),
                     false,
                     true,
                 );
@@ -241,10 +244,10 @@ final class LegacyAuth
 
         if ($maxuserscheck) {
             $userCount = (int) NexusDB::table('users')->count();
-            if ($userCount >= $maxusers) {
+            if ($userCount >= $settings['maxusers']) {
                 LegacyResponse::abort(
-                    (string) ($lang_functions['std_sorry'] ?? ''),
-                    (string) ($lang_functions['std_account_limit_reached'] ?? ''),
+                    (string) ($lang['std_sorry'] ?? ''),
+                    (string) ($lang['std_account_limit_reached'] ?? ''),
                     false,
                     true,
                 );
@@ -252,12 +255,12 @@ final class LegacyAuth
         }
 
         if ($ipcheck) {
-            $ip = \function_exists('getip') ? \getip() : '';
+            $ip = $context->ip;
             $ipCount = (int) NexusDB::table('users')->where('ip', $ip)->count();
-            if ($ipCount > $maxip) {
+            if ($ipCount > $settings['maxip']) {
                 LegacyResponse::abort(
-                    (string) ($lang_functions['std_sorry'] ?? ''),
-                    (string) ($lang_functions['std_the_ip'] ?? '').'<b>'.\htmlspecialchars($ip).'</b>'.\sprintf((string) ($lang_functions['std_used_many_times'] ?? ''), Setting::getSiteName()),
+                    (string) ($lang['std_sorry'] ?? ''),
+                    (string) ($lang['std_the_ip'] ?? '').'<b>'.\htmlspecialchars($ip).'</b>'.\sprintf((string) ($lang['std_used_many_times'] ?? ''), Setting::getSiteName()),
                     false,
                     true,
                 );
@@ -296,34 +299,35 @@ final class LegacyAuth
      *
      * Mirrors `loggedinorreturn()`.
      */
-    public static function requireLogin(bool $mainPage = false): void
+    public static function requireLogin(bool $mainPage, LegacyAuthContext $context): void
     {
-        $CURUSER = $GLOBALS['CURUSER'] ?? null;
-
-        if (! $CURUSER) {
-            if (nexus()->getScript() === 'ajax') {
-                exit(fail('Not login!', $_POST));
+        if (! $context->isLoggedIn()) {
+            if ($context->script === 'ajax') {
+                exit(json_encode(Api::fail('Not login!', $context->requestBody)));
             }
 
             if ($mainPage) {
-                nexus_redirect('login.php');
+                LegacyResponse::redirect('login.php');
             } else {
-                nexus_redirect('login.php?returnto=' . rawurlencode(basename($_SERVER['REQUEST_URI'] ?? '')));
+                $returnTo = $context->requestUri !== null && $context->requestUri !== ''
+                    ? rawurlencode(basename($context->requestUri))
+                    : '';
+                LegacyResponse::redirect('login.php?returnto=' . $returnTo);
             }
             exit;
         }
 
-        if (($CURUSER['enabled'] ?? '') !== 'yes' && nexus()->getScript() !== 'self-enable') {
-            nexus_redirect('self-enable.php');
+        if (($context->user['enabled'] ?? '') !== 'yes' && $context->script !== 'self-enable') {
+            LegacyResponse::redirect('self-enable.php');
         }
     }
 
     /**
      * Look up a user id by username (case-insensitive). Aborts on failure.
      */
-    public static function userIdFromName(string $username): int
+    public static function userIdFromName(string $username, LegacyAuthContext $context): int
     {
-        $lang_functions = $GLOBALS['lang_functions'] ?? [];
+        $lang = $context->lang;
 
         $id = NexusDB::table('users')
             ->whereRaw('LOWER(username) = LOWER(?)', [$username])
@@ -331,8 +335,8 @@ final class LegacyAuth
 
         if ($id === null) {
             LegacyResponse::abort(
-                (string) ($lang_functions['std_error'] ?? ''),
-                (string) ($lang_functions['std_no_user_named'] ?? '')."'".$username."'",
+                (string) ($lang['std_error'] ?? ''),
+                (string) ($lang['std_no_user_named'] ?? '')."'".$username."'",
             );
         }
 
@@ -343,33 +347,36 @@ final class LegacyAuth
      * Bootstrap the current user from the legacy auth cookie.
      *
      * Mirrors `userlogin()`: checks the IP ban list, reads the user from
-     * the cookie, generates a missing passkey, and populates $GLOBALS.
+     * the cookie, generates a missing passkey, and returns the user row.
+     * The caller (the `userlogin()` wrapper) is responsible for populating
+     * `$GLOBALS['CURUSER']` so the rest of the legacy page keeps working.
+     *
+     * @return array<string, mixed>|null
      */
-    public static function loginFromCookie(): bool
+    public static function loginFromCookie(LegacyAuthContext $context): ?array
     {
         static $loginResult;
-        if (! is_null($loginResult)) {
+        if ($loginResult !== null) {
             return $loginResult;
         }
 
-        $lang_functions = $GLOBALS['lang_functions'] ?? [];
-        $Cache = $GLOBALS['Cache'] ?? null;
-        unset($GLOBALS['CURUSER']);
+        $lang = $context->lang;
+        $cache = $context->cache;
 
-        $ip = \getip();
+        $ip = $context->ip;
         $nip = ip2long($ip);
 
         if ($nip) {
             if (NexusDB::table('bans')->where('first', '<=', $nip)->where('last', '>=', $nip)->exists()) {
                 header('HTTP/1.1 403 Forbidden');
-                print('<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"></head><body>' . ($lang_functions['text_unauthorized_ip'] ?? '') . "</body></html>\n");
+                print('<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"></head><body>' . ($lang['text_unauthorized_ip'] ?? '') . "</body></html>\n");
                 die;
             }
         }
 
-        $row = \get_user_from_cookie($_COOKIE);
+        $row = AuthCookie::userFromCookie($context->cookies, true);
         if (empty($row)) {
-            return $loginResult = false;
+            return $loginResult = null;
         }
 
         if (! $row['passkey']) {
@@ -377,15 +384,14 @@ final class LegacyAuth
             NexusDB::table('users')->where('id', $row['id'])->update(['passkey' => $passkey]);
         }
 
-        $GLOBALS['oldip'] = $row['ip'];
+        $row['old_ip'] = $row['ip'];
         $row['ip'] = $ip;
         $row['seedbonus'] = floatval($row['seedbonus']);
-        $GLOBALS['CURUSER'] = $row;
 
-        if (isset($_GET['clearcache']) && $_GET['clearcache'] && \get_user_class() >= UC_MODERATOR && $Cache !== null) {
-            $Cache->setClearCache(1);
+        if (isset($context->queryParams['clearcache']) && $context->queryParams['clearcache'] && (int) ($row['class'] ?? 0) >= $context->moderatorClass && $cache !== null && method_exists($cache, 'setClearCache')) {
+            $cache->setClearCache(1);
         }
 
-        return $loginResult = true;
+        return $loginResult = $row;
     }
 }

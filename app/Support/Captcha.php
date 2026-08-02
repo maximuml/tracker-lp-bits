@@ -47,12 +47,12 @@ final class Captcha
     /**
      * Render the active captcha markup when enabled.
      *
-     * Mirrors `show_image_code()`.
-     */
-    /**
+     * Mirrors `show_image_code()`. The `$secret` value is passed by the
+     * caller instead of being read from `$_GET` inside the helper.
+     *
      * @param  array<string, string>  $labels
      */
-    public static function render(string $enabledFlag, array $labels = []): void
+    public static function render(string $enabledFlag, array $labels = [], ?string $secret = null): void
     {
         if ($enabledFlag !== 'yes') {
             return;
@@ -74,7 +74,7 @@ final class Captcha
                 'image' => $labels[$labelKey] ?? $labels['row_security_image'] ?? '',
                 'code' => $labels['row_security_code'] ?? '',
             ],
-            'secret' => $_GET['secret'] ?? '',
+            'secret' => $secret ?? '',
         ]);
 
         if ($markup !== '') {

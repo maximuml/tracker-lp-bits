@@ -74,6 +74,5 @@ Use this skill when asked to test the tracker-lp-bits app in the local Docker Co
 
 - The legacy autocomplete on `/torrents.php` may not register native keystrokes in headless automation; trigger `suggest(0, '<term>')` from the console to verify it.
 - GitHub Actions CI may not start due to account billing/spending limits; rely on local Docker verification when that happens.
-- `torrents2.php` hot-search results are cached globally under the Redis key `en_hot_search_torrents2`. The cached HTML stores the `view`/`pageSize` that was active when the cache was first populated, so switching views can display stale hot-search links. Clear the cache (`redis-cli DEL en_hot_search_torrents2`) before verifying hot-search link preservation, and retest on a second view.
-- The `torrents2.php` search-box form only has a hidden `<input name="view">`, so submitting the form from a `pageSize=2` URL drops `pageSize`. Add a hidden `pageSize` input if preserving page size through form submissions is required.
-- Category icon links and pagination links now preserve `view`/`pageSize` in PR #166, but the fixes must be verified against the Redis hot-search cache and the search-box form limitations above.
+- `torrents2.php` hot-search results are cached per `view` + `pageSize` under Redis keys like `hot_search_torrents2_<view>_<pageSize>`. Old global keys (`en_hot_search_torrents2*`) may remain from earlier commits; clear them (`redis-cli --scan --pattern 'en_hot_search_torrents2*' | xargs -r redis-cli DEL`) before testing to avoid confusion.
+- `torrents2.php` category icons, pagination links, tag cloud, hot-search links, and the search-box `<form>` now preserve `view` and `pageSize` as of the final PR #166 fixes.

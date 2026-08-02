@@ -230,28 +230,38 @@ function nexus_json_encode($data)
     return \App\Support\Json::encode($data);
 }
 /**
- * @param mixed $args
+ * @param  mixed  $data
  * @return array<array-key, mixed>
  */
-function api(...$args)
+function api(int $ret, string $msg, $data = [])
 {
-    return \App\Support\Api::call(...$args);
+    return \App\Support\Api::call($ret, $msg, $data, $_REQUEST);
 }
 /**
- * @param mixed $args
+ * @param mixed $msgOrData
+ * @param mixed $data
  * @return array<array-key, mixed>
  */
-function success(...$args)
+function success($msgOrData = 'OK', $data = [])
 {
-    return \App\Support\Api::success(...$args);
+    if (func_num_args() === 1) {
+        return \App\Support\Api::success('OK', $msgOrData, $_REQUEST);
+    }
+
+    return \App\Support\Api::success((string) $msgOrData, $data, $_REQUEST);
 }
 /**
- * @param mixed $args
+ * @param mixed $msgOrData
+ * @param mixed $data
  * @return array<array-key, mixed>
  */
-function fail(...$args)
+function fail($msgOrData = 'ERROR', $data = [])
 {
-    return \App\Support\Api::fail(...$args);
+    if (func_num_args() === 1) {
+        return \App\Support\Api::fail('ERROR', $msgOrData, $_REQUEST);
+    }
+
+    return \App\Support\Api::fail((string) $msgOrData, $data, $_REQUEST);
 }
 /**
  * @param string|bool $all

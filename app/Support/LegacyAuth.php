@@ -303,7 +303,7 @@ final class LegacyAuth
     {
         if (! $context->isLoggedIn()) {
             if ($context->script === 'ajax') {
-                exit(json_encode(Api::fail('Not login!', $context->requestBody)));
+                exit(json_encode(Api::fail('Not login!', $context->requestBody, $context->request)));
             }
 
             if ($mainPage) {

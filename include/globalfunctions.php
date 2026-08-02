@@ -65,7 +65,10 @@ function nexus_dd($vars)
  */
 function do_log($log, $level = 'info', $echo = false)
 {
-    \App\Support\Logger::write((string) $log, $level, (bool) $echo);
+    $CURUSER = $GLOBALS['CURUSER'] ?? null;
+    $user = is_array($CURUSER) && !empty($CURUSER) ? $CURUSER : null;
+    $passkey = $_REQUEST['passkey'] ?? $_REQUEST['authkey'] ?? '';
+    \App\Support\Logger::write((string) $log, $level, (bool) $echo, $user, $passkey);
 }
 /**
  * @param bool $withTimeZone

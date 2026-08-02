@@ -21,6 +21,48 @@ function get_user_lang($user_id)
 	return \App\Support\Locale::userFolder($user_id);
 }
 /**
+ * Assemble the legacy auth context from the current request/global state.
+ *
+ * This helper lives in the procedural wrapper layer so `App\Support\LegacyAuth`
+ * can stay free of `$GLOBALS` and super-globals.
+ */
+function legacy_auth_context(): \App\Support\LegacyAuthContext
+{
+    $langFolder = \App\Support\Locale::folderFromCookie($_COOKIE['c_lang_folder'] ?? null);
+
+    $script = '';
+    if (\function_exists('nexus')) {
+        $script = \nexus()->getScript();
+    } else {
+        $scriptFile = $_SERVER['SCRIPT_FILENAME'] ?? '';
+        $script = basename($scriptFile);
+        if (str_contains($script, '.')) {
+            $script = strstr($script, '.', true);
+        }
+    }
+
+    return new \App\Support\LegacyAuthContext(
+        user: $GLOBALS['CURUSER'] ?? null,
+        lang: $GLOBALS['lang_functions'] ?? [],
+        cache: $GLOBALS['Cache'] ?? null,
+        ip: \function_exists('getip') ? \getip() : \App\Support\Network::clientIp(),
+        requestUri: $_SERVER['REQUEST_URI'] ?? null,
+        request: array_merge((array) $_POST, (array) $_GET),
+        cookies: $_COOKIE,
+        maxLoginAttempts: (int) ($GLOBALS['maxloginattempts'] ?? 0),
+        captchaEnabled: ($GLOBALS['iv'] ?? '') === 'yes',
+        registration: [
+            'invitesystem' => $GLOBALS['invitesystem'] ?? '',
+            'registration' => $GLOBALS['registration'] ?? '',
+            'maxusers' => (int) ($GLOBALS['maxusers'] ?? 0),
+            'maxip' => (int) ($GLOBALS['maxip'] ?? 0),
+        ],
+        langId: \App\Support\Locale::idFromFolder($langFolder),
+        moderatorClass: defined('UC_MODERATOR') ? (int) \constant('UC_MODERATOR') : 0,
+        script: $script,
+    );
+}
+/**
  * @param string $script_name
  * @param bool $target
  * @param string $lang_folder
@@ -450,7 +492,7 @@ function get_torrent_2_user_value($user_snatched_arr)
  */
 function cur_user_check()
 {
-	\App\Support\LegacyAuth::currentUserCheck();
+    \App\Support\LegacyAuth::currentUserCheck(legacy_auth_context());
 }
 /**
  * @param string $type
@@ -577,7 +619,7 @@ function sent_mail($to,$fromname,$fromemail,$subject,$body,$type = "confirmation
  * @return void
  */
 function failedloginscheck ($type = 'Login') {
-    \App\Support\LegacyAuth::failedLoginsCheck((string) $type);
+    \App\Support\LegacyAuth::failedLoginsCheck((string) $type, legacy_auth_context());
 }
 /**
  * @param string $type
@@ -587,7 +629,7 @@ function failedloginscheck ($type = 'Login') {
  */
 function failedlogins ($type = 'login', $recover = false, $head = true)
 {
-    \App\Support\LegacyAuth::failedLogins((string) $type, (bool) $recover, (bool) $head);
+    \App\Support\LegacyAuth::failedLogins((string) $type, (bool) $recover, (bool) $head, legacy_auth_context());
 }
 
 /**
@@ -598,7 +640,7 @@ function failedlogins ($type = 'login', $recover = false, $head = true)
  */
 function login_failedlogins($type = 'login', $recover = false, $head = true)
 {
-    \App\Support\LegacyAuth::loginFailedLogins((string) $type, (bool) $recover, (bool) $head);
+    \App\Support\LegacyAuth::loginFailedLogins((string) $type, (bool) $recover, (bool) $head, legacy_auth_context());
 }
 
 /**
@@ -607,8 +649,8 @@ function login_failedlogins($type = 'login', $recover = false, $head = true)
  */
 function remaining($type = 'login')
 {
-	global $maxloginattempts;
-	return \App\Support\LegacyAuth::remainingAttempts((string) $type, (int) $maxloginattempts, \getip());
+    $context = legacy_auth_context();
+    return \App\Support\LegacyAuth::remainingAttempts((string) $type, $context->maxLoginAttempts, $context->ip);
 }
 /**
  * @param string $type
@@ -617,7 +659,7 @@ function remaining($type = 'login')
  * @return bool
  */
 function registration_check($type = "invitesystem", $maxuserscheck = true, $ipcheck = true) {
-    return \App\Support\LegacyAuth::registrationCheck((string) $type, (bool) $maxuserscheck, (bool) $ipcheck);
+    return \App\Support\LegacyAuth::registrationCheck((string) $type, (bool) $maxuserscheck, (bool) $ipcheck, legacy_auth_context());
 }
 
 /**
@@ -650,7 +692,7 @@ function image_code () {
  * @return bool
  */
 function check_code ($imagehash, $imagestring, $where = 'signup.php', $maxattemptlog = false, $head = true) {
-    return \App\Support\LegacyAuth::checkCode((string) $imagehash, (string) $imagestring, (string) $where, (bool) $maxattemptlog, (bool) $head);
+    return \App\Support\LegacyAuth::checkCode((string) $imagehash, (string) $imagestring, (string) $where, (bool) $maxattemptlog, (bool) $head, legacy_auth_context());
 }
 
 /**
@@ -662,7 +704,7 @@ function show_image_code () {
         'row_security_image' => $lang_functions['row_security_image'] ?? '',
         'row_security_challenge' => $lang_functions['row_security_challenge'] ?? '',
         'row_security_code' => $lang_functions['row_security_code'] ?? '',
-    ]);
+    ], (string) ($_GET['secret'] ?? ''));
 }
 /**
  * @param string $ip
@@ -727,7 +769,15 @@ function dbconn($autoclean = false, $doLogin = true)
  * @return bool
  */
 function userlogin() {
-	return \App\Support\LegacyAuth::loginFromCookie();
+    $context = legacy_auth_context();
+    $user = \App\Support\LegacyAuth::loginFromCookie($context);
+    if ($user !== null) {
+        $GLOBALS['oldip'] = $user['ip'] ?? '';
+        $GLOBALS['CURUSER'] = $user;
+        return true;
+    }
+    unset($GLOBALS['CURUSER']);
+    return false;
 }
 /**
  * @param bool $printProgress
@@ -1056,7 +1106,7 @@ function base64 ($string, $encode=true) {
  * @return void
  */
 function loggedinorreturn($mainpage = false) {
-	\App\Support\LegacyAuth::requireLogin((bool) $mainpage);
+    \App\Support\LegacyAuth::requireLogin((bool) $mainpage, legacy_auth_context());
 }
 /**
  * @param mixed $id
@@ -1220,7 +1270,7 @@ function ssr ($arg) {
  */
 function parked()
 {
-    \App\Support\LegacyAuth::parked();
+    \App\Support\LegacyAuth::parked(legacy_auth_context());
 }
 
 /**
@@ -1466,7 +1516,7 @@ function get_hr_img(array $torrent, $searchBoxId)
  * @return int
  */
 function get_user_id_from_name($username){
-	return \App\Support\LegacyAuth::userIdFromName((string) $username);
+    return \App\Support\LegacyAuth::userIdFromName((string) $username, legacy_auth_context());
 }
 /**
  * @param string|int $id

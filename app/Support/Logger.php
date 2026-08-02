@@ -2,8 +2,6 @@
 
 namespace App\Support;
 
-use Illuminate\Support\Facades\Auth;
-
 /**
  * Legacy file-log helpers extracted from `include/globalfunctions.php`.
  *
@@ -18,7 +16,10 @@ final class Logger
     /** @var array<string, string> */
     private static array $filePaths = [];
 
-    public static function write(string $log, string $level = 'info', bool $echo = false): void
+    /**
+     * @param  array<string, mixed>|null  $user
+     */
+    public static function write(string $log, string $level = 'info', bool $echo = false, ?array $user = null, ?string $passkey = null): void
     {
         if (self::$logLevel === null) {
             self::$logLevel = (string) Env::get('LOG_LEVEL', 'debug');
@@ -44,21 +45,8 @@ final class Logger
             $fd = fopen(sys_get_temp_dir() . '/nexus.log', 'a');
         }
 
-        $uid = 0;
-        $passkey = '';
-        if (defined('IN_NEXUS') && IN_NEXUS) {
-            global $CURUSER;
-            $uid = $CURUSER['id'] ?? 0;
-            $passkey = $CURUSER['passkey'] ?? $_REQUEST['passkey'] ?? $_REQUEST['authkey'] ?? '';
-        } else {
-            try {
-                $user = Auth::user();
-                $uid = $user->id ?? 0;
-                $passkey = $user->passkey ?? request('passkey', request('authkey', ''));
-            } catch (\Throwable $exception) {
-                $passkey = "!IN_NEXUS:" . $exception->getMessage();
-            }
-        }
+        $uid = $user['id'] ?? 0;
+        $passkey = $passkey ?? '';
 
         $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
         $nexus = \Nexus\Nexus::instance();

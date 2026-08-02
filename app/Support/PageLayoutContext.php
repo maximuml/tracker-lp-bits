@@ -65,6 +65,7 @@ final class PageLayoutContext
         public string $enableSpecial,
         public ?string $customMenu,
         public string $maxdlSystem,
+        public string $whereTweak,
         public int $adminClass,
         public int $moderatorClass,
         public int $sysopClass,

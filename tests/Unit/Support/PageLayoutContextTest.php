@@ -47,6 +47,7 @@ class PageLayoutContextTest extends TestCase
             enableSpecial: 'no',
             customMenu: null,
             maxdlSystem: '',
+            whereTweak: 'yes',
             adminClass: 14,
             moderatorClass: 13,
             sysopClass: 15,

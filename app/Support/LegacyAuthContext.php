@@ -16,14 +16,18 @@ namespace App\Support;
  */
 final class LegacyAuthContext
 {
+    private ?int $langIdCache = null;
+
     /**
      * @param  array<string, mixed>|null  $user  Current user row (`$GLOBALS['CURUSER']`).
      * @param  array<string, string>  $lang  Loaded language strings (`$GLOBALS['lang_functions']`).
      * @param  object|null  $cache  Legacy Redis cache wrapper (`$GLOBALS['Cache']`).
-     * @param  array<string, mixed>  $request  Merged request data (`$_POST` + `$_GET`).
+     * @param  array<string, mixed>  $requestBody  `$_POST`.
+     * @param  array<string, mixed>  $queryParams  `$_GET`.
+     * @param  array<string, mixed>  $request  Merged `$_POST` + `$_GET`.
      * @param  array<string, string>  $cookies  `$_COOKIE`.
      * @param  array<string, mixed>  $registration  Settings: `invitesystem`, `registration`, `maxusers`, `maxip`.
-     * @param  int|null  $langId  Language id derived from the language cookie.
+     * @param  string|null  $langFolder  Raw language folder from the language cookie.
      */
     public function __construct(
         public ?array $user,
@@ -31,12 +35,14 @@ final class LegacyAuthContext
         public ?object $cache,
         public string $ip,
         public ?string $requestUri,
+        public array $requestBody,
+        public array $queryParams,
         public array $request,
         public array $cookies,
         public int $maxLoginAttempts,
         public bool $captchaEnabled,
         public array $registration,
-        public ?int $langId,
+        public ?string $langFolder,
         public int $moderatorClass,
         public string $script,
     ) {
@@ -55,5 +61,24 @@ final class LegacyAuthContext
     public function isModerator(): bool
     {
         return (int) ($this->user['class'] ?? 0) >= $this->moderatorClass;
+    }
+
+    /**
+     * Resolve the language id from the cookie folder lazily. This avoids
+     * an uncached database query for callers that do not need it.
+     */
+    public function langId(): int
+    {
+        if ($this->langIdCache !== null) {
+            return $this->langIdCache;
+        }
+
+        if ($this->langFolder === null || $this->langFolder === '') {
+            return $this->langIdCache = 0;
+        }
+
+        $folder = Locale::folderFromCookie($this->langFolder);
+
+        return $this->langIdCache = Locale::idFromFolder($folder);
     }
 }

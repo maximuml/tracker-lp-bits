@@ -184,7 +184,7 @@ final class LegacyAuth
         if ($context->isLoggedIn()) {
             NexusDB::table('users')
                 ->where('id', $context->user['id'] ?? 0)
-                ->update(['lang' => $context->langId ?? '']);
+                ->update(['lang' => $context->langId()]);
 
             LegacyResponse::abort(
                 (string) ($lang['std_permission_denied'] ?? ''),
@@ -303,7 +303,7 @@ final class LegacyAuth
     {
         if (! $context->isLoggedIn()) {
             if ($context->script === 'ajax') {
-                exit(json_encode(Api::fail('Not login!', $context->request)));
+                exit(json_encode(Api::fail('Not login!', $context->requestBody)));
             }
 
             if ($mainPage) {
@@ -384,10 +384,11 @@ final class LegacyAuth
             NexusDB::table('users')->where('id', $row['id'])->update(['passkey' => $passkey]);
         }
 
+        $row['old_ip'] = $row['ip'];
         $row['ip'] = $ip;
         $row['seedbonus'] = floatval($row['seedbonus']);
 
-        if (isset($context->request['clearcache']) && $context->request['clearcache'] && $context->isModerator() && $cache !== null) {
+        if (isset($context->queryParams['clearcache']) && $context->queryParams['clearcache'] && (int) ($row['class'] ?? 0) >= $context->moderatorClass && $cache !== null && method_exists($cache, 'setClearCache')) {
             $cache->setClearCache(1);
         }
 

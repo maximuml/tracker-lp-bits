@@ -28,8 +28,6 @@ function get_user_lang($user_id)
  */
 function legacy_auth_context(): \App\Support\LegacyAuthContext
 {
-    $langFolder = \App\Support\Locale::folderFromCookie($_COOKIE['c_lang_folder'] ?? null);
-
     $script = '';
     if (\function_exists('nexus')) {
         $script = \nexus()->getScript();
@@ -47,6 +45,8 @@ function legacy_auth_context(): \App\Support\LegacyAuthContext
         cache: $GLOBALS['Cache'] ?? null,
         ip: \function_exists('getip') ? \getip() : \App\Support\Network::clientIp(),
         requestUri: $_SERVER['REQUEST_URI'] ?? null,
+        requestBody: $_POST,
+        queryParams: $_GET,
         request: array_merge((array) $_POST, (array) $_GET),
         cookies: $_COOKIE,
         maxLoginAttempts: (int) ($GLOBALS['maxloginattempts'] ?? 0),
@@ -57,7 +57,7 @@ function legacy_auth_context(): \App\Support\LegacyAuthContext
             'maxusers' => (int) ($GLOBALS['maxusers'] ?? 0),
             'maxip' => (int) ($GLOBALS['maxip'] ?? 0),
         ],
-        langId: \App\Support\Locale::idFromFolder($langFolder),
+        langFolder: $_COOKIE['c_lang_folder'] ?? null,
         moderatorClass: defined('UC_MODERATOR') ? (int) \constant('UC_MODERATOR') : 0,
         script: $script,
     );
@@ -772,7 +772,7 @@ function userlogin() {
     $context = legacy_auth_context();
     $user = \App\Support\LegacyAuth::loginFromCookie($context);
     if ($user !== null) {
-        $GLOBALS['oldip'] = $user['ip'] ?? '';
+        $GLOBALS['oldip'] = $user['old_ip'] ?? $user['ip'] ?? '';
         $GLOBALS['CURUSER'] = $user;
         return true;
     }

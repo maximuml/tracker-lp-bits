@@ -1,4 +1,7 @@
 <?php
+
+use Illuminate\Support\Facades\Auth;
+
 /**
  * @return int
  */
@@ -65,9 +68,30 @@ function nexus_dd($vars)
  */
 function do_log($log, $level = 'info', $echo = false)
 {
-    $CURUSER = $GLOBALS['CURUSER'] ?? null;
-    $user = is_array($CURUSER) && !empty($CURUSER) ? $CURUSER : null;
-    $passkey = $_REQUEST['passkey'] ?? $_REQUEST['authkey'] ?? '';
+    $user = null;
+    $passkey = '';
+
+    if (defined('IN_NEXUS') && IN_NEXUS) {
+        $CURUSER = $GLOBALS['CURUSER'] ?? null;
+        if (is_array($CURUSER) && ! empty($CURUSER)) {
+            $user = $CURUSER;
+            $passkey = (string) ($CURUSER['passkey'] ?? '');
+        }
+        if ($passkey === '') {
+            $passkey = $_REQUEST['passkey'] ?? $_REQUEST['authkey'] ?? '';
+        }
+    } else {
+        try {
+            $authUser = Auth::user();
+            if ($authUser instanceof \Illuminate\Database\Eloquent\Model) {
+                $user = $authUser->getAttributes();
+                $passkey = (string) ($authUser->getAttribute('passkey') ?? '');
+            }
+        } catch (\Throwable $exception) {
+            $passkey = '!NO_AUTH';
+        }
+    }
+
     \App\Support\Logger::write((string) $log, $level, (bool) $echo, $user, $passkey);
 }
 /**

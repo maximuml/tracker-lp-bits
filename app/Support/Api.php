@@ -25,7 +25,7 @@ final class Api
      */
     public static function call(...$args): array
     {
-        Logger::write('api begin', 'info');
+        \do_log('api begin', 'info');
 
         if (func_num_args() < 3) {
             $ret = -1;
@@ -41,7 +41,7 @@ final class Api
             $data = $data->response()->getData(true);
         }
 
-        Logger::write('api after prepare data', 'info');
+        \do_log('api after prepare data', 'info');
 
         $nexus = \Nexus\Nexus::instance();
         $time = (float) number_format(microtime(true) - ($nexus ? $nexus->getStartTimestamp() : 0), 3);
@@ -80,7 +80,7 @@ final class Api
             $results['queries'] = LegacyDb::lastQuery(true);
         }
 
-        Logger::write('api end', 'info');
+        \do_log('api end', 'info');
 
         return $results;
     }
@@ -107,7 +107,7 @@ final class Api
             $data = $args[1];
         }
 
-        Logger::write('success before api', 'info');
+        \do_log('success before api', 'info');
 
         return self::call(0, $msg, $data);
     }

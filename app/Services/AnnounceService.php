@@ -371,11 +371,20 @@ final class AnnounceService
             $this->realAnnounceInterval = mt_rand($end1, $end2);
         }
 
+        if ($this->torrentId > 0) {
+            $counts = $this->countPeers() ?: (object) ['seeders' => 0, 'leechers' => 0];
+        } else {
+            $counts = (object) [
+                'seeders' => (int) ($this->torrent['seeders'] ?? 0),
+                'leechers' => (int) ($this->torrent['leechers'] ?? 0),
+            ];
+        }
+
         return [
             'interval'     => $this->realAnnounceInterval,
             'min interval' => MIN_ANNOUNCE_WAIT_SECOND,
-            'complete'     => (int) ($this->torrent['seeders'] ?? 0),
-            'incomplete'   => (int) ($this->torrent['leechers'] ?? 0),
+            'complete'     => (int) ($counts->seeders ?? 0),
+            'incomplete'   => (int) ($counts->leechers ?? 0),
             'downloaded'   => (int) ($this->torrent['times_completed'] ?? 0),
             'peers'        => $this->compact ? '' : [],
             'peers6'       => '',

@@ -6,8 +6,8 @@ require_once(get_langfile_path('torrents.php'));
 loggedinorreturn();
 parked();
 
-$search = $_REQUEST['search'] ?? '';
-$searchArea = $_REQUEST['search_area'] ?? \App\Repositories\SearchRepository::SEARCH_AREA_TITLE;
+$search = is_scalar($_REQUEST['search'] ?? '') ? (string) ($_REQUEST['search'] ?? '') : '';
+$searchArea = is_scalar($_REQUEST['search_area'] ?? '') ? (int) ($_REQUEST['search_area'] ?? 0) : \App\Repositories\SearchRepository::SEARCH_AREA_TITLE;
 
 //approval status
 $approvalStatusNoneVisible = get_setting('torrent.approval_status_none_visible');
@@ -34,12 +34,15 @@ $shouldUseMeili = $meilisearchEnabled && !empty($search);
 $count = 0;
 $rows = [];
 if ($search) {
+    $searchRaw = $search;
     $search = str_replace(".", " ", $search);
     $searchArr = preg_split("/[\s]+/", $search, 10,PREG_SPLIT_NO_EMPTY);
     if ($shouldUseMeili) {
         try {
             $searchRep = new \App\Repositories\MeiliSearchRepository();
             $searchParams = $_GET;
+            $searchParams['search'] = $searchRaw;
+            $searchParams['search_area'] = $searchArea;
             if ($approvalStatus != null) {
                 $searchParams['approval_status'] = $approvalStatus;
             }

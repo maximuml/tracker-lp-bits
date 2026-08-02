@@ -5,10 +5,10 @@ require_once(get_langfile_path());
 loggedinorreturn();
 parked();
 user_can('viewuserlist', true);
-$search = trim($_GET['search'] ?? '');
-$class = $_GET['class'] ?? '-';
-$country = intval($_GET['country'] ?? 0);
-$letter = trim($_GET["letter"] ?? '');
+$search = trim(is_scalar($_GET['search'] ?? '') ? (string) ($_GET['search'] ?? '') : '');
+$class = is_scalar($_GET['class'] ?? '') ? (string) ($_GET['class'] ?? '-') : '-';
+$country = intval(is_scalar($_GET['country'] ?? '') ? (string) ($_GET['country'] ?? '0') : '0');
+$letter = trim(is_scalar($_GET["letter"] ?? '') ? (string) ($_GET["letter"] ?? '') : '');
 
 if (strlen($letter) > 1)
 	die;

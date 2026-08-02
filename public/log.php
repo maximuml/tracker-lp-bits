@@ -35,8 +35,10 @@ function searchtable($title, $action, $opts = array()){
 		print("<input type=\"text\" name=\"query\" style=\"width:500px\" value=\"".$q."\">\n");
 		if ($opts) {
 			print($lang_log['text_in']."<select name=search>");
-			foreach($opts as $value => $text)
-				print("<option value='".$value."'". (isset($_GET['search']) && $value == $_GET['search'] ? " selected" : "").">".$text."</option>");
+			$selectedSearchValue = is_scalar($_GET['search'] ?? '') ? (string) ($_GET['search'] ?? '') : '';
+			foreach($opts as $value => $text) {
+				print("<option value='".$value."'". ($value === $selectedSearchValue ? " selected" : "").">".$text."</option>");
+			}
 			print("</select>");
 			}
 		print("<input type=\"hidden\" name=\"action\" value='".$action."'>&nbsp;&nbsp;");

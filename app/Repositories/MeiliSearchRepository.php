@@ -288,8 +288,9 @@ class MeiliSearchRepository extends BaseRepository
         $filters = [];
         //think about search area
         $searchArea = $this->getSearchArea($params);
+        $searchQuery = is_scalar($params['search'] ?? '') ? (string) ($params['search'] ?? '') : '';
         if ($searchArea == self::SEARCH_AREA_OWNER) {
-            $searchOwner = User::query()->where('username', trim($params['search']))->first(['id']);
+            $searchOwner = User::query()->where('username', trim($searchQuery))->first(['id']);
             if (!$searchOwner) {
                 //No user match, no results
                 return $results;
@@ -566,10 +567,10 @@ class MeiliSearchRepository extends BaseRepository
     /** @param  array<int|string, mixed>  $params */
     private function getQuery(array $params): string
     {
-        $q = trim($params['search']);
+        $q = trim(is_scalar($params['search'] ?? '') ? (string) ($params['search'] ?? '') : '');
         $searchMode = SearchBox::getDefaultSearchMode();
-        if (isset($params['search_mode'], SearchBox::$searchModes[$params['search_mode']])) {
-            $searchMode = $params['search_mode'];
+        if (isset($params['search_mode']) && is_scalar($params['search_mode']) && isset(SearchBox::$searchModes[(string) $params['search_mode']])) {
+            $searchMode = (string) $params['search_mode'];
         }
         do_log("search mode: " . SearchBox::$searchModes[$searchMode]['text']);
         if ($searchMode == SearchBox::SEARCH_MODE_AND) {
@@ -584,8 +585,9 @@ class MeiliSearchRepository extends BaseRepository
      */
     private function getSearchArea(array $params)
     {
-        if (isset($params['search_area'], self::$searchAreas[$params['search_area']])) {
-            return $params['search_area'];
+        $searchArea = is_scalar($params['search_area'] ?? '') ? (string) ($params['search_area'] ?? '') : '';
+        if (isset(self::$searchAreas[$searchArea])) {
+            return $searchArea;
         }
         return self::SEARCH_AREA_TITLE;
     }

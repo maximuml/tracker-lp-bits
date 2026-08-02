@@ -966,6 +966,9 @@ if ($allsec != 1 || $enablespecial != 'yes'){ //do not print searchbox if showin
 ?>
 <form method="get" name="searchbox" action="torrents2.php">
     <input type="hidden" name="view" value="<?php echo htmlspecialchars($view) ?>" />
+    <?php if (!empty($_GET['pageSize']) && ctype_digit($_GET['pageSize'])): ?>
+    <input type="hidden" name="pageSize" value="<?php echo htmlspecialchars((int)$_GET['pageSize']) ?>" />
+    <?php endif; ?>
 	<table border="1" class="searchbox" cellspacing="0" cellpadding="5" width="100%">
 		<tbody>
 		<tr>
@@ -1183,7 +1186,9 @@ if ($allsec != 1 || $enablespecial != 'yes'){ //do not print searchbox if showin
 						</td>
 					</tr>
 <?php
-$Cache->new_page('hot_search_torrents2', 3670, true);
+$hotSearchPageSize = !empty($_GET['pageSize']) && ctype_digit($_GET['pageSize']) ? (int)$_GET['pageSize'] : 0;
+$hotSearchCacheKey = 'hot_search_torrents2_' . $view . '_' . $hotSearchPageSize;
+$Cache->new_page($hotSearchCacheKey, 3670, true);
 if (!$Cache->get_page()){
     \App\Repositories\TorrentListingRepository::cleanupSuggest();
     $searchres = \App\Repositories\TorrentListingRepository::getHotSearch();

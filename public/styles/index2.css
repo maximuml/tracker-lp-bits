@@ -288,6 +288,117 @@
     max-height: 260px;
 }
 
+/* News */
+.i2-news-list {
+    margin-left: 16pt;
+}
+
+.i2-news-item {
+    margin-bottom: 8px;
+}
+
+.i2-news-item img.minus,
+.i2-news-item img.plus {
+    vertical-align: middle;
+}
+
+/* Shoutbox */
+.i2-shoutbox form {
+    margin-top: 4px;
+}
+
+.i2-shoutbox label {
+    margin-right: 6px;
+    white-space: nowrap;
+}
+
+/* Tables */
+.i2-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 12px;
+}
+
+.i2-table td,
+.i2-table th {
+    padding: 6px 8px;
+}
+
+/* Forum posts */
+.i2-forum-table td {
+    font-size: .95em;
+}
+
+/* Top uploaders */
+.i2-top-uploader-tabs {
+    margin-bottom: 0;
+    border-collapse: collapse;
+}
+
+.i2-top-uploader-tabs td {
+    padding: 6px 8px;
+    border: 1px solid rgba(127,127,127,.35);
+}
+
+/* Poll */
+.i2-poll-content {
+    padding: 8px 12px;
+    border: 1px solid rgba(127,127,127,.35);
+    border-radius: 6px;
+    background: rgba(127,127,127,.05);
+}
+
+.i2-poll-results td {
+    padding: 3px 0;
+}
+
+.i2-poll-content label {
+    display: block;
+    margin: 4px 0;
+}
+
+/* Stats tables */
+.i2-stats-tables {
+    margin-top: 20px;
+}
+
+.i2-stats-tables h3 {
+    margin: 16px 0 8px;
+    font-size: 1.05em;
+}
+
+.i2-stats-table,
+.i2-class-table {
+    margin-bottom: 12px;
+}
+
+/* Tracker load */
+.i2-tracker-load-box {
+    text-align: center;
+    padding: 12px;
+    border: 1px solid rgba(127,127,127,.35);
+    border-radius: 6px;
+    background: rgba(127,127,127,.05);
+    font-family: monospace;
+}
+
+/* Disclaimer */
+.i2-disclaimer div {
+    padding: 10px;
+    border: 1px solid rgba(127,127,127,.35);
+    border-radius: 6px;
+    background: rgba(127,127,127,.05);
+}
+
+/* Browser note */
+.i2-browser-note {
+    text-align: center;
+}
+
+.i2-browser-note img {
+    border: 0;
+}
+
 @media (max-width: 760px) {
     .i2-dash-row {
         grid-template-columns: 1fr;

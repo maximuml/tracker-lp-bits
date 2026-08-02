@@ -150,6 +150,14 @@ $counter = 0;
 //while ($row = mysql_fetch_assoc($res))
 $lastcom_tooltip = [];
 $torrent_tooltip = [];
+$categoryImageLinkParams = [];
+if (!empty($_GET['view'])) {
+    $categoryImageLinkParams['view'] = $_GET['view'];
+}
+if (!empty($_GET['pageSize']) && ctype_digit($_GET['pageSize'])) {
+    $categoryImageLinkParams['pageSize'] = (int) $_GET['pageSize'];
+}
+$categoryImageLinkPrefix = '?' . ($categoryImageLinkParams ? http_build_query($categoryImageLinkParams) . '&' : '');
 foreach ($rows as $row)
 {
 	$id = $row["id"];
@@ -158,7 +166,7 @@ foreach ($rows as $row)
 
 	print("<td class=\"rowfollow nowrap\" valign=\"middle\" style='padding: 0px'>");
 	if (isset($row["category"])) {
-		print(return_category_image($row["category"], "?"));
+		print(return_category_image($row["category"], $categoryImageLinkPrefix));
 		if ($has_secondicon){
 			print(get_second_icon($row));
 		}

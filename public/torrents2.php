@@ -898,6 +898,9 @@ if (!empty($_GET['pageSize'])) {
     $torrentsperpage = $maxPageSize;
 }
 $torrentsperpage = min($maxPageSize, $torrentsperpage);
+if (!empty($_GET['pageSize']) && ctype_digit($_GET['pageSize'])) {
+    $addparam .= "pageSize=" . urlencode($_GET['pageSize']) . "&";
+}
 
 if ($count)
 {
@@ -1008,7 +1011,14 @@ if ($allsec != 1 || $enablespecial != 'yes'){ //do not print searchbox if showin
 //					}
 //					?>
 <!--				</table>-->
-                <?php echo build_search_box_category_table($sectiontype, '1', '?', '?', 0, $_SERVER['QUERY_STRING'], ['select_unselect' => true, 'user_notifs' => $CURUSER['notifs']])?>
+                <?php
+                $filterLinkParams = ['view' => $view];
+                if (!empty($_GET['pageSize']) && ctype_digit($_GET['pageSize'])) {
+                    $filterLinkParams['pageSize'] = (int) $_GET['pageSize'];
+                }
+                $filterLinkPrefix = '?' . http_build_query($filterLinkParams) . '&';
+                echo build_search_box_category_table($sectiontype, '1', $filterLinkPrefix, $filterLinkPrefix, 0, $_SERVER['QUERY_STRING'], ['select_unselect' => true, 'user_notifs' => $CURUSER['notifs']])
+                ?>
 			</td>
 
 			<td class="rowfollow" valign="middle">
@@ -1173,7 +1183,7 @@ if ($allsec != 1 || $enablespecial != 'yes'){ //do not print searchbox if showin
 						</td>
 					</tr>
 <?php
-$Cache->new_page('hot_search', 3670, true);
+$Cache->new_page('hot_search_torrents2', 3670, true);
 if (!$Cache->get_page()){
     \App\Repositories\TorrentListingRepository::cleanupSuggest();
     $searchres = \App\Repositories\TorrentListingRepository::getHotSearch();
@@ -1181,7 +1191,11 @@ if (!$Cache->get_page()){
     $hotsearch = "";
     foreach ($searchres as $searchrow)
     {
-        $hotsearch .= "<a href=\"".htmlspecialchars("?search=" . rawurlencode($searchrow["keywords"]) . "&notnewword=1")."\"><u>" . htmlspecialchars($searchrow["keywords"]) . "</u></a>&nbsp;&nbsp;";
+        $hotSearchParams = ['view' => $view, 'search' => $searchrow["keywords"], 'notnewword' => '1'];
+        if (!empty($_GET['pageSize']) && ctype_digit($_GET['pageSize'])) {
+            $hotSearchParams['pageSize'] = (int) $_GET['pageSize'];
+        }
+        $hotsearch .= "<a href=\"" . htmlspecialchars("?" . http_build_query($hotSearchParams)) . "\"><u>" . htmlspecialchars($searchrow["keywords"]) . "</u></a>&nbsp;&nbsp;";
         $hotcount += mb_strlen($searchrow["keywords"],"UTF-8");
         if ($hotcount > 60)
             break;
@@ -1195,7 +1209,9 @@ if (!$Cache->get_page()){
 echo $Cache->next_row();
 
 if ($allTags->isNotEmpty()) {
-    echo '<tr><td colspan="3" class="embedded" style="padding-top: 4px">' . $tagRep->renderSpan($sectiontype, ['*'], true) . '</td></tr>';
+    $tagSpan = $tagRep->renderSpan($sectiontype, ['*'], true);
+    $tagSpan = str_replace('href="?tag_id=', 'href="' . $filterLinkPrefix . 'tag_id=', $tagSpan);
+    echo '<tr><td colspan="3" class="embedded" style="padding-top: 4px">' . $tagSpan . '</td></tr>';
 }
 
 ?>

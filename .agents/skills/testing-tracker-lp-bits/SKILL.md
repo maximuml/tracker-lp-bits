@@ -40,7 +40,38 @@ Use this skill when asked to test the tracker-lp-bits app in the local Docker Co
 9. Run `composer validate` and `vendor/bin/phpstan analyse`.
 10. Check `docker logs nexusphp-php` for new fatals or deprecation warnings.
 
+## Test flow for `torrents2.php` grid PRs
+
+1. Open `/torrents2.php` (default `card` view). Verify 5 active torrents render in a grid and no JS errors appear in the console.
+2. Switch to `?view=table` and click each sort header (Name, Size, Seeders, etc.); verify `view=table` and `sort`/`type` are preserved in the URL.
+3. Switch to `?view=compact` and verify the compact list renders.
+4. Test the view switcher with active filters (`incldead`, `spstate`, `cat`, `search`, `pageSize`) and confirm the current filter state is preserved.
+5. Test category filtering:
+   - Using the search-box checkbox (`cat401=1`) should preserve `view`.
+   - Clicking a category icon should also preserve `view` and `pageSize`.
+6. Test keyword search (`?search=Linkin&search_area=0&search_mode=0`) and the **including dead** vs **active** dropdown.
+7. Test dropdowns: `incldead`, `spstate`, `inclbookmarked`.
+8. Test numeric ranges: `size_begin/end`, `seeders_begin/end`, `leechers_begin/end`, `times_completed_begin/end`, `added_begin/end`.
+9. Test pagination with `pageSize=2`:
+   - Direct URLs `?view=card&pageSize=2` and `?view=card&pageSize=2&page=1` work.
+   - `Prev`/`Next`/numbered pager links must preserve both `view` and `pageSize`.
+10. Hover/click card cover, card title, and table title links and verify each lands on `details.php?id=<id>&hit=1` with no 500.
+11. Click the **Search Box** header and verify the filter body expands/collapses.
+12. Run static checks inside the `nexusphp-php` container:
+    - `php -l public/torrents2.php app/Support/TorrentGrid.php app/Support/TorrentTable.php`
+    - `composer validate --strict`
+    - PHPStan default, `level5`, `level5.app`, `level6`
+    - `vendor/bin/phpunit --testsuite Unit --no-coverage`
+13. Check `docker compose logs --tail=100 php` for new `WARNING`/`ERROR`/`NOTICE` lines when browsing `torrents2.php`.
+
+## Automation notes for this page
+
+- Native mouse clicks on the small view-switcher buttons and **Go!** button may miss due to coordinate scaling; prefer `document.querySelector(...).click()` or direct `window.location` navigation while the recording captures the resulting page state.
+- Table sort links include `&` in the `href`; scope selectors to the table header row and match the full `sort=1&type=desc` substring to avoid clicking the wrong link.
+- Table title links are inside a `<b>` with `title="<torrent name>"`; use `document.querySelector('a[title="CriticalPathTest"]').click()` rather than a generic `details.php` selector, which can match the uploader/userdetails link instead.
+
 ## Known limitations
 
 - The legacy autocomplete on `/torrents.php` may not register native keystrokes in headless automation; trigger `suggest(0, '<term>')` from the console to verify it.
 - GitHub Actions CI may not start due to account billing/spending limits; rely on local Docker verification when that happens.
+- Category icon links and pagination links do not currently preserve `pageSize` or `view`; verify these carefully and report regressions.

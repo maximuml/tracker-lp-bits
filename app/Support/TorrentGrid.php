@@ -81,9 +81,17 @@ final class TorrentGrid
         $id = (int) $row['id'];
         $name = htmlspecialchars((string) $row['name']);
         $cover = $showCover && !empty($row['cover']) ? (string) $row['cover'] : '';
+        $categoryImageLinkParams = [];
+        if (!empty($_GET['view'])) {
+            $categoryImageLinkParams['view'] = $_GET['view'];
+        }
+        if (!empty($_GET['pageSize']) && ctype_digit($_GET['pageSize'])) {
+            $categoryImageLinkParams['pageSize'] = (int) $_GET['pageSize'];
+        }
+        $categoryImageLinkPrefix = '?' . ($categoryImageLinkParams ? http_build_query($categoryImageLinkParams) . '&' : '');
         $categoryImage = '';
         if (!empty($row['category'])) {
-            $categoryImage = return_category_image((int) $row['category'], '?');
+            $categoryImage = return_category_image((int) $row['category'], $categoryImageLinkPrefix);
         }
 
         $badges = self::badges($row, $lastBrowse, $langFunctions);

@@ -52,6 +52,10 @@ class RouteServiceProvider extends ServiceProvider
                 ->middleware('throttle:third-party')
                 ->group(base_path('routes/third-party.php'));
 
+            Route::middleware('throttle:tracker')
+                ->namespace($this->namespace)
+                ->group(base_path('routes/tracker.php'));
+
         });
     }
 
@@ -68,6 +72,10 @@ class RouteServiceProvider extends ServiceProvider
 
         RateLimiter::for('third-party', function (Request $request) {
             return Limit::perMinute(10)->by(getip());
+        });
+
+        RateLimiter::for('tracker', function (Request $request) {
+            return Limit::perMinute(120)->by($request->ip() ?? 'default');
         });
     }
 }

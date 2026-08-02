@@ -44,3 +44,50 @@ Use this skill when asked to test the tracker-lp-bits app in the local Docker Co
 
 - The legacy autocomplete on `/torrents.php` may not register native keystrokes in headless automation; trigger `suggest(0, '<term>')` from the console to verify it.
 - GitHub Actions CI may not start due to account billing/spending limits; rely on local Docker verification when that happens.
+
+## Testing `/announce.php` end-to-end
+
+Use these notes when verifying the BitTorrent announce endpoint in the Docker stack.
+
+### Request host / `basic.BASEURL` must match
+
+`AnnounceService::checkTrackerUrl()` compares the current request host with the tracker URL built from `basic.BASEURL`. A mismatch causes a `warning message` response and aborts peer processing.
+
+- `CriticalPathTest` sets `basic.BASEURL` to `openresty`, so it must be run with:
+  ```bash
+  docker compose exec -e CRITICAL_PATH_BASE_URL=http://openresty php vendor/bin/phpunit \
+    --filter testCriticalPath tests/Feature/CriticalPathTest.php --no-coverage
+  ```
+- For manual tests from the `php` container, request `http://openresty/announce.php` and ensure `basic.BASEURL` is `openresty`:
+  ```php
+  App\Support\Settings::saveBatch('basic', ['BASEURL' => 'openresty']);
+  \Illuminate\Support\Facades\Redis::flushAll();
+  ```
+
+### `peer_id` and `info_hash` encoding
+
+`AnnounceRequest` validates `info_hash` and `peer_id` with `strlen() == 20` on the raw binary string. Use 20-byte values and build the query with `PHP_QUERY_RFC3986`:
+
+```php
+$peerId = '-qB4' . sprintf('%02d', random_int(0, 99)) . random_bytes(14); // 20 bytes
+$query  = http_build_query($params, '', '&', PHP_QUERY_RFC3986);
+```
+
+Use `User-Agent: qBittorrent/4.x.x` and a `-qB4...` `peer_id` to pass the `AgentAllowRepository` allow-list check.
+
+### Controlling the peer IP
+
+`Network::clientIp()` reads `HTTP_X_FORWARDED_FOR` first. Use distinct `10.0.0.x` IPs per peer to avoid the same-IP seeder warning (`You cannot seed the same torrent in the same location from more than 1 client.`):
+
+```php
+curl_setopt($ch, CURLOPT_HTTPHEADER, ['X-Forwarded-For: 10.0.0.1']);
+```
+
+### Lock / cache behavior
+
+- The short re-announce lock (`isReAnnounce:<md5(passkey+info_hash)>`) has a 5s TTL. A second request within that window returns early and does **not** insert a duplicate peer.
+- The `isReAnnounce` early-return response is built by `buildInitialRepDict()`, which now queries the `peers` table live for `complete`/`incomplete` counts, so the response reflects the current peer state even when the `torrent_hash_<infoHash>_content` cache has not expired.
+
+### Missing required parameters
+
+The openresty Lua filter in `.docker/openresty/lua/tracker_filter.lua` rejects requests missing required announce parameters with `400 Bad Request` and a bencoded `failure reason` (e.g. `Missing parameter: port`) before PHP is reached.

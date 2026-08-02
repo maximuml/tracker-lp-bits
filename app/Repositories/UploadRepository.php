@@ -261,7 +261,7 @@ class UploadRepository extends BaseRepository
      */
     private function getHitAndRun(Request $request, Category $category): int
     {
-        $hr = $request->input("hr.{$category->mode}", 0);
+        $hr = $request->input("hr.{$category->mode}");
         if (!is_numeric($hr)) {
             $hr = $request->input('hr', 0);
         }
@@ -491,10 +491,7 @@ class UploadRepository extends BaseRepository
         $subCategories = [];
         foreach (SearchBox::$taxonomies as $name => $info) {
             $value = $this->getSubCategoryValue($request, $name, $category->mode);
-            if ($value > 0) {
-                if (!isset($subCategoryInfo[$name])) {
-                    throw new NexusException(nexus_trans('upload.not_supported_sub_category_field', ['field' => $name]));
-                }
+            if ($value > 0 && isset($subCategoryInfo[$name])) {
                 $subCategoryValues = array_column($subCategoryInfo[$name]['data'], 'name', 'id');
                 if (!isset($subCategoryValues[$value])) {
                     throw new NexusException(nexus_trans(
@@ -503,7 +500,7 @@ class UploadRepository extends BaseRepository
                     ));
                 }
             }
-            $subCategories[$name] = $value;
+            $subCategories[$name] = $value > 0 && isset($subCategoryInfo[$name]) ? $value : 0;
         }
 
         $tags = $this->getTags($request, $category->mode);

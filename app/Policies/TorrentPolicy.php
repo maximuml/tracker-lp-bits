@@ -9,6 +9,14 @@ use App\Support\TorrentAccess;
 
 class TorrentPolicy extends BasePolicy
 {
+    public function before(User $user, $ability)
+    {
+        if ($ability === 'download') {
+            return null;
+        }
+        return parent::before($user, $ability);
+    }
+
     public function viewAny(User $user): bool
     {
         return true;

@@ -91,7 +91,7 @@ class TorrentDownloadController extends Controller
             'last_access' => now()->toDateTimeString(),
             'ip' => $ip,
         ]);
-        IpLogRepository::saveToCache($user->id, $request->getRequestUri(), [$ip]);
+        IpLogRepository::saveToCache($user->id, $request->getPathInfo(), [$ip]);
 
         $torrent = Torrent::query()->findOrFail($id);
 

@@ -6,9 +6,12 @@ class TorrentAlreadyExistsException extends NexusException
 {
     private int $torrentId;
 
-    public function __construct(int $torrentId)
+    public function __construct(int $torrentId, ?string $message = null)
     {
-        parent::__construct('torrent.already_exists', 0, null);
+        if ($message === null) {
+            $message = nexus_trans('upload.torrent_existed', ['id' => $torrentId]);
+        }
+        parent::__construct($message, 0, null);
         $this->torrentId = $torrentId;
     }
 

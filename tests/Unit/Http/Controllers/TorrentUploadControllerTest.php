@@ -22,11 +22,12 @@ final class TorrentUploadControllerTest extends TestCase
     {
         $torrent = new Torrent();
         $torrent->id = 42;
+
+        /** @var UploadRepository&Mockery\MockInterface $repository */
         $repository = Mockery::mock(UploadRepository::class);
-        $repository->shouldReceive('upload')
-            ->once()
-            ->with(Mockery::type(Request::class))
-            ->andReturn($torrent);
+        /** @var Mockery\Expectation $expectation */
+        $expectation = $repository->shouldReceive('upload');
+        $expectation->once()->with(Mockery::type(Request::class))->andReturn($torrent);
 
         $controller = new TorrentUploadController();
         $request = Request::create('/takeupload', 'POST', [
@@ -43,10 +44,11 @@ final class TorrentUploadControllerTest extends TestCase
 
     public function test_legacy_store_redirects_to_existing_torrent(): void
     {
+        /** @var UploadRepository&Mockery\MockInterface $repository */
         $repository = Mockery::mock(UploadRepository::class);
-        $repository->shouldReceive('upload')
-            ->once()
-            ->andThrow(new TorrentAlreadyExistsException(99));
+        /** @var Mockery\Expectation $expectation */
+        $expectation = $repository->shouldReceive('upload');
+        $expectation->once()->andThrow(new TorrentAlreadyExistsException(99, 'Torrent already exists'));
 
         $controller = new TorrentUploadController();
         $request = Request::create('/takeupload', 'POST', [

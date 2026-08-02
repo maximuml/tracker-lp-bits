@@ -16,9 +16,9 @@ $rows = \App\Models\Torrent::query()
     ->get()
     ->toArray();
 
-stdhead($lang_index['head_index'] ?? 'Home');
 \Nexus\Nexus::css('styles/torrents2.css', 'header', true);
 \Nexus\Nexus::css('styles/index2.css', 'header', true);
+stdhead($lang_index['head_index'] ?? 'Home');
 begin_main_frame();
 
 echo '<div class="t2-wrap">';

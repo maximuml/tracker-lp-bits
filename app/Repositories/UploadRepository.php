@@ -4,15 +4,20 @@ namespace App\Repositories;
 use App\Auth\Permission;
 use App\Enums\ModelEventEnum;
 use App\Exceptions\NexusException;
+use App\Exceptions\TorrentAlreadyExistsException;
 use App\Http\Resources\SearchBoxResource;
 use App\Models\BonusLogs;
 use App\Models\Category;
 use App\Models\File;
+use App\Models\Message;
 use App\Models\SearchBox;
 use App\Models\Setting;
 use App\Models\Torrent;
 use App\Models\TorrentExtra;
 use App\Models\User;
+use App\Repositories\TorrentUploadRepository;
+use App\Support\Locale;
+use App\Support\Url;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
@@ -71,7 +76,7 @@ class UploadRepository extends BaseRepository
         $infoHash = pack("H*", sha1(Bencode::encode($dict['info'])));
         $exists = Torrent::query()->where('info_hash', $infoHash)->first(['id']);
         if ($exists) {
-            throw new NexusException(nexus_trans('upload.torrent_existed', ['id' => $exists->id]));
+            throw new TorrentAlreadyExistsException($exists->id);
         }
         $subCategoriesAngTags = $this->getSubCategoriesAndTags($request, $category);
         $fileListInfo = $this->getFileListInfo($info, $dname);
@@ -112,7 +117,7 @@ class UploadRepository extends BaseRepository
             'cover' => $this->getCover($request),
             'pieces_hash' => sha1($info['pieces']),
             'cache_stamp' => time(),
-            'hr' => $this->getHitAndRun($request),
+            'hr' => $this->getHitAndRun($request, $category),
             'pos_state' => $posStateInfo['posState'],
             'pos_state_until' => $posStateInfo['posStateUntil'],
             'approval_status' => $this->getApprovalStatus($request),
@@ -124,7 +129,7 @@ class UploadRepository extends BaseRepository
             'nfo' => $this->getNfoContent($request),
             'created_at' => $nowStr,
         ];
-        $newTorrent = DB::transaction(function () use ($torrentInsert, $extraInsert, $fileListInfo, $subCategoriesAngTags, $dict, $torrentSavePath) {
+        $newTorrent = DB::transaction(function () use ($request, $category, $torrentInsert, $extraInsert, $fileListInfo, $subCategoriesAngTags, $dict, $torrentSavePath) {
             $newTorrent = Torrent::query()->create($torrentInsert);
             $id = $newTorrent->id;
             $torrentFilePath = "$torrentSavePath/$id.torrent";
@@ -147,12 +152,14 @@ class UploadRepository extends BaseRepository
             if (!empty($subCategoriesAngTags['tags'])) {
                 insert_torrent_tags($id, $subCategoriesAngTags['tags']);
             }
+            $this->saveCustomFields($request, $category, $id);
             $this->sendReward($id);
             return $newTorrent;
         });
         $id = $newTorrent->id;
         $torrentRep = new TorrentRepository();
-        $torrentRep->addPiecesHashCache($id, $torrentInsert['pieces_hash']);
+        $torrentRep->addPiecesHashCache($id, $newTorrent->pieces_hash);
+        $this->handleOffer($request, $newTorrent, $user);
         write_log("Torrent $id ($newTorrent->name) was uploaded by $uploaderUsername");
         fire_event(ModelEventEnum::TORRENT_CREATED, $newTorrent);
         return $newTorrent;
@@ -248,10 +255,17 @@ class UploadRepository extends BaseRepository
         return intval($price);
     }
 
-    /** @param  \Illuminate\Http\Request  $request */
-    private function getHitAndRun(Request $request): int
+    /**
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Models\Category  $category
+     */
+    private function getHitAndRun(Request $request, Category $category): int
     {
-        $hr = $request->hr ?? 0;
+        $hr = $request->input("hr.{$category->mode}", 0);
+        if (!is_numeric($hr)) {
+            $hr = $request->input('hr', 0);
+        }
+        $hr = (int) $hr;
         if ($hr > 0 && !Permission::canSetTorrentHitAndRun()) {
             throw new NexusException(nexus_trans("upload.no_permission_to_set_torrent_hr"));
         }
@@ -359,10 +373,17 @@ class UploadRepository extends BaseRepository
         ];
     }
 
-    /** @param  \App\Models\SearchBox  $section */
-    private function canUploadToSection(SearchBox $section): bool
+    /**
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Models\SearchBox  $section
+     */
+    private function canUploadToSection(Request $request, SearchBox $section): bool
     {
         $user = Auth::user();
+        if ($user->uploadpos !== 'yes') {
+            throw new NexusException(nexus_trans('upload.unauthorized_to_upload'));
+        }
+
         $uploadDenyApprovalDenyCount = Setting::getUploadDenyApprovalDenyCount();
         $approvalDenyCount = Torrent::query()->where('owner', $user->id)
             ->where('approval_status', Torrent::APPROVAL_STATUS_DENY)
@@ -371,7 +392,13 @@ class UploadRepository extends BaseRepository
         if ($uploadDenyApprovalDenyCount > 0 && $approvalDenyCount >= $uploadDenyApprovalDenyCount) {
             throw new NexusException(nexus_trans("upload.approval_deny_reach_upper_limit"));
         }
+
         if ($section->isSectionBrowse()) {
+            $offerId = (int) $request->offer;
+            if ($offerId > 0 && Setting::get('main.showoffer') == 'yes' && TorrentUploadRepository::isAllowedOffer($offerId, $user->id)) {
+                return true;
+            }
+
             $offerSkipApprovedCount = Setting::getOfferSkipApprovedCount();
             if ($user->offer_allowed_count >= $offerSkipApprovedCount) {
                 return true;
@@ -451,7 +478,7 @@ class UploadRepository extends BaseRepository
         if (!$section instanceof SearchBox) {
             throw new NexusException(nexus_trans('upload.invalid_section'));
         }
-        $this->canUploadToSection($section);
+        $this->canUploadToSection($request, $section);
 
         $sectionResource = new SearchBoxResource($section);
         $sectionData = $sectionResource->response()->getData(true);
@@ -463,7 +490,7 @@ class UploadRepository extends BaseRepository
         $subCategoryInfo = array_column($sectionInfo['sub_categories'], null, 'field');
         $subCategories = [];
         foreach (SearchBox::$taxonomies as $name => $info) {
-            $value = $request->get($name, 0);
+            $value = $this->getSubCategoryValue($request, $name, $category->mode);
             if ($value > 0) {
                 if (!isset($subCategoryInfo[$name])) {
                     throw new NexusException(nexus_trans('upload.not_supported_sub_category_field', ['field' => $name]));
@@ -478,10 +505,8 @@ class UploadRepository extends BaseRepository
             }
             $subCategories[$name] = $value;
         }
-        $tags = $request->tags ?: [];
-        if (!is_array($tags)) {
-            $tags = explode(',', $tags);
-        }
+
+        $tags = $this->getTags($request, $category->mode);
         $allTags = array_column($sectionInfo['tags'], 'name', 'id');
         foreach ($tags as $tag) {
             if (!isset($allTags[$tag])) {
@@ -596,6 +621,92 @@ class UploadRepository extends BaseRepository
         return $successCount;
     }
 
+    /**
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Models\Category  $category
+     */
+    private function saveCustomFields(Request $request, Category $category, int $torrentId): void
+    {
+        if (!$request->has("custom_fields")) {
+            return;
+        }
+        $data = $request->input("custom_fields.{$category->mode}", []);
+        if (empty($data)) {
+            return;
+        }
+        $field = new \Nexus\Field\Field();
+        $field->saveFieldValues($category->mode, $torrentId, $data);
+    }
 
+    /**
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Models\Torrent  $torrent
+     */
+    private function handleOffer(Request $request, Torrent $torrent, User $user): void
+    {
+        $offerId = (int) $request->offer;
+        if ($offerId <= 0) {
+            return;
+        }
+        if (!TorrentUploadRepository::isAllowedOffer($offerId, $user->id)) {
+            return;
+        }
+
+        $voterIds = TorrentUploadRepository::getOfferVoterIds($offerId, $user->id);
+        foreach ($voterIds as $voterId) {
+            $locale = Locale::userLocale($voterId);
+            $msg = nexus_trans("torrent.msg_offer_you_voted", [], $locale)
+                . $torrent->name
+                . nexus_trans("torrent.msg_was_uploaded_by", [], $locale)
+                . $user->username
+                . nexus_trans("torrent.msg_you_can_download", [], $locale)
+                . "[url=" . Url::schemeAndHost() . "/details.php?id=" . $torrent->id . "&hit=1]"
+                . nexus_trans("torrent.msg_here", [], $locale)
+                . "[/url]";
+            $subject = nexus_trans("torrent.msg_offer", [], $locale)
+                . $torrent->name
+                . nexus_trans("torrent.msg_was_just_uploaded", [], $locale);
+            Message::add([
+                'sender' => 0,
+                'subject' => $subject,
+                'receiver' => $voterId,
+                'added' => now()->toDateTimeString(),
+                'msg' => $msg,
+            ]);
+        }
+        TorrentUploadRepository::finalizeOffer($offerId, $user->id);
+    }
+
+    /**
+     * @param  \Illuminate\Http\Request  $request
+     */
+    private function getSubCategoryValue(Request $request, string $name, int $mode): int
+    {
+        $legacyKey = "{$name}_sel.{$mode}";
+        if ($request->has($legacyKey)) {
+            $value = $request->input($legacyKey, 0);
+        } else {
+            $value = $request->get($name, 0);
+        }
+        return is_numeric($value) ? (int) $value : 0;
+    }
+
+    /**
+     * @param  \Illuminate\Http\Request  $request
+     * @return  array<int, mixed>
+     */
+    private function getTags(Request $request, int $mode): array
+    {
+        if ($request->has("tags.{$mode}")) {
+            $tags = $request->input("tags.{$mode}", []);
+            return is_array($tags) ? $tags : [];
+        }
+
+        $tags = $request->tags ?: [];
+        if (!is_array($tags)) {
+            $tags = explode(',', $tags);
+        }
+        return $tags;
+    }
 
 }

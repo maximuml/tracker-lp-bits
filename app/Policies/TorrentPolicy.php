@@ -2,111 +2,74 @@
 
 namespace App\Policies;
 
+use App\Models\Setting;
 use App\Models\Torrent;
 use App\Models\User;
-use Illuminate\Auth\Access\HandlesAuthorization;
+use App\Support\TorrentAccess;
 
 class TorrentPolicy extends BasePolicy
 {
-    use HandlesAuthorization;
-
-    /**
-     * Determine whether the user can view any models.
-     *
-     * @param  \App\Models\User  $user
-     * @return \Illuminate\Auth\Access\Response|bool
-     */
-    public function viewAny(User $user)
+    public function viewAny(User $user): bool
     {
         return true;
     }
 
-    /**
-     * Determine whether the user can view the model.
-     *
-     * @param  \App\Models\User  $user
-     * @param  \App\Models\Torrent  $torrent
-     * @return \Illuminate\Auth\Access\Response|bool
-     */
-    public function view(User $user, Torrent $torrent)
+    public function view(User $user, Torrent $torrent): bool
     {
         return true;
     }
 
-    /**
-     * Determine whether the user can create models.
-     *
-     * @param  \App\Models\User  $user
-     * @return \Illuminate\Auth\Access\Response|bool
-     */
-    public function create(User $user)
+    public function create(User $user): bool
     {
-        //
-    
         return false;
     }
 
-    /**
-     * Determine whether the user can update the model.
-     *
-     * @param  \App\Models\User  $user
-     * @param  \App\Models\Torrent  $torrent
-     * @return \Illuminate\Auth\Access\Response|bool
-     */
-    public function update(User $user, Torrent $torrent)
+    public function update(User $user, Torrent $torrent): bool
     {
-        //
-    
         return false;
     }
 
-    /**
-     * Determine whether the user can delete the model.
-     *
-     * @param  \App\Models\User  $user
-     * @param  \App\Models\Torrent  $torrent
-     * @return \Illuminate\Auth\Access\Response|bool
-     */
-    public function delete(User $user, Torrent $torrent)
+    public function delete(User $user, Torrent $torrent): bool
     {
-        //
-    
         return false;
     }
 
-    /**
-     * Determine whether the user can restore the model.
-     *
-     * @param  \App\Models\User  $user
-     * @param  \App\Models\Torrent  $torrent
-     * @return \Illuminate\Auth\Access\Response|bool
-     */
-    public function restore(User $user, Torrent $torrent)
+    public function restore(User $user, Torrent $torrent): bool
     {
-        //
-    
         return false;
     }
 
-    /**
-     * Determine whether the user can permanently delete the model.
-     *
-     * @param  \App\Models\User  $user
-     * @param  \App\Models\Torrent  $torrent
-     * @return \Illuminate\Auth\Access\Response|bool
-     */
-    public function forceDelete(User $user, Torrent $torrent)
+    public function forceDelete(User $user, Torrent $torrent): bool
     {
-        //
-    
         return false;
     }
 
-    private function can(User $user)
+    public function download(User $user, Torrent $torrent): bool
     {
-        if ($user->class >= User::CLASS_ADMINISTRATOR) {
-            return true;
+        if ($user->downloadpos === 'no') {
+            return false;
         }
-        return false;
+
+        $approvalNotAllowed = $torrent->approval_status != Torrent::APPROVAL_STATUS_ALLOW
+            && Setting::get('torrent.approval_status_none_visible') == 'no';
+        $allowOwnerDownload = $torrent->owner == $user->id;
+        $canSeedBanned = user_can('seebanned', false, $user->id);
+        $canAccessTorrent = TorrentAccess::canAccess($torrent->id, $user->id);
+
+        if ((($torrent->banned == 'yes' || ($approvalNotAllowed && !$allowOwnerDownload)) && !$canSeedBanned)
+            || !$canAccessTorrent
+        ) {
+            do_log(sprintf(
+                "[DENY_DOWNLOAD], user: %s, approvalNotAllowed: %s, allowOwnerDownload: %s, canSeedBanned: %s, canAccessTorrent: %s",
+                $user->id,
+                $approvalNotAllowed ? 'true' : 'false',
+                $allowOwnerDownload ? 'true' : 'false',
+                $canSeedBanned ? 'true' : 'false',
+                $canAccessTorrent ? 'true' : 'false'
+            ), 'error');
+            return false;
+        }
+
+        return true;
     }
 }

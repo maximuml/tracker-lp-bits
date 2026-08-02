@@ -15,9 +15,11 @@ use App\Models\SearchBox;
 use App\Models\SecondIcon;
 use App\Models\Source;
 use App\Models\Standard;
+use App\Models\Torrent;
 use App\Models\TorrentCustomField;
 use App\Models\User;
 use App\Policies\CodecPolicy;
+use App\Policies\TorrentPolicy;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -27,7 +29,7 @@ class AuthServiceProvider extends ServiceProvider
     /**
      * The policy mappings for the application.
      *
-     * @var array
+     * @var array<class-string, class-string>
      */
     protected $policies = [
         SearchBox::class => CodecPolicy::class,
@@ -43,6 +45,7 @@ class AuthServiceProvider extends ServiceProvider
         Standard::class => CodecPolicy::class,        Processing::class => CodecPolicy::class,
 
         Plugin::class => CodecPolicy::class,
+        Torrent::class => TorrentPolicy::class,
     ];
 
     /**

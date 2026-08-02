@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\TorrentDownloadController;
+use App\Http\Controllers\TorrentUploadController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -18,6 +20,13 @@ Route::get('/', function () {
 });
 
 Route::get("/error", [\App\Http\Controllers\ToolController::class, "error"]);
+
+Route::post('/takeupload', [TorrentUploadController::class, 'legacyStore'])
+    ->middleware('auth.nexus:nexus-web')
+    ->name('torrents.legacy-store');
+
+Route::get('/download', [TorrentDownloadController::class, 'download'])
+    ->name('torrents.download');
 
 Route::group(['prefix' => 'web', 'middleware' => ['auth.nexus:nexus-web']], function () {
     Route::get('torrent-approval-page', [\App\Http\Controllers\TorrentController::class, 'approvalPage']);

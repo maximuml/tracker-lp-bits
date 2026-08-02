@@ -141,7 +141,7 @@ final class AnnounceService
             throw TrackerException::failure('Browser access blocked!');
         }
 
-        if (! Url::isSecure()) {
+        if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'on') {
             $headers = $this->request->headers->all();
             if (isset($headers['cookie']) || isset($headers['accept-language']) || isset($headers['accept-charset'])) {
                 throw TrackerException::failure('Anti-Cheater: You cannot use this agent');
@@ -203,22 +203,23 @@ final class AnnounceService
             $this->warn('Passkey invalid');
         }
 
-        $infoHashHex = sha1($this->infoHash);
+        $infoHashSha1 = sha1($this->infoHash);
         $reAnnounceInterval = 5;
         $frequencyInterval = 30;
         $isStoppedOrCompleted = !empty($this->event) && in_array($this->event, ['completed', 'stopped'], true);
 
-        $reAnnounceKey = 'isReAnnounce:' . md5($passkey . ':' . bin2hex($this->infoHash));
+        $lockParams = ['info_hash' => $this->infoHash, 'passkey' => $passkey];
+        $reAnnounceKey = 'isReAnnounce:' . md5(http_build_query($lockParams));
         if (!$redis->set($reAnnounceKey, TIMENOW, ['nx', 'ex' => $reAnnounceInterval])) {
             $this->isReAnnounce = true;
         }
 
         $torrentNotExistsKey = 'torrent_not_exists';
-        if ($redis->get("{$torrentNotExistsKey}:{$infoHashHex}")) {
+        if ($redis->get("{$torrentNotExistsKey}:{$this->infoHash}")) {
             throw TrackerException::failure('torrent not registered with this tracker');
         }
 
-        $frequencyKey = "reAnnounceCheckByInfoHash:{$passkey}:{$infoHashHex}";
+        $frequencyKey = "reAnnounceCheckByInfoHash:{$passkey}:{$infoHashSha1}";
         if (!$isStoppedOrCompleted && !$this->isReAnnounce && !$redis->set($frequencyKey, TIMENOW, ['nx', 'ex' => $frequencyInterval])) {
             do_log('[ANNOUNCE] Request too frequent(h)');
             $this->warn('Request too frequent(h)', 300);
@@ -307,7 +308,7 @@ final class AnnounceService
     {
         $infoHashHex = bin2hex($this->infoHash);
 
-        $this->torrent = NexusDB::remember("torrent_hash_{$infoHashHex}_content", 350, function () use ($infoHashHex) {
+        $this->torrent = NexusDB::remember("torrent_hash_{$this->infoHash}_content", 350, function () {
             $tsField = NexusDB::unixTimestampField('added');
             $torrent = NexusDB::table('torrents')
                 ->leftJoin('categories', 'torrents.category', '=', 'categories.id')
@@ -326,7 +327,7 @@ final class AnnounceService
 
         if (!$this->torrent) {
             do_log('[TORRENT NOT EXISTS] info_hash: ' . $infoHashHex);
-            NexusDB::redis()->set('torrent_not_exists:' . $infoHashHex, TIMENOW, ['ex' => 24 * 3600]);
+            NexusDB::redis()->set('torrent_not_exists:' . $this->infoHash, TIMENOW, ['ex' => 24 * 3600]);
             throw TrackerException::failure('torrent not registered with this tracker');
         }
 
@@ -461,6 +462,7 @@ final class AnnounceService
             if ($buyStatus > 10) {
                 (new UserRepository())->updateDownloadPrivileges(null, $this->userId, 'no', 'announce_paid_torrent_too_many_times');
             }
+            \Nexus\Nexus::dispatchQueueJob(new \App\Jobs\BuyTorrent($this->userId, $this->torrentId));
             $torrentRep->addBuyFailCache($this->userId, $this->torrentId);
             $this->warn('purchase in progress, please try again later, and make sure you have enough bonus', 300);
         }
@@ -583,10 +585,12 @@ final class AnnounceService
 
         if ($uploaded > 1073741824 && $upspeed > ($mayBeCheaterSpeed / $cheaterdetSecurity)) {
             $this->insertOrUpdateCheater($time, $uploaded, $downloaded, $seeders, $leechers, 'Abnormally high uploading rate');
+            return;
         }
 
         if ($cheaterdetSecurity > 1 && $uploaded > 1073741824 && $upspeed > 1048576 && $leechers < (2 * $cheaterdetSecurity)) {
             $this->insertOrUpdateCheater($time, $uploaded, $downloaded, $seeders, $leechers, 'User is uploading fast when there is few leechers');
+            return;
         }
 
         if ($cheaterdetSecurity > 1 && $uploaded > 10485760 && $upspeed > 102400 && $leechers == 0) {
@@ -1059,7 +1063,7 @@ final class AnnounceService
         $lockKey = sprintf('record_batch_lock:%s:%s', $this->userId, $this->torrentId);
         if ($redis->set($lockKey, TIMENOW, ['nx', 'ex' => $this->autocleanIntervalOne])) {
             CleanupRepository::recordBatch($redis, $this->userId, $this->torrentId);
-            IpLogRepository::saveToCache($this->userId, $this->request->getRequestUri(), [$this->ip]);
+            IpLogRepository::saveToCache($this->userId, null, [$this->ip]);
         }
 
         if (RequireSeedTorrentRepository::shouldRecordUser($redis, $this->userId, $this->torrentId)) {

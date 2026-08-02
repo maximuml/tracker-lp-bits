@@ -75,7 +75,7 @@ class RouteServiceProvider extends ServiceProvider
         });
 
         RateLimiter::for('tracker', function (Request $request) {
-            return Limit::perMinute(120)->by($request->input('passkey') ?: $request->ip());
+            return Limit::perMinute(120)->by($request->ip() ?? 'default');
         });
     }
 }

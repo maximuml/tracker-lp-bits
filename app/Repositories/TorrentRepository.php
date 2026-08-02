@@ -504,17 +504,22 @@ class TorrentRepository extends BaseRepository
         return "$speed/s";
     }
 
+    /** @var array<string, string> */
+    private static array $downHashKeys = [];
+
     /**
      * @param  mixed  $id
      * @param  mixed  $user
      */
     public function encryptDownHash($id, $user): string
     {
-        $key = $this->getEncryptDownHashKey($user);
+        $userInfo = $this->getUserForDownHash($user);
+        $key = $this->getHkdfDownHashKey($userInfo['id'], $userInfo['passkey']);
         $payload = [
             'id' => $id,
-            'exp' => time() + 3600
+            'exp' => time() + 3600,
         ];
+
         return JWT::encode($payload, $key, 'HS256');
     }
 
@@ -525,36 +530,95 @@ class TorrentRepository extends BaseRepository
      */
     public function decryptDownHash($downHash, $user)
     {
-        $key = $this->getEncryptDownHashKey($user);
-        try {
-            $decoded = JWT::decode($downHash, new Key($key, 'HS256'));
-            return [$decoded->id];
-        } catch (\Exception $e) {
-            do_log("Invalid down hash: $downHash, " . $e->getMessage(), "error");
-            return [];
+        $userInfo = $this->getUserForDownHash($user);
+        $keys = $this->buildDownHashVerificationKeys($userInfo['id'], $userInfo['passkey']);
+
+        foreach ($keys as $key) {
+            try {
+                $decoded = JWT::decode($downHash, new Key($key, 'HS256'));
+
+                return [$decoded->id];
+            } catch (\Exception $e) {
+                continue;
+            }
         }
+
+        \App\Support\Logger::write("Invalid down hash: $downHash", "error");
+
+        return [];
     }
 
     /**
      * @param  mixed  $user
-     * @return  mixed
+     * @return  array{id: int, passkey: string}
      */
-    private function getEncryptDownHashKey($user)
+    private function getUserForDownHash($user): array
     {
-        $passkey = "";
+        $passkey = '';
         if ($user instanceof User && $user->passkey) {
             $passkey = $user->passkey;
+            $id = (int) $user->id;
         } elseif (is_array($user) && !empty($user['passkey'])) {
             $passkey = $user['passkey'];
+            $id = (int) $user['id'];
         } elseif (is_scalar($user)) {
             $user = User::query()->findOrFail(intval($user), ['id', 'passkey']);
             $passkey = $user->passkey;
+            $id = (int) $user->id;
+        } else {
+            throw new \InvalidArgumentException("Invalid user: " . json_encode($user));
         }
+
         if (empty($passkey)) {
             throw new \InvalidArgumentException("Invalid user: " . json_encode($user));
         }
-        //down hash is relative to user passkey
-        return md5($passkey . date('Ymd') . $user['id']);
+
+        return ['id' => $id, 'passkey' => (string) $passkey];
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private function buildDownHashVerificationKeys(int $userId, string $passkey): array
+    {
+        $keys = [$this->getHkdfDownHashKey($userId, $passkey)];
+
+        // Legacy md5-based keys are still accepted until the user changes their
+        // passkey; the old key material includes the passkey, so a passkey
+        // rotation automatically invalidates any previously issued md5 downhash.
+        $now = time();
+        foreach ([$now, $now - 86400, $now - 2 * 86400] as $ts) {
+            $keys[] = $this->getLegacyMd5DownHashKey($userId, $passkey, date('Ymd', $ts));
+        }
+
+        return $keys;
+    }
+
+    private function getHkdfDownHashKey(int $userId, string $passkey): string
+    {
+        $cacheKey = $userId . ':' . $passkey;
+        if (isset(self::$downHashKeys[$cacheKey])) {
+            return self::$downHashKeys[$cacheKey];
+        }
+
+        $appKey = \App\Support\Env::get('APP_KEY');
+        if ($appKey === null || $appKey === '') {
+            $appKey = getenv('APP_KEY') ?: ($_ENV['APP_KEY'] ?? $_SERVER['APP_KEY'] ?? '');
+        }
+        if (empty($appKey)) {
+            throw new \RuntimeException('APP_KEY is not configured for downhash');
+        }
+
+        if (str_starts_with($appKey, 'base64:')) {
+            $appKey = base64_decode(substr($appKey, 7));
+        }
+
+        return self::$downHashKeys[$cacheKey] = hash_hkdf('sha256', $appKey, 32, 'nexus-downhash-' . $userId . '-' . $passkey);
+    }
+
+    private function getLegacyMd5DownHashKey(int $userId, string $passkey, string $dateYmd): string
+    {
+        return md5($passkey . $dateYmd . $userId);
     }
 
     /**

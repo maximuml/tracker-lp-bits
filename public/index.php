@@ -33,6 +33,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST")
 	}
 }
 \Nexus\Nexus::css('styles/shoutbox.css', 'header', true);
+\Nexus\Nexus::css('styles/torrents2.css', 'header', true);
 \Nexus\Nexus::js('js/shoutbox.js', 'footer', true);
 $toastLang = json_encode([
     'newMessage' => $lang_index['toast_new_message'] ?? 'New message',
@@ -182,143 +183,19 @@ if ($showlastxforumposts_main == "yes" && $CURUSER)
 // ------------- start: latest torrents ------------------//
 
 if ($showlastxtorrents_main == "yes") {
-		$ltCacheKey = 'index_latest_torrents_grid_v2';
+		$ltCacheKey = 'index_latest_torrents_grid_v3';
 		$ltCacheTtl = 120;
 		$ltHtml = $Cache->get_value($ltCacheKey);
 		if ($ltHtml === false || $ltHtml === null || $ltHtml === '') {
 			$latestTorrents = \App\Repositories\IndexRepository::getLatestTorrents(9);
 			if ($latestTorrents->isNotEmpty()) {
-				ob_start();
-				?>
-				<h2><?php echo $lang_index['text_last_five_torrent'] ?></h2>
-				<style>
-					.lt-grid {
-						display: grid;
-						grid-template-columns: repeat(3, 1fr);
-						gap: 12px;
-						margin: 8px 0 16px;
-					}
-					.lt-grid .lt-card {
-						border: 1px solid rgba(127,127,127,.35);
-						border-radius: 6px;
-						overflow: hidden;
-						display: flex;
-						flex-direction: column;
-						background: rgba(127,127,127,.05);
-					}
-					.lt-grid .lt-cover {
-						position: relative;
-						display: block;
-						width: 100%;
-						aspect-ratio: 2 / 3;
-						max-height: 240px;
-						background: rgba(0,0,0,.08);
-						overflow: hidden;
-					}
-					.lt-grid .lt-cover img,
-					.lt-grid .lt-cover .lt-cover-fallback {
-						width: 100%;
-						height: 100%;
-						object-fit: cover;
-						display: block;
-					}
-					.lt-grid .lt-cover-fallback {
-						display: flex;
-						align-items: center;
-						justify-content: center;
-						padding: 8px;
-						box-sizing: border-box;
-						font-size: 12px;
-						line-height: 1.3;
-						color: rgba(127,127,127,.85);
-						text-align: center;
-						word-break: break-word;
-					}
-					.lt-grid .lt-type {
-						position: absolute;
-						top: 6px;
-						right: 6px;
-						background: rgba(0,0,0,.78);
-						color: #fff;
-						font-size: 11px;
-						font-weight: bold;
-						padding: 2px 6px;
-						border-radius: 3px;
-						line-height: 1.2;
-						letter-spacing: .3px;
-						pointer-events: none;
-					}
-					.lt-grid .lt-title {
-						padding: 6px 8px 4px;
-						font-size: 12px;
-						line-height: 1.3;
-						overflow: hidden;
-						display: -webkit-box;
-						-webkit-line-clamp: 2;
-						-webkit-box-orient: vertical;
-					}
-					.lt-grid .lt-title a { text-decoration: none; }
-					.lt-grid .lt-meta {
-						margin-top: auto;
-						display: flex;
-						flex-wrap: wrap;
-						gap: 4px 10px;
-						padding: 6px 8px;
-						font-size: 11px;
-						border-top: 1px solid rgba(127,127,127,.2);
-					}
-					.lt-grid .lt-seed { color: #2fad2f; font-weight: bold; }
-					.lt-grid .lt-leech { color: #d04848; font-weight: bold; }
-					@media (max-width: 700px) {
-						.lt-grid { grid-template-columns: repeat(2, 1fr); }
-					}
-					@media (max-width: 420px) {
-						.lt-grid { grid-template-columns: 1fr; }
-					}
-				</style>
-				<div class="lt-grid">
-				<?php
-				foreach ($latestTorrents as $torrent)
-				{
-					$detailsUrl = 'details.php?id=' . (int)$torrent->id . '&hit=1';
-					$rawCover = trim((string)($torrent->cover ?? ''));
-					$thumbUrl = $rawCover !== '' ? cover_thumb_url($rawCover, 240, 360) : '';
-					$typeLabel = trim((string)($torrent->basic_category->name ?? ''));
-					if (($torrent->anonymous ?? 'no') === 'yes') {
-						$ownerHtml = '<i>Anonymous</i>';
-					} else {
-						$ownerHtml = get_username((int)$torrent->owner);
-					}
-					$nameSafe = htmlspecialchars($torrent->name);
-					?>
-					<div class="lt-card">
-						<a class="lt-cover" href="<?php echo htmlspecialchars($detailsUrl) ?>" title="<?php echo $nameSafe ?>">
-							<?php if ($thumbUrl !== '') { ?>
-								<img src="<?php echo htmlspecialchars($thumbUrl) ?>" alt="<?php echo $nameSafe ?>" loading="lazy" onerror="this.style.display='none';if(this.nextElementSibling){this.nextElementSibling.style.display='flex';}" />
-								<div class="lt-cover-fallback" style="display:none;"><?php echo htmlspecialchars(mb_substr($torrent->name, 0, 60)) ?></div>
-							<?php } else { ?>
-								<div class="lt-cover-fallback"><?php echo htmlspecialchars(mb_substr($torrent->name, 0, 60)) ?></div>
-							<?php } ?>
-							<?php if ($typeLabel !== '') { ?>
-								<span class="lt-type"><?php echo htmlspecialchars($typeLabel) ?></span>
-							<?php } ?>
-						</a>
-						<div class="lt-title">
-							<a href="<?php echo htmlspecialchars($detailsUrl) ?>"><b><?php echo $nameSafe ?></b></a>
-						</div>
-						<div class="lt-meta">
-							<span class="lt-seed" title="<?php echo htmlspecialchars($lang_index['col_seeder']) ?>">&#x25B2; <?php echo (int)$torrent->seeders ?></span>
-							<span class="lt-leech" title="<?php echo htmlspecialchars($lang_index['col_leecher']) ?>">&#x25BC; <?php echo (int)$torrent->leechers ?></span>
-							<span><?php echo mksize((int)$torrent->size) ?></span>
-							<span><?php echo $ownerHtml ?></span>
-						</div>
-					</div>
-					<?php
-				}
-				?>
-				</div>
-				<?php
-				$ltHtml = ob_get_clean();
+				$searchBoxId = 1;
+				$rows = array_map(
+					fn ($torrent) => ['search_box_id' => $searchBoxId] + $torrent->toArray(),
+					$latestTorrents->all()
+				);
+				$ltHtml = '<h2>' . $lang_index['text_last_five_torrent'] . '</h2>'
+					. \App\Support\TorrentGrid::render($rows, 'card', $searchBoxId, true);
 				$Cache->cache_value($ltCacheKey, $ltHtml, $ltCacheTtl);
 			} else {
 				$ltHtml = '';

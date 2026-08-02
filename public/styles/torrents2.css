@@ -1,0 +1,246 @@
+.t2-wrap {
+    width: 97%;
+    margin: 0 auto;
+    padding: 10px 0;
+}
+
+.t2-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.t2-header h1 {
+    margin: 0;
+    font-size: 1.4rem;
+}
+
+.t2-switcher {
+    display: flex;
+    gap: 6px;
+}
+
+.t2-switcher__btn {
+    display: inline-block;
+    padding: 6px 14px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background: #f8f8f8;
+    color: #333;
+    text-decoration: none;
+    font-size: 0.85rem;
+}
+
+.t2-switcher__btn:hover {
+    background: #eee;
+}
+
+.t2-switcher__btn--active {
+    background: #357abd;
+    border-color: #357abd;
+    color: #fff;
+}
+
+.t2-filters {
+    display: flex;
+    align-items: flex-end;
+    gap: 12px;
+    margin-bottom: 16px;
+    padding: 12px;
+    background: #f5f5f5;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.t2-filters label {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 0.85rem;
+}
+
+.t2-filters select,
+.t2-filters input[type="text"] {
+    padding: 5px 8px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    min-width: 160px;
+}
+
+.t2-btn {
+    padding: 6px 14px;
+    border: 1px solid #357abd;
+    border-radius: 4px;
+    background: #357abd;
+    color: #fff;
+    cursor: pointer;
+    font-size: 0.85rem;
+}
+
+.t2-btn:hover {
+    background: #2a6199;
+}
+
+.t2-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.t2-card {
+    display: flex;
+    flex-direction: column;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    overflow: hidden;
+    transition: box-shadow 0.15s ease;
+}
+
+.t2-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.t2-cover {
+    display: block;
+    width: 100%;
+    height: 140px;
+    background: #e9e9e9;
+    text-align: center;
+    overflow: hidden;
+}
+
+.t2-cover img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.t2-cover--placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #999;
+    font-size: 0.8rem;
+}
+
+.t2-cover--placeholder img {
+    width: auto;
+    height: auto;
+    max-width: 48px;
+    max-height: 48px;
+    object-fit: contain;
+}
+
+.t2-card-body {
+    padding: 10px;
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.t2-title {
+    margin: 0;
+    font-size: 0.95rem;
+    line-height: 1.25;
+}
+
+.t2-title a {
+    color: #333;
+    text-decoration: none;
+}
+
+.t2-title a:hover {
+    text-decoration: underline;
+}
+
+.t2-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.t2-badge {
+    display: inline-block;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 0.7rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    color: #fff;
+}
+
+.t2-badge--new { background: #28a745; }
+.t2-badge--free { background: #007bff; }
+.t2-badge--twoup { background: #17a2b8; }
+.t2-badge--twoupfree { background: #20c997; }
+.t2-badge--halfdown { background: #ffc107; color: #333; }
+.t2-badge--twouphalfdown { background: #fd7e14; }
+.t2-badge--thirtypercent { background: #6f42c1; }
+.t2-badge--banned { background: #dc3545; }
+.t2-badge--sticky { background: #e83e8c; }
+
+.t2-stats {
+    margin-top: auto;
+    font-size: 0.8rem;
+    color: #666;
+}
+
+.t2-seeders { color: #28a745; font-weight: bold; }
+.t2-leechers { color: #dc3545; font-weight: bold; }
+
+.t2-tags {
+    font-size: 0.75rem;
+}
+
+.t2-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.t2-card--compact {
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+    padding: 10px;
+}
+
+.t2-card--compact .t2-cover {
+    width: 60px;
+    height: 60px;
+    flex: 0 0 60px;
+    border-radius: 4px;
+}
+
+.t2-card--compact .t2-card-body {
+    padding: 0;
+    flex: 1 1 auto;
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.t2-card--compact .t2-title {
+    flex: 1 1 200px;
+    min-width: 200px;
+}
+
+.t2-card--compact .t2-badges,
+.t2-card--compact .t2-tags,
+.t2-card--compact .t2-stats {
+    margin-top: 0;
+}
+
+.t2-empty {
+    padding: 24px;
+    text-align: center;
+    background: #f8f8f8;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}

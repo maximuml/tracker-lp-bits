@@ -298,7 +298,7 @@ class IndexRepository
     public static function getChartData(): array
     {
         /** @var mixed $cached */
-        $cached = NexusDB::cache_get('index2_chart_data');
+        $cached = NexusDB::cache_get('index2_chart_v2');
         if (is_array($cached)) {
             $classLabels = [];
             $classValues = [];
@@ -359,7 +359,7 @@ class IndexRepository
             'total_peers' => $seeders + $leechers,
         ];
 
-        NexusDB::cache_put('index2_chart_data', $result, 3600);
+        NexusDB::cache_put('index2_chart_v2', $result, 3600);
 
         $classLabels = [];
         $classValues = [];

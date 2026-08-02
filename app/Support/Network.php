@@ -2,6 +2,8 @@
 
 namespace App\Support;
 
+use Symfony\Component\HttpFoundation\IpUtils;
+
 /**
  * IP helpers extracted from `include/functions.php`.
  *
@@ -17,6 +19,9 @@ namespace App\Support;
  */
 final class Network
 {
+    /** @var array<int, string>|null */
+    private static ?array $trustedProxies = null;
+
     /**
      * Legacy `validip()` check. IPv6 addresses are considered valid,
      * IPv4 addresses must not fall inside the legacy reserved IANA ranges.
@@ -47,26 +52,150 @@ final class Network
     }
 
     /**
-     * Legacy `getip()` resolver. Picks the first valid IP from
-     * `HTTP_X_FORWARDED_FOR`, `HTTP_CLIENT_IP` or `REMOTE_ADDR`,
-     * then optionally trims to the first comma-separated value.
+     * Legacy `getip()` resolver. Only trusts `X-Forwarded-For` and
+     * `Client-Ip` headers when the direct peer (`REMOTE_ADDR`) is a
+     * configured trusted proxy. The forwarded chain is walked from right
+     * to left, skipping trusted proxies, so that a client cannot inject
+     * an arbitrary leftmost address. This matches Symfony/Laravel's
+     * `Request::ip()` behaviour.
      */
     public static function clientIp(bool $real = true): string
     {
-        if (($forwarded = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? getenv('HTTP_X_FORWARDED_FOR')) && self::isValid($forwarded)) {
-            $ip = $forwarded;
-        } elseif (($client = $_SERVER['HTTP_CLIENT_IP'] ?? getenv('HTTP_CLIENT_IP')) && self::isValid($client)) {
-            $ip = $client;
-        } else {
-            $ip = $_SERVER['REMOTE_ADDR'] ?? getenv('REMOTE_ADDR') ?: '';
+        $remoteAddr = self::serverVar('REMOTE_ADDR');
+        $trusted = self::getTrustedProxies();
+
+        if (!self::isIpTrusted($remoteAddr, $trusted)) {
+            return self::normalizeIp($remoteAddr, $real);
         }
 
-        $ip = trim(trim((string) $ip), ',');
+        $chainTrusted = self::getChainTrustedProxies($remoteAddr, $trusted);
+
+        if ($forwarded = self::serverVar('HTTP_X_FORWARDED_FOR')) {
+            $ip = self::resolveForwardedClientIp($forwarded, $real, $chainTrusted) ?? $remoteAddr;
+        } elseif (($client = self::serverVar('HTTP_CLIENT_IP')) && self::isValidIpFormat($client) && !self::isIpTrusted($client, $chainTrusted)) {
+            $ip = $client;
+        } else {
+            $ip = $remoteAddr;
+        }
+
+        return self::normalizeIp($ip, $real);
+    }
+
+    private static function normalizeIp(string $ip, bool $real): string
+    {
+        $ip = trim($ip, ',');
         if ($real && str_contains($ip, ',')) {
             return (string) strstr($ip, ',', true);
         }
 
         return $ip;
+    }
+
+    /**
+     * Override the configured trusted proxies. Intended for unit tests.
+     *
+     * @param  array<int, string>|null  $proxies
+     */
+    public static function setTrustedProxies(?array $proxies): void
+    {
+        self::$trustedProxies = $proxies;
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private static function getTrustedProxies(): array
+    {
+        if (self::$trustedProxies !== null) {
+            return self::$trustedProxies;
+        }
+
+        $config = \App\Support\Env::get('TRUSTED_PROXIES', '10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,127.0.0.1,::1');
+        if ($config === '*') {
+            return ['*'];
+        }
+
+        return array_values(array_filter(array_map('trim', explode(',', (string) $config))));
+    }
+
+    /**
+     * @param  array<int, string>  $trusted
+     */
+    private static function isIpTrusted(string $ip, array $trusted): bool
+    {
+        if ($ip === '') {
+            return false;
+        }
+
+        if ($trusted === ['*']) {
+            return true;
+        }
+
+        if ($trusted === []) {
+            return false;
+        }
+
+        return IpUtils::checkIp($ip, $trusted);
+    }
+
+    /**
+     * @param  array<int, string>  $trusted
+     * @return array<int, string>
+     */
+    private static function getChainTrustedProxies(string $remoteAddr, array $trusted): array
+    {
+        if ($trusted === ['*'] && $remoteAddr !== '') {
+            // Trust only the direct peer; the chain beyond it must still be
+            // inspected to discard any entries added by that proxy.
+            return [$remoteAddr];
+        }
+
+        return $trusted;
+    }
+
+    /**
+     * @param  array<int, string>  $trusted
+     */
+    private static function resolveForwardedClientIp(string $forwarded, bool $real, array $trusted): ?string
+    {
+        $ips = array_map('trim', explode(',', $forwarded));
+
+        for ($i = count($ips) - 1; $i >= 0; $i--) {
+            $candidate = $ips[$i];
+            if ($candidate === '') {
+                continue;
+            }
+
+            // Reject malformed chain entries rather than skipping them; skipping
+            // could allow an attacker-controlled entry further left to be chosen.
+            if (!self::isValidIpFormat($candidate)) {
+                return null;
+            }
+
+            if (self::isIpTrusted($candidate, $trusted)) {
+                continue;
+            }
+
+            if ($real) {
+                return $candidate;
+            }
+
+            return $forwarded;
+        }
+
+        return null;
+    }
+
+    private static function isValidIpFormat(string $ip): bool
+    {
+        return filter_var($ip, FILTER_VALIDATE_IP) !== false;
+    }
+
+    private static function serverVar(string $key): string
+    {
+        $value = $_SERVER[$key] ?? getenv($key);
+
+        return is_string($value) ? $value : '';
     }
 
     /**

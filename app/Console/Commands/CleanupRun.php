@@ -33,7 +33,19 @@ class CleanupRun extends Command
         $command = "php $script $arg";
 
         $begin = time();
-        $output = Environment::run($command, 'array', false, false);
+
+        try {
+            $output = Environment::run($command, 'array', false, true);
+        } catch (\RuntimeException $e) {
+            $cost = time() - $begin;
+            $this->error('Cleanup worker failed after ' . $cost . ' seconds:');
+            foreach (explode("\n", trim($e->getMessage())) as $line) {
+                $this->error($line);
+            }
+
+            return Command::FAILURE;
+        }
+
         $cost = time() - $begin;
 
         foreach ($output as $line) {

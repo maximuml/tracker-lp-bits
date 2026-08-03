@@ -16,5 +16,6 @@ class VerifyCsrfToken extends Middleware
         self::TG_WEBHOOK_PREFIX . "/*",
         "web/token/*",
         "takeupload",
+        "takeedit",
     ];
 }

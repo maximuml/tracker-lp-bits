@@ -233,7 +233,7 @@ class UploadRepository extends BaseRepository
     }
 
     /** @param  \Illuminate\Http\Request  $request */
-    private function getPrice(Request $request): int
+    public function getPrice(Request $request): int
     {
         $price =  $request->price ?: 0;
         if (!is_numeric($price)) {
@@ -259,7 +259,7 @@ class UploadRepository extends BaseRepository
      * @param  \Illuminate\Http\Request  $request
      * @param  \App\Models\Category  $category
      */
-    private function getHitAndRun(Request $request, Category $category): int
+    public function getHitAndRun(Request $request, Category $category): int
     {
         $hr = $request->input("hr.{$category->mode}");
         if (!is_numeric($hr)) {
@@ -279,7 +279,7 @@ class UploadRepository extends BaseRepository
      * @param  \Illuminate\Http\Request  $request
      * @return  array<int|string, mixed>
      */
-    private function getPosStateInfo(Request $request): array
+    public function getPosStateInfo(Request $request): array
     {
         $posState = $request->pos_state ?: Torrent::POS_STATE_STICKY_NONE;
         $posStateUntil = $request->pos_state_until ?: null;
@@ -464,10 +464,11 @@ class UploadRepository extends BaseRepository
     /**
      * @param  \Illuminate\Http\Request  $request
      * @param  \App\Models\Category  $category
+     * @param  bool  $checkUploadPermission
      * @return  array<int|string, mixed>
      * @throws NexusException
      */
-    private function getSubCategoriesAndTags(Request $request, Category $category): array
+    public function getSubCategoriesAndTags(Request $request, Category $category, bool $checkUploadPermission = true): array
     {
         $searchBoxRep = new SearchBoxRepository();
         $sections = $searchBoxRep->listSections(SearchBox::listAllSectionId())->keyBy('id');
@@ -478,7 +479,9 @@ class UploadRepository extends BaseRepository
         if (!$section instanceof SearchBox) {
             throw new NexusException(nexus_trans('upload.invalid_section'));
         }
-        $this->canUploadToSection($request, $section);
+        if ($checkUploadPermission) {
+            $this->canUploadToSection($request, $section);
+        }
 
         $sectionResource = new SearchBoxResource($section);
         $sectionData = $sectionResource->response()->getData(true);
@@ -514,7 +517,7 @@ class UploadRepository extends BaseRepository
     }
 
     /** @param  \Illuminate\Http\Request  $request */
-    private function getCover(Request $request):string
+    public function getCover(Request $request):string
     {
         $descr = $request->descr ?? '';
         if (empty($descr)) {
@@ -622,7 +625,7 @@ class UploadRepository extends BaseRepository
      * @param  \Illuminate\Http\Request  $request
      * @param  \App\Models\Category  $category
      */
-    private function saveCustomFields(Request $request, Category $category, int $torrentId): void
+    public function saveCustomFields(Request $request, Category $category, int $torrentId): void
     {
         if (!$request->has("custom_fields")) {
             return;

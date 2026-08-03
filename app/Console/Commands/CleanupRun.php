@@ -2,8 +2,8 @@
 
 namespace App\Console\Commands;
 
-use App\Support\Environment;
 use Illuminate\Console\Command;
+use Symfony\Component\Process\Process;
 
 class CleanupRun extends Command
 {
@@ -30,32 +30,20 @@ class CleanupRun extends Command
         $force = $this->option('force');
         $script = base_path('include/cleanup_cli.php');
         $arg = $force ? '1' : '0';
-        $command = "php $script $arg";
+
+        $process = Process::fromShellCommandline("php {$script} {$arg}");
+        $process->setTimeout(null);
 
         $begin = time();
-
-        try {
-            $output = Environment::run($command, 'array', false, true);
-        } catch (\RuntimeException $e) {
-            $cost = time() - $begin;
-            $this->error('Cleanup worker failed after ' . $cost . ' seconds:');
-            foreach (explode("\n", trim($e->getMessage())) as $line) {
-                $this->error($line);
-            }
-
-            return Command::FAILURE;
-        }
-
+        $exitCode = $process->run(function ($type, $buffer) {
+            $this->output->write($buffer, false);
+        });
         $cost = time() - $begin;
-
-        foreach ($output as $line) {
-            $this->line($line);
-        }
 
         $log = sprintf('[CLEANUP_RUN] DONE, cost time: %d seconds', $cost);
         do_log($log);
         $this->info($log);
 
-        return Command::SUCCESS;
+        return $exitCode === 0 ? Command::SUCCESS : Command::FAILURE;
     }
 }

@@ -10,6 +10,10 @@ if (!RUNNING_IN_OCTANE) {
 $GLOBALS['hook'] = $hook = new \Nexus\Plugin\Hook();
 $GLOBALS['plugin'] = $plugin = new \Nexus\Plugin\Plugin();
 
+// Legacy pages define this in include/core.php, but Laravel-routed endpoints
+// (e.g. /announce) may need it before the legacy bootstrap is reached.
+defined('TIMENOW') || define('TIMENOW', time());
+
 /*
 |--------------------------------------------------------------------------
 | Create The Application

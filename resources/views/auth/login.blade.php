@@ -12,6 +12,14 @@ $showWarn = $returnto !== '' && ! $nowarn;
         <div class="error">{{ $error }}</div>
     @endif
 
+    @if ($errors->any())
+        <div class="error">
+            @foreach ($errors->all() as $message)
+                <div>{{ $message }}</div>
+            @endforeach
+        </div>
+    @endif
+
     <form method="get" action="/login">
         <input type="hidden" name="secret" value="{{ $secret }}" />
         @if ($returnto !== '')
@@ -34,7 +42,7 @@ $showWarn = $returnto !== '' && ! $nowarn;
         <p><b>{{ $lang['p_error'] ?? 'Error:' }}</b> {{ $lang['p_after_logged_in'] ?? 'The page you tried to view can only be used when you are logged in.' }}</p>
     @endif
 
-    <form id="login-form" method="post" action="/login">
+    <form id="login-form" method="post" action="takelogin.php">
         @csrf
         <input type="hidden" name="secret" value="{{ $secret }}" />
         @if ($returnto !== '')
@@ -74,7 +82,23 @@ $showWarn = $returnto !== '' && ! $nowarn;
                 </td>
             </tr>
         </table>
+
+        {!! $passkeyLoginHtml !!}
     </form>
+
+    @if ($oauthProviders->isNotEmpty())
+        <p>
+            {{ $lang['other_methods'] ?? 'Other methods' }}:
+            @foreach ($oauthProviders as $oauthProvider)
+                [<b><a href="oauth/redirect/{{ $oauthProvider->uuid }}">{{ $oauthProvider->name }}</a></b>]
+                @if (! $loop->last)&nbsp;&nbsp;@endif
+            @endforeach
+        </p>
+    @endif
+
+    @if ($isComplainEnabled)
+        <p>[<b><a href="complains.php">{{ $lang['text_complain'] ?? 'Complain' }}</a></b>]</p>
+    @endif
 
     @php
         $isSmtpEnabled = (\App\Models\Setting::get('main.smtptype') ?? 'none') !== 'none';

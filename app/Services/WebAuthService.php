@@ -140,7 +140,9 @@ class WebAuthService
         $duration = ! empty($data['logout']) && $data['logout'] === 'yes' ? 900 : 0;
         AuthCookie::setLoginCookie((int) $row['id'], null, $duration);
 
-        (new UserRepository())->saveLoginLog((int) $row['id'], $ip, 'Web', false);
+        (new UserRepository())->saveLoginLog((int) $row['id'], $ip, 'Web', true);
+
+        clear_user_cache((int) $row['id']);
 
         return $user;
     }
@@ -172,7 +174,7 @@ class WebAuthService
         throw new AuthenticationException('Invalid captcha response.');
     }
 
-    private function recordFailedAttempt(string $ip): void
+    public function recordFailedAttempt(string $ip): void
     {
         $count = (int) NexusDB::table('loginattempts')->where('ip', $ip)->count();
 

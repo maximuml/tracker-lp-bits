@@ -19,10 +19,16 @@
         p { margin: 0.5em 0; }
         a { color: #06c; }
     </style>
+    @foreach (\Nexus\Nexus::getAppendHeaders() as $html)
+        {!! $html !!}
+    @endforeach
 </head>
 <body>
     <div class="container">
         @yield('content')
     </div>
+    @foreach (\Nexus\Nexus::getAppendFooters() as $html)
+        {!! $html !!}
+    @endforeach
 </body>
 </html>

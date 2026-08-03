@@ -1,10 +1,11 @@
 <?php
 
 /**
- * Legacy POST handler for the login form.
+ * Legacy login form handler.
  *
- * Forwards the submitted credentials to the Laravel /login route so
- * existing forms (and old bookmarks) keep working.
+ * Forwards both GET and POST requests to the Laravel /login route so
+ * the old URL keeps working while the new Blade form posts directly to
+ * /login (or here) with a CSRF token.
  */
 
 $rootpath = dirname(__DIR__) . '/';
@@ -19,12 +20,15 @@ $server['SCRIPT_NAME'] = '';
 $server['SCRIPT_FILENAME'] = '';
 $server['PHP_SELF'] = '';
 
+$method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+$params = $method === 'POST' ? $_POST : $_GET;
+
 $uri = '/login' . (empty($_SERVER['QUERY_STRING']) ? '' : '?' . $_SERVER['QUERY_STRING']);
 
 $request = Illuminate\Http\Request::create(
     $uri,
-    'POST',
-    $_POST,
+    $method,
+    $params,
     $_COOKIE,
     $_FILES,
     $server

@@ -5,7 +5,11 @@ namespace App\Http\Controllers\Auth;
 use App\Exceptions\AuthenticationException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
+use App\Models\OauthProvider;
+use App\Models\Setting;
+use App\Repositories\UserPasskeyRepository;
 use App\Services\WebAuthService;
+use App\Services\Captcha\Drivers\ImageCaptchaDriver;
 use App\Support\Captcha;
 use App\Support\Locale;
 use App\Support\Network;
@@ -13,6 +17,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\View\View;
 
 class WebController extends Controller
@@ -37,7 +42,11 @@ class WebController extends Controller
             $folder = Locale::folderForId($sitelanguage, $langFolder);
             if ($folder !== '') {
                 Locale::setFolderCookie($folder);
-                return Redirect::to('/login');
+
+                $query = $request->query();
+                unset($query['sitelanguage']);
+
+                return Redirect::to('/login' . (empty($query) ? '' : '?' . http_build_query($query)));
             }
         }
 
@@ -45,18 +54,28 @@ class WebController extends Controller
         $returnto = (string) $request->query('returnto', '');
         $nowarn = $request->has('nowarn');
 
+        $langFunctions = $this->langFunctions($langFolder);
+
         $captchaEnabled = $this->authService->isCaptchaEnabled();
         $captchaMarkup = '';
         if ($captchaEnabled) {
-            $captchaMarkup = Captcha::manager()->driver()->render([
-                'labels' => $this->langFunctions($langFolder),
+            $driver = Captcha::manager()->driver();
+            $imageLabelKey = $driver instanceof ImageCaptchaDriver
+                ? 'row_security_image'
+                : 'row_security_challenge';
+
+            $captchaMarkup = $driver->render([
+                'labels' => [
+                    'image' => $langFunctions[$imageLabelKey] ?? $langFunctions['row_security_image'] ?? 'Security Image',
+                    'code' => $langFunctions['row_security_code'] ?? 'Security Code',
+                ],
                 'secret' => $secret,
             ]);
         }
 
         return view('auth.login', [
             'lang' => $this->langLogin($langFolder),
-            'langFunctions' => $this->langFunctions($langFolder),
+            'langFunctions' => $langFunctions,
             'languages' => Locale::languageList('site_lang', true),
             'langFolder' => $langFolder,
             'secret' => $secret,
@@ -67,19 +86,43 @@ class WebController extends Controller
             'maxAttempts' => $this->authService->maxLoginAttempts(),
             'nowarn' => $nowarn,
             'error' => $request->session()->get('error'),
+            'oauthProviders' => OauthProvider::query()
+                ->orderBy('priority', 'desc')
+                ->where('enabled', '=', 1)
+                ->get(['uuid', 'name']),
+            'isComplainEnabled' => Setting::getIsComplainEnabled(),
+            'passkeyLoginHtml' => $this->renderPasskeyLogin(),
         ]);
     }
 
-    public function login(LoginRequest $request): RedirectResponse
+    public function login(Request $request): RedirectResponse
     {
         if (Auth::guard('nexus-web')->check()) {
             return Redirect::intended('index.php');
         }
 
+        $ip = Network::clientIp();
+
         try {
-            $this->authService->authenticate($request->validated(), Network::clientIp());
+            $this->authService->assertNotBanned($ip);
         } catch (AuthenticationException $exception) {
-            return Redirect::back()->withInput()->with('error', $exception->getMessage());
+            return $this->backWithError($request, $exception->getMessage());
+        }
+
+        $validator = Validator::make($request->all(), (new LoginRequest())->rules());
+
+        if ($validator->fails()) {
+            $this->authService->recordFailedAttempt($ip);
+
+            return Redirect::back()
+                ->withErrors($validator)
+                ->withInput($request->except('password'));
+        }
+
+        try {
+            $this->authService->authenticate($validator->validated(), $ip);
+        } catch (AuthenticationException $exception) {
+            return $this->backWithError($request, $exception->getMessage());
         }
 
         $returnto = $request->input('returnto', '');
@@ -114,7 +157,7 @@ class WebController extends Controller
      */
     private function langLogin(string $langFolder): array
     {
-        $path = Locale::filePath($langFolder, 'login.php');
+        $path = base_path(Locale::filePath($langFolder, 'login.php'));
         if (! file_exists($path)) {
             return [];
         }
@@ -129,7 +172,7 @@ class WebController extends Controller
      */
     private function langFunctions(string $langFolder): array
     {
-        $path = Locale::filePath($langFolder, 'functions.php');
+        $path = base_path(Locale::filePath($langFolder, 'functions.php'));
         if (! file_exists($path)) {
             return [];
         }
@@ -137,6 +180,22 @@ class WebController extends Controller
         include $path;
 
         return $lang_functions ?? [];
+    }
+
+    private function renderPasskeyLogin(): string
+    {
+        ob_start();
+        UserPasskeyRepository::renderLogin();
+        \Nexus\Nexus::js('js/passkey.js', 'footer', true);
+
+        return (string) ob_get_clean();
+    }
+
+    private function backWithError(Request $request, string $message): RedirectResponse
+    {
+        return Redirect::back()
+            ->withInput($request->except('password'))
+            ->with('error', $message);
     }
 
     private function isLocalUrl(string $url): bool

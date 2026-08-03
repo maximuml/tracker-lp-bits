@@ -117,8 +117,8 @@ elif [ "$SERVICE_NAME" = "cleanup" ]; then
     echo_info "Start Cleanup ...";
     while true; do
       if [ -f "$ENV_FILE" ] && [ -f "$VENDOR_AUTOLOAD_FILE" ]; then
-        echo_success "[Cleanup] env: $ENV_FILE and vendor autoload file: $VENDOR_AUTOLOAD_FILE exists, Run cleanup at $(date '+%Y-%m-%d %H:%M:%S')";
-        php include/cleanup_cli.php;
+        echo_success "[Cleanup] env: $ENV_FILE and vendor autoload file: $VENDOR_AUTOLOAD_FILE exists, Run cleanup:run at $(date '+%Y-%m-%d %H:%M:%S')";
+        php artisan cleanup:run;
         sleep 60;
       else
         echo_info "[Cleanup] .env or vendor not exists，wait 5 seconds...";

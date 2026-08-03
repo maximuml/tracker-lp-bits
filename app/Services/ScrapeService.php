@@ -69,10 +69,11 @@ class ScrapeService
                 ->where('passkey', $passkey)
                 ->first();
 
-            return $record ? $record->toArray() : null;
+            return $record ? $record->toArray() : [];
         });
 
         if (empty($user)) {
+            NexusDB::redis()->set("passkey_invalid:{$passkey}", TIMENOW, ['ex' => 24 * 3600]);
             throw TrackerException::failure("Invalid passkey! Re-download the .torrent from " . get_setting('basic.BASEURL'));
         }
 

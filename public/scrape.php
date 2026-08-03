@@ -23,7 +23,7 @@ $uri = '/scrape' . (empty($_SERVER['QUERY_STRING']) ? '' : '?' . $_SERVER['QUERY
 $request = Illuminate\Http\Request::create(
     $uri,
     $_SERVER['REQUEST_METHOD'] ?? 'GET',
-    $_GET,
+    [],
     $_COOKIE,
     $_FILES,
     $server

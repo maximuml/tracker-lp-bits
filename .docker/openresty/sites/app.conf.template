@@ -52,6 +52,25 @@ server {
         fastcgi_param HTTP_X_FORWARDED_FOR $proxy_add_x_forwarded_for;
     }
 
+    location = /scrape.php {
+        fastcgi_pass php:9000;
+        fastcgi_index index.php;
+        include fastcgi_params;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        fastcgi_param REQUEST_ID $request_id;
+        fastcgi_param HTTP_X_FORWARDED_FOR $proxy_add_x_forwarded_for;
+    }
+
+    location = /scrape {
+        fastcgi_pass php:9000;
+        fastcgi_index index.php;
+        include fastcgi_params;
+        fastcgi_param SCRIPT_FILENAME $document_root/scrape.php;
+        fastcgi_param SCRIPT_NAME /scrape.php;
+        fastcgi_param REQUEST_ID $request_id;
+        fastcgi_param HTTP_X_FORWARDED_FOR $proxy_add_x_forwarded_for;
+    }
+
     # Static attachments outside the public root (matches attachment.savedirectory = ./attachments)
     location /attachments/ {
         alias /var/www/html/attachments/;

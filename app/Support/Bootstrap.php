@@ -18,7 +18,7 @@ final class Bootstrap
      */
     public static function connect(bool $autoclean = false, bool $doLogin = true): void
     {
-        global $useCronTriggerCleanUp;
+        $useCronTriggerCleanUp = (bool) SupportContext::getGlobal('useCronTriggerCleanUp', false);
 
         \Nexus\Database\NexusDB::getInstance()->autoConnect();
 
@@ -38,7 +38,8 @@ final class Bootstrap
      */
     public static function autoClean(bool $printProgress = false): string|bool
     {
-        global $autoclean_interval_one, $rootpath;
+        $autoclean_interval_one = (int) SupportContext::getGlobal('autoclean_interval_one', 900);
+        $rootpath = (string) SupportContext::getGlobal('rootpath', dirname(__DIR__, 2) . '/');
 
         $now = TIMENOW;
         $ts = (int) \Nexus\Database\NexusDB::table('avps')->where('arg', 'lastcleantime')->value('value_u');

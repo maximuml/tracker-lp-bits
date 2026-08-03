@@ -78,7 +78,7 @@ final class Permissions
         fail:
         \do_log("$log, [FAIL]");
         if (defined('IN_NEXUS') && IN_NEXUS && !(defined('IN_TRACKER') && IN_TRACKER)) {
-            global $lang_functions;
+            $lang_functions = SupportContext::getLangFunctions();
             $requireClass = \get_setting("authority.$permission");
             if (isset(User::$classes[$requireClass])) {
                 \stderr(

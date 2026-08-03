@@ -67,9 +67,9 @@ final class Input
 
         foreach ($vars as $v) {
             if (isset($get[$v])) {
-                $GLOBALS[$v] = self::unescape($get[$v]);
+                SupportContext::setGlobal($v, self::unescape($get[$v]));
             } elseif (isset($post[$v])) {
-                $GLOBALS[$v] = self::unescape($post[$v]);
+                SupportContext::setGlobal($v, self::unescape($post[$v]));
             } else {
                 return 0;
             }

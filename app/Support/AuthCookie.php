@@ -83,8 +83,9 @@ final class AuthCookie
                     'expires' => (int) $data['expires'],
                 ];
             }
-        } catch (DecryptException $e) {
-            // not an application-encrypted token; try legacy HMAC below
+        } catch (\RuntimeException $e) {
+            // not an application-encrypted token, or APP_KEY is missing/invalid;
+            // try legacy HMAC below
         }
 
         if ($authKey === null || $authKey === '') {
@@ -345,7 +346,11 @@ final class AuthCookie
         $payload = self::verifyToken($token);
         if ($payload !== null) {
             $log .= ", uid = {$payload['user_id']} (app encrypted)";
-            return self::fetchUser($payload['user_id'], $isArray, $log);
+            $row = self::fetchUser($payload['user_id'], $isArray, $log);
+            if ($row !== null && $isArray) {
+                unset($row['auth_key'], $row['passhash']);
+            }
+            return $row;
         }
 
         // Legacy HMAC token: decode first to get the user id, then load

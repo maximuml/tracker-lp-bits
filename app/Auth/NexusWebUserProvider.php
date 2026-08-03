@@ -79,10 +79,12 @@ class NexusWebUserProvider implements UserProvider
             return false;
         }
 
-        return \App\Support\AuthCookie::verifyToken(
+        $payload = \App\Support\AuthCookie::verifyToken(
             (string) ($credentials['c_secure_pass'] ?? ''),
             (string) $user->auth_key,
-        ) !== null;
+        );
+
+        return $payload !== null && $payload['user_id'] === $user->id;
     }
 
     /**

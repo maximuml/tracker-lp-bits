@@ -1,48 +1,27 @@
 <?php
-require_once("../include/bittorrent.php");
-header("Content-Type: text/html; charset=utf-8");
-$id = (int) $_GET["id"];
-$confirm_md5 = $_GET["secret"];
 
-if (!$id)
-	httperr();
+$rootpath = dirname(__DIR__) . '/';
+require_once $rootpath . 'vendor/autoload.php';
+$app = require_once $rootpath . 'bootstrap/app.php';
 
-dbconn();
+$kernel = $app->make(Illuminate\Contracts\Http\Kernel::class);
 
-$user = \App\Models\User::query()->where('id', $id)->first(['passhash', 'secret', 'auth_key', 'editsecret', 'status']);
-if (!$user)
-	httperr();
-$user->makeVisible(['secret', 'auth_key']);
-$row = $user->toArray();
+$server = $_SERVER;
+$server['SCRIPT_NAME'] = '';
+$server['SCRIPT_FILENAME'] = '';
+$server['PHP_SELF'] = '';
 
-if ($row["status"] != "pending") {
-	header("Location: ok.php?type=confirmed");
-	exit();
-}
+$uri = '/confirm' . (empty($_SERVER['QUERY_STRING']) ? '' : '?' . $_SERVER['QUERY_STRING']);
 
-$confirm_sec = hash_pad($row["secret"]);
-if ($confirm_md5 != md5($confirm_sec))
-	httperr();
+$request = Illuminate\Http\Request::create(
+    $uri,
+    'GET',
+    $_GET,
+    $_COOKIE,
+    $_FILES,
+    $server
+);
 
-$affected = \App\Models\User::query()->where('id', $id)->where('status', 'pending')->update(['status' => 'confirmed', 'editsecret' => '']);
-
-if (!$affected)
-	httperr();
-
-publish_model_event(\App\Enums\ModelEventEnum::USER_UPDATED, $id);
-//if ($securelogin == "yes")
-//{
-//	$securelogin_indentity_cookie = true;
-//	$passh = md5($row["passhash"].$_SERVER["REMOTE_ADDR"]);
-//}
-//else	// when it's op, default is not use secure login
-//{
-//	$securelogin_indentity_cookie = false;
-//	$passh = md5($row["passhash"]);
-//}
-//logincookie($id, $passh,1,get_setting('system.cookie_valid_days', 365) * 86400,$securelogin_indentity_cookie);
-logincookie($id, $row["auth_key"]);
-//sessioncookie($row["id"], $passh,false);
-
-header("Location: ok.php?type=confirm");
-?>
+$response = $kernel->handle($request);
+$response->send();
+$kernel->terminate($request, $response);

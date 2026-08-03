@@ -42,7 +42,7 @@ class CriticalPathTest extends TestCase
         Settings::saveBatch('security', ['iv' => '', 'maxip' => '100', 'use_challenge_response_authentication' => 'no']);
         Settings::saveBatch('basic', ['BASEURL' => 'openresty']);
         Settings::saveBatch('authority', ['upload' => '1']);
-        Settings::saveBatch('main', ['maxusers' => '100000']);
+        Settings::saveBatch('main', ['maxusers' => '100000', 'smtptype' => 'none']);
 
         // The upload handler saves .torrent files to the configured directory.
         // Make sure it is writable for the FPM worker (www-data).
@@ -86,6 +86,21 @@ class CriticalPathTest extends TestCase
         }
 
         $this->fail('CSRF token not found on login page');
+    }
+
+    /**
+     * Fetch the Laravel CSRF token from the legacy signup page.
+     */
+    private function fetchSignupToken(): string
+    {
+        $response = $this->request('GET', '/signup.php', [], true);
+        $this->assertSame(200, $response['status'], 'Could not fetch signup page');
+
+        if (preg_match('/name="_token"[^>]*value="([^"]+)"/', $response['body'], $matches)) {
+            return $matches[1];
+        }
+
+        $this->fail('CSRF token not found on signup page');
     }
 
     /**
@@ -164,9 +179,12 @@ class CriticalPathTest extends TestCase
         $email = $username . '@example.com';
 
         // 1. Signup
+        $signupToken = $this->fetchSignupToken();
         $signup = $this->request('POST', '/takesignup.php', [
+            '_token' => $signupToken,
             'wantusername' => $username,
             'wantpassword' => $password,
+            'passagain' => $password,
             'email' => $email,
             'country' => '1',
             'gender' => 'Male',

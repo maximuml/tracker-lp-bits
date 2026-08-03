@@ -1,121 +1,28 @@
 <?php
-require_once("../include/bittorrent.php");
-dbconn();
 
-$langid = intval($_GET['sitelanguage'] ?? 0);
-if ($langid)
-{
-	$lang_folder = validlang($langid);
-    $enabled = \App\Models\Language::listEnabled();
-    if (!in_array($lang_folder, $enabled)) {
-        nexus_redirect(getBaseUrl());
-    }
-	if(get_langfolder_cookie() != $lang_folder)
-	{
-		set_langfolder_cookie($lang_folder);
-        nexus_redirect($_SERVER['REQUEST_URI']);
-	}
-}
-require_once(get_langfile_path("", false, $CURLANGDIR));
-cur_user_check ();
-$type = $_GET['type'] ?? '';
-$isPreRegisterEmailAndUsername = get_setting("system.is_invite_pre_email_and_username") == "yes";
-if ($type == 'invite')
-{
-	registration_check();
-	failedloginscheck ("Invite signup");
-	$code = $_GET["invitenumber"] ?? '';
-    if (empty($code)) {
-        stderr($lang_signup['std_error'], "Require invitenumber");
-    }
+$rootpath = dirname(__DIR__) . '/';
+require_once $rootpath . 'vendor/autoload.php';
+$app = require_once $rootpath . 'bootstrap/app.php';
 
-	$nuIP = getip();
-	$dom = @gethostbyaddr($nuIP);
-	if ($dom == $nuIP || @gethostbyname($dom) != $nuIP)
-	$dom = "";
-	else
-	{
-	$dom = strtoupper($dom);
-	preg_match('/^(.+)\.([A-Z]{2,3})$/', $dom, $tldm);
-	$dom = $tldm[2];
-	}
+$kernel = $app->make(Illuminate\Contracts\Http\Kernel::class);
 
-	$inv = \App\Models\Invite::query()->where('valid', \App\Models\Invite::VALID_YES)->where('hash', $code)->first();
-	$inviter = $inv ? (int)$inv->inviter : 0;
-	if (!$inv)
-		stderr($lang_signup['std_error'], $lang_signup['std_uninvited'], 0);
-	stdhead($lang_signup['head_invite_signup']);
-}
-else {
-	registration_check("normal");
-	failedloginscheck ("Signup");
-	stdhead($lang_signup['head_signup']);
-}
+$server = $_SERVER;
+$server['SCRIPT_NAME'] = '';
+$server['SCRIPT_FILENAME'] = '';
+$server['PHP_SELF'] = '';
 
-$s = "<select name=\"sitelanguage\" onchange='submit()'>\n";
+$method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+$uri = '/signup' . (empty($_SERVER['QUERY_STRING']) ? '' : '?' . $_SERVER['QUERY_STRING']);
 
-$langs = langlist("site_lang", true);
+$request = Illuminate\Http\Request::create(
+    $uri,
+    $method,
+    $method === 'POST' ? $_POST : $_GET,
+    $_COOKIE,
+    $_FILES,
+    $server
+);
 
-foreach ($langs as $row)
-{
-	if ($row["site_lang_folder"] == get_langfolder_cookie()) $se = " selected"; else $se = "";
-	$s .= "<option value=". $row["id"] . $se. ">" . htmlspecialchars($row["lang_name"]) . "</option>\n";
-}
-$s .= "\n</select>";
-?>
-<form method="get" action=<?php echo $_SERVER['PHP_SELF'] ?>>
-<?php
-if ($type == 'invite')
-print("<input type=hidden name=type value='invite'><input type=hidden name=invitenumber value='".$code."'>");
-print("<div align=right valign=top>".$lang_signup['text_select_lang']. $s . "</div>");
-?>
-</form>
-<p>
-<form method="post" action="takesignup.php" id="signup-form">
-<?php if ($type == 'invite') print("<input type=\"hidden\" name=\"inviter\" value=\"".$inviter."\"><input type=hidden name=type value='invite'>");?>
-<table border="1" cellspacing="0" cellpadding="10">
-<?php
-print("<tr><td class=text align=center colspan=2>".$lang_signup['text_cookies_note']."</td></tr>");
-$formInputStyle = 'style="width: min(100%, 320px); min-width: 180px; border: 1px solid gray; box-sizing: border-box"';
-if ($isPreRegisterEmailAndUsername && !empty($inv["pre_register_username"])) {
-    $usernameInput = sprintf('<input type="text" %s name="wantusername" value="%s" readonly autocomplete="username" />', $formInputStyle, htmlspecialchars($inv["pre_register_username"], ENT_QUOTES));
-} else {
-    $usernameInput = '<input type="text" ' . $formInputStyle . ' name="wantusername" autocomplete="username" />';
-}
-
-if ($isPreRegisterEmailAndUsername && !empty($inv["pre_register_email"])) {
-    $emailInput = sprintf('<input type="email" %s name="email" value="%s" readonly autocomplete="email" />', $formInputStyle, htmlspecialchars($inv["pre_register_email"], ENT_QUOTES));
-} else {
-    $emailInput = '<input type="email" ' . $formInputStyle . ' name="email" autocomplete="email" />';
-}
-
-?>
-<tr><td class=rowhead><?php echo $lang_signup['row_desired_username'] ?></td><td class=rowfollow align=left><?php echo $usernameInput?><br />
-<font class=small><?php echo $lang_signup['text_allowed_characters'] ?></font></td></tr>
-<tr><td class=rowhead><?php echo $lang_signup['row_pick_a_password'] ?></td><td class=rowfollow align=left><input type="password" <?php echo $formInputStyle; ?> class="wantpassword" autocomplete="new-password" /><br />
-	<font class=small><?php echo $lang_signup['text_minimum_six_characters'] ?></font></td></tr>
-<tr><td class=rowhead><?php echo $lang_signup['row_enter_password_again'] ?></td><td class=rowfollow align=left><input type="password" <?php echo $formInputStyle; ?> class="passagain" autocomplete="new-password" /></td></tr>
-<?php
-show_image_code ();
-?>
-<tr><td class=rowhead><?php echo $lang_signup['row_email_address'] ?></td><td class=rowfollow align=left><?php echo $emailInput?></td></tr>
-<?php $countries = "<option value=\"8\">---- ".$lang_signup['select_none_selected']." ----</option>n";
-$countryRows = \Nexus\Database\NexusDB::table('countries')->orderBy('name')->get(['id','name']);
-foreach ($countryRows as $ct_a)
-$countries .= "<option value=" . $ct_a->id . ($ct_a->id == 8 ? " selected" : "") . ">" . htmlspecialchars($ct_a->name) . "</option>n";
-tr($lang_signup['row_country'], "<select name=country>n$countries</select>", 1);
-?>
-<tr><td class=rowhead><?php echo $lang_signup['row_gender'] ?></td><td class=rowfollow align=left>
-<input type=radio name=gender value=Male><?php echo $lang_signup['radio_male'] ?><input type=radio name=gender value=Female><?php echo $lang_signup['radio_female'] ?></td></tr>
-<tr><td class=rowhead><?php echo $lang_signup['row_verification'] ?></td><td class=rowfollow align=left><input type=checkbox name=rulesverify value=yes><?php echo $lang_signup['checkbox_read_rules'] ?><br />
-<input type=checkbox name=faqverify value=yes><?php echo $lang_signup['checkbox_read_faq'] ?> <br />
-<input type=checkbox name=ageverify value=yes><?php echo $lang_signup['checkbox_age'] ?></td></tr>
-<input type=hidden name=hash value=<?php echo $code ?? '' ?>>
-    <input type="hidden" name="wantpassword" />
-<tr><td class=toolbox colspan="2" align="center"><font color=red><b><?php echo $lang_signup['text_all_fields_required'] ?></b><p></font><input id="submit-btn" type=button value=<?php echo $lang_signup['submit_sign_up'] ?> style='height: 25px'></td></tr>
-</table>
-</form>
-
-<?php
-render_password_hash_js("signup-form", "wantpassword", "wantpassword", true,"passagain", "wantusername");
-stdfoot();
+$response = $kernel->handle($request);
+$response->send();
+$kernel->terminate($request, $response);

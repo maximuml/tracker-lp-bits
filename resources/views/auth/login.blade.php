@@ -8,6 +8,10 @@ $showWarn = $returnto !== '' && ! $nowarn;
 @section('title', ($lang['head_login'] ?? 'Login') . ' :: ' . $siteName)
 
 @section('content')
+    @if (request()->query('status') === 'reset')
+        <div class="success">Your password has been reset. Please check your email for the new password.</div>
+    @endif
+
     @if ($error)
         <div class="error">{{ $error }}</div>
     @endif

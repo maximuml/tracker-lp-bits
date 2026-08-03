@@ -9,6 +9,7 @@
         .container { max-width: 600px; margin: 2em auto; background: #fff; border: 1px solid #ccc; padding: 1em; }
         h1 { text-align: center; font-size: 1.4em; }
         .error { color: #d00; margin: 1em 0; text-align: center; }
+        .success { color: #080; margin: 1em 0; text-align: center; }
         table { width: 100%; border-collapse: collapse; }
         .rowhead { width: 30%; padding: 0.5em; background: #eee; font-weight: bold; text-align: right; }
         .rowfollow { padding: 0.5em; }

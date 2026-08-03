@@ -27,4 +27,16 @@ class EnvTest extends TestCase
         $this->assertSame('world', Env::normalize('"world"'));
         $this->assertSame('plain', Env::normalize('plain'));
     }
+
+    public function test_cast_converts_boolean_and_null_strings(): void
+    {
+        $this->assertTrue(Env::cast('true'));
+        $this->assertTrue(Env::cast('TRUE'));
+        $this->assertFalse(Env::cast('false'));
+        $this->assertFalse(Env::cast('FALSE'));
+        $this->assertNull(Env::cast('null'));
+        $this->assertNull(Env::cast('NULL'));
+        $this->assertSame('42', Env::cast('42'));
+        $this->assertSame('plain', Env::cast('plain'));
+    }
 }

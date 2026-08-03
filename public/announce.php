@@ -15,14 +15,14 @@ $kernel = $app->make(Illuminate\Contracts\Http\Kernel::class);
 // When announce.php is executed directly by the FPM worker, Symfony's request
 // parser treats the script name as the base URL and derives an empty path info,
 // which makes Laravel's router return 404. Build the request manually so the
-// path info is /announce.php while preserving the original query parameters,
+// path info is /announce while preserving the original query parameters,
 // headers and client IP.
 $server = $_SERVER;
 $server['SCRIPT_NAME'] = '';
 $server['SCRIPT_FILENAME'] = '';
 $server['PHP_SELF'] = '';
 
-$uri = '/announce.php' . (empty($_SERVER['QUERY_STRING']) ? '' : '?' . $_SERVER['QUERY_STRING']);
+$uri = '/announce' . (empty($_SERVER['QUERY_STRING']) ? '' : '?' . $_SERVER['QUERY_STRING']);
 $request = Illuminate\Http\Request::create(
     $uri,
     $_SERVER['REQUEST_METHOD'] ?? 'GET',

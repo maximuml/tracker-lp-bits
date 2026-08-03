@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Auth\WebController as AuthWebController;
 use App\Http\Controllers\TorrentDownloadController;
 use App\Http\Controllers\TorrentEditController;
 use App\Http\Controllers\TorrentUploadController;
@@ -19,6 +20,10 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return redirect('index.php');
 });
+
+Route::get('/login', [AuthWebController::class, 'showLogin'])->name('login');
+Route::post('/login', [AuthWebController::class, 'login']);
+Route::get('/logout', [AuthWebController::class, 'logout'])->name('logout');
 
 Route::get("/error", [\App\Http\Controllers\ToolController::class, "error"]);
 

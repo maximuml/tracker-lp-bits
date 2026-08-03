@@ -4,7 +4,7 @@ namespace App\Support;
 
 use App\Models\User;
 use Illuminate\Contracts\Encryption\DecryptException;
-use Illuminate\Support\Facades\Crypt;
+use Illuminate\Encryption\Encrypter;
 use Nexus\Database\NexusDB;
 
 /**
@@ -58,7 +58,7 @@ final class AuthCookie
             'expires' => $expires,
         ];
 
-        return Crypt::encryptString(json_encode($tokenData));
+        return self::encrypter()->encryptString(json_encode($tokenData));
     }
 
     /**
@@ -75,7 +75,7 @@ final class AuthCookie
     public static function verifyToken(string $token, ?string $authKey = null): ?array
     {
         try {
-            $decrypted = Crypt::decryptString($token);
+            $decrypted = self::encrypter()->decryptString($token);
             $data = json_decode($decrypted, true);
             if (is_array($data) && isset($data['user_id'], $data['expires']) && (int) $data['expires'] >= time()) {
                 return [
@@ -167,6 +167,79 @@ final class AuthCookie
     public static function clear(): void
     {
         setcookie(self::COOKIE_NAME, '', 0x7fffffff, '/', '', isHttps(), true);
+    }
+
+    /**
+     * Lazily create the Laravel encrypter used for new auth tokens.
+     *
+     * Works outside the full Laravel bootstrap by reading `APP_KEY` from
+     * the environment or `.env` file and constructing an `Encrypter` directly.
+     */
+    private static function encrypter(): Encrypter
+    {
+        static $encrypter;
+        if ($encrypter === null) {
+            $key = self::appKey();
+            if ($key === '') {
+                throw new \RuntimeException('APP_KEY is not set for auth cookie encryption');
+            }
+            $encrypter = new Encrypter($key, 'aes-256-cbc');
+        }
+
+        return $encrypter;
+    }
+
+    /**
+     * Resolve the application encryption key from config, environment or `.env`.
+     */
+    private static function appKey(): string
+    {
+        $candidates = [];
+
+        if (function_exists('config')) {
+            try {
+                $candidates[] = config('app.key');
+            } catch (\Throwable $e) {
+                // Laravel not booted, fall back to environment
+            }
+        }
+
+        $candidates[] = $_SERVER['APP_KEY'] ?? '';
+        $candidates[] = $_ENV['APP_KEY'] ?? '';
+
+        $env = getenv('APP_KEY');
+        if ($env !== false && $env !== '') {
+            $candidates[] = $env;
+        }
+
+        $key = '';
+        foreach ($candidates as $candidate) {
+            if (is_string($candidate) && $candidate !== '') {
+                $key = $candidate;
+                break;
+            }
+        }
+
+        // Last resort: parse .env directly when no Laravel container is booted.
+        if ($key === '') {
+            $envFile = dirname(__DIR__, 2) . '/.env';
+            if (file_exists($envFile) && class_exists(\Dotenv\Dotenv::class)) {
+                try {
+                    $dotenv = \Dotenv\Dotenv::createImmutable(dirname(__DIR__, 2));
+                    $dotenv->safeLoad();
+                    $key = $_SERVER['APP_KEY'] ?? ($_ENV['APP_KEY'] ?? '');
+                } catch (\Throwable $e) {
+                    // ignore .env parse errors
+                }
+            }
+        }
+
+        if (str_starts_with($key, 'base64:')) {
+            $decoded = base64_decode(substr($key, 7), true);
+            return $decoded === false ? '' : $decoded;
+        }
+
+        return $key;
     }
 
     /**

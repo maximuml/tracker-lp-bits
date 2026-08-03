@@ -1178,7 +1178,7 @@ if ($action == "viewforum")
 
 	$forumname = $row['name'];
 	$forummoderators = get_forum_moderators($forumid,false);
-	$search = trim($_GET["search"] ?? '');
+	$search = trim(is_scalar($_GET["search"] ?? '') ? (string) ($_GET["search"] ?? '') : '');
 	$topicQuery = \App\Models\Topic::query()->where('forumid', $forumid);
 	if ($search){
 		$topicQuery->where('subject', 'like', '%'.$search.'%');

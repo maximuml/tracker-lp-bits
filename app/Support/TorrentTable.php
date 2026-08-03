@@ -94,8 +94,11 @@ final class TorrentTable
 $count_get = 0;
 $oldlink = "";
 foreach ($_GET as $get_name => $get_value) {
-	$get_name = \Nexus\Database\NexusDB::getInstance()->escapeString(strip_tags(str_replace(array("\"","'"),array("",""),$get_name)));
-	$get_value = \Nexus\Database\NexusDB::getInstance()->escapeString(strip_tags(str_replace(array("\"","'"),array("",""),$get_value)));
+    if (is_array($get_value)) {
+        continue;
+    }
+	$get_name = \Nexus\Database\NexusDB::getInstance()->escapeString(strip_tags(str_replace(array("\"","'"),array("",""),(string) $get_name)));
+	$get_value = \Nexus\Database\NexusDB::getInstance()->escapeString(strip_tags(str_replace(array("\"","'"),array("",""),(string) $get_value)));
 
 	if ($get_name != "sort" && $get_name != "type") {
 		if ($count_get > 0) {

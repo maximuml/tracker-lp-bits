@@ -52,8 +52,10 @@ if ($showsubcat){
 	if ($showaudiocodec) $audiocodecs = searchbox_item_list("audiocodecs", $sectiontype);
 }
 
-$searchstr_ori = htmlspecialchars(trim($_GET["search"] ?? ''));
-$searchstr = \Nexus\Database\NexusDB::getInstance()->escapeString(trim($_GET["search"] ?? ''));
+$searchstr_raw = is_scalar($_GET["search"] ?? '') ? (string) ($_GET["search"] ?? '') : '';
+$searchstr_ori = htmlspecialchars(trim($searchstr_raw));
+$searchstr = \Nexus\Database\NexusDB::getInstance()->escapeString(trim($searchstr_raw));
+$searchParams['search'] = $searchstr_raw;
 if (empty($searchstr)) {
     unset($searchstr);
 }
@@ -1213,7 +1215,7 @@ if ($count) {
             'limit' => $size,
         ]));
     }
-    $rows = apply_filter('torrent_list', $rows, $page, $sectiontype, $_GET['search'] ?? '');
+    $rows = apply_filter('torrent_list', $rows, $page, $sectiontype, $searchstr_raw);
 	print($pagertop);
 	if ($sectiontype == $browsecatmode)
 		torrenttable($rows, "torrents", $sectiontype);

@@ -22,7 +22,7 @@ final class TorrentAccess
      */
     public static function canAccess(array|int|string $torrent, int|string $uid): bool
     {
-        $specialcatmode = $GLOBALS['specialcatmode'] ?? 0;
+        $specialcatmode = (int) \App\Models\Setting::get('main.specialcat', 0);
 
         if (\get_setting('main.spsct') !== 'yes') {
             return true;

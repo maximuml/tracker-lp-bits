@@ -83,16 +83,17 @@ final class SiteAccess
         $loginType = $setting['login_type'];
 
         if ($loginType === 'secret') {
-            if (empty($_REQUEST['secret'])) {
+            if (empty(SupportContext::getRequestInput('secret'))) {
                 \do_log('no secret');
                 return false;
             }
-            if ($_REQUEST['secret'] !== $setting['login_secret']) {
-                \do_log('invlaid secret: ' . $_REQUEST['secret']);
+            $secret = SupportContext::getRequestInput('secret');
+            if ($secret !== $setting['login_secret']) {
+                \do_log('invlaid secret: ' . $secret);
                 return false;
             }
             if ($setting['login_secret_deadline'] < date('Y-m-d H:i:s')) {
-                \do_log("secret: {$_REQUEST['secret']} expires(deadline: {$setting['login_secret_deadline']})");
+                \do_log("secret: {$secret} expires(deadline: {$setting['login_secret_deadline']})");
                 return false;
             }
             return true;

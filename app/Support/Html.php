@@ -258,8 +258,8 @@ final class Html
      */
     public static function torrentSelection(string $name, string $selName, string $listName, int $selectedId = 0, int $mode = 0): string
     {
-        $items = \App\Support\SearchBox::itemList($GLOBALS['Cache'] ?? null, $listName, $mode);
-        $chooseOne = $GLOBALS['lang_functions']['select_choose_one'] ?? '';
+        $items = \App\Support\SearchBox::itemList(SupportContext::getCache(), $listName, $mode);
+        $chooseOne = SupportContext::getLangFunctions()['select_choose_one'] ?? '';
 
         return self::torrentSelect($name, $selName, $chooseOne, $selectedId, $items);
     }
@@ -270,7 +270,7 @@ final class Html
      */
     public static function promotionSelection(int $selected = 0, int $hide = 0): string
     {
-        $lang = $GLOBALS['lang_functions'] ?? [];
+        $lang = SupportContext::getLangFunctions();
         $labels = [
             'normal' => (string) ($lang['text_normal'] ?? ''),
             'free' => (string) ($lang['text_free'] ?? ''),
@@ -495,7 +495,7 @@ final class Html
      */
     public static function formatSpoiler(string $content, string $title = '', bool $defaultCollapsed = true): string
     {
-        $defaultTitle = $GLOBALS['lang_functions']['spoiler_default_title'] ?? '';
+        $defaultTitle = SupportContext::getLangFunctions()['spoiler_default_title'] ?? '';
 
         return \App\Support\Comment::addTempCode(\App\Support\BBCode::spoiler($content, $title, $defaultTitle, $defaultCollapsed));
     }

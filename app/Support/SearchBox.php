@@ -134,7 +134,7 @@ final class SearchBox
 
         parse_str($checkedValues, $checkedValuesArr);
         $searchBox = \App\Models\SearchBox::query()->with(['categories', 'categories.icon'])->findOrFail($mode);
-        $lang = Locale::folderFromCookie($_COOKIE['c_lang_folder'] ?? null);
+        $lang = Locale::folderFromCookie(SupportContext::getCookieValue('c_lang_folder'));
         $withTaxonomies = [];
 
         if ($searchBox->showsubcat) {

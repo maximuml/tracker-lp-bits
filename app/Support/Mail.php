@@ -30,7 +30,8 @@ final class Mail
         string $multipleMail,
         string $hdrEncoding,
     ): bool {
-        $lang = $GLOBALS['lang_functions'] ?? [];
+        $lang = SupportContext::getLangFunctions();
+        $siteConfig = SupportContext::getSiteConfig();
 
         return self::sent(
             $to,
@@ -44,13 +45,13 @@ final class Mail
             $multipleMail,
             $hdrEncoding,
             [
-                'site_name' => (string) ($GLOBALS['SITENAME'] ?? ''),
-                'site_email' => (string) ($GLOBALS['SITEEMAIL'] ?? ''),
-                'smtp_type' => (string) ($GLOBALS['smtptype'] ?? ''),
-                'smtp' => (string) ($GLOBALS['smtp'] ?? ''),
-                'smtp_host' => (string) ($GLOBALS['smtp_host'] ?? ''),
-                'smtp_port' => (string) ($GLOBALS['smtp_port'] ?? ''),
-                'smtp_from' => (string) ($GLOBALS['smtp_from'] ?? ''),
+                'site_name' => (string) ($siteConfig['SITENAME'] ?? ''),
+                'site_email' => (string) ($siteConfig['SITEEMAIL'] ?? ''),
+                'smtp_type' => (string) ($siteConfig['smtptype'] ?? ''),
+                'smtp' => (string) ($siteConfig['smtp'] ?? ''),
+                'smtp_host' => (string) ($siteConfig['smtp_host'] ?? ''),
+                'smtp_port' => (string) ($siteConfig['smtp_port'] ?? ''),
+                'smtp_from' => (string) ($siteConfig['smtp_from'] ?? ''),
             ],
             [
                 'error' => $lang['std_error'] ?? 'Error',
@@ -121,7 +122,7 @@ final class Mail
 
         if ($smtpType === 'advanced') {
             $mid = md5(getip() . $fromName);
-            $name = $_SERVER['SERVER_NAME'] ?? $siteName;
+            $name = SupportContext::getServerValue('SERVER_NAME', $siteName);
             $headers = '';
             $headers .= "From: $fromName <$fromEmail>".$eol;
             $headers .= "Reply-To: $fromName <$fromEmail>".$eol;

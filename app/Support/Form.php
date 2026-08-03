@@ -19,7 +19,7 @@ final class Form
      */
     public static function datetimepickerInput(string $name, string $value = '', string $label = '', array $options = []): string
     {
-        $lang = Locale::folderFromCookie($_COOKIE['c_lang_folder'] ?? null, true);
+        $lang = Locale::folderFromCookie(SupportContext::getCookieValue('c_lang_folder'), true);
         if ($lang === 'zh_CN') {
             $lang = 'zh';
         }

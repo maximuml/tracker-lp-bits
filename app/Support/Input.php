@@ -44,11 +44,14 @@ final class Input
             return null;
         }
 
-        if (! isset($_REQUEST[$name])) {
+        $value = SupportContext::getRequestInput($name);
+        if ($value === null) {
             return false;
         }
 
-        return $GLOBALS[$name] = $_REQUEST[$name];
+        SupportContext::setGlobal($name, $value);
+
+        return $value;
     }
 
     /**

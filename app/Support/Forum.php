@@ -92,7 +92,7 @@ final class Forum
      */
     public static function isModerator(int|string $id, string $in = 'post'): bool
     {
-        $CURUSER = $GLOBALS['CURUSER'] ?? [];
+        $CURUSER = SupportContext::getUser() ?? [];
 
         switch ($in) {
             case 'post':

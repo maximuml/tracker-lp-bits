@@ -100,7 +100,7 @@ final class Shoutbox
     public static function toolbar(string $formName = 'shbox', string $fieldName = 'shbox_text'): string
     {
         $panelId = 'shoutbox-emoji-panel';
-        $lang = $GLOBALS['lang_shoutbox'] ?? [];
+        $lang = SupportContext::getLangShoutbox();
 
         $b = $lang['toolbar_bold'] ?? 'B';
         $i = $lang['toolbar_italic'] ?? 'I';
@@ -174,7 +174,7 @@ final class Shoutbox
             return '';
         }
 
-        $lang = $GLOBALS['lang_shoutbox'] ?? [];
+        $lang = SupportContext::getLangShoutbox();
         $editLabel = $lang['text_edit'] ?? 'edit';
         $delLabel = $lang['text_del'] ?? 'del';
         $html = '<span class="shout-actions">';
@@ -292,7 +292,7 @@ final class Shoutbox
             $reactors = [];
         }
 
-        $lang = $GLOBALS['lang_shoutbox'] ?? [];
+        $lang = SupportContext::getLangShoutbox();
         $titleReact = (string) ($lang['title_react'] ?? 'React');
         $titleAdd = (string) ($lang['title_add_reaction'] ?? 'Add reaction');
         $titleReacted = (string) ($lang['title_reacted_by'] ?? 'Reacted by');
@@ -338,9 +338,9 @@ final class Shoutbox
             $text .= ($text === '' ? '' : ', ') . '+' . $remaining . ' more';
         }
         if ($text === '') {
-            return (string) ($GLOBALS['lang_shoutbox']['title_react'] ?? 'React');
+            return (string) (SupportContext::getLangShoutbox()['title_react'] ?? 'React');
         }
-        return ((string) ($GLOBALS['lang_shoutbox']['title_reacted_by'] ?? 'Reacted by')) . ': ' . $text;
+        return ((string) (SupportContext::getLangShoutbox()['title_reacted_by'] ?? 'Reacted by')) . ': ' . $text;
     }
 
     /**
@@ -388,8 +388,9 @@ final class Shoutbox
                 $cls = $isMe ? 'shout-mention shout-mention-me' : 'shout-mention';
                 $name = $cache[$key]['name'];
                 $title = '';
-                if (isset($GLOBALS['lang_shoutbox']['tooltip_nick_reply'])) {
-                    $title = ' title="' . htmlspecialchars((string) $GLOBALS['lang_shoutbox']['tooltip_nick_reply'], ENT_QUOTES) . '"';
+                $shoutboxLang = SupportContext::getLangShoutbox();
+                if (isset($shoutboxLang['tooltip_nick_reply'])) {
+                    $title = ' title="' . htmlspecialchars((string) $shoutboxLang['tooltip_nick_reply'], ENT_QUOTES) . '"';
                 }
                 if ($currentUserId > 0) {
                     $onclick = 'return shoutReply(' . htmlspecialchars(json_encode($name, JSON_UNESCAPED_UNICODE), ENT_QUOTES) . ')';

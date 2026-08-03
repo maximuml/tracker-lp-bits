@@ -91,3 +91,33 @@ curl_setopt($ch, CURLOPT_HTTPHEADER, ['X-Forwarded-For: 10.0.0.1']);
 ### Missing required parameters
 
 The openresty Lua filter in `.docker/openresty/lua/tracker_filter.lua` rejects requests missing required announce parameters with `400 Bad Request` and a bencoded `failure reason` (e.g. `Missing parameter: port`) before PHP is reached.
+
+## Testing `/scrape` and `/scrape.php` end-to-end
+
+Both `GET /scrape` and `GET /scrape.php` dispatch to `ScrapeController::scrape` through the FPM wrapper. `ScrapeService::parseInfoHashes()` reads `QUERY_STRING` directly, URL-decodes each `info_hash` value, and matches the resulting raw 20-byte binary against `torrents.info_hash`.
+
+- Send `info_hash` values **URL-encoded raw binary** (not hex). Use `rawurlencode($infoHashBinary)`; a custom encoder must zero-pad bytes < 16 (e.g. `%0E`, not `%E`).
+- Repeat `info_hash` query parameters for multi-torrent scrape (`info_hash=...&info_hash=...`).
+- Valid responses are `200` `Content-Type: text/plain; charset=utf-8` with a `files` dict keyed by raw info_hash.
+- Invalid passkey returns `200` with `failure reason` and sets Redis `passkey_invalid:<passkey>` with a 24h TTL.
+- Missing `info_hash` returns `200` with `warning message`, `files: []`, plus `interval` / `min interval`.
+
+## Testing `cleanup:run` and the cleanup container
+
+- `docker compose exec php php artisan cleanup:run --force` should exit `0` and stream legacy `cleanup_cli.php` progress, ending with `[CLEANUP_RUN] DONE, cost time: N seconds`.
+- The `cleanup` service in `.docker/php/entrypoint.sh` runs the command in a 60s loop. Verify with `docker compose logs --since 2m cleanup`.
+
+## Testing the merged `php8` regression bundle
+
+Typical settings for a full `php8` regression run:
+
+```sql
+INSERT INTO settings (name, value) VALUES ('use_challenge_response_authentication','no'),('security.iv','no'),('tweak.where','yes'),('meilisearch.enabled','no'),('torrent.download_support_passkey','yes'),('torrent.approval_status_none_visible','yes') ON DUPLICATE KEY UPDATE value=VALUES(value);
+```
+
+Then clear the Redis settings cache (`nexus_settings_in_nexus`, `nexus_settings_in_laravel`).
+
+- `public/torrents/` must exist and be writable by `www-data`; `takeupload.php` writes the `.torrent` file through `getFullDirectory(main.torrent_dir)` which resolves relative to the FPM `getcwd()` (`public/`).
+- `storage/framework/views/` must be writable so `TorrentPolicy` denial views can be compiled.
+- Generate a fresh `.torrent` with `Rhilip\Bencode\Bencode` and `announce=http://openresty/announce.php`, upload via `/takeupload.php`, capture `info_hash` from the DB for announce/scrape probes.
+- For first authenticated downloads, add `letdown=1` (`download.php?id=<id>&letdown=1`) to bypass the `showdlnotice` redirect to `downloadnotice.php`.

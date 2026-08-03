@@ -3,6 +3,8 @@
 namespace App\Support;
 
 use App\Models\User;
+use Illuminate\Contracts\Encryption\DecryptException;
+use Illuminate\Encryption\Encrypter;
 use Nexus\Database\NexusDB;
 
 /**
@@ -40,71 +42,68 @@ final class AuthCookie
      * Build the signed auth-token string that goes into the
      * `c_secure_pass` cookie value.
      *
-     * Token format: `base64(json({"user_id":N,"expires":T}) . "." . hmac_sha256)`
-     *
-     * The HMAC is computed over the JSON payload using the user's
-     * `auth_key` as the secret. This is the exact shape the legacy
-     * `logincookie()` produces.
+     * New tokens are encrypted with Laravel's encrypter (which uses
+     * `APP_KEY`), making them independent of the per-user `auth_key`.
+     * Legacy HMAC tokens are still accepted by `verifyToken()` for the
+     * lifetime of the existing cookie.
      *
      * @param  int  $userId  The user's `users.id`
-     * @param  string  $authKey  The user's `users.auth_key` (HMAC secret)
+     * @param  string|null  $authKey  Deprecated; no longer used, kept for call-site compatibility
      * @param  int  $expires  Unix timestamp when the cookie expires
-     *
-     * @throws \RuntimeException if `$authKey` is empty
      */
-    public static function buildToken(int $userId, string $authKey, int $expires): string
+    public static function buildToken(int $userId, ?string $authKey, int $expires): string
     {
-        if ($authKey === '') {
-            throw new \RuntimeException('auth_key is empty');
-        }
-
         $tokenData = [
             'user_id' => $userId,
             'expires' => $expires,
         ];
-        $tokenJson = json_encode($tokenData);
-        $signature = hash_hmac('sha256', $tokenJson, $authKey);
 
-        return base64_encode($tokenJson.'.'.$signature);
+        return self::encrypter()->encryptString(json_encode($tokenData));
     }
 
     /**
      * Verify and decode a `c_secure_pass` cookie value.
      *
-     * Returns the decoded payload `['user_id' => int, 'expires' => int]`
-     * on success, or `null` if the token is malformed, the signature
-     * is invalid, or the token has expired.
+     * First tries the new Laravel-encrypted token (signed by `APP_KEY`).
+     * If that fails and `$authKey` is provided, falls back to the legacy
+     * HMAC token signed with the user's `auth_key`.
      *
      * @param  string  $token  The raw cookie value
-     * @param  string  $authKey  The user's `users.auth_key` for HMAC verification
+     * @param  string|null  $authKey  The user's `users.auth_key` for legacy HMAC verification
      * @return array{user_id: int, expires: int}|null
      */
-    public static function verifyToken(string $token, string $authKey): ?array
+    public static function verifyToken(string $token, ?string $authKey = null): ?array
     {
-        $decoded = base64_decode($token, true);
-        if ($decoded === false) {
+        try {
+            $decrypted = self::encrypter()->decryptString($token);
+            $data = json_decode($decrypted, true);
+            if (is_array($data) && isset($data['user_id'], $data['expires']) && (int) $data['expires'] >= time()) {
+                return [
+                    'user_id' => (int) $data['user_id'],
+                    'expires' => (int) $data['expires'],
+                ];
+            }
+        } catch (\RuntimeException $e) {
+            // not an application-encrypted token, or APP_KEY is missing/invalid;
+            // try legacy HMAC below
+        }
+
+        if ($authKey === null || $authKey === '') {
             return null;
         }
 
-        $dotPos = strrpos($decoded, '.');
-        if ($dotPos === false) {
+        $legacy = self::decodeCookie([self::COOKIE_NAME => $token]);
+        if ($legacy === null) {
             return null;
         }
 
-        $tokenJson = substr($decoded, 0, $dotPos);
-        $signature = substr($decoded, $dotPos + 1);
-
-        $expectedSignature = hash_hmac('sha256', $tokenJson, $authKey);
-        if (! hash_equals($expectedSignature, $signature)) {
+        $expectedSignature = hash_hmac('sha256', $legacy['token_json'], $authKey);
+        if (! hash_equals($expectedSignature, $legacy['signature'])) {
             return null;
         }
 
-        $data = json_decode($tokenJson, true);
-        if (! is_array($data) || ! isset($data['user_id'], $data['expires'])) {
-            return null;
-        }
-
-        if ((int) $data['expires'] < time()) {
+        $data = json_decode($legacy['token_json'], true);
+        if (! is_array($data) || ! isset($data['user_id'], $data['expires']) || (int) $data['expires'] < time()) {
             return null;
         }
 
@@ -138,21 +137,17 @@ final class AuthCookie
      * them.
      *
      * @param  int  $userId  The user's `users.id`
-     * @param  string  $authKey  The user's `users.auth_key`
+     * @param  string|null  $authKey  Deprecated; no longer used, kept for call-site compatibility
      * @param  int  $durationSeconds  Cookie lifetime in seconds (0 = default 365 days)
      */
-    public static function setLoginCookie(int $userId, string $authKey, int $durationSeconds = 0): void
+    public static function setLoginCookie(int $userId, ?string $authKey = null, int $durationSeconds = 0): void
     {
-        if ($authKey === '') {
-            throw new \RuntimeException('auth_key is empty');
-        }
-
         if ($durationSeconds <= 0) {
             $durationSeconds = (int) get_setting('system.cookie_valid_days', 365) * 86400;
         }
 
         $expires = self::computeExpires($durationSeconds);
-        $token = self::buildToken($userId, $authKey, $expires);
+        $token = self::buildToken($userId, null, $expires);
 
         setcookie(self::COOKIE_NAME, $token, $expires, '/', '', isHttps(), true);
 
@@ -173,6 +168,79 @@ final class AuthCookie
     public static function clear(): void
     {
         setcookie(self::COOKIE_NAME, '', 0x7fffffff, '/', '', isHttps(), true);
+    }
+
+    /**
+     * Lazily create the Laravel encrypter used for new auth tokens.
+     *
+     * Works outside the full Laravel bootstrap by reading `APP_KEY` from
+     * the environment or `.env` file and constructing an `Encrypter` directly.
+     */
+    private static function encrypter(): Encrypter
+    {
+        static $encrypter;
+        if ($encrypter === null) {
+            $key = self::appKey();
+            if ($key === '') {
+                throw new \RuntimeException('APP_KEY is not set for auth cookie encryption');
+            }
+            $encrypter = new Encrypter($key, 'aes-256-cbc');
+        }
+
+        return $encrypter;
+    }
+
+    /**
+     * Resolve the application encryption key from config, environment or `.env`.
+     */
+    private static function appKey(): string
+    {
+        $candidates = [];
+
+        if (function_exists('config')) {
+            try {
+                $candidates[] = config('app.key');
+            } catch (\Throwable $e) {
+                // Laravel not booted, fall back to environment
+            }
+        }
+
+        $candidates[] = $_SERVER['APP_KEY'] ?? '';
+        $candidates[] = $_ENV['APP_KEY'] ?? '';
+
+        $env = getenv('APP_KEY');
+        if ($env !== false && $env !== '') {
+            $candidates[] = $env;
+        }
+
+        $key = '';
+        foreach ($candidates as $candidate) {
+            if (is_string($candidate) && $candidate !== '') {
+                $key = $candidate;
+                break;
+            }
+        }
+
+        // Last resort: parse .env directly when no Laravel container is booted.
+        if ($key === '') {
+            $envFile = dirname(__DIR__, 2) . '/.env';
+            if (file_exists($envFile) && class_exists(\Dotenv\Dotenv::class)) {
+                try {
+                    $dotenv = \Dotenv\Dotenv::createImmutable(dirname(__DIR__, 2));
+                    $dotenv->safeLoad();
+                    $key = $_SERVER['APP_KEY'] ?? ($_ENV['APP_KEY'] ?? '');
+                } catch (\Throwable $e) {
+                    // ignore .env parse errors
+                }
+            }
+        }
+
+        if (str_starts_with($key, 'base64:')) {
+            $decoded = base64_decode(substr($key, 7), true);
+            return $decoded === false ? '' : $decoded;
+        }
+
+        return $key;
     }
 
     /**
@@ -254,10 +322,12 @@ final class AuthCookie
     }
 
     /**
-     * Look up the user from the legacy auth cookie.
+     * Look up the user from the auth cookie.
      *
-     * Mirrors `get_user_from_cookie()`. When `$isArray` is true the row is
-     * returned as an array, otherwise an Eloquent User model is returned.
+     * Accepts both the new Laravel-encrypted token (signed by `APP_KEY`)
+     * and the legacy HMAC token (signed by the user's `auth_key`).
+     * When `$isArray` is true the row is returned as an array, otherwise
+     * an Eloquent User model is returned.
      *
      * @param  array<string, mixed>  $cookie
      * @return array<string, mixed>|\App\Models\User|null
@@ -265,15 +335,60 @@ final class AuthCookie
     public static function userFromCookie(array $cookie, bool $isArray = true): array|\App\Models\User|null
     {
         $log = 'cookie: ' . json_encode($cookie);
+        if (empty($cookie[self::COOKIE_NAME])) {
+            \do_log("$log, param not enough");
+            return null;
+        }
+
+        $token = $cookie[self::COOKIE_NAME];
+
+        // New Laravel-encrypted token is verified without a per-user secret.
+        $payload = self::verifyToken($token);
+        if ($payload !== null) {
+            $log .= ", uid = {$payload['user_id']} (app encrypted)";
+            $row = self::fetchUser($payload['user_id'], $isArray, $log);
+            if ($row !== null && $isArray) {
+                unset($row['auth_key'], $row['passhash']);
+            }
+            return $row;
+        }
+
+        // Legacy HMAC token: decode first to get the user id, then load
+        // the user and verify the signature against the stored auth_key.
         $result = self::decodeCookie($cookie);
         if (empty($result)) {
             return null;
         }
 
         $id = $result['user_id'];
-        $tokenJson = $result['token_json'];
-        $signature = $result['signature'];
-        $log .= ", uid = $id";
+        $log .= ", uid = $id (legacy)";
+
+        $row = self::fetchUser($id, $isArray, $log);
+        if ($row === null) {
+            return null;
+        }
+
+        $authKey = $isArray ? $row['auth_key'] : $row->auth_key;
+        if (self::verifyToken($token, (string) $authKey) === null) {
+            \do_log("$log, !hash_equals");
+            return null;
+        }
+
+        if ($isArray) {
+            unset($row['auth_key'], $row['passhash']);
+        }
+
+        return $row;
+    }
+
+    /**
+     * Fetch a user by id with the legacy status/enabled checks.
+     *
+     * @param  int  $id
+     * @return array<string, mixed>|\App\Models\User|null
+     */
+    private static function fetchUser(int $id, bool $isArray, string $log)
+    {
         $isAjax = \nexus()->isAjax();
         $selfEnableBonus = \App\Models\Setting::getSelfEnableBonus();
         $shouldIgnoreEnabled = defined('IN_NEXUS') && IN_NEXUS && !$isAjax && $selfEnableBonus > 0;
@@ -291,28 +406,19 @@ final class AuthCookie
                 \do_log("$log, user not exists");
                 return null;
             }
-            $authKey = $row['auth_key'];
-            unset($row['auth_key'], $row['passhash']);
-        } else {
-            $row = \App\Models\User::query()->find($id);
-            if (!$row) {
-                \do_log("$log, user not exists");
-                return null;
-            }
-            $checkFields = ['status'];
-            if (!$shouldIgnoreEnabled) {
-                $checkFields[] = 'enabled';
-            }
-            $row->checkIsNormal($checkFields);
-            $authKey = $row->auth_key;
+            return $row;
         }
 
-        $expectedSignature = hash_hmac('sha256', $tokenJson, $authKey);
-        if (!hash_equals($expectedSignature, $signature)) {
-            \do_log("$log, !hash_equals, expectedSignature: $expectedSignature, actualSignature: $signature");
+        $row = \App\Models\User::query()->find($id);
+        if (!$row) {
+            \do_log("$log, user not exists");
             return null;
         }
-
+        $checkFields = ['status'];
+        if (!$shouldIgnoreEnabled) {
+            $checkFields[] = 'enabled';
+        }
+        $row->checkIsNormal($checkFields);
         return $row;
     }
 }

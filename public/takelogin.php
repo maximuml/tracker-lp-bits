@@ -17,16 +17,8 @@ function bark($text = "")
 if ($iv == "yes") {
     check_code($_POST['imagehash'] ?? null, $_POST['imagestring'] ?? null, 'login.php', true);
 }
-//同时支持新旧两种登录方式
-$useChallengeResponse = \App\Models\Setting::getIsUseChallengeResponseAuthentication();
-if ($useChallengeResponse) {
-    if (empty($_POST['response'])) {
-        failedlogins("Require response parameter.");
-    }
-} else {
-    if (empty($_POST['password'])) {
-        failedlogins("Require password parameter.");
-    }
+if (empty($_POST['password'])) {
+    failedlogins("Require password parameter.");
 }
 
 $user = \App\Models\User::query()->where('username', $username)->first(['id', 'passhash', 'secret', 'auth_key', 'enabled', 'status', 'two_step_secret', 'lang']);
@@ -50,37 +42,28 @@ if (!empty($row['two_step_secret'])) {
 }
 $log = "user: {$row['id']}, ip: $ip";
 $update = [];
-if ($useChallengeResponse) {
-    $challenge = \Nexus\Database\NexusDB::cache_get(get_challenge_key($username));
-    if (empty($challenge)) {
-        failedlogins("expired");
+$passwordHash = hash('sha256', $row['secret'] . hash('sha256', $_POST['password']));
+$log .= ", passwordHash: $passwordHash";
+if (empty($row['auth_key'])) {
+    //先使用旧的验证方式验证
+    if ($row["passhash"] != md5($row["secret"] . $_POST['password'] . $row["secret"])) {
+        do_log("$log, md5 not equal");
+        login_failedlogins();
     }
-    $log .= ", useChallengeResponse, client response: " . $_POST['response'];
-} else {
-    $passwordHash = hash('sha256', $row['secret'] . hash('sha256', $_POST['password']));
-    $log .= ", !useChallengeResponse, passwordHash: $passwordHash";
-    if (empty($row['auth_key'])) {
-        //先使用旧的验证方式验证
-        if ($row["passhash"] != md5($row["secret"] . $_POST['password'] . $row["secret"])) {
-            do_log("$log, md5 not equal");
-            login_failedlogins();
-        }
-        $log .= ", no auth_key, upgrade to challenge response";
-        //自动升级为新的验证方式
-        $update['passhash'] = $row['passhash'] = $passwordHash;
-    }
-    //后端自动生成挑战响应
-    $challenge = mksecret();
-    $_POST['response'] = hash_hmac('sha256', $passwordHash, $challenge);
-    $log .= ", server generate response: " . $_POST['response'];
+    $log .= ", no auth_key, upgrade password hash";
+    //自动升级为新的验证方式
+    $update['passhash'] = $row['passhash'] = $passwordHash;
 }
+//后端用 passhash 验证（与 legacy challenge-response 等价，但由服务端生成）
+$challenge = mksecret();
+$_POST['response'] = hash_hmac('sha256', $passwordHash, $challenge);
+$log .= ", server generate response: " . $_POST['response'];
 $expectedResponse = hash_hmac('sha256', $row['passhash'], $challenge);
 $log .= ", expectedResponse: $expectedResponse";
 if (!hash_equals($expectedResponse, $_POST["response"])) {
     do_log("$log, !hash_equals");
     login_failedlogins();
 }
-\Nexus\Database\NexusDB::cache_del(get_challenge_key($username));
 do_log("$log, login successful");
 $userRep = new \App\Repositories\UserRepository();
 $userRep->saveLoginLog($row['id'], $ip, 'Web', true);

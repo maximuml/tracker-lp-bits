@@ -8,7 +8,7 @@ use Illuminate\Contracts\Auth\UserProvider;
 class NexusWebUserProvider implements UserProvider
 {
     /**
-     * @var \Illuminate\Database\Eloquent\Builder
+     * @var \Illuminate\Database\Eloquent\Builder<User>
      */
     protected $query;
 
@@ -24,7 +24,8 @@ class NexusWebUserProvider implements UserProvider
      */
     public function retrieveById($identifier)
     {
-        return $this->query->find($identifier);
+        $user = $this->query->where('id', $identifier)->first();
+        return $user instanceof User ? $user : null;
     }
 
 
@@ -37,7 +38,7 @@ class NexusWebUserProvider implements UserProvider
      */
     public function retrieveByToken($identifier, $token)
     {
-
+        return null;
     }
 
     /**
@@ -56,32 +57,39 @@ class NexusWebUserProvider implements UserProvider
     /**
      * Retrieve a user by the given credentials.
      *
-     * @param  array  $credentials
+     * @param  array<string, mixed>  $credentials
      * @return \Illuminate\Contracts\Auth\Authenticatable|null
      */
     public function retrieveByCredentials(array $credentials)
     {
-        $result = get_user_id_and_signature_from_cookie($credentials);
-        if (empty($result)) {
-            return null;
-        }
-        return $this->retrieveById($result['user_id']);
+        $user = \App\Support\AuthCookie::userFromCookie($credentials, false);
+        return $user instanceof User ? $user : null;
     }
 
     /**
      * Validate a user against the given credentials.
      *
      * @param  \Illuminate\Contracts\Auth\Authenticatable  $user
-     * @param  array  $credentials
+     * @param  array<string, mixed>  $credentials
      * @return bool
      */
     public function validateCredentials(Authenticatable $user, array $credentials)
     {
-        list($tokenJson, $signature) = explode('.', base64_decode($credentials["c_secure_pass"]));
-        $expectedSignature = hash_hmac('sha256', $tokenJson, $user->auth_key);
-        return  hash_equals($expectedSignature, $signature);
+        if (! $user instanceof User) {
+            return false;
+        }
+
+        $payload = \App\Support\AuthCookie::verifyToken(
+            (string) ($credentials['c_secure_pass'] ?? ''),
+            (string) $user->auth_key,
+        );
+
+        return $payload !== null && $payload['user_id'] === $user->id;
     }
 
+    /**
+     * @param  array<string, mixed>  $credentials
+     */
     public function rehashPasswordIfRequired(Authenticatable $user, #[\SensitiveParameter] array $credentials, bool $force = false)
     {
         // TODO: Implement rehashPasswordIfRequired() method.

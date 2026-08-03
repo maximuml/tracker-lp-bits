@@ -20,9 +20,9 @@ final class UserDisplay
      */
     public static function currentClass(): string|int
     {
+        $user = SupportContext::getUser();
         if (defined('IN_NEXUS') && IN_NEXUS) {
-            global $CURUSER;
-            return $CURUSER['class'] ?? '';
+            return $user['class'] ?? '';
         }
 
         if (! auth()->check()) {
@@ -39,9 +39,9 @@ final class UserDisplay
      */
     public static function currentId(): int
     {
+        $user = SupportContext::getUser();
         if (defined('IN_NEXUS') && IN_NEXUS) {
-            global $CURUSER;
-            return (int) ($CURUSER['id'] ?? 0);
+            return (int) ($user['id'] ?? 0);
         }
 
         if (! auth()->check()) {
@@ -58,9 +58,9 @@ final class UserDisplay
      */
     public static function currentPasskey(): string
     {
+        $user = SupportContext::getUser();
         if (defined('IN_NEXUS') && IN_NEXUS) {
-            global $CURUSER;
-            return $CURUSER['passkey'] ?? '';
+            return $user['passkey'] ?? '';
         }
 
         if (! auth()->check()) {
@@ -77,9 +77,9 @@ final class UserDisplay
      */
     public static function currentUsername(): string
     {
+        $user = SupportContext::getUser();
         if (defined('IN_NEXUS') && IN_NEXUS) {
-            global $CURUSER;
-            return $CURUSER['username'] ?? '';
+            return $user['username'] ?? '';
         }
 
         if (! auth()->check()) {

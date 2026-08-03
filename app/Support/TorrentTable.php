@@ -12,11 +12,11 @@ final class TorrentTable
         ob_start();
 
 
-	global $Cache;
-	global $lang_functions;
-	global $CURUSER, $waitsystem;
-	global $torrentmanage_class, $enabletooltip_tweak, $staffmem_class;
-	global $CURLANGDIR;
+	$cache = SupportContext::getCache();
+	$lang_functions = SupportContext::getLangFunctions();
+	$user = SupportContext::getUser() ?? [];
+	$waitsystem = (string) SupportContext::getGlobal('waitsystem', '');
+	$enabletooltip_tweak = (string) SupportContext::getGlobal('enabletooltip_tweak', '');
 
 	$torrent = new \Nexus\Torrent\Torrent();
 	$torrentRep = new \App\Repositories\TorrentRepository();
@@ -27,14 +27,14 @@ final class TorrentTable
     }
 	unset($row);
 
-	$torrentSeedingLeechingStatus = $torrent->listLeechingSeedingStatus($CURUSER['id'], $torrentIdArr);
+	$torrentSeedingLeechingStatus = $torrent->listLeechingSeedingStatus($user['id'], $torrentIdArr);
     $tagRep = new \App\Repositories\TagRepository();
 	$torrentTagCollection = \App\Models\TorrentTag::query()->whereIn('torrent_id', $torrentIdArr)->get();
 	$torrentTagResult = $torrentTagCollection->groupBy('torrent_id');
 	$showCover = false;
     $showSeedBoxIcon = false;
 	if ($searchBoxId) {
-	    $searchBoxExtra = get_searchbox_value($searchBoxId, "extra");
+	    $searchBoxExtra = SearchBox::value($cache, $searchBoxId, 'extra');
 	    if (!empty($searchBoxExtra[\App\Models\SearchBox::EXTRA_DISPLAY_COVER_ON_TORRENT_LIST])) {
 	        $showCover = true;
         }
@@ -55,17 +55,17 @@ final class TorrentTable
     }
 
 
-    $last_browse = $CURUSER['last_browse'];
+    $last_browse = $user['last_browse'];
 //	if ($variant == "torrent"){
-//		$last_browse = $CURUSER['last_browse'];
+//		$last_browse = $user['last_browse'];
 //		$sectiontype = $browsecatmode;
 //	}
 //	elseif($variant == "music"){
-//		$last_browse = $CURUSER['last_music'];
+//		$last_browse = $user['last_music'];
 //		$sectiontype = $specialcatmode;
 //	}
 //	else{
-//		$last_browse = $CURUSER['last_browse'];
+//		$last_browse = $user['last_browse'];
 //		$sectiontype = "";
 //	}
 
@@ -75,8 +75,8 @@ final class TorrentTable
 	}
     $wait = 0;
 	if (get_user_class() < UC_VIP && $waitsystem == "yes") {
-		$ratio = get_ratio($CURUSER["id"], false);
-		$gigs = $CURUSER["uploaded"] / (1024*1024*1024);
+		$ratio = get_ratio($user["id"], false);
+		$gigs = $user["uploaded"] / (1024*1024*1024);
 		if($gigs > 10)
 		{
 			if ($ratio < 0.4) $wait = 24;
@@ -93,7 +93,7 @@ final class TorrentTable
 <?php
 $count_get = 0;
 $oldlink = "";
-foreach ($_GET as $get_name => $get_value) {
+foreach (SupportContext::allQuery() as $get_name => $get_value) {
     if (is_array($get_value)) {
         continue;
     }
@@ -113,11 +113,11 @@ foreach ($_GET as $get_name => $get_value) {
 if ($count_get > 0) {
 	$oldlink = $oldlink . "&amp;";
 }
-$sort = $_GET['sort'] ?? '';
+$sort = SupportContext::getQuery('sort', '');
 $link = array();
 for ($i=1; $i<=9; $i++){
 	if ($sort == $i)
-		$link[$i] = ($_GET['type'] == "desc" ? "asc" : "desc");
+		$link[$i] = (SupportContext::getQuery('type') == "desc" ? "asc" : "desc");
 	else $link[$i] = ($i == 1 ? "asc" : "desc");
 }
 ?>
@@ -129,11 +129,11 @@ if ($wait)
 {
 	print("<td class=\"colhead\">".$lang_functions['col_wait']."</td>\n");
 }
-if ($CURUSER['showcomnum'] != 'no') { ?>
+if ($user['showcomnum'] != 'no') { ?>
 <td class="colhead"><a href="?<?php echo $oldlink?>sort=3&amp;type=<?php echo $link[3]?>"><img class="comments" src="pic/trans.gif" alt="comments" title="<?php echo $lang_functions['title_number_of_comments'] ?>" /></a></td>
 <?php } ?>
 
-<td class="colhead"><a href="?<?php echo $oldlink?>sort=4&amp;type=<?php echo $link[4]?>"><img class="time" src="pic/trans.gif" alt="time" title="<?php echo ($CURUSER['timetype'] != 'timealive' ? $lang_functions['title_time_added'] : $lang_functions['title_time_alive'])?>" /></a></td>
+<td class="colhead"><a href="?<?php echo $oldlink?>sort=4&amp;type=<?php echo $link[4]?>"><img class="time" src="pic/trans.gif" alt="time" title="<?php echo ($user['timetype'] != 'timealive' ? $lang_functions['title_time_added'] : $lang_functions['title_time_alive'])?>" /></a></td>
 <td class="colhead"><a href="?<?php echo $oldlink?>sort=5&amp;type=<?php echo $link[5]?>"><img class="size" src="pic/trans.gif" alt="size" title="<?php echo $lang_functions['title_size'] ?>" /></a></td>
 <td class="colhead"><a href="?<?php echo $oldlink?>sort=7&amp;type=<?php echo $link[7]?>"><img class="seeders" src="pic/trans.gif" alt="seeders" title="<?php echo $lang_functions['title_number_of_seeders'] ?>" /></a></td>
 <td class="colhead"><a href="?<?php echo $oldlink?>sort=8&amp;type=<?php echo $link[8]?>"><img class="leechers" src="pic/trans.gif" alt="leechers" title="<?php echo $lang_functions['title_number_of_leechers'] ?>" /></a></td>
@@ -145,7 +145,7 @@ if (user_can('torrentmanage')) { ?>
 <?php } ?>
 </tr>
 <?php
-$caticonrow = get_category_icon_row($CURUSER['caticon']);
+$caticonrow = get_category_icon_row($user['caticon']);
 if ($caticonrow['secondicon'] == 'yes')
 $has_secondicon = true;
 else $has_secondicon = false;
@@ -179,7 +179,7 @@ foreach ($rows as $row)
 
 	if($count_dispname > $max_length_of_torrent_name)
 		$dispname=mb_substr($dispname, 0, $max_length_of_torrent_name-2,"UTF-8") . "..";
-	if ($CURUSER['appendsticky'] == 'yes') {
+	if ($user['appendsticky'] == 'yes') {
         $posStates = \App\Models\Torrent::listPosStates();
         $stickyicon = str_repeat("<img class=\"sticky\" src=\"pic/trans.gif\" alt=\"Sticky\" title=\"".$posStates[$row['pos_state']]['text']."\" />&nbsp;", $posStates[$row['pos_state']]['icon_counts'] ?? 0);
     } else {
@@ -200,7 +200,7 @@ foreach ($rows as $row)
     }
 
 	print("<td class=\"rowfollow\" width=\"100%\" align=\"left\" style='padding: 0px'><table class=\"torrentname\" width=\"100%\"><tr" . $sphighlight . ">$tdCover<td class=\"embedded\" style='padding-left: 5px'>".$stickyicon."<a $short_torrent_name_alt $mouseovertorrent href=\"details.php?id=".$id."&amp;hit=1\"><b>".htmlspecialchars($dispname)."</b></a>");
-	if ($CURUSER['appendnew'] != 'no' && strtotime($row["added"]) >= $last_browse)
+	if ($user['appendnew'] != 'no' && strtotime($row["added"]) >= $last_browse)
 		print("<b> (<font class='new'>".$lang_functions['text_new_uppercase']."</font>)</b>");
 
 	$banned_torrent = ($row["banned"] == 'yes' ? " <b>(<font class=\"striking\">".$lang_functions['text_banned']."</font>)</b>" : "");
@@ -233,11 +233,11 @@ foreach ($rows as $row)
 	print("</td>");
 
 		$act = "";
-		if ($CURUSER["dlicon"] != 'no' && $CURUSER["downloadpos"] != "no")
+		if ($user["dlicon"] != 'no' && $user["downloadpos"] != "no")
 		$act .= "<a href=\"download.php?id=".$id."\"><img class=\"download\" src=\"pic/trans.gif\" style='padding-bottom: 2px;' alt=\"download\" title=\"".$lang_functions['title_download_torrent']."\" /></a>" ;
-		if ($CURUSER["bmicon"] == 'yes'){
+		if ($user["bmicon"] == 'yes'){
 			$bookmark = " href=\"javascript: bookmark(".$id.",".$counter.");\"";
-			$act .= ($act ? "<br />" : "")."<a id=\"bookmark".$counter."\" ".$bookmark." >".get_torrent_bookmark_state($CURUSER['id'], $id)."</a>";
+			$act .= ($act ? "<br />" : "")."<a id=\"bookmark".$counter."\" ".$bookmark." >".get_torrent_bookmark_state($user['id'], $id)."</a>";
 		}
 
 	print("<td width=\"20\" class=\"embedded\" style=\"text-align: right;padding-right: 5px\" valign=\"middle\">".$act."</td>\n");
@@ -255,7 +255,7 @@ foreach ($rows as $row)
 		print("<td class=\"rowfollow nowrap\">".$lang_functions['text_none']."</td>\n");
 	}
 
-	if ($CURUSER['showcomnum'] != 'no')
+	if ($user['showcomnum'] != 'no')
 	{
 	print("<td class=\"rowfollow\">");
 	$nl = "";
@@ -266,19 +266,19 @@ foreach ($rows as $row)
 	if (!$row["comments"]) {
 		print("<a href=\"comment.php?action=add&amp;pid=".$id."&amp;type=torrent\" title=\"".$lang_functions['title_add_comments']."\">" . $row["comments"] .  "</a>");
 	} else {
-		if ($enabletooltip_tweak == 'yes' && $CURUSER['showlastcom'] != 'no')
+		if ($enabletooltip_tweak == 'yes' && $user['showlastcom'] != 'no')
 		{
-			if (!$lastcom = $Cache->get_value('torrent_'.$id.'_last_comment_content')){
+			if (!$lastcom = $cache->get_value('torrent_'.$id.'_last_comment_content')){
 				$lastcom = \Nexus\Database\NexusDB::table('comments')->where('torrent', $id)->orderBy('id', 'desc')->first();
 				$lastcom = $lastcom ? array_merge((array) $lastcom, array_values((array) $lastcom)) : null;
-				$Cache->cache_value('torrent_'.$id.'_last_comment_content', $lastcom, 1855);
+				$cache->cache_value('torrent_'.$id.'_last_comment_content', $lastcom, 1855);
 			}
 			$timestamp = strtotime($lastcom["added"]);
-			$hasnewcom = ($lastcom['user'] != $CURUSER['id'] && $timestamp >= $last_browse);
+			$hasnewcom = ($lastcom['user'] != $user['id'] && $timestamp >= $last_browse);
 			$onmouseover = '';
 			if ($lastcom)
 			{
-				if ($CURUSER['timetype'] != 'timealive')
+				if ($user['timetype'] != 'timealive')
 					$lastcomtime = $lang_functions['text_at_time'].$lastcom['added'];
 				else
 					$lastcomtime = $lang_functions['text_blank'].gettime($lastcom["added"],true,false,true);
@@ -326,7 +326,7 @@ foreach ($rows as $row)
 
 		if (
 		    $row["anonymous"] == "yes"
-            && (user_can('viewanonymous') || (isset($row['owner']) && $row['owner'] == $CURUSER['id']))
+            && (user_can('viewanonymous') || (isset($row['owner']) && $row['owner'] == $user['id']))
         ) {
 			print("<td class=\"rowfollow\" align=\"center\"><i>".$lang_functions['text_anonymous']."</i><br />".(isset($row["owner"]) ? "(" . get_username($row["owner"]) .")" : "<i>".$lang_functions['text_orphaned']."</i>") . "</td>\n");
 		}
@@ -345,17 +345,17 @@ foreach ($rows as $row)
         if (user_can('torrent-delete')) {
             $actions[] = "<a href=\"".htmlspecialchars("fastdelete.php?id=".$row['id'])."\"><img class=\"staff_delete\" src=\"pic/trans.gif\" alt=\"D\" title=\"".$lang_functions['text_delete']."\" /></a>";
         }
-        $actions[] = "<a href=\"edit.php?returnto=" . rawurlencode($_SERVER["REQUEST_URI"]) . "&amp;id=" . $row["id"] . "\"><img class=\"staff_edit\" src=\"pic/trans.gif\" alt=\"E\" title=\"".$lang_functions['text_edit']."\" /></a>";
+        $actions[] = "<a href=\"edit.php?returnto=" . rawurlencode(SupportContext::getServerValue('REQUEST_URI', '')) . "&amp;id=" . $row["id"] . "\"><img class=\"staff_edit\" src=\"pic/trans.gif\" alt=\"E\" title=\"".$lang_functions['text_edit']."\" /></a>";
 		echo sprintf("<td class=\"rowfollow\">%s</td>", implode("<br />", $actions));
 	}
 	print("</tr>\n");
 	$counter++;
 }
 print("</table>");
-if ($CURUSER['appendpromotion'] == 'highlight')
+if ($user['appendpromotion'] == 'highlight')
 	print("<p align=\"center\"> ".$lang_functions['text_promoted_torrents_note']."</p>\n");
 
-if($enabletooltip_tweak == 'yes' && (!isset($CURUSER) || $CURUSER['showlastcom'] == 'yes'))
+if($enabletooltip_tweak == 'yes' && (empty($user) || ($user['showlastcom'] ?? '') == 'yes'))
 create_tooltip_container($lastcom_tooltip, 400);
 create_tooltip_container($torrent_tooltip, 500);
 

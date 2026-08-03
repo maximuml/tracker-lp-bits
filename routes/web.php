@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\TorrentDownloadController;
+use App\Http\Controllers\TorrentEditController;
 use App\Http\Controllers\TorrentUploadController;
 use Illuminate\Support\Facades\Route;
 
@@ -24,6 +25,10 @@ Route::get("/error", [\App\Http\Controllers\ToolController::class, "error"]);
 Route::post('/takeupload', [TorrentUploadController::class, 'legacyStore'])
     ->middleware('auth.nexus:nexus-web')
     ->name('torrents.legacy-store');
+
+Route::post('/takeedit', [TorrentEditController::class, 'legacyUpdate'])
+    ->middleware('auth.nexus:nexus-web')
+    ->name('torrents.legacy-update');
 
 Route::get('/download', [TorrentDownloadController::class, 'download'])
     ->name('torrents.download');

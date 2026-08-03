@@ -34,7 +34,7 @@ class TorrentPolicy extends BasePolicy
 
     public function update(User $user, Torrent $torrent): bool
     {
-        return false;
+        return $torrent->owner == $user->id || \user_can('torrentmanage', false, $user->id);
     }
 
     public function delete(User $user, Torrent $torrent): bool

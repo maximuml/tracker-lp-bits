@@ -34,7 +34,7 @@ if (!isRunningInConsole() && !in_array($script, ['announce', 'scrape', 'torrentr
     checkGuestVisit();
 }
 
-define('TIMENOW', time());
+defined('TIMENOW') || define('TIMENOW', time());
 
 define ("UC_PEASANT", 0);
 define ("UC_USER", 1);

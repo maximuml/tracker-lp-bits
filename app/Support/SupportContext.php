@@ -161,19 +161,19 @@ final class SupportContext
     /** @return  array<string, mixed> */
     public static function getSiteConfig(): array
     {
-        if (empty(self::$siteConfig) && ! empty($GLOBALS['SITENAME'])) {
-            return [
-                'SITENAME' => (string) ($GLOBALS['SITENAME'] ?? ''),
-                'SITEEMAIL' => (string) ($GLOBALS['SITEEMAIL'] ?? ''),
-                'smtptype' => (string) ($GLOBALS['smtptype'] ?? ''),
-                'smtp' => (string) ($GLOBALS['smtp'] ?? ''),
-                'smtp_host' => (string) ($GLOBALS['smtp_host'] ?? ''),
-                'smtp_port' => (string) ($GLOBALS['smtp_port'] ?? ''),
-                'smtp_from' => (string) ($GLOBALS['smtp_from'] ?? ''),
-            ];
+        if (! empty(self::$siteConfig)) {
+            return self::$siteConfig;
         }
 
-        return self::$siteConfig;
+        return [
+            'SITENAME' => (string) ($GLOBALS['SITENAME'] ?? ''),
+            'SITEEMAIL' => (string) ($GLOBALS['SITEEMAIL'] ?? ''),
+            'smtptype' => (string) ($GLOBALS['smtptype'] ?? ''),
+            'smtp' => (string) ($GLOBALS['smtp'] ?? ''),
+            'smtp_host' => (string) ($GLOBALS['smtp_host'] ?? ''),
+            'smtp_port' => (string) ($GLOBALS['smtp_port'] ?? ''),
+            'smtp_from' => (string) ($GLOBALS['smtp_from'] ?? ''),
+        ];
     }
 
     public static function setGlobal(string $key, mixed $value): void
@@ -194,7 +194,15 @@ final class SupportContext
 
     public static function getServerValue(string $key, mixed $default = null): mixed
     {
-        return self::$server[$key] ?? $_SERVER[$key] ?? $default;
+        if (array_key_exists($key, self::$server)) {
+            return self::$server[$key];
+        }
+
+        if (array_key_exists($key, $_SERVER)) {
+            return $_SERVER[$key];
+        }
+
+        return $default;
     }
 
     /** @param  array<string, mixed>  $cookie */

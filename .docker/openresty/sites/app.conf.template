@@ -35,6 +35,7 @@ server {
         include fastcgi_params;
         fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
         fastcgi_param REQUEST_ID $request_id;
+        fastcgi_param HTTP_X_FORWARDED_FOR $proxy_add_x_forwarded_for;
     }
 
     location = /announce {
@@ -48,6 +49,7 @@ server {
         fastcgi_param SCRIPT_FILENAME $document_root/announce.php;
         fastcgi_param SCRIPT_NAME /announce.php;
         fastcgi_param REQUEST_ID $request_id;
+        fastcgi_param HTTP_X_FORWARDED_FOR $proxy_add_x_forwarded_for;
     }
 
     # Static attachments outside the public root (matches attachment.savedirectory = ./attachments)
@@ -61,6 +63,7 @@ server {
         include fastcgi_params;
         fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
         fastcgi_param REQUEST_ID $request_id;
+        fastcgi_param HTTP_X_FORWARDED_FOR $proxy_add_x_forwarded_for;
     }
 
 }

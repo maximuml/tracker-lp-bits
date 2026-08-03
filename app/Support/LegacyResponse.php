@@ -82,7 +82,7 @@ final class LegacyResponse
      */
     public static function permissionDenied(?int $allowMinimumClass = null): void
     {
-        $lang_functions = $GLOBALS['lang_functions'] ?? [];
+        $lang_functions = SupportContext::getLangFunctions();
 
         if ($allowMinimumClass === null) {
             self::abort(
@@ -127,8 +127,8 @@ final class LegacyResponse
             return true;
         }
 
-        $CURUSER = $GLOBALS['CURUSER'] ?? [];
-        $lang_functions = $GLOBALS['lang_functions'] ?? [];
+        $CURUSER = SupportContext::getUser() ?? [];
+        $lang_functions = SupportContext::getLangFunctions();
 
         $msg = 'Invalid ID Attempt: Username: '.($CURUSER['username'] ?? '')
             .' - UserID: '.($CURUSER['id'] ?? '')
@@ -171,8 +171,8 @@ final class LegacyResponse
      */
     public static function canUpload(string $where = 'torrents'): bool
     {
-        $CURUSER = $GLOBALS['CURUSER'] ?? [];
-        $lang_functions = $GLOBALS['lang_functions'] ?? [];
+        $CURUSER = SupportContext::getUser() ?? [];
+        $lang_functions = SupportContext::getLangFunctions();
 
         if (($CURUSER['uploadpos'] ?? '') != 'yes') {
             return false;
@@ -187,7 +187,7 @@ final class LegacyResponse
         if ($uploadDenyApprovalDenyCount > 0 && $approvalDenyCount >= $uploadDenyApprovalDenyCount) {
             self::abort(
                 (string) ($lang_functions['std_sorry'] ?? ''),
-                \sprintf((string) ($lang_functions['approval_deny_reach_upper_limit'] ?? ''), $uploadDenyApprovalDenyCount),
+                \sprintf((string) ($lang_functions['approval_deny_reach_upper_limit'] ?? '%s'), $uploadDenyApprovalDenyCount),
                 false,
             );
         }
@@ -206,7 +206,7 @@ final class LegacyResponse
         }
 
         if ($where === 'music') {
-            $enablespecial = $GLOBALS['enablespecial'] ?? '';
+            $enablespecial = SupportContext::getGlobal('enablespecial', '');
             if ($enablespecial === 'yes' && \user_can('uploadspecial')) {
                 return true;
             }

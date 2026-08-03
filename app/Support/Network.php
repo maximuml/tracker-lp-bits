@@ -193,7 +193,10 @@ final class Network
 
     private static function serverVar(string $key): string
     {
-        $value = $_SERVER[$key] ?? getenv($key);
+        $value = SupportContext::getServerValue($key, '');
+        if ($value === '') {
+            $value = getenv($key);
+        }
 
         return is_string($value) ? $value : '';
     }

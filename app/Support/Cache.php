@@ -114,10 +114,10 @@ final class Cache
      */
     public static function pageCheck(string $file = 'cachefile', bool $endpage = true, int $cachetime = 600): bool
     {
-        $rootpath = $GLOBALS['rootpath'] ?? '';
-        $cacheDir = $GLOBALS['cache'] ?? '';
-        $langDir = $GLOBALS['CURLANGDIR'] ?? '';
-        $lang = $GLOBALS['lang_functions'] ?? [];
+        $rootpath = SupportContext::getGlobal('rootpath', defined('ROOT_PATH') ? constant('ROOT_PATH') : '');
+        $cacheDir = SupportContext::getGlobal('cache', '');
+        $langDir = SupportContext::getGlobal('CURLANGDIR', '');
+        $lang = SupportContext::getLangFunctions();
 
         $cachefile = self::path($rootpath, $cacheDir, $langDir, $file);
         if (self::isFresh($cachefile, $cachetime)) {
@@ -143,9 +143,9 @@ final class Cache
      */
     public static function pageSave(string $file = 'cachefile'): void
     {
-        $rootpath = $GLOBALS['rootpath'] ?? '';
-        $cacheDir = $GLOBALS['cache'] ?? '';
-        $langDir = $GLOBALS['CURLANGDIR'] ?? '';
+        $rootpath = SupportContext::getGlobal('rootpath', defined('ROOT_PATH') ? constant('ROOT_PATH') : '');
+        $cacheDir = SupportContext::getGlobal('cache', '');
+        $langDir = SupportContext::getGlobal('CURLANGDIR', '');
 
         $cachefile = self::path($rootpath, $cacheDir, $langDir, $file);
         $contents = ob_get_contents();

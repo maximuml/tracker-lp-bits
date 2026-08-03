@@ -242,8 +242,8 @@ final class Time
             }
         }
 
-        $lang_functions = $GLOBALS['lang_functions'] ?? [];
-        $CURUSER = $GLOBALS['CURUSER'] ?? null;
+        $lang_functions = SupportContext::getLangFunctions();
+        $CURUSER = SupportContext::getUser();
         $TIMENOW = defined('TIMENOW') ? (int) TIMENOW : time();
 
         if (isset($CURUSER) && ($CURUSER['timetype'] ?? '') != 'timealive' && ! $forceago) {

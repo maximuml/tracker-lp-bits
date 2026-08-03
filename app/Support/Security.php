@@ -25,8 +25,9 @@ final class Security
             return $src;
         }
 
-        if (isset($_SERVER['DOCUMENT_ROOT'])) {
-            $guessScriptFilename = sprintf('%s/%s', $_SERVER['DOCUMENT_ROOT'], trim($path, '/'));
+        $documentRoot = SupportContext::getServerValue('DOCUMENT_ROOT');
+        if ($documentRoot !== null && $documentRoot !== '') {
+            $guessScriptFilename = sprintf('%s/%s', $documentRoot, trim($path, '/'));
             if (!file_exists($guessScriptFilename)) {
                 return $src;
             }

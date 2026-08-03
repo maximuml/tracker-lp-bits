@@ -166,7 +166,7 @@ final class Frame
         string $subject,
         int $maxSubjectLength,
     ): string {
-        $lang = $GLOBALS['lang_functions'] ?? [];
+        $lang = SupportContext::getLangFunctions();
 
         return self::composeOpen($title, $type, $hasSubject, $subject, $maxSubjectLength, $lang)
             . \App\Support\Form::bbcodeEditor('compose', 'body', $body, false, 130, false);
@@ -179,7 +179,7 @@ final class Frame
      */
     public static function composeEnd(): string
     {
-        return self::composeClose($GLOBALS['lang_functions'] ?? []);
+        return self::composeClose(SupportContext::getLangFunctions());
     }
 
     public static function sqlError(string $error, string $file, string $line): string

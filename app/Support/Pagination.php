@@ -167,14 +167,15 @@ final class Pagination
     public static function pager(int $rpp, int $count, string $href, array $opts = [], string $pagename = 'page'): array
     {
         $pages = (int) ceil($count / $rpp);
-        $rawPage = $_GET[$pagename] ?? null;
+        $rawPage = SupportContext::getQuery($pagename);
         if (! is_scalar($rawPage)) {
             $rawPage = null;
         }
         $page = self::resolvePage($rawPage, $count, $rpp, ! empty($opts['lastpagedefault']));
 
-        $isPresto = isset($_SERVER['HTTP_USER_AGENT']) && str_contains((string) $_SERVER['HTTP_USER_AGENT'], 'Presto');
-        $lang = $GLOBALS['lang_functions'] ?? [];
+        $userAgent = SupportContext::getServerValue('HTTP_USER_AGENT');
+        $isPresto = is_string($userAgent) && str_contains($userAgent, 'Presto');
+        $lang = SupportContext::getLangFunctions();
         $labels = [
             'prev' => (string) ($lang['text_prev'] ?? ''),
             'next' => (string) ($lang['text_next'] ?? ''),
@@ -185,7 +186,7 @@ final class Pagination
         ];
 
         $result = self::render($rpp, $count, $href, $page, $pages, $labels, $pagename, $isPresto);
-        $GLOBALS['add_key_shortcut'] = Html::keyShortcutScript($page, $pages - 1);
+        SupportContext::setGlobal('add_key_shortcut', Html::keyShortcutScript($page, $pages - 1));
 
         return $result;
     }

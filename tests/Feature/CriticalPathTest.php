@@ -241,6 +241,13 @@ class CriticalPathTest extends TestCase
 
         $torrent = Torrent::query()->find($torrentId);
         $this->assertNotNull($torrent, 'Torrent row was not created');
+
+        // 4a. Verify the migrated details page renders
+        $torrentDetails = $this->request('GET', "/details.php?id={$torrentId}", [], true);
+        $this->assertSame(200, $torrentDetails['status'], "details.php failed: {$torrentDetails['status']}\n{$torrentDetails['body']}");
+        $this->assertStringContainsString('Details for torrent', $torrentDetails['body'], 'details.php is missing page title');
+        $this->assertStringContainsString('CriticalPathTest', $torrentDetails['body'], 'details.php does not show torrent name');
+
         $infoHash = $torrent->info_hash;
         $this->assertSame(20, strlen($infoHash), 'Torrent info_hash is not 20 bytes');
 

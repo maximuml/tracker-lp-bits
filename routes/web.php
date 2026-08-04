@@ -7,6 +7,7 @@ use App\Http\Controllers\TorrentDetailsController;
 use App\Http\Controllers\WebCommentController;
 use App\Http\Controllers\TorrentDownloadController;
 use App\Http\Controllers\TorrentEditController;
+use App\Http\Controllers\ForumController;
 use App\Http\Controllers\TorrentListingController;
 use App\Http\Controllers\TorrentUploadController;
 use App\Http\Controllers\UserDetailController;
@@ -66,6 +67,10 @@ Route::group(['middleware' => ['auth.nexus:nexus-web']], function () {
     Route::get('/comment/{commentId}/delete', [WebCommentController::class, 'destroy']);
     Route::get('/comment/{commentId}/original', [WebCommentController::class, 'original']);
 });
+
+Route::match(['get', 'post'], '/forums', [ForumController::class, 'legacy'])
+    ->middleware('auth.nexus:nexus-web')
+    ->name('forums.legacy');
 
 Route::get('/userdetails', [UserDetailController::class, 'show'])
     ->middleware('auth.nexus:nexus-web')

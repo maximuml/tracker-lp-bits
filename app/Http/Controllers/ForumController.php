@@ -2,99 +2,25 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Resources\ForumResource;
-use App\Models\Forum;
-use App\Models\OverForum;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
 
 class ForumController extends Controller
 {
     /**
-     * Display a listing of the resource.
-     * @param  \Illuminate\Http\Request  $request
-     * @return  array<string, mixed>
+     * Serve the legacy forums.php page from a Laravel view.
+     *
+     * The real markup lives in resources/views/forum/_forums_legacy.php
+     * and is included by forum/index.blade.php so the original HTML/PHP
+     * interleaving is preserved as closely as possible.
      */
-    public function index(Request $request)
+    public function legacy(Request $request): View|RedirectResponse
     {
-        $forId = $request->forid;
-        $query = Forum::query()->orderBy("sort", "asc")->with("moderators");
-        if ($forId) {
-            $query->where("forid", $forId);
+        if (! defined('IN_NEXUS') || ! isset($GLOBALS['CURUSER'])) {
+            return redirect('/forums.php?' . $request->getQueryString());
         }
-        $list = $query->get();
-        $resource = ForumResource::collection($list);
-        return $this->success($resource);
-    }
 
-    /**
-     * Show the form for creating a new resource.
-     * @return  \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    
-        return new \Illuminate\Http\Response('');
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     * @param  \Illuminate\Http\Request  $request
-     * @return  \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        //
-    
-        return new \Illuminate\Http\Response('');
-    }
-
-    /**
-     * Display the specified resource.
-     * @param  \App\Models\OverForum  $overForum
-     * @return  \Illuminate\Http\Response
-     */
-    public function show(OverForum $overForum)
-    {
-        //
-    
-        return new \Illuminate\Http\Response('');
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     * @param  \App\Models\OverForum  $overForum
-     * @return  \Illuminate\Http\Response
-     */
-    public function edit(OverForum $overForum)
-    {
-        //
-    
-        return new \Illuminate\Http\Response('');
-    }
-
-    /**
-     * Update the specified resource in storage.
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\OverForum  $overForum
-     * @return  \Illuminate\Http\Response
-     */
-    public function update(Request $request, OverForum $overForum)
-    {
-        //
-    
-        return new \Illuminate\Http\Response('');
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     * @param  \App\Models\OverForum  $overForum
-     * @return  \Illuminate\Http\Response
-     */
-    public function destroy(OverForum $overForum)
-    {
-        //
-    
-        return new \Illuminate\Http\Response('');
+        return view('forum.index');
     }
 }

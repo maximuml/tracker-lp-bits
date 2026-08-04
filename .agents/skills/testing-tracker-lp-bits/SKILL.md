@@ -132,3 +132,20 @@ Then clear the Redis settings cache (`nexus_settings_in_nexus`, `nexus_settings_
 - When `main.smtptype='none'`, `Mail::sentLegacy` writes the email body to `/tmp/nexus-YYYY-MM-DD.log` in the `php` container; read reset/confirm URLs and new passwords from that log.
 - Watch for `Mail::sentLegacy`/`SupportContext` globals-drain regression: if auth wrappers do not load `config/allconfig.php`, `$GLOBALS['smtptype']` is empty and `Mail::sent` may call `stderr()`/`Style::cssRow` and throw a `TypeError`.
 - Use `AuthCookie::verifyToken($rawCookieValue)` (with `urldecode` if reading from curl jar) to inspect the APP_KEY-encrypted `c_secure_pass` cookie.
+
+## Testing PR #188 comment migration (`public/comment.php` wrapper)
+
+- The legacy wrapper dispatches to Laravel `WebCommentController` routes under the `auth.nexus:nexus-web` middleware.
+- `GET /comment.php?action=add&pid=<id>&type=torrent` should render `comments.create` using `Frame::composeBegin/composeEnd` (BBCode editor, `textarea name="body"`, submit `id="qr"`).
+- `POST /comment.php?action=add&type=torrent` (with `pid` and `body`) should redirect to `details.php?id=<pid>#<newId>`.
+- `GET /comment.php?action=add&pid=<id>&type=torrent&sub=quote&cid=<id>` should prefill `[quote=<username>]<text>[/quote]`.
+- `GET/POST /comment.php?action=edit&cid=<id>&type=<type>` should load an edit form and redirect to `details.php?id=<pid>`.
+- `GET /comment.php?action=delete&cid=<id>&type=<type>` should show confirmation; the `sure=1` link removes the comment.
+- `GET /comment.php?action=vieworiginal&cid=<id>&type=<type>` (staff/commanage) should display `comments.ori_text`.
+- `type=offer` redirects to `offers.php?id=<id>&off_details=1#<newId>`.
+- Anti-flood rejects a second comment by a normal user within 10s with HTTP 403 and `Comment Flooding Not Allowed`.
+- Common gotchas found during testing:
+  - `CommentRepository::getParent()` casts Eloquent models with `(array)`, producing private-property arrays instead of `['name' => ..., 'owner' => ...]`. Use `$model->toArray()` or `json_decode(json_encode($model), true)`.
+  - `public/comment.php` must put the query string into the `$uri` passed to `Request::create()`; `REQUEST_URI` in the `$server` array is overwritten by Symfony and the query is lost for POST requests. This causes `StoreCommentRequest` to fail `type` validation.
+  - `public/comment.php` must not strip `cid` from the query when `action=add` because `sub=quote` needs `cid` as a query parameter.
+  - The rendered `form action` in `resources/views/comments/_form.blade.php` is not HTML-escaped to `&amp;`; browsers tolerate raw `&`, but the legacy `details.php` quick-comment form uses `htmlspecialchars`.

@@ -3,6 +3,7 @@
 use App\Http\Controllers\Auth\RegistrationController;
 use App\Http\Controllers\Auth\RecoveryController;
 use App\Http\Controllers\Auth\WebController as AuthWebController;
+use App\Http\Controllers\WebCommentController;
 use App\Http\Controllers\TorrentDownloadController;
 use App\Http\Controllers\TorrentEditController;
 use App\Http\Controllers\ForumController;
@@ -52,10 +53,18 @@ Route::post('/takeedit', [TorrentEditController::class, 'legacyUpdate'])
 Route::get('/download', [TorrentDownloadController::class, 'download'])
     ->name('torrents.download');
 
+Route::group(['middleware' => ['auth.nexus:nexus-web']], function () {
+    Route::get('/comment/add', [WebCommentController::class, 'create']);
+    Route::post('/comment', [WebCommentController::class, 'store']);
+    Route::get('/comment/{commentId}/edit', [WebCommentController::class, 'edit']);
+    Route::post('/comment/{commentId}/edit', [WebCommentController::class, 'update']);
+    Route::get('/comment/{commentId}/delete', [WebCommentController::class, 'destroy']);
+    Route::get('/comment/{commentId}/original', [WebCommentController::class, 'original']);
+});
+
 Route::match(['get', 'post'], '/forums', [ForumController::class, 'legacy'])
     ->middleware('auth.nexus:nexus-web')
     ->name('forums.legacy');
-
 Route::group(['prefix' => 'web', 'middleware' => ['auth.nexus:nexus-web']], function () {
     Route::get('torrent-approval-page', [\App\Http\Controllers\TorrentController::class, 'approvalPage']);
     Route::get('torrent-approval-logs', [\App\Http\Controllers\TorrentController::class, 'approvalLogs']);

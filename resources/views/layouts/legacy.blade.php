@@ -1,8 +1,10 @@
 @php
-stdhead($__env->yieldContent('title'));
+stdhead($title ?? $__env->yieldContent('title'));
 begin_main_frame();
 @endphp
+
 @yield('content')
+
 @php
 end_main_frame();
 stdfoot();

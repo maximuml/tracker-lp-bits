@@ -16,6 +16,20 @@ server {
         access_log off;
     }
 
+    # Laravel-routed legacy listing pages must take precedence over the
+    # public/torrents/ upload directory, which otherwise matches $uri/.
+    location = /torrents {
+        rewrite ^ /nexus.php last;
+    }
+
+    location = /torrents/ {
+        return 301 /torrents$is_args$args;
+    }
+
+    location = /special {
+        rewrite ^ /nexus.php last;
+    }
+
     location / {
         try_files $uri $uri/ /nexus.php?$query_string;
     }

@@ -8,7 +8,9 @@ use App\Http\Controllers\WebCommentController;
 use App\Http\Controllers\TorrentDownloadController;
 use App\Http\Controllers\TorrentEditController;
 use App\Http\Controllers\ForumController;
+use App\Http\Controllers\TorrentListingController;
 use App\Http\Controllers\TorrentUploadController;
+use App\Http\Controllers\UserDetailController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -55,6 +57,8 @@ Route::get('/download', [TorrentDownloadController::class, 'download'])
     ->name('torrents.download');
 
 Route::group(['middleware' => ['auth.nexus:nexus-web']], function () {
+    Route::get('/torrents', [TorrentListingController::class, 'index'])->name('torrents.index');
+    Route::get('/special', [TorrentListingController::class, 'index'])->name('torrents.special');
     Route::get('/details/{id}', [TorrentDetailsController::class, 'show'])->name('torrent.details');
     Route::get('/comment/add', [WebCommentController::class, 'create']);
     Route::post('/comment', [WebCommentController::class, 'store']);
@@ -67,6 +71,10 @@ Route::group(['middleware' => ['auth.nexus:nexus-web']], function () {
 Route::match(['get', 'post'], '/forums', [ForumController::class, 'legacy'])
     ->middleware('auth.nexus:nexus-web')
     ->name('forums.legacy');
+
+Route::get('/userdetails', [UserDetailController::class, 'show'])
+    ->middleware('auth.nexus:nexus-web')
+    ->name('user.details');
 
 Route::group(['prefix' => 'web', 'middleware' => ['auth.nexus:nexus-web']], function () {
     Route::get('torrent-approval-page', [\App\Http\Controllers\TorrentController::class, 'approvalPage']);

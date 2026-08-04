@@ -27,11 +27,11 @@ $showComments = ($CURUSER['showcomment'] ?? '') !== 'no';
     <tr>
         <td class="text" align="center">
             <b>{{ $lang_details['text_quick_comment'] }}</b><br /><br />
-            <form id="compose" name="comment" method="post" action="{{ e('comment.php?action=add&type=torrent') }}" onsubmit="return postvalid(this);">
+            <form id="compose" name="comment" method="post" action="{{ 'comment.php?action=add&type=torrent' }}" onsubmit="return postvalid(this);">
                 <input type="hidden" name="pid" value="{{ $id }}" />
                 {!! \App\Support\Html::quickReply('comment', 'body', $lang_details['submit_add_comment']) !!}
             </form>
         </td>
     </tr>
 </table>
-<p align="center"><a class="index" href="{{ e('comment.php?action=add&pid=' . $id . '&type=torrent') }}">{{ $lang_details['text_add_a_comment'] }}</a></p>
+<p align="center"><a class="index" href="{{ 'comment.php?action=add&pid=' . $id . '&type=torrent' }}">{{ $lang_details['text_add_a_comment'] }}</a></p>

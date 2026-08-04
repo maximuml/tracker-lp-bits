@@ -36,7 +36,6 @@ install.lock
 update.lock
 .env.bak
 attachments
-bitbucket
 /public/attachments
 /public/bitbucket
 /torrents/*.torrent

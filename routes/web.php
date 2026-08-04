@@ -3,6 +3,7 @@
 use App\Http\Controllers\Auth\RegistrationController;
 use App\Http\Controllers\Auth\RecoveryController;
 use App\Http\Controllers\Auth\WebController as AuthWebController;
+use App\Http\Controllers\BitbucketUploadController;
 use App\Http\Controllers\TorrentDetailsController;
 use App\Http\Controllers\WebCommentController;
 use App\Http\Controllers\TorrentDownloadController;
@@ -57,6 +58,8 @@ Route::get('/download', [TorrentDownloadController::class, 'download'])
     ->name('torrents.download');
 
 Route::group(['middleware' => ['auth.nexus:nexus-web']], function () {
+    Route::get('/bitbucket-upload', [BitbucketUploadController::class, 'create'])->name('bitbucket.upload');
+    Route::post('/bitbucket-upload', [BitbucketUploadController::class, 'store']);
     Route::get('/torrents', [TorrentListingController::class, 'index'])->name('torrents.index');
     Route::get('/special', [TorrentListingController::class, 'index'])->name('torrents.special');
     Route::get('/details/{id}', [TorrentDetailsController::class, 'show'])->name('torrent.details');

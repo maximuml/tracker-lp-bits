@@ -70,9 +70,6 @@ class TorrentDownloadController extends Controller
                 throw new NexusException('download.account_parked');
             }
             if (!$request->letdown) {
-                if ($user->showdlnotice == 1) {
-                    return redirect('/downloadnotice.php?torrentid=' . $id . '&type=firsttime');
-                }
                 if ($user->showclienterror == 'yes') {
                     return redirect('/downloadnotice.php?torrentid=' . $id . '&type=client');
                 }

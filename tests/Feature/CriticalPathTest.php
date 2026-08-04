@@ -74,6 +74,21 @@ class CriticalPathTest extends TestCase
     }
 
     /**
+     * Fetch the Laravel CSRF token from the legacy login page.
+     */
+    private function fetchLoginToken(): string
+    {
+        $response = $this->request('GET', '/login.php', [], true);
+        $this->assertSame(200, $response['status'], 'Could not fetch login page');
+
+        if (preg_match('/name="_token"[^>]*value="([^"]+)"/', $response['body'], $matches)) {
+            return $matches[1];
+        }
+
+        $this->fail('CSRF token not found on login page');
+    }
+
+    /**
      * Execute a cURL request against the legacy web server.
      *
      * @param  array<int|string|CURLFile, mixed>  $data
@@ -171,7 +186,9 @@ class CriticalPathTest extends TestCase
         // 3. Logout and log back in to verify the standalone login flow
         $this->request('GET', '/logout.php', [], true);
 
+        $loginToken = $this->fetchLoginToken();
         $login = $this->request('POST', '/takelogin.php', [
+            '_token' => $loginToken,
             'username' => $username,
             'password' => $password,
         ], true);

@@ -167,7 +167,7 @@ final class AuthCookie
      */
     public static function clear(): void
     {
-        setcookie(self::COOKIE_NAME, '', 0x7fffffff, '/', '', isHttps(), true);
+        setcookie(self::COOKIE_NAME, '', time() - 3600, '/', '', isHttps(), true);
     }
 
     /**

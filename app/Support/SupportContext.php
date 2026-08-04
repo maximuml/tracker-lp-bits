@@ -165,7 +165,7 @@ final class SupportContext
             return self::$siteConfig;
         }
 
-        return [
+        $globals = [
             'SITENAME' => (string) ($GLOBALS['SITENAME'] ?? ''),
             'SITEEMAIL' => (string) ($GLOBALS['SITEEMAIL'] ?? ''),
             'smtptype' => (string) ($GLOBALS['smtptype'] ?? ''),
@@ -174,6 +174,27 @@ final class SupportContext
             'smtp_port' => (string) ($GLOBALS['smtp_port'] ?? ''),
             'smtp_from' => (string) ($GLOBALS['smtp_from'] ?? ''),
         ];
+
+        $keys = [
+            'SITENAME' => 'basic.SITENAME',
+            'SITEEMAIL' => 'main.SITEEMAIL',
+            'smtptype' => 'main.smtptype',
+            'smtp' => 'main.smtp',
+            'smtp_host' => 'main.smtp_host',
+            'smtp_port' => 'main.smtp_port',
+            'smtp_from' => 'main.smtp_from',
+        ];
+
+        if (class_exists(\App\Models\Setting::class)) {
+            foreach ($keys as $name => $settingName) {
+                $value = \App\Models\Setting::get($settingName);
+                if (! is_null($value)) {
+                    $globals[$name] = (string) $value;
+                }
+            }
+        }
+
+        return $globals;
     }
 
     public static function setGlobal(string $key, mixed $value): void

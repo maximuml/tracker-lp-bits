@@ -41,8 +41,11 @@ class CriticalPathTest extends TestCase
         // without browser interaction. Allow the test user to upload.
         Settings::saveBatch('security', ['iv' => '', 'maxip' => '100', 'use_challenge_response_authentication' => 'no']);
         Settings::saveBatch('basic', ['BASEURL' => 'openresty']);
-        Settings::saveBatch('authority', ['upload' => '1']);
-        Settings::saveBatch('main', ['maxusers' => '100000']);
+        // Allow the seeded normal user to upload and view special torrents.
+        // Seeded categories all share mode 4 with main.specialcat, so every
+        // torrent is treated as special unless this authority is lowered.
+        Settings::saveBatch('authority', ['upload' => '1', 'view_special_torrent' => '1']);
+        Settings::saveBatch('main', ['maxusers' => '100000', 'spsct' => 'yes']);
         Settings::saveBatch('smtp', ['smtptype' => 'none']);
 
         // The upload handler saves .torrent files to the configured directory.
@@ -324,5 +327,10 @@ class CriticalPathTest extends TestCase
         $search = $this->request('GET', '/torrents.php?search=Critical', [], true);
         $this->assertSame(200, $search['status'], "torrents.php search failed: {$search['status']}\n{$search['body']}");
         $this->assertStringContainsString('CriticalPathTest', $search['body'], 'torrents.php search is missing the uploaded torrent name');
+
+        // 10. Direct Laravel /torrents route must work even when public/torrents/ exists
+        $laravelListing = $this->request('GET', '/torrents', [], true);
+        $this->assertSame(200, $laravelListing['status'], "Direct /torrents route failed: {$laravelListing['status']}\n{$laravelListing['body']}");
+        $this->assertStringContainsString('CriticalPathTest', $laravelListing['body'], 'Direct /torrents route is missing the uploaded torrent name');
     }
 }

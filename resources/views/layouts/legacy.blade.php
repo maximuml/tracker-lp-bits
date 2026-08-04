@@ -1,5 +1,5 @@
 @php
-stdhead($title ?? '');
+stdhead($title ?? $__env->yieldContent('title'));
 begin_main_frame();
 @endphp
 

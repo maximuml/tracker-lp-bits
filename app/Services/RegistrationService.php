@@ -68,7 +68,7 @@ class RegistrationService
             throw new AuthenticationException($this->msg($langFunctions, 'std_account_limit_reached', 'The current user account limit has been reached.'));
         }
 
-        $maxIp = (int) Setting::get('main.maxip', 0);
+        $maxIp = (int) Setting::get('security.maxip', 0);
         if ($maxIp > 0 && User::query()->where('ip', $ip)->count() > $maxIp) {
             throw new AuthenticationException(
                 $this->msg($langFunctions, 'std_the_ip', 'The IP ')
@@ -137,6 +137,7 @@ class RegistrationService
         $country = (int) ($data['country'] ?? 0);
         $gender = ucfirst(strtolower(trim((string) ($data['gender'] ?? ''))));
         $passwordAgain = trim((string) ($data['passagain'] ?? ''));
+        $isClientHashed = ($data['wantpassword_hashed'] ?? '0') === '1';
 
         $this->validateSignupFields(
             $username,
@@ -146,6 +147,7 @@ class RegistrationService
             $gender,
             $country,
             $isInvite && $isPreRegister && $invite !== null,
+            $isClientHashed,
             $langSignup,
             $langTakesignup,
         );
@@ -169,7 +171,6 @@ class RegistrationService
             );
         }
 
-        $isClientHashed = ($data['wantpassword_hashed'] ?? '0') === '1';
         $clientHashedPassword = $isClientHashed ? $passwordInput : hash('sha256', $passwordInput);
         $secret = Token::randomHex();
         $passhash = hash('sha256', $secret . $clientHashedPassword);
@@ -371,6 +372,7 @@ class RegistrationService
         string $gender,
         int $country,
         bool $preRegistered,
+        bool $isClientHashed,
         array $langSignup,
         array $langTakesignup,
     ): void {
@@ -390,7 +392,9 @@ class RegistrationService
             throw new AuthenticationException($this->msg($langTakesignup, 'std_wrong_email_address_format', 'That doesn\'t look like a valid email address.'));
         }
 
-        $this->validatePassword($password, $passAgain, $username, $langTakesignup);
+        if (! $isClientHashed) {
+            $this->validatePassword($password, $passAgain, $username, $langTakesignup);
+        }
 
         $allowedGenders = ['Male', 'Female'];
         if (! in_array($gender, $allowedGenders, true)) {
@@ -502,7 +506,7 @@ class RegistrationService
                 : 'ok.php?type=adminactivate';
         }
 
-        if ($verification === 'automatic' || Setting::get('main.smtptype', 'none') === 'none') {
+        if ($verification === 'automatic' || Setting::get('smtp.smtptype', 'none') === 'none') {
             $psecret = md5(Strings::padHash($secret));
 
             return $baseUrl . '/confirm.php?id=' . $userId . '&secret=' . $psecret;
@@ -526,6 +530,10 @@ class RegistrationService
         array $langMail,
     ): void {
         $baseUrl = Setting::getBaseUrl();
+        if (! str_contains($baseUrl, '://')) {
+            $baseUrl = Http::protocolPrefix(isHttps()) . $baseUrl;
+        }
+        $baseUrl = rtrim($baseUrl, '/');
         $psecret = md5(Strings::padHash($secret));
         $confirmUrl = $baseUrl . '/confirm.php?id=' . $userId . '&secret=' . $psecret;
         $resendUrl = $baseUrl . '/confirm_resend.php';

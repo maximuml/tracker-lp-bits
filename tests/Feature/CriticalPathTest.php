@@ -42,7 +42,8 @@ class CriticalPathTest extends TestCase
         Settings::saveBatch('security', ['iv' => '', 'maxip' => '100', 'use_challenge_response_authentication' => 'no']);
         Settings::saveBatch('basic', ['BASEURL' => 'openresty']);
         Settings::saveBatch('authority', ['upload' => '1']);
-        Settings::saveBatch('main', ['maxusers' => '100000', 'smtptype' => 'none']);
+        Settings::saveBatch('main', ['maxusers' => '100000']);
+        Settings::saveBatch('smtp', ['smtptype' => 'none']);
 
         // The upload handler saves .torrent files to the configured directory.
         // Make sure it is writable for the FPM worker (www-data).

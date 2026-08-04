@@ -178,11 +178,11 @@ final class SupportContext
         $keys = [
             'SITENAME' => 'basic.SITENAME',
             'SITEEMAIL' => 'main.SITEEMAIL',
-            'smtptype' => 'main.smtptype',
-            'smtp' => 'main.smtp',
-            'smtp_host' => 'main.smtp_host',
-            'smtp_port' => 'main.smtp_port',
-            'smtp_from' => 'main.smtp_from',
+            'smtptype' => 'smtp.smtptype',
+            'smtp' => 'smtp.smtp',
+            'smtp_host' => 'smtp.smtp_host',
+            'smtp_port' => 'smtp.smtp_port',
+            'smtp_from' => 'smtp.smtp_from',
         ];
 
         if (class_exists(\App\Models\Setting::class)) {

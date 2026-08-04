@@ -9,6 +9,7 @@ use App\Http\Controllers\TorrentDownloadController;
 use App\Http\Controllers\TorrentEditController;
 use App\Http\Controllers\TorrentListingController;
 use App\Http\Controllers\TorrentUploadController;
+use App\Http\Controllers\UserDetailController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -65,6 +66,11 @@ Route::group(['middleware' => ['auth.nexus:nexus-web']], function () {
     Route::get('/comment/{commentId}/delete', [WebCommentController::class, 'destroy']);
     Route::get('/comment/{commentId}/original', [WebCommentController::class, 'original']);
 });
+
+Route::get('/userdetails', [UserDetailController::class, 'show'])
+    ->middleware('auth.nexus:nexus-web')
+    ->name('user.details');
+
 Route::group(['prefix' => 'web', 'middleware' => ['auth.nexus:nexus-web']], function () {
     Route::get('torrent-approval-page', [\App\Http\Controllers\TorrentController::class, 'approvalPage']);
     Route::get('torrent-approval-logs', [\App\Http\Controllers\TorrentController::class, 'approvalLogs']);

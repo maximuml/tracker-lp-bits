@@ -24,6 +24,14 @@ class TorrentPolicy extends BasePolicy
 
     public function view(User $user, Torrent $torrent): bool
     {
+        if ($torrent->banned === 'yes' && !\user_can('seebanned', false, $user->id) && $torrent->owner != $user->id) {
+            return false;
+        }
+
+        if (!\can_access_torrent($torrent->toArray(), $user->id) && $torrent->owner != $user->id) {
+            return false;
+        }
+
         return true;
     }
 
@@ -50,6 +58,11 @@ class TorrentPolicy extends BasePolicy
     public function forceDelete(User $user, Torrent $torrent): bool
     {
         return false;
+    }
+
+    public function comment(User $user, Torrent $torrent): bool
+    {
+        return $user->parked !== 'yes';
     }
 
     public function download(User $user, Torrent $torrent): bool

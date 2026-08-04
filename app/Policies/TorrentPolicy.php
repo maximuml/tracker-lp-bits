@@ -28,7 +28,7 @@ class TorrentPolicy extends BasePolicy
             return false;
         }
 
-        if (!\can_access_torrent($torrent->toArray(), $user->id) && $torrent->owner != $user->id) {
+        if (!\can_access_torrent($torrent->id, $user->id) && $torrent->owner != $user->id) {
             return false;
         }
 

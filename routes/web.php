@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Auth\RegistrationController;
+use App\Http\Controllers\Auth\RecoveryController;
 use App\Http\Controllers\Auth\WebController as AuthWebController;
 use App\Http\Controllers\TorrentDownloadController;
 use App\Http\Controllers\TorrentEditController;
@@ -24,6 +26,17 @@ Route::get('/', function () {
 Route::get('/login', [AuthWebController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthWebController::class, 'login']);
 Route::get('/logout', [AuthWebController::class, 'logout'])->name('logout');
+
+Route::get('/signup', [RegistrationController::class, 'showSignup'])->name('signup');
+Route::post('/signup', [RegistrationController::class, 'signup']);
+Route::post('/takesignup', [RegistrationController::class, 'signup']);
+
+Route::get('/confirm', [RegistrationController::class, 'confirm'])->name('confirm');
+
+Route::get('/confirm_resend', [RegistrationController::class, 'showConfirmResend'])->name('confirm_resend');
+Route::post('/confirm_resend', [RegistrationController::class, 'resendConfirmation']);
+
+Route::match(['get', 'post'], '/recover', [RecoveryController::class, 'recover'])->name('recover');
 
 Route::get("/error", [\App\Http\Controllers\ToolController::class, "error"]);
 

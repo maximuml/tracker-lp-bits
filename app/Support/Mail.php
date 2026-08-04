@@ -104,7 +104,7 @@ final class Mail
         };
         $windows = strtoupper(substr(PHP_OS, 0, 3)) === 'WIN';
 
-        if ($smtpType === 'none') {
+        if ($smtpType === 'none' || $smtpType === '') {
             return false;
         }
 

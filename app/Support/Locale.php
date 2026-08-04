@@ -138,7 +138,7 @@ final class Locale
             $expires = time() + $expires;
         }
 
-        setcookie('c_lang_folder', $folder, $expires, '/', '', false, true);
+        setcookie('c_lang_folder', $folder, $expires, '/', '', isHttps(), true);
     }
 
     /**

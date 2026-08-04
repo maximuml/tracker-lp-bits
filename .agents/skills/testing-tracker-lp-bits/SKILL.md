@@ -121,3 +121,14 @@ Then clear the Redis settings cache (`nexus_settings_in_nexus`, `nexus_settings_
 - `storage/framework/views/` must be writable so `TorrentPolicy` denial views can be compiled.
 - Generate a fresh `.torrent` with `Rhilip\Bencode\Bencode` and `announce=http://openresty/announce.php`, upload via `/takeupload.php`, capture `info_hash` from the DB for announce/scrape probes.
 - For first authenticated downloads, add `letdown=1` (`download.php?id=<id>&letdown=1`) to bypass the `showdlnotice` redirect to `downloadnotice.php`.
+
+## Testing PR 19a+19b auth (signup/confirm/recover/login/logout)
+
+- Disable login-attempt bans or clear `loginattempts` before repeated login probes (`DELETE FROM loginattempts`).
+- Use `Rhilip\Bencode\Bencode` to generate a minimal `.torrent` and upload via `/takeupload.php` for regression.
+- Signup and confirm resend POSTs need `_token` and a shared cookie jar between the GET form and POST.
+- Confirm hash: `md5(str_pad($secret, 20))` (because `Strings::padHash` pads to 20 bytes).
+- Recover reset hash: `md5(str_pad($editsecret, 20) . $email . $passhash . str_pad($editsecret, 20))`.
+- When `main.smtptype='none'`, `Mail::sentLegacy` writes the email body to `/tmp/nexus-YYYY-MM-DD.log` in the `php` container; read reset/confirm URLs and new passwords from that log.
+- Watch for `Mail::sentLegacy`/`SupportContext` globals-drain regression: if auth wrappers do not load `config/allconfig.php`, `$GLOBALS['smtptype']` is empty and `Mail::sent` may call `stderr()`/`Style::cssRow` and throw a `TypeError`.
+- Use `AuthCookie::verifyToken($rawCookieValue)` (with `urldecode` if reading from curl jar) to inspect the APP_KEY-encrypted `c_secure_pass` cookie.

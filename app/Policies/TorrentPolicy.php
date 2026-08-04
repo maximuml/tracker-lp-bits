@@ -52,6 +52,11 @@ class TorrentPolicy extends BasePolicy
         return false;
     }
 
+    public function comment(User $user, Torrent $torrent): bool
+    {
+        return $user->parked !== 'yes';
+    }
+
     public function download(User $user, Torrent $torrent): bool
     {
         if ($user->downloadpos === 'no') {

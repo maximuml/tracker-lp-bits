@@ -1398,8 +1398,9 @@ if ($action == "viewunread")
 
 	$beforepostid = intval($_GET['beforepostid'] ?? 0);
 	$maxresults = 25;
+	$lastCatchup = (int) ($CURUSER['last_catchup'] ?? 0);
 	$unreadQuery = \App\Models\Topic::query()
-		->where('lastpost', '>', $CURUSER['last_catchup'] ?? '1970-01-01 00:00:00');
+		->where('lastpost', '>', $lastCatchup);
 	if ($beforepostid) {
 		$unreadQuery->where('lastpost', '<', $beforepostid);
 	}

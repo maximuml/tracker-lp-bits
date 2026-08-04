@@ -19,7 +19,7 @@ $action = $_GET['action'] ?? '';
 $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 $commentId = (int) ($_GET['cid'] ?? 0);
 
-$uri = match ($action) {
+$uriPath = match ($action) {
     'add' => $method === 'POST' ? '/comment' : '/comment/add',
     'edit' => '/comment/' . $commentId . '/edit',
     'delete' => '/comment/' . $commentId . '/delete',
@@ -28,14 +28,21 @@ $uri = match ($action) {
 };
 
 $query = $_GET;
-unset($query['action'], $query['cid']);
+unset($query['action']);
+if (in_array($action, ['edit', 'delete', 'vieworiginal'], true)) {
+    unset($query['cid']);
+}
 $post = $_POST;
 
 $server = $_SERVER;
-$server['REQUEST_URI'] = $uri . ($query ? '?' . http_build_query($query, '', '&', PHP_QUERY_RFC3986) : '');
 $server['SCRIPT_NAME'] = '/comment.php';
 $server['SCRIPT_FILENAME'] = $rootpath . 'public/comment.php';
 $server['REQUEST_METHOD'] = $method;
+
+$uri = $uriPath;
+if ($query) {
+    $uri .= '?' . http_build_query($query, '', '&', PHP_QUERY_RFC3986);
+}
 
 $request = \Illuminate\Http\Request::create(
     $uri,

@@ -1,5 +1,5 @@
 @php
-echo '<form id="compose" method="post" action="' . $formAction . '">' . "\n";
+echo '<form id="compose" method="post" action="' . e($formAction) . '">' . "\n";
 echo '<input type="hidden" name="_token" value="' . e(csrf_token()) . '" />' . "\n";
 if (! empty($parentId)) {
     echo '<input type="hidden" name="pid" value="' . $parentId . '" />' . "\n";

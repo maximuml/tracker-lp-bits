@@ -24,6 +24,14 @@ class TorrentPolicy extends BasePolicy
 
     public function view(User $user, Torrent $torrent): bool
     {
+        if ($torrent->banned === 'yes' && !\user_can('seebanned', false, $user->id) && $torrent->owner != $user->id) {
+            return false;
+        }
+
+        if (!\can_access_torrent($torrent->id, $user->id) && $torrent->owner != $user->id) {
+            return false;
+        }
+
         return true;
     }
 

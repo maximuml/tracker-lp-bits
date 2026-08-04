@@ -315,5 +315,14 @@ class CriticalPathTest extends TestCase
         $this->assertSame(200, $details['status'], "userdetails.php failed: {$details['status']}\n{$details['body']}");
         $this->assertStringContainsString('Share Ratio', $details['body'], 'userdetails.php is missing share ratio label');
         $this->assertStringContainsString('2.000', $details['body'], 'userdetails.php does not show expected ratio 2.000');
+
+        // 9. Verify torrent listing and search still work after migration
+        $listing = $this->request('GET', '/torrents.php', [], true);
+        $this->assertSame(200, $listing['status'], "torrents.php listing failed: {$listing['status']}\n{$listing['body']}");
+        $this->assertStringContainsString('CriticalPathTest', $listing['body'], 'torrents.php is missing the uploaded torrent name');
+
+        $search = $this->request('GET', '/torrents.php?search=Critical', [], true);
+        $this->assertSame(200, $search['status'], "torrents.php search failed: {$search['status']}\n{$search['body']}");
+        $this->assertStringContainsString('CriticalPathTest', $search['body'], 'torrents.php search is missing the uploaded torrent name');
     }
 }

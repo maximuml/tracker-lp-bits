@@ -5,6 +5,7 @@ use App\Http\Controllers\Auth\RecoveryController;
 use App\Http\Controllers\Auth\WebController as AuthWebController;
 use App\Http\Controllers\TorrentDownloadController;
 use App\Http\Controllers\TorrentEditController;
+use App\Http\Controllers\TorrentListingController;
 use App\Http\Controllers\TorrentUploadController;
 use Illuminate\Support\Facades\Route;
 
@@ -50,6 +51,11 @@ Route::post('/takeedit', [TorrentEditController::class, 'legacyUpdate'])
 
 Route::get('/download', [TorrentDownloadController::class, 'download'])
     ->name('torrents.download');
+
+Route::group(['middleware' => ['auth.nexus:nexus-web']], function () {
+    Route::get('/torrents', [TorrentListingController::class, 'index'])->name('torrents.index');
+    Route::get('/special', [TorrentListingController::class, 'index'])->name('torrents.special');
+});
 
 Route::group(['prefix' => 'web', 'middleware' => ['auth.nexus:nexus-web']], function () {
     Route::get('torrent-approval-page', [\App\Http\Controllers\TorrentController::class, 'approvalPage']);

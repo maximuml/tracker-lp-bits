@@ -1,33 +1,38 @@
 <?php
-require_once("../include/bittorrent.php");
+require "../include/bittorrent.php";
 dbconn();
 $langFile = get_langfile_path();
 if (!is_file(__DIR__ . '/../' . $langFile)) {
-	$langFile = __DIR__ . '/../lang/en/lang_takeflush.php';
+    $langFile = __DIR__ . '/../lang/en/lang_takeflush.php';
 }
 require_once $langFile;
 loggedinorreturn();
-function bark($msg)
-{
-   global $lang_takeflush;
-   stdhead();
-   stdmsg($lang_takeflush['std_failed'], $msg);
-   stdfoot();
-   exit;
+$rootpath = dirname(__DIR__) . '/';
+
+if (! class_exists(\Illuminate\Http\Request::class)) {
+    require_once $rootpath . 'vendor/autoload.php';
 }
 
-$id = intval($_GET['id'] ?? 0);
-int_check($id,true);
+$app = require_once $rootpath . 'bootstrap/app.php';
+$kernel = $app->make(\Illuminate\Contracts\Http\Kernel::class);
 
-if (get_user_class() >= UC_MODERATOR || $CURUSER['id'] == "$id")
-{
-   $deadtime = deadtime();
-   $lastAction = date("Y-m-d H:i:s", $deadtime);
-   $effected = \App\Models\Peer::query()->where('last_action', '<', $lastAction)->where('userid', $id)->delete();
+$method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+$uri = '/takeflush' . (empty($_SERVER['QUERY_STRING']) ? '' : '?' . $_SERVER['QUERY_STRING']);
 
-   stderr($lang_takeflush['std_success'], "$effected ".$lang_takeflush['std_ghost_torrents_cleaned']);
-}
-else
-{
-   bark($lang_takeflush['std_cannot_flush_others']);
-}
+$server = $_SERVER;
+$server['SCRIPT_NAME'] = '/takeflush.php';
+$server['SCRIPT_FILENAME'] = $rootpath . 'public/takeflush.php';
+$server['REQUEST_METHOD'] = $method;
+
+$request = \Illuminate\Http\Request::create(
+    $uri,
+    $method,
+    $method === 'POST' ? $_POST : $_GET,
+    $_COOKIE,
+    $_FILES,
+    $server
+);
+
+$response = $kernel->handle($request);
+$response->send();
+$kernel->terminate($request, $response);

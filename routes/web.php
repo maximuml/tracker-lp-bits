@@ -117,6 +117,12 @@ Route::group(['middleware' => ['auth.nexus:nexus-web']], function () {
     Route::match(['get', 'post'], '/checkuser', [LegacyPagesController::class, 'checkuser'])->name('checkuser.legacy');
     Route::match(['get', 'post'], '/takeconfirm', [LegacyPagesController::class, 'takeconfirm'])->name('takeconfirm.legacy');
     Route::match(['get', 'post'], '/user-ban-log', [LegacyPagesController::class, 'userBanLog'])->name('user-ban-log.legacy');
+    Route::match(['get', 'post'], '/torrent_info', [LegacyPagesController::class, 'torrentInfo'])->name('torrent_info.legacy');
+    Route::match(['get', 'post'], '/viewsnatches', [LegacyPagesController::class, 'viewSnatches'])->name('viewsnatches.legacy');
+    Route::match(['get', 'post'], '/takeflush', [LegacyPagesController::class, 'takeFlush'])->name('takeflush.legacy');
+    Route::match(['get', 'post'], '/takereseed', [LegacyPagesController::class, 'takeReseed'])->name('takereseed.legacy');
+    Route::match(['get', 'post'], '/clearcache', [LegacyPagesController::class, 'clearCache'])->name('clearcache.legacy');
+    Route::match(['get', 'post'], '/fastdelete', [LegacyPagesController::class, 'fastDelete'])->name('fastdelete.legacy');
     Route::get('/comment/add', [WebCommentController::class, 'create']);
     Route::post('/comment', [WebCommentController::class, 'store']);
     Route::get('/comment/{commentId}/edit', [WebCommentController::class, 'edit']);
@@ -124,6 +130,10 @@ Route::group(['middleware' => ['auth.nexus:nexus-web']], function () {
     Route::get('/comment/{commentId}/delete', [WebCommentController::class, 'destroy']);
     Route::get('/comment/{commentId}/original', [WebCommentController::class, 'original']);
 });
+
+Route::match(['get', 'post'], '/bookmark', [LegacyPagesController::class, 'bookmark'])->name('bookmark.legacy');
+Route::match(['get', 'post'], '/viewfilelist', [LegacyPagesController::class, 'viewFileList'])->name('viewfilelist.legacy');
+Route::match(['get', 'post'], '/viewpeerlist', [LegacyPagesController::class, 'viewPeerList'])->name('viewpeerlist.legacy');
 
 Route::match(['get', 'post'], '/forums', [ForumController::class, 'legacy'])
     ->middleware('auth.nexus:nexus-web')

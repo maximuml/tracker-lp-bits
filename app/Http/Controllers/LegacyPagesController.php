@@ -194,9 +194,54 @@ class LegacyPagesController extends Controller
         return $this->legacy($request, 'user-ban-log');
     }
 
-    private function legacy(Request $request, string $page): View|RedirectResponse
+    public function bookmark(Request $request): Response|RedirectResponse
     {
-        if (! defined('IN_NEXUS') || ! isset($GLOBALS['CURUSER'])) {
+        return $this->legacyRaw($request, 'bookmark', false);
+    }
+
+    public function fastDelete(Request $request): Response|RedirectResponse
+    {
+        return $this->legacyWithRedirect($request, 'fastdelete');
+    }
+
+    public function torrentInfo(Request $request): View|RedirectResponse
+    {
+        return $this->legacy($request, 'torrent_info');
+    }
+
+    public function viewFileList(Request $request): Response|RedirectResponse
+    {
+        return $this->legacyRaw($request, 'viewfilelist', false);
+    }
+
+    public function viewPeerList(Request $request): Response|RedirectResponse
+    {
+        return $this->legacyRaw($request, 'viewpeerlist', false);
+    }
+
+    public function viewSnatches(Request $request): View|RedirectResponse
+    {
+        return $this->legacy($request, 'viewsnatches');
+    }
+
+    public function takeFlush(Request $request): View|RedirectResponse
+    {
+        return $this->legacy($request, 'takeflush');
+    }
+
+    public function takeReseed(Request $request): View|RedirectResponse
+    {
+        return $this->legacy($request, 'takereseed');
+    }
+
+    public function clearCache(Request $request): View|RedirectResponse
+    {
+        return $this->legacy($request, 'clearcache');
+    }
+
+    private function legacy(Request $request, string $page, bool $auth = true): View|RedirectResponse
+    {
+        if (! defined('IN_NEXUS') || ($auth && ! isset($GLOBALS['CURUSER']))) {
             $qs = $request->getQueryString();
             return redirect('/' . $page . '.php' . ($qs ? '?' . $qs : ''));
         }
@@ -204,9 +249,9 @@ class LegacyPagesController extends Controller
         return view($page . '.index');
     }
 
-    private function legacyWithRedirect(Request $request, string $page): Response|RedirectResponse
+    private function legacyWithRedirect(Request $request, string $page, bool $auth = true): Response|RedirectResponse
     {
-        if (! defined('IN_NEXUS') || ! isset($GLOBALS['CURUSER'])) {
+        if (! defined('IN_NEXUS') || ($auth && ! isset($GLOBALS['CURUSER']))) {
             $qs = $request->getQueryString();
 
             return redirect('/' . $page . '.php' . ($qs ? '?' . $qs : ''));
@@ -226,5 +271,35 @@ class LegacyPagesController extends Controller
         }
 
         return response($content);
+    }
+
+    private function legacyRaw(Request $request, string $page, bool $auth = true): Response|RedirectResponse
+    {
+        if (! defined('IN_NEXUS') || ($auth && ! isset($GLOBALS['CURUSER']))) {
+            $qs = $request->getQueryString();
+
+            return redirect('/' . $page . '.php' . ($qs ? '?' . $qs : ''));
+        }
+
+        $content = view($page . '.index')->render();
+
+        $headers = headers_list();
+        $responseHeaders = [];
+        $status = http_response_code();
+        foreach ($headers as $header) {
+            if (stripos($header, 'Location:') === 0) {
+                $url = trim(substr($header, 9));
+                header_remove('Location');
+
+                return redirect($url, ($status >= 300 && $status < 400) ? $status : 302);
+            }
+
+            $parts = explode(':', $header, 2);
+            if (count($parts) === 2) {
+                $responseHeaders[trim($parts[0])] = trim($parts[1]);
+            }
+        }
+
+        return response($content, 200, $responseHeaders);
     }
 }

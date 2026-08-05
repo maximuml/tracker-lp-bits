@@ -44,5 +44,9 @@ class VerifyCsrfToken extends Middleware
         "modrules",
         "nowarn",
         "takeconfirm",
+        "fastdelete",
+        "takeflush",
+        "takereseed",
+        "clearcache",
     ];
 }

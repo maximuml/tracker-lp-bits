@@ -13,6 +13,8 @@ use App\Http\Controllers\ForumController;
 use App\Http\Controllers\TorrentListingController;
 use App\Http\Controllers\TorrentUploadController;
 use App\Http\Controllers\UserDetailController;
+use App\Http\Controllers\ToptenController;
+use App\Http\Controllers\LogController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -66,6 +68,8 @@ Route::group(['middleware' => ['auth.nexus:nexus-web']], function () {
     Route::get('/torrents', [TorrentListingController::class, 'index'])->name('torrents.index');
     Route::get('/special', [TorrentListingController::class, 'index'])->name('torrents.special');
     Route::get('/details/{id}', [TorrentDetailsController::class, 'show'])->name('torrent.details');
+    Route::get('/topten', [ToptenController::class, 'legacy'])->name('topten.legacy');
+    Route::get('/log', [LogController::class, 'legacy'])->name('log.legacy');
     Route::get('/comment/add', [WebCommentController::class, 'create']);
     Route::post('/comment', [WebCommentController::class, 'store']);
     Route::get('/comment/{commentId}/edit', [WebCommentController::class, 'edit']);

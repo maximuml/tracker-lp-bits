@@ -58,6 +58,7 @@ Route::get('/download', [TorrentDownloadController::class, 'download'])
     ->name('torrents.download');
 
 Route::group(['middleware' => ['auth.nexus:nexus-web']], function () {
+    Route::get('/upload', [TorrentUploadController::class, 'create'])->name('torrents.upload');
     Route::match(['get', 'post'], '/offers', [OfferController::class, 'legacy'])->name('offers.legacy');
     Route::get('/torrents', [TorrentListingController::class, 'index'])->name('torrents.index');
     Route::get('/special', [TorrentListingController::class, 'index'])->name('torrents.special');

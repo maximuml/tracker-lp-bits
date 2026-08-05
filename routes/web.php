@@ -87,6 +87,11 @@ Route::group(['middleware' => ['auth.nexus:nexus-web']], function () {
     Route::match(['get', 'post'], '/sendmessage', [LegacyPagesController::class, 'sendmessage'])->name('sendmessage.legacy');
     Route::match(['get', 'post'], '/userhistory', [LegacyPagesController::class, 'userhistory'])->name('userhistory.legacy');
     Route::match(['get', 'post'], '/invite', [LegacyPagesController::class, 'invite'])->name('invite.legacy');
+    Route::match(['get', 'post'], '/news', [LegacyPagesController::class, 'news'])->name('news.legacy');
+    Route::match(['get', 'post'], '/makepoll', [LegacyPagesController::class, 'makepoll'])->name('makepoll.legacy');
+    Route::match(['get', 'post'], '/polloverview', [LegacyPagesController::class, 'polloverview'])->name('polloverview.legacy');
+    Route::match(['get', 'post'], '/attendance', [LegacyPagesController::class, 'attendance'])->name('attendance.legacy');
+    Route::match(['get', 'post'], '/takemessage', [LegacyPagesController::class, 'takeMessage'])->name('takemessage.legacy');
     Route::get('/comment/add', [WebCommentController::class, 'create']);
     Route::post('/comment', [WebCommentController::class, 'store']);
     Route::get('/comment/{commentId}/edit', [WebCommentController::class, 'edit']);

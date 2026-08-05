@@ -23,5 +23,10 @@ class VerifyCsrfToken extends Middleware
         "comment",
         "comment/*",
         "mybonus",
+        "news",
+        "makepoll",
+        "polloverview",
+        "attendance",
+        "takemessage",
     ];
 }

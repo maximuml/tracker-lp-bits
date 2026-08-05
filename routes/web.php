@@ -68,6 +68,12 @@ Route::post('/takeedit', [TorrentEditController::class, 'legacyUpdate'])
 Route::get('/download', [TorrentDownloadController::class, 'download'])
     ->name('torrents.download');
 
+Route::match(['get', 'post'], '/aboutnexus', [LegacyPagesController::class, 'aboutNexus'])->name('aboutnexus.legacy');
+Route::match(['get', 'post'], '/rules', [LegacyPagesController::class, 'rules'])->name('rules.legacy');
+Route::match(['get', 'post'], '/useragreement', [LegacyPagesController::class, 'userAgreement'])->name('useragreement.legacy');
+Route::match(['get', 'post'], '/faq', [LegacyPagesController::class, 'faq'])->name('faq.legacy');
+Route::match(['get', 'post'], '/donate', [LegacyPagesController::class, 'donate'])->name('donate.legacy');
+
 Route::group(['middleware' => ['auth.nexus:nexus-web']], function () {
     Route::get('/upload', [TorrentUploadController::class, 'create'])->name('torrents.upload');
     Route::get('/bitbucket-upload', [BitbucketUploadController::class, 'create'])->name('bitbucket.upload');
@@ -123,6 +129,9 @@ Route::group(['middleware' => ['auth.nexus:nexus-web']], function () {
     Route::match(['get', 'post'], '/takereseed', [LegacyPagesController::class, 'takeReseed'])->name('takereseed.legacy');
     Route::match(['get', 'post'], '/clearcache', [LegacyPagesController::class, 'clearCache'])->name('clearcache.legacy');
     Route::match(['get', 'post'], '/fastdelete', [LegacyPagesController::class, 'fastDelete'])->name('fastdelete.legacy');
+    Route::match(['get', 'post'], '/donated', [LegacyPagesController::class, 'donated'])->name('donated.legacy');
+    Route::match(['get', 'post'], '/faqmanage', [LegacyPagesController::class, 'faqManage'])->name('faqmanage.legacy');
+    Route::match(['get', 'post'], '/faqactions', [LegacyPagesController::class, 'faqActions'])->name('faqactions.legacy');
     Route::get('/comment/add', [WebCommentController::class, 'create']);
     Route::post('/comment', [WebCommentController::class, 'store']);
     Route::get('/comment/{commentId}/edit', [WebCommentController::class, 'edit']);

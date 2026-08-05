@@ -2,30 +2,32 @@
 require "../include/bittorrent.php";
 dbconn();
 loggedinorreturn();
-if (get_user_class() < UC_SYSOP)
-stderr("Error", "Access denied.");
-if ($_SERVER["REQUEST_METHOD"] == "POST")
-{
-if ($_POST["username"] == "" || $_POST["donated"] == "")
-stderr("Error", "Missing form data.");
-$username = trim($_POST["username"]);
-$donated = trim($_POST["donated"]);
+$rootpath = dirname(__DIR__) . '/';
 
-$user = \App\Models\User::query()->where('username', $username)->first(['id']);
-if (!$user)
-	stderr("Error", "Unable to update account.");
-\App\Models\User::query()->where('id', $user->id)->update(['donated' => $donated]);
-header("Location: " . get_protocol_prefix() . "$BASEURL/userdetails.php?id=$user->id");
-die;
+if (! class_exists(\Illuminate\Http\Request::class)) {
+    require_once $rootpath . 'vendor/autoload.php';
 }
-stdhead("Update Users Donated Amounts");
-?>
-<h1>Update Users Donated Amounts</h1>
-<form method=post action=donated.php>
-<table border=1 cellspacing=0 cellpadding=5>
-<tr><td class=rowhead>User name</td><td><input type=text name=username size=40></td></tr>
-<tr><td class=rowhead>Donated</td><td><input type=uploaded name=donated size=5></td></tr>
-<tr><td colspan=2 align=center><input type=submit value="Okay" class=btn></td></tr>
-</table>
-</form>
-<?php stdfoot();
+
+$app = require_once $rootpath . 'bootstrap/app.php';
+$kernel = $app->make(\Illuminate\Contracts\Http\Kernel::class);
+
+$method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+$uri = '/donated' . (empty($_SERVER['QUERY_STRING']) ? '' : '?' . $_SERVER['QUERY_STRING']);
+
+$server = $_SERVER;
+$server['SCRIPT_NAME'] = '/donated.php';
+$server['SCRIPT_FILENAME'] = $rootpath . 'public/donated.php';
+$server['REQUEST_METHOD'] = $method;
+
+$request = \Illuminate\Http\Request::create(
+    $uri,
+    $method,
+    $method === 'POST' ? $_POST : $_GET,
+    $_COOKIE,
+    $_FILES,
+    $server
+);
+
+$response = $kernel->handle($request);
+$response->send();
+$kernel->terminate($request, $response);

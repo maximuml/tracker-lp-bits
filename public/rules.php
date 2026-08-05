@@ -2,30 +2,32 @@
 require "../include/bittorrent.php";
 dbconn();
 require_once(get_langfile_path());
-//loggedinorreturn();
-stdhead($lang_rules['head_rules']);
-$Cache->new_page('rules', 900, true);
-if (!$Cache->get_page())
-{
-$Cache->add_whole_row();
-//make_folder("cache/" , get_langfolder_cookie());
-//cache_check ('rules');
-begin_main_frame();
+$rootpath = dirname(__DIR__) . '/';
 
-$lang_id = get_guest_lang_id();
-$is_rulelang = \Nexus\Database\NexusDB::table('language')->where('id', $lang_id)->value('rule_lang');
-if (!$is_rulelang){
-	$lang_id = 6; //English
+if (! class_exists(\Illuminate\Http\Request::class)) {
+    require_once $rootpath . 'vendor/autoload.php';
 }
-$rules = \Nexus\Database\NexusDB::table('rules')->where('lang_id', $lang_id)->orderBy('id')->get();
-foreach ($rules as $rule){
-	$arr = (array) $rule;
-	begin_frame($arr['title'], false);
-	print(format_comment($arr["text"]));
-	end_frame();
-}
-end_main_frame();
-}
-//cache_save ('rules');
-stdfoot();
-?>
+
+$app = require_once $rootpath . 'bootstrap/app.php';
+$kernel = $app->make(\Illuminate\Contracts\Http\Kernel::class);
+
+$method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+$uri = '/rules' . (empty($_SERVER['QUERY_STRING']) ? '' : '?' . $_SERVER['QUERY_STRING']);
+
+$server = $_SERVER;
+$server['SCRIPT_NAME'] = '/rules.php';
+$server['SCRIPT_FILENAME'] = $rootpath . 'public/rules.php';
+$server['REQUEST_METHOD'] = $method;
+
+$request = \Illuminate\Http\Request::create(
+    $uri,
+    $method,
+    $method === 'POST' ? $_POST : $_GET,
+    $_COOKIE,
+    $_FILES,
+    $server
+);
+
+$response = $kernel->handle($request);
+$response->send();
+$kernel->terminate($request, $response);

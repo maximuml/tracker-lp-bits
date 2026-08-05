@@ -5,9 +5,20 @@ namespace App\Http\Controllers;
 use App\Repositories\TorrentEditRepository;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
 
 class TorrentEditController extends Controller
 {
+    public function legacy(Request $request): View|RedirectResponse
+    {
+        if (! defined('IN_NEXUS') || ! isset($GLOBALS['CURUSER'])) {
+            $qs = $request->getQueryString();
+            return redirect('/edit.php' . ($qs ? '?' . $qs : ''));
+        }
+
+        return view('torrent.edit');
+    }
+
     public function legacyUpdate(Request $request, TorrentEditRepository $repository): RedirectResponse
     {
         $torrent = $repository->update($request);

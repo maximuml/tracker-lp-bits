@@ -51,6 +51,10 @@ Route::post('/takeupload', [TorrentUploadController::class, 'legacyStore'])
     ->middleware('auth.nexus:nexus-web')
     ->name('torrents.legacy-store');
 
+Route::get('/edit', [TorrentEditController::class, 'legacy'])
+    ->middleware('auth.nexus:nexus-web')
+    ->name('torrents.legacy-edit');
+
 Route::post('/takeedit', [TorrentEditController::class, 'legacyUpdate'])
     ->middleware('auth.nexus:nexus-web')
     ->name('torrents.legacy-update');

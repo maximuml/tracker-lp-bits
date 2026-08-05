@@ -64,8 +64,6 @@ Route::post('/takeedit', [TorrentEditController::class, 'legacyUpdate'])
 Route::get('/download', [TorrentDownloadController::class, 'download'])
     ->name('torrents.download');
 
-Route::get('/mybar', [MyController::class, 'bar'])->name('my.bar');
-
 Route::group(['middleware' => ['auth.nexus:nexus-web']], function () {
     Route::get('/upload', [TorrentUploadController::class, 'create'])->name('torrents.upload');
     Route::get('/bitbucket-upload', [BitbucketUploadController::class, 'create'])->name('bitbucket.upload');

@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\View\View;
 
 class MyController extends Controller
@@ -27,17 +26,5 @@ class MyController extends Controller
         }
 
         return view('my.hr');
-    }
-
-    public function bar(Request $request): Response|RedirectResponse
-    {
-        if (! defined('IN_NEXUS')) {
-            $qs = $request->getQueryString();
-            return redirect('/mybar.php' . ($qs ? '?' . $qs : ''));
-        }
-
-        $content = view('my.bar')->render();
-
-        return response($content, 200, ['Content-Type' => 'image/png']);
     }
 }

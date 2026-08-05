@@ -149,3 +149,28 @@ Then clear the Redis settings cache (`nexus_settings_in_nexus`, `nexus_settings_
   - `public/comment.php` must put the query string into the `$uri` passed to `Request::create()`; `REQUEST_URI` in the `$server` array is overwritten by Symfony and the query is lost for POST requests. This causes `StoreCommentRequest` to fail `type` validation.
   - `public/comment.php` must not strip `cid` from the query when `action=add` because `sub=quote` needs `cid` as a query parameter.
   - The rendered `form action` in `resources/views/comments/_form.blade.php` is not HTML-escaped to `&amp;`; browsers tolerate raw `&`, but the legacy `details.php` quick-comment form uses `htmlspecialchars`.
+
+## Testing php8 PR #199-#205 legacy-page migrations
+
+This section covers the combined `php8` branch migrations (`usercp`, `edit`/`takeedit`, `mybonus`/`myhr`, `topten`/`log`, `index.php`, and `friends`/`messages`/`getrss`/`sendmessage`/`userhistory`/`invite`).
+
+### Login/logout gotchas
+
+- `public/login.php` builds `Illuminate\Http\Request::create($uri, $_SERVER['REQUEST_METHOD'], $_GET, ...)` for **both** GET and POST. This means a form POST to `/login.php` loses `username`/`password`/`_token`, so Laravel returns `419` (CSRF) because no `_token` reaches `VerifyCsrfToken`.
+- The direct Laravel `/login` route works as expected (POST returns `302` to `index.php` and sets `c_secure_pass`).
+- Workaround for UI automation: navigate to `http://openresty/logout`, then `http://openresty/login`, fill the form, and submit; or use curl against `/login` with a CSRF token extracted from `/login`.
+
+### Download/announce/scrape
+
+- `download.php?id=<id>` redirects to `downloadnotice.php` on the first authenticated download. Append `&letdown=1` to bypass the notice and receive `Content-Type: application/x-bittorrent`.
+- `announce.php` requires a 20-byte `peer_id` and an allowed `User-Agent` (e.g. `uTorrent/3000` with peer_id `-UT3000...`).
+- `scrape.php` returns a valid `files` dict when `info_hash` is supplied as raw binary URL-encoded.
+
+### Forums `viewunread` state setup
+
+- To make `/forums.php?action=viewunread` list a topic, ensure `users.last_catchup` is `0` (or lower than `topics.lastpost`) **and** `readposts` has no row for that user/topic. Then click **Catch up** to update `last_catchup` and verify `viewunread` shows nothing afterwards.
+
+### Known failures in the bundle
+
+- `/userhistory.php?id=1` (default action, no `action=` query) currently throws `TypeError: App\Support\PageLayout::header(): Argument #1 ($title) must be of type string, null given` because `stdhead()` is called with a `null` title in `resources/views/userhistory/_userhistory_legacy.php`. The named actions (`viewposts`, `viewcomments`) render correctly.
+- `public/login.php` POST login is broken as described above.

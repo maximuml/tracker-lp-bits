@@ -73,6 +73,9 @@ Route::match(['get', 'post'], '/rules', [LegacyPagesController::class, 'rules'])
 Route::match(['get', 'post'], '/useragreement', [LegacyPagesController::class, 'userAgreement'])->name('useragreement.legacy');
 Route::match(['get', 'post'], '/faq', [LegacyPagesController::class, 'faq'])->name('faq.legacy');
 Route::match(['get', 'post'], '/donate', [LegacyPagesController::class, 'donate'])->name('donate.legacy');
+Route::match(['get', 'post'], '/getusertorrentlistajax', [LegacyPagesController::class, 'getUserTorrentListAjax'])->name('getusertorrentlistajax.legacy');
+Route::match(['get', 'post'], '/searchsuggest', [LegacyPagesController::class, 'searchSuggest'])->name('searchsuggest.legacy');
+Route::match(['get', 'post'], '/ajax', [LegacyPagesController::class, 'ajax'])->name('ajax.legacy');
 
 Route::group(['middleware' => ['auth.nexus:nexus-web']], function () {
     Route::get('/upload', [TorrentUploadController::class, 'create'])->name('torrents.upload');
@@ -132,6 +135,9 @@ Route::group(['middleware' => ['auth.nexus:nexus-web']], function () {
     Route::match(['get', 'post'], '/donated', [LegacyPagesController::class, 'donated'])->name('donated.legacy');
     Route::match(['get', 'post'], '/faqmanage', [LegacyPagesController::class, 'faqManage'])->name('faqmanage.legacy');
     Route::match(['get', 'post'], '/faqactions', [LegacyPagesController::class, 'faqActions'])->name('faqactions.legacy');
+    Route::match(['get', 'post'], '/search', [LegacyPagesController::class, 'search'])->name('search.legacy');
+    Route::match(['get', 'post'], '/usersearch', [LegacyPagesController::class, 'usersearch'])->name('usersearch.legacy');
+    Route::match(['get', 'post'], '/autocomplete_torrents', [LegacyPagesController::class, 'autocompleteTorrents'])->name('autocomplete_torrents.legacy');
     Route::get('/comment/add', [WebCommentController::class, 'create']);
     Route::post('/comment', [WebCommentController::class, 'store']);
     Route::get('/comment/{commentId}/edit', [WebCommentController::class, 'edit']);

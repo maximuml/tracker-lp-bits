@@ -1,28 +1,32 @@
 <?php
 require "../include/bittorrent.php";
 dbconn();
-if (isset($_GET['q']) && $_GET['q'] != '')
-{
-	$searchstr = trim($_GET['q']);
-	
-	$suggestRows = \Nexus\Database\NexusDB::table('suggest')
-	    ->selectRaw('keywords AS suggest, COUNT(*) AS count')
-	    ->where('keywords', 'like', $searchstr . '%')
-	    ->groupBy('keywords')
-	    ->orderByDesc('count')
-	    ->orderByDesc('keywords')
-	    ->limit(10)
-	    ->get();
-	$result = array(htmlspecialchars($searchstr), array(), array());
-	$i = 0;
-	foreach ($suggestRows as $suggest){
-		$suggest = (array) $suggest;
-		if (strlen($suggest['suggest']) > 25) continue;
-		$result[1][] = $suggest['suggest'];
-		$result[2][] = $suggest['count']." times";
-		$i++;
-		if ($i >= 5) break;
-	}
-	echo json_encode($result);
+$rootpath = dirname(__DIR__) . '/';
+
+if (! class_exists(\Illuminate\Http\Request::class)) {
+    require_once $rootpath . 'vendor/autoload.php';
 }
-?>
+
+$app = require_once $rootpath . 'bootstrap/app.php';
+$kernel = $app->make(\Illuminate\Contracts\Http\Kernel::class);
+
+$method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+$uri = '/searchsuggest' . (empty($_SERVER['QUERY_STRING']) ? '' : '?' . $_SERVER['QUERY_STRING']);
+
+$server = $_SERVER;
+$server['SCRIPT_NAME'] = '/searchsuggest.php';
+$server['SCRIPT_FILENAME'] = $rootpath . 'public/searchsuggest.php';
+$server['REQUEST_METHOD'] = $method;
+
+$request = \Illuminate\Http\Request::create(
+    $uri,
+    $method,
+    $method === 'POST' ? $_POST : $_GET,
+    $_COOKIE,
+    $_FILES,
+    $server
+);
+
+$response = $kernel->handle($request);
+$response->send();
+$kernel->terminate($request, $response);

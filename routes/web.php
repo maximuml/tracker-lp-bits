@@ -92,6 +92,16 @@ Route::group(['middleware' => ['auth.nexus:nexus-web']], function () {
     Route::match(['get', 'post'], '/polloverview', [LegacyPagesController::class, 'polloverview'])->name('polloverview.legacy');
     Route::match(['get', 'post'], '/attendance', [LegacyPagesController::class, 'attendance'])->name('attendance.legacy');
     Route::match(['get', 'post'], '/takemessage', [LegacyPagesController::class, 'takeMessage'])->name('takemessage.legacy');
+    Route::match(['get', 'post'], '/deletemessage', [LegacyPagesController::class, 'deletemessage'])->name('deletemessage.legacy');
+    Route::match(['get', 'post'], '/report', [LegacyPagesController::class, 'report'])->name('report.legacy');
+    Route::match(['get', 'post'], '/reports', [LegacyPagesController::class, 'reports'])->name('reports.legacy');
+    Route::match(['get', 'post'], '/bans', [LegacyPagesController::class, 'bans'])->name('bans.legacy');
+    Route::match(['get', 'post'], '/cheaterbox', [LegacyPagesController::class, 'cheaterbox'])->name('cheaterbox.legacy');
+    Route::match(['get', 'post'], '/cheaters', [LegacyPagesController::class, 'cheaters'])->name('cheaters.legacy');
+    Route::match(['get', 'post'], '/iphistory', [LegacyPagesController::class, 'iphistory'])->name('iphistory.legacy');
+    Route::match(['get', 'post'], '/ipcheck', [LegacyPagesController::class, 'ipcheck'])->name('ipcheck.legacy');
+    Route::match(['get', 'post'], '/ipsearch', [LegacyPagesController::class, 'ipsearch'])->name('ipsearch.legacy');
+    Route::match(['get', 'post'], '/modtask', [LegacyPagesController::class, 'modtask'])->name('modtask.legacy');
     Route::get('/comment/add', [WebCommentController::class, 'create']);
     Route::post('/comment', [WebCommentController::class, 'store']);
     Route::get('/comment/{commentId}/edit', [WebCommentController::class, 'edit']);

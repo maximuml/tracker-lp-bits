@@ -10,6 +10,7 @@ use App\Http\Controllers\WebCommentController;
 use App\Http\Controllers\TorrentDownloadController;
 use App\Http\Controllers\TorrentEditController;
 use App\Http\Controllers\ForumController;
+use App\Http\Controllers\MyController;
 use App\Http\Controllers\TorrentListingController;
 use App\Http\Controllers\TorrentUploadController;
 use App\Http\Controllers\UserDetailController;
@@ -58,6 +59,8 @@ Route::post('/takeedit', [TorrentEditController::class, 'legacyUpdate'])
 Route::get('/download', [TorrentDownloadController::class, 'download'])
     ->name('torrents.download');
 
+Route::get('/mybar', [MyController::class, 'bar'])->name('my.bar');
+
 Route::group(['middleware' => ['auth.nexus:nexus-web']], function () {
     Route::get('/upload', [TorrentUploadController::class, 'create'])->name('torrents.upload');
     Route::get('/bitbucket-upload', [BitbucketUploadController::class, 'create'])->name('bitbucket.upload');
@@ -66,6 +69,8 @@ Route::group(['middleware' => ['auth.nexus:nexus-web']], function () {
     Route::get('/torrents', [TorrentListingController::class, 'index'])->name('torrents.index');
     Route::get('/special', [TorrentListingController::class, 'index'])->name('torrents.special');
     Route::get('/details/{id}', [TorrentDetailsController::class, 'show'])->name('torrent.details');
+    Route::match(['get', 'post'], '/mybonus', [MyController::class, 'bonus'])->name('my.bonus');
+    Route::get('/myhr', [MyController::class, 'hr'])->name('my.hr');
     Route::get('/comment/add', [WebCommentController::class, 'create']);
     Route::post('/comment', [WebCommentController::class, 'store']);
     Route::get('/comment/{commentId}/edit', [WebCommentController::class, 'edit']);

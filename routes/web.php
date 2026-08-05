@@ -58,6 +58,7 @@ Route::get('/download', [TorrentDownloadController::class, 'download'])
     ->name('torrents.download');
 
 Route::group(['middleware' => ['auth.nexus:nexus-web']], function () {
+    Route::get('/upload', [TorrentUploadController::class, 'create'])->name('torrents.upload');
     Route::get('/bitbucket-upload', [BitbucketUploadController::class, 'create'])->name('bitbucket.upload');
     Route::post('/bitbucket-upload', [BitbucketUploadController::class, 'store']);
     Route::get('/torrents', [TorrentListingController::class, 'index'])->name('torrents.index');

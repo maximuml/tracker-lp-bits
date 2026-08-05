@@ -4,60 +4,32 @@ dbconn();
 require_once(get_langfile_path());
 loggedinorreturn();
 parked();
-$id = intval($_GET["id"] ?? 0);
-int_check($id,true);
-function bark($msg)
-{
-  global $lang_checkuser;
-  stdhead();
-  stdmsg($lang_checkuser['std_error'], $msg);
-  stdfoot();
-  exit;
+$rootpath = dirname(__DIR__) . '/';
+
+if (! class_exists(\Illuminate\Http\Request::class)) {
+    require_once $rootpath . 'vendor/autoload.php';
 }
 
-$userObj = \App\Models\User::query()->where('status', 'pending')->where('id', $id)->first();
-if (!$userObj) bark($lang_checkuser['std_no_user_id']);
-$user = $userObj->toArray();
+$app = require_once $rootpath . 'bootstrap/app.php';
+$kernel = $app->make(\Illuminate\Contracts\Http\Kernel::class);
 
-if (get_user_class() < UC_MODERATOR) {
-	if ($user['invited_by'] != $CURUSER['id'])
-		bark($lang_checkuser['std_no_permission']);
-}
+$method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+$uri = '/checkuser' . (empty($_SERVER['QUERY_STRING']) ? '' : '?' . $_SERVER['QUERY_STRING']);
 
-if ($user["gender"] == "Male") $gender = '<img class="male" src="pic/trans.gif" alt="Male" title="Male" style="margin-left: 4pt">';
-elseif ($user["gender"] == "Female") $gender = '<img class="female" src="pic/trans.gif" alt="Female" title="Female" style="margin-left: 4pt">';
-elseif ($user["gender"] == "N/A") $gender = '<img class="no_gender" src="pic/trans.gif" alt="N/A" title="No gender" style="margin-left: 4pt">';
+$server = $_SERVER;
+$server['SCRIPT_NAME'] = '/checkuser.php';
+$server['SCRIPT_FILENAME'] = $rootpath . 'public/checkuser.php';
+$server['REQUEST_METHOD'] = $method;
 
-if ($user['added'] == "0000-00-00 00:00:00" || $user['added'] == null)
-  $joindate = 'N/A';
-else
-  $joindate = "$user[added] (" . get_elapsed_time(strtotime($user["added"])) . " ago)";
+$request = \Illuminate\Http\Request::create(
+    $uri,
+    $method,
+    $method === 'POST' ? $_POST : $_GET,
+    $_COOKIE,
+    $_FILES,
+    $server
+);
 
-$country = '';
-$countryRow = \Nexus\Database\NexusDB::table('countries')->where('id', $user['country'])->first(['name', 'flagpic']);
-if ($countryRow) {
-  $arr = (array) $countryRow;
-  $country = "<td class=embedded><img src=pic/flag/{$arr['flagpic']} alt=\"{$arr['name']}\" style='margin-left: 8pt'></td>";
-}
-
-stdhead($lang_checkuser['head_detail_for'] . $user["username"]);
-
-$enabled = $user["enabled"] == 'yes';
-print("<p><table class=main border=0 cellspacing=0 cellpadding=0>".
-"<tr><td class=embedded><h1 style='margin:0px'>" . get_username($user['id'], true, false) . "</h1></td>$country</tr></table></p><br />\n");
-
-if (!$enabled)
-  print($lang_checkuser['text_account_disabled']);
-?>
-<table width=737 border=1 cellspacing=0 cellpadding=5>
-<tr><td class=rowhead width=1%><?php echo $lang_checkuser['row_join_date'] ?></td><td align=left width=99%><?php echo $joindate;?></td></tr>
-<tr><td class=rowhead width=1%><?php echo $lang_checkuser['row_gender'] ?></td><td align=left width=99%><?php echo $gender;?></td></tr>
-<tr><td class=rowhead width=1%><?php echo $lang_checkuser['row_email'] ?></td><td align=left width=99%><a href=mailto:<?php echo $user['email'];?>><?php echo $user['email'];?></a></td></tr>
-<?php
-if (get_user_class() >= UC_MODERATOR AND $user['ip'] != '')
-	print ("<tr><td class=rowhead width=1%>".$lang_checkuser['row_ip']."</td><td align=left width=99%>{$user['ip']}</td></tr>");
-print("<form method=post action=takeconfirm.php?id=".htmlspecialchars($id).">");
-print("<input type=hidden name=email value={$user['email']}>");
-print("<tr><td class=rowhead width=1%><input type=\"checkbox\" name=\"conusr[]\" value=\"" . $id . "\" checked/></td>");
-print("<td align=left width=99%><input type=submit style='height: 20px' value=\"".$lang_checkuser['submit_confirm_this_user'] ."\"></form></tr></td></table>");
-stdfoot();
+$response = $kernel->handle($request);
+$response->send();
+$kernel->terminate($request, $response);

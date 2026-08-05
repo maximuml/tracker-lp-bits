@@ -38,5 +38,11 @@ class VerifyCsrfToken extends Middleware
         "ipcheck",
         "ipsearch",
         "modtask",
+        "staffbox",
+        "takestaffmess",
+        "takecontact",
+        "modrules",
+        "nowarn",
+        "takeconfirm",
     ];
 }

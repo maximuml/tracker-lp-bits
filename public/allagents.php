@@ -2,19 +2,32 @@
 require "../include/bittorrent.php";
 dbconn();
 loggedinorreturn();
-if (get_user_class() < UC_MODERATOR)
-	stderr("Error", "Permission denied.");
-$agents = \Nexus\Database\NexusDB::table('peers')
-    ->selectRaw('agent, count(*) as counts')
-    ->groupBy('agent')
-    ->orderBy('agent')
-    ->get();
-stdhead("All Clients");
-print("<table align=center border=3 cellspacing=0 cellpadding=5>\n");
-print("<tr><td class=colhead>Client</td><td class=colhead>Counts</td></tr>\n");
-foreach ($agents as $row) {
-	$arr2 = (array) $row;
-	print("</a></td><td align=left>{$arr2['agent']}</td><td align=left>{$arr2['counts']}</td></tr>\n");
+$rootpath = dirname(__DIR__) . '/';
+
+if (! class_exists(\Illuminate\Http\Request::class)) {
+    require_once $rootpath . 'vendor/autoload.php';
 }
-print("</table>\n");
-stdfoot();
+
+$app = require_once $rootpath . 'bootstrap/app.php';
+$kernel = $app->make(\Illuminate\Contracts\Http\Kernel::class);
+
+$method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+$uri = '/allagents' . (empty($_SERVER['QUERY_STRING']) ? '' : '?' . $_SERVER['QUERY_STRING']);
+
+$server = $_SERVER;
+$server['SCRIPT_NAME'] = '/allagents.php';
+$server['SCRIPT_FILENAME'] = $rootpath . 'public/allagents.php';
+$server['REQUEST_METHOD'] = $method;
+
+$request = \Illuminate\Http\Request::create(
+    $uri,
+    $method,
+    $method === 'POST' ? $_POST : $_GET,
+    $_COOKIE,
+    $_FILES,
+    $server
+);
+
+$response = $kernel->handle($request);
+$response->send();
+$kernel->terminate($request, $response);

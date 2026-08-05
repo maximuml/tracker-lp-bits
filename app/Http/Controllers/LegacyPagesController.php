@@ -119,6 +119,81 @@ class LegacyPagesController extends Controller
         return $this->legacyWithRedirect($request, 'modtask');
     }
 
+    public function staff(Request $request): View|RedirectResponse
+    {
+        return $this->legacy($request, 'staff');
+    }
+
+    public function staffbox(Request $request): Response|RedirectResponse
+    {
+        return $this->legacyWithRedirect($request, 'staffbox');
+    }
+
+    public function staffmess(Request $request): View|RedirectResponse
+    {
+        return $this->legacy($request, 'staffmess');
+    }
+
+    public function takeStaffmess(Request $request): Response|RedirectResponse
+    {
+        return $this->legacyWithRedirect($request, 'takestaffmess');
+    }
+
+    public function contactstaff(Request $request): View|RedirectResponse
+    {
+        return $this->legacy($request, 'contactstaff');
+    }
+
+    public function takecontact(Request $request): Response|RedirectResponse
+    {
+        return $this->legacyWithRedirect($request, 'takecontact');
+    }
+
+    public function modrules(Request $request): Response|RedirectResponse
+    {
+        return $this->legacyWithRedirect($request, 'modrules');
+    }
+
+    public function donorlist(Request $request): View|RedirectResponse
+    {
+        return $this->legacy($request, 'donorlist');
+    }
+
+    public function stats(Request $request): View|RedirectResponse
+    {
+        return $this->legacy($request, 'stats');
+    }
+
+    public function warned(Request $request): View|RedirectResponse
+    {
+        return $this->legacy($request, 'warned');
+    }
+
+    public function nowarn(Request $request): Response|RedirectResponse
+    {
+        return $this->legacyWithRedirect($request, 'nowarn');
+    }
+
+    public function allagents(Request $request): View|RedirectResponse
+    {
+        return $this->legacy($request, 'allagents');
+    }
+
+    public function checkuser(Request $request): View|RedirectResponse
+    {
+        return $this->legacy($request, 'checkuser');
+    }
+
+    public function takeconfirm(Request $request): Response|RedirectResponse
+    {
+        return $this->legacyWithRedirect($request, 'takeconfirm');
+    }
+
+    public function userBanLog(Request $request): View|RedirectResponse
+    {
+        return $this->legacy($request, 'user-ban-log');
+    }
+
     private function legacy(Request $request, string $page): View|RedirectResponse
     {
         if (! defined('IN_NEXUS') || ! isset($GLOBALS['CURUSER'])) {

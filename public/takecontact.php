@@ -3,45 +3,32 @@ require "../include/bittorrent.php";
 dbconn();
 require_once(get_langfile_path());
 loggedinorreturn();
+$rootpath = dirname(__DIR__) . '/';
 
-if ($_SERVER["REQUEST_METHOD"] != "POST")
-	stderr($lang_takecontact['std_error'], $lang_takecontact['std_method']);
-
-$msg = trim($_POST["body"]);
-$subject = trim($_POST["subject"]);
-
-if (!$msg)
-	stderr($lang_takecontact['std_error'],$lang_takecontact['std_please_enter_something']);
-
-if (!$subject)
-	stderr($lang_takecontact['std_error'],$lang_takecontact['std_please_define_subject']);
-
-$added = "'" . date("Y-m-d H:i:s") . "'";
-$userid = $CURUSER['id'];
-
-// Anti Flood Code
-// This code ensures that a member can only send one PM per minute.
-if (get_user_class() < UC_MODERATOR) {
-	if (strtotime($CURUSER['last_staffmsg']) > (TIMENOW - 60))
-	{
-		$secs = 60 - (TIMENOW - strtotime($CURUSER['last_staffmsg']));
-		stderr($lang_takecontact['std_error'],$lang_takecontact['std_message_flooding'].$secs.$lang_takecontact['std_second'].($secs == 1 ? '' : $lang_takecontact['std_s']).$lang_takecontact['std_before_sending_pm']);
-	}
-}
-\App\Models\StaffMessage::add($userid, $subject, $msg);
-// Update Last PM sent...
-\App\Models\User::query()->where('id', $CURUSER['id'])->update(['last_staffmsg' => date('Y-m-d H:i:s')]);
-$Cache->delete_value('staff_message_count');
-$Cache->delete_value('staff_new_message_count');
-clear_staff_message_cache();
-if ($_POST["returnto"])
-{
-	header("Location: " . htmlspecialchars($_POST["returnto"]));
-	die;
+if (! class_exists(\Illuminate\Http\Request::class)) {
+    require_once $rootpath . 'vendor/autoload.php';
 }
 
-stdhead();
-stdmsg($lang_takecontact['std_succeeded'], $lang_takecontact['std_message_succesfully_sent']);
-stdfoot();
-exit;
-?>
+$app = require_once $rootpath . 'bootstrap/app.php';
+$kernel = $app->make(\Illuminate\Contracts\Http\Kernel::class);
+
+$method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+$uri = '/takecontact' . (empty($_SERVER['QUERY_STRING']) ? '' : '?' . $_SERVER['QUERY_STRING']);
+
+$server = $_SERVER;
+$server['SCRIPT_NAME'] = '/takecontact.php';
+$server['SCRIPT_FILENAME'] = $rootpath . 'public/takecontact.php';
+$server['REQUEST_METHOD'] = $method;
+
+$request = \Illuminate\Http\Request::create(
+    $uri,
+    $method,
+    $method === 'POST' ? $_POST : $_GET,
+    $_COOKIE,
+    $_FILES,
+    $server
+);
+
+$response = $kernel->handle($request);
+$response->send();
+$kernel->terminate($request, $response);

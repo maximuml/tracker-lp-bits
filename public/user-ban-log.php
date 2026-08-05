@@ -1,37 +1,32 @@
 <?php
 require "../include/bittorrent.php";
+dbconn();
+$rootpath = dirname(__DIR__) . '/';
 
-$query = \App\Models\UserBanLog::query();
-$q = htmlspecialchars($_REQUEST['q'] ?? '');
-if (!empty($q)) {
-    $query->where('username', 'like', "%{$q}%");
+if (! class_exists(\Illuminate\Http\Request::class)) {
+    require_once $rootpath . 'vendor/autoload.php';
 }
-$total = (clone $query)->count();
-$perPage = 50;
-list($paginationTop, $paginationBottom, $limit, $offset) = pager($perPage, $total, "?");
-$rows = (clone $query)->offset($offset)->take($perPage)->orderBy('id', 'desc')->get()->toArray();
-$header = [
-    'id' => 'ID',
-    'uid' => 'UID',
-    'username' => 'Username',
-    'reason' => 'Reason',
-    'created_at' => 'Created at',
-];
-$table = build_table($header, $rows);
-$q = htmlspecialchars($q);
-$filterForm = <<<FORM
-<div>
-    <h1 style="text-align: center">User ban log</h1>
-    <form id="filterForm" action="{$_SERVER['REQUEST_URI']}" method="get">
-        <input id="q" type="text" name="q" value="{$q}" placeholder="username">
-        <input type="submit">
-        <input type="reset" onclick="document.getElementById('q').value='';document.getElementById('filterForm').submit();">
-    </form>
-</div>
-FORM;
-stdhead('User ban log');
-begin_main_frame();
-echo $filterForm . $table . $paginationBottom;
-end_main_frame();
-stdfoot();
 
+$app = require_once $rootpath . 'bootstrap/app.php';
+$kernel = $app->make(\Illuminate\Contracts\Http\Kernel::class);
+
+$method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+$uri = '/user-ban-log' . (empty($_SERVER['QUERY_STRING']) ? '' : '?' . $_SERVER['QUERY_STRING']);
+
+$server = $_SERVER;
+$server['SCRIPT_NAME'] = '/user-ban-log.php';
+$server['SCRIPT_FILENAME'] = $rootpath . 'public/user-ban-log.php';
+$server['REQUEST_METHOD'] = $method;
+
+$request = \Illuminate\Http\Request::create(
+    $uri,
+    $method,
+    $method === 'POST' ? $_POST : $_GET,
+    $_COOKIE,
+    $_FILES,
+    $server
+);
+
+$response = $kernel->handle($request);
+$response->send();
+$kernel->terminate($request, $response);

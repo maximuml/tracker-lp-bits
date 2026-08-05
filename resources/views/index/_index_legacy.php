@@ -408,6 +408,7 @@ if ($CURUSER && $showpolls_main == "yes")
 			else //user has not voted yet
 			{
 				print("<form method=\"post\" action=\"index.php\">\n");
+				print("<input type=\"hidden\" name=\"_token\" value=\"" . htmlspecialchars(csrf_token()) . "\" />\n");
 				for ($i = 0; $i < count($o); ++$i)
 				{
 					if ($o[$i])

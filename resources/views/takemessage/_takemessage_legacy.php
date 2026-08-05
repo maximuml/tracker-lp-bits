@@ -115,6 +115,7 @@ if ($_SERVER["REQUEST_METHOD"] != "POST")
 	$date=date("Y-m-d H:i:s");
 	// Update Last PM sent...
 	\App\Models\User::query()->where('id', $CURUSER['id'])->update(['last_pm' => date("Y-m-d H:i:s")]);
+	$Cache->delete_value('user_'.$CURUSER['id'].'_content');
 
 	// Send notification email.
 if ($emailnotify_smtp=='yes' && $smtptype != 'none'){

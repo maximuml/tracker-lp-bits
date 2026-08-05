@@ -2,53 +2,33 @@
 require "../include/bittorrent.php";
 dbconn();
 require_once(get_langfile_path());
-require_once(get_langfile_path('catmanage.php'));
 loggedinorreturn();
-if (get_user_class() < UC_ADMINISTRATOR) {
-    permissiondenied();
-}
-$field = new \Nexus\Field\Field();
+$rootpath = dirname(__DIR__) . '/';
 
-
-$action = $_GET['action'] ?? 'view';
-if ($action == 'view') {
-    stdhead($lang_fields['field_management']." - ".$lang_fields['text_field']);
-    begin_main_frame();
-    $r =  $field->buildFieldTable();
-    echo $r;
-    stdfoot();
-} elseif ($action == 'add') {
-    stdhead($lang_fields['field_management']." - ".$lang_fields['text_add']);
-    begin_main_frame();
-    echo $field->buildFieldForm();
-} elseif ($action == 'submit') {
-    die("This method is deprecated! This method is no longer available in 1.10, it does not save data correctly, please go to the management system!");
-    try {
-        $result = $field->save($_REQUEST);
-        nexus_redirect('fields.php?action=view');
-    } catch (\Exception $e) {
-        stderr($lang_fields['field_management'], $e->getMessage());
-    }
-} elseif ($action == 'edit') {
-    $id = intval($_GET['id'] ?? 0);
-    if ($id == 0) {
-        stderr($lang_fields['field_management'], "Invalid id");
-    }
-    $row = (array) \Nexus\Database\NexusDB::table('torrents_custom_fields')->where('id', $id)->first();
-    if (empty($row)) {
-        stderr('', 'Invalid id');
-    }
-    stdhead($lang_fields['field_management']." - ".$lang_fields['text_edit']);
-    begin_main_frame();
-    echo $field->buildFieldForm($row);
-} elseif ($action == 'del') {
-    $id = intval($_GET['id'] ?? 0);
-    if ($id == 0) {
-        stderr($lang_fields['field_management'], "Invalid id");
-    }
-    \Nexus\Database\NexusDB::table('torrents_custom_fields')->where('id', $id)->delete();
-    nexus_redirect('fields.php?action=view');
+if (! class_exists(\Illuminate\Http\Request::class)) {
+    require_once $rootpath . 'vendor/autoload.php';
 }
 
+$app = require_once $rootpath . 'bootstrap/app.php';
+$kernel = $app->make(\Illuminate\Contracts\Http\Kernel::class);
 
+$method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+$uri = '/fields' . (empty($_SERVER['QUERY_STRING']) ? '' : '?' . $_SERVER['QUERY_STRING']);
 
+$server = $_SERVER;
+$server['SCRIPT_NAME'] = '/fields.php';
+$server['SCRIPT_FILENAME'] = $rootpath . 'public/fields.php';
+$server['REQUEST_METHOD'] = $method;
+
+$request = \Illuminate\Http\Request::create(
+    $uri,
+    $method,
+    $method === 'POST' ? $_POST : $_GET,
+    $_COOKIE,
+    $_FILES,
+    $server
+);
+
+$response = $kernel->handle($request);
+$response->send();
+$kernel->terminate($request, $response);

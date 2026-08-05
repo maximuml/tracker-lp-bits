@@ -19,6 +19,7 @@ class VerifyCsrfToken extends Middleware
         "takeedit",
         "bitbucket-upload",
         "offers",
+        "usercp",
         "comment",
         "comment/*",
     ];

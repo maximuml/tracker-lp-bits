@@ -13,6 +13,7 @@ use App\Http\Controllers\ForumController;
 use App\Http\Controllers\TorrentListingController;
 use App\Http\Controllers\TorrentUploadController;
 use App\Http\Controllers\UserDetailController;
+use App\Http\Controllers\UsercpController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -81,6 +82,10 @@ Route::match(['get', 'post'], '/forums', [ForumController::class, 'legacy'])
 Route::get('/userdetails', [UserDetailController::class, 'show'])
     ->middleware('auth.nexus:nexus-web')
     ->name('user.details');
+
+Route::match(['get', 'post'], '/usercp', [UsercpController::class, 'legacy'])
+    ->middleware('auth.nexus:nexus-web')
+    ->name('usercp.legacy');
 
 Route::group(['prefix' => 'web', 'middleware' => ['auth.nexus:nexus-web']], function () {
     Route::get('torrent-approval-page', [\App\Http\Controllers\TorrentController::class, 'approvalPage']);

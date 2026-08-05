@@ -17,6 +17,7 @@ use App\Http\Controllers\UserDetailController;
 use App\Http\Controllers\UsercpController;
 use App\Http\Controllers\ToptenController;
 use App\Http\Controllers\LogController;
+use App\Http\Controllers\LegacyPagesController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -78,6 +79,12 @@ Route::group(['middleware' => ['auth.nexus:nexus-web']], function () {
     Route::get('/myhr', [MyController::class, 'hr'])->name('my.hr');
     Route::get('/topten', [ToptenController::class, 'legacy'])->name('topten.legacy');
     Route::get('/log', [LogController::class, 'legacy'])->name('log.legacy');
+    Route::match(['get', 'post'], '/friends', [LegacyPagesController::class, 'friends'])->name('friends.legacy');
+    Route::match(['get', 'post'], '/messages', [LegacyPagesController::class, 'messages'])->name('messages.legacy');
+    Route::match(['get', 'post'], '/getrss', [LegacyPagesController::class, 'getrss'])->name('getrss.legacy');
+    Route::match(['get', 'post'], '/sendmessage', [LegacyPagesController::class, 'sendmessage'])->name('sendmessage.legacy');
+    Route::match(['get', 'post'], '/userhistory', [LegacyPagesController::class, 'userhistory'])->name('userhistory.legacy');
+    Route::match(['get', 'post'], '/invite', [LegacyPagesController::class, 'invite'])->name('invite.legacy');
     Route::get('/comment/add', [WebCommentController::class, 'create']);
     Route::post('/comment', [WebCommentController::class, 'store']);
     Route::get('/comment/{commentId}/edit', [WebCommentController::class, 'edit']);

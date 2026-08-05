@@ -22,5 +22,6 @@ class VerifyCsrfToken extends Middleware
         "usercp",
         "comment",
         "comment/*",
+        "mybonus",
     ];
 }

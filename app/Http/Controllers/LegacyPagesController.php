@@ -38,6 +38,31 @@ class LegacyPagesController extends Controller
         return $this->legacy($request, 'invite');
     }
 
+    public function news(Request $request): View|RedirectResponse
+    {
+        return $this->legacy($request, 'news');
+    }
+
+    public function makepoll(Request $request): View|RedirectResponse
+    {
+        return $this->legacy($request, 'makepoll');
+    }
+
+    public function polloverview(Request $request): View|RedirectResponse
+    {
+        return $this->legacy($request, 'polloverview');
+    }
+
+    public function attendance(Request $request): View|RedirectResponse
+    {
+        return $this->legacy($request, 'attendance');
+    }
+
+    public function takeMessage(Request $request): View|RedirectResponse
+    {
+        return $this->legacy($request, 'takemessage');
+    }
+
     private function legacy(Request $request, string $page): View|RedirectResponse
     {
         if (! defined('IN_NEXUS') || ! isset($GLOBALS['CURUSER'])) {

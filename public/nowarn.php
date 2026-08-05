@@ -1,53 +1,33 @@
 <?php
-require_once("../include/bittorrent.php");
-function bark($msg) {
-stdhead();
-stdmsg("Update Has Failed !", $msg);
-stdfoot();
-exit;
-}
+require "../include/bittorrent.php";
 dbconn();
 loggedinorreturn();
+$rootpath = dirname(__DIR__) . '/';
 
-if(isset($_POST["nowarned"])&&($_POST["nowarned"]=="nowarned")){
-//if (get_user_class() >= UC_SYSOP) {
-if (get_user_class() < UC_MODERATOR)
-stderr("Sorry", "Access denied.");
-{
-if (empty($_POST["usernw"]) && empty($_POST["desact"]) && empty($_POST["delete"]))
-   bark("You Must Select A User To Edit.");
-
-if (!empty($_POST["usernw"]))
-{
-//$msg = sqlesc("Your Warning Has Been Removed By: " . $CURUSER['username'] . ".");
-//$added = sqlesc(date("Y-m-d H:i:s"));
-//$userid = implode(", ", $_POST['usernw']);
-////sql_query("INSERT INTO messages (sender, receiver, msg, added) VALUES (0, $userid, $msg, $added)") or sqlerr(__FILE__, __LINE__);
-//
-//$r = sql_query("SELECT modcomment FROM users WHERE id IN (" . implode(", ", $_POST['usernw']) . ")")or sqlerr(__FILE__, __LINE__);
-//$user = mysql_fetch_array($r);
-//$exmodcomment = $user["modcomment"];
-//$modcomment = date("Y-m-d") . " - Warning Removed By " . $CURUSER['username'] . ".\n". $modcomment . $exmodcomment;
-//sql_query("UPDATE users SET modcomment=" . sqlesc($modcomment) . " WHERE id IN (" . implode(", ", $_POST['usernw']) . ")") or sqlerr(__FILE__, __LINE__);
-//
-//$do="UPDATE users SET warned='no', warneduntil=null WHERE id IN (" . implode(", ", $_POST['usernw']) . ")";
-//$res=sql_query($do);
-
-$modcomment = date("Y-m-d") . " - Warning Removed By " . $CURUSER['username'];
-\App\Models\User::query()->whereIn('id', $_POST['usernw'])
-    ->update([
-        'warned' => 'no',
-        'warneduntil' => null,
-        'modcomment' => \Nexus\Database\NexusDB::raw("if(modcomment = '', '$modcomment', concat_ws('\n', '$modcomment', modcomment))")
-    ]);
+if (! class_exists(\Illuminate\Http\Request::class)) {
+    require_once $rootpath . 'vendor/autoload.php';
 }
 
-if (!empty($_POST["desact"])){
-//$do="UPDATE users SET enabled='no' WHERE id IN (" . implode(", ", $_POST['desact']) . ")";
-//$res=sql_query($do);
-    \App\Models\User::query()->whereIn('id', $_POST['desact'])->update(['enabled' => 'no']);
-}
-}
-}
-header("Location: warned.php");
-?>
+$app = require_once $rootpath . 'bootstrap/app.php';
+$kernel = $app->make(\Illuminate\Contracts\Http\Kernel::class);
+
+$method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+$uri = '/nowarn' . (empty($_SERVER['QUERY_STRING']) ? '' : '?' . $_SERVER['QUERY_STRING']);
+
+$server = $_SERVER;
+$server['SCRIPT_NAME'] = '/nowarn.php';
+$server['SCRIPT_FILENAME'] = $rootpath . 'public/nowarn.php';
+$server['REQUEST_METHOD'] = $method;
+
+$request = \Illuminate\Http\Request::create(
+    $uri,
+    $method,
+    $method === 'POST' ? $_POST : $_GET,
+    $_COOKIE,
+    $_FILES,
+    $server
+);
+
+$response = $kernel->handle($request);
+$response->send();
+$kernel->terminate($request, $response);

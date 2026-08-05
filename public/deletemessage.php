@@ -1,45 +1,35 @@
 <?php
-  require "../include/bittorrent.php";
-  $id = $_GET["id"];
-  if (!is_numeric($id) || $id < 1 || floor($id) != $id)
-    die("Invalid ID");
+require "../include/bittorrent.php";
+dbconn();
+require_once(get_langfile_path());
+loggedinorreturn();
 
-  $type = $_GET["type"];
+$rootpath = dirname(__DIR__) . '/';
 
-  dbconn();
-  require_once(get_langfile_path());
-  loggedinorreturn();
-  if ($type == 'in')
-  {
-  	// make sure message is in CURUSER's Inbox
-	  $msg = \App\Models\Message::query()->where('id', $id)->first(['receiver', 'location']);
-	  if (!$msg) die($lang_deletemessage['std_bad_message_id']);
-	  $arr = $msg->toArray();
-	  if ($arr["receiver"] != $CURUSER["id"])
-	    die($lang_deletemessage['std_not_suggested']);
-    if ($arr["location"] == 'in')
-	  	\App\Models\Message::query()->where('id', $id)->delete();
-    else if ($arr["location"] == 'both')
-			\App\Models\Message::query()->where('id', $id)->update(['location' => 'out']);
-    else
-    	die($lang_deletemessage['std_not_in_inbox']);
-  }
-	elseif ($type == 'out')
-  {
-   	// make sure message is in CURUSER's Sentbox
-	  $msg = \App\Models\Message::query()->where('id', $id)->first(['sender', 'location']);
-	  if (!$msg) die($lang_deletemessage['std_bad_message_id']);
-	  $arr = $msg->toArray();
-	  if ($arr["sender"] != $CURUSER["id"])
-	    die($lang_deletemessage['std_not_suggested']);
-    if ($arr["location"] == 'out')
-	  	\App\Models\Message::query()->where('id', $id)->delete();
-    else if ($arr["location"] == 'both')
-			\App\Models\Message::query()->where('id', $id)->update(['location' => 'in']);
-    else
-    	die($lang_deletemessage['std_not_in_sentbox']);
-  }
-  else
-  	die($lang_deletemessage['std_unknown_pm_type']);
-  header("Location: " . get_protocol_prefix() . "$BASEURL/messages.php".($type == 'out'?"?out=1":""));
-?>
+if (! class_exists(\Illuminate\Http\Request::class)) {
+    require_once $rootpath . 'vendor/autoload.php';
+}
+
+$app = require_once $rootpath . 'bootstrap/app.php';
+$kernel = $app->make(\Illuminate\Contracts\Http\Kernel::class);
+
+$method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+$uri = '/deletemessage' . (empty($_SERVER['QUERY_STRING']) ? '' : '?' . $_SERVER['QUERY_STRING']);
+
+$server = $_SERVER;
+$server['SCRIPT_NAME'] = '/deletemessage.php';
+$server['SCRIPT_FILENAME'] = $rootpath . 'public/deletemessage.php';
+$server['REQUEST_METHOD'] = $method;
+
+$request = \Illuminate\Http\Request::create(
+    $uri,
+    $method,
+    $method === 'POST' ? $_POST : $_GET,
+    $_COOKIE,
+    $_FILES,
+    $server
+);
+
+$response = $kernel->handle($request);
+$response->send();
+$kernel->terminate($request, $response);

@@ -28,5 +28,15 @@ class VerifyCsrfToken extends Middleware
         "polloverview",
         "attendance",
         "takemessage",
+        "deletemessage",
+        "report",
+        "reports",
+        "bans",
+        "cheaterbox",
+        "cheaters",
+        "iphistory",
+        "ipcheck",
+        "ipsearch",
+        "modtask",
     ];
 }

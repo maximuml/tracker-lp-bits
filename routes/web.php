@@ -18,6 +18,7 @@ use App\Http\Controllers\UsercpController;
 use App\Http\Controllers\ToptenController;
 use App\Http\Controllers\LogController;
 use App\Http\Controllers\LegacyPagesController;
+use App\Http\Controllers\IndexController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -79,6 +80,7 @@ Route::group(['middleware' => ['auth.nexus:nexus-web']], function () {
     Route::get('/myhr', [MyController::class, 'hr'])->name('my.hr');
     Route::get('/topten', [ToptenController::class, 'legacy'])->name('topten.legacy');
     Route::get('/log', [LogController::class, 'legacy'])->name('log.legacy');
+    Route::match(['get', 'post'], '/index', [IndexController::class, 'legacy'])->name('index.legacy');
     Route::match(['get', 'post'], '/friends', [LegacyPagesController::class, 'friends'])->name('friends.legacy');
     Route::match(['get', 'post'], '/messages', [LegacyPagesController::class, 'messages'])->name('messages.legacy');
     Route::match(['get', 'post'], '/getrss', [LegacyPagesController::class, 'getrss'])->name('getrss.legacy');

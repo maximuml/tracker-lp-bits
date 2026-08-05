@@ -1070,7 +1070,7 @@ function stdhead($title = "", $msgalert = true, $script = "", $place = "")
 {
     $context = page_layout_context();
     \App\Support\PageLayout::setContext($context);
-    \App\Support\PageLayout::header($title, $msgalert, $script, $place);
+    \App\Support\PageLayout::header((string) $title, $msgalert, $script, $place);
 }
 
 /**

@@ -67,6 +67,12 @@ final class LegacyResponse
 
         if ($head) {
             \stdhead();
+        } elseif ($foot && PageLayout::getContext() === null) {
+            // Ensure a PageLayout context exists for stdfoot() even when the
+            // caller requested no header (e.g. permission denied before stdhead).
+            ob_start();
+            \stdhead();
+            ob_end_clean();
         }
         echo Frame::stdMessage($heading, $text, $htmlstrip);
         if ($foot) {

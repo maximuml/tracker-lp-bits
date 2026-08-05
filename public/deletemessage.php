@@ -1,6 +1,7 @@
 <?php
 require "../include/bittorrent.php";
 dbconn();
+require_once(get_langfile_path());
 loggedinorreturn();
 
 $rootpath = dirname(__DIR__) . '/';

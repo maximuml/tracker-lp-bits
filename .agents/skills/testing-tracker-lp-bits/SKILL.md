@@ -174,3 +174,11 @@ This section covers the combined `php8` branch migrations (`usercp`, `edit`/`tak
 
 - `/userhistory.php?id=1` (default action, no `action=` query) currently throws `TypeError: App\Support\PageLayout::header(): Argument #1 ($title) must be of type string, null given` because `stdhead()` is called with a `null` title in `resources/views/userhistory/_userhistory_legacy.php`. The named actions (`viewposts`, `viewcomments`) render correctly.
 - `public/login.php` POST login is broken as described above.
+
+## Testing PR #27 staff/mod page migrations
+
+- `storage/framework/views/` must be writable by the PHP-FPM worker (`www-data`, gid 82). Also create `public/tmp`; otherwise Blade view compilation fails with `tempnam(): file created in the system's temporary directory` and the first request returns HTTP 500.
+- A `cheaters` row, a `comments` row on an existing torrent, an `offers` row, and a pending user (`status='pending'`) are useful for exercising `cheaterbox.php`, `report.php`, `makepoll.php`/`polloverview.php`, and `modtask.php confirmuser`.
+- The `bans.php` form can be exercised via `curl` because the native submit button may not register under automation.
+- `/modtask.php` `edituser` requires the same fields as the `userdetails.php` edit form, including `email`, `username`, `title`, `avatar`, `signature`, `privacy`, `donor`, `uploadpos`, `downloadpos`, `forumpost`, etc. `cruprfmanage` permission means `email` and `username` cannot be omitted or they will be blanked.
+- `/deletemessage.php` originally compared `messages.location` (a `smallint`) to the strings `'in'`, `'out'`, and `'both'`, which never matched. PR #27 fixed this by using the numeric `PM_DELETED`/`saved` semantics from `messages/_messages_legacy.php` and ensuring `lang_deletemessage` is loaded.

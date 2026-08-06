@@ -51,7 +51,7 @@ class BitbucketUploadController extends Controller
     public function store(Request $request): View|RedirectResponse
     {
         if (SupportContext::getCache() === null) {
-            return redirect('/bitbucket-upload.php');
+            return redirect('/bitbucket-upload.php', 307);
         }
 
         $user = Auth::guard('nexus-web')->user();

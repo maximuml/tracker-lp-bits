@@ -3,7 +3,6 @@
 namespace App\Support;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 /**
  * Centralised, static runtime context for legacy helpers.
@@ -142,19 +141,7 @@ final class SupportContext
             return self::$user;
         }
 
-        if (! empty($GLOBALS['CURUSER'])) {
-            return $GLOBALS['CURUSER'];
-        }
-
-        $app = function_exists('app') ? app() : null;
-        if (is_object($app) && method_exists($app, 'isBooted') && $app->isBooted()) {
-            $authUser = Auth::guard('nexus-web')->user();
-            if ($authUser !== null) {
-                return $authUser->toArray();
-            }
-        }
-
-        return null;
+        return ! empty($GLOBALS['CURUSER']) ? $GLOBALS['CURUSER'] : null;
     }
 
     /** @param  array<string, string>  $lang */

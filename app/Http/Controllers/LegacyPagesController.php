@@ -239,6 +239,46 @@ class LegacyPagesController extends Controller
         return $this->legacy($request, 'clearcache');
     }
 
+    public function aboutNexus(Request $request): View|RedirectResponse
+    {
+        return $this->legacy($request, 'aboutnexus', false);
+    }
+
+    public function rules(Request $request): View|RedirectResponse
+    {
+        return $this->legacy($request, 'rules', false);
+    }
+
+    public function userAgreement(Request $request): View|RedirectResponse
+    {
+        return $this->legacy($request, 'useragreement', false);
+    }
+
+    public function faq(Request $request): View|RedirectResponse
+    {
+        return $this->legacy($request, 'faq', false);
+    }
+
+    public function donate(Request $request): View|RedirectResponse
+    {
+        return $this->legacy($request, 'donate', false);
+    }
+
+    public function donated(Request $request): Response|RedirectResponse
+    {
+        return $this->legacyWithRedirect($request, 'donated');
+    }
+
+    public function faqManage(Request $request): View|RedirectResponse
+    {
+        return $this->legacy($request, 'faqmanage');
+    }
+
+    public function faqActions(Request $request): Response|RedirectResponse
+    {
+        return $this->legacyWithRedirect($request, 'faqactions');
+    }
+
     private function legacy(Request $request, string $page, bool $auth = true): View|RedirectResponse
     {
         if (! defined('IN_NEXUS') || ($auth && ! isset($GLOBALS['CURUSER']))) {

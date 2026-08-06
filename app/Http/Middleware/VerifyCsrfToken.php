@@ -48,5 +48,7 @@ class VerifyCsrfToken extends Middleware
         "takeflush",
         "takereseed",
         "clearcache",
+        "donated",
+        "faqactions",
     ];
 }

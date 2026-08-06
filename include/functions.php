@@ -41,22 +41,22 @@ function legacy_auth_context(): \App\Support\LegacyAuthContext
     }
 
     return new \App\Support\LegacyAuthContext(
-        user: $GLOBALS['CURUSER'] ?? null,
-        lang: $GLOBALS['lang_functions'] ?? [],
-        cache: $GLOBALS['Cache'] ?? null,
+        user: SupportContext::getUser(),
+        lang: SupportContext::getLangFunctions(),
+        cache: SupportContext::getCache(),
         ip: \function_exists('getip') ? \getip() : \App\Support\Network::clientIp(),
         requestUri: SupportContext::getServerValue('REQUEST_URI'),
         requestBody: SupportContext::allPost(),
         queryParams: SupportContext::allQuery(),
         request: array_merge(SupportContext::allPost(), SupportContext::allQuery()),
         cookies: SupportContext::allCookie(),
-        maxLoginAttempts: (int) ($GLOBALS['maxloginattempts'] ?? 0),
-        captchaEnabled: ($GLOBALS['iv'] ?? '') === 'yes',
+        maxLoginAttempts: (int) SupportContext::getGlobal('maxloginattempts', 0),
+        captchaEnabled: SupportContext::getGlobal('iv', '') === 'yes',
         registration: [
-            'invitesystem' => $GLOBALS['invitesystem'] ?? '',
-            'registration' => $GLOBALS['registration'] ?? '',
-            'maxusers' => (int) ($GLOBALS['maxusers'] ?? 0),
-            'maxip' => (int) ($GLOBALS['maxip'] ?? 0),
+            'invitesystem' => (string) SupportContext::getGlobal('invitesystem', ''),
+            'registration' => (string) SupportContext::getGlobal('registration', ''),
+            'maxusers' => (int) SupportContext::getGlobal('maxusers', 0),
+            'maxip' => (int) SupportContext::getGlobal('maxip', 0),
         ],
         langFolder: SupportContext::getCookieValue('c_lang_folder'),
         moderatorClass: defined('UC_MODERATOR') ? (int) \constant('UC_MODERATOR') : 0,
@@ -89,40 +89,40 @@ function page_layout_context(): \App\Support\PageLayoutContext
     }
 
     return new \App\Support\PageLayoutContext(
-        user: $GLOBALS['CURUSER'] ?? null,
-        lang: $GLOBALS['lang_functions'] ?? [],
-        cache: $GLOBALS['Cache'] ?? null,
-        defaultStylesheet: (int) ($GLOBALS['defcss'] ?? 0),
-        langDir: $GLOBALS['CURLANGDIR'] ?? '',
-        siteName: $GLOBALS['SITENAME'] ?? '',
-        slogan: $GLOBALS['SLOGAN'] ?? '',
-        logoMain: $GLOBALS['logo_main'] ?? '',
-        baseUrl: $GLOBALS['BASEURL'] ?? '',
-        siteOnline: $GLOBALS['SITE_ONLINE'] ?? 'yes',
-        enableDonation: $GLOBALS['enabledonation'] ?? 'no',
-        titleKeywordsTweak: $GLOBALS['titlekeywords_tweak'] ?? '',
-        metaKeywordsTweak: $GLOBALS['metakeywords_tweak'] ?? '',
-        metaDescriptionTweak: $GLOBALS['metadescription_tweak'] ?? '',
-        cssDateTweak: $GLOBALS['cssdate_tweak'] ?? '',
-        deleteNotTransferTwoAccount: (int) ($GLOBALS['deletenotransfertwo_account'] ?? 0),
-        neverDeleteAccount: (int) ($GLOBALS['neverdelete_account'] ?? 0),
-        iniUploadMain: (int) ($GLOBALS['iniupload_main'] ?? 0),
-        dateFounded: $GLOBALS['datefounded'] ?? '',
-        icpLicenseMain: $GLOBALS['icplicense_main'] ?? '',
-        addKeyShortcut: $GLOBALS['add_key_shortcut'] ?? '',
-        queryName: $GLOBALS['query_name'] ?? [],
-        enableSqlDebugTweak: $GLOBALS['enablesqldebug_tweak'] ?? 'no',
-        sqlDebugTweak: (int) ($GLOBALS['sqldebug_tweak'] ?? 0),
-        analyticsCodeTweak: $GLOBALS['analyticscode_tweak'] ?? '',
+        user: SupportContext::getUser(),
+        lang: SupportContext::getLangFunctions(),
+        cache: SupportContext::getCache(),
+        defaultStylesheet: (int) SupportContext::getGlobal('defcss', 0),
+        langDir: (string) SupportContext::getGlobal('CURLANGDIR', ''),
+        siteName: (string) SupportContext::getGlobal('SITENAME', ''),
+        slogan: (string) SupportContext::getGlobal('SLOGAN', ''),
+        logoMain: (string) SupportContext::getGlobal('logo_main', ''),
+        baseUrl: (string) SupportContext::getGlobal('BASEURL', ''),
+        siteOnline: (string) SupportContext::getGlobal('SITE_ONLINE', 'yes'),
+        enableDonation: (string) SupportContext::getGlobal('enabledonation', 'no'),
+        titleKeywordsTweak: (string) SupportContext::getGlobal('titlekeywords_tweak', ''),
+        metaKeywordsTweak: (string) SupportContext::getGlobal('metakeywords_tweak', ''),
+        metaDescriptionTweak: (string) SupportContext::getGlobal('metadescription_tweak', ''),
+        cssDateTweak: (string) SupportContext::getGlobal('cssdate_tweak', ''),
+        deleteNotTransferTwoAccount: (int) SupportContext::getGlobal('deletenotransfertwo_account', 0),
+        neverDeleteAccount: (int) SupportContext::getGlobal('neverdelete_account', 0),
+        iniUploadMain: (int) SupportContext::getGlobal('iniupload_main', 0),
+        dateFounded: (string) SupportContext::getGlobal('datefounded', ''),
+        icpLicenseMain: (string) SupportContext::getGlobal('icplicense_main', ''),
+        addKeyShortcut: (string) SupportContext::getGlobal('add_key_shortcut', ''),
+        queryName: (array) SupportContext::getGlobal('query_name', []),
+        enableSqlDebugTweak: (string) SupportContext::getGlobal('enablesqldebug_tweak', 'no'),
+        sqlDebugTweak: (int) SupportContext::getGlobal('sqldebug_tweak', 0),
+        analyticsCodeTweak: (string) SupportContext::getGlobal('analyticscode_tweak', ''),
         requestSearch: is_scalar(SupportContext::getQuery('search', '')) ? (string) SupportContext::getQuery('search', '') : '',
         requestSearchArea: is_scalar(SupportContext::getQuery('search_area', '')) ? (string) SupportContext::getQuery('search_area', '') : '',
         scriptFileName: SupportContext::getServerValue('SCRIPT_FILENAME', ''),
         script: $script,
-        enableOffer: $GLOBALS['enableoffer'] ?? '',
-        enableSpecial: $GLOBALS['enablespecial'] ?? '',
+        enableOffer: (string) SupportContext::getGlobal('enableoffer', ''),
+        enableSpecial: (string) SupportContext::getGlobal('enablespecial', ''),
         customMenu: (string) \apply_filter('nexus_menu') ?: null,
-        maxdlSystem: $GLOBALS['maxdlsystem'] ?? '',
-        whereTweak: $GLOBALS['where_tweak'] ?? '',
+        maxdlSystem: (string) SupportContext::getGlobal('maxdlsystem', ''),
+        whereTweak: (string) SupportContext::getGlobal('where_tweak', ''),
         adminClass: defined('UC_ADMINISTRATOR') ? (int) \constant('UC_ADMINISTRATOR') : 0,
         moderatorClass: defined('UC_MODERATOR') ? (int) \constant('UC_MODERATOR') : 0,
         sysopClass: defined('UC_SYSOP') ? (int) \constant('UC_SYSOP') : 0,
@@ -841,11 +841,13 @@ function userlogin() {
     $context = legacy_auth_context();
     $user = \App\Support\LegacyAuth::loginFromCookie($context);
     if ($user !== null) {
-        $GLOBALS['oldip'] = $user['old_ip'] ?? $user['ip'] ?? '';
-        $GLOBALS['CURUSER'] = $user;
+        SupportContext::setGlobal('oldip', $user['old_ip'] ?? $user['ip'] ?? '');
+        SupportContext::setGlobal('CURUSER', $user);
+        SupportContext::setUser($user);
         return true;
     }
-    unset($GLOBALS['CURUSER']);
+    SupportContext::setGlobal('CURUSER', null);
+    SupportContext::setUser(null);
     return false;
 }
 /**
@@ -990,22 +992,21 @@ function get_if_restricted_is_open()
  * @return void
  */
 function menu ($selected = "home") {
-    $langFunctions = $GLOBALS['lang_functions'] ?? [];
     $customMenu = (string) \apply_filter('nexus_menu');
 
     $result = \App\Support\Menu::render(
         \function_exists('nexus') ? \nexus()->getScript() : '',
-        (array) $langFunctions,
-        (string) ($GLOBALS['enableoffer'] ?? ''),
-        (string) ($GLOBALS['enablespecial'] ?? ''),
+        SupportContext::getLangFunctions(),
+        (string) SupportContext::getGlobal('enableoffer', ''),
+        (string) SupportContext::getGlobal('enablespecial', ''),
         $customMenu !== '' ? $customMenu : null,
-        $GLOBALS['CURUSER'] ?? null,
-        $GLOBALS['Cache'] ?? null,
-        $GLOBALS['CURLANGDIR'] ?? '',
+        SupportContext::getUser(),
+        SupportContext::getCache(),
+        (string) SupportContext::getGlobal('CURLANGDIR', ''),
     );
 
-    $CURUSER = $GLOBALS['CURUSER'] ?? null;
-    if ($CURUSER && ($GLOBALS['where_tweak'] ?? '') === 'yes') {
+    $CURUSER = SupportContext::getUser();
+    if ($CURUSER && SupportContext::getGlobal('where_tweak', '') === 'yes') {
         $GLOBALS['USERUPDATESET']['page'] = $result['selected'];
     }
 
@@ -1015,7 +1016,9 @@ function menu ($selected = "home") {
  * @return array<array-key, mixed>|null
  */
 function get_css_row() {
-	global $CURUSER, $defcss, $Cache;
+	$CURUSER = SupportContext::getUser();
+	$defcss = (int) SupportContext::getGlobal('defcss', 0);
+	$Cache = SupportContext::getCache();
 	return \App\Support\Style::cssRow($Cache, $CURUSER ? $CURUSER["stylesheet"] : $defcss, $defcss);
 }
 /**

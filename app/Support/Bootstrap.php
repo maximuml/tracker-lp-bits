@@ -18,6 +18,11 @@ final class Bootstrap
      */
     public static function connect(bool $autoclean = false, bool $doLogin = true): void
     {
+        // Refresh the per-request context from the current superglobals first so
+        // legacy login reads the correct cookies/server values, not stale FPM
+        // worker state from a previous request.
+        SupportContext::fromGlobals();
+
         $useCronTriggerCleanUp = (bool) SupportContext::getGlobal('useCronTriggerCleanUp', false);
 
         \Nexus\Database\NexusDB::getInstance()->autoConnect();
@@ -25,6 +30,9 @@ final class Bootstrap
         if ($doLogin) {
             \userlogin();
         }
+
+        // Capture userlogin side effects (CURUSER, oldip) into the context.
+        SupportContext::fromGlobals();
 
         if (! $useCronTriggerCleanUp && $autoclean) {
             register_shutdown_function('autoclean');

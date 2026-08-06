@@ -2,13 +2,17 @@
 
 namespace App\Support;
 
+use App\Models\Setting;
 use App\Repositories\ToolRepository;
+use Illuminate\Support\Facades\Request;
 
 /**
  * Legacy mail-sending helper extracted from `include/functions.php`.
  *
  * Backs `sent_mail()`. It keeps the three transport modes (`default`,
- * `advanced`, `external`) and the legacy `stderr()` UI side effects.
+ * `advanced`, `external`) and no longer calls `stderr()` from inside the
+ * mailer; failures are returned as `false` and the caller decides how to
+ * report them. Site/SMTP configuration is read directly from `Setting`.
  */
 final class Mail
 {
@@ -30,9 +34,6 @@ final class Mail
         string $multipleMail,
         string $hdrEncoding,
     ): bool {
-        $lang = SupportContext::getLangFunctions();
-        $siteConfig = SupportContext::getSiteConfig();
-
         return self::sent(
             $to,
             $fromName,
@@ -40,26 +41,17 @@ final class Mail
             $subject,
             $body,
             $type,
-            $showMsg,
             $multiple,
             $multipleMail,
             $hdrEncoding,
             [
-                'site_name' => (string) ($siteConfig['SITENAME'] ?? ''),
-                'site_email' => (string) ($siteConfig['SITEEMAIL'] ?? ''),
-                'smtp_type' => (string) ($siteConfig['smtptype'] ?? ''),
-                'smtp' => (string) ($siteConfig['smtp'] ?? ''),
-                'smtp_host' => (string) ($siteConfig['smtp_host'] ?? ''),
-                'smtp_port' => (string) ($siteConfig['smtp_port'] ?? ''),
-                'smtp_from' => (string) ($siteConfig['smtp_from'] ?? ''),
-            ],
-            [
-                'error' => $lang['std_error'] ?? 'Error',
-                'success' => $lang['std_success'] ?? 'Success',
-                'unable_to_send_mail' => $lang['text_unable_to_send_mail'] ?? 'Unable to send mail',
-                'confirmation_email_sent' => $lang['std_confirmation_email_sent'] ?? 'Confirmation email sent to ',
-                'account_details_sent' => $lang['std_account_details_sent'] ?? 'Account details sent to ',
-                'please_wait' => $lang['std_please_wait'] ?? 'Please wait...',
+                'site_name' => (string) Setting::get('basic.SITENAME', ''),
+                'site_email' => (string) Setting::get('main.SITEEMAIL', ''),
+                'smtp_type' => (string) Setting::get('smtp.smtptype', 'none'),
+                'smtp' => (string) Setting::get('smtp.smtp', ''),
+                'smtp_host' => (string) Setting::get('smtp.smtp_host', ''),
+                'smtp_port' => (string) Setting::get('smtp.smtp_port', ''),
+                'smtp_from' => (string) Setting::get('smtp.smtp_from', ''),
             ]
         );
     }
@@ -71,7 +63,6 @@ final class Mail
      */
     /**
      * @param  array<string, mixed>  $mailConfig
-     * @param  array<string, string>  $labels
      */
     public static function sent(
         string $to,
@@ -80,12 +71,10 @@ final class Mail
         string $subject,
         string $body,
         string $type,
-        bool $showMsg,
         bool $multiple,
         string $multipleMail,
         string $hdrEncoding,
         array $mailConfig,
-        array $labels,
     ): bool {
         \do_log("to: $to, fromname: $fromName, fromemail: $fromEmail, subject: $subject, body: $body. type: $type");
 
@@ -109,20 +98,18 @@ final class Mail
         }
 
         if ($smtpType === 'default') {
-            @mail(
+            return (bool) @mail(
                 $to,
                 '=?'.$hdrEncoding.'?B?'.base64_encode($subject).'?=',
                 $body,
                 'From: '.$siteEmail.$eol.'Content-type: text/html; charset='.$hdrEncoding.$eol,
                 "-f$siteEmail"
-            ) or \stderr($labels['error'], $labels['unable_to_send_mail']);
-
-            return true;
+            );
         }
 
         if ($smtpType === 'advanced') {
-            $mid = md5(getip() . $fromName);
-            $name = SupportContext::getServerValue('SERVER_NAME', $siteName);
+            $mid = md5(Network::clientIp() . $fromName);
+            $name = (string) Request::server('SERVER_NAME', $siteName);
             $headers = '';
             $headers .= "From: $fromName <$fromEmail>".$eol;
             $headers .= "Reply-To: $fromName <$fromEmail>".$eol;
@@ -153,12 +140,12 @@ final class Mail
                 }
             }
 
-            @mail(
+            $result = (bool) @mail(
                 $to,
                 '=?'.$hdrEncoding.'?B?'.base64_encode($subject).'?=',
                 $body,
                 $headers
-            ) or \stderr($labels['error'], $labels['unable_to_send_mail']);
+            );
 
             ini_restore('SMTP');
             ini_restore('smtp_port');
@@ -166,27 +153,15 @@ final class Mail
                 ini_restore('sendmail_from');
             }
 
-            return true;
+            return $result;
         }
 
         if ($smtpType === 'external') {
             $toolRep = new ToolRepository();
-            $sendResult = $toolRep->sendMail($to, $subject, $body);
-            if ($sendResult === false) {
-                \stderr($labels['error'], $labels['unable_to_send_mail']);
-            }
 
-            return true;
+            return (bool) $toolRep->sendMail($to, $subject, $body);
         }
 
-        if ($showMsg) {
-            if ($type === 'confirmation') {
-                \stderr($labels['success'], $labels['confirmation_email_sent'] . '<b>'. htmlspecialchars($to) ."</b>.\n" . $labels['please_wait'], false);
-            } elseif ($type === 'details') {
-                \stderr($labels['success'], $labels['account_details_sent'] . '<b>'. htmlspecialchars($to) ."</b>.\n" . $labels['please_wait'], false);
-            }
-        }
-
-        return true;
+        return false;
     }
 }

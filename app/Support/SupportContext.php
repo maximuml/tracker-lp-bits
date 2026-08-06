@@ -240,6 +240,43 @@ final class SupportContext
         return $GLOBALS[$key] ?? $default;
     }
 
+    /**
+     * Return a snapshot of the legacy global state suitable for passing to
+     * Blade/PHP partials. Superglobals and internal Laravel/bootstrap variables
+     * are excluded so views do not re-import PHP internals as local variables.
+     *
+     * @return array<string, mixed>
+     */
+    public static function getGlobalsForView(): array
+    {
+        $excluded = [
+            'GLOBALS',
+            '_GET',
+            '_POST',
+            '_REQUEST',
+            '_SERVER',
+            '_FILES',
+            '_COOKIE',
+            '_ENV',
+            'argc',
+            'argv',
+            'app',
+            'kernel',
+            'HTTP_RAW_POST_DATA',
+            '__composer_autoload_files',
+        ];
+
+        $context = [];
+        foreach ($GLOBALS as $key => $value) {
+            if (in_array($key, $excluded, true)) {
+                continue;
+            }
+            $context[$key] = $value;
+        }
+
+        return $context;
+    }
+
     public static function setServerValue(string $key, mixed $value): void
     {
         self::$server[$key] = $value;

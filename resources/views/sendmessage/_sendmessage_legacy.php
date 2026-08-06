@@ -1,5 +1,5 @@
 <?php
-extract($GLOBALS, EXTR_SKIP);
+extract($context, EXTR_SKIP);
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 $receiver = intval($_GET["receiver"] ?? 0);
 	int_check($receiver,true);

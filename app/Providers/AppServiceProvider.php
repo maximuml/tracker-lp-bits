@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Http\Middleware\Locale;
+use App\Support\SupportContext;
 use Carbon\Carbon;
 use Filament\Support\Assets\Css;
 use Filament\Support\Facades\FilamentAsset;
@@ -67,6 +68,12 @@ class AppServiceProvider extends ServiceProvider
             Css::make("sprites", asset('styles/sprites.css')),
             Css::make("admin", asset('styles/admin.css')),
         ]);
+
+        // Pass the legacy global context into every view so Blade/PHP partials
+        // can stop reading $GLOBALS directly via extract($GLOBALS).
+        View::composer('*', static function (\Illuminate\View\View $view): void {
+            $view->with('context', SupportContext::getGlobalsForView());
+        });
 
         do_action('nexus_boot');
     }

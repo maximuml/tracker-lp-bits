@@ -239,3 +239,33 @@ Any partial that starts with `extract($GLOBALS, EXTR_SKIP);` and then calls `mkg
 
 - Use the user's `editsecret` padded to 20 chars: `$secret = str_pad($editsecret, 20)`; `$md5 = md5($secret . $email . $secret);`.
 - The URL format is `/confirmemail.php/<id>/<md5>/<email>` (or `/confirmemail/<id>/<md5>/<email>` once routing is fixed).
+
+### Testing `takesignup.php` / `signup.php`
+
+- The form at `/signup.php` uses `crypto-js.js`, but the inline script calls `sha256(password)` while `crypto-js.js` only exposes `CryptoJS.SHA256`. The normal "Sign up!" button therefore fails to populate the hidden `wantpassword` and `wantpassword_hashed` fields and the server returns `Don't leave any fields blank.`.
+- To test the `/signup` POST route from the browser console, set the hidden `wantpassword` to `CryptoJS.SHA256('password').toString()`, `wantpassword_hashed` to `1`, and `passagain` to the same hash, then submit the form.
+- `takesignup.php` sets `$nexusRoute = '/signup'` and `require __DIR__ . '/nexus.php'`, so POST/GET to `takesignup.php` should reach the same Laravel route as `/signup`.
+- Direct `curl` POSTs to `takelogin.php` and `takesignup.php` tend to return 419 because curl's cookie handling does not play well with Laravel's encrypted session/XSRF cookies; prefer a real browser session for these endpoints.
+
+## Testing PR #232 view-context and signup/login hashing
+
+PR #232 injects a filtered `$context` into every Blade view (`View::composer('*')`) and replaces the remaining `extract($GLOBALS, EXTR_SKIP)` / `mkglobal()` calls in `delete`/`fastdelete`/`ok` partials with `SupportContext::getRequestInput()`.
+
+### What to verify
+
+- `grep` shows 215 `extract($context, EXTR_SKIP)` in `resources/views` and 0 `extract($GLOBALS` / `mkglobal(` in views.
+- `php -l` on changed files; `phpstan analyse`; `php artisan cache:clear config:clear view:clear route:clear`; `redis-cli FLUSHDB`.
+- Signup (`/signup.php`): the auth layout loads jQuery, layer, and `js/crypto-js.js`; `Form::passwordHashJs` hashes with `CryptoJS.SHA256(password).toString()`; hidden `wantpassword`/`wantpassword_hashed` are appended; submit reaches `ok.php?type=confirm`.
+- Login (`/login.php`): direct password form posts to `takelogin.php` and lands on `index.php`; only uses challenge-response when `security.use_challenge_response_authentication=yes`.
+- Critical path: `index`, `torrents.php`, `details.php?id=2`, `download.php?id=2&letdown=1` (bencode), `forums.php`, `offers.php`, `userdetails.php?id=1`, `logout.php`.
+- Legacy `public/nexus.php` pages: `/ajax.php`, `/latestcomments.php`, `/shoutbox_sse.php`, `/getattachment.php`, `/attachment.php`, `/image.php`.
+- `delete.php` (POST `reasontype` from `edit.php` delete form) and `fastdelete.php?id=<id>&sure=1` remove the torrent and print `Torrent deleted!`.
+- `ok.php?type=signup|confirmed|confirm` renders the legacy status messages.
+- POST wrappers: `takemessage.php` (success message + new `messages` row), `takeupdate.php` (mark report `dealtwith`), `takeinvite.php` (redirects to `invite.php?id=<uid>&sent=1`; actual insert requires working mail).
+- Confirm no `extract(` or `mkglobal` warnings in `docker logs nexusphp-php` during the run.
+
+### Common gotchas
+
+- `/signup.php` only works if `auth.blade.php` includes jQuery and layer; without them the `Sign up!` button does nothing because the inline handler uses `jQuery`/`layer`.
+- `/image.php?action=regimage` may return 404 when `security.iv=no` or the configured captcha driver does not implement `outputImage()`; this is environment/config, not necessarily a PR regression.
+- `takeinvite.php` redirects with `sent=1` even when `Mail::sent` cannot send because `smtp.smtptype=none`; the insert is gated on `sent_mail()` returning `true`.

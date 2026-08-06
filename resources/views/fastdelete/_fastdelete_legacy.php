@@ -1,5 +1,5 @@
 <?php
-extract($GLOBALS, EXTR_SKIP);
+extract($context, EXTR_SKIP);
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 function bark($msg) {
   global $lang_fastdelete;
@@ -9,8 +9,8 @@ function bark($msg) {
   return;
 }
 
-global $id;
-if (!mkglobal("id")) {
+$id = \App\Support\SupportContext::getRequestInput('id');
+if ($id === null) {
     bark($lang_fastdelete['std_missing_form_data']);
     return;
 }

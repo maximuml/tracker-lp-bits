@@ -408,7 +408,10 @@ class LegacyPagesController extends Controller
             return new SymfonyResponse('', 403);
         }
 
-        $callback = function () {
+        $context = SupportContext::getGlobalsForView();
+
+        $callback = function () use ($context) {
+            extract($context, EXTR_SKIP);
             $scriptFile = resource_path('views/shoutbox_sse/_shoutbox_sse_legacy.php');
             if (is_file($scriptFile)) {
                 require $scriptFile;

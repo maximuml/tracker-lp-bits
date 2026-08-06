@@ -9,7 +9,7 @@ function bark($msg) {
   stdhead();
   stdmsg($lang_delete['std_delete_failed'], $msg);
   stdfoot();
-  return;
+  exit();
 }
 
 global $id;

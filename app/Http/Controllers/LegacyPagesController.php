@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\CleanupService;
 use App\Support\SupportContext;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
@@ -507,9 +508,13 @@ class LegacyPagesController extends Controller
         return $this->legacy($request, 'staffpanel', true);
     }
 
-    public function docleanup(Request $request): View|RedirectResponse
+    public function docleanup(Request $request): Response
     {
-        return $this->legacy($request, 'docleanup', true);
+        return \response(
+            app(CleanupService::class)->runFull($request->boolean('forceall'), true),
+            200,
+            ['Content-Type' => 'text/html; charset=utf-8']
+        );
     }
 
     public function page(Request $request): Response|RedirectResponse
@@ -597,9 +602,13 @@ class LegacyPagesController extends Controller
         return $this->legacyWithRedirect($request, 'confirmemail', false);
     }
 
-    public function cron(Request $request): Response|RedirectResponse
+    public function cron(Request $request): Response
     {
-        return $this->legacyRaw($request, 'cron', false);
+        return \response(
+            app(CleanupService::class)->triggerCron(),
+            200,
+            ['Content-Type' => 'text/plain; charset=utf-8']
+        );
     }
 
     public function delete(Request $request): View|RedirectResponse

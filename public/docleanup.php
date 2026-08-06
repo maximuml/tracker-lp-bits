@@ -1,30 +1,34 @@
 <?php
-ob_start();
-require_once("../include/bittorrent.php");
+require "../include/bittorrent.php";
 dbconn();
+require_once(get_langfile_path());
+loggedinorreturn();
+$rootpath = dirname(__DIR__) . '/';
 
-if (get_user_class() < UC_SYSOP) {
-die('forbidden');
+if (! class_exists(\Illuminate\Http\Request::class)) {
+    require_once $rootpath . 'vendor/autoload.php';
 }
-require get_langfile_path();
 
-echo "<html><head><title>".$lang_docleanup['title']."</title></head><body>";
-echo "<p>";
-echo $lang_docleanup['running'] . "<br />";
-ob_flush();
-flush();
-if (isset($_GET['forceall']) && $_GET['forceall']) {
-	$forceall = 1;
-} else {
-	$forceall = 0;
-    echo $lang_docleanup['force'] . '<br />';
-}
-echo "</p>";
-$tstart = getmicrotime();
-require_once("include/cleanup.php");
-print("<p>".docleanup($forceall, 1)."</p>");
-$tend = getmicrotime();
-$totaltime = ($tend - $tstart);
-printf ($lang_docleanup['time_consumed']."<br />", $totaltime);
-echo $lang_docleanup['done']."<br />";
-echo "</body></html>";
+$app = require_once $rootpath . 'bootstrap/app.php';
+$kernel = $app->make(\Illuminate\Contracts\Http\Kernel::class);
+
+$method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+$uri = '/docleanup' . (empty($_SERVER['QUERY_STRING']) ? '' : '?' . $_SERVER['QUERY_STRING']);
+
+$server = $_SERVER;
+$server['SCRIPT_NAME'] = '/docleanup.php';
+$server['SCRIPT_FILENAME'] = $rootpath . 'public/docleanup.php';
+$server['REQUEST_METHOD'] = $method;
+
+$request = \Illuminate\Http\Request::create(
+    $uri,
+    $method,
+    $method === 'POST' ? $_POST : $_GET,
+    $_COOKIE,
+    $_FILES,
+    $server
+);
+
+$response = $kernel->handle($request);
+$response->send();
+$kernel->terminate($request, $response);

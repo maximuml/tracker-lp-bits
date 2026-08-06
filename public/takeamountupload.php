@@ -1,42 +1,33 @@
 <?php
 require "../include/bittorrent.php";
-if ($_SERVER["REQUEST_METHOD"] != "POST")
-	stderr("Error", "Permission denied!");
 dbconn();
 loggedinorreturn();
+$rootpath = dirname(__DIR__) . '/';
 
-if (get_user_class() < UC_SYSOP)
-	stderr("Sorry", "Permission denied.");
-
-$sender_id = ($_POST['sender'] == 'system' ? 0 : (int)$CURUSER['id']);
-$added = date("Y-m-d H:i:s");
-$msg = trim($_POST['msg']);
-$amount = $_POST['amount'];
-if (!$msg || !$amount)
-	stderr("Error","Don't leave any fields blank.");
-if(!is_numeric($amount))
-	stderr("Error","amount must be numeric");
-$updateset = (array) $_POST['clases'];
-foreach ($updateset as $class) {
-	if (!is_valid_id($class) && $class != 0)
-		stderr("Error","Invalid Class");
-}
-$subject = trim($_POST['subject']);
-
-$amount = getsize_int($amount,"G");
-\App\Models\User::query()->whereIn('class', $updateset)->increment('uploaded', $amount);
-
-$userIds = \App\Models\User::query()->whereIn('class', $updateset)->pluck('id')->all();
-foreach ($userIds as $userId)
-{
-	\Nexus\Database\NexusDB::table('messages')->insert([
-	    'sender' => $sender_id,
-	    'receiver' => $userId,
-	    'added' => $added,
-	    'subject' => $subject,
-	    'msg' => $msg,
-	]);
+if (! class_exists(\Illuminate\Http\Request::class)) {
+    require_once $rootpath . 'vendor/autoload.php';
 }
 
-header("Location: amountupload.php?sent=1");
-?>
+$app = require_once $rootpath . 'bootstrap/app.php';
+$kernel = $app->make(\Illuminate\Contracts\Http\Kernel::class);
+
+$method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+$uri = '/takeamountupload' . (empty($_SERVER['QUERY_STRING']) ? '' : '?' . $_SERVER['QUERY_STRING']);
+
+$server = $_SERVER;
+$server['SCRIPT_NAME'] = '/takeamountupload.php';
+$server['SCRIPT_FILENAME'] = $rootpath . 'public/takeamountupload.php';
+$server['REQUEST_METHOD'] = $method;
+
+$request = \Illuminate\Http\Request::create(
+    $uri,
+    $method,
+    $method === 'POST' ? $_POST : $_GET,
+    $_COOKIE,
+    $_FILES,
+    $server
+);
+
+$response = $kernel->handle($request);
+$response->send();
+$kernel->terminate($request, $response);

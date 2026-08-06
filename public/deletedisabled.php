@@ -1,44 +1,34 @@
 <?php
 require "../include/bittorrent.php";
 dbconn();
-loggedinorreturn();
 require_once(get_langfile_path());
-if (get_user_class() < UC_SYSOP)
-	permissiondenied();
+loggedinorreturn();
+$rootpath = dirname(__DIR__) . '/';
 
-$shownotice=false;
-stderr("Error", "Hard deletion of users is not recommended and can cause many problems.");
-if ($_SERVER["REQUEST_METHOD"] == "POST")
-{
-	if ($_POST['sure'])
-	{
-		$deletecount = \App\Models\User::query()->where('enabled', 'no')->delete();
-		$shownotice=true;
-	}
+if (! class_exists(\Illuminate\Http\Request::class)) {
+    require_once $rootpath . 'vendor/autoload.php';
 }
-stdhead($lang_deletedisabled['head_delete_diasabled']);
-begin_main_frame();
-?>
-<h1 align="center"><?php echo $lang_deletedisabled['text_delete_diasabled']?></h1>
-<?php
-if ($shownotice)
-{
-?>
-<div style="text-align: center;"><?php echo $deletecount.$lang_deletedisabled['text_users_are_disabled']?></div>
-<?php
-}
-else
-{
-?>
-<div style="text-align: center;"><?php echo $lang_deletedisabled['text_delete_disabled_note']?></div>
-<div style="text-align: center; margin-top: 10px;">
-<form method="post" action="?">
-<input type="hidden" name="sure" value="1" />
-<input type="submit" value="<?php echo $lang_deletedisabled['submit_delete_all_disabled_users']?>" />
-</form>
-</div>
-<?php
-}
-end_main_frame();
-stdfoot();
-?>
+
+$app = require_once $rootpath . 'bootstrap/app.php';
+$kernel = $app->make(\Illuminate\Contracts\Http\Kernel::class);
+
+$method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+$uri = '/deletedisabled' . (empty($_SERVER['QUERY_STRING']) ? '' : '?' . $_SERVER['QUERY_STRING']);
+
+$server = $_SERVER;
+$server['SCRIPT_NAME'] = '/deletedisabled.php';
+$server['SCRIPT_FILENAME'] = $rootpath . 'public/deletedisabled.php';
+$server['REQUEST_METHOD'] = $method;
+
+$request = \Illuminate\Http\Request::create(
+    $uri,
+    $method,
+    $method === 'POST' ? $_POST : $_GET,
+    $_COOKIE,
+    $_FILES,
+    $server
+);
+
+$response = $kernel->handle($request);
+$response->send();
+$kernel->terminate($request, $response);

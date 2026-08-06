@@ -1,0 +1,1 @@
+@php include resource_path('views/page/_page_legacy.php'); @endphp

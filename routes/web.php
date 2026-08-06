@@ -82,6 +82,11 @@ Route::match(['get', 'post'], '/shoutbox_sse', [LegacyPagesController::class, 's
 
 Route::match(['get', 'post'], '/torrentrss', [LegacyPagesController::class, 'torrentrss'])->name('torrentrss.legacy');
 
+Route::match(['get', 'post'], '/page', [LegacyPagesController::class, 'page'])->name('page.legacy');
+Route::match(['get', 'post'], '/tags', [LegacyPagesController::class, 'tags'])->name('tags.legacy');
+Route::match(['get', 'post'], '/suggest', [LegacyPagesController::class, 'suggest'])->name('suggest.legacy');
+Route::match(['get', 'post'], '/opensearch', [LegacyPagesController::class, 'opensearch'])->name('opensearch.legacy');
+
 Route::group(['middleware' => ['auth.nexus:nexus-web']], function () {
     Route::get('/upload', [TorrentUploadController::class, 'create'])->name('torrents.upload');
     Route::get('/bitbucket-upload', [BitbucketUploadController::class, 'create'])->name('bitbucket.upload');
@@ -175,6 +180,15 @@ Route::group(['middleware' => ['auth.nexus:nexus-web']], function () {
     Route::match(['get', 'post'], '/users', [LegacyPagesController::class, 'users'])->name('users.legacy');
     Route::match(['get', 'post'], '/staffpanel', [LegacyPagesController::class, 'staffpanel'])->name('staffpanel.legacy');
     Route::match(['get', 'post'], '/docleanup', [LegacyPagesController::class, 'docleanup'])->name('docleanup.legacy');
+    Route::match(['get', 'post'], '/location', [LegacyPagesController::class, 'location'])->name('location.legacy');
+    Route::match(['get', 'post'], '/preview', [LegacyPagesController::class, 'preview'])->name('preview.legacy');
+    Route::match(['get', 'post'], '/moresmilies', [LegacyPagesController::class, 'moresmilies'])->name('moresmilies.legacy');
+    Route::match(['get', 'post'], '/smilies', [LegacyPagesController::class, 'smilies'])->name('smilies.legacy');
+    Route::match(['get', 'post'], '/mailtest', [LegacyPagesController::class, 'mailtest'])->name('mailtest.legacy');
+    Route::match(['get', 'post'], '/mysql_stats', [LegacyPagesController::class, 'mysqlStats'])->name('mysql_stats.legacy');
+    Route::match(['get', 'post'], '/reset', [LegacyPagesController::class, 'reset'])->name('reset.legacy');
+    Route::match(['get', 'post'], '/self-enable', [LegacyPagesController::class, 'selfEnable'])->name('self-enable.legacy');
+    Route::match(['get', 'post'], '/unco', [LegacyPagesController::class, 'unco'])->name('unco.legacy');
 });
 
 Route::match(['get', 'post'], '/shoutbox', [LegacyPagesController::class, 'shoutbox'])->name('shoutbox.legacy');

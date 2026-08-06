@@ -1,1 +1,1 @@
-@include('shoutbox._shoutbox_legacy')
+@php include resource_path('views/shoutbox/_shoutbox_legacy.php'); @endphp

@@ -2,53 +2,32 @@
 require "../include/bittorrent.php";
 dbconn();
 loggedinorreturn();
+$rootpath = dirname(__DIR__) . '/';
 
-if (get_user_class() < UC_MODERATOR)
-stderr("Sorry", "Access denied.");
-$status = $_GET['status'];
-	if ($status)
-		int_check($status,true);
-		
-$rows = \App\Models\User::query()->where('status', 'pending')->orderBy('username')->get();
-if( $rows->isNotEmpty() )
-{
-	stdhead("Unconfirmed Users");
-	begin_main_frame();
-	begin_frame("");
-print'<br><table width=100% border=1 cellspacing=0 cellpadding=5>';
-if ($status)
-	print '<tr><td class=rowhead colspan=5><font color=red size=1>The User account has been updated!</font></tr></td>';
-print'<tr>';
-print'<td class=rowhead><center>Name</center></td>';
-print'<td class=rowhead><center>eMail</center></td>';
-print'<td class=rowhead><center>Added</center></td>';
-print'<td class=rowhead><center>Set Status</center></td>';
-print'<td class=rowhead><center>Confirm</center></td>';
-print'</tr>';
-foreach ($rows as $userRow)
-{
-$row = (array) $userRow;
-$id = $row['id'];
-print'<tr><form method=post action=modtask.php>';
-print'<input type=hidden name=\'action\' value=\'confirmuser\'>';
-print("<input type=hidden name='userid' value='$id'>");
-print'<a href="userdetails.php?id=' . $row['id'] . '"><td><center>' . $row['username'] . '</center></td></a>';
-print'<td align=center>&nbsp;&nbsp;&nbsp;&nbsp;' . $row['email'] . '</td>';
-print'<td align=center>&nbsp;&nbsp;&nbsp;&nbsp;' . $row['added'] . '</td>';
-print'<td align=center><select name=confirm><option value=pending>pending</option><option value=confirmed>confirmed</option></select></td>';
-print'<td align=center><input type=submit value="-Go-" style=\'height: 20px; width: 40px\'>';
-print'</form></tr>';
-}
-print '</table>';
-end_frame();
-end_main_frame();
-}else{
-	if ($status) {
-		stderr("Updated!","The user account has been updated.");
-	}
-	else {
-		stderr("Ups!","Nothing Found...");
-	}
+if (! class_exists(\Illuminate\Http\Request::class)) {
+    require_once $rootpath . 'vendor/autoload.php';
 }
 
-stdfoot();
+$app = require_once $rootpath . 'bootstrap/app.php';
+$kernel = $app->make(\Illuminate\Contracts\Http\Kernel::class);
+
+$method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+$uri = '/unco' . (empty($_SERVER['QUERY_STRING']) ? '' : '?' . $_SERVER['QUERY_STRING']);
+
+$server = $_SERVER;
+$server['SCRIPT_NAME'] = '/unco.php';
+$server['SCRIPT_FILENAME'] = $rootpath . 'public/unco.php';
+$server['REQUEST_METHOD'] = $method;
+
+$request = \Illuminate\Http\Request::create(
+    $uri,
+    $method,
+    $method === 'POST' ? $_POST : $_GET,
+    $_COOKIE,
+    $_FILES,
+    $server
+);
+
+$response = $kernel->handle($request);
+$response->send();
+$kernel->terminate($request, $response);

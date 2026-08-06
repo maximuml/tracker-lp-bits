@@ -1,45 +1,35 @@
 <?php
-require_once("../include/bittorrent.php");
+require "../include/bittorrent.php";
 dbconn();
 require_once(get_langfile_path());
 loggedinorreturn();
 parked();
-?>
-<html><head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<title><?php echo $lang_moresmilies['head_more_smilies']?></title>
-<style type="text/css">
-img {border: none;}
-body {color: #000000; background-color: #ffffff}
-</style>
-</head>
-<body>
-<script type="text/javascript">
-function SmileIT(smile,form,text){
-   window.opener.document.forms[form].elements[text].value = window.opener.document.forms[form].elements[text].value+" "+smile+" ";
-   window.opener.document.forms[form].elements[text].focus();
-   window.close();
-}
-</script>
+$rootpath = dirname(__DIR__) . '/';
 
-<table class="lista" width="100%" cellpadding="1" cellspacing="1">
-<?php
-$count = 0;
-for($i=1; $i<192; $i++) {
-  if ($count % 3==0)
-     print("\n<tr>");
-
-     print("\n\t<td class=\"lista\" align=\"center\"><a href=\"javascript: SmileIT('[em$i]','".htmlspecialchars($_GET["form"])."','".htmlspecialchars($_GET["text"])."')\"><img src=\"pic/smilies/$i.gif\" alt=\"\" ></a></td>");
-     $count++;
-
-  if ($count % 3==0)
-     print("\n</tr>");
+if (! class_exists(\Illuminate\Http\Request::class)) {
+    require_once $rootpath . 'vendor/autoload.php';
 }
 
-?>
-</table>
-<div align="center">
- <a href="javascript: window.close()"><?php echo $lang_moresmilies['text_close']?></a>
-</div>
-</body>
-</html>
+$app = require_once $rootpath . 'bootstrap/app.php';
+$kernel = $app->make(\Illuminate\Contracts\Http\Kernel::class);
+
+$method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+$uri = '/moresmilies' . (empty($_SERVER['QUERY_STRING']) ? '' : '?' . $_SERVER['QUERY_STRING']);
+
+$server = $_SERVER;
+$server['SCRIPT_NAME'] = '/moresmilies.php';
+$server['SCRIPT_FILENAME'] = $rootpath . 'public/moresmilies.php';
+$server['REQUEST_METHOD'] = $method;
+
+$request = \Illuminate\Http\Request::create(
+    $uri,
+    $method,
+    $method === 'POST' ? $_POST : $_GET,
+    $_COOKIE,
+    $_FILES,
+    $server
+);
+
+$response = $kernel->handle($request);
+$response->send();
+$kernel->terminate($request, $response);

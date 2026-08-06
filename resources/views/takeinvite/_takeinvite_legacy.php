@@ -3,10 +3,10 @@ extract($GLOBALS, EXTR_SKIP);
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
 $langFile = get_langfile_path();
-if (!is_file(__DIR__ . '/../' . $langFile)) {
-	$langFile = __DIR__ . '/../lang/en/lang_takeinvite.php';
+if (!is_file(ROOT_PATH . $langFile)) {
+	$langFile = 'lang/en/lang_takeinvite.php';
 }
-require_once $langFile;
+require_once ROOT_PATH . $langFile;
 $id = $CURUSER['id'];
 $lockName = sprintf("takeinvite:%s", $id);
 $lock = new \Nexus\Database\NexusLock($lockName, 10);

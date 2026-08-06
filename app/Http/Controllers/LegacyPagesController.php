@@ -510,6 +510,71 @@ class LegacyPagesController extends Controller
         return $this->legacy($request, 'docleanup', true);
     }
 
+    public function page(Request $request): Response|RedirectResponse
+    {
+        return $this->legacyRaw($request, 'page', false);
+    }
+
+    public function location(Request $request): View|RedirectResponse
+    {
+        return $this->legacy($request, 'location', true);
+    }
+
+    public function tags(Request $request): View|RedirectResponse
+    {
+        return $this->legacy($request, 'tags', false);
+    }
+
+    public function suggest(Request $request): Response|RedirectResponse
+    {
+        return $this->legacyRaw($request, 'suggest', false);
+    }
+
+    public function preview(Request $request): View|RedirectResponse
+    {
+        return $this->legacy($request, 'preview', true);
+    }
+
+    public function moresmilies(Request $request): View|RedirectResponse
+    {
+        return $this->legacy($request, 'moresmilies', true);
+    }
+
+    public function smilies(Request $request): View|RedirectResponse
+    {
+        return $this->legacy($request, 'smilies', true);
+    }
+
+    public function opensearch(Request $request): Response|RedirectResponse
+    {
+        return $this->legacyRaw($request, 'opensearch', false);
+    }
+
+    public function mailtest(Request $request): View|RedirectResponse
+    {
+        return $this->legacy($request, 'mailtest', true);
+    }
+
+    public function mysqlStats(Request $request): View|RedirectResponse
+    {
+        return $this->legacy($request, 'mysql_stats', true);
+    }
+
+    public function reset(Request $request): View|RedirectResponse
+    {
+        return $this->legacy($request, 'reset', true);
+    }
+
+    public function selfEnable(Request $request): View|RedirectResponse
+    {
+        return $this->legacy($request, 'self-enable', true);
+    }
+
+    public function unco(Request $request): View|RedirectResponse
+    {
+        return $this->legacy($request, 'unco', true);
+    }
+
     private function legacy(Request $request, string $page, bool $auth = true): View|RedirectResponse
     {
         if (! defined('IN_NEXUS') || ($auth && ! isset($GLOBALS['CURUSER']))) {
@@ -569,7 +634,10 @@ class LegacyPagesController extends Controller
 
             $parts = explode(':', $header, 2);
             if (count($parts) === 2) {
-                $responseHeaders[trim($parts[0])] = trim($parts[1]);
+                $name = trim($parts[0]);
+                $value = trim($parts[1]);
+                $responseHeaders[$name] = ($responseHeaders[$name] ?? '') !== '' ? $responseHeaders[$name] . ', ' . $value : $value;
+                header_remove($name);
             }
         }
 

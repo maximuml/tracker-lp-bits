@@ -2,11 +2,18 @@
 extract($GLOBALS, EXTR_SKIP);
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
-if ($_SERVER["REQUEST_METHOD"] != "POST")
-	stderr("Error", "Permission denied!");
-
 if (get_user_class() < UC_SYSOP)
 	stderr("Sorry", "Permission denied.");
+
+if ($_SERVER["REQUEST_METHOD"] != "POST") {
+	if (isset($_GET['sent']) && $_GET['sent'] == 1) {
+		stdhead("Add Upload");
+		stdmsg("Success", "Upload amount has been added successfully.");
+		stdfoot();
+		return;
+	}
+	stderr("Error", "Permission denied!");
+}
 
 $sender_id = ($_POST['sender'] == 'system' ? 0 : (int)$CURUSER['id']);
 $added = date("Y-m-d H:i:s");
@@ -38,4 +45,4 @@ foreach ($userIds as $userId)
 	]);
 }
 
-header("Location: amountupload.php?sent=1");
+header("Location: takeamountupload.php?sent=1");

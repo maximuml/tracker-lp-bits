@@ -2,35 +2,32 @@
 require "../include/bittorrent.php";
 dbconn();
 loggedinorreturn();
-user_can('user-delete', true);
+$rootpath = dirname(__DIR__) . '/';
 
-if ($_SERVER["REQUEST_METHOD"] == "POST")
-{
-$userid = trim($_POST["userid"]);
-
-if (!$userid)
-  stderr("Error", "Please fill out the form correctly.");
-
-$user = \App\Models\User::query()->where('id', $userid)->first();
-if (!$user)
-  stderr("Error", "Bad user id or password. Please verify that all entered information is correct.");
-$arr = $user->toArray();
-
-$id = $arr['id'];
-$name = $arr['username'];
-$userRep = new \App\Repositories\UserRepository();
-$userRep->destroy($id);
-stderr("Success", "The account <b>".htmlspecialchars($name)."</b> was deleted.",false);
+if (! class_exists(\Illuminate\Http\Request::class)) {
+    require_once $rootpath . 'vendor/autoload.php';
 }
-stdhead("Delete account");
-?>
-<h1>Delete account</h1>
-<table border=1 cellspacing=0 cellpadding=5>
-<form method=post action=delacctadmin.php>
-<tr><td class=rowhead>User name</td><td><input size=40 name=userid></td></tr>
 
-<tr><td colspan=2><input type=submit class=btn value='Delete'></td></tr>
-</form>
-</table>
-<?php
-stdfoot();
+$app = require_once $rootpath . 'bootstrap/app.php';
+$kernel = $app->make(\Illuminate\Contracts\Http\Kernel::class);
+
+$method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+$uri = '/delacctadmin' . (empty($_SERVER['QUERY_STRING']) ? '' : '?' . $_SERVER['QUERY_STRING']);
+
+$server = $_SERVER;
+$server['SCRIPT_NAME'] = '/delacctadmin.php';
+$server['SCRIPT_FILENAME'] = $rootpath . 'public/delacctadmin.php';
+$server['REQUEST_METHOD'] = $method;
+
+$request = \Illuminate\Http\Request::create(
+    $uri,
+    $method,
+    $method === 'POST' ? $_POST : $_GET,
+    $_COOKIE,
+    $_FILES,
+    $server
+);
+
+$response = $kernel->handle($request);
+$response->send();
+$kernel->terminate($request, $response);

@@ -465,6 +465,51 @@ class LegacyPagesController extends Controller
         return $this->legacyRaw($request, 'magic', true);
     }
 
+    public function delacctadmin(Request $request): View|RedirectResponse
+    {
+        return $this->legacy($request, 'delacctadmin', true);
+    }
+
+    public function deletedisabled(Request $request): View|RedirectResponse
+    {
+        return $this->legacy($request, 'deletedisabled', true);
+    }
+
+    public function massmail(Request $request): View|RedirectResponse
+    {
+        return $this->legacy($request, 'massmail', true);
+    }
+
+    public function takeamountupload(Request $request): Response|RedirectResponse
+    {
+        return $this->legacyWithRedirect($request, 'takeamountupload', true);
+    }
+
+    public function takeinvite(Request $request): Response|RedirectResponse
+    {
+        return $this->legacyWithRedirect($request, 'takeinvite', true);
+    }
+
+    public function takeupdate(Request $request): Response|RedirectResponse
+    {
+        return $this->legacyWithRedirect($request, 'takeupdate', true);
+    }
+
+    public function users(Request $request): View|RedirectResponse
+    {
+        return $this->legacy($request, 'users', true);
+    }
+
+    public function staffpanel(Request $request): View|RedirectResponse
+    {
+        return $this->legacy($request, 'staffpanel', true);
+    }
+
+    public function docleanup(Request $request): View|RedirectResponse
+    {
+        return $this->legacy($request, 'docleanup', true);
+    }
+
     private function legacy(Request $request, string $page, bool $auth = true): View|RedirectResponse
     {
         if (! defined('IN_NEXUS') || ($auth && ! isset($GLOBALS['CURUSER']))) {

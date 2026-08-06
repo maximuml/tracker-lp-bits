@@ -166,6 +166,15 @@ Route::group(['middleware' => ['auth.nexus:nexus-web']], function () {
     Route::match(['get', 'post'], '/settings', [LegacyPagesController::class, 'settings'])->name('settings.legacy');
     Route::match(['get', 'post'], '/freeleech', [LegacyPagesController::class, 'freeleech'])->name('freeleech.legacy');
     Route::match(['get', 'post'], '/magic', [LegacyPagesController::class, 'magic'])->name('magic.legacy');
+    Route::match(['get', 'post'], '/delacctadmin', [LegacyPagesController::class, 'delacctadmin'])->name('delacctadmin.legacy');
+    Route::match(['get', 'post'], '/deletedisabled', [LegacyPagesController::class, 'deletedisabled'])->name('deletedisabled.legacy');
+    Route::match(['get', 'post'], '/massmail', [LegacyPagesController::class, 'massmail'])->name('massmail.legacy');
+    Route::match(['get', 'post'], '/takeamountupload', [LegacyPagesController::class, 'takeamountupload'])->name('takeamountupload.legacy');
+    Route::match(['get', 'post'], '/takeinvite', [LegacyPagesController::class, 'takeinvite'])->name('takeinvite.legacy');
+    Route::match(['get', 'post'], '/takeupdate', [LegacyPagesController::class, 'takeupdate'])->name('takeupdate.legacy');
+    Route::match(['get', 'post'], '/users', [LegacyPagesController::class, 'users'])->name('users.legacy');
+    Route::match(['get', 'post'], '/staffpanel', [LegacyPagesController::class, 'staffpanel'])->name('staffpanel.legacy');
+    Route::match(['get', 'post'], '/docleanup', [LegacyPagesController::class, 'docleanup'])->name('docleanup.legacy');
 });
 
 Route::match(['get', 'post'], '/shoutbox', [LegacyPagesController::class, 'shoutbox'])->name('shoutbox.legacy');

@@ -60,5 +60,11 @@ class VerifyCsrfToken extends Middleware
         "attachment",
         "settings",
         "magic",
+        "delacctadmin",
+        "deletedisabled",
+        "massmail",
+        "takeamountupload",
+        "takeinvite",
+        "takeupdate",
     ];
 }

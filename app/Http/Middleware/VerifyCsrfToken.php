@@ -57,5 +57,6 @@ class VerifyCsrfToken extends Middleware
         "moforums",
         "fields",
         "shoutbox",
+        "attachment",
     ];
 }

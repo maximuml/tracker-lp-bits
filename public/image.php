@@ -1,22 +1,32 @@
 <?php
-require_once("../include/bittorrent.php");
+require "../include/bittorrent.php";
 dbconn();
+$rootpath = dirname(__DIR__) . '/';
 
-$action = $_GET['action'] ?? '';
-$imagehash = $_GET['imagehash'] ?? '';
-
-if ($action !== 'regimage') {
-    http_response_code(404);
-    exit('Invalid captcha action');
+if (! class_exists(\Illuminate\Http\Request::class)) {
+    require_once $rootpath . 'vendor/autoload.php';
 }
 
-$driver = captcha_manager()->driver('image');
+$app = require_once $rootpath . 'bootstrap/app.php';
+$kernel = $app->make(\Illuminate\Contracts\Http\Kernel::class);
 
-if (!method_exists($driver, 'outputImage')) {
-    http_response_code(404);
-    exit('Captcha driver does not support image rendering');
-}
+$method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+$uri = '/image' . (empty($_SERVER['QUERY_STRING']) ? '' : '?' . $_SERVER['QUERY_STRING']);
 
-$driver->outputImage($imagehash);
+$server = $_SERVER;
+$server['SCRIPT_NAME'] = '/image.php';
+$server['SCRIPT_FILENAME'] = $rootpath . 'public/image.php';
+$server['REQUEST_METHOD'] = $method;
 
-?>
+$request = \Illuminate\Http\Request::create(
+    $uri,
+    $method,
+    $method === 'POST' ? $_POST : $_GET,
+    $_COOKIE,
+    $_FILES,
+    $server
+);
+
+$response = $kernel->handle($request);
+$response->send();
+$kernel->terminate($request, $response);

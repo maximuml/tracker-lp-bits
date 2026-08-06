@@ -8,6 +8,8 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class LegacyPagesController extends Controller
 {
@@ -377,6 +379,52 @@ class LegacyPagesController extends Controller
         return $this->legacyRaw($request, 'shoutbox', false);
     }
 
+    public function attachment(Request $request): View|RedirectResponse
+    {
+        return $this->legacy($request, 'attachment', true);
+    }
+
+    public function getattachment(Request $request): Response|RedirectResponse
+    {
+        return $this->legacyRaw($request, 'getattachment', true);
+    }
+
+    public function image(Request $request): Response|RedirectResponse
+    {
+        return $this->legacyRaw($request, 'image', false);
+    }
+
+    public function shoutboxHistory(Request $request): View|RedirectResponse
+    {
+        return $this->legacy($request, 'shoutbox_history', true);
+    }
+
+    public function shoutboxSse(Request $request): SymfonyResponse
+    {
+        if (! isset($GLOBALS['CURUSER'])) {
+            return new SymfonyResponse('', 403);
+        }
+
+        $callback = function () {
+            $scriptFile = resource_path('views/shoutbox_sse/_shoutbox_sse_legacy.php');
+            if (is_file($scriptFile)) {
+                require $scriptFile;
+            }
+        };
+
+        return new StreamedResponse($callback, 200, [
+            'Content-Type' => 'text/event-stream; charset=utf-8',
+            'Cache-Control' => 'no-cache',
+            'Connection' => 'keep-alive',
+            'X-Accel-Buffering' => 'no',
+        ]);
+    }
+
+    public function latestcomments(Request $request): View|RedirectResponse
+    {
+        return $this->legacy($request, 'latestcomments', true);
+    }
+
     private function legacy(Request $request, string $page, bool $auth = true): View|RedirectResponse
     {
         if (! defined('IN_NEXUS') || ($auth && ! isset($GLOBALS['CURUSER']))) {
@@ -438,6 +486,8 @@ class LegacyPagesController extends Controller
             }
         }
 
-        return response($content, 200, $responseHeaders);
+        $responseStatus = ($status >= 100) ? $status : 200;
+
+        return response($content, $responseStatus, $responseHeaders);
     }
 }

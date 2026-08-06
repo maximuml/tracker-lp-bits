@@ -77,6 +77,9 @@ Route::match(['get', 'post'], '/getusertorrentlistajax', [LegacyPagesController:
 Route::match(['get', 'post'], '/searchsuggest', [LegacyPagesController::class, 'searchSuggest'])->name('searchsuggest.legacy');
 Route::match(['get', 'post'], '/ajax', [LegacyPagesController::class, 'ajax'])->name('ajax.legacy');
 
+Route::match(['get', 'post'], '/image', [LegacyPagesController::class, 'image'])->name('image.legacy');
+Route::match(['get', 'post'], '/shoutbox_sse', [LegacyPagesController::class, 'shoutboxSse'])->name('shoutbox_sse.legacy');
+
 Route::group(['middleware' => ['auth.nexus:nexus-web']], function () {
     Route::get('/upload', [TorrentUploadController::class, 'create'])->name('torrents.upload');
     Route::get('/bitbucket-upload', [BitbucketUploadController::class, 'create'])->name('bitbucket.upload');
@@ -150,6 +153,10 @@ Route::group(['middleware' => ['auth.nexus:nexus-web']], function () {
     Route::match(['get', 'post'], '/fields', [LegacyPagesController::class, 'fields'])->name('fields.legacy');
     Route::match(['get', 'post'], '/formats', [LegacyPagesController::class, 'formats'])->name('formats.legacy');
     Route::match(['get', 'post'], '/videoformats', [LegacyPagesController::class, 'videoformats'])->name('videoformats.legacy');
+    Route::match(['get', 'post'], '/attachment', [LegacyPagesController::class, 'attachment'])->name('attachment.legacy');
+    Route::match(['get', 'post'], '/getattachment', [LegacyPagesController::class, 'getattachment'])->name('getattachment.legacy');
+    Route::match(['get', 'post'], '/shoutbox_history', [LegacyPagesController::class, 'shoutboxHistory'])->name('shoutbox_history.legacy');
+    Route::match(['get', 'post'], '/latestcomments', [LegacyPagesController::class, 'latestcomments'])->name('latestcomments.legacy');
 });
 
 Route::match(['get', 'post'], '/shoutbox', [LegacyPagesController::class, 'shoutbox'])->name('shoutbox.legacy');

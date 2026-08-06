@@ -239,3 +239,10 @@ Any partial that starts with `extract($GLOBALS, EXTR_SKIP);` and then calls `mkg
 
 - Use the user's `editsecret` padded to 20 chars: `$secret = str_pad($editsecret, 20)`; `$md5 = md5($secret . $email . $secret);`.
 - The URL format is `/confirmemail.php/<id>/<md5>/<email>` (or `/confirmemail/<id>/<md5>/<email>` once routing is fixed).
+
+### Testing `takesignup.php` / `signup.php`
+
+- The form at `/signup.php` uses `crypto-js.js`, but the inline script calls `sha256(password)` while `crypto-js.js` only exposes `CryptoJS.SHA256`. The normal "Sign up!" button therefore fails to populate the hidden `wantpassword` and `wantpassword_hashed` fields and the server returns `Don't leave any fields blank.`.
+- To test the `/signup` POST route from the browser console, set the hidden `wantpassword` to `CryptoJS.SHA256('password').toString()`, `wantpassword_hashed` to `1`, and `passagain` to the same hash, then submit the form.
+- `takesignup.php` sets `$nexusRoute = '/signup'` and `require __DIR__ . '/nexus.php'`, so POST/GET to `takesignup.php` should reach the same Laravel route as `/signup`.
+- Direct `curl` POSTs to `takelogin.php` and `takesignup.php` tend to return 419 because curl's cookie handling does not play well with Laravel's encrypted session/XSRF cookies; prefer a real browser session for these endpoints.

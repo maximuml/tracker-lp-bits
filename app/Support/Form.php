@@ -486,7 +486,7 @@ $formVar.on("click", "input[type=button]", function() {
         return
     }
     if (password !== "") {
-        const passwordHashed = sha256(password)
+        const passwordHashed = CryptoJS.SHA256(password).toString()
         $formVar.find("input[name={$passwordHashedName}]").val(passwordHashed)
         const hashedMarkerName = "{$passwordHashedName}_hashed"
         let jqHashedMarker = $formVar.find("input[name=" + hashedMarkerName + "]")
@@ -545,11 +545,11 @@ async function login(username, password, jqForm) {
             return
         }
 
-        const clientHashedPassword = sha256(password);
+        const clientHashedPassword = CryptoJS.SHA256(password).toString();
 
-        const serverSideHash = sha256(challengeData.data.secret + clientHashedPassword);
+        const serverSideHash = CryptoJS.SHA256(challengeData.data.secret + clientHashedPassword).toString();
 
-        const clientResponse = hmacSha256(challengeData.data.challenge, serverSideHash);
+        const clientResponse = CryptoJS.HmacSHA256(serverSideHash, challengeData.data.challenge).toString();
         jqForm.find("input[name=response]").val(clientResponse)
         jqForm.submit()
     } catch (error) {

@@ -1,9 +1,9 @@
 <?php
-extract($GLOBALS, EXTR_SKIP);
+extract($context, EXTR_SKIP);
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
-global $type;
-if (!mkglobal("type"))
+$type = \App\Support\SupportContext::getRequestInput('type');
+if ($type === null)
 	return;
 if ($type == "adminactivate")
 {
@@ -19,8 +19,8 @@ elseif ($type == "inviter")
 }
 elseif ($type == "signup")
 {
-	global $email;
-	if (!mkglobal("email"))
+	$email = \App\Support\SupportContext::getRequestInput('email');
+	if ($email === null)
 		return;
 	stdhead($lang_ok['head_user_signup']);
         stdmsg($lang_ok['std_signup_successful'],

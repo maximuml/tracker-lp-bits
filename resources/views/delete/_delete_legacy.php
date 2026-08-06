@@ -1,5 +1,5 @@
 <?php
-extract($GLOBALS, EXTR_SKIP);
+extract($context, EXTR_SKIP);
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
 //require_once(get_langfile_path("",true));
@@ -12,8 +12,8 @@ function bark($msg) {
   exit();
 }
 
-global $id;
-if (!mkglobal("id"))
+$id = \App\Support\SupportContext::getRequestInput('id');
+if ($id === null)
 	bark($lang_delete['std_missing_form_date']);
 
 $id = intval($id ?? 0);

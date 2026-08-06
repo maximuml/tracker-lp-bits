@@ -1,5 +1,5 @@
 <?php
-extract($GLOBALS, EXTR_SKIP);
+extract($context, EXTR_SKIP);
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 $id =  isset($_POST['id']) ? intval($_POST['id']) : (isset($_GET['id']) ? intval($_GET['id']) : die());
 int_check($id,true);

@@ -20,6 +20,8 @@
         p { margin: 0.5em 0; }
         a { color: #06c; }
     </style>
+    <script type="text/javascript" src="js/jquery-1.12.4.min.js"></script>
+    <script type="text/javascript" src="vendor/layer-v3.5.1/layer/layer.js"></script>
     @foreach (\Nexus\Nexus::getAppendHeaders() as $html)
         {!! $html !!}
     @endforeach

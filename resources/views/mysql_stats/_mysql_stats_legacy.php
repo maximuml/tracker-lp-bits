@@ -1,5 +1,5 @@
 <?php
-extract($GLOBALS, EXTR_SKIP);
+extract($context, EXTR_SKIP);
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
 /* $Id: mysql_stats.php,v 1.0 2005/06/20 22:52:24 CoLdFuSiOn Exp $ */

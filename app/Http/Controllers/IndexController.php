@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Repositories\IndexRepository;
+use App\Support\SupportContext;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -11,12 +12,12 @@ class IndexController extends Controller
 {
     public function legacy(Request $request): View|RedirectResponse
     {
-        if (! defined('IN_NEXUS') || ! isset($GLOBALS['CURUSER'])) {
+        if (! defined('IN_NEXUS') || SupportContext::getUser() === null) {
             $qs = $request->getQueryString();
             return redirect('/index.php' . ($qs ? '?' . $qs : ''));
         }
 
-        if ($request->isMethod('post') && ($GLOBALS['showpolls_main'] ?? '') === 'yes') {
+        if ($request->isMethod('post') && SupportContext::getGlobal('showpolls_main', '') === 'yes') {
             return $this->handlePollVote($request);
         }
 
@@ -26,7 +27,7 @@ class IndexController extends Controller
     private function handlePollVote(Request $request): RedirectResponse
     {
         $choice = $request->input('choice');
-        $user = $GLOBALS['CURUSER'];
+        $user = SupportContext::getUser();
 
         if ($choice === null || $choice === '' || $choice >= 256 || $choice != floor($choice)) {
             return redirect('/index.php');
@@ -45,11 +46,11 @@ class IndexController extends Controller
 
         IndexRepository::recordPollVote($pollId, $user['id'], (int) $choice);
 
-        $cache = $GLOBALS['Cache'];
+        $cache = SupportContext::getCache();
         $cache->delete_value('current_poll_content');
         $cache->delete_value('current_poll_result', true);
 
-        $pollvoteBonus = (float) ($GLOBALS['pollvote_bonus'] ?? 0);
+        $pollvoteBonus = (float) SupportContext::getGlobal('pollvote_bonus', 0);
         if ($pollvoteBonus > 0) {
             \KPS('+', $pollvoteBonus, $user['id']);
         }

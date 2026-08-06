@@ -28,7 +28,6 @@ class TorrentListingController extends Controller
 
         $currentUser = SupportContext::getUser() ?? $user->toArray();
         SupportContext::setUser($currentUser);
-        $GLOBALS['CURUSER'] = $currentUser;
 
         $data = TorrentSearchRepository::getListingData($request->query->all());
 

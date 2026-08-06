@@ -27,7 +27,6 @@ class BitbucketUploadController extends Controller
 
         $currentUser = SupportContext::getUser() ?? $user->toArray();
         SupportContext::setUser($currentUser);
-        $GLOBALS['CURUSER'] = $currentUser;
 
         $lang = $this->loadLang();
 
@@ -61,7 +60,6 @@ class BitbucketUploadController extends Controller
 
         $currentUser = SupportContext::getUser() ?? $user->toArray();
         SupportContext::setUser($currentUser);
-        $GLOBALS['CURUSER'] = $currentUser;
 
         $lang = $this->loadLang();
 

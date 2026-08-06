@@ -49,7 +49,6 @@ class TorrentDetailsController extends Controller
 
         $currentUser = SupportContext::getUser() ?? $user->toArray();
         SupportContext::setUser($currentUser);
-        $GLOBALS['CURUSER'] = $currentUser;
 
         if (empty(SupportContext::getGlobal('lang_functions')) || empty(SupportContext::getGlobal('lang_details'))) {
             SupportContext::setServerValue('SCRIPT_NAME', '/details.php');

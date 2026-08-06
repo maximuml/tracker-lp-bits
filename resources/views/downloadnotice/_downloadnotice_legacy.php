@@ -7,10 +7,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST")
 	$torrentid = intval($_POST['id'] ?? 0);
 	$type = $_POST['type'];
 	$hidenotice = $_POST['hidenotice'];
-	if (!$torrentid || !in_array($type,array('firsttime', 'client', 'ratio')))
+	if (!$torrentid || !in_array($type,array('firsttime', 'client', 'ratio'))) {
 		echo "error";
 		return;
-	elseif ($type == 'firsttime')
+	} elseif ($type == 'firsttime')
 	{
 		if ($hidenotice){
 			\App\Models\User::query()->where('id', $CURUSER['id'])->update(['showdlnotice' => 0]);

@@ -601,11 +601,8 @@ class TorrentRepository extends BaseRepository
             return self::$downHashKeys[$cacheKey];
         }
 
-        $appKey = \App\Support\Env::get('APP_KEY');
-        if (empty($appKey)) {
-            $appKey = (string) config('app.key');
-        }
-        if (empty($appKey)) {
+        $appKey = (string) \App\Support\Env::get('APP_KEY', '');
+        if ($appKey === '') {
             throw new \RuntimeException('APP_KEY is not configured for downhash');
         }
 

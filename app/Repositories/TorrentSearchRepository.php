@@ -7,9 +7,10 @@ use App\Support\SupportContext;
 class TorrentSearchRepository
 {
     /**
+     * @param  array<string, mixed>  $query  Query parameters to use instead of $_GET
      * @return array<string, mixed>
      */
-    public static function getListingData(): array
+    public static function getListingData(array $query = []): array
     {
         global $CURUSER, $Cache, $USERUPDATESET, $lang_torrents, $lang_special;
         global $browsecatmode, $specialcatmode, $enablespecial, $torrentsperpage_main;
@@ -44,7 +45,8 @@ switch (nexus()->getScript()) {
 $tagRep = new \App\Repositories\TagRepository();
 $allTags = $tagRep->listAll($sectiontype);
 $filterInputWidth = 62;
-$searchParams = $_GET;
+$searchParams = $query ?: SupportContext::allQuery();
+$hasSearchParams = !empty($searchParams);
 $searchParams['mode'] = $sectiontype;
 
 $showsubcat = get_searchbox_value($sectiontype, 'showsubcat');//whether show subcategory (i.e. sources, codecs) or not
@@ -67,7 +69,7 @@ if ($showsubcat){
 	if ($showaudiocodec) $audiocodecs = searchbox_item_list("audiocodecs", $sectiontype);
 }
 
-$searchstr_raw = is_scalar($_GET["search"] ?? '') ? (string) ($_GET["search"] ?? '') : '';
+$searchstr_raw = is_scalar($searchParams["search"] ?? '') ? (string) ($searchParams["search"] ?? '') : '';
 $searchstr_ori = htmlspecialchars(trim($searchstr_raw));
 $searchstr = \Nexus\Database\NexusDB::getInstance()->escapeString(trim($searchstr_raw));
 $searchParams['search'] = $searchstr_raw;
@@ -81,9 +83,9 @@ do_log("[SHOULD_USE_MEILI]: $shouldUseMeili");
 // sorting by MarkoStamcar
 $column = '';
 $ascdesc = '';
-if (isset($_GET['sort']) && $_GET['sort'] && isset($_GET['type']) && $_GET['type']) {
+if (isset($searchParams['sort']) && $searchParams['sort'] && isset($searchParams['type']) && $searchParams['type']) {
 
-	switch($_GET['sort']) {
+	switch($searchParams['sort']) {
 		case '1': $column = "name"; break;
 		case '2': $column = "numfiles"; break;
 		case '3': $column = "comments"; break;
@@ -96,7 +98,7 @@ if (isset($_GET['sort']) && $_GET['sort'] && isset($_GET['type']) && $_GET['type
 		default: $column = "id"; break;
 	}
 
-	switch($_GET['type']) {
+	switch($searchParams['type']) {
 		case 'asc': $ascdesc = "ASC"; $linkascdesc = "asc"; break;
 		case 'desc': $ascdesc = "DESC"; $linkascdesc = "desc"; break;
 		default: $ascdesc = "DESC"; $linkascdesc = "desc"; break;
@@ -111,7 +113,7 @@ if (isset($_GET['sort']) && $_GET['sort'] && isset($_GET['type']) && $_GET['type
 		$orderby = "ORDER BY pos_state DESC, torrents." . $column . " " . $ascdesc;
 	}
 
-	$pagerlink = "sort=" . intval($_GET['sort']) . "&type=" . $linkascdesc . "&";
+	$pagerlink = "sort=" . intval($searchParams['sort']) . "&type=" . $linkascdesc . "&";
 
 } else {
 
@@ -132,8 +134,8 @@ $whereprocessingina = array();
 $whereaudiocodecina = array();
 $whereothera = [];
 //----------------- start whether show torrents from all sections---------------------//
-if ($_GET)
-	$allsec = intval($_GET["allsec"] ?? 0);
+if ($hasSearchParams)
+	$allsec = intval($searchParams["allsec"] ?? 0);
 else $allsec = 0;
 if ($allsec == 1)		//show torrents from all sections
 {
@@ -142,8 +144,8 @@ if ($allsec == 1)		//show torrents from all sections
 // ----------------- end whether ignoring section ---------------------//
 // ----------------- start bookmarked ---------------------//
 $inclbookmarked = 0;
-if ($_GET)
-	$inclbookmarked = intval($_GET["inclbookmarked"] ?? 0);
+if ($hasSearchParams)
+	$inclbookmarked = intval($searchParams["inclbookmarked"] ?? 0);
 elseif ($CURUSER['notifs']){
 	if (strpos($CURUSER['notifs'], "[inclbookmarked=0]") !== false)
 		$inclbookmarked = 0;
@@ -156,7 +158,7 @@ elseif ($CURUSER['notifs']){
 if (!in_array($inclbookmarked,array(0,1,2)))
 {
 	$inclbookmarked = 0;
-	write_log("User " . $CURUSER["username"] . "," . $CURUSER["ip"] . " is hacking inclbookmarked field in" . $_SERVER['SCRIPT_NAME'], 'mod');
+	write_log("User " . $CURUSER["username"] . "," . $CURUSER["ip"] . " is hacking inclbookmarked field in" . SupportContext::getServerValue('SCRIPT_NAME', ''), 'mod');
 }
 if ($inclbookmarked == 0)  //all(bookmarked,not)
 {
@@ -177,8 +179,8 @@ elseif ($inclbookmarked == 2)		//not bookmarked
 // ----------------- end bookmarked ---------------------//
 
 // ----------------- start include dead ---------------------//
-if (isset($_GET["incldead"]))
-	$include_dead = intval($_GET["incldead"] ?? 0);
+if (isset($searchParams["incldead"]))
+	$include_dead = intval($searchParams["incldead"] ?? 0);
 elseif ($CURUSER['notifs']){
 	if (strpos($CURUSER['notifs'], "[incldead=0]") !== false)
 		$include_dead = 0;
@@ -193,7 +195,7 @@ else $include_dead = 1;
 if (!in_array($include_dead,array(0,1,2)))
 {
 	$include_dead = 0;
-	write_log("User " . $CURUSER["username"] . "," . $CURUSER["ip"] . " is hacking incldead field in" . $_SERVER['SCRIPT_NAME'], 'mod');
+	write_log("User " . $CURUSER["username"] . "," . $CURUSER["ip"] . " is hacking incldead field in" . SupportContext::getServerValue('SCRIPT_NAME', ''), 'mod');
 }
 if ($include_dead == 0)  //all(active,dead)
 {
@@ -220,8 +222,8 @@ if (empty($CURUSER['id']) || !user_can('seebanned')) {
 }
 
 $special_state = 0;
-if ($_GET)
-	$special_state = intval($_GET["spstate"] ?? 0);
+if ($hasSearchParams)
+	$special_state = intval($searchParams["spstate"] ?? 0);
 elseif ($CURUSER['notifs']){
 	if (strpos($CURUSER['notifs'], "[spstate=0]") !== false)
 		$special_state = 0;
@@ -244,7 +246,7 @@ elseif ($CURUSER['notifs']){
 if (!in_array($special_state,array(0,1,2,3,4,5,6,7)))
 {
 	$special_state = 0;
-	write_log("User " . $CURUSER["username"] . "," . $CURUSER["ip"] . " is hacking spstate field in " . $_SERVER['SCRIPT_NAME'], 'mod');
+	write_log("User " . $CURUSER["username"] . "," . $CURUSER["ip"] . " is hacking spstate field in " . SupportContext::getServerValue('SCRIPT_NAME', ''), 'mod');
 }
 if($special_state == 0)	//all
 {
@@ -339,22 +341,22 @@ elseif ($special_state == 7)	//30% down
 	}
 }
 
-$category_get = intval($_GET["cat"] ?? 0);
+$category_get = intval($searchParams["cat"] ?? 0);
 $source_get = $medium_get = $codec_get = $standard_get = $processing_get = $audiocodec_get = 0;
 if ($showsubcat){
-if ($showsource) $source_get = intval($_GET["source"] ?? 0);
-if ($showmedium) $medium_get = intval($_GET["medium"] ?? 0);
-if ($showcodec) $codec_get = intval($_GET["codec"] ?? 0);
-if ($showstandard) $standard_get = intval($_GET["standard"] ?? 0);
-if ($showprocessing) $processing_get = intval($_GET["processing"] ?? 0);
-if ($showaudiocodec) $audiocodec_get = intval($_GET["audiocodec"] ?? 0);
+if ($showsource) $source_get = intval($searchParams["source"] ?? 0);
+if ($showmedium) $medium_get = intval($searchParams["medium"] ?? 0);
+if ($showcodec) $codec_get = intval($searchParams["codec"] ?? 0);
+if ($showstandard) $standard_get = intval($searchParams["standard"] ?? 0);
+if ($showprocessing) $processing_get = intval($searchParams["processing"] ?? 0);
+if ($showaudiocodec) $audiocodec_get = intval($searchParams["audiocodec"] ?? 0);
 }
 
-$all = intval($_GET["all"] ?? 0);
+$all = intval($searchParams["all"] ?? 0);
 
 if (!$all)
 {
-	if (!$_GET && $CURUSER['notifs'])
+	if (!$hasSearchParams && $CURUSER['notifs'])
 	{
 		$all = true;
 		foreach ($cats as $cat)
@@ -533,7 +535,7 @@ if (!$all)
 		$all = True;
 		foreach ($cats as $cat)
 		{
-		    $__is = (isset($_GET["cat{$cat['id']}"]) && $_GET["cat{$cat['id']}"]);
+		    $__is = (isset($searchParams["cat{$cat['id']}"]) && $searchParams["cat{$cat['id']}"]);
 			$all &= $__is;
 			if ($__is)
 			{
@@ -545,7 +547,7 @@ if (!$all)
 		if ($showsource)
 		foreach ($sources as $source)
 		{
-            $__is = (isset($_GET["source{$source['id']}"]) && $_GET["source{$source['id']}"]);
+            $__is = (isset($searchParams["source{$source['id']}"]) && $searchParams["source{$source['id']}"]);
             $all &= $__is;
 			if ($__is)
 			{
@@ -556,7 +558,7 @@ if (!$all)
 		if ($showmedium)
 		foreach ($media as $medium)
 		{
-            $__is = (isset($_GET["medium{$medium['id']}"]) && $_GET["medium{$medium['id']}"]);
+            $__is = (isset($searchParams["medium{$medium['id']}"]) && $searchParams["medium{$medium['id']}"]);
             $all &= $__is;
             if ($__is)
 			{
@@ -567,7 +569,7 @@ if (!$all)
 		if ($showcodec)
 		foreach ($codecs as $codec)
 		{
-            $__is = (isset($_GET["codec{$codec['id']}"]) && $_GET["codec{$codec['id']}"]);
+            $__is = (isset($searchParams["codec{$codec['id']}"]) && $searchParams["codec{$codec['id']}"]);
             $all &= $__is;
             if ($__is)
 			{
@@ -578,7 +580,7 @@ if (!$all)
 		if ($showstandard)
 		foreach ($standards as $standard)
 		{
-            $__is = (isset($_GET["standard{$standard['id']}"]) && $_GET["standard{$standard['id']}"]);
+            $__is = (isset($searchParams["standard{$standard['id']}"]) && $searchParams["standard{$standard['id']}"]);
             $all &= $__is;
             if ($__is)
 			{
@@ -589,7 +591,7 @@ if (!$all)
 		if ($showprocessing)
 		foreach ($processings as $processing)
 		{
-            $__is = (isset($_GET["processing{$processing['id']}"]) && $_GET["processing{$processing['id']}"]);
+            $__is = (isset($searchParams["processing{$processing['id']}"]) && $searchParams["processing{$processing['id']}"]);
             $all &= $__is;
             if ($__is)
 			{
@@ -600,7 +602,7 @@ if (!$all)
 		if ($showaudiocodec)
 		foreach ($audiocodecs as $audiocodec)
 		{
-            $__is = (isset($_GET["audiocodec{$audiocodec['id']}"]) && $_GET["audiocodec{$audiocodec['id']}"]);
+            $__is = (isset($searchParams["audiocodec{$audiocodec['id']}"]) && $searchParams["audiocodec{$audiocodec['id']}"]);
             $all &= $__is;
             if ($__is)
 			{
@@ -678,13 +680,13 @@ $wherebase = $wherea;
 $search_area = 0;
 if (isset($searchstr))
 {
-	if (!isset($_GET['notnewword']) || !$_GET['notnewword']){
+	if (!isset($searchParams['notnewword']) || !$searchParams['notnewword']){
 		$notnewword="";
 	}
 	else{
 		$notnewword="notnewword=1&";
 	}
-	$search_mode = intval($_GET["search_mode"] ?? 0);
+	$search_mode = intval($searchParams["search_mode"] ?? 0);
     /**
      * Deprecated search mode: 1(OR)
      * @since 1.8
@@ -692,10 +694,10 @@ if (isset($searchstr))
 	if (!in_array($search_mode,array(0,2)))
 	{
 		$search_mode = 0;
-		write_log("User " . $CURUSER["username"] . "," . $CURUSER["ip"] . " is hacking search_mode field in" . $_SERVER['SCRIPT_NAME'], 'mod');
+		write_log("User " . $CURUSER["username"] . "," . $CURUSER["ip"] . " is hacking search_mode field in" . SupportContext::getServerValue('SCRIPT_NAME', ''), 'mod');
 	}
 
-	$search_area = intval($_GET["search_area"] ?? 0) ;
+	$search_area = intval($searchParams["search_area"] ?? 0) ;
 	$like_expression_array = [];
 
 	switch ($search_mode)
@@ -779,7 +781,7 @@ if (isset($searchstr))
 		{
 			$search_area = 0;
 			$wherea[] =  "torrents.name LIKE '%" . $searchstr . "%'";
-			write_log("User " . $CURUSER["username"] . "," . $CURUSER["ip"] . " is hacking search_area field in" . $_SERVER['SCRIPT_NAME'], 'mod');
+			write_log("User " . $CURUSER["username"] . "," . $CURUSER["ip"] . " is hacking search_area field in" . SupportContext::getServerValue('SCRIPT_NAME', ''), 'mod');
 			break;
 		}
 	}
@@ -799,8 +801,8 @@ if ($approvalStatusIconEnabled == 'yes' || (user_can('torrent-approval') && $app
 }
 //when user can use approval status filter, and pass `approval_status` parameter, will affect
 //OR if [not approval can not be view] and not staff member, force to view  approval allowed
-if ($showApprovalStatusFilter && isset($_REQUEST['approval_status']) && is_numeric($_REQUEST['approval_status'])) {
-    $approvalStatus = intval($_REQUEST['approval_status']);
+if ($showApprovalStatusFilter && isset($searchParams['approval_status']) && is_numeric($searchParams['approval_status'])) {
+    $approvalStatus = intval($searchParams['approval_status']);
     $wherea[] = "torrents.approval_status = $approvalStatus";
     $searchParams['approval_status'] = $approvalStatus;
     $addparam .= "approval_status=$approvalStatus&";
@@ -809,53 +811,53 @@ if ($showApprovalStatusFilter && isset($_REQUEST['approval_status']) && is_numer
     $searchParams['approval_status'] = \App\Models\Torrent::APPROVAL_STATUS_ALLOW;
 }
 
-if (isset($_GET['size_begin']) && ctype_digit($_GET['size_begin'])) {
-    $wherea[] = "torrents.size >= " . intval($_GET['size_begin']) * 1024 * 1024 * 1024;
-    $addparam .= "size_begin=" . intval($_GET['size_begin']) . "&";
+if (isset($searchParams['size_begin']) && ctype_digit($searchParams['size_begin'])) {
+    $wherea[] = "torrents.size >= " . intval($searchParams['size_begin']) * 1024 * 1024 * 1024;
+    $addparam .= "size_begin=" . intval($searchParams['size_begin']) . "&";
 }
-if (isset($_GET['size_end']) && ctype_digit($_GET['size_end'])) {
-    $wherea[] = "torrents.size <= " . intval($_GET['size_end']) * 1024 * 1024 * 1024;
-    $addparam .= "size_end=" . intval($_GET['size_end']) . "&";
-}
-
-if (isset($_GET['seeders_begin']) && ctype_digit($_GET['seeders_begin'])) {
-    $wherea[] = "torrents.seeders >= " . (int)$_GET['seeders_begin'];
-    $addparam .= "seeders_begin=" . intval($_GET['seeders_begin']) . "&";
-}
-if (isset($_GET['seeders_end']) && ctype_digit($_GET['seeders_end'])) {
-    $wherea[] = "torrents.seeders <= " . (int)$_GET['seeders_end'];
-    $addparam .= "seeders_end=" . intval($_GET['seeders_end']) . "&";
+if (isset($searchParams['size_end']) && ctype_digit($searchParams['size_end'])) {
+    $wherea[] = "torrents.size <= " . intval($searchParams['size_end']) * 1024 * 1024 * 1024;
+    $addparam .= "size_end=" . intval($searchParams['size_end']) . "&";
 }
 
-if (isset($_GET['leechers_begin']) && ctype_digit($_GET['leechers_begin'])) {
-    $wherea[] = "torrents.leechers >= " . (int)$_GET['leechers_begin'];
-    $addparam .= "leechers_begin=" . intval($_GET['leechers_begin']) . "&";
+if (isset($searchParams['seeders_begin']) && ctype_digit($searchParams['seeders_begin'])) {
+    $wherea[] = "torrents.seeders >= " . (int)$searchParams['seeders_begin'];
+    $addparam .= "seeders_begin=" . intval($searchParams['seeders_begin']) . "&";
 }
-if (isset($_GET['leechers_end']) && ctype_digit($_GET['leechers_end'])) {
-    $wherea[] = "torrents.leechers <= " . (int)$_GET['leechers_end'];
-    $addparam .= "leechers_end=" . intval($_GET['leechers_end']) . "&";
+if (isset($searchParams['seeders_end']) && ctype_digit($searchParams['seeders_end'])) {
+    $wherea[] = "torrents.seeders <= " . (int)$searchParams['seeders_end'];
+    $addparam .= "seeders_end=" . intval($searchParams['seeders_end']) . "&";
 }
 
-if (isset($_GET['times_completed_begin']) && ctype_digit($_GET['times_completed_begin'])) {
-    $wherea[] = "torrents.times_completed >= " . (int)$_GET['times_completed_begin'];
-    $addparam .= "times_completed_begin=" . intval($_GET['times_completed_begin']) . "&";
+if (isset($searchParams['leechers_begin']) && ctype_digit($searchParams['leechers_begin'])) {
+    $wherea[] = "torrents.leechers >= " . (int)$searchParams['leechers_begin'];
+    $addparam .= "leechers_begin=" . intval($searchParams['leechers_begin']) . "&";
 }
-if (isset($_GET['times_completed_end']) && ctype_digit($_GET['times_completed_end'])) {
-    $wherea[] = "torrents.times_completed <= " . (int)$_GET['times_completed_end'];
-    $addparam .= "times_completed_end=" . intval($_GET['times_completed_end']) . "&";
+if (isset($searchParams['leechers_end']) && ctype_digit($searchParams['leechers_end'])) {
+    $wherea[] = "torrents.leechers <= " . (int)$searchParams['leechers_end'];
+    $addparam .= "leechers_end=" . intval($searchParams['leechers_end']) . "&";
+}
+
+if (isset($searchParams['times_completed_begin']) && ctype_digit($searchParams['times_completed_begin'])) {
+    $wherea[] = "torrents.times_completed >= " . (int)$searchParams['times_completed_begin'];
+    $addparam .= "times_completed_begin=" . intval($searchParams['times_completed_begin']) . "&";
+}
+if (isset($searchParams['times_completed_end']) && ctype_digit($searchParams['times_completed_end'])) {
+    $wherea[] = "torrents.times_completed <= " . (int)$searchParams['times_completed_end'];
+    $addparam .= "times_completed_end=" . intval($searchParams['times_completed_end']) . "&";
 }
 
 /** @var \Illuminate\Database\Connection $db */
 $db = \Nexus\Database\NexusDB::table('torrents')->getConnection();
 $quote = fn ($value) => (string) $db->getPdo()->quote((string) $value);
 
-if (isset($_GET['added_begin']) && !empty($_GET['added_begin'])) {
-    $wherea[] = "torrents.added >= " . $quote($_GET['added_begin']);
-    $addparam .= "added_begin=" . $_GET['added_begin'] . "&";
+if (isset($searchParams['added_begin']) && !empty($searchParams['added_begin'])) {
+    $wherea[] = "torrents.added >= " . $quote($searchParams['added_begin']);
+    $addparam .= "added_begin=" . $searchParams['added_begin'] . "&";
 }
-if (isset($_GET['added_end']) && !empty($_GET['added_end'])) {
-    $wherea[] = "torrents.added <= " . $quote(\Carbon\Carbon::parse($_GET['added_end'])->endOfDay()->toDateTimeString());
-    $addparam .= "added_end=" . $_GET['added_end'] . "&";
+if (isset($searchParams['added_end']) && !empty($searchParams['added_end'])) {
+    $wherea[] = "torrents.added <= " . $quote(\Carbon\Carbon::parse($searchParams['added_end'])->endOfDay()->toDateTimeString());
+    $addparam .= "added_end=" . $searchParams['added_end'] . "&";
 }
 
 $where = implode(" AND ", $wherea);
@@ -881,7 +883,7 @@ if (!empty($whereothera)) {
     $where .= ($where ? " AND " : "") . implode(" AND ", $whereothera);
 }
 
-$tagId = intval($_REQUEST['tag_id'] ?? 0);
+$tagId = intval($searchParams['tag_id'] ?? 0);
 if ($tagId > 0) {
     $addparam .= "tag_id={$tagId}&";
 }
@@ -907,8 +909,8 @@ if ($shouldUseMeili) {
     $count = \App\Repositories\TorrentListingRepository::getCount($listingOptions);
 }
 $maxPageSize = 100;
-if (!empty($_GET['pageSize'])) {
-    $torrentsperpage = $_GET['pageSize'];
+if (!empty($searchParams['pageSize'])) {
+    $torrentsperpage = $searchParams['pageSize'];
 } elseif ($CURUSER["torrentsperpage"]) {
     $torrentsperpage = (int)$CURUSER["torrentsperpage"];
 } elseif ($torrentsperpage_main) {
@@ -920,7 +922,7 @@ $torrentsperpage = min($maxPageSize, $torrentsperpage);
 
 if ($count)
 {
-    if (isset($searchstr) && (!isset($_GET['notnewword']) || !$_GET['notnewword'])){
+    if (isset($searchstr) && (!isset($searchParams['notnewword']) || !$searchParams['notnewword'])){
         insert_suggest($searchstr, $CURUSER['id']);
     }
 	if ($pagerlink !== '') {

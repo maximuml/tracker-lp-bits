@@ -447,7 +447,7 @@ function end_table() {
  */
 function insert_smilies_frame()
 {
-	global $lang_functions;
+	$lang_functions = \App\Support\SupportContext::getLangFunctions();
 	echo \App\Support\Smilies::framedTable($lang_functions['text_smilies'], $lang_functions['col_type_something'], $lang_functions['col_to_make_a']);
 }
 /**
@@ -483,7 +483,7 @@ function write_log($text, $security = "normal")
  */
 function get_elapsed_time($ts,$shortunit = false)
 {
-	global $lang_functions;
+	$lang_functions = \App\Support\SupportContext::getLangFunctions();
 	return \App\Support\Time::elapsedSince((int)$ts, TIMENOW, [
 		'year' => $lang_functions['text_year'] ?? '',
 		'year_short' => $lang_functions['text_short_year'] ?? '',
@@ -765,7 +765,8 @@ function check_code ($imagehash, $imagestring, $where = 'signup.php', $maxattemp
  * @return void
  */
 function show_image_code () {
-    global $lang_functions, $iv;
+    $lang_functions = \App\Support\SupportContext::getLangFunctions();
+    $iv = (string) \App\Support\SupportContext::getGlobal('iv', '');
     \App\Support\Captcha::render((string) $iv, [
         'row_security_image' => $lang_functions['row_security_image'] ?? '',
         'row_security_challenge' => $lang_functions['row_security_challenge'] ?? '',
@@ -778,7 +779,7 @@ function show_image_code () {
  */
 function get_ip_location($ip)
 {
-	global $lang_functions;
+	$lang_functions = \App\Support\SupportContext::getLangFunctions();
 
 	return \App\Support\Network::ipLocation(
 		(string) $ip,
@@ -809,7 +810,9 @@ function validip_format($ip)
  * @return string
  */
 function maxslots () {
-	global $lang_functions, $CURUSER, $maxdlsystem;
+	$lang_functions = \App\Support\SupportContext::getLangFunctions();
+	$CURUSER = \App\Support\SupportContext::getUser() ?? [];
+	$maxdlsystem = (string) \App\Support\SupportContext::getGlobal('maxdlsystem', '');
 	return \App\Support\Slots::display(
 		(float) $CURUSER["uploaded"],
 		(float) $CURUSER["downloaded"],
@@ -907,7 +910,7 @@ function deadtime() {
  * @return string
  */
 function mkprettytime($s) {
-	global $lang_functions;
+	$lang_functions = \App\Support\SupportContext::getLangFunctions();
 	return \App\Support\Format::prettyTime((float)$s, $lang_functions['text_day'] ?? 'day(s)');
 }
 /**
@@ -974,7 +977,7 @@ function validemail($email) {
  * @return string
  */
 function validlang($langid) {
-	global $deflang;
+	$deflang = (string) \App\Support\SupportContext::getGlobal('deflang', '');
 	return \App\Support\Locale::folderForId($langid, (string) $deflang);
 }
 /**
@@ -1024,14 +1027,16 @@ function get_css_row() {
  */
 function get_css_uri($file = "")
 {
-    global $defcss, $Cache, $CURUSER;
+    $defcss = (int) \App\Support\SupportContext::getGlobal('defcss', 0);
+    $Cache = \App\Support\SupportContext::getCache();
+    $CURUSER = \App\Support\SupportContext::getUser() ?? [];
 	return \App\Support\Style::cssUri($Cache, $CURUSER ? $CURUSER["stylesheet"] : $defcss, $defcss, (string) $file);
 }
 /**
  * @return string
  */
 function get_font_css_uri(){
-	global $CURUSER;
+	$CURUSER = \App\Support\SupportContext::getUser() ?? [];
 	return \App\Support\Style::fontCssUri($CURUSER['fontsize'] ?? null);
 }
 /**
@@ -1039,7 +1044,9 @@ function get_font_css_uri(){
  */
 function get_style_addicode()
 {
-	global $defcss, $Cache, $CURUSER;
+	$defcss = (int) \App\Support\SupportContext::getGlobal('defcss', 0);
+	$Cache = \App\Support\SupportContext::getCache();
+	$CURUSER = \App\Support\SupportContext::getUser() ?? [];
 	return \App\Support\Style::addiCode($Cache, $CURUSER ? $CURUSER["stylesheet"] : $defcss, $defcss);
 }
 /**
@@ -1048,7 +1055,7 @@ function get_style_addicode()
  */
 function get_cat_folder($cat = 101)
 {
-	global $CURLANGDIR;
+	$CURLANGDIR = (string) \App\Support\SupportContext::getGlobal('CURLANGDIR', '');
 
 	return \App\Support\Path::categoryFolderForId($cat, (string) $CURLANGDIR);
 }
@@ -1057,7 +1064,7 @@ function get_cat_folder($cat = 101)
  */
 function get_style_highlight()
 {
-	global $CURUSER;
+	$CURUSER = \App\Support\SupportContext::getUser() ?? [];
 	return \App\Support\Style::highlightColor($CURUSER ? (int) $CURUSER["stylesheet"] : null);
 }
 /**
@@ -1165,7 +1172,9 @@ function make_folder($pre, $folder_name)
  */
 function cover_thumb_url($url, $maxWidth = 240, $maxHeight = 360, $quality = 82)
 {
-	global $savedirectory_attachment, $httpdirectory_attachment, $Cache;
+	$savedirectory_attachment = (string) \App\Support\SupportContext::getGlobal('savedirectory_attachment', '');
+	$httpdirectory_attachment = (string) \App\Support\SupportContext::getGlobal('httpdirectory_attachment', '');
+	$Cache = \App\Support\SupportContext::getCache();
 	return \App\Support\CoverThumb::url(
 		(string) $url,
 		(int) $maxWidth,
@@ -1241,7 +1250,7 @@ function searchfield($s) {
  * @return array<array-key, mixed>
  */
 function genrelist($catmode = 1) {
-	global $Cache;
+	$Cache = \App\Support\SupportContext::getCache();
 	return \App\Support\Category::listByMode($Cache, $catmode);
 }
 /**
@@ -1250,7 +1259,7 @@ function genrelist($catmode = 1) {
  * @return array<array-key, mixed>
  */
 function searchbox_item_list(string $table, int $mode){
-	global $Cache;
+	$Cache = \App\Support\SupportContext::getCache();
 	return \App\Support\SearchBox::itemList($Cache, $table, $mode);
 }
 /**
@@ -1283,7 +1292,7 @@ function writecomment($userid, $comment, $oldModcomment = null) {
  */
 function return_torrent_bookmark_array($userid)
 {
-	global $Cache;
+	$Cache = \App\Support\SupportContext::getCache();
 	return \App\Support\TorrentBookmark::bookmarkArray($Cache, $userid);
 }
 /**
@@ -1294,7 +1303,8 @@ function return_torrent_bookmark_array($userid)
  */
 function get_torrent_bookmark_state($userid, $torrentid, $text = false)
 {
-	global $Cache, $lang_functions;
+	$Cache = \App\Support\SupportContext::getCache();
+	$lang_functions = \App\Support\SupportContext::getLangFunctions();
 	return \App\Support\TorrentBookmark::stateMarkup($Cache, $userid, $torrentid, (bool) $text, [
 		'title_bookmark_torrent' => $lang_functions['title_bookmark_torrent'] ?? '',
 		'title_delbookmark_torrent' => $lang_functions['title_delbookmark_torrent'] ?? '',
@@ -1447,7 +1457,7 @@ function getSmileIt($formname, $taname, $smilyNumber) {
  * @return string
  */
 function classlist($selectname,$maxclass, $selected, $minClass = 0, $includeNoClass = false, $disabled = false){
-    global $lang_functions;
+    $lang_functions = \App\Support\SupportContext::getLangFunctions();
     return \App\Support\UserClass::classSelect(
         (string) $selectname,
         (int) $maxclass,
@@ -1481,7 +1491,7 @@ function gettime($time, $withago = true, $twoline = false, $forceago = false, $o
  * @return string
  */
 function get_forum_pic_folder(){
-	global $CURLANGDIR;
+	$CURLANGDIR = (string) \App\Support\SupportContext::getGlobal('CURLANGDIR', '');
 	return \App\Support\Forum::picFolder((string) $CURLANGDIR);
 }
 /**
@@ -1490,7 +1500,7 @@ function get_forum_pic_folder(){
  */
 function get_category_icon_row($typeid)
 {
-	global $Cache;
+	$Cache = \App\Support\SupportContext::getCache();
 	return \App\Support\Category::iconRow($Cache, $typeid);
 }
 /**
@@ -1499,7 +1509,7 @@ function get_category_icon_row($typeid)
  */
 function get_category_row($catid = NULL)
 {
-	global $Cache;
+	$Cache = \App\Support\SupportContext::getCache();
 	return \App\Support\Category::row($Cache, $catid);
 }
 /**
@@ -1508,7 +1518,7 @@ function get_category_row($catid = NULL)
  */
 function get_second_icon($row) //for CHDBits
 {
-	global $Cache;
+	$Cache = \App\Support\SupportContext::getCache();
 	return \App\Support\Category::secondIcon($Cache, $row, get_cat_folder($row['category'] ?? ''));
 }
 /**
@@ -1519,7 +1529,7 @@ function get_second_icon($row) //for CHDBits
  */
 function get_torrent_bg_color($promotion = 1, $posState = "", array $torrent = [])
 {
-	global $CURUSER;
+	$CURUSER = \App\Support\SupportContext::getUser() ?? [];
 	return \App\Support\Promotion::backgroundStyle((int) $promotion, (string) $posState, $torrent, (string) $CURUSER['appendpromotion']);
 }
 /**
@@ -1534,8 +1544,14 @@ function get_torrent_bg_color($promotion = 1, $posState = "", array $torrent = [
  */
 function get_torrent_promotion_append($promotion = 1, $forcemode = "", $showtimeleft = false, $added = "", $promotionTimeType = 0, $promotionUntil = '', $ignoreGlobal = false)
 {
-	global $CURUSER, $lang_functions;
-	global $expirehalfleech_torrent, $expirefree_torrent, $expiretwoup_torrent, $expiretwoupfree_torrent, $expiretwouphalfleech_torrent, $expirethirtypercentleech_torrent;
+	$CURUSER = \App\Support\SupportContext::getUser() ?? [];
+	$lang_functions = \App\Support\SupportContext::getLangFunctions();
+	$expirehalfleech_torrent = (int) \App\Support\SupportContext::getGlobal('expirehalfleech_torrent', 0);
+	$expirefree_torrent = (int) \App\Support\SupportContext::getGlobal('expirefree_torrent', 0);
+	$expiretwoup_torrent = (int) \App\Support\SupportContext::getGlobal('expiretwoup_torrent', 0);
+	$expiretwoupfree_torrent = (int) \App\Support\SupportContext::getGlobal('expiretwoupfree_torrent', 0);
+	$expiretwouphalfleech_torrent = (int) \App\Support\SupportContext::getGlobal('expiretwouphalfleech_torrent', 0);
+	$expirethirtypercentleech_torrent = (int) \App\Support\SupportContext::getGlobal('expirethirtypercentleech_torrent', 0);
 
 	return \App\Support\Promotion::append(
 		(int) $promotion,
@@ -1569,8 +1585,14 @@ function get_torrent_promotion_append($promotion = 1, $forcemode = "", $showtime
  */
 function get_torrent_promotion_append_sub($promotion = 1, $forcemode = "", $showtimeleft = false, $added = "", $promotionTimeType = 0, $promotionUntil = '', $ignoreGlobal = false)
 {
-	global $CURUSER, $lang_functions;
-	global $expirehalfleech_torrent, $expirefree_torrent, $expiretwoup_torrent, $expiretwoupfree_torrent, $expiretwouphalfleech_torrent, $expirethirtypercentleech_torrent;
+	$CURUSER = \App\Support\SupportContext::getUser() ?? [];
+	$lang_functions = \App\Support\SupportContext::getLangFunctions();
+	$expirehalfleech_torrent = (int) \App\Support\SupportContext::getGlobal('expirehalfleech_torrent', 0);
+	$expirefree_torrent = (int) \App\Support\SupportContext::getGlobal('expirefree_torrent', 0);
+	$expiretwoup_torrent = (int) \App\Support\SupportContext::getGlobal('expiretwoup_torrent', 0);
+	$expiretwoupfree_torrent = (int) \App\Support\SupportContext::getGlobal('expiretwoupfree_torrent', 0);
+	$expiretwouphalfleech_torrent = (int) \App\Support\SupportContext::getGlobal('expiretwouphalfleech_torrent', 0);
+	$expirethirtypercentleech_torrent = (int) \App\Support\SupportContext::getGlobal('expirethirtypercentleech_torrent', 0);
 
 	return \App\Support\Promotion::appendSub(
 		(int) $promotion,
@@ -1620,7 +1642,7 @@ function is_forum_moderator($id, $in = 'post'){
  * @return int
  */
 function get_guest_lang_id(){
-	global $CURLANGDIR;
+	$CURLANGDIR = (string) \App\Support\SupportContext::getGlobal('CURLANGDIR', '');
 	return \App\Support\Locale::guestId((string) $CURLANGDIR);
 }
 /**
@@ -1645,7 +1667,7 @@ function get_plain_username($id){
  * @return mixed
  */
 function get_searchbox_value($mode = 1, $item = 'showsubcat'){
-	global $Cache;
+	$Cache = \App\Support\SupportContext::getCache();
 	return \App\Support\SearchBox::value($Cache, $mode, (string) $item);
 }
 /**
@@ -1663,7 +1685,7 @@ function get_ratio($userid, $html = true){
  */
 function add_s($num, $es = false)
 {
-	global $lang_functions;
+	$lang_functions = \App\Support\SupportContext::getLangFunctions();
 	return \App\Support\Strings::pluralize((float)$num, '', $es ? ($lang_functions['text_es'] ?? '') : ($lang_functions['text_s'] ?? ''));
 }
 /**
@@ -1672,7 +1694,7 @@ function add_s($num, $es = false)
  */
 function is_or_are($num)
 {
-	global $lang_functions;
+	$lang_functions = \App\Support\SupportContext::getLangFunctions();
 	return \App\Support\Strings::pluralize((float)$num, $lang_functions['text_is'] ?? '', $lang_functions['text_are'] ?? '');
 }
 /**
@@ -1722,7 +1744,7 @@ function get_hl_color($color=0)
  */
 function get_forum_moderators($forumid, $plaintext = true)
 {
-	global $Cache;
+	$Cache = \App\Support\SupportContext::getCache();
 	return \App\Support\Forum::moderators($Cache, $forumid, (bool) $plaintext);
 }
 /**
@@ -1749,7 +1771,7 @@ function promotion_selection($selected = 0, $hide = 0)
  */
 function get_post_row($postid)
 {
-	global $Cache;
+	$Cache = \App\Support\SupportContext::getCache();
 	return \App\Support\Forum::postRow($Cache, $postid);
 }
 /**
@@ -1758,7 +1780,7 @@ function get_post_row($postid)
  */
 function get_country_row($id)
 {
-	global $Cache;
+	$Cache = \App\Support\SupportContext::getCache();
 	return \App\Support\Country::row($Cache, $id);
 }
 
@@ -1784,7 +1806,7 @@ function valid_class_name($filename)
  */
 function return_avatar_image($url)
 {
-	global $CURLANGDIR;
+	$CURLANGDIR = (string) \App\Support\SupportContext::getGlobal('CURLANGDIR', '');
 	return \App\Support\UserDisplay::avatarImage((string) $url, (string) $CURLANGDIR);
 }
 /**
@@ -1805,7 +1827,7 @@ function return_category_image($categoryid, $link="")
  */
 function torrentTags($tags = 0, $type = 'checkbox')
 {
-    global $lang_functions;
+    $lang_functions = \App\Support\SupportContext::getLangFunctions();
     return \App\Support\TorrentTags::render($tags, $type, [
         'text_tag_no_release_to_any_other' => $lang_functions['text_tag_no_release_to_any_other'] ?? '',
         'text_tag_first_release' => $lang_functions['text_tag_first_release'] ?? '',
@@ -2054,7 +2076,7 @@ function calculate_harem_addition($uid)
  */
 function build_search_box_category_table($mode, $checkboxValue, $categoryHrefPrefix, $taxonomyHrefPrefix, $taxonomyNameLength, $checkedValues = '', array $options = [])
 {
-    global $Cache;
+    $Cache = \App\Support\SupportContext::getCache();
     return \App\Support\SearchBox::buildCategoryTable(
         $Cache,
         $mode,

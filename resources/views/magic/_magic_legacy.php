@@ -1,7 +1,7 @@
 <?php
 extract($GLOBALS, EXTR_SKIP);
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
-
+header('Content-Type: application/json');
 
 $userid = $CURUSER["id"];
 $torrentid = (int) $_POST["id"];

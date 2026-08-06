@@ -8,6 +8,7 @@ defined('LARAVEL_START') || define('LARAVEL_START', microtime(true));
 defined('IN_NEXUS') || define('IN_NEXUS', true);
 
 $rootpath = dirname(__DIR__) . '/';
+set_include_path(get_include_path() . PATH_SEPARATOR . $rootpath);
 
 // Resolve whether this is a legacy .php wrapper (FPM executing public/<page>.php)
 // or the Laravel fallback entry point (nexus.php).
@@ -141,7 +142,7 @@ $extraLangFiles = [
     'take-increment-bulk' => ['increment-bulk.php'],
     'upload' => ['edit.php'],
 ];
-$scriptLangFiles = $extraLangFiles[$script] ?? [$script . '.php'];
+$scriptLangFiles = array_unique(array_merge([$script . '.php'], $extraLangFiles[$script] ?? []));
 foreach ($scriptLangFiles as $scriptLangFile) {
     $langPath = $rootpath . get_langfile_path($scriptLangFile);
     if (is_file($langPath)) {

@@ -1,97 +1,34 @@
 <?php
-require_once("../include/bittorrent.php");
+require "../include/bittorrent.php";
 dbconn();
 require_once(get_langfile_path());
-//require_once(get_langfile_path("",true));
 loggedinorreturn();
-user_can('torrent-delete', true);
-function bark($msg) {
-  global $lang_delete;
-  stdhead();
-  stdmsg($lang_delete['std_delete_failed'], $msg);
-  stdfoot();
-  exit;
+$rootpath = dirname(__DIR__) . '/';
+
+if (! class_exists(\Illuminate\Http\Request::class)) {
+    require_once $rootpath . 'vendor/autoload.php';
 }
 
-if (!mkglobal("id"))
-	bark($lang_delete['std_missing_form_date']);
+$app = require_once $rootpath . 'bootstrap/app.php';
+$kernel = $app->make(\Illuminate\Contracts\Http\Kernel::class);
 
-$id = intval($id ?? 0);
-if (!$id)
-	die();
+$method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+$uri = '/delete' . (empty($_SERVER['QUERY_STRING']) ? '' : '?' . $_SERVER['QUERY_STRING']);
 
-$torrent = \App\Models\Torrent::query()->select('name', 'owner', 'seeders', 'anonymous')->where('id', $id)->first();
-if (!$torrent)
-	die();
-$row = $torrent->toArray();
+$server = $_SERVER;
+$server['SCRIPT_NAME'] = '/delete.php';
+$server['SCRIPT_FILENAME'] = $rootpath . 'public/delete.php';
+$server['REQUEST_METHOD'] = $method;
 
-if ($CURUSER["id"] != $row["owner"] && !user_can('torrentmanage'))
-	bark($lang_delete['std_not_owner']);
+$request = \Illuminate\Http\Request::create(
+    $uri,
+    $method,
+    $method === 'POST' ? $_POST : $_GET,
+    $_COOKIE,
+    $_FILES,
+    $server
+);
 
-$rt = intval($_POST["reasontype"] ?? 0);
-
-if (!is_int($rt) || $rt < 1 || $rt > 5)
-	bark($lang_delete['std_invalid_reason']."$rt.");
-
-$reason = $_POST["reason"] ?? [];
-
-if ($rt == 1)
-	$reasonstr = "Dead: 0 seeders, 0 leechers = 0 peers total";
-elseif ($rt == 2)
-	$reasonstr = "Dupe" . (!empty($reason[0]) ? (": " . trim($reason[0])) : "!");
-elseif ($rt == 3)
-	$reasonstr = "Nuked" . (!empty($reason[1]) ? (": " . trim($reason[1])) : "!");
-elseif ($rt == 4)
-{
-	if (empty($reason[2]))
-		bark($lang_delete['std_describe_violated_rule']);
-  $reasonstr = $SITENAME." rules broken: " . trim($reason[2]);
-}
-else
-{
-	if (empty($reason[3]))
-		bark($lang_delete['std_enter_reason']);
-  $reasonstr = trim($reason[3]);
-}
-$searchRep = new \App\Repositories\SearchRepository();
-$deleteEsResult = $searchRep->deleteTorrent($id);
-if ($deleteEsResult === false) {
-    bark('Delete es fail.');
-}
-deletetorrent($id);
-
-if ($row['anonymous'] == 'yes' && $CURUSER["id"] == $row["owner"]) {
-	write_log("Torrent $id ({$row['name']}) was deleted by its anonymous uploader ($reasonstr)",'normal');
-} else {
-	write_log("Torrent $id ({$row['name']}) was deleted by {$CURUSER['username']} ($reasonstr)",'normal');
-}
-
-//===remove karma
-KPS("-",$uploadtorrent_bonus,$row["owner"]);
-
-//Send pm to torrent uploader
-if ($CURUSER["id"] != $row["owner"] && \App\Models\User::exists($row["owner"])){
-	$dt = date("Y-m-d H:i:s");
-    $locale = get_user_locale($row["owner"]);
-    $subject = nexus_trans("torrent.msg_torrent_deleted", [], $locale);
-    $msg = nexus_trans("torrent.msg_the_torrent_you_uploaded", [], $locale).$row['name'].nexus_trans("torrent.msg_was_deleted_by", [], $locale)."[url=userdetails.php?id=".$CURUSER['id']."]".$CURUSER['username']."[/url]".nexus_trans("torrent.msg_reason_is", [], $locale).$reasonstr;
-    \App\Models\Message::add([
-        'sender' => 0,
-        'receiver' => $row['owner'],
-        'subject' => $subject,
-        'msg' => $msg,
-        'added' => $dt,
-    ]);
-}
-stdhead($lang_delete['head_torrent_deleted']);
-
-if (isset($_POST["returnto"]))
-	$ret = "<a href=\"" . htmlspecialchars($_POST["returnto"]) . "\">".$lang_delete['text_go_back']."</a>";
-else
-	$ret = "<a href=\"index.php\">".$lang_delete['text_back_to_index']."</a>";
-
-?>
-<h1><?php echo $lang_delete['text_torrent_deleted'] ?></h1>
-<p><?php echo  $ret ?></p>
-<?php
-stdfoot();
+$response = $kernel->handle($request);
+$response->send();
+$kernel->terminate($request, $response);

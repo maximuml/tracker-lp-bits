@@ -575,6 +575,81 @@ class LegacyPagesController extends Controller
         return $this->legacy($request, 'unco', true);
     }
 
+    public function adduser(Request $request): Response|RedirectResponse
+    {
+        return $this->legacyWithRedirect($request, 'adduser', true);
+    }
+
+    public function bitbucketlog(Request $request): View|RedirectResponse
+    {
+        return $this->legacy($request, 'bitbucketlog', true);
+    }
+
+    public function complains(Request $request): Response|RedirectResponse
+    {
+        return $this->legacyWithRedirect($request, 'complains', true);
+    }
+
+    public function confirmemail(Request $request): Response|RedirectResponse
+    {
+        return $this->legacyWithRedirect($request, 'confirmemail', false);
+    }
+
+    public function cron(Request $request): Response|RedirectResponse
+    {
+        return $this->legacyRaw($request, 'cron', false);
+    }
+
+    public function delete(Request $request): View|RedirectResponse
+    {
+        return $this->legacy($request, 'delete', true);
+    }
+
+    public function downloadnotice(Request $request): Response|RedirectResponse
+    {
+        return $this->legacyWithRedirect($request, 'downloadnotice', true);
+    }
+
+    public function emailGateway(Request $request): Response|RedirectResponse
+    {
+        return $this->legacyRaw($request, 'email-gateway', false);
+    }
+
+    public function incrementBulk(Request $request): View|RedirectResponse
+    {
+        return $this->legacy($request, 'increment-bulk', true);
+    }
+
+    public function maxlogin(Request $request): Response|RedirectResponse
+    {
+        return $this->legacyWithRedirect($request, 'maxlogin', true);
+    }
+
+    public function ok(Request $request): View|RedirectResponse
+    {
+        return $this->legacy($request, 'ok', false);
+    }
+
+    public function setlistLookup(Request $request): Response|RedirectResponse
+    {
+        return $this->legacyRaw($request, 'setlist_lookup', true);
+    }
+
+    public function takeIncrementBulk(Request $request): Response|RedirectResponse
+    {
+        return $this->legacyWithRedirect($request, 'take-increment-bulk', true);
+    }
+
+    public function testip(Request $request): View|RedirectResponse
+    {
+        return $this->legacy($request, 'testip', true);
+    }
+
+    public function thanks(Request $request): Response|RedirectResponse
+    {
+        return $this->legacyRaw($request, 'thanks', true);
+    }
+
     private function legacy(Request $request, string $page, bool $auth = true): View|RedirectResponse
     {
         if (! defined('IN_NEXUS') || ($auth && ! isset($GLOBALS['CURUSER']))) {

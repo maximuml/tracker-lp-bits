@@ -1,34 +1,32 @@
 <?php
-require_once("../include/bittorrent.php");
-
-if (!preg_match(':^/(\d{1,10})/([\w]{32})/(.+)$:', $_SERVER["PATH_INFO"], $matches))
-	httperr();
-
-$id = intval($matches[1] ?? 0);
-$md5 = $matches[2];
-$email = urldecode($matches[3]);
-//print($email);
-//die();
-
-if (!$id)
-	httperr();
+require "../include/bittorrent.php";
 dbconn();
+$rootpath = dirname(__DIR__) . '/';
 
-$user = \App\Models\User::query()->where('id', $id)->first(['editsecret']);
-if (!$user)
-	httperr();
-$row = $user->toArray();
+if (! class_exists(\Illuminate\Http\Request::class)) {
+    require_once $rootpath . 'vendor/autoload.php';
+}
 
-$sec = hash_pad($row["editsecret"]);
-if (preg_match('/^ *$/s', $sec))
-	httperr();
-if ($md5 != md5($sec . $email . $sec))
-	httperr();
+$app = require_once $rootpath . 'bootstrap/app.php';
+$kernel = $app->make(\Illuminate\Contracts\Http\Kernel::class);
 
-$affected = \App\Models\User::query()->where('id', $id)->where('editsecret', $row['editsecret'])->update(['editsecret' => '', 'email' => $email]);
+$method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+$uri = '/confirmemail' . (empty($_SERVER['QUERY_STRING']) ? '' : '?' . $_SERVER['QUERY_STRING']);
 
-if (!$affected)
-	httperr();
+$server = $_SERVER;
+$server['SCRIPT_NAME'] = '/confirmemail.php';
+$server['SCRIPT_FILENAME'] = $rootpath . 'public/confirmemail.php';
+$server['REQUEST_METHOD'] = $method;
 
-header("Location: " . get_protocol_prefix() . "$BASEURL/usercp.php?action=security&type=saved");
-?>
+$request = \Illuminate\Http\Request::create(
+    $uri,
+    $method,
+    $method === 'POST' ? $_POST : $_GET,
+    $_COOKIE,
+    $_FILES,
+    $server
+);
+
+$response = $kernel->handle($request);
+$response->send();
+$kernel->terminate($request, $response);

@@ -1,31 +1,33 @@
 <?php
-require_once("../include/bittorrent.php");
+require "../include/bittorrent.php";
 dbconn();
 loggedinorreturn();
+$rootpath = dirname(__DIR__) . '/';
 
-header('Content-Type: application/json; charset=utf-8');
-
-$name = trim($_GET['name'] ?? $_POST['name'] ?? '');
-$url = trim($_GET['url'] ?? $_POST['url'] ?? '');
-
-if (!$name && !$url) {
-    echo json_encode(['success' => false, 'error' => 'Torrent name or setlist URL is required.']);
-    exit;
+if (! class_exists(\Illuminate\Http\Request::class)) {
+    require_once $rootpath . 'vendor/autoload.php';
 }
 
-try {
-    if ($url) {
-        $host = parse_url($url, PHP_URL_HOST) ?: '';
-        if (!in_array(strtolower($host), ['www.setlist.fm', 'setlist.fm'], true)) {
-            echo json_encode(['success' => false, 'error' => 'Only setlist.fm URLs are allowed.']);
-            exit;
-        }
-        $result = \App\Support\SetlistLookup::fromUrl($url);
-    } else {
-        $result = \App\Support\SetlistLookup::fromTorrentName($name);
-    }
-    echo json_encode($result, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-} catch (\Throwable $e) {
-    do_log($e->getMessage() . "\n" . $e->getTraceAsString(), 'error');
-    echo json_encode(['success' => false, 'error' => 'Setlist lookup failed.']);
-}
+$app = require_once $rootpath . 'bootstrap/app.php';
+$kernel = $app->make(\Illuminate\Contracts\Http\Kernel::class);
+
+$method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+$uri = '/setlist_lookup' . (empty($_SERVER['QUERY_STRING']) ? '' : '?' . $_SERVER['QUERY_STRING']);
+
+$server = $_SERVER;
+$server['SCRIPT_NAME'] = '/setlist_lookup.php';
+$server['SCRIPT_FILENAME'] = $rootpath . 'public/setlist_lookup.php';
+$server['REQUEST_METHOD'] = $method;
+
+$request = \Illuminate\Http\Request::create(
+    $uri,
+    $method,
+    $method === 'POST' ? $_POST : $_GET,
+    $_COOKIE,
+    $_FILES,
+    $server
+);
+
+$response = $kernel->handle($request);
+$response->send();
+$kernel->terminate($request, $response);

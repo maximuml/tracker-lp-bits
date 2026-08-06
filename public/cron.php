@@ -1,13 +1,32 @@
 <?php
-require_once("../include/bittorrent.php");
+require "../include/bittorrent.php";
 dbconn();
-if ($useCronTriggerCleanUp) {
-	$return = autoclean();
-	if ($return) {
-		echo $return."\n";
-	} else {
-		echo "Clean-up not triggered.\n";
-	}
-} else {
-	echo "Forbidden. Clean-up is set to be browser-triggered.\n";
+$rootpath = dirname(__DIR__) . '/';
+
+if (! class_exists(\Illuminate\Http\Request::class)) {
+    require_once $rootpath . 'vendor/autoload.php';
 }
+
+$app = require_once $rootpath . 'bootstrap/app.php';
+$kernel = $app->make(\Illuminate\Contracts\Http\Kernel::class);
+
+$method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+$uri = '/cron' . (empty($_SERVER['QUERY_STRING']) ? '' : '?' . $_SERVER['QUERY_STRING']);
+
+$server = $_SERVER;
+$server['SCRIPT_NAME'] = '/cron.php';
+$server['SCRIPT_FILENAME'] = $rootpath . 'public/cron.php';
+$server['REQUEST_METHOD'] = $method;
+
+$request = \Illuminate\Http\Request::create(
+    $uri,
+    $method,
+    $method === 'POST' ? $_POST : $_GET,
+    $_COOKIE,
+    $_FILES,
+    $server
+);
+
+$response = $kernel->handle($request);
+$response->send();
+$kernel->terminate($request, $response);

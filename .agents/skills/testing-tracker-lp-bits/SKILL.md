@@ -183,6 +183,35 @@ This section covers the combined `php8` branch migrations (`usercp`, `edit`/`tak
 - `/modtask.php` `edituser` requires the same fields as the `userdetails.php` edit form, including `email`, `username`, `title`, `avatar`, `signature`, `privacy`, `donor`, `uploadpos`, `downloadpos`, `forumpost`, etc. `cruprfmanage` permission means `email` and `username` cannot be omitted or they will be blanked.
 - `/deletemessage.php` originally compared `messages.location` (a `smallint`) to the strings `'in'`, `'out'`, and `'both'`, which never matched. PR #27 fixed this by using the numeric `PM_DELETED`/`saved` semantics from `messages/_messages_legacy.php` and ensuring `lang_deletemessage` is loaded.
 
+## Testing PR #231 unified `nexus.php` dispatcher (public wrapper consolidation)
+
+PR #231 replaces per-page dispatching in `public/*.php` with `require __DIR__ . '/nexus.php';` and a single `Request::create()` call inside `public/nexus.php`.
+
+### What to verify
+
+- `php -l public/nexus.php` and representative wrappers (`index.php`, `torrents.php`, `details.php`, `comment.php`, `takelogin.php`, `takesignup.php`, `takeupload.php`, `confirmemail.php`, `forums.php`, `userdetails.php`).
+- `./vendor/bin/phpstan analyse` and `php artisan test --testsuite Unit/Feature` pass.
+- `$_GET`/`$_POST`/`$_FILES`/`$_SERVER`/`$_COOKIE` are copied into the Laravel `Request` correctly; special wrappers rewrite `$_GET`/`$nexusRoute` before `nexus.php`.
+- Clean URLs without `.php` fall back to `nexus.php` and redirect to the corresponding `.php` wrapper, e.g. `/torrents` -> `302` to `/torrents.php?` and `/details/2` -> `302` to `/details.php?id=2`.
+- Special routing wrappers:
+  - `details.php` sets `$nexusRoute = '/details/' . $id` and unsets `$_GET['id']`.
+  - `comment.php` maps `action=add|edit|delete|vieworiginal` to the Laravel `/comment/*` routes.
+  - `takelogin.php` and `takesignup.php` set `$nexusRoute` to `/login` and `/signup`.
+- Tracker endpoints: `announce.php` and `scrape.php` define `IN_NEXUS` and still return `200` bencoded responses.
+- PATH_INFO: `confirmemail.php/<id>/<32-md5>/<email>` should reach the legacy `confirmemail` partial and return a legacy `<h1>Not Found</h1>` from `httperr()` when the hash does not match.
+- POST wrappers (`takesignup.php`, `takeupload.php`, `comment.php`, `takemessage.php`, `takestaffmess.php`, `deletemessage.php`) should produce validation/error pages or redirects, not 405/500.
+- Admin/utility wrappers (`catmanage.php`, `forummanage.php`, `moforums.php`, `fields.php`, `formats.php`, `videoformats.php`, `faqactions.php`, `faqmanage.php`) render forms/tables.
+- Critical path pages (`index.php`, `torrents.php`, `details.php`, `userdetails.php`, `forums.php`, `offers.php`, `mybonus.php`, `bitbucket-upload.php`, `topten.php`, `log.php`, `staffpanel.php`) render 200.
+
+### Common gotchas
+
+- `takelogin.php` and `takesignup.php` need the CSRF token extracted from the **unauthenticated** form page; fetching the token while logged in may return an empty token because `/login` and `/signup` redirect authenticated users to `index.php`.
+- `takeupload.php` requires a valid generated `.torrent` and the `_token`; an empty title should redirect to `/error?error=The+title+cannot+be+empty`.
+- `comment.php` POST `action=add` needs `pid=<torrentId>&type=torrent` and `body`; success redirects to `details.php?id=<pid>#<newId>`.
+- `comment.php` `action=delete&cid=<id>&type=torrent&sure=1` should redirect to the parent details page.
+- `mailtest.php` POST form fields are `action=sendmail` and `email=<address>`; with `smtp.smtptype=none` the expected result is `Unable to send mail. (SMTP disabled or mail not sent)`.
+- For `announce.php` and `scrape.php`, build the query with `rawurlencode()` on the raw 20-byte `info_hash` and `peer_id` and use a `User-Agent` from the allow list (`qBittorrent/4.0.0`).
+
 ## Testing PR #219 remaining public/*.php migrations
 
 ### Pages and expected behavior

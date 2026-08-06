@@ -98,6 +98,7 @@ final class SupportContext
     public static function setUser(?array $user): void
     {
         self::$user = $user;
+        self::setGlobal('CURUSER', $user);
     }
 
     /**

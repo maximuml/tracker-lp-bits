@@ -33,7 +33,6 @@ class TorrentUploadController extends Controller
 
         $currentUser = SupportContext::getUser() ?? $user->toArray();
         SupportContext::setUser($currentUser);
-        $GLOBALS['CURUSER'] = $currentUser;
 
         if (empty(SupportContext::getGlobal('lang_upload')) || empty(SupportContext::getGlobal('lang_edit'))) {
             SupportContext::setServerValue('SCRIPT_NAME', '/upload.php');

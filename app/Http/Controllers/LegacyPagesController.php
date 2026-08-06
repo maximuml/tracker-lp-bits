@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Support\SupportContext;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -330,7 +331,8 @@ class LegacyPagesController extends Controller
         try {
             $callable = ['AjaxInterface', $action];
             if (! is_callable($callable)) {
-                do_log("hacking attempt made by " . ($GLOBALS['CURUSER']['username'] ?? 'guest') . ",uid " . ($GLOBALS['CURUSER']['id'] ?? 0), 'error');
+                $currentUser = SupportContext::getUser() ?? [];
+                do_log("hacking attempt made by " . ($currentUser['username'] ?? 'guest') . ",uid " . ($currentUser['id'] ?? 0), 'error');
                 throw new \RuntimeException("Invalid action: {$action}");
             }
 
@@ -401,7 +403,7 @@ class LegacyPagesController extends Controller
 
     public function shoutboxSse(Request $request): SymfonyResponse
     {
-        if (! isset($GLOBALS['CURUSER'])) {
+        if (SupportContext::getUser() === null) {
             return new SymfonyResponse('', 403);
         }
 
@@ -652,7 +654,7 @@ class LegacyPagesController extends Controller
 
     private function legacy(Request $request, string $page, bool $auth = true): View|RedirectResponse
     {
-        if (! defined('IN_NEXUS') || ($auth && ! isset($GLOBALS['CURUSER']))) {
+        if (! defined('IN_NEXUS') || ($auth && SupportContext::getUser() === null)) {
             $qs = $request->getQueryString();
             return redirect('/' . $page . '.php' . ($qs ? '?' . $qs : ''));
         }
@@ -663,7 +665,7 @@ class LegacyPagesController extends Controller
 
     private function legacyWithRedirect(Request $request, string $page, bool $auth = true): Response|RedirectResponse
     {
-        if (! defined('IN_NEXUS') || ($auth && ! isset($GLOBALS['CURUSER']))) {
+        if (! defined('IN_NEXUS') || ($auth && SupportContext::getUser() === null)) {
             $qs = $request->getQueryString();
 
             return redirect('/' . $page . '.php' . ($qs ? '?' . $qs : ''));
@@ -688,7 +690,7 @@ class LegacyPagesController extends Controller
 
     private function legacyRaw(Request $request, string $page, bool $auth = true): Response|RedirectResponse
     {
-        if (! defined('IN_NEXUS') || ($auth && ! isset($GLOBALS['CURUSER']))) {
+        if (! defined('IN_NEXUS') || ($auth && SupportContext::getUser() === null)) {
             $qs = $request->getQueryString();
 
             return redirect('/' . $page . '.php' . ($qs ? '?' . $qs : ''));

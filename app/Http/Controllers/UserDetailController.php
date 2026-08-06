@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Repositories\UserDetailRepository;
 use App\Support\LegacyResponse;
+use App\Support\SupportContext;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -18,13 +19,13 @@ class UserDetailController extends Controller
             abort(404);
         }
 
-        if (! defined('IN_NEXUS') || ! isset($GLOBALS['CURUSER'])) {
+        if (! defined('IN_NEXUS') || SupportContext::getUser() === null) {
             return redirect('/userdetails.php?' . $request->getQueryString());
         }
 
         $user = UserDetailRepository::getUser($id);
         /** @var array<string, string> $lang */
-        $lang = $GLOBALS['lang_userdetails'] ?? [];
+        $lang = (array) SupportContext::getGlobal('lang_userdetails', []);
 
         if ($user === null) {
             LegacyResponse::abort(

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -277,6 +278,68 @@ class LegacyPagesController extends Controller
     public function faqActions(Request $request): Response|RedirectResponse
     {
         return $this->legacyWithRedirect($request, 'faqactions');
+    }
+
+    public function search(Request $request): View|RedirectResponse
+    {
+        return $this->legacy($request, 'search');
+    }
+
+    public function usersearch(Request $request): View|RedirectResponse
+    {
+        return $this->legacy($request, 'usersearch');
+    }
+
+    public function getUserTorrentListAjax(Request $request): Response|RedirectResponse
+    {
+        return $this->legacyRaw($request, 'getusertorrentlistajax', false);
+    }
+
+    public function searchSuggest(Request $request): Response|RedirectResponse
+    {
+        return $this->legacyRaw($request, 'searchsuggest', false);
+    }
+
+    public function autocompleteTorrents(Request $request): Response|RedirectResponse
+    {
+        return $this->legacyRaw($request, 'autocomplete_torrents');
+    }
+
+    public function ajax(Request $request): JsonResponse|RedirectResponse
+    {
+        if (! defined('IN_NEXUS')) {
+            $qs = $request->getQueryString();
+
+            return redirect('/ajax.php' . ($qs ? '?' . $qs : ''));
+        }
+
+        $action = (string) $request->input('action', '');
+        $params = $request->input('params', []);
+
+        $passkeyActions = ['getPasskeyGetArgs', 'processPasskeyGet'];
+        if (! in_array($action, $passkeyActions, true)) {
+            loggedinorreturn();
+        }
+
+        if (! class_exists('AjaxInterface')) {
+            view('ajax._ajax_legacy')->render();
+        }
+
+        try {
+            $callable = ['AjaxInterface', $action];
+            if (! is_callable($callable)) {
+                do_log("hacking attempt made by " . ($GLOBALS['CURUSER']['username'] ?? 'guest') . ",uid " . ($GLOBALS['CURUSER']['id'] ?? 0), 'error');
+                throw new \RuntimeException("Invalid action: {$action}");
+            }
+
+            $result = call_user_func($callable, $params);
+
+            return response()->json(success($result));
+        } catch (\Throwable $exception) {
+            do_log($exception->getMessage() . $exception->getTraceAsString(), 'error');
+
+            return response()->json(fail($exception->getMessage(), $request->all()));
+        }
     }
 
     private function legacy(Request $request, string $page, bool $auth = true): View|RedirectResponse

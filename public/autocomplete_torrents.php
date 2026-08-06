@@ -2,26 +2,32 @@
 require "../include/bittorrent.php";
 dbconn();
 loggedinorreturn();
+$rootpath = dirname(__DIR__) . '/';
 
-header("Expires: Mon, 26 Jul 1997 05:00:00 GMT");
-header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
-header("Cache-Control: no-cache, must-revalidate");
-header("Pragma: no-cache");
-header("Content-Type: application/json; charset=utf-8");
-
-$torrents = [];
-
-$query = trim($_GET['q'] ?? '');
-if ($query !== '' && strlen($query) >= 2 && get_setting('meilisearch.enabled') == 'yes') {
-    try {
-        $user = \App\Models\User::query()->find($CURUSER['id']);
-        if ($user) {
-            $rep = new \App\Repositories\MeiliSearchRepository();
-            $torrents = $rep->autocomplete($query, 10, $user);
-        }
-    } catch (\Throwable $e) {
-        do_log('MeiliSearch autocomplete error: ' . $e->getMessage(), 'error');
-    }
+if (! class_exists(\Illuminate\Http\Request::class)) {
+    require_once $rootpath . 'vendor/autoload.php';
 }
 
-echo json_encode(['torrents' => $torrents]);
+$app = require_once $rootpath . 'bootstrap/app.php';
+$kernel = $app->make(\Illuminate\Contracts\Http\Kernel::class);
+
+$method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+$uri = '/autocomplete_torrents' . (empty($_SERVER['QUERY_STRING']) ? '' : '?' . $_SERVER['QUERY_STRING']);
+
+$server = $_SERVER;
+$server['SCRIPT_NAME'] = '/autocomplete_torrents.php';
+$server['SCRIPT_FILENAME'] = $rootpath . 'public/autocomplete_torrents.php';
+$server['REQUEST_METHOD'] = $method;
+
+$request = \Illuminate\Http\Request::create(
+    $uri,
+    $method,
+    $method === 'POST' ? $_POST : $_GET,
+    $_COOKIE,
+    $_FILES,
+    $server
+);
+
+$response = $kernel->handle($request);
+$response->send();
+$kernel->terminate($request, $response);

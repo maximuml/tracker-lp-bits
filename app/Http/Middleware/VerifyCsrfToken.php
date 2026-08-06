@@ -50,5 +50,7 @@ class VerifyCsrfToken extends Middleware
         "clearcache",
         "donated",
         "faqactions",
+        "ajax",
+        "getusertorrentlistajax",
     ];
 }

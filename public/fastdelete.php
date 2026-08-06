@@ -1,67 +1,34 @@
 <?php
-require_once("../include/bittorrent.php");
+require "../include/bittorrent.php";
 dbconn();
 require_once(get_langfile_path());
-//require_once(get_langfile_path("",true));
 loggedinorreturn();
-function bark($msg) {
-  global $lang_fastdelete;
-  stdhead();
-  stdmsg($lang_fastdelete['std_delete_failed'], $msg);
-  stdfoot();
-  exit;
+$rootpath = dirname(__DIR__) . '/';
+
+if (! class_exists(\Illuminate\Http\Request::class)) {
+    require_once $rootpath . 'vendor/autoload.php';
 }
 
-if (!mkglobal("id"))
-    bark($lang_fastdelete['std_missing_form_data']);
+$app = require_once $rootpath . 'bootstrap/app.php';
+$kernel = $app->make(\Illuminate\Contracts\Http\Kernel::class);
 
-$id = intval($id ?? 0);
-int_check($id);
-$sure = $_GET["sure"];
+$method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+$uri = '/fastdelete' . (empty($_SERVER['QUERY_STRING']) ? '' : '?' . $_SERVER['QUERY_STRING']);
 
-$torrent = \App\Models\Torrent::query()->where('id', $id)->first(['name', 'owner', 'seeders', 'anonymous']);
-if (!$torrent)
-    die();
-$row = $torrent->toArray();
+$server = $_SERVER;
+$server['SCRIPT_NAME'] = '/fastdelete.php';
+$server['SCRIPT_FILENAME'] = $rootpath . 'public/fastdelete.php';
+$server['REQUEST_METHOD'] = $method;
 
-if (!user_can('torrentmanage') || !user_can('torrent-delete'))
-    bark($lang_fastdelete['text_no_permission']);
+$request = \Illuminate\Http\Request::create(
+    $uri,
+    $method,
+    $method === 'POST' ? $_POST : $_GET,
+    $_COOKIE,
+    $_FILES,
+    $server
+);
 
-if (!$sure)
-	{
-	stderr($lang_fastdelete['std_delete_torrent'], $lang_fastdelete['std_delete_torrent_note']."<a class=altlink href=fastdelete.php?id=$id&sure=1>".$lang_fastdelete['std_here_if_sure'],false);
-	}
-
-$searchRep = new \App\Repositories\SearchRepository();
-$deleteEsResult = $searchRep->deleteTorrent($id);
-if ($deleteEsResult === false) {
-    bark('Delete es fail.');
-}
-deletetorrent($id);
-KPS("-",$uploadtorrent_bonus,$row["owner"]);
-if ($row['anonymous'] == 'yes' && $CURUSER["id"] == $row["owner"]) {
-	write_log("Torrent $id ($row[name]) was deleted by its anonymous uploader",'normal');
-} else {
-	write_log("Torrent $id ($row[name]) was deleted by $CURUSER[username]",'normal');
-}
-//Send pm to torrent uploader
-if (\App\Models\User::query()->where("id", $row['owner'])->exists()) {
-    if ($CURUSER["id"] != $row["owner"]){
-        $locale = get_user_locale($row["owner"]);
-        $dt = date("Y-m-d H:i:s");
-        $subject = nexus_trans("torrent.msg_torrent_deleted", [], $locale);
-        $msg = nexus_trans("torrent.msg_the_torrent_you_uploaded", [], $locale)
-            .$row['name']
-            .nexus_trans("torrent.msg_was_deleted_by", ['admin' => $CURUSER['username']], $locale)
-        ;
-        \App\Models\Message::add([
-            'sender' => 0,
-            'receiver' => $row['owner'],
-            'subject' => $subject,
-            'msg' => $msg,
-            'added' => $dt,
-        ]);
-    }
-}
-header("Location: torrents.php");
-?>
+$response = $kernel->handle($request);
+$response->send();
+$kernel->terminate($request, $response);

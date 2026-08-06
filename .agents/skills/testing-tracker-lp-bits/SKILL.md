@@ -182,3 +182,31 @@ This section covers the combined `php8` branch migrations (`usercp`, `edit`/`tak
 - The `bans.php` form can be exercised via `curl` because the native submit button may not register under automation.
 - `/modtask.php` `edituser` requires the same fields as the `userdetails.php` edit form, including `email`, `username`, `title`, `avatar`, `signature`, `privacy`, `donor`, `uploadpos`, `downloadpos`, `forumpost`, etc. `cruprfmanage` permission means `email` and `username` cannot be omitted or they will be blanked.
 - `/deletemessage.php` originally compared `messages.location` (a `smallint`) to the strings `'in'`, `'out'`, and `'both'`, which never matched. PR #27 fixed this by using the numeric `PM_DELETED`/`saved` semantics from `messages/_messages_legacy.php` and ensuring `lang_deletemessage` is loaded.
+
+## Testing PR #219 remaining public/*.php migrations
+
+### Pages and expected behavior
+
+- `/adduser.php` GET renders a user-creation form; POST with alphanumeric username (3-20 chars) creates the user and 302s to `userdetails.php?id=<new>`.
+- `/bitbucketlog.php` lists uploaded avatar images with `[Delete]` links.
+- `/complains.php` is intended to be reachable by both anonymous users (file a complaint) and logged-in admins (view/reply). In the migrated route it is placed inside the `auth.nexus:nexus-web` group, while the partial's `cur_user_check()` aborts for logged-in users, so the page is unusable without a route/middleware change.
+- `/confirmemail.php/<id>/<md5>/<email>` relies on `$_SERVER['PATH_INFO']` matching `:/(\d{1,10})/([\w]{32})/(.+):`. The openresty `try_files` does not preserve `PATH_INFO` for these URLs; the request 404s. Needs an explicit rewrite/location or `$_GET` fallback.
+- `/cron.php` returns plain text; when `useCronTriggerCleanUp` is true and `autoclean()` does not run, it prints `Clean-up not triggered.`
+- `/delete.php?id=<torrentid>` (POST `id`, `reasontype`) should delete the torrent and print `Torrent deleted`. If the page is blank, check that `mkglobal("id")` was followed by `global $id;` so `intval($id)` sees the parsed value.
+- `/downloadnotice.php?torrentid=<id>` renders a first-time notice; submitting the form 302s to `download.php?id=<id>&letdown=1`.
+- `/email-gateway.php` is intentionally empty (the partial calls `exit(0);`).
+- `/increment-bulk.php` GET renders a batch bonus/invite/upload form; `take-increment-bulk.php` POST redirects to `increment-bulk.php?sent=1&type=<type>`.
+- `/maxlogin.php` lists `loginattempts`; `?action=ban|unban|delete&id=<row>` mutates the table.
+- `/ok.php?type=<type>` renders status messages (`signup`, `sysop`, `confirmed`, `adminactivate`). A blank page means `mkglobal("type")` populated `$GLOBALS['type']` but the local `$type` variable was not declared `global` after `extract($GLOBALS, EXTR_SKIP)`.
+- `/setlist_lookup.php?name=...` returns `Content-Type: application/json; charset=utf-8` with `success`, `data`, and `text`.
+- `/testip.php` accepts `ip` by GET/POST and prints whether it is banned based on `bans`.
+- `/thanks.php` POST `id=<torrentid>` inserts a `thanks` row and awards bonus points; returns empty body on success.
+
+### Common Blade-wrap regression (`mkglobal` / `extract`)
+
+Any partial that starts with `extract($GLOBALS, EXTR_SKIP);` and then calls `mkglobal("foo")` will set `$GLOBALS['foo']` but **not** create the local variable `$foo` (because `EXTR_SKIP` refuses to overwrite the already-extracted copy of `$GLOBALS`? actually because `mkglobal` only updates `$GLOBALS` and PHP variable scope does not auto-bind globals in function-less include). The fix is to add `global $foo;` immediately after `mkglobal("foo")` in the partial, or replace the `mkglobal` call with direct `$_GET`/`$_POST` access. PR #219 hit this in `ok`, `delete`, and several other legacy pages.
+
+### Confirm hash for `confirmemail.php`
+
+- Use the user's `editsecret` padded to 20 chars: `$secret = str_pad($editsecret, 20)`; `$md5 = md5($secret . $email . $secret);`.
+- The URL format is `/confirmemail.php/<id>/<md5>/<email>` (or `/confirmemail/<id>/<md5>/<email>` once routing is fixed).

@@ -2,6 +2,7 @@
 extract($GLOBALS, EXTR_SKIP);
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
+global $type;
 if (!mkglobal("type"))
 	return;
 if ($type == "adminactivate")
@@ -16,8 +17,11 @@ elseif ($type == "inviter")
 	stdmsg($lang_ok['std_account_activated'],
 	$lang_ok['account_activated_note_two']);
 }
-elseif ($type == "signup" && mkglobal("email"))
+elseif ($type == "signup")
 {
+	global $email;
+	if (!mkglobal("email"))
+		return;
 	stdhead($lang_ok['head_user_signup']);
         stdmsg($lang_ok['std_signup_successful'],
 	$lang_ok['std_confirmation_email_note']. htmlspecialchars($email) . $lang_ok['std_confirmation_email_note_end']);

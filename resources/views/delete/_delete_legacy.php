@@ -12,6 +12,7 @@ function bark($msg) {
   return;
 }
 
+global $id;
 if (!mkglobal("id"))
 	bark($lang_delete['std_missing_form_date']);
 

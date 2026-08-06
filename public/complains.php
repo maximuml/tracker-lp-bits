@@ -2,7 +2,6 @@
 require "../include/bittorrent.php";
 dbconn();
 require_once(get_langfile_path());
-loggedinorreturn();
 $rootpath = dirname(__DIR__) . '/';
 
 if (! class_exists(\Illuminate\Http\Request::class)) {

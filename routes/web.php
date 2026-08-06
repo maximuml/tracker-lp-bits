@@ -196,7 +196,6 @@ Route::group(['middleware' => ['auth.nexus:nexus-web']], function () {
     Route::match(['get', 'post'], '/unco', [LegacyPagesController::class, 'unco'])->name('unco.legacy');
     Route::match(['get', 'post'], '/adduser', [LegacyPagesController::class, 'adduser'])->name('adduser.legacy');
     Route::match(['get', 'post'], '/bitbucketlog', [LegacyPagesController::class, 'bitbucketlog'])->name('bitbucketlog.legacy');
-    Route::match(['get', 'post'], '/complains', [LegacyPagesController::class, 'complains'])->name('complains.legacy');
     Route::match(['get', 'post'], '/delete', [LegacyPagesController::class, 'delete'])->name('delete.legacy');
     Route::match(['get', 'post'], '/downloadnotice', [LegacyPagesController::class, 'downloadnotice'])->name('downloadnotice.legacy');
     Route::match(['get', 'post'], '/increment-bulk', [LegacyPagesController::class, 'incrementBulk'])->name('increment-bulk.legacy');
@@ -207,6 +206,7 @@ Route::group(['middleware' => ['auth.nexus:nexus-web']], function () {
     Route::match(['get', 'post'], '/thanks', [LegacyPagesController::class, 'thanks'])->name('thanks.legacy');
 });
 
+Route::match(['get', 'post'], '/complains', [LegacyPagesController::class, 'complains'])->name('complains.legacy');
 Route::match(['get', 'post'], '/shoutbox', [LegacyPagesController::class, 'shoutbox'])->name('shoutbox.legacy');
 
 Route::match(['get', 'post'], '/bookmark', [LegacyPagesController::class, 'bookmark'])->name('bookmark.legacy');

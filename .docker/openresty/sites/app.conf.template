@@ -90,6 +90,19 @@ server {
         alias /var/www/html/attachments/;
     }
 
+    # confirmemail.php/<id>/<md5>/<email> uses PATH_INFO
+    location ~ ^/confirmemail\.php(/.*)$ {
+        fastcgi_split_path_info ^(/confirmemail\.php)(/.*)$;
+        fastcgi_pass php:9000;
+        fastcgi_index index.php;
+        include fastcgi_params;
+        fastcgi_param SCRIPT_FILENAME $document_root/confirmemail.php;
+        fastcgi_param SCRIPT_NAME /confirmemail.php;
+        fastcgi_param PATH_INFO $fastcgi_path_info;
+        fastcgi_param REQUEST_ID $request_id;
+        fastcgi_param HTTP_X_FORWARDED_FOR $proxy_add_x_forwarded_for;
+    }
+
     location ~ \.php$ {
         fastcgi_pass php:9000;
         fastcgi_index index.php;

@@ -587,7 +587,7 @@ class LegacyPagesController extends Controller
 
     public function complains(Request $request): Response|RedirectResponse
     {
-        return $this->legacyWithRedirect($request, 'complains', true);
+        return $this->legacyWithRedirect($request, 'complains', false);
     }
 
     public function confirmemail(Request $request): Response|RedirectResponse

@@ -12,7 +12,7 @@ class TorrentSearchRepository
      */
     public static function getListingData(array $query = []): array
     {
-        global $CURUSER, $Cache, $USERUPDATESET, $lang_torrents, $lang_special;
+        global $CURUSER, $Cache, $lang_torrents, $lang_special;
         global $browsecatmode, $specialcatmode, $enablespecial, $torrentsperpage_main;
         global $catimgurl, $catpadding, $catsperrow;
 

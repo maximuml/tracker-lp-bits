@@ -1,4 +1,4 @@
-<?php global $USERUPDATESET;
+<?php
 print("<table width=\"97%\" class=\"main\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\"><tr><td class=\"embedded\">");
 
 ?>
@@ -49,7 +49,7 @@ else {
 }
 if ($CURUSER){
 	if ($sectiontype == $browsecatmode)
-		$USERUPDATESET['last_browse'] = TIMENOW;
-	else	$USERUPDATESET['last_music'] = TIMENOW;
+		\App\Support\SupportContext::addUserUpdate('last_browse', TIMENOW);
+	else	\App\Support\SupportContext::addUserUpdate('last_music', TIMENOW);
 }
 print("</td></tr></table>");

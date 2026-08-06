@@ -6,7 +6,8 @@ ini_set('error_reporting', E_ALL);
 ini_set('display_errors', 0);
 require_once __DIR__ . '/constants.php';
 require_once $rootpath . 'vendor/autoload.php';
-$USERUPDATESET = array();
+\App\Support\SupportContext::setUserUpdateSet([]);
+$USERUPDATESET = &\App\Support\SupportContext::getUserUpdateSet();
 $query_name=array();
 \Nexus\Nexus::boot();
 if (is_fpm_mode()) {

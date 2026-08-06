@@ -48,6 +48,9 @@ final class SupportContext
     /** @var array<string, mixed> */
     private static array $request = [];
 
+    /** @var array<string, mixed> */
+    private static array $userUpdateSet = [];
+
     private static ?Request $laravelRequest = null;
 
     /**
@@ -77,6 +80,8 @@ final class SupportContext
         self::$get = $_GET;
         self::$post = $_POST;
         self::$request = $_REQUEST;
+        self::$userUpdateSet = (array) ($GLOBALS['USERUPDATESET'] ?? []);
+        $GLOBALS['USERUPDATESET'] = &self::$userUpdateSet;
     }
 
     /**
@@ -90,6 +95,8 @@ final class SupportContext
         self::$get = $request->query->all();
         self::$post = $request->request->all();
         self::$request = $request->input();
+        self::$userUpdateSet = (array) ($GLOBALS['USERUPDATESET'] ?? []);
+        $GLOBALS['USERUPDATESET'] = &self::$userUpdateSet;
     }
 
     /**
@@ -99,6 +106,30 @@ final class SupportContext
     {
         self::$user = $user;
         self::setGlobal('CURUSER', $user);
+    }
+
+    /**
+     * Return a reference to the legacy per-request user update set.
+     *
+     * `stdhead()`/`stdfoot()` flush this array to the `users` table, so
+     * callers must mutate the same array between header and footer.
+     *
+     * @return  array<string, mixed>
+     */
+    public static function &getUserUpdateSet(): array
+    {
+        return self::$userUpdateSet;
+    }
+
+    /** @param  array<string, mixed>  $data */
+    public static function setUserUpdateSet(array $data): void
+    {
+        self::$userUpdateSet = $data;
+    }
+
+    public static function addUserUpdate(string $key, mixed $value): void
+    {
+        self::$userUpdateSet[$key] = $value;
     }
 
     /**
@@ -326,6 +357,7 @@ final class SupportContext
         self::$get = [];
         self::$post = [];
         self::$request = [];
+        self::$userUpdateSet = [];
         self::$laravelRequest = null;
     }
 }

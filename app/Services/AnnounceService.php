@@ -17,6 +17,7 @@ use App\Repositories\UserRepository;
 use App\Support\LegacyDb;
 use App\Support\Network;
 use App\Support\Strings;
+use App\Support\SupportContext;
 use App\Support\Tracker;
 use App\Support\Url;
 use App\Utils\MsgAlert;
@@ -141,7 +142,8 @@ final class AnnounceService
             throw TrackerException::failure('Browser access blocked!');
         }
 
-        if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'on') {
+        $https = $this->request->server('HTTPS');
+        if ($https !== null && $https !== 'on') {
             $headers = $this->request->headers->all();
             if (isset($headers['cookie']) || isset($headers['accept-language']) || isset($headers['accept-charset'])) {
                 throw TrackerException::failure('Anti-Cheater: You cannot use this agent');
@@ -249,7 +251,7 @@ final class AnnounceService
         }
 
         $this->userId = (int) $this->user['id'];
-        $GLOBALS['CURUSER'] = $this->user;
+        SupportContext::setUser($this->user);
 
         if ($this->user['enabled'] === 'no') {
             throw TrackerException::failure('Your account is disabled!');

@@ -6,6 +6,7 @@ use App\Models\Peer;
 use App\Models\Setting;
 use App\Models\Torrent;
 use App\Models\User;
+use App\Support\SupportContext;
 use Carbon\Carbon;
 use Filament\Facades\Filament;
 use Illuminate\Support\Facades\DB;
@@ -71,7 +72,7 @@ class DashboardRepository extends BaseRepository
         $result[$name] = [
             'name' => $name,
             'text' => nexus_trans("dashboard.system_info.$name"),
-            'value' =>  $_SERVER['SERVER_SOFTWARE'] ?? '',
+            'value' => SupportContext::getServerValue('SERVER_SOFTWARE', ''),
         ];
 
         $name = 'load_average';

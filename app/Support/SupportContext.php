@@ -271,6 +271,12 @@ final class SupportContext
         return self::$post[$key] ?? $_POST[$key] ?? $default;
     }
 
+    /** @return  array<string, mixed> */
+    public static function allPost(): array
+    {
+        return self::$post ?: $_POST;
+    }
+
     /**
      * @param  array<string, mixed>  $request
      */
@@ -282,6 +288,12 @@ final class SupportContext
     public static function getRequestInput(string $key, mixed $default = null): mixed
     {
         return self::$request[$key] ?? $_REQUEST[$key] ?? $default;
+    }
+
+    /** @return  array<string, mixed> */
+    public static function allRequest(): array
+    {
+        return self::$request ?: $_REQUEST;
     }
 
     public static function setLaravelRequest(?Request $request): void

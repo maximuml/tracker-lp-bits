@@ -602,8 +602,8 @@ class TorrentRepository extends BaseRepository
         }
 
         $appKey = \App\Support\Env::get('APP_KEY');
-        if ($appKey === null || $appKey === '') {
-            $appKey = getenv('APP_KEY') ?: ($_ENV['APP_KEY'] ?? $_SERVER['APP_KEY'] ?? '');
+        if (empty($appKey)) {
+            $appKey = (string) config('app.key');
         }
         if (empty($appKey)) {
             throw new \RuntimeException('APP_KEY is not configured for downhash');

@@ -1,29 +1,48 @@
 <?php
 class Attendance
 {
-    protected $userid;
-    protected $curdate;
-    public function __construct($userid){
+    protected int $userid;
+    protected string $curdate;
+    public string $cachename;
+
+    public function __construct(int $userid){
         $this->userid = $userid;
         $this->curdate = date('Y-m-d');
         $this->cachename = sprintf('attendance_%u_%s', $this->userid, $this->curdate);
     }
 
-    public function check($flush = false)
+    /**
+     * @return array<string, mixed>|false
+     */
+    public function check(bool $flush = false): array|false
     {
-        global $Cache;
-        if($flush || ($row = $Cache->get_value($this->cachename)) === false){
-            $record = \App\Models\Attendance::query()
-                ->where('uid', $this->userid)
-                ->whereDate('added', $this->curdate)
-                ->first();
-            $row = $record ? $record->toArray() : array();
+        $Cache = \App\Support\SupportContext::getCache();
+
+        if ($Cache !== null && ! $flush) {
+            $row = $Cache->get_value($this->cachename);
+            if ($row !== false) {
+                return empty($row) ? false : $row;
+            }
+        }
+
+        $record = \App\Models\Attendance::query()
+            ->where('uid', $this->userid)
+            ->whereDate('added', $this->curdate)
+            ->first();
+        $row = $record ? $record->toArray() : array();
+
+        if ($Cache !== null) {
             $Cache->cache_value($this->cachename, $row, 600);
         }
+
         return empty($row) ? false : $row;
     }
 
-    public function attend($initial = 10, $step = 5, $maximum = 2000, $continous = array())
+    /**
+     * @param  array<int, int>  $continous
+     * @return array<int, int>|false
+     */
+    public function attend(int|float $initial = 10, int|float $step = 5, int|float $maximum = 2000, array $continous = array()): array|false
     {
         do_log(json_encode(func_get_args()));
         if($this->check(true)) return false;
@@ -77,8 +96,10 @@ class Attendance
         }
         do_log(sprintf('uid: %s, date: %s, doUpdate: %s', $this->userid, $this->curdate, $doUpdate), 'notice');
         KPS('+', $points, $this->userid);
-        global $Cache;
-        $Cache->delete_value($this->cachename);
+        $Cache = \App\Support\SupportContext::getCache();
+        if ($Cache !== null) {
+            $Cache->delete_value($this->cachename);
+        }
         return array(++$totalDays, $cdays, $points);
     }
 }

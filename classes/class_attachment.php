@@ -1,13 +1,22 @@
 <?php
-class ATTACHMENT{
-	var $userid;
-	var $class;
-	var $countlimit;
-	var $countsofar=0;
-	var $sizelimit;
-	var $allowedext = array();
 
-	function __construct($userid) {
+use App\Models\Setting;
+
+class ATTACHMENT{
+	public int $userid;
+	public int $class;
+	public int $countlimit;
+	public int $countsofar=0;
+	public int $sizelimit;
+	/** @var array<int, string> */
+	public array $allowedext = array();
+
+	private function attachmentSetting(string $key, mixed $default = null): mixed
+	{
+		return Setting::get('attachment.' . $key, $default);
+	}
+
+	function __construct(int $userid) {
 		$this->userid = $userid;
 		$this->set_class();
 		$this->set_count_so_far();
@@ -16,22 +25,19 @@ class ATTACHMENT{
 		$this->set_allowed_ext();
 	}
 
-	function enable_attachment()
+	function enable_attachment(): bool
 	{
-		global $enableattach_attachment;
-		if ($enableattach_attachment == 'yes')
-			return true;
-		else return false;
+		return $this->attachmentSetting('enableattach') == 'yes';
 	}
 
-	function set_class()
+	function set_class(): void
 	{
 		$userid = $this->userid;
 		$row = get_user_row($userid);
-		$this->class = $row['class'];
+		$this->class = (int) ($row['class'] ?? 0);
 	}
 
-	function set_count_so_far()
+	function set_count_so_far(): void
 	{
 		$userid = $this->userid;
 		$now = date("Y-m-d H:i:s", TIMENOW-86400);
@@ -39,127 +45,128 @@ class ATTACHMENT{
 			->where('userid', $userid)
 			->where('added', '>', $now)
 			->count();
-		$this->countsofar = $countsofar;
+		$this->countsofar = (int) $countsofar;
 	}
 
-	function get_count_so_far()
+	function get_count_so_far(): int
 	{
 		return $this->countsofar;
 	}
 
-	function get_count_limit_class($class)
+	function get_count_limit_class(int $class): int
 	{
-		global $classone_attachment, $classtwo_attachment, $classthree_attachment, $classfour_attachment,$countone_attachment, $counttwo_attachment, $countthree_attachment, $countfour_attachment;
-		if ($class >= $classfour_attachment && $countfour_attachment)
-			return $countfour_attachment;
-		elseif ($class >= $classthree_attachment && $countthree_attachment)
-			return $countthree_attachment;
-		elseif ($class >= $classtwo_attachment && $counttwo_attachment)
-			return $counttwo_attachment;
-		elseif ($class >= $classone_attachment && $countone_attachment)
-			return $countone_attachment;
+		$limits = [
+			(int) $this->attachmentSetting('classfour', 0) => (int) $this->attachmentSetting('countfour', 0),
+			(int) $this->attachmentSetting('classthree', 0) => (int) $this->attachmentSetting('countthree', 0),
+			(int) $this->attachmentSetting('classtwo', 0) => (int) $this->attachmentSetting('counttwo', 0),
+			(int) $this->attachmentSetting('classone', 0) => (int) $this->attachmentSetting('countone', 0),
+		];
+		krsort($limits);
+		foreach ($limits as $classLimit => $countLimit) {
+			if ($classLimit > 0 && $class >= $classLimit && $countLimit > 0) {
+				return $countLimit;
+			}
+		}
+		return 0;
 	}
 
-	function set_count_limit()
+	function set_count_limit(): void
 	{
 		$class = $this->class;
 		$countlimit = $this->get_count_limit_class($class);
 		$this->countlimit = $countlimit;
 	}
 
-	function get_count_limit()
+	function get_count_limit(): int
 	{
 		return $this->countlimit;
 	}
 
-	function get_count_left()
+	function get_count_left(): int
 	{
 		$left = $this->countlimit - $this->countsofar;
 		return $left;
 	}
 
-	function get_size_limit_class($class)
+	function get_size_limit_class(int $class): int
 	{
-		global $classone_attachment, $classtwo_attachment, $classthree_attachment, $classfour_attachment,$sizeone_attachment, $sizetwo_attachment, $sizethree_attachment, $sizefour_attachment;
-		if ($class >= $classfour_attachment && $sizefour_attachment)
-			return $sizefour_attachment;
-		elseif ($class >= $classthree_attachment && $sizethree_attachment)
-			return $sizethree_attachment;
-		elseif ($class >= $classtwo_attachment && $sizetwo_attachment)
-			return $sizetwo_attachment;
-		elseif ($class >= $classone_attachment && $sizeone_attachment)
-			return $sizeone_attachment;
+		$limits = [
+			(int) $this->attachmentSetting('classfour', 0) => (int) $this->attachmentSetting('sizefour', 0),
+			(int) $this->attachmentSetting('classthree', 0) => (int) $this->attachmentSetting('sizethree', 0),
+			(int) $this->attachmentSetting('classtwo', 0) => (int) $this->attachmentSetting('sizetwo', 0),
+			(int) $this->attachmentSetting('classone', 0) => (int) $this->attachmentSetting('sizeone', 0),
+		];
+		krsort($limits);
+		foreach ($limits as $classLimit => $sizeLimit) {
+			if ($classLimit > 0 && $class >= $classLimit && $sizeLimit > 0) {
+				return $sizeLimit;
+			}
+		}
+		return 0;
 	}
 
-	function set_size_limit()
+	function set_size_limit(): void
 	{
 		$class = $this->class;
 		$sizelimit = $this->get_size_limit_class($class);
 		$this->sizelimit = $sizelimit;
 	}
 
-	function get_size_limit_kb()
+	function get_size_limit_kb(): int
 	{
 		return $this->sizelimit;
 	}
 
-	function get_size_limit_byte()
+	function get_size_limit_byte(): int
 	{
 		return $this->sizelimit * 1024;
 	}
 
-	function get_allowed_ext_class($class)
+	/**
+	 * @return array<int, string>
+	 */
+	function get_allowed_ext_class(int $class): array
 	{
-		global $classone_attachment, $classtwo_attachment, $classthree_attachment, $classfour_attachment,$extone_attachment, $exttwo_attachment, $extthree_attachment, $extfour_attachment;
+		$tiers = [
+			['class' => (int) $this->attachmentSetting('classone', 0), 'ext' => (string) $this->attachmentSetting('extone', '')],
+			['class' => (int) $this->attachmentSetting('classtwo', 0), 'ext' => (string) $this->attachmentSetting('exttwo', '')],
+			['class' => (int) $this->attachmentSetting('classthree', 0), 'ext' => (string) $this->attachmentSetting('extthree', '')],
+			['class' => (int) $this->attachmentSetting('classfour', 0), 'ext' => (string) $this->attachmentSetting('extfour', '')],
+		];
+
 		$allowedext = array();
-		if ($class >= $classone_attachment){
-			$temprow = $this->extract_allowed_ext($extone_attachment);
-			if (count($temprow)){
-				foreach ($temprow as $temp){
+		foreach ($tiers as $tier) {
+			if ($tier['class'] === 0 || $class >= $tier['class']) {
+				$temprow = $this->extract_allowed_ext($tier['ext']);
+				foreach ($temprow as $temp) {
 					$allowedext[] = $temp;
 				}
-			}
-			if ($class >= $classtwo_attachment){
-				$temprow = $this->extract_allowed_ext($exttwo_attachment);
-				if (count($temprow)){
-					foreach ($temprow as $temp){
-						$allowedext[] = $temp;
-					}
-				}
-				if ($class >= $classthree_attachment){
-					$temprow = $this->extract_allowed_ext($extthree_attachment);
-					if (count($temprow)){
-						foreach ($temprow as $temp){
-							$allowedext[] = $temp;
-						}
-					}
-					if ($class >= $classfour_attachment){
-						$temprow = $this->extract_allowed_ext($extfour_attachment);
-						if (count($temprow)){
-							foreach ($temprow as $temp){
-								$allowedext[] = $temp;
-							}
-						}
-					}
-				}
+			} elseif ($tier['class'] > 0) {
+				break;
 			}
 		}
 		return $allowedext;
 	}
 
-	function set_allowed_ext()
+	function set_allowed_ext(): void
 	{
 		$class = $this->class;
 		$allowedext = $this->get_allowed_ext_class($class);
 		$this->allowedext = $allowedext;
 	}
 
-	function get_allowed_ext()
+	/**
+	 * @return array<int, string>
+	 */
+	function get_allowed_ext(): array
 	{
 		return $this->allowedext;
 	}
 
-	function extract_allowed_ext($string)
+	/**
+	 * @return array<int, string>
+	 */
+	function extract_allowed_ext(string $string): array
 	{
 		$string = rtrim(trim($string), ",");
 		$exts = explode(",", $string);
@@ -170,7 +177,7 @@ class ATTACHMENT{
 		return $extrow;
 	}
 
-	function is_gif_ani($filename) {
+	function is_gif_ani(string $filename): bool {
     		if(!($fh = @fopen($filename, 'rb')))
         		return false;
     		$count = 0;

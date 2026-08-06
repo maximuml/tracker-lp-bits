@@ -239,6 +239,12 @@ final class SupportContext
         return is_string($value) || $value === null ? $value : (string) $value;
     }
 
+    /** @return  array<string, mixed> */
+    public static function allCookie(): array
+    {
+        return self::$cookie ?: $_COOKIE;
+    }
+
     /**
      * @param  array<string, mixed>  $get
      */

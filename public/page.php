@@ -1,29 +1,31 @@
 <?php
 require "../include/bittorrent.php";
+$rootpath = dirname(__DIR__) . '/';
 
-if (!empty($_REQUEST['view'])) {
-    $view = trim($_REQUEST['view'], "/.");
-    $view = str_replace(".", "/", $view);
-    if (!empty($_REQUEST['plugin'])) {
-        $pluginId = $_REQUEST['plugin'];
-        $plugin = \Nexus\Plugin\Plugin::getById($pluginId);
-        $viewFile = $plugin->getNexusView($view);
-    } else {
-        $viewFile = ROOT_PATH . "resources/views/$view";
-    }
-
-    if (!str_ends_with($viewFile, ".php")) {
-        $viewFile .= ".php";
-    }
-    if (file_exists($viewFile)) {
-        require $viewFile;
-    } else {
-        $msg = "viewFile: $viewFile not exists, _REQUEST: " . json_encode($_REQUEST);
-        do_log($msg, "error");
-        throw new \RuntimeException($msg);
-    }
-} else {
-    $msg = "require view parameter, _REQUEST: " . json_encode($_REQUEST);
-    do_log($msg, "error");
-    throw new \RuntimeException($msg);
+if (! class_exists(\Illuminate\Http\Request::class)) {
+    require_once $rootpath . 'vendor/autoload.php';
 }
+
+$app = require_once $rootpath . 'bootstrap/app.php';
+$kernel = $app->make(\Illuminate\Contracts\Http\Kernel::class);
+
+$method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+$uri = '/page' . (empty($_SERVER['QUERY_STRING']) ? '' : '?' . $_SERVER['QUERY_STRING']);
+
+$server = $_SERVER;
+$server['SCRIPT_NAME'] = '/page.php';
+$server['SCRIPT_FILENAME'] = $rootpath . 'public/page.php';
+$server['REQUEST_METHOD'] = $method;
+
+$request = \Illuminate\Http\Request::create(
+    $uri,
+    $method,
+    $method === 'POST' ? $_POST : $_GET,
+    $_COOKIE,
+    $_FILES,
+    $server
+);
+
+$response = $kernel->handle($request);
+$response->send();
+$kernel->terminate($request, $response);

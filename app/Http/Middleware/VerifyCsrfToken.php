@@ -66,5 +66,10 @@ class VerifyCsrfToken extends Middleware
         "takeamountupload",
         "takeinvite",
         "takeupdate",
+        "tags",
+        "preview",
+        "mailtest",
+        "reset",
+        "self-enable",
     ];
 }

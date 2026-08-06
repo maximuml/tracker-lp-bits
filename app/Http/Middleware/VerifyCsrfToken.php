@@ -71,5 +71,14 @@ class VerifyCsrfToken extends Middleware
         "mailtest",
         "reset",
         "self-enable",
+        "adduser",
+        "complains",
+        "delete",
+        "downloadnotice",
+        "maxlogin",
+        "setlist_lookup",
+        "take-increment-bulk",
+        "thanks",
+        "testip",
     ];
 }

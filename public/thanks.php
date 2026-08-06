@@ -1,25 +1,33 @@
 <?php
-require_once("../include/bittorrent.php");
+require "../include/bittorrent.php";
 dbconn();
 loggedinorreturn();
+$rootpath = dirname(__DIR__) . '/';
 
-
-if (isset($_GET['id']))
-	stderr("Party is over!", "This trick doesn't work anymore. You need to click the button!");
-$userid = $CURUSER["id"];
-$torrentid = $_POST["id"];
-$torrentowner = \App\Models\Torrent::query()->where('id', $torrentid)->value('owner');
-if (!$torrentowner)
-	stderr("Error", "Invalid torrent id!");
-$t_ab = \Nexus\Database\NexusDB::table('thanks')->where('torrentid', $torrentid)->where('userid', $userid)->count();
-if ($t_ab != 0)
-	stderr("Error", "You already said thanks!");
-if (isset($userid) && isset($torrentid))
-{
-\Nexus\Database\NexusDB::table('thanks')->insert([
-    'torrentid' => $torrentid,
-    'userid' => $userid,
-]);
-KPS("+",$saythanks_bonus,$CURUSER['id']);//User gets bonus for saying thanks
-KPS("+",$receivethanks_bonus,$torrentowner);//Thanks receiver get bonus
+if (! class_exists(\Illuminate\Http\Request::class)) {
+    require_once $rootpath . 'vendor/autoload.php';
 }
+
+$app = require_once $rootpath . 'bootstrap/app.php';
+$kernel = $app->make(\Illuminate\Contracts\Http\Kernel::class);
+
+$method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+$uri = '/thanks' . (empty($_SERVER['QUERY_STRING']) ? '' : '?' . $_SERVER['QUERY_STRING']);
+
+$server = $_SERVER;
+$server['SCRIPT_NAME'] = '/thanks.php';
+$server['SCRIPT_FILENAME'] = $rootpath . 'public/thanks.php';
+$server['REQUEST_METHOD'] = $method;
+
+$request = \Illuminate\Http\Request::create(
+    $uri,
+    $method,
+    $method === 'POST' ? $_POST : $_GET,
+    $_COOKIE,
+    $_FILES,
+    $server
+);
+
+$response = $kernel->handle($request);
+$response->send();
+$kernel->terminate($request, $response);

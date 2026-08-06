@@ -87,6 +87,11 @@ Route::match(['get', 'post'], '/tags', [LegacyPagesController::class, 'tags'])->
 Route::match(['get', 'post'], '/suggest', [LegacyPagesController::class, 'suggest'])->name('suggest.legacy');
 Route::match(['get', 'post'], '/opensearch', [LegacyPagesController::class, 'opensearch'])->name('opensearch.legacy');
 
+Route::match(['get', 'post'], '/confirmemail', [LegacyPagesController::class, 'confirmemail'])->name('confirmemail.legacy');
+Route::match(['get', 'post'], '/cron', [LegacyPagesController::class, 'cron'])->name('cron.legacy');
+Route::match(['get', 'post'], '/email-gateway', [LegacyPagesController::class, 'emailGateway'])->name('email-gateway.legacy');
+Route::match(['get', 'post'], '/ok', [LegacyPagesController::class, 'ok'])->name('ok.legacy');
+
 Route::group(['middleware' => ['auth.nexus:nexus-web']], function () {
     Route::get('/upload', [TorrentUploadController::class, 'create'])->name('torrents.upload');
     Route::get('/bitbucket-upload', [BitbucketUploadController::class, 'create'])->name('bitbucket.upload');
@@ -189,8 +194,19 @@ Route::group(['middleware' => ['auth.nexus:nexus-web']], function () {
     Route::match(['get', 'post'], '/reset', [LegacyPagesController::class, 'reset'])->name('reset.legacy');
     Route::match(['get', 'post'], '/self-enable', [LegacyPagesController::class, 'selfEnable'])->name('self-enable.legacy');
     Route::match(['get', 'post'], '/unco', [LegacyPagesController::class, 'unco'])->name('unco.legacy');
+    Route::match(['get', 'post'], '/adduser', [LegacyPagesController::class, 'adduser'])->name('adduser.legacy');
+    Route::match(['get', 'post'], '/bitbucketlog', [LegacyPagesController::class, 'bitbucketlog'])->name('bitbucketlog.legacy');
+    Route::match(['get', 'post'], '/delete', [LegacyPagesController::class, 'delete'])->name('delete.legacy');
+    Route::match(['get', 'post'], '/downloadnotice', [LegacyPagesController::class, 'downloadnotice'])->name('downloadnotice.legacy');
+    Route::match(['get', 'post'], '/increment-bulk', [LegacyPagesController::class, 'incrementBulk'])->name('increment-bulk.legacy');
+    Route::match(['get', 'post'], '/maxlogin', [LegacyPagesController::class, 'maxlogin'])->name('maxlogin.legacy');
+    Route::match(['get', 'post'], '/setlist_lookup', [LegacyPagesController::class, 'setlistLookup'])->name('setlist_lookup.legacy');
+    Route::match(['get', 'post'], '/take-increment-bulk', [LegacyPagesController::class, 'takeIncrementBulk'])->name('take-increment-bulk.legacy');
+    Route::match(['get', 'post'], '/testip', [LegacyPagesController::class, 'testip'])->name('testip.legacy');
+    Route::match(['get', 'post'], '/thanks', [LegacyPagesController::class, 'thanks'])->name('thanks.legacy');
 });
 
+Route::match(['get', 'post'], '/complains', [LegacyPagesController::class, 'complains'])->name('complains.legacy');
 Route::match(['get', 'post'], '/shoutbox', [LegacyPagesController::class, 'shoutbox'])->name('shoutbox.legacy');
 
 Route::match(['get', 'post'], '/bookmark', [LegacyPagesController::class, 'bookmark'])->name('bookmark.legacy');

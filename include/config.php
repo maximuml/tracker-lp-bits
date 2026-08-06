@@ -269,7 +269,7 @@ $website_code = $CODE['website'];
 // The BONUS array comes from the database settings cache. Provide an empty
 // fallback so missing/uncached bonus keys do not emit undefined-variable
 // warnings when downstream pages (delete, fastdelete, mybonus) use them.
-$BONUS = $GLOBALS['BONUS'] ?? [];
+$BONUS = SupportContext::getGlobal('BONUS', []);
 
 $donortimes_bonus = $BONUS['donortimes'] ?? 0;
 $perseeding_bonus = $BONUS['perseeding'] ?? 0;

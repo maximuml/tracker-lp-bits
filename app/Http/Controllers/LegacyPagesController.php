@@ -634,7 +634,10 @@ class LegacyPagesController extends Controller
 
             $parts = explode(':', $header, 2);
             if (count($parts) === 2) {
-                $responseHeaders[trim($parts[0])] = trim($parts[1]);
+                $name = trim($parts[0]);
+                $value = trim($parts[1]);
+                $responseHeaders[$name] = ($responseHeaders[$name] ?? '') !== '' ? $responseHeaders[$name] . ', ' . $value : $value;
+                header_remove($name);
             }
         }
 

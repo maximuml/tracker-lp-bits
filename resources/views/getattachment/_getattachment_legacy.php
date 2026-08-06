@@ -28,7 +28,6 @@ if (!$f) {
 	echo "Cannot open file";
 	return;
 }
-header("Content-Length: " . $row['filesize']);
 header("Content-Type: application/octet-stream");
 
 if ( str_replace("Gecko", "", $_SERVER['HTTP_USER_AGENT']) != $_SERVER['HTTP_USER_AGENT'])

@@ -72,10 +72,7 @@ function legacy_auth_context(): \App\Support\LegacyAuthContext
  */
 function page_layout_context(): \App\Support\PageLayoutContext
 {
-    $userUpdateSet = &$GLOBALS['USERUPDATESET'];
-    if (! is_array($userUpdateSet)) {
-        $userUpdateSet = [];
-    }
+    $userUpdateSet = &\App\Support\SupportContext::getUserUpdateSet();
 
     $script = '';
     if (\function_exists('nexus')) {
@@ -1007,7 +1004,7 @@ function menu ($selected = "home") {
 
     $CURUSER = SupportContext::getUser();
     if ($CURUSER && SupportContext::getGlobal('where_tweak', '') === 'yes') {
-        $GLOBALS['USERUPDATESET']['page'] = $result['selected'];
+        SupportContext::addUserUpdate('page', $result['selected']);
     }
 
     echo $result['html'];

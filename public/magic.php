@@ -2,40 +2,32 @@
 require "../include/bittorrent.php";
 dbconn();
 loggedinorreturn();
+$rootpath = dirname(__DIR__) . '/';
 
-$userid = $CURUSER["id"];
-$torrentid = (int) $_POST["id"];
-$value = (int) abs($_POST['value']);
-if (!in_array($value, \App\Models\Setting::getBonusRewardOptions())) {
-    exit(json_encode(fail("Invalid value.", $_POST)));
+if (! class_exists(\Illuminate\Http\Request::class)) {
+    require_once $rootpath . 'vendor/autoload.php';
 }
 
-if($value > $CURUSER['seedbonus']) exit(json_encode(fail('You do not have such bonus!', $_POST)));
-$torrentowner = \App\Models\Torrent::query()->where('id', $torrentid)->value('owner');
-if (!$torrentowner) exit(json_encode(fail("Invalid torrent id!", $_POST)));
-if($torrentowner == $userid) exit(json_encode(fail('You are giving magic to yourself.', $_POST)));
-$t_ab = \Nexus\Database\NexusDB::table('magic')->where('torrentid', $torrentid)->where('userid', $userid)->count();
-if ($t_ab != 0) exit(json_encode(fail("You already gave the magic value!", $_POST)));
-$todayStr = now()->startOfDay();
-$todayCount = \App\Models\Reward::query()
-    ->where('userid', $userid)
-    ->where('created_at', ">=", $todayStr)
-    ->count();
-$timesLimit = \App\Models\Setting::getBonusRewardTimesLimit();
-if ($timesLimit > 0 && $todayCount >= $timesLimit) exit(json_encode(fail("You already reach times limit!", $_POST)));
-$torrentOwnerInfo = \App\Models\User::query()->find($torrentowner, \App\Models\User::$commonFields);
-if (!$torrentOwnerInfo) {
-    exit(json_encode(fail("Invalid torrent owner!", $_POST)));
-}
-if (isset($userid) && isset($torrentid)&& isset($value)) {
-    \Nexus\Database\NexusDB::table('magic')->insert([
-        'torrentid' => $torrentid,
-        'userid' => $userid,
-        'value' => $value,
-    ]);
-    KPS("-",$value,$CURUSER['id']);//selete
-    \App\Models\BonusLogs::add($CURUSER['id'], $CURUSER['seedbonus'], $value, $CURUSER['seedbonus'] - $value, "", \App\Models\BonusLogs::BUSINESS_TYPE_REWARD_TORRENT);
-    KPS("+",$value,$torrentowner);//add to the owner
-    \App\Models\BonusLogs::add($torrentOwnerInfo['id'], $torrentOwnerInfo['seedbonus'], $value, $torrentOwnerInfo['seedbonus'] + $value, "", \App\Models\BonusLogs::BUSINESS_TYPE_TORRENT_BE_REWARD);
-    exit(json_encode(success("OK", $_POST)));
-}
+$app = require_once $rootpath . 'bootstrap/app.php';
+$kernel = $app->make(\Illuminate\Contracts\Http\Kernel::class);
+
+$method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+$uri = '/magic' . (empty($_SERVER['QUERY_STRING']) ? '' : '?' . $_SERVER['QUERY_STRING']);
+
+$server = $_SERVER;
+$server['SCRIPT_NAME'] = '/magic.php';
+$server['SCRIPT_FILENAME'] = $rootpath . 'public/magic.php';
+$server['REQUEST_METHOD'] = $method;
+
+$request = \Illuminate\Http\Request::create(
+    $uri,
+    $method,
+    $method === 'POST' ? $_POST : $_GET,
+    $_COOKIE,
+    $_FILES,
+    $server
+);
+
+$response = $kernel->handle($request);
+$response->send();
+$kernel->terminate($request, $response);

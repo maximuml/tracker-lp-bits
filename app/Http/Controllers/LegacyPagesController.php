@@ -425,6 +425,46 @@ class LegacyPagesController extends Controller
         return $this->legacy($request, 'latestcomments', true);
     }
 
+    public function bonusLog(Request $request): View|RedirectResponse
+    {
+        return $this->legacy($request, 'bonus-log', true);
+    }
+
+    public function medal(Request $request): View|RedirectResponse
+    {
+        return $this->legacy($request, 'medal', true);
+    }
+
+    public function task(Request $request): View|RedirectResponse
+    {
+        return $this->legacy($request, 'task', true);
+    }
+
+    public function torrentrss(Request $request): Response|RedirectResponse
+    {
+        return $this->legacyRaw($request, 'torrentrss', false);
+    }
+
+    public function uploaders(Request $request): View|RedirectResponse
+    {
+        return $this->legacy($request, 'uploaders', true);
+    }
+
+    public function settings(Request $request): View|RedirectResponse
+    {
+        return $this->legacy($request, 'settings', true);
+    }
+
+    public function freeleech(Request $request): View|RedirectResponse
+    {
+        return $this->legacy($request, 'freeleech', true);
+    }
+
+    public function magic(Request $request): Response|RedirectResponse
+    {
+        return $this->legacyRaw($request, 'magic', true);
+    }
+
     private function legacy(Request $request, string $page, bool $auth = true): View|RedirectResponse
     {
         if (! defined('IN_NEXUS') || ($auth && ! isset($GLOBALS['CURUSER']))) {
@@ -434,6 +474,7 @@ class LegacyPagesController extends Controller
 
         return view($page . '.index');
     }
+
 
     private function legacyWithRedirect(Request $request, string $page, bool $auth = true): Response|RedirectResponse
     {
@@ -458,6 +499,7 @@ class LegacyPagesController extends Controller
 
         return response($content);
     }
+
 
     private function legacyRaw(Request $request, string $page, bool $auth = true): Response|RedirectResponse
     {

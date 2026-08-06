@@ -58,5 +58,7 @@ class VerifyCsrfToken extends Middleware
         "fields",
         "shoutbox",
         "attachment",
+        "settings",
+        "magic",
     ];
 }

@@ -2,6 +2,7 @@
 
 use App\Models\SearchBox;
 use App\Models\TorrentExtra;
+use App\Support\SupportContext;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
 /**
@@ -10,7 +11,7 @@ use Illuminate\Support\Str;
  */
 function get_langfolder_cookie($transToLocale = false)
 {
-	return \App\Support\Locale::folderFromCookie($_COOKIE["c_lang_folder"] ?? null, (bool) $transToLocale);
+	return \App\Support\Locale::folderFromCookie(SupportContext::getCookieValue('c_lang_folder', ''), (bool) $transToLocale);
 }
 /**
  * @param string|int $user_id
@@ -32,7 +33,7 @@ function legacy_auth_context(): \App\Support\LegacyAuthContext
     if (\function_exists('nexus')) {
         $script = \nexus()->getScript();
     } else {
-        $scriptFile = $_SERVER['SCRIPT_FILENAME'] ?? '';
+        $scriptFile = SupportContext::getServerValue('SCRIPT_FILENAME', '');
         $script = basename($scriptFile);
         if (str_contains($script, '.')) {
             $script = strstr($script, '.', true);
@@ -44,11 +45,11 @@ function legacy_auth_context(): \App\Support\LegacyAuthContext
         lang: $GLOBALS['lang_functions'] ?? [],
         cache: $GLOBALS['Cache'] ?? null,
         ip: \function_exists('getip') ? \getip() : \App\Support\Network::clientIp(),
-        requestUri: $_SERVER['REQUEST_URI'] ?? null,
-        requestBody: $_POST,
-        queryParams: $_GET,
-        request: array_merge((array) $_POST, (array) $_GET),
-        cookies: $_COOKIE,
+        requestUri: SupportContext::getServerValue('REQUEST_URI'),
+        requestBody: SupportContext::allPost(),
+        queryParams: SupportContext::allQuery(),
+        request: array_merge(SupportContext::allPost(), SupportContext::allQuery()),
+        cookies: SupportContext::allCookie(),
         maxLoginAttempts: (int) ($GLOBALS['maxloginattempts'] ?? 0),
         captchaEnabled: ($GLOBALS['iv'] ?? '') === 'yes',
         registration: [
@@ -57,7 +58,7 @@ function legacy_auth_context(): \App\Support\LegacyAuthContext
             'maxusers' => (int) ($GLOBALS['maxusers'] ?? 0),
             'maxip' => (int) ($GLOBALS['maxip'] ?? 0),
         ],
-        langFolder: $_COOKIE['c_lang_folder'] ?? null,
+        langFolder: SupportContext::getCookieValue('c_lang_folder'),
         moderatorClass: defined('UC_MODERATOR') ? (int) \constant('UC_MODERATOR') : 0,
         script: $script,
     );
@@ -80,7 +81,7 @@ function page_layout_context(): \App\Support\PageLayoutContext
     if (\function_exists('nexus')) {
         $script = \nexus()->getScript();
     } else {
-        $scriptFile = $_SERVER['SCRIPT_FILENAME'] ?? '';
+        $scriptFile = SupportContext::getServerValue('SCRIPT_FILENAME', '');
         $script = basename($scriptFile);
         if (str_contains($script, '.')) {
             $script = strstr($script, '.', true);
@@ -113,9 +114,9 @@ function page_layout_context(): \App\Support\PageLayoutContext
         enableSqlDebugTweak: $GLOBALS['enablesqldebug_tweak'] ?? 'no',
         sqlDebugTweak: (int) ($GLOBALS['sqldebug_tweak'] ?? 0),
         analyticsCodeTweak: $GLOBALS['analyticscode_tweak'] ?? '',
-        requestSearch: is_scalar($_GET['search'] ?? '') ? (string) ($_GET['search'] ?? '') : '',
-        requestSearchArea: is_scalar($_GET['search_area'] ?? '') ? (string) ($_GET['search_area'] ?? '') : '',
-        scriptFileName: $_SERVER['SCRIPT_FILENAME'] ?? '',
+        requestSearch: is_scalar(SupportContext::getQuery('search', '')) ? (string) SupportContext::getQuery('search', '') : '',
+        requestSearchArea: is_scalar(SupportContext::getQuery('search_area', '')) ? (string) SupportContext::getQuery('search_area', '') : '',
+        scriptFileName: SupportContext::getServerValue('SCRIPT_FILENAME', ''),
         script: $script,
         enableOffer: $GLOBALS['enableoffer'] ?? '',
         enableSpecial: $GLOBALS['enablespecial'] ?? '',
@@ -772,7 +773,7 @@ function show_image_code () {
         'row_security_image' => $lang_functions['row_security_image'] ?? '',
         'row_security_challenge' => $lang_functions['row_security_challenge'] ?? '',
         'row_security_code' => $lang_functions['row_security_code'] ?? '',
-    ], (string) ($_GET['secret'] ?? ''));
+    ], (string) SupportContext::getQuery('secret', ''));
 }
 /**
  * @param string $ip
@@ -915,7 +916,7 @@ function mkprettytime($s) {
  * @return int
  */
 function mkglobal($vars) {
-	return \App\Support\Input::globalize($vars, $_GET, $_POST);
+	return \App\Support\Input::globalize($vars, SupportContext::allQuery(), SupportContext::allPost());
 }
 /**
  * @param mixed $x

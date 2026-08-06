@@ -1,4 +1,7 @@
 <?php
+
+use App\Support\SupportContext;
+
 /**
  * @var array<string, mixed> $BASIC
  * @var array<string, mixed> $MAIN
@@ -28,7 +31,7 @@ function ReadConfig ($configname = NULL) {
 		return $tmp;
 	} else {
 		foreach ($CONFIGURATIONS as $CONFIGURATION) {
-			$GLOBALS[$CONFIGURATION] = ReadConfig($CONFIGURATION);
+			SupportContext::setGlobal($CONFIGURATION, ReadConfig($CONFIGURATION));
 		}
 	}
 }
@@ -61,7 +64,7 @@ function oldReadConfig ($configname) {
 		if (empty($tmp)) {
 			die("Error! <font color=red>Cannot read configuration file <b>".htmlspecialchars($configname)."</b></font><br /><font color=blue>Before the setup starts, please ensure that you have properly configured file and directory access permissions. For *nix system, please see below.</font><br />chmod 777 config <br />chmod 777 config/".$configname."<br /><br /> If access permission is alright, perhaps there's some misconfiguration or the configuration file is corrupted. Please check config/".$configname);
 		}
-		$GLOBALS[$configname] = $tmp;
+		SupportContext::setGlobal($configname, $tmp);
 		return $tmp;
 	}
 }
@@ -77,11 +80,11 @@ if (file_exists('config/allconfig.php')) {
 //load settings from database
 $settings = get_setting();
 foreach ($settings as $name => $value) {
-    $GLOBALS[strtoupper($name)] = $value;
+    SupportContext::setGlobal(strtoupper($name), $value);
 }
 
 $SITENAME = $BASIC['SITENAME'];
-$BASEURL = $BASIC['BASEURL'] ?: ($_SERVER['HTTP_HOST'] ?? 'localhost');
+$BASEURL = $BASIC['BASEURL'] ?: (SupportContext::getServerValue('HTTP_HOST', 'localhost'));
 $announce_urls = array();
 $announce_urls[] = $BASIC['announce_url'] ?: ($BASEURL . DEFAULT_TRACKER_URI);
 

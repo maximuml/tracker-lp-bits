@@ -11,7 +11,7 @@ class MyController extends Controller
 {
     public function bonus(Request $request): View|RedirectResponse
     {
-        if (! defined('IN_NEXUS') || SupportContext::getUser() === null) {
+        if (! defined('IN_NEXUS') || ! IN_NEXUS || SupportContext::getUser() === null) {
             $qs = $request->getQueryString();
             return redirect('/mybonus.php' . ($qs ? '?' . $qs : ''));
         }
@@ -21,7 +21,7 @@ class MyController extends Controller
 
     public function hr(Request $request): View|RedirectResponse
     {
-        if (! defined('IN_NEXUS') || SupportContext::getUser() === null) {
+        if (! defined('IN_NEXUS') || ! IN_NEXUS || SupportContext::getUser() === null) {
             $qs = $request->getQueryString();
             return redirect('/myhr.php' . ($qs ? '?' . $qs : ''));
         }

@@ -311,7 +311,7 @@ class LegacyPagesController extends Controller
 
     public function ajax(Request $request): JsonResponse|RedirectResponse
     {
-        if (! defined('IN_NEXUS')) {
+        if (! defined('IN_NEXUS') || ! IN_NEXUS) {
             $qs = $request->getQueryString();
 
             return redirect('/ajax.php' . ($qs ? '?' . $qs : ''));
@@ -663,7 +663,7 @@ class LegacyPagesController extends Controller
 
     private function legacy(Request $request, string $page, bool $auth = true): View|RedirectResponse
     {
-        if (! defined('IN_NEXUS') || ($auth && SupportContext::getUser() === null)) {
+        if (! defined('IN_NEXUS') || ! IN_NEXUS || ($auth && SupportContext::getUser() === null)) {
             $qs = $request->getQueryString();
             return redirect('/' . $page . '.php' . ($qs ? '?' . $qs : ''));
         }
@@ -674,7 +674,7 @@ class LegacyPagesController extends Controller
 
     private function legacyWithRedirect(Request $request, string $page, bool $auth = true): Response|RedirectResponse
     {
-        if (! defined('IN_NEXUS') || ($auth && SupportContext::getUser() === null)) {
+        if (! defined('IN_NEXUS') || ! IN_NEXUS || ($auth && SupportContext::getUser() === null)) {
             $qs = $request->getQueryString();
 
             return redirect('/' . $page . '.php' . ($qs ? '?' . $qs : ''));
@@ -699,7 +699,7 @@ class LegacyPagesController extends Controller
 
     private function legacyRaw(Request $request, string $page, bool $auth = true): Response|RedirectResponse
     {
-        if (! defined('IN_NEXUS') || ($auth && SupportContext::getUser() === null)) {
+        if (! defined('IN_NEXUS') || ! IN_NEXUS || ($auth && SupportContext::getUser() === null)) {
             $qs = $request->getQueryString();
 
             return redirect('/' . $page . '.php' . ($qs ? '?' . $qs : ''));

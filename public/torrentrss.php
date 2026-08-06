@@ -1,245 +1,32 @@
 <?php
 require "../include/bittorrent.php";
-$passkey = $_GET['passkey'] ?? $CURUSER['passkey'] ?? '';
-if (!$passkey) {
-    die("require passkey");
-}
-$exactParams = ['inclbookmarked', 'paid', 'rows', 'icat', 'ismalldescr', 'isize', 'iuplder', 'search', 'search_mode', 'sticky', 'linktype'];
-$prefixedParams = ['cat', 'sou', 'med', 'cod', 'sta', 'pro', 'tea', 'aud'];
-foreach ($_GET as $key => $value) {
-    if (in_array($key, $exactParams, true)) {
-        continue;
-    }
-    if (preg_match('/^(cat|sou|med|cod|sta|pro|tea|aud)\d+$/', $key)) {
-        continue;
-    }
-    unset($_GET[$key]);
-}
-$cacheKey = "nexus_rss:$passkey:" . md5(http_build_query($_GET));
-$cacheData = \Nexus\Database\NexusDB::cache_get($cacheKey);
-if ($cacheData && nexus_env('APP_ENV') != 'local') {
-    do_log("rss get from cache");
-    header ("Content-type: text/xml");
-    die($cacheData);
-}
-dbconn(doLogin: false);
-function hex_esc($matches) {
-	return sprintf("%02x", ord($matches[0]));
-}
-$dllink = false;
+dbconn();
+$rootpath = dirname(__DIR__) . '/';
 
-$showrows = intval($_GET['rows'] ?? 0);
-if ($showrows < 1 || $showrows > 50) {
-    $showrows = 50;
+if (! class_exists(\Illuminate\Http\Request::class)) {
+    require_once $rootpath . 'vendor/autoload.php';
 }
 
-$paidFilter = '0';
-if (isset($_GET['paid']) && in_array($_GET['paid'], ['0', '1', '2'], true)) {
-    $paidFilter = $_GET['paid'];
-}
+$app = require_once $rootpath . 'bootstrap/app.php';
+$kernel = $app->make(\Illuminate\Contracts\Http\Kernel::class);
 
-$baseQuery = \Nexus\Database\NexusDB::table('torrents')
-    ->leftJoin('categories', 'torrents.category', '=', 'categories.id')
-    ->leftJoin('torrent_extras', 'torrents.id', '=', 'torrent_extras.torrent_id')
-    ->select('torrents.id', 'torrents.category', 'torrents.name', 'torrent_extras.descr', 'torrents.info_hash', 'torrents.size', 'torrents.added', 'torrents.anonymous', 'torrents.owner', 'categories.name as category_name');
+$method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+$uri = '/torrentrss' . (empty($_SERVER['QUERY_STRING']) ? '' : '?' . $_SERVER['QUERY_STRING']);
 
-if ($passkey) {
-    $user = \Nexus\Database\NexusDB::remember('user_passkey_'.$passkey.'_rss', 3600, function () use ($passkey) {
-        $row = \Nexus\Database\NexusDB::table('users')->where('passkey', $passkey)->first(['id', 'enabled', 'parked', 'passkey']);
-        return $row ? (array) $row : [];
-    });
-	if (!$user)
-		die("invalid passkey");
-	elseif ($user['enabled'] == 'no' || $user['parked'] == 'yes')
-		die("account disabed or parked");
-	elseif (isset($_GET['linktype']) && $_GET['linktype'] == 'dl')
-		$dllink = true;
+$server = $_SERVER;
+$server['SCRIPT_NAME'] = '/torrentrss.php';
+$server['SCRIPT_FILENAME'] = $rootpath . 'public/torrentrss.php';
+$server['REQUEST_METHOD'] = $method;
 
-    $inclbookmarked = intval($_GET['inclbookmarked'] ?? 0);
-    if ($inclbookmarked == 1) {
-        $bookmarkarray = return_torrent_bookmark_array($user['id']);
-        if (!empty($bookmarkarray)) {
-            $baseQuery->whereIn('torrents.id', $bookmarkarray);
-        }
-    }
+$request = \Illuminate\Http\Request::create(
+    $uri,
+    $method,
+    $method === 'POST' ? $_POST : $_GET,
+    $_COOKIE,
+    $_FILES,
+    $server
+);
 
-    $approvalStatusNoneVisible = get_setting('torrent.approval_status_none_visible');
-    if ($approvalStatusNoneVisible == 'no' && !user_can('staffmem', false, $user['id'])) {
-        $baseQuery->where('torrents.approval_status', \App\Models\Torrent::APPROVAL_STATUS_ALLOW);
-    }
-
-    $browseMode = get_setting('main.browsecat');
-    $onlyBrowseSection = get_setting('main.spsct') != 'yes' || !user_can('view_special_torrent', false, $user['id']);
-    if ($onlyBrowseSection) {
-        $allBrowseCategoryId = \App\Models\SearchBox::listCategoryId($browseMode);
-        $baseQuery->whereIn('torrents.category', $allBrowseCategoryId);
-    }
-}
-
-$baseQuery->where('torrents.visible', 'yes');
-
-if ($paidFilter === '0') {
-    $baseQuery->where('torrents.price', 0);
-} elseif ($paidFilter === '1') {
-    $baseQuery->where('torrents.price', '>', 0);
-}
-
-function applyRssFilter($query, $tablename = "sources", $itemname = "source", $getname = "sou")
-{
-    $items = searchbox_item_list($tablename, 0);
-    $ids = [];
-    foreach ($items as $item) {
-        if (!empty($_GET[$getname.$item['id']])) {
-            $ids[] = $item['id'];
-        }
-    }
-    if (!empty($ids)) {
-        $query->whereIn($itemname, $ids);
-    }
-}
-
-applyRssFilter($baseQuery, "categories", "category", "cat");
-applyRssFilter($baseQuery, "sources", "source", "sou");
-applyRssFilter($baseQuery, "media", "medium", "med");
-applyRssFilter($baseQuery, "codecs", "codec", "cod");
-applyRssFilter($baseQuery, "standards", "standard", "sta");
-applyRssFilter($baseQuery, "processings", "processing", "pro");
-applyRssFilter($baseQuery, "audiocodecs", "audiocodec", "aud");
-
-$hasStickyFirst = $hasStickySecond = $hasStickyNormal = $noNormalResults = false;
-$prependIdArr = $prependRows = $normalRows = [];
-$stickyWhere = $normalWhere = '';
-if (isset($_GET['sticky']) && $inclbookmarked == 0) {
-    $stickyArr = explode(',', $_GET['sticky']);
-    //Only handle sticky first + second
-    $posStates = [];
-    if (in_array('0', $stickyArr, true)) {
-        $hasStickyNormal = true;
-    }
-    if (in_array('1', $stickyArr, true)) {
-        $hasStickyFirst = true;
-        $posStates[] = \App\Models\Torrent::POS_STATE_STICKY_FIRST;
-    }
-    if (in_array('2', $stickyArr, true)) {
-        $hasStickySecond = true;
-        $posStates[] = \App\Models\Torrent::POS_STATE_STICKY_SECOND;
-    }
-    if (!empty($posStates)) {
-        $prependIdArr = \App\Models\Torrent::query()->whereIn('pos_state', $posStates)->pluck('id')->toArray();
-    }
-}
-$prependIdArr = apply_filter("sticky_promotion_torrent_ids", $prependIdArr);
-if ($hasStickyNormal) {
-    $stickyWhere = sprintf("torrents.pos_state = '%s'", \App\Models\Torrent::POS_STATE_STICKY_NONE);
-} elseif ($hasStickyFirst || $hasStickySecond) {
-    $noNormalResults = true;
-}
-
-if (!$noNormalResults) {
-    $normalQuery = clone $baseQuery;
-    if ($hasStickyNormal) {
-        $normalQuery->where('torrents.pos_state', \App\Models\Torrent::POS_STATE_STICKY_NONE);
-    }
-    $normalSql = $normalQuery->toSql();
-    $normalCacheKey = sprintf("nexus_rss:normal:%s", md5($normalSql . ':' . $showrows));
-    $normalRows = \Nexus\Database\NexusDB::remember($normalCacheKey, 300, function () use ($normalQuery, $showrows) {
-        return $normalQuery->orderBy('torrents.id', 'desc')->limit($showrows)->get()->map(fn ($row) => (array) $row)->all();
-    });
-}
-if (!empty($prependIdArr)) {
-    $prependIdStr = implode(',', array_map('intval', $prependIdArr));
-    $prependQuery = clone $baseQuery;
-    $prependQuery->whereIn('torrents.id', $prependIdArr);
-    $prependCacheKey = sprintf("nexus_rss:prepend:%s", md5($prependQuery->toSql() . ':' . $prependIdStr));
-    $prependRows = \Nexus\Database\NexusDB::remember($prependCacheKey, 300, function () use ($prependQuery, $prependIdStr) {
-        return $prependQuery->orderByRaw('FIELD(torrents.id, ' . $prependIdStr . ')')->get()->map(fn ($row) => (array) $row)->all();
-    });
-}
-$list = [];
-foreach ($prependRows as $row) {
-    $list[$row['id']] = $row;
-}
-foreach ($normalRows as $row) {
-    if (!isset($list[$row['id']])) {
-        $list[$row['id']] = $row;
-    }
-}
-
-//dd($prependIdArr, $prependRows, $normalRows, $list, $startindex,last_query());
-
-$torrentRep = new \App\Repositories\TorrentRepository();
-$url = get_protocol_prefix().$BASEURL;
-$year = substr($datefounded, 0, 4);
-$yearfounded = ($year ? $year : 2007);
-$copyright = "Copyright (c) ".$SITENAME." ".(date("Y") != $yearfounded ? $yearfounded."-" : "").date("Y").", all rights reserved";
-$xml = "<?xml version=\"1.0\" encoding=\"utf-8\"?>";
-//The commented version passed feed validator at http://www.feedvalidator.org
-/*print('
-<rss version="2.0" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:atom="http://www.w3.org/2005/Atom">');*/
-$xml .= '<rss version="2.0">';
-$xml .= '<channel>
-		<title>' . addslashes($SITENAME.' Torrents'). '</title>
-		<link><![CDATA[' . $url . ']]></link>
-		<description><![CDATA[' . addslashes('Latest torrents from '.$SITENAME.' - '.htmlspecialchars($SLOGAN)) . ']]></description>
-		<language>zh-cn</language>
-		<copyright>'.$copyright.'</copyright>
-		<managingEditor>'.$SITEEMAIL.' ('.$SITENAME.' Admin)</managingEditor>
-		<webMaster>'.$SITEEMAIL.' ('.$SITENAME.' Webmaster)</webMaster>
-		<pubDate>'.date('r').'</pubDate>
-		<generator>'.PROJECTNAME.' RSS Generator</generator>
-		<docs><![CDATA[http://www.rssboard.org/rss-specification]]></docs>
-		<ttl>60</ttl>
-		<image>
-			<url><![CDATA[' . $url.'/pic/rss_logo.jpg'. ']]></url>
-			<title>' . addslashes($SITENAME.' Torrents') . '</title>
-			<link><![CDATA[' . $url . ']]></link>
-			<width>100</width>
-			<height>100</height>
-			<description>' . addslashes($SITENAME.' Torrents') . '</description>
-		</image>';
-/*print('
-		<atom:link href="'.$url.$_SERVER['REQUEST_URI'].'" rel="self" type="application/rss+xml" />');*/
-//print('
-//');
-foreach ($list as $row)
-{
-    $ownerInfo = get_user_row($row['owner']);
-	$title = "";
-	if ($row['anonymous'] == 'yes') {
-        $author = 'anonymous';
-    } elseif (!empty($ownerInfo)) {
-        $author = $ownerInfo['username'];
-    } else {
-        $author = nexus_trans("nexus.user_not_exists");
-    }
-	$itemurl = $url."/details.php?id=".$row['id'];
-	if ($dllink)
-		$itemdlurl = $torrentRep->getDownloadUrl($row['id'], $user);
-	else $itemdlurl = $url."/download.php?id=".$row['id'];
-	if (!empty($_GET['icat'])) $title .= "[".$row['category_name']."]";
-	$title .= $row['name'];
-	if (!empty($_GET['isize'])) $title .= "[".mksize($row['size'])."]";
-	if (!empty($_GET['iuplder'])) $title .= "[".$author."]";
-	$content = format_comment($row['descr'], true, false, false, false);
-	$xml .= '<item>
-			<title><![CDATA['.$title.']]></title>
-			<link>'.$itemurl.'</link>
-			<description><![CDATA['.$content.']]></description>
-';
-//print('			<dc:creator>'.$author.'</dc:creator>');
-$xml .= '<author>'.$author.'@'.$_SERVER['HTTP_HOST'].' ('.$author.')</author>';
-$xml .= '<category domain="'.$url.'/torrents.php?cat='.$row['category'].'">'.$row['category_name'].'</category>
-			<comments><![CDATA['.$url.'/details.php?id='.$row['id'].'&cmtpage=0#startcomments]]></comments>
-			<enclosure url="'.$itemdlurl.'" length="'.$row['size'].'" type="application/x-bittorrent" />
-			<guid isPermaLink="false">'.preg_replace_callback('/./s', 'hex_esc', hash_pad($row['info_hash'])).'</guid>
-			<pubDate>'.date('r',strtotime($row['added'])).'</pubDate>
-		</item>
-';
-}
-$xml .= '</channel>
-</rss>';
-do_log("rss cache generated");
-\Nexus\Database\NexusDB::cache_put($cacheKey, $xml, 300);
-header ("Content-type: text/xml");
-echo $xml;
-?>
+$response = $kernel->handle($request);
+$response->send();
+$kernel->terminate($request, $response);

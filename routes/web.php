@@ -77,6 +77,11 @@ Route::match(['get', 'post'], '/getusertorrentlistajax', [LegacyPagesController:
 Route::match(['get', 'post'], '/searchsuggest', [LegacyPagesController::class, 'searchSuggest'])->name('searchsuggest.legacy');
 Route::match(['get', 'post'], '/ajax', [LegacyPagesController::class, 'ajax'])->name('ajax.legacy');
 
+Route::match(['get', 'post'], '/image', [LegacyPagesController::class, 'image'])->name('image.legacy');
+Route::match(['get', 'post'], '/shoutbox_sse', [LegacyPagesController::class, 'shoutboxSse'])->name('shoutbox_sse.legacy');
+
+Route::match(['get', 'post'], '/torrentrss', [LegacyPagesController::class, 'torrentrss'])->name('torrentrss.legacy');
+
 Route::group(['middleware' => ['auth.nexus:nexus-web']], function () {
     Route::get('/upload', [TorrentUploadController::class, 'create'])->name('torrents.upload');
     Route::get('/bitbucket-upload', [BitbucketUploadController::class, 'create'])->name('bitbucket.upload');
@@ -150,6 +155,17 @@ Route::group(['middleware' => ['auth.nexus:nexus-web']], function () {
     Route::match(['get', 'post'], '/fields', [LegacyPagesController::class, 'fields'])->name('fields.legacy');
     Route::match(['get', 'post'], '/formats', [LegacyPagesController::class, 'formats'])->name('formats.legacy');
     Route::match(['get', 'post'], '/videoformats', [LegacyPagesController::class, 'videoformats'])->name('videoformats.legacy');
+    Route::match(['get', 'post'], '/attachment', [LegacyPagesController::class, 'attachment'])->name('attachment.legacy');
+    Route::match(['get', 'post'], '/getattachment', [LegacyPagesController::class, 'getattachment'])->name('getattachment.legacy');
+    Route::match(['get', 'post'], '/shoutbox_history', [LegacyPagesController::class, 'shoutboxHistory'])->name('shoutbox_history.legacy');
+    Route::match(['get', 'post'], '/latestcomments', [LegacyPagesController::class, 'latestcomments'])->name('latestcomments.legacy');
+    Route::match(['get', 'post'], '/bonus-log', [LegacyPagesController::class, 'bonusLog'])->name('bonus-log.legacy');
+    Route::match(['get', 'post'], '/medal', [LegacyPagesController::class, 'medal'])->name('medal.legacy');
+    Route::match(['get', 'post'], '/task', [LegacyPagesController::class, 'task'])->name('task.legacy');
+    Route::match(['get', 'post'], '/uploaders', [LegacyPagesController::class, 'uploaders'])->name('uploaders.legacy');
+    Route::match(['get', 'post'], '/settings', [LegacyPagesController::class, 'settings'])->name('settings.legacy');
+    Route::match(['get', 'post'], '/freeleech', [LegacyPagesController::class, 'freeleech'])->name('freeleech.legacy');
+    Route::match(['get', 'post'], '/magic', [LegacyPagesController::class, 'magic'])->name('magic.legacy');
 });
 
 Route::match(['get', 'post'], '/shoutbox', [LegacyPagesController::class, 'shoutbox'])->name('shoutbox.legacy');

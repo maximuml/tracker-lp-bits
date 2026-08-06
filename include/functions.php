@@ -148,7 +148,7 @@ function get_langfile_path($script_name ="", $target = false, $lang_folder = "")
  * @return void
  */
 function stdmsg($heading, $text, $htmlstrip = false) {
-	echo \App\Support\Frame::stdMessage($heading, $text, $htmlstrip);
+	echo \App\Support\Frame::stdMessage((string) $heading, (string) $text, $htmlstrip);
 }
 /**
  * @param string $heading

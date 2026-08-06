@@ -342,6 +342,41 @@ class LegacyPagesController extends Controller
         }
     }
 
+    public function catmanage(Request $request): Response|RedirectResponse
+    {
+        return $this->legacyWithRedirect($request, 'catmanage');
+    }
+
+    public function forummanage(Request $request): Response|RedirectResponse
+    {
+        return $this->legacyWithRedirect($request, 'forummanage');
+    }
+
+    public function moforums(Request $request): Response|RedirectResponse
+    {
+        return $this->legacyWithRedirect($request, 'moforums');
+    }
+
+    public function fields(Request $request): Response|RedirectResponse
+    {
+        return $this->legacyWithRedirect($request, 'fields');
+    }
+
+    public function formats(Request $request): View|RedirectResponse
+    {
+        return $this->legacy($request, 'formats');
+    }
+
+    public function videoformats(Request $request): View|RedirectResponse
+    {
+        return $this->legacy($request, 'videoformats');
+    }
+
+    public function shoutbox(Request $request): Response|RedirectResponse
+    {
+        return $this->legacyRaw($request, 'shoutbox', false);
+    }
+
     private function legacy(Request $request, string $page, bool $auth = true): View|RedirectResponse
     {
         if (! defined('IN_NEXUS') || ($auth && ! isset($GLOBALS['CURUSER']))) {

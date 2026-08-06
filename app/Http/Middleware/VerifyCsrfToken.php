@@ -52,5 +52,10 @@ class VerifyCsrfToken extends Middleware
         "faqactions",
         "ajax",
         "getusertorrentlistajax",
+        "catmanage",
+        "forummanage",
+        "moforums",
+        "fields",
+        "shoutbox",
     ];
 }

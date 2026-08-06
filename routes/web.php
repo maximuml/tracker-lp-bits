@@ -144,7 +144,15 @@ Route::group(['middleware' => ['auth.nexus:nexus-web']], function () {
     Route::post('/comment/{commentId}/edit', [WebCommentController::class, 'update']);
     Route::get('/comment/{commentId}/delete', [WebCommentController::class, 'destroy']);
     Route::get('/comment/{commentId}/original', [WebCommentController::class, 'original']);
+    Route::match(['get', 'post'], '/catmanage', [LegacyPagesController::class, 'catmanage'])->name('catmanage.legacy');
+    Route::match(['get', 'post'], '/forummanage', [LegacyPagesController::class, 'forummanage'])->name('forummanage.legacy');
+    Route::match(['get', 'post'], '/moforums', [LegacyPagesController::class, 'moforums'])->name('moforums.legacy');
+    Route::match(['get', 'post'], '/fields', [LegacyPagesController::class, 'fields'])->name('fields.legacy');
+    Route::match(['get', 'post'], '/formats', [LegacyPagesController::class, 'formats'])->name('formats.legacy');
+    Route::match(['get', 'post'], '/videoformats', [LegacyPagesController::class, 'videoformats'])->name('videoformats.legacy');
 });
+
+Route::match(['get', 'post'], '/shoutbox', [LegacyPagesController::class, 'shoutbox'])->name('shoutbox.legacy');
 
 Route::match(['get', 'post'], '/bookmark', [LegacyPagesController::class, 'bookmark'])->name('bookmark.legacy');
 Route::match(['get', 'post'], '/viewfilelist', [LegacyPagesController::class, 'viewFileList'])->name('viewfilelist.legacy');

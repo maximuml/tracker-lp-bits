@@ -1,9 +1,13 @@
 <?php
 
+use App\Support\SupportContext;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Http\Request;
 
 defined('LARAVEL_START') || define('LARAVEL_START', microtime(true));
+defined('IN_NEXUS') || define('IN_NEXUS', true);
+
+$rootpath = dirname(__DIR__) . '/';
 
 // Resolve whether this is a legacy .php wrapper (FPM executing public/<page>.php)
 // or the Laravel fallback entry point (nexus.php).
@@ -120,9 +124,56 @@ if (file_exists(__DIR__.'/../storage/framework/maintenance.php')) {
 require_once __DIR__.'/../vendor/autoload.php';
 
 $app = require_once __DIR__.'/../bootstrap/app.php';
+
+// Legacy bootstrap: settings, cache, language, user login and globals.
+// This is what the old per-page `require '../include/bittorrent.php'; dbconn();`
+// block used to do; centralising it here lets every wrapper become one line.
+require_once $rootpath . 'include/core.php';
+require_once $rootpath . 'classes/class_attendance.php';
+
+// Load the page-specific language file(s) the legacy wrappers used to require.
+$script = nexus()->getScript();
+$extraLangFiles = [
+    'search' => ['torrents.php'],
+    'shoutbox_history' => ['shoutbox.php'],
+    'special' => ['torrents.php'],
+    'torrents' => ['special.php'],
+    'take-increment-bulk' => ['increment-bulk.php'],
+    'upload' => ['edit.php'],
+];
+$scriptLangFiles = $extraLangFiles[$script] ?? [$script . '.php'];
+foreach ($scriptLangFiles as $scriptLangFile) {
+    $langPath = $rootpath . get_langfile_path($scriptLangFile);
+    if (is_file($langPath)) {
+        require_once $langPath;
+    }
+}
+
+// Synchronise the legacy global state into the context object so helpers can
+// read it without touching $GLOBALS directly.
+SupportContext::fromGlobals();
+
 $kernel = $app->make(Kernel::class);
 
 $request = Request::create($uri, $method, $parameters, $_COOKIE, $files, $server);
+
+SupportContext::fromRequest($request);
+
+// Replicate legacy per-page parked() guards.
+$parkedScripts = [
+    'viewsnatches', 'users', 'special', 'forums', 'report', 'cheaterbox', 'upload',
+    'offers', 'comment', 'userdetails', 'checkuser', 'invite', 'bitbucket-upload',
+    'mybonus', 'userhistory', 'moresmilies', 'torrents', 'getattachment',
+    'sendmessage', 'reports', 'self-enable', 'friends', 'settings', 'topten', 'attendance',
+];
+if (in_array($script, $parkedScripts, true)) {
+    \parked();
+}
+
+// Autoclean only ran on the legacy index.php wrapper.
+if ($script === 'index') {
+    register_shutdown_function('autoclean');
+}
 
 $response = $kernel->handle($request);
 $response->send();

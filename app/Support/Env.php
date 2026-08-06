@@ -24,7 +24,24 @@ final class Env
             return self::$env;
         }
 
-        return self::$env[$key] ?? $default;
+        if (array_key_exists($key, self::$env)) {
+            return self::$env[$key];
+        }
+
+        $value = getenv($key);
+        if ($value !== false) {
+            return $value;
+        }
+
+        if (isset($_ENV[$key])) {
+            return $_ENV[$key];
+        }
+
+        if (isset($_SERVER[$key])) {
+            return $_SERVER[$key];
+        }
+
+        return $default;
     }
 
     /**

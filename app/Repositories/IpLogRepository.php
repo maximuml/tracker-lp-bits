@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Models\IpLog;
+use App\Support\SupportContext;
 use Carbon\Carbon;
 use Nexus\Database\NexusDB;
 
@@ -26,8 +27,8 @@ class IpLogRepository extends BaseRepository
         }
         $redis = NexusDB::redis();
         if (is_null($uri)) {
-            $parsed_uri = parse_url($_SERVER['REQUEST_URI']);
-            $uri = $parsed_uri['path'];
+            $parsed_uri = parse_url(SupportContext::getServerValue('REQUEST_URI', ''));
+            $uri = $parsed_uri['path'] ?? '/';
         }
         if (is_null($ipArr)) {
             $ipArr = [getip()];

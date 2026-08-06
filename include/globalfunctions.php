@@ -1,5 +1,6 @@
 <?php
 
+use App\Support\SupportContext;
 use Illuminate\Support\Facades\Auth;
 
 /**
@@ -72,13 +73,13 @@ function do_log($log, $level = 'info', $echo = false)
     $passkey = '';
 
     if (defined('IN_NEXUS') && IN_NEXUS) {
-        $CURUSER = $GLOBALS['CURUSER'] ?? null;
+        $CURUSER = SupportContext::getUser();
         if (is_array($CURUSER) && ! empty($CURUSER)) {
             $user = $CURUSER;
             $passkey = (string) ($CURUSER['passkey'] ?? '');
         }
         if ($passkey === '') {
-            $passkey = $_REQUEST['passkey'] ?? $_REQUEST['authkey'] ?? '';
+            $passkey = (string) (SupportContext::getRequestInput('passkey') ?? SupportContext::getRequestInput('authkey') ?? '');
         }
     } else {
         try {
@@ -235,7 +236,7 @@ function nexus_json_encode($data)
  */
 function api(int $ret, string $msg, $data = [])
 {
-    return \App\Support\Api::call($ret, $msg, $data, $_REQUEST);
+    return \App\Support\Api::call($ret, $msg, $data, SupportContext::allRequest());
 }
 /**
  * @param mixed $msgOrData
@@ -245,10 +246,10 @@ function api(int $ret, string $msg, $data = [])
 function success($msgOrData = 'OK', $data = [])
 {
     if (func_num_args() === 1) {
-        return \App\Support\Api::success('OK', $msgOrData, $_REQUEST);
+        return \App\Support\Api::success('OK', $msgOrData, SupportContext::allRequest());
     }
 
-    return \App\Support\Api::success((string) $msgOrData, $data, $_REQUEST);
+    return \App\Support\Api::success((string) $msgOrData, $data, SupportContext::allRequest());
 }
 /**
  * @param mixed $msgOrData
@@ -258,10 +259,10 @@ function success($msgOrData = 'OK', $data = [])
 function fail($msgOrData = 'ERROR', $data = [])
 {
     if (func_num_args() === 1) {
-        return \App\Support\Api::fail('ERROR', $msgOrData, $_REQUEST);
+        return \App\Support\Api::fail('ERROR', $msgOrData, SupportContext::allRequest());
     }
 
-    return \App\Support\Api::fail((string) $msgOrData, $data, $_REQUEST);
+    return \App\Support\Api::fail((string) $msgOrData, $data, SupportContext::allRequest());
 }
 /**
  * @param string|bool $all

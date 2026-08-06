@@ -46,7 +46,8 @@ class ScrapeService
             throw TrackerException::failure('Browser access blocked!');
         }
 
-        if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'on') {
+        $https = $request->server('HTTPS');
+        if ($https !== null && $https !== 'on') {
             $headers = $request->headers->all();
             if (isset($headers['cookie']) || isset($headers['accept-language']) || isset($headers['accept-charset'])) {
                 throw TrackerException::failure('Anti-Cheater: You cannot use this agent');

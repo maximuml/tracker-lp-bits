@@ -1134,7 +1134,7 @@ if ($action == "setlocked")
 	$locked = \App\Support\SupportContext::getPost("locked");
 	\App\Models\Topic::query()->where('id', $topicid)->update(['locked' => $locked]);
 
-	header("Location: \App\Support\SupportContext::getPost(returnto)");
+	header('Location: ' . \App\Support\SupportContext::getPost('returnto'));
 	die;
 }
 
@@ -1152,7 +1152,7 @@ if ($action == 'hltopic')
 	$forum_last_replied_topic_row = $Cache->get_value('forum_'.$forumid.'_last_replied_topic_content');
 	if ($forum_last_replied_topic_row && $forum_last_replied_topic_row['id'] == $topicid)
 		$Cache->delete_value('forum_'.$forumid.'_last_replied_topic_content');
-	header("Location: \App\Support\SupportContext::getPost(returnto)");
+	header('Location: ' . \App\Support\SupportContext::getPost('returnto'));
 	die;
 }
 
@@ -1168,7 +1168,7 @@ if ($action == "setsticky")
 	$sticky = \App\Support\SupportContext::getPost("sticky");
 	\App\Models\Topic::query()->where('id', $topicid)->update(['sticky' => $sticky]);
 
-	header("Location: \App\Support\SupportContext::getPost(returnto)");
+	header('Location: ' . \App\Support\SupportContext::getPost('returnto'));
 	die;
 }
 

@@ -195,9 +195,6 @@ final class Network
     {
         $value = SupportContext::getServerValue($key);
         if ($value === null) {
-            $value = $_SERVER[$key] ?? null;
-        }
-        if ($value === null) {
             $env = getenv($key);
             $value = is_string($env) ? $env : '';
         }

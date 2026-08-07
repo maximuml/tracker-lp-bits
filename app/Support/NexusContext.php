@@ -8,10 +8,9 @@ use Illuminate\Http\Request;
 /**
  * Per-request value object that holds all legacy runtime state.
  *
- * This replaces the superglobal fallbacks in SupportContext. The context is
- * populated once from a Laravel Request (or, during CLI/bootstrap, from PHP
- * superglobals via an explicit fromGlobals() call) and then read by the
- * SupportContext facade and legacy helpers without touching $_GET/$_POST etc.
+ * The context is populated from a Laravel Request and then read by the
+ * SupportContext facade and legacy helpers. No PHP superglobals or $GLOBALS
+ * are used after the initial Request capture.
  */
 final class NexusContext
 {
@@ -81,14 +80,6 @@ final class NexusContext
         return $context;
     }
 
-    public static function fromGlobals(?Request $request = null): self
-    {
-        $context = new self();
-        $context->setFromGlobals($request);
-
-        return $context;
-    }
-
     public function setFromRequest(Request $request): void
     {
         $this->laravelRequest = $request;
@@ -98,61 +89,6 @@ final class NexusContext
         $this->post = $request->request->all();
         $this->request = $request->input();
         $this->files = $request->files->all();
-
-        $this->ensureUserUpdateSetReference();
-    }
-
-    /**
-     * Merge runtime variables from $GLOBALS into this context and (re)capture
-     * request data. Existing keys in $this->globals are preserved so values set
-     * by LegacyBootstrap (hook, plugin, CURUSER, Cache, etc.) are not lost.
-     */
-    public function setFromGlobals(?Request $request = null): void
-    {
-        foreach ($GLOBALS as $key => $value) {
-            if (in_array($key, self::GLOBALS_EXCLUDED, true)) {
-                continue;
-            }
-            if (! array_key_exists($key, $this->globals)) {
-                $this->globals[$key] = $value;
-            }
-        }
-
-        $this->user = $this->globals['CURUSER'] ?? null;
-        if ($this->user === null && ! empty($GLOBALS['CURUSER'])) {
-            $this->user = $GLOBALS['CURUSER'];
-            $this->globals['CURUSER'] = $GLOBALS['CURUSER'];
-        }
-        $this->langFunctions = (array) ($this->globals['lang_functions'] ?? []);
-        $this->langShoutbox = (array) ($this->globals['lang_shoutbox'] ?? []);
-        $this->cache = $this->globals['Cache'] ?? null;
-        $this->bonusTweak = (string) ($this->globals['bonus_tweak'] ?? '');
-        $this->siteConfig = [
-            'SITENAME' => (string) ($this->globals['SITENAME'] ?? ''),
-            'SITEEMAIL' => (string) ($this->globals['SITEEMAIL'] ?? ''),
-            'smtptype' => (string) ($this->globals['smtptype'] ?? ''),
-            'smtp' => (string) ($this->globals['smtp'] ?? ''),
-            'smtp_host' => (string) ($this->globals['smtp_host'] ?? ''),
-            'smtp_port' => (string) ($this->globals['smtp_port'] ?? ''),
-            'smtp_from' => (string) ($this->globals['smtp_from'] ?? ''),
-        ];
-
-        if ($request !== null) {
-            $this->laravelRequest = $request;
-            $this->server = $request->server->all();
-            $this->cookie = $request->cookies->all();
-            $this->get = $request->query->all();
-            $this->post = $request->request->all();
-            $this->request = $request->input();
-            $this->files = $request->files->all();
-        } else {
-            $this->server = $_SERVER;
-            $this->cookie = $_COOKIE;
-            $this->get = $_GET;
-            $this->post = $_POST;
-            $this->request = $_REQUEST;
-            $this->files = $_FILES;
-        }
 
         $this->ensureUserUpdateSetReference();
     }
@@ -167,7 +103,7 @@ final class NexusContext
     /** @return array<string, mixed>|null */
     public function getUser(): ?array
     {
-        return $this->user ?? $this->globals['CURUSER'] ?? null;
+        return $this->user;
     }
 
     /** @return array<string, mixed> */
@@ -198,7 +134,7 @@ final class NexusContext
     /** @return array<string, string> */
     public function getLangFunctions(): array
     {
-        return $this->langFunctions ?: (array) ($this->globals['lang_functions'] ?? []);
+        return $this->langFunctions;
     }
 
     /** @param array<string, string> $lang */
@@ -211,7 +147,7 @@ final class NexusContext
     /** @return array<string, string> */
     public function getLangShoutbox(): array
     {
-        return $this->langShoutbox ?: (array) ($this->globals['lang_shoutbox'] ?? []);
+        return $this->langShoutbox;
     }
 
     public function setCache(?object $cache): void
@@ -222,7 +158,7 @@ final class NexusContext
 
     public function getCache(): ?object
     {
-        return $this->cache ?? $this->globals['Cache'] ?? null;
+        return $this->cache;
     }
 
     public function setBonusTweak(string $value): void
@@ -233,7 +169,7 @@ final class NexusContext
 
     public function getBonusTweak(): string
     {
-        return $this->bonusTweak ?: (string) ($this->globals['bonus_tweak'] ?? '');
+        return $this->bonusTweak;
     }
 
     /** @param array<string, mixed> $config */
@@ -252,14 +188,14 @@ final class NexusContext
             return $this->siteConfig;
         }
 
-        $globals = [
-            'SITENAME' => (string) ($this->globals['SITENAME'] ?? ''),
-            'SITEEMAIL' => (string) ($this->globals['SITEEMAIL'] ?? ''),
-            'smtptype' => (string) ($this->globals['smtptype'] ?? ''),
-            'smtp' => (string) ($this->globals['smtp'] ?? ''),
-            'smtp_host' => (string) ($this->globals['smtp_host'] ?? ''),
-            'smtp_port' => (string) ($this->globals['smtp_port'] ?? ''),
-            'smtp_from' => (string) ($this->globals['smtp_from'] ?? ''),
+        $config = [
+            'SITENAME' => '',
+            'SITEEMAIL' => '',
+            'smtptype' => '',
+            'smtp' => '',
+            'smtp_host' => '',
+            'smtp_port' => '',
+            'smtp_from' => '',
         ];
 
         $keys = [
@@ -276,12 +212,12 @@ final class NexusContext
             foreach ($keys as $name => $settingName) {
                 $value = Setting::get($settingName);
                 if (! is_null($value)) {
-                    $globals[$name] = (string) $value;
+                    $config[$name] = (string) $value;
                 }
             }
         }
 
-        return $globals;
+        return $config;
     }
 
     public function setGlobal(string $key, mixed $value): void

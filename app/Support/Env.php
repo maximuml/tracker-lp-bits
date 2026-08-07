@@ -33,14 +33,6 @@ final class Env
             return $value;
         }
 
-        if (isset($_ENV[$key])) {
-            return $_ENV[$key];
-        }
-
-        if (isset($_SERVER[$key])) {
-            return $_SERVER[$key];
-        }
-
         return $default;
     }
 

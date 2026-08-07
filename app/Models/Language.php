@@ -53,15 +53,16 @@ class Language extends NexusModel
 
 
     /**
-     * @param  mixed  $withoutCache
-     * @return  mixed
+     * @param  bool  $withoutCache
+     * @return  array<int, string>
      */
-    public static function listEnabled($withoutCache = false)
+    public static function listEnabled(bool $withoutCache = false): array
     {
-        if ($withoutCache) {
-            return Setting::getFromDb('main.site_language_enabled', self::DEFAULT_ENABLED);
-        }
-        return Setting::get('main.site_language_enabled', self::DEFAULT_ENABLED);
+        $value = $withoutCache
+            ? Setting::getFromDb('main.site_language_enabled', self::DEFAULT_ENABLED)
+            : Setting::get('main.site_language_enabled', self::DEFAULT_ENABLED);
+
+        return is_array($value) ? $value : self::DEFAULT_ENABLED;
     }
 
     public static function updateTransStatus(): void

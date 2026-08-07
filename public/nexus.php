@@ -112,6 +112,8 @@ if ($script === 'details') {
     if (isset($_GET['id'])) {
         $routePath = '/details/' . (int) $_GET['id'];
         unset($_GET['id']);
+    } elseif ($pathInfo !== '') {
+        $routePath = '/details' . $pathInfo;
     }
 } elseif ($script === 'comment') {
     $commentAction = (string) ($_GET['action'] ?? '');
@@ -192,6 +194,14 @@ LegacyBootstrap::boot($request, $rootpath);
 $script = nexus()->getScript();
 
 // Load the page-specific language file(s) the legacy wrappers used to require.
+// Capture the variables they define without touching $GLOBALS directly.
+$loadScriptLanguage = static function (string $path): array {
+    $before = get_defined_vars();
+    require_once $path;
+
+    return array_diff_key(get_defined_vars(), $before);
+};
+
 $extraLangFiles = [
     'search' => ['torrents.php'],
     'shoutbox_history' => ['shoutbox.php'],
@@ -204,13 +214,14 @@ $scriptLangFiles = array_unique(array_merge([$script . '.php'], $extraLangFiles[
 foreach ($scriptLangFiles as $scriptLangFile) {
     $langPath = $rootpath . get_langfile_path($scriptLangFile);
     if (is_file($langPath)) {
-        require_once $langPath;
+        foreach ($loadScriptLanguage($langPath) as $langKey => $langValue) {
+            if (in_array($langKey, ['before', 'path', 'loadScriptLanguage'], true)) {
+                continue;
+            }
+            SupportContext::setGlobal($langKey, $langValue);
+        }
     }
 }
-
-// Synchronise any per-script language globals into the context so helpers can
-// read them without touching $GLOBALS directly.
-SupportContext::fromGlobals($request);
 
 // Replicate legacy per-page parked() guards.
 $parkedScripts = [

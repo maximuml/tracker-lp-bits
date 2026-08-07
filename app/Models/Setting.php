@@ -135,7 +135,7 @@ class Setting extends NexusModel
 
     public static function getDefaultLang(): string
     {
-        return self::get("main.defaultlang");
+        return (string) (self::get("main.defaultlang") ?: 'en');
     }
 
     public static function getIsUseChallengeResponseAuthentication(): bool

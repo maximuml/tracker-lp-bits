@@ -5,8 +5,8 @@ namespace App\Support;
 /**
  * Legacy request-input helpers extracted from `include/functions.php`.
  *
- * Backs `mkglobal()` and `unesc()`. These are transitional shims —
- * modern code should use the Request object directly.
+ * Backs `mkglobal()` and `unesc()`. Values are written into the request
+ * context only; no PHP superglobals are mutated.
  */
 final class Input
 {
@@ -21,27 +21,26 @@ final class Input
     }
 
     /**
-     * Import the named `$_GET` / `$_POST` keys into `$GLOBALS`.
+     * Import `$_REQUEST` keys into the request context.
      *
-     * Mirrors `mkglobal()`. Returns `1` on success, `0` if any key
-     * is missing.
-     *
-     * @param  string|array<int|string, string>  $vars
-     */
-    /**
-     * Import `$_REQUEST` keys into `$GLOBALS`.
-     *
-     * Mirrors `GetVar()`.
+     * Mirrors `GetVar()`. For a single key, returns the value or `false` when
+     * missing. For an array of keys, returns an associative array of found
+     * values (so callers can `extract()` them into local scope).
      *
      * @param  string|array<int|string, string>  $name
      */
     public static function getVar(string|array $name): mixed
     {
         if (is_array($name)) {
+            $result = [];
             foreach ($name as $var) {
-                self::getVar($var);
+                $value = self::getVar($var);
+                if ($value !== false) {
+                    $result[$var] = $value;
+                }
             }
-            return null;
+
+            return $result;
         }
 
         $value = SupportContext::getRequestInput($name);
@@ -49,7 +48,6 @@ final class Input
             return false;
         }
 
-        $GLOBALS[$name] = $value;
         SupportContext::setGlobal($name, $value);
 
         return $value;
@@ -69,11 +67,9 @@ final class Input
         foreach ($vars as $v) {
             if (isset($get[$v])) {
                 $value = self::unescape($get[$v]);
-                $GLOBALS[$v] = $value;
                 SupportContext::setGlobal($v, $value);
             } elseif (isset($post[$v])) {
                 $value = self::unescape($post[$v]);
-                $GLOBALS[$v] = $value;
                 SupportContext::setGlobal($v, $value);
             } else {
                 return 0;

@@ -8,20 +8,12 @@ use Illuminate\Http\Request;
  * Static facade for the per-request NexusContext value object.
  *
  * Legacy helpers and Blade/PHP partials still call these static methods while
- * the implementation lives in NexusContext. All superglobal fallbacks have been
- * removed: the context must be populated explicitly via fromRequest() or
- * fromGlobals() (the latter is only used during legacy bootstrap/CLI).
+ * the implementation lives in NexusContext. The context must be populated
+ * explicitly via fromRequest(); no PHP superglobals or $GLOBALS are used.
  */
 final class SupportContext
 {
     private static ?NexusContext $context = null;
-
-    public static function fromGlobals(?Request $request = null): void
-    {
-        $context = self::$context ?? new NexusContext();
-        $context->setFromGlobals($request);
-        self::$context = $context;
-    }
 
     public static function fromRequest(Request $request): void
     {

@@ -10,6 +10,7 @@ server {
     ssl_certificate_key /certs/private.key;
 
     client_max_body_size 100M;
+    server_tokens off;
 
     location = /favicon.ico {
         log_not_found off;

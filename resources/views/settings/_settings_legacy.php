@@ -45,7 +45,7 @@ if ($action == 'savesettings_main')	// save main
 		'startsubid', 'logo', 'showlastxforumposts', 'enable_technical_info', 'site_language_enabled', 'show_top_uploader', 'offer_skip_approved_count',
         'upload_deny_approval_deny_count', 'enable_global_search', 'tmp_invite_count', 'complain_enabled'
 	);
-	GetVar($validConfig);
+	extract(GetVar($validConfig), EXTR_OVERWRITE);
 	$MAIN = [];
 	foreach($validConfig as $config) {
 		$MAIN[$config] = $$config ?? null;
@@ -67,7 +67,7 @@ elseif ($action == 'savesettings_basic') 	// save basic
 	$validConfig = array(
 		'SITENAME', 'BASEURL', 'announce_url'
 	);
-	GetVar($validConfig);
+	extract(GetVar($validConfig), EXTR_OVERWRITE);
 	$BASIC = [];
 	foreach($validConfig as $config) {
 		$BASIC[$config] = $$config ?? null;
@@ -81,7 +81,7 @@ elseif ($action == 'savesettings_code') 	// save database
 {
 	stdhead($lang_settings['head_save_code_settings']);
 	$validConfig = array('mainversion','subversion','releasedate','website');
-	GetVar($validConfig);
+	extract(GetVar($validConfig), EXTR_OVERWRITE);
 	$CODE = [];
 	foreach($validConfig as $config) {
 		$CODE[$config] = $$config ?? null;
@@ -102,7 +102,7 @@ elseif ($action == 'savesettings_bonus') 	// save bonus
         'harem_addition', 'hundredgbupload', 'tengbdownload', 'hundredgbdownload', 'official_addition', 'official_tag', 'zero_bonus_tag', 'zero_bonus_factor',
         'one_tmp_invite', 'rainbow_id', 'change_username_card', 'min_size', 'self_enable'
     );
-	GetVar($validConfig);
+	extract(GetVar($validConfig), EXTR_OVERWRITE);
 	$BONUS = [];
 	foreach($validConfig as $config) {
 		$BONUS[$config] = $$config ?? null;
@@ -138,7 +138,7 @@ elseif ($action == 'savesettings_account') 	// save account
         'nmtime', 'nmdl', \App\Models\User::CLASS_NEXUS_MASTER . '_min_seed_points', 'nmprratio', 'nmderatio', \App\Models\User::CLASS_NEXUS_MASTER . '_alias',
         'getInvitesByPromotion', 'destroy_disabled'
     );
-	GetVar($validConfig);
+	extract(GetVar($validConfig), EXTR_OVERWRITE);
 	$ACCOUNT = [];
 	foreach($validConfig as $config) {
 		$ACCOUNT[$config] = $$config ?? null;
@@ -161,7 +161,7 @@ elseif($action == 'savesettings_torrent') 	// save account
         'nfo_view_style_default', 'tax_factor', 'max_price', 'paid_torrent_enabled', 'reward_bonus_options', 'reward_times_limit'
     );
 	$validConfig = apply_filter('setting_valid_config', $validConfig);
-	GetVar($validConfig);
+	extract(GetVar($validConfig), EXTR_OVERWRITE);
 	$TORRENT = [];
 	foreach($validConfig as $config) {
 		$TORRENT[$config] = $$config ?? null;
@@ -176,14 +176,14 @@ elseif ($action == 'savesettings_smtp') 	// save smtp
 {
 	stdhead($lang_settings['head_save_smtp_settings']);
 	$validConfig = array('smtptype', 'emailnotify');
-	GetVar($validConfig);
+	extract(GetVar($validConfig), EXTR_OVERWRITE);
 	if ((isset($smtptype)) && $smtptype == 'advanced') {
 		$validConfig = array_merge($validConfig, array('smtp_host','smtp_port','smtp_from'));
 	} elseif ($smtptype == 'external') {
 		$validConfig = array_merge($validConfig, array('smtpaddress','smtpport', 'encryption', 'accountname','accountpassword'));
 	}
 
-	GetVar($validConfig);
+	extract(GetVar($validConfig), EXTR_OVERWRITE);
 	$SMTP = [];
 	foreach($validConfig as $config) {
 		$SMTP[$config] = $$config ?? null;
@@ -201,7 +201,7 @@ elseif ($action == 'savesettings_security') 	// save security
 		'guest_visit_type', 'guest_visit_value_static_page', 'guest_visit_value_custom_content', 'guest_visit_value_redirect',
 		'login_type', 'login_secret_lifetime', 'use_challenge_response_authentication',
 	);
-	GetVar($validConfig);
+	extract(GetVar($validConfig), EXTR_OVERWRITE);
 	$SECURITY = [];
 	foreach($validConfig as $config) {
 		$SECURITY[$config] = $$config ?? null;
@@ -227,7 +227,7 @@ elseif ($action == 'savesettings_authority') 	// save user authority
         'view_special_torrent','movetorrent','chrmanage','viewinvite', 'buyinvite','seebanned','againstoffer','userbar', 'torrent-approval',
         'torrent-delete', 'user-delete', 'user-change-class', 'torrent-set-special-tag', 'torrent-approval-allow-automatic', 'torrent-set-price'
     );
-	GetVar($validConfig);
+	extract(GetVar($validConfig), EXTR_OVERWRITE);
 	$AUTHORITY = [];
 	foreach($validConfig as $config) {
 		$AUTHORITY[$config] = $$config ?? null;
@@ -246,7 +246,7 @@ elseif ($action == 'savesettings_tweak')	// save tweak
 {
 	stdhead($lang_settings['head_save_tweak_settings']);
 	$validConfig = array('where','iplog1','bonus','datefounded', 'enablelocation', 'titlekeywords', 'metakeywords', 'metadescription', 'enablesqldebug', 'sqldebug', 'cssdate', 'enabletooltip', 'analyticscode');
-	GetVar($validConfig);
+	extract(GetVar($validConfig), EXTR_OVERWRITE);
 	$TWEAK = [];
 	foreach($validConfig as $config) {
 		$TWEAK[$config] = $$config ?? null;
@@ -260,7 +260,7 @@ elseif ($action == 'savesettings_attachment')	// save attachment
 {
 	stdhead($lang_settings['head_save_attachment_settings']);
 	$validConfig = array('enableattach','classone','countone','sizeone', 'extone', 'classtwo','counttwo','sizetwo', 'exttwo', 'classthree','countthree','sizethree', 'extthree', 'classfour','countfour','sizefour', 'extfour', 'savedirectory', 'httpdirectory', 'savedirectorytype', 'thumbnailtype', 'thumbquality', 'thumbwidth', 'thumbheight', 'watermarkpos', 'watermarkwidth', 'watermarkheight', 'watermarkquality', 'altthumbwidth', 'altthumbheight');
-	GetVar($validConfig);
+	extract(GetVar($validConfig), EXTR_OVERWRITE);
 	$ATTACHMENT = [];
 	foreach($validConfig as $config) {
 		$ATTACHMENT[$config] = $$config ?? null;
@@ -275,7 +275,7 @@ elseif ($action == 'savesettings_misc')
 {
     stdhead($lang_settings['row_misc_settings']);
 	$validConfig = array('donation_custom', 'protected_forum',);
-    GetVar($validConfig);
+    extract(GetVar($validConfig), EXTR_OVERWRITE);
     $data = [];
 	if (!empty($protected_forum) && !preg_match("/^[,\\d]*[\\d]+$/",$protected_forum)){
 		stderr($lang_settings['std_error'],$lang_settings['forum_format_error'].'<br>'.$lang_settings['std_click']."<a class=\"altlink\" href=\"settings.php\">".$lang_settings['std_here']."</a>".$lang_settings['std_to_go_back'],false,false);

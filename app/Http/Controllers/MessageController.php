@@ -2,113 +2,30 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Resources\MessageResource;
-use App\Models\Message;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Response;
+use Illuminate\View\View;
 
-class MessageController extends Controller
+class MessageController extends LegacyController
 {
-    /**
-     * message list
-     * @param  \Illuminate\Http\Request  $request
-     * @return  array<string, mixed>
-     */
-    public function index(Request $request)
+    public function messages(Request $request): View|RedirectResponse
     {
-        $user = Auth::user();
-        $query = $user->receive_messages()
-            ->with(['send_user'])
-            ->orderBy('id', 'desc');
-
-        if ($request->unread) {
-            $query->where('unread', 'yes');
-        }
-        $messages = $query->paginate();
-        $resource = MessageResource::collection($messages);
-        return $this->success($resource);
-
+        return $this->legacyPage($request, 'messages');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     * @param  \Illuminate\Http\Request  $request
-     * @return  \Illuminate\Http\Response
-     */
-    public function store(Request $request)
+    public function sendmessage(Request $request): View|RedirectResponse
     {
-        //
-    
-        return new \Illuminate\Http\Response('');
+        return $this->legacyPage($request, 'sendmessage');
     }
 
-    /**
-     * Display the specified resource.
-     * @param  mixed  $id
-     * @return  array<string, mixed>
-     */
-    public function show($id)
+    public function takeMessage(Request $request): View|RedirectResponse
     {
-        $message = Message::query()->with(['send_user'])->findOrFail($id);
-        $message->update(['unread' => 'no']);
-        $resource = new MessageResource($message);
-//        $resource->additional([
-//            'page_title' => nexus_trans('message.show.page_title'),
-//        ]);
-
-        return $this->success($resource);
+        return $this->legacyPage($request, 'takemessage');
     }
 
-    /**
-     * Update the specified resource in storage.
-     * @param  \Illuminate\Http\Request  $request
-     * @param  mixed  $id
-     * @return  \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
+    public function deletemessage(Request $request): Response|RedirectResponse
     {
-        //
-    
-        return new \Illuminate\Http\Response('');
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     * @param  mixed  $id
-     * @return  \Illuminate\Http\Response
-     */
-    public function destroy($id)
-    {
-        //
-    
-        return new \Illuminate\Http\Response('');
-    }
-
-    /**
-     * @param  \Illuminate\Http\Request  $request
-     * @return  array<int|string, mixed>
-     */
-    public function listUnread(Request $request): array
-    {
-        $user = Auth::user();
-        $query = $user->receive_messages()
-            ->with(['send_user'])
-            ->orderBy('id', 'desc')
-            ->where('unread', 'yes');
-
-        $messages = $query->paginate();
-        $resource = MessageResource::collection($messages);
-//        $resource->additional([
-//            'site_info' => site_info(),
-//        ]);
-        return $this->success($resource);
-    }
-
-    /** @return  array<string, mixed> */
-    public function countUnread()
-    {
-        $user = Auth::user();
-        $count = $user->receive_messages()->where('unread', 'yes')->count();
-        return $this->success(['unread' => $count]);
+        return $this->legacyPageWithRedirect($request, 'deletemessage');
     }
 }

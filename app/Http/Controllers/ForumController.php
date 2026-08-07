@@ -5,9 +5,10 @@ namespace App\Http\Controllers;
 use App\Support\SupportContext;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\View\View;
 
-class ForumController extends Controller
+class ForumController extends LegacyController
 {
     /**
      * Serve the legacy forums.php page from a Laravel view.
@@ -23,5 +24,20 @@ class ForumController extends Controller
         }
 
         return view('forum.index');
+    }
+
+    public function forummanage(Request $request): Response|RedirectResponse
+    {
+        return $this->legacyPageWithRedirect($request, 'forummanage');
+    }
+
+    public function moforums(Request $request): Response|RedirectResponse
+    {
+        return $this->legacyPageWithRedirect($request, 'moforums');
+    }
+
+    public function latestcomments(Request $request): View|RedirectResponse
+    {
+        return $this->legacyPage($request, 'latestcomments', true);
     }
 }

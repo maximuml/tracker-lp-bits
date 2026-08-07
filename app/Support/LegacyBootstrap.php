@@ -54,8 +54,6 @@ final class LegacyBootstrap
         SupportContext::reset();
         if ($request !== null) {
             SupportContext::fromRequest($request);
-        } else {
-            SupportContext::fromGlobals();
         }
     }
 

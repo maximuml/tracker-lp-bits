@@ -3,27 +3,24 @@
 namespace Tests\Unit\Support;
 
 use App\Support\Input;
+use App\Support\SupportContext;
 use PHPUnit\Framework\TestCase;
 
 final class InputTest extends TestCase
 {
-    protected function tearDown(): void
+    protected function setUp(): void
     {
-        foreach (['id', 'name', 'foo'] as $key) {
-            if (isset($GLOBALS[$key])) {
-                unset($GLOBALS[$key]);
-            }
-        }
-        parent::tearDown();
+        parent::setUp();
+        SupportContext::reset();
     }
 
-    public function test_globalize_imports_get_variables_into_globals(): void
+    public function test_globalize_imports_get_variables_into_context(): void
     {
         $result = Input::globalize(['id', 'name'], ['id' => '5', 'name' => 'test'], []);
 
         $this->assertSame(1, $result);
-        $this->assertSame('5', $GLOBALS['id']);
-        $this->assertSame('test', $GLOBALS['name']);
+        $this->assertSame('5', SupportContext::getGlobal('id'));
+        $this->assertSame('test', SupportContext::getGlobal('name'));
     }
 
     public function test_globalize_imports_post_when_get_missing(): void
@@ -31,15 +28,15 @@ final class InputTest extends TestCase
         $result = Input::globalize('id:name', [], ['id' => '7', 'name' => 'post']);
 
         $this->assertSame(1, $result);
-        $this->assertSame('7', $GLOBALS['id']);
-        $this->assertSame('post', $GLOBALS['name']);
+        $this->assertSame('7', SupportContext::getGlobal('id'));
+        $this->assertSame('post', SupportContext::getGlobal('name'));
     }
 
     public function test_globalize_prefers_get_over_post(): void
     {
         $result = Input::globalize(['id'], ['id' => 'from_get'], ['id' => 'from_post']);
 
-        $this->assertSame('from_get', $GLOBALS['id']);
+        $this->assertSame('from_get', SupportContext::getGlobal('id'));
     }
 
     public function test_globalize_returns_zero_when_any_key_missing(): void
@@ -47,7 +44,7 @@ final class InputTest extends TestCase
         $result = Input::globalize(['id', 'missing'], ['id' => '5'], []);
 
         $this->assertSame(0, $result);
-        $this->assertFalse(isset($GLOBALS['missing']));
+        $this->assertNull(SupportContext::getGlobal('missing'));
     }
 
     public function test_globalize_accepts_colon_separated_string(): void
@@ -55,8 +52,8 @@ final class InputTest extends TestCase
         $result = Input::globalize('foo:bar', ['foo' => 'a', 'bar' => 'b'], []);
 
         $this->assertSame(1, $result);
-        $this->assertSame('a', $GLOBALS['foo']);
-        $this->assertSame('b', $GLOBALS['bar']);
+        $this->assertSame('a', SupportContext::getGlobal('foo'));
+        $this->assertSame('b', SupportContext::getGlobal('bar'));
     }
 
     public function test_unescape_returns_value_unchanged(): void

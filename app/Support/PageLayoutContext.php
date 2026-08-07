@@ -24,12 +24,12 @@ final class PageLayoutContext
     public bool $offlineMsg = false;
 
     /**
-     * @param  array<string, mixed>|null  $user  Current user row (`$GLOBALS['CURUSER']`).
-     * @param  array<string, string>  $lang  Loaded language strings (`$GLOBALS['lang_functions']`).
-     * @param  object|null  $cache  Legacy Redis cache wrapper (`$GLOBALS['Cache']`).
-     * @param  array<string, mixed>  $queryName  Legacy SQL debug query list (`$GLOBALS['query_name']`).
-     * @param  int  $defaultStylesheet  Default stylesheet id (`$GLOBALS['defcss']`).
-     * @param  array<string, mixed>  $userUpdateSet  Mutable user update set (`$GLOBALS['USERUPDATESET']`).
+     * @param  array<string, mixed>|null  $user  Current user row.
+     * @param  array<string, string>  $lang  Loaded language strings.
+     * @param  object|null  $cache  Legacy Redis cache wrapper.
+     * @param  array<string, mixed>  $queryName  Legacy SQL debug query list.
+     * @param  int  $defaultStylesheet  Default stylesheet id.
+     * @param  array<string, mixed>  $userUpdateSet  Mutable user update set.
      */
     public function __construct(
         public ?array $user,

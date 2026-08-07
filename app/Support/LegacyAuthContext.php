@@ -19,13 +19,13 @@ final class LegacyAuthContext
     private ?int $langIdCache = null;
 
     /**
-     * @param  array<string, mixed>|null  $user  Current user row (`$GLOBALS['CURUSER']`).
-     * @param  array<string, string>  $lang  Loaded language strings (`$GLOBALS['lang_functions']`).
-     * @param  object|null  $cache  Legacy Redis cache wrapper (`$GLOBALS['Cache']`).
-     * @param  array<string, mixed>  $requestBody  `$_POST`.
-     * @param  array<string, mixed>  $queryParams  `$_GET`.
-     * @param  array<string, mixed>  $request  Merged `$_POST` + `$_GET`.
-     * @param  array<string, string>  $cookies  `$_COOKIE`.
+     * @param  array<string, mixed>|null  $user  Current user row.
+     * @param  array<string, string>  $lang  Loaded language strings.
+     * @param  object|null  $cache  Legacy Redis cache wrapper.
+     * @param  array<string, mixed>  $requestBody  POST data.
+     * @param  array<string, mixed>  $queryParams  Query data.
+     * @param  array<string, mixed>  $request  Merged POST + query data.
+     * @param  array<string, string>  $cookies  Cookie data.
      * @param  array<string, mixed>  $registration  Settings: `invitesystem`, `registration`, `maxusers`, `maxip`.
      * @param  string|null  $langFolder  Raw language folder from the language cookie.
      */

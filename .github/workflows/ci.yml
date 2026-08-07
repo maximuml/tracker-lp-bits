@@ -49,6 +49,10 @@ jobs:
       - name: Audit composer dependencies
         run: composer audit
 
+      - name: Prepare environment
+        run: |
+          cp .env.example .env
+
       - name: Run PHP syntax lint
         run: |
           find . -type f -name '*.php' \

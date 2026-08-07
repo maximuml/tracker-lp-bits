@@ -40,8 +40,8 @@ final class Menu
         }
 
         $userId = (int) ($user['id'] ?? 0);
-        $normalSectionName = SearchBox::value($cache, Settings::get('main.browsecat'), 'section_name');
-        $specialSectionName = SearchBox::value($cache, Settings::get('main.specialcat'), 'section_name');
+        $normalSectionName = SearchBox::value($cache, (int) (Settings::get('main.browsecat') ?? 1), 'section_name');
+        $specialSectionName = SearchBox::value($cache, (int) (Settings::get('main.specialcat') ?? 2), 'section_name');
 
         $items = [];
         $items[] = self::item($selected, 'home', 'index.php', $langFunctions['text_home'] ?? 'Home');

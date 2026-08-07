@@ -15,8 +15,8 @@ class TorrentSearchRepository
         $CURUSER = SupportContext::getUser() ?? [];
         $lang_torrents = SupportContext::getGlobal('lang_torrents', []);
         $lang_special = SupportContext::getGlobal('lang_special', []);
-        $browsecatmode = (int) SupportContext::getGlobal('browsecatmode', 0);
-        $specialcatmode = (int) SupportContext::getGlobal('specialcatmode', 0);
+        $browsecatmode = (int) SupportContext::getGlobal('browsecatmode', 1);
+        $specialcatmode = (int) SupportContext::getGlobal('specialcatmode', 2);
         $enablespecial = SupportContext::getGlobal('enablespecial', '');
         $torrentsperpage_main = (int) SupportContext::getGlobal('torrentsperpage_main', 0);
         $catimgurl = '';

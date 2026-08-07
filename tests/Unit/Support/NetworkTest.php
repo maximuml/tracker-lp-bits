@@ -3,6 +3,7 @@
 namespace Tests\Unit\Support;
 
 use App\Support\Network;
+use App\Support\SupportContext;
 use PHPUnit\Framework\TestCase;
 
 class NetworkTest extends TestCase
@@ -87,140 +88,130 @@ class NetworkTest extends TestCase
 
     // ---------- clientIp() ----------
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+        SupportContext::reset();
+        Network::setTrustedProxies(null);
+    }
+
+    protected function tearDown(): void
+    {
+        SupportContext::reset();
+        Network::setTrustedProxies(null);
+        parent::tearDown();
+    }
+
+    private function setServerContext(array $server): void
+    {
+        SupportContext::reset();
+        foreach ($server as $key => $value) {
+            SupportContext::setServerValue($key, $value);
+        }
+    }
+
     public function test_clientIp_returns_rightmost_non_trusted_forwarded_ip(): void
     {
-        $backup = $_SERVER;
         Network::setTrustedProxies(['10.0.0.0/8']);
 
         // The rightmost entry is a trusted proxy; the one to its left is the
         // real client. The leftmost value is attacker-controlled and ignored.
-        $_SERVER = [
+        $this->setServerContext([
             'HTTP_X_FORWARDED_FOR' => '1.2.3.4, 203.0.113.5, 10.0.0.2',
             'REMOTE_ADDR' => '10.0.0.4',
-        ];
+        ]);
 
         $this->assertSame('203.0.113.5', Network::clientIp());
         $this->assertSame('1.2.3.4, 203.0.113.5, 10.0.0.2', Network::clientIp(false));
-
-        Network::setTrustedProxies(null);
-        $_SERVER = $backup;
     }
 
     public function test_clientIp_falls_back_to_client_ip_and_remote_addr(): void
     {
-        $backup = $_SERVER;
         Network::setTrustedProxies(['10.0.0.4']);
 
-        $_SERVER = ['HTTP_CLIENT_IP' => '10.0.0.3', 'REMOTE_ADDR' => '10.0.0.4'];
+        $this->setServerContext(['HTTP_CLIENT_IP' => '10.0.0.3', 'REMOTE_ADDR' => '10.0.0.4']);
         $this->assertSame('10.0.0.3', Network::clientIp());
 
-        $_SERVER = ['REMOTE_ADDR' => '10.0.0.4'];
+        $this->setServerContext(['REMOTE_ADDR' => '10.0.0.4']);
         $this->assertSame('10.0.0.4', Network::clientIp());
-
-        Network::setTrustedProxies(null);
-        $_SERVER = $backup;
     }
 
     public function test_clientIp_ignores_x_forwarded_for_from_untrusted_remote_addr(): void
     {
-        $backup = $_SERVER;
         Network::setTrustedProxies(['127.0.0.1']);
 
-        $_SERVER = [
+        $this->setServerContext([
             'HTTP_X_FORWARDED_FOR' => '1.2.3.4',
             'REMOTE_ADDR' => '5.6.7.8',
-        ];
+        ]);
 
         $this->assertSame('5.6.7.8', Network::clientIp());
-
-        Network::setTrustedProxies(null);
-        $_SERVER = $backup;
     }
 
     public function test_clientIp_respects_cidr_trusted_proxies(): void
     {
-        $backup = $_SERVER;
         Network::setTrustedProxies(['10.0.0.0/8']);
 
-        $_SERVER = [
+        $this->setServerContext([
             'HTTP_X_FORWARDED_FOR' => '1.2.3.4, 203.0.113.5, 10.0.0.2',
             'REMOTE_ADDR' => '10.0.0.4',
-        ];
+        ]);
 
         $this->assertSame('203.0.113.5', Network::clientIp());
-
-        Network::setTrustedProxies(null);
-        $_SERVER = $backup;
     }
 
     public function test_clientIp_empty_trusted_proxies_means_trust_none(): void
     {
-        $backup = $_SERVER;
         Network::setTrustedProxies([]);
 
-        $_SERVER = [
+        $this->setServerContext([
             'HTTP_X_FORWARDED_FOR' => '1.2.3.4',
             'REMOTE_ADDR' => '5.6.7.8',
-        ];
+        ]);
 
         $this->assertSame('5.6.7.8', Network::clientIp());
-
-        Network::setTrustedProxies(null);
-        $_SERVER = $backup;
     }
 
     public function test_clientIp_wildcard_skips_the_trusted_proxy_entry_in_chain(): void
     {
-        $backup = $_SERVER;
         Network::setTrustedProxies(['*']);
 
         // With a wildcard, REMOTE_ADDR itself is treated as the only trusted
         // proxy. The chain is walked from the right; the proxy's own appended
         // peer address (5.6.7.8) is the real client, left of it is spoofed.
-        $_SERVER = [
+        $this->setServerContext([
             'HTTP_X_FORWARDED_FOR' => '1.2.3.4, 5.6.7.8, 10.0.0.4',
             'REMOTE_ADDR' => '10.0.0.4',
-        ];
+        ]);
 
         $this->assertSame('5.6.7.8', Network::clientIp());
-
-        Network::setTrustedProxies(null);
-        $_SERVER = $backup;
     }
 
     public function test_clientIp_does_not_skip_private_ips_in_forwarded_chain(): void
     {
-        $backup = $_SERVER;
         Network::setTrustedProxies(['10.0.0.2']);
 
         // The legacy isValid() rejects 192.168.x, but a trusted proxy may
         // legitimately append a private client address. The resolver should
         // accept it instead of continuing left to the attacker value.
-        $_SERVER = [
+        $this->setServerContext([
             'HTTP_X_FORWARDED_FOR' => '1.2.3.4, 192.168.1.10, 10.0.0.2',
             'REMOTE_ADDR' => '10.0.0.2',
-        ];
+        ]);
 
         $this->assertSame('192.168.1.10', Network::clientIp());
-
-        Network::setTrustedProxies(null);
-        $_SERVER = $backup;
     }
 
     public function test_clientIp_falls_back_to_remote_addr_on_malformed_forwarded_entry(): void
     {
-        $backup = $_SERVER;
         Network::setTrustedProxies(['10.0.0.2']);
 
         // A malformed entry in the chain is suspicious; stop and use REMOTE_ADDR.
-        $_SERVER = [
+        $this->setServerContext([
             'HTTP_X_FORWARDED_FOR' => '1.2.3.4, not-an-ip, 10.0.0.2',
             'REMOTE_ADDR' => '10.0.0.2',
-        ];
+        ]);
 
         $this->assertSame('10.0.0.2', Network::clientIp());
-
-        Network::setTrustedProxies(null);
-        $_SERVER = $backup;
     }
 }

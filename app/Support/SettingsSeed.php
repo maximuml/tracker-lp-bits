@@ -2,6 +2,8 @@
 
 namespace App\Support;
 
+use App\Models\SearchBox;
+
 /**
  * Generated settings seed migrated from `include/config.php`.
  *
@@ -86,8 +88,11 @@ final class SettingsSeed
         SupportContext::setGlobal('defcss', $MAIN['defstylesheet']);
         SupportContext::setGlobal('enabledonation', $MAIN['donation']);
         SupportContext::setGlobal('enablespecial', $MAIN['spsct']);
-        SupportContext::setGlobal('browsecatmode', (int)$MAIN['browsecat']);
-        SupportContext::setGlobal('specialcatmode', (int)$MAIN['specialcat']);
+        $searchBoxIds = SearchBox::query()->orderBy('id')->pluck('id')->all();
+        $defaultBrowsecat = (int) ($searchBoxIds[0] ?? 1);
+        $defaultSpecialcat = (int) ($searchBoxIds[1] ?? $defaultBrowsecat);
+        SupportContext::setGlobal('browsecatmode', (int) ($MAIN['browsecat'] ?? $defaultBrowsecat));
+        SupportContext::setGlobal('specialcatmode', (int) ($MAIN['specialcat'] ?? $defaultSpecialcat));
         SupportContext::setGlobal('waitsystem', $MAIN['waitsystem']);
         SupportContext::setGlobal('maxdlsystem', $MAIN['maxdlsystem']);
         SupportContext::setGlobal('bitbucket', $MAIN['bitbucket']);

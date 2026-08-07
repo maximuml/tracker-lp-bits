@@ -350,8 +350,8 @@ final class LegacyAuth
      *
      * Mirrors `userlogin()`: checks the IP ban list, reads the user from
      * the cookie, generates a missing passkey, and returns the user row.
-     * The caller (the `userlogin()` wrapper) is responsible for populating
-     * `$GLOBALS['CURUSER']` so the rest of the legacy page keeps working.
+     * The caller is responsible for populating SupportContext::setUser() so the
+     * rest of the legacy page keeps working.
      *
      * @return array<string, mixed>|null
      */

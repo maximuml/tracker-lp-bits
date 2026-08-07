@@ -277,6 +277,11 @@ class NexusDB
         $capsule = new Capsule(Container::getInstance());
         $connectionName = self::getConnectionName();
         $capsule->addConnection($config, $connectionName);
+        // Capsule's constructor sets database.default to 'default', which would
+        // break Laravel's DB facade and Eloquent when it runs after the kernel
+        // has already loaded the real database config. Set the default to the
+        // actual connection name so both managers resolve the same default.
+        Container::getInstance()['config']['database.default'] = $connectionName;
         $capsule->setAsGlobal();
         $capsule->bootEloquent();
         $connection = self::$eloquentConnection = $capsule->getConnection($connectionName);

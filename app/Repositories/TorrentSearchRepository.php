@@ -12,12 +12,19 @@ class TorrentSearchRepository
      */
     public static function getListingData(array $query = []): array
     {
-        global $CURUSER, $Cache, $lang_torrents, $lang_special;
-        global $browsecatmode, $specialcatmode, $enablespecial, $torrentsperpage_main;
-        global $catimgurl, $catpadding, $catsperrow;
+        $CURUSER = SupportContext::getUser() ?? [];
+        $lang_torrents = SupportContext::getGlobal('lang_torrents', []);
+        $lang_special = SupportContext::getGlobal('lang_special', []);
+        $browsecatmode = (int) SupportContext::getGlobal('browsecatmode', 0);
+        $specialcatmode = (int) SupportContext::getGlobal('specialcatmode', 0);
+        $enablespecial = SupportContext::getGlobal('enablespecial', '');
+        $torrentsperpage_main = (int) SupportContext::getGlobal('torrentsperpage_main', 0);
+        $catimgurl = '';
+        $catpadding = 0;
+        $catsperrow = 0;
 
         if (empty($CURUSER)) {
-            $CURUSER = SupportContext::getUser() ?? [];
+            $CURUSER = [];
         }
 
         $sources = $media = $codecs = $standards = $processings = $audiocodecs = [];

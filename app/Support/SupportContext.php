@@ -5,547 +5,268 @@ namespace App\Support;
 use Illuminate\Http\Request;
 
 /**
- * Centralised, static runtime context for legacy helpers.
+ * Static facade for the per-request NexusContext value object.
  *
- * This is an intermediate migration step: it lets `App\Support` classes stop
- * reading `$GLOBALS` / `$_GET` / `$_POST` / `$_SERVER` / `$_COOKIE` directly
- * while legacy pages still work. Legacy entrypoints can populate the context
- * explicitly via `fromGlobals()`; Laravel entrypoints can use `fromRequest()`
- * or individual setters. When a value has not been set, getters fall back to
- * the corresponding PHP superglobal so legacy callers continue to work.
+ * Legacy helpers and Blade/PHP partials still call these static methods while
+ * the implementation lives in NexusContext. All superglobal fallbacks have been
+ * removed: the context must be populated explicitly via fromRequest() or
+ * fromGlobals() (the latter is only used during legacy bootstrap/CLI).
  */
 final class SupportContext
 {
-    /** @var array<string, mixed>|null */
-    private static ?array $user = null;
+    private static ?NexusContext $context = null;
 
-    /** @var array<string, string> */
-    private static array $langFunctions = [];
-
-    /** @var array<string, string> */
-    private static array $langShoutbox = [];
-
-    /** @var object|null */
-    private static ?object $cache = null;
-
-    private static string $bonusTweak = '';
-
-    /** @var array<string, mixed> */
-    private static array $siteConfig = [];
-
-    /** @var array<string, mixed> */
-    private static array $server = [];
-
-    /** @var array<string, mixed> */
-    private static array $cookie = [];
-
-    /** @var array<string, mixed> */
-    private static array $get = [];
-
-    /** @var array<string, mixed> */
-    private static array $post = [];
-
-    /** @var array<string, mixed> */
-    private static array $request = [];
-
-    /** @var array<string, mixed> */
-    private static array $files = [];
-
-    /** @var array<string, mixed> */
-    private static array $userUpdateSet = [];
-
-    private static ?Request $laravelRequest = null;
-
-    /**
-     * Populate the context from the current PHP superglobals.
-     *
-     * Legacy pages call this once after `$CURUSER`, `$lang_functions`, etc.
-     * have been initialised.
-     */
-    public static function fromGlobals(): void
+    public static function fromGlobals(?Request $request = null): void
     {
-        self::$user = $GLOBALS['CURUSER'] ?? null;
-        self::$langFunctions = (array) ($GLOBALS['lang_functions'] ?? []);
-        self::$langShoutbox = (array) ($GLOBALS['lang_shoutbox'] ?? []);
-        self::$cache = $GLOBALS['Cache'] ?? null;
-        self::$bonusTweak = (string) ($GLOBALS['bonus_tweak'] ?? '');
-        self::$siteConfig = [
-            'SITENAME' => (string) ($GLOBALS['SITENAME'] ?? ''),
-            'SITEEMAIL' => (string) ($GLOBALS['SITEEMAIL'] ?? ''),
-            'smtptype' => (string) ($GLOBALS['smtptype'] ?? ''),
-            'smtp' => (string) ($GLOBALS['smtp'] ?? ''),
-            'smtp_host' => (string) ($GLOBALS['smtp_host'] ?? ''),
-            'smtp_port' => (string) ($GLOBALS['smtp_port'] ?? ''),
-            'smtp_from' => (string) ($GLOBALS['smtp_from'] ?? ''),
-        ];
-        self::$server = $_SERVER;
-        self::$cookie = $_COOKIE;
-        self::$get = $_GET;
-        self::$post = $_POST;
-        self::$request = $_REQUEST;
-        self::$files = $_FILES;
-        self::$userUpdateSet = (array) ($GLOBALS['USERUPDATESET'] ?? []);
-        $GLOBALS['USERUPDATESET'] = &self::$userUpdateSet;
+        $context = self::$context ?? new NexusContext();
+        $context->setFromGlobals($request);
+        self::$context = $context;
     }
 
-    /**
-     * Populate the context from a Laravel request and the application settings.
-     */
     public static function fromRequest(Request $request): void
     {
-        self::$laravelRequest = $request;
-        self::$server = $request->server->all();
-        self::$cookie = $request->cookies->all();
-        self::$get = $request->query->all();
-        self::$post = $request->request->all();
-        self::$request = $request->input();
-        self::$files = $_FILES;
-        self::$userUpdateSet = (array) ($GLOBALS['USERUPDATESET'] ?? []);
-        $GLOBALS['USERUPDATESET'] = &self::$userUpdateSet;
+        $context = self::$context ?? new NexusContext();
+        $context->setFromRequest($request);
+        self::$context = $context;
     }
 
-    /**
-     * @param  array<string, mixed>|null  $user
-     */
+    public static function reset(): void
+    {
+        self::$context = new NexusContext();
+    }
+
+    public static function getContext(): NexusContext
+    {
+        return self::context();
+    }
+
+    private static function context(): NexusContext
+    {
+        return self::$context ?? (self::$context = new NexusContext());
+    }
+
+    /** @param array<string, mixed>|null $user */
     public static function setUser(?array $user): void
     {
-        self::$user = $user;
-        self::setGlobal('CURUSER', $user);
+        self::context()->setUser($user);
+    }
+
+    /** @return array<string, mixed>|null */
+    public static function getUser(): ?array
+    {
+        return self::context()->getUser();
     }
 
     /**
      * Return a reference to the legacy per-request user update set.
      *
-     * `stdhead()`/`stdfoot()` flush this array to the `users` table, so
-     * callers must mutate the same array between header and footer.
-     *
-     * @return  array<string, mixed>
+     * @return array<string, mixed>
      */
     public static function &getUserUpdateSet(): array
     {
-        return self::$userUpdateSet;
+        return self::context()->userUpdateSet;
     }
 
-    /** @param  array<string, mixed>  $data */
+    /** @param array<string, mixed> $data */
     public static function setUserUpdateSet(array $data): void
     {
-        self::$userUpdateSet = $data;
+        self::context()->setUserUpdateSet($data);
     }
 
     public static function addUserUpdate(string $key, mixed $value): void
     {
-        self::$userUpdateSet[$key] = $value;
+        self::context()->addUserUpdate($key, $value);
     }
 
-    /**
-     * @return  array<string, mixed>|null
-     */
-    public static function getUser(): ?array
-    {
-        if (self::$user !== null) {
-            return self::$user;
-        }
-
-        return ! empty($GLOBALS['CURUSER']) ? $GLOBALS['CURUSER'] : null;
-    }
-
-    /** @param  array<string, string>  $lang */
+    /** @param array<string, string> $lang */
     public static function setLangFunctions(array $lang): void
     {
-        self::$langFunctions = $lang;
+        self::context()->setLangFunctions($lang);
     }
 
-    /** @return  array<string, string> */
+    /** @return array<string, string> */
     public static function getLangFunctions(): array
     {
-        return self::$langFunctions ?: (array) ($GLOBALS['lang_functions'] ?? []);
+        return self::context()->getLangFunctions();
     }
 
-    /** @param  array<string, string>  $lang */
+    /** @param array<string, string> $lang */
     public static function setLangShoutbox(array $lang): void
     {
-        self::$langShoutbox = $lang;
+        self::context()->setLangShoutbox($lang);
     }
 
-    /** @return  array<string, string> */
+    /** @return array<string, string> */
     public static function getLangShoutbox(): array
     {
-        return self::$langShoutbox ?: (array) ($GLOBALS['lang_shoutbox'] ?? []);
+        return self::context()->getLangShoutbox();
     }
 
     public static function setCache(?object $cache): void
     {
-        self::$cache = $cache;
+        self::context()->setCache($cache);
     }
 
     public static function getCache(): ?object
     {
-        return self::$cache ?? ($GLOBALS['Cache'] ?? null);
+        return self::context()->getCache();
     }
 
     public static function setBonusTweak(string $value): void
     {
-        self::$bonusTweak = $value;
+        self::context()->setBonusTweak($value);
     }
 
     public static function getBonusTweak(): string
     {
-        return self::$bonusTweak ?: (string) ($GLOBALS['bonus_tweak'] ?? '');
+        return self::context()->getBonusTweak();
     }
 
-    /** @param  array<string, mixed>  $config */
+    /** @param array<string, mixed> $config */
     public static function setSiteConfig(array $config): void
     {
-        self::$siteConfig = $config;
+        self::context()->setSiteConfig($config);
     }
 
-    /** @return  array<string, mixed> */
+    /** @return array<string, mixed> */
     public static function getSiteConfig(): array
     {
-        if (! empty(self::$siteConfig)) {
-            return self::$siteConfig;
-        }
-
-        $globals = [
-            'SITENAME' => (string) ($GLOBALS['SITENAME'] ?? ''),
-            'SITEEMAIL' => (string) ($GLOBALS['SITEEMAIL'] ?? ''),
-            'smtptype' => (string) ($GLOBALS['smtptype'] ?? ''),
-            'smtp' => (string) ($GLOBALS['smtp'] ?? ''),
-            'smtp_host' => (string) ($GLOBALS['smtp_host'] ?? ''),
-            'smtp_port' => (string) ($GLOBALS['smtp_port'] ?? ''),
-            'smtp_from' => (string) ($GLOBALS['smtp_from'] ?? ''),
-        ];
-
-        $keys = [
-            'SITENAME' => 'basic.SITENAME',
-            'SITEEMAIL' => 'main.SITEEMAIL',
-            'smtptype' => 'smtp.smtptype',
-            'smtp' => 'smtp.smtp',
-            'smtp_host' => 'smtp.smtp_host',
-            'smtp_port' => 'smtp.smtp_port',
-            'smtp_from' => 'smtp.smtp_from',
-        ];
-
-        if (class_exists(\App\Models\Setting::class)) {
-            foreach ($keys as $name => $settingName) {
-                $value = \App\Models\Setting::get($settingName);
-                if (! is_null($value)) {
-                    $globals[$name] = (string) $value;
-                }
-            }
-        }
-
-        return $globals;
+        return self::context()->getSiteConfig();
     }
 
     public static function setGlobal(string $key, mixed $value): void
     {
-        $GLOBALS[$key] = $value;
+        self::context()->setGlobal($key, $value);
     }
 
-    /** @return  mixed */
     public static function getGlobal(string $key, mixed $default = null): mixed
     {
-        return $GLOBALS[$key] ?? $default;
+        return self::context()->getGlobal($key, $default);
     }
 
-    /**
-     * Return a snapshot of the legacy global state suitable for passing to
-     * Blade/PHP partials. Superglobals and internal Laravel/bootstrap variables
-     * are excluded so views do not re-import PHP internals as local variables.
-     *
-     * @return array<string, mixed>
-     */
+    /** @return array<string, mixed> */
     public static function getGlobalsForView(): array
     {
-        $excluded = [
-            'GLOBALS',
-            '_GET',
-            '_POST',
-            '_REQUEST',
-            '_SERVER',
-            '_FILES',
-            '_COOKIE',
-            '_ENV',
-            'argc',
-            'argv',
-            'app',
-            'kernel',
-            'request',
-            'response',
-            'parameters',
-            'files',
-            'server',
-            'method',
-            'uri',
-            'routePath',
-            'pathInfo',
-            'queryString',
-            'isWrapper',
-            'page',
-            'executedScript',
-            'scriptFilename',
-            'scriptName',
-            'parsedUrl',
-            'requestPath',
-            'requestUri',
-            'nexusRoute',
-            'parkedScripts',
-            'extraLangFiles',
-            'scriptLangFiles',
-            'scriptLangFile',
-            'langPath',
-            'HTTP_RAW_POST_DATA',
-            '__composer_autoload_files',
-        ];
-
-        $context = [];
-        foreach ($GLOBALS as $key => $value) {
-            if (in_array($key, $excluded, true)) {
-                continue;
-            }
-            $context[$key] = $value;
-        }
-
-        return $context;
+        return self::context()->getGlobalsForView();
     }
 
     public static function setServerValue(string $key, mixed $value): void
     {
-        self::$server[$key] = $value;
+        self::context()->setServerValue($key, $value);
     }
 
     public static function getServerValue(string $key, mixed $default = null): mixed
     {
-        if (array_key_exists($key, self::$server)) {
-            return self::$server[$key];
-        }
-
-        $request = self::getLaravelRequest();
-        if ($request !== null) {
-            $value = $request->server->get($key);
-            if ($value !== null) {
-                return $value;
-            }
-        }
-
-        if (array_key_exists($key, $_SERVER)) {
-            return $_SERVER[$key];
-        }
-
-        return $default;
+        return self::context()->getServerValue($key, $default);
     }
 
-    /** @param  array<string, mixed>  $cookie */
+    /** @param array<string, mixed> $cookie */
     public static function setCookie(array $cookie): void
     {
-        self::$cookie = $cookie;
+        self::context()->setCookie($cookie);
     }
 
     public static function getCookieValue(string $key, ?string $default = null): ?string
     {
-        if (array_key_exists($key, self::$cookie)) {
-            $value = self::$cookie[$key];
-        } else {
-            $request = self::getLaravelRequest();
-            if ($request !== null) {
-                $value = $request->cookies->get($key);
-            } else {
-                $value = $_COOKIE[$key] ?? $default;
-            }
-        }
-
-        if (! isset($value)) {
-            $value = $default;
-        }
-
-        return is_string($value) || $value === null ? $value : (string) $value;
+        return self::context()->getCookieValue($key, $default);
     }
 
-    /** @return  array<string, mixed> */
+    /** @return array<string, mixed> */
     public static function allCookie(): array
     {
-        if (! empty(self::$cookie)) {
-            return self::$cookie;
-        }
-
-        $request = self::getLaravelRequest();
-        return $request !== null ? $request->cookies->all() : $_COOKIE;
+        return self::context()->allCookie();
     }
 
-    /**
-     * @param  array<string, mixed>  $get
-     */
+    /** @param array<string, mixed> $get */
     public static function setGet(array $get): void
     {
-        self::$get = $get;
+        self::context()->setGet($get);
     }
 
     public static function getQuery(string $key, mixed $default = null): mixed
     {
-        if (array_key_exists($key, self::$get)) {
-            return self::$get[$key];
-        }
-
-        $request = self::getLaravelRequest();
-        if ($request !== null) {
-            return $request->query($key, $default);
-        }
-
-        return $_GET[$key] ?? $default;
+        return self::context()->getQuery($key, $default);
     }
 
     public static function removeQuery(string $key): void
     {
-        unset(self::$get[$key]);
+        self::context()->removeQuery($key);
     }
 
-    /** @return  array<string, mixed> */
+    /** @return array<string, mixed> */
     public static function allQuery(): array
     {
-        if (! empty(self::$get)) {
-            return self::$get;
-        }
-
-        $request = self::getLaravelRequest();
-        return $request !== null ? $request->query->all() : $_GET;
+        return self::context()->allQuery();
     }
 
-    /**
-     * @param  array<string, mixed>  $post
-     */
+    /** @param array<string, mixed> $post */
     public static function setPost(array $post): void
     {
-        self::$post = $post;
+        self::context()->setPost($post);
     }
 
     public static function getPost(string $key, mixed $default = null): mixed
     {
-        if (array_key_exists($key, self::$post)) {
-            return self::$post[$key];
-        }
-
-        $request = self::getLaravelRequest();
-        if ($request !== null) {
-            return $request->request->all()[$key] ?? $default;
-        }
-
-        return $_POST[$key] ?? $default;
+        return self::context()->getPost($key, $default);
     }
 
     public static function removePost(string $key): void
     {
-        unset(self::$post[$key]);
+        self::context()->removePost($key);
     }
 
-    /** @return  array<string, mixed> */
+    /** @return array<string, mixed> */
     public static function allPost(): array
     {
-        if (! empty(self::$post)) {
-            return self::$post;
-        }
-
-        $request = self::getLaravelRequest();
-        return $request !== null ? $request->request->all() : $_POST;
+        return self::context()->allPost();
     }
 
-    /**
-     * @param  array<string, mixed>  $request
-     */
+    /** @param array<string, mixed> $request */
     public static function setRequest(array $request): void
     {
-        self::$request = $request;
+        self::context()->setRequest($request);
     }
 
     public static function getRequestInput(string $key, mixed $default = null): mixed
     {
-        if (array_key_exists($key, self::$request)) {
-            return self::$request[$key];
-        }
-
-        $request = self::getLaravelRequest();
-        if ($request !== null) {
-            return $request->input($key, $default);
-        }
-
-        return $_REQUEST[$key] ?? $default;
+        return self::context()->getRequestInput($key, $default);
     }
 
     public static function removeRequestInput(string $key): void
     {
-        unset(self::$request[$key]);
+        self::context()->removeRequestInput($key);
     }
 
-    /** @return  array<string, mixed> */
+    /** @return array<string, mixed> */
     public static function allRequest(): array
     {
-        if (! empty(self::$request)) {
-            return self::$request;
-        }
-
-        $request = self::getLaravelRequest();
-        return $request !== null ? $request->input() : $_REQUEST;
+        return self::context()->allRequest();
     }
 
-    /**
-     * @param  array<string, mixed>  $files
-     */
+    /** @param array<string, mixed> $files */
     public static function setFiles(array $files): void
     {
-        self::$files = $files;
+        self::context()->setFiles($files);
     }
 
     public static function getFile(string $key, mixed $default = null): mixed
     {
-        return self::$files[$key] ?? $default;
+        return self::context()->getFile($key, $default);
     }
 
-    /** @return  array<string, mixed> */
+    /** @return array<string, mixed> */
     public static function allFiles(): array
     {
-        return self::$files;
+        return self::context()->allFiles();
     }
 
     public static function setLaravelRequest(?Request $request): void
     {
-        self::$laravelRequest = $request;
+        self::context()->setLaravelRequest($request);
     }
 
     public static function getLaravelRequest(): ?Request
     {
-        if (self::$laravelRequest !== null) {
-            return self::$laravelRequest;
-        }
-
-        if (function_exists('app')) {
-            $app = app();
-            if ($app->bound('request')) {
-                /** @var mixed $request */
-                $request = $app->make('request');
-                if ($request instanceof Request) {
-                    return $request;
-                }
-            }
-        }
-
-        return null;
-    }
-
-    public static function reset(): void
-    {
-        self::$user = null;
-        self::$langFunctions = [];
-        self::$langShoutbox = [];
-        self::$cache = null;
-        self::$bonusTweak = '';
-        self::$siteConfig = [];
-        self::$server = [];
-        self::$cookie = [];
-        self::$get = [];
-        self::$post = [];
-        self::$request = [];
-        self::$files = [];
-        self::$userUpdateSet = [];
-        self::$laravelRequest = null;
+        return self::context()->getLaravelRequest();
     }
 }

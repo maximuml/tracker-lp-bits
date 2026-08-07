@@ -16,7 +16,11 @@
             "Database\\Factories\\": "database/factories/",
             "Database\\Seeders\\": "database/seeders/"
         },
-        "files": []
+        "files": [
+            "config/nexus_constants.php",
+            "include/globalfunctions.php",
+            "include/functions.php"
+        ]
     },
     "require": {
         "php": ">=8.4 <8.6",

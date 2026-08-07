@@ -49,6 +49,7 @@ final class Input
             return false;
         }
 
+        $GLOBALS[$name] = $value;
         SupportContext::setGlobal($name, $value);
 
         return $value;
@@ -67,9 +68,13 @@ final class Input
 
         foreach ($vars as $v) {
             if (isset($get[$v])) {
-                SupportContext::setGlobal($v, self::unescape($get[$v]));
+                $value = self::unescape($get[$v]);
+                $GLOBALS[$v] = $value;
+                SupportContext::setGlobal($v, $value);
             } elseif (isset($post[$v])) {
-                SupportContext::setGlobal($v, self::unescape($post[$v]));
+                $value = self::unescape($post[$v]);
+                $GLOBALS[$v] = $value;
+                SupportContext::setGlobal($v, $value);
             } else {
                 return 0;
             }

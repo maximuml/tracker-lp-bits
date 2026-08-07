@@ -16,43 +16,18 @@ server {
         access_log off;
     }
 
-    # Laravel-routed legacy listing pages must take precedence over the
-    # public/torrents/ upload directory, which otherwise matches $uri/.
-    location = /torrents {
-        rewrite ^ /nexus.php last;
-    }
-
-    location = /torrents/ {
-        return 301 /torrents$is_args$args;
-    }
-
-    location = /special {
-        rewrite ^ /nexus.php last;
-    }
-
-    location / {
-        try_files $uri $uri/ /nexus.php?$query_string;
-    }
-
     # Filament
     location ^~ /filament {
         try_files $uri $uri/ /nexus.php$is_args$args;
     }
 
-    location = /announce.php {
-        access_by_lua_block {
-            local filter = require("tracker_filter")
-            filter()
-        }
-        fastcgi_pass php:9000;
-        fastcgi_index index.php;
-        include fastcgi_params;
-        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
-        fastcgi_param REQUEST_ID $request_id;
-        fastcgi_param HTTP_X_FORWARDED_FOR $proxy_add_x_forwarded_for;
+    # All non-static requests fall back to the single Laravel entry point.
+    location / {
+        try_files $uri $uri/ /nexus.php?$query_string;
     }
 
-    location = /announce {
+    # Tracker announce with Lua validation.
+    location ~ ^/announce(?:\.php)?$ {
         access_by_lua_block {
             local filter = require("tracker_filter")
             filter()
@@ -60,27 +35,45 @@ server {
         fastcgi_pass php:9000;
         fastcgi_index index.php;
         include fastcgi_params;
-        fastcgi_param SCRIPT_FILENAME $document_root/announce.php;
+        fastcgi_param SCRIPT_FILENAME $document_root/nexus.php;
         fastcgi_param SCRIPT_NAME /announce.php;
         fastcgi_param REQUEST_ID $request_id;
         fastcgi_param HTTP_X_FORWARDED_FOR $proxy_add_x_forwarded_for;
     }
 
-    location = /scrape.php {
+    # Scrape endpoint.
+    location ~ ^/scrape(?:\.php)?$ {
         fastcgi_pass php:9000;
         fastcgi_index index.php;
         include fastcgi_params;
-        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        fastcgi_param SCRIPT_FILENAME $document_root/nexus.php;
+        fastcgi_param SCRIPT_NAME /scrape.php;
         fastcgi_param REQUEST_ID $request_id;
         fastcgi_param HTTP_X_FORWARDED_FOR $proxy_add_x_forwarded_for;
     }
 
-    location = /scrape {
+    # confirmemail.php/<id>/<md5>/<email> uses PATH_INFO.
+    location ~ ^/confirmemail\.php(/.*)?$ {
+        fastcgi_split_path_info ^(/confirmemail\.php)(/.*)$;
         fastcgi_pass php:9000;
         fastcgi_index index.php;
         include fastcgi_params;
-        fastcgi_param SCRIPT_FILENAME $document_root/scrape.php;
-        fastcgi_param SCRIPT_NAME /scrape.php;
+        fastcgi_param SCRIPT_FILENAME $document_root/nexus.php;
+        fastcgi_param SCRIPT_NAME /confirmemail.php;
+        fastcgi_param PATH_INFO $fastcgi_path_info;
+        fastcgi_param REQUEST_ID $request_id;
+        fastcgi_param HTTP_X_FORWARDED_FOR $proxy_add_x_forwarded_for;
+    }
+
+    # Remaining .php URLs (including the root index.php wrapper) are served if the
+    # file still exists; otherwise they fall through to nexus.php so legacy URLs
+    # like /torrents.php keep working after the per-page wrappers are removed.
+    location ~ \.php$ {
+        try_files $uri /nexus.php =404;
+        fastcgi_pass php:9000;
+        fastcgi_index index.php;
+        include fastcgi_params;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
         fastcgi_param REQUEST_ID $request_id;
         fastcgi_param HTTP_X_FORWARDED_FOR $proxy_add_x_forwarded_for;
     }
@@ -89,27 +82,4 @@ server {
     location /attachments/ {
         alias /var/www/html/attachments/;
     }
-
-    # confirmemail.php/<id>/<md5>/<email> uses PATH_INFO
-    location ~ ^/confirmemail\.php(/.*)$ {
-        fastcgi_split_path_info ^(/confirmemail\.php)(/.*)$;
-        fastcgi_pass php:9000;
-        fastcgi_index index.php;
-        include fastcgi_params;
-        fastcgi_param SCRIPT_FILENAME $document_root/confirmemail.php;
-        fastcgi_param SCRIPT_NAME /confirmemail.php;
-        fastcgi_param PATH_INFO $fastcgi_path_info;
-        fastcgi_param REQUEST_ID $request_id;
-        fastcgi_param HTTP_X_FORWARDED_FOR $proxy_add_x_forwarded_for;
-    }
-
-    location ~ \.php$ {
-        fastcgi_pass php:9000;
-        fastcgi_index index.php;
-        include fastcgi_params;
-        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
-        fastcgi_param REQUEST_ID $request_id;
-        fastcgi_param HTTP_X_FORWARDED_FOR $proxy_add_x_forwarded_for;
-    }
-
 }

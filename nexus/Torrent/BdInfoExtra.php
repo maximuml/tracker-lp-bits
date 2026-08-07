@@ -2,6 +2,8 @@
 
 namespace Nexus\Torrent;
 
+use App\Support\SupportContext;
+
 class BdInfoExtra
 {
     private $bdInfo;
@@ -859,7 +861,7 @@ class BdInfoExtra
      */
     public function renderOnDetailsPage(): string
     {
-        global $lang_functions;
+        $lang_functions = SupportContext::getLangFunctions();
         
         // 获取所有DISC
         $allDiscs = $this->getAllDiscs();

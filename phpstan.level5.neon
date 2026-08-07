@@ -15,7 +15,7 @@ parameters:
     scanFiles:
         - include/globalfunctions.php
         - include/functions.php
-        - include/constants.php
+        - config/nexus_constants.php
         - include/cleanup.php
 
     scanDirectories:

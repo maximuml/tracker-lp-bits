@@ -52,9 +52,10 @@ class TorrentDetailsController extends Controller
 
         if (empty(SupportContext::getGlobal('lang_functions')) || empty(SupportContext::getGlobal('lang_details'))) {
             SupportContext::setServerValue('SCRIPT_NAME', '/details.php');
-            global $lang_functions, $lang_details;
             require_once base_path(get_langfile_path('functions.php'));
+            SupportContext::setGlobal('lang_functions', $lang_functions ?? []);
             require_once base_path(get_langfile_path());
+            SupportContext::setGlobal('lang_details', $lang_details ?? []);
         }
 
         $langDetails = SupportContext::getGlobal('lang_details') ?? [];

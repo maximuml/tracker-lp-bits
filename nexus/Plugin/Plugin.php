@@ -10,6 +10,8 @@ class Plugin
      */
     private static array $plugins = [];
 
+    private static bool $started = false;
+
 //    public function __construct()
 //    {
 //        $this->start();
@@ -17,6 +19,11 @@ class Plugin
 
     public function start(): void
     {
+        if (self::$started) {
+            return;
+        }
+        self::$started = true;
+
         $this->loadProviders();
         $this->bootPlugins();
     }

@@ -1,5 +1,6 @@
 <?php
 
+use App\Support\LegacyBootstrap;
 use App\Support\SupportContext;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Http\Request;
@@ -9,6 +10,18 @@ defined('IN_NEXUS') || define('IN_NEXUS', true);
 
 $rootpath = dirname(__DIR__) . '/';
 set_include_path(get_include_path() . PATH_SEPARATOR . $rootpath);
+
+$requestUri = (string) ($_SERVER['REQUEST_URI'] ?? '/');
+$parsedUrl = parse_url($requestUri);
+if ($parsedUrl === false) {
+    $parsedUrl = ['path' => '/', 'query' => ''];
+}
+$requestPath = $parsedUrl['path'] ?? '/';
+
+// Announce/scrape endpoints do not need language/user login bootstrapping.
+if (preg_match('#^/(?:announce|scrape)(?:\.php)?(?:/|$|\?)#', $requestPath)) {
+    defined('IN_TRACKER') || define('IN_TRACKER', true);
+}
 
 // Resolve whether this is a legacy .php wrapper (FPM executing public/<page>.php)
 // or the Laravel fallback entry point (nexus.php).
@@ -28,12 +41,6 @@ $isWrapper = ($executedScript !== '' && $executedScript !== 'nexus.php');
 $nexusRoute = (isset($nexusRoute) && is_string($nexusRoute) && $nexusRoute !== '') ? $nexusRoute : null;
 $page = '';
 $pathInfo = '';
-$requestUri = (string) ($_SERVER['REQUEST_URI'] ?? '/');
-$parsedUrl = parse_url($requestUri);
-if ($parsedUrl === false) {
-    $parsedUrl = ['path' => '/', 'query' => ''];
-}
-$requestPath = $parsedUrl['path'] ?? '/';
 
 if ($isWrapper) {
     $page = preg_replace('/\.php$/', '', $executedScript) ?? '';
@@ -52,9 +59,19 @@ if ($nexusRoute !== null) {
         unset($_SERVER['PATH_INFO']);
     }
 } elseif ($page === '') {
-    // Fallback entry point: keep the clean URI as-is.
-    $routePath = $requestPath;
-    $pathInfo = (string) ($_SERVER['PATH_INFO'] ?? '');
+    // Fallback entry point: derive script and PATH_INFO from the URI so
+    // /torrents, /torrents.php and /confirmemail/1/md5/email work without
+    // a per-page wrapper.
+    if ($requestPath === '/' || $requestPath === '') {
+        $routePath = '/';
+        $pathInfo = '';
+    } elseif (preg_match('#^/([a-zA-Z0-9_-]+)(?:\.php)?(/.*)?$#', $requestPath, $matches)) {
+        $routePath = '/' . $matches[1];
+        $pathInfo = $matches[2] ?? '';
+    } else {
+        $routePath = $requestPath;
+        $pathInfo = (string) ($_SERVER['PATH_INFO'] ?? '');
+    }
 } else {
     // Wrapper entry point: strip the .php suffix and route to the canonical path.
     $routePath = '/' . $page;
@@ -75,13 +92,42 @@ if ($isWrapper && $page !== '') {
 } elseif ($nexusRoute !== null) {
     $script = basename($nexusRoute) ?: 'nexus';
     $script = preg_replace('/[^a-zA-Z0-9_-]/', '', $script) ?? '';
+    if ($script === '') {
+        $script = 'nexus';
+    }
 } else {
     $segments = explode('/', trim($routePath, '/'));
     $script = $segments[0] ?? '';
     $script = preg_replace('/[^a-zA-Z0-9_-]/', '', $script) ?? '';
     if ($script === '') {
-        $script = 'nexus';
+        $script = 'index';
     }
+}
+
+$method = (string) ($_SERVER['REQUEST_METHOD'] ?? 'GET');
+
+// Map legacy wrapper query parameters to Laravel path parameters now that the
+// per-page wrappers are gone.
+if ($script === 'details') {
+    if (isset($_GET['id'])) {
+        $routePath = '/details/' . (int) $_GET['id'];
+        unset($_GET['id']);
+    }
+} elseif ($script === 'comment') {
+    $commentAction = (string) ($_GET['action'] ?? '');
+    $commentId = (int) ($_GET['cid'] ?? 0);
+    if (in_array($commentAction, ['edit', 'delete', 'vieworiginal'], true)) {
+        unset($_GET['action'], $_GET['cid']);
+        $routePath = '/comment/' . $commentId . '/' . $commentAction;
+    } elseif ($commentAction === 'add' && $method === 'GET') {
+        unset($_GET['action']);
+        $routePath = '/comment/add';
+    } else {
+        unset($_GET['action']);
+        $routePath = '/comment';
+    }
+} elseif ($script === 'takelogin') {
+    $routePath = '/login';
 }
 
 // Build the URI query string from the current GET parameters. Wrappers that
@@ -90,7 +136,6 @@ if ($isWrapper && $page !== '') {
 $queryString = http_build_query($_GET, '', '&', PHP_QUERY_RFC3986);
 
 $uri = $routePath . ($queryString !== '' ? '?' . $queryString : '');
-$method = (string) ($_SERVER['REQUEST_METHOD'] ?? 'GET');
 
 // Build the server array passed to Laravel/Symfony. This ensures both the
 // Request object and the legacy $_SERVER global agree on SCRIPT_NAME/REQUEST_URI.
@@ -131,21 +176,22 @@ require_once __DIR__.'/../vendor/autoload.php';
 
 $app = require_once __DIR__.'/../bootstrap/app.php';
 
-// Force Nexus to re-derive its per-request script/platform from the current
-// $_SERVER state, otherwise FPM worker persistence can leak the first request's
-// script into later requests (especially for direct routes like /torrents).
-if (!defined('TIMENOW')) {
-    \Nexus\Nexus::flush();
-}
+$request = Request::create($uri, $method, $parameters, $_COOKIE, $files, $server);
 
-// Legacy bootstrap: settings, cache, language, user login and globals.
-// This is what the old per-page `require '../include/bittorrent.php'; dbconn();`
-// block used to do; centralising it here lets every wrapper become one line.
-require_once $rootpath . 'include/core.php';
-require_once $rootpath . 'classes/class_attendance.php';
+// Bind the request and bootstrap Laravel (env, config, providers) before the
+// legacy bootstrap so AuthCookie can resolve APP_KEY when validating the
+// login cookie. The kernel will re-bind and re-bootstrap during handle().
+$app->instance('request', $request);
+$kernel = $app->make(Kernel::class);
+$kernel->bootstrap();
+
+// Legacy bootstrap: cache, Eloquent, settings, language, login and plugins,
+// wired into SupportContext instead of $GLOBALS.
+LegacyBootstrap::boot($request, $rootpath);
+
+$script = nexus()->getScript();
 
 // Load the page-specific language file(s) the legacy wrappers used to require.
-$script = nexus()->getScript();
 $extraLangFiles = [
     'search' => ['torrents.php'],
     'shoutbox_history' => ['shoutbox.php'],
@@ -162,15 +208,9 @@ foreach ($scriptLangFiles as $scriptLangFile) {
     }
 }
 
-// Synchronise the legacy global state into the context object so helpers can
-// read it without touching $GLOBALS directly.
-SupportContext::fromGlobals();
-
-$kernel = $app->make(Kernel::class);
-
-$request = Request::create($uri, $method, $parameters, $_COOKIE, $files, $server);
-
-SupportContext::fromRequest($request);
+// Synchronise any per-script language globals into the context so helpers can
+// read them without touching $GLOBALS directly.
+SupportContext::fromGlobals($request);
 
 // Replicate legacy per-page parked() guards.
 $parkedScripts = [

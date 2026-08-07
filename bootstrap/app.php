@@ -1,14 +1,17 @@
 <?php
 defined('LARAVEL_START') || define('LARAVEL_START', microtime(true));
 defined('IN_NEXUS') || define('IN_NEXUS', false);
-require_once dirname(__DIR__) . '/include/constants.php';
-require_once dirname(__DIR__) . '/include/globalfunctions.php';
-require_once dirname(__DIR__) . '/include/functions.php';
 if (!RUNNING_IN_OCTANE) {
     \Nexus\Nexus::boot();
 }
-$GLOBALS['hook'] = $hook = new \Nexus\Plugin\Hook();
-$GLOBALS['plugin'] = $plugin = new \Nexus\Plugin\Plugin();
+$hook = new \Nexus\Plugin\Hook();
+$plugin = new \Nexus\Plugin\Plugin();
+$GLOBALS['hook'] = $hook;
+$GLOBALS['plugin'] = $plugin;
+if (class_exists(\App\Support\SupportContext::class)) {
+    \App\Support\SupportContext::setGlobal('hook', $hook);
+    \App\Support\SupportContext::setGlobal('plugin', $plugin);
+}
 
 // Legacy pages define this in include/core.php, but Laravel-routed endpoints
 // (e.g. /announce) may need it before the legacy bootstrap is reached.

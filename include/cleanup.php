@@ -200,7 +200,7 @@ function demotion($class,$deratio){
  * @return mixed
  */
 function user_to_peasant($down_floor_gb, $minratio){
-	global $deletepeasant_account;
+	$deletepeasant_account = (int) \App\Support\SupportContext::getGlobal('deletepeasant_account', 0);
 
 	$length = $deletepeasant_account*86400;
 	$until = date("Y-m-d H:i:s",(TIMENOW + $length));
@@ -335,12 +335,10 @@ function disable_user(\Illuminate\Database\Eloquent\Builder $query, $reasonKey)
  */
 function docleanup($forceAll = 0, $printProgress = false) {
 	//require_once(get_langfile_path("cleanup.php",true));
-	global $torrent_dir, $signup_timeout, $max_dead_torrent_time, $autoclean_interval_one, $autoclean_interval_two, $autoclean_interval_three, $autoclean_interval_four, $autoclean_interval_five, $SITENAME,$bonus,$invite_timeout,$offervotetimeout_main,$offeruptimeout_main, $iniupload_main;
-	global $donortimes_bonus, $perseeding_bonus, $maxseeding_bonus, $tzero_bonus, $nzero_bonus, $bzero_bonus, $l_bonus;
-	global $expirehalfleech_torrent, $expirefree_torrent, $expiretwoup_torrent, $expiretwoupfree_torrent, $expiretwouphalfleech_torrent, $expirethirtypercentleech_torrent, $expirenormal_torrent, $hotdays_torrent, $hotseeder_torrent,$halfleechbecome_torrent,$freebecome_torrent,$twoupbecome_torrent,$twoupfreebecome_torrent, $twouphalfleechbecome_torrent, $thirtypercentleechbecome_torrent, $normalbecome_torrent, $deldeadtorrent_torrent;
-	global $neverdelete_account, $neverdeletepacked_account, $deletepacked_account, $deleteunpacked_account, $deletenotransfer_account, $deletenotransfertwo_account, $deletepeasant_account, $psdlone_account, $psratioone_account, $psdltwo_account, $psratiotwo_account, $psdlthree_account, $psratiothree_account, $psdlfour_account, $psratiofour_account, $psdlfive_account, $psratiofive_account, $putime_account, $pudl_account, $puprratio_account, $puderatio_account, $eutime_account, $eudl_account, $euprratio_account, $euderatio_account, $cutime_account, $cudl_account, $cuprratio_account, $cuderatio_account, $iutime_account, $iudl_account, $iuprratio_account, $iuderatio_account, $vutime_account, $vudl_account, $vuprratio_account, $vuderatio_account, $exutime_account, $exudl_account, $exuprratio_account, $exuderatio_account, $uutime_account, $uudl_account, $uuprratio_account, $uuderatio_account, $nmtime_account, $nmdl_account, $nmprratio_account, $nmderatio_account, $getInvitesByPromotion_class;
-	global $Cache;
-	global $rootpath;
+	$context = \App\Support\SupportContext::getGlobalsForView();
+	extract($context, EXTR_SKIP);
+	$Cache = \App\Support\SupportContext::getCache();
+	$rootpath = \base_path() . '/';
     $requestId = nexus()->getRequestId();
 //	require_once($rootpath . '/lang/_target/lang_cleanup.php');
 	set_time_limit(0);

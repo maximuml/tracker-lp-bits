@@ -44,8 +44,13 @@ class Torrent
                     $activeStatus = 'leeching';
                 }
             }
-            $realDownloaded = $row['size'] - $row['to_go'];
-            $progress = sprintf('%.4f', $realDownloaded / $row['size']);
+            $torrentSize = (float) $row['size'];
+            if ($torrentSize <= 0) {
+                $progress = '100.0000';
+            } else {
+                $realDownloaded = $torrentSize - (float) $row['to_go'];
+                $progress = sprintf('%.4f', $realDownloaded / $torrentSize);
+            }
             $snatchedList[$id] = [
                 'finished' => $row['to_go'] == 0 ? 'yes' : 'no',
                 'progress' => floatval($progress),

@@ -16,7 +16,11 @@ class UserDetailController extends Controller
         $id = (int) $request->input('id', 0);
 
         if ($id <= 0) {
-            abort(404);
+            $currentUser = SupportContext::getUser();
+            $id = (int) ($currentUser['id'] ?? 0);
+            if ($id <= 0) {
+                abort(404);
+            }
         }
 
         if (! defined('IN_NEXUS') || ! IN_NEXUS || SupportContext::getUser() === null) {

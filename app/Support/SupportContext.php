@@ -137,7 +137,11 @@ final class SupportContext
      */
     public static function getUser(): ?array
     {
-        return self::$user ?? ($GLOBALS['CURUSER'] ?? null);
+        if (self::$user !== null) {
+            return self::$user;
+        }
+
+        return ! empty($GLOBALS['CURUSER']) ? $GLOBALS['CURUSER'] : null;
     }
 
     /** @param  array<string, string>  $lang */
@@ -262,6 +266,30 @@ final class SupportContext
             'argv',
             'app',
             'kernel',
+            'request',
+            'response',
+            'parameters',
+            'files',
+            'server',
+            'method',
+            'uri',
+            'routePath',
+            'pathInfo',
+            'queryString',
+            'isWrapper',
+            'page',
+            'executedScript',
+            'scriptFilename',
+            'scriptName',
+            'parsedUrl',
+            'requestPath',
+            'requestUri',
+            'nexusRoute',
+            'parkedScripts',
+            'extraLangFiles',
+            'scriptLangFiles',
+            'scriptLangFile',
+            'langPath',
             'HTTP_RAW_POST_DATA',
             '__composer_autoload_files',
         ];
@@ -288,6 +316,14 @@ final class SupportContext
             return self::$server[$key];
         }
 
+        $request = self::getLaravelRequest();
+        if ($request !== null) {
+            $value = $request->server->get($key);
+            if ($value !== null) {
+                return $value;
+            }
+        }
+
         if (array_key_exists($key, $_SERVER)) {
             return $_SERVER[$key];
         }
@@ -303,7 +339,20 @@ final class SupportContext
 
     public static function getCookieValue(string $key, ?string $default = null): ?string
     {
-        $value = self::$cookie[$key] ?? $_COOKIE[$key] ?? $default;
+        if (array_key_exists($key, self::$cookie)) {
+            $value = self::$cookie[$key];
+        } else {
+            $request = self::getLaravelRequest();
+            if ($request !== null) {
+                $value = $request->cookies->get($key);
+            } else {
+                $value = $_COOKIE[$key] ?? $default;
+            }
+        }
+
+        if (! isset($value)) {
+            $value = $default;
+        }
 
         return is_string($value) || $value === null ? $value : (string) $value;
     }
@@ -311,7 +360,12 @@ final class SupportContext
     /** @return  array<string, mixed> */
     public static function allCookie(): array
     {
-        return self::$cookie ?: $_COOKIE;
+        if (! empty(self::$cookie)) {
+            return self::$cookie;
+        }
+
+        $request = self::getLaravelRequest();
+        return $request !== null ? $request->cookies->all() : $_COOKIE;
     }
 
     /**
@@ -324,13 +378,27 @@ final class SupportContext
 
     public static function getQuery(string $key, mixed $default = null): mixed
     {
-        return self::$get[$key] ?? $_GET[$key] ?? $default;
+        if (array_key_exists($key, self::$get)) {
+            return self::$get[$key];
+        }
+
+        $request = self::getLaravelRequest();
+        if ($request !== null) {
+            return $request->query($key, $default);
+        }
+
+        return $_GET[$key] ?? $default;
     }
 
     /** @return  array<string, mixed> */
     public static function allQuery(): array
     {
-        return self::$get ?: $_GET;
+        if (! empty(self::$get)) {
+            return self::$get;
+        }
+
+        $request = self::getLaravelRequest();
+        return $request !== null ? $request->query->all() : $_GET;
     }
 
     /**
@@ -343,13 +411,27 @@ final class SupportContext
 
     public static function getPost(string $key, mixed $default = null): mixed
     {
-        return self::$post[$key] ?? $_POST[$key] ?? $default;
+        if (array_key_exists($key, self::$post)) {
+            return self::$post[$key];
+        }
+
+        $request = self::getLaravelRequest();
+        if ($request !== null) {
+            return $request->request->all()[$key] ?? $default;
+        }
+
+        return $_POST[$key] ?? $default;
     }
 
     /** @return  array<string, mixed> */
     public static function allPost(): array
     {
-        return self::$post ?: $_POST;
+        if (! empty(self::$post)) {
+            return self::$post;
+        }
+
+        $request = self::getLaravelRequest();
+        return $request !== null ? $request->request->all() : $_POST;
     }
 
     /**
@@ -362,13 +444,27 @@ final class SupportContext
 
     public static function getRequestInput(string $key, mixed $default = null): mixed
     {
-        return self::$request[$key] ?? $_REQUEST[$key] ?? $default;
+        if (array_key_exists($key, self::$request)) {
+            return self::$request[$key];
+        }
+
+        $request = self::getLaravelRequest();
+        if ($request !== null) {
+            return $request->input($key, $default);
+        }
+
+        return $_REQUEST[$key] ?? $default;
     }
 
     /** @return  array<string, mixed> */
     public static function allRequest(): array
     {
-        return self::$request ?: $_REQUEST;
+        if (! empty(self::$request)) {
+            return self::$request;
+        }
+
+        $request = self::getLaravelRequest();
+        return $request !== null ? $request->input() : $_REQUEST;
     }
 
     public static function setLaravelRequest(?Request $request): void
@@ -378,7 +474,22 @@ final class SupportContext
 
     public static function getLaravelRequest(): ?Request
     {
-        return self::$laravelRequest ?? (function_exists('request') ? request() : null);
+        if (self::$laravelRequest !== null) {
+            return self::$laravelRequest;
+        }
+
+        if (function_exists('app')) {
+            $app = app();
+            if ($app->bound('request')) {
+                /** @var mixed $request */
+                $request = $app->make('request');
+                if ($request instanceof Request) {
+                    return $request;
+                }
+            }
+        }
+
+        return null;
     }
 
     public static function reset(): void

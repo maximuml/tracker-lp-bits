@@ -1,9 +1,14 @@
 <?php
 
+use App\Support\SupportContext;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Http\Request;
 
 defined('LARAVEL_START') || define('LARAVEL_START', microtime(true));
+defined('IN_NEXUS') || define('IN_NEXUS', true);
+
+$rootpath = dirname(__DIR__) . '/';
+set_include_path(get_include_path() . PATH_SEPARATOR . $rootpath);
 
 // Resolve whether this is a legacy .php wrapper (FPM executing public/<page>.php)
 // or the Laravel fallback entry point (nexus.php).
@@ -62,6 +67,23 @@ if ($nexusRoute !== null) {
     }
 }
 
+// Determine the legacy "script" name used for per-page language files,
+// parked() guards and autoclean. For direct Laravel routes this is derived
+// from the first path segment, otherwise it is the wrapper page name.
+if ($isWrapper && $page !== '') {
+    $script = $page;
+} elseif ($nexusRoute !== null) {
+    $script = basename($nexusRoute) ?: 'nexus';
+    $script = preg_replace('/[^a-zA-Z0-9_-]/', '', $script) ?? '';
+} else {
+    $segments = explode('/', trim($routePath, '/'));
+    $script = $segments[0] ?? '';
+    $script = preg_replace('/[^a-zA-Z0-9_-]/', '', $script) ?? '';
+    if ($script === '') {
+        $script = 'nexus';
+    }
+}
+
 // Build the URI query string from the current GET parameters. Wrappers that
 // rewrite the route can modify $_GET before requiring this file (e.g. to drop
 // an id that is now encoded in the path).
@@ -76,26 +98,14 @@ $server = $_SERVER;
 $server['REQUEST_URI'] = $uri;
 $server['REQUEST_METHOD'] = $method;
 
-if ($isWrapper && $page !== '') {
-    $server['SCRIPT_NAME'] = '/' . $page . '.php';
-    $server['SCRIPT_FILENAME'] = __DIR__ . '/' . $page . '.php';
-    $server['PHP_SELF'] = '/' . $page . '.php' . $pathInfo;
+$server['SCRIPT_NAME'] = '/' . $script . '.php';
+$server['SCRIPT_FILENAME'] = __DIR__ . '/' . $script . '.php';
+$server['PHP_SELF'] = '/' . $script . '.php' . $pathInfo;
 
-    if ($pathInfo !== '') {
-        $server['PATH_INFO'] = $pathInfo;
-    } else {
-        unset($server['PATH_INFO']);
-    }
+if ($pathInfo !== '') {
+    $server['PATH_INFO'] = $pathInfo;
 } else {
-    if (empty($server['SCRIPT_NAME'])) {
-        $server['SCRIPT_NAME'] = '/nexus.php';
-    }
-    if (empty($server['SCRIPT_FILENAME'])) {
-        $server['SCRIPT_FILENAME'] = __FILE__;
-    }
-    if (empty($server['PHP_SELF'])) {
-        $server['PHP_SELF'] = '/nexus.php';
-    }
+    unset($server['PATH_INFO']);
 }
 
 // Mirror the normalized values back to the global $_SERVER for legacy helpers
@@ -120,9 +130,63 @@ if (file_exists(__DIR__.'/../storage/framework/maintenance.php')) {
 require_once __DIR__.'/../vendor/autoload.php';
 
 $app = require_once __DIR__.'/../bootstrap/app.php';
+
+// Force Nexus to re-derive its per-request script/platform from the current
+// $_SERVER state, otherwise FPM worker persistence can leak the first request's
+// script into later requests (especially for direct routes like /torrents).
+if (!defined('TIMENOW')) {
+    \Nexus\Nexus::flush();
+}
+
+// Legacy bootstrap: settings, cache, language, user login and globals.
+// This is what the old per-page `require '../include/bittorrent.php'; dbconn();`
+// block used to do; centralising it here lets every wrapper become one line.
+require_once $rootpath . 'include/core.php';
+require_once $rootpath . 'classes/class_attendance.php';
+
+// Load the page-specific language file(s) the legacy wrappers used to require.
+$script = nexus()->getScript();
+$extraLangFiles = [
+    'search' => ['torrents.php'],
+    'shoutbox_history' => ['shoutbox.php'],
+    'special' => ['torrents.php'],
+    'torrents' => ['special.php'],
+    'take-increment-bulk' => ['increment-bulk.php'],
+    'upload' => ['edit.php'],
+];
+$scriptLangFiles = array_unique(array_merge([$script . '.php'], $extraLangFiles[$script] ?? []));
+foreach ($scriptLangFiles as $scriptLangFile) {
+    $langPath = $rootpath . get_langfile_path($scriptLangFile);
+    if (is_file($langPath)) {
+        require_once $langPath;
+    }
+}
+
+// Synchronise the legacy global state into the context object so helpers can
+// read it without touching $GLOBALS directly.
+SupportContext::fromGlobals();
+
 $kernel = $app->make(Kernel::class);
 
 $request = Request::create($uri, $method, $parameters, $_COOKIE, $files, $server);
+
+SupportContext::fromRequest($request);
+
+// Replicate legacy per-page parked() guards.
+$parkedScripts = [
+    'viewsnatches', 'users', 'special', 'forums', 'report', 'cheaterbox', 'upload',
+    'offers', 'comment', 'userdetails', 'checkuser', 'invite', 'bitbucket-upload',
+    'mybonus', 'userhistory', 'moresmilies', 'torrents', 'getattachment',
+    'sendmessage', 'reports', 'self-enable', 'friends', 'settings', 'topten', 'attendance',
+];
+if (in_array($script, $parkedScripts, true)) {
+    \parked();
+}
+
+// Autoclean only ran on the legacy index.php wrapper.
+if ($script === 'index') {
+    register_shutdown_function('autoclean');
+}
 
 $response = $kernel->handle($request);
 $response->send();

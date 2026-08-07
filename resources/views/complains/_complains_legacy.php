@@ -75,7 +75,11 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
             permissiondenied();
     }
 }else{
-    switch (filter_input(INPUT_GET, 'action', FILTER_SANITIZE_FULL_SPECIAL_CHARS)){
+    $action = filter_input(INPUT_GET, 'action', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+    if (empty($action) && $isAdmin) {
+        $action = 'list';
+    }
+    switch ($action){
         case 'list':
             if(!$isAdmin) permissiondenied();
             $showTable = function($rows){

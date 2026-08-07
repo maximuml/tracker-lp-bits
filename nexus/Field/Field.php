@@ -6,6 +6,7 @@ use App\Models\SearchBox;
 use App\Models\Tag;
 use App\Models\TorrentCustomField;
 use App\Models\TorrentCustomFieldValue;
+use App\Support\SupportContext;
 use Nexus\Database\NexusDB;
 
 class Field
@@ -89,7 +90,9 @@ class Field
 
     function buildFieldForm(array $row = [])
     {
-        global $lang_fields, $lang_functions, $lang_catmanage;
+        $lang_functions = SupportContext::getLangFunctions();
+        $lang_fields = (array) SupportContext::getGlobal('lang_fields', []);
+        $lang_catmanage = (array) SupportContext::getGlobal('lang_catmanage', []);
         $trName = tr($lang_fields['col_name'] . '<font color="red">*</font>', '<input type="text" name="name" value="' . ($row['name'] ?? '') . '" style="width: 300px" />&nbsp;&nbsp;' . $lang_fields['col_name_help'], 1, '', true);
         $trLabel = tr($lang_fields['col_label'] . '<font color="red">*</font>', '<input type="text" name="label" value="' . ($row['label'] ?? '') . '"  style="width: 300px" />', 1, '', true);
         $trType = tr($lang_fields['col_type'] . '<font color="red">*</font>', $this->radio('type', $this->getTypeRadioOptions(), $row['type'] ?? null), 1, '', true);
@@ -130,7 +133,8 @@ HTML;
 
     function buildFieldTable()
     {
-        global $lang_fields, $lang_functions;
+        $lang_functions = SupportContext::getLangFunctions();
+        $lang_fields = (array) SupportContext::getGlobal('lang_fields', []);
         $perPage = 10;
         $total = NexusDB::table('torrents_custom_fields')->count();
         list($paginationTop, $paginationBottom, , $offset, $rpp) = pager($perPage, $total, "?");
@@ -174,7 +178,8 @@ HEAD;
 
     public function save($data)
     {
-        global $lang_functions, $lang_fields;
+        $lang_functions = SupportContext::getLangFunctions();
+        $lang_fields = (array) SupportContext::getGlobal('lang_fields', []);
         $attributes = [];
         if (empty($data['name'])) {
             throw new \InvalidArgumentException("{$lang_fields['col_name']} {$lang_functions['text_required']}");

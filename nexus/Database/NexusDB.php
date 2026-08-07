@@ -4,6 +4,7 @@ namespace Nexus\Database;
 
 use App\Models\OauthClient;
 use App\Models\PersonalAccessToken;
+use App\Support\SupportContext;
 use Illuminate\Container\Container;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Capsule\Manager as Capsule;
@@ -342,7 +343,10 @@ class NexusDB
     public static function remember($key, $ttl, \Closure $callback)
     {
         if (IN_NEXUS) {
-            global $Cache;
+            $Cache = SupportContext::getCache();
+            if ($Cache === null) {
+                return Cache::remember($key, $ttl, $callback);
+            }
             $result = $Cache->get_value($key);
             if ($result === false) {
                 $result = $callback();
@@ -360,7 +364,10 @@ class NexusDB
     public static function cache_put($key, $value, $ttl = 3600)
     {
         if (IN_NEXUS) {
-            global $Cache;
+            $Cache = SupportContext::getCache();
+            if ($Cache === null) {
+                return Cache::put($key, $value, $ttl);
+            }
             return $Cache->cache_value($key, $value, $ttl);
         } else {
             return Cache::put($key, $value, $ttl);
@@ -370,7 +377,10 @@ class NexusDB
     public static function cache_get($key)
     {
         if (IN_NEXUS) {
-            global $Cache;
+            $Cache = SupportContext::getCache();
+            if ($Cache === null) {
+                return Cache::get($key);
+            }
             return $Cache->get_value($key);
         } else {
             return Cache::get($key);
@@ -379,15 +389,16 @@ class NexusDB
 
     public static function cache_del($key)
     {
-        if (IN_NEXUS) {
-            global $Cache;
+        $Cache = SupportContext::getCache();
+        if (IN_NEXUS && $Cache !== null) {
             $Cache->delete_value($key, true);
-        } else {
-            Cache::forget($key);
-            $langList = get_langfolder_list();
-            foreach ($langList as $lf) {
-                Cache::forget($lf . '_' . $key);
-            }
+            return;
+        }
+
+        Cache::forget($key);
+        $langList = get_langfolder_list();
+        foreach ($langList as $lf) {
+            Cache::forget($lf . '_' . $key);
         }
     }
 
@@ -415,7 +426,10 @@ class NexusDB
     public static function redis()
     {
         if (IN_NEXUS) {
-            global $Cache;
+            $Cache = SupportContext::getCache();
+            if ($Cache === null) {
+                return Redis::connection()->client();
+            }
             return $Cache->getRedis();
         } else {
             return Redis::connection()->client();

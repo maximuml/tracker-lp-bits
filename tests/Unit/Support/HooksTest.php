@@ -3,6 +3,7 @@
 namespace Tests\Unit\Support;
 
 use App\Support\Hooks;
+use App\Support\SupportContext;
 use Nexus\Plugin\Hook;
 use PHPUnit\Framework\TestCase;
 
@@ -11,12 +12,12 @@ final class HooksTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $GLOBALS['hook'] = new Hook();
+        SupportContext::setGlobal('hook', new Hook());
     }
 
     protected function tearDown(): void
     {
-        unset($GLOBALS['hook']);
+        SupportContext::setGlobal('hook', null);
         parent::tearDown();
     }
 

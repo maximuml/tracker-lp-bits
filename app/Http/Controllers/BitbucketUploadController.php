@@ -172,8 +172,8 @@ class BitbucketUploadController extends Controller
     {
         if (empty(SupportContext::getGlobal('lang_bitbucketupload'))) {
             SupportContext::setServerValue('SCRIPT_NAME', '/bitbucket-upload.php');
-            global $lang_bitbucketupload;
             require_once base_path(get_langfile_path());
+            SupportContext::setGlobal('lang_bitbucketupload', $lang_bitbucketupload ?? []);
         }
 
         return (array) SupportContext::getGlobal('lang_bitbucketupload', []);

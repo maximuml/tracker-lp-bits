@@ -2,6 +2,8 @@
 
 namespace Nexus\Torrent;
 
+use App\Support\SupportContext;
+
 class TechnicalInformation
 {
     private $mediaInfo;
@@ -169,7 +171,7 @@ class TechnicalInformation
 
     public function renderOnDetailsPage()
     {
-        global $lang_functions;
+        $lang_functions = SupportContext::getLangFunctions();
         if (empty($this->mediaInfo)) {
             return '';
         }

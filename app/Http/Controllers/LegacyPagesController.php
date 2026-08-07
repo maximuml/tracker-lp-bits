@@ -201,6 +201,11 @@ class LegacyPagesController extends Controller
 
     public function bookmark(Request $request): Response|RedirectResponse
     {
+        $torrentId = (int) $request->input('torrentid', 0);
+        if ($torrentId <= 0) {
+            return redirect('/torrents.php');
+        }
+
         return $this->legacyRaw($request, 'bookmark', false);
     }
 

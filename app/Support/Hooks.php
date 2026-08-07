@@ -37,10 +37,7 @@ final class Hooks
     {
         if (function_exists('app')) {
             try {
-                $hook = app(Hook::class);
-                if ($hook instanceof Hook) {
-                    return $hook;
-                }
+                return app(Hook::class);
             } catch (\Throwable $e) {
                 // fall back to the legacy context value
             }

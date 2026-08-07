@@ -75,8 +75,9 @@ RUN echo "error_log = /dev/stderr" >> /usr/local/etc/php/conf.d/error-logging.in
 RUN echo "upload_max_filesize = 10M" >> /usr/local/etc/php/conf.d/upload.ini
 RUN echo "post_max_size = 10M" >> /usr/local/etc/php/conf.d/upload.ini
 
-# Production OPcache defaults
-COPY .docker/php/opcache.ini /usr/local/etc/php/conf.d/opcache.ini
+# Production OPcache defaults (override with --build-arg NEXUSPHP_ENV=dev for development)
+ARG NEXUSPHP_ENV=prod
+COPY .docker/php/opcache.${NEXUSPHP_ENV}.ini /usr/local/etc/php/conf.d/opcache.ini
 
 # 安装 Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer

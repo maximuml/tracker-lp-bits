@@ -2,7 +2,13 @@
 <?php
 
 define('LARAVEL_START', microtime(true));
-defined('IN_NEXUS') || define('IN_NEXUS', true);
+
+// Only enter legacy mode for commands that load the legacy bootstrap below.
+// Other artisan commands (migrate, test, etc.) keep IN_NEXUS false so NexusDB
+// falls back to Laravel's DB/Schema/Capsule.
+if (in_array($_SERVER['argv'][1] ?? '', ['cleanup:run'], true)) {
+    defined('IN_NEXUS') || define('IN_NEXUS', true);
+}
 
 /*
 |--------------------------------------------------------------------------

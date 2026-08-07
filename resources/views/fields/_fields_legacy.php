@@ -8,7 +8,7 @@ if (get_user_class() < UC_ADMINISTRATOR) {
 $field = new \Nexus\Field\Field();
 
 
-$action = $_GET['action'] ?? 'view';
+$action = \App\Support\SupportContext::getQuery('action') ?? 'view';
 if ($action == 'view') {
     stdhead($lang_fields['field_management']." - ".$lang_fields['text_field']);
     begin_main_frame();
@@ -22,13 +22,13 @@ if ($action == 'view') {
 } elseif ($action == 'submit') {
     echo "This method is deprecated! This method is no longer available in 1.10, it does not save data correctly, please go to the management system!"; return;
     try {
-        $result = $field->save($_REQUEST);
+        $result = $field->save(\App\Support\SupportContext::allRequest());
         nexus_redirect('fields.php?action=view');
     } catch (\Exception $e) {
         stderr($lang_fields['field_management'], $e->getMessage());
     }
 } elseif ($action == 'edit') {
-    $id = intval($_GET['id'] ?? 0);
+    $id = intval(\App\Support\SupportContext::getQuery('id') ?? 0);
     if ($id == 0) {
         stderr($lang_fields['field_management'], "Invalid id");
     }
@@ -40,7 +40,7 @@ if ($action == 'view') {
     begin_main_frame();
     echo $field->buildFieldForm($row);
 } elseif ($action == 'del') {
-    $id = intval($_GET['id'] ?? 0);
+    $id = intval(\App\Support\SupportContext::getQuery('id') ?? 0);
     if ($id == 0) {
         stderr($lang_fields['field_management'], "Invalid id");
     }

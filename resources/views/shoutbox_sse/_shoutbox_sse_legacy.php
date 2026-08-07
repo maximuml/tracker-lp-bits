@@ -1,13 +1,15 @@
 <?php
 extract($context, EXTR_SKIP);
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
-if (! isset($CURUSER)) {
+
+$__server_HTTP_LAST_EVENT_ID = \App\Support\SupportContext::getServerValue('HTTP_LAST_EVENT_ID');
+if (! (isset($CURUSER))) {
     http_response_code(403);
     return;
 }
 
-$type = $_GET['type'] ?? 'shoutbox';
-$lastId = (int) ($_SERVER['HTTP_LAST_EVENT_ID'] ?? $_GET['last_id'] ?? 0);
+$type = \App\Support\SupportContext::getQuery('type') ?? 'shoutbox';
+$lastId = (int) ($__server_HTTP_LAST_EVENT_ID ?? \App\Support\SupportContext::getQuery('last_id') ?? 0);
 $userId = (int) ($CURUSER['id'] ?? 0);
 
 // Keep PHP-FPM worker time for a single stream short; browsers reconnect automatically.
@@ -55,7 +57,7 @@ function buildShoutboxQuery(string $type, int $lastId): object
     $query = \Nexus\Database\NexusDB::table('shoutbox')
         ->orderBy('id')
         ->where('id', '>', $lastId);
-    \App\Support\Shoutbox::applyTypeFilter($query, $type, $GLOBALS['CURUSER'] ?? null);
+    \App\Support\Shoutbox::applyTypeFilter($query, $type, \App\Support\SupportContext::getGlobal('CURUSER') ?? null);
     return $query;
 }
 

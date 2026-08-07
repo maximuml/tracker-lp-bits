@@ -2,23 +2,26 @@
 extract($context, EXTR_SKIP);
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
-$passkey = $_GET['passkey'] ?? $CURUSER['passkey'] ?? '';
+
+$__server_HTTP_HOST = \App\Support\SupportContext::getServerValue('HTTP_HOST');
+$__server_REQUEST_URI = \App\Support\SupportContext::getServerValue('REQUEST_URI');
+$passkey = \App\Support\SupportContext::getQuery('passkey') ?? $CURUSER['passkey'] ?? '';
 if (!$passkey) {
     echo "require passkey";
     return;
 }
 $exactParams = ['inclbookmarked', 'paid', 'rows', 'icat', 'ismalldescr', 'isize', 'iuplder', 'search', 'search_mode', 'sticky', 'linktype'];
 $prefixedParams = ['cat', 'sou', 'med', 'cod', 'sta', 'pro', 'tea', 'aud'];
-foreach ($_GET as $key => $value) {
+foreach (\App\Support\SupportContext::allQuery() as $key => $value) {
     if (in_array($key, $exactParams, true)) {
         continue;
     }
     if (preg_match('/^(cat|sou|med|cod|sta|pro|tea|aud)\d+$/', $key)) {
         continue;
     }
-    unset($_GET[$key]);
+    \App\Support\SupportContext::removeQuery($key);
 }
-$cacheKey = "nexus_rss:$passkey:" . md5(http_build_query($_GET));
+$cacheKey = "nexus_rss:$passkey:" . md5(http_build_query(\App\Support\SupportContext::allQuery()));
 $cacheData = \Nexus\Database\NexusDB::cache_get($cacheKey);
 if ($cacheData && nexus_env('APP_ENV') != 'local') {
     do_log("rss get from cache");
@@ -31,14 +34,14 @@ function hex_esc($matches) {
 }
 $dllink = false;
 
-$showrows = intval($_GET['rows'] ?? 0);
+$showrows = intval(\App\Support\SupportContext::getQuery('rows') ?? 0);
 if ($showrows < 1 || $showrows > 50) {
     $showrows = 50;
 }
 
 $paidFilter = '0';
-if (isset($_GET['paid']) && in_array($_GET['paid'], ['0', '1', '2'], true)) {
-    $paidFilter = $_GET['paid'];
+if (((\App\Support\SupportContext::getQuery('paid') !== null)) && in_array(\App\Support\SupportContext::getQuery('paid'), ['0', '1', '2'], true)) {
+    $paidFilter = \App\Support\SupportContext::getQuery('paid');
 }
 
 $baseQuery = \Nexus\Database\NexusDB::table('torrents')
@@ -57,11 +60,11 @@ if ($passkey) {
 	} elseif ($user['enabled'] == 'no' || $user['parked'] == 'yes') {
 		echo "account disabed or parked";
 		return;
-	} elseif (isset($_GET['linktype']) && $_GET['linktype'] == 'dl') {
+	} elseif (((\App\Support\SupportContext::getQuery('linktype') !== null)) && \App\Support\SupportContext::getQuery('linktype') == 'dl') {
 		$dllink = true;
 	}
 
-    $inclbookmarked = intval($_GET['inclbookmarked'] ?? 0);
+    $inclbookmarked = intval(\App\Support\SupportContext::getQuery('inclbookmarked') ?? 0);
     if ($inclbookmarked == 1) {
         $bookmarkarray = return_torrent_bookmark_array($user['id']);
         if (!empty($bookmarkarray)) {
@@ -95,7 +98,7 @@ function applyRssFilter($query, $tablename = "sources", $itemname = "source", $g
     $items = searchbox_item_list($tablename, 0);
     $ids = [];
     foreach ($items as $item) {
-        if (!empty($_GET[$getname.$item['id']])) {
+        if (!empty(\App\Support\SupportContext::getQuery($getname.$item['id']))) {
             $ids[] = $item['id'];
         }
     }
@@ -115,8 +118,8 @@ applyRssFilter($baseQuery, "audiocodecs", "audiocodec", "aud");
 $hasStickyFirst = $hasStickySecond = $hasStickyNormal = $noNormalResults = false;
 $prependIdArr = $prependRows = $normalRows = [];
 $stickyWhere = $normalWhere = '';
-if (isset($_GET['sticky']) && $inclbookmarked == 0) {
-    $stickyArr = explode(',', $_GET['sticky']);
+if (((\App\Support\SupportContext::getQuery('sticky') !== null)) && $inclbookmarked == 0) {
+    $stickyArr = explode(',', \App\Support\SupportContext::getQuery('sticky'));
     //Only handle sticky first + second
     $posStates = [];
     if (in_array('0', $stickyArr, true)) {
@@ -166,7 +169,7 @@ foreach ($prependRows as $row) {
     $list[$row['id']] = $row;
 }
 foreach ($normalRows as $row) {
-    if (!isset($list[$row['id']])) {
+    if (!(isset($list[$row['id']]))) {
         $list[$row['id']] = $row;
     }
 }
@@ -204,7 +207,7 @@ $xml .= '<channel>
 			<description>' . addslashes($SITENAME.' Torrents') . '</description>
 		</image>';
 /*print('
-		<atom:link href="'.$url.$_SERVER['REQUEST_URI'].'" rel="self" type="application/rss+xml" />');*/
+		<atom:link href="'.$url.$__server_REQUEST_URI.'" rel="self" type="application/rss+xml" />');*/
 //print('
 //');
 foreach ($list as $row)
@@ -222,10 +225,10 @@ foreach ($list as $row)
 	if ($dllink)
 		$itemdlurl = $torrentRep->getDownloadUrl($row['id'], $user);
 	else $itemdlurl = $url."/download.php?id=".$row['id'];
-	if (!empty($_GET['icat'])) $title .= "[".$row['category_name']."]";
+	if (!empty(\App\Support\SupportContext::getQuery('icat'))) $title .= "[".$row['category_name']."]";
 	$title .= $row['name'];
-	if (!empty($_GET['isize'])) $title .= "[".mksize($row['size'])."]";
-	if (!empty($_GET['iuplder'])) $title .= "[".$author."]";
+	if (!empty(\App\Support\SupportContext::getQuery('isize'))) $title .= "[".mksize($row['size'])."]";
+	if (!empty(\App\Support\SupportContext::getQuery('iuplder'))) $title .= "[".$author."]";
 	$content = format_comment($row['descr'], true, false, false, false);
 	$xml .= '<item>
 			<title><![CDATA['.$title.']]></title>
@@ -233,7 +236,7 @@ foreach ($list as $row)
 			<description><![CDATA['.$content.']]></description>
 ';
 //print('			<dc:creator>'.$author.'</dc:creator>');
-$xml .= '<author>'.$author.'@'.$_SERVER['HTTP_HOST'].' ('.$author.')</author>';
+$xml .= '<author>'.$author.'@'.$__server_HTTP_HOST.' ('.$author.')</author>';
 $xml .= '<category domain="'.$url.'/torrents.php?cat='.$row['category'].'">'.$row['category_name'].'</category>
 			<comments><![CDATA['.$url.'/details.php?id='.$row['id'].'&cmtpage=0#startcomments]]></comments>
 			<enclosure url="'.$itemdlurl.'" length="'.$row['size'].'" type="application/x-bittorrent" />

@@ -6,7 +6,7 @@ class AjaxInterface{
 
     public static function toggleUserMedalStatus($params)
     {
-        global $CURUSER;
+$CURUSER = \App\Support\SupportContext::getUser() ?? [];
         $rep = new \App\Repositories\MedalRepository();
         return $rep->toggleUserMedalStatus($params['id'], $CURUSER['id']);
     }
@@ -14,14 +14,14 @@ class AjaxInterface{
 
     public static function attendanceRetroactive($params)
     {
-        global $CURUSER;
+$CURUSER = \App\Support\SupportContext::getUser() ?? [];
         $rep = new \App\Repositories\AttendanceRepository();
         return $rep->retroactive($CURUSER['id'], $params['date']);
     }
 
     public static function removeUserLeechWarn($params)
     {
-        global $CURUSER;
+$CURUSER = \App\Support\SupportContext::getUser() ?? [];
         $rep = new \App\Repositories\UserRepository();
         return $rep->removeLeechWarn($CURUSER['id'], $params['uid']);
     }
@@ -34,16 +34,16 @@ class AjaxInterface{
 
     public static function approvalModal($params)
     {
-        global $CURUSER;
+$CURUSER = \App\Support\SupportContext::getUser() ?? [];
         $rep = new \App\Repositories\TorrentRepository();
         return $rep->buildApprovalModal($CURUSER['id'], $params['torrent_id']);
     }
 
     public static function approval($params)
     {
-        global $CURUSER;
+$CURUSER = \App\Support\SupportContext::getUser() ?? [];
         foreach (['torrent_id', 'approval_status',] as $field) {
-            if (!isset($params[$field])) {
+            if (!(isset($params[$field]))) {
                 throw new \InvalidArgumentException("Require $field");
             }
         }
@@ -53,7 +53,7 @@ class AjaxInterface{
 
     public static function addSeedBoxRecord($params)
     {
-        global $CURUSER;
+$CURUSER = \App\Support\SupportContext::getUser() ?? [];
         $rep = new \App\Repositories\SeedBoxRepository();
         $params['uid'] = $CURUSER['id'];
         $params['type'] = \App\Models\SeedBoxRecord::TYPE_USER;
@@ -63,28 +63,28 @@ class AjaxInterface{
 
     public static function removeSeedBoxRecord($params)
     {
-        global $CURUSER;
+$CURUSER = \App\Support\SupportContext::getUser() ?? [];
         $rep = new \App\Repositories\SeedBoxRepository();
         return $rep->delete($params['id'], $CURUSER['id']);
     }
 
     public static function removeHitAndRun($params)
     {
-        global $CURUSER;
+$CURUSER = \App\Support\SupportContext::getUser() ?? [];
         $rep = new \App\Repositories\BonusRepository();
         return $rep->consumeToCancelHitAndRun($CURUSER['id'], $params['id']);
     }
 
     public static function consumeBenefit($params)
     {
-        global $CURUSER;
+$CURUSER = \App\Support\SupportContext::getUser() ?? [];
         $rep = new \App\Repositories\UserRepository();
         return $rep->consumeBenefit($CURUSER['id'], $params);
     }
 
     public static function clearShoutBox($params)
     {
-        global $CURUSER;
+$CURUSER = \App\Support\SupportContext::getUser() ?? [];
         user_can('sbmanage', true);
         \Nexus\Database\NexusDB::table('shoutbox')->delete();
         \Nexus\Database\NexusDB::table('shoutbox_reactions')->delete();
@@ -93,7 +93,7 @@ class AjaxInterface{
 
     public static function shoutboxEdit($params)
     {
-        global $CURUSER;
+$CURUSER = \App\Support\SupportContext::getUser() ?? [];
         $id = (int) ($params['id'] ?? 0);
         $text = trim((string) ($params['text'] ?? ''));
         if ($id <= 0 || $text === '') {
@@ -132,7 +132,7 @@ class AjaxInterface{
 
     public static function shoutboxDelete($params)
     {
-        global $CURUSER;
+$CURUSER = \App\Support\SupportContext::getUser() ?? [];
         $id = (int) ($params['id'] ?? 0);
         if ($id <= 0) {
             throw new \InvalidArgumentException('Invalid input');
@@ -164,7 +164,7 @@ class AjaxInterface{
 
     public static function shoutboxReact($params)
     {
-        global $CURUSER;
+$CURUSER = \App\Support\SupportContext::getUser() ?? [];
         $id = (int) ($params['id'] ?? 0);
         $reaction = (string) ($params['reaction'] ?? '');
         if ($id <= 0 || ! in_array($reaction, \App\Support\Shoutbox::REACTIONS, true)) {
@@ -195,21 +195,21 @@ class AjaxInterface{
 
     public static function buyMedal($params)
     {
-        global $CURUSER;
+$CURUSER = \App\Support\SupportContext::getUser() ?? [];
         $rep = new \App\Repositories\BonusRepository();
         return $rep->consumeToBuyMedal($CURUSER['id'], $params['medal_id']);
     }
 
     public static function giftMedal($params)
     {
-        global $CURUSER;
+$CURUSER = \App\Support\SupportContext::getUser() ?? [];
         $rep = new \App\Repositories\BonusRepository();
         return $rep->consumeToGiftMedal($CURUSER['id'], $params['medal_id'], $params['uid']);
     }
 
     public static function saveUserMedal($params)
     {
-        global $CURUSER;
+$CURUSER = \App\Support\SupportContext::getUser() ?? [];
         $data = [];
         foreach ($params as $param) {
             $fieldAndId = explode('_', $param['name']);
@@ -225,14 +225,14 @@ class AjaxInterface{
 
     public static function claimTask($params)
     {
-        global $CURUSER;
+$CURUSER = \App\Support\SupportContext::getUser() ?? [];
         $rep = new \App\Repositories\ExamRepository();
         return $rep->assignToUser($CURUSER['id'], $params['exam_id']);
     }
 
     public static function addToken($params)
     {
-        global $CURUSER;
+$CURUSER = \App\Support\SupportContext::getUser() ?? [];
         if (empty($params['name'])) {
             throw new \InvalidArgumentException("Name is required");
         }
@@ -243,7 +243,7 @@ class AjaxInterface{
 
     public static function removeToken($params)
     {
-        global $CURUSER;
+$CURUSER = \App\Support\SupportContext::getUser() ?? [];
         if (empty($params['id'])) {
             throw new \InvalidArgumentException("id is required");
         }
@@ -254,49 +254,49 @@ class AjaxInterface{
 
     public static function getPasskeyCreateArgs($params)
     {
-        global $CURUSER;
+$CURUSER = \App\Support\SupportContext::getUser() ?? [];
         $rep = new \App\Repositories\UserPasskeyRepository();
         return $rep->getCreateArgs($CURUSER['id'], $CURUSER['username']);
     }
 
     public static function processPasskeyCreate($params)
     {
-        global $CURUSER;
+$CURUSER = \App\Support\SupportContext::getUser() ?? [];
         $rep = new \App\Repositories\UserPasskeyRepository();
         return $rep->processCreate($CURUSER['id'], $params['challengeId'], $params['clientDataJSON'], $params['attestationObject']);
     }
 
     public static function deletePasskey($params)
     {
-        global $CURUSER;
+$CURUSER = \App\Support\SupportContext::getUser() ?? [];
         $rep = new \App\Repositories\UserPasskeyRepository();
         return $rep->delete($CURUSER['id'], $params['credentialId']);
     }
 
     public static function getPasskeyList($params)
     {
-        global $CURUSER;
+$CURUSER = \App\Support\SupportContext::getUser() ?? [];
         $rep = new \App\Repositories\UserPasskeyRepository();
         return $rep->getList($CURUSER['id']);
     }
 
     public static function getPasskeyGetArgs($params)
     {
-        global $CURUSER;
+$CURUSER = \App\Support\SupportContext::getUser() ?? [];
         $rep = new \App\Repositories\UserPasskeyRepository();
         return $rep->getGetArgs();
     }
 
     public static function processPasskeyGet($params)
     {
-        global $CURUSER;
+$CURUSER = \App\Support\SupportContext::getUser() ?? [];
         $rep = new \App\Repositories\UserPasskeyRepository();
         return $rep->processGet($params['challengeId'], $params['id'], $params['clientDataJSON'], $params['authenticatorData'], $params['signature'], $params['userHandle']);
     }
 
     public static function getToastNotifications($params)
     {
-        global $CURUSER;
+$CURUSER = \App\Support\SupportContext::getUser() ?? [];
         if (!is_array($params)) {
             $params = [];
         }

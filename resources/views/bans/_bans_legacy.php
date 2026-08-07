@@ -1,21 +1,24 @@
 <?php
 extract($context, EXTR_SKIP);
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
+
+$__server_REQUEST_METHOD = \App\Support\SupportContext::getServerValue('REQUEST_METHOD');
+$__server_REQUEST_URI = \App\Support\SupportContext::getServerValue('REQUEST_URI');
 if (get_user_class() < UC_ADMINISTRATOR)
 stderr("Sorry", "Access denied.");
 
-$remove = intval($_GET['remove'] ?? 0);
+$remove = intval(\App\Support\SupportContext::getQuery('remove') ?? 0);
 if (is_valid_id($remove))
 {
   \Nexus\Database\NexusDB::table('bans')->where('id', $remove)->delete();
   write_log("Ban ".htmlspecialchars($remove)." was removed by {$CURUSER['id']} ($CURUSER[username])",'mod');
 }
 
-if ($_SERVER["REQUEST_METHOD"] == "POST" && get_user_class() >= UC_ADMINISTRATOR)
+if ($__server_REQUEST_METHOD == "POST" && get_user_class() >= UC_ADMINISTRATOR)
 {
-	$first = trim($_POST["first"]);
-	$last = trim($_POST["last"]);
-	$comment = trim($_POST["comment"]);
+	$first = trim(\App\Support\SupportContext::getPost("first"));
+	$last = trim(\App\Support\SupportContext::getPost("last"));
+	$comment = trim(\App\Support\SupportContext::getPost("comment"));
 	if (!$first || !$last || !$comment)
 		stderr("Error", "Missing form data.");
 	$firstlong = ip2long($first);
@@ -29,7 +32,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && get_user_class() >= UC_ADMINISTRATOR
 	    'last' => $lastlong,
 	    'comment' => $comment,
 	]);
-	header("Location: {$_SERVER['REQUEST_URI']}");
+	header("Location: {$__server_REQUEST_URI}");
 	return;
 }
 

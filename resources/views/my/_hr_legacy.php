@@ -1,13 +1,15 @@
 <?php
 extract($context, EXTR_SKIP);
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
+
+$__server_REQUEST_URI = \App\Support\SupportContext::getServerValue('REQUEST_URI');
 $userid =  $CURUSER['id'];
 $pagerParams = [];
-if (!empty($_GET['userid'])) {
-    if (!user_can('viewhistory') && $_GET['userid'] != $CURUSER['id']) {
+if (!empty(\App\Support\SupportContext::getQuery('userid'))) {
+    if (!user_can('viewhistory') && \App\Support\SupportContext::getQuery('userid') != $CURUSER['id']) {
         permissiondenied($viewhistory_class);
     }
-    $userid = $_GET['userid'];
+    $userid = \App\Support\SupportContext::getQuery('userid');
     $pagerParams['userid'] = $userid;
 }
 $userInfo = \App\Models\User::query()->find($userid, \App\Models\User::$commonFields);
@@ -19,7 +21,7 @@ $pageTitle = $userInfo->username . ' - H&R';
 stdhead($pageTitle);
 print("<h1>$pageTitle</h1>");
 
-$status = $_GET['status'] ?? \App\Models\HitAndRun::STATUS_INSPECTING;
+$status = \App\Support\SupportContext::getQuery('status') ?? \App\Models\HitAndRun::STATUS_INSPECTING;
 $allStatus = \App\Models\HitAndRun::listStatus();
 $headerFilters = [];
 $pagerParams['status'] = $status;
@@ -31,9 +33,9 @@ foreach ($allStatus as $key => $value) {
 }
 
 print("<p>" . implode(' | ', $headerFilters) . "</p>");
-$q = htmlspecialchars($_GET['q'] ?? '');
+$q = htmlspecialchars(\App\Support\SupportContext::getQuery('q') ?? '');
 $filterForm = <<<FORM
-<form id="filterForm" action="{$_SERVER['REQUEST_URI']}" method="get">
+<form id="filterForm" action="{$__server_REQUEST_URI}" method="get">
     <input id="q" type="text" name="q" value="{$q}" placeholder="{$lang_myhr['th_hr_id']}">
     <input type="submit">
     <input type="reset" onclick="document.getElementById('q').value='';document.getElementById('filterForm').submit();">

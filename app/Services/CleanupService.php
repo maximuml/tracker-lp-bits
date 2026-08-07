@@ -42,7 +42,7 @@ final class CleanupService
      */
     public function runFull(bool $forceAll = false, bool $printProgress = true): string
     {
-        if (\get_user_class() < \constant('UC_SYSOP')) {
+        if (! \app()->runningInConsole() && \get_user_class() < \constant('UC_SYSOP')) {
             return 'forbidden';
         }
 

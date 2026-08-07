@@ -3,7 +3,7 @@ extract($context, EXTR_SKIP);
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 function purge_neighbors_cache()
 {
-	global $CURUSER;
+$CURUSER = \App\Support\SupportContext::getUser() ?? [];
 	$cachefile = "cache/" . get_langfolder_cookie() . "/neighbors/" . $CURUSER['id'] . ".html";
 	if (file_exists($cachefile))
 		unlink($cachefile);
@@ -13,7 +13,7 @@ function purge_neighbors_cache()
 //make_folder("cache/" , get_langfolder_cookie() . "/neighbors");
 
 $userid = $CURUSER['id'];
-$action = $_GET['action'] ?? '';
+$action = \App\Support\SupportContext::getQuery('action') ?? '';
 
 if (!is_valid_id($userid))
 stderr($lang_friends['std_error'], $lang_friends['std_invalid_id']."$userid.");
@@ -23,8 +23,8 @@ $user = $CURUSER;
 
 if ($action == 'add')
 {
-	$targetid = $_GET['targetid'];
-	$type = $_GET['type'];
+	$targetid = \App\Support\SupportContext::getQuery('targetid');
+	$type = \App\Support\SupportContext::getQuery('type');
 
 	if (!is_valid_id($targetid))
 	stderr($lang_friends['std_error'], $lang_friends['std_invalid_id']."$targetid.");
@@ -57,9 +57,9 @@ if ($action == 'add')
 
 if ($action == 'delete')
 {
-	$targetid = $_GET['targetid'];
-	$sure = $_GET['sure'];
-	$type = htmlspecialchars($_GET['type']);
+	$targetid = \App\Support\SupportContext::getQuery('targetid');
+	$sure = \App\Support\SupportContext::getQuery('sure');
+	$type = htmlspecialchars(\App\Support\SupportContext::getQuery('type'));
 
 	if ($type == 'friend')
 	$typename = $lang_friends['text_friend'];
@@ -192,7 +192,7 @@ else
 				{
 					$torrent_2_user_value_target = get_torrent_2_user_value($user_snatched_arr_target);	//get this torrent to target user's value
 
-					if(!isset($other_user_2_curuser_value[$user_snatched_arr_target['userid']]))	// first, set to 0
+					if(!(isset($other_user_2_curuser_value[$user_snatched_arr_target['userid']])))	// first, set to 0
 					$other_user_2_curuser_value[$user_snatched_arr_target['userid']] = 0.0;
 
 					$other_user_2_curuser_value[$user_snatched_arr_target['userid']] += $torrent_2_user_value_target * $torrent_2_user_value;

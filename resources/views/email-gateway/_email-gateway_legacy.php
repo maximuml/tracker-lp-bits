@@ -2,8 +2,10 @@
 extract($context, EXTR_SKIP);
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
+
+$__server_REQUEST_METHOD = \App\Support\SupportContext::getServerValue('REQUEST_METHOD');
 exit(0);
-$id = intval($_GET["id"] ?? 0);
+$id = intval(\App\Support\SupportContext::getQuery("id") ?? 0);
 int_check($id,true);
 
 $user = \App\Models\User::query()->where('id', $id)->first(['username', 'class', 'email']);
@@ -13,13 +15,13 @@ $username = $arr["username"];
 if ($arr["class"] < UC_MODERATOR)
 	stderr("Error", "The gateway can only be used to e-mail staff members.");
 
-if ($_SERVER["REQUEST_METHOD"] == "POST")
+if ($__server_REQUEST_METHOD == "POST")
 {
 	$to = $arr["email"];
-	$from = substr(htmlspecialchars(trim($_POST["from"])), 0, 80);
+	$from = substr(htmlspecialchars(trim(\App\Support\SupportContext::getPost("from"))), 0, 80);
 	if ($from == "") $from = "Anonymous";
 
-	$from_email = substr(htmlspecialchars(trim($_POST["from_email"])), 0, 80);
+	$from_email = substr(htmlspecialchars(trim(\App\Support\SupportContext::getPost("from_email"))), 0, 80);
 	if ($from_email == "") $from_email = "".$SITEEMAIL."";
 	$from_email =  safe_email($from_email);
 	if (!$from_email)
@@ -28,11 +30,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST")
   	stderr("Error","Invalid email address!");
 	$from = "$from <$from_email>";
 
-	$subject = substr(htmlspecialchars(trim($_POST["subject"])), 0, 80);
+	$subject = substr(htmlspecialchars(trim(\App\Support\SupportContext::getPost("subject"))), 0, 80);
 	if ($subject == "") $subject = "(No subject)";
 	$subject = "Fw: $subject";
 
-	$message = htmlspecialchars(trim($_POST["message"]));
+	$message = htmlspecialchars(trim(\App\Support\SupportContext::getPost("message")));
 	if ($message == "") stderr("Error", "No message text!");
 
 	$message = "Message submitted from ".getip()." at " . date("Y-m-d H:i:s") . ".\n" .

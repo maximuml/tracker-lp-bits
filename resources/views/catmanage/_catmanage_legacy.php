@@ -6,7 +6,7 @@ if (get_user_class() < UC_ADMINISTRATOR)
     permissiondenied();
 
 $perpage = 50;
-$pagerParam = '?action=view&type=' . ($_GET['type'] ?? 'searchbox') . '&';
+$pagerParam = '?action=view&type=' . (\App\Support\SupportContext::getQuery('type') ?? 'searchbox') . '&';
 function return_category_db_table_name($type)
 {
 	switch($type)
@@ -72,7 +72,7 @@ function category_icon_selection($iconId = 0)
 
 function return_type_name($type)
 {
-	global $lang_catmanage;
+$lang_catmanage = (array) (\App\Support\SupportContext::getGlobal('lang_catmanage') ?? []);
 	switch ($type)
 	{
 		case 'searchbox':
@@ -112,7 +112,7 @@ function return_type_name($type)
 }
 
 function print_type_list($type){
-	global $lang_catmanage;
+$lang_catmanage = (array) (\App\Support\SupportContext::getGlobal('lang_catmanage') ?? []);
 	$typename=return_type_name($type);
 	stdhead($lang_catmanage['head_category_management']." - ".$typename);
 	begin_main_frame();
@@ -143,14 +143,16 @@ function print_type_list($type){
 }
 function check_valid_type($type)
 {
-	global $lang_catmanage;
+$lang_catmanage = (array) (\App\Support\SupportContext::getGlobal('lang_catmanage') ?? []);
 	$validtype=array('searchbox', 'caticon', 'secondicon', 'category', 'source', 'medium', 'codec', 'standard', 'processing', 'audiocodec');
 	if (!in_array($type, $validtype))
 		stderr($lang_catmanage['std_error'], $lang_catmanage['std_invalid_type']);
 }
 function print_sub_category_list($type)
 {
-	global $lang_catmanage, $perpage, $pagerParam;
+$lang_catmanage = (array) (\App\Support\SupportContext::getGlobal('lang_catmanage') ?? []);
+$perpage = \App\Support\SupportContext::getGlobal('perpage');
+$pagerParam = \App\Support\SupportContext::getGlobal('pagerParam');
 	$dbtablename = return_category_db_table_name($type);
 	$num = \Nexus\Database\NexusDB::table($dbtablename)->count();
 	if (!$num)
@@ -186,8 +188,8 @@ print($pagerbottom);
 }
 function print_category_editor($type, $row='')
 {
-	global $lang_catmanage;
-	global $validsubcattype;
+$lang_catmanage = (array) (\App\Support\SupportContext::getGlobal('lang_catmanage') ?? []);
+$validsubcattype = \App\Support\SupportContext::getGlobal('validsubcattype');
 	if (in_array($type, $validsubcattype))
 		print_sub_category_editor($type, $row);
 	else
@@ -353,7 +355,7 @@ function print_category_editor($type, $row='')
 }
 function print_sub_category_editor($type, $row='')
 {
-	global $lang_catmanage;
+$lang_catmanage = (array) (\App\Support\SupportContext::getGlobal('lang_catmanage') ?? []);
 	$typename=return_type_name($type);
 	if ($row)
 	{
@@ -382,12 +384,12 @@ tr($lang_catmanage['col_order'], "<input type=\"text\" name=\"sort_index\" value
 }
 
 $validsubcattype=array('source', 'medium', 'codec', 'standard', 'processing', 'audiocodec');
-$type = $_GET['type'] ?? '';
+$type = \App\Support\SupportContext::getQuery('type') ?? '';
 if ($type == '')
 	$type = 'searchbox';
 else
 	check_valid_type($type);
-$action = $_GET['action'] ?? '';
+$action = \App\Support\SupportContext::getQuery('action') ?? '';
 if ($action == '')
 	$action = 'view';
 if ($action == 'view')
@@ -610,7 +612,7 @@ print($pagerbottom);
 }
 elseif($action == 'del')
 {
-	$id = intval($_GET['id'] ?? 0);
+	$id = intval(\App\Support\SupportContext::getQuery('id') ?? 0);
 	if (!$id)
 	{
 		stderr($lang_catmanage['std_error'], $lang_catmanage['std_invalid_id']);
@@ -638,7 +640,7 @@ elseif($action == 'del')
 }
 elseif($action == 'edit')
 {
-	$id = intval($_GET['id'] ?? 0);
+	$id = intval(\App\Support\SupportContext::getQuery('id') ?? 0);
 	if (!$id)
 	{
 		stderr($lang_catmanage['std_error'], $lang_catmanage['std_invalid_id']);

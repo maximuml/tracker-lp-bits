@@ -5,9 +5,9 @@ error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 if (get_user_class() < UC_SYSOP)
  stderr("Error", "Permission denied.");
 
-$action = isset($_POST['action']) ? htmlspecialchars($_POST['action']) : (isset($_GET['action']) ? htmlspecialchars($_GET['action']) : 'showlist');
-$id = isset($_POST['id']) ? (int)$_POST['id'] : (isset($_GET['id']) ? (int)$_GET['id'] : 0);
-$update = isset($_POST['update']) ? htmlspecialchars($_POST['update']) : (isset($_GET['update']) ? htmlspecialchars($_GET['update']) : '');
+$action = ((\App\Support\SupportContext::getPost('action') !== null)) ? htmlspecialchars(\App\Support\SupportContext::getPost('action')) : (((\App\Support\SupportContext::getQuery('action') !== null)) ? htmlspecialchars(\App\Support\SupportContext::getQuery('action')) : 'showlist');
+$id = ((\App\Support\SupportContext::getPost('id') !== null)) ? (int)\App\Support\SupportContext::getPost('id') : (((\App\Support\SupportContext::getQuery('id') !== null)) ? (int)\App\Support\SupportContext::getQuery('id') : 0);
+$update = ((\App\Support\SupportContext::getPost('update') !== null)) ? htmlspecialchars(\App\Support\SupportContext::getPost('update')) : (((\App\Support\SupportContext::getQuery('update') !== null)) ? htmlspecialchars(\App\Support\SupportContext::getQuery('update')) : '');
 
 function check ($id) {
 	if (!is_valid_id($id))
@@ -22,9 +22,9 @@ function searchform () {
 <?php
 }
 $countrows = \Nexus\Database\NexusDB::table('loginattempts')->count() + 1;
-$page = intval($_GET["page"] ?? 0);
+$page = intval(\App\Support\SupportContext::getQuery("page") ?? 0);
 
-$order = $_GET['order'] ?? '';
+$order = \App\Support\SupportContext::getQuery('order') ?? '';
 $orderColumn = match ($order) {
     'ip' => 'ip',
     'added' => 'added',
@@ -98,7 +98,7 @@ stdfoot();
 	print("<input type='hidden' name='action' value='save'>");
 	print("<input type='hidden' name='id' value='{$a['id']}'>");
 	print("<input type='hidden' name='ip' value='{$a['ip']}'>");
-	if ($_GET['return'] == 'yes')
+	if (\App\Support\SupportContext::getQuery('return') == 'yes')
 		print("<input type='hidden' name='returnto' value='viewunbaniprequest.php'>");
 	print("<tr><td>Attempts <input type='text' size='33' name='attempts' value='{$a['attempts']}'>");
 	print("<tr><td>Attempt Type <select name='type'><option value='login' ".($a["type"] == "login" ? "selected" : "").">Login Attempt</option><option value='recover' ".($a["type"] == "recover" ? "selected" : "").">Recover Password Attempts</option></select></tr></td>");
@@ -108,10 +108,10 @@ stdfoot();
 	stdfoot();
 
 }elseif ($action == 'save') {
-	$id = intval($_POST['id'] ?? 0);
-	$attempts = (int)$_POST['attempts'];
-	$type = $_POST['type'];
-	$banned = $_POST['banned'];
+	$id = intval(\App\Support\SupportContext::getPost('id') ?? 0);
+	$attempts = (int)\App\Support\SupportContext::getPost('attempts');
+	$type = \App\Support\SupportContext::getPost('type');
+	$banned = \App\Support\SupportContext::getPost('banned');
 		check($id);
 	if (!is_numeric($attempts) || $attempts < 0)
 		stderr("Error", "Invalid attempts");
@@ -120,15 +120,15 @@ stdfoot();
 	    'type' => $type,
 	    'banned' => $banned,
 	]);
-	if ($_POST['returnto']){
-		$returnto = $_POST['returnto'];
+	if (\App\Support\SupportContext::getPost('returnto')){
+		$returnto = \App\Support\SupportContext::getPost('returnto');
 		header("Location: $returnto");
 	}
 	else
 		header("Location: maxlogin.php?update=Edit");
 	return;
 }elseif ($action == 'searchip') {
-	$ip = $_POST['ip'] ?? '';
+	$ip = \App\Support\SupportContext::getPost('ip') ?? '';
 	$search = \Nexus\Database\NexusDB::table('loginattempts')->where('ip', 'LIKE', "%$ip%")->get();
 	stdhead ("Max. Login Attemps - Search");
 	print("<h2>Failed Login Attempts</h2>");

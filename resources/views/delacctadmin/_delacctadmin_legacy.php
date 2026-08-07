@@ -2,11 +2,13 @@
 extract($context, EXTR_SKIP);
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
+
+$__server_REQUEST_METHOD = \App\Support\SupportContext::getServerValue('REQUEST_METHOD');
 user_can('user-delete', true);
 
-if ($_SERVER["REQUEST_METHOD"] == "POST")
+if ($__server_REQUEST_METHOD == "POST")
 {
-$userid = trim($_POST["userid"]);
+$userid = trim(\App\Support\SupportContext::getPost("userid"));
 
 if (!$userid)
   stderr("Error", "Please fill out the form correctly.");

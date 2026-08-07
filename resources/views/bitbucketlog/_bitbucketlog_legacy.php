@@ -2,12 +2,14 @@
 extract($context, EXTR_SKIP);
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
+
+$__server_PHP_SELF = \App\Support\SupportContext::getServerValue('PHP_SELF');
 if (get_user_class() < UC_ADMINISTRATOR)
 stderr("Sorry", "Access denied.");
 $bucketpath = "$bitbucket";
 if (get_user_class() >= UC_MODERATOR)
 {
-	 $delete = intval($_GET["delete"] ?? 0);
+	 $delete = intval(\App\Support\SupportContext::getQuery("delete") ?? 0);
 	 if (is_valid_id($delete)) {
 		 $bitbucket = \Nexus\Database\NexusDB::table('bitbucket')->where('id', $delete)->first(['name', 'owner']);
 		 if ($bitbucket) {
@@ -21,7 +23,7 @@ if (get_user_class() >= UC_MODERATOR)
 stdhead("BitBucket Log");
 $count = \Nexus\Database\NexusDB::table('bitbucket')->count();
 $perpage = 10;
-list($pagertop, $pagerbottom, , $offset, $rpp) = pager($perpage, $count, $_SERVER["PHP_SELF"] . "?out=" . ($_GET["out"] ?? '') . "&" );
+list($pagertop, $pagerbottom, , $offset, $rpp) = pager($perpage, $count, $__server_PHP_SELF . "?out=" . (\App\Support\SupportContext::getQuery("out") ?? '') . "&" );
 print("<h1>BitBucket Log</h1>\n");
 print("Total Images Stored: $count");
 echo $pagertop;

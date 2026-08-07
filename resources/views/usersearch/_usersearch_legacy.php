@@ -1,6 +1,8 @@
 <?php
 extract($context, EXTR_SKIP);
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
+
+$__server_REQUEST_URI = \App\Support\SupportContext::getServerValue('REQUEST_URI');
 $hasModcomment = \Illuminate\Support\Facades\Schema::hasColumn('users', 'modcomment');
 
 // 0 - No debug; 1 - Show and run SQL query; 2 - Show SQL query only
@@ -11,7 +13,7 @@ if (get_user_class() < UC_MODERATOR)
 stdhead("Administrative User Search");
 echo "<h1>Administrative User Search</h1>\n";
 
-if (!empty($_GET['h']))
+if (!empty(\App\Support\SupportContext::getQuery('h')))
 {
 	echo "<table width=65% border=0 align=center><tr><td class=embedded bgcolor='#F5F4EA'><div align=left>\n
 	Fields left blank will be ignored;\n
@@ -36,65 +38,65 @@ if (!empty($_GET['h']))
 }
 else
 {
-	echo "<p align=center>(<a href='".$_SERVER["REQUEST_URI"]."?h=1'>Instructions</a>)";
-	echo "&nbsp;-&nbsp;(<a href='".$_SERVER["REQUEST_URI"]."'>Reset</a>)</p>\n";
+	echo "<p align=center>(<a href='".$__server_REQUEST_URI."?h=1'>Instructions</a>)";
+	echo "&nbsp;-&nbsp;(<a href='".$__server_REQUEST_URI."'>Reset</a>)</p>\n";
 }
 
 $highlight = " bgcolor=#BBAF9B";
 
 ?>
 
-<form method=get action=<?php echo $_SERVER["REQUEST_URI"]?>>
+<form method=get action=<?php echo $__server_REQUEST_URI?>>
 <table border="1" cellspacing="0" cellpadding="5">
 <tr>
 
   <td valign="middle" class=rowhead>Name:</td>
-  <td<?php echo $_GET['n']?$highlight:""?>><input name="n" type="text" value="<?php echo htmlspecialchars($_GET['n'])?>" size=35></td>
+  <td<?php echo \App\Support\SupportContext::getQuery('n')?$highlight:""?>><input name="n" type="text" value="<?php echo htmlspecialchars(\App\Support\SupportContext::getQuery('n'))?>" size=35></td>
 
   <td valign="middle" class=rowhead>Ratio:</td>
-  <td<?php echo $_GET['r']?$highlight:""?>><select name="rt">
+  <td<?php echo \App\Support\SupportContext::getQuery('r')?$highlight:""?>><select name="rt">
 <?php
 	$options = array("equal","above","below","between");
 	for ($i = 0; $i < count($options); $i++){
-	    echo "<option value=$i ".(($_GET['rt']=="$i")?"selected":"").">".$options[$i]."</option>\n";
+	    echo "<option value=$i ".((\App\Support\SupportContext::getQuery('rt')=="$i")?"selected":"").">".$options[$i]."</option>\n";
 	}
 	?>
     </select>
-    <input name="r" type="text" value="<?php echo htmlspecialchars($_GET['r'])?>" size="5" maxlength="4">
-    <input name="r2" type="text" value="<?php echo htmlspecialchars($_GET['r2'])?>" size="5" maxlength="4"></td>
+    <input name="r" type="text" value="<?php echo htmlspecialchars(\App\Support\SupportContext::getQuery('r'))?>" size="5" maxlength="4">
+    <input name="r2" type="text" value="<?php echo htmlspecialchars(\App\Support\SupportContext::getQuery('r2'))?>" size="5" maxlength="4"></td>
 
   <td valign="middle" class=rowhead>Member status:</td>
-  <td<?php echo $_GET['st']?$highlight:""?>><select name="st">
+  <td<?php echo \App\Support\SupportContext::getQuery('st')?$highlight:""?>><select name="st">
 <?php
 	$options = array("(any)","confirmed","pending");
 	for ($i = 0; $i < count($options); $i++){
-	    echo "<option value=$i ".(($_GET['st']=="$i")?"selected":"").">".$options[$i]."</option>\n";
+	    echo "<option value=$i ".((\App\Support\SupportContext::getQuery('st')=="$i")?"selected":"").">".$options[$i]."</option>\n";
 	}
     ?>
     </select></td></tr>
 <tr><td valign="middle" class=rowhead>Email:</td>
-  <td<?php echo $_GET['em']?$highlight:""?>><input name="em" type="text" value="<?php echo htmlspecialchars($_GET['em'])?>" size="35"></td>
+  <td<?php echo \App\Support\SupportContext::getQuery('em')?$highlight:""?>><input name="em" type="text" value="<?php echo htmlspecialchars(\App\Support\SupportContext::getQuery('em'))?>" size="35"></td>
   <td valign="middle" class=rowhead>IP:</td>
-  <td<?php echo $_GET['ip']?$highlight:""?>><input name="ip" type="text" value="<?php echo htmlspecialchars($_GET['ip'])?>" maxlength="64"></td>
+  <td<?php echo \App\Support\SupportContext::getQuery('ip')?$highlight:""?>><input name="ip" type="text" value="<?php echo htmlspecialchars(\App\Support\SupportContext::getQuery('ip'))?>" maxlength="64"></td>
 
   <td valign="middle" class=rowhead>Account status:</td>
-  <td<?php echo $_GET['as']?$highlight:""?>><select name="as">
+  <td<?php echo \App\Support\SupportContext::getQuery('as')?$highlight:""?>><select name="as">
 <?php
     $options = array("(any)","enabled","disabled");
     for ($i = 0; $i < count($options); $i++){
-      echo "<option value=$i ".(($_GET['as']=="$i")?"selected":"").">".$options[$i]."</option>\n";
+      echo "<option value=$i ".((\App\Support\SupportContext::getQuery('as')=="$i")?"selected":"").">".$options[$i]."</option>\n";
     }
 ?>
     </select></td></tr>
 <tr>
   <td valign="middle" class=rowhead>Comment:</td>
-  <td<?php echo $_GET['co']?$highlight:""?>><input name="co" type="text" value="<?php echo htmlspecialchars($_GET['co'])?>" size="35"></td>
+  <td<?php echo \App\Support\SupportContext::getQuery('co')?$highlight:""?>><input name="co" type="text" value="<?php echo htmlspecialchars(\App\Support\SupportContext::getQuery('co'))?>" size="35"></td>
   <td valign="middle" class=rowhead>Mask:</td>
-  <td<?php echo $_GET['ma']?$highlight:""?>><input name="ma" type="text" value="<?php echo htmlspecialchars($_GET['ma'])?>" maxlength="17"></td>
+  <td<?php echo \App\Support\SupportContext::getQuery('ma')?$highlight:""?>><input name="ma" type="text" value="<?php echo htmlspecialchars(\App\Support\SupportContext::getQuery('ma'))?>" maxlength="17"></td>
   <td valign="middle" class=rowhead>Class:</td>
-  <td<?php echo ($_GET['c'] && $_GET['c'] != 1)?$highlight:""?>><select name="c"><option value='1'>(any)</option>
+  <td<?php echo (\App\Support\SupportContext::getQuery('c') && \App\Support\SupportContext::getQuery('c') != 1)?$highlight:""?>><select name="c"><option value='1'>(any)</option>
 <?php
-  $class = $_GET['c'];
+  $class = \App\Support\SupportContext::getQuery('c');
   if (!is_valid_id($class))
   	$class = '';
   for ($i = 2;;++$i) {
@@ -109,41 +111,41 @@ $highlight = " bgcolor=#BBAF9B";
 
     <td valign="middle" class=rowhead>Joined:</td>
 
-  <td<?php echo $_GET['d']?$highlight:""?>><select name="dt">
+  <td<?php echo \App\Support\SupportContext::getQuery('d')?$highlight:""?>><select name="dt">
 <?php
 	$options = array("on","before","after","between");
 	for ($i = 0; $i < count($options); $i++){
-	  echo "<option value=$i ".(($_GET['dt']=="$i")?"selected":"").">".$options[$i]."</option>\n";
+	  echo "<option value=$i ".((\App\Support\SupportContext::getQuery('dt')=="$i")?"selected":"").">".$options[$i]."</option>\n";
 	}
 ?>
     </select>
 
-    <input name="d" type="text" value="<?php echo htmlspecialchars($_GET['d'])?>" size="12" maxlength="10">
+    <input name="d" type="text" value="<?php echo htmlspecialchars(\App\Support\SupportContext::getQuery('d'))?>" size="12" maxlength="10">
 
-    <input name="d2" type="text" value="<?php echo htmlspecialchars($_GET['d2'])?>" size="12" maxlength="10"></td>
+    <input name="d2" type="text" value="<?php echo htmlspecialchars(\App\Support\SupportContext::getQuery('d2'))?>" size="12" maxlength="10"></td>
 
 
   <td valign="middle" class=rowhead>Uploaded:</td>
 
-  <td<?php echo $_GET['ul']?$highlight:""?>><select name="ult" id="ult">
+  <td<?php echo \App\Support\SupportContext::getQuery('ul')?$highlight:""?>><select name="ult" id="ult">
 <?php
     $options = array("equal","above","below","between");
     for ($i = 0; $i < count($options); $i++){
-  	  echo "<option value=$i ".(($_GET['ult']=="$i")?"selected":"").">".$options[$i]."</option>\n";
+  	  echo "<option value=$i ".((\App\Support\SupportContext::getQuery('ult')=="$i")?"selected":"").">".$options[$i]."</option>\n";
     }
 ?>
     </select>
 
-    <input name="ul" type="text" id="ul" size="8" maxlength="7" value="<?php echo htmlspecialchars($_GET['ul'])?>">
+    <input name="ul" type="text" id="ul" size="8" maxlength="7" value="<?php echo htmlspecialchars(\App\Support\SupportContext::getQuery('ul'))?>">
 
-    <input name="ul2" type="text" id="ul2" size="8" maxlength="7" value="<?php echo htmlspecialchars($_GET['ul2'])?>"></td>
+    <input name="ul2" type="text" id="ul2" size="8" maxlength="7" value="<?php echo htmlspecialchars(\App\Support\SupportContext::getQuery('ul2'))?>"></td>
   <td valign="middle" class="rowhead">Donor:</td>
 
-  <td<?php echo $_GET['do']?$highlight:""?>><select name="do">
+  <td<?php echo \App\Support\SupportContext::getQuery('do')?$highlight:""?>><select name="do">
 <?php
     $options = array("(any)","Yes","No");
 	for ($i = 0; $i < count($options); $i++){
-	  echo "<option value=$i ".(($_GET['do']=="$i")?"selected":"").">".$options[$i]."</option>\n";
+	  echo "<option value=$i ".((\App\Support\SupportContext::getQuery('do')=="$i")?"selected":"").">".$options[$i]."</option>\n";
     }
 ?>
 	</select></td></tr>
@@ -151,49 +153,49 @@ $highlight = " bgcolor=#BBAF9B";
 
 <td valign="middle" class=rowhead>Last seen:</td>
 
-  <td <?php echo $_GET['ls']?$highlight:""?>><select name="lst">
+  <td <?php echo \App\Support\SupportContext::getQuery('ls')?$highlight:""?>><select name="lst">
 <?php
   $options = array("on","before","after","between");
   for ($i = 0; $i < count($options); $i++){
-    echo "<option value=$i ".(($_GET['lst']=="$i")?"selected":"").">".$options[$i]."</option>\n";
+    echo "<option value=$i ".((\App\Support\SupportContext::getQuery('lst')=="$i")?"selected":"").">".$options[$i]."</option>\n";
   }
 ?>
   </select>
 
-  <input name="ls" type="text" value="<?php echo htmlspecialchars($_GET['ls'])?>" size="12" maxlength="10">
+  <input name="ls" type="text" value="<?php echo htmlspecialchars(\App\Support\SupportContext::getQuery('ls'))?>" size="12" maxlength="10">
 
-  <input name="ls2" type="text" value="<?php echo htmlspecialchars($_GET['ls2'])?>" size="12" maxlength="10"></td>
+  <input name="ls2" type="text" value="<?php echo htmlspecialchars(\App\Support\SupportContext::getQuery('ls2'))?>" size="12" maxlength="10"></td>
 	  <td valign="middle" class=rowhead>Downloaded:</td>
 
-  <td<?php echo $_GET['dl']?$highlight:""?>><select name="dlt" id="dlt">
+  <td<?php echo \App\Support\SupportContext::getQuery('dl')?$highlight:""?>><select name="dlt" id="dlt">
 <?php
 	$options = array("equal","above","below","between");
 	for ($i = 0; $i < count($options); $i++){
-	  echo "<option value=$i ".(($_GET['dlt']=="$i")?"selected":"").">".$options[$i]."</option>\n";
+	  echo "<option value=$i ".((\App\Support\SupportContext::getQuery('dlt')=="$i")?"selected":"").">".$options[$i]."</option>\n";
 	}
 ?>
     </select>
 
-    <input name="dl" type="text" id="dl" size="8" maxlength="7" value="<?php echo htmlspecialchars($_GET['dl'])?>">
+    <input name="dl" type="text" id="dl" size="8" maxlength="7" value="<?php echo htmlspecialchars(\App\Support\SupportContext::getQuery('dl'))?>">
 
-    <input name="dl2" type="text" id="dl2" size="8" maxlength="7" value="<?php echo htmlspecialchars($_GET['dl2'])?>"></td>
+    <input name="dl2" type="text" id="dl2" size="8" maxlength="7" value="<?php echo htmlspecialchars(\App\Support\SupportContext::getQuery('dl2'))?>"></td>
 
 	<td valign="middle" class=rowhead>Warned:</td>
 
-	<td<?php echo $_GET['w']?$highlight:""?>><select name="w">
+	<td<?php echo \App\Support\SupportContext::getQuery('w')?$highlight:""?>><select name="w">
 <?php
   $options = array("(any)","Yes","No");
 	for ($i = 0; $i < count($options); $i++){
-		echo "<option value=$i ".(($_GET['w']=="$i")?"selected":"").">".$options[$i]."</option>\n";
+		echo "<option value=$i ".((\App\Support\SupportContext::getQuery('w')=="$i")?"selected":"").">".$options[$i]."</option>\n";
   }
 ?>
 	</select></td></tr>
 
 <tr><td class="rowhead"></td><td></td>
   <td valign="middle" class=rowhead>Active only:</td>
-	<td<?php echo $_GET['ac']?$highlight:""?>><input name="ac" type="checkbox" value="1" <?php echo ($_GET['ac'])?"checked":"" ?>></td>
+	<td<?php echo \App\Support\SupportContext::getQuery('ac')?$highlight:""?>><input name="ac" type="checkbox" value="1" <?php echo (\App\Support\SupportContext::getQuery('ac'))?"checked":"" ?>></td>
   <td valign="middle" class=rowhead>Disabled IP: </td>
-  <td<?php echo $_GET['dip']?$highlight:""?>><input name="dip" type="checkbox" value="1" <?php echo ($_GET['dip'])?"checked":"" ?>></td>
+  <td<?php echo \App\Support\SupportContext::getQuery('dip')?$highlight:""?>><input name="dip" type="checkbox" value="1" <?php echo (\App\Support\SupportContext::getQuery('dip'))?"checked":"" ?>></td>
   </tr>
 <tr><td colspan="6" align=center><input name="submit" type=submit class=btn></td></tr>
 </table>
@@ -248,10 +250,10 @@ function haswildcard($text){
 
 $userQuery = \Nexus\Database\NexusDB::table('users as u');
 $q = '';
-if (count($_GET) > 0 && !$_GET['h'])
+if (count(\App\Support\SupportContext::allQuery()) > 0 && !\App\Support\SupportContext::getQuery('h'))
 {
 	// name
-  $names = explode(' ',trim($_GET['n']));
+  $names = explode(' ',trim(\App\Support\SupportContext::getQuery('n')));
   if ($names[0] !== "")
   {
 		$names_inc = [];
@@ -306,11 +308,11 @@ if (count($_GET) > 0 && !$_GET['h'])
 	    }
 	  	});
 	  }
-	  $q .= ($q ? "&" : "") . "n=".rawurlencode(trim($_GET['n']));
+	  $q .= ($q ? "&" : "") . "n=".rawurlencode(trim(\App\Support\SupportContext::getQuery('n')));
   }
 
   // email
-  $emaila = explode(' ', trim($_GET['em']));
+  $emaila = explode(' ', trim(\App\Support\SupportContext::getQuery('em')));
   if ($emaila[0] !== "")
   {
   	$userQuery->where(function ($query) use ($emaila) {
@@ -338,12 +340,12 @@ if (count($_GET) > 0 && !$_GET['h'])
     	$first = false;
     }
   	});
-	$q .= ($q ? "&" : "") . "em=".rawurlencode(trim($_GET['em']));
+	$q .= ($q ? "&" : "") . "em=".rawurlencode(trim(\App\Support\SupportContext::getQuery('em')));
   }
 
   //class
   // NB: the c parameter is passed as two units above the real one
-  $class = $_GET['c'] - 2;
+  $class = \App\Support\SupportContext::getQuery('c') - 2;
 	if (is_valid_id($class + 1))
 	{
   	$userQuery->where('u.class', $class);
@@ -351,7 +353,7 @@ if (count($_GET) > 0 && !$_GET['h'])
   }
 
   // IP
-  $ip = trim($_GET['ip']);
+  $ip = trim(\App\Support\SupportContext::getQuery('ip'));
   if ($ip)
   {
   	$regex = "/^(((1?\\d{1,2})|(2[0-4]\\d)|(25[0-5]))(\\.\\b|$)){4}$/";
@@ -362,7 +364,7 @@ if (count($_GET) > 0 && !$_GET['h'])
       return;
     }
 
-    $mask = trim($_GET['ma']);
+    $mask = trim(\App\Support\SupportContext::getQuery('ma'));
     if ($mask == "" || $mask == "255.255.255.255")
     	$userQuery->where('u.ip', $ip);
     else
@@ -392,7 +394,7 @@ if (count($_GET) > 0 && !$_GET['h'])
   }
 
   // ratio
-  $ratio = trim($_GET['r']);
+  $ratio = trim(\App\Support\SupportContext::getQuery('r'));
   if ($ratio)
   {
   	if ($ratio == '---')
@@ -411,12 +413,12 @@ if (count($_GET) > 0 && !$_GET['h'])
       	stdfoot();
         return;
       }
-      $ratiotype = $_GET['rt'];
+      $ratiotype = \App\Support\SupportContext::getQuery('rt');
       $q .= ($q ? "&" : "") . "rt=$ratiotype";
       $userQuery->where('u.downloaded', '>', 0);
       if ($ratiotype == "3")
       {
-      	$ratio2 = trim($_GET['r2']);
+      	$ratio2 = trim(\App\Support\SupportContext::getQuery('r2'));
         if(!$ratio2)
         {
         	stdmsg("Error", "Two ratios needed for this type of search.");
@@ -443,7 +445,7 @@ if (count($_GET) > 0 && !$_GET['h'])
   }
 
   // comment
-  $comments = explode(' ',trim($_GET['co']));
+  $comments = explode(' ',trim(\App\Support\SupportContext::getQuery('co')));
   if ($comments[0] !== "" && $hasModcomment)
   {
 		$comments_inc = [];
@@ -498,13 +500,13 @@ if (count($_GET) > 0 && !$_GET['h'])
 	    }
 	  	});
 	  }
-    $q .= ($q ? "&" : "") . "co=".rawurlencode(trim($_GET['co']));
+    $q .= ($q ? "&" : "") . "co=".rawurlencode(trim(\App\Support\SupportContext::getQuery('co')));
   }
 
   $unit = 1073741824;		// 1GB
 
   // uploaded
-  $ul = trim($_GET['ul']);
+  $ul = trim(\App\Support\SupportContext::getQuery('ul'));
   if ($ul)
   {
   	if (!is_numeric($ul) || $ul < 0)
@@ -513,11 +515,11 @@ if (count($_GET) > 0 && !$_GET['h'])
     	stdfoot();
       return;
     }
-    $ultype = $_GET['ult'];
+    $ultype = \App\Support\SupportContext::getQuery('ult');
     $q .= ($q ? "&" : "") . "ult=$ultype";
     if ($ultype == "3")
     {
-	    $ul2 = trim($_GET['ul2']);
+	    $ul2 = trim(\App\Support\SupportContext::getQuery('ul2'));
     	if(!$ul2)
     	{
       	stdmsg("Error", "Two uploaded amounts needed for this type of search.");
@@ -543,7 +545,7 @@ if (count($_GET) > 0 && !$_GET['h'])
   }
 
   // downloaded
-  $dl = trim($_GET['dl']);
+  $dl = trim(\App\Support\SupportContext::getQuery('dl'));
   if ($dl)
   {
   	if (!is_numeric($dl) || $dl < 0)
@@ -552,11 +554,11 @@ if (count($_GET) > 0 && !$_GET['h'])
     	stdfoot();
       return;
     }
-    $dltype = $_GET['dlt'];
+    $dltype = \App\Support\SupportContext::getQuery('dlt');
     $q .= ($q ? "&" : "") . "dlt=$dltype";
     if ($dltype == "3")
     {
-    	$dl2 = trim($_GET['dl2']);
+    	$dl2 = trim(\App\Support\SupportContext::getQuery('dl2'));
       if(!$dl2)
       {
       	stdmsg("Error", "Two downloaded amounts needed for this type of search.");
@@ -582,7 +584,7 @@ if (count($_GET) > 0 && !$_GET['h'])
   }
 
   // date joined
-  $date = trim($_GET['d']);
+  $date = trim(\App\Support\SupportContext::getQuery('d'));
   if ($date)
   {
   	if (!$date = mkdate($date))
@@ -592,7 +594,7 @@ if (count($_GET) > 0 && !$_GET['h'])
       return;
     }
     $q .= ($q ? "&" : "") . "d=$date";
-    $datetype = $_GET['dt'];
+    $datetype = \App\Support\SupportContext::getQuery('dt');
 		$q .= ($q ? "&" : "") . "dt=$datetype";
     if ($datetype == "0")
     {
@@ -602,7 +604,7 @@ if (count($_GET) > 0 && !$_GET['h'])
     {
       if ($datetype == "3")
       {
-        $date2 = mkdate(trim($_GET['d2']));
+        $date2 = mkdate(trim(\App\Support\SupportContext::getQuery('d2')));
         if ($date2)
         {
           $q .= ($q ? "&" : "") . "d2=$date2";
@@ -623,7 +625,7 @@ if (count($_GET) > 0 && !$_GET['h'])
   }
 
 	// date last seen
-  $last = trim($_GET['ls']);
+  $last = trim(\App\Support\SupportContext::getQuery('ls'));
   if ($last)
   {
   	if (!$last = mkdate($last))
@@ -633,7 +635,7 @@ if (count($_GET) > 0 && !$_GET['h'])
       return;
     }
     $q .= ($q ? "&" : "") . "ls=$last";
-    $lasttype = $_GET['lst'];
+    $lasttype = \App\Support\SupportContext::getQuery('lst');
     $q .= ($q ? "&" : "") . "lst=$lasttype";
     if ($lasttype == "0")
     {
@@ -643,7 +645,7 @@ if (count($_GET) > 0 && !$_GET['h'])
     {
       if ($lasttype == "3")
       {
-      	$last2 = mkdate(trim($_GET['ls2']));
+      	$last2 = mkdate(trim(\App\Support\SupportContext::getQuery('ls2')));
         if ($last2)
         {
         	$q .= ($q ? "&" : "") . "ls2=$last2";
@@ -664,7 +666,7 @@ if (count($_GET) > 0 && !$_GET['h'])
   }
 
   // status
-  $status = $_GET['st'];
+  $status = \App\Support\SupportContext::getQuery('st');
   if ($status)
   {
   	$userQuery->where('u.status', $status == "1" ? 'confirmed' : 'pending');
@@ -672,7 +674,7 @@ if (count($_GET) > 0 && !$_GET['h'])
   }
 
   // account status
-  $accountstatus = $_GET['as'];
+  $accountstatus = \App\Support\SupportContext::getQuery('as');
   if ($accountstatus)
   {
   	$userQuery->where('u.enabled', $accountstatus == "1" ? 'yes' : 'no');
@@ -680,7 +682,7 @@ if (count($_GET) > 0 && !$_GET['h'])
   }
 
   //donor
-	$donor = $_GET['do'];
+	$donor = \App\Support\SupportContext::getQuery('do');
   if ($donor)
   {
 		$userQuery->where('u.donor', $donor == 1 ? 'yes' : 'no');
@@ -688,7 +690,7 @@ if (count($_GET) > 0 && !$_GET['h'])
   }
 
   //warned
-	$warned = $_GET['w'];
+	$warned = \App\Support\SupportContext::getQuery('w');
   if ($warned)
   {
 		$userQuery->where('u.warned', $warned == 1 ? 'yes' : 'no');
@@ -696,7 +698,7 @@ if (count($_GET) > 0 && !$_GET['h'])
   }
 
   // disabled IP
-  $disabled = $_GET['dip'];
+  $disabled = \App\Support\SupportContext::getQuery('dip');
   if ($disabled)
   {
     $userQuery->leftJoin('users as u2', 'u.ip', '=', 'u2.ip')->where('u2.enabled', 'no');
@@ -704,7 +706,7 @@ if (count($_GET) > 0 && !$_GET['h'])
   }
 
   // active
-  $active = $_GET['ac'];
+  $active = \App\Support\SupportContext::getQuery('ac');
   if ($active == "1")
   {
     $userQuery->leftJoin('peers as p', 'u.id', '=', 'p.userid');
@@ -719,11 +721,11 @@ if ($hasModcomment) {
 
 $count = (int) (clone $userQuery)->selectRaw('count(distinct u.id) as count')->value('count');
 
-$q = isset($q)?($q."&"):"";
+$q = (isset($q))?($q."&"):"";
 
 $perpage = 30;
 
-list($pagertop, $pagerbottom, , $offset, $rpp, ) = pager($perpage, $count, $_SERVER["REQUEST_URI"]."?".$q);
+list($pagertop, $pagerbottom, , $offset, $rpp, ) = pager($perpage, $count, $__server_REQUEST_URI."?".$q);
 
 $res = (clone $userQuery)->distinct()->selectRaw($select_is)->offset($offset)->limit($rpp)->get()->map(fn ($row) => (array)$row)->all();
 

@@ -1,4 +1,6 @@
 <?php
+
+$__server_QUERY_STRING = \App\Support\SupportContext::getServerValue('QUERY_STRING');
 $searchBoxRightTdStyle = 'padding: 1px;padding-left: 10px;white-space: nowrap';
 if ($allsec != 1 || $enablespecial != 'yes'){ //do not print searchbox if showing bookmarked torrents from all sections;
 ?>
@@ -48,7 +50,7 @@ if ($allsec != 1 || $enablespecial != 'yes'){ //do not print searchbox if showin
 //					}
 //					?>
 <!--				</table>-->
-                <?php echo build_search_box_category_table($sectiontype, '1', '?', '?', 0, $_SERVER['QUERY_STRING'], ['select_unselect' => true, 'user_notifs' => $CURUSER['notifs']])?>
+                <?php echo build_search_box_category_table($sectiontype, '1', '?', '?', 0, $__server_QUERY_STRING, ['select_unselect' => true, 'user_notifs' => $CURUSER['notifs']])?>
 			</td>
 
 			<td class="rowfollow" valign="middle">
@@ -106,7 +108,7 @@ if ($allsec != 1 || $enablespecial != 'yes'){ //do not print searchbox if showin
                                 <option value=""><?php echo $lang_torrents['select_all'] ?></option>
                                 <?php
                                 foreach (\App\Models\Torrent::listApprovalStatus(true) as $key => $value) {
-                                    printf('<option value="%s"%s>%s</option>', $key, isset($approvalStatus) && (string)$approvalStatus === (string)$key ? ' selected' : '', $value);
+                                    printf('<option value="%s"%s>%s</option>', $key, (isset($approvalStatus)) && (string)$approvalStatus === (string)$key ? ' selected' : '', $value);
                                 }
                                 ?>
                             </select>
@@ -120,7 +122,7 @@ if ($allsec != 1 || $enablespecial != 'yes'){ //do not print searchbox if showin
                     </tr>
                     <tr>
                         <td class="bottom" style="<?php echo $searchBoxRightTdStyle ?>">
-                            <input type="number" min="1" name="size_begin" style="width: <?php echo $filterInputWidth?>px" value="<?php echo htmlspecialchars($_GET['size_begin'] ?? '') ?>"/> ~ <input type="number" min="1" name="size_end" style="width: <?php echo $filterInputWidth?>px" value="<?php echo htmlspecialchars($_GET['size_end'] ?? '') ?>"/>
+                            <input type="number" min="1" name="size_begin" style="width: <?php echo $filterInputWidth?>px" value="<?php echo htmlspecialchars(\App\Support\SupportContext::getQuery('size_begin') ?? '') ?>"/> ~ <input type="number" min="1" name="size_end" style="width: <?php echo $filterInputWidth?>px" value="<?php echo htmlspecialchars(\App\Support\SupportContext::getQuery('size_end') ?? '') ?>"/>
                         </td>
                     </tr>
 
@@ -131,7 +133,7 @@ if ($allsec != 1 || $enablespecial != 'yes'){ //do not print searchbox if showin
                     </tr>
                     <tr>
                         <td class="bottom" style="<?php echo $searchBoxRightTdStyle ?>">
-                            <input type="number" min="1" name="seeders_begin" style="width: <?php echo $filterInputWidth?>px" value="<?php echo htmlspecialchars($_GET['seeders_begin'] ?? '') ?>"/> ~ <input type="number" min="1" name="seeders_end" style="width: <?php echo $filterInputWidth?>px" value="<?php echo htmlspecialchars($_GET['seeders_end'] ?? '') ?>"/>
+                            <input type="number" min="1" name="seeders_begin" style="width: <?php echo $filterInputWidth?>px" value="<?php echo htmlspecialchars(\App\Support\SupportContext::getQuery('seeders_begin') ?? '') ?>"/> ~ <input type="number" min="1" name="seeders_end" style="width: <?php echo $filterInputWidth?>px" value="<?php echo htmlspecialchars(\App\Support\SupportContext::getQuery('seeders_end') ?? '') ?>"/>
                         </td>
                     </tr>
 
@@ -142,7 +144,7 @@ if ($allsec != 1 || $enablespecial != 'yes'){ //do not print searchbox if showin
                     </tr>
                     <tr>
                         <td class="bottom" style="<?php echo $searchBoxRightTdStyle ?>">
-                            <input type="number" min="1" name="leechers_begin" style="width: <?php echo $filterInputWidth?>px" value="<?php echo htmlspecialchars($_GET['leechers_begin'] ?? '') ?>"/> ~ <input type="number" min="1" name="leechers_end" style="width: <?php echo $filterInputWidth?>px" value="<?php echo htmlspecialchars($_GET['leechers_end'] ?? '') ?>"/>
+                            <input type="number" min="1" name="leechers_begin" style="width: <?php echo $filterInputWidth?>px" value="<?php echo htmlspecialchars(\App\Support\SupportContext::getQuery('leechers_begin') ?? '') ?>"/> ~ <input type="number" min="1" name="leechers_end" style="width: <?php echo $filterInputWidth?>px" value="<?php echo htmlspecialchars(\App\Support\SupportContext::getQuery('leechers_end') ?? '') ?>"/>
                         </td>
                     </tr>
 
@@ -153,7 +155,7 @@ if ($allsec != 1 || $enablespecial != 'yes'){ //do not print searchbox if showin
                     </tr>
                     <tr>
                         <td class="bottom" style="<?php echo $searchBoxRightTdStyle ?>">
-                            <input type="number" min="1" name="times_completed_begin" style="width: <?php echo $filterInputWidth?>px" value="<?php echo htmlspecialchars($_GET['times_completed_begin'] ?? '') ?>"/> ~ <input type="number" min="1" name="times_completed_end" style="width: <?php echo $filterInputWidth?>px" value="<?php echo htmlspecialchars($_GET['times_completed_end'] ?? '') ?>"/>
+                            <input type="number" min="1" name="times_completed_begin" style="width: <?php echo $filterInputWidth?>px" value="<?php echo htmlspecialchars(\App\Support\SupportContext::getQuery('times_completed_begin') ?? '') ?>"/> ~ <input type="number" min="1" name="times_completed_end" style="width: <?php echo $filterInputWidth?>px" value="<?php echo htmlspecialchars(\App\Support\SupportContext::getQuery('times_completed_end') ?? '') ?>"/>
                         </td>
                     </tr>
 
@@ -166,8 +168,8 @@ if ($allsec != 1 || $enablespecial != 'yes'){ //do not print searchbox if showin
                         <td class="bottom" style="<?php echo $searchBoxRightTdStyle ?>">
                             <?php echo sprintf(
                                 '%s ~ %s',
-                                datetimepicker_input('added_begin', htmlspecialchars($_GET['added_begin'] ?? ''), '', ['require_files' => true, 'format' => 'Y-m-d', 'style' => 'width: '.$filterInputWidth.'px']),
-                                datetimepicker_input('added_end', htmlspecialchars($_GET['added_end'] ?? ''), '', ['require_files' => false, 'format' => 'Y-m-d', 'style' => 'width: '.$filterInputWidth.'px']),
+                                datetimepicker_input('added_begin', htmlspecialchars(\App\Support\SupportContext::getQuery('added_begin') ?? ''), '', ['require_files' => true, 'format' => 'Y-m-d', 'style' => 'width: '.$filterInputWidth.'px']),
+                                datetimepicker_input('added_end', htmlspecialchars(\App\Support\SupportContext::getQuery('added_end') ?? ''), '', ['require_files' => false, 'format' => 'Y-m-d', 'style' => 'width: '.$filterInputWidth.'px']),
                             ) ?>
                         </td>
                     </tr>
@@ -199,14 +201,14 @@ if ($allsec != 1 || $enablespecial != 'yes'){ //do not print searchbox if showin
 
 							<select name="search_area">
 								<option value="0"><?php echo $lang_torrents['select_title'] ?></option>
-								<option value="1"<?php print(isset($_GET["search_area"]) && $_GET["search_area"] == 1 ? " selected=\"selected\"" : ""); ?>><?php echo $lang_torrents['select_description'] ?></option>
-								<option value="3"<?php print(isset($_GET["search_area"]) && $_GET["search_area"] == 3 ? " selected=\"selected\"" : ""); ?>><?php echo $lang_torrents['select_uploader'] ?></option>
+								<option value="1"<?php print(((\App\Support\SupportContext::getQuery("search_area") !== null)) && \App\Support\SupportContext::getQuery("search_area") == 1 ? " selected=\"selected\"" : ""); ?>><?php echo $lang_torrents['select_description'] ?></option>
+								<option value="3"<?php print(((\App\Support\SupportContext::getQuery("search_area") !== null)) && \App\Support\SupportContext::getQuery("search_area") == 3 ? " selected=\"selected\"" : ""); ?>><?php echo $lang_torrents['select_uploader'] ?></option>
 							</select>
 
 							<?php echo $lang_torrents['text_with'] ?>
 
 							<select name="search_mode" style="width: 60px;">
-                                <?php echo \App\Models\SearchBox::listSelectModeOptions($_GET["search_mode"] ?? "")?>
+                                <?php echo \App\Models\SearchBox::listSelectModeOptions(\App\Support\SupportContext::getQuery("search_mode") ?? "")?>
 							</select>
 
 							<?php echo $lang_torrents['text_mode'] ?>

@@ -25,7 +25,7 @@ if ($unit <= 0) {
         $total = $unit * $elapsedDay;
         $isUserBonusEnough = $CURUSER['seedbonus'] >= $total;
         $userBonusNotEnoughTip = nexus_trans('self-enable.bonus_not_enough', ['bonus' => $CURUSER['seedbonus']]);
-        if (!empty($_POST['submit'])) {
+        if (!empty(\App\Support\SupportContext::getPost('submit'))) {
             if (!$isUserBonusEnough) {
                 stdmsg('Error', $userBonusNotEnoughTip);
             } else {

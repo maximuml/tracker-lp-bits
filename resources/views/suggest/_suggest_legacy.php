@@ -10,9 +10,9 @@ header("Cache-Control: no-cache, must-revalidate" );
 header("Pragma: no-cache" );
 header("Content-Type: text/xml; charset=utf-8");
 
-if (isset($_GET['q']) && $_GET['q'] != '')
+if (((\App\Support\SupportContext::getQuery('q') !== null)) && \App\Support\SupportContext::getQuery('q') != '')
 {
-	$searchstr = unesc(trim($_GET['q']));
+	$searchstr = unesc(trim(\App\Support\SupportContext::getQuery('q')));
 	
 	$suggestRows = \Nexus\Database\NexusDB::table('suggest')
 	    ->selectRaw('keywords AS suggest, COUNT(*) AS count')

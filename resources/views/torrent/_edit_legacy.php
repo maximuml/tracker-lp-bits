@@ -2,7 +2,9 @@
 extract($context, EXTR_SKIP);
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
-$id = intval($_GET['id'] ?? 0);
+
+$__server_REQUEST_URI = \App\Support\SupportContext::getServerValue('REQUEST_URI');
+$id = intval(\App\Support\SupportContext::getQuery('id') ?? 0);
 if (!$id)
 	die();
 
@@ -50,15 +52,15 @@ $showaudiocodec = (get_searchbox_value($sectionmode, 'showaudiocodec') || ($allo
 $settingMain = get_setting('main');
 stdhead($lang_edit['head_edit_torrent'] . "\"". $row["name"] . "\"");
 
-if (!isset($CURUSER) || ($CURUSER["id"] != $row["owner"] && !user_can('torrentmanage'))) {
+if (!(isset($CURUSER)) || ($CURUSER["id"] != $row["owner"] && !user_can('torrentmanage'))) {
 	print("<h1 align=\"center\">".$lang_edit['text_cannot_edit_torrent']."</h1>");
-	echo sprintf("<p>".$lang_edit['text_cannot_edit_torrent_note']."</p>", $_SERVER["REQUEST_URI"] ?? '');
+	echo sprintf("<p>".$lang_edit['text_cannot_edit_torrent_note']."</p>", $__server_REQUEST_URI ?? '');
 }
 else {
 	print("<form method=\"post\" id=\"compose\" name=\"edittorrent\" action=\"takeedit.php\" enctype=\"multipart/form-data\">");
 	print("<input type=\"hidden\" name=\"id\" value=\"$id\" />");
-	if (isset($_GET["returnto"]))
-	print("<input type=\"hidden\" name=\"returnto\" value=\"" . htmlspecialchars($_GET["returnto"]) . "\" />");
+	if (((\App\Support\SupportContext::getQuery("returnto") !== null)))
+	print("<input type=\"hidden\" name=\"returnto\" value=\"" . htmlspecialchars(\App\Support\SupportContext::getQuery("returnto")) . "\" />");
 	print("<table border=\"1\" cellspacing=\"0\" cellpadding=\"5\" width=\"97%\">\n");
 	print("<tr><td class='colhead' colspan='2' align='center'>".htmlspecialchars($row["name"])."</td></tr>");
 	tr($lang_edit['row_torrent_name']."<font color=\"red\">*</font>", "<input type=\"text\" style=\"width: 99%;\" name=\"name\" value=\"" . htmlspecialchars($row["name"]) . "\" />", 1);
@@ -202,8 +204,8 @@ else {
         print("<br /><br />");
         print("<form method=\"post\" action=\"delete.php\">\n");
         print("<input type=\"hidden\" name=\"id\" value=\"$id\" />\n");
-        if (isset($_GET["returnto"]))
-            print("<input type=\"hidden\" name=\"returnto\" value=\"" . htmlspecialchars($_GET["returnto"]) . "\" />\n");
+        if (((\App\Support\SupportContext::getQuery("returnto") !== null)))
+            print("<input type=\"hidden\" name=\"returnto\" value=\"" . htmlspecialchars(\App\Support\SupportContext::getQuery("returnto")) . "\" />\n");
         print("<table border=\"1\" cellspacing=\"0\" cellpadding=\"5\">\n");
         print("<tr><td class=\"colhead\" align=\"left\" style='padding-bottom: 3px' colspan=\"2\">".$lang_edit['text_delete_torrent']."</td></tr>");
         tr("<input name=\"reasontype\" type=\"radio\" value=\"1\" />&nbsp;".$lang_edit['radio_dead'], $lang_edit['text_dead_note'], 1);

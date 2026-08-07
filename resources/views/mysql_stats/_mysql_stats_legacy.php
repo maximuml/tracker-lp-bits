@@ -12,7 +12,7 @@ error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 if (get_user_class() < UC_SYSOP)
 	stderr("Error", "Permission denied.");
 
-$GLOBALS["byteUnits"] = array('Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB');
+\App\Support\SupportContext::setGlobal("byteUnits", array('Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB'));
 
 $day_of_week = array('Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat');
 $month = array('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec');
@@ -39,17 +39,17 @@ $timespanfmt = '%s days, %s hours, %s minutes and %s seconds';
         $dh           = pow(10, $comma);
         $li           = pow(10, $limes);
         $return_value = $value;
-        $unit         = $GLOBALS['byteUnits'][0];
+        $unit         = \App\Support\SupportContext::getGlobal('byteUnits')[0];
 
         for ( $d = 6, $ex = 15; $d >= 1; $d--, $ex-=3 ) {
-            if (isset($GLOBALS['byteUnits'][$d]) && $value >= $li * pow(10, $ex)) {
+            if ((isset(\App\Support\SupportContext::getGlobal('byteUnits')[$d])) && $value >= $li * pow(10, $ex)) {
                 $value = round($value / ( pow(1024, $d) / $dh) ) /$dh;
-                $unit = $GLOBALS['byteUnits'][$d];
+                $unit = \App\Support\SupportContext::getGlobal('byteUnits')[$d];
                 break 1;
             } // end if
         } // end for
 
-        if ($unit != $GLOBALS['byteUnits'][0]) {
+        if ($unit != \App\Support\SupportContext::getGlobal('byteUnits')[0]) {
             $return_value = number_format($value, $comma, '.', ',');
         } else {
             $return_value = number_format($value, 0, '.', ',');
@@ -95,7 +95,9 @@ $timespanfmt = '%s days, %s hours, %s minutes and %s seconds';
      */
     function localisedDate($timestamp = -1, $format = '')
     {
-        global $datefmt, $month, $day_of_week;
+$datefmt = \App\Support\SupportContext::getGlobal('datefmt');
+$month = \App\Support\SupportContext::getGlobal('month');
+$day_of_week = \App\Support\SupportContext::getGlobal('day_of_week');
 
         if ($format == '') {
             $format = $datefmt;
@@ -150,7 +152,7 @@ $timespanfmt = '%s days, %s hours, %s minutes and %s seconds';
         $result = '';
         $len = strlen($format);
         for ($i = 0; $i < $len; $i++) {
-            if ($format[$i] === '%' && $i + 1 < $len && isset($handlers[$format[$i + 1]])) {
+            if ($format[$i] === '%' && $i + 1 < $len && (isset($handlers[$format[$i + 1]]))) {
                 $result .= $handlers[$format[$i + 1]]();
                 $i++;
             } else {

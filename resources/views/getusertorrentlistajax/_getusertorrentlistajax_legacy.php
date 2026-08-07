@@ -9,12 +9,12 @@ header("Pragma: no-cache" );
 //header("Content-Type: text/xml; charset=utf-8");
 
 $torrentRep = new \App\Repositories\TorrentRepository();
-$GLOBALS['torrentRep'] = $torrentRep;
+\App\Support\SupportContext::setGlobal('torrentRep', $torrentRep);
 $seedBoxRep = new \App\Repositories\SeedBoxRepository();
-$GLOBALS['seedBoxRep'] = $seedBoxRep;
-$id = intval($_GET['userid'] ?? 0);
-$GLOBALS['id'] = $id;
-$type = $_GET['type'] ?? '';
+\App\Support\SupportContext::setGlobal('seedBoxRep', $seedBoxRep);
+$id = intval(\App\Support\SupportContext::getQuery('userid') ?? 0);
+\App\Support\SupportContext::setGlobal('id', $id);
+$type = \App\Support\SupportContext::getQuery('type') ?? '';
 if (!in_array($type,array('uploaded','seeding','leeching','completed','incomplete')))
     return;
 if(!user_can('torrenthistory') && $id != $CURUSER["id"])
@@ -22,8 +22,12 @@ if(!user_can('torrenthistory') && $id != $CURUSER["id"])
 
 function maketable($rows, $mode = 'seeding')
 {
-	global $lang_getusertorrentlistajax,$CURUSER,$lang_functions, $id;
-	global $torrentRep, $seedBoxRep;
+$lang_getusertorrentlistajax = (array) (\App\Support\SupportContext::getGlobal('lang_getusertorrentlistajax') ?? []);
+$CURUSER = \App\Support\SupportContext::getUser() ?? [];
+$lang_functions = \App\Support\SupportContext::getLangFunctions();
+$id = \App\Support\SupportContext::getGlobal('id');
+$torrentRep = \App\Support\SupportContext::getGlobal('torrentRep');
+$seedBoxRep = \App\Support\SupportContext::getGlobal('seedBoxRep');
 	$showClient = false;
 	switch ($mode)
 	{
@@ -327,7 +331,7 @@ switch ($type)
 
 if ($query) {
     $cacheKey = sprintf('user:%s:type:%s:total_size', $id, $type);
-    $page = (int)($_GET['page'] ?? 0);
+    $page = (int)(\App\Support\SupportContext::getQuery('page') ?? 0);
     if ($page == 0) {
         $sumRes = [
             'count' => (clone $query)->count(),
@@ -358,7 +362,7 @@ if ($count > 0 && $query)
 $table = $pagertop . $torrentlist . $pagerbottom;
 $hasData = false;
 $summary = sprintf('<b>%s</b>%s', $count, $lang_getusertorrentlistajax['text_record'] . add_s ( $count ));
-if (isset($total_size) && $total_size){
+if ((isset($total_size)) && $total_size){
     $hasData = true;
     $summary .= $lang_getusertorrentlistajax['text_total_size'] . mksize($total_size);
 } elseif ($count) {

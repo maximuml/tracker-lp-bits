@@ -2,11 +2,13 @@
 extract($context, EXTR_SKIP);
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
-if ($_SERVER["REQUEST_METHOD"] == "POST")
+
+$__server_REQUEST_METHOD = \App\Support\SupportContext::getServerValue('REQUEST_METHOD');
+if ($__server_REQUEST_METHOD == "POST")
 {
-	$torrentid = intval($_POST['id'] ?? 0);
-	$type = $_POST['type'];
-	$hidenotice = $_POST['hidenotice'];
+	$torrentid = intval(\App\Support\SupportContext::getPost('id') ?? 0);
+	$type = \App\Support\SupportContext::getPost('type');
+	$hidenotice = \App\Support\SupportContext::getPost('hidenotice');
 	if (!$torrentid || !in_array($type,array('firsttime', 'client', 'ratio'))) {
 		echo "error";
 		return;
@@ -31,8 +33,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST")
 }
 else
 {
-	$torrentid = (int)$_GET["torrentid"];
-	$type = $_GET["type"];
+	$torrentid = (int)\App\Support\SupportContext::getQuery("torrentid");
+	$type = \App\Support\SupportContext::getQuery("type");
 	switch ($type)
 	{
 		case 'client':

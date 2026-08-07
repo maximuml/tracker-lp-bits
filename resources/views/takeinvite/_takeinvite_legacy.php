@@ -22,15 +22,15 @@ try {
     stderr($lang_takeinvite['std_error'], $exception->getMessage());
 }
 function bark($msg) {
-  global $lang_takeinvite;
+$lang_takeinvite = (array) (\App\Support\SupportContext::getGlobal('lang_takeinvite') ?? []);
   stdhead();
   stdmsg($lang_takeinvite['head_invitation_failed'], $msg);
   stdfoot();
   exit;
 }
-$email = unesc(htmlspecialchars(trim($_POST["email"])));
+$email = unesc(htmlspecialchars(trim(\App\Support\SupportContext::getPost("email"))));
 $email = safe_email($email);
-$preRegisterUsername = $_POST['pre_register_username'] ?? '';
+$preRegisterUsername = \App\Support\SupportContext::getPost('pre_register_username') ?? '';
 $isPreRegisterEmailAndUsername = get_setting("system.is_invite_pre_email_and_username") == "yes";
 if (strlen($preRegisterUsername) > 12)
 	bark($lang_takeinvite['std_username_too_long']);
@@ -39,7 +39,7 @@ if (!$email)
 if (!check_email($email))
 	bark($lang_takeinvite['std_invalid_email_address']);
 
-$body = str_replace("<br />", "<br />", nl2br(trim(strip_tags($_POST["body"]))));
+$body = str_replace("<br />", "<br />", nl2br(trim(strip_tags(\App\Support\SupportContext::getPost("body")))));
 if(!$body)
 	bark($lang_takeinvite['std_must_enter_personal_message']);
 
@@ -63,13 +63,13 @@ if (\App\Models\User::query()->where('email', $email)->count() > 0)
 if (\App\Models\Invite::query()->where('invitee', $email)->count() > 0)
   bark($lang_takeinvite['std_invitation_already_sent_to'].htmlspecialchars($email).$lang_takeinvite['std_await_user_registeration']);
 
-if (empty($_POST['hash'])) {
+if (empty(\App\Support\SupportContext::getPost('hash'))) {
     bark($lang_takeinvite['std_must_select_invite']);
 }
-if ($_POST['hash'] == 'permanent') {
+if (\App\Support\SupportContext::getPost('hash') == 'permanent') {
     $hash  = md5(mt_rand(1,10000).$CURUSER['username'].TIMENOW.$CURUSER['passhash']);
 } else {
-    $hashRecord = \App\Models\Invite::query()->where('inviter', $CURUSER['id'])->where('hash', $_POST['hash'])->first();
+    $hashRecord = \App\Models\Invite::query()->where('inviter', $CURUSER['id'])->where('hash', \App\Support\SupportContext::getPost('hash'))->first();
     if (!$hashRecord) {
         bark($lang_takeinvite['hash_not_exists']);
     }
@@ -79,7 +79,7 @@ if ($_POST['hash'] == 'permanent') {
     if ($hashRecord->expired_at->lt(now())) {
         bark($lang_takeinvite['hash_expired']);
     }
-    $hash = $_POST['hash'];
+    $hash = \App\Support\SupportContext::getPost('hash');
 }
 
 $title = $SITENAME.$lang_takeinvite['mail_tilte'];
@@ -101,7 +101,7 @@ EOD;
 $sendResult = sent_mail($email,$SITENAME,$SITEEMAIL,$title,$message,"invitesignup",false,false,'');
 //this email is sent only when someone give out an invitation
 if ($sendResult === true) {
-    if (isset($hashRecord)) {
+    if ((isset($hashRecord))) {
         $update = [
             'invitee' => $email,
             'time_invited' => now(),

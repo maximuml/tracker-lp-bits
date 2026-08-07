@@ -9,18 +9,18 @@ function bark($msg) {
  return;
 }
 user_can('staffmem', true);
-if (empty($_POST['delreport'])) {
+if (empty(\App\Support\SupportContext::getPost('delreport'))) {
     stderr('Error', $lang_functions['select_at_least_one_record']);
 }
-if ($_POST['setdealt']){
+if (\App\Support\SupportContext::getPost('setdealt')){
 	\Nexus\Database\NexusDB::table('reports')
-	    ->whereIn('id', $_POST['delreport'])
+	    ->whereIn('id', \App\Support\SupportContext::getPost('delreport'))
 	    ->where('dealtwith', 0)
 	    ->update(['dealtwith' => 1, 'dealtby' => $CURUSER['id']]);
 	$Cache->delete_value('staff_new_report_count');
 }
-elseif ($_POST['delete']){
-	\Nexus\Database\NexusDB::table('reports')->whereIn('id', $_POST['delreport'])->delete();
+elseif (\App\Support\SupportContext::getPost('delete')){
+	\Nexus\Database\NexusDB::table('reports')->whereIn('id', \App\Support\SupportContext::getPost('delreport'))->delete();
 	$Cache->delete_value('staff_new_report_count');
 	$Cache->delete_value('staff_report_count');
 }

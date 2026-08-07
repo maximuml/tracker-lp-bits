@@ -269,3 +269,27 @@ PR #232 injects a filtered `$context` into every Blade view (`View::composer('*'
 - `/signup.php` only works if `auth.blade.php` includes jQuery and layer; without them the `Sign up!` button does nothing because the inline handler uses `jQuery`/`layer`.
 - `/image.php?action=regimage` may return 404 when `security.iv=no` or the configured captcha driver does not implement `outputImage()`; this is environment/config, not necessarily a PR regression.
 - `takeinvite.php` redirects with `sent=1` even when `Mail::sent` cannot send because `smtp.smtptype=none`; the insert is gated on `sent_mail()` returning `true`.
+
+## Testing PR #52/53 drain-blade-globals
+
+PR #52/53 removes `include/bittorrent.php` and `include/cleanup_cli.php`, loads `include/core.php` from `artisan`, refactors `CleanupRun` to call `CleanupService::runFull()` directly, drains raw `$_GET`/`$_POST`/`$_SERVER`/`$GLOBALS` usage from ~115 legacy Blade/PHP partials, and routes `public/announce.php` and `public/scrape.php` through `public/nexus.php`.
+
+### What to verify
+
+- `docker compose exec php php artisan cleanup:run --force` exits 0 and prints `Full cleanup is done` + `[CLEANUP_RUN] DONE, cost time: <n> seconds`.
+- `include/bittorrent.php` and `include/cleanup_cli.php` do not exist; `artisan` requires `include/core.php`.
+- `php -l` on changed files; `grep -R` in `resources/views` for `$_GET|$_POST|$_REQUEST|$_SERVER|$_FILES|$_COOKIE` returns nothing; `extract($context, EXTR_SKIP)` is present.
+- `/announce.php` and `/scrape.php` return valid bencode (use a valid `-qB4...` peer_id and 20-byte `info_hash`).
+- Signup from `/signup.php` creates a user and lands on `ok.php?type=confirm`; the new user can log in and visit `userdetails.php` / `usercp.php`.
+- Critical path (`index`, `torrents`, `details`, `download`, `forums`, `offers`, `userdetails`, `login/logout`) renders without 500.
+- SupportContext-heavy pages: `usersearch`, `usercp`, `messages`, `modtask`, `forum`, `offers`, `getrss`, `torrentrss`, `invite`, `bitbucket-upload`, `settings`, `freeleech`, `magic`, `medal`, `task`, `bonus-log`, `uploaders`.
+- POST wrappers: `takemessage`, `sendmessage`, `takeinvite`, `modrules`, `moforums`, `deletemessage`, `delete` / `fastdelete`.
+
+### Common gotchas
+
+- After the superglobal draining, search `resources/views/**` for `SupportContext::get*(bare_word)` (e.g. `getQuery(action)` or `getPost(returnto)`) and fix missing string quotes. `/complains.php` and `/forums.php` POST actions (`setlocked`, `hltopic`, `setsticky`) will throw `Undefined constant "..."` if left unquoted.
+- Use `http://localhost` (not `http://openresty`) for browser/curl tests when `basic.BASEURL` is set to `localhost`; otherwise redirects and `c_secure_pass` cookies will not match.
+- A `c_secure_pass` cookie generated on `localhost` cannot be reused on `openresty`. Generate tokens with `App\Support\AuthCookie::buildToken()` inside the `php` container for curl scripts.
+- `takeinvite.php` needs working mail to persist an invite; use `invite.php?id=<uid>` for UI verification and expect `sent=1` redirect.
+- `download.php?id=<id>&letdown=1` should return `application/x-bittorrent` and a bencode payload.
+- `comment.php` should be POSTed as a normal form (`curl -d ...`), not with `curl -X POST -L`, so the 302 redirect is followed with GET.

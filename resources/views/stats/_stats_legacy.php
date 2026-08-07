@@ -1,6 +1,8 @@
 <?php
 extract($context, EXTR_SKIP);
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
+
+$__server_PHP_SELF = \App\Support\SupportContext::getServerValue('PHP_SELF');
 if (get_user_class() < UC_MODERATOR)
 	stderr("Error", "Permission denied.");
 
@@ -25,8 +27,8 @@ begin_main_frame();
 $n_tor = \Nexus\Database\NexusDB::table('torrents')->count();
 $n_peers = \Nexus\Database\NexusDB::table('peers')->count();
 
-$uporder = $_GET['uporder'] ?? '';
-$catorder = $_GET["catorder"] ?? '';
+$uporder = \App\Support\SupportContext::getQuery('uporder') ?? '';
+$catorder = \App\Support\SupportContext::getQuery("catorder") ?? '';
 
 if ($uporder == "lastul")
 	$orderby = "last DESC, name";
@@ -54,11 +56,11 @@ else
 	begin_frame("Uploader Activity", True);
 	begin_table();
 	print("<tr>\n
-	<td class=colhead><a href=\"" . $_SERVER['PHP_SELF'] . "?uporder=uploader&catorder=$catorder\" class=colheadlink>Uploader</a></td>\n
-	<td class=colhead><a href=\"" . $_SERVER['PHP_SELF'] . "?uporder=lastul&catorder=$catorder\" class=colheadlink>Last Upload</a></td>\n
-	<td class=colhead><a href=\"" . $_SERVER['PHP_SELF'] . "?uporder=torrents&catorder=$catorder\" class=colheadlink>Torrents</a></td>\n
+	<td class=colhead><a href=\"" . $__server_PHP_SELF . "?uporder=uploader&catorder=$catorder\" class=colheadlink>Uploader</a></td>\n
+	<td class=colhead><a href=\"" . $__server_PHP_SELF . "?uporder=lastul&catorder=$catorder\" class=colheadlink>Last Upload</a></td>\n
+	<td class=colhead><a href=\"" . $__server_PHP_SELF . "?uporder=torrents&catorder=$catorder\" class=colheadlink>Torrents</a></td>\n
 	<td class=colhead>Perc.</td>\n
-	<td class=colhead><a href=\"" . $_SERVER['PHP_SELF'] . "?uporder=peers&catorder=$catorder\" class=colheadlink>Peers</a></td>\n
+	<td class=colhead><a href=\"" . $__server_PHP_SELF . "?uporder=peers&catorder=$catorder\" class=colheadlink>Peers</a></td>\n
 	<td class=colhead>Perc.</td>\n
 	</tr>\n");
 	foreach ($upers as $uper)
@@ -98,11 +100,11 @@ else
 
 	begin_frame("Category Activity", True);
 	begin_table();
-	print("<tr><td class=colhead><a href=\"" . $_SERVER['PHP_SELF'] . "?uporder=$uporder&catorder=category\" class=colheadlink>Category</a></td>
-	<td class=colhead><a href=\"" . $_SERVER['PHP_SELF'] . "?uporder=$uporder&catorder=lastul\" class=colheadlink>Last Upload</a></td>
-	<td class=colhead><a href=\"" . $_SERVER['PHP_SELF'] . "?uporder=$uporder&catorder=torrents\" class=colheadlink>Torrents</a></td>
+	print("<tr><td class=colhead><a href=\"" . $__server_PHP_SELF . "?uporder=$uporder&catorder=category\" class=colheadlink>Category</a></td>
+	<td class=colhead><a href=\"" . $__server_PHP_SELF . "?uporder=$uporder&catorder=lastul\" class=colheadlink>Last Upload</a></td>
+	<td class=colhead><a href=\"" . $__server_PHP_SELF . "?uporder=$uporder&catorder=torrents\" class=colheadlink>Torrents</a></td>
 	<td class=colhead>Perc.</td>
-	<td class=colhead><a href=\"" . $_SERVER['PHP_SELF'] . "?uporder=$uporder&catorder=peers\" class=colheadlink>Peers</a></td>
+	<td class=colhead><a href=\"" . $__server_PHP_SELF . "?uporder=$uporder&catorder=peers\" class=colheadlink>Peers</a></td>
 	<td class=colhead>Perc.</td></tr>\n");
 	foreach ($cats as $cat)
 	{

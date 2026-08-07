@@ -3,14 +3,14 @@ extract($context, EXTR_SKIP);
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 function bark($msg)
 {
-   global $lang_takeflush;
+$lang_takeflush = (array) (\App\Support\SupportContext::getGlobal('lang_takeflush') ?? []);
    stdhead();
    stdmsg($lang_takeflush['std_failed'], $msg);
    stdfoot();
    return;
 }
 
-$id = intval($_GET['id'] ?? 0);
+$id = intval(\App\Support\SupportContext::getQuery('id') ?? 0);
 int_check($id,true);
 
 if (get_user_class() >= UC_MODERATOR || $CURUSER['id'] == "$id")

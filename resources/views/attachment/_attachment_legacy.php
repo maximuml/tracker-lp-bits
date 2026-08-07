@@ -1,6 +1,8 @@
 <?php
 extract($context, EXTR_SKIP);
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
+
+$__server_REQUEST_METHOD = \App\Support\SupportContext::getServerValue('REQUEST_METHOD');
 include_once($rootpath . 'classes/class_attachment.php');
 
 $Attach = new ATTACHMENT($CURUSER['id']);
@@ -10,7 +12,7 @@ $count_left = $Attach->get_count_left();
 $size_limit = $Attach->get_size_limit_byte();
 $allowed_exts = $Attach->get_allowed_ext();
 $css_uri = get_css_uri();
-$altsize = $_POST['altsize'] ?? '';
+$altsize = \App\Support\SupportContext::getPost('altsize') ?? '';
 ?>
 <html>
 <head>
@@ -24,9 +26,9 @@ $altsize = $_POST['altsize'] ?? '';
 $warning = "";
 if ($Attach->enable_attachment())
 {
-	if ($_SERVER["REQUEST_METHOD"] == "POST")
+	if ($__server_REQUEST_METHOD == "POST")
 	{
-		$file = $_FILES['file'];
+		$file = \App\Support\SupportContext::getFile('file');
 		$filesize = $file["size"];
 		$filetype = $file["type"];
 		$origfilename = $file['name'];
@@ -262,15 +264,15 @@ if ($Attach->enable_attachment())
 				    'driver' => $storageDriver,
 				]);
 				$count_left--;
-				if (!empty($_REQUEST['callback_func']) && preg_match('/^preview_custom_field_image_\d+$/', $_REQUEST['callback_func'])) {
-                    echo sprintf('<script type="text/javascript">parent.%s("%s", "%s")</script>', $_REQUEST['callback_func'], $dlkey, $url);
+				if (!empty(\App\Support\SupportContext::getRequestInput('callback_func')) && preg_match('/^preview_custom_field_image_\d+$/', \App\Support\SupportContext::getRequestInput('callback_func'))) {
+                    echo sprintf('<script type="text/javascript">parent.%s("%s", "%s")</script>', \App\Support\SupportContext::getRequestInput('callback_func'), $dlkey, $url);
                 } else {
                     echo("<script type=\"text/javascript\">parent.tag_extimage('". "[attach]" . $dlkey . "[/attach]" . "');</script>");
                 }
 			}
 		}
 	}
-	print("<form enctype=\"multipart/form-data\" name=\"attachment\" method=\"post\" action=\"attachment.php?callback_func=" . ($_REQUEST['callback_func'] ?? '') . "\">");
+	print("<form enctype=\"multipart/form-data\" name=\"attachment\" method=\"post\" action=\"attachment.php?callback_func=" . (\App\Support\SupportContext::getRequestInput('callback_func') ?? '') . "\">");
 	print("<tr>");
 	print("<td class=\"embedded\" colspan=\"2\" align=left>");
 	print("<input type=\"file\" name=\"file\"".($count_left ? "" : " disabled=\"disabled\"")." />&nbsp;");

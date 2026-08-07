@@ -4,29 +4,29 @@ error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 user_can('staffmem', true);
 
 
-if (!empty($_POST['setdealt'])) {
-    if (empty($_POST['delcheater'])) {
+if (!empty(\App\Support\SupportContext::getPost('setdealt'))) {
+    if (empty(\App\Support\SupportContext::getPost('delcheater'))) {
         stderr("Error", $lang_functions['select_at_least_one_record']);
     }
-//	$res = sql_query ("SELECT id FROM cheaters WHERE dealtwith=0 AND id IN (" . implode(", ", $_POST['delcheater']) . ")");
+//	$res = sql_query ("SELECT id FROM cheaters WHERE dealtwith=0 AND id IN (" . implode(", ", \App\Support\SupportContext::getPost('delcheater')) . ")");
 //	while ($arr = mysql_fetch_assoc($res))
 //		sql_query ("UPDATE cheaters SET dealtwith=1, dealtby = {$CURUSER['id']} WHERE id = {$arr['id']}") or sqlerr();
 
-	\App\Models\Cheater::query()->whereIn('id', $_POST['delcheater'])
+	\App\Models\Cheater::query()->whereIn('id', \App\Support\SupportContext::getPost('delcheater'))
         ->where('dealtwith', 0)
         ->update(['dealtwith' => 1, 'dealtby' => $CURUSER['id']])
     ;
 	$Cache->delete_value('staff_new_cheater_count');
 }
-elseif (!empty($_POST['delete'])) {
-    if (empty($_POST['delcheater'])) {
+elseif (!empty(\App\Support\SupportContext::getPost('delete'))) {
+    if (empty(\App\Support\SupportContext::getPost('delcheater'))) {
         stderr("Error", $lang_functions['select_at_least_one_record']);
     }
-//	$res = sql_query ("SELECT id FROM cheaters WHERE id IN (" . implode(", ", $_POST['delcheater']) . ")");
+//	$res = sql_query ("SELECT id FROM cheaters WHERE id IN (" . implode(", ", \App\Support\SupportContext::getPost('delcheater')) . ")");
 //	while ($arr = mysql_fetch_assoc($res))
 //		sql_query ("DELETE from cheaters WHERE id = {$arr['id']}") or sqlerr();
 
-	\App\Models\Cheater::query()->whereIn('id', $_POST['delcheater'])->delete();
+	\App\Models\Cheater::query()->whereIn('id', \App\Support\SupportContext::getPost('delcheater'))->delete();
 	$Cache->delete_value('staff_new_cheater_count');
 }
 

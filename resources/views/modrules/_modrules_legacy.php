@@ -9,7 +9,7 @@ function clear_rules_cache()
     \Nexus\Database\NexusDB::cache_del('rules');
 }
 
-if (isset($_GET["act"]) && $_GET["act"] == "newsect")
+if (((\App\Support\SupportContext::getQuery("act") !== null)) && \App\Support\SupportContext::getQuery("act") == "newsect")
 {
 	stdhead("Add section");
 	//print("<td valign=top style=\"padding: 10px;\" colspan=2 align=center>");
@@ -33,10 +33,10 @@ if (isset($_GET["act"]) && $_GET["act"] == "newsect")
 	print("</td></tr></table>");
 	stdfoot();
 }
-elseif (isset($_GET["act"]) && $_GET["act"]=="addsect"){
-	$title = $_POST["title"];
-	$text = $_POST["text"];
-	$language = $_POST["language"];
+elseif (((\App\Support\SupportContext::getQuery("act") !== null)) && \App\Support\SupportContext::getQuery("act")=="addsect"){
+	$title = \App\Support\SupportContext::getPost("title");
+	$text = \App\Support\SupportContext::getPost("text");
+	$language = \App\Support\SupportContext::getPost("language");
 	\Nexus\Database\NexusDB::table('rules')->insert([
 	    'title' => $title,
 	    'text' => $text,
@@ -46,8 +46,8 @@ elseif (isset($_GET["act"]) && $_GET["act"]=="addsect"){
 	header("Location: modrules.php");
 	return;
 }
-elseif (isset($_GET["act"]) && $_GET["act"] == "edit"){
-	$id = intval($_GET["id"]);
+elseif (((\App\Support\SupportContext::getQuery("act") !== null)) && \App\Support\SupportContext::getQuery("act") == "edit"){
+	$id = intval(\App\Support\SupportContext::getQuery("id"));
 	$res = (array) \Nexus\Database\NexusDB::table('rules')->where('id', $id)->first();
 	stdhead("Edit rules");
 	//print("<td valign=top style=\"padding: 10px;\" colspan=2 align=center>");
@@ -71,11 +71,11 @@ elseif (isset($_GET["act"]) && $_GET["act"] == "edit"){
 	print("</td></tr></table>");
 	stdfoot();
 }
-elseif (isset($_GET["act"]) && $_GET["act"]=="edited"){
-	$id = intval($_POST["id"] ?? 0);
-	$title = $_POST["title"];
-	$text = $_POST["text"];
-	$language = $_POST["language"];
+elseif (((\App\Support\SupportContext::getQuery("act") !== null)) && \App\Support\SupportContext::getQuery("act")=="edited"){
+	$id = intval(\App\Support\SupportContext::getPost("id") ?? 0);
+	$title = \App\Support\SupportContext::getPost("title");
+	$text = \App\Support\SupportContext::getPost("text");
+	$language = \App\Support\SupportContext::getPost("language");
 	\Nexus\Database\NexusDB::table('rules')->where('id', $id)->update([
 	    'title' => $title,
 	    'text' => $text,
@@ -85,9 +85,9 @@ elseif (isset($_GET["act"]) && $_GET["act"]=="edited"){
 	header("Location: modrules.php");
 	return;
 }
-elseif (isset($_GET["act"]) && $_GET["act"]=="del"){
-	$id = (int)$_GET["id"];
-	$sure = intval($_GET["sure"] ?? 0);
+elseif (((\App\Support\SupportContext::getQuery("act") !== null)) && \App\Support\SupportContext::getQuery("act")=="del"){
+	$id = (int)\App\Support\SupportContext::getQuery("id");
+	$sure = intval(\App\Support\SupportContext::getQuery("sure") ?? 0);
 	if (!$sure)
 	{
 		stderr("Delete Rule","You are about to delete a rule. Click <a class=altlink href=?act=del&id=$id&sure=1>here</a> if you are sure.",false);

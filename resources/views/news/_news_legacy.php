@@ -2,18 +2,21 @@
 extract($context, EXTR_SKIP);
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
-$action = htmlspecialchars($_GET["action"] ?? '');
+
+$__server_HTTP_REFERER = \App\Support\SupportContext::getServerValue('HTTP_REFERER');
+$__server_REQUEST_METHOD = \App\Support\SupportContext::getServerValue('REQUEST_METHOD');
+$action = htmlspecialchars(\App\Support\SupportContext::getQuery("action") ?? '');
 
 //  Delete News Item    //////////////////////////////////////////////////////
 
 if ($action == 'delete')
 {
-	$newsid = intval($_GET["newsid"] ?? 0);
+	$newsid = intval(\App\Support\SupportContext::getQuery("newsid") ?? 0);
 	int_check($newsid,true);
 
-	$returnto = !empty($_GET["returnto"]) ? htmlspecialchars($_GET["returnto"]) : htmlspecialchars($_SERVER["HTTP_REFERER"]);
+	$returnto = !empty(\App\Support\SupportContext::getQuery("returnto")) ? htmlspecialchars(\App\Support\SupportContext::getQuery("returnto")) : htmlspecialchars($__server_HTTP_REFERER);
 
-	$sure = intval($_GET["sure"] ?? 0);
+	$sure = intval(\App\Support\SupportContext::getQuery("sure") ?? 0);
 	if (!$sure)
 	stderr($lang_news['std_delete_news_item'], $lang_news['std_are_you_sure'] . "<a class=altlink href=?action=delete&newsid=$newsid&returnto=$returnto&sure=1>".$lang_news['std_here']."</a>".$lang_news['std_if_sure'],false);
 
@@ -29,18 +32,18 @@ if ($action == 'delete')
 
 if ($action == 'add')
 {
-	$body = htmlspecialchars($_POST['body'],ENT_QUOTES);
+	$body = htmlspecialchars(\App\Support\SupportContext::getPost('body'),ENT_QUOTES);
 	if (!$body)
 	stderr($lang_news['std_error'], $lang_news['std_news_body_empty']);
 
-	$title = htmlspecialchars($_POST['subject']);
+	$title = htmlspecialchars(\App\Support\SupportContext::getPost('subject'));
 	if (!$title)
 	stderr($lang_news['std_error'], $lang_news['std_news_title_empty']);
 
-	$added = intval($_POST["added"] ?? 0);
+	$added = intval(\App\Support\SupportContext::getPost("added") ?? 0);
 	if (!$added)
 	$added = date("Y-m-d H:i:s");
-	$notify = $_POST['notify'] ?? '';
+	$notify = \App\Support\SupportContext::getPost('notify') ?? '';
 	if ($notify != 'yes')
 		$notify = 'no';
 	$newsId = \App\Models\News::query()->insertGetId([
@@ -63,7 +66,7 @@ if ($action == 'add')
 if ($action == 'edit')
 {
 
-	$newsid = intval($_GET["newsid"] ?? 0);
+	$newsid = intval(\App\Support\SupportContext::getQuery("newsid") ?? 0);
 	int_check($newsid,true);
 
 	$news = \App\Models\News::query()->where('id', $newsid)->first();
@@ -73,19 +76,19 @@ if ($action == 'edit')
 
 	$arr = $news->toArray();
 
-	if ($_SERVER['REQUEST_METHOD'] == 'POST')
+	if ($__server_REQUEST_METHOD == 'POST')
 	{
-		$body = htmlspecialchars($_POST['body'],ENT_QUOTES);
+		$body = htmlspecialchars(\App\Support\SupportContext::getPost('body'),ENT_QUOTES);
 
 		if ($body == "")
 		stderr($lang_news['std_error'], $lang_news['std_news_body_empty']);
 
-		$title = htmlspecialchars($_POST['subject']);
+		$title = htmlspecialchars(\App\Support\SupportContext::getPost('subject'));
 
 		if ($title == "")
 		stderr($lang_news['std_error'], $lang_news['std_news_title_empty']);
 
-		$notify = $_POST['notify'] ?? '';
+		$notify = \App\Support\SupportContext::getPost('notify') ?? '';
 		if ($notify != 'yes')
 			$notify = 'no';
 		\App\Models\News::query()->where('id', $newsid)->update([

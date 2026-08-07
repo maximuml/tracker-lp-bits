@@ -2,7 +2,7 @@
 extract($context, EXTR_SKIP);
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 function bark($msg) {
-	global $lang_topten;
+$lang_topten = (array) (\App\Support\SupportContext::getGlobal('lang_topten') ?? []);
 	genbark($msg, $lang_topten['std_error']);
 }
 if (!user_can('topten')){
@@ -11,9 +11,9 @@ if (!user_can('topten')){
 
 function usershare_table($res, $frame_caption)
 {
-	global $lang_topten;
-	global $CURUSER;
-	global $lang_topten;
+$lang_topten = (array) (\App\Support\SupportContext::getGlobal('lang_topten') ?? []);
+$CURUSER = \App\Support\SupportContext::getUser() ?? [];
+$lang_topten = (array) (\App\Support\SupportContext::getGlobal('lang_topten') ?? []);
 	begin_frame($frame_caption, true);
 	begin_table();
 ?>
@@ -55,7 +55,7 @@ end_frame();
 
 function _torrenttable($res, $frame_caption)
 {
-	global $lang_topten;
+$lang_topten = (array) (\App\Support\SupportContext::getGlobal('lang_topten') ?? []);
 	begin_frame($frame_caption, true);
 	begin_table();
 ?>
@@ -92,8 +92,8 @@ end_frame();
 
 function countriestable($res, $frame_caption, $what)
 {
-	global $CURUSER;
-	global $lang_topten;
+$CURUSER = \App\Support\SupportContext::getUser() ?? [];
+$lang_topten = (array) (\App\Support\SupportContext::getGlobal('lang_topten') ?? []);
 	begin_frame($frame_caption, true);
 	begin_table();
 ?>
@@ -124,7 +124,7 @@ end_frame();
 
 function peerstable($res, $frame_caption)
 {
-	global $lang_topten;
+$lang_topten = (array) (\App\Support\SupportContext::getGlobal('lang_topten') ?? []);
 	begin_frame($frame_caption, true);
 	begin_table();
 
@@ -142,7 +142,7 @@ function peerstable($res, $frame_caption)
 
 function bonustable($res, $frame_caption)
 {
-	global $lang_topten;
+$lang_topten = (array) (\App\Support\SupportContext::getGlobal('lang_topten') ?? []);
 	begin_frame($frame_caption, true);
 	begin_table();
 
@@ -162,7 +162,7 @@ function bonustable($res, $frame_caption)
 
 function charityTable($res, $frame_caption)
 {
-	global $lang_topten;
+$lang_topten = (array) (\App\Support\SupportContext::getGlobal('lang_topten') ?? []);
 	begin_frame($frame_caption, true);
 	begin_table();
 
@@ -181,7 +181,7 @@ function charityTable($res, $frame_caption)
 
 function cmttable($res, $frame_caption, $col2_name)
 {
-	global $lang_topten;
+$lang_topten = (array) (\App\Support\SupportContext::getGlobal('lang_topten') ?? []);
 	begin_frame($frame_caption, true);
 	begin_table();
 
@@ -199,7 +199,7 @@ function cmttable($res, $frame_caption, $col2_name)
 
 function locationtable($res, $frame_caption)
 {
-	global $lang_topten;
+$lang_topten = (array) (\App\Support\SupportContext::getGlobal('lang_topten') ?? []);
 	begin_frame($frame_caption, true);
 	begin_table();
 
@@ -217,7 +217,7 @@ function locationtable($res, $frame_caption)
 
 function postable($res, $frame_caption)
 {
-	global $lang_topten;
+$lang_topten = (array) (\App\Support\SupportContext::getGlobal('lang_topten') ?? []);
 	begin_frame($frame_caption, true);
 	begin_table();
 
@@ -235,7 +235,7 @@ function postable($res, $frame_caption)
 
 function bigtopic_table($res, $frame_caption)
 {
-	global $lang_topten;
+$lang_topten = (array) (\App\Support\SupportContext::getGlobal('lang_topten') ?? []);
 	begin_frame($frame_caption, true);
 	begin_table();
 
@@ -255,7 +255,7 @@ function bigtopic_table($res, $frame_caption)
 
 function donortable($res, $frame_caption)
 {
-	global $lang_topten;
+$lang_topten = (array) (\App\Support\SupportContext::getGlobal('lang_topten') ?? []);
 	begin_frame($frame_caption, true);
 	begin_table();
 
@@ -273,7 +273,7 @@ function donortable($res, $frame_caption)
 
 function clienttable($res, $frame_caption)
 {
-	global $lang_topten;
+$lang_topten = (array) (\App\Support\SupportContext::getGlobal('lang_topten') ?? []);
 	begin_frame($frame_caption, true);
 	begin_table();
 
@@ -291,7 +291,7 @@ function clienttable($res, $frame_caption)
 
 function lastsearch_table($res, $frame_caption)
 {
-	global $lang_topten;
+$lang_topten = (array) (\App\Support\SupportContext::getGlobal('lang_topten') ?? []);
 	begin_frame($frame_caption, true);
 	begin_table();
 
@@ -309,7 +309,7 @@ function lastsearch_table($res, $frame_caption)
 
 function search_ranktable($res, $frame_caption)
 {
-	global $lang_topten;
+$lang_topten = (array) (\App\Support\SupportContext::getGlobal('lang_topten') ?? []);
 	begin_frame($frame_caption, true);
 	begin_table();
 
@@ -328,9 +328,9 @@ function search_ranktable($res, $frame_caption)
 
 function supply_snatchtable($res, $frame_caption)
 {
-	global $lang_topten;
-	global $CURUSER;
-	global $lang_topten;
+$lang_topten = (array) (\App\Support\SupportContext::getGlobal('lang_topten') ?? []);
+$CURUSER = \App\Support\SupportContext::getUser() ?? [];
+$lang_topten = (array) (\App\Support\SupportContext::getGlobal('lang_topten') ?? []);
 	begin_frame($frame_caption, true);
 	begin_table();
 ?>
@@ -373,7 +373,7 @@ end_frame();
 
 function stylesheettable($res, $frame_caption)
 {
-	global $lang_topten;
+$lang_topten = (array) (\App\Support\SupportContext::getGlobal('lang_topten') ?? []);
 	begin_frame($frame_caption, true);
 	begin_table();
 
@@ -392,7 +392,7 @@ function stylesheettable($res, $frame_caption)
 
 function languagetable($res, $frame_caption)
 {
-	global $lang_topten;
+$lang_topten = (array) (\App\Support\SupportContext::getGlobal('lang_topten') ?? []);
 	begin_frame($frame_caption, true);
 	begin_table();
 
@@ -411,11 +411,11 @@ function languagetable($res, $frame_caption)
 
 stdhead($lang_topten['head_top_ten']);
 begin_main_frame();
-$type = isset($_GET["type"]) ? (int)$_GET["type"] : 0;
+$type = ((\App\Support\SupportContext::getQuery("type") !== null)) ? (int)\App\Support\SupportContext::getQuery("type") : 0;
 if (!in_array($type,array(1,2,3,4,5,6,7)))
 $type = 1;
-$limit = isset($_GET["lim"]) ? (int)$_GET["lim"] : false;
-$subtype = isset($_GET["subtype"]) ? $_GET["subtype"] : false;
+$limit = ((\App\Support\SupportContext::getQuery("lim") !== null)) ? (int)\App\Support\SupportContext::getQuery("lim") : false;
+$subtype = ((\App\Support\SupportContext::getQuery("subtype") !== null)) ? \App\Support\SupportContext::getQuery("subtype") : false;
 
 print("<p align=\"center\">"  .
 ($type == 1 && !$limit ? "<b>".$lang_topten['text_users']."</b>" : "<a href=\"topten.php?type=1\">".$lang_topten['text_users']."</a>") .	" | " .

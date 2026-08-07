@@ -8,32 +8,32 @@ stdfoot();
 exit;
 }
 
-if(isset($_POST["nowarned"])&&($_POST["nowarned"]=="nowarned")){
+if(((\App\Support\SupportContext::getPost("nowarned") !== null))&&(\App\Support\SupportContext::getPost("nowarned")=="nowarned")){
 //if (get_user_class() >= UC_SYSOP) {
 if (get_user_class() < UC_MODERATOR)
 stderr("Sorry", "Access denied.");
 {
-if (empty($_POST["usernw"]) && empty($_POST["desact"]) && empty($_POST["delete"]))
+if (empty(\App\Support\SupportContext::getPost("usernw")) && empty(\App\Support\SupportContext::getPost("desact")) && empty(\App\Support\SupportContext::getPost("delete")))
    bark("You Must Select A User To Edit.");
 
-if (!empty($_POST["usernw"]))
+if (!empty(\App\Support\SupportContext::getPost("usernw")))
 {
 //$msg = sqlesc("Your Warning Has Been Removed By: " . $CURUSER['username'] . ".");
 //$added = sqlesc(date("Y-m-d H:i:s"));
-//$userid = implode(", ", $_POST['usernw']);
+//$userid = implode(", ", \App\Support\SupportContext::getPost('usernw'));
 ////sql_query("INSERT INTO messages (sender, receiver, msg, added) VALUES (0, $userid, $msg, $added)") or sqlerr(__FILE__, __LINE__);
 //
-//$r = sql_query("SELECT modcomment FROM users WHERE id IN (" . implode(", ", $_POST['usernw']) . ")")or sqlerr(__FILE__, __LINE__);
+//$r = sql_query("SELECT modcomment FROM users WHERE id IN (" . implode(", ", \App\Support\SupportContext::getPost('usernw')) . ")")or sqlerr(__FILE__, __LINE__);
 //$user = mysql_fetch_array($r);
 //$exmodcomment = $user["modcomment"];
 //$modcomment = date("Y-m-d") . " - Warning Removed By " . $CURUSER['username'] . ".\n". $modcomment . $exmodcomment;
-//sql_query("UPDATE users SET modcomment=" . sqlesc($modcomment) . " WHERE id IN (" . implode(", ", $_POST['usernw']) . ")") or sqlerr(__FILE__, __LINE__);
+//sql_query("UPDATE users SET modcomment=" . sqlesc($modcomment) . " WHERE id IN (" . implode(", ", \App\Support\SupportContext::getPost('usernw')) . ")") or sqlerr(__FILE__, __LINE__);
 //
-//$do="UPDATE users SET warned='no', warneduntil=null WHERE id IN (" . implode(", ", $_POST['usernw']) . ")";
+//$do="UPDATE users SET warned='no', warneduntil=null WHERE id IN (" . implode(", ", \App\Support\SupportContext::getPost('usernw')) . ")";
 //$res=sql_query($do);
 
 $modcomment = date("Y-m-d") . " - Warning Removed By " . $CURUSER['username'];
-\App\Models\User::query()->whereIn('id', $_POST['usernw'])
+\App\Models\User::query()->whereIn('id', \App\Support\SupportContext::getPost('usernw'))
     ->update([
         'warned' => 'no',
         'warneduntil' => null,
@@ -41,10 +41,10 @@ $modcomment = date("Y-m-d") . " - Warning Removed By " . $CURUSER['username'];
     ]);
 }
 
-if (!empty($_POST["desact"])){
-//$do="UPDATE users SET enabled='no' WHERE id IN (" . implode(", ", $_POST['desact']) . ")";
+if (!empty(\App\Support\SupportContext::getPost("desact"))){
+//$do="UPDATE users SET enabled='no' WHERE id IN (" . implode(", ", \App\Support\SupportContext::getPost('desact')) . ")";
 //$res=sql_query($do);
-    \App\Models\User::query()->whereIn('id', $_POST['desact'])->update(['enabled' => 'no']);
+    \App\Models\User::query()->whereIn('id', \App\Support\SupportContext::getPost('desact'))->update(['enabled' => 'no']);
 }
 }
 }

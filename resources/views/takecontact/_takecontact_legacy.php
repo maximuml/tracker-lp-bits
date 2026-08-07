@@ -1,11 +1,13 @@
 <?php
 extract($context, EXTR_SKIP);
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
-if ($_SERVER["REQUEST_METHOD"] != "POST")
+
+$__server_REQUEST_METHOD = \App\Support\SupportContext::getServerValue('REQUEST_METHOD');
+if ($__server_REQUEST_METHOD != "POST")
 	stderr($lang_takecontact['std_error'], $lang_takecontact['std_method']);
 
-$msg = trim($_POST["body"]);
-$subject = trim($_POST["subject"]);
+$msg = trim(\App\Support\SupportContext::getPost("body"));
+$subject = trim(\App\Support\SupportContext::getPost("subject"));
 
 if (!$msg)
 	stderr($lang_takecontact['std_error'],$lang_takecontact['std_please_enter_something']);
@@ -31,9 +33,9 @@ if (get_user_class() < UC_MODERATOR) {
 $Cache->delete_value('staff_message_count');
 $Cache->delete_value('staff_new_message_count');
 clear_staff_message_cache();
-if ($_POST["returnto"])
+if (\App\Support\SupportContext::getPost("returnto"))
 {
-	header("Location: " . htmlspecialchars($_POST["returnto"]));
+	header("Location: " . htmlspecialchars(\App\Support\SupportContext::getPost("returnto")));
 	return;
 }
 

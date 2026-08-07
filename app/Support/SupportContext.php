@@ -49,6 +49,9 @@ final class SupportContext
     private static array $request = [];
 
     /** @var array<string, mixed> */
+    private static array $files = [];
+
+    /** @var array<string, mixed> */
     private static array $userUpdateSet = [];
 
     private static ?Request $laravelRequest = null;
@@ -80,6 +83,7 @@ final class SupportContext
         self::$get = $_GET;
         self::$post = $_POST;
         self::$request = $_REQUEST;
+        self::$files = $_FILES;
         self::$userUpdateSet = (array) ($GLOBALS['USERUPDATESET'] ?? []);
         $GLOBALS['USERUPDATESET'] = &self::$userUpdateSet;
     }
@@ -95,6 +99,7 @@ final class SupportContext
         self::$get = $request->query->all();
         self::$post = $request->request->all();
         self::$request = $request->input();
+        self::$files = $_FILES;
         self::$userUpdateSet = (array) ($GLOBALS['USERUPDATESET'] ?? []);
         $GLOBALS['USERUPDATESET'] = &self::$userUpdateSet;
     }
@@ -390,6 +395,11 @@ final class SupportContext
         return $_GET[$key] ?? $default;
     }
 
+    public static function removeQuery(string $key): void
+    {
+        unset(self::$get[$key]);
+    }
+
     /** @return  array<string, mixed> */
     public static function allQuery(): array
     {
@@ -421,6 +431,11 @@ final class SupportContext
         }
 
         return $_POST[$key] ?? $default;
+    }
+
+    public static function removePost(string $key): void
+    {
+        unset(self::$post[$key]);
     }
 
     /** @return  array<string, mixed> */
@@ -456,6 +471,11 @@ final class SupportContext
         return $_REQUEST[$key] ?? $default;
     }
 
+    public static function removeRequestInput(string $key): void
+    {
+        unset(self::$request[$key]);
+    }
+
     /** @return  array<string, mixed> */
     public static function allRequest(): array
     {
@@ -465,6 +485,25 @@ final class SupportContext
 
         $request = self::getLaravelRequest();
         return $request !== null ? $request->input() : $_REQUEST;
+    }
+
+    /**
+     * @param  array<string, mixed>  $files
+     */
+    public static function setFiles(array $files): void
+    {
+        self::$files = $files;
+    }
+
+    public static function getFile(string $key, mixed $default = null): mixed
+    {
+        return self::$files[$key] ?? $default;
+    }
+
+    /** @return  array<string, mixed> */
+    public static function allFiles(): array
+    {
+        return self::$files;
     }
 
     public static function setLaravelRequest(?Request $request): void
@@ -505,6 +544,7 @@ final class SupportContext
         self::$get = [];
         self::$post = [];
         self::$request = [];
+        self::$files = [];
         self::$userUpdateSet = [];
         self::$laravelRequest = null;
     }

@@ -3,26 +3,28 @@ extract($context, EXTR_SKIP);
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
 
-if ($_SERVER["REQUEST_METHOD"] != "POST")
+
+$__server_REQUEST_METHOD = \App\Support\SupportContext::getServerValue('REQUEST_METHOD');
+if ($__server_REQUEST_METHOD != "POST")
 	stderr($lang_takemessage['std_error'], $lang_takemessage['std_permission_denied']);
 
-	$origmsg = intval($_POST["origmsg"] ?? 0);
-	$msg = trim($_POST["body"]);
-	if (isset($_POST['forward']) && $_POST['forward'] == 1) //this is forwarding
+	$origmsg = intval(\App\Support\SupportContext::getPost("origmsg") ?? 0);
+	$msg = trim(\App\Support\SupportContext::getPost("body"));
+	if (((\App\Support\SupportContext::getPost('forward') !== null)) && \App\Support\SupportContext::getPost('forward') == 1) //this is forwarding
 	{
 		if (!$origmsg)
 			stderr($lang_takemessage['std_error'], $lang_takemessage['std_invalid_id']);
 		$origmsgRecord = \App\Models\Message::query()->where('id', $origmsg)
 		    ->where(function ($query) {
-		        $query->where('receiver', $GLOBALS['CURUSER']['id'])
-		              ->orWhere('sender', $GLOBALS['CURUSER']['id']);
+		        $query->where('receiver', \App\Support\SupportContext::getGlobal('CURUSER')['id'])
+		              ->orWhere('sender', \App\Support\SupportContext::getGlobal('CURUSER')['id']);
 		    })->first();
 		if (!$origmsgRecord)
 			stderr($lang_takemessage['std_error'], $lang_takemessage['std_no_permission_forwarding']);
 		$origmsgrow = $origmsgRecord->toArray();
-		if(!$_POST['to'])
+		if(!\App\Support\SupportContext::getPost('to'))
 			stderr($lang_takemessage['std_error'], $lang_takemessage['std_must_enter_username']);
-		$receiver = get_user_id_from_name(trim($_POST['to']));
+		$receiver = get_user_id_from_name(trim(\App\Support\SupportContext::getPost('to')));
         $locale = get_user_locale($receiver);
 		if ($origmsgrow['sender'] == 0)
 		{
@@ -38,15 +40,15 @@ if ($_SERVER["REQUEST_METHOD"] != "POST")
 	}
 	else
 	{
-		$receiver = intval($_POST["receiver"] ?? 0);
+		$receiver = intval(\App\Support\SupportContext::getPost("receiver") ?? 0);
 		if (!is_valid_id($receiver) || ($origmsg && !is_valid_id($origmsg)))
 			stderr($lang_takemessage['std_error'],$lang_takemessage['std_invalid_id']);
 		$bodyadd = "";
 		if (!$msg)
 			stderr($lang_takemessage['std_error'],$lang_takemessage['std_please_enter_something']);
 	}
-	$save = $_POST["save"];
-	$returnto = $_POST["returnto"];
+	$save = \App\Support\SupportContext::getPost("save");
+	$returnto = \App\Support\SupportContext::getPost("returnto");
 
 	// Anti Flood Code
 	// This code ensures that a member can only send one PM every 10 seconds.
@@ -97,7 +99,7 @@ if ($_SERVER["REQUEST_METHOD"] != "POST")
 		stderr($lang_takemessage['std_refused'], $lang_takemessage['std_user_blocks_all_pms']);
 	}
 
-	$subject = trim($_POST['subject']);
+	$subject = trim(\App\Support\SupportContext::getPost('subject'));
 
 	$messageRecord = \App\Models\Message::add([
 		'sender' => $CURUSER["id"],
@@ -166,7 +168,7 @@ EOD;
 
 	}
 }
-	$delete = $_POST["delete"];
+	$delete = \App\Support\SupportContext::getPost("delete");
 
 	if ($origmsg)
 	{

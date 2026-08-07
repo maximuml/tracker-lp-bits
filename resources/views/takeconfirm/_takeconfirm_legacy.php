@@ -1,14 +1,14 @@
 <?php
 extract($context, EXTR_SKIP);
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
-$id =  isset($_POST['id']) ? intval($_POST['id']) : (isset($_GET['id']) ? intval($_GET['id']) : die());
+$id =  ((\App\Support\SupportContext::getPost('id') !== null)) ? intval(\App\Support\SupportContext::getPost('id')) : (((\App\Support\SupportContext::getQuery('id') !== null)) ? intval(\App\Support\SupportContext::getQuery('id')) : die());
 int_check($id,true);
 if (($CURUSER['id'] != $id && !user_can('viewinvite')) || !is_valid_id($id))
     stderr($lang_functions['std_sorry'],$lang_functions['std_permission_denied'], true, false);
-$email = unesc(htmlspecialchars(trim($_POST["email"])));
-if(!empty($_POST['conusr'])) {
-//    sql_query("UPDATE users SET status = 'confirmed', editsecret = '' WHERE id IN (" . implode(", ", $_POST['conusr']) . ") AND status='pending'");
-    $userList = \App\Models\User::query()->whereIn('id', $_POST['conusr'])
+$email = unesc(htmlspecialchars(trim(\App\Support\SupportContext::getPost("email"))));
+if(!empty(\App\Support\SupportContext::getPost('conusr'))) {
+//    sql_query("UPDATE users SET status = 'confirmed', editsecret = '' WHERE id IN (" . implode(", ", \App\Support\SupportContext::getPost('conusr')) . ") AND status='pending'");
+    $userList = \App\Models\User::query()->whereIn('id', \App\Support\SupportContext::getPost('conusr'))
         ->where('status', 'pending')
         ->where('invited_by', $id)
         ->get(\App\Models\User::$commonFields)

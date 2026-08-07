@@ -1,8 +1,8 @@
 <?php
 extract($context, EXTR_SKIP);
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
-$action = $_GET['action'] ?? '';
-$imagehash = $_GET['imagehash'] ?? '';
+$action = \App\Support\SupportContext::getQuery('action') ?? '';
+$imagehash = \App\Support\SupportContext::getQuery('imagehash') ?? '';
 
 if ($action !== 'regimage') {
     http_response_code(404);

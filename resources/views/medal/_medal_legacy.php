@@ -2,9 +2,11 @@
 extract($context, EXTR_SKIP);
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
+
+$__server_REQUEST_URI = \App\Support\SupportContext::getServerValue('REQUEST_URI');
 $query = \App\Models\Medal::query()->where('display_on_medal_page', 1)
     ->orderBy('priority', 'desc')->orderBy("id", 'desc');
-$q = htmlspecialchars($_REQUEST['q'] ?? '');
+$q = htmlspecialchars(\App\Support\SupportContext::getRequestInput('q') ?? '');
 if (!empty($q)) {
     $query->where('username', 'name', "%{$q}%");
 }
@@ -28,7 +30,7 @@ $columnGiftFeeLabel = nexus_trans('medal.fields.gift_fee');
 $header = '<h1 style="text-align: center">'.$title.'</h1>';
 $filterForm = <<<FORM
 <div>
-    <form id="filterForm" action="{$_SERVER['REQUEST_URI']}" method="get">
+    <form id="filterForm" action="{$__server_REQUEST_URI}" method="get">
         <input id="q" type="text" name="q" value="{$q}" placeholder="username">
         <input type="submit">
         <input type="reset" onclick="document.getElementById('q').value='';document.getElementById('filterForm').submit();">

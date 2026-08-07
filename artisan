@@ -3,6 +3,13 @@
 
 define('LARAVEL_START', microtime(true));
 
+// Only enter legacy mode for commands that load the legacy bootstrap below.
+// Other artisan commands (migrate, test, etc.) keep IN_NEXUS false so NexusDB
+// falls back to Laravel's DB/Schema/Capsule.
+if (in_array($_SERVER['argv'][1] ?? '', ['cleanup:run'], true)) {
+    defined('IN_NEXUS') || define('IN_NEXUS', true);
+}
+
 /*
 |--------------------------------------------------------------------------
 | Register The Auto Loader
@@ -17,6 +24,15 @@ define('LARAVEL_START', microtime(true));
 require __DIR__.'/vendor/autoload.php';
 
 $app = require_once __DIR__.'/bootstrap/app.php';
+
+// Load the legacy bootstrap for artisan commands that still need $GLOBALS-based
+// helpers. Web requests load this via public/nexus.php; migration/install
+// commands must not load it because the database is not yet populated.
+$command = $_SERVER['argv'][1] ?? '';
+if (in_array($command, ['cleanup:run'], true)) {
+    $rootpath = __DIR__ . '/';
+    require_once $rootpath . 'include/core.php';
+}
 
 /*
 |--------------------------------------------------------------------------

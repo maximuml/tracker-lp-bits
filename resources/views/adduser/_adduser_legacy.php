@@ -2,20 +2,22 @@
 extract($context, EXTR_SKIP);
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
+
+$__server_REQUEST_METHOD = \App\Support\SupportContext::getServerValue('REQUEST_METHOD');
 if (get_user_class() < UC_ADMINISTRATOR)
 stderr("Error", "Access denied.");
-if ($_SERVER["REQUEST_METHOD"] == "POST")
+if ($__server_REQUEST_METHOD == "POST")
 {
-//	if ($_POST["username"] == "" || $_POST["password"] == "" || $_POST["email"] == "")
+//	if (\App\Support\SupportContext::getPost("username") == "" || \App\Support\SupportContext::getPost("password") == "" || \App\Support\SupportContext::getPost("email") == "")
 //	stderr("Error", "Missing form data.");
-//	if ($_POST["password"] != $_POST["password2"])
+//	if (\App\Support\SupportContext::getPost("password") != \App\Support\SupportContext::getPost("password2"))
 //	stderr("Error", "Passwords mismatch.");
-//	$email = htmlspecialchars(trim($_POST["email"]));
+//	$email = htmlspecialchars(trim(\App\Support\SupportContext::getPost("email")));
 //	$email = safe_email($email);
 //	if (!check_email($email))
 //	stderr("Error","Invalid email address!");
 //
-//	$username = $_POST["username"];
+//	$username = \App\Support\SupportContext::getPost("username");
 //
 //	if (!validusername($username))
 //		stderr("Error","Invalid username.");
@@ -24,8 +26,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST")
 //	$arr = mysql_fetch_row($res);
 //	if ($arr)
 //		stderr("Error","Username already exists!");
-//	$password = $_POST["password"];
-//	$email = sqlesc($_POST["email"]);
+//	$password = \App\Support\SupportContext::getPost("password");
+//	$email = sqlesc(\App\Support\SupportContext::getPost("email"));
 //	$res = sql_query("SELECT id FROM users WHERE email=$email");
 //	$arr = mysql_fetch_row($res);
 //	if ($arr)
@@ -43,10 +45,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST")
     try {
         $userRep = new \App\Repositories\UserRepository();
         $newUser = $userRep->store([
-            'username' => $_POST['username'],
-            'email' => $_POST['email'],
-            'password' => $_POST['password'],
-            'password_confirmation' => $_POST['password2'],
+            'username' => \App\Support\SupportContext::getPost('username'),
+            'email' => \App\Support\SupportContext::getPost('email'),
+            'password' => \App\Support\SupportContext::getPost('password'),
+            'password_confirmation' => \App\Support\SupportContext::getPost('password2'),
         ]);
     } catch (\Exception $e) {
         stderr("ERROR", $e->getMessage());

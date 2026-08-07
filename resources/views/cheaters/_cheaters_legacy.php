@@ -1,6 +1,8 @@
 <?php
 extract($context, EXTR_SKIP);
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
+
+$__server_REQUEST_URI = \App\Support\SupportContext::getServerValue('REQUEST_URI');
 // mod_cheat for torrentbits based tracker
 // Copy this file to the same dir as the rest of the tracker stuff...
 
@@ -14,16 +16,16 @@ if (get_user_class() < UC_MODERATOR) stderr("Error", "Permission denied.");
 stdhead("Cheaters");
 begin_frame('Cheaters');
 
-$page = @$_GET['page'];
+$page = @\App\Support\SupportContext::getQuery('page');
 //$perpage = 100; // currently ignored
 
-$class = @$_GET['c'];
+$class = @\App\Support\SupportContext::getQuery('c');
 if (!is_valid_user_class($class-2)) $class = '';
 
-$ratio = @$_GET['r'];
+$ratio = @\App\Support\SupportContext::getQuery('r');
 if (!is_valid_id($ratio) && $ratio>=1 && $ratio<=7) $ratio = '';
 
-echo '<center><form method="get" action="'.$_SERVER["REQUEST_URI"].'">';
+echo '<center><form method="get" action="'.$__server_REQUEST_URI.'">';
 begin_table();
 
 echo '<tr><th colspan="4">Important</th></tr><tr><td colspan="4" class="left">';

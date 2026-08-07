@@ -1,13 +1,15 @@
 <?php
 extract($context, EXTR_SKIP);
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
-$id = (int)$_GET["id"];
+
+$__server_HTTP_USER_AGENT = \App\Support\SupportContext::getServerValue('HTTP_USER_AGENT');
+$id = (int)\App\Support\SupportContext::getQuery("id");
 
 if (!$id) {
 	echo 'Invalid id.';
 	return;
 }
-$dlkey = $_GET["dlkey"];
+$dlkey = \App\Support\SupportContext::getQuery("dlkey");
 
 if (!$dlkey) {
 	echo 'Invalid key';
@@ -30,19 +32,19 @@ if (!$f) {
 }
 header("Content-Type: application/octet-stream");
 
-if ( str_replace("Gecko", "", $_SERVER['HTTP_USER_AGENT']) != $_SERVER['HTTP_USER_AGENT'])
+if ( str_replace("Gecko", "", $__server_HTTP_USER_AGENT) != $__server_HTTP_USER_AGENT)
 {
 	header ("Content-Disposition: attachment; filename=\"{$row['filename']}\" ; charset=utf-8");
 }
-else if ( str_replace("Firefox", "", $_SERVER['HTTP_USER_AGENT']) != $_SERVER['HTTP_USER_AGENT'] )
+else if ( str_replace("Firefox", "", $__server_HTTP_USER_AGENT) != $__server_HTTP_USER_AGENT )
 {
 	header ("Content-Disposition: attachment; filename=\"{$row['filename']}\" ; charset=utf-8");
 }
-else if ( str_replace("Opera", "", $_SERVER['HTTP_USER_AGENT']) != $_SERVER['HTTP_USER_AGENT'] )
+else if ( str_replace("Opera", "", $__server_HTTP_USER_AGENT) != $__server_HTTP_USER_AGENT )
 {
 	header ("Content-Disposition: attachment; filename=\"{$row['filename']}\" ; charset=utf-8");
 }
-else if ( str_replace("IE", "", $_SERVER['HTTP_USER_AGENT']) != $_SERVER['HTTP_USER_AGENT'] )
+else if ( str_replace("IE", "", $__server_HTTP_USER_AGENT) != $__server_HTTP_USER_AGENT )
 {
 	header ("Content-Disposition: attachment; filename=".str_replace("+", "%20", rawurlencode($row['filename'])));
 }

@@ -5,8 +5,8 @@ error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
 header('Content-Type: application/json; charset=utf-8');
 
-$name = trim($_GET['name'] ?? $_POST['name'] ?? '');
-$url = trim($_GET['url'] ?? $_POST['url'] ?? '');
+$name = trim(\App\Support\SupportContext::getQuery('name') ?? \App\Support\SupportContext::getPost('name') ?? '');
+$url = trim(\App\Support\SupportContext::getQuery('url') ?? \App\Support\SupportContext::getPost('url') ?? '');
 
 if (!$name && !$url) {
     echo json_encode(['success' => false, 'error' => 'Torrent name or setlist URL is required.']);

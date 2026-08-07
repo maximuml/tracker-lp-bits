@@ -1,11 +1,16 @@
 <?php
 extract($context, EXTR_SKIP);
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
-$action = $_GET["action"] ?? '';
+
+$__server_HTTP_REFERER = \App\Support\SupportContext::getServerValue('HTTP_REFERER');
+$__server_PHP_SELF = \App\Support\SupportContext::getServerValue('PHP_SELF');
+$__server_QUERY_STRING = \App\Support\SupportContext::getServerValue('QUERY_STRING');
+$__server_REQUEST_METHOD = \App\Support\SupportContext::getServerValue('REQUEST_METHOD');
+$action = \App\Support\SupportContext::getQuery("action") ?? '';
 
 function can_access_staff_message($msg)
 {
-    global $CURUSER;
+$CURUSER = \App\Support\SupportContext::getUser() ?? [];
     if (user_can('staffmem')) {
         return true;
     }
@@ -19,7 +24,7 @@ function can_access_staff_message($msg)
 
 if (!$action) {
 	stdhead($lang_staffbox['head_staff_pm']);
-	$url = $_SERVER['PHP_SELF']."?";
+	$url = $__server_PHP_SELF."?";
     $query = \App\Repositories\MessageRepository::buildStaffMessageQuery($CURUSER['id']);
     $count = $query->count();
 	$perpage = 20;
@@ -55,7 +60,7 @@ if (!$action) {
 			$answered = "<font color=red>".$lang_staffbox['text_no']."</font>";
 
     		$pmid = $arr["id"];
-		print("<tr><td width=100% class=rowfollow align=left><a href=staffbox.php?action=viewpm&pmid=$pmid&return=".urlencode($_SERVER['QUERY_STRING']).">".htmlspecialchars($arr['subject'])."</td><td class=rowfollow align=center>" . get_username($arr['sender']) . "</td><td class=rowfollow align=center><nobr>".gettime($arr['added'], true, false)."</nobr></td><td class=rowfollow align=center>$answered</td><td class=rowfollow align=center><input type=\"checkbox\" name=\"setanswered[]\" value=\"" . $arr['id'] . "\" /></td></tr>\n");
+		print("<tr><td width=100% class=rowfollow align=left><a href=staffbox.php?action=viewpm&pmid=$pmid&return=".urlencode($__server_QUERY_STRING).">".htmlspecialchars($arr['subject'])."</td><td class=rowfollow align=center>" . get_username($arr['sender']) . "</td><td class=rowfollow align=center><nobr>".gettime($arr['added'], true, false)."</nobr></td><td class=rowfollow align=center>$answered</td><td class=rowfollow align=center><input type=\"checkbox\" name=\"setanswered[]\" value=\"" . $arr['id'] . "\" /></td></tr>\n");
 	}
     $checkAll = $lang_functions['input_check_all'];
     $uncheckAll = $lang_functions['input_uncheck_all'];
@@ -70,7 +75,7 @@ if (!$action) {
 
 if ($action == "viewpm")
 {
-$pmid = intval($_GET["pmid"] ?? 0);
+$pmid = intval(\App\Support\SupportContext::getQuery("pmid") ?? 0);
 
 $arr4 = \App\Models\StaffMessage::query()->findOrFail($pmid)->toArray();
 can_access_staff_message($arr4);
@@ -111,7 +116,7 @@ print("<tr><td colspan=\"".$colspan."\" align=\"left\">".format_comment($arr4["a
 print("<tr><td colspan=\"".$colspan."\" align=\"right\">");
 print("<font color=white>");
 if ($arr4["answered"] == 0)
-print("[ <a href=\"staffbox.php?action=answermessage&receiver=" . $arr4['sender'] . "&answeringto=".$arr4['id']."\">".$lang_staffbox['text_reply']."</a> ] [ <a href=\"staffbox.php?action=setanswered&id=".$arr4['id']."&return=".urlencode($_GET['return'] ?? '')."\">".$lang_staffbox['text_mark_answered']."</a> ] ");
+print("[ <a href=\"staffbox.php?action=answermessage&receiver=" . $arr4['sender'] . "&answeringto=".$arr4['id']."\">".$lang_staffbox['text_reply']."</a> ] [ <a href=\"staffbox.php?action=setanswered&id=".$arr4['id']."&return=".urlencode(\App\Support\SupportContext::getQuery('return') ?? '')."\">".$lang_staffbox['text_mark_answered']."</a> ] ");
 print("[ <a href=\"staffbox.php?action=deletestaffmessage&id=" . $arr4["id"] . "\">".$lang_staffbox['text_delete']."</a> ]");
 print("</font>");
 print("</td></tr>");
@@ -120,8 +125,8 @@ stdfoot();
 }
 
 if ($action == "answermessage") {
-        $answeringto = intval($_GET["answeringto"] ?? 0);
-        $receiver = intval($_GET["receiver"] ?? 0);
+        $answeringto = intval(\App\Support\SupportContext::getQuery("answeringto") ?? 0);
+        $receiver = intval(\App\Support\SupportContext::getQuery("receiver") ?? 0);
 
         int_check($receiver,true);
 
@@ -138,8 +143,8 @@ if ($action == "answermessage") {
 	begin_main_frame();
         ?>
 	<form method="post" id="compose" name="message" action="?action=takeanswer">
-<?php if ($_GET["returnto"] || $_SERVER["HTTP_REFERER"]) { ?>
-        <input type=hidden name=returnto value="<?php echo htmlspecialchars($_GET["returnto"] ?? '') ? htmlspecialchars($_GET["returnto"]) : htmlspecialchars($_SERVER["HTTP_REFERER"])?>">
+<?php if (\App\Support\SupportContext::getQuery("returnto") || $__server_HTTP_REFERER) { ?>
+        <input type=hidden name=returnto value="<?php echo htmlspecialchars(\App\Support\SupportContext::getQuery("returnto") ?? '') ? htmlspecialchars(\App\Support\SupportContext::getQuery("returnto")) : htmlspecialchars($__server_HTTP_REFERER)?>">
 <?php } ?>
         <input type=hidden name=receiver value=<?php echo $receiver?>>
         <input type=hidden name=answeringto value=<?php echo $answeringto?>>
@@ -153,17 +158,17 @@ if ($action == "answermessage") {
 }
 
 if ($action == "takeanswer") {
-  if ($_SERVER["REQUEST_METHOD"] != "POST")
+  if ($__server_REQUEST_METHOD != "POST")
     die();
 
-     $receiver = intval($_POST["receiver"] ?? 0);
-   $answeringto = $_POST["answeringto"];
+     $receiver = intval(\App\Support\SupportContext::getPost("receiver") ?? 0);
+   $answeringto = \App\Support\SupportContext::getPost("answeringto");
 
    int_check($receiver,true);
 
           $userid = $CURUSER["id"];
 
-  			$msg = trim($_POST["body"]);
+  			$msg = trim(\App\Support\SupportContext::getPost("body"));
 
    if (!$msg)
      stderr($lang_staffbox['std_error'], $lang_staffbox['std_body_is_empty']);
@@ -188,7 +193,7 @@ clear_staff_message_cache();
 }
 if ($action == "deletestaffmessage") {
 
-   $id = intval($_GET["id"] ?? 0);
+   $id = intval(\App\Support\SupportContext::getQuery("id") ?? 0);
 
     if (!is_numeric($id) || $id < 1 || floor($id) != $id)
     return;
@@ -204,29 +209,29 @@ clear_staff_message_cache();
 if ($action == "setanswered") {
 
 
-$id = intval($_GET["id"] ?? 0);
+$id = intval(\App\Support\SupportContext::getQuery("id") ?? 0);
     can_access_staff_message($id);
 \App\Models\StaffMessage::query()->where('id', $id)->update(['answered' => 1, 'answeredby' => $CURUSER['id']]);
 $Cache->delete_value('staff_new_message_count');
     clear_staff_message_cache();
-header("Location: staffbox.php" . (!empty($_GET['return']) ? "?" . $_GET['return'] : ''));
+header("Location: staffbox.php" . (!empty(\App\Support\SupportContext::getQuery('return')) ? "?" . \App\Support\SupportContext::getQuery('return') : ''));
     return;
 }
 
 if ($action == "takecontactanswered") {
-    if (empty($_POST['setanswered'])) {
+    if (empty(\App\Support\SupportContext::getPost('setanswered'))) {
         stderr($lang_staffbox['std_sorry'], nexus_trans('nexus.select_one_please'));
     }
 
-if ($_POST['setdealt']){
-	$messages = \App\Models\StaffMessage::query()->where('answered', 0)->whereIn('id', $_POST['setanswered'])->get();
+if (\App\Support\SupportContext::getPost('setdealt')){
+	$messages = \App\Models\StaffMessage::query()->where('answered', 0)->whereIn('id', \App\Support\SupportContext::getPost('setanswered'))->get();
 	foreach ($messages as $message) {
 	    can_access_staff_message($message->toArray());
         $message->update(['answered' => 1, 'answeredby' => $CURUSER['id']]);
     }
 }
-elseif ($_POST['delete']){
-	$messages = \App\Models\StaffMessage::query()->whereIn('id', $_POST['setanswered'])->get();
+elseif (\App\Support\SupportContext::getPost('delete')){
+	$messages = \App\Models\StaffMessage::query()->whereIn('id', \App\Support\SupportContext::getPost('setanswered'))->get();
 	foreach ($messages as $message) {
         can_access_staff_message($message->toArray());
         $message->delete();

@@ -334,10 +334,6 @@ final class SettingsSeed
         SupportContext::setGlobal('uploaderdouble_torrent', $TORRENT['uploaderdouble']);
         SupportContext::setGlobal('deldeadtorrent_torrent', $TORRENT['deldeadtorrent']);
 
-        //foreach ($CONFIGURATIONS as $CONFIGURATION) {
-        //	unset($GLOBALS[$CONFIGURATION]);
-        //}
-
         //Directory for subs
         SupportContext::setGlobal('SUBSPATH', "subs");
         //Whether clean-up is triggered by cron, instead of the default browser clicks.

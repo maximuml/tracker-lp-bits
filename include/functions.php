@@ -682,35 +682,6 @@ function sent_mail($to,$fromname,$fromemail,$subject,$body,$type = "confirmation
 }
 /**
  * @param string $type
- * @return void
- */
-function failedloginscheck ($type = 'Login') {
-    \App\Support\LegacyAuth::failedLoginsCheck((string) $type, legacy_auth_context());
-}
-/**
- * @param string $type
- * @param bool $recover
- * @param bool $head
- * @return void
- */
-function failedlogins ($type = 'login', $recover = false, $head = true)
-{
-    \App\Support\LegacyAuth::failedLogins((string) $type, (bool) $recover, (bool) $head, legacy_auth_context());
-}
-
-/**
- * @param string $type
- * @param bool $recover
- * @param bool $head
- * @return void
- */
-function login_failedlogins($type = 'login', $recover = false, $head = true)
-{
-    \App\Support\LegacyAuth::loginFailedLogins((string) $type, (bool) $recover, (bool) $head, legacy_auth_context());
-}
-
-/**
- * @param string $type
  * @return string
  */
 function remaining($type = 'login')

@@ -65,6 +65,9 @@ if ($nexusRoute !== null) {
     if ($requestPath === '/' || $requestPath === '') {
         $routePath = '/';
         $pathInfo = '';
+    } elseif ($requestPath === '/nexus.php') {
+        $routePath = '/';
+        $pathInfo = '';
     } elseif (preg_match('#^/([a-zA-Z0-9_-]+)(?:\.php)?(/.*)?$#', $requestPath, $matches)) {
         $routePath = '/' . $matches[1];
         $pathInfo = $matches[2] ?? '';

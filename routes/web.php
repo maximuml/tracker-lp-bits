@@ -42,6 +42,10 @@ Route::get('/', function () {
     return redirect('index.php');
 });
 
+Route::get('/health', function () {
+    return response()->json(['status' => 'ok']);
+})->name('health');
+
 Route::get('/login', [AuthWebController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthWebController::class, 'login']);
 Route::get('/logout', [AuthWebController::class, 'logout'])->name('logout');

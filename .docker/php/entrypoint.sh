@@ -88,6 +88,16 @@ if [ "$SERVICE_NAME" = "php" ]; then
       echo_success "vendor autoload file: $VENDOR_AUTOLOAD_FILE already exists, skip run composer install ..."
     fi
 
+    # Cache Laravel bootstrap files for production (safe to rerun on each FPM container start)
+    echo_info "Caching Laravel bootstrap files ..."
+    php artisan storage:link --force
+    php artisan config:cache
+    php artisan route:cache
+    php artisan view:cache
+    php artisan icons:cache
+    php artisan filament:cache-components
+    echo_success "Laravel bootstrap files cached."
+
     # 最后启动 PHP-FPM
     exec php-fpm
 elif [ "$SERVICE_NAME" = "queue" ]; then

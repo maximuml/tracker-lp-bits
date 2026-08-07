@@ -5,6 +5,7 @@ use App\Http\Controllers\Auth\RecoveryController;
 use App\Http\Controllers\Auth\WebController as AuthWebController;
 use App\Http\Controllers\BitbucketUploadController;
 use App\Http\Controllers\OfferController;
+use App\Http\Controllers\TorrentActionController;
 use App\Http\Controllers\TorrentDetailsController;
 use App\Http\Controllers\WebCommentController;
 use App\Http\Controllers\TorrentDownloadController;
@@ -77,14 +78,14 @@ Route::match(['get', 'post'], '/rules', [LegacyPagesController::class, 'rules'])
 Route::match(['get', 'post'], '/useragreement', [LegacyPagesController::class, 'userAgreement'])->name('useragreement.legacy');
 Route::match(['get', 'post'], '/faq', [LegacyPagesController::class, 'faq'])->name('faq.legacy');
 Route::match(['get', 'post'], '/donate', [LegacyPagesController::class, 'donate'])->name('donate.legacy');
-Route::match(['get', 'post'], '/getusertorrentlistajax', [LegacyPagesController::class, 'getUserTorrentListAjax'])->name('getusertorrentlistajax.legacy');
-Route::match(['get', 'post'], '/searchsuggest', [LegacyPagesController::class, 'searchSuggest'])->name('searchsuggest.legacy');
+Route::match(['get', 'post'], '/getusertorrentlistajax', [TorrentActionController::class, 'getUserTorrentListAjax'])->name('getusertorrentlistajax.legacy');
+Route::match(['get', 'post'], '/searchsuggest', [TorrentActionController::class, 'searchSuggest'])->name('searchsuggest.legacy');
 Route::match(['get', 'post'], '/ajax', [LegacyPagesController::class, 'ajax'])->name('ajax.legacy');
 
 Route::match(['get', 'post'], '/image', [LegacyPagesController::class, 'image'])->name('image.legacy');
 Route::match(['get', 'post'], '/shoutbox_sse', [ShoutboxController::class, 'shoutboxSse'])->name('shoutbox_sse.legacy');
 
-Route::match(['get', 'post'], '/torrentrss', [LegacyPagesController::class, 'torrentrss'])->name('torrentrss.legacy');
+Route::match(['get', 'post'], '/torrentrss', [TorrentActionController::class, 'torrentrss'])->name('torrentrss.legacy');
 
 Route::match(['get', 'post'], '/page', [LegacyPagesController::class, 'page'])->name('page.legacy');
 Route::match(['get', 'post'], '/tags', [LegacyPagesController::class, 'tags'])->name('tags.legacy');
@@ -93,7 +94,7 @@ Route::match(['get', 'post'], '/opensearch', [LegacyPagesController::class, 'ope
 
 Route::match(['get', 'post'], '/confirmemail', [LegacyPagesController::class, 'confirmemail'])->name('confirmemail.legacy');
 Route::match(['get', 'post'], '/cron', [ManagementController::class, 'cron'])->name('cron.legacy');
-Route::match(['get', 'post'], '/email-gateway', [LegacyPagesController::class, 'emailGateway'])->name('email-gateway.legacy');
+Route::match(['get', 'post'], '/email-gateway', [TorrentActionController::class, 'emailGateway'])->name('email-gateway.legacy');
 Route::match(['get', 'post'], '/ok', [LegacyPagesController::class, 'ok'])->name('ok.legacy');
 
 Route::group(['middleware' => ['auth.nexus:nexus-web']], function () {
@@ -146,18 +147,18 @@ Route::group(['middleware' => ['auth.nexus:nexus-web']], function () {
     Route::match(['get', 'post'], '/checkuser', [ManagementController::class, 'checkuser'])->name('checkuser.legacy');
     Route::match(['get', 'post'], '/takeconfirm', [ManagementController::class, 'takeconfirm'])->name('takeconfirm.legacy');
     Route::match(['get', 'post'], '/user-ban-log', [ManagementController::class, 'userBanLog'])->name('user-ban-log.legacy');
-    Route::match(['get', 'post'], '/torrent_info', [LegacyPagesController::class, 'torrentInfo'])->name('torrent_info.legacy');
-    Route::match(['get', 'post'], '/viewsnatches', [LegacyPagesController::class, 'viewSnatches'])->name('viewsnatches.legacy');
-    Route::match(['get', 'post'], '/takeflush', [LegacyPagesController::class, 'takeFlush'])->name('takeflush.legacy');
-    Route::match(['get', 'post'], '/takereseed', [LegacyPagesController::class, 'takeReseed'])->name('takereseed.legacy');
+    Route::match(['get', 'post'], '/torrent_info', [TorrentActionController::class, 'torrentInfo'])->name('torrent_info.legacy');
+    Route::match(['get', 'post'], '/viewsnatches', [TorrentActionController::class, 'viewSnatches'])->name('viewsnatches.legacy');
+    Route::match(['get', 'post'], '/takeflush', [TorrentActionController::class, 'takeFlush'])->name('takeflush.legacy');
+    Route::match(['get', 'post'], '/takereseed', [TorrentActionController::class, 'takeReseed'])->name('takereseed.legacy');
     Route::match(['get', 'post'], '/clearcache', [ManagementController::class, 'clearCache'])->name('clearcache.legacy');
-    Route::match(['get', 'post'], '/fastdelete', [LegacyPagesController::class, 'fastDelete'])->name('fastdelete.legacy');
+    Route::match(['get', 'post'], '/fastdelete', [TorrentActionController::class, 'fastDelete'])->name('fastdelete.legacy');
     Route::match(['get', 'post'], '/donated', [LegacyPagesController::class, 'donated'])->name('donated.legacy');
     Route::match(['get', 'post'], '/faqmanage', [LegacyPagesController::class, 'faqManage'])->name('faqmanage.legacy');
     Route::match(['get', 'post'], '/faqactions', [LegacyPagesController::class, 'faqActions'])->name('faqactions.legacy');
     Route::match(['get', 'post'], '/search', [LegacyPagesController::class, 'search'])->name('search.legacy');
     Route::match(['get', 'post'], '/usersearch', [LegacyPagesController::class, 'usersearch'])->name('usersearch.legacy');
-    Route::match(['get', 'post'], '/autocomplete_torrents', [LegacyPagesController::class, 'autocompleteTorrents'])->name('autocomplete_torrents.legacy');
+    Route::match(['get', 'post'], '/autocomplete_torrents', [TorrentActionController::class, 'autocompleteTorrents'])->name('autocomplete_torrents.legacy');
     Route::get('/comment/add', [WebCommentController::class, 'create']);
     Route::post('/comment', [WebCommentController::class, 'store']);
     Route::get('/comment/{commentId}/edit', [WebCommentController::class, 'edit']);
@@ -201,22 +202,22 @@ Route::group(['middleware' => ['auth.nexus:nexus-web']], function () {
     Route::match(['get', 'post'], '/unco', [ManagementController::class, 'unco'])->name('unco.legacy');
     Route::match(['get', 'post'], '/adduser', [ManagementController::class, 'adduser'])->name('adduser.legacy');
     Route::match(['get', 'post'], '/bitbucketlog', [LegacyPagesController::class, 'bitbucketlog'])->name('bitbucketlog.legacy');
-    Route::match(['get', 'post'], '/delete', [LegacyPagesController::class, 'delete'])->name('delete.legacy');
-    Route::match(['get', 'post'], '/downloadnotice', [LegacyPagesController::class, 'downloadnotice'])->name('downloadnotice.legacy');
+    Route::match(['get', 'post'], '/delete', [TorrentActionController::class, 'delete'])->name('delete.legacy');
+    Route::match(['get', 'post'], '/downloadnotice', [TorrentActionController::class, 'downloadnotice'])->name('downloadnotice.legacy');
     Route::match(['get', 'post'], '/increment-bulk', [ManagementController::class, 'incrementBulk'])->name('increment-bulk.legacy');
     Route::match(['get', 'post'], '/maxlogin', [ManagementController::class, 'maxlogin'])->name('maxlogin.legacy');
     Route::match(['get', 'post'], '/setlist_lookup', [ManagementController::class, 'setlistLookup'])->name('setlist_lookup.legacy');
     Route::match(['get', 'post'], '/take-increment-bulk', [ManagementController::class, 'takeIncrementBulk'])->name('take-increment-bulk.legacy');
     Route::match(['get', 'post'], '/testip', [ManagementController::class, 'testip'])->name('testip.legacy');
-    Route::match(['get', 'post'], '/thanks', [LegacyPagesController::class, 'thanks'])->name('thanks.legacy');
+    Route::match(['get', 'post'], '/thanks', [TorrentActionController::class, 'thanks'])->name('thanks.legacy');
 });
 
 Route::match(['get', 'post'], '/complains', [ManagementController::class, 'complains'])->name('complains.legacy');
 Route::match(['get', 'post'], '/shoutbox', [ShoutboxController::class, 'shoutbox'])->name('shoutbox.legacy');
 
-Route::match(['get', 'post'], '/bookmark', [LegacyPagesController::class, 'bookmark'])->name('bookmark.legacy');
-Route::match(['get', 'post'], '/viewfilelist', [LegacyPagesController::class, 'viewFileList'])->name('viewfilelist.legacy');
-Route::match(['get', 'post'], '/viewpeerlist', [LegacyPagesController::class, 'viewPeerList'])->name('viewpeerlist.legacy');
+Route::match(['get', 'post'], '/bookmark', [TorrentActionController::class, 'bookmark'])->name('bookmark.legacy');
+Route::match(['get', 'post'], '/viewfilelist', [TorrentActionController::class, 'viewFileList'])->name('viewfilelist.legacy');
+Route::match(['get', 'post'], '/viewpeerlist', [TorrentActionController::class, 'viewPeerList'])->name('viewpeerlist.legacy');
 
 Route::match(['get', 'post'], '/forums', [ForumController::class, 'legacy'])
     ->middleware('auth.nexus:nexus-web')

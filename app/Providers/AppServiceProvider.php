@@ -18,6 +18,8 @@ use Illuminate\Http\Resources\Json\JsonResource;
 use Laravel\Passport\Passport;
 use Nexus\Database\NexusDB;
 use Nexus\Nexus;
+use Nexus\Plugin\Hook;
+use Nexus\Plugin\Plugin;
 use Filament\Facades\Filament;
 
 class AppServiceProvider extends ServiceProvider
@@ -29,6 +31,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register()
     {
+        $this->app->singleton(Hook::class, static fn () => SupportContext::getGlobal('hook') ?? new Hook());
+        $this->app->singleton(Plugin::class, static fn () => SupportContext::getGlobal('plugin') ?? new Plugin());
+
         do_action('nexus_register');
     }
 
@@ -39,8 +44,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        global $plugin;
-        $plugin->start();
+        app(Plugin::class)->start();
         NexusDB::customModel();
         DB::connection(config('database.default'))->enableQueryLog();
         $forceScheme = strtolower(env('FORCE_SCHEME'));

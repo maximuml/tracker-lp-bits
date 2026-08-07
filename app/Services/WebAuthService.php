@@ -60,6 +60,39 @@ class WebAuthService
     }
 
     /**
+     * Validate a user's password without producing side effects.
+     *
+     * This is used by the stateful guard attempt()/once() methods.
+     */
+    public function validatePassword(User $user, string $password): bool
+    {
+        if ($password === '') {
+            return false;
+        }
+
+        $user->makeVisible(['passhash', 'secret', 'auth_key']);
+        $row = $user->toArray();
+
+        $secret = (string) ($row['secret'] ?? '');
+        $passhash = (string) ($row['passhash'] ?? '');
+        $authKey = (string) ($row['auth_key'] ?? '');
+        $passwordHash = hash('sha256', $secret . hash('sha256', $password));
+
+        if (empty($authKey)) {
+            $oldMd5 = md5($secret . $password . $secret);
+            if (hash_equals($oldMd5, $passhash)) {
+                return true;
+            }
+        }
+
+        $challenge = Token::randomHex();
+        $expected = hash_hmac('sha256', $passhash, $challenge);
+        $response = hash_hmac('sha256', $passwordHash, $challenge);
+
+        return hash_equals($expected, $response);
+    }
+
+    /**
      * @param  array<string, mixed>  $data
      */
     public function authenticate(array $data, string $ip): User
@@ -78,7 +111,6 @@ class WebAuthService
             $this->verifyCaptcha($data);
         }
 
-        /** @var User|null $user */
         $user = User::query()
             ->where('username', $username)
             ->first(['id', 'username', 'passhash', 'secret', 'auth_key', 'enabled', 'status', 'two_step_secret', 'lang']);
@@ -109,27 +141,18 @@ class WebAuthService
             }
         }
 
-        $passwordHash = hash('sha256', $row['secret'] . hash('sha256', $password));
-        $update = [];
-
-        if (empty($row['auth_key'])) {
-            $oldMd5 = md5($row['secret'] . $password . $row['secret']);
-            if (! hash_equals($oldMd5, $row['passhash'])) {
-                $this->recordFailedAttempt($ip);
-                throw new AuthenticationException('Username or password invalid.');
-            }
-            $update['passhash'] = $row['passhash'] = $passwordHash;
-        }
-
-        $challenge = Token::randomHex();
-        $expected = hash_hmac('sha256', $row['passhash'], $challenge);
-        $response = hash_hmac('sha256', $passwordHash, $challenge);
-        if (! hash_equals($expected, $response)) {
+        if (! $this->validatePassword($user, $password)) {
             $this->recordFailedAttempt($ip);
             throw new AuthenticationException('Username or password invalid.');
         }
 
+        $row = $user->toArray();
+
+        $update = [];
         if (empty($row['auth_key'])) {
+            $secret = (string) $row['secret'];
+            $passwordHash = hash('sha256', $secret . hash('sha256', $password));
+            $update['passhash'] = $passwordHash;
             $update['auth_key'] = hash('sha256', Token::randomHex(32));
         }
 

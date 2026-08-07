@@ -357,11 +357,6 @@ final class LegacyAuth
      */
     public static function loginFromCookie(LegacyAuthContext $context): ?array
     {
-        static $loginResult;
-        if ($loginResult !== null) {
-            return $loginResult;
-        }
-
         $lang = $context->lang;
         $cache = $context->cache;
 
@@ -378,7 +373,7 @@ final class LegacyAuth
 
         $row = AuthCookie::userFromCookie($context->cookies, true);
         if (empty($row)) {
-            return $loginResult = null;
+            return null;
         }
 
         if (! $row['passkey']) {
@@ -394,6 +389,6 @@ final class LegacyAuth
             $cache->setClearCache(1);
         }
 
-        return $loginResult = $row;
+        return $row;
     }
 }

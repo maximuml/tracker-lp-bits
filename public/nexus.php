@@ -178,6 +178,13 @@ $app = require_once __DIR__.'/../bootstrap/app.php';
 
 $request = Request::create($uri, $method, $parameters, $_COOKIE, $files, $server);
 
+// Bind the request and bootstrap Laravel (env, config, providers) before the
+// legacy bootstrap so AuthCookie can resolve APP_KEY when validating the
+// login cookie. The kernel will re-bind and re-bootstrap during handle().
+$app->instance('request', $request);
+$kernel = $app->make(Kernel::class);
+$kernel->bootstrap();
+
 // Legacy bootstrap: cache, Eloquent, settings, language, login and plugins,
 // wired into SupportContext instead of $GLOBALS.
 LegacyBootstrap::boot($request, $rootpath);
@@ -203,7 +210,7 @@ foreach ($scriptLangFiles as $scriptLangFile) {
 
 // Synchronise any per-script language globals into the context so helpers can
 // read them without touching $GLOBALS directly.
-SupportContext::fromGlobals();
+SupportContext::fromGlobals($request);
 
 // Replicate legacy per-page parked() guards.
 $parkedScripts = [
@@ -220,8 +227,6 @@ if (in_array($script, $parkedScripts, true)) {
 if ($script === 'index') {
     register_shutdown_function('autoclean');
 }
-
-$kernel = $app->make(Kernel::class);
 
 $response = $kernel->handle($request);
 $response->send();

@@ -132,8 +132,8 @@ final class LegacyBootstrap
     {
         defined('TIMENOW') || define('TIMENOW', time());
 
-        $hook = new Hook();
-        $plugin = new Plugin();
+        $hook = app(Hook::class);
+        $plugin = app(Plugin::class);
         SupportContext::setGlobal('hook', $hook);
         SupportContext::setGlobal('plugin', $plugin);
         $plugin->start();

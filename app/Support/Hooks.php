@@ -2,35 +2,52 @@
 
 namespace App\Support;
 
+use Nexus\Plugin\Hook;
+
 /**
  * Legacy hook/action helpers extracted from `include/globalfunctions.php`.
  *
  * Backs `add_filter()`, `apply_filter()`, `add_action()` and `do_action()`.
- * The global `$hook` instance is still managed by the legacy bootstrap.
+ * Uses the container-bound Hook singleton when available, falling back to the
+ * value stored in SupportContext for non-Laravel callers (e.g. plain PHPUnit).
  */
 final class Hooks
 {
     public static function addFilter(string $name, callable $function, int $priority = 10, int $argc = 1): void
     {
-        $hook = SupportContext::getGlobal('hook');
-        $hook->addFilter($name, $function, $priority, $argc);
+        self::hook()->addFilter($name, $function, $priority, $argc);
     }
 
     public static function applyFilter(string $name, mixed ...$args): mixed
     {
-        $hook = SupportContext::getGlobal('hook');
-        return $hook->applyFilter($name, ...$args);
+        return self::hook()->applyFilter($name, ...$args);
     }
 
     public static function addAction(string $name, callable $function, int $priority = 10, int $argc = 1): void
     {
-        $hook = SupportContext::getGlobal('hook');
-        $hook->addAction($name, $function, $priority, $argc);
+        self::hook()->addAction($name, $function, $priority, $argc);
     }
 
     public static function doAction(string $name, mixed ...$args): mixed
     {
+        return self::hook()->doAction($name, ...$args);
+    }
+
+    private static function hook(): Hook
+    {
+        if (function_exists('app')) {
+            try {
+                $hook = app(Hook::class);
+                if ($hook instanceof Hook) {
+                    return $hook;
+                }
+            } catch (\Throwable $e) {
+                // fall back to the legacy context value
+            }
+        }
+
         $hook = SupportContext::getGlobal('hook');
-        return $hook->doAction($name, ...$args);
+
+        return $hook instanceof Hook ? $hook : new Hook();
     }
 }

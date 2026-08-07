@@ -67,6 +67,23 @@ if ($nexusRoute !== null) {
     }
 }
 
+// Determine the legacy "script" name used for per-page language files,
+// parked() guards and autoclean. For direct Laravel routes this is derived
+// from the first path segment, otherwise it is the wrapper page name.
+if ($isWrapper && $page !== '') {
+    $script = $page;
+} elseif ($nexusRoute !== null) {
+    $script = basename($nexusRoute) ?: 'nexus';
+    $script = preg_replace('/[^a-zA-Z0-9_-]/', '', $script) ?? '';
+} else {
+    $segments = explode('/', trim($routePath, '/'));
+    $script = $segments[0] ?? '';
+    $script = preg_replace('/[^a-zA-Z0-9_-]/', '', $script) ?? '';
+    if ($script === '') {
+        $script = 'nexus';
+    }
+}
+
 // Build the URI query string from the current GET parameters. Wrappers that
 // rewrite the route can modify $_GET before requiring this file (e.g. to drop
 // an id that is now encoded in the path).
@@ -81,26 +98,14 @@ $server = $_SERVER;
 $server['REQUEST_URI'] = $uri;
 $server['REQUEST_METHOD'] = $method;
 
-if ($isWrapper && $page !== '') {
-    $server['SCRIPT_NAME'] = '/' . $page . '.php';
-    $server['SCRIPT_FILENAME'] = __DIR__ . '/' . $page . '.php';
-    $server['PHP_SELF'] = '/' . $page . '.php' . $pathInfo;
+$server['SCRIPT_NAME'] = '/' . $script . '.php';
+$server['SCRIPT_FILENAME'] = __DIR__ . '/' . $script . '.php';
+$server['PHP_SELF'] = '/' . $script . '.php' . $pathInfo;
 
-    if ($pathInfo !== '') {
-        $server['PATH_INFO'] = $pathInfo;
-    } else {
-        unset($server['PATH_INFO']);
-    }
+if ($pathInfo !== '') {
+    $server['PATH_INFO'] = $pathInfo;
 } else {
-    if (empty($server['SCRIPT_NAME'])) {
-        $server['SCRIPT_NAME'] = '/nexus.php';
-    }
-    if (empty($server['SCRIPT_FILENAME'])) {
-        $server['SCRIPT_FILENAME'] = __FILE__;
-    }
-    if (empty($server['PHP_SELF'])) {
-        $server['PHP_SELF'] = '/nexus.php';
-    }
+    unset($server['PATH_INFO']);
 }
 
 // Mirror the normalized values back to the global $_SERVER for legacy helpers
@@ -125,6 +130,13 @@ if (file_exists(__DIR__.'/../storage/framework/maintenance.php')) {
 require_once __DIR__.'/../vendor/autoload.php';
 
 $app = require_once __DIR__.'/../bootstrap/app.php';
+
+// Force Nexus to re-derive its per-request script/platform from the current
+// $_SERVER state, otherwise FPM worker persistence can leak the first request's
+// script into later requests (especially for direct routes like /torrents).
+if (!defined('TIMENOW')) {
+    \Nexus\Nexus::flush();
+}
 
 // Legacy bootstrap: settings, cache, language, user login and globals.
 // This is what the old per-page `require '../include/bittorrent.php'; dbconn();`

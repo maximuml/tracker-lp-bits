@@ -481,6 +481,7 @@ final class SupportContext
         if (function_exists('app')) {
             $app = app();
             if ($app->bound('request')) {
+                /** @var mixed $request */
                 $request = $app->make('request');
                 if ($request instanceof Request) {
                     return $request;

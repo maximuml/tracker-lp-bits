@@ -25,7 +25,7 @@ final class LegacyBootstrap
 
         self::bootNexus();
         self::bootCache($rootpath);
-        self::bootDatabase($rootpath);
+        self::bootDatabase();
         self::bootTimezone();
         self::bootSettings();
         self::bootLanguage($rootpath);
@@ -42,7 +42,7 @@ final class LegacyBootstrap
 
         self::bootNexus();
         self::bootCache($rootpath);
-        self::bootDatabase($rootpath);
+        self::bootDatabase();
         self::bootTimezone();
         self::bootSettings();
         self::bootLanguage($rootpath);
@@ -77,9 +77,11 @@ final class LegacyBootstrap
         SupportContext::setCache($Cache);
     }
 
-    private static function bootDatabase(string $rootpath): void
+    private static function bootDatabase(): void
     {
-        require_once $rootpath . 'include/eloquent.php';
+        $dbConfig = Config::get('nexus.database');
+        $config = $dbConfig['connections'][$dbConfig['default']];
+        \Nexus\Database\NexusDB::bootEloquent($config);
     }
 
     private static function bootTimezone(): void

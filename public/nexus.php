@@ -11,6 +11,18 @@ defined('IN_NEXUS') || define('IN_NEXUS', true);
 $rootpath = dirname(__DIR__) . '/';
 set_include_path(get_include_path() . PATH_SEPARATOR . $rootpath);
 
+$requestUri = (string) ($_SERVER['REQUEST_URI'] ?? '/');
+$parsedUrl = parse_url($requestUri);
+if ($parsedUrl === false) {
+    $parsedUrl = ['path' => '/', 'query' => ''];
+}
+$requestPath = $parsedUrl['path'] ?? '/';
+
+// Announce/scrape endpoints do not need language/user login bootstrapping.
+if (preg_match('#^/(?:announce|scrape)(?:\.php)?(?:/|$|\?)#', $requestPath)) {
+    defined('IN_TRACKER') || define('IN_TRACKER', true);
+}
+
 // Resolve whether this is a legacy .php wrapper (FPM executing public/<page>.php)
 // or the Laravel fallback entry point (nexus.php).
 $scriptFilename = (string) ($_SERVER['SCRIPT_FILENAME'] ?? __FILE__);
@@ -29,12 +41,6 @@ $isWrapper = ($executedScript !== '' && $executedScript !== 'nexus.php');
 $nexusRoute = (isset($nexusRoute) && is_string($nexusRoute) && $nexusRoute !== '') ? $nexusRoute : null;
 $page = '';
 $pathInfo = '';
-$requestUri = (string) ($_SERVER['REQUEST_URI'] ?? '/');
-$parsedUrl = parse_url($requestUri);
-if ($parsedUrl === false) {
-    $parsedUrl = ['path' => '/', 'query' => ''];
-}
-$requestPath = $parsedUrl['path'] ?? '/';
 
 if ($isWrapper) {
     $page = preg_replace('/\.php$/', '', $executedScript) ?? '';
@@ -53,9 +59,19 @@ if ($nexusRoute !== null) {
         unset($_SERVER['PATH_INFO']);
     }
 } elseif ($page === '') {
-    // Fallback entry point: keep the clean URI as-is.
-    $routePath = $requestPath;
-    $pathInfo = (string) ($_SERVER['PATH_INFO'] ?? '');
+    // Fallback entry point: derive script and PATH_INFO from the URI so
+    // /torrents, /torrents.php and /confirmemail/1/md5/email work without
+    // a per-page wrapper.
+    if ($requestPath === '/' || $requestPath === '') {
+        $routePath = '/';
+        $pathInfo = '';
+    } elseif (preg_match('#^/([a-zA-Z0-9_-]+)(?:\.php)?(/.*)?$#', $requestPath, $matches)) {
+        $routePath = '/' . $matches[1];
+        $pathInfo = $matches[2] ?? '';
+    } else {
+        $routePath = $requestPath;
+        $pathInfo = (string) ($_SERVER['PATH_INFO'] ?? '');
+    }
 } else {
     // Wrapper entry point: strip the .php suffix and route to the canonical path.
     $routePath = '/' . $page;
@@ -84,8 +100,34 @@ if ($isWrapper && $page !== '') {
     $script = $segments[0] ?? '';
     $script = preg_replace('/[^a-zA-Z0-9_-]/', '', $script) ?? '';
     if ($script === '') {
-        $script = 'nexus';
+        $script = 'index';
     }
+}
+
+$method = (string) ($_SERVER['REQUEST_METHOD'] ?? 'GET');
+
+// Map legacy wrapper query parameters to Laravel path parameters now that the
+// per-page wrappers are gone.
+if ($script === 'details') {
+    if (isset($_GET['id'])) {
+        $routePath = '/details/' . (int) $_GET['id'];
+        unset($_GET['id']);
+    }
+} elseif ($script === 'comment') {
+    $commentAction = (string) ($_GET['action'] ?? '');
+    $commentId = (int) ($_GET['cid'] ?? 0);
+    if (in_array($commentAction, ['edit', 'delete', 'vieworiginal'], true)) {
+        unset($_GET['action'], $_GET['cid']);
+        $routePath = '/comment/' . $commentId . '/' . $commentAction;
+    } elseif ($commentAction === 'add' && $method === 'GET') {
+        unset($_GET['action']);
+        $routePath = '/comment/add';
+    } else {
+        unset($_GET['action']);
+        $routePath = '/comment';
+    }
+} elseif ($script === 'takelogin') {
+    $routePath = '/login';
 }
 
 // Build the URI query string from the current GET parameters. Wrappers that
@@ -94,7 +136,6 @@ if ($isWrapper && $page !== '') {
 $queryString = http_build_query($_GET, '', '&', PHP_QUERY_RFC3986);
 
 $uri = $routePath . ($queryString !== '' ? '?' . $queryString : '');
-$method = (string) ($_SERVER['REQUEST_METHOD'] ?? 'GET');
 
 // Build the server array passed to Laravel/Symfony. This ensures both the
 // Request object and the legacy $_SERVER global agree on SCRIPT_NAME/REQUEST_URI.

@@ -6,10 +6,12 @@ define('NEXUS_START', microtime(true));
 require ROOT_PATH . 'include/globalfunctions.php';
 require ROOT_PATH . 'include/functions.php';
 require ROOT_PATH . 'vendor/autoload.php';
-require ROOT_PATH . 'include/constants.php';
+require ROOT_PATH . 'config/nexus_constants.php';
 $withLaravel = false;
 if (file_exists(ROOT_PATH . '.env')) {
-    require ROOT_PATH . 'include/eloquent.php';
+    $dbConfig = \App\Support\Config::get('nexus.database');
+    $config = $dbConfig['connections'][$dbConfig['default']];
+    \Nexus\Database\NexusDB::bootEloquent($config);
     require ROOT_PATH . 'classes/class_cache_redis.php';
     $Cache = new class_cache_redis();
     $withLaravel = true;

@@ -6,10 +6,10 @@ define('PM_DELETED',0); // Message was deleted
 define('PM_INBOX',1); // Message located in Inbox for reciever
 define('PM_SENTBOX',-1); // GET value for sent box
 // Determine action
-$action = $_GET['action'] ?? '';
+$action = \App\Support\SupportContext::getQuery('action') ?? '';
 if (!$action)
 {
-	$action = $_POST['action'] ?? '';
+	$action = \App\Support\SupportContext::getPost('action') ?? '';
 	if (!$action)
 		$action = 'viewmailbox';
 }
@@ -18,7 +18,7 @@ if (!$action)
 if ($action == "viewmailbox")
 {
 // Get Mailbox Number
-$mailbox = $_GET['box'] ?? 0;
+$mailbox = \App\Support\SupportContext::getQuery('box') ?? 0;
 if (!$mailbox)
 	$mailbox = PM_INBOX;
 
@@ -56,8 +56,8 @@ stdhead($mailbox_name);
 
 <?php
 //search
-$keyword = trim($_GET["keyword"] ?? '');
-$place = $_GET["place"] ?? '';
+$keyword = trim(\App\Support\SupportContext::getQuery("keyword") ?? '');
+$place = \App\Support\SupportContext::getQuery("place") ?? '';
 $messageQuery = \App\Models\Message::query();
 if ($keyword) {
     switch ($place) {
@@ -74,7 +74,7 @@ if ($keyword) {
             });
     }
 }
-$unread = $_GET["unread"] ?? '';
+$unread = \App\Support\SupportContext::getQuery("unread") ?? '';
 if ($unread === 'yes' || $unread === 'no') {
     $messageQuery->where('unread', $unread);
 }
@@ -192,7 +192,7 @@ stdfoot();
 }
 if ($action == "viewmessage")
 {
-$pm_id = (int) $_GET['id'];
+$pm_id = (int) \App\Support\SupportContext::getQuery('id');
 if (!$pm_id)
 {
 stderr($lang_messages['std_error'],$lang_messages['std_no_permission']);
@@ -297,10 +297,10 @@ stdfoot();
 }
 if ($action == "moveordel")
 {
-$pm_id = intval($_POST['id'] ?? 0);
-$pm_box = intval($_POST['box'] ?? 0);
-$pm_messages = $_POST['messages'];
-if ($_POST['markread'])
+$pm_id = intval(\App\Support\SupportContext::getPost('id') ?? 0);
+$pm_box = intval(\App\Support\SupportContext::getPost('box') ?? 0);
+$pm_messages = \App\Support\SupportContext::getPost('messages');
+if (\App\Support\SupportContext::getPost('markread'))
 {
 	if ($pm_id)
 	{
@@ -325,7 +325,7 @@ if ($updated == 0)
 	header("Location: messages.php?action=viewmailbox&box=" . $pm_box);
 	exit();
 }
-elseif ($_POST['move'])
+elseif (\App\Support\SupportContext::getPost('move'))
 {
 if ($pm_id)
 {
@@ -349,7 +349,7 @@ stderr($lang_messages['std_error'],$lang_messages['std_cannot_move_messages']);
 header("Location: messages.php?action=viewmailbox&box=" . $pm_box);
 exit();
 }
-elseif ($_POST['delete'])
+elseif (\App\Support\SupportContext::getPost('delete'))
 {
 if ($pm_id)
 {
@@ -431,7 +431,7 @@ stderr($lang_messages['std_error'],$lang_messages['std_no_action']);
 if ($action == "forward")
 {
 // Display form
-$pm_id = (int) $_GET['id'];
+$pm_id = (int) \App\Support\SupportContext::getQuery('id');
 
 // Get the message
 $message = \App\Models\Message::query()
@@ -552,16 +552,16 @@ stdfoot();
 }
 if ($action == "editmailboxes2")
 {
-$action2 = (string) $_GET['action2'];
+$action2 = (string) \App\Support\SupportContext::getQuery('action2');
 if (!$action2)
 {
 stderr($lang_messages['std_error'],$lang_messages['std_no_action']);
 }
 if ($action2 == "add")
 {
-$nameone = $_GET['new1'];
-$nametwo = $_GET['new2'];
-$namethree = $_GET['new3'];
+$nameone = \App\Support\SupportContext::getQuery('new1');
+$nametwo = \App\Support\SupportContext::getQuery('new2');
+$namethree = \App\Support\SupportContext::getQuery('new3');
 
 // Get current max box number
 $box = \Nexus\Database\NexusDB::table('pmboxes')->where('userid', $CURUSER['id'])->max('boxnumber');
@@ -597,13 +597,13 @@ stderr($lang_messages['std_error'],$lang_messages['text_no_mailboxes_to_edit']);
 }
 foreach ($pmBoxes as $pmBox)
 {
-if (isset($_GET['edit' . $pmBox->id]))
+if (((\App\Support\SupportContext::getQuery('edit' . $pmBox->id) !== null)))
 {
-if ($_GET['edit' . $pmBox->id] != $pmBox->name)
+if (\App\Support\SupportContext::getQuery('edit' . $pmBox->id) != $pmBox->name)
 {
-if (strlen($_GET['edit' . $pmBox->id]) > 0)
+if (strlen(\App\Support\SupportContext::getQuery('edit' . $pmBox->id)) > 0)
 {
-\Nexus\Database\NexusDB::table('pmboxes')->where('id', $pmBox->id)->update(['name' => $_GET['edit' . $pmBox->id]]);
+\Nexus\Database\NexusDB::table('pmboxes')->where('id', $pmBox->id)->update(['name' => \App\Support\SupportContext::getQuery('edit' . $pmBox->id)]);
 }
 else
 {
@@ -622,7 +622,7 @@ exit();
 }
 if ($action == "deletemessage")
 {
-$pm_id = (int) $_GET['id'];
+$pm_id = (int) \App\Support\SupportContext::getQuery('id');
 
 // Delete message
 // Delete message
@@ -660,13 +660,13 @@ exit();
 //----- FUNCTIONS ------
 function insertJumpTo($selected = 0)
 {
-global $lang_messages;
-global $CURUSER;
+$lang_messages = (array) (\App\Support\SupportContext::getGlobal('lang_messages') ?? []);
+$CURUSER = \App\Support\SupportContext::getUser() ?? [];
 $pmBoxes = \Nexus\Database\NexusDB::table('pmboxes')->where('userid', $CURUSER['id'])->orderBy('boxnumber')->get(['boxnumber','name']);
-$place = $_GET['place'] ?? '';
+$place = \App\Support\SupportContext::getQuery('place') ?? '';
 ?>
 <form action="messages.php" method="get">
-<input type="hidden" name="action" value="viewmailbox"><?php echo $lang_messages['text_search'] ?>&nbsp;&nbsp;<input id="searchinput" name="keyword" type="text" value="<?php echo htmlspecialchars($_GET['keyword'] ?? '')?>" style="width: 200px"/>
+<input type="hidden" name="action" value="viewmailbox"><?php echo $lang_messages['text_search'] ?>&nbsp;&nbsp;<input id="searchinput" name="keyword" type="text" value="<?php echo htmlspecialchars(\App\Support\SupportContext::getQuery('keyword') ?? '')?>" style="width: 200px"/>
 <?php echo $lang_messages['text_in'] ?>&nbsp;<select name="place">
 <option value="both" <?php echo ($place == 'both' ? " selected" : "")?>><?php echo $lang_messages['select_both'] ?></option>
 <option value="title" <?php echo ($place == 'title' ? " selected" : "")?>><?php echo $lang_messages['select_title'] ?></option>
@@ -693,9 +693,9 @@ echo("<option value=\"" . $row['boxnumber'] . "\">" . $row['name'] . "</option>\
 <?php
 }
 function messagemenu ($selected = 1) {
-	global $lang_messages;
-	global $BASEURL;
-	global $CURUSER;
+$lang_messages = (array) (\App\Support\SupportContext::getGlobal('lang_messages') ?? []);
+$BASEURL = \App\Support\SupportContext::getGlobal('BASEURL');
+$CURUSER = \App\Support\SupportContext::getUser() ?? [];
 	begin_main_frame();
 	print ("<div id=\"pmboxnav\"><ul id=\"pmboxmenu\" class=\"menu\">");
 	print ("<li" . ($selected == 1 ? " class=selected" : "") . "><a href=\"" . get_protocol_prefix() . $BASEURL . "/messages.php\" >".$lang_messages['text_inbox']."</a></li>");

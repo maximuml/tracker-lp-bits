@@ -2,7 +2,7 @@
 extract($context, EXTR_SKIP);
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 function bark($msg) {
-  global $lang_fastdelete;
+$lang_fastdelete = (array) (\App\Support\SupportContext::getGlobal('lang_fastdelete') ?? []);
   stdhead();
   stdmsg($lang_fastdelete['std_delete_failed'], $msg);
   stdfoot();
@@ -17,7 +17,7 @@ if ($id === null) {
 
 $id = intval($id ?? 0);
 int_check($id);
-$sure = $_GET["sure"];
+$sure = \App\Support\SupportContext::getQuery("sure");
 
 $torrent = \App\Models\Torrent::query()->where('id', $id)->first(['name', 'owner', 'seeders', 'anonymous']);
 if (!$torrent)

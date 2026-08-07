@@ -8,11 +8,14 @@ header("Cache-Control: no-cache, must-revalidate" );
 header("Pragma: no-cache" );
 header("Content-Type: text/html; charset=utf-8");
 
-$id = intval($_GET['id'] ?? 0);
-$GLOBALS['seedBoxRep'] = new \App\Repositories\SeedBoxRepository();
+$id = intval(\App\Support\SupportContext::getQuery('id') ?? 0);
+\App\Support\SupportContext::setGlobal('seedBoxRep', new \App\Repositories\SeedBoxRepository());
 function get_location_column($e, $isStrongPrivacy, $canView): array
 {
-    global $enablelocation_tweak, $seedBoxRep, $lang_functions, $lang_viewpeerlist;
+$enablelocation_tweak = \App\Support\SupportContext::getGlobal('enablelocation_tweak');
+$seedBoxRep = \App\Support\SupportContext::getGlobal('seedBoxRep');
+$lang_functions = \App\Support\SupportContext::getLangFunctions();
+$lang_viewpeerlist = (array) (\App\Support\SupportContext::getGlobal('lang_viewpeerlist') ?? []);
     $address = $ips = [];
     $isSeedBox = false;
     //First, build the location
@@ -56,7 +59,7 @@ function get_location_column($e, $isStrongPrivacy, $canView): array
     } else {
         $result = $location;
     }
-    if (isset($seedBoxIcon) && !empty($seedBoxIcon)) {
+    if ((isset($seedBoxIcon)) && !empty($seedBoxIcon)) {
         $isSeedBox = true;
     }
     return [
@@ -67,7 +70,7 @@ function get_location_column($e, $isStrongPrivacy, $canView): array
 
 function get_username_seed_box_icon($e): string
 {
-    global $seedBoxRep;
+$seedBoxRep = \App\Support\SupportContext::getGlobal('seedBoxRep');
     foreach (array_filter([$e['ipv4'], $e['ipv6']]) as $ip) {
         $icon = $seedBoxRep->renderIcon($ip, $e['userid']);
         if (!empty($icon)) {
@@ -78,13 +81,17 @@ function get_username_seed_box_icon($e): string
 }
 
 
-if(isset($CURUSER))
+if((isset($CURUSER)))
 {
 function dltable($name, $arr, $torrent, &$isSeedBoxCaseWhens)
 {
-	global $lang_viewpeerlist,$viewanonymous_class,$userprofile_class,$enablelocation_tweak;
-	global $CURUSER;
-	global $lang_functions, $seedBoxRep;
+$lang_viewpeerlist = (array) (\App\Support\SupportContext::getGlobal('lang_viewpeerlist') ?? []);
+$viewanonymous_class = \App\Support\SupportContext::getGlobal('viewanonymous_class');
+$userprofile_class = \App\Support\SupportContext::getGlobal('userprofile_class');
+$enablelocation_tweak = \App\Support\SupportContext::getGlobal('enablelocation_tweak');
+$CURUSER = \App\Support\SupportContext::getUser() ?? [];
+$lang_functions = \App\Support\SupportContext::getLangFunctions();
+$seedBoxRep = \App\Support\SupportContext::getGlobal('seedBoxRep');
 
 	$s = "<b>" . count($arr) . " $name</b>\n";
 	$showLocationColumn = $enablelocation_tweak == 'yes' || user_can('userprofile');
@@ -171,7 +178,7 @@ function dltable($name, $arr, $torrent, &$isSeedBoxCaseWhens)
     $seeders = array();
     $torrent = \App\Models\Torrent::query()->findOrFail($id, ['id', 'seeders', 'leechers']);
     $seedersAndLeechers = apply_filter("torrent_seeder_leecher_list", [], $id);
-    if (isset($seedersAndLeechers['seeders'], $seedersAndLeechers['leechers'])) {
+    if ((isset($seedersAndLeechers['seeders']) && isset($seedersAndLeechers['leechers']))) {
 //        dd($seedersAndLeechers);
         $seeders = $seedersAndLeechers['seeders'];
         $downloaders = $seedersAndLeechers['leechers'];

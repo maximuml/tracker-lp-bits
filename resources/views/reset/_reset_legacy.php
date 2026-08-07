@@ -2,15 +2,17 @@
 extract($context, EXTR_SKIP);
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
+
+$__server_REQUEST_METHOD = \App\Support\SupportContext::getServerValue('REQUEST_METHOD');
 // Reset Lost Password ACTION
 if (get_user_class() < UC_ADMINISTRATOR)
 stderr("Error", "Permission denied, Administrator Only.");
 
-if ($_SERVER["REQUEST_METHOD"] == "POST")
+if ($__server_REQUEST_METHOD == "POST")
 {
- $username = trim($_POST["username"]);
- $newpassword = trim($_POST["newpassword"]);
- $newpasswordagain = trim($_POST["newpasswordagain"]);
+ $username = trim(\App\Support\SupportContext::getPost("username"));
+ $newpassword = trim(\App\Support\SupportContext::getPost("newpassword"));
+ $newpasswordagain = trim(\App\Support\SupportContext::getPost("newpasswordagain"));
 
  if (empty($username) || empty($newpassword) || empty($newpasswordagain))
 	stderr("Error","Don't leave any fields blank.");

@@ -1,20 +1,22 @@
 <?php
 extract($context, EXTR_SKIP);
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
+
+$__server_REQUEST_URI = \App\Support\SupportContext::getServerValue('REQUEST_URI');
 if (!user_can('log'))
 {
 stderr($lang_log['std_sorry'],$lang_log['std_permission_denied_only'].get_user_class_name($log_class,false,true,true).sprintf($lang_log['std_or_above_can_view'], \App\Models\Setting::getSiteName()),false);
 }
 
-$q = htmlspecialchars(trim($_GET['query'] ?? ''));
+$q = htmlspecialchars(trim(\App\Support\SupportContext::getQuery('query') ?? ''));
 
 function permissiondeny(){
-	global $lang_log;
+$lang_log = (array) (\App\Support\SupportContext::getGlobal('lang_log') ?? []);
 	stderr($lang_log['std_sorry'],$lang_log['std_permission_denied'],false);
 }
 
 function logmenu($selected = "dailylog"){
-		global $lang_log;
+$lang_log = (array) (\App\Support\SupportContext::getGlobal('lang_log') ?? []);
 		begin_main_frame();
 		print ("<div id=\"lognav\"><ul id=\"logmenu\" class=\"menu\">");
 		print ("<li" . ($selected == "dailylog" ? " class=selected" : "") . "><a href=\"?action=dailylog\">".$lang_log['text_daily_log']."</a></li>");
@@ -26,14 +28,15 @@ function logmenu($selected = "dailylog"){
 }
 
 function searchtable($title, $action, $opts = array()){
-		global $lang_log, $q;
+$lang_log = (array) (\App\Support\SupportContext::getGlobal('lang_log') ?? []);
+$q = \App\Support\SupportContext::getGlobal('q');
 		print("<table border=1 cellspacing=0 width=940 cellpadding=5>\n");
 		print("<tr><td class=colhead align=left>".$title."</td></tr>\n");
-		print("<tr><td class=toolbox align=left><form method=\"get\" action='" . $_SERVER['REQUEST_URI'] . "'>\n");
+		print("<tr><td class=toolbox align=left><form method=\"get\" action='" . $__server_REQUEST_URI . "'>\n");
 		print("<input type=\"text\" name=\"query\" style=\"width:500px\" value=\"".$q."\">\n");
 		if ($opts) {
 			print($lang_log['text_in']."<select name=search>");
-			$selectedSearchValue = is_scalar($_GET['search'] ?? '') ? (string) ($_GET['search'] ?? '') : '';
+			$selectedSearchValue = is_scalar(\App\Support\SupportContext::getQuery('search') ?? '') ? (string) (\App\Support\SupportContext::getQuery('search') ?? '') : '';
 			foreach($opts as $value => $text) {
 				print("<option value='".$value."'". ($value === $selectedSearchValue ? " selected" : "").">".$text."</option>");
 			}
@@ -45,10 +48,10 @@ function searchtable($title, $action, $opts = array()){
 }
 
 function additem($title, $action){
-		global $lang_log;
+$lang_log = (array) (\App\Support\SupportContext::getGlobal('lang_log') ?? []);
 		print("<table border=1 cellspacing=0 width=940 cellpadding=5>\n");
 		print("<tr><td class=colhead align=left>".$title."</td></tr>\n");
-		print("<tr><td class=toolbox align=left><form method=\"post\" action='" . $_SERVER['REQUEST_URI'] . "'>\n");
+		print("<tr><td class=toolbox align=left><form method=\"post\" action='" . $__server_REQUEST_URI . "'>\n");
 		print("<textarea name=\"txt\" style=\"width:500px\" rows=\"3\" >".$title."</textarea>\n");
 		print("<input type=\"hidden\" name=\"action\" value=".$action.">");
 		print("<input type=\"hidden\" name=\"do\" value=\"add\">");
@@ -57,12 +60,12 @@ function additem($title, $action){
 }
 
 function edititem($title, $action, $id){
-		global $lang_log;
+$lang_log = (array) (\App\Support\SupportContext::getGlobal('lang_log') ?? []);
 		$row = \App\Repositories\LogRepository::getGenericById($action, $id);
 		if ($row) {
 		print("<table border=1 cellspacing=0 width=940 cellpadding=5>\n");
 		print("<tr><td class=colhead align=left>".$title."</td></tr>\n");
-		print("<tr><td class=toolbox align=left><form method=\"post\" action='" . $_SERVER['REQUEST_URI'] . "'>\n");
+		print("<tr><td class=toolbox align=left><form method=\"post\" action='" . $__server_REQUEST_URI . "'>\n");
 		print("<textarea name=\"txt\" style=\"width:500px\" rows=\"3\" >".$row["txt"]."</textarea>\n");
 		print("<input type=\"hidden\" name=\"action\" value=".$action.">");
 		print("<input type=\"hidden\" name=\"do\" value=\"update\">");
@@ -72,7 +75,7 @@ function edititem($title, $action, $id){
 		}
 }
 
-$action = isset($_POST['action']) ? htmlspecialchars($_POST['action']) : (isset($_GET['action']) ? htmlspecialchars($_GET['action']) : '');
+$action = ((\App\Support\SupportContext::getPost('action') !== null)) ? htmlspecialchars(\App\Support\SupportContext::getPost('action')) : (((\App\Support\SupportContext::getQuery('action') !== null)) ? htmlspecialchars(\App\Support\SupportContext::getQuery('action')) : '');
 $allowed_actions = array("dailylog","chronicle","news","poll");
 if (!$action)
 	$action='dailylog';
@@ -83,7 +86,7 @@ else {
 	case "dailylog":
 		stdhead($lang_log['head_site_log']);
 
-		$search = $_GET["search"] ?? '';
+		$search = \App\Support\SupportContext::getQuery("search") ?? '';
 
 		$addparam = "";
 		if (user_can('confilog')){
@@ -153,26 +156,26 @@ else {
 		if (user_can('chrmanage'))
 			additem($lang_log['text_add_chronicle'], 'chronicle');
 		if (
-			(isset($_GET['do']) && $_GET['do'] == "del")
-			|| (isset($_GET['do'] ) && $_GET['do'] == 'edit')
-			|| (isset($_POST['do']) && $_POST['do'] == "add")
-			|| (isset($_POST['do']) && $_POST['do'] == "update")
+			(((\App\Support\SupportContext::getQuery('do') !== null)) && \App\Support\SupportContext::getQuery('do') == "del")
+			|| (((\App\Support\SupportContext::getQuery('do') !== null)) && \App\Support\SupportContext::getQuery('do') == 'edit')
+			|| (((\App\Support\SupportContext::getPost('do') !== null)) && \App\Support\SupportContext::getPost('do') == "add")
+			|| (((\App\Support\SupportContext::getPost('do') !== null)) && \App\Support\SupportContext::getPost('do') == "update")
 		)
 		{
-			$txt = $_POST['txt'] ?? '';
+			$txt = \App\Support\SupportContext::getPost('txt') ?? '';
             if (get_user_class() < $chrmanage_class)
                 permissiondeny();
-			elseif (isset($_POST['do']) && $_POST['do'] == "add")
+			elseif (((\App\Support\SupportContext::getPost('do') !== null)) && \App\Support\SupportContext::getPost('do') == "add")
 					\App\Repositories\LogRepository::addChronicle((int)$CURUSER["id"], $txt);
-			elseif (isset($_POST['do'] ) && $_POST['do'] == "update"){
-				$id = intval($_POST['id'] ?? 0);
+			elseif (((\App\Support\SupportContext::getPost('do') !== null)) && \App\Support\SupportContext::getPost('do') == "update"){
+				$id = intval(\App\Support\SupportContext::getPost('id') ?? 0);
 				if (!$id) { header("Location: log.php?action=chronicle"); die();}
 				else \App\Repositories\LogRepository::updateChronicle($id, $txt);}
-			else {$id = (intval($_GET['id'] ?? 0));
+			else {$id = (intval(\App\Support\SupportContext::getQuery('id') ?? 0));
 				if (!$id) { header("Location: log.php?action=chronicle"); die();}
-				elseif ($_GET['do'] == "del")
+				elseif (\App\Support\SupportContext::getQuery('do') == "del")
 					\App\Repositories\LogRepository::deleteChronicle($id);
-				elseif (isset($_GET['do']) && $_GET['do'] == "edit")
+				elseif (((\App\Support\SupportContext::getQuery('do') !== null)) && \App\Support\SupportContext::getQuery('do') == "edit")
 					edititem($lang_log['text_edit_chronicle'],'chronicle', $id);
 				}
 		}
@@ -208,7 +211,7 @@ else {
 		break;
 	case "news":
 		stdhead($lang_log['head_news']);
-		$search = $_GET["search"] ?? '';
+		$search = \App\Support\SupportContext::getQuery("search") ?? '';
 		$addparam = $q ? "search=".rawurlencode($search)."&query=".rawurlencode($q)."&" : "";
 		logmenu("news");
 		$opt = array ('title' => $lang_log['text_title'], 'body' => $lang_log['text_body'], 'both' => $lang_log['text_both']);
@@ -242,9 +245,9 @@ else {
 		die;
 		break;
 	case "poll":
-		$do = $_GET["do"] ?? '';
-  		$pollid = intval($_GET["pollid"] ?? 0);
-  		$returnto = htmlspecialchars($_GET["returnto"] ?? '');
+		$do = \App\Support\SupportContext::getQuery("do") ?? '';
+  		$pollid = intval(\App\Support\SupportContext::getQuery("pollid") ?? 0);
+  		$returnto = htmlspecialchars(\App\Support\SupportContext::getQuery("returnto") ?? '');
   		if ($do == "delete")
   		{
   		if (!user_can('chrmanage'))
@@ -252,7 +255,7 @@ else {
 
   		int_check($pollid,true);
 
-   		$sure = $_GET["sure"] ?? '';
+   		$sure = \App\Support\SupportContext::getQuery("sure") ?? '';
    		if (!$sure)
     		stderr($lang_log['std_delete_poll'],$lang_log['std_delete_poll_confirmation'] .
     		"<a href=?action=poll&do=delete&pollid=$pollid&returnto=$returnto&sure=1>".$lang_log['std_here_if_sure'],false);
@@ -323,7 +326,7 @@ else {
 
     print("<table width=100% class=main border=0 cellspacing=0 cellpadding=0>\n");
     $i = 0;
-    while (isset($os[$i]))
+    while ((isset($os[$i])))
     {
 		$a = $os[$i];
 	  	if ($tvotes > 0)

@@ -2,6 +2,7 @@
 <?php
 
 define('LARAVEL_START', microtime(true));
+defined('IN_NEXUS') || define('IN_NEXUS', true);
 
 /*
 |--------------------------------------------------------------------------
@@ -17,6 +18,11 @@ define('LARAVEL_START', microtime(true));
 require __DIR__.'/vendor/autoload.php';
 
 $app = require_once __DIR__.'/bootstrap/app.php';
+
+// Load the legacy bootstrap for artisan commands that still use $GLOBALS-based
+// helpers (e.g. cleanup:run -> docleanup()). Web requests load this via public/nexus.php.
+$rootpath = __DIR__ . '/';
+require_once $rootpath . 'include/core.php';
 
 /*
 |--------------------------------------------------------------------------

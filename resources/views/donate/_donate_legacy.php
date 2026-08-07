@@ -4,7 +4,7 @@ error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 if ($enabledonation != 'yes')
 	stderr($lang_donate['std_sorry'], $lang_donate['std_do_not_accept_donation']);
 
-$do = $_GET['do'] ?? '';
+$do = \App\Support\SupportContext::getQuery('do') ?? '';
 
 if ($do == 'thanks') {
 	stderr($lang_donate['std_success'], $lang_donate['std_donation_success_note_one']."<a href=\"sendmessage.php?receiver=".$ACCOUNTANTID."\"><b>".$lang_donate['std_here']."</b></a>".$lang_donate['std_donation_success_note_two'], false);

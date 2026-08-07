@@ -1,13 +1,15 @@
 <?php
 extract($context, EXTR_SKIP);
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
-$userid = intval($_GET["id"] ?? 0);
+
+$__server_PHP_SELF = \App\Support\SupportContext::getServerValue('PHP_SELF');
+$userid = intval(\App\Support\SupportContext::getQuery("id") ?? 0);
 int_check($userid,true);
 
 if ($CURUSER["id"] != $userid && !user_can('viewhistory'))
 permissiondenied();
 
-$action = htmlspecialchars($_GET["action"]);
+$action = htmlspecialchars(\App\Support\SupportContext::getQuery("action"));
 
 $perpage = 15;
 
@@ -21,7 +23,7 @@ if ($action == "viewposts")
 	    ->distinct()
 	    ->count('p.id');
 
-	list($pagertop, $pagerbottom, , $offset, $perpage) = pager($perpage, $postcount, $_SERVER["PHP_SELF"] . "?action=viewposts&id=$userid&");
+	list($pagertop, $pagerbottom, , $offset, $perpage) = pager($perpage, $postcount, $__server_PHP_SELF . "?action=viewposts&id=$userid&");
 
 	$subject = get_username($userid);
 
@@ -117,7 +119,7 @@ if ($action == "viewcomments")
 	    ->where('c.user', $userid)
 	    ->count();
 
-	list($pagertop, $pagerbottom, , $offset, $perpage) = pager($perpage, $commentcount, $_SERVER["PHP_SELF"] . "?action=viewcomments&id=$userid&");
+	list($pagertop, $pagerbottom, , $offset, $perpage) = pager($perpage, $commentcount, $__server_PHP_SELF . "?action=viewcomments&id=$userid&");
 
 	$subject = get_username($userid);
 

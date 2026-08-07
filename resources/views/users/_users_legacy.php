@@ -3,10 +3,10 @@ extract($context, EXTR_SKIP);
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
 user_can('viewuserlist', true);
-$search = trim(is_scalar($_GET['search'] ?? '') ? (string) ($_GET['search'] ?? '') : '');
-$class = is_scalar($_GET['class'] ?? '') ? (string) ($_GET['class'] ?? '-') : '-';
-$country = intval(is_scalar($_GET['country'] ?? '') ? (string) ($_GET['country'] ?? '0') : '0');
-$letter = trim(is_scalar($_GET["letter"] ?? '') ? (string) ($_GET["letter"] ?? '') : '');
+$search = trim(is_scalar(\App\Support\SupportContext::getQuery('search') ?? '') ? (string) (\App\Support\SupportContext::getQuery('search') ?? '') : '');
+$class = is_scalar(\App\Support\SupportContext::getQuery('class') ?? '') ? (string) (\App\Support\SupportContext::getQuery('class') ?? '-') : '-';
+$country = intval(is_scalar(\App\Support\SupportContext::getQuery('country') ?? '') ? (string) (\App\Support\SupportContext::getQuery('country') ?? '0') : '0');
+$letter = trim(is_scalar(\App\Support\SupportContext::getQuery("letter") ?? '') ? (string) (\App\Support\SupportContext::getQuery("letter") ?? '') : '');
 
 if (strlen($letter) > 1)
 	return;

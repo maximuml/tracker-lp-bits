@@ -9,11 +9,11 @@ if (! defined('PM_INBOX')) {
     define('PM_INBOX', 1);
 }
 
-$id = $_GET["id"] ?? 0;
+$id = \App\Support\SupportContext::getQuery("id") ?? 0;
 if (!is_numeric($id) || $id < 1 || floor($id) != $id)
     stderr("Error", $lang_deletemessage['std_bad_message_id']);
 
-$type = $_GET["type"] ?? '';
+$type = \App\Support\SupportContext::getQuery("type") ?? '';
 
 if ($type == 'in')
 {

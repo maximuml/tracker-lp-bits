@@ -3,7 +3,9 @@ extract($context, EXTR_SKIP);
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
 
-$uid = $_REQUEST['uid'] ?? $CURUSER['id'] ?? 0;
+
+$__server_REQUEST_URI = \App\Support\SupportContext::getServerValue('REQUEST_URI');
+$uid = \App\Support\SupportContext::getRequestInput('uid') ?? $CURUSER['id'] ?? 0;
 int_check($uid,true);
 $user = \App\Models\User::query()->where('id', $uid)->first(\App\Models\User::$commonFields);
 if (!$user) {
@@ -14,14 +16,14 @@ if ($uid != $CURUSER['id']) {
 }
 $isRecordSeedingBonusLog = \App\Models\Setting::getIsRecordSeedingBonusLog();
 $defaultCategory = \App\Models\BonusLogs::CATEGORY_COMMON;
-$category = $_REQUEST['category'] ?? $defaultCategory;
+$category = \App\Support\SupportContext::getRequestInput('category') ?? $defaultCategory;
 $categoryOptions = \App\Models\BonusLogs::listCategoryOptions($isRecordSeedingBonusLog);
-if (!isset($categoryOptions[$category])) {
+if (!(isset($categoryOptions[$category]))) {
     stderr("Error", "Invalid category: $category");
 }
-$businessType = $_REQUEST['business_type'] ?? 0;
+$businessType = \App\Support\SupportContext::getRequestInput('business_type') ?? 0;
 $businessTypeOptions = \App\Models\BonusLogs::listBusinessTypeOptions($isRecordSeedingBonusLog ? '' : $defaultCategory);
-if ($businessType && !isset($businessTypeOptions[$businessType])) {
+if ($businessType && !(isset($businessTypeOptions[$businessType]))) {
     stderr("Error", "Invalid business_type: $businessType");
 }
 
@@ -34,13 +36,13 @@ $categoryOptionsText = $businessTypeOptionsText = '';
 foreach ($categoryOptions as $name => $text) {
     $categoryOptionsText .= sprintf(
         '<option value="%s"%s>%s</option>',
-        $name, isset($_REQUEST['category']) && $_REQUEST['category'] == $name ? ' selected' : '', $text
+        $name, ((\App\Support\SupportContext::getRequestInput('category') !== null)) && \App\Support\SupportContext::getRequestInput('category') == $name ? ' selected' : '', $text
     );
 }
 foreach ($businessTypeOptions as $name => $text) {
     $businessTypeOptionsText .= sprintf(
         '<option value="%s"%s>%s</option>',
-        $name, isset($_REQUEST['business_type']) && $_REQUEST['business_type'] == $name ? ' selected' : '', $text
+        $name, ((\App\Support\SupportContext::getRequestInput('business_type') !== null)) && \App\Support\SupportContext::getRequestInput('business_type') == $name ? ' selected' : '', $text
     );
 }
 
@@ -50,7 +52,7 @@ $categoryText = nexus_trans('bonus-log.category');
 $businessTypeText = nexus_trans('bonus-log.fields.business_type');
 $filterForm = <<<FORM
 <div>
-    <form id="filterForm" action="{$_SERVER['REQUEST_URI']}" method="get">
+    <form id="filterForm" action="{$__server_REQUEST_URI}" method="get">
         <input type="hidden" name="uid" value="{$uid}" />
         <span>{$categoryText}:</span>
         <select name="category">

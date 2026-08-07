@@ -1,5 +1,5 @@
 <?php
-global $CURUSER, $lang_upload, $lang_edit, $lang_functions, $browsecatmode, $specialcatmode, $altname_main, $max_torrent_size, $torrent_dir, $enableoffer, $BASEURL;
+extract($context, EXTR_SKIP);
 ?>
 	<form id="compose" enctype="multipart/form-data" action="takeupload.php" method="post" name="upload">
 			<?php

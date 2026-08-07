@@ -3,7 +3,10 @@ extract($context, EXTR_SKIP);
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
 
-$isLogin = isset($CURUSER['id']);
+
+$__server_HTTP_REFERER = \App\Support\SupportContext::getServerValue('HTTP_REFERER');
+$__server_REQUEST_METHOD = \App\Support\SupportContext::getServerValue('REQUEST_METHOD');
+$isLogin = (isset($CURUSER['id']));
 $isAdmin = user_can('staffmem');
 
 if($isLogin && !$isAdmin) {
@@ -14,15 +17,15 @@ if (!$isAdmin && !\App\Models\Setting::getIsComplainEnabled()) {
 }
 
 $uid = $CURUSER['id'] ?? 0;
-if($_SERVER['REQUEST_METHOD'] === 'POST'){
-    switch($action = filter_input(INPUT_POST, 'action', FILTER_SANITIZE_FULL_SPECIAL_CHARS)){
+if($__server_REQUEST_METHOD === 'POST'){
+    switch($action = filter_var(\App\Support\SupportContext::getPost(action), FILTER_SANITIZE_FULL_SPECIAL_CHARS)){
         case 'new':
             cur_user_check();
-            check_code ($_POST['imagehash'] ?? null, $_POST['imagestring'] ?? null,'complains.php');
+            check_code (\App\Support\SupportContext::getPost('imagehash') ?? null, \App\Support\SupportContext::getPost('imagestring') ?? null,'complains.php');
             \Nexus\Database\NexusLock::lockOrFail("complains:lock:" . getip(), 10);
-            $email = filter_input(INPUT_POST, 'email', FILTER_VALIDATE_EMAIL);
+            $email = filter_var(\App\Support\SupportContext::getPost(email), FILTER_VALIDATE_EMAIL);
             \Nexus\Database\NexusLock::lockOrFail("complains:lock:" . $email, 600);
-            $body = filter_input(INPUT_POST, 'body', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+            $body = filter_var(\App\Support\SupportContext::getPost(body), FILTER_SANITIZE_FULL_SPECIAL_CHARS);
             if(empty($email) || empty($body)) stderr($lang_functions['std_error'], $lang_complains['text_new_failure']);
             $user = \App\Models\User::query()->where('email', $email)->where('enabled', 'no')->first();
             if (!$user) {
@@ -39,8 +42,8 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
             nexus_redirect(sprintf('complains.php?action=view&id=%s', \Nexus\Database\NexusDB::table('complains')->where('id', $complainId)->value('uuid')));
             break;
         case 'reply':
-            $id = filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT);
-            $body = filter_input(INPUT_POST, 'body', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+            $id = filter_var(\App\Support\SupportContext::getPost(id), FILTER_VALIDATE_INT);
+            $body = filter_var(\App\Support\SupportContext::getPost(body), FILTER_SANITIZE_FULL_SPECIAL_CHARS);
             $complain = \App\Models\Complain::query()->findOrFail($id);
             if(empty($id) || empty($body)) stderr($lang_functions['std_error'], $lang_complains['text_new_failure']);
             \Nexus\Database\NexusDB::table('complain_replies')->insert([
@@ -58,24 +61,24 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
                     do_log($exception->getMessage(), 'error');
                 }
             }
-            nexus_redirect($_SERVER['HTTP_REFERER']);
+            nexus_redirect($__server_HTTP_REFERER);
             break;
         case 'answered':
         case 'unanswered':
             if(!$isAdmin) permissiondenied();
-            $id = filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT);
+            $id = filter_var(\App\Support\SupportContext::getPost(id), FILTER_VALIDATE_INT);
             if(!$id) permissiondenied();
             \Nexus\Database\NexusDB::table('complains')->where('id', $id)->update([
                 'answered' => $action == 'answered' ? 1 : 0,
             ]);
             $Cache->delete_value('COMPLAINTS_COUNT_CACHE');
-            nexus_redirect($_SERVER['HTTP_REFERER']);
+            nexus_redirect($__server_HTTP_REFERER);
             break;
         default:
             permissiondenied();
     }
 }else{
-    $action = filter_input(INPUT_GET, 'action', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+    $action = filter_var(\App\Support\SupportContext::getQuery(action), FILTER_SANITIZE_FULL_SPECIAL_CHARS);
     if (empty($action) && $isAdmin) {
         $action = 'list';
     }
@@ -83,7 +86,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
         case 'list':
             if(!$isAdmin) permissiondenied();
             $showTable = function($rows){
-                global $lang_complains;
+$lang_complains = (array) (\App\Support\SupportContext::getGlobal('lang_complains') ?? []);
                 echo '<table width="100%">';
                 echo EchoRow('colhead', $lang_complains['th_complain_at'], $lang_complains['th_complain_account'], $lang_complains['th_action_view']);
                 foreach ($rows as $r) {
@@ -94,7 +97,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
             };
             stdhead($lang_complains['text_complain']);
             begin_main_frame();
-            if(!isset($_GET['page'])){
+            if(!((\App\Support\SupportContext::getQuery('page') !== null))){
                 $pendingRows = \Nexus\Database\NexusDB::table('complains')->where('answered', 0)->orderByDesc('id')->get(['added', 'uuid', 'email']);
                 begin_frame($lang_complains['pending_complaints']);
                 if($pendingRows->count()){
@@ -124,7 +127,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
             stdfoot();
             break;
         case 'view':
-            $uuid = filter_input(INPUT_GET, 'id', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+            $uuid = filter_var(\App\Support\SupportContext::getQuery(id), FILTER_SANITIZE_FULL_SPECIAL_CHARS);
             if(strlen($uuid) != 36) permissiondenied();
             $complain = (array) \Nexus\Database\NexusDB::table('complains')->where('uuid', $uuid)->first();
             if(!$complain) permissiondenied();

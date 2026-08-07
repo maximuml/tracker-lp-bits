@@ -2,9 +2,11 @@
 extract($context, EXTR_SKIP);
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
+
+$__server_PHP_SELF = \App\Support\SupportContext::getServerValue('PHP_SELF');
 $prefix = '';
 $user = $CURUSER;
-$PHP_SELF = $_SERVER['PHP_SELF'];
+$PHP_SELF = $__server_PHP_SELF;
 
 user_can('forummanage', true);
 
@@ -12,8 +14,8 @@ $overforums = \Nexus\Database\NexusDB::table('overforums')->orderBy('sort')->get
 $maxSort = \Nexus\Database\NexusDB::table('forums')->count();
 
 // DELETE FORUM ACTION
-if (isset($_GET['action']) && $_GET['action'] == "del") {
-	$id = intval($_GET['id'] ?? 0);
+if (((\App\Support\SupportContext::getQuery('action') !== null)) && \App\Support\SupportContext::getQuery('action') == "del") {
+	$id = intval(\App\Support\SupportContext::getQuery('id') ?? 0);
 	if (!$id) {
 		header("Location: forummanage.php");
 	return;
@@ -32,29 +34,29 @@ if (isset($_GET['action']) && $_GET['action'] == "del") {
 }
 
 //EDIT FORUM ACTION
-elseif (isset($_POST['action']) && $_POST['action'] == "editforum") {
-	$name = $_POST['name'];
-	$desc = $_POST['desc'];
-	$id = $_POST['id'];
+elseif (((\App\Support\SupportContext::getPost('action') !== null)) && \App\Support\SupportContext::getPost('action') == "editforum") {
+	$name = \App\Support\SupportContext::getPost('name');
+	$desc = \App\Support\SupportContext::getPost('desc');
+	$id = \App\Support\SupportContext::getPost('id');
 	if (!$name && !$desc && !$id) {
 		header("Location: " . get_protocol_prefix() . "$BASEURL/forummanage.php");
 	return;
 	}
-	if (!empty($_POST["moderator"])) {
-		$moderator = $_POST["moderator"];
+	if (!empty(\App\Support\SupportContext::getPost("moderator"))) {
+		$moderator = \App\Support\SupportContext::getPost("moderator");
 		set_forum_moderators($moderator,$id);
 	}
 	else{
 		\Nexus\Database\NexusDB::table('forummods')->where('forumid', $id)->delete();
 	}
 	\Nexus\Database\NexusDB::table('forums')->where('id', $id)->update([
-	    'sort' => $_POST['sort'],
-	    'name' => $_POST['name'],
-	    'description' => $_POST['desc'],
-	    'forid' => $_POST['overforums'],
-	    'minclassread' => $_POST['readclass'],
-	    'minclasswrite' => $_POST['writeclass'],
-	    'minclasscreate' => $_POST['createclass'],
+	    'sort' => \App\Support\SupportContext::getPost('sort'),
+	    'name' => \App\Support\SupportContext::getPost('name'),
+	    'description' => \App\Support\SupportContext::getPost('desc'),
+	    'forid' => \App\Support\SupportContext::getPost('overforums'),
+	    'minclassread' => \App\Support\SupportContext::getPost('readclass'),
+	    'minclasswrite' => \App\Support\SupportContext::getPost('writeclass'),
+	    'minclasscreate' => \App\Support\SupportContext::getPost('createclass'),
 	]);
 	$Cache->delete_value('forums_list');
 	$Cache->delete_value('forum_moderator_array');
@@ -63,25 +65,25 @@ elseif (isset($_POST['action']) && $_POST['action'] == "editforum") {
 }
 
 //ADD FORUM ACTION
-elseif (isset($_POST['action']) && $_POST['action'] == "addforum") {
-	$name = ($_POST['name']);
-	$desc = ($_POST['desc']);
+elseif (((\App\Support\SupportContext::getPost('action') !== null)) && \App\Support\SupportContext::getPost('action') == "addforum") {
+	$name = (\App\Support\SupportContext::getPost('name'));
+	$desc = (\App\Support\SupportContext::getPost('desc'));
 	if (!$name && !$desc) {
 		header("Location: " . get_protocol_prefix() . "$BASEURL/forummanage.php");
 	return;
 	}
 	$id = \Nexus\Database\NexusDB::table('forums')->insertGetId([
-	    'sort' => $_POST['sort'],
-	    'name' => $_POST['name'],
-	    'description' => $_POST['desc'],
-	    'minclassread' => $_POST['readclass'],
-	    'minclasswrite' => $_POST['writeclass'],
-	    'minclasscreate' => $_POST['createclass'],
-	    'forid' => $_POST['overforums'],
+	    'sort' => \App\Support\SupportContext::getPost('sort'),
+	    'name' => \App\Support\SupportContext::getPost('name'),
+	    'description' => \App\Support\SupportContext::getPost('desc'),
+	    'minclassread' => \App\Support\SupportContext::getPost('readclass'),
+	    'minclasswrite' => \App\Support\SupportContext::getPost('writeclass'),
+	    'minclasscreate' => \App\Support\SupportContext::getPost('createclass'),
+	    'forid' => \App\Support\SupportContext::getPost('overforums'),
 	]);
 	$Cache->delete_value('forums_list');
-	if ($_POST["moderator"]){
-		$moderator = $_POST["moderator"];
+	if (\App\Support\SupportContext::getPost("moderator")){
+		$moderator = \App\Support\SupportContext::getPost("moderator");
 		set_forum_moderators($moderator,$id);
 	}
 	header("Location: forummanage.php");
@@ -91,9 +93,9 @@ elseif (isset($_POST['action']) && $_POST['action'] == "addforum") {
 // SHOW FORUMS WITH FORUM MANAGEMENT TOOLS
 stdhead($lang_forummanage['head_forum_management']);
 begin_main_frame();
-if (isset($_GET['action']) && $_GET['action'] == "editforum") {
+if (((\App\Support\SupportContext::getQuery('action') !== null)) && \App\Support\SupportContext::getQuery('action') == "editforum") {
 	//EDIT PAGE FOR THE FORUMS
-	$id = intval($_GET["id"] ?? 0);
+	$id = intval(\App\Support\SupportContext::getQuery("id") ?? 0);
 	$row = (array) \Nexus\Database\NexusDB::table('forums')->where('id', $id)->first();
 	if (!$row) {
 		print ($lang_forummanage['text_no_records_found']);
@@ -101,7 +103,7 @@ if (isset($_GET['action']) && $_GET['action'] == "editforum") {
 ?>
 <h1 align=center><a class=faqlink href=forummanage.php><?php echo $lang_forummanage['text_forum_management']?></a><b>--></b><?php echo $lang_forummanage['text_edit_forum']?></h2>
 <br />
-<form method=post action="<?php echo $_SERVER["PHP_SELF"];?>">
+<form method=post action="<?php echo $__server_PHP_SELF;?>">
 <table width="100%"  border="0" cellspacing="0" cellpadding="3" align="center">
 <tr align="center">
     <td colspan="2" class=colhead><?php echo $lang_forummanage['text_edit_forum']?> -- <?php echo htmlspecialchars($row["name"]);?></td>
@@ -188,11 +190,11 @@ if (isset($_GET['action']) && $_GET['action'] == "editforum") {
 	}
 }
 //
-elseif (isset($_GET['action']) && $_GET['action'] == "newforum"){
+elseif (((\App\Support\SupportContext::getQuery('action') !== null)) && \App\Support\SupportContext::getQuery('action') == "newforum"){
 ?>
 <h2 class=transparentbg align=center><a class=faqlink href=forummanage.php><?php echo $lang_forummanage['text_forum_management']?></a><b>--></b><?php echo $lang_forummanage['text_add_forum']?></h2>
 <br />
-<form method=post action="<?php echo $_SERVER["PHP_SELF"];?>">
+<form method=post action="<?php echo $__server_PHP_SELF;?>">
 <table width="100%"  border="0" cellspacing="0" cellpadding="3" align="center">
 <tr align="center">
     <td colspan="2" class=colhead><?php echo $lang_forummanage['text_make_new_forum']?></td>

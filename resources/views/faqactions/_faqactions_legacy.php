@@ -34,8 +34,8 @@ function clear_faq_cache()
 //stdhead("FAQ Management");
 
 // ACTION: reorder - reorder sections and items
-if (isset($_GET['action']) && $_GET['action'] == "reorder") {
-	foreach($_POST['order'] as $id => $position) {
+if (((\App\Support\SupportContext::getQuery('action') !== null)) && \App\Support\SupportContext::getQuery('action') == "reorder") {
+	foreach(\App\Support\SupportContext::getPost('order') as $id => $position) {
 		\Nexus\Database\NexusDB::table('faq')->where('id', (int)$id)->update(['order' => (int)$position]);
 	}
 	header("Location: " . get_protocol_prefix() . "$BASEURL/faqmanage.php");
@@ -43,12 +43,12 @@ if (isset($_GET['action']) && $_GET['action'] == "reorder") {
 }
 
 // ACTION: edit - edit a section or item
-elseif (isset($_GET['action']) && $_GET['action'] == "edit" && isset($_GET['id'])) {
+elseif (((\App\Support\SupportContext::getQuery('action') !== null)) && \App\Support\SupportContext::getQuery('action') == "edit" && ((\App\Support\SupportContext::getQuery('id') !== null))) {
 	stdhead("FAQ Management");
 	begin_main_frame();
 	print("<h1 align=\"center\">Edit Section or Item</h1>");
 
-	$row = \Nexus\Database\NexusDB::table('faq')->where('id', (int)$_GET['id'])->first();
+	$row = \Nexus\Database\NexusDB::table('faq')->where('id', (int)\App\Support\SupportContext::getQuery('id'))->first();
 	if ($row) {
 		$arr = (array) $row;
 		$arr['question'] = htmlspecialchars($arr['question']);
@@ -98,14 +98,14 @@ elseif (isset($_GET['action']) && $_GET['action'] == "edit" && isset($_GET['id']
 }
 
 // subACTION: edititem - edit an item
-elseif (isset($_GET['action']) && $_GET['action'] == "edititem" && $_POST['id'] != NULL && $_POST['question'] != NULL && $_POST['answer'] != NULL && $_POST['flag'] != NULL && $_POST['categ'] != NULL) {
-	$question = $_POST['question'];
-	$answer = $_POST['answer'];
-	\Nexus\Database\NexusDB::table('faq')->where('id', (int)$_POST['id'])->update([
+elseif (((\App\Support\SupportContext::getQuery('action') !== null)) && \App\Support\SupportContext::getQuery('action') == "edititem" && \App\Support\SupportContext::getPost('id') != NULL && \App\Support\SupportContext::getPost('question') != NULL && \App\Support\SupportContext::getPost('answer') != NULL && \App\Support\SupportContext::getPost('flag') != NULL && \App\Support\SupportContext::getPost('categ') != NULL) {
+	$question = \App\Support\SupportContext::getPost('question');
+	$answer = \App\Support\SupportContext::getPost('answer');
+	\Nexus\Database\NexusDB::table('faq')->where('id', (int)\App\Support\SupportContext::getPost('id'))->update([
 	    'question' => $question,
 	    'answer' => $answer,
-	    'flag' => (int)$_POST['flag'],
-	    'categ' => (int)$_POST['categ'],
+	    'flag' => (int)\App\Support\SupportContext::getPost('flag'),
+	    'categ' => (int)\App\Support\SupportContext::getPost('categ'),
 	]);
     clear_faq_cache();
 	header("Location: " . get_protocol_prefix() . "$BASEURL/faqmanage.php");
@@ -113,12 +113,12 @@ elseif (isset($_GET['action']) && $_GET['action'] == "edititem" && $_POST['id'] 
 }
 
 // subACTION: editsect - edit a section
-elseif (isset($_GET['action']) && $_GET['action'] == "editsect" && $_POST['id'] != NULL && $_POST['title'] != NULL && $_POST['flag'] != NULL) {
-	$title = $_POST['title'];
-	\Nexus\Database\NexusDB::table('faq')->where('id', (int)$_POST['id'])->update([
+elseif (((\App\Support\SupportContext::getQuery('action') !== null)) && \App\Support\SupportContext::getQuery('action') == "editsect" && \App\Support\SupportContext::getPost('id') != NULL && \App\Support\SupportContext::getPost('title') != NULL && \App\Support\SupportContext::getPost('flag') != NULL) {
+	$title = \App\Support\SupportContext::getPost('title');
+	\Nexus\Database\NexusDB::table('faq')->where('id', (int)\App\Support\SupportContext::getPost('id'))->update([
 	    'question' => $title,
 	    'answer' => '',
-	    'flag' => (int)$_POST['flag'],
+	    'flag' => (int)\App\Support\SupportContext::getPost('flag'),
 	    'categ' => 0,
 	]);
     clear_faq_cache();
@@ -127,9 +127,9 @@ elseif (isset($_GET['action']) && $_GET['action'] == "editsect" && $_POST['id'] 
 }
 
 // ACTION: delete - delete a section or item
-elseif (isset($_GET['action']) && $_GET['action'] == "delete" && isset($_GET['id'])) {
-	if ($_GET['confirm'] == "yes") {
-		\Nexus\Database\NexusDB::table('faq')->where('id', (int)($_GET['id'] ?? 0))->delete();
+elseif (((\App\Support\SupportContext::getQuery('action') !== null)) && \App\Support\SupportContext::getQuery('action') == "delete" && ((\App\Support\SupportContext::getQuery('id') !== null))) {
+	if (\App\Support\SupportContext::getQuery('confirm') == "yes") {
+		\Nexus\Database\NexusDB::table('faq')->where('id', (int)(\App\Support\SupportContext::getQuery('id') ?? 0))->delete();
 		header("Location: " . get_protocol_prefix() . "$BASEURL/faqmanage.php");
 		return;
 	}
@@ -137,7 +137,7 @@ elseif (isset($_GET['action']) && $_GET['action'] == "delete" && isset($_GET['id
 		stdhead("FAQ Management");
 		begin_main_frame();
 		print("<h1 align=\"center\">Confirmation required</h1>");
-        $id = intval($_GET['id'] ?? 0);
+        $id = intval(\App\Support\SupportContext::getQuery('id') ?? 0);
 		print("<table border=\"1\" cellspacing=\"0\" cellpadding=\"5\" align=\"center\" width=\"95%\">\n<tr><td align=\"center\">Please click <a href=\"faqactions.php?action=delete&id={$id}&confirm=yes\">here</a> to confirm.</td></tr>\n</table>\n");
 		end_main_frame();
 		stdfoot();
@@ -145,7 +145,7 @@ elseif (isset($_GET['action']) && $_GET['action'] == "delete" && isset($_GET['id
 }
 
 // ACTION: additem - add a new item
-elseif (isset($_GET['action']) && $_GET['action'] == "additem" && $_GET['inid'] && $_GET['langid']) {
+elseif (((\App\Support\SupportContext::getQuery('action') !== null)) && \App\Support\SupportContext::getQuery('action') == "additem" && \App\Support\SupportContext::getQuery('inid') && \App\Support\SupportContext::getQuery('langid')) {
 	stdhead("FAQ Management");
 	begin_main_frame();
 	print("<h1 align=\"center\">Add Item</h1>");
@@ -154,8 +154,8 @@ elseif (isset($_GET['action']) && $_GET['action'] == "additem" && $_GET['inid'] 
 	print("<tr><td>Question:</td><td><input style=\"width: 600px;\" type=\"text\" name=\"question\" value=\"\" /></td></tr>\n");
 	print("<tr><td style=\"vertical-align: top;\">Answer:</td><td><textarea rows=20 style=\"width: 600px; height=600px;\" name=\"answer\"></textarea></td></tr>\n");
 	print("<tr><td>Status:</td><td><select name=\"flag\" style=\"width: 110px;\"><option value=\"0\" style=\"color: #FF0000;\">Hidden</option><option value=\"1\" style=\"color: #000000;\">Normal</option><option value=\"2\" style=\"color: #0000FF;\">Updated</option><option value=\"3\" style=\"color: #008000;\" selected=\"selected\">New</option></select></td></tr>");
-	print("<input type=hidden name=categ value=\"".(intval($_GET['inid'] ?? 0))."\">");
-	print("<input type=hidden name=langid value=\"".(intval($_GET['langid'] ?? 0))."\">");
+	print("<input type=hidden name=categ value=\"".(intval(\App\Support\SupportContext::getQuery('inid') ?? 0))."\">");
+	print("<input type=hidden name=langid value=\"".(intval(\App\Support\SupportContext::getQuery('langid') ?? 0))."\">");
 	print("<tr><td colspan=\"2\" align=\"center\"><input type=\"submit\" value=\"Add\" style=\"width: 60px;\"></td></tr>\n");
 	print("</table></form>");
 	end_main_frame();
@@ -163,7 +163,7 @@ elseif (isset($_GET['action']) && $_GET['action'] == "additem" && $_GET['inid'] 
 }
 
 // ACTION: addsection - add a new section
-elseif (isset($_GET['action']) && $_GET['action'] == "addsection") {
+elseif (((\App\Support\SupportContext::getQuery('action') !== null)) && \App\Support\SupportContext::getQuery('action') == "addsection") {
 	stdhead("FAQ Management");
 	begin_main_frame();
 	print("<h1 align=\"center\">Add Section</h1>");
@@ -187,11 +187,11 @@ elseif (isset($_GET['action']) && $_GET['action'] == "addsection") {
 }
 
 // subACTION: addnewitem - add a new item to the db
-elseif (isset($_GET['action']) && $_GET['action'] == "addnewitem" && $_POST['question'] != NULL && $_POST['answer'] != NULL) {
-	$question = $_POST['question'];
-	$answer = $_POST['answer'];
-	$categ = intval($_POST['categ'] ?? 0);
-	$langid = intval($_POST['langid'] ?? 0);
+elseif (((\App\Support\SupportContext::getQuery('action') !== null)) && \App\Support\SupportContext::getQuery('action') == "addnewitem" && \App\Support\SupportContext::getPost('question') != NULL && \App\Support\SupportContext::getPost('answer') != NULL) {
+	$question = \App\Support\SupportContext::getPost('question');
+	$answer = \App\Support\SupportContext::getPost('answer');
+	$categ = intval(\App\Support\SupportContext::getPost('categ') ?? 0);
+	$langid = intval(\App\Support\SupportContext::getPost('langid') ?? 0);
 	$maxRow = \Nexus\Database\NexusDB::table('faq')
 	    ->where('type', 'item')
 	    ->where('categ', $categ)
@@ -212,7 +212,7 @@ elseif (isset($_GET['action']) && $_GET['action'] == "addnewitem" && $_POST['que
 	    'lang_id' => $langid,
 	    'question' => $question,
 	    'answer' => $answer,
-	    'flag' => (int)($_POST['flag'] ?? 0),
+	    'flag' => (int)(\App\Support\SupportContext::getPost('flag') ?? 0),
 	    'categ' => $categ,
 	    'order' => $order,
 	]);
@@ -222,9 +222,9 @@ elseif (isset($_GET['action']) && $_GET['action'] == "addnewitem" && $_POST['que
 }
 
 // subACTION: addnewsect - add a new section to the db
-elseif (isset($_GET['action']) && $_GET['action'] == "addnewsect" && $_POST['title'] != NULL && $_POST['flag'] != NULL) {
-	$title = $_POST['title'];
-	$language = intval($_POST['language'] ?? 0);
+elseif (((\App\Support\SupportContext::getQuery('action') !== null)) && \App\Support\SupportContext::getQuery('action') == "addnewsect" && \App\Support\SupportContext::getPost('title') != NULL && \App\Support\SupportContext::getPost('flag') != NULL) {
+	$title = \App\Support\SupportContext::getPost('title');
+	$language = intval(\App\Support\SupportContext::getPost('language') ?? 0);
 	$maxRow = \Nexus\Database\NexusDB::table('faq')
 	    ->where('type', 'categ')
 	    ->where('lang_id', $language)
@@ -244,7 +244,7 @@ elseif (isset($_GET['action']) && $_GET['action'] == "addnewsect" && $_POST['tit
 	    'lang_id' => $language,
 	    'question' => $title,
 	    'answer' => '',
-	    'flag' => (int)($_POST['flag'] ?? 0),
+	    'flag' => (int)(\App\Support\SupportContext::getPost('flag') ?? 0),
 	    'categ' => 0,
 	    'order' => $order,
 	]);

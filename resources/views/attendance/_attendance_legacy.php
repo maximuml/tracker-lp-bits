@@ -3,6 +3,8 @@ extract($context, EXTR_SKIP);
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
 
+
+$__server_REQUEST_METHOD = \App\Support\SupportContext::getServerValue('REQUEST_METHOD');
 \Nexus\Nexus::css('vendor/fullcalendar-5.10.2/main.min.css', 'header', true);
 \Nexus\Nexus::js('vendor/fullcalendar-5.10.2/main.min.js', 'footer', true);
 
@@ -29,9 +31,9 @@ if (is_string($attendanceCaptchaSetting)) {
     $attendanceCaptchaEnabled = (bool) $attendanceCaptchaSetting;
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+if ($__server_REQUEST_METHOD === 'POST') {
     if ($attendanceCaptchaEnabled && $iv == 'yes') {
-        check_code($_POST['imagehash'] ?? null, $_POST['imagestring'] ?? null, 'attendance.php');
+        check_code(\App\Support\SupportContext::getPost('imagehash') ?? null, \App\Support\SupportContext::getPost('imagestring') ?? null, 'attendance.php');
     }
     $attendance = $attendanceRepository->attend($CURUSER['id']);
     if (!$attendance->is_updated) {

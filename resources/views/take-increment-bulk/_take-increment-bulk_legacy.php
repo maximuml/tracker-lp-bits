@@ -2,44 +2,46 @@
 extract($context, EXTR_SKIP);
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
-if ($_SERVER["REQUEST_METHOD"] != "POST")
+
+$__server_REQUEST_METHOD = \App\Support\SupportContext::getServerValue('REQUEST_METHOD');
+if ($__server_REQUEST_METHOD != "POST")
     stderr("Error", "Permission denied!");
 
 if (get_user_class() < UC_SYSOP)
     stderr("Sorry", "Permission denied.");
 
 $validTypeMap = $lang_incrementbulk['types'];
-$sender_id = ($_POST['sender'] == 'system' ? 0 : (int)$CURUSER['id']);
+$sender_id = (\App\Support\SupportContext::getPost('sender') == 'system' ? 0 : (int)$CURUSER['id']);
 $added = date("Y-m-d H:i:s");
-$msg = trim($_POST['msg']);
-$amount = $_POST['amount'];
-$type = $_POST['type'] ?? '';
+$msg = trim(\App\Support\SupportContext::getPost('msg'));
+$amount = \App\Support\SupportContext::getPost('amount');
+$type = \App\Support\SupportContext::getPost('type') ?? '';
 if (!$msg || !$amount || !$type)
     stderr("Error","Don't leave any fields blank.");
 if(!is_numeric($amount))
     stderr("Error","amount must be numeric");
-if (!isset($validTypeMap[$type])) {
+if (!(isset($validTypeMap[$type]))) {
     stderr("Error","Invalid type");
 }
 if ($type == 'uploaded') {
     $amount = getsize_int($amount,"G");
 }
 $isTypeTmpInvite = $type == 'tmp_invites';
-$subject = trim($_POST['subject']);
+$subject = trim(\App\Support\SupportContext::getPost('subject'));
 $duration = 0;
 $size = 2000;
 $page = 1;
 set_time_limit(300);
 $conditions = [];
-if (!empty($_POST['classes'])) {
-    $conditions[] = "class IN (" . implode(', ', $_POST['classes']) . ")";
+if (!empty(\App\Support\SupportContext::getPost('classes'))) {
+    $conditions[] = "class IN (" . implode(', ', \App\Support\SupportContext::getPost('classes')) . ")";
 }
-$conditions = apply_filter("role_query_conditions", $conditions, $_POST);
+$conditions = apply_filter("role_query_conditions", $conditions, \App\Support\SupportContext::allPost());
 if (empty($conditions)) {
     stderr("Error","No valid filter");
 }
 if ($isTypeTmpInvite) {
-    $duration = intval($_POST['duration'] ?? 0);
+    $duration = intval(\App\Support\SupportContext::getPost('duration') ?? 0);
     if ($duration <= 0) {
         stderr("Sorry", "Invalid duration: $duration");
     }

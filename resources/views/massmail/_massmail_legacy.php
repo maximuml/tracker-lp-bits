@@ -2,25 +2,27 @@
 extract($context, EXTR_SKIP);
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
+
+$__server_REQUEST_METHOD = \App\Support\SupportContext::getServerValue('REQUEST_METHOD');
 if (get_user_class() < UC_SYSOP)
 stderr("Error", "Permission denied.");
-$class = intval($_POST["class"] ?? 0);
+$class = intval(\App\Support\SupportContext::getPost("class") ?? 0);
 	if ($class)
 		int_check($class,true);
 
-if ($_SERVER["REQUEST_METHOD"] == "POST")
+if ($__server_REQUEST_METHOD == "POST")
 {
-    $or = $_POST["or"] ?? '';
+    $or = \App\Support\SupportContext::getPost("or") ?? '';
     if (!in_array($or, ["<", ">", "=", "<=", ">="], true)) {
         stderr("Error", "Invalid symbol!");
     }
 $rows = \App\Models\User::query()->where('class', $or, $class)->get(['id', 'username', 'email']);
 
-$subject = substr(htmlspecialchars(trim($_POST["subject"])), 0, 80);
+$subject = substr(htmlspecialchars(trim(\App\Support\SupportContext::getPost("subject"))), 0, 80);
 if ($subject == "") $subject = "(no subject)";
 $subject = "Fw: $subject";
 
-$message1 = htmlspecialchars(trim($_POST["message"]));
+$message1 = htmlspecialchars(trim(\App\Support\SupportContext::getPost("message")));
 if ($message1 == "") stderr("Error", "Empty message!");
 
 foreach ($rows as $userRow) {

@@ -1,16 +1,23 @@
 <?php
-global $id, $type, $menuSelected, $pageSize, $userRep;
 extract($context, EXTR_SKIP);
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
-$id = isset($_GET["id"]) ? intval($_GET["id"]) : (int) ($CURUSER['id'] ?? 0);
-$type = unesc($_GET["type"] ?? '');
-$menuSelected = $_REQUEST['menu'] ?? 'invitee';
+
+$__server_REQUEST_URI = \App\Support\SupportContext::getServerValue('REQUEST_URI');
+$id = ((\App\Support\SupportContext::getQuery("id") !== null)) ? intval(\App\Support\SupportContext::getQuery("id")) : (int) ($CURUSER['id'] ?? 0);
+\App\Support\SupportContext::setGlobal('id', $id);
+$type = unesc(\App\Support\SupportContext::getQuery("type") ?? '');
+$menuSelected = \App\Support\SupportContext::getRequestInput('menu') ?? 'invitee';
 $pageSize = 50;
 if (($CURUSER['id'] != $id && !user_can('viewinvite')) || !is_valid_id($id))
     stderr($lang_invite['std_sorry'],$lang_invite['std_permission_denied'], true, false);
 $userRep = new \App\Repositories\UserRepository();
+\App\Support\SupportContext::setGlobal('userRep', $userRep);
 function inviteMenu ($selected = "invitee") {
-    global $lang_invite, $id, $CURUSER, $invitesystem, $userRep;
+$lang_invite = (array) (\App\Support\SupportContext::getGlobal('lang_invite') ?? []);
+$id = \App\Support\SupportContext::getGlobal('id');
+$CURUSER = \App\Support\SupportContext::getUser() ?? [];
+$invitesystem = \App\Support\SupportContext::getGlobal('invitesystem');
+$userRep = \App\Support\SupportContext::getGlobal('userRep');
     begin_main_frame("", false, "100%");
     print ("<div id=\"invitenav\" style='position: relative'><ul id=\"invitemenu\" class=\"menu\">");
     print ("<li" . ($selected == "invitee" ? " class=selected" : "") . "><a href=\"?id=".$id."&menu=invitee\">".$lang_invite['text_invite_status']."</a></li>");
@@ -38,7 +45,7 @@ stdhead($lang_invite['head_invites']);
 print("<table width=100% class=main border=0 cellspacing=0 cellpadding=0><tr><td class=embedded>");
 
 print("<h1 align=center><a href=\"invite.php?id=".$id."\">".$user['username'].$lang_invite['text_invite_system']."</a></h1>");
-	$sent = htmlspecialchars($_GET['sent'] ?? '');
+	$sent = htmlspecialchars(\App\Support\SupportContext::getQuery('sent') ?? '');
 	if ($sent == 1){
 		$msg = $lang_invite['text_invite_code_sent'];
 		print("<p align=center><font color=red>".$msg."</font></p>");
@@ -99,8 +106,8 @@ if ($type == 'new'){
     inviteMenu($menuSelected);
     if ($menuSelected == 'invitee') {
         $filters = [
-            'status' => $_GET['status'] ?? '',
-            'enabled' => $_GET['enabled'] ?? '',
+            'status' => \App\Support\SupportContext::getQuery('status') ?? '',
+            'enabled' => \App\Support\SupportContext::getQuery('enabled') ?? '',
         ];
         $number = \App\Repositories\InviteRepository::countInvitees($id, $filters);
         $textSelectOnePlease = nexus_trans('nexus.select_one_please');
@@ -108,13 +115,13 @@ if ($type == 'new'){
         foreach (['yes', 'no'] as $item) {
             $enabledOptions .= sprintf(
                 '<option value="%s"%s>%s</option>',
-                $item, isset($_GET['enabled']) && $_GET['enabled'] == $item ? ' selected' : '', strtoupper($item)
+                $item, ((\App\Support\SupportContext::getQuery('enabled') !== null)) && \App\Support\SupportContext::getQuery('enabled') == $item ? ' selected' : '', strtoupper($item)
             );
         }
         foreach (['pending' => $lang_invite['text_pending'], 'confirmed' => $lang_invite['text_confirmed']] as $name => $text) {
             $statusOptions .= sprintf(
                 '<option value="%s"%s>%s</option>',
-                $name, isset($_GET['status']) && $_GET['status'] == $name ? ' selected' : '', $text
+                $name, ((\App\Support\SupportContext::getQuery('status') !== null)) && \App\Support\SupportContext::getQuery('status') == $name ? ' selected' : '', $text
             );
         }
 
@@ -122,7 +129,7 @@ if ($type == 'new'){
         $submitText = nexus_trans('label.submit');
         $filterForm = <<<FORM
 <div>
-    <form id="filterForm" action="{$_SERVER['REQUEST_URI']}" method="get">
+    <form id="filterForm" action="{$__server_REQUEST_URI}" method="get">
         <input type="hidden" name="menu" value="{$menuSelected}" />
         <input type="hidden" name="id" value="{$id}" />
         <span>{$lang_invite['text_enabled']}:</span>
@@ -232,7 +239,7 @@ JS;
         {
             $pendingcount = number_format(\App\Repositories\InviteRepository::countPendingInvitees((int)$CURUSER['id']));
             $colSpan = 12;
-            if (isset($haremAdditionFactor) && $haremAdditionFactor > 0) {
+            if ((isset($haremAdditionFactor)) && $haremAdditionFactor > 0) {
                 $colSpan += 1;
             }
             if ($pendingcount){

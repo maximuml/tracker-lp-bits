@@ -2,11 +2,13 @@
 extract($context, EXTR_SKIP);
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
+
+$__server_HTTP_REFERER = \App\Support\SupportContext::getServerValue('HTTP_REFERER');
 if (get_user_class() < UC_SYSOP)
     stderr("Sorry", "Access denied.");
 
 $validTypeMap = $lang_incrementbulk['types'];
-$type = $_REQUEST['type'] ?? '';
+$type = \App\Support\SupportContext::getRequestInput('type') ?? '';
 stdhead($lang_incrementbulk['page_title'], false);
 $classes = array_chunk(\App\Models\User::listClass(), 4, true);
 ?>
@@ -16,16 +18,16 @@ $classes = array_chunk(\App\Models\User::listClass(), 4, true);
                     <form method=post action=take-increment-bulk.php>
                         <?php
 
-                        if (isset($_GET["returnto"]) || $_SERVER["HTTP_REFERER"])
+                        if (((\App\Support\SupportContext::getQuery("returnto") !== null)) || $__server_HTTP_REFERER)
                         {
                             ?>
-                            <input type=hidden name=returnto value="<?php echo htmlspecialchars($_GET["returnto"]) ? htmlspecialchars($_GET["returnto"]) : htmlspecialchars($_SERVER["HTTP_REFERER"])?>">
+                            <input type=hidden name=returnto value="<?php echo htmlspecialchars(\App\Support\SupportContext::getQuery("returnto")) ? htmlspecialchars(\App\Support\SupportContext::getQuery("returnto")) : htmlspecialchars($__server_HTTP_REFERER)?>">
                             <?php
                         }
                         ?>
                         <table cellspacing=0 cellpadding=5>
                             <?php
-                            if (isset($_GET["sent"]) && $_GET["sent"] == 1) {
+                            if (((\App\Support\SupportContext::getQuery("sent") !== null)) && \App\Support\SupportContext::getQuery("sent") == 1) {
                                 echo '<tr><td colspan=2 class="text" align="center"><font color=red><b> '. ($validTypeMap[$type] ?? '') . $lang_incrementbulk['sent_success'] .'</font></b></tr></td>';
                             }
                             ?>

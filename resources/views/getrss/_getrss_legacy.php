@@ -1,6 +1,8 @@
 <?php
 extract($context, EXTR_SKIP);
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
+
+$__server_REQUEST_METHOD = \App\Support\SupportContext::getServerValue('REQUEST_METHOD');
 $brsectiontype = $browsecatmode;
 $spsectiontype = $specialcatmode;
 if ($enablespecial == 'yes' && user_can('view_special_torrent'))
@@ -41,10 +43,10 @@ $stickyTypes = [
     2 => nexus_trans('torrent.pos_state_r_sticky')
 ];
 $query[] = "passkey=" . $CURUSER['passkey'];
-if ($_SERVER['REQUEST_METHOD'] == "POST") {
+if ($__server_REQUEST_METHOD == "POST") {
 	$link = get_protocol_prefix(). $BASEURL ."/torrentrss.php";
-	if (isset($_POST['showrows']) && in_array($_POST['showrows'], $allowed_showrows, 1))
-		$query[] = "rows=".(int)$_POST['showrows'];
+	if (((\App\Support\SupportContext::getPost('showrows') !== null)) && in_array(\App\Support\SupportContext::getPost('showrows'), $allowed_showrows, 1))
+		$query[] = "rows=".(int)\App\Support\SupportContext::getPost('showrows');
 	else {
 		stdmsg($lang_getrss['std_error'],$lang_getrss['std_no_row']);
 		stdfoot();
@@ -52,7 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
 	}
 	foreach ($brcats as $cat)
 	{
-		if (!empty($_POST["cat{$cat['id']}"]))
+		if (!empty(\App\Support\SupportContext::getPost("cat{$cat['id']}")))
 		{
 			$query[] = "cat{$cat['id']}=1";
 		}
@@ -61,7 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
 	{
 		foreach ($spcats as $cat)
 		{
-			if (!empty($_POST["cat{$cat['id']}"]))
+			if (!empty(\App\Support\SupportContext::getPost("cat{$cat['id']}")))
 			{
 				$query[] = "cat{$cat['id']}=1";
 			}
@@ -71,7 +73,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
 		if ($showsource)
 		foreach ($sources as $source)
 		{
-			if (!empty($_POST["sou{$source['id']}"]))
+			if (!empty(\App\Support\SupportContext::getPost("sou{$source['id']}")))
 			{
 				$query[] = "sou{$source['id']}=1";
 			}
@@ -79,7 +81,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
 		if ($showmedium)
 		foreach ($media as $medium)
 		{
-			if (!empty($_POST["med{$medium['id']}"]))
+			if (!empty(\App\Support\SupportContext::getPost("med{$medium['id']}")))
 			{
 				$query[] = "med{$medium['id']}=1";
 			}
@@ -87,7 +89,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
 		if ($showcodec)
 		foreach ($codecs as $codec)
 		{
-			if (!empty($_POST["cod{$codec['id']}"]))
+			if (!empty(\App\Support\SupportContext::getPost("cod{$codec['id']}")))
 			{
 				$query[] = "cod{$codec['id']}=1";
 			}
@@ -95,7 +97,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
 		if ($showstandard)
 		foreach ($standards as $standard)
 		{
-			if (!empty($_POST["sta{$standard['id']}"]))
+			if (!empty(\App\Support\SupportContext::getPost("sta{$standard['id']}")))
 			{
 				$query[] = "sta{$standard['id']}=1";
 			}
@@ -103,7 +105,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
 		if ($showprocessing)
 		foreach ($processings as $processing)
 		{
-			if (!empty($_POST["pro{$processing['id']}"]))
+			if (!empty(\App\Support\SupportContext::getPost("pro{$processing['id']}")))
 			{
 				$query[] = "pro{$processing['id']}=1";
 			}
@@ -111,36 +113,36 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
 		if ($showaudiocodec)
 		foreach ($audiocodecs as $audiocodec)
 		{
-			if (!empty($_POST["aud{$audiocodec['id']}"]))
+			if (!empty(\App\Support\SupportContext::getPost("aud{$audiocodec['id']}")))
 			{
 				$query[] = "aud{$audiocodec['id']}=1";
 			}
 		}
 	}
-	if (!empty($_POST["itemcategory"]))
+	if (!empty(\App\Support\SupportContext::getPost("itemcategory")))
 	{
 		$query[] = "icat=1";
 	}
-	if (!empty($_POST["itemsmalldescr"]))
+	if (!empty(\App\Support\SupportContext::getPost("itemsmalldescr")))
 	{
 		$query[] = "ismalldescr=1";
 	}
-	if (!empty($_POST["itemsize"]))
+	if (!empty(\App\Support\SupportContext::getPost("itemsize")))
 	{
 		$query[] = "isize=1";
 	}
-	if (!empty($_POST["itemuploader"]))
+	if (!empty(\App\Support\SupportContext::getPost("itemuploader")))
 	{
 		$query[] = "iuplder=1";
 	}
-	$searchstr = \Nexus\Database\NexusDB::getInstance()->escapeString(trim($_POST["search"] ?? ''));
+	$searchstr = \Nexus\Database\NexusDB::getInstance()->escapeString(trim(\App\Support\SupportContext::getPost("search") ?? ''));
 //	if (empty($searchstr))
 //		unset($searchstr);
 	if ($searchstr)
 	{
 		$query[] = "search=".rawurlencode($searchstr);
-		if ($_POST["search_mode"]){
-			$search_mode = intval($_POST["search_mode"] ?? 0);
+		if (\App\Support\SupportContext::getPost("search_mode")){
+			$search_mode = intval(\App\Support\SupportContext::getPost("search_mode") ?? 0);
 			if (!in_array($search_mode,array(0,2)))
 			{
 				$search_mode = 0;
@@ -148,13 +150,13 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
 			$query[] = "search_mode=".$search_mode;
 		}
 	}
-	if (!empty($_POST['sticky']) && is_array($_POST['sticky'])) {
-	    $query[] = "sticky=" . implode(',', $_POST['sticky']);
+	if (!empty(\App\Support\SupportContext::getPost('sticky')) && is_array(\App\Support\SupportContext::getPost('sticky'))) {
+	    $query[] = "sticky=" . implode(',', \App\Support\SupportContext::getPost('sticky'));
     }
-    if (isset($_POST['paid'])) {
-        $query[] = "paid=" . $_POST['paid'];
+    if (((\App\Support\SupportContext::getPost('paid') !== null))) {
+        $query[] = "paid=" . \App\Support\SupportContext::getPost('paid');
     }
-	$inclbookmarked=intval($_POST['inclbookmarked'] ?? 0);
+	$inclbookmarked=intval(\App\Support\SupportContext::getPost('inclbookmarked') ?? 0);
 	if($inclbookmarked)
 	{
 		if (!in_array($inclbookmarked,array(0,1)))

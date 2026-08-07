@@ -1,7 +1,9 @@
 <?php
 extract($context, EXTR_SKIP);
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
-$id = $_GET["id"];
+
+$__server_SCRIPT_NAME = \App\Support\SupportContext::getServerValue('SCRIPT_NAME');
+$id = \App\Support\SupportContext::getQuery("id");
 int_check($id,true);
 
 stdhead($lang_viewsnatches['head_snatch_detail']);
@@ -13,7 +15,7 @@ $count = \Nexus\Database\NexusDB::table('snatched')->where('finished', 'yes')->w
 $seedBoxRep = new \App\Repositories\SeedBoxRepository();
 if ($count){
 	$perpage = 25;
-	list($pagertop, $pagerbottom, , $offset, $rpp) = pager($perpage, $count, $_SERVER["SCRIPT_NAME"] . "?id=" . htmlspecialchars($id) . "&" );
+	list($pagertop, $pagerbottom, , $offset, $rpp) = pager($perpage, $count, $__server_SCRIPT_NAME . "?id=" . htmlspecialchars($id) . "&" );
 	print("<p align=center>".$lang_viewsnatches['text_users_top_finished_recently']."</p>");
 	print("<table border=1 cellspacing=0 cellpadding=5 align=center width=940>\n");
 	print("<tr><td class=colhead align=center>".$lang_viewsnatches['col_username']."</td>".(user_can('userprofile') ? "<td class=colhead align=center>".$lang_viewsnatches['col_ip']."</td>" : "")."<td class=colhead align=center>".$lang_viewsnatches['col_uploaded']."/".$lang_viewsnatches['col_downloaded']."</td><td class=colhead align=center>".$lang_viewsnatches['col_ratio']."</td><td class=colhead align=center>".$lang_viewsnatches['col_se_time']."</td><td class=colhead align=center>".$lang_viewsnatches['col_le_time']."</td><td class=colhead align=center>".$lang_viewsnatches['col_when_completed']."</td><td class=colhead align=center>".$lang_viewsnatches['col_last_action']."</td><td class=colhead align=center>".$lang_viewsnatches['col_report_user']."</td></tr>");

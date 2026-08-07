@@ -2,8 +2,15 @@
 extract($context, EXTR_SKIP);
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 function bonusarray($option = 0){
-	global $onegbupload_bonus,$fivegbupload_bonus,$tengbupload_bonus,$oneinvite_bonus,$customtitle_bonus,$vipstatus_bonus, $basictax_bonus, $taxpercentage_bonus;
-	global $lang_mybonus;
+$onegbupload_bonus = \App\Support\SupportContext::getGlobal('onegbupload_bonus');
+$fivegbupload_bonus = \App\Support\SupportContext::getGlobal('fivegbupload_bonus');
+$tengbupload_bonus = \App\Support\SupportContext::getGlobal('tengbupload_bonus');
+$oneinvite_bonus = \App\Support\SupportContext::getGlobal('oneinvite_bonus');
+$customtitle_bonus = \App\Support\SupportContext::getGlobal('customtitle_bonus');
+$vipstatus_bonus = \App\Support\SupportContext::getGlobal('vipstatus_bonus');
+$basictax_bonus = \App\Support\SupportContext::getGlobal('basictax_bonus');
+$taxpercentage_bonus = \App\Support\SupportContext::getGlobal('taxpercentage_bonus');
+$lang_mybonus = (array) (\App\Support\SupportContext::getGlobal('lang_mybonus') ?? []);
 
 	$results = [];
     //1.0 GB Uploaded
@@ -279,10 +286,10 @@ $lockText = sprintf($lang_mybonus['lock_text'], $lockSeconds);
 if ($bonus_tweak == "disable" || $bonus_tweak == "disablesave")
 	stderr($lang_mybonus['std_sorry'],$lang_mybonus['std_karma_system_disabled'].($bonus_tweak == "disablesave" ? "<b>".$lang_mybonus['std_points_active']."</b>" : ""),false);
 
-$action = htmlspecialchars($_GET['action'] ?? '');
-$do = htmlspecialchars($_GET['do'] ?? '');
+$action = htmlspecialchars(\App\Support\SupportContext::getQuery('action') ?? '');
+$do = htmlspecialchars(\App\Support\SupportContext::getQuery('do') ?? '');
 unset($msg);
-if (isset($do)) {
+if ((isset($do))) {
 	if ($do == "upload")
 	$msg = $lang_mybonus['text_success_upload'];
     elseif ($do == "download")
@@ -533,11 +540,11 @@ print($lang_mybonus['text_howto_get_karma_five'].$uploadtorrent_bonus.$lang_mybo
 
 // Bonus exchange
 if ($action == "exchange") {
-	if (isset($_POST["userid"]) || isset($_POST["points"]) || isset($_POST["bonus"]) || isset($_POST["art"]) || !isset($_POST['option']) || !isset($allBonus[$_POST['option']])){
+	if (((\App\Support\SupportContext::getPost("userid") !== null)) || ((\App\Support\SupportContext::getPost("points") !== null)) || ((\App\Support\SupportContext::getPost("bonus") !== null)) || ((\App\Support\SupportContext::getPost("art") !== null)) || !((\App\Support\SupportContext::getPost('option') !== null)) || !(isset($allBonus[\App\Support\SupportContext::getPost('option')]))){
 		write_log("User " . $CURUSER["username"] . "," . $CURUSER["ip"] . " is trying to cheat at bonus system",'mod');
 		die($lang_mybonus['text_cheat_alert']);
 	}
-	$option = intval($_POST["option"] ?? 0);
+	$option = intval(\App\Support\SupportContext::getPost("option") ?? 0);
 	$bonusarray = $allBonus[$option];
 	$points = $bonusarray['points'];
 	$userid = $CURUSER['id'];
@@ -632,7 +639,7 @@ if ($action == "exchange") {
 		*note if they try to use a restricted word, they will recieve the special title "I just wasted my karma" *****/
 		elseif($art == "title") {
 			//===custom title
-			$title = $_POST["title"];
+			$title = \App\Support\SupportContext::getPost("title");
 			$words = array("fuck", "shit", "pussy", "cunt", "nigger", "Staff Leader","SysOp", "Administrator","Moderator","Uploader","Retiree","VIP","Nexus Master","Ultimate User","Extreme User","Veteran User","Insane User","Crazy User","Elite User","Power User","User","Peasant","Champion");
 			$title = str_replace($words, $lang_mybonus['text_wasted_karma'], $title);
 //			$bonuscomment = date("Y-m-d") . " - " .$points. " Points for custom title. Old title is ".htmlspecialchars(trim($CURUSER["title"]))." and new title is $title\n " .htmlspecialchars($bonuscomment);
@@ -642,13 +649,13 @@ if ($action == "exchange") {
 		}
 		elseif($art == 'gift_2') // charity giving
 		{
-			$points = intval($_POST["bonuscharity"] ?? 0);
+			$points = intval(\App\Support\SupportContext::getPost("bonuscharity") ?? 0);
 			if ($points < 1000 || $points > 50000){
 				stdmsg($lang_mybonus['text_error'], $lang_mybonus['bonus_amount_not_allowed_two'], 0);
 				stdfoot();
 				die();
 			}
-			$ratiocharity = $_POST["ratiocharity"];
+			$ratiocharity = \App\Support\SupportContext::getPost("ratiocharity");
 			if ($ratiocharity < 0.1 || $ratiocharity > 0.8){
 				stdmsg($lang_mybonus['text_error'], $lang_mybonus['bonus_ratio_not_allowed']);
 				stdfoot();
@@ -683,10 +690,10 @@ if ($action == "exchange") {
 		}
 		elseif($art == "gift_1" && $bonusgift_bonus == 'yes') {
 			//=== trade for giving the gift of karma
-			$points = $_POST["bonusgift"];
-			$message = $_POST["message"];
+			$points = \App\Support\SupportContext::getPost("bonusgift");
+			$message = \App\Support\SupportContext::getPost("message");
 			//==gift for peeps with no more options
-			$usernamegift = trim($_POST["username"]);
+			$usernamegift = trim(\App\Support\SupportContext::getPost("username"));
 			$receiver = \App\Models\User::query()->where('username', $usernamegift)->first(['id', 'seedbonus']);
 			$arr = $receiver ? $receiver->toArray() : [];
             if (empty($arr)) {
@@ -705,7 +712,7 @@ if ($action == "exchange") {
 			}
 			if($CURUSER['seedbonus'] >= $points) {
 				$points2= number_format($points,1);
-//				$bonuscomment = date("Y-m-d") . " - " .$points2. " Points as gift to ".htmlspecialchars(trim($_POST["username"])).".\n " .htmlspecialchars($bonuscomment);
+//				$bonuscomment = date("Y-m-d") . " - " .$points2. " Points as gift to ".htmlspecialchars(trim(\App\Support\SupportContext::getPost("username"))).".\n " .htmlspecialchars($bonuscomment);
 
 				$aftertaxpoint = $points;
 				if ($taxpercentage_bonus)
@@ -722,7 +729,7 @@ if ($action == "exchange") {
 				}
 
 //				sql_query("UPDATE users SET seedbonus = seedbonus - $points, bonuscomment = ".sqlesc($bonuscomment)." WHERE id = ".sqlesc($userid)) or sqlerr(__FILE__, __LINE__);
-                $bonusRep->consumeUserBonus($CURUSER['id'], $points, \App\Models\BonusLogs::BUSINESS_TYPE_GIFT_TO_SOMEONE, $points2 . " Points as gift to ".htmlspecialchars(trim($_POST["username"])));
+                $bonusRep->consumeUserBonus($CURUSER['id'], $points, \App\Models\BonusLogs::BUSINESS_TYPE_GIFT_TO_SOMEONE, $points2 . " Points as gift to ".htmlspecialchars(trim(\App\Support\SupportContext::getPost("username"))));
 				\App\Models\User::query()->where('id', $useridgift)->increment('seedbonus', $aftertaxpoint);
                 \App\Models\BonusLogs::add($useridgift, $userseedbonus, $aftertaxpoint, $userseedbonus + $aftertaxpoint, " + " .$points2receiver. " Points (after tax) as a gift from ".($CURUSER["username"]), \App\Models\BonusLogs::BUSINESS_TYPE_RECEIVE_GIFT);
 
@@ -741,7 +748,7 @@ if ($action == "exchange") {
 					'msg' => $msg,
 					'receiver' => $useridgift,
 				]);
-				$usernamegift = unesc($_POST["username"]);
+				$usernamegift = unesc(\App\Support\SupportContext::getPost("username"));
                 nexus_redirect("" . get_protocol_prefix() . "$BASEURL/mybonus.php?do=transfer");
 			}
 			else{
@@ -749,16 +756,16 @@ if ($action == "exchange") {
 				print("<tr><td align=\"left\"></td><td align=\"left\">".$lang_mybonus['text_not_enough_karma']."<br /><br /></td></tr></table>");
 			}
 		} elseif ($art == 'cancel_hr') {
-		    if (empty($_POST['hr_id'])) {
-		        stderr("Error","Invalid H&R ID: " . ($_POST['hr_id'] ?? ''), false, false);
+		    if (empty(\App\Support\SupportContext::getPost('hr_id'))) {
+		        stderr("Error","Invalid H&R ID: " . (\App\Support\SupportContext::getPost('hr_id') ?? ''), false, false);
             }
-            $bonusRep->consumeToCancelHitAndRun($userid, $_POST['hr_id']);
+            $bonusRep->consumeToCancelHitAndRun($userid, \App\Support\SupportContext::getPost('hr_id'));
             nexus_redirect("" . get_protocol_prefix() . "$BASEURL/mybonus.php?do=cancel_hr");
 //        } elseif ($art == 'buy_medal') {
-//            if (empty($_POST['medal_id'])) {
-//                stderr("Error","Invalid Medal ID: " . ($_POST['medal_id'] ?? ''), false, false);
+//            if (empty(\App\Support\SupportContext::getPost('medal_id'))) {
+//                stderr("Error","Invalid Medal ID: " . (\App\Support\SupportContext::getPost('medal_id') ?? ''), false, false);
 //            }
-//            $bonusRep->consumeToBuyMedal($userid, $_POST['medal_id']);
+//            $bonusRep->consumeToBuyMedal($userid, \App\Support\SupportContext::getPost('medal_id'));
 //            nexus_redirect("" . get_protocol_prefix() . "$BASEURL/mybonus.php?do=buy_medal");
         } elseif ($art == 'attendance_card') {
             $bonusRep->consumeToBuyAttendanceCard($userid);

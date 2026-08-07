@@ -2,32 +2,34 @@
 extract($context, EXTR_SKIP);
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
+
+$__server_PHP_SELF = \App\Support\SupportContext::getServerValue('PHP_SELF');
 if ($enableoffer == 'no')
 permissiondenied();
 function bark($msg) {
-	global $lang_offers;
+$lang_offers = (array) (\App\Support\SupportContext::getGlobal('lang_offers') ?? []);
 	stdhead($lang_offers['head_offer_error']);
 	stdmsg($lang_offers['std_error'], $msg);
 	stdfoot();
 	exit;
 }
 
-if (isset($_GET['category']) && $_GET["category"]){
-	$categ = isset($_GET['category']) ? (int)$_GET['category'] : 0;
+if (((\App\Support\SupportContext::getQuery('category') !== null)) && \App\Support\SupportContext::getQuery("category")){
+	$categ = ((\App\Support\SupportContext::getQuery('category') !== null)) ? (int)\App\Support\SupportContext::getQuery('category') : 0;
 	if(!is_valid_id($categ))
 	stderr($lang_offers['std_error'], $lang_offers['std_smell_rat']);
 }
 
-if (isset($_GET['id']) && $_GET["id"]){
-	$id = htmlspecialchars(intval($_GET["id"] ?? 0));
+if (((\App\Support\SupportContext::getQuery('id') !== null)) && \App\Support\SupportContext::getQuery("id")){
+	$id = htmlspecialchars(intval(\App\Support\SupportContext::getQuery("id") ?? 0));
 	if (preg_match('/^[0-9]+$/', !$id))
 	stderr($lang_offers['std_error'], $lang_offers['std_smell_rat']);
 }
 
 //==== add offer
-if (isset($_GET['add_offer']) && $_GET["add_offer"]){
+if (((\App\Support\SupportContext::getQuery('add_offer') !== null)) && \App\Support\SupportContext::getQuery("add_offer")){
 	user_can('addoffer', true);
-	$add_offer = intval($_GET["add_offer"] ?? 0);
+	$add_offer = intval(\App\Support\SupportContext::getQuery("add_offer") ?? 0);
 	if($add_offer != '1')
 	stderr($lang_offers['std_error'], $lang_offers['std_smell_rat']);
 
@@ -56,9 +58,9 @@ if (isset($_GET['add_offer']) && $_GET["add_offer"]){
 //=== end add offer
 
 //=== take new offer
-if (isset($_GET['new_offer']) && $_GET["new_offer"]){
+if (((\App\Support\SupportContext::getQuery('new_offer') !== null)) && \App\Support\SupportContext::getQuery("new_offer")){
 	user_can('addoffer', true);
-	$new_offer = intval($_GET["new_offer"] ?? 0);
+	$new_offer = intval(\App\Support\SupportContext::getQuery("new_offer") ?? 0);
 	if($new_offer != '1')
 	stderr($lang_offers['std_error'], $lang_offers['std_smell_rat']);
 
@@ -66,20 +68,20 @@ if (isset($_GET['new_offer']) && $_GET["new_offer"]){
 	if (preg_match("/^[0-9]+$/", !$userid))
 	stderr($lang_offers['std_error'], $lang_offers['std_smell_rat']);
 
-	$name = $_POST["name"];
+	$name = \App\Support\SupportContext::getPost("name");
 	if ($name == "")
 	bark($lang_offers['std_must_enter_name']);
 
-	$cat = intval($_POST["type"] ?? 0);
+	$cat = intval(\App\Support\SupportContext::getPost("type") ?? 0);
 	if (!is_valid_id($cat))
 	bark($lang_offers['std_must_select_category']);
 
-	$descrmain = unesc($_POST["body"]);
+	$descrmain = unesc(\App\Support\SupportContext::getPost("body"));
 	if (!$descrmain)
 	bark($lang_offers['std_must_enter_description']);
 
-	if (!empty($_POST['picture'])){
-		$picture = unesc($_POST["picture"]);
+	if (!empty(\App\Support\SupportContext::getPost('picture'))){
+		$picture = unesc(\App\Support\SupportContext::getPost("picture"));
 		if(!preg_match("/^https?:\/\/[^\s'\"<>]+\.(jpg|gif|png)$/i", $picture))
 		stderr($lang_offers['std_error'], $lang_offers['std_wrong_image_format']);
 		$pic = "[img]".$picture."[/img]\n";
@@ -88,7 +90,7 @@ if (isset($_GET['new_offer']) && $_GET["new_offer"]){
 	$descr = $pic;
 	$descr .= $descrmain;
 
-	$existing = \App\Models\Offer::query()->where('name', $_POST['name'])->first(['name']);
+	$existing = \App\Models\Offer::query()->where('name', \App\Support\SupportContext::getPost('name'))->first(['name']);
 	if (!$existing){
 		//===add karma //=== uncomment if you use the mod
 		//\App\Models\User::query()->where('id', $CURUSER['id'])->increment('seedbonus', 10.0);
@@ -99,7 +101,7 @@ if (isset($_GET['new_offer']) && $_GET["new_offer"]){
 				'userid' => $CURUSER["id"],
 				'name' => $name,
 				'descr' => $descr,
-				'category' => intval($_POST["type"] ?? 0),
+				'category' => intval(\App\Support\SupportContext::getPost("type") ?? 0),
 				'added' => date("Y-m-d H:i:s"),
 				'allowed' => 'pending',
 				'yeah' => 0,
@@ -139,13 +141,13 @@ if (isset($_GET['new_offer']) && $_GET["new_offer"]){
 //==end take new offer
 
 //=== offer details
-if (isset($_GET['off_details']) && $_GET["off_details"]){
+if (((\App\Support\SupportContext::getQuery('off_details') !== null)) && \App\Support\SupportContext::getQuery("off_details")){
 
-	$off_details = intval($_GET["off_details"] ?? 0);
+	$off_details = intval(\App\Support\SupportContext::getQuery("off_details") ?? 0);
 	if($off_details != '1')
 	stderr($lang_offers['std_error'], $lang_offers['std_smell_rat']);
 
-	$id = intval($_GET["id"] ?? 0);
+	$id = intval(\App\Support\SupportContext::getQuery("id") ?? 0);
 	if(!$id)
 		die();
 		//stderr("Error", "I smell a rat!");
@@ -249,18 +251,18 @@ if (isset($_GET['off_details']) && $_GET["off_details"]){
 }
 //=== end offer details
 //=== allow offer by staff
-if (isset($_GET["allow_offer"]) && $_GET["allow_offer"]) {
+if (((\App\Support\SupportContext::getQuery("allow_offer") !== null)) && \App\Support\SupportContext::getQuery("allow_offer")) {
 
 	if (!user_can('offermanage'))
 	stderr($lang_offers['std_access_denied'], $lang_offers['std_mans_job']);
 
-	$allow_offer = intval($_GET["allow_offer"] ?? 0);
+	$allow_offer = intval(\App\Support\SupportContext::getQuery("allow_offer") ?? 0);
 	if($allow_offer != '1')
 	stderr($lang_offers['std_error'], $lang_offers['std_smell_rat']);
 
 	//=== to allow the offer  credit to S4NE for this next bit :)
-	//if ($_POST["offerid"]){
-	$offid = intval($_POST["offerid"] ?? 0);
+	//if (\App\Support\SupportContext::getPost("offerid")){
+	$offid = intval(\App\Support\SupportContext::getPost("offerid") ?? 0);
 	if(!is_valid_id($offid))
 	stderr($lang_offers['std_error'], $lang_offers['std_smell_rat']);
 
@@ -297,16 +299,16 @@ if (isset($_GET["allow_offer"]) && $_GET["allow_offer"]) {
 //=== end allow the offer
 
 //=== allow offer by vote
-if (isset($_GET["finish_offer"]) && $_GET["finish_offer"]) {
+if (((\App\Support\SupportContext::getQuery("finish_offer") !== null)) && \App\Support\SupportContext::getQuery("finish_offer")) {
 
 	if (!user_can('offermanage'))
 	stderr($lang_offers['std_access_denied'], $lang_offers['std_have_no_permission']);
 
-	$finish_offer = intval($_GET["finish_offer"] ?? 0);
+	$finish_offer = intval(\App\Support\SupportContext::getQuery("finish_offer") ?? 0);
 	if($finish_offer != '1')
 	stderr($lang_offers['std_error'], $lang_offers['std_smell_rat']);
 
-	$offid = intval($_POST["finish"] ?? 0);
+	$offid = intval(\App\Support\SupportContext::getPost("finish") ?? 0);
 	if(!is_valid_id($offid))
 		stderr($lang_offers['std_error'], $lang_offers['std_smell_rat']);
 
@@ -358,13 +360,13 @@ if (isset($_GET["finish_offer"]) && $_GET["finish_offer"]) {
 
 //=== edit offer
 
-if (isset($_GET["edit_offer"]) && $_GET["edit_offer"]) {
+if (((\App\Support\SupportContext::getQuery("edit_offer") !== null)) && \App\Support\SupportContext::getQuery("edit_offer")) {
 
-	$edit_offer =  intval($_GET["edit_offer"] ?? 0);
+	$edit_offer =  intval(\App\Support\SupportContext::getQuery("edit_offer") ?? 0);
 	if($edit_offer != '1')
 	stderr($lang_offers['std_error'], $lang_offers['std_smell_rat']);
 
-	$id = intval($_GET["id"] ?? 0);
+	$id = intval(\App\Support\SupportContext::getQuery("id") ?? 0);
 
 	$offerRow = \App\Models\Offer::query()->where('id', $id)->first();
 	if (!$offerRow) {
@@ -407,34 +409,34 @@ if (isset($_GET["edit_offer"]) && $_GET["edit_offer"]) {
 //=== end edit offer
 
 //==== take offer edit
-if (isset($_GET["take_off_edit"]) && $_GET["take_off_edit"]){
+if (((\App\Support\SupportContext::getQuery("take_off_edit") !== null)) && \App\Support\SupportContext::getQuery("take_off_edit")){
 
-	$take_off_edit = intval($_GET["take_off_edit"] ?? 0);
+	$take_off_edit = intval(\App\Support\SupportContext::getQuery("take_off_edit") ?? 0);
 	if($take_off_edit != '1')
 	stderr($lang_offers['std_error'], $lang_offers['std_smell_rat']);
 
-	$id = intval($_GET["id"] ?? 0);
+	$id = intval(\App\Support\SupportContext::getQuery("id") ?? 0);
 
 	$offerOwner = \App\Models\Offer::query()->where('id', $id)->value('userid');
 
 	if ($CURUSER['id'] != $offerOwner && !user_can('offermanage'))
 	stderr($lang_offers['std_error'], $lang_offers['std_access_denied']);
 
-	$name = $_POST["name"];
+	$name = \App\Support\SupportContext::getPost("name");
 
-	if (!empty($_POST['picture'])){
-		$picture = unesc($_POST["picture"]);
+	if (!empty(\App\Support\SupportContext::getPost('picture'))){
+		$picture = unesc(\App\Support\SupportContext::getPost("picture"));
 		if(!preg_match("/^https?:\/\/[^\s'\"<>]+\.(jpg|gif|png)$/i", $picture))
 		stderr($lang_offers['std_error'], $lang_offers['std_wrong_image_format']);
 		$pic = "[img]".$picture."[/img]\n";
 	}
 	$descr = "$pic";
-	$descr .= unesc($_POST["body"]);
+	$descr .= unesc(\App\Support\SupportContext::getPost("body"));
 	if (!$name)
 	bark($lang_offers['std_must_enter_name']);
 	if (!$descr)
 	bark($lang_offers['std_must_enter_description']);
-	$cat = intval($_POST["category"] ?? 0);
+	$cat = intval(\App\Support\SupportContext::getPost("category") ?? 0);
 	if (!is_valid_id($cat))
 	bark($lang_offers['std_must_select_category']);
 
@@ -449,13 +451,13 @@ if (isset($_GET["take_off_edit"]) && $_GET["take_off_edit"]){
 //======end take offer edit
 
 //=== offer votes list
-if (isset($_GET["offer_vote"]) && $_GET["offer_vote"]){
+if (((\App\Support\SupportContext::getQuery("offer_vote") !== null)) && \App\Support\SupportContext::getQuery("offer_vote")){
 
-	$offer_vote = intval($_GET["offer_vote"] ?? 0);
+	$offer_vote = intval(\App\Support\SupportContext::getQuery("offer_vote") ?? 0);
 	if($offer_vote != '1')
 	stderr($lang_offers['std_error'], $lang_offers['std_smell_rat']);
 
-	$offerid = htmlspecialchars(intval($_GET['id'] ?? 0));
+	$offerid = htmlspecialchars(intval(\App\Support\SupportContext::getQuery('id') ?? 0));
 
 	$count = \Nexus\Database\NexusDB::table('offervotes')->where('offerid', $offerid)->count();
 
@@ -465,7 +467,7 @@ if (isset($_GET["offer_vote"]) && $_GET["offer_vote"]){
 	print("<h1 align=center>".$lang_offers['text_vote_results_for']." <a  href=offers.php?id=$offerid&off_details=1><b>".htmlspecialchars($offername)."</b></a></h1>");
 
 	$perpage = 25;
-	[$pagertop, $pagerbottom, , $offset, $perpage, ] = pager($perpage, $count, $_SERVER["PHP_SELF"] ."?id=".$offerid."&offer_vote=1&");
+	[$pagertop, $pagerbottom, , $offset, $perpage, ] = pager($perpage, $count, $__server_PHP_SELF ."?id=".$offerid."&offer_vote=1&");
 	$voteRows = \Nexus\Database\NexusDB::table('offervotes')
 		->where('offerid', $offerid)
 		->orderBy('id')
@@ -501,9 +503,9 @@ if (isset($_GET["offer_vote"]) && $_GET["offer_vote"]){
 //=== end offer votes list
 
 //=== offer votes
-if (isset($_GET["vote"]) && $_GET["vote"]){
-	$offerid = htmlspecialchars(intval($_GET["id"] ?? 0));
-	$vote = htmlspecialchars($_GET["vote"]);
+if (((\App\Support\SupportContext::getQuery("vote") !== null)) && \App\Support\SupportContext::getQuery("vote")){
+	$offerid = htmlspecialchars(intval(\App\Support\SupportContext::getQuery("id") ?? 0));
+	$vote = htmlspecialchars(\App\Support\SupportContext::getQuery("vote"));
 	if ($vote == 'against' && !user_can('againstoffer'))
 		stderr($lang_offers['std_error'], $lang_offers['std_smell_rat']);
 	if ($vote =='yeah' || $vote =='against')
@@ -595,13 +597,13 @@ if (isset($_GET["vote"]) && $_GET["vote"]){
 //=== end offer votes
 
 //=== delete offer
-if (isset($_GET["del_offer"]) && $_GET["del_offer"]){
+if (((\App\Support\SupportContext::getQuery("del_offer") !== null)) && \App\Support\SupportContext::getQuery("del_offer")){
 
-	$del_offer = intval($_GET["del_offer"] ?? 0);
+	$del_offer = intval(\App\Support\SupportContext::getQuery("del_offer") ?? 0);
 	if($del_offer != '1')
 	stderr($lang_offers['std_error'], $lang_offers['std_smell_rat']);
 
-	$offer = intval($_GET["id"] ?? 0);
+	$offer = intval(\App\Support\SupportContext::getQuery("id") ?? 0);
 
 	$userid = intval($CURUSER["id"] ?? 0);
 	if (!is_valid_id($userid))
@@ -618,11 +620,11 @@ if (isset($_GET["del_offer"]) && $_GET["del_offer"]){
 	if ($userid != $num["userid"] && !user_can('offermanage'))
 	stderr($lang_offers['std_error'], $lang_offers['std_cannot_delete_others_offer']);
 
-	if ($_GET["sure"])
+	if (\App\Support\SupportContext::getQuery("sure"))
 	{
-		$sure = $_GET["sure"];
+		$sure = \App\Support\SupportContext::getQuery("sure");
 		if($sure == '0' || $sure == '1')
-		$sure = intval($_GET["sure"] ?? 0);
+		$sure = intval(\App\Support\SupportContext::getQuery("sure") ?? 0);
 		else
 		stderr($lang_offers['std_error'], $lang_offers['std_smell_rat']);
 	}
@@ -632,7 +634,7 @@ if (isset($_GET["del_offer"]) && $_GET["del_offer"]){
 	stderr($lang_offers['std_delete_offer'], $lang_offers['std_delete_offer_note']."<br /><form method=post action=offers.php?id=$offer&del_offer=1&sure=1>".$lang_offers['text_reason_is']."<input type=text style=\"width: 200px\" name=reason><input type=submit value=\"".$lang_offers['submit_confirm']."\"></form>",false);
 	elseif ($sure == 1)
 	{
-		$reason = $_POST["reason"];
+		$reason = \App\Support\SupportContext::getPost("reason");
 		\App\Models\Offer::query()->where('id', $offer)->delete();
 		\Nexus\Database\NexusDB::table('offervotes')->where('offerid', $offer)->delete();
 		\App\Models\Comment::query()->where('offer', $offer)->delete();
@@ -666,25 +668,25 @@ if (isset($_GET["del_offer"]) && $_GET["del_offer"]){
 
 //=== prolly not needed, but what the hell... basically stopping the page getting screwed up
 $sort = '';
-if (isset($_GET["sort"]) && $_GET["sort"])
+if (((\App\Support\SupportContext::getQuery("sort") !== null)) && \App\Support\SupportContext::getQuery("sort"))
 {
-	$sort = $_GET["sort"];
+	$sort = \App\Support\SupportContext::getQuery("sort");
 	if($sort == 'cat' || $sort == 'name' || $sort == 'added' || $sort == 'comments' || $sort == 'yeah' || $sort == 'against' || $sort == 'v_res')
-	$sort = $_GET["sort"];
+	$sort = \App\Support\SupportContext::getQuery("sort");
 	else
 	stderr($lang_offers['std_error'], $lang_offers['std_smell_rat']);
 }
 //=== end of prolly not needed, but what the hell :P
 
-$categ = intval($_GET["category"] ?? 0);
+$categ = intval(\App\Support\SupportContext::getQuery("category") ?? 0);
 $offerorid = 0;
-if (isset($_GET["offerorid"]) && $_GET["offerorid"]){
-	$offerorid = htmlspecialchars(intval($_GET["offerorid"] ?? 0));
+if (((\App\Support\SupportContext::getQuery("offerorid") !== null)) && \App\Support\SupportContext::getQuery("offerorid")){
+	$offerorid = htmlspecialchars(intval(\App\Support\SupportContext::getQuery("offerorid") ?? 0));
 	if (preg_match("/^[0-9]+$/", !$offerorid))
 	stderr($lang_offers['std_error'], $lang_offers['std_smell_rat']);
 }
 
-$search = ($_GET["search"] ?? '');
+$search = (\App\Support\SupportContext::getQuery("search") ?? '');
 
 
 $cat_order_type = "desc";
@@ -703,31 +705,31 @@ if ($v_res_order_type == "") { $sort = " ORDER BY added " . $added_order_type; $
 
 if ($sort == "cat")
 {
-	if ($_GET['type'] == "desc")
+	if (\App\Support\SupportContext::getQuery('type') == "desc")
 		$cat_order_type = "asc";
 	$sort = " ORDER BY category ". $cat_order_type;
 }
 else if ($sort == "name")
 {
-	if ($_GET['type'] == "desc")
+	if (\App\Support\SupportContext::getQuery('type') == "desc")
 		$name_order_type = "asc";
 	$sort = " ORDER BY name ". $name_order_type;
 }
 else if ($sort == "added")
 {
-	if ($_GET['type'] == "desc")
+	if (\App\Support\SupportContext::getQuery('type') == "desc")
 		$added_order_type = "asc";
 	$sort = " ORDER BY added " . $added_order_type;
 }
 else if ($sort == "comments")
 {
-	if ($_GET['type'] == "desc")
+	if (\App\Support\SupportContext::getQuery('type') == "desc")
 		$comments_order_type = "asc";
 	$sort = " ORDER BY comments " . $comments_order_type;
 }
 else if ($sort == "v_res")
 {
-	if ($_GET['type'] == "desc")
+	if (\App\Support\SupportContext::getQuery('type') == "desc")
 		$v_res_order_type = "asc";
 	$sort = " ORDER BY (yeah - against) " . $v_res_order_type;
 }
@@ -754,7 +756,7 @@ $count = $offerQuery->count('offers.id');
 
 $perpage = 25;
 
-[$pagertop, $pagerbottom, , $offset, $perpage, ] = pager($perpage, $count, $_SERVER["PHP_SELF"] ."?" . "category=" . ($_GET["category"] ?? '') . "&sort=" . ($_GET["sort"] ?? '') . "&" );
+[$pagertop, $pagerbottom, , $offset, $perpage, ] = pager($perpage, $count, $__server_PHP_SELF ."?" . "category=" . (\App\Support\SupportContext::getQuery("category") ?? '') . "&sort=" . (\App\Support\SupportContext::getQuery("sort") ?? '') . "&" );
 
 //stderr("", $sort);
 if($sort == "")
@@ -807,7 +809,7 @@ if (!$num)
 	stdmsg($lang_offers['text_nothing_found'],$lang_offers['text_nothing_found']);
 else
 {
-	$catid = $_GET['category'];
+	$catid = \App\Support\SupportContext::getQuery('category');
 	print("<table class=\"torrents\" cellspacing=\"0\" cellpadding=\"5\" width=\"100%\">");
 	print("<tr><td class=\"colhead\" style=\"padding: 0px\"><a href=\"?category=" . $catid . "&amp;sort=cat&amp;type=".$cat_order_type."\">".$lang_offers['col_type']."</a></td>".
 "<td class=\"colhead\" width=\"100%\"><a href=\"?category=" . $catid . "&amp;sort=name&amp;type=".$name_order_type."\">".$lang_offers['col_title']."</a></td>".
@@ -915,7 +917,7 @@ print("<td class=\"colhead\">".$lang_offers['col_offered_by']."</td>".
 	}
 	print("</table>\n");
 	echo $pagerbottom;
-if(!isset($CURUSER) || $CURUSER['showlastcom'] == 'yes')
+if(!(isset($CURUSER)) || $CURUSER['showlastcom'] == 'yes')
 create_tooltip_container($lastcom_tooltip, 400);
 }
 end_main_frame();

@@ -5,9 +5,9 @@ $CURUSER = $currentUser;
 $user = $user;
 $customField = $customField;
 $settingMain = get_setting('main');
-$lang_details = $GLOBALS['lang_details'] ?? [];
-$lang_functions = $GLOBALS['lang_functions'] ?? [];
-$torrentnameprefix = $GLOBALS['torrentnameprefix'] ?? '';
+$lang_details = \App\Support\SupportContext::getGlobal('lang_details') ?? [];
+$lang_functions = \App\Support\SupportContext::getGlobal('lang_functions') ?? [];
+$torrentnameprefix = \App\Support\SupportContext::getGlobal('torrentnameprefix') ?? '';
 
     $row = apply_filter('torrent_detail', $row);
     if (user_can('torrentmanage') || $CURUSER["id"] == $row["owner"])
@@ -15,25 +15,25 @@ $torrentnameprefix = $GLOBALS['torrentnameprefix'] ?? '';
     else $owned = 0;
     $torrentRep = new \App\Repositories\TorrentRepository();
     $searchBoxRep = new \App\Repositories\SearchBoxRepository();
-	if (!empty($_GET["hit"])) {
+	if (!empty(\App\Support\SupportContext::getQuery("hit"))) {
         \App\Repositories\TorrentDetailRepository::incrementViews($id);
 	}
 
-	if (!isset($_GET["cmtpage"])) {
-		if (!empty($_GET["uploaded"]))
+	if (!((\App\Support\SupportContext::getQuery("cmtpage") !== null))) {
+		if (!empty(\App\Support\SupportContext::getQuery("uploaded")))
 		{
 			print("<h1 align=\"center\">".$lang_details['text_successfully_uploaded']."</h1>");
 			print("<p>".$lang_details['text_redownload_torrent_note']."</p>");
 			header("refresh: 1; url=download.php?id=$id");
 		}
-		elseif (!empty($_GET["edited"])) {
+		elseif (!empty(\App\Support\SupportContext::getQuery("edited"))) {
 			print("<h1 align=\"center\">".$lang_details['text_successfully_edited']."</h1>");
-			if (isset($_GET["returnto"]))
-				print("<p><b>".$lang_details['text_go_back'] . "<a href=\"".htmlspecialchars($_GET["returnto"])."\">" . $lang_details['text_whence_you_came']."</a></b></p>");
-		} elseif (!empty($_GET['existed'])) {
+			if (((\App\Support\SupportContext::getQuery("returnto") !== null)))
+				print("<p><b>".$lang_details['text_go_back'] . "<a href=\"".htmlspecialchars(\App\Support\SupportContext::getQuery("returnto"))."\">" . $lang_details['text_whence_you_came']."</a></b></p>");
+		} elseif (!empty(\App\Support\SupportContext::getQuery('existed'))) {
             print("<h1 align=\"center\" style='color: red'>".$lang_details['torrent_existed']."</h1>");
-            if (isset($_GET["returnto"]))
-                print("<p><b>".$lang_details['text_go_back'] . "<a href=\"".htmlspecialchars($_GET["returnto"])."\">" . $lang_details['text_whence_you_came']."</a></b></p>");
+            if (((\App\Support\SupportContext::getQuery("returnto") !== null)))
+                print("<p><b>".$lang_details['text_go_back'] . "<a href=\"".htmlspecialchars(\App\Support\SupportContext::getQuery("returnto"))."\">" . $lang_details['text_whence_you_came']."</a></b></p>");
         }
         $banned_torrent = ($row["banned"] == 'yes' ? " <b>(<font class=\"striking\">".$lang_functions['text_banned']."</font>)</b>" : "");
 		$sp_torrent = get_torrent_promotion_append($row['sp_state'],'word', false, '', 0, '', $row['__ignore_global_sp_state'] ?? false);
@@ -63,8 +63,8 @@ $torrentnameprefix = $GLOBALS['torrentnameprefix'] ?? '';
 		print("<table width=\"97%\" cellspacing=\"0\" cellpadding=\"5\">\n");
 
 		$url = "edit.php?id=" . $row["id"];
-		if (isset($_GET["returnto"])) {
-			$url .= "&returnto=" . rawurlencode($_GET["returnto"]);
+		if (((\App\Support\SupportContext::getQuery("returnto") !== null))) {
+			$url .= "&returnto=" . rawurlencode(\App\Support\SupportContext::getQuery("returnto"));
 		}
 		$editlink = "a title=\"".$lang_details['title_edit_torrent']."\" href=\"$url\"";
 
@@ -76,7 +76,7 @@ $torrentnameprefix = $GLOBALS['torrentnameprefix'] ?? '';
 			$uprow = "<i>".$lang_details['text_anonymous']."</i> (" . get_username($row['owner'], false, true, true, false, false, true) . ")";
 		}
 		else {
-			$uprow = (isset($row['owner']) ? get_username($row['owner'], false, true, true, false, false, true) : "<i>".$lang_details['text_unknown']."</i>");
+			$uprow = ((isset($row['owner'])) ? get_username($row['owner'], false, true, true, false, false, true) : "<i>".$lang_details['text_unknown']."</i>");
 		}
 		if ($CURUSER["id"] == $row["owner"])
 			$CURUSER["downloadpos"] = "yes";
@@ -101,19 +101,19 @@ $torrentnameprefix = $GLOBALS['torrentnameprefix'] ?? '';
 		$size_info =  "<b>".$lang_details['text_size']."</b>" . mksize($row["size"]);
 		$type_info = "&nbsp;&nbsp;&nbsp;<b>".$lang_details['row_type'].":</b>&nbsp;".$row["cat_name"];
 //        $source_info = $medium_info = $codec_info = $audiocodec_info = $standard_info = $processing_info = $team_info = '';
-//		if (isset($row["source_name"]))
+//		if ((isset($row["source_name"])))
 //			$source_info = "&nbsp;&nbsp;&nbsp;<b>".$lang_details['text_source']."&nbsp;</b>".$row['source_name'];
-//		if (isset($row["medium_name"]))
+//		if ((isset($row["medium_name"])))
 //			$medium_info = "&nbsp;&nbsp;&nbsp;<b>".$lang_details['text_medium']."&nbsp;</b>".$row['medium_name'];
-//		if (isset($row["codec_name"]))
+//		if ((isset($row["codec_name"])))
 //			$codec_info = "&nbsp;&nbsp;&nbsp;<b>".$lang_details['text_codec']."&nbsp;</b>".$row['codec_name'];
-//		if (isset($row["standard_name"]))
+//		if ((isset($row["standard_name"])))
 //			$standard_info = "&nbsp;&nbsp;&nbsp;<b>".$lang_details['text_stardard']."&nbsp;</b>".$row['standard_name'];
-//		if (isset($row["processing_name"]))
+//		if ((isset($row["processing_name"])))
 //			$processing_info = "&nbsp;&nbsp;&nbsp;<b>".$lang_details['text_processing']."&nbsp;</b>".$row['processing_name'];
-//		if (isset($row["team_name"]))
+//		if ((isset($row["team_name"])))
 //			$team_info = "&nbsp;&nbsp;&nbsp;<b>".$lang_details['text_team']."&nbsp;</b>".$row['team_name'];
-//		if (isset($row["audiocodec_name"]))
+//		if ((isset($row["audiocodec_name"])))
 //			$audiocodec_info = "&nbsp;&nbsp;&nbsp;<b>".$lang_details['text_audio_codec']."&nbsp;</b>".$row['audiocodec_name'];
 
 //		tr($lang_details['row_basic_info'], $size_info.$type_info.$source_info . $medium_info. $codec_info . $audiocodec_info. $standard_info . $processing_info . $team_info, 1);
@@ -238,7 +238,7 @@ JS;
 		tr($lang_details['row_hot_meter'], "<table><tr><td class=\"no_border_wide\"><b>" . $lang_details['text_views']."</b>". $row["views"] . "</td><td class=\"no_border_wide\"><b>" . $lang_details['text_hits']. "</b>" . $row["hits"] . "</td><td class=\"no_border_wide\"><b>" .$lang_details['text_snatched'] . "</b><a href=\"viewsnatches.php?id=".$id."\"><b>" . $row["times_completed"]. $lang_details['text_view_snatches'] . "</td><td class=\"no_border_wide\"><b>" . $lang_details['row_last_seeder']. "</b>" . gettime($row["last_action"]) . "</td></tr></table>",1);
 
 		tr("<span id=\"seeders\"></span><span id=\"leechers\"></span>".$lang_details['row_peers']."<br /><span id=\"showpeer\"><a href=\"javascript: viewpeerlist(".$row['id'].");\" class=\"sublink\">".$lang_details['text_see_full_list']."</a></span><span id=\"hidepeer\" style=\"display: none;\"><a href=\"javascript: hidepeerlist();\" class=\"sublink\">".$lang_details['text_hide_list']."</a></span>", "<div id=\"peercount\"><b>".$row['seeders'].$lang_details['text_seeders'].add_s($row['seeders'])."</b> | <b>".$row['leechers'].$lang_details['text_leechers'].add_s($row['leechers'])."</b></div><div id=\"peerlist\"></div>" , 1);
-		if (isset($_GET['dllist']) && $_GET['dllist'] == 1)
+		if (((\App\Support\SupportContext::getQuery('dllist') !== null)) && \App\Support\SupportContext::getQuery('dllist') == 1)
 		{
 			$scronload = "viewpeerlist(".$row['id'].")";
 
@@ -313,7 +313,7 @@ echo "</script>";
             $no_give = $lang_details['text_no_magic_added'];
         }
 
-        if(isset($bonus_has) && isset($arr_temp) && intval($bonus_has) < intval($arr_temp[0])){
+        if((isset($bonus_has)) && (isset($arr_temp)) && intval($bonus_has) < intval($arr_temp[0])){
 
         }else if ($whether_have_give_value == 0 ) {
             $magic_value_button = '<ul id="listNumber" class="magic">'.$magic_value_button.'</ul>';

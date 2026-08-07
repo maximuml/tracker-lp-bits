@@ -1,11 +1,13 @@
 <?php
 extract($context, EXTR_SKIP);
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
+
+$__server_PHP_SELF = \App\Support\SupportContext::getServerValue('PHP_SELF');
 if (!user_can('userprofile'))
 	permissiondenied();
 else
 {
-	$ip = htmlspecialchars(trim($_GET['ip']));
+	$ip = htmlspecialchars(trim(\App\Support\SupportContext::getQuery('ip')));
 	if ($ip)
 	{
 		$regex = "/^(((1?\d{1,2})|(2[0-4]\d)|(25[0-5]))(\.\b|$)){4}$/";
@@ -15,7 +17,7 @@ else
 		}
 	}
 
-	$mask = trim($_GET['mask'] ?? '');
+	$mask = trim(\App\Support\SupportContext::getQuery('mask') ?? '');
 	$singleIp = ($mask == "" || $mask == "255.255.255.255");
 	if ($singleIp)
 	{
@@ -97,11 +99,11 @@ else
 		die;
 	}
 
-	$order = $_GET['order'] ?? '';
-	$page = intval($_GET["page"] ?? 0);
+	$order = \App\Support\SupportContext::getQuery('order') ?? '';
+	$page = intval(\App\Support\SupportContext::getQuery("page") ?? 0);
 	$perpage = 20;
 
-	list($pagertop, $pagerbottom, , $offset, $rpp) = pager($perpage, $count, "{$_SERVER['PHP_SELF']}?ip=$ip&mask=$mask&order=$order&");
+	list($pagertop, $pagerbottom, , $offset, $rpp) = pager($perpage, $count, "{$__server_PHP_SELF}?ip=$ip&mask=$mask&order=$order&");
 
 	if ($order == "added")
 		$orderby = "added DESC";

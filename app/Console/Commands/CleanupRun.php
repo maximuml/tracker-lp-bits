@@ -2,8 +2,8 @@
 
 namespace App\Console\Commands;
 
+use App\Services\CleanupService;
 use Illuminate\Console\Command;
-use Symfony\Component\Process\Process;
 
 class CleanupRun extends Command
 {
@@ -25,25 +25,34 @@ class CleanupRun extends Command
      * Execute the console command.
      * @return int
      */
-    public function handle()
+    public function handle(CleanupService $service)
     {
-        $force = $this->option('force');
-        $script = base_path('include/cleanup_cli.php');
-        $arg = $force ? '1' : '0';
+        $lockFile = sprintf('%s/nexus_cleanup_cli.lock', sys_get_temp_dir());
+        $fd = fopen($lockFile, 'c');
+        if ($fd === false || !flock($fd, LOCK_EX | LOCK_NB)) {
+            $this->warn('Cleanup already running.');
 
-        $process = Process::fromShellCommandline("php {$script} {$arg}");
-        $process->setTimeout(null);
+            return Command::SUCCESS;
+        }
+
+        register_shutdown_function(function () use ($fd, $lockFile) {
+            flock($fd, LOCK_UN);
+            fclose($fd);
+            @unlink($lockFile);
+        });
+
+        $force = $this->option('force');
 
         $begin = time();
-        $exitCode = $process->run(function ($type, $buffer) {
-            $this->output->write($buffer, false);
-        });
+        $output = $service->runFull($force, true);
         $cost = time() - $begin;
+
+        $this->output->write($output, false);
 
         $log = sprintf('[CLEANUP_RUN] DONE, cost time: %d seconds', $cost);
         do_log($log);
         $this->info($log);
 
-        return $exitCode === 0 ? Command::SUCCESS : Command::FAILURE;
+        return Command::SUCCESS;
     }
 }

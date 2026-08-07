@@ -1,18 +1,20 @@
 <?php
 extract($context, EXTR_SKIP);
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
-if ($_SERVER["REQUEST_METHOD"] != "POST")
+
+$__server_REQUEST_METHOD = \App\Support\SupportContext::getServerValue('REQUEST_METHOD');
+if ($__server_REQUEST_METHOD != "POST")
 	stderr("Error", "Permission denied!");
 
 if (get_user_class() < UC_ADMINISTRATOR)
 	stderr("Sorry", "Permission denied.");
 
-$sender_id = ($_POST['sender'] == 'system' ? 0 : (int)$CURUSER['id']);
+$sender_id = (\App\Support\SupportContext::getPost('sender') == 'system' ? 0 : (int)$CURUSER['id']);
 $dt = date("Y-m-d H:i:s");
-$msg = trim($_POST['msg']);
+$msg = trim(\App\Support\SupportContext::getPost('msg'));
 if (!$msg)
 	stderr("Error","Don't leave any fields blank.");
-$updateset = $_POST['clases'];
+$updateset = \App\Support\SupportContext::getPost('clases');
 if (is_array($updateset)) {
 	foreach ($updateset as &$class) {
         $class=intval($class);
@@ -23,16 +25,16 @@ if (is_array($updateset)) {
 	if (!is_valid_id($updateset) && $updateset != 0)
 		stderr("Error","Invalid Class");
 }
-$subject = trim($_POST['subject']);
+$subject = trim(\App\Support\SupportContext::getPost('subject'));
 $size = 10000;
 $page = 1;
 set_time_limit(300);
 $conditions = [];
-if (!empty($_POST['classes'])) {
-    $classIds = array_map('intval', $_POST['classes']);
+if (!empty(\App\Support\SupportContext::getPost('classes'))) {
+    $classIds = array_map('intval', \App\Support\SupportContext::getPost('classes'));
     $conditions[] = "class IN (" . implode(', ', $classIds) . ")";
 }
-$conditions = apply_filter("role_query_conditions", $conditions, $_POST);
+$conditions = apply_filter("role_query_conditions", $conditions, \App\Support\SupportContext::allPost());
 if (empty($conditions)) {
     stderr("Error","No valid filter");
 }

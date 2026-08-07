@@ -6,10 +6,10 @@ stderr("Sorry", "Access denied.");
 
 $tabs = ['users', 'peers'];
 $tab = 'users';
-if (!empty($_REQUEST['tab']) && in_array($_REQUEST['tab'], $tabs)) {
-    $tab = $_REQUEST['tab'];
+if (!empty(\App\Support\SupportContext::getRequestInput('tab')) && in_array(\App\Support\SupportContext::getRequestInput('tab'), $tabs)) {
+    $tab = \App\Support\SupportContext::getRequestInput('tab');
 }
-$page = $_REQUEST['page'] ?? 0;
+$page = \App\Support\SupportContext::getRequestInput('page') ?? 0;
 $title = 'Duplicate IP users';
 stdhead($title);
 print '<h1>'.$title.'</h1>';

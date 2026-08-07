@@ -2,6 +2,8 @@
 extract($context, EXTR_SKIP);
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
+
+$__server_REQUEST_URI = \App\Support\SupportContext::getServerValue('REQUEST_URI');
 if (get_user_class() < UC_SYSOP) {
 	echo "access denied.";
 	return;
@@ -10,36 +12,36 @@ stdhead("Manage Locations");
 begin_main_frame("",false,100);
 begin_frame("Manage Locations",true,10,"100%","center");
 
-$sure = $_GET['sure'] ?? '';
+$sure = \App\Support\SupportContext::getQuery('sure') ?? '';
 if($sure == "yes") {
-	$delid = (int)$_GET['delid'];
+	$delid = (int)\App\Support\SupportContext::getQuery('delid');
 	\Nexus\Database\NexusDB::table('locations')->where('id', $delid)->delete();
-	echo("Location successfuly removed, click <a class=altlink href=" . $_SERVER['REQUEST_URI'] .">here</a> to go back.");
+	echo("Location successfuly removed, click <a class=altlink href=" . $__server_REQUEST_URI .">here</a> to go back.");
 	end_frame();
 	stdfoot();
 	return;
 }
-$delid = intval($_GET['delid'] ?? 0);
+$delid = intval(\App\Support\SupportContext::getQuery('delid') ?? 0);
 if($delid > 0) {
-	echo("Are you sure you would like to delete this Location?( <strong><a href='". $_SERVER['REQUEST_URI'] . "?delid=$delid&sure=yes'>Yes!</a></strong> / <strong><a href='". $_SERVER['REQUEST_URI'] . "'>No</a></strong> )");
+	echo("Are you sure you would like to delete this Location?( <strong><a href='". $__server_REQUEST_URI . "?delid=$delid&sure=yes'>Yes!</a></strong> / <strong><a href='". $__server_REQUEST_URI . "'>No</a></strong> )");
 	end_frame();
 	stdfoot();
 	return;
 }
 
-$edited = intval($_GET['edited'] ?? 0);
+$edited = intval(\App\Support\SupportContext::getQuery('edited') ?? 0);
 if($edited == 1) {
-	$id = intval($_GET['id'] ?? 0);
-	$name = $_GET['name'];
-	$flagpic = $_GET['flagpic'];
-	$location_main = $_GET['location_main'];
-	$location_sub = $_GET['location_sub'];
-	$start_ip = $_GET['start_ip'];
-	$end_ip = $_GET['end_ip'];
-	$theory_upspeed = $_GET['theory_upspeed'];
-	$practical_upspeed = $_GET['practical_upspeed'];
-	$theory_downspeed = $_GET['theory_downspeed'];
-	$practical_downspeed = $_GET['practical_downspeed'];
+	$id = intval(\App\Support\SupportContext::getQuery('id') ?? 0);
+	$name = \App\Support\SupportContext::getQuery('name');
+	$flagpic = \App\Support\SupportContext::getQuery('flagpic');
+	$location_main = \App\Support\SupportContext::getQuery('location_main');
+	$location_sub = \App\Support\SupportContext::getQuery('location_sub');
+	$start_ip = \App\Support\SupportContext::getQuery('start_ip');
+	$end_ip = \App\Support\SupportContext::getQuery('end_ip');
+	$theory_upspeed = \App\Support\SupportContext::getQuery('theory_upspeed');
+	$practical_upspeed = \App\Support\SupportContext::getQuery('practical_upspeed');
+	$theory_downspeed = \App\Support\SupportContext::getQuery('theory_downspeed');
+	$practical_downspeed = \App\Support\SupportContext::getQuery('practical_downspeed');
 
 	if(validip_format($start_ip) && validip_format($end_ip))
 	{
@@ -57,7 +59,7 @@ if($edited == 1) {
 			    'theory_downspeed' => $theory_downspeed,
 			    'practical_downspeed' => $practical_downspeed,
 			]);
-			stdmsg("Success!","Location has been edited, click <a class=altlink href=" . $_SERVER['REQUEST_URI'] .">here</a> to go back");
+			stdmsg("Success!","Location has been edited, click <a class=altlink href=" . $__server_REQUEST_URI .">here</a> to go back");
 			stdfoot();
 			return;
 		}
@@ -69,7 +71,7 @@ if($edited == 1) {
 
 }
 
-$editid = $_GET['editid'] ?? 0;
+$editid = \App\Support\SupportContext::getQuery('editid') ?? 0;
 if($editid > 0) {
 	$row = (array) \Nexus\Database\NexusDB::table('locations')->where('id', $editid)->first();
 	if (!$row) {
@@ -86,7 +88,7 @@ if($editid > 0) {
 		$theory_downspeed = $row['theory_downspeed'];
 		$practical_downspeed = $row['practical_downspeed'];
 
-		echo("<form name='form1' method='get' action='" . $_SERVER['REQUEST_URI'] . "'>'");
+		echo("<form name='form1' method='get' action='" . $__server_REQUEST_URI . "'>'");
 		echo("<input type='hidden' name='id' value='$editid'><table class=main cellspacing=0 cellpadding=5 width=50%>");
 		echo("<tr><td class=colhead align=center colspan=2>Editing Locations</td><input type='hidden' name='edited' value='1'></tr>");
 		echo("<tr><td class=rowhead>Name:</td><td class=rowfollow align=left><input type='text' size=10 name='name' value='$name'></td></tr>");
@@ -107,19 +109,19 @@ if($editid > 0) {
 	return;
 }
 
-$add = $_GET['add'] ?? '';
+$add = \App\Support\SupportContext::getQuery('add') ?? '';
 $success = false;
 if($add == 'true') {
-	$name = $_GET['name'];
-	$flagpic = $_GET['flagpic'];
-	$location_main = $_GET['location_main'];
-	$location_sub = $_GET['location_sub'];
-	$start_ip = $_GET['start_ip'];
-	$end_ip = $_GET['end_ip'];
-	$theory_upspeed = $_GET['theory_upspeed'];
-	$practical_upspeed = $_GET['practical_upspeed'];
-	$theory_downspeed = $_GET['theory_downspeed'];
-	$practical_downspeed = $_GET['practical_downspeed'];
+	$name = \App\Support\SupportContext::getQuery('name');
+	$flagpic = \App\Support\SupportContext::getQuery('flagpic');
+	$location_main = \App\Support\SupportContext::getQuery('location_main');
+	$location_sub = \App\Support\SupportContext::getQuery('location_sub');
+	$start_ip = \App\Support\SupportContext::getQuery('start_ip');
+	$end_ip = \App\Support\SupportContext::getQuery('end_ip');
+	$theory_upspeed = \App\Support\SupportContext::getQuery('theory_upspeed');
+	$practical_upspeed = \App\Support\SupportContext::getQuery('practical_upspeed');
+	$theory_downspeed = \App\Support\SupportContext::getQuery('theory_downspeed');
+	$practical_downspeed = \App\Support\SupportContext::getQuery('practical_downspeed');
 
 	if(validip_format($start_ip) && validip_format($end_ip))
 	{
@@ -147,7 +149,7 @@ if($add == 'true') {
 
 }
 
-echo("<form name='form1' method='get' action='" . $_SERVER['REQUEST_URI'] . "'>");
+echo("<form name='form1' method='get' action='" . $__server_REQUEST_URI . "'>");
 echo("<table class=main cellspacing=0 cellpadding=5 width=48% align= left>");
 echo("<tr><td class=colhead align=center colspan=2>Add New Locations</td></tr>");
 echo("<tr><td class=rowhead>Name:</td><td class=rowfollow align=left><input type='text' size=10 name='name'></td></tr>");
@@ -164,10 +166,10 @@ echo("<tr><td class=toolbox align=center colspan=2><input class=btn type='Submit
 echo("</table>");
 echo("</form>");
 
-$range_start_ip = $_GET['range_start_ip'] ?? '';
-$range_end_ip = $_GET['range_end_ip'] ?? '';
+$range_start_ip = \App\Support\SupportContext::getQuery('range_start_ip') ?? '';
+$range_end_ip = \App\Support\SupportContext::getQuery('range_end_ip') ?? '';
 
-echo("<form name='form2' method='get' action='" . $_SERVER['REQUEST_URI'] . "'>");
+echo("<form name='form2' method='get' action='" . $__server_REQUEST_URI . "'>");
 echo("<table class=main cellspacing=0 cellpadding=5 width=48% align=right>");
 echo("<tr><td class=colhead align=center colspan=2>Check IP Range</td></tr>");
 echo("<tr><td class=rowhead><nobr>Start IP:</nobr></td><td class=rowfollow align=left><input type='text' size=30 name='range_start_ip' value='" . $range_start_ip . "'></td></tr>");
@@ -178,7 +180,7 @@ echo("</form>");
 
 print("<br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br />");
 
-$check_range = $_GET['check_range'] ?? '';
+$check_range = \App\Support\SupportContext::getQuery('check_range') ?? '';
 $hasRangeFilter = false;
 if($check_range == 'true') {
 	if(validip_format($range_start_ip) && validip_format($range_end_ip))
@@ -250,8 +252,8 @@ foreach ($locations as $loc) {
 	"<td class=rowfollow align=left>$practical_upspeed</td>" .
 	"<td class=rowfollow align=left>$theory_downspeed</td>" .
 	"<td class=rowfollow align=left>$practical_downspeed</td>" .
-	"<td class=rowfollow align=center><a href='" . $_SERVER['REQUEST_URI'] . "?editid=$id'>Edit</a></td>".
-	"<td class=rowfollow align=center><a href='" . $_SERVER['REQUEST_URI'] . "?delid=$id'>Remove</a></td>" .
+	"<td class=rowfollow align=center><a href='" . $__server_REQUEST_URI . "?editid=$id'>Edit</a></td>".
+	"<td class=rowfollow align=center><a href='" . $__server_REQUEST_URI . "?delid=$id'>Remove</a></td>" .
 	"</tr>");
 }
 print("</table>");

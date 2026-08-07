@@ -3,7 +3,7 @@ extract($context, EXTR_SKIP);
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 user_can('askreseed', true);
 
-$reseedid = intval($_GET["reseedid"] ?? 0);
+$reseedid = intval(\App\Support\SupportContext::getQuery("reseedid") ?? 0);
 $torrent = \App\Models\Torrent::query()->find($reseedid);
 $row = $torrent === null ? null : $torrent->toArray();
 $seederCount = \App\Models\Peer::query()->where('torrent', $reseedid)->count();

@@ -2,11 +2,13 @@
 extract($context, EXTR_SKIP);
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
+
+$__server_REQUEST_METHOD = \App\Support\SupportContext::getServerValue('REQUEST_METHOD');
 if (get_user_class() < UC_SYSOP)
 	stderr("Sorry", "Permission denied.");
 
-if ($_SERVER["REQUEST_METHOD"] != "POST") {
-	if (isset($_GET['sent']) && $_GET['sent'] == 1) {
+if ($__server_REQUEST_METHOD != "POST") {
+	if (((\App\Support\SupportContext::getQuery('sent') !== null)) && \App\Support\SupportContext::getQuery('sent') == 1) {
 		stdhead("Add Upload");
 		stdmsg("Success", "Upload amount has been added successfully.");
 		stdfoot();
@@ -15,20 +17,20 @@ if ($_SERVER["REQUEST_METHOD"] != "POST") {
 	stderr("Error", "Permission denied!");
 }
 
-$sender_id = ($_POST['sender'] == 'system' ? 0 : (int)$CURUSER['id']);
+$sender_id = (\App\Support\SupportContext::getPost('sender') == 'system' ? 0 : (int)$CURUSER['id']);
 $added = date("Y-m-d H:i:s");
-$msg = trim($_POST['msg']);
-$amount = $_POST['amount'];
+$msg = trim(\App\Support\SupportContext::getPost('msg'));
+$amount = \App\Support\SupportContext::getPost('amount');
 if (!$msg || !$amount)
 	stderr("Error","Don't leave any fields blank.");
 if(!is_numeric($amount))
 	stderr("Error","amount must be numeric");
-$updateset = (array) $_POST['clases'];
+$updateset = (array) \App\Support\SupportContext::getPost('clases');
 foreach ($updateset as $class) {
 	if (!is_valid_id($class) && $class != 0)
 		stderr("Error","Invalid Class");
 }
-$subject = trim($_POST['subject']);
+$subject = trim(\App\Support\SupportContext::getPost('subject'));
 
 $amount = getsize_int($amount,"G");
 \App\Models\User::query()->whereIn('class', $updateset)->increment('uploaded', $amount);

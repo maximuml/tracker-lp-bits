@@ -2,14 +2,16 @@
 extract($context, EXTR_SKIP);
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
+
+$__server_REQUEST_METHOD = \App\Support\SupportContext::getServerValue('REQUEST_METHOD');
 if (get_user_class() < UC_SYSOP)
 	permissiondenied();
 
 $shownotice=false;
 stderr("Error", "Hard deletion of users is not recommended and can cause many problems.");
-if ($_SERVER["REQUEST_METHOD"] == "POST")
+if ($__server_REQUEST_METHOD == "POST")
 {
-	if ($_POST['sure'])
+	if (\App\Support\SupportContext::getPost('sure'))
 	{
 		$deletecount = \App\Models\User::query()->where('enabled', 'no')->delete();
 		$shownotice=true;

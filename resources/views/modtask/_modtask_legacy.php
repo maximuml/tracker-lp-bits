@@ -3,7 +3,7 @@ extract($context, EXTR_SKIP);
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 function puke()
 {
-	global $CURUSER;
+$CURUSER = \App\Support\SupportContext::getUser() ?? [];
 	$msg = "User ".$CURUSER["username"]." (id: ".$CURUSER["id"].") is hacking user's profile. IP : ".getip();
 	write_log($msg,'mod');
 	stderr("Error", "Permission denied. For security reason, we logged this action");
@@ -12,49 +12,49 @@ function puke()
 if (!user_can('prfmanage'))
 	puke();
 
-$action = $_POST["action"];
+$action = \App\Support\SupportContext::getPost("action");
 if ($action == "confirmuser")
 {
-	$userid = (int)$_POST["userid"];
-	$confirm = $_POST["confirm"];
+	$userid = (int)\App\Support\SupportContext::getPost("userid");
+	$confirm = \App\Support\SupportContext::getPost("confirm");
 	\App\Repositories\ModtaskRepository::confirmUser($userid, $confirm);
 	header("Location: " . get_protocol_prefix() . "$BASEURL/unco.php?status=1");
 	return;
 }
 if ($action == "edituser")
 {
-	$userid = $_POST["userid"];
+	$userid = \App\Support\SupportContext::getPost("userid");
 	$userInfo = \App\Models\User::query()->findOrFail($userid);
-//	$class = intval($_POST["class"] ?? 0);
+//	$class = intval(\App\Support\SupportContext::getPost("class") ?? 0);
 	$class = $userInfo->class;
     $locale = get_user_locale($userid);
-//	$vip_added = ($_POST["vip_added"] == 'yes' ? 'yes' : 'no');
+//	$vip_added = (\App\Support\SupportContext::getPost("vip_added") == 'yes' ? 'yes' : 'no');
     $vip_added = $userInfo->vip_added;
-//	$vip_until = !empty($_POST["vip_until"]) ? $_POST['vip_until'] : null;
+//	$vip_until = !empty(\App\Support\SupportContext::getPost("vip_until")) ? \App\Support\SupportContext::getPost('vip_until') : null;
     $vip_until = $userInfo->vip_until;
 
-	$warned = $_POST["warned"] ?? '';
-	$warnlength = intval($_POST["warnlength"] ?? 0);
-	$warnpm = $_POST["warnpm"] ?? '';
-	$title = $_POST["title"] ?? '';
-	$avatar = $_POST["avatar"] ?? '';
-	$signature = $_POST["signature"] ?? '';
+	$warned = \App\Support\SupportContext::getPost("warned") ?? '';
+	$warnlength = intval(\App\Support\SupportContext::getPost("warnlength") ?? 0);
+	$warnpm = \App\Support\SupportContext::getPost("warnpm") ?? '';
+	$title = \App\Support\SupportContext::getPost("title") ?? '';
+	$avatar = \App\Support\SupportContext::getPost("avatar") ?? '';
+	$signature = \App\Support\SupportContext::getPost("signature") ?? '';
 
-	$enabled = $_POST["enabled"] ?? 'yes';
-	$uploadpos = $_POST["uploadpos"] ?? 'yes';
-	$downloadpos = $_POST["downloadpos"] ?? 'yes';
-	$privacy = $_POST["privacy"] ?? 'normal';
-	$forumpost = $_POST["forumpost"] ?? 'yes';
-	$chpassword = $_POST["chpassword"] ?? '';
-	$passagain = $_POST["passagain"] ?? '';
+	$enabled = \App\Support\SupportContext::getPost("enabled") ?? 'yes';
+	$uploadpos = \App\Support\SupportContext::getPost("uploadpos") ?? 'yes';
+	$downloadpos = \App\Support\SupportContext::getPost("downloadpos") ?? 'yes';
+	$privacy = \App\Support\SupportContext::getPost("privacy") ?? 'normal';
+	$forumpost = \App\Support\SupportContext::getPost("forumpost") ?? 'yes';
+	$chpassword = \App\Support\SupportContext::getPost("chpassword") ?? '';
+	$passagain = \App\Support\SupportContext::getPost("passagain") ?? '';
 
-	$supportlang = $_POST["supportlang"] ?? '';
-	$support = $_POST["support"] ?? 'no';
-	$supportfor = $_POST["supportfor"] ?? '';
+	$supportlang = \App\Support\SupportContext::getPost("supportlang") ?? '';
+	$support = \App\Support\SupportContext::getPost("support") ?? 'no';
+	$supportfor = \App\Support\SupportContext::getPost("supportfor") ?? '';
 
-	$moviepicker = $_POST["moviepicker"] ?? 'no';
-	$pickfor = $_POST["pickfor"] ?? '';
-	$stafffor = $_POST["staffduties"] ?? '';
+	$moviepicker = \App\Support\SupportContext::getPost("moviepicker") ?? 'no';
+	$pickfor = \App\Support\SupportContext::getPost("pickfor") ?? '';
+	$stafffor = \App\Support\SupportContext::getPost("staffduties") ?? '';
 
 	if (!is_valid_id($userid) || !is_valid_user_class($class))
 		stderr("Error", "Bad user ID or class ID.");
@@ -94,16 +94,16 @@ if ($action == "edituser")
 //	}
 	if(user_can('cruprfmanage'))
 	{
-		$email = $_POST["email"] ?? '';
-		$username = $_POST["username"] ?? '';
-		$modcomment = $_POST["modcomment"] ?? '';
-		$downloaded = $_POST["downloaded"] ?? 0;
-		$ori_downloaded = $_POST["ori_downloaded"] ?? 0;
-		$uploaded = $_POST["uploaded"] ?? 0;
-		$ori_uploaded = $_POST["ori_uploaded"] ?? 0;
-		$bonus = $_POST["bonus"] ?? 0;
-		$ori_bonus = $_POST["ori_bonus"] ?? 0;
-		$invites = $_POST["invites"] ?? 0;
+		$email = \App\Support\SupportContext::getPost("email") ?? '';
+		$username = \App\Support\SupportContext::getPost("username") ?? '';
+		$modcomment = \App\Support\SupportContext::getPost("modcomment") ?? '';
+		$downloaded = \App\Support\SupportContext::getPost("downloaded") ?? 0;
+		$ori_downloaded = \App\Support\SupportContext::getPost("ori_downloaded") ?? 0;
+		$uploaded = \App\Support\SupportContext::getPost("uploaded") ?? 0;
+		$ori_uploaded = \App\Support\SupportContext::getPost("ori_uploaded") ?? 0;
+		$bonus = \App\Support\SupportContext::getPost("bonus") ?? 0;
+		$ori_bonus = \App\Support\SupportContext::getPost("ori_bonus") ?? 0;
+		$invites = \App\Support\SupportContext::getPost("invites") ?? 0;
 		$added = date("Y-m-d H:i:s");
 		if ($arr['email'] != $email){
 			$updateset['email'] = $email;
@@ -181,13 +181,13 @@ if ($action == "edituser")
 	}
 	if(get_user_class() == UC_STAFFLEADER)
 	{
-		$donor = $_POST["donor"];
-		$donoruntil = !empty($_POST['donoruntil']) ? $_POST['donoruntil'] : null;
-		$donated = $_POST["donated"];
-		$donated_cny = $_POST["donated_cny"];
+		$donor = \App\Support\SupportContext::getPost("donor");
+		$donoruntil = !empty(\App\Support\SupportContext::getPost('donoruntil')) ? \App\Support\SupportContext::getPost('donoruntil') : null;
+		$donated = \App\Support\SupportContext::getPost("donated");
+		$donated_cny = \App\Support\SupportContext::getPost("donated_cny");
 		$this_donated_usd = $donated - $arr["donated"];
 		$this_donated_cny = $donated_cny - $arr["donated_cny"];
-		$memo = htmlspecialchars($_POST["donation_memo"]);
+		$memo = htmlspecialchars(\App\Support\SupportContext::getPost("donation_memo"));
 
 		if ($donated != $arr['donated'] || $donated_cny != $arr['donated_cny']) {
 			\App\Repositories\ModtaskRepository::addFund($userid, (float)$this_donated_usd, (float)$this_donated_cny, $memo);
@@ -225,7 +225,7 @@ if ($action == "edituser")
 //			$passupdate=true;
 //	}
 //
-//	if (isset($passupdate) && $passupdate) {
+//	if ((isset($passupdate)) && $passupdate) {
 //		$sec = mksecret();
 //		$passhash = md5($sec . $chpassword . $sec);
 //		$updateset[] = "secret = " . sqlesc($sec);
@@ -350,7 +350,7 @@ if ($action == "edituser")
 	if ($privacy == "low" OR $privacy == "normal" OR $privacy == "strong")
 		$updateset['privacy'] = $privacy;
 
-	if (isset($_POST["resetkey"]) && $_POST["resetkey"] == "yes")
+	if (((\App\Support\SupportContext::getPost("resetkey") !== null)) && \App\Support\SupportContext::getPost("resetkey") == "yes")
 	{
 		$newpasskey = md5($arr['username'].date("Y-m-d H:i:s").$arr['passhash']);
 		$updateset['passkey'] = $newpasskey;
@@ -475,7 +475,7 @@ if ($action == "edituser")
         \App\Models\UserModifyLog::query()->insert($userModifyLogsInsert);
     }
     clear_user_cache($userid, $userInfo->passkey);
-	$returnto = htmlspecialchars($_POST["returnto"]);
+	$returnto = htmlspecialchars(\App\Support\SupportContext::getPost("returnto"));
 	header("Location: " . get_protocol_prefix() . "$BASEURL/$returnto");
 	return;
 }

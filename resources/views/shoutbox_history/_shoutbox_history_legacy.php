@@ -8,14 +8,14 @@ stdhead($lang_shoutbox['text_history_title'] ?? 'Shoutbox history');
 begin_main_frame();
 
 $perPage = 50;
-$page = max(1, (int) ($_GET['page'] ?? 1));
+$page = max(1, (int) (\App\Support\SupportContext::getQuery('page') ?? 1));
 $offset = ($page - 1) * $perPage;
 
 $filters = [
-    'user' => trim((string) ($_GET['user'] ?? '')),
-    'from' => trim((string) ($_GET['from'] ?? '')),
-    'to' => trim((string) ($_GET['to'] ?? '')),
-    'search' => trim((string) ($_GET['search'] ?? '')),
+    'user' => trim((string) (\App\Support\SupportContext::getQuery('user') ?? '')),
+    'from' => trim((string) (\App\Support\SupportContext::getQuery('from') ?? '')),
+    'to' => trim((string) (\App\Support\SupportContext::getQuery('to') ?? '')),
+    'search' => trim((string) (\App\Support\SupportContext::getQuery('search') ?? '')),
 ];
 
 $currentUserId = (int) ($CURUSER['id'] ?? 0);

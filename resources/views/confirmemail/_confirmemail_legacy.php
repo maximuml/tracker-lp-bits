@@ -3,7 +3,9 @@ extract($context, EXTR_SKIP);
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
 
-if (!preg_match(':^/(\d{1,10})/([\w]{32})/(.+)$:', $_SERVER["PATH_INFO"], $matches))
+
+$__server_PATH_INFO = \App\Support\SupportContext::getServerValue('PATH_INFO');
+if (!preg_match(':^/(\d{1,10})/([\w]{32})/(.+)$:', $__server_PATH_INFO, $matches))
 	httperr();
 
 $id = intval($matches[1] ?? 0);

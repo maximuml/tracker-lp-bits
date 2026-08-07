@@ -5,11 +5,11 @@ error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 if (get_user_class() < UC_SYSOP)
 	permissiondenied();
 
-$action = isset($_POST['action']) ? htmlspecialchars($_POST['action']) : '';
+$action = ((\App\Support\SupportContext::getPost('action') !== null)) ? htmlspecialchars(\App\Support\SupportContext::getPost('action')) : '';
 
 if ($action == "sendmail")
 {
-	$email = htmlspecialchars(trim($_POST['email']));
+	$email = htmlspecialchars(trim(\App\Support\SupportContext::getPost('email')));
 	$email = safe_email($email);
 	if (!check_email($email))
 		stderr($lang_mailtest['std_error'], $lang_mailtest['std_invalid_email_address']);

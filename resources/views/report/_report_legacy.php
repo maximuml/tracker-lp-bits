@@ -1,22 +1,24 @@
 <?php
 extract($context, EXTR_SKIP);
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
-$reportofferid = $_GET["reportofferid"];
-$user = $_GET["user"];
-$commentid = $_GET["commentid"];
-$torrent = $_GET["torrent"];
-$forumpost = $_GET["forumpost"];
+$reportofferid = \App\Support\SupportContext::getQuery("reportofferid");
+$user = \App\Support\SupportContext::getQuery("user");
+$commentid = \App\Support\SupportContext::getQuery("commentid");
+$torrent = \App\Support\SupportContext::getQuery("torrent");
+$forumpost = \App\Support\SupportContext::getQuery("forumpost");
 
-$takeuser = $_POST["takeuser"];
-$takecommentid = $_POST["takecommentid"];
-$taketorrent = $_POST["taketorrent"];
-$takeforumpost = $_POST["takeforumpost"];
-$takereason = $_POST["reason"];
-$takereportofferid = $_POST["takereportofferid"];
+$takeuser = \App\Support\SupportContext::getPost("takeuser");
+$takecommentid = \App\Support\SupportContext::getPost("takecommentid");
+$taketorrent = \App\Support\SupportContext::getPost("taketorrent");
+$takeforumpost = \App\Support\SupportContext::getPost("takeforumpost");
+$takereason = \App\Support\SupportContext::getPost("reason");
+$takereportofferid = \App\Support\SupportContext::getPost("takereportofferid");
 
 function takereport($reportid, $type, $reason)
 {
-	global $CURUSER, $lang_report, $Cache;
+$CURUSER = \App\Support\SupportContext::getUser() ?? [];
+$lang_report = (array) (\App\Support\SupportContext::getGlobal('lang_report') ?? []);
+$Cache = \App\Support\SupportContext::getCache();
 	int_check($reportid);
 	// Check if takereason is set
 	if ($reason == ''){
@@ -50,42 +52,42 @@ function takereport($reportid, $type, $reason)
 }
 
 //////////OFFER #1 START//////////
-if (isset($takereportofferid) && isset($takereason))
+if ((isset($takereportofferid)) && (isset($takereason)))
 {
 	takereport($takereportofferid, 'offer', $takereason);
 }
 //////////OFFER #1 END//////////
 
 //////////USER #1 START//////////
-elseif ((isset($takeuser)) && (isset($takereason)))
+elseif (((isset($takeuser))) && ((isset($takereason))))
 {
 	takereport($takeuser, 'user', $takereason);
 }
 //////////USER #1 END//////////
 
 //////////TORRENT #1 START//////////
-elseif ((isset($taketorrent)) && (isset($takereason)))
+elseif (((isset($taketorrent))) && ((isset($takereason))))
 {
 	takereport($taketorrent, 'torrent', $takereason);
 }
 //////////TORRENT #1 END//////////
 
 //////////FORUM POST #1 START//////////
-elseif ((isset($takeforumpost)) && (isset($takereason)))
+elseif (((isset($takeforumpost))) && ((isset($takereason))))
 {
 	takereport($takeforumpost, 'post', $takereason);
 }
 //////////FORUM #1 END//////////
 
 //////////COMMENT #1 START//////////
-elseif ((isset($takecommentid)) && (isset($takereason)))
+elseif (((isset($takecommentid))) && ((isset($takereason))))
 {
 	takereport($takecommentid, 'comment', $takereason);
 }
 //////////COMMENT #1 END//////////
 
 //////////USER #2 START//////////
-elseif (isset($user))
+elseif ((isset($user)))
 {
 	int_check($user);
 	if ($user == $CURUSER['id']) {
@@ -114,7 +116,7 @@ elseif (isset($user))
 //////////USER #2 END//////////
 
 //////////TORRENT #2 START//////////
-elseif (isset($torrent))
+elseif ((isset($torrent)))
 {
 	int_check($torrent);
 	$name = \App\Models\Torrent::query()->where('id', $torrent)->value('name');
@@ -130,7 +132,7 @@ elseif (isset($torrent))
 //////////TORRENT #2 END//////////
 
 //////////FORUM POST #2 START//////////
-elseif (isset($forumpost))
+elseif ((isset($forumpost)))
 {
 	int_check($forumpost);
 	$arr = (array) \Nexus\Database\NexusDB::table('topics')
@@ -147,7 +149,7 @@ elseif (isset($forumpost))
 //////////FORUM POST #2 END//////////
 
 //////////COMMENT #2 START//////////
-elseif (isset($commentid))
+elseif ((isset($commentid)))
 {
 	int_check($commentid);
 	$comment = \App\Models\Comment::query()->where('id', $commentid)->first(['id', 'user', 'torrent', 'request', 'offer']);
@@ -174,7 +176,7 @@ elseif (isset($commentid))
 //////////COMMENT #2 END//////////
 
 //////////OFFER #2 START//////////
-elseif (isset($reportofferid))
+elseif ((isset($reportofferid)))
 {
 	int_check($reportofferid);
 	$offer = \App\Models\Offer::query()->where('id', $reportofferid)->first(['id', 'name']);

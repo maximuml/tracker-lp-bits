@@ -3,7 +3,7 @@ extract($context, EXTR_SKIP);
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 user_can('userprofile', true);
 
-$userid = intval($_GET["id"] ?? 0);
+$userid = intval(\App\Support\SupportContext::getQuery("id") ?? 0);
 if (!is_valid_id($userid))
 	stderr($lang_iphistory['std_error'], $lang_iphistory['std_invalid_id']);
 
@@ -15,7 +15,7 @@ $perpage = 20;
 
 $iplogDistinct = \Nexus\Database\NexusDB::table('iplog')->where('userid', $userid)->distinct('access')->count('access');
 $countrows = $iplogDistinct + 1;
-$order = $_GET['order'] ?? '';
+$order = \App\Support\SupportContext::getQuery('order') ?? '';
 
 list($pagertop, $pagerbottom, , $offset, $perpage) = pager($perpage, $countrows, "iphistory.php?id=$userid&order=$order&");
 

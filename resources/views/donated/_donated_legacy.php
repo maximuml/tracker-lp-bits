@@ -1,14 +1,16 @@
 <?php
 extract($context, EXTR_SKIP);
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
+
+$__server_REQUEST_METHOD = \App\Support\SupportContext::getServerValue('REQUEST_METHOD');
 if (get_user_class() < UC_SYSOP)
 stderr("Error", "Access denied.");
-if ($_SERVER["REQUEST_METHOD"] == "POST")
+if ($__server_REQUEST_METHOD == "POST")
 {
-if ($_POST["username"] == "" || $_POST["donated"] == "")
+if (\App\Support\SupportContext::getPost("username") == "" || \App\Support\SupportContext::getPost("donated") == "")
 stderr("Error", "Missing form data.");
-$username = trim($_POST["username"]);
-$donated = trim($_POST["donated"]);
+$username = trim(\App\Support\SupportContext::getPost("username"));
+$donated = trim(\App\Support\SupportContext::getPost("donated"));
 
 $user = \App\Models\User::query()->where('username', $username)->first(['id']);
 if (!$user)

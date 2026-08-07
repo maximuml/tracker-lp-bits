@@ -1,18 +1,21 @@
 <?php
 extract($context, EXTR_SKIP);
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
+
+$__server_PHP_SELF = \App\Support\SupportContext::getServerValue('PHP_SELF');
+$__server_REMOTE_ADDR = \App\Support\SupportContext::getServerValue('REMOTE_ADDR');
 $CURUSER['notifs'] = (string) ($CURUSER['notifs'] ?? '');
 $userInfo = \App\Models\User::query()->findOrFail($CURUSER["id"]);
 $siteName = \App\Models\Setting::getSiteName();
 function bark($msg) {
 	stdhead();
-	global $lang_usercp;
+$lang_usercp = (array) (\App\Support\SupportContext::getGlobal('lang_usercp') ?? []);
 	stdmsg($lang_usercp['std_sorry'], $msg);
 	stdfoot();
 	exit;
 }
 function usercpmenu ($selected = "home") {
-	global $lang_usercp;
+$lang_usercp = (array) (\App\Support\SupportContext::getGlobal('lang_usercp') ?? []);
 	begin_main_frame();
 	print ("<div id=\"usercpnav\"><ul id=\"usercpmenu\" class=\"menu\">");
 	print ("<li" . ($selected == "home" ? " class=selected" : "") . "><a href=\"usercp.php\">".$lang_usercp['text_user_cp_home']."</a></li>");
@@ -48,7 +51,7 @@ function form($name, $type = "save", $id = "") {
 	return print("<form method=post action=usercp.php id=\"".$id."\"><input type=hidden name=action value=".htmlspecialchars($name)."><input type=hidden name=type value={$type}>");
 }
 function submit($type = "submit") {
-	global $lang_usercp;
+$lang_usercp = (array) (\App\Support\SupportContext::getGlobal('lang_usercp') ?? []);
 	print("<tr><td class=\"rowhead\" valign=\"top\" align=\"right\">".$lang_usercp['row_save_settings']."</td><td class=\"rowfollow\" valign=\"top\" align=left><input type=".$type." value=\"".$lang_usercp['submit_save_settings']."\"></td></tr>");
 }
 function format_tz($a)
@@ -59,20 +62,20 @@ function format_tz($a)
 	":" . ($m==0?"00":$m);
 }
 function priv($name, $descr) {
-	global $CURUSER;
+$CURUSER = \App\Support\SupportContext::getUser() ?? [];
 	if ($CURUSER["privacy"] == $name)
 	return "<input type=\"radio\" name=\"privacy\" value=\"".htmlspecialchars($name)."\" checked=\"checked\" /> ".htmlspecialchars($descr);
 	else
 	return "<input type=\"radio\" name=\"privacy\" value=\"".htmlspecialchars($name)."\" /> ".htmlspecialchars($descr);
 }
 function goback ($where = "-1") {
-	global $lang_usercp;
+$lang_usercp = (array) (\App\Support\SupportContext::getGlobal('lang_usercp') ?? []);
 	$text = $lang_usercp['text_go_back'];
 	$goback = "<a class=faqlink HREF=\"javascript:history.go(".htmlspecialchars($where).")\">".htmlspecialchars($text)."</a>";
 	return $goback;
 }
-$action = isset($_POST['action']) ? htmlspecialchars($_POST['action']) : (isset($_GET['action']) ? htmlspecialchars($_GET['action']) : '');
-$type = isset($_POST['type']) ? htmlspecialchars($_POST['type']) : (isset($_GET['type']) ? htmlspecialchars($_GET['type']) : '');
+$action = ((\App\Support\SupportContext::getPost('action') !== null)) ? htmlspecialchars(\App\Support\SupportContext::getPost('action')) : (((\App\Support\SupportContext::getQuery('action') !== null)) ? htmlspecialchars(\App\Support\SupportContext::getQuery('action')) : '');
+$type = ((\App\Support\SupportContext::getPost('type') !== null)) ? htmlspecialchars(\App\Support\SupportContext::getPost('type')) : (((\App\Support\SupportContext::getQuery('type') !== null)) ? htmlspecialchars(\App\Support\SupportContext::getQuery('type')) : '');
 
 $allowed_actions = array("personal","tracker","forum","security");
 if ($action){
@@ -83,22 +86,22 @@ if ($action){
 		case "personal":
 			if ($type == 'save') {
 				$data = [];
-				$parked = $_POST["parked"];
+				$parked = \App\Support\SupportContext::getPost("parked");
 				if ($parked != 'yes')
 					$parked = 'no';
-				$acceptpms = $_POST["acceptpms"];
-				$deletepms = ($_POST["deletepms"] != "" ? "yes" : "no");
-				$savepms = ($_POST["savepms"] != "" ? "yes" : "no");
-				$commentpm = $_POST["commentpm"];
-				$gender = $_POST["gender"];
-				$country = $_POST["country"];
-				//	$tzoffset = $_POST["tzoffset"];
-				$avatar = ($_POST["avatar"] ?? '') == '' ? ($_POST["savatar"] ?? '') : ($_POST["avatar"] ?? '');
+				$acceptpms = \App\Support\SupportContext::getPost("acceptpms");
+				$deletepms = (\App\Support\SupportContext::getPost("deletepms") != "" ? "yes" : "no");
+				$savepms = (\App\Support\SupportContext::getPost("savepms") != "" ? "yes" : "no");
+				$commentpm = \App\Support\SupportContext::getPost("commentpm");
+				$gender = \App\Support\SupportContext::getPost("gender");
+				$country = \App\Support\SupportContext::getPost("country");
+				//	$tzoffset = \App\Support\SupportContext::getPost("tzoffset");
+				$avatar = (\App\Support\SupportContext::getPost("avatar") ?? '') == '' ? (\App\Support\SupportContext::getPost("savatar") ?? '') : (\App\Support\SupportContext::getPost("avatar") ?? '');
 
 				if(preg_match("/^https?:\/\/[^\s'\"<>]+\.(jpg|gif|png|jpeg)$/i", $avatar) && !preg_match("/\.php/i",$avatar) && !preg_match("/\.js/i",$avatar) && !preg_match("/\.cgi/i",$avatar)) {
 					$data['avatar'] = htmlspecialchars( trim( $avatar ) );
 				}
-				$info = htmlspecialchars(trim($_POST["info"] ?? ''));
+				$info = htmlspecialchars(trim(\App\Support\SupportContext::getPost("info") ?? ''));
 
 				$data['parked'] = $parked;
 				$data['acceptpms'] = $acceptpms;
@@ -111,14 +114,14 @@ if ($action){
 				//	$data['tzoffset'] = $tzoffset;
 
 				$data['info'] = $info;
-				$data['tracker_url_id'] = $_POST["tracker_url_id"];
+				$data['tracker_url_id'] = \App\Support\SupportContext::getPost("tracker_url_id");
 
 				//notifs
-                if (!empty($_POST['notifs'])) {
+                if (!empty(\App\Support\SupportContext::getPost('notifs'))) {
                     preg_match_all('/\[(.*)\]/Ui', (string) $CURUSER['notifs'], $notifsArr);
                     $notifsArr = array_fill_keys($notifsArr[1], 1);
                     foreach (\App\Models\User::$notificationOptions as $option) {
-                        if (isset($_POST['notifs'][$option])) {
+                        if (((\App\Support\SupportContext::getPost('notifs') !== null))) {
                             $notifsArr[$option] = 1;
                         } else {
                             unset($notifsArr[$option]);
@@ -194,8 +197,8 @@ if ($action){
 				$showtooltipsetting = false;
 			if ($type == 'save') {
 				$data = [];
-				$pmnotif = $_POST["pmnotif"] ?? '';
-				$emailnotif = $_POST["emailnotif"] ?? '';
+				$pmnotif = \App\Support\SupportContext::getPost("pmnotif") ?? '';
+				$emailnotif = \App\Support\SupportContext::getPost("emailnotif") ?? '';
 
                 preg_match_all('/\[(.*)\]/Ui', $CURUSER['notifs'], $notifs);
                 $notifs = array_fill_keys($notifs[1], 1);
@@ -221,7 +224,7 @@ if ($action){
 			function browsecheck($dbtable, $cbname, array &$result){
 				$ids = \Nexus\Database\NexusDB::table($dbtable)->pluck('id');
 				foreach ($ids as $id) {
-					if (isset($_POST[$cbname.$id]) && $_POST[$cbname.$id] == 'yes') {
+					if (((\App\Support\SupportContext::getPost($cbname.$id) !== null)) && \App\Support\SupportContext::getPost($cbname.$id) == 'yes') {
 					    $result[$cbname.$id] = 1;
                     } else {
 					    unset($result[$cbname.$id]);
@@ -235,22 +238,22 @@ if ($action){
 				browsecheck("standards", "sta", $notifs);
 				browsecheck("processings", "pro", $notifs);
 				browsecheck("audiocodecs", "aud", $notifs);
-				$incldead = $_POST["incldead"];
-				if (isset($incldead) && $incldead != 1) {
+				$incldead = \App\Support\SupportContext::getPost("incldead");
+				if ((isset($incldead)) && $incldead != 1) {
 				    $notifs["incldead=$incldead"] = 1;
                 }
-				$spstate = $_POST["spstate"];
+				$spstate = \App\Support\SupportContext::getPost("spstate");
 				if ($spstate) {
                     $notifs["spstate=$spstate"] = 1;
                 }
-				$inclbookmarked = $_POST["inclbookmarked"];
+				$inclbookmarked = \App\Support\SupportContext::getPost("inclbookmarked");
 				if ($inclbookmarked) {
                     $notifs["inclbookmarked=$inclbookmarked"] = 1;
                 }
-				$stylesheet = $_POST["stylesheet"];
-//				$caticon = $_POST["caticon"];
-				$sitelanguage = $_POST["sitelanguage"];
-				$fontsize = $_POST["fontsize"];
+				$stylesheet = \App\Support\SupportContext::getPost("stylesheet");
+//				$caticon = \App\Support\SupportContext::getPost("caticon");
+				$sitelanguage = \App\Support\SupportContext::getPost("sitelanguage");
+				$fontsize = \App\Support\SupportContext::getPost("fontsize");
 				if ($fontsize == 'large' || $fontsize == 'small')
 					$data['fontsize'] = $fontsize;
 				else
@@ -266,42 +269,42 @@ if ($action){
 					if(get_langfolder_cookie() != $lang_folder)
 					{
 						set_langfolder_cookie($lang_folder);
-						header("Location: " . $_SERVER['PHP_SELF']);
+						header("Location: " . $__server_PHP_SELF);
 					}
 					$data['lang'] = (int)$sitelanguage;
 				}
 
-				$data['torrentsperpage'] = min(100, intval($_POST["torrentsperpage"] ?? 0));
+				$data['torrentsperpage'] = min(100, intval(\App\Support\SupportContext::getPost("torrentsperpage") ?? 0));
 				if ($showtooltipsetting){
-					$data['tooltip'] = $_POST['tooltip'];
+					$data['tooltip'] = \App\Support\SupportContext::getPost('tooltip');
 				}
-				$data['timetype'] = $_POST['timetype'];
+				$data['timetype'] = \App\Support\SupportContext::getPost('timetype');
 
-				$data['appendsticky'] = ($_POST["appendsticky"] == 'yes' ? "yes" : "no");
-				$data['appendnew'] = ($_POST["appendnew"] == 'yes' ? "yes" : "no");
-				$data['appendpromotion'] = $_POST["appendpromotion"];
-				$data['appendpicked'] = ($_POST["appendpicked"] == 'yes' ? "yes" : "no");
-				$data['dlicon'] = ($_POST['dlicon'] == 'yes' ? "yes" : "no");
-				$data['bmicon'] = ($_POST['bmicon'] == 'yes' ? "yes" : "no");
+				$data['appendsticky'] = (\App\Support\SupportContext::getPost("appendsticky") == 'yes' ? "yes" : "no");
+				$data['appendnew'] = (\App\Support\SupportContext::getPost("appendnew") == 'yes' ? "yes" : "no");
+				$data['appendpromotion'] = \App\Support\SupportContext::getPost("appendpromotion");
+				$data['appendpicked'] = (\App\Support\SupportContext::getPost("appendpicked") == 'yes' ? "yes" : "no");
+				$data['dlicon'] = (\App\Support\SupportContext::getPost('dlicon') == 'yes' ? "yes" : "no");
+				$data['bmicon'] = (\App\Support\SupportContext::getPost('bmicon') == 'yes' ? "yes" : "no");
 
-				$data['showcomnum'] = ($_POST["showcomnum"] == 'yes' ? "yes" : "no");
+				$data['showcomnum'] = (\App\Support\SupportContext::getPost("showcomnum") == 'yes' ? "yes" : "no");
 				if ($showtooltipsetting){
-					$data['showlastcom'] = ($_POST["showlastcom"] == 'yes' ? "yes" : "no");
+					$data['showlastcom'] = (\App\Support\SupportContext::getPost("showlastcom") == 'yes' ? "yes" : "no");
 				}
-				$data['pmnum'] = ($_POST["pmnum"] < 1 || $_POST["pmnum"] > 100 ? 20 : floor($_POST["pmnum"]));
-				$data['sbnum'] = ($_POST["sbnum"] ? max(10, min(500, intval($_POST["sbnum"] ?? 0))) : 70);
-				$data['sbrefresh'] = ($_POST["sbrefresh"] ? max(10, min(3600, intval($_POST["sbrefresh"] ?? 0))) : 120);
+				$data['pmnum'] = (\App\Support\SupportContext::getPost("pmnum") < 1 || \App\Support\SupportContext::getPost("pmnum") > 100 ? 20 : floor(\App\Support\SupportContext::getPost("pmnum")));
+				$data['sbnum'] = (\App\Support\SupportContext::getPost("sbnum") ? max(10, min(500, intval(\App\Support\SupportContext::getPost("sbnum") ?? 0))) : 70);
+				$data['sbrefresh'] = (\App\Support\SupportContext::getPost("sbrefresh") ? max(10, min(3600, intval(\App\Support\SupportContext::getPost("sbrefresh") ?? 0))) : 120);
 
-				if ($_POST["showdescription"] == 'yes')
+				if (\App\Support\SupportContext::getPost("showdescription") == 'yes')
 					$data['showdescription'] = 'yes';
 				else
 					$data['showdescription'] = 'no';
 
-				if ($_POST["smalldescr"] == 'yes')
+				if (\App\Support\SupportContext::getPost("smalldescr") == 'yes')
 					$data['showsmalldescr'] = 'yes';
 				else
 					$data['showsmalldescr'] = 'no';
-				if ($_POST["showcomment"] == 'yes')
+				if (\App\Support\SupportContext::getPost("showcomment") == 'yes')
 					$data['showcomment'] = 'yes';
 				else
 					$data['showcomment'] = 'no';
@@ -552,15 +555,15 @@ if ($showshoutbox_main == "yes") //system side setting for shoutbox
 				$showtooltipsetting = false;
 			if ($type == 'save') {
 				$data = [
-				    'topicsperpage' => min(100, intval($_POST["topicsperpage"] ?? 0)),
-				    'postsperpage' => min(100, intval($_POST["postsperpage"] ?? 0)),
-				    'avatars' => ($_POST["avatars"] != "" ? "yes" : "no"),
-				    'signatures' => ($_POST["signatures"] != "" ? "yes" : "no"),
-				    'clicktopic' => $_POST["clicktopic"],
-				    'signature' => htmlspecialchars(trim($_POST["signature"])),
+				    'topicsperpage' => min(100, intval(\App\Support\SupportContext::getPost("topicsperpage") ?? 0)),
+				    'postsperpage' => min(100, intval(\App\Support\SupportContext::getPost("postsperpage") ?? 0)),
+				    'avatars' => (\App\Support\SupportContext::getPost("avatars") != "" ? "yes" : "no"),
+				    'signatures' => (\App\Support\SupportContext::getPost("signatures") != "" ? "yes" : "no"),
+				    'clicktopic' => \App\Support\SupportContext::getPost("clicktopic"),
+				    'signature' => htmlspecialchars(trim(\App\Support\SupportContext::getPost("signature"))),
                 ];
 				if ($showtooltipsetting)
-					$data['showlastpost'] = ($_POST["ttlastpost"] != "" ? "yes" : "no");
+					$data['showlastpost'] = (\App\Support\SupportContext::getPost("ttlastpost") != "" ? "yes" : "no");
 
 				\App\Models\User::query()->where('id', $CURUSER["id"])->update($data);
 				header("Location: usercp.php?action=forum&type=saved");
@@ -587,7 +590,7 @@ if ($showshoutbox_main == "yes") //system side setting for shoutbox
 			break;
 		case "security":
 			if ($type == 'confirm') {
-				$response = $_POST['response'];
+				$response = \App\Support\SupportContext::getPost('response');
 				if (!$response){
 					stderr($lang_usercp['std_error'], $lang_usercp['std_enter_old_password'].goback(), 0);
 				}
@@ -605,13 +608,13 @@ if ($showshoutbox_main == "yes") //system side setting for shoutbox
 				$changedemail = 0;
 				$passupdated = 0;
 				$privacyupdated = 0;
-				$resetpasskey = $_POST["resetpasskey"];
-				$email = htmlspecialchars(trim($_POST["email"]));
-				$chpassword = $_POST["chpassword"];
-//				$passagain = $_POST["passagain"];
-				$privacy = $_POST["privacy"];
-				$twoStepSecret = $_POST['two_step_secret'] ?? '';
-				$twoStepSecretHash = $_POST['two_step_code'];
+				$resetpasskey = \App\Support\SupportContext::getPost("resetpasskey");
+				$email = htmlspecialchars(trim(\App\Support\SupportContext::getPost("email")));
+				$chpassword = \App\Support\SupportContext::getPost("chpassword");
+//				$passagain = \App\Support\SupportContext::getPost("passagain");
+				$privacy = \App\Support\SupportContext::getPost("privacy");
+				$twoStepSecret = \App\Support\SupportContext::getPost('two_step_secret') ?? '';
+				$twoStepSecretHash = \App\Support\SupportContext::getPost('two_step_code');
 
 				if (!empty($twoStepSecretHash)) {
 				    if (empty($CURUSER['two_step_secret'])) {
@@ -668,7 +671,7 @@ if ($showshoutbox_main == "yes") //system side setting for shoutbox
 					$body = <<<EOD
 {$changeEmailOne}{$CURUSER["username"]}{$lang_usercp['mail_change_email_two']}($email){$lang_usercp['mail_change_email_three']}
 
-{$lang_usercp['mail_change_email_four']}{$_SERVER["REMOTE_ADDR"]}{$lang_usercp['mail_change_email_five']}
+{$lang_usercp['mail_change_email_four']}{$__server_REMOTE_ADDR}{$lang_usercp['mail_change_email_five']}
 
 {$lang_usercp['mail_change_email_six']}<b><a href="javascript:void(null)" onclick="window.open('http://$BASEURL/confirmemail.php/{$CURUSER["id"]}/$hash/$obemail')">{$lang_usercp['mail_here']}</a></b>{$lang_usercp['mail_change_email_six_1']}<br />
 http://$BASEURL/confirmemail.php/{$CURUSER["id"]}/$hash/$obemail
@@ -691,12 +694,12 @@ EOD;
 				$userId = $CURUSER["id"];
                 \Nexus\Database\NexusDB::transaction(function () use ($userId, $data) {
                     \App\Models\User::query()->where('id', $userId)->update($data);
-                    if (!empty($_REQUEST['resetauthkey']) && $_REQUEST['resetauthkey'] == 1) {
+                    if (!empty(\App\Support\SupportContext::getRequestInput('resetauthkey')) && \App\Support\SupportContext::getRequestInput('resetauthkey') == 1) {
                         //reset authkey
                         $torrentRep = new \App\Repositories\TorrentRepository();
                         $torrentRep->resetTrackerReportAuthKeySecret($userId);
                     }
-                    do_action("usercp_security_update", $_POST);
+                    do_action("usercp_security_update", \App\Support\SupportContext::allPost());
                 });
 				$to = "usercp.php?action=security&type=saved";
 				if ($changedemail == 1)
@@ -717,14 +720,14 @@ EOD;
 			print ("<table border=0 cellspacing=0 cellpadding=5 width=".CONTENT_WIDTH.">");
 			if ($type == 'save') {
 //				print("<form method=post action=usercp.php><input type=hidden name=action value=security><input type=hidden name=type value=confirm>");
-				$resetpasskey = $_POST["resetpasskey"];
-				$resetauthkey = $_POST["resetauthkey"];
-				$email = htmlspecialchars(trim($_POST["email"]));
-				$chpassword = $_POST["chpassword"];
-				$passagain = $_POST["passagain"];
-				$privacy = $_POST["privacy"];
-				$two_step_secret = $_POST["two_step_secret"] ?? '';
-				$two_step_code = $_POST["two_step_code"];
+				$resetpasskey = \App\Support\SupportContext::getPost("resetpasskey");
+				$resetauthkey = \App\Support\SupportContext::getPost("resetauthkey");
+				$email = htmlspecialchars(trim(\App\Support\SupportContext::getPost("email")));
+				$chpassword = \App\Support\SupportContext::getPost("chpassword");
+				$passagain = \App\Support\SupportContext::getPost("passagain");
+				$privacy = \App\Support\SupportContext::getPost("privacy");
+				$two_step_secret = \App\Support\SupportContext::getPost("two_step_secret") ?? '';
+				$two_step_code = \App\Support\SupportContext::getPost("two_step_code");
 				if ($resetpasskey == 1)
 				print("<input type=\"hidden\" name=\"resetpasskey\" value=\"1\">");
                 if ($resetauthkey == 1)
@@ -738,7 +741,7 @@ EOD;
 				Print("<tr><td class=\"rowhead nowrap\" valign=\"top\" align=\"right\" width=1%>".$lang_usercp['row_security_check']."</td><td valign=\"top\" align=\"left\" width=\"99%\"><input type=password class=oldpassword style=\"width: 200px\"><br /><font class=small>".$lang_usercp['text_security_check_note']."</font></td></tr>\n");
 				print('<input type=hidden name=username value="'.$CURUSER["username"].'">');
                 print('<input type=hidden name=response>');
-                do_action("usercp_security_update_confirm", $_POST);
+                do_action("usercp_security_update_confirm", \App\Support\SupportContext::allPost());
                 submit("button");
 				print("</table></form>");
                 render_password_challenge_js("security", "username", "oldpassword");
@@ -746,7 +749,7 @@ EOD;
 				die;
 			}
 			if ($type == 'saved')
-				print("<tr><td colspan=2 class=\"heading\" valign=\"top\" align=\"center\"><font color=red>".$lang_usercp['text_saved'].($_GET["mail"] == "1" ? $lang_usercp['std_confirmation_email_sent'] : "")." ".($_GET["passkey"] == "1" ? $lang_usercp['std_passkey_reset'] : "")." ".($_GET["password"] == "1" ? $lang_usercp['std_password_changed'] : "")." ".($_GET["privacy"] == "1" ? $lang_usercp['std_privacy_level_updated'] : "")."</font></td></tr>\n");
+				print("<tr><td colspan=2 class=\"heading\" valign=\"top\" align=\"center\"><font color=red>".$lang_usercp['text_saved'].(\App\Support\SupportContext::getQuery("mail") == "1" ? $lang_usercp['std_confirmation_email_sent'] : "")." ".(\App\Support\SupportContext::getQuery("passkey") == "1" ? $lang_usercp['std_passkey_reset'] : "")." ".(\App\Support\SupportContext::getQuery("password") == "1" ? $lang_usercp['std_password_changed'] : "")." ".(\App\Support\SupportContext::getQuery("privacy") == "1" ? $lang_usercp['std_privacy_level_updated'] : "")."</font></td></tr>\n");
 
 			tr_small($lang_usercp['row_reset_passkey'],"<input type=checkbox name=resetpasskey value=1 />".$lang_usercp['checkbox_reset_my_passkey']."<br /><font class=small>".$lang_usercp['text_reset_passkey_note']."</font>", 1);
 //			tr_small($lang_usercp['row_reset_authkey'],"<input type=checkbox name=resetauthkey value=1 />".$lang_usercp['checkbox_reset_my_authkey']."<br /><font class=small>".$lang_usercp['text_reset_authkey_note']."</font>", 1);

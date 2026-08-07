@@ -3,22 +3,25 @@ extract($context, EXTR_SKIP);
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
 
+
+$__server_HTTP_HOST = \App\Support\SupportContext::getServerValue('HTTP_HOST');
+$__server_SCRIPT_NAME = \App\Support\SupportContext::getServerValue('SCRIPT_NAME');
 if (get_user_class() < UC_SYSOP)
 permissiondenied();
 
 function go_back()
 {
-	global $lang_settings;
+$lang_settings = (array) (\App\Support\SupportContext::getGlobal('lang_settings') ?? []);
 	stdmsg($lang_settings['std_message'], $lang_settings['std_click']."<a class=\"altlink\" href=\"settings.php\">".$lang_settings['std_here']."</a>".$lang_settings['std_to_go_back']);
 }
 
 function yesorno($title, $name, $value, $note="")
 {
-	global $lang_settings;
+$lang_settings = (array) (\App\Support\SupportContext::getGlobal('lang_settings') ?? []);
 	tr($title, "<input type='radio' id='".$name."yes' name='".$name."'".($value == "yes" ? " checked=\"checked\"" : "")." value='yes' /> <label for='".$name."yes'>".$lang_settings['text_yes']."</label> <input type='radio' id='".$name."no' name='".$name."'".($value == "no" ? " checked=\"checked\"" : "")." value='no' /> <label for='".$name."no'>".$lang_settings['text_no']."</label><br />".$note, 1);
 }
 
-$action = isset($_POST['action']) ? $_POST['action'] : 'showmenu';
+$action = ((\App\Support\SupportContext::getPost('action') !== null)) ? \App\Support\SupportContext::getPost('action') : 'showmenu';
 $allowed_actions = array('basicsettings','mainsettings','smtpsettings','securitysettings','authoritysettings','tweaksettings', 'botsettings','codesettings','bonussettings','accountsettings','torrentsettings', 'attachmentsettings', 'savesettings_basic', 'savesettings_main','savesettings_smtp','savesettings_security','savesettings_authority','savesettings_tweak','savesettings_bot','savesettings_code','savesettings_bonus', 'savesettings_account','savesettings_torrent', 'savesettings_attachment', 'showmenu', 'miscsettings', 'savesettings_misc');
 if (!in_array($action, $allowed_actions))
 $action = 'showmenu';
@@ -28,7 +31,7 @@ $notice = "<h1 align=\"center\"><a class=\"faqlink\" href=\"settings.php\">".$la
 
 if ($action == 'savesettings_main')	// save main
 {
-	do_log(json_encode($_REQUEST));
+	do_log(json_encode(\App\Support\SupportContext::allRequest()));
 	stdhead($lang_settings['head_save_main_settings']);
 	$validConfig = array(
 		'site_online','max_torrent_size','announce_interval', 'annintertwoage', 'annintertwo', 'anninterthreeage', 'anninterthree', 'signup_timeout',
@@ -105,9 +108,9 @@ elseif ($action == 'savesettings_bonus') 	// save bonus
 		$BONUS[$config] = $$config ?? null;
 	}
 	$BONUS['attendance_continuous'] = array();
-	if(count($_POST['attendance_continuous_day']) == count($_POST['attendance_continuous_value'])){
-		foreach($_POST['attendance_continuous_day'] as $k => $day){
-			$value = (int) $_POST['attendance_continuous_value'][$k];
+	if(count(\App\Support\SupportContext::getPost('attendance_continuous_day')) == count(\App\Support\SupportContext::getPost('attendance_continuous_value'))){
+		foreach(\App\Support\SupportContext::getPost('attendance_continuous_day') as $k => $day){
+			$value = (int) \App\Support\SupportContext::getPost('attendance_continuous_value')[$k];
 			if($day > 0 && $value > 0) $BONUS['attendance_continuous'][$day] = $value;
 		}
 	}
@@ -174,7 +177,7 @@ elseif ($action == 'savesettings_smtp') 	// save smtp
 	stdhead($lang_settings['head_save_smtp_settings']);
 	$validConfig = array('smtptype', 'emailnotify');
 	GetVar($validConfig);
-	if (isset($smtptype) && $smtptype == 'advanced') {
+	if ((isset($smtptype)) && $smtptype == 'advanced') {
 		$validConfig = array_merge($validConfig, array('smtp_host','smtp_port','smtp_from'));
 	} elseif ($smtptype == 'external') {
 		$validConfig = array_merge($validConfig, array('smtpaddress','smtpport', 'encryption', 'accountname','accountpassword'));
@@ -203,8 +206,8 @@ elseif ($action == 'savesettings_security') 	// save security
 	foreach($validConfig as $config) {
 		$SECURITY[$config] = $$config ?? null;
 	}
-	if ($_POST['login_secret_regenerate'] == 'yes') {
-		$minute = intval($_POST['login_secret_lifetime']);
+	if (\App\Support\SupportContext::getPost('login_secret_regenerate') == 'yes') {
+		$minute = intval(\App\Support\SupportContext::getPost('login_secret_lifetime'));
 		$SECURITY['login_secret_deadline'] = date('Y-m-d H:i:s', strtotime("+ $minute minutes"));
 		$SECURITY['login_secret'] = md5(microtime(true));
 	}
@@ -229,7 +232,7 @@ elseif ($action == 'savesettings_authority') 	// save user authority
 	foreach($validConfig as $config) {
 		$AUTHORITY[$config] = $$config ?? null;
 		if (in_array($config, \App\Models\Setting::$permissionMustHaveClass)) {
-		    if (!isset(\App\Models\User::$classes[$AUTHORITY[$config]])) {
+		    if (!(isset(\App\Models\User::$classes[$AUTHORITY[$config]]))) {
 		        stderr('Error', "Invalid user class: " . $AUTHORITY[$config]);
             }
         }
@@ -290,7 +293,7 @@ elseif ($action == 'tweaksettings')		// tweak settings
 	$TWEAK = get_setting_from_db('tweak');
 	stdhead($lang_settings['head_tweak_settings']);
 	print ($notice);
-	print ("<form method='post' action='".$_SERVER["SCRIPT_NAME"]."'><input type='hidden' name='action' value='savesettings_tweak' />");
+	print ("<form method='post' action='".$__server_SCRIPT_NAME."'><input type='hidden' name='action' value='savesettings_tweak' />");
 	yesorno($lang_settings['row_save_user_location'], 'where', $TWEAK["where"], $lang_settings['text_save_user_location_note']);
 //	yesorno($lang_settings['row_log_user_ips'], 'iplog1', $TWEAK["iplog1"], $lang_settings['text_store_user_ips_note']);
 	tr($lang_settings['row_kps_enabled'],"<input type='radio' id='bonusenable' name='bonus'" . ($TWEAK["bonus"] == "enable" ? " checked='checked'" : "") . " value='enable' /> <label for='bonusenable'>".$lang_settings['text_enabled']."</label> <input type='radio' id='bonusdisablesave' name='bonus'" . ($TWEAK["bonus"] == "disablesave" ? " checked='checked'" : "") . " value='disablesave' /> <label for='bonusdisablesave'>".$lang_settings['text_disabled_but_save']."</label> <input type='radio' id='bonusdisable' name='bonus'" . ($TWEAK["bonus"] == "disable" ? " checked='checked'" : "") . " value='disable' /> <label for='bonusdisable'>".$lang_settings['text_disabled_no_save']."</label> <br />".$lang_settings['text_kps_note'], 1);
@@ -313,7 +316,7 @@ elseif ($action == 'smtpsettings')	// stmp settings
 	stdhead($lang_settings['head_smtp_settings']);
 	print ($notice);
 	print("<tbody>");
-	print ("<form method='post' action='".$_SERVER["SCRIPT_NAME"]."'><input type='hidden' name='action' value='savesettings_smtp'>");
+	print ("<form method='post' action='".$__server_SCRIPT_NAME."'><input type='hidden' name='action' value='savesettings_smtp'>");
 	yesorno($lang_settings['row_enable_email_notification'], 'emailnotify', $SMTP["emailnotify"], $lang_settings['text_email_notification_note']);
 	$smtp_select = "<input type=\"radio\" name=\"smtptype\" value=\"default\" onclick=\"document.getElementById('smtp_advanced').style.display='none'; document.getElementById('smtp_external').style.display='none';\"".($SMTP['smtptype'] == "default" ? " checked" : "")."> ". $lang_settings['text_smtp_default'] . "<br /><input type=\"radio\" name=\"smtptype\" value=\"advanced\" onclick=\"document.getElementById('smtp_advanced').style.display=''; document.getElementById('smtp_external').style.display='none';\"".($SMTP['smtptype'] == "advanced" ? " checked" : "")."> " . $lang_settings['text_smtp_advanced']."<br /><input type=\"radio\" name=\"smtptype\" value=\"external\" onclick=\"document.getElementById('smtp_advanced').style.display='none'; document.getElementById('smtp_external').style.display='';\"".($SMTP['smtptype'] == "external" ? " checked" : "")."> " . $lang_settings['text_smtp_external']."<br /><input type=\"radio\" name=\"smtptype\" value=\"none\" onclick=\"document.getElementById('smtp_advanced').style.display='none'; document.getElementById('smtp_external').style.display='none';\"".($SMTP['smtptype'] == "none" ? " checked" : "")."> " . $lang_settings['text_smtp_none'];
 	tr($lang_settings['row_mail_function_type'], $smtp_select, 1);
@@ -347,10 +350,10 @@ elseif ($action == 'securitysettings')	//security settings
 	stdhead($lang_settings['head_security_settings']);
 	print ($notice);
 	print("<tbody>");
-	print ("<form method='post' action='".$_SERVER["SCRIPT_NAME"]."' name='securitysettings_form'><input type='hidden' name='action' value='savesettings_security'>");
+	print ("<form method='post' action='".$__server_SCRIPT_NAME."' name='securitysettings_form'><input type='hidden' name='action' value='savesettings_security'>");
 	tr($lang_settings['row_enable_ssl'],"<input type='radio' name='securelogin'" . ($SECURITY["securelogin"] == "yes" ? " checked" : "") . " value='yes'> ".$lang_settings['text_yes']. " <input type='radio' name='securelogin'" . ($SECURITY["securelogin"] == "no" ? " checked" : "") . " value='no'> ".$lang_settings['text_no']. " <input type='radio' name='securelogin'" . ($SECURITY["securelogin"] == "op" ? " checked" : "") . " value='op'> ".$lang_settings['text_optional']."<br />".$lang_settings['text_ssl_note'], 1);
 //	tr($lang_settings['row_enable_ssl_tracker'],"<input type='radio' name='securetracker'" . ($SECURITY["securetracker"] == "yes" ? " checked" : "") . " value='yes'> ".$lang_settings['text_yes']. " <input type='radio' name='securetracker'" . ($SECURITY["securetracker"] == "no" ? " checked" : "") . " value='no'> ".$lang_settings['text_no']. " <input type='radio' name='securetracker'" . ($SECURITY["securetracker"] == "op" ? " checked" : "") . " value='op'> ".$lang_settings['text_optional']."<br />".$lang_settings['text_ssl_note'], 1);
-//	tr($lang_settings['row_https_announce_url'],"<input type='text' style=\"width: 300px\" name=https_announce_url value='".($SECURITY["https_announce_url"] ? $SECURITY["https_announce_url"] : "")."'> ".$lang_settings['text_https_announce_url_note'] . $_SERVER["HTTP_HOST"]."/announce.php", 1);
+//	tr($lang_settings['row_https_announce_url'],"<input type='text' style=\"width: 300px\" name=https_announce_url value='".($SECURITY["https_announce_url"] ? $SECURITY["https_announce_url"] : "")."'> ".$lang_settings['text_https_announce_url_note'] . $__server_HTTP_HOST."/announce.php", 1);
 	yesorno($lang_settings['row_enable_image_verification'], 'iv', $SECURITY["iv"], $lang_settings['text_image_verification_note']);
 	yesorno($lang_settings['row_allow_email_change'], 'changeemail', $SECURITY["changeemail"], $lang_settings['text_email_change_note']);
 	tr($lang_settings['row_cheater_detection_level'],"<select name='cheaterdet'><option value=0 " . ($SECURITY["cheaterdet"] == 0 ? " selected" : "") . "> ".$lang_settings['select_none']." </option><option value=1 " . ($SECURITY["cheaterdet"] == 1 ? " selected" : "") . "> ".$lang_settings['select_conservative']." </option><option value=2 " . ($SECURITY["cheaterdet"] == 2 ? " selected" : "") . "> ".$lang_settings['select_normal']." </option><option value=3 " . ($SECURITY["cheaterdet"] == 3 ? " selected" : "") . "> ".$lang_settings['select_strict']." </option><option value=4 " . ($SECURITY["cheaterdet"] == 4 ? " selected" : "") . "> ".$lang_settings['select_paranoid']." </option></select> ".$lang_settings['text_cheater_detection_level_note']."<br />".$lang_settings['text_never_suspect'].classlist('nodetect',$AUTHORITY['staffmem'],$SECURITY['nodetect']).$lang_settings['text_or_above'].get_user_class_name(UC_UPLOADER,false,true,true).".", 1);
@@ -414,7 +417,7 @@ elseif ($action == 'authoritysettings')	//Authority settings
 	stdhead($lang_settings['head_authority_settings']);
 	print ($notice);
 	$maxclass = UC_SYSOP;
-	print ("<form method='post' action='".$_SERVER["SCRIPT_NAME"]."'><input type='hidden' name='action' value='savesettings_authority'>");
+	print ("<form method='post' action='".$__server_SCRIPT_NAME."'><input type='hidden' name='action' value='savesettings_authority'>");
 	tr($lang_settings['row_default_class'], $lang_settings['text_default_user_class'].classlist('defaultclass',UC_STAFFLEADER,$AUTHORITY['defaultclass']).$lang_settings['text_default'].get_user_class_name(UC_USER,false,true,true).$lang_settings['text_default_class_note'], 1);
 	tr($lang_settings['row_staff_member'], $lang_settings['text_minimum_class'].classlist('staffmem',UC_STAFFLEADER,$AUTHORITY['staffmem']).$lang_settings['text_default'].get_user_class_name(UC_MODERATOR,false,true,true).$lang_settings['text_staff_member_note'], 1);
 	tr($lang_settings['row_news_management'], $lang_settings['text_minimum_class'].classlist('newsmanage',$maxclass,$AUTHORITY['newsmanage'],0,true).$lang_settings['text_default'].get_user_class_name(UC_ADMINISTRATOR,false,true,true).$lang_settings['text_news_management_note'],1);
@@ -481,10 +484,10 @@ elseif ($action == 'basicsettings')	// basic settings
 	stdhead($lang_settings['head_basic_settings']);
 	print ($notice);
 	$config = get_setting_from_db('basic');
-	print ("<form method='post' action='".$_SERVER["SCRIPT_NAME"]."'><input type='hidden' name='action' value='savesettings_basic'>");
+	print ("<form method='post' action='".$__server_SCRIPT_NAME."'><input type='hidden' name='action' value='savesettings_basic'>");
 	tr($lang_settings['row_site_name'],"<input type='text' style=\"width: 300px\" name=SITENAME value='".($config["SITENAME"] ? $config["SITENAME"]: "Nexus")."'> ".$lang_settings['text_site_name_note'], 1);
-	tr($lang_settings['row_base_url'],"<input type='text' style=\"width: 300px\" name=BASEURL value='".($config["BASEURL"] ? $config["BASEURL"] : $_SERVER["HTTP_HOST"])."'> ".$lang_settings['text_it_should_be'] . $_SERVER["HTTP_HOST"] . $lang_settings['text_base_url_note'], 1);
-//	tr($lang_settings['row_announce_url'],"<input type='text' style=\"width: 300px\" name=announce_url value='".($config["announce_url"] ? $config["announce_url"] : $_SERVER["HTTP_HOST"].DEFAULT_TRACKER_URI)."'> ".$lang_settings['text_it_should_be'] . $_SERVER["HTTP_HOST"].DEFAULT_TRACKER_URI, 1);
+	tr($lang_settings['row_base_url'],"<input type='text' style=\"width: 300px\" name=BASEURL value='".($config["BASEURL"] ? $config["BASEURL"] : $__server_HTTP_HOST)."'> ".$lang_settings['text_it_should_be'] . $__server_HTTP_HOST . $lang_settings['text_base_url_note'], 1);
+//	tr($lang_settings['row_announce_url'],"<input type='text' style=\"width: 300px\" name=announce_url value='".($config["announce_url"] ? $config["announce_url"] : $__server_HTTP_HOST.DEFAULT_TRACKER_URI)."'> ".$lang_settings['text_it_should_be'] . $__server_HTTP_HOST.DEFAULT_TRACKER_URI, 1);
 //	tr($lang_settings['row_mysql_host'],"<input type='text' style=\"width: 300px\" name=mysql_host value='".($config["mysql_host"] ? $config["mysql_host"] : "localhost")."'> ".$lang_settings['text_mysql_host_note'], 1);
 //	tr($lang_settings['row_mysql_user'],"<input type='text' style=\"width: 300px\" name=mysql_user value='".($config["mysql_user"] ? $config["mysql_user"] : "root")."'> ".$lang_settings['text_mysql_user_note'], 1);
 //	tr($lang_settings['row_mysql_password'],"<input type='password' style=\"width: 300px\" name=mysql_pass value=''> ".$lang_settings['text_mysql_password_note'], 1);
@@ -502,7 +505,7 @@ elseif ($action == 'attachmentsettings')	// basic settings
 	$ATTACHMENT = get_setting_from_db('attachment');
 	stdhead($lang_settings['head_attachment_settings']);
 	print ($notice);
-	print ("<form method='post' action='".$_SERVER["SCRIPT_NAME"]."'><input type='hidden' name='action' value='savesettings_attachment'>");
+	print ("<form method='post' action='".$__server_SCRIPT_NAME."'><input type='hidden' name='action' value='savesettings_attachment'>");
 	yesorno($lang_settings['row_enable_attachment'], 'enableattach', $ATTACHMENT["enableattach"], $lang_settings['text_enable_attachment_note']);
 	tr($lang_settings['row_attachment_authority'], $lang_settings['text_attachment_authority_note_one']."<ul><li>".classlist('classone', UC_STAFFLEADER, $ATTACHMENT['classone']) . $lang_settings['text_can_upload_at_most'] . "<input type='text' style=\"width: 50px\" name=\"countone\" value='".($ATTACHMENT['countone'] ? $ATTACHMENT['countone']: '')."'> ".$lang_settings['text_file_size_below']."<input type='text' style=\"width: 50px\" name=\"sizeone\" value='".($ATTACHMENT['sizeone'] ? $ATTACHMENT['sizeone']: '')."'>".$lang_settings['text_with_extension_name']."<input type='text' style=\"width: 200px\" name=\"extone\" value='".($ATTACHMENT['extone'] ? $ATTACHMENT['extone']: '')."'>".$lang_settings['text_authority_default_one_one'].get_user_class_name(UC_USER,false,true,true).$lang_settings['text_authority_default_one_two']."</li><li>".classlist('classtwo', UC_STAFFLEADER, $ATTACHMENT['classtwo']) . $lang_settings['text_can_upload_at_most'] . "<input type='text' style=\"width: 50px\" name=\"counttwo\" value='".($ATTACHMENT['counttwo'] ? $ATTACHMENT['counttwo']: '')."'> ".$lang_settings['text_file_size_below']."<input type='text' style=\"width: 50px\" name=\"sizetwo\" value='".($ATTACHMENT['sizetwo'] ? $ATTACHMENT['sizetwo']: '')."'>".$lang_settings['text_with_extension_name']."<input type='text' style=\"width: 200px\" name=\"exttwo\" value='".($ATTACHMENT['exttwo'] ? $ATTACHMENT['exttwo']: '')."'>".$lang_settings['text_authority_default_two_one'].get_user_class_name(UC_POWER_USER,false,true,true).$lang_settings['text_authority_default_two_two']."</li><li>".classlist('classthree', UC_STAFFLEADER, $ATTACHMENT['classthree']) . $lang_settings['text_can_upload_at_most'] . "<input type='text' style=\"width: 50px\" name=\"countthree\" value='".($ATTACHMENT['countthree'] ? $ATTACHMENT['countthree']: '')."'> ".$lang_settings['text_file_size_below']."<input type='text' style=\"width: 50px\" name=\"sizethree\" value='".($ATTACHMENT['sizethree'] ? $ATTACHMENT['sizethree']: '')."'>".$lang_settings['text_with_extension_name']."<input type='text' style=\"width: 200px\" name=\"extthree\" value='".($ATTACHMENT['extthree'] ? $ATTACHMENT['extthree']: '')."'>".$lang_settings['text_authority_default_three_one'].get_user_class_name(UC_INSANE_USER,false,true,true).$lang_settings['text_authority_default_three_two']."</li><li>".classlist('classfour', UC_STAFFLEADER, $ATTACHMENT['classfour']) . $lang_settings['text_can_upload_at_most'] . "<input type='text' style=\"width: 50px\" name=\"countfour\" value='".($ATTACHMENT['countfour'] ? $ATTACHMENT['countfour']: '')."'> ".$lang_settings['text_file_size_below']."<input type='text' style=\"width: 50px\" name=\"sizefour\" value='".($ATTACHMENT['sizefour'] ? $ATTACHMENT['sizefour']: '')."'>".$lang_settings['text_with_extension_name']."<input type='text' style=\"width: 200px\" name=\"extfour\" value='".($ATTACHMENT['extfour'] ? $ATTACHMENT['extfour']: '')."'>".$lang_settings['text_authority_default_four_one'].get_user_class_name(UC_MODERATOR,false,true,true).$lang_settings['text_authority_default_four_two']."</li></ul>".$lang_settings['text_attachment_authority_note_two'], 1);
 	tr($lang_settings['row_save_directory'],"<input type='text' style=\"width: 300px\" name=\"savedirectory\" value='".($ATTACHMENT['savedirectory'] ? $ATTACHMENT['savedirectory']: "./attachments")."'> ".$lang_settings['text_save_directory_note'], 1);
@@ -524,7 +527,7 @@ elseif ($action == 'codesettings')	// code settings
 	$CODE = get_setting_from_db('code');
 	stdhead($lang_settings['head_code_settings']);
 	print ($notice);
-	print ("<form method='post' action='".$_SERVER["SCRIPT_NAME"]."'><input type='hidden' name='action' value='savesettings_code'>");
+	print ("<form method='post' action='".$__server_SCRIPT_NAME."'><input type='hidden' name='action' value='savesettings_code'>");
 	tr($lang_settings['row_main_version'],"<input type='text' style=\"width: 300px\" name=mainversion value='".($CODE["mainversion"] ? $CODE["mainversion"] : PROJECTNAME." PHP")."'> ".$lang_settings['text_main_version_note'], 1);
 	tr($lang_settings['row_sub_version'],"<input type='text' style=\"width: 300px\" name=subversion value='".($CODE["subversion"] ? $CODE["subversion"] : "1.0")."'> ".$lang_settings['text_sub_version_note'], 1);
 	tr($lang_settings['row_release_date'],"<input type='text' style=\"width: 300px\" name=releasedate value='".($CODE["releasedate"] ? $CODE["releasedate"] : "2008-12-10")."'> ".$lang_settings['text_release_date_note'], 1);
@@ -536,60 +539,60 @@ elseif ($action == 'bonussettings'){
 	$BONUS = get_setting_from_db('bonus');
 	stdhead($lang_settings['head_bonus_settings']);
 	print ($notice);
-	print ("<form method='post' action='".$_SERVER["SCRIPT_NAME"]."'><input type='hidden' name='action' value='savesettings_bonus'>");
+	print ("<form method='post' action='".$__server_SCRIPT_NAME."'><input type='hidden' name='action' value='savesettings_bonus'>");
 	print("<tr><td colspan=2 align=center><b>".$lang_settings['text_bonus_by_seeding']."</b></td></tr>");
-	tr($lang_settings['row_min_size'], $lang_settings['text_bonus_mini_size']."<input type='text' style=\"width: 100px\" name=min_size value='".(isset($BONUS["min_size"]) ? $BONUS["min_size"] : 0 )."'>".$lang_settings['text_bonus_mini_size_help'],1);
-	tr($lang_settings['row_donor_gets_double'], $lang_settings['text_donor_gets']."<input type='text' style=\"width: 50px\" name=donortimes value='".(isset($BONUS["donortimes"]) ? $BONUS["donortimes"] : 2 )."'>".$lang_settings['text_times_as_many'],1);
-	tr($lang_settings['row_basic_seeding_bonus'], $lang_settings['text_user_would_get']."<input type='text' style=\"width: 50px\" name=perseeding value='".(isset($BONUS["perseeding"]) ? $BONUS["perseeding"] : 1 )."'>".$lang_settings['text_bonus_points']."<input type='text' style=\"width: 50px\" name=maxseeding value='".(isset($BONUS["maxseeding"]) ? $BONUS["maxseeding"] : 7 )."'>".$lang_settings['text_torrents_default'], 1);
+	tr($lang_settings['row_min_size'], $lang_settings['text_bonus_mini_size']."<input type='text' style=\"width: 100px\" name=min_size value='".((isset($BONUS["min_size"])) ? $BONUS["min_size"] : 0 )."'>".$lang_settings['text_bonus_mini_size_help'],1);
+	tr($lang_settings['row_donor_gets_double'], $lang_settings['text_donor_gets']."<input type='text' style=\"width: 50px\" name=donortimes value='".((isset($BONUS["donortimes"])) ? $BONUS["donortimes"] : 2 )."'>".$lang_settings['text_times_as_many'],1);
+	tr($lang_settings['row_basic_seeding_bonus'], $lang_settings['text_user_would_get']."<input type='text' style=\"width: 50px\" name=perseeding value='".((isset($BONUS["perseeding"])) ? $BONUS["perseeding"] : 1 )."'>".$lang_settings['text_bonus_points']."<input type='text' style=\"width: 50px\" name=maxseeding value='".((isset($BONUS["maxseeding"])) ? $BONUS["maxseeding"] : 7 )."'>".$lang_settings['text_torrents_default'], 1);
 
 	$formulaLiArr = [];
 	$formulaLiArr[] = "<li>".$lang_settings['text_bonus_formula_two']."</li>";
-	$formulaLiArr[] = "<li>".$lang_settings['text_bonus_formula_three']."<input type='text' style=\"width: 50px\" name=tzero value='".(isset($BONUS["tzero"]) ? $BONUS["tzero"] : 4 )."'>".$lang_settings['text_bonus_formula_four']."</li>";
+	$formulaLiArr[] = "<li>".$lang_settings['text_bonus_formula_three']."<input type='text' style=\"width: 50px\" name=tzero value='".((isset($BONUS["tzero"])) ? $BONUS["tzero"] : 4 )."'>".$lang_settings['text_bonus_formula_four']."</li>";
 	$formulaLiArr[] = "<li>".$lang_settings['text_bonus_formula_five']."</li>";
-	$formulaLiArr[] = "<li>".$lang_settings['text_bonus_formula_six']."<input type='text' style=\"width: 50px\" name=nzero value='".(isset($BONUS["nzero"]) ? $BONUS["nzero"] : 7 )."'>".$lang_settings['text_bonus_formula_seven']."</li>";
-	$formulaLiArr[] = "<li>".$lang_settings['text_bonus_formula_zero_bonus_factor']."<input type='text' style=\"width: 50px\" name=zero_bonus_factor value='".(isset($BONUS["zero_bonus_factor"]) ? $BONUS["zero_bonus_factor"] : 0.2 )."'>".$lang_settings['zero_bonus_factor_default']."</li>";
+	$formulaLiArr[] = "<li>".$lang_settings['text_bonus_formula_six']."<input type='text' style=\"width: 50px\" name=nzero value='".((isset($BONUS["nzero"])) ? $BONUS["nzero"] : 7 )."'>".$lang_settings['text_bonus_formula_seven']."</li>";
+	$formulaLiArr[] = "<li>".$lang_settings['text_bonus_formula_zero_bonus_factor']."<input type='text' style=\"width: 50px\" name=zero_bonus_factor value='".((isset($BONUS["zero_bonus_factor"])) ? $BONUS["zero_bonus_factor"] : 0.2 )."'>".$lang_settings['zero_bonus_factor_default']."</li>";
 	$formulaLiArr[] = "<li>".$lang_settings['text_bonus_formula_eight']."</li>";
-	$formulaLiArr[] = "<li>".$lang_settings['text_bonus_formula_nine']."<input type='text' style=\"width: 50px\" name=bzero value='".(isset($BONUS["bzero"]) ? $BONUS["bzero"] : 100 )."'>".$lang_settings['text_bonus_formula_ten']."</li>";
-	$formulaLiArr[] = "<li>".$lang_settings['text_bonus_formula_eleven']."<input type='text' style=\"width: 50px\" name=l value='".(isset($BONUS["l"]) ? $BONUS["l"] : 300 )."'>".$lang_settings['text_bonus_formula_twelve']."</li>";
+	$formulaLiArr[] = "<li>".$lang_settings['text_bonus_formula_nine']."<input type='text' style=\"width: 50px\" name=bzero value='".((isset($BONUS["bzero"])) ? $BONUS["bzero"] : 100 )."'>".$lang_settings['text_bonus_formula_ten']."</li>";
+	$formulaLiArr[] = "<li>".$lang_settings['text_bonus_formula_eleven']."<input type='text' style=\"width: 50px\" name=l value='".((isset($BONUS["l"])) ? $BONUS["l"] : 300 )."'>".$lang_settings['text_bonus_formula_twelve']."</li>";
 	tr($lang_settings['row_seeding_formula'], $lang_settings['text_bonus_formula_one']."<br /><br />&nbsp;&nbsp;&nbsp;&nbsp;<img src=pic/bonusformulaa.svg title=\"A = sigma( ( 1 - 10 ^ ( - Ti / T0 ) ) * Si * ( 1 + sqrt( 2 ) * 10 ^ ( - ( Ni - 1 ) / ( N0 - 1 ) ) ) * Wi\"><br />&nbsp;&nbsp;&nbsp;&nbsp;<img src=pic/bonusformulab.png alt=\"B = B0 * 2 / pi * arctan( A / L )\" title=\"B = B0 * 2 / pi * arctan( A / L )\"><br />".$lang_settings['text_where']."<ul>".implode("", $formulaLiArr)."</ul>", 1);
 
 	print("<tr><td colspan=2 align=center><b>".$lang_settings['text_misc_ways_get_bonus']."</b></td></tr>");
-	tr($lang_settings['row_uploading_torrent'],$lang_settings['text_user_would_get']."<input type='text' style=\"width: 50px\" name=uploadtorrent value='".(isset($BONUS["uploadtorrent"]) ? $BONUS["uploadtorrent"] : 15 )."'>".$lang_settings['text_uploading_torrent_note'], 1);
-	tr($lang_settings['row_starting_topic'],$lang_settings['text_user_would_get']."<input type='text' style=\"width: 50px\" name=starttopic value='".(isset($BONUS["starttopic"]) ? $BONUS["starttopic"] : 2 )."'>".$lang_settings['text_starting_topic_note'], 1);
-	tr($lang_settings['row_making_post'],$lang_settings['text_user_would_get']."<input type='text' style=\"width: 50px\" name=makepost value='".(isset($BONUS["makepost"]) ? $BONUS["makepost"] : 1 )."'>".$lang_settings['text_making_post_note'], 1);
-	tr($lang_settings['row_adding_comment'],$lang_settings['text_user_would_get']."<input type='text' style=\"width: 50px\" name=addcomment value='".(isset($BONUS["addcomment"]) ? $BONUS["addcomment"] : 1 )."'>".$lang_settings['text_adding_comment_note'], 1);
-	tr($lang_settings['row_voting_on_poll'],$lang_settings['text_user_would_get']."<input type='text' style=\"width: 50px\" name=pollvote value='".(isset($BONUS["pollvote"]) ? $BONUS["pollvote"] : 1 )."'>".$lang_settings['text_voting_on_poll_note'], 1);
-	tr($lang_settings['row_voting_on_offer'],$lang_settings['text_user_would_get']."<input type='text' style=\"width: 50px\" name=offervote value='".(isset($BONUS["offervote"]) ? $BONUS["offervote"] : 1 )."'>".$lang_settings['text_voting_on_offer_note'], 1);
-	tr($lang_settings['row_saying_thanks'], $lang_settings['text_giver_and_receiver_get']."<input type='text' style=\"width: 50px\" name=saythanks value='".(isset($BONUS["saythanks"]) ? $BONUS["saythanks"] : 0.5 )."'>".$lang_settings['text_saying_thanks_and']."<input type='text' style=\"width: 50px\" name=receivethanks value='".(isset($BONUS["receivethanks"]) ? $BONUS["receivethanks"] : 0 )."'>".$lang_settings['text_saying_thanks_default'], 1);
-	tr($lang_settings['row_harem_addition'],$lang_settings['text_user_would_get_by_harem']."<input type='text' style=\"width: 50px\" name=harem_addition value='".(isset($BONUS["harem_addition"]) ? $BONUS["harem_addition"] : 0 )."'>".$lang_settings['text_harem_addition_note'], 1);
-	tr($lang_settings['row_official_addition'],$lang_settings['text_user_would_get_by_official']."<input type='text' style=\"width: 50px\" name=official_addition value='".(isset($BONUS["official_addition"]) ? $BONUS["official_addition"] : 0.5 )."'>".$lang_settings['text_addition_addition_note'], 1);
+	tr($lang_settings['row_uploading_torrent'],$lang_settings['text_user_would_get']."<input type='text' style=\"width: 50px\" name=uploadtorrent value='".((isset($BONUS["uploadtorrent"])) ? $BONUS["uploadtorrent"] : 15 )."'>".$lang_settings['text_uploading_torrent_note'], 1);
+	tr($lang_settings['row_starting_topic'],$lang_settings['text_user_would_get']."<input type='text' style=\"width: 50px\" name=starttopic value='".((isset($BONUS["starttopic"])) ? $BONUS["starttopic"] : 2 )."'>".$lang_settings['text_starting_topic_note'], 1);
+	tr($lang_settings['row_making_post'],$lang_settings['text_user_would_get']."<input type='text' style=\"width: 50px\" name=makepost value='".((isset($BONUS["makepost"])) ? $BONUS["makepost"] : 1 )."'>".$lang_settings['text_making_post_note'], 1);
+	tr($lang_settings['row_adding_comment'],$lang_settings['text_user_would_get']."<input type='text' style=\"width: 50px\" name=addcomment value='".((isset($BONUS["addcomment"])) ? $BONUS["addcomment"] : 1 )."'>".$lang_settings['text_adding_comment_note'], 1);
+	tr($lang_settings['row_voting_on_poll'],$lang_settings['text_user_would_get']."<input type='text' style=\"width: 50px\" name=pollvote value='".((isset($BONUS["pollvote"])) ? $BONUS["pollvote"] : 1 )."'>".$lang_settings['text_voting_on_poll_note'], 1);
+	tr($lang_settings['row_voting_on_offer'],$lang_settings['text_user_would_get']."<input type='text' style=\"width: 50px\" name=offervote value='".((isset($BONUS["offervote"])) ? $BONUS["offervote"] : 1 )."'>".$lang_settings['text_voting_on_offer_note'], 1);
+	tr($lang_settings['row_saying_thanks'], $lang_settings['text_giver_and_receiver_get']."<input type='text' style=\"width: 50px\" name=saythanks value='".((isset($BONUS["saythanks"])) ? $BONUS["saythanks"] : 0.5 )."'>".$lang_settings['text_saying_thanks_and']."<input type='text' style=\"width: 50px\" name=receivethanks value='".((isset($BONUS["receivethanks"])) ? $BONUS["receivethanks"] : 0 )."'>".$lang_settings['text_saying_thanks_default'], 1);
+	tr($lang_settings['row_harem_addition'],$lang_settings['text_user_would_get_by_harem']."<input type='text' style=\"width: 50px\" name=harem_addition value='".((isset($BONUS["harem_addition"])) ? $BONUS["harem_addition"] : 0 )."'>".$lang_settings['text_harem_addition_note'], 1);
+	tr($lang_settings['row_official_addition'],$lang_settings['text_user_would_get_by_official']."<input type='text' style=\"width: 50px\" name=official_addition value='".((isset($BONUS["official_addition"])) ? $BONUS["official_addition"] : 0.5 )."'>".$lang_settings['text_addition_addition_note'], 1);
 
 	$tagRep = new \App\Repositories\TagRepository();
 	tr($lang_settings['row_official_tag'], $tagRep->buildSelect(0,'official_tag', $BONUS["official_tag"] ?? '') . $lang_settings['text_official_tag_note'], 1);
 	tr($lang_settings['row_zero_bonus_tag'], $tagRep->buildSelect(0,'zero_bonus_tag', $BONUS["zero_bonus_tag"] ?? '') . $lang_settings['text_zero_bonus_tag_note'], 1);
 
 	print("<tr><td colspan=2 align=center><b>".$lang_settings['text_things_cost_bonus']."</b></td></tr>");
-	tr($lang_settings['row_one_gb_credit'],$lang_settings['text_it_costs_user']."<input type='text' style=\"width: 50px\" name=onegbupload value='".(isset($BONUS["onegbupload"]) ? $BONUS["onegbupload"] : 300 )."'>".$lang_settings['text_one_gb_credit_note'], 1);
-	tr($lang_settings['row_five_gb_credit'],$lang_settings['text_it_costs_user']."<input type='text' style=\"width: 50px\" name=fivegbupload value='".(isset($BONUS["fivegbupload"]) ? $BONUS["fivegbupload"] : 800 )."'>".$lang_settings['text_five_gb_credit_note'], 1);
-	tr($lang_settings['row_ten_gb_credit'],$lang_settings['text_it_costs_user']."<input type='text' style=\"width: 50px\" name=tengbupload value='".(isset($BONUS["tengbupload"]) ? $BONUS["tengbupload"] : 1200 )."'>".$lang_settings['text_ten_gb_credit_note'], 1);
-	tr($lang_settings['row_hundred_gb_credit'],$lang_settings['text_it_costs_user']."<input type='text' style=\"width: 50px\" name=hundredgbupload value='".(isset($BONUS["hundredgbupload"]) ? $BONUS["hundredgbupload"] : 10000 )."'>".$lang_settings['text_hundred_gb_credit_note'], 1);
-	tr($lang_settings['row_ten_gb_download_credit'],$lang_settings['text_it_costs_user']."<input type='text' style=\"width: 50px\" name=tengbdownload value='".(isset($BONUS["tengbdownload"]) ? $BONUS["tengbdownload"] : 1000 )."'>".$lang_settings['text_ten_gb_download_credit_note'], 1);
-	tr($lang_settings['row_hundred_gb_download_credit'],$lang_settings['text_it_costs_user']."<input type='text' style=\"width: 50px\" name=hundredgbdownload value='".(isset($BONUS["hundredgbdownload"]) ? $BONUS["hundredgbdownload"] : 8000 )."'>".$lang_settings['text_hundred_gb_download_credit_note'], 1);
+	tr($lang_settings['row_one_gb_credit'],$lang_settings['text_it_costs_user']."<input type='text' style=\"width: 50px\" name=onegbupload value='".((isset($BONUS["onegbupload"])) ? $BONUS["onegbupload"] : 300 )."'>".$lang_settings['text_one_gb_credit_note'], 1);
+	tr($lang_settings['row_five_gb_credit'],$lang_settings['text_it_costs_user']."<input type='text' style=\"width: 50px\" name=fivegbupload value='".((isset($BONUS["fivegbupload"])) ? $BONUS["fivegbupload"] : 800 )."'>".$lang_settings['text_five_gb_credit_note'], 1);
+	tr($lang_settings['row_ten_gb_credit'],$lang_settings['text_it_costs_user']."<input type='text' style=\"width: 50px\" name=tengbupload value='".((isset($BONUS["tengbupload"])) ? $BONUS["tengbupload"] : 1200 )."'>".$lang_settings['text_ten_gb_credit_note'], 1);
+	tr($lang_settings['row_hundred_gb_credit'],$lang_settings['text_it_costs_user']."<input type='text' style=\"width: 50px\" name=hundredgbupload value='".((isset($BONUS["hundredgbupload"])) ? $BONUS["hundredgbupload"] : 10000 )."'>".$lang_settings['text_hundred_gb_credit_note'], 1);
+	tr($lang_settings['row_ten_gb_download_credit'],$lang_settings['text_it_costs_user']."<input type='text' style=\"width: 50px\" name=tengbdownload value='".((isset($BONUS["tengbdownload"])) ? $BONUS["tengbdownload"] : 1000 )."'>".$lang_settings['text_ten_gb_download_credit_note'], 1);
+	tr($lang_settings['row_hundred_gb_download_credit'],$lang_settings['text_it_costs_user']."<input type='text' style=\"width: 50px\" name=hundredgbdownload value='".((isset($BONUS["hundredgbdownload"])) ? $BONUS["hundredgbdownload"] : 8000 )."'>".$lang_settings['text_hundred_gb_download_credit_note'], 1);
 
 
-	tr($lang_settings['row_ratio_limit'],$lang_settings['text_user_with_ratio']."<input type='text' style=\"width: 50px\" name=ratiolimit value='".(isset($BONUS["ratiolimit"]) ? $BONUS["ratiolimit"] : 6 )."'>".$lang_settings['text_uploaded_amount_above']."<input type='text' style=\"width: 50px\" name=dlamountlimit value='".(isset($BONUS["dlamountlimit"]) ? $BONUS["dlamountlimit"] : 50 )."'>".$lang_settings['text_ratio_limit_default'], 1);
-	tr($lang_settings['row_buy_an_invite'],$lang_settings['text_it_costs_user']."<input type='text' style=\"width: 50px\" name=oneinvite value='".(isset($BONUS["oneinvite"]) ? $BONUS["oneinvite"] : 1000 )."'>".$lang_settings['text_buy_an_invite_note'], 1);
-	tr($lang_settings['row_buy_an_tmp_invite'],$lang_settings['text_it_costs_user']."<input type='text' style=\"width: 50px\" name=one_tmp_invite value='".(isset($BONUS["one_tmp_invite"]) ? $BONUS["one_tmp_invite"] : \App\Models\BonusLogs::DEFAULT_BONUS_BUY_TEMPORARY_INVITE )."'>".$lang_settings['text_buy_an_tmp_invite_note'], 1);
+	tr($lang_settings['row_ratio_limit'],$lang_settings['text_user_with_ratio']."<input type='text' style=\"width: 50px\" name=ratiolimit value='".((isset($BONUS["ratiolimit"])) ? $BONUS["ratiolimit"] : 6 )."'>".$lang_settings['text_uploaded_amount_above']."<input type='text' style=\"width: 50px\" name=dlamountlimit value='".((isset($BONUS["dlamountlimit"])) ? $BONUS["dlamountlimit"] : 50 )."'>".$lang_settings['text_ratio_limit_default'], 1);
+	tr($lang_settings['row_buy_an_invite'],$lang_settings['text_it_costs_user']."<input type='text' style=\"width: 50px\" name=oneinvite value='".((isset($BONUS["oneinvite"])) ? $BONUS["oneinvite"] : 1000 )."'>".$lang_settings['text_buy_an_invite_note'], 1);
+	tr($lang_settings['row_buy_an_tmp_invite'],$lang_settings['text_it_costs_user']."<input type='text' style=\"width: 50px\" name=one_tmp_invite value='".((isset($BONUS["one_tmp_invite"])) ? $BONUS["one_tmp_invite"] : \App\Models\BonusLogs::DEFAULT_BONUS_BUY_TEMPORARY_INVITE )."'>".$lang_settings['text_buy_an_tmp_invite_note'], 1);
 
-	tr($lang_settings['row_custom_title'],$lang_settings['text_it_costs_user']."<input type='text' style=\"width: 50px\" name=customtitle value='".(isset($BONUS["customtitle"]) ? $BONUS["customtitle"] : 5000 )."'>".$lang_settings['text_custom_title_note'], 1);
-	tr($lang_settings['row_vip_status'],$lang_settings['text_it_costs_user']."<input type='text' style=\"width: 50px\" name=vipstatus value='".(isset($BONUS["vipstatus"]) ? $BONUS["vipstatus"] : 8000 )."'>".$lang_settings['text_vip_status_note'], 1);
+	tr($lang_settings['row_custom_title'],$lang_settings['text_it_costs_user']."<input type='text' style=\"width: 50px\" name=customtitle value='".((isset($BONUS["customtitle"])) ? $BONUS["customtitle"] : 5000 )."'>".$lang_settings['text_custom_title_note'], 1);
+	tr($lang_settings['row_vip_status'],$lang_settings['text_it_costs_user']."<input type='text' style=\"width: 50px\" name=vipstatus value='".((isset($BONUS["vipstatus"])) ? $BONUS["vipstatus"] : 8000 )."'>".$lang_settings['text_vip_status_note'], 1);
 	yesorno($lang_settings['row_allow_giving_bonus_gift'], 'bonusgift', $BONUS["bonusgift"], $lang_settings['text_giving_bonus_gift_note']);
-	tr($lang_settings['row_bonus_gift_tax'], $lang_settings['text_system_charges']."<input type='text' style=\"width: 50px\" name='basictax' value='".(isset($BONUS["basictax"]) ? $BONUS["basictax"] : 5 )."'>".$lang_settings['text_bonus_points_plus']."<input type='text' style=\"width: 50px\" name='taxpercentage' value='".(isset($BONUS["taxpercentage"]) ? $BONUS["taxpercentage"] : 10 )."'>".$lang_settings['text_bonus_gift_tax_note'], 1);
-    tr($lang_settings['row_cancel_hr'],$lang_settings['text_it_costs_user']."<input type='text' style=\"width: 50px\" name=cancel_hr value='".(isset($BONUS["cancel_hr"]) ? $BONUS["cancel_hr"] : \App\Models\BonusLogs::DEFAULT_BONUS_CANCEL_ONE_HIT_AND_RUN )."'>".$lang_settings['text_cancel_hr_note'], 1);
-    tr($lang_settings['row_attendance_card'],$lang_settings['text_it_costs_user']."<input type='text' style=\"width: 50px\" name=attendance_card value='".(isset($BONUS["attendance_card"]) ? $BONUS["attendance_card"] : \App\Models\BonusLogs::DEFAULT_BONUS_BUY_ATTENDANCE_CARD )."'>".$lang_settings['text_attendance_card_note'], 1);
-    tr($lang_settings['row_buy_rainbow_id'],$lang_settings['text_it_costs_user']."<input type='text' style=\"width: 50px\" name=rainbow_id value='".(isset($BONUS["rainbow_id"]) ? $BONUS["rainbow_id"] : \App\Models\BonusLogs::DEFAULT_BONUS_BUY_RAINBOW_ID )."'>".$lang_settings['text_buy_rainbow_id_note'], 1);
-    tr($lang_settings['row_buy_change_username_card'],$lang_settings['text_it_costs_user']."<input type='text' style=\"width: 50px\" name=change_username_card value='".(isset($BONUS["change_username_card"]) ? $BONUS["change_username_card"] : \App\Models\BonusLogs::DEFAULT_BONUS_BUY_CHANGE_USERNAME_CARD )."'>".$lang_settings['text_buy_change_username_card_note'], 1);
-    tr($lang_settings['row_self_enable'],$lang_settings['text_it_costs_user']."<input type='text' style=\"width: 50px\" name=self_enable value='".(isset($BONUS["self_enable"]) ? $BONUS["self_enable"] : \App\Models\BonusLogs::DEFAULT_BONUS_SELF_ENABLE )."'>".$lang_settings['text_self_enable_note'], 1);
+	tr($lang_settings['row_bonus_gift_tax'], $lang_settings['text_system_charges']."<input type='text' style=\"width: 50px\" name='basictax' value='".((isset($BONUS["basictax"])) ? $BONUS["basictax"] : 5 )."'>".$lang_settings['text_bonus_points_plus']."<input type='text' style=\"width: 50px\" name='taxpercentage' value='".((isset($BONUS["taxpercentage"])) ? $BONUS["taxpercentage"] : 10 )."'>".$lang_settings['text_bonus_gift_tax_note'], 1);
+    tr($lang_settings['row_cancel_hr'],$lang_settings['text_it_costs_user']."<input type='text' style=\"width: 50px\" name=cancel_hr value='".((isset($BONUS["cancel_hr"])) ? $BONUS["cancel_hr"] : \App\Models\BonusLogs::DEFAULT_BONUS_CANCEL_ONE_HIT_AND_RUN )."'>".$lang_settings['text_cancel_hr_note'], 1);
+    tr($lang_settings['row_attendance_card'],$lang_settings['text_it_costs_user']."<input type='text' style=\"width: 50px\" name=attendance_card value='".((isset($BONUS["attendance_card"])) ? $BONUS["attendance_card"] : \App\Models\BonusLogs::DEFAULT_BONUS_BUY_ATTENDANCE_CARD )."'>".$lang_settings['text_attendance_card_note'], 1);
+    tr($lang_settings['row_buy_rainbow_id'],$lang_settings['text_it_costs_user']."<input type='text' style=\"width: 50px\" name=rainbow_id value='".((isset($BONUS["rainbow_id"])) ? $BONUS["rainbow_id"] : \App\Models\BonusLogs::DEFAULT_BONUS_BUY_RAINBOW_ID )."'>".$lang_settings['text_buy_rainbow_id_note'], 1);
+    tr($lang_settings['row_buy_change_username_card'],$lang_settings['text_it_costs_user']."<input type='text' style=\"width: 50px\" name=change_username_card value='".((isset($BONUS["change_username_card"])) ? $BONUS["change_username_card"] : \App\Models\BonusLogs::DEFAULT_BONUS_BUY_CHANGE_USERNAME_CARD )."'>".$lang_settings['text_buy_change_username_card_note'], 1);
+    tr($lang_settings['row_self_enable'],$lang_settings['text_it_costs_user']."<input type='text' style=\"width: 50px\" name=self_enable value='".((isset($BONUS["self_enable"])) ? $BONUS["self_enable"] : \App\Models\BonusLogs::DEFAULT_BONUS_SELF_ENABLE )."'>".$lang_settings['text_self_enable_note'], 1);
 
 
     echo '<tr><td colspan="2" align="center"><b>' . $lang_settings['text_attendance_get_bonus'] . '</b></td></tr>';
@@ -619,53 +622,53 @@ elseif ($action == 'accountsettings'){
 	stdhead($lang_settings['head_account_settings']);
 	print ($notice);
 	$maxclass = UC_VIP;
-	print ("<form method='post' action='".$_SERVER["SCRIPT_NAME"]."'><input type='hidden' name='action' value='savesettings_account'>");
+	print ("<form method='post' action='".$__server_SCRIPT_NAME."'><input type='hidden' name='action' value='savesettings_account'>");
 	print("<tr><td colspan=2 align=center><b>".$lang_settings['text_delete_inactive_accounts']."</b></td></tr>");
 	tr($lang_settings['row_never_delete'],classlist('neverdelete',$maxclass,$ACCOUNT['neverdelete']).$lang_settings['text_never_delete'].get_user_class_name(UC_VETERAN_USER,false,true,true), 1);
 	tr($lang_settings['row_never_delete_if_packed'],classlist('neverdeletepacked',$maxclass,$ACCOUNT['neverdeletepacked']).$lang_settings['text_never_delete_if_packed'].get_user_class_name(UC_ELITE_USER,false,true,true), 1);
-	tr($lang_settings['row_delete_packed'],$lang_settings['text_delete_packed_note_one']."<input type='text' style=\"width: 50px\" name=deletepacked value='".(isset($ACCOUNT["deletepacked"]) ? $ACCOUNT["deletepacked"] : 400 )."'>".$lang_settings['text_delete_packed_note_two'], 1);
-	tr($lang_settings['row_delete_unpacked'],$lang_settings['text_delete_unpacked_note_one']."<input type='text' style=\"width: 50px\" name=deleteunpacked value='".(isset($ACCOUNT["deleteunpacked"]) ? $ACCOUNT["deleteunpacked"] : 150 )."'>".$lang_settings['text_delete_unpacked_note_two'], 1);
-	tr($lang_settings['row_delete_no_transfer'],$lang_settings['text_delete_transfer_note_one']."<input type='text' style=\"width: 50px\" name=deletenotransfer value='".(isset($ACCOUNT["deletenotransfer"]) ? $ACCOUNT["deletenotransfer"] : 60 )."'>".$lang_settings['text_delete_transfer_note_two']."<input type='text' style=\"width: 50px\" name=deletenotransfertwo value='".(isset($ACCOUNT["deletenotransfertwo"]) ? $ACCOUNT["deletenotransfertwo"] : 0 )."'>".$lang_settings['text_delete_transfer_note_three'], 1);
-	tr($lang_settings['row_destroy_disabled'],$lang_settings['text_destroy_disabled_note_one']."<input type='text' style=\"width: 50px\" name=destroy_disabled value='".(isset($ACCOUNT["destroy_disabled"]) ? $ACCOUNT["destroy_disabled"] : 500 )."'>".$lang_settings['text_destroy_disabled_note_two'], 1);
+	tr($lang_settings['row_delete_packed'],$lang_settings['text_delete_packed_note_one']."<input type='text' style=\"width: 50px\" name=deletepacked value='".((isset($ACCOUNT["deletepacked"])) ? $ACCOUNT["deletepacked"] : 400 )."'>".$lang_settings['text_delete_packed_note_two'], 1);
+	tr($lang_settings['row_delete_unpacked'],$lang_settings['text_delete_unpacked_note_one']."<input type='text' style=\"width: 50px\" name=deleteunpacked value='".((isset($ACCOUNT["deleteunpacked"])) ? $ACCOUNT["deleteunpacked"] : 150 )."'>".$lang_settings['text_delete_unpacked_note_two'], 1);
+	tr($lang_settings['row_delete_no_transfer'],$lang_settings['text_delete_transfer_note_one']."<input type='text' style=\"width: 50px\" name=deletenotransfer value='".((isset($ACCOUNT["deletenotransfer"])) ? $ACCOUNT["deletenotransfer"] : 60 )."'>".$lang_settings['text_delete_transfer_note_two']."<input type='text' style=\"width: 50px\" name=deletenotransfertwo value='".((isset($ACCOUNT["deletenotransfertwo"])) ? $ACCOUNT["deletenotransfertwo"] : 0 )."'>".$lang_settings['text_delete_transfer_note_three'], 1);
+	tr($lang_settings['row_destroy_disabled'],$lang_settings['text_destroy_disabled_note_one']."<input type='text' style=\"width: 50px\" name=destroy_disabled value='".((isset($ACCOUNT["destroy_disabled"])) ? $ACCOUNT["destroy_disabled"] : 500 )."'>".$lang_settings['text_destroy_disabled_note_two'], 1);
 
 
 	print("<tr><td colspan=2 align=center><b>".$lang_settings['text_user_promotion_demotion']."</b></td></tr>");
-	tr($lang_settings['row_ban_peasant_one'].get_user_class_name(UC_PEASANT,false,false,true).$lang_settings['row_ban_peasant_two'],get_user_class_name(UC_PEASANT,false,true,true).$lang_settings['text_ban_peasant_note_one']."<input type='text' style=\"width: 50px\" name=deletepeasant value='".(isset($ACCOUNT["deletepeasant"]) ? $ACCOUNT["deletepeasant"] : 30 )."'>".$lang_settings['text_ban_peasant_note_two'], 1);
+	tr($lang_settings['row_ban_peasant_one'].get_user_class_name(UC_PEASANT,false,false,true).$lang_settings['row_ban_peasant_two'],get_user_class_name(UC_PEASANT,false,true,true).$lang_settings['text_ban_peasant_note_one']."<input type='text' style=\"width: 50px\" name=deletepeasant value='".((isset($ACCOUNT["deletepeasant"])) ? $ACCOUNT["deletepeasant"] : 30 )."'>".$lang_settings['text_ban_peasant_note_two'], 1);
     $inputAlias = "0_alias";
 	tr($lang_settings['row_demoted_to_peasant_one'].get_user_class_name(UC_PEASANT,false,false,true).$lang_settings['row_demoted_to_peasant_two'],
-        $lang_settings['text_alias'] . "<input type='text' style=\"width: 60px\" name='".$inputAlias."' value='".(isset($ACCOUNT[$inputAlias]) ? $ACCOUNT[$inputAlias] : '' )."'><br/>"
+        $lang_settings['text_alias'] . "<input type='text' style=\"width: 60px\" name='".$inputAlias."' value='".((isset($ACCOUNT[$inputAlias])) ? $ACCOUNT[$inputAlias] : '' )."'><br/>"
         .$lang_settings['text_demoted_peasant_note_one'].get_user_class_name(UC_PEASANT,false,true,true).$lang_settings['text_demoted_peasant_note_two']."<br /><ul>
-		<li>".$lang_settings['text_downloaded_amount_larger_than']."<input type='text' style=\"width: 50px\" name=psdlone value='".(isset($ACCOUNT["psdlone"]) ? $ACCOUNT["psdlone"] : 50 )."'>".$lang_settings['text_and_ratio_below']."<input type='text' style=\"width: 50px\" name=psratioone value='".(isset($ACCOUNT["psratioone"]) ? $ACCOUNT["psratioone"] : 0.4 )."'>".$lang_settings['text_demote_peasant_default_one']."</li>
-		<li>".$lang_settings['text_downloaded_amount_larger_than']."<input type='text' style=\"width: 50px\" name=psdltwo value='".(isset($ACCOUNT["psdltwo"]) ? $ACCOUNT["psdltwo"] : 100 )."'>".$lang_settings['text_and_ratio_below']."<input type='text' style=\"width: 50px\" name=psratiotwo value='".(isset($ACCOUNT["psratiotwo"]) ? $ACCOUNT["psratiotwo"] : 0.5 )."'>".$lang_settings['text_demote_peasant_default_two']."</li>
-		<li>".$lang_settings['text_downloaded_amount_larger_than']."<input type='text' style=\"width: 50px\" name=psdlthree value='".(isset($ACCOUNT["psdlthree"]) ? $ACCOUNT["psdlthree"] : 200 )."'>".$lang_settings['text_and_ratio_below']."<input type='text' style=\"width: 50px\" name=psratiothree value='".(isset($ACCOUNT["psratiothree"]) ? $ACCOUNT["psratiothree"] : 0.6 )."'>".$lang_settings['text_demote_peasant_default_three']."</li>
-		<li>".$lang_settings['text_downloaded_amount_larger_than']."<input type='text' style=\"width: 50px\" name=psdlfour value='".(isset($ACCOUNT["psdlfour"]) ? $ACCOUNT["psdlfour"] : 400 )."'>".$lang_settings['text_and_ratio_below']."<input type='text' style=\"width: 50px\" name=psratiofour value='".(isset($ACCOUNT["psratiofour"]) ? $ACCOUNT["psratiofour"] : 0.7 )."'>".$lang_settings['text_demote_peasant_default_four']."</li>
-		<li>".$lang_settings['text_downloaded_amount_larger_than']."<input type='text' style=\"width: 50px\" name=psdlfive value='".(isset($ACCOUNT["psdlfive"]) ? $ACCOUNT["psdlfive"] : 800 )."'>".$lang_settings['text_and_ratio_below']."<input type='text' style=\"width: 50px\" name=psratiofive value='".(isset($ACCOUNT["psratiofive"]) ? $ACCOUNT["psratiofive"] : 0.8 )."'>".$lang_settings['text_demote_peasant_default_five']."</li>
+		<li>".$lang_settings['text_downloaded_amount_larger_than']."<input type='text' style=\"width: 50px\" name=psdlone value='".((isset($ACCOUNT["psdlone"])) ? $ACCOUNT["psdlone"] : 50 )."'>".$lang_settings['text_and_ratio_below']."<input type='text' style=\"width: 50px\" name=psratioone value='".((isset($ACCOUNT["psratioone"])) ? $ACCOUNT["psratioone"] : 0.4 )."'>".$lang_settings['text_demote_peasant_default_one']."</li>
+		<li>".$lang_settings['text_downloaded_amount_larger_than']."<input type='text' style=\"width: 50px\" name=psdltwo value='".((isset($ACCOUNT["psdltwo"])) ? $ACCOUNT["psdltwo"] : 100 )."'>".$lang_settings['text_and_ratio_below']."<input type='text' style=\"width: 50px\" name=psratiotwo value='".((isset($ACCOUNT["psratiotwo"])) ? $ACCOUNT["psratiotwo"] : 0.5 )."'>".$lang_settings['text_demote_peasant_default_two']."</li>
+		<li>".$lang_settings['text_downloaded_amount_larger_than']."<input type='text' style=\"width: 50px\" name=psdlthree value='".((isset($ACCOUNT["psdlthree"])) ? $ACCOUNT["psdlthree"] : 200 )."'>".$lang_settings['text_and_ratio_below']."<input type='text' style=\"width: 50px\" name=psratiothree value='".((isset($ACCOUNT["psratiothree"])) ? $ACCOUNT["psratiothree"] : 0.6 )."'>".$lang_settings['text_demote_peasant_default_three']."</li>
+		<li>".$lang_settings['text_downloaded_amount_larger_than']."<input type='text' style=\"width: 50px\" name=psdlfour value='".((isset($ACCOUNT["psdlfour"])) ? $ACCOUNT["psdlfour"] : 400 )."'>".$lang_settings['text_and_ratio_below']."<input type='text' style=\"width: 50px\" name=psratiofour value='".((isset($ACCOUNT["psratiofour"])) ? $ACCOUNT["psratiofour"] : 0.7 )."'>".$lang_settings['text_demote_peasant_default_four']."</li>
+		<li>".$lang_settings['text_downloaded_amount_larger_than']."<input type='text' style=\"width: 50px\" name=psdlfive value='".((isset($ACCOUNT["psdlfive"])) ? $ACCOUNT["psdlfive"] : 800 )."'>".$lang_settings['text_and_ratio_below']."<input type='text' style=\"width: 50px\" name=psratiofive value='".((isset($ACCOUNT["psratiofive"])) ? $ACCOUNT["psratiofive"] : 0.8 )."'>".$lang_settings['text_demote_peasant_default_five']."</li>
 		</ul><br />".$lang_settings['text_demote_peasant_note'], 1);
 
     $inputAlias = "1_alias";
     tr($lang_settings['row_default_user_one'].get_user_class_name(UC_USER,false,false,true).$lang_settings['row_default_user_two'],
-        $lang_settings['text_alias'] . "<input type='text' style=\"width: 60px\" name='".$inputAlias."' value='".(isset($ACCOUNT[$inputAlias]) ? $ACCOUNT[$inputAlias] : '' )."'>", 1);
+        $lang_settings['text_alias'] . "<input type='text' style=\"width: 60px\" name='".$inputAlias."' value='".((isset($ACCOUNT[$inputAlias])) ? $ACCOUNT[$inputAlias] : '' )."'>", 1);
 
 	function promotion_criteria($class, $input, $time, $dl, $prratio, $deratio, $defaultInvites=0, $defaultSeedPoints = 0, $defaultAlias = ''){
-		global $lang_settings;
-		global $ACCOUNT;
+$lang_settings = (array) (\App\Support\SupportContext::getGlobal('lang_settings') ?? []);
+$ACCOUNT = \App\Support\SupportContext::getGlobal('ACCOUNT');
 		$inputtime = $input."time";
 		$inputdl = $input."dl";
 		$inputprratio = $input."prratio";
 		$inputderatio = $input."deratio";
 		$inputSeedPoints = $class . "_min_seed_points";
 		$inputAlias = $class . "_alias";
-		if (!isset($class))
+		if (!(isset($class)))
 			return;
 		$x = $lang_settings['row_promote_to_one'].get_user_class_name($class,false,false,true).$lang_settings['row_promote_to_two'];
-		$y = $lang_settings['text_alias'] . "<input type='text' style=\"width: 60px\" name='".$inputAlias."' value='".(isset($ACCOUNT[$inputAlias]) ? $ACCOUNT[$inputAlias] : $defaultAlias )."'><br/>"
-		    .$lang_settings['text_member_longer_than']."<input type='text' style=\"width: 50px\" name='".$inputtime."' value='".(isset($ACCOUNT[$inputtime]) ? $ACCOUNT[$inputtime] : $time )."'>"
-            .$lang_settings['text_seed_points_more_than']."<input type='text' style=\"width: 60px\" name='".$inputSeedPoints."' value='".(isset($ACCOUNT[$inputSeedPoints]) ? $ACCOUNT[$inputSeedPoints] : $defaultSeedPoints )."'>"
-            .$lang_settings['text_downloaded_more_than']."<input type='text' style=\"width: 50px\" name='".$inputdl."' value='".(isset($ACCOUNT[$inputdl]) ? $ACCOUNT[$inputdl] : $dl )."'>"
-            .$lang_settings['text_with_ratio_above']."<input type='text' style=\"width: 50px\" name='".$inputprratio."' value='".(isset($ACCOUNT[$inputprratio]) ? $ACCOUNT[$inputprratio] : $prratio )."'>"
+		$y = $lang_settings['text_alias'] . "<input type='text' style=\"width: 60px\" name='".$inputAlias."' value='".((isset($ACCOUNT[$inputAlias])) ? $ACCOUNT[$inputAlias] : $defaultAlias )."'><br/>"
+		    .$lang_settings['text_member_longer_than']."<input type='text' style=\"width: 50px\" name='".$inputtime."' value='".((isset($ACCOUNT[$inputtime])) ? $ACCOUNT[$inputtime] : $time )."'>"
+            .$lang_settings['text_seed_points_more_than']."<input type='text' style=\"width: 60px\" name='".$inputSeedPoints."' value='".((isset($ACCOUNT[$inputSeedPoints])) ? $ACCOUNT[$inputSeedPoints] : $defaultSeedPoints )."'>"
+            .$lang_settings['text_downloaded_more_than']."<input type='text' style=\"width: 50px\" name='".$inputdl."' value='".((isset($ACCOUNT[$inputdl])) ? $ACCOUNT[$inputdl] : $dl )."'>"
+            .$lang_settings['text_with_ratio_above']."<input type='text' style=\"width: 50px\" name='".$inputprratio."' value='".((isset($ACCOUNT[$inputprratio])) ? $ACCOUNT[$inputprratio] : $prratio )."'>"
             .$lang_settings['text_be_promoted_to'].get_user_class_name($class,false,true,true).$lang_settings['text_promote_to_default_one']."'".$time."', '".$dl."', '".$defaultSeedPoints."', '".$prratio."'.<br />"
-            .$lang_settings['text_demote_with_ratio_below']."<input type='text' style=\"width: 50px\" name='".$inputderatio."' value='".(isset($ACCOUNT[$inputderatio]) ? $ACCOUNT[$inputderatio] : $deratio )."'>".$lang_settings['text_promote_to_default_two']."'".$deratio."'.<br />"
-            .$lang_settings['text_users_get']."<input type='text' style=\"width: 50px\" name='getInvitesByPromotion[".$class."]' value='".(isset($ACCOUNT['getInvitesByPromotion'][$class]) ? $ACCOUNT['getInvitesByPromotion'][$class] : $defaultInvites )."'>".$lang_settings['text_invitations_default']."'".$defaultInvites."'.";
+            .$lang_settings['text_demote_with_ratio_below']."<input type='text' style=\"width: 50px\" name='".$inputderatio."' value='".((isset($ACCOUNT[$inputderatio])) ? $ACCOUNT[$inputderatio] : $deratio )."'>".$lang_settings['text_promote_to_default_two']."'".$deratio."'.<br />"
+            .$lang_settings['text_users_get']."<input type='text' style=\"width: 50px\" name='getInvitesByPromotion[".$class."]' value='".((isset($ACCOUNT['getInvitesByPromotion'][$class])) ? $ACCOUNT['getInvitesByPromotion'][$class] : $defaultInvites )."'>".$lang_settings['text_invitations_default']."'".$defaultInvites."'.";
 
 		tr($x, $y, 1);
 	}
@@ -685,7 +688,7 @@ elseif ($action == 'torrentsettings')
 	$TORRENT = get_setting_from_db('torrent');
 	stdhead($lang_settings['head_torrent_settings']);
 	print ($notice);
-	print ("<form method='post' action='".$_SERVER["SCRIPT_NAME"]."'><input type='hidden' name='action' value='savesettings_torrent'>");
+	print ("<form method='post' action='".$__server_SCRIPT_NAME."'><input type='hidden' name='action' value='savesettings_torrent'>");
 
     tr($lang_settings['row_sticky_first_level_background_color'],"<input type='text' name=sticky_first_level_background_color style=\"width: 100px\" value={$TORRENT['sticky_first_level_background_color']}> ".$lang_settings['text_sticky_first_level_background_color_note'], 1);
     tr($lang_settings['row_sticky_second_level_background_color'],"<input type='text' name=sticky_second_level_background_color style=\"width: 100px\" value={$TORRENT['sticky_second_level_background_color']}> ".$lang_settings['text_sticky_second_level_background_color_note'], 1);
@@ -710,31 +713,31 @@ elseif ($action == 'torrentsettings')
     tr($lang_settings['row_reward_times_limit'],"<input type='number' name=reward_times_limit style=\"width: 100px\" value={$TORRENT['reward_times_limit']}> ".$lang_settings['text_reward_times_limit_note'], 1);
 
 //    yesorno($lang_settings['row_promotion_rules'], 'prorules', $TORRENT["prorules"], $lang_settings['text_promotion_rules_note']);
-	tr($lang_settings['row_random_promotion'], $lang_settings['text_random_promotion_note_one']."<ul><li><input type='text' style=\"width: 50px\" name=randomhalfleech value='".(isset($TORRENT["randomhalfleech"]) ? $TORRENT["randomhalfleech"] : 5 )."'>".$lang_settings['text_halfleech_chance_becoming']."</li><li><input type='text' style=\"width: 50px\" name=randomfree value='".(isset($TORRENT["randomfree"]) ? $TORRENT["randomfree"] : 2 )."'>".$lang_settings['text_free_chance_becoming']."</li><li><input type='text' style=\"width: 50px\" name=randomtwoup value='".(isset($TORRENT["randomtwoup"]) ? $TORRENT["randomtwoup"] : 2 )."'>".$lang_settings['text_twoup_chance_becoming']."</li><li><input type='text' style=\"width: 50px\" name=randomtwoupfree value='".(isset($TORRENT["randomtwoupfree"]) ? $TORRENT["randomtwoupfree"] : 1 )."'>".$lang_settings['text_freetwoup_chance_becoming']."</li><li><input type='text' style=\"width: 50px\" name=randomtwouphalfdown value='".(isset($TORRENT["randomtwouphalfdown"]) ? $TORRENT["randomtwouphalfdown"] : 0 )."'>".$lang_settings['text_twouphalfleech_chance_becoming']."</li><li><input type='text' style=\"width: 50px\" name=randomthirtypercentdown value='".(isset($TORRENT["randomthirtypercentdown"]) ? $TORRENT["randomthirtypercentdown"] : 0 )."'>".$lang_settings['text_thirtypercentleech_chance_becoming']."</li></ul>".$lang_settings['text_random_promotion_note_two'], 1);
-	tr($lang_settings['row_large_torrent_promotion'], $lang_settings['text_torrent_larger_than']."<input type='text' style=\"width: 50px\" name=largesize value='".(isset($TORRENT["largesize"]) ? $TORRENT["largesize"] : 20 )."'>".$lang_settings['text_gb_promoted_to']."<select name=largepro>".promotion_selection((isset($TORRENT['largepro']) ? $TORRENT['largepro'] : 2), 1)."</select>".$lang_settings['text_by_system_upon_uploading']."<br />".$lang_settings['text_large_torrent_promotion_note'], 1);
+	tr($lang_settings['row_random_promotion'], $lang_settings['text_random_promotion_note_one']."<ul><li><input type='text' style=\"width: 50px\" name=randomhalfleech value='".((isset($TORRENT["randomhalfleech"])) ? $TORRENT["randomhalfleech"] : 5 )."'>".$lang_settings['text_halfleech_chance_becoming']."</li><li><input type='text' style=\"width: 50px\" name=randomfree value='".((isset($TORRENT["randomfree"])) ? $TORRENT["randomfree"] : 2 )."'>".$lang_settings['text_free_chance_becoming']."</li><li><input type='text' style=\"width: 50px\" name=randomtwoup value='".((isset($TORRENT["randomtwoup"])) ? $TORRENT["randomtwoup"] : 2 )."'>".$lang_settings['text_twoup_chance_becoming']."</li><li><input type='text' style=\"width: 50px\" name=randomtwoupfree value='".((isset($TORRENT["randomtwoupfree"])) ? $TORRENT["randomtwoupfree"] : 1 )."'>".$lang_settings['text_freetwoup_chance_becoming']."</li><li><input type='text' style=\"width: 50px\" name=randomtwouphalfdown value='".((isset($TORRENT["randomtwouphalfdown"])) ? $TORRENT["randomtwouphalfdown"] : 0 )."'>".$lang_settings['text_twouphalfleech_chance_becoming']."</li><li><input type='text' style=\"width: 50px\" name=randomthirtypercentdown value='".((isset($TORRENT["randomthirtypercentdown"])) ? $TORRENT["randomthirtypercentdown"] : 0 )."'>".$lang_settings['text_thirtypercentleech_chance_becoming']."</li></ul>".$lang_settings['text_random_promotion_note_two'], 1);
+	tr($lang_settings['row_large_torrent_promotion'], $lang_settings['text_torrent_larger_than']."<input type='text' style=\"width: 50px\" name=largesize value='".((isset($TORRENT["largesize"])) ? $TORRENT["largesize"] : 20 )."'>".$lang_settings['text_gb_promoted_to']."<select name=largepro>".promotion_selection(((isset($TORRENT['largepro'])) ? $TORRENT['largepro'] : 2), 1)."</select>".$lang_settings['text_by_system_upon_uploading']."<br />".$lang_settings['text_large_torrent_promotion_note'], 1);
 	tr($lang_settings['row_promotion_timeout'], $lang_settings['text_promotion_timeout_note_one']."<ul>
-<li>".$lang_settings['text_halfleech_will_become']."<select name=halfleechbecome>".promotion_selection((isset($TORRENT['halfleechbecome']) ? $TORRENT['halfleechbecome'] : 1), 5)."</select>".$lang_settings['text_after']."<input type='text' style=\"width: 50px\" name=expirehalfleech value='".(isset($TORRENT["expirehalfleech"]) ? $TORRENT["expirehalfleech"] : 150 )."'>".$lang_settings['text_halfleech_timeout_default']."</li>
+<li>".$lang_settings['text_halfleech_will_become']."<select name=halfleechbecome>".promotion_selection(((isset($TORRENT['halfleechbecome'])) ? $TORRENT['halfleechbecome'] : 1), 5)."</select>".$lang_settings['text_after']."<input type='text' style=\"width: 50px\" name=expirehalfleech value='".((isset($TORRENT["expirehalfleech"])) ? $TORRENT["expirehalfleech"] : 150 )."'>".$lang_settings['text_halfleech_timeout_default']."</li>
 
-<li>".$lang_settings['text_free_will_become']."<select name=freebecome>".promotion_selection((isset($TORRENT['freebecome']) ? $TORRENT['freebecome'] : 1), 2)."</select>".$lang_settings['text_after']."<input type='text' style=\"width: 50px\" name=expirefree value='".(isset($TORRENT["expirefree"]) ? $TORRENT["expirefree"] : 60 )."'>".$lang_settings['text_free_timeout_default']."</li>
+<li>".$lang_settings['text_free_will_become']."<select name=freebecome>".promotion_selection(((isset($TORRENT['freebecome'])) ? $TORRENT['freebecome'] : 1), 2)."</select>".$lang_settings['text_after']."<input type='text' style=\"width: 50px\" name=expirefree value='".((isset($TORRENT["expirefree"])) ? $TORRENT["expirefree"] : 60 )."'>".$lang_settings['text_free_timeout_default']."</li>
 
-<li>".$lang_settings['text_twoup_will_become']."<select name=twoupbecome>".promotion_selection((isset($TORRENT['twoupbecome']) ? $TORRENT['twoupbecome'] : 1), 3)."</select>".$lang_settings['text_after']."<input type='text' style=\"width: 50px\" name=expiretwoup value='".(isset($TORRENT["expiretwoup"]) ? $TORRENT["expiretwoup"] : 60 )."'>".$lang_settings['text_twoup_timeout_default']."</li>
+<li>".$lang_settings['text_twoup_will_become']."<select name=twoupbecome>".promotion_selection(((isset($TORRENT['twoupbecome'])) ? $TORRENT['twoupbecome'] : 1), 3)."</select>".$lang_settings['text_after']."<input type='text' style=\"width: 50px\" name=expiretwoup value='".((isset($TORRENT["expiretwoup"])) ? $TORRENT["expiretwoup"] : 60 )."'>".$lang_settings['text_twoup_timeout_default']."</li>
 
-<li>".$lang_settings['text_freetwoup_will_become']."<select name=twoupfreebecome>".promotion_selection((isset($TORRENT['twoupfreebecome']) ? $TORRENT['twoupfreebecome'] : 1), 4)."</select>".$lang_settings['text_after']."<input type='text' style=\"width: 50px\" name=expiretwoupfree value='".(isset($TORRENT["expiretwoupfree"]) ? $TORRENT["expiretwoupfree"] : 30 )."'>".$lang_settings['text_freetwoup_timeout_default']."</li>
+<li>".$lang_settings['text_freetwoup_will_become']."<select name=twoupfreebecome>".promotion_selection(((isset($TORRENT['twoupfreebecome'])) ? $TORRENT['twoupfreebecome'] : 1), 4)."</select>".$lang_settings['text_after']."<input type='text' style=\"width: 50px\" name=expiretwoupfree value='".((isset($TORRENT["expiretwoupfree"])) ? $TORRENT["expiretwoupfree"] : 30 )."'>".$lang_settings['text_freetwoup_timeout_default']."</li>
 
-<li>".$lang_settings['text_halfleechtwoup_will_become']."<select name=twouphalfleechbecome>".promotion_selection((isset($TORRENT['twouphalfleechbecome']) ? $TORRENT['twouphalfleechbecome'] : 1), 6)."</select>".$lang_settings['text_after']."<input type='text' style=\"width: 50px\" name=expiretwouphalfleech value='".(isset($TORRENT["expiretwouphalfleech"]) ? $TORRENT["expiretwouphalfleech"] : 30 )."'>".$lang_settings['text_halfleechtwoup_timeout_default']."</li>
+<li>".$lang_settings['text_halfleechtwoup_will_become']."<select name=twouphalfleechbecome>".promotion_selection(((isset($TORRENT['twouphalfleechbecome'])) ? $TORRENT['twouphalfleechbecome'] : 1), 6)."</select>".$lang_settings['text_after']."<input type='text' style=\"width: 50px\" name=expiretwouphalfleech value='".((isset($TORRENT["expiretwouphalfleech"])) ? $TORRENT["expiretwouphalfleech"] : 30 )."'>".$lang_settings['text_halfleechtwoup_timeout_default']."</li>
 
-<li>".$lang_settings['text_thirtypercentleech_will_become']."<select name=thirtypercentleechbecome>".promotion_selection((isset($TORRENT['thirtypercentleechbecome']) ? $TORRENT['thirtypercentleechbecome'] : 1), 7)."</select>".$lang_settings['text_after']."<input type='text' style=\"width: 50px\" name=expirethirtypercentleech value='".(isset($TORRENT["expirethirtypercentleech"]) ? $TORRENT["expirethirtypercentleech"] : 30 )."'>".$lang_settings['text_thirtypercentleech_timeout_default']."</li>
+<li>".$lang_settings['text_thirtypercentleech_will_become']."<select name=thirtypercentleechbecome>".promotion_selection(((isset($TORRENT['thirtypercentleechbecome'])) ? $TORRENT['thirtypercentleechbecome'] : 1), 7)."</select>".$lang_settings['text_after']."<input type='text' style=\"width: 50px\" name=expirethirtypercentleech value='".((isset($TORRENT["expirethirtypercentleech"])) ? $TORRENT["expirethirtypercentleech"] : 30 )."'>".$lang_settings['text_thirtypercentleech_timeout_default']."</li>
 
-<li>".$lang_settings['text_normal_will_become']."<select name=normalbecome>".promotion_selection((isset($TORRENT['normalbecome']) ? $TORRENT['normalbecome'] : 1), 0)."</select>".$lang_settings['text_after']."<input type='text' style=\"width: 50px\" name=expirenormal value='".(isset($TORRENT["expirenormal"]) ? $TORRENT["expirenormal"] : 0 )."'>".$lang_settings['text_normal_timeout_default']."</li>
+<li>".$lang_settings['text_normal_will_become']."<select name=normalbecome>".promotion_selection(((isset($TORRENT['normalbecome'])) ? $TORRENT['normalbecome'] : 1), 0)."</select>".$lang_settings['text_after']."<input type='text' style=\"width: 50px\" name=expirenormal value='".((isset($TORRENT["expirenormal"])) ? $TORRENT["expirenormal"] : 0 )."'>".$lang_settings['text_normal_timeout_default']."</li>
 
 </ul>".$lang_settings['text_promotion_timeout_note_two'], 1);
 
 
     do_action('setting_fields', $TORRENT);
 
-	tr($lang_settings['row_auto_pick_hot'], $lang_settings['text_torrents_uploaded_within']."<input type='text' style=\"width: 50px\" name=hotdays value='".(isset($TORRENT["hotdays"]) ? $TORRENT["hotdays"] : 7 )."'>".$lang_settings['text_days_with_more_than']."<input type='text' style=\"width: 50px\" name=hotseeder value='".(isset($TORRENT["hotseeder"]) ? $TORRENT["hotseeder"] : 10 )."'>".$lang_settings['text_be_picked_as_hot']."<br />".$lang_settings['text_auto_pick_hot_default'], 1);
-	tr($lang_settings['row_uploader_get_double'], $lang_settings['text_torrent_uploader_gets']."<input type='text' style=\"width: 50px\" name=uploaderdouble value='".(isset($TORRENT["uploaderdouble"]) ? $TORRENT["uploaderdouble"] : 1 )."'>".$lang_settings['text_times_uploading_credit'].$lang_settings['text_uploader_get_double_default'], 1);
-	tr($lang_settings['row_delete_dead_torrents'], $lang_settings['text_torrents_being_dead_for']."<input type='text' style=\"width: 50px\" name=deldeadtorrent value='".(isset($TORRENT["deldeadtorrent"]) ? $TORRENT["deldeadtorrent"] : 0 )."'>".$lang_settings['text_days_be_deleted']."<br />".$lang_settings['row_delete_dead_torrents_note'], 1);
+	tr($lang_settings['row_auto_pick_hot'], $lang_settings['text_torrents_uploaded_within']."<input type='text' style=\"width: 50px\" name=hotdays value='".((isset($TORRENT["hotdays"])) ? $TORRENT["hotdays"] : 7 )."'>".$lang_settings['text_days_with_more_than']."<input type='text' style=\"width: 50px\" name=hotseeder value='".((isset($TORRENT["hotseeder"])) ? $TORRENT["hotseeder"] : 10 )."'>".$lang_settings['text_be_picked_as_hot']."<br />".$lang_settings['text_auto_pick_hot_default'], 1);
+	tr($lang_settings['row_uploader_get_double'], $lang_settings['text_torrent_uploader_gets']."<input type='text' style=\"width: 50px\" name=uploaderdouble value='".((isset($TORRENT["uploaderdouble"])) ? $TORRENT["uploaderdouble"] : 1 )."'>".$lang_settings['text_times_uploading_credit'].$lang_settings['text_uploader_get_double_default'], 1);
+	tr($lang_settings['row_delete_dead_torrents'], $lang_settings['text_torrents_being_dead_for']."<input type='text' style=\"width: 50px\" name=deldeadtorrent value='".((isset($TORRENT["deldeadtorrent"])) ? $TORRENT["deldeadtorrent"] : 0 )."'>".$lang_settings['text_days_be_deleted']."<br />".$lang_settings['row_delete_dead_torrents_note'], 1);
 	tr($lang_settings['row_save_settings'],"<input type='submit' name='save' value='".$lang_settings['submit_save_settings']."'>", 1);
 	print ("</form>");
 }
@@ -743,7 +746,7 @@ elseif ($action == 'mainsettings')	// main settings
 	$MAIN = get_setting_from_db('main');
 	stdhead($lang_settings['head_main_settings']);
 	print ($notice);
-	print ("<form method='post' action='".$_SERVER["SCRIPT_NAME"]."'><input type='hidden' name='action' value='savesettings_main'>");
+	print ("<form method='post' action='".$__server_SCRIPT_NAME."'><input type='hidden' name='action' value='savesettings_main'>");
 	$sh = "gmail.com";
 
 	yesorno($lang_settings['row_site_online'], 'site_online', $MAIN['site_online'], $lang_settings['text_site_online_note']);
@@ -841,12 +844,12 @@ JS;
 	tr($lang_settings['row_cleanup_interval'], $lang_settings['text_cleanup_interval_note_one']."<br /><ul><li>".$lang_settings['text_priority_one']."<input type='text' style=\"width: 100px\" name=autoclean_interval_one value='".($MAIN["autoclean_interval_one"] ? $MAIN["autoclean_interval_one"] : 900)."'> ".$lang_settings['text_priority_one_note']."</li><li>".$lang_settings['text_priority_two']."<input type='text' style=\"width: 100px\" name=autoclean_interval_two value='".($MAIN["autoclean_interval_two"] ? $MAIN["autoclean_interval_two"] : 1800)."'> ".$lang_settings['text_priority_two_note']."</li><li>".$lang_settings['text_priority_three']."<input type='text' style=\"width: 100px\" name=autoclean_interval_three value='".($MAIN["autoclean_interval_three"] ? $MAIN["autoclean_interval_three"] : 3600)."'> ".$lang_settings['text_priority_three_note']."</li><li>".$lang_settings['text_priority_four']."<input type='text' style=\"width: 100px\" name=autoclean_interval_four value='".($MAIN["autoclean_interval_four"] ? $MAIN["autoclean_interval_four"] : 43200)."'> ".$lang_settings['text_priority_four_note']."</li><li>".$lang_settings['text_priority_five']."<input type='text' style=\"width: 100px\" name=autoclean_interval_five value='".($MAIN["autoclean_interval_five"] ? $MAIN["autoclean_interval_five"] : 648000)."'> ".$lang_settings['text_priority_five_note']."</li></ul>".$lang_settings['text_cleanup_interval_note_two'], 1);
 	tr($lang_settings['row_signup_timeout'],"<input type='text' style=\"width: 100px\" name=signup_timeout value='".($MAIN["signup_timeout"] ? $MAIN["signup_timeout"] : 259200)."'> ".$lang_settings['text_signup_timeout_note'], 1);
 	tr($lang_settings['row_min_offer_votes'],"<input type='text' style=\"width: 100px\" name=minoffervotes value='".($MAIN["minoffervotes"] ? $MAIN["minoffervotes"] : 15)."'> ".$lang_settings['text_min_offer_votes_note'], 1);
-	tr($lang_settings['row_offer_vote_timeout'],"<input type='text' style=\"width: 100px\" name=offervotetimeout value='".(isset($MAIN["offervotetimeout"]) ? $MAIN["offervotetimeout"] : 259200)."'> ".$lang_settings['text_offer_vote_timeout_note'], 1);
-	tr($lang_settings['row_offer_upload_timeout'],"<input type='text' style=\"width: 100px\" name=offeruptimeout value='".(isset($MAIN["offeruptimeout"]) ? $MAIN["offeruptimeout"] : 86400)."'> ".$lang_settings['text_offer_upload_timeout_note'], 1);
+	tr($lang_settings['row_offer_vote_timeout'],"<input type='text' style=\"width: 100px\" name=offervotetimeout value='".((isset($MAIN["offervotetimeout"])) ? $MAIN["offervotetimeout"] : 259200)."'> ".$lang_settings['text_offer_vote_timeout_note'], 1);
+	tr($lang_settings['row_offer_upload_timeout'],"<input type='text' style=\"width: 100px\" name=offeruptimeout value='".((isset($MAIN["offeruptimeout"])) ? $MAIN["offeruptimeout"] : 86400)."'> ".$lang_settings['text_offer_upload_timeout_note'], 1);
 	tr($lang_settings['row_offer_skip_approved_count'],"<input type='text' style=\"width: 100px\" name=offer_skip_approved_count value='".($MAIN["offer_skip_approved_count"] ?? '')."'> ".$lang_settings['text_offer_skip_approved_count_note'], 1);
 	tr($lang_settings['row_upload_deny_approval_deny_count'],"<input type='text' style=\"width: 100px\" name=upload_deny_approval_deny_count value='".($MAIN["upload_deny_approval_deny_count"] ?? '')."'> ".$lang_settings['text_upload_deny_approval_deny_count_note'], 1);
 
-	tr($lang_settings['row_max_subtitle_size'],"<input type='text' style=\"width: 100px\" name=maxsubsize value='".(isset($MAIN["maxsubsize"]) ? $MAIN["maxsubsize"] : 3145728)."'> ". $lang_settings['text_max_subtitle_size_note'], 1);
+	tr($lang_settings['row_max_subtitle_size'],"<input type='text' style=\"width: 100px\" name=maxsubsize value='".((isset($MAIN["maxsubsize"])) ? $MAIN["maxsubsize"] : 3145728)."'> ". $lang_settings['text_max_subtitle_size_note'], 1);
 	tr($lang_settings['row_posts_per_page'],"<input type='text' style=\"width: 100px\" name=postsperpage value='".($MAIN["postsperpage"] ? $MAIN["postsperpage"] : 10)."'> ".$lang_settings['text_posts_per_page_note'], 1);
 	tr($lang_settings['row_topics_per_page'],"<input type='text' style=\"width: 100px\" name=topicsperpage value='".($MAIN["topicsperpage"] ? $MAIN["topicsperpage"] : 20)."'> ".$lang_settings['text_topics_per_page_note'], 1);
 	tr($lang_settings['row_torrents_per_page'],"<input type='text' style=\"width: 100px\" name=torrentsperpage value='".($MAIN["torrentsperpage"] ? $MAIN["torrentsperpage"] : 50)."'> ".$lang_settings['text_torrents_per_page_note'], 1);
@@ -873,7 +876,7 @@ elseif ($action == 'miscsettings')
     $misc = $result['misc'] ?? [];
     stdhead($lang_settings['head_torrent_settings']);
     print ($notice);
-    print ("<form method='post' action='".$_SERVER["SCRIPT_NAME"]."'><input type='hidden' name='action' value='savesettings_misc'>");
+    print ("<form method='post' action='".$__server_SCRIPT_NAME."'><input type='hidden' name='action' value='savesettings_misc'>");
     tr($lang_settings['row_misc_donation_custom'],"<textarea cols=\"100\"  rows=\"10\" name='donation_custom'>".($misc['donation_custom'] ?? '')."</textarea><br/>".$lang_settings['text_donation_custom_note'], 1);
 	tr($lang_settings['row_protected_forum'], "<input type='text' style=\"width: 100px\" name='protected_forum' value='".($misc["protected_forum"] ??'')."'> ".$lang_settings['text_protected_forum'], 1);
 	tr($lang_settings['row_save_settings'],"<input type='submit' name='save' value='".$lang_settings['submit_save_settings']."'>", 1);
@@ -883,18 +886,18 @@ elseif ($action == 'showmenu')	// settings main page
 {
 	stdhead($lang_settings['head_website_settings']);
 	print ($notice);
-	tr($lang_settings['row_basic_settings'], "<form method='post' action='".$_SERVER["SCRIPT_NAME"]."'><input type='hidden' name='action' value='basicsettings'><input type='submit' value=\"".$lang_settings['submit_basic_settings']."\"> ".$lang_settings['text_basic_settings_note']."</form>", 1);
-	tr($lang_settings['row_main_settings'], "<form method='post' action='".$_SERVER["SCRIPT_NAME"]."'><input type='hidden' name='action' value='mainsettings'><input type='submit' value=\"".$lang_settings['submit_main_settings']."\"> ".$lang_settings['text_main_settings_note']."</form>", 1);
-	tr($lang_settings['row_smtp_settings'], "<form method='post' action='".$_SERVER["SCRIPT_NAME"]."'><input type='hidden' name='action' value='smtpsettings'><input type='submit' value=\"".$lang_settings['submit_smtp_settings']."\"> ".$lang_settings['text_smtp_settings_note']."</form>", 1);
-	tr($lang_settings['row_security_settings'],"<form method='post' action='".$_SERVER["SCRIPT_NAME"]."'><input type='hidden' name='action' value='securitysettings'><input type='submit' value=\"".$lang_settings['submit_security_settings']."\"> ".$lang_settings['text_security_settings_note']."</form>", 1);
-	tr($lang_settings['row_authority_settings'],"<form method='post' action='".$_SERVER["SCRIPT_NAME"]."'><input type='hidden' name='action' value='authoritysettings'><input type='submit' value=\"".$lang_settings['submit_authority_settings']."\"> ".$lang_settings['text_authority_settings_note']."</form>", 1);
-	tr($lang_settings['row_tweak_settings'],"<form method='post' action='".$_SERVER["SCRIPT_NAME"]."'><input type='hidden' name='action' value='tweaksettings'><input type='submit' value=\"".$lang_settings['submit_tweak_settings']."\"> ".$lang_settings['text_tweak_settings_note']."</form>", 1);
-	tr($lang_settings['row_bonus_settings'], "<form method='post' action='".$_SERVER["SCRIPT_NAME"]."'><input type='hidden' name='action' value='bonussettings'><input type='submit' value=\"".$lang_settings['submit_bonus_settings']."\"> ".$lang_settings['text_bonus_settings_note']."</form>", 1);
-	tr($lang_settings['row_account_settings'], "<form method='post' action='".$_SERVER["SCRIPT_NAME"]."'><input type='hidden' name='action' value='accountsettings'><input type='submit' value=\"".$lang_settings['submit_account_settings']."\"> ".$lang_settings['text_account_settings_settings']."</form>", 1);
-	tr($lang_settings['row_torrents_settings'], "<form method='post' action='".$_SERVER["SCRIPT_NAME"]."'><input type='hidden' name='action' value='torrentsettings'><input type='submit' value=\"".$lang_settings['submit_torrents_settings']."\"> ".$lang_settings['text_torrents_settings_note']."</form>", 1);
-	tr($lang_settings['row_attachment_settings'], "<form method='post' action='".$_SERVER["SCRIPT_NAME"]."'><input type='hidden' name='action' value='attachmentsettings'><input type='submit' value=\"".$lang_settings['submit_attachment_settings']."\"> ".$lang_settings['text_attachment_settings_note']."</form>", 1);
-	tr($lang_settings['row_misc_settings'], "<form method='post' action='".$_SERVER["SCRIPT_NAME"]."'><input type='hidden' name='action' value='miscsettings'><input type='submit' value=\"".$lang_settings['submit_misc_settings']."\"> ".$lang_settings['text_misc_settings_note']."</form>", 1);
-//	tr($lang_settings['row_code_settings'], "<form method='post' action='".$_SERVER["SCRIPT_NAME"]."'><input type='hidden' name='action' value='codesettings'><input type='submit' value=\"".$lang_settings['submit_code_settings']."\"> ".$lang_settings['text_code_settings_note']."</form>", 1);
+	tr($lang_settings['row_basic_settings'], "<form method='post' action='".$__server_SCRIPT_NAME."'><input type='hidden' name='action' value='basicsettings'><input type='submit' value=\"".$lang_settings['submit_basic_settings']."\"> ".$lang_settings['text_basic_settings_note']."</form>", 1);
+	tr($lang_settings['row_main_settings'], "<form method='post' action='".$__server_SCRIPT_NAME."'><input type='hidden' name='action' value='mainsettings'><input type='submit' value=\"".$lang_settings['submit_main_settings']."\"> ".$lang_settings['text_main_settings_note']."</form>", 1);
+	tr($lang_settings['row_smtp_settings'], "<form method='post' action='".$__server_SCRIPT_NAME."'><input type='hidden' name='action' value='smtpsettings'><input type='submit' value=\"".$lang_settings['submit_smtp_settings']."\"> ".$lang_settings['text_smtp_settings_note']."</form>", 1);
+	tr($lang_settings['row_security_settings'],"<form method='post' action='".$__server_SCRIPT_NAME."'><input type='hidden' name='action' value='securitysettings'><input type='submit' value=\"".$lang_settings['submit_security_settings']."\"> ".$lang_settings['text_security_settings_note']."</form>", 1);
+	tr($lang_settings['row_authority_settings'],"<form method='post' action='".$__server_SCRIPT_NAME."'><input type='hidden' name='action' value='authoritysettings'><input type='submit' value=\"".$lang_settings['submit_authority_settings']."\"> ".$lang_settings['text_authority_settings_note']."</form>", 1);
+	tr($lang_settings['row_tweak_settings'],"<form method='post' action='".$__server_SCRIPT_NAME."'><input type='hidden' name='action' value='tweaksettings'><input type='submit' value=\"".$lang_settings['submit_tweak_settings']."\"> ".$lang_settings['text_tweak_settings_note']."</form>", 1);
+	tr($lang_settings['row_bonus_settings'], "<form method='post' action='".$__server_SCRIPT_NAME."'><input type='hidden' name='action' value='bonussettings'><input type='submit' value=\"".$lang_settings['submit_bonus_settings']."\"> ".$lang_settings['text_bonus_settings_note']."</form>", 1);
+	tr($lang_settings['row_account_settings'], "<form method='post' action='".$__server_SCRIPT_NAME."'><input type='hidden' name='action' value='accountsettings'><input type='submit' value=\"".$lang_settings['submit_account_settings']."\"> ".$lang_settings['text_account_settings_settings']."</form>", 1);
+	tr($lang_settings['row_torrents_settings'], "<form method='post' action='".$__server_SCRIPT_NAME."'><input type='hidden' name='action' value='torrentsettings'><input type='submit' value=\"".$lang_settings['submit_torrents_settings']."\"> ".$lang_settings['text_torrents_settings_note']."</form>", 1);
+	tr($lang_settings['row_attachment_settings'], "<form method='post' action='".$__server_SCRIPT_NAME."'><input type='hidden' name='action' value='attachmentsettings'><input type='submit' value=\"".$lang_settings['submit_attachment_settings']."\"> ".$lang_settings['text_attachment_settings_note']."</form>", 1);
+	tr($lang_settings['row_misc_settings'], "<form method='post' action='".$__server_SCRIPT_NAME."'><input type='hidden' name='action' value='miscsettings'><input type='submit' value=\"".$lang_settings['submit_misc_settings']."\"> ".$lang_settings['text_misc_settings_note']."</form>", 1);
+//	tr($lang_settings['row_code_settings'], "<form method='post' action='".$__server_SCRIPT_NAME."'><input type='hidden' name='action' value='codesettings'><input type='submit' value=\"".$lang_settings['submit_code_settings']."\"> ".$lang_settings['text_code_settings_note']."</form>", 1);
 }
 print("</table>");
 stdfoot();

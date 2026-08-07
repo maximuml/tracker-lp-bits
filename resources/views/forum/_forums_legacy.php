@@ -6,11 +6,15 @@ extract($context, EXTR_SKIP);
 // and null-to-string coercions behave as they did outside Laravel.
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
+
+$__server_REQUEST_URI = \App\Support\SupportContext::getServerValue('REQUEST_URI');
 // ------------- start: functions ------------------//
 //print forum stats
 function forum_stats ()
 {
-	global $lang_forums, $Cache, $today_date;
+$lang_forums = (array) (\App\Support\SupportContext::getGlobal('lang_forums') ?? []);
+$Cache = \App\Support\SupportContext::getCache();
+$today_date = \App\Support\SupportContext::getGlobal('today_date', '');
 
 	if (!$activeforumuser_num = $Cache->get_value('active_forum_user_count')){
 		$secs = 900;
@@ -49,7 +53,8 @@ function forum_stats ()
 //set all topics as read
 function catch_up()
 {
-	global $CURUSER, $Cache;
+$CURUSER = \App\Support\SupportContext::getUser() ?? [];
+$Cache = \App\Support\SupportContext::getCache();
 
 	if (!$CURUSER)
 		die;
@@ -64,7 +69,7 @@ function catch_up()
 
 //return image
 function get_topic_image($status= "read"){
-	global $lang_forums;
+$lang_forums = (array) (\App\Support\SupportContext::getGlobal('lang_forums') ?? []);
 	switch($status){
 		case "read": {
 			return "<img class=\"unlocked\" src=\"pic/trans.gif\" alt=\"read\" title=\"".$lang_forums['title_read']."\" />";
@@ -94,7 +99,7 @@ function highlight_topic($subject, $hlcolor=0)
 }
 
 function check_whether_exist($id, $place='forum'){
-	global $lang_forums;
+$lang_forums = (array) (\App\Support\SupportContext::getGlobal('lang_forums') ?? []);
 	int_check($id,true);
 	switch ($place){
 		case 'forum':
@@ -125,7 +130,7 @@ function check_whether_exist($id, $place='forum'){
 //update the last post of a topic
 function update_topic_last_post($topicid)
 {
-	global $lang_forums;
+$lang_forums = (array) (\App\Support\SupportContext::getGlobal('lang_forums') ?? []);
 	$postid = \App\Models\Post::query()->where('topicid', $topicid)->orderByDesc('id')->value('id');
 	if (!$postid) {
 		die($lang_forums['std_no_post_found']);
@@ -135,7 +140,7 @@ function update_topic_last_post($topicid)
 
 function get_forum_row($forumid = 0)
 {
-	global $Cache;
+$Cache = \App\Support\SupportContext::getCache();
 	if (!$forums = $Cache->get_value('forums_list')){
 		$forums = \App\Models\Forum::query()->orderBy('forid')->orderBy('sort')->get()->keyBy('id')->map(fn($f) => $f->toArray())->all();
 		$Cache->cache_value('forums_list', $forums, 86400);
@@ -145,7 +150,8 @@ function get_forum_row($forumid = 0)
 	else return $forums[$forumid] ?? null;
 }
 function get_last_read_post_id($topicid) {
-	global $CURUSER, $Cache;
+$CURUSER = \App\Support\SupportContext::getUser() ?? [];
+$Cache = \App\Support\SupportContext::getCache();
 	static $ret;
 	if (!$ret && !$ret = $Cache->get_value('user_'.$CURUSER['id'].'_last_read_post_list')){
 		$ret = [];
@@ -157,7 +163,7 @@ function get_last_read_post_id($topicid) {
 		}
 		else $Cache->cache_value('user_'.$CURUSER['id'].'_last_read_post_list', 'no record', 900);
 	}
-	if ($ret != "no record" && isset($ret[$topicid]) && $CURUSER['last_catchup'] < $ret[$topicid]){
+	if ($ret != "no record" && (isset($ret[$topicid])) && $CURUSER['last_catchup'] < $ret[$topicid]){
 		return $ret[$topicid];
 	}
 	elseif ($CURUSER['last_catchup'])
@@ -168,8 +174,9 @@ function get_last_read_post_id($topicid) {
 //-------- Inserts a compose frame
 function insert_compose_frame($id, $type = 'new')
 {
-	global $maxsubjectlength, $CURUSER;
-	global $lang_forums;
+$maxsubjectlength = \App\Support\SupportContext::getGlobal('maxsubjectlength');
+$CURUSER = \App\Support\SupportContext::getUser() ?? [];
+$lang_forums = (array) (\App\Support\SupportContext::getGlobal('lang_forums') ?? []);
 	$hassubject = false;
 	$subject = "";
 	$body = "";
@@ -250,18 +257,18 @@ if (!$topicsperpage){
 	else $topicsperpage = 20;
 }
 $today_date = date("Y-m-d",TIMENOW);
-$GLOBALS['maxsubjectlength'] = $maxsubjectlength;
-$GLOBALS['postsperpage'] = $postsperpage;
-$GLOBALS['topicsperpage'] = $topicsperpage;
-$GLOBALS['today_date'] = $today_date;
+\App\Support\SupportContext::setGlobal('maxsubjectlength', $maxsubjectlength);
+\App\Support\SupportContext::setGlobal('postsperpage', $postsperpage);
+\App\Support\SupportContext::setGlobal('topicsperpage', $topicsperpage);
+\App\Support\SupportContext::setGlobal('today_date', $today_date);
 // ------------- end: Global variables ------------------//
 
-$action = htmlspecialchars(trim($_GET["action"] ?? ''));
+$action = htmlspecialchars(trim(\App\Support\SupportContext::getQuery("action") ?? ''));
 
 //-------- Action: New topic
 if ($action == "newtopic")
 {
-	$forumid = intval($_GET["forumid"] ?? 0);
+	$forumid = intval(\App\Support\SupportContext::getQuery("forumid") ?? 0);
 	check_whether_exist($forumid, 'forum');
 	stdhead($lang_forums['head_new_topic']);
 	begin_main_frame();
@@ -272,7 +279,7 @@ if ($action == "newtopic")
 }
 if ($action == "quotepost")
 {
-	$postid = intval($_GET["postid"] ?? 0);
+	$postid = intval(\App\Support\SupportContext::getQuery("postid") ?? 0);
 	check_whether_exist($postid, 'post');
     if (!can_view_post($CURUSER['id'], $postid)) {
         permissiondenied();
@@ -289,7 +296,7 @@ if ($action == "quotepost")
 
 if ($action == "reply")
 {
-	$topicid = intval($_GET["topicid"] ?? 0);
+	$topicid = intval(\App\Support\SupportContext::getQuery("topicid") ?? 0);
 	check_whether_exist($topicid, 'topic');
 	stdhead($lang_forums['head_post_reply']);
 	begin_main_frame();
@@ -303,7 +310,7 @@ if ($action == "reply")
 
 if ($action == "editpost")
 {
-	$postid = intval($_GET["postid"] ?? 0);
+	$postid = intval(\App\Support\SupportContext::getQuery("postid") ?? 0);
 	check_whether_exist($postid, 'post');
 
 	$post = \App\Models\Post::query()->where('id', $postid)->first(['userid', 'topicid']);
@@ -333,10 +340,10 @@ if ($action == "post")
 		stderr($lang_forums['std_sorry'], $lang_forums['std_unauthorized_to_post'],false);
 		die;
 	}
-	$id = $_POST["id"];
-	$type = $_POST["type"];
-	$subject = $_POST["subject"] ?? '';
-	$body = trim($_POST["body"]);
+	$id = \App\Support\SupportContext::getPost("id");
+	$type = \App\Support\SupportContext::getPost("type");
+	$subject = \App\Support\SupportContext::getPost("subject") ?? '';
+	$body = trim(\App\Support\SupportContext::getPost("body"));
 	$hassubject = false;
 	switch ($type){
 		case 'new':
@@ -351,7 +358,7 @@ if ($action == "post")
 			check_whether_exist($id, 'topic');
 			$topicid = $id;
 			$forumid = \App\Models\Topic::query()->where('id', $topicid)->value('forumid');
-			$quotepostid = $_POST["postid"];
+			$quotepostid = \App\Support\SupportContext::getPost("postid");
 			break;
 		}
 		case 'edit':
@@ -565,12 +572,12 @@ if ($action == "post")
 
 if ($action == "viewtopic")
 {
-	$highlight = htmlspecialchars(trim($_GET["highlight"] ?? ''));
+	$highlight = htmlspecialchars(trim(\App\Support\SupportContext::getQuery("highlight") ?? ''));
 
-	$topicid = intval($_GET["topicid"] ?? 0);
+	$topicid = intval(\App\Support\SupportContext::getQuery("topicid") ?? 0);
 	int_check($topicid,true);
-	$page = $_GET["page"] ?? 0;
-	$authorid = intval($_GET["authorid"] ?? 0);
+	$page = \App\Support\SupportContext::getQuery("page") ?? 0;
+	$authorid = intval(\App\Support\SupportContext::getQuery("authorid") ?? 0);
 	$postQuery = \App\Models\Post::query()->where('topicid', $topicid);
 	if ($authorid)
 	{
@@ -630,7 +637,7 @@ if ($action == "viewtopic")
 
 	$pages = ceil($postcount / $perpage);
 
-	if (isset($page[0]) && $page[0] == "p")
+	if ((isset($page[0])) && $page[0] == "p")
 	{
 		$findpost = substr($page, 1);
 		$postIds = (clone $postQuery)->orderBy('added')->pluck('id')->all();
@@ -642,7 +649,7 @@ if ($action == "viewtopic")
 	if ($page === "last"){
 	$page = $pages-1;
 	}
-	elseif(isset($page))
+	elseif((isset($page)))
 	{
 		if($page < 0){
 		$page = 0;
@@ -871,11 +878,11 @@ if ($action == "viewtopic")
 		print("<table border=\"0\" cellspacing=\"0\" cellpadding=\"0\" align=\"left\">\n");
 		print("<tr><td class=\"embedded\"><form method=\"post\" action=\"?action=setsticky\">\n");
 		print("<input type=\"hidden\" name=\"topicid\" value=\"".$topicid."\" />\n");
-		print("<input type=\"hidden\" name=\"returnto\" value=\"".htmlspecialchars($_SERVER['REQUEST_URI'])."\" />\n");
+		print("<input type=\"hidden\" name=\"returnto\" value=\"".htmlspecialchars($__server_REQUEST_URI)."\" />\n");
 		print("<input type=\"hidden\" name=\"sticky\" value=\"".($sticky ? 'no' : 'yes')."\" /><input type=\"submit\" class=\"medium\" value=\"".($sticky ? $lang_forums['submit_unsticky'] : $lang_forums['submit_sticky'])."\" /></form></td>\n");
 		print("<td class=\"embedded\"><form method=\"post\" action=\"?action=setlocked\">\n");
 		print("<input type=\"hidden\" name=\"topicid\" value=\"".$topicid."\" />\n");
-		print("<input type=\"hidden\" name=\"returnto\" value=\"".htmlspecialchars($_SERVER['REQUEST_URI'])."\" />\n");
+		print("<input type=\"hidden\" name=\"returnto\" value=\"".htmlspecialchars($__server_REQUEST_URI)."\" />\n");
 		print("<input type=\"hidden\" name=\"locked\" value=\"".($locked ? 'no' : 'yes')."\" /><input type=\"submit\" class=\"medium\" value=\"".($locked ? $lang_forums['submit_unlock'] : $lang_forums['submit_lock'])."\" /></form></td>\n");
 		print("<td class=\"embedded\"><form method=\"get\" action=\"?\">\n");
 		print("<input type=\"hidden\" name=\"action\" value=\"deletetopic\" />\n");
@@ -932,7 +939,7 @@ if ($action == "viewtopic")
 <option style='background-color: plum' value=\"39\">Plum</option>
 <option style='background-color: white' value=\"40\">White</option>");
 		print("</select>");
-		print("<input type=\"hidden\" name=\"returnto\" value=\"".htmlspecialchars($_SERVER['REQUEST_URI'])."\" />\n");
+		print("<input type=\"hidden\" name=\"returnto\" value=\"".htmlspecialchars($__server_REQUEST_URI)."\" />\n");
 		print("<input type=\"submit\" class=\"medium\" value=\"".$lang_forums['submit_change']."\" /></form></td>");
 		print("</tr>\n");
 		print("</table>\n");
@@ -965,9 +972,9 @@ if ($action == "viewtopic")
 
 if ($action == "movetopic")
 {
-	$forumid = intval($_POST["forumid"] ?? 0);
+	$forumid = intval(\App\Support\SupportContext::getPost("forumid") ?? 0);
 
-	$topicid = intval($_GET["topicid"] ?? 0);
+	$topicid = intval(\App\Support\SupportContext::getQuery("topicid") ?? 0);
 	$ismod = is_forum_moderator($topicid,'topic');
 	if (!is_valid_id($forumid) || !is_valid_id($topicid) || (!user_can('postmanage') && !$ismod))
 		permissiondenied();
@@ -1016,7 +1023,7 @@ if ($action == "movetopic")
 
 if ($action == "deletetopic")
 {
-	$topicid = intval($_GET["topicid"] ?? 0);
+	$topicid = intval(\App\Support\SupportContext::getQuery("topicid") ?? 0);
 	$topic = \App\Models\Topic::query()->where('id', $topicid)->first(['forumid', 'userid']);
 	if (!$topic){
 		die;
@@ -1029,7 +1036,7 @@ if ($action == "deletetopic")
 	if (!is_valid_id($topicid) || (!user_can('postmanage') && !$ismod))
 		permissiondenied();
 
-	$sure = intval($_GET["sure"] ?? 0);
+	$sure = intval(\App\Support\SupportContext::getQuery("sure") ?? 0);
 	if (!$sure)
 	{
 		stderr($lang_forums['std_delete_topic'], $lang_forums['std_delete_topic_note'] .
@@ -1060,8 +1067,8 @@ if ($action == "deletetopic")
 
 if ($action == "deletepost")
 {
-	$postid = intval($_GET["postid"] ?? 0);
-	$sure = intval($_GET["sure"] ?? 0);
+	$postid = intval(\App\Support\SupportContext::getQuery("postid") ?? 0);
+	$sure = intval(\App\Support\SupportContext::getQuery("sure") ?? 0);
 
 	$ismod = is_forum_moderator($postid, 'post');
 	if ((!user_can('postmanage') && !$ismod) || !is_valid_id($postid))
@@ -1119,25 +1126,25 @@ if ($action == "deletepost")
 
 if ($action == "setlocked")
 {
-	$topicid = intval($_POST["topicid"] ?? 0);
+	$topicid = intval(\App\Support\SupportContext::getPost("topicid") ?? 0);
 	$ismod = is_forum_moderator($topicid,'topic');
 	if (!$topicid || (!user_can('postmanage') && !$ismod))
 		permissiondenied();
 
-	$locked = $_POST["locked"];
+	$locked = \App\Support\SupportContext::getPost("locked");
 	\App\Models\Topic::query()->where('id', $topicid)->update(['locked' => $locked]);
 
-	header("Location: $_POST[returnto]");
+	header("Location: \App\Support\SupportContext::getPost(returnto)");
 	die;
 }
 
 if ($action == 'hltopic')
 {
-	$topicid = intval($_GET["topicid"] ?? 0);
+	$topicid = intval(\App\Support\SupportContext::getQuery("topicid") ?? 0);
 	$ismod = is_forum_moderator($topicid,'topic');
 	if (!$topicid || (!user_can('postmanage') && !$ismod))
 		permissiondenied();
-	$color = intval($_POST["color"]);
+	$color = intval(\App\Support\SupportContext::getPost("color"));
 	if ($color==0 || get_hl_color($color))
 		\App\Models\Topic::query()->where('id', $topicid)->update(['hlcolor' => $color]);
 
@@ -1145,7 +1152,7 @@ if ($action == 'hltopic')
 	$forum_last_replied_topic_row = $Cache->get_value('forum_'.$forumid.'_last_replied_topic_content');
 	if ($forum_last_replied_topic_row && $forum_last_replied_topic_row['id'] == $topicid)
 		$Cache->delete_value('forum_'.$forumid.'_last_replied_topic_content');
-	header("Location: $_POST[returnto]");
+	header("Location: \App\Support\SupportContext::getPost(returnto)");
 	die;
 }
 
@@ -1153,15 +1160,15 @@ if ($action == 'hltopic')
 
 if ($action == "setsticky")
 {
-	$topicid = intval($_POST["topicid"] ?? 0);
+	$topicid = intval(\App\Support\SupportContext::getPost("topicid") ?? 0);
 	$ismod = is_forum_moderator($topicid,'topic');
 	if (!$topicid || (!user_can('postmanage') && !$ismod))
 		permissiondenied();
 
-	$sticky = $_POST["sticky"];
+	$sticky = \App\Support\SupportContext::getPost("sticky");
 	\App\Models\Topic::query()->where('id', $topicid)->update(['sticky' => $sticky]);
 
-	header("Location: $_POST[returnto]");
+	header("Location: \App\Support\SupportContext::getPost(returnto)");
 	die;
 }
 
@@ -1169,7 +1176,7 @@ if ($action == "setsticky")
 
 if ($action == "viewforum")
 {
-	$forumid = intval($_GET["forumid"] ?? 0);
+	$forumid = intval(\App\Support\SupportContext::getQuery("forumid") ?? 0);
 	int_check($forumid,true);
 	$userid = intval($CURUSER["id"] ?? 0);
 	//------ Get forum name, moderators
@@ -1183,7 +1190,7 @@ if ($action == "viewforum")
 
 	$forumname = $row['name'];
 	$forummoderators = get_forum_moderators($forumid,false);
-	$search = trim(is_scalar($_GET["search"] ?? '') ? (string) ($_GET["search"] ?? '') : '');
+	$search = trim(is_scalar(\App\Support\SupportContext::getQuery("search") ?? '') ? (string) (\App\Support\SupportContext::getQuery("search") ?? '') : '');
 	$topicQuery = \App\Models\Topic::query()->where('forumid', $forumid);
 	if ($search){
 		$topicQuery->where('subject', 'like', '%'.$search.'%');
@@ -1195,8 +1202,8 @@ if ($action == "viewforum")
 	$num = $topicQuery->count();
 
 	[$pagertop, $pagerbottom, , $offset, $perpage, ] = pager($topicsperpage, $num, "?"."action=viewforum&forumid=".$forumid.$addparam."&");
-	if (isset($_GET["sort"])){
-		switch ($_GET["sort"]){
+	if (((\App\Support\SupportContext::getQuery("sort") !== null))){
+		switch (\App\Support\SupportContext::getQuery("sort")){
 			case 'firstpostasc':
 			{
 				$orderby = "firstpost ASC";
@@ -1253,7 +1260,7 @@ if ($action == "viewforum")
 	{
 		print("<table border=\"1\" cellspacing=\"0\" cellpadding=\"5\" width=\"97%\">");
 
-		print("<tr><td class=\"colhead\" align=\"center\" width=\"99%\">".$lang_forums['col_topic']."</td><td class=\"colhead\" align=\"center\"><a href=\"".htmlspecialchars("?action=viewforum&forumid=".$forumid.$addparam."&sort=".(isset($_GET["sort"]) && $_GET["sort"] == 'firstpostdesc' ? "firstpostasc" : "firstpostdesc"))."\" title=\"".(isset($_GET["sort"]) && $_GET["sort"] == 'firstpostdesc' ?  $lang_forums['title_order_topic_asc'] : $lang_forums['title_order_topic_desc'])."\">".$lang_forums['col_author']."</a></td><td class=\"colhead\" align=\"center\">".$lang_forums['col_replies']."/".$lang_forums['col_views']."</td><td class=\"colhead\" align=\"center\"><a href=\"".htmlspecialchars("?action=viewforum&forumid=".$forumid.$addparam."&sort=".(isset($_GET["sort"]) && $_GET["sort"] == 'lastpostasc' ? "lastpostdesc" : "lastpostasc"))."\" title=\"".(isset($_GET["sort"]) && $_GET["sort"] == 'lastpostasc' ? $lang_forums['title_order_post_desc'] : $lang_forums['title_order_post_asc'])."\">".$lang_forums['col_last_post']."</a></td>\n");
+		print("<tr><td class=\"colhead\" align=\"center\" width=\"99%\">".$lang_forums['col_topic']."</td><td class=\"colhead\" align=\"center\"><a href=\"".htmlspecialchars("?action=viewforum&forumid=".$forumid.$addparam."&sort=".(((\App\Support\SupportContext::getQuery("sort") !== null)) && \App\Support\SupportContext::getQuery("sort") == 'firstpostdesc' ? "firstpostasc" : "firstpostdesc"))."\" title=\"".(((\App\Support\SupportContext::getQuery("sort") !== null)) && \App\Support\SupportContext::getQuery("sort") == 'firstpostdesc' ?  $lang_forums['title_order_topic_asc'] : $lang_forums['title_order_topic_desc'])."\">".$lang_forums['col_author']."</a></td><td class=\"colhead\" align=\"center\">".$lang_forums['col_replies']."/".$lang_forums['col_views']."</td><td class=\"colhead\" align=\"center\"><a href=\"".htmlspecialchars("?action=viewforum&forumid=".$forumid.$addparam."&sort=".(((\App\Support\SupportContext::getQuery("sort") !== null)) && \App\Support\SupportContext::getQuery("sort") == 'lastpostasc' ? "lastpostdesc" : "lastpostasc"))."\" title=\"".(((\App\Support\SupportContext::getQuery("sort") !== null)) && \App\Support\SupportContext::getQuery("sort") == 'lastpostasc' ? $lang_forums['title_order_post_desc'] : $lang_forums['title_order_post_asc'])."\">".$lang_forums['col_last_post']."</a></td>\n");
 
 		print("</tr>\n");
 		$counter = 0;
@@ -1396,7 +1403,7 @@ if ($action == "viewunread")
 {
 	$userid = $CURUSER['id'];
 
-	$beforepostid = intval($_GET['beforepostid'] ?? 0);
+	$beforepostid = intval(\App\Support\SupportContext::getQuery('beforepostid') ?? 0);
 	$maxresults = 25;
 	$lastCatchup = (int) ($CURUSER['last_catchup'] ?? 0);
 	$unreadQuery = \App\Models\Topic::query()
@@ -1465,7 +1472,7 @@ if ($action == "search")
 	unset($error);
 	$error = true;
 	$found = "";
-	$keywords = htmlspecialchars(trim($_GET["keywords"]));
+	$keywords = htmlspecialchars(trim(\App\Support\SupportContext::getQuery("keywords")));
 	if ($keywords != "")
 	{
 		$term = '%'.$keywords.'%';
@@ -1560,7 +1567,7 @@ stdfoot();
 die;
 }
 
-if (isset($_GET["catchup"]) && $_GET["catchup"] == 1){
+if (((\App\Support\SupportContext::getQuery("catchup") !== null)) && \App\Support\SupportContext::getQuery("catchup") == 1){
 	catch_up();
 }
 

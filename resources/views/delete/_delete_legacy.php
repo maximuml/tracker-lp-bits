@@ -5,7 +5,7 @@ error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 //require_once(get_langfile_path("",true));
 user_can('torrent-delete', true);
 function bark($msg) {
-  global $lang_delete;
+$lang_delete = (array) (\App\Support\SupportContext::getGlobal('lang_delete') ?? []);
   stdhead();
   stdmsg($lang_delete['std_delete_failed'], $msg);
   stdfoot();
@@ -27,12 +27,12 @@ $row = $torrent->toArray();
 if ($CURUSER["id"] != $row["owner"] && !user_can('torrentmanage'))
 	bark($lang_delete['std_not_owner']);
 
-$rt = intval($_POST["reasontype"] ?? 0);
+$rt = intval(\App\Support\SupportContext::getPost("reasontype") ?? 0);
 
 if (!is_int($rt) || $rt < 1 || $rt > 5)
 	bark($lang_delete['std_invalid_reason']."$rt.");
 
-$reason = $_POST["reason"] ?? [];
+$reason = \App\Support\SupportContext::getPost("reason") ?? [];
 
 if ($rt == 1)
 	$reasonstr = "Dead: 0 seeders, 0 leechers = 0 peers total";
@@ -84,8 +84,8 @@ if ($CURUSER["id"] != $row["owner"] && \App\Models\User::exists($row["owner"])){
 }
 stdhead($lang_delete['head_torrent_deleted']);
 
-if (isset($_POST["returnto"]))
-	$ret = "<a href=\"" . htmlspecialchars($_POST["returnto"]) . "\">".$lang_delete['text_go_back']."</a>";
+if (((\App\Support\SupportContext::getPost("returnto") !== null)))
+	$ret = "<a href=\"" . htmlspecialchars(\App\Support\SupportContext::getPost("returnto")) . "\">".$lang_delete['text_go_back']."</a>";
 else
 	$ret = "<a href=\"index.php\">".$lang_delete['text_back_to_index']."</a>";
 

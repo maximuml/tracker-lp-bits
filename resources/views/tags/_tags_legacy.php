@@ -5,7 +5,7 @@ error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
 function insert_tag($name, $description, $syntax, $example, $remarks)
 {
-	global $lang_tags;
+$lang_tags = (array) (\App\Support\SupportContext::getGlobal('lang_tags') ?? []);
 	$result = format_comment($example);
 	print("<p class=sub><b>$name</b></p>\n");
 	print("<table class=main width=100% border=1 cellspacing=0 cellpadding=5>\n");
@@ -21,7 +21,7 @@ function insert_tag($name, $description, $syntax, $example, $remarks)
 stdhead($lang_tags['head_tags']);
 begin_main_frame();
 begin_frame($lang_tags['text_tags']);
-$test = $_POST["test"] ?? '';
+$test = \App\Support\SupportContext::getPost("test") ?? '';
 $siteName = \App\Models\Setting::getSiteName();
 ?>
 <p><?php echo sprintf($lang_tags['text_bb_tags_note'], $siteName) ?></p>

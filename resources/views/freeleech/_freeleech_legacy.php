@@ -5,7 +5,7 @@ error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 if (get_user_class() < UC_ADMINISTRATOR)
 	stderr("Error", "Permission denied.");
 
-$action = isset($_POST['action']) ? htmlspecialchars($_POST['action']) : (isset($_GET['action']) ? htmlspecialchars($_GET['action']) : 'main');
+$action = ((\App\Support\SupportContext::getPost('action') !== null)) ? htmlspecialchars(\App\Support\SupportContext::getPost('action')) : (((\App\Support\SupportContext::getQuery('action') !== null)) ? htmlspecialchars(\App\Support\SupportContext::getQuery('action')) : 'main');
 if ($action == 'setallfree')
 {
 	\Nexus\Database\NexusDB::table('torrents_state')->update(['global_sp_state' => 2]);

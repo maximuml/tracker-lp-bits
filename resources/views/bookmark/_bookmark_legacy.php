@@ -8,8 +8,8 @@ header("Cache-Control: no-cache, must-revalidate" );
 header("Pragma: no-cache" );
 header("Content-Type: text/xml; charset=utf-8");
 
-$torrentid = intval($_GET['torrentid'] ?? 0);
-if(isset($CURUSER))
+$torrentid = intval(\App\Support\SupportContext::getQuery('torrentid') ?? 0);
+if((isset($CURUSER)))
 {
     $searchRep = new \App\Repositories\SearchRepository();
 	$bookmark = \Nexus\Database\NexusDB::table('bookmarks')->where('torrentid', $torrentid)->where('userid', $CURUSER['id'])->first();

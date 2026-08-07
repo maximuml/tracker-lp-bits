@@ -3,8 +3,11 @@ extract($context, EXTR_SKIP);
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
 
-$action = $_GET["action"] ?? '';
-$pollid = intval($_GET["pollid"] ?? 0);
+
+$__server_HTTP_REFERER = \App\Support\SupportContext::getServerValue('HTTP_REFERER');
+$__server_REQUEST_METHOD = \App\Support\SupportContext::getServerValue('REQUEST_METHOD');
+$action = \App\Support\SupportContext::getQuery("action") ?? '';
+$pollid = intval(\App\Support\SupportContext::getQuery("pollid") ?? 0);
 $poll = [];
 
 if ($action == "edit")
@@ -15,15 +18,15 @@ if ($action == "edit")
 		stderr($lang_makepoll['std_error'], $lang_makepoll['std_no_poll_id']);
 }
 
-if ($_SERVER["REQUEST_METHOD"] == "POST")
+if ($__server_REQUEST_METHOD == "POST")
 {
-	$pollid = intval($_POST["pollid"] ?? 0);
-	$question = htmlspecialchars($_POST["question"]);
-	$returnto = htmlspecialchars($_POST["returnto"]);
+	$pollid = intval(\App\Support\SupportContext::getPost("pollid") ?? 0);
+	$question = htmlspecialchars(\App\Support\SupportContext::getPost("question"));
+	$returnto = htmlspecialchars(\App\Support\SupportContext::getPost("returnto"));
 	$options = [];
 	for ($i = 0; $i <= 19; $i++) {
 	    $key = "option$i";
-	    $options[$key] = htmlspecialchars($_POST[$key] ?? '');
+	    $options[$key] = htmlspecialchars(\App\Support\SupportContext::getPost($key) ?? '');
 	}
 
 	if (!$question || !$options['option0'] || !$options['option1'])
@@ -93,7 +96,7 @@ input.mp
 if ($pollid)
 print("<input type=hidden name=pollid value=\"".$poll["id"]."\">");
 ?>
-<input type=hidden name=returnto value="<?php echo htmlspecialchars($_GET["returnto"] ?? '') ? htmlspecialchars($_GET["returnto"] ?? '') : htmlspecialchars($_SERVER["HTTP_REFERER"] ?? '')?>">
+<input type=hidden name=returnto value="<?php echo htmlspecialchars(\App\Support\SupportContext::getQuery("returnto") ?? '') ? htmlspecialchars(\App\Support\SupportContext::getQuery("returnto") ?? '') : htmlspecialchars($__server_HTTP_REFERER ?? '')?>">
 </form>
 
 <?php

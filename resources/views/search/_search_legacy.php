@@ -2,8 +2,10 @@
 extract($context, EXTR_SKIP);
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
-$search = is_scalar($_REQUEST['search'] ?? '') ? (string) ($_REQUEST['search'] ?? '') : '';
-$searchArea = is_scalar($_REQUEST['search_area'] ?? '') ? (int) ($_REQUEST['search_area'] ?? 0) : \App\Repositories\SearchRepository::SEARCH_AREA_TITLE;
+
+$__server_SCRIPT_NAME = \App\Support\SupportContext::getServerValue('SCRIPT_NAME');
+$search = is_scalar(\App\Support\SupportContext::getRequestInput('search') ?? '') ? (string) (\App\Support\SupportContext::getRequestInput('search') ?? '') : '';
+$searchArea = is_scalar(\App\Support\SupportContext::getRequestInput('search_area') ?? '') ? (int) (\App\Support\SupportContext::getRequestInput('search_area') ?? 0) : \App\Repositories\SearchRepository::SEARCH_AREA_TITLE;
 
 //approval status
 $approvalStatusNoneVisible = get_setting('torrent.approval_status_none_visible');
@@ -20,7 +22,7 @@ if (\App\Models\SearchBox::isSpecialEnabled() && user_can('view_special_torrent'
 
 //see banned
 $banned = null;
-if (!isset($CURUSER) || !user_can('seebanned')) {
+if (!(isset($CURUSER)) || !user_can('seebanned')) {
     $banned = "no";
 }
 
@@ -36,7 +38,7 @@ if ($search) {
     if ($shouldUseMeili) {
         try {
             $searchRep = new \App\Repositories\MeiliSearchRepository();
-            $searchParams = $_GET;
+            $searchParams = \App\Support\SupportContext::allQuery();
             $searchParams['search'] = $searchRaw;
             $searchParams['search_area'] = $searchArea;
             if ($approvalStatus != null) {
@@ -87,7 +89,7 @@ if ($search) {
                 $q = "%{$queryString}%";
                 $torrentQuery->where("$tableTorrent.name", "like", $q);
             }
-            write_log("User " . $CURUSER["username"] . "," . $CURUSER["ip"] . " is hacking search_area field in" . $_SERVER['SCRIPT_NAME'], 'mod');
+            write_log("User " . $CURUSER["username"] . "," . $CURUSER["ip"] . " is hacking search_area field in" . $__server_SCRIPT_NAME, 'mod');
         }
         if ($approvalStatus !== null) {
             $torrentQuery->where("$tableTorrent.approval_status", $approvalStatus);
@@ -110,9 +112,9 @@ else $torrentsperpage = 50;
 $column = 'id';
 $ascdesc = 'desc';
 $addparam = "?search=$search&search_area=$searchArea&";
-if (isset($_GET['sort']) && $_GET['sort'] && isset($_GET['type']) && $_GET['type']) {
+if (((\App\Support\SupportContext::getQuery('sort') !== null)) && \App\Support\SupportContext::getQuery('sort') && ((\App\Support\SupportContext::getQuery('type') !== null)) && \App\Support\SupportContext::getQuery('type')) {
 
-    switch($_GET['sort']) {
+    switch(\App\Support\SupportContext::getQuery('sort')) {
         case '1': $column = "name"; break;
         case '2': $column = "numfiles"; break;
         case '3': $column = "comments"; break;
@@ -125,13 +127,13 @@ if (isset($_GET['sort']) && $_GET['sort'] && isset($_GET['type']) && $_GET['type
         default: $column = "id"; break;
     }
 
-    switch($_GET['type']) {
+    switch(\App\Support\SupportContext::getQuery('type')) {
         case 'asc': $ascdesc = "ASC"; $linkascdesc = "asc"; break;
         case 'desc': $ascdesc = "DESC"; $linkascdesc = "desc"; break;
         default: $ascdesc = "DESC"; $linkascdesc = "desc"; break;
     }
 
-    $addparam .= "sort=" . intval($_GET['sort']) . "&type=" . $linkascdesc . "&";
+    $addparam .= "sort=" . intval(\App\Support\SupportContext::getQuery('sort')) . "&type=" . $linkascdesc . "&";
 
 }
 

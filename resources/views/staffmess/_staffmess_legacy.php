@@ -1,6 +1,8 @@
 <?php
 extract($context, EXTR_SKIP);
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
+
+$__server_HTTP_REFERER = \App\Support\SupportContext::getServerValue('HTTP_REFERER');
 if (get_user_class() < UC_ADMINISTRATOR)
 stderr("Sorry", "Access denied.");
 stdhead("Mass PM", false);
@@ -12,16 +14,16 @@ $classes = array_chunk(\App\Models\User::$classes, 4, true);
 <form method=post action=takestaffmess.php>
 <?php
 
-if ($_GET["returnto"] || $_SERVER["HTTP_REFERER"])
+if (\App\Support\SupportContext::getQuery("returnto") || $__server_HTTP_REFERER)
 {
 ?>
-<input type=hidden name=returnto value="<?php echo htmlspecialchars($_GET["returnto"]) ? htmlspecialchars($_GET["returnto"]) : htmlspecialchars($_SERVER["HTTP_REFERER"])?>">
+<input type=hidden name=returnto value="<?php echo htmlspecialchars(\App\Support\SupportContext::getQuery("returnto")) ? htmlspecialchars(\App\Support\SupportContext::getQuery("returnto")) : htmlspecialchars($__server_HTTP_REFERER)?>">
 <?php
 }
 ?>
 <table cellspacing=0 cellpadding=5>
 <?php
-if ($_GET["sent"] == 1) {
+if (\App\Support\SupportContext::getQuery("sent") == 1) {
 ?>
 <tr><td colspan=2><font color=red><b>The message has ben sent.</b></font></td></tr>
 <?php

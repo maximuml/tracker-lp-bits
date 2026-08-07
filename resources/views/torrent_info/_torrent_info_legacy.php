@@ -39,7 +39,7 @@ function torrent_structure_builder($array, $parent = "")
 
 user_can('torrentstructure', true);
 
-$id = (int)$_GET["id"];
+$id = (int)\App\Support\SupportContext::getQuery("id");
 
 if (!$id)
 	httperr();

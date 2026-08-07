@@ -1,19 +1,19 @@
 <?php
 extract($context, EXTR_SKIP);
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
-if (isset($_GET['del']))
+if (((\App\Support\SupportContext::getQuery('del') !== null)))
 {
-	if (is_valid_id($_GET['del']))
+	if (is_valid_id(\App\Support\SupportContext::getQuery('del')))
 	{
 		if(user_can('sbmanage'))
 		{
-			$delId = (int)$_GET['del'];
+			$delId = (int)\App\Support\SupportContext::getQuery('del');
 			\Nexus\Database\NexusDB::table('shoutbox')->where('id', $delId)->delete();
 			\Nexus\Database\NexusDB::table('shoutbox_reactions')->where('shoutbox_id', $delId)->delete();
 		}
 	}
 }
-$isAjax = !empty($_GET['ajax']);
+$isAjax = !empty(\App\Support\SupportContext::getQuery('ajax'));
 $where = 'shoutbox';
 $refresh = ($CURUSER['sbrefresh'] ?? 120);
 if (!$isAjax):
@@ -122,7 +122,7 @@ function shoutAttachToggleHandler() {
 endif; // if (!$isAjax)
 ?>
 <?php
-if (isset($_GET['sent']) && $_GET['sent'] === 'yes' && !empty($_GET['shbox_text'])) {
+if (((\App\Support\SupportContext::getQuery('sent') !== null)) && \App\Support\SupportContext::getQuery('sent') === 'yes' && !empty(\App\Support\SupportContext::getQuery('shbox_text'))) {
     $userid = (int) ($CURUSER['id'] ?? 0);
     if (!$userid) {
         do_log('Someone is hacking shoutbox. no_permission_to_shoutbox - IP : ' . getip());
@@ -130,7 +130,7 @@ if (isset($_GET['sent']) && $_GET['sent'] === 'yes' && !empty($_GET['shbox_text'
     }
     $type = 'sb';
     $date = time();
-    $text = trim($_GET['shbox_text']);
+    $text = trim(\App\Support\SupportContext::getQuery('shbox_text'));
     if (mb_strlen($text) > \App\Support\Shoutbox::MAX_MESSAGE_LENGTH) {
         echo ($lang_shoutbox['text_message_too_long'] ?? 'Message too long'); return;
     }
@@ -147,7 +147,7 @@ if (isset($_GET['sent']) && $_GET['sent'] === 'yes' && !empty($_GET['shbox_text'
     print "<script type=\"text/javascript\">parent.document.forms['shbox'].shbox_text.value='';</script>";
 }
 
-if (!isset($CURUSER)) {
+if (!(isset($CURUSER))) {
     echo '<h1>' . $lang_shoutbox['std_access_denied'] . '</h1><p>' . $lang_shoutbox['std_access_denied_note'] . '</p></body></html>'; return;
 }
 
@@ -173,7 +173,7 @@ function shoutbox_class_badge($class)
 		];
 	}
 	$class = (int)$class;
-	if (!isset($map[$class])) {
+	if (!(isset($map[$class]))) {
 		return '';
 	}
 	$label = $map[$class][0];
@@ -191,7 +191,7 @@ print("\n");
 else
 {
 	$rows = $rows->map(fn ($r) => (array) $r);
-	$showAvatars = isset($CURUSER['avatars']) && $CURUSER['avatars'] === 'yes';
+	$showAvatars = (isset($CURUSER['avatars'])) && $CURUSER['avatars'] === 'yes';
 	$tooltipAvatar = $lang_shoutbox['tooltip_avatar'] ?? 'Open profile';
 	$tooltipReply = $lang_shoutbox['tooltip_nick_reply'] ?? 'Reply via @';
 	$labelMore = $lang_shoutbox['shout_show_more'] ?? 'more';

@@ -1,10 +1,12 @@
 <?php
 extract($context, EXTR_SKIP);
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
-$receiver = intval($_GET["receiver"] ?? 0);
+
+$__server_HTTP_REFERER = \App\Support\SupportContext::getServerValue('HTTP_REFERER');
+$receiver = intval(\App\Support\SupportContext::getQuery("receiver") ?? 0);
 	int_check($receiver,true);
 
-	$replyto = $_GET["replyto"] ?? '';
+	$replyto = \App\Support\SupportContext::getQuery("replyto") ?? '';
 	if ($replyto && !is_valid_id($replyto))
 		stderr($lang_sendmessage['std_error'],$lang_sendmessage['std_permission_denied']);
 
@@ -39,8 +41,8 @@ $receiver = intval($_GET["receiver"] ?? 0);
 	begin_main_frame();
 	print("<form id=compose name=\"compose\" method=post action=takemessage.php>");
 	print("<input type=hidden name=receiver value=".$receiver.">");
-	if ((isset($_GET["returnto"]) && $_GET["returnto"]) || $_SERVER["HTTP_REFERER"])
-		print("<input type=hidden name=returnto value=\"".(htmlspecialchars($_GET["returnto"] ?? '') ? htmlspecialchars($_GET["returnto"]) : htmlspecialchars($_SERVER["HTTP_REFERER"]))."\">");
+	if ((((\App\Support\SupportContext::getQuery("returnto") !== null)) && \App\Support\SupportContext::getQuery("returnto")) || $__server_HTTP_REFERER)
+		print("<input type=hidden name=returnto value=\"".(htmlspecialchars(\App\Support\SupportContext::getQuery("returnto") ?? '') ? htmlspecialchars(\App\Support\SupportContext::getQuery("returnto")) : htmlspecialchars($__server_HTTP_REFERER))."\">");
 	$title = $lang_sendmessage['text_message_to'].get_username($receiver);
 	begin_compose($title, ($replyto ? "reply" : "new"), $body, true, $subject);
 	print("<tr><td class=toolbox colspan=2 align=center>");

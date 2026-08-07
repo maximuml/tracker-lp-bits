@@ -1,14 +1,16 @@
 <?php
 extract($context, EXTR_SKIP);
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
+
+$__server_PHP_SELF = \App\Support\SupportContext::getServerValue('PHP_SELF');
 user_can('forummanage', true);
 
-$act = $_GET['action'] ?? '';
+$act = \App\Support\SupportContext::getQuery('action') ?? '';
 if (!$act) {
     $act = "forum";
 }
-$id = intval($_GET['id'] ?? 0);
-$PHP_SELF = $_SERVER['PHP_SELF'];
+$id = intval(\App\Support\SupportContext::getQuery('id') ?? 0);
+$PHP_SELF = $__server_PHP_SELF;
 $user = $CURUSER;
 $prefix = '';
 
@@ -22,36 +24,36 @@ if ($act == "del") {
 	return;
 }
 
-if (isset($_POST['action']) && $_POST['action'] == "editforum") {
+if (((\App\Support\SupportContext::getPost('action') !== null)) && \App\Support\SupportContext::getPost('action') == "editforum") {
     user_can('forummanage', true);
-    $name = $_POST['name'];
-    $desc = $_POST['desc'];
+    $name = \App\Support\SupportContext::getPost('name');
+    $desc = \App\Support\SupportContext::getPost('desc');
     if (!$name && !$desc && !$id) { header("Location: $PHP_SELF?action=forum");
 	return;}
-    \Nexus\Database\NexusDB::table('overforums')->where('id', (int)$_POST['id'])->update([
-        'sort' => $_POST['sort'],
-        'name' => $_POST['name'],
-        'description' => $_POST['desc'],
-        'minclassview' => $_POST['viewclass'],
+    \Nexus\Database\NexusDB::table('overforums')->where('id', (int)\App\Support\SupportContext::getPost('id'))->update([
+        'sort' => \App\Support\SupportContext::getPost('sort'),
+        'name' => \App\Support\SupportContext::getPost('name'),
+        'description' => \App\Support\SupportContext::getPost('desc'),
+        'minclassview' => \App\Support\SupportContext::getPost('viewclass'),
     ]);
     $Cache->delete_value('overforums_list');
     header("Location: $PHP_SELF?action=forum");
 	return;
 }
 
-if (isset($_POST['action']) && $_POST['action'] == "addforum") {
+if (((\App\Support\SupportContext::getPost('action') !== null)) && \App\Support\SupportContext::getPost('action') == "addforum") {
     user_can('forummanage', true);
-    $name = trim($_POST['name']);
-    $desc = trim($_POST['desc']);
+    $name = trim(\App\Support\SupportContext::getPost('name'));
+    $desc = trim(\App\Support\SupportContext::getPost('desc'));
     if (!$name && !$desc) {
         header("Location: $PHP_SELF?action=forum");
 	return;
     }
     \Nexus\Database\NexusDB::table('overforums')->insert([
-        'sort' => $_POST['sort'],
-        'name' => $_POST['name'],
-        'description' => $_POST['desc'],
-        'minclassview' => $_POST['viewclass'],
+        'sort' => \App\Support\SupportContext::getPost('sort'),
+        'name' => \App\Support\SupportContext::getPost('name'),
+        'description' => \App\Support\SupportContext::getPost('desc'),
+        'minclassview' => \App\Support\SupportContext::getPost('viewclass'),
     ]);
     $Cache->delete_value('overforums_list');
     header("Location: $PHP_SELF?action=forum");
@@ -129,7 +131,7 @@ if ($act == "forum") {
 }
 
 if ($act == "editforum") {
-    $id = intval($_GET["id"] ?? 0);
+    $id = intval(\App\Support\SupportContext::getQuery("id") ?? 0);
     $row = (array) \Nexus\Database\NexusDB::table('overforums')->where('id', $id)->first();
     if (!$row) {
         print $lang_moforums['text_no_records_found'];

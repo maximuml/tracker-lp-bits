@@ -12,9 +12,23 @@ class RemovedFeaturesTest extends TestCase
         $this->assertFileDoesNotExist(base_path('lang/en/lang_promotionlink.php'));
         $this->assertFileDoesNotExist(database_path('migrations/2021_06_08_113437_create_prolinkclicks_table.php'));
 
-        $this->assertStringNotContainsString('promotionlink', file_get_contents(public_path('usercp.php')));
-        $this->assertStringNotContainsString('prolinkpoint', file_get_contents(public_path('mybonus.php')));
-        $this->assertStringNotContainsString('prolinkclicks', file_get_contents(public_path('topten.php')));
+        // The legacy per-page wrappers are gone; verify the strings are not
+        // present in the migrated views/controllers either.
+        foreach ([
+            base_path('resources/views/usercp/index.blade.php'),
+            base_path('resources/views/usercp/_usercp_legacy.php'),
+            base_path('resources/views/my/bonus.blade.php'),
+            base_path('resources/views/my/_bonus_legacy.php'),
+            base_path('resources/views/topten/index.blade.php'),
+            base_path('resources/views/topten/_topten_legacy.php'),
+            base_path('include/functions.php'),
+        ] as $file) {
+            $this->assertFileExists($file);
+            $content = file_get_contents($file);
+            $this->assertStringNotContainsString('promotionlink', $content);
+            $this->assertStringNotContainsString('prolinkpoint', $content);
+            $this->assertStringNotContainsString('prolinkclicks', $content);
+        }
     }
 
     public function test_only_english_language_pack_remains(): void
@@ -28,10 +42,12 @@ class RemovedFeaturesTest extends TestCase
     public function test_hot_classic_recommend_pick_options_removed(): void
     {
         foreach ([
-            public_path('upload.php'),
-            public_path('edit.php'),
-            public_path('takeupload.php'),
-            public_path('takeedit.php'),
+            base_path('resources/views/torrents/upload.blade.php'),
+            base_path('resources/views/torrents/_upload_legacy.blade.php'),
+            base_path('resources/views/torrent/edit.blade.php'),
+            base_path('resources/views/torrent/_edit_legacy.php'),
+            app_path('Http/Controllers/TorrentUploadController.php'),
+            app_path('Http/Controllers/TorrentEditController.php'),
             base_path('include/functions.php'),
         ] as $file) {
             $this->assertFileExists($file);
@@ -43,7 +59,10 @@ class RemovedFeaturesTest extends TestCase
 
     public function test_school_field_removed_from_signup(): void
     {
-        foreach ([public_path('signup.php'), public_path('takesignup.php')] as $file) {
+        foreach ([
+            base_path('resources/views/auth/signup.blade.php'),
+            app_path('Http/Controllers/Auth/RegistrationController.php'),
+        ] as $file) {
             $this->assertFileExists($file);
             $this->assertStringNotContainsString('name="school"', file_get_contents($file));
         }
@@ -51,8 +70,15 @@ class RemovedFeaturesTest extends TestCase
 
     public function test_uploader_bandwidth_row_removed_from_torrent_details(): void
     {
-        $content = file_get_contents(public_path('details.php'));
-        $this->assertStringNotContainsString('Uploader Bandwidth', $content);
-        $this->assertStringNotContainsString('Upload Speed', $content);
+        foreach ([
+            base_path('resources/views/torrent/details.blade.php'),
+            base_path('resources/views/torrent/_details_legacy.blade.php'),
+            app_path('Http/Controllers/TorrentDetailsController.php'),
+        ] as $file) {
+            $this->assertFileExists($file);
+            $content = file_get_contents($file);
+            $this->assertStringNotContainsString('Uploader Bandwidth', $content);
+            $this->assertStringNotContainsString('Upload Speed', $content);
+        }
     }
 }

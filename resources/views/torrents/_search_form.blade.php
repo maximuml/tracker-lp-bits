@@ -1,4 +1,5 @@
 <?php
+extract($context, EXTR_SKIP);
 
 $__server_QUERY_STRING = \App\Support\SupportContext::getServerValue('QUERY_STRING');
 $searchBoxRightTdStyle = 'padding: 1px;padding-left: 10px;white-space: nowrap';

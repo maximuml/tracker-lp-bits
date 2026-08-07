@@ -54,6 +54,9 @@ final class SupportContext
     /** @var array<string, mixed> */
     private static array $userUpdateSet = [];
 
+    /** @var array<string, mixed> */
+    private static array $globals = [];
+
     private static ?Request $laravelRequest = null;
 
     /**
@@ -64,29 +67,57 @@ final class SupportContext
      */
     public static function fromGlobals(): void
     {
-        self::$user = $GLOBALS['CURUSER'] ?? null;
-        self::$langFunctions = (array) ($GLOBALS['lang_functions'] ?? []);
-        self::$langShoutbox = (array) ($GLOBALS['lang_shoutbox'] ?? []);
-        self::$cache = $GLOBALS['Cache'] ?? null;
-        self::$bonusTweak = (string) ($GLOBALS['bonus_tweak'] ?? '');
-        self::$siteConfig = [
-            'SITENAME' => (string) ($GLOBALS['SITENAME'] ?? ''),
-            'SITEEMAIL' => (string) ($GLOBALS['SITEEMAIL'] ?? ''),
-            'smtptype' => (string) ($GLOBALS['smtptype'] ?? ''),
-            'smtp' => (string) ($GLOBALS['smtp'] ?? ''),
-            'smtp_host' => (string) ($GLOBALS['smtp_host'] ?? ''),
-            'smtp_port' => (string) ($GLOBALS['smtp_port'] ?? ''),
-            'smtp_from' => (string) ($GLOBALS['smtp_from'] ?? ''),
+        $excluded = [
+            'GLOBALS', '_GET', '_POST', '_REQUEST', '_SERVER', '_FILES', '_COOKIE', '_ENV',
+            'argc', 'argv', 'app', 'kernel', 'request', 'response',
+            'parameters', 'files', 'server', 'method', 'uri', 'routePath', 'pathInfo',
+            'queryString', 'isWrapper', 'page', 'executedScript', 'scriptFilename', 'scriptName',
+            'parsedUrl', 'requestPath', 'requestUri', 'nexusRoute', 'parkedScripts',
+            'extraLangFiles', 'scriptLangFiles', 'scriptLangFile', 'langPath', 'HTTP_RAW_POST_DATA',
+            '__composer_autoload_files',
         ];
+
+        foreach ($GLOBALS as $key => $value) {
+            if (in_array($key, $excluded, true)) {
+                continue;
+            }
+            if (! array_key_exists($key, self::$globals)) {
+                self::$globals[$key] = $value;
+            }
+        }
+
+        self::$user = self::$globals['CURUSER'] ?? null;
+        if (self::$user === null && ! empty($GLOBALS['CURUSER'])) {
+            self::$user = $GLOBALS['CURUSER'];
+            self::$globals['CURUSER'] = $GLOBALS['CURUSER'];
+        }
+        self::$langFunctions = (array) (self::$globals['lang_functions'] ?? []);
+        self::$langShoutbox = (array) (self::$globals['lang_shoutbox'] ?? []);
+        self::$cache = self::$globals['Cache'] ?? null;
+        self::$bonusTweak = (string) (self::$globals['bonus_tweak'] ?? '');
+        self::$siteConfig = [
+            'SITENAME' => (string) (self::$globals['SITENAME'] ?? ''),
+            'SITEEMAIL' => (string) (self::$globals['SITEEMAIL'] ?? ''),
+            'smtptype' => (string) (self::$globals['smtptype'] ?? ''),
+            'smtp' => (string) (self::$globals['smtp'] ?? ''),
+            'smtp_host' => (string) (self::$globals['smtp_host'] ?? ''),
+            'smtp_port' => (string) (self::$globals['smtp_port'] ?? ''),
+            'smtp_from' => (string) (self::$globals['smtp_from'] ?? ''),
+        ];
+
         self::$server = $_SERVER;
         self::$cookie = $_COOKIE;
         self::$get = $_GET;
         self::$post = $_POST;
         self::$request = $_REQUEST;
         self::$files = $_FILES;
-        self::$userUpdateSet = (array) ($GLOBALS['USERUPDATESET'] ?? []);
-        $GLOBALS['USERUPDATESET'] = &self::$userUpdateSet;
+
+        if (! array_key_exists('USERUPDATESET', self::$globals)) {
+            self::$globals['USERUPDATESET'] = [];
+        }
+        self::$userUpdateSet = &self::$globals['USERUPDATESET'];
     }
+
 
     /**
      * Populate the context from a Laravel request and the application settings.
@@ -99,10 +130,14 @@ final class SupportContext
         self::$get = $request->query->all();
         self::$post = $request->request->all();
         self::$request = $request->input();
-        self::$files = $_FILES;
-        self::$userUpdateSet = (array) ($GLOBALS['USERUPDATESET'] ?? []);
-        $GLOBALS['USERUPDATESET'] = &self::$userUpdateSet;
+        self::$files = $request->files->all();
+
+        if (! array_key_exists('USERUPDATESET', self::$globals)) {
+            self::$globals['USERUPDATESET'] = [];
+        }
+        self::$userUpdateSet = &self::$globals['USERUPDATESET'];
     }
+
 
     /**
      * @param  array<string, mixed>|null  $user
@@ -110,8 +145,9 @@ final class SupportContext
     public static function setUser(?array $user): void
     {
         self::$user = $user;
-        self::setGlobal('CURUSER', $user);
+        self::$globals['CURUSER'] = $user;
     }
+
 
     /**
      * Return a reference to the legacy per-request user update set.
@@ -146,58 +182,75 @@ final class SupportContext
             return self::$user;
         }
 
-        return ! empty($GLOBALS['CURUSER']) ? $GLOBALS['CURUSER'] : null;
+        return ! empty(self::$globals['CURUSER']) ? self::$globals['CURUSER'] : null;
     }
+
 
     /** @param  array<string, string>  $lang */
     public static function setLangFunctions(array $lang): void
     {
         self::$langFunctions = $lang;
+        self::$globals['lang_functions'] = $lang;
     }
+
 
     /** @return  array<string, string> */
     public static function getLangFunctions(): array
     {
-        return self::$langFunctions ?: (array) ($GLOBALS['lang_functions'] ?? []);
+        return self::$langFunctions ?: (array) (self::$globals['lang_functions'] ?? []);
     }
+
 
     /** @param  array<string, string>  $lang */
     public static function setLangShoutbox(array $lang): void
     {
         self::$langShoutbox = $lang;
+        self::$globals['lang_shoutbox'] = $lang;
     }
+
 
     /** @return  array<string, string> */
     public static function getLangShoutbox(): array
     {
-        return self::$langShoutbox ?: (array) ($GLOBALS['lang_shoutbox'] ?? []);
+        return self::$langShoutbox ?: (array) (self::$globals['lang_shoutbox'] ?? []);
     }
+
 
     public static function setCache(?object $cache): void
     {
         self::$cache = $cache;
+        self::$globals['Cache'] = $cache;
     }
+
 
     public static function getCache(): ?object
     {
-        return self::$cache ?? ($GLOBALS['Cache'] ?? null);
+        return self::$cache ?? (self::$globals['Cache'] ?? null);
     }
+
 
     public static function setBonusTweak(string $value): void
     {
         self::$bonusTweak = $value;
+        self::$globals['bonus_tweak'] = $value;
     }
+
 
     public static function getBonusTweak(): string
     {
-        return self::$bonusTweak ?: (string) ($GLOBALS['bonus_tweak'] ?? '');
+        return self::$bonusTweak ?: (string) (self::$globals['bonus_tweak'] ?? '');
     }
+
 
     /** @param  array<string, mixed>  $config */
     public static function setSiteConfig(array $config): void
     {
         self::$siteConfig = $config;
+        foreach ($config as $key => $value) {
+            self::$globals[$key] = $value;
+        }
     }
+
 
     /** @return  array<string, mixed> */
     public static function getSiteConfig(): array
@@ -207,13 +260,13 @@ final class SupportContext
         }
 
         $globals = [
-            'SITENAME' => (string) ($GLOBALS['SITENAME'] ?? ''),
-            'SITEEMAIL' => (string) ($GLOBALS['SITEEMAIL'] ?? ''),
-            'smtptype' => (string) ($GLOBALS['smtptype'] ?? ''),
-            'smtp' => (string) ($GLOBALS['smtp'] ?? ''),
-            'smtp_host' => (string) ($GLOBALS['smtp_host'] ?? ''),
-            'smtp_port' => (string) ($GLOBALS['smtp_port'] ?? ''),
-            'smtp_from' => (string) ($GLOBALS['smtp_from'] ?? ''),
+            'SITENAME' => (string) (self::$globals['SITENAME'] ?? ''),
+            'SITEEMAIL' => (string) (self::$globals['SITEEMAIL'] ?? ''),
+            'smtptype' => (string) (self::$globals['smtptype'] ?? ''),
+            'smtp' => (string) (self::$globals['smtp'] ?? ''),
+            'smtp_host' => (string) (self::$globals['smtp_host'] ?? ''),
+            'smtp_port' => (string) (self::$globals['smtp_port'] ?? ''),
+            'smtp_from' => (string) (self::$globals['smtp_from'] ?? ''),
         ];
 
         $keys = [
@@ -238,16 +291,19 @@ final class SupportContext
         return $globals;
     }
 
+
     public static function setGlobal(string $key, mixed $value): void
     {
-        $GLOBALS[$key] = $value;
+        self::$globals[$key] = $value;
     }
+
 
     /** @return  mixed */
     public static function getGlobal(string $key, mixed $default = null): mixed
     {
-        return $GLOBALS[$key] ?? $default;
+        return self::$globals[$key] ?? $default;
     }
+
 
     /**
      * Return a snapshot of the legacy global state suitable for passing to
@@ -259,56 +315,23 @@ final class SupportContext
     public static function getGlobalsForView(): array
     {
         $excluded = [
-            'GLOBALS',
-            '_GET',
-            '_POST',
-            '_REQUEST',
-            '_SERVER',
-            '_FILES',
-            '_COOKIE',
-            '_ENV',
-            'argc',
-            'argv',
-            'app',
-            'kernel',
-            'request',
-            'response',
-            'parameters',
-            'files',
-            'server',
-            'method',
-            'uri',
-            'routePath',
-            'pathInfo',
-            'queryString',
-            'isWrapper',
-            'page',
-            'executedScript',
-            'scriptFilename',
-            'scriptName',
-            'parsedUrl',
-            'requestPath',
-            'requestUri',
-            'nexusRoute',
-            'parkedScripts',
-            'extraLangFiles',
-            'scriptLangFiles',
-            'scriptLangFile',
-            'langPath',
-            'HTTP_RAW_POST_DATA',
+            'GLOBALS', '_GET', '_POST', '_REQUEST', '_SERVER', '_FILES', '_COOKIE', '_ENV',
+            'argc', 'argv', 'app', 'kernel', 'request', 'response',
+            'parameters', 'files', 'server', 'method', 'uri', 'routePath', 'pathInfo',
+            'queryString', 'isWrapper', 'page', 'executedScript', 'scriptFilename', 'scriptName',
+            'parsedUrl', 'requestPath', 'requestUri', 'nexusRoute', 'parkedScripts',
+            'extraLangFiles', 'scriptLangFiles', 'scriptLangFile', 'langPath', 'HTTP_RAW_POST_DATA',
             '__composer_autoload_files',
         ];
 
-        $context = [];
-        foreach ($GLOBALS as $key => $value) {
-            if (in_array($key, $excluded, true)) {
-                continue;
-            }
-            $context[$key] = $value;
+        $context = self::$globals;
+        foreach ($excluded as $key) {
+            unset($context[$key]);
         }
 
         return $context;
     }
+
 
     public static function setServerValue(string $key, mixed $value): void
     {
@@ -547,5 +570,6 @@ final class SupportContext
         self::$files = [];
         self::$userUpdateSet = [];
         self::$laravelRequest = null;
+        self::$globals = [];
     }
 }

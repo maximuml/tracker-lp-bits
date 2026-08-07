@@ -1,5 +1,6 @@
 <?php
 
+use App\Support\LegacyBootstrap;
 use App\Support\SupportContext;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Http\Request;
@@ -75,6 +76,9 @@ if ($isWrapper && $page !== '') {
 } elseif ($nexusRoute !== null) {
     $script = basename($nexusRoute) ?: 'nexus';
     $script = preg_replace('/[^a-zA-Z0-9_-]/', '', $script) ?? '';
+    if ($script === '') {
+        $script = 'nexus';
+    }
 } else {
     $segments = explode('/', trim($routePath, '/'));
     $script = $segments[0] ?? '';
@@ -131,21 +135,15 @@ require_once __DIR__.'/../vendor/autoload.php';
 
 $app = require_once __DIR__.'/../bootstrap/app.php';
 
-// Force Nexus to re-derive its per-request script/platform from the current
-// $_SERVER state, otherwise FPM worker persistence can leak the first request's
-// script into later requests (especially for direct routes like /torrents).
-if (!defined('TIMENOW')) {
-    \Nexus\Nexus::flush();
-}
+$request = Request::create($uri, $method, $parameters, $_COOKIE, $files, $server);
 
-// Legacy bootstrap: settings, cache, language, user login and globals.
-// This is what the old per-page `require '../include/bittorrent.php'; dbconn();`
-// block used to do; centralising it here lets every wrapper become one line.
-require_once $rootpath . 'include/core.php';
-require_once $rootpath . 'classes/class_attendance.php';
+// Legacy bootstrap: cache, Eloquent, settings, language, login and plugins,
+// wired into SupportContext instead of $GLOBALS.
+LegacyBootstrap::boot($request, $rootpath);
+
+$script = nexus()->getScript();
 
 // Load the page-specific language file(s) the legacy wrappers used to require.
-$script = nexus()->getScript();
 $extraLangFiles = [
     'search' => ['torrents.php'],
     'shoutbox_history' => ['shoutbox.php'],
@@ -162,15 +160,9 @@ foreach ($scriptLangFiles as $scriptLangFile) {
     }
 }
 
-// Synchronise the legacy global state into the context object so helpers can
-// read it without touching $GLOBALS directly.
+// Synchronise any per-script language globals into the context so helpers can
+// read them without touching $GLOBALS directly.
 SupportContext::fromGlobals();
-
-$kernel = $app->make(Kernel::class);
-
-$request = Request::create($uri, $method, $parameters, $_COOKIE, $files, $server);
-
-SupportContext::fromRequest($request);
 
 // Replicate legacy per-page parked() guards.
 $parkedScripts = [
@@ -187,6 +179,8 @@ if (in_array($script, $parkedScripts, true)) {
 if ($script === 'index') {
     register_shutdown_function('autoclean');
 }
+
+$kernel = $app->make(Kernel::class);
 
 $response = $kernel->handle($request);
 $response->send();

@@ -44,10 +44,9 @@ if ($action == 'savesettings_main')	// save main
 		'startsubid', 'logo', 'showlastxforumposts', 'enable_technical_info', 'site_language_enabled', 'show_top_uploader', 'offer_skip_approved_count',
         'upload_deny_approval_deny_count', 'enable_global_search', 'tmp_invite_count', 'complain_enabled'
 	);
-	extract(GetVar($validConfig), EXTR_OVERWRITE);
 	$MAIN = [];
 	foreach($validConfig as $config) {
-		$MAIN[$config] = $$config ?? null;
+		$MAIN[$config] = \App\Support\SupportContext::getRequestInput($config) ?? null;
 	}
 
 	saveSetting('main', $MAIN);
@@ -66,10 +65,9 @@ elseif ($action == 'savesettings_basic') 	// save basic
 	$validConfig = array(
 		'SITENAME', 'BASEURL', 'announce_url'
 	);
-	extract(GetVar($validConfig), EXTR_OVERWRITE);
 	$BASIC = [];
 	foreach($validConfig as $config) {
-		$BASIC[$config] = $$config ?? null;
+		$BASIC[$config] = \App\Support\SupportContext::getRequestInput($config) ?? null;
 	}
 	saveSetting('basic', $BASIC);
 	$actiontime = date("F j, Y, g:i a");
@@ -80,10 +78,9 @@ elseif ($action == 'savesettings_code') 	// save database
 {
 	stdhead($lang_settings['head_save_code_settings']);
 	$validConfig = array('mainversion','subversion','releasedate','website');
-	extract(GetVar($validConfig), EXTR_OVERWRITE);
 	$CODE = [];
 	foreach($validConfig as $config) {
-		$CODE[$config] = $$config ?? null;
+		$CODE[$config] = \App\Support\SupportContext::getRequestInput($config) ?? null;
 	}
 	saveSetting('code', $CODE);
 	$actiontime = date("F j, Y, g:i a");
@@ -101,14 +98,13 @@ elseif ($action == 'savesettings_bonus') 	// save bonus
         'harem_addition', 'hundredgbupload', 'tengbdownload', 'hundredgbdownload', 'official_addition', 'official_tag', 'zero_bonus_tag', 'zero_bonus_factor',
         'one_tmp_invite', 'rainbow_id', 'change_username_card', 'min_size', 'self_enable'
     );
-	extract(GetVar($validConfig), EXTR_OVERWRITE);
 	$BONUS = [];
 	foreach($validConfig as $config) {
-		$BONUS[$config] = $$config ?? null;
+		$BONUS[$config] = \App\Support\SupportContext::getRequestInput($config) ?? null;
 	}
 	$BONUS['attendance_continuous'] = array();
-	if(count(\App\Support\SupportContext::getPost('attendance_continuous_day')) == count(\App\Support\SupportContext::getPost('attendance_continuous_value'))){
-		foreach(\App\Support\SupportContext::getPost('attendance_continuous_day') as $k => $day){
+	if(count((array) \App\Support\SupportContext::getPost('attendance_continuous_day')) == count((array) \App\Support\SupportContext::getPost('attendance_continuous_value'))){
+		foreach((array) \App\Support\SupportContext::getPost('attendance_continuous_day') as $k => $day){
 			$value = (int) \App\Support\SupportContext::getPost('attendance_continuous_value')[$k];
 			if($day > 0 && $value > 0) $BONUS['attendance_continuous'][$day] = $value;
 		}
@@ -137,10 +133,9 @@ elseif ($action == 'savesettings_account') 	// save account
         'nmtime', 'nmdl', \App\Models\User::CLASS_NEXUS_MASTER . '_min_seed_points', 'nmprratio', 'nmderatio', \App\Models\User::CLASS_NEXUS_MASTER . '_alias',
         'getInvitesByPromotion', 'destroy_disabled'
     );
-	extract(GetVar($validConfig), EXTR_OVERWRITE);
 	$ACCOUNT = [];
 	foreach($validConfig as $config) {
-		$ACCOUNT[$config] = $$config ?? null;
+		$ACCOUNT[$config] = \App\Support\SupportContext::getRequestInput($config) ?? null;
 	}
 	saveSetting('account', $ACCOUNT);
 	$actiontime = date("F j, Y, g:i a");
@@ -160,10 +155,9 @@ elseif($action == 'savesettings_torrent') 	// save account
         'nfo_view_style_default', 'tax_factor', 'max_price', 'paid_torrent_enabled', 'reward_bonus_options', 'reward_times_limit'
     );
 	$validConfig = apply_filter('setting_valid_config', $validConfig);
-	extract(GetVar($validConfig), EXTR_OVERWRITE);
 	$TORRENT = [];
 	foreach($validConfig as $config) {
-		$TORRENT[$config] = $$config ?? null;
+		$TORRENT[$config] = \App\Support\SupportContext::getRequestInput($config) ?? null;
 	}
 
 	saveSetting('torrent', $TORRENT);
@@ -174,18 +168,17 @@ elseif($action == 'savesettings_torrent') 	// save account
 elseif ($action == 'savesettings_smtp') 	// save smtp
 {
 	stdhead($lang_settings['head_save_smtp_settings']);
+	$smtpType = \App\Support\SupportContext::getRequestInput('smtptype') ?? null;
 	$validConfig = array('smtptype', 'emailnotify');
-	extract(GetVar($validConfig), EXTR_OVERWRITE);
-	if ((isset($smtptype)) && $smtptype == 'advanced') {
+	if ($smtpType == 'advanced') {
 		$validConfig = array_merge($validConfig, array('smtp_host','smtp_port','smtp_from'));
-	} elseif ($smtptype == 'external') {
+	} elseif ($smtpType == 'external') {
 		$validConfig = array_merge($validConfig, array('smtpaddress','smtpport', 'encryption', 'accountname','accountpassword'));
 	}
 
-	extract(GetVar($validConfig), EXTR_OVERWRITE);
 	$SMTP = [];
 	foreach($validConfig as $config) {
-		$SMTP[$config] = $$config ?? null;
+		$SMTP[$config] = \App\Support\SupportContext::getRequestInput($config) ?? null;
 	}
 	saveSetting('smtp', $SMTP);
 	$actiontime = date("F j, Y, g:i a");
@@ -200,10 +193,9 @@ elseif ($action == 'savesettings_security') 	// save security
 		'guest_visit_type', 'guest_visit_value_static_page', 'guest_visit_value_custom_content', 'guest_visit_value_redirect',
 		'login_type', 'login_secret_lifetime', 'use_challenge_response_authentication',
 	);
-	extract(GetVar($validConfig), EXTR_OVERWRITE);
 	$SECURITY = [];
 	foreach($validConfig as $config) {
-		$SECURITY[$config] = $$config ?? null;
+		$SECURITY[$config] = \App\Support\SupportContext::getRequestInput($config) ?? null;
 	}
 	if (\App\Support\SupportContext::getPost('login_secret_regenerate') == 'yes') {
 		$minute = intval(\App\Support\SupportContext::getPost('login_secret_lifetime'));
@@ -226,10 +218,9 @@ elseif ($action == 'savesettings_authority') 	// save user authority
         'view_special_torrent','movetorrent','chrmanage','viewinvite', 'buyinvite','seebanned','againstoffer','userbar', 'torrent-approval',
         'torrent-delete', 'user-delete', 'user-change-class', 'torrent-set-special-tag', 'torrent-approval-allow-automatic', 'torrent-set-price'
     );
-	extract(GetVar($validConfig), EXTR_OVERWRITE);
 	$AUTHORITY = [];
 	foreach($validConfig as $config) {
-		$AUTHORITY[$config] = $$config ?? null;
+		$AUTHORITY[$config] = \App\Support\SupportContext::getRequestInput($config) ?? null;
 		if (in_array($config, \App\Models\Setting::$permissionMustHaveClass)) {
 		    if (!(isset(\App\Models\User::$classes[$AUTHORITY[$config]]))) {
 		        stderr('Error', "Invalid user class: " . $AUTHORITY[$config]);
@@ -245,10 +236,9 @@ elseif ($action == 'savesettings_tweak')	// save tweak
 {
 	stdhead($lang_settings['head_save_tweak_settings']);
 	$validConfig = array('where','iplog1','bonus','datefounded', 'enablelocation', 'titlekeywords', 'metakeywords', 'metadescription', 'enablesqldebug', 'sqldebug', 'cssdate', 'enabletooltip', 'analyticscode');
-	extract(GetVar($validConfig), EXTR_OVERWRITE);
 	$TWEAK = [];
 	foreach($validConfig as $config) {
-		$TWEAK[$config] = $$config ?? null;
+		$TWEAK[$config] = \App\Support\SupportContext::getRequestInput($config) ?? null;
 	}
 	saveSetting('tweak', $TWEAK);
 	$actiontime = date("F j, Y, g:i a");
@@ -259,10 +249,9 @@ elseif ($action == 'savesettings_attachment')	// save attachment
 {
 	stdhead($lang_settings['head_save_attachment_settings']);
 	$validConfig = array('enableattach','classone','countone','sizeone', 'extone', 'classtwo','counttwo','sizetwo', 'exttwo', 'classthree','countthree','sizethree', 'extthree', 'classfour','countfour','sizefour', 'extfour', 'savedirectory', 'httpdirectory', 'savedirectorytype', 'thumbnailtype', 'thumbquality', 'thumbwidth', 'thumbheight', 'watermarkpos', 'watermarkwidth', 'watermarkheight', 'watermarkquality', 'altthumbwidth', 'altthumbheight');
-	extract(GetVar($validConfig), EXTR_OVERWRITE);
 	$ATTACHMENT = [];
 	foreach($validConfig as $config) {
-		$ATTACHMENT[$config] = $$config ?? null;
+		$ATTACHMENT[$config] = \App\Support\SupportContext::getRequestInput($config) ?? null;
 	}
 
 	saveSetting('attachment', $ATTACHMENT);
@@ -274,14 +263,13 @@ elseif ($action == 'savesettings_misc')
 {
     stdhead($lang_settings['row_misc_settings']);
 	$validConfig = array('donation_custom', 'protected_forum',);
-    extract(GetVar($validConfig), EXTR_OVERWRITE);
     $data = [];
-	if (!empty($protected_forum) && !preg_match("/^[,\\d]*[\\d]+$/",$protected_forum)){
+    foreach($validConfig as $config) {
+        $data[$config] = \App\Support\SupportContext::getRequestInput($config) ?? null;
+    }
+	if (!empty($data['protected_forum']) && !preg_match("/^[,\\d]*[\\d]+$/", $data['protected_forum'])){
 		stderr($lang_settings['std_error'],$lang_settings['forum_format_error'].'<br>'.$lang_settings['std_click']."<a class=\"altlink\" href=\"settings.php\">".$lang_settings['std_here']."</a>".$lang_settings['std_to_go_back'],false,false);
 	}
-    foreach($validConfig as $config) {
-        $data[$config] = $$config ?? null;
-    }
     saveSetting('misc', $data, 'no');
     $actiontime = date("F j, Y, g:i a");
     write_log("Misc settings updated by {$CURUSER['username']}. $actiontime",'mod');

@@ -14,11 +14,14 @@ use App\Listeners\RemoveOauthTokens;
 use App\Listeners\RemoveSeedBoxRecordCache;
 use App\Listeners\SendEmailNotificationWhenTorrentCreated;
 use App\Listeners\SyncTorrentToElasticsearch;
+use App\Listeners\ResetNexus;
 use App\Listeners\SyncTorrentToMeilisearch;
 use App\Listeners\TestTorrentUpdated;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
+use Illuminate\Queue\Events\JobProcessing;
+use Illuminate\Queue\Events\Looping;
 use Illuminate\Support\Facades\Event;
 
 class EventServiceProvider extends ServiceProvider
@@ -50,6 +53,21 @@ class EventServiceProvider extends ServiceProvider
         ],
         UserDisabled::class => [
             RemoveOauthTokens::class,
+        ],
+        Looping::class => [
+            ResetNexus::class,
+        ],
+        JobProcessing::class => [
+            ResetNexus::class,
+        ],
+        'Laravel\Octane\Events\RequestReceived' => [
+            ResetNexus::class,
+        ],
+        'Laravel\Octane\Events\TaskReceived' => [
+            ResetNexus::class,
+        ],
+        'Laravel\Octane\Events\TickReceived' => [
+            ResetNexus::class,
         ],
     ];
 

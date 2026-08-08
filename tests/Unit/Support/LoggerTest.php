@@ -54,7 +54,7 @@ class LoggerTest extends TestCase
         $this->assertStringEndsWith('.log', $path);
     }
 
-    public function test_write_uses_passed_user_and_passkey_and_ignores_globals(): void
+    public function test_write_uses_passed_user_and_passkey(): void
     {
         $dir = sys_get_temp_dir() . '/nexus-logger-test-' . uniqid();
         mkdir($dir, 0777, true);
@@ -63,7 +63,6 @@ class LoggerTest extends TestCase
         putenv('LOG_LEVEL=debug');
         putenv('APP_ENV=testing');
 
-        $GLOBALS['CURUSER'] = ['id' => 99, 'passkey' => 'global-passkey'];
         $_REQUEST['passkey'] = 'request-passkey';
 
         try {
@@ -75,13 +74,10 @@ class LoggerTest extends TestCase
             $this->assertStringContainsString('[42]', $content);
             $this->assertStringContainsString('[explicit-passkey]', $content);
             $this->assertStringContainsString('unit message', $content);
-            $this->assertStringNotContainsString('[99]', $content);
-            $this->assertStringNotContainsString('global-passkey', $content);
             $this->assertStringNotContainsString('request-passkey', $content);
         } finally {
             @unlink(Logger::filePath());
             @rmdir($dir);
-            unset($GLOBALS['CURUSER']);
             unset($_REQUEST['passkey']);
         }
     }

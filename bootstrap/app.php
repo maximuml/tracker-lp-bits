@@ -6,8 +6,6 @@ if (!RUNNING_IN_OCTANE) {
 }
 $hook = new \Nexus\Plugin\Hook();
 $plugin = new \Nexus\Plugin\Plugin();
-$GLOBALS['hook'] = $hook;
-$GLOBALS['plugin'] = $plugin;
 if (class_exists(\App\Support\SupportContext::class)) {
     \App\Support\SupportContext::setGlobal('hook', $hook);
     \App\Support\SupportContext::setGlobal('plugin', $plugin);

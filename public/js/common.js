@@ -163,11 +163,30 @@ else {
 
 function disableother(select,target)
 {
-	if (document.getElementById(select).value == 0)
-		document.getElementById(target).disabled = false;
-	else {
-	document.getElementById(target).disabled = true;
-	document.getElementById(select).disabled = false;
+	var sel = document.getElementById(select);
+	var tgt = document.getElementById(target);
+	if (!sel || !tgt) return;
+
+	var selSection = document.getElementById(select + '_section');
+	var tgtSection = document.getElementById(target + '_section');
+
+	if (sel.value == 0) {
+		tgt.disabled = false;
+		setSectionDisabled(selSection, false);
+		setSectionDisabled(tgtSection, false);
+	} else {
+		tgt.disabled = true;
+		setSectionDisabled(selSection, false);
+		setSectionDisabled(tgtSection, true);
+	}
+}
+
+function setSectionDisabled(section, disabled)
+{
+	if (!section) return;
+	var controls = section.querySelectorAll('input, select, textarea');
+	for (var i = 0; i < controls.length; i++) {
+		controls[i].disabled = disabled;
 	}
 }
 

@@ -1,5 +1,4 @@
 <?php
-extract($context, EXTR_SKIP);
 
 $medalType = 'valid_medals';
 $userInfo = \App\Models\User::query()->with($medalType)->findOrFail($user['id']);

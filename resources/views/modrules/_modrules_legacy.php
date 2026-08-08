@@ -1,5 +1,4 @@
 <?php
-extract($context, EXTR_SKIP);
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 if (get_user_class() < UC_ADMINISTRATOR) {
 	stderr("Error","Only Administrators and above can modify the Rules, sorry.");

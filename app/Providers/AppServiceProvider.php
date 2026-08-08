@@ -73,10 +73,16 @@ class AppServiceProvider extends ServiceProvider
             Css::make("admin", asset('styles/admin.css')),
         ]);
 
-        // Pass the legacy global context into every view so Blade/PHP partials
-        // can stop reading $GLOBALS directly via extract($GLOBALS).
+        // Pass the legacy global context into every view as individual variables
+        // so Blade/PHP partials no longer need extract($context, EXTR_SKIP).
         View::composer('*', static function (\Illuminate\View\View $view): void {
-            $view->with('context', SupportContext::getGlobalsForView());
+            $context = SupportContext::getGlobalsForView();
+            foreach ($context as $key => $value) {
+                if (! array_key_exists($key, $view->getData())) {
+                    $view->with($key, $value);
+                }
+            }
+            $view->with('context', $context);
         });
 
         do_action('nexus_boot');

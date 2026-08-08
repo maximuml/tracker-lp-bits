@@ -1,5 +1,4 @@
 <?php
-extract($context, EXTR_SKIP);
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 function bonusarray($option = 0){
 $onegbupload_bonus = \App\Support\SupportContext::getGlobal('onegbupload_bonus');

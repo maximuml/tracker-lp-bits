@@ -1,5 +1,4 @@
 <?php
-extract($context, EXTR_SKIP);
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 \Nexus\Nexus::css('styles/shoutbox.css', 'header', true);
 \Nexus\Nexus::js('js/shoutbox.js', 'footer', true);

@@ -1,5 +1,4 @@
 <?php
-extract($context, EXTR_SKIP);
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 $id =  ((\App\Support\SupportContext::getPost('id') !== null)) ? intval(\App\Support\SupportContext::getPost('id')) : (((\App\Support\SupportContext::getQuery('id') !== null)) ? intval(\App\Support\SupportContext::getQuery('id')) : die());
 int_check($id,true);

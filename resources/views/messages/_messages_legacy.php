@@ -1,5 +1,4 @@
 <?php
-extract($context, EXTR_SKIP);
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 // Define constants
 define('PM_DELETED',0); // Message was deleted

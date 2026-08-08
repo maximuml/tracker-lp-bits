@@ -1,5 +1,4 @@
 <?php
-extract($context, EXTR_SKIP);
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 $id = intval(\App\Support\SupportContext::getQuery("id") ?? 0);
 int_check($id,true);

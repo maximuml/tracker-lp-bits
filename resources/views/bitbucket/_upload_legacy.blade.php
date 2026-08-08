@@ -1,4 +1,4 @@
-<?php extract($context, EXTR_SKIP); ?>
+<?php?>
 <h1>{{ $lang['text_avatar_upload'] }}</h1>
 <form method="post" action="/bitbucket-upload" enctype="multipart/form-data">
 <table border="1" cellspacing="0" cellpadding="5">

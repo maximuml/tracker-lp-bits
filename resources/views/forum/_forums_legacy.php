@@ -1,5 +1,4 @@
 <?php
-extract($context, EXTR_SKIP);
 
 // The original procedural page relies on loose PHP variable/array-key
 // handling. Keep the same runtime error level so that undefined indices

@@ -1,5 +1,4 @@
 <?php
-extract($context, EXTR_SKIP);
 ?>
 	<form id="compose" enctype="multipart/form-data" action="takeupload.php" method="post" name="upload">
 			<?php

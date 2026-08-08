@@ -18,8 +18,8 @@
         },
         "files": [
             "config/nexus_constants.php",
-            "include/globalfunctions.php",
-            "include/functions.php"
+            "app/Support/Legacy/globalfunctions.php",
+            "app/Support/Legacy/functions.php"
         ]
     },
     "require": {

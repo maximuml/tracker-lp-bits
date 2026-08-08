@@ -9,7 +9,10 @@ parameters:
         - app/Console
         - app/Http
         - app/Repositories
-        - include
+
+    excludePaths:
+        analyse:
+            - app/Support/Legacy
 
     bootstrapFiles:
         - tests/phpstan/bootstrap.php
@@ -18,10 +21,10 @@ parameters:
         - bootstrap/app.php
 
     scanFiles:
-        - include/globalfunctions.php
-        - include/functions.php
+        - app/Support/Legacy/globalfunctions.php
+        - app/Support/Legacy/functions.php
         - config/nexus_constants.php
-        - include/cleanup.php
+        - app/Support/Legacy/cleanup.php
 
     scanDirectories:
         - vendor
@@ -37,7 +40,7 @@ parameters:
     ignoreErrors:
         -
             message: '#Variable \$[a-zA-Z_][a-zA-Z0-9_]* might not be defined\.#'
-            path: include/cleanup.php
+            path: app/Support/Legacy/cleanup.php
 
     universalObjectCratesClasses:
         - Illuminate\Http\Resources\Json\JsonResource

@@ -5,7 +5,6 @@ parameters:
         - nexus
         - public
         - config
-        - include
         - database
         - tests
     excludePaths:

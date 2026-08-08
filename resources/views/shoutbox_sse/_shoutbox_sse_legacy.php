@@ -1,11 +1,13 @@
 <?php
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
-$__server_HTTP_LAST_EVENT_ID = \App\Support\SupportContext::getServerValue('HTTP_LAST_EVENT_ID');
-if (! (isset($CURUSER))) {
+$CURUSER = \App\Support\SupportContext::getUser();
+if (! $CURUSER) {
     http_response_code(403);
     return;
 }
+
+$__server_HTTP_LAST_EVENT_ID = \App\Support\SupportContext::getServerValue('HTTP_LAST_EVENT_ID');
 
 $type = \App\Support\SupportContext::getQuery('type') ?? 'shoutbox';
 $lastId = (int) ($__server_HTTP_LAST_EVENT_ID ?? \App\Support\SupportContext::getQuery('last_id') ?? 0);

@@ -499,4 +499,62 @@ final class Html
 
         return \App\Support\Comment::addTempCode(\App\Support\BBCode::spoiler($content, $title, $defaultTitle, $defaultCollapsed));
     }
+
+    /**
+     * Render the page header. Backs the legacy `stdhead()` helper.
+     */
+    public static function stdhead(string $title = "", bool $msgalert = true, string $script = "", string $place = ""): void
+    {
+        $context = \page_layout_context();
+        \App\Support\PageLayout::setContext($context);
+        \App\Support\PageLayout::header($title, $msgalert, $script, $place);
+    }
+
+    /**
+     * Render the page footer. Backs the legacy `stdfoot()` helper.
+     */
+    public static function stdfoot(): void
+    {
+        \App\Support\PageLayout::footer();
+    }
+
+    /**
+     * Open a framed content block. Backs the legacy `begin_frame()` helper.
+     */
+    public static function beginFrame(string $caption = "", bool $center = false, int $padding = 10, string $width = "100%", string $caption_center = "left"): void
+    {
+        echo \App\Support\Frame::open($caption, $center, $padding, $width, $caption_center);
+    }
+
+    /**
+     * Close a framed content block. Backs the legacy `end_frame()` helper.
+     */
+    public static function endFrame(): void
+    {
+        echo \App\Support\Frame::CLOSE;
+    }
+
+    /**
+     * Open a data table. Backs the legacy `begin_table()` helper.
+     */
+    public static function beginTable(bool $fullwidth = false, int $padding = 5): void
+    {
+        echo \App\Support\Frame::tableOpen($fullwidth, $padding);
+    }
+
+    /**
+     * Close a data table. Backs the legacy `end_table()` helper.
+     */
+    public static function endTable(): void
+    {
+        echo \App\Support\Frame::TABLE_CLOSE;
+    }
+
+    /**
+     * Emit a settings table row. Backs the legacy `tr()` helper.
+     */
+    public static function tr(mixed $x, mixed $y, bool $noesc = false, string $relation = '', bool $return = false): ?string
+    {
+        return self::emitSettingsRow((string) $x, (string) $y, ! $noesc, $relation, $return);
+    }
 }

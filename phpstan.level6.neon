@@ -21,11 +21,10 @@ parameters:
         - bootstrap/app.php
 
     scanFiles:
-        - app/Support/Legacy/functions.php
         - config/nexus_constants.php
-        - app/Support/Legacy/cleanup.php
 
     scanDirectories:
+        - app/Support/Legacy
         - vendor
         - classes
 

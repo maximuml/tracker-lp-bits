@@ -204,7 +204,8 @@ function addTempCode($value) {
  * @return string
  */
 function formatUrl($url, $newWindow = false, $text = '', $linkClass = '') {
-    return \App\Support\Html::formatUrl((string) $url, (bool) $newWindow, (string) $text, (string) $linkClass);
+    trigger_deprecation('maximuml/tracker-lp-bits', '2.0', 'The %s() function is deprecated, use %s::%s() instead.', __FUNCTION__, '\App\Support\HtmlRenderer', 'formatUrl');
+    return \App\Support\HtmlRenderer::formatUrl($url, $newWindow, $text, $linkClass);
 }
 /**
  * @param string $text
@@ -223,7 +224,8 @@ function formatCode($text) {
  * @return string
  */
 function formatImg($src, $enableImageResizer, $image_max_width, $image_max_height, $imgId = "") {
-    return \App\Support\Html::formatImg((string) $src, (bool) $enableImageResizer, (int) $image_max_width, (int) $image_max_height, (string) $imgId);
+    trigger_deprecation('maximuml/tracker-lp-bits', '2.0', 'The %s() function is deprecated, use %s::%s() instead.', __FUNCTION__, '\App\Support\HtmlRenderer', 'formatImg');
+    return \App\Support\HtmlRenderer::formatImg($src, $enableImageResizer, $image_max_width, $image_max_height, $imgId);
 }
 
 /**
@@ -233,7 +235,8 @@ function formatImg($src, $enableImageResizer, $image_max_width, $image_max_heigh
  * @return string
  */
 function formatFlash($src, $width, $height) {
-    return \App\Support\Html::formatFlash((string) $src, $width, $height);
+    trigger_deprecation('maximuml/tracker-lp-bits', '2.0', 'The %s() function is deprecated, use %s::%s() instead.', __FUNCTION__, '\App\Support\HtmlRenderer', 'formatFlash');
+    return \App\Support\HtmlRenderer::formatFlash($src, $width, $height);
 }
 /**
  * @param string $src
@@ -252,7 +255,8 @@ function formatFlv($src, $width, $height) {
  */
 function formatYoutube($src, $width = '', $height = ''): string
 {
-    return \App\Support\Html::formatYoutube((string) $src, $width, $height);
+    trigger_deprecation('maximuml/tracker-lp-bits', '2.0', 'The %s() function is deprecated, use %s::%s() instead.', __FUNCTION__, '\App\Support\HtmlRenderer', 'formatYoutube');
+    return \App\Support\HtmlRenderer::formatYoutube($src, $width, $height);
 }
 
 /**
@@ -270,7 +274,8 @@ function formatVideo($src, $width, $height) {
  * @return string
  */
 function formatAudio($src) {
-    return \App\Support\Html::formatAudio((string) $src);
+    trigger_deprecation('maximuml/tracker-lp-bits', '2.0', 'The %s() function is deprecated, use %s::%s() instead.', __FUNCTION__, '\App\Support\HtmlRenderer', 'formatAudio');
+    return \App\Support\HtmlRenderer::formatAudio($src);
 }
 
 /**
@@ -281,7 +286,8 @@ function formatAudio($src) {
  */
 function formatSpoiler($content, $title = '', $defaultCollapsed = true): string
 {
-    return \App\Support\Html::formatSpoiler((string) $content, (string) $title, (bool) $defaultCollapsed);
+    trigger_deprecation('maximuml/tracker-lp-bits', '2.0', 'The %s() function is deprecated, use %s::%s() instead.', __FUNCTION__, '\App\Support\HtmlRenderer', 'formatSpoiler');
+    return \App\Support\HtmlRenderer::formatSpoiler($content, $title, $defaultCollapsed);
 }
 
 /**
@@ -290,7 +296,8 @@ function formatSpoiler($content, $title = '', $defaultCollapsed = true): string
  */
 function formatHidden($content): string
 {
-    return addTempCode(\App\Support\BBCode::hidden((string) $content));
+    trigger_deprecation('maximuml/tracker-lp-bits', '2.0', 'The %s() function is deprecated, use %s::%s() instead.', __FUNCTION__, '\App\Support\HtmlRenderer', 'formatHidden');
+    return \App\Support\HtmlRenderer::formatHidden($content);
 }
 
 /**
@@ -310,7 +317,8 @@ function formatTextAlign($text, $align): string
  */
 function format_urls($text, $newWindow = false)
 {
-	return \App\Support\BBCode::formatUrls((string) $text, (bool) $newWindow);
+    trigger_deprecation('maximuml/tracker-lp-bits', '2.0', 'The %s() function is deprecated, use %s::%s() instead.', __FUNCTION__, '\App\Support\Format', 'formatUrls');
+    return \App\Support\Format::formatUrls($text, $newWindow);
 }
 /**
  * @param string $text
@@ -327,18 +335,8 @@ function format_urls($text, $newWindow = false)
  */
 function format_comment($text, $strip_html = true, $xssclean = false, $newtab = true, $imageresizer = true, $image_max_width = 700, $enableimage = true, $enableflash = true , $imagenum = -1, $image_max_height = 0)
 {
-	return \App\Support\Comment::format(
-		(string) $text,
-		(bool) $strip_html,
-		(bool) $xssclean,
-		(bool) $newtab,
-		(bool) $imageresizer,
-		(int) $image_max_width,
-		(bool) $enableimage,
-		(bool) $enableflash,
-		(int) $imagenum,
-		(int) $image_max_height,
-	);
+    trigger_deprecation('maximuml/tracker-lp-bits', '2.0', 'The %s() function is deprecated, use %s::%s() instead.', __FUNCTION__, '\App\Support\Format', 'formatComment');
+    return \App\Support\Format::formatComment($text, $strip_html, $xssclean, $newtab, $imageresizer, $image_max_width, $enableimage, $enableflash, $imagenum, $image_max_height);
 }
 /**
  * @param string $search
@@ -349,7 +347,8 @@ function format_comment($text, $strip_html = true, $xssclean = false, $newtab = 
  */
 function highlight($search,$subject,$hlstart='<b><font class="striking">',$hlend="</font></b>")
 {
-	return \App\Support\Strings::highlight((string)$search, (string)$subject, $hlstart, $hlend);
+    trigger_deprecation('maximuml/tracker-lp-bits', '2.0', 'The %s() function is deprecated, use %s::%s() instead.', __FUNCTION__, '\App\Support\Format', 'highlight');
+    return \App\Support\Format::highlight($search, $subject, $hlstart, $hlend);
 }
 
 /**
@@ -362,7 +361,8 @@ function highlight($search,$subject,$hlstart='<b><font class="striking">',$hlend
  */
 function get_user_class_name($class, $compact = false, $b_colored = false, $I18N = false, array $options = [])
 {
-	return \App\Support\UserClass::name($class, $compact, $b_colored, $I18N, $options);
+    trigger_deprecation('maximuml/tracker-lp-bits', '2.0', 'The %s() function is deprecated, use %s::%s() instead.', __FUNCTION__, '\App\Support\User', 'getUserClassName');
+    return \App\Support\User::getUserClassName($class, $compact, $b_colored, $I18N, $options);
 }
 /**
  * @param mixed $class
@@ -370,7 +370,8 @@ function get_user_class_name($class, $compact = false, $b_colored = false, $I18N
  */
 function is_valid_user_class($class)
 {
-	return \App\Support\Validators::isUserClass($class);
+    trigger_deprecation('maximuml/tracker-lp-bits', '2.0', 'The %s() function is deprecated, use %s::%s() instead.', __FUNCTION__, '\App\Support\User', 'isValidUserClass');
+    return \App\Support\User::isValidUserClass($class);
 }
 /**
  * @param mixed $value
@@ -418,13 +419,15 @@ function end_main_frame() {
  * @return void
  */
 function begin_frame($caption = "", $center = false, $padding = 10, $width="100%", $caption_center="left") {
-	echo \App\Support\Frame::open($caption, $center, $padding, $width, $caption_center);
+    trigger_deprecation('maximuml/tracker-lp-bits', '2.0', 'The %s() function is deprecated, use %s::%s() instead.', __FUNCTION__, '\App\Support\Html', 'beginFrame');
+    \App\Support\Html::beginFrame($caption, $center, $padding, $width, $caption_center);
 }
 /**
  * @return void
  */
 function end_frame() {
-	echo \App\Support\Frame::CLOSE;
+    trigger_deprecation('maximuml/tracker-lp-bits', '2.0', 'The %s() function is deprecated, use %s::%s() instead.', __FUNCTION__, '\App\Support\Html', 'endFrame');
+    \App\Support\Html::endFrame();
 }
 /**
  * @param bool $fullwidth
@@ -432,13 +435,15 @@ function end_frame() {
  * @return void
  */
 function begin_table($fullwidth = false, $padding = 5) {
-	echo \App\Support\Frame::tableOpen($fullwidth, $padding);
+    trigger_deprecation('maximuml/tracker-lp-bits', '2.0', 'The %s() function is deprecated, use %s::%s() instead.', __FUNCTION__, '\App\Support\Html', 'beginTable');
+    \App\Support\Html::beginTable($fullwidth, $padding);
 }
 /**
  * @return void
  */
 function end_table() {
-	echo \App\Support\Frame::TABLE_CLOSE;
+    trigger_deprecation('maximuml/tracker-lp-bits', '2.0', 'The %s() function is deprecated, use %s::%s() instead.', __FUNCTION__, '\App\Support\Html', 'endTable');
+    \App\Support\Html::endTable();
 }
 
 //-------- Inserts a smilies frame
@@ -457,7 +462,8 @@ function insert_smilies_frame()
  */
 function get_ratio_color($ratio)
 {
-	return \App\Support\Ratio::color((float)$ratio);
+    trigger_deprecation('maximuml/tracker-lp-bits', '2.0', 'The %s() function is deprecated, use %s::%s() instead.', __FUNCTION__, '\App\Support\Format', 'getRatioColor');
+    return \App\Support\Format::getRatioColor($ratio);
 }
 /**
  * @param mixed $ratio
@@ -474,7 +480,8 @@ function get_slr_color($ratio)
  */
 function write_log($text, $security = "normal")
 {
-    \App\Support\Log::write((string) $text, (string) $security, get_user_id());
+    trigger_deprecation('maximuml/tracker-lp-bits', '2.0', 'The %s() function is deprecated, use %s::%s() instead.', __FUNCTION__, '\App\Support\Log', 'write');
+    \App\Support\Log::write($text, $security, get_user_id());
 }
 
 /**
@@ -484,20 +491,8 @@ function write_log($text, $security = "normal")
  */
 function get_elapsed_time($ts,$shortunit = false)
 {
-	$lang_functions = \App\Support\SupportContext::getLangFunctions();
-	return \App\Support\Time::elapsedSince((int)$ts, TIMENOW, [
-		'year' => $lang_functions['text_year'] ?? '',
-		'year_short' => $lang_functions['text_short_year'] ?? '',
-		'month' => $lang_functions['text_month'] ?? '',
-		'month_short' => $lang_functions['text_short_month'] ?? '',
-		'day' => $lang_functions['text_day'] ?? '',
-		'day_short' => $lang_functions['text_short_day'] ?? '',
-		'hour' => $lang_functions['text_hour'] ?? '',
-		'hour_short' => $lang_functions['text_short_hour'] ?? '',
-		'min' => $lang_functions['text_min'] ?? '',
-		'min_short' => $lang_functions['text_short_min'] ?? '',
-		'plural_suffix' => $lang_functions['text_s'] ?? '',
-	], (bool)$shortunit);
+    trigger_deprecation('maximuml/tracker-lp-bits', '2.0', 'The %s() function is deprecated, use %s::%s() instead.', __FUNCTION__, '\App\Support\Format', 'getElapsedTime');
+    return \App\Support\Format::getElapsedTime($ts, $shortunit);
 }
 /**
  * @param string $form
@@ -559,7 +554,8 @@ function get_torrent_2_user_value($user_snatched_arr)
  */
 function cur_user_check()
 {
-    \App\Support\LegacyAuth::currentUserCheck(legacy_auth_context());
+    trigger_deprecation('maximuml/tracker-lp-bits', '2.0', 'The %s() function is deprecated, use %s::%s() instead.', __FUNCTION__, '\App\Support\User', 'currentUserCheck');
+    \App\Support\User::currentUserCheck();
 }
 /**
  * @param string $type
@@ -595,7 +591,8 @@ function nexus_redirect($url)
  */
 function set_cachetimestamp($id, $field = "cache_stamp")
 {
-	\App\Support\Cache::touchTorrent($id, $field);
+    trigger_deprecation('maximuml/tracker-lp-bits', '2.0', 'The %s() function is deprecated, use %s::%s() instead.', __FUNCTION__, '\App\Support\CacheHelper', 'setCacheTimestamp');
+    \App\Support\CacheHelper::setCacheTimestamp($id, $field);
 }
 /**
  * @param string|int $id
@@ -604,7 +601,8 @@ function set_cachetimestamp($id, $field = "cache_stamp")
  */
 function reset_cachetimestamp($id, $field = "cache_stamp")
 {
-	\App\Support\Cache::resetTorrent($id, $field);
+    trigger_deprecation('maximuml/tracker-lp-bits', '2.0', 'The %s() function is deprecated, use %s::%s() instead.', __FUNCTION__, '\App\Support\CacheHelper', 'resetCacheTimestamp');
+    \App\Support\CacheHelper::resetCacheTimestamp($id, $field);
 }
 /**
  * @param string $file
@@ -613,14 +611,16 @@ function reset_cachetimestamp($id, $field = "cache_stamp")
  * @return bool
  */
 function cache_check ($file = 'cachefile',$endpage = true, $cachetime = 600) {
-	return \App\Support\Cache::pageCheck((string) $file, (bool) $endpage, (int) $cachetime);
+    trigger_deprecation('maximuml/tracker-lp-bits', '2.0', 'The %s() function is deprecated, use %s::%s() instead.', __FUNCTION__, '\App\Support\CacheHelper', 'cacheCheck');
+    return \App\Support\CacheHelper::cacheCheck($file, $endpage, $cachetime);
 }
 /**
  * @param string $file
  * @return void
  */
 function cache_save  ($file = 'cachefile') {
-	\App\Support\Cache::pageSave((string) $file);
+    trigger_deprecation('maximuml/tracker-lp-bits', '2.0', 'The %s() function is deprecated, use %s::%s() instead.', __FUNCTION__, '\App\Support\CacheHelper', 'cacheSave');
+    \App\Support\CacheHelper::cacheSave($file);
 }
 /**
  * @param string $lang
@@ -730,20 +730,16 @@ function image_code () {
  * @return bool
  */
 function check_code ($imagehash, $imagestring, $where = 'signup.php', $maxattemptlog = false, $head = true) {
-    return \App\Support\LegacyAuth::checkCode((string) $imagehash, (string) $imagestring, (string) $where, (bool) $maxattemptlog, (bool) $head, legacy_auth_context());
+    trigger_deprecation('maximuml/tracker-lp-bits', '2.0', 'The %s() function is deprecated, use %s::%s() instead.', __FUNCTION__, '\App\Support\Captcha', 'checkCode');
+    return \App\Support\Captcha::checkCode($imagehash, $imagestring, $where, $maxattemptlog, $head, \legacy_auth_context());
 }
 
 /**
  * @return void
  */
 function show_image_code () {
-    $lang_functions = \App\Support\SupportContext::getLangFunctions();
-    $iv = (string) \App\Support\SupportContext::getGlobal('iv', '');
-    \App\Support\Captcha::render((string) $iv, [
-        'row_security_image' => $lang_functions['row_security_image'] ?? '',
-        'row_security_challenge' => $lang_functions['row_security_challenge'] ?? '',
-        'row_security_code' => $lang_functions['row_security_code'] ?? '',
-    ], (string) SupportContext::getQuery('secret', ''));
+    trigger_deprecation('maximuml/tracker-lp-bits', '2.0', 'The %s() function is deprecated, use %s::%s() instead.', __FUNCTION__, '\App\Support\Captcha', 'showImageCode');
+    \App\Support\Captcha::showImageCode();
 }
 /**
  * @param string $ip
@@ -860,7 +856,8 @@ function mksize_loose($bytes)
  */
 function mksize($bytes)
 {
-	return \App\Support\Format::size((float)$bytes);
+    trigger_deprecation('maximuml/tracker-lp-bits', '2.0', 'The %s() function is deprecated, use %s::%s() instead.', __FUNCTION__, '\App\Support\Format', 'mksize');
+    return \App\Support\Format::mksize($bytes);
 }
 
 /**
@@ -908,7 +905,8 @@ function unesc($x) {
  * @return string|null
  */
 function tr($x, $y, $noesc = false, $relation = '', $return = false) {
-	return \App\Support\Html::emitSettingsRow($x, $y, !(bool) $noesc, $relation, $return);
+    trigger_deprecation('maximuml/tracker-lp-bits', '2.0', 'The %s() function is deprecated, use %s::%s() instead.', __FUNCTION__, '\App\Support\Html', 'tr');
+    return \App\Support\Html::tr($x, $y, $noesc, $relation, $return);
 }
 /**
  * @param string $x
@@ -1048,9 +1046,8 @@ function get_style_highlight()
  */
 function stdhead($title = "", $msgalert = true, $script = "", $place = "")
 {
-    $context = page_layout_context();
-    \App\Support\PageLayout::setContext($context);
-    \App\Support\PageLayout::header((string) $title, $msgalert, $script, $place);
+    trigger_deprecation('maximuml/tracker-lp-bits', '2.0', 'The %s() function is deprecated, use %s::%s() instead.', __FUNCTION__, '\App\Support\Html', 'stdhead');
+    \App\Support\Html::stdhead($title, $msgalert, $script, $place);
 }
 
 /**
@@ -1058,7 +1055,8 @@ function stdhead($title = "", $msgalert = true, $script = "", $place = "")
  */
 function stdfoot()
 {
-    \App\Support\PageLayout::footer();
+    trigger_deprecation('maximuml/tracker-lp-bits', '2.0', 'The %s() function is deprecated, use %s::%s() instead.', __FUNCTION__, '\App\Support\Html', 'stdfoot');
+    \App\Support\Html::stdfoot();
 }
 
 /**
@@ -1956,7 +1954,8 @@ function list_require_search_box_id()
  */
 function can_access_torrent($torrent, $uid)
 {
-    return \App\Support\TorrentAccess::canAccess($torrent, $uid);
+    trigger_deprecation('maximuml/tracker-lp-bits', '2.0', 'The %s() function is deprecated, use %s::%s() instead.', __FUNCTION__, '\App\Support\User', 'canAccessTorrent');
+    return \App\Support\User::canAccessTorrent($torrent, $uid);
 }
 
 /**

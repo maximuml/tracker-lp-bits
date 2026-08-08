@@ -189,4 +189,87 @@ final class Format
 
         return number_format($bytes / 1125899906842624, 3).$separator.'PB';
     }
+
+    /**
+     * Legacy alias for {@see size()}. Backs the legacy `mksize()` helper.
+     */
+    public static function mksize(int|float $bytes): string
+    {
+        return self::size($bytes);
+    }
+
+    /**
+     * Format an elapsed timestamp. Backs the legacy `get_elapsed_time()` helper.
+     */
+    public static function getElapsedTime(int $ts, bool $shortunit = false): string
+    {
+        $lang_functions = SupportContext::getLangFunctions();
+
+        return \App\Support\Time::elapsedSince($ts, (int) TIMENOW, [
+            'year' => $lang_functions['text_year'] ?? '',
+            'year_short' => $lang_functions['text_short_year'] ?? '',
+            'month' => $lang_functions['text_month'] ?? '',
+            'month_short' => $lang_functions['text_short_month'] ?? '',
+            'day' => $lang_functions['text_day'] ?? '',
+            'day_short' => $lang_functions['text_short_day'] ?? '',
+            'hour' => $lang_functions['text_hour'] ?? '',
+            'hour_short' => $lang_functions['text_short_hour'] ?? '',
+            'min' => $lang_functions['text_min'] ?? '',
+            'min_short' => $lang_functions['text_short_min'] ?? '',
+            'plural_suffix' => $lang_functions['text_s'] ?? '',
+        ], $shortunit);
+    }
+
+    /**
+     * Return the color code for a ratio. Backs the legacy `get_ratio_color()` helper.
+     */
+    public static function getRatioColor(int|float $ratio): string
+    {
+        return \App\Support\Ratio::color((float) $ratio);
+    }
+
+    /**
+     * Format a comment body. Backs the legacy `format_comment()` helper.
+     */
+    public static function formatComment(
+        string $text,
+        bool $stripHtml = true,
+        bool $xssclean = false,
+        bool $newtab = true,
+        bool $imageresizer = true,
+        int $imageMaxWidth = 700,
+        bool $enableimage = true,
+        bool $enableflash = true,
+        int $imagenum = -1,
+        int $imageMaxHeight = 0,
+    ): string {
+        return \App\Support\Comment::format(
+            $text,
+            $stripHtml,
+            $xssclean,
+            $newtab,
+            $imageresizer,
+            $imageMaxWidth,
+            $enableimage,
+            $enableflash,
+            $imagenum,
+            $imageMaxHeight,
+        );
+    }
+
+    /**
+     * Turn bare URLs into clickable links. Backs the legacy `format_urls()` helper.
+     */
+    public static function formatUrls(string $text, bool $newWindow = false): string
+    {
+        return \App\Support\BBCode::formatUrls($text, $newWindow);
+    }
+
+    /**
+     * Highlight occurrences of a needle in a subject. Backs the legacy `highlight()` helper.
+     */
+    public static function highlight(string $search, string $subject, string $hlstart = '<b><font class="striking">', string $hlend = '</font></b>'): string
+    {
+        return \App\Support\Strings::highlight($search, $subject, $hlstart, $hlend);
+    }
 }

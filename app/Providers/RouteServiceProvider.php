@@ -77,5 +77,9 @@ class RouteServiceProvider extends ServiceProvider
         RateLimiter::for('tracker', function (Request $request) {
             return Limit::perMinute(120)->by($request->ip() ?? 'default');
         });
+
+        RateLimiter::for('login', function (Request $request) {
+            return Limit::perMinute(10)->by($request->ip() ?? 'default');
+        });
     }
 }

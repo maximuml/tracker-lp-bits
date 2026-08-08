@@ -2,6 +2,8 @@ services:
   php:
     build:
       dockerfile: .docker/php/Dockerfile
+      args:
+        NEXUSPHP_ENV: dev
     image: nexusphp_php
     container_name: nexusphp-php
     environment:

@@ -26,7 +26,7 @@ require __DIR__.'/vendor/autoload.php';
 $app = require_once __DIR__.'/bootstrap/app.php';
 
 // Load the legacy bootstrap for artisan commands that still need legacy helpers.
-// Web requests load this via public/nexus.php; migration/install commands must
+// Web requests load this via public/index.php; migration/install commands must
 // not load it because the database is not yet populated.
 $command = $_SERVER['argv'][1] ?? '';
 if (in_array($command, ['cleanup:run'], true)) {

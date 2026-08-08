@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Support\SupportContext;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -24,14 +23,11 @@ class ShoutboxController extends LegacyController
 
     public function shoutboxSse(Request $request): SymfonyResponse
     {
-        if (SupportContext::getUser() === null) {
+        if (\App\Support\SupportContext::getUser() === null) {
             return new SymfonyResponse('', 403);
         }
 
-        $context = SupportContext::getGlobalsForView();
-
-        $callback = function () use ($context) {
-            extract($context, EXTR_SKIP);
+        $callback = function () {
             $scriptFile = resource_path('views/shoutbox_sse/_shoutbox_sse_legacy.php');
             if (is_file($scriptFile)) {
                 require $scriptFile;

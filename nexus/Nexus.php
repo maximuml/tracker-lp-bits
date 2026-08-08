@@ -6,7 +6,6 @@ use Illuminate\Container\Container;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\Capsule\Manager;
 use Illuminate\Redis\RedisManager;
-use Illuminate\Support\Arr;
 use Nexus\Translation\NexusTranslator;
 
 final class Nexus
@@ -142,38 +141,75 @@ final class Nexus
         return $this->getFirst($ip);
     }
 
-    private function retrieveFromServer(array $fields, bool $includeHeader = false)
+    private function retrieveFromServer(array $fields, bool $includeHeader = false): mixed
     {
-        if ($this->runningInOctane()) {
-            $servers = request()->server();
-            $headers = request()->header();
-        } else {
-            $servers = $_SERVER;
-            $headers = getallheaders();
-        }
+        $request = $this->requestOrNull();
+
         foreach ($fields as $field) {
-            $result = $servers[$field] ?? null;
-            if ($result !== null && $result !== '') {
-                return $result;
-            }
-            if ($includeHeader) {
-                $result = $headers[$field] ?? null;
-                if (is_array($result)) {
-                    $result = Arr::first($result);
-                }
+            if ($request !== null) {
+                $result = $request->server($field);
                 if ($result !== null && $result !== '') {
                     return $result;
                 }
+
+                if ($includeHeader) {
+                    $result = $request->header($this->fieldToHeaderName($field));
+                    if ($result !== null && $result !== '') {
+                        return $result;
+                    }
+                }
+            } else {
+                $result = $_SERVER[$field] ?? null;
+                if ($result !== null && $result !== '') {
+                    return $result;
+                }
+
+                if ($includeHeader) {
+                    $result = $this->headerFromServer($this->fieldToHeaderName($field));
+                    if ($result !== null && $result !== '') {
+                        return $result;
+                    }
+                }
             }
         }
+
+        return null;
     }
 
-    private function runningInOctane(): bool
+    private function requestOrNull(): ?\Illuminate\Http\Request
     {
-        if (defined('RUNNING_IN_OCTANE') && RUNNING_IN_OCTANE) {
-            return true;
+        $container = Container::getInstance();
+        if (! $container->bound('request')) {
+            return null;
         }
-        return false;
+
+        /** @var \Illuminate\Http\Request $request */
+        $request = $container->make('request');
+        return $request;
+    }
+
+    private function fieldToHeaderName(string $field): string
+    {
+        if (str_starts_with($field, 'HTTP_')) {
+            $field = substr($field, 5);
+        }
+
+        return str_replace('_', '-', strtolower($field));
+    }
+
+    private function headerFromServer(string $headerName): ?string
+    {
+        $serverName = 'HTTP_' . str_replace('-', '_', strtoupper($headerName));
+        if (isset($_SERVER[$serverName])) {
+            return $_SERVER[$serverName];
+        }
+
+        $serverName = str_replace('-', '_', strtoupper($headerName));
+        if (in_array($serverName, ['CONTENT_TYPE', 'CONTENT_LENGTH'], true) && isset($_SERVER[$serverName])) {
+            return $_SERVER[$serverName];
+        }
+
+        return null;
     }
 
     public function isAjax(): bool
@@ -194,7 +230,13 @@ final class Nexus
 
     private function generateRequestId(): string
     {
-        $prefix = ($_SERVER['SCRIPT_FILENAME'] ?? '') . implode('', $_SERVER['argv'] ?? []);
+        $request = $this->requestOrNull();
+        $scriptFilename = $request?->server('SCRIPT_FILENAME') ?? $_SERVER['SCRIPT_FILENAME'] ?? '';
+        $argv = $request?->server('argv') ?? $_SERVER['argv'] ?? [];
+        if (! is_array($argv)) {
+            $argv = [$argv];
+        }
+        $prefix = $scriptFilename . implode('', $argv);
         $prefix = substr(md5($prefix), 0, 4);
         // 4 + 23 = 27 characters, after replace '.', 26
         $requestId = str_replace('.', '', uniqid($prefix, true));

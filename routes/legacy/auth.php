@@ -31,7 +31,7 @@ use App\Http\Controllers\WebCommentController;
     Route::match(['get', 'post'], '/offers', [OfferController::class, 'legacy'])->name('offers.legacy');
     Route::get('/torrents', [TorrentListingController::class, 'index'])->name('torrents.index');
     Route::get('/special', [TorrentListingController::class, 'index'])->name('torrents.special');
-    Route::get('/details/{id}', [TorrentDetailsController::class, 'show'])->name('torrent.details');
+    Route::get('/details/{id}', [TorrentDetailsController::class, 'show'])->where('id', '[0-9]+')->name('torrent.details');
     Route::match(['get', 'post'], '/mybonus', [MyController::class, 'bonus'])->name('my.bonus');
     Route::get('/myhr', [MyController::class, 'hr'])->name('my.hr');
     Route::get('/topten', [ToptenController::class, 'legacy'])->name('topten.legacy');

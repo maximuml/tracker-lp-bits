@@ -1,0 +1,46 @@
+/**
+ * Nexus design tokens.
+ *
+ * These CSS custom properties are the single source of truth for colors,
+ * spacing, typography and layout limits. Theme files can override them
+ * by redeclaring the same variables on a scoped class (e.g. .theme-dark).
+ */
+
+:root,
+.nexus-theme {
+    --nexus-bg: #f5f4ea;
+    --nexus-surface: #ffffff;
+    --nexus-surface-alt: #ece9d8;
+    --nexus-border: #000000;
+    --nexus-text: #000000;
+    --nexus-text-muted: #7d7b7b;
+    --nexus-primary: #4d6c99;
+    --nexus-primary-text: #ffffff;
+    --nexus-link: #0066cc;
+    --nexus-success: #2f8f3f;
+    --nexus-warning: #d97706;
+    --nexus-danger: #dc2626;
+
+    --nexus-radius: 0;
+    --nexus-space-xs: 0.25rem;
+    --nexus-space-sm: 0.5rem;
+    --nexus-space-md: 1rem;
+    --nexus-space-lg: 1.5rem;
+    --nexus-content-max: 75rem;
+    --nexus-font-sans: Tahoma, Arial, Helvetica, sans-serif;
+}
+
+.nexus-theme.dark {
+    --nexus-bg: #0f172a;
+    --nexus-surface: #1e293b;
+    --nexus-surface-alt: #334155;
+    --nexus-border: #475569;
+    --nexus-text: #e2e8f0;
+    --nexus-text-muted: #94a3b8;
+    --nexus-primary: #93c5fd;
+    --nexus-primary-text: #0f172a;
+    --nexus-link: #60a5fa;
+    --nexus-success: #86efac;
+    --nexus-warning: #fcd34d;
+    --nexus-danger: #fca5a5;
+}

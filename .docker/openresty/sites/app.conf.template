@@ -19,12 +19,12 @@ server {
 
     # Filament
     location ^~ /filament {
-        try_files $uri $uri/ /nexus.php$is_args$args;
+        try_files $uri $uri/ /index.php$is_args$args;
     }
 
     # All non-static requests fall back to the single Laravel entry point.
     location / {
-        try_files $uri $uri/ /nexus.php?$query_string;
+        try_files $uri $uri/ /index.php?$query_string;
     }
 
     # Tracker announce with Lua validation.
@@ -36,7 +36,7 @@ server {
         fastcgi_pass php:9000;
         fastcgi_index index.php;
         include fastcgi_params;
-        fastcgi_param SCRIPT_FILENAME $document_root/nexus.php;
+        fastcgi_param SCRIPT_FILENAME $document_root/index.php;
         fastcgi_param SCRIPT_NAME /announce.php;
         fastcgi_param REQUEST_ID $request_id;
         fastcgi_param HTTP_X_FORWARDED_FOR $proxy_add_x_forwarded_for;
@@ -47,7 +47,7 @@ server {
         fastcgi_pass php:9000;
         fastcgi_index index.php;
         include fastcgi_params;
-        fastcgi_param SCRIPT_FILENAME $document_root/nexus.php;
+        fastcgi_param SCRIPT_FILENAME $document_root/index.php;
         fastcgi_param SCRIPT_NAME /scrape.php;
         fastcgi_param REQUEST_ID $request_id;
         fastcgi_param HTTP_X_FORWARDED_FOR $proxy_add_x_forwarded_for;
@@ -59,7 +59,7 @@ server {
         fastcgi_pass php:9000;
         fastcgi_index index.php;
         include fastcgi_params;
-        fastcgi_param SCRIPT_FILENAME $document_root/nexus.php;
+        fastcgi_param SCRIPT_FILENAME $document_root/index.php;
         fastcgi_param SCRIPT_NAME /confirmemail.php;
         fastcgi_param PATH_INFO $fastcgi_path_info;
         fastcgi_param REQUEST_ID $request_id;
@@ -67,10 +67,10 @@ server {
     }
 
     # Remaining .php URLs (including the root index.php wrapper) are served if the
-    # file still exists; otherwise they fall through to nexus.php so legacy URLs
+    # file still exists; otherwise they fall through to index.php so legacy URLs
     # like /torrents.php keep working after the per-page wrappers are removed.
     location ~ \.php$ {
-        try_files $uri /nexus.php =404;
+        try_files $uri /index.php =404;
         fastcgi_pass php:9000;
         fastcgi_index index.php;
         include fastcgi_params;

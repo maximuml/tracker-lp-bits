@@ -1,2 +1,1 @@
-@php@endphp
 @php include resource_path('views/user-ban-log/_user-ban-log_legacy.php'); @endphp

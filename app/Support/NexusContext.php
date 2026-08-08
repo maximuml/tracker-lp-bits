@@ -88,9 +88,38 @@ final class NexusContext
         $this->get = $request->query->all();
         $this->post = $request->request->all();
         $this->request = $request->input();
-        $this->files = $request->files->all();
+        $this->files = $this->normalizeFiles($request->files->all());
 
         $this->ensureUserUpdateSetReference();
+    }
+
+    /**
+     * Convert Symfony UploadedFile objects into the legacy array format so
+     * legacy partials can keep using $file['tmp_name'], $file['size'], etc.
+     *
+     * @param  array<string, mixed>  $files
+     * @return array<string, mixed>
+     */
+    private function normalizeFiles(array $files): array
+    {
+        $normalized = [];
+        foreach ($files as $key => $value) {
+            if (is_array($value)) {
+                $normalized[$key] = $this->normalizeFiles($value);
+            } elseif ($value instanceof \Symfony\Component\HttpFoundation\File\UploadedFile) {
+                $normalized[$key] = [
+                    'name' => $value->getClientOriginalName(),
+                    'type' => $value->getClientMimeType(),
+                    'tmp_name' => $value->getPathname(),
+                    'error' => $value->getError(),
+                    'size' => $value->getSize(),
+                ];
+            } else {
+                $normalized[$key] = $value;
+            }
+        }
+
+        return $normalized;
     }
 
     /** @param array<string, mixed>|null $user */
@@ -421,7 +450,7 @@ final class NexusContext
     /** @param array<string, mixed> $files */
     public function setFiles(array $files): void
     {
-        $this->files = $files;
+        $this->files = $this->normalizeFiles($files);
     }
 
     public function getFile(string $key, mixed $default = null): mixed

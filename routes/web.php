@@ -47,6 +47,10 @@ Route::get('/', function () {
     return redirect('index.php');
 });
 
+Route::get('/nexus', function () {
+    return redirect('index.php');
+});
+
 Route::get('/health', function () {
     return response()->json(['status' => 'ok']);
 })->name('health');

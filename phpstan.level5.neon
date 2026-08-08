@@ -7,16 +7,20 @@ parameters:
         - app/Support
         - app/Models
 
+    excludePaths:
+        analyse:
+            - app/Support/Legacy
+
     bootstrapFiles:
         - tests/phpstan/bootstrap.php
         - tests/phpstan/constants.stub.php
         - bootstrap/app.php
 
     scanFiles:
-        - include/globalfunctions.php
-        - include/functions.php
+        - app/Support/Legacy/globalfunctions.php
+        - app/Support/Legacy/functions.php
         - config/nexus_constants.php
-        - include/cleanup.php
+        - app/Support/Legacy/cleanup.php
 
     scanDirectories:
         - vendor

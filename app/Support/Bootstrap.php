@@ -72,7 +72,7 @@ final class Bootstrap
             return false;
         }
 
-        require_once $rootpath . 'include/cleanup.php';
+        require_once $rootpath . 'app/Support/Legacy/cleanup.php';
 
         return docleanup(0, $printProgress);
     }

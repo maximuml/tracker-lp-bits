@@ -47,7 +47,7 @@ final class CleanupService
         }
 
         if (! \function_exists('docleanup')) {
-            require_once \base_path('include/cleanup.php');
+            require_once \base_path('app/Support/Legacy/cleanup.php');
         }
 
         $tstart = \getmicrotime();

@@ -27,7 +27,7 @@ final class Environment
 
     public static function commandExists(string $command): bool
     {
-        return trim((string) exec("command -v $command")) !== '';
+        return trim((string) exec('command -v ' . escapeshellarg($command))) !== '';
     }
 
     /**
@@ -41,14 +41,18 @@ final class Environment
     public static function run(string $command, string $format = 'string', bool $artisan = false, bool $exception = true): string|array
     {
         $append = ' 2>&1';
-        if (!str_ends_with($command, $append)) {
-            $command .= $append;
-        }
+        $needsAppend = !str_ends_with($command, $append);
 
         if ($artisan) {
             $phpPath = \nexus_env('PHP_PATH') ?: 'php';
             $webRoot = rtrim(ROOT_PATH, '/');
-            $command = "$phpPath $webRoot/artisan $command";
+            $command = escapeshellcmd($command);
+            $command = str_replace('`', '\\`', $command);
+            $command = escapeshellarg($phpPath) . ' ' . escapeshellarg($webRoot . '/artisan') . ' ' . $command;
+        }
+
+        if ($needsAppend) {
+            $command .= $append;
         }
 
         \do_log("command: $command");

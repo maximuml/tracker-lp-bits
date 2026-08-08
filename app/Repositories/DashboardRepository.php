@@ -79,7 +79,7 @@ class DashboardRepository extends BaseRepository
         $result[$name] = [
             'name' => $name,
             'text' => nexus_trans("dashboard.system_info.$name"),
-            'value' =>  exec('uptime'),
+            'value' =>  function_exists('sys_getloadavg') ? implode(', ', sys_getloadavg()) : 'N/A',
         ];
         return $result;
     }

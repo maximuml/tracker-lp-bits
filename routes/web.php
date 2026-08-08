@@ -75,7 +75,7 @@ Route::match(['get', 'post'], '/recover', [RecoveryController::class, 'recover']
 Route::get("/error", [\App\Http\Controllers\ToolController::class, "error"]);
 
 Route::post('/takeupload', [TorrentUploadController::class, 'legacyStore'])
-    ->middleware('auth.nexus:nexus-web')
+    ->middleware(['auth.nexus:nexus-web', 'throttle:upload'])
     ->name('torrents.legacy-store');
 
 Route::get('/edit', [TorrentEditController::class, 'legacy'])

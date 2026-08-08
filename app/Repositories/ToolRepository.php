@@ -45,11 +45,13 @@ class ToolRepository extends BaseRepository
             $filename = $baseFilename . ".tar.gz";
             $command = "tar";
             foreach ($excludes as $item) {
-                $command .= " --exclude=$dirName/$item";
+                $command .= ' --exclude=' . escapeshellarg("$dirName/$item");
             }
             $command .= sprintf(
                 ' -czf %s -C %s %s 2>&1',
-                $filename, dirname($webRoot), $dirName
+                escapeshellarg($filename),
+                escapeshellarg(dirname($webRoot)),
+                escapeshellarg($dirName)
             );
             $result = exec($command, $output, $result_code);
             do_log(sprintf(
@@ -102,18 +104,32 @@ class ToolRepository extends BaseRepository
         $connectionName = config('database.default');
         $config = config("database.connections.$connectionName");
         $filename = sprintf('%s/%s.database.%s.sql', $this->getBackupExportPath(), basename(base_path()), date('Ymd.His'));
-        if (command_exists("mariadb-dump")) {
-            $command = sprintf(
-                'mariadb-dump --user=%s --password=%s --host=%s --port=%s --single-transaction --no-create-db --no-tablespaces --ssl=0 %s >> %s 2>&1',
-                $config['username'], $config['password'], $config['host'], $config['port'], $config['database'], $filename,
-            );
-        } else {
-            $command = sprintf(
-                'mysqldump --user=%s --password=%s --host=%s --port=%s --single-transaction --no-create-db --no-tablespaces --ssl-mode=DISABLED %s >> %s 2>&1',
-                $config['username'], $config['password'], $config['host'], $config['port'], $config['database'], $filename,
-            );
+        $tmpFile = tempnam(sys_get_temp_dir(), 'db.cnf');
+        if ($tmpFile === false) {
+            throw new \RuntimeException('Could not create temporary database credentials file');
         }
+        $optionContent = sprintf(
+            "[client]\nuser=%s\npassword=%s\nhost=%s\nport=%s\n",
+            $config['username'],
+            $config['password'],
+            $config['host'] ?? '127.0.0.1',
+            $config['port'] ?? 3306
+        );
+        file_put_contents($tmpFile, $optionContent);
+        chmod($tmpFile, 0600);
+
+        $dumpCommand = command_exists('mariadb-dump') ? 'mariadb-dump' : 'mysqldump';
+        $sslFlag = command_exists('mariadb-dump') ? '--ssl=0' : '--ssl-mode=DISABLED';
+        $command = sprintf(
+            '%s --defaults-extra-file=%s --single-transaction --no-create-db --no-tablespaces %s %s >> %s 2>&1',
+            $dumpCommand,
+            escapeshellarg($tmpFile),
+            $sslFlag,
+            escapeshellarg($config['database']),
+            escapeshellarg($filename)
+        );
         $result = exec($command, $output, $result_code);
+        @unlink($tmpFile);
         do_log(sprintf(
             "command: %s, output: %s, result_code: %s, result: %s, filename: %s",
             $command, json_encode($output), $result_code, $result, $filename
@@ -144,9 +160,11 @@ class ToolRepository extends BaseRepository
             $filename = $baseFilename . ".tar.gz";
             $command = sprintf(
                 'tar -czf %s -C %s %s -C %s %s 2>&1',
-                $filename,
-                dirname($backupWeb['filename']), basename($backupWeb['filename']),
-                dirname($backupDatabase['filename']), basename($backupDatabase['filename'])
+                escapeshellarg($filename),
+                escapeshellarg(dirname($backupWeb['filename'])),
+                escapeshellarg(basename($backupWeb['filename'])),
+                escapeshellarg(dirname($backupDatabase['filename'])),
+                escapeshellarg(basename($backupDatabase['filename']))
             );
             $result = exec($command, $output, $result_code);
             do_log(sprintf(

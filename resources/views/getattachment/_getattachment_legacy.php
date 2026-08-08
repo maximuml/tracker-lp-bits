@@ -19,38 +19,26 @@ if (!$row) {
 	echo 'No attachment found.';
 	return;
 }
+$basePath = realpath($httpdirectory_attachment);
 $filelocation = $httpdirectory_attachment."/".$row['location'];
-if (!is_file($filelocation) || !is_readable($filelocation)) {
+$realFile = realpath($filelocation);
+if ($basePath === false || $realFile === false || !str_starts_with($realFile, $basePath) || !is_file($realFile) || !is_readable($realFile)) {
 	echo 'File not found or cannot be read.';
 	return;
 }
-$f = fopen($filelocation, "rb");
+$f = fopen($realFile, "rb");
 if (!$f) {
 	echo "Cannot open file";
 	return;
 }
 header("Content-Type: application/octet-stream");
 
-if ( str_replace("Gecko", "", $__server_HTTP_USER_AGENT) != $__server_HTTP_USER_AGENT)
-{
-	header ("Content-Disposition: attachment; filename=\"{$row['filename']}\" ; charset=utf-8");
+$filename = basename((string) ($row['filename'] ?? ''));
+$filename = str_replace(['"', '\\', "\r", "\n"], '', $filename);
+if ($filename === '') {
+    $filename = 'attachment';
 }
-else if ( str_replace("Firefox", "", $__server_HTTP_USER_AGENT) != $__server_HTTP_USER_AGENT )
-{
-	header ("Content-Disposition: attachment; filename=\"{$row['filename']}\" ; charset=utf-8");
-}
-else if ( str_replace("Opera", "", $__server_HTTP_USER_AGENT) != $__server_HTTP_USER_AGENT )
-{
-	header ("Content-Disposition: attachment; filename=\"{$row['filename']}\" ; charset=utf-8");
-}
-else if ( str_replace("IE", "", $__server_HTTP_USER_AGENT) != $__server_HTTP_USER_AGENT )
-{
-	header ("Content-Disposition: attachment; filename=".str_replace("+", "%20", rawurlencode($row['filename'])));
-}
-else
-{
-	header ("Content-Disposition: attachment; filename=".str_replace("+", "%20", rawurlencode($row['filename'])));
-}
+header('Content-Disposition: attachment; filename="' . $filename . '"');
 
 do
 {

@@ -871,7 +871,7 @@ JS;
 }
 elseif ($action == 'miscsettings')
 {
-    $result = \App\Models\Setting::getByWhereRaw("name like 'misc.%'");
+    $result = \App\Models\Setting::getByNameLike('misc.%');
     $misc = $result['misc'] ?? [];
     stdhead($lang_settings['head_torrent_settings']);
     print ($notice);

@@ -82,7 +82,7 @@ class NexusUpdate extends Command
             $tmpPath = $this->update->downAndExtractCode($url, $includes);
             if (!$keepTmp) {
                 $this->doLog("Delete tmp files in: $tmpPath");
-                $this->update->executeCommand("rm -rf " . rtrim($tmpPath, '/'));
+                $this->update->executeCommand("rm -rf " . escapeshellarg(rtrim($tmpPath, '/')));
             } else {
                 $this->doLog("Keep tmp files in: $tmpPath");
             }

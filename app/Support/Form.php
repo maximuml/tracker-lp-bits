@@ -68,11 +68,11 @@ final class Form
 ?>
 
 <script type="text/javascript">
-    let textareaId = "<?php echo $text?>"
-    let editTbodyId = "<?php echo $editTbodyId?>"
-    let previewTbodyId = "<?php echo $previewTbodyId?>"
-    let btnEditId = "<?php echo $btnEditId?>"
-    let btnPreviewId = "<?php echo $btnPreviewId?>"
+    let textareaId = <?php echo json_encode($text, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>
+    let editTbodyId = <?php echo json_encode($editTbodyId, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>
+    let previewTbodyId = <?php echo json_encode($previewTbodyId, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>
+    let btnEditId = <?php echo json_encode($btnEditId, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>
+    let btnPreviewId = <?php echo json_encode($btnPreviewId, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>
 //<![CDATA[
 var b_open = 0;
 var i_open = 0;
@@ -97,7 +97,7 @@ function cstat() {
 	var c = stacksize(bbtags);
 	if ( (c < 1) || (c == null) ) {c = 0;}
 	if ( ! bbtags[0] ) {c = 0;}
-	document.<?php echo $form?>.tagcount.value = "Close last, Open "+c;
+	document.forms[<?php echo json_encode($form, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>].tagcount.value = "Close last, Open "+c;
 }
 function stacksize(thearray) {
 	for (i = 0; i < thearray.length; i++ ) {
@@ -126,8 +126,8 @@ function closeall() {
 			tagRemove = popstack(bbtags)
 			if ( (tagRemove != 'color') ) {
 				doInsert("[/"+tagRemove+"]", "", false);
-				eval("document.<?php echo $form?>." + tagRemove + ".value = ' " + tagRemove.toUpperCase() + " '");
-				eval(tagRemove + "_open = 0");
+				document.forms[<?php echo json_encode($form, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>][tagRemove].value = ' ' + tagRemove.toUpperCase() + ' ';
+				window[tagRemove + '_open'] = 0;
 			} else {
 				doInsert("[/"+tagRemove+"]", "", false);
 			}
@@ -135,18 +135,18 @@ function closeall() {
 			return;
 		}
 	}
-	document.<?php echo $form?>.tagcount.value = "Close last, Open 0";
+	document.forms[<?php echo json_encode($form, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>].tagcount.value = "Close last, Open 0";
 	bbtags = new Array();
-	document.<?php echo $form?>.<?php echo $text?>.focus();
+	document.forms[<?php echo json_encode($form, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>][<?php echo json_encode($text, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>].focus();
 }
 function add_code(NewCode) {
-	document.<?php echo $form?>.<?php echo $text?>.value += NewCode;
-	document.<?php echo $form?>.<?php echo $text?>.focus();
+	document.forms[<?php echo json_encode($form, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>][<?php echo json_encode($text, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>].value += NewCode;
+	document.forms[<?php echo json_encode($form, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>][<?php echo json_encode($text, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>].focus();
 }
 function alterfont(theval, thetag) {
 	if (theval == 0) return;
 	if(doInsert("[" + thetag + "=" + theval + "]", "[/" + thetag + "]", true)) pushstack(bbtags, thetag);
-	document.<?php echo $form?>.color.selectedIndex = 0;
+	document.forms[<?php echo json_encode($form, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>].color.selectedIndex = 0;
 	cstat();
 }
 
@@ -194,7 +194,7 @@ function tag_email(PromptEmail, PromptError) {
 function doInsert(ibTag, ibClsTag, isSingle)
 {
 	var isClose = false;
-	var obj_ta = document.<?php echo $form?>.<?php echo $text?>;
+	var obj_ta = document.forms[<?php echo json_encode($form, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>][<?php echo json_encode($text, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>];
 	if ( (myVersion >= 4) && is_ie && is_win)
 	{
 		if(obj_ta.isTextEdit)
@@ -237,22 +237,22 @@ function doInsert(ibTag, ibClsTag, isSingle)
 
 function clearContent()
 {
-    document.<?php echo $form?>.<?php echo $text?>.value = '';
+    document.forms[<?php echo json_encode($form, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>][<?php echo json_encode($text, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>].value = '';
 }
 
 function winop()
 {
-	windop = window.open("moresmilies.php?form=<?php echo $form?>&text=<?php echo $text?>","mywin","height=500,width=500,resizable=no,scrollbars=yes");
+	windop = window.open("moresmilies.php?form=<?php echo urlencode($form) ?>&text=<?php echo urlencode($text) ?>","mywin","height=500,width=500,resizable=no,scrollbars=yes");
 }
 
 function simpletag(thetag)
 {
-	var tagOpen = eval(thetag + "_open");
+	var tagOpen = window[thetag + '_open'];
 	if (tagOpen == 0) {
 		if(doInsert("[" + thetag + "]", "[/" + thetag + "]", true))
 		{
-			eval(thetag + "_open = 1");
-			eval("document.<?php echo $form?>." + thetag + ".value += '*'");
+			window[thetag + '_open'] = 1;
+			document.forms[<?php echo json_encode($form, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>][thetag].value += '*';
 			pushstack(bbtags, thetag);
 			cstat();
 		}
@@ -269,8 +269,8 @@ function simpletag(thetag)
 			tagRemove = popstack(bbtags);
 			doInsert("[/" + tagRemove + "]", "", false)
 			if ((tagRemove != 'COLOR') ){
-				eval("document.<?php echo $form?>." + tagRemove + ".value = '" + tagRemove.toUpperCase() + "'");
-				eval(tagRemove + "_open = 0");
+				document.forms[<?php echo json_encode($form, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>][tagRemove].value = tagRemove.toUpperCase();
+				window[tagRemove + '_open'] = 0;
 			}
 		}
 		cstat();

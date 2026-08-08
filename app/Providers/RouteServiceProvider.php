@@ -23,8 +23,6 @@ class RouteServiceProvider extends ServiceProvider
      * The controller namespace for the application.
      *
      * When present, controller route declarations will automatically be prefixed with this namespace.
-     *
-     * @var string|null
      */
     // protected $namespace = 'App\\Http\\Controllers';
 
@@ -80,6 +78,30 @@ class RouteServiceProvider extends ServiceProvider
 
         RateLimiter::for('login', function (Request $request) {
             return Limit::perMinute(10)->by($request->ip() ?? 'default');
+        });
+
+        RateLimiter::for('ajax', function (Request $request) {
+            return Limit::perMinute(60)->by($request->ip() ?? 'default');
+        });
+
+        RateLimiter::for('shoutbox', function (Request $request) {
+            return Limit::perMinute(30)->by($request->user()?->id ?: $request->ip() ?? 'default');
+        });
+
+        RateLimiter::for('comment', function (Request $request) {
+            return Limit::perMinute(15)->by($request->user()?->id ?: $request->ip() ?? 'default');
+        });
+
+        RateLimiter::for('attachment', function (Request $request) {
+            return Limit::perMinute(30)->by($request->user()?->id ?: $request->ip() ?? 'default');
+        });
+
+        RateLimiter::for('upload', function (Request $request) {
+            return Limit::perMinute(10)->by($request->user()?->id ?: $request->ip() ?? 'default');
+        });
+
+        RateLimiter::for('torrents', function (Request $request) {
+            return Limit::perMinute(60)->by($request->ip() ?? 'default');
         });
     }
 }

@@ -162,13 +162,21 @@ class PluginRepository extends BaseRepository
         return str_replace("xiaomlove/nexusphp-", "", $plugin->package_name);
     }
 
+    private function validatePackageName(string $packageName): void
+    {
+        if (!preg_match('/^[a-z0-9_.-]+\/[a-z0-9_.-]+$/i', $packageName)) {
+            throw new \InvalidArgumentException("Invalid composer package name: $packageName");
+        }
+    }
+
     /**
      * @param  \App\Models\Plugin  $plugin
      * @return  mixed
      */
     private function execComposerConfig(Plugin $plugin)
     {
-        $command = sprintf("composer config repositories.%s git %s", $this->getRepositoryKey($plugin), $plugin->remote_url);
+        $this->validatePackageName($plugin->package_name);
+        $command = sprintf("composer config repositories.%s git %s", $this->getRepositoryKey($plugin), escapeshellarg((string) $plugin->remote_url));
         do_log("[COMPOSER_CONFIG]: $command");
         return $this->executeCommand($command);
     }
@@ -179,7 +187,8 @@ class PluginRepository extends BaseRepository
      */
     private function execComposerRequire(Plugin $plugin)
     {
-        $command = sprintf("composer require %s", $plugin->package_name);
+        $this->validatePackageName($plugin->package_name);
+        $command = sprintf("composer require %s", escapeshellarg($plugin->package_name));
         do_log("[COMPOSER_REQUIRE]: $command");
         return $this->executeCommand($command);
     }
@@ -190,7 +199,8 @@ class PluginRepository extends BaseRepository
      */
     private function execComposerRemove(Plugin $plugin)
     {
-        $command = sprintf("composer remove %s", $plugin->package_name);
+        $this->validatePackageName($plugin->package_name);
+        $command = sprintf("composer remove %s", escapeshellarg($plugin->package_name));
         do_log("[COMPOSER_REMOVE]: $command");
         return $this->executeCommand($command);
     }
@@ -201,7 +211,8 @@ class PluginRepository extends BaseRepository
      */
     private function execComposerUpdate(Plugin $plugin)
     {
-        $command = sprintf("composer update %s", $plugin->package_name);
+        $this->validatePackageName($plugin->package_name);
+        $command = sprintf("composer update %s", escapeshellarg($plugin->package_name));
         do_log("[COMPOSER_UPDATE]: $command");
         return $this->executeCommand($command);
     }
@@ -212,7 +223,8 @@ class PluginRepository extends BaseRepository
      */
     private function execPluginInstall(Plugin $plugin)
     {
-        $command = sprintf("php artisan plugin install %s", $plugin->package_name);
+        $this->validatePackageName($plugin->package_name);
+        $command = sprintf("php artisan plugin install %s", escapeshellarg($plugin->package_name));
         do_log("[PLUGIN_INSTALL]: $command");
         return $this->executeCommand($command);
     }
@@ -235,12 +247,13 @@ class PluginRepository extends BaseRepository
      */
     public function getInstalledVersion($packageName)
     {
-        $command = sprintf('composer info |grep -E %s', $packageName);
+        $this->validatePackageName((string) $packageName);
+        $command = sprintf('composer info | grep -F %s', escapeshellarg($packageName));
         $result = $this->executeCommand($command);
         $parts = preg_split("/[\s]+/", trim($result));
-        $version = $parts[1];
+        $version = $parts[1] ?? '';
         if (str_contains($version, 'dev')) {
-            $version .= " $parts[2]";
+            $version .= " " . ($parts[2] ?? '');
         }
         return $version;
     }

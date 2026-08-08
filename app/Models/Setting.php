@@ -89,13 +89,13 @@ class Setting extends NexusModel
     }
 
     /**
-     * @param  mixed  $whereRaw
+     * @param  string  $pattern
      * @return  array<int|string, mixed>
      */
-    public static function getByWhereRaw($whereRaw): array
+    public static function getByNameLike(string $pattern): array
     {
         $result = [];
-        $list = self::query()->whereRaw($whereRaw)->get();
+        $list = self::query()->where('name', 'like', $pattern)->get();
         foreach ($list as $value) {
             Arr::set($result, $value->name, self::normalizeValue($value));
         }

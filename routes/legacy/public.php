@@ -16,7 +16,7 @@ Route::match(['get', 'post'], '/faq', [InfoController::class, 'faq'])->name('faq
 Route::match(['get', 'post'], '/donate', [InfoController::class, 'donate'])->name('donate.legacy');
 Route::match(['get', 'post'], '/getusertorrentlistajax', [TorrentActionController::class, 'getUserTorrentListAjax'])->name('getusertorrentlistajax.legacy');
 Route::match(['get', 'post'], '/searchsuggest', [TorrentActionController::class, 'searchSuggest'])->name('searchsuggest.legacy');
-Route::match(['get', 'post'], '/ajax', [UtilityController::class, 'ajax'])->name('ajax.legacy');
+Route::match(['get', 'post'], '/ajax', [UtilityController::class, 'ajax'])->middleware('throttle:ajax')->name('ajax.legacy');
 
 Route::match(['get', 'post'], '/image', [UtilityController::class, 'image'])->name('image.legacy');
 Route::match(['get', 'post'], '/shoutbox_sse', [ShoutboxController::class, 'shoutboxSse'])->name('shoutbox_sse.legacy');
@@ -34,7 +34,7 @@ Route::match(['get', 'post'], '/email-gateway', [TorrentActionController::class,
 Route::match(['get', 'post'], '/ok', [UtilityController::class, 'ok'])->name('ok.legacy');
 
 Route::match(['get', 'post'], '/complains', [SupportController::class, 'complains'])->name('complains.legacy');
-Route::match(['get', 'post'], '/shoutbox', [ShoutboxController::class, 'shoutbox'])->name('shoutbox.legacy');
+Route::match(['get', 'post'], '/shoutbox', [ShoutboxController::class, 'shoutbox'])->middleware('throttle:shoutbox')->name('shoutbox.legacy');
 
 Route::match(['get', 'post'], '/bookmark', [TorrentActionController::class, 'bookmark'])->name('bookmark.legacy');
 Route::match(['get', 'post'], '/viewfilelist', [TorrentActionController::class, 'viewFileList'])->name('viewfilelist.legacy');

@@ -82,6 +82,7 @@ class BitbucketUploadController extends Controller
         }
 
         $filename = $file->getClientOriginalName();
+        $filename = preg_replace('/[\x00-\x1F\x7F]/', '', $filename);
         $pp = pathinfo($filename);
         if ($pp['basename'] !== $filename) {
             LegacyResponse::abort($lang['std_upload_failed'] ?? '', $lang['std_bad_file_name'] ?? '', false);

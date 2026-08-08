@@ -17,7 +17,6 @@ parameters:
         - bootstrap/app.php
 
     scanFiles:
-        - app/Support/Legacy/globalfunctions.php
         - app/Support/Legacy/functions.php
         - config/nexus_constants.php
         - app/Support/Legacy/cleanup.php

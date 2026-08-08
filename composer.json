@@ -18,7 +18,6 @@
         },
         "files": [
             "config/nexus_constants.php",
-            "app/Support/Legacy/globalfunctions.php",
             "app/Support/Legacy/functions.php"
         ]
     },

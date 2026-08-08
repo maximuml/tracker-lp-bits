@@ -85,7 +85,8 @@ final class SettingsSeed
         SupportContext::setGlobal('enablebitbucket_main', $MAIN['enablebitbucket']);
         SupportContext::setGlobal('altname_main', $MAIN['altname'] ?? '');
         SupportContext::setGlobal('deflang', $MAIN['defaultlang']);
-        SupportContext::setGlobal('defcss', $MAIN['defstylesheet']);
+        $firstStylesheetId = (int) (\Nexus\Database\NexusDB::table('stylesheets')->orderBy('id')->value('id') ?? 3);
+        SupportContext::setGlobal('defcss', (int) ($MAIN['defstylesheet'] ?: $firstStylesheetId));
         SupportContext::setGlobal('enabledonation', $MAIN['donation']);
         SupportContext::setGlobal('enablespecial', $MAIN['spsct']);
         $searchBoxIds = SearchBox::query()->orderBy('id')->pluck('id')->all();

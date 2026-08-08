@@ -103,18 +103,22 @@
                 $customField = new \Nexus\Field\Field();
                 $hitAndRunRep = new \App\Repositories\HitAndRunRepository();
                 if ($allowtorrents) {
+                    echo "<tbody id=\"browsecat_section\" data-mode=\"$browsecatmode\">\n";
                     $selectNormal = $searchBoxRep->renderTaxonomySelect($browsecatmode);
                     tr($lang_upload['row_quality'], $selectNormal, 1, "mode_$browsecatmode");
                     echo $customField->renderOnUploadPage(0, $browsecatmode);
                     echo $hitAndRunRep->renderOnUploadPage('', $browsecatmode);
                     tr($lang_functions['text_tags'], $tagRep->renderCheckbox($browsecatmode), 1, "mode_$browsecatmode");
+                    echo "</tbody>\n";
                 }
                 if ($allowspecial) {
+                    echo "<tbody id=\"specialcat_section\" data-mode=\"$specialcatmode\">\n";
                     $selectNormal = $searchBoxRep->renderTaxonomySelect($specialcatmode);
                     tr($lang_upload['row_quality'], $selectNormal, 1, "mode_$specialcatmode");
                     echo $customField->renderOnUploadPage(0, $specialcatmode);
                     echo $hitAndRunRep->renderOnUploadPage('', $specialcatmode);
                     tr($lang_functions['text_tags'], $tagRep->renderCheckbox($specialcatmode), 1, "mode_$specialcatmode");
+                    echo "</tbody>\n";
                 }
 
 				//==== offer dropdown for offer mod  from code by S4NE
@@ -142,8 +146,8 @@ jQuery('select[name="offer"]').on("change", function () {
         jQuery("#name").val(response.data.name)
         clearContent()
         doInsert(response.data.descr, '', false)
-        jQuery("#specialcat").prop('disabled', false).val(0)
-        jQuery("#browsecat").prop('disabled', false).val(response.data.category)
+        jQuery("#specialcat").prop('disabled', false).val(0).trigger('change')
+        jQuery("#browsecat").prop('disabled', false).val(response.data.category).trigger('change')
     }, 'json')
 })
 JS;

@@ -47,24 +47,30 @@ Route::get('/', function () {
     return redirect('index.php');
 });
 
+Route::get('/nexus', function () {
+    return redirect('index.php');
+});
+
 Route::get('/health', function () {
     return response()->json(['status' => 'ok']);
 })->name('health');
 
 Route::get('/login', [AuthWebController::class, 'showLogin'])->name('login');
-Route::post('/login', [AuthWebController::class, 'login']);
+Route::post('/login', [AuthWebController::class, 'login'])->middleware('throttle:login');
 Route::get('/logout', [AuthWebController::class, 'logout'])->name('logout');
 
 Route::get('/signup', [RegistrationController::class, 'showSignup'])->name('signup');
-Route::post('/signup', [RegistrationController::class, 'signup']);
-Route::post('/takesignup', [RegistrationController::class, 'signup']);
+Route::post('/signup', [RegistrationController::class, 'signup'])->middleware('throttle:login');
+Route::post('/takesignup', [RegistrationController::class, 'signup'])->middleware('throttle:login');
 
 Route::get('/confirm', [RegistrationController::class, 'confirm'])->name('confirm');
 
 Route::get('/confirm_resend', [RegistrationController::class, 'showConfirmResend'])->name('confirm_resend');
-Route::post('/confirm_resend', [RegistrationController::class, 'resendConfirmation']);
+Route::post('/confirm_resend', [RegistrationController::class, 'resendConfirmation'])->middleware('throttle:login');
 
-Route::match(['get', 'post'], '/recover', [RecoveryController::class, 'recover'])->name('recover');
+Route::match(['get', 'post'], '/recover', [RecoveryController::class, 'recover'])
+    ->middleware('throttle:login')
+    ->name('recover');
 
 Route::get("/error", [\App\Http\Controllers\ToolController::class, "error"]);
 

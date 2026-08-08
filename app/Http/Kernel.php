@@ -6,6 +6,7 @@ use App\Http\Middleware\CheckSiteStatus;
 use App\Http\Middleware\Filament;
 use App\Http\Middleware\Locale;
 use App\Http\Middleware\LogUserIp;
+use App\Http\Middleware\SecurityHeaders;
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
 
 class Kernel extends HttpKernel
@@ -28,6 +29,7 @@ class Kernel extends HttpKernel
         \App\Http\Middleware\BootNexus::class,
         Locale::class,
         LogUserIp::class,
+        SecurityHeaders::class,
     ];
 
     /**

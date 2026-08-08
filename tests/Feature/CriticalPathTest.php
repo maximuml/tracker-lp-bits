@@ -288,7 +288,7 @@ class CriticalPathTest extends TestCase
         $this->assertArrayHasKey('interval', $startResponse, 'Start announce response missing interval');
 
         // 6. Calculate seed bonus for the user
-        dispatch(new CalculateUserSeedBonus($user->id, $user->id, (string) $user->id, ''));
+        dispatch_sync(new CalculateUserSeedBonus($user->id, $user->id, (string) $user->id, ''));
         $user->refresh();
         $this->assertGreaterThan(0, (float) $user->seed_points_per_hour, 'Seed points per hour were not updated');
 

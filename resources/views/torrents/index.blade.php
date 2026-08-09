@@ -1,4 +1,4 @@
-@extends('layouts.legacy_torrents')
+@extends('layouts.nexus_legacy')
 
 @section('title', $pageTitle)
 

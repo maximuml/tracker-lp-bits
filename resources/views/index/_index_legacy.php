@@ -1,6 +1,8 @@
 <?php
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
-\Nexus\Nexus::css('styles/shoutbox.css', 'header', true);
+if (empty($nexus_legacy_layout)) {
+    \Nexus\Nexus::css('styles/shoutbox.css', 'header', true);
+}
 \Nexus\Nexus::js('js/shoutbox.js', 'footer', true);
 $toastLang = json_encode([
     'newMessage' => $lang_index['toast_new_message'] ?? 'New message',
@@ -10,10 +12,14 @@ $toastLang = json_encode([
     'userId' => (int) ($CURUSER['id'] ?? 0),
 ], JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
 \Nexus\Nexus::js("window.TOAST_LANG = $toastLang;", 'footer', false, 'toast-lang');
-\Nexus\Nexus::css('styles/toast.css', 'header', true);
+if (empty($nexus_legacy_layout)) {
+    \Nexus\Nexus::css('styles/toast.css', 'header', true);
+}
 \Nexus\Nexus::js('js/toast.js', 'footer', true);
-stdhead($lang_index['head_home']);
-begin_main_frame();
+if (empty($nexus_legacy_layout)) {
+    stdhead($lang_index['head_home']);
+    begin_main_frame();
+}
 
 // ------------- start: recent news ------------------//
 print("<h2>".$lang_index['text_recent_news'].(user_can('newsmanage') ? " - <font class=\"small\">[<a class=\"altlink\" href=\"news.php\"><b>".$lang_index['text_news_page']."</b></a>]</font>" : "")."</h2>");
@@ -638,6 +644,8 @@ if ($CURUSER) {
 	\App\Models\User::where('id', $CURUSER["id"])->update(['last_home' => now()]);
 }
 $Cache->delete_value('user_'.$CURUSER["id"].'_unread_news_count');
-end_main_frame();
-stdfoot();
+if (empty($nexus_legacy_layout)) {
+    end_main_frame();
+    stdfoot();
+}
 ?>

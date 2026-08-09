@@ -5,6 +5,10 @@
 @tailwind utilities;
 
 @layer base {
+    [x-cloak] {
+        display: none !important;
+    }
+
     body {
         font-family: var(--nexus-font-sans);
     }

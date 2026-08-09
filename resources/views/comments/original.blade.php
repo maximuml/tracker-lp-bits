@@ -1,4 +1,4 @@
-@extends('layouts.legacy')
+@extends('layouts.nexus_legacy')
 
 @section('title', $lang['head_original_comment'] ?? 'Original comment')
 

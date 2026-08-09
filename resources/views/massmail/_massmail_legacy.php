@@ -45,7 +45,7 @@ stderr("Error", "Try again.");
 
 }
 
-stdhead("Mass E-mail Gateway");
+if (empty($nexus_legacy_layout)) { stdhead("Mass E-mail Gateway"); }
 ?>
 
 <p><table border=0 class=main cellspacing=0 cellpadding=0><tr>
@@ -79,4 +79,4 @@ print("</select></td></tr>\n");
 </table>
 
 <?php
-stdfoot();
+if (empty($nexus_legacy_layout)) { stdfoot(); }

@@ -76,8 +76,8 @@ else
 		$tdattr = "width=\"50%\"";
 	else
 		$tdattr = "colspan=\"2\" width=\"100%\"";
-	stdhead($lang_downloadnotice['head_download_notice']);
-	begin_main_frame();
+	if (empty($nexus_legacy_layout)) { stdhead($lang_downloadnotice['head_download_notice']); }
+	if (empty($nexus_legacy_layout)) { begin_main_frame(); }
 ?>
 <h2><?php echo $title?></h2>
 <table width="100%"><tr>
@@ -157,6 +157,6 @@ if ($forcecheck)
 ?>
 </table>
 <?php
-	end_main_frame();
-	stdfoot();
+	if (empty($nexus_legacy_layout)) { end_main_frame(); }
+	if (empty($nexus_legacy_layout)) { stdfoot(); }
 }

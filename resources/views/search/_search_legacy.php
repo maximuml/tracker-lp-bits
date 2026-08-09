@@ -158,4 +158,4 @@ if ($search && $count > 0) {
     stdmsg($lang_torrents['std_search_results_for'] . htmlspecialchars($search) . "\"",$lang_torrents['std_try_again']);
 }
 print("</td></tr></table>");
-stdfoot();
+if (empty($nexus_legacy_layout)) { stdfoot(); }

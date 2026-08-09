@@ -17,8 +17,8 @@ if (empty($nexus_legacy_layout)) {
 }
 \Nexus\Nexus::js('js/toast.js', 'footer', true);
 if (empty($nexus_legacy_layout)) {
-    stdhead($lang_index['head_home']);
-    begin_main_frame();
+    if (empty($nexus_legacy_layout)) { stdhead($lang_index['head_home']); }
+    if (empty($nexus_legacy_layout)) { begin_main_frame(); }
 }
 
 // ------------- start: recent news ------------------//
@@ -645,7 +645,7 @@ if ($CURUSER) {
 }
 $Cache->delete_value('user_'.$CURUSER["id"].'_unread_news_count');
 if (empty($nexus_legacy_layout)) {
-    end_main_frame();
-    stdfoot();
+    if (empty($nexus_legacy_layout)) { end_main_frame(); }
+    if (empty($nexus_legacy_layout)) { stdfoot(); }
 }
 ?>

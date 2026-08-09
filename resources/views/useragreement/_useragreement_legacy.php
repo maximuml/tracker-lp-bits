@@ -1,7 +1,7 @@
 <?php
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
-stdhead("User Agreement");
-begin_main_frame();
+if (empty($nexus_legacy_layout)) { stdhead("User Agreement"); }
+if (empty($nexus_legacy_layout)) { begin_main_frame(); }
 begin_frame("user agreement");
 $baseUrl = getSchemeAndHttpHost();
 ?>
@@ -96,5 +96,5 @@ The "<?php echo $SITENAME ?>" is the title of this publication only.
 Copyright © 2007 by <?php echo $BASEURL ?>.  All rights reserved.
 <?php
 end_frame();
-end_main_frame();
-stdfoot();
+if (empty($nexus_legacy_layout)) { end_main_frame(); }
+if (empty($nexus_legacy_layout)) { stdfoot(); }

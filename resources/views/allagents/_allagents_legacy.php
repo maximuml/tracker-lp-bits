@@ -7,7 +7,7 @@ $agents = \Nexus\Database\NexusDB::table('peers')
     ->groupBy('agent')
     ->orderBy('agent')
     ->get();
-stdhead("All Clients");
+if (empty($nexus_legacy_layout)) { stdhead("All Clients"); }
 print("<table align=center border=3 cellspacing=0 cellpadding=5>\n");
 print("<tr><td class=colhead>Client</td><td class=colhead>Counts</td></tr>\n");
 foreach ($agents as $row) {
@@ -15,4 +15,4 @@ foreach ($agents as $row) {
 	print("</a></td><td align=left>{$arr2['agent']}</td><td align=left>{$arr2['counts']}</td></tr>\n");
 }
 print("</table>\n");
-stdfoot();
+if (empty($nexus_legacy_layout)) { stdfoot(); }

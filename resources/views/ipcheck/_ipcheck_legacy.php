@@ -10,7 +10,7 @@ if (!empty(\App\Support\SupportContext::getRequestInput('tab')) && in_array(\App
 }
 $page = \App\Support\SupportContext::getRequestInput('page') ?? 0;
 $title = 'Duplicate IP users';
-stdhead($title);
+if (empty($nexus_legacy_layout)) { stdhead($title); }
 print '<h1>'.$title.'</h1>';
 //print '<ul class="menu" style="padding-inline-start: 0">';
 //foreach ($tabs as $item) {
@@ -99,5 +99,5 @@ else
 end_frame();
 end_table();
 
-stdfoot();
+if (empty($nexus_legacy_layout)) { stdfoot(); }
 ?>

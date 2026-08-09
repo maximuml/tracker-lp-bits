@@ -165,7 +165,7 @@ $day_of_week = \App\Support\SupportContext::getGlobal('day_of_week');
 ////////////////////// END FUNCTION LIST /////////////////////////////////////
 
 
-stdhead("Stats");
+if (empty($nexus_legacy_layout)) { stdhead("Stats"); }
 
 /**
  * Displays the sub-page heading
@@ -411,4 +411,4 @@ if (!empty($serverStatus)) {
 
 
 <?php
-stdfoot();
+if (empty($nexus_legacy_layout)) { stdfoot(); }

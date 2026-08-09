@@ -19,7 +19,7 @@ if (get_user_class() >= UC_MODERATOR)
 				 stderr("Warning", "Unable to unlink file: <b>{$a['name']}</b>. You should contact an administrator about this error.",false);
 				 			} } }
 }
-stdhead("BitBucket Log");
+if (empty($nexus_legacy_layout)) { stdhead("BitBucket Log"); }
 $count = \Nexus\Database\NexusDB::table('bitbucket')->count();
 $perpage = 10;
 list($pagertop, $pagerbottom, , $offset, $rpp) = pager($perpage, $count, $__server_PHP_SELF . "?out=" . (\App\Support\SupportContext::getQuery("out") ?? '') . "&" );
@@ -51,4 +51,4 @@ else {
 		}
 		echo
 		$pagerbottom;
-		stdfoot();
+		if (empty($nexus_legacy_layout)) { stdfoot(); }

@@ -31,8 +31,8 @@ else
         stderr($lang_donate['std_error'], $lang_donate['std_no_donation_account_available'], false);
     }
 
-	stdhead($lang_donate['head_donation']);
-	begin_main_frame();
+	if (empty($nexus_legacy_layout)) { stdhead($lang_donate['head_donation']); }
+	if (empty($nexus_legacy_layout)) { begin_main_frame(); }
 	print("<h2>".$lang_donate['text_donate']."</h2>");
 	print("<table width=100%>");
 	print("<tr><td colspan=2 class=text align=left>".$lang_donate['text_donation_note']."</td></tr>");
@@ -98,6 +98,6 @@ print("</tr>");
 print("<tr><td class=text colspan=2 align=left>".$lang_donate['text_after_donation_note_one']
 ."<a href=\"sendmessage.php?receiver=".$ACCOUNTANTID."\"><font class=\"striking\"><b>".$lang_donate['text_send_us']."</b></font></a>".$lang_donate['text_after_donation_note_two']."</td></tr>");
 print("</table>");
-end_main_frame();
-stdfoot();
+if (empty($nexus_legacy_layout)) { end_main_frame(); }
+if (empty($nexus_legacy_layout)) { stdfoot(); }
 }

@@ -1,9 +1,9 @@
 <?php
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
-stdhead(PROJECTNAME);
+if (empty($nexus_legacy_layout)) { stdhead(PROJECTNAME); }
 print ("<h1>".PROJECTNAME."</h1>");
-begin_main_frame();
+if (empty($nexus_legacy_layout)) { begin_main_frame(); }
 begin_frame("<span id=\"version\">".$lang_aboutnexus['text_version']."</span>");
 echo sprintf ($lang_aboutnexus['text_version_note'], \App\Models\Setting::getSiteName(), PROJECTNAME);
 print ("<br /><br /><table class=\"main\" border=\"1\" cellspacing=\"0\" cellpadding=\"5\" align=\"center\">");
@@ -58,5 +58,5 @@ tr($lang_aboutnexus['text_web_site'],'<a href="' . NEXUSPHPURL . '" target="_bla
 print ("</table>");
 print ("<br /><br />");
 end_frame();
-end_main_frame();
-stdfoot();
+if (empty($nexus_legacy_layout)) { end_main_frame(); }
+if (empty($nexus_legacy_layout)) { stdfoot(); }

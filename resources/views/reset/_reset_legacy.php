@@ -48,7 +48,7 @@ $id = $arr['id'];
 write_log("Password Reset For $username by {$CURUSER['username']}");
  stderr("Success", "The password of account <b>$username</b> is reset , please inform user of this change.",false);
 }
-stdhead("Reset User's Lost Password");
+if (empty($nexus_legacy_layout)) { stdhead("Reset User's Lost Password"); }
 ?>
 <table border=1 cellspacing=0 cellpadding=5>
 <form method=post>
@@ -60,4 +60,4 @@ stdhead("Reset User's Lost Password");
 </form>
 </table>
 <?php
-stdfoot();
+if (empty($nexus_legacy_layout)) { stdfoot(); }

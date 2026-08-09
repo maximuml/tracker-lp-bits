@@ -5,8 +5,8 @@ if (get_user_class() < UC_ADMINISTRATOR) {
 	permissiondenied();
 }
 
-stdhead("FAQ Management");
-begin_main_frame();
+if (empty($nexus_legacy_layout)) { stdhead("FAQ Management"); }
+if (empty($nexus_legacy_layout)) { begin_main_frame(); }
 
 print("<h1 align=\"center\">FAQ Management</h1>");
 
@@ -121,5 +121,5 @@ print("</form>\n");
 print("<p>When the position numbers don't reflect the position in the table, it means the order id is bigger than the total number of sections/items and you should check all the order id's in the table and click \"reorder\"</p>");
 echo $pagerbottom ?? '';
 
-end_main_frame();
-stdfoot();
+if (empty($nexus_legacy_layout)) { end_main_frame(); }
+if (empty($nexus_legacy_layout)) { stdfoot(); }

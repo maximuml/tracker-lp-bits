@@ -6,10 +6,10 @@ $count = \Nexus\Database\NexusDB::table('reports')->count();
 if (!$count){
 	stderr($lang_reports['std_oho'], $lang_reports['std_no_report']);
 }
-stdhead($lang_reports['head_reports']);
+if (empty($nexus_legacy_layout)) { stdhead($lang_reports['head_reports']); }
 $perpage = 10;
 list($pagertop, $pagerbottom, , $offset, $rpp) = pager($perpage, $count, "reports.php?");
-begin_main_frame();
+if (empty($nexus_legacy_layout)) { begin_main_frame(); }
 print("<h1 align=center>".$lang_reports['text_reports']."</h1>");
 print("<table border=1 cellspacing=0 cellpadding=5 align=center>\n");
 print("<tr><td class=colhead><nobr>".$lang_reports['col_added']."</nobr></td><td class=colhead>".$lang_reports['col_reporter']."</td><td class=colhead>".$lang_reports['col_reporting']."</td><td class=colhead><nobr>".$lang_reports['col_type']."</nobr></td><td class=colhead>".$lang_reports['col_reason']."</td><td class=colhead><nobr>".$lang_reports['col_dealt_with']."</nobr></td><td class=colhead><nobr>".$lang_reports['col_action']."</nobr></td>");
@@ -123,5 +123,5 @@ foreach ($reportRows as $reportRow) {
 <?php
 print("</table>");
 print($pagerbottom);
-end_main_frame();
-stdfoot();
+if (empty($nexus_legacy_layout)) { end_main_frame(); }
+if (empty($nexus_legacy_layout)) { stdfoot(); }

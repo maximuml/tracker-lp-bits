@@ -28,7 +28,7 @@ EOD;
 }
 else
 {
-	stdhead($lang_mailtest['head_mail_test']);
+	if (empty($nexus_legacy_layout)) { stdhead($lang_mailtest['head_mail_test']); }
 	print("<h1 align=\"center\">".$lang_mailtest['text_mail_test']."</h1>");
 	print("<table border=\"1\" cellspacing=\"0\" cellpadding=\"5\">\n");
 	print("<form method='post' action='mailtest.php'>");
@@ -36,5 +36,5 @@ else
 	tr($lang_mailtest['row_enter_email'], "<input type='text' name='email' size=35><br />".$lang_mailtest['text_enter_email_note'], 1);
 	print("<tr><td colspan=\"2\" align=\"center\"><input type='submit' name='sendmail' value='".$lang_mailtest['submit_send_it']."'></td></tr>");
 	print("</form></table>");
-	stdfoot();
+	if (empty($nexus_legacy_layout)) { stdfoot(); }
 }

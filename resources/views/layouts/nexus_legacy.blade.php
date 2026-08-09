@@ -18,6 +18,9 @@
     <link rel="stylesheet" href="{{ $css_uri }}theme.css" type="text/css" />
     <link rel="stylesheet" href="styles/nexus-legacy-compat.css" type="text/css" />
 
+    <script type="text/javascript" src="js/jquery-1.12.4.min.js"></script>
+    <script type="text/javascript" src="vendor/layer-v3.5.1/layer/layer.js"></script>
+
     @foreach (\Nexus\Nexus::getAppendHeaders() as $html)
         {!! $html !!}
     @endforeach
@@ -40,6 +43,16 @@
     @foreach (\Nexus\Nexus::getAppendFooters() as $html)
         {!! $html !!}
     @endforeach
+
+    <script type="application/javascript" src="js/nexus.js"></script>
+    <script type="application/javascript" src="js/medium-zoom.min.js"></script>
+    <script type="application/javascript" src="vendor/jquery-goup-1.1.3/jquery.goup.min.js"></script>
+    <script>
+        jQuery(document).ready(function(){
+            jQuery.goup()
+            mediumZoom('[data-zoomable]')
+        })
+    </script>
 
     @stack('body')
 </body>

@@ -1,1 +1,10 @@
-@php include resource_path('views/staffmess/_staffmess_legacy.php'); @endphp
+@extends('layouts.nexus_legacy')
+
+@section('title', config('app.name'))
+
+@section('content')
+    @php
+    $nexus_legacy_layout = true;
+    @endphp
+    @include('staffmess._staffmess_legacy')
+@endsection

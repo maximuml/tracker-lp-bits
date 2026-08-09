@@ -159,7 +159,7 @@ function stdmsg($heading, $text, $htmlstrip = false) {
  */
 function stderr($heading, $text, $htmlstrip = true, $head = true, $foot = true, $die = true)
 {
-	\App\Support\LegacyResponse::abort($heading, $text, $htmlstrip, $head, $foot, $die);
+	\App\Support\LegacyResponse::abort((string) $heading, (string) $text, $htmlstrip, $head, $foot, $die);
 }
 /**
  * @param string $file
@@ -336,7 +336,7 @@ function format_urls($text, $newWindow = false)
 function format_comment($text, $strip_html = true, $xssclean = false, $newtab = true, $imageresizer = true, $image_max_width = 700, $enableimage = true, $enableflash = true , $imagenum = -1, $image_max_height = 0)
 {
     trigger_deprecation('maximuml/tracker-lp-bits', '2.0', 'The %s() function is deprecated, use %s::%s() instead.', __FUNCTION__, '\App\Support\Format', 'formatComment');
-    return \App\Support\Format::formatComment($text, $strip_html, $xssclean, $newtab, $imageresizer, $image_max_width, $enableimage, $enableflash, $imagenum, $image_max_height);
+    return \App\Support\Format::formatComment((string) $text, $strip_html, $xssclean, $newtab, $imageresizer, $image_max_width, $enableimage, $enableflash, $imagenum, $image_max_height);
 }
 /**
  * @param string $search

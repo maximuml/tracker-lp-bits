@@ -30,8 +30,8 @@ $filterForm = <<<FORM
     </form>
 </div>
 FORM;
-stdhead('User ban log');
-begin_main_frame();
+if (empty($nexus_legacy_layout)) { stdhead('User ban log'); }
+if (empty($nexus_legacy_layout)) { begin_main_frame(); }
 echo $filterForm . $table . $paginationBottom;
-end_main_frame();
-stdfoot();
+if (empty($nexus_legacy_layout)) { end_main_frame(); }
+if (empty($nexus_legacy_layout)) { stdfoot(); }

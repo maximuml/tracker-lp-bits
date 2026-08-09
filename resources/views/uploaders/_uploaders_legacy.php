@@ -20,8 +20,8 @@ $sortColumn = match ($order) {
     default => 'users.username',
 };
 $sortDirection = $order === 'username' ? 'ASC' : 'DESC';
-stdhead($lang_uploaders['head_uploaders']);
-begin_main_frame();
+if (empty($nexus_legacy_layout)) { stdhead($lang_uploaders['head_uploaders']); }
+if (empty($nexus_legacy_layout)) { begin_main_frame(); }
 ?>
 <div style="width: 940px">
 <?php
@@ -132,5 +132,5 @@ else{
 ?>
 </div>
 <?php
-end_main_frame();
-stdfoot();
+if (empty($nexus_legacy_layout)) { end_main_frame(); }
+if (empty($nexus_legacy_layout)) { stdfoot(); }

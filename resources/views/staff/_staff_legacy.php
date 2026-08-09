@@ -1,12 +1,12 @@
 <?php
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 user_can('staffmem', true);
-stdhead($lang_staff['head_staff']);
+if (empty($nexus_legacy_layout)) { stdhead($lang_staff['head_staff']); }
 
 $Cache->new_page('staff_page', 900, true);
 if (!$Cache->get_page()){
 $Cache->add_whole_row();
-begin_main_frame();
+if (empty($nexus_legacy_layout)) { begin_main_frame(); }
 $secs = 900;
 $dt = TIMENOW - $secs;
 $onlineimg = "<img class=\"button_online\" src=\"pic/trans.gif\" alt=\"online\" title=\"".$lang_staff['title_online']."\" />";
@@ -215,9 +215,9 @@ begin_frame($lang_staff['text_vip']);
 end_frame();
 
 //--------------------- VIP section ---------------------------//
-end_main_frame();
+if (empty($nexus_legacy_layout)) { end_main_frame(); }
 	$Cache->end_whole_row();
 	$Cache->cache_page();
 }
 echo $Cache->next_row();
-stdfoot();
+if (empty($nexus_legacy_layout)) { stdfoot(); }

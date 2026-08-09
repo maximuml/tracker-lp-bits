@@ -81,7 +81,7 @@ $rep = new \App\Repositories\BonusRepository();
 $total = $rep->getCount($category, $uid, $businessType);
 list($pagertop, $pagerbottom, $limit, $offset, $pageSize, $page) = pager(50, $total, "$pagerParam&");
 $list = $rep->getList($category, $uid, $businessType, $page + 1, $pageSize);
-begin_main_frame();
+if (empty($nexus_legacy_layout)) { begin_main_frame(); }
 print($filterForm);
 print("<table id='bonus-log-table' width='100%' cellpadding='5'>");
 print("<tr>
@@ -105,7 +105,7 @@ foreach ($list as $row) {
 
 print("</table>");
 print($pagerbottom);
-end_main_frame();
-stdfoot();
+if (empty($nexus_legacy_layout)) { end_main_frame(); }
+if (empty($nexus_legacy_layout)) { stdfoot(); }
 
 

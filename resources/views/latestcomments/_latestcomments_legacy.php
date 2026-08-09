@@ -1,7 +1,7 @@
 <?php
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
-stdhead($lang_functions['text_latest_comments'] ?? 'Latest Comments');
-begin_main_frame();
+if (empty($nexus_legacy_layout)) { stdhead($lang_functions['text_latest_comments'] ?? 'Latest Comments'); }
+if (empty($nexus_legacy_layout)) { begin_main_frame(); }
 
 $perpage = 20;
 $count = \App\Repositories\CommentRepository::countLatest();
@@ -74,5 +74,5 @@ if ($count == 0) {
     print($pagerbottom);
 }
 
-end_main_frame();
-stdfoot();
+if (empty($nexus_legacy_layout)) { end_main_frame(); }
+if (empty($nexus_legacy_layout)) { stdfoot(); }

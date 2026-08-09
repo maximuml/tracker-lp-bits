@@ -2,14 +2,14 @@
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 //loggedinorreturn();
 
-stdhead($lang_faq['head_faq']);
+if (empty($nexus_legacy_layout)) { stdhead($lang_faq['head_faq']); }
 $Cache->new_page('faq', 900, true);
 if (!$Cache->get_page())
 {
 $Cache->add_whole_row();
 //make_folder("cache/" , get_langfolder_cookie());
 //cache_check ('faq');
-begin_main_frame();
+if (empty($nexus_legacy_layout)) { begin_main_frame(); }
 
 begin_frame($lang_faq['text_welcome_to'].$SITENAME." - ".$SLOGAN);
 echo sprintf($lang_faq['text_welcome_content_one'].sprintf($lang_faq['text_welcome_content_two'], \App\Models\Setting::getSiteName(), \App\Models\Setting::getSiteName()));
@@ -96,10 +96,10 @@ if (isset($faq_categ)) {
 		}
 	}
 }
-end_main_frame();
+if (empty($nexus_legacy_layout)) { end_main_frame(); }
 	$Cache->end_whole_row();
 	$Cache->cache_page();
 }
 echo $Cache->next_row();
 //cache_save ('faq');
-stdfoot();
+if (empty($nexus_legacy_layout)) { stdfoot(); }

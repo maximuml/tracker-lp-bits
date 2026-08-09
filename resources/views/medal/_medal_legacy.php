@@ -36,8 +36,8 @@ $filterForm = <<<FORM
     </form>
 </div>
 FORM;
-stdhead($title);
-begin_main_frame();
+if (empty($nexus_legacy_layout)) { stdhead($title); }
+if (empty($nexus_legacy_layout)) { begin_main_frame(); }
 $table = <<<TABLE
 <table border="1" cellspacing="0" cellpadding="5" width="100%">
 <thead>
@@ -98,7 +98,7 @@ foreach ($rows as $row) {
 }
 $table .= '</tbody></table>';
 echo $header . $table . $paginationBottom;
-end_main_frame();
+if (empty($nexus_legacy_layout)) { end_main_frame(); }
 $confirmBuyMsg = nexus_trans('medal.confirm_to_buy');
 $confirmGiftMsg = nexus_trans('medal.confirm_to_gift');
 $js = <<<JS
@@ -145,5 +145,5 @@ jQuery('.gift').on('click', function (e) {
 })
 JS;
 \Nexus\Nexus::js($js, 'footer', false);
-stdfoot();
+if (empty($nexus_legacy_layout)) { stdfoot(); }
 

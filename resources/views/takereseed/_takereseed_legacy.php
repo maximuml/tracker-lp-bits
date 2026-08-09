@@ -38,9 +38,9 @@ $pn_msg = nexus_trans("torrent.msg_reseed_user", [], $locale).$CURUSER["username
     "last_reseed" => now(),
     "seeders" => $seederCount,
 ]);
-stdhead($lang_takereseed['head_reseed_request']);
-begin_main_frame();
+if (empty($nexus_legacy_layout)) { stdhead($lang_takereseed['head_reseed_request']); }
+if (empty($nexus_legacy_layout)) { begin_main_frame(); }
 print("<center>".$lang_takereseed['std_it_worked']."</center>");
-end_main_frame();
-stdfoot();
+if (empty($nexus_legacy_layout)) { end_main_frame(); }
+if (empty($nexus_legacy_layout)) { stdfoot(); }
 }

@@ -5,7 +5,7 @@ $__server_PHP_SELF = \App\Support\SupportContext::getServerValue('PHP_SELF');
 if (get_user_class() < UC_MODERATOR)
 	stderr("Error", "Permission denied.");
 
-stdhead("Stats");
+if (empty($nexus_legacy_layout)) { stdhead("Stats"); }
 ?>
 
 <STYLE TYPE="text/css" MEDIA=screen>
@@ -21,7 +21,7 @@ stdhead("Stats");
 </STYLE>
 
 <?php
-begin_main_frame();
+if (empty($nexus_legacy_layout)) { begin_main_frame(); }
 
 $n_tor = \Nexus\Database\NexusDB::table('torrents')->count();
 $n_peers = \Nexus\Database\NexusDB::table('peers')->count();
@@ -119,6 +119,6 @@ else
 	end_frame();
 }
 
-end_main_frame();
-stdfoot();
+if (empty($nexus_legacy_layout)) { end_main_frame(); }
+if (empty($nexus_legacy_layout)) { stdfoot(); }
 return;

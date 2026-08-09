@@ -34,7 +34,7 @@ if ($ip)
 	  stderr("Result", "<table border=0 cellspacing=0 cellpadding=0><tr><td class=embedded>The IP address <b>". $ip ."</b> is banned:</td></tr></table><p>". $banstable ."</p>", false);
 	}
 }
-stdhead();
+if (empty($nexus_legacy_layout)) { stdhead(); }
 
 ?>
 <h1>Test IP address</h1>
@@ -46,4 +46,4 @@ stdhead();
 </table>
 
 <?php
-stdfoot();
+if (empty($nexus_legacy_layout)) { stdfoot(); }

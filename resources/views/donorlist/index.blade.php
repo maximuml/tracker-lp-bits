@@ -1,1 +1,10 @@
-@php include resource_path('views/donorlist/_donorlist_legacy.php'); @endphp
+@extends('layouts.nexus_legacy')
+
+@section('title', config('app.name'))
+
+@section('content')
+    @php
+    $nexus_legacy_layout = true;
+    @endphp
+    @include('donorlist._donorlist_legacy')
+@endsection

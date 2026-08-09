@@ -1,6 +1,6 @@
-@extends('layouts.legacy_details')
+@extends('layouts.nexus_legacy')
 
-@section('title', $lang['head_avatar_upload'] ?? '')
+@section('title', ($lang['head_avatar_upload'] ?? '') . ' :: ' . ($siteName ?? config('app.name')))
 
 @section('content')
     @php

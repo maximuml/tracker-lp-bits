@@ -36,8 +36,8 @@ $receiver = intval(\App\Support\SupportContext::getQuery("receiver") ?? 0);
 		else $subject = "Re: " . $msga['subject'];
 		$subject = htmlspecialchars($subject);
 	}
-	stdhead($lang_sendmessage['head_send_message'], false);
-	begin_main_frame();
+	if (empty($nexus_legacy_layout)) { stdhead($lang_sendmessage['head_send_message'], false); }
+	if (empty($nexus_legacy_layout)) { begin_main_frame(); }
 	print("<form id=compose name=\"compose\" method=post action=takemessage.php>");
 	print("<input type=hidden name=receiver value=".$receiver.">");
 	if ((((\App\Support\SupportContext::getQuery("returnto") !== null)) && \App\Support\SupportContext::getQuery("returnto")) || $__server_HTTP_REFERER)
@@ -52,6 +52,6 @@ $receiver = intval(\App\Support\SupportContext::getQuery("receiver") ?? 0);
 	print("<input type=checkbox name='save' value='yes' ". ($CURUSER['savepms'] == 'yes' ? " checked" : "").">".$lang_sendmessage['checkbox_save_message_to_sendbox']);
 	print("</td></tr>");
 	end_compose();
-	end_main_frame();
-	stdfoot();
+	if (empty($nexus_legacy_layout)) { end_main_frame(); }
+	if (empty($nexus_legacy_layout)) { stdfoot(); }
 ?>

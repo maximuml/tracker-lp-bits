@@ -53,7 +53,7 @@ if (!$torrentName || !is_file($fn) || !is_readable($fn))
 
 
 // Standard html headers
-stdhead("Torrent Info");
+if (empty($nexus_legacy_layout)) { stdhead("Torrent Info"); }
 ?>
 
 <style type="text/css">
@@ -80,7 +80,7 @@ li span.title {font-weight: bold;}
 
 <?php
 
-begin_main_frame();
+if (empty($nexus_legacy_layout)) { begin_main_frame(); }
 
 
 $dict = \Rhilip\Bencode\Bencode::load($fn);
@@ -92,5 +92,5 @@ echo "</ul>";
 print("</td></table>"); // End table
 
 // Standard html footers
-end_main_frame();
-stdfoot();
+if (empty($nexus_legacy_layout)) { end_main_frame(); }
+if (empty($nexus_legacy_layout)) { stdfoot(); }

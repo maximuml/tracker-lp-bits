@@ -8,7 +8,7 @@ if (get_user_class() < UC_SYSOP)
 
 $validTypeMap = $lang_incrementbulk['types'];
 $type = \App\Support\SupportContext::getRequestInput('type') ?? '';
-stdhead($lang_incrementbulk['page_title'], false);
+if (empty($nexus_legacy_layout)) { stdhead($lang_incrementbulk['page_title'], false); }
 $classes = array_chunk(\App\Models\User::listClass(), 4, true);
 ?>
     <table class=main width=737 border=0 cellspacing=0 cellpadding=0><tr><td class=embedded>
@@ -76,4 +76,4 @@ $classes = array_chunk(\App\Models\User::listClass(), 4, true);
 
                 </div></td></tr></table>
 <?php
-stdfoot();
+if (empty($nexus_legacy_layout)) { stdfoot(); }

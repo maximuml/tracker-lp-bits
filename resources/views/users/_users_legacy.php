@@ -32,7 +32,7 @@ if ($country > 0)
 {
 	$q .= ($q ? "&" : "") . "country=$country";
 }
-stdhead($lang_users['head_users']);
+if (empty($nexus_legacy_layout)) { stdhead($lang_users['head_users']); }
 
 print($lang_users['text_users']);
 
@@ -98,5 +98,5 @@ print("<tr><td align=left>".get_username($arr['id'])."</td><td>".gettime($arr['a
 print("</table>");
 print($pagerbottom);
 
-stdfoot();
+if (empty($nexus_legacy_layout)) { stdfoot(); }
 return;

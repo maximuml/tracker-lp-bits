@@ -16,8 +16,8 @@ if ($__server_REQUEST_METHOD == "POST")
 		$shownotice=true;
 	}
 }
-stdhead($lang_deletedisabled['head_delete_diasabled']);
-begin_main_frame();
+if (empty($nexus_legacy_layout)) { stdhead($lang_deletedisabled['head_delete_diasabled']); }
+if (empty($nexus_legacy_layout)) { begin_main_frame(); }
 ?>
 <h1 align="center"><?php echo $lang_deletedisabled['text_delete_diasabled']?></h1>
 <?php
@@ -39,5 +39,5 @@ else
 </div>
 <?php
 }
-end_main_frame();
-stdfoot();
+if (empty($nexus_legacy_layout)) { end_main_frame(); }
+if (empty($nexus_legacy_layout)) { stdfoot(); }

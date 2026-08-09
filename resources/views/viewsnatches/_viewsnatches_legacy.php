@@ -5,8 +5,8 @@ $__server_SCRIPT_NAME = \App\Support\SupportContext::getServerValue('SCRIPT_NAME
 $id = \App\Support\SupportContext::getQuery("id");
 int_check($id,true);
 
-stdhead($lang_viewsnatches['head_snatch_detail']);
-begin_main_frame();
+if (empty($nexus_legacy_layout)) { stdhead($lang_viewsnatches['head_snatch_detail']); }
+if (empty($nexus_legacy_layout)) { begin_main_frame(); }
 
 $torrent_name = \App\Models\Torrent::query()->where('id', $id)->value('name');
 print("<h1 align=center>".$lang_viewsnatches['text_snatch_detail_for'] . "<a href=details.php?id=" . htmlspecialchars($id) . "><b>".htmlspecialchars($torrent_name)."</b></a></h1>");
@@ -66,5 +66,5 @@ else
 {
 	stdmsg($lang_viewsnatches['std_sorry'], $lang_viewsnatches['std_no_snatched_users']);
 }
-end_main_frame();
-stdfoot();
+if (empty($nexus_legacy_layout)) { end_main_frame(); }
+if (empty($nexus_legacy_layout)) { stdfoot(); }

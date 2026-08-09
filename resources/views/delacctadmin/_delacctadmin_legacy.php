@@ -23,7 +23,7 @@ $userRep = new \App\Repositories\UserRepository();
 $userRep->destroy($id);
 stderr("Success", "The account <b>".htmlspecialchars($name)."</b> was deleted.",false);
 }
-stdhead("Delete account");
+if (empty($nexus_legacy_layout)) { stdhead("Delete account"); }
 ?>
 <h1>Delete account</h1>
 <table border=1 cellspacing=0 cellpadding=5>
@@ -34,4 +34,4 @@ stdhead("Delete account");
 </form>
 </table>
 <?php
-stdfoot();
+if (empty($nexus_legacy_layout)) { stdfoot(); }

@@ -4,8 +4,8 @@ error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 \Nexus\Nexus::css('#ban-info td {border: none}', 'header', false);
 
 $title = nexus_trans('self-enable.title');
-stdhead($title);
-begin_main_frame();
+if (empty($nexus_legacy_layout)) { stdhead($title); }
+if (empty($nexus_legacy_layout)) { begin_main_frame(); }
 begin_frame($title, true,10,"100%","center");
 $unit = \App\Models\Setting::getSelfEnableBonus();
 if ($unit <= 0) {
@@ -55,5 +55,5 @@ if ($unit <= 0) {
     }
 }
 end_frame();
-end_main_frame();
-stdfoot();
+if (empty($nexus_legacy_layout)) { end_main_frame(); }
+if (empty($nexus_legacy_layout)) { stdfoot(); }

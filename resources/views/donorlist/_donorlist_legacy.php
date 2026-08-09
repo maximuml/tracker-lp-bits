@@ -4,9 +4,9 @@ if (get_user_class() > UC_MODERATOR) {
 	$count = \App\Models\User::query()->where('donor', 'yes')->count();
 
 	list($pagertop, $pagerbottom, , $offset, $rpp) = pager(50, $count, "donorlist.php?");
-	stdhead("Donorlist");
+	if (empty($nexus_legacy_layout)) { stdhead("Donorlist"); }
 	if ($count == 0)
-	begin_main_frame();
+	if (empty($nexus_legacy_layout)) { begin_main_frame(); }
 	// ===================================
 	$users = number_format($count);
 	begin_frame("Donor List ($users)", true);
@@ -36,8 +36,8 @@ foreach ($rows as $arr) {
 end_table();
 end_frame();
 // ===================================
-end_main_frame();
-stdfoot();
+if (empty($nexus_legacy_layout)) { end_main_frame(); }
+if (empty($nexus_legacy_layout)) { stdfoot(); }
 }
 else {
 	stderr("Sorry", "Access denied!");

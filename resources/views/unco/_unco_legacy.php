@@ -11,8 +11,8 @@ $status = \App\Support\SupportContext::getQuery('status');
 $rows = \App\Models\User::query()->where('status', 'pending')->orderBy('username')->get();
 if( $rows->isNotEmpty() )
 {
-	stdhead("Unconfirmed Users");
-	begin_main_frame();
+	if (empty($nexus_legacy_layout)) { stdhead("Unconfirmed Users"); }
+	if (empty($nexus_legacy_layout)) { begin_main_frame(); }
 	begin_frame("");
 print'<br><table width=100% border=1 cellspacing=0 cellpadding=5>';
 if ($status)
@@ -40,7 +40,7 @@ print'</form></tr>';
 }
 print '</table>';
 end_frame();
-end_main_frame();
+if (empty($nexus_legacy_layout)) { end_main_frame(); }
 }else{
 	if ($status) {
 		stderr("Updated!","The user account has been updated.");
@@ -50,4 +50,4 @@ end_main_frame();
 	}
 }
 
-stdfoot();
+if (empty($nexus_legacy_layout)) { stdfoot(); }

@@ -3,9 +3,9 @@ error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 function bark($msg)
 {
 $lang_takeflush = (array) (\App\Support\SupportContext::getGlobal('lang_takeflush') ?? []);
-   stdhead();
+   if (empty($nexus_legacy_layout)) { stdhead(); }
    stdmsg($lang_takeflush['std_failed'], $msg);
-   stdfoot();
+   if (empty($nexus_legacy_layout)) { stdfoot(); }
    return;
 }
 

@@ -1,1 +1,10 @@
-@include('faq._faq_legacy')
+@extends('layouts.nexus_legacy')
+
+@section('title', config('app.name'))
+
+@section('content')
+    @php
+    $nexus_legacy_layout = true;
+    @endphp
+    @include('faq._faq_legacy')
+@endsection

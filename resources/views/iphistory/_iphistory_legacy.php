@@ -30,8 +30,8 @@ $rows = $userHistory->union($ipLogHistory)
     ->offset($offset)
     ->get();
 
-stdhead($lang_iphistory['head_ip_history_log_for'].$username);
-begin_main_frame();
+if (empty($nexus_legacy_layout)) { stdhead($lang_iphistory['head_ip_history_log_for'].$username); }
+if (empty($nexus_legacy_layout)) { begin_main_frame(); }
 
 print("<h1 align=\"center\">".$lang_iphistory['text_historical_ip_by'] . get_username($userid)."</h1>");
 
@@ -76,7 +76,7 @@ print("</table>");
 
 echo $pagerbottom;
 
-end_main_frame();
-stdfoot();
+if (empty($nexus_legacy_layout)) { end_main_frame(); }
+if (empty($nexus_legacy_layout)) { stdfoot(); }
 die;
 ?>

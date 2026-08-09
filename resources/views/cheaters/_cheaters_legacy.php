@@ -12,7 +12,7 @@ $top = 100;  // Only look at the top xxx most likely...
 
 if (get_user_class() < UC_MODERATOR) stderr("Error", "Permission denied.");
 
-stdhead("Cheaters");
+if (empty($nexus_legacy_layout)) { stdhead("Cheaters"); }
 begin_frame('Cheaters');
 
 $page = @\App\Support\SupportContext::getQuery('page');
@@ -107,5 +107,5 @@ end_table();
 echo $pagerbottom;
 end_frame();
 
-stdfoot();
+if (empty($nexus_legacy_layout)) { stdfoot(); }
 ?>

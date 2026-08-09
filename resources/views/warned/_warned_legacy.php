@@ -3,7 +3,7 @@ error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 if (get_user_class() < UC_MODERATOR)
 stderr("Sorry", "Access denied.");
 
-stdhead("Warned Users");
+if (empty($nexus_legacy_layout)) { stdhead("Warned Users"); }
 $count = \App\Models\User::query()->where('warned', 'yes')->count();
 $warned = number_format($count);
 begin_frame("Warned Users: ($warned)", true);
@@ -65,4 +65,4 @@ print("<input type=\"hidden\" name=\"nowarned\" value=\"nowarned\"></form></tabl
 }
 print("<p>" . ($pagemenu ?? '') . "<br>" . ($browsemenu ?? '') . "</p>");
 
-stdfoot();
+if (empty($nexus_legacy_layout)) { stdfoot(); }

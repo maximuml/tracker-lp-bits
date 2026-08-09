@@ -16,7 +16,7 @@ else
 $Cache->delete_value($cachename);
 $done = true;
 }
-stdhead("Clear cache");
+if (empty($nexus_legacy_layout)) { stdhead("Clear cache"); }
 ?>
 <h1>Clear cache</h1>
 <?php
@@ -30,4 +30,4 @@ print ("<p align=center><font class=striking>Cache cleared</font></p>");
 <tr><td colspan=2 align=center><input type=submit value="Okay" class=btn></td></tr>
 </table>
 </form>
-<?php stdfoot();
+<?php if (empty($nexus_legacy_layout)) { stdfoot(); }

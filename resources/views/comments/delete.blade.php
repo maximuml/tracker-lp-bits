@@ -1,4 +1,4 @@
-@extends('layouts.legacy')
+@extends('layouts.nexus_legacy')
 
 @section('title', $heading)
 

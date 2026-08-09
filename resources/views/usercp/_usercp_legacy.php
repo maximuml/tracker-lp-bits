@@ -1,4 +1,53 @@
 <?php
+namespace App\View\Legacy\Usercp;
+// Nexus legacy layout compatibility shims for usercp.php
+function header(string $header, bool $replace = true, int $http_response_code = 0): void
+{
+    if (stripos($header, 'Location:') === 0) {
+        $url = trim(substr($header, 9));
+        throw new \Illuminate\Http\Exceptions\HttpResponseException(new \Illuminate\Http\RedirectResponse($url, 302));
+    }
+    \header($header, $replace, $http_response_code);
+}
+
+function stderr($heading, $text, $htmlstrip = true, $head = true, $foot = true, $die = true)
+{
+    if (empty($GLOBALS['nexus_legacy_layout'])) {
+        \stderr($heading, $text, $htmlstrip, $head, $foot, $die);
+        return;
+    }
+    $html = \App\Support\Frame::stdMessage((string) $heading, (string) $text, (bool) $htmlstrip);
+    throw new \Illuminate\Http\Exceptions\HttpResponseException(response($html));
+}
+
+function stdhead(...$args)
+{
+    if (empty($GLOBALS['nexus_legacy_layout'])) {
+        \stdhead(...$args);
+    }
+}
+
+function stdfoot(...$args)
+{
+    if (empty($GLOBALS['nexus_legacy_layout'])) {
+        \stdfoot(...$args);
+    }
+}
+
+function begin_main_frame(...$args)
+{
+    if (empty($GLOBALS['nexus_legacy_layout'])) {
+        \begin_main_frame(...$args);
+    }
+}
+
+function end_main_frame(...$args)
+{
+    if (empty($GLOBALS['nexus_legacy_layout'])) {
+        \end_main_frame(...$args);
+    }
+}
+
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
 $__server_PHP_SELF = \App\Support\SupportContext::getServerValue('PHP_SELF');
@@ -47,7 +96,7 @@ function form($name, $type = "save", $id = "") {
     if ($id == "") {
         $id = "form" . random_str();
     }
-	return print("<form method=post action=usercp.php id=\"".$id."\"><input type=hidden name=action value=".htmlspecialchars($name)."><input type=hidden name=type value={$type}>");
+	return print("<form method=post action=usercp.php id=\"".$id."\"><input type=hidden name=_token value=\"" . csrf_token() . "\"><input type=hidden name=action value=".htmlspecialchars($name)."><input type=hidden name=type value={$type}>");
 }
 function submit($type = "submit") {
 $lang_usercp = (array) (\App\Support\SupportContext::getGlobal('lang_usercp') ?? []);
@@ -186,9 +235,7 @@ if ($action){
   tr($lang_usercp['row_info'], "<textarea name=\"info\" style=\"width:700px\" rows=\"10\" >" . htmlspecialchars($CURUSER["info"] ?? '') . "</textarea><br />".$lang_usercp['text_info_note'], 1);
   submit();
   print("</table></form>");
-  stdfoot();
-  die;
-  break;
+  return;
 		case "tracker":
 			if ($enabletooltip_tweak == 'yes')
 				$showtooltipsetting = true;
@@ -544,9 +591,7 @@ if ($showshoutbox_main == "yes") //system side setting for shoutbox
 
 			submit();
 			print("</table></form>");
-			stdfoot();
-			die;
-			break;
+			return;
 		case "forum":
 			if ($enabletooltip_tweak == 'yes')
 				$showtooltipsetting = true;
@@ -584,9 +629,7 @@ if ($showshoutbox_main == "yes") //system side setting for shoutbox
 			tr_small($lang_usercp['row_forum_signature'], "<textarea name=signature style=\"width:700px\" rows=10>" . $CURUSER['signature'] . "</textarea><br />".$lang_usercp['text_signature_note'],1);
 			submit();
 			print("</table></form>");
-			stdfoot();
-			die;
-			break;
+			return;
 		case "security":
 			if ($type == 'confirm') {
 				$response = \App\Support\SupportContext::getPost('response');
@@ -627,7 +670,7 @@ if ($showshoutbox_main == "yes") //system side setting for shoutbox
                     }
                     if (!\App\Support\TwoFactorAuthHelper::verifyCode($secretToVerify, $twoStepSecretHash)) {
                         stderr($lang_usercp['std_error'], 'Invalid two step code'.goback("-2"), 0);
-                        die;
+                        return;
                     }
                 }
 
@@ -647,11 +690,11 @@ if ($showshoutbox_main == "yes") //system side setting for shoutbox
 				{
 					if (!validemail($email)){
 						stderr($lang_usercp['std_error'], $lang_usercp['std_wrong_email_address_format'].goback("-2"), 0);
-						die;
+						return;
 					}
 					if (\App\Models\User::query()->where('email', $email)->where('id', '!=', $CURUSER['id'])->exists()){
 						stderr($lang_usercp['std_error'], $lang_usercp['std_email_in_use'].goback("-2"), 0);
-						die;
+						return;
 					}
 					$changedemail = 1;
 				}
@@ -685,7 +728,7 @@ EOD;
 
 				}
 				if ($privacy != "normal" && $privacy != "low" && $privacy != "strong")
-				die("whoops");
+				throw new \Illuminate\Http\Exceptions\HttpResponseException(response('whoops'));
 
 				$data['privacy'] = $privacy;
 				if ($CURUSER['privacy'] != $privacy) $privacyupdated = 1;
@@ -745,7 +788,7 @@ EOD;
 				print("</table></form>");
                 render_password_challenge_js("security", "username", "oldpassword");
 				stdfoot();
-				die;
+				return;
 			}
 			if ($type == 'saved')
 				print("<tr><td colspan=2 class=\"heading\" valign=\"top\" align=\"center\"><font color=red>".$lang_usercp['text_saved'].(\App\Support\SupportContext::getQuery("mail") == "1" ? $lang_usercp['std_confirmation_email_sent'] : "")." ".(\App\Support\SupportContext::getQuery("passkey") == "1" ? $lang_usercp['std_passkey_reset'] : "")." ".(\App\Support\SupportContext::getQuery("password") == "1" ? $lang_usercp['std_password_changed'] : "")." ".(\App\Support\SupportContext::getQuery("privacy") == "1" ? $lang_usercp['std_privacy_level_updated'] : "")."</font></td></tr>\n");
@@ -788,9 +831,7 @@ EOD;
 			print("</table></form>");
 
             render_password_hash_js("security", "password", "chpassword", false,"passagain");
-			stdfoot();
-			die;
-			break;
+			return;
 	}
 }
 }

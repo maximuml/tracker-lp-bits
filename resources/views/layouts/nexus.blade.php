@@ -24,7 +24,7 @@
         </x-slot:actions>
     </x-nexus.header>
 
-    <main id="main-content" class="mx-auto max-w-content flex-grow px-4 py-6" role="main" aria-label="Main content">
+    <main id="main-content" class="mx-auto max-w-content flex-grow px-4 py-6" role="main" aria-label="Main content" tabindex="-1">
         @yield('content')
     </main>
 

@@ -13,7 +13,9 @@
 
     @php
     $defCss = \App\Support\SupportContext::getGlobal('defcss', 4);
-    $css_uri = \App\Support\Style::cssUri(null, $defCss, $defCss);
+    $user = \App\Support\SupportContext::getUser() ?? [];
+    $userStylesheet = $user['stylesheet'] ?? $defCss;
+    $css_uri = \App\Support\Style::cssUri(\App\Support\SupportContext::getCache(), $userStylesheet, $defCss);
     @endphp
     <link rel="stylesheet" href="{{ $css_uri }}theme.css" type="text/css" />
     <link rel="stylesheet" href="styles/nexus-legacy-compat.css" type="text/css" />
@@ -38,7 +40,7 @@
         </x-slot:actions>
     </x-nexus.header>
 
-    <main id="main-content" class="mx-auto max-w-content flex-grow overflow-x-auto px-4 py-6" role="main" aria-label="Main content">
+    <main id="main-content" class="mx-auto max-w-content flex-grow overflow-x-auto px-4 py-6" role="main" aria-label="Main content" tabindex="-1">
         @yield('content')
     </main>
 

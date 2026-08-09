@@ -14,17 +14,21 @@
     @stack('head')
 </head>
 <body class="min-h-screen bg-nexus-bg text-nexus-text antialiased">
+    <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:left-2 focus:top-2 focus:z-50 focus:rounded focus:bg-nexus-primary focus:px-4 focus:py-2 focus:text-nexus-primary-text">
+        Skip to main content
+    </a>
+
     <x-nexus.header :user="Auth::guard('nexus-web')->user()">
         <x-slot:actions>
             @yield('header-actions')
         </x-slot:actions>
     </x-nexus.header>
 
-    <main class="mx-auto max-w-content flex-grow px-4 py-6">
+    <main id="main-content" class="mx-auto max-w-content flex-grow px-4 py-6" role="main" aria-label="Main content">
         @yield('content')
     </main>
 
-    <x-nexus.footer />
+    <x-nexus.footer role="contentinfo" />
 
     @stack('body')
 </body>

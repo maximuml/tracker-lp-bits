@@ -9,7 +9,7 @@ $classes = $header
 @endphp
 
 @if ($header)
-    <th {{ $attributes->merge(['class' => $classes]) }}>
+    <th {{ $attributes->merge(['class' => $classes]) }} scope="col">
         {{ $slot }}
     </th>
 @else

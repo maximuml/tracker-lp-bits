@@ -1,0 +1,69 @@
+/*
+ * Legacy-compatibility bridge stylesheet for the HTML5/viewport migration.
+ * These rules are intentionally conservative: they only prevent media/code
+ * overflow on narrow viewports and expose the nexus design tokens so legacy
+ * theme files can opt into them later without depending on the Vite build.
+ */
+
+:root,
+.nexus-theme {
+    --nexus-bg: #f5f4ea;
+    --nexus-surface: #ffffff;
+    --nexus-surface-alt: #ece9d8;
+    --nexus-border: #000000;
+    --nexus-text: #000000;
+    --nexus-text-muted: #7d7b7b;
+    --nexus-primary: #4d6c99;
+    --nexus-primary-text: #ffffff;
+    --nexus-link: #0066cc;
+    --nexus-success: #2f8f3f;
+    --nexus-warning: #d97706;
+    --nexus-danger: #dc2626;
+
+    --nexus-radius: 0;
+    --nexus-space-xs: 0.25rem;
+    --nexus-space-sm: 0.5rem;
+    --nexus-space-md: 1rem;
+    --nexus-space-lg: 1.5rem;
+    --nexus-content-max: 75rem;
+    --nexus-font-sans: Tahoma, Arial, Helvetica, sans-serif;
+}
+
+.nexus-theme.dark {
+    --nexus-bg: #0f172a;
+    --nexus-surface: #1e293b;
+    --nexus-surface-alt: #334155;
+    --nexus-border: #475569;
+    --nexus-text: #e2e8f0;
+    --nexus-text-muted: #94a3b8;
+    --nexus-primary: #93c5fd;
+    --nexus-primary-text: #0f172a;
+    --nexus-link: #60a5fa;
+    --nexus-success: #86efac;
+    --nexus-warning: #fcd34d;
+    --nexus-danger: #fca5a5;
+}
+
+img,
+embed,
+iframe,
+object,
+video {
+    max-width: 100%;
+    height: auto;
+}
+
+pre {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+input,
+select,
+textarea {
+    max-width: 100%;
+}
+
+table {
+    max-width: 100%;
+}

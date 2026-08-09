@@ -13,11 +13,13 @@ if (!empty(\App\Support\SupportContext::getQuery('userid'))) {
 }
 $userInfo = \App\Models\User::query()->find($userid, \App\Models\User::$commonFields);
 if (empty($userInfo)) {
-    stderr('Error', "User not exists.");
+    if (empty($nexus_legacy_layout)) { stderr('Error', "User not exists."); }
+    else { stdmsg('Error', "User not exists."); }
+    return;
 }
 
 $pageTitle = $userInfo->username . ' - H&R';
-stdhead($pageTitle);
+if (empty($nexus_legacy_layout)) { stdhead($pageTitle); }
 print("<h1>$pageTitle</h1>");
 
 $status = \App\Support\SupportContext::getQuery('status') ?? \App\Models\HitAndRun::STATUS_INSPECTING;
@@ -41,7 +43,7 @@ $filterForm = <<<FORM
 </form>
 FORM;
 
-begin_main_frame("", true);
+if (empty($nexus_legacy_layout)) { begin_main_frame("", true); }
 
 print $filterForm;
 
@@ -124,6 +126,6 @@ JS;
 
 print("</table>");
 print($pagerbottom);
-end_main_frame();
-stdfoot();
+if (empty($nexus_legacy_layout)) { end_main_frame(); }
+if (empty($nexus_legacy_layout)) { stdfoot(); }
 

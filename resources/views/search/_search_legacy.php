@@ -138,7 +138,7 @@ if (((\App\Support\SupportContext::getQuery('sort') !== null)) && \App\Support\S
 
 list($pagertop, $pagerbottom, $limit, $offset, $size, $page) = pager($torrentsperpage, $count, $addparam);
 
-stdhead(nexus_trans('search.global_search'));
+if (empty($nexus_legacy_layout)) { stdhead(nexus_trans('search.global_search')); }
 print("<table width=\"97%\" class=\"main\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\"><tr><td class=\"embedded\">");
 if ($search && $count > 0) {
     if ($shouldUseMeili) {

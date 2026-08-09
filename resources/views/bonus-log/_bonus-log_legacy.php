@@ -26,7 +26,7 @@ if ($businessType && !(isset($businessTypeOptions[$businessType]))) {
     stderr("Error", "Invalid business_type: $businessType");
 }
 
-stdhead(nexus_trans('bonus-log.title_for_user'));
+if (empty($nexus_legacy_layout)) { stdhead(nexus_trans('bonus-log.title_for_user')); }
 $pagerParam = "?uid=$uid&category=$category&business_type=$businessType";
 print("<h1 align=center>".nexus_trans('bonus-log.title_for_user') . "<a href=userdetails.php?id=" . htmlspecialchars($uid) . "><b>&nbsp;".htmlspecialchars($user->username)."</b></a></h1>");
 

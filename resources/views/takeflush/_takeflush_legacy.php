@@ -1,6 +1,6 @@
 <?php
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
-function bark($msg)
+function bark($msg, $nexus_legacy_layout = false)
 {
 $lang_takeflush = (array) (\App\Support\SupportContext::getGlobal('lang_takeflush') ?? []);
    if (empty($nexus_legacy_layout)) { stdhead(); }
@@ -22,5 +22,5 @@ if (get_user_class() >= UC_MODERATOR || $CURUSER['id'] == "$id")
 }
 else
 {
-   bark($lang_takeflush['std_cannot_flush_others']);
+   bark($lang_takeflush['std_cannot_flush_others'], $nexus_legacy_layout);
 }

@@ -5,38 +5,82 @@
 @section('content')
     <h1 class="mb-4 text-2xl font-bold text-nexus-primary">Nexus Design System Preview</h1>
 
-    <section class="mb-6 border border-nexus-border bg-nexus-surface p-4">
-        <h2 class="mb-2 text-lg font-semibold text-nexus-text">Header &amp; Navigation</h2>
-        <p class="text-sm text-nexus-muted">
-            The header above is responsive. Resize the viewport to see the mobile hamburger menu.
-        </p>
-    </section>
+    <x-nexus.alert variant="info" class="mb-6" title="Design system status">
+        This preview exercises the new Nexus component library. Resize the viewport to verify responsive behavior.
+    </x-nexus.alert>
 
-    <section class="mb-6 border border-nexus-border bg-nexus-surface p-4">
-        <h2 class="mb-2 text-lg font-semibold text-nexus-text">Buttons</h2>
+    <x-nexus.card title="Buttons" class="mb-6">
         <div class="flex flex-wrap gap-2">
-            <button class="bg-nexus-primary px-4 py-2 text-nexus-primary-text">Primary</button>
-            <button class="border border-nexus-border bg-nexus-surface-alt px-4 py-2 text-nexus-text">Secondary</button>
-            <button class="bg-nexus-danger px-4 py-2 text-white">Danger</button>
-            <button class="bg-nexus-success px-4 py-2 text-white">Success</button>
-            <button class="bg-nexus-warning px-4 py-2 text-white">Warning</button>
+            <x-nexus.button variant="primary">Primary</x-nexus.button>
+            <x-nexus.button variant="secondary">Secondary</x-nexus.button>
+            <x-nexus.button variant="success">Success</x-nexus.button>
+            <x-nexus.button variant="warning">Warning</x-nexus.button>
+            <x-nexus.button variant="danger">Danger</x-nexus.button>
+            <x-nexus.button variant="ghost" href="#">Link</x-nexus.button>
         </div>
-    </section>
 
-    <section class="mb-6 border border-nexus-border bg-nexus-surface p-4">
-        <h2 class="mb-2 text-lg font-semibold text-nexus-text">Surface &amp; Tokens</h2>
-        <div class="grid grid-cols-2 gap-4 md:grid-cols-4">
-            <div class="h-16 bg-nexus-bg border border-nexus-border"></div>
-            <div class="h-16 bg-nexus-surface border border-nexus-border"></div>
-            <div class="h-16 bg-nexus-surface-alt border border-nexus-border"></div>
-            <div class="h-16 bg-nexus-primary text-nexus-primary-text flex items-center justify-center">Primary</div>
+        <div class="mt-4 flex flex-wrap items-center gap-2">
+            <x-nexus.button variant="primary" size="sm">Small</x-nexus.button>
+            <x-nexus.button variant="primary" size="md">Medium</x-nexus.button>
+            <x-nexus.button variant="primary" size="lg">Large</x-nexus.button>
+            <x-nexus.button variant="secondary" disabled="true">Disabled</x-nexus.button>
         </div>
-    </section>
+    </x-nexus.card>
 
-    <section class="border border-nexus-border bg-nexus-surface p-4">
-        <h2 class="mb-2 text-lg font-semibold text-nexus-text">Typography</h2>
-        <p class="text-nexus-text">Body text uses the configured sans-serif font stack.</p>
-        <p class="text-sm text-nexus-muted">Muted text for secondary information.</p>
-        <a href="#" class="text-nexus-link hover:underline">Link example</a>
-    </section>
+    <x-nexus.card title="Badges" class="mb-6">
+        <div class="flex flex-wrap gap-2">
+            <x-nexus.badge>Default</x-nexus.badge>
+            <x-nexus.badge variant="primary">Primary</x-nexus.badge>
+            <x-nexus.badge variant="success">Success</x-nexus.badge>
+            <x-nexus.badge variant="warning">Warning</x-nexus.badge>
+            <x-nexus.badge variant="danger">Danger</x-nexus.badge>
+        </div>
+    </x-nexus.card>
+
+    <x-nexus.card title="Table" class="mb-6">
+        <x-nexus.table>
+            <x-slot:head>
+                <x-nexus.table.cell header>Torrent</x-nexus.table.cell>
+                <x-nexus.table.cell header>Size</x-nexus.table.cell>
+                <x-nexus.table.cell header>Status</x-nexus.table.cell>
+            </x-slot:head>
+
+            <x-nexus.table.row>
+                <x-nexus.table.cell>Ubuntu ISO</x-nexus.table.cell>
+                <x-nexus.table.cell>1.2 GB</x-nexus.table.cell>
+                <x-nexus.table.cell><x-nexus.badge variant="success">Seeding</x-nexus.badge></x-nexus.table.cell>
+            </x-nexus.table.row>
+            <x-nexus.table.row>
+                <x-nexus.table.cell>Sample release</x-nexus.table.cell>
+                <x-nexus.table.cell>450 MB</x-nexus.table.cell>
+                <x-nexus.table.cell><x-nexus.badge variant="warning">Leeching</x-nexus.badge></x-nexus.table.cell>
+            </x-nexus.table.row>
+        </x-nexus.table>
+    </x-nexus.card>
+
+    <x-nexus.card title="Form row" class="mb-6">
+        <form class="space-y-4" onsubmit="return false;">
+            <x-nexus.form.row label="Username" for="username" required help="Between 3 and 20 characters.">
+                <input id="username" type="text" class="w-full border border-nexus-border bg-nexus-bg px-3 py-2 text-nexus-text focus:outline-none focus:ring-2 focus:ring-nexus-primary" />
+            </x-nexus.form.row>
+
+            <x-nexus.form.row label="Email" for="email" error="This email is already in use.">
+                <input id="email" type="email" class="w-full border border-nexus-border bg-nexus-bg px-3 py-2 text-nexus-text focus:outline-none focus:ring-2 focus:ring-nexus-primary" />
+            </x-nexus.form.row>
+
+            <x-nexus.form.row>
+                <x-nexus.button variant="primary" type="submit">Submit</x-nexus.button>
+            </x-nexus.form.row>
+        </form>
+    </x-nexus.card>
+
+    <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <x-nexus.alert variant="success" title="Success">
+            Operation completed successfully.
+        </x-nexus.alert>
+
+        <x-nexus.alert variant="warning" title="Warning">
+            This action cannot be undone.
+        </x-nexus.alert>
+    </div>
 @endsection

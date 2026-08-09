@@ -55,6 +55,12 @@ Route::get('/health', function () {
     return response()->json(['status' => 'ok']);
 })->name('health');
 
+if (app()->environment('local')) {
+    Route::get('/ui-preview', function () {
+        return view('ui.preview');
+    })->name('ui.preview');
+}
+
 Route::get('/login', [AuthWebController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthWebController::class, 'login'])->middleware('throttle:login');
 Route::get('/logout', [AuthWebController::class, 'logout'])->name('logout');

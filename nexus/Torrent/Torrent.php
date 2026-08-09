@@ -46,10 +46,10 @@ class Torrent
             }
             $torrentSize = (float) $row['size'];
             if ($torrentSize <= 0) {
-                $progress = '100.0000';
+                $progress = '1.0000';
             } else {
                 $realDownloaded = $torrentSize - (float) $row['to_go'];
-                $progress = sprintf('%.4f', $realDownloaded / $torrentSize);
+                $progress = sprintf('%.4f', min(1, max(0, $realDownloaded / $torrentSize)));
             }
             $snatchedList[$id] = [
                 'finished' => $row['to_go'] == 0 ? 'yes' : 'no',
@@ -68,10 +68,11 @@ class Torrent
         } elseif ($activeStatus == 'leeching') {
             $color = 'blue';
         }
-        $progress = ($progress * 100) . '%';
+        $percentage = min(100.0, max(0.0, (float) $progress * 100.0));
+        $progressText = $percentage . '%';
         $result = sprintf(
             '<div style="padding: 1px;margin-top: 2px;border: 1px solid #838383" title="%s"><div style="width: %s;background-color: %s;height: 2px"></div></div>',
-            $activeStatus . " $progress", $progress, $color
+            $activeStatus . ' ' . $progressText, $progressText, $color
         );
         return $result;
     }

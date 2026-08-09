@@ -471,7 +471,7 @@ JS;
         $formVar = 'jqForm' . md5($formId);
         $js = <<<JS
 var $formVar = jQuery("#{$formId}");
-$formVar.on("click", "input[type=button]", function() {
+$formVar.on("click", "button[type=button], input[type=button]", function() {
     let jqUsername = $formVar.find("[name={$usernameName}]")
     let jqPassword = $formVar.find(".{$passwordOriginalClass}")
     let jqPasswordConfirm = $formVar.find(".{$passwordConfirmClass}")
@@ -516,7 +516,7 @@ JS;
         $formVar = 'jqForm' . md5($formId);
         $js = <<<JS
 var $formVar = jQuery("#{$formId}");
-$formVar.on("click", "input[type=button]", function() {
+$formVar.on("click", "button[type=button], input[type=button]", function() {
     let useChallengeResponseAuthentication = $formVar.find("input[name=response]").length > 0
     if (!useChallengeResponseAuthentication) {
         return $formVar.submit()

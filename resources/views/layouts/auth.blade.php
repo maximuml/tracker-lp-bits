@@ -20,6 +20,12 @@
         p { margin: 0.5em 0; }
         a { color: #06c; }
     </style>
+    @php
+    $defCss = \App\Support\SupportContext::getGlobal('defcss', 4);
+    $css_uri = \App\Support\Style::cssUri(null, $defCss, $defCss);
+    @endphp
+    <link rel="stylesheet" href="{{ $css_uri }}theme.css" type="text/css" />
+    <link rel="stylesheet" href="styles/nexus-legacy-compat.css" type="text/css" />
     <script type="text/javascript" src="js/jquery-1.12.4.min.js"></script>
     <script type="text/javascript" src="vendor/layer-v3.5.1/layer/layer.js"></script>
     @foreach (\Nexus\Nexus::getAppendHeaders() as $html)

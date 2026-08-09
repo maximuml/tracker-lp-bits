@@ -1,3 +1,19 @@
+@import './nexus-tokens.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+    [x-cloak] {
+        display: none !important;
+    }
+
+    body {
+        font-family: var(--nexus-font-sans);
+    }
+
+    a {
+        color: var(--nexus-link);
+    }
+}

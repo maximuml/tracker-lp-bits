@@ -78,6 +78,7 @@ use App\Http\Controllers\WebCommentController;
     Route::match(['get', 'post'], '/viewsnatches', [TorrentActionController::class, 'viewSnatches'])->name('viewsnatches.legacy');
     Route::match(['get', 'post'], '/takeflush', [TorrentActionController::class, 'takeFlush'])->name('takeflush.legacy');
     Route::match(['get', 'post'], '/takereseed', [TorrentActionController::class, 'takeReseed'])->name('takereseed.legacy');
+    Route::match(['get', 'post'], '/thanks', [TorrentActionController::class, 'thanks'])->name('thanks.legacy');
     Route::match(['get', 'post'], '/clearcache', [AdminController::class, 'clearCache'])->name('clearcache.legacy');
     Route::match(['get', 'post'], '/fastdelete', [TorrentActionController::class, 'fastDelete'])->name('fastdelete.legacy');
     Route::match(['get', 'post'], '/donated', [InfoController::class, 'donated'])->name('donated.legacy');

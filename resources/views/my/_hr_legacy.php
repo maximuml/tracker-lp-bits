@@ -17,7 +17,7 @@ if (empty($userInfo)) {
 }
 
 $pageTitle = $userInfo->username . ' - H&R';
-stdhead($pageTitle);
+if (empty($nexus_legacy_layout)) { stdhead($pageTitle); }
 print("<h1>$pageTitle</h1>");
 
 $status = \App\Support\SupportContext::getQuery('status') ?? \App\Models\HitAndRun::STATUS_INSPECTING;
@@ -41,7 +41,7 @@ $filterForm = <<<FORM
 </form>
 FORM;
 
-begin_main_frame("", true);
+if (empty($nexus_legacy_layout)) { begin_main_frame("", true); }
 
 print $filterForm;
 
@@ -124,6 +124,6 @@ JS;
 
 print("</table>");
 print($pagerbottom);
-end_main_frame();
-stdfoot();
+if (empty($nexus_legacy_layout)) { end_main_frame(); }
+if (empty($nexus_legacy_layout)) { stdfoot(); }
 

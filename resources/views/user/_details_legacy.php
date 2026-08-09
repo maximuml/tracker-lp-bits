@@ -30,6 +30,7 @@ $forumposts = \App\Models\Post::query()->where('userid', $user['id'])->count();
 	$country = "<img src=\"pic/flag/".$arr['flagpic']."\" alt=\"".$arr['name']."\" style='margin-left: 8pt' />";
 
 
+$gender = '';
 if ($user["gender"] == "Male")
 $gender = "<img class='male' src='pic/trans.gif' alt='Male' title='".$lang_userdetails['title_male']."' style='margin-left: 4pt' />";
 elseif ($user["gender"] == "Female")

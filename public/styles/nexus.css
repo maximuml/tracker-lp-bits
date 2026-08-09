@@ -7,10 +7,10 @@ img.hitandrun {
 details summary {
     width: fit-content;
     line-height: 28px;
-    color: #4d6c99;
+    color: var(--nexus-primary, #4d6c99);
     cursor: pointer;
     font-weight: 700;
-    background-color: rgba(77, 108, 153, 0.1);
+    background-color: color-mix(in srgb, var(--nexus-primary, #4d6c99) 10%, transparent);
     padding: 0 10px;
     transition: margin .15s ease-out;
 }
@@ -18,7 +18,7 @@ details[open] summary {
     margin-bottom: 10px;
 }
 .layui-layer {
-    color: black;
+    color: var(--nexus-text, black);
 }
 .layer-form {
     padding: 10px 15px;
@@ -64,7 +64,7 @@ details[open] summary {
     overflow-wrap: anywhere;
 }
 .text-muted {
-    color: #7d7b7b
+    color: var(--nexus-text-muted, #7d7b7b);
 }
 .codemain>pre {
     margin: 0;
@@ -82,7 +82,7 @@ details[open] summary {
     padding: 10px 0;
 }
 .form-control-row .label {
-    width: 80px
+    width: 80px;
 }
 .form-control-row .field {
 

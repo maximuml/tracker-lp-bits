@@ -1,15 +1,20 @@
+:root
+{
+	--nexus-page-bg: #cfcfcc;
+}
+
 body
 {
 	margin-top: 0px;
 	margin-bottom: 0px;
-	color: #000000;
+	color: var(--nexus-text, #000000);
 	font-family: tahoma, arial, helvetica, sans-serif;
-	background-color: #cfcfcc;
+	background-color: var(--nexus-page-bg, #cfcfcc);
 }
 body.inframe
 {
 	background-image: none;
-	background-color: #ece9d8;
+	background-color: var(--nexus-surface-alt, #ece9d8);
 }
 table
 {
@@ -18,7 +23,7 @@ table
 	border-left: medium none;
 	border-bottom: medium none;
 	border-collapse: collapse;
-	background-color: #ece9d8
+	background-color: var(--nexus-surface-alt, #ece9d8);
 }
 table.head
 {
@@ -28,39 +33,39 @@ table.head
 }
 table.main
 {
-	background-color: #f5f4ea
+	background-color: var(--nexus-bg, #f5f4ea);
 }
 table.mainouter
 {
-	background-color: #f5f4ea
+	background-color: var(--nexus-bg, #f5f4ea);
 }
 table.message
 {
-	border-right: #000000 1px solid;
-	border-top: #000000 1px solid;
-	border-left: #000000 1px solid;
-	border-bottom: #000000 1px solid
+	border-right: var(--nexus-border, #000000) 1px solid;
+	border-top: var(--nexus-border, #000000) 1px solid;
+	border-left: var(--nexus-border, #000000) 1px solid;
+	border-bottom: var(--nexus-border, #000000) 1px solid;
 }
 table.bottom
 {
-	background: none transparent scroll repeat 0% 0%
+	background: none transparent scroll repeat 0% 0%;
 }
 a.info
 {
 	z-index: 24;
-	color: #000;
+	color: var(--nexus-text, #000);
 	position: relative;
-	background-color: #ccc;
-	text-decoration: none
+	background-color: var(--nexus-surface-alt, #ccc);
+	text-decoration: none;
 }
 a.info:hover
 {
 	z-index: 25;
-	background-color: #ff0
+	background-color: #ff0;
 }
 a.info span
 {
-	display: none
+	display: none;
 }
 a.info:hover span
 {
@@ -70,42 +75,42 @@ a.info:hover span
 	left: 2em;
 	border-left: #0cf 1px solid;
 	width: 15em;
-	color: #000;
+	color: var(--nexus-text, #000);
 	border-bottom: #0cf 1px solid;
 	position: absolute;
 	top: 2em;
-	background-color: #cff;
-	text-align: center
+	background-color: var(--nexus-surface, #cff);
+	text-align: center;
 }
 table.bottom
 {
-	background: none transparent scroll repeat 0% 0%
+	background: none transparent scroll repeat 0% 0%;
 }
 h1
 {
 }
 h2
 {
-	margin-bottom: 6px
+	margin-bottom: 6px;
 }
 h2.transparentbg
 {
 	background-color: transparent;
-	background-image: none
+	background-image: none;
 }
 p
 {
 }
 p.sub
 {
-	margin-bottom: 4pt
+	margin-bottom: 4pt;
 }
 td
 {
-	border-right: #000000 1px solid;
-	border-top: #000000 1px solid;
-	border-left: #000000 1px solid;
-	border-bottom: #000000 1px solid
+	border-right: var(--nexus-border, #000000) 1px solid;
+	border-top: var(--nexus-border, #000000) 1px solid;
+	border-left: var(--nexus-border, #000000) 1px solid;
+	border-bottom: var(--nexus-border, #000000) 1px solid;
 }
 td.embedded
 {
@@ -117,7 +122,7 @@ td.embedded
 	border-left: medium none;
 	padding-top: 0px;
 	border-bottom: medium none;
-	text-align: left
+	text-align: left;
 }
 td.no_border
 {
@@ -130,7 +135,7 @@ td.no_border
 	padding-top: 3px;
 	border-bottom: medium none;
 	background-color: transparent;
-	text-align: left
+	text-align: left;
 }
 td.no_border_wide
 {
@@ -152,25 +157,25 @@ td.shoutrow
 	border-top: medium none;
 	border-left: medium none;
 	border-bottom: medium none;
-	background-color: #f5f4ea
+	background-color: var(--nexus-bg, #f5f4ea);
 }
 td.bottom
 {
 	border-right: medium none;
 	border-top: medium none;
 	border-left: medium none;
-	border-bottom: medium none
+	border-bottom: medium none;
 }
 td.heading
 {
-	font-weight: bold
+	font-weight: bold;
 }
 td.text
 {
 	padding-right: 10pt;
 	padding-left: 10pt;
 	padding-bottom: 10pt;
-	padding-top: 10pt
+	padding-top: 10pt;
 }
 td.comment
 {
@@ -178,32 +183,32 @@ td.comment
 	padding-left: 10pt;
 	padding-bottom: 10pt;
 	padding-top: 10pt;
-	text-align: left
+	text-align: left;
 }
 td.colhead
 {
-	white-space:nowrap;
+	white-space: nowrap;
 	font-weight: bold;
-	color: #ffffff;
-	background-color: #0055a4
+	color: var(--nexus-primary-text, #ffffff);
+	background-color: var(--nexus-primary, #0055a4);
 }
 .nowrap
 {
-	white-space:nowrap;
+	white-space: nowrap;
 }
 td.rowhead_left
 {
-	text-align: left
+	text-align: left;
 }
 td.rowhead_center
 {
-	text-align: center
+	text-align: center;
 }
 td.rowhead
 {
 	font-weight: bold;
 	vertical-align: top;
-	text-align: right
+	text-align: right;
 }
 td.rowfollow
 {
@@ -232,7 +237,7 @@ td.navigation
 	border-top: medium none;
 	font-weight: bold;
 	border-left: medium none;
-	border-bottom: medium none
+	border-bottom: medium none;
 }
 td.clear
 {
@@ -240,22 +245,22 @@ td.clear
 	border-top: 0px;
 	background: none transparent scroll repeat 0% 0%;
 	border-left: 0px;
-	border-bottom: 0px
+	border-bottom: 0px;
 }
 form
 {
 	margin-top: 0px;
-	margin-bottom: 0px
+	margin-bottom: 0px;
 }
 .sublink
 {
 	font-weight: normal;
-	font-style: italic
+	font-style: italic;
 }
 font.gray
 {
-	color: #aca899;
-	text-decoration: underline
+	color: var(--nexus-text-muted, #aca899);
+	text-decoration: underline;
 }
 .attach img
 {
@@ -265,7 +270,7 @@ font.gray
 }
 .attach a:link
 {
-	color: #0099CC;
+	color: var(--nexus-link, #0099CC);
 	text-decoration: underline;
 }
 .attach .size
@@ -274,21 +279,21 @@ font.gray
 }
 a:link
 {
-	color: #000000;
-	text-decoration: none
+	color: var(--nexus-text, #000000);
+	text-decoration: none;
 }
 a:visited
 {
-	color: #000000;
-	text-decoration: none
+	color: var(--nexus-text, #000000);
+	text-decoration: none;
 }
 a:hover
 {
-	color: #ff0000
+	color: var(--nexus-danger, #ff0000);
 }
 a.index
 {
-	font-weight: bold
+	font-weight: bold;
 }
 a.biglink
 {
@@ -297,50 +302,50 @@ a.biglink
 a.altlink:link
 {
 	font-weight: bold;
-	color: #a83838;
-	text-decoration: none
+	color: var(--nexus-danger, #a83838);
+	text-decoration: none;
 }
 a.altlink:visited
 {
 	font-weight: bold;
-	color: #a83838;
-	text-decoration: none
+	color: var(--nexus-danger, #a83838);
+	text-decoration: none;
 }
 a.altlink:hover
 {
-	text-decoration: underline
+	text-decoration: underline;
 }
 a.altlink_blue:link
 {
 	font-weight: bold;
-	color: #004e98;
-	text-decoration: none
+	color: var(--nexus-primary, #004e98);
+	text-decoration: none;
 }
 a.altlink_blue:visited
 {
 	font-weight: bold;
-	color: #004e98;
-	text-decoration: none
+	color: var(--nexus-primary, #004e98);
+	text-decoration: none;
 }
 a.altlink_blue:hover
 {
-	text-decoration: underline
+	text-decoration: underline;
 }
 a.altlink_green:link
 {
 	font-weight: bold;
-	color: #007800;
-	text-decoration: none
+	color: var(--nexus-success, #007800);
+	text-decoration: none;
 }
 a.altlink_green:visited
 {
 	font-weight: bold;
-	color: #007800;
-	text-decoration: none
+	color: var(--nexus-success, #007800);
+	text-decoration: none;
 }
 a.altlink_green:hover
 {
-	text-decoration: underline
+	text-decoration: underline;
 }
 .important
 {
@@ -348,45 +353,45 @@ a.altlink_green:hover
 }
 .red
 {
-	color: #ee0000
+	color: var(--nexus-danger, #ee0000);
 }
 .yellow
 {
-	color: #997700
+	color: var(--nexus-warning, #997700);
 }
 .green
 {
-	color: #000000
+	color: var(--nexus-text, #000000);
 }
 .btn2
 {
-	border-right: #ccc 1px outset;
+	border-right: var(--nexus-border, #ccc) 1px outset;
 	padding-right: 2px;
-	border-top: #ccc 1px outset;
+	border-top: var(--nexus-border, #ccc) 1px outset;
 	padding-left: 2px;
 	font-weight: bold;
 	background: url(./btnbg.gif) repeat-x left top;
 	padding-bottom: 1px;
-	border-left: #ccc 1px outset;
+	border-left: var(--nexus-border, #ccc) 1px outset;
 	cursor: pointer;
-	color: #666;
+	color: var(--nexus-text-muted, #666);
 	padding-top: 1px;
-	border-bottom: #ccc 1px outset
+	border-bottom: var(--nexus-border, #ccc) 1px outset;
 }
 .btn
 {
-	border-right: #ccc 1px outset;
+	border-right: var(--nexus-border, #ccc) 1px outset;
 	padding-right: 2px;
-	border-top: #ccc 1px outset;
+	border-top: var(--nexus-border, #ccc) 1px outset;
 	padding-left: 2px;
 	font-weight: bold;
 	background: url(./btnbg.gif) repeat-x left top;
 	padding-bottom: 1px;
-	border-left: #ccc 1px outset;
+	border-left: var(--nexus-border, #ccc) 1px outset;
 	cursor: pointer;
-	color: #666;
+	color: var(--nexus-text-muted, #666);
 	padding-top: 1px;
-	border-bottom: #ccc 1px outset
+	border-bottom: var(--nexus-border, #ccc) 1px outset;
 }
 .small
 {
@@ -411,55 +416,55 @@ img
 }
 img.border
 {
-	border-right: #000000 1px solid;
-	border-top: #000000 1px solid;
-	border-left: #000000 1px solid;
-	border-bottom: #000000 1px solid
+	border-right: var(--nexus-border, #000000) 1px solid;
+	border-top: var(--nexus-border, #000000) 1px solid;
+	border-left: var(--nexus-border, #000000) 1px solid;
+	border-bottom: var(--nexus-border, #000000) 1px solid;
 }
 .gobutton
 {
-	background: #476ba2;
-	color: #fff
+	background: var(--nexus-primary, #476ba2);
+	color: var(--nexus-primary-text, #fff);
 }
 .codetop
 {
 	padding-right: 3px;
 	padding-left: 3px;
 	font-weight: bold;
-	background: url(./code.gif) #f1b000 no-repeat right 50%;
+	background: url(./code.gif) var(--nexus-warning, #f1b000) no-repeat right 50%;
 	padding-bottom: 3px;
 	margin: 0px auto;
-	color: #000;
-	padding-top: 3px
+	color: var(--nexus-text, #000);
+	padding-top: 3px;
 }
 .codemain
 {
-	border-right: #000 1px solid;
+	border-right: var(--nexus-border, #000) 1px solid;
 	padding-right: 3px;
-	border-top: #000 1px solid;
+	border-top: var(--nexus-border, #000) 1px solid;
 	padding-left: 3px;
-	background: #fff;
+	background: var(--nexus-surface, #fff);
 	padding-bottom: 3px;
 	margin: 0px auto;
-	border-left: #000 1px solid;
-	color: #000;
+	border-left: var(--nexus-border, #000) 1px solid;
+	color: var(--nexus-text, #000);
 	padding-top: 3px;
-	border-bottom: #000 1px solid
+	border-bottom: var(--nexus-border, #000) 1px solid;
 }
 .dropmenu
 {
-	background:#F2F9FD none repeat scroll 0 0;
-	border:3px solid #A6C9D7;
-	margin-top:3px;
-	opacity:0.9;
-	position:absolute;
-	text-align:left;
+	background: var(--nexus-surface, #F2F9FD) none repeat scroll 0 0;
+	border: 3px solid #A6C9D7;
+	margin-top: 3px;
+	opacity: 0.9;
+	position: absolute;
+	text-align: left;
 }
 .dropmenu ul
 {
 	list-style-type: none;
 	white-space: nowrap;
-	padding:10px;
+	padding: 10px;
 }
 .dropmenu ul li
 {
@@ -486,15 +491,15 @@ ul.menu li
 }
 ul.menu li a
 {
-	border-right: #778 1px solid;
+	border-right: var(--nexus-border, #778) 1px solid;
 	padding-right: 7px;
-	border-top: #778 1px solid;
+	border-top: var(--nexus-border, #778) 1px solid;
 	padding-left: 7px;
 	background: url(./shade.gif) white repeat-x left top;
-	background-color: #cfe0df;
+	background-color: var(--nexus-surface-alt, #cfe0df);
 	padding-bottom: 3px;
-	border-left: #778 1px solid;
-	color: #2d2b2b;
+	border-left: var(--nexus-border, #778) 1px solid;
+	color: var(--nexus-text, #2d2b2b);
 	margin-right: 3px;
 	padding-top: 3px;
 	border-bottom: none;
@@ -508,25 +513,25 @@ ul.menu li a
 }
 ul.menu li a:link
 {
-	color: #2d2b2b;
+	color: var(--nexus-text, #2d2b2b);
 }
 ul.menu li a:visited
 {
-	color: #2d2b2b;
+	color: var(--nexus-text, #2d2b2b);
 }
 ul.menu li a:hover
 {
-	color: #2d2b2b;
+	color: var(--nexus-text, #2d2b2b);
 	text-decoration: underline;
 }
 ul.menu li a:active
 {
-	color: #2d2b2b;
+	color: var(--nexus-text, #2d2b2b);
 }
 ul.menu li.selected a
 {
 	background-image: url(./shadeactive.gif);
-	background-color: #ffffff;
+	background-color: var(--nexus-surface, #ffffff);
 	border-bottom-color: white;
 	font: bold 11px verdana;
 	position: relative;
@@ -539,7 +544,7 @@ ul.menu li.selected a:hover
 .listitem
 {
 	margin-left: 10px;
-	margin-right: 5px
+	margin-right: 5px;
 }
 .StaffLeader_Name{color: #8b0000}
 A.StaffLeader_Name:link{color: #8b0000}
@@ -624,13 +629,13 @@ A.Peasant_Name:visited{color: #708090}
 
 .logo
 {
-	color: #000000;
+	color: var(--nexus-text, #000000);
 	font-family: tahoma, arial, helvetica, sans-serif;
 }
 
 .slogan
 {
-	color: #333333;
+	color: var(--nexus-text, #333333);
 	font-family: tahoma, arial, helvetica, sans-serif;
 }
 

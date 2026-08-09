@@ -60,7 +60,7 @@ return array (
     'smalldescription' => 'yes',
     'altname' => '',
     'defaultlang' => 'en',
-    'defstylesheet' => '3',
+    'defstylesheet' => '4',
     'donation' => 'yes',
     'spsct' => 'no',
     'browsecat' => '4',

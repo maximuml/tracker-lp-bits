@@ -223,7 +223,7 @@ final class Format
     /**
      * Return the color code for a ratio. Backs the legacy `get_ratio_color()` helper.
      */
-    public static function getRatioColor(int|float $ratio): string
+    public static function getRatioColor(mixed $ratio): string
     {
         return \App\Support\Ratio::color((float) $ratio);
     }

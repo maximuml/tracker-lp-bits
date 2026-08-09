@@ -86,13 +86,13 @@ final class Captcha
      * Verify an image captcha response. Backs the legacy `check_code()` helper.
      */
     public static function checkCode(
-        string $imagehash,
-        string $imagestring,
+        mixed $imagehash,
+        mixed $imagestring,
         string $where = 'signup.php',
         bool $maxattemptlog = false,
         bool $head = true,
     ): bool {
-        return LegacyAuth::checkCode($imagehash, $imagestring, $where, $maxattemptlog, $head, \legacy_auth_context());
+        return LegacyAuth::checkCode((string) $imagehash, (string) $imagestring, $where, $maxattemptlog, $head, \legacy_auth_context());
     }
 
     /**

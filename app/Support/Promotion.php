@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Support;
 
+use App\Enums\TorrentPromotion;
 use App\Models\Torrent;
 use App\Models\TorrentState;
 
@@ -217,9 +218,11 @@ final class Promotion
             $timeline = TorrentState::resolveTimeline();
             $current = $timeline['current'] ?? null;
 
-            $state = is_array($current) && isset($current['global_sp_state'])
-                ? (int) $current['global_sp_state']
-                : Torrent::PROMOTION_NORMAL;
+            $state = TorrentPromotion::fromIntSafe(
+                is_array($current) && isset($current['global_sp_state'])
+                    ? (int) $current['global_sp_state']
+                    : TorrentPromotion::NORMAL->value
+            )->value;
         }
 
         return $state;

@@ -13,6 +13,7 @@
  */
 namespace App\Models;
 
+use App\Enums\HitAndRunMode;
 use App\Enums\ModelEventEnum;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -204,15 +205,15 @@ class HitAndRun extends NexusModel
     {
         $enableSpecialSection = Setting::get('main.spsct') == 'yes';
         $browseMode = self::getConfig('mode', Setting::get('main.browsecat'));
-        $browseEnabled = $browseMode && in_array($browseMode, [self::MODE_GLOBAL, self::MODE_MANUAL]);
-        if (!$enableSpecialSection) {
-            do_log("Not enable special section, browseEnabled: $browseEnabled");
+        $browseEnabled = HitAndRunMode::fromStringSafe(is_string($browseMode) ? $browseMode : null)->isEnabled();
+        if (! $enableSpecialSection) {
+            do_log("Not enable special section, browseEnabled: " . ($browseEnabled ? 'true' : 'false'));
             return $browseEnabled;
         }
         $specialMode = self::getConfig('mode', Setting::get('main.specialcat'));
-        $specialEnabled =  $specialMode && in_array($specialMode, [self::MODE_GLOBAL, self::MODE_MANUAL]);
+        $specialEnabled = HitAndRunMode::fromStringSafe(is_string($specialMode) ? $specialMode : null)->isEnabled();
         $result = $browseEnabled || $specialEnabled;
-        do_log("Enable special section, browseEnabled: $browseEnabled, specialEnabled: $specialEnabled, result: $result");
+        do_log("Enable special section, browseEnabled: " . ($browseEnabled ? 'true' : 'false') . ", specialEnabled: " . ($specialEnabled ? 'true' : 'false') . ", result: " . ($result ? 'true' : 'false'));
         return $result;
     }
 

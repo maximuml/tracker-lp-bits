@@ -45,6 +45,8 @@
  */
 namespace App\Models;
 
+use App\Enums\HitAndRunMode;
+use App\Enums\TorrentPromotion;
 use App\Repositories\TagRepository;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -290,23 +292,39 @@ class Torrent extends NexusModel
         return self::$promotionTypes[$spStateReal]['text'] ?? '';
     }
 
-    /** @return  mixed */
-    public function getSpStateRealAttribute()
+    /**
+     * Effective promotion state, considering global special state and validity.
+     *
+     * Uses TorrentPromotion enum for validation while still returning the legacy
+     * integer code so callers can keep indexing $promotionTypes.
+     *
+     * @return  int
+     */
+    public function getSpStateRealAttribute(): int
     {
         if ($this->getRawOriginal('sp_state') === null) {
             throw new \RuntimeException('no select sp_state field');
         }
-        $spState = $this->sp_state;
-        $global = get_global_sp_state();
+        $spState = (int) $this->sp_state;
+        $global = (int) get_global_sp_state();
         $log = sprintf('torrent: %s sp_state: %s, global sp state: %s', $this->id, $spState, $global);
-        if ($global != self::PROMOTION_NORMAL) {
-            $spState = $global;
+
+        $resolved = TorrentPromotion::fromIntSafe($spState);
+        $globalResolved = TorrentPromotion::fromIntSafe($global);
+
+        if ($globalResolved !== TorrentPromotion::NORMAL) {
+            $spState = $globalResolved->value;
+            $resolved = $globalResolved;
             $log .= sprintf(", global != %s, set sp_state to global: %s", self::PROMOTION_NORMAL, $global);
         }
-        if (!isset(self::$promotionTypes[$spState])) {
+
+        // fromIntSafe guarantees a valid enum, but keep the $promotionTypes guard
+        // for backwards compatibility with any code that still inspects that array.
+        if (! isset(self::$promotionTypes[$spState])) {
             $log .= ", but now sp_state: $spState, is invalid, reset to: " . self::PROMOTION_NORMAL;
             $spState = self::PROMOTION_NORMAL;
         }
+
         do_log($log, 'debug');
         return $spState;
     }
@@ -415,14 +433,16 @@ class Torrent extends NexusModel
             do_log(sprintf('[INVALID_CATEGORY], Torrent: %s, category: %s invalid', $this->id, $this->category), 'error');
             return self::HR_NO;
         }
-        $hrMode = HitAndRun::getConfig('mode', $searchBoxId);
-        if ($hrMode == HitAndRun::MODE_GLOBAL) {
+        $hrMode = HitAndRunMode::fromStringSafe(
+            is_string($mode = HitAndRun::getConfig('mode', $searchBoxId)) ? $mode : null
+        );
+        if ($hrMode === HitAndRunMode::GLOBAL) {
             return self::HR_YES;
         }
-        if ($hrMode == HitAndRun::MODE_DISABLED) {
+        if ($hrMode === HitAndRunMode::DISABLED) {
             return self::HR_NO;
         }
-        return $this->getRawOriginal('hr');
+        return (int) $this->getRawOriginal('hr');
     }
 
     /** @return  mixed */

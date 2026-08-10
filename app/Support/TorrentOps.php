@@ -2,6 +2,7 @@
 
 namespace App\Support;
 
+use App\Enums\TorrentPromotion;
 use App\Models\Torrent;
 use App\Models\TorrentOperationLog;
 use App\Repositories\MeiliSearchRepository;
@@ -175,18 +176,16 @@ final class TorrentOps
                 $spStateReal = $torrent['sp_state'];
             }
 
-            if (!isset(\App\Models\Torrent::$promotionTypes[$spStateReal])) {
-                $log .= ", spStateReal = $spStateReal, invalid, reset to: $spStateNormal";
-                $spStateReal = $spStateNormal;
-            }
+            $promotion = TorrentPromotion::fromIntSafe((int) $spStateReal);
+            $log .= ", spStateReal = $spStateReal, promotion: {$promotion->label()}";
 
             $uploaderRatio = \get_setting('torrent.uploaderdouble');
             $log .= ", uploaderRatio: $uploaderRatio";
             if ($torrent['owner'] == $user['id'] && $uploaderRatio != 1) {
-                $upRatio = max($uploaderRatio, \App\Models\Torrent::$promotionTypes[$spStateReal]['up_multiplier']);
+                $upRatio = max($uploaderRatio, $promotion->upMultiplier());
                 $log .= ", [IS_UPLOADER] && uploaderRatio != 1, upRatio: $upRatio";
             } else {
-                $upRatio = \App\Models\Torrent::$promotionTypes[$spStateReal]['up_multiplier'];
+                $upRatio = $promotion->upMultiplier();
                 $log .= ", [IS_NOT_UPLOADER] || uploaderRatio == 1, upRatio: $upRatio";
             }
 
@@ -194,7 +193,7 @@ final class TorrentOps
                 $downRatio = 0;
                 $log .= ", [IS_VIP], downRatio: $downRatio";
             } else {
-                $downRatio = \App\Models\Torrent::$promotionTypes[$spStateReal]['down_multiplier'];
+                $downRatio = $promotion->downMultiplier();
                 $log .= ", [IS_NOT_VIP], downRatio: $downRatio";
             }
         } else {

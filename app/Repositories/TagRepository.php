@@ -1,6 +1,7 @@
 <?php
 namespace App\Repositories;
 
+use App\Auth\Permission;
 use App\Models\Tag;
 use App\Models\Torrent;
 use App\Models\TorrentTag;
@@ -84,7 +85,7 @@ class TagRepository extends BaseRepository
     {
         $html = '';
         $results = $this->listAll($searchBoxId);
-        if (!$ignorePermission && !user_can('torrent-set-special-tag')) {
+        if (!$ignorePermission && !Permission::canSetTorrentSpecialTag()) {
             $specialTags = Tag::listSpecial();
             $results = $results->filter(fn ($item) => !in_array($item->id, $specialTags));
         }

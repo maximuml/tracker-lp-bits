@@ -16,7 +16,7 @@ $id = intval(\App\Support\SupportContext::getQuery('userid') ?? 0);
 $type = \App\Support\SupportContext::getQuery('type') ?? '';
 if (!in_array($type,array('uploaded','seeding','leeching','completed','incomplete')))
     return;
-if(!user_can('torrenthistory') && $id != $CURUSER["id"])
+if(!\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::TORRENT_HISTORY) && $id != $CURUSER["id"])
     permissiondenied();
 
 function maketable($rows, $mode = 'seeding')
@@ -109,7 +109,7 @@ $seedBoxRep = \App\Support\SupportContext::getGlobal('seedBoxRep');
 		default: break;
 	}
 	$shouldShowClient = false;
-	if ($showClient && (user_can('userprofile') || $CURUSER['id'] == $id)) {
+	if ($showClient && (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::VIEW_USER_CONFIDENTIAL_INFO) || $CURUSER['id'] == $id)) {
 	    $shouldShowClient = true;
     }
 	$results = $torrentIdArr = [];
@@ -237,7 +237,7 @@ switch ($type)
 		        'categories.image', 'torrents.category', 'torrents.sp_state', 'torrents.size', 'torrents.hr',
 		        'torrents.added', 'torrents.owner as userid', 'categories.mode as search_box_id'
 		    ]);
-		if ($CURUSER['id'] != $id && !user_can('viewanonymous')) {
+		if ($CURUSER['id'] != $id && !\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::VIEW_ANONYMOUS)) {
 		    $query->where('torrents.anonymous', 'no');
         }
 		$query->orderByDesc('torrents.id');

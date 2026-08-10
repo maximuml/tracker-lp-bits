@@ -10,7 +10,7 @@ $lang_functions = \App\Support\SupportContext::getGlobal('lang_functions') ?? []
 $torrentnameprefix = \App\Support\SupportContext::getGlobal('torrentnameprefix') ?? '';
 
     $row = apply_filter('torrent_detail', $row);
-    if (user_can('torrentmanage') || $CURUSER["id"] == $row["owner"])
+    if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::TORRENT_MANAGE) || $CURUSER["id"] == $row["owner"])
     $owned = 1;
     else $owned = 0;
     $torrentRep = new \App\Repositories\TorrentRepository();
@@ -70,7 +70,7 @@ $torrentnameprefix = \App\Support\SupportContext::getGlobal('torrentnameprefix')
 
 		// ------------- start upped by block ------------------//
 		if($row['anonymous'] == 'yes') {
-			if (!user_can('viewanonymous') && $row['owner'] != $CURUSER['id'])
+			if (!\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::VIEW_ANONYMOUS) && $row['owner'] != $CURUSER['id'])
 			$uprow = "<i>".$lang_details['text_anonymous']."</i>";
 			else
 			$uprow = "<i>".$lang_details['text_anonymous']."</i> (" . get_username($row['owner'], false, true, true, false, false, true) . ")";
@@ -139,12 +139,12 @@ $torrentnameprefix = \App\Support\SupportContext::getGlobal('torrentnameprefix')
             $actions[] = "<a title=\"".$lang_details['title_download_torrent']."\" href=\"download.php?id=".$id."\"><img class=\"dt_download\" src=\"pic/trans.gif\" alt=\"download\" />&nbsp;<b><font class=\"small\">".$downloadBtn."</font></b></a>";
         }
         if ($owned == 1) {
-            $actions[] = "<$editlink><img class=\"dt_edit\" src=\"pic/trans.gif\" alt=\"edit\" />&nbsp;<b><font class=\"small\">".(user_can('torrentmanage') ? $lang_details['text_edit_and_delete_torrent'] : $lang_details['text_edit_torrent']). "</font></b></a>";
+            $actions[] = "<$editlink><img class=\"dt_edit\" src=\"pic/trans.gif\" alt=\"edit\" />&nbsp;<b><font class=\"small\">".(\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::TORRENT_MANAGE) ? $lang_details['text_edit_and_delete_torrent'] : $lang_details['text_edit_torrent']). "</font></b></a>";
         }
-        if (user_can('askreseed') && $row['seeders'] == 0) {
+        if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::ASK_RESEED) && $row['seeders'] == 0) {
             $actions[] = "<a title=\"".$lang_details['title_ask_for_reseed']."\" href=\"takereseed.php?reseedid=$id\"><img class=\"dt_reseed\" src=\"pic/trans.gif\" alt=\"reseed\">&nbsp;<b><font class=\"small\">".$lang_details['text_ask_for_reseed'] ."</font></b></a>";
         }
-        if (user_can('torrent-approval') && (get_setting('torrent.approval_status_icon_enabled') == 'yes' || get_setting('torrent.approval_status_none_visible') == 'no')) {
+        if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::TORRENT_APPROVAL) && (get_setting('torrent.approval_status_icon_enabled') == 'yes' || get_setting('torrent.approval_status_none_visible') == 'no')) {
             $approvalIcon = '<svg t="1655224943277" class="icon" viewBox="0 0 1397 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="45530" width="16" height="16"><path d="M1396.363636 121.018182c0 0-223.418182 74.472727-484.072727 372.363636-242.036364 269.963636-297.890909 381.672727-390.981818 530.618182C512 1014.690909 372.363636 744.727273 0 549.236364l195.490909-186.181818c0 0 176.872727 121.018182 297.890909 344.436364 0 0 307.2-474.763636 902.981818-707.490909L1396.363636 121.018182 1396.363636 121.018182zM1396.363636 121.018182" p-id="45531" fill="#e78d0f"></path></svg>';
             $actions[] = sprintf(
                 '<a href="javascript:;"><b><font id="approval" class="small approval" data-torrent_id="%s">%s&nbsp;%s</font></b></a>',
@@ -231,7 +231,7 @@ JS;
 		    $infoTds[] = "<td class=\"no_border_wide\">" . $files_info . "</td>";
         }
 		$infoTds[] = "<td class=\"no_border_wide\"><b>".$lang_details['row_info_hash'].":</b>&nbsp;".preg_replace_callback('/./s', "hex_esc", hash_pad($row["info_hash"]))."</td>";
-		if (user_can('torrentstructure')) {
+		if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::TORRENT_STRUCTURE)) {
 		    $infoTds[] = "<td class=\"no_border_wide\"><b>" . $lang_details['text_torrent_structure'] . "</b><a href=\"torrent_info.php?id=".$id."\">".$lang_details['text_torrent_info_note']."</a></td>";
         }
         tr($lang_details['row_torrent_info'], "<table><tr>" . implode("", $infoTds) . "</tr></table><span id='filelist'></span>",1);

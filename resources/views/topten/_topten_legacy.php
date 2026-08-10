@@ -4,7 +4,7 @@ function bark($msg) {
 $lang_topten = (array) (\App\Support\SupportContext::getGlobal('lang_topten') ?? []);
 	genbark($msg, $lang_topten['std_error']);
 }
-if (!user_can('topten')){
+if (!\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::TOP_TEN)){
 	stderr($lang_topten['std_sorry'],$lang_topten['std_permission_denied_only'].get_user_class_name($topten_class,false,true,true).sprintf($lang_topten['std_or_above_can_view'], \App\Models\Setting::getSiteName()),false);
 }
 

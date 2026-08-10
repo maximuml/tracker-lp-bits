@@ -2,7 +2,7 @@
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
 $__server_REQUEST_URI = \App\Support\SupportContext::getServerValue('REQUEST_URI');
-if (!user_can('log'))
+if (!\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::LOG))
 {
 stderr($lang_log['std_sorry'],$lang_log['std_permission_denied_only'].get_user_class_name($log_class,false,true,true).sprintf($lang_log['std_or_above_can_view'], \App\Models\Setting::getSiteName()),false);
 }
@@ -88,7 +88,7 @@ else {
 		$search = \App\Support\SupportContext::getQuery("search") ?? '';
 
 		$addparam = "";
-		if (user_can('confilog')){
+		if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::CONFIDENTIAL_LOG)){
 			if (in_array($search, ['mod', 'normal', 'all'])) {
 				$addparam = "search=".rawurlencode($search)."&";
 			}
@@ -119,7 +119,7 @@ else {
 
 			print("<table width=940 border=1 cellspacing=0 cellpadding=5>\n");
 			print("<tr><td class=colhead align=center><img class=\"time\" src=\"pic/trans.gif\" alt=\"time\" title=\"".$lang_log['title_time_added']."\" /></td><td class=colhead align=left>".$lang_log['col_event']);
-            if (user_can('confilog')){
+            if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::CONFIDENTIAL_LOG)){
                 print("<td class=colhead align=left>".$lang_log['col_user']."</td>");
             }
             print("</td></tr>\n");
@@ -132,7 +132,7 @@ else {
 				if (strpos($arr['txt'],'was edited by')) $color = "blue";
 				if (strpos($arr['txt'],'settings updated by')) $color = "darkred";
 				print("<tr><td class=\"rowfollow nowrap\" align=center>".gettime($arr['added'],true,false)."</td><td class=rowfollow align=left><font color='".$color."'>".htmlspecialchars($arr['txt'])."</font></td>");
-                if (user_can('confilog')){
+                if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::CONFIDENTIAL_LOG)){
                     print("<td class=rowfollow align=left>".($arr['uid'] > 0 ? get_username($arr['uid']) : "System")."</td>");
                 }
                 print("</tr>\n");
@@ -152,7 +152,7 @@ else {
 		$addparam = $q ? "query=".rawurlencode($q)."&" : "";
 		logmenu("chronicle");
 		searchtable($lang_log['text_search_chronicle'], 'chronicle');
-		if (user_can('chrmanage'))
+		if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::CHR_MANAGE))
 			additem($lang_log['text_add_chronicle'], 'chronicle');
 		if (
 			(((\App\Support\SupportContext::getQuery('do') !== null)) && \App\Support\SupportContext::getQuery('do') == "del")
@@ -193,11 +193,11 @@ else {
 		//echo $pagertop;
 
 			print("<table width=940 border=1 cellspacing=0 cellpadding=5>\n");
-			print("<tr><td class=colhead align=center>".$lang_log['col_date']."</td><td class=colhead align=left>".$lang_log['col_event']."</td>".(user_can('chrmanage') ? "<td class=colhead align=center>".$lang_log['col_modify']."</td>" : "")."</tr>\n");
+			print("<tr><td class=colhead align=center>".$lang_log['col_date']."</td><td class=colhead align=left>".$lang_log['col_event']."</td>".(\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::CHR_MANAGE) ? "<td class=colhead align=center>".$lang_log['col_modify']."</td>" : "")."</tr>\n");
 			foreach ($chronicleRows as $arr)
 			{
 				$date = gettime($arr['added'],true,false);
-				print("<tr><td class=rowfollow align=center><nobr>$date</nobr></td><td class=rowfollow align=left>".format_comment($arr["txt"],true,false,true)."</td>".(user_can('chrmanage') ? "<td align=center nowrap><b><a href=\"?action=chronicle&do=edit&id=".$arr["id"]."\">".$lang_log['text_edit']."</a>&nbsp;|&nbsp;<a href=\"?action=chronicle&do=del&id=".$arr["id"]."\"><font color=red>".$lang_log['text_delete']."</font></a></b></td>" : "")."</tr>\n");
+				print("<tr><td class=rowfollow align=center><nobr>$date</nobr></td><td class=rowfollow align=left>".format_comment($arr["txt"],true,false,true)."</td>".(\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::CHR_MANAGE) ? "<td align=center nowrap><b><a href=\"?action=chronicle&do=edit&id=".$arr["id"]."\">".$lang_log['text_edit']."</a>&nbsp;|&nbsp;<a href=\"?action=chronicle&do=del&id=".$arr["id"]."\"><font color=red>".$lang_log['text_delete']."</font></a></b></td>" : "")."</tr>\n");
 			}
 			print("</table>");
 			echo $pagerbottom;
@@ -249,7 +249,7 @@ else {
   		$returnto = htmlspecialchars(\App\Support\SupportContext::getQuery("returnto") ?? '');
   		if ($do == "delete")
   		{
-  		if (!user_can('chrmanage'))
+  		if (!\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::CHR_MANAGE))
   		stderr($lang_log['std_error'], $lang_log['std_permission_denied']);
 
   		int_check($pollid,true);
@@ -299,7 +299,7 @@ else {
 
     print($added);
 
-    if (user_can('pollmanage'))
+    if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::POLL_MANAGE))
     {
     	print(" - [<a href=makepoll.php?action=edit&pollid={$poll['id']}><b>".$lang_log['text_edit']."</b></a>]\n");
 			print(" - [<a href=?action=poll&do=delete&pollid={$poll['id']}><b>".$lang_log['text_delete']."</b></a>]\n");

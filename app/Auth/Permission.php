@@ -3,12 +3,25 @@
 namespace App\Auth;
 
 use App\Enums\Permission\PermissionEnum;
+use App\Exceptions\InsufficientPermissionException;
 use App\Models\User;
 use App\Support\Permissions;
 use Illuminate\Support\Facades\Auth;
 
 class Permission
 {
+    public static function can(PermissionEnum $permission, ?User $user = null): bool
+    {
+        return self::userCan(self::user($user), $permission);
+    }
+
+    public static function assertCan(PermissionEnum $permission, ?User $user = null): void
+    {
+        if (!self::can($permission, $user)) {
+            throw new InsufficientPermissionException();
+        }
+    }
+
     public static function canUploadToNormalSection(?User $user = null): bool
     {
         $user = self::user($user);
@@ -33,6 +46,11 @@ class Permission
     public static function canSetTorrentPosState(?User $user = null): bool
     {
         return self::userCan($user, PermissionEnum::TORRENT_SET_STICKY);
+    }
+
+    public static function canApproveTorrent(?User $user = null): bool
+    {
+        return self::userCan($user, PermissionEnum::TORRENT_APPROVAL);
     }
 
     public static function canTorrentApprovalAllowAutomatic(?User $user = null): bool
@@ -74,6 +92,41 @@ class Permission
     public static function canViewBannedTorrent(?User $user = null): bool
     {
         return self::userCan($user, PermissionEnum::TORRENT_VIEW_BANNED);
+    }
+
+    public static function canDeleteTorrent(?User $user = null): bool
+    {
+        return self::userCan($user, PermissionEnum::TORRENT_DELETE);
+    }
+
+    public static function canSetTorrentOnPromotion(?User $user = null): bool
+    {
+        return self::userCan($user, PermissionEnum::TORRENT_ON_PROMOTION);
+    }
+
+    public static function canMoveTorrent(?User $user = null): bool
+    {
+        return self::userCan($user, PermissionEnum::MOVE_TORRENT);
+    }
+
+    public static function canViewAnonymous(?User $user = null): bool
+    {
+        return self::userCan($user, PermissionEnum::VIEW_ANONYMOUS);
+    }
+
+    public static function canViewConfidentialLog(?User $user = null): bool
+    {
+        return self::userCan($user, PermissionEnum::CONFIDENTIAL_LOG);
+    }
+
+    public static function canViewTorrentHistory(?User $user = null): bool
+    {
+        return self::userCan($user, PermissionEnum::TORRENT_HISTORY);
+    }
+
+    public static function canViewTorrentStructure(?User $user = null): bool
+    {
+        return self::userCan($user, PermissionEnum::TORRENT_STRUCTURE);
     }
 
     private static function user(?User $user = null): User

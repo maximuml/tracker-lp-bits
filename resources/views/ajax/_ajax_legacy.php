@@ -84,7 +84,7 @@ $CURUSER = \App\Support\SupportContext::getUser() ?? [];
     public static function clearShoutBox($params)
     {
 $CURUSER = \App\Support\SupportContext::getUser() ?? [];
-        user_can('sbmanage', true);
+        \App\Auth\Permission::assertCan(\App\Enums\Permission\PermissionEnum::SB_MANAGE);
         \Nexus\Database\NexusDB::table('shoutbox')->delete();
         \Nexus\Database\NexusDB::table('shoutbox_reactions')->delete();
         return true;
@@ -107,10 +107,10 @@ $CURUSER = \App\Support\SupportContext::getUser() ?? [];
         }
         $msgUserId = (int) ($msg->userid ?? 0);
         $msgDate = (int) ($msg->date ?? 0);
-        if ($msgUserId !== (int) $CURUSER['id'] && ! user_can('sbmanage')) {
+        if ($msgUserId !== (int) $CURUSER['id'] && ! \App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::SB_MANAGE)) {
             throw new \RuntimeException('No permission');
         }
-        if ((time() - $msgDate) > \App\Support\Shoutbox::EDIT_WINDOW && ! user_can('sbmanage')) {
+        if ((time() - $msgDate) > \App\Support\Shoutbox::EDIT_WINDOW && ! \App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::SB_MANAGE)) {
             throw new \RuntimeException('Edit window expired');
         }
         $editLock = new \Nexus\Database\NexusLock('shoutbox_edit:' . $CURUSER['id'], 10);
@@ -142,10 +142,10 @@ $CURUSER = \App\Support\SupportContext::getUser() ?? [];
         }
         $msgUserId = (int) ($msg->userid ?? 0);
         $msgDate = (int) ($msg->date ?? 0);
-        if ($msgUserId !== (int) $CURUSER['id'] && ! user_can('sbmanage')) {
+        if ($msgUserId !== (int) $CURUSER['id'] && ! \App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::SB_MANAGE)) {
             throw new \RuntimeException('No permission');
         }
-        if ((time() - $msgDate) > \App\Support\Shoutbox::EDIT_WINDOW && ! user_can('sbmanage')) {
+        if ((time() - $msgDate) > \App\Support\Shoutbox::EDIT_WINDOW && ! \App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::SB_MANAGE)) {
             throw new \RuntimeException('Delete window expired');
         }
         $deleteLock = new \Nexus\Database\NexusLock('shoutbox_delete:' . $CURUSER['id'], 10);

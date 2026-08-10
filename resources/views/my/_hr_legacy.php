@@ -5,7 +5,7 @@ $__server_REQUEST_URI = \App\Support\SupportContext::getServerValue('REQUEST_URI
 $userid =  $CURUSER['id'];
 $pagerParams = [];
 if (!empty(\App\Support\SupportContext::getQuery('userid'))) {
-    if (!user_can('viewhistory') && \App\Support\SupportContext::getQuery('userid') != $CURUSER['id']) {
+    if (!\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::VIEW_USER_HISTORY) && \App\Support\SupportContext::getQuery('userid') != $CURUSER['id']) {
         permissiondenied($viewhistory_class);
     }
     $userid = \App\Support\SupportContext::getQuery('userid');

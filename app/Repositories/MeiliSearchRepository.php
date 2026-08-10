@@ -1,6 +1,8 @@
 <?php
 namespace App\Repositories;
 
+use App\Auth\Permission;
+use App\Enums\Permission\PermissionEnum;
 use App\Exceptions\NexusException;
 use App\Models\Bookmark;
 use App\Models\Category;
@@ -359,10 +361,10 @@ class MeiliSearchRepository extends BaseRepository
         }
 
         $params = ['mode' => SearchBox::listAuthorizedSectionId()];
-        if (!user_can('seebanned')) {
+        if (!Permission::canViewBannedTorrent()) {
             $params['banned'] = 'no';
         }
-        if (get_setting('torrent.approval_status_none_visible') == 'no' && !user_can('torrent-approval')) {
+        if (get_setting('torrent.approval_status_none_visible') == 'no' && !Permission::canApproveTorrent()) {
             $params['approval_status'] = Torrent::APPROVAL_STATUS_ALLOW;
         }
         $filters = $this->getFilters($params, $user);

@@ -2,6 +2,8 @@
 
 namespace App\Support;
 
+use App\Auth\Permission;
+
 final class TorrentTable
 {
     /**
@@ -127,7 +129,7 @@ if ($user['showcomnum'] != 'no') { ?>
 <td class="colhead"><a href="?<?php echo $oldlink?>sort=6&amp;type=<?php echo $link[6]?>"><img class="snatched" src="pic/trans.gif" alt="snatched" title="<?php echo $lang_functions['title_number_of_snatched']?>" /></a></td>
 <td class="colhead"><a href="?<?php echo $oldlink?>sort=9&amp;type=<?php echo $link[9]?>"><?php echo $lang_functions['col_uploader']?></a></td>
 <?php
-if (user_can('torrentmanage')) { ?>
+if (Permission::canManageTorrent()) { ?>
 	<td class="colhead"><?php echo $lang_functions['col_action'] ?></td>
 <?php } ?>
 </tr>
@@ -313,7 +315,7 @@ foreach ($rows as $row)
 
 		if (
 		    $row["anonymous"] == "yes"
-            && (user_can('viewanonymous') || (isset($row['owner']) && $row['owner'] == $user['id']))
+            && (Permission::canViewAnonymous() || (isset($row['owner']) && $row['owner'] == $user['id']))
         ) {
 			print("<td class=\"rowfollow\" align=\"center\"><i>".$lang_functions['text_anonymous']."</i><br />".(isset($row["owner"]) ? "(" . get_username($row["owner"]) .")" : "<i>".$lang_functions['text_orphaned']."</i>") . "</td>\n");
 		}
@@ -326,10 +328,10 @@ foreach ($rows as $row)
 			print("<td class=\"rowfollow\">" . (isset($row["owner"]) ? get_username($row["owner"]) : "<i>".$lang_functions['text_orphaned']."</i>") . "</td>\n");
 		}
 
-	if (user_can('torrentmanage'))
+	if (Permission::canManageTorrent())
 	{
         $actions = [];
-        if (user_can('torrent-delete')) {
+        if (Permission::canDeleteTorrent()) {
             $actions[] = "<a href=\"".htmlspecialchars("fastdelete.php?id=".$row['id'])."\"><img class=\"staff_delete\" src=\"pic/trans.gif\" alt=\"D\" title=\"".$lang_functions['text_delete']."\" /></a>";
         }
         $actions[] = "<a href=\"edit.php?returnto=" . rawurlencode(SupportContext::getServerValue('REQUEST_URI', '')) . "&amp;id=" . $row["id"] . "\"><img class=\"staff_edit\" src=\"pic/trans.gif\" alt=\"E\" title=\"".$lang_functions['text_edit']."\" /></a>";

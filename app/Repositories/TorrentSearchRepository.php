@@ -2,6 +2,7 @@
 
 namespace App\Repositories;
 
+use App\Auth\Permission;
 use App\Support\SupportContext;
 
 class TorrentSearchRepository
@@ -210,7 +211,7 @@ elseif ($include_dead == 2)		//dead
 }
 // ----------------- end include dead ---------------------//
 
-if (empty($CURUSER['id']) || !user_can('seebanned')) {
+if (empty($CURUSER['id']) || !Permission::canViewBannedTorrent()) {
 //    $wherea[] = "banned = 'no'";
     $whereothera[] = "banned = 'no'";
     $searchParams["banned"] = 'no';
@@ -761,7 +762,7 @@ if (isset($searchstr))
 			}
 			else
 			{
-				if(user_can('torrentmanage'))	// moderator or above, show all
+				if(Permission::canManageTorrent())	// moderator or above, show all
 				{
 					$wherea[] =  implode($ANDOR, $like_expression_array);
 				}
@@ -791,7 +792,7 @@ $approvalStatusIconEnabled = get_setting('torrent.approval_status_icon_enabled')
 $approvalStatus = null;
 $showApprovalStatusFilter = false;
 //when enable approval status icon, all user can use this filter, otherwise only staff member and approval none visible is 'no' can use
-if ($approvalStatusIconEnabled == 'yes' || (user_can('torrent-approval') && $approvalStatusNoneVisible == 'no')) {
+if ($approvalStatusIconEnabled == 'yes' || (Permission::canApproveTorrent() && $approvalStatusNoneVisible == 'no')) {
     $showApprovalStatusFilter = true;
 }
 //when user can use approval status filter, and pass `approval_status` parameter, will affect
@@ -801,7 +802,7 @@ if ($showApprovalStatusFilter && isset($searchParams['approval_status']) && is_n
     $wherea[] = "torrents.approval_status = $approvalStatus";
     $searchParams['approval_status'] = $approvalStatus;
     $addparam .= "approval_status=$approvalStatus&";
-} elseif ($approvalStatusNoneVisible == 'no' && !user_can('torrent-approval')) {
+} elseif ($approvalStatusNoneVisible == 'no' && !Permission::canApproveTorrent()) {
     $wherea[] = "torrents.approval_status = " . \App\Models\Torrent::APPROVAL_STATUS_ALLOW;
     $searchParams['approval_status'] = \App\Models\Torrent::APPROVAL_STATUS_ALLOW;
 }

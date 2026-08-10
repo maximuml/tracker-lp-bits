@@ -1,6 +1,6 @@
 <?php
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
-user_can('userprofile', true);
+\App\Auth\Permission::assertCan(\App\Enums\Permission\PermissionEnum::VIEW_USER_CONFIDENTIAL_INFO);
 
 $userid = intval(\App\Support\SupportContext::getQuery("id") ?? 0);
 if (!is_valid_id($userid))

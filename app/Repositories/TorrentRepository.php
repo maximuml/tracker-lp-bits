@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Auth\Permission;
 use App\Enums\ModelEventEnum;
+use App\Enums\Permission\PermissionEnum;
 use App\Events\TorrentUpdated;
 use App\Exceptions\InsufficientPermissionException;
 use App\Exceptions\NexusException;
@@ -721,7 +722,7 @@ class TorrentRepository extends BaseRepository
     public function buildApprovalModal($user, $torrentId)
     {
         $user = $this->getUser($user);
-        user_can('torrent-approval', true);
+        Permission::assertCan(PermissionEnum::TORRENT_APPROVAL, $user);
         $torrent = Torrent::query()->findOrFail($torrentId, ['id', 'approval_status', 'banned']);
         $radios = [];
         foreach (Torrent::$approvalStatus as $key => $value) {
@@ -769,7 +770,7 @@ class TorrentRepository extends BaseRepository
     public function approval($user, array $params): array
     {
         $user = $this->getUser($user);
-        user_can('torrent-approval', true);
+        Permission::assertCan(PermissionEnum::TORRENT_APPROVAL, $user);
         $torrent = Torrent::query()->findOrFail($params['torrent_id'], Torrent::$commentFields);
         $lastLog = TorrentOperationLog::query()
             ->where('torrent_id', $params['torrent_id'])
@@ -891,7 +892,7 @@ class TorrentRepository extends BaseRepository
      */
     public function syncTags($id, array $tagIdArr = [], $remove = true)
     {
-        user_can('torrentmanage', true);
+        Permission::assertCan(PermissionEnum::TORRENT_MANAGE);
         $idArr = Arr::wrap($id);
         return NexusDB::transaction(function () use ($idArr, $tagIdArr, $remove) {
             $sql = "insert into torrent_tags (torrent_id, tag_id, created_at, updated_at) values ";
@@ -921,7 +922,7 @@ class TorrentRepository extends BaseRepository
      */
     public function setPosState($id, $posState, $posStateUntil = null): int
     {
-        user_can('torrentsticky', true);
+        Permission::assertCan(PermissionEnum::TORRENT_SET_STICKY);
         if ($posState == Torrent::POS_STATE_STICKY_NONE) {
             $posStateUntil = null;
         }
@@ -943,7 +944,7 @@ class TorrentRepository extends BaseRepository
      */
     public function setHr($id, $hrStatus): int
     {
-        user_can('torrentmanage', true);
+        Permission::assertCan(PermissionEnum::TORRENT_MANAGE);
         if (!isset(Torrent::$hrStatus[$hrStatus])) {
             throw new \InvalidArgumentException("Invalid hrStatus: $hrStatus");
         }
@@ -963,7 +964,7 @@ class TorrentRepository extends BaseRepository
      */
     public function setSpState($id, $spState, $promotionTimeType, $promotionUntil = null): int
     {
-        user_can('torrentonpromotion', true);
+        Permission::assertCan(PermissionEnum::TORRENT_ON_PROMOTION);
         if (!isset(Torrent::$promotionTypes[$spState])) {
             throw new \InvalidArgumentException("Invalid spState: $spState");
         }

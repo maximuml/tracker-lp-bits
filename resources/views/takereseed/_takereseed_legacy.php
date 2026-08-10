@@ -1,6 +1,6 @@
 <?php
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
-user_can('askreseed', true);
+\App\Auth\Permission::assertCan(\App\Enums\Permission\PermissionEnum::ASK_RESEED);
 
 $reseedid = intval(\App\Support\SupportContext::getQuery("reseedid") ?? 0);
 $torrent = \App\Models\Torrent::query()->find($reseedid);

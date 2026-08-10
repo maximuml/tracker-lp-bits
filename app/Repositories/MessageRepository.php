@@ -1,6 +1,8 @@
 <?php
 namespace App\Repositories;
 
+use App\Auth\Permission;
+use App\Enums\Permission\PermissionEnum;
 use App\Models\Message;
 use App\Models\Setting;
 use App\Models\StaffMessage;
@@ -89,7 +91,7 @@ class MessageRepository extends BaseRepository
         if ($answered !== null) {
             $query->where('answered', $answered);
         }
-        if (!user_can('staffmem', false, $uid)) {
+        if (!Permission::can(PermissionEnum::STAFF_MEMBER, User::findOrFail($uid))) {
             //Not staff member only can see authorized
             $permissions = ToolRepository::listUserAllPermissions($uid);
             $query->whereIn('permission', $permissions);

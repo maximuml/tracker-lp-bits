@@ -2,6 +2,7 @@
 
 namespace App\Support;
 
+use App\Auth\Permission;
 use App\Models\Setting;
 use App\Models\Torrent;
 use App\Models\User;
@@ -203,7 +204,7 @@ final class LegacyResponse
             if (($CURUSER['offer_allowed_count'] ?? 0) >= $offerSkipApprovedCount) {
                 return true;
             }
-            if (\user_can('upload')) {
+            if (Permission::canUploadToNormalSection()) {
                 return true;
             }
             if (Time::isWeekendUploadOpen(Setting::getIsUploadOpenAtWeekend(), \time())) {

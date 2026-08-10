@@ -320,7 +320,7 @@ if ($action == "editpost")
 	$locked = $topic && ($topic->locked == 'yes');
 
 	$ismod = is_forum_moderator($postid, 'post');
-	if (($CURUSER["id"] != $post->userid || $locked) && !user_can('postmanage') && !$ismod)
+	if (($CURUSER["id"] != $post->userid || $locked) && !\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::POST_MANAGE) && !$ismod)
 		permissiondenied();
 
 	stdhead($lang_forums['text_edit_post']);
@@ -410,7 +410,7 @@ if ($action == "post")
 		$topicLocked = \App\Models\Topic::query()->where('id', $topicid)->value('locked');
 		if ($topicLocked === null)
 			die("Topic id n/a");
-		if ($topicLocked == 'yes' && !user_can('postmanage') && !is_forum_moderator($topicid, 'topic'))
+		if ($topicLocked == 'yes' && !\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::POST_MANAGE) && !is_forum_moderator($topicid, 'topic'))
 			stderr($lang_forums['std_error'], $lang_forums['std_topic_locked']);
 	}
 
@@ -419,7 +419,7 @@ if ($action == "post")
         $postid = $id;
         $topicInfo = \App\Models\Topic::query()->findOrFail($topicid);
         $postInfo = \App\Models\Post::query()->findOrFail($id);
-        if ($postInfo->userid != $CURUSER['id'] && !is_forum_moderator($postid, 'post') && !user_can('postmanage')) {
+        if ($postInfo->userid != $CURUSER['id'] && !is_forum_moderator($postid, 'post') && !\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::POST_MANAGE)) {
             permissiondenied();
         }
 		if ($hassubject){
@@ -452,7 +452,7 @@ if ($action == "post")
 		// Anti Flood Code
 		// To ensure that posts are not entered within 10 seconds limiting posts
 		// to a maximum of 360*6 per hour.
-		if (!user_can('postmanage')) {
+		if (!\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::POST_MANAGE)) {
 			if (strtotime($CURUSER['last_post']) > (TIMENOW - 10))
 			{
 				$secs = 10 - (TIMENOW - strtotime($CURUSER['last_post']));
@@ -616,7 +616,7 @@ if ($action == "viewtopic")
 
 	if (get_user_class() < $row["minclassread"])
 		stderr($lang_forums['std_error'], $lang_forums['std_unpermitted_viewing_topic']);
-	if (((get_user_class() >= $row["minclasswrite"] && !$locked) || user_can('postmanage') || $is_forummod) && $CURUSER["forumpost"] == 'yes')
+	if (((get_user_class() >= $row["minclasswrite"] && !$locked) || \App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::POST_MANAGE) || $is_forummod) && $CURUSER["forumpost"] == 'yes')
 		$maypost = true;
 	else $maypost = false;
 
@@ -861,17 +861,17 @@ if ($action == "viewtopic")
 		if ($maypost && $canViewProtected)
 		print("<a href=\"".htmlspecialchars("?action=quotepost&postid=".$postid)."\"><img class=\"f_quote\" src=\"pic/trans.gif\" alt=\"Quote\" title=\"".$lang_forums['title_reply_with_quote']."\" /></a>");
 
-		if (user_can('postmanage') || $is_forummod)
+		if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::POST_MANAGE) || $is_forummod)
 		print("<a href=\"".htmlspecialchars("?action=deletepost&postid=".$postid)."\"><img class=\"f_delete\" src=\"pic/trans.gif\" alt=\"Delete\" title=\"".$lang_forums['title_delete_post']."\" /></a>");
 
-		if (($CURUSER["id"] == $posterid && !$locked) || user_can('postmanage') || $is_forummod)
+		if (($CURUSER["id"] == $posterid && !$locked) || \App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::POST_MANAGE) || $is_forummod)
 		print("<a href=\"".htmlspecialchars("?action=editpost&postid=".$postid)."\"><img class=\"f_edit\" src=\"pic/trans.gif\" alt=\"Edit\" title=\"".$lang_forums['title_edit_post']."\" /></a>");
 		print("</td></tr></table>");
 	}
 
 	//------ Mod options
 
-	if (user_can('postmanage') || $is_forummod)
+	if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::POST_MANAGE) || $is_forummod)
 	{
 		print("</td></tr><tr><td class=\"toolbox\" align=\"center\">\n");
 		print("<table border=\"0\" cellspacing=\"0\" cellpadding=\"0\" align=\"left\">\n");
@@ -975,7 +975,7 @@ if ($action == "movetopic")
 
 	$topicid = intval(\App\Support\SupportContext::getQuery("topicid") ?? 0);
 	$ismod = is_forum_moderator($topicid,'topic');
-	if (!is_valid_id($forumid) || !is_valid_id($topicid) || (!user_can('postmanage') && !$ismod))
+	if (!is_valid_id($forumid) || !is_valid_id($topicid) || (!\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::POST_MANAGE) && !$ismod))
 		permissiondenied();
 
 	// Make sure topic and forum is valid
@@ -1032,7 +1032,7 @@ if ($action == "deletetopic")
 		$userid = $topic->userid;
 	}
 	$ismod = is_forum_moderator($topicid,'topic');
-	if (!is_valid_id($topicid) || (!user_can('postmanage') && !$ismod))
+	if (!is_valid_id($topicid) || (!\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::POST_MANAGE) && !$ismod))
 		permissiondenied();
 
 	$sure = intval(\App\Support\SupportContext::getQuery("sure") ?? 0);
@@ -1070,7 +1070,7 @@ if ($action == "deletepost")
 	$sure = intval(\App\Support\SupportContext::getQuery("sure") ?? 0);
 
 	$ismod = is_forum_moderator($postid, 'post');
-	if ((!user_can('postmanage') && !$ismod) || !is_valid_id($postid))
+	if ((!\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::POST_MANAGE) && !$ismod) || !is_valid_id($postid))
 		permissiondenied();
 
 	//------- Get topic id
@@ -1127,7 +1127,7 @@ if ($action == "setlocked")
 {
 	$topicid = intval(\App\Support\SupportContext::getPost("topicid") ?? 0);
 	$ismod = is_forum_moderator($topicid,'topic');
-	if (!$topicid || (!user_can('postmanage') && !$ismod))
+	if (!$topicid || (!\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::POST_MANAGE) && !$ismod))
 		permissiondenied();
 
 	$locked = \App\Support\SupportContext::getPost("locked");
@@ -1141,7 +1141,7 @@ if ($action == 'hltopic')
 {
 	$topicid = intval(\App\Support\SupportContext::getQuery("topicid") ?? 0);
 	$ismod = is_forum_moderator($topicid,'topic');
-	if (!$topicid || (!user_can('postmanage') && !$ismod))
+	if (!$topicid || (!\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::POST_MANAGE) && !$ismod))
 		permissiondenied();
 	$color = intval(\App\Support\SupportContext::getPost("color"));
 	if ($color==0 || get_hl_color($color))
@@ -1161,7 +1161,7 @@ if ($action == "setsticky")
 {
 	$topicid = intval(\App\Support\SupportContext::getPost("topicid") ?? 0);
 	$ismod = is_forum_moderator($topicid,'topic');
-	if (!$topicid || (!user_can('postmanage') && !$ismod))
+	if (!$topicid || (!\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::POST_MANAGE) && !$ismod))
 		permissiondenied();
 
 	$sticky = \App\Support\SupportContext::getPost("sticky");
@@ -1583,7 +1583,7 @@ if ($CURUSER)
 stdhead($lang_forums['head_forums']);
 begin_main_frame();
 print("<h1 align=\"center\">".$SITENAME."&nbsp;".$lang_forums['text_forums']."</h1>");
-print("<p align=\"center\"><a href=\"?action=search\"><b>".$lang_forums['text_search']."</b></a> | <a href=\"?action=viewunread\"><b>".$lang_forums['text_view_unread']."</b></a> | <a href=\"?catchup=1\"><b>".$lang_forums['text_catch_up']."</b></a> ".(user_can('forummanage') ? "| <a href=\"forummanage.php\"><b>".$lang_forums['text_forum_manager']."</b></a>":"")."</p>");
+print("<p align=\"center\"><a href=\"?action=search\"><b>".$lang_forums['text_search']."</b></a> | <a href=\"?action=viewunread\"><b>".$lang_forums['text_view_unread']."</b></a> | <a href=\"?catchup=1\"><b>".$lang_forums['text_catch_up']."</b></a> ".(\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::FORUM_MANAGE) ? "| <a href=\"forummanage.php\"><b>".$lang_forums['text_forum_manager']."</b></a>":"")."</p>");
 print("<table border=\"1\" cellspacing=\"0\" cellpadding=\"5\" width=\"100%\">\n");
 
 if (!$overforums = $Cache->get_value('overforums_list')){

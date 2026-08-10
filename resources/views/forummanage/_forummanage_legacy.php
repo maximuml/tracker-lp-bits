@@ -7,7 +7,7 @@ $prefix = '';
 $user = $CURUSER;
 $PHP_SELF = $__server_PHP_SELF;
 
-user_can('forummanage', true);
+\App\Auth\Permission::assertCan(\App\Enums\Permission\PermissionEnum::FORUM_MANAGE);
 
 $overforums = \Nexus\Database\NexusDB::table('overforums')->orderBy('sort')->get(['id', 'name']);
 $maxSort = \Nexus\Database\NexusDB::table('forums')->count();

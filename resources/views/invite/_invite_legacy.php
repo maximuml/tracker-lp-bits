@@ -7,7 +7,7 @@ $id = ((\App\Support\SupportContext::getQuery("id") !== null)) ? intval(\App\Sup
 $type = unesc(\App\Support\SupportContext::getQuery("type") ?? '');
 $menuSelected = \App\Support\SupportContext::getRequestInput('menu') ?? 'invitee';
 $pageSize = 50;
-if (($CURUSER['id'] != $id && !user_can('viewinvite')) || !is_valid_id($id))
+if (($CURUSER['id'] != $id && !\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::VIEW_INVITE)) || !is_valid_id($id))
     stderr($lang_invite['std_sorry'],$lang_invite['std_permission_denied'], true, false);
 $userRep = new \App\Repositories\UserRepository();
 \App\Support\SupportContext::setGlobal('userRep', $userRep);

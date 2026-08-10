@@ -78,7 +78,7 @@ elseif ($CURUSER["id"] <> $user["id"])
 		print(" - (<a href=\"friends.php?action=add&amp;type=block&amp;targetid=".$id."\">".$lang_userdetails['text_add_to_blocks']."</a>)</p>");
 	}
 }
-if ($CURUSER['id'] == $user['id'] || user_can('cruprfmanage'))
+if ($CURUSER['id'] == $user['id'] || \App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::MANAGE_USER_CONFIDENTIAL_INFO))
 	print("<h2>".$lang_userdetails['text_flush_ghost_torrents']."<a class=\"altlink\" href=\"takeflush.php?id=".$id."\">".$lang_userdetails['text_here']."</a></h2>\n");
 ?>
 <table width="100%" border="1" cellspacing="0" cellpadding="5">
@@ -87,13 +87,13 @@ $userIdDisplay = $user['id'];
 $userManageSystemUrl = sprintf('%s/%s/user/users/%s',getSchemeAndHttpHost(), nexus_env('FILAMENT_PATH', 'nexusphp'), $user['id']);
 $userManageSystemText = sprintf('<a href="%s" target="_blank" class="altlink">%s</a>', $userManageSystemUrl, $lang_functions['text_management_system']);
 $migratedHelp = "&nbsp;&nbsp;".sprintf($lang_userdetails['change_field_value_migrated'], $userManageSystemText);
-if (user_can('prfmanage') && $user["class"] < get_user_class()) {
+if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::MANAGE_USER_BASIC_INFO) && $user["class"] < get_user_class()) {
     $userIdDisplay .= "&nbsp;[$userManageSystemText]";
 }
-if (($user["privacy"] != "strong") OR (user_can('prfmanage')) || $CURUSER['id'] == $user['id']){
+if (($user["privacy"] != "strong") OR (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::MANAGE_USER_BASIC_INFO)) || $CURUSER['id'] == $user['id']){
     tr_small($lang_userdetails['text_user_id'], $userIdDisplay, 1);
     $tmpInviteCount = $userInfo->temporary_invites()->count();
-	if ($CURUSER['id'] == $user['id'] || user_can('viewinvite')){
+	if ($CURUSER['id'] == $user['id'] || \App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::VIEW_INVITE)){
 	if ($user["invites"] <= 0 && $tmpInviteCount <= 0)
 	tr_small($lang_userdetails['row_invitation'], $lang_userdetails['text_no_invitation'], 1);
 	else
@@ -113,17 +113,17 @@ if (($user["privacy"] != "strong") OR (user_can('prfmanage')) || $CURUSER['id'] 
 if ($where_tweak == "yes") {
 	tr_small($lang_userdetails['row_last_seen_location'], $user['page'], 1);
 }
-if (user_can('userprofile') OR $user["privacy"] == "low" ||  $user["id"] == $CURUSER["id"]) {
+if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::VIEW_USER_CONFIDENTIAL_INFO) OR $user["privacy"] == "low" ||  $user["id"] == $CURUSER["id"]) {
 	tr_small($lang_userdetails['row_email'], "<a href=\"mailto:".$user['email']."\">".$user['email']."</a>", 1);
 }
-if (user_can('userprofile')) {
+if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::VIEW_USER_CONFIDENTIAL_INFO)) {
 	$iphistory = \App\Repositories\UserDetailRepository::getIplogCount($id);
 
 	if ($iphistory > 0)
 	tr_small($lang_userdetails['row_ip_history'], $lang_userdetails['text_user_earlier_used']."<b><a href=\"iphistory.php?id=" . $user['id'] . "\">" . $iphistory. $lang_userdetails['text_different_ips'].add_s($iphistory, true)."</a></b>", 1);
 }
 $seedBoxRep = new \App\Repositories\SeedBoxRepository();
-if (user_can('userprofile') ||  $user["id"] == $CURUSER["id"])
+if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::VIEW_USER_CONFIDENTIAL_INFO) ||  $user["id"] == $CURUSER["id"])
 {
     $seedBoxIcon = $seedBoxRep->renderIcon($CURUSER['ip'], $CURUSER['id']);
 	if ($enablelocation_tweak == 'yes'){
@@ -144,7 +144,7 @@ if (!empty($peerRows))
 	{
 	    $clientselect .= "<tr>";
 		$clientselect .= sprintf('<td>%s</td>', get_agent($arr['peer_id'], $arr['agent']));
-		if (user_can('userprofile') ||  $user["id"] == $CURUSER["id"]) {
+		if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::VIEW_USER_CONFIDENTIAL_INFO) ||  $user["id"] == $CURUSER["id"]) {
             $v4 = $user["id"] == $CURUSER["id"] ? hide_text($arr['ipv4']) : $arr['ipv4'];
             $v6 = $user["id"] == $CURUSER["id"] ? hide_text($arr['ipv6']) : $arr['ipv6'];
             $clientselect .= sprintf('<td>%s</td><td>%s</td><td>%s</td>', $v4.$seedBoxRep->renderIcon($arr['ipv4'], $user['id']), $v6.$seedBoxRep->renderIcon($arr['ipv6'], $user['id']), $arr['port']);
@@ -189,7 +189,7 @@ $slt = "<tr><td class=\"embedded\"><strong>" . $lang_userdetails['text_seeding_t
 
 tr_small($lang_userdetails['row_gender'], $gender, 1);
 
-if (($user['donated'] > 0 || $user['donated_cny'] > 0 )&& (user_can('userprofile') || $CURUSER["id"] == $user["id"]))
+if (($user['donated'] > 0 || $user['donated_cny'] > 0 )&& (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::VIEW_USER_CONFIDENTIAL_INFO) || $CURUSER["id"] == $user["id"]))
 tr_small($lang_userdetails['row_donated'], "$".htmlspecialchars($user['donated'])."&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;".htmlspecialchars($user['donated_cny']), 1);
 
 if ($user["avatar"])
@@ -274,11 +274,11 @@ if (!empty($props)) {
 
 do_action('user_detail_rows', $user['id'], 'web');
 
-tr_small($lang_userdetails['row_torrent_comment'], ($torrentcomments && ($user["id"] == $CURUSER["id"] || user_can('viewhistory')) ? "<a href=\"userhistory.php?action=viewcomments&amp;id=".$id."\" title=\"".$lang_userdetails['link_view_comments']."\">".$torrentcomments."</a>" : $torrentcomments), 1);
+tr_small($lang_userdetails['row_torrent_comment'], ($torrentcomments && ($user["id"] == $CURUSER["id"] || \App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::VIEW_USER_HISTORY)) ? "<a href=\"userhistory.php?action=viewcomments&amp;id=".$id."\" title=\"".$lang_userdetails['link_view_comments']."\">".$torrentcomments."</a>" : $torrentcomments), 1);
 
-tr_small($lang_userdetails['row_forum_posts'], ($forumposts && ($user["id"] == $CURUSER["id"] || user_can('viewhistory')) ? "<a href=\"userhistory.php?action=viewposts&amp;id=".$id."\" title=\"".$lang_userdetails['link_view_posts']."\">".$forumposts."</a>" : $forumposts), 1);
+tr_small($lang_userdetails['row_forum_posts'], ($forumposts && ($user["id"] == $CURUSER["id"] || \App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::VIEW_USER_HISTORY)) ? "<a href=\"userhistory.php?action=viewposts&amp;id=".$id."\" title=\"".$lang_userdetails['link_view_posts']."\">".$forumposts."</a>" : $forumposts), 1);
 
-if ($user["id"] == $CURUSER["id"] || user_can('viewhistory')) {
+if ($user["id"] == $CURUSER["id"] || \App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::VIEW_USER_HISTORY)) {
     if (\App\Models\HitAndRun::getIsEnabled()) {
         $hrStatus = (new \App\Repositories\HitAndRunRepository())->getStatusStats($user['id']);
         tr_small('H&R', sprintf('<a href="myhr.php?userid=%s" target="_blank">%s</a>', $user['id'], $hrStatus), 1);
@@ -289,12 +289,12 @@ if ($user["id"] == $CURUSER["id"] || user_can('viewhistory')) {
     tr_small($lang_functions['text_seed_points'], number_format($user['seed_points'], 1) . "&nbsp;&nbsp;<span class='text-muted'>(" . nexus_trans('label.updated_at') . ": " . $user['seed_points_updated_at'] . ")</span>", 1);
 }
 
-if (user_can('prfmanage') && $user["class"] < get_user_class()) {
+if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::MANAGE_USER_BASIC_INFO) && $user["class"] < get_user_class()) {
     $bonusTable = build_bonus_table($user);
     tr_small($lang_userdetails['text_bonus_table'], $bonusTable['table'], 1);
 }
 
-if ($user["ip"] && (user_can('torrenthistory') || $user["id"] == $CURUSER["id"])){
+if ($user["ip"] && (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::TORRENT_HISTORY) || $user["id"] == $CURUSER["id"])){
 
 tr_small($lang_userdetails['row_uploaded_torrents'], "<a href=\"javascript: getusertorrentlistajax('".$user['id']."', 'uploaded', 'ka'); klappe_news('a')\"><img class=\"plus\" src=\"pic/trans.gif\" id=\"pica\" alt=\"Show/Hide\" title=\"".$lang_userdetails['title_show_or_hide'] ."\" />   <u>".$lang_userdetails['text_show_or_hide']."</u></a><div id=\"ka\" style=\"display: none;\" data-type='uploaded'></div>", 1);
 
@@ -319,7 +319,7 @@ else
 }
 $showpmbutton = 0;
 if ($CURUSER["id"] != $user["id"])
-if (user_can('staffmem'))
+if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::STAFF_MEMBER))
 $showpmbutton = 1;
 elseif ($user["acceptpms"] == "yes")
 {
@@ -339,7 +339,7 @@ print("</td></tr>");
 }
 print("</table>\n");
 
-if (user_can('prfmanage') && $user["class"] < get_user_class())
+if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::MANAGE_USER_BASIC_INFO) && $user["class"] < get_user_class())
 {
 	begin_frame($lang_userdetails['text_edit_user'], true);
 	print("<form method=\"post\" action=\"modtask.php\">");
@@ -361,7 +361,7 @@ if (user_can('prfmanage') && $user["class"] < get_user_class())
 		tr($lang_userdetails['row_donated'], "USD: <input type=\"text\" size=\"5\" name=\"donated\" value=\"" . htmlspecialchars((string)$user['donated']) . "\" />&nbsp;&nbsp;&nbsp;&nbsp;CNY: <input type=\"text\" size=\"5\" name=\"donated_cny\" value=\"" . htmlspecialchars((string)$user['donated_cny']) . "\" />" . $lang_userdetails['text_transaction_memo'] . "<input type=\"text\" size=\"50\" name=\"donation_memo\" />", 1);
         tr($lang_userdetails['row_donoruntil'], "<input type=\"text\" name=\"donoruntil\" value=\"".htmlspecialchars((string)$user["donoruntil"])."\" /> ".$lang_userdetails['text_donoruntil_note'], 1);
 	}
-	if (user_can('user-change-class')) {
+	if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::USER_CHANGE_CLASS)) {
         $maxclass = get_user_class() - 1;
         $classselect=classlist('class', $maxclass, $user["class"], 0, false, true);
         tr($lang_userdetails['row_class'], $classselect . $migratedHelp, 1);
@@ -381,7 +381,7 @@ if (user_can('prfmanage') && $user["class"] < get_user_class())
 	tr($lang_userdetails['row_movie_picker'], "<input name=\"moviepicker\" value=\"yes\" type=\"radio\"" . ($moviepicker ? " checked=\"checked\"" : "") . " />".$lang_userdetails['radio_yes']."<input name=\"moviepicker\" value=\"no\" type=\"radio\"" . (!$moviepicker ? " checked=\"checked\"" : "") . " />".$lang_userdetails['radio_no'], 1);
 	tr($lang_userdetails['row_pick_for'], "<textarea cols=\"60\" rows=\"6\" name=\"pickfor\">".$pickfor."</textarea>", 1);
 
-	if (user_can('cruprfmanage'))
+	if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::MANAGE_USER_CONFIDENTIAL_INFO))
 	{
         $modcomment = \App\Models\UserModifyLog::query()
             ->where("user_id", $user["id"])
@@ -492,7 +492,7 @@ JS;
 	tr($lang_userdetails['row_forum_post_possible'], "<input type=\"radio\" name=\"forumpost\" value=\"yes\"" .($user["forumpost"]=="yes" ? " checked=\"checked\"" : "") . " />".$lang_userdetails['radio_yes']."<input type=\"radio\" name=\"forumpost\" value=\"no\"" .($user["forumpost"]=="no" ? " checked=\"checked\"" : "") . " />".$lang_userdetails['radio_no'], 1);
 	tr($lang_userdetails['row_upload_possible'], "<input type=\"radio\" name=\"uploadpos\" value=\"yes\"" .($user["uploadpos"]=="yes" ? " checked=\"checked\"" : "") . " />".$lang_userdetails['radio_yes']."<input type=\"radio\" name=\"uploadpos\" value=\"no\"" .($user["uploadpos"]=="no" ? " checked=\"checked\"" : "") . " />".$lang_userdetails['radio_no'], 1);
 	tr($lang_userdetails['row_download_possible'], "<input type=\"radio\" name=\"downloadpos\" value=\"yes\"" .($user["downloadpos"]=="yes" ? " checked=\"checked\"" : "") . " />".$lang_userdetails['radio_yes']."<input type=\"radio\" name=\"downloadpos\" value=\"no\"" .($user["downloadpos"]=="no" ? " checked=\"checked\"" : "") . " />".$lang_userdetails['radio_no'], 1);
-	if (user_can('cruprfmanage'))
+	if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::MANAGE_USER_CONFIDENTIAL_INFO))
 	{
 		tr($lang_userdetails['row_change_username'], "<input type=\"text\" size=\"25\" name=\"username\" value=\"" . htmlspecialchars($user['username']) . "\" />", 1);
 
@@ -502,7 +502,7 @@ JS;
 	tr($lang_userdetails['row_change_password'], "<input disabled type=\"password\" name=\"chpassword\" size=\"50\" />".$migratedHelp, 1);
 	tr($lang_userdetails['row_repeat_password'], "<input disabled type=\"password\" name=\"passagain\" size=\"50\" />".$migratedHelp, 1);
 
-	if (user_can('cruprfmanage'))
+	if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::MANAGE_USER_CONFIDENTIAL_INFO))
 	{
 		tr($lang_userdetails['row_amount_uploaded'], "<input disabled type=\"text\" size=\"60\" name=\"uploaded\" value=\"" . htmlspecialchars($user['uploaded']) . "\" /><input type=\"hidden\" name=\"ori_uploaded\" value=\"" . htmlspecialchars($user['uploaded']) . "\" />".$migratedHelp, 1);
 		tr($lang_userdetails['row_amount_downloaded'], "<input disabled type=\"text\" size=\"60\" name=\"downloaded\" value=\"" .htmlspecialchars($user['downloaded']) . "\" /><input type=\"hidden\" name=\"ori_downloaded\" value=\"" .htmlspecialchars($user['downloaded']) . "\" />".$migratedHelp, 1);
@@ -515,7 +515,7 @@ JS;
 	print("</table>\n");
 	print("</form>\n");
 	end_frame();
-	if (user_can('user-delete'))
+	if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::USER_DELETE))
 	{
 		begin_frame($lang_userdetails['text_delete_user'], true);
 		print("<form method=\"post\" action=\"delacctadmin.php\" name=\"deluser\">

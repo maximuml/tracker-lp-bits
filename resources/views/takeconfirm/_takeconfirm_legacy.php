@@ -2,7 +2,7 @@
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 $id =  ((\App\Support\SupportContext::getPost('id') !== null)) ? intval(\App\Support\SupportContext::getPost('id')) : (((\App\Support\SupportContext::getQuery('id') !== null)) ? intval(\App\Support\SupportContext::getQuery('id')) : die());
 int_check($id,true);
-if (($CURUSER['id'] != $id && !user_can('viewinvite')) || !is_valid_id($id))
+if (($CURUSER['id'] != $id && !\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::VIEW_INVITE)) || !is_valid_id($id))
     stderr($lang_functions['std_sorry'],$lang_functions['std_permission_denied'], true, false);
 $email = unesc(htmlspecialchars(trim(\App\Support\SupportContext::getPost("email"))));
 if(!empty(\App\Support\SupportContext::getPost('conusr'))) {

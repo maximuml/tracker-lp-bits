@@ -1,6 +1,6 @@
 <?php
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
-user_can('staffmem', true);
+\App\Auth\Permission::assertCan(\App\Enums\Permission\PermissionEnum::STAFF_MEMBER);
 
 $count = \Nexus\Database\NexusDB::table('reports')->count();
 if (!$count){

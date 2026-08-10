@@ -36,7 +36,7 @@ function torrent_structure_builder($array, $parent = "")
 
 
 
-user_can('torrentstructure', true);
+\App\Auth\Permission::assertCan(\App\Enums\Permission\PermissionEnum::TORRENT_STRUCTURE);
 
 $id = (int)\App\Support\SupportContext::getQuery("id");
 

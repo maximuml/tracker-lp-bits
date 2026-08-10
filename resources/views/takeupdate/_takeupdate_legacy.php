@@ -7,7 +7,7 @@ function bark($msg) {
  stdfoot();
  return;
 }
-user_can('staffmem', true);
+\App\Auth\Permission::assertCan(\App\Enums\Permission\PermissionEnum::STAFF_MEMBER);
 if (empty(\App\Support\SupportContext::getPost('delreport'))) {
     stderr('Error', $lang_functions['select_at_least_one_record']);
 }

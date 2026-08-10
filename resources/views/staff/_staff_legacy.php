@@ -1,6 +1,6 @@
 <?php
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
-user_can('staffmem', true);
+\App\Auth\Permission::assertCan(\App\Enums\Permission\PermissionEnum::STAFF_MEMBER);
 stdhead($lang_staff['head_staff']);
 
 $Cache->new_page('staff_page', 900, true);

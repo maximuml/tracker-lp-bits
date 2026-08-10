@@ -51,7 +51,7 @@ if ($__server_REQUEST_METHOD != "POST")
 
 	// Anti Flood Code
 	// This code ensures that a member can only send one PM every 10 seconds.
-	if (!user_can('staffmem')) {
+	if (!\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::STAFF_MEMBER)) {
 		if (strtotime($CURUSER['last_pm']) > (TIMENOW - 10))
 		{
 			$secs = 60 - (TIMENOW - strtotime($CURUSER['last_pm']));
@@ -72,7 +72,7 @@ if ($__server_REQUEST_METHOD != "POST")
 	$user = (array) $user;
 
 	//Make sure recipient wants this message
-	if (!user_can('staffmem'))
+	if (!\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::STAFF_MEMBER))
 	{
 		if ($user["parked"] == "yes")
 		stderr($lang_takemessage['std_refused'], $lang_takemessage['std_account_parked']);

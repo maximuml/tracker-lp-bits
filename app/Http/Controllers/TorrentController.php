@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Auth\Permission;
+use App\Enums\Permission\PermissionEnum;
 use App\Http\Resources\RewardResource;
 use App\Http\Resources\TorrentOperationLogResource;
 use App\Http\Resources\TorrentResource;
@@ -120,7 +122,7 @@ class TorrentController extends Controller
      */
     public function approvalPage(Request $request)
     {
-        user_can('torrent-approval', true);
+        Permission::assertCan(PermissionEnum::TORRENT_APPROVAL);
         $request->validate(['torrent_id' => 'required']);
         $torrentId = $request->torrent_id;
         $torrent = Torrent::query()->findOrFail($torrentId, Torrent::$commentFields);
@@ -134,7 +136,7 @@ class TorrentController extends Controller
      */
     public function approvalLogs(Request $request)
     {
-        user_can('torrent-approval', true);
+        Permission::assertCan(PermissionEnum::TORRENT_APPROVAL);
         $request->validate(['torrent_id' => 'required']);
         $torrentId = $request->torrent_id;
         $actionTypes = [
@@ -160,7 +162,7 @@ class TorrentController extends Controller
      */
     public function approval(Request $request)
     {
-        user_can('torrent-approval', true);
+        Permission::assertCan(PermissionEnum::TORRENT_APPROVAL);
         $request->validate([
             'torrent_id' => 'required',
             'approval_status' => 'required',

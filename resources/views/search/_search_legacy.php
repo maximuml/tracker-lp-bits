@@ -9,7 +9,7 @@ $searchArea = is_scalar(\App\Support\SupportContext::getRequestInput('search_are
 //approval status
 $approvalStatusNoneVisible = get_setting('torrent.approval_status_none_visible');
 $approvalStatus = null;
-if ($approvalStatusNoneVisible == 'no' && !user_can('torrent-approval')) {
+if ($approvalStatusNoneVisible == 'no' && !\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::TORRENT_APPROVAL)) {
     $approvalStatus = \App\Models\Torrent::APPROVAL_STATUS_ALLOW;
 }
 
@@ -18,7 +18,7 @@ $modeArr = [\App\Models\SearchBox::getBrowseMode()];
 
 //see banned
 $banned = null;
-if (!(isset($CURUSER)) || !user_can('seebanned')) {
+if (!(isset($CURUSER)) || !\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::TORRENT_VIEW_BANNED)) {
     $banned = "no";
 }
 

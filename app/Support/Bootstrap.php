@@ -42,38 +42,6 @@ final class Bootstrap
      */
     public static function autoClean(bool $printProgress = false): string|bool
     {
-        $autoclean_interval_one = (int) SupportContext::getGlobal('autoclean_interval_one', 900);
-        $rootpath = (string) SupportContext::getGlobal('rootpath', dirname(__DIR__, 2) . '/');
-
-        $now = TIMENOW;
-        $ts = (int) \Nexus\Database\NexusDB::table('avps')->where('arg', 'lastcleantime')->value('value_u');
-
-        if ($ts === 0) {
-            \do_log("SELECT value_u FROM avps WHERE arg = 'lastcleantime', empty");
-            \Nexus\Database\NexusDB::table('avps')->insert(['arg' => 'lastcleantime', 'value_u' => $now]);
-
-            return false;
-        }
-
-        if ($ts + $autoclean_interval_one > $now) {
-            \do_log("ts: {$ts} + autoclean_interval_one: $autoclean_interval_one > now: $now");
-
-            return false;
-        }
-
-        $updated = \Nexus\Database\NexusDB::table('avps')
-            ->where('arg', 'lastcleantime')
-            ->where('value_u', $ts)
-            ->update(['value_u' => $now]);
-
-        if (! $updated) {
-            \do_log("UPDATE avps SET value_u=$now WHERE arg='lastcleantime' AND value_u = $ts, affectedRows = 0");
-
-            return false;
-        }
-
-        require_once $rootpath . 'app/Support/Legacy/cleanup.php';
-
-        return docleanup(0, $printProgress);
+        return app(\App\Services\CleanupService::class)->runAll(false, $printProgress);
     }
 }

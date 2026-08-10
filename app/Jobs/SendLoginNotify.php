@@ -65,7 +65,7 @@ class SendLoginNotify implements ShouldQueue
         $user = User::query()->findOrFail($thisLoginLog->uid, User::$commonFields);
         $locale = $user->locale;
         $toolRep = new ToolRepository();
-        $subject = nexus_trans('message.login_notify.subject', ['site_name' => Setting::get('basic.SITENAME')], $locale);
+        $subject = nexus_trans('message.login_notify.subject', ['site_name' => \App\Support\Config\SiteConfig::current()->basic->siteName()], $locale);
         $body = nexus_trans('message.login_notify.body', [
             'this_login_time' => $thisLoginLog->created_at,
             'this_ip' => $thisLoginLog->ip,

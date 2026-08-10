@@ -203,7 +203,7 @@ class HitAndRun extends NexusModel
 
     public static function getIsEnabled(): bool
     {
-        $browseMode = self::getConfig('mode', Setting::get('main.browsecat'));
+        $browseMode = self::getConfig('mode', \App\Support\Config\SiteConfig::current()->main->browseCat());
         $browseEnabled = HitAndRunMode::fromStringSafe(is_string($browseMode) ? $browseMode : null)->isEnabled();
         do_log("H&R browseEnabled: " . ($browseEnabled ? 'true' : 'false'));
         return $browseEnabled;

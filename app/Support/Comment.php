@@ -95,8 +95,8 @@ final class Comment
             '[/font]', '[/size]', '[hr]', '  ',
         ];
         $replaceXhtmlTagArray = [
-            \get_protocol_prefix() . \get_setting('basic.BASEURL'),
-            \get_setting('basic.SITENAME'),
+            \get_protocol_prefix() . \App\Support\Config\SiteConfig::current()->basic->baseUrl(),
+            \App\Support\Config\SiteConfig::current()->basic->siteName(),
             '&#x2022; ',
             '<b>', '</b>', '<i>', '</i>', '<u>', '</u>', '<s>', '</s>',
             '<pre>', '</pre>', '</span>', '</font>', '</font>', '<hr>',
@@ -232,8 +232,8 @@ final class Comment
             );
         }
 
-        $enableattach_attachment = \get_setting('attachment.enableattach');
-        if ($enableattach_attachment === 'yes' && $imagenum != 1) {
+        $enableattach_attachment = \App\Support\Config\SiteConfig::current()->attachment->enableAttach();
+        if ($enableattach_attachment && $imagenum != 1) {
             $limit = 20;
             $s = (string) preg_replace_callback(
                 '/\[attach\]([0-9a-zA-z][0-9a-zA-z]*)\[\/attach\]/is',

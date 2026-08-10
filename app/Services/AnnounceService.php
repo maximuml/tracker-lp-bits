@@ -309,7 +309,7 @@ final class AnnounceService
         }
 
         if ($this->torrent['approval_status'] != Torrent::APPROVAL_STATUS_ALLOW
-            && get_setting('torrent.approval_status_none_visible') == 'no'
+            && !\App\Support\Config\SiteConfig::current()->torrent->approvalStatusNoneVisible()
             && !Permissions::userCan(PermissionEnum::TORRENT_VIEW_BANNED->value, false, $this->userId)
         ) {
             throw TrackerException::failure('torrent review not approved');
@@ -341,7 +341,7 @@ final class AnnounceService
 
     private function detectSeedBox(): void
     {
-        if (get_setting('seed_box.enabled') != 'yes') {
+        if (!\App\Support\Config\SiteConfig::current()->seedBox->enabled()) {
             return;
         }
 
@@ -360,7 +360,7 @@ final class AnnounceService
             || !isset($this->torrent['price'])
             || (int) $this->torrent['price'] <= 0
             || (int) $this->torrent['owner'] == $this->userId
-            || get_setting('torrent.paid_torrent_enabled') != 'yes'
+            || !\App\Support\Config\SiteConfig::current()->torrent->paidTorrentEnabled()
         ) {
             return;
         }

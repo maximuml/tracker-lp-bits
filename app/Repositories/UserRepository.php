@@ -177,7 +177,7 @@ class UserRepository extends BaseRepository
         if (!isset(User::$classes[$class])) {
             throw new \InvalidArgumentException("Invalid user class: $class");
         }
-        $setting = Setting::get('main');
+        $setting = \App\Support\Config\SiteConfig::current()->main->toArray();
         $secret = mksecret();
         $passhash = hash('sha256', $secret . hash('sha256', $password));
         $data = [
@@ -576,7 +576,7 @@ class UserRepository extends BaseRepository
         if ($metaKey == UserMeta::META_KEY_CHANGE_USERNAME) {
             $changeLog = $user->usernameChangeLogs()->orderBy('id', 'desc')->first();
             if ($changeLog) {
-                $miniDays = Setting::get('system.change_username_min_interval_in_days', 365);
+                $miniDays = \App\Support\Config\SiteConfig::current()->system->changeUsernameMinIntervalInDays(365);
                 if (abs($changeLog->created_at->diffInDays()) <= $miniDays) {
                     $msg = nexus_trans('user.change_username_lte_min_interval', ['last_change_time' => $changeLog->created_at, 'interval' => $miniDays]);
                     throw new \RuntimeException($msg);
@@ -585,7 +585,7 @@ class UserRepository extends BaseRepository
             NexusDB::transaction(function () use ($user, $meta, $params) {
                 $this->changeUsername(
                     $user, UsernameChangeLog::CHANGE_TYPE_USER, $user, $params['username'],
-                    Setting::get('system.change_username_card_allow_characters_outside_the_alphabets') == 'yes'
+                    \App\Support\Config\SiteConfig::current()->system->changeUsernameCardAllowCharactersOutsideTheAlphabets()
                 );
                 $meta->delete();
                 clear_user_cache($user->id, $user->passkey);
@@ -935,11 +935,11 @@ class UserRepository extends BaseRepository
      */
     public function getInviteBtnText(int $uid)
     {
-        if (Setting::get('main.invitesystem') != 'yes') {
+        if (!\App\Support\Config\SiteConfig::current()->main->inviteSystem()) {
             throw new NexusException(nexus_trans('invite.send_deny_reasons.invite_system_closed'));
         }
         if (!Permission::can(PermissionEnum::SEND_INVITE, User::findOrFail($uid))) {
-            $requireClass = get_setting("authority." . PermissionEnum::SEND_INVITE->value);
+            $requireClass = \App\Support\Config\SiteConfig::current()->authority->permission(PermissionEnum::SEND_INVITE->value);
             throw new NexusException(nexus_trans('invite.send_deny_reasons.no_permission', ['class' => User::getClassText($requireClass)]));
         }
         $userInfo = User::query()->findOrFail($uid, User::$commonFields);
@@ -983,7 +983,7 @@ class UserRepository extends BaseRepository
      */
     private function listUserSeedingLeechingData(array $userIdArr)
     {
-        $minSize = get_setting('bonus.min_size', 0);
+        $minSize = \App\Support\Config\SiteConfig::current()->bonus->minSize(0);
         $data = NexusDB::table('torrents')
             ->leftJoin('peers', 'peers.torrent', '=', 'torrents.id')
             ->select('peers.userid', 'peers.seeder', 'torrents.size')

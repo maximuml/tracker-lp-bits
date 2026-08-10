@@ -131,7 +131,7 @@ class MedalRepository extends BaseRepository
         }
         $current = $userMedal->status;
         if ($current == UserMedal::STATUS_NOT_WEARING) {
-            $maxWearAllow = Setting::get('system.maximum_number_of_medals_can_be_worn');
+            $maxWearAllow = \App\Support\Config\SiteConfig::current()->system->maximumNumberOfMedalsCanBeWorn();
             $user = User::query()->findOrFail($userId, User::$commonFields);
             $wearCount = $user->wearing_medals()->count();
             if ($maxWearAllow && $wearCount >= $maxWearAllow) {
@@ -177,7 +177,7 @@ class MedalRepository extends BaseRepository
                 'updated_at' => $nowStr,
             ];
         }
-        $maxWearAllow = Setting::get('system.maximum_number_of_medals_can_be_worn');
+        $maxWearAllow = \App\Support\Config\SiteConfig::current()->system->maximumNumberOfMedalsCanBeWorn();
         if ($maxWearAllow && $wearCount > $maxWearAllow) {
             throw new NexusException(nexus_trans('medal.max_allow_wearing', ['count' => $maxWearAllow]));
         }

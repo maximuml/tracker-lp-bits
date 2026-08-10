@@ -40,7 +40,7 @@ final class TorrentTable
 	    if (!empty($searchBoxExtra[\App\Models\SearchBox::EXTRA_DISPLAY_COVER_ON_TORRENT_LIST])) {
 	        $showCover = true;
         }
-        $showSeedBoxIcon = get_setting('seed_box.enabled') == 'yes';
+        $showSeedBoxIcon = \App\Support\Config\SiteConfig::current()->seedBox->enabled();
         if (empty($searchBoxExtra[\App\Models\SearchBox::EXTRA_DISPLAY_SEED_BOX_ICON_ON_TORRENT_LIST])) {
             $showSeedBoxIcon = false;
         }

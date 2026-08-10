@@ -143,7 +143,7 @@ final class AuthCookie
     public static function setLoginCookie(int $userId, ?string $authKey = null, int $durationSeconds = 0): void
     {
         if ($durationSeconds <= 0) {
-            $durationSeconds = (int) get_setting('system.cookie_valid_days', 365) * 86400;
+            $durationSeconds = (int) \App\Support\Config\SiteConfig::current()->system->cookieValidDays(365) * 86400;
         }
 
         $expires = self::computeExpires($durationSeconds);

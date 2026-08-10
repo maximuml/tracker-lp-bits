@@ -73,7 +73,7 @@ class TorrentPolicy extends BasePolicy
         }
 
         $approvalNotAllowed = $torrent->approval_status != Torrent::APPROVAL_STATUS_ALLOW
-            && Setting::get('torrent.approval_status_none_visible') == 'no';
+            && !\App\Support\Config\SiteConfig::current()->torrent->approvalStatusNoneVisible();
         $allowOwnerDownload = $torrent->owner == $user->id;
         $canSeedBanned = Permission::canViewBannedTorrent($user);
         $canAccessTorrent = TorrentAccess::canAccess($torrent->id, $user->id);

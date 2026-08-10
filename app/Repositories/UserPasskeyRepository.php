@@ -17,7 +17,7 @@ class UserPasskeyRepository extends BaseRepository
     {
         $formats = ['android-key', 'android-safetynet', 'apple', 'fido-u2f', 'packed', 'tpm', 'none'];
         $rpId = explode(':', nexus()->getRequestHost())[0];
-        return new WebAuthn(get_setting('basic.SITENAME'), $rpId, $formats);
+        return new WebAuthn(\App\Support\Config\SiteConfig::current()->basic->siteName(), $rpId, $formats);
     }
 
     /** @param  mixed  $challenge */

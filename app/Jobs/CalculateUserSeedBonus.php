@@ -79,10 +79,10 @@ class CalculateUserSeedBonus implements ShouldQueue
         );
         do_log("$logPrefix, job start ...");
 
-        $haremAdditionFactor = Setting::get('bonus.harem_addition');
-        $officialAdditionFactor = Setting::get('bonus.official_addition');
-        $donortimes_bonus = Setting::get('bonus.donortimes');
-        $autoclean_interval_one = Setting::get('main.autoclean_interval_one');
+        $haremAdditionFactor = \App\Support\Config\SiteConfig::current()->bonus->haremAddition();
+        $officialAdditionFactor = \App\Support\Config\SiteConfig::current()->bonus->officialAddition();
+        $donortimes_bonus = \App\Support\Config\SiteConfig::current()->bonus->donorTimes();
+        $autoclean_interval_one = \App\Support\Config\SiteConfig::current()->main->autocleanIntervalOne();
 
         $idStr = $this->idStr;
         $delIdRedisKey = false;

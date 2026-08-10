@@ -1,0 +1,52 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Support\Config;
+
+use App\Models\Setting;
+
+final class SiteConfig
+{
+    public readonly MainConfig $main;
+    public readonly TorrentConfig $torrent;
+    public readonly AccountConfig $account;
+    public readonly SecurityConfig $security;
+    public readonly SystemConfig $system;
+    public readonly SeedBoxConfig $seedBox;
+    public readonly MeiliSearchConfig $meiliSearch;
+    public readonly BasicConfig $basic;
+    public readonly BonusConfig $bonus;
+    public readonly AttachmentConfig $attachment;
+    public readonly SmtpConfig $smtp;
+    public readonly BackupConfig $backup;
+    public readonly CaptchaConfig $captcha;
+    public readonly AuthorityConfig $authority;
+
+    /** @param array<string, mixed> $data */
+    public function __construct(array $data = [])
+    {
+        $this->main = new MainConfig($data['main'] ?? []);
+        $this->torrent = new TorrentConfig($data['torrent'] ?? []);
+        $this->account = new AccountConfig($data['account'] ?? []);
+        $this->security = new SecurityConfig($data['security'] ?? []);
+        $this->system = new SystemConfig($data['system'] ?? []);
+        $this->seedBox = new SeedBoxConfig($data['seed_box'] ?? []);
+        $this->meiliSearch = new MeiliSearchConfig($data['meilisearch'] ?? []);
+        $this->basic = new BasicConfig($data['basic'] ?? []);
+        $this->bonus = new BonusConfig($data['bonus'] ?? []);
+        $this->attachment = new AttachmentConfig($data['attachment'] ?? []);
+        $this->smtp = new SmtpConfig($data['smtp'] ?? []);
+        $this->backup = new BackupConfig($data['backup'] ?? []);
+        $this->captcha = new CaptchaConfig($data['captcha'] ?? []);
+        $this->authority = new AuthorityConfig($data['authority'] ?? []);
+    }
+
+    public static function current(): self
+    {
+        /** @var array<string, mixed> $settings */
+        $settings = Setting::get() ?: [];
+
+        return new self($settings);
+    }
+}

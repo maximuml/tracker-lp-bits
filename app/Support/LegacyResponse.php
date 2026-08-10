@@ -185,7 +185,7 @@ final class LegacyResponse
             return false;
         }
 
-        $uploadDenyApprovalDenyCount = (int) \get_setting('main.upload_deny_approval_deny_count');
+        $uploadDenyApprovalDenyCount = (int) \App\Support\Config\SiteConfig::current()->main->uploadDenyApprovalDenyCount();
         $approvalDenyCount = Torrent::query()
             ->where('owner', $CURUSER['id'] ?? 0)
             ->where('approval_status', Torrent::APPROVAL_STATUS_DENY)
@@ -200,7 +200,7 @@ final class LegacyResponse
         }
 
         if ($where === 'torrents') {
-            $offerSkipApprovedCount = (int) \get_setting('main.offer_skip_approved_count');
+            $offerSkipApprovedCount = (int) \App\Support\Config\SiteConfig::current()->main->offerSkipApprovedCount();
             if (($CURUSER['offer_allowed_count'] ?? 0) >= $offerSkipApprovedCount) {
                 return true;
             }

@@ -318,7 +318,7 @@ TD;
      */
     public static function requiredIds(): array
     {
-        $setting = \get_setting('main');
+        $setting = \App\Support\Config\SiteConfig::current()->main->toArray();
         $maps = [
             'torrents' => [$setting['browsecat']],
             'usercp' => [$setting['browsecat']],

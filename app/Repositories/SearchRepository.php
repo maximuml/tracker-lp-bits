@@ -702,7 +702,7 @@ class SearchRepository extends BaseRepository
         $page = isset($params['page']) && is_numeric($params['page']) ? $params['page'] : 0;
         if ($user->torrentsperpage) {
             $size = $user->torrentsperpage;
-        } elseif (($sizeFromConfig = Setting::get('main.torrentsperpage')) > 0) {
+        } elseif (($sizeFromConfig = \App\Support\Config\SiteConfig::current()->main->torrentsPerPage()) > 0) {
             $size = $sizeFromConfig;
         } else {
             $size = 50;

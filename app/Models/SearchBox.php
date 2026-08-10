@@ -194,7 +194,7 @@ class SearchBox extends NexusModel
         $result = [];
         foreach (self::$sections as $key => $value) {
             $value['text'] = nexus_trans("searchbox.sections.$key");
-            $value['mode'] = Setting::get("main.{$key}cat");
+            $value['mode'] = \App\Support\Config\SiteConfig::current()->main->category($key);
             if ($field !== null && isset($value[$field])) {
                 $result[$key] = $value[$field];
             } else {
@@ -277,7 +277,7 @@ class SearchBox extends NexusModel
         if (!empty($this->section_name[$locale])) {
             return $this->section_name[$locale];
         }
-        $defaultLang = get_setting("main.defaultlang");
+        $defaultLang = \App\Support\Config\SiteConfig::current()->main->defaultLang();
         if (!empty($this->section_name[$defaultLang])) {
             return $this->section_name[$defaultLang];
         }
@@ -300,7 +300,7 @@ class SearchBox extends NexusModel
     /** @return  mixed */
     public static function getBrowseMode()
     {
-        return Setting::get('main.browsecat');
+        return \App\Support\Config\SiteConfig::current()->main->browseCat();
     }
 
     /** @return  mixed */
@@ -394,7 +394,7 @@ class SearchBox extends NexusModel
     /** @return  mixed */
     public static function getDefaultSearchMode()
     {
-        $meiliConf = get_setting("meilisearch");
+        $meiliConf = \App\Support\Config\SiteConfig::current()->meiliSearch->toArray();
         if ($meiliConf['enabled'] == 'yes') {
             return $meiliConf['default_search_mode'];
         } else {

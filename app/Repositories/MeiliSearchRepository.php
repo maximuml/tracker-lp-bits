@@ -130,7 +130,7 @@ class MeiliSearchRepository extends BaseRepository
 
     public static function isEnabled(): bool
     {
-        return Setting::get('meilisearch.enabled') == 'yes';
+        return \App\Support\Config\SiteConfig::current()->meiliSearch->enabled();
     }
 
     /** @return  mixed */
@@ -348,7 +348,7 @@ class MeiliSearchRepository extends BaseRepository
         if (!Permission::canViewBannedTorrent()) {
             $params['banned'] = 'no';
         }
-        if (get_setting('torrent.approval_status_none_visible') == 'no' && !Permission::canApproveTorrent()) {
+        if (!\App\Support\Config\SiteConfig::current()->torrent->approvalStatusNoneVisible() && !Permission::canApproveTorrent()) {
             $params['approval_status'] = Torrent::APPROVAL_STATUS_ALLOW;
         }
         $filters = $this->getFilters($params, $user);
@@ -621,7 +621,7 @@ class MeiliSearchRepository extends BaseRepository
     {
         if ($user->torrentsperpage) {
             $size = $user->torrentsperpage;
-        } elseif (($sizeFromConfig = Setting::get('main.torrentsperpage')) > 0) {
+        } elseif (($sizeFromConfig = \App\Support\Config\SiteConfig::current()->main->torrentsPerPage()) > 0) {
             $size = $sizeFromConfig;
         } else {
             $size = 100;
@@ -672,7 +672,7 @@ class MeiliSearchRepository extends BaseRepository
     private static function getSearchableAttributes(): array
     {
         $attributes = ["name", "url"];
-        if (Setting::get("meilisearch.search_description") == 'yes') {
+        if (\App\Support\Config\SiteConfig::current()->meiliSearch->searchDescription()) {
             $attributes[] = "descr";
         }
         return $attributes;

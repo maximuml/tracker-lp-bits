@@ -285,7 +285,7 @@ class TorrentRepository extends BaseRepository
     public function getSearchBox(?int $id = null)
     {
         if (is_null($id)) {
-            $id = Setting::get('main.browsecat');
+            $id = \App\Support\Config\SiteConfig::current()->main->browseCat();
         }
         $searchBox = SearchBox::query()->findOrFail((int)$id);
         $category = $searchBox->categories()->orderBy('sort_index')->orderBy('id')->get();
@@ -791,7 +791,7 @@ class TorrentRepository extends BaseRepository
                 $torrentOperationLog['action_type'] = TorrentOperationLog::ACTION_TYPE_APPROVAL_ALLOW;
                 //increase promotion time
                 if (
-                    Setting::get('torrent.approval_status_none_visible') == 'no'
+                    !\App\Support\Config\SiteConfig::current()->torrent->approvalStatusNoneVisible()
                     && $torrent->sp_state != Torrent::PROMOTION_NORMAL
                     && $torrent->promotion_until
                 ) {
@@ -870,13 +870,13 @@ class TorrentRepository extends BaseRepository
     /** @param  mixed  $approvalStatus */
     public function shouldShowApprovalStatusIcon($approvalStatus): bool
     {
-        if (get_setting('torrent.approval_status_icon_enabled') == 'yes') {
+        if (\App\Support\Config\SiteConfig::current()->torrent->approvalStatusIconEnabled()) {
             //启用审核状态图标，肯定显示
             return true;
         }
         if (
             $approvalStatus != \App\Models\Torrent::APPROVAL_STATUS_ALLOW
-            && get_setting('torrent.approval_status_none_visible') == 'no'
+            && !\App\Support\Config\SiteConfig::current()->torrent->approvalStatusNoneVisible()
         ) {
             //不启用审核状态图标，尽量不显示。在种子不是审核通过状态，而审核不通过又不能被用户看到时，显示
             return true;
@@ -1258,7 +1258,7 @@ HTML;
         $torrentDir = sprintf(
             "%s/%s/",
             rtrim(ROOT_PATH, '/'),
-            rtrim(get_setting("main.torrent_dir"), '/')
+            rtrim(\App\Support\Config\SiteConfig::current()->main->torrentDir(), '/')
         );
         while (true) {
             $list = (clone $query)->forPage($page, $size)->get(['id', 'pieces_hash']);

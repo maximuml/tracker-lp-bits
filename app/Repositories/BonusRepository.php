@@ -302,8 +302,8 @@ class BonusRepository extends BaseRepository
                 'channel' => $channel,
             ]);
             //increment owner bonus
-            $taxFactor = Setting::get('torrent.tax_factor');
-            if (!is_numeric($taxFactor) || $taxFactor < 0 || $taxFactor > 1) {
+            $taxFactor = \App\Support\Config\SiteConfig::current()->torrent->taxFactor();
+            if ($taxFactor < 0 || $taxFactor > 1) {
                 throw new \RuntimeException("Invalid tax_factor: $taxFactor");
             }
             $increaseBonus = $requireBonus * (1 - $taxFactor);

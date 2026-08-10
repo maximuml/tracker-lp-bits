@@ -50,7 +50,7 @@ class TorrentDownloadController extends Controller
                 throw new NexusException('download.invalid_downhash_decrypt');
             }
             $id = (int) $decrypted[0];
-        } elseif (Setting::get('torrent.download_support_passkey') == 'yes' && !empty($passkey) && !empty($id)) {
+        } elseif (\App\Support\Config\SiteConfig::current()->torrent->downloadSupportPasskey() && !empty($passkey) && !empty($id)) {
             $user = User::query()->where('passkey', $passkey)->first();
             if (!$user) {
                 throw new NexusException('download.invalid_passkey');
@@ -115,7 +115,7 @@ class TorrentDownloadController extends Controller
 
         $torrent->increment('hits');
 
-        $filename = Setting::get('main.torrentnameprefix') . $torrent->save_as . '.torrent';
+        $filename = \App\Support\Config\SiteConfig::current()->main->torrentNamePrefix() . $torrent->save_as . '.torrent';
         $headers = [
             'Content-Type' => 'application/x-bittorrent',
             'Content-Disposition' => Http::contentDisposition($filename, 'attachment'),

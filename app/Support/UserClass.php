@@ -229,7 +229,7 @@ final class UserClass
         }
 
         if ($settingAccount === null) {
-            $settingAccount = \get_setting('account');
+            $settingAccount = \App\Support\Config\SiteConfig::current()->account->toArray();
         }
 
         if ($I18N) {

@@ -79,7 +79,7 @@ final class Permissions
         \do_log("$log, [FAIL]");
         if (defined('IN_NEXUS') && IN_NEXUS && !(defined('IN_TRACKER') && IN_TRACKER)) {
             $lang_functions = SupportContext::getLangFunctions();
-            $requireClass = \get_setting("authority.$permission");
+            $requireClass = \App\Support\Config\SiteConfig::current()->authority->permission($permission);
             if (isset(User::$classes[$requireClass])) {
                 \stderr(
                     $lang_functions['std_sorry'],

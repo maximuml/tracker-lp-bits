@@ -75,7 +75,7 @@ class ScrapeService
 
         if (empty($user)) {
             NexusDB::redis()->set("passkey_invalid:{$passkey}", TIMENOW, ['ex' => 24 * 3600]);
-            throw TrackerException::failure("Invalid passkey! Re-download the .torrent from " . get_setting('basic.BASEURL'));
+            throw TrackerException::failure("Invalid passkey! Re-download the .torrent from " . \App\Support\Config\SiteConfig::current()->basic->baseUrl());
         }
 
         if ($user['enabled'] === 'no') {

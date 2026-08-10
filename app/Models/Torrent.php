@@ -53,6 +53,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Laravel\Scout\Searchable;
 use Nexus\Database\NexusDB;
 
 /**
@@ -66,6 +67,8 @@ use Nexus\Database\NexusDB;
  */
 class Torrent extends NexusModel
 {
+    use Searchable;
+
     /** @var  list<string> */
     protected $fillable = [
         'name', 'filename', 'save_as',
@@ -374,6 +377,45 @@ class Torrent extends NexusModel
             }
         }
         return $fields;
+    }
+
+    /**
+     * Only sync the MeiliSearch index when MeiliSearch is enabled.
+     *
+     * @return  bool
+     */
+    public function shouldBeSearchable(): bool
+    {
+        return \App\Repositories\MeiliSearchRepository::isEnabled();
+    }
+
+    /** @return  array<int|string, mixed> */
+    public function toSearchableArray(): array
+    {
+        $fields = \App\Repositories\MeiliSearchRepository::getRequiredFields();
+        $row = [];
+        foreach ($fields as $field) {
+            $row[$field] = \App\Repositories\MeiliSearchRepository::formatValueForMeili($field, $this->getAttribute($field));
+        }
+
+        return $row;
+    }
+
+    /**
+     * Override the Scout boot so unit tests that instantiate the model outside
+     * the full Laravel application do not fail when the config container is
+     * not available.
+     */
+    public static function bootSearchable(): void
+    {
+        static::addGlobalScope(new \Laravel\Scout\SearchableScope);
+
+        static::whenBooted(function () {
+            if (app()->bound('config')) {
+                static::observe(new \Laravel\Scout\ModelObserver);
+            }
+            (new self())->registerSearchableMacros();
+        });
     }
 
     /**

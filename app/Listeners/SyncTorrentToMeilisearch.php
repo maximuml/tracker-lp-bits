@@ -2,8 +2,7 @@
 
 namespace App\Listeners;
 
-use App\Events\TorrentCreated;
-use App\Repositories\MeiliSearchRepository;
+use App\Models\Torrent;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 
@@ -22,15 +21,17 @@ class SyncTorrentToMeilisearch implements ShouldQueue
      */
     public function handle($event): void
     {
-        $id = $event->model->id ?? 0;
-        if ($id == 0) {
-            do_log("event: " . get_class($event) . " no model id", 'error');
+        $torrent = $event->model ?? null;
+        if (!$torrent instanceof Torrent) {
+            do_log("event: " . get_class($event) . " no torrent model", 'error');
             return;
         }
         try {
-            $meiliSearch = new MeiliSearchRepository();
-            $result = $meiliSearch->doImportFromDatabase($id);
-            do_log(sprintf("doImportFromDatabase: %s result: %s", $id, var_export($result, true)));
+            $torrent->refresh();
+            if ($torrent->shouldBeSearchable()) {
+                $torrent->searchable();
+            }
+            do_log("sync torrent to MeiliSearch: " . $torrent->id);
         } catch (\Throwable $e) {
             do_log('MeiliSearch sync listener failed: ' . $e->getMessage(), 'error');
         }

@@ -15,7 +15,7 @@ return [
     |
     */
 
-    'driver' => env('SCOUT_DRIVER', 'elastic'),
+    'driver' => env('SCOUT_DRIVER', 'meilisearch'),
 
     /*
     |--------------------------------------------------------------------------
@@ -130,8 +130,13 @@ return [
     */
 
     'meilisearch' => [
-        'host' => env('MEILISEARCH_HOST', 'http://localhost:7700'),
-        'key' => env('MEILISEARCH_KEY', null),
+        'host' => sprintf(
+            '%s://%s:%s',
+            config('nexus.meilisearch.scheme', 'http'),
+            config('nexus.meilisearch.host', 'meilisearch'),
+            config('nexus.meilisearch.port', 7700),
+        ),
+        'key' => config('nexus.meilisearch.master_key', ''),
     ],
 
 ];

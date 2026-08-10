@@ -2,7 +2,6 @@
 namespace App\Repositories;
 
 use App\Auth\Permission;
-use App\Enums\Permission\PermissionEnum;
 use App\Exceptions\NexusException;
 use App\Models\Bookmark;
 use App\Models\Category;
@@ -129,7 +128,7 @@ class MeiliSearchRepository extends BaseRepository
         return self::$client;
     }
 
-    public function isEnabled(): bool
+    public static function isEnabled(): bool
     {
         return Setting::get('meilisearch.enabled') == 'yes';
     }
@@ -194,8 +193,8 @@ class MeiliSearchRepository extends BaseRepository
         $index = $client->index($indexName);
         $settings = [
             "distinctAttribute" => "id",
-            "displayedAttributes" => $this->getRequiredFields(),
-            "searchableAttributes" => $this->getSearchableAttributes(),
+            "displayedAttributes" => self::getRequiredFields(),
+            "searchableAttributes" => self::getSearchableAttributes(),
             "filterableAttributes" => self::$filterableAttributes,
             "sortableAttributes" => self::$sortableAttributes,
             "rankingRules" => [
@@ -214,10 +213,10 @@ class MeiliSearchRepository extends BaseRepository
     }
 
     /** @return  array<int|string, mixed> */
-    public function getRequiredFields(): array
+    public static function getRequiredFields(): array
     {
         return array_values(array_unique(array_merge(
-            self::$filterableAttributes, self::$sortableAttributes, $this->getSearchableAttributes()
+            self::$filterableAttributes, self::$sortableAttributes, self::getSearchableAttributes()
         )));
     }
 
@@ -240,8 +239,10 @@ class MeiliSearchRepository extends BaseRepository
         }
         $total = 0;
         $tasks = [];
+        $columns = DB::getSchemaBuilder()->getColumnListing('torrents');
+        $fields = array_values(array_intersect($this->getRequiredFields(), $columns));
         while (true) {
-            $query = Torrent::query()->select($this->getRequiredFields())->orderBy('id')->forPage($page, $size);
+            $query = Torrent::query()->select($fields)->orderBy('id')->forPage($page, $size);
             if ($id) {
                 $query->whereIn("id", Arr::wrap($id));
             }
@@ -253,14 +254,7 @@ class MeiliSearchRepository extends BaseRepository
                 break;
             }
             do_log(sprintf('importing page: %s with id: %s, %s records...', $page, $id, $count));
-            $data = [];
-            foreach ($torrents as $torrent) {
-                $row = [];
-                foreach ($torrent->getAttributes() as $field => $value) {
-                    $row[$field] = $this->formatValueForMeili($field, $value);
-                }
-                $data[] = $row;
-            }
+            $data = $torrents->map->toSearchableArray()->all();
             $result = $index->updateDocuments($data);
             if (is_array($result) && isset($result['taskUid'])) {
                 $tasks[] = $result['taskUid'];
@@ -281,8 +275,7 @@ class MeiliSearchRepository extends BaseRepository
      */
     public function search(array $params, $user)
     {
-        $results['total'] = 0;
-        $results['list'] = [];
+        $results = ['total' => 0, 'list' => []];
         if (!$this->isEnabled()) {
             do_log("Not enabled!");
             return $results;
@@ -300,42 +293,32 @@ class MeiliSearchRepository extends BaseRepository
                 $filters[] = "owner = " . $searchOwner->id;
             }
         }
-        if (!($user instanceof User) || !$user->torrentsperpage || !$user->notifs) {
+        if (!($user instanceof User)) {
             $user = User::query()->findOrFail(intval($user));
         }
         $filters = array_merge($filters, $this->getFilters($params, $user));
         $query = $this->getQuery($params);
-        $page = isset($params['page']) && is_numeric($params['page']) ? $params['page'] : 0;
+        $page = isset($params['page']) && is_numeric($params['page']) ? (int) $params['page'] : 0;
         $perPage = $this->getPerPage($user);
-        $index = $this->getIndex();
-        $searchParams = [
-            "q" => $query,
-            "hitsPerPage" => $perPage,
-            //NP starts from 0, but meilisearch starts from 1
-            "page" => $page + 1,
-            "filter" => $filters,
-            "attributesToRetrieve" => $this->getAttributesToRetrieve(),
+
+        $options = [
+            'filter' => implode(' AND ', $filters),
+            'attributesToRetrieve' => $this->getAttributesToRetrieve(),
         ];
-        if (isset($params['sort'], $params['type'])) {
-            $searchParams['sort'] = $this->getSort($params);
+        $sort = $this->getSort($params);
+        if (!empty($sort)) {
+            $options['sort'] = $sort;
         }
-        $searchResult = $index->search($query, $searchParams);
-        $total = $searchResult->getTotalHits();
-        do_log("search params: " . nexus_json_encode($searchParams) . ", total: $total");
-        $results['total'] = $total;
+
+        $paginator = Torrent::search($query)->options($options)->paginate($perPage, 'page', $page + 1);
+        $torrents = new \Illuminate\Database\Eloquent\Collection($paginator->items());
+        $total = $paginator->total();
+        do_log("search params: " . nexus_json_encode($options) . ", page: " . ($page + 1) . ", perPage: $perPage, total: $total");
         if ($total > 0) {
-            $torrentIdArr = array_column($searchResult->getHits(), 'id');
-            $fields = Torrent::getFieldsForList();
-            $idStr = implode(',', $torrentIdArr);
-            $torrents = Torrent::query()
-                ->select($fields)
-                ->with('basic_category')
-                ->whereIn('id', $torrentIdArr)
-                ->orderByRaw("field(id,$idStr)")
-                ->get()
-            ;
+            $torrents->load('basic_category');
             $list = [];
             foreach ($torrents as $torrent) {
+                assert($torrent instanceof Torrent);
                 $searchBoxId = $torrent->basic_category->mode;
                 $arr = $torrent->toArray();
                 $arr['search_box_id'] = $searchBoxId;
@@ -343,6 +326,7 @@ class MeiliSearchRepository extends BaseRepository
             }
             $results['list'] = $list;
         }
+        $results['total'] = $total;
         return $results;
     }
 
@@ -369,15 +353,15 @@ class MeiliSearchRepository extends BaseRepository
         }
         $filters = $this->getFilters($params, $user);
 
-        $index = $this->getIndex();
-        $result = $index->search($query, [
+        $options = [
             'limit' => $limit,
             'attributesToRetrieve' => ['id', 'name'],
-            'filter' => $filters,
-        ]);
+            'filter' => implode(' AND ', $filters),
+        ];
+        $result = Torrent::search($query)->options($options)->take($limit)->raw();
 
         $torrents = [];
-        foreach ($result->getHits() as $hit) {
+        foreach ($result['hits'] ?? [] as $hit) {
             $torrents[] = [
                 'id' => (int) $hit['id'],
                 'name' => (string) $hit['name'],
@@ -650,13 +634,13 @@ class MeiliSearchRepository extends BaseRepository
      * @param  mixed  $value
      * @return  mixed
      */
-    private function formatValueForMeili($field, $value)
+    public static function formatValueForMeili($field, $value)
     {
         if (in_array($field, self::$intFields)) {
             return intval($value);
         }
         if (in_array($field, self::$timestampFields)) {
-            return strtotime($value);
+            return strtotime((string) $value);
         }
         if (in_array($field, self::$yesOrNoFields)) {
             return $value == 'yes' ? 1 : 0;
@@ -676,7 +660,7 @@ class MeiliSearchRepository extends BaseRepository
     }
 
     /** @return  array<int|string, mixed> */
-    private function getAttributesToRetrieve(): array
+    private static function getAttributesToRetrieve(): array
     {
         if (nexus_env("APP_ENV") == 'production') {
             return ['id'];
@@ -685,7 +669,7 @@ class MeiliSearchRepository extends BaseRepository
     }
 
     /** @return  array<int|string, mixed> */
-    private function getSearchableAttributes(): array
+    private static function getSearchableAttributes(): array
     {
         $attributes = ["name", "url"];
         if (Setting::get("meilisearch.search_description") == 'yes') {

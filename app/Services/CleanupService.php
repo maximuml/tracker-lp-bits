@@ -36,6 +36,9 @@ final class CleanupService
             ['task' => 'manage-user-classes', 'method' => 'manageUserClasses'],
             ['task' => 'cleanup-dead-torrents', 'method' => 'cleanupDeadTorrentsAndIpLogs'],
         ],
+        5 => [
+            ['task' => 'cleanup-class-5', 'method' => 'cleanupClass5'],
+        ],
     ];
 
     public function __construct(

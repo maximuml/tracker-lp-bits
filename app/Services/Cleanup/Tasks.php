@@ -257,14 +257,15 @@ final class Tasks
     }
 
     /**
-     * Priority Class 4: delete dead torrents and old IP logs.
+     * Priority Class 4: delete dead torrents, old IP logs, and stale failed jobs.
      */
     public function cleanupDeadTorrentsAndIpLogs(): string
     {
         $this->deleteDeadTorrents();
         $this->deleteOldIpLogs();
+        $this->deleteFailedJobs();
 
-        return 'delete dead torrents and old IP logs';
+        return 'delete dead torrents, old IP logs and failed jobs';
     }
 
     // ------------------------------------------------------------------------
@@ -1011,5 +1012,127 @@ final class Tasks
         $until = date('Y-m-d H:i:s', time() - $length);
 
         NexusDB::table('iplog')->where('access', '<', $until)->delete();
+    }
+
+    private function deleteFailedJobs(): void
+    {
+        $length = 10 * 86400;
+        $until = date('Y-m-d H:i:s', time() - $length);
+
+        NexusDB::table('failed_jobs')->where('failed_at', '<', $until)->delete();
+    }
+
+    /**
+     * Priority Class 5: cleanup tasks that run every 15 days.
+     */
+    public function cleanupClass5(): string
+    {
+        $this->updateClientPopularity();
+        $this->deleteOldSystemMessages();
+        $this->deleteOldReadPosts();
+        $this->deleteOldCheaters();
+        $this->deleteOldShoutbox();
+        $this->deleteOldSiteLog();
+        $this->lockOldTopics();
+        $this->deleteOldReports();
+        $this->deleteExpiredOAuthTokens();
+
+        return 'cleanup class 5';
+    }
+
+    // ------------------------------------------------------------------------
+    // Class 5 helpers
+    // ------------------------------------------------------------------------
+
+    private function updateClientPopularity(): void
+    {
+        $clientIds = NexusDB::table('agent_allowed_family')->pluck('id');
+
+        foreach ($clientIds as $clientId) {
+            $count = NexusDB::table('users')->where('clientselect', $clientId)->count();
+            NexusDB::table('agent_allowed_family')->where('id', $clientId)->update(['hits' => $count]);
+        }
+    }
+
+    private function deleteOldSystemMessages(): void
+    {
+        $length = 180 * 86400;
+        $until = date('Y-m-d H:i:s', time() - $length);
+
+        NexusDB::table('messages')->where('sender', 0)->where('added', '<', $until)->delete();
+    }
+
+    private function deleteOldReadPosts(): void
+    {
+        $length = 180 * 86400;
+        $until = date('Y-m-d H:i:s', time() - $length);
+
+        $postId = NexusDB::table('posts')
+            ->where('added', '<', $until)
+            ->orderBy('added', 'desc')
+            ->value('id');
+
+        if ($postId) {
+            NexusDB::table('users')->where('last_catchup', '<', $postId)->update(['last_catchup' => $postId]);
+            NexusDB::table('readposts')->where('lastpostread', '<', $postId)->delete();
+        }
+    }
+
+    private function deleteOldCheaters(): void
+    {
+        $length = 180 * 86400;
+        $until = date('Y-m-d H:i:s', time() - $length);
+
+        NexusDB::table('cheaters')->where('added', '<', $until)->delete();
+    }
+
+    private function deleteOldShoutbox(): void
+    {
+        $length = 180 * 86400;
+        $until = time() - $length;
+
+        NexusDB::table('shoutbox')->where('date', '<', $until)->delete();
+    }
+
+    private function deleteOldSiteLog(): void
+    {
+        $length = 180 * 86400;
+        $until = date('Y-m-d H:i:s', time() - $length);
+
+        NexusDB::table('sitelog')->where('added', '<', $until)->delete();
+    }
+
+    private function lockOldTopics(): void
+    {
+        $length = 365 * 86400;
+        $diff = time() - $length;
+        $postAddedField = NexusDB::unixTimestampField('posts.added');
+
+        NexusDB::table('topics')
+            ->where('sticky', 'no')
+            ->whereIn('lastpost', function ($query) use ($postAddedField, $diff): void {
+                $query->select('id')->from('posts')->whereRaw("{$postAddedField} < ?", [$diff]);
+            })
+            ->update(['locked' => 'yes']);
+    }
+
+    private function deleteOldReports(): void
+    {
+        $length = 4 * 7 * 86400;
+        $until = date('Y-m-d H:i:s', time() - $length);
+
+        NexusDB::table('reports')
+            ->where('dealtwith', 1)
+            ->where('added', '<', $until)
+            ->delete();
+    }
+
+    private function deleteExpiredOAuthTokens(): void
+    {
+        $now = now();
+
+        NexusDB::table('oauth_auth_codes')->where('expires_at', '<=', $now)->delete();
+        NexusDB::table('oauth_access_tokens')->where('expires_at', '<=', $now)->delete();
+        NexusDB::table('oauth_refresh_tokens')->where('expires_at', '<=', $now)->delete();
     }
 }

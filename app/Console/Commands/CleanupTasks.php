@@ -13,7 +13,7 @@ final class CleanupTasks extends Command
     protected $signature = 'cleanup:tasks {task : The cleanup task to run}';
 
     /** @var string */
-    protected $description = 'Run a single cleanup task. Available tasks: prune-peers, reset-seed-bonus-counters, update-torrent-visibility, update-forum-counts, prune-offers, expire-torrent-promotions, expire-torrent-sticky, cleanup-stale-auth, disable-inactive-users, manage-user-classes, cleanup-dead-torrents';
+    protected $description = 'Run a single cleanup task. Available tasks: prune-peers, reset-seed-bonus-counters, update-torrent-visibility, update-forum-counts, prune-offers, expire-torrent-promotions, expire-torrent-sticky, cleanup-stale-auth, disable-inactive-users, manage-user-classes, cleanup-dead-torrents, cleanup-class-5';
 
     /** @var array<string, string> */
     private const TASKS = [
@@ -28,6 +28,7 @@ final class CleanupTasks extends Command
         'disable-inactive-users' => 'disableInactiveUsers',
         'manage-user-classes' => 'manageUserClasses',
         'cleanup-dead-torrents' => 'cleanupDeadTorrentsAndIpLogs',
+        'cleanup-class-5' => 'cleanupClass5',
     ];
 
     /**

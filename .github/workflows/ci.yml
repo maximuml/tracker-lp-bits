@@ -66,6 +66,8 @@ jobs:
           cp .env.example .env
           sed -i 's/^CACHE_DRIVER=.*/CACHE_DRIVER=array/' .env
           sed -i 's/^QUEUE_CONNECTION=.*/QUEUE_CONNECTION=sync/' .env
+          sed -i 's/^CHANNEL_NAME_SETTING=.*/CHANNEL_NAME_SETTING=/' .env
+          sed -i 's/^CHANNEL_NAME_MODEL_EVENT=.*/CHANNEL_NAME_MODEL_EVENT=/' .env
 
       - name: Run PHP syntax lint
         run: |

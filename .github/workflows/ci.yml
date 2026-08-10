@@ -11,6 +11,18 @@ jobs:
     name: Lint PHP and validate composer
     runs-on: ubuntu-latest
 
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: nexusphp
+          MYSQL_USER: nexusphp
+          MYSQL_PASSWORD: nexusphp
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -21,7 +33,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.4'
-          extensions: bcmath, curl, gd, gmp, intl, json, mbstring, mysqli, pdo, redis, sqlite3, xml, zip
+          extensions: bcmath, curl, gd, gmp, intl, json, mbstring, mysqli, pdo, pdo_mysql, redis, sqlite3, xml, zip
           coverage: none
 
       - name: Cache Composer dependencies
@@ -91,6 +103,11 @@ jobs:
           php artisan icons:cache
           php artisan filament:cache-components
 
+      - name: Wait for MySQL and migrate
+        run: |
+          while ! nc -z 127.0.0.1 3306; do sleep 1; done
+          php artisan migrate:fresh --seed --force
+
       - name: Run PHPUnit unit tests
         run: vendor/bin/phpunit --testsuite Unit --no-coverage
 
@@ -106,7 +123,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.4'
-          extensions: bcmath, curl, gd, gmp, intl, json, mbstring, mysqli, pdo, redis, sqlite3, xml, zip
+          extensions: bcmath, curl, gd, gmp, intl, json, mbstring, mysqli, pdo, pdo_mysql, redis, sqlite3, xml, zip
           coverage: none
 
       - name: Prepare environment

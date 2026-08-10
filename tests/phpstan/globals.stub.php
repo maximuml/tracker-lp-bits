@@ -411,9 +411,6 @@ $lang_shoutbox = [];
 /** @var array<string, mixed> $lang_signup */
 $lang_signup = [];
 
-/** @var array<string, mixed> $lang_special */
-$lang_special = [];
-
 /** @var array<string, mixed> $lang_staff */
 $lang_staff = [];
 

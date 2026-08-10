@@ -410,14 +410,6 @@ class UploadRepository extends BaseRepository
                 throw new NexusException(nexus_trans('upload.unauthorized_upload_freely'));
             }
             return true;
-        } elseif ($section->isSectionSpecial()) {
-            if (!Setting::getIsSpecialSectionEnabled()) {
-                throw new NexusException(nexus_trans('upload.special_section_not_enabled'));
-            }
-            if (!Permission::canUploadToSpecialSection()) {
-                throw new NexusException(nexus_trans('upload.unauthorized_upload_freely'));
-            }
-            return true;
         }
         throw new NexusException(nexus_trans('upload.invalid_section'));
     }

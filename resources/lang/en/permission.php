@@ -165,14 +165,6 @@ return [
         'text' => 'Upload Torrent',
         'desc' => 'Upload torrents to Torrents section',
     ],
-    'uploadspecial' => [
-        'text' => 'Upload Special Torrent',
-        'desc' => 'Upload torrents to Special section',
-    ],
-    'view_special_torrent' => [
-        'text' => 'View Special Torrent',
-        'desc' => 'View torrents in Special section',
-    ],
     'movetorrent' => [
         'text' => 'Move Torrent',
         'desc' => 'Move torrents between sections',

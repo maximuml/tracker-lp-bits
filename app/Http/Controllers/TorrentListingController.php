@@ -15,10 +15,7 @@ class TorrentListingController extends Controller
     public function index(Request $request): View|RedirectResponse
     {
         if (SupportContext::getCache() === null) {
-            $path = $request->path();
-            $entry = $path === 'special' ? 'special.php' : 'torrents.php';
-
-            return redirect('/' . $entry . '?' . http_build_query($request->query->all()));
+            return redirect('/torrents.php?' . http_build_query($request->query->all()));
         }
 
         $user = Auth::guard('nexus-web')->user();

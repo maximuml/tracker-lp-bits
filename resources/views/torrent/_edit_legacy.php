@@ -25,21 +25,7 @@ $hitAndRunRep = new \App\Repositories\HitAndRunRepository();
 $tagRep = new \App\Repositories\TagRepository();
 $tagIdArr = \App\Models\TorrentTag::query()->where('torrent_id', $id)->get()->pluck('tag_id')->toArray();
 $searchBoxRep = new \App\Repositories\SearchBoxRepository();
-if ($enablespecial == 'yes' && user_can('movetorrent'))
-	$allowmove = true; //enable moving torrent to other section
-else $allowmove = false;
-
 $sectionmode = $row['cat_mode'];
-if ($sectionmode == $browsecatmode)
-{
-	$othermode = $specialcatmode;
-	$movenote = $lang_edit['text_move_to_special'];
-}
-else
-{
-	$othermode = $browsecatmode;
-	$movenote = $lang_edit['text_move_to_browse'];
-}
 /*
 $showsource = (get_searchbox_value($sectionmode, 'showsource') || ($allowmove && get_searchbox_value($othermode, 'showsource'))); //whether show sources or not
 $showmedium = (get_searchbox_value($sectionmode, 'showmedium') || ($allowmove && get_searchbox_value($othermode, 'showmedium'))); //whether show media or not
@@ -82,7 +68,7 @@ else {
         tr($lang_functions['text_technical_info'], '<textarea name="technical_info" rows="8" style="width: 99%;">' . $row['technical_info'] . '</textarea><br/>' . $lang_functions['text_technical_info_help_text'], 1);
     }
 
-	$s = "<select name=\"type\" id=\"oricat\" data-mode='$sectionmode'>";
+	$s = "<select name=\"type\" data-mode='$sectionmode'>";
 
 	$cats = genrelist($sectionmode);
 	foreach ($cats as $subrow) {
@@ -93,19 +79,7 @@ else {
 	}
 
 	$s .= "</select>\n";
-	if ($allowmove){
-		$s2 = "<select name=\"type\" id=newcat disabled data-mode='$othermode'>\n";
-		$cats2 = genrelist($othermode);
-		foreach ($cats2 as $subrow) {
-			$s2 .= "<option value=\"" . $subrow["id"] . "\"";
-			if ($subrow["id"] == $row["category"])
-			$s2 .= " selected=\"selected\"";
-			$s2 .= ">" . htmlspecialchars($subrow["name"]) . "</option>\n";
-		}
-		$s2 .= "</select>\n";
-		$movecheckbox = "<input type=\"checkbox\" id=movecheck name=\"movecheck\" value=\"1\" onclick=\"disableother2('oricat','newcat')\" />";
-	}
-	tr($lang_edit['row_type']."<font color=\"red\">*</font>", $s.($allowmove ? "&nbsp;&nbsp;".$movecheckbox.$movenote.$s2 : ""), 1);
+	tr($lang_edit['row_type']."<font color=\"red\">*</font>", $s, 1);
 /*
 	if ($showsource || $showmedium || $showcodec || $showaudiocodec || $showstandard || $showprocessing){
 		if ($showsource){
@@ -143,17 +117,11 @@ else {
 
 */
 
-    $editModes = [$sectionmode];
-    if ($allowmove && $othermode) {
-        $editModes[] = $othermode;
-    }
-    foreach ($editModes as $editMode) {
-        $select = $searchBoxRep->renderTaxonomySelect($editMode, $row);
-        tr($lang_edit['row_quality'], $select, 1, "mode_$editMode");
-        echo $customField->renderOnUploadPage($id, $editMode);
-        echo $hitAndRunRep->renderOnUploadPage($row['hr'], $editMode);
-        tr($lang_functions['text_tags'], $tagRep->renderCheckbox($editMode, $tagIdArr), 1, "mode_$editMode");
-    }
+    $select = $searchBoxRep->renderTaxonomySelect($sectionmode, $row);
+    tr($lang_edit['row_quality'], $select, 1, "mode_$sectionmode");
+    echo $customField->renderOnUploadPage($id, $sectionmode);
+    echo $hitAndRunRep->renderOnUploadPage($row['hr'], $sectionmode);
+    tr($lang_functions['text_tags'], $tagRep->renderCheckbox($sectionmode, $tagIdArr), 1, "mode_$sectionmode");
 
 	$rowChecks = [];
 	if (user_can('beanonymous') || user_can('torrentmanage')) {
@@ -273,26 +241,6 @@ EOT;
 }
 \Nexus\Nexus::js('vendor/jquery-loading/jquery.loading.min.js', 'footer', true);
 \Nexus\Nexus::js('js/ptgen.js', 'footer', true);
-$customFieldJs = <<<JS
-jQuery("#movecheck").on("change", function () {
-    let _this = jQuery(this);
-    let checked = _this.prop("checked");
-    let activeSelect
-    if (checked) {
-        activeSelect = jQuery("#newcat");
-    } else {
-        activeSelect = jQuery("#oricat");
-    }
-    let mode = activeSelect.attr("data-mode");
-    console.log(mode)
-    jQuery("tr[relation]").hide();
-    jQuery("tr[relation=mode_" + mode +"]").show();
-})
-jQuery("tr[relation]").hide();
-jQuery("tr[relation=mode_{$sectionmode}]").show();
-
-JS;
-\Nexus\Nexus::js($customFieldJs, 'footer', false);
 stdfoot();
 function getAddedTimeOption($timeStamp, $addSeconds) {
     $timeStamp += $addSeconds;

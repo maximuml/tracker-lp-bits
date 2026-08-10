@@ -24,15 +24,13 @@ final class LegacyRequestMiddleware
     private const EXTRA_LANG_FILES = [
         'search' => ['torrents.php'],
         'shoutbox_history' => ['shoutbox.php'],
-        'special' => ['torrents.php'],
-        'torrents' => ['special.php'],
         'take-increment-bulk' => ['increment-bulk.php'],
         'upload' => ['edit.php'],
     ];
 
     /** @var array<int, string> */
     private const PARKED_SCRIPTS = [
-        'viewsnatches', 'users', 'special', 'forums', 'report', 'cheaterbox', 'upload',
+        'viewsnatches', 'users', 'forums', 'report', 'cheaterbox', 'upload',
         'offers', 'comment', 'userdetails', 'checkuser', 'invite', 'bitbucket-upload',
         'mybonus', 'userhistory', 'moresmilies', 'torrents', 'getattachment',
         'sendmessage', 'reports', 'self-enable', 'friends', 'settings', 'topten', 'attendance',

@@ -361,11 +361,6 @@ class TorrentResource extends Resource
                         return $get('section_id') != SearchBox::getBrowseMode();
                     })
                 ,
-                $searchBoxRep->buildSearchBoxFormSchema(SearchBox::getSpecialSearchBox(), 'section_info')
-                    ->hidden(function (Get $get) {
-                        return $get('section_id') != SearchBox::getSpecialMode();
-                    })
-                ,
 
             ])
             ->action(function (Collection $records, array $data) {

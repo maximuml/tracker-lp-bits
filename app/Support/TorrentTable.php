@@ -56,19 +56,6 @@ final class TorrentTable
 
 
     $last_browse = $user['last_browse'];
-//	if ($variant == "torrent"){
-//		$last_browse = $user['last_browse'];
-//		$sectiontype = $browsecatmode;
-//	}
-//	elseif($variant == "music"){
-//		$last_browse = $user['last_music'];
-//		$sectiontype = $specialcatmode;
-//	}
-//	else{
-//		$last_browse = $user['last_browse'];
-//		$sectiontype = "";
-//	}
-
 	$time_now = TIMENOW;
 	if ($last_browse > $time_now) {
 		$last_browse=$time_now;

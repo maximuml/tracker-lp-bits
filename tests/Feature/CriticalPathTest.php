@@ -41,11 +41,9 @@ class CriticalPathTest extends TestCase
         // without browser interaction. Allow the test user to upload.
         Settings::saveBatch('security', ['iv' => '', 'maxip' => '100', 'use_challenge_response_authentication' => 'no']);
         Settings::saveBatch('basic', ['BASEURL' => 'openresty']);
-        // Allow the seeded normal user to upload and view special torrents.
-        // Seeded categories all share mode 4 with main.specialcat, so every
-        // torrent is treated as special unless this authority is lowered.
-        Settings::saveBatch('authority', ['upload' => '1', 'view_special_torrent' => '1']);
-        Settings::saveBatch('main', ['maxusers' => '100000', 'spsct' => 'yes']);
+        // Allow the seeded normal user to upload torrents.
+        Settings::saveBatch('authority', ['upload' => '1']);
+        Settings::saveBatch('main', ['maxusers' => '100000']);
         Settings::saveBatch('smtp', ['smtptype' => 'none']);
 
         // The upload handler saves .torrent files to the configured directory.

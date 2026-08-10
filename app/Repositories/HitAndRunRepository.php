@@ -153,16 +153,6 @@ class HitAndRunRepository extends BaseRepository
             $this->doCronjobUpdateStatus($setting, $uid, $torrentId, $ignoreTime);
             $this->checkAndDisableUser($setting);
         }
-        $specialMode = Setting::get('main.specialcat');
-        if ($diffInSection && $browseMode != $specialMode) {
-            $setting = HitAndRun::getConfig('*', $specialMode);
-            if (HitAndRunMode::fromStringSafe($setting['mode'] ?? null)->isEnabled()) {
-                $setting['diff_in_section'] = $diffInSection;
-                $setting['search_box_id'] = $specialMode;
-                $this->doCronjobUpdateStatus($setting, $uid, $torrentId, $ignoreTime);
-                $this->checkAndDisableUser($setting);
-            }
-        }
     }
 
     /**

@@ -159,49 +159,6 @@ else {
 }
 }
 
-// disableother.js
-
-function disableother(select,target)
-{
-	var sel = document.getElementById(select);
-	var tgt = document.getElementById(target);
-	if (!sel || !tgt) return;
-
-	var selSection = document.getElementById(select + '_section');
-	var tgtSection = document.getElementById(target + '_section');
-
-	if (sel.value == 0) {
-		tgt.disabled = false;
-		setSectionDisabled(selSection, false);
-		setSectionDisabled(tgtSection, false);
-	} else {
-		tgt.disabled = true;
-		setSectionDisabled(selSection, false);
-		setSectionDisabled(tgtSection, true);
-	}
-}
-
-function setSectionDisabled(section, disabled)
-{
-	if (!section) return;
-	var controls = section.querySelectorAll('input, select, textarea');
-	for (var i = 0; i < controls.length; i++) {
-		controls[i].disabled = disabled;
-	}
-}
-
-function disableother2(oricat,newcat)
-{
-	if (document.getElementById("movecheck").checked == true){
-		document.getElementById(oricat).disabled = true;
-		document.getElementById(newcat).disabled = false;
-	}
-	else {
-		document.getElementById(oricat).disabled = false;
-		document.getElementById(newcat).disabled = true;
-	}
-}
-
 // ctrlenter.js
 var submitted = false;
 function ctrlenter(event,formname,submitname){

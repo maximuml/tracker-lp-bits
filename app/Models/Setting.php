@@ -220,11 +220,6 @@ class Setting extends NexusModel
         return self::get("main.sptime") == "yes";
     }
 
-    public static function getIsSpecialSectionEnabled(): bool
-    {
-        return self::get('main.spsct') == 'yes';
-    }
-
     public static function getIsComplainEnabled(): bool
     {
         return self::get('main.complain_enabled') == 'yes';

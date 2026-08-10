@@ -13,7 +13,6 @@ return array (
   'require_name' => 'The title cannot be empty',
   'price_too_much' => 'Price exceeds the allowable range',
   'approval_deny_reach_upper_limit' => 'The number of torrent rejected for the current review: %s reaches the upper limit and publishing is not allowed.',
-  'special_section_not_enabled' => 'Special zone is not enabled.',
   'paid_torrent_not_enabled' => 'The paid torrent is not enabled.',
   'no_permission_to_set_torrent_hr' => 'No permission to set torrent H&R.',
   'no_permission_to_set_torrent_pos_state' => 'There is no permission to set torrent top.',

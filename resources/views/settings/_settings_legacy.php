@@ -39,7 +39,7 @@ if ($action == 'savesettings_main')	// save main
 		'icplicense', 'autoclean_interval_one', 'autoclean_interval_two', 'autoclean_interval_three','autoclean_interval_four', 'autoclean_interval_five',
 		'reportemail','invitesystem','registration','enablenfo',
 		'showpolls','showstats','showlastxtorrents', 'showtrackerload','showshoutbox','showoffer','sptime','enablebitbucket',
-		'smalldescription','altname','defaultlang','defstylesheet', 'donation','spsct','browsecat','specialcat','waitsystem',
+		'smalldescription','altname','defaultlang','defstylesheet', 'donation','browsecat','waitsystem',
 		'maxdlsystem','bitbucket','torrentnameprefix', 'showforumstats','verification','invite_count','invite_timeout', 'seeding_leeching_time_calc_start',
 		'startsubid', 'logo', 'showlastxforumposts', 'enable_technical_info', 'site_language_enabled', 'show_top_uploader', 'offer_skip_approved_count',
         'upload_deny_approval_deny_count', 'enable_global_search', 'tmp_invite_count', 'complain_enabled'
@@ -214,8 +214,7 @@ elseif ($action == 'savesettings_authority') 	// save user authority
 	    'defaultclass','staffmem','newsmanage','sbmanage','pollmanage','postmanage',
         'commanage','forummanage','viewuserlist','torrentmanage','torrentsticky', 'torrentonpromotion', 'torrent_hr', 'askreseed', 'viewnfo',
         'torrentstructure','sendinvite','viewhistory','topten','log','confilog','userprofile', 'torrenthistory','prfmanage', 'cruprfmanage',
-        'uploadsub','delownsub','submanage','updateextinfo', 'viewanonymous','beanonymous','addoffer','offermanage', 'upload','uploadspecial',
-        'view_special_torrent','movetorrent','chrmanage','viewinvite', 'buyinvite','seebanned','againstoffer','userbar', 'torrent-approval',
+        'uploadsub','delownsub','submanage','updateextinfo', 'viewanonymous','beanonymous','addoffer','offermanage', 'upload','movetorrent','chrmanage','viewinvite', 'buyinvite','seebanned','againstoffer','userbar', 'torrent-approval',
         'torrent-delete', 'user-delete', 'user-change-class', 'torrent-set-special-tag', 'torrent-approval-allow-automatic', 'torrent-set-price'
     );
 	$AUTHORITY = [];
@@ -450,8 +449,7 @@ elseif ($action == 'authoritysettings')	//Authority settings
 	tr($lang_settings['row_add_offer'], $lang_settings['text_minimum_class'].classlist('addoffer',$maxclass,$AUTHORITY['addoffer'],0,true).$lang_settings['text_default'].get_user_class_name(UC_PEASANT,false,true,true).$lang_settings['text_add_offer_note'], 1);
 	tr($lang_settings['row_offer_management'], $lang_settings['text_minimum_class'].classlist('offermanage',$maxclass,$AUTHORITY['offermanage'],0,true).$lang_settings['text_default'].get_user_class_name(UC_MODERATOR,false,true,true).$lang_settings['text_offer_management_note'],1);
 	tr($lang_settings['row_upload_torrent'], $lang_settings['text_minimum_class'].classlist('upload',$maxclass,$AUTHORITY['upload'],0,true).$lang_settings['text_default'].get_user_class_name(UC_POWER_USER,false,true,true).$lang_settings['text_upload_torrent_note'], 1);
-	tr($lang_settings['row_upload_special_torrent'], $lang_settings['text_minimum_class'].classlist('uploadspecial',$maxclass,$AUTHORITY['uploadspecial'],0,true).$lang_settings['text_default'].get_user_class_name(UC_UPLOADER,false,true,true).$lang_settings['text_upload_special_torrent_note'],1);
-	tr($lang_settings['row_view_special_torrent'], $lang_settings['text_minimum_class'].classlist('view_special_torrent',$maxclass,$AUTHORITY['view_special_torrent'],0,true).$lang_settings['text_default'].get_user_class_name(UC_CRAZY_USER,false,true,true).$lang_settings['text_view_special_torrent_note'],1);
+
 	tr($lang_settings['row_move_torrent'], $lang_settings['text_minimum_class'].classlist('movetorrent',$maxclass,$AUTHORITY['movetorrent'],0,true).$lang_settings['text_default'].get_user_class_name(UC_MODERATOR,false,true,true).$lang_settings['text_move_torrent_note'],1);
 	tr($lang_settings['row_chronicle_management'], $lang_settings['text_minimum_class'].classlist('chrmanage',$maxclass,$AUTHORITY['chrmanage'],0,true).$lang_settings['text_default'].get_user_class_name(UC_MODERATOR,false,true,true).$lang_settings['text_chronicle_management_note'],1);
 	tr($lang_settings['row_view_invite'], $lang_settings['text_minimum_class'].classlist('viewinvite',$maxclass,$AUTHORITY['viewinvite'],0,true).$lang_settings['text_default'].get_user_class_name(UC_MODERATOR,false,true,true).$lang_settings['text_view_invite_note'],1);
@@ -763,17 +761,13 @@ elseif ($action == 'mainsettings')	// main settings
 	yesorno($lang_settings['row_weekend_free_uploading'],'sptime', $MAIN['sptime'], $lang_settings['text_weekend_free_uploading_note']);
 	yesorno($lang_settings['row_enable_bitbucket'],'enablebitbucket', $MAIN['enablebitbucket'], $lang_settings['text_bitbucket_note']);
 	yesorno($lang_settings['row_ptshow_naming_style'],'altname', $MAIN['altname'], $lang_settings['text_ptshow_naming_style_note']);
-    yesorno($lang_settings['row_show_special_section'],'spsct', $MAIN['spsct'], $lang_settings['text_show_special_section_note']);
 	$searchboxes = \Nexus\Database\NexusDB::table('searchbox')->get(['id', 'name']);
-	$catlist = "";
-	$bcatlist = $scatlist = '';
+	$bcatlist = '';
 	foreach ($searchboxes as $searchbox) {
 	    $array = (array) $searchbox;
 		$bcatlist .= "<input type=radio name=browsecat value='".$array['id']."'".($MAIN["browsecat"] == $array['id'] ? " checked" : "").">".$array['name']."&nbsp;";
-		$scatlist .= "<input type=radio name=specialcat value='".$array['id']."'".($MAIN["specialcat"] == $array['id'] ? " checked" : "").">".$array['name']."&nbsp;";
 	}
 	tr($lang_settings['row_torrents_category_mode'], $bcatlist."<br />".$lang_settings['text_torrents_category_mode_note'], 1);
-	tr($lang_settings['row_special_category_mode'], $scatlist."<br />".$lang_settings['text_special_category_mode_note'], 1);
 
     $allSiteLanguages = \App\Models\Language::query()->where('site_lang', 1)->get();
     $allEnabled = \App\Models\Language::listEnabled(true);

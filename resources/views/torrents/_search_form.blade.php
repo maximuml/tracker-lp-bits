@@ -2,7 +2,6 @@
 
 $__server_QUERY_STRING = \App\Support\SupportContext::getServerValue('QUERY_STRING');
 $searchBoxRightTdStyle = 'padding: 1px;padding-left: 10px;white-space: nowrap';
-if ($allsec != 1 || $enablespecial != 'yes'){ //do not print searchbox if showing bookmarked torrents from all sections;
 ?>
 <form method="get" name="searchbox" action="?">
 	<table border="1" class="searchbox" cellspacing="0" cellpadding="5" width="100%">
@@ -252,5 +251,4 @@ if ($allTags->isNotEmpty()) {
 	</table>
 	</form>
 <?php
-}
 ?>

@@ -44,7 +44,6 @@ class PageLayoutContextTest extends TestCase
             scriptFileName: '/var/www/public/index.php',
             script: 'index',
             enableOffer: 'no',
-            enableSpecial: 'no',
             customMenu: null,
             maxdlSystem: '',
             whereTweak: 'yes',

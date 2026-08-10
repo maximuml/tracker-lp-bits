@@ -236,7 +236,7 @@ class PageLayout
 <?php 
         } else {
             begin_main_frame();
-            $menuResult = Menu::render($context->script, $context->lang, $context->enableOffer, $context->enableSpecial, $context->customMenu, $context->user, $context->cache, $context->langDir);
+            $menuResult = Menu::render($context->script, $context->lang, $context->enableOffer, $context->customMenu, $context->user, $context->cache, $context->langDir);
             print $menuResult['html'];
             if ($context->whereTweak === 'yes') {
                 $context->userUpdateSet['page'] = $menuResult['selected'];
@@ -400,7 +400,7 @@ class PageLayout
             </span>
         </td>
                 <?php 
-            if (SearchBox::isSpecialEnabled() && Settings::get('main.enable_global_search') == 'yes') {
+            if (Settings::get('main.enable_global_search') == 'yes') {
                 ?>
         <td class="bottom" align="left" style="border: none">
             <form action="search.php" method="get" target="<?php 

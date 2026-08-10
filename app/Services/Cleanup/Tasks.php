@@ -1,0 +1,1138 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Services\Cleanup;
+
+use App\Enums\ModelEventEnum;
+use App\Models\Torrent;
+use App\Models\User;
+use App\Support\Events;
+use App\Support\Locale;
+use App\Support\Log;
+use App\Support\Time;
+use App\Support\TorrentOps;
+use App\Support\UserOps;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
+use Nexus\Database\NexusDB;
+
+/**
+ * Idempotent cleanup task implementations drained from the legacy `docleanup()`.
+ *
+ * Each public method performs one self-contained cleanup operation and returns
+ * a short log message. Callers are responsible for locking and scheduling.
+ */
+final class Tasks
+{
+    /**
+     * Priority Class 1: remove peers whose last_action is older than the dead
+     * threshold.
+     */
+    public function prunePeers(): string
+    {
+        $deadtime = date('Y-m-d H:i:s', Time::deadThreshold(
+            (int) get_setting('main.anninterthree', 3600),
+            time()
+        ));
+
+        NexusDB::table('peers')->where('last_action', '<', $deadtime)->delete();
+
+        return 'update peer status';
+    }
+
+    /**
+     * Priority Class 1: reset per-hour seed bonus counters for users whose seeding
+     * snapshot is older than two autoclean intervals.
+     */
+    public function resetSeedBonusCounters(): string
+    {
+        $interval = (int) get_setting('main.autoclean_interval_one', 900);
+        $cutoff = Carbon::now()->subSeconds(2 * $interval)->toDateTimeString();
+
+        NexusDB::table('users')
+            ->where('seed_points_updated_at', '<', $cutoff)
+            ->update([
+                'seed_points_per_hour' => 0,
+                'seed_bonus_per_hour' => 0,
+                'seeding_torrent_count' => 0,
+                'seeding_torrent_size' => 0,
+            ]);
+
+        return 'reset seed bonus counters';
+    }
+
+    /**
+     * Priority Class 2: mark torrents with no seeders and stale last_action as
+     * invisible.
+     */
+    public function updateTorrentVisibility(): string
+    {
+        $maxDeadTime = (int) get_setting('main.max_dead_torrent_time', 21600);
+        $deadtime = Time::deadThreshold((int) get_setting('main.anninterthree', 3600), time()) - $maxDeadTime;
+        $lastActionDeadTime = date('Y-m-d H:i:s', $deadtime);
+
+        NexusDB::table('torrents')
+            ->where('visible', 'yes')
+            ->where('last_action', '<', $lastActionDeadTime)
+            ->where('seeders', 0)
+            ->update(['visible' => 'no']);
+
+        return "update torrents' visibility";
+    }
+
+    /**
+     * Priority Class 3: recompute post/topic counts for every forum.
+     */
+    public function updateForumCounts(): string
+    {
+        $forumIds = NexusDB::table('forums')->pluck('id');
+
+        foreach ($forumIds as $forumId) {
+            $postcount = 0;
+            $topiccount = 0;
+            $topicIds = NexusDB::table('topics')->where('forumid', $forumId)->pluck('id');
+
+            foreach ($topicIds as $topicId) {
+                $postcount += (int) NexusDB::table('posts')->where('topicid', $topicId)->count();
+                ++$topiccount;
+            }
+
+            NexusDB::table('forums')
+                ->where('id', $forumId)
+                ->update(['postcount' => $postcount, 'topiccount' => $topiccount]);
+        }
+
+        $cache = \App\Support\SupportContext::getCache();
+        $cache->delete_value('forums_list');
+
+        return 'update forum post/topic count';
+    }
+
+    /**
+     * Priority Class 3: delete offers that were never voted on and offers that
+     * were approved but never uploaded.
+     */
+    public function pruneOffers(): string
+    {
+        $offerVoteTimeout = (int) get_setting('main.offervotetimeout', 259200);
+        if ($offerVoteTimeout > 0) {
+            $dt = date('Y-m-d H:i:s', time() - $offerVoteTimeout);
+            $offerIds = NexusDB::table('offers')
+                ->where('added', '<', $dt)
+                ->where('allowed', '<>', 'allowed')
+                ->pluck('id', 'name')
+                ->all();
+
+            $this->deleteOffers($offerIds, 'vote timeout');
+        }
+
+        $offerUploadTimeout = (int) get_setting('main.offeruptimeout', 86400);
+        if ($offerUploadTimeout > 0) {
+            $dt = date('Y-m-d H:i:s', time() - $offerUploadTimeout);
+            $offerIds = NexusDB::table('offers')
+                ->where('allowedtime', '<', $dt)
+                ->where('allowed', 'allowed')
+                ->pluck('id', 'name')
+                ->all();
+
+            $this->deleteOffers($offerIds, 'upload timeout');
+        }
+
+        return 'delete offers if not voted on / uploaded after some time';
+    }
+
+    /**
+     * Priority Class 3: expire time-based global torrent promotions.
+     */
+    public function expireTorrentPromotions(): string
+    {
+        $this->expirePromotionType(
+            (int) get_setting('torrent.expirehalfleech', 0),
+            Torrent::PROMOTION_HALF_DOWN,
+            (int) get_setting('torrent.halfleechbecome', Torrent::PROMOTION_NORMAL),
+        );
+
+        $this->expirePromotionType(
+            (int) get_setting('torrent.expirefree', 0),
+            Torrent::PROMOTION_FREE,
+            (int) get_setting('torrent.freebecome', Torrent::PROMOTION_NORMAL),
+        );
+
+        $this->expirePromotionType(
+            (int) get_setting('torrent.expiretwoup', 0),
+            Torrent::PROMOTION_TWO_TIMES_UP,
+            (int) get_setting('torrent.twoupbecome', Torrent::PROMOTION_NORMAL),
+        );
+
+        $this->expirePromotionType(
+            (int) get_setting('torrent.expiretwoupfree', 0),
+            Torrent::PROMOTION_FREE_TWO_TIMES_UP,
+            (int) get_setting('torrent.twoupfreebecome', Torrent::PROMOTION_NORMAL),
+        );
+
+        $this->expirePromotionType(
+            (int) get_setting('torrent.expiretwouphalfleech', 0),
+            Torrent::PROMOTION_HALF_DOWN_TWO_TIMES_UP,
+            (int) get_setting('torrent.twouphalfleechbecome', Torrent::PROMOTION_NORMAL),
+        );
+
+        $this->expirePromotionType(
+            (int) get_setting('torrent.expirethirtypercentleech', 0),
+            Torrent::PROMOTION_ONE_THIRD_DOWN,
+            (int) get_setting('torrent.thirtypercentleechbecome', Torrent::PROMOTION_NORMAL),
+        );
+
+        $this->expirePromotionType(
+            (int) get_setting('torrent.expirenormal', 0),
+            Torrent::PROMOTION_NORMAL,
+            (int) get_setting('torrent.normalbecome', Torrent::PROMOTION_NORMAL),
+        );
+
+        $this->expireIndividualPromotions();
+
+        return 'expire torrent promotion';
+    }
+
+    /**
+     * Priority Class 3: expire sticky position states.
+     */
+    public function expireTorrentSticky(): string
+    {
+        $toBeExpirePosStates = [Torrent::POS_STATE_STICKY_FIRST, Torrent::POS_STATE_STICKY_SECOND];
+
+        Torrent::query()
+            ->whereIn('pos_state', $toBeExpirePosStates)
+            ->whereNotNull('pos_state_until')
+            ->where('pos_state_until', '<', now())
+            ->update([
+                'pos_state' => Torrent::POS_STATE_STICKY_NONE,
+                'pos_state_until' => null,
+            ]);
+
+        return 'expire torrent pos state';
+    }
+
+    /**
+     * Priority Class 4: delete unconfirmed accounts, old login attempts, invite
+     * codes and regimage records.
+     */
+    public function cleanupStaleAuth(): string
+    {
+        $this->deleteUnconfirmedAccounts();
+        $this->deleteOldLoginAttempts();
+        $this->deleteOldInviteCodes();
+        $this->deleteRegimages();
+
+        return 'cleanup stale auth records';
+    }
+
+    /**
+     * Priority Class 4: disable or destroy inactive user accounts.
+     */
+    public function disableInactiveUsers(): string
+    {
+        $this->disableNoTransferByLastAccess();
+        $this->disableNoTransferByRegisterTime();
+        $this->disableNotParked();
+        $this->disableParked();
+        $this->destroyDisabledAccounts();
+
+        return 'disable/destroy inactive user accounts';
+    }
+
+    /**
+     * Priority Class 4: promote/demote users and ban leech-warning expiries.
+     */
+    public function manageUserClasses(): string
+    {
+        $this->promotePeasantsToUsers();
+        $this->promoteUsersByClass();
+        $this->demoteUsersByClass();
+        $this->demoteUsersToPeasant();
+        $this->banLeechWarningExpired();
+
+        return 'manage user classes';
+    }
+
+    /**
+     * Priority Class 4: delete dead torrents, old IP logs, and stale failed jobs.
+     */
+    public function cleanupDeadTorrentsAndIpLogs(): string
+    {
+        $this->deleteDeadTorrents();
+        $this->deleteOldIpLogs();
+        $this->deleteFailedJobs();
+
+        return 'delete dead torrents, old IP logs and failed jobs';
+    }
+
+    // ------------------------------------------------------------------------
+    // Offer helpers
+    // ------------------------------------------------------------------------
+
+    private function deleteOffers(array $offerIds, string $reason): void
+    {
+        if ($offerIds === []) {
+            return;
+        }
+
+        $ids = array_keys($offerIds);
+
+        NexusDB::table('offervotes')->whereIn('offerid', $ids)->delete();
+        NexusDB::table('comments')->whereIn('offer', $ids)->delete();
+        NexusDB::table('offers')->whereIn('id', $ids)->delete();
+
+        foreach ($offerIds as $name => $id) {
+            Log::write("Offer {$id} ({$name}) was deleted by system ({$reason})", 'normal');
+        }
+    }
+
+    // ------------------------------------------------------------------------
+    // Torrent promotion helpers
+    // ------------------------------------------------------------------------
+
+    private function expirePromotionType(int $days, int $fromState, int $toState): void
+    {
+        if ($days <= 0) {
+            return;
+        }
+
+        $secs = $days * 86400;
+        $dt = date('Y-m-d H:i:s', time() - $secs);
+
+        $validStates = [
+            Torrent::PROMOTION_NORMAL,
+            Torrent::PROMOTION_FREE,
+            Torrent::PROMOTION_TWO_TIMES_UP,
+            Torrent::PROMOTION_FREE_TWO_TIMES_UP,
+            Torrent::PROMOTION_HALF_DOWN,
+            Torrent::PROMOTION_HALF_DOWN_TWO_TIMES_UP,
+        ];
+        $targetState = in_array($toState, $validStates, true) ? $toState : Torrent::PROMOTION_NORMAL;
+
+        $becomeMap = [
+            Torrent::PROMOTION_NORMAL => 'normal',
+            Torrent::PROMOTION_FREE => 'Free',
+            Torrent::PROMOTION_TWO_TIMES_UP => '2X',
+            Torrent::PROMOTION_FREE_TWO_TIMES_UP => '2X Free',
+            Torrent::PROMOTION_HALF_DOWN => '50%',
+            Torrent::PROMOTION_HALF_DOWN_TWO_TIMES_UP => '2X 50%',
+        ];
+        $become = $becomeMap[$targetState] ?? 'normal';
+
+        $torrents = NexusDB::table('torrents')
+            ->where('added', '<', $dt)
+            ->where('sp_state', $fromState)
+            ->where('promotion_time_type', Torrent::PROMOTION_TIME_TYPE_GLOBAL)
+            ->get(['id', 'name']);
+
+        foreach ($torrents as $torrent) {
+            $arr = (array) $torrent;
+
+            NexusDB::table('torrents')
+                ->where('id', $arr['id'])
+                ->update(['sp_state' => $targetState]);
+
+            Events::publishModel(ModelEventEnum::TORRENT_UPDATED, (int) $arr['id']);
+
+            if ($targetState === Torrent::PROMOTION_NORMAL) {
+                Log::write("Torrent {$arr['id']} ({$arr['name']}) is no longer on promotion (time expired)", 'normal');
+            } else {
+                Log::write("Promotion type for torrent {$arr['id']} ({$arr['name']}) is changed to {$become} (time expired)", 'normal');
+            }
+        }
+    }
+
+    private function expireIndividualPromotions(): void
+    {
+        $torrents = Torrent::query()
+            ->where('promotion_time_type', Torrent::PROMOTION_TIME_TYPE_DEADLINE)
+            ->where('promotion_until', '<', now())
+            ->get(['id']);
+
+        foreach ($torrents as $torrent) {
+            Torrent::query()->where('id', $torrent->id)->update([
+                'sp_state' => Torrent::PROMOTION_NORMAL,
+                'promotion_time_type' => Torrent::PROMOTION_TIME_TYPE_GLOBAL,
+                'promotion_until' => null,
+            ]);
+
+            Events::publishModel(ModelEventEnum::TORRENT_UPDATED, $torrent->id);
+        }
+    }
+
+    // ------------------------------------------------------------------------
+    // Stale auth helpers
+    // ------------------------------------------------------------------------
+
+    private function deleteUnconfirmedAccounts(): void
+    {
+        $signupTimeout = (int) get_setting('main.signup_timeout', 259200);
+        $deadtime = time() - $signupTimeout;
+
+        User::query()
+            ->where('status', User::STATUS_PENDING)
+            ->whereRaw('added < FROM_UNIXTIME(?)', [$deadtime])
+            ->whereRaw('last_login < FROM_UNIXTIME(?)', [$deadtime])
+            ->whereRaw('last_access < FROM_UNIXTIME(?)', [$deadtime])
+            ->delete();
+    }
+
+    private function deleteOldLoginAttempts(): void
+    {
+        $secs = 12 * 60 * 60;
+        $dt = date('Y-m-d H:i:s', time() - $secs);
+
+        NexusDB::table('loginattempts')
+            ->where('banned', 'no')
+            ->where('added', '<', $dt)
+            ->delete();
+    }
+
+    private function deleteOldInviteCodes(): void
+    {
+        $inviteTimeout = (int) get_setting('main.invite_timeout', 7);
+        $secs = $inviteTimeout * 24 * 60 * 60;
+        $dt = date('Y-m-d H:i:s', time() - $secs);
+        $nowStr = Carbon::now()->toDateTimeString();
+
+        NexusDB::table('invites')
+            ->where(function ($query) use ($dt): void {
+                $query->where('time_invited', '<', $dt)
+                    ->whereNotNull('time_invited')
+                    ->where('invitee', '!=', '');
+            })
+            ->orWhere(function ($query) use ($nowStr): void {
+                $query->where('invitee', '')
+                    ->whereNotNull('expired_at')
+                    ->where('expired_at', '<', $nowStr);
+            })
+            ->delete();
+    }
+
+    private function deleteRegimages(): void
+    {
+        NexusDB::table('regimages')->delete();
+    }
+
+    // ------------------------------------------------------------------------
+    // Inactive user helpers
+    // ------------------------------------------------------------------------
+
+    private function disableNoTransferByLastAccess(): void
+    {
+        $days = (int) get_setting('account.deletenotransfer', 0);
+        if ($days <= 0) {
+            return;
+        }
+
+        $secs = $days * 86400;
+        $dt = date('Y-m-d H:i:s', time() - $secs);
+        $maxclass = $this->neverDeleteClass();
+        $iniupload = get_setting('main.iniupload', 0);
+
+        $query = User::query()
+            ->where('parked', 'no')
+            ->where('status', User::STATUS_CONFIRMED)
+            ->where('class', '<', $maxclass)
+            ->where('last_access', '<', $dt)
+            ->where('downloaded', 0)
+            ->where(function (Builder $q) use ($iniupload): void {
+                $q->where('uploaded', 0)->orWhere('uploaded', $iniupload);
+            });
+
+        $this->disableUsers($query, 'cleanup.disable_user_no_transfer_alt_last_access_time');
+    }
+
+    private function disableNoTransferByRegisterTime(): void
+    {
+        $days = (int) get_setting('account.deletenotransfertwo', 0);
+        if ($days <= 0) {
+            return;
+        }
+
+        $secs = $days * 86400;
+        $dt = date('Y-m-d H:i:s', time() - $secs);
+        $maxclass = $this->neverDeleteClass();
+        $iniupload = get_setting('main.iniupload', 0);
+
+        $query = User::query()
+            ->where('parked', 'no')
+            ->where('status', User::STATUS_CONFIRMED)
+            ->where('class', '<', $maxclass)
+            ->where('added', '<', $dt)
+            ->where('downloaded', 0)
+            ->where(function (Builder $q) use ($iniupload): void {
+                $q->where('uploaded', 0)->orWhere('uploaded', $iniupload);
+            });
+
+        $this->disableUsers($query, 'cleanup.disable_user_no_transfer_alt_register_time');
+    }
+
+    private function disableNotParked(): void
+    {
+        $days = (int) get_setting('account.deleteunpacked', 0);
+        if ($days <= 0) {
+            return;
+        }
+
+        $secs = $days * 86400;
+        $dt = date('Y-m-d H:i:s', time() - $secs);
+        $maxclass = $this->neverDeleteClass();
+
+        $query = User::query()
+            ->where('parked', 'no')
+            ->where('status', User::STATUS_CONFIRMED)
+            ->where('class', '<', $maxclass)
+            ->where('last_access', '<', $dt);
+
+        $this->disableUsers($query, 'cleanup.disable_user_not_parked');
+    }
+
+    private function disableParked(): void
+    {
+        $days = (int) get_setting('account.deletepacked', 0);
+        if ($days <= 0) {
+            return;
+        }
+
+        $secs = $days * 86400;
+        $dt = date('Y-m-d H:i:s', time() - $secs);
+        $maxclass = $this->neverDeleteParkedClass();
+
+        $query = User::query()
+            ->where('parked', 'yes')
+            ->where('status', User::STATUS_CONFIRMED)
+            ->where('class', '<', $maxclass)
+            ->where('last_access', '<', $dt);
+
+        $this->disableUsers($query, 'cleanup.disable_user_parked');
+    }
+
+    private function destroyDisabledAccounts(): void
+    {
+        $destroyDisabledDays = (int) get_setting('account.destroy_disabled', 0);
+        if ($destroyDisabledDays <= 0) {
+            return;
+        }
+
+        $secs = $destroyDisabledDays * 86400;
+        $dt = date('Y-m-d H:i:s', time() - $secs);
+
+        $userRep = new \App\Repositories\UserRepository();
+
+        User::query()
+            ->where('enabled', User::ENABLED_NO)
+            ->where('last_access', '<', $dt)
+            ->select(['id', 'username', 'lang'])
+            ->orderBy('id', 'asc')
+            ->chunk(2000, function (\Illuminate\Support\Collection $users) use ($userRep): void {
+                $userRep->destroy($users, 'cleanup.destroy_disabled_account');
+            });
+    }
+
+    private function neverDeleteClass(): int
+    {
+        return min((int) get_setting('account.neverdelete', User::CLASS_VIP), (int) User::CLASS_VIP);
+    }
+
+    private function neverDeleteParkedClass(): int
+    {
+        return (int) get_setting('account.neverdeletepacked', User::CLASS_VIP);
+    }
+
+    /**
+     * @param Builder<User> $query
+     */
+    private function disableUsers(Builder $query, string $reasonKey): void
+    {
+        $results = $query->where('enabled', User::ENABLED_YES)->get(['id', 'username', 'lang']);
+        if ($results->isEmpty()) {
+            return;
+        }
+
+        $results->load('language');
+
+        $uidArr = [];
+        $userBanLogData = [];
+        $userModifyLogs = [];
+
+        foreach ($results as $user) {
+            $uid = $user->id;
+            $enableCacheResult = NexusDB::cache_get(User::getUserEnableLatelyCacheKey($uid));
+            if ($enableCacheResult) {
+                do_log(sprintf("user: %s just enable at: %s, skip", $uid, $enableCacheResult));
+                continue;
+            }
+
+            $uidArr[] = $uid;
+            $reason = Locale::trans($reasonKey, [], $user->locale);
+
+            $userBanLogData[] = [
+                'uid' => $uid,
+                'username' => $user->username,
+                'reason' => $reason,
+            ];
+
+            $userModifyLogs[] = [
+                'user_id' => $uid,
+                'content' => sprintf('[CLEANUP] %s', $reason),
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s'),
+            ];
+        }
+
+        if ($uidArr === []) {
+            return;
+        }
+
+        User::query()->whereIn('id', $uidArr)->update(['enabled' => User::ENABLED_NO]);
+        \App\Models\UserBanLog::query()->insert($userBanLogData);
+        \App\Models\UserModifyLog::query()->insert($userModifyLogs);
+
+        do_log("[DISABLE_USER]({$reasonKey}): " . implode(', ', $uidArr));
+
+        foreach ($uidArr as $uid) {
+            Events::publishModel(ModelEventEnum::USER_DISABLED, $uid);
+        }
+    }
+
+    // ------------------------------------------------------------------------
+    // User class helpers
+    // ------------------------------------------------------------------------
+
+    private function promotePeasantsToUsers(): void
+    {
+        $this->peasantToUser(
+            (int) get_setting('account.psdlfive', 0),
+            0,
+            (float) get_setting('account.psratiofive', 0),
+        );
+
+        $this->peasantToUser(
+            (int) get_setting('account.psdlfour', 0),
+            (int) get_setting('account.psdlfive', 0),
+            (float) get_setting('account.psratiofour', 0),
+        );
+
+        $this->peasantToUser(
+            (int) get_setting('account.psdlthree', 0),
+            (int) get_setting('account.psdlfour', 0),
+            (float) get_setting('account.psratiothree', 0),
+        );
+
+        $this->peasantToUser(
+            (int) get_setting('account.psdltwo', 0),
+            (int) get_setting('account.psdlthree', 0),
+            (float) get_setting('account.psratiotwo', 0),
+        );
+
+        $this->peasantToUser(
+            (int) get_setting('account.psdlone', 0),
+            (int) get_setting('account.psdltwo', 0),
+            (float) get_setting('account.psratioone', 0),
+        );
+    }
+
+    private function peasantToUser(int $downFloorGb, int $downRoofGb, float $minRatio): void
+    {
+        if ($downFloorGb <= 0) {
+            return;
+        }
+
+        $downlimitFloor = $downFloorGb * 1024 * 1024 * 1024;
+        $downlimitRoof = $downRoofGb * 1024 * 1024 * 1024;
+
+        $query = User::query()
+            ->where('class', User::CLASS_PEASANT)
+            ->where('downloaded', '>=', $downlimitFloor);
+
+        if ($downlimitRoof > $downFloorGb) {
+            $query->where('downloaded', '<', $downlimitRoof);
+        }
+
+        $res = $query->whereRaw('uploaded / downloaded >= ?', [$minRatio])->get(['id']);
+
+        if ($res->isEmpty()) {
+            return;
+        }
+
+        $dt = date('Y-m-d H:i:s');
+
+        foreach ($res as $arr) {
+            $uid = $arr->id;
+            $locale = Locale::userLocale($uid);
+
+            UserOps::logModify($uid, 'Leech Warning removed by System.');
+
+            User::query()->where('id', $uid)->update([
+                'class' => User::CLASS_USER,
+                'leechwarn' => 'no',
+                'leechwarnuntil' => null,
+            ]);
+
+            NexusDB::table('messages')->insert([
+                'sender' => 0,
+                'receiver' => $uid,
+                'added' => $dt,
+                'subject' => Locale::trans('cleanup.msg_low_ratio_warning_removed', [], $locale),
+                'msg' => Locale::trans('cleanup.msg_your_ratio_warning_removed', [], $locale),
+            ]);
+
+            Events::publishModel(ModelEventEnum::USER_UPDATED, $uid);
+        }
+    }
+
+    private function promoteUsersByClass(): void
+    {
+        $getInvitesByPromotion = get_setting('account.getInvitesByPromotion', []);
+
+        $promotions = [
+            [User::CLASS_POWER_USER, 'account.pudl', 'account.puprratio', 'account.putime'],
+            [User::CLASS_ELITE_USER, 'account.eudl', 'account.euprratio', 'account.eutime'],
+            [User::CLASS_CRAZY_USER, 'account.cudl', 'account.cuprratio', 'account.cutime'],
+            [User::CLASS_INSANE_USER, 'account.iudl', 'account.iuprratio', 'account.iutime'],
+            [User::CLASS_VETERAN_USER, 'account.vudl', 'account.vuprratio', 'account.vutime'],
+            [User::CLASS_EXTREME_USER, 'account.exudl', 'account.exuprratio', 'account.exutime'],
+            [User::CLASS_ULTIMATE_USER, 'account.uudl', 'account.uuprratio', 'account.uutime'],
+            [User::CLASS_NEXUS_MASTER, 'account.nmdl', 'account.nmprratio', 'account.nmtime'],
+        ];
+
+        foreach ($promotions as [$class, $dlKey, $ratioKey, $timeKey]) {
+            $this->promoteUsers(
+                $class,
+                (int) get_setting($dlKey, 0),
+                (float) get_setting($ratioKey, 0),
+                (int) get_setting($timeKey, 0),
+                (int) ($getInvitesByPromotion[(int) $class] ?? 0),
+            );
+        }
+    }
+
+    private function promoteUsers(string $class, int $downFloorGb, float $minRatio, int $timeWeek, int $addInvite): void
+    {
+        if ($downFloorGb <= 0) {
+            return;
+        }
+
+        $limit = $downFloorGb * 1024 * 1024 * 1024;
+        $maxdt = date('Y-m-d H:i:s', time() - 86400 * 7 * $timeWeek);
+
+        $minSeedPoints = User::getMinSeedPoints($class);
+        if ($minSeedPoints === false) {
+            throw new \RuntimeException("class: {$class} can't get min seed points.");
+        }
+
+        $oriclass = (int) $class - 1;
+
+        $res = User::query()
+            ->where('class', (string) $oriclass)
+            ->where('downloaded', '>=', $limit)
+            ->where('seed_points', '>=', $minSeedPoints)
+            ->whereRaw('uploaded / downloaded >= ?', [$minRatio])
+            ->where('added', '<', $maxdt)
+            ->get(['id', 'max_class_once']);
+
+        do_log("match user count: " . $res->count());
+
+        if ($res->isEmpty()) {
+            return;
+        }
+
+        $dt = date('Y-m-d H:i:s');
+
+        foreach ($res as $arr) {
+            $uid = $arr->id;
+            $locale = Locale::userLocale($uid);
+            $className = \App\Support\User::getUserClassName($class, false, false, false);
+
+            $subject = Locale::trans('cleanup.msg_promoted_to', [], $locale) . $className;
+            $msg = Locale::trans('cleanup.msg_now_you_are', [], $locale)
+                . $className
+                . Locale::trans('cleanup.msg_see_faq', [], $locale);
+
+            if ((int) $class <= (int) $arr->max_class_once) {
+                do_log(sprintf('user: %s upgrade to class: %s', $uid, $class));
+                User::query()->where('id', $uid)->update(['class' => $class]);
+            } else {
+                do_log(sprintf('user: %s upgrade to class: %s, and add invites: %s', $uid, $class, $addInvite));
+                User::query()->where('id', $uid)->update([
+                    'class' => $class,
+                    'max_class_once' => $class,
+                    'invites' => NexusDB::raw('invites + ' . $addInvite),
+                ]);
+            }
+
+            NexusDB::table('messages')->insert([
+                'sender' => 0,
+                'receiver' => $uid,
+                'added' => $dt,
+                'subject' => $subject,
+                'msg' => $msg,
+            ]);
+
+            Events::publishModel(ModelEventEnum::USER_UPDATED, $uid);
+        }
+    }
+
+    private function demoteUsersByClass(): void
+    {
+        $demotions = [
+            [User::CLASS_NEXUS_MASTER, 'account.nmderatio'],
+            [User::CLASS_ULTIMATE_USER, 'account.uuderatio'],
+            [User::CLASS_EXTREME_USER, 'account.exuderatio'],
+            [User::CLASS_VETERAN_USER, 'account.vuderatio'],
+            [User::CLASS_INSANE_USER, 'account.iuderatio'],
+            [User::CLASS_CRAZY_USER, 'account.cuderatio'],
+            [User::CLASS_ELITE_USER, 'account.euderatio'],
+            [User::CLASS_POWER_USER, 'account.puderatio'],
+        ];
+
+        foreach ($demotions as [$class, $ratioKey]) {
+            $this->demoteUsers($class, (float) get_setting($ratioKey, 0));
+        }
+    }
+
+    private function demoteUsers(string $class, float $deRatio): void
+    {
+        if ($deRatio <= 0) {
+            return;
+        }
+
+        $newclass = (int) $class - 1;
+
+        $res = User::query()
+            ->where('class', $class)
+            ->whereRaw('uploaded < downloaded * ?', [$deRatio])
+            ->get(['id']);
+
+        do_log("match user count: " . $res->count());
+
+        if ($res->isEmpty()) {
+            return;
+        }
+
+        $dt = date('Y-m-d H:i:s');
+
+        foreach ($res as $arr) {
+            $uid = $arr->id;
+            $locale = Locale::userLocale($uid);
+            $className = \App\Support\User::getUserClassName($class, false, false, false);
+            $newClassName = \App\Support\User::getUserClassName((string) $newclass, false, false, false);
+
+            $subject = Locale::trans('cleanup.msg_demoted_to', [], $locale) . $newClassName;
+            $msg = Locale::trans('cleanup.msg_demoted_from', [], $locale)
+                . $className
+                . Locale::trans('cleanup.msg_to', [], $locale)
+                . $newClassName
+                . Locale::trans('cleanup.msg_because_ratio_drop_below', [], $locale)
+                . $deRatio . ".\n";
+
+            User::query()->where('id', $uid)->update(['class' => (string) $newclass]);
+
+            NexusDB::table('messages')->insert([
+                'sender' => 0,
+                'receiver' => $uid,
+                'added' => $dt,
+                'subject' => $subject,
+                'msg' => $msg,
+            ]);
+
+            Events::publishModel(ModelEventEnum::USER_UPDATED, $uid);
+        }
+    }
+
+    private function demoteUsersToPeasant(): void
+    {
+        $pairs = [
+            ['account.psdlone', 'account.psratioone'],
+            ['account.psdltwo', 'account.psratiotwo'],
+            ['account.psdlthree', 'account.psratiothree'],
+            ['account.psdlfour', 'account.psratiofour'],
+            ['account.psdlfive', 'account.psratiofive'],
+        ];
+
+        foreach ($pairs as [$dlKey, $ratioKey]) {
+            $this->userToPeasant(
+                (int) get_setting($dlKey, 0),
+                (float) get_setting($ratioKey, 0),
+            );
+        }
+    }
+
+    private function userToPeasant(int $downFloorGb, float $minRatio): void
+    {
+        if ($downFloorGb <= 0) {
+            return;
+        }
+
+        $deletepeasantAccount = (int) get_setting('account.deletepeasant', 30);
+        $length = $deletepeasantAccount * 86400;
+        $until = date('Y-m-d H:i:s', time() + $length);
+        $downlimitFloor = $downFloorGb * 1024 * 1024 * 1024;
+
+        $res = User::query()
+            ->where('class', User::CLASS_USER)
+            ->where('downloaded', '>', $downlimitFloor)
+            ->whereRaw('uploaded / downloaded < ?', [$minRatio])
+            ->get(['id']);
+
+        if ($res->isEmpty()) {
+            return;
+        }
+
+        $dt = date('Y-m-d H:i:s');
+
+        foreach ($res as $arr) {
+            $uid = $arr->id;
+            $locale = Locale::userLocale($uid);
+            $peasantName = \App\Support\User::getUserClassName(User::CLASS_PEASANT, false, false, false);
+
+            $subject = Locale::trans('cleanup.msg_demoted_to', [], $locale) . $peasantName;
+            $msg = Locale::trans('cleanup.msg_must_fix_ratio_within', [], $locale)
+                . $deletepeasantAccount
+                . Locale::trans('cleanup.msg_days_or_get_banned', [], $locale);
+
+            UserOps::logModify($uid, 'Leech Warned by System - Low Ratio.');
+
+            User::query()->where('id', $uid)->update([
+                'class' => User::CLASS_PEASANT,
+                'leechwarn' => 'yes',
+                'leechwarnuntil' => $until,
+            ]);
+
+            NexusDB::table('messages')->insert([
+                'sender' => 0,
+                'receiver' => $uid,
+                'added' => $dt,
+                'subject' => $subject,
+                'msg' => $msg,
+            ]);
+
+            Events::publishModel(ModelEventEnum::USER_UPDATED, $uid);
+        }
+    }
+
+    private function banLeechWarningExpired(): void
+    {
+        $dt = date('Y-m-d H:i:s');
+
+        $results = User::query()
+            ->where('class', '<', User::CLASS_VIP)
+            ->where('donor', 'no')
+            ->where('enabled', User::ENABLED_YES)
+            ->where('leechwarn', 'yes')
+            ->where('leechwarnuntil', '<', $dt)
+            ->get(['id', 'username', 'lang']);
+
+        if ($results->isEmpty()) {
+            return;
+        }
+
+        $results->load('language');
+
+        $uidArr = [];
+        $userBanLogData = [];
+
+        foreach ($results as $user) {
+            $uid = $user->id;
+            $uidArr[] = $uid;
+
+            $userBanLogData[] = [
+                'uid' => $uid,
+                'username' => $user->username,
+                'reason' => Locale::trans('cleanup.ban_user_with_leech_warning_expired', [], $user->locale),
+            ];
+
+            UserOps::logModify($uid, 'Banned by System because of Leech Warning expired.', $user->modcomment);
+        }
+
+        User::query()->whereIn('id', $uidArr)->update(['enabled' => User::ENABLED_NO]);
+        \App\Models\UserBanLog::query()->insert($userBanLogData);
+
+        do_log('ban user: ' . implode(', ', $uidArr));
+
+        foreach ($uidArr as $uid) {
+            Events::publishModel(ModelEventEnum::USER_UPDATED, $uid);
+        }
+    }
+
+    // ------------------------------------------------------------------------
+    // Dead torrent / IP log helpers
+    // ------------------------------------------------------------------------
+
+    private function deleteDeadTorrents(): void
+    {
+        $days = (int) get_setting('torrent.deldeadtorrent', 0);
+        if ($days <= 0) {
+            return;
+        }
+
+        $length = $days * 86400;
+        $until = date('Y-m-d H:i:s', time() - $length);
+        $dt = date('Y-m-d H:i:s');
+
+        $res = NexusDB::table('torrents as t')
+            ->leftJoin('users as u', 't.owner', '=', 'u.id')
+            ->where('t.visible', 'no')
+            ->where('t.last_action', '<', $until)
+            ->where('t.seeders', 0)
+            ->where('t.leechers', 0)
+            ->select('t.id', 't.name', 't.owner', 'u.id as uid')
+            ->get();
+
+        foreach ($res as $torrent) {
+            $arr = (array) $torrent;
+
+            TorrentOps::deleteTorrents((int) $arr['id']);
+
+            if (!empty($arr['uid'])) {
+                $locale = Locale::userLocale((int) $arr['owner']);
+
+                NexusDB::table('messages')->insert([
+                    'sender' => 0,
+                    'receiver' => $arr['owner'],
+                    'added' => $dt,
+                    'subject' => Locale::trans('cleanup.msg_your_torrent_deleted', [], $locale),
+                    'msg' => Locale::trans('cleanup.msg_your_torrent', [], $locale)
+                        . '[i]' . $arr['name'] . '[/i]'
+                        . Locale::trans('cleanup.msg_was_deleted_because_dead', [], $locale),
+                ]);
+
+                Log::write("Torrent {$arr['id']} ({$arr['name']}) is deleted by system because of being dead for a long time.", 'normal');
+            }
+        }
+    }
+
+    private function deleteOldIpLogs(): void
+    {
+        $length = 90 * 86400;
+        $until = date('Y-m-d H:i:s', time() - $length);
+
+        NexusDB::table('iplog')->where('access', '<', $until)->delete();
+    }
+
+    private function deleteFailedJobs(): void
+    {
+        $length = 10 * 86400;
+        $until = date('Y-m-d H:i:s', time() - $length);
+
+        NexusDB::table('failed_jobs')->where('failed_at', '<', $until)->delete();
+    }
+
+    /**
+     * Priority Class 5: cleanup tasks that run every 15 days.
+     */
+    public function cleanupClass5(): string
+    {
+        $this->updateClientPopularity();
+        $this->deleteOldSystemMessages();
+        $this->deleteOldReadPosts();
+        $this->deleteOldCheaters();
+        $this->deleteOldShoutbox();
+        $this->deleteOldSiteLog();
+        $this->lockOldTopics();
+        $this->deleteOldReports();
+        $this->deleteExpiredOAuthTokens();
+
+        return 'cleanup class 5';
+    }
+
+    // ------------------------------------------------------------------------
+    // Class 5 helpers
+    // ------------------------------------------------------------------------
+
+    private function updateClientPopularity(): void
+    {
+        $clientIds = NexusDB::table('agent_allowed_family')->pluck('id');
+
+        foreach ($clientIds as $clientId) {
+            $count = NexusDB::table('users')->where('clientselect', $clientId)->count();
+            NexusDB::table('agent_allowed_family')->where('id', $clientId)->update(['hits' => $count]);
+        }
+    }
+
+    private function deleteOldSystemMessages(): void
+    {
+        $length = 180 * 86400;
+        $until = date('Y-m-d H:i:s', time() - $length);
+
+        NexusDB::table('messages')->where('sender', 0)->where('added', '<', $until)->delete();
+    }
+
+    private function deleteOldReadPosts(): void
+    {
+        $length = 180 * 86400;
+        $until = date('Y-m-d H:i:s', time() - $length);
+
+        $postId = NexusDB::table('posts')
+            ->where('added', '<', $until)
+            ->orderBy('added', 'desc')
+            ->value('id');
+
+        if ($postId) {
+            NexusDB::table('users')->where('last_catchup', '<', $postId)->update(['last_catchup' => $postId]);
+            NexusDB::table('readposts')->where('lastpostread', '<', $postId)->delete();
+        }
+    }
+
+    private function deleteOldCheaters(): void
+    {
+        $length = 180 * 86400;
+        $until = date('Y-m-d H:i:s', time() - $length);
+
+        NexusDB::table('cheaters')->where('added', '<', $until)->delete();
+    }
+
+    private function deleteOldShoutbox(): void
+    {
+        $length = 180 * 86400;
+        $until = time() - $length;
+
+        NexusDB::table('shoutbox')->where('date', '<', $until)->delete();
+    }
+
+    private function deleteOldSiteLog(): void
+    {
+        $length = 180 * 86400;
+        $until = date('Y-m-d H:i:s', time() - $length);
+
+        NexusDB::table('sitelog')->where('added', '<', $until)->delete();
+    }
+
+    private function lockOldTopics(): void
+    {
+        $length = 365 * 86400;
+        $diff = time() - $length;
+        $postAddedField = NexusDB::unixTimestampField('posts.added');
+
+        NexusDB::table('topics')
+            ->where('sticky', 'no')
+            ->whereIn('lastpost', function ($query) use ($postAddedField, $diff): void {
+                $query->select('id')->from('posts')->whereRaw("{$postAddedField} < ?", [$diff]);
+            })
+            ->update(['locked' => 'yes']);
+    }
+
+    private function deleteOldReports(): void
+    {
+        $length = 4 * 7 * 86400;
+        $until = date('Y-m-d H:i:s', time() - $length);
+
+        NexusDB::table('reports')
+            ->where('dealtwith', 1)
+            ->where('added', '<', $until)
+            ->delete();
+    }
+
+    private function deleteExpiredOAuthTokens(): void
+    {
+        $now = now();
+
+        NexusDB::table('oauth_auth_codes')->where('expires_at', '<=', $now)->delete();
+        NexusDB::table('oauth_access_tokens')->where('expires_at', '<=', $now)->delete();
+        NexusDB::table('oauth_refresh_tokens')->where('expires_at', '<=', $now)->delete();
+    }
+}

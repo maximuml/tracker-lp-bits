@@ -49,6 +49,7 @@ class Kernel extends ConsoleKernel
         $schedule->job(new CheckQueueFailedJobs())->everySixHours();
         $schedule->job(new MaintainPluginState())->everyMinute();
         $schedule->job(new UpdateIsSeedBoxFromUserRecordsCache())->everySixHours();
+        $schedule->command('cleanup:run')->everyFifteenMinutes();
         $schedule->job(new CheckCleanup())->everyFifteenMinutes();
         $schedule->job(new SaveIpLogCacheToDB())->hourly();
         $schedule->job(new RemoveUserWarning())->everyTwentySeconds();

@@ -33,8 +33,6 @@ if ($count) {
 	print($pagertop);
 	if ($sectiontype == $browsecatmode)
 		torrenttable($rows, "torrents", $sectiontype);
-	elseif ($sectiontype == $specialcatmode)
-		torrenttable($rows, "music", $sectiontype);
 	else torrenttable($rows, "bookmarks", $sectiontype);
 	print($pagerbottom);
 }

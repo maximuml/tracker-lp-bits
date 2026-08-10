@@ -203,18 +203,10 @@ class HitAndRun extends NexusModel
 
     public static function getIsEnabled(): bool
     {
-        $enableSpecialSection = Setting::get('main.spsct') == 'yes';
         $browseMode = self::getConfig('mode', Setting::get('main.browsecat'));
         $browseEnabled = HitAndRunMode::fromStringSafe(is_string($browseMode) ? $browseMode : null)->isEnabled();
-        if (! $enableSpecialSection) {
-            do_log("Not enable special section, browseEnabled: " . ($browseEnabled ? 'true' : 'false'));
-            return $browseEnabled;
-        }
-        $specialMode = self::getConfig('mode', Setting::get('main.specialcat'));
-        $specialEnabled = HitAndRunMode::fromStringSafe(is_string($specialMode) ? $specialMode : null)->isEnabled();
-        $result = $browseEnabled || $specialEnabled;
-        do_log("Enable special section, browseEnabled: " . ($browseEnabled ? 'true' : 'false') . ", specialEnabled: " . ($specialEnabled ? 'true' : 'false') . ", result: " . ($result ? 'true' : 'false'));
-        return $result;
+        do_log("H&R browseEnabled: " . ($browseEnabled ? 'true' : 'false'));
+        return $browseEnabled;
     }
 
     /**
@@ -235,8 +227,7 @@ class HitAndRun extends NexusModel
 
     public static function diffInSection(): bool
     {
-        $enableSpecialSection = Setting::get('main.spsct') == 'yes';
-        return $enableSpecialSection && apply_filter("hit_and_run_diff_in_section", false);
+        return apply_filter("hit_and_run_diff_in_section", false);
     }
 
     /** @return  \Illuminate\Database\Eloquent\Relations\BelongsTo<Torrent, $this> */

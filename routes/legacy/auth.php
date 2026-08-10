@@ -30,7 +30,6 @@ use App\Http\Controllers\WebCommentController;
     Route::post('/bitbucket-upload', [BitbucketUploadController::class, 'store'])->middleware('throttle:upload');
     Route::match(['get', 'post'], '/offers', [OfferController::class, 'legacy'])->name('offers.legacy');
     Route::get('/torrents', [TorrentListingController::class, 'index'])->middleware('throttle:torrents')->name('torrents.index');
-    Route::get('/special', [TorrentListingController::class, 'index'])->middleware('throttle:torrents')->name('torrents.special');
     Route::get('/details/{id}', [TorrentDetailsController::class, 'show'])->where('id', '[0-9]+')->name('torrent.details');
     Route::match(['get', 'post'], '/mybonus', [MyController::class, 'bonus'])->name('my.bonus');
     Route::get('/myhr', [MyController::class, 'hr'])->name('my.hr');

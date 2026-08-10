@@ -62,7 +62,6 @@ final class PageLayoutContext
         public string $scriptFileName,
         public string $script,
         public string $enableOffer,
-        public string $enableSpecial,
         public ?string $customMenu,
         public string $maxdlSystem,
         public string $whereTweak,

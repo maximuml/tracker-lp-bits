@@ -9,20 +9,10 @@ use Illuminate\Support\Facades\Auth;
 
 class Permission
 {
-    public static function canUploadToSpecialSection(?User $user = null): bool
-    {
-        return self::canUploadToNormalSection($user) && self::userCan($user, PermissionEnum::UPLOAD_TO_SPECIAL_SECTION);
-    }
-
     public static function canUploadToNormalSection(?User $user = null): bool
     {
         $user = self::user($user);
         return $user->uploadpos == 'yes' && self::userCan($user, PermissionEnum::UPLOAD);
-    }
-
-    public static function canViewSpecialSection(?User $user = null): bool
-    {
-        return self::userCan($user, PermissionEnum::TORRENT_VIEW_SPECIAL);
     }
 
     public static function canBeAnonymous(?User $user = null): bool

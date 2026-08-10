@@ -3,7 +3,6 @@
 namespace App\Support;
 
 use App\Enums\HitAndRunMode;
-use App\Enums\Permission\PermissionEnum;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
 
@@ -24,30 +23,7 @@ final class TorrentAccess
      */
     public static function canAccess(array|int|string $torrent, int|string $uid): bool
     {
-        $specialcatmode = (int) \App\Models\Setting::get('main.specialcat', 0);
-
-        if (\get_setting('main.spsct') !== 'yes') {
-            return true;
-        }
-
-        if (is_array($torrent) && isset($torrent['search_box_id'])) {
-            $searchBoxId = $torrent['search_box_id'];
-        } elseif (is_numeric($torrent)) {
-            $record = \App\Models\Torrent::query()->findOrFail((int) $torrent, ['id', 'category']);
-            $searchBoxId = $record->basic_category->mode ?? 0;
-            if ($searchBoxId == 0) {
-                \do_log('[INVALID_CATEGORY], torrent: ' . $record->id, 'error');
-                return false;
-            }
-        } else {
-            throw new \InvalidArgumentException('Unsupported argument: ' . json_encode($torrent));
-        }
-
-        if ($searchBoxId != $specialcatmode) {
-            return true;
-        }
-
-        return Permissions::userCan(PermissionEnum::TORRENT_VIEW_SPECIAL->value, false, (int) $uid);
+        return true;
     }
 
     /**

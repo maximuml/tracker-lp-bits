@@ -52,9 +52,7 @@ class SecondIconResource extends Resource
     {
         $searchBoxRep = new SearchBoxRepository();
         $torrentMode = Setting::get('main.browsecat');
-        $specialMode = Setting::get('main.specialcat');
         $torrentTaxonomySchema = $searchBoxRep->listTaxonomyFormSchema($torrentMode);
-        $specialTaxonomySchema = $searchBoxRep->listTaxonomyFormSchema($specialMode);
         $modeOptions = SearchBox::listModeOptions();
         return $schema
             ->components([
@@ -83,12 +81,6 @@ class SecondIconResource extends Resource
                     ->schema($torrentTaxonomySchema)
                     ->columns(4)
                     ->hidden(fn (Get $get) => $get('mode') != $torrentMode)
-                ,
-                Section::make(__('label.second_icon.select_section'))
-                    ->id("taxonomy_$specialMode")
-                    ->schema($specialTaxonomySchema)
-                    ->columns(4)
-                    ->hidden(fn (Get $get) => $get('mode') != $specialMode)
                 ,
 
             ]);

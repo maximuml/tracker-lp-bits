@@ -284,9 +284,6 @@ class SearchBox extends NexusModel
         if ($this->isSectionBrowse()) {
             return nexus_trans("searchbox.sections.browse");
         }
-        if ($this->isSectionSpecial()) {
-            return nexus_trans("searchbox.sections.special");
-        }
         return $this->name;
     }
 
@@ -298,11 +295,6 @@ class SearchBox extends NexusModel
             $result[$key] = nexus_trans("search.search_modes.{$value['text']}");
         }
         return $result;
-    }
-
-    public static function isSpecialEnabled(): bool
-    {
-        return Setting::getIsSpecialSectionEnabled();
     }
 
     /** @return  mixed */
@@ -317,26 +309,9 @@ class SearchBox extends NexusModel
         return self::query()->find(self::getBrowseMode());
     }
 
-    /** @return  mixed */
-    public static function getSpecialMode()
-    {
-        return Setting::get('main.specialcat');
-    }
-
-    /** @return  mixed */
-    public static function getSpecialSearchBox()
-    {
-        return self::query()->find(self::getSpecialMode());
-    }
-
     public function isSectionBrowse(): bool
     {
         return $this->id == self::getBrowseMode();
-    }
-
-    public function isSectionSpecial(): bool
-    {
-        return $this->id == self::getSpecialMode();
     }
 
 
@@ -469,21 +444,13 @@ class SearchBox extends NexusModel
     /** @return  array<int|string, mixed> */
     public static function listAuthorizedSectionId(): array
     {
-        $modeIds = [self::getBrowseMode()];
-        if (self::isSpecialEnabled() && Permission::canViewSpecialSection()) {
-            $modeIds[] = self::getSpecialMode();
-        }
-        return $modeIds;
+        return [self::getBrowseMode()];
     }
 
     /** @return  array<int|string, mixed> */
     public static function listAllSectionId(): array
     {
-        $modeIds = [self::getBrowseMode()];
-        if (self::isSpecialEnabled()) {
-            $modeIds[] = self::getSpecialMode();
-        }
-        return $modeIds;
+        return [self::getBrowseMode()];
     }
 
 }

@@ -88,12 +88,9 @@ final class SettingsSeed
         $firstStylesheetId = (int) (\Nexus\Database\NexusDB::table('stylesheets')->orderBy('id')->value('id') ?? 3);
         SupportContext::setGlobal('defcss', (int) ($MAIN['defstylesheet'] ?: $firstStylesheetId));
         SupportContext::setGlobal('enabledonation', $MAIN['donation']);
-        SupportContext::setGlobal('enablespecial', $MAIN['spsct']);
         $searchBoxIds = SearchBox::query()->orderBy('id')->pluck('id')->all();
         $defaultBrowsecat = (int) ($searchBoxIds[0] ?? 1);
-        $defaultSpecialcat = (int) ($searchBoxIds[1] ?? $defaultBrowsecat);
         SupportContext::setGlobal('browsecatmode', (int) ($MAIN['browsecat'] ?? $defaultBrowsecat));
-        SupportContext::setGlobal('specialcatmode', (int) ($MAIN['specialcat'] ?? $defaultSpecialcat));
         SupportContext::setGlobal('waitsystem', $MAIN['waitsystem']);
         SupportContext::setGlobal('maxdlsystem', $MAIN['maxdlsystem']);
         SupportContext::setGlobal('bitbucket', $MAIN['bitbucket']);
@@ -160,7 +157,6 @@ final class SettingsSeed
         SupportContext::setGlobal('addoffer_class', $AUTHORITY['addoffer']);
         SupportContext::setGlobal('offermanage_class', $AUTHORITY['offermanage']);
         SupportContext::setGlobal('upload_class', $AUTHORITY['upload']);
-        SupportContext::setGlobal('uploadspecial_class', $AUTHORITY['uploadspecial']);
         SupportContext::setGlobal('movetorrent_class', $AUTHORITY['movetorrent']);
         SupportContext::setGlobal('chrmanage_class', $AUTHORITY['chrmanage']);
         SupportContext::setGlobal('viewinvite_class', $AUTHORITY['viewinvite']);

@@ -321,13 +321,12 @@ TD;
         $setting = \get_setting('main');
         $maps = [
             'torrents' => [$setting['browsecat']],
-            'special' => [$setting['specialcat']],
-            'usercp' => [$setting['browsecat'], $setting['specialcat']],
-            'getrss' => [$setting['browsecat'], $setting['specialcat']],
-            'userdetails' => [$setting['browsecat'], $setting['specialcat']],
-            'offers' => [$setting['browsecat'], $setting['specialcat']],
-            'details' => [$setting['browsecat'], $setting['specialcat']],
-            'search' => [$setting['browsecat'], $setting['specialcat']],
+            'usercp' => [$setting['browsecat']],
+            'getrss' => [$setting['browsecat']],
+            'userdetails' => [$setting['browsecat']],
+            'offers' => [$setting['browsecat']],
+            'details' => [$setting['browsecat']],
+            'search' => [$setting['browsecat']],
         ];
         $script = \nexus()->getScript();
 

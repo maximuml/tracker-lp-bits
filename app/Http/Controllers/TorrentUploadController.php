@@ -64,16 +64,15 @@ class TorrentUploadController extends Controller
                 ->count();
         }
 
-        $allowtorrents = $has_allowed_offer || LegacyResponse::canUpload('torrents');
-        $allowspecial = LegacyResponse::canUpload('music');
-        if (! $allowtorrents && ! $allowspecial) {
+        $uploadFreely = LegacyResponse::canUpload('torrents');
+        $allowtorrents = $has_allowed_offer || $uploadFreely;
+        if (! $allowtorrents) {
             LegacyResponse::abort($lang_upload['std_sorry'] ?? '', $lang_upload['std_please_offer'] ?? '', false);
         }
 
         return view('torrents.upload', [
+            'uploadFreely' => $uploadFreely,
             'allowtorrents' => $allowtorrents,
-            'allowspecial' => $allowspecial,
-            'allowtwosec' => ($allowtorrents && $allowspecial),
             'settingMain' => get_setting('main'),
             'torrentRep' => new TorrentRepository(),
             'searchBoxRep' => new SearchBoxRepository(),

@@ -24,7 +24,6 @@ final class Menu
         string $scriptName,
         array $langFunctions,
         string $enableOffer,
-        string $enableSpecial,
         ?string $customMenu,
         ?array $user = null,
         ?object $cache = null,
@@ -41,7 +40,6 @@ final class Menu
 
         $userId = (int) ($user['id'] ?? 0);
         $normalSectionName = SearchBox::value($cache, (int) (Settings::get('main.browsecat') ?? 1), 'section_name');
-        $specialSectionName = SearchBox::value($cache, (int) (Settings::get('main.specialcat') ?? 2), 'section_name');
 
         $items = [];
         $items[] = self::item($selected, 'home', 'index.php', $langFunctions['text_home'] ?? 'Home');
@@ -49,9 +47,6 @@ final class Menu
         $items[] = self::item($selected, 'latestcomments', 'latestcomments.php', $langFunctions['text_latest_comments'] ?? 'Latest Comments');
         $items[] = self::item($selected, 'torrents', 'torrents.php', $normalSectionName[$langDir] ?? ($langFunctions['text_torrents'] ?? 'Torrents'), "rel='sub-menu'");
 
-        if ($enableSpecial === 'yes' && Permissions::userCan('view_special_torrent', false, $userId)) {
-            $items[] = self::item($selected, 'special', 'special.php', $specialSectionName[$langDir] ?? ($langFunctions['text_special'] ?? 'Special'));
-        }
         if ($enableOffer === 'yes') {
             $items[] = self::item($selected, 'offers', 'offers.php', $langFunctions['text_offers'] ?? 'Offers');
         }
@@ -81,7 +76,6 @@ final class Menu
             preg_match('/forums/i', $scriptName) => 'forums',
             preg_match('/latestcomments/i', $scriptName) => 'latestcomments',
             preg_match('/torrents/i', $scriptName) => 'torrents',
-            preg_match('/special/i', $scriptName) => 'special',
             preg_match('/offers/i', $scriptName), preg_match('/offcomment/i', $scriptName) => 'offers',
             preg_match('/upload/i', $scriptName) => 'upload',
             preg_match('/usercp/i', $scriptName) => 'usercp',

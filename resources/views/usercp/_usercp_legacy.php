@@ -314,11 +314,6 @@ if ($action){
 			stdhead($lang_usercp['head_control_panel'].$lang_usercp['head_tracker_settings']);
 			usercpmenu ("tracker");
             form ("tracker");
-$brsectiontype = $browsecatmode;
-$spsectiontype = $specialcatmode;
-if ($enablespecial == 'yes' && get_user_class() >= get_setting('authority.view_special_torrent'))
-	$allowspecial = true;
-else $allowspecial = false;
 if (strpos($CURUSER['notifs'], "[spstate=0]") !== false)
     $special_state = 0;
 elseif (strpos($CURUSER['notifs'], "[spstate=1]") !== false)
@@ -336,34 +331,7 @@ elseif (strpos($CURUSER['notifs'], "[spstate=6]") !== false)
 elseif (strpos($CURUSER['notifs'], "[spstate=7]") !== false)
     $special_state = 7;
 else $special_state = 0;
-/*
-$showsubcat = (get_searchbox_value($brsectiontype, 'showsubcat') || ($allowspecial && get_searchbox_value($spsectiontype, 'showsubcat')));
-$showsource = (get_searchbox_value($brsectiontype, 'showsource') || ($allowspecial && get_searchbox_value($spsectiontype, 'showsource'))); //whether show sources or not
-$showmedium = (get_searchbox_value($brsectiontype, 'showmedium') || ($allowspecial && get_searchbox_value($spsectiontype, 'showmedium'))); //whether show media or not
-$showcodec = (get_searchbox_value($brsectiontype, 'showcodec') || ($allowspecial && get_searchbox_value($spsectiontype, 'showcodec'))); //whether show codecs or not
-$showstandard = (get_searchbox_value($brsectiontype, 'showstandard') || ($allowspecial && get_searchbox_value($spsectiontype, 'showstandard'))); //whether show standards or not
-$showprocessing = (get_searchbox_value($brsectiontype, 'showprocessing') || ($allowspecial && get_searchbox_value($spsectiontype, 'showprocessing'))); //whether show processings or not
-$showaudiocodec = (get_searchbox_value($brsectiontype, 'showaudiocodec') || ($allowspecial && get_searchbox_value($spsectiontype, 'showaudiocodec'))); //whether show audio codecs or not
-$brcatsperror = (int)get_searchbox_value($brsectiontype, 'catsperrow');
-$catsperrow = (int)get_searchbox_value($spsectiontype, 'catsperrow');
-$catsperrow = !$allowspecial ? $brcatsperror : $catsperrow; //show how many cats per line
 
-$brcatpadding = get_searchbox_value($brsectiontype, 'catpadding');
-$spcatpadding = get_searchbox_value($spsectiontype, 'catpadding');
-$catpadding = (!$allowspecial ? $brcatpadding : ($brcatpadding < $spcatpadding ? $brcatpadding : $spcatpadding)); //padding space between categories in pixel
-
-$brcats = genrelist($brsectiontype);
-$spcats = genrelist($spsectiontype);
-
-if ($showsubcat){
-if ($showsource) $sources = searchbox_item_list("sources");
-if ($showmedium) $media = searchbox_item_list("media");
-if ($showcodec) $codecs = searchbox_item_list("codecs");
-if ($showstandard) $standards = searchbox_item_list("standards");
-if ($showprocessing) $processings = searchbox_item_list("processings");
-if ($showaudiocodec) $audiocodecs = searchbox_item_list("audiocodecs");
-}
-*/
 			print ("<table border=0 cellspacing=0 cellpadding=5 width=".CONTENT_WIDTH.">");
 			if ($type == 'saved')
 				print("<tr><td colspan=2 class=\"heading\" valign=\"top\" align=\"center\"><font color=red>".$lang_usercp['text_saved']."</font></td></tr>\n");
@@ -371,121 +339,10 @@ if ($showaudiocodec) $audiocodecs = searchbox_item_list("audiocodecs");
 				tr_small($lang_usercp['row_email_notification'], "<input type=checkbox name=pmnotif" . (strpos($CURUSER['notifs'], "[pm]") !== false ? " checked" : "") . " value=yes> ".$lang_usercp['checkbox_notification_received_pm']."<br />\n<input type=checkbox name=emailnotif" . (strpos($CURUSER['notifs'], "[email]") !== false ? " checked" : "") . " value=\"yes\" /> ".$lang_usercp['checkbox_notification_default_categories'], 1);
             //no this option
 			$brenablecatrow = false;
-/*
-			$categories = "<table>".($allowspecial ? "<tr><td class=embedded align=left><font class=big>".$lang_usercp['text_at_browse_page']."</font></td></tr></table><table>" : "")."<tr><td class=embedded align=left><b>".($brenablecatrow == true ? $brcatrow[0] : $lang_usercp['text_category'])."</b></td></tr><tr>";
-			$i = 0;
-			foreach ($brcats as $cat)//print category list of Torrents section
-			{
-				$numinrow = $i % $catsperrow;
-				$rownum = (int)($i / $catsperrow);
-				if ($i && $numinrow == 0){
-					$categories .= "</tr>".($brenablecatrow ? "<tr><td class=embedded align=left><b>".$brcatrow[$rownum]."</b></td></tr>" : "")."<tr>";
-				}
-				$categories .= "<td align=left class=bottom style=\"padding-bottom: 4px;padding-left: ".$catpadding."px\"><input class=checkbox name=cat".$cat['id']." type=\"checkbox\" " . (strpos($CURUSER['notifs'], "[cat".$cat['id']."]") !== false ? " checked" : "")." value='yes'>".return_category_image($cat['id'], "torrents.php?allsec=1&amp;")."</td>\n";
-				$i++;
-			}
-			$categories .= "</tr>";
-			if ($allowspecial) //print category list of Special section
-			{
-				$categories .= "</table><table><tr><td class=embedded align=left><font class=big>".$lang_usercp['text_at_special_page']."</font></td></tr></table><table>";
-				$categories .= "<tr><td class=embedded align=left><b>".($spenablecatrow == true ? $spcatrow[0] : $lang_usercp['text_category'])."</b></td></tr><tr>";
-				$i = 0;
-				foreach ($spcats as $cat)
-				{
-					$numinrow = $i % $catsperrow;
-					$rownum = (int)($i / $catsperrow);
-					if ($i && $numinrow == 0){
-						$categories .= "</tr>".($spenablecatrow ? "<tr><td class=embedded align=left><b>".$spcatrow[$rownum]."</b></td></tr>" : "")."<tr>";
-					}
-//					$categories .= "<td align=left class=bottom style=\"padding-bottom: 4px;padding-left: ".$catpadding."px\"><input class=checkbox name=cat".$cat['id']." type=\"checkbox\" " . (strpos($CURUSER['notifs'], "[cat".$cat['id']."]") !== false ? " checked" : "")." value='yes'><img src=pic/" .get_cat_folder($cat['id']). '/'. htmlspecialchars($cat['image']) . " border='0' alt=\"" .$cat['name']."\" title=\"" .$cat['name']."\"></td>\n";
-					$categories .= "<td align=left class=bottom style=\"padding-bottom: 4px;padding-left: ".$catpadding."px\"><input class=checkbox name=cat".$cat['id']." type=\"checkbox\" " . (strpos($CURUSER['notifs'], "[cat".$cat['id']."]") !== false ? " checked" : "")." value='yes'>" . return_category_image($cat['id'], "special.php?allsec=1&amp;") . "</td>\n";
-					$i++;
-				}
-			$categories .= "</tr>";
-			}
-			if ($showsubcat)//Show subcategory (i.e. source, codecs) selections
-			{
-				$categories .= "</table><table><tr><td class=embedded align=left><font class=big>".$lang_usercp['text_sub_category']."</font></td></tr></table><table>";
-				if ($showsource){
-				$categories .= "<tr><td class=embedded align=left><b>".$lang_usercp['text_source']."</b></td></tr><tr>";
-				$i = 0;
-				foreach ($sources as $source)
-				{
-					$categories .= ($i && $i % $catsperrow == 0) ? "</tr><tr>" : "";
-					$categories .= "<td align=left class=bottom style=\"padding-bottom: 4px;padding-left: ".$catpadding."px\"><input class=checkbox name=sou{$source['id']} type=\"checkbox\" " . (strpos($CURUSER['notifs'], "[sou".$source['id']."]") !== false ? " checked" : "") . " value='yes'>{$source['name']}</td>\n";
-					$i++;
-				}
-				$categories .= "</tr>";
-				}
-				if ($showmedium){
-				$categories .= "<tr><td class=embedded align=left><b>".$lang_usercp['text_medium']."</b></td></tr><tr>";
-				$i = 0;
-				foreach ($media as $medium)
-				{
-					$categories .= ($i && $i % $catsperrow == 0) ? "</tr><tr>" : "";
-					$categories .= "<td align=left class=bottom style=\"padding-bottom: 4px;padding-left: ".$catpadding."px\"><input class=checkbox name=med{$medium['id']} type=\"checkbox\" " . (strpos($CURUSER['notifs'], "[med".$medium['id']."]") !== false ? " checked" : "") . " value='yes'>{$medium['name']}</td>\n";
-					$i++;
-				}
-				$categories .= "</tr>";
-				}
-				if ($showcodec){
-				$categories .= "<tr><td class=embedded align=left><b>".$lang_usercp['text_codec']."</b></td></tr><tr>";
-				$i = 0;
-				foreach ($codecs as $codec)
-				{
-					$categories .= ($i && $i % $catsperrow == 0) ? "</tr><tr>" : "";
-					$categories .= "<td align=left class=bottom style=\"padding-bottom: 4px;padding-left: ".$catpadding."px\"><input class=checkbox name=cod{$codec['id']} type=\"checkbox\" " . (strpos($CURUSER['notifs'], "[cod".$codec['id']."]") !== false ? " checked" : "") . " value='yes'>{$codec['name']}</td>\n";
-					$i++;
-				}
-				$categories .= "</tr>";
-				}
-				if ($showaudiocodec){
-				$categories .= "<tr><td class=embedded align=left><b>".$lang_usercp['text_audio_codec']."</b></td></tr><tr>";
-				$i = 0;
-				foreach ($audiocodecs as $audiocodec)
-				{
-					$categories .= ($i && $i % $catsperrow == 0) ? "</tr><tr>" : "";
-					$categories .= "<td align=left class=bottom style=\"padding-bottom: 4px;padding-left: ".$catpadding."px\"><input class=checkbox name=aud{$audiocodec['id']} type=\"checkbox\" " . (strpos($CURUSER['notifs'], "[aud".$audiocodec['id']."]") !== false ? " checked" : "") . " value='yes'>{$audiocodec['name']}</td>\n";
-					$i++;
-				}
-				$categories .= "</tr>";
-				}
-				if ($showstandard){
-				$categories .= "<tr><td class=embedded align=left><b>".$lang_usercp['text_standard']."</b></td></tr><tr>";
-				$i = 0;
-				foreach ($standards as $standard)
-				{
-					$categories .= ($i && $i % $catsperrow == 0) ? "</tr><tr>" : "";
-					$categories .= "<td align=left class=bottom style=\"padding-bottom: 4px;padding-left: ".$catpadding."px\"><input class=checkbox name=sta{$standard['id']} type=\"checkbox\" " . (strpos($CURUSER['notifs'], "[sta".$standard['id']."]") !== false ? " checked" : "") . " value='yes'>{$standard['name']}</td>\n";
-					$i++;
-				}
-				$categories .= "</tr>";
-				}
-				if ($showprocessing){
-				$categories .= "<tr><td class=embedded align=left><b>".$lang_usercp['text_processing']."</b></td></tr><tr>";
-				$i = 0;
-				foreach ($processings as $processing)
-				{
-					$categories .= ($i && $i % $catsperrow == 0) ? "</tr><tr>" : "";
-					$categories .= "<td align=left class=bottom style=\"padding-bottom: 4px;padding-left: ".$catpadding."px\"><input class=checkbox name=pro{$processing['id']} type=\"checkbox\" " . (strpos($CURUSER['notifs'], "[pro".$processing['id']."]") !== false ? " checked" : "") . " value='yes'>{$processing['name']}</td>\n";
-					$i++;
-				}
-				$categories .= "</tr>";
-				}
-			}
-			$categories .= "</table><table>";
-			$categories .= "<tr><td colspan=3 class=embedded align=left><font class=big>".$lang_usercp['text_additional_selection']."</font></td></tr>";
 
-
-			$categories .= "<tr><td class=bottom><b>".$lang_usercp['text_show_dead_active']."</b><br /><select name=\"incldead\"><option value=\"0\" ".(strpos($CURUSER['notifs'], "[incldead=0]") !== false ? " selected" : "").">".$lang_usercp['select_including_dead']."</option><option value=\"1\" ".(strpos($CURUSER['notifs'], "[incldead=1]") !== false ||  strpos($CURUSER['notifs'], "incldead") == false ? " selected" : "").">".$lang_usercp['select_active']."</option><option value=\"2\" ".(strpos($CURUSER['notifs'], "[incldead=2]") !== false  ? " selected" : "").">".$lang_usercp['select_dead']."</option></select></td><td class=bottom align=left><b>".$lang_usercp['text_show_special_torrents']."</b><br /><select name=\"spstate\"><option value=\"0\" ".($special_state == 0 ? " selected" : "").">".$lang_usercp['select_all']."</option>".promotion_selection($special_state)."</select></td><td class=bottom><b>".$lang_usercp['text_show_bookmarked']."</b><br /><select name=\"inclbookmarked\"><option value=\"0\" ".(strpos($CURUSER['notifs'], "[inclbookmarked=0]") !== false ? " selected" : "").">".$lang_usercp['select_all']."</option><option value=\"1\" ".(strpos($CURUSER['notifs'], "[inclbookmarked=1]") !== false ? " selected" : "")." >".$lang_usercp['select_bookmarked']."</option><option value=\"2\" ".(strpos($CURUSER['notifs'], "[inclbookmarked=2]") !== false ? " selected" : "").">".$lang_usercp['select_bookmarked_exclude']."</option></select></td></tr>";
-			$categories .= "</table>";
-*/
 
             $categories = build_search_box_category_table($browsecatmode, 'yes','torrents.php?allsec=1', false, 3, $CURUSER['notifs'], ['section_name' => true]);
             $delimiter = '<div style="height: 1px;background-color: #eee;margin: 10px 0"></div>';
-            if (get_setting('main.spsct') == 'yes') {
-                $categories .= $delimiter . build_search_box_category_table($specialcatmode, 'yes','special.php?allsec=1', false, 3, $CURUSER['notifs'], ['section_name' => true]);
-            }
             $categories .= $delimiter . "<table><caption><font class='big'>{$lang_usercp['text_additional_selection']}</font></caption><tr><td class=bottom><b>".$lang_usercp['text_show_dead_active']."</b><br /><select name=\"incldead\"><option value=\"0\" ".(strpos($CURUSER['notifs'], "[incldead=0]") !== false ? " selected" : "").">".$lang_usercp['select_including_dead']."</option><option value=\"1\" ".(strpos($CURUSER['notifs'], "[incldead=1]") !== false ||  strpos($CURUSER['notifs'], "incldead") == false ? " selected" : "").">".$lang_usercp['select_active']."</option><option value=\"2\" ".(strpos($CURUSER['notifs'], "[incldead=2]") !== false  ? " selected" : "").">".$lang_usercp['select_dead']."</option></select></td><td class=bottom align=left><b>".$lang_usercp['text_show_special_torrents']."</b><br /><select name=\"spstate\"><option value=\"0\" ".($special_state == 0 ? " selected" : "").">".$lang_usercp['select_all']."</option>".promotion_selection($special_state)."</select></td><td class=bottom><b>".$lang_usercp['text_show_bookmarked']."</b><br /><select name=\"inclbookmarked\"><option value=\"0\" ".(strpos($CURUSER['notifs'], "[inclbookmarked=0]") !== false ? " selected" : "").">".$lang_usercp['select_all']."</option><option value=\"1\" ".(strpos($CURUSER['notifs'], "[inclbookmarked=1]") !== false ? " selected" : "")." >".$lang_usercp['select_bookmarked']."</option><option value=\"2\" ".(strpos($CURUSER['notifs'], "[inclbookmarked=2]") !== false ? " selected" : "").">".$lang_usercp['select_bookmarked_exclude']."</option></select></td></tr></table>";
             tr_small($lang_usercp['row_browse_default_categories'], $categories,1);
 			$ss_sa = \Nexus\Database\NexusDB::table('stylesheets')

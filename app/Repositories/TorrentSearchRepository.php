@@ -14,10 +14,7 @@ class TorrentSearchRepository
     {
         $CURUSER = SupportContext::getUser() ?? [];
         $lang_torrents = SupportContext::getGlobal('lang_torrents', []);
-        $lang_special = SupportContext::getGlobal('lang_special', []);
         $browsecatmode = (int) SupportContext::getGlobal('browsecatmode', 1);
-        $specialcatmode = (int) SupportContext::getGlobal('specialcatmode', 2);
-        $enablespecial = SupportContext::getGlobal('enablespecial', '');
         $torrentsperpage_main = (int) SupportContext::getGlobal('torrentsperpage_main', 0);
         $catimgurl = '';
         $catpadding = 0;
@@ -33,15 +30,6 @@ class TorrentSearchRepository
 switch (nexus()->getScript()) {
     case 'torrents':
         $sectiontype = $browsecatmode;
-        break;
-    case 'special':
-        if (get_setting('main.spsct') != 'yes') {
-            httperr();
-        }
-        if (!user_can('view_special_torrent')) {
-            stderr($lang_special['std_sorry'],$lang_special['std_permission_denied_only'].get_user_class_name(get_setting('authority.view_special_torrent'),false,true,true).sprintf($lang_special['std_or_above_can_view'], \App\Models\Setting::getSiteName()),false);
-        }
-        $sectiontype = $specialcatmode;
         break;
     default:
         $sectiontype = 0;

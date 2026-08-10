@@ -211,13 +211,6 @@ final class LegacyResponse
             }
         }
 
-        if ($where === 'music') {
-            $enablespecial = SupportContext::getGlobal('enablespecial', '');
-            if ($enablespecial === 'yes' && \user_can('uploadspecial')) {
-                return true;
-            }
-        }
-
         return false;
     }
 

@@ -13,7 +13,6 @@ class MenuTest extends TestCase
             scriptName: 'index.php',
             langFunctions: ['text_home' => 'Home'],
             enableOffer: 'no',
-            enableSpecial: 'no',
             customMenu: '<b>Custom</b>',
         );
 
@@ -27,7 +26,6 @@ class MenuTest extends TestCase
             scriptName: 'forums.php',
             langFunctions: ['text_home' => 'Home', 'text_forums' => 'Forums'],
             enableOffer: 'no',
-            enableSpecial: 'no',
             customMenu: '<b>Custom</b>',
         );
 

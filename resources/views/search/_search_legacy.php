@@ -15,9 +15,6 @@ if ($approvalStatusNoneVisible == 'no' && !user_can('torrent-approval')) {
 
 //section
 $modeArr = [\App\Models\SearchBox::getBrowseMode()];
-if (\App\Models\SearchBox::isSpecialEnabled() && user_can('view_special_torrent')) {
-    $modeArr[] = \App\Models\SearchBox::getSpecialMode();
-}
 
 //see banned
 $banned = null;

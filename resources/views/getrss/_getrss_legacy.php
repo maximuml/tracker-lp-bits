@@ -3,27 +3,18 @@ error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
 $__server_REQUEST_METHOD = \App\Support\SupportContext::getServerValue('REQUEST_METHOD');
 $brsectiontype = $browsecatmode;
-$spsectiontype = $specialcatmode;
-if ($enablespecial == 'yes' && user_can('view_special_torrent'))
-	$allowspecial = true;
-else $allowspecial = false;
-$showsubcat = (get_searchbox_value($brsectiontype, 'showsubcat') || ($allowspecial && get_searchbox_value($spsectiontype, 'showsubcat')));
-$showsource = (get_searchbox_value($brsectiontype, 'showsource') || ($allowspecial && get_searchbox_value($spsectiontype, 'showsource'))); //whether show sources or not
-$showmedium = (get_searchbox_value($brsectiontype, 'showmedium') || ($allowspecial && get_searchbox_value($spsectiontype, 'showmedium'))); //whether show media or not
-$showcodec = (get_searchbox_value($brsectiontype, 'showcodec') || ($allowspecial && get_searchbox_value($spsectiontype, 'showcodec'))); //whether show codecs or not
-$showstandard = (get_searchbox_value($brsectiontype, 'showstandard') || ($allowspecial && get_searchbox_value($spsectiontype, 'showstandard'))); //whether show standards or not
-$showprocessing = (get_searchbox_value($brsectiontype, 'showprocessing') || ($allowspecial && get_searchbox_value($spsectiontype, 'showprocessing'))); //whether show processings or not
-$showaudiocodec = (get_searchbox_value($brsectiontype, 'showaudiocodec') || ($allowspecial && get_searchbox_value($spsectiontype, 'showaudiocodec'))); //whether show audio codecs or not
-$brcatsperror = (int)get_searchbox_value($brsectiontype, 'catsperrow');
-$catsperrow = (int)get_searchbox_value($spsectiontype, 'catsperrow');
-$catsperrow = !$allowspecial ? $brcatsperror : $catsperrow; //show how many cats per line
+$showsubcat = get_searchbox_value($brsectiontype, 'showsubcat');
+$showsource = get_searchbox_value($brsectiontype, 'showsource'); //whether show sources or not
+$showmedium = get_searchbox_value($brsectiontype, 'showmedium'); //whether show media or not
+$showcodec = get_searchbox_value($brsectiontype, 'showcodec'); //whether show codecs or not
+$showstandard = get_searchbox_value($brsectiontype, 'showstandard'); //whether show standards or not
+$showprocessing = get_searchbox_value($brsectiontype, 'showprocessing'); //whether show processings or not
+$showaudiocodec = get_searchbox_value($brsectiontype, 'showaudiocodec'); //whether show audio codecs or not
+$catsperrow = (int)get_searchbox_value($brsectiontype, 'catsperrow'); //show how many cats per line
 
-$brcatpadding = get_searchbox_value($brsectiontype, 'catpadding');
-$spcatpadding = get_searchbox_value($spsectiontype, 'catpadding');
-$catpadding = (!$allowspecial ? $brcatpadding : ($brcatpadding < $spcatpadding ? $brcatpadding : $spcatpadding)); //padding space between categories in pixel
+$catpadding = get_searchbox_value($brsectiontype, 'catpadding'); //padding space between categories in pixel
 
 $brcats = genrelist($brsectiontype);
-$spcats = genrelist($spsectiontype);
 
 if ($showsubcat){
 if ($showsource) $sources = searchbox_item_list("sources", $brsectiontype);
@@ -56,16 +47,6 @@ if ($__server_REQUEST_METHOD == "POST") {
 		if (!empty(\App\Support\SupportContext::getPost("cat{$cat['id']}")))
 		{
 			$query[] = "cat{$cat['id']}=1";
-		}
-	}
-	if ($enablespecial == 'yes')
-	{
-		foreach ($spcats as $cat)
-		{
-			if (!empty(\App\Support\SupportContext::getPost("cat{$cat['id']}")))
-			{
-				$query[] = "cat{$cat['id']}=1";
-			}
 		}
 	}
 	if ($showsubcat){
@@ -200,22 +181,6 @@ foreach ($brcats as $cat)//print category list of Torrents section
 	$i++;
 }
 $categories .= "</tr>";
-if ($allowspecial) //print category list of Special section
-{
-	$categories .= "<tr>";
-	$i = 0;
-	foreach ($spcats as $cat)
-	{
-		$numinrow = $i % $catsperrow;
-		$rownum = (int)($i / $catsperrow);
-		if ($i && $numinrow == 0){
-			$categories .= "</tr>".($spenablecatrow ? "<tr><td class=\"embedded\" align=\"left\"><b>".$spcatrow[$rownum]."</b></td></tr>" : "")."<tr>";
-		}
-		$categories .= "<td align=\"left\" class=\"bottom\" style=\"padding-bottom: 4px;padding-left: ".$catpadding."px\"><input name=\"cat".$cat['id']."\" type=\"checkbox\" " . (strpos($CURUSER['notifs'], "[cat".$cat['id']."]") !== false ? " checked=\"checked\"" : "")." value='yes' />".return_category_image($cat['id'], "torrents.php?allsec=1&amp;")."</td>\n";
-		$i++;
-	}
-	$categories .= "</tr>";
-}
 			if ($showsubcat)//Show subcategory (i.e. source, codecs) selections
 			{
 				if ($showsource){
@@ -290,11 +255,6 @@ $categories .= "</table>";
 
 $categories = build_search_box_category_table($browsecatmode, 'yes', 'torrents.php?allsec=1&', false, 3, '', ['section_name' => true]);
 print($categories);
-if (get_setting('main.spsct') == 'yes') {
-    print '<div style="height: 1px;background-color: #eee;margin: 10px 0"></div>';
-    $categoriesSpecial = build_search_box_category_table($specialcatmode, 'yes', 'special.php?allsec=1&', false, 3, '', ['section_name' => true]);
-    print($categoriesSpecial);
-}
 ?>
 </td>
 </tr>

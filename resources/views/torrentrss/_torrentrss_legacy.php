@@ -77,11 +77,8 @@ if ($passkey) {
     }
 
     $browseMode = get_setting('main.browsecat');
-    $onlyBrowseSection = get_setting('main.spsct') != 'yes' || !user_can('view_special_torrent', false, $user['id']);
-    if ($onlyBrowseSection) {
-        $allBrowseCategoryId = \App\Models\SearchBox::listCategoryId($browseMode);
-        $baseQuery->whereIn('torrents.category', $allBrowseCategoryId);
-    }
+    $allBrowseCategoryId = \App\Models\SearchBox::listCategoryId($browseMode);
+    $baseQuery->whereIn('torrents.category', $allBrowseCategoryId);
 }
 
 $baseQuery->where('torrents.visible', 'yes');

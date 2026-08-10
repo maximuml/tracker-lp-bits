@@ -143,18 +143,16 @@ else {
 
 */
 
-    $sectionCurrent = $searchBoxRep->renderTaxonomySelect($sectionmode, $row);
-    tr($lang_edit['row_quality'], $sectionCurrent, 1, "mode_$sectionmode");
-    echo $customField->renderOnUploadPage($id, $sectionmode);
-    echo $hitAndRunRep->renderOnUploadPage($row['hr'], $sectionmode);
-    tr($lang_functions['text_tags'], $tagRep->renderCheckbox($sectionmode, $tagIdArr), 1, "mode_$sectionmode");
-
+    $editModes = [$sectionmode];
     if ($allowmove && $othermode) {
-        $selectOther = $searchBoxRep->renderTaxonomySelect($othermode, $row);
-        tr($lang_edit['row_quality'], $selectOther, 1, "mode_$othermode");
-        echo $customField->renderOnUploadPage($id, $othermode);
-        echo $hitAndRunRep->renderOnUploadPage($row['hr'], $othermode);
-        tr($lang_functions['text_tags'], $tagRep->renderCheckbox($othermode, $tagIdArr), 1, "mode_$othermode");
+        $editModes[] = $othermode;
+    }
+    foreach ($editModes as $editMode) {
+        $select = $searchBoxRep->renderTaxonomySelect($editMode, $row);
+        tr($lang_edit['row_quality'], $select, 1, "mode_$editMode");
+        echo $customField->renderOnUploadPage($id, $editMode);
+        echo $hitAndRunRep->renderOnUploadPage($row['hr'], $editMode);
+        tr($lang_functions['text_tags'], $tagRep->renderCheckbox($editMode, $tagIdArr), 1, "mode_$editMode");
     }
 
 	$rowChecks = [];

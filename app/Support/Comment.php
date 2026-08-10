@@ -2,6 +2,9 @@
 
 namespace App\Support;
 
+use App\Auth\Permission;
+use App\Enums\Permission\PermissionEnum;
+
 /**
  * Legacy BBCode formatter extracted from `include/functions.php`.
  *
@@ -292,7 +295,7 @@ final class Comment
             $html .= '<div style="margin-top: 8pt; margin-bottom: 8pt;"><table id="cid' . $row['id'] . '" border="0" cellspacing="0" cellpadding="0" width="100%"><tr><td class="embedded" width="99%">#' . $row['id'] . '&nbsp;&nbsp;<font color="gray">' . ($lang_functions['text_by'] ?? '') . '</font>';
             $html .= \get_username($row['user'], false, true, true, false, false, true);
             $html .= '&nbsp;&nbsp;<font color="gray">' . ($lang_functions['text_at'] ?? '') . '</font>' . \gettime($row['added'])
-                . ($row['editedby'] && \user_can('commanage') ? ' - [<a href="comment.php?action=vieworiginal&amp;cid=' . $row['id'] . '&amp;type=' . $type . '">' . ($lang_functions['text_view_original'] ?? '') . '</a>]' : '')
+                . ($row['editedby'] && Permission::can(PermissionEnum::COM_MANAGE) ? ' - [<a href="comment.php?action=vieworiginal&amp;cid=' . $row['id'] . '&amp;type=' . $type . '">' . ($lang_functions['text_view_original'] ?? '') . '</a>]' : '')
                 . '</td><td class="embedded nowrap" width="1%"><a href="#top"><img class="top" src="pic/trans.gif" alt="Top" title="Top" /></a>&nbsp;&nbsp;</td></tr></table></div>';
 
             $avatar = ($CURUSER['avatars'] ?? '') === 'yes' ? \htmlspecialchars(trim($userRow['avatar'])) : '';
@@ -316,7 +319,7 @@ final class Comment
 
             $actionbar = '<a href="comment.php?action=add&amp;sub=quote&amp;cid=' . $row['id'] . '&amp;pid=' . $parentId . '&amp;type=' . $type . '"><img class="f_quote" src="pic/trans.gif" alt="Quote" title="' . ($lang_functions['title_reply_with_quote'] ?? '') . '" /></a>'
                 . '<a href="comment.php?action=add&amp;pid=' . $parentId . '&amp;type=' . $type . '"><img class="f_reply" src="pic/trans.gif" alt="Add Reply" title="' . ($lang_functions['title_add_reply'] ?? '') . '" /></a>'
-                . (\user_can('commanage') ? '<a href="comment.php?action=delete&amp;cid=' . $row['id'] . '&amp;type=' . $type . '"><img class="f_delete" src="pic/trans.gif" alt="Delete" title="' . ($lang_functions['title_delete'] ?? '') . '" /></a>' : '')
+                . (Permission::can(PermissionEnum::COM_MANAGE) ? '<a href="comment.php?action=delete&amp;cid=' . $row['id'] . '&amp;type=' . $type . '"><img class="f_delete" src="pic/trans.gif" alt="Delete" title="' . ($lang_functions['title_delete'] ?? '') . '" /></a>' : '')
                 . (($row['user'] == $CURUSER['id'] || \get_user_class() >= $commanage_class) ? '<a href="comment.php?action=edit&amp;cid=' . $row['id'] . '&amp;type=' . $type . '"><img class="f_edit" src="pic/trans.gif" alt="Edit" title="' . ($lang_functions['title_edit'] ?? '') . '" /></a>' : '');
 
             $onlineIcon = ($userRow['last_access'] > $dt)

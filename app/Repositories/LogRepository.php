@@ -2,6 +2,7 @@
 
 namespace App\Repositories;
 
+use App\Auth\Permission;
 use App\Models\News;
 use App\Models\Poll;
 use App\Models\PollAnswer;
@@ -43,7 +44,7 @@ class LogRepository
     {
         $query = NexusDB::table('sitelog');
 
-        if (user_can('confilog')) {
+        if (Permission::canViewConfidentialLog()) {
             if (in_array($filters['search'] ?? '', ['mod', 'normal'], true)) {
                 $query->where('security_level', $filters['search']);
             }

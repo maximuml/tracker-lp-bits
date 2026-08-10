@@ -12,6 +12,8 @@ use Filament\Schemas\Components\Utilities\Get;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Actions\DeleteAction;
+use App\Auth\Permission;
+use App\Enums\Permission\PermissionEnum;
 use App\Filament\OptionsTrait;
 use App\Filament\Resources\User\UserResource;
 use App\Models\Exam;
@@ -73,7 +75,7 @@ class UserProfile extends ViewRecord implements HasActions
 //            if (user_can('user-change-class')) {
 //                $actions[] = $this->buildChangeClassAction();
 //            }
-            if (user_can('user-delete')) {
+            if (Permission::can(PermissionEnum::USER_DELETE)) {
                 $actions[] = $this->buildDeleteAction();
             }
             $actions = apply_filter('user_profile_actions', $actions);

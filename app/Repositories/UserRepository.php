@@ -1,7 +1,9 @@
 <?php
 namespace App\Repositories;
 
+use App\Auth\Permission;
 use App\Enums\ModelEventEnum;
+use App\Enums\Permission\PermissionEnum;
 use App\Exceptions\InsufficientPermissionException;
 use App\Exceptions\NexusException;
 use App\Http\Resources\ExamUserResource;
@@ -644,7 +646,7 @@ class UserRepository extends BaseRepository
      */
     public function changeClass($operator, $targetUser, $newClass, $reason = '', array $extra = []): bool
     {
-        user_can('user-change-class', true);
+        Permission::assertCan(PermissionEnum::USER_CHANGE_CLASS);
         $operator = $this->getUser($operator);
         $targetUser = $this->getUser($targetUser);
         if ($operator) {
@@ -800,7 +802,7 @@ class UserRepository extends BaseRepository
     public function destroy(Collection|int $id, $reasonKey = 'user.destroy_by_admin')
     {
         if (!isRunningInConsole()) {
-            user_can('user-delete', true);
+            Permission::assertCan(PermissionEnum::USER_DELETE);
         }
         if (is_int($id)) {
             $uidArr = Arr::wrap($id);
@@ -936,9 +938,8 @@ class UserRepository extends BaseRepository
         if (Setting::get('main.invitesystem') != 'yes') {
             throw new NexusException(nexus_trans('invite.send_deny_reasons.invite_system_closed'));
         }
-        $permission = 'sendinvite';
-        if (!user_can($permission, false, $uid)) {
-            $requireClass = get_setting("authority.$permission");
+        if (!Permission::can(PermissionEnum::SEND_INVITE, User::findOrFail($uid))) {
+            $requireClass = get_setting("authority." . PermissionEnum::SEND_INVITE->value);
             throw new NexusException(nexus_trans('invite.send_deny_reasons.no_permission', ['class' => User::getClassText($requireClass)]));
         }
         $userInfo = User::query()->findOrFail($uid, User::$commonFields);

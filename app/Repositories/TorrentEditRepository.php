@@ -2,7 +2,9 @@
 
 namespace App\Repositories;
 
+use App\Auth\Permission;
 use App\Enums\ModelEventEnum;
+use App\Enums\Permission\PermissionEnum;
 use App\Exceptions\NexusException;
 use App\Models\Category;
 use App\Models\SearchBox;
@@ -41,7 +43,7 @@ class TorrentEditRepository extends BaseRepository
             throw new NexusException(nexus_trans('takeedit.missing_form_data'));
         }
 
-        if ($user->id != $torrentOld->owner && !\user_can('torrentmanage', false, $user->id)) {
+        if ($user->id != $torrentOld->owner && !Permission::canManageTorrent($user)) {
             throw new NexusException(nexus_trans('takeedit.not_owner'));
         }
 
@@ -60,7 +62,7 @@ class TorrentEditRepository extends BaseRepository
 
         $oldMode = (int) Category::query()->where('id', $torrentOld->category)->value('mode');
         $newMode = (int) $category->mode;
-        if ($oldMode != $newMode && !\user_can('movetorrent', false, $user->id)) {
+        if ($oldMode != $newMode && !Permission::canMoveTorrent($user)) {
             throw new NexusException(nexus_trans('takeedit.cannot_move_torrent'));
         }
 
@@ -91,11 +93,11 @@ class TorrentEditRepository extends BaseRepository
             $updateset[$field] = $subCategories[$field] ?? 0;
         }
 
-        if (\user_can('torrentmanage', false, $user->id)) {
+        if (Permission::canManageTorrent($user)) {
             $updateset['visible'] = $request->input('visible') ? 'yes' : 'no';
         }
 
-        if (\user_can('torrentonpromotion', false, $user->id)) {
+        if (Permission::canSetTorrentOnPromotion($user)) {
             $spState = Torrent::PROMOTION_NORMAL;
             if ($request->has('sel_spstate')) {
                 $selSpState = (int) $request->input('sel_spstate');
@@ -123,7 +125,7 @@ class TorrentEditRepository extends BaseRepository
             $updateset['promotion_until'] = $promotionUntil;
         }
 
-        if (\user_can('torrentsticky', false, $user->id) && $request->has('pos_state')) {
+        if (Permission::canSetTorrentPosState($user) && $request->has('pos_state')) {
             $posState = $request->input('pos_state');
             if (isset(Torrent::$posStates[$posState])) {
                 $posStateUntil = $request->input('pos_state_until') ?: null;
@@ -139,11 +141,11 @@ class TorrentEditRepository extends BaseRepository
             }
         }
 
-        if (\user_can('torrent_hr', false, $user->id) && ($request->has("hr.{$category->mode}") || $request->has('hr'))) {
+        if (Permission::canSetTorrentHitAndRun($user) && ($request->has("hr.{$category->mode}") || $request->has('hr'))) {
             $updateset['hr'] = $this->uploadRepository->getHitAndRun($request, $category);
         }
 
-        if (\user_can('torrent-set-price', false, $user->id) && $paidTorrentEnabled) {
+        if (Permission::canSetTorrentPrice($user) && $paidTorrentEnabled) {
             $updateset['price'] = $this->uploadRepository->getPrice($request);
         }
 

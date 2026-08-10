@@ -24,6 +24,8 @@ use Filament\Tables\Filters\Filter;
 use Filament\Forms\Components\TextInput;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Forms\Components\DatePicker;
+use App\Auth\Permission;
+use App\Enums\Permission\PermissionEnum;
 use App\Filament\OptionsTrait;
 use App\Filament\Resources\Torrent\TorrentResource\Pages;
 use App\Filament\Resources\Torrent\TorrentResource\RelationManagers;
@@ -162,7 +164,7 @@ class TorrentResource extends Resource
     {
         $user = Auth::user();
         $actions = [];
-        if (user_can('torrentsticky')) {
+        if (Permission::canSetTorrentPosState()) {
             $actions[] = BulkAction::make('posState')
                 ->label(__('admin.resources.torrent.bulk_action_pos_state'))
                 ->form([
@@ -189,7 +191,7 @@ class TorrentResource extends Resource
                 ->deselectRecordsAfterCompletion();
         }
 
-        if (user_can('torrentonpromotion')) {
+        if (Permission::canSetTorrentOnPromotion()) {
             $actions[] = BulkAction::make('sp_state')
                 ->label(__('admin.resources.torrent.bulk_action_sp_state'))
                 ->form([
@@ -221,7 +223,7 @@ class TorrentResource extends Resource
                 ->deselectRecordsAfterCompletion();
         }
 
-        if (user_can('torrentmanage')) {
+        if (Permission::canManageTorrent()) {
             $actions[] = BulkAction::make('remove_tag')
                 ->label(__('admin.resources.torrent.bulk_action_remove_tag'))
                 ->requiresConfirmation()
@@ -293,7 +295,7 @@ class TorrentResource extends Resource
         }
 //        $actions[] = self::getBulkActionChangeCategory();
 
-        if (user_can('torrent-delete')) {
+        if (Permission::canDeleteTorrent()) {
             $actions[] = DeleteBulkAction::make('bulk-delete')->using(function (Collection $records) {
                 deletetorrent($records->pluck('id')->toArray());
             });
@@ -304,7 +306,7 @@ class TorrentResource extends Resource
     private static function getActions(): array
     {
         $actions = [];
-        if (self::shouldShowApproval() && user_can('torrent-approval')) {
+        if (self::shouldShowApproval() && Permission::canApproveTorrent()) {
             $actions[] = \Filament\Actions\Action::make('approval')
                 ->label(__('admin.resources.torrent.action_approval'))
                 ->schema([
@@ -327,7 +329,7 @@ class TorrentResource extends Resource
                 });
 
         }
-        if (user_can('torrent-delete')) {
+        if (Permission::canDeleteTorrent()) {
             $actions[] = DeleteAction::make('delete')->using(function ($record) {
                 deletetorrent($record->id);
             });

@@ -3,9 +3,11 @@
 namespace App\Services;
 
 use App\DTOs\AnnounceRequestDto;
+use App\Enums\Permission\PermissionEnum;
 use App\Exceptions\ClientNotAllowedException;
 use App\Exceptions\TrackerException;
 use App\Models\Torrent;
+use App\Support\Permissions;
 use App\Models\User;
 use App\Repositories\AgentAllowRepository;
 use App\Repositories\CleanupRepository;
@@ -302,13 +304,13 @@ final class AnnounceService
 
         $this->torrentId = (int) $this->torrent['id'];
 
-        if ($this->torrent['banned'] === 'yes' && !user_can('seebanned', false, $this->userId)) {
+        if ($this->torrent['banned'] === 'yes' && !Permissions::userCan(PermissionEnum::TORRENT_VIEW_BANNED->value, false, $this->userId)) {
             throw TrackerException::failure('torrent banned');
         }
 
         if ($this->torrent['approval_status'] != Torrent::APPROVAL_STATUS_ALLOW
             && get_setting('torrent.approval_status_none_visible') == 'no'
-            && !user_can('seebanned', false, $this->userId)
+            && !Permissions::userCan(PermissionEnum::TORRENT_VIEW_BANNED->value, false, $this->userId)
         ) {
             throw TrackerException::failure('torrent review not approved');
         }

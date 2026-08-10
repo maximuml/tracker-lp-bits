@@ -3,6 +3,7 @@
 namespace App\Support;
 
 use App\Enums\HitAndRunMode;
+use App\Enums\Permission\PermissionEnum;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
 
@@ -46,7 +47,7 @@ final class TorrentAccess
             return true;
         }
 
-        return \user_can('view_special_torrent', false, $uid);
+        return Permissions::userCan(PermissionEnum::TORRENT_VIEW_SPECIAL->value, false, (int) $uid);
     }
 
     /**

@@ -3,7 +3,6 @@
 namespace App\Support;
 
 use App\Auth\Permission;
-use App\Models\Setting;
 use App\Models\Torrent;
 use App\Models\User;
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -104,7 +103,7 @@ final class LegacyResponse
             (string) ($lang_functions['std_sorry'] ?? ''),
             (string) ($lang_functions['std_permission_denied_only'] ?? '')
                 .UserClass::name($allowMinimumClass, false, true, true)
-                .\sprintf((string) ($lang_functions['std_or_above_can_view'] ?? ''), Setting::getSiteName()),
+                .\sprintf((string) ($lang_functions['std_or_above_can_view'] ?? ''), \App\Support\Config\SiteConfig::current()->basic->siteName()),
             false,
         );
     }
@@ -207,7 +206,7 @@ final class LegacyResponse
             if (Permission::canUploadToNormalSection()) {
                 return true;
             }
-            if (Time::isWeekendUploadOpen(Setting::getIsUploadOpenAtWeekend(), \time())) {
+            if (Time::isWeekendUploadOpen(\App\Support\Config\SiteConfig::current()->main->isUploadOpenAtWeekend(), \time())) {
                 return true;
             }
         }

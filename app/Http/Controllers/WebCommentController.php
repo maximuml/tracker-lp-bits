@@ -6,7 +6,6 @@ use App\Http\Requests\StoreCommentRequest;
 use App\Http\Requests\UpdateCommentRequest;
 use App\Models\Comment;
 use App\Models\Message;
-use App\Models\Setting;
 use App\Models\Torrent;
 use App\Models\User;
 use App\Repositories\CommentRepository;
@@ -289,7 +288,7 @@ class WebCommentController extends Controller
 
     private function applyBonus(string $sign, int $userId): void
     {
-        $points = (float) Setting::get('bonus.addcomment', 0);
+        $points = \App\Support\Config\SiteConfig::current()->bonus->addComment();
         if ($points != 0) {
             Bonus::updatePoints($sign, $points, $userId);
         }
@@ -309,7 +308,7 @@ class WebCommentController extends Controller
         $subject = nexus_trans('comment.msg_new_comment', [], $locale);
         $messageKey = 'comment.msg_' . $type . '_receive_comment';
         $message = nexus_trans($messageKey, [], $locale)
-            . ' [url=' . Http::protocolPrefix(Url::isSecure()) . rtrim((string) Setting::getBaseUrl(), '/') . '/' . $this->buildScript($type, $parentId) . '] ' . $name . '[/url].';
+            . ' [url=' . Http::protocolPrefix(Url::isSecure()) . rtrim((string) \App\Support\Config\SiteConfig::current()->basic->baseUrl(), '/') . '/' . $this->buildScript($type, $parentId) . '] ' . $name . '[/url].';
 
         Message::add([
             'sender' => 0,

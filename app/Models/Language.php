@@ -58,11 +58,10 @@ class Language extends NexusModel
      */
     public static function listEnabled(bool $withoutCache = false): array
     {
-        $value = $withoutCache
-            ? Setting::getFromDb('main.site_language_enabled', self::DEFAULT_ENABLED)
-            : Setting::get('main.site_language_enabled', self::DEFAULT_ENABLED);
-
-        return is_array($value) ? $value : self::DEFAULT_ENABLED;
+        $siteConfig = $withoutCache
+            ? \App\Support\Config\SiteConfig::fromDb()
+            : \App\Support\Config\SiteConfig::current();
+        return $siteConfig->main->enabledSiteLanguages(self::DEFAULT_ENABLED);
     }
 
     public static function updateTransStatus(): void

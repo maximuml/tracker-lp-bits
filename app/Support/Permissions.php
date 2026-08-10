@@ -83,7 +83,7 @@ final class Permissions
             if (isset(User::$classes[$requireClass])) {
                 \stderr(
                     $lang_functions['std_sorry'],
-                    $lang_functions['std_permission_denied_only'] . \get_user_class_name($requireClass, false, true, true) . sprintf($lang_functions['std_or_above_can_view'], \App\Models\Setting::getSiteName()),
+                    $lang_functions['std_permission_denied_only'] . \get_user_class_name($requireClass, false, true, true) . sprintf($lang_functions['std_or_above_can_view'], \App\Support\Config\SiteConfig::current()->basic->siteName()),
                     false,
                 );
             } else {

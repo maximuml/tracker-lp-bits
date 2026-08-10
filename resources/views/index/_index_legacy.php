@@ -299,7 +299,7 @@ if ($showlastxtorrents_main == "yes") {
 
 // ------------- start: top uploader ------------------//
 
-if (get_setting('main.show_top_uploader') == "yes") {
+if (\App\Support\Config\SiteConfig::current()->main->showTopUploader()) {
     $allUploaders = \App\Repositories\IndexRepository::getTopUploaders(10);
     if ($allUploaders->isNotEmpty()) {
         \Nexus\Nexus::css('.tr-top-uploader-tab>td {cursor: pointer}', 'footer', false);

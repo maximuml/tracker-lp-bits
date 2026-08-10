@@ -277,7 +277,7 @@ print($categories);
         </td>
     </tr>
 <tr>
-    <?php if(get_setting("torrent.paid_torrent_enabled") == "yes"){?>
+    <?php if(\App\Support\Config\SiteConfig::current()->torrent->paidTorrentEnabled()){?>
 <tr>
     <td class="rowhead"><?php echo $lang_getrss['row_paid']?>
     </td>

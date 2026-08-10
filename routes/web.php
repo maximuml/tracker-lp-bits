@@ -115,8 +115,8 @@ Route::group(['prefix' => 'web', 'middleware' => ['auth.nexus:nexus-web']], func
 });
 
 if (!isRunningInConsole()) {
-    $passkeyLoginUri = get_setting('security.login_secret');
-    if (!empty($passkeyLoginUri) && get_setting('security.login_type') == 'passkey') {
+    $passkeyLoginUri = \App\Support\Config\SiteConfig::current()->security->loginSecret();
+    if (!empty($passkeyLoginUri) && \App\Support\Config\SiteConfig::current()->security->loginType() === 'passkey') {
         Route::get("$passkeyLoginUri/{passkey}", [\App\Http\Controllers\AuthenticateController::class, 'passkeyLogin']);
     }
 }

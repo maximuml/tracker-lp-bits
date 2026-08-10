@@ -136,7 +136,7 @@ class Update extends Install
         }
         //fix base url, since beta8
         if (WITH_LARAVEL && NexusDB::hasTable('settings')) {
-            $settingBasic = get_setting('basic');
+            $settingBasic = \App\Support\Config\SiteConfig::current()->basic->toArray();
             if (isset($settingBasic['BASEURL']) && Str::startsWith($settingBasic['BASEURL'], 'localhost')) {
                 $this->doLog('[RESET CONFIG basic.BASEURL]');
                 Setting::query()->where('name', 'basic.BASEURL')->update(['value' => '']);
@@ -323,10 +323,10 @@ class Update extends Install
         $hasTableSetting = NexusDB::hasTable('settings');
         if ($hasTableSetting) {
             $updateSettings = [];
-            if (get_setting("system.meilisearch_enabled") == 'yes') {
+            if (\App\Support\Config\SiteConfig::current()->system->meilisearchEnabled()) {
                 $updateSettings["enabled"] = "yes";
             }
-            if (get_setting("system.meilisearch_search_description") == 'yes') {
+            if (\App\Support\Config\SiteConfig::current()->system->meilisearchSearchDescription()) {
                 $updateSettings["search_description"] = "yes";
             }
             if (!empty($updateSettings)) {

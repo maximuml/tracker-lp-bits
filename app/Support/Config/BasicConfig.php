@@ -16,4 +16,9 @@ final class BasicConfig extends Config
         return $this->string('SITENAME', $default);
     }
 
+    public function announceUrl(string $default = ''): string
+    {
+        return $this->string('announce_url', $default);
+    }
+
 }

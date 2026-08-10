@@ -4,7 +4,6 @@ namespace App\Jobs;
 
 use App\Models\BonusLogs;
 use App\Models\IpLog;
-use App\Models\Setting;
 use App\Models\User;
 use App\Repositories\IpLogRepository;
 use Illuminate\Bus\Queueable;
@@ -233,7 +232,7 @@ class CalculateUserSeedBonus implements ShouldQueue
      */
     private function insertIntoClickHouseBulk(array $bonusLogInsert): void
     {
-        if (!Setting::getIsRecordSeedingBonusLog()) {
+        if (!\App\Support\Config\SiteConfig::current()->system->isRecordSeedingBonusLog()) {
             do_log("not enabled");
             return;
         }

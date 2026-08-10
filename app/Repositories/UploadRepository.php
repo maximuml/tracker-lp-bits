@@ -11,7 +11,6 @@ use App\Models\Category;
 use App\Models\File;
 use App\Models\Message;
 use App\Models\SearchBox;
-use App\Models\Setting;
 use App\Models\Torrent;
 use App\Models\TorrentExtra;
 use App\Models\User;
@@ -69,7 +68,8 @@ class UploadRepository extends BaseRepository
             throw new NexusException(nexus_trans("upload.invalid_pieces"));
         }
         $dict['info']['private'] = 1;
-        $dict['info']['source'] = sprintf("[%s] %s", Setting::getBaseUrl(), Setting::getSiteName());
+        $siteConfig = \App\Support\Config\SiteConfig::current();
+        $dict['info']['source'] = sprintf("[%s] %s", $siteConfig->basic->baseUrl(), $siteConfig->basic->siteName());
         unset ($dict['announce-list']); // remove multi-tracker capability
         unset ($dict['nodes']); // remove cached peers (Bitcomet & Azareus)
 
@@ -177,7 +177,7 @@ class UploadRepository extends BaseRepository
             throw new NexusException("upload torrent file error");
         }
         $size = $file->getSize();
-        $maxAllowSize = Setting::getUploadTorrentMaxSize();
+        $maxAllowSize = \App\Support\Config\SiteConfig::current()->main->maxTorrentSize();
         if ($size > $maxAllowSize) {
             $msg = sprintf("%s%s%s",
                 nexus_trans("upload.torrent_file_too_big"),
@@ -243,11 +243,11 @@ class UploadRepository extends BaseRepository
             if (!Permission::canSetTorrentPrice()) {
                 throw new NexusException(nexus_trans("upload.no_permission_to_set_torrent_price"));
             }
-            $paidTorrentEnabled = Setting::getIsPaidTorrentEnabled();
-            if (!$paidTorrentEnabled) {
+            $siteConfig = \App\Support\Config\SiteConfig::current();
+            if (!$siteConfig->torrent->paidTorrentEnabled()) {
                 throw new NexusException(nexus_trans("upload.paid_torrent_not_enabled"));
             }
-            $maxPrice = Setting::getUploadTorrentMaxPrice();
+            $maxPrice = $siteConfig->torrent->maxPrice();
             if ($maxPrice > 0 && $price > $maxPrice) {
                 throw new NexusException(nexus_trans('upload.price_too_much'));
             }
@@ -384,7 +384,7 @@ class UploadRepository extends BaseRepository
             throw new NexusException(nexus_trans('upload.unauthorized_to_upload'));
         }
 
-        $uploadDenyApprovalDenyCount = Setting::getUploadDenyApprovalDenyCount();
+        $uploadDenyApprovalDenyCount = \App\Support\Config\SiteConfig::current()->main->uploadDenyApprovalDenyCount();
         $approvalDenyCount = Torrent::query()->where('owner', $user->id)
             ->where('approval_status', Torrent::APPROVAL_STATUS_DENY)
             ->count()
@@ -399,7 +399,7 @@ class UploadRepository extends BaseRepository
                 return true;
             }
 
-            $offerSkipApprovedCount = Setting::getOfferSkipApprovedCount();
+            $offerSkipApprovedCount = \App\Support\Config\SiteConfig::current()->main->offerSkipApprovedCount();
             if ($user->offer_allowed_count >= $offerSkipApprovedCount) {
                 return true;
             }
@@ -417,9 +417,10 @@ class UploadRepository extends BaseRepository
     /** @param  mixed  $torrentSize */
     private function getSpState($torrentSize): int
     {
-        $largeTorrentSize = Setting::getLargeTorrentSize();
+        $siteConfig = \App\Support\Config\SiteConfig::current();
+        $largeTorrentSize = $siteConfig->torrent->largeSize();
         if ($largeTorrentSize > 0 && $torrentSize > $largeTorrentSize * 1073741824) {
-            $largeTorrentSpState = Setting::getLargeTorrentSpState();
+            $largeTorrentSpState = $siteConfig->torrent->largeSpState();
             if (isset(Torrent::$promotionTypes[$largeTorrentSpState])) {
                 do_log("large torrent, sp state from config: $largeTorrentSpState");
                 return $largeTorrentSpState;
@@ -427,13 +428,14 @@ class UploadRepository extends BaseRepository
             do_log("invalid large torrent sp state: $largeTorrentSpState", 'error');
             return Torrent::PROMOTION_NORMAL;
         } else {
-            $probabilities = [
-                Torrent::PROMOTION_FREE => Setting::getUploadTorrentFreeProbability(),
-                Torrent::PROMOTION_TWO_TIMES_UP => Setting::getUploadTorrentTwoTimesUpProbability(),
-                Torrent::PROMOTION_FREE_TWO_TIMES_UP => Setting::getUploadTorrentFreeTwoTimesUpProbability(),
-                Torrent::PROMOTION_HALF_DOWN => Setting::getUploadTorrentHalfDownProbability(),
-                Torrent::PROMOTION_HALF_DOWN_TWO_TIMES_UP => Setting::getUploadTorrentHalfDownTwoTimesUpProbability(),
-                Torrent::PROMOTION_ONE_THIRD_DOWN => Setting::getUploadTorrentOneThirdDownProbability(),
+            $torrentConfig = \App\Support\Config\SiteConfig::current()->torrent;
+        $probabilities = [
+                Torrent::PROMOTION_FREE => $torrentConfig->randomFreeProbability(),
+                Torrent::PROMOTION_TWO_TIMES_UP => $torrentConfig->randomTwoTimesUpProbability(),
+                Torrent::PROMOTION_FREE_TWO_TIMES_UP => $torrentConfig->randomFreeTwoTimesUpProbability(),
+                Torrent::PROMOTION_HALF_DOWN => $torrentConfig->randomHalfDownProbability(),
+                Torrent::PROMOTION_HALF_DOWN_TWO_TIMES_UP => $torrentConfig->randomHalfDownTwoTimesUpProbability(),
+                Torrent::PROMOTION_ONE_THIRD_DOWN => $torrentConfig->randomOneThirdDownProbability(),
             ];
             $sum = array_sum($probabilities);
             if ($sum == 0) {
@@ -521,7 +523,7 @@ class UploadRepository extends BaseRepository
 
     private function getTorrentSavePath(): string
     {
-        $torrentSavePath = getFullDirectory(Setting::getTorrentSaveDir());
+        $torrentSavePath = getFullDirectory(\App\Support\Config\SiteConfig::current()->main->torrentDir());
         if (!is_dir($torrentSavePath)) {
             do_log(sprintf("torrentSavePath: %s not exists", $torrentSavePath), 'error');
             throw new NexusException(nexus_trans('upload.torrent_save_dir_not_exists'));
@@ -538,7 +540,7 @@ class UploadRepository extends BaseRepository
     {
         $user = Auth::user();
         $old = $user->seedbonus;
-        $delta = Setting::getUploadTorrentRewardBonus();
+        $delta = \App\Support\Config\SiteConfig::current()->bonus->uploadTorrent();
         if ($delta > 0) {
             $new = $old + $delta;
             $user->increment('seedbonus', $delta);
@@ -556,7 +558,8 @@ class UploadRepository extends BaseRepository
     public function sendEmailNotification(Torrent $torrent, $userId = 0): int
     {
         $logMsg = sprintf("torrent: %s, category: %s", $torrent->id, $torrent->category);
-        if (!Setting::getIsAllowUserReceiveEmailNotification() || Setting::getSmtpType() == 'none') {
+        $siteConfig = \App\Support\Config\SiteConfig::current();
+        if (!$siteConfig->smtp->emailNotify() || $siteConfig->smtp->type() == 'none') {
             do_log("$logMsg, not allow user receive email notification or smtp type is none");
             return 0;
         }
@@ -590,10 +593,10 @@ class UploadRepository extends BaseRepository
                 $locale = $user->locale;
                 $logUser = "$logPage, user $user->id, locale: $locale";
                 $subject = nexus_trans("upload.email_notification_subject", [
-                    'site_name' => Setting::getSiteName()
+                    'site_name' => \App\Support\Config\SiteConfig::current()->basic->siteName()
                 ], $locale);
                 $body = nexus_trans("upload.email_notification_body", [
-                    'site_name' => Setting::getSiteName(),
+                    'site_name' => \App\Support\Config\SiteConfig::current()->basic->siteName(),
                     'name' => $torrent->name,
                     'size' => mksize($torrent->size),
                     'category' => $categoryName,

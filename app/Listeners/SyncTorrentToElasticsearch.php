@@ -2,7 +2,6 @@
 
 namespace App\Listeners;
 
-use App\Models\Setting;
 use App\Repositories\SearchRepository;
 use App\Repositories\ToolRepository;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -51,7 +50,7 @@ class SyncTorrentToElasticsearch implements ShouldQueue
     public function failed($event, \Throwable $exception)
     {
         $toolRep = new ToolRepository();
-        $to = Setting::get('main.SITEEMAIL');
+        $to = \App\Support\Config\SiteConfig::current()->main->siteEmail();
         $subject = sprintf('Event: %s listener: %s handle error', get_class($event), __CLASS__);
         $body = sprintf("%s\n%s", $exception->getMessage(), $exception->getTraceAsString());
         try {

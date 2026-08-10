@@ -47,4 +47,19 @@ final class SystemConfig extends Config
         return $this->bool('is_invite_pre_email_and_username', $default);
     }
 
+    public function meilisearchEnabled(bool $default = false): bool
+    {
+        return $this->bool('meilisearch_enabled', $default);
+    }
+
+    public function meilisearchSearchDescription(bool $default = false): bool
+    {
+        return $this->bool('meilisearch_search_description', $default);
+    }
+
+    public function isRecordSeedingBonusLog(bool $default = false): bool
+    {
+        return $this->bool('is_record_seeding_bonus_log', $default);
+    }
+
 }

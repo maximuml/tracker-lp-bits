@@ -32,7 +32,7 @@ class UserFactory extends Factory
         $secret = mksecret();
         $passhash = md5($secret . $password . $secret);
         if (self::$defaultStyleSheet == "") {
-            self::$defaultStyleSheet = get_setting("main.defstylesheet");
+            self::$defaultStyleSheet = \App\Support\Config\SiteConfig::current()->main->defStylesheet();
         }
         $username = sprintf("%s_%s", microtime(true), self::$sequence);
         $email = sprintf("%s@example.net", $username);

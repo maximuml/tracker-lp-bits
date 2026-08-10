@@ -8,8 +8,8 @@ class Chevereto extends Storage {
 
     function upload(string $filepath): string
     {
-        $api = get_setting("image_hosting_chevereto.upload_api_endpoint");
-        $token = get_setting("image_hosting_chevereto.upload_token");
+        $api = \App\Support\Config\SiteConfig::current()->imageHosting->cheveretoUploadApiEndpoint();
+        $token = \App\Support\Config\SiteConfig::current()->imageHosting->cheveretoUploadToken();
         $logPrefix = "filepath: $filepath, api: $api, token: $token";
         $httpClient = new \GuzzleHttp\Client();
         $response = $httpClient->request('POST', $api, [
@@ -51,7 +51,7 @@ class Chevereto extends Storage {
 
     function getBaseUrl(): string
     {
-        return get_setting("image_hosting_chevereto.base_url");
+        return \App\Support\Config\SiteConfig::current()->imageHosting->cheveretoBaseUrl();
     }
 
     function getDriverName(): string

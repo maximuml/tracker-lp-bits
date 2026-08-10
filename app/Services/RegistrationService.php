@@ -7,7 +7,6 @@ use App\Exceptions\AuthenticationException;
 use App\Models\Invite;
 use App\Models\Message;
 use App\Models\MessageTemplate;
-use App\Models\Setting;
 use App\Models\User;
 use App\Repositories\UserRepository;
 use App\Support\AuthCookie;
@@ -73,7 +72,7 @@ class RegistrationService
             throw new AuthenticationException(
                 $this->msg($langFunctions, 'std_the_ip', 'The IP ')
                 . '<b>' . htmlspecialchars($ip) . '</b>'
-                . sprintf($this->msg($langFunctions, 'std_used_many_times', ' is already being used on too many accounts. No more accounts allowed at <b>%s</b>.'), Setting::getSiteName())
+                . sprintf($this->msg($langFunctions, 'std_used_many_times', ' is already being used on too many accounts. No more accounts allowed at <b>%s</b>.'), \App\Support\Config\SiteConfig::current()->basic->siteName())
             );
         }
     }
@@ -433,13 +432,13 @@ class RegistrationService
      */
     private function sendWelcomeMessage(User $user, array $langTakesignup): void
     {
-        $subject = $this->msg($langTakesignup, 'msg_subject', 'Welcome to ') . Setting::getSiteName() . '!';
+        $subject = $this->msg($langTakesignup, 'msg_subject', 'Welcome to ') . \App\Support\Config\SiteConfig::current()->basic->siteName() . '!';
         $msg = MessageTemplate::forRegisterWelcome($user->lang, ['username' => $user->username]);
 
         if (empty($msg)) {
             $msg = $this->msg($langTakesignup, 'msg_congratulations', 'Congratulations ')
                 . $user->username
-                . sprintf($this->msg($langTakesignup, 'msg_you_are_a_member', ''), Setting::getSiteName(), Setting::getSiteName());
+                . sprintf($this->msg($langTakesignup, 'msg_you_are_a_member', ''), \App\Support\Config\SiteConfig::current()->basic->siteName(), \App\Support\Config\SiteConfig::current()->basic->siteName());
         }
 
         Message::add([
@@ -493,7 +492,7 @@ class RegistrationService
      */
     private function resolveSignupRedirect(int $userId, string $secret, User $user, string $verification, string $email, string $langFolder, array $langTakesignup): string
     {
-        $baseUrl = Setting::getBaseUrl();
+        $baseUrl = \App\Support\Config\SiteConfig::current()->basic->baseUrl();
         if (! str_contains($baseUrl, '://')) {
             $baseUrl = Http::protocolPrefix(isHttps()) . $baseUrl;
         }
@@ -529,7 +528,7 @@ class RegistrationService
         string $langFolder,
         array $langMail,
     ): void {
-        $baseUrl = Setting::getBaseUrl();
+        $baseUrl = \App\Support\Config\SiteConfig::current()->basic->baseUrl();
         if (! str_contains($baseUrl, '://')) {
             $baseUrl = Http::protocolPrefix(isHttps()) . $baseUrl;
         }
@@ -537,7 +536,7 @@ class RegistrationService
         $psecret = md5(Strings::padHash($secret));
         $confirmUrl = $baseUrl . '/confirm.php?id=' . $userId . '&secret=' . $psecret;
         $resendUrl = $baseUrl . '/confirm_resend.php';
-        $siteName = Setting::getSiteName();
+        $siteName = \App\Support\Config\SiteConfig::current()->basic->siteName();
         $reportEmail = \App\Support\Config\SiteConfig::current()->main->reportEmail('');
 
         $mailOne = $langMail['mail_one'] ?? 'Hi ';

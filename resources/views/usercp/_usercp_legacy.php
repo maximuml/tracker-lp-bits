@@ -615,7 +615,7 @@ EOD;
                 tr_small($lang_usercp['row_two_step_secret'],"<input type=text name=two_step_code />".$lang_usercp['text_two_step_secret_unbind_note'], 1);
             } else {
                 $twoStepSecret = \App\Support\TwoFactorAuthHelper::createSecret();
-                $twoStepQrCodeUrl = \App\Support\TwoFactorAuthHelper::qrCodeUrl(sprintf('%s(%s)', get_setting('basic.SITENAME'), $CURUSER['username']), $twoStepSecret);
+                $twoStepQrCodeUrl = \App\Support\TwoFactorAuthHelper::qrCodeUrl(sprintf('%s(%s)', \App\Support\Config\SiteConfig::current()->basic->siteName(), $CURUSER['username']), $twoStepSecret);
                 $twoStepY = '<div style="display: flex;align-items:center">';
                 $twoStepY .= sprintf('<div><img src="%s" /></div>', $twoStepQrCodeUrl);
                 $twoStepY .= sprintf(
@@ -699,15 +699,16 @@ else{
 if ($CURUSER["avatar"])
 	tr_small($lang_usercp['row_avatar'], "<img src=\"" . $CURUSER["avatar"] . "\" border=0>", 1);
 tr_small($lang_usercp['row_passkey'], hide_text($CURUSER["passkey"]), 1);
-if (get_setting('security.login_type') == 'passkey' && get_setting('security.login_secret_deadline') > date('Y-m-d H:i:s')) {
-    tr_small($lang_usercp['row_passkey_login_url'], sprintf('%s/%s/%s', getSchemeAndHttpHost(), get_setting('security.login_secret'), $CURUSER['passkey']), 1);
+$loginSecretDeadline = \App\Support\Config\SiteConfig::current()->security->loginSecretDeadline();
+if (\App\Support\Config\SiteConfig::current()->security->loginType() === 'passkey' && $loginSecretDeadline !== null && $loginSecretDeadline > date('Y-m-d H:i:s')) {
+    tr_small($lang_usercp['row_passkey_login_url'], sprintf('%s/%s/%s', getSchemeAndHttpHost(), \App\Support\Config\SiteConfig::current()->security->loginSecret(), $CURUSER['passkey']), 1);
 }
 tr_small($lang_usercp['row_invitations'],$CURUSER['invites']." [<a href=\"invite.php?id=".$CURUSER['id']."\" title=\"".$lang_usercp['link_send_invitation']."\">".$lang_usercp['text_send']."</a>]",1);
 tr_small($lang_usercp['row_karma_points'], $CURUSER['seedbonus']." [<a href=\"mybonus.php\" title=\"".$lang_usercp['link_use_karma_points']."\">".$lang_usercp['text_use']."</a>]", 1);
 tr_small($lang_usercp['row_written_comments'], $commentcount." [<a href=\"userhistory.php?action=viewcomments&id=".$CURUSER['id']."\" title=\"".$lang_usercp['link_view_comments']."\">".$lang_usercp['text_view']."</a>]", 1);
 
 //start seed box
-if (get_setting('seed_box.enabled') == 'yes') {
+if (\App\Support\Config\SiteConfig::current()->seedBox->enabled()) {
     $seedBox = '';
     $columnOperator = nexus_trans('label.seed_box_record.operator');
     $columnBandwidth = nexus_trans('label.seed_box_record.bandwidth');

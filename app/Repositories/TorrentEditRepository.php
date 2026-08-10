@@ -8,7 +8,6 @@ use App\Enums\Permission\PermissionEnum;
 use App\Exceptions\NexusException;
 use App\Models\Category;
 use App\Models\SearchBox;
-use App\Models\Setting;
 use App\Models\StaffMessage;
 use App\Models\Torrent;
 use App\Models\TorrentOperationLog;
@@ -66,8 +65,9 @@ class TorrentEditRepository extends BaseRepository
             throw new NexusException(nexus_trans('takeedit.cannot_move_torrent'));
         }
 
-        $maxPrice = Setting::getUploadTorrentMaxPrice();
-        $paidTorrentEnabled = Setting::getIsPaidTorrentEnabled();
+        $siteConfig = \App\Support\Config\SiteConfig::current();
+        $maxPrice = $siteConfig->torrent->maxPrice();
+        $paidTorrentEnabled = $siteConfig->torrent->paidTorrentEnabled();
         if ($maxPrice > 0 && $paidTorrentEnabled) {
             $price = (int) $request->input('price', 0);
             if ($price > $maxPrice) {

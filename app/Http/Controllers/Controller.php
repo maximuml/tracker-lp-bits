@@ -151,7 +151,7 @@ class Controller extends BaseController
         $results = [];
         foreach ($names as $name) {
             if (in_array($name, $this->extraSettingNames)) {
-                $results[$name] = get_setting($name);
+                $results[$name] = \App\Models\Setting::get($name);
             }
         }
         if (!empty($results)) {

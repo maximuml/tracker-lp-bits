@@ -3,7 +3,6 @@ namespace App\Repositories;
 
 use App\Models\Attendance;
 use App\Models\AttendanceLog;
-use App\Models\Setting;
 use App\Models\User;
 use Carbon\Carbon;
 use Nexus\Database\NexusDB;
@@ -19,8 +18,8 @@ class AttendanceRepository extends BaseRepository
         $attendance = $this->getAttendance($uid);
         $now = Carbon::now();
         $today = Carbon::today();
-        $settings = Setting::get('bonus');
-        $initialBonus = $settings['attendance_initial'] ?? Attendance::INITIAL_BONUS;
+        $config = \App\Support\Config\SiteConfig::current()->bonus;
+        $initialBonus = $config->attendanceInitial(Attendance::INITIAL_BONUS);
         $isUpdated = 1;
         $initialData = [
             'uid' => $uid,
@@ -107,11 +106,11 @@ class AttendanceRepository extends BaseRepository
      */
     public function getContinuousPoints($days)
     {
-        $settings = Setting::get('bonus');
-        $initial = $settings['attendance_initial'] ?? Attendance::INITIAL_BONUS;
-        $step = $settings['attendance_step'] ?? Attendance::STEP_BONUS;
-        $max = $settings['attendance_max'] ?? Attendance::MAX_BONUS;
-        $extraAwards = $settings['attendance_continuous'] ?? Attendance::CONTINUOUS_BONUS;
+        $config = \App\Support\Config\SiteConfig::current()->bonus;
+        $initial = $config->attendanceInitial(Attendance::INITIAL_BONUS);
+        $step = $config->attendanceStep(Attendance::STEP_BONUS);
+        $max = $config->attendanceMax(Attendance::MAX_BONUS);
+        $extraAwards = $config->attendanceContinuous(Attendance::CONTINUOUS_BONUS);
         $points = min($initial + ($days - 1) * $step, $max);
         krsort($extraAwards);
         foreach ($extraAwards as $key => $value) {

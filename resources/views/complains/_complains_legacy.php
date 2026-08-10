@@ -55,7 +55,7 @@ if($__server_REQUEST_METHOD === 'POST'){
             if ($uid > 0) {
                 try {
                     $toolRep = new \App\Repositories\ToolRepository();
-                    $toolRep->sendMail($complain->email, $lang_complains['reply_notify_subject'], sprintf($lang_complains['reply_notify_body'], get_setting('basic.SITENAME'), getSchemeAndHttpHost() . '/complains.php?action=view&id=' . $complain->uuid));
+                    $toolRep->sendMail($complain->email, $lang_complains['reply_notify_subject'], sprintf($lang_complains['reply_notify_body'], \App\Support\Config\SiteConfig::current()->basic->siteName(), getSchemeAndHttpHost() . '/complains.php?action=view&id=' . $complain->uuid));
                 } catch (\Exception $exception) {
                     do_log($exception->getMessage(), 'error');
                 }

@@ -390,7 +390,7 @@ final class AuthCookie
     private static function fetchUser(int $id, bool $isArray, string $log)
     {
         $isAjax = \nexus()->isAjax();
-        $selfEnableBonus = \App\Models\Setting::getSelfEnableBonus();
+        $selfEnableBonus = \App\Support\Config\SiteConfig::current()->bonus->selfEnable();
         $shouldIgnoreEnabled = defined('IN_NEXUS') && IN_NEXUS && !$isAjax && $selfEnableBonus > 0;
 
         if ($isArray) {

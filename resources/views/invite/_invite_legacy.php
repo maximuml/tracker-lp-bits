@@ -89,7 +89,7 @@ if ($type == 'new'){
         $inviteSelectOptions .= sprintf('<option value="%s">%s (%s: %s)</option>', $tmp->hash, $tmp->hash, $lang_invite['text_expired_at'], $tmp->expired_at);
     }
     $preUsernameTr = "";
-    if (get_setting("system.is_invite_pre_email_and_username") == "yes") {
+    if (\App\Support\Config\SiteConfig::current()->system->isInvitePreEmailAndUsername()) {
         $preUsernameTr = "<tr><td class=\"rowhead nowrap\" valign=\"top\" align=\"right\">".nexus_trans("invite.pre_register_username")."</td><td align=left><input type=text size=40 name=pre_register_username><br /><font align=left class=small>".nexus_trans("invite.pre_register_username_help")."</font></td></tr>";
     }
 	print("<form method=post action=takeinvite.php?id=".htmlspecialchars($id).">".
@@ -162,7 +162,7 @@ JS;
             print("<tr><td colspan=7 align=center>".$lang_invite['text_no_invites']."</tr>");
         } else {
             list($pagertop, $pagerbottom, $limit, $offset) = pager($pageSize, $number, "?id=$id&menu=$menuSelected&");
-            $haremAdditionFactor = (float)get_setting('bonus.harem_addition');
+            $haremAdditionFactor = \App\Support\Config\SiteConfig::current()->bonus->haremAddition();
             $inviteRows = \App\Repositories\InviteRepository::getInvitees($id, $filters, (int)$offset, $pageSize);
 
             print("<tr>

@@ -121,6 +121,11 @@ final class MainConfig extends Config
         return $this->int('upload_deny_approval_deny_count', $default);
     }
 
+    public function maxTorrentSize(int $default = 0): int
+    {
+        return $this->int('max_torrent_size', $default);
+    }
+
     public function waitSystem(bool $default = false): bool
     {
         return $this->bool('waitsystem', $default);
@@ -176,6 +181,11 @@ final class MainConfig extends Config
         return $this->int('maxip', $default);
     }
 
+    public function isUploadOpenAtWeekend(bool $default = false): bool
+    {
+        return $this->bool('sptime', $default);
+    }
+
     public function defStylesheet(int $default = 1): int
     {
         return $this->int('defstylesheet', $default);
@@ -184,6 +194,25 @@ final class MainConfig extends Config
     public function inviteCount(int $default = 0): int
     {
         return $this->int('invite_count', $default);
+    }
+
+    public function showTopUploader(bool $default = false): bool
+    {
+        return $this->bool('show_top_uploader', $default);
+    }
+
+    public function enableTechnicalInfo(bool $default = false): bool
+    {
+        return $this->bool('enable_technical_info', $default);
+    }
+
+    /**
+     * @param array<int, string> $default
+     * @return array<int, string>
+     */
+    public function enabledSiteLanguages(array $default = ['en']): array
+    {
+        return $this->array('site_language_enabled', $default);
     }
 
     public function torrentsPerPageNullable(?string $default = null): ?string

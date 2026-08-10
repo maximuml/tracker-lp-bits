@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\ThankResource;
-use App\Models\Setting;
 use App\Models\Thank;
 use App\Models\Torrent;
 use App\Models\User;
@@ -57,8 +56,8 @@ class ThankController extends Controller
 
         $result = DB::transaction(function () use ($user, $torrentOwner, $torrent) {
             $thank = $user->thank_torrent_logs()->create(['torrentid' => $torrent->id]);
-            $sayThanksBonus = Setting::get('bonus.saythanks');
-            $receiveThanksBonus = Setting::get('bonus.receivethanks');
+            $sayThanksBonus = \App\Support\Config\SiteConfig::current()->bonus->sayThanks();
+            $receiveThanksBonus = \App\Support\Config\SiteConfig::current()->bonus->receiveThanks();
             if ($sayThanksBonus > 0) {
                 $affectedRows = User::query()
                     ->where('id', $user->id)

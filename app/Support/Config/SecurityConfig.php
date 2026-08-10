@@ -32,6 +32,16 @@ final class SecurityConfig extends Config
         return $this->int('maxip', $default);
     }
 
+    public function maxLoginAttempts(int $default = 10): int
+    {
+        return $this->int('maxloginattempts', $default);
+    }
+
+    public function captchaRequired(bool $default = false): bool
+    {
+        return $this->bool('iv', $default);
+    }
+
     public function guestVisitType(): ?string
     {
         $value = $this->data['guest_visit_type'] ?? null;
@@ -49,6 +59,16 @@ final class SecurityConfig extends Config
     {
         $value = $this->data['login_type'] ?? null;
         return $value !== null ? (string) $value : null;
+    }
+
+    public function loginSecret(string $default = ''): string
+    {
+        return $this->string('login_secret', $default);
+    }
+
+    public function httpsAnnounceUrl(string $default = ''): string
+    {
+        return $this->string('https_announce_url', $default);
     }
 
 }

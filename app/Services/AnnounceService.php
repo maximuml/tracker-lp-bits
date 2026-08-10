@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\DTOs\AnnounceRequestDto;
 use App\Exceptions\ClientNotAllowedException;
 use App\Enums\HitAndRunMode;
 use App\Exceptions\TrackerException;
@@ -11,13 +12,13 @@ use App\Models\Torrent;
 use App\Models\User;
 use App\Repositories\AgentAllowRepository;
 use App\Repositories\CleanupRepository;
-use App\ValueObjects\InfoHash;
 use App\Repositories\IpLogRepository;
 use App\Repositories\RequireSeedTorrentRepository;
 use App\Repositories\TorrentRepository;
 use App\Repositories\UserRepository;
+use App\Services\Announce\PeerLifecycle;
+use App\Services\Announce\RateLimiter;
 use App\Support\LegacyDb;
-use App\Support\Network;
 use App\Support\Strings;
 use App\Support\SupportContext;
 use App\Support\Tracker;
@@ -29,6 +30,7 @@ use Nexus\Database\NexusDB;
 final class AnnounceService
 {
     private Request $request;
+    private AnnounceRequestDto $dto;
 
     /** @var array<string, mixed> */
     private array $params;
@@ -79,15 +81,25 @@ final class AnnounceService
     public function handle(Request $request, array $params): array
     {
         $this->request = $request;
-        $this->params = $params;
-        $this->agent = (string) $request->header('User-Agent');
+        $this->dto = AnnounceRequestDto::fromRequest($request, $params);
+        $this->params = $this->dto->toParams();
+        $this->agent = $this->dto->userAgent;
+        $this->ip = $this->dto->ip;
+        $this->ipv4 = $this->dto->ipv4 ?? '';
+        $this->ipv6 = $this->dto->ipv6 ?? '';
+        $this->peerId = $this->dto->peerId->toBinary();
+        $this->infoHash = $this->dto->infoHash->toBinary();
+        $this->left = $this->dto->left;
+        $this->event = $this->dto->event;
+        $this->compact = $this->dto->compact;
+        $this->rsize = $this->dto->numWant;
+        $this->seeder = $this->dto->isSeeder() ? 'yes' : 'no';
         $this->dt = date('Y-m-d H:i:s', TIMENOW);
 
-        $this->prepareParams();
         $this->blockBrowser();
-        $this->resolveIp();
         $this->checkPort();
-        $this->rateLimitLocks();
+        $rateLimitResult = (new RateLimiter())->check($this->dto);
+        $this->isReAnnounce = $rateLimitResult->isReAnnounce;
         $this->authenticateUser();
         $this->checkClient();
         $this->loadTorrent();
@@ -98,40 +110,30 @@ final class AnnounceService
             return $repDict;
         }
 
-        $this->findSelf();
-        $this->loadSnatchInfo();
-        $this->validateAnnounceTime();
+        $this->userId = (int) $this->user['id'];
+        $this->torrentId = (int) $this->torrent['id'];
+
         $this->detectSeedBox();
+
+        $peerLifecycle = new PeerLifecycle($this->dto, $this->torrent, $this->user, $this->isIPSeedBox, $this->dt);
+        $this->self = $peerLifecycle->findSelf();
+        $this->loadSnatchInfo();
+        $peerLifecycle->setSnatchInfo($this->snatchInfo ?: false);
+
+        $this->validateAnnounceTime();
         $this->handlePaidTorrent();
 
         [$upthis, $downthis, $snatchTimeColumn, $snatchTimeIncrement, $leechTimeNoSeederIncrement] = $this->computeTraffic();
         $this->checkSeedBoxSpeed($upthis);
         $this->cheaterCheck($upthis, $downthis);
 
-        $response = NexusDB::transaction(function () use ($upthis, $downthis, $snatchTimeColumn, $snatchTimeIncrement, $leechTimeNoSeederIncrement) {
-            return $this->process($upthis, $downthis, $snatchTimeColumn, $snatchTimeIncrement, $leechTimeNoSeederIncrement);
+        $response = NexusDB::transaction(function () use ($peerLifecycle, $upthis, $downthis, $snatchTimeColumn, $snatchTimeIncrement, $leechTimeNoSeederIncrement) {
+            return $this->process($peerLifecycle, $upthis, $downthis, $snatchTimeColumn, $snatchTimeIncrement, $leechTimeNoSeederIncrement);
         });
 
         $this->postProcess();
 
         return $response;
-    }
-
-    private function prepareParams(): void
-    {
-        $this->peerId = $this->params['peer_id'];
-        $this->infoHash = $this->params['info_hash'];
-        $this->left = (int) $this->params['left'];
-        $this->seeder = $this->left == 0 ? 'yes' : 'no';
-        $this->event = $this->params['event'] ?? null;
-        $this->compact = !empty($this->params['compact']);
-        $this->rsize = (int) ($this->params['numwant'] ?? $this->params['num_want'] ?? 50);
-        if ($this->rsize < 0) {
-            $this->rsize = 0;
-        }
-        if ($this->rsize > 200) {
-            $this->rsize = 200;
-        }
     }
 
     private function blockBrowser(): void
@@ -150,23 +152,6 @@ final class AnnounceService
             if (isset($headers['cookie']) || isset($headers['accept-language']) || isset($headers['accept-charset'])) {
                 throw TrackerException::failure('Anti-Cheater: You cannot use this agent');
             }
-        }
-    }
-
-    private function resolveIp(): void
-    {
-        $this->ip = getip(true);
-
-        if (Network::isIpv4($this->ip)) {
-            $this->ipv4 = $this->ip;
-        } elseif (!empty($this->params['ipv4']) && Network::isIpv4($this->params['ipv4'])) {
-            $this->ipv4 = $this->params['ipv4'];
-        }
-
-        if (Network::isIpv6($this->ip)) {
-            $this->ipv6 = $this->ip;
-        } elseif (!empty($this->params['ipv6']) && Network::isIpv6($this->params['ipv6'])) {
-            $this->ipv6 = $this->params['ipv6'];
         }
     }
 
@@ -194,40 +179,6 @@ final class AnnounceService
             $port == 6699 => true,
             default => false,
         };
-    }
-
-    private function rateLimitLocks(): void
-    {
-        $passkey = $this->params['passkey'];
-        $redis = NexusDB::redis();
-
-        $passkeyInvalidKey = 'passkey_invalid';
-        if ($redis->get("{$passkeyInvalidKey}:{$passkey}")) {
-            do_log('[ANNOUNCE] Passkey invalid');
-            $this->warn('Passkey invalid');
-        }
-
-        $infoHashSha1 = InfoHash::fromBinary($this->infoHash)->fingerprint();
-        $reAnnounceInterval = 5;
-        $frequencyInterval = 30;
-        $isStoppedOrCompleted = !empty($this->event) && in_array($this->event, ['completed', 'stopped'], true);
-
-        $lockParams = ['info_hash' => $this->infoHash, 'passkey' => $passkey];
-        $reAnnounceKey = 'isReAnnounce:' . md5(http_build_query($lockParams));
-        if (!$redis->set($reAnnounceKey, TIMENOW, ['nx', 'ex' => $reAnnounceInterval])) {
-            $this->isReAnnounce = true;
-        }
-
-        $torrentNotExistsKey = 'torrent_not_exists';
-        if ($redis->get("{$torrentNotExistsKey}:{$this->infoHash}")) {
-            throw TrackerException::failure('torrent not registered with this tracker');
-        }
-
-        $frequencyKey = "reAnnounceCheckByInfoHash:{$passkey}:{$infoHashSha1}";
-        if (!$isStoppedOrCompleted && !$this->isReAnnounce && !$redis->set($frequencyKey, TIMENOW, ['nx', 'ex' => $frequencyInterval])) {
-            do_log('[ANNOUNCE] Request too frequent(h)');
-            $this->warn('Request too frequent(h)', 300);
-        }
     }
 
     private function authenticateUser(): void
@@ -393,28 +344,6 @@ final class AnnounceService
             'peers'        => $this->compact ? '' : [],
             'peers6'       => '',
         ];
-    }
-
-    private function findSelf(): void
-    {
-        $selfRecord = NexusDB::table('peers')
-            ->where('torrent', $this->torrentId)
-            ->where('userid', $this->userId)
-            ->where('peer_id', $this->peerId)
-            ->first();
-
-        if (!$selfRecord) {
-            return;
-        }
-
-        $this->self = (array) $selfRecord;
-        $this->self['last_action_unix_timestamp'] = $this->self['last_action']
-            ? strtotime($this->self['last_action'])
-            : 0;
-        $this->self['announcetime'] = max(0, TIMENOW - (int) $this->self['last_action_unix_timestamp']);
-        $this->self['prevts'] = !empty($this->self['prev_action'])
-            ? strtotime($this->self['prev_action'])
-            : 0;
     }
 
     private function loadSnatchInfo(): void
@@ -643,15 +572,12 @@ final class AnnounceService
         }
     }
 
-    private function process(int $upthis, int $downthis, ?string $snatchTimeColumn, int $snatchTimeIncrement, int $leechTimeNoSeederIncrement): array
+    private function process(PeerLifecycle $peerLifecycle, int $upthis, int $downthis, ?string $snatchTimeColumn, int $snatchTimeIncrement, int $leechTimeNoSeederIncrement): array
     {
-        if ($this->self !== null && $this->event === 'stopped') {
-            $this->processStopped($upthis, $downthis, (string) $snatchTimeColumn, $snatchTimeIncrement, $leechTimeNoSeederIncrement);
-        } elseif ($this->self !== null) {
-            $this->processUpdate($upthis, $downthis, (string) $snatchTimeColumn, $snatchTimeIncrement, $leechTimeNoSeederIncrement);
-        } else {
-            $this->processNewPeer();
-        }
+        $result = $peerLifecycle->process($upthis, $downthis, $snatchTimeColumn, $snatchTimeIncrement, $leechTimeNoSeederIncrement);
+        $this->self = $result->self;
+        $this->snatchInfo = $result->snatchInfo;
+        $this->torrentUpdate = $result->torrentUpdate;
 
         $this->handleHitAndRun();
         $this->applyUserUpdate();
@@ -664,255 +590,6 @@ final class AnnounceService
         }
 
         return $this->buildPeerListResponse();
-    }
-
-    private function processStopped(int $upthis, int $downthis, string $snatchTimeColumn, int $snatchTimeIncrement, int $leechTimeNoSeederIncrement): void
-    {
-        $snatchUpdate = $this->buildSnatchUpdate($upthis, $downthis, $snatchTimeColumn, $snatchTimeIncrement, $leechTimeNoSeederIncrement);
-
-        $deleted = NexusDB::table('peers')->where('id', (int) $this->self['id'])->delete();
-        if ($deleted) {
-            $this->torrentUpdate[$this->self['seeder'] === 'yes' ? 'seeders' : 'leechers'] = NexusDB::raw(
-                $this->self['seeder'] === 'yes' ? 'seeders - 1' : 'leechers - 1'
-            );
-
-            if (!empty($this->snatchInfo)) {
-                NexusDB::table('snatched')->where('id', (int) $this->snatchInfo['id'])->update($snatchUpdate);
-            }
-        }
-    }
-
-    private function processUpdate(int $upthis, int $downthis, string $snatchTimeColumn, int $snatchTimeIncrement, int $leechTimeNoSeederIncrement): void
-    {
-        $peerIPUpdate = [];
-        if ($this->ipv4) {
-            $peerIPUpdate['ipv4'] = $this->ipv4;
-        }
-        if ($this->ipv6) {
-            $peerIPUpdate['ipv6'] = $this->ipv6;
-        }
-
-        $peerUpdate = [
-            'ip'          => $this->ip,
-            'port'        => (int) $this->params['port'],
-            'uploaded'    => (int) $this->params['uploaded'],
-            'downloaded'  => (int) $this->params['downloaded'],
-            'to_go'       => $this->left,
-            'prev_action' => $this->self['last_action'],
-            'last_action' => $this->dt,
-            'seeder'      => $this->seeder,
-            'agent'       => $this->agent,
-            'is_seed_box' => (int) $this->isIPSeedBox,
-        ];
-
-        $snatchUpdate = $this->buildSnatchUpdate($upthis, $downthis, $snatchTimeColumn, $snatchTimeIncrement, $leechTimeNoSeederIncrement);
-
-        if ($this->event === 'completed') {
-            $peerUpdate['finishedat'] = TIMENOW;
-            $snatchUpdate['completedat'] = $this->dt;
-            $snatchUpdate['finished'] = 'yes';
-            $this->torrentUpdate['times_completed'] = NexusDB::raw('times_completed + 1');
-        }
-
-        $peerUpdate = array_merge($peerUpdate, $peerIPUpdate);
-
-        $peerAffected = NexusDB::table('peers')->where('id', (int) $this->self['id'])->update($peerUpdate);
-
-        if ($peerAffected > 0) {
-            if ($this->seeder !== $this->self['seeder']) {
-                if ($this->seeder === 'yes') {
-                    $this->torrentUpdate['seeders'] = NexusDB::raw('seeders + 1');
-                    $this->torrentUpdate['leechers'] = NexusDB::raw('leechers - 1');
-                } else {
-                    $this->torrentUpdate['seeders'] = NexusDB::raw('seeders - 1');
-                    $this->torrentUpdate['leechers'] = NexusDB::raw('leechers + 1');
-                }
-            }
-
-            if (!empty($this->snatchInfo)) {
-                NexusDB::table('snatched')->where('id', (int) $this->snatchInfo['id'])->update($snatchUpdate);
-                do_action('snatched_saved', $this->torrent, $this->snatchInfo);
-            }
-        }
-    }
-
-    private function processNewPeer(): void
-    {
-        if ($this->event === 'stopped') {
-            do_log("[INSERT PEER] event = 'stopped', ignore.");
-            return;
-        }
-
-        $isPeerExist = NexusDB::table('peers')
-            ->where('torrent', $this->torrentId)
-            ->where('peer_id', $this->peerId)
-            ->where('userid', $this->userId)
-            ->exists();
-
-        if ($isPeerExist) {
-            do_log("[INSERT PEER] peer already exists for torrent: {$this->torrentId}, user: {$this->userId}.");
-            return;
-        }
-
-        $sameIPRecord = NexusDB::table('peers')
-            ->where('torrent', $this->torrentId)
-            ->where('userid', $this->userId)
-            ->where('ip', $this->ip)
-            ->value('id');
-        if (!empty($sameIPRecord) && $this->seeder === 'yes') {
-            $this->warn('You cannot seed the same torrent in the same location from more than 1 client.', 300);
-        }
-
-        $valid = NexusDB::table('peers')
-            ->where('torrent', $this->torrentId)
-            ->where('userid', $this->userId)
-            ->count();
-        if ($valid >= 1 && $this->seeder === 'no') {
-            throw TrackerException::failure('You already are downloading the same torrent. You may only leech from one location at a time.');
-        }
-        if ($valid >= 3 && $this->seeder === 'yes') {
-            throw TrackerException::failure('You cannot seed the same torrent from more than 3 locations.');
-        }
-
-        $this->enforceWaitAndSlotLimitsForNewPeer();
-
-        $peerInsert = [
-            'torrent'        => $this->torrentId,
-            'userid'         => $this->userId,
-            'peer_id'        => $this->peerId,
-            'ip'             => $this->ip,
-            'port'           => (int) $this->params['port'],
-            'connectable'    => 'yes',
-            'uploaded'       => (int) $this->params['uploaded'],
-            'downloaded'     => (int) $this->params['downloaded'],
-            'to_go'          => $this->left,
-            'started'        => $this->dt,
-            'last_action'    => $this->dt,
-            'seeder'         => $this->seeder,
-            'agent'          => $this->agent,
-            'downloadoffset' => (int) $this->params['downloaded'],
-            'uploadoffset'   => (int) $this->params['uploaded'],
-            'passkey'        => $this->params['passkey'],
-            'is_seed_box'    => (int) $this->isIPSeedBox,
-        ];
-
-        if ($this->ipv4) {
-            $peerInsert['ipv4'] = $this->ipv4;
-        }
-        if ($this->ipv6) {
-            $peerInsert['ipv6'] = $this->ipv6;
-        }
-
-        do_log("[INSERT PEER] peer not exists for torrent: {$this->torrentId}, user: {$this->userId}, peer_id: " . bin2hex($this->peerId));
-
-        try {
-            NexusDB::table('peers')->insert($peerInsert);
-            $this->torrentUpdate[$this->seeder === 'yes' ? 'seeders' : 'leechers'] = NexusDB::raw(
-                $this->seeder === 'yes' ? 'seeders + 1' : 'leechers + 1'
-            );
-
-            $existingSnatchId = NexusDB::table('snatched')
-                ->where('torrentid', $this->torrentId)
-                ->where('userid', $this->userId)
-                ->value('id');
-
-            if ($existingSnatchId) {
-                NexusDB::table('snatched')->where('id', (int) $existingSnatchId)->update([
-                    'to_go'       => $this->left,
-                    'last_action' => $this->dt,
-                ]);
-                $this->snatchInfo = LegacyDb::snatchInfo($this->torrentId, $this->userId);
-            } else {
-                $snatchInsert = [
-                    'torrentid'  => $this->torrentId,
-                    'userid'     => $this->userId,
-                    'ip'         => $this->ip,
-                    'port'       => (int) $this->params['port'],
-                    'uploaded'   => (int) $this->params['uploaded'],
-                    'downloaded' => (int) $this->params['downloaded'],
-                    'to_go'      => $this->left,
-                    'startdat'   => $this->dt,
-                    'last_action'=> $this->dt,
-                ];
-                NexusDB::table('snatched')->insert($snatchInsert);
-                $this->snatchInfo = LegacyDb::snatchInfo($this->torrentId, $this->userId);
-            }
-        } catch (\Exception $exception) {
-            do_log('[INSERT PEER] error: ' . $exception->getMessage());
-        }
-    }
-
-    private function enforceWaitAndSlotLimitsForNewPeer(): void
-    {
-        if ((int) $this->user['class'] >= (int) User::CLASS_VIP) {
-            return;
-        }
-
-        $ratio = ($this->user['downloaded'] > 0) ? ($this->user['uploaded'] / $this->user['downloaded']) : 1;
-        $gigs  = $this->user['downloaded'] / (1024 * 1024 * 1024);
-
-        if ($gigs <= 10) {
-            return;
-        }
-
-        if (get_setting('main.waitsystem') == 'yes' && is_array($this->torrent)) {
-            $elapsed = TIMENOW - (int) ($this->torrent['ts'] ?? 0);
-            $wait = match (true) {
-                $ratio < 0.4  => 24,
-                $ratio < 0.5  => 12,
-                $ratio < 0.6  => 6,
-                $ratio < 0.8  => 3,
-                default       => 0,
-            };
-
-            if ($elapsed < $wait) {
-                $faqUrl = Url::schemeAndHost(true) . '/faq.php#id46';
-                $this->warn(
-                    'Your ratio is too low! You need to wait ' . mkprettytime($wait * 3600 - $elapsed) . ' to start, please read ' . $faqUrl . ' for details',
-                    $elapsed
-                );
-            }
-        }
-
-        if (get_setting('main.maxdlsystem') == 'yes') {
-            $max = match (true) {
-                $ratio < 0.5  => 1,
-                $ratio < 0.65 => 2,
-                $ratio < 0.8  => 3,
-                $ratio < 0.95 => 4,
-                default       => 0,
-            };
-
-            if ($max > 0) {
-                $leechingCount = NexusDB::table('peers')
-                    ->where('userid', $this->userId)
-                    ->where('seeder', 'no')
-                    ->count();
-
-                if ($leechingCount >= $max) {
-                    throw TrackerException::failure(
-                        "Your slot limit is reached! You may at most download $max torrents at the same time, please read " . Url::schemeAndHost(true) . '/faq.php#id66 for details'
-                    );
-                }
-            }
-        }
-    }
-
-    private function buildSnatchUpdate(int $upthis, int $downthis, string $snatchTimeColumn, int $snatchTimeIncrement, int $leechTimeNoSeederIncrement): array
-    {
-        $snatchUpdate = [
-            'uploaded'    => NexusDB::raw('uploaded + ' . $upthis),
-            'downloaded'  => NexusDB::raw('downloaded + ' . $downthis),
-            'to_go'       => $this->left,
-            $snatchTimeColumn => NexusDB::raw("{$snatchTimeColumn} + " . $snatchTimeIncrement),
-            'last_action' => $this->dt,
-        ];
-
-        if ($leechTimeNoSeederIncrement > 0) {
-            $snatchUpdate['leech_time_no_seeder'] = NexusDB::raw('leech_time_no_seeder + ' . $leechTimeNoSeederIncrement);
-        }
-
-        return $snatchUpdate;
     }
 
     private function handleHitAndRun(): void

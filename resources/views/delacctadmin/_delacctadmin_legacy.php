@@ -3,7 +3,7 @@ error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
 
 $__server_REQUEST_METHOD = \App\Support\SupportContext::getServerValue('REQUEST_METHOD');
-user_can('user-delete', true);
+\App\Auth\Permission::assertCan(\App\Enums\Permission\PermissionEnum::USER_DELETE);
 
 if ($__server_REQUEST_METHOD == "POST")
 {

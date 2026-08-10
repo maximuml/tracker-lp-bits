@@ -28,7 +28,7 @@
                 }
 
                 //price
-                if (user_can('torrent-set-price') && get_setting("torrent.paid_torrent_enabled") == "yes") {
+                if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::TORRENT_SET_PRICE) && get_setting("torrent.paid_torrent_enabled") == "yes") {
                     $maxPrice = get_setting("torrent.max_price");
                     $pricePlaceholder = "";
                     if ($maxPrice > 0) {
@@ -135,7 +135,7 @@ JS;
 
                 //pick
                 $pickcontent = '';
-                if(user_can('torrentsticky'))
+                if(\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::TORRENT_SET_STICKY))
                 {
                     $options = [];
                     foreach (\App\Models\Torrent::listPosStates() as $key => $value) {
@@ -148,7 +148,7 @@ JS;
                     tr($lang_edit['row_pick'], $pickcontent, 1);
                 }
 
-				if(user_can('beanonymous'))
+				if(\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::BE_ANONYMOUS))
 				{
 					tr($lang_upload['row_show_uploader'], "<input type=\"checkbox\" name=\"uplver\" value=\"yes\" />".$lang_upload['checkbox_hide_uploader_note'], 1);
 				}

@@ -2,7 +2,7 @@
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
 //require_once(get_langfile_path("",true));
-user_can('torrent-delete', true);
+\App\Auth\Permission::assertCan(\App\Enums\Permission\PermissionEnum::TORRENT_DELETE);
 function bark($msg) {
 $lang_delete = (array) (\App\Support\SupportContext::getGlobal('lang_delete') ?? []);
   stdhead();
@@ -23,7 +23,7 @@ if (!$torrent)
 	return;
 $row = $torrent->toArray();
 
-if ($CURUSER["id"] != $row["owner"] && !user_can('torrentmanage'))
+if ($CURUSER["id"] != $row["owner"] && !\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::TORRENT_MANAGE))
 	bark($lang_delete['std_not_owner']);
 
 $rt = intval(\App\Support\SupportContext::getPost("reasontype") ?? 0);

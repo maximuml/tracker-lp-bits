@@ -23,7 +23,7 @@ if (!$torrent)
     return;
 $row = $torrent->toArray();
 
-if (!user_can('torrentmanage') || !user_can('torrent-delete')) {
+if (!\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::TORRENT_MANAGE) || !\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::TORRENT_DELETE)) {
     bark($lang_fastdelete['text_no_permission']);
     return;
 }

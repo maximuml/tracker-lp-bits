@@ -2709,7 +2709,39 @@ function clear_torrent_cache($infoHash)
  */
 function user_can($permission, $fail = false, $uid = 0): bool
 {
-    return \App\Support\Permissions::userCan($permission, (bool) $fail, (int) $uid);
+    $enum = \App\Enums\Permission\PermissionEnum::tryFrom((string) $permission);
+    if ($enum === null) {
+        \do_log("Unknown permission string: $permission", 'error');
+        if ($fail) {
+            \App\Support\Permissions::assertHasPermission(false);
+        }
+        return false;
+    }
+
+    if ((int) $uid <= 0) {
+        $uid = (int) \get_user_id();
+    }
+    if ($uid <= 0) {
+        if ($fail) {
+            \App\Support\Permissions::assertHasPermission(false);
+        }
+        return false;
+    }
+
+    $user = \App\Models\User::find($uid);
+    if (!$user) {
+        if ($fail) {
+            \App\Support\Permissions::assertHasPermission(false);
+        }
+        return false;
+    }
+
+    $result = \App\Auth\Permission::can($enum, $user);
+    if ($fail && !$result) {
+        \App\Support\Permissions::assertHasPermission(false);
+    }
+
+    return $result;
 }
 /**
  * @param bool $permissionCheckResult

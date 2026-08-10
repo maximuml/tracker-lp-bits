@@ -8,7 +8,7 @@ $CURUSER = \App\Support\SupportContext::getUser() ?? [];
 	stderr("Error", "Permission denied. For security reason, we logged this action");
 }
 
-if (!user_can('prfmanage'))
+if (!\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::MANAGE_USER_BASIC_INFO))
 	puke();
 
 $action = \App\Support\SupportContext::getPost("action");
@@ -87,11 +87,11 @@ if ($action == "edituser")
     $banLog = [];
     $userModifyLogs = [];
 
-//	if(!user_can('cruprfmanage'))
+//	if(!\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::MANAGE_USER_CONFIDENTIAL_INFO))
 //	{
 //		$modcomment = $arr["modcomment"];
 //	}
-	if(user_can('cruprfmanage'))
+	if(\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::MANAGE_USER_CONFIDENTIAL_INFO))
 	{
 		$email = \App\Support\SupportContext::getPost("email") ?? '';
 		$username = \App\Support\SupportContext::getPost("username") ?? '';
@@ -235,7 +235,7 @@ if ($action == "edituser")
 		puke();
 
     //migrate to management
-//	if (user_can('user-change-class') && $curclass != $class)
+//	if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::USER_CHANGE_CLASS) && $curclass != $class)
 //	{
 //		$what = ($class > $curclass ? $lang_modtask_target[get_user_lang($userid)]['msg_promoted'] : $lang_modtask_target[get_user_lang($userid)]['msg_demoted']);
 //		$subject = sqlesc($lang_modtask_target[get_user_lang($userid)]['msg_class_change']);

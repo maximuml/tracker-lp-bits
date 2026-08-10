@@ -17,7 +17,7 @@ if ($count){
 	list($pagertop, $pagerbottom, , $offset, $rpp) = pager($perpage, $count, $__server_SCRIPT_NAME . "?id=" . htmlspecialchars($id) . "&" );
 	print("<p align=center>".$lang_viewsnatches['text_users_top_finished_recently']."</p>");
 	print("<table border=1 cellspacing=0 cellpadding=5 align=center width=940>\n");
-	print("<tr><td class=colhead align=center>".$lang_viewsnatches['col_username']."</td>".(user_can('userprofile') ? "<td class=colhead align=center>".$lang_viewsnatches['col_ip']."</td>" : "")."<td class=colhead align=center>".$lang_viewsnatches['col_uploaded']."/".$lang_viewsnatches['col_downloaded']."</td><td class=colhead align=center>".$lang_viewsnatches['col_ratio']."</td><td class=colhead align=center>".$lang_viewsnatches['col_se_time']."</td><td class=colhead align=center>".$lang_viewsnatches['col_le_time']."</td><td class=colhead align=center>".$lang_viewsnatches['col_when_completed']."</td><td class=colhead align=center>".$lang_viewsnatches['col_last_action']."</td><td class=colhead align=center>".$lang_viewsnatches['col_report_user']."</td></tr>");
+	print("<tr><td class=colhead align=center>".$lang_viewsnatches['col_username']."</td>".(\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::VIEW_USER_CONFIDENTIAL_INFO) ? "<td class=colhead align=center>".$lang_viewsnatches['col_ip']."</td>" : "")."<td class=colhead align=center>".$lang_viewsnatches['col_uploaded']."/".$lang_viewsnatches['col_downloaded']."</td><td class=colhead align=center>".$lang_viewsnatches['col_ratio']."</td><td class=colhead align=center>".$lang_viewsnatches['col_se_time']."</td><td class=colhead align=center>".$lang_viewsnatches['col_le_time']."</td><td class=colhead align=center>".$lang_viewsnatches['col_when_completed']."</td><td class=colhead align=center>".$lang_viewsnatches['col_last_action']."</td><td class=colhead align=center>".$lang_viewsnatches['col_report_user']."</td></tr>");
 
 	$snatchedRows = \Nexus\Database\NexusDB::table('snatched')
 	    ->where('finished', 'yes')
@@ -52,12 +52,12 @@ if ($count){
 		$userrow = get_user_row($arr['userid']);
 		if ($userrow['privacy'] == 'strong'){
 			$username = $lang_viewsnatches['text_anonymous'];
-			if (user_can('viewanonymous') || $arr["id"] == $CURUSER['id'])
+			if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::VIEW_ANONYMOUS) || $arr["id"] == $CURUSER['id'])
 				$username .= "<br />(".get_username($arr['userid']).")";
 		}
 		else $username = get_username($arr['userid']);
 		$reportImage = "<img class=\"f_report\" src=\"pic/trans.gif\" alt=\"Report\" title=\"".$lang_viewsnatches['title_report']."\" />";
-		print("<tr$highlight><td class=rowfollow align=center>" . $username ."</td>".(user_can('userprofile') ? "<td class=rowfollow align=center><span class='nowrap'>".$arr['ip'].$seedBoxRep->renderIcon($arr['ip'], $arr['userid'])."</span></td>" : "")."<td class=rowfollow align=center>".$uploaded."@".$uprate.$lang_viewsnatches['text_per_second']."<br />".$downloaded."@".$downrate.$lang_viewsnatches['text_per_second']."</td><td class=rowfollow align=center>$ratio</td><td class=rowfollow align=center>$seedtime</td><td class=rowfollow align=center>$leechtime</td><td class=rowfollow align=center>".gettime($arr['completedat'],true,false)."</td><td class=rowfollow align=center>".gettime($arr['last_action'],true,false)."</td><td class=rowfollow align=center style='padding: 0px'>".($userrow['privacy'] != 'strong' || user_can('viewanonymous') ? "<a href=report.php?user={$arr['userid']}>$reportImage</a>" : $reportImage)."</td></tr>\n");
+		print("<tr$highlight><td class=rowfollow align=center>" . $username ."</td>".(\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::VIEW_USER_CONFIDENTIAL_INFO) ? "<td class=rowfollow align=center><span class='nowrap'>".$arr['ip'].$seedBoxRep->renderIcon($arr['ip'], $arr['userid'])."</span></td>" : "")."<td class=rowfollow align=center>".$uploaded."@".$uprate.$lang_viewsnatches['text_per_second']."<br />".$downloaded."@".$downrate.$lang_viewsnatches['text_per_second']."</td><td class=rowfollow align=center>$ratio</td><td class=rowfollow align=center>$seedtime</td><td class=rowfollow align=center>$leechtime</td><td class=rowfollow align=center>".gettime($arr['completedat'],true,false)."</td><td class=rowfollow align=center>".gettime($arr['last_action'],true,false)."</td><td class=rowfollow align=center style='padding: 0px'>".($userrow['privacy'] != 'strong' || \App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::VIEW_ANONYMOUS) ? "<a href=report.php?user={$arr['userid']}>$reportImage</a>" : $reportImage)."</td></tr>\n");
 	}
 		print("</table>\n");
 		print($pagerbottom);

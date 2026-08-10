@@ -6,7 +6,7 @@ error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 $__server_HTTP_REFERER = \App\Support\SupportContext::getServerValue('HTTP_REFERER');
 $__server_REQUEST_METHOD = \App\Support\SupportContext::getServerValue('REQUEST_METHOD');
 $isLogin = (isset($CURUSER['id']));
-$isAdmin = user_can('staffmem');
+$isAdmin = \App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::STAFF_MEMBER);
 
 if($isLogin && !$isAdmin) {
     permissiondenied();

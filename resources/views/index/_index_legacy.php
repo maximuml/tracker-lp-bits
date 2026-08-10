@@ -16,7 +16,7 @@ stdhead($lang_index['head_home']);
 begin_main_frame();
 
 // ------------- start: recent news ------------------//
-print("<h2>".$lang_index['text_recent_news'].(user_can('newsmanage') ? " - <font class=\"small\">[<a class=\"altlink\" href=\"news.php\"><b>".$lang_index['text_news_page']."</b></a>]</font>" : "")."</h2>");
+print("<h2>".$lang_index['text_recent_news'].(\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::NEWS_MANAGE) ? " - <font class=\"small\">[<a class=\"altlink\" href=\"news.php\"><b>".$lang_index['text_news_page']."</b></a>]</font>" : "")."</h2>");
 
 $Cache->new_page('recent_news', 86400, true);
 if (!$Cache->get_page()){
@@ -58,7 +58,7 @@ if (count($latestNews) > 0)
 echo $Cache->next_row();
 while($Cache->next_row()){
 	echo $Cache->next_part();
-	if (user_can('newsmanage'))
+	if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::NEWS_MANAGE))
 	echo $Cache->next_part();
 }
 echo $Cache->next_row();
@@ -75,7 +75,7 @@ if ($showshoutbox_main == "yes") {
         <font class='striking' id="countdown"></font><font class="small"><?php echo $lang_index['text_seconds']?></font>
         - <a href="shoutbox_history.php" class="small"><?php echo $lang_index['text_shoutbox_history'] ?? 'History'; ?></a>
         <?php
-        if (user_can('sbmanage')) {
+        if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::SB_MANAGE)) {
             echo ' - <font class="small" id="clear-shout-box">[<a class="altlink" href="javascript:;"><b>'.$lang_index['clear_shout_box'].'</b></a>]</font>';
             $clearShoutBoxJs = <<<JS
 jQuery('#clear-shout-box').on("click", function () {
@@ -352,7 +352,7 @@ if ($CURUSER && $showpolls_main == "yes")
 
 		print("<h2>".$lang_index['text_polls']);
 
-		if (user_can('pollmanage'))
+		if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::POLL_MANAGE))
 		{
 			print("<font class=\"small\"> - [<a class=\"altlink\" href=\"makepoll.php?returnto=main\"><b>".$lang_index['text_new']."</b></a>]\n");
 			if ($pollexists)
@@ -401,7 +401,7 @@ if ($CURUSER && $showpolls_main == "yes")
 				$tvotes = number_format($tvotes);
 				print("<p align=\"center\">".$lang_index['text_votes']." ".$tvotes."</p>\n");
 
-				if (user_can('log'))
+				if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::LOG))
 					print("<p align=\"center\"><a href=\"log.php?action=poll\">".$lang_index['text_previous_polls']."</a></p>\n");
 			}
 			else //user has not voted yet

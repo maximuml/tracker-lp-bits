@@ -93,7 +93,7 @@ $lang_functions = \App\Support\SupportContext::getLangFunctions();
 $seedBoxRep = \App\Support\SupportContext::getGlobal('seedBoxRep');
 
 	$s = "<b>" . count($arr) . " $name</b>\n";
-	$showLocationColumn = $enablelocation_tweak == 'yes' || user_can('userprofile');
+	$showLocationColumn = $enablelocation_tweak == 'yes' || \App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::VIEW_USER_CONFIDENTIAL_INFO);
 	if (!count($arr))
 		return $s;
 	$s .= "\n";
@@ -123,7 +123,7 @@ $seedBoxRep = \App\Support\SupportContext::getGlobal('seedBoxRep');
         $secs = max(1, ($e["la"] - $e["st"]));
         $columnLocation = $usernameSeedBoxIcon = '';
         $isStrongPrivacy = $privacy == "strong" || ($torrent['anonymous'] == 'yes' && $e['userid'] == $torrent['owner']);
-        $canView = user_can('viewanonymous') || $e['userid'] == $CURUSER['id'];
+        $canView = \App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::VIEW_ANONYMOUS) || $e['userid'] == $CURUSER['id'];
         if ($showLocationColumn) {
             $columnLocationResult = get_location_column($e, $isStrongPrivacy, $canView);
             $columnLocation = $columnLocationResult['td'];

@@ -10,7 +10,7 @@ $action = \App\Support\SupportContext::getQuery("action") ?? '';
 function can_access_staff_message($msg)
 {
 $CURUSER = \App\Support\SupportContext::getUser() ?? [];
-    if (user_can('staffmem')) {
+    if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::STAFF_MEMBER)) {
         return true;
     }
     if (is_numeric($msg)) {

@@ -2,7 +2,7 @@
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
 $__server_PHP_SELF = \App\Support\SupportContext::getServerValue('PHP_SELF');
-if (!user_can('userprofile'))
+if (!\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::VIEW_USER_CONFIDENTIAL_INFO))
 	permissiondenied();
 else
 {

@@ -37,7 +37,7 @@ $showaudiocodec = (get_searchbox_value($sectionmode, 'showaudiocodec') || ($allo
 $settingMain = get_setting('main');
 stdhead($lang_edit['head_edit_torrent'] . "\"". $row["name"] . "\"");
 
-if (!(isset($CURUSER)) || ($CURUSER["id"] != $row["owner"] && !user_can('torrentmanage'))) {
+if (!(isset($CURUSER)) || ($CURUSER["id"] != $row["owner"] && !\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::TORRENT_MANAGE))) {
 	print("<h1 align=\"center\">".$lang_edit['text_cannot_edit_torrent']."</h1>");
 	echo sprintf("<p>".$lang_edit['text_cannot_edit_torrent_note']."</p>", $__server_REQUEST_URI ?? '');
 }
@@ -51,7 +51,7 @@ else {
 	tr($lang_edit['row_torrent_name']."<font color=\"red\">*</font>", "<input type=\"text\" style=\"width: 99%;\" name=\"name\" value=\"" . htmlspecialchars($row["name"]) . "\" />", 1);
 
     //price
-    if (user_can('torrent-set-price') && get_setting("torrent.paid_torrent_enabled") == "yes") {
+    if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::TORRENT_SET_PRICE) && get_setting("torrent.paid_torrent_enabled") == "yes") {
         $maxPrice = get_setting("torrent.max_price");
         $pricePlaceholder = "";
         if ($maxPrice > 0) {
@@ -124,20 +124,20 @@ else {
     tr($lang_functions['text_tags'], $tagRep->renderCheckbox($sectionmode, $tagIdArr), 1, "mode_$sectionmode");
 
 	$rowChecks = [];
-	if (user_can('beanonymous') || user_can('torrentmanage')) {
+	if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::BE_ANONYMOUS) || \App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::TORRENT_MANAGE)) {
 	    $rowChecks[] = "<label><input type=\"checkbox\" name=\"anonymous\"" . ($row["anonymous"] == "yes" ? " checked=\"checked\"" : "" ) . " value=\"1\" />".$lang_edit['checkbox_anonymous_note']."</label>";
     }
-	if (user_can('torrentmanage')) {
+	if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::TORRENT_MANAGE)) {
 	    array_unshift($rowChecks, "<label><input id='visible' type=\"checkbox\" name=\"visible\"" . ($row["visible"] == "yes" ? " checked=\"checked\"" : "" ) . " value=\"1\" />".$lang_edit['checkbox_visible']."</label>");
     }
 	if (!empty($rowChecks)) {
         tr($lang_edit['row_check'], implode('&nbsp;&nbsp;', $rowChecks), 1);
     }
 
-	if (user_can('torrentsticky') || (user_can('torrentmanage') && $CURUSER["picker"] == 'yes')){
+	if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::TORRENT_SET_STICKY) || (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::TORRENT_MANAGE) && $CURUSER["picker"] == 'yes')){
 		$pickcontent = $pickcontentPrefix =  "";
 
-        if(user_can('torrentonpromotion'))
+        if(\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::TORRENT_ON_PROMOTION))
         {
             $pickcontent .= "<b>".$lang_edit['row_special_torrent']."&nbsp;</b>"."<select name=\"sel_spstate\" style=\"width: 100px;\">" .promotion_selection($row["sp_state"], 0). "</select>&nbsp;&nbsp;&nbsp;".'<select name="promotion_time_type" onchange="if (this.value == \'2\') {document.getElementById(\'promotion_until_note\').style.display = \'\';} else {document.getElementById(\'promotion_until_note\').style.display = \'none\';}"><option value="0"'.($row['promotion_time_type'] == 0 ? ' selected="selected"' : '').'>'.$lang_edit['select_use_global_setting'].'</option><option value="1"'.($row['promotion_time_type'] == 1 ? ' selected="selected"' : '').'>'.$lang_edit['select_forever'].'</option><option value="2"'.($row['promotion_time_type'] == 2 ? ' selected="selected"' : '').'>'.$lang_edit['select_until'].'</option></select><span id="promotion_until_note"'.($row['promotion_time_type'] == 2 ? '' : ' style="display: none;"').'>';
             $pickcontent .= '<input type="text" id="promotionuntiltime" name="promotionuntil" style="width: 120px;" value="'.($row['promotion_until'] > $row['added'] ? $row['promotion_until'] : '').'" />';
@@ -147,7 +147,7 @@ else {
             }
             $pickcontent .= '</select>)&nbsp;'.$lang_edit['text_promotion_until_note'].'</span>&nbsp;&nbsp;';
         }
-		if(user_can('torrentsticky'))
+		if(\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::TORRENT_SET_STICKY))
 		{
             if ($pickcontent) {
                 $pickcontent .= "<br />";
@@ -165,7 +165,7 @@ else {
 	print("<tr><td class=\"toolbox\" colspan=\"2\" align=\"center\"><input id=\"qr\" type=\"submit\" value=\"".$lang_edit['submit_edit_it']."\" /> <input type=\"reset\" value=\"".$lang_edit['submit_revert_changes']."\" /></td></tr>\n");
 	print("</table>\n");
 	print("</form>\n");
-	if (user_can('torrent-delete') && user_can('torrentmanage')) {
+	if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::TORRENT_DELETE) && \App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::TORRENT_MANAGE)) {
         print("<br /><br />");
         print("<form method=\"post\" action=\"delete.php\">\n");
         print("<input type=\"hidden\" name=\"id\" value=\"$id\" />\n");

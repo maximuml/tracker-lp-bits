@@ -4,7 +4,7 @@ if (((\App\Support\SupportContext::getQuery('del') !== null)))
 {
 	if (is_valid_id(\App\Support\SupportContext::getQuery('del')))
 	{
-		if(user_can('sbmanage'))
+		if(\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::SB_MANAGE))
 		{
 			$delId = (int)\App\Support\SupportContext::getQuery('del');
 			\Nexus\Database\NexusDB::table('shoutbox')->where('id', $delId)->delete();
@@ -202,7 +202,7 @@ else
 	$prevUserId = 0;
 	$prevDate = 0;
 	$currentUserId = (int)($CURUSER['id'] ?? 0);
-	$isStaff = user_can('sbmanage');
+	$isStaff = \App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::SB_MANAGE);
 
 	$shoutIds = $rows->pluck('id')->map(fn ($id) => (int) $id)->all();
 	$reactionData = \App\Support\Shoutbox::prefetchReactions($shoutIds, $currentUserId);

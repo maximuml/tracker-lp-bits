@@ -5,7 +5,7 @@ $__server_PHP_SELF = \App\Support\SupportContext::getServerValue('PHP_SELF');
 $userid = intval(\App\Support\SupportContext::getQuery("id") ?? 0);
 int_check($userid,true);
 
-if ($CURUSER["id"] != $userid && !user_can('viewhistory'))
+if ($CURUSER["id"] != $userid && !\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::VIEW_USER_HISTORY))
 permissiondenied();
 
 $action = htmlspecialchars(\App\Support\SupportContext::getQuery("action"));

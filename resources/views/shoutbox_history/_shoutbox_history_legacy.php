@@ -19,7 +19,7 @@ $filters = [
 
 $currentUserId = (int) ($CURUSER['id'] ?? 0);
 echo '<script>var SHOUT_CSRF = \'' . htmlspecialchars(\App\Support\Shoutbox::csrfToken($currentUserId)) . '\';</script>';
-$isStaff = user_can('sbmanage');
+$isStaff = \App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::SB_MANAGE);
 
 // Helpbox has been removed; only regular shoutbox messages are shown.
 $query = \Nexus\Database\NexusDB::table('shoutbox')

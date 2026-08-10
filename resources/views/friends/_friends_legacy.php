@@ -342,7 +342,7 @@ print($blocks);
 print("</td></tr></table>\n");
 
 print("</td></tr></table>\n");
-if (user_can('viewuserlist'))
+if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::VIEW_USER_LIST))
 	print("<p><a href=users.php><b>".$lang_friends['text_find_user']."</b></a></p>");
 stdfoot();
 ?>

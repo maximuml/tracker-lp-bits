@@ -612,7 +612,7 @@ if ($action == "exchange") {
 		}
 		//=== trade for invites
 		elseif($art == "invite") {
-			if(!user_can('buyinvite'))
+			if(!\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::BUY_INVITE))
 				die(get_user_class_name($buyinvite_class,false,false,true).$lang_mybonus['text_plus_only']);
 			$invites = $CURUSER['invites'];
 			$inv = $invites+$bonusarray['menge'];
@@ -623,7 +623,7 @@ if ($action == "exchange") {
 		}
         //=== temporary invite
         elseif($art == "tmp_invite") {
-            if(!user_can('buyinvite'))
+            if(!\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::BUY_INVITE))
                 die(get_user_class_name($buyinvite_class,false,false,true).$lang_mybonus['text_plus_only']);
 //            $invites = $CURUSER['invites'];
 //            $inv = $invites+$bonusarray['menge'];

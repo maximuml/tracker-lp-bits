@@ -72,7 +72,7 @@ if ($passkey) {
     }
 
     $approvalStatusNoneVisible = get_setting('torrent.approval_status_none_visible');
-    if ($approvalStatusNoneVisible == 'no' && !user_can('staffmem', false, $user['id'])) {
+    if ($approvalStatusNoneVisible == 'no' && !\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::STAFF_MEMBER, \App\Models\User::find($user['id']))) {
         $baseQuery->where('torrents.approval_status', \App\Models\Torrent::APPROVAL_STATUS_ALLOW);
     }
 

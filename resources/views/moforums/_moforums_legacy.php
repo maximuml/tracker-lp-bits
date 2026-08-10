@@ -2,7 +2,7 @@
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
 $__server_PHP_SELF = \App\Support\SupportContext::getServerValue('PHP_SELF');
-user_can('forummanage', true);
+\App\Auth\Permission::assertCan(\App\Enums\Permission\PermissionEnum::FORUM_MANAGE);
 
 $act = \App\Support\SupportContext::getQuery('action') ?? '';
 if (!$act) {
@@ -14,7 +14,7 @@ $user = $CURUSER;
 $prefix = '';
 
 if ($act == "del") {
-    user_can('forummanage', true);
+    \App\Auth\Permission::assertCan(\App\Enums\Permission\PermissionEnum::FORUM_MANAGE);
     if (!$id) { header("Location: $PHP_SELF?action=forum");
 	return;}
     \Nexus\Database\NexusDB::table('overforums')->where('id', $id)->delete();
@@ -24,7 +24,7 @@ if ($act == "del") {
 }
 
 if (((\App\Support\SupportContext::getPost('action') !== null)) && \App\Support\SupportContext::getPost('action') == "editforum") {
-    user_can('forummanage', true);
+    \App\Auth\Permission::assertCan(\App\Enums\Permission\PermissionEnum::FORUM_MANAGE);
     $name = \App\Support\SupportContext::getPost('name');
     $desc = \App\Support\SupportContext::getPost('desc');
     if (!$name && !$desc && !$id) { header("Location: $PHP_SELF?action=forum");
@@ -41,7 +41,7 @@ if (((\App\Support\SupportContext::getPost('action') !== null)) && \App\Support\
 }
 
 if (((\App\Support\SupportContext::getPost('action') !== null)) && \App\Support\SupportContext::getPost('action') == "addforum") {
-    user_can('forummanage', true);
+    \App\Auth\Permission::assertCan(\App\Enums\Permission\PermissionEnum::FORUM_MANAGE);
     $name = trim(\App\Support\SupportContext::getPost('name'));
     $desc = trim(\App\Support\SupportContext::getPost('desc'));
     if (!$name && !$desc) {

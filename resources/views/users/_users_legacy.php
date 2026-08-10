@@ -1,7 +1,7 @@
 <?php
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
-user_can('viewuserlist', true);
+\App\Auth\Permission::assertCan(\App\Enums\Permission\PermissionEnum::VIEW_USER_LIST);
 $search = trim(is_scalar(\App\Support\SupportContext::getQuery('search') ?? '') ? (string) (\App\Support\SupportContext::getQuery('search') ?? '') : '');
 $class = is_scalar(\App\Support\SupportContext::getQuery('class') ?? '') ? (string) (\App\Support\SupportContext::getQuery('class') ?? '-') : '-';
 $country = intval(is_scalar(\App\Support\SupportContext::getQuery('country') ?? '') ? (string) (\App\Support\SupportContext::getQuery('country') ?? '0') : '0');

@@ -139,7 +139,7 @@ class DashboardRepository extends BaseRepository
         $result[$name] = [
             'name' => $name,
             'text' => nexus_trans("dashboard.user.$name"),
-            'value' => sprintf('%s / %s', number_format(User::query()->count()), number_format(intval(Setting::get('main.maxusers')))),
+            'value' => sprintf('%s / %s', number_format(User::query()->count()), number_format(intval(\App\Support\Config\SiteConfig::current()->main->maxUsers()))),
         ];
         $name = 'unconfirmed';
         $result[$name] = [

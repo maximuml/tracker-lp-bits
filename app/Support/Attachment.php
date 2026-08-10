@@ -80,7 +80,7 @@ final class Attachment
      */
     public static function rowAndUrlByKey(string $dlkey): array
     {
-        $httpdirectory = \get_setting('attachment.httpdirectory');
+        $httpdirectory = \App\Support\Config\SiteConfig::current()->attachment->httpDirectory();
         $row = \Nexus\Database\NexusDB::cache_get('attachment_' . $dlkey . '_content');
 
         if (empty($row) && strlen($dlkey) == 32) {
@@ -186,7 +186,7 @@ final class Attachment
 
         return preg_replace_callback($pattern, function ($matches) {
             $dlkey = $matches[1];
-            $httpdirectory = \get_setting('attachment.httpdirectory');
+            $httpdirectory = \App\Support\Config\SiteConfig::current()->attachment->httpDirectory();
             $row = \Nexus\Database\NexusDB::remember('attachment_' . $dlkey . '_content', 86400, function () use ($dlkey) {
                 $record = \App\Models\Attachment::query()->where('dlkey', $dlkey)->first();
 

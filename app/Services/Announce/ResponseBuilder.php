@@ -30,12 +30,12 @@ final class ResponseBuilder
      */
     public function initial(int $torrentId): InitialResponseResult
     {
-        $announceInterval = (int) get_setting('main.announce_interval', 1800);
-        $annInterTwoAge = (int) get_setting('main.annintertwoage', 0);
-        $annInterTwo = (int) get_setting('main.annintertwo', 0);
-        $annInterThreeAge = (int) get_setting('main.anninterthreeage', 0);
-        $annInterThree = (int) get_setting('main.anninterthree', 0);
-        $autocleanIntervalOne = (int) get_setting('main.autoclean_interval_one', 900);
+        $announceInterval = (int) \App\Support\Config\SiteConfig::current()->main->announceInterval(1800);
+        $annInterTwoAge = (int) \App\Support\Config\SiteConfig::current()->main->annintertwoage(0);
+        $annInterTwo = (int) \App\Support\Config\SiteConfig::current()->main->annintertwo(0);
+        $annInterThreeAge = (int) \App\Support\Config\SiteConfig::current()->main->anninterthreeage(0);
+        $annInterThree = (int) \App\Support\Config\SiteConfig::current()->main->anninterthree(0);
+        $autocleanIntervalOne = (int) \App\Support\Config\SiteConfig::current()->main->autocleanIntervalOne(900);
 
         $begin = (int) ($announceInterval / 2);
         $end1 = (int) (($announceInterval + $annInterTwo) / 2);

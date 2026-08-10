@@ -55,20 +55,20 @@ class RegistrationService
         $isInvite = $type === 'invite';
         $isNormal = $type === 'normal';
 
-        if ($isInvite && Setting::get('main.invitesystem', 'no') !== 'yes') {
+        if ($isInvite && !\App\Support\Config\SiteConfig::current()->main->inviteSystem()) {
             throw new AuthenticationException($this->msg($langFunctions, 'std_invite_system_disabled', 'The invite system is currently disabled.'));
         }
 
-        if ($isNormal && Setting::get('main.registration', 'no') !== 'yes') {
+        if ($isNormal && !\App\Support\Config\SiteConfig::current()->main->registration()) {
             throw new AuthenticationException($this->msg($langFunctions, 'std_open_registration_disabled', 'Open registration is currently disabled.'));
         }
 
-        $maxUsers = (int) Setting::get('main.maxusers', 0);
+        $maxUsers = (int) \App\Support\Config\SiteConfig::current()->main->maxUsers(0);
         if ($maxUsers > 0 && User::query()->count() >= $maxUsers) {
             throw new AuthenticationException($this->msg($langFunctions, 'std_account_limit_reached', 'The current user account limit has been reached.'));
         }
 
-        $maxIp = (int) Setting::get('security.maxip', 0);
+        $maxIp = (int) \App\Support\Config\SiteConfig::current()->security->maxIp(0);
         if ($maxIp > 0 && User::query()->where('ip', $ip)->count() > $maxIp) {
             throw new AuthenticationException(
                 $this->msg($langFunctions, 'std_the_ip', 'The IP ')
@@ -121,7 +121,7 @@ class RegistrationService
             }
         }
 
-        $isPreRegister = Setting::get('system.is_invite_pre_email_and_username', 'no') === 'yes';
+        $isPreRegister = \App\Support\Config\SiteConfig::current()->system->isInvitePreEmailAndUsername();
 
         if ($isInvite && $isPreRegister && ! empty($invite->pre_register_username) && ! empty($invite->pre_register_email)) {
             $username = (string) $invite->pre_register_username;
@@ -176,7 +176,7 @@ class RegistrationService
         $passhash = hash('sha256', $secret . $clientHashedPassword);
         $authKey = Token::randomHex();
         $passkey = md5($username . now()->toDateTimeString() . $passhash);
-        $verification = (string) Setting::get('main.verification', 'email');
+        $verification = (string) \App\Support\Config\SiteConfig::current()->main->verification('email');
         $editsecret = $verification === 'admin' ? '' : $secret;
 
         $userData = [
@@ -190,13 +190,13 @@ class RegistrationService
             'country' => $country,
             'gender' => $gender,
             'status' => 'pending',
-            'class' => Setting::get('authority.defaultclass', User::CLASS_USER),
-            'invites' => (int) Setting::get('main.invite_count', 0),
+            'class' => \App\Support\Config\SiteConfig::current()->authority->defaultClass(User::CLASS_USER),
+            'invites' => (int) \App\Support\Config\SiteConfig::current()->main->inviteCount(0),
             'added' => now()->toDateTimeString(),
             'last_access' => now()->toDateTimeString(),
             'lang' => Locale::idFromFolder($langFolder),
-            'stylesheet' => (int) Setting::get('main.defstylesheet', 1),
-            'uploaded' => max(0, (int) Setting::get('main.iniupload', 0)),
+            'stylesheet' => (int) \App\Support\Config\SiteConfig::current()->main->defStylesheet(1),
+            'uploaded' => max(0, (int) \App\Support\Config\SiteConfig::current()->main->iniUpload(0)),
             'ip' => $ip,
         ];
 
@@ -275,7 +275,7 @@ class RegistrationService
      */
     public function resendConfirmation(array $data, string $ip, string $langFolder, array $langConfirmResend, array $langFunctions): string
     {
-        if (Setting::get('main.verification', 'email') === 'admin') {
+        if (\App\Support\Config\SiteConfig::current()->main->verification('email') === 'admin') {
             throw new AuthenticationException($this->msg($langConfirmResend, 'std_need_admin_verification', 'Account needs manual verification from administrators.'));
         }
 
@@ -312,7 +312,7 @@ class RegistrationService
         $secret = Token::randomHex();
         $clientHashedPassword = hash('sha256', $password);
         $passhash = hash('sha256', $secret . $clientHashedPassword);
-        $verification = (string) Setting::get('main.verification', 'email');
+        $verification = (string) \App\Support\Config\SiteConfig::current()->main->verification('email');
         $editsecret = $verification === 'admin' ? '' : $secret;
 
         $affected = User::query()->where('id', $user->id)->update([
@@ -453,7 +453,7 @@ class RegistrationService
 
     private function maybeAddTemporaryInvite(int $userId): void
     {
-        $tmpInviteCount = (int) Setting::get('main.tmp_invite_count', 0);
+        $tmpInviteCount = (int) \App\Support\Config\SiteConfig::current()->main->tmpInviteCount(0);
         if ($tmpInviteCount <= 0) {
             return;
         }
@@ -506,7 +506,7 @@ class RegistrationService
                 : 'ok.php?type=adminactivate';
         }
 
-        if ($verification === 'automatic' || Setting::get('smtp.smtptype', 'none') === 'none') {
+        if ($verification === 'automatic' || \App\Support\Config\SiteConfig::current()->smtp->type('none') === 'none') {
             $psecret = md5(Strings::padHash($secret));
 
             return $baseUrl . '/confirm.php?id=' . $userId . '&secret=' . $psecret;
@@ -538,7 +538,7 @@ class RegistrationService
         $confirmUrl = $baseUrl . '/confirm.php?id=' . $userId . '&secret=' . $psecret;
         $resendUrl = $baseUrl . '/confirm_resend.php';
         $siteName = Setting::getSiteName();
-        $reportEmail = Setting::get('main.reportemail', '');
+        $reportEmail = \App\Support\Config\SiteConfig::current()->main->reportEmail('');
 
         $mailOne = $langMail['mail_one'] ?? 'Hi ';
         $mailTwo = sprintf($langMail['mail_two'] ?? ',<br /><br />You have requested a new user account on %s and you have <br />specified this address ', $siteName);
@@ -570,7 +570,7 @@ class RegistrationService
         Mail::sentLegacy(
             $email,
             $siteName,
-            Setting::get('main.SITEEMAIL', ''),
+            \App\Support\Config\SiteConfig::current()->main->siteEmail(''),
             $title,
             $body,
             'signup',

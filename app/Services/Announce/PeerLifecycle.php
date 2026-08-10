@@ -306,7 +306,7 @@ final class PeerLifecycle
             return;
         }
 
-        if (get_setting('main.waitsystem') == 'yes' && is_array($this->torrent)) {
+        if (\App\Support\Config\SiteConfig::current()->main->waitSystem() && is_array($this->torrent)) {
             $elapsed = TIMENOW - (int) ($this->torrent['ts'] ?? 0);
             $wait = match (true) {
                 $ratio < 0.4  => 24,
@@ -325,7 +325,7 @@ final class PeerLifecycle
             }
         }
 
-        if (get_setting('main.maxdlsystem') == 'yes') {
+        if (\App\Support\Config\SiteConfig::current()->main->maxDlSystem()) {
             $max = match (true) {
                 $ratio < 0.5  => 1,
                 $ratio < 0.65 => 2,

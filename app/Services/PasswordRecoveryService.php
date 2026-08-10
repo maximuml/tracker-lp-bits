@@ -161,7 +161,7 @@ class PasswordRecoveryService
         Mail::sentLegacy(
             $email,
             $siteName,
-            Setting::get('main.SITEEMAIL', ''),
+            \App\Support\Config\SiteConfig::current()->main->siteEmail(''),
             $siteName . $this->msg($langRecover, 'mail_title', ' password reset confirmation'),
             $body,
             'confirmation',
@@ -197,7 +197,7 @@ class PasswordRecoveryService
         Mail::sentLegacy(
             $user->email,
             $siteName,
-            Setting::get('main.SITEEMAIL', ''),
+            \App\Support\Config\SiteConfig::current()->main->siteEmail(''),
             $siteName . $this->msg($langRecover, 'mail_two_title', ' account details'),
             $body,
             'details',

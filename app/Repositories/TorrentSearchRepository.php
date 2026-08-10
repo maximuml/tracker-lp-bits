@@ -73,7 +73,7 @@ if (empty($searchstr)) {
     unset($searchstr);
 }
 
-$meilisearchEnabled = get_setting('meilisearch.enabled') == 'yes';
+$meilisearchEnabled = \App\Support\Config\SiteConfig::current()->meiliSearch->enabled();
 $shouldUseMeili = $meilisearchEnabled && !empty($searchstr);
 do_log("[SHOULD_USE_MEILI]: $shouldUseMeili");
 // sorting by MarkoStamcar
@@ -787,12 +787,12 @@ if (isset($searchstr))
 }
 
 //approval status
-$approvalStatusNoneVisible = get_setting('torrent.approval_status_none_visible');
-$approvalStatusIconEnabled = get_setting('torrent.approval_status_icon_enabled');
+$approvalStatusNoneVisible = \App\Support\Config\SiteConfig::current()->torrent->approvalStatusNoneVisible();
+$approvalStatusIconEnabled = \App\Support\Config\SiteConfig::current()->torrent->approvalStatusIconEnabled();
 $approvalStatus = null;
 $showApprovalStatusFilter = false;
 //when enable approval status icon, all user can use this filter, otherwise only staff member and approval none visible is 'no' can use
-if ($approvalStatusIconEnabled == 'yes' || (Permission::canApproveTorrent() && $approvalStatusNoneVisible == 'no')) {
+if ($approvalStatusIconEnabled || (Permission::canApproveTorrent() && !$approvalStatusNoneVisible)) {
     $showApprovalStatusFilter = true;
 }
 //when user can use approval status filter, and pass `approval_status` parameter, will affect
@@ -802,7 +802,7 @@ if ($showApprovalStatusFilter && isset($searchParams['approval_status']) && is_n
     $wherea[] = "torrents.approval_status = $approvalStatus";
     $searchParams['approval_status'] = $approvalStatus;
     $addparam .= "approval_status=$approvalStatus&";
-} elseif ($approvalStatusNoneVisible == 'no' && !Permission::canApproveTorrent()) {
+} elseif (!$approvalStatusNoneVisible && !Permission::canApproveTorrent()) {
     $wherea[] = "torrents.approval_status = " . \App\Models\Torrent::APPROVAL_STATUS_ALLOW;
     $searchParams['approval_status'] = \App\Models\Torrent::APPROVAL_STATUS_ALLOW;
 }

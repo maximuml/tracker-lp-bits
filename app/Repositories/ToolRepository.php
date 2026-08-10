@@ -214,7 +214,7 @@ class ToolRepository extends BaseRepository
      */
     public function cronjobBackup($force = false): bool|array
     {
-        $setting = Setting::get('backup');
+        $setting = \App\Support\Config\SiteConfig::current()->backup->toArray();
         if ($setting['enabled'] != 'yes' && !$force) {
             do_log("Backup not enabled.");
             return false;
@@ -267,7 +267,7 @@ class ToolRepository extends BaseRepository
         }
         $result = compact('filename', 'result_code');
         if (empty($setting)) {
-            $setting = Setting::get('backup');
+            $setting = \App\Support\Config\SiteConfig::current()->backup->toArray();
         }
 
         $saveResult = $this->saveToFtp($setting, $filename);
@@ -415,7 +415,7 @@ class ToolRepository extends BaseRepository
 
         // Create a message
         $message = (new Email())
-            ->from(new Address(Setting::get('main.SITEEMAIL'), Setting::get('basic.SITENAME')))
+            ->from(new Address(\App\Support\Config\SiteConfig::current()->main->siteEmail(), \App\Support\Config\SiteConfig::current()->basic->siteName()))
             ->to($to)
             ->subject($subject)
             ->text($body)
@@ -470,7 +470,7 @@ class ToolRepository extends BaseRepository
      */
     public static function listUserClassPermissions($class): array
     {
-        $settings = Setting::get('authority');
+        $settings = \App\Support\Config\SiteConfig::current()->authority->toArray();
         $result = [];
         foreach ($settings as $permission => $minClass) {
             if ($minClass >= User::CLASS_PEASANT && $minClass <= $class) {
@@ -622,7 +622,7 @@ class ToolRepository extends BaseRepository
      */
     public function sendAlarmEmail(string $subjectTransKey, array $subjectTransContext, string $msgTransKey, array $msgTransContext): void
     {
-        $receiverUid = get_setting("system.alarm_email_receiver");
+        $receiverUid = \App\Support\Config\SiteConfig::current()->system->alarmEmailReceiver();
         if (empty($receiverUid)) {
             $locale = Locale::getDefault();
             $subject = nexus_trans($subjectTransKey, $subjectTransContext, $locale);

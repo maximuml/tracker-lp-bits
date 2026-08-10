@@ -202,7 +202,7 @@ class UploadRepository extends BaseRepository
     /** @param  \Illuminate\Http\Request  $request */
     private function getNfoContent(Request $request): string
     {
-        $enableNfo = get_setting("main.enablenfo") == "yes";
+        $enableNfo = \App\Support\Config\SiteConfig::current()->main->enableNfo();
         if (!$enableNfo) {
             return '';
         }
@@ -395,7 +395,7 @@ class UploadRepository extends BaseRepository
 
         if ($section->isSectionBrowse()) {
             $offerId = (int) $request->offer;
-            if ($offerId > 0 && Setting::get('main.showoffer') == 'yes' && TorrentUploadRepository::isAllowedOffer($offerId, $user->id)) {
+            if ($offerId > 0 && \App\Support\Config\SiteConfig::current()->main->showOffer() && TorrentUploadRepository::isAllowedOffer($offerId, $user->id)) {
                 return true;
             }
 

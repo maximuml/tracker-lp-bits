@@ -332,7 +332,7 @@ class User extends Authenticatable implements FilamentUser, HasName
         if ($class >= self::CLASS_VIP) {
             $alias = nexus_trans('user.class_names.' . $class);
         } else {
-            $alias = Setting::get("account.{$class}_alias");
+            $alias = \App\Support\Config\SiteConfig::current()->account->classAlias($class);
         }
         if (!empty($alias)) {
             $classText .= "({$alias})";
@@ -593,7 +593,7 @@ class User extends Authenticatable implements FilamentUser, HasName
 
     public static function getMinSeedPoints($class)
     {
-        $setting = Setting::get("account.{$class}_min_seed_points");
+        $setting = \App\Support\Config\SiteConfig::current()->account->classMinSeedPoints($class);
         if (is_numeric($setting)) {
             return $setting;
         }
@@ -919,7 +919,7 @@ class User extends Authenticatable implements FilamentUser, HasName
 
     public static function getAccessAdminClassMin()
     {
-        return Setting::get("system.access_admin_class_min") ?: User::CLASS_ADMINISTRATOR;
+        return \App\Support\Config\SiteConfig::current()->system->accessAdminClassMin() ?: User::CLASS_ADMINISTRATOR;
     }
 
     public function isDonating(): bool

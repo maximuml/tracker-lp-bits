@@ -145,7 +145,7 @@ class HitAndRunRepository extends BaseRepository
     public function cronjobUpdateStatus($uid = null, $torrentId = null, $ignoreTime = false)
     {
         $diffInSection = HitAndRun::diffInSection();
-        $browseMode = Setting::get('main.browsecat');
+        $browseMode = \App\Support\Config\SiteConfig::current()->main->browseCat();
         $setting = HitAndRun::getConfig('*', $browseMode);
         if (HitAndRunMode::fromStringSafe($setting['mode'] ?? null)->isEnabled()) {
             $setting['diff_in_section'] = $diffInSection;

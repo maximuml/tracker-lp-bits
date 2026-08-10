@@ -66,7 +66,7 @@ class Locale
     /** @return  mixed */
     public static function getDefault()
     {
-        $defaultLang = get_setting("main.defaultlang");
+        $defaultLang = \App\Support\Config\SiteConfig::current()->main->defaultLang();
         return self::$languageMaps[$defaultLang] ?? 'en';
     }
 

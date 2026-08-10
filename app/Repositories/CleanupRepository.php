@@ -249,7 +249,7 @@ LUA;
     {
         if (self::$oneTaskSeconds == 0) {
             //最低间隔，要在这个时间内执行掉全部任务
-            $totalSeconds = get_setting("main.autoclean_interval_one");
+            $totalSeconds = \App\Support\Config\SiteConfig::current()->main->autocleanIntervalOne();
             //每个任务能分到的秒数，不能到顶，任务数+1计算
             self::$oneTaskSeconds = floor($totalSeconds / (self::$totalTask + 1));
         }
@@ -294,8 +294,7 @@ LUA;
     /** @param  mixed  $level */
     private static function getInterval($level): int
     {
-        $name = sprintf("main.autoclean_interval_%s", $level);
-        return intval(get_setting($name));
+        return \App\Support\Config\SiteConfig::current()->main->autocleanInterval((string) $level);
     }
 
     /** @return  void */
@@ -332,7 +331,7 @@ LUA;
             if ($timestamp < $lastTime + $interval * 2) {
                 continue;
             }
-            $receiverUid = get_setting("system.alarm_email_receiver");
+            $receiverUid = \App\Support\Config\SiteConfig::current()->system->alarmEmailReceiver();
             do_log("receiverUid: $receiverUid");
             if (empty($receiverUid)) {
                 $locale = Locale::getDefault();
@@ -360,7 +359,7 @@ LUA;
      */
     private static function getAlarmEmailSubjectForCleanup(string|null $locale = null)
     {
-        return nexus_trans("cleanup.alarm_email_subject", ["site_name" => get_setting("basic.SITENAME")], $locale);
+        return nexus_trans("cleanup.alarm_email_subject", ["site_name" => \App\Support\Config\SiteConfig::current()->basic->siteName()], $locale);
     }
 
     /**
@@ -395,7 +394,7 @@ LUA;
             do_log(sprintf("no failed jobs since: %s", $since));
             return;
         }
-        $receiverUid = get_setting("system.alarm_email_receiver");
+        $receiverUid = \App\Support\Config\SiteConfig::current()->system->alarmEmailReceiver();
         do_log("receiverUid: $receiverUid");
         $toolRep = new ToolRepository();
         if (empty($receiverUid)) {
@@ -422,7 +421,7 @@ LUA;
      */
     private static function getAlarmEmailSubjectForQueueFailedJobs(string|null $locale = null)
     {
-        return nexus_trans("cleanup.alarm_email_subject_for_queue_failed_jobs", ["site_name" => get_setting("basic.SITENAME")], $locale);
+        return nexus_trans("cleanup.alarm_email_subject_for_queue_failed_jobs", ["site_name" => \App\Support\Config\SiteConfig::current()->basic->siteName()], $locale);
     }
 
     /**

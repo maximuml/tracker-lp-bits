@@ -112,7 +112,7 @@ final class CleanupService
 
         foreach (self::CLASSES as $level => $taskList) {
             $arg = $this->getLastCleanArg($level);
-            $interval = (int) get_setting("main.autoclean_interval_{$this->intervalName($level)}", 0);
+            $interval = (int) \App\Support\Config\SiteConfig::current()->main->autocleanInterval($this->intervalName($level), 0);
 
             if (! $forceAll) {
                 $ts = (int) NexusDB::table('avps')->where('arg', $arg)->value('value_u');
@@ -162,7 +162,7 @@ final class CleanupService
             $task = $item['task'];
             $method = $item['method'];
             $lockKey = "cleanup:task:{$task}";
-            $lockTtl = max(60, (int) get_setting("main.autoclean_interval_{$this->intervalName($level)}", 3600));
+            $lockTtl = max(60, (int) \App\Support\Config\SiteConfig::current()->main->autocleanInterval($this->intervalName($level), 3600));
             $lock = new \Nexus\Database\NexusLock($lockKey, $lockTtl);
 
             if (! $lock->acquire()) {

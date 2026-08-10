@@ -16,7 +16,7 @@ final class Url
     public static function isSecure(): bool
     {
         if (Environment::isConsole()) {
-            return Setting::get('security.securelogin') !== 'no';
+            return \App\Support\Config\SiteConfig::current()->security->secureLogin();
         }
 
         return Nexus::instance()->getRequestSchema() === 'https';
@@ -25,7 +25,7 @@ final class Url
     public static function schemeAndHost(bool $fromConfig = false): string
     {
         if (Environment::isConsole() || $fromConfig) {
-            $host = (string) Setting::get('basic.BASEURL');
+            $host = (string) \App\Support\Config\SiteConfig::current()->basic->baseUrl();
         } else {
             $host = Nexus::instance()->getRequestHost();
         }

@@ -116,7 +116,7 @@ final class UserDisplay
                     'wearing_medals' => function ($query) {
                         $query->orderBy('user_medals.priority', 'desc')
                             ->orderBy('user_medals.id', 'desc')
-                            ->limit((int) \get_setting('system.maximum_number_of_medals_can_be_worn', 3));
+                            ->limit((int) \App\Support\Config\SiteConfig::current()->system->maximumNumberOfMedalsCanBeWorn(3));
                     },
                 ])
                 ->find($id, $neededColumns);

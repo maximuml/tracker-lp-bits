@@ -27,7 +27,7 @@ final class CheaterDetector
         bool $isDonor,
         bool $isIPSeedBox,
     ): void {
-        if ($self === null || $self['announcetime'] <= 0 || get_setting('seed_box.enabled') != 'yes') {
+        if ($self === null || $self['announcetime'] <= 0 || !\App\Support\Config\SiteConfig::current()->seedBox->enabled()) {
             return;
         }
 
@@ -35,7 +35,7 @@ final class CheaterDetector
             return;
         }
 
-        $notSeedBoxMaxSpeedMbps = (float) get_setting('seed_box.not_seed_box_max_speed', 0);
+        $notSeedBoxMaxSpeedMbps = (float) \App\Support\Config\SiteConfig::current()->seedBox->notSeedBoxMaxSpeed(0);
         if ($notSeedBoxMaxSpeedMbps <= 0) {
             return;
         }
@@ -69,12 +69,12 @@ final class CheaterDetector
             return;
         }
 
-        $cheaterdetSecurity = (int) get_setting('security.cheaterdet', 0);
+        $cheaterdetSecurity = (int) \App\Support\Config\SiteConfig::current()->security->cheaterdet(0);
         if (!$cheaterdetSecurity) {
             return;
         }
 
-        $nodetectSecurity = (int) get_setting('security.nodetect', 0);
+        $nodetectSecurity = (int) \App\Support\Config\SiteConfig::current()->security->noDetect(0);
         if ((int) $user['class'] >= $nodetectSecurity) {
             return;
         }
@@ -99,7 +99,7 @@ final class CheaterDetector
         string $time,
     ): void {
         $upspeed = $uploaded > 0 ? $uploaded / $self['announcetime'] : 0;
-        $mustBeCheaterSpeed = (int) get_setting('system.maximum_upload_speed', 8000) * 1024 * 1024 / 8;
+        $mustBeCheaterSpeed = (int) \App\Support\Config\SiteConfig::current()->system->maximumUploadSpeed(8000) * 1024 * 1024 / 8;
         $mayBeCheaterSpeed = $mustBeCheaterSpeed / 2;
 
         if ($uploaded > 1073741824 && $upspeed > ($mustBeCheaterSpeed / $cheaterdetSecurity)) {

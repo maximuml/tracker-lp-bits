@@ -45,13 +45,13 @@ final class Mail
             $multipleMail,
             $hdrEncoding,
             [
-                'site_name' => (string) Setting::get('basic.SITENAME', ''),
-                'site_email' => (string) Setting::get('main.SITEEMAIL', ''),
-                'smtp_type' => (string) Setting::get('smtp.smtptype', 'none'),
-                'smtp' => (string) Setting::get('smtp.smtp', ''),
-                'smtp_host' => (string) Setting::get('smtp.smtp_host', ''),
-                'smtp_port' => (string) Setting::get('smtp.smtp_port', ''),
-                'smtp_from' => (string) Setting::get('smtp.smtp_from', ''),
+                'site_name' => (string) \App\Support\Config\SiteConfig::current()->basic->siteName(''),
+                'site_email' => (string) \App\Support\Config\SiteConfig::current()->main->siteEmail(''),
+                'smtp_type' => (string) \App\Support\Config\SiteConfig::current()->smtp->type('none'),
+                'smtp' => (string) \App\Support\Config\SiteConfig::current()->smtp->smtp(''),
+                'smtp_host' => (string) \App\Support\Config\SiteConfig::current()->smtp->host(''),
+                'smtp_port' => (string) \App\Support\Config\SiteConfig::current()->smtp->port(''),
+                'smtp_from' => (string) \App\Support\Config\SiteConfig::current()->smtp->from(''),
             ]
         );
     }

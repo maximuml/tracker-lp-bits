@@ -27,7 +27,7 @@ final class SiteAccess
             return;
         }
 
-        $setting = \get_setting('security');
+        $setting = \App\Support\Config\SiteConfig::current()->security->toArray();
         $guestVisitType = (string) ($setting['guest_visit_type'] ?? '');
 
         if ($guestVisitType === '' || $guestVisitType === 'normal') {
@@ -74,7 +74,7 @@ final class SiteAccess
      */
     public static function canDoLogin(): bool
     {
-        $setting = \get_setting('security');
+        $setting = \App\Support\Config\SiteConfig::current()->security->toArray();
 
         if (empty($setting['login_type']) || $setting['login_type'] === 'normal') {
             return true;

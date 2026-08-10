@@ -33,7 +33,7 @@ class Bonus
     public static function calculateForUser(int|string $uid, ?array $torrentIdArr = null): array
     {
         $uid = (int) $uid;
-        $settingBonus = \App\Models\Setting::get('bonus');
+        $settingBonus = \App\Support\Config\SiteConfig::current()->bonus->toArray();
         $minSize = $settingBonus['min_size'] ?? 0;
         $nowStr = date('Y-m-d H:i:s');
         $logPrefix = "[CALCULATE_SEED_BONUS], uid: $uid, torrentIdArr: " . json_encode($torrentIdArr);
@@ -70,10 +70,10 @@ class Bonus
             }
         }
 
-        $officialTag = \App\Models\Setting::get('bonus.official_tag');
-        $officialAdditionalFactor = \App\Models\Setting::get('bonus.official_addition');
-        $zeroBonusTag = \App\Models\Setting::get('bonus.zero_bonus_tag');
-        $zeroBonusFactor = \App\Models\Setting::get('bonus.zero_bonus_factor');
+        $officialTag = \App\Support\Config\SiteConfig::current()->bonus->officialTag();
+        $officialAdditionalFactor = \App\Support\Config\SiteConfig::current()->bonus->officialAddition();
+        $zeroBonusTag = \App\Support\Config\SiteConfig::current()->bonus->zeroBonusTag();
+        $zeroBonusFactor = \App\Support\Config\SiteConfig::current()->bonus->zeroBonusFactor();
 
         $medalQuery = NexusDB::table('medals')
             ->whereIn('id', function ($query) use ($uid, $nowStr) {
@@ -381,12 +381,12 @@ class Bonus
             $bonusResult = self::calculateForUser((int) ($user['id'] ?? 0));
         }
 
-        $officialTag = (string) \get_setting('bonus.official_tag');
-        $officialAdditionalFactor = (float) \get_setting('bonus.official_addition', 0);
-        $haremFactor = (float) \get_setting('bonus.harem_addition');
+        $officialTag = (string) \App\Support\Config\SiteConfig::current()->bonus->officialTag();
+        $officialAdditionalFactor = (float) \App\Support\Config\SiteConfig::current()->bonus->officialAddition(0);
+        $haremFactor = (float) \App\Support\Config\SiteConfig::current()->bonus->haremAddition();
         $haremAddition = self::haremAddition((int) ($user['id'] ?? 0));
         $isDonor = \is_donor($user);
-        $donortimesBonus = (float) \get_setting('bonus.donortimes');
+        $donortimesBonus = (float) \App\Support\Config\SiteConfig::current()->bonus->donorTimes();
 
         return self::buildBonusTable(
             $bonusResult,

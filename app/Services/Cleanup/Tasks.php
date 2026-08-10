@@ -33,7 +33,7 @@ final class Tasks
     public function prunePeers(): string
     {
         $deadtime = date('Y-m-d H:i:s', Time::deadThreshold(
-            (int) get_setting('main.anninterthree', 3600),
+            (int) \App\Support\Config\SiteConfig::current()->main->anninterthree(3600),
             time()
         ));
 
@@ -48,7 +48,7 @@ final class Tasks
      */
     public function resetSeedBonusCounters(): string
     {
-        $interval = (int) get_setting('main.autoclean_interval_one', 900);
+        $interval = (int) \App\Support\Config\SiteConfig::current()->main->autocleanIntervalOne(900);
         $cutoff = Carbon::now()->subSeconds(2 * $interval)->toDateTimeString();
 
         NexusDB::table('users')
@@ -69,8 +69,8 @@ final class Tasks
      */
     public function updateTorrentVisibility(): string
     {
-        $maxDeadTime = (int) get_setting('main.max_dead_torrent_time', 21600);
-        $deadtime = Time::deadThreshold((int) get_setting('main.anninterthree', 3600), time()) - $maxDeadTime;
+        $maxDeadTime = (int) \App\Support\Config\SiteConfig::current()->main->maxDeadTorrentTime(21600);
+        $deadtime = Time::deadThreshold((int) \App\Support\Config\SiteConfig::current()->main->anninterthree(3600), time()) - $maxDeadTime;
         $lastActionDeadTime = date('Y-m-d H:i:s', $deadtime);
 
         NexusDB::table('torrents')
@@ -116,7 +116,7 @@ final class Tasks
      */
     public function pruneOffers(): string
     {
-        $offerVoteTimeout = (int) get_setting('main.offervotetimeout', 259200);
+        $offerVoteTimeout = (int) \App\Support\Config\SiteConfig::current()->main->offerVoteTimeout(259200);
         if ($offerVoteTimeout > 0) {
             $dt = date('Y-m-d H:i:s', time() - $offerVoteTimeout);
             $offerIds = NexusDB::table('offers')
@@ -128,7 +128,7 @@ final class Tasks
             $this->deleteOffers($offerIds, 'vote timeout');
         }
 
-        $offerUploadTimeout = (int) get_setting('main.offeruptimeout', 86400);
+        $offerUploadTimeout = (int) \App\Support\Config\SiteConfig::current()->main->offerUploadTimeout(86400);
         if ($offerUploadTimeout > 0) {
             $dt = date('Y-m-d H:i:s', time() - $offerUploadTimeout);
             $offerIds = NexusDB::table('offers')
@@ -149,45 +149,45 @@ final class Tasks
     public function expireTorrentPromotions(): string
     {
         $this->expirePromotionType(
-            (int) get_setting('torrent.expirehalfleech', 0),
+            (int) \App\Support\Config\SiteConfig::current()->torrent->expireHalfleech(0),
             Torrent::PROMOTION_HALF_DOWN,
-            (int) get_setting('torrent.halfleechbecome', Torrent::PROMOTION_NORMAL),
+            (int) \App\Support\Config\SiteConfig::current()->torrent->halfleechbecome(Torrent::PROMOTION_NORMAL),
         );
 
         $this->expirePromotionType(
-            (int) get_setting('torrent.expirefree', 0),
+            (int) \App\Support\Config\SiteConfig::current()->torrent->expireFree(0),
             Torrent::PROMOTION_FREE,
-            (int) get_setting('torrent.freebecome', Torrent::PROMOTION_NORMAL),
+            (int) \App\Support\Config\SiteConfig::current()->torrent->freebecome(Torrent::PROMOTION_NORMAL),
         );
 
         $this->expirePromotionType(
-            (int) get_setting('torrent.expiretwoup', 0),
+            (int) \App\Support\Config\SiteConfig::current()->torrent->expireTwoup(0),
             Torrent::PROMOTION_TWO_TIMES_UP,
-            (int) get_setting('torrent.twoupbecome', Torrent::PROMOTION_NORMAL),
+            (int) \App\Support\Config\SiteConfig::current()->torrent->twoupbecome(Torrent::PROMOTION_NORMAL),
         );
 
         $this->expirePromotionType(
-            (int) get_setting('torrent.expiretwoupfree', 0),
+            (int) \App\Support\Config\SiteConfig::current()->torrent->expireTwoupfree(0),
             Torrent::PROMOTION_FREE_TWO_TIMES_UP,
-            (int) get_setting('torrent.twoupfreebecome', Torrent::PROMOTION_NORMAL),
+            (int) \App\Support\Config\SiteConfig::current()->torrent->twoupfreebecome(Torrent::PROMOTION_NORMAL),
         );
 
         $this->expirePromotionType(
-            (int) get_setting('torrent.expiretwouphalfleech', 0),
+            (int) \App\Support\Config\SiteConfig::current()->torrent->expireTwouphalfleech(0),
             Torrent::PROMOTION_HALF_DOWN_TWO_TIMES_UP,
-            (int) get_setting('torrent.twouphalfleechbecome', Torrent::PROMOTION_NORMAL),
+            (int) \App\Support\Config\SiteConfig::current()->torrent->twouphalfleechbecome(Torrent::PROMOTION_NORMAL),
         );
 
         $this->expirePromotionType(
-            (int) get_setting('torrent.expirethirtypercentleech', 0),
+            (int) \App\Support\Config\SiteConfig::current()->torrent->expireThirtypercentleech(0),
             Torrent::PROMOTION_ONE_THIRD_DOWN,
-            (int) get_setting('torrent.thirtypercentleechbecome', Torrent::PROMOTION_NORMAL),
+            (int) \App\Support\Config\SiteConfig::current()->torrent->thirtypercentleechbecome(Torrent::PROMOTION_NORMAL),
         );
 
         $this->expirePromotionType(
-            (int) get_setting('torrent.expirenormal', 0),
+            (int) \App\Support\Config\SiteConfig::current()->torrent->expireNormal(0),
             Torrent::PROMOTION_NORMAL,
-            (int) get_setting('torrent.normalbecome', Torrent::PROMOTION_NORMAL),
+            (int) \App\Support\Config\SiteConfig::current()->torrent->normalbecome(Torrent::PROMOTION_NORMAL),
         );
 
         $this->expireIndividualPromotions();
@@ -369,7 +369,7 @@ final class Tasks
 
     private function deleteUnconfirmedAccounts(): void
     {
-        $signupTimeout = (int) get_setting('main.signup_timeout', 259200);
+        $signupTimeout = (int) \App\Support\Config\SiteConfig::current()->main->signupTimeout(259200);
         $deadtime = time() - $signupTimeout;
 
         User::query()
@@ -393,7 +393,7 @@ final class Tasks
 
     private function deleteOldInviteCodes(): void
     {
-        $inviteTimeout = (int) get_setting('main.invite_timeout', 7);
+        $inviteTimeout = (int) \App\Support\Config\SiteConfig::current()->main->inviteTimeout(7);
         $secs = $inviteTimeout * 24 * 60 * 60;
         $dt = date('Y-m-d H:i:s', time() - $secs);
         $nowStr = Carbon::now()->toDateTimeString();
@@ -423,7 +423,7 @@ final class Tasks
 
     private function disableNoTransferByLastAccess(): void
     {
-        $days = (int) get_setting('account.deletenotransfer', 0);
+        $days = (int) \App\Support\Config\SiteConfig::current()->account->deleteNoTransfer(0);
         if ($days <= 0) {
             return;
         }
@@ -431,7 +431,7 @@ final class Tasks
         $secs = $days * 86400;
         $dt = date('Y-m-d H:i:s', time() - $secs);
         $maxclass = $this->neverDeleteClass();
-        $iniupload = get_setting('main.iniupload', 0);
+        $iniupload = \App\Support\Config\SiteConfig::current()->main->iniUpload(0);
 
         $query = User::query()
             ->where('parked', 'no')
@@ -448,7 +448,7 @@ final class Tasks
 
     private function disableNoTransferByRegisterTime(): void
     {
-        $days = (int) get_setting('account.deletenotransfertwo', 0);
+        $days = (int) \App\Support\Config\SiteConfig::current()->account->deleteNoTransferTwo(0);
         if ($days <= 0) {
             return;
         }
@@ -456,7 +456,7 @@ final class Tasks
         $secs = $days * 86400;
         $dt = date('Y-m-d H:i:s', time() - $secs);
         $maxclass = $this->neverDeleteClass();
-        $iniupload = get_setting('main.iniupload', 0);
+        $iniupload = \App\Support\Config\SiteConfig::current()->main->iniUpload(0);
 
         $query = User::query()
             ->where('parked', 'no')
@@ -473,7 +473,7 @@ final class Tasks
 
     private function disableNotParked(): void
     {
-        $days = (int) get_setting('account.deleteunpacked', 0);
+        $days = (int) \App\Support\Config\SiteConfig::current()->account->deleteUnpacked(0);
         if ($days <= 0) {
             return;
         }
@@ -493,7 +493,7 @@ final class Tasks
 
     private function disableParked(): void
     {
-        $days = (int) get_setting('account.deletepacked', 0);
+        $days = (int) \App\Support\Config\SiteConfig::current()->account->deletePacked(0);
         if ($days <= 0) {
             return;
         }
@@ -513,7 +513,7 @@ final class Tasks
 
     private function destroyDisabledAccounts(): void
     {
-        $destroyDisabledDays = (int) get_setting('account.destroy_disabled', 0);
+        $destroyDisabledDays = (int) \App\Support\Config\SiteConfig::current()->account->destroyDisabled(0);
         if ($destroyDisabledDays <= 0) {
             return;
         }
@@ -535,12 +535,12 @@ final class Tasks
 
     private function neverDeleteClass(): int
     {
-        return min((int) get_setting('account.neverdelete', User::CLASS_VIP), (int) User::CLASS_VIP);
+        return min(\App\Support\Config\SiteConfig::current()->account->neverdelete(), (int) User::CLASS_VIP);
     }
 
     private function neverDeleteParkedClass(): int
     {
-        return (int) get_setting('account.neverdeletepacked', User::CLASS_VIP);
+        return \App\Support\Config\SiteConfig::current()->account->neverdeletepacked();
     }
 
     /**
@@ -606,33 +606,33 @@ final class Tasks
     private function promotePeasantsToUsers(): void
     {
         $this->peasantToUser(
-            (int) get_setting('account.psdlfive', 0),
+            (int) \App\Support\Config\SiteConfig::current()->account->psdlfive(0),
             0,
-            (float) get_setting('account.psratiofive', 0),
+            (float) \App\Support\Config\SiteConfig::current()->account->psratiofive(0),
         );
 
         $this->peasantToUser(
-            (int) get_setting('account.psdlfour', 0),
-            (int) get_setting('account.psdlfive', 0),
-            (float) get_setting('account.psratiofour', 0),
+            (int) \App\Support\Config\SiteConfig::current()->account->psdlfour(0),
+            (int) \App\Support\Config\SiteConfig::current()->account->psdlfive(0),
+            (float) \App\Support\Config\SiteConfig::current()->account->psratiofour(0),
         );
 
         $this->peasantToUser(
-            (int) get_setting('account.psdlthree', 0),
-            (int) get_setting('account.psdlfour', 0),
-            (float) get_setting('account.psratiothree', 0),
+            (int) \App\Support\Config\SiteConfig::current()->account->psdlthree(0),
+            (int) \App\Support\Config\SiteConfig::current()->account->psdlfour(0),
+            (float) \App\Support\Config\SiteConfig::current()->account->psratiothree(0),
         );
 
         $this->peasantToUser(
-            (int) get_setting('account.psdltwo', 0),
-            (int) get_setting('account.psdlthree', 0),
-            (float) get_setting('account.psratiotwo', 0),
+            (int) \App\Support\Config\SiteConfig::current()->account->psdltwo(0),
+            (int) \App\Support\Config\SiteConfig::current()->account->psdlthree(0),
+            (float) \App\Support\Config\SiteConfig::current()->account->psratiotwo(0),
         );
 
         $this->peasantToUser(
-            (int) get_setting('account.psdlone', 0),
-            (int) get_setting('account.psdltwo', 0),
-            (float) get_setting('account.psratioone', 0),
+            (int) \App\Support\Config\SiteConfig::current()->account->psdlone(0),
+            (int) \App\Support\Config\SiteConfig::current()->account->psdltwo(0),
+            (float) \App\Support\Config\SiteConfig::current()->account->psratioone(0),
         );
     }
 
@@ -687,25 +687,25 @@ final class Tasks
 
     private function promoteUsersByClass(): void
     {
-        $getInvitesByPromotion = get_setting('account.getInvitesByPromotion', []);
+        $getInvitesByPromotion = \App\Support\Config\SiteConfig::current()->account->getInvitesByPromotion([]);
 
         $promotions = [
-            [User::CLASS_POWER_USER, 'account.pudl', 'account.puprratio', 'account.putime'],
-            [User::CLASS_ELITE_USER, 'account.eudl', 'account.euprratio', 'account.eutime'],
-            [User::CLASS_CRAZY_USER, 'account.cudl', 'account.cuprratio', 'account.cutime'],
-            [User::CLASS_INSANE_USER, 'account.iudl', 'account.iuprratio', 'account.iutime'],
-            [User::CLASS_VETERAN_USER, 'account.vudl', 'account.vuprratio', 'account.vutime'],
-            [User::CLASS_EXTREME_USER, 'account.exudl', 'account.exuprratio', 'account.exutime'],
-            [User::CLASS_ULTIMATE_USER, 'account.uudl', 'account.uuprratio', 'account.uutime'],
-            [User::CLASS_NEXUS_MASTER, 'account.nmdl', 'account.nmprratio', 'account.nmtime'],
+            User::CLASS_POWER_USER,
+            User::CLASS_ELITE_USER,
+            User::CLASS_CRAZY_USER,
+            User::CLASS_INSANE_USER,
+            User::CLASS_VETERAN_USER,
+            User::CLASS_EXTREME_USER,
+            User::CLASS_ULTIMATE_USER,
+            User::CLASS_NEXUS_MASTER,
         ];
 
-        foreach ($promotions as [$class, $dlKey, $ratioKey, $timeKey]) {
+        foreach ($promotions as $class) {
             $this->promoteUsers(
                 $class,
-                (int) get_setting($dlKey, 0),
-                (float) get_setting($ratioKey, 0),
-                (int) get_setting($timeKey, 0),
+                \App\Support\Config\SiteConfig::current()->account->promotionDl($class, 0),
+                \App\Support\Config\SiteConfig::current()->account->promotionRatio($class, 0.0),
+                \App\Support\Config\SiteConfig::current()->account->promotionTime($class, 0),
                 (int) ($getInvitesByPromotion[(int) $class] ?? 0),
             );
         }
@@ -780,18 +780,18 @@ final class Tasks
     private function demoteUsersByClass(): void
     {
         $demotions = [
-            [User::CLASS_NEXUS_MASTER, 'account.nmderatio'],
-            [User::CLASS_ULTIMATE_USER, 'account.uuderatio'],
-            [User::CLASS_EXTREME_USER, 'account.exuderatio'],
-            [User::CLASS_VETERAN_USER, 'account.vuderatio'],
-            [User::CLASS_INSANE_USER, 'account.iuderatio'],
-            [User::CLASS_CRAZY_USER, 'account.cuderatio'],
-            [User::CLASS_ELITE_USER, 'account.euderatio'],
-            [User::CLASS_POWER_USER, 'account.puderatio'],
+            User::CLASS_NEXUS_MASTER,
+            User::CLASS_ULTIMATE_USER,
+            User::CLASS_EXTREME_USER,
+            User::CLASS_VETERAN_USER,
+            User::CLASS_INSANE_USER,
+            User::CLASS_CRAZY_USER,
+            User::CLASS_ELITE_USER,
+            User::CLASS_POWER_USER,
         ];
 
-        foreach ($demotions as [$class, $ratioKey]) {
-            $this->demoteUsers($class, (float) get_setting($ratioKey, 0));
+        foreach ($demotions as $class) {
+            $this->demoteUsers($class, \App\Support\Config\SiteConfig::current()->account->demotionRatio($class, 0.0));
         }
     }
 
@@ -846,19 +846,16 @@ final class Tasks
 
     private function demoteUsersToPeasant(): void
     {
-        $pairs = [
-            ['account.psdlone', 'account.psratioone'],
-            ['account.psdltwo', 'account.psratiotwo'],
-            ['account.psdlthree', 'account.psratiothree'],
-            ['account.psdlfour', 'account.psratiofour'],
-            ['account.psdlfive', 'account.psratiofive'],
+        $configs = [
+            [\App\Support\Config\SiteConfig::current()->account->psdlone(0), \App\Support\Config\SiteConfig::current()->account->psratioone(0.0)],
+            [\App\Support\Config\SiteConfig::current()->account->psdltwo(0), \App\Support\Config\SiteConfig::current()->account->psratiotwo(0.0)],
+            [\App\Support\Config\SiteConfig::current()->account->psdlthree(0), \App\Support\Config\SiteConfig::current()->account->psratiothree(0.0)],
+            [\App\Support\Config\SiteConfig::current()->account->psdlfour(0), \App\Support\Config\SiteConfig::current()->account->psratiofour(0.0)],
+            [\App\Support\Config\SiteConfig::current()->account->psdlfive(0), \App\Support\Config\SiteConfig::current()->account->psratiofive(0.0)],
         ];
 
-        foreach ($pairs as [$dlKey, $ratioKey]) {
-            $this->userToPeasant(
-                (int) get_setting($dlKey, 0),
-                (float) get_setting($ratioKey, 0),
-            );
+        foreach ($configs as [$downFloorGb, $minRatio]) {
+            $this->userToPeasant((int) $downFloorGb, (float) $minRatio);
         }
     }
 
@@ -868,7 +865,7 @@ final class Tasks
             return;
         }
 
-        $deletepeasantAccount = (int) get_setting('account.deletepeasant', 30);
+        $deletepeasantAccount = (int) \App\Support\Config\SiteConfig::current()->account->deletePeasant(30);
         $length = $deletepeasantAccount * 86400;
         $until = date('Y-m-d H:i:s', time() + $length);
         $downlimitFloor = $downFloorGb * 1024 * 1024 * 1024;
@@ -965,7 +962,7 @@ final class Tasks
 
     private function deleteDeadTorrents(): void
     {
-        $days = (int) get_setting('torrent.deldeadtorrent', 0);
+        $days = (int) \App\Support\Config\SiteConfig::current()->torrent->delDeadTorrent(0);
         if ($days <= 0) {
             return;
         }

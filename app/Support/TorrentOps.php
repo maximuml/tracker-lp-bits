@@ -33,7 +33,7 @@ final class TorrentOps
             ->keyBy('id');
 
         $torrentRep = new TorrentRepository();
-        $torrentDir = get_setting('main.torrent_dir');
+        $torrentDir = \App\Support\Config\SiteConfig::current()->main->torrentDir();
 
         NexusDB::table('torrents')->whereIn('id', $idArr)->delete();
         NexusDB::table('torrent_extras')->whereIn('torrent_id', $idArr)->delete();
@@ -179,7 +179,7 @@ final class TorrentOps
             $promotion = TorrentPromotion::fromIntSafe((int) $spStateReal);
             $log .= ", spStateReal = $spStateReal, promotion: {$promotion->label()}";
 
-            $uploaderRatio = \get_setting('torrent.uploaderdouble');
+            $uploaderRatio = \App\Support\Config\SiteConfig::current()->torrent->uploaderdouble();
             $log .= ", uploaderRatio: $uploaderRatio";
             if ($torrent['owner'] == $user['id'] && $uploaderRatio != 1) {
                 $upRatio = max($uploaderRatio, $promotion->upMultiplier());
@@ -208,13 +208,13 @@ final class TorrentOps
         $downloadedIncrementForUser = $realDownloaded * $downRatio;
         $log .= ", uploadedIncrementForUser: $uploadedIncrementForUser, downloadedIncrementForUser: $downloadedIncrementForUser";
 
-        $isSeedBoxRuleEnabled = \get_setting('seed_box.enabled') == 'yes';
+        $isSeedBoxRuleEnabled = \App\Support\Config\SiteConfig::current()->seedBox->enabled();
         $log .= ", isSeedBoxRuleEnabled: $isSeedBoxRuleEnabled, user class: {$user['class']}, __is_donor: {$user['__is_donor']}";
         if ($isSeedBoxRuleEnabled && $torrent['owner'] != $user['id'] && !($user['class'] >= \App\Models\User::CLASS_VIP || $user['__is_donor'])) {
             $isIPSeedBox = \isIPSeedBox($queries['ip'], $user['id']);
             $log .= ", isIPSeedBox: " . ($isIPSeedBox ? 'true' : 'false');
             if ($isIPSeedBox) {
-                $isSeedBoxNoPromotion = \get_setting('seed_box.no_promotion') == 'yes';
+                $isSeedBoxNoPromotion = \App\Support\Config\SiteConfig::current()->seedBox->noPromotion();
                 $log .= ", isSeedBoxNoPromotion: " . ($isSeedBoxNoPromotion ? 'true' : 'false');
                 if ($isSeedBoxNoPromotion) {
                     $uploadedIncrementForUser = $realUploaded;
@@ -222,8 +222,8 @@ final class TorrentOps
                     $log .= ', isIPSeedBox && isSeedBoxNoPromotion, increment for user = real';
                 }
 
-                $maxUploadedTimes = \get_setting('seed_box.max_uploaded');
-                $maxUploadedDurationSeconds = \get_setting('seed_box.max_uploaded_duration', 0) * 3600;
+                $maxUploadedTimes = \App\Support\Config\SiteConfig::current()->seedBox->maxUploaded();
+                $maxUploadedDurationSeconds = \App\Support\Config\SiteConfig::current()->seedBox->maxUploadedDuration(0) * 3600;
                 $torrentTTL = time() - strtotime($torrent['added']);
                 $timeRangeValid = ($maxUploadedDurationSeconds == 0) || ($torrentTTL < $maxUploadedDurationSeconds);
                 $log .= ", maxUploadedTimes: $maxUploadedTimes, maxUploadedDurationSeconds: $maxUploadedDurationSeconds, timeRangeValid: " . ($timeRangeValid ? 'true' : 'false');

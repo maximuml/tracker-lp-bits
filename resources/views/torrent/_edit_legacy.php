@@ -49,6 +49,9 @@ $showprocessing = (get_searchbox_value($sectionmode, 'showprocessing') || ($allo
 $showaudiocodec = (get_searchbox_value($sectionmode, 'showaudiocodec') || ($allowmove && get_searchbox_value($othermode, 'showaudiocodec'))); //whether show audio codecs or not
 */
 $settingMain = get_setting('main');
+if ($allowmove && $othermode) {
+    \Nexus\Nexus::css("tbody.move-target { display: none; }", 'header', false, 'edit-move-target-style');
+}
 stdhead($lang_edit['head_edit_torrent'] . "\"". $row["name"] . "\"");
 
 if (!(isset($CURUSER)) || ($CURUSER["id"] != $row["owner"] && !user_can('torrentmanage'))) {
@@ -144,15 +147,28 @@ else {
 */
 
     $editModes = [$sectionmode];
-    if ($allowmove && $othermode) {
+    if ($allowmove && $othermode && $othermode != $sectionmode) {
         $editModes[] = $othermode;
     }
+    $hasMoveSection = $allowmove && $othermode && $othermode != $sectionmode;
     foreach ($editModes as $editMode) {
+        $isMoveTarget = $hasMoveSection && $editMode == $othermode;
+        if ($hasMoveSection) {
+            ob_start();
+        }
         $select = $searchBoxRep->renderTaxonomySelect($editMode, $row);
         tr($lang_edit['row_quality'], $select, 1, "mode_$editMode");
         echo $customField->renderOnUploadPage($id, $editMode);
         echo $hitAndRunRep->renderOnUploadPage($row['hr'], $editMode);
         tr($lang_functions['text_tags'], $tagRep->renderCheckbox($editMode, $tagIdArr), 1, "mode_$editMode");
+        if ($hasMoveSection) {
+            $rows = ob_get_clean();
+            $tbodyClass = $isMoveTarget ? 'move-target' : 'move-source';
+            $style = $isMoveTarget ? ' style="display:none"' : '';
+            echo '<tbody class="' . $tbodyClass . '"' . $style . '>';
+            echo $rows;
+            echo '</tbody>';
+        }
     }
 
 	$rowChecks = [];
@@ -275,21 +291,13 @@ EOT;
 \Nexus\Nexus::js('js/ptgen.js', 'footer', true);
 $customFieldJs = <<<JS
 jQuery("#movecheck").on("change", function () {
-    let _this = jQuery(this);
-    let checked = _this.prop("checked");
-    let activeSelect
-    if (checked) {
-        activeSelect = jQuery("#newcat");
-    } else {
-        activeSelect = jQuery("#oricat");
+    disableother2('oricat','newcat');
+});
+jQuery(function () {
+    if (document.getElementById("movecheck")) {
+        disableother2('oricat','newcat');
     }
-    let mode = activeSelect.attr("data-mode");
-    console.log(mode)
-    jQuery("tr[relation]").hide();
-    jQuery("tr[relation=mode_" + mode +"]").show();
-})
-jQuery("tr[relation]").hide();
-jQuery("tr[relation=mode_{$sectionmode}]").show();
+});
 
 JS;
 \Nexus\Nexus::js($customFieldJs, 'footer', false);

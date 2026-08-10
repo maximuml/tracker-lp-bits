@@ -192,14 +192,17 @@ function setSectionDisabled(section, disabled)
 
 function disableother2(oricat,newcat)
 {
-	if (document.getElementById("movecheck").checked == true){
-		document.getElementById(oricat).disabled = true;
-		document.getElementById(newcat).disabled = false;
-	}
-	else {
-		document.getElementById(oricat).disabled = false;
-		document.getElementById(newcat).disabled = true;
-	}
+	var moveCheck = document.getElementById("movecheck");
+	if (!moveCheck) return;
+	var moveChecked = moveCheck.checked == true;
+	var oricatEl = document.getElementById(oricat);
+	var newcatEl = document.getElementById(newcat);
+	if (oricatEl) oricatEl.disabled = moveChecked;
+	if (newcatEl) newcatEl.disabled = !moveChecked;
+	var sourceRows = document.querySelector("tbody.move-source");
+	var targetRows = document.querySelector("tbody.move-target");
+	if (sourceRows) sourceRows.style.display = moveChecked ? "none" : "table-row-group";
+	if (targetRows) targetRows.style.display = moveChecked ? "table-row-group" : "none";
 }
 
 // ctrlenter.js

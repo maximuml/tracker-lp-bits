@@ -2,6 +2,7 @@
 
 namespace App\Policies;
 
+use App\Auth\Permission;
 use App\Models\Setting;
 use App\Models\Torrent;
 use App\Models\User;
@@ -24,11 +25,11 @@ class TorrentPolicy extends BasePolicy
 
     public function view(User $user, Torrent $torrent): bool
     {
-        if ($torrent->banned === 'yes' && !\user_can('seebanned', false, $user->id) && $torrent->owner != $user->id) {
+        if ($torrent->banned === 'yes' && !Permission::canViewBannedTorrent($user) && $torrent->owner != $user->id) {
             return false;
         }
 
-        if (!\can_access_torrent($torrent->id, $user->id) && $torrent->owner != $user->id) {
+        if (!TorrentAccess::canAccess($torrent->id, $user->id) && $torrent->owner != $user->id) {
             return false;
         }
 
@@ -42,7 +43,7 @@ class TorrentPolicy extends BasePolicy
 
     public function update(User $user, Torrent $torrent): bool
     {
-        return $torrent->owner == $user->id || \user_can('torrentmanage', false, $user->id);
+        return $torrent->owner == $user->id || Permission::canManageTorrent($user);
     }
 
     public function delete(User $user, Torrent $torrent): bool
@@ -74,7 +75,7 @@ class TorrentPolicy extends BasePolicy
         $approvalNotAllowed = $torrent->approval_status != Torrent::APPROVAL_STATUS_ALLOW
             && Setting::get('torrent.approval_status_none_visible') == 'no';
         $allowOwnerDownload = $torrent->owner == $user->id;
-        $canSeedBanned = user_can('seebanned', false, $user->id);
+        $canSeedBanned = Permission::canViewBannedTorrent($user);
         $canAccessTorrent = TorrentAccess::canAccess($torrent->id, $user->id);
 
         if ((($torrent->banned == 'yes' || ($approvalNotAllowed && !$allowOwnerDownload)) && !$canSeedBanned)

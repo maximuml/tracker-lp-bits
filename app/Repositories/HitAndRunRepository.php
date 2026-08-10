@@ -1,6 +1,7 @@
 <?php
 namespace App\Repositories;
 
+use App\Auth\Permission;
 use App\Enums\HitAndRunMode;
 use App\Enums\ModelEventEnum;
 use App\Models\HitAndRun;
@@ -656,7 +657,7 @@ class HitAndRunRepository extends BaseRepository
     {
         if (HitAndRunMode::fromStringSafe(
                 is_string($mode = HitAndRun::getConfig('mode', $searchBoxId)) ? $mode : null
-            ) === HitAndRunMode::MANUAL && user_can('torrent_hr')) {
+            ) === HitAndRunMode::MANUAL && Permission::canSetTorrentHitAndRun()) {
             $hrRadio = sprintf('<label><input type="radio" name="hr[%s]" value="0"%s />NO</label>', $searchBoxId, $value == 0 ? ' checked' : '');
             $hrRadio .= sprintf('<label><input type="radio" name="hr[%s]" value="1"%s />YES</label>', $searchBoxId, $value == 1 ? ' checked' : '');
             return tr('H&R', $hrRadio, 1, "mode_$searchBoxId", true);

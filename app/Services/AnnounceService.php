@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Exceptions\ClientNotAllowedException;
+use App\Enums\HitAndRunMode;
 use App\Exceptions\TrackerException;
 use App\Exceptions\TrackerWarningException;
 use App\Models\HitAndRun;
@@ -10,6 +11,7 @@ use App\Models\Torrent;
 use App\Models\User;
 use App\Repositories\AgentAllowRepository;
 use App\Repositories\CleanupRepository;
+use App\ValueObjects\InfoHash;
 use App\Repositories\IpLogRepository;
 use App\Repositories\RequireSeedTorrentRepository;
 use App\Repositories\TorrentRepository;
@@ -205,7 +207,7 @@ final class AnnounceService
             $this->warn('Passkey invalid');
         }
 
-        $infoHashSha1 = sha1($this->infoHash);
+        $infoHashSha1 = InfoHash::fromBinary($this->infoHash)->fingerprint();
         $reAnnounceInterval = 5;
         $frequencyInterval = 30;
         $isStoppedOrCompleted = !empty($this->event) && in_array($this->event, ['completed', 'stopped'], true);
@@ -928,11 +930,13 @@ final class AnnounceService
             return;
         }
 
-        $hrMode = HitAndRun::getConfig('mode', $this->torrent['mode']);
-        do_log("[HR_LOG] user: {$this->userId}, torrent: {$this->torrentId}, hrMode: {$hrMode}");
+        $hrMode = HitAndRunMode::fromStringSafe(
+            is_string($mode = HitAndRun::getConfig('mode', $this->torrent['mode'])) ? $mode : null
+        );
+        do_log("[HR_LOG] user: {$this->userId}, torrent: {$this->torrentId}, hrMode: {$hrMode->value}");
 
-        if ($hrMode != HitAndRun::MODE_GLOBAL && ($hrMode != HitAndRun::MODE_MANUAL || $this->torrent['hr'] != Torrent::HR_YES)) {
-            do_log("[HR_LOG] user: {$this->userId}, torrent: {$this->torrentId}, hrMode: {$hrMode}, not match", 'debug');
+        if (! $hrMode->isGlobal() && ($hrMode !== HitAndRunMode::MANUAL || $this->torrent['hr'] != Torrent::HR_YES)) {
+            do_log("[HR_LOG] user: {$this->userId}, torrent: {$this->torrentId}, hrMode: {$hrMode->value}, not match", 'debug');
             return;
         }
 

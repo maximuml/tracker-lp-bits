@@ -1,6 +1,7 @@
 <?php
 namespace App\Repositories;
 
+use App\Enums\HitAndRunMode;
 use App\Enums\ModelEventEnum;
 use App\Models\HitAndRun;
 use App\Models\Message;
@@ -145,7 +146,7 @@ class HitAndRunRepository extends BaseRepository
         $diffInSection = HitAndRun::diffInSection();
         $browseMode = Setting::get('main.browsecat');
         $setting = HitAndRun::getConfig('*', $browseMode);
-        if ($setting['mode'] != HitAndRun::MODE_DISABLED) {
+        if (HitAndRunMode::fromStringSafe($setting['mode'] ?? null)->isEnabled()) {
             $setting['diff_in_section'] = $diffInSection;
             $setting['search_box_id'] = $browseMode;
             $this->doCronjobUpdateStatus($setting, $uid, $torrentId, $ignoreTime);
@@ -154,7 +155,7 @@ class HitAndRunRepository extends BaseRepository
         $specialMode = Setting::get('main.specialcat');
         if ($diffInSection && $browseMode != $specialMode) {
             $setting = HitAndRun::getConfig('*', $specialMode);
-            if ($setting['mode'] != HitAndRun::MODE_DISABLED) {
+            if (HitAndRunMode::fromStringSafe($setting['mode'] ?? null)->isEnabled()) {
                 $setting['diff_in_section'] = $diffInSection;
                 $setting['search_box_id'] = $specialMode;
                 $this->doCronjobUpdateStatus($setting, $uid, $torrentId, $ignoreTime);
@@ -175,11 +176,8 @@ class HitAndRunRepository extends BaseRepository
         do_log("setting: " . json_encode($setting) . ", uid: $uid, torrentId: $torrentId, ignoreTime: " . var_export($ignoreTime, true));
         $size = 1000;
         $page = 1;
-        if (empty($setting['mode'])) {
-            do_log("H&R not set.");
-            return false;
-        }
-        if ($setting['mode'] == HitAndRun::MODE_DISABLED) {
+        $mode = HitAndRunMode::fromStringSafe($setting['mode'] ?? null);
+        if ($mode === HitAndRunMode::DISABLED) {
             do_log("H&R mode is disabled.");
             return false;
         }
@@ -656,7 +654,9 @@ class HitAndRunRepository extends BaseRepository
      */
     public function renderOnUploadPage($value, $searchBoxId): string
     {
-        if (HitAndRun::getConfig('mode', $searchBoxId) == \App\Models\HitAndRun::MODE_MANUAL && user_can('torrent_hr')) {
+        if (HitAndRunMode::fromStringSafe(
+                is_string($mode = HitAndRun::getConfig('mode', $searchBoxId)) ? $mode : null
+            ) === HitAndRunMode::MANUAL && user_can('torrent_hr')) {
             $hrRadio = sprintf('<label><input type="radio" name="hr[%s]" value="0"%s />NO</label>', $searchBoxId, $value == 0 ? ' checked' : '');
             $hrRadio .= sprintf('<label><input type="radio" name="hr[%s]" value="1"%s />YES</label>', $searchBoxId, $value == 1 ? ' checked' : '');
             return tr('H&R', $hrRadio, 1, "mode_$searchBoxId", true);

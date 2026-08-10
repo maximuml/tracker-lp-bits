@@ -2,6 +2,9 @@
 
 namespace App\Http\Requests;
 
+use App\ValueObjects\InfoHash;
+use App\ValueObjects\Passkey;
+use App\ValueObjects\PeerId;
 use Illuminate\Foundation\Http\FormRequest;
 
 class AnnounceRequest extends FormRequest
@@ -20,26 +23,32 @@ class AnnounceRequest extends FormRequest
     /** @return array<string, mixed> */
     public static function announceRules(): array
     {
-        $binarySize = static function (string $attribute, mixed $value, callable $fail, int $size) {
-            if (!is_string($value) || strlen($value) !== $size) {
-                $fail("The {$attribute} must be {$size} bytes.");
-            }
-        };
-
         return [
-            'passkey'    => 'required|string|size:32',
+            'passkey'    => [
+                'required',
+                'string',
+                static function (string $attribute, mixed $value, callable $fail) {
+                    if (! Passkey::tryFromString(is_string($value) ? $value : null)) {
+                        $fail("The {$attribute} must be 32 characters.");
+                    }
+                },
+            ],
             'info_hash'  => [
                 'required',
                 'string',
-                static function (string $attribute, mixed $value, callable $fail) use ($binarySize) {
-                    $binarySize($attribute, $value, $fail, 20);
+                static function (string $attribute, mixed $value, callable $fail) {
+                    if (! InfoHash::tryFromBinary(is_string($value) ? $value : null)) {
+                        $fail("The {$attribute} must be 20 bytes.");
+                    }
                 },
             ],
             'peer_id'    => [
                 'required',
                 'string',
-                static function (string $attribute, mixed $value, callable $fail) use ($binarySize) {
-                    $binarySize($attribute, $value, $fail, 20);
+                static function (string $attribute, mixed $value, callable $fail) {
+                    if (! PeerId::tryFromBinary(is_string($value) ? $value : null)) {
+                        $fail("The {$attribute} must be 20 bytes.");
+                    }
                 },
             ],
             'port'       => 'required|integer|between:1,65535',

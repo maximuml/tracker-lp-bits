@@ -45,25 +45,26 @@
                     tr($lang_functions['text_technical_info'], '<textarea name="technical_info" rows="8" style="width: 99%;"></textarea><br/>' . $lang_functions['text_technical_info_help_text'], 1);
                 }
 
-				if ($allowtorrents){
-					$disablespecial = " onchange=\"disableother('browsecat','specialcat')\"";
-					$s = "<select name=\"type\" id=\"browsecat\" data-mode='$browsecatmode' ".($allowtwosec ? $disablespecial : "").">\n<option value=\"0\">".$lang_upload['select_choose_one']."</option>\n";
-					$cats = genrelist($browsecatmode);
-					foreach ($cats as $row)
-						$s .= "<option value=\"" . $row["id"] . "\">" . htmlspecialchars($row["name"]) . "</option>\n";
-					$s .= "</select>\n";
+				$sections = [];
+				if ($allowtorrents) {
+					$sections[] = ['id' => 'browsecat', 'mode' => $browsecatmode, 'target' => 'specialcat', 'label' => $lang_upload['text_to_browse_section']];
 				}
-				else $s = "";
-				if ($allowspecial){
-					$disablebrowse = " onchange=\"disableother('specialcat','browsecat')\"";
-					$s2 = "<select name=\"type\" id=\"specialcat\" data-mode='$specialcatmode' ".$disablebrowse.">\n<option value=\"0\">".$lang_upload['select_choose_one']."</option>\n";
-					$cats2 = genrelist($specialcatmode);
-					foreach ($cats2 as $row)
-						$s2 .= "<option value=\"" . $row["id"] . "\">" . htmlspecialchars($row["name"]) . "</option>\n";
-					$s2 .= "</select>\n";
+				if ($allowspecial) {
+					$sections[] = ['id' => 'specialcat', 'mode' => $specialcatmode, 'target' => 'browsecat', 'label' => $lang_upload['text_to_special_section']];
 				}
-				else $s2 = "";
-				tr($lang_upload['row_type']."<font color=\"red\">*</font>", ($allowtwosec ? $lang_upload['text_to_browse_section'] : "").$s.($allowtwosec ? $lang_upload['text_to_special_section'] : "").$s2.($allowtwosec ? $lang_upload['text_type_note'] : ""),1);
+
+				$s = '';
+				foreach ($sections as $section) {
+					$disabler = $allowtwosec ? " onchange=\"disableother('{$section['id']}','{$section['target']}')\"" : '';
+					$select = "<select name=\"type\" id=\"{$section['id']}\" data-mode='{$section['mode']}' {$disabler}>\n<option value=\"0\">".$lang_upload['select_choose_one']."</option>\n";
+					$cats = genrelist($section['mode']);
+					foreach ($cats as $row) {
+						$select .= "<option value=\"" . $row["id"] . "\">" . htmlspecialchars($row["name"]) . "</option>\n";
+					}
+					$select .= "</select>\n";
+					$s .= ($allowtwosec ? $section['label'] : '') . $select;
+				}
+				tr($lang_upload['row_type']."<font color=\"red\">*</font>", $s.($allowtwosec ? $lang_upload['text_type_note'] : ''), 1);
 /*
 				if ($showsource || $showmedium || $showcodec || $showaudiocodec || $showstandard || $showprocessing){
 					if ($showsource){
@@ -102,22 +103,13 @@
 */
                 $customField = new \Nexus\Field\Field();
                 $hitAndRunRep = new \App\Repositories\HitAndRunRepository();
-                if ($allowtorrents) {
-                    echo "<tbody id=\"browsecat_section\" data-mode=\"$browsecatmode\">\n";
-                    $selectNormal = $searchBoxRep->renderTaxonomySelect($browsecatmode);
-                    tr($lang_upload['row_quality'], $selectNormal, 1, "mode_$browsecatmode");
-                    echo $customField->renderOnUploadPage(0, $browsecatmode);
-                    echo $hitAndRunRep->renderOnUploadPage('', $browsecatmode);
-                    tr($lang_functions['text_tags'], $tagRep->renderCheckbox($browsecatmode), 1, "mode_$browsecatmode");
-                    echo "</tbody>\n";
-                }
-                if ($allowspecial) {
-                    echo "<tbody id=\"specialcat_section\" data-mode=\"$specialcatmode\">\n";
-                    $selectNormal = $searchBoxRep->renderTaxonomySelect($specialcatmode);
-                    tr($lang_upload['row_quality'], $selectNormal, 1, "mode_$specialcatmode");
-                    echo $customField->renderOnUploadPage(0, $specialcatmode);
-                    echo $hitAndRunRep->renderOnUploadPage('', $specialcatmode);
-                    tr($lang_functions['text_tags'], $tagRep->renderCheckbox($specialcatmode), 1, "mode_$specialcatmode");
+                foreach ($sections as $section) {
+                    echo "<tbody id=\"{$section['id']}_section\" data-mode=\"{$section['mode']}\">\n";
+                    $selectNormal = $searchBoxRep->renderTaxonomySelect($section['mode']);
+                    tr($lang_upload['row_quality'], $selectNormal, 1, "mode_{$section['mode']}");
+                    echo $customField->renderOnUploadPage(0, $section['mode']);
+                    echo $hitAndRunRep->renderOnUploadPage('', $section['mode']);
+                    tr($lang_functions['text_tags'], $tagRep->renderCheckbox($section['mode']), 1, "mode_{$section['mode']}");
                     echo "</tbody>\n";
                 }
 

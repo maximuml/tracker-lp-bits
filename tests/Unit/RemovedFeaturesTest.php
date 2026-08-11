@@ -16,7 +16,7 @@ class RemovedFeaturesTest extends TestCase
         // present in the migrated views/controllers either.
         foreach ([
             base_path('resources/views/usercp/index.blade.php'),
-            base_path('resources/views/usercp/_usercp_legacy.php'),
+            base_path('resources/views/usercp/_usercp.blade.php'),
             base_path('resources/views/my/bonus.blade.php'),
             base_path('resources/views/my/_bonus_legacy.php'),
             base_path('resources/views/topten/index.blade.php'),

@@ -6,14 +6,8 @@ $__server_REMOTE_ADDR = \App\Support\SupportContext::getServerValue('REMOTE_ADDR
 $CURUSER['notifs'] = (string) ($CURUSER['notifs'] ?? '');
 $userInfo = \App\Models\User::query()->findOrFail($CURUSER["id"]);
 $siteName = \App\Models\Setting::getSiteName();
-function bark($msg) {
-	\App\Support\Html::stdhead();
-$lang_usercp = (array) (\App\Support\SupportContext::getGlobal('lang_usercp') ?? []);
-	\App\Support\Html::stdMessage($lang_usercp['std_sorry'], $msg);
-	\App\Support\Html::stdfoot();
-	exit;
-}
-function usercpmenu ($selected = "home") {
+
+if (!function_exists('usercpmenu')) { function usercpmenu ($selected = "home") {
 $lang_usercp = (array) (\App\Support\SupportContext::getGlobal('lang_usercp') ?? []);
 	\App\Support\Frame::mainFrameOpen();
 	print ("<div id=\"usercpnav\"><ul id=\"usercpmenu\" class=\"menu\">");
@@ -24,8 +18,8 @@ $lang_usercp = (array) (\App\Support\SupportContext::getGlobal('lang_usercp') ??
 	print ("<li" . ($selected == "security" ? " class=selected" : "") . "><a href=\"?action=security\">".$lang_usercp['text_security_settings']."</a></li>");
 	print ("</ul></div>");
 	\App\Support\Frame::mainFrameClose();
-}
-function getimagewidth ($imagewidth, $imageheight)
+} }
+if (!function_exists('getimagewidth')) { function getimagewidth ($imagewidth, $imageheight)
 {
 	while (($imagewidth > 150) or ($imageheight > 150))
 	{
@@ -33,8 +27,8 @@ function getimagewidth ($imagewidth, $imageheight)
 		$imageheight=150;
 	}
 	return $imagewidth;
-}
-function getimageheight ($imagewidth, $imageheight)
+} }
+if (!function_exists('getimageheight')) { function getimageheight ($imagewidth, $imageheight)
 {
 	while (($imagewidth > 150) or ($imageheight > 150))
 	{
@@ -42,37 +36,37 @@ function getimageheight ($imagewidth, $imageheight)
 		$imageheight=150;
 	}
 	return $imageheight;
-}
-function form($name, $type = "save", $id = "") {
+} }
+if (!function_exists('form')) { function form($name, $type = "save", $id = "") {
     if ($id == "") {
         $id = "form" . random_str();
     }
 	return print("<form method=post action=usercp.php id=\"".$id."\"><input type=hidden name=action value=".htmlspecialchars($name)."><input type=hidden name=type value={$type}>");
-}
-function submit($type = "submit") {
+} }
+if (!function_exists('submit')) { function submit($type = "submit") {
 $lang_usercp = (array) (\App\Support\SupportContext::getGlobal('lang_usercp') ?? []);
 	print("<tr><td class=\"rowhead\" valign=\"top\" align=\"right\">".$lang_usercp['row_save_settings']."</td><td class=\"rowfollow\" valign=\"top\" align=left><input type=".$type." value=\"".$lang_usercp['submit_save_settings']."\"></td></tr>");
-}
-function format_tz($a)
+} }
+if (!function_exists('format_tz')) { function format_tz($a)
 {
 	$h = floor($a);
 	$m = ($a - floor($a)) * 60;
 	return ($a >= 0?"+":"-") . (strlen(abs($h)) > 1?"":"0") . abs($h) .
 	":" . ($m==0?"00":$m);
-}
-function priv($name, $descr) {
+} }
+if (!function_exists('priv')) { function priv($name, $descr) {
 $CURUSER = \App\Support\SupportContext::getUser() ?? [];
 	if ($CURUSER["privacy"] == $name)
 	return "<input type=\"radio\" name=\"privacy\" value=\"".htmlspecialchars($name)."\" checked=\"checked\" /> ".htmlspecialchars($descr);
 	else
 	return "<input type=\"radio\" name=\"privacy\" value=\"".htmlspecialchars($name)."\" /> ".htmlspecialchars($descr);
-}
-function goback ($where = "-1") {
+} }
+if (!function_exists('goback')) { function goback ($where = "-1") {
 $lang_usercp = (array) (\App\Support\SupportContext::getGlobal('lang_usercp') ?? []);
 	$text = $lang_usercp['text_go_back'];
 	$goback = "<a class=faqlink HREF=\"javascript:history.go(".htmlspecialchars($where).")\">".htmlspecialchars($text)."</a>";
 	return $goback;
-}
+} }
 $action = ((\App\Support\SupportContext::getPost('action') !== null)) ? htmlspecialchars(\App\Support\SupportContext::getPost('action')) : (((\App\Support\SupportContext::getQuery('action') !== null)) ? htmlspecialchars(\App\Support\SupportContext::getQuery('action')) : '');
 $type = ((\App\Support\SupportContext::getPost('type') !== null)) ? htmlspecialchars(\App\Support\SupportContext::getPost('type')) : (((\App\Support\SupportContext::getQuery('type') !== null)) ? htmlspecialchars(\App\Support\SupportContext::getQuery('type')) : '');
 
@@ -217,7 +211,7 @@ if ($action){
 				    unset($notifs['email']);
                 }
 
-			function browsecheck($dbtable, $cbname, array &$result){
+			if (!function_exists('browsecheck')) { function browsecheck($dbtable, $cbname, array &$result){
 				$ids = \Nexus\Database\NexusDB::table($dbtable)->pluck('id');
 				foreach ($ids as $id) {
 					if (((\App\Support\SupportContext::getPost($cbname.$id) !== null)) && \App\Support\SupportContext::getPost($cbname.$id) == 'yes') {
@@ -226,7 +220,7 @@ if ($action){
 					    unset($result[$cbname.$id]);
                     }
 				}
-			}
+			} }
                 browsecheck("categories", "cat", $notifs);
 				browsecheck("sources", "sou", $notifs);
 				browsecheck("media", "med", $notifs);

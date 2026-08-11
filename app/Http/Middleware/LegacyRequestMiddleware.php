@@ -131,7 +131,7 @@ final class LegacyRequestMiddleware
         $method = $request->getMethod();
         $query = $request->query->all();
 
-        if ($script === 'details') {
+        if ($script === 'details' || $script === 'torrent') {
             if (isset($query['id'])) {
                 $routePath = '/details/' . (int) $query['id'];
                 unset($query['id']);

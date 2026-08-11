@@ -32,7 +32,7 @@ $users = number_format($count);
     @foreach ($rows as $arr)
         <tr>
             <td>{{ $arr['id'] }}</td>
-            <td align="left">{{ \App\Support\UserDisplay::username($arr['id']) }}</td>
+            <td align="left">{!! \App\Support\UserDisplay::username($arr['id']) !!}</td>
             <td align="left"><a href="mailto:{{ $arr['email'] }}">{{ $arr['email'] }}</a></td>
             <td align="left">{{ $arr['added'] }}</td>
             <td align="left">${{ $arr['donated'] }}</td>

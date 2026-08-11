@@ -69,7 +69,7 @@ a.colheadlink:hover {
         $percP = $n_peers > 0 ? number_format(100 * $nP / $n_peers, 1) . '%' : '---';
         @endphp
         <tr>
-            <td>{{ \App\Support\UserDisplay::username($uper['id']) }}</td>
+            <td>{!! \App\Support\UserDisplay::username($uper['id']) !!}</td>
             <td>{{ $lastCell }}</td>
             <td align="right">{{ $nT }}</td>
             <td align="right">{{ $percT }}</td>

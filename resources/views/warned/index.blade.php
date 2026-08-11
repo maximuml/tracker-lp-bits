@@ -54,7 +54,7 @@ $rows = \App\Models\User::query()
             $class = \App\Support\UserClass::name($arr["class"], false, true, true);
             @endphp
             <tr>
-                <td align="left">{{ \App\Support\UserDisplay::username($arr['id']) }}</td>
+                <td align="left">{!! \App\Support\UserDisplay::username($arr['id']) !!}</td>
                 <td align="center">{{ $added }}</td>
                 <td align="center">{{ $last_access }}</td>
                 <td align="center">{{ $class }}</td>

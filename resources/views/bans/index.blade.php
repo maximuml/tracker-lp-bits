@@ -62,7 +62,7 @@ $bans = \Nexus\Database\NexusDB::table('bans')->orderByDesc('added')->get();
                 <td>{{ \App\Support\Time::format($arr['added']) }}</td>
                 <td align="left">{{ long2ip($arr['first']) }}</td>
                 <td align="left">{{ long2ip($arr['last']) }}</td>
-                <td align="left">{{ \App\Support\UserDisplay::username($arr['addedby']) }}</td>
+                <td align="left">{!! \App\Support\UserDisplay::username($arr['addedby']) !!}</td>
                 <td align="left">{{ $arr['comment'] }}</td>
                 <td><a href="bans.php?remove={{ $arr['id'] }}">Remove</a></td>
             </tr>

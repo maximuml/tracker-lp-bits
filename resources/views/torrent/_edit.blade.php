@@ -1,20 +1,15 @@
-<?php
-error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
-
-
+@php
+$id = $torrentId;
+$row = $torrentRow;
+$row['cat_mode'] = $row['search_box_id'] ?? $row['cat_mode'] ?? null;
+$CURUSER = $currentUser;
 $__server_REQUEST_URI = \App\Support\SupportContext::getServerValue('REQUEST_URI');
-$id = intval(\App\Support\SupportContext::getQuery('id') ?? 0);
-if (!$id)
-	die();
-
-$row = \Nexus\Database\NexusDB::table('torrents')
-    ->leftJoin('categories', 'torrents.category', '=', 'categories.id')
-    ->leftJoin('torrent_extras', 'torrents.id', '=', 'torrent_extras.torrent_id')
-    ->where('torrents.id', $id)
-    ->select('torrents.*', 'categories.mode as cat_mode', 'torrent_extras.media_info as technical_info', 'torrent_extras.descr')
-    ->first();
-if (!$row) die();
-$row = (array) $row;
+if (!$id) {
+    \App\Support\LegacyResponse::abort('Error', 'Invalid torrent id', true, false);
+}
+if (empty($row)) {
+    \App\Support\LegacyResponse::abort('Error', 'Torrent not found', true, false);
+}
 
 /**
  * custom fields
@@ -34,8 +29,6 @@ $showstandard = (get_searchbox_value($sectionmode, 'showstandard') || ($allowmov
 $showprocessing = (get_searchbox_value($sectionmode, 'showprocessing') || ($allowmove && get_searchbox_value($othermode, 'showprocessing'))); //whether show processings or not
 $showaudiocodec = (get_searchbox_value($sectionmode, 'showaudiocodec') || ($allowmove && get_searchbox_value($othermode, 'showaudiocodec'))); //whether show audio codecs or not
 */
-\App\Support\Html::stdhead($lang_edit['head_edit_torrent'] . "\"". $row["name"] . "\"");
-
 if (!(isset($CURUSER)) || ($CURUSER["id"] != $row["owner"] && !\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::TORRENT_MANAGE))) {
 	print("<h1 align=\"center\">".$lang_edit['text_cannot_edit_torrent']."</h1>");
 	echo sprintf("<p>".$lang_edit['text_cannot_edit_torrent_note']."</p>", $__server_REQUEST_URI ?? '');
@@ -141,8 +134,9 @@ else {
             $pickcontent .= "<b>".$lang_edit['row_special_torrent']."&nbsp;</b>"."<select name=\"sel_spstate\" style=\"width: 100px;\">" .\App\Support\Html::promotionSelection($row["sp_state"], 0). "</select>&nbsp;&nbsp;&nbsp;".'<select name="promotion_time_type" onchange="if (this.value == \'2\') {document.getElementById(\'promotion_until_note\').style.display = \'\';} else {document.getElementById(\'promotion_until_note\').style.display = \'none\';}"><option value="0"'.($row['promotion_time_type'] == 0 ? ' selected="selected"' : '').'>'.$lang_edit['select_use_global_setting'].'</option><option value="1"'.($row['promotion_time_type'] == 1 ? ' selected="selected"' : '').'>'.$lang_edit['select_forever'].'</option><option value="2"'.($row['promotion_time_type'] == 2 ? ' selected="selected"' : '').'>'.$lang_edit['select_until'].'</option></select><span id="promotion_until_note"'.($row['promotion_time_type'] == 2 ? '' : ' style="display: none;"').'>';
             $pickcontent .= '<input type="text" id="promotionuntiltime" name="promotionuntil" style="width: 120px;" value="'.($row['promotion_until'] > $row['added'] ? $row['promotion_until'] : '').'" />';
             $pickcontent .= '&nbsp;('.$lang_edit['text_ie_for'].'<select name="promotionaddedtime" onchange="document.getElementById(\'promotionuntiltime\').value=this.value;"><option value="'.($row['promotion_until'] > $row['added'] ? $row['promotion_until'] : '').'">'.$lang_edit['text_keep_current'].'</option>';
+            $addedTimeStamp = strtotime($row['added']);
             foreach (array(900, 1800, 3600, 5400, 7200, 14400, 21600, 28800, 43200, 64800, 86400, 129600, 259200, 604800, 1296000, 2592000, 7776000, 15552000, 31104000) as $seconds) {
-                $pickcontent .= getAddedTimeOption(strtotime($row['added']), $seconds);
+                $pickcontent .= '<option value="' . date('Y-m-d H:i:s', $addedTimeStamp + $seconds) . '">' . \App\Support\Format::prettyTimeWithLocale($seconds) . '</option>';
             }
             $pickcontent .= '</select>)&nbsp;'.$lang_edit['text_promotion_until_note'].'</span>&nbsp;&nbsp;';
         }
@@ -240,9 +234,4 @@ EOT;
 }
 \Nexus\Nexus::js('vendor/jquery-loading/jquery.loading.min.js', 'footer', true);
 \Nexus\Nexus::js('js/ptgen.js', 'footer', true);
-\App\Support\Html::stdfoot();
-function getAddedTimeOption($timeStamp, $addSeconds) {
-    $timeStamp += $addSeconds;
-    $timeString = date("Y-m-d H:i:s", $timeStamp);
-    return '<option value="'.$timeString.'">'.\App\Support\Format::prettyTimeWithLocale($addSeconds).'</option>';
-}
+@endphp

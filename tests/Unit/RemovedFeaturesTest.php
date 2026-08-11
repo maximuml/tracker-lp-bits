@@ -45,7 +45,7 @@ class RemovedFeaturesTest extends TestCase
             base_path('resources/views/torrents/upload.blade.php'),
             base_path('resources/views/torrents/_upload.blade.php'),
             base_path('resources/views/torrent/edit.blade.php'),
-            base_path('resources/views/torrent/_edit_legacy.php'),
+            base_path('resources/views/torrent/_edit.blade.php'),
             app_path('Http/Controllers/TorrentUploadController.php'),
             app_path('Http/Controllers/TorrentEditController.php'),
             base_path('app/Support/Legacy/functions.php'),

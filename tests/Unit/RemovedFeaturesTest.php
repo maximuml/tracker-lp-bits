@@ -43,7 +43,7 @@ class RemovedFeaturesTest extends TestCase
     {
         foreach ([
             base_path('resources/views/torrents/upload.blade.php'),
-            base_path('resources/views/torrents/_upload_legacy.blade.php'),
+            base_path('resources/views/torrents/_upload.blade.php'),
             base_path('resources/views/torrent/edit.blade.php'),
             base_path('resources/views/torrent/_edit_legacy.php'),
             app_path('Http/Controllers/TorrentUploadController.php'),
@@ -72,7 +72,7 @@ class RemovedFeaturesTest extends TestCase
     {
         foreach ([
             base_path('resources/views/torrent/details.blade.php'),
-            base_path('resources/views/torrent/_details_legacy.blade.php'),
+            base_path('resources/views/torrent/_details.blade.php'),
             app_path('Http/Controllers/TorrentDetailsController.php'),
         ] as $file) {
             $this->assertFileExists($file);

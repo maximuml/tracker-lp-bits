@@ -3,10 +3,10 @@ error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
 $__server_SCRIPT_NAME = \App\Support\SupportContext::getServerValue('SCRIPT_NAME');
 $id = \App\Support\SupportContext::getQuery("id");
-int_check($id,true);
+\App\Support\LegacyResponse::assertId($id, true);
 
-stdhead($lang_viewsnatches['head_snatch_detail']);
-begin_main_frame();
+\App\Support\Html::stdhead($lang_viewsnatches['head_snatch_detail']);
+\App\Support\Frame::mainFrameOpen();
 
 $torrent_name = \App\Models\Torrent::query()->where('id', $id)->value('name');
 print("<h1 align=center>".$lang_viewsnatches['text_snatch_detail_for'] . "<a href=details.php?id=" . htmlspecialchars($id) . "><b>".htmlspecialchars($torrent_name)."</b></a></h1>");
@@ -14,7 +14,7 @@ $count = \Nexus\Database\NexusDB::table('snatched')->where('finished', 'yes')->w
 $seedBoxRep = new \App\Repositories\SeedBoxRepository();
 if ($count){
 	$perpage = 25;
-	list($pagertop, $pagerbottom, , $offset, $rpp) = pager($perpage, $count, $__server_SCRIPT_NAME . "?id=" . htmlspecialchars($id) . "&" );
+	list($pagertop, $pagerbottom, , $offset, $rpp) = \App\Support\Pagination::pager($perpage, $count, $__server_SCRIPT_NAME . "?id=" . htmlspecialchars($id) . "&");
 	print("<p align=center>".$lang_viewsnatches['text_users_top_finished_recently']."</p>");
 	print("<table border=1 cellspacing=0 cellpadding=5 align=center width=940>\n");
 	print("<tr><td class=colhead align=center>".$lang_viewsnatches['col_username']."</td>".(\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::VIEW_USER_CONFIDENTIAL_INFO) ? "<td class=colhead align=center>".$lang_viewsnatches['col_ip']."</td>" : "")."<td class=colhead align=center>".$lang_viewsnatches['col_uploaded']."/".$lang_viewsnatches['col_downloaded']."</td><td class=colhead align=center>".$lang_viewsnatches['col_ratio']."</td><td class=colhead align=center>".$lang_viewsnatches['col_se_time']."</td><td class=colhead align=center>".$lang_viewsnatches['col_le_time']."</td><td class=colhead align=center>".$lang_viewsnatches['col_when_completed']."</td><td class=colhead align=center>".$lang_viewsnatches['col_last_action']."</td><td class=colhead align=center>".$lang_viewsnatches['col_report_user']."</td></tr>");
@@ -33,7 +33,7 @@ if ($count){
 		if ($arr["downloaded"] > 0)
 		{
 			$ratio = number_format($arr["uploaded"] / $arr["downloaded"], 3);
-			$ratio = "<font color=" . get_ratio_color($ratio) . ">$ratio</font>";
+			$ratio = "<font color=" . \App\Support\Ratio::color($ratio) . ">$ratio</font>";
 		}
 		elseif ($arr["uploaded"] > 0)
 			$ratio = $lang_viewsnatches['text_inf'];
@@ -64,7 +64,7 @@ if ($count){
 }
 else
 {
-	stdmsg($lang_viewsnatches['std_sorry'], $lang_viewsnatches['std_no_snatched_users']);
+	\App\Support\Html::stdMessage($lang_viewsnatches['std_sorry'], $lang_viewsnatches['std_no_snatched_users']);
 }
-end_main_frame();
-stdfoot();
+\App\Support\Frame::mainFrameClose();
+\App\Support\Html::stdfoot();

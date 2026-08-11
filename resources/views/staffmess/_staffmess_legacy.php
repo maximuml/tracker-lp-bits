@@ -3,8 +3,8 @@ error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
 $__server_HTTP_REFERER = \App\Support\SupportContext::getServerValue('HTTP_REFERER');
 if (\App\Support\UserDisplay::currentClass() < UC_ADMINISTRATOR)
-stderr("Sorry", "Access denied.");
-stdhead("Mass PM", false);
+\App\Support\LegacyResponse::abort("Sorry", "Access denied.");
+\App\Support\Html::stdhead("Mass PM", false);
 $classes = array_chunk(\App\Models\User::$classes, 4, true);
 ?>
 <table class=main width=737 border=0 cellspacing=0 cellpadding=0><tr><td class=embedded>
@@ -69,4 +69,4 @@ if (\App\Support\SupportContext::getQuery("sent") == 1) {
 <br />
 NOTE: Do not user BB codes. (NO HTML)
 <?php
-stdfoot();
+\App\Support\Html::stdfoot();

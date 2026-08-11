@@ -5,10 +5,10 @@ error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
 $__server_REQUEST_URI = \App\Support\SupportContext::getServerValue('REQUEST_URI');
 $uid = \App\Support\SupportContext::getRequestInput('uid') ?? $CURUSER['id'] ?? 0;
-int_check($uid,true);
+\App\Support\LegacyResponse::assertId($uid, true);
 $user = \App\Models\User::query()->where('id', $uid)->first(\App\Models\User::$commonFields);
 if (!$user) {
-    stderr("Error", "Invalid uid: $uid");
+    \App\Support\LegacyResponse::abort("Error", "Invalid uid: $uid");
 }
 if ($uid != $CURUSER['id']) {
     user_can(\App\Enums\Permission\PermissionEnum::VIEW_USER_HISTORY->value, true, $CURUSER['id']);
@@ -18,15 +18,15 @@ $defaultCategory = \App\Models\BonusLogs::CATEGORY_COMMON;
 $category = \App\Support\SupportContext::getRequestInput('category') ?? $defaultCategory;
 $categoryOptions = \App\Models\BonusLogs::listCategoryOptions($isRecordSeedingBonusLog);
 if (!(isset($categoryOptions[$category]))) {
-    stderr("Error", "Invalid category: $category");
+    \App\Support\LegacyResponse::abort("Error", "Invalid category: $category");
 }
 $businessType = \App\Support\SupportContext::getRequestInput('business_type') ?? 0;
 $businessTypeOptions = \App\Models\BonusLogs::listBusinessTypeOptions($isRecordSeedingBonusLog ? '' : $defaultCategory);
 if ($businessType && !(isset($businessTypeOptions[$businessType]))) {
-    stderr("Error", "Invalid business_type: $businessType");
+    \App\Support\LegacyResponse::abort("Error", "Invalid business_type: $businessType");
 }
 
-stdhead(nexus_trans('bonus-log.title_for_user'));
+\App\Support\Html::stdhead(nexus_trans('bonus-log.title_for_user'));
 $pagerParam = "?uid=$uid&category=$category&business_type=$businessType";
 print("<h1 align=center>".nexus_trans('bonus-log.title_for_user') . "<a href=userdetails.php?id=" . htmlspecialchars($uid) . "><b>&nbsp;".htmlspecialchars($user->username)."</b></a></h1>");
 
@@ -79,9 +79,9 @@ JS;
 
 $rep = new \App\Repositories\BonusRepository();
 $total = $rep->getCount($category, $uid, $businessType);
-list($pagertop, $pagerbottom, $limit, $offset, $pageSize, $page) = pager(50, $total, "$pagerParam&");
+list($pagertop, $pagerbottom, $limit, $offset, $pageSize, $page) = \App\Support\Pagination::pager(50, $total, "$pagerParam&");
 $list = $rep->getList($category, $uid, $businessType, $page + 1, $pageSize);
-begin_main_frame();
+\App\Support\Frame::mainFrameOpen();
 print($filterForm);
 print("<table id='bonus-log-table' width='100%' cellpadding='5'>");
 print("<tr>
@@ -105,7 +105,7 @@ foreach ($list as $row) {
 
 print("</table>");
 print($pagerbottom);
-end_main_frame();
-stdfoot();
+\App\Support\Frame::mainFrameClose();
+\App\Support\Html::stdfoot();
 
 

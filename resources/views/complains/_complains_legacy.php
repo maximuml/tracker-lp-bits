@@ -9,10 +9,10 @@ $isLogin = (isset($CURUSER['id']));
 $isAdmin = \App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::STAFF_MEMBER);
 
 if($isLogin && !$isAdmin) {
-    permissiondenied();
+    \App\Support\LegacyResponse::permissionDenied();
 }
 if (!$isAdmin && !\App\Models\Setting::getIsComplainEnabled()) {
-    stderr($lang_functions['std_error'], $lang_complains['complain_not_enabled']);
+    \App\Support\LegacyResponse::abort($lang_functions['std_error'], $lang_complains['complain_not_enabled']);
 }
 
 $uid = $CURUSER['id'] ?? 0;
@@ -25,10 +25,10 @@ if($__server_REQUEST_METHOD === 'POST'){
             $email = filter_var(\App\Support\SupportContext::getPost('email'), FILTER_VALIDATE_EMAIL);
             \Nexus\Database\NexusLock::lockOrFail("complains:lock:" . $email, 600);
             $body = filter_var(\App\Support\SupportContext::getPost('body'), FILTER_SANITIZE_FULL_SPECIAL_CHARS);
-            if(empty($email) || empty($body)) stderr($lang_functions['std_error'], $lang_complains['text_new_failure']);
+            if(empty($email) || empty($body)) \App\Support\LegacyResponse::abort($lang_functions['std_error'], $lang_complains['text_new_failure']);
             $user = \App\Models\User::query()->where('email', $email)->where('enabled', 'no')->first();
             if (!$user) {
-                stderr($lang_functions['std_error'], $lang_complains['text_new_failure']);
+                \App\Support\LegacyResponse::abort($lang_functions['std_error'], $lang_complains['text_new_failure']);
             }
             $complainId = \Nexus\Database\NexusDB::table('complains')->insertGetId([
                 'uuid' => \Nexus\Database\NexusDB::raw('UUID()'),
@@ -38,13 +38,13 @@ if($__server_REQUEST_METHOD === 'POST'){
                 'ip' => \App\Support\Network::clientIp(),
             ]);
             $Cache->delete_value('COMPLAINTS_COUNT_CACHE');
-            nexus_redirect(sprintf('complains.php?action=view&id=%s', \Nexus\Database\NexusDB::table('complains')->where('id', $complainId)->value('uuid')));
+            \App\Support\LegacyResponse::redirect(sprintf('complains.php?action=view&id=%s', \Nexus\Database\NexusDB::table('complains')->where('id', $complainId)->value('uuid')));
             break;
         case 'reply':
             $id = filter_var(\App\Support\SupportContext::getPost('id'), FILTER_VALIDATE_INT);
             $body = filter_var(\App\Support\SupportContext::getPost('body'), FILTER_SANITIZE_FULL_SPECIAL_CHARS);
             $complain = \App\Models\Complain::query()->findOrFail($id);
-            if(empty($id) || empty($body)) stderr($lang_functions['std_error'], $lang_complains['text_new_failure']);
+            if(empty($id) || empty($body)) \App\Support\LegacyResponse::abort($lang_functions['std_error'], $lang_complains['text_new_failure']);
             \Nexus\Database\NexusDB::table('complain_replies')->insert([
                 'complain' => $id,
                 'userid' => $uid,
@@ -60,21 +60,21 @@ if($__server_REQUEST_METHOD === 'POST'){
                     do_log($exception->getMessage(), 'error');
                 }
             }
-            nexus_redirect($__server_HTTP_REFERER);
+            \App\Support\LegacyResponse::redirect($__server_HTTP_REFERER);
             break;
         case 'answered':
         case 'unanswered':
-            if(!$isAdmin) permissiondenied();
+            if(!$isAdmin) \App\Support\LegacyResponse::permissionDenied();
             $id = filter_var(\App\Support\SupportContext::getPost('id'), FILTER_VALIDATE_INT);
-            if(!$id) permissiondenied();
+            if(!$id) \App\Support\LegacyResponse::permissionDenied();
             \Nexus\Database\NexusDB::table('complains')->where('id', $id)->update([
                 'answered' => $action == 'answered' ? 1 : 0,
             ]);
             $Cache->delete_value('COMPLAINTS_COUNT_CACHE');
-            nexus_redirect($__server_HTTP_REFERER);
+            \App\Support\LegacyResponse::redirect($__server_HTTP_REFERER);
             break;
         default:
-            permissiondenied();
+            \App\Support\LegacyResponse::permissionDenied();
     }
 }else{
     $action = filter_var(\App\Support\SupportContext::getQuery('action'), FILTER_SANITIZE_FULL_SPECIAL_CHARS);
@@ -83,31 +83,31 @@ if($__server_REQUEST_METHOD === 'POST'){
     }
     switch ($action){
         case 'list':
-            if(!$isAdmin) permissiondenied();
+            if(!$isAdmin) \App\Support\LegacyResponse::permissionDenied();
             $showTable = function($rows){
 $lang_complains = (array) (\App\Support\SupportContext::getGlobal('lang_complains') ?? []);
                 echo '<table width="100%">';
-                echo EchoRow('colhead', $lang_complains['th_complain_at'], $lang_complains['th_complain_account'], $lang_complains['th_action_view']);
+                echo \App\Support\Html::tableRow('colhead', $lang_complains['th_complain_at'], $lang_complains['th_complain_account'], $lang_complains['th_action_view']);
                 foreach ($rows as $r) {
                     $row = (array) $r;
-                    echo EchoRow('rowfollow', \App\Support\Time::format($row['added']), htmlspecialchars($row['email']), sprintf('<a href="?action=view&id=%s" class="faqlink">%s</a>', $row['uuid'], $lang_complains['th_action_view']));
+                    echo \App\Support\Html::tableRow('rowfollow', \App\Support\Time::format($row['added']), htmlspecialchars($row['email']), sprintf('<a href="?action=view&id=%s" class="faqlink">%s</a>', $row['uuid'], $lang_complains['th_action_view']));
                 }
                 echo '</table>';
             };
-            stdhead($lang_complains['text_complain']);
-            begin_main_frame();
+            \App\Support\Html::stdhead($lang_complains['text_complain']);
+            \App\Support\Frame::mainFrameOpen();
             if(!((\App\Support\SupportContext::getQuery('page') !== null))){
                 $pendingRows = \Nexus\Database\NexusDB::table('complains')->where('answered', 0)->orderByDesc('id')->get(['added', 'uuid', 'email']);
-                begin_frame($lang_complains['pending_complaints']);
+                \App\Support\Html::beginFrame($lang_complains['pending_complaints']);
                 if($pendingRows->count()){
                     $showTable($pendingRows);
                 }else{
                     echo $lang_complains['no_pending_complaints'];
                 }
-                end_frame();
+                \App\Support\Html::endFrame();
             }
-            begin_frame($lang_complains['complaints_processed']);
-            list($pagertop, $pagerbottom, , $offset, $rpp) = pager(20, \Nexus\Database\NexusDB::table('complains')->where('answered', 1)->count(), '?action=list&');
+            \App\Support\Html::beginFrame($lang_complains['complaints_processed']);
+            list($pagertop, $pagerbottom, , $offset, $rpp) = \App\Support\Pagination::pager(20, \Nexus\Database\NexusDB::table('complains')->where('answered', 1)->count(), '?action=list&');
             $processedRows = \Nexus\Database\NexusDB::table('complains')
                 ->where('answered', 1)
                 ->orderByDesc('id')
@@ -121,24 +121,24 @@ $lang_complains = (array) (\App\Support\SupportContext::getGlobal('lang_complain
             }else{
                 echo $lang_complains['no_complaints_have_been_processed'];
             }
-            end_frame();
-            end_main_frame();
-            stdfoot();
+            \App\Support\Html::endFrame();
+            \App\Support\Frame::mainFrameClose();
+            \App\Support\Html::stdfoot();
             break;
         case 'view':
             $uuid = filter_var(\App\Support\SupportContext::getQuery('id'), FILTER_SANITIZE_FULL_SPECIAL_CHARS);
-            if(strlen($uuid) != 36) permissiondenied();
+            if(strlen($uuid) != 36) \App\Support\LegacyResponse::permissionDenied();
             $complain = (array) \Nexus\Database\NexusDB::table('complains')->where('uuid', $uuid)->first();
-            if(!$complain) permissiondenied();
+            if(!$complain) \App\Support\LegacyResponse::permissionDenied();
             $user = \App\Models\User::query()->where('email', $complain['email'])->first();
-            stdhead($lang_complains['text_complain']);
-            begin_main_frame();
+            \App\Support\Html::stdhead($lang_complains['text_complain']);
+            \App\Support\Frame::mainFrameOpen();
             if(!$isLogin){
-                begin_frame($lang_complains['text_created_title']);
+                \App\Support\Html::beginFrame($lang_complains['text_created_title']);
                 printf('<p style="font-weight: bold; color: red">%s</p>', $lang_complains['text_created_note']);
-                end_frame();
+                \App\Support\Html::endFrame();
             }
-            begin_frame($lang_complains['text_new_body']);
+            \App\Support\Html::beginFrame($lang_complains['text_new_body']);
             printf('%s：%s<br />%s %s', $lang_complains['text_added'], \App\Support\Time::format($complain['added']), $lang_complains['text_new_email'], htmlspecialchars($complain['email']));
             if($isAdmin) {
                 if ($user) {
@@ -150,9 +150,9 @@ $lang_complains = (array) (\App\Support\SupportContext::getGlobal('lang_complain
                 printf('<br />IP: ' . htmlspecialchars($complain['ip']));
             }
             echo '<hr />', \App\Support\Format::formatComment($complain['body']);
-            end_frame();
+            \App\Support\Html::endFrame();
             // REPLIES
-            begin_frame($lang_complains['text_replies']);
+            \App\Support\Html::beginFrame($lang_complains['text_replies']);
             $replyRows = \Nexus\Database\NexusDB::table('complain_replies')->where('complain', $complain['id'])->orderByDesc('id')->get();
             if($replyRows->count()){
                 foreach ($replyRows as $r) {
@@ -167,25 +167,25 @@ $lang_complains = (array) (\App\Support\SupportContext::getGlobal('lang_complain
             }else{
                 printf('<p align="center">%s</p>', $lang_complains['text_no_replies']);
             }
-            end_frame();
+            \App\Support\Html::endFrame();
             // NEW REPLY
             if($complain['answered']){
                 printf('<p align="center">%s</p>', $lang_complains['text_closed']);
             }else{
                 printf('<br /><br /><table style="border:1px solid #000000;" align="center"><tr><td class="text" align="center"><b>%s</b><br /><br /><form id="reply" method="post" action="" onsubmit="return postvalid(this);"><input type="hidden" name="action" value="reply" /><input type="hidden" name="id" value="%u" /><br />', $lang_complains['text_reply'], $complain['id']);
-                quickreply('reply', 'body', $lang_complains['text_reply']);
+                \App\Support\Html::quickReplyVoid('reply', 'body', $lang_complains['text_reply']);
                 echo '</form></td></tr></table>';
             }
             if($isAdmin){
                 printf('<form action="" method="post" style="text-align: center; margin-top: 2em"><input type="hidden" name="action" value="%s" /><input type="hidden" name="id" value="%u" /><button>%s</button></form>', $complain['answered'] ? 'unanswered' : 'answered', $complain['id'],$complain['answered'] ? $lang_complains['text_unanswer_it'] : $lang_complains['text_answer_it']);
             }
-            end_main_frame();
-            stdfoot();
+            \App\Support\Frame::mainFrameClose();
+            \App\Support\Html::stdfoot();
             break;
         case 'compose':
         default:
             cur_user_check();
-            stdhead($lang_complains['text_complain']);
+            \App\Support\Html::stdhead($lang_complains['text_complain']);
             ?>
             <h2><?= $lang_complains['text_new_complain'] ?></h2>
             <form action="" method="post">
@@ -202,6 +202,6 @@ $lang_complains = (array) (\App\Support\SupportContext::getGlobal('lang_complain
                 </table>
             </form>
             <?php
-            stdfoot();
+            \App\Support\Html::stdfoot();
     }
 }

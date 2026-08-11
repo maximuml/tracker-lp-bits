@@ -160,7 +160,7 @@ class UploadRepository extends BaseRepository
         $torrentRep = new TorrentRepository();
         $torrentRep->addPiecesHashCache($id, $newTorrent->pieces_hash);
         $this->handleOffer($request, $newTorrent, $user);
-        write_log("Torrent $id ($newTorrent->name) was uploaded by $uploaderUsername");
+        \App\Support\Log::writeWithContext("Torrent $id ($newTorrent->name) was uploaded by $uploaderUsername");
         fire_event(ModelEventEnum::TORRENT_CREATED, $newTorrent);
         return $newTorrent;
     }

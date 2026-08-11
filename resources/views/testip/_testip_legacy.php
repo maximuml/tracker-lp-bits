@@ -4,7 +4,7 @@ error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
 
 $__server_REQUEST_METHOD = \App\Support\SupportContext::getServerValue('REQUEST_METHOD');
-if (\App\Support\UserDisplay::currentClass() < UC_MODERATOR) stderr("Error", "Permission denied");
+if (\App\Support\UserDisplay::currentClass() < UC_MODERATOR) \App\Support\LegacyResponse::abort("Error", "Permission denied");
 
 if ($__server_REQUEST_METHOD == "POST")
 	$ip = \App\Support\SupportContext::getPost("ip");
@@ -14,10 +14,10 @@ if ($ip)
 {
 	$nip = ip2long($ip);
 	if ($nip == -1)
-	  stderr("Error", "Bad IP.");
+	  \App\Support\LegacyResponse::abort("Error", "Bad IP.");
 	$rows = \Nexus\Database\NexusDB::table('bans')->where('first', '<=', $nip)->where('last', '>=', $nip)->get();
 	if ($rows->isEmpty())
-	  stderr("Result", "The IP address <b>". htmlspecialchars($ip) ."</b> is not banned.",false);
+	  \App\Support\LegacyResponse::abort("Result", "The IP address <b>". htmlspecialchars($ip) ."</b> is not banned.", false);
 	else
 	{
 	  $banstable = "<table class=main border=0 cellspacing=0 cellpadding=5>\n" .
@@ -31,10 +31,10 @@ if ($ip)
 	    $banstable .= "<tr><td>$first</td><td>$last</td><td>$comment</td></tr>\n";
 	  }
 	  $banstable .= "</table>\n";
-	  stderr("Result", "<table border=0 cellspacing=0 cellpadding=0><tr><td class=embedded>The IP address <b>". $ip ."</b> is banned:</td></tr></table><p>". $banstable ."</p>", false);
+	  \App\Support\LegacyResponse::abort("Result", "<table border=0 cellspacing=0 cellpadding=0><tr><td class=embedded>The IP address <b>". $ip ."</b> is banned:</td></tr></table><p>". $banstable ."</p>", false);
 	}
 }
-stdhead();
+\App\Support\Html::stdhead();
 
 ?>
 <h1>Test IP address</h1>
@@ -46,4 +46,4 @@ stdhead();
 </table>
 
 <?php
-stdfoot();
+\App\Support\Html::stdfoot();

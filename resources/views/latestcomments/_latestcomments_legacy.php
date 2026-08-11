@@ -1,15 +1,15 @@
 <?php
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
-stdhead($lang_functions['text_latest_comments'] ?? 'Latest Comments');
-begin_main_frame();
+\App\Support\Html::stdhead($lang_functions['text_latest_comments'] ?? 'Latest Comments');
+\App\Support\Frame::mainFrameOpen();
 
 $perpage = 20;
 $count = \App\Repositories\CommentRepository::countLatest();
 
 if ($count == 0) {
-    stdmsg($lang_functions['text_sorry'] ?? 'Sorry', $lang_functions['text_no_comments'] ?? 'No comments yet.');
+    \App\Support\Html::stdMessage($lang_functions['text_sorry'] ?? 'Sorry', $lang_functions['text_no_comments'] ?? 'No comments yet.');
 } else {
-    [$pagertop, $pagerbottom, , $offset, $perpage] = pager($perpage, $count, 'latestcomments.php?');
+    [$pagertop, $pagerbottom, , $offset, $perpage] = \App\Support\Pagination::pager($perpage, $count, 'latestcomments.php?');
     $rows = \App\Repositories\CommentRepository::getLatest($perpage, $offset);
 
     $uidArr = array_unique(array_column($rows, 'user'));
@@ -74,5 +74,5 @@ if ($count == 0) {
     print($pagerbottom);
 }
 
-end_main_frame();
-stdfoot();
+\App\Support\Frame::mainFrameClose();
+\App\Support\Html::stdfoot();

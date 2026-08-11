@@ -35,7 +35,7 @@ class LatestTorrents extends BaseWidget implements HasActions
         return [
             TextColumn::make('name')
                 ->label(__('label.name'))
-                ->formatStateUsing(fn ($record) => torrent_name_for_admin($record, false, 30))
+                ->formatStateUsing(fn ($record) => \App\Support\TorrentAccess::adminName($record, false, 30))
             ,
             TextColumn::make('owner')
                 ->label(__('label.torrent.owner'))

@@ -4,15 +4,15 @@ error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
 
 if (((\App\Support\SupportContext::getQuery('id') !== null)))
-	stderr("Party is over!", "This trick doesn't work anymore. You need to click the button!");
+	\App\Support\LegacyResponse::abort("Party is over!", "This trick doesn't work anymore. You need to click the button!");
 $userid = $CURUSER["id"];
 $torrentid = \App\Support\SupportContext::getPost("id");
 $torrentowner = \App\Models\Torrent::query()->where('id', $torrentid)->value('owner');
 if (!$torrentowner)
-	stderr("Error", "Invalid torrent id!");
+	\App\Support\LegacyResponse::abort("Error", "Invalid torrent id!");
 $t_ab = \Nexus\Database\NexusDB::table('thanks')->where('torrentid', $torrentid)->where('userid', $userid)->count();
 if ($t_ab != 0)
-	stderr("Error", "You already said thanks!");
+	\App\Support\LegacyResponse::abort("Error", "You already said thanks!");
 if ((isset($userid)) && (isset($torrentid)))
 {
 \Nexus\Database\NexusDB::table('thanks')->insert([

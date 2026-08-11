@@ -5,7 +5,7 @@ error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
 $__server_PATH_INFO = \App\Support\SupportContext::getServerValue('PATH_INFO');
 if (!preg_match(':^/(\d{1,10})/([\w]{32})/(.+)$:', $__server_PATH_INFO, $matches))
-	httperr();
+	\App\Support\LegacyResponse::notFound();
 
 $id = intval($matches[1] ?? 0);
 $md5 = $matches[2];
@@ -14,22 +14,22 @@ $email = urldecode($matches[3]);
 //die();
 
 if (!$id)
-	httperr();
+	\App\Support\LegacyResponse::notFound();
 
 $user = \App\Models\User::query()->where('id', $id)->first(['editsecret']);
 if (!$user)
-	httperr();
+	\App\Support\LegacyResponse::notFound();
 $row = $user->toArray();
 
 $sec = hash_pad($row["editsecret"]);
 if (preg_match('/^ *$/s', $sec))
-	httperr();
+	\App\Support\LegacyResponse::notFound();
 if ($md5 != md5($sec . $email . $sec))
-	httperr();
+	\App\Support\LegacyResponse::notFound();
 
 $affected = \App\Models\User::query()->where('id', $id)->where('editsecret', $row['editsecret'])->update(['editsecret' => '', 'email' => $email]);
 
 if (!$affected)
-	httperr();
+	\App\Support\LegacyResponse::notFound();
 
 header("Location: " . get_protocol_prefix() . "$BASEURL/usercp.php?action=security&type=saved");

@@ -2,10 +2,10 @@
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 function bark($msg) {
 $lang_topten = (array) (\App\Support\SupportContext::getGlobal('lang_topten') ?? []);
-	genbark($msg, $lang_topten['std_error']);
+	\App\Support\LegacyResponse::bark( $lang_topten['std_error'], $msg);
 }
 if (!\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::TOP_TEN)){
-	stderr($lang_topten['std_sorry'],$lang_topten['std_permission_denied_only'].\App\Support\UserClass::name($topten_class,false,true,true).sprintf($lang_topten['std_or_above_can_view'], \App\Models\Setting::getSiteName()),false);
+	\App\Support\LegacyResponse::abort($lang_topten['std_sorry'], $lang_topten['std_permission_denied_only'].\App\Support\UserClass::name($topten_class,false,true,true).sprintf($lang_topten['std_or_above_can_view'], \App\Models\Setting::getSiteName()), false);
 }
 
 function usershare_table($res, $frame_caption)
@@ -13,8 +13,8 @@ function usershare_table($res, $frame_caption)
 $lang_topten = (array) (\App\Support\SupportContext::getGlobal('lang_topten') ?? []);
 $CURUSER = \App\Support\SupportContext::getUser() ?? [];
 $lang_topten = (array) (\App\Support\SupportContext::getGlobal('lang_topten') ?? []);
-	begin_frame($frame_caption, true);
-	begin_table();
+	\App\Support\Html::beginFrame($frame_caption, true);
+	\App\Support\Html::beginTable();
 ?>
 <tr>
 <td class="colhead"><?php echo $lang_topten['col_rank'] ?></td>
@@ -33,7 +33,7 @@ foreach ($res as $a) { $a = (array) $a;
 	if ($a["downloaded"])
 	{
 		$ratio = $a["uploaded"] / $a["downloaded"];
-		$color = get_ratio_color($ratio);
+		$color = \App\Support\Ratio::color($ratio);
 		$ratio = number_format($ratio, 2);
 		if ($color)
 		$ratio = "<font color=\"$color\">$ratio</font>";
@@ -48,15 +48,15 @@ foreach ($res as $a) { $a = (array) $a;
 	"</td><td class=\"rowfollow\" align=\"right\">" . $ratio .
 	"</td><td class=\"rowfollow\" align=\"left\">" . \App\Support\Time::format($a["added"],true,false). "</td></tr>");
 }
-end_table();
-end_frame();
+\App\Support\Html::endTable();
+\App\Support\Html::endFrame();
 }
 
 function _torrenttable($res, $frame_caption)
 {
 $lang_topten = (array) (\App\Support\SupportContext::getGlobal('lang_topten') ?? []);
-	begin_frame($frame_caption, true);
-	begin_table();
+	\App\Support\Html::beginFrame($frame_caption, true);
+	\App\Support\Html::beginTable();
 ?>
 <tr>
 <td class="colhead" align="center"><?php echo $lang_topten['col_rank'] ?></td>
@@ -75,7 +75,7 @@ foreach ($res as $a) { $a = (array) $a;
 	if ($a["leechers"])
 	{
 		$r = $a["seeders"] / $a["leechers"];
-		$ratio = "<font color=\"" . get_ratio_color($r) . "\">" . number_format($r, 2) . "</font>";
+		$ratio = "<font color=\"" . \App\Support\Ratio::color($r) . "\">" . number_format($r, 2) . "</font>";
 	}
 	else
 	$ratio = $lang_topten['text_inf'];
@@ -85,16 +85,16 @@ foreach ($res as $a) { $a = (array) $a;
 	"</td><td class=\"rowfollow\" align=\"right\">" . number_format($a["leechers"]) . "</td><td class=\"rowfollow\" align=\"right\">" . ($a["leechers"] + $a["seeders"]) .
 	"</td><td class=\"rowfollow\" align=\"right\">$ratio</td>\n");
 }
-end_table();
-end_frame();
+\App\Support\Html::endTable();
+\App\Support\Html::endFrame();
 }
 
 function countriestable($res, $frame_caption, $what)
 {
 $CURUSER = \App\Support\SupportContext::getUser() ?? [];
 $lang_topten = (array) (\App\Support\SupportContext::getGlobal('lang_topten') ?? []);
-	begin_frame($frame_caption, true);
-	begin_table();
+	\App\Support\Html::beginFrame($frame_caption, true);
+	\App\Support\Html::beginTable();
 ?>
 <tr>
 <td class="colhead"><?php echo $lang_topten['col_rank'] ?></td>
@@ -117,15 +117,15 @@ foreach ($res as $a) { $a = (array) $a;
 	"<img align=\"center\" src=\"pic/flag/{$a['flagpic']}\" alt=\"\" /></td><td class=\"embedded\" style='padding-left: 5px'><b>{$a['name']}</b></td>".
 	"</tr></table></td><td class=\"rowfollow\" align=\"right\">$value</td></tr>\n");
 }
-end_table();
-end_frame();
+\App\Support\Html::endTable();
+\App\Support\Html::endFrame();
 }
 
 function peerstable($res, $frame_caption)
 {
 $lang_topten = (array) (\App\Support\SupportContext::getGlobal('lang_topten') ?? []);
-	begin_frame($frame_caption, true);
-	begin_table();
+	\App\Support\Html::beginFrame($frame_caption, true);
+	\App\Support\Html::beginTable();
 
 	print("<tr><td class=\"colhead\">".$lang_topten['col_rank']."</td><td class=\"colhead\">".$lang_topten['col_username']."</td><td class=\"colhead\">".$lang_topten['col_upload_rate']."</td><td class=\"colhead\">".$lang_topten['col_download_rate']."</td></tr>");
 
@@ -135,15 +135,15 @@ $lang_topten = (array) (\App\Support\SupportContext::getGlobal('lang_topten') ??
 		++$n;
 	}
 
-	end_table();
-	end_frame();
+	\App\Support\Html::endTable();
+	\App\Support\Html::endFrame();
 }
 
 function bonustable($res, $frame_caption)
 {
 $lang_topten = (array) (\App\Support\SupportContext::getGlobal('lang_topten') ?? []);
-	begin_frame($frame_caption, true);
-	begin_table();
+	\App\Support\Html::beginFrame($frame_caption, true);
+	\App\Support\Html::beginTable();
 
 	print("<tr><td class=\"colhead\">".$lang_topten['col_rank']."</td><td class=\"colhead\">".$lang_topten['col_username']."</td><td class=\"colhead\">".$lang_topten['col_bonus']."</td></tr>");
 
@@ -154,16 +154,16 @@ $lang_topten = (array) (\App\Support\SupportContext::getGlobal('lang_topten') ??
 		$n++;
 	}
 
-	end_table();
-	end_frame();
+	\App\Support\Html::endTable();
+	\App\Support\Html::endFrame();
 }
 
 
 function charityTable($res, $frame_caption)
 {
 $lang_topten = (array) (\App\Support\SupportContext::getGlobal('lang_topten') ?? []);
-	begin_frame($frame_caption, true);
-	begin_table();
+	\App\Support\Html::beginFrame($frame_caption, true);
+	\App\Support\Html::beginTable();
 
 	print("<tr><td class=\"colhead\">".$lang_topten['col_rank']."</td><td class=\"colhead\">".$lang_topten['col_username']."</td><td class=\"colhead\">".$lang_topten['col_bonus']."</td></tr>");
 
@@ -174,15 +174,15 @@ $lang_topten = (array) (\App\Support\SupportContext::getGlobal('lang_topten') ??
 		$n++;
 	}
 
-	end_table();
-	end_frame();
+	\App\Support\Html::endTable();
+	\App\Support\Html::endFrame();
 }
 
 function cmttable($res, $frame_caption, $col2_name)
 {
 $lang_topten = (array) (\App\Support\SupportContext::getGlobal('lang_topten') ?? []);
-	begin_frame($frame_caption, true);
-	begin_table();
+	\App\Support\Html::beginFrame($frame_caption, true);
+	\App\Support\Html::beginTable();
 
 	print("<tr><td class=\"colhead\">".$lang_topten['col_rank']."</td><td class=\"colhead\">".$lang_topten['col_username']."</td><td class=\"colhead\">".$col2_name."</td></tr>");
 
@@ -192,15 +192,15 @@ $lang_topten = (array) (\App\Support\SupportContext::getGlobal('lang_topten') ??
 		$n++;
 	}
 
-	end_table();
-	end_frame();
+	\App\Support\Html::endTable();
+	\App\Support\Html::endFrame();
 }
 
 function locationtable($res, $frame_caption)
 {
 $lang_topten = (array) (\App\Support\SupportContext::getGlobal('lang_topten') ?? []);
-	begin_frame($frame_caption, true);
-	begin_table();
+	\App\Support\Html::beginFrame($frame_caption, true);
+	\App\Support\Html::beginTable();
 
 	print("<tr><td class=\"colhead\">".$lang_topten['col_rank']."</td><td class=\"colhead\">".$lang_topten['col_location']."</td><td class=\"colhead\">".$lang_topten['col_number']."</td></tr>");
 
@@ -210,15 +210,15 @@ $lang_topten = (array) (\App\Support\SupportContext::getGlobal('lang_topten') ??
 		$n++;
 	}
 
-	end_table();
-	end_frame();
+	\App\Support\Html::endTable();
+	\App\Support\Html::endFrame();
 }
 
 function postable($res, $frame_caption)
 {
 $lang_topten = (array) (\App\Support\SupportContext::getGlobal('lang_topten') ?? []);
-	begin_frame($frame_caption, true);
-	begin_table();
+	\App\Support\Html::beginFrame($frame_caption, true);
+	\App\Support\Html::beginTable();
 
 	print("<tr><td class=\"colhead\">".$lang_topten['col_rank']."</td><td class=\"colhead\">".$lang_topten['col_username']."</td><td class=\"colhead\">".$lang_topten['col_topics']."</td><td class=\"colhead\">".$lang_topten['col_posts']."</td></tr>");
 
@@ -228,15 +228,15 @@ $lang_topten = (array) (\App\Support\SupportContext::getGlobal('lang_topten') ??
 		$n++;
 	}
 
-	end_table();
-	end_frame();
+	\App\Support\Html::endTable();
+	\App\Support\Html::endFrame();
 }
 
 function bigtopic_table($res, $frame_caption)
 {
 $lang_topten = (array) (\App\Support\SupportContext::getGlobal('lang_topten') ?? []);
-	begin_frame($frame_caption, true);
-	begin_table();
+	\App\Support\Html::beginFrame($frame_caption, true);
+	\App\Support\Html::beginTable();
 
 	print("<tr><td class=\"colhead\">".$lang_topten['col_rank']."</td><td class=\"colhead\">".$lang_topten['col_subject']."</td><td class=\"colhead\">".$lang_topten['col_posts']."</td></tr>");
 
@@ -248,15 +248,15 @@ $lang_topten = (array) (\App\Support\SupportContext::getGlobal('lang_topten') ??
 		$n++;
 	}
 
-	end_table();
-	end_frame();
+	\App\Support\Html::endTable();
+	\App\Support\Html::endFrame();
 }
 
 function donortable($res, $frame_caption)
 {
 $lang_topten = (array) (\App\Support\SupportContext::getGlobal('lang_topten') ?? []);
-	begin_frame($frame_caption, true);
-	begin_table();
+	\App\Support\Html::beginFrame($frame_caption, true);
+	\App\Support\Html::beginTable();
 
 	print("<tr><td class=\"colhead\">".$lang_topten['col_rank']."</td><td class=\"colhead\">".$lang_topten['col_username']."</td><td class=\"colhead\">".$lang_topten['col_donated_usd']."</td><td class=\"colhead\">".$lang_topten['col_donated_cny']."</td></tr>");
 
@@ -266,15 +266,15 @@ $lang_topten = (array) (\App\Support\SupportContext::getGlobal('lang_topten') ??
 		$n++;
 	}
 
-	end_table();
-	end_frame();
+	\App\Support\Html::endTable();
+	\App\Support\Html::endFrame();
 }
 
 function clienttable($res, $frame_caption)
 {
 $lang_topten = (array) (\App\Support\SupportContext::getGlobal('lang_topten') ?? []);
-	begin_frame($frame_caption, true);
-	begin_table();
+	\App\Support\Html::beginFrame($frame_caption, true);
+	\App\Support\Html::beginTable();
 
 	print("<tr><td class=\"colhead\">".$lang_topten['col_rank']."</td><td class=\"colhead\">".$lang_topten['col_name']."</td><td class=\"colhead\">".$lang_topten['col_number']."</td></tr>");
 
@@ -284,15 +284,15 @@ $lang_topten = (array) (\App\Support\SupportContext::getGlobal('lang_topten') ??
 		$n++;
 	}
 
-	end_table();
-	end_frame();
+	\App\Support\Html::endTable();
+	\App\Support\Html::endFrame();
 }
 
 function lastsearch_table($res, $frame_caption)
 {
 $lang_topten = (array) (\App\Support\SupportContext::getGlobal('lang_topten') ?? []);
-	begin_frame($frame_caption, true);
-	begin_table();
+	\App\Support\Html::beginFrame($frame_caption, true);
+	\App\Support\Html::beginTable();
 
 	print("<tr><td class=\"colhead\">".$lang_topten['col_rank']."</td><td class=\"colhead\">".$lang_topten['col_keyword']."</td><td class=\"colhead\">".$lang_topten['col_datetime']."</td></tr>");
 
@@ -302,15 +302,15 @@ $lang_topten = (array) (\App\Support\SupportContext::getGlobal('lang_topten') ??
 		$n++;
 	}
 
-	end_table();
-	end_frame();
+	\App\Support\Html::endTable();
+	\App\Support\Html::endFrame();
 }
 
 function search_ranktable($res, $frame_caption)
 {
 $lang_topten = (array) (\App\Support\SupportContext::getGlobal('lang_topten') ?? []);
-	begin_frame($frame_caption, true);
-	begin_table();
+	\App\Support\Html::beginFrame($frame_caption, true);
+	\App\Support\Html::beginTable();
 
 	print("<tr><td class=\"colhead\">".$lang_topten['col_rank']."</td><td class=\"colhead\">".$lang_topten['col_keyword']."</td><td class=\"colhead\">".$lang_topten['col_times']."</td></tr>");
 
@@ -320,8 +320,8 @@ $lang_topten = (array) (\App\Support\SupportContext::getGlobal('lang_topten') ??
 		$n++;
 	}
 
-	end_table();
-	end_frame();
+	\App\Support\Html::endTable();
+	\App\Support\Html::endFrame();
 }
 
 
@@ -330,8 +330,8 @@ function supply_snatchtable($res, $frame_caption)
 $lang_topten = (array) (\App\Support\SupportContext::getGlobal('lang_topten') ?? []);
 $CURUSER = \App\Support\SupportContext::getUser() ?? [];
 $lang_topten = (array) (\App\Support\SupportContext::getGlobal('lang_topten') ?? []);
-	begin_frame($frame_caption, true);
-	begin_table();
+	\App\Support\Html::beginFrame($frame_caption, true);
+	\App\Support\Html::beginTable();
 ?>
 
 <tr>
@@ -351,7 +351,7 @@ foreach ($res as $a) { $a = (array) $a;
 	if ($a["downloaded"])
 	{
 		$ratio = $a["uploaded"] / $a["downloaded"];
-		$color = get_ratio_color($ratio);
+		$color = \App\Support\Ratio::color($ratio);
 		$ratio = number_format($ratio, 2);
 		if ($color)
 		$ratio = "<font color=\"$color\">$ratio</font>";
@@ -366,15 +366,15 @@ foreach ($res as $a) { $a = (array) $a;
 	"</td><td class=\"rowfollow\" align=\"right\">" . $ratio .
 	"</td><td class=\"rowfollow\" align=\"left\">" . \App\Support\Time::format($a["added"]). "</td></tr>");
 }
-end_table();
-end_frame();
+\App\Support\Html::endTable();
+\App\Support\Html::endFrame();
 }
 
 function stylesheettable($res, $frame_caption)
 {
 $lang_topten = (array) (\App\Support\SupportContext::getGlobal('lang_topten') ?? []);
-	begin_frame($frame_caption, true);
-	begin_table();
+	\App\Support\Html::beginFrame($frame_caption, true);
+	\App\Support\Html::beginTable();
 
 	print("<tr><td class=\"colhead\">".$lang_topten['col_rank']."</td><td class=\"colhead\">".$lang_topten['col_name']."</td><td class=\"colhead\">".$lang_topten['col_number']."</td></tr>");
 
@@ -385,15 +385,15 @@ $lang_topten = (array) (\App\Support\SupportContext::getGlobal('lang_topten') ??
 		$n++;
 	}
 
-	end_table();
-	end_frame();
+	\App\Support\Html::endTable();
+	\App\Support\Html::endFrame();
 }
 
 function languagetable($res, $frame_caption)
 {
 $lang_topten = (array) (\App\Support\SupportContext::getGlobal('lang_topten') ?? []);
-	begin_frame($frame_caption, true);
-	begin_table();
+	\App\Support\Html::beginFrame($frame_caption, true);
+	\App\Support\Html::beginTable();
 
 	print("<tr><td class=\"colhead\">".$lang_topten['col_rank']."</td><td class=\"colhead\">".$lang_topten['col_name']."</td><td class=\"colhead\">".$lang_topten['col_number']."</td></tr>");
 
@@ -404,12 +404,12 @@ $lang_topten = (array) (\App\Support\SupportContext::getGlobal('lang_topten') ??
 		$n++;
 	}
 
-	end_table();
-	end_frame();
+	\App\Support\Html::endTable();
+	\App\Support\Html::endFrame();
 }
 
-stdhead($lang_topten['head_top_ten']);
-begin_main_frame();
+\App\Support\Html::stdhead($lang_topten['head_top_ten']);
+\App\Support\Frame::mainFrameOpen();
 $type = ((\App\Support\SupportContext::getQuery("type") !== null)) ? (int)\App\Support\SupportContext::getQuery("type") : 0;
 if (!in_array($type,array(1,2,3,4,5,6,7)))
 $type = 1;
@@ -836,11 +836,11 @@ elseif ($type == 7)	// search
 	}
 }
 */
-	end_main_frame();
+	\App\Support\Frame::mainFrameClose();
 	print("<p><font class=\"small\">".$lang_topten['text_this_page_last_updated'].date('Y-m-d H:i:s'). ", ".$lang_topten['text_started_recording_date'].$datefounded.$lang_topten['text_update_interval']."</font></p>");
 	$Cache->end_whole_row();
 	$Cache->cache_page();
 }
 echo $Cache->next_row();
-stdfoot();
+\App\Support\Html::stdfoot();
 ?>

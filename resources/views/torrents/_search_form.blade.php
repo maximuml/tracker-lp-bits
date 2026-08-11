@@ -49,7 +49,7 @@ $searchBoxRightTdStyle = 'padding: 1px;padding-left: 10px;white-space: nowrap';
 //					}
 //					?>
 <!--				</table>-->
-                <?php echo build_search_box_category_table($sectiontype, '1', '?', '?', 0, $__server_QUERY_STRING, ['select_unselect' => true, 'user_notifs' => $CURUSER['notifs']])?>
+                <?php echo \App\Support\SearchBox::buildCategoryTableWithContext($sectiontype, '1', '?', '?', 0, $__server_QUERY_STRING, ['select_unselect' => true, 'user_notifs' => $CURUSER['notifs']])?>
 			</td>
 
 			<td class="rowfollow" valign="middle">
@@ -77,7 +77,7 @@ $searchBoxRightTdStyle = 'padding: 1px;padding-left: 10px;white-space: nowrap';
 						<td class="bottom" style="padding: 1px;padding-left: 10px">
 							<select class="med" name="spstate" style="width: 100px;">
 								<option value="0"><?php echo $lang_torrents['select_all'] ?></option>
-<?php echo promotion_selection($special_state, 0)?>
+<?php echo \App\Support\Html::promotionSelection($special_state, 0)?>
 							</select>
 						</td>
 					</tr>
@@ -167,8 +167,8 @@ $searchBoxRightTdStyle = 'padding: 1px;padding-left: 10px;white-space: nowrap';
                         <td class="bottom" style="<?php echo $searchBoxRightTdStyle ?>">
                             <?php echo sprintf(
                                 '%s ~ %s',
-                                datetimepicker_input('added_begin', htmlspecialchars(\App\Support\SupportContext::getQuery('added_begin') ?? ''), '', ['require_files' => true, 'format' => 'Y-m-d', 'style' => 'width: '.$filterInputWidth.'px']),
-                                datetimepicker_input('added_end', htmlspecialchars(\App\Support\SupportContext::getQuery('added_end') ?? ''), '', ['require_files' => false, 'format' => 'Y-m-d', 'style' => 'width: '.$filterInputWidth.'px']),
+                                \App\Support\Form::datetimepickerInput('added_begin', htmlspecialchars(\App\Support\SupportContext::getQuery('added_begin') ?? ''), '', ['require_files' => true, 'format' => 'Y-m-d', 'style' => 'width: '.$filterInputWidth.'px']),
+                                \App\Support\Form::datetimepickerInput('added_end', htmlspecialchars(\App\Support\SupportContext::getQuery('added_end') ?? ''), '', ['require_files' => false, 'format' => 'Y-m-d', 'style' => 'width: '.$filterInputWidth.'px']),
                             ) ?>
                         </td>
                     </tr>

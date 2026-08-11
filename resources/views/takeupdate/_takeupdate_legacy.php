@@ -2,14 +2,14 @@
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
 function bark($msg) {
- stdhead();
-   stdmsg("Failed", $msg);
- stdfoot();
+ \App\Support\Html::stdhead();
+   \App\Support\Html::stdMessage("Failed", $msg);
+ \App\Support\Html::stdfoot();
  return;
 }
 \App\Auth\Permission::assertCan(\App\Enums\Permission\PermissionEnum::STAFF_MEMBER);
 if (empty(\App\Support\SupportContext::getPost('delreport'))) {
-    stderr('Error', $lang_functions['select_at_least_one_record']);
+    \App\Support\LegacyResponse::abort('Error', $lang_functions['select_at_least_one_record']);
 }
 if (\App\Support\SupportContext::getPost('setdealt')){
 	\Nexus\Database\NexusDB::table('reports')

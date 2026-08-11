@@ -3,7 +3,7 @@ error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
 $__server_PHP_SELF = \App\Support\SupportContext::getServerValue('PHP_SELF');
 if (!\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::VIEW_USER_CONFIDENTIAL_INFO))
-	permissiondenied();
+	\App\Support\LegacyResponse::permissionDenied();
 else
 {
 	$ip = htmlspecialchars(trim(\App\Support\SupportContext::getQuery('ip')));
@@ -12,7 +12,7 @@ else
 		$regex = "/^(((1?\d{1,2})|(2[0-4]\d)|(25[0-5]))(\.\b|$)){4}$/";
 		if (!filter_var($ip, FILTER_VALIDATE_IP))
 		{
-			stderr($lang_ipsearch['std_error'], $lang_ipsearch['std_invalid_ip']);
+			\App\Support\LegacyResponse::abort($lang_ipsearch['std_error'], $lang_ipsearch['std_invalid_ip']);
 		}
 	}
 
@@ -33,14 +33,14 @@ else
 			$n = substr($mask, 1, strlen($mask) - 1);
 				if (!is_numeric($n) or $n < 0 or $n > 32)
 				{
-					stderr($lang_ipsearch['std_error'], $lang_ipsearch['std_invalid_subnet_mask']);
+					\App\Support\LegacyResponse::abort($lang_ipsearch['std_error'], $lang_ipsearch['std_invalid_subnet_mask']);
 				}
 				else
 					$mask = long2ip(pow(2,32) - pow(2,32-$n));
 		}
 		elseif (!preg_match($regex, $mask))
 		{
-			stderr($lang_ipsearch['std_error'], $lang_ipsearch['std_invalid_subnet_mask']);
+			\App\Support\LegacyResponse::abort($lang_ipsearch['std_error'], $lang_ipsearch['std_invalid_subnet_mask']);
 		}
 		$addr = "Mask: $mask";
 	}
@@ -60,14 +60,14 @@ else
 		}
 	};
 
-	stdhead($lang_ipsearch['head_search_ip_history']);
-	begin_main_frame();
+	\App\Support\Html::stdhead($lang_ipsearch['head_search_ip_history']);
+	\App\Support\Frame::mainFrameOpen();
 
 	print("<h1 align=\"center\">".$lang_ipsearch['text_search_ip_history']."</h1>\n");
 	print("<form method=\"get\" action=\"\">");
 	print("<table align=center border=1 cellspacing=0 width=115 cellpadding=5>\n");
-	tr($lang_ipsearch['row_ip']."<font color=red>*</font>", "<input type=\"text\" name=\"ip\" size=\"40\" value=\"".htmlspecialchars($ip)."\" />", 1);
-	tr("<nobr>".$lang_ipsearch['row_subnet_mask']."</nobr>", "<input type=\"text\" name=\"mask\" size=\"40\" value=\"" . htmlspecialchars($mask) . "\" />", 1);
+	\App\Support\Html::tr($lang_ipsearch['row_ip']."<font color=red>*</font>", "<input type=\"text\" name=\"ip\" size=\"40\" value=\"".htmlspecialchars($ip)."\" />", 1);
+	\App\Support\Html::tr("<nobr>".$lang_ipsearch['row_subnet_mask']."</nobr>", "<input type=\"text\" name=\"mask\" size=\"40\" value=\"" . htmlspecialchars($mask) . "\" />", 1);
 	print("<tr><td align=\"right\" colspan=\"2\"><input type=\"submit\" value=\"".$lang_ipsearch['submit_search']."\"/></td></tr>");
 	print("</table></form>\n");
 	if ($ip)
@@ -93,8 +93,8 @@ else
 	if ($count == 0)
 	{
 		print("<p align=\"center\">".$lang_ipsearch['text_no_users_found']."</p>\n");
-		end_main_frame();
-		stdfoot();
+		\App\Support\Frame::mainFrameClose();
+		\App\Support\Html::stdfoot();
 		die;
 	}
 
@@ -102,7 +102,7 @@ else
 	$page = intval(\App\Support\SupportContext::getQuery("page") ?? 0);
 	$perpage = 20;
 
-	list($pagertop, $pagerbottom, , $offset, $rpp) = pager($perpage, $count, "{$__server_PHP_SELF}?ip=$ip&mask=$mask&order=$order&");
+	list($pagertop, $pagerbottom, , $offset, $rpp) = \App\Support\Pagination::pager($perpage, $count, "{$__server_PHP_SELF}?ip=$ip&mask=$mask&order=$order&");
 
 	if ($order == "added")
 		$orderby = "added DESC";
@@ -174,7 +174,7 @@ else
 
 	echo $pagerbottom;
 	}
-	end_main_frame();
-	stdfoot();
+	\App\Support\Frame::mainFrameClose();
+	\App\Support\Html::stdfoot();
 }
 ?>

@@ -59,8 +59,8 @@ if (((\App\Support\SupportContext::getPost('action') !== null)) && \App\Support\
 	return;
 }
 
-stdhead($lang_moforums['head_overforum_management']);
-begin_main_frame();
+\App\Support\Html::stdhead($lang_moforums['head_overforum_management']);
+\App\Support\Frame::mainFrameOpen();
 
 $maxSort = \Nexus\Database\NexusDB::table('overforums')->count();
 
@@ -181,5 +181,5 @@ if ($act == "editforum") {
 <?php
     }
 }
-end_main_frame();
-stdfoot();
+\App\Support\Frame::mainFrameClose();
+\App\Support\Html::stdfoot();

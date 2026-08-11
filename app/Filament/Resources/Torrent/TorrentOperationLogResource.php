@@ -57,7 +57,7 @@ class TorrentOperationLogResource extends Resource
                     ->label(__('label.user.label'))
                 ,
                 TextColumn::make('torrent.name')
-                    ->formatStateUsing(fn ($record) => torrent_name_for_admin($record->torrent))
+                    ->formatStateUsing(fn ($record) => \App\Support\TorrentAccess::adminName($record->torrent))
                     ->label(__('label.torrent.label'))
                 ,
                 TextColumn::make('action_type_text')

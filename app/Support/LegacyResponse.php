@@ -54,11 +54,11 @@ final class LegacyResponse
         if ($die && ! (defined('IN_NEXUS') && IN_NEXUS)) {
             ob_start();
             if ($head) {
-                \stdhead();
+                \App\Support\Html::stdhead();
             }
             echo Frame::stdMessage($heading, $text, $htmlstrip);
             if ($foot) {
-                \stdfoot();
+                \App\Support\Html::stdfoot();
             }
             $html = (string) ob_get_clean();
 
@@ -66,17 +66,17 @@ final class LegacyResponse
         }
 
         if ($head) {
-            \stdhead();
+            \App\Support\Html::stdhead();
         } elseif ($foot && PageLayout::getContext() === null) {
             // Ensure a PageLayout context exists for stdfoot() even when the
             // caller requested no header (e.g. permission denied before stdhead).
             ob_start();
-            \stdhead();
+            \App\Support\Html::stdhead();
             ob_end_clean();
         }
         echo Frame::stdMessage($heading, $text, $htmlstrip);
         if ($foot) {
-            \stdfoot();
+            \App\Support\Html::stdfoot();
         }
         if ($die) {
             exit;
@@ -141,7 +141,7 @@ final class LegacyResponse
             .' - UserIP : '.(\App\Support\Network::clientIp());
 
         if ($log && \function_exists('write_log')) {
-            \write_log($msg, 'mod');
+            \App\Support\Log::writeWithContext($msg, 'mod');
         }
         if (\function_exists('do_log')) {
             \do_log($msg, 'error');
@@ -160,7 +160,7 @@ final class LegacyResponse
         }
 
         if ($stdfoot && \function_exists('stdfoot')) {
-            \stdfoot();
+            \App\Support\Html::stdfoot();
         }
         if ($die) {
             exit;
@@ -222,10 +222,10 @@ final class LegacyResponse
      */
     public static function bark(string $title, string $message): void
     {
-        \stdhead($title);
+        \App\Support\Html::stdhead($title);
         echo '<h1>' . \htmlspecialchars($title) . "</h1>\n";
         echo '<p>' . \htmlspecialchars($message) . "</p>\n";
-        \stdfoot();
+        \App\Support\Html::stdfoot();
         exit;
     }
 

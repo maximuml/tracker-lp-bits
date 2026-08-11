@@ -16,18 +16,18 @@ if ($__server_REQUEST_METHOD == "POST")
 		if ($hidenotice){
 			\App\Models\User::query()->where('id', $CURUSER['id'])->update(['showdlnotice' => 0]);
 		}
-		nexus_redirect(getSchemeAndHttpHost(). "/download.php?id=".$torrentid."&letdown=1");
+		\App\Support\LegacyResponse::redirect(getSchemeAndHttpHost(). "/download.php?id=".$torrentid."&letdown=1");
 	}
 	elseif ($type == 'client')
 	{
 		if ($hidenotice){
 			\App\Models\User::query()->where('id', $CURUSER['id'])->update(['showclienterror' => 'no']);
 		}
-        nexus_redirect(getSchemeAndHttpHost() . "/download.php?id=".$torrentid."&letdown=1");
+        \App\Support\LegacyResponse::redirect(getSchemeAndHttpHost() . "/download.php?id=".$torrentid."&letdown=1");
 	}
 	else
 	{
-        nexus_redirect(getSchemeAndHttpHost() . "/download.php?id=".$torrentid."&letdown=1");
+        \App\Support\LegacyResponse::redirect(getSchemeAndHttpHost() . "/download.php?id=".$torrentid."&letdown=1");
 	}
 }
 else
@@ -76,8 +76,8 @@ else
 		$tdattr = "width=\"50%\"";
 	else
 		$tdattr = "colspan=\"2\" width=\"100%\"";
-	stdhead($lang_downloadnotice['head_download_notice']);
-	begin_main_frame();
+	\App\Support\Html::stdhead($lang_downloadnotice['head_download_notice']);
+	\App\Support\Frame::mainFrameOpen();
 ?>
 <h2><?php echo $title?></h2>
 <table width="100%"><tr>
@@ -157,6 +157,6 @@ if ($forcecheck)
 ?>
 </table>
 <?php
-	end_main_frame();
-	stdfoot();
+	\App\Support\Frame::mainFrameClose();
+	\App\Support\Html::stdfoot();
 }

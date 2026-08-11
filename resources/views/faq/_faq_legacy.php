@@ -2,18 +2,18 @@
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 //loggedinorreturn();
 
-stdhead($lang_faq['head_faq']);
+\App\Support\Html::stdhead($lang_faq['head_faq']);
 $Cache->new_page('faq', 900, true);
 if (!$Cache->get_page())
 {
 $Cache->add_whole_row();
 //make_folder("cache/" , get_langfolder_cookie());
 //cache_check ('faq');
-begin_main_frame();
+\App\Support\Frame::mainFrameOpen();
 
-begin_frame($lang_faq['text_welcome_to'].$SITENAME." - ".$SLOGAN);
+\App\Support\Html::beginFrame($lang_faq['text_welcome_to'].$SITENAME." - ".$SLOGAN);
 echo sprintf($lang_faq['text_welcome_content_one'].sprintf($lang_faq['text_welcome_content_two'], \App\Models\Setting::getSiteName(), \App\Models\Setting::getSiteName()));
-end_frame();
+\App\Support\Html::endFrame();
 
 $lang_id = get_guest_lang_id();
 $is_rulelang = \Nexus\Database\NexusDB::table('language')->where('id', $lang_id)->value('rule_lang');
@@ -55,7 +55,7 @@ if (isset($faq_categ)) {
 	}
 	*/
 
-	begin_frame("<span id=\"top\">".$lang_faq['text_contents'] . "</span>");
+	\App\Support\Html::beginFrame("<span id=\"top\">".$lang_faq['text_contents'] . "</span>");
 	foreach ($faq_categ as $id => $temp)
 	{
 		if ($faq_categ[$id]['flag'] == "1")
@@ -73,13 +73,13 @@ if (isset($faq_categ)) {
 			print("</ul></li></ul><br />");
 		}
 	}
-	end_frame();
+	\App\Support\Html::endFrame();
 
 	foreach ($faq_categ as $id => $temp) {
 		if ($faq_categ[$id]['flag'] == "1")
 		{
 			$frame = $faq_categ[$id]['title'] ." - <a href=\"#top\"><img class=\"top\" src=\"pic/trans.gif\" alt=\"Top\" title=\"Top\" /></a>";
-			begin_frame($frame);
+			\App\Support\Html::beginFrame($frame);
 			print("<span id=\"id". $faq_categ[$id]['link_id'] ."\"></span>");
 			if (array_key_exists("items", $faq_categ[$id]))
 			{
@@ -92,14 +92,14 @@ if (isset($faq_categ)) {
 					}
 				}
 			}
-			end_frame();
+			\App\Support\Html::endFrame();
 		}
 	}
 }
-end_main_frame();
+\App\Support\Frame::mainFrameClose();
 	$Cache->end_whole_row();
 	$Cache->cache_page();
 }
 echo $Cache->next_row();
 //cache_save ('faq');
-stdfoot();
+\App\Support\Html::stdfoot();

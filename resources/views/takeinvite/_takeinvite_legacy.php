@@ -11,20 +11,20 @@ $lockName = sprintf("takeinvite:%s", $id);
 $lock = new \Nexus\Database\NexusLock($lockName, 10);
 if (!$lock->get()) {
     $errMsg = nexus_trans("nexus.do_not_repeat");
-    stderr($errMsg, $errMsg);
+    \App\Support\LegacyResponse::abort($errMsg, $errMsg);
 }
 registration_check('invitesystem', true, false);
 $userRep = new \App\Repositories\UserRepository();
 try {
     $sendText = $userRep->getInviteBtnText($CURUSER['id']);
 } catch (\Exception $exception) {
-    stderr($lang_takeinvite['std_error'], $exception->getMessage());
+    \App\Support\LegacyResponse::abort($lang_takeinvite['std_error'], $exception->getMessage());
 }
 function bark($msg) {
 $lang_takeinvite = (array) (\App\Support\SupportContext::getGlobal('lang_takeinvite') ?? []);
-  stdhead();
-  stdmsg($lang_takeinvite['head_invitation_failed'], $msg);
-  stdfoot();
+  \App\Support\Html::stdhead();
+  \App\Support\Html::stdMessage($lang_takeinvite['head_invitation_failed'], $msg);
+  \App\Support\Html::stdfoot();
   exit;
 }
 $email = unesc(htmlspecialchars(trim(\App\Support\SupportContext::getPost("email"))));

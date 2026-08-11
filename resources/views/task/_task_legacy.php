@@ -7,7 +7,7 @@ $query = \App\Models\Exam::query()
 ;
 $total = (clone $query)->count();
 $perPage = 20;
-list($paginationTop, $paginationBottom, $limit, $offset) = pager($perPage, $total, "?");
+list($paginationTop, $paginationBottom, $limit, $offset) = \App\Support\Pagination::pager($perPage, $total, "?");
 $rows = (clone $query)->offset($offset)->take($perPage)->orderBy('id', 'desc')->withCount("onGoingUsers")->get();
 $title = nexus_trans('exam.type_task');
 $columnNameLabel = nexus_trans('label.name');
@@ -25,8 +25,8 @@ $columnClaimLabel = nexus_trans('exam.action_claim_task');
 $columnClaimedUserCountLabel = nexus_trans('exam.claimed_user_count');
 
 $header = '<h1 style="text-align: center">'.$title.'</h1>';
-stdhead($title);
-begin_main_frame();
+\App\Support\Html::stdhead($title);
+\App\Support\Frame::mainFrameOpen();
 $table = <<<TABLE
 <table border="1" cellspacing="0" cellpadding="5" width="100%">
 <thead>
@@ -81,7 +81,7 @@ foreach ($rows as $row) {
 }
 $table .= '</tbody></table>';
 echo $header . $table . $paginationBottom;
-end_main_frame();
+\App\Support\Frame::mainFrameClose();
 $confirmBuyMsg = nexus_trans('exam.confirm_to_claim');
 $confirmGiftMsg = nexus_trans('medal.confirm_to_gift');
 $js = <<<JS
@@ -111,5 +111,5 @@ jQuery('.claim').on('click', function (e) {
 JS;
 \Nexus\Nexus::js('vendor/jquery-loading/jquery.loading.min.js', 'footer', true);
 \Nexus\Nexus::js($js, 'footer', false);
-stdfoot();
+\App\Support\Html::stdfoot();
 

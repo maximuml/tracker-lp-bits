@@ -2,15 +2,15 @@
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
 if (\App\Support\UserDisplay::currentClass() < UC_SYSOP)
- stderr("Error", "Permission denied.");
+ \App\Support\LegacyResponse::abort("Error", "Permission denied.");
 
 $action = ((\App\Support\SupportContext::getPost('action') !== null)) ? htmlspecialchars(\App\Support\SupportContext::getPost('action')) : (((\App\Support\SupportContext::getQuery('action') !== null)) ? htmlspecialchars(\App\Support\SupportContext::getQuery('action')) : 'showlist');
 $id = ((\App\Support\SupportContext::getPost('id') !== null)) ? (int)\App\Support\SupportContext::getPost('id') : (((\App\Support\SupportContext::getQuery('id') !== null)) ? (int)\App\Support\SupportContext::getQuery('id') : 0);
 $update = ((\App\Support\SupportContext::getPost('update') !== null)) ? htmlspecialchars(\App\Support\SupportContext::getPost('update')) : (((\App\Support\SupportContext::getQuery('update') !== null)) ? htmlspecialchars(\App\Support\SupportContext::getQuery('update')) : '');
 
 function check ($id) {
-	if (!is_valid_id($id))
-		stderr("Error","Invalid ID");
+	if (!\App\Support\Validators::isId($id))
+		\App\Support\LegacyResponse::abort("Error", "Invalid ID");
 }
 function searchform () {
 ?>
@@ -34,13 +34,13 @@ $orderColumn = match ($order) {
 };
 
 $perpage = 50;
-list($pagertop, $pagerbottom, , $offset, $perpage) = pager($perpage, $countrows, "maxlogin.php?order=$order&");
+list($pagertop, $pagerbottom, , $offset, $perpage) = \App\Support\Pagination::pager($perpage, $countrows, "maxlogin.php?order=$order&");
 $msg = '';
 if ($update) {
     $msg = "<h3><b>".htmlspecialchars($update)." Successful!</b></h3>";
 }
 if ($action == 'showlist') {
-stdhead ("Max. Login Attemps - Show List");
+\App\Support\Html::stdhead("Max. Login Attemps - Show List");
 print("<h1>Failed Login Attempts</h1>");
 print($msg);
 print("<table border=1 cellspacing=0 cellpadding=5 width=100%>\n");
@@ -67,28 +67,28 @@ if ($countrows > $perpage) {
     echo $pagerbottom;
 }
 searchform();
-stdfoot();
+\App\Support\Html::stdfoot();
 }elseif ($action == 'ban') {
 	check($id);
-	stdhead ("Max. Login Attemps - BAN");
+	\App\Support\Html::stdhead("Max. Login Attemps - BAN");
 	\Nexus\Database\NexusDB::table('loginattempts')->where('id', $id)->update(['banned' => 'yes']);
 	header("Location: maxlogin.php?update=Ban");
 	return;
 }elseif ($action == 'unban') {
 	check($id);
-	stdhead ("Max. Login Attemps - UNBAN");
+	\App\Support\Html::stdhead("Max. Login Attemps - UNBAN");
 	\Nexus\Database\NexusDB::table('loginattempts')->where('id', $id)->update(['banned' => 'no']);
 	header("Location: maxlogin.php?update=Unban");
 	return;
 }elseif ($action == 'delete') {
 	check($id);
-	stdhead ("Max. Login Attemps - DELETE");
+	\App\Support\Html::stdhead("Max. Login Attemps - DELETE");
 	\Nexus\Database\NexusDB::table('loginattempts')->where('id', $id)->delete();
 	header("Location: maxlogin.php?update=Delete");
 	return;
 }elseif ($action == 'edit') {
 	check($id);
-	stdhead ("Max. Login Attemps - EDIT (".htmlspecialchars($id).")");
+	\App\Support\Html::stdhead("Max. Login Attemps - EDIT (".htmlspecialchars($id).")");
 	$a = (array) \Nexus\Database\NexusDB::table('loginattempts')->where('id', $id)->first();
 	print("<table border=1 cellspacing=0 cellpadding=5 width=100%>\n");
 	print("<tr><td><p>IP Address: <b>".htmlspecialchars($a['ip'])."</b></p>");
@@ -104,7 +104,7 @@ stdfoot();
 	print("<tr><td>Current Status <select name='banned'><option value='yes' ".($a["banned"] == "yes" ? "selected" : "").">Banned!</option><option value='no' ".($a["banned"] == "no" ? "selected" : "").">Not Banned!</option></select></tr></td>");
 	print("<tr><td><input type='submit' name='submit' value='Save' class=btn></tr></td>");
 	print("</table>");
-	stdfoot();
+	\App\Support\Html::stdfoot();
 
 }elseif ($action == 'save') {
 	$id = intval(\App\Support\SupportContext::getPost('id') ?? 0);
@@ -113,7 +113,7 @@ stdfoot();
 	$banned = \App\Support\SupportContext::getPost('banned');
 		check($id);
 	if (!is_numeric($attempts) || $attempts < 0)
-		stderr("Error", "Invalid attempts");
+		\App\Support\LegacyResponse::abort("Error", "Invalid attempts");
 	\Nexus\Database\NexusDB::table('loginattempts')->where('id', $id)->update([
 	    'attempts' => $attempts,
 	    'type' => $type,
@@ -129,7 +129,7 @@ stdfoot();
 }elseif ($action == 'searchip') {
 	$ip = \App\Support\SupportContext::getPost('ip') ?? '';
 	$search = \Nexus\Database\NexusDB::table('loginattempts')->where('ip', 'LIKE', "%$ip%")->get();
-	stdhead ("Max. Login Attemps - Search");
+	\App\Support\Html::stdhead("Max. Login Attemps - Search");
 	print("<h2>Failed Login Attempts</h2>");
 	print("<table border=1 cellspacing=0 cellpadding=5 width=100%>\n");
 	if ($search->isEmpty())
@@ -149,7 +149,7 @@ stdfoot();
 	}
 	print("</table>\n");
 	searchform();
-	stdfoot();
+	\App\Support\Html::stdfoot();
 }
 else
-	stderr("Error","Invalid Action");
+	\App\Support\LegacyResponse::abort("Error", "Invalid Action");

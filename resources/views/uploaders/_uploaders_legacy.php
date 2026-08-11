@@ -3,7 +3,7 @@ error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
 
 if (\App\Support\UserDisplay::currentClass() < UC_UPLOADER)
-    permissiondenied();
+    \App\Support\LegacyResponse::permissionDenied();
 
 $year=intval(\App\Support\SupportContext::getQuery('year') ?? 0);
 if (!$year || $year < 2000)
@@ -20,8 +20,8 @@ $sortColumn = match ($order) {
     default => 'users.username',
 };
 $sortDirection = $order === 'username' ? 'ASC' : 'DESC';
-stdhead($lang_uploaders['head_uploaders']);
-begin_main_frame();
+\App\Support\Html::stdhead($lang_uploaders['head_uploaders']);
+\App\Support\Frame::mainFrameOpen();
 ?>
 <div style="width: 940px">
 <?php
@@ -132,5 +132,5 @@ else{
 ?>
 </div>
 <?php
-end_main_frame();
-stdfoot();
+\App\Support\Frame::mainFrameClose();
+\App\Support\Html::stdfoot();

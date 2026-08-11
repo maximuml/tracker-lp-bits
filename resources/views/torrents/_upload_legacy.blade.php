@@ -17,14 +17,14 @@
 					</td>
 				</tr>
 				<?php
-				tr($lang_upload['row_torrent_file']."<font color=\"red\">*</font>", "<input type=\"file\" class=\"file\" id=\"torrent\" name=\"file\" onchange=\"getname()\" />\n", 1);
+				\App\Support\Html::tr($lang_upload['row_torrent_file']."<font color=\"red\">*</font>", "<input type=\"file\" class=\"file\" id=\"torrent\" name=\"file\" onchange=\"getname()\" />\n", 1);
 				if ($altname_main == 'yes'){
-					tr($lang_upload['row_torrent_name'], "<b>".$lang_upload['text_english_title']."</b>&nbsp;<input type=\"text\" style=\"width: 250px;\" name=\"name\" />&nbsp;&nbsp;&nbsp;
+					\App\Support\Html::tr($lang_upload['row_torrent_name'], "<b>".$lang_upload['text_english_title']."</b>&nbsp;<input type=\"text\" style=\"width: 250px;\" name=\"name\" />&nbsp;&nbsp;&nbsp;
 <b>".$lang_upload['text_chinese_title']."</b>&nbsp;<input type=\"text\" style=\"width: 250px\" name=\"cnname\"><br /><font class=\"medium\">".$lang_upload['text_titles_note']."</font>", 1);
 				} else {
 				    $autoFillText = $lang_upload['fill_setlist'];
 				    $nameInput = $torrentRep->buildUploadFieldInput("name", "", $lang_upload['text_torrent_name_note'], $autoFillText, 'setlistLookupBtn', 'lookupSetlist()');
-                    tr($lang_upload['row_torrent_name'], $nameInput, 1);
+                    \App\Support\Html::tr($lang_upload['row_torrent_name'], $nameInput, 1);
                 }
 
                 //price
@@ -34,7 +34,7 @@
                     if ($maxPrice > 0) {
                         $pricePlaceholder = nexus_trans("label.torrent.max_price_help", ["max_price" => $maxPrice]);
                     }
-                    tr(nexus_trans('label.torrent.price'), '<input type="number" min="0" name="price" placeholder="'.$pricePlaceholder.'" />&nbsp;&nbsp;' . nexus_trans('label.torrent.price_help', ['tax_factor' => (\App\Support\Config\SiteConfig::current()->torrent->taxFactor() * 100) . '%']), 1);
+                    \App\Support\Html::tr(nexus_trans('label.torrent.price'), '<input type="number" min="0" name="price" placeholder="'.$pricePlaceholder.'" />&nbsp;&nbsp;' . nexus_trans('label.torrent.price_help', ['tax_factor' => (\App\Support\Config\SiteConfig::current()->torrent->taxFactor() * 100) . '%']), 1);
                 }
 
 				print("<tr><td class=\"rowhead\" style='padding: 3px' valign=\"top\">".$lang_upload['row_description']."<font color=\"red\">*</font></td><td class=\"rowfollow\">");
@@ -42,7 +42,7 @@
 				print("</td></tr>\n");
 
                 if (\App\Support\Config\SiteConfig::current()->main->enableTechnicalInfo()) {
-                    tr($lang_functions['text_technical_info'], '<textarea name="technical_info" rows="8" style="width: 99%;"></textarea><br/>' . $lang_functions['text_technical_info_help_text'], 1);
+                    \App\Support\Html::tr($lang_functions['text_technical_info'], '<textarea name="technical_info" rows="8" style="width: 99%;"></textarea><br/>' . $lang_functions['text_technical_info_help_text'], 1);
                 }
 
 				$s = "<select name=\"type\" id=\"browsecat\" data-mode='$browsecatmode'>\n<option value=\"0\">".$lang_upload['select_choose_one']."</option>\n";
@@ -51,7 +51,7 @@
 				$s .= "<option value=\"" . $row["id"] . "\">" . htmlspecialchars($row["name"]) . "</option>\n";
 			}
 			$s .= "</select>\n";
-			tr($lang_upload['row_type']."<font color=\"red\">*</font>", $s, 1);
+			\App\Support\Html::tr($lang_upload['row_type']."<font color=\"red\">*</font>", $s, 1);
 /*
 				if ($showsource || $showmedium || $showcodec || $showaudiocodec || $showstandard || $showprocessing){
 					if ($showsource){
@@ -92,10 +92,10 @@
                 $hitAndRunRep = new \App\Repositories\HitAndRunRepository();
                 echo "<tbody id=\"browsecat_section\" data-mode=\"$browsecatmode\">\n";
 				$selectNormal = $searchBoxRep->renderTaxonomySelect($browsecatmode);
-				tr($lang_upload['row_quality'], $selectNormal, 1, "mode_$browsecatmode");
+				\App\Support\Html::tr($lang_upload['row_quality'], $selectNormal, 1, "mode_$browsecatmode");
 				echo $customField->renderOnUploadPage(0, $browsecatmode);
 				echo $hitAndRunRep->renderOnUploadPage('', $browsecatmode);
-				tr($lang_functions['text_tags'], $tagRep->renderCheckbox($browsecatmode), 1, "mode_$browsecatmode");
+				\App\Support\Html::tr($lang_functions['text_tags'], $tagRep->renderCheckbox($browsecatmode), 1, "mode_$browsecatmode");
 				echo "</tbody>\n";
 
 
@@ -107,7 +107,7 @@
 					foreach ($offerRows as $offerrow)
 						$offer .= "<option value=\"" . $offerrow->id . "\">" . htmlspecialchars($offerrow->name) . "</option>";
 					$offer .= "</select>";
-					tr($lang_upload['row_your_offer']. (!$uploadFreely ? "<font color=red>*</font>" : ""), $offer.$lang_upload['text_please_select_offer'] , 1);
+					\App\Support\Html::tr($lang_upload['row_your_offer']. (!$uploadFreely ? "<font color=red>*</font>" : ""), $offer.$lang_upload['text_please_select_offer'], 1);
 					$getOfferJs = <<<JS
 jQuery('select[name="offer"]').on("change", function () {
     let id = this.value
@@ -142,15 +142,15 @@ JS;
                         $options[] = "<option value=\"" . $key . "\">".$value['text']."</option>";
                     }
                     $pickcontent .= "<b>".$lang_edit['row_torrent_position'].":&nbsp;</b>"."<select name=\"pos_state\" style=\"width: 100px;\">" . implode('', $options) . "</select>&nbsp;&nbsp;&nbsp;";
-                    $pickcontent .= datetimepicker_input('pos_state_until', '', nexus_trans('label.deadline') . ":&nbsp;", ['require_files' => true]);
+                    $pickcontent .= \App\Support\Form::datetimepickerInput('pos_state_until', '', nexus_trans('label.deadline') . ":&nbsp;", ['require_files' => true]);
                 }
                 if ($pickcontent) {
-                    tr($lang_edit['row_pick'], $pickcontent, 1);
+                    \App\Support\Html::tr($lang_edit['row_pick'], $pickcontent, 1);
                 }
 
 				if(\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::BE_ANONYMOUS))
 				{
-					tr($lang_upload['row_show_uploader'], "<input type=\"checkbox\" name=\"uplver\" value=\"yes\" />".$lang_upload['checkbox_hide_uploader_note'], 1);
+					\App\Support\Html::tr($lang_upload['row_show_uploader'], "<input type=\"checkbox\" name=\"uplver\" value=\"yes\" />".$lang_upload['checkbox_hide_uploader_note'], 1);
 				}
 				?>
 				<tr><td class="toolbox" align="center" colspan="2"><b><?php echo $lang_upload['text_read_rules']?></b> <input id="qr" type="submit" class="btn" value="<?php echo $lang_upload['submit_upload']?>" /></td></tr>

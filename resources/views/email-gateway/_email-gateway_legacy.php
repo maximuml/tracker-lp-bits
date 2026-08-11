@@ -5,14 +5,14 @@ error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 $__server_REQUEST_METHOD = \App\Support\SupportContext::getServerValue('REQUEST_METHOD');
 exit(0);
 $id = intval(\App\Support\SupportContext::getQuery("id") ?? 0);
-int_check($id,true);
+\App\Support\LegacyResponse::assertId($id, true);
 
 $user = \App\Models\User::query()->where('id', $id)->first(['username', 'class', 'email']);
-if (!$user) stderr("Error", "No such user.");
+if (!$user) \App\Support\LegacyResponse::abort("Error", "No such user.");
 $arr = $user->toArray();
 $username = $arr["username"];
 if ($arr["class"] < UC_MODERATOR)
-	stderr("Error", "The gateway can only be used to e-mail staff members.");
+	\App\Support\LegacyResponse::abort("Error", "The gateway can only be used to e-mail staff members.");
 
 if ($__server_REQUEST_METHOD == "POST")
 {
@@ -24,9 +24,9 @@ if ($__server_REQUEST_METHOD == "POST")
 	if ($from_email == "") $from_email = "".$SITEEMAIL."";
 	$from_email =  safe_email($from_email);
 	if (!$from_email)
-    	stderr("Error","You must enter an email address!");
+    	\App\Support\LegacyResponse::abort("Error", "You must enter an email address!");
 	if (!check_email($from_email))
-  	stderr("Error","Invalid email address!");
+  	\App\Support\LegacyResponse::abort("Error", "Invalid email address!");
 	$from = "$from <$from_email>";
 
 	$subject = substr(htmlspecialchars(trim(\App\Support\SupportContext::getPost("subject"))), 0, 80);
@@ -34,7 +34,7 @@ if ($__server_REQUEST_METHOD == "POST")
 	$subject = "Fw: $subject";
 
 	$message = htmlspecialchars(trim(\App\Support\SupportContext::getPost("message")));
-	if ($message == "") stderr("Error", "No message text!");
+	if ($message == "") \App\Support\LegacyResponse::abort("Error", "No message text!");
 
 	$message = "Message submitted from ".\App\Support\Network::clientIp()." at " . date("Y-m-d H:i:s") . ".\n" .
 		"Note: By replying to this e-mail you will reveal your e-mail address.\n" .
@@ -45,12 +45,12 @@ if ($__server_REQUEST_METHOD == "POST")
 	$success = sent_mail($to,$from,$from_email,$subject,$message,"E-Mail Gateway",false);
 
 	if ($success)
-		stderr("Success", "E-mail successfully queued for delivery.");
+		\App\Support\LegacyResponse::abort("Success", "E-mail successfully queued for delivery.");
 	else
-		stderr("Error", "The mail could not be sent. Please try again later.");
+		\App\Support\LegacyResponse::abort("Error", "The mail could not be sent. Please try again later.");
 }
 
-stdhead("E-mail gateway");
+\App\Support\Html::stdhead("E-mail gateway");
 ?>
 <p><table border=0 class=main cellspacing=0 cellpadding=0><tr>
 <td class=embedded style='padding-left: 10px'><font size=3><b>Send e-mail to <?php echo $username;?></b></font></td>
@@ -68,4 +68,4 @@ stdhead("E-mail gateway");
 <font class=small><b>Note:</b> Your IP-address will be logged and visible to the recipient to prevent abuse.<br />
 Make sure to supply a valid e-mail address if you expect a reply.</font>
 </p>
-<?php stdfoot();
+<?php \App\Support\Html::stdfoot();

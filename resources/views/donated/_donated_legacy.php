@@ -3,22 +3,22 @@ error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
 $__server_REQUEST_METHOD = \App\Support\SupportContext::getServerValue('REQUEST_METHOD');
 if (\App\Support\UserDisplay::currentClass() < UC_SYSOP)
-stderr("Error", "Access denied.");
+\App\Support\LegacyResponse::abort("Error", "Access denied.");
 if ($__server_REQUEST_METHOD == "POST")
 {
 if (\App\Support\SupportContext::getPost("username") == "" || \App\Support\SupportContext::getPost("donated") == "")
-stderr("Error", "Missing form data.");
+\App\Support\LegacyResponse::abort("Error", "Missing form data.");
 $username = trim(\App\Support\SupportContext::getPost("username"));
 $donated = trim(\App\Support\SupportContext::getPost("donated"));
 
 $user = \App\Models\User::query()->where('username', $username)->first(['id']);
 if (!$user)
-	stderr("Error", "Unable to update account.");
+	\App\Support\LegacyResponse::abort("Error", "Unable to update account.");
 \App\Models\User::query()->where('id', $user->id)->update(['donated' => $donated]);
 header("Location: " . get_protocol_prefix() . "$BASEURL/userdetails.php?id=$user->id");
 return;
 }
-stdhead("Update Users Donated Amounts");
+\App\Support\Html::stdhead("Update Users Donated Amounts");
 ?>
 <h1>Update Users Donated Amounts</h1>
 <form method=post action=donated.php>
@@ -28,4 +28,4 @@ stdhead("Update Users Donated Amounts");
 <tr><td colspan=2 align=center><input type=submit value="Okay" class=btn></td></tr>
 </table>
 </form>
-<?php stdfoot();
+<?php \App\Support\Html::stdfoot();

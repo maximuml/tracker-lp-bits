@@ -4,13 +4,13 @@ error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 $__server_REQUEST_METHOD = \App\Support\SupportContext::getServerValue('REQUEST_METHOD');
 $__server_REQUEST_URI = \App\Support\SupportContext::getServerValue('REQUEST_URI');
 if (\App\Support\UserDisplay::currentClass() < UC_ADMINISTRATOR)
-stderr("Sorry", "Access denied.");
+\App\Support\LegacyResponse::abort("Sorry", "Access denied.");
 
 $remove = intval(\App\Support\SupportContext::getQuery('remove') ?? 0);
-if (is_valid_id($remove))
+if (\App\Support\Validators::isId($remove))
 {
   \Nexus\Database\NexusDB::table('bans')->where('id', $remove)->delete();
-  write_log("Ban ".htmlspecialchars($remove)." was removed by {$CURUSER['id']} ($CURUSER[username])",'mod');
+  \App\Support\Log::writeWithContext("Ban ".htmlspecialchars($remove)." was removed by {$CURUSER['id']} ($CURUSER[username])",'mod');
 }
 
 if ($__server_REQUEST_METHOD == "POST" && \App\Support\UserDisplay::currentClass() >= UC_ADMINISTRATOR)
@@ -19,11 +19,11 @@ if ($__server_REQUEST_METHOD == "POST" && \App\Support\UserDisplay::currentClass
 	$last = trim(\App\Support\SupportContext::getPost("last"));
 	$comment = trim(\App\Support\SupportContext::getPost("comment"));
 	if (!$first || !$last || !$comment)
-		stderr("Error", "Missing form data.");
+		\App\Support\LegacyResponse::abort("Error", "Missing form data.");
 	$firstlong = ip2long($first);
 	$lastlong = ip2long($last);
 	if ($firstlong == -1 || $lastlong == -1)
-		stderr("Error", "Bad IP address.");
+		\App\Support\LegacyResponse::abort("Error", "Bad IP address.");
 	\Nexus\Database\NexusDB::table('bans')->insert([
 	    'added' => date("Y-m-d H:i:s"),
 	    'addedby' => $CURUSER['id'],
@@ -39,7 +39,7 @@ if ($__server_REQUEST_METHOD == "POST" && \App\Support\UserDisplay::currentClass
 
 $bans = \Nexus\Database\NexusDB::table('bans')->orderByDesc('added')->get();
 
-stdhead("Bans");
+\App\Support\Html::stdhead("Bans");
 
 print("<h1>Current Bans</h1>\n");
 
@@ -72,6 +72,6 @@ if (\App\Support\UserDisplay::currentClass() >= UC_ADMINISTRATOR)
 	print("</form>\n</table>\n");
 }
 
-stdfoot();
+\App\Support\Html::stdfoot();
 
 ?>

@@ -1,13 +1,13 @@
 <?php
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 if (\App\Support\UserDisplay::currentClass() < UC_MODERATOR)
-stderr("Sorry", "Access denied.");
+\App\Support\LegacyResponse::abort("Sorry", "Access denied.");
 
-stdhead("Warned Users");
+\App\Support\Html::stdhead("Warned Users");
 $count = \App\Models\User::query()->where('warned', 'yes')->count();
 $warned = number_format($count);
-begin_frame("Warned Users: ($warned)", true);
-begin_table();
+\App\Support\Html::beginFrame("Warned Users: ($warned)", true);
+\App\Support\Html::beginTable();
 
 $rows = \App\Models\User::query()
     ->where('warned', 1)
@@ -38,7 +38,7 @@ $ratio = number_format($arr["uploaded"] / $arr["downloaded"], 3);
 } else {
 $ratio="---";
 }
-$ratio = "<font color=" . get_ratio_color($ratio) . ">$ratio</font>";
+$ratio = "<font color=" . \App\Support\Ratio::color($ratio) . ">$ratio</font>";
   $uploaded = \App\Support\Format::size($arr["uploaded"]);
   $downloaded = \App\Support\Format::size($arr["downloaded"]);
 // $uploaded = str_replace(" ", "<br>", mksize($arr["uploaded"]));
@@ -65,4 +65,4 @@ print("<input type=\"hidden\" name=\"nowarned\" value=\"nowarned\"></form></tabl
 }
 print("<p>" . ($pagemenu ?? '') . "<br>" . ($browsemenu ?? '') . "</p>");
 
-stdfoot();
+\App\Support\Html::stdfoot();

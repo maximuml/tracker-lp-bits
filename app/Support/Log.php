@@ -22,4 +22,11 @@ final class Log
             'uid' => $userId ?? 0,
         ]);
     }
+
+    public static function writeWithContext(string $text, string $security = 'normal'): void
+    {
+        $user = \App\Support\SupportContext::getUser() ?? [];
+
+        self::write($text, $security, (int) ($user['id'] ?? 0));
+    }
 }

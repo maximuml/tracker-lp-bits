@@ -2,11 +2,11 @@
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
 if (\App\Support\UserDisplay::currentClass() < UC_ADMINISTRATOR) {
-	permissiondenied();
+	\App\Support\LegacyResponse::permissionDenied();
 }
 
-stdhead("FAQ Management");
-begin_main_frame();
+\App\Support\Html::stdhead("FAQ Management");
+\App\Support\Frame::mainFrameOpen();
 
 print("<h1 align=\"center\">FAQ Management</h1>");
 
@@ -121,5 +121,5 @@ print("</form>\n");
 print("<p>When the position numbers don't reflect the position in the table, it means the order id is bigger than the total number of sections/items and you should check all the order id's in the table and click \"reorder\"</p>");
 echo $pagerbottom ?? '';
 
-end_main_frame();
-stdfoot();
+\App\Support\Frame::mainFrameClose();
+\App\Support\Html::stdfoot();

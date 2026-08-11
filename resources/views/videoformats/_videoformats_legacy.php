@@ -1,6 +1,6 @@
 <?php
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
-stdhead("Video Formats");
+\App\Support\Html::stdhead("Video Formats");
 ?>
 <table class=main width=940 border=0 cellspacing=0 cellpadding=0><tr><td class=embedded>
 <h2>Downloaded a movie and don't know what CAM/TS/TC/SCR means?</h2>
@@ -199,4 +199,4 @@ again without proper reason.<br />
 </td></tr></table>
 <br />
 <?php
-stdfoot();
+\App\Support\Html::stdfoot();

@@ -332,4 +332,43 @@ TD;
 
         return array_map('intval', \Illuminate\Support\Arr::wrap($maps[$script] ?? []));
     }
+
+    /**
+     * Read a search-box setting, fetching the cache from the request context.
+     *
+     * Backs the legacy `get_searchbox_value()` helper.
+     */
+    public static function valueWithContext(int|string $mode, string $item = 'showsubcat'): mixed
+    {
+        return self::value(\App\Support\SupportContext::getCache(), $mode, $item);
+    }
+
+    /**
+     * Build the category checkbox table, fetching the cache from the request context.
+     *
+     * Backs the legacy `build_search_box_category_table()` helper.
+     */
+    /**
+     * @param  array<string, mixed>  $options
+     */
+    public static function buildCategoryTableWithContext(
+        int|string $mode,
+        int|string $checkboxValue,
+        string $categoryHrefPrefix,
+        string $taxonomyHrefPrefix,
+        int|string $taxonomyNameLength,
+        ?string $checkedValues = '',
+        array $options = [],
+    ): string {
+        return self::buildCategoryTable(
+            \App\Support\SupportContext::getCache(),
+            $mode,
+            $checkboxValue,
+            $categoryHrefPrefix,
+            $taxonomyHrefPrefix,
+            $taxonomyNameLength,
+            $checkedValues,
+            $options,
+        );
+    }
 }

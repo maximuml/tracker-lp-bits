@@ -1,13 +1,13 @@
 <?php
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 $id = intval(\App\Support\SupportContext::getQuery("id") ?? 0);
-int_check($id,true);
+\App\Support\LegacyResponse::assertId($id, true);
 function bark($msg)
 {
 $lang_checkuser = (array) (\App\Support\SupportContext::getGlobal('lang_checkuser') ?? []);
-  stdhead();
-  stdmsg($lang_checkuser['std_error'], $msg);
-  stdfoot();
+  \App\Support\Html::stdhead();
+  \App\Support\Html::stdMessage($lang_checkuser['std_error'], $msg);
+  \App\Support\Html::stdfoot();
   exit;
 }
 
@@ -27,7 +27,7 @@ elseif ($user["gender"] == "N/A") $gender = '<img class="no_gender" src="pic/tra
 if ($user['added'] == "0000-00-00 00:00:00" || $user['added'] == null)
   $joindate = 'N/A';
 else
-  $joindate = "$user[added] (" . get_elapsed_time(strtotime($user["added"])) . " ago)";
+  $joindate = "$user[added] (" . \App\Support\Format::getElapsedTime(strtotime($user["added"])) . " ago)";
 
 $country = '';
 $countryRow = \Nexus\Database\NexusDB::table('countries')->where('id', $user['country'])->first(['name', 'flagpic']);
@@ -36,7 +36,7 @@ if ($countryRow) {
   $country = "<td class=embedded><img src=pic/flag/{$arr['flagpic']} alt=\"{$arr['name']}\" style='margin-left: 8pt'></td>";
 }
 
-stdhead($lang_checkuser['head_detail_for'] . $user["username"]);
+\App\Support\Html::stdhead($lang_checkuser['head_detail_for'] . $user["username"]);
 
 $enabled = $user["enabled"] == 'yes';
 print("<p><table class=main border=0 cellspacing=0 cellpadding=0>".
@@ -56,4 +56,4 @@ print("<form method=post action=takeconfirm.php?id=".htmlspecialchars($id).">");
 print("<input type=hidden name=email value={$user['email']}>");
 print("<tr><td class=rowhead width=1%><input type=\"checkbox\" name=\"conusr[]\" value=\"" . $id . "\" checked/></td>");
 print("<td align=left width=99%><input type=submit style='height: 20px' value=\"".$lang_checkuser['submit_confirm_this_user'] ."\"></form></tr></td></table>");
-stdfoot();
+\App\Support\Html::stdfoot();

@@ -650,7 +650,7 @@ class HitAndRunRepository extends BaseRepository
             ) === HitAndRunMode::MANUAL && Permission::canSetTorrentHitAndRun()) {
             $hrRadio = sprintf('<label><input type="radio" name="hr[%s]" value="0"%s />NO</label>', $searchBoxId, $value == 0 ? ' checked' : '');
             $hrRadio .= sprintf('<label><input type="radio" name="hr[%s]" value="1"%s />YES</label>', $searchBoxId, $value == 1 ? ' checked' : '');
-            return tr('H&R', $hrRadio, 1, "mode_$searchBoxId", true);
+            return \App\Support\Html::tr('H&R', $hrRadio, 1, "mode_$searchBoxId", true);
         }
         return '';
     }

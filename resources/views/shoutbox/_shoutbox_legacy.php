@@ -2,7 +2,7 @@
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 if (((\App\Support\SupportContext::getQuery('del') !== null)))
 {
-	if (is_valid_id(\App\Support\SupportContext::getQuery('del')))
+	if (\App\Support\Validators::isId(\App\Support\SupportContext::getQuery('del')))
 	{
 		if(\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::SB_MANAGE))
 		{

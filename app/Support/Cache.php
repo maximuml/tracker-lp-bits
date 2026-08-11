@@ -124,8 +124,8 @@ final class Cache
             include $cachefile;
             if ($endpage) {
                 echo '<p align="center"><font class="small">' . ($lang['text_page_last_updated'] ?? '') . date('Y-m-d H:i:s', filemtime($cachefile)) . '</font></p>';
-                \end_main_frame();
-                \stdfoot();
+                \App\Support\Frame::mainFrameClose();
+                \App\Support\Html::stdfoot();
                 exit;
             }
 

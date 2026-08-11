@@ -4,9 +4,9 @@ error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 \Nexus\Nexus::css('#ban-info td {border: none}', 'header', false);
 
 $title = nexus_trans('self-enable.title');
-stdhead($title);
-begin_main_frame();
-begin_frame($title, true,10,"100%","center");
+\App\Support\Html::stdhead($title);
+\App\Support\Frame::mainFrameOpen();
+\App\Support\Html::beginFrame($title, true, 10, "100%", "center");
 $unit = \App\Models\Setting::getSelfEnableBonus();
 if ($unit <= 0) {
     printf('<h3>%s</h3>', nexus_trans('self-enable.feature_disabled'));
@@ -26,14 +26,14 @@ if ($unit <= 0) {
         $userBonusNotEnoughTip = nexus_trans('self-enable.bonus_not_enough', ['bonus' => $CURUSER['seedbonus']]);
         if (!empty(\App\Support\SupportContext::getPost('submit'))) {
             if (!$isUserBonusEnough) {
-                stdmsg('Error', $userBonusNotEnoughTip);
+                \App\Support\Html::stdMessage('Error', $userBonusNotEnoughTip);
             } else {
                 $userRep = new \App\Repositories\UserRepository();
                 $bonusRep = new \App\Repositories\BonusRepository();
                 $operator = \App\Models\User::query()->find($CURUSER['id']);
                 $bonusRep->consumeUserBonus($CURUSER['id'], $total, \App\Models\BonusLogs::BUSINESS_TYPE_SELF_ENABLE, $title);
                 $userRep->enableUser($operator, $CURUSER['id'], $title);
-                nexus_redirect('index.php');
+                \App\Support\LegacyResponse::redirect('index.php');
             }
         } else {
             printf('<h3>%s</h3>', nexus_trans('self-enable.latest_ban_info'));
@@ -54,6 +54,6 @@ if ($unit <= 0) {
         }
     }
 }
-end_frame();
-end_main_frame();
-stdfoot();
+\App\Support\Html::endFrame();
+\App\Support\Frame::mainFrameClose();
+\App\Support\Html::stdfoot();

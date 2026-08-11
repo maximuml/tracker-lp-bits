@@ -201,11 +201,11 @@ final class Format
     /**
      * Format an elapsed timestamp. Backs the legacy `get_elapsed_time()` helper.
      */
-    public static function getElapsedTime(int $ts, bool $shortunit = false): string
+    public static function getElapsedTime(int|string $ts, bool $shortunit = false): string
     {
         $lang_functions = SupportContext::getLangFunctions();
 
-        return \App\Support\Time::elapsedSince($ts, (int) TIMENOW, [
+        return \App\Support\Time::elapsedSince((int) $ts, (int) TIMENOW, [
             'year' => $lang_functions['text_year'] ?? '',
             'year_short' => $lang_functions['text_short_year'] ?? '',
             'month' => $lang_functions['text_month'] ?? '',

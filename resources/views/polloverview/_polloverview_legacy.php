@@ -8,9 +8,9 @@ if ($pollid)
 {
 	$poll = (array) \Nexus\Database\NexusDB::table('polls')->where('id', $pollid)->first();
 	if (!$poll)
-		stderr($lang_polloverview['std_error'], $lang_polloverview['text_no_poll_id']);
+		\App\Support\LegacyResponse::abort($lang_polloverview['std_error'], $lang_polloverview['text_no_poll_id']);
 
-	stdhead($lang_polloverview['head_poll_overview']);
+	\App\Support\Html::stdhead($lang_polloverview['head_poll_overview']);
 	print("<h1 align=\"center\">".$lang_polloverview['text_polls_overview']."</h1>\n");
 
 	print("<table width=737 border=1 cellspacing=0 cellpadding=5><tr>\n" .
@@ -37,7 +37,7 @@ if ($pollid)
 	}
 	else{
 		$perpage = 100;
-		list($pagertop, $pagerbottom, , $offset, $rpp) = pager($perpage, $count, "?id=".$pollid."&");
+		list($pagertop, $pagerbottom, , $offset, $rpp) = \App\Support\Pagination::pager($perpage, $count, "?id=".$pollid."&");
 		$answers = \Nexus\Database\NexusDB::table('pollanswers')
 		    ->leftJoin('users', 'pollanswers.userid', '=', 'users.id')
 		    ->where('pollanswers.pollid', $pollid)
@@ -57,14 +57,14 @@ if ($pollid)
 		print("</table>\n");
 		print($pagerbottom);
 	}
-	stdfoot();
+	\App\Support\Html::stdfoot();
 }
 else
 {
 	$polls = \Nexus\Database\NexusDB::table('polls')->orderByDesc('id')->get(['id', 'added', 'question']);
  	if ($polls->isEmpty())
-  		stderr($lang_polloverview['std_error'], $lang_polloverview['text_no_users_voted']);
-	stdhead($lang_polloverview['head_poll_overview']);
+  		\App\Support\LegacyResponse::abort($lang_polloverview['std_error'], $lang_polloverview['text_no_users_voted']);
+	\App\Support\Html::stdhead($lang_polloverview['head_poll_overview']);
 	print("<h1 align=\"center\">".$lang_polloverview['text_polls_overview']."</h1>\n");
 
 	print("<table width=737 border=1 cellspacing=0 cellpadding=5><tr>\n" .
@@ -75,6 +75,6 @@ else
 		print("<tr><td align=center><a href=\"polloverview.php?id=".$poll['id']."\">".$poll['id']."</a></td><td>".$added."</td><td><a href=\"polloverview.php?id=".$poll['id']."\">".$poll['question']."</a></td></tr>\n");
 	}
 	print("</table>\n");
-	stdfoot();
+	\App\Support\Html::stdfoot();
 }
 ?>

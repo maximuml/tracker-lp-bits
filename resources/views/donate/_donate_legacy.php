@@ -1,12 +1,12 @@
 <?php
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 if ($enabledonation != 'yes')
-	stderr($lang_donate['std_sorry'], $lang_donate['std_do_not_accept_donation']);
+	\App\Support\LegacyResponse::abort($lang_donate['std_sorry'], $lang_donate['std_do_not_accept_donation']);
 
 $do = \App\Support\SupportContext::getQuery('do') ?? '';
 
 if ($do == 'thanks') {
-	stderr($lang_donate['std_success'], $lang_donate['std_donation_success_note_one']."<a href=\"sendmessage.php?receiver=".$ACCOUNTANTID."\"><b>".$lang_donate['std_here']."</b></a>".$lang_donate['std_donation_success_note_two'], false);
+	\App\Support\LegacyResponse::abort($lang_donate['std_success'], $lang_donate['std_donation_success_note_one']."<a href=\"sendmessage.php?receiver=".$ACCOUNTANTID."\"><b>".$lang_donate['std_here']."</b></a>".$lang_donate['std_donation_success_note_two'], false);
 }
 else
 {
@@ -28,11 +28,11 @@ else
 		$tdattr = "colspan=\"2\" width=\"100%\"";
 
 	if (!$showpaypal && !$showalipay && !$custom) {
-        stderr($lang_donate['std_error'], $lang_donate['std_no_donation_account_available'], false);
+        \App\Support\LegacyResponse::abort($lang_donate['std_error'], $lang_donate['std_no_donation_account_available'], false);
     }
 
-	stdhead($lang_donate['head_donation']);
-	begin_main_frame();
+	\App\Support\Html::stdhead($lang_donate['head_donation']);
+	\App\Support\Frame::mainFrameOpen();
 	print("<h2>".$lang_donate['text_donate']."</h2>");
 	print("<table width=100%>");
 	print("<tr><td colspan=2 class=text align=left>".$lang_donate['text_donation_note']."</td></tr>");
@@ -98,6 +98,6 @@ print("</tr>");
 print("<tr><td class=text colspan=2 align=left>".$lang_donate['text_after_donation_note_one']
 ."<a href=\"sendmessage.php?receiver=".$ACCOUNTANTID."\"><font class=\"striking\"><b>".$lang_donate['text_send_us']."</b></font></a>".$lang_donate['text_after_donation_note_two']."</td></tr>");
 print("</table>");
-end_main_frame();
-stdfoot();
+\App\Support\Frame::mainFrameClose();
+\App\Support\Html::stdfoot();
 }

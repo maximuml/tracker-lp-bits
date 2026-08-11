@@ -4,7 +4,7 @@ error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
 $__server_REQUEST_METHOD = \App\Support\SupportContext::getServerValue('REQUEST_METHOD');
 if (\App\Support\UserDisplay::currentClass() < UC_ADMINISTRATOR)
-stderr("Error", "Access denied.");
+\App\Support\LegacyResponse::abort("Error", "Access denied.");
 if ($__server_REQUEST_METHOD == "POST")
 {
 //	if (\App\Support\SupportContext::getPost("username") == "" || \App\Support\SupportContext::getPost("password") == "" || \App\Support\SupportContext::getPost("email") == "")
@@ -50,12 +50,12 @@ if ($__server_REQUEST_METHOD == "POST")
             'password_confirmation' => \App\Support\SupportContext::getPost('password2'),
         ]);
     } catch (\Exception $e) {
-        stderr("ERROR", $e->getMessage());
+        \App\Support\LegacyResponse::abort("ERROR", $e->getMessage());
     }
 	header("Location: " . get_protocol_prefix() . "$BASEURL/userdetails.php?id=".htmlspecialchars($newUser->id));
 	return;
 }
-stdhead("Add user");
+\App\Support\Html::stdhead("Add user");
 
 ?>
 <h1>Add user</h1>
@@ -68,4 +68,4 @@ stdhead("Add user");
 <tr><td colspan=2 align=center><input type=submit value="Okay" class=btn></td></tr>
 </table>
 </form>
-<?php stdfoot();
+<?php \App\Support\Html::stdfoot();

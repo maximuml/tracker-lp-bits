@@ -3,16 +3,16 @@ error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
 $__server_REQUEST_METHOD = \App\Support\SupportContext::getServerValue('REQUEST_METHOD');
 $brsectiontype = $browsecatmode;
-$showsubcat = get_searchbox_value($brsectiontype, 'showsubcat');
-$showsource = get_searchbox_value($brsectiontype, 'showsource'); //whether show sources or not
-$showmedium = get_searchbox_value($brsectiontype, 'showmedium'); //whether show media or not
-$showcodec = get_searchbox_value($brsectiontype, 'showcodec'); //whether show codecs or not
-$showstandard = get_searchbox_value($brsectiontype, 'showstandard'); //whether show standards or not
-$showprocessing = get_searchbox_value($brsectiontype, 'showprocessing'); //whether show processings or not
-$showaudiocodec = get_searchbox_value($brsectiontype, 'showaudiocodec'); //whether show audio codecs or not
-$catsperrow = (int)get_searchbox_value($brsectiontype, 'catsperrow'); //show how many cats per line
+$showsubcat = \App\Support\SearchBox::valueWithContext($brsectiontype, 'showsubcat');
+$showsource = \App\Support\SearchBox::valueWithContext($brsectiontype, 'showsource'); //whether show sources or not
+$showmedium = \App\Support\SearchBox::valueWithContext($brsectiontype, 'showmedium'); //whether show media or not
+$showcodec = \App\Support\SearchBox::valueWithContext($brsectiontype, 'showcodec'); //whether show codecs or not
+$showstandard = \App\Support\SearchBox::valueWithContext($brsectiontype, 'showstandard'); //whether show standards or not
+$showprocessing = \App\Support\SearchBox::valueWithContext($brsectiontype, 'showprocessing'); //whether show processings or not
+$showaudiocodec = \App\Support\SearchBox::valueWithContext($brsectiontype, 'showaudiocodec'); //whether show audio codecs or not
+$catsperrow = (int)\App\Support\SearchBox::valueWithContext($brsectiontype, 'catsperrow'); //show how many cats per line
 
-$catpadding = get_searchbox_value($brsectiontype, 'catpadding'); //padding space between categories in pixel
+$catpadding = \App\Support\SearchBox::valueWithContext($brsectiontype, 'catpadding'); //padding space between categories in pixel
 
 $brcats = genrelist($brsectiontype);
 
@@ -24,7 +24,7 @@ if ($showstandard) $standards = searchbox_item_list("standards", $brsectiontype)
 if ($showprocessing) $processings = searchbox_item_list("processings", $brsectiontype);
 if ($showaudiocodec) $audiocodecs = searchbox_item_list("audiocodecs", $brsectiontype);
 }
-stdhead($lang_getrss['head_rss_feeds']);
+\App\Support\Html::stdhead($lang_getrss['head_rss_feeds']);
 $query = [];
 $allowed_showrows=array('10','50');
 $stickyTypes = [
@@ -38,8 +38,8 @@ if ($__server_REQUEST_METHOD == "POST") {
 	if (((\App\Support\SupportContext::getPost('showrows') !== null)) && in_array(\App\Support\SupportContext::getPost('showrows'), $allowed_showrows, 1))
 		$query[] = "rows=".(int)\App\Support\SupportContext::getPost('showrows');
 	else {
-		stdmsg($lang_getrss['std_error'],$lang_getrss['std_no_row']);
-		stdfoot();
+		\App\Support\Html::stdMessage($lang_getrss['std_error'], $lang_getrss['std_no_row']);
+		\App\Support\Html::stdfoot();
 		die();
 	}
 	foreach ($brcats as $cat)
@@ -153,8 +153,8 @@ if ($__server_REQUEST_METHOD == "POST") {
 	if ($queries)
 		$link .= "?".$queries;
 	$msg = $lang_getrss['std_use_following_url'] ."\n".$link."\n\n".$lang_getrss['std_utorrent_feed_url']."\n".$link."&linktype=dl".$addinclbm;
-	stdmsg($lang_getrss['std_done'],\App\Support\Format::formatComment($msg));
-	stdfoot();
+	\App\Support\Html::stdMessage($lang_getrss['std_done'], \App\Support\Format::formatComment($msg));
+	\App\Support\Html::stdfoot();
 	die();
 }
 
@@ -253,7 +253,7 @@ $categories .= "</tr>";
 $categories .= "</table>";
 */
 
-$categories = build_search_box_category_table($browsecatmode, 'yes', 'torrents.php?allsec=1&', false, 3, '', ['section_name' => true]);
+$categories = \App\Support\SearchBox::buildCategoryTableWithContext($browsecatmode, 'yes', 'torrents.php?allsec=1&', false, 3, '', ['section_name' => true]);
 print($categories);
 ?>
 </td>
@@ -310,4 +310,4 @@ print($categories);
 </table>
 </form>
 <?php
-stdfoot();
+\App\Support\Html::stdfoot();

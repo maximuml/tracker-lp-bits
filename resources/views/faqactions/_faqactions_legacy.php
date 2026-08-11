@@ -23,7 +23,7 @@ error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
 
 if (\App\Support\UserDisplay::currentClass() < UC_ADMINISTRATOR) {
-	stderr("Error","Only Administrators and above can modify the FAQ, sorry.");
+	\App\Support\LegacyResponse::abort("Error", "Only Administrators and above can modify the FAQ, sorry.");
 }
 
 function clear_faq_cache()
@@ -43,8 +43,8 @@ if (((\App\Support\SupportContext::getQuery('action') !== null)) && \App\Support
 
 // ACTION: edit - edit a section or item
 elseif (((\App\Support\SupportContext::getQuery('action') !== null)) && \App\Support\SupportContext::getQuery('action') == "edit" && ((\App\Support\SupportContext::getQuery('id') !== null))) {
-	stdhead("FAQ Management");
-	begin_main_frame();
+	\App\Support\Html::stdhead("FAQ Management");
+	\App\Support\Frame::mainFrameOpen();
 	print("<h1 align=\"center\">Edit Section or Item</h1>");
 
 	$row = \Nexus\Database\NexusDB::table('faq')->where('id', (int)\App\Support\SupportContext::getQuery('id'))->first();
@@ -92,8 +92,8 @@ elseif (((\App\Support\SupportContext::getQuery('action') !== null)) && \App\Sup
 		}
 	}
 
-	end_main_frame();
-	stdfoot();
+	\App\Support\Frame::mainFrameClose();
+	\App\Support\Html::stdfoot();
 }
 
 // subACTION: edititem - edit an item
@@ -133,20 +133,20 @@ elseif (((\App\Support\SupportContext::getQuery('action') !== null)) && \App\Sup
 		return;
 	}
 	else {
-		stdhead("FAQ Management");
-		begin_main_frame();
+		\App\Support\Html::stdhead("FAQ Management");
+		\App\Support\Frame::mainFrameOpen();
 		print("<h1 align=\"center\">Confirmation required</h1>");
         $id = intval(\App\Support\SupportContext::getQuery('id') ?? 0);
 		print("<table border=\"1\" cellspacing=\"0\" cellpadding=\"5\" align=\"center\" width=\"95%\">\n<tr><td align=\"center\">Please click <a href=\"faqactions.php?action=delete&id={$id}&confirm=yes\">here</a> to confirm.</td></tr>\n</table>\n");
-		end_main_frame();
-		stdfoot();
+		\App\Support\Frame::mainFrameClose();
+		\App\Support\Html::stdfoot();
 	}
 }
 
 // ACTION: additem - add a new item
 elseif (((\App\Support\SupportContext::getQuery('action') !== null)) && \App\Support\SupportContext::getQuery('action') == "additem" && \App\Support\SupportContext::getQuery('inid') && \App\Support\SupportContext::getQuery('langid')) {
-	stdhead("FAQ Management");
-	begin_main_frame();
+	\App\Support\Html::stdhead("FAQ Management");
+	\App\Support\Frame::mainFrameOpen();
 	print("<h1 align=\"center\">Add Item</h1>");
 	print("<form method=\"post\" action=\"faqactions.php?action=addnewitem\">");
 	print("<table border=\"1\" cellspacing=\"0\" cellpadding=\"10\" align=\"center\">\n");
@@ -157,14 +157,14 @@ elseif (((\App\Support\SupportContext::getQuery('action') !== null)) && \App\Sup
 	print("<input type=hidden name=langid value=\"".(intval(\App\Support\SupportContext::getQuery('langid') ?? 0))."\">");
 	print("<tr><td colspan=\"2\" align=\"center\"><input type=\"submit\" value=\"Add\" style=\"width: 60px;\"></td></tr>\n");
 	print("</table></form>");
-	end_main_frame();
-	stdfoot();
+	\App\Support\Frame::mainFrameClose();
+	\App\Support\Html::stdfoot();
 }
 
 // ACTION: addsection - add a new section
 elseif (((\App\Support\SupportContext::getQuery('action') !== null)) && \App\Support\SupportContext::getQuery('action') == "addsection") {
-	stdhead("FAQ Management");
-	begin_main_frame();
+	\App\Support\Html::stdhead("FAQ Management");
+	\App\Support\Frame::mainFrameOpen();
 	print("<h1 align=\"center\">Add Section</h1>");
 	print("<form method=\"post\" action=\"faqactions.php?action=addnewsect\">");
 	print("<table border=\"1\" cellspacing=\"0\" cellpadding=\"10\" align=\"center\">\n");
@@ -181,8 +181,8 @@ elseif (((\App\Support\SupportContext::getQuery('action') !== null)) && \App\Sup
 	print("<tr><td>Status:</td><td><select name=\"flag\" style=\"width: 110px;\"><option value=\"0\" style=\"color: #FF0000;\">Hidden</option><option value=\"1\" style=\"color: #000000;\" selected=\"selected\">Normal</option></select></td></tr>");
 	print("<tr><td colspan=\"2\" align=\"center\"><input type=\"submit\" name=\"edit\" value=\"Add\" style=\"width: 60px;\"></td></tr>\n");
 	print("</table>");
-	end_main_frame();
-	stdfoot();
+	\App\Support\Frame::mainFrameClose();
+	\App\Support\Html::stdfoot();
 }
 
 // subACTION: addnewitem - add a new item to the db

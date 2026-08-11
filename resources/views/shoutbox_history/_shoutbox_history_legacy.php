@@ -3,8 +3,8 @@ error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 \Nexus\Nexus::css('styles/shoutbox.css', 'header', true);
 \Nexus\Nexus::js('js/shoutbox.js', 'footer', true);
 
-stdhead($lang_shoutbox['text_history_title'] ?? 'Shoutbox history');
-begin_main_frame();
+\App\Support\Html::stdhead($lang_shoutbox['text_history_title'] ?? 'Shoutbox history');
+\App\Support\Frame::mainFrameOpen();
 
 $perPage = 50;
 $page = max(1, (int) (\App\Support\SupportContext::getQuery('page') ?? 1));
@@ -127,5 +127,5 @@ if ($totalPages > 1) {
     echo '</div>';
 }
 
-end_main_frame();
-stdfoot();
+\App\Support\Frame::mainFrameClose();
+\App\Support\Html::stdfoot();

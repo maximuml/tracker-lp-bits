@@ -3,17 +3,17 @@ error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
 
 if (\App\Support\UserDisplay::currentClass() < UC_MODERATOR)
-stderr("Sorry", "Access denied.");
+\App\Support\LegacyResponse::abort("Sorry", "Access denied.");
 $status = \App\Support\SupportContext::getQuery('status');
 	if ($status)
-		int_check($status,true);
+		\App\Support\LegacyResponse::assertId($status, true);
 		
 $rows = \App\Models\User::query()->where('status', 'pending')->orderBy('username')->get();
 if( $rows->isNotEmpty() )
 {
-	stdhead("Unconfirmed Users");
-	begin_main_frame();
-	begin_frame("");
+	\App\Support\Html::stdhead("Unconfirmed Users");
+	\App\Support\Frame::mainFrameOpen();
+	\App\Support\Html::beginFrame("");
 print'<br><table width=100% border=1 cellspacing=0 cellpadding=5>';
 if ($status)
 	print '<tr><td class=rowhead colspan=5><font color=red size=1>The User account has been updated!</font></tr></td>';
@@ -39,15 +39,15 @@ print'<td align=center><input type=submit value="-Go-" style=\'height: 20px; wid
 print'</form></tr>';
 }
 print '</table>';
-end_frame();
-end_main_frame();
+\App\Support\Html::endFrame();
+\App\Support\Frame::mainFrameClose();
 }else{
 	if ($status) {
-		stderr("Updated!","The user account has been updated.");
+		\App\Support\LegacyResponse::abort("Updated!", "The user account has been updated.");
 	}
 	else {
-		stderr("Ups!","Nothing Found...");
+		\App\Support\LegacyResponse::abort("Ups!", "Nothing Found...");
 	}
 }
 
-stdfoot();
+\App\Support\Html::stdfoot();

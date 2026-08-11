@@ -17,9 +17,9 @@ $lang_tags = (array) (\App\Support\SupportContext::getGlobal('lang_tags') ?? [])
 	print("</table>\n");
 }
 
-stdhead($lang_tags['head_tags']);
-begin_main_frame();
-begin_frame($lang_tags['text_tags']);
+\App\Support\Html::stdhead($lang_tags['head_tags']);
+\App\Support\Frame::mainFrameOpen();
+\App\Support\Html::beginFrame($lang_tags['text_tags']);
 $test = \App\Support\SupportContext::getPost("test") ?? '';
 $siteName = \App\Models\Setting::getSiteName();
 ?>
@@ -296,6 +296,6 @@ insert_tag(
     ""
 );
 
-end_frame();
-end_main_frame();
-stdfoot();
+\App\Support\Html::endFrame();
+\App\Support\Frame::mainFrameClose();
+\App\Support\Html::stdfoot();

@@ -12,8 +12,8 @@ $toastLang = json_encode([
 \Nexus\Nexus::js("window.TOAST_LANG = $toastLang;", 'footer', false, 'toast-lang');
 \Nexus\Nexus::css('styles/toast.css', 'header', true);
 \Nexus\Nexus::js('js/toast.js', 'footer', true);
-stdhead($lang_index['head_home']);
-begin_main_frame();
+\App\Support\Html::stdhead($lang_index['head_home']);
+\App\Support\Frame::mainFrameOpen();
 
 // ------------- start: recent news ------------------//
 print("<h2>".$lang_index['text_recent_news'].(\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::NEWS_MANAGE) ? " - <font class=\"small\">[<a class=\"altlink\" href=\"news.php\"><b>".$lang_index['text_news_page']."</b></a>]</font>" : "")."</h2>");
@@ -448,32 +448,32 @@ if ($showstats_main == "yes")
 ?>
 <tr>
 <?php
-	twotd($lang_index['row_users_active_today'],$totalonlinetoday);
-	twotd($lang_index['row_users_active_this_week'],$totalonlineweek);
+	\App\Support\Html::twoTd($lang_index['row_users_active_today'], $totalonlinetoday);
+	\App\Support\Html::twoTd($lang_index['row_users_active_this_week'], $totalonlineweek);
 ?>
 </tr>
 <tr>
 <?php
-	twotd($lang_index['row_registered_users'],$registered." / ".number_format($maxusers));
-	twotd($lang_index['row_unconfirmed_users'],$unverified);
+	\App\Support\Html::twoTd($lang_index['row_registered_users'], $registered." / ".number_format($maxusers));
+	\App\Support\Html::twoTd($lang_index['row_unconfirmed_users'], $unverified);
 ?>
 </tr>
 <tr>
 <?php
-	twotd(\App\Support\UserClass::name(UC_VIP,false,false,true),$VIP);
-	twotd($lang_index['row_donors']." <img class=\"star\" src=\"pic/trans.gif\" alt=\"Donor\" />",$donated);
+	\App\Support\Html::twoTd(\App\Support\UserClass::name(UC_VIP,false,false,true), $VIP);
+	\App\Support\Html::twoTd($lang_index['row_donors']." <img class=\"star\" src=\"pic/trans.gif\" alt=\"Donor\" />", $donated);
 ?>
 </tr>
 <tr>
 <?php
-	twotd($lang_index['row_warned_users']." <img class=\"warned\" src=\"pic/trans.gif\" alt=\"warned\" />",$warned);
-	twotd($lang_index['row_banned_users']." <img class=\"disabled\" src=\"pic/trans.gif\" alt=\"disabled\" />",$disabled);
+	\App\Support\Html::twoTd($lang_index['row_warned_users']." <img class=\"warned\" src=\"pic/trans.gif\" alt=\"warned\" />", $warned);
+	\App\Support\Html::twoTd($lang_index['row_banned_users']." <img class=\"disabled\" src=\"pic/trans.gif\" alt=\"disabled\" />", $disabled);
 ?>
 </tr>
 <tr>
 <?php
-	twotd($lang_index['row_male_users'],$registered_male);
-	twotd($lang_index['row_female_users'],$registered_female);
+	\App\Support\Html::twoTd($lang_index['row_male_users'], $registered_male);
+	\App\Support\Html::twoTd($lang_index['row_female_users'], $registered_female);
 ?>
 </tr>
 <?php
@@ -505,38 +505,38 @@ if ($showstats_main == "yes")
 ?>
 <tr>
 <?php
-	twotd($lang_index['row_torrents'],$torrents);
-	twotd($lang_index['row_dead_torrents'],$dead);
+	\App\Support\Html::twoTd($lang_index['row_torrents'], $torrents);
+	\App\Support\Html::twoTd($lang_index['row_dead_torrents'], $dead);
 ?>
 </tr>
 <tr>
 <?php
-	twotd($lang_index['row_seeders'],$seeders);
-	twotd($lang_index['row_leechers'],$leechers);
+	\App\Support\Html::twoTd($lang_index['row_seeders'], $seeders);
+	\App\Support\Html::twoTd($lang_index['row_leechers'], $leechers);
 ?>
 </tr>
 <tr>
 <?php
-	twotd($lang_index['row_peers'],$peers);
-	twotd($lang_index['row_seeder_leecher_ratio'],$ratio."%");
+	\App\Support\Html::twoTd($lang_index['row_peers'], $peers);
+	\App\Support\Html::twoTd($lang_index['row_seeder_leecher_ratio'], $ratio."%");
 ?>
 </tr>
 <tr>
 <?php
-	twotd($lang_index['row_active_browsing_users'], $activewebusernow);
-	twotd($lang_index['row_tracker_active_users'], $activetrackerusernow);
+	\App\Support\Html::twoTd($lang_index['row_active_browsing_users'], $activewebusernow);
+	\App\Support\Html::twoTd($lang_index['row_tracker_active_users'], $activetrackerusernow);
 ?>
 </tr>
 <tr>
 <?php
-	twotd($lang_index['row_total_size_of_torrents'],$totaltorrentssize);
-	twotd($lang_index['row_total_uploaded'],\App\Support\Format::size($totaluploaded));
+	\App\Support\Html::twoTd($lang_index['row_total_size_of_torrents'], $totaltorrentssize);
+	\App\Support\Html::twoTd($lang_index['row_total_uploaded'], \App\Support\Format::size($totaluploaded));
 ?>
 </tr>
 <tr>
 <?php
-	twotd($lang_index['row_total_downloaded'],\App\Support\Format::size($totaldownloaded));
-	twotd($lang_index['row_total_data'],\App\Support\Format::size($totaldata));
+	\App\Support\Html::twoTd($lang_index['row_total_downloaded'], \App\Support\Format::size($totaldownloaded));
+	\App\Support\Html::twoTd($lang_index['row_total_data'], \App\Support\Format::size($totaldata));
 ?>
 </tr>
 <?php
@@ -564,32 +564,32 @@ if ($showstats_main == "yes")
 ?>
 <tr>
 <?php
-	twotd(\App\Support\UserClass::name(UC_PEASANT,false,false,true)." <img class=\"leechwarned\" src=\"pic/trans.gif\" alt=\"leechwarned\" />",$peasants);
-	twotd(\App\Support\UserClass::name(UC_USER,false,false,true),$users);
+	\App\Support\Html::twoTd(\App\Support\UserClass::name(UC_PEASANT,false,false,true)." <img class=\"leechwarned\" src=\"pic/trans.gif\" alt=\"leechwarned\" />", $peasants);
+	\App\Support\Html::twoTd(\App\Support\UserClass::name(UC_USER,false,false,true), $users);
 ?>
 </tr>
 <tr>
 <?php
-	twotd(\App\Support\UserClass::name(UC_POWER_USER,false,false,true),$powerusers);
-	twotd(\App\Support\UserClass::name(UC_ELITE_USER,false,false,true),$eliteusers);
+	\App\Support\Html::twoTd(\App\Support\UserClass::name(UC_POWER_USER,false,false,true), $powerusers);
+	\App\Support\Html::twoTd(\App\Support\UserClass::name(UC_ELITE_USER,false,false,true), $eliteusers);
 ?>
 </tr>
 <tr>
 <?php
-	twotd(\App\Support\UserClass::name(UC_CRAZY_USER,false,false,true),$crazyusers);
-	twotd(\App\Support\UserClass::name(UC_INSANE_USER,false,false,true),$insaneusers);
+	\App\Support\Html::twoTd(\App\Support\UserClass::name(UC_CRAZY_USER,false,false,true), $crazyusers);
+	\App\Support\Html::twoTd(\App\Support\UserClass::name(UC_INSANE_USER,false,false,true), $insaneusers);
 ?>
 </tr>
 <tr>
 <?php
-	twotd(\App\Support\UserClass::name(UC_VETERAN_USER,false,false,true),$veteranusers);
-	twotd(\App\Support\UserClass::name(UC_EXTREME_USER,false,false,true),$extremeusers);
+	\App\Support\Html::twoTd(\App\Support\UserClass::name(UC_VETERAN_USER,false,false,true), $veteranusers);
+	\App\Support\Html::twoTd(\App\Support\UserClass::name(UC_EXTREME_USER,false,false,true), $extremeusers);
 ?>
 </tr>
 <tr>
 <?php
-	twotd(\App\Support\UserClass::name(UC_ULTIMATE_USER,false,false,true),$ultimateusers);
-	twotd(\App\Support\UserClass::name(UC_NEXUS_MASTER,false,false,true),$nexusmasters);
+	\App\Support\Html::twoTd(\App\Support\UserClass::name(UC_ULTIMATE_USER,false,false,true), $ultimateusers);
+	\App\Support\Html::twoTd(\App\Support\UserClass::name(UC_NEXUS_MASTER,false,false,true), $nexusmasters);
 ?>
 </tr>
 <?php
@@ -638,6 +638,6 @@ if ($CURUSER) {
 	\App\Models\User::where('id', $CURUSER["id"])->update(['last_home' => now()]);
 }
 $Cache->delete_value('user_'.$CURUSER["id"].'_unread_news_count');
-end_main_frame();
-stdfoot();
+\App\Support\Frame::mainFrameClose();
+\App\Support\Html::stdfoot();
 ?>

@@ -4,10 +4,10 @@ error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
 $__server_REQUEST_METHOD = \App\Support\SupportContext::getServerValue('REQUEST_METHOD');
 if (\App\Support\UserDisplay::currentClass() < UC_SYSOP)
-	permissiondenied();
+	\App\Support\LegacyResponse::permissionDenied();
 
 $shownotice=false;
-stderr("Error", "Hard deletion of users is not recommended and can cause many problems.");
+\App\Support\LegacyResponse::abort("Error", "Hard deletion of users is not recommended and can cause many problems.");
 if ($__server_REQUEST_METHOD == "POST")
 {
 	if (\App\Support\SupportContext::getPost('sure'))
@@ -16,8 +16,8 @@ if ($__server_REQUEST_METHOD == "POST")
 		$shownotice=true;
 	}
 }
-stdhead($lang_deletedisabled['head_delete_diasabled']);
-begin_main_frame();
+\App\Support\Html::stdhead($lang_deletedisabled['head_delete_diasabled']);
+\App\Support\Frame::mainFrameOpen();
 ?>
 <h1 align="center"><?php echo $lang_deletedisabled['text_delete_diasabled']?></h1>
 <?php
@@ -39,5 +39,5 @@ else
 </div>
 <?php
 }
-end_main_frame();
-stdfoot();
+\App\Support\Frame::mainFrameClose();
+\App\Support\Html::stdfoot();

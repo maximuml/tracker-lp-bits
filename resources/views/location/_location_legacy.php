@@ -7,24 +7,24 @@ if (\App\Support\UserDisplay::currentClass() < UC_SYSOP) {
 	echo "access denied.";
 	return;
 }
-stdhead("Manage Locations");
-begin_main_frame("",false,100);
-begin_frame("Manage Locations",true,10,"100%","center");
+\App\Support\Html::stdhead("Manage Locations");
+\App\Support\Frame::mainFrameOpen("", false, 100);
+\App\Support\Html::beginFrame("Manage Locations", true, 10, "100%", "center");
 
 $sure = \App\Support\SupportContext::getQuery('sure') ?? '';
 if($sure == "yes") {
 	$delid = (int)\App\Support\SupportContext::getQuery('delid');
 	\Nexus\Database\NexusDB::table('locations')->where('id', $delid)->delete();
 	echo("Location successfuly removed, click <a class=altlink href=" . $__server_REQUEST_URI .">here</a> to go back.");
-	end_frame();
-	stdfoot();
+	\App\Support\Html::endFrame();
+	\App\Support\Html::stdfoot();
 	return;
 }
 $delid = intval(\App\Support\SupportContext::getQuery('delid') ?? 0);
 if($delid > 0) {
 	echo("Are you sure you would like to delete this Location?( <strong><a href='". $__server_REQUEST_URI . "?delid=$delid&sure=yes'>Yes!</a></strong> / <strong><a href='". $__server_REQUEST_URI . "'>No</a></strong> )");
-	end_frame();
-	stdfoot();
+	\App\Support\Html::endFrame();
+	\App\Support\Html::stdfoot();
 	return;
 }
 
@@ -58,8 +58,8 @@ if($edited == 1) {
 			    'theory_downspeed' => $theory_downspeed,
 			    'practical_downspeed' => $practical_downspeed,
 			]);
-			stdmsg("Success!","Location has been edited, click <a class=altlink href=" . $__server_REQUEST_URI .">here</a> to go back");
-			stdfoot();
+			\App\Support\Html::stdMessage("Success!", "Location has been edited, click <a class=altlink href=" . $__server_REQUEST_URI .">here</a> to go back");
+			\App\Support\Html::stdfoot();
 			return;
 		}
 		else
@@ -103,8 +103,8 @@ if($editid > 0) {
 		echo("<tr><td class=toolbox align=center colspan=2><input class=btn type='Submit'></td></tr>");
 		echo("</table></form>");
 	}
-	end_frame();
-	stdfoot();
+	\App\Support\Html::endFrame();
+	\App\Support\Html::stdfoot();
 	return;
 }
 
@@ -212,7 +212,7 @@ $baseQuery = \Nexus\Database\NexusDB::table('locations')
     });
 
 $count = $baseQuery->count();
-list($pagertop, $pagerbottom, , $offset, $perpage) = pager($perpage, $count, "location.php?");
+list($pagertop, $pagerbottom, , $offset, $perpage) = \App\Support\Pagination::pager($perpage, $count, "location.php?");
 
 $locations = (clone $baseQuery)
     ->orderBy('name')
@@ -258,7 +258,7 @@ foreach ($locations as $loc) {
 print("</table>");
 echo $pagerbottom;
 
-end_frame();
-end_frame();
-stdfoot();
+\App\Support\Html::endFrame();
+\App\Support\Html::endFrame();
+\App\Support\Html::stdfoot();
 

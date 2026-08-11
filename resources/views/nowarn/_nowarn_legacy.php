@@ -1,16 +1,16 @@
 <?php
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 function bark($msg) {
-stdhead();
-stdmsg("Update Has Failed !", $msg);
-stdfoot();
+\App\Support\Html::stdhead();
+\App\Support\Html::stdMessage("Update Has Failed !", $msg);
+\App\Support\Html::stdfoot();
 exit;
 }
 
 if(((\App\Support\SupportContext::getPost("nowarned") !== null))&&(\App\Support\SupportContext::getPost("nowarned")=="nowarned")){
 //if (get_user_class() >= UC_SYSOP) {
 if (\App\Support\UserDisplay::currentClass() < UC_MODERATOR)
-stderr("Sorry", "Access denied.");
+\App\Support\LegacyResponse::abort("Sorry", "Access denied.");
 {
 if (empty(\App\Support\SupportContext::getPost("usernw")) && empty(\App\Support\SupportContext::getPost("desact")) && empty(\App\Support\SupportContext::getPost("delete")))
    bark("You Must Select A User To Edit.");

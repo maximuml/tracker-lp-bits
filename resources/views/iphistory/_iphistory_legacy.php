@@ -3,12 +3,12 @@ error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 \App\Auth\Permission::assertCan(\App\Enums\Permission\PermissionEnum::VIEW_USER_CONFIDENTIAL_INFO);
 
 $userid = intval(\App\Support\SupportContext::getQuery("id") ?? 0);
-if (!is_valid_id($userid))
-	stderr($lang_iphistory['std_error'], $lang_iphistory['std_invalid_id']);
+if (!\App\Support\Validators::isId($userid))
+	\App\Support\LegacyResponse::abort($lang_iphistory['std_error'], $lang_iphistory['std_invalid_id']);
 
 $username = \App\Models\User::query()->where('id', $userid)->value('username');
 if (!$username)
-	stderr($lang_iphistory['error'], $lang_iphistory['text_user_not_found']);
+	\App\Support\LegacyResponse::abort($lang_iphistory['error'], $lang_iphistory['text_user_not_found']);
 
 $perpage = 20;
 
@@ -16,7 +16,7 @@ $iplogDistinct = \Nexus\Database\NexusDB::table('iplog')->where('userid', $useri
 $countrows = $iplogDistinct + 1;
 $order = \App\Support\SupportContext::getQuery('order') ?? '';
 
-list($pagertop, $pagerbottom, , $offset, $perpage) = pager($perpage, $countrows, "iphistory.php?id=$userid&order=$order&");
+list($pagertop, $pagerbottom, , $offset, $perpage) = \App\Support\Pagination::pager($perpage, $countrows, "iphistory.php?id=$userid&order=$order&");
 
 $userHistory = \Nexus\Database\NexusDB::table('users as u')
     ->select('u.id', 'u.ip as ip', 'last_access as access')
@@ -30,8 +30,8 @@ $rows = $userHistory->union($ipLogHistory)
     ->offset($offset)
     ->get();
 
-stdhead($lang_iphistory['head_ip_history_log_for'].$username);
-begin_main_frame();
+\App\Support\Html::stdhead($lang_iphistory['head_ip_history_log_for'].$username);
+\App\Support\Frame::mainFrameOpen();
 
 print("<h1 align=\"center\">".$lang_iphistory['text_historical_ip_by'] . \App\Support\UserDisplay::username($userid)."</h1>");
 
@@ -76,7 +76,7 @@ print("</table>");
 
 echo $pagerbottom;
 
-end_main_frame();
-stdfoot();
+\App\Support\Frame::mainFrameClose();
+\App\Support\Html::stdfoot();
 die;
 ?>

@@ -3,10 +3,10 @@ error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
 $__server_PHP_SELF = \App\Support\SupportContext::getServerValue('PHP_SELF');
 $userid = intval(\App\Support\SupportContext::getQuery("id") ?? 0);
-int_check($userid,true);
+\App\Support\LegacyResponse::assertId($userid, true);
 
 if ($CURUSER["id"] != $userid && !\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::VIEW_USER_HISTORY))
-permissiondenied();
+\App\Support\LegacyResponse::permissionDenied();
 
 $action = htmlspecialchars(\App\Support\SupportContext::getQuery("action"));
 
@@ -22,7 +22,7 @@ if ($action == "viewposts")
 	    ->distinct()
 	    ->count('p.id');
 
-	list($pagertop, $pagerbottom, , $offset, $perpage) = pager($perpage, $postcount, $__server_PHP_SELF . "?action=viewposts&id=$userid&");
+	list($pagertop, $pagerbottom, , $offset, $perpage) = \App\Support\Pagination::pager($perpage, $postcount, $__server_PHP_SELF . "?action=viewposts&id=$userid&");
 
 	$subject = \App\Support\UserDisplay::username($userid);
 
@@ -39,17 +39,17 @@ if ($action == "viewposts")
 	    ->limit($perpage)
 	    ->get(['f.id AS f_id', 'f.name', 't.id AS t_id', 't.subject', 't.lastpost', 'r.lastpostread', 'p.*']);
 
-	if ($posts->isEmpty()) stderr($lang_userhistory['std_error'], $lang_userhistory['std_no_posts_found']);
+	if ($posts->isEmpty()) \App\Support\LegacyResponse::abort($lang_userhistory['std_error'], $lang_userhistory['std_no_posts_found']);
 
-	stdhead($lang_userhistory['head_posts_history']);
+	\App\Support\Html::stdhead($lang_userhistory['head_posts_history']);
 
 	print("<h1>".$lang_userhistory['text_posts_history_for'].$subject."</h1>\n");
 
 	if ($postcount > $perpage) echo $pagertop;
 
-	begin_main_frame();
+	\App\Support\Frame::mainFrameOpen();
 
-	begin_frame();
+	\App\Support\Html::beginFrame();
 
 	foreach ($posts as $postRow) {
 		$arr = (array) $postRow;
@@ -85,7 +85,7 @@ if ($action == "viewposts")
 
       $body = \App\Support\Format::formatComment($arr["body"]);
 
-      if (is_valid_id($arr['editedby']))
+      if (\App\Support\Validators::isId($arr['editedby']))
       {
       	$editor = \App\Models\User::query()->where('id', $arr['editedby'])->value('username');
       	if ($editor)
@@ -100,13 +100,13 @@ if ($action == "viewposts")
       print("<br />");
 	}
 
-	end_frame();
+	\App\Support\Html::endFrame();
 
-	end_main_frame();
+	\App\Support\Frame::mainFrameClose();
 
 	if ($postcount > $perpage) echo $pagerbottom;
 
-	stdfoot();
+	\App\Support\Html::stdfoot();
 
 	die;
 }
@@ -118,7 +118,7 @@ if ($action == "viewcomments")
 	    ->where('c.user', $userid)
 	    ->count();
 
-	list($pagertop, $pagerbottom, , $offset, $perpage) = pager($perpage, $commentcount, $__server_PHP_SELF . "?action=viewcomments&id=$userid&");
+	list($pagertop, $pagerbottom, , $offset, $perpage) = \App\Support\Pagination::pager($perpage, $commentcount, $__server_PHP_SELF . "?action=viewcomments&id=$userid&");
 
 	$subject = \App\Support\UserDisplay::username($userid);
 
@@ -130,17 +130,17 @@ if ($action == "viewcomments")
 	    ->limit($perpage)
 	    ->get(['t.name', 'c.torrent AS t_id', 'c.id', 'c.added', 'c.text']);
 
-	if ($comments->isEmpty()) stderr($lang_userhistory['std_error'], $lang_userhistory['std_no_comments_found']);
+	if ($comments->isEmpty()) \App\Support\LegacyResponse::abort($lang_userhistory['std_error'], $lang_userhistory['std_no_comments_found']);
 
-	stdhead($lang_userhistory['head_comments_history']);
+	\App\Support\Html::stdhead($lang_userhistory['head_comments_history']);
 
 	print("<h1>".$lang_userhistory['text_comments_history_for']."$subject</h1>\n");
 
 	if ($commentcount > $perpage) echo $pagertop;
 
-	begin_main_frame();
+	\App\Support\Frame::mainFrameOpen();
 
-	begin_frame();
+	\App\Support\Html::beginFrame();
 
 	foreach ($comments as $commentRow)
 	{
@@ -178,21 +178,21 @@ if ($action == "viewcomments")
 		print("<br />");
 	}
 
-	end_frame();
+	\App\Support\Html::endFrame();
 
-	end_main_frame();
+	\App\Support\Frame::mainFrameClose();
 
 	if ($commentcount > $perpage) echo $pagerbottom;
 
-	stdfoot();
+	\App\Support\Html::stdfoot();
 
 	die;
 }
 
 if ($action != "")
-stderr($lang_userhistory['std_history_error'], $lang_userhistory['std_unkown_action']);
+\App\Support\LegacyResponse::abort($lang_userhistory['std_history_error'], $lang_userhistory['std_unkown_action']);
 
-stdhead($lang_userhistory['head_user_history']);
-stdmsg($lang_userhistory['std_history_error'], $lang_userhistory['std_unkown_action']);
-stdfoot();
+\App\Support\Html::stdhead($lang_userhistory['head_user_history']);
+\App\Support\Html::stdMessage($lang_userhistory['std_history_error'], $lang_userhistory['std_unkown_action']);
+\App\Support\Html::stdfoot();
 ?>

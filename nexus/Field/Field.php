@@ -93,15 +93,15 @@ class Field
         $lang_functions = SupportContext::getLangFunctions();
         $lang_fields = (array) SupportContext::getGlobal('lang_fields', []);
         $lang_catmanage = (array) SupportContext::getGlobal('lang_catmanage', []);
-        $trName = tr($lang_fields['col_name'] . '<font color="red">*</font>', '<input type="text" name="name" value="' . ($row['name'] ?? '') . '" style="width: 300px" />&nbsp;&nbsp;' . $lang_fields['col_name_help'], 1, '', true);
-        $trLabel = tr($lang_fields['col_label'] . '<font color="red">*</font>', '<input type="text" name="label" value="' . ($row['label'] ?? '') . '"  style="width: 300px" />', 1, '', true);
-        $trType = tr($lang_fields['col_type'] . '<font color="red">*</font>', $this->radio('type', $this->getTypeRadioOptions(), $row['type'] ?? null), 1, '', true);
-        $trRequired = tr($lang_fields['col_required'] . '<font color="red">*</font>', $this->radio('required', ['0' => $lang_functions['text_no'], '1' => $lang_functions['text_yes']], $row['required'] ?? null), 1, '', true);
-        $trHelp = tr($lang_fields['col_help'], '<textarea name="help" rows="4" cols="80">' . ($row['help'] ?? '') . '</textarea>', 1, '', true);
-        $trOptions = tr($lang_fields['col_options'], '<textarea name="options" rows="6" cols="80">' . ($row['options'] ?? '') . '</textarea><br/>' . $lang_fields['col_options_help'], 1, '', true);
-        $trIsSingleRow = tr($lang_fields['col_is_single_row'] . '<font color="red">*</font>', $this->radio('is_single_row', ['0' => $lang_functions['text_no'], '1' => $lang_functions['text_yes']], $row['is_single_row'] ?? null), 1, '', true);
-        $trPriority = tr(nexus_trans('label.priority') . '<font color="red">*</font>', '<input type="number" name="priority" value="' . ($row['priority'] ?? '0') . '" style="width: 300px" />', 1, '', true);
-        $trDisplay = tr($lang_fields['col_display'], '<textarea name="display" rows="4" cols="80">' . ($row['display'] ?? '') . '</textarea><br/>' . $lang_catmanage['row_custom_field_display_help'], 1, '', true);
+        $trName = \App\Support\Html::tr($lang_fields['col_name'] . '<font color="red">*</font>', '<input type="text" name="name" value="' . ($row['name'] ?? '') . '" style="width: 300px" />&nbsp;&nbsp;' . $lang_fields['col_name_help'], 1, '', true);
+        $trLabel = \App\Support\Html::tr($lang_fields['col_label'] . '<font color="red">*</font>', '<input type="text" name="label" value="' . ($row['label'] ?? '') . '"  style="width: 300px" />', 1, '', true);
+        $trType = \App\Support\Html::tr($lang_fields['col_type'] . '<font color="red">*</font>', $this->radio('type', $this->getTypeRadioOptions(), $row['type'] ?? null), 1, '', true);
+        $trRequired = \App\Support\Html::tr($lang_fields['col_required'] . '<font color="red">*</font>', $this->radio('required', ['0' => $lang_functions['text_no'], '1' => $lang_functions['text_yes']], $row['required'] ?? null), 1, '', true);
+        $trHelp = \App\Support\Html::tr($lang_fields['col_help'], '<textarea name="help" rows="4" cols="80">' . ($row['help'] ?? '') . '</textarea>', 1, '', true);
+        $trOptions = \App\Support\Html::tr($lang_fields['col_options'], '<textarea name="options" rows="6" cols="80">' . ($row['options'] ?? '') . '</textarea><br/>' . $lang_fields['col_options_help'], 1, '', true);
+        $trIsSingleRow = \App\Support\Html::tr($lang_fields['col_is_single_row'] . '<font color="red">*</font>', $this->radio('is_single_row', ['0' => $lang_functions['text_no'], '1' => $lang_functions['text_yes']], $row['is_single_row'] ?? null), 1, '', true);
+        $trPriority = \App\Support\Html::tr(nexus_trans('label.priority') . '<font color="red">*</font>', '<input type="number" name="priority" value="' . ($row['priority'] ?? '0') . '" style="width: 300px" />', 1, '', true);
+        $trDisplay = \App\Support\Html::tr($lang_fields['col_display'], '<textarea name="display" rows="4" cols="80">' . ($row['display'] ?? '') . '</textarea><br/>' . $lang_catmanage['row_custom_field_display_help'], 1, '', true);
 
         $id = $row['id'] ?? 0;
         $form = <<<HTML
@@ -137,7 +137,7 @@ HTML;
         $lang_fields = (array) SupportContext::getGlobal('lang_fields', []);
         $perPage = 10;
         $total = NexusDB::table('torrents_custom_fields')->count();
-        list($paginationTop, $paginationBottom, , $offset, $rpp) = pager($perPage, $total, "?");
+        list($paginationTop, $paginationBottom, , $offset, $rpp) = \App\Support\Pagination::pager($perPage, $total, "?");
         $res = NexusDB::table('torrents_custom_fields')
             ->orderBy('priority', 'desc')
             ->offset($offset)
@@ -293,9 +293,9 @@ HEAD;
             $trLabel = $row['label'] . $requireText;
             $trRelation = "mode_$searchBoxId";
             if ($row['type'] == self::TYPE_TEXT) {
-                $html .= tr($trLabel, sprintf('<input type="text" name="%s" value="%s" style="width: %s"/>', $name, $currentValue, '99%'), 1, $trRelation);
+                $html .= \App\Support\Html::tr($trLabel, sprintf('<input type="text" name="%s" value="%s" style="width: %s"/>', $name, $currentValue, '99%'), 1, $trRelation);
             } elseif ($row['type'] == self::TYPE_TEXTAREA) {
-                $html .= tr($trLabel, sprintf('<textarea name="%s" rows="4" style="width: %s">%s</textarea>', $name, '99%', $currentValue), 1, $trRelation);
+                $html .= \App\Support\Html::tr($trLabel, sprintf('<textarea name="%s" rows="4" style="width: %s">%s</textarea>', $name, '99%', $currentValue), 1, $trRelation);
             } elseif ($row['type'] == self::TYPE_RADIO || $row['type'] == self::TYPE_CHECKBOX) {
                 if ($row['type'] == self::TYPE_CHECKBOX) {
                     $name .= '[]';
@@ -319,7 +319,7 @@ HEAD;
                         $row['type'], $name, $value, $checked, $label
                     );
                 }
-                $html .= tr($trLabel, $part, 1, $trRelation);
+                $html .= \App\Support\Html::tr($trLabel, $part, 1, $trRelation);
             } elseif ($row['type'] == self::TYPE_SELECT) {
                 $part = '<select name="' . $name . '">';
                 foreach (preg_split('/[\r\n]+/', trim($row['options'])) as $option) {
@@ -338,7 +338,7 @@ HEAD;
                     );
                 }
                 $part .= '</select>';
-                $html .= tr($trLabel, $part, 1, $trRelation);
+                $html .= \App\Support\Html::tr($trLabel, $part, 1, $trRelation);
             } elseif ($row['type'] == self::TYPE_IMAGE) {
                 $callbackFunc = "preview_custom_field_image_" . $row['id'];
                 $iframeId = "iframe_$callbackFunc";
@@ -377,7 +377,7 @@ HEAD;
     }
 </script>
 JS;
-                $html .= tr($trLabel, $y, 1, $trRelation, true);
+                $html .= \App\Support\Html::tr($trLabel, $y, 1, $trRelation, true);
             }
         }
         return $html;
@@ -441,9 +441,9 @@ JS;
 
     public function renderOnTorrentDetailsPage($torrentId, $searchBoxId)
     {
-        $displayName = get_searchbox_value($searchBoxId, 'custom_fields_display_name');
+        $displayName = \App\Support\SearchBox::valueWithContext($searchBoxId, 'custom_fields_display_name');
         $customFields = $this->listTorrentCustomField($torrentId, $searchBoxId);
-        $mixedRowContent = get_searchbox_value($searchBoxId, 'custom_fields_display');
+        $mixedRowContent = \App\Support\SearchBox::valueWithContext($searchBoxId, 'custom_fields_display');
         $rowByRowHtml = '';
         $shouldRenderMixRow = false;
         foreach ($customFields as $field) {
@@ -462,17 +462,17 @@ JS;
                     $customFieldDisplay = $field['display'];
                     $customFieldDisplay = str_replace("<%{$field['name']}.label%>", $field['label'], $customFieldDisplay);
                     $customFieldDisplay = str_replace("<%{$field['name']}.value%>", $contentNotFormatted, $customFieldDisplay);
-                    $rowByRowHtml .= tr($field['label'], \App\Support\Format::formatComment($customFieldDisplay), 1);
+                    $rowByRowHtml .= \App\Support\Html::tr($field['label'], \App\Support\Format::formatComment($customFieldDisplay), 1);
                 } else {
                     $contentFormatted = $this->formatCustomFieldValue($field, true);
-                    $rowByRowHtml .= tr($field['label'], $contentFormatted, 1);
+                    $rowByRowHtml .= \App\Support\Html::tr($field['label'], $contentFormatted, 1);
                 }
             }
         }
 
         $result = $rowByRowHtml;
         if ($shouldRenderMixRow && $mixedRowContent) {
-            $result .= tr($displayName, \App\Support\Format::formatComment($mixedRowContent), 1);
+            $result .= \App\Support\Html::tr($displayName, \App\Support\Format::formatComment($mixedRowContent), 1);
         }
         return $result;
     }

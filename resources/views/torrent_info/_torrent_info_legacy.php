@@ -41,19 +41,19 @@ function torrent_structure_builder($array, $parent = "")
 $id = (int)\App\Support\SupportContext::getQuery("id");
 
 if (!$id)
-	httperr();
+	\App\Support\LegacyResponse::notFound();
 
 $torrentName = \App\Models\Torrent::query()->where('id', $id)->value('name');
 
 $fn = getFullDirectory("$torrent_dir/$id.torrent");
 
 if (!$torrentName || !is_file($fn) || !is_readable($fn))
-	httperr();
+	\App\Support\LegacyResponse::notFound();
 
 
 
 // Standard html headers
-stdhead("Torrent Info");
+\App\Support\Html::stdhead("Torrent Info");
 ?>
 
 <style type="text/css">
@@ -80,7 +80,7 @@ li span.title {font-weight: bold;}
 
 <?php
 
-begin_main_frame();
+\App\Support\Frame::mainFrameOpen();
 
 
 $dict = \Rhilip\Bencode\Bencode::load($fn);
@@ -92,5 +92,5 @@ echo "</ul>";
 print("</td></table>"); // End table
 
 // Standard html footers
-end_main_frame();
-stdfoot();
+\App\Support\Frame::mainFrameClose();
+\App\Support\Html::stdfoot();

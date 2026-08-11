@@ -7,7 +7,7 @@ $__server_QUERY_STRING = \App\Support\SupportContext::getServerValue('QUERY_STRI
 $__server_REQUEST_METHOD = \App\Support\SupportContext::getServerValue('REQUEST_METHOD');
 $action = \App\Support\SupportContext::getQuery("action") ?? '';
 
-function can_access_staff_message($msg)
+if (!function_exists('can_access_staff_message')) { function can_access_staff_message($msg)
 {
 $CURUSER = \App\Support\SupportContext::getUser() ?? [];
     if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::STAFF_MEMBER)) {
@@ -19,7 +19,7 @@ $CURUSER = \App\Support\SupportContext::getUser() ?? [];
     if (empty($msg['permission']) || !in_array($msg['permission'], \App\Repositories\ToolRepository::listUserAllPermissions($CURUSER['id']))) {
         \App\Support\LegacyResponse::permissionDenied(\App\Support\Config\SiteConfig::current()->authority->permission('staffmem'));
     }
-}
+} }
 
 if (!$action) {
 	\App\Support\Html::stdhead($lang_staffbox['head_staff_pm']);

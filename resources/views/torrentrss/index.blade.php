@@ -1,1 +1,1 @@
-@php include resource_path('views/torrentrss/_torrentrss_legacy.php'); @endphp
+@include('torrentrss._torrentrss')

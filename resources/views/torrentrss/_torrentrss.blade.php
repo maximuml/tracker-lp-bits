@@ -28,9 +28,9 @@ if ($cacheData && nexus_env('APP_ENV') != 'local') {
     echo $cacheData;
     return;
 }
-function hex_esc($matches) {
+if (!function_exists('hex_esc')) { function hex_esc($matches) {
 	return sprintf("%02x", ord($matches[0]));
-}
+} }
 $dllink = false;
 
 $showrows = intval(\App\Support\SupportContext::getQuery('rows') ?? 0);
@@ -88,7 +88,7 @@ if ($paidFilter === '0') {
     $baseQuery->where('torrents.price', '>', 0);
 }
 
-function applyRssFilter($query, $tablename = "sources", $itemname = "source", $getname = "sou")
+if (!function_exists('applyRssFilter')) { function applyRssFilter($query, $tablename = "sources", $itemname = "source", $getname = "sou")
 {
     $items = \App\Support\SearchBox::itemListWithContext($tablename, 0);
     $ids = [];
@@ -100,7 +100,7 @@ function applyRssFilter($query, $tablename = "sources", $itemname = "source", $g
     if (!empty($ids)) {
         $query->whereIn($itemname, $ids);
     }
-}
+} }
 
 applyRssFilter($baseQuery, "categories", "category", "cat");
 applyRssFilter($baseQuery, "sources", "source", "sou");

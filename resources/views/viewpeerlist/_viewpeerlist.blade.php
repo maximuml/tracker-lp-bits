@@ -82,7 +82,7 @@ $seedBoxRep = \App\Support\SupportContext::getGlobal('seedBoxRep');
 
 if((isset($CURUSER)))
 {
-function dltable($name, $arr, $torrent, &$isSeedBoxCaseWhens)
+if (!function_exists('dltable')) { function dltable($name, $arr, $torrent, &$isSeedBoxCaseWhens)
 {
 $lang_viewpeerlist = (array) (\App\Support\SupportContext::getGlobal('lang_viewpeerlist') ?? []);
 $viewanonymous_class = \App\Support\SupportContext::getGlobal('viewanonymous_class');
@@ -172,7 +172,7 @@ $seedBoxRep = \App\Support\SupportContext::getGlobal('seedBoxRep');
 	}
 	$s .= "</table>\n";
 	return $s;
-}
+} }
     $downloaders = array();
     $seeders = array();
     $torrent = \App\Models\Torrent::query()->findOrFail($id, ['id', 'seeders', 'leechers']);
@@ -209,7 +209,7 @@ $seedBoxRep = \App\Support\SupportContext::getGlobal('seedBoxRep');
         do_log("[UPDATE_TORRENT_SEEDERS_LEECHERS], torrent: $id, original: " . $torrent->toJson() . ", update: " . json_encode($update));
     }
 
-	function leech_sort($a,$b) {
+	if (!function_exists('leech_sort')) { function leech_sort($a,$b) {
 		$x = $a["to_go"];
 		$y = $b["to_go"];
 		if ($x == $y)
@@ -217,8 +217,8 @@ $seedBoxRep = \App\Support\SupportContext::getGlobal('seedBoxRep');
 		if ($x < $y)
 			return -1;
 		return 1;
-	}
-	function seed_sort($a,$b) {
+	} }
+	if (!function_exists('seed_sort')) { function seed_sort($a,$b) {
 		$x = $a["uploaded"];
 		$y = $b["uploaded"];
 		if ($x == $y)
@@ -226,7 +226,7 @@ $seedBoxRep = \App\Support\SupportContext::getGlobal('seedBoxRep');
 		if ($x < $y)
 			return 1;
 		return -1;
-	}
+	} }
 	$row = \App\Models\Torrent::query()->findOrFail($id, ['id', 'owner', 'size', 'anonymous'])->toArray();
 	usort($seeders, "seed_sort");
 	usort($downloaders, "leech_sort");

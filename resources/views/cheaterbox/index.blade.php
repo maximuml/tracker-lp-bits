@@ -1,1 +1,1 @@
-@php include resource_path('views/cheaterbox/_cheaterbox_legacy.php'); @endphp
+@include('cheaterbox._cheaterbox')

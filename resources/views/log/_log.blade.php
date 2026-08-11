@@ -9,12 +9,12 @@ if (!\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::LOG))
 
 $q = htmlspecialchars(trim(\App\Support\SupportContext::getQuery('query') ?? ''));
 
-function permissiondeny(){
+if (!function_exists('permissiondeny')) { function permissiondeny(){
 $lang_log = (array) (\App\Support\SupportContext::getGlobal('lang_log') ?? []);
 	\App\Support\LegacyResponse::abort($lang_log['std_sorry'], $lang_log['std_permission_denied'], false);
-}
+} }
 
-function logmenu($selected = "dailylog"){
+if (!function_exists('logmenu')) { function logmenu($selected = "dailylog"){
 $lang_log = (array) (\App\Support\SupportContext::getGlobal('lang_log') ?? []);
 		\App\Support\Frame::mainFrameOpen();
 		print ("<div id=\"lognav\"><ul id=\"logmenu\" class=\"menu\">");
@@ -24,9 +24,9 @@ $lang_log = (array) (\App\Support\SupportContext::getGlobal('lang_log') ?? []);
 		print ("<li" . ($selected == "poll" ? " class=selected" : "") . "><a href=\"?action=poll\">".$lang_log['text_poll']."</a></li>");
 		print ("</ul></div>");
 		\App\Support\Frame::mainFrameClose();
-}
+} }
 
-function searchtable($title, $action, $opts = array()){
+if (!function_exists('searchtable')) { function searchtable($title, $action, $opts = array()){
 $lang_log = (array) (\App\Support\SupportContext::getGlobal('lang_log') ?? []);
 $q = \App\Support\SupportContext::getGlobal('q');
 		print("<table border=1 cellspacing=0 width=940 cellpadding=5>\n");
@@ -44,9 +44,9 @@ $q = \App\Support\SupportContext::getGlobal('q');
 		print("<input type=\"hidden\" name=\"action\" value='".$action."'>&nbsp;&nbsp;");
 		print("<input type=submit value=" . $lang_log['submit_search'] . "></form>\n");
 		print("</td></tr></table><br />\n");
-}
+} }
 
-function additem($title, $action){
+if (!function_exists('additem')) { function additem($title, $action){
 $lang_log = (array) (\App\Support\SupportContext::getGlobal('lang_log') ?? []);
 		print("<table border=1 cellspacing=0 width=940 cellpadding=5>\n");
 		print("<tr><td class=colhead align=left>".$title."</td></tr>\n");
@@ -56,9 +56,9 @@ $lang_log = (array) (\App\Support\SupportContext::getGlobal('lang_log') ?? []);
 		print("<input type=\"hidden\" name=\"do\" value=\"add\">");
 		print("<input type=submit value=" . $lang_log['submit_add'] . "></form>\n");
 		print("</td></tr></table><br />\n");
-}
+} }
 
-function edititem($title, $action, $id){
+if (!function_exists('edititem')) { function edititem($title, $action, $id){
 $lang_log = (array) (\App\Support\SupportContext::getGlobal('lang_log') ?? []);
 		$row = \App\Repositories\LogRepository::getGenericById($action, $id);
 		if ($row) {
@@ -72,7 +72,7 @@ $lang_log = (array) (\App\Support\SupportContext::getGlobal('lang_log') ?? []);
 		print("<input type=submit value=" . $lang_log['submit_okay'] . " style='height: 20px' /></form>\n");
 		print("</td></tr></table><br />\n");
 		}
-}
+} }
 
 $action = ((\App\Support\SupportContext::getPost('action') !== null)) ? htmlspecialchars(\App\Support\SupportContext::getPost('action')) : (((\App\Support\SupportContext::getQuery('action') !== null)) ? htmlspecialchars(\App\Support\SupportContext::getQuery('action')) : '');
 $allowed_actions = array("dailylog","chronicle","news","poll");
@@ -278,12 +278,12 @@ else {
   		print("<table border=1 cellspacing=0 width=940 cellpadding=5>\n");
 		//print("<tr><td class=colhead align=center>".$lang_log['text_previous_polls']."</td></tr>\n");
 
-    function srt($a,$b)
+    if (!function_exists('srt')) { function srt($a,$b)
     {
       if ($a[0] > $b[0]) return -1;
       if ($a[0] < $b[0]) return 1;
       return 0;
-    }
+    } }
 
   foreach ($polls as $poll)
   {

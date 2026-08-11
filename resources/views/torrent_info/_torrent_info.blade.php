@@ -16,7 +16,7 @@ if (!function_exists('is_indexed_array')) {
     }
 }
 
-function torrent_structure_builder($array, $parent = "")
+if (!function_exists('torrent_structure_builder')) { function torrent_structure_builder($array, $parent = "")
 {
     $ret = '';
     foreach ($array as $item => $value) {
@@ -32,7 +32,7 @@ function torrent_structure_builder($array, $parent = "")
         }
     }
     return $ret;
-}
+} }
 
 
 

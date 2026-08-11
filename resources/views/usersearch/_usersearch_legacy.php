@@ -321,7 +321,7 @@ if (count(\App\Support\SupportContext::allQuery()) > 0 && !\App\Support\SupportC
 	  	if (strpos($email,'*') === False && strpos($email,'?') === False
 	    		&& strpos($email,'%') === False)
 	    {
-      	if (!validemail($email))
+      	if (!\App\Support\Validators::isEmail($email))
       	{
 	        \App\Support\Html::stdMessage("Error", "Bad email.");
 	        \App\Support\Html::stdfoot();

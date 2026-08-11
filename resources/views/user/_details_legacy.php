@@ -26,7 +26,7 @@ $torrentcomments = \App\Models\Comment::query()->where('user', $user['id'])->cou
 //$forumposts = $arr3[0];
 $forumposts = \App\Models\Post::query()->where('userid', $user['id'])->count();
 
-	$arr = get_country_row($user['country']);
+	$arr = \App\Support\Country::rowWithContext($user['country']);
 	$country = "<img src=\"pic/flag/".$arr['flagpic']."\" alt=\"".$arr['name']."\" style='margin-left: 8pt' />";
 
 
@@ -42,7 +42,7 @@ $moviepicker = $user["picker"] == 'yes';
 
 print("<h1 style='margin:0px'>" . \App\Support\UserDisplay::username($user['id'], true,false) . $country."</h1>");
 if ($userInfo->valid_medals->isNotEmpty()) {
-    print build_medal_image($userInfo->{$medalType}, 120, $CURUSER['id'] == $user['id']);
+    print \App\Support\Medal::buildImages($userInfo->{$medalType}, 120, $CURUSER['id'] == $user['id']);
     $warnMedalJs = <<<JS
 jQuery('#save-user-medal-btn').on("click", function (e) {
     let form = jQuery(this).closest('form');
@@ -120,7 +120,7 @@ if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::VIEW_USER_CO
 	$iphistory = \App\Repositories\UserDetailRepository::getIplogCount($id);
 
 	if ($iphistory > 0)
-	\App\Support\Html::trSmall($lang_userdetails['row_ip_history'], $lang_userdetails['text_user_earlier_used']."<b><a href=\"iphistory.php?id=" . $user['id'] . "\">" . $iphistory. $lang_userdetails['text_different_ips'].add_s($iphistory, true)."</a></b>", 1);
+	\App\Support\Html::trSmall($lang_userdetails['row_ip_history'], $lang_userdetails['text_user_earlier_used']."<b><a href=\"iphistory.php?id=" . $user['id'] . "\">" . $iphistory. $lang_userdetails['text_different_ips'].\App\Support\Strings::addS($iphistory, true)."</a></b>", 1);
 }
 $seedBoxRep = new \App\Repositories\SeedBoxRepository();
 if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::VIEW_USER_CONFIDENTIAL_INFO) ||  $user["id"] == $CURUSER["id"])
@@ -167,7 +167,7 @@ if ($user["downloaded"] > 0 && $true_download > 0)
 {
 	$sr = floor($user["uploaded"] / $user["downloaded"] * 1000) / 1000;
 	$true_ratio = floor($true_upload / $true_download * 1000) / 1000;
-	$sr = "<tr><td class=\"embedded\"><strong>" . $lang_userdetails['row_share_ratio'] . "</strong>:  <font color=\"" . \App\Support\Ratio::color($sr) . "\">" . number_format($sr, 3) . "</font>（<strong>".$lang_userdetails['row_real_share_ratio']."</strong>：".number_format($true_ratio, 3)."）</td><td class=\"embedded\">&nbsp;&nbsp;" . get_ratio_img($sr) . "</td></tr>";
+	$sr = "<tr><td class=\"embedded\"><strong>" . $lang_userdetails['row_share_ratio'] . "</strong>:  <font color=\"" . \App\Support\Ratio::color($sr) . "\">" . number_format($sr, 3) . "</font>（<strong>".$lang_userdetails['row_real_share_ratio']."</strong>：".number_format($true_ratio, 3)."）</td><td class=\"embedded\">&nbsp;&nbsp;" . \App\Support\Ratio::image($sr) . "</td></tr>";
 
 }
 //end
@@ -180,7 +180,7 @@ $true_xfer = "<tr><td class=\"embedded\"><strong>" . $lang_userdetails['row_real
 if ($user["leechtime"] > 0)
 {
 	$slr = floor($user["seedtime"] / $user["leechtime"] * 1000) / 1000;
-	$slr = "<tr><td class=\"embedded\"><strong>" . $lang_userdetails['text_seeding_leeching_time_ratio'] . "</strong>:  <font color=\"" . \App\Support\Ratio::color($slr) . "\">" . number_format($slr, 3) . "</font></td><td class=\"embedded\">&nbsp;&nbsp;" . get_ratio_img($slr) . "</td></tr>";
+	$slr = "<tr><td class=\"embedded\"><strong>" . $lang_userdetails['text_seeding_leeching_time_ratio'] . "</strong>:  <font color=\"" . \App\Support\Ratio::color($slr) . "\">" . number_format($slr, 3) . "</font></td><td class=\"embedded\">&nbsp;&nbsp;" . \App\Support\Ratio::image($slr) . "</td></tr>";
 }
 
 $slt = "<tr><td class=\"embedded\"><strong>" . $lang_userdetails['text_seeding_time'] . "</strong>:  ". \App\Support\Format::prettyTimeWithLocale($user["seedtime"]) . "</td><td class=\"embedded\">&nbsp;&nbsp;<strong>" . $lang_userdetails['text_leeching_time'] . "</strong>:  " . \App\Support\Format::prettyTimeWithLocale($user["leechtime"]) . "</td><td class=\"embedded text-muted\">&nbsp;&nbsp;(" . nexus_trans('label.updated_at') . ": " . $user['seed_time_updated_at'] . ")</td></tr>";
@@ -193,9 +193,9 @@ if (($user['donated'] > 0 || $user['donated_cny'] > 0 )&& (\App\Auth\Permission:
 \App\Support\Html::trSmall($lang_userdetails['row_donated'], "$".htmlspecialchars($user['donated'])."&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;".htmlspecialchars($user['donated_cny']), 1);
 
 if ($user["avatar"])
-\App\Support\Html::trSmall($lang_userdetails['row_avatar'], return_avatar_image(htmlspecialchars(trim($user["avatar"]))), 1);
+\App\Support\Html::trSmall($lang_userdetails['row_avatar'], \App\Support\UserDisplay::avatarImageWithContext(htmlspecialchars(trim($user["avatar"]))), 1);
 
-$uclass = get_user_class_image($user["class"]);
+$uclass = \App\Support\UserClass::imagePath($user["class"]);
 $utitle = \App\Support\UserClass::name($user["class"],false,false,true);
 $uclassImg = "<img alt=\"".\App\Support\UserClass::name($user["class"],false,false,true)."\" title=\"".\App\Support\UserClass::name($user["class"],false,false,true)."\" src=\"".$uclass."\" /> ".($user['title']!=="" ? "&nbsp;".htmlspecialchars(trim($user["title"]))."" :  "");
 if ($user['class'] == UC_VIP && !empty($user['vip_until']) && strtotime($user['vip_until'])) {

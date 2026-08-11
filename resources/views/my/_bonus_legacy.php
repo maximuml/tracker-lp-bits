@@ -118,7 +118,7 @@ $lang_mybonus = (array) (\App\Support\SupportContext::getGlobal('lang_mybonus') 
     $bonus['description'] = $lang_mybonus['text_bonus_gift_note'];
     if ($basictax_bonus || $taxpercentage_bonus){
         $onehundredaftertax = 100 - $taxpercentage_bonus - $basictax_bonus;
-        $bonus['description'] .= "<br /><br />".$lang_mybonus['text_system_charges_receiver']."<b>".($basictax_bonus ? $basictax_bonus.$lang_mybonus['text_tax_bonus_point'].add_s($basictax_bonus).($taxpercentage_bonus ? $lang_mybonus['text_tax_plus'] : "") : "").($taxpercentage_bonus ? $taxpercentage_bonus.$lang_mybonus['text_percent_of_transfered_amount'] : "")."</b>".$lang_mybonus['text_as_tax'].$onehundredaftertax.$lang_mybonus['text_tax_example_note'];
+        $bonus['description'] .= "<br /><br />".$lang_mybonus['text_system_charges_receiver']."<b>".($basictax_bonus ? $basictax_bonus.$lang_mybonus['text_tax_bonus_point'].\App\Support\Strings::addS($basictax_bonus).($taxpercentage_bonus ? $lang_mybonus['text_tax_plus'] : "") : "").($taxpercentage_bonus ? $taxpercentage_bonus.$lang_mybonus['text_percent_of_transfered_amount'] : "")."</b>".$lang_mybonus['text_as_tax'].$onehundredaftertax.$lang_mybonus['text_tax_example_note'];
     }
     $results[] = $bonus;
 
@@ -457,7 +457,7 @@ print("</table><br />");
 print("<h1>".$lang_mybonus['text_get_by_seeding']."</h1>");
 print("<ul>");
 if ($perseeding_bonus > 0)
-	print("<li>".$perseeding_bonus.$lang_mybonus['text_point'].add_s($perseeding_bonus).$lang_mybonus['text_for_seeding_torrent'].$maxseeding_bonus.$lang_mybonus['text_torrent'].add_s($maxseeding_bonus).")</li>");
+	print("<li>".$perseeding_bonus.$lang_mybonus['text_point'].\App\Support\Strings::addS($perseeding_bonus).$lang_mybonus['text_for_seeding_torrent'].$maxseeding_bonus.$lang_mybonus['text_torrent'].\App\Support\Strings::addS($maxseeding_bonus).")</li>");
 print("<li>".$lang_mybonus['text_bonus_formula_one'].$tzero_bonus.$lang_mybonus['text_bonus_formula_two'].$nzero_bonus.$lang_mybonus['text_bonus_formula_wi'].\App\Support\Config\SiteConfig::current()->bonus->zeroBonusFactor().$lang_mybonus['text_bonus_formula_three'].$bzero_bonus.$lang_mybonus['text_bonus_formula_four'].$l_bonus.$lang_mybonus['text_bonus_formula_five']."</li>");
 $minSize = \App\Support\Config\SiteConfig::current()->bonus->minSize();
 if ($minSize > 0) {
@@ -474,7 +474,7 @@ $A = $seedBonusResult['A'];
 $bonusTableResult = \App\Support\Bonus::buildBonusTableForUser($CURUSER, $seedBonusResult, ['table_style' => 'width: 50%']);
 
 $percent = $seedBonusResult['seed_bonus'] * 100 / ($bzero_bonus + $perseeding_bonus * $maxseeding_bonus);
-print("<div align=\"center\">".$lang_mybonus['text_you_are_currently_getting'].round($seedBonusResult['seed_bonus'],3).$lang_mybonus['text_point'].add_s($seedBonusResult['seed_bonus']).$lang_mybonus['text_per_hour']." (A = ".round($A,1).")</div><table align=\"center\" border=\"0\" width=\"400\"><tr><td class=\"loadbarbg\" style='border: none; padding: 0px;'>");
+print("<div align=\"center\">".$lang_mybonus['text_you_are_currently_getting'].round($seedBonusResult['seed_bonus'],3).$lang_mybonus['text_point'].\App\Support\Strings::addS($seedBonusResult['seed_bonus']).$lang_mybonus['text_per_hour']." (A = ".round($A,1).")</div><table align=\"center\" border=\"0\" width=\"400\"><tr><td class=\"loadbarbg\" style='border: none; padding: 0px;'>");
 
 if ($percent <= 30) $loadpic = "loadbarred";
 elseif ($percent <= 60) $loadpic = "loadbaryellow";
@@ -512,26 +512,26 @@ print '<div style="display: flex;justify-content: center;margin-top: 20px;">'.$b
 print("<h1>".$lang_mybonus['text_other_things_get_bonus']."</h1>");
 print("<ul>");
 if ($uploadtorrent_bonus > 0)
-	print("<li>".$lang_mybonus['text_upload_torrent'].$uploadtorrent_bonus.$lang_mybonus['text_point'].add_s($uploadtorrent_bonus)."</li>");
+	print("<li>".$lang_mybonus['text_upload_torrent'].$uploadtorrent_bonus.$lang_mybonus['text_point'].\App\Support\Strings::addS($uploadtorrent_bonus)."</li>");
 
 if ($starttopic_bonus > 0)
-	print("<li>".$lang_mybonus['text_start_topic'].$starttopic_bonus.$lang_mybonus['text_point'].add_s($starttopic_bonus)."</li>");
+	print("<li>".$lang_mybonus['text_start_topic'].$starttopic_bonus.$lang_mybonus['text_point'].\App\Support\Strings::addS($starttopic_bonus)."</li>");
 if ($makepost_bonus > 0)
-	print("<li>".$lang_mybonus['text_make_post'].$makepost_bonus.$lang_mybonus['text_point'].add_s($makepost_bonus)."</li>");
+	print("<li>".$lang_mybonus['text_make_post'].$makepost_bonus.$lang_mybonus['text_point'].\App\Support\Strings::addS($makepost_bonus)."</li>");
 if ($addcomment_bonus > 0)
-	print("<li>".$lang_mybonus['text_add_comment'].$addcomment_bonus.$lang_mybonus['text_point'].add_s($addcomment_bonus)."</li>");
+	print("<li>".$lang_mybonus['text_add_comment'].$addcomment_bonus.$lang_mybonus['text_point'].\App\Support\Strings::addS($addcomment_bonus)."</li>");
 if ($pollvote_bonus > 0)
-	print("<li>".$lang_mybonus['text_poll_vote'].$pollvote_bonus.$lang_mybonus['text_point'].add_s($pollvote_bonus)."</li>");
+	print("<li>".$lang_mybonus['text_poll_vote'].$pollvote_bonus.$lang_mybonus['text_point'].\App\Support\Strings::addS($pollvote_bonus)."</li>");
 if ($offervote_bonus > 0)
-	print("<li>".$lang_mybonus['text_offer_vote'].$offervote_bonus.$lang_mybonus['text_point'].add_s($offervote_bonus)."</li>");
+	print("<li>".$lang_mybonus['text_offer_vote'].$offervote_bonus.$lang_mybonus['text_point'].\App\Support\Strings::addS($offervote_bonus)."</li>");
 if ($saythanks_bonus > 0)
-	print("<li>".$lang_mybonus['text_say_thanks'].$saythanks_bonus.$lang_mybonus['text_point'].add_s($saythanks_bonus)."</li>");
+	print("<li>".$lang_mybonus['text_say_thanks'].$saythanks_bonus.$lang_mybonus['text_point'].\App\Support\Strings::addS($saythanks_bonus)."</li>");
 if ($receivethanks_bonus > 0)
-	print("<li>".$lang_mybonus['text_receive_thanks'].$receivethanks_bonus.$lang_mybonus['text_point'].add_s($receivethanks_bonus)."</li>");
+	print("<li>".$lang_mybonus['text_receive_thanks'].$receivethanks_bonus.$lang_mybonus['text_point'].\App\Support\Strings::addS($receivethanks_bonus)."</li>");
 print($lang_mybonus['text_howto_get_karma_four']);
 if ($ratiolimit_bonus > 0)
 	print("<li>".$lang_mybonus['text_user_with_ratio_above'].$ratiolimit_bonus.$lang_mybonus['text_and_uploaded_amount_above'].$dlamountlimit_bonus.$lang_mybonus['text_cannot_exchange_uploading']."</li>");
-print($lang_mybonus['text_howto_get_karma_five'].$uploadtorrent_bonus.$lang_mybonus['text_point'].add_s($uploadtorrent_bonus).$lang_mybonus['text_howto_get_karma_six']);
+print($lang_mybonus['text_howto_get_karma_five'].$uploadtorrent_bonus.$lang_mybonus['text_point'].\App\Support\Strings::addS($uploadtorrent_bonus).$lang_mybonus['text_howto_get_karma_six']);
 ?>
 </td></tr></table>
 <?php

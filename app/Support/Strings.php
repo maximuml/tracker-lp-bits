@@ -56,6 +56,26 @@ final class Strings
     }
 
     /**
+     * Context-aware plural suffix helper. Mirrors legacy `add_s()`.
+     */
+    public static function addS(int|float $num, bool $es = false): string
+    {
+        $lang = SupportContext::getLangFunctions();
+
+        return self::pluralize($num, '', $es ? ($lang['text_es'] ?? '') : ($lang['text_s'] ?? ''));
+    }
+
+    /**
+     * Context-aware "is/are" helper. Mirrors legacy `is_or_are()`.
+     */
+    public static function isOrAre(int|float $num): string
+    {
+        $lang = SupportContext::getLangFunctions();
+
+        return self::pluralize($num, $lang['text_is'] ?? '', $lang['text_are'] ?? '');
+    }
+
+    /**
      * Generate a random code of length `$length` from the legacy
      * visually-unambiguous alphabet. Uses `rand()` — NOT
      * `random_int()` — to match the legacy contract exactly.

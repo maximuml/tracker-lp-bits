@@ -96,6 +96,14 @@ final class Locale
     }
 
     /**
+     * Context-aware wrapper for {@see folderForId()}.
+     */
+    public static function folderForIdWithContext(int|string $langId): string
+    {
+        return self::folderForId($langId, (string) SupportContext::getGlobal('deflang', 'en'));
+    }
+
+    /**
      * Build the relative language file path.
      *
      * Mirrors `get_langfile_path()`. Also mutates the legacy `$CURLANGDIR`
@@ -204,6 +212,14 @@ final class Locale
             ->where('site_lang_folder', $langFolder)
             ->where('site_lang', 1)
             ->value('id') ?? 6);
+    }
+
+    /**
+     * Context-aware wrapper for {@see guestId()}.
+     */
+    public static function guestIdWithContext(): int
+    {
+        return self::guestId((string) SupportContext::getGlobal('CURLANGDIR', ''));
     }
 
     /**

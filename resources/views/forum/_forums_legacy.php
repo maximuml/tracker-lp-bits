@@ -22,7 +22,7 @@ $today_date = \App\Support\SupportContext::getGlobal('today_date', '');
 		$Cache->cache_value('active_forum_user_count', $activeforumuser_num, 300);
 	}
 	if ($activeforumuser_num){
-		$forumusers = $lang_forums['text_there'].is_or_are($activeforumuser_num)."<b>".$activeforumuser_num."</b>".$lang_forums['text_online_user'].add_s($activeforumuser_num).$lang_forums['text_in_forum_now'];
+		$forumusers = $lang_forums['text_there'].\App\Support\Strings::isOrAre($activeforumuser_num)."<b>".$activeforumuser_num."</b>".$lang_forums['text_online_user'].\App\Support\Strings::addS($activeforumuser_num).$lang_forums['text_in_forum_now'];
 	}
 	else
 		$forumusers = $lang_forums['text_no_active_users'];
@@ -42,7 +42,7 @@ $today_date = \App\Support\SupportContext::getGlobal('today_date', '');
 		$todaypostcount = \App\Models\Post::query()->where('added', '>', date("Y-m-d"))->count();
 		$Cache->cache_value('today_'.$today_date.'_posts_count', $todaypostcount, 700);
 	}
-	print($lang_forums['text_our_members_have'] ."<b>".$postcount."</b>". $lang_forums['text_posts_in_topics']."<b>".$topiccount."</b>".$lang_forums['text_in_topics']."<b><font class=\"new\">".$todaypostcount."</font></b>".$lang_forums['text_new_post'].add_s($todaypostcount).$lang_forums['text_posts_today']."<br /><br />");
+	print($lang_forums['text_our_members_have'] ."<b>".$postcount."</b>". $lang_forums['text_posts_in_topics']."<b>".$topiccount."</b>".$lang_forums['text_in_topics']."<b><font class=\"new\">".$todaypostcount."</font></b>".$lang_forums['text_new_post'].\App\Support\Strings::addS($todaypostcount).$lang_forums['text_posts_today']."<br /><br />");
 	print($forumusers);
 ?>
 </td></tr></table>
@@ -91,7 +91,7 @@ $lang_forums = (array) (\App\Support\SupportContext::getGlobal('lang_forums') ??
 
 function highlight_topic($subject, $hlcolor=0)
 {
-	$colorname=get_hl_color($hlcolor);
+	$colorname=\App\Support\Palette::forumHighlight($hlcolor);
 	if ($colorname)
 		$subject = "<b><font color=\"".$colorname."\">".$subject."</font></b>";
 	return $subject;
@@ -319,7 +319,7 @@ if ($action == "editpost")
 	$topic = \App\Models\Topic::query()->where('id', $post->topicid)->first(['locked']);
 	$locked = $topic && ($topic->locked == 'yes');
 
-	$ismod = is_forum_moderator($postid, 'post');
+	$ismod = \App\Support\Forum::isModerator($postid, 'post');
 	if (($CURUSER["id"] != $post->userid || $locked) && !\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::POST_MANAGE) && !$ismod)
 		\App\Support\LegacyResponse::permissionDenied();
 
@@ -410,7 +410,7 @@ if ($action == "post")
 		$topicLocked = \App\Models\Topic::query()->where('id', $topicid)->value('locked');
 		if ($topicLocked === null)
 			die("Topic id n/a");
-		if ($topicLocked == 'yes' && !\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::POST_MANAGE) && !is_forum_moderator($topicid, 'topic'))
+		if ($topicLocked == 'yes' && !\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::POST_MANAGE) && !\App\Support\Forum::isModerator($topicid, 'topic'))
 			\App\Support\LegacyResponse::abort($lang_forums['std_error'], $lang_forums['std_topic_locked']);
 	}
 
@@ -419,7 +419,7 @@ if ($action == "post")
         $postid = $id;
         $topicInfo = \App\Models\Topic::query()->findOrFail($topicid);
         $postInfo = \App\Models\Post::query()->findOrFail($id);
-        if ($postInfo->userid != $CURUSER['id'] && !is_forum_moderator($postid, 'post') && !\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::POST_MANAGE)) {
+        if ($postInfo->userid != $CURUSER['id'] && !\App\Support\Forum::isModerator($postid, 'post') && !\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::POST_MANAGE)) {
             \App\Support\LegacyResponse::permissionDenied();
         }
 		if ($hassubject){
@@ -612,7 +612,7 @@ if ($action == "viewtopic")
 	$row = get_forum_row($forumid);
 	//------ Get forum name, moderators
 	$forumname = $row['name'];
-	$is_forummod = is_forum_moderator($forumid,'forum');
+	$is_forummod = \App\Support\Forum::isModerator($forumid,'forum');
 
 	if (\App\Support\UserDisplay::currentClass() < $row["minclassread"])
 		\App\Support\LegacyResponse::abort($lang_forums['std_error'], $lang_forums['std_unpermitted_viewing_topic']);
@@ -777,7 +777,7 @@ if ($action == "viewtopic")
 		$signature = ($CURUSER["signatures"] == "yes" ? $arr2["signature"] : "");
 		$avatar = ($CURUSER["avatars"] == "yes" ? htmlspecialchars($arr2["avatar"]) : "");
 
-		$uclass = get_user_class_image($arr2["class"]);
+		$uclass = \App\Support\UserClass::imagePath($arr2["class"]);
 		$by = \App\Support\UserDisplay::username($posterid,false,true,true,false,false,true);
 
 		if (!$avatar)
@@ -849,7 +849,7 @@ if ($action == "viewtopic")
 
 		$stats = "<br />"."&nbsp;&nbsp;".$lang_forums['text_posts']."$forumposts<br />"."&nbsp;&nbsp;".$lang_forums['text_ul']."$uploaded <br />"."&nbsp;&nbsp;".$lang_forums['text_dl']."$downloaded<br />"."&nbsp;&nbsp;".$lang_forums['text_ratio']."$ratio";
 		print("<tr><td class=\"rowfollow\" width=\"150\" valign=\"top\" align=\"left\" style='padding: 0px'>" .
-		return_avatar_image($avatar). "<br /><br /><br />&nbsp;&nbsp;<img alt=\"".\App\Support\UserClass::name($arr2["class"],false,false,true)."\" title=\"".\App\Support\UserClass::name($arr2["class"],false,false,true)."\" src=\"".$uclass."\" />".$stats."</td><td class=\"rowfollow\" valign=\"top\"><br />".$body."</td></tr>\n");
+		\App\Support\UserDisplay::avatarImageWithContext($avatar). "<br /><br /><br />&nbsp;&nbsp;<img alt=\"".\App\Support\UserClass::name($arr2["class"],false,false,true)."\" title=\"".\App\Support\UserClass::name($arr2["class"],false,false,true)."\" src=\"".$uclass."\" />".$stats."</td><td class=\"rowfollow\" valign=\"top\"><br />".$body."</td></tr>\n");
 		$secs = 900;
 		$dt = date("Y-m-d H:i:s", TIMENOW - $secs); // calculate date.
 		$online = $arr2['last_access'] > $dt;
@@ -962,7 +962,7 @@ if ($action == "viewtopic")
 		print($lang_forums['text_topic_locked_new_denied']);
 	else print($lang_forums['text_unpermitted_posting_here']);
 
-	print(key_shortcut($page,$pages-1));
+	print(\App\Support\Html::keyShortcutScript($page,$pages-1));
 	\App\Support\Html::stdfoot();
 	die;
 }
@@ -974,7 +974,7 @@ if ($action == "movetopic")
 	$forumid = intval(\App\Support\SupportContext::getPost("forumid") ?? 0);
 
 	$topicid = intval(\App\Support\SupportContext::getQuery("topicid") ?? 0);
-	$ismod = is_forum_moderator($topicid,'topic');
+	$ismod = \App\Support\Forum::isModerator($topicid,'topic');
 	if (!\App\Support\Validators::isId($forumid) || !\App\Support\Validators::isId($topicid) || (!\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::POST_MANAGE) && !$ismod))
 		\App\Support\LegacyResponse::permissionDenied();
 
@@ -1031,7 +1031,7 @@ if ($action == "deletetopic")
 		$forumid = $topic->forumid;
 		$userid = $topic->userid;
 	}
-	$ismod = is_forum_moderator($topicid,'topic');
+	$ismod = \App\Support\Forum::isModerator($topicid,'topic');
 	if (!\App\Support\Validators::isId($topicid) || (!\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::POST_MANAGE) && !$ismod))
 		\App\Support\LegacyResponse::permissionDenied();
 
@@ -1069,7 +1069,7 @@ if ($action == "deletepost")
 	$postid = intval(\App\Support\SupportContext::getQuery("postid") ?? 0);
 	$sure = intval(\App\Support\SupportContext::getQuery("sure") ?? 0);
 
-	$ismod = is_forum_moderator($postid, 'post');
+	$ismod = \App\Support\Forum::isModerator($postid, 'post');
 	if ((!\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::POST_MANAGE) && !$ismod) || !\App\Support\Validators::isId($postid))
 		\App\Support\LegacyResponse::permissionDenied();
 
@@ -1126,7 +1126,7 @@ if ($action == "deletepost")
 if ($action == "setlocked")
 {
 	$topicid = intval(\App\Support\SupportContext::getPost("topicid") ?? 0);
-	$ismod = is_forum_moderator($topicid,'topic');
+	$ismod = \App\Support\Forum::isModerator($topicid,'topic');
 	if (!$topicid || (!\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::POST_MANAGE) && !$ismod))
 		\App\Support\LegacyResponse::permissionDenied();
 
@@ -1140,11 +1140,11 @@ if ($action == "setlocked")
 if ($action == 'hltopic')
 {
 	$topicid = intval(\App\Support\SupportContext::getQuery("topicid") ?? 0);
-	$ismod = is_forum_moderator($topicid,'topic');
+	$ismod = \App\Support\Forum::isModerator($topicid,'topic');
 	if (!$topicid || (!\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::POST_MANAGE) && !$ismod))
 		\App\Support\LegacyResponse::permissionDenied();
 	$color = intval(\App\Support\SupportContext::getPost("color"));
-	if ($color==0 || get_hl_color($color))
+	if ($color==0 || \App\Support\Palette::forumHighlight($color))
 		\App\Models\Topic::query()->where('id', $topicid)->update(['hlcolor' => $color]);
 
 	$forumid = \App\Models\Topic::query()->where('id', $topicid)->value('forumid');
@@ -1160,7 +1160,7 @@ if ($action == 'hltopic')
 if ($action == "setsticky")
 {
 	$topicid = intval(\App\Support\SupportContext::getPost("topicid") ?? 0);
-	$ismod = is_forum_moderator($topicid,'topic');
+	$ismod = \App\Support\Forum::isModerator($topicid,'topic');
 	if (!$topicid || (!\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::POST_MANAGE) && !$ismod))
 		\App\Support\LegacyResponse::permissionDenied();
 
@@ -1188,7 +1188,7 @@ if ($action == "viewforum")
 		\App\Support\LegacyResponse::permissionDenied();
 
 	$forumname = $row['name'];
-	$forummoderators = get_forum_moderators($forumid,false);
+	$forummoderators = \App\Support\Forum::moderatorsWithContext($forumid,false);
 	$search = trim(is_scalar(\App\Support\SupportContext::getQuery("search") ?? '') ? (string) (\App\Support\SupportContext::getQuery("search") ?? '') : '');
 	$topicQuery = \App\Models\Topic::query()->where('forumid', $forumid);
 	if ($search){
@@ -1317,7 +1317,7 @@ if ($action == "viewforum")
 
 			//---- Get userID and date of last post
 
-			$arr = get_post_row($topicarr['lastpost']);
+			$arr = \App\Support\Forum::postRowWithContext($topicarr['lastpost']);
 			$lppostid = intval($arr["id"] ?? 0);
 			$lpuserid = intval($arr["userid"] ?? 0);
 			$lpusername = \App\Support\UserDisplay::username($lpuserid);
@@ -1334,7 +1334,7 @@ if ($action == "viewforum")
 				$onmouseover = "onmouseover=\"domTT_activate(this, event, 'content', document.getElementById('" . $lastpost_tooltip[$counter]['id'] . "'), 'trail', false,'lifetime', 5000,'styleClass','niceTitle','fadeMax', 87,'maxWidth', 400);\"";
 			}
 
-			$arr = get_post_row($topicarr['firstpost']);
+			$arr = \App\Support\Forum::postRowWithContext($topicarr['firstpost']);
 			$fpuserid = intval($arr["userid"] ?? 0);
 			$fpauthor = \App\Support\UserDisplay::username($arr["userid"]);
 
@@ -1613,7 +1613,7 @@ foreach ($overforums as $a)
 		$forumname = htmlspecialchars($forums_arr["name"]);
 		$forumdescription = htmlspecialchars($forums_arr["description"]);
 
-		$forummoderators = get_forum_moderators($forums_arr['id'],false);
+		$forummoderators = \App\Support\Forum::moderatorsWithContext($forums_arr['id'],false);
 		if (!$forummoderators)
 			$forummoderators = "<a href=\"contactstaff.php\"><i>".$lang_forums['text_apply_now']."</i></a>";
 
@@ -1632,7 +1632,7 @@ foreach ($overforums as $a)
 		{
 			$lastpostid = $arr['lastpost'];
 			// Get last post info
-			$post_arr = get_post_row($lastpostid);
+			$post_arr = \App\Support\Forum::postRowWithContext($lastpostid);
 			$lastposterid = $post_arr["userid"];
 			$lastpostdate = \App\Support\Time::format($post_arr["added"],true,false);
 			$lasttopicid = $arr['id'];

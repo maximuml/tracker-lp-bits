@@ -14,15 +14,15 @@ $catsperrow = (int)\App\Support\SearchBox::valueWithContext($brsectiontype, 'cat
 
 $catpadding = \App\Support\SearchBox::valueWithContext($brsectiontype, 'catpadding'); //padding space between categories in pixel
 
-$brcats = genrelist($brsectiontype);
+$brcats = \App\Support\Category::listByModeWithContext($brsectiontype);
 
 if ($showsubcat){
-if ($showsource) $sources = searchbox_item_list("sources", $brsectiontype);
-if ($showmedium) $media = searchbox_item_list("media", $brsectiontype);
-if ($showcodec) $codecs = searchbox_item_list("codecs", $brsectiontype);
-if ($showstandard) $standards = searchbox_item_list("standards", $brsectiontype);
-if ($showprocessing) $processings = searchbox_item_list("processings", $brsectiontype);
-if ($showaudiocodec) $audiocodecs = searchbox_item_list("audiocodecs", $brsectiontype);
+if ($showsource) $sources = \App\Support\SearchBox::itemListWithContext("sources", $brsectiontype);
+if ($showmedium) $media = \App\Support\SearchBox::itemListWithContext("media", $brsectiontype);
+if ($showcodec) $codecs = \App\Support\SearchBox::itemListWithContext("codecs", $brsectiontype);
+if ($showstandard) $standards = \App\Support\SearchBox::itemListWithContext("standards", $brsectiontype);
+if ($showprocessing) $processings = \App\Support\SearchBox::itemListWithContext("processings", $brsectiontype);
+if ($showaudiocodec) $audiocodecs = \App\Support\SearchBox::itemListWithContext("audiocodecs", $brsectiontype);
 }
 \App\Support\Html::stdhead($lang_getrss['head_rss_feeds']);
 $query = [];

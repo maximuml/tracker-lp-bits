@@ -55,14 +55,14 @@ $showaudiocodec = \App\Support\SearchBox::valueWithContext($sectiontype, 'showau
 $catsperrow = \App\Support\SearchBox::valueWithContext($sectiontype, 'catsperrow'); //show how many cats per line in search box
 $catpadding = \App\Support\SearchBox::valueWithContext($sectiontype, 'catpadding'); //padding space between categories in pixel
 
-$cats = genrelist($sectiontype);
+$cats = \App\Support\Category::listByModeWithContext($sectiontype);
 if ($showsubcat){
-	if ($showsource) $sources = searchbox_item_list("sources", $sectiontype);
-	if ($showmedium) $media = searchbox_item_list("media", $sectiontype);
-	if ($showcodec) $codecs = searchbox_item_list("codecs", $sectiontype);
-	if ($showstandard) $standards = searchbox_item_list("standards", $sectiontype);
-	if ($showprocessing) $processings = searchbox_item_list("processings", $sectiontype);
-	if ($showaudiocodec) $audiocodecs = searchbox_item_list("audiocodecs", $sectiontype);
+	if ($showsource) $sources = \App\Support\SearchBox::itemListWithContext("sources", $sectiontype);
+	if ($showmedium) $media = \App\Support\SearchBox::itemListWithContext("media", $sectiontype);
+	if ($showcodec) $codecs = \App\Support\SearchBox::itemListWithContext("codecs", $sectiontype);
+	if ($showstandard) $standards = \App\Support\SearchBox::itemListWithContext("standards", $sectiontype);
+	if ($showprocessing) $processings = \App\Support\SearchBox::itemListWithContext("processings", $sectiontype);
+	if ($showaudiocodec) $audiocodecs = \App\Support\SearchBox::itemListWithContext("audiocodecs", $sectiontype);
 }
 
 $searchstr_raw = is_scalar($searchParams["search"] ?? '') ? (string) ($searchParams["search"] ?? '') : '';

@@ -161,7 +161,7 @@ $seedBoxRep = \App\Support\SupportContext::getGlobal('seedBoxRep');
 		$max_lenght_of_torrent_name=($CURUSER['fontsize'] == 'large' ? 70 : 80);
 		if($count_dispname > $max_lenght_of_torrent_name)
 			$dispname=mb_substr($dispname, 0, $max_lenght_of_torrent_name,"UTF-8") . "..";
-		$ret .= "<tr" .  $sphighlight  . "><td class=\"rowfollow nowrap\" valign=\"middle\" style='padding: 0px'>".return_category_image($arr['category'], "torrents.php?allsec=1&amp;")."</td>\n" .
+		$ret .= "<tr" .  $sphighlight  . "><td class=\"rowfollow nowrap\" valign=\"middle\" style='padding: 0px'>".\App\Support\Category::imageTagWithContext($arr['category'], "torrents.php?allsec=1&amp;")."</td>\n" .
 		"<td class=\"rowfollow\" width=\"100%\" align=\"left\"><a href=\"".htmlspecialchars("details.php?id=".$arr['torrent']."&hit=1")."\" title=\"".$nametitle."\"><b>" . $dispname . "</b></a>". $banned_torrent . $sp_torrent . $hrImg . $approvalStatusIcon  . "</td>";
 		$ret .= sprintf('<td class="rowfollow nowrap" align="center">%s<br/>%s</td>', substr($arr['added'], 0, 10), substr($arr['added'], 11));
 		//size
@@ -360,7 +360,7 @@ if ($count > 0 && $query)
 
 $table = $pagertop . $torrentlist . $pagerbottom;
 $hasData = false;
-$summary = sprintf('<b>%s</b>%s', $count, $lang_getusertorrentlistajax['text_record'] . add_s ( $count ));
+$summary = sprintf('<b>%s</b>%s', $count, $lang_getusertorrentlistajax['text_record'] . \App\Support\Strings::addS ( $count ));
 if ((isset($total_size)) && $total_size){
     $hasData = true;
     $summary .= $lang_getusertorrentlistajax['text_total_size'] . \App\Support\Format::size($total_size);

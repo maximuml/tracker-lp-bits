@@ -43,7 +43,7 @@ elseif (((\App\Support\SupportContext::getPost('action') !== null)) && \App\Supp
 	}
 	if (!empty(\App\Support\SupportContext::getPost("moderator"))) {
 		$moderator = \App\Support\SupportContext::getPost("moderator");
-		set_forum_moderators($moderator,$id);
+		\App\Support\Forum::setModerators($moderator,$id);
 	}
 	else{
 		\Nexus\Database\NexusDB::table('forummods')->where('forumid', $id)->delete();
@@ -83,7 +83,7 @@ elseif (((\App\Support\SupportContext::getPost('action') !== null)) && \App\Supp
 	$Cache->delete_value('forums_list');
 	if (\App\Support\SupportContext::getPost("moderator")){
 		$moderator = \App\Support\SupportContext::getPost("moderator");
-		set_forum_moderators($moderator,$id);
+		\App\Support\Forum::setModerators($moderator,$id);
 	}
 	header("Location: forummanage.php");
 	return;
@@ -133,7 +133,7 @@ if (((\App\Support\SupportContext::getQuery('action') !== null)) && \App\Support
     </td>
   </tr>
 <?php
-		$username = get_forum_moderators($row['id'],true);
+		$username = \App\Support\Forum::moderatorsWithContext($row['id'],true);
 ?>
   <tr><td><b><?php echo $lang_forummanage['row_moderator']?></b></td><td><input name="moderator" type="text" style="width: 200px" maxlength="200" value="<?php echo $username?>">&nbsp;<?php echo $lang_forummanage['text_moderator_note']?></td></tr>
     <tr>
@@ -292,7 +292,7 @@ if ($forums->isEmpty()) {
     foreach ($forums as $forumRow) {
         $row = (array) $forumRow;
         $name = $row['of_name'];
-        $moderators = get_forum_moderators($row['id'],false);
+        $moderators = \App\Support\Forum::moderatorsWithContext($row['id'],false);
         if (!$moderators)
             $moderators = $lang_forummanage['text_not_available'];
         echo "<tr><td><a href=forums.php?action=viewforum&forumid=".$row["id"]."><b>".htmlspecialchars($row["name"])."</b></a><br />".htmlspecialchars($row["description"])."</td>";

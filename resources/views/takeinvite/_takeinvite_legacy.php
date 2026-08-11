@@ -46,7 +46,7 @@ if ($isPreRegisterEmailAndUsername) {
     if (empty($preRegisterUsername)) {
         bark(nexus_trans("invite.require_pre_register_username"));
     }
-    if (!validusername($preRegisterUsername)) {
+    if (!\App\Support\Validators::isUsername($preRegisterUsername)) {
         bark(nexus_trans("user.username_invalid", ["username" => $preRegisterUsername]));
     }
     $exists = \App\Models\User::query()->where('username', $preRegisterUsername)->exists();

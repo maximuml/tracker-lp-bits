@@ -261,7 +261,7 @@ if ($action){
 
 				if (\App\Support\Validators::isId($sitelanguage))
 				{
-					$lang_folder = validlang($sitelanguage);
+					$lang_folder = \App\Support\Locale::folderForIdWithContext($sitelanguage);
 					if(get_langfolder_cookie() != $lang_folder)
 					{
 						set_langfolder_cookie($lang_folder);
@@ -448,7 +448,7 @@ if ($showshoutbox_main == "yes") //system side setting for shoutbox
 					\App\Support\LegacyResponse::abort($lang_usercp['std_error'], $lang_usercp['std_enter_old_password'].goback(), 0);
 				}
                 //验证旧密码
-                $challenge = \Nexus\Database\NexusDB::cache_get(get_challenge_key($userInfo->username));
+                $challenge = \Nexus\Database\NexusDB::cache_get(\App\Support\Token::challengeKey($userInfo->username));
                 if (empty($challenge)) {
                     \App\Support\LegacyResponse::abort($lang_usercp['std_error'], "expired!".goback(), 0);
                 }
@@ -499,7 +499,7 @@ if ($showshoutbox_main == "yes") //system side setting for shoutbox
 
 				if ($disableemailchange != 'no' && $smtptype != 'none' && $email != $CURUSER["email"])
 				{
-					if (!validemail($email)){
+					if (!\App\Support\Validators::isEmail($email)){
 						\App\Support\LegacyResponse::abort($lang_usercp['std_error'], $lang_usercp['std_wrong_email_address_format'].goback("-2"), 0);
 						die;
 					}
@@ -564,7 +564,7 @@ EOD;
 				if ($privacyupdated == 1)
 				$to .= "&privacy=1";
 				clear_user_cache($CURUSER["id"]);
-                \Nexus\Database\NexusDB::cache_del(get_challenge_key($userInfo->username));
+                \Nexus\Database\NexusDB::cache_del(\App\Support\Token::challengeKey($userInfo->username));
 				header("Location: $to");
 			}
 			\App\Support\Html::stdhead($lang_usercp['head_control_panel'].$lang_usercp['head_security_settings']);
@@ -930,7 +930,7 @@ foreach ($topicRows as $topicarr)
 	$replies = max(0, $posts - 1);
 
 	/// GETTING USERID AND DATE OF LAST POST ///
-	$arr = get_post_row($topicarr->lastpost);
+	$arr = \App\Support\Forum::postRowWithContext($topicarr->lastpost);
 	$postid = intval($arr["id"] ?? 0);
 	$userid = intval($arr["userid"] ?? 0);
 	$added = \App\Support\Time::format($arr['added'],true,false);

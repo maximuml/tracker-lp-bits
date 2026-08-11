@@ -4,6 +4,61 @@ error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 if (!defined('PM_DELETED')) { define('PM_DELETED',0); } // Message was deleted
 if (!defined('PM_INBOX')) { define('PM_INBOX',1); } // Message located in Inbox for reciever
 if (!defined('PM_SENTBOX')) { define('PM_SENTBOX',-1); } // GET value for sent box
+
+//----- FUNCTIONS ------
+if (!function_exists('insertJumpTo')) { function insertJumpTo($selected = 0)
+{
+$lang_messages = (array) (\App\Support\SupportContext::getGlobal('lang_messages') ?? []);
+$CURUSER = \App\Support\SupportContext::getUser() ?? [];
+$pmBoxes = \Nexus\Database\NexusDB::table('pmboxes')->where('userid', $CURUSER['id'])->orderBy('boxnumber')->get(['boxnumber','name']);
+$place = \App\Support\SupportContext::getQuery('place') ?? '';
+?>
+<form action="messages.php" method="get">
+<input type="hidden" name="action" value="viewmailbox"><?php echo $lang_messages['text_search'] ?>&nbsp;&nbsp;<input id="searchinput" name="keyword" type="text" value="<?php echo htmlspecialchars(\App\Support\SupportContext::getQuery('keyword') ?? '')?>" style="width: 200px"/>
+<?php echo $lang_messages['text_in'] ?>&nbsp;<select name="place">
+<option value="both" <?php echo ($place == 'both' ? " selected" : "")?>><?php echo $lang_messages['select_both'] ?></option>
+<option value="title" <?php echo ($place == 'title' ? " selected" : "")?>><?php echo $lang_messages['select_title'] ?></option>
+<option value="body" <?php echo ($place == 'body' ? " selected" : "")?>><?php echo $lang_messages['select_body'] ?></option>
+</select>
+<?php echo $lang_messages['text_jump_to'] ?><select name="box">
+<option value="1" <?php echo ($selected == PM_INBOX ? " selected" : "")?>><?php echo $lang_messages['select_inbox'] ?></option>
+<option value="-1" <?php echo ($selected == PM_SENTBOX ? " selected" : "")?>><?php echo $lang_messages['select_sentbox'] ?></option>
+<?php
+foreach ($pmBoxes as $row)
+{
+$row = (array) $row;
+if ($row['boxnumber'] == $selected)
+{
+echo("<option value=\"" . $row['boxnumber'] . "\" selected>" . $row['name'] . "</option>\n");
+}
+else
+{
+echo("<option value=\"" . $row['boxnumber'] . "\">" . $row['name'] . "</option>\n");
+}
+}
+?>
+</select> <input class=btn type="submit" value=<?php echo $lang_messages['submit_go'] ?>></form>
+<?php
+} }
+if (!function_exists('messagemenu')) { function messagemenu ($selected = 1) {
+$lang_messages = (array) (\App\Support\SupportContext::getGlobal('lang_messages') ?? []);
+$BASEURL = \App\Support\SupportContext::getGlobal('BASEURL');
+$CURUSER = \App\Support\SupportContext::getUser() ?? [];
+	\App\Support\Frame::mainFrameOpen();
+	print ("<div id=\"pmboxnav\"><ul id=\"pmboxmenu\" class=\"menu\">");
+	print ("<li" . ($selected == 1 ? " class=selected" : "") . "><a href=\"" . get_protocol_prefix() . $BASEURL . "/messages.php\" >".$lang_messages['text_inbox']."</a></li>");
+	print ("<li" . ($selected == -1 ? " class=selected" : "") . "><a href=\"" . get_protocol_prefix() . $BASEURL . "/messages.php?action=viewmailbox&box=-1\">".$lang_messages['text_sentbox']."</a></li>");
+$pmBoxes = \Nexus\Database\NexusDB::table('pmboxes')->where('userid', $CURUSER['id'])->orderBy('boxnumber')->get(['boxnumber','name']);
+if ($pmBoxes->count())
+    foreach ($pmBoxes as $row)
+    {
+    $row = (array) $row;
+    print ("<li" . ($selected == $row['boxnumber'] ? " class=selected" : "") . "><a href=\"" . get_protocol_prefix() . $BASEURL . "/messages.php?action=viewmailbox&box=".$row['boxnumber']."\">".$row['name']."</a></li>");
+    }
+	print ("</ul></div>");
+	\App\Support\Frame::mainFrameClose();
+} }
+
 // Determine action
 $action = \App\Support\SupportContext::getQuery('action') ?? '';
 if (!$action)
@@ -655,58 +710,3 @@ header("Location: messages.php?action=viewmailbox&id=" . $message['location']);
 exit();
 }
 }
-
-//----- FUNCTIONS ------
-if (!function_exists('insertJumpTo')) { function insertJumpTo($selected = 0)
-{
-$lang_messages = (array) (\App\Support\SupportContext::getGlobal('lang_messages') ?? []);
-$CURUSER = \App\Support\SupportContext::getUser() ?? [];
-$pmBoxes = \Nexus\Database\NexusDB::table('pmboxes')->where('userid', $CURUSER['id'])->orderBy('boxnumber')->get(['boxnumber','name']);
-$place = \App\Support\SupportContext::getQuery('place') ?? '';
-?>
-<form action="messages.php" method="get">
-<input type="hidden" name="action" value="viewmailbox"><?php echo $lang_messages['text_search'] ?>&nbsp;&nbsp;<input id="searchinput" name="keyword" type="text" value="<?php echo htmlspecialchars(\App\Support\SupportContext::getQuery('keyword') ?? '')?>" style="width: 200px"/>
-<?php echo $lang_messages['text_in'] ?>&nbsp;<select name="place">
-<option value="both" <?php echo ($place == 'both' ? " selected" : "")?>><?php echo $lang_messages['select_both'] ?></option>
-<option value="title" <?php echo ($place == 'title' ? " selected" : "")?>><?php echo $lang_messages['select_title'] ?></option>
-<option value="body" <?php echo ($place == 'body' ? " selected" : "")?>><?php echo $lang_messages['select_body'] ?></option>
-</select>
-<?php echo $lang_messages['text_jump_to'] ?><select name="box">
-<option value="1" <?php echo ($selected == PM_INBOX ? " selected" : "")?>><?php echo $lang_messages['select_inbox'] ?></option>
-<option value="-1" <?php echo ($selected == PM_SENTBOX ? " selected" : "")?>><?php echo $lang_messages['select_sentbox'] ?></option>
-<?php
-foreach ($pmBoxes as $row)
-{
-$row = (array) $row;
-if ($row['boxnumber'] == $selected)
-{
-echo("<option value=\"" . $row['boxnumber'] . "\" selected>" . $row['name'] . "</option>\n");
-}
-else
-{
-echo("<option value=\"" . $row['boxnumber'] . "\">" . $row['name'] . "</option>\n");
-}
-}
-?>
-</select> <input class=btn type="submit" value=<?php echo $lang_messages['submit_go'] ?>></form>
-<?php
-} }
-if (!function_exists('messagemenu')) { function messagemenu ($selected = 1) {
-$lang_messages = (array) (\App\Support\SupportContext::getGlobal('lang_messages') ?? []);
-$BASEURL = \App\Support\SupportContext::getGlobal('BASEURL');
-$CURUSER = \App\Support\SupportContext::getUser() ?? [];
-	\App\Support\Frame::mainFrameOpen();
-	print ("<div id=\"pmboxnav\"><ul id=\"pmboxmenu\" class=\"menu\">");
-	print ("<li" . ($selected == 1 ? " class=selected" : "") . "><a href=\"" . get_protocol_prefix() . $BASEURL . "/messages.php\" >".$lang_messages['text_inbox']."</a></li>");
-	print ("<li" . ($selected == -1 ? " class=selected" : "") . "><a href=\"" . get_protocol_prefix() . $BASEURL . "/messages.php?action=viewmailbox&box=-1\">".$lang_messages['text_sentbox']."</a></li>");
-$pmBoxes = \Nexus\Database\NexusDB::table('pmboxes')->where('userid', $CURUSER['id'])->orderBy('boxnumber')->get(['boxnumber','name']);
-if ($pmBoxes->count())
-    foreach ($pmBoxes as $row)
-    {
-    $row = (array) $row;
-    print ("<li" . ($selected == $row['boxnumber'] ? " class=selected" : "") . "><a href=\"" . get_protocol_prefix() . $BASEURL . "/messages.php?action=viewmailbox&box=".$row['boxnumber']."\">".$row['name']."</a></li>");
-    }
-	print ("</ul></div>");
-	\App\Support\Frame::mainFrameClose();
-} }
-?>

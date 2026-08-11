@@ -26,51 +26,51 @@ $email = safe_email($email);
 $preRegisterUsername = \App\Support\SupportContext::getPost('pre_register_username') ?? '';
 $isPreRegisterEmailAndUsername = \App\Support\Config\SiteConfig::current()->system->isInvitePreEmailAndUsername();
 if (strlen($preRegisterUsername) > 12)
-	bark($lang_takeinvite['std_username_too_long']);
+	\App\Support\LegacyResponse::abort($lang_takeinvite['head_invitation_failed'], $lang_takeinvite['std_username_too_long']);
 if (!$email)
-    bark($lang_takeinvite['std_must_enter_email']);
+    \App\Support\LegacyResponse::abort($lang_takeinvite['head_invitation_failed'], $lang_takeinvite['std_must_enter_email']);
 if (!check_email($email))
-	bark($lang_takeinvite['std_invalid_email_address']);
+	\App\Support\LegacyResponse::abort($lang_takeinvite['head_invitation_failed'], $lang_takeinvite['std_invalid_email_address']);
 
 $body = str_replace("<br />", "<br />", nl2br(trim(strip_tags(\App\Support\SupportContext::getPost("body")))));
 if(!$body)
-	bark($lang_takeinvite['std_must_enter_personal_message']);
+	\App\Support\LegacyResponse::abort($lang_takeinvite['head_invitation_failed'], $lang_takeinvite['std_must_enter_personal_message']);
 
 if ($isPreRegisterEmailAndUsername) {
     if (empty($preRegisterUsername)) {
-        bark(nexus_trans("invite.require_pre_register_username"));
+        \App\Support\LegacyResponse::abort($lang_takeinvite['head_invitation_failed'], nexus_trans("invite.require_pre_register_username"));
     }
     if (!\App\Support\Validators::isUsername($preRegisterUsername)) {
-        bark(nexus_trans("user.username_invalid", ["username" => $preRegisterUsername]));
+        \App\Support\LegacyResponse::abort($lang_takeinvite['head_invitation_failed'], nexus_trans("user.username_invalid", ["username" => $preRegisterUsername]));
     }
     $exists = \App\Models\User::query()->where('username', $preRegisterUsername)->exists();
     if ($exists) {
-        bark(nexus_trans("user.username_already_exists", ["username" => $preRegisterUsername]));
+        \App\Support\LegacyResponse::abort($lang_takeinvite['head_invitation_failed'], nexus_trans("user.username_already_exists", ["username" => $preRegisterUsername]));
     }
 }
 
 
 // check if email addy is already in use
 if (\App\Models\User::query()->where('email', $email)->count() > 0)
-  bark($lang_takeinvite['std_email_address'].htmlspecialchars($email).$lang_takeinvite['std_is_in_use']);
+  \App\Support\LegacyResponse::abort($lang_takeinvite['head_invitation_failed'], $lang_takeinvite['std_email_address'].htmlspecialchars($email).$lang_takeinvite['std_is_in_use']);
 if (\App\Models\Invite::query()->where('invitee', $email)->count() > 0)
-  bark($lang_takeinvite['std_invitation_already_sent_to'].htmlspecialchars($email).$lang_takeinvite['std_await_user_registeration']);
+  \App\Support\LegacyResponse::abort($lang_takeinvite['head_invitation_failed'], $lang_takeinvite['std_invitation_already_sent_to'].htmlspecialchars($email).$lang_takeinvite['std_await_user_registeration']);
 
 if (empty(\App\Support\SupportContext::getPost('hash'))) {
-    bark($lang_takeinvite['std_must_select_invite']);
+    \App\Support\LegacyResponse::abort($lang_takeinvite['head_invitation_failed'], $lang_takeinvite['std_must_select_invite']);
 }
 if (\App\Support\SupportContext::getPost('hash') == 'permanent') {
     $hash  = md5(mt_rand(1,10000).$CURUSER['username'].TIMENOW.$CURUSER['passhash']);
 } else {
     $hashRecord = \App\Models\Invite::query()->where('inviter', $CURUSER['id'])->where('hash', \App\Support\SupportContext::getPost('hash'))->first();
     if (!$hashRecord) {
-        bark($lang_takeinvite['hash_not_exists']);
+        \App\Support\LegacyResponse::abort($lang_takeinvite['head_invitation_failed'], $lang_takeinvite['hash_not_exists']);
     }
     if ($hashRecord->invitee != '') {
-        bark('hash '.$lang_takeinvite['std_is_in_use']);
+        \App\Support\LegacyResponse::abort($lang_takeinvite['head_invitation_failed'], 'hash '.$lang_takeinvite['std_is_in_use']);
     }
     if ($hashRecord->expired_at->lt(now())) {
-        bark($lang_takeinvite['hash_expired']);
+        \App\Support\LegacyResponse::abort($lang_takeinvite['head_invitation_failed'], $lang_takeinvite['hash_expired']);
     }
     $hash = \App\Support\SupportContext::getPost('hash');
 }

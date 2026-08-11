@@ -86,7 +86,10 @@ $CURUSER = \App\Support\SupportContext::getUser() ?? [];
     public static function clearShoutBox($params)
     {
 $CURUSER = \App\Support\SupportContext::getUser() ?? [];
-        \App\Auth\Permission::assertCan(\App\Enums\Permission\PermissionEnum::SB_MANAGE);
+        $user = \App\Models\User::query()->find($CURUSER['id'] ?? 0);
+        if (! $user || ! \App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::SB_MANAGE, $user)) {
+            throw new \RuntimeException('No permission');
+        }
         \Nexus\Database\NexusDB::table('shoutbox')->delete();
         \Nexus\Database\NexusDB::table('shoutbox_reactions')->delete();
         return true;
@@ -211,15 +214,26 @@ $CURUSER = \App\Support\SupportContext::getUser() ?? [];
     public static function saveUserMedal($params)
     {
 $CURUSER = \App\Support\SupportContext::getUser() ?? [];
+        if (is_string($params)) {
+            $params = json_decode($params, true);
+        }
+        if (!is_array($params)) {
+            throw new \InvalidArgumentException('Invalid params');
+        }
         $data = [];
         foreach ($params as $param) {
+            if (!is_array($param) || !isset($param['name'], $param['value'])) {
+                continue;
+            }
             $fieldAndId = explode('_', $param['name']);
+            if (count($fieldAndId) < 2) {
+                continue;
+            }
             $field = $fieldAndId[0];
             $id = $fieldAndId[1];
             $value = $param['value'];
             $data[$id][$field] = $value;
         }
-    //    dd($params, $data);
         $rep = new \App\Repositories\MedalRepository();
         return $rep->saveUserMedal($CURUSER['id'], $data);
     }

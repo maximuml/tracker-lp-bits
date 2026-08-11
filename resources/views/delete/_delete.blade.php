@@ -7,7 +7,7 @@ error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
 $id = \App\Support\SupportContext::getRequestInput('id');
 if ($id === null)
-	bark($lang_delete['std_missing_form_date']);
+	\App\Support\LegacyResponse::abort($lang_delete['std_delete_failed'], $lang_delete['std_missing_form_date']);
 
 $id = intval($id ?? 0);
 if (!$id)
@@ -18,12 +18,12 @@ if (!$torrent)
 $row = $torrent->toArray();
 
 if ($CURUSER["id"] != $row["owner"] && !\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::TORRENT_MANAGE))
-	bark($lang_delete['std_not_owner']);
+	\App\Support\LegacyResponse::abort($lang_delete['std_delete_failed'], $lang_delete['std_not_owner']);
 
 $rt = intval(\App\Support\SupportContext::getPost("reasontype") ?? 0);
 
 if (!is_int($rt) || $rt < 1 || $rt > 5)
-	bark($lang_delete['std_invalid_reason']."$rt.");
+	\App\Support\LegacyResponse::abort($lang_delete['std_delete_failed'], $lang_delete['std_invalid_reason']."$rt.");
 
 $reason = \App\Support\SupportContext::getPost("reason") ?? [];
 
@@ -36,19 +36,19 @@ elseif ($rt == 3)
 elseif ($rt == 4)
 {
 	if (empty($reason[2]))
-		bark($lang_delete['std_describe_violated_rule']);
+		\App\Support\LegacyResponse::abort($lang_delete['std_delete_failed'], $lang_delete['std_describe_violated_rule']);
   $reasonstr = $SITENAME." rules broken: " . trim($reason[2]);
 }
 else
 {
 	if (empty($reason[3]))
-		bark($lang_delete['std_enter_reason']);
+		\App\Support\LegacyResponse::abort($lang_delete['std_delete_failed'], $lang_delete['std_enter_reason']);
   $reasonstr = trim($reason[3]);
 }
 $searchRep = new \App\Repositories\SearchRepository();
 $deleteEsResult = $searchRep->deleteTorrent($id);
 if ($deleteEsResult === false) {
-    bark('Delete es fail.');
+    \App\Support\LegacyResponse::abort($lang_delete['std_delete_failed'], 'Delete es fail.');
 }
 deletetorrent($id);
 

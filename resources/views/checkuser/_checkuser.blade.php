@@ -5,12 +5,12 @@ $id = intval(\App\Support\SupportContext::getQuery("id") ?? 0);
 
 
 $userObj = \App\Models\User::query()->where('status', 'pending')->where('id', $id)->first();
-if (!$userObj) bark($lang_checkuser['std_no_user_id']);
+if (!$userObj) \App\Support\LegacyResponse::abort($lang_checkuser['std_error'], $lang_checkuser['std_no_user_id']);
 $user = $userObj->toArray();
 
 if (\App\Support\UserDisplay::currentClass() < UC_MODERATOR) {
 	if ($user['invited_by'] != $CURUSER['id'])
-		bark($lang_checkuser['std_no_permission']);
+		\App\Support\LegacyResponse::abort($lang_checkuser['std_error'], $lang_checkuser['std_no_permission']);
 }
 
 if ($user["gender"] == "Male") $gender = '<img class="male" src="pic/trans.gif" alt="Male" title="Male" style="margin-left: 4pt">';

@@ -1,13 +1,13 @@
 @php
 \App\Auth\Permission::assertCan(\App\Enums\Permission\PermissionEnum::ASK_RESEED);
 
-$reseedid = intval(\App\Support\SupportContext::getQuery("reseedid") ?? 0);
+$reseedid = intval(\App\Support\SupportContext::getQuery("reseedid") ?? \App\Support\SupportContext::getQuery("id") ?? 0);
 $torrent = \App\Models\Torrent::query()->find($reseedid);
 $row = $torrent === null ? null : $torrent->toArray();
 $seederCount = \App\Models\Peer::query()->where('torrent', $reseedid)->count();
 if ($seederCount > 0)
 	\App\Support\LegacyResponse::abort($lang_takereseed['std_error'], $lang_takereseed['std_torrent_not_dead']);
-elseif (strtotime($row['last_reseed']) > (TIMENOW - 900))
+elseif ($row !== null && strtotime($row['last_reseed'] ?? '') > (TIMENOW - 900))
 	\App\Support\LegacyResponse::abort($lang_takereseed['std_error'], $lang_takereseed['std_reseed_sent_recently']);
 else{
 $snatchedRows = \Nexus\Database\NexusDB::table('snatched')

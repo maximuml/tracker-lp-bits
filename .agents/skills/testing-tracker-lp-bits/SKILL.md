@@ -325,3 +325,41 @@ Branch `devin/phase7-5-6-helpers` contains `origin/php8` + PR #283 (Phase 5.2 ty
 - Browser file inputs are not reliably drivable; submit `/takeupload.php` and `/takeedit.php` via an authenticated curl/Python session and use the browser to verify the resulting pages.
 - `.git` is not mounted inside the `php` container, so `php -l` on changed files must be run from the host (`git diff origin/php8...HEAD -- '*.php' | xargs -P4 -n1 docker compose exec -T php php -l`).
 - `downloadnotice.php` may only appear for a normal user's first authenticated download; after that `download.php?id=<id>&letdown=1` returns the `.torrent` directly.
+
+## Testing PR #299 / Phase 11 converted view consolidation
+
+### Scope
+
+PR #299 converts the remaining `resources/views/**/_*_legacy.php` partials to `*.blade.php` and updates `UtilityController` (ajax) and `ShoutboxController` (SSE). All `take*`, staff, utility, and converted public pages should render without `Cannot redeclare` worker fatals or unescaped-HTML regressions.
+
+### What to verify
+
+- Static gates: `composer validate --strict`, `php -l` on changed PHP/Blade files, `php artisan view:cache`, PHPStan default/level5/level5.app/level6 clean.
+- Unit/feature suites: `phpunit --testsuite Unit` and `CriticalPathTest` with `-d memory_limit=1G`; restore `basic.BASEURL` to `localhost` and clear caches afterwards.
+- `php artisan meilisearch:stats` shows the expected document count; new uploads are searchable.
+- `/upload.php` renders with file/name/desc/category/taxonomy/Pick fields; `/takeupload.php` accepts a generated `.torrent` and 302s to `details.php?id=<id>&uploaded=1` (new) or `details.php?id=<id>&existed=1` (duplicate).
+- `/edit.php?id=<torrent>` loads with promotion, `pos_state`, and `pos_state_until` fields; `/takeedit.php` persists changes and redirects to `details.php?id=<id>&edited=1`.
+- `/torrent.php?id=<id>` alias renders the same content as `/details.php?id=<id>`.
+- `/torrents.php?search=<name>` and `/torrents.php?cat401=1&spstate=5` return expected results.
+- `/announce.php` and `/scrape.php` return valid bencode; 19-byte `info_hash`/`peer_id` return bencoded failure reasons.
+- `/shoutbox_sse.php` streams `text/event-stream` `event: ping` messages.
+- `/ajax.php` actions return JSON without PHP worker fatals; `clearShoutBox` should load the `User` model from `SupportContext` and pass it to `Permission::can` to avoid relying on Laravel's `Auth::user()` in legacy AJAX paths.
+- `/messages.php` (inbox) should render: `messagemenu()` and `insertJumpTo()` must be defined before they are called in `resources/views/messages/_messages.blade.php`.
+- `/delete.php?id=<torrent>`, `/takeinvite.php`, `/checkuser.php` no longer call a missing `bark()` helper; use `\App\Support\LegacyResponse::abort($title, $msg)` instead.
+- `/takeconfirm.php` loads `lang/en/lang_takeconfirm.php` which references `$SITENAME`/`$REPORTMAIL`; ensure `LegacyRequestMiddleware` sets these as local variables before requiring language files.
+- `/takereseed.php?id=<torrent>` falls back to `id` when `reseedid` is absent and guards against `null` torrent.
+- `/ajax.php?action=saveUserMedal` handles string-encoded `params` and validates each entry before indexing.
+
+### Test data / helpers
+
+- Generate a fresh `.torrent` with `bencodepy` and `announce=http://localhost/announce.php` for a clean upload test.
+- Use `xdotool` + `scrot` to drive the visible Chrome window and capture named screenshots without the huge HTML dumps from the `computer` screenshot tool:
+  ```bash
+  WID=$(xdotool search --onlyvisible --name 'NexusPHP')
+  xdotool windowactivate $WID
+  xdotool key ctrl+l
+  xdotool type --delay 10 'http://localhost/<page>.php'
+  xdotool key Return
+  sleep 3
+  scrot -u /home/ubuntu/screenshots/ss_<page>.png
+  ```

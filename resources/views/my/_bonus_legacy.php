@@ -541,7 +541,7 @@ print($lang_mybonus['text_howto_get_karma_five'].$uploadtorrent_bonus.$lang_mybo
 if ($action == "exchange") {
 	if (((\App\Support\SupportContext::getPost("userid") !== null)) || ((\App\Support\SupportContext::getPost("points") !== null)) || ((\App\Support\SupportContext::getPost("bonus") !== null)) || ((\App\Support\SupportContext::getPost("art") !== null)) || !((\App\Support\SupportContext::getPost('option') !== null)) || !(isset($allBonus[\App\Support\SupportContext::getPost('option')]))){
 		\App\Support\Log::writeWithContext("User " . $CURUSER["username"] . "," . $CURUSER["ip"] . " is trying to cheat at bonus system", 'mod');
-		die($lang_mybonus['text_cheat_alert']);
+		\App\Support\LegacyResponse::abort($lang_mybonus['text_error'], $lang_mybonus['text_cheat_alert'], true, false);
 	}
 	$option = intval(\App\Support\SupportContext::getPost("option") ?? 0);
 	$bonusarray = $allBonus[$option];
@@ -573,7 +573,7 @@ if ($action == "exchange") {
                 $ratio = 0;
             }
 			if ($ratiolimit_bonus > 0 && $ratio > $ratiolimit_bonus)
-				die($lang_mybonus['text_cheat_alert']);
+				\App\Support\LegacyResponse::abort($lang_mybonus['text_error'], $lang_mybonus['text_cheat_alert'], true, false);
 			else {
 			$upload = $CURUSER['uploaded'];
 			$up = $upload + $bonusarray['menge'];
@@ -613,7 +613,7 @@ if ($action == "exchange") {
 		//=== trade for invites
 		elseif($art == "invite") {
 			if(!\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::BUY_INVITE))
-				die(\App\Support\UserClass::name($buyinvite_class,false,false,true).$lang_mybonus['text_plus_only']);
+				\App\Support\LegacyResponse::abort($lang_mybonus['std_sorry'], \App\Support\UserClass::name($buyinvite_class,false,false,true).$lang_mybonus['text_plus_only'], false, false);
 			$invites = $CURUSER['invites'];
 			$inv = $invites+$bonusarray['menge'];
 //			$bonuscomment = date("Y-m-d") . " - " .$points. " Points for invites.\n " .htmlspecialchars($bonuscomment);
@@ -624,7 +624,7 @@ if ($action == "exchange") {
         //=== temporary invite
         elseif($art == "tmp_invite") {
             if(!\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::BUY_INVITE))
-                die(\App\Support\UserClass::name($buyinvite_class,false,false,true).$lang_mybonus['text_plus_only']);
+                \App\Support\LegacyResponse::abort($lang_mybonus['std_sorry'], \App\Support\UserClass::name($buyinvite_class,false,false,true).$lang_mybonus['text_plus_only'], false, false);
 //            $invites = $CURUSER['invites'];
 //            $inv = $invites+$bonusarray['menge'];
 //			$bonuscomment = date("Y-m-d") . " - " .$points. " Points for invites.\n " .htmlspecialchars($bonuscomment);
@@ -762,7 +762,7 @@ if ($action == "exchange") {
             \App\Support\LegacyResponse::redirect("" . get_protocol_prefix() . "$BASEURL/mybonus.php?do=cancel_hr");
 //        } elseif ($art == 'buy_medal') {
 //            if (empty(\App\Support\SupportContext::getPost('medal_id'))) {
-//                stderr("Error","Invalid Medal ID: " . (\App\Support\SupportContext::getPost('medal_id') ?? ''), false, false);
+
 //            }
 //            $bonusRep->consumeToBuyMedal($userid, \App\Support\SupportContext::getPost('medal_id'));
 //            nexus_redirect("" . get_protocol_prefix() . "$BASEURL/mybonus.php?do=buy_medal");

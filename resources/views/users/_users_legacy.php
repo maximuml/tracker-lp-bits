@@ -61,7 +61,6 @@ for ($i = 97; $i < 123; ++$i)
 {
 	$l = chr($i);
 	$L = chr($i - 32);
-	//stderr("",$class);
 	if ($l == $letter)
 		print("<font class=gray><b>$L</b></font>\n");
 	else

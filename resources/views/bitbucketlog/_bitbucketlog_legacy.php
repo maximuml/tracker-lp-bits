@@ -4,25 +4,25 @@ error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
 $__server_PHP_SELF = \App\Support\SupportContext::getServerValue('PHP_SELF');
 if (\App\Support\UserDisplay::currentClass() < UC_ADMINISTRATOR)
-stderr("Sorry", "Access denied.");
+\App\Support\LegacyResponse::abort("Sorry", "Access denied.");
 $bucketpath = "$bitbucket";
 if (\App\Support\UserDisplay::currentClass() >= UC_MODERATOR)
 {
 	 $delete = intval(\App\Support\SupportContext::getQuery("delete") ?? 0);
-	 if (is_valid_id($delete)) {
+	 if (\App\Support\Validators::isId($delete)) {
 		 $bitbucket = \Nexus\Database\NexusDB::table('bitbucket')->where('id', $delete)->first(['name', 'owner']);
 		 if ($bitbucket) {
 			 $a = (array) $bitbucket;
 			 if (\App\Support\UserDisplay::currentClass() >= UC_MODERATOR || $a["owner"] == $CURUSER["id"]) {
 				 \Nexus\Database\NexusDB::table('bitbucket')->where('id', $delete)->delete();
 				 if (!unlink("$bucketpath/{$a['name']}"))
-				 stderr("Warning", "Unable to unlink file: <b>{$a['name']}</b>. You should contact an administrator about this error.",false);
+				 \App\Support\LegacyResponse::abort("Warning", "Unable to unlink file: <b>{$a['name']}</b>. You should contact an administrator about this error.", false);
 				 			} } }
 }
-stdhead("BitBucket Log");
+\App\Support\Html::stdhead("BitBucket Log");
 $count = \Nexus\Database\NexusDB::table('bitbucket')->count();
 $perpage = 10;
-list($pagertop, $pagerbottom, , $offset, $rpp) = pager($perpage, $count, $__server_PHP_SELF . "?out=" . (\App\Support\SupportContext::getQuery("out") ?? '') . "&" );
+list($pagertop, $pagerbottom, , $offset, $rpp) = \App\Support\Pagination::pager($perpage, $count, $__server_PHP_SELF . "?out=" . (\App\Support\SupportContext::getQuery("out") ?? '') . "&");
 print("<h1>BitBucket Log</h1>\n");
 print("Total Images Stored: $count");
 echo $pagertop;
@@ -51,4 +51,4 @@ else {
 		}
 		echo
 		$pagerbottom;
-		stdfoot();
+		\App\Support\Html::stdfoot();

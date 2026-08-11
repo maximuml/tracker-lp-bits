@@ -39,10 +39,10 @@ if ($count) {
 else {
 	if (isset($searchstr)) {
 		print("<br />");
-		stdmsg($lang_torrents['std_search_results_for'] . $searchstr_ori . "\"",$lang_torrents['std_try_again']);
+		\App\Support\Html::stdMessage($lang_torrents['std_search_results_for'] . $searchstr_ori . "\"", $lang_torrents['std_try_again']);
 	}
 	else {
-		stdmsg($lang_torrents['std_nothing_found'],$lang_torrents['std_no_active_torrents']);
+		\App\Support\Html::stdMessage($lang_torrents['std_nothing_found'], $lang_torrents['std_no_active_torrents']);
 	}
 }
 if ($CURUSER){

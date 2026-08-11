@@ -64,7 +64,7 @@ final class TorrentTable
 	}
     $wait = 0;
 	if (\App\Support\UserDisplay::currentClass() < UC_VIP && $waitsystem == "yes") {
-		$ratio = get_ratio($user["id"], false);
+		$ratio = \App\Support\Ratio::forUserId($user["id"], false);
 		$gigs = $user["uploaded"] / (1024*1024*1024);
 		if($gigs > 10)
 		{
@@ -294,7 +294,7 @@ foreach ($rows as $row)
 
 	if ($row["seeders"]) {
 			$ratio = ($row["leechers"] ? ($row["seeders"] / $row["leechers"]) : 1);
-			$ratiocolor = get_slr_color($ratio);
+			$ratiocolor = \App\Support\Ratio::seedLeechColor($ratio);
 			print("<td class=\"rowfollow\" align=\"center\"><b><a href=\"details.php?id=".$id."&amp;hit=1&amp;dllist=1#seeders\">".($ratiocolor ? "<font color=\"" .
 			$ratiocolor . "\">" . number_format($row["seeders"]) . "</font>" : number_format($row["seeders"]))."</a></b></td>\n");
 	}

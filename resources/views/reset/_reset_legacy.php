@@ -5,7 +5,7 @@ error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 $__server_REQUEST_METHOD = \App\Support\SupportContext::getServerValue('REQUEST_METHOD');
 // Reset Lost Password ACTION
 if (\App\Support\UserDisplay::currentClass() < UC_ADMINISTRATOR)
-stderr("Error", "Permission denied, Administrator Only.");
+\App\Support\LegacyResponse::abort("Error", "Permission denied, Administrator Only.");
 
 if ($__server_REQUEST_METHOD == "POST")
 {
@@ -14,24 +14,24 @@ if ($__server_REQUEST_METHOD == "POST")
  $newpasswordagain = trim(\App\Support\SupportContext::getPost("newpasswordagain"));
 
  if (empty($username) || empty($newpassword) || empty($newpasswordagain))
-	stderr("Error","Don't leave any fields blank.");
+	\App\Support\LegacyResponse::abort("Error", "Don't leave any fields blank.");
 
  if ($newpassword != $newpasswordagain)
-	stderr("Error","The passwords didn't match! Must've typoed. Try again.");
+	\App\Support\LegacyResponse::abort("Error", "The passwords didn't match! Must've typoed. Try again.");
 
  if (strlen($newpassword) < 6)
-	stderr("Error","Sorry, password is too short (min is 6 chars)");
+	\App\Support\LegacyResponse::abort("Error", "Sorry, password is too short (min is 6 chars)");
 
    $user = \App\Models\User::query()->where('username', $username)->first();
 if (!$user) {
-    stderr("Error","Sorry, that username doesn't exist.");
+    \App\Support\LegacyResponse::abort("Error", "Sorry, that username doesn't exist.");
 }
 $arr = $user->toArray();
 if (\App\Support\UserDisplay::currentClass() <= $arr['class']) {
     $log = "Password Reset For $username by {$CURUSER['username']} denied: operator class => " . \App\Support\UserDisplay::currentClass() . " is not greater than target user => {$arr['class']}";
-    write_log($log);
+    \App\Support\Log::writeWithContext($log);
     do_log($log, 'alert');
-    stderr("Error","Sorry, you don't have enough permission to reset this user's password.");
+    \App\Support\LegacyResponse::abort("Error", "Sorry, you don't have enough permission to reset this user's password.");
 }
 
 $id = $arr['id'];
@@ -43,12 +43,12 @@ $id = $arr['id'];
     try {
         $userRep->resetPassword($id, $newpassword, $newpasswordagain);
     } catch (\Exception $e) {
-        stderr('Error', $e->getMessage());
+        \App\Support\LegacyResponse::abort('Error', $e->getMessage());
     }
-write_log("Password Reset For $username by {$CURUSER['username']}");
- stderr("Success", "The password of account <b>$username</b> is reset , please inform user of this change.",false);
+\App\Support\Log::writeWithContext("Password Reset For $username by {$CURUSER['username']}");
+ \App\Support\LegacyResponse::abort("Success", "The password of account <b>$username</b> is reset , please inform user of this change.", false);
 }
-stdhead("Reset User's Lost Password");
+\App\Support\Html::stdhead("Reset User's Lost Password");
 ?>
 <table border=1 cellspacing=0 cellpadding=5>
 <form method=post>
@@ -60,4 +60,4 @@ stdhead("Reset User's Lost Password");
 </form>
 </table>
 <?php
-stdfoot();
+\App\Support\Html::stdfoot();

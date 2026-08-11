@@ -370,7 +370,7 @@ class Install
         if ($this->runningInConsole()) {
             $this->currentStep = $step;
         } else {
-            nexus_redirect(getBaseUrl() . "?step=$step");
+            \App\Support\LegacyResponse::redirect(getBaseUrl() . "?step=$step");
             die(0);
         }
 

@@ -6,18 +6,18 @@ $userid =  $CURUSER['id'];
 $pagerParams = [];
 if (!empty(\App\Support\SupportContext::getQuery('userid'))) {
     if (!\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::VIEW_USER_HISTORY) && \App\Support\SupportContext::getQuery('userid') != $CURUSER['id']) {
-        permissiondenied($viewhistory_class);
+        \App\Support\LegacyResponse::permissionDenied($viewhistory_class);
     }
     $userid = \App\Support\SupportContext::getQuery('userid');
     $pagerParams['userid'] = $userid;
 }
 $userInfo = \App\Models\User::query()->find($userid, \App\Models\User::$commonFields);
 if (empty($userInfo)) {
-    stderr('Error', "User not exists.");
+    \App\Support\LegacyResponse::abort('Error', "User not exists.");
 }
 
 $pageTitle = $userInfo->username . ' - H&R';
-stdhead($pageTitle);
+\App\Support\Html::stdhead($pageTitle);
 print("<h1>$pageTitle</h1>");
 
 $status = \App\Support\SupportContext::getQuery('status') ?? \App\Models\HitAndRun::STATUS_INSPECTING;
@@ -41,13 +41,13 @@ $filterForm = <<<FORM
 </form>
 FORM;
 
-begin_main_frame("", true);
+\App\Support\Frame::mainFrameOpen("", true);
 
 print $filterForm;
 
 $baseQuery = \App\Models\HitAndRun::query()->where('uid', $userid)->where('status', $status);
 $rescount = (clone $baseQuery)->count();
-list($pagertop, $pagerbottom, $limit, $offset, $pageSize) = pager(50, $rescount, sprintf('?%s&', $queryString));
+list($pagertop, $pagerbottom, $limit, $offset, $pageSize) = \App\Support\Pagination::pager(50, $rescount, sprintf('?%s&', $queryString));
 print("<table width='100%' id='hr-table'>");
 print("<tr>
 				<td class='colhead' align='center'>{$lang_myhr['th_hr_id']}</td>
@@ -124,6 +124,6 @@ JS;
 
 print("</table>");
 print($pagerbottom);
-end_main_frame();
-stdfoot();
+\App\Support\Frame::mainFrameClose();
+\App\Support\Html::stdfoot();
 

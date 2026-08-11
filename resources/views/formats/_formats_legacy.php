@@ -1,6 +1,6 @@
 <?php
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
-stdhead("Downloaded Files");
+\App\Support\Html::stdhead("Downloaded Files");
 ?>
 <table class=main width=737 border=0 cellspacing=0 cellpadding=0><tr><td class=embedded>
 <h2>A Handy Guide to Using the Files You've Downloaded</h2>

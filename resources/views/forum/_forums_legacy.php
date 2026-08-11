@@ -99,19 +99,19 @@ function highlight_topic($subject, $hlcolor=0)
 
 function check_whether_exist($id, $place='forum'){
 $lang_forums = (array) (\App\Support\SupportContext::getGlobal('lang_forums') ?? []);
-	int_check($id,true);
+	\App\Support\LegacyResponse::assertId($id, true);
 	switch ($place){
 		case 'forum':
 		{
 			if (!\App\Models\Forum::query()->where('id', $id)->exists())
-				stderr($lang_forums['std_error'],$lang_forums['std_no_forum_id']);
+				\App\Support\LegacyResponse::abort($lang_forums['std_error'], $lang_forums['std_no_forum_id']);
 			break;
 		}
 		case 'topic':
 		{
 			$topic = \App\Models\Topic::query()->where('id', $id)->first(['forumid']);
 			if (!$topic)
-				stderr($lang_forums['std_error'],$lang_forums['std_bad_topic_id']);
+				\App\Support\LegacyResponse::abort($lang_forums['std_error'], $lang_forums['std_bad_topic_id']);
 			check_whether_exist($topic->forumid, 'forum');
 			break;
 		}
@@ -119,7 +119,7 @@ $lang_forums = (array) (\App\Support\SupportContext::getGlobal('lang_forums') ??
 		{
 			$post = \App\Models\Post::query()->where('id', $id)->first(['topicid']);
 			if (!$post)
-				stderr($lang_forums['std_error'],$lang_forums['std_no_post_id']);
+				\App\Support\LegacyResponse::abort($lang_forums['std_error'], $lang_forums['std_no_post_id']);
 			check_whether_exist($post->topicid, 'topic');
 			break;
 		}
@@ -200,7 +200,7 @@ $lang_forums = (array) (\App\Support\SupportContext::getGlobal('lang_forums') ??
 		{
 			$post = \App\Models\Post::query()->where('id', $id)->first(['topicid', 'body', 'userid']);
 			if (!$post)
-				stderr($lang_forums['std_error'], $lang_forums['std_no_post_id']);
+				\App\Support\LegacyResponse::abort($lang_forums['std_error'], $lang_forums['std_no_post_id']);
 			$topicid = $post->topicid;
 			$topic = \App\Models\Topic::query()->where('id', $topicid)->first(['subject']);
 			$topicname = $topic ? $topic->subject : '';
@@ -235,8 +235,8 @@ $lang_forums = (array) (\App\Support\SupportContext::getGlobal('lang_forums') ??
 	}
 	print("<input type=\"hidden\" name=\"id\" value=\"".$id."\" />");
 	print("<input type=\"hidden\" name=\"type\" value=\"".$type."\" />");
-	begin_compose($title, $type, $body, $hassubject, $subject);
-	end_compose();
+	\App\Support\Frame::composeBeginVoid($title, $type, $body, $hassubject, $subject);
+	\App\Support\Frame::composeEndVoid();
 	print("</form>");
 }
 // ------------- end: functions ------------------//
@@ -269,25 +269,25 @@ if ($action == "newtopic")
 {
 	$forumid = intval(\App\Support\SupportContext::getQuery("forumid") ?? 0);
 	check_whether_exist($forumid, 'forum');
-	stdhead($lang_forums['head_new_topic']);
-	begin_main_frame();
+	\App\Support\Html::stdhead($lang_forums['head_new_topic']);
+	\App\Support\Frame::mainFrameOpen();
 	insert_compose_frame($forumid,'new');
-	end_main_frame();
-	stdfoot();
+	\App\Support\Frame::mainFrameClose();
+	\App\Support\Html::stdfoot();
 	die;
 }
 if ($action == "quotepost")
 {
 	$postid = intval(\App\Support\SupportContext::getQuery("postid") ?? 0);
 	check_whether_exist($postid, 'post');
-    if (!can_view_post($CURUSER['id'], $postid)) {
-        permissiondenied();
+    if (!\App\Support\Forum::canViewPost($CURUSER['id'], $postid)) {
+        \App\Support\LegacyResponse::permissionDenied();
     }
-	stdhead($lang_forums['head_post_reply']);
-	begin_main_frame();
+	\App\Support\Html::stdhead($lang_forums['head_post_reply']);
+	\App\Support\Frame::mainFrameOpen();
 	insert_compose_frame($postid, 'quote');
-	end_main_frame();
-	stdfoot();
+	\App\Support\Frame::mainFrameClose();
+	\App\Support\Html::stdfoot();
 	die;
 }
 
@@ -297,11 +297,11 @@ if ($action == "reply")
 {
 	$topicid = intval(\App\Support\SupportContext::getQuery("topicid") ?? 0);
 	check_whether_exist($topicid, 'topic');
-	stdhead($lang_forums['head_post_reply']);
-	begin_main_frame();
+	\App\Support\Html::stdhead($lang_forums['head_post_reply']);
+	\App\Support\Frame::mainFrameOpen();
 	insert_compose_frame($topicid, 'reply');
-	end_main_frame();
-	stdfoot();
+	\App\Support\Frame::mainFrameClose();
+	\App\Support\Html::stdfoot();
 	die;
 }
 
@@ -314,20 +314,20 @@ if ($action == "editpost")
 
 	$post = \App\Models\Post::query()->where('id', $postid)->first(['userid', 'topicid']);
 	if (!$post)
-		stderr($lang_forums['std_error'], $lang_forums['std_no_post_id']);
+		\App\Support\LegacyResponse::abort($lang_forums['std_error'], $lang_forums['std_no_post_id']);
 
 	$topic = \App\Models\Topic::query()->where('id', $post->topicid)->first(['locked']);
 	$locked = $topic && ($topic->locked == 'yes');
 
 	$ismod = is_forum_moderator($postid, 'post');
 	if (($CURUSER["id"] != $post->userid || $locked) && !\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::POST_MANAGE) && !$ismod)
-		permissiondenied();
+		\App\Support\LegacyResponse::permissionDenied();
 
-	stdhead($lang_forums['text_edit_post']);
-	begin_main_frame();
+	\App\Support\Html::stdhead($lang_forums['text_edit_post']);
+	\App\Support\Frame::mainFrameOpen();
 	insert_compose_frame($postid, 'edit');
-	end_main_frame();
-	stdfoot();
+	\App\Support\Frame::mainFrameClose();
+	\App\Support\Html::stdfoot();
 	die;
 }
 
@@ -336,7 +336,7 @@ if ($action == "post")
 {
 	if ($CURUSER["forumpost"] == 'no')
 	{
-		stderr($lang_forums['std_sorry'], $lang_forums['std_unauthorized_to_post'],false);
+		\App\Support\LegacyResponse::abort($lang_forums['std_sorry'], $lang_forums['std_unauthorized_to_post'], false);
 		die;
 	}
 	$id = \App\Support\SupportContext::getPost("id");
@@ -383,9 +383,9 @@ if ($action == "post")
 	if ($hassubject){
 		$subject = trim($subject);
 		if (!$subject)
-			stderr($lang_forums['std_error'], $lang_forums['std_must_enter_subject']);
+			\App\Support\LegacyResponse::abort($lang_forums['std_error'], $lang_forums['std_must_enter_subject']);
 		if (strlen($subject) > $maxsubjectlength)
-			stderr($lang_forums['std_error'], $lang_forums['std_subject_limited']);
+			\App\Support\LegacyResponse::abort($lang_forums['std_error'], $lang_forums['std_subject_limited']);
 	}
 
 	//------ Make sure sure user has write access in forum
@@ -396,10 +396,10 @@ if ($action == "post")
         || \App\Support\UserDisplay::currentClass() < $arr["minclasswrite"]
         || ($type =='new' && \App\Support\UserDisplay::currentClass() < $arr["minclasscreate"])
     ) {
-        permissiondenied();
+        \App\Support\LegacyResponse::permissionDenied();
     }
 	if ($body == "")
-		stderr($lang_forums['std_error'], $lang_forums['std_no_body_text']);
+		\App\Support\LegacyResponse::abort($lang_forums['std_error'], $lang_forums['std_no_body_text']);
 
 	$userid = intval($CURUSER["id"] ?? 0);
 	$date = date("Y-m-d H:i:s");
@@ -411,7 +411,7 @@ if ($action == "post")
 		if ($topicLocked === null)
 			die("Topic id n/a");
 		if ($topicLocked == 'yes' && !\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::POST_MANAGE) && !is_forum_moderator($topicid, 'topic'))
-			stderr($lang_forums['std_error'], $lang_forums['std_topic_locked']);
+			\App\Support\LegacyResponse::abort($lang_forums['std_error'], $lang_forums['std_topic_locked']);
 	}
 
 	if ($type == 'edit')
@@ -420,7 +420,7 @@ if ($action == "post")
         $topicInfo = \App\Models\Topic::query()->findOrFail($topicid);
         $postInfo = \App\Models\Post::query()->findOrFail($id);
         if ($postInfo->userid != $CURUSER['id'] && !is_forum_moderator($postid, 'post') && !\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::POST_MANAGE)) {
-            permissiondenied();
+            \App\Support\LegacyResponse::permissionDenied();
         }
 		if ($hassubject){
 			\App\Models\Topic::query()->where('id', $topicid)->update(['subject' => $subject]);
@@ -456,7 +456,7 @@ if ($action == "post")
 			if (strtotime($CURUSER['last_post']) > (TIMENOW - 10))
 			{
 				$secs = 10 - (TIMENOW - strtotime($CURUSER['last_post']));
-				stderr($lang_forums['std_error'],$lang_forums['std_post_flooding'].$secs.$lang_forums['std_seconds_before_making'],false);
+				\App\Support\LegacyResponse::abort($lang_forums['std_error'], $lang_forums['std_post_flooding'].$secs.$lang_forums['std_seconds_before_making'], false);
 			}
 		}
 		if ($type == 'new'){ //new topic
@@ -477,7 +477,7 @@ if ($action == "post")
 			]);
 			$topicid = $topic ? $topic->id : 0;
 			if (!$topicid)
-				stderr($lang_forums['std_error'],$lang_forums['std_no_topic_id_returned']);
+				\App\Support\LegacyResponse::abort($lang_forums['std_error'], $lang_forums['std_no_topic_id_returned']);
 			\App\Models\Forum::query()->where('id', $forumid)->increment('topiccount');
 			\App\Models\Forum::query()->where('id', $forumid)->increment('postcount');
 		}
@@ -574,7 +574,7 @@ if ($action == "viewtopic")
 	$highlight = htmlspecialchars(trim(\App\Support\SupportContext::getQuery("highlight") ?? ''));
 
 	$topicid = intval(\App\Support\SupportContext::getQuery("topicid") ?? 0);
-	int_check($topicid,true);
+	\App\Support\LegacyResponse::assertId($topicid, true);
 	$page = \App\Support\SupportContext::getQuery("page") ?? 0;
 	$authorid = intval(\App\Support\SupportContext::getQuery("authorid") ?? 0);
 	$postQuery = \App\Models\Post::query()->where('topicid', $topicid);
@@ -593,7 +593,7 @@ if ($action == "viewtopic")
 
 	$topic = \App\Models\Topic::query()->where('id', $topicid)->first();
 	if (!$topic)
-		stderr($lang_forums['std_forum_error'], $lang_forums['std_topic_not_found']);
+		\App\Support\LegacyResponse::abort($lang_forums['std_forum_error'], $lang_forums['std_topic_not_found']);
 	$arr = $topic->toArray();
 
 	$forumid = $arr['forumid'];
@@ -615,7 +615,7 @@ if ($action == "viewtopic")
 	$is_forummod = is_forum_moderator($forumid,'forum');
 
 	if (\App\Support\UserDisplay::currentClass() < $row["minclassread"])
-		stderr($lang_forums['std_error'], $lang_forums['std_unpermitted_viewing_topic']);
+		\App\Support\LegacyResponse::abort($lang_forums['std_error'], $lang_forums['std_unpermitted_viewing_topic']);
 	if (((\App\Support\UserDisplay::currentClass() >= $row["minclasswrite"] && !$locked) || \App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::POST_MANAGE) || $is_forummod) && $CURUSER["forumpost"] == 'yes')
 		$maypost = true;
 	else $maypost = false;
@@ -711,16 +711,16 @@ if ($action == "viewtopic")
 	$uidArr = array_keys($uidArr);
 	unset($arr);
 
-	stdhead($lang_forums['head_view_topic']." \"".$orgsubject."\"");
-	begin_main_frame("",true);
+	\App\Support\Html::stdhead($lang_forums['head_view_topic']." \"".$orgsubject."\"");
+	\App\Support\Frame::mainFrameOpen("", true);
 
 	print("<h1 align=\"center\"><a class=\"faqlink\" href=\"forums.php\">".$SITENAME."&nbsp;".$lang_forums['text_forums']."</a>--><a class=\"faqlink\" href=\"".htmlspecialchars("?action=viewforum&forumid=".$forumid)."\">".$forumname."</a><b>--></b><span id=\"top\">".$subject.($locked ? "&nbsp;&nbsp;<b>[<font class=\"striking\">".$lang_forums['text_locked']."</font>]</b>" : "")."</span></h1>\n");
-	end_main_frame();
+	\App\Support\Frame::mainFrameClose();
 	print($pagertop);
 
 	//------ Print table
 
-	begin_main_frame();
+	\App\Support\Frame::mainFrameOpen();
 	print("<table border=\"0\" class=\"main\" cellspacing=\"0\" cellpadding=\"5\" width=\"97%\"><tr>\n");
 	print("<td class=\"embedded\" width=\"99%\">&nbsp;&nbsp;".$lang_forums['there_is']."<b>".$views."</b>".$lang_forums['hits_on_this_topic']);
 	print("</td>\n");
@@ -731,7 +731,7 @@ if ($action == "viewtopic")
 	}
 	print("</td>");
 	print("</tr></table>\n");
-	begin_frame();
+	\App\Support\Html::beginFrame();
 
 	$neededColumns = array('id', 'class', 'enabled', 'privacy', 'avatar', 'signature', 'uploaded', 'downloaded', 'last_access', 'username', 'donor', 'leechwarn', 'warned', 'title');
     $userInfoArr = \App\Models\User::query()->find($uidArr, $neededColumns)->keyBy('id');
@@ -767,7 +767,7 @@ if ($action == "viewtopic")
 
 		$uploaded = \App\Support\Format::size($arr2["uploaded"]);
 		$downloaded = \App\Support\Format::size($arr2["downloaded"]);
-		$ratio = get_ratio($arr2['id']);
+		$ratio = \App\Support\Ratio::forUserId($arr2['id']);
 
 		if (!$forumposts = $Cache->get_value('user_'.$posterid.'_post_count')){
 			$forumposts = \App\Models\Post::query()->where('userid', $posterid)->count();
@@ -808,7 +808,7 @@ if ($action == "viewtopic")
 		}
 
 		print("<div style=\"margin-top: 8pt; margin-bottom: 8pt;\"><table id=\"pid".$postid."\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\" width=\"100%\"><tr><td class=\"embedded\" width=\"99%\"><a href=\"".htmlspecialchars("forums.php?action=viewtopic&topicid=".$topicid."&page=p".$postid."#pid".$postid)."\">#".$postid."</a>&nbsp;&nbsp;<font color=\"gray\">".$lang_forums['text_by']."</font>".$by."&nbsp;&nbsp;<font color=\"gray\">".$lang_forums['text_at']."</font>".$added);
-		if (is_valid_id($arr['editedby']))
+		if (\App\Support\Validators::isId($arr['editedby']))
 			print("");
 		print("&nbsp;&nbsp;<font color=\"gray\">|</font>&nbsp;&nbsp;");
 		if ($authorid)
@@ -824,7 +824,7 @@ if ($action == "viewtopic")
 		$body = "<div id=\"pid".$postid."body\" style=\"word-break: break-all;\">";
 		//hidden content applied to second or higher floor post (for whose user class below Ad , not poster , not mods ,not reply's author)
 //		if ($protected_enabled && $pn+$offset>1 && get_user_class()<UC_ADMINISTRATOR && $userid != $base_posterid && $posterid!=$userid && !$is_forummod){
-		if ($pn+$offset>1 && !can_view_post($userid, $arr)){
+		if ($pn+$offset>1 && !\App\Support\Forum::canViewPost($userid, $arr)){
 			//enable content protection
 			$bodyContent = \App\Support\Format::formatComment($lang_forums["text_post_protected"]);
             $canViewProtected = false;
@@ -837,7 +837,7 @@ if ($action == "viewtopic")
             $bodyContent = \App\Support\Format::highlight($highlight,$bodyContent);
 		}
 
-		if (is_valid_id($arr['editedby']))
+		if (\App\Support\Validators::isId($arr['editedby']))
 		{
 			$lastedittime = \App\Support\Time::format($arr['editdate'],true,false);
             $bodyContent .= "<br /><p><font class=\"small\">".$lang_forums['text_last_edited_by'].\App\Support\UserDisplay::username($arr['editedby']).$lang_forums['text_last_edit_at'].$lastedittime."</font></p>\n";
@@ -944,9 +944,9 @@ if ($action == "viewtopic")
 		print("</table>\n");
 	}
 
-	end_frame();
+	\App\Support\Html::endFrame();
 
-	end_main_frame();
+	\App\Support\Frame::mainFrameClose();
 
 	print($pagerbottom);
 	if ($maypost){
@@ -954,7 +954,7 @@ if ($action == "viewtopic")
 "<td class=\"text\" align=\"center\"><b>".$lang_forums['text_quick_reply']."</b><br /><br />".
 "<form id=\"compose\" name=\"compose\" method=\"post\" action=\"?action=post\" onsubmit=\"return postvalid(this);\">".
 "<input type=\"hidden\" name=\"id\" value=\"".$topicid."\" /><input type=\"hidden\" name=\"type\" value=\"reply\" /><br />");
-	quickreply('compose', 'body',$lang_forums['submit_add_reply']);
+	\App\Support\Html::quickReplyVoid('compose', 'body', $lang_forums['submit_add_reply']);
 	print("</form></td></tr></table>");
 	print("<p align=\"center\"><a class=\"index\" href=\"".htmlspecialchars("?action=reply&topicid=".$topicid)."\">".$lang_forums['text_add_reply']."</a></p>\n");
 	}
@@ -963,7 +963,7 @@ if ($action == "viewtopic")
 	else print($lang_forums['text_unpermitted_posting_here']);
 
 	print(key_shortcut($page,$pages-1));
-	stdfoot();
+	\App\Support\Html::stdfoot();
 	die;
 }
 
@@ -975,22 +975,22 @@ if ($action == "movetopic")
 
 	$topicid = intval(\App\Support\SupportContext::getQuery("topicid") ?? 0);
 	$ismod = is_forum_moderator($topicid,'topic');
-	if (!is_valid_id($forumid) || !is_valid_id($topicid) || (!\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::POST_MANAGE) && !$ismod))
-		permissiondenied();
+	if (!\App\Support\Validators::isId($forumid) || !\App\Support\Validators::isId($topicid) || (!\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::POST_MANAGE) && !$ismod))
+		\App\Support\LegacyResponse::permissionDenied();
 
 	// Make sure topic and forum is valid
 
 	$forum = \App\Models\Forum::query()->where('id', $forumid)->first(['minclasswrite']);
 
 	if (!$forum)
-	stderr($lang_forums['std_error'], $lang_forums['std_forum_not_found']);
+	\App\Support\LegacyResponse::abort($lang_forums['std_error'], $lang_forums['std_forum_not_found']);
 
 	if (\App\Support\UserDisplay::currentClass() < $forum->minclasswrite)
-		permissiondenied();
+		\App\Support\LegacyResponse::permissionDenied();
 
 	$topic = \App\Models\Topic::query()->where('id', $topicid)->first(['forumid']);
 	if (!$topic)
-		stderr($lang_forums['std_error'], $lang_forums['std_topic_not_found']);
+		\App\Support\LegacyResponse::abort($lang_forums['std_error'], $lang_forums['std_topic_not_found']);
 	$old_forumid = $topic->forumid;
 
 	// get posts count
@@ -1032,14 +1032,14 @@ if ($action == "deletetopic")
 		$userid = $topic->userid;
 	}
 	$ismod = is_forum_moderator($topicid,'topic');
-	if (!is_valid_id($topicid) || (!\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::POST_MANAGE) && !$ismod))
-		permissiondenied();
+	if (!\App\Support\Validators::isId($topicid) || (!\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::POST_MANAGE) && !$ismod))
+		\App\Support\LegacyResponse::permissionDenied();
 
 	$sure = intval(\App\Support\SupportContext::getQuery("sure") ?? 0);
 	if (!$sure)
 	{
-		stderr($lang_forums['std_delete_topic'], $lang_forums['std_delete_topic_note'] .
-		"<a class=altlink href=?action=deletetopic&topicid=$topicid&sure=1>".$lang_forums['std_here_if_sure'],false);
+		\App\Support\LegacyResponse::abort($lang_forums['std_delete_topic'], $lang_forums['std_delete_topic_note'] .
+		"<a class=altlink href=?action=deletetopic&topicid=$topicid&sure=1>".$lang_forums['std_here_if_sure'], false);
 	}
 
 	$postcount = \App\Models\Post::query()->where('topicid', $topicid)->count();
@@ -1070,21 +1070,21 @@ if ($action == "deletepost")
 	$sure = intval(\App\Support\SupportContext::getQuery("sure") ?? 0);
 
 	$ismod = is_forum_moderator($postid, 'post');
-	if ((!\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::POST_MANAGE) && !$ismod) || !is_valid_id($postid))
-		permissiondenied();
+	if ((!\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::POST_MANAGE) && !$ismod) || !\App\Support\Validators::isId($postid))
+		\App\Support\LegacyResponse::permissionDenied();
 
 	//------- Get topic id
 	$post = \App\Models\Post::query()->where('id', $postid)->first(['topicid', 'userid']);
 	if (!$post)
-		stderr($lang_forums['std_error'], $lang_forums['std_post_not_found']);
+		\App\Support\LegacyResponse::abort($lang_forums['std_error'], $lang_forums['std_post_not_found']);
 	$topicid = $post->topicid;
 	$userid = $post->userid;
 
 	//------- Get the id of the last post before the one we're deleting
 	$prevPostId = \App\Models\Post::query()->where('topicid', $topicid)->where('id', '<', $postid)->orderByDesc('id')->value('id');
 	if (!$prevPostId) // This is the first post of a topic
-		stderr($lang_forums['std_error'], $lang_forums['std_cannot_delete_post'] .
-	"<a class=altlink href=?action=deletetopic&topicid=$topicid&sure=1>".$lang_forums['std_delete_topic_instead'],false);
+		\App\Support\LegacyResponse::abort($lang_forums['std_error'], $lang_forums['std_cannot_delete_post'] .
+	"<a class=altlink href=?action=deletetopic&topicid=$topicid&sure=1>".$lang_forums['std_delete_topic_instead'], false);
 	else
 	{
 		$redirtopost = "&page=p$prevPostId#pid$prevPostId";
@@ -1093,8 +1093,8 @@ if ($action == "deletepost")
 	//------- Make sure we know what we do :-)
 	if (!$sure)
 	{
-		stderr($lang_forums['std_delete_post'], $lang_forums['std_delete_post_note'] .
-		"<a class=altlink href=?action=deletepost&postid=$postid&sure=1>".$lang_forums['std_here_if_sure'],false);
+		\App\Support\LegacyResponse::abort($lang_forums['std_delete_post'], $lang_forums['std_delete_post_note'] .
+		"<a class=altlink href=?action=deletepost&postid=$postid&sure=1>".$lang_forums['std_here_if_sure'], false);
 	}
 
 	//------- Delete post
@@ -1128,7 +1128,7 @@ if ($action == "setlocked")
 	$topicid = intval(\App\Support\SupportContext::getPost("topicid") ?? 0);
 	$ismod = is_forum_moderator($topicid,'topic');
 	if (!$topicid || (!\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::POST_MANAGE) && !$ismod))
-		permissiondenied();
+		\App\Support\LegacyResponse::permissionDenied();
 
 	$locked = \App\Support\SupportContext::getPost("locked");
 	\App\Models\Topic::query()->where('id', $topicid)->update(['locked' => $locked]);
@@ -1142,7 +1142,7 @@ if ($action == 'hltopic')
 	$topicid = intval(\App\Support\SupportContext::getQuery("topicid") ?? 0);
 	$ismod = is_forum_moderator($topicid,'topic');
 	if (!$topicid || (!\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::POST_MANAGE) && !$ismod))
-		permissiondenied();
+		\App\Support\LegacyResponse::permissionDenied();
 	$color = intval(\App\Support\SupportContext::getPost("color"));
 	if ($color==0 || get_hl_color($color))
 		\App\Models\Topic::query()->where('id', $topicid)->update(['hlcolor' => $color]);
@@ -1162,7 +1162,7 @@ if ($action == "setsticky")
 	$topicid = intval(\App\Support\SupportContext::getPost("topicid") ?? 0);
 	$ismod = is_forum_moderator($topicid,'topic');
 	if (!$topicid || (!\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::POST_MANAGE) && !$ismod))
-		permissiondenied();
+		\App\Support\LegacyResponse::permissionDenied();
 
 	$sticky = \App\Support\SupportContext::getPost("sticky");
 	\App\Models\Topic::query()->where('id', $topicid)->update(['sticky' => $sticky]);
@@ -1176,16 +1176,16 @@ if ($action == "setsticky")
 if ($action == "viewforum")
 {
 	$forumid = intval(\App\Support\SupportContext::getQuery("forumid") ?? 0);
-	int_check($forumid,true);
+	\App\Support\LegacyResponse::assertId($forumid, true);
 	$userid = intval($CURUSER["id"] ?? 0);
 	//------ Get forum name, moderators
 	$row = get_forum_row($forumid);
 	if (!$row){
-		write_log("User " . $CURUSER["username"] . "," . $CURUSER["ip"] . " is trying to visit forum that doesn't exist", 'mod');
-		stderr($lang_forums['std_forum_error'],$lang_forums['std_forum_not_found']);
+		\App\Support\Log::writeWithContext("User " . $CURUSER["username"] . "," . $CURUSER["ip"] . " is trying to visit forum that doesn't exist", 'mod');
+		\App\Support\LegacyResponse::abort($lang_forums['std_forum_error'], $lang_forums['std_forum_not_found']);
 	}
 	if (\App\Support\UserDisplay::currentClass() < $row["minclassread"])
-		permissiondenied();
+		\App\Support\LegacyResponse::permissionDenied();
 
 	$forumname = $row['name'];
 	$forummoderators = get_forum_moderators($forumid,false);
@@ -1200,7 +1200,7 @@ if ($action == "viewforum")
 	}
 	$num = $topicQuery->count();
 
-	[$pagertop, $pagerbottom, , $offset, $perpage, ] = pager($topicsperpage, $num, "?"."action=viewforum&forumid=".$forumid.$addparam."&");
+	[$pagertop, $pagerbottom, , $offset, $perpage, ] = \App\Support\Pagination::pager($topicsperpage, $num, "?"."action=viewforum&forumid=".$forumid.$addparam."&");
 	if (((\App\Support\SupportContext::getQuery("sort") !== null))){
 		switch (\App\Support\SupportContext::getQuery("sort")){
 			case 'firstpostasc':
@@ -1237,10 +1237,10 @@ if ($action == "viewforum")
 	$orderParts = explode(' ', $orderby);
 	$topicRows = (clone $topicQuery)->orderBy('sticky', 'desc')->orderBy($orderParts[0], $orderParts[1] ?? 'desc')->offset($offset)->limit($perpage)->get();
 	$numtopics = $topicRows->count();
-	stdhead($lang_forums['head_forum']." ".$forumname);
-	begin_main_frame("",true);
+	\App\Support\Html::stdhead($lang_forums['head_forum']." ".$forumname);
+	\App\Support\Frame::mainFrameOpen("", true);
 	print("<h1 align=\"center\"><a class=\"faqlink\" href=\"forums.php\">".$SITENAME."&nbsp;".$lang_forums['text_forums'] ."</a>--><a class=\"faqlink\" href=\"".htmlspecialchars("forums.php?action=viewforum&forumid=".$forumid)."\">".$forumname."</a></h1>\n");
-	end_main_frame();
+	\App\Support\Frame::mainFrameClose();
 	print("<br />");
 	$maypost = \App\Support\UserDisplay::currentClass() >= $row["minclasswrite"] && \App\Support\UserDisplay::currentClass() >= $row["minclasscreate"] && $CURUSER["forumpost"] == 'yes';
 
@@ -1392,7 +1392,7 @@ if ($action == "viewforum")
 	} // if
 	else
 		print("<p>".$lang_forums['text_no_topics_found']."</p>");
-	stdfoot();
+	\App\Support\Html::stdfoot();
 	die;
 }
 
@@ -1412,7 +1412,7 @@ if ($action == "viewunread")
 	}
 	$unreadTopics = $unreadQuery->orderByDesc('lastpost')->limit(100)->get();
 
-	stdhead($lang_forums['head_view_unread']);
+	\App\Support\Html::stdhead($lang_forums['head_view_unread']);
 	print("<h1 align=\"center\"><a class=\"faqlink\" href=\"forums.php\">".$SITENAME."&nbsp;".$lang_forums['text_forums']."</a>-->".$lang_forums['text_topics_with_unread_posts']."</h1>");
 
 	$n = 0;
@@ -1461,13 +1461,13 @@ if ($action == "viewunread")
 	}
 	else
 		print("<p>".$lang_forums['text_nothing_found']."</p>");
-	stdfoot();
+	\App\Support\Html::stdfoot();
 	die;
 }
 
 if ($action == "search")
 {
-	stdhead($lang_forums['head_forum_search']);
+	\App\Support\Html::stdhead($lang_forums['head_forum_search']);
 	unset($error);
 	$error = true;
 	$found = "";
@@ -1541,7 +1541,7 @@ if ($action == "search")
 	if (!$error)
 	{
 		$perpage = $topicsperpage;
-		[$pagertop, $pagerbottom, , $offset, $perpage, ] = pager($perpage, $hits, "forums.php?action=search&keywords=".rawurlencode($keywords)."&");
+		[$pagertop, $pagerbottom, , $offset, $perpage, ] = \App\Support\Pagination::pager($perpage, $hits, "forums.php?action=search&keywords=".rawurlencode($keywords)."&");
 		$posts = (clone $searchQuery)
 			->select('posts.id', 'posts.topicid', 'posts.userid', 'posts.added', 'topics.subject', 'topics.hlcolor', 'forums.id AS forumid', 'forums.name AS forumname')
 			->orderByDesc('posts.id')
@@ -1562,7 +1562,7 @@ if ($action == "search")
 		print("</table>\n");
 		print($pagerbottom);
 	}
-stdfoot();
+\App\Support\Html::stdfoot();
 die;
 }
 
@@ -1572,7 +1572,7 @@ if (((\App\Support\SupportContext::getQuery("catchup") !== null)) && \App\Suppor
 
 //-------- Handle unknown action
 if ($action != "")
-	stderr($lang_forums['std_forum_error'], $lang_forums['std_unknown_action']);
+	\App\Support\LegacyResponse::abort($lang_forums['std_forum_error'], $lang_forums['std_unknown_action']);
 
 //-------- Default action: View forums
 
@@ -1580,8 +1580,8 @@ if ($action != "")
 if ($CURUSER)
 	\App\Models\User::query()->where('id', $CURUSER['id'])->update(['forum_access' => date("Y-m-d H:i:s")]);
 
-stdhead($lang_forums['head_forums']);
-begin_main_frame();
+\App\Support\Html::stdhead($lang_forums['head_forums']);
+\App\Support\Frame::mainFrameOpen();
 print("<h1 align=\"center\">".$SITENAME."&nbsp;".$lang_forums['text_forums']."</h1>");
 print("<p align=\"center\"><a href=\"?action=search\"><b>".$lang_forums['text_search']."</b></a> | <a href=\"?action=viewunread\"><b>".$lang_forums['text_view_unread']."</b></a> | <a href=\"?catchup=1\"><b>".$lang_forums['text_catch_up']."</b></a> ".(\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::FORUM_MANAGE) ? "| <a href=\"forummanage.php\"><b>".$lang_forums['text_forum_manager']."</b></a>":"")."</p>");
 print("<table border=\"1\" cellspacing=\"0\" cellpadding=\"5\" width=\"100%\">\n");
@@ -1679,6 +1679,6 @@ foreach ($overforums as $a)
 print("</table>");
 if ($showforumstats_main == "yes")
 	forum_stats();
-end_main_frame();
-stdfoot();
+\App\Support\Frame::mainFrameClose();
+\App\Support\Html::stdfoot();
 ?>

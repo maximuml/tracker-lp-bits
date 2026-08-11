@@ -57,7 +57,7 @@ class TorrentBuyLogResource extends Resource
                     ->label(__('label.username'))
                 ,
                 TextColumn::make('torrent_id')
-                    ->formatStateUsing(fn ($record) => torrent_name_for_admin($record->torrent))
+                    ->formatStateUsing(fn ($record) => \App\Support\TorrentAccess::adminName($record->torrent))
                     ->label(__('label.torrent.label'))
                 ,
                 TextColumn::make('price')

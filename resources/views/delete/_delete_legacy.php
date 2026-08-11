@@ -5,9 +5,9 @@ error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 \App\Auth\Permission::assertCan(\App\Enums\Permission\PermissionEnum::TORRENT_DELETE);
 function bark($msg) {
 $lang_delete = (array) (\App\Support\SupportContext::getGlobal('lang_delete') ?? []);
-  stdhead();
-  stdmsg($lang_delete['std_delete_failed'], $msg);
-  stdfoot();
+  \App\Support\Html::stdhead();
+  \App\Support\Html::stdMessage($lang_delete['std_delete_failed'], $msg);
+  \App\Support\Html::stdfoot();
   exit();
 }
 
@@ -59,9 +59,9 @@ if ($deleteEsResult === false) {
 deletetorrent($id);
 
 if ($row['anonymous'] == 'yes' && $CURUSER["id"] == $row["owner"]) {
-	write_log("Torrent $id ({$row['name']}) was deleted by its anonymous uploader ($reasonstr)",'normal');
+	\App\Support\Log::writeWithContext("Torrent $id ({$row['name']}) was deleted by its anonymous uploader ($reasonstr)",'normal');
 } else {
-	write_log("Torrent $id ({$row['name']}) was deleted by {$CURUSER['username']} ($reasonstr)",'normal');
+	\App\Support\Log::writeWithContext("Torrent $id ({$row['name']}) was deleted by {$CURUSER['username']} ($reasonstr)",'normal');
 }
 
 //===remove karma
@@ -81,7 +81,7 @@ if ($CURUSER["id"] != $row["owner"] && \App\Models\User::exists($row["owner"])){
         'added' => $dt,
     ]);
 }
-stdhead($lang_delete['head_torrent_deleted']);
+\App\Support\Html::stdhead($lang_delete['head_torrent_deleted']);
 
 if (((\App\Support\SupportContext::getPost("returnto") !== null)))
 	$ret = "<a href=\"" . htmlspecialchars(\App\Support\SupportContext::getPost("returnto")) . "\">".$lang_delete['text_go_back']."</a>";
@@ -92,4 +92,4 @@ else
 <h1><?php echo $lang_delete['text_torrent_deleted'] ?></h1>
 <p><?php echo  $ret ?></p>
 <?php
-stdfoot();
+\App\Support\Html::stdfoot();

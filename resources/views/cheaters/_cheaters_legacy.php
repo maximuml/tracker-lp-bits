@@ -10,10 +10,10 @@ $top = 100;  // Only look at the top xxx most likely...
 
 
 
-if (\App\Support\UserDisplay::currentClass() < UC_MODERATOR) stderr("Error", "Permission denied.");
+if (\App\Support\UserDisplay::currentClass() < UC_MODERATOR) \App\Support\LegacyResponse::abort("Error", "Permission denied.");
 
-stdhead("Cheaters");
-begin_frame('Cheaters');
+\App\Support\Html::stdhead("Cheaters");
+\App\Support\Html::beginFrame('Cheaters');
 
 $page = @\App\Support\SupportContext::getQuery('page');
 //$perpage = 100; // currently ignored
@@ -22,10 +22,10 @@ $class = @\App\Support\SupportContext::getQuery('c');
 if (!\App\Support\User::isValidUserClass($class-2)) $class = '';
 
 $ratio = @\App\Support\SupportContext::getQuery('r');
-if (!is_valid_id($ratio) && $ratio>=1 && $ratio<=7) $ratio = '';
+if (!\App\Support\Validators::isId($ratio) && $ratio>=1 && $ratio<=7) $ratio = '';
 
 echo '<center><form method="get" action="'.$__server_REQUEST_URI.'">';
-begin_table();
+\App\Support\Html::beginTable();
 
 echo '<tr><th colspan="4">Important</th></tr><tr><td colspan="4" class="left">';
 echo 'Although the word <b>cheat</b> is used here, it should be kept in mind that this<br />';
@@ -56,7 +56,7 @@ echo '<option value="6"'.($ratio == 6?' selected' : '').'>&gt;= 5.000</option>';
 echo '</select></td>';
 
 echo '</tr><tr><td colspan="4"><input name="submit" type="submit"></td></tr>';
-end_table();
+\App\Support\Html::endTable();
 echo '</form>';
 
 $baseQuery = \Nexus\Database\NexusDB::table('users')
@@ -76,20 +76,20 @@ if ($page < 1) $page = 1;
 elseif ($page > $pages) $page = $pages;
 
 echo $pagertop;
-begin_table();
+\App\Support\Html::beginTable();
 print("<tr><th class=\"left\">User name</th><th>Registered</th><th>Uploaded</th><th>Downloaded</th><th>Ratio</th><th>Cheat Value</th><th>Cheat Spread</th></tr>\n");
 
-list($pagertop, $pagerbottom, , $offset, $rpp) = pager(20, $top, "cheaters.php?");
+list($pagertop, $pagerbottom, , $offset, $rpp) = \App\Support\Pagination::pager(20, $top, "cheaters.php?");
 $rows = $baseQuery->orderByDesc('cheat')->offset($offset)->limit($rpp)->get()->map(fn ($r) => (array) $r)->all();
 foreach ($rows as $arr)
 {
   if ($arr['added'] == "0000-00-00 00:00:00" || $arr['added'] == null) $joindate = 'N/A';
-  else $joindate = get_elapsed_time(strtotime($arr['added'])).' ago';
+  else $joindate = \App\Support\Format::getElapsedTime(strtotime($arr['added'])).' ago';
   $age = date('U') - date('U',strtotime($arr['added']));
   if ($arr["downloaded"] > 0)
   {
     $ratio = number_format($arr["uploaded"] / $arr["downloaded"], 3);
-    $ratio = "<font color=" . get_ratio_color($ratio) . ">$ratio</font>";
+    $ratio = "<font color=" . \App\Support\Ratio::color($ratio) . ">$ratio</font>";
   } else {
     if ($arr["uploaded"] > 0) $ratio = "Inf.";
     else $ratio = "---";
@@ -103,9 +103,9 @@ foreach ($rows as $arr)
   echo '<td>'.$arr['cheat'].'</td>';
   echo '<td class="right">'.ceil(($arr['cheat'] - $min) / max(1, ($max - $min)) * 100).'%</td></tr>'."\n";
 }
-end_table();
+\App\Support\Html::endTable();
 echo $pagerbottom;
-end_frame();
+\App\Support\Html::endFrame();
 
-stdfoot();
+\App\Support\Html::stdfoot();
 ?>

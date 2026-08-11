@@ -7,9 +7,9 @@ $torrent = \App\Models\Torrent::query()->find($reseedid);
 $row = $torrent === null ? null : $torrent->toArray();
 $seederCount = \App\Models\Peer::query()->where('torrent', $reseedid)->count();
 if ($seederCount > 0)
-	stderr($lang_takereseed['std_error'], $lang_takereseed['std_torrent_not_dead']);
+	\App\Support\LegacyResponse::abort($lang_takereseed['std_error'], $lang_takereseed['std_torrent_not_dead']);
 elseif (strtotime($row['last_reseed']) > (TIMENOW - 900))
-	stderr($lang_takereseed['std_error'], $lang_takereseed['std_reseed_sent_recently']);
+	\App\Support\LegacyResponse::abort($lang_takereseed['std_error'], $lang_takereseed['std_reseed_sent_recently']);
 else{
 $snatchedRows = \Nexus\Database\NexusDB::table('snatched')
     ->join('users', 'snatched.userid', '=', 'users.id')
@@ -38,9 +38,9 @@ $pn_msg = nexus_trans("torrent.msg_reseed_user", [], $locale).$CURUSER["username
     "last_reseed" => now(),
     "seeders" => $seederCount,
 ]);
-stdhead($lang_takereseed['head_reseed_request']);
-begin_main_frame();
+\App\Support\Html::stdhead($lang_takereseed['head_reseed_request']);
+\App\Support\Frame::mainFrameOpen();
 print("<center>".$lang_takereseed['std_it_worked']."</center>");
-end_main_frame();
-stdfoot();
+\App\Support\Frame::mainFrameClose();
+\App\Support\Html::stdfoot();
 }

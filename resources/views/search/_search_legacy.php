@@ -84,7 +84,7 @@ if ($search) {
                 $q = "%{$queryString}%";
                 $torrentQuery->where("$tableTorrent.name", "like", $q);
             }
-            write_log("User " . $CURUSER["username"] . "," . $CURUSER["ip"] . " is hacking search_area field in" . $__server_SCRIPT_NAME, 'mod');
+            \App\Support\Log::writeWithContext("User " . $CURUSER["username"] . "," . $CURUSER["ip"] . " is hacking search_area field in" . $__server_SCRIPT_NAME, 'mod');
         }
         if ($approvalStatus !== null) {
             $torrentQuery->where("$tableTorrent.approval_status", $approvalStatus);
@@ -132,9 +132,9 @@ if (((\App\Support\SupportContext::getQuery('sort') !== null)) && \App\Support\S
 
 }
 
-list($pagertop, $pagerbottom, $limit, $offset, $size, $page) = pager($torrentsperpage, $count, $addparam);
+list($pagertop, $pagerbottom, $limit, $offset, $size, $page) = \App\Support\Pagination::pager($torrentsperpage, $count, $addparam);
 
-stdhead(nexus_trans('search.global_search'));
+\App\Support\Html::stdhead(nexus_trans('search.global_search'));
 print("<table width=\"97%\" class=\"main\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\"><tr><td class=\"embedded\">");
 if ($search && $count > 0) {
     if ($shouldUseMeili) {
@@ -151,7 +151,7 @@ if ($search && $count > 0) {
     echo \App\Support\TorrentTable::render(json_decode(json_encode($rows), true));
     print($pagerbottom);
 } else {
-    stdmsg($lang_torrents['std_search_results_for'] . htmlspecialchars($search) . "\"",$lang_torrents['std_try_again']);
+    \App\Support\Html::stdMessage($lang_torrents['std_search_results_for'] . htmlspecialchars($search) . "\"", $lang_torrents['std_try_again']);
 }
 print("</td></tr></table>");
-stdfoot();
+\App\Support\Html::stdfoot();

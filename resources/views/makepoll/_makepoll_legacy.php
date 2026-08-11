@@ -11,10 +11,10 @@ $poll = [];
 
 if ($action == "edit")
 {
-	int_check($pollid,true);
+	\App\Support\LegacyResponse::assertId($pollid, true);
 	$poll = (array) \Nexus\Database\NexusDB::table('polls')->where('id', $pollid)->first();
 	if (!$poll)
-		stderr($lang_makepoll['std_error'], $lang_makepoll['std_no_poll_id']);
+		\App\Support\LegacyResponse::abort($lang_makepoll['std_error'], $lang_makepoll['std_no_poll_id']);
 }
 
 if ($__server_REQUEST_METHOD == "POST")
@@ -29,7 +29,7 @@ if ($__server_REQUEST_METHOD == "POST")
 	}
 
 	if (!$question || !$options['option0'] || !$options['option1'])
-		stderr($lang_makepoll['std_error'], $lang_makepoll['std_missing_form_data']);
+		\App\Support\LegacyResponse::abort($lang_makepoll['std_error'], $lang_makepoll['std_missing_form_data']);
 
 	$data = array_merge(['question' => $question], $options);
 	if ($pollid) {
@@ -51,12 +51,12 @@ if ($__server_REQUEST_METHOD == "POST")
 }
 
 if ($pollid){
-	stdhead($lang_makepoll['head_edit_poll']);
+	\App\Support\Html::stdhead($lang_makepoll['head_edit_poll']);
 	print("<h1>".$lang_makepoll['text_edit_poll']."</h1>");
 }
 else
 {
-	stdhead($lang_makepoll['head_new_poll']);
+	\App\Support\Html::stdhead($lang_makepoll['head_new_poll']);
 	// Warn if current poll is less than 3 days old
 	$lastPoll = (array) \Nexus\Database\NexusDB::table('polls')->orderByDesc('added')->first(['question', 'added']);
 	if ($lastPoll)
@@ -99,5 +99,5 @@ print("<input type=hidden name=pollid value=\"".$poll["id"]."\">");
 </form>
 
 <?php
-stdfoot();
+\App\Support\Html::stdfoot();
 ?>

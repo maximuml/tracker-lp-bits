@@ -17,26 +17,26 @@ $CURUSER = \App\Support\SupportContext::getUser() ?? [];
         $msg = \App\Models\StaffMessage::query()->findOrFail($msg)->toArray();
     }
     if (empty($msg['permission']) || !in_array($msg['permission'], \App\Repositories\ToolRepository::listUserAllPermissions($CURUSER['id']))) {
-        permissiondenied(\App\Support\Config\SiteConfig::current()->authority->permission('staffmem'));
+        \App\Support\LegacyResponse::permissionDenied(\App\Support\Config\SiteConfig::current()->authority->permission('staffmem'));
     }
 }
 
 if (!$action) {
-	stdhead($lang_staffbox['head_staff_pm']);
+	\App\Support\Html::stdhead($lang_staffbox['head_staff_pm']);
 	$url = $__server_PHP_SELF."?";
     $query = \App\Repositories\MessageRepository::buildStaffMessageQuery($CURUSER['id']);
     $count = $query->count();
 	$perpage = 20;
-	list($pagertop, $pagerbottom, $limit, $offset, $pageSize, $pageNum) = pager($perpage, $count, $url);
+	list($pagertop, $pagerbottom, $limit, $offset, $pageSize, $pageNum) = \App\Support\Pagination::pager($perpage, $count, $url);
 	print ("<h1 align=center>".$lang_staffbox['text_staff_pm']."</h1>");
 	if ($count == 0)
 	{
 	    do_log(last_query());
-		stdmsg($lang_staffbox['std_sorry'], $lang_staffbox['std_no_messages_yet']);
+		\App\Support\Html::stdMessage($lang_staffbox['std_sorry'], $lang_staffbox['std_no_messages_yet']);
 	}
 	else
 	{
-		begin_main_frame();
+		\App\Support\Frame::mainFrameOpen();
 		print("<form method=post action=\"?action=takecontactanswered\">");
 		print("<table width=940 border=1 cellspacing=0 cellpadding=5 align=center>\n");
 		print("<tr>
@@ -67,9 +67,9 @@ if (!$action) {
     print("</table>\n");
 	print("</form>");
 	echo $pagerbottom;
-	end_main_frame();
+	\App\Support\Frame::mainFrameClose();
 	}
-	stdfoot();
+	\App\Support\Html::stdfoot();
 }
 
 if ($action == "viewpm")
@@ -80,7 +80,7 @@ $arr4 = \App\Models\StaffMessage::query()->findOrFail($pmid)->toArray();
 can_access_staff_message($arr4);
 $answeredby = \App\Support\UserDisplay::username($arr4["answeredby"]);
 
-if (is_valid_id($arr4["sender"]))
+if (\App\Support\Validators::isId($arr4["sender"]))
 {
 $sender = \App\Support\UserDisplay::username($arr4["sender"]);
 }
@@ -96,7 +96,7 @@ else{
 $colspan = "2";
 $width = "50";
 }
-stdhead($lang_staffbox['head_view_staff_pm']);
+\App\Support\Html::stdhead($lang_staffbox['head_view_staff_pm']);
 print("<h1 align=\"center\"><a class=\"faqlink\" href=\"staffbox.php\">".$lang_staffbox['text_staff_pm']."</a>-->".$subject."</h1>");
 print("<table width=\"737\" border=\"0\" cellpadding=\"4\" cellspacing=\"0\">");
 print("<tr><td width=\"".$width."%\" class=\"colhead\" align=\"left\">".$lang_staffbox['col_from']."</td>");
@@ -120,26 +120,26 @@ print("[ <a href=\"staffbox.php?action=deletestaffmessage&id=" . $arr4["id"] . "
 print("</font>");
 print("</td></tr>");
 print("</table>");
-stdfoot();
+\App\Support\Html::stdfoot();
 }
 
 if ($action == "answermessage") {
         $answeringto = intval(\App\Support\SupportContext::getQuery("answeringto") ?? 0);
         $receiver = intval(\App\Support\SupportContext::getQuery("receiver") ?? 0);
 
-        int_check($receiver,true);
+        \App\Support\LegacyResponse::assertId($receiver, true);
 
         $user = \App\Models\User::query()->find($receiver);
 
         if (!$user)
-  	 	stderr($lang_staffbox['std_error'], $lang_staffbox['std_no_user_id']);
+  	 	\App\Support\LegacyResponse::abort($lang_staffbox['std_error'], $lang_staffbox['std_no_user_id']);
 
         $staffmsg = \App\Models\StaffMessage::query()->findOrFail($answeringto)->toArray();
 
         can_access_staff_message($staffmsg);
 
-	stdhead($lang_staffbox['head_answer_to_staff_pm']);
-	begin_main_frame();
+	\App\Support\Html::stdhead($lang_staffbox['head_answer_to_staff_pm']);
+	\App\Support\Frame::mainFrameOpen();
         ?>
 	<form method="post" id="compose" name="message" action="?action=takeanswer">
 <?php if (\App\Support\SupportContext::getQuery("returnto") || $__server_HTTP_REFERER) { ?>
@@ -149,11 +149,11 @@ if ($action == "answermessage") {
         <input type=hidden name=answeringto value=<?php echo $answeringto?>>
 <?php
 	$title = $lang_staffbox['text_answering_to']."<a href=\"staffbox.php?action=viewpm&pmid=".$staffmsg['id']."\">".htmlspecialchars($staffmsg['subject'])."</a>".$lang_staffbox['text_sent_by'].\App\Support\UserDisplay::username($staffmsg['sender']);
-	begin_compose($title, "reply", "", false);
-	end_compose();
+	\App\Support\Frame::composeBeginVoid($title, "reply", "", false);
+	\App\Support\Frame::composeEndVoid();
 	print("</form>");
-	end_main_frame();
-	stdfoot();
+	\App\Support\Frame::mainFrameClose();
+	\App\Support\Html::stdfoot();
 }
 
 if ($action == "takeanswer") {
@@ -163,14 +163,14 @@ if ($action == "takeanswer") {
      $receiver = intval(\App\Support\SupportContext::getPost("receiver") ?? 0);
    $answeringto = \App\Support\SupportContext::getPost("answeringto");
 
-   int_check($receiver,true);
+   \App\Support\LegacyResponse::assertId($receiver, true);
 
           $userid = $CURUSER["id"];
 
   			$msg = trim(\App\Support\SupportContext::getPost("body"));
 
    if (!$msg)
-     stderr($lang_staffbox['std_error'], $lang_staffbox['std_body_is_empty']);
+     \App\Support\LegacyResponse::abort($lang_staffbox['std_error'], $lang_staffbox['std_body_is_empty']);
 
     can_access_staff_message($answeringto);
 
@@ -219,7 +219,7 @@ header("Location: staffbox.php" . (!empty(\App\Support\SupportContext::getQuery(
 
 if ($action == "takecontactanswered") {
     if (empty(\App\Support\SupportContext::getPost('setanswered'))) {
-        stderr($lang_staffbox['std_sorry'], nexus_trans('nexus.select_one_please'));
+        \App\Support\LegacyResponse::abort($lang_staffbox['std_sorry'], nexus_trans('nexus.select_one_please'));
     }
 
 if (\App\Support\SupportContext::getPost('setdealt')){

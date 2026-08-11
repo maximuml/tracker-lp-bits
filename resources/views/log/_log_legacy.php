@@ -4,26 +4,26 @@ error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 $__server_REQUEST_URI = \App\Support\SupportContext::getServerValue('REQUEST_URI');
 if (!\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::LOG))
 {
-stderr($lang_log['std_sorry'],$lang_log['std_permission_denied_only'].\App\Support\UserClass::name($log_class,false,true,true).sprintf($lang_log['std_or_above_can_view'], \App\Models\Setting::getSiteName()),false);
+\App\Support\LegacyResponse::abort($lang_log['std_sorry'], $lang_log['std_permission_denied_only'].\App\Support\UserClass::name($log_class,false,true,true).sprintf($lang_log['std_or_above_can_view'], \App\Models\Setting::getSiteName()), false);
 }
 
 $q = htmlspecialchars(trim(\App\Support\SupportContext::getQuery('query') ?? ''));
 
 function permissiondeny(){
 $lang_log = (array) (\App\Support\SupportContext::getGlobal('lang_log') ?? []);
-	stderr($lang_log['std_sorry'],$lang_log['std_permission_denied'],false);
+	\App\Support\LegacyResponse::abort($lang_log['std_sorry'], $lang_log['std_permission_denied'], false);
 }
 
 function logmenu($selected = "dailylog"){
 $lang_log = (array) (\App\Support\SupportContext::getGlobal('lang_log') ?? []);
-		begin_main_frame();
+		\App\Support\Frame::mainFrameOpen();
 		print ("<div id=\"lognav\"><ul id=\"logmenu\" class=\"menu\">");
 		print ("<li" . ($selected == "dailylog" ? " class=selected" : "") . "><a href=\"?action=dailylog\">".$lang_log['text_daily_log']."</a></li>");
 		print ("<li" . ($selected == "chronicle" ? " class=selected" : "") . "><a href=\"?action=chronicle\">".$lang_log['text_chronicle']."</a></li>");
 		print ("<li" . ($selected == "news" ? " class=selected" : "") . "><a href=\"?action=news\">".$lang_log['text_news']."</a></li>");
 		print ("<li" . ($selected == "poll" ? " class=selected" : "") . "><a href=\"?action=poll\">".$lang_log['text_poll']."</a></li>");
 		print ("</ul></div>");
-		end_main_frame();
+		\App\Support\Frame::mainFrameClose();
 }
 
 function searchtable($title, $action, $opts = array()){
@@ -79,11 +79,11 @@ $allowed_actions = array("dailylog","chronicle","news","poll");
 if (!$action)
 	$action='dailylog';
 if (!in_array($action, $allowed_actions))
-stderr($lang_log['std_error'], $lang_log['std_invalid_action']);
+\App\Support\LegacyResponse::abort($lang_log['std_error'], $lang_log['std_invalid_action']);
 else {
 	switch ($action){
 	case "dailylog":
-		stdhead($lang_log['head_site_log']);
+		\App\Support\Html::stdhead($lang_log['head_site_log']);
 
 		$search = \App\Support\SupportContext::getQuery("search") ?? '';
 
@@ -107,7 +107,7 @@ else {
 
 		$perpage = 50;
 
-		list($pagertop, $pagerbottom, $limit, $offset) = pager($perpage, $count, "log.php?action=dailylog&".$addparam);
+		list($pagertop, $pagerbottom, $limit, $offset) = \App\Support\Pagination::pager($perpage, $count, "log.php?action=dailylog&".$addparam);
 
 		$logRows = \App\Repositories\LogRepository::getSiteLog($filters, (int)$offset, $perpage);
 		if (empty($logRows))
@@ -144,11 +144,11 @@ else {
 
 		print($lang_log['time_zone_note']);
 
-		stdfoot();
+		\App\Support\Html::stdfoot();
 		die;
 		break;
 	case "chronicle":
-		stdhead($lang_log['head_chronicle']);
+		\App\Support\Html::stdhead($lang_log['head_chronicle']);
 		$addparam = $q ? "query=".rawurlencode($q)."&" : "";
 		logmenu("chronicle");
 		searchtable($lang_log['text_search_chronicle'], 'chronicle');
@@ -183,7 +183,7 @@ else {
 
 		$perpage = 50;
 
-		list($pagertop, $pagerbottom, $limit, $offset) = pager($perpage, $count, "log.php?action=chronicle&".$addparam);
+		list($pagertop, $pagerbottom, $limit, $offset) = \App\Support\Pagination::pager($perpage, $count, "log.php?action=chronicle&".$addparam);
 		$chronicleRows = \App\Repositories\LogRepository::getChronicle($q, (int)$offset, $perpage);
 		if (empty($chronicleRows))
 		print($lang_log['text_chronicle_empty']);
@@ -205,11 +205,11 @@ else {
 
 		print($lang_log['time_zone_note']);
 
-		stdfoot();
+		\App\Support\Html::stdfoot();
 		die;
 		break;
 	case "news":
-		stdhead($lang_log['head_news']);
+		\App\Support\Html::stdhead($lang_log['head_news']);
 		$search = \App\Support\SupportContext::getQuery("search") ?? '';
 		$addparam = $q ? "search=".rawurlencode($search)."&query=".rawurlencode($q)."&" : "";
 		logmenu("news");
@@ -221,7 +221,7 @@ else {
 
 		$perpage = 20;
 
-		list($pagertop, $pagerbottom, $limit, $offset) = pager($perpage, $count, "log.php?action=news&".$addparam);
+		list($pagertop, $pagerbottom, $limit, $offset) = \App\Support\Pagination::pager($perpage, $count, "log.php?action=news&".$addparam);
 		$newsRows = \App\Repositories\LogRepository::getNews($filters, (int)$offset, $perpage);
 		if (empty($newsRows))
 		print($lang_log['text_news_empty']);
@@ -240,7 +240,7 @@ else {
 
 		print($lang_log['time_zone_note']);
 
-		stdfoot();
+		\App\Support\Html::stdfoot();
 		die;
 		break;
 	case "poll":
@@ -250,14 +250,14 @@ else {
   		if ($do == "delete")
   		{
   		if (!\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::CHR_MANAGE))
-  		stderr($lang_log['std_error'], $lang_log['std_permission_denied']);
+  		\App\Support\LegacyResponse::abort($lang_log['std_error'], $lang_log['std_permission_denied']);
 
-  		int_check($pollid,true);
+  		\App\Support\LegacyResponse::assertId($pollid, true);
 
    		$sure = \App\Support\SupportContext::getQuery("sure") ?? '';
    		if (!$sure)
-    		stderr($lang_log['std_delete_poll'],$lang_log['std_delete_poll_confirmation'] .
-    		"<a href=?action=poll&do=delete&pollid=$pollid&returnto=$returnto&sure=1>".$lang_log['std_here_if_sure'],false);
+    		\App\Support\LegacyResponse::abort($lang_log['std_delete_poll'], $lang_log['std_delete_poll_confirmation'] .
+    		"<a href=?action=poll&do=delete&pollid=$pollid&returnto=$returnto&sure=1>".$lang_log['std_here_if_sure'], false);
 
 		\App\Repositories\LogRepository::deletePoll($pollid);
 		$Cache->delete_value('current_poll_content');
@@ -271,9 +271,9 @@ else {
 
   $pollcount = \App\Repositories\LogRepository::getPollCount();
   if ($pollcount == 0)
-  	stderr($lang_log['std_sorry'], $lang_log['std_no_polls']);
+  	\App\Support\LegacyResponse::abort($lang_log['std_sorry'], $lang_log['std_no_polls']);
   $polls = \App\Repositories\LogRepository::getPollsExceptFirst();
-  stdhead($lang_log['head_previous_polls']);
+  \App\Support\Html::stdhead($lang_log['head_previous_polls']);
   		logmenu("poll");
   		print("<table border=1 cellspacing=0 width=940 cellpadding=5>\n");
 		//print("<tr><td class=colhead align=center>".$lang_log['text_previous_polls']."</td></tr>\n");
@@ -346,7 +346,7 @@ else {
 }
 	print("</table>");
 		print($lang_log['time_zone_note']);
-		stdfoot();
+		\App\Support\Html::stdfoot();
 		die;
 		break;
 	}

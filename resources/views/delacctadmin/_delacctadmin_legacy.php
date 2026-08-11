@@ -10,20 +10,20 @@ if ($__server_REQUEST_METHOD == "POST")
 $userid = trim(\App\Support\SupportContext::getPost("userid"));
 
 if (!$userid)
-  stderr("Error", "Please fill out the form correctly.");
+  \App\Support\LegacyResponse::abort("Error", "Please fill out the form correctly.");
 
 $user = \App\Models\User::query()->where('id', $userid)->first();
 if (!$user)
-  stderr("Error", "Bad user id or password. Please verify that all entered information is correct.");
+  \App\Support\LegacyResponse::abort("Error", "Bad user id or password. Please verify that all entered information is correct.");
 $arr = $user->toArray();
 
 $id = $arr['id'];
 $name = $arr['username'];
 $userRep = new \App\Repositories\UserRepository();
 $userRep->destroy($id);
-stderr("Success", "The account <b>".htmlspecialchars($name)."</b> was deleted.",false);
+\App\Support\LegacyResponse::abort("Success", "The account <b>".htmlspecialchars($name)."</b> was deleted.", false);
 }
-stdhead("Delete account");
+\App\Support\Html::stdhead("Delete account");
 ?>
 <h1>Delete account</h1>
 <table border=1 cellspacing=0 cellpadding=5>
@@ -34,4 +34,4 @@ stdhead("Delete account");
 </form>
 </table>
 <?php
-stdfoot();
+\App\Support\Html::stdfoot();

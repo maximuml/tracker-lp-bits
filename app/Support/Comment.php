@@ -335,4 +335,12 @@ final class Comment
 
         return $html;
     }
+
+    /**
+     * @param  array<int, array<string, mixed>>  $rows
+     */
+    public static function tableVoid(array $rows, string $type, int|string $parentId, bool $review = false): void
+    {
+        echo self::table($rows, $type, $parentId, $review);
+    }
 }

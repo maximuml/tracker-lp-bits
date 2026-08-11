@@ -3,9 +3,9 @@ error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
 $__server_PHP_SELF = \App\Support\SupportContext::getServerValue('PHP_SELF');
 if (\App\Support\UserDisplay::currentClass() < UC_MODERATOR)
-	stderr("Error", "Permission denied.");
+	\App\Support\LegacyResponse::abort("Error", "Permission denied.");
 
-stdhead("Stats");
+\App\Support\Html::stdhead("Stats");
 ?>
 
 <STYLE TYPE="text/css" MEDIA=screen>
@@ -21,7 +21,7 @@ stdhead("Stats");
 </STYLE>
 
 <?php
-begin_main_frame();
+\App\Support\Frame::mainFrameOpen();
 
 $n_tor = \Nexus\Database\NexusDB::table('torrents')->count();
 $n_peers = \Nexus\Database\NexusDB::table('peers')->count();
@@ -49,11 +49,11 @@ $second->where('u.class', '>', 3)->groupBy('u.id');
 $upers = $first->union($second)->orderByRaw($orderby)->get();
 
 if ($upers->isEmpty())
-	stdmsg("Sorry...", "No uploaders.");
+	\App\Support\Html::stdMessage("Sorry...", "No uploaders.");
 else
 {
-	begin_frame("Uploader Activity", True);
-	begin_table();
+	\App\Support\Html::beginFrame("Uploader Activity", True);
+	\App\Support\Html::beginTable();
 	print("<tr>\n
 	<td class=colhead><a href=\"" . $__server_PHP_SELF . "?uporder=uploader&catorder=$catorder\" class=colheadlink>Uploader</a></td>\n
 	<td class=colhead><a href=\"" . $__server_PHP_SELF . "?uporder=lastul&catorder=$catorder\" class=colheadlink>Last Upload</a></td>\n
@@ -66,18 +66,18 @@ else
 	{
 		$uper = (array) $uper;
 		print("<tr><td>" . \App\Support\UserDisplay::username($uper['id']) . "</td>\n");
-		print("<td " . ($uper['last']?(">".$uper['last']." (".get_elapsed_time(strtotime($uper['last']))." ago)"):"align=center>---") . "</td>\n");
+		print("<td " . ($uper['last']?(">".$uper['last']." (".\App\Support\Format::getElapsedTime(strtotime($uper['last']))." ago)"):"align=center>---") . "</td>\n");
 		print("<td align=right>" . $uper['n_t'] . "</td>\n");
 		print("<td align=right>" . ($n_tor > 0?number_format(100 * $uper['n_t']/$n_tor,1)."%":"---") . "</td>\n");
 		print("<td align=right>" . $uper['n_p']."</td>\n");
 		print("<td align=right>" . ($n_peers > 0?number_format(100 * $uper['n_p']/$n_peers,1)."%":"---") . "</td></tr>\n");
 	}
-	end_table();
-	end_frame();
+	\App\Support\Html::endTable();
+	\App\Support\Html::endFrame();
 }
 
 if ($n_tor == 0)
-	stdmsg("Sorry...", "No categories defined!");
+	\App\Support\Html::stdMessage("Sorry...", "No categories defined!");
 else
 {
   if ($catorder == "lastul")
@@ -97,8 +97,8 @@ else
     ->orderByRaw($orderby)
     ->get();
 
-	begin_frame("Category Activity", True);
-	begin_table();
+	\App\Support\Html::beginFrame("Category Activity", True);
+	\App\Support\Html::beginTable();
 	print("<tr><td class=colhead><a href=\"" . $__server_PHP_SELF . "?uporder=$uporder&catorder=category\" class=colheadlink>Category</a></td>
 	<td class=colhead><a href=\"" . $__server_PHP_SELF . "?uporder=$uporder&catorder=lastul\" class=colheadlink>Last Upload</a></td>
 	<td class=colhead><a href=\"" . $__server_PHP_SELF . "?uporder=$uporder&catorder=torrents\" class=colheadlink>Torrents</a></td>
@@ -109,16 +109,16 @@ else
 	{
 		$cat = (array) $cat;
 		print("<tr><td class=rowhead>" . $cat['name'] . "</b></a></td>");
-		print("<td " . ($cat['last']?(">".$cat['last']." (".get_elapsed_time(strtotime($cat['last']))." ago)"):"align = center>---") ."</td>");
+		print("<td " . ($cat['last']?(">".$cat['last']." (".\App\Support\Format::getElapsedTime(strtotime($cat['last']))." ago)"):"align = center>---") ."</td>");
 		print("<td align=right>" . $cat['n_t'] . "</td>");
 		print("<td align=right>" . number_format(100 * $cat['n_t']/$n_tor,1) . "%</td>");
 		print("<td align=right>" . $cat['n_p'] . "</td>");
 		print("<td align=right>" . ($n_peers > 0?number_format(100 * $cat['n_p']/$n_peers,1)."%":"---") . "</td>\n");
 	}
-	end_table();
-	end_frame();
+	\App\Support\Html::endTable();
+	\App\Support\Html::endFrame();
 }
 
-end_main_frame();
-stdfoot();
+\App\Support\Frame::mainFrameClose();
+\App\Support\Html::stdfoot();
 return;

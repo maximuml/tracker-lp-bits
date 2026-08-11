@@ -79,11 +79,11 @@ final class CleanupService
             return 'forbidden';
         }
 
-        $tstart = \getmicrotime();
+        $tstart = \App\Support\Time::microtimeFloat();
 
         $progress = $this->runAll($forceAll, $printProgress);
 
-        $tend = \getmicrotime();
+        $tend = \App\Support\Time::microtimeFloat();
 
         $html = '<html><head><title>Do Clean-up</title></head><body>';
         $html .= '<p>clean-up in progress...please wait<br />';

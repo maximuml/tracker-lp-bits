@@ -3,16 +3,16 @@ error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
 $__server_REQUEST_METHOD = \App\Support\SupportContext::getServerValue('REQUEST_METHOD');
 if ($__server_REQUEST_METHOD != "POST")
-	stderr($lang_takecontact['std_error'], $lang_takecontact['std_method']);
+	\App\Support\LegacyResponse::abort($lang_takecontact['std_error'], $lang_takecontact['std_method']);
 
 $msg = trim(\App\Support\SupportContext::getPost("body"));
 $subject = trim(\App\Support\SupportContext::getPost("subject"));
 
 if (!$msg)
-	stderr($lang_takecontact['std_error'],$lang_takecontact['std_please_enter_something']);
+	\App\Support\LegacyResponse::abort($lang_takecontact['std_error'], $lang_takecontact['std_please_enter_something']);
 
 if (!$subject)
-	stderr($lang_takecontact['std_error'],$lang_takecontact['std_please_define_subject']);
+	\App\Support\LegacyResponse::abort($lang_takecontact['std_error'], $lang_takecontact['std_please_define_subject']);
 
 $added = "'" . date("Y-m-d H:i:s") . "'";
 $userid = $CURUSER['id'];
@@ -23,7 +23,7 @@ if (\App\Support\UserDisplay::currentClass() < UC_MODERATOR) {
 	if (strtotime($CURUSER['last_staffmsg']) > (TIMENOW - 60))
 	{
 		$secs = 60 - (TIMENOW - strtotime($CURUSER['last_staffmsg']));
-		stderr($lang_takecontact['std_error'],$lang_takecontact['std_message_flooding'].$secs.$lang_takecontact['std_second'].($secs == 1 ? '' : $lang_takecontact['std_s']).$lang_takecontact['std_before_sending_pm']);
+		\App\Support\LegacyResponse::abort($lang_takecontact['std_error'], $lang_takecontact['std_message_flooding'].$secs.$lang_takecontact['std_second'].($secs == 1 ? '' : $lang_takecontact['std_s']).$lang_takecontact['std_before_sending_pm']);
 	}
 }
 \App\Models\StaffMessage::add($userid, $subject, $msg);
@@ -38,7 +38,7 @@ if (\App\Support\SupportContext::getPost("returnto"))
 	return;
 }
 
-stdhead();
-stdmsg($lang_takecontact['std_succeeded'], $lang_takecontact['std_message_succesfully_sent']);
-stdfoot();
+\App\Support\Html::stdhead();
+\App\Support\Html::stdMessage($lang_takecontact['std_succeeded'], $lang_takecontact['std_message_succesfully_sent']);
+\App\Support\Html::stdfoot();
 return;

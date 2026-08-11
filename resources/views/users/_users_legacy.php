@@ -32,7 +32,7 @@ if ($country > 0)
 {
 	$q .= ($q ? "&" : "") . "country=$country";
 }
-stdhead($lang_users['head_users']);
+\App\Support\Html::stdhead($lang_users['head_users']);
 
 print($lang_users['text_users']);
 
@@ -82,7 +82,7 @@ $perpage = 50;
 $filters = ['search' => $search, 'class' => $class, 'country' => $country, 'letter' => $letter];
 $count = \App\Repositories\UserListingRepository::countUsers($filters);
 
-list($pagertop, $pagerbottom, $limit, $offset) = pager($perpage, $count, "users.php?".$q.($q ? "&" : ""));
+list($pagertop, $pagerbottom, $limit, $offset) = \App\Support\Pagination::pager($perpage, $count, "users.php?".$q.($q ? "&" : ""));
 
 print($pagertop);
 
@@ -98,5 +98,5 @@ print("<tr><td align=left>".\App\Support\UserDisplay::username($arr['id'])."</td
 print("</table>");
 print($pagerbottom);
 
-stdfoot();
+\App\Support\Html::stdfoot();
 return;

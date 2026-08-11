@@ -453,7 +453,7 @@ class TorrentRepository extends BaseRepository
             $item->share_ratio = $this->getShareRatio($item);
             $item->connect_time_total = $item->started->diffForHumans();
             $item->last_action_human = $item->last_action->diffForHumans();
-            $item->agent_human = htmlspecialchars(get_agent($item->peer_id, $item->agent));
+            $item->agent_human = htmlspecialchars(\App\Support\Strings::userAgentClient( $item->agent));
         }
         return $peers;
     }

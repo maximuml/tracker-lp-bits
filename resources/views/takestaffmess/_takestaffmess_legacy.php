@@ -3,26 +3,26 @@ error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
 $__server_REQUEST_METHOD = \App\Support\SupportContext::getServerValue('REQUEST_METHOD');
 if ($__server_REQUEST_METHOD != "POST")
-	stderr("Error", "Permission denied!");
+	\App\Support\LegacyResponse::abort("Error", "Permission denied!");
 
 if (\App\Support\UserDisplay::currentClass() < UC_ADMINISTRATOR)
-	stderr("Sorry", "Permission denied.");
+	\App\Support\LegacyResponse::abort("Sorry", "Permission denied.");
 
 $sender_id = (\App\Support\SupportContext::getPost('sender') == 'system' ? 0 : (int)$CURUSER['id']);
 $dt = date("Y-m-d H:i:s");
 $msg = trim(\App\Support\SupportContext::getPost('msg'));
 if (!$msg)
-	stderr("Error","Don't leave any fields blank.");
+	\App\Support\LegacyResponse::abort("Error", "Don't leave any fields blank.");
 $updateset = \App\Support\SupportContext::getPost('clases');
 if (is_array($updateset)) {
 	foreach ($updateset as &$class) {
         $class=intval($class);
-		if (!is_valid_id($class) && $class != 0)
-			stderr("Error","Invalid Class");
+		if (!\App\Support\Validators::isId($class) && $class != 0)
+			\App\Support\LegacyResponse::abort("Error", "Invalid Class");
 	}
 }else{
-	if (!is_valid_id($updateset) && $updateset != 0)
-		stderr("Error","Invalid Class");
+	if (!\App\Support\Validators::isId($updateset) && $updateset != 0)
+		\App\Support\LegacyResponse::abort("Error", "Invalid Class");
 }
 $subject = trim(\App\Support\SupportContext::getPost('subject'));
 $size = 10000;
@@ -35,7 +35,7 @@ if (!empty(\App\Support\SupportContext::getPost('classes'))) {
 }
 $conditions = apply_filter("role_query_conditions", $conditions, \App\Support\SupportContext::allPost());
 if (empty($conditions)) {
-    stderr("Error","No valid filter");
+    \App\Support\LegacyResponse::abort("Error", "No valid filter");
 }
 $whereStr = implode(' OR ', $conditions);
 while (true) {

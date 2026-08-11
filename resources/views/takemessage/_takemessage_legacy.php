@@ -5,24 +5,24 @@ error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
 $__server_REQUEST_METHOD = \App\Support\SupportContext::getServerValue('REQUEST_METHOD');
 if ($__server_REQUEST_METHOD != "POST")
-	stderr($lang_takemessage['std_error'], $lang_takemessage['std_permission_denied']);
+	\App\Support\LegacyResponse::abort($lang_takemessage['std_error'], $lang_takemessage['std_permission_denied']);
 
 	$origmsg = intval(\App\Support\SupportContext::getPost("origmsg") ?? 0);
 	$msg = trim(\App\Support\SupportContext::getPost("body"));
 	if (((\App\Support\SupportContext::getPost('forward') !== null)) && \App\Support\SupportContext::getPost('forward') == 1) //this is forwarding
 	{
 		if (!$origmsg)
-			stderr($lang_takemessage['std_error'], $lang_takemessage['std_invalid_id']);
+			\App\Support\LegacyResponse::abort($lang_takemessage['std_error'], $lang_takemessage['std_invalid_id']);
 		$origmsgRecord = \App\Models\Message::query()->where('id', $origmsg)
 		    ->where(function ($query) {
 		        $query->where('receiver', \App\Support\SupportContext::getGlobal('CURUSER')['id'])
 		              ->orWhere('sender', \App\Support\SupportContext::getGlobal('CURUSER')['id']);
 		    })->first();
 		if (!$origmsgRecord)
-			stderr($lang_takemessage['std_error'], $lang_takemessage['std_no_permission_forwarding']);
+			\App\Support\LegacyResponse::abort($lang_takemessage['std_error'], $lang_takemessage['std_no_permission_forwarding']);
 		$origmsgrow = $origmsgRecord->toArray();
 		if(!\App\Support\SupportContext::getPost('to'))
-			stderr($lang_takemessage['std_error'], $lang_takemessage['std_must_enter_username']);
+			\App\Support\LegacyResponse::abort($lang_takemessage['std_error'], $lang_takemessage['std_must_enter_username']);
 		$receiver = \App\Support\UserDisplay::userIdFromName(trim(\App\Support\SupportContext::getPost('to')));
         $locale = get_user_locale($receiver);
 		if ($origmsgrow['sender'] == 0)
@@ -40,11 +40,11 @@ if ($__server_REQUEST_METHOD != "POST")
 	else
 	{
 		$receiver = intval(\App\Support\SupportContext::getPost("receiver") ?? 0);
-		if (!is_valid_id($receiver) || ($origmsg && !is_valid_id($origmsg)))
-			stderr($lang_takemessage['std_error'],$lang_takemessage['std_invalid_id']);
+		if (!\App\Support\Validators::isId($receiver) || ($origmsg && !\App\Support\Validators::isId($origmsg)))
+			\App\Support\LegacyResponse::abort($lang_takemessage['std_error'], $lang_takemessage['std_invalid_id']);
 		$bodyadd = "";
 		if (!$msg)
-			stderr($lang_takemessage['std_error'],$lang_takemessage['std_please_enter_something']);
+			\App\Support\LegacyResponse::abort($lang_takemessage['std_error'], $lang_takemessage['std_please_enter_something']);
 	}
 	$save = \App\Support\SupportContext::getPost("save");
 	$returnto = \App\Support\SupportContext::getPost("returnto");
@@ -55,7 +55,7 @@ if ($__server_REQUEST_METHOD != "POST")
 		if (strtotime($CURUSER['last_pm']) > (TIMENOW - 10))
 		{
 			$secs = 60 - (TIMENOW - strtotime($CURUSER['last_pm']));
-			stderr($lang_takemessage['std_error'],$lang_takemessage['std_message_flooding_denied'].$secs.$lang_takemessage['std_before_sending_pm']);
+			\App\Support\LegacyResponse::abort($lang_takemessage['std_error'], $lang_takemessage['std_message_flooding_denied'].$secs.$lang_takemessage['std_before_sending_pm']);
 		}
 	}
 
@@ -68,14 +68,14 @@ if ($__server_REQUEST_METHOD != "POST")
 	    ->select('id', 'username', 'parked', 'email', 'acceptpms', 'notifs', \Nexus\Database\NexusDB::raw(\Nexus\Database\NexusDB::unixTimestampField('last_access') . ' as la'))
 	    ->first();
 	if (!$user)
-		stderr($lang_takemessage['std_error'], $lang_takemessage['std_user_not_exist']);
+		\App\Support\LegacyResponse::abort($lang_takemessage['std_error'], $lang_takemessage['std_user_not_exist']);
 	$user = (array) $user;
 
 	//Make sure recipient wants this message
 	if (!\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::STAFF_MEMBER))
 	{
 		if ($user["parked"] == "yes")
-		stderr($lang_takemessage['std_refused'], $lang_takemessage['std_account_parked']);
+		\App\Support\LegacyResponse::abort($lang_takemessage['std_refused'], $lang_takemessage['std_account_parked']);
 		if ($user["acceptpms"] == "yes")
 		{
 			$blocked = \Nexus\Database\NexusDB::table('blocks')
@@ -83,7 +83,7 @@ if ($__server_REQUEST_METHOD != "POST")
 			    ->where('blockid', $CURUSER["id"])
 			    ->count() > 0;
 			if ($blocked)
-			stderr($lang_takemessage['std_refused'], $lang_takemessage['std_user_blocks_your_pms']);
+			\App\Support\LegacyResponse::abort($lang_takemessage['std_refused'], $lang_takemessage['std_user_blocks_your_pms']);
 		}
 		elseif ($user["acceptpms"] == "friends")
 		{
@@ -92,10 +92,10 @@ if ($__server_REQUEST_METHOD != "POST")
 			    ->where('friendid', $CURUSER["id"])
 			    ->count() > 0;
 			if (!$isFriend)
-			stderr($lang_takemessage['std_refused'], $lang_takemessage['std_user_accepts_friends_pms']);
+			\App\Support\LegacyResponse::abort($lang_takemessage['std_refused'], $lang_takemessage['std_user_accepts_friends_pms']);
 		}
 		elseif ($user["acceptpms"] == "no")
-		stderr($lang_takemessage['std_refused'], $lang_takemessage['std_user_blocks_all_pms']);
+		\App\Support\LegacyResponse::abort($lang_takemessage['std_refused'], $lang_takemessage['std_user_blocks_all_pms']);
 	}
 
 	$subject = trim(\App\Support\SupportContext::getPost('subject'));
@@ -178,7 +178,7 @@ EOD;
 			if ($orig)
 			{
 				if ($orig->receiver != $CURUSER["id"])
-				stderr("w00t","This shouldn't happen.");
+				\App\Support\LegacyResponse::abort("w00t", "This shouldn't happen.");
 				if ($orig->saved == "no")
 				$orig->delete();
 				elseif ($orig->saved == "yes")
@@ -196,9 +196,9 @@ EOD;
 		die;
 	}
 
-	stdhead();
-	stdmsg($lang_takemessage['std_succeeded'], (($n_pms > 1) ? "$n".$lang_takemessage['std_messages_out_of']."$n_pms".$lang_takemessage['std_were'] : $lang_takemessage['std_message_was']).
+	\App\Support\Html::stdhead();
+	\App\Support\Html::stdMessage($lang_takemessage['std_succeeded'], (($n_pms > 1) ? "$n".$lang_takemessage['std_messages_out_of']."$n_pms".$lang_takemessage['std_were'] : $lang_takemessage['std_message_was']).
 	$lang_takemessage['std_successfully_sent'] . ($l ? " $l profile comment" . (($l>1) ? $lang_takemessage['std_s_were'] : $lang_takemessage['std_was']) . $lang_takemessage['std_updated'] : ""));
-stdfoot();
+\App\Support\Html::stdfoot();
 exit;
 ?>

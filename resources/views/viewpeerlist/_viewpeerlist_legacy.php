@@ -158,7 +158,7 @@ $seedBoxRep = \App\Support\SupportContext::getGlobal('seedBoxRep');
 		if ($e["downloaded"])
 		{
 			$ratio = floor(($e["uploaded"] / $e["downloaded"]) * 1000) / 1000;
-			$s .= "<td class=rowfollow align=\"center\" width=1%><font color=" . get_ratio_color($ratio) . "><nobr>" . number_format($ratio, 3) . "</nobr></font></td>\n";
+			$s .= "<td class=rowfollow align=\"center\" width=1%><font color=" . \App\Support\Ratio::color($ratio) . "><nobr>" . number_format($ratio, 3) . "</nobr></font></td>\n";
 		}
 		elseif ($e["uploaded"])
 		$s .= "<td class=rowfollow align=center width=1%>".$lang_viewpeerlist['text_inf']."</td>\n";
@@ -167,7 +167,7 @@ $seedBoxRep = \App\Support\SupportContext::getGlobal('seedBoxRep');
 		$s .= "<td class=rowfollow align=center width=1%><nobr>" . sprintf("%.2f%%", 100 * (1 - ($e["to_go"] / max(1, $torrent["size"])))) . "</nobr></td>\n";
 		$s .= "<td class=rowfollow align=center width=1%><nobr>" . \App\Support\Format::prettyTimeWithLocale($now - $e["st"]) . "</nobr></td>\n";
 		$s .= "<td class=rowfollow align=center width=1%><nobr>" . \App\Support\Format::prettyTimeWithLocale($now - $e["la"]) . "</nobr></td>\n";
-		$s .= "<td class=rowfollow align=center width=1%><nobr>" . htmlspecialchars(get_agent($e["peer_id"],$e["agent"])) . "</nobr></td>\n";
+		$s .= "<td class=rowfollow align=center width=1%><nobr>" . htmlspecialchars(\App\Support\Strings::userAgentClient($e["agent"])) . "</nobr></td>\n";
 		$s .= "</tr>\n";
 	}
 	$s .= "</table>\n";

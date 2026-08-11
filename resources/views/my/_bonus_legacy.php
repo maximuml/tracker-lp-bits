@@ -283,7 +283,7 @@ $allBonus = bonusarray();
 $lockSeconds = 10;
 $lockText = sprintf($lang_mybonus['lock_text'], $lockSeconds);
 if ($bonus_tweak == "disable" || $bonus_tweak == "disablesave")
-	stderr($lang_mybonus['std_sorry'],$lang_mybonus['std_karma_system_disabled'].($bonus_tweak == "disablesave" ? "<b>".$lang_mybonus['std_points_active']."</b>" : ""),false);
+	\App\Support\LegacyResponse::abort($lang_mybonus['std_sorry'], $lang_mybonus['std_karma_system_disabled'].($bonus_tweak == "disablesave" ? "<b>".$lang_mybonus['std_points_active']."</b>" : ""), false);
 
 $action = htmlspecialchars(\App\Support\SupportContext::getQuery('action') ?? '');
 $do = htmlspecialchars(\App\Support\SupportContext::getQuery('do') ?? '');
@@ -322,7 +322,7 @@ if ((isset($do))) {
 	else
 	$msg = '';
 }
-	stdhead($CURUSER['username'] . $lang_mybonus['head_karma_page']);
+	\App\Support\Html::stdhead($CURUSER['username'] . $lang_mybonus['head_karma_page']);
 
 	$bonus = number_format($CURUSER['seedbonus'], 1);
 if (!$action) {
@@ -471,7 +471,7 @@ print("</ul>");
 $seedBonusResult = calculate_seed_bonus($CURUSER['id']);
 $A = $seedBonusResult['A'];
 
-$bonusTableResult = build_bonus_table($CURUSER, $seedBonusResult, ['table_style' => 'width: 50%']);
+$bonusTableResult = \App\Support\Bonus::buildBonusTableForUser($CURUSER, $seedBonusResult, ['table_style' => 'width: 50%']);
 
 $percent = $seedBonusResult['seed_bonus'] * 100 / ($bzero_bonus + $perseeding_bonus * $maxseeding_bonus);
 print("<div align=\"center\">".$lang_mybonus['text_you_are_currently_getting'].round($seedBonusResult['seed_bonus'],3).$lang_mybonus['text_point'].add_s($seedBonusResult['seed_bonus']).$lang_mybonus['text_per_hour']." (A = ".round($A,1).")</div><table align=\"center\" border=\"0\" width=\"400\"><tr><td class=\"loadbarbg\" style='border: none; padding: 0px;'>");
@@ -540,7 +540,7 @@ print($lang_mybonus['text_howto_get_karma_five'].$uploadtorrent_bonus.$lang_mybo
 // Bonus exchange
 if ($action == "exchange") {
 	if (((\App\Support\SupportContext::getPost("userid") !== null)) || ((\App\Support\SupportContext::getPost("points") !== null)) || ((\App\Support\SupportContext::getPost("bonus") !== null)) || ((\App\Support\SupportContext::getPost("art") !== null)) || !((\App\Support\SupportContext::getPost('option') !== null)) || !(isset($allBonus[\App\Support\SupportContext::getPost('option')]))){
-		write_log("User " . $CURUSER["username"] . "," . $CURUSER["ip"] . " is trying to cheat at bonus system",'mod');
+		\App\Support\Log::writeWithContext("User " . $CURUSER["username"] . "," . $CURUSER["ip"] . " is trying to cheat at bonus system", 'mod');
 		die($lang_mybonus['text_cheat_alert']);
 	}
 	$option = intval(\App\Support\SupportContext::getPost("option") ?? 0);
@@ -558,7 +558,7 @@ if ($action == "exchange") {
         $lock = new \Nexus\Database\NexusLock($lockName, $lockSeconds);
         if (!$lock->get()) {
             do_log("[LOCKED], $lockName, $lockText");
-            nexus_redirect('mybonus.php?do=duplicated');
+            \App\Support\LegacyResponse::redirect('mybonus.php?do=duplicated');
         }
 		//=== trade for upload
 		if($art == "traffic") {
@@ -584,7 +584,7 @@ if ($action == "exchange") {
 //			$bonuscomment = date("Y-m-d") . " - " .$points. " Points for upload bonus.\n " .$bonuscomment;
 //			sql_query("UPDATE users SET uploaded = ".sqlesc($up).", seedbonus = seedbonus - $points, bonuscomment = ".sqlesc($bonuscomment)." WHERE id = ".sqlesc($userid)) or sqlerr(__FILE__, __LINE__);
             $bonusRep->consumeUserBonus($CURUSER['id'], $points, \App\Models\BonusLogs::BUSINESS_TYPE_EXCHANGE_UPLOAD, $points. " Points for uploaded.", ['uploaded' => $up]);
-			nexus_redirect("" . get_protocol_prefix() . "$BASEURL/mybonus.php?do=upload");
+			\App\Support\LegacyResponse::redirect("" . get_protocol_prefix() . "$BASEURL/mybonus.php?do=upload");
 			}
 		}
         if($art == "traffic_downloaded") {
@@ -595,20 +595,20 @@ if ($action == "exchange") {
                 $CURUSER['id'], $points, $CURUSER['downloaded'], $down
             ));
             $bonusRep->consumeUserBonus($CURUSER['id'], $points, \App\Models\BonusLogs::BUSINESS_TYPE_EXCHANGE_DOWNLOAD, $points. " Points for downloaded.", ['downloaded' => $down]);
-            nexus_redirect("" . get_protocol_prefix() . "$BASEURL/mybonus.php?do=download");
+            \App\Support\LegacyResponse::redirect("" . get_protocol_prefix() . "$BASEURL/mybonus.php?do=download");
         }
 		//=== trade for one month VIP status ***note "SET class = '10'" change "10" to whatever your VIP class number is
 		elseif($art == "class") {
 			if (\App\Support\UserDisplay::currentClass() >= UC_VIP) {
-				stdmsg($lang_mybonus['std_no_permission'],$lang_mybonus['std_class_above_vip'], 0);
-				stdfoot();
+				\App\Support\Html::stdMessage($lang_mybonus['std_no_permission'], $lang_mybonus['std_class_above_vip'], 0);
+				\App\Support\Html::stdfoot();
 				die;
 			}
 			$vip_until = date("Y-m-d H:i:s",(strtotime(date("Y-m-d H:i:s")) + 28*86400));
 //			$bonuscomment = date("Y-m-d") . " - " .$points. " Points for 1 month VIP Status.\n " .htmlspecialchars($bonuscomment);
 //			sql_query("UPDATE users SET class = '".UC_VIP."', vip_added = 'yes', vip_until = ".sqlesc($vip_until).", seedbonus = seedbonus - $points, bonuscomment=".sqlesc($bonuscomment)." WHERE id = ".sqlesc($userid)) or sqlerr(__FILE__, __LINE__);
             $bonusRep->consumeUserBonus($CURUSER['id'], $points, \App\Models\BonusLogs::BUSINESS_TYPE_BUY_VIP, $points. " Points for 1 month VIP Status.", ['class' => UC_VIP, 'vip_added' => 'yes', 'vip_until' => $vip_until]);
-			nexus_redirect("" . get_protocol_prefix() . "$BASEURL/mybonus.php?do=vip");
+			\App\Support\LegacyResponse::redirect("" . get_protocol_prefix() . "$BASEURL/mybonus.php?do=vip");
 		}
 		//=== trade for invites
 		elseif($art == "invite") {
@@ -619,7 +619,7 @@ if ($action == "exchange") {
 //			$bonuscomment = date("Y-m-d") . " - " .$points. " Points for invites.\n " .htmlspecialchars($bonuscomment);
 //			sql_query("UPDATE users SET invites = ".sqlesc($inv).", seedbonus = seedbonus - $points, bonuscomment=".sqlesc($bonuscomment)." WHERE id = ".sqlesc($userid)) or sqlerr(__FILE__, __LINE__);
             $bonusRep->consumeUserBonus($CURUSER['id'], $points, \App\Models\BonusLogs::BUSINESS_TYPE_EXCHANGE_INVITE, $points. " Points for invites.", ['invites' => $inv, ]);
-            nexus_redirect("" . get_protocol_prefix() . "$BASEURL/mybonus.php?do=invite");
+            \App\Support\LegacyResponse::redirect("" . get_protocol_prefix() . "$BASEURL/mybonus.php?do=invite");
 		}
         //=== temporary invite
         elseif($art == "tmp_invite") {
@@ -630,7 +630,7 @@ if ($action == "exchange") {
 //			$bonuscomment = date("Y-m-d") . " - " .$points. " Points for invites.\n " .htmlspecialchars($bonuscomment);
 //			sql_query("UPDATE users SET invites = ".sqlesc($inv).", seedbonus = seedbonus - $points, bonuscomment=".sqlesc($bonuscomment)." WHERE id = ".sqlesc($userid)) or sqlerr(__FILE__, __LINE__);
             $bonusRep->consumeToBuyTemporaryInvite($CURUSER['id']);
-            nexus_redirect("" . get_protocol_prefix() . "$BASEURL/mybonus.php?do=tmp_invite");
+            \App\Support\LegacyResponse::redirect("" . get_protocol_prefix() . "$BASEURL/mybonus.php?do=tmp_invite");
         }
 		//=== trade for special title
 		/**** the $words array are words that you DO NOT want the user to have... use to filter "bad words" & user class...
@@ -644,20 +644,20 @@ if ($action == "exchange") {
 //			$bonuscomment = date("Y-m-d") . " - " .$points. " Points for custom title. Old title is ".htmlspecialchars(trim($CURUSER["title"]))." and new title is $title\n " .htmlspecialchars($bonuscomment);
 //			sql_query("UPDATE users SET title = ".sqlesc($title).", seedbonus = seedbonus - $points, bonuscomment = ".sqlesc($bonuscomment)." WHERE id = ".sqlesc($userid)) or sqlerr(__FILE__, __LINE__);
             $bonusRep->consumeUserBonus($CURUSER['id'], $points, \App\Models\BonusLogs::BUSINESS_TYPE_CUSTOM_TITLE, $points. " Points for custom title. Old title is ".htmlspecialchars(trim($CURUSER["title"]))." and new title is $title.", ['title' => $title, ]);
-			nexus_redirect("" . get_protocol_prefix() . "$BASEURL/mybonus.php?do=title");
+			\App\Support\LegacyResponse::redirect("" . get_protocol_prefix() . "$BASEURL/mybonus.php?do=title");
 		}
 		elseif($art == 'gift_2') // charity giving
 		{
 			$points = intval(\App\Support\SupportContext::getPost("bonuscharity") ?? 0);
 			if ($points < 1000 || $points > 50000){
-				stdmsg($lang_mybonus['text_error'], $lang_mybonus['bonus_amount_not_allowed_two'], 0);
-				stdfoot();
+				\App\Support\Html::stdMessage($lang_mybonus['text_error'], $lang_mybonus['bonus_amount_not_allowed_two'], 0);
+				\App\Support\Html::stdfoot();
 				die();
 			}
 			$ratiocharity = \App\Support\SupportContext::getPost("ratiocharity");
 			if ($ratiocharity < 0.1 || $ratiocharity > 0.8){
-				stdmsg($lang_mybonus['text_error'], $lang_mybonus['bonus_ratio_not_allowed']);
-				stdfoot();
+				\App\Support\Html::stdMessage($lang_mybonus['text_error'], $lang_mybonus['bonus_ratio_not_allowed']);
+				\App\Support\Html::stdfoot();
 				die();
 			}
 			if($CURUSER['seedbonus'] >= $points) {
@@ -677,12 +677,12 @@ if ($action == "exchange") {
 				    ->whereRaw('downloaded > 10737418240')
 				    ->whereRaw('? > uploaded/downloaded', [$ratiocharity])
 				    ->increment('seedbonus', $charityPerUser);
-					nexus_redirect("" . get_protocol_prefix() . "$BASEURL/mybonus.php?do=charity");
+					\App\Support\LegacyResponse::redirect("" . get_protocol_prefix() . "$BASEURL/mybonus.php?do=charity");
 				}
 				else
 				{
-					stdmsg($lang_mybonus['std_sorry'], $lang_mybonus['std_no_users_need_charity']);
-					stdfoot();
+					\App\Support\Html::stdMessage($lang_mybonus['std_sorry'], $lang_mybonus['std_no_users_need_charity']);
+					\App\Support\Html::stdfoot();
 					die;
 				}
 			}
@@ -696,8 +696,8 @@ if ($action == "exchange") {
 			$receiver = \App\Models\User::query()->where('username', $usernamegift)->first(['id', 'seedbonus']);
 			$arr = $receiver ? $receiver->toArray() : [];
             if (empty($arr)) {
-                stdmsg($lang_mybonus['text_error'], $lang_mybonus['text_receiver_not_exists'], 0);
-                stdfoot();
+                \App\Support\Html::stdMessage($lang_mybonus['text_error'], $lang_mybonus['text_receiver_not_exists'], 0);
+                \App\Support\Html::stdfoot();
                 die;
             }
 			$useridgift = $arr['id'];
@@ -705,8 +705,8 @@ if ($action == "exchange") {
 //			$receiverbonuscomment = $arr['bonuscomment'];
 			if (!is_numeric($points) || $points < $bonusarray['points']) {
 				//write_log("User " . $CURUSER["username"] . "," . $CURUSER["ip"] . " is hacking bonus system",'mod');
-				stdmsg($lang_mybonus['text_error'], $lang_mybonus['bonus_amount_not_allowed']);
-				stdfoot();
+				\App\Support\Html::stdMessage($lang_mybonus['text_error'], $lang_mybonus['bonus_amount_not_allowed']);
+				\App\Support\Html::stdfoot();
 				die();
 			}
 			if($CURUSER['seedbonus'] >= $points) {
@@ -722,8 +722,8 @@ if ($action == "exchange") {
 				$points2receiver = number_format($aftertaxpoint,1);
 //				$newreceiverbonuscomment = date("Y-m-d") . " + " .$points2receiver. " Points (after tax) as a gift from ".($CURUSER["username"]).".\n " .htmlspecialchars($receiverbonuscomment);
 				if ($userid==$useridgift){
-					stdmsg($lang_mybonus['text_huh'], $lang_mybonus['text_karma_self_giving_warning'], 0);
-					stdfoot();
+					\App\Support\Html::stdMessage($lang_mybonus['text_huh'], $lang_mybonus['text_karma_self_giving_warning'], 0);
+					\App\Support\Html::stdfoot();
 					die;
 				}
 
@@ -748,7 +748,7 @@ if ($action == "exchange") {
 					'receiver' => $useridgift,
 				]);
 				$usernamegift = unesc(\App\Support\SupportContext::getPost("username"));
-                nexus_redirect("" . get_protocol_prefix() . "$BASEURL/mybonus.php?do=transfer");
+                \App\Support\LegacyResponse::redirect("" . get_protocol_prefix() . "$BASEURL/mybonus.php?do=transfer");
 			}
 			else{
 				print("<table width=\"97%\"><tr><td class=\"colhead\" align=\"left\" colspan=\"2\"><h1>".$lang_mybonus['text_oups']."</h1></td></tr>");
@@ -756,10 +756,10 @@ if ($action == "exchange") {
 			}
 		} elseif ($art == 'cancel_hr') {
 		    if (empty(\App\Support\SupportContext::getPost('hr_id'))) {
-		        stderr("Error","Invalid H&R ID: " . (\App\Support\SupportContext::getPost('hr_id') ?? ''), false, false);
+		        \App\Support\LegacyResponse::abort("Error", "Invalid H&R ID: " . (\App\Support\SupportContext::getPost('hr_id') ?? ''), false, false);
             }
             $bonusRep->consumeToCancelHitAndRun($userid, \App\Support\SupportContext::getPost('hr_id'));
-            nexus_redirect("" . get_protocol_prefix() . "$BASEURL/mybonus.php?do=cancel_hr");
+            \App\Support\LegacyResponse::redirect("" . get_protocol_prefix() . "$BASEURL/mybonus.php?do=cancel_hr");
 //        } elseif ($art == 'buy_medal') {
 //            if (empty(\App\Support\SupportContext::getPost('medal_id'))) {
 //                stderr("Error","Invalid Medal ID: " . (\App\Support\SupportContext::getPost('medal_id') ?? ''), false, false);
@@ -768,15 +768,15 @@ if ($action == "exchange") {
 //            nexus_redirect("" . get_protocol_prefix() . "$BASEURL/mybonus.php?do=buy_medal");
         } elseif ($art == 'attendance_card') {
             $bonusRep->consumeToBuyAttendanceCard($userid);
-            nexus_redirect("" . get_protocol_prefix() . "$BASEURL/mybonus.php?do=attendance_card");
+            \App\Support\LegacyResponse::redirect("" . get_protocol_prefix() . "$BASEURL/mybonus.php?do=attendance_card");
         } elseif ($art == 'rainbow_id') {
             $bonusRep->consumeToBuyRainbowId($userid);
-            nexus_redirect("" . get_protocol_prefix() . "$BASEURL/mybonus.php?do=rainbow_id");
+            \App\Support\LegacyResponse::redirect("" . get_protocol_prefix() . "$BASEURL/mybonus.php?do=rainbow_id");
         } elseif ($art == 'change_username_card') {
             $bonusRep->consumeToBuyChangeUsernameCard($userid);
-            nexus_redirect("" . get_protocol_prefix() . "$BASEURL/mybonus.php?do=change_username_card");
+            \App\Support\LegacyResponse::redirect("" . get_protocol_prefix() . "$BASEURL/mybonus.php?do=change_username_card");
         }
 	}
 }
-stdfoot();
+\App\Support\Html::stdfoot();
 ?>

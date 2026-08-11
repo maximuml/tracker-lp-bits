@@ -102,7 +102,7 @@ class TorrentResource extends Resource
             ->columns([
                 TextColumn::make('id')->sortable(),
                 TextColumn::make('basic_category.name')->label(__('label.torrent.category')),
-                TextColumn::make('name')->formatStateUsing(fn ($record) => torrent_name_for_admin($record, true))
+                TextColumn::make('name')->formatStateUsing(fn ($record) => \App\Support\TorrentAccess::adminName($record, true))
                     ->label(__('label.name'))
                     ->searchable(query: function (Builder $query, string $search) {
                         return $query->where("name", "like", "%{$search}%");

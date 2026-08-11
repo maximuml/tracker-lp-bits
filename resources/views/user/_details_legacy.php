@@ -91,36 +91,36 @@ if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::MANAGE_USER_
     $userIdDisplay .= "&nbsp;[$userManageSystemText]";
 }
 if (($user["privacy"] != "strong") OR (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::MANAGE_USER_BASIC_INFO)) || $CURUSER['id'] == $user['id']){
-    tr_small($lang_userdetails['text_user_id'], $userIdDisplay, 1);
+    \App\Support\Html::trSmall($lang_userdetails['text_user_id'], $userIdDisplay, 1);
     $tmpInviteCount = $userInfo->temporary_invites()->count();
 	if ($CURUSER['id'] == $user['id'] || \App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::VIEW_INVITE)){
 	if ($user["invites"] <= 0 && $tmpInviteCount <= 0)
-	tr_small($lang_userdetails['row_invitation'], $lang_userdetails['text_no_invitation'], 1);
+	\App\Support\Html::trSmall($lang_userdetails['row_invitation'], $lang_userdetails['text_no_invitation'], 1);
 	else
-	tr_small($lang_userdetails['row_invitation'], "<a href=\"invite.php?id=".$user['id']."\" title=\"".$lang_userdetails['link_send_invitation']."\">".sprintf('%s(%s)', $user['invites'], $tmpInviteCount)."</a>", 1);}
+	\App\Support\Html::trSmall($lang_userdetails['row_invitation'], "<a href=\"invite.php?id=".$user['id']."\" title=\"".$lang_userdetails['link_send_invitation']."\">".sprintf('%s(%s)', $user['invites'], $tmpInviteCount)."</a>", 1);}
 	else{
 	if ($CURUSER['id'] != $user['id'] || \App\Support\UserDisplay::currentClass() != $viewinvite_class){
 	if ($user["invites"] <= 0)
-	tr_small($lang_userdetails['row_invitation'], $lang_userdetails['text_no_invitation'], 1);
+	\App\Support\Html::trSmall($lang_userdetails['row_invitation'], $lang_userdetails['text_no_invitation'], 1);
 	else
-	tr($lang_userdetails['row_invitation'], $user['invites'], 1);}
+	\App\Support\Html::tr($lang_userdetails['row_invitation'], $user['invites'], 1);}
 	}
 	if ($user["invited_by"] > 0) {
-		tr_small($lang_userdetails['row_invited_by'], \App\Support\UserDisplay::username($user['invited_by']), 1);
+		\App\Support\Html::trSmall($lang_userdetails['row_invited_by'], \App\Support\UserDisplay::username($user['invited_by']), 1);
 	}
-	tr_small($lang_userdetails['row_join_date'], $joindate, 1);
-	tr_small($lang_userdetails['row_last_seen'], $lastseen, 1);
+	\App\Support\Html::trSmall($lang_userdetails['row_join_date'], $joindate, 1);
+	\App\Support\Html::trSmall($lang_userdetails['row_last_seen'], $lastseen, 1);
 if ($where_tweak == "yes") {
-	tr_small($lang_userdetails['row_last_seen_location'], $user['page'], 1);
+	\App\Support\Html::trSmall($lang_userdetails['row_last_seen_location'], $user['page'], 1);
 }
 if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::VIEW_USER_CONFIDENTIAL_INFO) OR $user["privacy"] == "low" ||  $user["id"] == $CURUSER["id"]) {
-	tr_small($lang_userdetails['row_email'], "<a href=\"mailto:".$user['email']."\">".$user['email']."</a>", 1);
+	\App\Support\Html::trSmall($lang_userdetails['row_email'], "<a href=\"mailto:".$user['email']."\">".$user['email']."</a>", 1);
 }
 if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::VIEW_USER_CONFIDENTIAL_INFO)) {
 	$iphistory = \App\Repositories\UserDetailRepository::getIplogCount($id);
 
 	if ($iphistory > 0)
-	tr_small($lang_userdetails['row_ip_history'], $lang_userdetails['text_user_earlier_used']."<b><a href=\"iphistory.php?id=" . $user['id'] . "\">" . $iphistory. $lang_userdetails['text_different_ips'].add_s($iphistory, true)."</a></b>", 1);
+	\App\Support\Html::trSmall($lang_userdetails['row_ip_history'], $lang_userdetails['text_user_earlier_used']."<b><a href=\"iphistory.php?id=" . $user['id'] . "\">" . $iphistory. $lang_userdetails['text_different_ips'].add_s($iphistory, true)."</a></b>", 1);
 }
 $seedBoxRep = new \App\Repositories\SeedBoxRepository();
 if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::VIEW_USER_CONFIDENTIAL_INFO) ||  $user["id"] == $CURUSER["id"])
@@ -133,7 +133,7 @@ if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::VIEW_USER_CO
 	else $locationinfo = "";
 //    $ip = $user["id"] == $CURUSER["id"] ? hide_text($user['ip']) : $user['ip'];
     $ip = $user["ip"];
-	tr_small($lang_userdetails['row_ip_address'], hide_text($ip.$locationinfo.$seedBoxIcon), 1);
+	\App\Support\Html::trSmall($lang_userdetails['row_ip_address'], \App\Support\Strings::hidden($ip.$locationinfo.$seedBoxIcon), 1);
 }
 $clientselect = '';
 $peerRows = \App\Repositories\UserDetailRepository::getPeers((int)$user['id']);
@@ -143,10 +143,10 @@ if (!empty($peerRows))
 	foreach ($peerRows as $arr)
 	{
 	    $clientselect .= "<tr>";
-		$clientselect .= sprintf('<td>%s</td>', get_agent($arr['peer_id'], $arr['agent']));
+		$clientselect .= sprintf('<td>%s</td>', \App\Support\Strings::userAgentClient( $arr['agent']));
 		if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::VIEW_USER_CONFIDENTIAL_INFO) ||  $user["id"] == $CURUSER["id"]) {
-            $v4 = $user["id"] == $CURUSER["id"] ? hide_text($arr['ipv4']) : $arr['ipv4'];
-            $v6 = $user["id"] == $CURUSER["id"] ? hide_text($arr['ipv6']) : $arr['ipv6'];
+            $v4 = $user["id"] == $CURUSER["id"] ? \App\Support\Strings::hidden($arr['ipv4']) : $arr['ipv4'];
+            $v6 = $user["id"] == $CURUSER["id"] ? \App\Support\Strings::hidden($arr['ipv6']) : $arr['ipv6'];
             $clientselect .= sprintf('<td>%s</td><td>%s</td><td>%s</td>', $v4.$seedBoxRep->renderIcon($arr['ipv4'], $user['id']), $v6.$seedBoxRep->renderIcon($arr['ipv6'], $user['id']), $arr['port']);
         } else {
             $clientselect .= sprintf('<td>%s</td><td>%s</td><td>%s</td>', '---', '---', '---');
@@ -156,7 +156,7 @@ if (!empty($peerRows))
 	$clientselect .= '</table>';
 }
 if ($clientselect)
-	tr_small($lang_userdetails['row_bt_client'], $clientselect, 1);
+	\App\Support\Html::trSmall($lang_userdetails['row_bt_client'], $clientselect, 1);
 
 
 //真实分享、上传、下载率显示
@@ -167,33 +167,33 @@ if ($user["downloaded"] > 0 && $true_download > 0)
 {
 	$sr = floor($user["uploaded"] / $user["downloaded"] * 1000) / 1000;
 	$true_ratio = floor($true_upload / $true_download * 1000) / 1000;
-	$sr = "<tr><td class=\"embedded\"><strong>" . $lang_userdetails['row_share_ratio'] . "</strong>:  <font color=\"" . get_ratio_color($sr) . "\">" . number_format($sr, 3) . "</font>（<strong>".$lang_userdetails['row_real_share_ratio']."</strong>：".number_format($true_ratio, 3)."）</td><td class=\"embedded\">&nbsp;&nbsp;" . get_ratio_img($sr) . "</td></tr>";
+	$sr = "<tr><td class=\"embedded\"><strong>" . $lang_userdetails['row_share_ratio'] . "</strong>:  <font color=\"" . \App\Support\Ratio::color($sr) . "\">" . number_format($sr, 3) . "</font>（<strong>".$lang_userdetails['row_real_share_ratio']."</strong>：".number_format($true_ratio, 3)."）</td><td class=\"embedded\">&nbsp;&nbsp;" . get_ratio_img($sr) . "</td></tr>";
 
 }
 //end
 
 $xfer = "<tr><td class=\"embedded\"><strong>" . $lang_userdetails['row_uploaded'] . "</strong>:  ". \App\Support\Format::size($user["uploaded"]) . "</td><td class=\"embedded\">&nbsp;&nbsp;<strong>" . $lang_userdetails['row_downloaded'] . "</strong>:  " . \App\Support\Format::size($user["downloaded"]) . "</td></tr>";
 $true_xfer = "<tr><td class=\"embedded\"><strong>" . $lang_userdetails['row_real_uploaded'] . "</strong>:  ". \App\Support\Format::size($true_upload) . "</td><td class=\"embedded\">&nbsp;&nbsp;<strong>" . $lang_userdetails['row_real_downloaded'] . "</strong>:  " . \App\Support\Format::size($true_download) . "</td><td class=\"embedded text-muted\">&nbsp;&nbsp;" . $lang_userdetails['row_real_ps'] . "</td></tr>";
-tr_small($lang_userdetails['row_transfer'], "<table border=\"0\" cellspacing=\"0\" cellpadding=\"0\">" . ($sr ?? '') . $xfer .  $true_xfer . "</table>", 1);
+\App\Support\Html::trSmall($lang_userdetails['row_transfer'], "<table border=\"0\" cellspacing=\"0\" cellpadding=\"0\">" . ($sr ?? '') . $xfer .  $true_xfer . "</table>", 1);
 
 
 if ($user["leechtime"] > 0)
 {
 	$slr = floor($user["seedtime"] / $user["leechtime"] * 1000) / 1000;
-	$slr = "<tr><td class=\"embedded\"><strong>" . $lang_userdetails['text_seeding_leeching_time_ratio'] . "</strong>:  <font color=\"" . get_ratio_color($slr) . "\">" . number_format($slr, 3) . "</font></td><td class=\"embedded\">&nbsp;&nbsp;" . get_ratio_img($slr) . "</td></tr>";
+	$slr = "<tr><td class=\"embedded\"><strong>" . $lang_userdetails['text_seeding_leeching_time_ratio'] . "</strong>:  <font color=\"" . \App\Support\Ratio::color($slr) . "\">" . number_format($slr, 3) . "</font></td><td class=\"embedded\">&nbsp;&nbsp;" . get_ratio_img($slr) . "</td></tr>";
 }
 
 $slt = "<tr><td class=\"embedded\"><strong>" . $lang_userdetails['text_seeding_time'] . "</strong>:  ". \App\Support\Format::prettyTimeWithLocale($user["seedtime"]) . "</td><td class=\"embedded\">&nbsp;&nbsp;<strong>" . $lang_userdetails['text_leeching_time'] . "</strong>:  " . \App\Support\Format::prettyTimeWithLocale($user["leechtime"]) . "</td><td class=\"embedded text-muted\">&nbsp;&nbsp;(" . nexus_trans('label.updated_at') . ": " . $user['seed_time_updated_at'] . ")</td></tr>";
 
-	tr_small($lang_userdetails['row_sltime'], "<table border=\"0\" cellspacing=\"0\" cellpadding=\"0\">" . ($slr ?? '') . $slt . "</table>", 1);
+	\App\Support\Html::trSmall($lang_userdetails['row_sltime'], "<table border=\"0\" cellspacing=\"0\" cellpadding=\"0\">" . ($slr ?? '') . $slt . "</table>", 1);
 
-tr_small($lang_userdetails['row_gender'], $gender, 1);
+\App\Support\Html::trSmall($lang_userdetails['row_gender'], $gender, 1);
 
 if (($user['donated'] > 0 || $user['donated_cny'] > 0 )&& (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::VIEW_USER_CONFIDENTIAL_INFO) || $CURUSER["id"] == $user["id"]))
-tr_small($lang_userdetails['row_donated'], "$".htmlspecialchars($user['donated'])."&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;".htmlspecialchars($user['donated_cny']), 1);
+\App\Support\Html::trSmall($lang_userdetails['row_donated'], "$".htmlspecialchars($user['donated'])."&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;".htmlspecialchars($user['donated_cny']), 1);
 
 if ($user["avatar"])
-tr_small($lang_userdetails['row_avatar'], return_avatar_image(htmlspecialchars(trim($user["avatar"]))), 1);
+\App\Support\Html::trSmall($lang_userdetails['row_avatar'], return_avatar_image(htmlspecialchars(trim($user["avatar"]))), 1);
 
 $uclass = get_user_class_image($user["class"]);
 $utitle = \App\Support\UserClass::name($user["class"],false,false,true);
@@ -201,7 +201,7 @@ $uclassImg = "<img alt=\"".\App\Support\UserClass::name($user["class"],false,fal
 if ($user['class'] == UC_VIP && !empty($user['vip_until']) && strtotime($user['vip_until'])) {
     $uclassImg .= sprintf('%s: %s', $lang_userdetails['row_vip_until'], $user['vip_until']);
 }
-tr_small($lang_userdetails['row_class'], $uclassImg, 1);
+\App\Support\Html::trSmall($lang_userdetails['row_class'], $uclassImg, 1);
 
 //User meta
 $metas = $userRep->listMetas($user['id']);
@@ -269,46 +269,46 @@ if ($metas->has($metaKey)) {
 }
 
 if (!empty($props)) {
-    tr_small($lang_userdetails['row_user_props'], sprintf('<div style="display: flex;align-items: center">%s</div>', implode('&nbsp;|&nbsp;', $props)), 1);
+    \App\Support\Html::trSmall($lang_userdetails['row_user_props'], sprintf('<div style="display: flex;align-items: center">%s</div>', implode('&nbsp;|&nbsp;', $props)), 1);
 }
 
 do_action('user_detail_rows', $user['id'], 'web');
 
-tr_small($lang_userdetails['row_torrent_comment'], ($torrentcomments && ($user["id"] == $CURUSER["id"] || \App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::VIEW_USER_HISTORY)) ? "<a href=\"userhistory.php?action=viewcomments&amp;id=".$id."\" title=\"".$lang_userdetails['link_view_comments']."\">".$torrentcomments."</a>" : $torrentcomments), 1);
+\App\Support\Html::trSmall($lang_userdetails['row_torrent_comment'], ($torrentcomments && ($user["id"] == $CURUSER["id"] || \App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::VIEW_USER_HISTORY)) ? "<a href=\"userhistory.php?action=viewcomments&amp;id=".$id."\" title=\"".$lang_userdetails['link_view_comments']."\">".$torrentcomments."</a>" : $torrentcomments), 1);
 
-tr_small($lang_userdetails['row_forum_posts'], ($forumposts && ($user["id"] == $CURUSER["id"] || \App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::VIEW_USER_HISTORY)) ? "<a href=\"userhistory.php?action=viewposts&amp;id=".$id."\" title=\"".$lang_userdetails['link_view_posts']."\">".$forumposts."</a>" : $forumposts), 1);
+\App\Support\Html::trSmall($lang_userdetails['row_forum_posts'], ($forumposts && ($user["id"] == $CURUSER["id"] || \App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::VIEW_USER_HISTORY)) ? "<a href=\"userhistory.php?action=viewposts&amp;id=".$id."\" title=\"".$lang_userdetails['link_view_posts']."\">".$forumposts."</a>" : $forumposts), 1);
 
 if ($user["id"] == $CURUSER["id"] || \App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::VIEW_USER_HISTORY)) {
     if (\App\Models\HitAndRun::getIsEnabled()) {
         $hrStatus = (new \App\Repositories\HitAndRunRepository())->getStatusStats($user['id']);
-        tr_small('H&R', sprintf('<a href="myhr.php?userid=%s" target="_blank">%s</a>', $user['id'], $hrStatus), 1);
+        \App\Support\Html::trSmall('H&R', sprintf('<a href="myhr.php?userid=%s" target="_blank">%s</a>', $user['id'], $hrStatus), 1);
     }
 
     $bonusLogText = sprintf('&nbsp;&nbsp;<a href="bonus-log.php?uid=%s" target="_blank" class="altlink">[%s]</a>', $user['id'], nexus_trans("bonus-log.view_detail"));
-    tr_small($lang_userdetails['row_karma_points'], number_format($user['seedbonus'], 1) . $bonusLogText, 1);
-    tr_small($lang_functions['text_seed_points'], number_format($user['seed_points'], 1) . "&nbsp;&nbsp;<span class='text-muted'>(" . nexus_trans('label.updated_at') . ": " . $user['seed_points_updated_at'] . ")</span>", 1);
+    \App\Support\Html::trSmall($lang_userdetails['row_karma_points'], number_format($user['seedbonus'], 1) . $bonusLogText, 1);
+    \App\Support\Html::trSmall($lang_functions['text_seed_points'], number_format($user['seed_points'], 1) . "&nbsp;&nbsp;<span class='text-muted'>(" . nexus_trans('label.updated_at') . ": " . $user['seed_points_updated_at'] . ")</span>", 1);
 }
 
 if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::MANAGE_USER_BASIC_INFO) && $user["class"] < \App\Support\UserDisplay::currentClass()) {
-    $bonusTable = build_bonus_table($user);
-    tr_small($lang_userdetails['text_bonus_table'], $bonusTable['table'], 1);
+    $bonusTable = \App\Support\Bonus::buildBonusTableForUser($user);
+    \App\Support\Html::trSmall($lang_userdetails['text_bonus_table'], $bonusTable['table'], 1);
 }
 
 if ($user["ip"] && (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::TORRENT_HISTORY) || $user["id"] == $CURUSER["id"])){
 
-tr_small($lang_userdetails['row_uploaded_torrents'], "<a href=\"javascript: getusertorrentlistajax('".$user['id']."', 'uploaded', 'ka'); klappe_news('a')\"><img class=\"plus\" src=\"pic/trans.gif\" id=\"pica\" alt=\"Show/Hide\" title=\"".$lang_userdetails['title_show_or_hide'] ."\" />   <u>".$lang_userdetails['text_show_or_hide']."</u></a><div id=\"ka\" style=\"display: none;\" data-type='uploaded'></div>", 1);
+\App\Support\Html::trSmall($lang_userdetails['row_uploaded_torrents'], "<a href=\"javascript: getusertorrentlistajax('".$user['id']."', 'uploaded', 'ka'); klappe_news('a')\"><img class=\"plus\" src=\"pic/trans.gif\" id=\"pica\" alt=\"Show/Hide\" title=\"".$lang_userdetails['title_show_or_hide'] ."\" />   <u>".$lang_userdetails['text_show_or_hide']."</u></a><div id=\"ka\" style=\"display: none;\" data-type='uploaded'></div>", 1);
 
 
-tr_small($lang_userdetails['row_current_seeding'], "<a href=\"javascript: getusertorrentlistajax('".$user['id']."', 'seeding', 'ka1'); klappe_news('a1')\"><img class=\"plus\" src=\"pic/trans.gif\" id=\"pica1\" alt=\"Show/Hide\" title=\"".$lang_userdetails['title_show_or_hide']."\" />   <u>".$lang_userdetails['text_show_or_hide']."</u></a><div id=\"ka1\" style=\"display: none;\" data-type='seeding'></div>", 1);
+\App\Support\Html::trSmall($lang_userdetails['row_current_seeding'], "<a href=\"javascript: getusertorrentlistajax('".$user['id']."', 'seeding', 'ka1'); klappe_news('a1')\"><img class=\"plus\" src=\"pic/trans.gif\" id=\"pica1\" alt=\"Show/Hide\" title=\"".$lang_userdetails['title_show_or_hide']."\" />   <u>".$lang_userdetails['text_show_or_hide']."</u></a><div id=\"ka1\" style=\"display: none;\" data-type='seeding'></div>", 1);
 
 
-tr_small($lang_userdetails['row_current_leeching'], "<a href=\"javascript: getusertorrentlistajax('".$user['id']."', 'leeching', 'ka2'); klappe_news('a2')\"><img class=\"plus\" src=\"pic/trans.gif\" id=\"pica2\" alt=\"Show/Hide\" title=\"".$lang_userdetails['title_show_or_hide']."\" />   <u>".$lang_userdetails['text_show_or_hide']."</u></a><div id=\"ka2\" style=\"display: none;\" data-type='leeching'></div>", 1);
+\App\Support\Html::trSmall($lang_userdetails['row_current_leeching'], "<a href=\"javascript: getusertorrentlistajax('".$user['id']."', 'leeching', 'ka2'); klappe_news('a2')\"><img class=\"plus\" src=\"pic/trans.gif\" id=\"pica2\" alt=\"Show/Hide\" title=\"".$lang_userdetails['title_show_or_hide']."\" />   <u>".$lang_userdetails['text_show_or_hide']."</u></a><div id=\"ka2\" style=\"display: none;\" data-type='leeching'></div>", 1);
 
 
-tr_small($lang_userdetails['row_completed_torrents'], "<a href=\"javascript: getusertorrentlistajax('".$user['id']."', 'completed', 'ka3'); klappe_news('a3')\"><img class=\"plus\" src=\"pic/trans.gif\" id=\"pica3\" alt=\"Show/Hide\" title=\"".$lang_userdetails['title_show_or_hide']."\" />   <u>".$lang_userdetails['text_show_or_hide']."</u></a><div id=\"ka3\" style=\"display: none;\" data-type='completed'></div>", 1);
+\App\Support\Html::trSmall($lang_userdetails['row_completed_torrents'], "<a href=\"javascript: getusertorrentlistajax('".$user['id']."', 'completed', 'ka3'); klappe_news('a3')\"><img class=\"plus\" src=\"pic/trans.gif\" id=\"pica3\" alt=\"Show/Hide\" title=\"".$lang_userdetails['title_show_or_hide']."\" />   <u>".$lang_userdetails['text_show_or_hide']."</u></a><div id=\"ka3\" style=\"display: none;\" data-type='completed'></div>", 1);
 
 
-tr_small($lang_userdetails['row_incomplete_torrents'], "<a href=\"javascript: getusertorrentlistajax('".$user['id']."', 'incomplete', 'ka4'); klappe_news('a4')\"><img class=\"plus\" src=\"pic/trans.gif\" id=\"pica4\" alt=\"Show/Hide\" title=\"".$lang_userdetails['title_show_or_hide']."\" />   <u>".$lang_userdetails['text_show_or_hide']."</u></a><div id=\"ka4\" style=\"display: none;\" data-type='incomplete'></div>", 1);
+\App\Support\Html::trSmall($lang_userdetails['row_incomplete_torrents'], "<a href=\"javascript: getusertorrentlistajax('".$user['id']."', 'incomplete', 'ka4'); klappe_news('a4')\"><img class=\"plus\" src=\"pic/trans.gif\" id=\"pica4\" alt=\"Show/Hide\" title=\"".$lang_userdetails['title_show_or_hide']."\" />   <u>".$lang_userdetails['text_show_or_hide']."</u></a><div id=\"ka4\" style=\"display: none;\" data-type='incomplete'></div>", 1);
 }
 if ($user["info"])
 	print("<tr><td align=\"left\" colspan=\"2\" class=\"text\">" . \App\Support\Format::formatComment($user["info"],false) . "</td></tr>\n");
@@ -341,45 +341,45 @@ print("</table>\n");
 
 if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::MANAGE_USER_BASIC_INFO) && $user["class"] < \App\Support\UserDisplay::currentClass())
 {
-	begin_frame($lang_userdetails['text_edit_user'], true);
+	\App\Support\Html::beginFrame($lang_userdetails['text_edit_user'], true);
 	print("<form method=\"post\" action=\"modtask.php\">");
 	print("<input type=\"hidden\" name=\"action\" value=\"edituser\" />");
 	print("<input type=\"hidden\" name=\"userid\" value=\"".$id."\" />");
 	print("<input type=\"hidden\" name=\"returnto\" value=\"".htmlspecialchars("userdetails.php?id=$id")."\" />");
 	print("<table width=\"100%\" class=\"main\" border=\"1\" cellspacing=\"0\" cellpadding=\"5\">\n");
-	tr($lang_userdetails['row_title'], "<input type=\"text\" size=\"60\" name=\"title\" value=\"" . htmlspecialchars(trim((string)$user['title'])) . "\" />", 1);
+	\App\Support\Html::tr($lang_userdetails['row_title'], "<input type=\"text\" size=\"60\" name=\"title\" value=\"" . htmlspecialchars(trim((string)$user['title'])) . "\" />", 1);
 	$avatar = htmlspecialchars(trim((string)$user["avatar"]));
 
-	tr($lang_userdetails['row_privacy_level'], "<input type=\"radio\" name=\"privacy\" value=\"low\"".($user["privacy"] == "low" ? " checked=\"checked\"" : "")." />".$lang_userdetails['radio_low']."<input type=\"radio\" name=\"privacy\" value=\"normal\"".($user["privacy"] == "normal" ? " checked=\"checked\"" : "")." />".$lang_userdetails['radio_normal']."<input type=\"radio\" name=\"privacy\" value=\"strong\"".($user["privacy"] == "strong" ? " checked=\"checked\"" : "")." />".$lang_userdetails['radio_strong'], 1);
-	tr($lang_userdetails['row_avatar_url'], "<input type=\"text\" size=\"60\" name=\"avatar\" value=\"".$avatar."\" />", 1);
+	\App\Support\Html::tr($lang_userdetails['row_privacy_level'], "<input type=\"radio\" name=\"privacy\" value=\"low\"".($user["privacy"] == "low" ? " checked=\"checked\"" : "")." />".$lang_userdetails['radio_low']."<input type=\"radio\" name=\"privacy\" value=\"normal\"".($user["privacy"] == "normal" ? " checked=\"checked\"" : "")." />".$lang_userdetails['radio_normal']."<input type=\"radio\" name=\"privacy\" value=\"strong\"".($user["privacy"] == "strong" ? " checked=\"checked\"" : "")." />".$lang_userdetails['radio_strong'], 1);
+	\App\Support\Html::tr($lang_userdetails['row_avatar_url'], "<input type=\"text\" size=\"60\" name=\"avatar\" value=\"".$avatar."\" />", 1);
 	$signature = trim((string)$user["signature"]);
-	tr($lang_userdetails['row_signature'], "<textarea cols=\"60\" rows=\"6\" name=\"signature\">".$signature."</textarea>", 1);
+	\App\Support\Html::tr($lang_userdetails['row_signature'], "<textarea cols=\"60\" rows=\"6\" name=\"signature\">".$signature."</textarea>", 1);
 
 	if (\App\Support\UserDisplay::currentClass() == UC_STAFFLEADER)
 	{
-		tr($lang_userdetails['row_donor_status'], "<input type=\"radio\" name=\"donor\" value=\"yes\"" .($user["donor"] == "yes" ? " checked=\"checked\"" : "")." />".$lang_userdetails['radio_yes']." <input type=\"radio\" name=\"donor\" value=\"no\"" .($user["donor"] == "no" ? " checked=\"checked\"" : "").">".$lang_userdetails['radio_no'], 1);
-		tr($lang_userdetails['row_donated'], "USD: <input type=\"text\" size=\"5\" name=\"donated\" value=\"" . htmlspecialchars((string)$user['donated']) . "\" />&nbsp;&nbsp;&nbsp;&nbsp;CNY: <input type=\"text\" size=\"5\" name=\"donated_cny\" value=\"" . htmlspecialchars((string)$user['donated_cny']) . "\" />" . $lang_userdetails['text_transaction_memo'] . "<input type=\"text\" size=\"50\" name=\"donation_memo\" />", 1);
-        tr($lang_userdetails['row_donoruntil'], "<input type=\"text\" name=\"donoruntil\" value=\"".htmlspecialchars((string)$user["donoruntil"])."\" /> ".$lang_userdetails['text_donoruntil_note'], 1);
+		\App\Support\Html::tr($lang_userdetails['row_donor_status'], "<input type=\"radio\" name=\"donor\" value=\"yes\"" .($user["donor"] == "yes" ? " checked=\"checked\"" : "")." />".$lang_userdetails['radio_yes']." <input type=\"radio\" name=\"donor\" value=\"no\"" .($user["donor"] == "no" ? " checked=\"checked\"" : "").">".$lang_userdetails['radio_no'], 1);
+		\App\Support\Html::tr($lang_userdetails['row_donated'], "USD: <input type=\"text\" size=\"5\" name=\"donated\" value=\"" . htmlspecialchars((string)$user['donated']) . "\" />&nbsp;&nbsp;&nbsp;&nbsp;CNY: <input type=\"text\" size=\"5\" name=\"donated_cny\" value=\"" . htmlspecialchars((string)$user['donated_cny']) . "\" />" . $lang_userdetails['text_transaction_memo'] . "<input type=\"text\" size=\"50\" name=\"donation_memo\" />", 1);
+        \App\Support\Html::tr($lang_userdetails['row_donoruntil'], "<input type=\"text\" name=\"donoruntil\" value=\"".htmlspecialchars((string)$user["donoruntil"])."\" /> ".$lang_userdetails['text_donoruntil_note'], 1);
 	}
 	if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::USER_CHANGE_CLASS)) {
         $maxclass = \App\Support\UserDisplay::currentClass() - 1;
-        $classselect=classlist('class', $maxclass, $user["class"], 0, false, true);
-        tr($lang_userdetails['row_class'], $classselect . $migratedHelp, 1);
+        $classselect=\App\Support\UserClass::classSelectWithContext('class', $maxclass, $user["class"], 0, false, true);
+        \App\Support\Html::tr($lang_userdetails['row_class'], $classselect . $migratedHelp, 1);
     }
-	tr($lang_userdetails['row_vip_by_bonus'], "<input type=\"radio\" name=\"vip_added\" value=\"yes\"" .($user["vip_added"] == "yes" ? " checked=\"checked\"" : "")." disabled='disabled'/>".$lang_userdetails['radio_yes']." <input type=\"radio\" name=\"vip_added\" value=\"no\"" .($user["vip_added"] == "no" ? " checked=\"checked\"" : "")." disabled='disabled'/>".$lang_userdetails['radio_no'].$migratedHelp, 1);
-	tr($lang_userdetails['row_vip_until'], "<input type=\"text\" name=\"vip_until\" value=\"".htmlspecialchars((string)$user["vip_until"])."\" disabled='disabled'/> ".$lang_userdetails['text_vip_until_note']. $migratedHelp, 1);
+	\App\Support\Html::tr($lang_userdetails['row_vip_by_bonus'], "<input type=\"radio\" name=\"vip_added\" value=\"yes\"" .($user["vip_added"] == "yes" ? " checked=\"checked\"" : "")." disabled='disabled'/>".$lang_userdetails['radio_yes']." <input type=\"radio\" name=\"vip_added\" value=\"no\"" .($user["vip_added"] == "no" ? " checked=\"checked\"" : "")." disabled='disabled'/>".$lang_userdetails['radio_no'].$migratedHelp, 1);
+	\App\Support\Html::tr($lang_userdetails['row_vip_until'], "<input type=\"text\" name=\"vip_until\" value=\"".htmlspecialchars((string)$user["vip_until"])."\" disabled='disabled'/> ".$lang_userdetails['text_vip_until_note']. $migratedHelp, 1);
 	$supportlang = htmlspecialchars((string)$user["supportlang"]);
 	$supportfor = htmlspecialchars((string)$user["supportfor"]);
 	$pickfor = htmlspecialchars((string)$user["pickfor"]);
 	$staffduties = htmlspecialchars((string)$user["stafffor"]);
 
-	tr($lang_userdetails['row_staff_duties'], "<textarea cols=\"60\" rows=\"6\" name=\"staffduties\">".$staffduties."</textarea>", 1);
-	tr($lang_userdetails['row_support_language'], "<input type=\"text\" name=\"supportlang\" value=\"".$supportlang."\" />", 1);
-	tr($lang_userdetails['row_support'], "<input type=\"radio\" name=\"support\" value=\"yes\"" .($user["support"] == "yes" ? " checked=\"checked\"" : "")." />".$lang_userdetails['radio_yes']." <input type=\"radio\" name=\"support\" value=\"no\"" .($user["support"] == "no" ? " checked=\"checked\"" : "")." />".$lang_userdetails['radio_no'], 1);
-	tr($lang_userdetails['row_support_for'], "<textarea cols=\"60\" rows=\"6\" name=\"supportfor\">".$supportfor."</textarea>", 1);
+	\App\Support\Html::tr($lang_userdetails['row_staff_duties'], "<textarea cols=\"60\" rows=\"6\" name=\"staffduties\">".$staffduties."</textarea>", 1);
+	\App\Support\Html::tr($lang_userdetails['row_support_language'], "<input type=\"text\" name=\"supportlang\" value=\"".$supportlang."\" />", 1);
+	\App\Support\Html::tr($lang_userdetails['row_support'], "<input type=\"radio\" name=\"support\" value=\"yes\"" .($user["support"] == "yes" ? " checked=\"checked\"" : "")." />".$lang_userdetails['radio_yes']." <input type=\"radio\" name=\"support\" value=\"no\"" .($user["support"] == "no" ? " checked=\"checked\"" : "")." />".$lang_userdetails['radio_no'], 1);
+	\App\Support\Html::tr($lang_userdetails['row_support_for'], "<textarea cols=\"60\" rows=\"6\" name=\"supportfor\">".$supportfor."</textarea>", 1);
 
-	tr($lang_userdetails['row_movie_picker'], "<input name=\"moviepicker\" value=\"yes\" type=\"radio\"" . ($moviepicker ? " checked=\"checked\"" : "") . " />".$lang_userdetails['radio_yes']."<input name=\"moviepicker\" value=\"no\" type=\"radio\"" . (!$moviepicker ? " checked=\"checked\"" : "") . " />".$lang_userdetails['radio_no'], 1);
-	tr($lang_userdetails['row_pick_for'], "<textarea cols=\"60\" rows=\"6\" name=\"pickfor\">".$pickfor."</textarea>", 1);
+	\App\Support\Html::tr($lang_userdetails['row_movie_picker'], "<input name=\"moviepicker\" value=\"yes\" type=\"radio\"" . ($moviepicker ? " checked=\"checked\"" : "") . " />".$lang_userdetails['radio_yes']."<input name=\"moviepicker\" value=\"no\" type=\"radio\"" . (!$moviepicker ? " checked=\"checked\"" : "") . " />".$lang_userdetails['radio_no'], 1);
+	\App\Support\Html::tr($lang_userdetails['row_pick_for'], "<textarea cols=\"60\" rows=\"6\" name=\"pickfor\">".$pickfor."</textarea>", 1);
 
 	if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::MANAGE_USER_CONFIDENTIAL_INFO))
 	{
@@ -391,7 +391,7 @@ if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::MANAGE_USER_
             ->map(fn ($item) => sprintf("[%s] %s", $item->created_at->format("Y-m-d"), $item->content))
             ->implode("\n")
         ;
-		tr($lang_userdetails['row_comment'], "<textarea cols=\"60\" rows=\"6\" name=\"modcomment\">".$modcomment."</textarea>", 1);
+		\App\Support\Html::tr($lang_userdetails['row_comment'], "<textarea cols=\"60\" rows=\"6\" name=\"modcomment\">".$modcomment."</textarea>", 1);
         $bonuscomment = \App\Models\BonusLogs::query()
             ->where("uid", $user["id"])
             ->whereNotIn("business_type", \App\Models\BonusLogs::$businessTypeSeeding)
@@ -401,7 +401,7 @@ if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::MANAGE_USER_
             ->map(fn ($item) => sprintf("[%s] %s", $item->created_at->format("Y-m-d"), $item->comment))
             ->implode("\n")
         ;
-		tr($lang_userdetails['row_seeding_karma'], "<textarea cols=\"60\" rows=\"6\" name=\"bonuscomment\" readonly=\"readonly\">".$bonuscomment."</textarea>", 1);
+		\App\Support\Html::tr($lang_userdetails['row_seeding_karma'], "<textarea cols=\"60\" rows=\"6\" name=\"bonuscomment\" readonly=\"readonly\">".$bonuscomment."</textarea>", 1);
 	}
 	$warned = $user["warned"] == "yes";
 
@@ -433,7 +433,7 @@ if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::MANAGE_USER_
 	}
 
 
-	$elapsedlw = $user["lastwarned"] ? get_elapsed_time(strtotime($user["lastwarned"])) : '';
+	$elapsedlw = $user["lastwarned"] ? \App\Support\Format::getElapsedTime(strtotime($user["lastwarned"])) : '';
 	print("<tr><td align=\"left\" class=\"rowfollow\">".$lang_userdetails['text_times_warned']."</td><td align=\"left\" class=\"rowfollow\">".$user['timeswarned']."</td></tr>\n");
 
 	if ($user["timeswarned"] == 0)
@@ -488,40 +488,40 @@ JS;
 		print("<td class=\"rowfollow\">".$lang_userdetails['text_not_warned']."</td></tr>\n");
 	}
 	print("</table></td></tr>");
-	tr($lang_userdetails['row_enabled'], $migratedHelp, 1);
-	tr($lang_userdetails['row_forum_post_possible'], "<input type=\"radio\" name=\"forumpost\" value=\"yes\"" .($user["forumpost"]=="yes" ? " checked=\"checked\"" : "") . " />".$lang_userdetails['radio_yes']."<input type=\"radio\" name=\"forumpost\" value=\"no\"" .($user["forumpost"]=="no" ? " checked=\"checked\"" : "") . " />".$lang_userdetails['radio_no'], 1);
-	tr($lang_userdetails['row_upload_possible'], "<input type=\"radio\" name=\"uploadpos\" value=\"yes\"" .($user["uploadpos"]=="yes" ? " checked=\"checked\"" : "") . " />".$lang_userdetails['radio_yes']."<input type=\"radio\" name=\"uploadpos\" value=\"no\"" .($user["uploadpos"]=="no" ? " checked=\"checked\"" : "") . " />".$lang_userdetails['radio_no'], 1);
-	tr($lang_userdetails['row_download_possible'], "<input type=\"radio\" name=\"downloadpos\" value=\"yes\"" .($user["downloadpos"]=="yes" ? " checked=\"checked\"" : "") . " />".$lang_userdetails['radio_yes']."<input type=\"radio\" name=\"downloadpos\" value=\"no\"" .($user["downloadpos"]=="no" ? " checked=\"checked\"" : "") . " />".$lang_userdetails['radio_no'], 1);
+	\App\Support\Html::tr($lang_userdetails['row_enabled'], $migratedHelp, 1);
+	\App\Support\Html::tr($lang_userdetails['row_forum_post_possible'], "<input type=\"radio\" name=\"forumpost\" value=\"yes\"" .($user["forumpost"]=="yes" ? " checked=\"checked\"" : "") . " />".$lang_userdetails['radio_yes']."<input type=\"radio\" name=\"forumpost\" value=\"no\"" .($user["forumpost"]=="no" ? " checked=\"checked\"" : "") . " />".$lang_userdetails['radio_no'], 1);
+	\App\Support\Html::tr($lang_userdetails['row_upload_possible'], "<input type=\"radio\" name=\"uploadpos\" value=\"yes\"" .($user["uploadpos"]=="yes" ? " checked=\"checked\"" : "") . " />".$lang_userdetails['radio_yes']."<input type=\"radio\" name=\"uploadpos\" value=\"no\"" .($user["uploadpos"]=="no" ? " checked=\"checked\"" : "") . " />".$lang_userdetails['radio_no'], 1);
+	\App\Support\Html::tr($lang_userdetails['row_download_possible'], "<input type=\"radio\" name=\"downloadpos\" value=\"yes\"" .($user["downloadpos"]=="yes" ? " checked=\"checked\"" : "") . " />".$lang_userdetails['radio_yes']."<input type=\"radio\" name=\"downloadpos\" value=\"no\"" .($user["downloadpos"]=="no" ? " checked=\"checked\"" : "") . " />".$lang_userdetails['radio_no'], 1);
 	if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::MANAGE_USER_CONFIDENTIAL_INFO))
 	{
-		tr($lang_userdetails['row_change_username'], "<input type=\"text\" size=\"25\" name=\"username\" value=\"" . htmlspecialchars($user['username']) . "\" />", 1);
+		\App\Support\Html::tr($lang_userdetails['row_change_username'], "<input type=\"text\" size=\"25\" name=\"username\" value=\"" . htmlspecialchars($user['username']) . "\" />", 1);
 
-		tr($lang_userdetails['row_change_email'], "<input type=\"text\" size=\"80\" name=\"email\" value=\"" . htmlspecialchars($user['email']) . "\" />", 1);
+		\App\Support\Html::tr($lang_userdetails['row_change_email'], "<input type=\"text\" size=\"80\" name=\"email\" value=\"" . htmlspecialchars($user['email']) . "\" />", 1);
 	}
 
-	tr($lang_userdetails['row_change_password'], "<input disabled type=\"password\" name=\"chpassword\" size=\"50\" />".$migratedHelp, 1);
-	tr($lang_userdetails['row_repeat_password'], "<input disabled type=\"password\" name=\"passagain\" size=\"50\" />".$migratedHelp, 1);
+	\App\Support\Html::tr($lang_userdetails['row_change_password'], "<input disabled type=\"password\" name=\"chpassword\" size=\"50\" />".$migratedHelp, 1);
+	\App\Support\Html::tr($lang_userdetails['row_repeat_password'], "<input disabled type=\"password\" name=\"passagain\" size=\"50\" />".$migratedHelp, 1);
 
 	if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::MANAGE_USER_CONFIDENTIAL_INFO))
 	{
-		tr($lang_userdetails['row_amount_uploaded'], "<input disabled type=\"text\" size=\"60\" name=\"uploaded\" value=\"" . htmlspecialchars($user['uploaded']) . "\" /><input type=\"hidden\" name=\"ori_uploaded\" value=\"" . htmlspecialchars($user['uploaded']) . "\" />".$migratedHelp, 1);
-		tr($lang_userdetails['row_amount_downloaded'], "<input disabled type=\"text\" size=\"60\" name=\"downloaded\" value=\"" .htmlspecialchars($user['downloaded']) . "\" /><input type=\"hidden\" name=\"ori_downloaded\" value=\"" .htmlspecialchars($user['downloaded']) . "\" />".$migratedHelp, 1);
-		tr($lang_userdetails['row_seeding_karma'], "<input disabled type=\"text\" size=\"60\" name=\"bonus\" value=\"" .number_format($user['seedbonus'], 1) . "\" /><input type=\"hidden\" name=\"ori_bonus\" value=\"" .number_format($user['seedbonus'], 1) . "\" />".$migratedHelp, 1);
-		tr($lang_userdetails['row_invites'], "<input disabled type=\"text\" size=\"60\" name=\"invites\" value=\"" .htmlspecialchars($user['invites']) . "\" />".$migratedHelp, 1);
+		\App\Support\Html::tr($lang_userdetails['row_amount_uploaded'], "<input disabled type=\"text\" size=\"60\" name=\"uploaded\" value=\"" . htmlspecialchars($user['uploaded']) . "\" /><input type=\"hidden\" name=\"ori_uploaded\" value=\"" . htmlspecialchars($user['uploaded']) . "\" />".$migratedHelp, 1);
+		\App\Support\Html::tr($lang_userdetails['row_amount_downloaded'], "<input disabled type=\"text\" size=\"60\" name=\"downloaded\" value=\"" .htmlspecialchars($user['downloaded']) . "\" /><input type=\"hidden\" name=\"ori_downloaded\" value=\"" .htmlspecialchars($user['downloaded']) . "\" />".$migratedHelp, 1);
+		\App\Support\Html::tr($lang_userdetails['row_seeding_karma'], "<input disabled type=\"text\" size=\"60\" name=\"bonus\" value=\"" .number_format($user['seedbonus'], 1) . "\" /><input type=\"hidden\" name=\"ori_bonus\" value=\"" .number_format($user['seedbonus'], 1) . "\" />".$migratedHelp, 1);
+		\App\Support\Html::tr($lang_userdetails['row_invites'], "<input disabled type=\"text\" size=\"60\" name=\"invites\" value=\"" .htmlspecialchars($user['invites']) . "\" />".$migratedHelp, 1);
 	}
-	tr($lang_userdetails['row_passkey'], "<input name=\"resetkey\" value=\"yes\" type=\"checkbox\" />".$lang_userdetails['checkbox_reset_passkey'], 1);
+	\App\Support\Html::tr($lang_userdetails['row_passkey'], "<input name=\"resetkey\" value=\"yes\" type=\"checkbox\" />".$lang_userdetails['checkbox_reset_passkey'], 1);
 
 	print("<tr><td class=\"toolbox\" colspan=\"2\" align=\"center\"><input type=\"submit\" class=\"btn\" value=\"".$lang_userdetails['submit_okay']."\" /></td></tr>\n");
 	print("</table>\n");
 	print("</form>\n");
-	end_frame();
+	\App\Support\Html::endFrame();
 	if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::USER_DELETE))
 	{
-		begin_frame($lang_userdetails['text_delete_user'], true);
+		\App\Support\Html::beginFrame($lang_userdetails['text_delete_user'], true);
 		print("<form method=\"post\" action=\"delacctadmin.php\" name=\"deluser\">
 		<input name=\"userid\" size=\"10\" type=\"hidden\" value=\"". $user["id"] ."\" />
 		<input name=\"delenable\" type=\"checkbox\" onclick=\"if (this.checked) {enabledel('".$lang_userdetails['js_delete_user_note']."');}else{disabledel();}\" /><input name=\"submit\" type=\"submit\" value=\"".$lang_userdetails['submit_delete']."\" disabled=\"disabled\" /></form>");
-		end_frame();
+		\App\Support\Html::endFrame();
 	}
 }
 

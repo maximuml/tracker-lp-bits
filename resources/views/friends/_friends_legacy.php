@@ -14,8 +14,8 @@ $CURUSER = \App\Support\SupportContext::getUser() ?? [];
 $userid = $CURUSER['id'];
 $action = \App\Support\SupportContext::getQuery('action') ?? '';
 
-if (!is_valid_id($userid))
-stderr($lang_friends['std_error'], $lang_friends['std_invalid_id']."$userid.");
+if (!\App\Support\Validators::isId($userid))
+\App\Support\LegacyResponse::abort($lang_friends['std_error'], $lang_friends['std_invalid_id']."$userid.");
 
 $user = $CURUSER;
 // action: add -------------------------------------------------------------
@@ -25,8 +25,8 @@ if ($action == 'add')
 	$targetid = \App\Support\SupportContext::getQuery('targetid');
 	$type = \App\Support\SupportContext::getQuery('type');
 
-	if (!is_valid_id($targetid))
-	stderr($lang_friends['std_error'], $lang_friends['std_invalid_id']."$targetid.");
+	if (!\App\Support\Validators::isId($targetid))
+	\App\Support\LegacyResponse::abort($lang_friends['std_error'], $lang_friends['std_invalid_id']."$targetid.");
 
 	if ($type == 'friend')
 	{
@@ -39,10 +39,10 @@ if ($action == 'add')
 		$field_is = 'blockid';
 	}
 	else
-	stderr($lang_friends['std_error'], $lang_friends['std_unknown_type']."$type");
+	\App\Support\LegacyResponse::abort($lang_friends['std_error'], $lang_friends['std_unknown_type']."$type");
 
 	if (\App\Repositories\FriendsRepository::exists($userid, $type, $targetid))
-	stderr($lang_friends['std_error'], $lang_friends['std_user_id'].$targetid.$lang_friends['std_already_in'].$table_is.$lang_friends['std_list']);
+	\App\Support\LegacyResponse::abort($lang_friends['std_error'], $lang_friends['std_user_id'].$targetid.$lang_friends['std_already_in'].$table_is.$lang_friends['std_list']);
 
 	\App\Repositories\FriendsRepository::add($userid, $type, $targetid);
 
@@ -63,27 +63,27 @@ if ($action == 'delete')
 	if ($type == 'friend')
 	$typename = $lang_friends['text_friend'];
 	else $typename = $lang_friends['text_block'];
-	if (!is_valid_id($targetid))
-	stderr($lang_friends['std_error'], $lang_friends['std_invalid_id']."$userid.");
+	if (!\App\Support\Validators::isId($targetid))
+	\App\Support\LegacyResponse::abort($lang_friends['std_error'], $lang_friends['std_invalid_id']."$userid.");
 
 	if (!$sure) {
-        stderr($lang_friends['std_delete'].$type, $lang_friends['std_delete_note'].$typename.$lang_friends['std_click'].
-            "<a href=?id=$userid&action=delete&type=$type&targetid=$targetid&sure=1>".$lang_friends['std_here_if_sure'],false);
+        \App\Support\LegacyResponse::abort($lang_friends['std_delete'].$type, $lang_friends['std_delete_note'].$typename.$lang_friends['std_click'].
+            "<a href=?id=$userid&action=delete&type=$type&targetid=$targetid&sure=1>".$lang_friends['std_here_if_sure'], false);
     }
 
 	if ($type == 'friend')
 	{
 		if (\App\Repositories\FriendsRepository::delete($userid, 'friend', $targetid) == 0)
-		stderr($lang_friends['std_error'], $lang_friends['std_no_friend_found']."$targetid");
+		\App\Support\LegacyResponse::abort($lang_friends['std_error'], $lang_friends['std_no_friend_found']."$targetid");
 		$frag = "friends";
 	}
 	elseif ($type == 'block')
 	{
 		if (\App\Repositories\FriendsRepository::delete($userid, 'block', $targetid) == 0)
-		stderr($lang_friends['std_error'], $lang_friends['std_no_block_found']."$targetid");
+		\App\Support\LegacyResponse::abort($lang_friends['std_error'], $lang_friends['std_no_block_found']."$targetid");
 		$frag = "blocks";
 	} else {
-        stderr($lang_friends['std_error'], $lang_friends['std_unknown_type']."$type");
+        \App\Support\LegacyResponse::abort($lang_friends['std_error'], $lang_friends['std_unknown_type']."$type");
     }
 
 	purge_neighbors_cache();
@@ -94,7 +94,7 @@ if ($action == 'delete')
 
 // main body  -----------------------------------------------------------------
 
-stdhead($lang_friends['head_personal_lists_for']. $user['username']);
+\App\Support\Html::stdhead($lang_friends['head_personal_lists_for']. $user['username']);
 
 print("<p><table class=main border=0 cellspacing=0 cellpadding=0>".
 "<tr><td class=embedded><h1 style='margin:0px'> " . $lang_friends['text_personallist'] . " ".\App\Support\UserDisplay::username($user['id'])."</h1></td></tr></table></p>\n");
@@ -344,5 +344,5 @@ print("</td></tr></table>\n");
 print("</td></tr></table>\n");
 if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::VIEW_USER_LIST))
 	print("<p><a href=users.php><b>".$lang_friends['text_find_user']."</b></a></p>");
-stdfoot();
+\App\Support\Html::stdfoot();
 ?>

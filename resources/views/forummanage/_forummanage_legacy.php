@@ -90,8 +90,8 @@ elseif (((\App\Support\SupportContext::getPost('action') !== null)) && \App\Supp
 }
 
 // SHOW FORUMS WITH FORUM MANAGEMENT TOOLS
-stdhead($lang_forummanage['head_forum_management']);
-begin_main_frame();
+\App\Support\Html::stdhead($lang_forummanage['head_forum_management']);
+\App\Support\Frame::mainFrameOpen();
 if (((\App\Support\SupportContext::getQuery('action') !== null)) && \App\Support\SupportContext::getQuery('action') == "editforum") {
 	//EDIT PAGE FOR THE FORUMS
 	$id = intval(\App\Support\SupportContext::getQuery("id") ?? 0);
@@ -302,5 +302,5 @@ if ($forums->isEmpty()) {
 echo "</table>";
 }
 
-end_main_frame();
-stdfoot();
+\App\Support\Frame::mainFrameClose();
+\App\Support\Html::stdfoot();

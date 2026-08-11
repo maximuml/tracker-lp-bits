@@ -235,17 +235,17 @@ class PageLayout
             ?></b></font></a>
 <?php 
         } else {
-            begin_main_frame();
+            \App\Support\Frame::mainFrameOpen();
             $menuResult = Menu::render($context->script, $context->lang, $context->enableOffer, $context->customMenu, $context->user, $context->cache, $context->langDir);
             print $menuResult['html'];
             if ($context->whereTweak === 'yes') {
                 $context->userUpdateSet['page'] = $menuResult['selected'];
             }
-            end_main_frame();
+            \App\Support\Frame::mainFrameClose();
             $datum = getdate();
             $datum["hours"] = sprintf("%02.0f", $datum["hours"]);
             $datum["minutes"] = sprintf("%02.0f", $datum["minutes"]);
-            $ratio = get_ratio($context->user['id']);
+            $ratio = \App\Support\Ratio::forUserId($context->user['id']);
             //// check every 15 minutes //////////////////
             $messages = $context->cache->get_value('user_' . $context->user["id"] . '_inbox_count');
             if ($messages == "") {
@@ -417,7 +417,7 @@ class PageLayout
                         </div>
                         <div>
                             <span><?php 
-                echo build_search_area($context->requestSearchArea ?? '', ['style' => 'width: 88px']);
+                echo \App\Support\SearchBox::areaSelect($context->requestSearchArea ?? '', ['style' => 'width: 88px']);
                 ?></span>
                         </div>
                     </div>
@@ -487,7 +487,7 @@ class PageLayout
                     if (!empty($currentPromotion['remark'])) {
                         $msg .= '<br/>' . sprintf($remarkTpl, $currentPromotion['remark']);
                     }
-                    msgalert("torrents.php", $msg, "green");
+                    \App\Support\Html::messageAlertVoid("torrents.php", $msg, "green");
                 }
                 if ($upcomingPromotion) {
                     $promotionText = \App\Models\Torrent::$promotionTypes[$upcomingPromotion['global_sp_state']]['text'] ?? '';
@@ -499,12 +499,12 @@ class PageLayout
                     if (!empty($upcomingPromotion['remark'])) {
                         $msg .= '<br/>' . sprintf($remarkTpl, $upcomingPromotion['remark']);
                     }
-                    msgalert("torrents.php", $msg, "blue");
+                    \App\Support\Html::messageAlertVoid("torrents.php", $msg, "blue");
                 }
                 if ($context->user['leechwarn'] == 'yes') {
                     $kicktimeout = \App\Support\Time::format($context->user['leechwarnuntil'], false, false, true);
                     $text = $context->lang['text_please_improve_ratio_within'] . $kicktimeout . $context->lang['text_or_you_will_be_banned'];
-                    msgalert("faq.php#id17", $text, "orange");
+                    \App\Support\Html::messageAlertVoid("faq.php#id17", $text, "orange");
                 }
                 if ($context->deleteNotTransferTwoAccount) {
                     if ($context->user['downloaded'] == 0 && ($context->user['uploaded'] == 0 || $context->user['uploaded'] == $context->iniUploadMain)) {
@@ -515,18 +515,18 @@ class PageLayout
                             if (TIMENOW > $addedtime + $secs / 3) {
                                 $kicktimeout = \App\Support\Time::format(date("Y-m-d H:i:s", $addedtime + $secs), false, false, true);
                                 $text = $context->lang['text_please_download_something_within'] . $kicktimeout . $context->lang['text_inactive_account_be_deleted'];
-                                msgalert("rules.php", $text, "gray");
+                                \App\Support\Html::messageAlertVoid("rules.php", $text, "gray");
                             }
                         }
                     }
                 }
                 if ($context->user['showclienterror'] == 'yes') {
                     $text = $context->lang['text_banned_client_warning'];
-                    msgalert("faq.php#id29", $text, "black");
+                    \App\Support\Html::messageAlertVoid("faq.php#id29", $text, "black");
                 }
                 if ($unread) {
                     $text = $context->lang['text_you_have'] . $unread . $context->lang['text_new_message'] . add_s($unread) . $context->lang['text_click_here_to_read'];
-                    msgalert("messages.php", $text, "red");
+                    \App\Support\Html::messageAlertVoid("messages.php", $text, "red");
                 }
                 \App\Utils\MsgAlert::getInstance()->render();
                 /*
@@ -554,7 +554,7 @@ class PageLayout
                     }
                     if ($new_news > 0) {
                         $text = $context->lang['text_there_is'] . is_or_are($new_news) . $new_news . $context->lang['text_new_news'];
-                        msgalert("index.php", $text, "green");
+                        \App\Support\Html::messageAlertVoid("index.php", $text, "green");
                     }
                 }
                 //Staff message, not only staff member
@@ -568,7 +568,7 @@ class PageLayout
                 }
                 if ($nummessages > 0) {
                     $text = $context->lang['text_there_is'] . is_or_are($nummessages) . $nummessages . $context->lang['text_new_staff_message'] . add_s($nummessages);
-                    msgalert("staffbox.php", $text, "blue");
+                    \App\Support\Html::messageAlertVoid("staffbox.php", $text, "blue");
                 }
                 //torrent approval
                 if (Permissions::userCan('torrent-approval', false, (int) ($context->user['id'] ?? 0)) && Settings::get('torrent.approval_status_none_visible') == 'no') {
@@ -579,7 +579,7 @@ class PageLayout
                         $context->cache->cache_value($cacheKey, $toApprovalCounts, 60);
                     }
                     if ($toApprovalCounts) {
-                        msgalert('torrents.php?approval_status=0&incldead=0', sprintf($context->lang['text_torrent_to_approval'], is_or_are($toApprovalCounts), $toApprovalCounts, add_s($toApprovalCounts)), 'darkred');
+                        \App\Support\Html::messageAlertVoid('torrents.php?approval_status=0&incldead=0', sprintf($context->lang['text_torrent_to_approval'], is_or_are($toApprovalCounts), $toApprovalCounts, add_s($toApprovalCounts)), 'darkred');
                     }
                 }
                 //seed box approval
@@ -591,7 +591,7 @@ class PageLayout
                         $context->cache->cache_value($cacheKey, $toApprovalCounts, 60);
                     }
                     if ($toApprovalCounts) {
-                        msgalert('/nexusphp/system/seed-box-records?tableFilters[status][value]=0', sprintf($context->lang['text_seed_box_record_to_approval'], is_or_are($toApprovalCounts), $toApprovalCounts, add_s($toApprovalCounts)), 'darkred');
+                        \App\Support\Html::messageAlertVoid('/nexusphp/system/seed-box-records?tableFilters[status][value]=0', sprintf($context->lang['text_seed_box_record_to_approval'], is_or_are($toApprovalCounts), $toApprovalCounts, add_s($toApprovalCounts)), 'darkred');
                     }
                 }
                 if (Permissions::userCan('staffmem', false, (int) ($context->user['id'] ?? 0))) {
@@ -600,7 +600,7 @@ class PageLayout
                         $context->cache->cache_value('COMPLAINTS_COUNT_CACHE', $complaints, 600);
                     }
                     if ($complaints) {
-                        msgalert('complains.php?action=list', sprintf($context->lang['text_complains'], is_or_are($complaints), $complaints, add_s($complaints)), 'darkred');
+                        \App\Support\Html::messageAlertVoid('complains.php?action=list', sprintf($context->lang['text_complains'], is_or_are($complaints), $complaints, add_s($complaints)), 'darkred');
                     }
                     $numreports = $context->cache->get_value('staff_new_report_count');
                     if ($numreports == "") {
@@ -609,7 +609,7 @@ class PageLayout
                     }
                     if ($numreports) {
                         $text = $context->lang['text_there_is'] . is_or_are($numreports) . $numreports . $context->lang['text_new_report'] . add_s($numreports);
-                        msgalert("reports.php", $text, "blue");
+                        \App\Support\Html::messageAlertVoid("reports.php", $text, "blue");
                     }
                     $numcheaters = $context->cache->get_value('staff_new_cheater_count');
                     if ($numcheaters == "") {
@@ -618,14 +618,14 @@ class PageLayout
                     }
                     if ($numcheaters) {
                         $text = $context->lang['text_there_is'] . is_or_are($numcheaters) . $numcheaters . $context->lang['text_new_suspected_cheater'] . add_s($numcheaters);
-                        msgalert("cheaterbox.php", $text, "blue");
+                        \App\Support\Html::messageAlertVoid("cheaterbox.php", $text, "blue");
                     }
                 }
                 //show the exam info
                 $exam = new \Nexus\Exam\Exam();
                 $currentExam = $exam->getCurrent($context->user['id']);
                 if (!empty($currentExam['html'])) {
-                    msgalert($currentExam['exam']->type == \App\Models\Exam::TYPE_TASK ? "task.php" : "messages.php", $currentExam['html'], $currentExam['exam']->background_color ?? 'blue');
+                    \App\Support\Html::messageAlertVoid($currentExam['exam']->type == \App\Models\Exam::TYPE_TASK ? "task.php" : "messages.php", $currentExam['html'], $currentExam['exam']->background_color ?? 'blue');
                 }
             }
             if ($context->offlineMsg) {

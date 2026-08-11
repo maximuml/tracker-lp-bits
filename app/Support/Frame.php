@@ -195,4 +195,46 @@ final class Frame
             .'<tr><td class="embedded"><font color="white"><h1>SQL Error</h1>'."\n"
             .'<b>'.$error.$location.'</b></font></td></tr></table>';
     }
+
+    /**
+     * Emit the main-frame opener. Backs the legacy `begin_main_frame()` helper.
+     */
+    public static function mainFrameOpen(
+        string $caption = '',
+        bool $center = false,
+        int|string $width = 100,
+    ): void {
+        $contentWidth = defined('CONTENT_WIDTH') ? (int) \constant('CONTENT_WIDTH') : 0;
+        echo self::mainOpen($caption, $center, $width, $contentWidth);
+    }
+
+    /**
+     * Close a main frame. Backs the legacy `end_main_frame()` helper.
+     */
+    public static function mainFrameClose(): void
+    {
+        echo self::CLOSE;
+    }
+
+    /**
+     * Emit a full compose-form opener. Backs the legacy `begin_compose()` helper.
+     */
+    public static function composeBeginVoid(
+        string $title = '',
+        string $type = 'new',
+        string $body = '',
+        bool $hasSubject = true,
+        string $subject = '',
+        int $maxSubjectLength = 100,
+    ): void {
+        echo self::composeBegin($title, $type, $body, $hasSubject, $subject, $maxSubjectLength);
+    }
+
+    /**
+     * Emit a compose-form closer. Backs the legacy `end_compose()` helper.
+     */
+    public static function composeEndVoid(): void
+    {
+        echo self::composeEnd();
+    }
 }

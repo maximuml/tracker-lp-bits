@@ -1,12 +1,12 @@
 <?php
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 \App\Auth\Permission::assertCan(\App\Enums\Permission\PermissionEnum::STAFF_MEMBER);
-stdhead($lang_staff['head_staff']);
+\App\Support\Html::stdhead($lang_staff['head_staff']);
 
 $Cache->new_page('staff_page', 900, true);
 if (!$Cache->get_page()){
 $Cache->add_whole_row();
-begin_main_frame();
+\App\Support\Frame::mainFrameOpen();
 $secs = 900;
 $dt = TIMENOW - $secs;
 $onlineimg = "<img class=\"button_online\" src=\"pic/trans.gif\" alt=\"online\" title=\"".$lang_staff['title_online']."\" />";
@@ -25,7 +25,7 @@ foreach ($supportUsers as $userRow) {
  "<td class=embedded>".$arr['supportfor']."</td></tr>\n";
 }
 
-begin_frame($lang_staff['text_firstline_support']."<font class=small> - [<a class=altlink href=contactstaff.php><b>".$lang_staff['text_apply_for_it']."</b></a>]</font>");
+\App\Support\Html::beginFrame($lang_staff['text_firstline_support']."<font class=small> - [<a class=altlink href=contactstaff.php><b>".$lang_staff['text_apply_for_it']."</b></a>]</font>");
 ?>
 <?php echo $lang_staff['text_firstline_support_note'] ?>
 <br /><br />
@@ -46,7 +46,7 @@ begin_frame($lang_staff['text_firstline_support']."<font class=small> - [<a clas
 	<?php echo $ppl?>
 </table>
 <?php
-end_frame();
+\App\Support\Html::endFrame();
 
 //--------------------- FIRST LINE SUPPORT SECTION ---------------------------//
 
@@ -62,7 +62,7 @@ foreach ($pickerUsers as $userRow) {
  "<td class=embedded>".$arr['pickfor']."</td></tr>\n";
 }
 
-begin_frame($lang_staff['text_movie_critics']."<font class=small> - [<a class=altlink href=contactstaff.php><b>".$lang_staff['text_apply_for_it']."</b></a>]</font>");
+\App\Support\Html::beginFrame($lang_staff['text_movie_critics']."<font class=small> - [<a class=altlink href=contactstaff.php><b>".$lang_staff['text_apply_for_it']."</b></a>]</font>");
 ?>
 <?php echo $lang_staff['text_movie_critics_note'] ?>
 <br /><br />
@@ -82,7 +82,7 @@ begin_frame($lang_staff['text_movie_critics']."<font class=small> - [<a class=al
 	<?php echo $ppl?>
 </table>
 <?php
-end_frame();
+\App\Support\Html::endFrame();
 
 //--------------------- film critics section ---------------------------//
 
@@ -114,7 +114,7 @@ foreach ($forumMods as $modRow) {
  "<td class=embedded>".$forums."</td></tr>\n";
 }
 
-begin_frame($lang_staff['text_forum_moderators']."<font class=small> - [<a class=altlink href=contactstaff.php><b>".$lang_staff['text_apply_for_it']."</b></a>]</font>");
+\App\Support\Html::beginFrame($lang_staff['text_forum_moderators']."<font class=small> - [<a class=altlink href=contactstaff.php><b>".$lang_staff['text_apply_for_it']."</b></a>]</font>");
 ?>
 <?php echo $lang_staff['text_forum_moderators_note'] ?>
 <br /><br />
@@ -134,7 +134,7 @@ begin_frame($lang_staff['text_forum_moderators']."<font class=small> - [<a class
 	<?php echo $ppl?>
 </table>
 <?php
-end_frame();
+\App\Support\Html::endFrame();
 
 //--------------------- film critics section ---------------------------//
 
@@ -166,7 +166,7 @@ foreach ($staffUsers as $userRow) {
  "<td class=embedded>".$arr['stafffor']."</td></tr>\n";
 }
 
-begin_frame($lang_staff['text_general_staff']."<font class=small> - [<a class=altlink href=contactstaff.php><b>".$lang_staff['text_apply_for_it']."</b></a>]</font>");
+\App\Support\Html::beginFrame($lang_staff['text_general_staff']."<font class=small> - [<a class=altlink href=contactstaff.php><b>".$lang_staff['text_apply_for_it']."</b></a>]</font>");
 ?>
 <?php echo $lang_staff['text_general_staff_note'] ?>
 <br /><br />
@@ -174,7 +174,7 @@ begin_frame($lang_staff['text_general_staff']."<font class=small> - [<a class=al
 	<?php echo $ppl?>
 </table>
 <?php
-end_frame();
+\App\Support\Html::endFrame();
 
 //--------------------- general staff section ---------------------------//
 
@@ -192,7 +192,7 @@ foreach ($vipUsers as $userRow) {
  "<td class=embedded>".$arr['stafffor']."</td></tr>\n";
 }
 
-begin_frame($lang_staff['text_vip']);
+\App\Support\Html::beginFrame($lang_staff['text_vip']);
 ?>
 <?php echo sprintf($lang_staff['text_vip_note'], \App\Models\Setting::getSiteName()) ?>
 <br /><br />
@@ -212,12 +212,12 @@ begin_frame($lang_staff['text_vip']);
 	<?php echo $ppl?>
 </table>
 <?php
-end_frame();
+\App\Support\Html::endFrame();
 
 //--------------------- VIP section ---------------------------//
-end_main_frame();
+\App\Support\Frame::mainFrameClose();
 	$Cache->end_whole_row();
 	$Cache->cache_page();
 }
 echo $Cache->next_row();
-stdfoot();
+\App\Support\Html::stdfoot();

@@ -17,7 +17,7 @@ $type = \App\Support\SupportContext::getQuery('type') ?? '';
 if (!in_array($type,array('uploaded','seeding','leeching','completed','incomplete')))
     return;
 if(!\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::TORRENT_HISTORY) && $id != $CURUSER["id"])
-    permissiondenied();
+    \App\Support\LegacyResponse::permissionDenied();
 
 function maketable($rows, $mode = 'seeding')
 {
@@ -188,7 +188,7 @@ $seedBoxRep = \App\Support\SupportContext::getGlobal('seedBoxRep');
 			if ($arr['downloaded'] > 0)
 			{
 				$ratio = number_format($arr['uploaded'] / $arr['downloaded'], 3);
-				$ratio = "<font color=\"" . get_ratio_color($ratio) . "\">".$ratio."</font>";
+				$ratio = "<font color=\"" . \App\Support\Ratio::color($ratio) . "\">".$ratio."</font>";
 			}
 			elseif ($arr['uploaded'] > 0) $ratio = "Inf.";
 			else $ratio = "---";
@@ -211,7 +211,7 @@ $seedBoxRep = \App\Support\SupportContext::getGlobal('seedBoxRep');
             }
 		    $ret .= sprintf(
 		        '<td class="rowfollow" align="center">%s<br/>%s</td><td class="rowfollow" align="center">%s</td>',
-                get_agent($arr['peer_id'], $arr['agent']), $arr['port'],
+                \App\Support\Strings::userAgentClient( $arr['agent']), $arr['port'],
                 implode('<br/>', $ipArr)
             );
         }
@@ -352,7 +352,7 @@ if ($query) {
 if ($count > 0 && $query)
 {
     $pageSize = 100;
-    list($pagertop, $pagerbottom, $limit, $offset) = pager($pageSize, $count, "getusertorrentlistajax.php?");
+    list($pagertop, $pagerbottom, $limit, $offset) = \App\Support\Pagination::pager($pageSize, $count, "getusertorrentlistajax.php?");
     $rows = $query->offset($offset)->limit($pageSize)->get()->map(fn ($r) => (array) $r)->all();
     do_log("count: $count, type: $type");
     list($torrentlist, $total_size_this_page) = maketable($rows, $type);

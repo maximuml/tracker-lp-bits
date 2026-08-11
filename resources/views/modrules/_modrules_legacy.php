@@ -1,7 +1,7 @@
 <?php
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 if (\App\Support\UserDisplay::currentClass() < UC_ADMINISTRATOR) {
-	stderr("Error","Only Administrators and above can modify the Rules, sorry.");
+	\App\Support\LegacyResponse::abort("Error", "Only Administrators and above can modify the Rules, sorry.");
 }
 function clear_rules_cache()
 {
@@ -10,7 +10,7 @@ function clear_rules_cache()
 
 if (((\App\Support\SupportContext::getQuery("act") !== null)) && \App\Support\SupportContext::getQuery("act") == "newsect")
 {
-	stdhead("Add section");
+	\App\Support\Html::stdhead("Add section");
 	//print("<td valign=top style=\"padding: 10px;\" colspan=2 align=center>");
 	//begin_main_frame();
 	print("<h1 align=center>Add Rules</h1>");
@@ -30,7 +30,7 @@ if (((\App\Support\SupportContext::getQuery("act") !== null)) && \App\Support\Su
 	print("<tr><td colspan=\"2\" align=\"center\"><input type=\"submit\" value=\"Add\" style=\"width: 60px;\"></td></tr>\n");
 	print("</table></form>");
 	print("</td></tr></table>");
-	stdfoot();
+	\App\Support\Html::stdfoot();
 }
 elseif (((\App\Support\SupportContext::getQuery("act") !== null)) && \App\Support\SupportContext::getQuery("act")=="addsect"){
 	$title = \App\Support\SupportContext::getPost("title");
@@ -48,7 +48,7 @@ elseif (((\App\Support\SupportContext::getQuery("act") !== null)) && \App\Suppor
 elseif (((\App\Support\SupportContext::getQuery("act") !== null)) && \App\Support\SupportContext::getQuery("act") == "edit"){
 	$id = intval(\App\Support\SupportContext::getQuery("id"));
 	$res = (array) \Nexus\Database\NexusDB::table('rules')->where('id', $id)->first();
-	stdhead("Edit rules");
+	\App\Support\Html::stdhead("Edit rules");
 	//print("<td valign=top style=\"padding: 10px;\" colspan=2 align=center>");
 	//begin_main_frame();
 	print("<h1 align=center>Edit Rules</h1>");
@@ -68,7 +68,7 @@ elseif (((\App\Support\SupportContext::getQuery("act") !== null)) && \App\Suppor
 	print("<tr><td colspan=\"2\" align=\"center\"><input type=hidden value=$res[id] name=id><input type=\"submit\" value=\"Save\" style=\"width: 60px;\"></td></tr>\n");
 	print("</table>");
 	print("</td></tr></table>");
-	stdfoot();
+	\App\Support\Html::stdfoot();
 }
 elseif (((\App\Support\SupportContext::getQuery("act") !== null)) && \App\Support\SupportContext::getQuery("act")=="edited"){
 	$id = intval(\App\Support\SupportContext::getPost("id") ?? 0);
@@ -89,7 +89,7 @@ elseif (((\App\Support\SupportContext::getQuery("act") !== null)) && \App\Suppor
 	$sure = intval(\App\Support\SupportContext::getQuery("sure") ?? 0);
 	if (!$sure)
 	{
-		stderr("Delete Rule","You are about to delete a rule. Click <a class=altlink href=?act=del&id=$id&sure=1>here</a> if you are sure.",false);
+		\App\Support\LegacyResponse::abort("Delete Rule", "You are about to delete a rule. Click <a class=altlink href=?act=del&id=$id&sure=1>here</a> if you are sure.", false);
 	}
 	\Nexus\Database\NexusDB::table('rules')->where('id', $id)->delete();
     clear_rules_cache();
@@ -103,7 +103,7 @@ else{
 	    ->orderBy('rules.id')
 	    ->get(['rules.*', 'language.lang_name'])
 	    ->map(fn ($r) => (array) $r);
-	stdhead("Rules Manangement");
+	\App\Support\Html::stdhead("Rules Manangement");
 	//print("<td valign=top style=\"padding: 10px;\" colspan=2 align=center>");
 	print("<h1 align=center>Rules Manangement</h1>");
 	print("<br /><table width=940 border=0 cellspacing=0 cellpadding=5>");
@@ -117,5 +117,5 @@ else{
 	}
 	//print("");
 	print("</td></tr></table>");
-	stdfoot();
+	\App\Support\Html::stdfoot();
 }

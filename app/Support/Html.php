@@ -553,8 +553,70 @@ final class Html
     /**
      * Emit a settings table row. Backs the legacy `tr()` helper.
      */
-    public static function tr(mixed $x, mixed $y, bool $noesc = false, string $relation = '', bool $return = false): ?string
+    public static function tr(mixed $x, mixed $y, bool|int $noesc = false, string $relation = '', bool $return = false): ?string
     {
-        return self::emitSettingsRow((string) $x, (string) $y, ! $noesc, $relation, $return);
+        return self::emitSettingsRow((string) $x, (string) $y, ! (bool) $noesc, $relation, $return);
+    }
+
+    /**
+     * Emit a narrow-label settings row. Backs the legacy `tr_small()` helper.
+     *
+     * The legacy `$noesc` flag is inverted before passing to the escaping
+     * helper, matching the original semantics.
+     */
+    public static function trSmall(
+        mixed $x,
+        mixed $y,
+        bool|int $noesc = false,
+        string $relation = '',
+        bool $return = false,
+    ): ?string {
+        return self::emitSettingsRowSmall((string) $x, (string) $y, ! (bool) $noesc, $relation, $return);
+    }
+
+    /**
+     * Emit two bare table cells. Backs the legacy `twotd()` helper.
+     */
+    public static function twoTd(string $head, string $follow): void
+    {
+        echo self::settingsCells($head, $follow);
+    }
+
+    /**
+     * Emit a standard message box. Backs the legacy `stdmsg()` helper.
+     */
+    public static function stdMessage(string $heading, string $text, bool $htmlstrip = false): void
+    {
+        echo \App\Support\Frame::stdMessage($heading, $text, $htmlstrip);
+    }
+
+    /**
+     * Emit a quick-reply form block. Backs the legacy `quickreply()` helper.
+     */
+    public static function quickReplyVoid(string $formName, string $textareaName, string $submitLabel): void
+    {
+        echo self::quickReply($formName, $textareaName, $submitLabel);
+    }
+
+    /**
+     * Emit a banner-style site alert. Backs the legacy `msgalert()` helper.
+     */
+    public static function messageAlertVoid(string $url, string $text, string $bgcolor = 'red'): void
+    {
+        echo self::messageAlert($url, $text, $bgcolor);
+    }
+
+    /**
+     * Emit the framed smilies table. Backs the legacy `insert_smilies_frame()` helper.
+     */
+    public static function smiliesFrame(): void
+    {
+        $lang = \App\Support\SupportContext::getLangFunctions();
+
+        echo \App\Support\Smilies::framedTable(
+            (string) ($lang['text_smilies'] ?? ''),
+            (string) ($lang['col_type_something'] ?? ''),
+            (string) ($lang['col_to_make_a'] ?? ''),
+        );
     }
 }

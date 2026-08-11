@@ -48,7 +48,7 @@ final class Security
         if (preg_match($dangerScriptsPattern, $path)) {
             $msg = sprintf('[DANGER_URL]: %s [%s]', $src, \nexus()->getRequestId());
             \do_log($msg, 'alert');
-            \write_log($msg, 'mod');
+            \App\Support\Log::writeWithContext($msg, 'mod');
         }
 
         \do_log("[NOT_ALLOW_SRC]: $src with path: $path");

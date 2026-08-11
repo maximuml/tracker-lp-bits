@@ -31,7 +31,7 @@ if ($__server_REQUEST_METHOD === 'POST') {
     }
     $attendance = $attendanceRepository->attend($CURUSER['id']);
     if (!$attendance->is_updated) {
-        stderr($lang_attendance['sorry'], $lang_attendance['already_attended']);
+        \App\Support\LegacyResponse::abort($lang_attendance['sorry'], $lang_attendance['already_attended']);
     }
 } else {
     $attendance = $attendanceRepository->getAttendance($CURUSER['id']);
@@ -55,8 +55,8 @@ if (!$attendance) {
     $hasAttendedToday = false;
 }
 
-stdhead($lang_attendance['title']);
-begin_main_frame();
+\App\Support\Html::stdhead($lang_attendance['title']);
+\App\Support\Frame::mainFrameOpen();
 
 if ($hasAttendedToday) {
     $todayDate = $today->format('Y-m-d');
@@ -75,9 +75,9 @@ if ($hasAttendedToday) {
     $headerLeft = sprintf($lang_attendance['attend_info'] . $lang_attendance['retroactive_description'], $count, $cdays, $points, $CURUSER['attendance_card']);
     $headerRight = nexus_trans('attendance.ranking', ['ranking' => $myRanking, 'counts' => $todayCounts]);
 
-    begin_frame($lang_attendance['success']);
+    \App\Support\Html::beginFrame($lang_attendance['success']);
     printf('<p>%s<span style="float:right">%s</span></p>', $headerLeft, $headerRight);
-    end_frame();
+    \App\Support\Html::endFrame();
 
     $logs = \App\Models\AttendanceLog::query()
         ->where('uid', $CURUSER['id'])
@@ -162,7 +162,7 @@ EOP;
     echo '</ul>';
 } else {
     $buttonLabel = $lang_attendance['attend_button'] ?? 'Check in';
-    begin_frame($lang_attendance['title']);
+    \App\Support\Html::beginFrame($lang_attendance['title']);
     echo '<table width="100%" border="1" cellspacing="0" cellpadding="10"><tbody>';
     echo '<tr><td class="text">';
     echo '<div style="margin-top: 20px; text-align: center;">';
@@ -177,8 +177,8 @@ EOP;
     echo '</div>';
     echo '</td></tr>';
     echo '</tbody></table>';
-    end_frame();
+    \App\Support\Html::endFrame();
 }
 
-end_main_frame();
-stdfoot();
+\App\Support\Frame::mainFrameClose();
+\App\Support\Html::stdfoot();

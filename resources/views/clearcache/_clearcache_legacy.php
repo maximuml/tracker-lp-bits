@@ -3,20 +3,20 @@ error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
 $__server_REQUEST_METHOD = \App\Support\SupportContext::getServerValue('REQUEST_METHOD');
 if (\App\Support\UserDisplay::currentClass() < UC_MODERATOR)
-stderr("Error", "Permission denied.");
+\App\Support\LegacyResponse::abort("Error", "Permission denied.");
 $done = false;
 if ($__server_REQUEST_METHOD == "POST")
 {
 $cachename = \App\Support\SupportContext::getPost("cachename");
 if ($cachename == "")
-stderr("Error", "You must fill in cache name.");
+\App\Support\LegacyResponse::abort("Error", "You must fill in cache name.");
 if (\App\Support\SupportContext::getPost('multilang') == 'yes')
 $Cache->delete_value($cachename, true);
 else 
 $Cache->delete_value($cachename);
 $done = true;
 }
-stdhead("Clear cache");
+\App\Support\Html::stdhead("Clear cache");
 ?>
 <h1>Clear cache</h1>
 <?php
@@ -30,4 +30,4 @@ print ("<p align=center><font class=striking>Cache cleared</font></p>");
 <tr><td colspan=2 align=center><input type=submit value="Okay" class=btn></td></tr>
 </table>
 </form>
-<?php stdfoot();
+<?php \App\Support\Html::stdfoot();

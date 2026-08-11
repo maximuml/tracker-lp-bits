@@ -9,7 +9,7 @@ if (!empty($q)) {
 }
 $total = (clone $query)->count();
 $perPage = 50;
-list($paginationTop, $paginationBottom, $limit, $offset) = pager($perPage, $total, "?");
+list($paginationTop, $paginationBottom, $limit, $offset) = \App\Support\Pagination::pager($perPage, $total, "?");
 $rows = (clone $query)->offset($offset)->take($perPage)->orderBy('id', 'desc')->get()->toArray();
 $header = [
     'id' => 'ID',
@@ -18,7 +18,7 @@ $header = [
     'reason' => 'Reason',
     'created_at' => 'Created at',
 ];
-$table = build_table($header, $rows);
+$table = \App\Support\Html::buildTable($header, $rows);
 $q = htmlspecialchars($q);
 $filterForm = <<<FORM
 <div>
@@ -30,8 +30,8 @@ $filterForm = <<<FORM
     </form>
 </div>
 FORM;
-stdhead('User ban log');
-begin_main_frame();
+\App\Support\Html::stdhead('User ban log');
+\App\Support\Frame::mainFrameOpen();
 echo $filterForm . $table . $paginationBottom;
-end_main_frame();
-stdfoot();
+\App\Support\Frame::mainFrameClose();
+\App\Support\Html::stdfoot();

@@ -3,14 +3,14 @@ error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 if (\App\Support\UserDisplay::currentClass() > UC_MODERATOR) {
 	$count = \App\Models\User::query()->where('donor', 'yes')->count();
 
-	list($pagertop, $pagerbottom, , $offset, $rpp) = pager(50, $count, "donorlist.php?");
-	stdhead("Donorlist");
+	list($pagertop, $pagerbottom, , $offset, $rpp) = \App\Support\Pagination::pager(50, $count, "donorlist.php?");
+	\App\Support\Html::stdhead("Donorlist");
 	if ($count == 0)
-	begin_main_frame();
+	\App\Support\Frame::mainFrameOpen();
 	// ===================================
 	$users = number_format($count);
-	begin_frame("Donor List ($users)", true);
-	begin_table();
+	\App\Support\Html::beginFrame("Donor List ($users)", true);
+	\App\Support\Html::beginTable();
 	echo $pagerbottom;
 ?>
 <form method="post">
@@ -33,12 +33,12 @@ foreach ($rows as $arr) {
 </form>
 <?php
 // ------------------
-end_table();
-end_frame();
+\App\Support\Html::endTable();
+\App\Support\Html::endFrame();
 // ===================================
-end_main_frame();
-stdfoot();
+\App\Support\Frame::mainFrameClose();
+\App\Support\Html::stdfoot();
 }
 else {
-	stderr("Sorry", "Access denied!");
+	\App\Support\LegacyResponse::abort("Sorry", "Access denied!");
 }

@@ -302,4 +302,30 @@ final class UserClass
         $list .= "</select>";
         return $list;
     }
+
+    /**
+     * Build a class select with language labels from the request context.
+     *
+     * Backs the legacy `classlist()` helper in views.
+     */
+    public static function classSelectWithContext(
+        string $selectName,
+        int $maxClass,
+        int|string $selected,
+        int $minClass = 0,
+        bool $includeNoClass = false,
+        bool $disabled = false,
+    ): string {
+        $lang = \App\Support\SupportContext::getLangFunctions();
+
+        return self::classSelect(
+            $selectName,
+            $maxClass,
+            $selected,
+            $minClass,
+            $includeNoClass,
+            $disabled,
+            ['select_an_user_class' => $lang['select_an_user_class'] ?? '---'],
+        );
+    }
 }

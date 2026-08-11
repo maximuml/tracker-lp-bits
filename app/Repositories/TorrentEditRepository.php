@@ -216,12 +216,12 @@ class TorrentEditRepository extends BaseRepository
 
         if ($user->id == $torrentOld->owner) {
             if ($torrentOld->anonymous == 'yes') {
-                \write_log("Torrent $id ($name) was edited by Anonymous");
+                \App\Support\Log::writeWithContext("Torrent $id ($name) was edited by Anonymous");
             } else {
-                \write_log("Torrent $id ($name) was edited by {$user->username}");
+                \App\Support\Log::writeWithContext("Torrent $id ($name) was edited by {$user->username}");
             }
         } else {
-            \write_log("Torrent $id ($name) was edited by {$user->username}, Mod Edit");
+            \App\Support\Log::writeWithContext("Torrent $id ($name) was edited by {$user->username}, Mod Edit");
         }
     }
 }

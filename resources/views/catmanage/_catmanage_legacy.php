@@ -2,7 +2,7 @@
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
 if (\App\Support\UserDisplay::currentClass() < UC_ADMINISTRATOR)
-    permissiondenied();
+    \App\Support\LegacyResponse::permissionDenied();
 
 $perpage = 50;
 $pagerParam = '?action=view&type=' . (\App\Support\SupportContext::getQuery('type') ?? 'searchbox') . '&';
@@ -113,8 +113,8 @@ $lang_catmanage = (array) (\App\Support\SupportContext::getGlobal('lang_catmanag
 function print_type_list($type){
 $lang_catmanage = (array) (\App\Support\SupportContext::getGlobal('lang_catmanage') ?? []);
 	$typename=return_type_name($type);
-	stdhead($lang_catmanage['head_category_management']." - ".$typename);
-	begin_main_frame();
+	\App\Support\Html::stdhead($lang_catmanage['head_category_management']." - ".$typename);
+	\App\Support\Frame::mainFrameOpen();
 ?>
 <h1 align="center"><?php echo $lang_catmanage['text_category_management']?> - <?php echo $typename?></h1>
 <div>
@@ -145,7 +145,7 @@ function check_valid_type($type)
 $lang_catmanage = (array) (\App\Support\SupportContext::getGlobal('lang_catmanage') ?? []);
 	$validtype=array('searchbox', 'caticon', 'secondicon', 'category', 'source', 'medium', 'codec', 'standard', 'processing', 'audiocodec');
 	if (!in_array($type, $validtype))
-		stderr($lang_catmanage['std_error'], $lang_catmanage['std_invalid_type']);
+		\App\Support\LegacyResponse::abort($lang_catmanage['std_error'], $lang_catmanage['std_invalid_type']);
 }
 function print_sub_category_list($type)
 {
@@ -157,7 +157,7 @@ $pagerParam = \App\Support\SupportContext::getGlobal('pagerParam');
 	if (!$num)
 		print("<p align=\"center\">".$lang_catmanage['text_no_record_yet']."</p>");
 	else{
-		[$pagertop, $pagerbottom, , $offset, $perpage, ] = pager($perpage, $num, $pagerParam);
+		[$pagertop, $pagerbottom, , $offset, $perpage, ] = \App\Support\Pagination::pager($perpage, $num, $pagerParam);
 		$rows = \Nexus\Database\NexusDB::table($dbtablename)->orderByDesc('id')->offset($offset)->limit($perpage)->get();
 ?>
 <table border="1" cellspacing="0" cellpadding="5" width="97%">
@@ -231,8 +231,8 @@ $validsubcattype = \App\Support\SupportContext::getGlobal('validsubcattype');
 				$catsperrow = 8;
 				$catpadding = 3;
 			}
-			tr($lang_catmanage['row_searchbox_name']."<font color=\"red\">*</font>", "<input type=\"text\" name=\"name\" value=\"".htmlspecialchars($name)."\" style=\"width: 300px\" /> " . $lang_catmanage['text_searchbox_name_note'], 1);
-			tr($lang_catmanage['row_show_sub_category'], "<input type=\"checkbox\" name=\"showsource\" value=\"1\"".($showsource ? " checked=\"checked\"" : "")." /> " . $lang_catmanage['text_sources'] . "<input type=\"checkbox\" name=\"showmedium\" value=\"1\"".($showmedium ? " checked=\"checked\"" : "")." /> " . $lang_catmanage['text_media'] . "<input type=\"checkbox\" name=\"showcodec\" value=\"1\"".($showcodec ? " checked=\"checked\"" : "")." /> " . $lang_catmanage['text_codecs'] . "<input type=\"checkbox\" name=\"showstandard\" value=\"1\"".($showstandard ? " checked=\"checked\"" : "")." /> " . $lang_catmanage['text_standards'] . "<input type=\"checkbox\" name=\"showprocessing\" value=\"1\"".($showprocessing ? " checked=\"checked\"" : "")." /> " . $lang_catmanage['text_processings'] . "<input type=\"checkbox\" name=\"showaudiocodec\" value=\"1\"".($showaudiocodec ? " checked=\"checked\"" : "")." /> " . $lang_catmanage['text_audio_codecs']."<br />".$lang_catmanage['text_show_sub_category_note'], 1);
+			\App\Support\Html::tr($lang_catmanage['row_searchbox_name']."<font color=\"red\">*</font>", "<input type=\"text\" name=\"name\" value=\"".htmlspecialchars($name)."\" style=\"width: 300px\" /> " . $lang_catmanage['text_searchbox_name_note'], 1);
+			\App\Support\Html::tr($lang_catmanage['row_show_sub_category'], "<input type=\"checkbox\" name=\"showsource\" value=\"1\"".($showsource ? " checked=\"checked\"" : "")." /> " . $lang_catmanage['text_sources'] . "<input type=\"checkbox\" name=\"showmedium\" value=\"1\"".($showmedium ? " checked=\"checked\"" : "")." /> " . $lang_catmanage['text_media'] . "<input type=\"checkbox\" name=\"showcodec\" value=\"1\"".($showcodec ? " checked=\"checked\"" : "")." /> " . $lang_catmanage['text_codecs'] . "<input type=\"checkbox\" name=\"showstandard\" value=\"1\"".($showstandard ? " checked=\"checked\"" : "")." /> " . $lang_catmanage['text_standards'] . "<input type=\"checkbox\" name=\"showprocessing\" value=\"1\"".($showprocessing ? " checked=\"checked\"" : "")." /> " . $lang_catmanage['text_processings'] . "<input type=\"checkbox\" name=\"showaudiocodec\" value=\"1\"".($showaudiocodec ? " checked=\"checked\"" : "")." /> " . $lang_catmanage['text_audio_codecs']."<br />".$lang_catmanage['text_show_sub_category_note'], 1);
 
 			//extra
             $extraCheckbox = "";
@@ -242,15 +242,15 @@ $validsubcattype = \App\Support\SupportContext::getGlobal('validsubcattype');
                     $name, !empty($row['extra'][$name]) ? ' checked' : '', $text
                 );
             }
-            tr($lang_catmanage['row_searchbox_extras'], $extraCheckbox, 1);
+            \App\Support\Html::tr($lang_catmanage['row_searchbox_extras'], $extraCheckbox, 1);
 
-			tr($lang_catmanage['row_items_per_row']."<font color=\"red\">*</font>", "<input type=\"text\" name=\"catsperrow\" value=\"".$catsperrow."\" style=\"width: 100px\" /> " . $lang_catmanage['text_items_per_row_note'], 1);
-			tr($lang_catmanage['row_padding_between_items']."<font color=\"red\">*</font>", "<input type=\"text\" name=\"catpadding\" value=\"".$catpadding."\" style=\"width: 100px\" /> " . $lang_catmanage['text_padding_between_items_note'], 1);
+			\App\Support\Html::tr($lang_catmanage['row_items_per_row']."<font color=\"red\">*</font>", "<input type=\"text\" name=\"catsperrow\" value=\"".$catsperrow."\" style=\"width: 100px\" /> " . $lang_catmanage['text_items_per_row_note'], 1);
+			\App\Support\Html::tr($lang_catmanage['row_padding_between_items']."<font color=\"red\">*</font>", "<input type=\"text\" name=\"catpadding\" value=\"".$catpadding."\" style=\"width: 100px\" /> " . $lang_catmanage['text_padding_between_items_note'], 1);
             $field = new \Nexus\Field\Field();
-            tr($lang_catmanage['row_enable_custom_field'], $field->buildFieldCheckbox('custom_fields[]', $row['custom_fields'] ?? ''), 1);
-            tr($lang_catmanage['row_custom_field_display_name'], '<input type="text" name="custom_fields_display_name" style="width: 300px" value="' . ($row['custom_fields_display_name'] ?? '') . '" />', 1);
+            \App\Support\Html::tr($lang_catmanage['row_enable_custom_field'], $field->buildFieldCheckbox('custom_fields[]', $row['custom_fields'] ?? ''), 1);
+            \App\Support\Html::tr($lang_catmanage['row_custom_field_display_name'], '<input type="text" name="custom_fields_display_name" style="width: 300px" value="' . ($row['custom_fields_display_name'] ?? '') . '" />', 1);
             $helpText = '<br/>' . $lang_catmanage['row_custom_field_display_help'];
-            tr($lang_catmanage['row_custom_field_display'], '<textarea name="custom_fields_display" style="width: 300px" rows="8">' . ($row['custom_fields_display'] ?? '') . '</textarea>' . $helpText, 1);
+            \App\Support\Html::tr($lang_catmanage['row_custom_field_display'], '<textarea name="custom_fields_display" style="width: 300px" rows="8">' . ($row['custom_fields_display'] ?? '') . '</textarea>' . $helpText, 1);
 		}
 		elseif ($type=='caticon')
 		{
@@ -277,13 +277,13 @@ $validsubcattype = \App\Support\SupportContext::getGlobal('validsubcattype');
 ?>
 <tr><td colspan="2"><?php echo $lang_catmanage['text_icon_directory_note']?></td></tr>
 <?php
-			tr($lang_catmanage['col_name']."<font color=\"red\">*</font>", "<input type=\"text\" name=\"name\" value=\"".htmlspecialchars($name)."\" style=\"width: 300px\" /> ", 1);
-			tr($lang_catmanage['col_folder']."<font color=\"red\">*</font>", "<input type=\"text\" name=\"folder\" value=\"".htmlspecialchars($folder)."\" style=\"width: 300px\" /><br />" . $lang_catmanage['text_folder_note'], 1);
-			tr($lang_catmanage['text_multi_language'], "<input type=\"checkbox\" name=\"multilang\" value=\"yes\"".($multilang == 'yes' ? " checked=\"checked\"" : "")." />".$lang_catmanage['text_yes'] ."<br />". $lang_catmanage['text_multi_language_note'], 1);
-			tr($lang_catmanage['text_second_icon'], "<input type=\"checkbox\" name=\"secondicon\" value=\"yes\"".($secondicon == 'yes' ? " checked=\"checked\"" : "")." />".$lang_catmanage['text_yes'] ."<br />". $lang_catmanage['text_second_icon_note'], 1);
-			tr($lang_catmanage['text_css_file'], "<input type=\"text\" name=\"cssfile\" value=\"".htmlspecialchars($cssfile)."\" style=\"width: 300px\" /> ". $lang_catmanage['text_css_file_note'], 1);
-			tr($lang_catmanage['text_designer'], "<input type=\"text\" name=\"designer\" value=\"".htmlspecialchars($designer)."\" style=\"width: 300px\" /> ". $lang_catmanage['text_designer_note'], 1);
-			tr($lang_catmanage['text_comment'], "<input type=\"text\" name=\"comment\" value=\"".htmlspecialchars($comment)."\" style=\"width: 300px\" /> ". $lang_catmanage['text_comment_note'], 1);
+			\App\Support\Html::tr($lang_catmanage['col_name']."<font color=\"red\">*</font>", "<input type=\"text\" name=\"name\" value=\"".htmlspecialchars($name)."\" style=\"width: 300px\" /> ", 1);
+			\App\Support\Html::tr($lang_catmanage['col_folder']."<font color=\"red\">*</font>", "<input type=\"text\" name=\"folder\" value=\"".htmlspecialchars($folder)."\" style=\"width: 300px\" /><br />" . $lang_catmanage['text_folder_note'], 1);
+			\App\Support\Html::tr($lang_catmanage['text_multi_language'], "<input type=\"checkbox\" name=\"multilang\" value=\"yes\"".($multilang == 'yes' ? " checked=\"checked\"" : "")." />".$lang_catmanage['text_yes'] ."<br />". $lang_catmanage['text_multi_language_note'], 1);
+			\App\Support\Html::tr($lang_catmanage['text_second_icon'], "<input type=\"checkbox\" name=\"secondicon\" value=\"yes\"".($secondicon == 'yes' ? " checked=\"checked\"" : "")." />".$lang_catmanage['text_yes'] ."<br />". $lang_catmanage['text_second_icon_note'], 1);
+			\App\Support\Html::tr($lang_catmanage['text_css_file'], "<input type=\"text\" name=\"cssfile\" value=\"".htmlspecialchars($cssfile)."\" style=\"width: 300px\" /> ". $lang_catmanage['text_css_file_note'], 1);
+			\App\Support\Html::tr($lang_catmanage['text_designer'], "<input type=\"text\" name=\"designer\" value=\"".htmlspecialchars($designer)."\" style=\"width: 300px\" /> ". $lang_catmanage['text_designer_note'], 1);
+			\App\Support\Html::tr($lang_catmanage['text_comment'], "<input type=\"text\" name=\"comment\" value=\"".htmlspecialchars($comment)."\" style=\"width: 300px\" /> ". $lang_catmanage['text_comment_note'], 1);
 		}
 		elseif ($type=='secondicon')
 		{
@@ -312,10 +312,10 @@ $validsubcattype = \App\Support\SupportContext::getGlobal('validsubcattype');
 				$processing = 0;
 				$audiocodec = 0;
 			}
-			tr($lang_catmanage['col_name']."<font color=\"red\">*</font>", "<input type=\"text\" name=\"name\" value=\"".htmlspecialchars($name)."\" style=\"width: 300px\" /> " . $lang_catmanage['text_second_icon_name_note'], 1);
-			tr($lang_catmanage['col_image']."<font color=\"red\">*</font>", "<input type=\"text\" name=\"image\" value=\"".htmlspecialchars($image)."\" style=\"width: 300px\" /><br />" . $lang_catmanage['text_image_note'], 1);
-			tr($lang_catmanage['text_class_name'], "<input type=\"text\" name=\"class_name\" value=\"".htmlspecialchars($class_name)."\" style=\"width: 300px\" /><br />" . $lang_catmanage['text_class_name_note'], 1);
-			tr($lang_catmanage['row_selections']."<font color=\"red\">*</font>", torrent_selection(return_type_name('source'), 'source', return_category_db_table_name('source'), $source) . torrent_selection(return_type_name('medium'), 'medium', return_category_db_table_name('medium'), $medium) . torrent_selection(return_type_name('codec'), 'codec', return_category_db_table_name('codec'), $codec) . torrent_selection(return_type_name('standard'), 'standard', return_category_db_table_name('standard'), $standard) . torrent_selection(return_type_name('processing'), 'processing', return_category_db_table_name('processing'), $processing) . torrent_selection(return_type_name('audiocodec'), 'audiocodec', return_category_db_table_name('audiocodec'), $audiocodec)."<br />".$lang_catmanage['text_selections_note'], 1);
+			\App\Support\Html::tr($lang_catmanage['col_name']."<font color=\"red\">*</font>", "<input type=\"text\" name=\"name\" value=\"".htmlspecialchars($name)."\" style=\"width: 300px\" /> " . $lang_catmanage['text_second_icon_name_note'], 1);
+			\App\Support\Html::tr($lang_catmanage['col_image']."<font color=\"red\">*</font>", "<input type=\"text\" name=\"image\" value=\"".htmlspecialchars($image)."\" style=\"width: 300px\" /><br />" . $lang_catmanage['text_image_note'], 1);
+			\App\Support\Html::tr($lang_catmanage['text_class_name'], "<input type=\"text\" name=\"class_name\" value=\"".htmlspecialchars($class_name)."\" style=\"width: 300px\" /><br />" . $lang_catmanage['text_class_name_note'], 1);
+			\App\Support\Html::tr($lang_catmanage['row_selections']."<font color=\"red\">*</font>", \App\Support\Html::torrentSelection(return_type_name('source'), 'source', return_category_db_table_name('source'), $source) . \App\Support\Html::torrentSelection(return_type_name('medium'), 'medium', return_category_db_table_name('medium'), $medium) . \App\Support\Html::torrentSelection(return_type_name('codec'), 'codec', return_category_db_table_name('codec'), $codec) . \App\Support\Html::torrentSelection(return_type_name('standard'), 'standard', return_category_db_table_name('standard'), $standard) . \App\Support\Html::torrentSelection(return_type_name('processing'), 'processing', return_category_db_table_name('processing'), $processing) . \App\Support\Html::torrentSelection(return_type_name('audiocodec'), 'audiocodec', return_category_db_table_name('audiocodec'), $audiocodec)."<br />".$lang_catmanage['text_selections_note'], 1);
 		}
 		elseif ($type=='category')
 		{
@@ -335,12 +335,12 @@ $validsubcattype = \App\Support\SupportContext::getGlobal('validsubcattype');
 				$class_name = '';
 				$sort_index = 0;
 			}
-			tr($lang_catmanage['row_category_name']."<font color=\"red\">*</font>", "<input type=\"text\" name=\"name\" value=\"".htmlspecialchars($name)."\" style=\"width: 300px\" /> " . $lang_catmanage['text_category_name_note'], 1);
-			tr($lang_catmanage['col_image']."<font color=\"red\">*</font>", "<input type=\"text\" name=\"image\" value=\"".htmlspecialchars($image)."\" style=\"width: 300px\" /><br />" . $lang_catmanage['text_image_note'], 1);
-			tr($lang_catmanage['text_class_name'], "<input type=\"text\" name=\"class_name\" value=\"".htmlspecialchars($class_name)."\" style=\"width: 300px\" /><br />" . $lang_catmanage['text_class_name_note'], 1);
-			tr($lang_catmanage['row_mode']."<font color=\"red\">*</font>", return_category_mode_selection('mode', $mode), 1);
-			tr($lang_catmanage['text_category_icons']."<font color=\"red\">*</font>", category_icon_selection($row['icon_id'] ?? 0), 1);
-			tr($lang_catmanage['col_order'], "<input type=\"text\" name=\"sort_index\" value=\"".$sort_index."\" style=\"width: 100px\" /> " . $lang_catmanage['text_order_note'], 1);
+			\App\Support\Html::tr($lang_catmanage['row_category_name']."<font color=\"red\">*</font>", "<input type=\"text\" name=\"name\" value=\"".htmlspecialchars($name)."\" style=\"width: 300px\" /> " . $lang_catmanage['text_category_name_note'], 1);
+			\App\Support\Html::tr($lang_catmanage['col_image']."<font color=\"red\">*</font>", "<input type=\"text\" name=\"image\" value=\"".htmlspecialchars($image)."\" style=\"width: 300px\" /><br />" . $lang_catmanage['text_image_note'], 1);
+			\App\Support\Html::tr($lang_catmanage['text_class_name'], "<input type=\"text\" name=\"class_name\" value=\"".htmlspecialchars($class_name)."\" style=\"width: 300px\" /><br />" . $lang_catmanage['text_class_name_note'], 1);
+			\App\Support\Html::tr($lang_catmanage['row_mode']."<font color=\"red\">*</font>", return_category_mode_selection('mode', $mode), 1);
+			\App\Support\Html::tr($lang_catmanage['text_category_icons']."<font color=\"red\">*</font>", category_icon_selection($row['icon_id'] ?? 0), 1);
+			\App\Support\Html::tr($lang_catmanage['col_order'], "<input type=\"text\" name=\"sort_index\" value=\"".$sort_index."\" style=\"width: 100px\" /> " . $lang_catmanage['text_order_note'], 1);
 		}
 ?>
 </table>
@@ -371,8 +371,8 @@ $lang_catmanage = (array) (\App\Support\SupportContext::getGlobal('lang_catmanag
 <h1 align="center"><a class="faqlink" href="?action=view&amp;type=<?php echo $type?>"><?php echo $typename?></a></h1>
 <table border="1" cellspacing="0" cellpadding="10" width="100%">
 <?php
-tr($lang_catmanage['col_name']."<font color=\"red\">*</font>", "<input type=\"text\" name=\"name\" value=\"".htmlspecialchars($name)."\" style=\"width: 300px\" /> " . $lang_catmanage['text_subcategory_name_note'], 1);
-tr($lang_catmanage['col_order'], "<input type=\"text\" name=\"sort_index\" value=\"".$sort_index."\" style=\"width: 100px\" /> " . $lang_catmanage['text_order_note'], 1);
+\App\Support\Html::tr($lang_catmanage['col_name']."<font color=\"red\">*</font>", "<input type=\"text\" name=\"name\" value=\"".htmlspecialchars($name)."\" style=\"width: 300px\" /> " . $lang_catmanage['text_subcategory_name_note'], 1);
+\App\Support\Html::tr($lang_catmanage['col_order'], "<input type=\"text\" name=\"sort_index\" value=\"".$sort_index."\" style=\"width: 100px\" /> " . $lang_catmanage['text_order_note'], 1);
 ?>
 </table>
 <div style="text-align: center; margin-top: 10px;">
@@ -407,7 +407,7 @@ if ($action == 'view')
 	if (!$num)
 		print("<p align=\"center\">".$lang_catmanage['text_no_record_yet']."</p>");
 	else{
-		[$pagertop, $pagerbottom, , $offset, $perpage, ] = pager($perpage, $num, $pagerParam);
+		[$pagertop, $pagerbottom, , $offset, $perpage, ] = \App\Support\Pagination::pager($perpage, $num, $pagerParam);
 		$rows = \Nexus\Database\NexusDB::table($dbtablename)->orderBy('id')->offset($offset)->limit($perpage)->get();
 ?>
 <table border="1" cellspacing="0" cellpadding="5" width="97%">
@@ -458,7 +458,7 @@ print($pagerbottom);
 	if (!$num)
 		print("<p align=\"center\">".$lang_catmanage['text_no_record_yet']."</p>");
 	else{
-		[$pagertop, $pagerbottom, , $offset, $perpage, ] = pager($perpage, $num, $pagerParam);
+		[$pagertop, $pagerbottom, , $offset, $perpage, ] = \App\Support\Pagination::pager($perpage, $num, $pagerParam);
 		$rows = \Nexus\Database\NexusDB::table($dbtablename)->orderBy('id')->offset($offset)->limit($perpage)->get();
 ?>
 <table border="1" cellspacing="0" cellpadding="5" width="97%">
@@ -509,7 +509,7 @@ print($pagerbottom);
 	if (!$num)
 		print("<p align=\"center\">".$lang_catmanage['text_no_record_yet']."</p>");
 	else{
-		[$pagertop, $pagerbottom, , $offset, $perpage, ] = pager($perpage, $num, $pagerParam);
+		[$pagertop, $pagerbottom, , $offset, $perpage, ] = \App\Support\Pagination::pager($perpage, $num, $pagerParam);
 		$rows = \Nexus\Database\NexusDB::table($dbtablename)->orderBy('id')->offset($offset)->limit($perpage)->get();
 ?>
 <table border="1" cellspacing="0" cellpadding="5" width="97%">
@@ -558,7 +558,7 @@ print($pagerbottom);
 	if (!$num)
 		print("<p align=\"center\">".$lang_catmanage['text_no_record_yet']."</p>");
 	else{
-		[$pagertop, $pagerbottom, , $offset, $perpage, ] = pager($perpage, $num, $pagerParam);
+		[$pagertop, $pagerbottom, , $offset, $perpage, ] = \App\Support\Pagination::pager($perpage, $num, $pagerParam);
 		$rows = \Nexus\Database\NexusDB::table($dbtablename)
 			->select([$dbtablename.'.*', 'searchbox.name as catmodename', 'caticons.name as icon_name'])
 			->leftJoin('searchbox', $dbtablename.'.mode', '=', 'searchbox.id')
@@ -606,15 +606,15 @@ print($pagerbottom);
 ?>
 </div>
 <?php
-	end_main_frame();
-	stdfoot();
+	\App\Support\Frame::mainFrameClose();
+	\App\Support\Html::stdfoot();
 }
 elseif($action == 'del')
 {
 	$id = intval(\App\Support\SupportContext::getQuery('id') ?? 0);
 	if (!$id)
 	{
-		stderr($lang_catmanage['std_error'], $lang_catmanage['std_invalid_id']);
+		\App\Support\LegacyResponse::abort($lang_catmanage['std_error'], $lang_catmanage['std_invalid_id']);
 	}
 	$dbtablename=return_category_db_table_name($type);
 	$row = \Nexus\Database\NexusDB::table($dbtablename)->where('id', $id)->first();
@@ -642,36 +642,36 @@ elseif($action == 'edit')
 	$id = intval(\App\Support\SupportContext::getQuery('id') ?? 0);
 	if (!$id)
 	{
-		stderr($lang_catmanage['std_error'], $lang_catmanage['std_invalid_id']);
+		\App\Support\LegacyResponse::abort($lang_catmanage['std_error'], $lang_catmanage['std_invalid_id']);
 	}
 	else
 	{
 		$dbtablename=return_category_db_table_name($type);
 		$row = (array) \Nexus\Database\NexusDB::table($dbtablename)->where('id', $id)->first();
 		if (!$row)
-			stderr($lang_catmanage['std_error'], $lang_catmanage['std_invalid_id']);
+			\App\Support\LegacyResponse::abort($lang_catmanage['std_error'], $lang_catmanage['std_invalid_id']);
 		else
 		{
 			$typename=return_type_name($type);
-			stdhead($typename);
+			\App\Support\Html::stdhead($typename);
 			print("<form method=\"post\" action=\"?action=submit&amp;type=".$type."\">");
 			print("<input type=\"hidden\" name=\"isedit\" value=\"1\" />");
 			print("<input type=\"hidden\" name=\"id\" value=\"".$id."\" />");
 			print_category_editor($type, $row);
 			print("</form>");
-			stdfoot();
+			\App\Support\Html::stdfoot();
 		}
 	}
 }
 elseif($action == 'add')
 {
 	$typename=return_type_name($type);
-	stdhead($lang_catmanage['head_add']." - ".$typename);
+	\App\Support\Html::stdhead($lang_catmanage['head_add']." - ".$typename);
 	print("<form method=\"post\" action=\"?action=submit&amp;type=".$type."\">");
 	print("<input type=\"hidden\" name=\"isedit\" value=\"0\" />");
 	print_category_editor($type);
 	print("</form>");
-	stdfoot();
+	\App\Support\Html::stdfoot();
 }
 elseif($action == 'submit')
 {

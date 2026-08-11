@@ -10,7 +10,7 @@ if (! defined('PM_INBOX')) {
 
 $id = \App\Support\SupportContext::getQuery("id") ?? 0;
 if (!is_numeric($id) || $id < 1 || floor($id) != $id)
-    stderr("Error", $lang_deletemessage['std_bad_message_id']);
+    \App\Support\LegacyResponse::abort("Error", $lang_deletemessage['std_bad_message_id']);
 
 $type = \App\Support\SupportContext::getQuery("type") ?? '';
 
@@ -18,13 +18,13 @@ if ($type == 'in')
 {
     $msg = \App\Models\Message::query()->where('id', $id)->first(['receiver', 'sender', 'location', 'saved', 'unread']);
     if (!$msg)
-        stderr("Error", $lang_deletemessage['std_bad_message_id']);
+        \App\Support\LegacyResponse::abort("Error", $lang_deletemessage['std_bad_message_id']);
     $arr = $msg->toArray();
     if ($arr["receiver"] != $CURUSER["id"])
-        stderr("Error", $lang_deletemessage['std_not_suggested']);
+        \App\Support\LegacyResponse::abort("Error", $lang_deletemessage['std_not_suggested']);
 
     if ($arr["location"] == PM_DELETED)
-        stderr("Error", $lang_deletemessage['std_not_in_inbox']);
+        \App\Support\LegacyResponse::abort("Error", $lang_deletemessage['std_not_in_inbox']);
 
     if ($arr["saved"] == 'yes')
     {
@@ -41,13 +41,13 @@ elseif ($type == 'out')
 {
     $msg = \App\Models\Message::query()->where('id', $id)->first(['receiver', 'sender', 'location', 'saved', 'unread']);
     if (!$msg)
-        stderr("Error", $lang_deletemessage['std_bad_message_id']);
+        \App\Support\LegacyResponse::abort("Error", $lang_deletemessage['std_bad_message_id']);
     $arr = $msg->toArray();
     if ($arr["sender"] != $CURUSER["id"])
-        stderr("Error", $lang_deletemessage['std_not_suggested']);
+        \App\Support\LegacyResponse::abort("Error", $lang_deletemessage['std_not_suggested']);
 
     if ($arr["location"] == PM_DELETED && $arr["saved"] == 'no')
-        stderr("Error", $lang_deletemessage['std_not_in_sentbox']);
+        \App\Support\LegacyResponse::abort("Error", $lang_deletemessage['std_not_in_sentbox']);
 
     if ($arr["location"] == PM_DELETED)
     {
@@ -60,7 +60,7 @@ elseif ($type == 'out')
     $Cache->delete_value('user_'.$CURUSER["id"].'_outbox_count');
 }
 else
-    stderr("Error", $lang_deletemessage['std_unknown_pm_type']);
+    \App\Support\LegacyResponse::abort("Error", $lang_deletemessage['std_unknown_pm_type']);
 
 header("Location: " . get_protocol_prefix() . "$BASEURL/messages.php" . ($type == 'out' ? "?out=1" : ""));
 return;

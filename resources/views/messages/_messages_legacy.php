@@ -29,7 +29,7 @@ $pmBoxName = \Nexus\Database\NexusDB::table('pmboxes')
     ->where('boxnumber', $mailbox)
     ->value('name');
 if (!$pmBoxName)
-    stderr($lang_messages['std_error'],$lang_messages['std_invalid_mailbox']);
+    \App\Support\LegacyResponse::abort($lang_messages['std_error'], $lang_messages['std_invalid_mailbox']);
 $mailbox_name = htmlspecialchars($pmBoxName);
 }
 else
@@ -45,7 +45,7 @@ if ($mailbox != PM_SENTBOX)
 else
 	$sender_receiver = $lang_messages['text_receiver'];
 // Start Page
-stdhead($mailbox_name);
+\App\Support\Html::stdhead($mailbox_name);
 ?>
 <?php messagemenu($mailbox)?>
 <table border="0" cellpadding="4" cellspacing="0" width="737">
@@ -88,7 +88,7 @@ else
 
 $perpage = ($CURUSER['pmnum'] ? $CURUSER['pmnum'] : 20);
 
-[$pagertop, $pagerbottom, , $offset, $perpage, ] = pager($perpage, $count, "?action=viewmailbox".($mailbox ? "&box=".$mailbox : "").($place ? "&place=".$place : "").($keyword ? "&keyword=".rawurlencode($keyword) : "").($unread ? "&unread=".$unread : "")."&");
+[$pagertop, $pagerbottom, , $offset, $perpage, ] = \App\Support\Pagination::pager($perpage, $count, "?action=viewmailbox".($mailbox ? "&box=".$mailbox : "").($place ? "&place=".$place : "").($keyword ? "&keyword=".rawurlencode($keyword) : "").($unread ? "&unread=".$unread : "")."&");
 
 if ($mailbox != PM_SENTBOX)
 {
@@ -187,14 +187,14 @@ print("</form>");
 <a href="messages.php?action=editmailboxes"><b><?php echo $lang_messages['text_mailbox_manager'] ?></a></b></div></td></tr></table>
 <?php
 }
-stdfoot();
+\App\Support\Html::stdfoot();
 }
 if ($action == "viewmessage")
 {
 $pm_id = (int) \App\Support\SupportContext::getQuery('id');
 if (!$pm_id)
 {
-stderr($lang_messages['std_error'],$lang_messages['std_no_permission']);
+\App\Support\LegacyResponse::abort($lang_messages['std_error'], $lang_messages['std_no_permission']);
 }
 
 // Get the message
@@ -254,7 +254,7 @@ $subject = $lang_messages['text_no_subject'];
 \App\Models\Message::query()->where('id', $pm_id)->where('receiver', $CURUSER['id'])->update(['unread' => 'no']);
 $Cache->delete_value('user_'.$CURUSER['id'].'_unread_message_count');
 // Display message
-stdhead("PM ($subject)"); ?>
+\App\Support\Html::stdhead("PM ($subject)"); ?>
 <h1><?php echo $subject?></h1>
 <?php
 $mailbox = ($message['sender'] == $CURUSER['id'] ? -1 : $message['location']);
@@ -292,7 +292,7 @@ href="messages.php?action=forward&id=<?php echo $pm_id?>"><?php echo $lang_messa
 </tr>
 </table>
 <?php
-stdfoot();
+\App\Support\Html::stdfoot();
 }
 if ($action == "moveordel")
 {
@@ -309,7 +309,7 @@ $updated = \App\Models\Message::query()->where('id', $pm_id)->where('receiver', 
 	else
 	{
         if (empty($pm_messages)) {
-            stderr('Error', $lang_functions['select_at_least_one_record']);
+            \App\Support\LegacyResponse::abort('Error', $lang_functions['select_at_least_one_record']);
         }
 // Mark multiple messages as read
 $updated = \App\Models\Message::query()->whereIn('id', $pm_messages)->where('receiver', $CURUSER['id'])->update(['unread' => 'no']);
@@ -318,7 +318,7 @@ $updated = \App\Models\Message::query()->whereIn('id', $pm_messages)->where('rec
 // Check if messages were moved
 if ($updated == 0)
 	{
-	stderr($lang_messages['std_error'],$lang_messages['std_cannot_mark_messages']);
+	\App\Support\LegacyResponse::abort($lang_messages['std_error'], $lang_messages['std_cannot_mark_messages']);
 	}
 
 	header("Location: messages.php?action=viewmailbox&box=" . $pm_box);
@@ -340,7 +340,7 @@ $updated = \App\Models\Message::query()->whereIn('id', $pm_messages)->where('rec
 // Check if messages were moved
 if ($updated == 0)
 {
-stderr($lang_messages['std_error'],$lang_messages['std_cannot_move_messages']);
+\App\Support\LegacyResponse::abort($lang_messages['std_error'], $lang_messages['std_cannot_move_messages']);
 }
 	$Cache->delete_value('user_'.$CURUSER['id'].'_unread_message_count');
 	$Cache->delete_value('user_'.$CURUSER['id'].'_inbox_count');
@@ -355,7 +355,7 @@ if ($pm_id)
 // Delete a single message
 $message = \App\Models\Message::query()->where('id', $pm_id)->first();
 if (!$message)
-    stderr($lang_messages['std_error'],$lang_messages['std_cannot_delete_messages']);
+    \App\Support\LegacyResponse::abort($lang_messages['std_error'], $lang_messages['std_cannot_delete_messages']);
 $message = $message->toArray();
 if ($message['receiver'] == $CURUSER['id'] && $message['saved'] == 'no')
 {
@@ -383,7 +383,7 @@ elseif ($message['sender'] == $CURUSER['id'] && $message['location'] != PM_DELET
 else
 {
 if (!$pm_messages)
-stderr($lang_messages['std_error'], $lang_messages['std_no_message_selected']);
+\App\Support\LegacyResponse::abort($lang_messages['std_error'], $lang_messages['std_no_message_selected']);
 // Delete multiple messages
 $deletedCount = 0;
 foreach ($pm_messages as $id)
@@ -415,7 +415,7 @@ $Cache->delete_value('user_'.$CURUSER["id"].'_outbox_count');
 // Check if messages were moved
 if ($deletedCount == 0)
 {
-stderr($lang_messages['std_error'],$lang_messages['std_cannot_delete_messages']);
+\App\Support\LegacyResponse::abort($lang_messages['std_error'], $lang_messages['std_cannot_delete_messages']);
 }
 else
 {
@@ -423,7 +423,7 @@ header("Location: messages.php?action=viewmailbox");
 exit();
 }
 }
-stderr($lang_messages['std_error'],$lang_messages['std_no_action']);
+\App\Support\LegacyResponse::abort($lang_messages['std_error'], $lang_messages['std_no_action']);
 }
 
 
@@ -440,7 +440,7 @@ $message = \App\Models\Message::query()
     })
     ->first();
 if (!$message)
-    stderr($lang_messages['std_error'],$lang_messages['std_no_permission_forwarding']);
+    \App\Support\LegacyResponse::abort($lang_messages['std_error'], $lang_messages['std_no_permission_forwarding']);
 $message = $message->toArray();
 
 // Prepare variables
@@ -461,7 +461,7 @@ $orig_name2 = \App\Models\User::query()->where('id', $orig)->value('username') ?
 
 $body = "-------- Original Message from " . $orig_name2 . " --------<br />" . \App\Support\Format::formatComment($message['msg']);
 
-stdhead($subject);?>
+\App\Support\Html::stdhead($subject);?>
 <h1 align="center"><?php echo $lang_messages['text_forward_pm'] ?></h1>
 <table border="0" cellpadding="4" cellspacing="0"  width="737">
 <form action="takemessage.php" method="post">
@@ -494,13 +494,13 @@ stdhead($subject);?>
 </table>
 </form>
 <?php
-stdfoot();
+\App\Support\Html::stdfoot();
 }
 if ($action == "editmailboxes")
 {
 $pmBoxes = \Nexus\Database\NexusDB::table('pmboxes')->where('userid', $CURUSER['id'])->orderBy('boxnumber')->get(['id','boxnumber','name']);
 
-stdhead($lang_messages['head_editing_mailboxes']); ?>
+\App\Support\Html::stdhead($lang_messages['head_editing_mailboxes']); ?>
 <h1><?php echo $lang_messages['text_editing_mailboxes'] ?></h1>
 <table width="737" border="0" cellpadding="4" cellspacing="0">
 <tr>
@@ -547,14 +547,14 @@ echo("<input type=\"submit\" value=".$lang_messages['submit_edit'].">");
 </tr>
 </table>
 <?php
-stdfoot();
+\App\Support\Html::stdfoot();
 }
 if ($action == "editmailboxes2")
 {
 $action2 = (string) \App\Support\SupportContext::getQuery('action2');
 if (!$action2)
 {
-stderr($lang_messages['std_error'],$lang_messages['std_no_action']);
+\App\Support\LegacyResponse::abort($lang_messages['std_error'], $lang_messages['std_no_action']);
 }
 if ($action2 == "add")
 {
@@ -592,7 +592,7 @@ if ($action2 == "edit");
 $pmBoxes = \Nexus\Database\NexusDB::table('pmboxes')->where('userid', $CURUSER['id'])->get(['id','boxnumber','name']);
 if ($pmBoxes->isEmpty())
 {
-stderr($lang_messages['std_error'],$lang_messages['text_no_mailboxes_to_edit']);
+\App\Support\LegacyResponse::abort($lang_messages['std_error'], $lang_messages['text_no_mailboxes_to_edit']);
 }
 foreach ($pmBoxes as $pmBox)
 {
@@ -627,7 +627,7 @@ $pm_id = (int) \App\Support\SupportContext::getQuery('id');
 // Delete message
 $message = \App\Models\Message::query()->where('id', $pm_id)->first();
 if (!$message)
-    stderr($lang_messages['std_error'],$lang_messages['std_no_message_id']);
+    \App\Support\LegacyResponse::abort($lang_messages['std_error'], $lang_messages['std_no_message_id']);
 $message = $message->toArray();
 if ($message['receiver'] == $CURUSER['id'] && $message['saved'] == 'no')
 {
@@ -647,7 +647,7 @@ elseif ($message['sender'] == $CURUSER['id'] && $message['location'] != PM_DELET
 }
 if ($affected == 0)
 {
-stderr($lang_messages['std_error'],$lang_messages['std_could_not_delete_message']);
+\App\Support\LegacyResponse::abort($lang_messages['std_error'], $lang_messages['std_could_not_delete_message']);
 }
 else
 {
@@ -695,7 +695,7 @@ function messagemenu ($selected = 1) {
 $lang_messages = (array) (\App\Support\SupportContext::getGlobal('lang_messages') ?? []);
 $BASEURL = \App\Support\SupportContext::getGlobal('BASEURL');
 $CURUSER = \App\Support\SupportContext::getUser() ?? [];
-	begin_main_frame();
+	\App\Support\Frame::mainFrameOpen();
 	print ("<div id=\"pmboxnav\"><ul id=\"pmboxmenu\" class=\"menu\">");
 	print ("<li" . ($selected == 1 ? " class=selected" : "") . "><a href=\"" . get_protocol_prefix() . $BASEURL . "/messages.php\" >".$lang_messages['text_inbox']."</a></li>");
 	print ("<li" . ($selected == -1 ? " class=selected" : "") . "><a href=\"" . get_protocol_prefix() . $BASEURL . "/messages.php?action=viewmailbox&box=-1\">".$lang_messages['text_sentbox']."</a></li>");
@@ -707,6 +707,6 @@ if ($pmBoxes->count())
     print ("<li" . ($selected == $row['boxnumber'] ? " class=selected" : "") . "><a href=\"" . get_protocol_prefix() . $BASEURL . "/messages.php?action=viewmailbox&box=".$row['boxnumber']."\">".$row['name']."</a></li>");
     }
 	print ("</ul></div>");
-	end_main_frame();
+	\App\Support\Frame::mainFrameClose();
 }
 ?>

@@ -1,7 +1,7 @@
 <?php
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 if (\App\Support\UserDisplay::currentClass() < UC_MODERATOR)
-stderr("Sorry", "Access denied.");
+\App\Support\LegacyResponse::abort("Sorry", "Access denied.");
 
 $tabs = ['users', 'peers'];
 $tab = 'users';
@@ -10,14 +10,14 @@ if (!empty(\App\Support\SupportContext::getRequestInput('tab')) && in_array(\App
 }
 $page = \App\Support\SupportContext::getRequestInput('page') ?? 0;
 $title = 'Duplicate IP users';
-stdhead($title);
+\App\Support\Html::stdhead($title);
 print '<h1>'.$title.'</h1>';
 //print '<ul class="menu" style="padding-inline-start: 0">';
 //foreach ($tabs as $item) {
 //    echo sprintf('<li class="%s"><a href="?tab=%s&page=%s">%s</a></li>', $tab == $item ? 'selected' : '', $item, $page, $item);
 //}
 //print '</ul>';
-begin_table();
+\App\Support\Html::beginTable();
 
 if (\App\Support\UserDisplay::currentClass() >= UC_MODERATOR || $CURUSER["guard"] == "yes")
 {
@@ -65,7 +65,7 @@ if (\App\Support\UserDisplay::currentClass() >= UC_MODERATOR || $CURUSER["guard"
 		  else
 			$ratio="---";
 
-		  $ratio = "<font color=" . get_ratio_color($ratio) . ">$ratio</font>";
+		  $ratio = "<font color=" . \App\Support\Ratio::color($ratio) . ">$ratio</font>";
 		  $uploaded = \App\Support\Format::size($arr["uploaded"]);
 		  $downloaded = \App\Support\Format::size($arr["downloaded"]);
 		  $added = substr($arr['added'],0,10);
@@ -96,8 +96,8 @@ else
  print("<br /><table width=60% border=1 cellspacing=0 cellpadding=9><tr><td align=center>");
  print("<h2>Sorry, only for Team</h2></table></td></tr>");
 }
-end_frame();
-end_table();
+\App\Support\Html::endFrame();
+\App\Support\Html::endTable();
 
-stdfoot();
+\App\Support\Html::stdfoot();
 ?>

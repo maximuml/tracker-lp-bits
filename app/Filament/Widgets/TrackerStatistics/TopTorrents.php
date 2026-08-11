@@ -50,7 +50,7 @@ class TopTorrents extends BaseWidget implements HasActions
                     /** @var Torrent $record */
                     $record = $column->getRecord();
 
-                    return torrent_name_for_admin($record, false, 50);
+                    return \App\Support\TorrentAccess::adminName($record, false, 50);
                 })
             ,
             TextColumn::make('size')

@@ -11,7 +11,7 @@ if (!empty($q)) {
 }
 $total = (clone $query)->count();
 $perPage = 20;
-list($paginationTop, $paginationBottom, $limit, $offset) = pager($perPage, $total, "?");
+list($paginationTop, $paginationBottom, $limit, $offset) = \App\Support\Pagination::pager($perPage, $total, "?");
 $rows = (clone $query)->offset($offset)->take($perPage)->orderBy('id', 'desc')->get();
 $q = htmlspecialchars($q);
 $title = nexus_trans('medal.label');
@@ -36,8 +36,8 @@ $filterForm = <<<FORM
     </form>
 </div>
 FORM;
-stdhead($title);
-begin_main_frame();
+\App\Support\Html::stdhead($title);
+\App\Support\Frame::mainFrameOpen();
 $table = <<<TABLE
 <table border="1" cellspacing="0" cellpadding="5" width="100%">
 <thead>
@@ -98,7 +98,7 @@ foreach ($rows as $row) {
 }
 $table .= '</tbody></table>';
 echo $header . $table . $paginationBottom;
-end_main_frame();
+\App\Support\Frame::mainFrameClose();
 $confirmBuyMsg = nexus_trans('medal.confirm_to_buy');
 $confirmGiftMsg = nexus_trans('medal.confirm_to_gift');
 $js = <<<JS
@@ -145,5 +145,5 @@ jQuery('.gift').on('click', function (e) {
 })
 JS;
 \Nexus\Nexus::js($js, 'footer', false);
-stdfoot();
+\App\Support\Html::stdfoot();
 

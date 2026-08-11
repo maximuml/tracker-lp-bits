@@ -4,8 +4,8 @@ function puke()
 {
 $CURUSER = \App\Support\SupportContext::getUser() ?? [];
 	$msg = "User ".$CURUSER["username"]." (id: ".$CURUSER["id"].") is hacking user's profile. IP : ".\App\Support\Network::clientIp();
-	write_log($msg,'mod');
-	stderr("Error", "Permission denied. For security reason, we logged this action");
+	\App\Support\Log::writeWithContext($msg, 'mod');
+	\App\Support\LegacyResponse::abort("Error", "Permission denied. For security reason, we logged this action");
 }
 
 if (!\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::MANAGE_USER_BASIC_INFO))
@@ -55,10 +55,10 @@ if ($action == "edituser")
 	$pickfor = \App\Support\SupportContext::getPost("pickfor") ?? '';
 	$stafffor = \App\Support\SupportContext::getPost("staffduties") ?? '';
 
-	if (!is_valid_id($userid) || !\App\Support\User::isValidUserClass($class))
-		stderr("Error", "Bad user ID or class ID.");
+	if (!\App\Support\Validators::isId($userid) || !\App\Support\User::isValidUserClass($class))
+		\App\Support\LegacyResponse::abort("Error", "Bad user ID or class ID.");
 	if (\App\Support\UserDisplay::currentClass() <= $class)
-		stderr("Error", "You have no permission to change user's class to ".\App\Support\UserClass::name($class,false,false,true).". BTW, how do you get here?");
+		\App\Support\LegacyResponse::abort("Error", "You have no permission to change user's class to ".\App\Support\UserClass::name($class,false,false,true).". BTW, how do you get here?");
 	$arr = \App\Repositories\ModtaskRepository::getUserArray($userid) ?? puke();
 
 	$curenabled = $arr["enabled"];

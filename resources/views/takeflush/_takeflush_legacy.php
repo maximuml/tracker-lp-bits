@@ -3,14 +3,14 @@ error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 function bark($msg)
 {
 $lang_takeflush = (array) (\App\Support\SupportContext::getGlobal('lang_takeflush') ?? []);
-   stdhead();
-   stdmsg($lang_takeflush['std_failed'], $msg);
-   stdfoot();
+   \App\Support\Html::stdhead();
+   \App\Support\Html::stdMessage($lang_takeflush['std_failed'], $msg);
+   \App\Support\Html::stdfoot();
    return;
 }
 
 $id = intval(\App\Support\SupportContext::getQuery('id') ?? 0);
-int_check($id,true);
+\App\Support\LegacyResponse::assertId($id, true);
 
 if (\App\Support\UserDisplay::currentClass() >= UC_MODERATOR || $CURUSER['id'] == "$id")
 {
@@ -18,7 +18,7 @@ if (\App\Support\UserDisplay::currentClass() >= UC_MODERATOR || $CURUSER['id'] =
    $lastAction = date("Y-m-d H:i:s", $deadtime);
    $effected = \App\Models\Peer::query()->where('last_action', '<', $lastAction)->where('userid', $id)->delete();
 
-   stderr($lang_takeflush['std_success'], "$effected ".$lang_takeflush['std_ghost_torrents_cleaned']);
+   \App\Support\LegacyResponse::abort($lang_takeflush['std_success'], "$effected ".$lang_takeflush['std_ghost_torrents_cleaned']);
 }
 else
 {

@@ -5,15 +5,15 @@ $langFile = ROOT_PATH . get_langfile_path();
 if (file_exists($langFile)) {
 	require $langFile;
 }
-stdhead($lang_staffpanel["Administration"] ?? 'Administration');
+\App\Support\Html::stdhead($lang_staffpanel["Administration"] ?? 'Administration');
 print("<h1 align=center>" . ($lang_staffpanel["Administration"] ?? 'Administration') . "</h1>");
 if (\App\Support\UserDisplay::currentClass() < UC_MODERATOR)
 {
-	stdmsg("Error", "Access denied!!!");
-	stdfoot();
+	\App\Support\Html::stdMessage("Error", "Access denied!!!");
+	\App\Support\Html::stdfoot();
 	return;
 }
-begin_main_frame();
+\App\Support\Frame::mainFrameOpen();
 
 ///////////////////// SysOp Only \\\\\\\\\\\\\\\\\\\\\\\\\\\\
 if (\App\Support\UserDisplay::currentClass() >= UC_SYSOP) {
@@ -79,5 +79,5 @@ if (\App\Support\UserDisplay::currentClass() >= UC_MODERATOR) {
 	print("<br />");
 	print("<br />");
 }
-end_main_frame();
-stdfoot();
+\App\Support\Frame::mainFrameClose();
+\App\Support\Html::stdfoot();

@@ -52,7 +52,7 @@ class UserResource extends JsonResource
             'seedtime_text' => \App\Support\Format::prettyTimeWithLocale($this->seedtime),
             'leechtime' => $this->leechtime,
             'leechtime_text' => \App\Support\Format::prettyTimeWithLocale($this->leechtime),
-            'share_ratio' => get_ratio($this->id),
+            'share_ratio' => \App\Support\Ratio::forUserId($this->id),
             'seeding_leeching_data' => $this->whenHas('seeding_leeching_data'),
             'inviter' => new UserResource($this->whenLoaded('inviter')),
             'valid_medals' => MedalResource::collection($this->whenLoaded('valid_medals')),

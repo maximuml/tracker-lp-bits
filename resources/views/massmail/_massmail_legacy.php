@@ -4,16 +4,16 @@ error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
 $__server_REQUEST_METHOD = \App\Support\SupportContext::getServerValue('REQUEST_METHOD');
 if (\App\Support\UserDisplay::currentClass() < UC_SYSOP)
-stderr("Error", "Permission denied.");
+\App\Support\LegacyResponse::abort("Error", "Permission denied.");
 $class = intval(\App\Support\SupportContext::getPost("class") ?? 0);
 	if ($class)
-		int_check($class,true);
+		\App\Support\LegacyResponse::assertId($class, true);
 
 if ($__server_REQUEST_METHOD == "POST")
 {
     $or = \App\Support\SupportContext::getPost("or") ?? '';
     if (!in_array($or, ["<", ">", "=", "<=", ">="], true)) {
-        stderr("Error", "Invalid symbol!");
+        \App\Support\LegacyResponse::abort("Error", "Invalid symbol!");
     }
 $rows = \App\Models\User::query()->where('class', $or, $class)->get(['id', 'username', 'email']);
 
@@ -22,7 +22,7 @@ if ($subject == "") $subject = "(no subject)";
 $subject = "Fw: $subject";
 
 $message1 = htmlspecialchars(trim(\App\Support\SupportContext::getPost("message")));
-if ($message1 == "") stderr("Error", "Empty message!");
+if ($message1 == "") \App\Support\LegacyResponse::abort("Error", "Empty message!");
 
 foreach ($rows as $userRow) {
 $arr = (array) $userRow;
@@ -39,13 +39,13 @@ $success = sent_mail($to,$SITENAME,$SITEEMAIL,$subject,$message,"Mass Mail",fals
 
 
 if ($success)
-stderr("Success", "Messages sent.");
+\App\Support\LegacyResponse::abort("Success", "Messages sent.");
 else
-stderr("Error", "Try again.");
+\App\Support\LegacyResponse::abort("Error", "Try again.");
 
 }
 
-stdhead("Mass E-mail Gateway");
+\App\Support\Html::stdhead("Mass E-mail Gateway");
 ?>
 
 <p><table border=0 class=main cellspacing=0 cellpadding=0><tr>
@@ -79,4 +79,4 @@ print("</select></td></tr>\n");
 </table>
 
 <?php
-stdfoot();
+\App\Support\Html::stdfoot();

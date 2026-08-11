@@ -1,10 +1,10 @@
 <?php
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
-stdhead($lang_contactstaff['head_contact_staff'], false);
-begin_main_frame();
+\App\Support\Html::stdhead($lang_contactstaff['head_contact_staff'], false);
+\App\Support\Frame::mainFrameOpen();
 print("<form id=compose method=post name=\"compose\" action=takecontact.php>");
-begin_compose($lang_contactstaff['text_message_to_staff'], "new");
-end_compose();
+\App\Support\Frame::composeBeginVoid($lang_contactstaff['text_message_to_staff'], "new");
+\App\Support\Frame::composeEndVoid();
 print("</form>");
-end_main_frame();
-stdfoot();
+\App\Support\Frame::mainFrameClose();
+\App\Support\Html::stdfoot();

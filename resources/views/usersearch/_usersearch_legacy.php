@@ -7,9 +7,9 @@ $hasModcomment = \Illuminate\Support\Facades\Schema::hasColumn('users', 'modcomm
 // 0 - No debug; 1 - Show and run SQL query; 2 - Show SQL query only
 $DEBUG_MODE = 0;
 if (\App\Support\UserDisplay::currentClass() < UC_MODERATOR)
-	stderr("Error", "Permission denied.");
+	\App\Support\LegacyResponse::abort("Error", "Permission denied.");
 
-stdhead("Administrative User Search");
+\App\Support\Html::stdhead("Administrative User Search");
 echo "<h1>Administrative User Search</h1>\n";
 
 if (!empty(\App\Support\SupportContext::getQuery('h')))
@@ -96,7 +96,7 @@ $highlight = " bgcolor=#BBAF9B";
   <td<?php echo (\App\Support\SupportContext::getQuery('c') && \App\Support\SupportContext::getQuery('c') != 1)?$highlight:""?>><select name="c"><option value='1'>(any)</option>
 <?php
   $class = \App\Support\SupportContext::getQuery('c');
-  if (!is_valid_id($class))
+  if (!\App\Support\Validators::isId($class))
   	$class = '';
   for ($i = 2;;++$i) {
 		if ($c = \App\Support\UserClass::name($i-2,false,true,true))
@@ -228,7 +228,7 @@ function ratios($up,$down, $color = True)
 	{
 		$r = number_format($up / $down, 2);
     if ($color)
-			$r = "<font color=".get_ratio_color($r).">$r</font>";
+			$r = "<font color=".\App\Support\Ratio::color($r).">$r</font>";
 	}
 	else
 		if ($up > 0)
@@ -323,8 +323,8 @@ if (count(\App\Support\SupportContext::allQuery()) > 0 && !\App\Support\SupportC
 	    {
       	if (!validemail($email))
       	{
-	        stdmsg("Error", "Bad email.");
-	        stdfoot();
+	        \App\Support\Html::stdMessage("Error", "Bad email.");
+	        \App\Support\Html::stdfoot();
 	      	return;
 	      }
 	      $method = $first ? 'where' : 'orWhere';
@@ -345,7 +345,7 @@ if (count(\App\Support\SupportContext::allQuery()) > 0 && !\App\Support\SupportC
   //class
   // NB: the c parameter is passed as two units above the real one
   $class = \App\Support\SupportContext::getQuery('c') - 2;
-	if (is_valid_id($class + 1))
+	if (\App\Support\Validators::isId($class + 1))
 	{
   	$userQuery->where('u.class', $class);
     $q .= ($q ? "&" : "") . "c=".($class+2);
@@ -358,8 +358,8 @@ if (count(\App\Support\SupportContext::allQuery()) > 0 && !\App\Support\SupportC
   	$regex = "/^(((1?\\d{1,2})|(2[0-4]\\d)|(25[0-5]))(\\.\\b|$)){4}$/";
   	if (!filter_var($ip, FILTER_VALIDATE_IP))
     {
-    	stdmsg("Error", "Bad IP.");
-    	stdfoot();
+    	\App\Support\Html::stdMessage("Error", "Bad IP.");
+    	\App\Support\Html::stdfoot();
       return;
     }
 
@@ -373,8 +373,8 @@ if (count(\App\Support\SupportContext::allQuery()) > 0 && !\App\Support\SupportC
       	$n = substr($mask, 1, strlen($mask) - 1);
         if (!is_numeric($n) or $n < 0 or $n > 32)
         {
-        	stdmsg("Error", "Bad subnet mask.");
-        	stdfoot();
+        	\App\Support\Html::stdMessage("Error", "Bad subnet mask.");
+        	\App\Support\Html::stdfoot();
           return;
         }
         else
@@ -382,8 +382,8 @@ if (count(\App\Support\SupportContext::allQuery()) > 0 && !\App\Support\SupportC
       }
       elseif (!preg_match($regex, $mask))
       {
-				stdmsg("Error", "Bad subnet mask.");
-				stdfoot();
+				\App\Support\Html::stdMessage("Error", "Bad subnet mask.");
+				\App\Support\Html::stdfoot();
 	      return;
       }
       $userQuery->whereRaw("INET_ATON(u.ip) & INET_ATON(?) = INET_ATON(?) & INET_ATON(?)", [$mask, $ip, $mask]);
@@ -408,8 +408,8 @@ if (count(\App\Support\SupportContext::allQuery()) > 0 && !\App\Support\SupportC
     {
     	if (!is_numeric($ratio) || $ratio < 0)
       {
-      	stdmsg("Error", "Bad ratio.");
-      	stdfoot();
+      	\App\Support\Html::stdMessage("Error", "Bad ratio.");
+      	\App\Support\Html::stdfoot();
         return;
       }
       $ratiotype = \App\Support\SupportContext::getQuery('rt');
@@ -420,14 +420,14 @@ if (count(\App\Support\SupportContext::allQuery()) > 0 && !\App\Support\SupportC
       	$ratio2 = trim(\App\Support\SupportContext::getQuery('r2'));
         if(!$ratio2)
         {
-        	stdmsg("Error", "Two ratios needed for this type of search.");
-        	stdfoot();
+        	\App\Support\Html::stdMessage("Error", "Two ratios needed for this type of search.");
+        	\App\Support\Html::stdfoot();
           return;
         }
         if (!is_numeric($ratio2) or $ratio2 < $ratio)
         {
-        	stdmsg("Error", "Bad second ratio.");
-        	stdfoot();
+        	\App\Support\Html::stdMessage("Error", "Bad second ratio.");
+        	\App\Support\Html::stdfoot();
         	return;
         }
         $userQuery->whereRaw('(u.uploaded/u.downloaded) BETWEEN ? AND ?', [(float)$ratio, (float)$ratio2]);
@@ -510,8 +510,8 @@ if (count(\App\Support\SupportContext::allQuery()) > 0 && !\App\Support\SupportC
   {
   	if (!is_numeric($ul) || $ul < 0)
   	{
-    	stdmsg("Error", "Bad uploaded amount.");
-    	stdfoot();
+    	\App\Support\Html::stdMessage("Error", "Bad uploaded amount.");
+    	\App\Support\Html::stdfoot();
       return;
     }
     $ultype = \App\Support\SupportContext::getQuery('ult');
@@ -521,14 +521,14 @@ if (count(\App\Support\SupportContext::allQuery()) > 0 && !\App\Support\SupportC
 	    $ul2 = trim(\App\Support\SupportContext::getQuery('ul2'));
     	if(!$ul2)
     	{
-      	stdmsg("Error", "Two uploaded amounts needed for this type of search.");
-      	stdfoot();
+      	\App\Support\Html::stdMessage("Error", "Two uploaded amounts needed for this type of search.");
+      	\App\Support\Html::stdfoot();
         return;
       }
       if (!is_numeric($ul2) or $ul2 < $ul)
       {
-      	stdmsg("Error", "Bad second uploaded amount.");
-      	stdfoot();
+      	\App\Support\Html::stdMessage("Error", "Bad second uploaded amount.");
+      	\App\Support\Html::stdfoot();
         return;
       }
       $userQuery->whereBetween('u.uploaded', [(float)$ul*$unit, (float)$ul2*$unit]);
@@ -549,8 +549,8 @@ if (count(\App\Support\SupportContext::allQuery()) > 0 && !\App\Support\SupportC
   {
   	if (!is_numeric($dl) || $dl < 0)
   	{
-    	stdmsg("Error", "Bad downloaded amount.");
-    	stdfoot();
+    	\App\Support\Html::stdMessage("Error", "Bad downloaded amount.");
+    	\App\Support\Html::stdfoot();
       return;
     }
     $dltype = \App\Support\SupportContext::getQuery('dlt');
@@ -560,14 +560,14 @@ if (count(\App\Support\SupportContext::allQuery()) > 0 && !\App\Support\SupportC
     	$dl2 = trim(\App\Support\SupportContext::getQuery('dl2'));
       if(!$dl2)
       {
-      	stdmsg("Error", "Two downloaded amounts needed for this type of search.");
-      	stdfoot();
+      	\App\Support\Html::stdMessage("Error", "Two downloaded amounts needed for this type of search.");
+      	\App\Support\Html::stdfoot();
         return;
       }
       if (!is_numeric($dl2) or $dl2 < $dl)
       {
-      	stdmsg("Error", "Bad second downloaded amount.");
-      	stdfoot();
+      	\App\Support\Html::stdMessage("Error", "Bad second downloaded amount.");
+      	\App\Support\Html::stdfoot();
         return;
       }
       $userQuery->whereBetween('u.downloaded', [(float)$dl*$unit, (float)$dl2*$unit]);
@@ -588,8 +588,8 @@ if (count(\App\Support\SupportContext::allQuery()) > 0 && !\App\Support\SupportC
   {
   	if (!$date = mkdate($date))
   	{
-    	stdmsg("Error", "Invalid date.");
-    	stdfoot();
+    	\App\Support\Html::stdMessage("Error", "Invalid date.");
+    	\App\Support\Html::stdfoot();
       return;
     }
     $q .= ($q ? "&" : "") . "d=$date";
@@ -611,8 +611,8 @@ if (count(\App\Support\SupportContext::allQuery()) > 0 && !\App\Support\SupportC
         }
         else
         {
-          stdmsg("Error", "Two dates needed for this type of search.");
-          stdfoot();
+          \App\Support\Html::stdMessage("Error", "Two dates needed for this type of search.");
+          \App\Support\Html::stdfoot();
           return;
         }
       }
@@ -629,8 +629,8 @@ if (count(\App\Support\SupportContext::allQuery()) > 0 && !\App\Support\SupportC
   {
   	if (!$last = mkdate($last))
   	{
-    	stdmsg("Error", "Invalid date.");
-    	stdfoot();
+    	\App\Support\Html::stdMessage("Error", "Invalid date.");
+    	\App\Support\Html::stdfoot();
       return;
     }
     $q .= ($q ? "&" : "") . "ls=$last";
@@ -652,8 +652,8 @@ if (count(\App\Support\SupportContext::allQuery()) > 0 && !\App\Support\SupportC
         }
         else
         {
-        	stdmsg("Error", "The second date is not valid.");
-        	stdfoot();
+        	\App\Support\Html::stdMessage("Error", "The second date is not valid.");
+        	\App\Support\Html::stdfoot();
         	return;
         }
       }
@@ -724,12 +724,12 @@ $q = (isset($q))?($q."&"):"";
 
 $perpage = 30;
 
-list($pagertop, $pagerbottom, , $offset, $rpp, ) = pager($perpage, $count, $__server_REQUEST_URI."?".$q);
+list($pagertop, $pagerbottom, , $offset, $rpp, ) = \App\Support\Pagination::pager($perpage, $count, $__server_REQUEST_URI."?".$q);
 
 $res = (clone $userQuery)->distinct()->selectRaw($select_is)->offset($offset)->limit($rpp)->get()->map(fn ($row) => (array)$row)->all();
 
   if (count($res) == 0)
-  	stdmsg("Warning","No user was found.");
+  	\App\Support\Html::stdMessage("Warning", "No user was found.");
   else
   {
   	if ($count > $perpage)
@@ -831,5 +831,5 @@ $res = (clone $userQuery)->distinct()->selectRaw($select_is)->offset($offset)->l
 }
 
 print("<p>$pagemenu<br />$browsemenu</p>");
-stdfoot();
+\App\Support\Html::stdfoot();
 return;

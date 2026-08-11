@@ -4,10 +4,10 @@ error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
 $__server_REQUEST_METHOD = \App\Support\SupportContext::getServerValue('REQUEST_METHOD');
 if ($__server_REQUEST_METHOD != "POST")
-    stderr("Error", "Permission denied!");
+    \App\Support\LegacyResponse::abort("Error", "Permission denied!");
 
 if (\App\Support\UserDisplay::currentClass() < UC_SYSOP)
-    stderr("Sorry", "Permission denied.");
+    \App\Support\LegacyResponse::abort("Sorry", "Permission denied.");
 
 $validTypeMap = $lang_incrementbulk['types'];
 $sender_id = (\App\Support\SupportContext::getPost('sender') == 'system' ? 0 : (int)$CURUSER['id']);
@@ -16,11 +16,11 @@ $msg = trim(\App\Support\SupportContext::getPost('msg'));
 $amount = \App\Support\SupportContext::getPost('amount');
 $type = \App\Support\SupportContext::getPost('type') ?? '';
 if (!$msg || !$amount || !$type)
-    stderr("Error","Don't leave any fields blank.");
+    \App\Support\LegacyResponse::abort("Error", "Don't leave any fields blank.");
 if(!is_numeric($amount))
-    stderr("Error","amount must be numeric");
+    \App\Support\LegacyResponse::abort("Error", "amount must be numeric");
 if (!(isset($validTypeMap[$type]))) {
-    stderr("Error","Invalid type");
+    \App\Support\LegacyResponse::abort("Error", "Invalid type");
 }
 if ($type == 'uploaded') {
     $amount = \App\Support\Format::bytesFromUnit($amount,"G");
@@ -37,12 +37,12 @@ if (!empty(\App\Support\SupportContext::getPost('classes'))) {
 }
 $conditions = apply_filter("role_query_conditions", $conditions, \App\Support\SupportContext::allPost());
 if (empty($conditions)) {
-    stderr("Error","No valid filter");
+    \App\Support\LegacyResponse::abort("Error", "No valid filter");
 }
 if ($isTypeTmpInvite) {
     $duration = intval(\App\Support\SupportContext::getPost('duration') ?? 0);
     if ($duration <= 0) {
-        stderr("Sorry", "Invalid duration: $duration");
+        \App\Support\LegacyResponse::abort("Sorry", "Invalid duration: $duration");
     }
 }
 $whereStr = implode(' OR ', $conditions);

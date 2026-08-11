@@ -4,11 +4,11 @@ error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
 $__server_HTTP_REFERER = \App\Support\SupportContext::getServerValue('HTTP_REFERER');
 if (\App\Support\UserDisplay::currentClass() < UC_SYSOP)
-    stderr("Sorry", "Access denied.");
+    \App\Support\LegacyResponse::abort("Sorry", "Access denied.");
 
 $validTypeMap = $lang_incrementbulk['types'];
 $type = \App\Support\SupportContext::getRequestInput('type') ?? '';
-stdhead($lang_incrementbulk['page_title'], false);
+\App\Support\Html::stdhead($lang_incrementbulk['page_title'], false);
 $classes = array_chunk(\App\Models\User::listClass(), 4, true);
 ?>
     <table class=main width=737 border=0 cellspacing=0 cellpadding=0><tr><td class=embedded>
@@ -76,4 +76,4 @@ $classes = array_chunk(\App\Models\User::listClass(), 4, true);
 
                 </div></td></tr></table>
 <?php
-stdfoot();
+\App\Support\Html::stdfoot();

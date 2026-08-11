@@ -45,15 +45,15 @@ $searchParams = $query ?: SupportContext::allQuery();
 $hasSearchParams = !empty($searchParams);
 $searchParams['mode'] = $sectiontype;
 
-$showsubcat = get_searchbox_value($sectiontype, 'showsubcat');//whether show subcategory (i.e. sources, codecs) or not
-$showsource = get_searchbox_value($sectiontype, 'showsource'); //whether show sources or not
-$showmedium = get_searchbox_value($sectiontype, 'showmedium'); //whether show media or not
-$showcodec = get_searchbox_value($sectiontype, 'showcodec'); //whether show codecs or not
-$showstandard = get_searchbox_value($sectiontype, 'showstandard'); //whether show standards or not
-$showprocessing = get_searchbox_value($sectiontype, 'showprocessing'); //whether show processings or not
-$showaudiocodec = get_searchbox_value($sectiontype, 'showaudiocodec'); //whether show audio codec or not
-$catsperrow = get_searchbox_value($sectiontype, 'catsperrow'); //show how many cats per line in search box
-$catpadding = get_searchbox_value($sectiontype, 'catpadding'); //padding space between categories in pixel
+$showsubcat = \App\Support\SearchBox::valueWithContext($sectiontype, 'showsubcat');//whether show subcategory (i.e. sources, codecs) or not
+$showsource = \App\Support\SearchBox::valueWithContext($sectiontype, 'showsource'); //whether show sources or not
+$showmedium = \App\Support\SearchBox::valueWithContext($sectiontype, 'showmedium'); //whether show media or not
+$showcodec = \App\Support\SearchBox::valueWithContext($sectiontype, 'showcodec'); //whether show codecs or not
+$showstandard = \App\Support\SearchBox::valueWithContext($sectiontype, 'showstandard'); //whether show standards or not
+$showprocessing = \App\Support\SearchBox::valueWithContext($sectiontype, 'showprocessing'); //whether show processings or not
+$showaudiocodec = \App\Support\SearchBox::valueWithContext($sectiontype, 'showaudiocodec'); //whether show audio codec or not
+$catsperrow = \App\Support\SearchBox::valueWithContext($sectiontype, 'catsperrow'); //show how many cats per line in search box
+$catpadding = \App\Support\SearchBox::valueWithContext($sectiontype, 'catpadding'); //padding space between categories in pixel
 
 $cats = genrelist($sectiontype);
 if ($showsubcat){
@@ -154,7 +154,7 @@ elseif ($CURUSER['notifs']){
 if (!in_array($inclbookmarked,array(0,1,2)))
 {
 	$inclbookmarked = 0;
-	write_log("User " . $CURUSER["username"] . "," . $CURUSER["ip"] . " is hacking inclbookmarked field in" . SupportContext::getServerValue('SCRIPT_NAME', ''), 'mod');
+	\App\Support\Log::writeWithContext("User " . $CURUSER["username"] . "," . $CURUSER["ip"] . " is hacking inclbookmarked field in" . SupportContext::getServerValue('SCRIPT_NAME', ''), 'mod');
 }
 if ($inclbookmarked == 0)  //all(bookmarked,not)
 {
@@ -191,7 +191,7 @@ else $include_dead = 1;
 if (!in_array($include_dead,array(0,1,2)))
 {
 	$include_dead = 0;
-	write_log("User " . $CURUSER["username"] . "," . $CURUSER["ip"] . " is hacking incldead field in" . SupportContext::getServerValue('SCRIPT_NAME', ''), 'mod');
+	\App\Support\Log::writeWithContext("User " . $CURUSER["username"] . "," . $CURUSER["ip"] . " is hacking incldead field in" . SupportContext::getServerValue('SCRIPT_NAME', ''), 'mod');
 }
 if ($include_dead == 0)  //all(active,dead)
 {
@@ -242,7 +242,7 @@ elseif ($CURUSER['notifs']){
 if (!in_array($special_state,array(0,1,2,3,4,5,6,7)))
 {
 	$special_state = 0;
-	write_log("User " . $CURUSER["username"] . "," . $CURUSER["ip"] . " is hacking spstate field in " . SupportContext::getServerValue('SCRIPT_NAME', ''), 'mod');
+	\App\Support\Log::writeWithContext("User " . $CURUSER["username"] . "," . $CURUSER["ip"] . " is hacking spstate field in " . SupportContext::getServerValue('SCRIPT_NAME', ''), 'mod');
 }
 if($special_state == 0)	//all
 {
@@ -486,43 +486,43 @@ if (!$all)
 	// when one clicked the cat, source, etc. name/image
 	elseif ($category_get)
 	{
-		int_check($category_get,true,true,true);
+		\App\Support\LegacyResponse::assertId($category_get, true, true, true);
 		$wherecatina[] = $category_get;
 		$addparam .= "cat=$category_get&";
 	}
 	elseif ($medium_get)
 	{
-		int_check($medium_get,true,true,true);
+		\App\Support\LegacyResponse::assertId($medium_get, true, true, true);
 		$wheremediumina[] = $medium_get;
 		$addparam .= "medium=$medium_get&";
 	}
 	elseif ($source_get)
 	{
-		int_check($source_get,true,true,true);
+		\App\Support\LegacyResponse::assertId($source_get, true, true, true);
 		$wheresourceina[] = $source_get;
 		$addparam .= "source=$source_get&";
 	}
 	elseif ($codec_get)
 	{
-		int_check($codec_get,true,true,true);
+		\App\Support\LegacyResponse::assertId($codec_get, true, true, true);
 		$wherecodecina[] = $codec_get;
 		$addparam .= "codec=$codec_get&";
 	}
 	elseif ($standard_get)
 	{
-		int_check($standard_get,true,true,true);
+		\App\Support\LegacyResponse::assertId($standard_get, true, true, true);
 		$wherestandardina[] = $standard_get;
 		$addparam .= "standard=$standard_get&";
 	}
 	elseif ($processing_get)
 	{
-		int_check($processing_get,true,true,true);
+		\App\Support\LegacyResponse::assertId($processing_get, true, true, true);
 		$whereprocessingina[] = $processing_get;
 		$addparam .= "processing=$processing_get&";
 	}
 	elseif ($audiocodec_get)
 	{
-		int_check($audiocodec_get,true,true,true);
+		\App\Support\LegacyResponse::assertId($audiocodec_get, true, true, true);
 		$whereaudiocodecina[] = $audiocodec_get;
 		$addparam .= "audiocodec=$audiocodec_get&";
 	}
@@ -690,7 +690,7 @@ if (isset($searchstr))
 	if (!in_array($search_mode,array(0,2)))
 	{
 		$search_mode = 0;
-		write_log("User " . $CURUSER["username"] . "," . $CURUSER["ip"] . " is hacking search_mode field in" . SupportContext::getServerValue('SCRIPT_NAME', ''), 'mod');
+		\App\Support\Log::writeWithContext("User " . $CURUSER["username"] . "," . $CURUSER["ip"] . " is hacking search_mode field in" . SupportContext::getServerValue('SCRIPT_NAME', ''), 'mod');
 	}
 
 	$search_area = intval($searchParams["search_area"] ?? 0) ;
@@ -777,7 +777,7 @@ if (isset($searchstr))
 		{
 			$search_area = 0;
 			$wherea[] =  "torrents.name LIKE '%" . $searchstr . "%'";
-			write_log("User " . $CURUSER["username"] . "," . $CURUSER["ip"] . " is hacking search_area field in" . SupportContext::getServerValue('SCRIPT_NAME', ''), 'mod');
+			\App\Support\Log::writeWithContext("User " . $CURUSER["username"] . "," . $CURUSER["ip"] . " is hacking search_area field in" . SupportContext::getServerValue('SCRIPT_NAME', ''), 'mod');
 			break;
 		}
 	}
@@ -931,7 +931,7 @@ if ($count)
 	//stderr("addparam",$addparam);
 	//echo $addparam;
 
-	list($pagertop, $pagerbottom, $limit, $offset, $size, $page) = pager($torrentsperpage, $count, "?" . $addparam);
+	list($pagertop, $pagerbottom, $limit, $offset, $size, $page) = \App\Support\Pagination::pager($torrentsperpage, $count, "?" . $addparam);
 }
 
         if (isset($searchstr)) {

@@ -7,8 +7,8 @@ $id = ((\App\Support\SupportContext::getQuery("id") !== null)) ? intval(\App\Sup
 $type = unesc(\App\Support\SupportContext::getQuery("type") ?? '');
 $menuSelected = \App\Support\SupportContext::getRequestInput('menu') ?? 'invitee';
 $pageSize = 50;
-if (($CURUSER['id'] != $id && !\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::VIEW_INVITE)) || !is_valid_id($id))
-    stderr($lang_invite['std_sorry'],$lang_invite['std_permission_denied'], true, false);
+if (($CURUSER['id'] != $id && !\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::VIEW_INVITE)) || !\App\Support\Validators::isId($id))
+    \App\Support\LegacyResponse::abort($lang_invite['std_sorry'], $lang_invite['std_permission_denied'], true, false);
 $userRep = new \App\Repositories\UserRepository();
 \App\Support\SupportContext::setGlobal('userRep', $userRep);
 function inviteMenu ($selected = "invitee") {
@@ -17,7 +17,7 @@ $id = \App\Support\SupportContext::getGlobal('id');
 $CURUSER = \App\Support\SupportContext::getUser() ?? [];
 $invitesystem = \App\Support\SupportContext::getGlobal('invitesystem');
 $userRep = \App\Support\SupportContext::getGlobal('userRep');
-    begin_main_frame("", false, "100%");
+    \App\Support\Frame::mainFrameOpen("", false, "100%");
     print ("<div id=\"invitenav\" style='position: relative'><ul id=\"invitemenu\" class=\"menu\">");
     print ("<li" . ($selected == "invitee" ? " class=selected" : "") . "><a href=\"?id=".$id."&menu=invitee\">".$lang_invite['text_invite_status']."</a></li>");
     print ("<li" . ($selected == "sent" ? " class=selected" : "") . "><a href=\"?id=".$id."&menu=sent\">".$lang_invite['text_sent_invites_status']."</a></li>");
@@ -32,15 +32,15 @@ $userRep = \App\Support\SupportContext::getGlobal('userRep');
     if ($CURUSER['id'] == $id) {
         print ("</ul><form style='position: absolute;top:0;right:0' method=post action=invite.php?id=".htmlspecialchars($id)."&type=new><input type=submit ".$disabled." value='".$sendBtnText."'></form></div>");
     }
-    end_main_frame();
+    \App\Support\Frame::mainFrameClose();
 }
 
 $user = \App\Models\User::query()->find($id);
 if (!$user) {
-    stderr($lang_invite['std_sorry'], 'Invalid id');
+    \App\Support\LegacyResponse::abort($lang_invite['std_sorry'], 'Invalid id');
 }
 $user = $user->toArray();
-stdhead($lang_invite['head_invites']);
+\App\Support\Html::stdhead($lang_invite['head_invites']);
 print("<table width=100% class=main border=0 cellspacing=0 cellpadding=0><tr><td class=embedded>");
 
 print("<h1 align=center><a href=\"invite.php?id=".$id."\">".$user['username'].$lang_invite['text_invite_system']."</a></h1>");
@@ -61,15 +61,15 @@ if ($inv["invites"] != 1){
 
 if ($type == 'new'){
     if ($CURUSER['id'] != $id) {
-        stderr($lang_invite['std_sorry'],$lang_invite['std_permission_denied'], true, false);
+        \App\Support\LegacyResponse::abort($lang_invite['std_sorry'], $lang_invite['std_permission_denied'], true, false);
     }
     try {
         $sendBtnText = $userRep->getInviteBtnText($CURUSER['id']);
     } catch (\Exception $exception) {
-        stdmsg($lang_invite['std_sorry'],$exception->getMessage().
-            "  <a class=altlink href=invite.php?id={$CURUSER['id']}>".$lang_invite['here_to_go_back'],false);
+        \App\Support\Html::stdMessage($lang_invite['std_sorry'], $exception->getMessage().
+            "  <a class=altlink href=invite.php?id={$CURUSER['id']}>".$lang_invite['here_to_go_back'], false);
         print("</td></tr></table>");
-        stdfoot();
+        \App\Support\Html::stdfoot();
         die;
     }
     registration_check('invitesystem',true,false);
@@ -161,7 +161,7 @@ JS;
         if(!$number){
             print("<tr><td colspan=7 align=center>".$lang_invite['text_no_invites']."</tr>");
         } else {
-            list($pagertop, $pagerbottom, $limit, $offset) = pager($pageSize, $number, "?id=$id&menu=$menuSelected&");
+            list($pagertop, $pagerbottom, $limit, $offset) = \App\Support\Pagination::pager($pageSize, $number, "?id=$id&menu=$menuSelected&");
             $haremAdditionFactor = \App\Support\Config\SiteConfig::current()->bonus->haremAddition();
             $inviteRows = \App\Repositories\InviteRepository::getInvitees($id, $filters, (int)$offset, $pageSize);
 
@@ -192,7 +192,7 @@ JS;
             {
                 if ($arr["downloaded"] > 0) {
                     $ratio = number_format($arr["uploaded"] / $arr["downloaded"], 3);
-                    $ratio = "<font color=" . get_ratio_color($ratio) . ">$ratio</font>";
+                    $ratio = "<font color=" . \App\Support\Ratio::color($ratio) . ">$ratio</font>";
                 } else {
                     if ($arr["uploaded"] > 0) {
                         $ratio = "Inf.";
@@ -256,7 +256,7 @@ JS;
         if(!$number1){
             print("<tr align=center><td colspan=6>".$lang_functions['text_none']."</tr>");
         } else {
-            list($pagertop, $pagerbottom, $limit, $offset) = pager($pageSize, $number1, "?id=$id&menu=$menuSelected&");
+            list($pagertop, $pagerbottom, $limit, $offset) = \App\Support\Pagination::pager($pageSize, $number1, "?id=$id&menu=$menuSelected&");
 
             $inviteRows = \App\Repositories\InviteRepository::getInvites($id, $menuSelected, (int)$offset, $pageSize);
 
@@ -302,6 +302,6 @@ JS;
     }
 
 }
-stdfoot();
+\App\Support\Html::stdfoot();
 die;
 ?>

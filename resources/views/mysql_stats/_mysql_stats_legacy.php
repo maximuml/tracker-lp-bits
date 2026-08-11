@@ -9,7 +9,7 @@ error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
  * Checks if the user is allowed to do what he tries to...
  */
 if (\App\Support\UserDisplay::currentClass() < UC_SYSOP)
-	stderr("Error", "Permission denied.");
+	\App\Support\LegacyResponse::abort("Error", "Permission denied.");
 
 \App\Support\SupportContext::setGlobal("byteUnits", array('Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB'));
 
@@ -165,7 +165,7 @@ $day_of_week = \App\Support\SupportContext::getGlobal('day_of_week');
 ////////////////////// END FUNCTION LIST /////////////////////////////////////
 
 
-stdhead("Stats");
+\App\Support\Html::stdhead("Stats");
 
 /**
  * Displays the sub-page heading
@@ -411,4 +411,4 @@ if (!empty($serverStatus)) {
 
 
 <?php
-stdfoot();
+\App\Support\Html::stdfoot();

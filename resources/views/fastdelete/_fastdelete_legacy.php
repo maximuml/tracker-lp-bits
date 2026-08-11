@@ -2,9 +2,9 @@
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 function bark($msg) {
 $lang_fastdelete = (array) (\App\Support\SupportContext::getGlobal('lang_fastdelete') ?? []);
-  stdhead();
-  stdmsg($lang_fastdelete['std_delete_failed'], $msg);
-  stdfoot();
+  \App\Support\Html::stdhead();
+  \App\Support\Html::stdMessage($lang_fastdelete['std_delete_failed'], $msg);
+  \App\Support\Html::stdfoot();
   return;
 }
 
@@ -15,7 +15,7 @@ if ($id === null) {
 }
 
 $id = intval($id ?? 0);
-int_check($id);
+\App\Support\LegacyResponse::assertId($id);
 $sure = \App\Support\SupportContext::getQuery("sure");
 
 $torrent = \App\Models\Torrent::query()->where('id', $id)->first(['name', 'owner', 'seeders', 'anonymous']);
@@ -30,7 +30,7 @@ if (!\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::TORRENT_MAN
 
 if (!$sure)
 {
-	stderr($lang_fastdelete['std_delete_torrent'], $lang_fastdelete['std_delete_torrent_note']."<a class=altlink href=fastdelete.php?id=$id&sure=1>".$lang_fastdelete['std_here_if_sure'],false);
+	\App\Support\LegacyResponse::abort($lang_fastdelete['std_delete_torrent'], $lang_fastdelete['std_delete_torrent_note']."<a class=altlink href=fastdelete.php?id=$id&sure=1>".$lang_fastdelete['std_here_if_sure'], false);
 	return;
 }
 
@@ -43,9 +43,9 @@ if ($deleteEsResult === false) {
 deletetorrent($id);
 KPS("-",$uploadtorrent_bonus,$row["owner"]);
 if ($row['anonymous'] == 'yes' && $CURUSER["id"] == $row["owner"]) {
-	write_log("Torrent $id ($row[name]) was deleted by its anonymous uploader",'normal');
+	\App\Support\Log::writeWithContext("Torrent $id ($row[name]) was deleted by its anonymous uploader", 'normal');
 } else {
-	write_log("Torrent $id ($row[name]) was deleted by $CURUSER[username]",'normal');
+	\App\Support\Log::writeWithContext("Torrent $id ($row[name]) was deleted by $CURUSER[username]", 'normal');
 }
 //Send pm to torrent uploader
 if (\App\Models\User::query()->where("id", $row['owner'])->exists()) {

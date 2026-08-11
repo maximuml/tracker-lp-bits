@@ -148,8 +148,7 @@ if (((\App\Support\SupportContext::getQuery('off_details') !== null)) && \App\Su
 
 	$id = intval(\App\Support\SupportContext::getQuery("id") ?? 0);
 	if(!$id)
-		die();
-		//stderr("Error", "I smell a rat!");
+		\App\Support\LegacyResponse::abort($lang_offers['std_error'], $lang_offers['std_smell_rat']);
 
 	$num = \App\Models\Offer::query()->where('id', $id)->first();
     if (!$num) {
@@ -755,7 +754,7 @@ $perpage = 25;
 
 [$pagertop, $pagerbottom, , $offset, $perpage, ] = \App\Support\Pagination::pager($perpage, $count, $__server_PHP_SELF ."?" . "category=" . (\App\Support\SupportContext::getQuery("category") ?? '') . "&sort=" . (\App\Support\SupportContext::getQuery("sort") ?? '') . "&");
 
-//stderr("", $sort);
+
 if($sort == "")
 $sort =  "ORDER BY added desc ";
 

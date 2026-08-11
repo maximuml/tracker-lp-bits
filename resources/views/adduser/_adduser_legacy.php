@@ -1,46 +1,11 @@
 <?php
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
-
 $__server_REQUEST_METHOD = \App\Support\SupportContext::getServerValue('REQUEST_METHOD');
 if (\App\Support\UserDisplay::currentClass() < UC_ADMINISTRATOR)
 \App\Support\LegacyResponse::abort("Error", "Access denied.");
 if ($__server_REQUEST_METHOD == "POST")
 {
-//	if (\App\Support\SupportContext::getPost("username") == "" || \App\Support\SupportContext::getPost("password") == "" || \App\Support\SupportContext::getPost("email") == "")
-//	stderr("Error", "Missing form data.");
-//	if (\App\Support\SupportContext::getPost("password") != \App\Support\SupportContext::getPost("password2"))
-//	stderr("Error", "Passwords mismatch.");
-//	$email = htmlspecialchars(trim(\App\Support\SupportContext::getPost("email")));
-//	$email = safe_email($email);
-//	if (!check_email($email))
-//	stderr("Error","Invalid email address!");
-//
-//	$username = \App\Support\SupportContext::getPost("username");
-//
-//	if (!validusername($username))
-//		stderr("Error","Invalid username.");
-//	$username = sqlesc($username);
-//	$res = sql_query("SELECT id FROM users WHERE username=$username");
-//	$arr = mysql_fetch_row($res);
-//	if ($arr)
-//		stderr("Error","Username already exists!");
-//	$password = \App\Support\SupportContext::getPost("password");
-//	$email = sqlesc(\App\Support\SupportContext::getPost("email"));
-//	$res = sql_query("SELECT id FROM users WHERE email=$email");
-//	$arr = mysql_fetch_row($res);
-//	if ($arr)
-//		stderr("Error","The e-mail address is already in use.");
-//	$secret = mksecret();
-//	$passhash = sqlesc(md5($secret . $password . $secret));
-//	$secret = sqlesc($secret);
-//
-//	sql_query("INSERT INTO users (added, last_access, secret, username, passhash, status, stylesheet, class,email) VALUES(NOW(), NOW(), $secret, $username, $passhash, 'confirmed', ".$defcss.",".$defaultclass_class.",$email)") or sqlerr(__FILE__, __LINE__);
-//	$res = sql_query("SELECT id FROM users WHERE username=$username");
-//	$arr = mysql_fetch_row($res);
-//	if (!$arr)
-//	stderr("Error", "Unable to create the account. The user name is possibly already taken.");
-
     try {
         $userRep = new \App\Repositories\UserRepository();
         $newUser = $userRep->store([

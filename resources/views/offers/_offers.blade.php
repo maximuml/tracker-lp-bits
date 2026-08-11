@@ -5,13 +5,13 @@ error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 $__server_PHP_SELF = \App\Support\SupportContext::getServerValue('PHP_SELF');
 if ($enableoffer == 'no')
 \App\Support\LegacyResponse::permissionDenied();
-function bark($msg) {
+if (!function_exists('offers_bark')) { function offers_bark($msg) {
 $lang_offers = (array) (\App\Support\SupportContext::getGlobal('lang_offers') ?? []);
 	\App\Support\Html::stdhead($lang_offers['head_offer_error']);
 	\App\Support\Html::stdMessage($lang_offers['std_error'], $msg);
 	\App\Support\Html::stdfoot();
 	exit;
-}
+} }
 
 if (((\App\Support\SupportContext::getQuery('category') !== null)) && \App\Support\SupportContext::getQuery("category")){
 	$categ = ((\App\Support\SupportContext::getQuery('category') !== null)) ? (int)\App\Support\SupportContext::getQuery('category') : 0;
@@ -69,15 +69,15 @@ if (((\App\Support\SupportContext::getQuery('new_offer') !== null)) && \App\Supp
 
 	$name = \App\Support\SupportContext::getPost("name");
 	if ($name == "")
-	bark($lang_offers['std_must_enter_name']);
+	offers_bark($lang_offers['std_must_enter_name']);
 
 	$cat = intval(\App\Support\SupportContext::getPost("type") ?? 0);
 	if (!\App\Support\Validators::isId($cat))
-	bark($lang_offers['std_must_select_category']);
+	offers_bark($lang_offers['std_must_select_category']);
 
 	$descrmain = unesc(\App\Support\SupportContext::getPost("body"));
 	if (!$descrmain)
-	bark($lang_offers['std_must_enter_description']);
+	offers_bark($lang_offers['std_must_enter_description']);
 
 	if (!empty(\App\Support\SupportContext::getPost('picture'))){
 		$picture = unesc(\App\Support\SupportContext::getPost("picture"));
@@ -109,10 +109,10 @@ if (((\App\Support\SupportContext::getQuery('new_offer') !== null)) && \App\Supp
 			]);
 		} catch (\Illuminate\Database\QueryException $e) {
 			if (str_contains($e->getMessage(), '1062') || str_contains($e->getMessage(), 'Duplicate'))
-				bark("!!!");
-			bark("mysql puked: ".$e->getMessage());
+				offers_bark("!!!");
+			offers_bark("mysql puked: ".$e->getMessage());
 		}
-		if (!$id) bark("mysql puked");
+		if (!$id) offers_bark("mysql puked");
 
 		// add new offer message to staffmessage
 		\App\Models\StaffMessage::query()->insert([
@@ -152,7 +152,7 @@ if (((\App\Support\SupportContext::getQuery('off_details') !== null)) && \App\Su
 
 	$num = \App\Models\Offer::query()->where('id', $id)->first();
     if (!$num) {
-        bark($lang_offers['text_nothing_found']);
+        offers_bark($lang_offers['text_nothing_found']);
     }
     $num = $num->toArray();
 
@@ -264,7 +264,7 @@ if (((\App\Support\SupportContext::getQuery("allow_offer") !== null)) && \App\Su
 
 	$offer = \App\Models\Offer::query()->with('user')->where('offers.id', $offid)->first(['offers.userid', 'offers.name']);
     if (!$offer) {
-        bark($lang_offers['text_nothing_found']);
+        offers_bark($lang_offers['text_nothing_found']);
     }
     $arr = $offer->toArray();
     $arr['username'] = $offer->user->username ?? '';
@@ -310,7 +310,7 @@ if (((\App\Support\SupportContext::getQuery("finish_offer") !== null)) && \App\S
 
 	$offer = \App\Models\Offer::query()->with('user')->where('offers.id', $offid)->first(['offers.userid', 'offers.name']);
     if (!$offer) {
-        bark($lang_offers['text_nothing_found']);
+        offers_bark($lang_offers['text_nothing_found']);
     }
     $arr = $offer->toArray();
     $arr['username'] = $offer->user->username ?? '';
@@ -366,7 +366,7 @@ if (((\App\Support\SupportContext::getQuery("edit_offer") !== null)) && \App\Sup
 
 	$offerRow = \App\Models\Offer::query()->where('id', $id)->first();
 	if (!$offerRow) {
-		bark($lang_offers['text_nothing_found']);
+		offers_bark($lang_offers['text_nothing_found']);
 	}
 	$num = $offerRow->toArray();
 
@@ -429,12 +429,12 @@ if (((\App\Support\SupportContext::getQuery("take_off_edit") !== null)) && \App\
 	$descr = "$pic";
 	$descr .= unesc(\App\Support\SupportContext::getPost("body"));
 	if (!$name)
-	bark($lang_offers['std_must_enter_name']);
+	offers_bark($lang_offers['std_must_enter_name']);
 	if (!$descr)
-	bark($lang_offers['std_must_enter_description']);
+	offers_bark($lang_offers['std_must_enter_description']);
 	$cat = intval(\App\Support\SupportContext::getPost("category") ?? 0);
 	if (!\App\Support\Validators::isId($cat))
-	bark($lang_offers['std_must_select_category']);
+	offers_bark($lang_offers['std_must_select_category']);
 
 	\App\Models\Offer::query()->where('id', $id)->update([
 		'category' => $cat,
@@ -521,7 +521,7 @@ if (((\App\Support\SupportContext::getQuery("vote") !== null)) && \App\Support\S
 		{
 			$offer = \App\Models\Offer::query()->with('user')->where('id', $offerid)->first(['offers.userid', 'offers.name']);
             if (!$offer) {
-                bark($lang_offers['text_nothing_found']);
+                offers_bark($lang_offers['text_nothing_found']);
             }
             $voteColumn = $vote == 'yeah' ? 'yeah' : 'against';
             \App\Models\Offer::query()->where('id', $offerid)->increment($voteColumn);
@@ -607,7 +607,7 @@ if (((\App\Support\SupportContext::getQuery("del_offer") !== null)) && \App\Supp
 
 	$offer = \App\Models\Offer::query()->where('id', $offer)->first();
 	if (!$offer) {
-		bark($lang_offers['text_nothing_found']);
+		offers_bark($lang_offers['text_nothing_found']);
 	}
 	$num = $offer->toArray();
 

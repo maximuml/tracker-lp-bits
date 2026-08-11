@@ -1,1 +1,1 @@
-@php include resource_path('views/topten/_topten_legacy.php'); @endphp
+@include('topten._topten')

@@ -1,1 +1,7 @@
-@php include resource_path('views/smilies/_smilies_legacy.php'); @endphp
+@extends('layouts.legacy')
+
+@section('title', $lang_smilies['text_smilies'] ?? '')
+
+@section('content')
+    @php \App\Support\Html::smiliesFrame(); @endphp
+@endsection

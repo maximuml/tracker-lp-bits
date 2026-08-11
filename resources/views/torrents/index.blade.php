@@ -3,5 +3,5 @@
 @section('title', $pageTitle)
 
 @section('content')
-    @include('torrents._torrents_legacy')
+    @include('torrents._torrents')
 @endsection

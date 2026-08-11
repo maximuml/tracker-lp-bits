@@ -1,1 +1,1 @@
-@include('ajax._ajax_legacy')
+@include('ajax._ajax')

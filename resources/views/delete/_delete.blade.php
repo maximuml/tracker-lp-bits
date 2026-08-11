@@ -3,13 +3,7 @@ error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
 //require_once(get_langfile_path("",true));
 \App\Auth\Permission::assertCan(\App\Enums\Permission\PermissionEnum::TORRENT_DELETE);
-function bark($msg) {
-$lang_delete = (array) (\App\Support\SupportContext::getGlobal('lang_delete') ?? []);
-  \App\Support\Html::stdhead();
-  \App\Support\Html::stdMessage($lang_delete['std_delete_failed'], $msg);
-  \App\Support\Html::stdfoot();
-  exit();
-}
+
 
 $id = \App\Support\SupportContext::getRequestInput('id');
 if ($id === null)

@@ -20,13 +20,7 @@ try {
 } catch (\Exception $exception) {
     \App\Support\LegacyResponse::abort($lang_takeinvite['std_error'], $exception->getMessage());
 }
-function bark($msg) {
-$lang_takeinvite = (array) (\App\Support\SupportContext::getGlobal('lang_takeinvite') ?? []);
-  \App\Support\Html::stdhead();
-  \App\Support\Html::stdMessage($lang_takeinvite['head_invitation_failed'], $msg);
-  \App\Support\Html::stdfoot();
-  exit;
-}
+
 $email = unesc(htmlspecialchars(trim(\App\Support\SupportContext::getPost("email"))));
 $email = safe_email($email);
 $preRegisterUsername = \App\Support\SupportContext::getPost('pre_register_username') ?? '';

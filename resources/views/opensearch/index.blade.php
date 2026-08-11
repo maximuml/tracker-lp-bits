@@ -1,1 +1,1 @@
-@php include resource_path('views/opensearch/_opensearch_legacy.php'); @endphp
+@include('opensearch._opensearch')

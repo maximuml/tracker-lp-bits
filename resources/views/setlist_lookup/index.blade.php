@@ -1,1 +1,1 @@
-@php include resource_path('views/setlist_lookup/_setlist_lookup_legacy.php'); @endphp
+@include('setlist_lookup._setlist_lookup')

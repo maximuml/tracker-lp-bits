@@ -1,1 +1,1 @@
-@php include resource_path('views/uploaders/_uploaders_legacy.php'); @endphp
+@include('uploaders._uploaders')

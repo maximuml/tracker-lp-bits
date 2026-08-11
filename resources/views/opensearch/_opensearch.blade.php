@@ -1,12 +1,12 @@
 <?php
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
-function data_url($file, $mime) 
+if (!function_exists('data_url')) { function data_url($file, $mime) 
 {  
   $contents = file_get_contents($file);
   $base64   = base64_encode($contents); 
   return ('data:' . $mime . ';base64,' . $base64);
-}
+} }
 $url = get_protocol_prefix().$BASEURL;
 $year = substr($datefounded, 0, 4);
 $yearfounded = ($year ? $year : 2007);

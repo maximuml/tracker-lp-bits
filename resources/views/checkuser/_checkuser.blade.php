@@ -2,14 +2,7 @@
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 $id = intval(\App\Support\SupportContext::getQuery("id") ?? 0);
 \App\Support\LegacyResponse::assertId($id, true);
-function bark($msg)
-{
-$lang_checkuser = (array) (\App\Support\SupportContext::getGlobal('lang_checkuser') ?? []);
-  \App\Support\Html::stdhead();
-  \App\Support\Html::stdMessage($lang_checkuser['std_error'], $msg);
-  \App\Support\Html::stdfoot();
-  exit;
-}
+
 
 $userObj = \App\Models\User::query()->where('status', 'pending')->where('id', $id)->first();
 if (!$userObj) bark($lang_checkuser['std_no_user_id']);

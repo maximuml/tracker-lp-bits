@@ -1,1 +1,1 @@
-@php include resource_path('views/image/_image_legacy.php'); @endphp
+@include('image._image')

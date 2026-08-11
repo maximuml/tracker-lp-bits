@@ -8,18 +8,18 @@ $action = ((\App\Support\SupportContext::getPost('action') !== null)) ? htmlspec
 $id = ((\App\Support\SupportContext::getPost('id') !== null)) ? (int)\App\Support\SupportContext::getPost('id') : (((\App\Support\SupportContext::getQuery('id') !== null)) ? (int)\App\Support\SupportContext::getQuery('id') : 0);
 $update = ((\App\Support\SupportContext::getPost('update') !== null)) ? htmlspecialchars(\App\Support\SupportContext::getPost('update')) : (((\App\Support\SupportContext::getQuery('update') !== null)) ? htmlspecialchars(\App\Support\SupportContext::getQuery('update')) : '');
 
-function check ($id) {
+if (!function_exists('check')) { function check ($id) {
 	if (!\App\Support\Validators::isId($id))
 		\App\Support\LegacyResponse::abort("Error", "Invalid ID");
-}
-function searchform () {
+} }
+if (!function_exists('searchform')) { function searchform () {
 ?>
 <form method=post name=search action=maxlogin.php?>
 <input type=hidden name=action value=searchip>
 <p class=success align=center>Search IP <input type=text name=ip size=25> <input type=submit name=submit value='Search IP' class=btn></p>
 </form>
 <?php
-}
+} }
 $countrows = \Nexus\Database\NexusDB::table('loginattempts')->count() + 1;
 $page = intval(\App\Support\SupportContext::getQuery("page") ?? 0);
 

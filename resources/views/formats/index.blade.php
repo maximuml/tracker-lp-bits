@@ -1,1 +1,1 @@
-@include('formats._formats_legacy')
+@include('formats._formats')

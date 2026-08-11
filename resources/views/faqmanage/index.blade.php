@@ -1,1 +1,1 @@
-@include('faqmanage._faqmanage_legacy')
+@include('faqmanage._faqmanage')

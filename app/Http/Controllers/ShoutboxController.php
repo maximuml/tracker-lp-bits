@@ -28,7 +28,7 @@ class ShoutboxController extends LegacyController
         }
 
         $callback = function () {
-            $scriptFile = resource_path('views/shoutbox_sse/_shoutbox_sse_legacy.php');
+            $scriptFile = resource_path('views/shoutbox_sse/_shoutbox_sse.blade.php');
             if (is_file($scriptFile)) {
                 require $scriptFile;
             }

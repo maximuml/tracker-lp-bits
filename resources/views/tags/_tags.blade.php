@@ -2,7 +2,7 @@
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
 
-function insert_tag($name, $description, $syntax, $example, $remarks)
+if (!function_exists('insert_tag')) { function insert_tag($name, $description, $syntax, $example, $remarks)
 {
 $lang_tags = (array) (\App\Support\SupportContext::getGlobal('lang_tags') ?? []);
 	$result = \App\Support\Format::formatComment($example);
@@ -15,7 +15,7 @@ $lang_tags = (array) (\App\Support\SupportContext::getGlobal('lang_tags') ?? [])
 	if ($remarks != "")
 		print("<tr><td>".$lang_tags['text_remarks']."</td><td>$remarks\n");
 	print("</table>\n");
-}
+} }
 
 \App\Support\Html::stdhead($lang_tags['head_tags']);
 \App\Support\Frame::mainFrameOpen();

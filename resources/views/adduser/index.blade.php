@@ -1,1 +1,1 @@
-@php include resource_path('views/adduser/_adduser_legacy.php'); @endphp
+@include('adduser._adduser')

@@ -3,10 +3,10 @@ error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 if (\App\Support\UserDisplay::currentClass() < UC_ADMINISTRATOR) {
 	\App\Support\LegacyResponse::abort("Error", "Only Administrators and above can modify the Rules, sorry.");
 }
-function clear_rules_cache()
+if (!function_exists('clear_rules_cache')) { function clear_rules_cache()
 {
     \Nexus\Database\NexusDB::cache_del('rules');
-}
+} }
 
 if (((\App\Support\SupportContext::getQuery("act") !== null)) && \App\Support\SupportContext::getQuery("act") == "newsect")
 {

@@ -1,1 +1,1 @@
-@include('videoformats._videoformats_legacy')
+@include('videoformats._videoformats')

@@ -1,1 +1,1 @@
-@php include resource_path('views/maxlogin/_maxlogin_legacy.php'); @endphp
+@include('maxlogin._maxlogin')

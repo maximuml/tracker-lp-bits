@@ -13,7 +13,7 @@ $takeforumpost = \App\Support\SupportContext::getPost("takeforumpost");
 $takereason = \App\Support\SupportContext::getPost("reason");
 $takereportofferid = \App\Support\SupportContext::getPost("takereportofferid");
 
-function takereport($reportid, $type, $reason)
+if (!function_exists('takereport')) { function takereport($reportid, $type, $reason)
 {
 $CURUSER = \App\Support\SupportContext::getUser() ?? [];
 $lang_report = (array) (\App\Support\SupportContext::getGlobal('lang_report') ?? []);
@@ -48,7 +48,7 @@ $Cache = \App\Support\SupportContext::getCache();
 		\App\Support\LegacyResponse::abort($lang_report['std_error'], $lang_report['std_already_reported_this']);
 		die();
 	}
-}
+} }
 
 //////////OFFER #1 START//////////
 if ((isset($takereportofferid)) && (isset($takereason)))

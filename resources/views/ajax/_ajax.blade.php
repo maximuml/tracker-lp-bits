@@ -1,6 +1,8 @@
 <?php
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
+if (!class_exists('AjaxInterface')) {
+
 class AjaxInterface{
 
     public static function toggleUserMedalStatus($params)
@@ -305,4 +307,5 @@ $CURUSER = \App\Support\SupportContext::getUser() ?? [];
 
         return \App\Support\ToastNotifications::get((int) $CURUSER['id'], $lastPmId, $lastShoutId, $init);
     }
+}
 }

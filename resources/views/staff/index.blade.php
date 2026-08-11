@@ -1,1 +1,1 @@
-@php include resource_path('views/staff/_staff_legacy.php'); @endphp
+@include('staff._staff')

@@ -1,1 +1,1 @@
-@php include resource_path('views/sendmessage/_sendmessage_legacy.php'); @endphp
+@include('sendmessage._sendmessage')

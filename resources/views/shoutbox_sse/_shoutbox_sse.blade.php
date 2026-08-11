@@ -21,12 +21,12 @@ $maxStreams = 30;
 $globalKey = 'shoutbox_sse_global';
 $redis = \Nexus\Database\NexusDB::redis();
 
-function sseShutdown(\Redis $redis, string $globalKey): void {
+if (!function_exists('sseShutdown')) { function sseShutdown(\Redis $redis, string $globalKey): void {
     try {
         $redis->decr($globalKey);
     } catch (\Throwable $e) {
     }
-}
+} }
 
 $active = (int) $redis->incr($globalKey);
 if ($active === 1) {
@@ -53,22 +53,22 @@ register_shutdown_function(function () use ($redis, $globalKey, $userLock) {
     sseShutdown($redis, $globalKey);
 });
 
-function buildShoutboxQuery(string $type, int $lastId): object
+if (!function_exists('buildShoutboxQuery')) { function buildShoutboxQuery(string $type, int $lastId): object
 {
     $query = \Nexus\Database\NexusDB::table('shoutbox')
         ->orderBy('id')
         ->where('id', '>', $lastId);
     \App\Support\Shoutbox::applyTypeFilter($query, $type, \App\Support\SupportContext::getGlobal('CURUSER') ?? null);
     return $query;
-}
+} }
 
-function flushOutput(): void
+if (!function_exists('flushOutput')) { function flushOutput(): void
 {
     if (ob_get_level()) {
         ob_flush();
     }
     flush();
-}
+} }
 
 $query = buildShoutboxQuery($type, $lastId);
 

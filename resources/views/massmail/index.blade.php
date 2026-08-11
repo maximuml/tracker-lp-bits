@@ -1,1 +1,1 @@
-@php include resource_path('views/massmail/_massmail_legacy.php'); @endphp
+@include('massmail._massmail')

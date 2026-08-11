@@ -293,3 +293,35 @@ PR #52/53 removes `include/bittorrent.php` and `include/cleanup_cli.php`, loads 
 - `takeinvite.php` needs working mail to persist an invite; use `invite.php?id=<uid>` for UI verification and expect `sent=1` redirect.
 - `download.php?id=<id>&letdown=1` should return `application/x-bittorrent` and a bencode payload.
 - `comment.php` should be POSTed as a normal form (`curl -d ...`), not with `curl -X POST -L`, so the 302 redirect is followed with GET.
+
+## Testing PR #283-#286 combined helper migration (`devin/phase7-5-6-helpers`)
+
+Branch `devin/phase7-5-6-helpers` contains `origin/php8` + PR #283 (Phase 5.2 typed `SiteConfig`), #284 (Phase 7.1), #285 (Phase 7.2-7.4), and #286 (Phase 7.5-7.6 helper migration). A full re-test of this branch exercises all four PRs.
+
+### What to verify
+
+- Lint/static gates: `composer validate --strict`, `php -l` on `git diff --name-only origin/php8...HEAD -- '*.php'`, `php artisan view:cache`, PHPStan default/level5/level5.app/level6 clean.
+- Unit/feature suites: `phpunit --testsuite Unit` and `tests/Feature/CriticalPathTest.php` with `-d memory_limit=1G`; note PHPUnit deprecation notices are not test failures.
+- `php artisan meilisearch:import` imports torrents; `curl -s 'http://localhost:7700/indexes/torrents/stats'` returns `numberOfDocuments >= 1`.
+- `/edit.php?id=<torrent>` must load without `TypeError` when `pos_state_until`/`pick_until` are `null`; `Form::datetimepickerInput()` now accepts `?string`.
+- `/takeedit.php` accepts `pos_state=normal` + empty deadline and `pos_state=sticky` + future `pos_state_until`, redirecting to `details.php?id=<id>&edited=1`.
+- Re-open `/edit.php` and confirm the selected promotion and deadline are persisted.
+- UI helper smoke: `/upload.php`, `/torrents.php` (search + category/promotion filters), `/details.php`, `/usercp.php`, `/settings.php` (Authority/Torrent Settings), `/userdetails.php`, `/messages.php`, `/index.php`, `/downloadnotice.php`, `/download.php`, `/forums.php`, `/offers.php`, `/topten.php`, `/log.php`, `/latestcomments.php`, `/faq.php`, `/rules.php`, `/contactstaff.php`, `/staffpanel.php`, `/mybonus.php`.
+- Tracker endpoints: `/announce.php` rejects invalid passkey/info_hash/peer_id with bencoded failure reasons; valid request returns `interval`/`peers` (a `warning message` for frequent requests is expected); `/scrape.php` returns bencode `files` dict (the key is raw 20-byte `info_hash`, so Python `bencode` may need raw-byte key handling).
+- `c_secure_pass` cookie for curl scripts can be generated from inside the `php` container with `App\Support\AuthCookie::buildToken()`; set `APP_KEY` explicitly because the standalone script does not boot the Laravel container:
+  ```bash
+  APP_KEY='base64:...' docker compose exec -T -e APP_KEY="$APP_KEY" php php /var/www/html/build_cookie.php
+  ```
+- Do not double-encode `info_hash`/`peer_id` in announce URLs; build the query string manually with `urllib.parse.quote(raw_bytes)` rather than passing raw bytes through `requests` params.
+
+### Common gotchas
+
+- `CriticalPathTest` leaves `basic.BASEURL` set to `openresty`; restore it to `localhost` and flush caches before host-side browser/curl tests:
+  ```sql
+  UPDATE settings SET value='localhost' WHERE name='basic.BASEURL';
+  ```
+  Then run `php artisan config:clear view:clear route:clear cache:clear`.
+- The `php` container has no `bash`; use `sh -c` for inline environment variables.
+- Browser file inputs are not reliably drivable; submit `/takeupload.php` and `/takeedit.php` via an authenticated curl/Python session and use the browser to verify the resulting pages.
+- `.git` is not mounted inside the `php` container, so `php -l` on changed files must be run from the host (`git diff origin/php8...HEAD -- '*.php' | xargs -P4 -n1 docker compose exec -T php php -l`).
+- `downloadnotice.php` may only appear for a normal user's first authenticated download; after that `download.php?id=<id>&letdown=1` returns the `.torrent` directly.

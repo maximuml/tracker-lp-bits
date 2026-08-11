@@ -66,7 +66,7 @@ foreach ($rows as $row) {
         else
             $ipshow = "<a href=\"ipsearch.php?ip=". $arr['ip'] ."\">" . $arr['ip'] ."</a>";
     }
-    $date = gettime($arr["access"]);
+    $date = \App\Support\Time::format($arr["access"]);
     print("<tr><td>".$date."</td>\n");
     print("<td>".$ipshow."</td>\n");
     print("<td>".$addr."</td></tr>\n");

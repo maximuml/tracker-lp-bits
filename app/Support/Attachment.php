@@ -128,8 +128,8 @@ final class Attachment
             $enableImage,
             $imageResizer,
             $url,
-            \mksize($row['filesize']),
-            \gettime($row['added']),
+            \App\Support\Format::size($row['filesize']),
+            \App\Support\Time::format($row['added']),
             [
                 'size' => \nexus_trans('attachment.size'),
                 'downloads' => \nexus_trans('attachment.downloads'),

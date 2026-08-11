@@ -141,10 +141,10 @@ else
 	    $user = (array) $user;
 		if ($user['added'] == '0000-00-00 00:00:00' || $user['added'] == null)
 			$added = $lang_ipsearch['text_not_available'];
-		else $added = gettime($user['added']);
+		else $added = \App\Support\Time::format($user['added']);
 		if ($user['last_access'] == '0000-00-00 00:00:00' || $user['added'] == null)
 			$lastaccess = $lang_ipsearch['text_not_available'];
-		else $lastaccess = gettime($user['last_access']);
+		else $lastaccess = \App\Support\Time::format($user['last_access']);
 
 		if ($user['last_ip'])
 			$ipstr = $user['last_ip'];
@@ -165,8 +165,8 @@ get_username($user['id'])."</td>".
 "<td align=\"center\">" . $ipstr . "</td>
 <td align=\"center\">" . $lastaccess . "</td>
 <td align=\"center\"><a href=\"iphistory.php?id=" . $user['id'] . "\">" . $iphistory. "</a></td>
-<td align=\"center\">" . gettime($user['access']) . "</td>
-<td align=\"center\">" . gettime($user['added']) . "</td>
+<td align=\"center\">" . \App\Support\Time::format($user['access']) . "</td>
+<td align=\"center\">" . \App\Support\Time::format($user['added']) . "</td>
 <td align=\"center\">" . $invited_by . "</td>
 </tr>\n";
 	}

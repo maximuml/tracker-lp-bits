@@ -756,7 +756,7 @@ if ($action == "viewtopic")
 		$postid = $arr["id"];
 		$posterid = $arr["userid"];
 
-		$added = gettime($arr["added"],true,false);
+		$added = \App\Support\Time::format($arr["added"],true,false);
 
 		//---- Get poster details
 
@@ -765,8 +765,8 @@ if ($action == "viewtopic")
 
 		$arr2 = $userInfo->toArray();
 
-		$uploaded = mksize($arr2["uploaded"]);
-		$downloaded = mksize($arr2["downloaded"]);
+		$uploaded = \App\Support\Format::size($arr2["uploaded"]);
+		$downloaded = \App\Support\Format::size($arr2["downloaded"]);
 		$ratio = get_ratio($arr2['id']);
 
 		if (!$forumposts = $Cache->get_value('user_'.$posterid.'_post_count')){
@@ -839,7 +839,7 @@ if ($action == "viewtopic")
 
 		if (is_valid_id($arr['editedby']))
 		{
-			$lastedittime = gettime($arr['editdate'],true,false);
+			$lastedittime = \App\Support\Time::format($arr['editdate'],true,false);
             $bodyContent .= "<br /><p><font class=\"small\">".$lang_forums['text_last_edited_by'].get_username($arr['editedby']).$lang_forums['text_last_edit_at'].$lastedittime."</font></p>\n";
 		}
 		$bodyContent = apply_filter('post_body', $bodyContent, $arr, $allPosts);
@@ -1321,13 +1321,13 @@ if ($action == "viewforum")
 			$lppostid = intval($arr["id"] ?? 0);
 			$lpuserid = intval($arr["userid"] ?? 0);
 			$lpusername = get_username($lpuserid);
-			$lpadded = gettime($arr["added"],true,false);
+			$lpadded = \App\Support\Time::format($arr["added"],true,false);
 			$onmouseover = "";
 			if ($enabletooltip_tweak == 'yes' && $CURUSER['showlastpost'] != 'no'){
 				if ($CURUSER['timetype'] != 'timealive')
 					$lastposttime = $lang_forums['text_at_time'].$arr["added"];
 				else
-					$lastposttime = $lang_forums['text_blank'].gettime($arr["added"],true,false,true);
+					$lastposttime = $lang_forums['text_blank'].\App\Support\Time::format($arr["added"],true,false,true);
 				$lptext = format_comment(mb_substr($arr['body'],0,100,"UTF-8") . (mb_strlen($arr['body'],"UTF-8") > 100 ? " ......" : "" ),true,false,false,true,600,false,false);
 				$lastpost_tooltip[$counter]['id'] = "lastpost_" . $counter;
 				$lastpost_tooltip[$counter]['content'] = $lang_forums['text_last_posted_by'].$lpusername.$lastposttime."<br />".$lptext;
@@ -1556,7 +1556,7 @@ if ($action == "search")
 		foreach ($posts as $post)
 		{
 			$post = (array) $post;
-			print("<tr><td class=\"rowfollow\" align=\"center\" width=\"1%\">".$post['id']."</td><td class=\"rowfollow\" align=\"left\"><a href=\"".htmlspecialchars("?action=viewtopic&topicid=".$post['topicid']."&highlight=".rawurlencode($keywords)."&page=p".$post['id']."#pid".$post['id'])."\">" . highlight_topic(highlight($keywords,htmlspecialchars($post['subject'])), $post['hlcolor']) . "</a></td><td class=\"rowfollow nowrap\" align=\"left\"><a href=\"".htmlspecialchars("?action=viewforum&forumid=".$post['forumid'])."\"><b>" . htmlspecialchars($post["forumname"]) . "</b></a></td><td class=\"rowfollow nowrap\" align=\"left\">" . gettime($post['added'],true,false) . "&nbsp;|&nbsp;". get_username($post['userid']) ."</td></tr>\n");
+			print("<tr><td class=\"rowfollow\" align=\"center\" width=\"1%\">".$post['id']."</td><td class=\"rowfollow\" align=\"left\"><a href=\"".htmlspecialchars("?action=viewtopic&topicid=".$post['topicid']."&highlight=".rawurlencode($keywords)."&page=p".$post['id']."#pid".$post['id'])."\">" . highlight_topic(highlight($keywords,htmlspecialchars($post['subject'])), $post['hlcolor']) . "</a></td><td class=\"rowfollow nowrap\" align=\"left\"><a href=\"".htmlspecialchars("?action=viewforum&forumid=".$post['forumid'])."\"><b>" . htmlspecialchars($post["forumname"]) . "</b></a></td><td class=\"rowfollow nowrap\" align=\"left\">" . \App\Support\Time::format($post['added'],true,false) . "&nbsp;|&nbsp;". get_username($post['userid']) ."</td></tr>\n");
 		}
 
 		print("</table>\n");
@@ -1634,7 +1634,7 @@ foreach ($overforums as $a)
 			// Get last post info
 			$post_arr = get_post_row($lastpostid);
 			$lastposterid = $post_arr["userid"];
-			$lastpostdate = gettime($post_arr["added"],true,false);
+			$lastpostdate = \App\Support\Time::format($post_arr["added"],true,false);
 			$lasttopicid = $arr['id'];
 			$hlcolor = $arr['hlcolor'];
 			$lasttopicdissubject = $lasttopicsubject = $arr['subject'];

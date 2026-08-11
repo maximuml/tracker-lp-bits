@@ -31,7 +31,7 @@ class IpLogRepository extends BaseRepository
             $uri = $parsed_uri['path'] ?? '/';
         }
         if (is_null($ipArr)) {
-            $ipArr = [getip()];
+            $ipArr = [\App\Support\Network::clientIp()];
         }
         $key = sprintf("%s:%s", self::CACHE_KEY_PREFIX, date('Y-m-d-H'));
         foreach ($ipArr as $ip) {

@@ -30,7 +30,7 @@ class MaxUploadedUser extends BaseWidget implements HasActions
                 ,
                 TextColumn::make('uploaded_total')
                     ->label(__('announce-log.uploaded_total'))
-                    ->formatStateUsing(fn ($state) => mksize($state))
+                    ->formatStateUsing(fn ($state) => \App\Support\Format::size($state))
                 ,
             ]);
     }

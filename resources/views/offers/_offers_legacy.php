@@ -163,7 +163,7 @@ if (((\App\Support\SupportContext::getQuery('off_details') !== null)) && \App\Su
 	print("<h1 align=\"center\" id=\"top\">".htmlspecialchars($s)."</h1>");
 
 	print("<table width=\"97%\" cellspacing=\"0\" cellpadding=\"5\">");
-	$offertime = gettime($num['added'],true,false);
+	$offertime = \App\Support\Time::format($num['added'],true,false);
 	if ($CURUSER['timetype'] != 'timealive')
 		$offertime = $lang_offers['text_at'].$offertime;
 	else $offertime = $lang_offers['text_blank'].$offertime;
@@ -846,7 +846,7 @@ print("<td class=\"colhead\">".$lang_offers['col_offered_by']."</td>".
 				if ($CURUSER['timetype'] != 'timealive')
 					$lastcomtime = $lang_offers['text_at_time'].$lastcom['added'];
 				else
-					$lastcomtime = $lang_offers['text_blank'].gettime($lastcom["added"],true,false,true);
+					$lastcomtime = $lang_offers['text_blank'].\App\Support\Time::format($lastcom["added"],true,false,true);
 					$counter = $i;
 					$lastcom_tooltip[$counter]['id'] = "lastcom_" . $counter;
 					$lastcom_tooltip[$counter]['content'] = ($hasnewcom ? "<b>(<font class='new'>".$lang_offers['text_new']."</font>)</b> " : "").$lang_offers['text_last_commented_by'].get_username($lastcom['user']) . $lastcomtime."<br />". format_comment(mb_substr($lastcom['text'],0,100,"UTF-8") . (mb_strlen($lastcom['text'],"UTF-8") > 100 ? " ......" : "" ),true,false,false,true,600,false,false);
@@ -888,7 +888,7 @@ print("<td class=\"colhead\">".$lang_offers['col_offered_by']."</td>".
 
 		$v_res = "<b><a href=\"?id=".$arr['id']."&amp;offer_vote=1\" title=\"".$lang_offers['title_show_vote_details']."\"><font color=\"green\">" .$arr['yeah']."</font> - <font color=\"red\">".$arr['against']."</font> = ".($arr['yeah'] - $arr['against']). "</a></b>";
 	}
-	$addtime = gettime($arr['added'],false,true);
+	$addtime = \App\Support\Time::format($arr['added'],false,true);
 	$dispname = $arr['name'];
 	$count_dispname=mb_strlen($arr['name'],"UTF-8");
 	$max_length_of_offer_name = 70;
@@ -900,12 +900,12 @@ print("<td class=\"colhead\">".$lang_offers['col_offered_by']."</td>".
 	if ($offervotetimeout_main > 0 && $offeruptimeout_main > 0){
 		if ($arr["allowed"] == 'allowed'){
 			$futuretime = strtotime($arr['allowedtime']) + $offeruptimeout_main;
-			$timeout = gettime(date("Y-m-d H:i:s", $futuretime), false, true, true, false, true);
+			$timeout = \App\Support\Time::format(date("Y-m-d H:i:s", $futuretime), false, true, true, false, true);
 		}
 		elseif ($arr["allowed"] == 'pending')
 		{
 			$futuretime = strtotime($arr['added']) + $offervotetimeout_main;
-			$timeout = gettime(date("Y-m-d H:i:s",$futuretime), false, true, true, false, true);
+			$timeout = \App\Support\Time::format(date("Y-m-d H:i:s",$futuretime), false, true, true, false, true);
 		}
 		if (!$timeout)
 			$timeout = "N/A";

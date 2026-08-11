@@ -137,7 +137,7 @@ class CleanupRepository extends BaseRepository
             $redis->expire($newBatch, $lifeTime);
         }
 
-        $userSeedBonusDeadline = deadtime();
+        $userSeedBonusDeadline = \App\Support\Time::deadThreshold(\App\Support\Config\SiteConfig::current()->main->anninterthree());
         $count = 0;
         $it = NULL;
         $length = $redis->hLen($batch);
@@ -377,9 +377,9 @@ LUA;
             "level" => $level,
             "last_time" => $lastTime > 0 ? Carbon::createFromTimestamp($lastTime)->toDateTimeString() : "",
             "elapsed_seconds" => $lastTime > 0 ? $now->getTimestamp() - $lastTime : "",
-            "elapsed_seconds_human" => $lastTime > 0 ? mkprettytime($now->getTimestamp() - $lastTime) : "",
+            "elapsed_seconds_human" => $lastTime > 0 ? \App\Support\Format::prettyTimeWithLocale($now->getTimestamp() - $lastTime) : "",
             "interval" => $interval,
-            "interval_human" => mkprettytime($interval),
+            "interval_human" => \App\Support\Format::prettyTimeWithLocale($interval),
         ], $locale);
     }
 

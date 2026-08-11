@@ -115,7 +115,7 @@ foreach ($reportRows as $reportRow) {
 		}
 	}
 
-	print("<tr><td class=rowfollow><nobr>".gettime($row['added'])."</nobr></td><td class=rowfollow>" . get_username($row['addedby']) . "</td><td class=rowfollow>".$reporting."</td><td class=rowfollow><nobr>".$type."</nobr></td><td class=rowfollow>".htmlspecialchars($row['reason'])."</td><td class=rowfollow><nobr>".$dealtwith."</nobr></td><td class=rowfollow><input type=\"checkbox\" name=\"delreport[]\" value=\"" . $row['id'] . "\" /></td></tr>\n");
+	print("<tr><td class=rowfollow><nobr>".\App\Support\Time::format($row['added'])."</nobr></td><td class=rowfollow>" . get_username($row['addedby']) . "</td><td class=rowfollow>".$reporting."</td><td class=rowfollow><nobr>".$type."</nobr></td><td class=rowfollow>".htmlspecialchars($row['reason'])."</td><td class=rowfollow><nobr>".$dealtwith."</nobr></td><td class=rowfollow><input type=\"checkbox\" name=\"delreport[]\" value=\"" . $row['id'] . "\" /></td></tr>\n");
 }
 ?>
 <tr><td class="colhead" colspan="7" align="right"><input type="submit" name="setdealt" value="<?php echo $lang_reports['submit_set_dealt']?>" /><input type="submit" name="delete" value="<?php echo $lang_reports['submit_delete']?>" /></td></tr>

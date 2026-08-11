@@ -59,7 +59,7 @@ if (!$action) {
 			$answered = "<font color=red>".$lang_staffbox['text_no']."</font>";
 
     		$pmid = $arr["id"];
-		print("<tr><td width=100% class=rowfollow align=left><a href=staffbox.php?action=viewpm&pmid=$pmid&return=".urlencode($__server_QUERY_STRING).">".htmlspecialchars($arr['subject'])."</td><td class=rowfollow align=center>" . get_username($arr['sender']) . "</td><td class=rowfollow align=center><nobr>".gettime($arr['added'], true, false)."</nobr></td><td class=rowfollow align=center>$answered</td><td class=rowfollow align=center><input type=\"checkbox\" name=\"setanswered[]\" value=\"" . $arr['id'] . "\" /></td></tr>\n");
+		print("<tr><td width=100% class=rowfollow align=left><a href=staffbox.php?action=viewpm&pmid=$pmid&return=".urlencode($__server_QUERY_STRING).">".htmlspecialchars($arr['subject'])."</td><td class=rowfollow align=center>" . get_username($arr['sender']) . "</td><td class=rowfollow align=center><nobr>".\App\Support\Time::format($arr['added'], true, false)."</nobr></td><td class=rowfollow align=center>$answered</td><td class=rowfollow align=center><input type=\"checkbox\" name=\"setanswered[]\" value=\"" . $arr['id'] . "\" /></td></tr>\n");
 	}
     $checkAll = $lang_functions['input_check_all'];
     $uncheckAll = $lang_functions['input_uncheck_all'];
@@ -106,7 +106,7 @@ print("<td width=\"".$width."%\" class=\"colhead\" align=\"left\">".$lang_staffb
 print("<tr><td class=\"rowfollow\" align=\"left\">".$sender."</td>");
 if ($arr4["answered"] == 1)
 print("<td class=\"rowfollow\" align=\"left\">".$answeredby."</td>");
-print("<td class=\"rowfollow\" align=\"left\">".gettime($arr4["added"])."</td></tr>");
+print("<td class=\"rowfollow\" align=\"left\">".\App\Support\Time::format($arr4["added"])."</td></tr>");
 print("<tr><td colspan=\"".$colspan."\" align=\"left\">".format_comment($arr4["msg"])."</td></tr>");
 if ($arr4["answered"] == 1 && $arr4["answer"])
 {

@@ -366,12 +366,12 @@ class PageLayout
                 <font class='color_uploaded'><?php 
             echo $context->lang['text_uploaded'];
             ?></font> <?php 
-            echo mksize($context->user['uploaded']);
+            echo \App\Support\Format::size($context->user['uploaded']);
             ?>
                 <font class='color_downloaded'> <?php 
             echo $context->lang['text_downloaded'];
             ?></font> <?php 
-            echo mksize($context->user['downloaded']);
+            echo \App\Support\Format::size($context->user['downloaded']);
             ?>
                 <font class='color_active'><?php 
             echo $context->lang['text_active_torrents'];
@@ -502,7 +502,7 @@ class PageLayout
                     msgalert("torrents.php", $msg, "blue");
                 }
                 if ($context->user['leechwarn'] == 'yes') {
-                    $kicktimeout = gettime($context->user['leechwarnuntil'], false, false, true);
+                    $kicktimeout = \App\Support\Time::format($context->user['leechwarnuntil'], false, false, true);
                     $text = $context->lang['text_please_improve_ratio_within'] . $kicktimeout . $context->lang['text_or_you_will_be_banned'];
                     msgalert("faq.php#id17", $text, "orange");
                 }
@@ -513,7 +513,7 @@ class PageLayout
                             $secs = $context->deleteNotTransferTwoAccount * 24 * 60 * 60;
                             $addedtime = strtotime($context->user['added']);
                             if (TIMENOW > $addedtime + $secs / 3) {
-                                $kicktimeout = gettime(date("Y-m-d H:i:s", $addedtime + $secs), false, false, true);
+                                $kicktimeout = \App\Support\Time::format(date("Y-m-d H:i:s", $addedtime + $secs), false, false, true);
                                 $text = $context->lang['text_please_download_something_within'] . $kicktimeout . $context->lang['text_inactive_account_be_deleted'];
                                 msgalert("rules.php", $text, "gray");
                             }
@@ -666,7 +666,7 @@ class PageLayout
             $query_name_laravel = [];
             $dbQueryCount = count($context->queryName) + last_query('COUNT');
         }
-        print " with <b>" . $dbQueryCount . "</b> db queries, <b>" . $context->cache->getCacheReadTimes() . "</b> reads and <b>" . $context->cache->getCacheWriteTimes() . "</b> writes of Redis and <b>" . mksize(memory_get_usage()) . "</b> ram]";
+        print " with <b>" . $dbQueryCount . "</b> db queries, <b>" . $context->cache->getCacheReadTimes() . "</b> reads and <b>" . $context->cache->getCacheWriteTimes() . "</b> writes of Redis and <b>" . \App\Support\Format::size(memory_get_usage()) . "</b> ram]";
         print "</div>\n";
         if ($debugQuery) {
             print "<div id=\"sql_debug\" style='text-align: left;'>SQL query list: <ul>";

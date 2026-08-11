@@ -21,7 +21,7 @@ if($__server_REQUEST_METHOD === 'POST'){
         case 'new':
             cur_user_check();
             check_code (\App\Support\SupportContext::getPost('imagehash') ?? null, \App\Support\SupportContext::getPost('imagestring') ?? null,'complains.php');
-            \Nexus\Database\NexusLock::lockOrFail("complains:lock:" . getip(), 10);
+            \Nexus\Database\NexusLock::lockOrFail("complains:lock:" . \App\Support\Network::clientIp(), 10);
             $email = filter_var(\App\Support\SupportContext::getPost('email'), FILTER_VALIDATE_EMAIL);
             \Nexus\Database\NexusLock::lockOrFail("complains:lock:" . $email, 600);
             $body = filter_var(\App\Support\SupportContext::getPost('body'), FILTER_SANITIZE_FULL_SPECIAL_CHARS);
@@ -35,7 +35,7 @@ if($__server_REQUEST_METHOD === 'POST'){
                 'email' => $email,
                 'body' => $body,
                 'added' => date('Y-m-d H:i:s'),
-                'ip' => getip(),
+                'ip' => \App\Support\Network::clientIp(),
             ]);
             $Cache->delete_value('COMPLAINTS_COUNT_CACHE');
             nexus_redirect(sprintf('complains.php?action=view&id=%s', \Nexus\Database\NexusDB::table('complains')->where('id', $complainId)->value('uuid')));
@@ -50,7 +50,7 @@ if($__server_REQUEST_METHOD === 'POST'){
                 'userid' => $uid,
                 'added' => date('Y-m-d H:i:s'),
                 'body' => $body,
-                'ip' => getip(),
+                'ip' => \App\Support\Network::clientIp(),
             ]);
             if ($uid > 0) {
                 try {
@@ -90,7 +90,7 @@ $lang_complains = (array) (\App\Support\SupportContext::getGlobal('lang_complain
                 echo EchoRow('colhead', $lang_complains['th_complain_at'], $lang_complains['th_complain_account'], $lang_complains['th_action_view']);
                 foreach ($rows as $r) {
                     $row = (array) $r;
-                    echo EchoRow('rowfollow', gettime($row['added']), htmlspecialchars($row['email']), sprintf('<a href="?action=view&id=%s" class="faqlink">%s</a>', $row['uuid'], $lang_complains['th_action_view']));
+                    echo EchoRow('rowfollow', \App\Support\Time::format($row['added']), htmlspecialchars($row['email']), sprintf('<a href="?action=view&id=%s" class="faqlink">%s</a>', $row['uuid'], $lang_complains['th_action_view']));
                 }
                 echo '</table>';
             };
@@ -139,7 +139,7 @@ $lang_complains = (array) (\App\Support\SupportContext::getGlobal('lang_complain
                 end_frame();
             }
             begin_frame($lang_complains['text_new_body']);
-            printf('%s：%s<br />%s %s', $lang_complains['text_added'], gettime($complain['added']), $lang_complains['text_new_email'], htmlspecialchars($complain['email']));
+            printf('%s：%s<br />%s %s', $lang_complains['text_added'], \App\Support\Time::format($complain['added']), $lang_complains['text_new_email'], htmlspecialchars($complain['email']));
             if($isAdmin) {
                 if ($user) {
                     printf(' [<a href="userdetails.php?id=%s" class="faqlink" target="_blank">%s</a>]', $user->id, $user->username);
@@ -157,7 +157,7 @@ $lang_complains = (array) (\App\Support\SupportContext::getGlobal('lang_complain
             if($replyRows->count()){
                 foreach ($replyRows as $r) {
                     $row = (array) $r;
-                    printf('<b>%s @ %s', $row['userid'] ? get_plain_username($row['userid']) : $lang_complains['text_complainer'], gettime($row['added']));
+                    printf('<b>%s @ %s', $row['userid'] ? get_plain_username($row['userid']) : $lang_complains['text_complainer'], \App\Support\Time::format($row['added']));
                     if ($isAdmin) {
                         printf(' (%s)', htmlspecialchars($row['ip']));
                     }

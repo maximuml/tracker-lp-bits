@@ -167,7 +167,7 @@ final class Promotion
             $expire = (int) ($expires[$config['expire']] ?? 0);
             if ($showTimeLeft && (($expire && $promotionTimeType == 0) || $promotionTimeType == 2)) {
                 $futureTime = $promotionTimeType == 2 ? strtotime($promotionUntil) : strtotime($added) + $expire * 86400;
-                $timeout = \gettime(date('Y-m-d H:i:s', $futureTime), false, false, true, false, true);
+                $timeout = \App\Support\Time::format(date('Y-m-d H:i:s', $futureTime), false, false, true, false, true);
                 if ($timeout) {
                     $text = $labels[$config['text']] ?? '';
                     if ($sub) {

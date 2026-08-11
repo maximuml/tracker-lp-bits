@@ -31,7 +31,7 @@ foreach ($updateset as $class) {
 }
 $subject = trim(\App\Support\SupportContext::getPost('subject'));
 
-$amount = getsize_int($amount,"G");
+$amount = \App\Support\Format::bytesFromUnit($amount,"G");
 \App\Models\User::query()->whereIn('class', $updateset)->increment('uploaded', $amount);
 
 $userIds = \App\Models\User::query()->whereIn('class', $updateset)->pluck('id')->all();

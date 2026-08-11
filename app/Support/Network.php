@@ -469,4 +469,21 @@ final class Network
 
         return $locations[$ip] = self::ipLocationLabels($geoName, $ip, $unknownLabel, $userIpLabel);
     }
+
+    /**
+     * Locale-aware wrapper for {@see ipLocation()}, mirroring the legacy
+     * `get_ip_location()` helper.
+     *
+     * @return array{0:string,1:string}
+     */
+    public static function ipLocationWithContext(string $ip): array
+    {
+        $lang_functions = \App\Support\SupportContext::getLangFunctions();
+
+        return self::ipLocation(
+            $ip,
+            (string) ($lang_functions['text_unknown'] ?? ''),
+            (string) ($lang_functions['text_user_ip'] ?? 'User IP'),
+        );
+    }
 }

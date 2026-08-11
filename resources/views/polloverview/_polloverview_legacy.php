@@ -16,7 +16,7 @@ if ($pollid)
 	print("<table width=737 border=1 cellspacing=0 cellpadding=5><tr>\n" .
  "<td class=colhead align=center><nobr>".$lang_polloverview['col_id']."</nobr></td><td class=colhead><nobr>".$lang_polloverview['col_added']."</nobr></td><td class=colhead><nobr>".$lang_polloverview['col_question']."</nobr></td></tr>\n");
 
-	$added = gettime($poll['added']);
+	$added = \App\Support\Time::format($poll['added']);
 	print("<tr><td align=center><a href=\"polloverview.php?id=".$poll['id']."\">".$poll['id']."</a></td><td>".$added."</td><td><a href=\"polloverview.php?id=".$poll['id']."\">".$poll['question']."</a></td></tr>\n");
 	print("</table>\n");
 
@@ -71,7 +71,7 @@ else
  "<td class=colhead align=center><nobr>".$lang_polloverview['col_id']."</nobr></td><td class=colhead>".$lang_polloverview['col_added']."</td><td class=colhead><nobr>".$lang_polloverview['col_question']."</nobr></td></tr>\n");
 	foreach ($polls as $pollRow) {
 	    $poll = (array) $pollRow;
-		$added = gettime($poll['added']);
+		$added = \App\Support\Time::format($poll['added']);
 		print("<tr><td align=center><a href=\"polloverview.php?id=".$poll['id']."\">".$poll['id']."</a></td><td>".$added."</td><td><a href=\"polloverview.php?id=".$poll['id']."\">".$poll['question']."</a></td></tr>\n");
 	}
 	print("</table>\n");

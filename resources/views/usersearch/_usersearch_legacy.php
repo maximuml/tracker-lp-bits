@@ -801,8 +801,8 @@ $res = (clone $userQuery)->distinct()->selectRaw($select_is)->offset($offset)->l
           <td><div align=center>" . $user['status'] . "</div></td>
           <td><div align=center>" . $user['enabled']."</div></td>
           <td><div align=center>" . ratios($pul,$pdl) . "</div></td>" .
-          "<td><div align=right>" . mksize($pul) . "</div></td>
-          <td><div align=right>" . mksize($pdl) . "</div></td>
+          "<td><div align=right>" . \App\Support\Format::size($pul) . "</div></td>
+          <td><div align=right>" . \App\Support\Format::size($pdl) . "</div></td>
           <td><div align=center>".($n_posts?"<a href=userhistory.php?action=viewposts&id=".$user['id'].">$n_posts</a>":$n_posts).
           "|".($n_comments?"<a href=userhistory.php?action=viewcomments&id=".$user['id'].">$n_comments</a>":$n_comments).
           "</div></td></tr>\n";

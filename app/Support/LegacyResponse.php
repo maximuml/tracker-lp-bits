@@ -138,7 +138,7 @@ final class LegacyResponse
 
         $msg = 'Invalid ID Attempt: Username: '.($CURUSER['username'] ?? '')
             .' - UserID: '.($CURUSER['id'] ?? '')
-            .' - UserIP : '.(\function_exists('getip') ? \getip() : '');
+            .' - UserIP : '.(\App\Support\Network::clientIp());
 
         if ($log && \function_exists('write_log')) {
             \write_log($msg, 'mod');

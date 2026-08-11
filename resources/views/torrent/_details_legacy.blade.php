@@ -84,7 +84,7 @@ $torrentnameprefix = \App\Support\SupportContext::getGlobal('torrentnameprefix')
 			print("<tr><td class=\"rowhead\" width=\"13%\">".$lang_details['row_download']."</td><td class=\"rowfollow\" width=\"87%\" align=\"left\">");
 			if ($CURUSER['timetype'] != 'timealive')
 				$uploadtime = $lang_details['text_at'].$row['added'];
-			else $uploadtime = $lang_details['text_blank'].gettime($row['added'],true,false);
+			else $uploadtime = $lang_details['text_blank'].\App\Support\Time::format($row['added'],true,false);
 			print("<a class=\"index\" href=\"download.php?id=$id\">" . htmlspecialchars($torrentnameprefix ."." .$row["save_as"]) . ".torrent</a>&nbsp;&nbsp;<a id=\"bookmark0\" href=\"javascript: bookmark(".$row['id'].",0);\">".get_torrent_bookmark_state($CURUSER['id'], $row['id'], false)."</a>&nbsp;&nbsp;&nbsp;".$lang_details['row_upped_by']."&nbsp;".$uprow.$uploadtime);
 			print("</td></tr>");
 		}
@@ -97,7 +97,7 @@ $torrentnameprefix = \App\Support\SupportContext::getGlobal('torrentnameprefix')
             tr($lang_details['row_tags'], $tagRep->renderSpan($row['search_box_id'], $torrentTags->pluck('tag_id')->toArray()),true);
         }
 
-		$size_info =  "<b>".$lang_details['text_size']."</b>" . mksize($row["size"]);
+		$size_info =  "<b>".$lang_details['text_size']."</b>" . \App\Support\Format::size($row["size"]);
 		$type_info = "&nbsp;&nbsp;&nbsp;<b>".$lang_details['row_type'].":</b>&nbsp;".$row["cat_name"];
 //        $source_info = $medium_info = $codec_info = $audiocodec_info = $standard_info = $processing_info = $team_info = '';
 //		if ((isset($row["source_name"])))
@@ -234,7 +234,7 @@ JS;
 		    $infoTds[] = "<td class=\"no_border_wide\"><b>" . $lang_details['text_torrent_structure'] . "</b><a href=\"torrent_info.php?id=".$id."\">".$lang_details['text_torrent_info_note']."</a></td>";
         }
         tr($lang_details['row_torrent_info'], "<table><tr>" . implode("", $infoTds) . "</tr></table><span id='filelist'></span>",1);
-		tr($lang_details['row_hot_meter'], "<table><tr><td class=\"no_border_wide\"><b>" . $lang_details['text_views']."</b>". $row["views"] . "</td><td class=\"no_border_wide\"><b>" . $lang_details['text_hits']. "</b>" . $row["hits"] . "</td><td class=\"no_border_wide\"><b>" .$lang_details['text_snatched'] . "</b><a href=\"viewsnatches.php?id=".$id."\"><b>" . $row["times_completed"]. $lang_details['text_view_snatches'] . "</td><td class=\"no_border_wide\"><b>" . $lang_details['row_last_seeder']. "</b>" . gettime($row["last_action"]) . "</td></tr></table>",1);
+		tr($lang_details['row_hot_meter'], "<table><tr><td class=\"no_border_wide\"><b>" . $lang_details['text_views']."</b>". $row["views"] . "</td><td class=\"no_border_wide\"><b>" . $lang_details['text_hits']. "</b>" . $row["hits"] . "</td><td class=\"no_border_wide\"><b>" .$lang_details['text_snatched'] . "</b><a href=\"viewsnatches.php?id=".$id."\"><b>" . $row["times_completed"]. $lang_details['text_view_snatches'] . "</td><td class=\"no_border_wide\"><b>" . $lang_details['row_last_seeder']. "</b>" . \App\Support\Time::format($row["last_action"]) . "</td></tr></table>",1);
 
 		tr("<span id=\"seeders\"></span><span id=\"leechers\"></span>".$lang_details['row_peers']."<br /><span id=\"showpeer\"><a href=\"javascript: viewpeerlist(".$row['id'].");\" class=\"sublink\">".$lang_details['text_see_full_list']."</a></span><span id=\"hidepeer\" style=\"display: none;\"><a href=\"javascript: hidepeerlist();\" class=\"sublink\">".$lang_details['text_hide_list']."</a></span>", "<div id=\"peercount\"><b>".$row['seeders'].$lang_details['text_seeders'].add_s($row['seeders'])."</b> | <b>".$row['leechers'].$lang_details['text_leechers'].add_s($row['leechers'])."</b></div><div id=\"peerlist\"></div>" , 1);
 		if (((\App\Support\SupportContext::getQuery('dllist') !== null)) && \App\Support\SupportContext::getQuery('dllist') == 1)

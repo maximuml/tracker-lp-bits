@@ -598,7 +598,7 @@ class UploadRepository extends BaseRepository
                 $body = nexus_trans("upload.email_notification_body", [
                     'site_name' => \App\Support\Config\SiteConfig::current()->basic->siteName(),
                     'name' => $torrent->name,
-                    'size' => mksize($torrent->size),
+                    'size' => \App\Support\Format::size($torrent->size),
                     'category' => $categoryName,
                     'upload_by' => $this->handleAnonymous($torrentUploader->username, $torrentUploader, $user, $torrent),
                     'description' => Str::limit(strip_tags(format_comment($torrent->extra->descr)), 500),

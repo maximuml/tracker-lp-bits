@@ -51,7 +51,7 @@ else
 			$title = $lang_downloadnotice['text_low_ratio_notice'];
 			$leechwarnuntiltime = strtotime($CURUSER['leechwarnuntil']);
 			if (TIMENOW < $leechwarnuntiltime){
-				$kicktimeout = gettime($CURUSER['leechwarnuntil'], false, false, true);
+				$kicktimeout = \App\Support\Time::format($CURUSER['leechwarnuntil'], false, false, true);
 				$note = $lang_downloadnotice['text_low_ratio_note_one'].$kicktimeout.$lang_downloadnotice['text_low_ratio_note_two'];
 			}
 			$noticenexttime = $lang_downloadnotice['text_notice_always_show'];

@@ -140,7 +140,7 @@ if ($showlastxforumposts_main == "yes" && $CURUSER)
 
 		foreach ($latestPosts as $postsx)
 		{
-			print("<tr><td><a href=\"forums.php?action=viewtopic&amp;topicid=".$postsx["tid"]."&amp;page=p".$postsx["pid"]."#pid".$postsx["pid"]."\"><b>".htmlspecialchars($postsx["subject"])."</b></a><br />".$lang_index['text_in']."<a href=\"forums.php?action=viewforum&amp;forumid=".$postsx["forumid"]."\">".htmlspecialchars($postsx["name"])."</a></td><td align=\"center\">".$postsx["views"]."</td><td align=\"center\">" . get_username($postsx["userpost"]) ."</td><td>".gettime($postsx["added"])."</td></tr>");
+			print("<tr><td><a href=\"forums.php?action=viewtopic&amp;topicid=".$postsx["tid"]."&amp;page=p".$postsx["pid"]."#pid".$postsx["pid"]."\"><b>".htmlspecialchars($postsx["subject"])."</b></a><br />".$lang_index['text_in']."<a href=\"forums.php?action=viewforum&amp;forumid=".$postsx["forumid"]."\">".htmlspecialchars($postsx["name"])."</a></td><td align=\"center\">".$postsx["views"]."</td><td align=\"center\">" . get_username($postsx["userpost"]) ."</td><td>".\App\Support\Time::format($postsx["added"])."</td></tr>");
 		}
 		print("</table>");
 	}
@@ -277,7 +277,7 @@ if ($showlastxtorrents_main == "yes") {
 						<div class="lt-meta">
 							<span class="lt-seed" title="<?php echo htmlspecialchars($lang_index['col_seeder']) ?>">&#x25B2; <?php echo (int)$torrent->seeders ?></span>
 							<span class="lt-leech" title="<?php echo htmlspecialchars($lang_index['col_leecher']) ?>">&#x25BC; <?php echo (int)$torrent->leechers ?></span>
-							<span><?php echo mksize((int)$torrent->size) ?></span>
+							<span><?php echo \App\Support\Format::size((int)$torrent->size) ?></span>
 							<span><?php echo $ownerHtml ?></span>
 						</div>
 					</div>
@@ -498,7 +498,7 @@ if ($showstats_main == "yes")
 	$peers = number_format($torrentStats['peers']);
 	$seeders = number_format($seeders);
 	$leechers = number_format($leechers);
-	$totaltorrentssize = mksize($torrentStats['totaltorrentssize']);
+	$totaltorrentssize = \App\Support\Format::size($torrentStats['totaltorrentssize']);
 	$totaluploaded = $torrentStats['totaluploaded'];
 	$totaldownloaded = $torrentStats['totaldownloaded'];
 	$totaldata = $torrentStats['totaldata'];
@@ -530,13 +530,13 @@ if ($showstats_main == "yes")
 <tr>
 <?php
 	twotd($lang_index['row_total_size_of_torrents'],$totaltorrentssize);
-	twotd($lang_index['row_total_uploaded'],mksize($totaluploaded));
+	twotd($lang_index['row_total_uploaded'],\App\Support\Format::size($totaluploaded));
 ?>
 </tr>
 <tr>
 <?php
-	twotd($lang_index['row_total_downloaded'],mksize($totaldownloaded));
-	twotd($lang_index['row_total_data'],mksize($totaldata));
+	twotd($lang_index['row_total_downloaded'],\App\Support\Format::size($totaldownloaded));
+	twotd($lang_index['row_total_data'],\App\Support\Format::size($totaldata));
 ?>
 </tr>
 <?php

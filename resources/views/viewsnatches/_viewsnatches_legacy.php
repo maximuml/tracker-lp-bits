@@ -39,13 +39,13 @@ if ($count){
 			$ratio = $lang_viewsnatches['text_inf'];
 		else
 			$ratio = "---";
-		$uploaded =mksize($arr["uploaded"]);
-		$downloaded = mksize($arr["downloaded"]);
-		$seedtime = mkprettytime($arr["seedtime"]);
-		$leechtime = mkprettytime($arr["leechtime"]);
+		$uploaded =\App\Support\Format::size($arr["uploaded"]);
+		$downloaded = \App\Support\Format::size($arr["downloaded"]);
+		$seedtime = \App\Support\Format::prettyTimeWithLocale($arr["seedtime"]);
+		$leechtime = \App\Support\Format::prettyTimeWithLocale($arr["leechtime"]);
 
-		$uprate = $arr["seedtime"] > 0 ? mksize($arr["uploaded"] / ($arr["seedtime"] + $arr["leechtime"])) : mksize(0);
-		$downrate = $arr["leechtime"] > 0 ? mksize($arr["downloaded"] / $arr["leechtime"]) : mksize(0);
+		$uprate = $arr["seedtime"] > 0 ? \App\Support\Format::size($arr["uploaded"] / ($arr["seedtime"] + $arr["leechtime"])) : \App\Support\Format::size(0);
+		$downrate = $arr["leechtime"] > 0 ? \App\Support\Format::size($arr["downloaded"] / $arr["leechtime"]) : \App\Support\Format::size(0);
 		//end
 
 		$highlight = $CURUSER["id"] == $arr["userid"] ? " bgcolor=#00A527" : "";
@@ -57,7 +57,7 @@ if ($count){
 		}
 		else $username = get_username($arr['userid']);
 		$reportImage = "<img class=\"f_report\" src=\"pic/trans.gif\" alt=\"Report\" title=\"".$lang_viewsnatches['title_report']."\" />";
-		print("<tr$highlight><td class=rowfollow align=center>" . $username ."</td>".(\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::VIEW_USER_CONFIDENTIAL_INFO) ? "<td class=rowfollow align=center><span class='nowrap'>".$arr['ip'].$seedBoxRep->renderIcon($arr['ip'], $arr['userid'])."</span></td>" : "")."<td class=rowfollow align=center>".$uploaded."@".$uprate.$lang_viewsnatches['text_per_second']."<br />".$downloaded."@".$downrate.$lang_viewsnatches['text_per_second']."</td><td class=rowfollow align=center>$ratio</td><td class=rowfollow align=center>$seedtime</td><td class=rowfollow align=center>$leechtime</td><td class=rowfollow align=center>".gettime($arr['completedat'],true,false)."</td><td class=rowfollow align=center>".gettime($arr['last_action'],true,false)."</td><td class=rowfollow align=center style='padding: 0px'>".($userrow['privacy'] != 'strong' || \App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::VIEW_ANONYMOUS) ? "<a href=report.php?user={$arr['userid']}>$reportImage</a>" : $reportImage)."</td></tr>\n");
+		print("<tr$highlight><td class=rowfollow align=center>" . $username ."</td>".(\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::VIEW_USER_CONFIDENTIAL_INFO) ? "<td class=rowfollow align=center><span class='nowrap'>".$arr['ip'].$seedBoxRep->renderIcon($arr['ip'], $arr['userid'])."</span></td>" : "")."<td class=rowfollow align=center>".$uploaded."@".$uprate.$lang_viewsnatches['text_per_second']."<br />".$downloaded."@".$downrate.$lang_viewsnatches['text_per_second']."</td><td class=rowfollow align=center>$ratio</td><td class=rowfollow align=center>$seedtime</td><td class=rowfollow align=center>$leechtime</td><td class=rowfollow align=center>".\App\Support\Time::format($arr['completedat'],true,false)."</td><td class=rowfollow align=center>".\App\Support\Time::format($arr['last_action'],true,false)."</td><td class=rowfollow align=center style='padding: 0px'>".($userrow['privacy'] != 'strong' || \App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::VIEW_ANONYMOUS) ? "<a href=report.php?user={$arr['userid']}>$reportImage</a>" : $reportImage)."</td></tr>\n");
 	}
 		print("</table>\n");
 		print($pagerbottom);

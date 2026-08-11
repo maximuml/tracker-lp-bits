@@ -66,8 +66,8 @@ if (get_user_class() >= UC_MODERATOR || $CURUSER["guard"] == "yes")
 			$ratio="---";
 
 		  $ratio = "<font color=" . get_ratio_color($ratio) . ">$ratio</font>";
-		  $uploaded = mksize($arr["uploaded"]);
-		  $downloaded = mksize($arr["downloaded"]);
+		  $uploaded = \App\Support\Format::size($arr["uploaded"]);
+		  $downloaded = \App\Support\Format::size($arr["downloaded"]);
 		  $added = substr($arr['added'],0,10);
 		  $last_access = substr($arr['last_access'],0,10);
 		  if($uc%2 == 0)

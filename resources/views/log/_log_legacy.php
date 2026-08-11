@@ -131,7 +131,7 @@ else {
 				if (strpos($arr['txt'],'was added to the Request section')) $color = "purple";
 				if (strpos($arr['txt'],'was edited by')) $color = "blue";
 				if (strpos($arr['txt'],'settings updated by')) $color = "darkred";
-				print("<tr><td class=\"rowfollow nowrap\" align=center>".gettime($arr['added'],true,false)."</td><td class=rowfollow align=left><font color='".$color."'>".htmlspecialchars($arr['txt'])."</font></td>");
+				print("<tr><td class=\"rowfollow nowrap\" align=center>".\App\Support\Time::format($arr['added'],true,false)."</td><td class=rowfollow align=left><font color='".$color."'>".htmlspecialchars($arr['txt'])."</font></td>");
                 if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::CONFIDENTIAL_LOG)){
                     print("<td class=rowfollow align=left>".($arr['uid'] > 0 ? get_username($arr['uid']) : "System")."</td>");
                 }
@@ -196,7 +196,7 @@ else {
 			print("<tr><td class=colhead align=center>".$lang_log['col_date']."</td><td class=colhead align=left>".$lang_log['col_event']."</td>".(\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::CHR_MANAGE) ? "<td class=colhead align=center>".$lang_log['col_modify']."</td>" : "")."</tr>\n");
 			foreach ($chronicleRows as $arr)
 			{
-				$date = gettime($arr['added'],true,false);
+				$date = \App\Support\Time::format($arr['added'],true,false);
 				print("<tr><td class=rowfollow align=center><nobr>$date</nobr></td><td class=rowfollow align=left>".format_comment($arr["txt"],true,false,true)."</td>".(\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::CHR_MANAGE) ? "<td align=center nowrap><b><a href=\"?action=chronicle&do=edit&id=".$arr["id"]."\">".$lang_log['text_edit']."</a>&nbsp;|&nbsp;<a href=\"?action=chronicle&do=del&id=".$arr["id"]."\"><font color=red>".$lang_log['text_delete']."</font></a></b></td>" : "")."</tr>\n");
 			}
 			print("</table>");
@@ -230,7 +230,7 @@ else {
 
 		//echo $pagertop;
 			foreach ($newsRows as $arr){
-				$date = gettime($arr['added'],true,false);
+				$date = \App\Support\Time::format($arr['added'],true,false);
 			print("<table width=940 border=1 cellspacing=0 cellpadding=5>\n");
 			print("<tr><td class=rowhead width='10%'>".$lang_log['col_title']."</td><td class=rowfollow align=left>".$arr["title"]."</td></tr><tr><td class=rowhead width='10%'>".$lang_log['col_date']."</td><td class=rowfollow align=left>".$date."</td></tr><tr><td class=rowhead width='10%'>".$lang_log['col_body']."</td><td class=rowfollow align=left>".format_comment($arr["body"],false,false,true)."</td></tr>\n");
 			print("</table><br />");
@@ -295,7 +295,7 @@ else {
     print("<tr><td align=center>\n");
 
     print("<p class=sub>");
-    $added = gettime($poll['added'], true, false);
+    $added = \App\Support\Time::format($poll['added'], true, false);
 
     print($added);
 

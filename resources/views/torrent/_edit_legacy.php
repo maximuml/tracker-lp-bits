@@ -244,5 +244,5 @@ stdfoot();
 function getAddedTimeOption($timeStamp, $addSeconds) {
     $timeStamp += $addSeconds;
     $timeString = date("Y-m-d H:i:s", $timeStamp);
-    return '<option value="'.$timeString.'">'.mkprettytime($addSeconds).'</option>';
+    return '<option value="'.$timeString.'">'.\App\Support\Format::prettyTimeWithLocale($addSeconds).'</option>';
 }

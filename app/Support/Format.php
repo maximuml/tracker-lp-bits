@@ -272,4 +272,16 @@ final class Format
     {
         return \App\Support\Strings::highlight($search, $subject, $hlstart, $hlend);
     }
+
+    /**
+     * Locale-aware wrapper for {@see prettyTime()}, mirroring the legacy
+     * `mkprettytime()` helper. Reads the "day" label from the current
+     * language context.
+     */
+    public static function prettyTimeWithLocale(int|float $s): string
+    {
+        $lang_functions = \App\Support\SupportContext::getLangFunctions();
+
+        return self::prettyTime($s, (string) ($lang_functions['text_day'] ?? 'day(s)'));
+    }
 }

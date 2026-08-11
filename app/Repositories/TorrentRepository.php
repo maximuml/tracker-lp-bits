@@ -402,7 +402,7 @@ class TorrentRepository extends BaseRepository
     {
         $diff = $peer->uploaded - $peer->uploadoffset;
         $seconds = max(1, $peer->started->diffInSeconds($peer->last_action, true));
-        return mksize($diff / $seconds) . '/s';
+        return \App\Support\Format::size($diff / $seconds) . '/s';
     }
 
     /** @param  mixed  $peer */
@@ -414,7 +414,7 @@ class TorrentRepository extends BaseRepository
         } else {
             $seconds = max(1, $peer->started->diffInSeconds($peer->last_action, true));
         }
-        return mksize($diff / $seconds) . '/s';
+        return \App\Support\Format::size($diff / $seconds) . '/s';
     }
 
     /** @param  mixed  $peer */
@@ -447,8 +447,8 @@ class TorrentRepository extends BaseRepository
     private function formatPeers($peers)
     {
         foreach ($peers as &$item) {
-            $item->upload_text = sprintf('%s@%s', mksize($item->uploaded), $this->getPeerUploadSpeed($item));
-            $item->download_text = sprintf('%s@%s', mksize($item->downloaded), $this->getPeerDownloadSpeed($item));
+            $item->upload_text = sprintf('%s@%s', \App\Support\Format::size($item->uploaded), $this->getPeerUploadSpeed($item));
+            $item->download_text = sprintf('%s@%s', \App\Support\Format::size($item->downloaded), $this->getPeerDownloadSpeed($item));
             $item->download_progress = $this->getDownloadProgress($item);
             $item->share_ratio = $this->getShareRatio($item);
             $item->connect_time_total = $item->started->diffForHumans();
@@ -481,9 +481,9 @@ class TorrentRepository extends BaseRepository
     public function getSnatchUploadSpeed($snatch)
     {
         if ($snatch->seedtime <= 0) {
-            $speed = mksize(0);
+            $speed = \App\Support\Format::size(0);
         } else {
-            $speed = mksize($snatch->uploaded / ($snatch->seedtime + $snatch->leechtime));
+            $speed = \App\Support\Format::size($snatch->uploaded / ($snatch->seedtime + $snatch->leechtime));
         }
         return "$speed/s";
     }
@@ -495,9 +495,9 @@ class TorrentRepository extends BaseRepository
     public function getSnatchDownloadSpeed($snatch)
     {
         if ($snatch->leechtime <= 0) {
-            $speed = mksize(0);
+            $speed = \App\Support\Format::size(0);
         } else {
-            $speed = mksize($snatch->downloaded / $snatch->leechtime);
+            $speed = \App\Support\Format::size($snatch->downloaded / $snatch->leechtime);
         }
         return "$speed/s";
     }

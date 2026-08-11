@@ -461,7 +461,7 @@ if ($perseeding_bonus > 0)
 print("<li>".$lang_mybonus['text_bonus_formula_one'].$tzero_bonus.$lang_mybonus['text_bonus_formula_two'].$nzero_bonus.$lang_mybonus['text_bonus_formula_wi'].\App\Support\Config\SiteConfig::current()->bonus->zeroBonusFactor().$lang_mybonus['text_bonus_formula_three'].$bzero_bonus.$lang_mybonus['text_bonus_formula_four'].$l_bonus.$lang_mybonus['text_bonus_formula_five']."</li>");
 $minSize = \App\Support\Config\SiteConfig::current()->bonus->minSize();
 if ($minSize > 0) {
-    print("<li>".sprintf($lang_mybonus['text_bonus_mini_size'], mksize($minSize))."</li>");
+    print("<li>".sprintf($lang_mybonus['text_bonus_mini_size'], \App\Support\Format::size($minSize))."</li>");
 }
 if ($donortimes_bonus)
 	print("<li>".$lang_mybonus['text_donors_always_get'].$donortimes_bonus.$lang_mybonus['text_times_of_bonus']."</li>");

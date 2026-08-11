@@ -55,7 +55,7 @@ class TopTorrents extends BaseWidget implements HasActions
             ,
             TextColumn::make('size')
                 ->label(__('label.torrent.size'))
-                ->formatStateUsing(fn ($state) => mksize($state))
+                ->formatStateUsing(fn ($state) => \App\Support\Format::size($state))
             ,
             TextColumn::make('seeders')->label(__('label.torrent.seeders')),
             TextColumn::make('leechers')->label(__('label.torrent.leechers')),

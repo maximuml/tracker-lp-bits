@@ -54,7 +54,7 @@ else
   foreach ($bans as $ban)
   {
  	  $arr = (array) $ban;
- 	  print("<tr><td>".gettime($arr['added'])."</td><td align=left>".long2ip($arr['first'])."</td><td align=left>".long2ip($arr['last'])."</td><td align=left>". get_username($arr['addedby']) .
+ 	  print("<tr><td>".\App\Support\Time::format($arr['added'])."</td><td align=left>".long2ip($arr['first'])."</td><td align=left>".long2ip($arr['last'])."</td><td align=left>". get_username($arr['addedby']) .
  	    "</td><td align=left>{$arr['comment']}</td><td><a href=bans.php?remove={$arr['id']}>Remove</a></td></tr>\n");
   }
   print("</table>\n");

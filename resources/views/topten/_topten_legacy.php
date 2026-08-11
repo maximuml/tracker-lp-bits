@@ -41,12 +41,12 @@ foreach ($res as $a) { $a = (array) $a;
 	else
 		$ratio = $lang_topten['text_inf'];
 	print("<tr><td class=\"rowfollow\" align=\"center\">$num</td><td class=\"rowfollow\" align=\"left\">" . get_username($a["userid"]) .
-	"</td><td class=\"rowfollow\" align=\"right\">" . mksize($a["uploaded"]) .
-	"</td><td class=\"rowfollow\" align=\"right\">" . mksize($a["upspeed"]) . "/s" .
-	"</td><td class=\"rowfollow\" align=\"right\">" . mksize($a["downloaded"]) .
-	"</td><td class=\"rowfollow\" align=\"right\">" . mksize($a["downspeed"]) . "/s" .
+	"</td><td class=\"rowfollow\" align=\"right\">" . \App\Support\Format::size($a["uploaded"]) .
+	"</td><td class=\"rowfollow\" align=\"right\">" . \App\Support\Format::size($a["upspeed"]) . "/s" .
+	"</td><td class=\"rowfollow\" align=\"right\">" . \App\Support\Format::size($a["downloaded"]) .
+	"</td><td class=\"rowfollow\" align=\"right\">" . \App\Support\Format::size($a["downspeed"]) . "/s" .
 	"</td><td class=\"rowfollow\" align=\"right\">" . $ratio .
-	"</td><td class=\"rowfollow\" align=\"left\">" . gettime($a["added"],true,false). "</td></tr>");
+	"</td><td class=\"rowfollow\" align=\"left\">" . \App\Support\Time::format($a["added"],true,false). "</td></tr>");
 }
 end_table();
 end_frame();
@@ -81,7 +81,7 @@ foreach ($res as $a) { $a = (array) $a;
 	$ratio = $lang_topten['text_inf'];
 	print("<tr><td class=\"rowfollow\" align=\"center\">$num</td><td class=\"rowfollow\" align=\"left\"><a href=\"details.php?id=" . $a["id"] . "&amp;hit=1\"><b>" .
 	$a["name"] . "</b></a></td><td class=\"rowfollow\" align=\"right\">" . number_format($a["times_completed"]) .
-	"</td><td class=\"rowfollow\" align=\"right\">" . mksize($a["data"]) . "</td><td class=\"rowfollow\" align=\"right\">" . number_format($a["seeders"]) .
+	"</td><td class=\"rowfollow\" align=\"right\">" . \App\Support\Format::size($a["data"]) . "</td><td class=\"rowfollow\" align=\"right\">" . number_format($a["seeders"]) .
 	"</td><td class=\"rowfollow\" align=\"right\">" . number_format($a["leechers"]) . "</td><td class=\"rowfollow\" align=\"right\">" . ($a["leechers"] + $a["seeders"]) .
 	"</td><td class=\"rowfollow\" align=\"right\">$ratio</td>\n");
 }
@@ -108,9 +108,9 @@ foreach ($res as $a) { $a = (array) $a;
 	if ($what == $lang_topten['col_users'])
 	$value = number_format($a["num"]);
 	elseif ($what == $lang_topten['col_uploaded'])
-	$value = mksize($a["ul"]);
+	$value = \App\Support\Format::size($a["ul"]);
 	elseif ($what == $lang_topten['col_average'])
-	$value = mksize($a["ul_avg"]);
+	$value = \App\Support\Format::size($a["ul_avg"]);
 	elseif ($what == $lang_topten['col_ratio'])
 	$value = number_format($a["r"],2);
 	print("<tr><td class=\"rowfollow\" align=\"center\">$num</td><td class=\"rowfollow\" align=\"left\"><table border=\"0\" class=\"main\" cellspacing=\"0\" cellpadding=\"0\"><tr><td class=\"embedded\">".
@@ -131,7 +131,7 @@ $lang_topten = (array) (\App\Support\SupportContext::getGlobal('lang_topten') ??
 
 	$n = 1;
 	foreach ($res as $arr) { $arr = (array) $arr;
-		print("<tr><td class=\"rowfollow\">$n</td><td class=\"rowfollow\">" . get_username($arr["userid"]) . "</td><td class=\"rowfollow\">" . mksize($arr["uprate"]) . "/s</td><td class=\"rowfollow\">" . mksize($arr["downrate"]) . "/s</td></tr>\n");
+		print("<tr><td class=\"rowfollow\">$n</td><td class=\"rowfollow\">" . get_username($arr["userid"]) . "</td><td class=\"rowfollow\">" . \App\Support\Format::size($arr["uprate"]) . "/s</td><td class=\"rowfollow\">" . \App\Support\Format::size($arr["downrate"]) . "/s</td></tr>\n");
 		++$n;
 	}
 
@@ -298,7 +298,7 @@ $lang_topten = (array) (\App\Support\SupportContext::getGlobal('lang_topten') ??
 
 	$n = 1;
 	foreach ($res as $arr) { $arr = (array) $arr;
-		print("<tr><td class=\"rowfollow\" align=\"center\">$n</td><td class=\"rowfollow\" align=\"left\"><a href=\"torrents.php?search=" . rawurlencode($arr["keywords"]) . "\">" . $arr["keywords"] . "</a></td><td class=\"rowfollow\" align=\"right\">" . gettime($arr["adddate"], true,false) . "</td></tr>\n");
+		print("<tr><td class=\"rowfollow\" align=\"center\">$n</td><td class=\"rowfollow\" align=\"left\"><a href=\"torrents.php?search=" . rawurlencode($arr["keywords"]) . "\">" . $arr["keywords"] . "</a></td><td class=\"rowfollow\" align=\"right\">" . \App\Support\Time::format($arr["adddate"], true,false) . "</td></tr>\n");
 		$n++;
 	}
 
@@ -360,11 +360,11 @@ foreach ($res as $a) { $a = (array) $a;
 	$ratio = $lang_topten['text_inf'];
 	print("<tr><td class=\"rowfollow\" align=\"center\">$num</td><td class=\"rowfollow\" align=\"left\">" . get_username($a["userid"]) .
 	"</td><td class=\"rowfollow\" align=\"right\">" . number_format($a["supplied"]) .
-	"</td><td class=\"rowfollow\" align=\"right\">" . mksize($a["uploaded"]) .
+	"</td><td class=\"rowfollow\" align=\"right\">" . \App\Support\Format::size($a["uploaded"]) .
 	"</td><td class=\"rowfollow\" align=\"right\">" . number_format($a["snatched"]) .
-	"</td><td class=\"rowfollow\" align=\"right\">" . mksize($a["downloaded"]) .
+	"</td><td class=\"rowfollow\" align=\"right\">" . \App\Support\Format::size($a["downloaded"]) .
 	"</td><td class=\"rowfollow\" align=\"right\">" . $ratio .
-	"</td><td class=\"rowfollow\" align=\"left\">" . gettime($a["added"]). "</td></tr>");
+	"</td><td class=\"rowfollow\" align=\"left\">" . \App\Support\Time::format($a["added"]). "</td></tr>");
 }
 end_table();
 end_frame();

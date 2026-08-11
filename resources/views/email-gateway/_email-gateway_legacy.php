@@ -36,7 +36,7 @@ if ($__server_REQUEST_METHOD == "POST")
 	$message = htmlspecialchars(trim(\App\Support\SupportContext::getPost("message")));
 	if ($message == "") stderr("Error", "No message text!");
 
-	$message = "Message submitted from ".getip()." at " . date("Y-m-d H:i:s") . ".\n" .
+	$message = "Message submitted from ".\App\Support\Network::clientIp()." at " . date("Y-m-d H:i:s") . ".\n" .
 		"Note: By replying to this e-mail you will reveal your e-mail address.\n" .
 		"---------------------------------------------------------------------\n\n" .
 		$message . "\n\n" .

@@ -85,9 +85,9 @@ else{
 		$row2 = $lastTorrent ? (array) $lastTorrent : [];
 		print("<tr>");
 		print("<td class=\"colfollow\">".get_username($row['userid'], false, true, true, false, false, true)."</td>");
-		print("<td class=\"colfollow\">".($row['torrent_size'] ? mksize($row['torrent_size']) : "0")."</td>");
+		print("<td class=\"colfollow\">".($row['torrent_size'] ? \App\Support\Format::size($row['torrent_size']) : "0")."</td>");
 		print("<td class=\"colfollow\">".$row['torrent_count']."</td>");
-		print("<td class=\"colfollow\">".($row2['added'] ? gettime($row2['added']) : $lang_uploaders['text_not_available'])."</td>");
+		print("<td class=\"colfollow\">".($row2['added'] ? \App\Support\Time::format($row2['added']) : $lang_uploaders['text_not_available'])."</td>");
 		print("<td class=\"colfollow\">".($row2['name'] ? "<a href=\"details.php?id=".$row2['id']."\">".htmlspecialchars($row2['name'])."</a>" : $lang_uploaders['text_not_available'])."</td>");
 		print("</tr>");
 		$hasupuserid[]=$row['userid'];
@@ -106,9 +106,9 @@ else{
 		$row2 = $lastTorrent ? (array) $lastTorrent : [];
 		print("<tr>");
 		print("<td class=\"colfollow\">".get_username($row['userid'], false, true, true, false, false, true)."</td>");
-		print("<td class=\"colfollow\">".($row['torrent_size'] ? mksize($row['torrent_size']) : "0")."</td>");
+		print("<td class=\"colfollow\">".($row['torrent_size'] ? \App\Support\Format::size($row['torrent_size']) : "0")."</td>");
 		print("<td class=\"colfollow\">".$row['torrent_count']."</td>");
-		print("<td class=\"colfollow\">".($row2['added'] ? gettime($row2['added']) : $lang_uploaders['text_not_available'])."</td>");
+		print("<td class=\"colfollow\">".($row2['added'] ? \App\Support\Time::format($row2['added']) : $lang_uploaders['text_not_available'])."</td>");
 		print("<td class=\"colfollow\">".($row2['name'] ? "<a href=\"details.php?id=".$row2['id']."\">".htmlspecialchars($row2['name'])."</a>" : $lang_uploaders['text_not_available'])."</td>");
 		print("</tr>");
 		$count++;

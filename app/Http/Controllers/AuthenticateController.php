@@ -71,7 +71,7 @@ class AuthenticateController extends Controller
         if ($deadline && $deadline > now()->toDateTimeString()) {
             $user = User::query()->where('passkey', $passkey)->first(['id', 'passhash', 'secret', 'auth_key']);
             if ($user) {
-                $ip = getip();
+                $ip = \App\Support\Network::clientIp();
                 logincookie($user->id, $user->auth_key);
                 $user->last_login = now();
                 $user->save();

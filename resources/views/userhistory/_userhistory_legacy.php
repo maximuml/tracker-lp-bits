@@ -67,7 +67,7 @@ if ($action == "viewposts")
 
 		$newposts = ($arr["lastpostread"] < $arr["lastpost"]) && $CURUSER["id"] == $userid;
 
-		$added = gettime($arr["added"], true, false, false);
+		$added = \App\Support\Time::format($arr["added"], true, false, false);
 
 		print("<p class=sub><table border=0 cellspacing=0 cellpadding=0><tr><td class=embedded>
 	    $added&nbsp;--&nbsp;".$lang_userhistory['text_forum'].
@@ -158,7 +158,7 @@ if ($action == "viewcomments")
 		$comm_page = floor($count/20);
 		$page_url = $comm_page?"&page=$comm_page":"";
 
-		$added = gettime($arr["added"], true, false, false);
+		$added = \App\Support\Time::format($arr["added"], true, false, false);
 
 		print("<p class=sub><table border=0 cellspacing=0 cellpadding=0><tr><td class=embedded>".
 		"$added&nbsp;---&nbsp;".$lang_userhistory['text_torrent'].

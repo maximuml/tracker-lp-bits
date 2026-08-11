@@ -42,7 +42,7 @@ if($edited == 1) {
 	$theory_downspeed = \App\Support\SupportContext::getQuery('theory_downspeed');
 	$practical_downspeed = \App\Support\SupportContext::getQuery('practical_downspeed');
 
-	if(validip_format($start_ip) && validip_format($end_ip))
+	if(\App\Support\Network::isValidIpv4Format((string) $start_ip) && \App\Support\Network::isValidIpv4Format((string) $end_ip))
 	{
 		if(ip2long($end_ip) > ip2long($start_ip))
 		{
@@ -122,7 +122,7 @@ if($add == 'true') {
 	$theory_downspeed = \App\Support\SupportContext::getQuery('theory_downspeed');
 	$practical_downspeed = \App\Support\SupportContext::getQuery('practical_downspeed');
 
-	if(validip_format($start_ip) && validip_format($end_ip))
+	if(\App\Support\Network::isValidIpv4Format((string) $start_ip) && \App\Support\Network::isValidIpv4Format((string) $end_ip))
 	{
 		if(ip2long($end_ip) > ip2long($start_ip))
 		{
@@ -182,7 +182,7 @@ print("<br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><
 $check_range = \App\Support\SupportContext::getQuery('check_range') ?? '';
 $hasRangeFilter = false;
 if($check_range == 'true') {
-	if(validip_format($range_start_ip) && validip_format($range_end_ip))
+	if(\App\Support\Network::isValidIpv4Format($range_start_ip) && \App\Support\Network::isValidIpv4Format($range_end_ip))
 	{
 		if(ip2long($range_end_ip) > ip2long($range_start_ip))
 		{

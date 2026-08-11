@@ -69,37 +69,37 @@ class AnnounceLogResource extends Resource
                                         TextEntry::make('timestamp')->label(__('announce-log.timestamp')),
                                         TextEntry::make('user_id')->label(__('announce-log.user_id'))->copyable(),
                                         TextEntry::make('torrent_id')->label(__('announce-log.torrent_id'))->copyable(),
-                                        TextEntry::make('torrent_size')->label(__('announce-log.torrent_size'))->formatStateUsing(fn($state) => mksize($state)),
+                                        TextEntry::make('torrent_size')->label(__('announce-log.torrent_size'))->formatStateUsing(fn($state) => \App\Support\Format::size($state)),
                                         TextEntry::make('seeder_count')->label(__('announce-log.seeder_count')),
                                         TextEntry::make('leecher_count')->label(__('announce-log.leecher_count')),
                                         TextEntry::make('promotion_state')->label(__('announce-log.promotion_state'))->formatStateUsing(fn($state) => Torrent::$promotionTypes[$state]['text'] ?? ''),
                                         TextEntry::make('promotion_state_desc')->label(__('announce-log.promotion_state_desc')),
                                         TextEntry::make('event')->label(__('announce-log.event')),
-                                        TextEntry::make('left')->label(__('announce-log.left'))->formatStateUsing(fn($state) => mksize($state)),
+                                        TextEntry::make('left')->label(__('announce-log.left'))->formatStateUsing(fn($state) => \App\Support\Format::size($state)),
                                         TextEntry::make('announce_time')->label(__('announce-log.announce_time')),
-                                        TextEntry::make('speed')->label(__('announce-log.speed'))->formatStateUsing(fn($state) => mksize($state) . "/s"),
+                                        TextEntry::make('speed')->label(__('announce-log.speed'))->formatStateUsing(fn($state) => \App\Support\Format::size($state) . "/s"),
                                     ])->columns(4),
 
                                 Fieldset::make(__('announce-log.fieldset_uploaded'))
                                     ->schema([
-                                        TextEntry::make('uploaded_offset')->label(__('announce-log.uploaded_offset'))->formatStateUsing(fn($state) => mksize($state)),
-                                        TextEntry::make('uploaded_total_last')->label(__('announce-log.uploaded_total_last'))->formatStateUsing(fn($state) => mksize($state)),
-                                        TextEntry::make('uploaded_total')->label(__('announce-log.uploaded_total'))->formatStateUsing(fn($state) => mksize($state)),
-                                        TextEntry::make('uploaded_increment')->label(__('announce-log.uploaded_increment'))->formatStateUsing(fn($state) => mksize($state)),
+                                        TextEntry::make('uploaded_offset')->label(__('announce-log.uploaded_offset'))->formatStateUsing(fn($state) => \App\Support\Format::size($state)),
+                                        TextEntry::make('uploaded_total_last')->label(__('announce-log.uploaded_total_last'))->formatStateUsing(fn($state) => \App\Support\Format::size($state)),
+                                        TextEntry::make('uploaded_total')->label(__('announce-log.uploaded_total'))->formatStateUsing(fn($state) => \App\Support\Format::size($state)),
+                                        TextEntry::make('uploaded_increment')->label(__('announce-log.uploaded_increment'))->formatStateUsing(fn($state) => \App\Support\Format::size($state)),
                                         TextEntry::make('up_factor')->label(__('announce-log.up_factor')),
                                         TextEntry::make('up_factor_desc')->label(__('announce-log.up_factor_desc')),
-                                        TextEntry::make('uploaded_increment_for_user')->label(__('announce-log.uploaded_increment_for_user'))->formatStateUsing(fn($state) => mksize($state)),
+                                        TextEntry::make('uploaded_increment_for_user')->label(__('announce-log.uploaded_increment_for_user'))->formatStateUsing(fn($state) => \App\Support\Format::size($state)),
                                     ])->columns(4),
 
                                 Fieldset::make(__('announce-log.fieldset_downloaded'))
                                     ->schema([
-                                        TextEntry::make('downloaded_offset')->label(__('announce-log.downloaded_offset'))->formatStateUsing(fn($state) => mksize($state)),
-                                        TextEntry::make('downloaded_total_last')->label(__('announce-log.downloaded_total_last'))->formatStateUsing(fn($state) => mksize($state)),
-                                        TextEntry::make('downloaded_total')->label(__('announce-log.downloaded_total'))->formatStateUsing(fn($state) => mksize($state)),
-                                        TextEntry::make('downloaded_increment')->label(__('announce-log.downloaded_increment'))->formatStateUsing(fn($state) => mksize($state)),
+                                        TextEntry::make('downloaded_offset')->label(__('announce-log.downloaded_offset'))->formatStateUsing(fn($state) => \App\Support\Format::size($state)),
+                                        TextEntry::make('downloaded_total_last')->label(__('announce-log.downloaded_total_last'))->formatStateUsing(fn($state) => \App\Support\Format::size($state)),
+                                        TextEntry::make('downloaded_total')->label(__('announce-log.downloaded_total'))->formatStateUsing(fn($state) => \App\Support\Format::size($state)),
+                                        TextEntry::make('downloaded_increment')->label(__('announce-log.downloaded_increment'))->formatStateUsing(fn($state) => \App\Support\Format::size($state)),
                                         TextEntry::make('down_factor')->label(__('announce-log.down_factor')),
                                         TextEntry::make('down_factor_desc')->label(__('announce-log.down_factor_desc')),
-                                        TextEntry::make('downloaded_increment_for_user')->label(__('announce-log.downloaded_increment_for_user'))->formatStateUsing(fn($state) => mksize($state)),
+                                        TextEntry::make('downloaded_increment_for_user')->label(__('announce-log.downloaded_increment_for_user'))->formatStateUsing(fn($state) => \App\Support\Format::size($state)),
                                     ])->columns(4),
                             ]),
                         Tab::make(__('announce-log.tab_secondary'))
@@ -145,31 +145,31 @@ class AnnounceLogResource extends Resource
                 TextColumn::make('peer_id')->label(__('announce-log.peer_id')),
                 TextColumn::make('torrent_size')
                     ->label(__('announce-log.torrent_size'))
-                    ->formatStateUsing(fn ($state): string => mksize($state))
+                    ->formatStateUsing(fn ($state): string => \App\Support\Format::size($state))
                 ,
                 TextColumn::make('uploaded_total')
                     ->label(__('announce-log.uploaded_total'))
-                    ->formatStateUsing(fn ($state): string => mksize($state))
+                    ->formatStateUsing(fn ($state): string => \App\Support\Format::size($state))
                     ->sortable()
                 ,
                 TextColumn::make('uploaded_increment')
                     ->label(__('announce-log.uploaded_increment'))
-                    ->formatStateUsing(fn ($state): string => mksize($state))
+                    ->formatStateUsing(fn ($state): string => \App\Support\Format::size($state))
                     ->sortable()
                 ,
                 TextColumn::make('downloaded_total')
                     ->label(__('announce-log.downloaded_total'))
-                    ->formatStateUsing(fn ($state): string => mksize($state))
+                    ->formatStateUsing(fn ($state): string => \App\Support\Format::size($state))
                     ->sortable()
                 ,
                 TextColumn::make('downloaded_increment')
                     ->label(__('announce-log.downloaded_increment'))
-                    ->formatStateUsing(fn ($state): string => mksize($state))
+                    ->formatStateUsing(fn ($state): string => \App\Support\Format::size($state))
                     ->sortable()
                 ,
                 TextColumn::make('left')
                     ->label(__('announce-log.left'))
-                    ->formatStateUsing(fn ($state): string => mksize($state))
+                    ->formatStateUsing(fn ($state): string => \App\Support\Format::size($state))
                     ->sortable()
                 ,
                 TextColumn::make('announce_time')

@@ -92,7 +92,7 @@ print("<table border=1 cellspacing=0 cellpadding=5>\n");
 print("<tr><td class=colhead align=left>".$lang_users['col_user_name']."</td><td class=colhead>".$lang_users['col_registered']."</td><td class=colhead>".$lang_users['col_last_access']."</td><td class=colhead align=left>".$lang_users['col_class']."</td><td class=colhead>".$lang_users['col_country']."</td></tr>\n");
 foreach ($userRows as $arr)
 {
-print("<tr><td align=left>".get_username($arr['id'])."</td><td>".gettime($arr['added'], true, false)."</td><td>".gettime($arr['last_access'],true,false)."</td><td align=left>". get_user_class_name($arr['class'],false,true,true) . "</td><td align=center>".$arr['country']."</td></tr>");
+print("<tr><td align=left>".get_username($arr['id'])."</td><td>".\App\Support\Time::format($arr['added'], true, false)."</td><td>".\App\Support\Time::format($arr['last_access'],true,false)."</td><td align=left>". get_user_class_name($arr['class'],false,true,true) . "</td><td align=center>".$arr['country']."</td></tr>");
 }
 
 print("</table>");

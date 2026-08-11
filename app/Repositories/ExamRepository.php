@@ -933,7 +933,7 @@ class ExamRepository extends BaseRepository
             switch ($index['index']) {
                 case Exam::INDEX_UPLOADED:
                 case Exam::INDEX_DOWNLOADED:
-                    $currentValueFormatted = mksize($currentValue);
+                    $currentValueFormatted = \App\Support\Format::size($currentValue);
                     $requireValueAtomic = $requireValue * 1024 * 1024 * 1024;
                     break;
                 case Exam::INDEX_SEED_TIME_AVERAGE:

@@ -266,7 +266,7 @@ class DashboardRepository extends BaseRepository
         $result[$name] = [
             'name' => $name,
             'text' => nexus_trans("dashboard.torrent.$name"),
-            'value' => mksize(Torrent::query()->sum('size')),
+            'value' => \App\Support\Format::size(Torrent::query()->sum('size')),
         ];
 
         $total_uploaded_byte = User::query()->sum('uploaded');
@@ -277,19 +277,19 @@ class DashboardRepository extends BaseRepository
         $result[$name] = [
             'name' => $name,
             'text' => nexus_trans("dashboard.torrent.$name"),
-            'value' => mksize($total_uploaded_byte),
+            'value' => \App\Support\Format::size($total_uploaded_byte),
         ];
         $name = 'total_downloaded';
         $result[$name] = [
             'name' => $name,
             'text' => nexus_trans("dashboard.torrent.$name"),
-            'value' => mksize($total_downloaded_byte),
+            'value' => \App\Support\Format::size($total_downloaded_byte),
         ];
         $name = 'total_uploaded_downloaded';
         $result[$name] = [
             'name' => $name,
             'text' => nexus_trans("dashboard.torrent.$name"),
-            'value' => mksize($total_byte),
+            'value' => \App\Support\Format::size($total_byte),
         ];
 
         return $result;
@@ -348,12 +348,12 @@ class DashboardRepository extends BaseRepository
         $result[] = [
             'name' => 'total_uploaded',
             'text' => __('dashboard.tracker.total_uploaded'),
-            'value' => mksize((float) User::query()->sum('uploaded')),
+            'value' => \App\Support\Format::size((float) User::query()->sum('uploaded')),
         ];
         $result[] = [
             'name' => 'total_downloaded',
             'text' => __('dashboard.tracker.total_downloaded'),
-            'value' => mksize((float) User::query()->sum('downloaded')),
+            'value' => \App\Support\Format::size((float) User::query()->sum('downloaded')),
         ];
 
         return $result;

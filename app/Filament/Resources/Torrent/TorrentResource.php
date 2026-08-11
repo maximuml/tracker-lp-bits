@@ -115,7 +115,7 @@ class TorrentResource extends Resource
                 ,
                 TextColumn::make('size')
                     ->label(__('label.torrent.size'))
-                    ->formatStateUsing(fn ($state) => mksize($state))
+                    ->formatStateUsing(fn ($state) => \App\Support\Format::size($state))
                     ->sortable()
                 ,
                 TextColumn::make('seeders')->label(__('label.torrent.seeders'))->sortable(),

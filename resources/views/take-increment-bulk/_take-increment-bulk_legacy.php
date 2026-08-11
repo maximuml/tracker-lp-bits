@@ -23,7 +23,7 @@ if (!(isset($validTypeMap[$type]))) {
     stderr("Error","Invalid type");
 }
 if ($type == 'uploaded') {
-    $amount = getsize_int($amount,"G");
+    $amount = \App\Support\Format::bytesFromUnit($amount,"G");
 }
 $isTypeTmpInvite = $type == 'tmp_invites';
 $subject = trim(\App\Support\SupportContext::getPost('subject'));

@@ -280,7 +280,7 @@ if ($Attach->enable_attachment())
 	if ($warning) {
 		print('<span class="striking">'.$warning.'</span>');
 	} else {
-		print("<b>".$lang_attachment['text_left']."</b><font color=\"red\">".$count_left."</font>".$lang_attachment['text_of'].$count_limit."&nbsp;&nbsp;&nbsp;<b>".$lang_attachment['text_size_limit']."</b>".mksize($size_limit)."&nbsp;&nbsp;&nbsp;<b>".$lang_attachment['text_file_extensions']."</b>");
+		print("<b>".$lang_attachment['text_left']."</b><font color=\"red\">".$count_left."</font>".$lang_attachment['text_of'].$count_limit."&nbsp;&nbsp;&nbsp;<b>".$lang_attachment['text_size_limit']."</b>".\App\Support\Format::size($size_limit)."&nbsp;&nbsp;&nbsp;<b>".$lang_attachment['text_file_extensions']."</b>");
 		$allowedextsblock = "";
 		foreach($allowed_exts as $ext) {
 			$allowedextsblock .= $ext."/";

@@ -86,7 +86,7 @@ if((isset($CURUSER)))
 	foreach ($files as $fileRow) {
 		$subrow = (array) $fileRow;
 		$badge = viewfilelist_render_badge((string)$subrow["filename"]);
-		$s .= "<tr><td class=rowfollow>" . $badge . htmlspecialchars($subrow["filename"]) . "</td><td class=rowfollow align=\"right\">" . mksize($subrow["size"]) . "</td></tr>\n";
+		$s .= "<tr><td class=rowfollow>" . $badge . htmlspecialchars($subrow["filename"]) . "</td><td class=rowfollow align=\"right\">" . \App\Support\Format::size($subrow["size"]) . "</td></tr>\n";
 	}
 	$s .= "</table>\n";
 	echo $s;

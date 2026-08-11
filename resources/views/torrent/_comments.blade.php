@@ -12,7 +12,7 @@ $showComments = ($CURUSER['showcomment'] ?? '') !== 'no';
         <h1 align="center" id="startcomments">{{ $lang_details['h1_user_comments'] }}</h1>
 
         @php
-        list($pagertop, $pagerbottom, $limit, $offset, $rpp) = pager(10, $count, "details.php?id=$id&cmtpage=1&", ['lastpagedefault' => 1], 'page');
+        list($pagertop, $pagerbottom, $limit, $offset, $rpp) = \App\Support\Pagination::pager(10, $count, "details.php?id=$id&cmtpage=1&", ['lastpagedefault' => 1], 'page');
         $allrows = \App\Repositories\TorrentDetailRepository::getComments($id, (int) $offset, (int) $rpp);
         @endphp
 

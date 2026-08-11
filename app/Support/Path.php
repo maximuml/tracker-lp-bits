@@ -105,14 +105,22 @@ final class Path
             return $catPath[$cat];
         }
 
-        $catrow = \get_category_row($cat);
-        $caticonrow = \get_category_icon_row($catrow['icon_id'] ?: 1);
+        $catrow = Category::rowWithContext($cat) ?? [];
+        $caticonrow = Category::iconRowWithContext((int) ($catrow['icon_id'] ?? 1)) ?? [];
 
         return $catPath[$cat] = self::categoryFolder(
-            $catrow['catmodename'],
-            $caticonrow['folder'],
+            (string) ($catrow['catmodename'] ?? ''),
+            (string) ($caticonrow['folder'] ?? ''),
             ($caticonrow['multilang'] ?? '') == 'yes',
             $langDir,
         );
+    }
+
+    /**
+     * Context-aware variant of {@see categoryFolderForId()}.
+     */
+    public static function categoryFolderForIdWithContext(int|string $cat): string
+    {
+        return self::categoryFolderForId($cat, (string) SupportContext::getGlobal('CURLANGDIR', ''));
     }
 }

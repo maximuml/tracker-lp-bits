@@ -60,7 +60,7 @@ if ($count == 0) {
             <table class="main" width="100%" border="0" cellspacing="0" cellpadding="5">
                 <tr>
                     <td class="rowfollow" width="150" valign="top" style="padding: 0px;">
-                        <?php echo return_avatar_image($avatar); ?>
+                        <?php echo \App\Support\UserDisplay::avatarImageWithContext($avatar); ?>
                     </td>
                     <td class="rowfollow word-break-all" valign="top">
                         <br />

@@ -525,7 +525,7 @@ class PageLayout
                     \App\Support\Html::messageAlertVoid("faq.php#id29", $text, "black");
                 }
                 if ($unread) {
-                    $text = $context->lang['text_you_have'] . $unread . $context->lang['text_new_message'] . add_s($unread) . $context->lang['text_click_here_to_read'];
+                    $text = $context->lang['text_you_have'] . $unread . $context->lang['text_new_message'] . Strings::addS($unread) . $context->lang['text_click_here_to_read'];
                     \App\Support\Html::messageAlertVoid("messages.php", $text, "red");
                 }
                 \App\Utils\MsgAlert::getInstance()->render();
@@ -537,7 +537,7 @@ class PageLayout
                 	}
                 	if ($pending_invitee > 0)
                 	{
-                		$text = $context->lang['text_your_friends'].add_s($pending_invitee).is_or_are($pending_invitee).$context->lang['text_awaiting_confirmation'];
+                		$text = $context->lang['text_your_friends'].Strings::addS($pending_invitee).Strings::isOrAre($pending_invitee).$context->lang['text_awaiting_confirmation'];
                 		msgalert("invite.php?id=".$context->user['id'],$text, "red");
                 	}*/
                 $settings_script_name = $context->scriptFileName;
@@ -553,7 +553,7 @@ class PageLayout
                         $context->cache->cache_value('user_' . $context->user["id"] . '_unread_news_count', $new_news, 300);
                     }
                     if ($new_news > 0) {
-                        $text = $context->lang['text_there_is'] . is_or_are($new_news) . $new_news . $context->lang['text_new_news'];
+                        $text = $context->lang['text_there_is'] . Strings::isOrAre($new_news) . $new_news . $context->lang['text_new_news'];
                         \App\Support\Html::messageAlertVoid("index.php", $text, "green");
                     }
                 }
@@ -567,7 +567,7 @@ class PageLayout
                     \App\Repositories\MessageRepository::updateStaffMessageCountCache($context->user['id'], 'new', $nummessages);
                 }
                 if ($nummessages > 0) {
-                    $text = $context->lang['text_there_is'] . is_or_are($nummessages) . $nummessages . $context->lang['text_new_staff_message'] . add_s($nummessages);
+                    $text = $context->lang['text_there_is'] . Strings::isOrAre($nummessages) . $nummessages . $context->lang['text_new_staff_message'] . Strings::addS($nummessages);
                     \App\Support\Html::messageAlertVoid("staffbox.php", $text, "blue");
                 }
                 //torrent approval
@@ -579,7 +579,7 @@ class PageLayout
                         $context->cache->cache_value($cacheKey, $toApprovalCounts, 60);
                     }
                     if ($toApprovalCounts) {
-                        \App\Support\Html::messageAlertVoid('torrents.php?approval_status=0&incldead=0', sprintf($context->lang['text_torrent_to_approval'], is_or_are($toApprovalCounts), $toApprovalCounts, add_s($toApprovalCounts)), 'darkred');
+                        \App\Support\Html::messageAlertVoid('torrents.php?approval_status=0&incldead=0', sprintf($context->lang['text_torrent_to_approval'], Strings::isOrAre($toApprovalCounts), $toApprovalCounts, Strings::addS($toApprovalCounts)), 'darkred');
                     }
                 }
                 //seed box approval
@@ -591,7 +591,7 @@ class PageLayout
                         $context->cache->cache_value($cacheKey, $toApprovalCounts, 60);
                     }
                     if ($toApprovalCounts) {
-                        \App\Support\Html::messageAlertVoid('/nexusphp/system/seed-box-records?tableFilters[status][value]=0', sprintf($context->lang['text_seed_box_record_to_approval'], is_or_are($toApprovalCounts), $toApprovalCounts, add_s($toApprovalCounts)), 'darkred');
+                        \App\Support\Html::messageAlertVoid('/nexusphp/system/seed-box-records?tableFilters[status][value]=0', sprintf($context->lang['text_seed_box_record_to_approval'], Strings::isOrAre($toApprovalCounts), $toApprovalCounts, Strings::addS($toApprovalCounts)), 'darkred');
                     }
                 }
                 if (Permissions::userCan('staffmem', false, (int) ($context->user['id'] ?? 0))) {
@@ -600,7 +600,7 @@ class PageLayout
                         $context->cache->cache_value('COMPLAINTS_COUNT_CACHE', $complaints, 600);
                     }
                     if ($complaints) {
-                        \App\Support\Html::messageAlertVoid('complains.php?action=list', sprintf($context->lang['text_complains'], is_or_are($complaints), $complaints, add_s($complaints)), 'darkred');
+                        \App\Support\Html::messageAlertVoid('complains.php?action=list', sprintf($context->lang['text_complains'], Strings::isOrAre($complaints), $complaints, Strings::addS($complaints)), 'darkred');
                     }
                     $numreports = $context->cache->get_value('staff_new_report_count');
                     if ($numreports == "") {
@@ -608,7 +608,7 @@ class PageLayout
                         $context->cache->cache_value('staff_new_report_count', $numreports, 900);
                     }
                     if ($numreports) {
-                        $text = $context->lang['text_there_is'] . is_or_are($numreports) . $numreports . $context->lang['text_new_report'] . add_s($numreports);
+                        $text = $context->lang['text_there_is'] . Strings::isOrAre($numreports) . $numreports . $context->lang['text_new_report'] . Strings::addS($numreports);
                         \App\Support\Html::messageAlertVoid("reports.php", $text, "blue");
                     }
                     $numcheaters = $context->cache->get_value('staff_new_cheater_count');
@@ -617,7 +617,7 @@ class PageLayout
                         $context->cache->cache_value('staff_new_cheater_count', $numcheaters, 900);
                     }
                     if ($numcheaters) {
-                        $text = $context->lang['text_there_is'] . is_or_are($numcheaters) . $numcheaters . $context->lang['text_new_suspected_cheater'] . add_s($numcheaters);
+                        $text = $context->lang['text_there_is'] . Strings::isOrAre($numcheaters) . $numcheaters . $context->lang['text_new_suspected_cheater'] . Strings::addS($numcheaters);
                         \App\Support\Html::messageAlertVoid("cheaterbox.php", $text, "blue");
                     }
                 }

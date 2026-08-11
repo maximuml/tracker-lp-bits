@@ -134,7 +134,7 @@ if (Permission::canManageTorrent()) { ?>
 <?php } ?>
 </tr>
 <?php
-$caticonrow = get_category_icon_row($user['caticon']);
+$caticonrow = \App\Support\Category::iconRowWithContext($user['caticon']);
 if ($caticonrow['secondicon'] == 'yes')
 $has_secondicon = true;
 else $has_secondicon = false;
@@ -150,7 +150,7 @@ foreach ($rows as $row)
 
 	print("<td class=\"rowfollow nowrap\" valign=\"middle\" style='padding: 0px'>");
 	if (isset($row["category"])) {
-		print(return_category_image($row["category"], "?"));
+		print(\App\Support\Category::imageTagWithContext($row["category"], "?"));
 		if ($has_secondicon){
 			print(\App\Support\Category::secondIconWithContext($row));
 		}

@@ -320,7 +320,7 @@ class HitAndRunRepository extends BaseRepository
             'now' => Carbon::now()->toDateTimeString(),
             'seed_time_minimum' => $setting['seed_time_minimum'],
             'seed_time' => bcdiv((string)$hitAndRun->snatch->seedtime, '3600', 1),
-            'share_ratio' => get_hr_ratio($hitAndRun->snatch->uploaded, $hitAndRun->snatch->downloaded),
+            'share_ratio' => \App\Support\Ratio::hr($hitAndRun->snatch->uploaded, $hitAndRun->snatch->downloaded),
             'ignore_when_ratio_reach' => $setting['ignore_when_ratio_reach'],
         ], $hitAndRun->user->locale);
         $update = [
@@ -417,7 +417,7 @@ class HitAndRunRepository extends BaseRepository
             'now' => Carbon::now()->toDateTimeString(),
             'seed_time' => bcdiv((string)$hitAndRun->snatch->seedtime, '3600', 1),
             'seed_time_minimum' => $setting['seed_time_minimum'],
-            'share_ratio' => get_hr_ratio($hitAndRun->snatch->uploaded, $hitAndRun->snatch->downloaded),
+            'share_ratio' => \App\Support\Ratio::hr($hitAndRun->snatch->uploaded, $hitAndRun->snatch->downloaded),
             'torrent_size' => \App\Support\Format::size($hitAndRun->torrent->size),
             'ignore_when_ratio_reach' => $setting['ignore_when_ratio_reach']
         ], $hitAndRun->user->locale);

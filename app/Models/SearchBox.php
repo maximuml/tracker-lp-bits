@@ -430,7 +430,7 @@ class SearchBox extends NexusModel
         static $results = null;
         if (is_null($results)) {
             $results = [];
-            $res = genrelist($searchBoxId);
+            $res = \App\Support\Category::listByModeWithContext($searchBoxId);
             foreach ($res as $item) {
                 $results[] = $item['id'];
             }

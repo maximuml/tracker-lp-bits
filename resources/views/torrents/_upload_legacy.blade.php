@@ -46,7 +46,7 @@
                 }
 
 				$s = "<select name=\"type\" id=\"browsecat\" data-mode='$browsecatmode'>\n<option value=\"0\">".$lang_upload['select_choose_one']."</option>\n";
-			$cats = genrelist($browsecatmode);
+			$cats = \App\Support\Category::listByModeWithContext($browsecatmode);
 			foreach ($cats as $row) {
 				$s .= "<option value=\"" . $row["id"] . "\">" . htmlspecialchars($row["name"]) . "</option>\n";
 			}

@@ -344,6 +344,18 @@ TD;
     }
 
     /**
+     * Read a search-box taxonomy list, fetching the cache from the request context.
+     *
+     * Backs the legacy `searchbox_item_list()` helper.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public static function itemListWithContext(string $table, int|string $mode): array
+    {
+        return self::itemList(\App\Support\SupportContext::getCache(), $table, $mode);
+    }
+
+    /**
      * Build the category checkbox table, fetching the cache from the request context.
      *
      * Backs the legacy `build_search_box_category_table()` helper.

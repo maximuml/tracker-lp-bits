@@ -10,7 +10,7 @@ $Cache->add_whole_row();
 //cache_check ('rules');
 \App\Support\Frame::mainFrameOpen();
 
-$lang_id = get_guest_lang_id();
+$lang_id = \App\Support\Locale::guestIdWithContext();
 $is_rulelang = \Nexus\Database\NexusDB::table('language')->where('id', $lang_id)->value('rule_lang');
 if (!$is_rulelang){
 	$lang_id = 6; //English

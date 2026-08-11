@@ -144,7 +144,7 @@ class UserRepository extends BaseRepository
             throw new \InvalidArgumentException("password confirmation != password");
         }
         $username = $params['username'];
-        if (!validusername($username)) {
+        if (!\App\Support\Validators::isUsername($username)) {
             throw new \InvalidArgumentException("Invalid username: $username");
         }
         $email = htmlspecialchars(trim($params['email']));
@@ -617,7 +617,7 @@ class UserRepository extends BaseRepository
         if ($strWidth < 4 || $strWidth > 20) {
             throw new \InvalidArgumentException("Invalid username, maybe too long or too short");
         }
-        if (!$allowOutsideAlphabets && !validusername($newUsername)) {
+        if (!$allowOutsideAlphabets && !\App\Support\Validators::isUsername($newUsername)) {
             throw new \InvalidArgumentException("Invalid username, only support alphabets");
         }
         if (User::query()->where('username', $newUsername)->where('id', '!=', $targetUser->id)->exists()) {

@@ -35,4 +35,14 @@ final class Country
 
         return $row ?: null;
     }
+
+    /**
+     * Context-aware wrapper for {@see row()}.
+     *
+     * @return array<string, mixed>|null
+     */
+    public static function rowWithContext(int|string $id): ?array
+    {
+        return self::row(SupportContext::getCache(), $id);
+    }
 }

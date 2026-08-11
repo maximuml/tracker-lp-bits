@@ -216,4 +216,22 @@ final class Forum
 
         return $row ?: null;
     }
+
+    /**
+     * Context-aware wrapper for {@see postRow()}.
+     *
+     * @return array<string, mixed>|null
+     */
+    public static function postRowWithContext(int|string $postId): ?array
+    {
+        return self::postRow(SupportContext::getCache(), $postId);
+    }
+
+    /**
+     * Context-aware wrapper for {@see moderators()}.
+     */
+    public static function moderatorsWithContext(int|string $forumId, bool $plainText = true): string
+    {
+        return self::moderators(SupportContext::getCache(), $forumId, $plainText);
+    }
 }

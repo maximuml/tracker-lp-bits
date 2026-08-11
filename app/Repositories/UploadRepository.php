@@ -190,7 +190,7 @@ class UploadRepository extends BaseRepository
             throw new NexusException("upload.empty_file");
         }
         $filename = $file->getClientOriginalName();
-        if (!validfilename($filename)) {
+        if (!\App\Support\Validators::isUploadFilename($filename)) {
             throw new NexusException("upload.invalid_filename");
         }
         if (!preg_match('/^(.+)\.torrent$/si', $filename, $matches)) {

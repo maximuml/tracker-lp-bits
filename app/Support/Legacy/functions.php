@@ -946,8 +946,7 @@ function validemail($email) {
  * @return string
  */
 function validlang($langid) {
-	$deflang = (string) \App\Support\SupportContext::getGlobal('deflang', '');
-	return \App\Support\Locale::folderForId($langid, (string) $deflang);
+	return \App\Support\Locale::folderForIdWithContext($langid);
 }
 /**
  * @return bool
@@ -1023,9 +1022,7 @@ function get_style_addicode()
  */
 function get_cat_folder($cat = 101)
 {
-	$CURLANGDIR = (string) \App\Support\SupportContext::getGlobal('CURLANGDIR', '');
-
-	return \App\Support\Path::categoryFolderForId($cat, (string) $CURLANGDIR);
+	return \App\Support\Path::categoryFolderForIdWithContext($cat);
 }
 /**
  * @return string
@@ -1218,8 +1215,7 @@ function searchfield($s) {
  * @return array<array-key, mixed>
  */
 function genrelist($catmode = 1) {
-	$Cache = \App\Support\SupportContext::getCache();
-	return \App\Support\Category::listByMode($Cache, $catmode);
+	return \App\Support\Category::listByModeWithContext($catmode);
 }
 /**
  * @param string $table
@@ -1227,8 +1223,7 @@ function genrelist($catmode = 1) {
  * @return array<array-key, mixed>
  */
 function searchbox_item_list(string $table, int $mode){
-	$Cache = \App\Support\SupportContext::getCache();
-	return \App\Support\SearchBox::itemList($Cache, $table, $mode);
+	return \App\Support\SearchBox::itemListWithContext($table, $mode);
 }
 /**
  * @param string $type
@@ -1468,8 +1463,7 @@ function get_forum_pic_folder(){
  */
 function get_category_icon_row($typeid)
 {
-	$Cache = \App\Support\SupportContext::getCache();
-	return \App\Support\Category::iconRow($Cache, $typeid);
+	return \App\Support\Category::iconRowWithContext($typeid);
 }
 /**
  * @param string|int|null $catid
@@ -1477,8 +1471,7 @@ function get_category_icon_row($typeid)
  */
 function get_category_row($catid = NULL)
 {
-	$Cache = \App\Support\SupportContext::getCache();
-	return \App\Support\Category::row($Cache, $catid);
+	return \App\Support\Category::rowWithContext($catid);
 }
 /**
  * @param array<array-key, mixed> $row
@@ -1486,8 +1479,7 @@ function get_category_row($catid = NULL)
  */
 function get_second_icon($row) //for CHDBits
 {
-	$Cache = \App\Support\SupportContext::getCache();
-	return \App\Support\Category::secondIcon($Cache, $row, get_cat_folder($row['category'] ?? ''));
+	return \App\Support\Category::secondIconWithContext($row);
 }
 /**
  * @param int $promotion
@@ -1610,8 +1602,7 @@ function is_forum_moderator($id, $in = 'post'){
  * @return int
  */
 function get_guest_lang_id(){
-	$CURLANGDIR = (string) \App\Support\SupportContext::getGlobal('CURLANGDIR', '');
-	return \App\Support\Locale::guestId((string) $CURLANGDIR);
+	return \App\Support\Locale::guestIdWithContext();
 }
 /**
  * @param string $name
@@ -1653,8 +1644,7 @@ function get_ratio($userid, $html = true){
  */
 function add_s($num, $es = false)
 {
-	$lang_functions = \App\Support\SupportContext::getLangFunctions();
-	return \App\Support\Strings::pluralize((float)$num, '', $es ? ($lang_functions['text_es'] ?? '') : ($lang_functions['text_s'] ?? ''));
+	return \App\Support\Strings::addS((float)$num, (bool)$es);
 }
 /**
  * @param int|float $num
@@ -1662,8 +1652,7 @@ function add_s($num, $es = false)
  */
 function is_or_are($num)
 {
-	$lang_functions = \App\Support\SupportContext::getLangFunctions();
-	return \App\Support\Strings::pluralize((float)$num, $lang_functions['text_is'] ?? '', $lang_functions['text_are'] ?? '');
+	return \App\Support\Strings::isOrAre((float)$num);
 }
 /**
  * @return float
@@ -1712,8 +1701,7 @@ function get_hl_color($color=0)
  */
 function get_forum_moderators($forumid, $plaintext = true)
 {
-	$Cache = \App\Support\SupportContext::getCache();
-	return \App\Support\Forum::moderators($Cache, $forumid, (bool) $plaintext);
+	return \App\Support\Forum::moderatorsWithContext($forumid, (bool) $plaintext);
 }
 /**
  * @param int $page
@@ -1739,8 +1727,7 @@ function promotion_selection($selected = 0, $hide = 0)
  */
 function get_post_row($postid)
 {
-	$Cache = \App\Support\SupportContext::getCache();
-	return \App\Support\Forum::postRow($Cache, $postid);
+	return \App\Support\Forum::postRowWithContext($postid);
 }
 /**
  * @param string|int $id
@@ -1748,8 +1735,7 @@ function get_post_row($postid)
  */
 function get_country_row($id)
 {
-	$Cache = \App\Support\SupportContext::getCache();
-	return \App\Support\Country::row($Cache, $id);
+	return \App\Support\Country::rowWithContext($id);
 }
 
 /**
@@ -1774,8 +1760,7 @@ function valid_class_name($filename)
  */
 function return_avatar_image($url)
 {
-	$CURLANGDIR = (string) \App\Support\SupportContext::getGlobal('CURLANGDIR', '');
-	return \App\Support\UserDisplay::avatarImage((string) $url, (string) $CURLANGDIR);
+	return \App\Support\UserDisplay::avatarImageWithContext((string) $url);
 }
 /**
  * @param string|int $categoryid

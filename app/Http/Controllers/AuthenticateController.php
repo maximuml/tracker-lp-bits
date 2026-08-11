@@ -174,7 +174,7 @@ class AuthenticateController extends Controller
             ]);
             $username = $request->username;
             $challenge = mksecret();
-            NexusDB::cache_put(get_challenge_key($username), $challenge,300);
+            NexusDB::cache_put(\App\Support\Token::challengeKey($username), $challenge,300);
             $user = User::query()->where("username", $username)->first(['secret']);
             return $this->success([
                 "challenge" => $challenge,

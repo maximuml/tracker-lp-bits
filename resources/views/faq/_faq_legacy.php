@@ -15,7 +15,7 @@ $Cache->add_whole_row();
 echo sprintf($lang_faq['text_welcome_content_one'].sprintf($lang_faq['text_welcome_content_two'], \App\Models\Setting::getSiteName(), \App\Models\Setting::getSiteName()));
 \App\Support\Html::endFrame();
 
-$lang_id = get_guest_lang_id();
+$lang_id = \App\Support\Locale::guestIdWithContext();
 $is_rulelang = \Nexus\Database\NexusDB::table('language')->where('id', $lang_id)->value('rule_lang');
 if (!$is_rulelang){
 	$lang_id = 6; //English

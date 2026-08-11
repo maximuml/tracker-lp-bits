@@ -40,7 +40,7 @@ if (((\App\Support\SupportContext::getQuery('add_offer') !== null)) && \App\Supp
 	"<table width=100% border=0 cellspacing=0 cellpadding=5><tr><td class=colhead align=center colspan=2>".$lang_offers['text_offers_open_to_all']."</td></tr>\n");
 
 	$s = "<select name=type>\n<option value=0>".$lang_offers['select_type_select']."</option>\n";
-	$cats = genrelist($browsecatmode);
+	$cats = \App\Support\Category::listByModeWithContext($browsecatmode);
 	foreach ($cats as $row)
 	$s .= "<option value=".$row["id"].">" . htmlspecialchars($row["name"]) . "</option>\n";
 	$s .= "</select>\n";
@@ -382,7 +382,7 @@ if (((\App\Support\SupportContext::getQuery("edit_offer") !== null)) && \App\Sup
 	$body = htmlspecialchars(unesc($num["descr"]));
 	$s2 = "<select name=\"category\">\n";
 
-	$cats = genrelist($browsecatmode);
+	$cats = \App\Support\Category::listByModeWithContext($browsecatmode);
 
 	foreach ($cats as $row)
 	$s2 .= "<option value=\"" . $row["id"] . "\" ".($row['id'] == $id2 ? " selected=\"selected\"" : "").">" . htmlspecialchars($row["name"]) . "</option>\n";
@@ -791,7 +791,7 @@ if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::ADD_OFFER))
 print("<div align=\"center\" style=\"margin-bottom: 8px;\"><a href=\"?add_offer=1\">".
 "<b>".$lang_offers['text_add_offer']."</b></a></div>");
 print("<div align=\"center\"><form method=\"get\" action=\"?\">".$lang_offers['text_search_offers']."&nbsp;&nbsp;<input type=\"text\" id=\"specialboxg\" name=\"search\" />&nbsp;&nbsp;");
-$cats = genrelist($browsecatmode);
+$cats = \App\Support\Category::listByModeWithContext($browsecatmode);
 $catdropdown = "";
 foreach ($cats as $cat) {
 	$catdropdown .= "<option value=\"" . $cat["id"] . "\"";
@@ -892,7 +892,7 @@ print("<td class=\"colhead\">".$lang_offers['col_offered_by']."</td>".
 	$max_length_of_offer_name = 70;
 	if($count_dispname > $max_length_of_offer_name)
 		$dispname=mb_substr($dispname, 0, $max_length_of_offer_name-2,"UTF-8") . "..";
-	print("<tr><td class=\"rowfollow\" style=\"padding: 0px\"><a href=\"?category=".$arr['cat_id']."\">".return_category_image($arr['cat_id'], "")."</a></td><td style='text-align: left'><a href=\"?id=".$arr['id']."&amp;off_details=1\" title=\"".htmlspecialchars($arr['name'])."\"><b>".htmlspecialchars($dispname)."</b></a>".($CURUSER['appendnew'] != 'no' && strtotime($arr["added"]) >= $last_offer ? "<b> (<font class='new'>".$lang_offers['text_new']."</font>)</b>" : "").$allowed."</td><td class=\"rowfollow nowrap\" style='padding: 5px' align=\"center\">".$v_res."</td><td class=\"rowfollow nowrap\" ".(!\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::AGAINST_OFFER) ? " colspan=\"2\" " : "")." style='padding: 5px'><a href=\"?id=".$arr['id']."&amp;vote=yeah\" title=\"".$lang_offers['title_i_want_this']."\"><font color=\"green\"><b>".$lang_offers['text_yep']."</b></font></a></td>".(\App\Support\UserDisplay::currentClass() >= $againstoffer_class ? "<td class=\"rowfollow nowrap\" align=\"center\"><a href=\"?id=".$arr['id']."&amp;vote=against\" title=\"".$lang_offers['title_do_not_want_it']."\"><font color=\"red\"><b>".$lang_offers['text_nah']."</b></font></a></td>" : ""));
+	print("<tr><td class=\"rowfollow\" style=\"padding: 0px\"><a href=\"?category=".$arr['cat_id']."\">".\App\Support\Category::imageTagWithContext($arr['cat_id'], "")."</a></td><td style='text-align: left'><a href=\"?id=".$arr['id']."&amp;off_details=1\" title=\"".htmlspecialchars($arr['name'])."\"><b>".htmlspecialchars($dispname)."</b></a>".($CURUSER['appendnew'] != 'no' && strtotime($arr["added"]) >= $last_offer ? "<b> (<font class='new'>".$lang_offers['text_new']."</font>)</b>" : "").$allowed."</td><td class=\"rowfollow nowrap\" style='padding: 5px' align=\"center\">".$v_res."</td><td class=\"rowfollow nowrap\" ".(!\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::AGAINST_OFFER) ? " colspan=\"2\" " : "")." style='padding: 5px'><a href=\"?id=".$arr['id']."&amp;vote=yeah\" title=\"".$lang_offers['title_i_want_this']."\"><font color=\"green\"><b>".$lang_offers['text_yep']."</b></font></a></td>".(\App\Support\UserDisplay::currentClass() >= $againstoffer_class ? "<td class=\"rowfollow nowrap\" align=\"center\"><a href=\"?id=".$arr['id']."&amp;vote=against\" title=\"".$lang_offers['title_do_not_want_it']."\"><font color=\"red\"><b>".$lang_offers['text_nah']."</b></font></a></td>" : ""));
 
 	print("<td class=\"rowfollow\">".$comment."</td><td class=\"rowfollow nowrap\">" . $addtime. "</td>");
 	if ($offervotetimeout_main > 0 && $offeruptimeout_main > 0){

@@ -90,7 +90,7 @@ if ($paidFilter === '0') {
 
 function applyRssFilter($query, $tablename = "sources", $itemname = "source", $getname = "sou")
 {
-    $items = searchbox_item_list($tablename, 0);
+    $items = \App\Support\SearchBox::itemListWithContext($tablename, 0);
     $ids = [];
     foreach ($items as $item) {
         if (!empty(\App\Support\SupportContext::getQuery($getname.$item['id']))) {

@@ -17,7 +17,7 @@ $ppl = '';
 $supportUsers = \App\Models\User::query()->where('support', 'yes')->where('status', 'confirmed')->orderBy('username')->get(['id', 'country', 'last_access', 'supportlang', 'supportfor']);
 foreach ($supportUsers as $userRow) {
 	$arr = $userRow->toArray();
-	$countryrow = get_country_row($arr['country']);
+	$countryrow = \App\Support\Country::rowWithContext($arr['country']);
 	$ppl .= "<tr><td class=embedded>". \App\Support\UserDisplay::username($arr['id']) ."</td><td class=embedded><img width=24 height=15 src=\"pic/flag/".$countryrow['flagpic']."\" title=\"".$countryrow['name']."\" style=\"padding-bottom:1px;\"></td>
  <td class=embedded> ".(strtotime($arr['last_access']) > $dt ? $onlineimg : $offlineimg)."</td>".
  "<td class=embedded><a href=sendmessage.php?receiver=".$arr['id']." title=\"".$lang_staff['title_send_pm']."\">".$sendpmimg."</a></td>".
@@ -55,7 +55,7 @@ $ppl = '';
 $pickerUsers = \App\Models\User::query()->where('picker', 'yes')->where('status', 'confirmed')->orderBy('username')->get(['id', 'country', 'last_access', 'pickfor']);
 foreach ($pickerUsers as $userRow) {
 	$arr = $userRow->toArray();
-	$countryrow = get_country_row($arr['country']);
+	$countryrow = \App\Support\Country::rowWithContext($arr['country']);
 	$ppl .= "<tr height=15><td class=embedded>". \App\Support\UserDisplay::username($arr['id']) ."</td><td class=embedded ><img width=24 height=15 src=\"pic/flag/".$countryrow['flagpic']."\" title=\"".$countryrow['name']."\" style=\"padding-bottom:1px;\"></td>
  <td class=embedded> ".(strtotime($arr['last_access']) > $dt ? $onlineimg : $offlineimg)."</td>".
  "<td class=embedded><a href=sendmessage.php?receiver=".$arr['id']." title=\"".$lang_staff['title_send_pm']."\">".$sendpmimg."</a></td>".
@@ -97,7 +97,7 @@ $forumMods = \Nexus\Database\NexusDB::table('forummods')
     ->values();
 foreach ($forumMods as $modRow) {
 	$arr = (array) $modRow;
-	$countryrow = get_country_row($arr['country']);
+	$countryrow = \App\Support\Country::rowWithContext($arr['country']);
 	$forums = "";
 	$forumRows = \Nexus\Database\NexusDB::table('forums as f')
 	    ->leftJoin('forummods as fm', 'f.id', '=', 'fm.forumid')
@@ -159,7 +159,7 @@ foreach ($staffUsers as $userRow) {
 		"</tr>";
 		$ppl .= "<tr height=15><td class=embedded colspan=5><hr color=\"#4040c0\"></td></tr>";
 	}
-	$countryrow = get_country_row($arr['country']);
+	$countryrow = \App\Support\Country::rowWithContext($arr['country']);
 	$ppl .= "<tr><td class=embedded>". \App\Support\UserDisplay::username($arr['id']) ."</td><td class=embedded ><img width=24 height=15 src=\"pic/flag/".$countryrow['flagpic']."\" title=\"".$countryrow['name']."\" style=\"padding-bottom:1px;\"></td>
  <td class=embedded> ".(strtotime($arr['last_access']) > $dt ? $onlineimg : $offlineimg)."</td>".
  "<td class=embedded><a href=sendmessage.php?receiver=".$arr['id']." title=\"".$lang_staff['title_send_pm']."\">".$sendpmimg."</a></td>".
@@ -185,7 +185,7 @@ $ppl = '';
 $vipUsers = \App\Models\User::query()->where('class', UC_VIP)->where('status', 'confirmed')->orderBy('username')->get();
 foreach ($vipUsers as $userRow) {
 	$arr = $userRow->toArray();
-	$countryrow = get_country_row($arr['country']);
+	$countryrow = \App\Support\Country::rowWithContext($arr['country']);
 	$ppl .= "<tr><td class=embedded>". \App\Support\UserDisplay::username($arr['id']) ."</td><td class=embedded><img width=24 height=15 src=\"pic/flag/".$countryrow['flagpic']."\" title=\"".$countryrow['name']."\" style=\"padding-bottom:1px;\"></td>
  <td class=embedded> ".(strtotime($arr['last_access']) > $dt ? $onlineimg : $offlineimg)."</td>".
  "<td class=embedded><a href=sendmessage.php?receiver=".$arr['id']." title=\"".$lang_staff['title_send_pm']."\">".$sendpmimg."</a></td>".

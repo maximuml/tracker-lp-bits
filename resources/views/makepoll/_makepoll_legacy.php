@@ -66,9 +66,9 @@ else
 		if ($days < 3)
 		{
 			if ($days >= 1)
-				$t = $days.$lang_makepoll['text_day'] . add_s($days);
+				$t = $days.$lang_makepoll['text_day'] . \App\Support\Strings::addS($days);
 			else
-				$t = $hours.$lang_makepoll['text_hour'] . add_s($hours);
+				$t = $hours.$lang_makepoll['text_hour'] . \App\Support\Strings::addS($hours);
 			print("<p><font class=striking><b>".$lang_makepoll['text_current_poll']."(<i>" . $lastPoll["question"] . "</i>)".$lang_makepoll['text_is_only'].$t.$lang_makepoll['text_old']."</b></font></p>");
 		}
 	}

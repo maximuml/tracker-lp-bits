@@ -91,7 +91,7 @@ if ($rescount) {
 				<td class='rowfollow' align='left'><a href='details.php?id=" . $row->torrent_id . "'>" . optional($row->torrent)->name . "</a></td>
 				<td class='rowfollow nowrap' align='center'>" . \App\Support\Format::size($row->snatch->uploaded) . "</td>
 				<td class='rowfollow nowrap' align='center'>" . \App\Support\Format::size($row->snatch->downloaded) . "</td>
-				<td class='rowfollow nowrap' align='center'>" . get_hr_ratio($row->snatch->uploaded, $row->snatch->downloaded) . "</td>
+				<td class='rowfollow nowrap' align='center'>" . \App\Support\Ratio::hr($row->snatch->uploaded, $row->snatch->downloaded) . "</td>
 				<td class='rowfollow nowrap' align='center'>" . $row->seedTimeRequired . "</td>
 				<td class='rowfollow nowrap' align='center'>" . format_datetime($row->snatch->completedat) . "</td>
 				<td class='rowfollow nowrap' align='center' >" . $row->inspectTimeLeft . "</td>

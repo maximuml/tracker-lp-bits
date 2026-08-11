@@ -89,12 +89,12 @@ $torrentnameprefix = \App\Support\SupportContext::getGlobal('torrentnameprefix')
 			print("</td></tr>");
 		}
 		else
-			tr($lang_details['row_download'], $lang_details['text_downloading_not_allowed']);
+			\App\Support\Html::tr($lang_details['row_download'], $lang_details['text_downloading_not_allowed']);
 		//tag
         $torrentTags = \App\Models\TorrentTag::query()->where('torrent_id', $row['id'])->get();
         if ($torrentTags->isNotEmpty()) {
             $tagRep = new \App\Repositories\TagRepository();
-            tr($lang_details['row_tags'], $tagRep->renderSpan($row['search_box_id'], $torrentTags->pluck('tag_id')->toArray()),true);
+            \App\Support\Html::tr($lang_details['row_tags'], $tagRep->renderSpan($row['search_box_id'], $torrentTags->pluck('tag_id')->toArray()),true);
         }
 
 		$size_info =  "<b>".$lang_details['text_size']."</b>" . \App\Support\Format::size($row["size"]);
@@ -122,7 +122,7 @@ $torrentnameprefix = \App\Support\SupportContext::getGlobal('torrentnameprefix')
         foreach ($taxonomyInfo as $item) {
             $taxonomyRendered .= sprintf('&nbsp;&nbsp;&nbsp;<b>%s: </b>%s', $item['label'], $item['value']);
         }
-        tr($lang_details['row_basic_info'], $size_info.$type_info.$taxonomyRendered, 1);
+        \App\Support\Html::tr($lang_details['row_basic_info'], $size_info.$type_info.$taxonomyRendered, 1);
 		$actions = [];
         if ($CURUSER["downloadpos"] != "no") {
             $hasBuy = \App\Models\TorrentBuyLog::query()->where('uid', $CURUSER['id'])->where('torrent_id', $id)->exists();
@@ -165,9 +165,9 @@ JS;
         }
         $actions = apply_filter('torrent_detail_actions', $actions, $row);
         $actions[] = "<a title=\"".$lang_details['title_report_torrent']."\" href=\"report.php?torrent=$id\"><img class=\"dt_report\" src=\"pic/trans.gif\" alt=\"report\" />&nbsp;<b><font class=\"small\">".$lang_details['text_report_torrent']."</font></b></a>";
-		tr($lang_details['row_action'], implode('&nbsp;|&nbsp;', $actions), 1);
+		\App\Support\Html::tr($lang_details['row_action'], implode('&nbsp;|&nbsp;', $actions), 1);
 
-        tr($lang_details['torrent_dl_url'],sprintf('<a title="%s" href="%s">%s</a>',$lang_details['torrent_dl_url_notice'], $torrentRep->getDownloadUrl($id, $CURUSER), $lang_details['torrent_dl_url_text']),1);
+        \App\Support\Html::tr($lang_details['torrent_dl_url'],sprintf('<a title="%s" href="%s">%s</a>',$lang_details['torrent_dl_url_notice'], $torrentRep->getDownloadUrl($id, $CURUSER), $lang_details['torrent_dl_url_text']),1);
 
 
 
@@ -205,14 +205,14 @@ JS;
 
             $technicalInfoResult = $technicalInfo->renderOnDetailsPage();
             if (!empty($technicalInfoResult)) {
-                tr($lang_functions['text_technical_info'], $technicalInfoResult, 1);
+                \App\Support\Html::tr($lang_functions['text_technical_info'], $technicalInfoResult, 1);
             }
         }
 
 		if ($CURUSER['showdescription'] != 'no' && !empty($row["descr"])){
             $desc = \App\Support\Format::formatComment($row['descr']);
             $desc = apply_filter('torrent_detail_description', $desc, $row['id'], $CURUSER['id']);
-            tr("<a href=\"javascript: klappe_news('descr')\"><span class=\"nowrap\"><img class=\"minus\" src=\"pic/trans.gif\" alt=\"Show/Hide\" id=\"picdescr\" title=\"".($lang_details['title_show_or_hide'] ?? '')."\" /> ".$lang_details['row_description']."</span></a>", "<div id='kdescr'>".$desc."</div>", 1);
+            \App\Support\Html::tr("<a href=\"javascript: klappe_news('descr')\"><span class=\"nowrap\"><img class=\"minus\" src=\"pic/trans.gif\" alt=\"Show/Hide\" id=\"picdescr\" title=\"".($lang_details['title_show_or_hide'] ?? '')."\" /> ".$lang_details['row_description']."</span></a>", "<div id='kdescr'>".$desc."</div>", 1);
 		}
 
 
@@ -233,10 +233,10 @@ JS;
 		if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::TORRENT_STRUCTURE)) {
 		    $infoTds[] = "<td class=\"no_border_wide\"><b>" . $lang_details['text_torrent_structure'] . "</b><a href=\"torrent_info.php?id=".$id."\">".$lang_details['text_torrent_info_note']."</a></td>";
         }
-        tr($lang_details['row_torrent_info'], "<table><tr>" . implode("", $infoTds) . "</tr></table><span id='filelist'></span>",1);
-		tr($lang_details['row_hot_meter'], "<table><tr><td class=\"no_border_wide\"><b>" . $lang_details['text_views']."</b>". $row["views"] . "</td><td class=\"no_border_wide\"><b>" . $lang_details['text_hits']. "</b>" . $row["hits"] . "</td><td class=\"no_border_wide\"><b>" .$lang_details['text_snatched'] . "</b><a href=\"viewsnatches.php?id=".$id."\"><b>" . $row["times_completed"]. $lang_details['text_view_snatches'] . "</td><td class=\"no_border_wide\"><b>" . $lang_details['row_last_seeder']. "</b>" . \App\Support\Time::format($row["last_action"]) . "</td></tr></table>",1);
+        \App\Support\Html::tr($lang_details['row_torrent_info'], "<table><tr>" . implode("", $infoTds) . "</tr></table><span id='filelist'></span>",1);
+		\App\Support\Html::tr($lang_details['row_hot_meter'], "<table><tr><td class=\"no_border_wide\"><b>" . $lang_details['text_views']."</b>". $row["views"] . "</td><td class=\"no_border_wide\"><b>" . $lang_details['text_hits']. "</b>" . $row["hits"] . "</td><td class=\"no_border_wide\"><b>" .$lang_details['text_snatched'] . "</b><a href=\"viewsnatches.php?id=".$id."\"><b>" . $row["times_completed"]. $lang_details['text_view_snatches'] . "</td><td class=\"no_border_wide\"><b>" . $lang_details['row_last_seeder']. "</b>" . \App\Support\Time::format($row["last_action"]) . "</td></tr></table>",1);
 
-		tr("<span id=\"seeders\"></span><span id=\"leechers\"></span>".$lang_details['row_peers']."<br /><span id=\"showpeer\"><a href=\"javascript: viewpeerlist(".$row['id'].");\" class=\"sublink\">".$lang_details['text_see_full_list']."</a></span><span id=\"hidepeer\" style=\"display: none;\"><a href=\"javascript: hidepeerlist();\" class=\"sublink\">".$lang_details['text_hide_list']."</a></span>", "<div id=\"peercount\"><b>".$row['seeders'].$lang_details['text_seeders'].add_s($row['seeders'])."</b> | <b>".$row['leechers'].$lang_details['text_leechers'].add_s($row['leechers'])."</b></div><div id=\"peerlist\"></div>" , 1);
+		\App\Support\Html::tr("<span id=\"seeders\"></span><span id=\"leechers\"></span>".$lang_details['row_peers']."<br /><span id=\"showpeer\"><a href=\"javascript: viewpeerlist(".$row['id'].");\" class=\"sublink\">".$lang_details['text_see_full_list']."</a></span><span id=\"hidepeer\" style=\"display: none;\"><a href=\"javascript: hidepeerlist();\" class=\"sublink\">".$lang_details['text_hide_list']."</a></span>", "<div id=\"peercount\"><b>".$row['seeders'].$lang_details['text_seeders'].\App\Support\Strings::addS($row['seeders'])."</b> | <b>".$row['leechers'].$lang_details['text_leechers'].\App\Support\Strings::addS($row['leechers'])."</b></div><div id=\"peerlist\"></div>" , 1);
 		if (((\App\Support\SupportContext::getQuery('dllist') !== null)) && \App\Support\SupportContext::getQuery('dllist') == 1)
 		{
 			$scronload = "viewpeerlist(".$row['id'].")";
@@ -357,7 +357,7 @@ echo "</script>";
         $haveGotBonus = str_replace('Number',$spanSumAll,$haveGotBonus);
         $firstLine = '<div style="height:25px">'.$magic_value_button.$span.$haveGotBonus.$show_all.'</div>';
         $otherLine = '<div>'.$current_user_magic.$show_list.$other_user_span.$show_list_description.'</div>';
-        tr($lang_details['magic_value_award'],$firstLine.$otherLine,1);
+        \App\Support\Html::tr($lang_details['magic_value_award'],$firstLine.$otherLine,1);
         //End 魔力值奖励功能
 
 		// ------------- start thanked-by block--------------//
@@ -389,7 +389,7 @@ echo "</script>";
 			$thanksby = \App\Support\UserDisplay::username($CURUSER['id'])." ".$thanksby;
 		}
 		$thanksbutton = "<input class=\"btn\" type=\"button\" id=\"saythanks\"  onclick=\"saythanks(".$torrentid.");\" ".$buttonvalue." />";
-		tr($lang_details['row_thanks_by'],"<span id=\"thanksadded\" style=\"display: none;\"><input class=\"btn\" type=\"button\" value=\"".$lang_details['text_thanks_added']."\" disabled=\"disabled\" /></span><span id=\"curuser\" style=\"display: none;\">".\App\Support\UserDisplay::username($CURUSER['id'])." </span><span id=\"thanksbutton\">".$thanksbutton."</span>&nbsp;&nbsp;<span id=\"nothanks\">".$nothanks."</span><span id=\"addcuruser\"></span>".$thanksby.($thanks_all < $thanksCount ? $lang_details['text_and_more'].$thanksCount.$lang_details['text_users_in_total'] : ""),1);
+		\App\Support\Html::tr($lang_details['row_thanks_by'],"<span id=\"thanksadded\" style=\"display: none;\"><input class=\"btn\" type=\"button\" value=\"".$lang_details['text_thanks_added']."\" disabled=\"disabled\" /></span><span id=\"curuser\" style=\"display: none;\">".\App\Support\UserDisplay::username($CURUSER['id'])." </span><span id=\"thanksbutton\">".$thanksbutton."</span>&nbsp;&nbsp;<span id=\"nothanks\">".$nothanks."</span><span id=\"addcuruser\"></span>".$thanksby.($thanks_all < $thanksCount ? $lang_details['text_and_more'].$thanksCount.$lang_details['text_users_in_total'] : ""),1);
 		// ------------- end thanked-by block--------------//
 
 		print("</table>\n");

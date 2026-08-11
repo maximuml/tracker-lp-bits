@@ -187,6 +187,14 @@ final class UserDisplay
     }
 
     /**
+     * Context-aware wrapper for {@see avatarImage()}.
+     */
+    public static function avatarImageWithContext(string $url): string
+    {
+        return self::avatarImage($url, (string) SupportContext::getGlobal('CURLANGDIR', ''));
+    }
+
+    /**
      * Build the admin-area username link.
      *
      * Mirrors `username_for_admin()`.

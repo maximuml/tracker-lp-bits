@@ -83,6 +83,36 @@ final class Category
     }
 
     /**
+     * Context-aware wrapper for {@see row()}.
+     *
+     * @return array<string, mixed>|null
+     */
+    public static function rowWithContext(int|string|null $catId = null): ?array
+    {
+        return self::row(SupportContext::getCache(), $catId);
+    }
+
+    /**
+     * Context-aware wrapper for {@see iconRow()}.
+     *
+     * @return array<string, mixed>|null
+     */
+    public static function iconRowWithContext(int|string $typeId): ?array
+    {
+        return self::iconRow(SupportContext::getCache(), $typeId);
+    }
+
+    /**
+     * Context-aware wrapper for {@see listByMode()}.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public static function listByModeWithContext(int|string $catmode = 1): array
+    {
+        return self::listByMode(SupportContext::getCache(), $catmode);
+    }
+
+    /**
      * Build the additional second-icon `<img>` tag for a torrent row.
      *
      * Mirrors `get_second_icon()`.
@@ -154,10 +184,7 @@ final class Category
     public static function secondIconWithContext(array $row): string
     {
         $cache = \App\Support\SupportContext::getCache();
-        $catFolder = \App\Support\Path::categoryFolderForId(
-            $row['category'] ?? '',
-            (string) \App\Support\SupportContext::getGlobal('CURLANGDIR', '')
-        );
+        $catFolder = \App\Support\Path::categoryFolderForIdWithContext($row['category'] ?? '');
 
         return self::secondIcon($cache, $row, $catFolder);
     }
@@ -204,14 +231,22 @@ final class Category
      *
      * Mirrors `return_category_image()`.
      */
+    public static function imageTagWithContext(int|string $categoryId, string $link = ''): string
+    {
+        return self::imageTag($categoryId, $link);
+    }
+
     public static function imageTag(int|string $categoryId, string $link = ''): string
     {
         static $cache = [];
 
         if (! isset($cache[$categoryId])) {
-            $categoryRow = \get_category_row($categoryId);
-            $catImgUrl = \get_cat_folder($categoryId);
-            $cache[$categoryId] = '<img' . ($categoryRow['class_name'] ? ' class="' . $categoryRow['class_name'] . '"' : '') . ' src="pic/cattrans.gif" alt="' . $categoryRow['name'] . '" title="' . $categoryRow['name'] . '" style="background-image: url(pic/' . $catImgUrl . '/' . $categoryRow['image'] . ');" />';
+            $categoryRow = self::rowWithContext($categoryId);
+            $catImgUrl = \App\Support\Path::categoryFolderForIdWithContext($categoryId);
+            $className = (string) ($categoryRow['class_name'] ?? '');
+            $name = (string) ($categoryRow['name'] ?? '');
+            $image = (string) ($categoryRow['image'] ?? '');
+            $cache[$categoryId] = '<img' . ($className ? ' class="' . $className . '"' : '') . ' src="pic/cattrans.gif" alt="' . $name . '" title="' . $name . '" style="background-image: url(pic/' . $catImgUrl . '/' . $image . ');" />';
         }
 
         $catImg = $cache[$categoryId];

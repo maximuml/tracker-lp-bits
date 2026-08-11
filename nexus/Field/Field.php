@@ -350,9 +350,9 @@ HEAD;
                 $y .= '<div id="' . $previewBoxId . '">';
                 if (!empty($currentValue)) {
                     if (substr($currentValue, 0, 4) == 'http') {
-                        $y .= formatImg($currentValue, true, 700, 0, $imgId);
+                        $y .= \App\Support\HtmlRenderer::formatImg($currentValue, true, 700, 0, $imgId);
                     } else {
-                        $y .= format_comment($currentValue);
+                        $y .= \App\Support\Format::formatComment($currentValue);
                     }
                 }
                 $y .= '</div>';
@@ -462,7 +462,7 @@ JS;
                     $customFieldDisplay = $field['display'];
                     $customFieldDisplay = str_replace("<%{$field['name']}.label%>", $field['label'], $customFieldDisplay);
                     $customFieldDisplay = str_replace("<%{$field['name']}.value%>", $contentNotFormatted, $customFieldDisplay);
-                    $rowByRowHtml .= tr($field['label'], format_comment($customFieldDisplay), 1);
+                    $rowByRowHtml .= tr($field['label'], \App\Support\Format::formatComment($customFieldDisplay), 1);
                 } else {
                     $contentFormatted = $this->formatCustomFieldValue($field, true);
                     $rowByRowHtml .= tr($field['label'], $contentFormatted, 1);
@@ -472,7 +472,7 @@ JS;
 
         $result = $rowByRowHtml;
         if ($shouldRenderMixRow && $mixedRowContent) {
-            $result .= tr($displayName, format_comment($mixedRowContent), 1);
+            $result .= tr($displayName, \App\Support\Format::formatComment($mixedRowContent), 1);
         }
         return $result;
     }
@@ -486,13 +486,13 @@ JS;
         switch ($customFieldWithValue['type']) {
             case self::TYPE_TEXT:
             case self::TYPE_TEXTAREA:
-                $result .= $doFormatComment ? format_comment($fieldValue) : $fieldValue;
+                $result .= $doFormatComment ? \App\Support\Format::formatComment($fieldValue) : $fieldValue;
                 break;
             case self::TYPE_IMAGE:
                 if (substr($fieldValue, 0, 4) == 'http') {
-                    $result .= $doFormatComment ? formatImg($fieldValue, true, 700, 0, "attach{$customFieldWithValue['id']}") : $fieldValue;
+                    $result .= $doFormatComment ? \App\Support\HtmlRenderer::formatImg($fieldValue, true, 700, 0, "attach{$customFieldWithValue['id']}") : $fieldValue;
                 } else {
-                    $result .= $doFormatComment ? format_comment($fieldValue) : $fieldValue;
+                    $result .= $doFormatComment ? \App\Support\Format::formatComment($fieldValue) : $fieldValue;
                 }
                 break;
             case self::TYPE_RADIO:

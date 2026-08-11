@@ -3,7 +3,7 @@ error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
 
 $__server_HTTP_REFERER = \App\Support\SupportContext::getServerValue('HTTP_REFERER');
-if (get_user_class() < UC_SYSOP)
+if (\App\Support\UserDisplay::currentClass() < UC_SYSOP)
     stderr("Sorry", "Access denied.");
 
 $validTypeMap = $lang_incrementbulk['types'];

@@ -6,7 +6,7 @@ $__server_REQUEST_METHOD = \App\Support\SupportContext::getServerValue('REQUEST_
 if ($__server_REQUEST_METHOD != "POST")
     stderr("Error", "Permission denied!");
 
-if (get_user_class() < UC_SYSOP)
+if (\App\Support\UserDisplay::currentClass() < UC_SYSOP)
     stderr("Sorry", "Permission denied.");
 
 $validTypeMap = $lang_incrementbulk['types'];

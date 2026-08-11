@@ -49,7 +49,7 @@ if (((\App\Support\SupportContext::getQuery('add_offer') !== null)) && \App\Supp
 	"</td></tr><tr><td class=rowhead align=right><b>".$lang_offers['row_post_or_photo']."</b></td><td class=rowfollow align=left>".
 	"<input type=text name=picture style=\"width: 99%;\"><br />".$lang_offers['text_link_to_picture']."</td></tr>".
 	"<tr><td class=rowhead align=right valign=top><b>".$lang_offers['row_description']."<b><font color=red>*</font></td><td class=rowfollow align=left>\n");
-	textbbcode("compose","body",$body,false, 130, true);
+	echo \App\Support\Form::bbcodeEditor("compose","body",$body,false, 130, true);
 	print("</td></tr><tr><td class=toolbox align=center colspan=2><input id=qr type=submit class=btn value=".$lang_offers['submit_add_offer']." ></td></tr></table></form><br />\n");
 	stdfoot();
 	die;
@@ -167,7 +167,7 @@ if (((\App\Support\SupportContext::getQuery('off_details') !== null)) && \App\Su
 	if ($CURUSER['timetype'] != 'timealive')
 		$offertime = $lang_offers['text_at'].$offertime;
 	else $offertime = $lang_offers['text_blank'].$offertime;
-	tr($lang_offers['row_info'], $lang_offers['text_offered_by'].get_username($num['userid']).$offertime, 1);
+	tr($lang_offers['row_info'], $lang_offers['text_offered_by'].\App\Support\UserDisplay::username($num['userid']).$offertime, 1);
 	if ($num["allowed"] == "pending")
 	$status="<font color=\"red\">".$lang_offers['text_pending']."</font>";
 	elseif ($num["allowed"] == "allowed")
@@ -207,7 +207,7 @@ if (((\App\Support\SupportContext::getQuery('off_details') !== null)) && \App\Su
 	$report = "<a href=\"report.php?reportofferid=".$id."\"><img class=\"dt_report\" src=\"pic/trans.gif\" alt=\"report\" />&nbsp;<b><font class=\"small\">".$lang_offers['report_offer']."</font></b></a>";
 	tr($lang_offers['row_action'], $edit . $delete .$report, 1);
 	if ($num["descr"]){
-		$off_bb = format_comment($num["descr"]);
+		$off_bb = \App\Support\Format::formatComment($num["descr"]);
 		tr($lang_offers['row_description'], $off_bb, 1);
 	}
 	print("</table>");
@@ -399,7 +399,7 @@ if (((\App\Support\SupportContext::getQuery("edit_offer") !== null)) && \App\Sup
 	tr($lang_offers['row_title']."<font color=\"red\">*</font>", "<input type=\"text\" style=\"width: 99%\" name=\"name\" value=\"".$title."\" />", 1);
 	tr($lang_offers['row_post_or_photo'], "<input type=\"text\" name=\"picture\" style=\"width: 99%\" value='' /><br />".$lang_offers['text_link_to_picture'], 1);
 	print("<tr><td class=\"rowhead\" align=\"right\" valign=\"top\"><b>".$lang_offers['row_description']."<font color=\"red\">*</font></b></td><td class=\"rowfollow\" align=\"left\">");
-	textbbcode("compose","body",$body, false, 130, true);
+	echo \App\Support\Form::bbcodeEditor("compose","body",$body, false, 130, true);
 	print("</td></tr>");
 	print("<tr><td class=\"toolbox\" style=\"vertical-align: middle; padding-top: 10px; padding-bottom: 10px;\" align=\"center\" colspan=\"2\"><input id=\"qr\" type=\"submit\" value=\"".$lang_offers['submit_edit_offer']."\" class=\"btn\" /></td></tr></table></form><br />\n");
 	stdfoot();
@@ -490,7 +490,7 @@ if (((\App\Support\SupportContext::getQuery("offer_vote") !== null)) && \App\Sup
 				$vote = "<b><font color=red>".$lang_offers['text_against']."</font></b>";
 			else $vote = "unknown";
 
-			print("<tr><td class=rowfollow>" . get_username($arr['userid']) . "</td><td class=rowfollow align=left >".$vote."</td></tr>\n");
+			print("<tr><td class=rowfollow>" . \App\Support\UserDisplay::username($arr['userid']) . "</td><td class=rowfollow align=left >".$vote."</td></tr>\n");
 		}
 		print("</table>\n");
 		echo $pagerbottom;
@@ -778,7 +778,7 @@ begin_frame($lang_offers['text_offers_section'], true,10,"100%","center");
 
 print("<p align=\"left\"><b><font size=\"5\">".$lang_offers['text_rules']."</font></b></p>\n");
 print("<div align=\"left\"><ul>");
-print("<li>".$lang_offers['text_rule_one_one'].get_user_class_name($upload_class, false, true, true).$lang_offers['text_rule_one_two'].get_user_class_name($addoffer_class, false, true, true).$lang_offers['text_rule_one_three']."</li>\n");
+print("<li>".$lang_offers['text_rule_one_one'].\App\Support\UserClass::name($upload_class, false, true, true).$lang_offers['text_rule_one_two'].\App\Support\UserClass::name($addoffer_class, false, true, true).$lang_offers['text_rule_one_three']."</li>\n");
 $offerSkipApprovedCount = \App\Support\Config\SiteConfig::current()->main->offerSkipApprovedCount();
 if (is_numeric($offerSkipApprovedCount) && $offerSkipApprovedCount > 0) {
     print("<li>".sprintf($lang_offers['text_rule_skip_offer'], $offerSkipApprovedCount)."</li>\n");
@@ -825,7 +825,7 @@ print("<td class=\"colhead\">".$lang_offers['col_offered_by']."</td>".
 	$arr = (array) $row;
 
 
-	$addedby = get_username($arr['userid']);
+	$addedby = \App\Support\UserDisplay::username($arr['userid']);
 	$comms = $arr['comments'];
 	if ($comms == 0)
 		$comment = "<a href=\"comment.php?action=add&amp;pid=".$arr['id']."&amp;type=offer\" title=\"".$lang_offers['title_add_comments']."\">0</a>";
@@ -849,7 +849,7 @@ print("<td class=\"colhead\">".$lang_offers['col_offered_by']."</td>".
 					$lastcomtime = $lang_offers['text_blank'].\App\Support\Time::format($lastcom["added"],true,false,true);
 					$counter = $i;
 					$lastcom_tooltip[$counter]['id'] = "lastcom_" . $counter;
-					$lastcom_tooltip[$counter]['content'] = ($hasnewcom ? "<b>(<font class='new'>".$lang_offers['text_new']."</font>)</b> " : "").$lang_offers['text_last_commented_by'].get_username($lastcom['user']) . $lastcomtime."<br />". format_comment(mb_substr($lastcom['text'],0,100,"UTF-8") . (mb_strlen($lastcom['text'],"UTF-8") > 100 ? " ......" : "" ),true,false,false,true,600,false,false);
+					$lastcom_tooltip[$counter]['content'] = ($hasnewcom ? "<b>(<font class='new'>".$lang_offers['text_new']."</font>)</b> " : "").$lang_offers['text_last_commented_by'].\App\Support\UserDisplay::username($lastcom['user']) . $lastcomtime."<br />". \App\Support\Format::formatComment(mb_substr($lastcom['text'],0,100,"UTF-8") . (mb_strlen($lastcom['text'],"UTF-8") > 100 ? " ......" : "" ),true,false,false,true,600,false,false);
 					$onmouseover = "onmouseover=\"domTT_activate(this, event, 'content', document.getElementById('" . $lastcom_tooltip[$counter]['id'] . "'), 'trail', false, 'delay', 500,'lifetime',3000,'fade','both','styleClass','niceTitle','fadeMax', 87,'maxWidth', 400);\"";
 			}
 		}
@@ -894,7 +894,7 @@ print("<td class=\"colhead\">".$lang_offers['col_offered_by']."</td>".
 	$max_length_of_offer_name = 70;
 	if($count_dispname > $max_length_of_offer_name)
 		$dispname=mb_substr($dispname, 0, $max_length_of_offer_name-2,"UTF-8") . "..";
-	print("<tr><td class=\"rowfollow\" style=\"padding: 0px\"><a href=\"?category=".$arr['cat_id']."\">".return_category_image($arr['cat_id'], "")."</a></td><td style='text-align: left'><a href=\"?id=".$arr['id']."&amp;off_details=1\" title=\"".htmlspecialchars($arr['name'])."\"><b>".htmlspecialchars($dispname)."</b></a>".($CURUSER['appendnew'] != 'no' && strtotime($arr["added"]) >= $last_offer ? "<b> (<font class='new'>".$lang_offers['text_new']."</font>)</b>" : "").$allowed."</td><td class=\"rowfollow nowrap\" style='padding: 5px' align=\"center\">".$v_res."</td><td class=\"rowfollow nowrap\" ".(!\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::AGAINST_OFFER) ? " colspan=\"2\" " : "")." style='padding: 5px'><a href=\"?id=".$arr['id']."&amp;vote=yeah\" title=\"".$lang_offers['title_i_want_this']."\"><font color=\"green\"><b>".$lang_offers['text_yep']."</b></font></a></td>".(get_user_class() >= $againstoffer_class ? "<td class=\"rowfollow nowrap\" align=\"center\"><a href=\"?id=".$arr['id']."&amp;vote=against\" title=\"".$lang_offers['title_do_not_want_it']."\"><font color=\"red\"><b>".$lang_offers['text_nah']."</b></font></a></td>" : ""));
+	print("<tr><td class=\"rowfollow\" style=\"padding: 0px\"><a href=\"?category=".$arr['cat_id']."\">".return_category_image($arr['cat_id'], "")."</a></td><td style='text-align: left'><a href=\"?id=".$arr['id']."&amp;off_details=1\" title=\"".htmlspecialchars($arr['name'])."\"><b>".htmlspecialchars($dispname)."</b></a>".($CURUSER['appendnew'] != 'no' && strtotime($arr["added"]) >= $last_offer ? "<b> (<font class='new'>".$lang_offers['text_new']."</font>)</b>" : "").$allowed."</td><td class=\"rowfollow nowrap\" style='padding: 5px' align=\"center\">".$v_res."</td><td class=\"rowfollow nowrap\" ".(!\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::AGAINST_OFFER) ? " colspan=\"2\" " : "")." style='padding: 5px'><a href=\"?id=".$arr['id']."&amp;vote=yeah\" title=\"".$lang_offers['title_i_want_this']."\"><font color=\"green\"><b>".$lang_offers['text_yep']."</b></font></a></td>".(\App\Support\UserDisplay::currentClass() >= $againstoffer_class ? "<td class=\"rowfollow nowrap\" align=\"center\"><a href=\"?id=".$arr['id']."&amp;vote=against\" title=\"".$lang_offers['title_do_not_want_it']."\"><font color=\"red\"><b>".$lang_offers['text_nah']."</b></font></a></td>" : ""));
 
 	print("<td class=\"rowfollow\">".$comment."</td><td class=\"rowfollow nowrap\">" . $addtime. "</td>");
 	if ($offervotetimeout_main > 0 && $offeruptimeout_main > 0){

@@ -18,7 +18,7 @@ $supportUsers = \App\Models\User::query()->where('support', 'yes')->where('statu
 foreach ($supportUsers as $userRow) {
 	$arr = $userRow->toArray();
 	$countryrow = get_country_row($arr['country']);
-	$ppl .= "<tr><td class=embedded>". get_username($arr['id']) ."</td><td class=embedded><img width=24 height=15 src=\"pic/flag/".$countryrow['flagpic']."\" title=\"".$countryrow['name']."\" style=\"padding-bottom:1px;\"></td>
+	$ppl .= "<tr><td class=embedded>". \App\Support\UserDisplay::username($arr['id']) ."</td><td class=embedded><img width=24 height=15 src=\"pic/flag/".$countryrow['flagpic']."\" title=\"".$countryrow['name']."\" style=\"padding-bottom:1px;\"></td>
  <td class=embedded> ".(strtotime($arr['last_access']) > $dt ? $onlineimg : $offlineimg)."</td>".
  "<td class=embedded><a href=sendmessage.php?receiver=".$arr['id']." title=\"".$lang_staff['title_send_pm']."\">".$sendpmimg."</a></td>".
  "<td class=embedded>".$arr['supportlang']."</td>".
@@ -56,7 +56,7 @@ $pickerUsers = \App\Models\User::query()->where('picker', 'yes')->where('status'
 foreach ($pickerUsers as $userRow) {
 	$arr = $userRow->toArray();
 	$countryrow = get_country_row($arr['country']);
-	$ppl .= "<tr height=15><td class=embedded>". get_username($arr['id']) ."</td><td class=embedded ><img width=24 height=15 src=\"pic/flag/".$countryrow['flagpic']."\" title=\"".$countryrow['name']."\" style=\"padding-bottom:1px;\"></td>
+	$ppl .= "<tr height=15><td class=embedded>". \App\Support\UserDisplay::username($arr['id']) ."</td><td class=embedded ><img width=24 height=15 src=\"pic/flag/".$countryrow['flagpic']."\" title=\"".$countryrow['name']."\" style=\"padding-bottom:1px;\"></td>
  <td class=embedded> ".(strtotime($arr['last_access']) > $dt ? $onlineimg : $offlineimg)."</td>".
  "<td class=embedded><a href=sendmessage.php?receiver=".$arr['id']." title=\"".$lang_staff['title_send_pm']."\">".$sendpmimg."</a></td>".
  "<td class=embedded>".$arr['pickfor']."</td></tr>\n";
@@ -108,7 +108,7 @@ foreach ($forumMods as $modRow) {
 		$forums .= "<a href=forums.php?action=viewforum&forumid=".$forumRow['id'].">".$forumRow['name']."</a>, ";
 	}
 	$forums = rtrim(trim($forums),",");
-	$ppl .= "<tr height=15><td class=embedded>". get_username($arr['userid']) ."</td><td class=embedded ><img width=24 height=15 src=\"pic/flag/".$countryrow['flagpic']."\" title=\"".$countryrow['name']."\" style=\"padding-bottom:1px;\"></td>
+	$ppl .= "<tr height=15><td class=embedded>". \App\Support\UserDisplay::username($arr['userid']) ."</td><td class=embedded ><img width=24 height=15 src=\"pic/flag/".$countryrow['flagpic']."\" title=\"".$countryrow['name']."\" style=\"padding-bottom:1px;\"></td>
  <td class=embedded> ".(strtotime($arr['last_access']) > $dt ? $onlineimg : $offlineimg)."</td>".
  "<td class=embedded><a href=sendmessage.php?receiver=".$arr['userid']." title=\"".$lang_staff['title_send_pm']."\">".$sendpmimg."</a></td>".
  "<td class=embedded>".$forums."</td></tr>\n";
@@ -149,7 +149,7 @@ foreach ($staffUsers as $userRow) {
 		$curr_class = $arr['class'];
 		if ($ppl != "")
 			$ppl .= "<tr height=15><td class=embedded colspan=5 align=right>&nbsp;</td></tr>";
-		$ppl .= "<tr height=15><td class=embedded colspan=5 align=right>" . get_user_class_name($arr["class"],false,true,true) . "</td></tr>";
+		$ppl .= "<tr height=15><td class=embedded colspan=5 align=right>" . \App\Support\UserClass::name($arr["class"],false,true,true) . "</td></tr>";
 		$ppl .= "<tr>" .
 		"<td class=embedded><b>" . $lang_staff['text_username'] . "</b></td>".
 		"<td class=embedded align=center><b>" . $lang_staff['text_country'] . "</b></td>".
@@ -160,7 +160,7 @@ foreach ($staffUsers as $userRow) {
 		$ppl .= "<tr height=15><td class=embedded colspan=5><hr color=\"#4040c0\"></td></tr>";
 	}
 	$countryrow = get_country_row($arr['country']);
-	$ppl .= "<tr><td class=embedded>". get_username($arr['id']) ."</td><td class=embedded ><img width=24 height=15 src=\"pic/flag/".$countryrow['flagpic']."\" title=\"".$countryrow['name']."\" style=\"padding-bottom:1px;\"></td>
+	$ppl .= "<tr><td class=embedded>". \App\Support\UserDisplay::username($arr['id']) ."</td><td class=embedded ><img width=24 height=15 src=\"pic/flag/".$countryrow['flagpic']."\" title=\"".$countryrow['name']."\" style=\"padding-bottom:1px;\"></td>
  <td class=embedded> ".(strtotime($arr['last_access']) > $dt ? $onlineimg : $offlineimg)."</td>".
  "<td class=embedded><a href=sendmessage.php?receiver=".$arr['id']." title=\"".$lang_staff['title_send_pm']."\">".$sendpmimg."</a></td>".
  "<td class=embedded>".$arr['stafffor']."</td></tr>\n";
@@ -186,7 +186,7 @@ $vipUsers = \App\Models\User::query()->where('class', UC_VIP)->where('status', '
 foreach ($vipUsers as $userRow) {
 	$arr = $userRow->toArray();
 	$countryrow = get_country_row($arr['country']);
-	$ppl .= "<tr><td class=embedded>". get_username($arr['id']) ."</td><td class=embedded><img width=24 height=15 src=\"pic/flag/".$countryrow['flagpic']."\" title=\"".$countryrow['name']."\" style=\"padding-bottom:1px;\"></td>
+	$ppl .= "<tr><td class=embedded>". \App\Support\UserDisplay::username($arr['id']) ."</td><td class=embedded><img width=24 height=15 src=\"pic/flag/".$countryrow['flagpic']."\" title=\"".$countryrow['name']."\" style=\"padding-bottom:1px;\"></td>
  <td class=embedded> ".(strtotime($arr['last_access']) > $dt ? $onlineimg : $offlineimg)."</td>".
  "<td class=embedded><a href=sendmessage.php?receiver=".$arr['id']." title=\"".$lang_staff['title_send_pm']."\">".$sendpmimg."</a></td>".
  "<td class=embedded>".$arr['stafffor']."</td></tr>\n";

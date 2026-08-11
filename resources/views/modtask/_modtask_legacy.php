@@ -55,10 +55,10 @@ if ($action == "edituser")
 	$pickfor = \App\Support\SupportContext::getPost("pickfor") ?? '';
 	$stafffor = \App\Support\SupportContext::getPost("staffduties") ?? '';
 
-	if (!is_valid_id($userid) || !is_valid_user_class($class))
+	if (!is_valid_id($userid) || !\App\Support\User::isValidUserClass($class))
 		stderr("Error", "Bad user ID or class ID.");
-	if (get_user_class() <= $class)
-		stderr("Error", "You have no permission to change user's class to ".get_user_class_name($class,false,false,true).". BTW, how do you get here?");
+	if (\App\Support\UserDisplay::currentClass() <= $class)
+		stderr("Error", "You have no permission to change user's class to ".\App\Support\UserClass::name($class,false,false,true).". BTW, how do you get here?");
 	$arr = \App\Repositories\ModtaskRepository::getUserArray($userid) ?? puke();
 
 	$curenabled = $arr["enabled"];
@@ -178,7 +178,7 @@ if ($action == "edituser")
 //			sql_query("INSERT INTO messages (sender, receiver, subject, msg, added) VALUES(0, $userid, $subject, $msg, $added)") or sqlerr(__FILE__, __LINE__);
 //		}
 	}
-	if(get_user_class() == UC_STAFFLEADER)
+	if(\App\Support\UserDisplay::currentClass() == UC_STAFFLEADER)
 	{
 		$donor = \App\Support\SupportContext::getPost("donor");
 		$donoruntil = !empty(\App\Support\SupportContext::getPost('donoruntil')) ? \App\Support\SupportContext::getPost('donoruntil') : null;
@@ -231,7 +231,7 @@ if ($action == "edituser")
 //		$updateset[] = "passhash = " . sqlesc($passhash);
 //	}
 
-	if ($curclass >= get_user_class())
+	if ($curclass >= \App\Support\UserDisplay::currentClass())
 		puke();
 
     //migrate to management

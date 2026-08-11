@@ -12,7 +12,7 @@ $lang_takeflush = (array) (\App\Support\SupportContext::getGlobal('lang_takeflus
 $id = intval(\App\Support\SupportContext::getQuery('id') ?? 0);
 int_check($id,true);
 
-if (get_user_class() >= UC_MODERATOR || $CURUSER['id'] == "$id")
+if (\App\Support\UserDisplay::currentClass() >= UC_MODERATOR || $CURUSER['id'] == "$id")
 {
    $deadtime = \App\Support\Time::deadThreshold(\App\Support\Config\SiteConfig::current()->main->anninterthree());
    $lastAction = date("Y-m-d H:i:s", $deadtime);

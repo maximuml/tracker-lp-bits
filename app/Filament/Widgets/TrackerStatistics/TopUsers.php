@@ -44,7 +44,7 @@ class TopUsers extends BaseWidget implements HasActions
         return [
             TextColumn::make('id')
                 ->label(__('label.user.username'))
-                ->formatStateUsing(fn (int $state) => username_for_admin($state))
+                ->formatStateUsing(fn (int $state) => \App\Support\UserDisplay::adminUsername($state))
             ,
             TextColumn::make('uploaded')
                 ->label(__('label.uploaded'))

@@ -48,6 +48,43 @@ final class LegacyAuthContext
     ) {
     }
 
+    /**
+     * Build a context from the current {@see SupportContext}.
+     * Replaces the legacy `legacy_auth_context()` helper for callers that
+     * already live inside the modern support layer.
+     */
+    public static function fromSupportContext(): self
+    {
+        $scriptFile = SupportContext::getServerValue('SCRIPT_FILENAME', '');
+        $script = basename($scriptFile);
+        if (str_contains($script, '.')) {
+            $script = strstr($script, '.', true);
+        }
+
+        return new self(
+            user: SupportContext::getUser(),
+            lang: SupportContext::getLangFunctions(),
+            cache: SupportContext::getCache(),
+            ip: \App\Support\Network::clientIp(),
+            requestUri: SupportContext::getServerValue('REQUEST_URI'),
+            requestBody: SupportContext::allPost(),
+            queryParams: SupportContext::allQuery(),
+            request: array_merge(SupportContext::allPost(), SupportContext::allQuery()),
+            cookies: SupportContext::allCookie(),
+            maxLoginAttempts: (int) SupportContext::getGlobal('maxloginattempts', 0),
+            captchaEnabled: SupportContext::getGlobal('iv', '') === 'yes',
+            registration: [
+                'invitesystem' => (string) SupportContext::getGlobal('invitesystem', ''),
+                'registration' => (string) SupportContext::getGlobal('registration', ''),
+                'maxusers' => (int) SupportContext::getGlobal('maxusers', 0),
+                'maxip' => (int) SupportContext::getGlobal('maxip', 0),
+            ],
+            langFolder: SupportContext::getCookieValue('c_lang_folder'),
+            moderatorClass: defined('UC_MODERATOR') ? (int) \constant('UC_MODERATOR') : 0,
+            script: $script,
+        );
+    }
+
     public function isLoggedIn(): bool
     {
         return $this->user !== null && ! empty($this->user['id']);

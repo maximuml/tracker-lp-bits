@@ -298,7 +298,7 @@ if ((isset($do))) {
     elseif ($do == "tmp_invite")
         $msg = $lang_mybonus['text_success_tmp_invites'];
 	elseif ($do == "vip")
-	$msg =  $lang_mybonus['text_success_vip']."<b>".get_user_class_name(UC_VIP,false,false,true)."</b>".$lang_mybonus['text_success_vip_two'];
+	$msg =  $lang_mybonus['text_success_vip']."<b>".\App\Support\UserClass::name(UC_VIP,false,false,true)."</b>".$lang_mybonus['text_success_vip_two'];
 	elseif ($do == "vipfalse")
 	$msg =  $lang_mybonus['text_no_permission'];
 	elseif ($do == "title")
@@ -403,7 +403,7 @@ for ($i=0; $i < count($allBonus); $i++)
 		}
 		elseif ($bonusarray['art'] == 'class')
 		{
-			if (get_user_class() >= UC_VIP)
+			if (\App\Support\UserDisplay::currentClass() >= UC_VIP)
 				print("<td class=\"rowfollow\" align=\"center\"><input type=\"submit\" name=\"submit\" value=\"".$lang_mybonus['std_class_above_vip']."\" disabled=\"disabled\" /></td>");
 			else
 				print("<td class=\"rowfollow\" align=\"center\"><input type=\"submit\" name=\"submit\" value=\"".$lang_mybonus['submit_exchange']."\" /></td>");
@@ -599,7 +599,7 @@ if ($action == "exchange") {
         }
 		//=== trade for one month VIP status ***note "SET class = '10'" change "10" to whatever your VIP class number is
 		elseif($art == "class") {
-			if (get_user_class() >= UC_VIP) {
+			if (\App\Support\UserDisplay::currentClass() >= UC_VIP) {
 				stdmsg($lang_mybonus['std_no_permission'],$lang_mybonus['std_class_above_vip'], 0);
 				stdfoot();
 				die;
@@ -613,7 +613,7 @@ if ($action == "exchange") {
 		//=== trade for invites
 		elseif($art == "invite") {
 			if(!\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::BUY_INVITE))
-				die(get_user_class_name($buyinvite_class,false,false,true).$lang_mybonus['text_plus_only']);
+				die(\App\Support\UserClass::name($buyinvite_class,false,false,true).$lang_mybonus['text_plus_only']);
 			$invites = $CURUSER['invites'];
 			$inv = $invites+$bonusarray['menge'];
 //			$bonuscomment = date("Y-m-d") . " - " .$points. " Points for invites.\n " .htmlspecialchars($bonuscomment);
@@ -624,7 +624,7 @@ if ($action == "exchange") {
         //=== temporary invite
         elseif($art == "tmp_invite") {
             if(!\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::BUY_INVITE))
-                die(get_user_class_name($buyinvite_class,false,false,true).$lang_mybonus['text_plus_only']);
+                die(\App\Support\UserClass::name($buyinvite_class,false,false,true).$lang_mybonus['text_plus_only']);
 //            $invites = $CURUSER['invites'];
 //            $inv = $invites+$bonusarray['menge'];
 //			$bonuscomment = date("Y-m-d") . " - " .$points. " Points for invites.\n " .htmlspecialchars($bonuscomment);

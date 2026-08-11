@@ -1,6 +1,6 @@
 <?php
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
-if (get_user_class() > UC_MODERATOR) {
+if (\App\Support\UserDisplay::currentClass() > UC_MODERATOR) {
 	$count = \App\Models\User::query()->where('donor', 'yes')->count();
 
 	list($pagertop, $pagerbottom, , $offset, $rpp) = pager(50, $count, "donorlist.php?");
@@ -26,7 +26,7 @@ $rows = \App\Models\User::query()
     ->map(fn ($r) => (array) $r);
 // ------------------
 foreach ($rows as $arr) {
-	echo "<tr><td>" . $arr['id'] . "</td><td align=\"left\">" . get_username($arr['id']) . "</td><td align=\"left\"><a href=mailto:" . $arr['email'] . ">" . $arr['email'] . "</a></td><td align=\"left\">" . $arr['added'] . "</a></td><td align=\"left\">$" . $arr['donated'] . "</td></tr>";
+	echo "<tr><td>" . $arr['id'] . "</td><td align=\"left\">" . \App\Support\UserDisplay::username($arr['id']) . "</td><td align=\"left\"><a href=mailto:" . $arr['email'] . ">" . $arr['email'] . "</a></td><td align=\"left\">" . $arr['added'] . "</a></td><td align=\"left\">$" . $arr['donated'] . "</td></tr>";
 }
 ?>
 

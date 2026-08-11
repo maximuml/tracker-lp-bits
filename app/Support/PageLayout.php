@@ -298,7 +298,7 @@ class PageLayout
                 <?php 
             echo $context->lang['text_welcome_back'];
             ?>, <?php 
-            echo get_username($context->user['id']);
+            echo \App\Support\UserDisplay::username($context->user['id']);
             ?>
                 [<a href="logout.php"><?php 
             echo $context->lang['text_logout'];

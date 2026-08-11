@@ -445,8 +445,8 @@ class ExamRepository extends BaseRepository
         $exam = Exam::query()->find($examId);
         $user = User::query()->findOrFail($uid);
         $locale = $user->locale;
-        $authUserClass = get_user_class();
-        $authUserId = get_user_id();
+        $authUserClass = \App\Support\UserDisplay::currentClass();
+        $authUserId = \App\Support\UserDisplay::currentId();
         $now = Carbon::now();
         if (!empty($exam->begin)) {
             $specificBegin = Carbon::parse($exam->begin);

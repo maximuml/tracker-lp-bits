@@ -145,15 +145,15 @@ $seedBoxRep = \App\Support\SupportContext::getGlobal('seedBoxRep');
 		$catimage = htmlspecialchars($arr["image"]);
 		$catname = htmlspecialchars($arr["catname"]);
 
-		$sphighlight = get_torrent_bg_color($arr['sp_state']);
+		$sphighlight = \App\Support\Promotion::backgroundStyleWithContext($arr['sp_state']);
         $banned_torrent = ($arr["banned"] == 'yes' ? " <b>(<font class=\"striking\">".$lang_functions['text_banned']."</font>)</b>" : "");
-		$sp_torrent = get_torrent_promotion_append($arr['sp_state'], '', false, '', 0, '', $arr['__ignore_global_sp_state'] ?? false);
+		$sp_torrent = \App\Support\Promotion::appendWithContext($arr['sp_state'], '', false, '', 0, '', $arr['__ignore_global_sp_state'] ?? false);
         //Total size
         if ($showtotalsize){
 			$total_size += $arr['size'];
 		}
 
-		$hrImg = get_hr_img($arr, $arr['search_box_id']);
+		$hrImg = \App\Support\TorrentAccess::hrImage($arr, $arr['search_box_id']);
         $approvalStatusIcon = $torrentRep->renderApprovalStatus($arr["approval_status"]);
 		//torrent name
 		$dispname = $nametitle = htmlspecialchars($arr["torrentname"]);

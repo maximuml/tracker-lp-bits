@@ -146,6 +146,23 @@ final class Category
     }
 
     /**
+     * Context-aware wrapper for {@see secondIcon()}.
+     * Mirrors the legacy `get_second_icon()` helper.
+     *
+     * @param  array<string, mixed>  $row
+     */
+    public static function secondIconWithContext(array $row): string
+    {
+        $cache = \App\Support\SupportContext::getCache();
+        $catFolder = \App\Support\Path::categoryFolderForId(
+            $row['category'] ?? '',
+            (string) \App\Support\SupportContext::getGlobal('CURLANGDIR', '')
+        );
+
+        return self::secondIcon($cache, $row, $catFolder);
+    }
+
+    /**
      * Return the category list for a search mode.
      *
      * Mirrors `genrelist()`.

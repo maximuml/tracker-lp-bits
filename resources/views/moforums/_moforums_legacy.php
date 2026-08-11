@@ -78,7 +78,7 @@ if ($act == "forum") {
         foreach ($overforums as $forumRow) {
             $row = (array) $forumRow;
             echo "<tr><td><a href=forums.php?action=forumview&forid=".$row["id"]."><b>".htmlspecialchars($row["name"])."</b></a><br />".$row["description"]."</td>";
-            echo "<td>" . get_user_class_name($row["minclassview"],false,true,true) . "</td><td><b><a href=\"".$PHP_SELF."?action=editforum&id=".$row["id"]."\">".$lang_moforums['text_edit']."</a>&nbsp;|&nbsp;<a href=\"javascript:confirm_delete('".$row["id"]."', '".$lang_moforums['js_sure_to_delete_overforum']."', '');\"><font color=red>".$lang_moforums['text_delete']."</font></a></b></td></tr>";
+            echo "<td>" . \App\Support\UserClass::name($row["minclassview"],false,true,true) . "</td><td><b><a href=\"".$PHP_SELF."?action=editforum&id=".$row["id"]."\">".$lang_moforums['text_edit']."</a>&nbsp;|&nbsp;<a href=\"javascript:confirm_delete('".$row["id"]."', '".$lang_moforums['js_sure_to_delete_overforum']."', '');\"><font color=red>".$lang_moforums['text_delete']."</font></a></b></td></tr>";
         }
     }
     echo "</table>";
@@ -102,9 +102,9 @@ if ($act == "forum") {
     <td>
     <select name=viewclass>
 <?php
-    $maxclass = get_user_class();
+    $maxclass = \App\Support\UserDisplay::currentClass();
     for ($i = 0; $i <= $maxclass; ++$i)
-        print("<option value=$i" . ($user["class"] == $i ? " selected" : "") . ">$prefix" . get_user_class_name($i,false,true,true) . "\n");
+        print("<option value=$i" . ($user["class"] == $i ? " selected" : "") . ">$prefix" . \App\Support\UserClass::name($i,false,true,true) . "\n");
 ?>
 	</select>
     </td>
@@ -154,9 +154,9 @@ if ($act == "editforum") {
     <td>
     <select name=viewclass>
 <?php
-    $maxclass = get_user_class();
+    $maxclass = \App\Support\UserDisplay::currentClass();
     for ($i = 0; $i <= $maxclass; ++$i)
-        print("<option value=$i" . ($row["minclassview"] == $i ? " selected" : "") . ">$prefix" . get_user_class_name($i,false,true,true) . "\n");
+        print("<option value=$i" . ($row["minclassview"] == $i ? " selected" : "") . ">$prefix" . \App\Support\UserClass::name($i,false,true,true) . "\n");
 ?>
 	</select>
     </td>

@@ -3,17 +3,17 @@ error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
 
 $__server_PHP_SELF = \App\Support\SupportContext::getServerValue('PHP_SELF');
-if (get_user_class() < UC_ADMINISTRATOR)
+if (\App\Support\UserDisplay::currentClass() < UC_ADMINISTRATOR)
 stderr("Sorry", "Access denied.");
 $bucketpath = "$bitbucket";
-if (get_user_class() >= UC_MODERATOR)
+if (\App\Support\UserDisplay::currentClass() >= UC_MODERATOR)
 {
 	 $delete = intval(\App\Support\SupportContext::getQuery("delete") ?? 0);
 	 if (is_valid_id($delete)) {
 		 $bitbucket = \Nexus\Database\NexusDB::table('bitbucket')->where('id', $delete)->first(['name', 'owner']);
 		 if ($bitbucket) {
 			 $a = (array) $bitbucket;
-			 if (get_user_class() >= UC_MODERATOR || $a["owner"] == $CURUSER["id"]) {
+			 if (\App\Support\UserDisplay::currentClass() >= UC_MODERATOR || $a["owner"] == $CURUSER["id"]) {
 				 \Nexus\Database\NexusDB::table('bitbucket')->where('id', $delete)->delete();
 				 if (!unlink("$bucketpath/{$a['name']}"))
 				 stderr("Warning", "Unable to unlink file: <b>{$a['name']}</b>. You should contact an administrator about this error.",false);
@@ -40,9 +40,9 @@ else {
 		$url = str_replace(" ", "%20", htmlspecialchars("$bitbucket/$name"));
 		print("<tr>");
 		print("<td><center><a href=$url><img src=\"".$url."\" border=0 onLoad='SetSize(this, 400)'></a></center>");
-		print("Uploaded by:  " . get_username($arr['owner']). "<br />");
+		print("Uploaded by:  " . \App\Support\UserDisplay::username($arr['owner']). "<br />");
 		print("(#{$arr['id']}) Filename: $name ($width&nbsp;x&nbsp;$height)");
-		if (get_user_class() >= UC_MODERATOR)
+		if (\App\Support\UserDisplay::currentClass() >= UC_MODERATOR)
 		print(" <b><a href=?delete={$arr['id']}>[Delete]</a></b><br />");
 		print("Added: $date $time");
 		print("</tr>");

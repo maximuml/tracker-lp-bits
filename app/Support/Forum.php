@@ -53,7 +53,7 @@ final class Forum
         $userIds = $moderatorsArray[$forumId] ?? [];
         $names = [];
         foreach ($userIds as $userId) {
-            $names[] = $plainText ? \get_plain_username($userId) : \get_username($userId);
+            $names[] = $plainText ? \App\Support\UserDisplay::plainUsername($userId) : \App\Support\UserDisplay::username($userId);
         }
 
         return rtrim(implode(', ', $names), ', ');
@@ -70,7 +70,7 @@ final class Forum
         $users = explode(',', $name);
         $userIds = [];
         foreach ($users as $user) {
-            $userIds[] = \get_user_id_from_name(trim($user));
+            $userIds[] = \App\Support\UserDisplay::userIdFromName(trim($user));
         }
 
         $max = count($userIds);
@@ -169,7 +169,7 @@ final class Forum
         $log = sprintf(
             'uid: %s, class: %s, post: %s, forumId: %s, protectedForumIdArr: %s, forumMods: %s, isForumMod: %s',
             $uid,
-            \get_user_class(),
+            \App\Support\UserDisplay::currentClass(),
             $post['id'],
             $forumId,
             json_encode($protectedForumIds),
@@ -179,7 +179,7 @@ final class Forum
 
         if (
             in_array($forumId, $protectedForumIds)
-            && \get_user_class() < \App\Models\User::CLASS_ADMINISTRATOR
+            && \App\Support\UserDisplay::currentClass() < \App\Models\User::CLASS_ADMINISTRATOR
             && $uid != $post['userid']
             && $uid != $topicInfo->userid
             && ! $isForumMod

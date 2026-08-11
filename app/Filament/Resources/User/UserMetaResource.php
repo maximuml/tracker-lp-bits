@@ -60,7 +60,7 @@ class UserMetaResource extends Resource
                 TextColumn::make('uid')
                     ->searchable()
                     ->label(__('label.username'))
-                    ->formatStateUsing(fn ($state) => username_for_admin($state))
+                    ->formatStateUsing(fn ($state) => \App\Support\UserDisplay::adminUsername($state))
                 ,
                 TextColumn::make('meta_key_text')
                     ->label(__('label.name'))

@@ -2,7 +2,7 @@
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
 
-if (get_user_class() < UC_UPLOADER)
+if (\App\Support\UserDisplay::currentClass() < UC_UPLOADER)
     permissiondenied();
 
 $year=intval(\App\Support\SupportContext::getQuery('year') ?? 0);
@@ -84,7 +84,7 @@ else{
 		$lastTorrent = \Nexus\Database\NexusDB::table('torrents')->where('owner', $row['userid'])->orderByDesc('id')->first(['id', 'name', 'added']);
 		$row2 = $lastTorrent ? (array) $lastTorrent : [];
 		print("<tr>");
-		print("<td class=\"colfollow\">".get_username($row['userid'], false, true, true, false, false, true)."</td>");
+		print("<td class=\"colfollow\">".\App\Support\UserDisplay::username($row['userid'], false, true, true, false, false, true)."</td>");
 		print("<td class=\"colfollow\">".($row['torrent_size'] ? \App\Support\Format::size($row['torrent_size']) : "0")."</td>");
 		print("<td class=\"colfollow\">".$row['torrent_count']."</td>");
 		print("<td class=\"colfollow\">".($row2['added'] ? \App\Support\Time::format($row2['added']) : $lang_uploaders['text_not_available'])."</td>");
@@ -105,7 +105,7 @@ else{
 		$lastTorrent = \Nexus\Database\NexusDB::table('torrents')->where('owner', $row['userid'])->orderByDesc('id')->first(['id', 'name', 'added']);
 		$row2 = $lastTorrent ? (array) $lastTorrent : [];
 		print("<tr>");
-		print("<td class=\"colfollow\">".get_username($row['userid'], false, true, true, false, false, true)."</td>");
+		print("<td class=\"colfollow\">".\App\Support\UserDisplay::username($row['userid'], false, true, true, false, false, true)."</td>");
 		print("<td class=\"colfollow\">".($row['torrent_size'] ? \App\Support\Format::size($row['torrent_size']) : "0")."</td>");
 		print("<td class=\"colfollow\">".$row['torrent_count']."</td>");
 		print("<td class=\"colfollow\">".($row2['added'] ? \App\Support\Time::format($row2['added']) : $lang_uploaders['text_not_available'])."</td>");

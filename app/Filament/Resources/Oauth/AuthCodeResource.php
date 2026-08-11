@@ -52,7 +52,7 @@ class AuthCodeResource extends Resource
                 TextColumn::make('id'),
                 TextColumn::make('user_id')
                     ->label(__('label.username'))
-                    ->formatStateUsing(fn ($record) => username_for_admin($record->user_id)),
+                    ->formatStateUsing(fn ($record) => \App\Support\UserDisplay::adminUsername($record->user_id)),
                 TextColumn::make('client.name')
                     ->label(__('oauth.client')),
                 TextColumn::make('expires_at')

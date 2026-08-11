@@ -296,7 +296,7 @@ class SearchBoxRepository extends BaseRepository
      */
     public function deleteCategory($id)
     {
-        if (get_user_class() < User::CLASS_SYSOP) {
+        if (\App\Support\UserDisplay::currentClass() < User::CLASS_SYSOP) {
             throw new InsufficientPermissionException();
         }
         $idArr = Arr::wrap($id);

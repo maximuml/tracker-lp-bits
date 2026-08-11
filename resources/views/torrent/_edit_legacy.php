@@ -60,7 +60,7 @@ else {
     }
 
     print("<tr><td class=\"rowhead\">".$lang_edit['row_description']."<font color=\"red\">*</font></td><td class=\"rowfollow\">");
-	textbbcode("edittorrent","descr",($row["descr"]), false, 130, true);
+	echo \App\Support\Form::bbcodeEditor("edittorrent","descr",($row["descr"]), false, 130, true);
 	print("</td></tr>");
 
     if (\App\Support\Config\SiteConfig::current()->main->enableTechnicalInfo()) {

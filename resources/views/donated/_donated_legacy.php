@@ -2,7 +2,7 @@
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
 $__server_REQUEST_METHOD = \App\Support\SupportContext::getServerValue('REQUEST_METHOD');
-if (get_user_class() < UC_SYSOP)
+if (\App\Support\UserDisplay::currentClass() < UC_SYSOP)
 stderr("Error", "Access denied.");
 if ($__server_REQUEST_METHOD == "POST")
 {

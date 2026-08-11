@@ -73,7 +73,7 @@ class UserMedalResource extends Resource
                 TextColumn::make('user.username')
                     ->label(__('label.username'))
                     ->searchable()
-                    ->formatStateUsing(fn ($record) => new HtmlString(get_username($record->uid, false, true, true, true)))
+                    ->formatStateUsing(fn ($record) => new HtmlString(\App\Support\UserDisplay::username($record->uid, false, true, true, true)))
                 ,
                 TextColumn::make('medal.name')->label(__('label.medal.label'))->searchable(),
                 ImageColumn::make('medal.image_large')->label(__('label.image')),

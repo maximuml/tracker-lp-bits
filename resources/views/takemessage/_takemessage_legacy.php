@@ -23,7 +23,7 @@ if ($__server_REQUEST_METHOD != "POST")
 		$origmsgrow = $origmsgRecord->toArray();
 		if(!\App\Support\SupportContext::getPost('to'))
 			stderr($lang_takemessage['std_error'], $lang_takemessage['std_must_enter_username']);
-		$receiver = get_user_id_from_name(trim(\App\Support\SupportContext::getPost('to')));
+		$receiver = \App\Support\UserDisplay::userIdFromName(trim(\App\Support\SupportContext::getPost('to')));
         $locale = get_user_locale($receiver);
 		if ($origmsgrow['sender'] == 0)
 		{
@@ -31,7 +31,7 @@ if ($__server_REQUEST_METHOD != "POST")
 		}
 		else
 		{
-			$origmsgsendername = get_plain_username($origmsgrow['sender']);
+			$origmsgsendername = \App\Support\UserDisplay::plainUsername($origmsgrow['sender']);
 			$origfrom = "[url=userdetails.php?id=".$origmsgrow['sender']."]".$origmsgsendername."[/url]";
 		}
 		$msg = "-------- ".nexus_trans("message.msg_original_message_from", [], $locale) . $origfrom . " --------\n" . $origmsgrow['msg']."\n\n".($msg ? "-------- [url=userdetails.php?id=".$CURUSER["id"]."]".$CURUSER["username"]."[/url][i] Wrote at ".date("Y-m-d H:i:s").":[/i] --------\n".$msg : "");

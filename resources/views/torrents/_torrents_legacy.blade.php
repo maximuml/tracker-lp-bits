@@ -8,11 +8,11 @@ print("<table width=\"97%\" class=\"main\" border=\"0\" cellspacing=\"0\" cellpa
 <?php
 if($inclbookmarked == 1)
 {
-	print("<h1 align=\"center\">" . get_username($CURUSER['id']) . $lang_torrents['text_s_bookmarked_torrent'] . "</h1>");
+	print("<h1 align=\"center\">" . \App\Support\UserDisplay::username($CURUSER['id']) . $lang_torrents['text_s_bookmarked_torrent'] . "</h1>");
 }
 elseif($inclbookmarked == 2)
 {
-	print("<h1 align=\"center\">" . get_username($CURUSER['id']) . $lang_torrents['text_s_not_bookmarked_torrent'] . "</h1>");
+	print("<h1 align=\"center\">" . \App\Support\UserDisplay::username($CURUSER['id']) . $lang_torrents['text_s_not_bookmarked_torrent'] . "</h1>");
 }
 
 if ($count) {
@@ -32,8 +32,8 @@ if ($count) {
     $rows = apply_filter('torrent_list', $rows, $page, $sectiontype, $searchstr_raw);
 	print($pagertop);
 	if ($sectiontype == $browsecatmode)
-		torrenttable($rows, "torrents", $sectiontype);
-	else torrenttable($rows, "bookmarks", $sectiontype);
+		echo \App\Support\TorrentTable::render($rows, "torrents", $sectiontype);
+	else echo \App\Support\TorrentTable::render($rows, "bookmarks", $sectiontype);
 	print($pagerbottom);
 }
 else {

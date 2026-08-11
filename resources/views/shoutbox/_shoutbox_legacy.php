@@ -179,7 +179,7 @@ function shoutbox_class_badge($class)
 	$color = $map[$class][1];
 	$tooltip = '';
 	if (function_exists('get_user_class_name')) {
-		$tooltip = (string)get_user_class_name($class, false, false, true);
+		$tooltip = (string)\App\Support\UserClass::name($class, false, false, true);
 	}
 	return '<span class="shout-class-badge" style="background:' . $color . '" title="' . htmlspecialchars($tooltip, ENT_QUOTES) . '">' . $label . '</span>';
 }
@@ -245,8 +245,8 @@ else
 		$avatarUrl = 'pic/default_avatar.png';
 		$nickReplyName = '';
 		if ($arr["userid"]) {
-			$username = get_username($arr["userid"],false,true,true,true,false,false,"",true);
-			$userRow = get_user_row((int)$arr["userid"]);
+			$username = \App\Support\UserDisplay::username($arr["userid"],false,true,true,true,false,false,"",true);
+			$userRow = \App\Support\UserDisplay::row((int)$arr["userid"]);
 			$nickReplyName = trim((string)($userRow["username"] ?? ''));
 			$classBadge = shoutbox_class_badge((int)($userRow["class"] ?? 0));
 			if ($showAvatars) {

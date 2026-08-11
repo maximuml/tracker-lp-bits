@@ -1,6 +1,6 @@
 <?php
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
-if (get_user_class() < UC_ADMINISTRATOR) {
+if (\App\Support\UserDisplay::currentClass() < UC_ADMINISTRATOR) {
 	stderr("Error","Only Administrators and above can modify the Rules, sorry.");
 }
 function clear_rules_cache()
@@ -111,7 +111,7 @@ else{
 	foreach ($rules as $arr){
 		print("<br /><table width=940 border=1 cellspacing=0 cellpadding=5>");
 		print("<tr><td class=colhead>$arr[title] - $arr[lang_name]</td></tr>\n");
-		print("<tr><td align=left>" . format_comment($arr["text"])."</td></tr>");
+		print("<tr><td align=left>" . \App\Support\Format::formatComment($arr["text"])."</td></tr>");
 		print("<tr><td align=left><a href=?act=edit&id=$arr[id]>Edit</a>&nbsp;&nbsp;<a href=?act=del&id=$arr[id]>Delete</a></td></tr></table>");
 		//end_main_frame();
 	}

@@ -33,6 +33,16 @@ final class UserDisplay
     }
 
     /**
+     * Resolve a user id from a username (case-insensitive).
+     *
+     * Mirrors the legacy `get_user_id_from_name()` helper.
+     */
+    public static function userIdFromName(string $username): int
+    {
+        return \App\Support\LegacyAuth::userIdFromName($username, \App\Support\LegacyAuthContext::fromSupportContext());
+    }
+
+    /**
      * Return the current user's id, or 0 when not authenticated.
      *
      * Mirrors `get_user_id()`.
@@ -161,7 +171,7 @@ final class UserDisplay
      */
     public static function plainUsername(int|string $id): string
     {
-        $row = \get_user_row($id);
+        $row = \App\Support\UserDisplay::row($id);
 
         return (string) ($row['username'] ?? '');
     }
@@ -187,7 +197,7 @@ final class UserDisplay
             return new HtmlString('');
         }
 
-        return new HtmlString(\get_username($id, false, true, true, true));
+        return new HtmlString(\App\Support\UserDisplay::username($id, false, true, true, true));
     }
 
     /**
@@ -213,7 +223,7 @@ final class UserDisplay
             return $usernameArray[$id];
         }
 
-        $arr = \get_user_row($id);
+        $arr = \App\Support\UserDisplay::row($id);
         if ($arr) {
             if ($big) {
                 $donorpic = 'starbig';
@@ -280,8 +290,8 @@ final class UserDisplay
             }
 
             $href = \getSchemeAndHttpHost() . "/userdetails.php?id=$id";
-            $classNameColored = \get_user_class_name($arr['class'], true, false, false);
-            $className = \get_user_class_name($arr['class'], false, true, true, ['with_alias' => true]);
+            $classNameColored = \App\Support\UserClass::name($arr['class'], true, false, false);
+            $className = \App\Support\UserClass::name($arr['class'], false, true, true, ['with_alias' => true]);
             $title = $arr['title'] ?? '';
 
             $username = ($link

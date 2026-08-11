@@ -939,10 +939,10 @@ foreach ($topicRows as $topicarr)
 	$added = \App\Support\Time::format($arr['added'],true,false);
 
 	/// GET NAME OF LAST POSTER ///
-	$username = get_username($userid);
+	$username = \App\Support\UserDisplay::username($userid);
 
 	/// GET NAME OF THE AUTHOR ///
-	$author = get_username($topic_userid);
+	$author = \App\Support\UserDisplay::username($topic_userid);
 	$subject = "<a href=forums.php?action=viewtopic&topicid=$topicid><b>" . htmlspecialchars($topicarr->subject) . "</b></a>";
 
 	print("<tr class=tableb><td style='padding-left: 10px' align=left class=rowfollow>$subject</td>".

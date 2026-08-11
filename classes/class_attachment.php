@@ -33,7 +33,7 @@ class ATTACHMENT{
 	function set_class(): void
 	{
 		$userid = $this->userid;
-		$row = get_user_row($userid);
+		$row = \App\Support\UserDisplay::row($userid);
 		$this->class = (int) ($row['class'] ?? 0);
 	}
 

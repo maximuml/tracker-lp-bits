@@ -4,7 +4,7 @@ error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 $__server_REQUEST_URI = \App\Support\SupportContext::getServerValue('REQUEST_URI');
 if (!\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::LOG))
 {
-stderr($lang_log['std_sorry'],$lang_log['std_permission_denied_only'].get_user_class_name($log_class,false,true,true).sprintf($lang_log['std_or_above_can_view'], \App\Models\Setting::getSiteName()),false);
+stderr($lang_log['std_sorry'],$lang_log['std_permission_denied_only'].\App\Support\UserClass::name($log_class,false,true,true).sprintf($lang_log['std_or_above_can_view'], \App\Models\Setting::getSiteName()),false);
 }
 
 $q = htmlspecialchars(trim(\App\Support\SupportContext::getQuery('query') ?? ''));
@@ -133,7 +133,7 @@ else {
 				if (strpos($arr['txt'],'settings updated by')) $color = "darkred";
 				print("<tr><td class=\"rowfollow nowrap\" align=center>".\App\Support\Time::format($arr['added'],true,false)."</td><td class=rowfollow align=left><font color='".$color."'>".htmlspecialchars($arr['txt'])."</font></td>");
                 if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::CONFIDENTIAL_LOG)){
-                    print("<td class=rowfollow align=left>".($arr['uid'] > 0 ? get_username($arr['uid']) : "System")."</td>");
+                    print("<td class=rowfollow align=left>".($arr['uid'] > 0 ? \App\Support\UserDisplay::username($arr['uid']) : "System")."</td>");
                 }
                 print("</tr>\n");
 			}
@@ -162,7 +162,7 @@ else {
 		)
 		{
 			$txt = \App\Support\SupportContext::getPost('txt') ?? '';
-            if (get_user_class() < $chrmanage_class)
+            if (\App\Support\UserDisplay::currentClass() < $chrmanage_class)
                 permissiondeny();
 			elseif (((\App\Support\SupportContext::getPost('do') !== null)) && \App\Support\SupportContext::getPost('do') == "add")
 					\App\Repositories\LogRepository::addChronicle((int)$CURUSER["id"], $txt);
@@ -197,7 +197,7 @@ else {
 			foreach ($chronicleRows as $arr)
 			{
 				$date = \App\Support\Time::format($arr['added'],true,false);
-				print("<tr><td class=rowfollow align=center><nobr>$date</nobr></td><td class=rowfollow align=left>".format_comment($arr["txt"],true,false,true)."</td>".(\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::CHR_MANAGE) ? "<td align=center nowrap><b><a href=\"?action=chronicle&do=edit&id=".$arr["id"]."\">".$lang_log['text_edit']."</a>&nbsp;|&nbsp;<a href=\"?action=chronicle&do=del&id=".$arr["id"]."\"><font color=red>".$lang_log['text_delete']."</font></a></b></td>" : "")."</tr>\n");
+				print("<tr><td class=rowfollow align=center><nobr>$date</nobr></td><td class=rowfollow align=left>".\App\Support\Format::formatComment($arr["txt"],true,false,true)."</td>".(\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::CHR_MANAGE) ? "<td align=center nowrap><b><a href=\"?action=chronicle&do=edit&id=".$arr["id"]."\">".$lang_log['text_edit']."</a>&nbsp;|&nbsp;<a href=\"?action=chronicle&do=del&id=".$arr["id"]."\"><font color=red>".$lang_log['text_delete']."</font></a></b></td>" : "")."</tr>\n");
 			}
 			print("</table>");
 			echo $pagerbottom;
@@ -232,7 +232,7 @@ else {
 			foreach ($newsRows as $arr){
 				$date = \App\Support\Time::format($arr['added'],true,false);
 			print("<table width=940 border=1 cellspacing=0 cellpadding=5>\n");
-			print("<tr><td class=rowhead width='10%'>".$lang_log['col_title']."</td><td class=rowfollow align=left>".$arr["title"]."</td></tr><tr><td class=rowhead width='10%'>".$lang_log['col_date']."</td><td class=rowfollow align=left>".$date."</td></tr><tr><td class=rowhead width='10%'>".$lang_log['col_body']."</td><td class=rowfollow align=left>".format_comment($arr["body"],false,false,true)."</td></tr>\n");
+			print("<tr><td class=rowhead width='10%'>".$lang_log['col_title']."</td><td class=rowfollow align=left>".$arr["title"]."</td></tr><tr><td class=rowhead width='10%'>".$lang_log['col_date']."</td><td class=rowfollow align=left>".$date."</td></tr><tr><td class=rowhead width='10%'>".$lang_log['col_body']."</td><td class=rowfollow align=left>".\App\Support\Format::formatComment($arr["body"],false,false,true)."</td></tr>\n");
 			print("</table><br />");
 			}
 			echo $pagerbottom;

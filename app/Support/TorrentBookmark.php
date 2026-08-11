@@ -72,4 +72,19 @@ final class TorrentBookmark
             ? ($labels['title_delbookmark_torrent'] ?? '')
             : '<img class="bookmark" src="pic/trans.gif" alt="Bookmarked" title="' . ($labels['title_delbookmark_torrent'] ?? '') . '" />';
     }
+
+    /**
+     * Context-aware wrapper for {@see stateMarkup()}.
+     * Mirrors the legacy `get_torrent_bookmark_state()` helper.
+     */
+    public static function stateMarkupWithContext(int|string $userId, int|string $torrentId, bool $text = false): string
+    {
+        $cache = \App\Support\SupportContext::getCache();
+        $lang = \App\Support\SupportContext::getLangFunctions();
+
+        return self::stateMarkup($cache, $userId, $torrentId, $text, [
+            'title_bookmark_torrent' => $lang['title_bookmark_torrent'] ?? '',
+            'title_delbookmark_torrent' => $lang['title_delbookmark_torrent'] ?? '',
+        ]);
+    }
 }

@@ -24,7 +24,7 @@ if ($action == "viewposts")
 
 	list($pagertop, $pagerbottom, , $offset, $perpage) = pager($perpage, $postcount, $__server_PHP_SELF . "?action=viewposts&id=$userid&");
 
-	$subject = get_username($userid);
+	$subject = \App\Support\UserDisplay::username($userid);
 
 	$posts = \Nexus\Database\NexusDB::table('posts as p')
 	    ->leftJoin('topics as t', 'p.topicid', '=', 't.id')
@@ -83,14 +83,14 @@ if ($action == "viewposts")
 
       print("<table class=main width=100% border=1 cellspacing=0 cellpadding=5>\n");
 
-      $body = format_comment($arr["body"]);
+      $body = \App\Support\Format::formatComment($arr["body"]);
 
       if (is_valid_id($arr['editedby']))
       {
       	$editor = \App\Models\User::query()->where('id', $arr['editedby'])->value('username');
       	if ($editor)
       	{
-      		$body .= "<p><font size=1 class=small>".$lang_userhistory['text_last_edited'].get_username($arr['editedby']).$lang_userhistory['text_at']."$arr[editdate]</font></p>\n";
+      		$body .= "<p><font size=1 class=small>".$lang_userhistory['text_last_edited'].\App\Support\UserDisplay::username($arr['editedby']).$lang_userhistory['text_at']."$arr[editdate]</font></p>\n";
       	}
       }
 
@@ -120,7 +120,7 @@ if ($action == "viewcomments")
 
 	list($pagertop, $pagerbottom, , $offset, $perpage) = pager($perpage, $commentcount, $__server_PHP_SELF . "?action=viewcomments&id=$userid&");
 
-	$subject = get_username($userid);
+	$subject = \App\Support\UserDisplay::username($userid);
 
 	$comments = \Nexus\Database\NexusDB::table('comments as c')
 	    ->leftJoin('torrents as t', 'c.torrent', '=', 't.id')
@@ -169,7 +169,7 @@ if ($action == "viewcomments")
 
 		print("<table class=main width=100% border=1 cellspacing=0 cellpadding=5>\n");
 
-		$body = format_comment($arr["text"]);
+		$body = \App\Support\Format::formatComment($arr["text"]);
 
 		print("<tr valign=top><td class=comment>$body</td></tr>\n");
 

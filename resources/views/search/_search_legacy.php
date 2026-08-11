@@ -148,7 +148,7 @@ if ($search && $count > 0) {
             ->toArray();
     }
     print($pagertop);
-    torrenttable(json_decode(json_encode($rows), true));
+    echo \App\Support\TorrentTable::render(json_decode(json_encode($rows), true));
     print($pagerbottom);
 } else {
     stdmsg($lang_torrents['std_search_results_for'] . htmlspecialchars($search) . "\"",$lang_torrents['std_try_again']);

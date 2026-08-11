@@ -392,9 +392,9 @@ if ($action == "post")
 	$arr = get_forum_row($forumid) or die($lang_forums['std_bad_forum_id']);
 
 	if (
-	    get_user_class() < $arr["minclassread"]
-        || get_user_class() < $arr["minclasswrite"]
-        || ($type =='new' && get_user_class() < $arr["minclasscreate"])
+	    \App\Support\UserDisplay::currentClass() < $arr["minclassread"]
+        || \App\Support\UserDisplay::currentClass() < $arr["minclasswrite"]
+        || ($type =='new' && \App\Support\UserDisplay::currentClass() < $arr["minclasscreate"])
     ) {
         permissiondenied();
     }
@@ -601,7 +601,7 @@ if ($action == "viewtopic")
 	$orgsubject = $arr['subject'];
 	$subject = htmlspecialchars($arr['subject']);
 	if ($highlight){
-		$subject = highlight($highlight,$orgsubject);
+		$subject = \App\Support\Format::highlight($highlight,$orgsubject);
 	}
 	$sticky = $arr['sticky'] == "yes";
 	$hlcolor = $arr['hlcolor'];
@@ -614,9 +614,9 @@ if ($action == "viewtopic")
 	$forumname = $row['name'];
 	$is_forummod = is_forum_moderator($forumid,'forum');
 
-	if (get_user_class() < $row["minclassread"])
+	if (\App\Support\UserDisplay::currentClass() < $row["minclassread"])
 		stderr($lang_forums['std_error'], $lang_forums['std_unpermitted_viewing_topic']);
-	if (((get_user_class() >= $row["minclasswrite"] && !$locked) || \App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::POST_MANAGE) || $is_forummod) && $CURUSER["forumpost"] == 'yes')
+	if (((\App\Support\UserDisplay::currentClass() >= $row["minclasswrite"] && !$locked) || \App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::POST_MANAGE) || $is_forummod) && $CURUSER["forumpost"] == 'yes')
 		$maypost = true;
 	else $maypost = false;
 
@@ -778,7 +778,7 @@ if ($action == "viewtopic")
 		$avatar = ($CURUSER["avatars"] == "yes" ? htmlspecialchars($arr2["avatar"]) : "");
 
 		$uclass = get_user_class_image($arr2["class"]);
-		$by = get_username($posterid,false,true,true,false,false,true);
+		$by = \App\Support\UserDisplay::username($posterid,false,true,true,false,false,true);
 
 		if (!$avatar)
 			$avatar = "pic/default_avatar.png";
@@ -826,30 +826,30 @@ if ($action == "viewtopic")
 //		if ($protected_enabled && $pn+$offset>1 && get_user_class()<UC_ADMINISTRATOR && $userid != $base_posterid && $posterid!=$userid && !$is_forummod){
 		if ($pn+$offset>1 && !can_view_post($userid, $arr)){
 			//enable content protection
-			$bodyContent = format_comment($lang_forums["text_post_protected"]);
+			$bodyContent = \App\Support\Format::formatComment($lang_forums["text_post_protected"]);
             $canViewProtected = false;
 		}else{
 			//display normal content
-			$bodyContent = format_comment($arr["body"]);
+			$bodyContent = \App\Support\Format::formatComment($arr["body"]);
             $canViewProtected = true;
 		}
 		if ($highlight){
-            $bodyContent = highlight($highlight,$bodyContent);
+            $bodyContent = \App\Support\Format::highlight($highlight,$bodyContent);
 		}
 
 		if (is_valid_id($arr['editedby']))
 		{
 			$lastedittime = \App\Support\Time::format($arr['editdate'],true,false);
-            $bodyContent .= "<br /><p><font class=\"small\">".$lang_forums['text_last_edited_by'].get_username($arr['editedby']).$lang_forums['text_last_edit_at'].$lastedittime."</font></p>\n";
+            $bodyContent .= "<br /><p><font class=\"small\">".$lang_forums['text_last_edited_by'].\App\Support\UserDisplay::username($arr['editedby']).$lang_forums['text_last_edit_at'].$lastedittime."</font></p>\n";
 		}
 		$bodyContent = apply_filter('post_body', $bodyContent, $arr, $allPosts);
 		$body .= $bodyContent . "</div>";
 		if ($signature)
-		$body .= "<p style='vertical-align:bottom'><br />____________________<br />" . format_comment($signature,false,false,false,true,500,true,false, 1,200) . "</p>";
+		$body .= "<p style='vertical-align:bottom'><br />____________________<br />" . \App\Support\Format::formatComment($signature,false,false,false,true,500,true,false, 1,200) . "</p>";
 
 		$stats = "<br />"."&nbsp;&nbsp;".$lang_forums['text_posts']."$forumposts<br />"."&nbsp;&nbsp;".$lang_forums['text_ul']."$uploaded <br />"."&nbsp;&nbsp;".$lang_forums['text_dl']."$downloaded<br />"."&nbsp;&nbsp;".$lang_forums['text_ratio']."$ratio";
 		print("<tr><td class=\"rowfollow\" width=\"150\" valign=\"top\" align=\"left\" style='padding: 0px'>" .
-		return_avatar_image($avatar). "<br /><br /><br />&nbsp;&nbsp;<img alt=\"".get_user_class_name($arr2["class"],false,false,true)."\" title=\"".get_user_class_name($arr2["class"],false,false,true)."\" src=\"".$uclass."\" />".$stats."</td><td class=\"rowfollow\" valign=\"top\"><br />".$body."</td></tr>\n");
+		return_avatar_image($avatar). "<br /><br /><br />&nbsp;&nbsp;<img alt=\"".\App\Support\UserClass::name($arr2["class"],false,false,true)."\" title=\"".\App\Support\UserClass::name($arr2["class"],false,false,true)."\" src=\"".$uclass."\" />".$stats."</td><td class=\"rowfollow\" valign=\"top\"><br />".$body."</td></tr>\n");
 		$secs = 900;
 		$dt = date("Y-m-d H:i:s", TIMENOW - $secs); // calculate date.
 		$online = $arr2['last_access'] > $dt;
@@ -891,7 +891,7 @@ if ($action == "viewtopic")
 		print("<td class=\"embedded\"><form method=\"post\" action=\"".htmlspecialchars("?action=movetopic&topicid=".$topicid)."\">\n"."&nbsp;".$lang_forums['text_move_thread_to']."&nbsp;<select class=\"med\" name=\"forumid\">");
 		$forums = get_forum_row();
 		foreach ($forums as $arr){
-			if ($arr["id"] != $forumid && get_user_class() >= $arr["minclasswrite"])
+			if ($arr["id"] != $forumid && \App\Support\UserDisplay::currentClass() >= $arr["minclasswrite"])
 				print("<option value=\"" . $arr["id"] . "\">" . htmlspecialchars($arr["name"]) . "</option>\n");
 		}
 		print("</select> <input type=\"submit\" class=\"medium\" value=\"".$lang_forums['submit_move']."\" /></form></td>");
@@ -985,7 +985,7 @@ if ($action == "movetopic")
 	if (!$forum)
 	stderr($lang_forums['std_error'], $lang_forums['std_forum_not_found']);
 
-	if (get_user_class() < $forum->minclasswrite)
+	if (\App\Support\UserDisplay::currentClass() < $forum->minclasswrite)
 		permissiondenied();
 
 	$topic = \App\Models\Topic::query()->where('id', $topicid)->first(['forumid']);
@@ -1184,7 +1184,7 @@ if ($action == "viewforum")
 		write_log("User " . $CURUSER["username"] . "," . $CURUSER["ip"] . " is trying to visit forum that doesn't exist", 'mod');
 		stderr($lang_forums['std_forum_error'],$lang_forums['std_forum_not_found']);
 	}
-	if (get_user_class() < $row["minclassread"])
+	if (\App\Support\UserDisplay::currentClass() < $row["minclassread"])
 		permissiondenied();
 
 	$forumname = $row['name'];
@@ -1242,7 +1242,7 @@ if ($action == "viewforum")
 	print("<h1 align=\"center\"><a class=\"faqlink\" href=\"forums.php\">".$SITENAME."&nbsp;".$lang_forums['text_forums'] ."</a>--><a class=\"faqlink\" href=\"".htmlspecialchars("forums.php?action=viewforum&forumid=".$forumid)."\">".$forumname."</a></h1>\n");
 	end_main_frame();
 	print("<br />");
-	$maypost = get_user_class() >= $row["minclasswrite"] && get_user_class() >= $row["minclasscreate"] && $CURUSER["forumpost"] == 'yes';
+	$maypost = \App\Support\UserDisplay::currentClass() >= $row["minclasswrite"] && \App\Support\UserDisplay::currentClass() >= $row["minclasscreate"] && $CURUSER["forumpost"] == 'yes';
 
 	if (!$maypost)
 		print("<p><i>".$lang_forums['text_unpermitted_starting_new_topics']."</i></p>\n");
@@ -1320,7 +1320,7 @@ if ($action == "viewforum")
 			$arr = get_post_row($topicarr['lastpost']);
 			$lppostid = intval($arr["id"] ?? 0);
 			$lpuserid = intval($arr["userid"] ?? 0);
-			$lpusername = get_username($lpuserid);
+			$lpusername = \App\Support\UserDisplay::username($lpuserid);
 			$lpadded = \App\Support\Time::format($arr["added"],true,false);
 			$onmouseover = "";
 			if ($enabletooltip_tweak == 'yes' && $CURUSER['showlastpost'] != 'no'){
@@ -1328,7 +1328,7 @@ if ($action == "viewforum")
 					$lastposttime = $lang_forums['text_at_time'].$arr["added"];
 				else
 					$lastposttime = $lang_forums['text_blank'].\App\Support\Time::format($arr["added"],true,false,true);
-				$lptext = format_comment(mb_substr($arr['body'],0,100,"UTF-8") . (mb_strlen($arr['body'],"UTF-8") > 100 ? " ......" : "" ),true,false,false,true,600,false,false);
+				$lptext = \App\Support\Format::formatComment(mb_substr($arr['body'],0,100,"UTF-8") . (mb_strlen($arr['body'],"UTF-8") > 100 ? " ......" : "" ),true,false,false,true,600,false,false);
 				$lastpost_tooltip[$counter]['id'] = "lastpost_" . $counter;
 				$lastpost_tooltip[$counter]['content'] = $lang_forums['text_last_posted_by'].$lpusername.$lastposttime."<br />".$lptext;
 				$onmouseover = "onmouseover=\"domTT_activate(this, event, 'content', document.getElementById('" . $lastpost_tooltip[$counter]['id'] . "'), 'trail', false,'lifetime', 5000,'styleClass','niceTitle','fadeMax', 87,'maxWidth', 400);\"";
@@ -1336,9 +1336,9 @@ if ($action == "viewforum")
 
 			$arr = get_post_row($topicarr['firstpost']);
 			$fpuserid = intval($arr["userid"] ?? 0);
-			$fpauthor = get_username($arr["userid"]);
+			$fpauthor = \App\Support\UserDisplay::username($arr["userid"]);
 
-			$subject = ($sticky ? "<img class=\"sticky\" src=\"pic/trans.gif\" alt=\"Sticky\" title=\"".$lang_forums['title_sticky']."\" />&nbsp;&nbsp;" : "") . "<a href=\"".htmlspecialchars("?action=viewtopic&forumid=".$forumid."&topicid=".$topicid)."\" ".$onmouseover.">" .highlight_topic(highlight($search,htmlspecialchars($topicarr["subject"])), $hlcolor) . "</a>".$topicpages;
+			$subject = ($sticky ? "<img class=\"sticky\" src=\"pic/trans.gif\" alt=\"Sticky\" title=\"".$lang_forums['title_sticky']."\" />&nbsp;&nbsp;" : "") . "<a href=\"".htmlspecialchars("?action=viewtopic&forumid=".$forumid."&topicid=".$topicid)."\" ".$onmouseover.">" .highlight_topic(\App\Support\Format::highlight($search,htmlspecialchars($topicarr["subject"])), $hlcolor) . "</a>".$topicpages;
 			$lastpostread = get_last_read_post_id($topicid);
 
 			if ($lastpostread >= $lppostid)
@@ -1359,7 +1359,7 @@ if ($action == "viewforum")
 			print("<tr><td class=\"rowfollow\" align=\"left\"><table border=\"0\" cellspacing=\"0\" cellpadding=\"0\"><tr>" .
 			"<td class=\"embedded\" style='padding-right: 10px'>".$img .
 			"</td><td class=\"embedded\" align=\"left\">\n" .
-			$subject."</td></tr></table></td><td class=\"rowfollow\" align=\"center\">".get_username($fpuserid)."<br />".$topictime."</td><td class=\"rowfollow\" align=\"center\">".$replies." / <font color=\"gray\">".$views."</font></td>\n" .
+			$subject."</td></tr></table></td><td class=\"rowfollow\" align=\"center\">".\App\Support\UserDisplay::username($fpuserid)."<br />".$topictime."</td><td class=\"rowfollow\" align=\"center\">".$replies." / <font color=\"gray\">".$views."</font></td>\n" .
 			"<td class=\"rowfollow nowrap\" align=\"center\">".$lpadded."<br />".$lpusername."</td>\n");
 
 			print("</tr>\n");
@@ -1416,7 +1416,7 @@ if ($action == "viewunread")
 	print("<h1 align=\"center\"><a class=\"faqlink\" href=\"forums.php\">".$SITENAME."&nbsp;".$lang_forums['text_forums']."</a>-->".$lang_forums['text_topics_with_unread_posts']."</h1>");
 
 	$n = 0;
-	$uc = get_user_class();
+	$uc = \App\Support\UserDisplay::currentClass();
 
 	foreach ($unreadTopics as $topic)
 	{
@@ -1478,7 +1478,7 @@ if ($action == "search")
 		$searchQuery = \Nexus\Database\NexusDB::table('posts')
 			->leftJoin('topics', 'posts.topicid', '=', 'topics.id')
 			->leftJoin('forums', 'topics.forumid', '=', 'forums.id')
-			->where('forums.minclassread', '<=', get_user_class())
+			->where('forums.minclassread', '<=', \App\Support\UserDisplay::currentClass())
 			->where(function ($q) use ($term) {
 				$q->where(function ($sub) use ($term) {
 					$sub->where('topics.subject', 'like', $term)->whereColumn('posts.id', 'topics.firstpost');
@@ -1556,7 +1556,7 @@ if ($action == "search")
 		foreach ($posts as $post)
 		{
 			$post = (array) $post;
-			print("<tr><td class=\"rowfollow\" align=\"center\" width=\"1%\">".$post['id']."</td><td class=\"rowfollow\" align=\"left\"><a href=\"".htmlspecialchars("?action=viewtopic&topicid=".$post['topicid']."&highlight=".rawurlencode($keywords)."&page=p".$post['id']."#pid".$post['id'])."\">" . highlight_topic(highlight($keywords,htmlspecialchars($post['subject'])), $post['hlcolor']) . "</a></td><td class=\"rowfollow nowrap\" align=\"left\"><a href=\"".htmlspecialchars("?action=viewforum&forumid=".$post['forumid'])."\"><b>" . htmlspecialchars($post["forumname"]) . "</b></a></td><td class=\"rowfollow nowrap\" align=\"left\">" . \App\Support\Time::format($post['added'],true,false) . "&nbsp;|&nbsp;". get_username($post['userid']) ."</td></tr>\n");
+			print("<tr><td class=\"rowfollow\" align=\"center\" width=\"1%\">".$post['id']."</td><td class=\"rowfollow\" align=\"left\"><a href=\"".htmlspecialchars("?action=viewtopic&topicid=".$post['topicid']."&highlight=".rawurlencode($keywords)."&page=p".$post['id']."#pid".$post['id'])."\">" . highlight_topic(\App\Support\Format::highlight($keywords,htmlspecialchars($post['subject'])), $post['hlcolor']) . "</a></td><td class=\"rowfollow nowrap\" align=\"left\"><a href=\"".htmlspecialchars("?action=viewforum&forumid=".$post['forumid'])."\"><b>" . htmlspecialchars($post["forumname"]) . "</b></a></td><td class=\"rowfollow nowrap\" align=\"left\">" . \App\Support\Time::format($post['added'],true,false) . "&nbsp;|&nbsp;". \App\Support\UserDisplay::username($post['userid']) ."</td></tr>\n");
 		}
 
 		print("</table>\n");
@@ -1592,7 +1592,7 @@ if (!$overforums = $Cache->get_value('overforums_list')){
 }
 foreach ($overforums as $a)
 {
-	if (get_user_class() < $a["minclassview"])
+	if (\App\Support\UserDisplay::currentClass() < $a["minclassview"])
 		continue;
 	$forid = $a["id"];
 	$overforumname = $a["name"];
@@ -1606,7 +1606,7 @@ foreach ($overforums as $a)
 	{
 		if ($forums_arr['forid'] != $forid)
 			continue;
-		if (get_user_class() < $forums_arr["minclassread"])
+		if (\App\Support\UserDisplay::currentClass() < $forums_arr["minclassread"])
 			continue;
 
 		$forumid = $forums_arr["id"];
@@ -1644,7 +1644,7 @@ foreach ($overforums as $a)
 				$lasttopicdissubject = mb_substr($lasttopicdissubject, 0, $max_length_of_topic_subject-2,"UTF-8") . "..";
 			$lasttopic = highlight_topic(htmlspecialchars($lasttopicdissubject), $hlcolor);
 
-			$lastpost = "<a href=\"".htmlspecialchars("?action=viewtopic&topicid=".$lasttopicid."&page=last#last")."\" title=\"".htmlspecialchars($lasttopicsubject)."\">".$lasttopic."</a><br />". $lastpostdate."&nbsp;|&nbsp;".get_username($lastposterid);
+			$lastpost = "<a href=\"".htmlspecialchars("?action=viewtopic&topicid=".$lasttopicid."&page=last#last")."\" title=\"".htmlspecialchars($lasttopicsubject)."\">".$lasttopic."</a><br />". $lastpostdate."&nbsp;|&nbsp;".\App\Support\UserDisplay::username($lastposterid);
 
 			$lastreadpost = get_last_read_post_id($lasttopicid);
 

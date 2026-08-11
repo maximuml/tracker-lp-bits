@@ -19,7 +19,7 @@ $rules = \Nexus\Database\NexusDB::table('rules')->where('lang_id', $lang_id)->or
 foreach ($rules as $rule){
 	$arr = (array) $rule;
 	begin_frame($arr['title'], false);
-	print(format_comment($arr["text"]));
+	print(\App\Support\Format::formatComment($arr["text"]));
 	end_frame();
 }
 end_main_frame();

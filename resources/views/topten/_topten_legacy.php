@@ -5,7 +5,7 @@ $lang_topten = (array) (\App\Support\SupportContext::getGlobal('lang_topten') ??
 	genbark($msg, $lang_topten['std_error']);
 }
 if (!\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::TOP_TEN)){
-	stderr($lang_topten['std_sorry'],$lang_topten['std_permission_denied_only'].get_user_class_name($topten_class,false,true,true).sprintf($lang_topten['std_or_above_can_view'], \App\Models\Setting::getSiteName()),false);
+	stderr($lang_topten['std_sorry'],$lang_topten['std_permission_denied_only'].\App\Support\UserClass::name($topten_class,false,true,true).sprintf($lang_topten['std_or_above_can_view'], \App\Models\Setting::getSiteName()),false);
 }
 
 function usershare_table($res, $frame_caption)
@@ -40,7 +40,7 @@ foreach ($res as $a) { $a = (array) $a;
 	}
 	else
 		$ratio = $lang_topten['text_inf'];
-	print("<tr><td class=\"rowfollow\" align=\"center\">$num</td><td class=\"rowfollow\" align=\"left\">" . get_username($a["userid"]) .
+	print("<tr><td class=\"rowfollow\" align=\"center\">$num</td><td class=\"rowfollow\" align=\"left\">" . \App\Support\UserDisplay::username($a["userid"]) .
 	"</td><td class=\"rowfollow\" align=\"right\">" . \App\Support\Format::size($a["uploaded"]) .
 	"</td><td class=\"rowfollow\" align=\"right\">" . \App\Support\Format::size($a["upspeed"]) . "/s" .
 	"</td><td class=\"rowfollow\" align=\"right\">" . \App\Support\Format::size($a["downloaded"]) .
@@ -131,7 +131,7 @@ $lang_topten = (array) (\App\Support\SupportContext::getGlobal('lang_topten') ??
 
 	$n = 1;
 	foreach ($res as $arr) { $arr = (array) $arr;
-		print("<tr><td class=\"rowfollow\">$n</td><td class=\"rowfollow\">" . get_username($arr["userid"]) . "</td><td class=\"rowfollow\">" . \App\Support\Format::size($arr["uprate"]) . "/s</td><td class=\"rowfollow\">" . \App\Support\Format::size($arr["downrate"]) . "/s</td></tr>\n");
+		print("<tr><td class=\"rowfollow\">$n</td><td class=\"rowfollow\">" . \App\Support\UserDisplay::username($arr["userid"]) . "</td><td class=\"rowfollow\">" . \App\Support\Format::size($arr["uprate"]) . "/s</td><td class=\"rowfollow\">" . \App\Support\Format::size($arr["downrate"]) . "/s</td></tr>\n");
 		++$n;
 	}
 
@@ -150,7 +150,7 @@ $lang_topten = (array) (\App\Support\SupportContext::getGlobal('lang_topten') ??
 	$n = 1;
 	foreach ($res as $arr) { $arr = (array) $arr;
 		//die();
-		print("<tr><td class=\"rowfollow\" align=\"center\">$n</td><td class=\"rowfollow\" align=\"left\">" . get_username($arr["id"]) . "</td><td class=\"rowfollow\" align=\"right\">" . number_format($arr["seedbonus"], 1) . "</td></tr>\n");
+		print("<tr><td class=\"rowfollow\" align=\"center\">$n</td><td class=\"rowfollow\" align=\"left\">" . \App\Support\UserDisplay::username($arr["id"]) . "</td><td class=\"rowfollow\" align=\"right\">" . number_format($arr["seedbonus"], 1) . "</td></tr>\n");
 		$n++;
 	}
 
@@ -170,7 +170,7 @@ $lang_topten = (array) (\App\Support\SupportContext::getGlobal('lang_topten') ??
 	$n = 1;
 	foreach ($res as $arr) { $arr = (array) $arr;
 		//die();
-		print("<tr><td class=\"rowfollow\" align=\"center\">$n</td><td class=\"rowfollow\" align=\"left\">" . get_username($arr["id"]) . "</td><td class=\"rowfollow\" align=\"right\">" . number_format($arr["charity"]) . "</td></tr>\n");
+		print("<tr><td class=\"rowfollow\" align=\"center\">$n</td><td class=\"rowfollow\" align=\"left\">" . \App\Support\UserDisplay::username($arr["id"]) . "</td><td class=\"rowfollow\" align=\"right\">" . number_format($arr["charity"]) . "</td></tr>\n");
 		$n++;
 	}
 
@@ -188,7 +188,7 @@ $lang_topten = (array) (\App\Support\SupportContext::getGlobal('lang_topten') ??
 
 	$n = 1;
 	foreach ($res as $arr) { $arr = (array) $arr;
-		print("<tr><td class=\"rowfollow\" align=\"center\">$n</td><td class=\"rowfollow\" align=\"left\">" . get_username($arr["userid"]) . "</td><td class=\"rowfollow\" align=\"right\">" . number_format($arr["num"]) . "</td></tr>\n");
+		print("<tr><td class=\"rowfollow\" align=\"center\">$n</td><td class=\"rowfollow\" align=\"left\">" . \App\Support\UserDisplay::username($arr["userid"]) . "</td><td class=\"rowfollow\" align=\"right\">" . number_format($arr["num"]) . "</td></tr>\n");
 		$n++;
 	}
 
@@ -206,7 +206,7 @@ $lang_topten = (array) (\App\Support\SupportContext::getGlobal('lang_topten') ??
 
 	$n = 1;
 	foreach ($res as $arr) { $arr = (array) $arr;
-		print("<tr><td class=\"rowfollow\" align=\"center\">$n</td><td class=\"rowfollow\" align=\"left\">" . get_username($arr["location_name"]) . "</td><td class=\"rowfollow\" align=\"right\">" . number_format($arr["num"]) . "</td></tr>\n");
+		print("<tr><td class=\"rowfollow\" align=\"center\">$n</td><td class=\"rowfollow\" align=\"left\">" . \App\Support\UserDisplay::username($arr["location_name"]) . "</td><td class=\"rowfollow\" align=\"right\">" . number_format($arr["num"]) . "</td></tr>\n");
 		$n++;
 	}
 
@@ -224,7 +224,7 @@ $lang_topten = (array) (\App\Support\SupportContext::getGlobal('lang_topten') ??
 
 	$n = 1;
 	foreach ($res as $arr) { $arr = (array) $arr;
-		print("<tr><td class=\"rowfollow\" align=\"center\">$n</td><td class=\"rowfollow\" align=\"left\">" . get_username($arr["userid"]) . "</td><td class=\"rowfollow\" align=\"right\">" . number_format($arr["usertopics"]) . "</td><td class=\"rowfollow\" align=\"right\">" . number_format($arr["userposts"]) . "</td></tr>\n");
+		print("<tr><td class=\"rowfollow\" align=\"center\">$n</td><td class=\"rowfollow\" align=\"left\">" . \App\Support\UserDisplay::username($arr["userid"]) . "</td><td class=\"rowfollow\" align=\"right\">" . number_format($arr["usertopics"]) . "</td><td class=\"rowfollow\" align=\"right\">" . number_format($arr["userposts"]) . "</td></tr>\n");
 		$n++;
 	}
 
@@ -262,7 +262,7 @@ $lang_topten = (array) (\App\Support\SupportContext::getGlobal('lang_topten') ??
 
 	$n = 1;
 	foreach ($res as $arr) { $arr = (array) $arr;
-		print("<tr><td class=\"rowfollow\" align=\"center\">$n</td><td class=\"rowfollow\" align=\"left\">" . get_username($arr["id"]) . "</td><td class=\"rowfollow\" align=\"right\">" . number_format($arr["donated"], 2) . "</td><td class=\"rowfollow\" align=\"right\">" . number_format($arr["donated_cny"], 2) . "</td></tr>\n");
+		print("<tr><td class=\"rowfollow\" align=\"center\">$n</td><td class=\"rowfollow\" align=\"left\">" . \App\Support\UserDisplay::username($arr["id"]) . "</td><td class=\"rowfollow\" align=\"right\">" . number_format($arr["donated"], 2) . "</td><td class=\"rowfollow\" align=\"right\">" . number_format($arr["donated_cny"], 2) . "</td></tr>\n");
 		$n++;
 	}
 
@@ -358,7 +358,7 @@ foreach ($res as $a) { $a = (array) $a;
 	}
 	else
 	$ratio = $lang_topten['text_inf'];
-	print("<tr><td class=\"rowfollow\" align=\"center\">$num</td><td class=\"rowfollow\" align=\"left\">" . get_username($a["userid"]) .
+	print("<tr><td class=\"rowfollow\" align=\"center\">$num</td><td class=\"rowfollow\" align=\"left\">" . \App\Support\UserDisplay::username($a["userid"]) .
 	"</td><td class=\"rowfollow\" align=\"right\">" . number_format($a["supplied"]) .
 	"</td><td class=\"rowfollow\" align=\"right\">" . \App\Support\Format::size($a["uploaded"]) .
 	"</td><td class=\"rowfollow\" align=\"right\">" . number_format($a["snatched"]) .

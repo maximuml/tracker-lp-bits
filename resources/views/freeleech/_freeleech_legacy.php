@@ -1,7 +1,7 @@
 <?php
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
-if (get_user_class() < UC_ADMINISTRATOR)
+if (\App\Support\UserDisplay::currentClass() < UC_ADMINISTRATOR)
 	stderr("Error", "Permission denied.");
 
 $action = ((\App\Support\SupportContext::getPost('action') !== null)) ? htmlspecialchars(\App\Support\SupportContext::getPost('action')) : (((\App\Support\SupportContext::getQuery('action') !== null)) ? htmlspecialchars(\App\Support\SupportContext::getQuery('action')) : 'main');

@@ -97,7 +97,7 @@ if ($action == 'delete')
 stdhead($lang_friends['head_personal_lists_for']. $user['username']);
 
 print("<p><table class=main border=0 cellspacing=0 cellpadding=0>".
-"<tr><td class=embedded><h1 style='margin:0px'> " . $lang_friends['text_personallist'] . " ".get_username($user['id'])."</h1></td></tr></table></p>\n");
+"<tr><td class=embedded><h1 style='margin:0px'> " . $lang_friends['text_personallist'] . " ".\App\Support\UserDisplay::username($user['id'])."</h1></td></tr></table></p>\n");
 
 //Start: Friends
 print("<table class=main width=737 border=0 cellspacing=0 cellpadding=0><tr><td class=embedded>");
@@ -117,8 +117,8 @@ foreach ($friendRows as $friend)
 	$friend_id_arr[] = $friend["id"];
 	$title = $friend["title"];
 	if (!$title)
-		$title = get_user_class_name($friend["class"],false,true,true);
-	$body1 = get_username($friend["id"]) .
+		$title = \App\Support\UserClass::name($friend["class"],false,true,true);
+	$body1 = \App\Support\UserDisplay::username($friend["id"]) .
 	" ($title)<br /><br />".$lang_friends['text_last_seen_on']. \App\Support\Time::format($friend['last_access'],true, false);
 	$body2 = "<a href=friends.php?id=$userid&action=delete&type=friend&targetid=" . $friend['id'] . ">".$lang_friends['text_remove_from_friends']."</a>".
 	"<br /><br /><a href=sendmessage.php?receiver=" . $friend['id'] . ">".$lang_friends['text_send_pm']."</a>";
@@ -327,7 +327,7 @@ else
 		if ($i % 6 == 0)
 		$blocks .= "<tr>";
 		$blocks .= "<td style='border: none; padding: 4px; spacing: 0px;'>[<font class=small><a href=friends.php?id=$userid&action=delete&type=block&targetid=" .
-		$block['id'] . ">D</a></font>] " . get_username($block["id"]) . "</td>";
+		$block['id'] . ">D</a></font>] " . \App\Support\UserDisplay::username($block["id"]) . "</td>";
 		if ($i % 6 == 5)
 		$blocks .= "</tr>";
 		$i++;

@@ -5,7 +5,7 @@ $__server_REQUEST_METHOD = \App\Support\SupportContext::getServerValue('REQUEST_
 if ($__server_REQUEST_METHOD != "POST")
 	stderr("Error", "Permission denied!");
 
-if (get_user_class() < UC_ADMINISTRATOR)
+if (\App\Support\UserDisplay::currentClass() < UC_ADMINISTRATOR)
 	stderr("Sorry", "Permission denied.");
 
 $sender_id = (\App\Support\SupportContext::getPost('sender') == 'system' ? 0 : (int)$CURUSER['id']);

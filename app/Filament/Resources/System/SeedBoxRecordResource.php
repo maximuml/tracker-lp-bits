@@ -85,7 +85,7 @@ class SeedBoxRecordResource extends Resource
                 TextColumn::make('user.username')
                     ->label(__('label.username'))
                     ->searchable()
-                    ->formatStateUsing(fn ($record) => username_for_admin($record->uid))
+                    ->formatStateUsing(fn ($record) => \App\Support\UserDisplay::adminUsername($record->uid))
                 ,
                 TextColumn::make('operator')->label(__('label.seed_box_record.operator'))->searchable(),
                 TextColumn::make('bandwidth')->label(__('label.seed_box_record.bandwidth')),

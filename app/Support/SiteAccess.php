@@ -56,7 +56,7 @@ final class SiteAccess
         }
 
         if ($guestVisitType === 'custom_content') {
-            $content = \format_comment($guestVisitValue);
+            $content = \App\Support\Format::formatComment($guestVisitValue);
             View::render('resources/templates/guest-visit-custom-content', ['content' => $content], false, ROOT_PATH);
         }
 

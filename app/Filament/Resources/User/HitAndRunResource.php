@@ -62,7 +62,7 @@ class HitAndRunResource extends Resource
                 TextColumn::make('user.username')
                     ->searchable()
                     ->label(__('label.username'))
-                    ->formatStateUsing(fn ($record) => new HtmlString(get_username($record->uid, false, true, true, true)))
+                    ->formatStateUsing(fn ($record) => new HtmlString(\App\Support\UserDisplay::username($record->uid, false, true, true, true)))
                 ,
 
                 TextColumn::make('torrent.name')->limit(30)->label(__('label.torrent.label')),
@@ -135,7 +135,7 @@ class HitAndRunResource extends Resource
                     ->label(__("label.status"))
                 ,
                 TextEntry::make('uid')
-                    ->formatStateUsing(fn ($record) => username_for_admin($record->uid))
+                    ->formatStateUsing(fn ($record) => \App\Support\UserDisplay::adminUsername($record->uid))
                     ->label(__("label.username"))
                 ,
                 TextEntry::make('torrent_id')

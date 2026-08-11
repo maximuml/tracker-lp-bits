@@ -40,7 +40,7 @@ $gender = "<img class='no_gender' src='pic/trans.gif' alt='N/A' title='".$lang_u
 $enabled = $user["enabled"] == 'yes';
 $moviepicker = $user["picker"] == 'yes';
 
-print("<h1 style='margin:0px'>" . get_username($user['id'], true,false) . $country."</h1>");
+print("<h1 style='margin:0px'>" . \App\Support\UserDisplay::username($user['id'], true,false) . $country."</h1>");
 if ($userInfo->valid_medals->isNotEmpty()) {
     print build_medal_image($userInfo->{$medalType}, 120, $CURUSER['id'] == $user['id']);
     $warnMedalJs = <<<JS
@@ -87,7 +87,7 @@ $userIdDisplay = $user['id'];
 $userManageSystemUrl = sprintf('%s/%s/user/users/%s',getSchemeAndHttpHost(), nexus_env('FILAMENT_PATH', 'nexusphp'), $user['id']);
 $userManageSystemText = sprintf('<a href="%s" target="_blank" class="altlink">%s</a>', $userManageSystemUrl, $lang_functions['text_management_system']);
 $migratedHelp = "&nbsp;&nbsp;".sprintf($lang_userdetails['change_field_value_migrated'], $userManageSystemText);
-if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::MANAGE_USER_BASIC_INFO) && $user["class"] < get_user_class()) {
+if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::MANAGE_USER_BASIC_INFO) && $user["class"] < \App\Support\UserDisplay::currentClass()) {
     $userIdDisplay .= "&nbsp;[$userManageSystemText]";
 }
 if (($user["privacy"] != "strong") OR (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::MANAGE_USER_BASIC_INFO)) || $CURUSER['id'] == $user['id']){
@@ -99,14 +99,14 @@ if (($user["privacy"] != "strong") OR (\App\Auth\Permission::can(\App\Enums\Perm
 	else
 	tr_small($lang_userdetails['row_invitation'], "<a href=\"invite.php?id=".$user['id']."\" title=\"".$lang_userdetails['link_send_invitation']."\">".sprintf('%s(%s)', $user['invites'], $tmpInviteCount)."</a>", 1);}
 	else{
-	if ($CURUSER['id'] != $user['id'] || get_user_class() != $viewinvite_class){
+	if ($CURUSER['id'] != $user['id'] || \App\Support\UserDisplay::currentClass() != $viewinvite_class){
 	if ($user["invites"] <= 0)
 	tr_small($lang_userdetails['row_invitation'], $lang_userdetails['text_no_invitation'], 1);
 	else
 	tr($lang_userdetails['row_invitation'], $user['invites'], 1);}
 	}
 	if ($user["invited_by"] > 0) {
-		tr_small($lang_userdetails['row_invited_by'], get_username($user['invited_by']), 1);
+		tr_small($lang_userdetails['row_invited_by'], \App\Support\UserDisplay::username($user['invited_by']), 1);
 	}
 	tr_small($lang_userdetails['row_join_date'], $joindate, 1);
 	tr_small($lang_userdetails['row_last_seen'], $lastseen, 1);
@@ -196,8 +196,8 @@ if ($user["avatar"])
 tr_small($lang_userdetails['row_avatar'], return_avatar_image(htmlspecialchars(trim($user["avatar"]))), 1);
 
 $uclass = get_user_class_image($user["class"]);
-$utitle = get_user_class_name($user["class"],false,false,true);
-$uclassImg = "<img alt=\"".get_user_class_name($user["class"],false,false,true)."\" title=\"".get_user_class_name($user["class"],false,false,true)."\" src=\"".$uclass."\" /> ".($user['title']!=="" ? "&nbsp;".htmlspecialchars(trim($user["title"]))."" :  "");
+$utitle = \App\Support\UserClass::name($user["class"],false,false,true);
+$uclassImg = "<img alt=\"".\App\Support\UserClass::name($user["class"],false,false,true)."\" title=\"".\App\Support\UserClass::name($user["class"],false,false,true)."\" src=\"".$uclass."\" /> ".($user['title']!=="" ? "&nbsp;".htmlspecialchars(trim($user["title"]))."" :  "");
 if ($user['class'] == UC_VIP && !empty($user['vip_until']) && strtotime($user['vip_until'])) {
     $uclassImg .= sprintf('%s: %s', $lang_userdetails['row_vip_until'], $user['vip_until']);
 }
@@ -289,7 +289,7 @@ if ($user["id"] == $CURUSER["id"] || \App\Auth\Permission::can(\App\Enums\Permis
     tr_small($lang_functions['text_seed_points'], number_format($user['seed_points'], 1) . "&nbsp;&nbsp;<span class='text-muted'>(" . nexus_trans('label.updated_at') . ": " . $user['seed_points_updated_at'] . ")</span>", 1);
 }
 
-if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::MANAGE_USER_BASIC_INFO) && $user["class"] < get_user_class()) {
+if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::MANAGE_USER_BASIC_INFO) && $user["class"] < \App\Support\UserDisplay::currentClass()) {
     $bonusTable = build_bonus_table($user);
     tr_small($lang_userdetails['text_bonus_table'], $bonusTable['table'], 1);
 }
@@ -311,7 +311,7 @@ tr_small($lang_userdetails['row_completed_torrents'], "<a href=\"javascript: get
 tr_small($lang_userdetails['row_incomplete_torrents'], "<a href=\"javascript: getusertorrentlistajax('".$user['id']."', 'incomplete', 'ka4'); klappe_news('a4')\"><img class=\"plus\" src=\"pic/trans.gif\" id=\"pica4\" alt=\"Show/Hide\" title=\"".$lang_userdetails['title_show_or_hide']."\" />   <u>".$lang_userdetails['text_show_or_hide']."</u></a><div id=\"ka4\" style=\"display: none;\" data-type='incomplete'></div>", 1);
 }
 if ($user["info"])
-	print("<tr><td align=\"left\" colspan=\"2\" class=\"text\">" . format_comment($user["info"],false) . "</td></tr>\n");
+	print("<tr><td align=\"left\" colspan=\"2\" class=\"text\">" . \App\Support\Format::formatComment($user["info"],false) . "</td></tr>\n");
 }
 else
 {
@@ -339,7 +339,7 @@ print("</td></tr>");
 }
 print("</table>\n");
 
-if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::MANAGE_USER_BASIC_INFO) && $user["class"] < get_user_class())
+if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::MANAGE_USER_BASIC_INFO) && $user["class"] < \App\Support\UserDisplay::currentClass())
 {
 	begin_frame($lang_userdetails['text_edit_user'], true);
 	print("<form method=\"post\" action=\"modtask.php\">");
@@ -355,14 +355,14 @@ if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::MANAGE_USER_
 	$signature = trim((string)$user["signature"]);
 	tr($lang_userdetails['row_signature'], "<textarea cols=\"60\" rows=\"6\" name=\"signature\">".$signature."</textarea>", 1);
 
-	if (get_user_class() == UC_STAFFLEADER)
+	if (\App\Support\UserDisplay::currentClass() == UC_STAFFLEADER)
 	{
 		tr($lang_userdetails['row_donor_status'], "<input type=\"radio\" name=\"donor\" value=\"yes\"" .($user["donor"] == "yes" ? " checked=\"checked\"" : "")." />".$lang_userdetails['radio_yes']." <input type=\"radio\" name=\"donor\" value=\"no\"" .($user["donor"] == "no" ? " checked=\"checked\"" : "").">".$lang_userdetails['radio_no'], 1);
 		tr($lang_userdetails['row_donated'], "USD: <input type=\"text\" size=\"5\" name=\"donated\" value=\"" . htmlspecialchars((string)$user['donated']) . "\" />&nbsp;&nbsp;&nbsp;&nbsp;CNY: <input type=\"text\" size=\"5\" name=\"donated_cny\" value=\"" . htmlspecialchars((string)$user['donated_cny']) . "\" />" . $lang_userdetails['text_transaction_memo'] . "<input type=\"text\" size=\"50\" name=\"donation_memo\" />", 1);
         tr($lang_userdetails['row_donoruntil'], "<input type=\"text\" name=\"donoruntil\" value=\"".htmlspecialchars((string)$user["donoruntil"])."\" /> ".$lang_userdetails['text_donoruntil_note'], 1);
 	}
 	if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::USER_CHANGE_CLASS)) {
-        $maxclass = get_user_class() - 1;
+        $maxclass = \App\Support\UserDisplay::currentClass() - 1;
         $classselect=classlist('class', $maxclass, $user["class"], 0, false, true);
         tr($lang_userdetails['row_class'], $classselect . $migratedHelp, 1);
     }
@@ -443,7 +443,7 @@ if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::MANAGE_USER_
 		if ($user["warnedby"] != "System")
 		{
 			$arr = \App\Repositories\UserDetailRepository::getWarnedBy((int)$user['warnedby']);
-			$warnedby = $arr ? "<br />[".$lang_userdetails['text_by']."<u>" . get_username($arr['id']) . "</u></a>]" : "";
+			$warnedby = $arr ? "<br />[".$lang_userdetails['text_by']."<u>" . \App\Support\UserDisplay::username($arr['id']) . "</u></a>]" : "";
 		}else{
 			$warnedby = "<br />[".$lang_userdetails['text_by_system']."]";
 			print("<tr><td class=\"rowfollow\">".$lang_userdetails['text_last_warning']."</td><td align=\"left\" class=\"rowfollow\"> {$user['lastwarned']} .(".$lang_userdetails['text_until'] ."$elapsedlw)   $warnedby</td></tr>\n");

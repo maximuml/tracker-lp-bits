@@ -39,7 +39,7 @@ class LatestTorrents extends BaseWidget implements HasActions
             ,
             TextColumn::make('owner')
                 ->label(__('label.torrent.owner'))
-                ->formatStateUsing(fn ($state) => username_for_admin($state))
+                ->formatStateUsing(fn ($state) => \App\Support\UserDisplay::adminUsername($state))
             ,
             TextColumn::make('size')->formatStateUsing(fn ($state) => \App\Support\Format::size($state))->label(__('label.torrent.size')),
             TextColumn::make('added')->dateTime()->label(__('label.added')),

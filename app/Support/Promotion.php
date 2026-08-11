@@ -76,6 +76,19 @@ final class Promotion
         return (string) \apply_filter('torrent_background_color', (string) $sphighlight, $torrent);
     }
 
+    /**
+     * Locale/context-aware wrapper for {@see backgroundStyle()}.
+     * Mirrors the legacy `get_torrent_bg_color()` helper.
+     *
+     * @param  array<string, mixed>  $torrent
+     */
+    public static function backgroundStyleWithContext(int $promotion, ?string $posState = '', ?array $torrent = []): string
+    {
+        $user = \App\Support\SupportContext::getUser() ?? [];
+
+        return self::backgroundStyle($promotion, $posState, $torrent, (string) ($user['appendpromotion'] ?? ''));
+    }
+
     private const PROMOTION_CONFIG = [
         2 => ['class' => 'free', 'text' => 'text_free', 'icon' => 'pro_free', 'alt' => 'Free', 'subColor' => '#0000FF', 'expire' => 'expirefree_torrent'],
         3 => ['class' => 'twoup', 'text' => 'text_two_times_up', 'icon' => 'pro_2up', 'alt' => '2X', 'subColor' => null, 'expire' => 'expiretwoup_torrent'],
@@ -98,9 +111,9 @@ final class Promotion
         int $promotion,
         string $forceMode,
         bool $showTimeLeft,
-        string $added,
+        ?string $added,
         int $promotionTimeType,
-        string $promotionUntil,
+        ?string $promotionUntil,
         bool $ignoreGlobal,
         string $appendPromotion,
         array $labels,
@@ -122,9 +135,9 @@ final class Promotion
         int $promotion,
         string $forceMode,
         bool $showTimeLeft,
-        string $added,
+        ?string $added,
         int $promotionTimeType,
-        string $promotionUntil,
+        ?string $promotionUntil,
         bool $ignoreGlobal,
         string $appendPromotion,
         array $labels,
@@ -141,15 +154,17 @@ final class Promotion
         int $promotion,
         string $forceMode,
         bool $showTimeLeft,
-        string $added,
+        ?string $added,
         int $promotionTimeType,
-        string $promotionUntil,
+        ?string $promotionUntil,
         bool $ignoreGlobal,
         string $appendPromotion,
         array $labels,
         array $expires,
         bool $sub,
     ): string {
+        $added = (string) ($added ?? '');
+        $promotionUntil = (string) ($promotionUntil ?? '');
         $globalSpState = \get_global_sp_state();
         $spTorrent = '';
         $onmouseover = '';
@@ -204,6 +219,83 @@ final class Promotion
         \do_log("$log, sp_torrent: $spTorrent");
 
         return $spTorrent;
+    }
+
+    /**
+     * Context-aware wrapper for {@see append()}.
+     * Mirrors the legacy `get_torrent_promotion_append()` helper.
+     */
+    public static function appendWithContext(
+        int $promotion,
+        string $forceMode,
+        bool $showTimeLeft,
+        ?string $added,
+        int $promotionTimeType,
+        ?string $promotionUntil,
+        bool $ignoreGlobal,
+    ): string {
+        $user = \App\Support\SupportContext::getUser() ?? [];
+        $expires = self::expireTorrentGlobals();
+
+        return self::append(
+            $promotion,
+            $forceMode,
+            $showTimeLeft,
+            $added,
+            $promotionTimeType,
+            $promotionUntil,
+            $ignoreGlobal,
+            (string) ($user['appendpromotion'] ?? ''),
+            \App\Support\SupportContext::getLangFunctions(),
+            $expires,
+        );
+    }
+
+    /**
+     * Context-aware wrapper for {@see appendSub()}.
+     * Mirrors the legacy `get_torrent_promotion_append_sub()` helper.
+     */
+    public static function appendSubWithContext(
+        int $promotion,
+        string $forceMode,
+        bool $showTimeLeft,
+        ?string $added,
+        int $promotionTimeType,
+        ?string $promotionUntil,
+        bool $ignoreGlobal,
+    ): string {
+        $user = \App\Support\SupportContext::getUser() ?? [];
+        $expires = self::expireTorrentGlobals();
+
+        return self::appendSub(
+            $promotion,
+            $forceMode,
+            $showTimeLeft,
+            $added,
+            $promotionTimeType,
+            $promotionUntil,
+            $ignoreGlobal,
+            (string) ($user['appendpromotion'] ?? ''),
+            \App\Support\SupportContext::getLangFunctions(),
+            $expires,
+        );
+    }
+
+    /**
+     * Collect the promotion-expiry globals used by append/appendSub.
+     *
+     * @return array<string, int>
+     */
+    private static function expireTorrentGlobals(): array
+    {
+        return [
+            'expirefree_torrent' => (int) \App\Support\SupportContext::getGlobal('expirefree_torrent', 0),
+            'expiretwoup_torrent' => (int) \App\Support\SupportContext::getGlobal('expiretwoup_torrent', 0),
+            'expiretwoupfree_torrent' => (int) \App\Support\SupportContext::getGlobal('expiretwoupfree_torrent', 0),
+            'expirehalfleech_torrent' => (int) \App\Support\SupportContext::getGlobal('expirehalfleech_torrent', 0),
+            'expiretwouphalfleech_torrent' => (int) \App\Support\SupportContext::getGlobal('expiretwouphalfleech_torrent', 0),
+            'expirethirtypercentleech_torrent' => (int) \App\Support\SupportContext::getGlobal('expirethirtypercentleech_torrent', 0),
+        ];
     }
 
     /**

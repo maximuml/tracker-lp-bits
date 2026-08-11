@@ -57,7 +57,7 @@ class AttendanceLogResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('id')->sortable(),
-                TextColumn::make('uid')->formatStateUsing(fn ($state) => username_for_admin($state)),
+                TextColumn::make('uid')->formatStateUsing(fn ($state) => \App\Support\UserDisplay::adminUsername($state)),
                 TextColumn::make('date')->label(__('attendance.fields.date'))->sortable(),
                 TextColumn::make('points')->label(__('attendance.fields.points')),
                 IconColumn::make('is_retroactive')

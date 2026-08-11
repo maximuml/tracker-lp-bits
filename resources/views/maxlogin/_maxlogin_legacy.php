@@ -1,7 +1,7 @@
 <?php
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
-if (get_user_class() < UC_SYSOP)
+if (\App\Support\UserDisplay::currentClass() < UC_SYSOP)
  stderr("Error", "Permission denied.");
 
 $action = ((\App\Support\SupportContext::getPost('action') !== null)) ? htmlspecialchars(\App\Support\SupportContext::getPost('action')) : (((\App\Support\SupportContext::getQuery('action') !== null)) ? htmlspecialchars(\App\Support\SupportContext::getQuery('action')) : 'showlist');
@@ -58,7 +58,7 @@ else
   	$arr = (array) $attemptRow;
   	$user = \App\Models\User::query()->where('ip', $arr['ip'])->first(['id', 'username']);
   	$a2 = $user ? $user->toArray() : [];
- 	  print("<tr><td align=>{$arr['id']}</td><td align=left>{$arr['ip']} " . ($a2['id'] ? get_username($a2['id']) : "" ) . "</td><td align=left>{$arr['added']}</td><td align=left>$arr[attempts]</td><td align=left>".($arr['type'] == "recover" ? "Recover Password Attempt!" : "Login Attempt!")."</td><td align=left>".($arr['banned'] == "yes" ? "<font color=red><b>banned</b></font> <a href=maxlogin.php?action=unban&id={$arr['id']}><font color=green>[<b>unban</b>]</font></a>" : "<font color=green><b>not banned</b></font> <a href=maxlogin.php?action=ban&id={$arr['id']}><font color=red>[<b>ban</b>]</font></a>")."  <a OnClick=\"return confirm('Are you wish to delete this attempt?');\" href=maxlogin.php?action=delete&id={$arr['id']}>[<b>delete</b></a>] <a href=maxlogin.php?action=edit&id={$arr['id']}><font color=blue>[<b>edit</b></a>]</font></td></tr>\n");
+ 	  print("<tr><td align=>{$arr['id']}</td><td align=left>{$arr['ip']} " . ($a2['id'] ? \App\Support\UserDisplay::username($a2['id']) : "" ) . "</td><td align=left>{$arr['added']}</td><td align=left>$arr[attempts]</td><td align=left>".($arr['type'] == "recover" ? "Recover Password Attempt!" : "Login Attempt!")."</td><td align=left>".($arr['banned'] == "yes" ? "<font color=red><b>banned</b></font> <a href=maxlogin.php?action=unban&id={$arr['id']}><font color=green>[<b>unban</b>]</font></a>" : "<font color=green><b>not banned</b></font> <a href=maxlogin.php?action=ban&id={$arr['id']}><font color=red>[<b>ban</b>]</font></a>")."  <a OnClick=\"return confirm('Are you wish to delete this attempt?');\" href=maxlogin.php?action=delete&id={$arr['id']}>[<b>delete</b></a>] <a href=maxlogin.php?action=edit&id={$arr['id']}><font color=blue>[<b>edit</b></a>]</font></td></tr>\n");
   }
 
 }
@@ -144,7 +144,7 @@ stdfoot();
 				  	$arr = (array) $attemptRow;
 				  	$user = \App\Models\User::query()->where('ip', $arr['ip'])->first(['id', 'username']);
 				  	$a2 = $user ? $user->toArray() : [];
-				 	print("<tr><td align=>{$arr['id']}</td><td align=left>{$arr['ip']} " . ($a2['id'] ? get_username($a2['id']) : "" ) . "</td><td align=left>{$arr['added']}</td><td align=left>$arr[attempts]</td><td align=left>".($arr['type'] == "recover" ? "Recover Password Attempt!" : "Login Attempt!")."</td><td align=left>".($arr['banned'] == "yes" ? "<font color=red><b>banned</b></font> <a href=maxlogin.php?action=unban&id={$arr['id']}><font color=green>[<b>unban</b>]</font></a>" : "<font color=green><b>not banned</b></font> <a href=maxlogin.php?action=ban&id={$arr['id']}><font color=red>[<b>ban</b>]</font></a>")."  <a OnClick=\"return confirm('Are you wish to delete this attempt?');\" href=maxlogin.php?action=delete&id={$arr['id']}>[<b>delete</b></a>] <a href=maxlogin.php?action=edit&id={$arr['id']}><font color=blue>[<b>edit</b></a>]</font></td></tr>\n");
+				 	print("<tr><td align=>{$arr['id']}</td><td align=left>{$arr['ip']} " . ($a2['id'] ? \App\Support\UserDisplay::username($a2['id']) : "" ) . "</td><td align=left>{$arr['added']}</td><td align=left>$arr[attempts]</td><td align=left>".($arr['type'] == "recover" ? "Recover Password Attempt!" : "Login Attempt!")."</td><td align=left>".($arr['banned'] == "yes" ? "<font color=red><b>banned</b></font> <a href=maxlogin.php?action=unban&id={$arr['id']}><font color=green>[<b>unban</b>]</font></a>" : "<font color=green><b>not banned</b></font> <a href=maxlogin.php?action=ban&id={$arr['id']}><font color=red>[<b>ban</b>]</font></a>")."  <a OnClick=\"return confirm('Are you wish to delete this attempt?');\" href=maxlogin.php?action=delete&id={$arr['id']}>[<b>delete</b></a>] <a href=maxlogin.php?action=edit&id={$arr['id']}><font color=blue>[<b>edit</b></a>]</font></td></tr>\n");
 				  }
 	}
 	print("</table>\n");

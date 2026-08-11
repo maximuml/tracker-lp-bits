@@ -53,7 +53,7 @@ class UserModifyLogResource extends Resource
                 TextColumn::make('user_id')->label('UID'),
                 TextColumn::make('user.username')
                     ->label(nexus_trans("label.username"))
-                    ->formatStateUsing(fn ($record) => username_for_admin($record->user_id))
+                    ->formatStateUsing(fn ($record) => \App\Support\UserDisplay::adminUsername($record->user_id))
                 ,
                 TextColumn::make('content')->label(nexus_trans("user-modify-log.content")),
                 TextColumn::make('created_at')->label(nexus_trans("label.created_at")),

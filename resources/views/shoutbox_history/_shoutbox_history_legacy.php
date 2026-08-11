@@ -88,7 +88,7 @@ $reactionUsers = $reactionData['users'];
 
 foreach ($rows as $arr) {
     $time = \App\Support\Shoutbox::formatTime((int) $arr['date'], true);
-    $username = $arr['userid'] ? get_username((int) $arr['userid'], false, true, true, true, false, false, '', true) : ($lang_shoutbox['text_guest'] ?? '<b>Guest</b>');
+    $username = $arr['userid'] ? \App\Support\UserDisplay::username((int) $arr['userid'], false, true, true, true, false, false, '', true) : ($lang_shoutbox['text_guest'] ?? '<b>Guest</b>');
     $shoutId = (int) $arr['id'];
     $actions = \App\Support\Shoutbox::renderActions($arr, $currentUserId, $isStaff);
     $reactions = \App\Support\Shoutbox::renderReactions(

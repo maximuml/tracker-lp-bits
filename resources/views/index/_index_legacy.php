@@ -33,13 +33,13 @@ if (count($latestNews) > 0)
 		$Cache->add_part();
 		if ($news_flag < 1) {
 			print("<a href=\"javascript: klappe_news('a".$newsItem['id']."')\"><img class=\"minus\" src=\"pic/trans.gif\" id=\"pica".$newsItem['id']."\" alt=\"Show/Hide\" title=\"".$lang_index['title_show_or_hide']."\" />&nbsp;" . date("Y.m.d",strtotime($newsItem['added'])) . " - " ."<b>". $newsItem['title'] . "</b></a>");
-			print("<div id=\"ka".$newsItem['id']."\" style=\"display: block;\"> ".format_comment($newsItem["body"],0)." </div> ");
+			print("<div id=\"ka".$newsItem['id']."\" style=\"display: block;\"> ".\App\Support\Format::formatComment($newsItem["body"],0)." </div> ");
 			$news_flag = $news_flag + 1;
 		}
 		else
 		{
 			print("<a href=\"javascript: klappe_news('a".$newsItem['id']."')\"><br /><img class=\"plus\" src=\"pic/trans.gif\" id=\"pica".$newsItem['id']."\" alt=\"Show/Hide\" title=\"".$lang_index['title_show_or_hide']."\" />&nbsp;" . date("Y.m.d",strtotime($newsItem['added'])) . " - " ."<b>". $newsItem['title'] . "</b></a>");
-			print("<div id=\"ka".$newsItem['id']."\" style=\"display: none;\"> ".format_comment($newsItem["body"],0)." </div> ");
+			print("<div id=\"ka".$newsItem['id']."\" style=\"display: none;\"> ".\App\Support\Format::formatComment($newsItem["body"],0)." </div> ");
 		}
 		$Cache->end_part();
 		$Cache->add_part();
@@ -119,7 +119,7 @@ if ($showlastxforumposts_main == "yes" && $CURUSER)
 	$latestPosts = \App\Models\Post::query()
 		->join('topics', 'posts.topicid', '=', 'topics.id')
 		->join('forums', 'topics.forumid', '=', 'forums.id')
-		->where('forums.minclassread', '<=', get_user_class())
+		->where('forums.minclassread', '<=', \App\Support\UserDisplay::currentClass())
 		->orderByDesc('posts.id')
 		->limit(5)
 		->get([
@@ -140,7 +140,7 @@ if ($showlastxforumposts_main == "yes" && $CURUSER)
 
 		foreach ($latestPosts as $postsx)
 		{
-			print("<tr><td><a href=\"forums.php?action=viewtopic&amp;topicid=".$postsx["tid"]."&amp;page=p".$postsx["pid"]."#pid".$postsx["pid"]."\"><b>".htmlspecialchars($postsx["subject"])."</b></a><br />".$lang_index['text_in']."<a href=\"forums.php?action=viewforum&amp;forumid=".$postsx["forumid"]."\">".htmlspecialchars($postsx["name"])."</a></td><td align=\"center\">".$postsx["views"]."</td><td align=\"center\">" . get_username($postsx["userpost"]) ."</td><td>".\App\Support\Time::format($postsx["added"])."</td></tr>");
+			print("<tr><td><a href=\"forums.php?action=viewtopic&amp;topicid=".$postsx["tid"]."&amp;page=p".$postsx["pid"]."#pid".$postsx["pid"]."\"><b>".htmlspecialchars($postsx["subject"])."</b></a><br />".$lang_index['text_in']."<a href=\"forums.php?action=viewforum&amp;forumid=".$postsx["forumid"]."\">".htmlspecialchars($postsx["name"])."</a></td><td align=\"center\">".$postsx["views"]."</td><td align=\"center\">" . \App\Support\UserDisplay::username($postsx["userpost"]) ."</td><td>".\App\Support\Time::format($postsx["added"])."</td></tr>");
 		}
 		print("</table>");
 	}
@@ -255,7 +255,7 @@ if ($showlastxtorrents_main == "yes") {
 					if (($torrent->anonymous ?? 'no') === 'yes') {
 						$ownerHtml = '<i>Anonymous</i>';
 					} else {
-						$ownerHtml = get_username((int)$torrent->owner);
+						$ownerHtml = \App\Support\UserDisplay::username((int)$torrent->owner);
 					}
 					$nameSafe = htmlspecialchars($torrent->name);
 					?>
@@ -324,14 +324,14 @@ JS;
         print ("<table class='top-uploader top-uploader-all' width=\"100%\" border=\"1\" cellspacing=\"0\" cellpadding=\"5\" style='display: none'><tr><td class=\"colhead\" width=\"\">".$lang_index['col_author']."</td><td class=\"colhead\" align=\"center\">".$lang_index['col_counts']."</td><td class=\"colhead\" align=\"center\">".$lang_index['col_ranking']."</td></tr>");
         foreach ($allUploaders as $ranking => $uploader)
         {
-            print ("<tr><td>" . get_username($uploader->id) . "</td><td align=\"center\">" . $uploader->count . "</td><td align=\"center\">" . ($ranking + 1) . "</td></tr>");
+            print ("<tr><td>" . \App\Support\UserDisplay::username($uploader->id) . "</td><td align=\"center\">" . $uploader->count . "</td><td align=\"center\">" . ($ranking + 1) . "</td></tr>");
         }
         print ("</table>");
 
         print ("<table class='top-uploader top-uploader-recently' width=\"100%\" border=\"1\" cellspacing=\"0\" cellpadding=\"5\"><tr><td class=\"colhead\" width=\"\">".$lang_index['col_author']."</td><td class=\"colhead\" align=\"center\">".$lang_index['col_counts']."</td><td class=\"colhead\" align=\"center\">".$lang_index['col_ranking']."</td></tr>");
         foreach ($recentUploaders as $ranking => $uploader)
         {
-            print ("<tr><td>" . get_username($uploader->id) . "</td><td align=\"center\">" . $uploader->count . "</td><td align=\"center\">" . ($ranking + 1) . "</td></tr>");
+            print ("<tr><td>" . \App\Support\UserDisplay::username($uploader->id) . "</td><td align=\"center\">" . $uploader->count . "</td><td align=\"center\">" . ($ranking + 1) . "</td></tr>");
         }
         print ("</table>");
     }
@@ -460,7 +460,7 @@ if ($showstats_main == "yes")
 </tr>
 <tr>
 <?php
-	twotd(get_user_class_name(UC_VIP,false,false,true),$VIP);
+	twotd(\App\Support\UserClass::name(UC_VIP,false,false,true),$VIP);
 	twotd($lang_index['row_donors']." <img class=\"star\" src=\"pic/trans.gif\" alt=\"Donor\" />",$donated);
 ?>
 </tr>
@@ -564,32 +564,32 @@ if ($showstats_main == "yes")
 ?>
 <tr>
 <?php
-	twotd(get_user_class_name(UC_PEASANT,false,false,true)." <img class=\"leechwarned\" src=\"pic/trans.gif\" alt=\"leechwarned\" />",$peasants);
-	twotd(get_user_class_name(UC_USER,false,false,true),$users);
+	twotd(\App\Support\UserClass::name(UC_PEASANT,false,false,true)." <img class=\"leechwarned\" src=\"pic/trans.gif\" alt=\"leechwarned\" />",$peasants);
+	twotd(\App\Support\UserClass::name(UC_USER,false,false,true),$users);
 ?>
 </tr>
 <tr>
 <?php
-	twotd(get_user_class_name(UC_POWER_USER,false,false,true),$powerusers);
-	twotd(get_user_class_name(UC_ELITE_USER,false,false,true),$eliteusers);
+	twotd(\App\Support\UserClass::name(UC_POWER_USER,false,false,true),$powerusers);
+	twotd(\App\Support\UserClass::name(UC_ELITE_USER,false,false,true),$eliteusers);
 ?>
 </tr>
 <tr>
 <?php
-	twotd(get_user_class_name(UC_CRAZY_USER,false,false,true),$crazyusers);
-	twotd(get_user_class_name(UC_INSANE_USER,false,false,true),$insaneusers);
+	twotd(\App\Support\UserClass::name(UC_CRAZY_USER,false,false,true),$crazyusers);
+	twotd(\App\Support\UserClass::name(UC_INSANE_USER,false,false,true),$insaneusers);
 ?>
 </tr>
 <tr>
 <?php
-	twotd(get_user_class_name(UC_VETERAN_USER,false,false,true),$veteranusers);
-	twotd(get_user_class_name(UC_EXTREME_USER,false,false,true),$extremeusers);
+	twotd(\App\Support\UserClass::name(UC_VETERAN_USER,false,false,true),$veteranusers);
+	twotd(\App\Support\UserClass::name(UC_EXTREME_USER,false,false,true),$extremeusers);
 ?>
 </tr>
 <tr>
 <?php
-	twotd(get_user_class_name(UC_ULTIMATE_USER,false,false,true),$ultimateusers);
-	twotd(get_user_class_name(UC_NEXUS_MASTER,false,false,true),$nexusmasters);
+	twotd(\App\Support\UserClass::name(UC_ULTIMATE_USER,false,false,true),$ultimateusers);
+	twotd(\App\Support\UserClass::name(UC_NEXUS_MASTER,false,false,true),$nexusmasters);
 ?>
 </tr>
 <?php

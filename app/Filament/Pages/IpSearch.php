@@ -56,7 +56,7 @@ class IpSearch extends Page implements HasTable
             ->columns([
                 TextColumn::make('userid')
                     ->label(__('label.username'))
-                    ->state(fn (array $record) => username_for_admin($record['userid']))
+                    ->state(fn (array $record) => \App\Support\UserDisplay::adminUsername($record['userid']))
                 ,
                 TextColumn::make('last_access_ip')
                     ->label(__('ip-search.last_access_ip'))
@@ -80,7 +80,7 @@ class IpSearch extends Page implements HasTable
                     ->label(__('ip-search.user_added'))
                 ,
                 TextColumn::make('invited_by')
-                    ->state(fn (array $record) => $record['invited_by'] > 0 ? username_for_admin($record['invited_by']) : '')
+                    ->state(fn (array $record) => $record['invited_by'] > 0 ? \App\Support\UserDisplay::adminUsername($record['invited_by']) : '')
                     ->label(__('ip-search.invited_by'))
                 ,
             ])

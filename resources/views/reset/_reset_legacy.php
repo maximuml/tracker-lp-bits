@@ -4,7 +4,7 @@ error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
 $__server_REQUEST_METHOD = \App\Support\SupportContext::getServerValue('REQUEST_METHOD');
 // Reset Lost Password ACTION
-if (get_user_class() < UC_ADMINISTRATOR)
+if (\App\Support\UserDisplay::currentClass() < UC_ADMINISTRATOR)
 stderr("Error", "Permission denied, Administrator Only.");
 
 if ($__server_REQUEST_METHOD == "POST")
@@ -27,8 +27,8 @@ if (!$user) {
     stderr("Error","Sorry, that username doesn't exist.");
 }
 $arr = $user->toArray();
-if (get_user_class() <= $arr['class']) {
-    $log = "Password Reset For $username by {$CURUSER['username']} denied: operator class => " . get_user_class() . " is not greater than target user => {$arr['class']}";
+if (\App\Support\UserDisplay::currentClass() <= $arr['class']) {
+    $log = "Password Reset For $username by {$CURUSER['username']} denied: operator class => " . \App\Support\UserDisplay::currentClass() . " is not greater than target user => {$arr['class']}";
     write_log($log);
     do_log($log, 'alert');
     stderr("Error","Sorry, you don't have enough permission to reset this user's password.");

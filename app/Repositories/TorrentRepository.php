@@ -254,9 +254,9 @@ class TorrentRepository extends BaseRepository
             }
 
             if ($apiQueryBuilder->hasIncludeField('description') && $apiQueryBuilder->hasInclude('extra')) {
-                $descriptionArr = format_description($torrent->extra->descr ?? '');
+                $descriptionArr = \App\Support\Description::parse($torrent->extra->descr ?? '');
                 $torrent->description = $descriptionArr;
-                $torrent->images = get_image_from_description($descriptionArr);
+                $torrent->images = \App\Support\Description::imageFromDescription($descriptionArr);
             }
             if ($apiQueryBuilder->hasIncludeField("download_url")) {
                 $torrent->download_url = $this->getDownloadUrl($id, $user);
@@ -1359,7 +1359,7 @@ HTML;
             }
 
         }
-        $operatorId = get_user_id();
+        $operatorId = \App\Support\UserDisplay::currentId();
         $siteLogArr = [];
         foreach ($torrents as $torrent) {
             $siteLogArr[] = [

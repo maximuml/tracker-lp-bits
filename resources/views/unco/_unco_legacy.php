@@ -2,7 +2,7 @@
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
 
-if (get_user_class() < UC_MODERATOR)
+if (\App\Support\UserDisplay::currentClass() < UC_MODERATOR)
 stderr("Sorry", "Access denied.");
 $status = \App\Support\SupportContext::getQuery('status');
 	if ($status)

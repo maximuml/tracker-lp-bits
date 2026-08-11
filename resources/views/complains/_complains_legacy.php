@@ -149,7 +149,7 @@ $lang_complains = (array) (\App\Support\SupportContext::getGlobal('lang_complain
                 }
                 printf('<br />IP: ' . htmlspecialchars($complain['ip']));
             }
-            echo '<hr />', format_comment($complain['body']);
+            echo '<hr />', \App\Support\Format::formatComment($complain['body']);
             end_frame();
             // REPLIES
             begin_frame($lang_complains['text_replies']);
@@ -157,12 +157,12 @@ $lang_complains = (array) (\App\Support\SupportContext::getGlobal('lang_complain
             if($replyRows->count()){
                 foreach ($replyRows as $r) {
                     $row = (array) $r;
-                    printf('<b>%s @ %s', $row['userid'] ? get_plain_username($row['userid']) : $lang_complains['text_complainer'], \App\Support\Time::format($row['added']));
+                    printf('<b>%s @ %s', $row['userid'] ? \App\Support\UserDisplay::plainUsername($row['userid']) : $lang_complains['text_complainer'], \App\Support\Time::format($row['added']));
                     if ($isAdmin) {
                         printf(' (%s)', htmlspecialchars($row['ip']));
                     }
                     echo ': </b>';
-                    echo format_comment($row['body']) . '<hr />';
+                    echo \App\Support\Format::formatComment($row['body']) . '<hr />';
                 }
             }else{
                 printf('<p align="center">%s</p>', $lang_complains['text_no_replies']);

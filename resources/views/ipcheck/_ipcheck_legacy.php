@@ -1,6 +1,6 @@
 <?php
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
-if (get_user_class() < UC_MODERATOR)
+if (\App\Support\UserDisplay::currentClass() < UC_MODERATOR)
 stderr("Sorry", "Access denied.");
 
 $tabs = ['users', 'peers'];
@@ -19,7 +19,7 @@ print '<h1>'.$title.'</h1>';
 //print '</ul>';
 begin_table();
 
-if (get_user_class() >= UC_MODERATOR || $CURUSER["guard"] == "yes")
+if (\App\Support\UserDisplay::currentClass() >= UC_MODERATOR || $CURUSER["guard"] == "yes")
 {
  $res = \Nexus\Database\NexusDB::table('users')
      ->selectRaw('ip, count(*) AS dupl')
@@ -76,7 +76,7 @@ if (get_user_class() >= UC_MODERATOR || $CURUSER["guard"] == "yes")
 			$utc = " bgcolor=\"ECE9D8\"";
 
 			$peer_count = \Nexus\Database\NexusDB::table('peers')->where('ip', $ras['ip'])->where('userid', $arr['id'])->count();
-		  print("<tr$utc><td align=left>" . get_username($arr["id"])."</td>
+		  print("<tr$utc><td align=left>" . \App\Support\UserDisplay::username($arr["id"])."</td>
 				  <td align=center>$arr[email]</td>
 				  <td align=center>$added</td>
 				  <td align=center>$last_access</td>

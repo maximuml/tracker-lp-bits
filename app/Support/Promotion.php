@@ -86,7 +86,12 @@ final class Promotion
     {
         $user = \App\Support\SupportContext::getUser() ?? [];
 
-        return self::backgroundStyle($promotion, $posState, $torrent, (string) ($user['appendpromotion'] ?? ''));
+        return self::backgroundStyle(
+            $promotion,
+            (string) ($posState ?? ''),
+            $torrent ?? [],
+            (string) ($user['appendpromotion'] ?? ''),
+        );
     }
 
     private const PROMOTION_CONFIG = [

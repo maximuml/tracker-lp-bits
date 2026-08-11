@@ -1,1 +1,1 @@
-@include('useragreement._useragreement_legacy')
+@include('useragreement._useragreement')

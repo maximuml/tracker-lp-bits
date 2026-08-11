@@ -205,7 +205,7 @@ $highlight = " bgcolor=#BBAF9B";
 
 // Validates date in the form [yy]yy-mm-dd;
 // Returns date if valid, 0 otherwise.
-function mkdate($date){
+if (!function_exists('mkdate')) { function mkdate($date){
   if (strpos($date,'-'))
   	$a = explode('-', $date);
   elseif (strpos($date,'/'))
@@ -219,10 +219,10 @@ function mkdate($date){
     	return  date ("Y-m-d", mktime (0,0,0,$a[1],$a[2],$a[0]));
     else
 			return 0;
-}
+} }
 
 // ratio as a string
-function ratios($up,$down, $color = True)
+if (!function_exists('ratios')) { function ratios($up,$down, $color = True)
 {
 	if ($down > 0)
 	{
@@ -236,16 +236,16 @@ function ratios($up,$down, $color = True)
 	  else
 	  	$r = "---";
 	return $r;
-}
+} }
 
 // checks for the usual wildcards *, ? plus mySQL ones
-function haswildcard($text){
+if (!function_exists('haswildcard')) { function haswildcard($text){
 	if (strpos($text,'*') === False && strpos($text,'?') === False
 			&& strpos($text,'%') === False && strpos($text,'_') === False)
   	return False;
   else
   	return True;
-}
+} }
 
 $userQuery = \Nexus\Database\NexusDB::table('users as u');
 $q = '';

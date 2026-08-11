@@ -1,1 +1,1 @@
-@include('faqactions._faqactions_legacy')
+@include('faqactions._faqactions')

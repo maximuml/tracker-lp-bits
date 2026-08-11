@@ -6,7 +6,7 @@ if (\App\Support\UserDisplay::currentClass() < UC_ADMINISTRATOR)
 
 $perpage = 50;
 $pagerParam = '?action=view&type=' . (\App\Support\SupportContext::getQuery('type') ?? 'searchbox') . '&';
-function return_category_db_table_name($type)
+if (!function_exists('return_category_db_table_name')) { function return_category_db_table_name($type)
 {
 	switch($type)
 	{
@@ -44,8 +44,8 @@ function return_category_db_table_name($type)
 			return false;
 	}
 	return $dbtablename;
-}
-function return_category_mode_selection($selname, $selectedid)
+} }
+if (!function_exists('return_category_mode_selection')) { function return_category_mode_selection($selname, $selectedid)
 {
 	$rows = \Nexus\Database\NexusDB::table('searchbox')->orderBy('id')->get(['id','name']);
 	$selection = "<select name=\"".$selname."\">";
@@ -55,9 +55,9 @@ function return_category_mode_selection($selname, $selectedid)
 	}
 	$selection .= "</select>";
 	return $selection;
-}
+} }
 
-function category_icon_selection($iconId = 0)
+if (!function_exists('category_icon_selection')) { function category_icon_selection($iconId = 0)
 {
     $rows = \Nexus\Database\NexusDB::table('caticons')->orderBy('id')->get(['id','name']);
     $selection = "<select name=\"icon_id\">";
@@ -67,9 +67,9 @@ function category_icon_selection($iconId = 0)
     }
     $selection .= "</select>";
     return $selection;
-}
+} }
 
-function return_type_name($type)
+if (!function_exists('return_type_name')) { function return_type_name($type)
 {
 $lang_catmanage = (array) (\App\Support\SupportContext::getGlobal('lang_catmanage') ?? []);
 	switch ($type)
@@ -108,9 +108,9 @@ $lang_catmanage = (array) (\App\Support\SupportContext::getGlobal('lang_catmanag
 			return false;
 	}
 	return $name;
-}
+} }
 
-function print_type_list($type){
+if (!function_exists('print_type_list')) { function print_type_list($type){
 $lang_catmanage = (array) (\App\Support\SupportContext::getGlobal('lang_catmanage') ?? []);
 	$typename=return_type_name($type);
 	\App\Support\Html::stdhead($lang_catmanage['head_category_management']." - ".$typename);
@@ -139,15 +139,15 @@ $lang_catmanage = (array) (\App\Support\SupportContext::getGlobal('lang_catmanag
 </span>
 </div>
 <?php
-}
-function check_valid_type($type)
+} }
+if (!function_exists('check_valid_type')) { function check_valid_type($type)
 {
 $lang_catmanage = (array) (\App\Support\SupportContext::getGlobal('lang_catmanage') ?? []);
 	$validtype=array('searchbox', 'caticon', 'secondicon', 'category', 'source', 'medium', 'codec', 'standard', 'processing', 'audiocodec');
 	if (!in_array($type, $validtype))
 		\App\Support\LegacyResponse::abort($lang_catmanage['std_error'], $lang_catmanage['std_invalid_type']);
-}
-function print_sub_category_list($type)
+} }
+if (!function_exists('print_sub_category_list')) { function print_sub_category_list($type)
 {
 $lang_catmanage = (array) (\App\Support\SupportContext::getGlobal('lang_catmanage') ?? []);
 $perpage = \App\Support\SupportContext::getGlobal('perpage');
@@ -184,8 +184,8 @@ $pagerParam = \App\Support\SupportContext::getGlobal('pagerParam');
 <?php
 print($pagerbottom);
 	}
-}
-function print_category_editor($type, $row='')
+} }
+if (!function_exists('print_category_editor')) { function print_category_editor($type, $row='')
 {
 $lang_catmanage = (array) (\App\Support\SupportContext::getGlobal('lang_catmanage') ?? []);
 $validsubcattype = \App\Support\SupportContext::getGlobal('validsubcattype');
@@ -351,8 +351,8 @@ $validsubcattype = \App\Support\SupportContext::getGlobal('validsubcattype');
 </div>
 <?php
 	}
-}
-function print_sub_category_editor($type, $row='')
+} }
+if (!function_exists('print_sub_category_editor')) { function print_sub_category_editor($type, $row='')
 {
 $lang_catmanage = (array) (\App\Support\SupportContext::getGlobal('lang_catmanage') ?? []);
 	$typename=return_type_name($type);
@@ -380,7 +380,7 @@ $lang_catmanage = (array) (\App\Support\SupportContext::getGlobal('lang_catmanag
 </div>
 </div>
 <?php
-}
+} }
 
 $validsubcattype=array('source', 'medium', 'codec', 'standard', 'processing', 'audiocodec');
 $type = \App\Support\SupportContext::getQuery('type') ?? '';

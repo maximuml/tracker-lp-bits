@@ -1,1 +1,1 @@
-@include('usersearch._usersearch_legacy')
+@include('usersearch._usersearch')

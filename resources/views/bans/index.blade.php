@@ -59,7 +59,7 @@ $bans = \Nexus\Database\NexusDB::table('bans')->orderByDesc('added')->get();
         @foreach ($bans as $ban)
             @php $arr = (array) $ban; @endphp
             <tr>
-                <td>{{ \App\Support\Time::format($arr['added']) }}</td>
+                <td>{!! \App\Support\Time::format($arr['added']) !!}</td>
                 <td align="left">{{ long2ip($arr['first']) }}</td>
                 <td align="left">{{ long2ip($arr['last']) }}</td>
                 <td align="left">{!! \App\Support\UserDisplay::username($arr['addedby']) !!}</td>

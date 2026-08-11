@@ -31,7 +31,7 @@ $rows = \App\Models\User::query()->where('status', 'pending')->orderBy('username
         </tr>
         @foreach ($rows as $userRow)
             @php
-            $row = (array) $userRow;
+            $row = $userRow->getAttributes();
             $id = $row['id'];
             @endphp
             <tr>

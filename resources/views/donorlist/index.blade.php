@@ -15,7 +15,7 @@ $rows = \App\Models\User::query()
     ->offset($offset)
     ->limit($rpp)
     ->get(['id', 'username', 'email', 'added', 'donated'])
-    ->map(fn ($r) => (array) $r);
+    ->map(fn ($r) => $r->getAttributes());
 $users = number_format($count);
 \App\Support\Html::beginFrame("Donor List ({$users})", true);
 \App\Support\Html::beginTable();

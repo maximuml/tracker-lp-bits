@@ -16,7 +16,7 @@ $rows = \App\Models\User::query()
     ->where('enabled', 'yes')
     ->orderByRaw('(uploaded/downloaded)')
     ->get()
-    ->map(fn ($r) => (array) $r);
+    ->map(fn ($r) => $r->getAttributes());
 @endphp
 
 <table border="1" width="675" cellspacing="0" cellpadding="2">
@@ -57,7 +57,7 @@ $rows = \App\Models\User::query()
                 <td align="left">{!! \App\Support\UserDisplay::username($arr['id']) !!}</td>
                 <td align="center">{{ $added }}</td>
                 <td align="center">{{ $last_access }}</td>
-                <td align="center">{{ $class }}</td>
+                <td align="center">{!! $class !!}</td>
                 <td align="center">{!! $downloaded !!}</td>
                 <td align="center">{!! $uploaded !!}</td>
                 <td align="center">{!! $ratio !!}</td>

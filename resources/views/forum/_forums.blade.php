@@ -9,7 +9,7 @@ error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 $__server_REQUEST_URI = \App\Support\SupportContext::getServerValue('REQUEST_URI');
 // ------------- start: functions ------------------//
 //print forum stats
-function forum_stats ()
+if (!function_exists('forum_stats')) { function forum_stats ()
 {
 $lang_forums = (array) (\App\Support\SupportContext::getGlobal('lang_forums') ?? []);
 $Cache = \App\Support\SupportContext::getCache();
@@ -47,10 +47,10 @@ $today_date = \App\Support\SupportContext::getGlobal('today_date', '');
 ?>
 </td></tr></table>
 <?php
-}
+} }
 
 //set all topics as read
-function catch_up()
+if (!function_exists('catch_up')) { function catch_up()
 {
 $CURUSER = \App\Support\SupportContext::getUser() ?? [];
 $Cache = \App\Support\SupportContext::getCache();
@@ -64,10 +64,10 @@ $Cache = \App\Support\SupportContext::getCache();
 		$CURUSER['last_catchup'] = $lastpostid;
 		\App\Models\User::query()->where('id', $CURUSER['id'])->update(['last_catchup' => $lastpostid]);
 	}
-}
+} }
 
 //return image
-function get_topic_image($status= "read"){
+if (!function_exists('get_topic_image')) { function get_topic_image($status= "read"){
 $lang_forums = (array) (\App\Support\SupportContext::getGlobal('lang_forums') ?? []);
 	switch($status){
 		case "read": {
@@ -87,17 +87,17 @@ $lang_forums = (array) (\App\Support\SupportContext::getGlobal('lang_forums') ??
 			break;
 		}
 	}
-}
+} }
 
-function highlight_topic($subject, $hlcolor=0)
+if (!function_exists('highlight_topic')) { function highlight_topic($subject, $hlcolor=0)
 {
 	$colorname=\App\Support\Palette::forumHighlight($hlcolor);
 	if ($colorname)
 		$subject = "<b><font color=\"".$colorname."\">".$subject."</font></b>";
 	return $subject;
-}
+} }
 
-function check_whether_exist($id, $place='forum'){
+if (!function_exists('check_whether_exist')) { function check_whether_exist($id, $place='forum'){
 $lang_forums = (array) (\App\Support\SupportContext::getGlobal('lang_forums') ?? []);
 	\App\Support\LegacyResponse::assertId($id, true);
 	switch ($place){
@@ -124,10 +124,10 @@ $lang_forums = (array) (\App\Support\SupportContext::getGlobal('lang_forums') ??
 			break;
 		}
 	}
-}
+} }
 
 //update the last post of a topic
-function update_topic_last_post($topicid)
+if (!function_exists('update_topic_last_post')) { function update_topic_last_post($topicid)
 {
 $lang_forums = (array) (\App\Support\SupportContext::getGlobal('lang_forums') ?? []);
 	$postid = \App\Models\Post::query()->where('topicid', $topicid)->orderByDesc('id')->value('id');
@@ -135,9 +135,9 @@ $lang_forums = (array) (\App\Support\SupportContext::getGlobal('lang_forums') ??
 		die($lang_forums['std_no_post_found']);
 	}
 	\App\Models\Topic::query()->where('id', $topicid)->update(['lastpost' => $postid]);
-}
+} }
 
-function get_forum_row($forumid = 0)
+if (!function_exists('get_forum_row')) { function get_forum_row($forumid = 0)
 {
 $Cache = \App\Support\SupportContext::getCache();
 	if (!$forums = $Cache->get_value('forums_list')){
@@ -147,8 +147,8 @@ $Cache = \App\Support\SupportContext::getCache();
 	if (!$forumid)
 		return $forums;
 	else return $forums[$forumid] ?? null;
-}
-function get_last_read_post_id($topicid) {
+} }
+if (!function_exists('get_last_read_post_id')) { function get_last_read_post_id($topicid) {
 $CURUSER = \App\Support\SupportContext::getUser() ?? [];
 $Cache = \App\Support\SupportContext::getCache();
 	static $ret;
@@ -168,10 +168,10 @@ $Cache = \App\Support\SupportContext::getCache();
 	elseif ($CURUSER['last_catchup'])
 		return $CURUSER['last_catchup'];
 	else return 0;
-}
+} }
 
 //-------- Inserts a compose frame
-function insert_compose_frame($id, $type = 'new')
+if (!function_exists('insert_compose_frame')) { function insert_compose_frame($id, $type = 'new')
 {
 $maxsubjectlength = \App\Support\SupportContext::getGlobal('maxsubjectlength');
 $CURUSER = \App\Support\SupportContext::getUser() ?? [];
@@ -238,7 +238,7 @@ $lang_forums = (array) (\App\Support\SupportContext::getGlobal('lang_forums') ??
 	\App\Support\Frame::composeBeginVoid($title, $type, $body, $hassubject, $subject);
 	\App\Support\Frame::composeEndVoid();
 	print("</form>");
-}
+} }
 // ------------- end: functions ------------------//
 // ------------- start: Global variables ------------------//
 $maxsubjectlength = 100;

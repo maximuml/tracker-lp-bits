@@ -1,1 +1,1 @@
-@php include resource_path('views/getusertorrentlistajax/_getusertorrentlistajax_legacy.php'); @endphp
+@include('getusertorrentlistajax._getusertorrentlistajax')

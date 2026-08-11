@@ -11,7 +11,7 @@ if (($CURUSER['id'] != $id && !\App\Auth\Permission::can(\App\Enums\Permission\P
     \App\Support\LegacyResponse::abort($lang_invite['std_sorry'], $lang_invite['std_permission_denied'], true, false);
 $userRep = new \App\Repositories\UserRepository();
 \App\Support\SupportContext::setGlobal('userRep', $userRep);
-function inviteMenu ($selected = "invitee") {
+if (!function_exists('inviteMenu')) { function inviteMenu ($selected = "invitee") {
 $lang_invite = (array) (\App\Support\SupportContext::getGlobal('lang_invite') ?? []);
 $id = \App\Support\SupportContext::getGlobal('id');
 $CURUSER = \App\Support\SupportContext::getUser() ?? [];
@@ -33,7 +33,7 @@ $userRep = \App\Support\SupportContext::getGlobal('userRep');
         print ("</ul><form style='position: absolute;top:0;right:0' method=post action=invite.php?id=".htmlspecialchars($id)."&type=new><input type=submit ".$disabled." value='".$sendBtnText."'></form></div>");
     }
     \App\Support\Frame::mainFrameClose();
-}
+} }
 
 $user = \App\Models\User::query()->find($id);
 if (!$user) {

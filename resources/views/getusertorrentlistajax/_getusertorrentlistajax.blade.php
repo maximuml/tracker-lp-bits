@@ -19,7 +19,7 @@ if (!in_array($type,array('uploaded','seeding','leeching','completed','incomplet
 if(!\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::TORRENT_HISTORY) && $id != $CURUSER["id"])
     \App\Support\LegacyResponse::permissionDenied();
 
-function maketable($rows, $mode = 'seeding')
+if (!function_exists('maketable')) { function maketable($rows, $mode = 'seeding')
 {
 $lang_getusertorrentlistajax = (array) (\App\Support\SupportContext::getGlobal('lang_getusertorrentlistajax') ?? []);
 $CURUSER = \App\Support\SupportContext::getUser() ?? [];
@@ -220,7 +220,7 @@ $seedBoxRep = \App\Support\SupportContext::getGlobal('seedBoxRep');
 	}
 	$ret .= "</table>\n";
 	return [$ret, $total_size];
-}
+} }
 $count = 0;
 $torrentlist = $pagertop = $pagerbottom = "";
 $query = null;

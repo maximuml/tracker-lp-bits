@@ -1,1 +1,1 @@
-@php include resource_path('views/viewfilelist/_viewfilelist_legacy.php'); @endphp
+@include('viewfilelist._viewfilelist')

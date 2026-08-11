@@ -130,6 +130,7 @@ use App\Http\Controllers\WebCommentController;
     Route::match(['get', 'post'], '/bitbucketlog', [InfoController::class, 'bitbucketlog'])->name('bitbucketlog.legacy');
     Route::match(['get', 'post'], '/delete', [TorrentActionController::class, 'delete'])->name('delete.legacy');
     Route::match(['get', 'post'], '/downloadnotice', [TorrentActionController::class, 'downloadnotice'])->name('downloadnotice.legacy');
+    Route::match(['get', 'post'], '/thanks', [TorrentActionController::class, 'thanks'])->name('thanks.legacy');
     Route::match(['get', 'post'], '/increment-bulk', [SystemController::class, 'incrementBulk'])->name('increment-bulk.legacy');
     Route::match(['get', 'post'], '/maxlogin', [SystemController::class, 'maxlogin'])->name('maxlogin.legacy');
     Route::match(['get', 'post'], '/setlist_lookup', [SystemController::class, 'setlistLookup'])->name('setlist_lookup.legacy');

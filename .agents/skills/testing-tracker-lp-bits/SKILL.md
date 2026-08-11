@@ -363,3 +363,11 @@ PR #299 converts the remaining `resources/views/**/_*_legacy.php` partials to `*
   sleep 3
   scrot -u /home/ubuntu/screenshots/ss_<page>.png
   ```
+
+### PR #299 re-run notes
+
+- The six targeted regressions from the first E2E run (`/messages.php`, `/delete.php?id=<torrent>`, `/takeconfirm.php`, `/takereseed.php?id=<torrent>`, `/ajax.php?action=saveUserMedal`, `/ajax.php?action=clearShoutBox`) were fixed by commit `e7daa1fd`.
+- `/thanks.php` is referenced by `public/js/common.js` (`ajax.post('thanks.php', ...)`); add `Route::match(['get', 'post'], '/thanks', [TorrentActionController::class, 'thanks'])->name('thanks.legacy')` to `routes/legacy/auth.php` to make the converted `resources/views/thanks` partial reachable.
+- `/page.php` is a dynamic loader and requires a `view` query parameter; the converted `resources/views/page/_page.blade.php` now returns a 400 response when `view` is missing instead of throwing a 500 `RuntimeException`.
+- `/image.php` only works with `?action=regimage&imagehash=<valid>`; without params it returns 404 (expected captcha behavior when the image captcha is disabled).
+

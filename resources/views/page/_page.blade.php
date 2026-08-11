@@ -26,5 +26,5 @@ if (!empty(\App\Support\SupportContext::getRequestInput('view'))) {
 } else {
     $msg = "require view parameter, _REQUEST: " . json_encode(\App\Support\SupportContext::allRequest());
     do_log($msg, "error");
-    throw new \RuntimeException($msg);
+    abort(400, 'require view parameter');
 }

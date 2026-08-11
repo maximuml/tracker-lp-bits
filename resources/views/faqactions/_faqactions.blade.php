@@ -26,10 +26,10 @@ if (\App\Support\UserDisplay::currentClass() < UC_ADMINISTRATOR) {
 	\App\Support\LegacyResponse::abort("Error", "Only Administrators and above can modify the FAQ, sorry.");
 }
 
-function clear_faq_cache()
+if (!function_exists('clear_faq_cache')) { function clear_faq_cache()
 {
     \Nexus\Database\NexusDB::cache_del('faq');
-}
+} }
 //stdhead("FAQ Management");
 
 // ACTION: reorder - reorder sections and items

@@ -1,1 +1,1 @@
-@include('forummanage._forummanage_legacy')
+@include('forummanage._forummanage')

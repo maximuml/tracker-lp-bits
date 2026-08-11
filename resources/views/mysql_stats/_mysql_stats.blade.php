@@ -33,7 +33,7 @@ $timespanfmt = '%s days, %s hours, %s minutes and %s seconds';
      * @author   staybyte
      * @version  1.0 - 20 July 2005
      */
-    function formatByteDown($value, $limes = 6, $comma = 0)
+    if (!function_exists('formatByteDown')) { function formatByteDown($value, $limes = 6, $comma = 0)
     {
         $dh           = pow(10, $comma);
         $li           = pow(10, $limes);
@@ -55,7 +55,7 @@ $timespanfmt = '%s days, %s hours, %s minutes and %s seconds';
         }
 
         return array($return_value, $unit);
-    } // end of the 'formatByteDown' function
+    } } // end of the 'formatByteDown' function
 
     /**
      * Returns a given timespan value in a readable format.
@@ -64,7 +64,7 @@ $timespanfmt = '%s days, %s hours, %s minutes and %s seconds';
      *
      * @return string  the formatted value
      */
-    function timespanFormat($seconds)
+    if (!function_exists('timespanFormat')) { function timespanFormat($seconds)
     {
         $return_string = '';
         $days = floor($seconds / 86400);
@@ -80,7 +80,7 @@ $timespanfmt = '%s days, %s hours, %s minutes and %s seconds';
             $seconds -= $minutes * 60;
         }
         return (string)$days." Days ". (string)$hours." Hours ". (string)$minutes." Minutes ". (string)$seconds." Seconds ";
-    }
+    } }
 
 
    /**
@@ -92,7 +92,7 @@ $timespanfmt = '%s days, %s hours, %s minutes and %s seconds';
      *
      * @access  public
      */
-    function localisedDate($timestamp = -1, $format = '')
+    if (!function_exists('localisedDate')) { function localisedDate($timestamp = -1, $format = '')
     {
 $datefmt = \App\Support\SupportContext::getGlobal('datefmt');
 $month = \App\Support\SupportContext::getGlobal('month');
@@ -160,7 +160,7 @@ $day_of_week = \App\Support\SupportContext::getGlobal('day_of_week');
         }
 
         return $result;
-    } // end of the 'localisedDate()' function
+    } } // end of the 'localisedDate()' function
     
 ////////////////////// END FUNCTION LIST /////////////////////////////////////
 

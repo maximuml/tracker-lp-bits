@@ -3,9 +3,9 @@
 @include('torrents._search_form')
 
 @if ($inclbookmarked == 1)
-    <h1 align="center">{{ \App\Support\UserDisplay::username($CURUSER['id']) }}{{ $lang_torrents['text_s_bookmarked_torrent'] }}</h1>
+    <h1 align="center">{!! \App\Support\UserDisplay::username($CURUSER['id']) !!}{{ $lang_torrents['text_s_bookmarked_torrent'] }}</h1>
 @elseif ($inclbookmarked == 2)
-    <h1 align="center">{{ \App\Support\UserDisplay::username($CURUSER['id']) }}{{ $lang_torrents['text_s_not_bookmarked_torrent'] }}</h1>
+    <h1 align="center">{!! \App\Support\UserDisplay::username($CURUSER['id']) !!}{{ $lang_torrents['text_s_not_bookmarked_torrent'] }}</h1>
 @endif
 
 @if ($count)

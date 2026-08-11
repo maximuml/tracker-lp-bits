@@ -71,7 +71,7 @@ class Snatch extends NexusModel
     protected function uploadText(): Attribute
     {
         return new Attribute(
-            get: fn($value, $attributes) => sprintf('%s@%s', mksize($attributes['uploaded']), $this->getUploadSpeed())
+            get: fn($value, $attributes) => sprintf('%s@%s', \App\Support\Format::size($attributes['uploaded']), $this->getUploadSpeed())
         );
     }
 
@@ -82,7 +82,7 @@ class Snatch extends NexusModel
     protected function downloadText(): Attribute
     {
         return new Attribute(
-            get: fn($value, $attributes) => sprintf('%s@%s', mksize($attributes['downloaded']), $this->getDownloadSpeed())
+            get: fn($value, $attributes) => sprintf('%s@%s', \App\Support\Format::size($attributes['downloaded']), $this->getDownloadSpeed())
         );
     }
 
@@ -90,7 +90,7 @@ class Snatch extends NexusModel
     protected function uploadedText(): Attribute
     {
         return new Attribute(
-            get: fn($value, $attributes) => sprintf('%s@%s', mksize($attributes['uploaded']), $this->getUploadSpeed())
+            get: fn($value, $attributes) => sprintf('%s@%s', \App\Support\Format::size($attributes['uploaded']), $this->getUploadSpeed())
         );
     }
 
@@ -98,7 +98,7 @@ class Snatch extends NexusModel
     protected function downloadedText(): Attribute
     {
         return new Attribute(
-            get: fn($value, $attributes) => sprintf('%s@%s', mksize($attributes['downloaded']), $this->getDownloadSpeed())
+            get: fn($value, $attributes) => sprintf('%s@%s', \App\Support\Format::size($attributes['downloaded']), $this->getDownloadSpeed())
         );
     }
 
@@ -113,9 +113,9 @@ class Snatch extends NexusModel
     public function getUploadSpeed(): string
     {
         if ($this->seedtime <= 0) {
-            $speed =  mksize(0);
+            $speed =  \App\Support\Format::size(0);
         } else {
-            $speed = mksize($this->uploaded / ($this->seedtime + $this->leechtime));
+            $speed = \App\Support\Format::size($this->uploaded / ($this->seedtime + $this->leechtime));
         }
         return "$speed/s";
     }
@@ -123,9 +123,9 @@ class Snatch extends NexusModel
     public function getDownloadSpeed(): string
     {
         if ($this->leechtime <= 0) {
-            $speed = mksize(0);
+            $speed = \App\Support\Format::size(0);
         } else {
-            $speed = mksize($this->downloaded / $this->leechtime);
+            $speed = \App\Support\Format::size($this->downloaded / $this->leechtime);
         }
         return "$speed/s";
     }

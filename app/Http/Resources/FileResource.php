@@ -19,7 +19,7 @@ class FileResource extends JsonResource
         return [
             'id' => $this->id,
             'filename' => $this->filename,
-            'size_human' => mksize($this->size),
+            'size_human' => \App\Support\Format::size($this->size),
         ];
     }
 }

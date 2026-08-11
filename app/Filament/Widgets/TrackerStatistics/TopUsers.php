@@ -48,11 +48,11 @@ class TopUsers extends BaseWidget implements HasActions
             ,
             TextColumn::make('uploaded')
                 ->label(__('label.uploaded'))
-                ->formatStateUsing(fn ($state) => mksize($state))
+                ->formatStateUsing(fn ($state) => \App\Support\Format::size($state))
             ,
             TextColumn::make('downloaded')
                 ->label(__('label.downloaded'))
-                ->formatStateUsing(fn ($state) => mksize($state))
+                ->formatStateUsing(fn ($state) => \App\Support\Format::size($state))
             ,
             TextColumn::make('share_ratio')
                 ->label(__('label.ratio'))

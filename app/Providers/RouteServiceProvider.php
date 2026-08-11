@@ -69,7 +69,7 @@ class RouteServiceProvider extends ServiceProvider
         });
 
         RateLimiter::for('third-party', function (Request $request) {
-            return Limit::perMinute(10)->by(getip());
+            return Limit::perMinute(10)->by(\App\Support\Network::clientIp());
         });
 
         RateLimiter::for('tracker', function (Request $request) {

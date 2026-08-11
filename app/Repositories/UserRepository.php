@@ -386,8 +386,8 @@ class UserRepository extends BaseRepository
         $modCommentText = nexus_trans('message.field_value_change_message_body', [
             'field' => nexus_trans("user.labels.$sourceField", [], 'en'),
             'operator' => $operator->username,
-            'old' => $formatSize ? mksize($old) : $old,
-            'new' => $formatSize ?  mksize($new) : $new,
+            'old' => $formatSize ? \App\Support\Format::size($old) : $old,
+            'new' => $formatSize ?  \App\Support\Format::size($new) : $new,
             'reason' => $reason,
         ], 'en');
         do_log("user: $uid, $modCommentText", 'alert');
@@ -400,8 +400,8 @@ class UserRepository extends BaseRepository
         $msg = nexus_trans('message.field_value_change_message_body', [
             'field' => $fieldLabel,
             'operator' => $operator->username,
-            'old' => $formatSize ? mksize($old) : $old,
-            'new' => $formatSize ?  mksize($new) : $new,
+            'old' => $formatSize ? \App\Support\Format::size($old) : $old,
+            'new' => $formatSize ?  \App\Support\Format::size($new) : $new,
             'reason' => $reason,
         ], $locale);
         $message = [

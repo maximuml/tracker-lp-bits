@@ -39,8 +39,8 @@ $ratio = number_format($arr["uploaded"] / $arr["downloaded"], 3);
 $ratio="---";
 }
 $ratio = "<font color=" . get_ratio_color($ratio) . ">$ratio</font>";
-  $uploaded = mksize($arr["uploaded"]);
-  $downloaded = mksize($arr["downloaded"]);
+  $uploaded = \App\Support\Format::size($arr["uploaded"]);
+  $downloaded = \App\Support\Format::size($arr["downloaded"]);
 // $uploaded = str_replace(" ", "<br>", mksize($arr["uploaded"]));
 // $downloaded = str_replace(" ", "<br>", mksize($arr["downloaded"]));
 

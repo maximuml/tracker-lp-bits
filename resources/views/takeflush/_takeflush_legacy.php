@@ -14,7 +14,7 @@ int_check($id,true);
 
 if (get_user_class() >= UC_MODERATOR || $CURUSER['id'] == "$id")
 {
-   $deadtime = deadtime();
+   $deadtime = \App\Support\Time::deadThreshold(\App\Support\Config\SiteConfig::current()->main->anninterthree());
    $lastAction = date("Y-m-d H:i:s", $deadtime);
    $effected = \App\Models\Peer::query()->where('last_action', '<', $lastAction)->where('userid', $id)->delete();
 

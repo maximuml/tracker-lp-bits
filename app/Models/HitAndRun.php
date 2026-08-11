@@ -135,7 +135,7 @@ class HitAndRun extends NexusModel
         }
         $inspectTime = HitAndRun::getConfig('inspect_time', $searchBoxId);
         $diffInSeconds = Carbon::now()->diffInSeconds($this->created_at->addHours(intval($inspectTime)), true);
-        return mkprettytime($diffInSeconds);
+        return \App\Support\Format::prettyTimeWithLocale($diffInSeconds);
     }
 
     private function doGetSeedTimeRequired(): string
@@ -154,7 +154,7 @@ class HitAndRun extends NexusModel
         }
         $seedTimeMinimum = HitAndRun::getConfig('seed_time_minimum', $searchBoxId);
         $diffInSeconds = 3600 * $seedTimeMinimum - $this->snatch->seedtime;
-        return mkprettytime($diffInSeconds);
+        return \App\Support\Format::prettyTimeWithLocale($diffInSeconds);
     }
 
     /** @return  mixed */

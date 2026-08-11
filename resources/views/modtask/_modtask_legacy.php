@@ -3,7 +3,7 @@ error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 function puke()
 {
 $CURUSER = \App\Support\SupportContext::getUser() ?? [];
-	$msg = "User ".$CURUSER["username"]." (id: ".$CURUSER["id"].") is hacking user's profile. IP : ".getip();
+	$msg = "User ".$CURUSER["username"]." (id: ".$CURUSER["id"].") is hacking user's profile. IP : ".\App\Support\Network::clientIp();
 	write_log($msg,'mod');
 	stderr("Error", "Permission denied. For security reason, we logged this action");
 }

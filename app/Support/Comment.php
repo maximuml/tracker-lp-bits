@@ -294,7 +294,7 @@ final class Comment
 
             $html .= '<div style="margin-top: 8pt; margin-bottom: 8pt;"><table id="cid' . $row['id'] . '" border="0" cellspacing="0" cellpadding="0" width="100%"><tr><td class="embedded" width="99%">#' . $row['id'] . '&nbsp;&nbsp;<font color="gray">' . ($lang_functions['text_by'] ?? '') . '</font>';
             $html .= \get_username($row['user'], false, true, true, false, false, true);
-            $html .= '&nbsp;&nbsp;<font color="gray">' . ($lang_functions['text_at'] ?? '') . '</font>' . \gettime($row['added'])
+            $html .= '&nbsp;&nbsp;<font color="gray">' . ($lang_functions['text_at'] ?? '') . '</font>' . \App\Support\Time::format($row['added'])
                 . ($row['editedby'] && Permission::can(PermissionEnum::COM_MANAGE) ? ' - [<a href="comment.php?action=vieworiginal&amp;cid=' . $row['id'] . '&amp;type=' . $type . '">' . ($lang_functions['text_view_original'] ?? '') . '</a>]' : '')
                 . '</td><td class="embedded nowrap" width="1%"><a href="#top"><img class="top" src="pic/trans.gif" alt="Top" title="Top" /></a>&nbsp;&nbsp;</td></tr></table></div>';
 
@@ -305,7 +305,7 @@ final class Comment
             $text = \format_comment($row['text']);
             $textEditby = '';
             if ($row['editedby']) {
-                $lastedittime = \gettime($row['editdate'], true, false);
+                $lastedittime = \App\Support\Time::format($row['editdate'], true, false);
                 $textEditby = '<br /><p><font class="small">' . ($lang_functions['text_last_edited_by'] ?? '') . \get_username($row['editedby']) . ($lang_functions['text_edited_at'] ?? '') . $lastedittime . "</font></p>\n";
             }
 

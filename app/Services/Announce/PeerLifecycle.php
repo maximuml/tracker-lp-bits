@@ -319,7 +319,7 @@ final class PeerLifecycle
             if ($elapsed < $wait) {
                 $faqUrl = Url::schemeAndHost(true) . '/faq.php#id46';
                 $this->warn(
-                    'Your ratio is too low! You need to wait ' . mkprettytime($wait * 3600 - $elapsed) . ' to start, please read ' . $faqUrl . ' for details',
+                    'Your ratio is too low! You need to wait ' . \App\Support\Format::prettyTimeWithLocale($wait * 3600 - $elapsed) . ' to start, please read ' . $faqUrl . ' for details',
                     $elapsed
                 );
             }

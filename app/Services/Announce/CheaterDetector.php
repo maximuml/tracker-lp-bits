@@ -120,7 +120,7 @@ final class CheaterDetector
                 \App\Models\UserBanLog::query()->insert([
                     'uid'      => $userId,
                     'username' => $user['username'],
-                    'reason'   => "$comment(Upload speed:" . mksize($upspeed) . '/s)',
+                    'reason'   => "$comment(Upload speed:" . \App\Support\Format::size($upspeed) . '/s)',
                 ]);
             });
 

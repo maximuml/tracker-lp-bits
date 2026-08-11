@@ -153,7 +153,7 @@ echo("<tr>\n<td class=rowfollow align=center><img class=\"readpm\" src=\"pic/tra
 echo("<td class=rowfollow align=left><a href=\"messages.php?action=viewmessage&id=" . $row['id'] . "\">" .
 $subject . "</a></td>\n");
 echo("<td class=rowfollow align=left>$username</td>\n");
-echo("<td class=rowfollow nowrap>" . gettime($row['added'],true,false) . "</td>\n");
+echo("<td class=rowfollow nowrap>" . \App\Support\Time::format($row['added'],true,false) . "</td>\n");
 echo("<td class=rowfollow><input class=checkbox type=\"checkbox\" name=\"messages[]\" value=\"" . $row['id'] . "\"></td>\n</tr>\n");
 }
 ?>
@@ -267,7 +267,7 @@ messagemenu($mailbox);
 </tr>
 <tr>
 <td class="rowfollow" align="left"><?php echo $sender?></td>
-<td class="rowfollow" align="left"><?php echo gettime($added,true,false)?>&nbsp;&nbsp;<?php echo $unread?></td>
+<td class="rowfollow" align="left"><?php echo \App\Support\Time::format($added,true,false)?>&nbsp;&nbsp;<?php echo $unread?></td>
 </tr>
 <tr>
 <td colspan="2" align="left"><?php echo $body?></td>

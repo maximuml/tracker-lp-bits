@@ -124,7 +124,7 @@ endif; // if (!$isAjax)
 if (((\App\Support\SupportContext::getQuery('sent') !== null)) && \App\Support\SupportContext::getQuery('sent') === 'yes' && !empty(\App\Support\SupportContext::getQuery('shbox_text'))) {
     $userid = (int) ($CURUSER['id'] ?? 0);
     if (!$userid) {
-        do_log('Someone is hacking shoutbox. no_permission_to_shoutbox - IP : ' . getip());
+        do_log('Someone is hacking shoutbox. no_permission_to_shoutbox - IP : ' . \App\Support\Network::clientIp());
         echo $lang_shoutbox['text_no_permission_to_shoutbox']; return;
     }
     $type = 'sb';

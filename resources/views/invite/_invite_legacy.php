@@ -210,11 +210,11 @@ JS;
                     <td class=rowfollow>".$arr['email']."</td>
                     <td class=rowfollow>".$arr['enabled']."</td>
                     <td class=rowfollow>" . $arr['torrent_count'] . "</td>
-                    <td class=rowfollow>" . mksize($arr['uploaded']) . "</td>
-                    <td class=rowfollow>" . mksize($arr['downloaded']) . "</td>
+                    <td class=rowfollow>" . \App\Support\Format::size($arr['uploaded']) . "</td>
+                    <td class=rowfollow>" . \App\Support\Format::size($arr['downloaded']) . "</td>
                     <td class=rowfollow>".$ratio."</td>
                     <td class=rowfollow>".number_format($arr['seeding_torrent_count'])."</td>
-                    <td class=rowfollow>".mksize($arr['seeding_torrent_size'])."</td>
+                    <td class=rowfollow>".\App\Support\Format::size($arr['seeding_torrent_size'])."</td>
                     <td class=rowfollow>".number_format($arr['seed_points_per_hour'], 3)."</td>
                 ");
 

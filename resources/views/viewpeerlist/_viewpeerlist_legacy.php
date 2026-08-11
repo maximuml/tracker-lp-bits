@@ -20,13 +20,13 @@ $lang_viewpeerlist = (array) (\App\Support\SupportContext::getGlobal('lang_viewp
     //First, build the location
     if ($enablelocation_tweak == 'yes') {
         if (!empty($e['ipv4'])) {
-            list($loc_pub, $loc_mod) = get_ip_location($e['ipv4']);
+            list($loc_pub, $loc_mod) = \App\Support\Network::ipLocationWithContext($e['ipv4']);
             $seedBoxIcon = $seedBoxRep->renderIcon($e['ipv4'], $e['userid']);
             $address[] = $loc_pub . $seedBoxIcon;
             $ips[] = $e['ipv4'];
         }
         if (!empty($e['ipv6'])) {
-            list($loc_pub, $loc_mod) = get_ip_location($e['ipv6']);
+            list($loc_pub, $loc_mod) = \App\Support\Network::ipLocationWithContext($e['ipv6']);
             $seedBoxIcon = $seedBoxRep->renderIcon($e['ipv6'], $e['userid']);
             $address[] = $loc_pub . $seedBoxIcon;
             $ips[] = $e['ipv6'];
@@ -146,15 +146,15 @@ $seedBoxRep = \App\Support\SupportContext::getGlobal('seedBoxRep');
 		$s .= $columnUsername . $columnLocation;
 
 		$s .= "<td class=rowfollow align=center width=1%><nobr>" . ($e['connectable'] == "yes" ? $lang_viewpeerlist['text_yes'] : "<font color=red>".$lang_viewpeerlist['text_no']."</font>") . "</nobr></td>\n";
-		$s .= "<td class=rowfollow align=center width=1%><nobr>" . mksize($e["uploaded"]) . "</nobr></td>\n";
+		$s .= "<td class=rowfollow align=center width=1%><nobr>" . \App\Support\Format::size($e["uploaded"]) . "</nobr></td>\n";
 
-		$s .= "<td class=rowfollow align=center width=1%><nobr>" . mksize(($e["uploaded"] - $e["uploadoffset"]) / $secs) . "/s</nobr></td>\n";
-		$s .= "<td class=rowfollow align=center width=1%><nobr>" . mksize($e["downloaded"]) . "</nobr></td>\n";
+		$s .= "<td class=rowfollow align=center width=1%><nobr>" . \App\Support\Format::size(($e["uploaded"] - $e["uploadoffset"]) / $secs) . "/s</nobr></td>\n";
+		$s .= "<td class=rowfollow align=center width=1%><nobr>" . \App\Support\Format::size($e["downloaded"]) . "</nobr></td>\n";
 
 		if ($e["seeder"] == "no")
-		$s .= "<td class=rowfollow align=center width=1%><nobr>" . mksize(($e["downloaded"] - $e["downloadoffset"]) / $secs) . "/s</nobr></td>\n";
+		$s .= "<td class=rowfollow align=center width=1%><nobr>" . \App\Support\Format::size(($e["downloaded"] - $e["downloadoffset"]) / $secs) . "/s</nobr></td>\n";
 		else
-		$s .= "<td class=rowfollow align=center width=1%><nobr>" . mksize(($e["downloaded"] - $e["downloadoffset"]) / max(1, $e["finishedat"] - $e['st'])) .	"/s</nobr></td>\n";
+		$s .= "<td class=rowfollow align=center width=1%><nobr>" . \App\Support\Format::size(($e["downloaded"] - $e["downloadoffset"]) / max(1, $e["finishedat"] - $e['st'])) .	"/s</nobr></td>\n";
 		if ($e["downloaded"])
 		{
 			$ratio = floor(($e["uploaded"] / $e["downloaded"]) * 1000) / 1000;
@@ -165,8 +165,8 @@ $seedBoxRep = \App\Support\SupportContext::getGlobal('seedBoxRep');
 		else
 		$s .= "<td class=rowfollow align=center width=1%>---</td>\n";
 		$s .= "<td class=rowfollow align=center width=1%><nobr>" . sprintf("%.2f%%", 100 * (1 - ($e["to_go"] / max(1, $torrent["size"])))) . "</nobr></td>\n";
-		$s .= "<td class=rowfollow align=center width=1%><nobr>" . mkprettytime($now - $e["st"]) . "</nobr></td>\n";
-		$s .= "<td class=rowfollow align=center width=1%><nobr>" . mkprettytime($now - $e["la"]) . "</nobr></td>\n";
+		$s .= "<td class=rowfollow align=center width=1%><nobr>" . \App\Support\Format::prettyTimeWithLocale($now - $e["st"]) . "</nobr></td>\n";
+		$s .= "<td class=rowfollow align=center width=1%><nobr>" . \App\Support\Format::prettyTimeWithLocale($now - $e["la"]) . "</nobr></td>\n";
 		$s .= "<td class=rowfollow align=center width=1%><nobr>" . htmlspecialchars(get_agent($e["peer_id"],$e["agent"])) . "</nobr></td>\n";
 		$s .= "</tr>\n";
 	}

@@ -166,7 +166,7 @@ $seedBoxRep = \App\Support\SupportContext::getGlobal('seedBoxRep');
 		$ret .= sprintf('<td class="rowfollow nowrap" align="center">%s<br/>%s</td>', substr($arr['added'], 0, 10), substr($arr['added'], 11));
 		//size
 		if ($showsize)
-			$ret .= "<td class=\"rowfollow\" align=\"center\">". mksize_compact($arr['size'])."</td>";
+			$ret .= "<td class=\"rowfollow\" align=\"center\">". \App\Support\Format::sizeCompact($arr['size'])."</td>";
 		//number of seeders
 		if ($showsenum)
 			$ret .= "<td class=\"rowfollow\" align=\"center\">".$arr['seeders']."</td>";
@@ -175,12 +175,12 @@ $seedBoxRep = \App\Support\SupportContext::getGlobal('seedBoxRep');
 			$ret .= "<td class=\"rowfollow\" align=\"center\">".$arr['leechers']."</td>";
 		//uploaded amount
 		if ($showuploaded){
-			$uploaded = mksize_compact($arr["uploaded"]);
+			$uploaded = \App\Support\Format::sizeCompact($arr["uploaded"]);
 			$ret .= "<td class=\"rowfollow\" align=\"center\">".$uploaded."</td>";
 		}
 		//downloaded amount
 		if ($showdownloaded){
-			$downloaded = mksize_compact($arr["downloaded"]);
+			$downloaded = \App\Support\Format::sizeCompact($arr["downloaded"]);
 			$ret .= "<td class=\"rowfollow\" align=\"center\">".$downloaded."</td>";
 		}
 		//ratio
@@ -195,13 +195,13 @@ $seedBoxRep = \App\Support\SupportContext::getGlobal('seedBoxRep');
 			$ret .= "<td class=\"rowfollow\" align=\"center\">".$ratio."</td>";
 		}
 		if ($showsetime){
-			$ret .= "<td class=\"rowfollow\" align=\"center\">".mkprettytime($arr['seedtime'])."</td>";
+			$ret .= "<td class=\"rowfollow\" align=\"center\">".\App\Support\Format::prettyTimeWithLocale($arr['seedtime'])."</td>";
 		}
 		if ($showletime){
-			$ret .= "<td class=\"rowfollow\" align=\"center\">".mkprettytime($arr['leechtime'])."</td>";
+			$ret .= "<td class=\"rowfollow\" align=\"center\">".\App\Support\Format::prettyTimeWithLocale($arr['leechtime'])."</td>";
 		}
 		if ($showcotime)
-			$ret .= "<td class=\"rowfollow\" align=\"center\">"."". str_replace("&nbsp;", "<br />", gettime($arr['completedat'],false)). "</td>";
+			$ret .= "<td class=\"rowfollow\" align=\"center\">"."". str_replace("&nbsp;", "<br />", \App\Support\Time::format($arr['completedat'],false)). "</td>";
 		if ($showanonymous)
 			$ret .= "<td class=\"rowfollow\" align=\"center\">".$arr['anonymous']."</td>";
 		if ($shouldShowClient) {
@@ -363,7 +363,7 @@ $hasData = false;
 $summary = sprintf('<b>%s</b>%s', $count, $lang_getusertorrentlistajax['text_record'] . add_s ( $count ));
 if ((isset($total_size)) && $total_size){
     $hasData = true;
-    $summary .= $lang_getusertorrentlistajax['text_total_size'] . mksize($total_size);
+    $summary .= $lang_getusertorrentlistajax['text_total_size'] . \App\Support\Format::size($total_size);
 } elseif ($count) {
     $hasData = true;
 }

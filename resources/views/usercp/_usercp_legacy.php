@@ -662,7 +662,7 @@ $commentcount = \App\Models\Comment::query()->where('user', $CURUSER["id"])->cou
 if ($CURUSER['added'] == "0000-00-00 00:00:00" || $CURUSER['added'] == null)
 	$joindate = 'N/A';
 else
-	$joindate = $CURUSER['added']." (" . gettime($CURUSER['added'],true,false,true).")";
+	$joindate = $CURUSER['added']." (" . \App\Support\Time::format($CURUSER['added'],true,false,true).")";
 
 //Forum Posts
 if (!$forumposts = $Cache->get_value('user_'.$CURUSER['id'].'_post_count')){
@@ -690,7 +690,7 @@ tr_small($lang_usercp['row_join_date'], $joindate, 1);
 tr_small($lang_usercp['row_email_address'], $CURUSER['email'], 1);
 $seedBoxIcon = (new \App\Repositories\SeedBoxRepository())->renderIcon($CURUSER['ip'], $CURUSER['id']);
 if ($enablelocation_tweak == 'yes'){
-	list($loc_pub, $loc_mod) = get_ip_location($CURUSER["ip"]);
+	list($loc_pub, $loc_mod) = \App\Support\Network::ipLocationWithContext($CURUSER["ip"]);
 	tr_small($lang_usercp['row_ip_location'], hide_text($CURUSER["ip"]." <span title='" . $loc_mod . "'>[" . $loc_pub . "]</span>$seedBoxIcon"), 1);
 }
 else{
@@ -936,7 +936,7 @@ foreach ($topicRows as $topicarr)
 	$arr = get_post_row($topicarr->lastpost);
 	$postid = intval($arr["id"] ?? 0);
 	$userid = intval($arr["userid"] ?? 0);
-	$added = gettime($arr['added'],true,false);
+	$added = \App\Support\Time::format($arr['added'],true,false);
 
 	/// GET NAME OF LAST POSTER ///
 	$username = get_username($userid);

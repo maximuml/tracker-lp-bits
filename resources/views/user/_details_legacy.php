@@ -8,14 +8,14 @@ if ($user['added'] == "0000-00-00 00:00:00" || $user['added'] == null) {
     $joindate = $lang_userdetails['text_not_available'];
 } else {
     $weeks = abs(number_format($userInfo->added->diffInWeeks(), 1)) . nexus_trans('nexus.time_units.week');
-    $joindate = $user['added']." (" . gettime($user["added"], true, false, true).", $weeks)";
+    $joindate = $user['added']." (" . \App\Support\Time::format($user["added"], true, false, true).", $weeks)";
 }
 $lastseen = $user["last_access"];
 if ($lastseen == "0000-00-00 00:00:00" || $lastseen == null)
 $lastseen = $lang_userdetails['text_not_available'];
 else
 {
-	$lastseen .= " (" . gettime($lastseen, true, false, true).")";
+	$lastseen .= " (" . \App\Support\Time::format($lastseen, true, false, true).")";
 }
 //$res = sql_query("SELECT COUNT(*) FROM comments WHERE user=" . $user['id']) or sqlerr();
 //$arr3 = mysql_fetch_row($res);
@@ -127,7 +127,7 @@ if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::VIEW_USER_CO
 {
     $seedBoxIcon = $seedBoxRep->renderIcon($CURUSER['ip'], $CURUSER['id']);
 	if ($enablelocation_tweak == 'yes'){
-		list($loc_pub, $loc_mod) = get_ip_location($user['ip']);
+		list($loc_pub, $loc_mod) = \App\Support\Network::ipLocationWithContext($user['ip']);
 		$locationinfo = "<span title=\"" . $loc_mod . "\">[" . $loc_pub . "]</span>";
 	}
 	else $locationinfo = "";
@@ -172,8 +172,8 @@ if ($user["downloaded"] > 0 && $true_download > 0)
 }
 //end
 
-$xfer = "<tr><td class=\"embedded\"><strong>" . $lang_userdetails['row_uploaded'] . "</strong>:  ". mksize($user["uploaded"]) . "</td><td class=\"embedded\">&nbsp;&nbsp;<strong>" . $lang_userdetails['row_downloaded'] . "</strong>:  " . mksize($user["downloaded"]) . "</td></tr>";
-$true_xfer = "<tr><td class=\"embedded\"><strong>" . $lang_userdetails['row_real_uploaded'] . "</strong>:  ". mksize($true_upload) . "</td><td class=\"embedded\">&nbsp;&nbsp;<strong>" . $lang_userdetails['row_real_downloaded'] . "</strong>:  " . mksize($true_download) . "</td><td class=\"embedded text-muted\">&nbsp;&nbsp;" . $lang_userdetails['row_real_ps'] . "</td></tr>";
+$xfer = "<tr><td class=\"embedded\"><strong>" . $lang_userdetails['row_uploaded'] . "</strong>:  ". \App\Support\Format::size($user["uploaded"]) . "</td><td class=\"embedded\">&nbsp;&nbsp;<strong>" . $lang_userdetails['row_downloaded'] . "</strong>:  " . \App\Support\Format::size($user["downloaded"]) . "</td></tr>";
+$true_xfer = "<tr><td class=\"embedded\"><strong>" . $lang_userdetails['row_real_uploaded'] . "</strong>:  ". \App\Support\Format::size($true_upload) . "</td><td class=\"embedded\">&nbsp;&nbsp;<strong>" . $lang_userdetails['row_real_downloaded'] . "</strong>:  " . \App\Support\Format::size($true_download) . "</td><td class=\"embedded text-muted\">&nbsp;&nbsp;" . $lang_userdetails['row_real_ps'] . "</td></tr>";
 tr_small($lang_userdetails['row_transfer'], "<table border=\"0\" cellspacing=\"0\" cellpadding=\"0\">" . ($sr ?? '') . $xfer .  $true_xfer . "</table>", 1);
 
 
@@ -183,7 +183,7 @@ if ($user["leechtime"] > 0)
 	$slr = "<tr><td class=\"embedded\"><strong>" . $lang_userdetails['text_seeding_leeching_time_ratio'] . "</strong>:  <font color=\"" . get_ratio_color($slr) . "\">" . number_format($slr, 3) . "</font></td><td class=\"embedded\">&nbsp;&nbsp;" . get_ratio_img($slr) . "</td></tr>";
 }
 
-$slt = "<tr><td class=\"embedded\"><strong>" . $lang_userdetails['text_seeding_time'] . "</strong>:  ". mkprettytime($user["seedtime"]) . "</td><td class=\"embedded\">&nbsp;&nbsp;<strong>" . $lang_userdetails['text_leeching_time'] . "</strong>:  " . mkprettytime($user["leechtime"]) . "</td><td class=\"embedded text-muted\">&nbsp;&nbsp;(" . nexus_trans('label.updated_at') . ": " . $user['seed_time_updated_at'] . ")</td></tr>";
+$slt = "<tr><td class=\"embedded\"><strong>" . $lang_userdetails['text_seeding_time'] . "</strong>:  ". \App\Support\Format::prettyTimeWithLocale($user["seedtime"]) . "</td><td class=\"embedded\">&nbsp;&nbsp;<strong>" . $lang_userdetails['text_leeching_time'] . "</strong>:  " . \App\Support\Format::prettyTimeWithLocale($user["leechtime"]) . "</td><td class=\"embedded text-muted\">&nbsp;&nbsp;(" . nexus_trans('label.updated_at') . ": " . $user['seed_time_updated_at'] . ")</td></tr>";
 
 	tr_small($lang_userdetails['row_sltime'], "<table border=\"0\" cellspacing=\"0\" cellpadding=\"0\">" . ($slr ?? '') . $slt . "</table>", 1);
 
@@ -415,7 +415,7 @@ if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::MANAGE_USER_
 		else
 		{
 			print("<td align=\"left\" class=\"rowfollow\">".$lang_userdetails['text_until'].$warneduntil);
-			print("<br />(" . mkprettytime(strtotime($warneduntil) - strtotime(date("Y-m-d H:i:s"))) .$lang_userdetails['text_to_go'] .")</td>\n");
+			print("<br />(" . \App\Support\Format::prettyTimeWithLocale(strtotime($warneduntil) - strtotime(date("Y-m-d H:i:s"))) .$lang_userdetails['text_to_go'] .")</td>\n");
 		}
 		print("</tr>");
 
@@ -461,7 +461,7 @@ if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::MANAGE_USER_
 		if ($leechwarnuntil != '0000-00-00 00:00:00' || $leechwarnuntil != null)
 		{
 			print($lang_userdetails['text_until'].$leechwarnuntil);
-			print("<br />(" . mkprettytime(strtotime($leechwarnuntil) - strtotime(date("Y-m-d H:i:s"))) .$lang_userdetails['text_to_go'].")");
+			print("<br />(" . \App\Support\Format::prettyTimeWithLocale(strtotime($leechwarnuntil) - strtotime(date("Y-m-d H:i:s"))) .$lang_userdetails['text_to_go'].")");
 			printf('&nbsp;<input id="remove-leech-warn" type="button" class="btn" value="Remove" data-uid="%s" />', $user['id']);
 			$removeLeechWarnJs = <<<JS
 jQuery('#remove-leech-warn').on('click', function () {

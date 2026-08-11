@@ -52,7 +52,7 @@ if ($count == 0) {
                         <font color="gray"><?php echo $lang_functions['text_by'] ?? 'by'; ?></font>
                         <?php echo get_username($userId, false, true, true, false, false, true); ?>
                         &nbsp;&nbsp;<font color="gray"><?php echo $lang_functions['text_at'] ?? 'at'; ?></font>
-                        <?php echo gettime($row['added'] ?? ''); ?>
+                        <?php echo \App\Support\Time::format($row['added'] ?? ''); ?>
                         <?php echo $parentLink; ?>
                     </td>
                 </tr>

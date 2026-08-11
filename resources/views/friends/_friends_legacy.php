@@ -119,7 +119,7 @@ foreach ($friendRows as $friend)
 	if (!$title)
 		$title = get_user_class_name($friend["class"],false,true,true);
 	$body1 = get_username($friend["id"]) .
-	" ($title)<br /><br />".$lang_friends['text_last_seen_on']. gettime($friend['last_access'],true, false);
+	" ($title)<br /><br />".$lang_friends['text_last_seen_on']. \App\Support\Time::format($friend['last_access'],true, false);
 	$body2 = "<a href=friends.php?id=$userid&action=delete&type=friend&targetid=" . $friend['id'] . ">".$lang_friends['text_remove_from_friends']."</a>".
 	"<br /><br /><a href=sendmessage.php?receiver=" . $friend['id'] . ">".$lang_friends['text_send_pm']."</a>";
 
@@ -217,7 +217,7 @@ else
 					if (!$title)
 					$title = get_user_class_name($neighbors_arr["class"],false,true,true);
 					$body1 = get_username($neighbors_arr["id"]) .
-					" ($title)<br /><br />".$lang_friends['text_last_seen_on']. gettime($neighbors_arr['last_access'], true, false);
+					" ($title)<br /><br />".$lang_friends['text_last_seen_on']. \App\Support\Time::format($neighbors_arr['last_access'], true, false);
 
 
 					$body2 = ((empty($friend_id_arr)||(!in_array($neighbors_arr["id"],$friend_id_arr))) ? "<a href=friends.php?id=$userid&action=add&type=friend&targetid=" . $neighbors_arr['id'] . ">".$lang_friends['text_add_to_friends']."</a>" : "<a href=friends.php?id=$userid&action=delete&type=friend&targetid=" . $neighbors_arr['id'] . ">".$lang_friends['text_remove_from_friends']."</a>") .

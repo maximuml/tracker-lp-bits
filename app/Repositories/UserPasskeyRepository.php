@@ -172,7 +172,7 @@ class UserPasskeyRepository extends BaseRepository
         }
         $user->checkIsNormal();
 
-        $ip = getip();
+        $ip = \App\Support\Network::clientIp();
         $userRep = new UserRepository();
         $userRep->saveLoginLog($user->id, $ip, 'Web', true);
 
@@ -280,7 +280,7 @@ class UserPasskeyRepository extends BaseRepository
                                 } else {
                                     printf('<img style="width: 32px" src="%s" alt="%s" /><div style="margin-right:4px"><b>%s</b>', self::$passkeyvg, $passkey->credential_id, $passkey->credential_id);
                                 }
-                                printf('<br><b>%s</b>%s</div>', nexus_trans('passkey.passkey_created_at'), gettime($passkey->created_at));
+                                printf('<br><b>%s</b>%s</div>', nexus_trans('passkey.passkey_created_at'), \App\Support\Time::format($passkey->created_at));
                                 printf('<button type="button" style="margin-left:auto" data-passkey-id="%s">%s</button>', $passkey->credential_id, nexus_trans('passkey.passkey_delete'))
                                 ?>
                             </div>

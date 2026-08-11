@@ -559,7 +559,7 @@ class User extends Authenticatable implements FilamentUser, HasName
     protected function uploadedText(): Attribute
     {
         return new Attribute(
-            get: fn($value, $attributes) => mksize($attributes['uploaded'])
+            get: fn($value, $attributes) => \App\Support\Format::size($attributes['uploaded'])
         );
     }
 
@@ -568,7 +568,7 @@ class User extends Authenticatable implements FilamentUser, HasName
     protected function downloadedText(): Attribute
     {
         return new Attribute(
-            get: fn($value, $attributes) => mksize($attributes['downloaded'])
+            get: fn($value, $attributes) => \App\Support\Format::size($attributes['downloaded'])
         );
     }
 

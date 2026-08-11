@@ -350,7 +350,7 @@ final class Shoutbox
     {
         $timeString = date('Y-m-d H:i:s', $timestamp);
 
-        return \gettime($timeString, true, false, true, $oneUnit);
+        return \App\Support\Time::format($timeString, true, false, true, $oneUnit);
     }
 
     /**

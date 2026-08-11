@@ -97,8 +97,8 @@ foreach ($rows as $arr)
   if ($arr['added'] == '0000-00-00 00:00:00' || $arr['added'] == null) $arr['added'] = '-';
   echo '<tr><th class="left"><a href="userdetails.php?id='.$arr['id'].'"><b>'.$arr['username'].'</b></a></th>';
   echo '<td>'.$joindate.'</td>';
-  echo '<td class="right">'.mksize($arr['uploaded']).' @ '.mksize($arr['uploaded'] / $age).'ps</td>';
-  echo '<td class="right">'.mksize($arr['downloaded']).' @ '.mksize($arr['downloaded'] / $age).'ps</td>';
+  echo '<td class="right">'.\App\Support\Format::size($arr['uploaded']).' @ '.\App\Support\Format::size($arr['uploaded'] / $age).'ps</td>';
+  echo '<td class="right">'.\App\Support\Format::size($arr['downloaded']).' @ '.\App\Support\Format::size($arr['downloaded'] / $age).'ps</td>';
   echo '<td>'.$ratio.'</td>';
   echo '<td>'.$arr['cheat'].'</td>';
   echo '<td class="right">'.ceil(($arr['cheat'] - $min) / max(1, ($max - $min)) * 100).'%</td></tr>'."\n";

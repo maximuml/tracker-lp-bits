@@ -222,7 +222,7 @@ foreach ($list as $row)
 	else $itemdlurl = $url."/download.php?id=".$row['id'];
 	if (!empty(\App\Support\SupportContext::getQuery('icat'))) $title .= "[".$row['category_name']."]";
 	$title .= $row['name'];
-	if (!empty(\App\Support\SupportContext::getQuery('isize'))) $title .= "[".mksize($row['size'])."]";
+	if (!empty(\App\Support\SupportContext::getQuery('isize'))) $title .= "[".\App\Support\Format::size($row['size'])."]";
 	if (!empty(\App\Support\SupportContext::getQuery('iuplder'))) $title .= "[".$author."]";
 	$content = format_comment($row['descr'], true, false, false, false);
 	$xml .= '<item>

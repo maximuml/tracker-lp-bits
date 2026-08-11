@@ -270,7 +270,7 @@ foreach ($rows as $row)
 				if ($user['timetype'] != 'timealive')
 					$lastcomtime = $lang_functions['text_at_time'].$lastcom['added'];
 				else
-					$lastcomtime = $lang_functions['text_blank'].gettime($lastcom["added"],true,false,true);
+					$lastcomtime = $lang_functions['text_blank'].\App\Support\Time::format($lastcom["added"],true,false,true);
 					$lastcom_tooltip[$counter]['id'] = "lastcom_" . $counter;
 					$lastcom_tooltip[$counter]['content'] = ($hasnewcom ? "<b>(<font class='new'>".$lang_functions['text_new_uppercase']."</font>)</b> " : "").$lang_functions['text_last_commented_by'].get_username($lastcom['user']) . $lastcomtime."<br />". format_comment(mb_substr($lastcom['text'],0,100,"UTF-8") . (mb_strlen($lastcom['text'],"UTF-8") > 100 ? " ......" : "" ),true,false,false,true,600,false,false);
 					$onmouseover = "onmouseover=\"domTT_activate(this, event, 'content', document.getElementById('" . $lastcom_tooltip[$counter]['id'] . "'), 'trail', false, 'delay', 500,'lifetime',3000,'fade','both','styleClass','niceTitle','fadeMax', 87,'maxWidth', 400);\"";
@@ -286,11 +286,11 @@ foreach ($rows as $row)
 	}
 
 	$time = $row["added"];
-	$time = gettime($time,false,true);
+	$time = \App\Support\Time::format($time,false,true);
 	print("<td class=\"rowfollow nowrap\">". $time. "</td>");
 
 	//size
-	print("<td class=\"rowfollow\">" . mksize_compact($row["size"])."</td>");
+	print("<td class=\"rowfollow\">" . \App\Support\Format::sizeCompact($row["size"])."</td>");
 
 	if ($row["seeders"]) {
 			$ratio = ($row["leechers"] ? ($row["seeders"] / $row["leechers"]) : 1);

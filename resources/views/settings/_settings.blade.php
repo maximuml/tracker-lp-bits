@@ -8,17 +8,17 @@ $__server_SCRIPT_NAME = \App\Support\SupportContext::getServerValue('SCRIPT_NAME
 if (\App\Support\UserDisplay::currentClass() < UC_SYSOP)
 \App\Support\LegacyResponse::permissionDenied();
 
-function go_back()
+if (!function_exists('go_back')) { function go_back()
 {
 $lang_settings = (array) (\App\Support\SupportContext::getGlobal('lang_settings') ?? []);
 	\App\Support\Html::stdMessage($lang_settings['std_message'], $lang_settings['std_click']."<a class=\"altlink\" href=\"settings.php\">".$lang_settings['std_here']."</a>".$lang_settings['std_to_go_back']);
-}
+} }
 
-function yesorno($title, $name, $value, $note="")
+if (!function_exists('yesorno')) { function yesorno($title, $name, $value, $note="")
 {
 $lang_settings = (array) (\App\Support\SupportContext::getGlobal('lang_settings') ?? []);
 	\App\Support\Html::tr($title, "<input type='radio' id='".$name."yes' name='".$name."'".($value == "yes" ? " checked=\"checked\"" : "")." value='yes' /> <label for='".$name."yes'>".$lang_settings['text_yes']."</label> <input type='radio' id='".$name."no' name='".$name."'".($value == "no" ? " checked=\"checked\"" : "")." value='no' /> <label for='".$name."no'>".$lang_settings['text_no']."</label><br />".$note, 1);
-}
+} }
 
 $action = ((\App\Support\SupportContext::getPost('action') !== null)) ? \App\Support\SupportContext::getPost('action') : 'showmenu';
 $allowed_actions = array('basicsettings','mainsettings','smtpsettings','securitysettings','authoritysettings','tweaksettings', 'botsettings','codesettings','bonussettings','accountsettings','torrentsettings', 'attachmentsettings', 'savesettings_basic', 'savesettings_main','savesettings_smtp','savesettings_security','savesettings_authority','savesettings_tweak','savesettings_bot','savesettings_code','savesettings_bonus', 'savesettings_account','savesettings_torrent', 'savesettings_attachment', 'showmenu', 'miscsettings', 'savesettings_misc');
@@ -632,7 +632,7 @@ elseif ($action == 'accountsettings'){
     $inputAlias = "1_alias";
     \App\Support\Html::tr($lang_settings['row_default_user_one'].\App\Support\UserClass::name(UC_USER,false,false,true).$lang_settings['row_default_user_two'], $lang_settings['text_alias'] . "<input type='text' style=\"width: 60px\" name='".$inputAlias."' value='".((isset($ACCOUNT[$inputAlias])) ? $ACCOUNT[$inputAlias] : '' )."'>", 1);
 
-	function promotion_criteria($class, $input, $time, $dl, $prratio, $deratio, $defaultInvites=0, $defaultSeedPoints = 0, $defaultAlias = ''){
+	if (!function_exists('promotion_criteria')) { function promotion_criteria($class, $input, $time, $dl, $prratio, $deratio, $defaultInvites=0, $defaultSeedPoints = 0, $defaultAlias = ''){
 $lang_settings = (array) (\App\Support\SupportContext::getGlobal('lang_settings') ?? []);
 $ACCOUNT = \App\Support\SupportContext::getGlobal('ACCOUNT');
 		$inputtime = $input."time";
@@ -654,7 +654,7 @@ $ACCOUNT = \App\Support\SupportContext::getGlobal('ACCOUNT');
             .$lang_settings['text_users_get']."<input type='text' style=\"width: 50px\" name='getInvitesByPromotion[".$class."]' value='".((isset($ACCOUNT['getInvitesByPromotion'][$class])) ? $ACCOUNT['getInvitesByPromotion'][$class] : $defaultInvites )."'>".$lang_settings['text_invitations_default']."'".$defaultInvites."'.";
 
 		\App\Support\Html::tr($x, $y, 1);
-	}
+	} }
 	promotion_criteria(UC_POWER_USER, "pu", 4, 50, 1.05, 0.95, 1, \App\Models\User::$classes[UC_POWER_USER]['min_seed_points']);
 	promotion_criteria(UC_ELITE_USER, "eu", 8, 120, 1.55, 1.45, 0, \App\Models\User::$classes[UC_ELITE_USER]['min_seed_points']);
 	promotion_criteria(UC_CRAZY_USER, "cu", 15, 300, 2.05, 1.95, 2, \App\Models\User::$classes[UC_CRAZY_USER]['min_seed_points']);

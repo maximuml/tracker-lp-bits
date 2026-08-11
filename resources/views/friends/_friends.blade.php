@@ -1,11 +1,12 @@
-<?php
-error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
+@php
+if (!function_exists('purge_neighbors_cache')) {
 function purge_neighbors_cache()
 {
 $CURUSER = \App\Support\SupportContext::getUser() ?? [];
 	$cachefile = "cache/" . get_langfolder_cookie() . "/neighbors/" . $CURUSER['id'] . ".html";
 	if (file_exists($cachefile))
 		unlink($cachefile);
+}
 }
 
 //make_folder("cache/" , get_langfolder_cookie());
@@ -345,4 +346,4 @@ print("</td></tr></table>\n");
 if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::VIEW_USER_LIST))
 	print("<p><a href=users.php><b>".$lang_friends['text_find_user']."</b></a></p>");
 \App\Support\Html::stdfoot();
-?>
+@endphp

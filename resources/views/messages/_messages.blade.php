@@ -1,9 +1,9 @@
 <?php
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 // Define constants
-define('PM_DELETED',0); // Message was deleted
-define('PM_INBOX',1); // Message located in Inbox for reciever
-define('PM_SENTBOX',-1); // GET value for sent box
+if (!defined('PM_DELETED')) { define('PM_DELETED',0); } // Message was deleted
+if (!defined('PM_INBOX')) { define('PM_INBOX',1); } // Message located in Inbox for reciever
+if (!defined('PM_SENTBOX')) { define('PM_SENTBOX',-1); } // GET value for sent box
 // Determine action
 $action = \App\Support\SupportContext::getQuery('action') ?? '';
 if (!$action)
@@ -657,7 +657,7 @@ exit();
 }
 
 //----- FUNCTIONS ------
-function insertJumpTo($selected = 0)
+if (!function_exists('insertJumpTo')) { function insertJumpTo($selected = 0)
 {
 $lang_messages = (array) (\App\Support\SupportContext::getGlobal('lang_messages') ?? []);
 $CURUSER = \App\Support\SupportContext::getUser() ?? [];
@@ -690,8 +690,8 @@ echo("<option value=\"" . $row['boxnumber'] . "\">" . $row['name'] . "</option>\
 ?>
 </select> <input class=btn type="submit" value=<?php echo $lang_messages['submit_go'] ?>></form>
 <?php
-}
-function messagemenu ($selected = 1) {
+} }
+if (!function_exists('messagemenu')) { function messagemenu ($selected = 1) {
 $lang_messages = (array) (\App\Support\SupportContext::getGlobal('lang_messages') ?? []);
 $BASEURL = \App\Support\SupportContext::getGlobal('BASEURL');
 $CURUSER = \App\Support\SupportContext::getUser() ?? [];
@@ -708,5 +708,5 @@ if ($pmBoxes->count())
     }
 	print ("</ul></div>");
 	\App\Support\Frame::mainFrameClose();
-}
+} }
 ?>

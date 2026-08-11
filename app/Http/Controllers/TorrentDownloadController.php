@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Exceptions\NexusException;
-use App\Models\Setting;
 use App\Models\Torrent;
 use App\Models\User;
 use App\Policies\TorrentPolicy;
@@ -100,7 +99,7 @@ class TorrentDownloadController extends Controller
             $user->passkey = $passkey;
         }
 
-        $torrentSavePath = getFullDirectory(Setting::getTorrentSaveDir());
+        $torrentSavePath = getFullDirectory(\App\Support\Config\SiteConfig::current()->main->torrentDir());
         $fn = $torrentSavePath . '/' . $torrent->id . '.torrent';
         if (!is_file($fn) || !is_readable($fn) || filesize($fn) == 0) {
             abort(404);
@@ -110,7 +109,7 @@ class TorrentDownloadController extends Controller
         $dict->cleanRootFields()
             ->setAnnounce(Tracker::schemaAndHost($user->tracker_url_id, true) . '?passkey=' . $user->passkey)
             ->setComment(Url::schemeAndHost(true) . '/details.php?id=' . $torrent->id)
-            ->setCreatedBy(Setting::getSiteName())
+            ->setCreatedBy(\App\Support\Config\SiteConfig::current()->basic->siteName())
             ->setCreationDate(strtotime($torrent->added));
 
         $torrent->increment('hits');

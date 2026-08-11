@@ -779,7 +779,7 @@ begin_frame($lang_offers['text_offers_section'], true,10,"100%","center");
 print("<p align=\"left\"><b><font size=\"5\">".$lang_offers['text_rules']."</font></b></p>\n");
 print("<div align=\"left\"><ul>");
 print("<li>".$lang_offers['text_rule_one_one'].get_user_class_name($upload_class, false, true, true).$lang_offers['text_rule_one_two'].get_user_class_name($addoffer_class, false, true, true).$lang_offers['text_rule_one_three']."</li>\n");
-$offerSkipApprovedCount = get_setting('main.offer_skip_approved_count');
+$offerSkipApprovedCount = \App\Support\Config\SiteConfig::current()->main->offerSkipApprovedCount();
 if (is_numeric($offerSkipApprovedCount) && $offerSkipApprovedCount > 0) {
     print("<li>".sprintf($lang_offers['text_rule_skip_offer'], $offerSkipApprovedCount)."</li>\n");
 }

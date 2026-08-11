@@ -61,7 +61,7 @@ abstract class Storage {
 
     public static function getDriver(?string $name = null): Storage
     {
-        $driver = $name ?: get_setting("image_hosting.driver");
+        $driver = $name ?: \App\Support\Config\SiteConfig::current()->imageHosting->driver();
         if (isset(self::$drivers[$driver])) {
             return self::$drivers[$driver];
         }

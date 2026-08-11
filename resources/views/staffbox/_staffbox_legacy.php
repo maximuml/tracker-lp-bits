@@ -17,7 +17,7 @@ $CURUSER = \App\Support\SupportContext::getUser() ?? [];
         $msg = \App\Models\StaffMessage::query()->findOrFail($msg)->toArray();
     }
     if (empty($msg['permission']) || !in_array($msg['permission'], \App\Repositories\ToolRepository::listUserAllPermissions($CURUSER['id']))) {
-        permissiondenied(get_setting('authority.staffmem'));
+        permissiondenied(\App\Support\Config\SiteConfig::current()->authority->permission('staffmem'));
     }
 }
 

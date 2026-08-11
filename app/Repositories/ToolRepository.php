@@ -7,7 +7,6 @@ use App\Models\Message;
 use App\Models\News;
 use App\Models\Poll;
 use App\Models\PollAnswer;
-use App\Models\Setting;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Arr;
@@ -195,7 +194,7 @@ class ToolRepository extends BaseRepository
 
     private function getBackupExportPath(): string
     {
-        $path = Setting::getBackupExportPath();
+        $path = \App\Support\Config\SiteConfig::current()->backup->exportPath();
         if (empty($path)) {
             $path = self::getBackupExportPathDefault();
         }
@@ -359,7 +358,7 @@ class ToolRepository extends BaseRepository
         $nameParts = explode('.', $basename);
         $firstPart = $nameParts[0];
         $lastPart = $nameParts[count($nameParts) - 1];
-        $retentionCount = Setting::getBackupRetentionCount();
+        $retentionCount = \App\Support\Config\SiteConfig::current()->backup->retentionCount();
         if ($retentionCount <= 0) {
             $retentionCount = self::BACKUP_RETENTION_COUNT_DEFAULT;
         }
@@ -393,20 +392,24 @@ class ToolRepository extends BaseRepository
     {
         $log = "[SEND_MAIL]";
         $factory = new EsmtpTransportFactory();
-        $smtp = Setting::getFromDb('smtp');
-        do_log("$log, to: $to, subject: $subject, body: $body, smtp: " . json_encode($smtp));
-        $encryption = null;
-        if (isset($smtp['encryption']) && in_array($smtp['encryption'], ['ssl', 'tls'])) {
-            $encryption = $smtp['encryption'];
+        $smtpConfig = \App\Support\Config\SiteConfig::fromDb()->smtp;
+        do_log("$log, to: $to, subject: $subject, body: $body, smtp: " . json_encode($smtpConfig->toArray()));
+        $encryption = $smtpConfig->encryption();
+        if ($encryption !== null && !in_array($encryption, ['ssl', 'tls'])) {
+            $encryption = null;
         }
+        $smtpPort = $smtpConfig->port();
+        $smtpAddress = $smtpConfig->address();
+        $accountName = $smtpConfig->accountName() ?: null;
+        $accountPassword = $smtpConfig->accountPassword() ?: null;
+        $port = $smtpPort !== '' ? (int) $smtpPort : null;
         // Create the Transport
         $transport = $factory->create(new Dsn(
-//            $encryption === 'tls' ? (($smtp['smtpport'] == 465) ? 'smtps' : 'smtp') : '',
-            $smtp['smtpport'] == 465 && in_array($encryption, ['ssl', 'tls']) ? 'smtps' : 'smtp',
-            $smtp['smtpaddress'],
-            $smtp['accountname'] ?? null,
-            $smtp['accountpassword'] ?? null,
-            $smtp['smtpport'] ?? null,
+            $port === 465 && $encryption !== null ? 'smtps' : 'smtp',
+            $smtpAddress,
+            $accountName,
+            $accountPassword,
+            $port,
             ['verify_peer' => false]
         ));
 

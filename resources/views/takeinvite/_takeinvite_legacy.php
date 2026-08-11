@@ -30,7 +30,7 @@ $lang_takeinvite = (array) (\App\Support\SupportContext::getGlobal('lang_takeinv
 $email = unesc(htmlspecialchars(trim(\App\Support\SupportContext::getPost("email"))));
 $email = safe_email($email);
 $preRegisterUsername = \App\Support\SupportContext::getPost('pre_register_username') ?? '';
-$isPreRegisterEmailAndUsername = get_setting("system.is_invite_pre_email_and_username") == "yes";
+$isPreRegisterEmailAndUsername = \App\Support\Config\SiteConfig::current()->system->isInvitePreEmailAndUsername();
 if (strlen($preRegisterUsername) > 12)
 	bark($lang_takeinvite['std_username_too_long']);
 if (!$email)

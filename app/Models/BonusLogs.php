@@ -160,39 +160,34 @@ class BonusLogs extends NexusModel
         return nexus_trans('bonus-log.business_types.' . $this->business_type);
     }
 
-    /** @return  mixed */
-    public static function getBonusForCancelHitAndRun()
+    /** @return  float */
+    public static function getBonusForCancelHitAndRun(): float
     {
-        $result = Setting::get('bonus.cancel_hr');
-        return $result ?? self::DEFAULT_BONUS_CANCEL_ONE_HIT_AND_RUN;
+        return \App\Support\Config\SiteConfig::current()->bonus->cancelHr(self::DEFAULT_BONUS_CANCEL_ONE_HIT_AND_RUN);
     }
 
-    /** @return  mixed */
-    public static function getBonusForBuyAttendanceCard()
+    /** @return  float */
+    public static function getBonusForBuyAttendanceCard(): float
     {
-        $result = Setting::get('bonus.attendance_card');
-        return $result ?? self::DEFAULT_BONUS_BUY_ATTENDANCE_CARD;
+        return \App\Support\Config\SiteConfig::current()->bonus->attendanceCard(self::DEFAULT_BONUS_BUY_ATTENDANCE_CARD);
     }
 
-    /** @return  mixed */
-    public static function getBonusForBuyTemporaryInvite()
+    /** @return  float */
+    public static function getBonusForBuyTemporaryInvite(): float
     {
-        $result = Setting::get('bonus.one_tmp_invite');
-        return $result ?? self::DEFAULT_BONUS_BUY_TEMPORARY_INVITE;
+        return \App\Support\Config\SiteConfig::current()->bonus->oneTmpInvite(self::DEFAULT_BONUS_BUY_TEMPORARY_INVITE);
     }
 
-    /** @return  mixed */
-    public static function getBonusForBuyRainbowId()
+    /** @return  float */
+    public static function getBonusForBuyRainbowId(): float
     {
-        $result = Setting::get('bonus.rainbow_id');
-        return $result ?? self::DEFAULT_BONUS_BUY_RAINBOW_ID;
+        return \App\Support\Config\SiteConfig::current()->bonus->rainbowId(self::DEFAULT_BONUS_BUY_RAINBOW_ID);
     }
 
-    /** @return  mixed */
-    public static function getBonusForBuyChangeUsernameCard()
+    /** @return  float */
+    public static function getBonusForBuyChangeUsernameCard(): float
     {
-        $result = Setting::get('bonus.change_username_card');
-        return $result ?? self::DEFAULT_BONUS_BUY_CHANGE_USERNAME_CARD;
+        return \App\Support\Config\SiteConfig::current()->bonus->changeUsernameCard(self::DEFAULT_BONUS_BUY_CHANGE_USERNAME_CARD);
     }
 
     /**

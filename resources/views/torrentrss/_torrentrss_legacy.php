@@ -71,12 +71,11 @@ if ($passkey) {
         }
     }
 
-    $approvalStatusNoneVisible = get_setting('torrent.approval_status_none_visible');
-    if ($approvalStatusNoneVisible == 'no' && !\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::STAFF_MEMBER, \App\Models\User::find($user['id']))) {
+    if (!\App\Support\Config\SiteConfig::current()->torrent->approvalStatusNoneVisible() && !\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::STAFF_MEMBER, \App\Models\User::find($user['id']))) {
         $baseQuery->where('torrents.approval_status', \App\Models\Torrent::APPROVAL_STATUS_ALLOW);
     }
 
-    $browseMode = get_setting('main.browsecat');
+    $browseMode = \App\Support\Config\SiteConfig::current()->main->browseCat();
     $allBrowseCategoryId = \App\Models\SearchBox::listCategoryId($browseMode);
     $baseQuery->whereIn('torrents.category', $allBrowseCategoryId);
 }

@@ -3,7 +3,6 @@
 namespace App\Services\Captcha;
 
 use App\Services\Captcha\Exceptions\CaptchaValidationException;
-use App\Models\Setting;
 use Illuminate\Support\Arr;
 
 class CaptchaManager
@@ -116,7 +115,7 @@ class CaptchaManager
             $this->config = is_array($config) ? $config : [];
 
             try {
-                $settings = Setting::get('captcha', []);
+                $settings = \App\Support\Config\SiteConfig::current()->captcha->toArray();
                 if (is_array($settings) && !empty($settings)) {
                     $this->config = array_replace_recursive($this->config, $settings);
                 }

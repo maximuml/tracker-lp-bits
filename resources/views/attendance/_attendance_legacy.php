@@ -23,12 +23,7 @@ $start = $today->clone()->subMonth(2);
 
 $attendanceRepository = new \App\Repositories\AttendanceRepository();
 
-$attendanceCaptchaSetting = \App\Models\Setting::get('captcha.attendance.enabled', config('captcha.attendance.enabled', true));
-if (is_string($attendanceCaptchaSetting)) {
-    $attendanceCaptchaEnabled = in_array(strtolower($attendanceCaptchaSetting), ['1', 'true', 'yes'], true);
-} else {
-    $attendanceCaptchaEnabled = (bool) $attendanceCaptchaSetting;
-}
+$attendanceCaptchaEnabled = \App\Support\Config\SiteConfig::current()->captcha->attendanceEnabled((bool) config('captcha.attendance.enabled', true));
 
 if ($__server_REQUEST_METHOD === 'POST') {
     if ($attendanceCaptchaEnabled && $iv == 'yes') {

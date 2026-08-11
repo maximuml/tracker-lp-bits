@@ -7,7 +7,6 @@ use App\Http\Resources\ExamResource;
 use App\Http\Resources\UserResource;
 use App\Models\LoginLog;
 use App\Models\PersonalAccessTokenPlain;
-use App\Models\Setting;
 use App\Models\User;
 use App\Repositories\AuthenticateRepository;
 use App\Repositories\UserRepository;
@@ -45,9 +44,8 @@ class AuthenticateController extends Controller
         $result = $this->repository->login($request->username, $request->password);
         $includes = explode(',', $request->get('include', ''));
         if (in_array('site_info', $includes)) {
-            $basic = Setting::get('basic');
             $result['site_info'] = [
-                'site_name' => $basic['SITENAME'],
+                'site_name' => \App\Support\Config\SiteConfig::current()->basic->siteName(),
             ];
         }
         return $this->success($result);
@@ -69,7 +67,7 @@ class AuthenticateController extends Controller
      */
     public function passkeyLogin($passkey)
     {
-        $deadline = Setting::get('security.login_secret_deadline');
+        $deadline = \App\Support\Config\SiteConfig::current()->security->loginSecretDeadline();
         if ($deadline && $deadline > now()->toDateTimeString()) {
             $user = User::query()->where('passkey', $passkey)->first(['id', 'passhash', 'secret', 'auth_key']);
             if ($user) {

@@ -2,8 +2,6 @@
 
 namespace App\Support;
 
-use App\Models\Setting;
-
 /**
  * Legacy site-information helper extracted from `include/globalfunctions.php`.
  *
@@ -17,10 +15,8 @@ final class Site
      */
     public static function info(): array
     {
-        $setting = Setting::get('basic');
-
         return [
-            'site_name' => $setting['SITENAME'] ?? '',
+            'site_name' => \App\Support\Config\SiteConfig::current()->basic->siteName(),
             'base_url' => Url::schemeAndHost(),
         ];
     }

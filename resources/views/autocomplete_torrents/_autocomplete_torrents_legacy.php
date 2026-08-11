@@ -10,7 +10,7 @@ header("Content-Type: application/json; charset=utf-8");
 $torrents = [];
 
 $query = trim(\App\Support\SupportContext::getQuery('q') ?? '');
-if ($query !== '' && strlen($query) >= 2 && get_setting('meilisearch.enabled') == 'yes') {
+if ($query !== '' && strlen($query) >= 2 && \App\Support\Config\SiteConfig::current()->meiliSearch->enabled()) {
     try {
         $user = \App\Models\User::query()->find($CURUSER['id']);
         if ($user) {

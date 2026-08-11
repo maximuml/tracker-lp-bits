@@ -42,7 +42,7 @@ $lang_mybonus = (array) (\App\Support\SupportContext::getGlobal('lang_mybonus') 
 
     //100.0 GB Uploaded
     $bonus = array();
-    $bonus['points'] = get_setting('bonus.hundredgbupload');
+    $bonus['points'] = \App\Support\Config\SiteConfig::current()->bonus->hundredGbUpload();
     $bonus['art'] = 'traffic';
     $bonus['menge'] = 107374182400;
     $bonus['name'] = $lang_mybonus['text_uploaded_four'];
@@ -51,7 +51,7 @@ $lang_mybonus = (array) (\App\Support\SupportContext::getGlobal('lang_mybonus') 
 
     //10.0 GB Downloaded
     $bonus = array();
-    $bonus['points'] = get_setting('bonus.tengbdownload');
+    $bonus['points'] = \App\Support\Config\SiteConfig::current()->bonus->tenGbDownload();
     $bonus['art'] = 'traffic_downloaded';
     $bonus['menge'] = 10737418240;
     $bonus['name'] = $lang_mybonus['text_downloaded_ten_gb'];
@@ -60,7 +60,7 @@ $lang_mybonus = (array) (\App\Support\SupportContext::getGlobal('lang_mybonus') 
 
     //100.0 GB Downloaded
     $bonus = array();
-    $bonus['points'] = get_setting('bonus.hundredgbdownload');
+    $bonus['points'] = \App\Support\Config\SiteConfig::current()->bonus->hundredGbDownload();
     $bonus['art'] = 'traffic_downloaded';
     $bonus['menge'] = 107374182400;
     $bonus['name'] = $lang_mybonus['text_downloaded_hundred_gb'];
@@ -383,20 +383,20 @@ for ($i=0; $i < count($allBonus); $i++)
 		}
 		elseif($bonusarray['art'] == 'invite')
 		{
-			if (\App\Models\Setting::get('main.invitesystem') != 'yes')
+			if (!\App\Support\Config\SiteConfig::current()->main->inviteSystem())
 				print("<td class=\"rowfollow\" align=\"center\"><input type=\"submit\" name=\"submit\" value=\"".nexus_trans('invite.send_deny_reasons.invite_system_closed')."\" disabled=\"disabled\" /></td>");
 			elseif(!user_can($permission, false, 0)){
-			$requireClass = get_setting("authority.$permission");
+			$requireClass = \App\Support\Config\SiteConfig::current()->authority->permission($permission);
 				print("<td class=\"rowfollow\" align=\"center\"><input type=\"submit\" name=\"submit\" value=\"".nexus_trans('invite.send_deny_reasons.no_permission', ['class' => \App\Models\User::getClassText($requireClass)])."\" disabled=\"disabled\" /></td>");}
 			else
 				print("<td class=\"rowfollow\" align=\"center\"><input type=\"submit\" name=\"submit\" value=\"".$lang_mybonus['submit_exchange']."\" /></td>");
 		}
 		elseif($bonusarray['art'] == 'tmp_invite')
 		{
-			if (\App\Models\Setting::get('main.invitesystem') != 'yes')
+			if (!\App\Support\Config\SiteConfig::current()->main->inviteSystem())
 				print("<td class=\"rowfollow\" align=\"center\"><input type=\"submit\" name=\"submit\" value=\"".nexus_trans('invite.send_deny_reasons.invite_system_closed')."\" disabled=\"disabled\" /></td>");
 			elseif(!user_can($permission, false, 0)){
-			$requireClass = get_setting("authority.$permission");
+			$requireClass = \App\Support\Config\SiteConfig::current()->authority->permission($permission);
 				print("<td class=\"rowfollow\" align=\"center\"><input type=\"submit\" name=\"submit\" value=\"".nexus_trans('invite.send_deny_reasons.no_permission', ['class' => \App\Models\User::getClassText($requireClass)])."\" disabled=\"disabled\" /></td>");}
 			else
 				print("<td class=\"rowfollow\" align=\"center\"><input type=\"submit\" name=\"submit\" value=\"".$lang_mybonus['submit_exchange']."\" /></td>");
@@ -458,8 +458,8 @@ print("<h1>".$lang_mybonus['text_get_by_seeding']."</h1>");
 print("<ul>");
 if ($perseeding_bonus > 0)
 	print("<li>".$perseeding_bonus.$lang_mybonus['text_point'].add_s($perseeding_bonus).$lang_mybonus['text_for_seeding_torrent'].$maxseeding_bonus.$lang_mybonus['text_torrent'].add_s($maxseeding_bonus).")</li>");
-print("<li>".$lang_mybonus['text_bonus_formula_one'].$tzero_bonus.$lang_mybonus['text_bonus_formula_two'].$nzero_bonus.$lang_mybonus['text_bonus_formula_wi'].get_setting('bonus.zero_bonus_factor').$lang_mybonus['text_bonus_formula_three'].$bzero_bonus.$lang_mybonus['text_bonus_formula_four'].$l_bonus.$lang_mybonus['text_bonus_formula_five']."</li>");
-$minSize = get_setting('bonus.min_size');
+print("<li>".$lang_mybonus['text_bonus_formula_one'].$tzero_bonus.$lang_mybonus['text_bonus_formula_two'].$nzero_bonus.$lang_mybonus['text_bonus_formula_wi'].\App\Support\Config\SiteConfig::current()->bonus->zeroBonusFactor().$lang_mybonus['text_bonus_formula_three'].$bzero_bonus.$lang_mybonus['text_bonus_formula_four'].$l_bonus.$lang_mybonus['text_bonus_formula_five']."</li>");
+$minSize = \App\Support\Config\SiteConfig::current()->bonus->minSize();
 if ($minSize > 0) {
     print("<li>".sprintf($lang_mybonus['text_bonus_mini_size'], mksize($minSize))."</li>");
 }

@@ -8,8 +8,8 @@ class Lsky extends Storage {
 
     function upload(string $filepath): string
     {
-        $api = get_setting("image_hosting_lsky.upload_api_endpoint");
-        $token = get_setting("image_hosting_lsky.upload_token");
+        $api = \App\Support\Config\SiteConfig::current()->imageHosting->lskyUploadApiEndpoint();
+        $token = \App\Support\Config\SiteConfig::current()->imageHosting->lskyUploadToken();
         $logPrefix = "filepath: $filepath, api: $api, token: $token";
         $httpClient = new \GuzzleHttp\Client();
         $response = $httpClient->request('POST', $api, [
@@ -54,7 +54,7 @@ class Lsky extends Storage {
 
     function getBaseUrl(): string
     {
-        return get_setting("image_hosting_lsky.base_url");
+        return \App\Support\Config\SiteConfig::current()->imageHosting->lskyBaseUrl();
     }
 
     function getDriverName(): string

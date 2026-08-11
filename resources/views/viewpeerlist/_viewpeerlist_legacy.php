@@ -235,7 +235,7 @@ $seedBoxRep = \App\Support\SupportContext::getGlobal('seedBoxRep');
     $seederTable = dltable($lang_viewpeerlist['text_seeders'], $seeders, $row, $isSeedBoxCaseWhens);
     $leecherTable = dltable($lang_viewpeerlist['text_leechers'], $downloaders, $row, $isSeedBoxCaseWhens);
     //update peer is_seed_box
-    if (!empty($isSeedBoxCaseWhens) && get_setting('seed_box.enabled') == 'yes') {
+    if (!empty($isSeedBoxCaseWhens) && \App\Support\Config\SiteConfig::current()->seedBox->enabled()) {
         $caseSql = sprintf(
             "case id %s end",
             implode(' ', array_values($isSeedBoxCaseWhens))

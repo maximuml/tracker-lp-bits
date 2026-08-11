@@ -308,7 +308,7 @@ class Install
             if (!NexusDB::hasColumn('settings', 'autoload')) {
                 $this->runMigrate('database/migrations/2022_05_06_191830_add_autoload_to_settings_table.php');
             }
-            $settingsFromDb = Setting::getFromDb();
+            $settingsFromDb = \App\Support\Config\SiteConfig::fromDb()->toArray();
         }
         $this->doLog("settings form db: " . json_encode($settingsFromDb));
         foreach ($settings as $prefix => &$group) {
@@ -779,9 +779,9 @@ class Install
     public function initTrackerUrl(string $scene): void
     {
         if ($scene == "update") {
-            $announceUrl = get_setting("security.https_announce_url");
+            $announceUrl = \App\Support\Config\SiteConfig::current()->security->httpsAnnounceUrl();
             if (empty($announceUrl)) {
-                $announceUrl = get_setting("basic.announce_url");
+                $announceUrl = \App\Support\Config\SiteConfig::current()->basic->announceUrl();
             }
         }
         if (empty($announceUrl)) {

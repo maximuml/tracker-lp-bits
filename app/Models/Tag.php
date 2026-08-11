@@ -85,9 +85,11 @@ class Tag extends NexusModel
     /** @return  array<int|string, mixed> */
     public static function listSpecial(): array
     {
+        $config = \App\Support\Config\SiteConfig::current()->bonus;
+
         return array_filter([
-            Setting::get('bonus.official_tag'),
-            Setting::get('bonus.zero_bonus_tag'),
+            $config->officialTag(),
+            $config->zeroBonusTag(),
         ]);
     }
 

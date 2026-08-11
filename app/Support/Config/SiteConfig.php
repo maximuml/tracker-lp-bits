@@ -22,6 +22,7 @@ final class SiteConfig
     public readonly BackupConfig $backup;
     public readonly CaptchaConfig $captcha;
     public readonly AuthorityConfig $authority;
+    public readonly ImageHostingConfig $imageHosting;
 
     /** @param array<string, mixed> $data */
     public function __construct(array $data = [])
@@ -40,12 +41,29 @@ final class SiteConfig
         $this->backup = new BackupConfig($data['backup'] ?? []);
         $this->captcha = new CaptchaConfig($data['captcha'] ?? []);
         $this->authority = new AuthorityConfig($data['authority'] ?? []);
+
+        $imageHostingData = $data['image_hosting'] ?? [];
+        if (!empty($data['image_hosting_chevereto'])) {
+            $imageHostingData['chevereto'] = $data['image_hosting_chevereto'];
+        }
+        if (!empty($data['image_hosting_lsky'])) {
+            $imageHostingData['lsky'] = $data['image_hosting_lsky'];
+        }
+        $this->imageHosting = new ImageHostingConfig($imageHostingData);
     }
 
     public static function current(): self
     {
         /** @var array<string, mixed> $settings */
         $settings = Setting::get() ?: [];
+
+        return new self($settings);
+    }
+
+    public static function fromDb(): self
+    {
+        /** @var array<string, mixed> $settings */
+        $settings = Setting::getFromDb() ?: [];
 
         return new self($settings);
     }

@@ -7,9 +7,8 @@ $search = is_scalar(\App\Support\SupportContext::getRequestInput('search') ?? ''
 $searchArea = is_scalar(\App\Support\SupportContext::getRequestInput('search_area') ?? '') ? (int) (\App\Support\SupportContext::getRequestInput('search_area') ?? 0) : \App\Repositories\SearchRepository::SEARCH_AREA_TITLE;
 
 //approval status
-$approvalStatusNoneVisible = get_setting('torrent.approval_status_none_visible');
 $approvalStatus = null;
-if ($approvalStatusNoneVisible == 'no' && !\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::TORRENT_APPROVAL)) {
+if (!\App\Support\Config\SiteConfig::current()->torrent->approvalStatusNoneVisible() && !\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::TORRENT_APPROVAL)) {
     $approvalStatus = \App\Models\Torrent::APPROVAL_STATUS_ALLOW;
 }
 
@@ -22,7 +21,7 @@ if (!(isset($CURUSER)) || !\App\Auth\Permission::can(\App\Enums\Permission\Permi
     $banned = "no";
 }
 
-$meilisearchEnabled = get_setting('meilisearch.enabled') == 'yes';
+$meilisearchEnabled = \App\Support\Config\SiteConfig::current()->meiliSearch->enabled();
 $shouldUseMeili = $meilisearchEnabled && !empty($search);
 
 $count = 0;

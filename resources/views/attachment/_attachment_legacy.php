@@ -65,7 +65,7 @@ if ($Attach->enable_attachment())
                 $width = $imagesize[0];
             }
             //get driver
-            $storageDriver = get_setting("image_hosting.driver", "local");
+            $storageDriver = \App\Support\Config\SiteConfig::current()->imageHosting->driver('local');
             if ($storageDriver == "local" || !$isimage) {
                 if ($savedirectorytype_attachment == 'onedir')
                     $savepath = "";

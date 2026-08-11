@@ -14,7 +14,6 @@ use App\Models\Invite;
 use App\Models\LoginLog;
 use App\Models\Message;
 use App\Models\OauthProvider;
-use App\Models\Setting;
 use App\Models\SiteLog;
 use App\Models\Snatch;
 use App\Models\Torrent;
@@ -524,8 +523,11 @@ class UserRepository extends BaseRepository
         if ($operator->id == $user->id) {
             return;
         }
-        $classRequire = Setting::get($minAuthClass);
-        if ($operator->class < $classRequire || $operator->class <= $user->class) {
+        $permissionName = str_starts_with($minAuthClass, 'authority.')
+            ? substr($minAuthClass, strlen('authority.'))
+            : $minAuthClass;
+        $classRequire = \App\Support\Config\SiteConfig::current()->authority->permission($permissionName);
+        if ($classRequire === null || $operator->class < $classRequire || $operator->class <= $user->class) {
             throw new InsufficientPermissionException();
         }
     }

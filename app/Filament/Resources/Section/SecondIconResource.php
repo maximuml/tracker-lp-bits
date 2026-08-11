@@ -18,7 +18,6 @@ use App\Filament\Resources\Section\SecondIconResource\Pages;
 use App\Filament\Resources\Section\SecondIconResource\RelationManagers;
 use App\Models\SearchBox;
 use App\Models\SecondIcon;
-use App\Models\Setting;
 use App\Repositories\SearchBoxRepository;
 use Filament\Forms;
 use Filament\Resources\Resource;
@@ -51,7 +50,7 @@ class SecondIconResource extends Resource
     public static function form(Schema $schema): Schema
     {
         $searchBoxRep = new SearchBoxRepository();
-        $torrentMode = Setting::get('main.browsecat');
+        $torrentMode = \App\Support\Config\SiteConfig::current()->main->browseCat();
         $torrentTaxonomySchema = $searchBoxRep->listTaxonomyFormSchema($torrentMode);
         $modeOptions = SearchBox::listModeOptions();
         return $schema

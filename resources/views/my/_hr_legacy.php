@@ -100,7 +100,7 @@ if ($rescount) {
 				</tr>");
     }
    if ($hasActionRemove) {
-       $msg = nexus_trans('hr.remove_confirm_msg', ['bonus' => get_setting('bonus.cancel_hr')]);
+       $msg = nexus_trans('hr.remove_confirm_msg', ['bonus' => \App\Support\Config\SiteConfig::current()->bonus->cancelHr()]);
        $js = <<<JS
 jQuery('#hr-table').on('click', '.remove-hr', function () {
     var id = jQuery(this).attr('data-id')

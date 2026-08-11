@@ -125,4 +125,49 @@ final class TorrentConfig extends Config
         return $this->float('tax_factor', $default);
     }
 
+    public function maxPrice(int $default = 0): int
+    {
+        return $this->int('max_price', $default);
+    }
+
+    public function largeSize(int $default = 0): int
+    {
+        return $this->int('largesize', $default);
+    }
+
+    public function largeSpState(int $default = 0): int
+    {
+        return $this->int('largepro', $default);
+    }
+
+    public function randomFreeProbability(int $default = 0): int
+    {
+        return $this->int('randomfree', $default);
+    }
+
+    public function randomTwoTimesUpProbability(int $default = 0): int
+    {
+        return $this->int('randomtwoup', $default);
+    }
+
+    public function randomFreeTwoTimesUpProbability(int $default = 0): int
+    {
+        return $this->int('randomtwoupfree', $default);
+    }
+
+    public function randomHalfDownProbability(int $default = 0): int
+    {
+        return $this->int('randomhalfleech', $default);
+    }
+
+    public function randomHalfDownTwoTimesUpProbability(int $default = 0): int
+    {
+        return $this->int('randomtwouphalfdown', $default);
+    }
+
+    public function randomOneThirdDownProbability(int $default = 0): int
+    {
+        return $this->int('randomthirtypercentdown', $default);
+    }
+
 }

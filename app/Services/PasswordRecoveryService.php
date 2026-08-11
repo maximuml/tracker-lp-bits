@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Exceptions\AuthenticationException;
-use App\Models\Setting;
 use App\Models\User;
 use App\Support\Email;
 use App\Support\Http;
@@ -134,12 +133,12 @@ class PasswordRecoveryService
      */
     private function sendResetRequestEmail(string $email, int $userId, string $hash, string $ip, array $langRecover): void
     {
-        $baseUrl = Setting::getBaseUrl();
+        $baseUrl = \App\Support\Config\SiteConfig::current()->basic->baseUrl();
         if (! str_contains($baseUrl, '://')) {
             $baseUrl = Http::protocolPrefix(isHttps()) . $baseUrl;
         }
         $baseUrl = rtrim($baseUrl, '/');
-        $siteName = Setting::getSiteName();
+        $siteName = \App\Support\Config\SiteConfig::current()->basic->siteName();
 
         $mailOne = $langRecover['mail_one'] ?? 'Hi,<br /><br />Someone, hopefully you, requested that the password for the account<br />associated with this email address ';
         $mailTwo = $langRecover['mail_two'] ?? ' be reset.<br /><br />The request originated from ';
@@ -177,12 +176,12 @@ class PasswordRecoveryService
      */
     private function sendNewPasswordEmail(User $user, string $newPassword, array $langRecover): void
     {
-        $baseUrl = Setting::getBaseUrl();
+        $baseUrl = \App\Support\Config\SiteConfig::current()->basic->baseUrl();
         if (! str_contains($baseUrl, '://')) {
             $baseUrl = Http::protocolPrefix(isHttps()) . $baseUrl;
         }
         $baseUrl = rtrim($baseUrl, '/');
-        $siteName = Setting::getSiteName();
+        $siteName = \App\Support\Config\SiteConfig::current()->basic->siteName();
 
         $mailTwoFour = sprintf($langRecover['mail_two_four'] ?? '<br /><br />You may change your password in User CP - Security Settings after logging in.<br />------<br />Yours,<br />The %s Team.', $siteName);
 

@@ -28,20 +28,20 @@
                 }
 
                 //price
-                if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::TORRENT_SET_PRICE) && get_setting("torrent.paid_torrent_enabled") == "yes") {
-                    $maxPrice = get_setting("torrent.max_price");
+                if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::TORRENT_SET_PRICE) && \App\Support\Config\SiteConfig::current()->torrent->paidTorrentEnabled()) {
+                    $maxPrice = \App\Support\Config\SiteConfig::current()->torrent->maxPrice();
                     $pricePlaceholder = "";
                     if ($maxPrice > 0) {
                         $pricePlaceholder = nexus_trans("label.torrent.max_price_help", ["max_price" => $maxPrice]);
                     }
-                    tr(nexus_trans('label.torrent.price'), '<input type="number" min="0" name="price" placeholder="'.$pricePlaceholder.'" />&nbsp;&nbsp;' . nexus_trans('label.torrent.price_help', ['tax_factor' => (floatval(get_setting('torrent.tax_factor', 0)) * 100) . '%']), 1);
+                    tr(nexus_trans('label.torrent.price'), '<input type="number" min="0" name="price" placeholder="'.$pricePlaceholder.'" />&nbsp;&nbsp;' . nexus_trans('label.torrent.price_help', ['tax_factor' => (\App\Support\Config\SiteConfig::current()->torrent->taxFactor() * 100) . '%']), 1);
                 }
 
 				print("<tr><td class=\"rowhead\" style='padding: 3px' valign=\"top\">".$lang_upload['row_description']."<font color=\"red\">*</font></td><td class=\"rowfollow\">");
 				textbbcode("upload","descr", "", false, 130, true);
 				print("</td></tr>\n");
 
-                if ($settingMain['enable_technical_info'] == 'yes') {
+                if (\App\Support\Config\SiteConfig::current()->main->enableTechnicalInfo()) {
                     tr($lang_functions['text_technical_info'], '<textarea name="technical_info" rows="8" style="width: 99%;"></textarea><br/>' . $lang_functions['text_technical_info_help_text'], 1);
                 }
 

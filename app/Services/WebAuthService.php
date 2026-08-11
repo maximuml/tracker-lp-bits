@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Exceptions\AuthenticationException;
-use App\Models\Setting;
 use App\Models\User;
 use App\Repositories\UserRepository;
 use App\Support\AuthCookie;
@@ -17,12 +16,12 @@ class WebAuthService
 {
     private static function getMaxLoginAttempts(): int
     {
-        return (int) Setting::getFromDb('security.maxloginattempts', 10);
+        return \App\Support\Config\SiteConfig::fromDb()->security->maxLoginAttempts();
     }
 
     private static function isCaptchaRequired(): bool
     {
-        return Setting::getFromDb('security.iv', 'no') === 'yes' && Captcha::manager()->isEnabled();
+        return \App\Support\Config\SiteConfig::fromDb()->security->captchaRequired() && Captcha::manager()->isEnabled();
     }
 
     public function isCaptchaEnabled(): bool
@@ -128,7 +127,7 @@ class WebAuthService
             throw new AuthenticationException('Account unconfirmed.');
         }
 
-        if ($row['enabled'] === 'no' && (int) Setting::getSelfEnableBonus() <= 0) {
+        if ($row['enabled'] === 'no' && (int) \App\Support\Config\SiteConfig::current()->bonus->selfEnable() <= 0) {
             $this->recordFailedAttempt($ip);
             throw new AuthenticationException('Account disabled.');
         }

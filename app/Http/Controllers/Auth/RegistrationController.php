@@ -7,7 +7,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\ConfirmResendRequest;
 use App\Http\Requests\Auth\SignupRequest;
 use App\Models\Invite;
-use App\Models\Setting;
 use App\Services\RegistrationService;
 use App\Services\WebAuthService;
 use App\Support\Captcha;
@@ -86,7 +85,7 @@ class RegistrationController extends Controller
             'isInvite' => $isInvite,
             'invite' => $invite,
             'code' => $code,
-            'isPreRegisterEmailAndUsername' => Setting::get('system.is_invite_pre_email_and_username', 'no') === 'yes',
+            'isPreRegisterEmailAndUsername' => \App\Support\Config\SiteConfig::current()->system->isInvitePreEmailAndUsername(),
             'countries' => $countries,
             'remaining' => $this->authService->remainingAttempts(Network::clientIp()),
             'maxAttempts' => $this->authService->maxLoginAttempts(),

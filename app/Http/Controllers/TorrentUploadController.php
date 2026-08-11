@@ -73,7 +73,6 @@ class TorrentUploadController extends Controller
         return view('torrents.upload', [
             'uploadFreely' => $uploadFreely,
             'allowtorrents' => $allowtorrents,
-            'settingMain' => \App\Support\Config\SiteConfig::current()->main->toArray(),
             'torrentRep' => new TorrentRepository(),
             'searchBoxRep' => new SearchBoxRepository(),
             'tagRep' => new TagRepository(),

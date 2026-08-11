@@ -208,7 +208,7 @@ class SeedBoxRepository extends BaseRepository
     {
         static $enableSeedBox;
         if ($enableSeedBox === null) {
-            $enableSeedBox = get_setting('seed_box.enabled') == 'yes';
+            $enableSeedBox = \App\Support\Config\SiteConfig::current()->seedBox->enabled();
         }
         foreach (Arr::wrap($ipArr) as $ip) {
             if ((isIPV4($ip) || isIPV6($ip)) && $enableSeedBox && isIPSeedBox($ip, $uid)) {

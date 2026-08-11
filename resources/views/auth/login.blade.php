@@ -105,7 +105,7 @@ $showWarn = $returnto !== '' && ! $nowarn;
     @endif
 
     @php
-        $isSmtpEnabled = (\App\Models\Setting::get('main.smtptype') ?? 'none') !== 'none';
+        $isSmtpEnabled = \App\Support\Config\SiteConfig::current()->smtp->type() !== 'none';
     @endphp
 
     <p>{!! $lang['p_no_account_signup'] ?? 'Don\'t have an account? Sign up!' !!}</p>

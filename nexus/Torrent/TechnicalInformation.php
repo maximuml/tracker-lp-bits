@@ -181,7 +181,7 @@ class TechnicalInformation
         if (empty($general) && empty($videos) && empty($audios)) {
             // Parser couldn't pull anything structured — fall back to raw spoiler only.
             $rawmediaInfo = sprintf('[spoiler=%s][raw]<pre>%s</pre>[/raw][/spoiler]', nexus_trans('torrent.show_hide_media_info'), $this->mediaInfo);
-            return sprintf('<div class="nexus-media-info-raw"><pre>%s</pre></div>', format_comment($rawmediaInfo, false));
+            return sprintf('<div class="nexus-media-info-raw"><pre>%s</pre></div>', \App\Support\Format::formatComment($rawmediaInfo, false));
         }
 
         $css = '<style>
@@ -251,7 +251,7 @@ class TechnicalInformation
                 $title = nexus_trans('torrent.collapse_show_more_audio');
                 $html .= sprintf(
                     '<div class="nti-more">%s</div>',
-                    format_comment(sprintf('[spoiler=%s][raw]%s[/raw][/spoiler]', $title, $hiddenHtml), false)
+                    \App\Support\Format::formatComment(sprintf('[spoiler=%s][raw]%s[/raw][/spoiler]', $title, $hiddenHtml), false)
                 );
             }
             $html .= '</div>';
@@ -263,7 +263,7 @@ class TechnicalInformation
 
         // Raw spoiler at the bottom
         $rawMediaInfo = sprintf('[spoiler=%s][raw]<pre>%s</pre>[/raw][/spoiler]', nexus_trans('torrent.show_hide_media_info'), $this->mediaInfo);
-        $html .= sprintf('<div class="nti-raw nexus-media-info-raw">%s</div>', format_comment($rawMediaInfo, false));
+        $html .= sprintf('<div class="nti-raw nexus-media-info-raw">%s</div>', \App\Support\Format::formatComment($rawMediaInfo, false));
 
         $html .= '</div>'; // .nti-wrap
         return $html;
@@ -464,7 +464,7 @@ class TechnicalInformation
             $body .= '<b>' . htmlspecialchars((string)$k) . ': </b>' . htmlspecialchars((string)$v) . '<br>';
         }
         $bbcode = sprintf('[spoiler=%s][raw]%s[/raw][/spoiler]', $title, $body);
-        return sprintf('<div class="nti-more">%s</div>', format_comment($bbcode, false));
+        return sprintf('<div class="nti-more">%s</div>', \App\Support\Format::formatComment($bbcode, false));
     }
 
     public function getSummaryInfo(): array
@@ -543,7 +543,7 @@ class TechnicalInformation
             $table .= '<tr>';
             // 检查format_comment函数是否存在
             if (function_exists('format_comment')) {
-                $table .= sprintf('<td style="border: none; padding-right: 5px;padding-bottom: 5px;">%s</td>', format_comment($spoiler, false));
+                $table .= sprintf('<td style="border: none; padding-right: 5px;padding-bottom: 5px;">%s</td>', \App\Support\Format::formatComment($spoiler, false));
             } else {
                 $table .= sprintf('<td style="border: none; padding-right: 5px;padding-bottom: 5px;">%s</td>', $spoiler);
             }

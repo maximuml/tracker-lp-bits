@@ -3,7 +3,7 @@ error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
 
 $__server_REQUEST_METHOD = \App\Support\SupportContext::getServerValue('REQUEST_METHOD');
-if (get_user_class() < UC_SYSOP)
+if (\App\Support\UserDisplay::currentClass() < UC_SYSOP)
 stderr("Error", "Permission denied.");
 $class = intval(\App\Support\SupportContext::getPost("class") ?? 0);
 	if ($class)
@@ -55,18 +55,18 @@ stdhead("Mass E-mail Gateway");
 <form method=post action=massmail.php>
 
 <?php
-if (get_user_class() == UC_MODERATOR && $CURUSER["class"] > UC_POWER_USER)
+if (\App\Support\UserDisplay::currentClass() == UC_MODERATOR && $CURUSER["class"] > UC_POWER_USER)
 printf("<input type=hidden name=class value={$CURUSER['class']}\n");
 else
 {
     $prefix = '';
 print("<tr><td class=rowhead>Classe</td><td colspan=2 align=left><select name=or><option value='<'><<option value='>'>><option value='='>=<option value='<='><=<option value='>='>>=</select><select name=class>\n");
-if (get_user_class() == UC_MODERATOR)
+if (\App\Support\UserDisplay::currentClass() == UC_MODERATOR)
 $maxclass = UC_POWER_USER;
 else
-$maxclass = get_user_class() - 1;
+$maxclass = \App\Support\UserDisplay::currentClass() - 1;
 for ($i = 0; $i <= $maxclass; ++$i)
-print("<option value=$i" . ($CURUSER["class"] == $i ? " selected" : "") . ">$prefix" . get_user_class_name($i,false,true,true) . "\n");
+print("<option value=$i" . ($CURUSER["class"] == $i ? " selected" : "") . ">$prefix" . \App\Support\UserClass::name($i,false,true,true) . "\n");
 print("</select></td></tr>\n");
 }
 ?>

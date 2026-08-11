@@ -6,7 +6,7 @@ $hasModcomment = \Illuminate\Support\Facades\Schema::hasColumn('users', 'modcomm
 
 // 0 - No debug; 1 - Show and run SQL query; 2 - Show SQL query only
 $DEBUG_MODE = 0;
-if (get_user_class() < UC_MODERATOR)
+if (\App\Support\UserDisplay::currentClass() < UC_MODERATOR)
 	stderr("Error", "Permission denied.");
 
 stdhead("Administrative User Search");
@@ -99,7 +99,7 @@ $highlight = " bgcolor=#BBAF9B";
   if (!is_valid_id($class))
   	$class = '';
   for ($i = 2;;++$i) {
-		if ($c = get_user_class_name($i-2,false,true,true))
+		if ($c = \App\Support\UserClass::name($i-2,false,true,true))
        	 print("<option value=" . $i . ($class && $class == $i? " selected" : "") . ">$c</option>\n");
 	  else
 	   	break;
@@ -793,7 +793,7 @@ $res = (clone $userQuery)->distinct()->selectRaw($select_is)->offset($offset)->l
       $n_comments = $n['count'] ?? 0;
 
     	echo "<tr><td>" .
-      		get_username($user['id']) . "</td>" .
+      		\App\Support\UserDisplay::username($user['id']) . "</td>" .
           "<td>" . ratios($user['uploaded'], $user['downloaded']) . "</td>
           <td>" . $ipstr . "</td><td>" . $user['email'] . "</td>
           <td><div align=center>" . $user['added'] . "</div></td>

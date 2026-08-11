@@ -35,9 +35,9 @@ $torrentnameprefix = \App\Support\SupportContext::getGlobal('torrentnameprefix')
                 print("<p><b>".$lang_details['text_go_back'] . "<a href=\"".htmlspecialchars(\App\Support\SupportContext::getQuery("returnto"))."\">" . $lang_details['text_whence_you_came']."</a></b></p>");
         }
         $banned_torrent = ($row["banned"] == 'yes' ? " <b>(<font class=\"striking\">".$lang_functions['text_banned']."</font>)</b>" : "");
-		$sp_torrent = get_torrent_promotion_append($row['sp_state'],'word', false, '', 0, '', $row['__ignore_global_sp_state'] ?? false);
-		$sp_torrent_sub = get_torrent_promotion_append_sub($row['sp_state'],"",true,$row['added'], $row['promotion_time_type'], $row['promotion_until'], $row['__ignore_global_sp_state'] ?? false);
-        $hrImg = get_hr_img($row, $row['search_box_id']);
+		$sp_torrent = \App\Support\Promotion::appendWithContext($row['sp_state'],'word', false, '', 0, '', $row['__ignore_global_sp_state'] ?? false);
+		$sp_torrent_sub = \App\Support\Promotion::appendSubWithContext($row['sp_state'],"",true,$row['added'], $row['promotion_time_type'], $row['promotion_until'], $row['__ignore_global_sp_state'] ?? false);
+        $hrImg = \App\Support\TorrentAccess::hrImage($row, $row['search_box_id']);
         $approvalStatusIcon = $torrentRep->renderApprovalStatus($row["approval_status"]);
         $paidIcon = $torrentRep->getPaidIcon($row, 20);
 		$s=htmlspecialchars($row["name"]).$banned_torrent.$paidIcon.($sp_torrent ? "&nbsp;&nbsp;&nbsp;".$sp_torrent : "").($sp_torrent_sub) . $hrImg . $approvalStatusIcon;
@@ -72,10 +72,10 @@ $torrentnameprefix = \App\Support\SupportContext::getGlobal('torrentnameprefix')
 			if (!\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::VIEW_ANONYMOUS) && $row['owner'] != $CURUSER['id'])
 			$uprow = "<i>".$lang_details['text_anonymous']."</i>";
 			else
-			$uprow = "<i>".$lang_details['text_anonymous']."</i> (" . get_username($row['owner'], false, true, true, false, false, true) . ")";
+			$uprow = "<i>".$lang_details['text_anonymous']."</i> (" . \App\Support\UserDisplay::username($row['owner'], false, true, true, false, false, true) . ")";
 		}
 		else {
-			$uprow = ((isset($row['owner'])) ? get_username($row['owner'], false, true, true, false, false, true) : "<i>".$lang_details['text_unknown']."</i>");
+			$uprow = ((isset($row['owner'])) ? \App\Support\UserDisplay::username($row['owner'], false, true, true, false, false, true) : "<i>".$lang_details['text_unknown']."</i>");
 		}
 		if ($CURUSER["id"] == $row["owner"])
 			$CURUSER["downloadpos"] = "yes";
@@ -85,7 +85,7 @@ $torrentnameprefix = \App\Support\SupportContext::getGlobal('torrentnameprefix')
 			if ($CURUSER['timetype'] != 'timealive')
 				$uploadtime = $lang_details['text_at'].$row['added'];
 			else $uploadtime = $lang_details['text_blank'].\App\Support\Time::format($row['added'],true,false);
-			print("<a class=\"index\" href=\"download.php?id=$id\">" . htmlspecialchars($torrentnameprefix ."." .$row["save_as"]) . ".torrent</a>&nbsp;&nbsp;<a id=\"bookmark0\" href=\"javascript: bookmark(".$row['id'].",0);\">".get_torrent_bookmark_state($CURUSER['id'], $row['id'], false)."</a>&nbsp;&nbsp;&nbsp;".$lang_details['row_upped_by']."&nbsp;".$uprow.$uploadtime);
+			print("<a class=\"index\" href=\"download.php?id=$id\">" . htmlspecialchars($torrentnameprefix ."." .$row["save_as"]) . ".torrent</a>&nbsp;&nbsp;<a id=\"bookmark0\" href=\"javascript: bookmark(".$row['id'].",0);\">".\App\Support\TorrentBookmark::stateMarkupWithContext($CURUSER['id'], $row['id'], false)."</a>&nbsp;&nbsp;&nbsp;".$lang_details['row_upped_by']."&nbsp;".$uprow.$uploadtime);
 			print("</td></tr>");
 		}
 		else
@@ -210,7 +210,7 @@ JS;
         }
 
 		if ($CURUSER['showdescription'] != 'no' && !empty($row["descr"])){
-            $desc = format_comment($row['descr']);
+            $desc = \App\Support\Format::formatComment($row['descr']);
             $desc = apply_filter('torrent_detail_description', $desc, $row['id'], $CURUSER['id']);
             tr("<a href=\"javascript: klappe_news('descr')\"><span class=\"nowrap\"><img class=\"minus\" src=\"pic/trans.gif\" alt=\"Show/Hide\" id=\"picdescr\" title=\"".($lang_details['title_show_or_hide'] ?? '')."\" /> ".$lang_details['row_description']."</span></a>", "<div id='kdescr'>".$desc."</div>", 1);
 		}
@@ -306,7 +306,7 @@ echo "</script>";
         $add_value = $magicInfo['add_value'];
         foreach ($magicInfo['givers'] as $giver) {
             $give_value_userid = $giver->userid;
-            $give_value[] = get_username($give_value_userid)." ";
+            $give_value[] = \App\Support\UserDisplay::username($give_value_userid)." ";
         }
         if ($magicInfo['givers']->isEmpty()) {
             $no_give = $lang_details['text_no_magic_added'];
@@ -351,7 +351,7 @@ echo "</script>";
             $show_list_description = null;
             $haveGotBonus = $no_give;
         }
-        $current_user_magic = "<span id='current_user_magic' style='display:none'>".get_username($CURUSER['id'])."</span>&nbsp;";
+        $current_user_magic = "<span id='current_user_magic' style='display:none'>".\App\Support\UserDisplay::username($CURUSER['id'])."</span>&nbsp;";
         $haveGotBonus = $lang_details['magic_haveGotBonus'].'&nbsp';
         $spanSumAll = '<span id="spanSumAll">'.$sum_value.'</span>';
         $haveGotBonus = str_replace('Number',$spanSumAll,$haveGotBonus);
@@ -375,7 +375,7 @@ echo "</script>";
 			if ((int) $t->userid == $CURUSER['id']) {
 				$thanks_said = 1;
 			} else {
-				$thanksby .= get_username($thanks_userid)." ";
+				$thanksby .= \App\Support\UserDisplay::username($thanks_userid)." ";
 			}
 		}
 		if ($thanks_all == 0) {
@@ -386,10 +386,10 @@ echo "</script>";
 			$buttonvalue = " value=\"".$lang_details['submit_say_thanks']."\"";
 		} else {
 			$buttonvalue = " value=\"".$lang_details['submit_you_said_thanks']."\" disabled=\"disabled\"";
-			$thanksby = get_username($CURUSER['id'])." ".$thanksby;
+			$thanksby = \App\Support\UserDisplay::username($CURUSER['id'])." ".$thanksby;
 		}
 		$thanksbutton = "<input class=\"btn\" type=\"button\" id=\"saythanks\"  onclick=\"saythanks(".$torrentid.");\" ".$buttonvalue." />";
-		tr($lang_details['row_thanks_by'],"<span id=\"thanksadded\" style=\"display: none;\"><input class=\"btn\" type=\"button\" value=\"".$lang_details['text_thanks_added']."\" disabled=\"disabled\" /></span><span id=\"curuser\" style=\"display: none;\">".get_username($CURUSER['id'])." </span><span id=\"thanksbutton\">".$thanksbutton."</span>&nbsp;&nbsp;<span id=\"nothanks\">".$nothanks."</span><span id=\"addcuruser\"></span>".$thanksby.($thanks_all < $thanksCount ? $lang_details['text_and_more'].$thanksCount.$lang_details['text_users_in_total'] : ""),1);
+		tr($lang_details['row_thanks_by'],"<span id=\"thanksadded\" style=\"display: none;\"><input class=\"btn\" type=\"button\" value=\"".$lang_details['text_thanks_added']."\" disabled=\"disabled\" /></span><span id=\"curuser\" style=\"display: none;\">".\App\Support\UserDisplay::username($CURUSER['id'])." </span><span id=\"thanksbutton\">".$thanksbutton."</span>&nbsp;&nbsp;<span id=\"nothanks\">".$nothanks."</span><span id=\"addcuruser\"></span>".$thanksby.($thanks_all < $thanksCount ? $lang_details['text_and_more'].$thanksCount.$lang_details['text_users_in_total'] : ""),1);
 		// ------------- end thanked-by block--------------//
 
 		print("</table>\n");

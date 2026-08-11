@@ -494,7 +494,7 @@ class ToolRepository extends BaseRepository
             return $uidPermissionsCached[$uid];
         }
         $log = "uid: $uid";
-        $userInfo = get_user_row($uid);
+        $userInfo = \App\Support\UserDisplay::row($uid);
         $class = $userInfo['class'];
 
         //Class permission

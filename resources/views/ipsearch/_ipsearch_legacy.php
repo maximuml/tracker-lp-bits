@@ -155,13 +155,13 @@ else
 
 		if ($user["invited_by"] > 0)
 		{
-			$invited_by = get_username($user['invited_by']);
+			$invited_by = \App\Support\UserDisplay::username($user['invited_by']);
 		}
 		else
 			$invited_by = $lang_ipsearch['text_not_available'];
 
 		echo "<tr><td align=\"center\">" .
-get_username($user['id'])."</td>".
+\App\Support\UserDisplay::username($user['id'])."</td>".
 "<td align=\"center\">" . $ipstr . "</td>
 <td align=\"center\">" . $lastaccess . "</td>
 <td align=\"center\"><a href=\"iphistory.php?id=" . $user['id'] . "\">" . $iphistory. "</a></td>

@@ -1,6 +1,6 @@
 <?php
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
-if (get_user_class() < UC_MODERATOR)
+if (\App\Support\UserDisplay::currentClass() < UC_MODERATOR)
 stderr("Sorry", "Access denied.");
 
 stdhead("Warned Users");
@@ -46,9 +46,9 @@ $ratio = "<font color=" . get_ratio_color($ratio) . ">$ratio</font>";
 
 $added = substr($arr['added'],0,10);
 $last_access = substr($arr['last_access'],0,10);
-$class=get_user_class_name($arr["class"],false,true,true);
+$class=\App\Support\UserClass::name($arr["class"],false,true,true);
 
-print("<tr><td align=left>" . get_username($arr['id']) ."</td>
+print("<tr><td align=left>" . \App\Support\UserDisplay::username($arr['id']) ."</td>
   <td align=center>$added</td>
   <td align=center>$last_access</td>
   <td align=center>$class</td>
@@ -59,7 +59,7 @@ print("<tr><td align=left>" . get_username($arr['id']) ."</td>
   <td bgcolor=\"#008000\" align=center><input type=\"checkbox\" name=\"usernw[]\" value=\"{$arr['id']}\"></td>
   <td bgcolor=\"#FF000\" align=center><input type=\"checkbox\" name=\"desact[]\" value=\"{$arr['id']}\"></td></tr>\n");
 }
-if (get_user_class() >= UC_ADMINISTRATOR) {
+if (\App\Support\UserDisplay::currentClass() >= UC_ADMINISTRATOR) {
 print("<tr><td colspan=10 align=right><input type=\"submit\" name=\"submit\" value=\"Apply Changes\"></td></tr>\n");
 print("<input type=\"hidden\" name=\"nowarned\" value=\"nowarned\"></form></table>\n");
 }

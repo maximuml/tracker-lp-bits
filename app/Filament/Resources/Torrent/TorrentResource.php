@@ -128,7 +128,7 @@ class TorrentResource extends Resource
                 TextColumn::make('added')->label(__('label.added'))->dateTime(),
                 TextColumn::make('user.username')
                     ->label(__('label.torrent.owner'))
-                    ->formatStateUsing(fn ($record) => username_for_admin($record->owner))
+                    ->formatStateUsing(fn ($record) => \App\Support\UserDisplay::adminUsername($record->owner))
                 ,
             ])
             ->defaultSort('id', 'desc')

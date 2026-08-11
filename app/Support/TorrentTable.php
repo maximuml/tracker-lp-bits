@@ -63,7 +63,7 @@ final class TorrentTable
 		$last_browse=$time_now;
 	}
     $wait = 0;
-	if (get_user_class() < UC_VIP && $waitsystem == "yes") {
+	if (\App\Support\UserDisplay::currentClass() < UC_VIP && $waitsystem == "yes") {
 		$ratio = get_ratio($user["id"], false);
 		$gigs = $user["uploaded"] / (1024*1024*1024);
 		if($gigs > 10)
@@ -145,14 +145,14 @@ $torrent_tooltip = [];
 foreach ($rows as $row)
 {
 	$id = $row["id"];
-	$sphighlight = get_torrent_bg_color($row['sp_state'], $row['pos_state'], $row);
+	$sphighlight = \App\Support\Promotion::backgroundStyleWithContext($row['sp_state'], $row['pos_state'], $row);
 	print("<tr" . $sphighlight . ">\n");
 
 	print("<td class=\"rowfollow nowrap\" valign=\"middle\" style='padding: 0px'>");
 	if (isset($row["category"])) {
 		print(return_category_image($row["category"], "?"));
 		if ($has_secondicon){
-			print(get_second_icon($row));
+			print(\App\Support\Category::secondIconWithContext($row));
 		}
 	}
 	else
@@ -175,8 +175,8 @@ foreach ($rows as $row)
         $stickyicon = "";
     }
 	$stickyicon = apply_filter('sticky_icon', $stickyicon, $row);
-    $sp_torrent = get_torrent_promotion_append($row['sp_state'],"",true,$row["added"], $row['promotion_time_type'], $row['promotion_until'], $row['__ignore_global_sp_state'] ?? false);
-	$hrImg = get_hr_img($row, $row['search_box_id']);
+    $sp_torrent = \App\Support\Promotion::appendWithContext($row['sp_state'],"",true,$row["added"], $row['promotion_time_type'], $row['promotion_until'], $row['__ignore_global_sp_state'] ?? false);
+	$hrImg = \App\Support\TorrentAccess::hrImage($row, $row['search_box_id']);
 
 	//cover
     $coverSrc = $tdCover = '';
@@ -193,7 +193,7 @@ foreach ($rows as $row)
 		print("<b> (<font class='new'>".$lang_functions['text_new_uppercase']."</font>)</b>");
 
 	$banned_torrent = ($row["banned"] == 'yes' ? " <b>(<font class=\"striking\">".$lang_functions['text_banned']."</font>)</b>" : "");
-	$sp_torrent_sub = get_torrent_promotion_append_sub($row['sp_state'],"",true,$row['added'], $row['promotion_time_type'], $row['promotion_until'], $row['__ignore_global_sp_state'] ?? false);
+	$sp_torrent_sub = \App\Support\Promotion::appendSubWithContext($row['sp_state'],"",true,$row['added'], $row['promotion_time_type'], $row['promotion_until'], $row['__ignore_global_sp_state'] ?? false);
     $approvalStatusIcon = $torrentRep->renderApprovalStatus($row['approval_status']);
     if ($showSeedBoxIcon && $seedBoxPeerInfo->has($row['id'])) {
         $seedBoxIcon = $seedBoxRep->getSeedBoxIcon();
@@ -226,7 +226,7 @@ foreach ($rows as $row)
 		$act .= "<a href=\"download.php?id=".$id."\"><img class=\"download\" src=\"pic/trans.gif\" style='padding-bottom: 2px;' alt=\"download\" title=\"".$lang_functions['title_download_torrent']."\" /></a>" ;
 		if ($user["bmicon"] == 'yes'){
 			$bookmark = " href=\"javascript: bookmark(".$id.",".$counter.");\"";
-			$act .= ($act ? "<br />" : "")."<a id=\"bookmark".$counter."\" ".$bookmark." >".get_torrent_bookmark_state($user['id'], $id)."</a>";
+			$act .= ($act ? "<br />" : "")."<a id=\"bookmark".$counter."\" ".$bookmark." >".\App\Support\TorrentBookmark::stateMarkupWithContext($user['id'], $id)."</a>";
 		}
 
 	print("<td width=\"20\" class=\"embedded\" style=\"text-align: right;padding-right: 5px\" valign=\"middle\">".$act."</td>\n");
@@ -272,7 +272,7 @@ foreach ($rows as $row)
 				else
 					$lastcomtime = $lang_functions['text_blank'].\App\Support\Time::format($lastcom["added"],true,false,true);
 					$lastcom_tooltip[$counter]['id'] = "lastcom_" . $counter;
-					$lastcom_tooltip[$counter]['content'] = ($hasnewcom ? "<b>(<font class='new'>".$lang_functions['text_new_uppercase']."</font>)</b> " : "").$lang_functions['text_last_commented_by'].get_username($lastcom['user']) . $lastcomtime."<br />". format_comment(mb_substr($lastcom['text'],0,100,"UTF-8") . (mb_strlen($lastcom['text'],"UTF-8") > 100 ? " ......" : "" ),true,false,false,true,600,false,false);
+					$lastcom_tooltip[$counter]['content'] = ($hasnewcom ? "<b>(<font class='new'>".$lang_functions['text_new_uppercase']."</font>)</b> " : "").$lang_functions['text_last_commented_by'].\App\Support\UserDisplay::username($lastcom['user']) . $lastcomtime."<br />". \App\Support\Format::formatComment(mb_substr($lastcom['text'],0,100,"UTF-8") . (mb_strlen($lastcom['text'],"UTF-8") > 100 ? " ......" : "" ),true,false,false,true,600,false,false);
 					$onmouseover = "onmouseover=\"domTT_activate(this, event, 'content', document.getElementById('" . $lastcom_tooltip[$counter]['id'] . "'), 'trail', false, 'delay', 500,'lifetime',3000,'fade','both','styleClass','niceTitle','fadeMax', 87,'maxWidth', 400);\"";
 			}
 		} else {
@@ -317,7 +317,7 @@ foreach ($rows as $row)
 		    $row["anonymous"] == "yes"
             && (Permission::canViewAnonymous() || (isset($row['owner']) && $row['owner'] == $user['id']))
         ) {
-			print("<td class=\"rowfollow\" align=\"center\"><i>".$lang_functions['text_anonymous']."</i><br />".(isset($row["owner"]) ? "(" . get_username($row["owner"]) .")" : "<i>".$lang_functions['text_orphaned']."</i>") . "</td>\n");
+			print("<td class=\"rowfollow\" align=\"center\"><i>".$lang_functions['text_anonymous']."</i><br />".(isset($row["owner"]) ? "(" . \App\Support\UserDisplay::username($row["owner"]) .")" : "<i>".$lang_functions['text_orphaned']."</i>") . "</td>\n");
 		}
 		elseif ($row["anonymous"] == "yes")
 		{
@@ -325,7 +325,7 @@ foreach ($rows as $row)
 		}
 		else
 		{
-			print("<td class=\"rowfollow\">" . (isset($row["owner"]) ? get_username($row["owner"]) : "<i>".$lang_functions['text_orphaned']."</i>") . "</td>\n");
+			print("<td class=\"rowfollow\">" . (isset($row["owner"]) ? \App\Support\UserDisplay::username($row["owner"]) : "<i>".$lang_functions['text_orphaned']."</i>") . "</td>\n");
 		}
 
 	if (Permission::canManageTorrent())

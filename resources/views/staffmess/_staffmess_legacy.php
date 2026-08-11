@@ -2,7 +2,7 @@
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
 $__server_HTTP_REFERER = \App\Support\SupportContext::getServerValue('HTTP_REFERER');
-if (get_user_class() < UC_ADMINISTRATOR)
+if (\App\Support\UserDisplay::currentClass() < UC_ADMINISTRATOR)
 stderr("Sorry", "Access denied.");
 stdhead("Mass PM", false);
 $classes = array_chunk(\App\Models\User::$classes, 4, true);

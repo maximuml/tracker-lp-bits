@@ -127,9 +127,9 @@ $row = $message->toArray();
 if ($row['sender'] != 0)
 {
 if ($mailbox != PM_SENTBOX)
-	$username = get_username($row['sender']);
+	$username = \App\Support\UserDisplay::username($row['sender']);
 else
-	$username = get_username($row['receiver']);
+	$username = \App\Support\UserDisplay::username($row['receiver']);
 }
 else
 {
@@ -216,7 +216,7 @@ $message = $message->toArray();
 if ($message['sender'] == $CURUSER['id'])
 {
 // Display to
-$sender = get_username($message['receiver']);
+$sender = \App\Support\UserDisplay::username($message['receiver']);
 $reply = "";
 $from = $lang_messages['text_to'];
 }
@@ -230,11 +230,11 @@ $reply = "";
 }
 else
 {
-$sender = get_username($message['sender']);
+$sender = \App\Support\UserDisplay::username($message['sender']);
 $reply = " [ <a href=\"sendmessage.php?receiver=" . $message['sender'] . "&replyto=" . $pm_id . "\">".$lang_messages['text_reply']."</a> ]";
 }
 }
-$body = format_comment($message['msg'], true);
+$body = \App\Support\Format::formatComment($message['msg'], true);
 $added = $message['added'];
 if ($message['sender'] == $CURUSER['id'])
 {
@@ -448,18 +448,18 @@ $subject = "Fwd: " . htmlspecialchars($message['subject']);
 $from = $message['receiver'];
 $orig = $message['sender'];
 
-$from_name = get_username($from);
+$from_name = \App\Support\UserDisplay::username($from);
 if ($orig == 0)
 {
 $orig_name = $orig_name2 = $lang_messages['text_system'];
 }
 else
 {
-$orig_name = get_username($orig);
+$orig_name = \App\Support\UserDisplay::username($orig);
 $orig_name2 = \App\Models\User::query()->where('id', $orig)->value('username') ?? '';
 }
 
-$body = "-------- Original Message from " . $orig_name2 . " --------<br />" . format_comment($message['msg']);
+$body = "-------- Original Message from " . $orig_name2 . " --------<br />" . \App\Support\Format::formatComment($message['msg']);
 
 stdhead($subject);?>
 <h1 align="center"><?php echo $lang_messages['text_forward_pm'] ?></h1>

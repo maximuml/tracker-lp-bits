@@ -3,7 +3,7 @@ error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
 $__server_REQUEST_METHOD = \App\Support\SupportContext::getServerValue('REQUEST_METHOD');
 $__server_REQUEST_URI = \App\Support\SupportContext::getServerValue('REQUEST_URI');
-if (get_user_class() < UC_ADMINISTRATOR)
+if (\App\Support\UserDisplay::currentClass() < UC_ADMINISTRATOR)
 stderr("Sorry", "Access denied.");
 
 $remove = intval(\App\Support\SupportContext::getQuery('remove') ?? 0);
@@ -13,7 +13,7 @@ if (is_valid_id($remove))
   write_log("Ban ".htmlspecialchars($remove)." was removed by {$CURUSER['id']} ($CURUSER[username])",'mod');
 }
 
-if ($__server_REQUEST_METHOD == "POST" && get_user_class() >= UC_ADMINISTRATOR)
+if ($__server_REQUEST_METHOD == "POST" && \App\Support\UserDisplay::currentClass() >= UC_ADMINISTRATOR)
 {
 	$first = trim(\App\Support\SupportContext::getPost("first"));
 	$last = trim(\App\Support\SupportContext::getPost("last"));
@@ -54,13 +54,13 @@ else
   foreach ($bans as $ban)
   {
  	  $arr = (array) $ban;
- 	  print("<tr><td>".\App\Support\Time::format($arr['added'])."</td><td align=left>".long2ip($arr['first'])."</td><td align=left>".long2ip($arr['last'])."</td><td align=left>". get_username($arr['addedby']) .
+ 	  print("<tr><td>".\App\Support\Time::format($arr['added'])."</td><td align=left>".long2ip($arr['first'])."</td><td align=left>".long2ip($arr['last'])."</td><td align=left>". \App\Support\UserDisplay::username($arr['addedby']) .
  	    "</td><td align=left>{$arr['comment']}</td><td><a href=bans.php?remove={$arr['id']}>Remove</a></td></tr>\n");
   }
   print("</table>\n");
 }
 
-if (get_user_class() >= UC_ADMINISTRATOR)
+if (\App\Support\UserDisplay::currentClass() >= UC_ADMINISTRATOR)
 {
 	print("<h1>Add ban</h1>\n");
 	print("<table border=1 cellspacing=0 cellpadding=5>\n");

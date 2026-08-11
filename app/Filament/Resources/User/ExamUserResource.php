@@ -76,7 +76,7 @@ class ExamUserResource extends Resource
                 TextColumn::make('user.username')
                     ->label(__('label.username'))
                     ->searchable()
-                    ->formatStateUsing(fn ($record) => new HtmlString(get_username($record->uid, false, true, true, true)))
+                    ->formatStateUsing(fn ($record) => new HtmlString(\App\Support\UserDisplay::username($record->uid, false, true, true, true)))
                 ,
                 TextColumn::make('exam.name')->label(__('label.exam.label')),
                 TextColumn::make('exam.typeText')->label(__('exam.type')),
@@ -168,7 +168,7 @@ class ExamUserResource extends Resource
                             ->label(__("label.status"))
                         ,
                         TextEntry::make('uid')
-                            ->formatStateUsing(fn ($record) => username_for_admin($record->uid))
+                            ->formatStateUsing(fn ($record) => \App\Support\UserDisplay::adminUsername($record->uid))
                             ->label(__("label.username"))
                         ,
                         TextEntry::make('exam.name')

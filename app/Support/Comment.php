@@ -123,7 +123,7 @@ final class Comment
             $s = (string) preg_replace_callback(
                 '/\[img\]([^\<\r\n"\']+?)\[\/img\]/i',
                 function (array $m) use ($imageresizer, $imageMaxWidth, $imageMaxHeight): string {
-                    return \formatImg($m[1], $imageresizer, $imageMaxWidth, $imageMaxHeight);
+                    return \App\Support\HtmlRenderer::formatImg($m[1], $imageresizer, $imageMaxWidth, $imageMaxHeight);
                 },
                 $s,
                 $imagenum,
@@ -132,7 +132,7 @@ final class Comment
             $s = (string) preg_replace_callback(
                 '/\[img=([^\<\r\n"\']+?)\]/i',
                 function (array $m) use ($imageresizer, $imageMaxWidth, $imageMaxHeight): string {
-                    return \formatImg($m[1], $imageresizer, $imageMaxWidth, $imageMaxHeight);
+                    return \App\Support\HtmlRenderer::formatImg($m[1], $imageresizer, $imageMaxWidth, $imageMaxHeight);
                 },
                 $s,
                 ($imagenum != -1 ? max($imagenum - $imgReplaceCount, 0) : -1),
@@ -145,7 +145,7 @@ final class Comment
         if (str_contains($s, '[youtube') && str_contains($s, 'v=')) {
             $s = (string) preg_replace_callback(
                 '/\[youtube(\,([1-9][0-9]*)\,([1-9][0-9]*))?\]((http|https):\/\/[^\s\'"<>]+)\[\/youtube\]/i',
-                static fn (array $m): string => \formatYoutube($m[4], $m[2] ?: 0, $m[3] ?: 0),
+                static fn (array $m): string => \App\Support\HtmlRenderer::formatYoutube($m[4], $m[2] ?: 0, $m[3] ?: 0),
                 $s,
             );
         }
@@ -153,7 +153,7 @@ final class Comment
         if (str_contains($s, '[video')) {
             $s = (string) preg_replace_callback(
                 '/\[video(\,([1-9][0-9]*)\,([1-9][0-9]*))?\]((http|https):\/\/[^\s\'"<>]+)\[\/video\]/i',
-                static fn (array $m): string => \formatVideo($m[4], $m[2] ?: 0, $m[3] ?: 0),
+                static fn (array $m): string => \App\Support\HtmlRenderer::formatVideo($m[4], $m[2] ?: 0, $m[3] ?: 0),
                 $s,
             );
         }
@@ -161,7 +161,7 @@ final class Comment
         if (str_contains($s, '[audio')) {
             $s = (string) preg_replace_callback(
                 '/\[audio\]((http|https):\/\/[^\s\'"<>]+)\[\/audio\]/i',
-                static fn (array $m): string => \formatAudio($m[1]),
+                static fn (array $m): string => \App\Support\HtmlRenderer::formatAudio($m[1]),
                 $s,
             );
         }
@@ -169,7 +169,7 @@ final class Comment
         $s = (string) preg_replace_callback(
             '/\[url=([^\[\s]+?)\](.+?)\[\/url\]/i',
             function (array $m) use ($newtab): string {
-                return \formatUrl($m[1], $newtab, $m[2], 'faqlink');
+                return \App\Support\HtmlRenderer::formatUrl($m[1], $newtab, $m[2], 'faqlink');
             },
             $s,
         );
@@ -177,33 +177,33 @@ final class Comment
         $s = (string) preg_replace_callback(
             '/\[url\]([^\[\s]+?)\[\/url\]/i',
             function (array $m) use ($newtab): string {
-                return \formatUrl($m[1], $newtab, '', 'faqlink');
+                return \App\Support\HtmlRenderer::formatUrl($m[1], $newtab, '', 'faqlink');
             },
             $s,
         );
 
         $s = (string) preg_replace_callback(
             '/\[left\](.*)\[\/left\]/isU',
-            static fn (array $m): string => \formatTextAlign($m[1], 'left'),
+            static fn (array $m): string => \App\Support\HtmlRenderer::formatTextAlign($m[1], 'left'),
             $s,
         );
         $s = (string) preg_replace_callback(
             '/\[center\](.*)\[\/center\]/isU',
-            static fn (array $m): string => \formatTextAlign($m[1], 'center'),
+            static fn (array $m): string => \App\Support\HtmlRenderer::formatTextAlign($m[1], 'center'),
             $s,
         );
         $s = (string) preg_replace_callback(
             '/\[right\](.*)\[\/right\]/isU',
-            static fn (array $m): string => \formatTextAlign($m[1], 'right'),
+            static fn (array $m): string => \App\Support\HtmlRenderer::formatTextAlign($m[1], 'right'),
             $s,
         );
         $s = (string) preg_replace_callback(
             '/\[hide\](.*)\[\/hide\]/isU',
-            static fn (array $m): string => \formatHidden($m[1]),
+            static fn (array $m): string => \App\Support\HtmlRenderer::formatHidden($m[1]),
             $s,
         );
 
-        $s = \format_urls($s, $newtab);
+        $s = \App\Support\Format::formatUrls($s, $newtab);
 
         if (strpos($s, '[quote') !== false && strpos($s, '[/quote]') !== false) {
             $s = \format_quotes($s);
@@ -222,7 +222,7 @@ final class Comment
             $s = (string) preg_replace_callback(
                 '/\[spoiler(=(.*))?\](.*)\[\/spoiler\]/isU',
                 function (array $m): string {
-                    return \formatSpoiler(
+                    return \App\Support\HtmlRenderer::formatSpoiler(
                         $m[3],
                         $m[2],
                         \nexus()->getScript() != 'preview',
@@ -293,7 +293,7 @@ final class Comment
             $userRow = $userInfo->toArray();
 
             $html .= '<div style="margin-top: 8pt; margin-bottom: 8pt;"><table id="cid' . $row['id'] . '" border="0" cellspacing="0" cellpadding="0" width="100%"><tr><td class="embedded" width="99%">#' . $row['id'] . '&nbsp;&nbsp;<font color="gray">' . ($lang_functions['text_by'] ?? '') . '</font>';
-            $html .= \get_username($row['user'], false, true, true, false, false, true);
+            $html .= \App\Support\UserDisplay::username($row['user'], false, true, true, false, false, true);
             $html .= '&nbsp;&nbsp;<font color="gray">' . ($lang_functions['text_at'] ?? '') . '</font>' . \App\Support\Time::format($row['added'])
                 . ($row['editedby'] && Permission::can(PermissionEnum::COM_MANAGE) ? ' - [<a href="comment.php?action=vieworiginal&amp;cid=' . $row['id'] . '&amp;type=' . $type . '">' . ($lang_functions['text_view_original'] ?? '') . '</a>]' : '')
                 . '</td><td class="embedded nowrap" width="1%"><a href="#top"><img class="top" src="pic/trans.gif" alt="Top" title="Top" /></a>&nbsp;&nbsp;</td></tr></table></div>';
@@ -302,11 +302,11 @@ final class Comment
             if (! $avatar) {
                 $avatar = 'pic/default_avatar.png';
             }
-            $text = \format_comment($row['text']);
+            $text = \App\Support\Format::formatComment($row['text']);
             $textEditby = '';
             if ($row['editedby']) {
                 $lastedittime = \App\Support\Time::format($row['editdate'], true, false);
-                $textEditby = '<br /><p><font class="small">' . ($lang_functions['text_last_edited_by'] ?? '') . \get_username($row['editedby']) . ($lang_functions['text_edited_at'] ?? '') . $lastedittime . "</font></p>\n";
+                $textEditby = '<br /><p><font class="small">' . ($lang_functions['text_last_edited_by'] ?? '') . \App\Support\UserDisplay::username($row['editedby']) . ($lang_functions['text_edited_at'] ?? '') . $lastedittime . "</font></p>\n";
             }
 
             $html .= '<table class="main" width="100%" border="0" cellspacing="0" cellpadding="5">' . "\n";
@@ -320,7 +320,7 @@ final class Comment
             $actionbar = '<a href="comment.php?action=add&amp;sub=quote&amp;cid=' . $row['id'] . '&amp;pid=' . $parentId . '&amp;type=' . $type . '"><img class="f_quote" src="pic/trans.gif" alt="Quote" title="' . ($lang_functions['title_reply_with_quote'] ?? '') . '" /></a>'
                 . '<a href="comment.php?action=add&amp;pid=' . $parentId . '&amp;type=' . $type . '"><img class="f_reply" src="pic/trans.gif" alt="Add Reply" title="' . ($lang_functions['title_add_reply'] ?? '') . '" /></a>'
                 . (Permission::can(PermissionEnum::COM_MANAGE) ? '<a href="comment.php?action=delete&amp;cid=' . $row['id'] . '&amp;type=' . $type . '"><img class="f_delete" src="pic/trans.gif" alt="Delete" title="' . ($lang_functions['title_delete'] ?? '') . '" /></a>' : '')
-                . (($row['user'] == $CURUSER['id'] || \get_user_class() >= $commanage_class) ? '<a href="comment.php?action=edit&amp;cid=' . $row['id'] . '&amp;type=' . $type . '"><img class="f_edit" src="pic/trans.gif" alt="Edit" title="' . ($lang_functions['title_edit'] ?? '') . '" /></a>' : '');
+                . (($row['user'] == $CURUSER['id'] || \App\Support\UserDisplay::currentClass() >= $commanage_class) ? '<a href="comment.php?action=edit&amp;cid=' . $row['id'] . '&amp;type=' . $type . '"><img class="f_edit" src="pic/trans.gif" alt="Edit" title="' . ($lang_functions['title_edit'] ?? '') . '" /></a>' : '');
 
             $onlineIcon = ($userRow['last_access'] > $dt)
                 ? '<img class="f_online" src="pic/trans.gif" alt="Online" title="' . ($lang_functions['title_online'] ?? '') . '" />'

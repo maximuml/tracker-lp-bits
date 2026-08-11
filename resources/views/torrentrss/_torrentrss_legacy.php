@@ -207,7 +207,7 @@ $xml .= '<channel>
 //');
 foreach ($list as $row)
 {
-    $ownerInfo = get_user_row($row['owner']);
+    $ownerInfo = \App\Support\UserDisplay::row($row['owner']);
 	$title = "";
 	if ($row['anonymous'] == 'yes') {
         $author = 'anonymous';
@@ -224,7 +224,7 @@ foreach ($list as $row)
 	$title .= $row['name'];
 	if (!empty(\App\Support\SupportContext::getQuery('isize'))) $title .= "[".\App\Support\Format::size($row['size'])."]";
 	if (!empty(\App\Support\SupportContext::getQuery('iuplder'))) $title .= "[".$author."]";
-	$content = format_comment($row['descr'], true, false, false, false);
+	$content = \App\Support\Format::formatComment($row['descr'], true, false, false, false);
 	$xml .= '<item>
 			<title><![CDATA['.$title.']]></title>
 			<link>'.$itemurl.'</link>

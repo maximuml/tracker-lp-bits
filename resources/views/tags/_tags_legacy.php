@@ -5,7 +5,7 @@ error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 function insert_tag($name, $description, $syntax, $example, $remarks)
 {
 $lang_tags = (array) (\App\Support\SupportContext::getGlobal('lang_tags') ?? []);
-	$result = format_comment($example);
+	$result = \App\Support\Format::formatComment($example);
 	print("<p class=sub><b>$name</b></p>\n");
 	print("<table class=main width=100% border=1 cellspacing=0 cellpadding=5>\n");
 	print("<tr valign=top><td width=25%>".$lang_tags['text_description']."</td><td>$description\n");
@@ -32,7 +32,7 @@ $siteName = \App\Models\Setting::getSiteName();
 <?php
 
 if ($test != "")
-  print("<p><hr>" . format_comment($test) . "</hr></p>\n");
+  print("<p><hr>" . \App\Support\Format::formatComment($test) . "</hr></p>\n");
 
 insert_tag(
 	$lang_tags['text_bold'],

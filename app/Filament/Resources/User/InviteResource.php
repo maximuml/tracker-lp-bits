@@ -60,7 +60,7 @@ class InviteResource extends Resource
                 TextColumn::make('id')->sortable(),
                 TextColumn::make('inviter')
                     ->label(__('invite.fields.inviter'))
-                    ->formatStateUsing(fn ($state) => username_for_admin($state))
+                    ->formatStateUsing(fn ($state) => \App\Support\UserDisplay::adminUsername($state))
                 ,
                 TextColumn::make('invitee')
                     ->label(__('invite.fields.invitee'))

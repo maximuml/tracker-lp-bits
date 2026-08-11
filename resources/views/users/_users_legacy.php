@@ -11,7 +11,7 @@ if (strlen($letter) > 1)
 	return;
 $q = '';
 
-if(!is_valid_user_class($class))
+if(!\App\Support\User::isValidUserClass($class))
 	$class = '-';
 
 if ($search != '' && $letter == '')
@@ -42,7 +42,7 @@ print("<select name=class>\n");
 print("<option value='-'>".$lang_users['select_any_class']."</option>\n");
 for ($i = 0;;++$i)
 {
-	if ($c = get_user_class_name($i,false,true,true))
+	if ($c = \App\Support\UserClass::name($i,false,true,true))
 		print("<option value=$i" . ($class != '-' && $class == $i ? " selected" : "") . ">$c</option>\n");
 	else
 		break;
@@ -92,7 +92,7 @@ print("<table border=1 cellspacing=0 cellpadding=5>\n");
 print("<tr><td class=colhead align=left>".$lang_users['col_user_name']."</td><td class=colhead>".$lang_users['col_registered']."</td><td class=colhead>".$lang_users['col_last_access']."</td><td class=colhead align=left>".$lang_users['col_class']."</td><td class=colhead>".$lang_users['col_country']."</td></tr>\n");
 foreach ($userRows as $arr)
 {
-print("<tr><td align=left>".get_username($arr['id'])."</td><td>".\App\Support\Time::format($arr['added'], true, false)."</td><td>".\App\Support\Time::format($arr['last_access'],true,false)."</td><td align=left>". get_user_class_name($arr['class'],false,true,true) . "</td><td align=center>".$arr['country']."</td></tr>");
+print("<tr><td align=left>".\App\Support\UserDisplay::username($arr['id'])."</td><td>".\App\Support\Time::format($arr['added'], true, false)."</td><td>".\App\Support\Time::format($arr['last_access'],true,false)."</td><td align=left>". \App\Support\UserClass::name($arr['class'],false,true,true) . "</td><td align=center>".$arr['country']."</td></tr>");
 }
 
 print("</table>");

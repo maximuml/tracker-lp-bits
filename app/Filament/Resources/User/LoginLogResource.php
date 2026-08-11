@@ -51,7 +51,7 @@ class LoginLogResource extends Resource
             ->columns([
                 TextColumn::make('id')->sortable(),
                 TextColumn::make('uid')
-                    ->formatStateUsing(fn ($state) => username_for_admin($state))
+                    ->formatStateUsing(fn ($state) => \App\Support\UserDisplay::adminUsername($state))
                     ->label(__('label.username'))
                 ,
                 TextColumn::make('ip')->searchable(),

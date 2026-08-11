@@ -26,7 +26,7 @@ class MaxUploadedUser extends BaseWidget implements HasActions
             ->columns([
                 TextColumn::make('user_id')
                     ->label(__('announce-log.user_id'))
-                    ->formatStateUsing(fn ($state) => username_for_admin($state))
+                    ->formatStateUsing(fn ($state) => \App\Support\UserDisplay::adminUsername($state))
                 ,
                 TextColumn::make('uploaded_total')
                     ->label(__('announce-log.uploaded_total'))

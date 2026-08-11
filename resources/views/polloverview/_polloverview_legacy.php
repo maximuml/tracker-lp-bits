@@ -51,7 +51,7 @@ if ($pollid)
 		print("<tr><td class=colhead align=center><nobr>".$lang_polloverview['col_username']."</nobr></td><td class=colhead align=center><nobr>".$lang_polloverview['col_selection']."<nobr></td></tr>\n");
 		foreach ($answers as $answerRow) {
 		    $useras = (array) $answerRow;
-			$username = get_username($useras['userid']);
+			$username = \App\Support\UserDisplay::username($useras['userid']);
   			print("<tr><td>".$username."</td><td>".$poll['option'.$useras['selection']]."</td></tr>\n");
  		}
 		print("</table>\n");

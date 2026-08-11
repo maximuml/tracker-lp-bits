@@ -153,7 +153,7 @@ if ($__server_REQUEST_METHOD == "POST") {
 	if ($queries)
 		$link .= "?".$queries;
 	$msg = $lang_getrss['std_use_following_url'] ."\n".$link."\n\n".$lang_getrss['std_utorrent_feed_url']."\n".$link."&linktype=dl".$addinclbm;
-	stdmsg($lang_getrss['std_done'],format_comment($msg));
+	stdmsg($lang_getrss['std_done'],\App\Support\Format::formatComment($msg));
 	stdfoot();
 	die();
 }

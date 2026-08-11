@@ -517,8 +517,8 @@ class UploadRepository extends BaseRepository
         if (empty($descr)) {
             return '';
         }
-        $descriptionArr = format_description($descr);
-        return get_image_from_description($descriptionArr, true, false);
+        $descriptionArr = \App\Support\Description::parse($descr);
+        return \App\Support\Description::imageFromDescription($descriptionArr, true, false);
     }
 
     private function getTorrentSavePath(): string
@@ -601,7 +601,7 @@ class UploadRepository extends BaseRepository
                     'size' => \App\Support\Format::size($torrent->size),
                     'category' => $categoryName,
                     'upload_by' => $this->handleAnonymous($torrentUploader->username, $torrentUploader, $user, $torrent),
-                    'description' => Str::limit(strip_tags(format_comment($torrent->extra->descr)), 500),
+                    'description' => Str::limit(strip_tags(\App\Support\Format::formatComment($torrent->extra->descr)), 500),
                     'torrent_url' => sprintf("%s/details.php?id=%s&hit=1", getBaseUrl(), $torrent->id),
                 ], $locale);
                 $sendResult = $toolRep->sendMail($user->email, $subject, $body);

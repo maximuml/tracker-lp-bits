@@ -33,7 +33,7 @@ $rows = $userHistory->union($ipLogHistory)
 stdhead($lang_iphistory['head_ip_history_log_for'].$username);
 begin_main_frame();
 
-print("<h1 align=\"center\">".$lang_iphistory['text_historical_ip_by'] . get_username($userid)."</h1>");
+print("<h1 align=\"center\">".$lang_iphistory['text_historical_ip_by'] . \App\Support\UserDisplay::username($userid)."</h1>");
 
 if ($countrows > $perpage)
 echo $pagertop;

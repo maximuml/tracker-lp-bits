@@ -60,7 +60,7 @@ class TokenResource extends Resource
                 TextColumn::make('token')->label(__('token.token')),
                 TextColumn::make('tokenable_id')
                     ->label(__('label.username'))
-                    ->formatStateUsing(fn ($state) => username_for_admin($state))
+                    ->formatStateUsing(fn ($state) => \App\Support\UserDisplay::adminUsername($state))
                 ,
                 TextColumn::make('last_used_at')->label(__('token.last_used_at')),
                 TextColumn::make('expires_at')->label(__('label.expire_at')),

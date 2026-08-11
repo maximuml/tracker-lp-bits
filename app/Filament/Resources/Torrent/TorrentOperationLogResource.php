@@ -53,7 +53,7 @@ class TorrentOperationLogResource extends Resource
             ->columns([
                 TextColumn::make('id')->sortable(),
                 TextColumn::make('user.username')
-                    ->formatStateUsing(fn ($record) => username_for_admin($record->uid))
+                    ->formatStateUsing(fn ($record) => \App\Support\UserDisplay::adminUsername($record->uid))
                     ->label(__('label.user.label'))
                 ,
                 TextColumn::make('torrent.name')

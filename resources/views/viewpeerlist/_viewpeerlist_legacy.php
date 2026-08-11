@@ -136,11 +136,11 @@ $seedBoxRep = \App\Support\SupportContext::getGlobal('seedBoxRep');
         if ($isStrongPrivacy) {
             $columnUsername = "<td class=rowfollow align=left width=1%><i>".$lang_viewpeerlist['text_anonymous']."</i>".$usernameSeedBoxIcon;
             if ($canView) {
-                $columnUsername .= "<br />(" . get_username($e['userid']) . ")";
+                $columnUsername .= "<br />(" . \App\Support\UserDisplay::username($e['userid']) . ")";
             }
             $columnUsername .= "</td>";
         } else {
-            $columnUsername = "<td class=rowfollow align=left width=1%>" . get_username($e['userid']).$usernameSeedBoxIcon."</td>";
+            $columnUsername = "<td class=rowfollow align=left width=1%>" . \App\Support\UserDisplay::username($e['userid']).$usernameSeedBoxIcon."</td>";
         }
 
 		$s .= $columnUsername . $columnLocation;

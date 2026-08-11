@@ -10,7 +10,7 @@ $top = 100;  // Only look at the top xxx most likely...
 
 
 
-if (get_user_class() < UC_MODERATOR) stderr("Error", "Permission denied.");
+if (\App\Support\UserDisplay::currentClass() < UC_MODERATOR) stderr("Error", "Permission denied.");
 
 stdhead("Cheaters");
 begin_frame('Cheaters');
@@ -19,7 +19,7 @@ $page = @\App\Support\SupportContext::getQuery('page');
 //$perpage = 100; // currently ignored
 
 $class = @\App\Support\SupportContext::getQuery('c');
-if (!is_valid_user_class($class-2)) $class = '';
+if (!\App\Support\User::isValidUserClass($class-2)) $class = '';
 
 $ratio = @\App\Support\SupportContext::getQuery('r');
 if (!is_valid_id($ratio) && $ratio>=1 && $ratio<=7) $ratio = '';
@@ -41,7 +41,7 @@ echo '<tr><th>Class:</th>';
 echo '<td><select name="c"><option value="1">(any)</option>';
 for ($i = 2; ;++$i)
 {
-  if ($c = get_user_class_name($i-2)) echo '<option value="'.$i.'"'.($class == $i? ' selected' : '').">&lt;= $c</option>\n";
+  if ($c = \App\Support\UserClass::name($i-2)) echo '<option value="'.$i.'"'.($class == $i? ' selected' : '').">&lt;= $c</option>\n";
   else break;
 }
 echo '</select></td>';

@@ -276,7 +276,7 @@ final class Ratio
      */
     public static function forUserId(int|string $userId, bool $html = true): string|int|float
     {
-        $row = \get_user_row($userId);
+        $row = \App\Support\UserDisplay::row($userId);
         if (empty($row)) {
             return '---';
         }

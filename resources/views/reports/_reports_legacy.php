@@ -25,7 +25,7 @@ $reportRows = \Nexus\Database\NexusDB::table('reports')
 foreach ($reportRows as $reportRow) {
 	$row = (array) $reportRow;
 	if ($row['dealtwith'])
-		$dealtwith = "<font color=green>".$lang_reports['text_yes']."</font> - " . get_username($row['dealtby']);
+		$dealtwith = "<font color=green>".$lang_reports['text_yes']."</font> - " . \App\Support\UserDisplay::username($row['dealtby']);
 	else
 		$dealtwith = "<font color=red>".$lang_reports['text_no']."</font>";
 	switch ($row['type'])
@@ -51,7 +51,7 @@ foreach ($reportRows as $reportRow) {
 				$reporting = $lang_reports['text_user_does_not_exist'];
 			else
 			{
-				$reporting = get_username($userId);
+				$reporting = \App\Support\UserDisplay::username($userId);
 			}
 			break;
 		}
@@ -79,7 +79,7 @@ foreach ($reportRows as $reportRow) {
 				$reporting = $lang_reports['text_post_does_not_exist'];
 			else
 			{
-				$reporting = $lang_reports['text_post_id'].$row['reportid'].$lang_reports['text_of_topic']."<b><a href=\"forums.php?action=viewtopic&topicid=".$arr['topicid']."&page=p".htmlspecialchars($row['reportid'])."#pid".htmlspecialchars($row['reportid'])."\">".htmlspecialchars($arr['subject'])."</a></b>".$lang_reports['text_by'].get_username($arr['postuserid']);
+				$reporting = $lang_reports['text_post_id'].$row['reportid'].$lang_reports['text_of_topic']."<b><a href=\"forums.php?action=viewtopic&topicid=".$arr['topicid']."&page=p".htmlspecialchars($row['reportid'])."#pid".htmlspecialchars($row['reportid'])."\">".htmlspecialchars($arr['subject'])."</a></b>".$lang_reports['text_by'].\App\Support\UserDisplay::username($arr['postuserid']);
 			}
 			break;
 		}
@@ -105,7 +105,7 @@ foreach ($reportRows as $reportRow) {
 					$of = $lang_reports['text_of_offer'];
 				} else //Comment belongs to no one
 					$of = "unknown";
-				$reporting = $lang_reports['text_comment_id'].$row['reportid'].$of."<b><a href=\"".$url."\">".htmlspecialchars($name)."</a></b>".$lang_reports['text_by'].get_username($arr['user']);
+				$reporting = $lang_reports['text_comment_id'].$row['reportid'].$of."<b><a href=\"".$url."\">".htmlspecialchars($name)."</a></b>".$lang_reports['text_by'].\App\Support\UserDisplay::username($arr['user']);
 			}
 			break;
 		}
@@ -115,7 +115,7 @@ foreach ($reportRows as $reportRow) {
 		}
 	}
 
-	print("<tr><td class=rowfollow><nobr>".\App\Support\Time::format($row['added'])."</nobr></td><td class=rowfollow>" . get_username($row['addedby']) . "</td><td class=rowfollow>".$reporting."</td><td class=rowfollow><nobr>".$type."</nobr></td><td class=rowfollow>".htmlspecialchars($row['reason'])."</td><td class=rowfollow><nobr>".$dealtwith."</nobr></td><td class=rowfollow><input type=\"checkbox\" name=\"delreport[]\" value=\"" . $row['id'] . "\" /></td></tr>\n");
+	print("<tr><td class=rowfollow><nobr>".\App\Support\Time::format($row['added'])."</nobr></td><td class=rowfollow>" . \App\Support\UserDisplay::username($row['addedby']) . "</td><td class=rowfollow>".$reporting."</td><td class=rowfollow><nobr>".$type."</nobr></td><td class=rowfollow>".htmlspecialchars($row['reason'])."</td><td class=rowfollow><nobr>".$dealtwith."</nobr></td><td class=rowfollow><input type=\"checkbox\" name=\"delreport[]\" value=\"" . $row['id'] . "\" /></td></tr>\n");
 }
 ?>
 <tr><td class="colhead" colspan="7" align="right"><input type="submit" name="setdealt" value="<?php echo $lang_reports['submit_set_dealt']?>" /><input type="submit" name="delete" value="<?php echo $lang_reports['submit_delete']?>" /></td></tr>

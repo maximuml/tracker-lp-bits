@@ -2,7 +2,7 @@
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
 $__server_PHP_SELF = \App\Support\SupportContext::getServerValue('PHP_SELF');
-if (get_user_class() < UC_MODERATOR)
+if (\App\Support\UserDisplay::currentClass() < UC_MODERATOR)
 	stderr("Error", "Permission denied.");
 
 stdhead("Stats");
@@ -65,7 +65,7 @@ else
 	foreach ($upers as $uper)
 	{
 		$uper = (array) $uper;
-		print("<tr><td>" . get_username($uper['id']) . "</td>\n");
+		print("<tr><td>" . \App\Support\UserDisplay::username($uper['id']) . "</td>\n");
 		print("<td " . ($uper['last']?(">".$uper['last']." (".get_elapsed_time(strtotime($uper['last']))." ago)"):"align=center>---") . "</td>\n");
 		print("<td align=right>" . $uper['n_t'] . "</td>\n");
 		print("<td align=right>" . ($n_tor > 0?number_format(100 * $uper['n_t']/$n_tor,1)."%":"---") . "</td>\n");

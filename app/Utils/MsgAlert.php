@@ -56,7 +56,7 @@ final class MsgAlert {
 
     private function getListKey(): string
     {
-        return sprintf("%s:%s", $this->redisKeyPrefix, get_user_id());
+        return sprintf("%s:%s", $this->redisKeyPrefix, \App\Support\UserDisplay::currentId());
     }
 
 

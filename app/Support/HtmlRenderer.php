@@ -46,4 +46,14 @@ final class HtmlRenderer
     {
         return Comment::addTempCode(BBCode::hidden($content));
     }
+
+    public static function formatVideo(string $src, int|string $width, int|string $height): string
+    {
+        return Html::formatVideo($src, $width, $height);
+    }
+
+    public static function formatTextAlign(string $text, string $align): string
+    {
+        return Comment::addTempCode(BBCode::textAlign($text, $align));
+    }
 }

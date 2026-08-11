@@ -38,7 +38,7 @@
                 }
 
 				print("<tr><td class=\"rowhead\" style='padding: 3px' valign=\"top\">".$lang_upload['row_description']."<font color=\"red\">*</font></td><td class=\"rowfollow\">");
-				textbbcode("upload","descr", "", false, 130, true);
+				echo \App\Support\Form::bbcodeEditor("upload","descr", "", false, 130, true);
 				print("</td></tr>\n");
 
                 if (\App\Support\Config\SiteConfig::current()->main->enableTechnicalInfo()) {

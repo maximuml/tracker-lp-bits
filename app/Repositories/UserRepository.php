@@ -224,7 +224,7 @@ class UserRepository extends BaseRepository
             throw new \InvalidArgumentException("password confirmation != password");
         }
         $user = User::query()->findOrFail($id, ['id', 'username', 'class']);
-        $operator = get_user_id();
+        $operator = \App\Support\UserDisplay::currentId();
         if ($operator) {
             $this->checkPermission($operator, $user);
         }
@@ -732,8 +732,8 @@ class UserRepository extends BaseRepository
         } else {
             $durationText = nexus_trans('label.permanent', [], $locale);
         }
-        $operatorId = get_user_id();
-        $operatorInfo = get_user_row($operatorId);
+        $operatorId = \App\Support\UserDisplay::currentId();
+        $operatorInfo = \App\Support\UserDisplay::row($operatorId);
         $message['msg'] = nexus_trans('user.grant_props_notification.body', ['name' => $metaName, 'operator' => $operatorInfo['username'], 'duration' => $durationText], $locale);
         if (!empty($metaData['duration'])) {
             $metaData['deadline'] = now()->addDays((int)$metaData['duration']);

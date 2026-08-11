@@ -36,7 +36,7 @@ class LatestUsers extends BaseWidget implements HasActions
         return [
             TextColumn::make('id')
                 ->label(__('label.user.username'))
-                ->formatStateUsing(fn ($state) => username_for_admin($state))
+                ->formatStateUsing(fn ($state) => \App\Support\UserDisplay::adminUsername($state))
             ,
             TextColumn::make('email')->label(__('label.email')),
             BadgeColumn::make('status')->colors(['success' => 'confirmed', 'danger' => 'pending'])->label(__('label.status')),

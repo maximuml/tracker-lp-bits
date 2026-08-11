@@ -103,13 +103,13 @@ elseif ((isset($user)))
 	$arr = $userRow->toArray();
 	if ($arr["class"] >= $staffmem_class)
 	{
-		stderr($lang_report['std_sorry'],$lang_report['std_cannot_report'].get_user_class_name($arr["class"],false,true,true), false);
+		stderr($lang_report['std_sorry'],$lang_report['std_cannot_report'].\App\Support\UserClass::name($arr["class"],false,true,true), false);
 		die();
 	}
 
 	else
 	{
-		stderr($lang_report['std_are_you_sure'], $lang_report['text_are_you_sure_user'].get_username(htmlspecialchars($user)).$lang_report['text_to_staff']."<br />".$lang_report['text_not_for_leechers']."<br />".$lang_report['text_reason_note']."<br /><form method=post action=report.php><input type=hidden name=takeuser value=\"".htmlspecialchars($user)."\">".$lang_report['text_reason_is']."<input type=text style=\"width: 200px\" name=reason><input type=submit value=\"".$lang_report['submit_confirm']."\"></form>", false);
+		stderr($lang_report['std_are_you_sure'], $lang_report['text_are_you_sure_user'].\App\Support\UserDisplay::username(htmlspecialchars($user)).$lang_report['text_to_staff']."<br />".$lang_report['text_not_for_leechers']."<br />".$lang_report['text_reason_note']."<br /><form method=post action=report.php><input type=hidden name=takeuser value=\"".htmlspecialchars($user)."\">".$lang_report['text_reason_is']."<input type=text style=\"width: 200px\" name=reason><input type=submit value=\"".$lang_report['submit_confirm']."\"></form>", false);
 	}
 }
 //////////USER #2 END//////////
@@ -143,7 +143,7 @@ elseif ((isset($forumpost)))
 	{
 		stderr($lang_report['std_error'],$lang_report['std_invalid_post_id']);
 	}
-	stderr($lang_report['std_are_you_sure'], $lang_report['text_are_you_sure_post'].$forumpost.$lang_report['text_of_topic']."<a href=\"forums.php?action=viewtopic&topicid=".$arr['topicid']."&page=p".htmlspecialchars($forumpost)."#".htmlspecialchars($forumpost)."\"><b>".htmlspecialchars($arr['subject'])."</b></a>".$lang_report['text_by'].get_username($arr['postuserid']).$lang_report['text_to_staff']."<br />".$lang_report['text_reason_note']."<br /><form method=post action=report.php><input type=hidden name=takeforumpost value=\"".htmlspecialchars($forumpost)."\">".$lang_report['text_reason_is']."<input type=text style=\"width: 200px\" name=reason><input type=submit value=\"".$lang_report['submit_confirm']."\"></form>", false);
+	stderr($lang_report['std_are_you_sure'], $lang_report['text_are_you_sure_post'].$forumpost.$lang_report['text_of_topic']."<a href=\"forums.php?action=viewtopic&topicid=".$arr['topicid']."&page=p".htmlspecialchars($forumpost)."#".htmlspecialchars($forumpost)."\"><b>".htmlspecialchars($arr['subject'])."</b></a>".$lang_report['text_by'].\App\Support\UserDisplay::username($arr['postuserid']).$lang_report['text_to_staff']."<br />".$lang_report['text_reason_note']."<br /><form method=post action=report.php><input type=hidden name=takeforumpost value=\"".htmlspecialchars($forumpost)."\">".$lang_report['text_reason_is']."<input type=text style=\"width: 200px\" name=reason><input type=submit value=\"".$lang_report['submit_confirm']."\"></form>", false);
 }
 //////////FORUM POST #2 END//////////
 
@@ -170,7 +170,7 @@ elseif ((isset($commentid)))
 	else //Comment belongs to no one
 		stderr($lang_report['std_error'], $lang_report['std_orphaned_comment']);
 
-	stderr($lang_report['std_are_you_sure'], $lang_report['text_are_you_sure_comment'].$commentid.$of."<a href=\"".$url."\"><b>".htmlspecialchars($name)."</b></a>".$lang_report['text_by'].get_username($arr['user']).$lang_report['text_to_staff']."<br />".$lang_report['text_reason_note']."<br /><form method=post action=report.php><input type=hidden name=takecommentid value=\"".htmlspecialchars($commentid)."\">".$lang_report['text_reason_is']."<input type=text style=\"width: 200px\" name=reason><input type=submit value=\"".$lang_report['submit_confirm']."\"></form>", false);
+	stderr($lang_report['std_are_you_sure'], $lang_report['text_are_you_sure_comment'].$commentid.$of."<a href=\"".$url."\"><b>".htmlspecialchars($name)."</b></a>".$lang_report['text_by'].\App\Support\UserDisplay::username($arr['user']).$lang_report['text_to_staff']."<br />".$lang_report['text_reason_note']."<br /><form method=post action=report.php><input type=hidden name=takecommentid value=\"".htmlspecialchars($commentid)."\">".$lang_report['text_reason_is']."<input type=text style=\"width: 200px\" name=reason><input type=submit value=\"".$lang_report['submit_confirm']."\"></form>", false);
 }
 //////////COMMENT #2 END//////////
 

@@ -49,13 +49,13 @@ if ($count){
 		//end
 
 		$highlight = $CURUSER["id"] == $arr["userid"] ? " bgcolor=#00A527" : "";
-		$userrow = get_user_row($arr['userid']);
+		$userrow = \App\Support\UserDisplay::row($arr['userid']);
 		if ($userrow['privacy'] == 'strong'){
 			$username = $lang_viewsnatches['text_anonymous'];
 			if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::VIEW_ANONYMOUS) || $arr["id"] == $CURUSER['id'])
-				$username .= "<br />(".get_username($arr['userid']).")";
+				$username .= "<br />(".\App\Support\UserDisplay::username($arr['userid']).")";
 		}
-		else $username = get_username($arr['userid']);
+		else $username = \App\Support\UserDisplay::username($arr['userid']);
 		$reportImage = "<img class=\"f_report\" src=\"pic/trans.gif\" alt=\"Report\" title=\"".$lang_viewsnatches['title_report']."\" />";
 		print("<tr$highlight><td class=rowfollow align=center>" . $username ."</td>".(\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::VIEW_USER_CONFIDENTIAL_INFO) ? "<td class=rowfollow align=center><span class='nowrap'>".$arr['ip'].$seedBoxRep->renderIcon($arr['ip'], $arr['userid'])."</span></td>" : "")."<td class=rowfollow align=center>".$uploaded."@".$uprate.$lang_viewsnatches['text_per_second']."<br />".$downloaded."@".$downrate.$lang_viewsnatches['text_per_second']."</td><td class=rowfollow align=center>$ratio</td><td class=rowfollow align=center>$seedtime</td><td class=rowfollow align=center>$leechtime</td><td class=rowfollow align=center>".\App\Support\Time::format($arr['completedat'],true,false)."</td><td class=rowfollow align=center>".\App\Support\Time::format($arr['last_action'],true,false)."</td><td class=rowfollow align=center style='padding: 0px'>".($userrow['privacy'] != 'strong' || \App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::VIEW_ANONYMOUS) ? "<a href=report.php?user={$arr['userid']}>$reportImage</a>" : $reportImage)."</td></tr>\n");
 	}

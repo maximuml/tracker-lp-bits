@@ -50,7 +50,7 @@ if ($count == 0) {
                     <td class="embedded" width="99%">
                         #<?php echo $commentId; ?>&nbsp;&nbsp;
                         <font color="gray"><?php echo $lang_functions['text_by'] ?? 'by'; ?></font>
-                        <?php echo get_username($userId, false, true, true, false, false, true); ?>
+                        <?php echo \App\Support\UserDisplay::username($userId, false, true, true, false, false, true); ?>
                         &nbsp;&nbsp;<font color="gray"><?php echo $lang_functions['text_at'] ?? 'at'; ?></font>
                         <?php echo \App\Support\Time::format($row['added'] ?? ''); ?>
                         <?php echo $parentLink; ?>
@@ -64,7 +64,7 @@ if ($count == 0) {
                     </td>
                     <td class="rowfollow word-break-all" valign="top">
                         <br />
-                        <?php echo format_comment((string) ($row['text'] ?? '')); ?>
+                        <?php echo \App\Support\Format::formatComment((string) ($row['text'] ?? '')); ?>
                     </td>
                 </tr>
             </table>

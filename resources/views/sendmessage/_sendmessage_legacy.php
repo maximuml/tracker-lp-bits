@@ -42,7 +42,7 @@ $receiver = intval(\App\Support\SupportContext::getQuery("receiver") ?? 0);
 	print("<input type=hidden name=receiver value=".$receiver.">");
 	if ((((\App\Support\SupportContext::getQuery("returnto") !== null)) && \App\Support\SupportContext::getQuery("returnto")) || $__server_HTTP_REFERER)
 		print("<input type=hidden name=returnto value=\"".(htmlspecialchars(\App\Support\SupportContext::getQuery("returnto") ?? '') ? htmlspecialchars(\App\Support\SupportContext::getQuery("returnto")) : htmlspecialchars($__server_HTTP_REFERER))."\">");
-	$title = $lang_sendmessage['text_message_to'].get_username($receiver);
+	$title = $lang_sendmessage['text_message_to'].\App\Support\UserDisplay::username($receiver);
 	begin_compose($title, ($replyto ? "reply" : "new"), $body, true, $subject);
 	print("<tr><td class=toolbox colspan=2 align=center>");
 	if ($replyto) {

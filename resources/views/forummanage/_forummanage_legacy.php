@@ -141,9 +141,9 @@ if (((\App\Support\SupportContext::getQuery('action') !== null)) && \App\Support
     <td>
     <select name=readclass>
 <?php
-             $maxclass = get_user_class();
+             $maxclass = \App\Support\UserDisplay::currentClass();
           for ($i = 0; $i <= $maxclass; ++$i)
-            print("<option value=$i" . ($row["minclassread"] == $i ? " selected" : "") . ">$prefix" . get_user_class_name($i,false,true,true));
+            print("<option value=$i" . ($row["minclassread"] == $i ? " selected" : "") . ">$prefix" . \App\Support\UserClass::name($i,false,true,true));
 ?>
         </select>
     </td>
@@ -152,9 +152,9 @@ if (((\App\Support\SupportContext::getQuery('action') !== null)) && \App\Support
     <td><b><?php echo $lang_forummanage['row_minimum_write_permission']?></td>
     <td><select name=writeclass>
 <?php
-              $maxclass = get_user_class();
+              $maxclass = \App\Support\UserDisplay::currentClass();
           for ($i = 0; $i <= $maxclass; ++$i)
-            print("<option value=$i" . ($row["minclasswrite"] == $i ? " selected" : "") . ">$prefix" . get_user_class_name($i,false,true,true) . "\n");
+            print("<option value=$i" . ($row["minclasswrite"] == $i ? " selected" : "") . ">$prefix" . \App\Support\UserClass::name($i,false,true,true) . "\n");
 ?>
         </select></td>
   </tr>
@@ -162,9 +162,9 @@ if (((\App\Support\SupportContext::getQuery('action') !== null)) && \App\Support
     <td><b><?php echo $lang_forummanage['row_minimum_create_topic_permission']?></td>
     <td><select name=createclass>
 <?php
-            $maxclass = get_user_class();
+            $maxclass = \App\Support\UserDisplay::currentClass();
           for ($i = 0; $i <= $maxclass; ++$i)
-            print("<option value=$i" . ($row["minclasscreate"] == $i ? " selected" : "") . ">$prefix" . get_user_class_name($i,false,true,true) . "\n");
+            print("<option value=$i" . ($row["minclasscreate"] == $i ? " selected" : "") . ">$prefix" . \App\Support\UserClass::name($i,false,true,true) . "\n");
 ?>
         </select></td>
   </tr>
@@ -227,9 +227,9 @@ elseif (((\App\Support\SupportContext::getQuery('action') !== null)) && \App\Sup
     <td>
     <select name=readclass>
 <?php
-             $maxclass = get_user_class();
+             $maxclass = \App\Support\UserDisplay::currentClass();
           for ($i = 0; $i <= $maxclass; ++$i)
-            print("<option value=$i" . ($user["class"] == $i ? " selected" : "") . ">$prefix" . get_user_class_name($i,false,true,true) . "\n");
+            print("<option value=$i" . ($user["class"] == $i ? " selected" : "") . ">$prefix" . \App\Support\UserClass::name($i,false,true,true) . "\n");
 ?>
         </select>
     </td>
@@ -238,9 +238,9 @@ elseif (((\App\Support\SupportContext::getQuery('action') !== null)) && \App\Sup
     <td><b><?php echo $lang_forummanage['row_minimum_write_permission']?></td>
     <td><select name=writeclass>
 <?php
-              $maxclass = get_user_class();
+              $maxclass = \App\Support\UserDisplay::currentClass();
           for ($i = 0; $i <= $maxclass; ++$i)
-            print("<option value=$i" . ($user["class"] == $i ? " selected" : "") . ">$prefix" . get_user_class_name($i,false,true,true) . "\n");
+            print("<option value=$i" . ($user["class"] == $i ? " selected" : "") . ">$prefix" . \App\Support\UserClass::name($i,false,true,true) . "\n");
 ?>
         </select></td>
   </tr>
@@ -248,9 +248,9 @@ elseif (((\App\Support\SupportContext::getQuery('action') !== null)) && \App\Sup
     <td><b><?php echo $lang_forummanage['row_minimum_create_topic_permission']?></td>
     <td><select name=createclass>
 <?php
-            $maxclass = get_user_class();
+            $maxclass = \App\Support\UserDisplay::currentClass();
           for ($i = 0; $i <= $maxclass; ++$i)
-            print("<option value=$i" . ($user["class"] == $i ? " selected" : "") . ">$prefix" . get_user_class_name($i,false,true,true) . "\n");
+            print("<option value=$i" . ($user["class"] == $i ? " selected" : "") . ">$prefix" . \App\Support\UserClass::name($i,false,true,true) . "\n");
 ?>
         </select></td>
   </tr>
@@ -296,7 +296,7 @@ if ($forums->isEmpty()) {
         if (!$moderators)
             $moderators = $lang_forummanage['text_not_available'];
         echo "<tr><td><a href=forums.php?action=viewforum&forumid=".$row["id"]."><b>".htmlspecialchars($row["name"])."</b></a><br />".htmlspecialchars($row["description"])."</td>";
-        echo "<td>".htmlspecialchars($name)."</td><td>" . get_user_class_name($row["minclassread"],false,true,true) . "</td><td>" . get_user_class_name($row["minclasswrite"],false,true,true) . "</td><td>" . get_user_class_name($row["minclasscreate"],false,true,true) . "</td><td>".$moderators."</td><td><b><a href=\"".$PHP_SELF."?action=editforum&id=".$row["id"]."\">".$lang_forummanage['text_edit']."</a>&nbsp;|&nbsp;<a href=\"javascript:confirm_delete('".$row["id"]."', '".$lang_forummanage['js_sure_to_delete_forum']."', '');\"><font color=red>".$lang_forummanage['text_delete']."</font></a></b></td></tr>";
+        echo "<td>".htmlspecialchars($name)."</td><td>" . \App\Support\UserClass::name($row["minclassread"],false,true,true) . "</td><td>" . \App\Support\UserClass::name($row["minclasswrite"],false,true,true) . "</td><td>" . \App\Support\UserClass::name($row["minclasscreate"],false,true,true) . "</td><td>".$moderators."</td><td><b><a href=\"".$PHP_SELF."?action=editforum&id=".$row["id"]."\">".$lang_forummanage['text_edit']."</a>&nbsp;|&nbsp;<a href=\"javascript:confirm_delete('".$row["id"]."', '".$lang_forummanage['js_sure_to_delete_forum']."', '');\"><font color=red>".$lang_forummanage['text_delete']."</font></a></b></td></tr>";
     }
 }
 echo "</table>";

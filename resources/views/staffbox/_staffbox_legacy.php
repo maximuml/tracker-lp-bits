@@ -53,13 +53,13 @@ if (!$action) {
 	{
     		if ($arr['answered'])
     		{
-       			$answered = "<nobr><font color=green>".$lang_staffbox['text_yes']."</font> - " . get_username($arr['answeredby']) . "</nobr>";
+       			$answered = "<nobr><font color=green>".$lang_staffbox['text_yes']."</font> - " . \App\Support\UserDisplay::username($arr['answeredby']) . "</nobr>";
     		}
    		else
 			$answered = "<font color=red>".$lang_staffbox['text_no']."</font>";
 
     		$pmid = $arr["id"];
-		print("<tr><td width=100% class=rowfollow align=left><a href=staffbox.php?action=viewpm&pmid=$pmid&return=".urlencode($__server_QUERY_STRING).">".htmlspecialchars($arr['subject'])."</td><td class=rowfollow align=center>" . get_username($arr['sender']) . "</td><td class=rowfollow align=center><nobr>".\App\Support\Time::format($arr['added'], true, false)."</nobr></td><td class=rowfollow align=center>$answered</td><td class=rowfollow align=center><input type=\"checkbox\" name=\"setanswered[]\" value=\"" . $arr['id'] . "\" /></td></tr>\n");
+		print("<tr><td width=100% class=rowfollow align=left><a href=staffbox.php?action=viewpm&pmid=$pmid&return=".urlencode($__server_QUERY_STRING).">".htmlspecialchars($arr['subject'])."</td><td class=rowfollow align=center>" . \App\Support\UserDisplay::username($arr['sender']) . "</td><td class=rowfollow align=center><nobr>".\App\Support\Time::format($arr['added'], true, false)."</nobr></td><td class=rowfollow align=center>$answered</td><td class=rowfollow align=center><input type=\"checkbox\" name=\"setanswered[]\" value=\"" . $arr['id'] . "\" /></td></tr>\n");
 	}
     $checkAll = $lang_functions['input_check_all'];
     $uncheckAll = $lang_functions['input_uncheck_all'];
@@ -78,11 +78,11 @@ $pmid = intval(\App\Support\SupportContext::getQuery("pmid") ?? 0);
 
 $arr4 = \App\Models\StaffMessage::query()->findOrFail($pmid)->toArray();
 can_access_staff_message($arr4);
-$answeredby = get_username($arr4["answeredby"]);
+$answeredby = \App\Support\UserDisplay::username($arr4["answeredby"]);
 
 if (is_valid_id($arr4["sender"]))
 {
-$sender = get_username($arr4["sender"]);
+$sender = \App\Support\UserDisplay::username($arr4["sender"]);
 }
 else
 $sender = $lang_staffbox['text_system'];
@@ -107,10 +107,10 @@ print("<tr><td class=\"rowfollow\" align=\"left\">".$sender."</td>");
 if ($arr4["answered"] == 1)
 print("<td class=\"rowfollow\" align=\"left\">".$answeredby."</td>");
 print("<td class=\"rowfollow\" align=\"left\">".\App\Support\Time::format($arr4["added"])."</td></tr>");
-print("<tr><td colspan=\"".$colspan."\" align=\"left\">".format_comment($arr4["msg"])."</td></tr>");
+print("<tr><td colspan=\"".$colspan."\" align=\"left\">".\App\Support\Format::formatComment($arr4["msg"])."</td></tr>");
 if ($arr4["answered"] == 1 && $arr4["answer"])
 {
-print("<tr><td colspan=\"".$colspan."\" align=\"left\">".format_comment($arr4["answer"])."</td></tr>");
+print("<tr><td colspan=\"".$colspan."\" align=\"left\">".\App\Support\Format::formatComment($arr4["answer"])."</td></tr>");
 }
 print("<tr><td colspan=\"".$colspan."\" align=\"right\">");
 print("<font color=white>");
@@ -148,7 +148,7 @@ if ($action == "answermessage") {
         <input type=hidden name=receiver value=<?php echo $receiver?>>
         <input type=hidden name=answeringto value=<?php echo $answeringto?>>
 <?php
-	$title = $lang_staffbox['text_answering_to']."<a href=\"staffbox.php?action=viewpm&pmid=".$staffmsg['id']."\">".htmlspecialchars($staffmsg['subject'])."</a>".$lang_staffbox['text_sent_by'].get_username($staffmsg['sender']);
+	$title = $lang_staffbox['text_answering_to']."<a href=\"staffbox.php?action=viewpm&pmid=".$staffmsg['id']."\">".htmlspecialchars($staffmsg['subject'])."</a>".$lang_staffbox['text_sent_by'].\App\Support\UserDisplay::username($staffmsg['sender']);
 	begin_compose($title, "reply", "", false);
 	end_compose();
 	print("</form>");

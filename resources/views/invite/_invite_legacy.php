@@ -183,7 +183,7 @@ JS;
             }
             print("<td class=colhead><b>".$lang_invite['text_seed_torrent_last_announce_at']."</b></td>");
             print("<td class=colhead><b>".$lang_invite['text_status']."</b></td>");
-            if ($CURUSER['id'] == $id || get_user_class() >= UC_SYSOP) {
+            if ($CURUSER['id'] == $id || \App\Support\UserDisplay::currentClass() >= UC_SYSOP) {
                 print("<td class=colhead><b>".$lang_invite['text_confirm']."</b></td>");
             }
 
@@ -206,7 +206,7 @@ JS;
                 else
                     $status = "<a href=checkuser.php?id={$arr['id']}><font color=#ca0226>".$lang_invite['text_pending']."</font></a>";
                 print("<tr class=rowfollow>
-                    <td class=rowfollow>".get_username($arr['id'])."</td>
+                    <td class=rowfollow>".\App\Support\UserDisplay::username($arr['id'])."</td>
                     <td class=rowfollow>".$arr['email']."</td>
                     <td class=rowfollow>".$arr['enabled']."</td>
                     <td class=rowfollow>" . $arr['torrent_count'] . "</td>
@@ -223,7 +223,7 @@ JS;
                 }
                 print("<td class=rowfollow>{$arr['last_announce_at']}</td>");
                 print("<td class=rowfollow>{$status}</td>");
-                if ($CURUSER['id'] == $id || get_user_class() >= UC_SYSOP){
+                if ($CURUSER['id'] == $id || \App\Support\UserDisplay::currentClass() >= UC_SYSOP){
                     print("<td class=rowfollow>");
                     if ($arr['status'] == 'pending')
                         print("<input type=\"checkbox\" name=\"conusr[]\" value=\"" . $arr['id'] . "\" />");
@@ -234,7 +234,7 @@ JS;
             }
         }
 
-        if ($CURUSER['id'] == $id || get_user_class() >= UC_SYSOP)
+        if ($CURUSER['id'] == $id || \App\Support\UserDisplay::currentClass() >= UC_SYSOP)
         {
             $pendingcount = number_format(\App\Repositories\InviteRepository::countPendingInvitees((int)$CURUSER['id']));
             $colSpan = 12;

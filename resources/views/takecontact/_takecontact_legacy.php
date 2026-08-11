@@ -19,7 +19,7 @@ $userid = $CURUSER['id'];
 
 // Anti Flood Code
 // This code ensures that a member can only send one PM per minute.
-if (get_user_class() < UC_MODERATOR) {
+if (\App\Support\UserDisplay::currentClass() < UC_MODERATOR) {
 	if (strtotime($CURUSER['last_staffmsg']) > (TIMENOW - 60))
 	{
 		$secs = 60 - (TIMENOW - strtotime($CURUSER['last_staffmsg']));

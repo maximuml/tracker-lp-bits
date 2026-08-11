@@ -57,7 +57,7 @@ class BonusLogResource extends Resource
             })
             ->columns([
                 TextColumn::make('uid')
-                    ->formatStateUsing(fn ($state) => username_for_admin($state))
+                    ->formatStateUsing(fn ($state) => \App\Support\UserDisplay::adminUsername($state))
                     ->label(__('label.username'))
                 ,
                 TextColumn::make('business_type_text')

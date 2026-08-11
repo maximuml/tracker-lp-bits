@@ -8,7 +8,7 @@ error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 /**
  * Checks if the user is allowed to do what he tries to...
  */
-if (get_user_class() < UC_SYSOP)
+if (\App\Support\UserDisplay::currentClass() < UC_SYSOP)
 	stderr("Error", "Permission denied.");
 
 \App\Support\SupportContext::setGlobal("byteUnits", array('Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB'));

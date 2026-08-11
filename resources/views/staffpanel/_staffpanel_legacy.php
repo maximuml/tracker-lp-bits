@@ -7,7 +7,7 @@ if (file_exists($langFile)) {
 }
 stdhead($lang_staffpanel["Administration"] ?? 'Administration');
 print("<h1 align=center>" . ($lang_staffpanel["Administration"] ?? 'Administration') . "</h1>");
-if (get_user_class() < UC_MODERATOR)
+if (\App\Support\UserDisplay::currentClass() < UC_MODERATOR)
 {
 	stdmsg("Error", "Access denied!!!");
 	stdfoot();
@@ -16,7 +16,7 @@ if (get_user_class() < UC_MODERATOR)
 begin_main_frame();
 
 ///////////////////// SysOp Only \\\\\\\\\\\\\\\\\\\\\\\\\\\\
-if (get_user_class() >= UC_SYSOP) {
+if (\App\Support\UserDisplay::currentClass() >= UC_SYSOP) {
 	echo("<h1 align=center>..:: " . ($lang_staffpanel["For SysOp Only"] ?? 'For SysOp Only') . "  ::..</h1>");
 	print("<br />");
 	print("<br />");
@@ -37,7 +37,7 @@ if (get_user_class() >= UC_SYSOP) {
 	print("<br />");
 }
 ///////////////////// Admin Only \\\\\\\\\\\\\\\\\\\\\\\\\\\\
-if (get_user_class() >= UC_ADMINISTRATOR) {
+if (\App\Support\UserDisplay::currentClass() >= UC_ADMINISTRATOR) {
 	echo("<h1 align=center>..:: " . ($lang_staffpanel["For Administrator Only"] ?? 'For Administrator Only') . " :..</h1>");
 	print("<br />");
 	print("<br />");
@@ -58,7 +58,7 @@ if (get_user_class() >= UC_ADMINISTRATOR) {
 	print("<br />");
 }
 ///////////////////// Moderator Only \\\\\\\\\\\\\\\\\\\\\\\\\\\\
-if (get_user_class() >= UC_MODERATOR) {
+if (\App\Support\UserDisplay::currentClass() >= UC_MODERATOR) {
 	echo("<h1 align=center>..:: " . ($lang_staffpanel["For Moderator Only"] ?? 'For Moderator Only') . "  ::..</h1>");
 	print("<br />");
 	print("<br />");

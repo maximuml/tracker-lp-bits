@@ -881,7 +881,7 @@ class BdInfoExtra
         // 如果没有有效数据，隐藏显示原始BDINFO
         if (!$hasValidData) {
             $rawBdInfo = sprintf('[spoiler=%s][raw]<pre>%s</pre>[/raw][/spoiler]', nexus_trans('torrent.show_hide_bd_info'), $this->bdInfo);
-            return sprintf('<div class="nexus-media-info-raw">%s</div>', format_comment($rawBdInfo, false));
+            return sprintf('<div class="nexus-media-info-raw">%s</div>', \App\Support\Format::formatComment($rawBdInfo, false));
         }
 
         $result = '';
@@ -937,7 +937,7 @@ class BdInfoExtra
         // 添加原始BDINFO
         $rawBdInfo = sprintf('[spoiler=%s][raw]<pre>%s</pre>[/raw][/spoiler]', nexus_trans('torrent.show_hide_bd_info'), $this->bdInfo);
         if (function_exists('format_comment')) {
-            $result .= sprintf('<div class="nexus-media-info-raw" style="margin-top: 15px;">%s</div>', format_comment($rawBdInfo, false));
+            $result .= sprintf('<div class="nexus-media-info-raw" style="margin-top: 15px;">%s</div>', \App\Support\Format::formatComment($rawBdInfo, false));
         } else {
             $result .= sprintf('<div class="nexus-media-info-raw" style="margin-top: 15px;">%s</div>', $rawBdInfo);
         }
@@ -1005,7 +1005,7 @@ class BdInfoExtra
             $table .= '<tr>';
             // 检查format_comment函数是否存在
             if (function_exists('format_comment')) {
-                $table .= sprintf('<td style="border: none; padding-right: 5px;padding-bottom: 5px;">%s</td>', format_comment($spoiler, false));
+                $table .= sprintf('<td style="border: none; padding-right: 5px;padding-bottom: 5px;">%s</td>', \App\Support\Format::formatComment($spoiler, false));
             } else {
                 $table .= sprintf('<td style="border: none; padding-right: 5px;padding-bottom: 5px;">%s</td>', $spoiler);
             }

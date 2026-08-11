@@ -9,7 +9,7 @@ exit;
 
 if(((\App\Support\SupportContext::getPost("nowarned") !== null))&&(\App\Support\SupportContext::getPost("nowarned")=="nowarned")){
 //if (get_user_class() >= UC_SYSOP) {
-if (get_user_class() < UC_MODERATOR)
+if (\App\Support\UserDisplay::currentClass() < UC_MODERATOR)
 stderr("Sorry", "Access denied.");
 {
 if (empty(\App\Support\SupportContext::getPost("usernw")) && empty(\App\Support\SupportContext::getPost("desact")) && empty(\App\Support\SupportContext::getPost("delete")))

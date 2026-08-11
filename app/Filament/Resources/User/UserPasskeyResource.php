@@ -48,7 +48,7 @@ class UserPasskeyResource extends Resource
                 Tables\Columns\TextColumn::make('id')->sortable()
                 ,
                 Tables\Columns\TextColumn::make('user_id')
-                    ->formatStateUsing(fn($state) => username_for_admin($state))
+                    ->formatStateUsing(fn($state) => \App\Support\UserDisplay::adminUsername($state))
                     ->label(__('label.username'))
                 ,
                 Tables\Columns\TextColumn::make('aaguid')

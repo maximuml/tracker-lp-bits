@@ -33,7 +33,7 @@ final class Permissions
         $log = "permission: $permission, fail: " . ($fail ? 'true' : 'false') . ", user: $uid";
 
         if ($uid == 0) {
-            $uid = (int) \get_user_id();
+            $uid = (int) \App\Support\UserDisplay::currentId();
             $log .= ", set current uid: $uid";
         }
 
@@ -49,7 +49,7 @@ final class Permissions
             return self::$userCanCache[$permission][$uid];
         }
 
-        $userInfo = \get_user_row($uid);
+        $userInfo = \App\Support\UserDisplay::row($uid);
         $class = $userInfo['class'] ?? '';
         $log .= ", userClass: $class";
 
@@ -83,7 +83,7 @@ final class Permissions
             if (isset(User::$classes[$requireClass])) {
                 \stderr(
                     $lang_functions['std_sorry'],
-                    $lang_functions['std_permission_denied_only'] . \get_user_class_name($requireClass, false, true, true) . sprintf($lang_functions['std_or_above_can_view'], \App\Support\Config\SiteConfig::current()->basic->siteName()),
+                    $lang_functions['std_permission_denied_only'] . \App\Support\UserClass::name($requireClass, false, true, true) . sprintf($lang_functions['std_or_above_can_view'], \App\Support\Config\SiteConfig::current()->basic->siteName()),
                     false,
                 );
             } else {

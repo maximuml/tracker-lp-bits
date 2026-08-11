@@ -534,7 +534,7 @@ class User extends Authenticatable implements FilamentUser, HasName
     {
         $locale = null;
         $log = "user: " . $this->id;
-        if (get_user_id() == $this->id) {
+        if (\App\Support\UserDisplay::currentId() == $this->id) {
             $locale = Locale::getLocaleFromCookie();
             $log .= ", locale from cookie: $locale";
         }

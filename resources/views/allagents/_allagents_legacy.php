@@ -1,6 +1,6 @@
 <?php
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
-if (get_user_class() < UC_MODERATOR)
+if (\App\Support\UserDisplay::currentClass() < UC_MODERATOR)
 	stderr("Error", "Permission denied.");
 $agents = \Nexus\Database\NexusDB::table('peers')
     ->selectRaw('agent, count(*) as counts')

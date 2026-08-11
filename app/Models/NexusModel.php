@@ -31,7 +31,7 @@ class NexusModel extends Model
     protected function usernameForAdmin(): Attribute
     {
         return Attribute::make(
-            get: fn (mixed $value, array $attributes) => username_for_admin($attributes['uid'] ?? $attributes['userid'] ?? $attributes['user_id'])
+            get: fn (mixed $value, array $attributes) => \App\Support\UserDisplay::adminUsername($attributes['uid'] ?? $attributes['userid'] ?? $attributes['user_id'])
         );
     }
 

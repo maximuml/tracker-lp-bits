@@ -1,6 +1,6 @@
 <?php
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
-function bonusarray($option = 0){
+if (!function_exists('bonusarray')) { function bonusarray($option = 0){
 $onegbupload_bonus = \App\Support\SupportContext::getGlobal('onegbupload_bonus');
 $fivegbupload_bonus = \App\Support\SupportContext::getGlobal('fivegbupload_bonus');
 $tengbupload_bonus = \App\Support\SupportContext::getGlobal('tengbupload_bonus');
@@ -277,7 +277,7 @@ $lang_mybonus = (array) (\App\Support\SupportContext::getGlobal('lang_mybonus') 
 //		default: break;
 //	}
 //	return $bonus;
-}
+} }
 
 $allBonus = bonusarray();
 $lockSeconds = 10;

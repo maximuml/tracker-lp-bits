@@ -157,7 +157,7 @@ $query = \Nexus\Database\NexusDB::table('shoutbox')->orderByDesc('date')->limit(
  * Build a small role badge for staff/VIP-tier classes. Returns empty string for
  * regular users so the shoutbox doesn't get cluttered with badges on every row.
  */
-function shoutbox_class_badge($class)
+if (!function_exists('shoutbox_class_badge')) { function shoutbox_class_badge($class)
 {
 	static $map = null;
 	if ($map === null) {
@@ -182,7 +182,7 @@ function shoutbox_class_badge($class)
 		$tooltip = (string)\App\Support\UserClass::name($class, false, false, true);
 	}
 	return '<span class="shout-class-badge" style="background:' . $color . '" title="' . htmlspecialchars($tooltip, ENT_QUOTES) . '">' . $label . '</span>';
-}
+} }
 
 $rows = $query->get();
 if ($rows->isEmpty())

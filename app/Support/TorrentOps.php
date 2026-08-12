@@ -55,25 +55,25 @@ final class TorrentOps
                 $torrentRep->delPiecesHashCache($torrentInfo->get($_id)->pieces_hash);
             }
 
-            \do_log("delete torrent: $_id", 'error');
-            @unlink(getFullDirectory("$torrentDir/$_id.torrent"));
+            Logger::writeWithContext("delete torrent: $_id", 'error');
+            @unlink(Path::resolve("$torrentDir/$_id.torrent", defined('ROOT_PATH') ? (string) ROOT_PATH : ''));
 
             TorrentOperationLog::add([
                 'torrent_id' => $_id,
-                'uid' => \get_user_id(),
+                'uid' => UserDisplay::currentId(),
                 'action_type' => TorrentOperationLog::ACTION_TYPE_DELETE,
                 'comment' => '',
             ], $notify);
 
-            \do_action('torrent_delete', $_id);
-            \fire_event('torrent_deleted', $torrentInfo->get($_id));
+            Hooks::doAction('torrent_delete', $_id);
+            Events::fire('torrent_deleted', $torrentInfo->get($_id));
         }
 
         try {
             $meiliSearchRep = new MeiliSearchRepository();
             $meiliSearchRep->deleteDocuments($idArr);
         } catch (\Throwable $e) {
-            \do_log('MeiliSearch delete on torrent delete failed: ' . $e->getMessage(), 'error');
+            Logger::writeWithContext('MeiliSearch delete on torrent delete failed: ' . $e->getMessage(), 'error');
         }
     }
 
@@ -163,7 +163,7 @@ final class TorrentOps
             $realDownloaded = max((int) \bcsub($queries['downloaded'], $peer['downloaded']), 0);
             $log .= ", [PEER_EXISTS], realUploaded: $realUploaded, realDownloaded: $realDownloaded, [SP_STATE]";
 
-            $spStateGlobal = \get_global_sp_state();
+            $spStateGlobal = Promotion::globalSpecialState();
             $spStateNormal = \App\Models\Torrent::PROMOTION_NORMAL;
             if (!empty($promotionInfo) && isset($promotionInfo['__ignore_global_sp_state'])) {
                 $log .= ', use promotionInfo';
@@ -247,7 +247,7 @@ final class TorrentOps
             'downloaded_increment' => $realDownloaded,
             'downloaded_increment_for_user' => $downloadedIncrementForUser,
         ];
-        \do_log("$log, result: " . \nexus_json_encode($result), 'info');
+        Logger::writeWithContext("$log, result: " . Json::encode($result), 'info');
 
         return $result;
     }

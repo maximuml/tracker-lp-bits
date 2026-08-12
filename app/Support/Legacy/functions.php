@@ -117,7 +117,7 @@ function page_layout_context(): \App\Support\PageLayoutContext
         scriptFileName: SupportContext::getServerValue('SCRIPT_FILENAME', ''),
         script: $script,
         enableOffer: (string) SupportContext::getGlobal('enableoffer', ''),
-        customMenu: (string) \apply_filter('nexus_menu') ?: null,
+        customMenu: (string) \App\Support\Hooks::applyFilter('nexus_menu') ?: null,
         maxdlSystem: (string) SupportContext::getGlobal('maxdlsystem', ''),
         whereTweak: (string) SupportContext::getGlobal('where_tweak', ''),
         adminClass: defined('UC_ADMINISTRATOR') ? (int) \constant('UC_ADMINISTRATOR') : 0,
@@ -479,8 +479,7 @@ function get_slr_color($ratio)
  */
 function write_log($text, $security = "normal")
 {
-    trigger_deprecation('maximuml/tracker-lp-bits', '2.0', 'The %s() function is deprecated, use %s::%s() instead.', __FUNCTION__, '\App\Support\Log', 'write');
-    \App\Support\Log::write($text, $security, get_user_id());
+    \App\Support\Log::writeWithContext((string) $text, (string) $security);
 }
 
 /**
@@ -931,7 +930,7 @@ function get_if_restricted_is_open()
  * @return void
  */
 function menu ($selected = "home") {
-    $customMenu = (string) \apply_filter('nexus_menu');
+    $customMenu = (string) \App\Support\Hooks::applyFilter('nexus_menu');
 
     $result = \App\Support\Menu::render(
         \function_exists('nexus') ? \nexus()->getScript() : '',
@@ -1097,18 +1096,11 @@ function make_folder($pre, $folder_name)
  */
 function cover_thumb_url($url, $maxWidth = 240, $maxHeight = 360, $quality = 82)
 {
-	$savedirectory_attachment = (string) \App\Support\SupportContext::getGlobal('savedirectory_attachment', '');
-	$httpdirectory_attachment = (string) \App\Support\SupportContext::getGlobal('httpdirectory_attachment', '');
-	$Cache = \App\Support\SupportContext::getCache();
-	return \App\Support\CoverThumb::url(
+	return \App\Support\CoverThumb::urlWithContext(
 		(string) $url,
 		(int) $maxWidth,
 		(int) $maxHeight,
 		(int) $quality,
-		(string) ($savedirectory_attachment ?: 'attachments'),
-		(string) ($httpdirectory_attachment ?: 'attachments'),
-		ROOT_PATH,
-		$Cache ?? null,
 	);
 }
 /**
@@ -1215,8 +1207,7 @@ function writecomment($userid, $comment, $oldModcomment = null) {
  */
 function return_torrent_bookmark_array($userid)
 {
-	$Cache = \App\Support\SupportContext::getCache();
-	return \App\Support\TorrentBookmark::bookmarkArray($Cache, $userid);
+	return \App\Support\TorrentBookmark::bookmarkArray(\App\Support\SupportContext::getCache(), (string) $userid);
 }
 /**
  * @param string|int $userid
@@ -1226,12 +1217,7 @@ function return_torrent_bookmark_array($userid)
  */
 function get_torrent_bookmark_state($userid, $torrentid, $text = false)
 {
-	$Cache = \App\Support\SupportContext::getCache();
-	$lang_functions = \App\Support\SupportContext::getLangFunctions();
-	return \App\Support\TorrentBookmark::stateMarkup($Cache, $userid, $torrentid, (bool) $text, [
-		'title_bookmark_torrent' => $lang_functions['title_bookmark_torrent'] ?? '',
-		'title_delbookmark_torrent' => $lang_functions['title_delbookmark_torrent'] ?? '',
-	]);
+	return \App\Support\TorrentBookmark::stateMarkupWithContext((string) $userid, (string) $torrentid, (bool) $text);
 }
 /**
  * @param array<array-key, mixed> $rows
@@ -1380,15 +1366,13 @@ function getSmileIt($formname, $taname, $smilyNumber) {
  * @return string
  */
 function classlist($selectname,$maxclass, $selected, $minClass = 0, $includeNoClass = false, $disabled = false){
-    $lang_functions = \App\Support\SupportContext::getLangFunctions();
-    return \App\Support\UserClass::classSelect(
+    return \App\Support\UserClass::classSelectWithContext(
         (string) $selectname,
         (int) $maxclass,
         $selected,
         (int) $minClass,
         (bool) $includeNoClass,
         (bool) $disabled,
-        ['select_an_user_class' => $lang_functions['select_an_user_class'] ?? '---']
     );
 }
 /**
@@ -1414,8 +1398,7 @@ function gettime($time, $withago = true, $twoline = false, $forceago = false, $o
  * @return string
  */
 function get_forum_pic_folder(){
-	$CURLANGDIR = (string) \App\Support\SupportContext::getGlobal('CURLANGDIR', '');
-	return \App\Support\Forum::picFolder((string) $CURLANGDIR);
+	return \App\Support\Forum::picFolderWithContext();
 }
 /**
  * @param string|int $typeid
@@ -1449,8 +1432,7 @@ function get_second_icon($row) //for CHDBits
  */
 function get_torrent_bg_color($promotion = 1, $posState = "", array $torrent = [])
 {
-	$CURUSER = \App\Support\SupportContext::getUser() ?? [];
-	return \App\Support\Promotion::backgroundStyle((int) $promotion, (string) $posState, $torrent, (string) $CURUSER['appendpromotion']);
+	return \App\Support\Promotion::backgroundStyleWithContext((int) $promotion, (string) $posState, $torrent);
 }
 /**
  * @param int $promotion
@@ -1464,33 +1446,14 @@ function get_torrent_bg_color($promotion = 1, $posState = "", array $torrent = [
  */
 function get_torrent_promotion_append($promotion = 1, $forcemode = "", $showtimeleft = false, $added = "", $promotionTimeType = 0, $promotionUntil = '', $ignoreGlobal = false)
 {
-	$CURUSER = \App\Support\SupportContext::getUser() ?? [];
-	$lang_functions = \App\Support\SupportContext::getLangFunctions();
-	$expirehalfleech_torrent = (int) \App\Support\SupportContext::getGlobal('expirehalfleech_torrent', 0);
-	$expirefree_torrent = (int) \App\Support\SupportContext::getGlobal('expirefree_torrent', 0);
-	$expiretwoup_torrent = (int) \App\Support\SupportContext::getGlobal('expiretwoup_torrent', 0);
-	$expiretwoupfree_torrent = (int) \App\Support\SupportContext::getGlobal('expiretwoupfree_torrent', 0);
-	$expiretwouphalfleech_torrent = (int) \App\Support\SupportContext::getGlobal('expiretwouphalfleech_torrent', 0);
-	$expirethirtypercentleech_torrent = (int) \App\Support\SupportContext::getGlobal('expirethirtypercentleech_torrent', 0);
-
-	return \App\Support\Promotion::append(
+	return \App\Support\Promotion::appendWithContext(
 		(int) $promotion,
 		(string) $forcemode,
 		(bool) $showtimeleft,
 		(string) $added,
 		(int) $promotionTimeType,
 		(string) $promotionUntil,
-		(bool) $ignoreGlobal,
-		(string) $CURUSER['appendpromotion'],
-		$lang_functions,
-		[
-			'expirefree_torrent' => $expirefree_torrent,
-			'expiretwoup_torrent' => $expiretwoup_torrent,
-			'expiretwoupfree_torrent' => $expiretwoupfree_torrent,
-			'expirehalfleech_torrent' => $expirehalfleech_torrent,
-			'expiretwouphalfleech_torrent' => $expiretwouphalfleech_torrent,
-			'expirethirtypercentleech_torrent' => $expirethirtypercentleech_torrent,
-		]
+		(bool) $ignoreGlobal
 	);
 }
 /**
@@ -1505,33 +1468,14 @@ function get_torrent_promotion_append($promotion = 1, $forcemode = "", $showtime
  */
 function get_torrent_promotion_append_sub($promotion = 1, $forcemode = "", $showtimeleft = false, $added = "", $promotionTimeType = 0, $promotionUntil = '', $ignoreGlobal = false)
 {
-	$CURUSER = \App\Support\SupportContext::getUser() ?? [];
-	$lang_functions = \App\Support\SupportContext::getLangFunctions();
-	$expirehalfleech_torrent = (int) \App\Support\SupportContext::getGlobal('expirehalfleech_torrent', 0);
-	$expirefree_torrent = (int) \App\Support\SupportContext::getGlobal('expirefree_torrent', 0);
-	$expiretwoup_torrent = (int) \App\Support\SupportContext::getGlobal('expiretwoup_torrent', 0);
-	$expiretwoupfree_torrent = (int) \App\Support\SupportContext::getGlobal('expiretwoupfree_torrent', 0);
-	$expiretwouphalfleech_torrent = (int) \App\Support\SupportContext::getGlobal('expiretwouphalfleech_torrent', 0);
-	$expirethirtypercentleech_torrent = (int) \App\Support\SupportContext::getGlobal('expirethirtypercentleech_torrent', 0);
-
-	return \App\Support\Promotion::appendSub(
+	return \App\Support\Promotion::appendSubWithContext(
 		(int) $promotion,
 		(string) $forcemode,
 		(bool) $showtimeleft,
 		(string) $added,
 		(int) $promotionTimeType,
 		(string) $promotionUntil,
-		(bool) $ignoreGlobal,
-		(string) $CURUSER['appendpromotion'],
-		$lang_functions,
-		[
-			'expirefree_torrent' => $expirefree_torrent,
-			'expiretwoup_torrent' => $expiretwoup_torrent,
-			'expiretwoupfree_torrent' => $expiretwoupfree_torrent,
-			'expirehalfleech_torrent' => $expirehalfleech_torrent,
-			'expiretwouphalfleech_torrent' => $expiretwouphalfleech_torrent,
-			'expirethirtypercentleech_torrent' => $expirethirtypercentleech_torrent,
-		]
+		(bool) $ignoreGlobal
 	);
 }
 /**
@@ -1740,16 +1684,7 @@ function return_category_image($categoryid, $link="")
  */
 function torrentTags($tags = 0, $type = 'checkbox')
 {
-    $lang_functions = \App\Support\SupportContext::getLangFunctions();
-    return \App\Support\TorrentTags::render($tags, $type, [
-        'text_tag_no_release_to_any_other' => $lang_functions['text_tag_no_release_to_any_other'] ?? '',
-        'text_tag_first_release' => $lang_functions['text_tag_first_release'] ?? '',
-        'text_tag_official' => $lang_functions['text_tag_official'] ?? '',
-        'text_tag_diy' => $lang_functions['text_tag_diy'] ?? '',
-        'text_tag_mother_language' => $lang_functions['text_tag_mother_language'] ?? '',
-        'text_tag_mother_language_subtitle' => $lang_functions['text_tag_mother_language_subtitle'] ?? '',
-        'text_tag_hdr' => $lang_functions['text_tag_hdr'] ?? '',
-    ]);
+    return \App\Support\TorrentTags::renderWithContext($tags, (string) $type);
 }
 /**
  * @param string $prefix
@@ -1990,15 +1925,13 @@ function calculate_harem_addition($uid)
  */
 function build_search_box_category_table($mode, $checkboxValue, $categoryHrefPrefix, $taxonomyHrefPrefix, $taxonomyNameLength, $checkedValues = '', array $options = [])
 {
-    $Cache = \App\Support\SupportContext::getCache();
-    return \App\Support\SearchBox::buildCategoryTable(
-        $Cache,
+    return \App\Support\SearchBox::buildCategoryTableWithContext(
         $mode,
         $checkboxValue,
-        $categoryHrefPrefix,
-        $taxonomyHrefPrefix,
+        (string) $categoryHrefPrefix,
+        (string) $taxonomyHrefPrefix,
         $taxonomyNameLength,
-        $checkedValues,
+        (string) $checkedValues,
         $options,
     );
 }
@@ -2150,31 +2083,7 @@ function nexus_dd($vars)
  */
 function do_log($log, $level = 'info', $echo = false)
 {
-    $user = null;
-    $passkey = '';
-
-    if (defined('IN_NEXUS') && IN_NEXUS) {
-        $CURUSER = SupportContext::getUser();
-        if (is_array($CURUSER) && ! empty($CURUSER)) {
-            $user = $CURUSER;
-            $passkey = (string) ($CURUSER['passkey'] ?? '');
-        }
-        if ($passkey === '') {
-            $passkey = (string) (SupportContext::getRequestInput('passkey') ?? SupportContext::getRequestInput('authkey') ?? '');
-        }
-    } else {
-        try {
-            $authUser = Auth::user();
-            if ($authUser instanceof \Illuminate\Database\Eloquent\Model) {
-                $user = $authUser->getAttributes();
-                $passkey = (string) ($authUser->getAttribute('passkey') ?? '');
-            }
-        } catch (\Throwable $exception) {
-            $passkey = '!NO_AUTH';
-        }
-    }
-
-    \App\Support\Logger::write((string) $log, $level, (bool) $echo, $user, $passkey);
+    \App\Support\Logger::writeWithContext((string) $log, (string) $level, (bool) $echo);
 }
 /**
  * @param bool $withTimeZone
@@ -2656,7 +2565,7 @@ function user_can($permission, $fail = false, $uid = 0): bool
 {
     $enum = \App\Enums\Permission\PermissionEnum::tryFrom((string) $permission);
     if ($enum === null) {
-        \do_log("Unknown permission string: $permission", 'error');
+        \App\Support\Logger::writeWithContext("Unknown permission string: $permission", 'error');
         if ($fail) {
             \App\Support\Permissions::assertHasPermission(false);
         }
@@ -2664,7 +2573,7 @@ function user_can($permission, $fail = false, $uid = 0): bool
     }
 
     if ((int) $uid <= 0) {
-        $uid = (int) \get_user_id();
+        $uid = (int) \App\Support\UserDisplay::currentId();
     }
     if ($uid <= 0) {
         if ($fail) {

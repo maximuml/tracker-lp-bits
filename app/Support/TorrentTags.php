@@ -42,7 +42,7 @@ final class TorrentTags
         $records = [];
         foreach ($tagIdArr as $tagId) {
             if (in_array($tagId, $specialTags) && ! $canSetSpecialTag) {
-                \do_log("special tag: $tagId, and user no permission");
+                Logger::writeWithContext("special tag: $tagId, and user no permission");
                 continue;
             }
             if (! isset($records[$tagId])) {
@@ -59,7 +59,7 @@ final class TorrentTags
             return;
         }
 
-        \do_log("[INSERT_TAGS], torrent: $torrentId with tags: " . nexus_json_encode($tagIdArr));
+        Logger::writeWithContext("[INSERT_TAGS], torrent: $torrentId with tags: " . Json::encode($tagIdArr));
         TorrentTag::query()->insert(array_values($records));
     }
 
@@ -100,5 +100,23 @@ final class TorrentTags
         }
 
         return $html;
+    }
+
+    /**
+     * Context-aware wrapper for {@see render()}.
+     */
+    public static function renderWithContext(int|string $tags = 0, string $type = 'checkbox'): string
+    {
+        $lang = SupportContext::getLangFunctions();
+
+        return self::render($tags, $type, [
+            'text_tag_no_release_to_any_other' => $lang['text_tag_no_release_to_any_other'] ?? '',
+            'text_tag_first_release' => $lang['text_tag_first_release'] ?? '',
+            'text_tag_official' => $lang['text_tag_official'] ?? '',
+            'text_tag_diy' => $lang['text_tag_diy'] ?? '',
+            'text_tag_mother_language' => $lang['text_tag_mother_language'] ?? '',
+            'text_tag_mother_language_subtitle' => $lang['text_tag_mother_language_subtitle'] ?? '',
+            'text_tag_hdr' => $lang['text_tag_hdr'] ?? '',
+        ]);
     }
 }

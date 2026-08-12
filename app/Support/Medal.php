@@ -38,23 +38,23 @@ final class Medal
             if ($withActions) {
                 $html .= sprintf(
                     '<div style="display: flex;flex-direction: column;align-items:flex-start"><span>%s: %s</span><span>%s: %s</span><span>%s: %s</span><label>%s: <input type="number" name="priority_%s" value="%s" style="width: 50px" placeholder="%s"></label>',
-                    nexus_trans('label.expire_at'),
-                    $medal->pivot->expire_at ? \App\Support\Time::formatDateTime($medal->pivot->expire_at) : nexus_trans('label.permanent'),
-                    nexus_trans('medal.fields.bonus_addition_factor'),
+                    Locale::trans('label.expire_at'),
+                    $medal->pivot->expire_at ? \App\Support\Time::formatDateTime($medal->pivot->expire_at) : Locale::trans('label.permanent'),
+                    Locale::trans('medal.fields.bonus_addition_factor'),
                     $medal->bonus_addition_factor ?? 0,
-                    nexus_trans('medal.bonus_addition_expire_at'),
-                    $medal->pivot->bonus_addition_expire_at ? \App\Support\Time::formatDateTime($medal->pivot->bonus_addition_expire_at) : nexus_trans('label.permanent'),
-                    nexus_trans('label.priority'),
+                    Locale::trans('medal.bonus_addition_expire_at'),
+                    $medal->pivot->bonus_addition_expire_at ? \App\Support\Time::formatDateTime($medal->pivot->bonus_addition_expire_at) : Locale::trans('label.permanent'),
+                    Locale::trans('label.priority'),
                     $medal->pivot->id,
                     $medal->pivot->priority ?? 0,
-                    nexus_trans('label.priority_help')
+                    Locale::trans('label.priority_help')
                 );
 
                 $checked = '';
                 if ($medal->pivot->status == UserMedal::STATUS_WEARING) {
                     $checked = ' checked';
                 }
-                $html .= sprintf('<label>%s<input type="checkbox" name="status_%s" value="1"%s></label>', nexus_trans('medal.action_wearing'), $medal->pivot->id, $checked);
+                $html .= sprintf('<label>%s<input type="checkbox" name="status_%s" value="1"%s></label>', Locale::trans('medal.action_wearing'), $medal->pivot->id, $checked);
                 $html .= '</div>';
             }
 

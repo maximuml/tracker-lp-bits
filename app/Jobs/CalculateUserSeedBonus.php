@@ -5,6 +5,10 @@ namespace App\Jobs;
 use App\Models\BonusLogs;
 use App\Models\IpLog;
 use App\Models\User;
+use App\Support\Bonus;
+use App\Support\Json;
+use App\Support\Logger;
+use App\Support\UserDisplay;
 use App\Repositories\IpLogRepository;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
@@ -76,7 +80,7 @@ class CalculateUserSeedBonus implements ShouldQueue
             "[CLEANUP_CLI_CALCULATE_SEED_BONUS_HANDLE_JOB], commonRequestId: %s, beginUid: %s, endUid: %s, idStr: %s, idRedisKey: %s",
             $this->requestId, $this->beginUid, $this->endUid, $this->idStr, $this->idRedisKey
         );
-        do_log("$logPrefix, job start ...");
+        Logger::writeWithContext("$logPrefix, job start ...");
 
         $haremAdditionFactor = \App\Support\Config\SiteConfig::current()->bonus->haremAddition();
         $officialAdditionFactor = \App\Support\Config\SiteConfig::current()->bonus->officialAddition();
@@ -90,7 +94,7 @@ class CalculateUserSeedBonus implements ShouldQueue
             $idStr = NexusDB::cache_get($this->idRedisKey);
         }
         if (empty($idStr)) {
-            do_log("$logPrefix, no idStr or idRedisKey", "error");
+            Logger::writeWithContext("$logPrefix, no idStr or idRedisKey", "error");
             return;
         }
         $idArr = array_filter(array_map('intval', explode(',', $idStr)));
@@ -101,11 +105,11 @@ class CalculateUserSeedBonus implements ShouldQueue
             ->map(fn ($row) => (array) $row)
             ->all();
         if (empty($results)) {
-            do_log("$logPrefix, no data from idStr: $idStr", "error");
+            Logger::writeWithContext("$logPrefix, no data from idStr: $idStr", "error");
             return;
         }
-        $logFile = getLogFile("seed-bonus-points");
-        do_log("$logPrefix, [GET_UID_REAL], count: " . count($results) . ", logFile: $logFile");
+        $logFile = Logger::filePath("seed-bonus-points");
+        Logger::writeWithContext("$logPrefix, [GET_UID_REAL], count: " . count($results) . ", logFile: $logFile");
         $fd = fopen($logFile, 'a');
         $rows = [];
         $nowStr = now()->toDateTimeString();
@@ -114,9 +118,9 @@ class CalculateUserSeedBonus implements ShouldQueue
         foreach ($results as $userInfo)
         {
             $uid = $userInfo['id'];
-            $isDonor = is_donor($userInfo);
-            $seedBonusResult = calculate_seed_bonus($uid);
-            $bonusLog = "[CLEANUP_CLI_CALCULATE_SEED_BONUS_HANDLE_USER], user: $uid, seedBonusResult: " . nexus_json_encode($seedBonusResult);
+            $isDonor = UserDisplay::isDonor($userInfo);
+            $seedBonusResult = Bonus::calculateForUser($uid);
+            $bonusLog = "[CLEANUP_CLI_CALCULATE_SEED_BONUS_HANDLE_USER], user: $uid, seedBonusResult: " . Json::encode($seedBonusResult);
             $all_bonus = $basicBonus = $seedBonusResult['seed_bonus'];
             $oldValue = $userInfo['seedbonus'];
             $bonusLog .= ", all_bonus: $all_bonus";
@@ -137,7 +141,7 @@ class CalculateUserSeedBonus implements ShouldQueue
                 $oldValue += $officialAddition;
             }
             if ($haremAdditionFactor > 0) {
-                $haremBonus = calculate_harem_addition($uid);
+                $haremBonus = Bonus::haremAddition($uid);
                 $haremAddition =  $haremBonus * $haremAdditionFactor;
                 $all_bonus += $haremAddition;
                 $bonusLog .= ", haremAdditionFactor: $haremAdditionFactor, haremBonus: $haremBonus, haremAddition: $haremAddition, all_bonus: $all_bonus";

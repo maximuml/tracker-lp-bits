@@ -54,6 +54,26 @@ final class CoverThumb
         return self::resizeLocal($url, $absolutePath, $maxWidth, $maxHeight, $quality, $rootPath, $publicUrl);
     }
 
+    /**
+     * Context-aware wrapper for {@see url()}.
+     */
+    public static function urlWithContext(string $url, int $maxWidth = 240, int $maxHeight = 360, int $quality = 82): string
+    {
+        $saveDirectory = (string) SupportContext::getGlobal('savedirectory_attachment', '');
+        $httpDirectory = (string) SupportContext::getGlobal('httpdirectory_attachment', '');
+
+        return self::url(
+            $url,
+            $maxWidth,
+            $maxHeight,
+            $quality,
+            $saveDirectory ?: 'attachments',
+            $httpDirectory ?: 'attachments',
+            defined('ROOT_PATH') ? (string) ROOT_PATH : '',
+            SupportContext::getCache() ?? null,
+        );
+    }
+
     private static function dispatchRemote(
         string $url,
         string $absolutePath,

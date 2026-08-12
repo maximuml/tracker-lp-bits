@@ -20,7 +20,7 @@ final class Security
         }
 
         $host = parse_url($src, PHP_URL_HOST);
-        $currentHost = parse_url(\getSchemeAndHttpHost(), PHP_URL_HOST);
+        $currentHost = parse_url(Url::schemeAndHost(), PHP_URL_HOST);
         if (!empty($host) && $host != $currentHost) {
             return $src;
         }
@@ -47,11 +47,11 @@ final class Security
         $dangerScriptsPattern = '/(logout|login|ajax|announce|scrape|adduser|modtask|docleanup|freeleech|take.*)\.php/i';
         if (preg_match($dangerScriptsPattern, $path)) {
             $msg = sprintf('[DANGER_URL]: %s [%s]', $src, \nexus()->getRequestId());
-            \do_log($msg, 'alert');
+            Logger::writeWithContext($msg, 'alert');
             \App\Support\Log::writeWithContext($msg, 'mod');
         }
 
-        \do_log("[NOT_ALLOW_SRC]: $src with path: $path");
+        Logger::writeWithContext("[NOT_ALLOW_SRC]: $src with path: $path");
 
         return '';
     }

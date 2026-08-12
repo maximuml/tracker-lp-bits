@@ -396,7 +396,7 @@ if ($enableattach_attachment == 'yes'){
 ?>
 <tr>
 <td colspan="2" valign="middle">
-<iframe src="<?php echo getSchemeAndHttpHost()?>/attachment.php" width="100%" height="24" frameborder="0" scrolling="no" marginheight="0" marginwidth="0"></iframe>
+<iframe src="<?php echo Url::schemeAndHost()?>/attachment.php" width="100%" height="24" frameborder="0" scrolling="no" marginheight="0" marginwidth="0"></iframe>
 </td>
 </tr>
 <?php
@@ -450,10 +450,10 @@ foreach ($quickSmilies as $smily) {
         string $passwordConfirmClass = 'password_confirmation',
         string $usernameName = 'username',
     ): void {
-        $tipTooShort = \nexus_trans('signup.password_too_short');
-        $tipTooLong = \nexus_trans('signup.password_too_long');
-        $tipEqualUsername = \nexus_trans('signup.password_equals_username');
-        $tipNotMatch = \nexus_trans('signup.passwords_unmatched');
+        $tipTooShort = Locale::trans('signup.password_too_short');
+        $tipTooLong = Locale::trans('signup.password_too_long');
+        $tipEqualUsername = Locale::trans('signup.password_equals_username');
+        $tipNotMatch = Locale::trans('signup.passwords_unmatched');
         $passwordValidateJS = '';
 
         if ($passwordRequired) {

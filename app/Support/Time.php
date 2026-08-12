@@ -235,7 +235,7 @@ final class Time
                 return Carbon::parse($time)->diffForHumans();
             } catch (\Exception $e) {
                 if (\function_exists('do_log')) {
-                    \do_log($e->getMessage().$e->getTraceAsString(), 'error');
+                    Logger::writeWithContext($e->getMessage().$e->getTraceAsString(), 'error');
                 }
 
                 return $time;
@@ -302,7 +302,7 @@ final class Time
             return Carbon::parse($datetime)->format($format);
         } catch (\Exception) {
             if (\function_exists('do_log')) {
-                \do_log("Invalid datetime: $datetime", 'error');
+                Logger::writeWithContext("Invalid datetime: $datetime", 'error');
             }
 
             return (string) $datetime;

@@ -256,7 +256,7 @@ final class UserClass
         $className = $compact ? str_replace(' ', '', $className) : $className;
 
         if (isset($options['uid'], $options['with_role'])) {
-            $className = implode('&nbsp;|&nbsp;', \apply_filter('user_class_name', [$className], $options['uid']));
+            $className = implode('&nbsp;|&nbsp;', Hooks::applyFilter('user_class_name', [$className], $options['uid']));
         }
 
         if ($className && $b_colored) {

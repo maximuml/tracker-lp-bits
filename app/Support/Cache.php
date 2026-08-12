@@ -191,7 +191,7 @@ final class Cache
 
     public static function clearUser(int|string $uid, string $passkey = ''): void
     {
-        \do_log("clear_user_cache, uid: $uid, passkey: $passkey");
+        Logger::writeWithContext("clear_user_cache, uid: $uid, passkey: $passkey");
         NexusDB::cache_del("user_{$uid}_content");
         NexusDB::cache_del("user_{$uid}_roles");
         NexusDB::cache_del("announce_user_passkey_$uid");
@@ -212,7 +212,7 @@ final class Cache
 
     public static function clearSettings(): void
     {
-        \do_log('clear_setting_cache');
+        Logger::writeWithContext('clear_setting_cache');
         NexusDB::cache_del('nexus_settings_in_laravel');
         NexusDB::cache_del('nexus_settings_in_nexus');
         NexusDB::cache_del('setting_protected_forum');
@@ -224,7 +224,7 @@ final class Cache
 
     public static function clearCategory(): void
     {
-        \do_log('clear_category_cache');
+        Logger::writeWithContext('clear_category_cache');
         NexusDB::cache_del('category_content');
         $searchBoxList = \App\Models\SearchBox::query()->get(['id']);
         foreach ($searchBoxList as $item) {
@@ -234,7 +234,7 @@ final class Cache
 
     public static function clearTaxonomy(string $table): void
     {
-        \do_log("clear_taxonomy_cache: $table");
+        Logger::writeWithContext("clear_taxonomy_cache: $table");
         $list = \App\Models\SearchBox::query()->get(['id']);
         foreach ($list as $item) {
             NexusDB::cache_del("{$table}_list_mode_{$item->id}");
@@ -244,19 +244,19 @@ final class Cache
 
     public static function clearStaffMessage(): void
     {
-        \do_log('clear_staff_message_cache');
+        Logger::writeWithContext('clear_staff_message_cache');
         \App\Repositories\MessageRepository::updateStaffMessageCountCache(false);
     }
 
     public static function clearSearchBox(): void
     {
-        \do_log('clear_search_box_cache');
+        Logger::writeWithContext('clear_search_box_cache');
         NexusDB::cache_del('search_box_content');
     }
 
     public static function clearIcon(): void
     {
-        \do_log('clear_icon_cache');
+        Logger::writeWithContext('clear_icon_cache');
         NexusDB::cache_del('category_icon_content');
     }
 
@@ -265,7 +265,7 @@ final class Cache
      */
     public static function clearInboxCount($uid): void
     {
-        \do_log('clear_inbox_count_cache');
+        Logger::writeWithContext('clear_inbox_count_cache');
         foreach (\Illuminate\Support\Arr::wrap($uid) as $id) {
             NexusDB::cache_del('user_'.$id.'_inbox_count');
             NexusDB::cache_del('user_'.$id.'_unread_message_count');
@@ -274,7 +274,7 @@ final class Cache
 
     public static function clearAgentAllowDeny(): void
     {
-        \do_log('clear_agent_allow_deny_cache');
+        Logger::writeWithContext('clear_agent_allow_deny_cache');
         $allowCacheKey = \App\Support\Env::get('CACHE_KEY_AGENT_ALLOW', 'all_agent_allows');
         $denyCacheKey = \App\Support\Env::get('CACHE_KEY_AGENT_DENY', 'all_agent_denies');
         foreach (['', ':php', ':go'] as $suffix) {
@@ -285,7 +285,7 @@ final class Cache
 
     public static function clearTorrent(string $infoHash): void
     {
-        \do_log('clear_torrent_cache');
+        Logger::writeWithContext('clear_torrent_cache');
         NexusDB::cache_del('torrent_hash_'.$infoHash.'_content');
         NexusDB::cache_del("torrent_not_exists:$infoHash");
     }

@@ -78,6 +78,39 @@ final class Logger
         }
     }
 
+    /**
+     * Write a log line, resolving the current user/passkey from the
+     * legacy or Laravel request context. Mirrors the legacy `do_log()`.
+     */
+    public static function writeWithContext(string $log, string $level = 'info', bool $echo = false): void
+    {
+        $user = null;
+        $passkey = '';
+
+        if (defined('IN_NEXUS') && IN_NEXUS) {
+            $curUser = SupportContext::getUser();
+            if (is_array($curUser) && ! empty($curUser)) {
+                $user = $curUser;
+                $passkey = (string) ($curUser['passkey'] ?? '');
+            }
+            if ($passkey === '') {
+                $passkey = (string) (SupportContext::getRequestInput('passkey') ?? SupportContext::getRequestInput('authkey') ?? '');
+            }
+        } else {
+            try {
+                $authUser = \Illuminate\Support\Facades\Auth::user();
+                if ($authUser instanceof \Illuminate\Database\Eloquent\Model) {
+                    $user = $authUser->getAttributes();
+                    $passkey = (string) ($authUser->getAttribute('passkey') ?? '');
+                }
+            } catch (\Throwable $exception) {
+                $passkey = '!NO_AUTH';
+            }
+        }
+
+        self::write($log, $level, $echo, $user, $passkey);
+    }
+
     public static function filePath(string $append = ''): string
     {
         if (isset(self::$filePaths[$append])) {

@@ -104,7 +104,7 @@ final class Attachment
             $url = \Nexus\Attachment\Storage::getDriver($driver)->getImageUrl($row['location']);
         }
 
-        \do_log(sprintf('driver: %s, location: %s, url: %s', $driver, $row['location'], $url));
+        Logger::writeWithContext(sprintf('driver: %s, location: %s, url: %s', $driver, $row['location'], $url));
 
         return [$row, $url];
     }
@@ -119,7 +119,7 @@ final class Attachment
         [$row, $url] = self::rowAndUrlByKey($dlkey);
 
         if (empty($row)) {
-            return '<div style="text-decoration: line-through; font-size: 7pt">' . \nexus_trans('attachment.text_key') . $dlkey . \nexus_trans('attachment.not_found') . '</div>';
+            return '<div style="text-decoration: line-through; font-size: 7pt">' . Locale::trans('attachment.text_key') . $dlkey . Locale::trans('attachment.not_found') . '</div>';
         }
 
         return self::render(
@@ -131,8 +131,8 @@ final class Attachment
             \App\Support\Format::size($row['filesize']),
             \App\Support\Time::format($row['added']),
             [
-                'size' => \nexus_trans('attachment.size'),
-                'downloads' => \nexus_trans('attachment.downloads'),
+                'size' => Locale::trans('attachment.size'),
+                'downloads' => Locale::trans('attachment.downloads'),
             ]
         );
     }
@@ -172,7 +172,7 @@ final class Attachment
      */
     public static function publicUrl(string $location): string
     {
-        return sprintf('%s/attachments/%s', \getSchemeAndHttpHost(), trim($location, '/'));
+        return sprintf('%s/attachments/%s', Url::schemeAndHost(), trim($location, '/'));
     }
 
     /**
@@ -194,7 +194,7 @@ final class Attachment
             });
 
             if (empty($row) || ($row['isimage'] ?? 0) != 1) {
-                \do_log(sprintf('dlkey: %s get attachment %s not exists or not image', $dlkey, json_encode($row)));
+                Logger::writeWithContext(sprintf('dlkey: %s get attachment %s not exists or not image', $dlkey, Json::encode($row)));
                 return $matches[0];
             }
 
@@ -204,7 +204,7 @@ final class Attachment
                 if (($row['thumb'] ?? 0) == 1) {
                     $url .= '.thumb.jpg';
                 }
-                $url = sprintf('%s/%s', \getSchemeAndHttpHost(true), trim($url, '/'));
+                $url = sprintf('%s/%s', Url::schemeAndHost(true), trim($url, '/'));
             } else {
                 $url = \Nexus\Attachment\Storage::getDriver($driver)->getImageUrl($row['location']);
             }

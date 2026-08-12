@@ -59,7 +59,7 @@ final class Promotion
     ): string {
         $sphighlight = null;
         if ($appendPromotion === 'highlight') {
-            $globalPromotionState = \get_global_sp_state();
+            $globalPromotionState = self::globalSpecialState();
             $code = ($globalPromotionState == 1) ? $promotion : $globalPromotionState;
             $sphighlight = self::backgroundClass((int) $code);
         }
@@ -73,7 +73,7 @@ final class Promotion
             }
         }
 
-        return (string) \apply_filter('torrent_background_color', (string) $sphighlight, $torrent);
+        return (string) Hooks::applyFilter('torrent_background_color', (string) $sphighlight, $torrent);
     }
 
     /**
@@ -170,7 +170,7 @@ final class Promotion
     ): string {
         $added = (string) ($added ?? '');
         $promotionUntil = (string) ($promotionUntil ?? '');
-        $globalSpState = \get_global_sp_state();
+        $globalSpState = self::globalSpecialState();
         $spTorrent = '';
         $onmouseover = '';
         $log = "[GET_PROMOTION], promotion: $promotion, forcemode: $forceMode, showtimeleft: $showTimeLeft, added: $added, promotionTimeType: $promotionTimeType, promotionUntil: $promotionUntil";
@@ -221,7 +221,7 @@ final class Promotion
             }
         }
 
-        \do_log("$log, sp_torrent: $spTorrent");
+        Logger::writeWithContext("$log, sp_torrent: $spTorrent");
 
         return $spTorrent;
     }

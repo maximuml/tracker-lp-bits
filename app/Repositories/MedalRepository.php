@@ -6,6 +6,9 @@ use App\Models\Medal;
 use App\Models\Setting;
 use App\Models\User;
 use App\Models\UserMedal;
+use App\Support\Cache;
+use App\Support\Logger;
+use App\Support\UserDisplay;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
@@ -87,7 +90,7 @@ class MedalRepository extends BaseRepository
         }
         $medal = Medal::query()->findOrFail($medalId);
         $exists = $user->valid_medals()->where('medal_id', $medalId)->exists();
-        do_log(last_query());
+        Logger::writeWithContext(last_query());
         if ($exists) {
             throw new \LogicException("user: $uid already own this medal: $medalId.");
         }
@@ -115,7 +118,7 @@ class MedalRepository extends BaseRepository
                 'status' => UserMedal::STATUS_NOT_WEARING,
             ]
         ]);
-        clear_user_cache($user->id);
+        Cache::clearUser($user->id);
     }
 
     /**
@@ -142,7 +145,7 @@ class MedalRepository extends BaseRepository
             $userMedal->status = UserMedal::STATUS_NOT_WEARING;
         }
         $userMedal->save();
-        clear_user_cache($userId);
+        Cache::clearUser($userId);
         return $userMedal;
     }
 
@@ -181,7 +184,7 @@ class MedalRepository extends BaseRepository
         if ($maxWearAllow && $wearCount > $maxWearAllow) {
             throw new NexusException(nexus_trans('medal.max_allow_wearing', ['count' => $maxWearAllow]));
         }
-        clear_user_cache($userId);
+        Cache::clearUser($userId);
         if (empty($rows)) {
             return 0;
         }
@@ -201,9 +204,9 @@ class MedalRepository extends BaseRepository
             ->whereIn('id', $idArr)
             ->whereNotNull($field)
             ->update([$field => NexusDB::raw("`$field` + INTERVAL $duration DAY")]);
-        do_log(sprintf(
+        Logger::writeWithContext(sprintf(
             "operator: %s, increase records: %s $field + $duration day, result: %s",
-            get_pure_username(), implode(', ', $idArr), $result
+            UserDisplay::currentUsername(), implode(', ', $idArr), $result
         ));
     }
 
@@ -219,9 +222,9 @@ class MedalRepository extends BaseRepository
         $result = NexusDB::table("user_medals")
             ->whereIn('id', $idArr)
             ->update([$field => $expireAt]);
-        do_log(sprintf(
+        Logger::writeWithContext(sprintf(
             "operator: %s, update records: %s $field $expireAt, result: %s",
-            get_pure_username(), implode(', ', $idArr), $result
+            UserDisplay::currentUsername(), implode(', ', $idArr), $result
         ));
     }
 
@@ -236,9 +239,9 @@ class MedalRepository extends BaseRepository
         $result = NexusDB::table("user_medals")
             ->whereIn('id', $idArr)
             ->update([$field => NexusDB::raw("null")]);
-        do_log(sprintf(
+        Logger::writeWithContext(sprintf(
             "operator: %s, update records: %s $field null, result: %s",
-            get_pure_username(), implode(', ', $idArr), $result
+            UserDisplay::currentUsername(), implode(', ', $idArr), $result
         ));
     }
 

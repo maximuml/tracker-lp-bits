@@ -2,7 +2,10 @@
 
 namespace App\Console\Commands;
 
+use App\Support\Bonus;
+use App\Support\Logger;
 use Illuminate\Console\Command;
+use Nexus\Nexus;
 
 class TrackerCalculateSeedBonus extends Command
 {
@@ -27,13 +30,13 @@ class TrackerCalculateSeedBonus extends Command
     public function handle()
     {
         $uid = $this->argument('uid');
-        $result = calculate_seed_bonus($uid);
+        $result = Bonus::calculateForUser($uid);
         $log = sprintf(
             "[%s], %s, uid: %s, result: \n%s",
-            nexus()->getRequestId(), __METHOD__, $uid, var_export($result, true)
+            Nexus::instance()->getRequestId(), __METHOD__, $uid, var_export($result, true)
         );
         $this->info($log);
-        do_log($log);
+        Logger::writeWithContext($log);
         return 0;
     }
 }

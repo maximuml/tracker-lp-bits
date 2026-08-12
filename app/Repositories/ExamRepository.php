@@ -12,6 +12,7 @@ use App\Models\Torrent;
 use App\Models\User;
 use App\Models\UserBanLog;
 use App\Models\UserModifyLog;
+use App\Support\UserDisplay;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
@@ -1012,7 +1013,7 @@ class ExamRepository extends BaseRepository
                 'exam_name' => $examName,
                 'old_end_time' => $oldEndTime,
                 'new_end_time' => $end,
-                'operator' => get_pure_username(),
+                'operator' => UserDisplay::currentUsername(),
                 'reason' => $reason,
             ], $locale),
         ]);

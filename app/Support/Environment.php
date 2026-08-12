@@ -55,18 +55,18 @@ final class Environment
             $command .= $append;
         }
 
-        \do_log("command: $command");
+        Logger::writeWithContext("command: $command");
         $result = exec($command, $output, $resultCode);
         $outputString = implode("\n", $output);
         $log = sprintf('result_code: %s, result: %s, output: %s', $resultCode, $result, $outputString);
 
         if ($resultCode != 0) {
-            \do_log($log, 'error');
+            Logger::writeWithContext($log, 'error');
             if ($exception) {
                 throw new \RuntimeException($outputString);
             }
         } else {
-            \do_log($log);
+            Logger::writeWithContext($log);
         }
 
         return $format === 'string' ? $outputString : $output;

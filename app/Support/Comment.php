@@ -74,7 +74,7 @@ final class Comment
         if (strpos($s, '[code]') !== false && strpos($s, '[/code]') !== false) {
             $s = (string) preg_replace_callback(
                 '/\[code\](.+?)\[\/code\]/is',
-                static fn (array $m): string => self::addTempCode(\App\Support\BBCode::code((string) $m[1], (string) \nexus_trans('label.text_code'))),
+                static fn (array $m): string => self::addTempCode(BBCode::code((string) $m[1], (string) Locale::trans('label.text_code'))),
                 $s,
             );
         }
@@ -95,7 +95,7 @@ final class Comment
             '[/font]', '[/size]', '[hr]', '  ',
         ];
         $replaceXhtmlTagArray = [
-            \get_protocol_prefix() . \App\Support\Config\SiteConfig::current()->basic->baseUrl(),
+            Url::schemeAndHost(),
             \App\Support\Config\SiteConfig::current()->basic->siteName(),
             '&#x2022; ',
             '<b>', '</b>', '<i>', '</i>', '<u>', '</u>', '<s>', '</s>',
@@ -313,7 +313,7 @@ final class Comment
             $secs = 900;
             $dt = date('Y-m-d H:i:s', TIMENOW - $secs);
             $html .= '<tr>' . "\n";
-            $html .= '<td class="rowfollow" width="150" valign="top" style="padding: 0px;">' . \return_avatar_image($avatar) . '</td>' . "\n";
+            $html .= '<td class="rowfollow" width="150" valign="top" style="padding: 0px;">' . UserDisplay::avatarImageWithContext($avatar) . '</td>' . "\n";
             $html .= '<td class="rowfollow word-break-all" valign="top"><br />' . $text . $textEditby . '</td>' . "\n";
             $html .= '</tr>' . "\n";
 

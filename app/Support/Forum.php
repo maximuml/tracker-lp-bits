@@ -23,6 +23,14 @@ final class Forum
     }
 
     /**
+     * Context-aware wrapper for {@see picFolder()}.
+     */
+    public static function picFolderWithContext(): string
+    {
+        return self::picFolder((string) SupportContext::getGlobal('CURLANGDIR', ''));
+    }
+
+    /**
      * Return a comma-separated list of moderators for the given forum.
      *
      * Mirrors `get_forum_moderators()`.
@@ -184,11 +192,11 @@ final class Forum
             && $uid != $topicInfo->userid
             && ! $isForumMod
         ) {
-            \do_log("$log, FALSE");
+            Logger::writeWithContext("$log, FALSE");
             return false;
         }
 
-        \do_log("$log, TRUE");
+        Logger::writeWithContext("$log, TRUE");
         return true;
     }
 

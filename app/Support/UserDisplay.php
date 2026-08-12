@@ -140,7 +140,7 @@ final class UserDisplay
             $arr['__is_rainbow'] = $metas->isNotEmpty() ? 1 : 0;
             $arr['__is_donor'] = self::isDonor($arr);
 
-            return \apply_filter('user_row', $arr);
+            return Hooks::applyFilter('user_row', $arr);
         });
 
         return $userRows[$id] = ($row ?: false);
@@ -297,7 +297,7 @@ final class UserDisplay
                 );
             }
 
-            $href = \getSchemeAndHttpHost() . "/userdetails.php?id=$id";
+            $href = Url::schemeAndHost() . "/userdetails.php?id=$id";
             $classNameColored = \App\Support\UserClass::name($arr['class'], true, false, false);
             $className = \App\Support\UserClass::name($arr['class'], false, true, true, ['with_alias' => true]);
             $title = $arr['title'] ?? '';
@@ -312,7 +312,7 @@ final class UserDisplay
 
             $username = '<span class="nowrap">' . ($bracket ? '(' . $username . ')' : $username) . $medalHtml . '</span>';
         } else {
-            $username = '<i>' . nexus_trans('nexus.user_not_exists') . '</i>';
+            $username = '<i>' . Locale::trans('nexus.user_not_exists') . '</i>';
             $username = '<span class="nowrap">' . ($bracket ? '(' . $username . ')' : $username) . '</span>';
         }
 

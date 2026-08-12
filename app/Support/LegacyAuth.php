@@ -277,6 +277,13 @@ final class LegacyAuth
      * column in `loginattempts`, subtracts from `$maxAttempts`, and
      * returns a small red/green HTML fragment.
      */
+    public static function remainingAttemptsFromContext(string $type = 'login'): string
+    {
+        $context = LegacyAuthContext::fromSupportContext();
+
+        return self::remainingAttempts($type, $context->maxLoginAttempts, $context->ip);
+    }
+
     public static function remainingAttempts(string $type, int $maxAttempts, string $ip): string
     {
         $total = (int) NexusDB::table('loginattempts')
@@ -390,5 +397,58 @@ final class LegacyAuth
         }
 
         return $row;
+    }
+
+    /**
+     * Bootstrap the current user from the auth cookie and populate
+     * {@see SupportContext}. Replaces the legacy `userlogin()` helper.
+     */
+    public static function loginFromContext(): bool
+    {
+        $context = LegacyAuthContext::fromSupportContext();
+        $user = self::loginFromCookie($context);
+
+        if ($user !== null) {
+            SupportContext::setGlobal('oldip', $user['old_ip'] ?? $user['ip'] ?? '');
+            SupportContext::setGlobal('CURUSER', $user);
+            SupportContext::setUser($user);
+
+            return true;
+        }
+
+        SupportContext::setGlobal('CURUSER', null);
+        SupportContext::setUser(null);
+
+        return false;
+    }
+
+    /**
+     * Run the legacy registration/invite system gate using the current context.
+     * Replaces the legacy `registration_check()` helper.
+     */
+    public static function registrationCheckFromContext(
+        string $type = 'invitesystem',
+        bool $maxuserscheck = true,
+        bool $ipcheck = true,
+    ): bool {
+        return self::registrationCheck($type, $maxuserscheck, $ipcheck, LegacyAuthContext::fromSupportContext());
+    }
+
+    /**
+     * Run the legacy "account parked" guard using the current context.
+     * Replaces the legacy `parked()` helper.
+     */
+    public static function parkedFromContext(): void
+    {
+        self::parked(LegacyAuthContext::fromSupportContext());
+    }
+
+    /**
+     * Run the legacy login guard using the current context.
+     * Replaces the legacy `loggedinorreturn()` helper.
+     */
+    public static function requireLoginFromContext(bool $mainPage = false): void
+    {
+        self::requireLogin($mainPage, LegacyAuthContext::fromSupportContext());
     }
 }

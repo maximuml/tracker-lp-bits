@@ -374,7 +374,7 @@ for ($i=0; $i < count($allBonus); $i++)
 
 	if($CURUSER['seedbonus'] >= $bonusarray['points'])
 	{
-	    $permission = 'sendinvite';
+	    $sendInvitePermission = \App\Enums\Permission\PermissionEnum::SEND_INVITE;
 		if ($bonusarray['art'] == 'gift_1'){
 			print("<td class=\"rowfollow\" align=\"center\"><input type=\"submit\" name=\"submit\" value=\"".$lang_mybonus['submit_karma_gift']."\" /></td>");
 		}
@@ -385,8 +385,8 @@ for ($i=0; $i < count($allBonus); $i++)
 		{
 			if (!\App\Support\Config\SiteConfig::current()->main->inviteSystem())
 				print("<td class=\"rowfollow\" align=\"center\"><input type=\"submit\" name=\"submit\" value=\"".nexus_trans('invite.send_deny_reasons.invite_system_closed')."\" disabled=\"disabled\" /></td>");
-			elseif(!user_can($permission, false, 0)){
-			$requireClass = \App\Support\Config\SiteConfig::current()->authority->permission($permission);
+			elseif(!\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::SEND_INVITE)){
+			$requireClass = \App\Support\Config\SiteConfig::current()->authority->permission($sendInvitePermission->value);
 				print("<td class=\"rowfollow\" align=\"center\"><input type=\"submit\" name=\"submit\" value=\"".nexus_trans('invite.send_deny_reasons.no_permission', ['class' => \App\Models\User::getClassText($requireClass)])."\" disabled=\"disabled\" /></td>");}
 			else
 				print("<td class=\"rowfollow\" align=\"center\"><input type=\"submit\" name=\"submit\" value=\"".$lang_mybonus['submit_exchange']."\" /></td>");
@@ -395,8 +395,8 @@ for ($i=0; $i < count($allBonus); $i++)
 		{
 			if (!\App\Support\Config\SiteConfig::current()->main->inviteSystem())
 				print("<td class=\"rowfollow\" align=\"center\"><input type=\"submit\" name=\"submit\" value=\"".nexus_trans('invite.send_deny_reasons.invite_system_closed')."\" disabled=\"disabled\" /></td>");
-			elseif(!user_can($permission, false, 0)){
-			$requireClass = \App\Support\Config\SiteConfig::current()->authority->permission($permission);
+			elseif(!\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::SEND_INVITE)){
+			$requireClass = \App\Support\Config\SiteConfig::current()->authority->permission($sendInvitePermission->value);
 				print("<td class=\"rowfollow\" align=\"center\"><input type=\"submit\" name=\"submit\" value=\"".nexus_trans('invite.send_deny_reasons.no_permission', ['class' => \App\Models\User::getClassText($requireClass)])."\" disabled=\"disabled\" /></td>");}
 			else
 				print("<td class=\"rowfollow\" align=\"center\"><input type=\"submit\" name=\"submit\" value=\"".$lang_mybonus['submit_exchange']."\" /></td>");

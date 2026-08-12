@@ -686,8 +686,7 @@ function sent_mail($to,$fromname,$fromemail,$subject,$body,$type = "confirmation
  */
 function remaining($type = 'login')
 {
-    $context = legacy_auth_context();
-    return \App\Support\LegacyAuth::remainingAttempts((string) $type, $context->maxLoginAttempts, $context->ip);
+    return \App\Support\LegacyAuth::remainingAttemptsFromContext((string) $type);
 }
 /**
  * @param string $type
@@ -696,7 +695,7 @@ function remaining($type = 'login')
  * @return bool
  */
 function registration_check($type = "invitesystem", $maxuserscheck = true, $ipcheck = true) {
-    return \App\Support\LegacyAuth::registrationCheck((string) $type, (bool) $maxuserscheck, (bool) $ipcheck, legacy_auth_context());
+    return \App\Support\LegacyAuth::registrationCheckFromContext((string) $type, (bool) $maxuserscheck, (bool) $ipcheck);
 }
 
 /**
@@ -805,17 +804,7 @@ function dbconn($autoclean = false, $doLogin = true)
  * @return bool
  */
 function userlogin() {
-    $context = legacy_auth_context();
-    $user = \App\Support\LegacyAuth::loginFromCookie($context);
-    if ($user !== null) {
-        SupportContext::setGlobal('oldip', $user['old_ip'] ?? $user['ip'] ?? '');
-        SupportContext::setGlobal('CURUSER', $user);
-        SupportContext::setUser($user);
-        return true;
-    }
-    SupportContext::setGlobal('CURUSER', null);
-    SupportContext::setUser(null);
-    return false;
+    return \App\Support\LegacyAuth::loginFromContext();
 }
 /**
  * @param bool $printProgress
@@ -1170,7 +1159,7 @@ function base64 ($string, $encode=true) {
  * @return void
  */
 function loggedinorreturn($mainpage = false) {
-    \App\Support\LegacyAuth::requireLogin((bool) $mainpage, legacy_auth_context());
+    \App\Support\LegacyAuth::requireLoginFromContext((bool) $mainpage);
 }
 /**
  * @param mixed $id
@@ -1333,7 +1322,7 @@ function ssr ($arg) {
  */
 function parked()
 {
-    \App\Support\LegacyAuth::parked(legacy_auth_context());
+    \App\Support\LegacyAuth::parkedFromContext();
 }
 
 /**

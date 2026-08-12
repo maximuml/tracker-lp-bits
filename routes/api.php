@@ -46,16 +46,16 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
 //        Route::resource('forums', \App\Http\Controllers\ForumController::class);
 //        Route::resource('topics', \App\Http\Controllers\TopicController::class);
 
-        Route::get('sections', [\App\Http\Controllers\UploadController::class, 'sections'])->middleware(ability(RoutePermissionEnum::TORRENT_UPLOAD));
-        Route::get('torrents/{section?}', [\App\Http\Controllers\TorrentController::class, 'index'])->middleware(ability(RoutePermissionEnum::TORRENT_LIST));
-        Route::post('upload', [\App\Http\Controllers\TorrentController::class, 'store'])->middleware(ability(RoutePermissionEnum::TORRENT_UPLOAD));
-        Route::get('detail/{id}', [\App\Http\Controllers\TorrentController::class, 'show'])->middleware(ability(RoutePermissionEnum::TORRENT_VIEW));
+        Route::get('sections', [\App\Http\Controllers\UploadController::class, 'sections'])->middleware(\App\Support\Permissions::abilityLabel(RoutePermissionEnum::TORRENT_UPLOAD));
+        Route::get('torrents/{section?}', [\App\Http\Controllers\TorrentController::class, 'index'])->middleware(\App\Support\Permissions::abilityLabel(RoutePermissionEnum::TORRENT_LIST));
+        Route::post('upload', [\App\Http\Controllers\TorrentController::class, 'store'])->middleware(\App\Support\Permissions::abilityLabel(RoutePermissionEnum::TORRENT_UPLOAD));
+        Route::get('detail/{id}', [\App\Http\Controllers\TorrentController::class, 'show'])->middleware(\App\Support\Permissions::abilityLabel(RoutePermissionEnum::TORRENT_VIEW));
 
-        Route::get('/profile/{id?}', [\App\Http\Controllers\UserController::class, 'show'])->middleware(ability(RoutePermissionEnum::USER_VIEW));
+        Route::get('/profile/{id?}', [\App\Http\Controllers\UserController::class, 'show'])->middleware(\App\Support\Permissions::abilityLabel(RoutePermissionEnum::USER_VIEW));
 
-        Route::post('bookmarks', [\App\Http\Controllers\BookmarkController::class, 'store'])->middleware(ability(RoutePermissionEnum::BOOKMARK_STORE));
-        Route::post('bookmarks/delete', [\App\Http\Controllers\BookmarkController::class, 'destroy'])->middleware(ability(RoutePermissionEnum::BOOKMARK_DELETE));
-        Route::get('comments', [\App\Http\Controllers\CommentController::class, 'index'])->middleware(ability(RoutePermissionEnum::TORRENT_VIEW));
+        Route::post('bookmarks', [\App\Http\Controllers\BookmarkController::class, 'store'])->middleware(\App\Support\Permissions::abilityLabel(RoutePermissionEnum::BOOKMARK_STORE));
+        Route::post('bookmarks/delete', [\App\Http\Controllers\BookmarkController::class, 'destroy'])->middleware(\App\Support\Permissions::abilityLabel(RoutePermissionEnum::BOOKMARK_DELETE));
+        Route::get('comments', [\App\Http\Controllers\CommentController::class, 'index'])->middleware(\App\Support\Permissions::abilityLabel(RoutePermissionEnum::TORRENT_VIEW));
 
     });
 

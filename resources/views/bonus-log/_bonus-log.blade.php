@@ -11,7 +11,7 @@ if (!$user) {
     \App\Support\LegacyResponse::abort("Error", "Invalid uid: $uid");
 }
 if ($uid != $CURUSER['id']) {
-    user_can(\App\Enums\Permission\PermissionEnum::VIEW_USER_HISTORY->value, true, $CURUSER['id']);
+    \App\Auth\Permission::assertCan(\App\Enums\Permission\PermissionEnum::VIEW_USER_HISTORY, $user);
 }
 $isRecordSeedingBonusLog = \App\Models\Setting::getIsRecordSeedingBonusLog();
 $defaultCategory = \App\Models\BonusLogs::CATEGORY_COMMON;

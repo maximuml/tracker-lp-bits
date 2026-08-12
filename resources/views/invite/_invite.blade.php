@@ -72,7 +72,7 @@ if ($type == 'new'){
         \App\Support\Html::stdfoot();
         die;
     }
-    registration_check('invitesystem',true,false);
+    \App\Support\LegacyAuth::registrationCheckFromContext('invitesystem', true, false);
     $temporaryInvites = \App\Models\Invite::query()->where('inviter', $CURUSER['id'])
         ->where('invitee', '')
         ->where('expired_at', '>', now())

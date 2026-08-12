@@ -34,7 +34,7 @@ class UtilityController extends LegacyController
 
         $passkeyActions = ['getPasskeyGetArgs', 'processPasskeyGet'];
         if (! in_array($action, $passkeyActions, true)) {
-            loggedinorreturn();
+            \App\Support\LegacyAuth::requireLoginFromContext();
         }
 
         if (! class_exists('AjaxInterface')) {

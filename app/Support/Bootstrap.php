@@ -27,7 +27,7 @@ final class Bootstrap
         \Nexus\Database\NexusDB::getInstance()->autoConnect();
 
         if ($doLogin) {
-            \userlogin();
+            \App\Support\LegacyAuth::loginFromContext();
         }
 
         if (! $useCronTriggerCleanUp && $autoclean) {

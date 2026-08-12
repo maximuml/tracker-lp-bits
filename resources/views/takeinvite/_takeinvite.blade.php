@@ -13,7 +13,7 @@ if (!$lock->get()) {
     $errMsg = nexus_trans("nexus.do_not_repeat");
     \App\Support\LegacyResponse::abort($errMsg, $errMsg);
 }
-registration_check('invitesystem', true, false);
+\App\Support\LegacyAuth::registrationCheckFromContext('invitesystem', true, false);
 $userRep = new \App\Repositories\UserRepository();
 try {
     $sendText = $userRep->getInviteBtnText($CURUSER['id']);

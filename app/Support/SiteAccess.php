@@ -23,7 +23,7 @@ final class SiteAccess
      */
     public static function checkGuestVisit(): void
     {
-        if (\userlogin()) {
+        if (\App\Support\LegacyAuth::loginFromContext()) {
             return;
         }
 

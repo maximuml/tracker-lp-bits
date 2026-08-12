@@ -52,7 +52,7 @@ final class LegacyRequestMiddleware
         $this->loadScriptLanguage($script, $rootpath);
 
         if (in_array($script, self::PARKED_SCRIPTS, true)) {
-            \parked();
+            \App\Support\LegacyAuth::parkedFromContext();
         }
 
         return $next($request);

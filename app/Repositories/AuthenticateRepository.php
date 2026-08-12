@@ -3,6 +3,7 @@ namespace App\Repositories;
 
 use App\Http\Resources\UserResource;
 use App\Models\User;
+use App\Services\WebAuthService;
 use Carbon\Carbon;
 use Illuminate\Encryption\Encrypter;
 use Illuminate\Http\Request;
@@ -21,8 +22,8 @@ class AuthenticateRepository extends BaseRepository
     {
         $user = User::query()
             ->where('username', $username)
-            ->first(array_merge(User::$commonFields, ['class', 'secret', 'passhash']));
-        if (!$user || md5($user->secret . $password . $user->secret) != $user->passhash) {
+            ->first(array_merge(User::$commonFields, ['class', 'secret', 'passhash', 'auth_key']));
+        if (!$user || !app(WebAuthService::class)->validatePassword($user, $password)) {
             throw new \InvalidArgumentException('Username or password invalid.');
         }
 //        if (nexus()->isPlatformAdmin() && !$user->canAccessAdmin()) {

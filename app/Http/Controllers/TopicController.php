@@ -5,9 +5,9 @@ namespace App\Http\Controllers;
 use App\Http\Resources\ForumResource;
 use App\Http\Resources\TopicResource;
 use App\Models\Forum;
-use App\Models\OverForum;
 use App\Models\Topic;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 
 class TopicController extends Controller
 {
@@ -32,74 +32,62 @@ class TopicController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
-     * @return  \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    
-        return new \Illuminate\Http\Response('');
-    }
-
-    /**
      * Store a newly created resource in storage.
      * @param  \Illuminate\Http\Request  $request
-     * @return  \Illuminate\Http\Response
+     * @return  array<string, mixed>
      */
     public function store(Request $request)
     {
-        //
-    
-        return new \Illuminate\Http\Response('');
+        $topic = Topic::query()->create($request->validate([
+            'forumid' => 'required|integer',
+            'subject' => 'required|string|max:255',
+            'userid' => 'required|integer',
+            'locked' => 'sometimes|boolean',
+            'sticky' => 'sometimes|boolean',
+            'hlcolor' => 'sometimes|string',
+        ]));
+
+        return $this->success(new TopicResource($topic), 'Topic created');
     }
 
     /**
      * Display the specified resource.
-     * @param  \App\Models\OverForum  $overForum
-     * @return  \Illuminate\Http\Response
+     * @param  \App\Models\Topic  $topic
+     * @return  array<string, mixed>
      */
-    public function show(OverForum $overForum)
+    public function show(Topic $topic)
     {
-        //
-    
-        return new \Illuminate\Http\Response('');
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     * @param  \App\Models\OverForum  $overForum
-     * @return  \Illuminate\Http\Response
-     */
-    public function edit(OverForum $overForum)
-    {
-        //
-    
-        return new \Illuminate\Http\Response('');
+        return $this->success(new TopicResource($topic->load('user', 'firstPost', 'lastPost')));
     }
 
     /**
      * Update the specified resource in storage.
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\OverForum  $overForum
-     * @return  \Illuminate\Http\Response
+     * @param  \App\Models\Topic  $topic
+     * @return  array<string, mixed>
      */
-    public function update(Request $request, OverForum $overForum)
+    public function update(Request $request, Topic $topic)
     {
-        //
-    
-        return new \Illuminate\Http\Response('');
+        $topic->update($request->validate([
+            'forumid' => 'sometimes|integer',
+            'subject' => 'sometimes|string|max:255',
+            'locked' => 'sometimes|boolean',
+            'sticky' => 'sometimes|boolean',
+            'hlcolor' => 'sometimes|string',
+        ]));
+
+        return $this->success(new TopicResource($topic->fresh()->load('user', 'firstPost', 'lastPost')), 'Topic updated');
     }
 
     /**
      * Remove the specified resource from storage.
-     * @param  \App\Models\OverForum  $overForum
-     * @return  \Illuminate\Http\Response
+     * @param  \App\Models\Topic  $topic
+     * @return  array<string, mixed>
      */
-    public function destroy(OverForum $overForum)
+    public function destroy(Topic $topic)
     {
-        //
-    
-        return new \Illuminate\Http\Response('');
+        $topic->delete();
+
+        return $this->success(['success' => true], 'Topic deleted');
     }
 }

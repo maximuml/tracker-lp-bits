@@ -259,7 +259,7 @@ class UserController extends Controller
 
         $resource = TorrentResource::collection($result);
 
-        return $resource;
+        return $this->success($resource);
 
     }
 
@@ -275,7 +275,7 @@ class UserController extends Controller
 
         $resource = TorrentResource::collection($result);
 
-        return $resource;
+        return $this->success($resource);
 
     }
 
@@ -283,7 +283,7 @@ class UserController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return  mixed
      */
-    public function LeechingTorrent(Request $request)
+    public function leechingTorrent(Request $request)
     {
         $user = Auth::user();
 
@@ -291,7 +291,7 @@ class UserController extends Controller
 
         $resource = TorrentResource::collection($result);
 
-        return $resource;
+        return $this->success($resource);
 
     }
 
@@ -311,7 +311,7 @@ class UserController extends Controller
 
         $resource = TorrentResource::collection($result);
 
-        return $resource;
+        return $this->success($resource);
 
     }
 
@@ -331,7 +331,7 @@ class UserController extends Controller
 
         $resource = TorrentResource::collection($result);
 
-        return $resource;
+        return $this->success($resource);
 
     }
 

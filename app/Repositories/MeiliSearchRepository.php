@@ -636,14 +636,16 @@ class MeiliSearchRepository extends BaseRepository
      */
     public static function formatValueForMeili($field, $value)
     {
+        // Yes/no enums must be resolved before any numeric cast so that a value
+        // like 'yes' is not accidentally run through intval() and stored as 0.
+        if (in_array($field, self::$yesOrNoFields)) {
+            return $value == 'yes' ? 1 : 0;
+        }
         if (in_array($field, self::$intFields)) {
             return intval($value);
         }
         if (in_array($field, self::$timestampFields)) {
             return strtotime((string) $value);
-        }
-        if (in_array($field, self::$yesOrNoFields)) {
-            return $value == 'yes' ? 1 : 0;
         }
         return strval($value);
     }

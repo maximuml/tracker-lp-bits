@@ -117,10 +117,10 @@ else {
 
 	$rowChecks = [];
 	if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::BE_ANONYMOUS) || \App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::TORRENT_MANAGE)) {
-	    $rowChecks[] = "<label><input type=\"checkbox\" name=\"anonymous\"" . ($row["anonymous"] == "yes" ? " checked=\"checked\"" : "" ) . " value=\"1\" />".$lang_edit['checkbox_anonymous_note']."</label>";
+	    $rowChecks[] = "<input type=\"hidden\" name=\"anonymous\" value=\"0\" /><label><input type=\"checkbox\" name=\"anonymous\"" . ($row["anonymous"] == "yes" ? " checked=\"checked\"" : "" ) . " value=\"1\" />".$lang_edit['checkbox_anonymous_note']."</label>";
     }
 	if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::TORRENT_MANAGE)) {
-	    array_unshift($rowChecks, "<label><input id='visible' type=\"checkbox\" name=\"visible\"" . ($row["visible"] == "yes" ? " checked=\"checked\"" : "" ) . " value=\"1\" />".$lang_edit['checkbox_visible']."</label>");
+	    array_unshift($rowChecks, "<input type=\"hidden\" name=\"visible\" value=\"0\" /><label><input id='visible' type=\"checkbox\" name=\"visible\"" . ($row["visible"] == "yes" ? " checked=\"checked\"" : "" ) . " value=\"1\" />".$lang_edit['checkbox_visible']."</label>");
     }
 	if (!empty($rowChecks)) {
         \App\Support\Html::tr($lang_edit['row_check'], implode('&nbsp;&nbsp;', $rowChecks), 1);

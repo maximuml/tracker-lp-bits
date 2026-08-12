@@ -109,4 +109,42 @@ final class Api
     {
         return self::call(-1, $msg, $data, $request);
     }
+
+    /**
+     * Context-aware `success()` that reads the request array and handles the
+     * legacy single-argument overload (`success($data)` vs `success($msg, $data)`).
+     *
+     * Backs the legacy `success()` helper.
+     *
+     * @return array<string, mixed>
+     */
+    public static function successWithContext(mixed ...$args): array
+    {
+        $request = SupportContext::allRequest();
+
+        return match (count($args)) {
+            0 => self::success('OK', [], $request),
+            1 => self::success('OK', $args[0], $request),
+            default => self::success((string) $args[0], $args[1] ?? [], $request),
+        };
+    }
+
+    /**
+     * Context-aware `fail()` that reads the request array and handles the
+     * legacy single-argument overload (`fail($data)` vs `fail($msg, $data)`).
+     *
+     * Backs the legacy `fail()` helper.
+     *
+     * @return array<string, mixed>
+     */
+    public static function failWithContext(mixed ...$args): array
+    {
+        $request = SupportContext::allRequest();
+
+        return match (count($args)) {
+            0 => self::fail('ERROR', [], $request),
+            1 => self::fail('ERROR', $args[0], $request),
+            default => self::fail((string) $args[0], $args[1] ?? [], $request),
+        };
+    }
 }

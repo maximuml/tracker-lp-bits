@@ -55,17 +55,22 @@ final class LegacyAuthContext
      */
     public static function fromSupportContext(): self
     {
-        $scriptFile = SupportContext::getServerValue('SCRIPT_FILENAME', '');
-        $script = basename($scriptFile);
-        if (str_contains($script, '.')) {
-            $script = strstr($script, '.', true);
+        $script = '';
+        if (\function_exists('nexus')) {
+            $script = \nexus()->getScript();
+        } else {
+            $scriptFile = SupportContext::getServerValue('SCRIPT_FILENAME', '');
+            $script = basename($scriptFile);
+            if (str_contains($script, '.')) {
+                $script = strstr($script, '.', true);
+            }
         }
 
         return new self(
             user: SupportContext::getUser(),
             lang: SupportContext::getLangFunctions(),
             cache: SupportContext::getCache(),
-            ip: \App\Support\Network::clientIp(),
+            ip: \function_exists('getip') ? \getip() : \App\Support\Network::clientIp(),
             requestUri: SupportContext::getServerValue('REQUEST_URI'),
             requestBody: SupportContext::allPost(),
             queryParams: SupportContext::allQuery(),

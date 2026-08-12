@@ -192,13 +192,12 @@ EOD;
 
 	if ($returnto)
 	{
-		header("Location: $returnto");
-		die;
+		\App\Support\LegacyResponse::redirect($returnto);
 	}
 
-	\App\Support\Html::stdhead();
-	\App\Support\Html::stdMessage($lang_takemessage['std_succeeded'], (($n_pms > 1) ? "$n".$lang_takemessage['std_messages_out_of']."$n_pms".$lang_takemessage['std_were'] : $lang_takemessage['std_message_was']).
-	$lang_takemessage['std_successfully_sent'] . ($l ? " $l profile comment" . (($l>1) ? $lang_takemessage['std_s_were'] : $lang_takemessage['std_was']) . $lang_takemessage['std_updated'] : ""));
-\App\Support\Html::stdfoot();
-exit;
+	\App\Support\LegacyResponse::abort(
+		$lang_takemessage['std_succeeded'],
+		(($n_pms > 1) ? "$n".$lang_takemessage['std_messages_out_of']."$n_pms".$lang_takemessage['std_were'] : $lang_takemessage['std_message_was']).
+	$lang_takemessage['std_successfully_sent'] . ($l ? " $l profile comment" . (($l>1) ? $lang_takemessage['std_s_were'] : $lang_takemessage['std_was']) . $lang_takemessage['std_updated'] : "")
+	);
 ?>

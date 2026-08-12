@@ -12,7 +12,7 @@ abstract class LegacyController extends Controller
 {
     protected function legacyPage(Request $request, string $page, bool $auth = true): View|RedirectResponse
     {
-        if (! defined('IN_NEXUS') || ! IN_NEXUS || ($auth && SupportContext::getUser() === null)) {
+        if ($auth && SupportContext::getUser() === null) {
             $qs = $request->getQueryString();
 
             return redirect('/' . $page . '.php' . ($qs ? '?' . $qs : ''));
@@ -23,7 +23,7 @@ abstract class LegacyController extends Controller
 
     protected function legacyPageWithRedirect(Request $request, string $page, bool $auth = true): Response|RedirectResponse
     {
-        if (! defined('IN_NEXUS') || ! IN_NEXUS || ($auth && SupportContext::getUser() === null)) {
+        if ($auth && SupportContext::getUser() === null) {
             $qs = $request->getQueryString();
 
             return redirect('/' . $page . '.php' . ($qs ? '?' . $qs : ''));
@@ -47,7 +47,7 @@ abstract class LegacyController extends Controller
 
     protected function legacyPageRaw(Request $request, string $page, bool $auth = true): Response|RedirectResponse
     {
-        if (! defined('IN_NEXUS') || ! IN_NEXUS || ($auth && SupportContext::getUser() === null)) {
+        if ($auth && SupportContext::getUser() === null) {
             $qs = $request->getQueryString();
 
             return redirect('/' . $page . '.php' . ($qs ? '?' . $qs : ''));

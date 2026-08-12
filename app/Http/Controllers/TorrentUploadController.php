@@ -31,14 +31,14 @@ class TorrentUploadController extends Controller
             return redirect('/login.php?returnto=' . urlencode($request->fullUrl()));
         }
 
-        $currentUser = SupportContext::getUser() ?? $user->toArray();
+        $currentUser = SupportContext::getUser() ?? $user->toLegacyArray();
         SupportContext::setUser($currentUser);
 
         if (empty(SupportContext::getGlobal('lang_upload')) || empty(SupportContext::getGlobal('lang_edit'))) {
             SupportContext::setServerValue('SCRIPT_NAME', '/upload.php');
-            require_once base_path(get_langfile_path());
+            require base_path(get_langfile_path());
             SupportContext::setGlobal('lang_upload', $lang_upload ?? []);
-            require_once base_path(get_langfile_path('edit.php'));
+            require base_path(get_langfile_path('edit.php'));
             SupportContext::setGlobal('lang_edit', $lang_edit ?? []);
         }
 

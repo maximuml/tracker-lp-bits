@@ -25,7 +25,7 @@ class BitbucketUploadController extends Controller
             return redirect('/login.php?returnto=' . urlencode($request->fullUrl()));
         }
 
-        $currentUser = SupportContext::getUser() ?? $user->toArray();
+        $currentUser = SupportContext::getUser() ?? $user->toLegacyArray();
         SupportContext::setUser($currentUser);
 
         $lang = $this->loadLang();
@@ -58,7 +58,7 @@ class BitbucketUploadController extends Controller
             return redirect('/login.php?returnto=' . urlencode($request->fullUrl()));
         }
 
-        $currentUser = SupportContext::getUser() ?? $user->toArray();
+        $currentUser = SupportContext::getUser() ?? $user->toLegacyArray();
         SupportContext::setUser($currentUser);
 
         $lang = $this->loadLang();
@@ -173,7 +173,7 @@ class BitbucketUploadController extends Controller
     {
         if (empty(SupportContext::getGlobal('lang_bitbucketupload'))) {
             SupportContext::setServerValue('SCRIPT_NAME', '/bitbucket-upload.php');
-            require_once base_path(get_langfile_path());
+            require base_path(get_langfile_path());
             SupportContext::setGlobal('lang_bitbucketupload', $lang_bitbucketupload ?? []);
         }
 

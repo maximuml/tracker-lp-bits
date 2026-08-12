@@ -24,6 +24,13 @@ class UserFactory extends Factory
      *
      * @return array<string, mixed>
      */
+    public function configure(): self
+    {
+        return $this->afterCreating(function (User $user) {
+            $user->refresh();
+        });
+    }
+
     public function definition(): array
     {
         $password = "123456";
@@ -53,6 +60,13 @@ class UserFactory extends Factory
             'status' => User::STATUS_CONFIRMED,
             'class' => $class,
             'enabled' => User::ENABLED_YES,
+            'timetype' => 'timealive',
+            'downloadpos' => 'yes',
+            'avatars' => 'yes',
+            'uploaded' => 0,
+            'downloaded' => 0,
+            'seedbonus' => 0.0,
+            'parked' => 'no',
         ];
     }
 

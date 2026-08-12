@@ -34,21 +34,35 @@ final class LegacyDb
      */
     public static function lastQuery(bool|string $all = false, string $format = 'json'): mixed
     {
-        static $connection;
-        if (is_null($connection)) {
-            $connectionName = NexusDB::getConnectionName();
-            if (defined('IN_NEXUS') && IN_NEXUS) {
-                $connection = Capsule::connection($connectionName);
-            } else {
-                $connection = DB::connection($connectionName);
-            }
+        $connectionName = NexusDB::getConnectionName();
+        if (defined('IN_NEXUS') && IN_NEXUS) {
+            $connection = Capsule::connection($connectionName);
+        } else {
+            $connection = DB::connection($connectionName);
         }
 
         if ($all === 'COUNT') {
             return count($connection->getQueryLog());
         }
 
-        $queries = $connection->getRawQueryLog();
+        $grammar = $connection->getQueryGrammar();
+        $queries = array_map(static function (array $log) use ($grammar) {
+            $bindings = array_map(static function ($binding) {
+                if (is_string($binding) && preg_match('//u', $binding) === false) {
+                    return '<binary:' . bin2hex($binding) . '>';
+                }
+                if (is_resource($binding) || gettype($binding) === 'resource (closed)') {
+                    return '<resource>';
+                }
+                return $binding;
+            }, $log['bindings']);
+
+            return [
+                'raw_query' => $grammar->substituteBindingsIntoRawSql($log['query'], $bindings),
+                'time' => $log['time'],
+            ];
+        }, $connection->getQueryLog());
+
         if ($all) {
             return $queries;
         }

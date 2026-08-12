@@ -23,7 +23,7 @@ class UserDetailController extends Controller
             }
         }
 
-        if (! defined('IN_NEXUS') || ! IN_NEXUS || SupportContext::getUser() === null) {
+        if (SupportContext::getUser() === null) {
             return redirect('/userdetails.php?' . $request->getQueryString());
         }
 

@@ -38,6 +38,8 @@ final class LegacyRequestMiddleware
 
     public function handle(Request $request, Closure $next): Response
     {
+        defined('IN_NEXUS') || define('IN_NEXUS', false);
+
         $request = $this->prepareRequest($request);
 
         // Make the rewritten request available to the container and URL generator
@@ -74,6 +76,10 @@ final class LegacyRequestMiddleware
             $parsedUrl = ['path' => '/', 'query' => ''];
         }
         $requestPath = $parsedUrl['path'] ?? '/';
+
+        if (str_starts_with($requestPath, '/api/v1/')) {
+            return $request;
+        }
 
         $scriptFilename = (string) ($server['SCRIPT_FILENAME'] ?? public_path('index.php'));
         $scriptName = (string) ($server['SCRIPT_NAME'] ?? '');
@@ -211,7 +217,7 @@ final class LegacyRequestMiddleware
             $REPORTMAIL = SupportContext::getGlobal('REPORTMAIL');
             $BASEURL = SupportContext::getGlobal('BASEURL');
             $before = get_defined_vars();
-            require_once $langPath;
+            require $langPath;
             foreach (array_diff_key(get_defined_vars(), $before) as $langKey => $langValue) {
                 if (in_array($langKey, ['before', 'path', 'langPath', 'scriptLangFiles', 'rootpath', 'scriptLangFile'], true)) {
                     continue;

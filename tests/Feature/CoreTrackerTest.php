@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Category;
 use App\Models\Comment;
 use App\Models\Torrent;
 use App\Models\User;
@@ -41,7 +42,10 @@ class CoreTrackerTest extends TestCase
     public function test_api_torrents_listing_returns_results(): void
     {
         $user = User::factory()->create();
-        Torrent::factory()->owner($user)->create();
+        $category = Category::where('mode', \App\Models\SearchBox::getBrowseMode())->first()
+            ?? Category::factory()->create();
+
+        Torrent::factory()->owner($user)->category($category->id)->create();
 
         Sanctum::actingAs($user, ['torrent:list']);
 

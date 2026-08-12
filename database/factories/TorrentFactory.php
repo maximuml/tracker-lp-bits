@@ -83,6 +83,18 @@ class TorrentFactory extends Factory
     }
 
     /**
+     * Use a specific category id for the torrent.
+     *
+     * @return $this
+     */
+    public function category(int $categoryId): self
+    {
+        return $this->state(fn (array $attributes) => [
+            'category' => $categoryId,
+        ]);
+    }
+
+    /**
      * Mark the torrent as banned.
      *
      * @return $this

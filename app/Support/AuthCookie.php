@@ -280,37 +280,37 @@ final class AuthCookie
     {
         $log = 'cookie: ' . json_encode($cookie);
         if (empty($cookie[self::COOKIE_NAME])) {
-            \do_log("$log, param not enough");
+            Logger::writeWithContext("$log, param not enough");
             return null;
         }
 
         $base64Decoded = base64_decode($cookie[self::COOKIE_NAME]);
         if (empty($base64Decoded)) {
-            \do_log("$log, invalid c_secure_pass");
+            Logger::writeWithContext("$log, invalid c_secure_pass");
             return null;
         }
 
         $log .= ", base64 decoded: $base64Decoded";
         $tokenJsonAndSignature = explode('.', $base64Decoded);
         if (count($tokenJsonAndSignature) !== 2) {
-            \do_log("$log, invalid c_secure_pass base64_decoded");
+            Logger::writeWithContext("$log, invalid c_secure_pass base64_decoded");
             return null;
         }
 
         $tokenJson = $tokenJsonAndSignature[0];
         $signature = $tokenJsonAndSignature[1];
         if (empty($tokenJson) || empty($signature)) {
-            \do_log("$log, no tokenJson or signature");
+            Logger::writeWithContext("$log, no tokenJson or signature");
             return null;
         }
 
         $tokenData = json_decode($tokenJson, true);
         if (!isset($tokenData['user_id'])) {
-            \do_log("$log, no user_id");
+            Logger::writeWithContext("$log, no user_id");
             return null;
         }
         if (!isset($tokenData['expires']) || $tokenData['expires'] < time()) {
-            \do_log("$log, signature expired");
+            Logger::writeWithContext("$log, signature expired");
             return null;
         }
 
@@ -336,7 +336,7 @@ final class AuthCookie
     {
         $log = 'cookie: ' . json_encode($cookie);
         if (empty($cookie[self::COOKIE_NAME])) {
-            \do_log("$log, param not enough");
+            Logger::writeWithContext("$log, param not enough");
             return null;
         }
 
@@ -370,7 +370,7 @@ final class AuthCookie
 
         $authKey = $isArray ? $row['auth_key'] : $row->auth_key;
         if (self::verifyToken($token, (string) $authKey) === null) {
-            \do_log("$log, !hash_equals");
+            Logger::writeWithContext("$log, !hash_equals");
             return null;
         }
 
@@ -403,7 +403,7 @@ final class AuthCookie
             $result = $query->first();
             $row = $result ? array_merge((array) $result, array_values((array) $result)) : null;
             if (!$row) {
-                \do_log("$log, user not exists");
+                Logger::writeWithContext("$log, user not exists");
                 return null;
             }
             return $row;
@@ -411,7 +411,7 @@ final class AuthCookie
 
         $row = \App\Models\User::query()->find($id);
         if (!$row) {
-            \do_log("$log, user not exists");
+            Logger::writeWithContext("$log, user not exists");
             return null;
         }
         $checkFields = ['status'];

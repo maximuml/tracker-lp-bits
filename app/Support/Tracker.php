@@ -39,7 +39,7 @@ final class Tracker
             $log .= ', ById has value';
         }
 
-        \do_log("$log, ssl_torrent: $ssl_torrent, base_announce_url: $base_announce_url");
+        Logger::writeWithContext("$log, ssl_torrent: $ssl_torrent, base_announce_url: $base_announce_url");
 
         if ($combine) {
             return $ssl_torrent . $base_announce_url;

@@ -96,7 +96,7 @@ class Bonus
         }
         $medalAdditionalFactor = floatval($medalQuery->value('factor') ?? 0);
 
-        \do_log("$logPrefix, sql: $sql, count: " . count($torrentResult) . ", officialTag: $officialTag, officialAdditionalFactor: $officialAdditionalFactor, zeroBonusTag: $zeroBonusTag, zeroBonusFactor: $zeroBonusFactor, medalAdditionalFactor: $medalAdditionalFactor");
+        Logger::writeWithContext("$logPrefix, sql: $sql, count: " . count($torrentResult) . ", officialTag: $officialTag, officialAdditionalFactor: $officialAdditionalFactor, zeroBonusTag: $zeroBonusTag, zeroBonusFactor: $zeroBonusFactor, medalAdditionalFactor: $medalAdditionalFactor");
 
         $result = self::aggregateSeedBonus(
             $torrentResult,
@@ -108,14 +108,14 @@ class Bonus
             $medalAdditionalFactor,
             $officialAdditionalFactor,
             function ($torrent, $weeks_alive, $gb_size_raw, $gb_size, $temp, $officialAIncrease) use ($logPrefix) {
-                \do_log(sprintf(
+                Logger::writeWithContext(sprintf(
                     "$logPrefix, torrent: %s, peer ID: %s, weeks: %s, size_raw: %s GB, size: %s GB, increase A: %s, increase official A: %s",
                     $torrent['id'], $torrent['peerID'] ?? '', $weeks_alive, $gb_size_raw, $gb_size, $temp, $officialAIncrease
                 ), 'debug');
             },
         );
 
-        \do_log("$logPrefix, result: " . json_encode($result));
+        Logger::writeWithContext("$logPrefix, result: " . json_encode($result));
 
         return $result;
     }
@@ -358,7 +358,7 @@ class Bonus
             ->where('enabled', \App\Models\User::ENABLED_YES)
             ->sum('seed_points_per_hour');
 
-        \do_log("[HAREM_ADDITION], user: $uid, addition: $addition");
+        Logger::writeWithContext("[HAREM_ADDITION], user: $uid, addition: $addition");
 
         return $addition;
     }

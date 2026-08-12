@@ -285,7 +285,7 @@ final class Ratio
         $downed = (float) ($row['downloaded'] ?? 0);
 
         if ($html) {
-            return self::userRatioHtml($uped, $downed, \nexus_trans('label.ratio'), \nexus_trans('label.infinite'));
+            return self::userRatioHtml($uped, $downed, Locale::trans('label.ratio'), Locale::trans('label.infinite'));
         }
 
         return self::userRatioNumeric($uped, $downed);

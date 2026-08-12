@@ -41,7 +41,7 @@ final class Permissions
             if ($fail) {
                 goto fail;
             }
-            \do_log("$log, unauthenticated, false");
+            Logger::writeWithContext("$log, unauthenticated, false");
             return false;
         }
 
@@ -54,7 +54,7 @@ final class Permissions
         $log .= ", userClass: $class";
 
         if ($class == User::CLASS_STAFF_LEADER) {
-            \do_log("$log, CLASS_STAFF_LEADER, true");
+            Logger::writeWithContext("$log, CLASS_STAFF_LEADER, true");
             self::$userCanCache[$permission][$uid] = true;
             return true;
         }
@@ -64,19 +64,19 @@ final class Permissions
 
         if (self::$sequence === 0) {
             self::$sequence++;
-            $log .= ', userAllPermissions: ' . \nexus_json_encode($userAllPermissions);
+            $log .= ', userAllPermissions: ' . Json::encode($userAllPermissions);
         }
 
         $log .= ", result: " . ($result ? 'true' : 'false');
 
         if (!$fail || $result) {
-            \do_log($log);
+            Logger::writeWithContext($log);
             self::$userCanCache[$permission][$uid] = $result;
             return $result;
         }
 
         fail:
-        \do_log("$log, [FAIL]");
+        Logger::writeWithContext("$log, [FAIL]");
         if (defined('IN_NEXUS') && IN_NEXUS && !(defined('IN_TRACKER') && IN_TRACKER)) {
             $lang_functions = SupportContext::getLangFunctions();
             $requireClass = \App\Support\Config\SiteConfig::current()->authority->permission($permission);
@@ -104,8 +104,8 @@ final class Permissions
 
     public static function hasRoleWorkSeeding(int $uid): mixed
     {
-        $result = \apply_filter('user_has_role_work_seeding', false, $uid);
-        \do_log("uid: $uid, result: " . ($result ? 'true' : 'false'));
+        $result = Hooks::applyFilter('user_has_role_work_seeding', false, $uid);
+        Logger::writeWithContext("uid: $uid, result: " . ($result ? 'true' : 'false'));
         return $result;
     }
 }

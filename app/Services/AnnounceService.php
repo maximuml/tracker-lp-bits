@@ -25,6 +25,7 @@ use App\Services\Announce\TrafficAccountant;
 use App\Services\Announce\TrafficResult;
 use App\Support\LegacyDb;
 use App\Support\SupportContext;
+use App\Support\UserDisplay;
 use App\Support\Tracker;
 use App\Support\Url;
 use App\Utils\MsgAlert;
@@ -232,7 +233,7 @@ final class AnnounceService
             throw TrackerException::failure('Your downloading privileges have been disabled! (Read the rules)');
         }
 
-        $this->isDonor = is_donor($this->user);
+        $this->isDonor = UserDisplay::isDonor($this->user);
         $this->user['__is_donor'] = $this->isDonor;
 
         $this->checkTrackerUrl();

@@ -338,10 +338,10 @@ class PageLayout
             }
             ?>
                 <a href="medal.php">[<?php 
-            echo nexus_trans('medal.label');
+            echo Locale::trans('medal.label');
             ?>]</a>
                 <a href="task.php">[<?php 
-            echo nexus_trans('exam.type_task');
+            echo Locale::trans('exam.type_task');
             ?>]</a>
                 <font class = 'color_invite'><?php 
             echo $context->lang['text_invite'];
@@ -412,7 +412,7 @@ class PageLayout
                             <span><input type="text" name="search" style="width: 80px;height: 12px" value="<?php 
                 echo $context->requestSearch ?? '';
                 ?>" placeholder="<?php 
-                echo nexus_trans('search.search_keyword');
+                echo Locale::trans('search.search_keyword');
                 ?>"/></span>
                         </div>
                         <div>
@@ -422,7 +422,7 @@ class PageLayout
                         </div>
                     </div>
                     <div><input type="submit" value="<?php 
-                echo nexus_trans('search.global_search');
+                echo Locale::trans('search.global_search');
                 ?>" style="width: 39px;white-space: break-spaces;padding: 0" /></div>
                 </div>
             </form>
@@ -656,7 +656,7 @@ class PageLayout
         $totaltime = $tend - nexus()->getStartTimestamp();
         $year = substr($context->dateFounded, 0, 4);
         $yearfounded = $year ? $year : 2007;
-        print " (c) " . " <a href=\"" . get_protocol_prefix() . $context->baseUrl . "\" target=\"_self\">" . $context->siteName . "</a> " . ($context->icpLicenseMain ? " " . $context->icpLicenseMain . " " : "") . (date("Y") != $yearfounded ? $yearfounded . "-" : "") . date("Y") . " " . VERSION . "<br /><br />";
+        print " (c) " . " <a href=\"" . Http::protocolPrefix(Url::isSecure()) . $context->baseUrl . "\" target=\"_self\">" . $context->siteName . "</a> " . ($context->icpLicenseMain ? " " . $context->icpLicenseMain . " " : "") . (date("Y") != $yearfounded ? $yearfounded . "-" : "") . date("Y") . " " . VERSION . "<br /><br />";
         printf("[page created in <b> %s </b> sec", sprintf("%.3f", $totaltime));
         $debugQuery = $context->enableSqlDebugTweak == 'yes' && $context->userClass() >= $context->sqlDebugTweak;
         if ($debugQuery) {

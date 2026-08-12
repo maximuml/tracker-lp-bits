@@ -57,7 +57,7 @@ final class Description
                         return $matches[1];
                     }
                     $url = \Nexus\Attachment\Storage::getDriver($item->driver)->getImageUrl($item->location);
-                    \do_log(sprintf('location: %s, driver: %s, url: %s', $item->location, $item->driver, $url));
+                    Logger::writeWithContext(sprintf('location: %s, driver: %s, url: %s', $item->location, $item->driver, $url));
 
                     return str_replace($matches[2], $url, $matches[1]);
                 }, $description);
@@ -152,7 +152,7 @@ final class Description
     public static function imageFromDescription(array $descriptionArr, bool $first = false, bool $useDefault = true): array|string
     {
         if ($first) {
-            $defaultUrl = $useDefault ? \getSchemeAndHttpHost() . '/pic/nophoto.gif' : '';
+            $defaultUrl = $useDefault ? Url::schemeAndHost() . '/pic/nophoto.gif' : '';
 
             return self::firstImageUrl($descriptionArr, $defaultUrl);
         }

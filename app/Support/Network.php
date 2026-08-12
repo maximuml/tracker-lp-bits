@@ -324,12 +324,12 @@ final class Network
             try {
                 $database = \nexus_env('GEOIP2_DATABASE');
                 if (empty($database)) {
-                    \do_log('no geoip2 database.');
+                    Logger::writeWithContext('no geoip2 database.');
 
                     return false;
                 }
                 if (! is_readable($database)) {
-                    \do_log("geoip2 database: $database is not readable.");
+                    Logger::writeWithContext("geoip2 database: $database is not readable.");
 
                     return false;
                 }
@@ -353,13 +353,13 @@ final class Network
                 $info['continent'] = $continentName;
                 $info['continent_en'] = $record->continent->names['en'] ?? '';
             } catch (\Exception $exception) {
-                \do_log($exception->getMessage() . ', trace: ' . $exception->getTraceAsString(), 'error');
+                Logger::writeWithContext($exception->getMessage() . ', trace: ' . $exception->getTraceAsString(), 'error');
             }
 
             return $info;
         });
 
-        \do_log('ip: ' . $ip . ', result: ' . Json::encode($locationInfo));
+        Logger::writeWithContext('ip: ' . $ip . ', result: ' . Json::encode($locationInfo));
 
         if ($locationInfo === false) {
             return false;
@@ -398,7 +398,7 @@ final class Network
         try {
             $database = \nexus_env('GEOIP2_ASN_DATABASE');
             if (!file_exists($database) || !is_readable($database)) {
-                \do_log("GEOIP2_ASN_DATABASE: $database not exists or not readable", 'debug');
+                Logger::writeWithContext("GEOIP2_ASN_DATABASE: $database not exists or not readable", 'debug');
                 return false;
             }
 
@@ -425,7 +425,7 @@ final class Network
                 $redis->hSet($key, $asn, $notFoundCacheValue);
             }
         } catch (\Throwable $throwable) {
-            \do_log("ip: $ip, " . $throwable->getMessage());
+            Logger::writeWithContext("ip: $ip, " . $throwable->getMessage());
             if (isset($asn)) {
                 $redis->hSet($key, $asn, $notFoundCacheValue);
             }

@@ -144,7 +144,7 @@ final class LegacyResponse
             \App\Support\Log::writeWithContext($msg, 'mod');
         }
         if (\function_exists('do_log')) {
-            \do_log($msg, 'error');
+            Logger::writeWithContext($msg, 'error');
         }
 
         if ($stdhead) {
@@ -248,7 +248,7 @@ final class LegacyResponse
     public static function redirect(string $url): void
     {
         if (substr($url, 0, 4) != 'http') {
-            $url = \getSchemeAndHttpHost() . '/' . trim($url, '/');
+            $url = Url::schemeAndHost() . '/' . trim($url, '/');
         }
 
         if (headers_sent()) {

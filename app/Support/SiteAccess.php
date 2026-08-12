@@ -40,7 +40,7 @@ final class SiteAccess
 
         $valueKey = "guest_visit_value_$guestVisitType";
         if (empty($setting[$valueKey])) {
-            \do_log("setting: security.$valueKey empty");
+            Logger::writeWithContext("setting: security.$valueKey empty");
             die(0);
         }
 
@@ -49,7 +49,7 @@ final class SiteAccess
         if ($guestVisitType === 'static_page') {
             $pageFile = ROOT_PATH . 'resources/static-pages/' . $guestVisitValue;
             if (! file_exists($pageFile) || ! is_readable($pageFile)) {
-                \do_log("pageFile: $pageFile is not exists or readable");
+                Logger::writeWithContext("pageFile: $pageFile is not exists or readable");
                 die(0);
             }
             die(\file_get_contents($pageFile) ?: '');
@@ -84,16 +84,16 @@ final class SiteAccess
 
         if ($loginType === 'secret') {
             if (empty(SupportContext::getRequestInput('secret'))) {
-                \do_log('no secret');
+                Logger::writeWithContext('no secret');
                 return false;
             }
             $secret = SupportContext::getRequestInput('secret');
             if ($secret !== $setting['login_secret']) {
-                \do_log('invlaid secret: ' . $secret);
+                Logger::writeWithContext('invlaid secret: ' . $secret);
                 return false;
             }
             if ($setting['login_secret_deadline'] < date('Y-m-d H:i:s')) {
-                \do_log("secret: {$secret} expires(deadline: {$setting['login_secret_deadline']})");
+                Logger::writeWithContext("secret: {$secret} expires(deadline: {$setting['login_secret_deadline']})");
                 return false;
             }
             return true;

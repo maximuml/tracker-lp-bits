@@ -261,7 +261,7 @@ TD;
                         }
 
                         $checked = '';
-                        \do_log("toCheck: $checkedValues, $namePrefix - {$item->id}", 'debug');
+                        Logger::writeWithContext("toCheck: $checkedValues, $namePrefix - {$item->id}", 'debug');
                         if ($checkedValues) {
                             if (
                                 str_contains($checkedValues, "[{$namePrefix}{$item->id}]")

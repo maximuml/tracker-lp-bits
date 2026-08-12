@@ -83,7 +83,7 @@ final class Settings
         if (! empty($records)) {
             Setting::query()->upsert($records, ['name'], ['value', 'updated_at']);
         }
-        \clear_setting_cache();
-        \do_action('nexus_setting_update');
+        Cache::clearSettings();
+        Hooks::doAction('nexus_setting_update');
     }
 }

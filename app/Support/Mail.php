@@ -76,7 +76,7 @@ final class Mail
         string $hdrEncoding,
         array $mailConfig,
     ): bool {
-        \do_log("to: $to, fromname: $fromName, fromemail: $fromEmail, subject: $subject, body: $body. type: $type");
+        Logger::writeWithContext("to: $to, fromname: $fromName, fromemail: $fromEmail, subject: $subject, body: $body. type: $type");
 
         $siteName = $mailConfig['site_name'] ?? '';
         $siteEmail = $mailConfig['site_email'] ?? '';

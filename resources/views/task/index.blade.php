@@ -1,1 +1,1 @@
-@php include resource_path('views/task/_task_legacy.php'); @endphp
+@include('task._task')

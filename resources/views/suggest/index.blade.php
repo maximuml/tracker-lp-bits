@@ -1,1 +1,1 @@
-@php include resource_path('views/suggest/_suggest_legacy.php'); @endphp
+@include('suggest._suggest')

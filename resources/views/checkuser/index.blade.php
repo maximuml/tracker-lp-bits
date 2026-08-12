@@ -1,1 +1,1 @@
-@php include resource_path('views/checkuser/_checkuser_legacy.php'); @endphp
+@include('checkuser._checkuser')

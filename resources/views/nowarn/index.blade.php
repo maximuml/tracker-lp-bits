@@ -1,17 +1,10 @@
 @php
-function bark($msg) {
-    \App\Support\Html::stdhead();
-    \App\Support\Html::stdMessage("Update Has Failed !", $msg);
-    \App\Support\Html::stdfoot();
-    exit;
-}
-
 if ((\App\Support\SupportContext::getPost("nowarned") !== null) && (\App\Support\SupportContext::getPost("nowarned") == "nowarned")) {
     if (\App\Support\UserDisplay::currentClass() < UC_MODERATOR) {
         \App\Support\LegacyResponse::abort("Sorry", "Access denied.");
     }
     if (empty(\App\Support\SupportContext::getPost("usernw")) && empty(\App\Support\SupportContext::getPost("desact")) && empty(\App\Support\SupportContext::getPost("delete"))) {
-        bark("You Must Select A User To Edit.");
+        \App\Support\LegacyResponse::abort("Update Has Failed !", "You Must Select A User To Edit.");
     }
 
     if (!empty(\App\Support\SupportContext::getPost("usernw"))) {

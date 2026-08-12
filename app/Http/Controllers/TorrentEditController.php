@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Torrent;
+use App\Repositories\TorrentDetailRepository;
 use App\Repositories\TorrentEditRepository;
 use App\Support\SupportContext;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 
 class TorrentEditController extends Controller
@@ -17,7 +20,46 @@ class TorrentEditController extends Controller
             return redirect('/edit.php' . ($qs ? '?' . $qs : ''));
         }
 
-        return view('torrent.edit');
+        $id = (int) $request->input('id', 0);
+        if ($id <= 0) {
+            abort(404);
+        }
+
+        $torrent = Torrent::query()->find($id);
+        if (! $torrent instanceof Torrent) {
+            abort(404);
+        }
+
+        $row = TorrentDetailRepository::getTorrent($id);
+        if (empty($row)) {
+            abort(404);
+        }
+
+        $user = Auth::guard('nexus-web')->user();
+        if ($user === null) {
+            return redirect('/login.php?returnto=' . urlencode($request->fullUrl()));
+        }
+
+        if (empty(SupportContext::getGlobal('lang_edit')) || empty(SupportContext::getGlobal('lang_functions'))) {
+            SupportContext::setServerValue('SCRIPT_NAME', '/edit.php');
+            require_once base_path(get_langfile_path('functions.php'));
+            SupportContext::setGlobal('lang_functions', $lang_functions ?? []);
+            require_once base_path(get_langfile_path());
+            SupportContext::setGlobal('lang_edit', $lang_edit ?? []);
+        }
+
+        $currentUser = SupportContext::getUser();
+        SupportContext::setUser($currentUser);
+
+        $langEdit = SupportContext::getGlobal('lang_edit') ?? [];
+        $headTitle = ($langEdit['head_edit_torrent'] ?? '') . '"' . $row['name'] . '"';
+
+        return view('torrent.edit', [
+            'torrentId' => $id,
+            'torrentRow' => $row,
+            'currentUser' => $currentUser,
+            'headTitle' => $headTitle,
+        ]);
     }
 
     public function legacyUpdate(Request $request, TorrentEditRepository $repository): RedirectResponse

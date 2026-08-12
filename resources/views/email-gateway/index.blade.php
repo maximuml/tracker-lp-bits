@@ -1,1 +1,1 @@
-@php include resource_path('views/email-gateway/_email-gateway_legacy.php'); @endphp
+@include('email-gateway._email-gateway')

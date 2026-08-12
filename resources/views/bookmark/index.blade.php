@@ -1,1 +1,1 @@
-@php include resource_path('views/bookmark/_bookmark_legacy.php'); @endphp
+@include('bookmark._bookmark')

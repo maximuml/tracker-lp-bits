@@ -1,1 +1,1 @@
-@php include resource_path('views/getattachment/_getattachment_legacy.php'); @endphp
+@include('getattachment._getattachment')

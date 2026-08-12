@@ -1,1 +1,1 @@
-@php include resource_path('views/reset/_reset_legacy.php'); @endphp
+@include('reset._reset')

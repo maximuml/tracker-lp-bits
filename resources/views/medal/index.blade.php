@@ -1,1 +1,1 @@
-@php include resource_path('views/medal/_medal_legacy.php'); @endphp
+@include('medal._medal')

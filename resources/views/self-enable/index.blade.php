@@ -1,1 +1,1 @@
-@php include resource_path('views/self-enable/_self-enable_legacy.php'); @endphp
+@include('self-enable._self-enable')

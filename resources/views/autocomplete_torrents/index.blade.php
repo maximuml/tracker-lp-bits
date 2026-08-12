@@ -1,1 +1,1 @@
-@php include resource_path('views/autocomplete_torrents/_autocomplete_torrents_legacy.php'); @endphp
+@include('autocomplete_torrents._autocomplete_torrents')

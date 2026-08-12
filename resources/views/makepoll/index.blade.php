@@ -1,1 +1,1 @@
-@php include resource_path('views/makepoll/_makepoll_legacy.php'); @endphp
+@include('makepoll._makepoll')

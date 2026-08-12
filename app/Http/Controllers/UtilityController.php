@@ -38,7 +38,7 @@ class UtilityController extends LegacyController
         }
 
         if (! class_exists('AjaxInterface')) {
-            view('ajax._ajax_legacy')->render();
+            view('ajax._ajax')->render();
         }
 
         try {

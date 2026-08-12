@@ -1,1 +1,1 @@
-@include('donate._donate_legacy')
+@include('donate._donate')

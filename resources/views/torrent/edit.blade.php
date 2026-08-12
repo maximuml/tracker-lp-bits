@@ -1,1 +1,7 @@
-@php include resource_path('views/torrent/_edit_legacy.php'); @endphp
+@extends('layouts.legacy_details')
+
+@section('title', $headTitle)
+
+@section('content')
+    @include('torrent._edit')
+@endsection

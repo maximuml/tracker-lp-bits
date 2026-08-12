@@ -206,6 +206,10 @@ final class LegacyRequestMiddleware
                 continue;
             }
 
+            $SITENAME = SupportContext::getGlobal('SITENAME');
+            $SITEEMAIL = SupportContext::getGlobal('SITEEMAIL');
+            $REPORTMAIL = SupportContext::getGlobal('REPORTMAIL');
+            $BASEURL = SupportContext::getGlobal('BASEURL');
             $before = get_defined_vars();
             require_once $langPath;
             foreach (array_diff_key(get_defined_vars(), $before) as $langKey => $langValue) {

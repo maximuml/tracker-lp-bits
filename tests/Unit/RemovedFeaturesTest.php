@@ -16,11 +16,11 @@ class RemovedFeaturesTest extends TestCase
         // present in the migrated views/controllers either.
         foreach ([
             base_path('resources/views/usercp/index.blade.php'),
-            base_path('resources/views/usercp/_usercp_legacy.php'),
+            base_path('resources/views/usercp/_usercp.blade.php'),
             base_path('resources/views/my/bonus.blade.php'),
-            base_path('resources/views/my/_bonus_legacy.php'),
+            base_path('resources/views/my/_bonus.blade.php'),
             base_path('resources/views/topten/index.blade.php'),
-            base_path('resources/views/topten/_topten_legacy.php'),
+            base_path('resources/views/topten/_topten.blade.php'),
             base_path('app/Support/Legacy/functions.php'),
         ] as $file) {
             $this->assertFileExists($file);
@@ -45,7 +45,7 @@ class RemovedFeaturesTest extends TestCase
             base_path('resources/views/torrents/upload.blade.php'),
             base_path('resources/views/torrents/_upload.blade.php'),
             base_path('resources/views/torrent/edit.blade.php'),
-            base_path('resources/views/torrent/_edit_legacy.php'),
+            base_path('resources/views/torrent/_edit.blade.php'),
             app_path('Http/Controllers/TorrentUploadController.php'),
             app_path('Http/Controllers/TorrentEditController.php'),
             base_path('app/Support/Legacy/functions.php'),

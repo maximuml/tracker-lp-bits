@@ -1,1 +1,1 @@
-@include('moforums._moforums_legacy')
+@include('moforums._moforums')

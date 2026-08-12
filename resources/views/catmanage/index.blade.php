@@ -1,1 +1,1 @@
-@include('catmanage._catmanage_legacy')
+@include('catmanage._catmanage')

@@ -1,1 +1,1 @@
-@php include resource_path('views/magic/_magic_legacy.php'); @endphp
+@include('magic._magic')

@@ -51,7 +51,7 @@ class UserFactory extends Factory
         return [
             'username' => $username,
             'email' => $email,
-            'secret' => mksecret(),
+            'secret' => $secret,
             'editsecret' => "",
             'passhash' => $passhash,
             'passkey' => Token::randomHex(16),

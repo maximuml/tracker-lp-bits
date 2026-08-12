@@ -371,3 +371,12 @@ PR #299 converts the remaining `resources/views/**/_*_legacy.php` partials to `*
 - `/page.php` is a dynamic loader and requires a `view` query parameter; the converted `resources/views/page/_page.blade.php` now returns a 400 response when `view` is missing instead of throwing a 500 `RuntimeException`.
 - `/image.php` only works with `?action=regimage&imagehash=<valid>`; without params it returns 404 (expected captcha behavior when the image captcha is disabled).
 
+### Phase 12 combined re-run notes
+
+- After the MeiliSearch `visible`/`banned`/`anonymous` yes/no cast fix and the `torrent/_edit` hidden-input fix, keyword search (`/torrents.php?search=<name>`), category/promotion filters, and torrent editing all work for PRs #299-#302.
+- `/modtask.php` is a POST-action processor, not a browseable staff page. A GET request without `action` falls through to `puke()` and displays "Permission denied. For security reason, we logged this action" even when the `Permission::can(MANAGE_USER_BASIC_INFO)` check succeeds. To verify it, POST `action=edituser` or `action=confirmuser` with all required fields from `userdetails.php`.
+- `/attachments.php` is not a registered route in the combined branch; the route appears to be handled through `attachments/` or not exposed as a public `.php` page, so a 404 there is expected.
+- `php -l` on changed files must run from the host side because `.git` is not mounted into the `php` container. Use `git diff --name-only origin/php8...HEAD -- '*.php' | sed 's|^|/var/www/html/|' | xargs -P4 -n1 docker compose exec -T php php -l`.
+- `CriticalPathTest` sets `basic.BASEURL='openresty'` and must be followed by a restore to `localhost` plus Redis/Laravel cache clears before host-side browser/curl tests.
+- After clearing caches, run `docker compose exec -T php php artisan view:cache` and `docker compose exec -T php php artisan route:cache` so legacy pages do not recompile on every request.
+

@@ -35,7 +35,7 @@ class IpLog extends NexusModel
      */
     private function getIpLocation(string $ip)
     {
-        $result = get_ip_location_from_geoip($ip);
+        $result = \App\Support\Network::geoIpInfo($ip) ?: [];
         $out = $result['name'] ?? '';
         $suffix = [];
         if (!empty($result['city_en'])) {

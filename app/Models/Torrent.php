@@ -338,7 +338,7 @@ class Torrent extends NexusModel
         $text = nexus_trans('torrent.pos_state_' . $this->pos_state);
         if ($this->pos_state != Torrent::POS_STATE_STICKY_NONE) {
             if ($this->pos_state_until) {
-                $append = format_datetime($this->pos_state_until);
+                $append = \App\Support\Time::formatDateTime($this->pos_state_until);
             } else {
                 $append = nexus_trans('label.permanent');
             }

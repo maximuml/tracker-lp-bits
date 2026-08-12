@@ -345,10 +345,10 @@ final class AnnounceService
             return;
         }
 
-        if ($this->ipv4 && isIPSeedBox($this->ipv4, $this->userId)) {
+        if ($this->ipv4 && \App\Support\Network::isSeedBox($this->ipv4, $this->userId)) {
             $this->isIPSeedBox = true;
         }
-        if (!$this->isIPSeedBox && $this->ipv6 && isIPSeedBox($this->ipv6, $this->userId)) {
+        if (!$this->isIPSeedBox && $this->ipv6 && \App\Support\Network::isSeedBox($this->ipv6, $this->userId)) {
             $this->isIPSeedBox = true;
         }
     }

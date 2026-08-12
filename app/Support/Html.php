@@ -306,8 +306,9 @@ final class Html
      *    visibility is toggled per-child by tipsy at hover time.
      *
      * @param  iterable<array{id?: mixed, content?: mixed}>  $items
+     * @param  int  $width  Legacy argument, ignored (tooltips are sized by CSS)
      */
-    public static function tooltipContainer(iterable $items): string
+    public static function tooltipContainer(iterable $items, int $width = 400): string
     {
         $children = '';
         foreach ($items as $item) {

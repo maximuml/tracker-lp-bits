@@ -1,11 +1,11 @@
 @php
-stdhead($title ?? $__env->yieldContent('title'));
-begin_main_frame();
+\App\Support\Html::stdhead($title ?? $__env->yieldContent('title'));
+\App\Support\Frame::mainFrameOpen();
 @endphp
 
 @yield('content')
 
 @php
-end_main_frame();
-stdfoot();
+\App\Support\Frame::mainFrameClose();
+\App\Support\Html::stdfoot();
 @endphp

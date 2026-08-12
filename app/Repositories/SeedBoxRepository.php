@@ -211,7 +211,7 @@ class SeedBoxRepository extends BaseRepository
             $enableSeedBox = \App\Support\Config\SiteConfig::current()->seedBox->enabled();
         }
         foreach (Arr::wrap($ipArr) as $ip) {
-            if ((isIPV4($ip) || isIPV6($ip)) && $enableSeedBox && isIPSeedBox($ip, $uid)) {
+            if ((\App\Support\Network::isIpv4($ip) || \App\Support\Network::isIpv6($ip)) && $enableSeedBox && \App\Support\Network::isSeedBox((string) $ip, (int) $uid)) {
                 return $this->getSeedBoxIcon();
             }
         }

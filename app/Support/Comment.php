@@ -74,7 +74,7 @@ final class Comment
         if (strpos($s, '[code]') !== false && strpos($s, '[/code]') !== false) {
             $s = (string) preg_replace_callback(
                 '/\[code\](.+?)\[\/code\]/is',
-                static fn (array $m): string => \formatCode($m[1]),
+                static fn (array $m): string => self::addTempCode(\App\Support\BBCode::code((string) $m[1], (string) \nexus_trans('label.text_code'))),
                 $s,
             );
         }

@@ -70,7 +70,7 @@ class UserMetaResource extends Resource
                 ,
                 TextColumn::make('created_at')
                     ->label(__('label.created_at'))
-                    ->formatStateUsing(fn ($state) => format_datetime($state))
+                    ->formatStateUsing(fn ($state) => \App\Support\Time::formatDateTime($state))
                 ,
             ])
             ->defaultSort('id', 'desc')

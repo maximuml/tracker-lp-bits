@@ -211,7 +211,7 @@ final class TorrentOps
         $isSeedBoxRuleEnabled = \App\Support\Config\SiteConfig::current()->seedBox->enabled();
         $log .= ", isSeedBoxRuleEnabled: $isSeedBoxRuleEnabled, user class: {$user['class']}, __is_donor: {$user['__is_donor']}";
         if ($isSeedBoxRuleEnabled && $torrent['owner'] != $user['id'] && !($user['class'] >= \App\Models\User::CLASS_VIP || $user['__is_donor'])) {
-            $isIPSeedBox = \isIPSeedBox($queries['ip'], $user['id']);
+            $isIPSeedBox = \App\Support\Network::isSeedBox((string) $queries['ip'], (int) $user['id']);
             $log .= ", isIPSeedBox: " . ($isIPSeedBox ? 'true' : 'false');
             if ($isIPSeedBox) {
                 $isSeedBoxNoPromotion = \App\Support\Config\SiteConfig::current()->seedBox->noPromotion();

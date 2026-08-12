@@ -21,7 +21,7 @@ class MessageResource extends JsonResource
             'subject' => $this->subject,
             'msg' => htmlspecialchars_decode(strip_all_tags($this->msg)),
             'added_human' => $this->added->diffForHumans(),
-            'added' => format_datetime($this->added),
+            'added' => \App\Support\Time::formatDateTime($this->added),
             'send_user' => new UserResource($this->whenLoaded('send_user')),
         ];
     }

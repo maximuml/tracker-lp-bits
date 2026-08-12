@@ -23,7 +23,7 @@ class TorrentOperationLogResource extends JsonResource
             'uid' => $this->uid,
             'username' => $this->user->username,
             'comment' => $this->comment,
-            'created_at' => format_datetime($this->created_at)
+            'created_at' => \App\Support\Time::formatDateTime($this->created_at)
         ];
     }
 }

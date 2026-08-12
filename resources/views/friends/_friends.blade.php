@@ -281,7 +281,7 @@ if (!$title)
 $title = get_user_class_name($friend["class"],false,true,true);
 $body1 = get_username($friend["fuid"]) .
 " ($title)<br /><br />".$lang_friends['text_last_seen_on']. $friend['last_access'] .
-"<br />(" . get_elapsed_time(strtotime($friend[last_access])) . $lang_friends['text_ago'].")";
+"<br />(" . \App\Support\Format::getElapsedTime((int) strtotime($friend['last_access'])) . $lang_friends['text_ago'].")";
 $body2 = "<a href=friends.php?id=$userid&action=add&type=friend&targetid=" . $friend['fuid'] . ">".$lang_friends['text_add_to_friends']."</a>".
 "<br /><br /><a href=sendmessage.php?receiver=" . $friend['fuid'] . ">".$lang_friends['text_send_pm']."</a>";
 $avatar = ($CURUSER["avatars"] == "yes" ? htmlspecialchars($friend["avatar"]) : "");

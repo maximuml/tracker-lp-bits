@@ -345,8 +345,8 @@ if ($user['appendpromotion'] == 'highlight')
 	print("<p align=\"center\"> ".$lang_functions['text_promoted_torrents_note']."</p>\n");
 
 if($enabletooltip_tweak == 'yes' && (empty($user) || ($user['showlastcom'] ?? '') == 'yes'))
-create_tooltip_container($lastcom_tooltip, 400);
-create_tooltip_container($torrent_tooltip, 500);
+echo \App\Support\Html::tooltipContainer($lastcom_tooltip, 400);
+echo \App\Support\Html::tooltipContainer($torrent_tooltip, 500);
 
         return ob_get_clean();
     }

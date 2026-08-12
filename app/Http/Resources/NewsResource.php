@@ -22,7 +22,7 @@ class NewsResource extends JsonResource
             'title' => $this->title,
             'body' => $descriptionArr,
             'images' => \App\Support\Description::imageFromDescription($descriptionArr),
-            'added' => format_datetime($this->added, 'Y.m.d'),
+            'added' => \App\Support\Time::formatDateTime($this->added, 'Y.m.d'),
             'user' => new UserResource($this->whenLoaded('user'))
         ];
     }

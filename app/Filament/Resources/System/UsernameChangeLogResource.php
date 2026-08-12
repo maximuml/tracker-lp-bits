@@ -65,7 +65,7 @@ class UsernameChangeLogResource extends Resource
                     ->searchable()
                     ->label(__('label.operator'))
                 ,
-                TextColumn::make('created_at')->label(__('label.created_at'))->formatStateUsing(fn ($state) => format_datetime($state)),
+                TextColumn::make('created_at')->label(__('label.created_at'))->formatStateUsing(fn ($state) => \App\Support\Time::formatDateTime($state)),
 
             ])
             ->defaultSort('id', 'desc')

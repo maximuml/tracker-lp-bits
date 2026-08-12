@@ -19,13 +19,13 @@ if (!$isAjax):
 ?>
 <html><head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<link rel="stylesheet" href="<?php echo get_font_css_uri()?>" type="text/css">
-<link rel="stylesheet" href="<?php echo get_css_uri()."theme.css"?>" type="text/css">
+<link rel="stylesheet" href="<?php echo \App\Support\Style::fontCssUriWithContext()?>" type="text/css">
+<link rel="stylesheet" href="<?php echo \App\Support\Style::cssUriWithContext()."theme.css"?>" type="text/css">
 <link rel="stylesheet" href="styles/curtain_imageresizer.css" type="text/css">
 <link rel="stylesheet" href="styles/nexus.css" type="text/css">
 <script src="js/curtain_imageresizer.js" type="text/javascript"></script><script>var SHOUT_CSRF = '<?php echo htmlspecialchars(\App\Support\Shoutbox::csrfToken((int)($CURUSER['id'] ?? 0))); ?>';</script><script src="js/shoutbox.js" type="text/javascript"></script><link rel="stylesheet" href="styles/shoutbox.css" type="text/css">
 <?php
-print(get_style_addicode());
+print(\App\Support\Style::addiCodeWithContext());
 $lastIdQuery = \Nexus\Database\NexusDB::table('shoutbox');
 \App\Support\Shoutbox::applyTypeFilter($lastIdQuery, $where, $CURUSER ?? null);
 $lastId = (int)$lastIdQuery->max('id');

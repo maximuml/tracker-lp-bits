@@ -27,8 +27,8 @@ class HitAndRunResource extends JsonResource
             'status' => $this->status,
             'status_text' => $this->status_text,
             'comment' => $this->comment,
-            'created_at' => format_datetime($this->created_at),
-            'updated_at' => format_datetime($this->updated_at),
+            'created_at' => \App\Support\Time::formatDateTime($this->created_at),
+            'updated_at' => \App\Support\Time::formatDateTime($this->updated_at),
             'seed_time_required' => $this->seedTimeRequired,
             'inspect_time_left' => $this->inspectTimeLeft,
         ];

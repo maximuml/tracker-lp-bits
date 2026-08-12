@@ -3,16 +3,14 @@
 namespace Database\Factories;
 
 use App\Models\User;
+use App\Support\Token;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
 
 class UserFactory extends Factory
 {
     private static string $defaultStyleSheet = "";
 
     private static int $sequence = 1;
-
 
     /**
      * The name of the factory's corresponding model.
@@ -24,9 +22,9 @@ class UserFactory extends Factory
     /**
      * Define the model's default state.
      *
-     * @return array
+     * @return array<string, mixed>
      */
-    public function definition()
+    public function definition(): array
     {
         $password = "123456";
         $secret = mksecret();
@@ -49,24 +47,58 @@ class UserFactory extends Factory
             'secret' => mksecret(),
             'editsecret' => "",
             'passhash' => $passhash,
+            'passkey' => Token::randomHex(16),
             'stylesheet' => self::$defaultStyleSheet,
             'added' => now()->toDateTimeString(),
             'status' => User::STATUS_CONFIRMED,
-            'class' => $class
+            'class' => $class,
+            'enabled' => User::ENABLED_YES,
         ];
     }
 
     /**
-     * Indicate that the model's email address should be unverified.
+     * Use the given user class.
      *
-     * @return \Illuminate\Database\Eloquent\Factories\Factory
+     * @return $this
      */
-//    public function unverified()
-//    {
-//        return $this->state(function (array $attributes) {
-//            return [
-//                'email_verified_at' => null,
-//            ];
-//        });
-//    }
+    public function class(int $class): self
+    {
+        return $this->state(fn (array $attributes) => [
+            'class' => $class,
+        ]);
+    }
+
+    /**
+     * Use a specific passkey.
+     *
+     * @return $this
+     */
+    public function withPasskey(string $passkey): self
+    {
+        return $this->state(fn (array $attributes) => [
+            'passkey' => $passkey,
+        ]);
+    }
+
+    /**
+     * Mark the user as an administrator.
+     *
+     * @return $this
+     */
+    public function admin(): self
+    {
+        return $this->class(intval(User::CLASS_SYSOP));
+    }
+
+    /**
+     * Mark the user as disabled.
+     *
+     * @return $this
+     */
+    public function disabled(): self
+    {
+        return $this->state(fn (array $attributes) => [
+            'enabled' => User::ENABLED_NO,
+        ]);
+    }
 }

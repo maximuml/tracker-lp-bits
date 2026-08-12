@@ -15,6 +15,17 @@ namespace App\Models;
 
 class Post extends NexusModel
 {
+    /** @var  list<string> */
+    protected $fillable = [
+        'topicid', 'userid', 'added', 'body', 'ori_body', 'editedby', 'editdate',
+    ];
+
+    /** @var  array<string, string> */
+    protected $casts = [
+        'added' => 'datetime',
+        'editdate' => 'datetime',
+    ];
+
     /** @return  \Illuminate\Database\Eloquent\Relations\BelongsTo<User, $this> */
     public function user(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {

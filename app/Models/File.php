@@ -13,4 +13,7 @@ class File extends NexusModel
 {
     /** @var  string */
     protected $table = 'files';
+
+    /** @var  list<string> */
+    protected $fillable = ['torrent', 'filename', 'size'];
 }

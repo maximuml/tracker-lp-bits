@@ -73,6 +73,22 @@ final class Smilies
     }
 
     /**
+     * Emit the framed smiley table using language strings from the request context.
+     *
+     * Backs the legacy `insert_smilies_frame()` helper.
+     */
+    public static function framedTableWithContext(): void
+    {
+        $lang = SupportContext::getLangFunctions();
+
+        echo self::framedTable(
+            $lang['text_smilies'] ?? '',
+            $lang['col_type_something'] ?? '',
+            $lang['col_to_make_a'] ?? ''
+        );
+    }
+
+    /**
      * Return the web-relative path for a numbered smiley image (e.g.
      * "/pic/smilies/1.gif"), or null when the directory or number is absent.
      *

@@ -30,39 +30,7 @@ function get_user_lang($user_id)
  */
 function legacy_auth_context(): \App\Support\LegacyAuthContext
 {
-    $script = '';
-    if (\function_exists('nexus')) {
-        $script = \nexus()->getScript();
-    } else {
-        $scriptFile = SupportContext::getServerValue('SCRIPT_FILENAME', '');
-        $script = basename($scriptFile);
-        if (str_contains($script, '.')) {
-            $script = strstr($script, '.', true);
-        }
-    }
-
-    return new \App\Support\LegacyAuthContext(
-        user: SupportContext::getUser(),
-        lang: SupportContext::getLangFunctions(),
-        cache: SupportContext::getCache(),
-        ip: \function_exists('getip') ? \getip() : \App\Support\Network::clientIp(),
-        requestUri: SupportContext::getServerValue('REQUEST_URI'),
-        requestBody: SupportContext::allPost(),
-        queryParams: SupportContext::allQuery(),
-        request: array_merge(SupportContext::allPost(), SupportContext::allQuery()),
-        cookies: SupportContext::allCookie(),
-        maxLoginAttempts: (int) SupportContext::getGlobal('maxloginattempts', 0),
-        captchaEnabled: SupportContext::getGlobal('iv', '') === 'yes',
-        registration: [
-            'invitesystem' => (string) SupportContext::getGlobal('invitesystem', ''),
-            'registration' => (string) SupportContext::getGlobal('registration', ''),
-            'maxusers' => (int) SupportContext::getGlobal('maxusers', 0),
-            'maxip' => (int) SupportContext::getGlobal('maxip', 0),
-        ],
-        langFolder: SupportContext::getCookieValue('c_lang_folder'),
-        moderatorClass: defined('UC_MODERATOR') ? (int) \constant('UC_MODERATOR') : 0,
-        script: $script,
-    );
+    return \App\Support\LegacyAuthContext::fromSupportContext();
 }
 
 /**
@@ -73,59 +41,7 @@ function legacy_auth_context(): \App\Support\LegacyAuthContext
  */
 function page_layout_context(): \App\Support\PageLayoutContext
 {
-    $userUpdateSet = &\App\Support\SupportContext::getUserUpdateSet();
-
-    $script = '';
-    if (\function_exists('nexus')) {
-        $script = \nexus()->getScript();
-    } else {
-        $scriptFile = SupportContext::getServerValue('SCRIPT_FILENAME', '');
-        $script = basename($scriptFile);
-        if (str_contains($script, '.')) {
-            $script = strstr($script, '.', true);
-        }
-    }
-
-    return new \App\Support\PageLayoutContext(
-        user: SupportContext::getUser(),
-        lang: SupportContext::getLangFunctions(),
-        cache: SupportContext::getCache(),
-        defaultStylesheet: (int) SupportContext::getGlobal('defcss', 0),
-        langDir: (string) SupportContext::getGlobal('CURLANGDIR', ''),
-        siteName: (string) SupportContext::getGlobal('SITENAME', ''),
-        slogan: (string) SupportContext::getGlobal('SLOGAN', ''),
-        logoMain: (string) SupportContext::getGlobal('logo_main', ''),
-        baseUrl: (string) SupportContext::getGlobal('BASEURL', ''),
-        siteOnline: (string) SupportContext::getGlobal('SITE_ONLINE', 'yes'),
-        enableDonation: (string) SupportContext::getGlobal('enabledonation', 'no'),
-        titleKeywordsTweak: (string) SupportContext::getGlobal('titlekeywords_tweak', ''),
-        metaKeywordsTweak: (string) SupportContext::getGlobal('metakeywords_tweak', ''),
-        metaDescriptionTweak: (string) SupportContext::getGlobal('metadescription_tweak', ''),
-        cssDateTweak: (string) SupportContext::getGlobal('cssdate_tweak', ''),
-        deleteNotTransferTwoAccount: (int) SupportContext::getGlobal('deletenotransfertwo_account', 0),
-        neverDeleteAccount: (int) SupportContext::getGlobal('neverdelete_account', 0),
-        iniUploadMain: (int) SupportContext::getGlobal('iniupload_main', 0),
-        dateFounded: (string) SupportContext::getGlobal('datefounded', ''),
-        icpLicenseMain: (string) SupportContext::getGlobal('icplicense_main', ''),
-        addKeyShortcut: (string) SupportContext::getGlobal('add_key_shortcut', ''),
-        queryName: (array) SupportContext::getGlobal('query_name', []),
-        enableSqlDebugTweak: (string) SupportContext::getGlobal('enablesqldebug_tweak', 'no'),
-        sqlDebugTweak: (int) SupportContext::getGlobal('sqldebug_tweak', 0),
-        analyticsCodeTweak: (string) SupportContext::getGlobal('analyticscode_tweak', ''),
-        requestSearch: is_scalar(SupportContext::getQuery('search', '')) ? (string) SupportContext::getQuery('search', '') : '',
-        requestSearchArea: is_scalar(SupportContext::getQuery('search_area', '')) ? (string) SupportContext::getQuery('search_area', '') : '',
-        scriptFileName: SupportContext::getServerValue('SCRIPT_FILENAME', ''),
-        script: $script,
-        enableOffer: (string) SupportContext::getGlobal('enableoffer', ''),
-        customMenu: (string) \App\Support\Hooks::applyFilter('nexus_menu') ?: null,
-        maxdlSystem: (string) SupportContext::getGlobal('maxdlsystem', ''),
-        whereTweak: (string) SupportContext::getGlobal('where_tweak', ''),
-        adminClass: defined('UC_ADMINISTRATOR') ? (int) \constant('UC_ADMINISTRATOR') : 0,
-        moderatorClass: defined('UC_MODERATOR') ? (int) \constant('UC_MODERATOR') : 0,
-        sysopClass: defined('UC_SYSOP') ? (int) \constant('UC_SYSOP') : 0,
-        vipClass: defined('UC_VIP') ? (int) \constant('UC_VIP') : 0,
-        userUpdateSet: $userUpdateSet,
-    );
+    return \App\Support\PageLayoutContext::fromSupportContext();
 }
 
 /**
@@ -452,8 +368,7 @@ function end_table() {
  */
 function insert_smilies_frame()
 {
-	$lang_functions = \App\Support\SupportContext::getLangFunctions();
-	echo \App\Support\Smilies::framedTable($lang_functions['text_smilies'], $lang_functions['col_type_something'], $lang_functions['col_to_make_a']);
+	\App\Support\Smilies::framedTableWithContext();
 }
 /**
  * @param mixed $ratio
@@ -675,7 +590,7 @@ function sent_mail($to,$fromname,$fromemail,$subject,$body,$type = "confirmation
 		(string) $type,
 		(bool) $showmsg,
 		(bool) $multiple,
-		(string) (is_array($multiplemail) ? implode(',', $multiplemail) : $multiplemail),
+		$multiplemail,
 		(string) $hdr_encoding
 	);
 }
@@ -930,24 +845,7 @@ function get_if_restricted_is_open()
  * @return void
  */
 function menu ($selected = "home") {
-    $customMenu = (string) \App\Support\Hooks::applyFilter('nexus_menu');
-
-    $result = \App\Support\Menu::render(
-        \function_exists('nexus') ? \nexus()->getScript() : '',
-        SupportContext::getLangFunctions(),
-        (string) SupportContext::getGlobal('enableoffer', ''),
-        $customMenu !== '' ? $customMenu : null,
-        SupportContext::getUser(),
-        SupportContext::getCache(),
-        (string) SupportContext::getGlobal('CURLANGDIR', ''),
-    );
-
-    $CURUSER = SupportContext::getUser();
-    if ($CURUSER && SupportContext::getGlobal('where_tweak', '') === 'yes') {
-        SupportContext::addUserUpdate('page', $result['selected']);
-    }
-
-    echo $result['html'];
+    \App\Support\Menu::outputWithContext((string) $selected);
 }
 /**
  * @return array<array-key, mixed>|null
@@ -1115,7 +1013,7 @@ function logoutcookie() {
  * @return string
  */
 function base64 ($string, $encode=true) {
-	return $encode ? \App\Support\Codec::base64Encode((string) $string) : \App\Support\Codec::base64Decode((string) $string);
+	return \App\Support\Codec::base64((string) $string, (bool) $encode);
 }
 /**
  * @param bool $mainpage
@@ -1530,8 +1428,7 @@ function get_plain_username($id){
  * @return mixed
  */
 function get_searchbox_value($mode = 1, $item = 'showsubcat'){
-	$Cache = \App\Support\SupportContext::getCache();
-	return \App\Support\SearchBox::value($Cache, $mode, (string) $item);
+	return \App\Support\SearchBox::valueWithContext($mode, (string) $item);
 }
 /**
  * @param string|int $userid
@@ -2235,11 +2132,7 @@ function api(int $ret, string $msg, $data = [])
  */
 function success($msgOrData = 'OK', $data = [])
 {
-    if (func_num_args() === 1) {
-        return \App\Support\Api::success('OK', $msgOrData, SupportContext::allRequest());
-    }
-
-    return \App\Support\Api::success((string) $msgOrData, $data, SupportContext::allRequest());
+    return \App\Support\Api::successWithContext(...func_get_args());
 }
 /**
  * @param mixed $msgOrData
@@ -2248,11 +2141,7 @@ function success($msgOrData = 'OK', $data = [])
  */
 function fail($msgOrData = 'ERROR', $data = [])
 {
-    if (func_num_args() === 1) {
-        return \App\Support\Api::fail('ERROR', $msgOrData, SupportContext::allRequest());
-    }
-
-    return \App\Support\Api::fail((string) $msgOrData, $data, SupportContext::allRequest());
+    return \App\Support\Api::failWithContext(...func_get_args());
 }
 /**
  * @param string|bool $all
@@ -2563,39 +2452,7 @@ function clear_torrent_cache($infoHash)
  */
 function user_can($permission, $fail = false, $uid = 0): bool
 {
-    $enum = \App\Enums\Permission\PermissionEnum::tryFrom((string) $permission);
-    if ($enum === null) {
-        \App\Support\Logger::writeWithContext("Unknown permission string: $permission", 'error');
-        if ($fail) {
-            \App\Support\Permissions::assertHasPermission(false);
-        }
-        return false;
-    }
-
-    if ((int) $uid <= 0) {
-        $uid = (int) \App\Support\UserDisplay::currentId();
-    }
-    if ($uid <= 0) {
-        if ($fail) {
-            \App\Support\Permissions::assertHasPermission(false);
-        }
-        return false;
-    }
-
-    $user = \App\Models\User::find($uid);
-    if (!$user) {
-        if ($fail) {
-            \App\Support\Permissions::assertHasPermission(false);
-        }
-        return false;
-    }
-
-    $result = \App\Auth\Permission::can($enum, $user);
-    if ($fail && !$result) {
-        \App\Support\Permissions::assertHasPermission(false);
-    }
-
-    return $result;
+    return \App\Support\Permissions::canWithContext((string) $permission, (bool) $fail, (int) $uid);
 }
 /**
  * @param bool $permissionCheckResult

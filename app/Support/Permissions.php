@@ -2,6 +2,8 @@
 
 namespace App\Support;
 
+use App\Auth\Permission;
+use App\Enums\Permission\PermissionEnum;
 use App\Exceptions\InsufficientPermissionException;
 use App\Models\User;
 use App\Repositories\ToolRepository;
@@ -95,6 +97,49 @@ final class Permissions
         if (!$permissionCheckResult) {
             throw new InsufficientPermissionException();
         }
+    }
+
+    /**
+     * Check whether a user has a permission, resolving the permission string to a
+     * typed enum and the user id to the current request user when needed.
+     *
+     * Backs the legacy `user_can()` helper.
+     */
+    public static function canWithContext(string|PermissionEnum $permission, bool $fail = false, int $uid = 0): bool
+    {
+        $enum = $permission instanceof PermissionEnum ? $permission : PermissionEnum::tryFrom($permission);
+        if ($enum === null) {
+            Logger::writeWithContext("Unknown permission string: $permission", 'error');
+            if ($fail) {
+                self::assertHasPermission(false);
+            }
+            return false;
+        }
+
+        if ($uid <= 0) {
+            $uid = (int) UserDisplay::currentId();
+        }
+        if ($uid <= 0) {
+            if ($fail) {
+                self::assertHasPermission(false);
+            }
+            return false;
+        }
+
+        $user = User::find($uid);
+        if (!$user) {
+            if ($fail) {
+                self::assertHasPermission(false);
+            }
+            return false;
+        }
+
+        $result = Permission::can($enum, $user);
+        if ($fail && !$result) {
+            self::assertHasPermission(false);
+        }
+
+        return $result;
     }
 
     public static function abilityLabel(\App\Enums\Permission\RoutePermissionEnum $permission): string

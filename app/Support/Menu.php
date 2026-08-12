@@ -69,6 +69,33 @@ final class Menu
         return ['html' => $html, 'selected' => $selected];
     }
 
+    /**
+     * Render and emit the main menu using values from the current request context.
+     *
+     * Backs the legacy `menu()` helper.
+     */
+    public static function outputWithContext(string $selected = 'home'): void
+    {
+        $customMenu = (string) \App\Support\Hooks::applyFilter('nexus_menu');
+
+        $result = self::render(
+            \function_exists('nexus') ? \nexus()->getScript() : '',
+            SupportContext::getLangFunctions(),
+            (string) SupportContext::getGlobal('enableoffer', ''),
+            $customMenu !== '' ? $customMenu : null,
+            SupportContext::getUser(),
+            SupportContext::getCache(),
+            (string) SupportContext::getGlobal('CURLANGDIR', ''),
+        );
+
+        $user = SupportContext::getUser();
+        if ($user && SupportContext::getGlobal('where_tweak', '') === 'yes') {
+            SupportContext::addUserUpdate('page', $result['selected']);
+        }
+
+        echo $result['html'];
+    }
+
     private static function selectedItem(string $scriptName): string
     {
         return match (1) {

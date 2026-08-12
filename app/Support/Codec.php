@@ -123,6 +123,16 @@ final class Codec
     }
 
     /**
+     * Boolean-dispatched base64 encode/decode wrapper.
+     *
+     * Backs the legacy `base64()` helper.
+     */
+    public static function base64(string $value, bool $encode = true): string
+    {
+        return $encode ? self::base64Encode($value) : self::base64Decode($value);
+    }
+
+    /**
      * Render an IBM-437 byte string as numeric HTML entities (`&#NNNN;`).
      *
      * Corresponds to the legacy `code_new()` — the active path used by

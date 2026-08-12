@@ -21,6 +21,8 @@ final class Mail
      * site/smtp configuration from legacy globals.
      *
      * Backs the `sent_mail()` helper.
+     *
+     * @param string|array<int, string> $multipleMail
      */
     public static function sentLegacy(
         string $to,
@@ -31,9 +33,13 @@ final class Mail
         string $type,
         bool $showMsg,
         bool $multiple,
-        string $multipleMail,
+        array|string $multipleMail,
         string $hdrEncoding,
     ): bool {
+        if (is_array($multipleMail)) {
+            $multipleMail = implode(',', $multipleMail);
+        }
+
         return self::sent(
             $to,
             $fromName,

@@ -75,6 +75,63 @@ final class PageLayoutContext
         $this->userUpdateSet = &$userUpdateSet;
     }
 
+    public static function fromSupportContext(): self
+    {
+        $userUpdateSet = &SupportContext::getUserUpdateSet();
+
+        $script = '';
+        if (\function_exists('nexus')) {
+            $script = \nexus()->getScript();
+        } else {
+            $scriptFile = SupportContext::getServerValue('SCRIPT_FILENAME', '');
+            $script = basename($scriptFile);
+            if (str_contains($script, '.')) {
+                $script = strstr($script, '.', true);
+            }
+        }
+
+        return new self(
+            user: SupportContext::getUser(),
+            lang: SupportContext::getLangFunctions(),
+            cache: SupportContext::getCache(),
+            defaultStylesheet: (int) SupportContext::getGlobal('defcss', 0),
+            langDir: (string) SupportContext::getGlobal('CURLANGDIR', ''),
+            siteName: (string) SupportContext::getGlobal('SITENAME', ''),
+            slogan: (string) SupportContext::getGlobal('SLOGAN', ''),
+            logoMain: (string) SupportContext::getGlobal('logo_main', ''),
+            baseUrl: (string) SupportContext::getGlobal('BASEURL', ''),
+            siteOnline: (string) SupportContext::getGlobal('SITE_ONLINE', 'yes'),
+            enableDonation: (string) SupportContext::getGlobal('enabledonation', 'no'),
+            titleKeywordsTweak: (string) SupportContext::getGlobal('titlekeywords_tweak', ''),
+            metaKeywordsTweak: (string) SupportContext::getGlobal('metakeywords_tweak', ''),
+            metaDescriptionTweak: (string) SupportContext::getGlobal('metadescription_tweak', ''),
+            cssDateTweak: (string) SupportContext::getGlobal('cssdate_tweak', ''),
+            deleteNotTransferTwoAccount: (int) SupportContext::getGlobal('deletenotransfertwo_account', 0),
+            neverDeleteAccount: (int) SupportContext::getGlobal('neverdelete_account', 0),
+            iniUploadMain: (int) SupportContext::getGlobal('iniupload_main', 0),
+            dateFounded: (string) SupportContext::getGlobal('datefounded', ''),
+            icpLicenseMain: (string) SupportContext::getGlobal('icplicense_main', ''),
+            addKeyShortcut: (string) SupportContext::getGlobal('add_key_shortcut', ''),
+            queryName: (array) SupportContext::getGlobal('query_name', []),
+            enableSqlDebugTweak: (string) SupportContext::getGlobal('enablesqldebug_tweak', 'no'),
+            sqlDebugTweak: (int) SupportContext::getGlobal('sqldebug_tweak', 0),
+            analyticsCodeTweak: (string) SupportContext::getGlobal('analyticscode_tweak', ''),
+            requestSearch: is_scalar(SupportContext::getQuery('search', '')) ? (string) SupportContext::getQuery('search', '') : '',
+            requestSearchArea: is_scalar(SupportContext::getQuery('search_area', '')) ? (string) SupportContext::getQuery('search_area', '') : '',
+            scriptFileName: SupportContext::getServerValue('SCRIPT_FILENAME', ''),
+            script: $script,
+            enableOffer: (string) SupportContext::getGlobal('enableoffer', ''),
+            customMenu: (string) \App\Support\Hooks::applyFilter('nexus_menu') ?: null,
+            maxdlSystem: (string) SupportContext::getGlobal('maxdlsystem', ''),
+            whereTweak: (string) SupportContext::getGlobal('where_tweak', ''),
+            adminClass: defined('UC_ADMINISTRATOR') ? (int) \constant('UC_ADMINISTRATOR') : 0,
+            moderatorClass: defined('UC_MODERATOR') ? (int) \constant('UC_MODERATOR') : 0,
+            sysopClass: defined('UC_SYSOP') ? (int) \constant('UC_SYSOP') : 0,
+            vipClass: defined('UC_VIP') ? (int) \constant('UC_VIP') : 0,
+            userUpdateSet: $userUpdateSet,
+        );
+    }
+
     public function isLoggedIn(): bool
     {
         return $this->user !== null && ! empty($this->user['id']);

@@ -222,7 +222,7 @@ class CalculateUserSeedBonus implements ShouldQueue
                 'value' => $delta,
                 'new_total_value' => $oldValue + $delta,
                 'comment' => BonusLogs::$businessTypes[$businessType]['text'] ?? '',
-                'created_at' => getDtMicro(),
+                'created_at' => \App\Support\Time::micro(),
             ];
         }
     }

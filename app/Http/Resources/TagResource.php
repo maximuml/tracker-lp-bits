@@ -26,8 +26,8 @@ class TagResource extends JsonResource
             'margin' => $this->margin,
             'border_radius' => $this->border_radius,
             'priority' => $this->priority,
-            'created_at' => format_datetime($this->created_at),
-            'updated_at' => format_datetime($this->updated_at),
+            'created_at' => \App\Support\Time::formatDateTime($this->created_at),
+            'updated_at' => \App\Support\Time::formatDateTime($this->updated_at),
         ];
     }
 }

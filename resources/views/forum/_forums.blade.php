@@ -1388,7 +1388,7 @@ if ($action == "viewforum")
 		print("</tr></table>");
 		print($pagerbottom);
 		if ($enabletooltip_tweak == 'yes' && $CURUSER['showlastpost'] != 'no')
-			create_tooltip_container($lastpost_tooltip, 400);
+			echo \App\Support\Html::tooltipContainer($lastpost_tooltip, 400);
 	} // if
 	else
 		print("<p>".$lang_forums['text_no_topics_found']."</p>");

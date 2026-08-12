@@ -115,4 +115,64 @@ final class Style
 
         return (string) (NexusDB::table('stylesheets')->where('id', 5)->value('hltr') ?? '');
     }
+
+    /**
+     * Convenience wrapper that reads the current user / default stylesheet
+     * from the support context and returns a stylesheet row.
+     *
+     * @return array<string, mixed>|null
+     */
+    public static function cssRowWithContext(): ?array
+    {
+        $user = SupportContext::getUser() ?? [];
+        $defaultId = (int) SupportContext::getGlobal('defcss', 0);
+
+        return self::cssRow(SupportContext::getCache(), $user ? $user['stylesheet'] : $defaultId, $defaultId);
+    }
+
+    /**
+     * Convenience wrapper that reads the current user / default stylesheet
+     * from the support context and returns the stylesheet URI.
+     */
+    public static function cssUriWithContext(string $file = ''): string
+    {
+        $user = SupportContext::getUser() ?? [];
+        $defaultId = (int) SupportContext::getGlobal('defcss', 0);
+
+        return self::cssUri(SupportContext::getCache(), $user ? $user['stylesheet'] : $defaultId, $defaultId, $file);
+    }
+
+    /**
+     * Convenience wrapper that reads the current user's font size from
+     * the support context and returns the font CSS URI.
+     */
+    public static function fontCssUriWithContext(): string
+    {
+        $user = SupportContext::getUser() ?? [];
+
+        return self::fontCssUri($user['fontsize'] ?? null);
+    }
+
+    /**
+     * Convenience wrapper that reads the current user / default stylesheet
+     * from the support context and returns the extra CSS (`addicode`).
+     */
+    public static function addiCodeWithContext(): string
+    {
+        $user = SupportContext::getUser() ?? [];
+        $defaultId = (int) SupportContext::getGlobal('defcss', 0);
+
+        return self::addiCode(SupportContext::getCache(), $user ? $user['stylesheet'] : $defaultId, $defaultId);
+    }
+
+    /**
+     * Convenience wrapper that reads the current user's stylesheet from
+     * the support context and returns the highlight CSS.
+     */
+    public static function highlightColorWithContext(): string
+    {
+        $user = SupportContext::getUser() ?? [];
+
+        return self::highlightColor($user ? (int) $user['stylesheet'] : null);
+    }
 }

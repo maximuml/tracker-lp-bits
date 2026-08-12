@@ -403,7 +403,7 @@ class UploadRepository extends BaseRepository
             if ($user->offer_allowed_count >= $offerSkipApprovedCount) {
                 return true;
             }
-            if (get_if_restricted_is_open()) {
+            if (\App\Support\Time::isWeekendUploadOpen(\App\Models\Setting::getIsUploadOpenAtWeekend(), time())) {
                 return true;
             }
             if (!Permission::canUploadToNormalSection()) {

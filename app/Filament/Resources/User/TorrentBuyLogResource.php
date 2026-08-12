@@ -65,7 +65,7 @@ class TorrentBuyLogResource extends Resource
                     ->label(__('label.price'))
                 ,
                 TextColumn::make('created_at')
-                    ->formatStateUsing(fn ($state) => format_datetime($state))
+                    ->formatStateUsing(fn ($state) => \App\Support\Time::formatDateTime($state))
                     ->label(__('label.created_at'))
                 ,
             ])

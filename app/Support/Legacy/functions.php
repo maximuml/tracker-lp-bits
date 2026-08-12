@@ -145,7 +145,7 @@ function get_langfile_path($script_name ="", $target = false, $lang_folder = "")
  * @return void
  */
 function stdmsg($heading, $text, $htmlstrip = false) {
-	echo \App\Support\Frame::stdMessage((string) $heading, (string) $text, $htmlstrip);
+	\App\Support\Html::stdMessage((string) $heading, (string) $text, (bool) $htmlstrip);
 }
 /**
  * @param string $heading
@@ -401,13 +401,13 @@ function is_valid_id($id)
  * @return void
  */
 function begin_main_frame($caption = "", $center = false, $width = 100) {
-	echo \App\Support\Frame::mainOpen($caption, $center, $width, CONTENT_WIDTH);
+	\App\Support\Frame::mainFrameOpen((string) $caption, (bool) $center, $width);
 }
 /**
  * @return void
  */
 function end_main_frame() {
-	echo \App\Support\Frame::CLOSE;
+	\App\Support\Frame::mainFrameClose();
 }
 /**
  * @param string $caption
@@ -518,14 +518,14 @@ function textbbcode($form, $text, $content = "", $hastitle = false, $col_num = 1
  */
 function begin_compose($title = "", $type = "new", $body = "", $hassubject = true, $subject = "", $maxsubjectlength = 100)
 {
-	echo \App\Support\Frame::composeBegin((string) $title, (string) $type, (string) $body, (bool) $hassubject, (string) $subject, (int) $maxsubjectlength);
+	\App\Support\Frame::composeBeginVoid((string) $title, (string) $type, (string) $body, (bool) $hassubject, (string) $subject, (int) $maxsubjectlength);
 }
 /**
  * @return void
  */
 function end_compose()
 {
-	echo \App\Support\Frame::composeEnd();
+	\App\Support\Frame::composeEndVoid();
 }
 /**
  * @param string $keyword
@@ -746,13 +746,7 @@ function show_image_code () {
  */
 function get_ip_location($ip)
 {
-	$lang_functions = \App\Support\SupportContext::getLangFunctions();
-
-	return \App\Support\Network::ipLocation(
-		(string) $ip,
-		(string) ($lang_functions['text_unknown'] ?? ''),
-		(string) ($lang_functions['text_user_ip'] ?? 'User IP')
-	);
+	return \App\Support\Network::ipLocationWithContext((string) $ip);
 }
 /**
  * @param bool $long
@@ -777,18 +771,7 @@ function validip_format($ip)
  * @return string
  */
 function maxslots () {
-	$lang_functions = \App\Support\SupportContext::getLangFunctions();
-	$CURUSER = \App\Support\SupportContext::getUser() ?? [];
-	$maxdlsystem = (string) \App\Support\SupportContext::getGlobal('maxdlsystem', '');
-	return \App\Support\Slots::display(
-		(float) $CURUSER["uploaded"],
-		(float) $CURUSER["downloaded"],
-		(string) $maxdlsystem,
-		(int) \get_user_class(),
-		(int) UC_VIP,
-		(string) ($lang_functions['text_slots'] ?? ''),
-		(string) ($lang_functions['text_unlimited'] ?? '')
-	);
+	return \App\Support\Slots::displayWithContext();
 }
 
 
@@ -878,8 +861,7 @@ function deadtime() {
  * @return string
  */
 function mkprettytime($s) {
-	$lang_functions = \App\Support\SupportContext::getLangFunctions();
-	return \App\Support\Format::prettyTime((float)$s, $lang_functions['text_day'] ?? 'day(s)');
+	return \App\Support\Format::prettyTimeWithLocale((float) $s);
 }
 /**
  * @param array<array-key, mixed>|string $vars
@@ -983,10 +965,7 @@ function menu ($selected = "home") {
  * @return array<array-key, mixed>|null
  */
 function get_css_row() {
-	$CURUSER = SupportContext::getUser();
-	$defcss = (int) SupportContext::getGlobal('defcss', 0);
-	$Cache = SupportContext::getCache();
-	return \App\Support\Style::cssRow($Cache, $CURUSER ? $CURUSER["stylesheet"] : $defcss, $defcss);
+	return \App\Support\Style::cssRowWithContext();
 }
 /**
  * @param string $file
@@ -994,27 +973,20 @@ function get_css_row() {
  */
 function get_css_uri($file = "")
 {
-    $defcss = (int) \App\Support\SupportContext::getGlobal('defcss', 0);
-    $Cache = \App\Support\SupportContext::getCache();
-    $CURUSER = \App\Support\SupportContext::getUser() ?? [];
-	return \App\Support\Style::cssUri($Cache, $CURUSER ? $CURUSER["stylesheet"] : $defcss, $defcss, (string) $file);
+	return \App\Support\Style::cssUriWithContext((string) $file);
 }
 /**
  * @return string
  */
 function get_font_css_uri(){
-	$CURUSER = \App\Support\SupportContext::getUser() ?? [];
-	return \App\Support\Style::fontCssUri($CURUSER['fontsize'] ?? null);
+	return \App\Support\Style::fontCssUriWithContext();
 }
 /**
  * @return string
  */
 function get_style_addicode()
 {
-	$defcss = (int) \App\Support\SupportContext::getGlobal('defcss', 0);
-	$Cache = \App\Support\SupportContext::getCache();
-	$CURUSER = \App\Support\SupportContext::getUser() ?? [];
-	return \App\Support\Style::addiCode($Cache, $CURUSER ? $CURUSER["stylesheet"] : $defcss, $defcss);
+	return \App\Support\Style::addiCodeWithContext();
 }
 /**
  * @param string|int $cat
@@ -1029,8 +1001,7 @@ function get_cat_folder($cat = 101)
  */
 function get_style_highlight()
 {
-	$CURUSER = \App\Support\SupportContext::getUser() ?? [];
-	return \App\Support\Style::highlightColor($CURUSER ? (int) $CURUSER["stylesheet"] : null);
+	return \App\Support\Style::highlightColorWithContext();
 }
 /**
  * @param string $title
@@ -1381,7 +1352,7 @@ function code_new($ibm_437, $view)
  */
 function create_tooltip_container($id_content_arr, $width = 400)
 {
-	echo \App\Support\Html::tooltipContainer($id_content_arr);
+	echo \App\Support\Html::tooltipContainer($id_content_arr, (int) $width);
 }
 
 /**
@@ -1391,7 +1362,7 @@ function create_tooltip_container($id_content_arr, $width = 400)
  * @return void
  */
 function quickreply($formname, $taname,$submit){
-	echo \App\Support\Html::quickReply((string) $formname, (string) $taname, (string) $submit);
+	\App\Support\Html::quickReplyVoid((string) $formname, (string) $taname, (string) $submit);
 }
 /**
  * @param string $formname
@@ -1957,7 +1928,7 @@ function get_ip_location_from_geoip($ip): bool|array
  */
 function msgalert($url, $text, $bgcolor = "red")
 {
-	echo \App\Support\Html::messageAlert($url, $text, $bgcolor);
+	\App\Support\Html::messageAlertVoid((string) $url, (string) $text, (string) $bgcolor);
 }
 /**
  * @param Illuminate\Support\Collection<array-key, mixed> $medals

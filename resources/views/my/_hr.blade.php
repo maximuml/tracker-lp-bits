@@ -93,7 +93,7 @@ if ($rescount) {
 				<td class='rowfollow nowrap' align='center'>" . \App\Support\Format::size($row->snatch->downloaded) . "</td>
 				<td class='rowfollow nowrap' align='center'>" . \App\Support\Ratio::hr($row->snatch->uploaded, $row->snatch->downloaded) . "</td>
 				<td class='rowfollow nowrap' align='center'>" . $row->seedTimeRequired . "</td>
-				<td class='rowfollow nowrap' align='center'>" . format_datetime($row->snatch->completedat) . "</td>
+				<td class='rowfollow nowrap' align='center'>" . \App\Support\Time::formatDateTime($row->snatch->completedat) . "</td>
 				<td class='rowfollow nowrap' align='center' >" . $row->inspectTimeLeft . "</td>
                 <td class='rowfollow nowrap' align='left' style='padding-left: 10px'>" . nl2br(trim($row->comment)) . "</td>
                 {$columnAction}

@@ -96,4 +96,24 @@ final class Slots
 
         return "<font class='color_slots'>{$slotsLabel}</font>{$unlimitedLabel}";
     }
+
+    /**
+     * Locale-aware wrapper for {@see display()} that reads the current
+     * user and relevant globals from the support context.
+     */
+    public static function displayWithContext(): string
+    {
+        $user = SupportContext::getUser() ?? [];
+        $lang = SupportContext::getLangFunctions();
+
+        return self::display(
+            (float) ($user['uploaded'] ?? 0),
+            (float) ($user['downloaded'] ?? 0),
+            (string) SupportContext::getGlobal('maxdlsystem', ''),
+            (int) ($user['class'] ?? 0),
+            (int) \App\Models\User::CLASS_VIP,
+            (string) ($lang['text_slots'] ?? ''),
+            (string) ($lang['text_unlimited'] ?? '')
+        );
+    }
 }

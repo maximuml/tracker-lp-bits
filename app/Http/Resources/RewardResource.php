@@ -21,8 +21,8 @@ class RewardResource extends JsonResource
             'user_id' => $this->userid,
             'torrent_id' => $this->torrentid,
             'value' => $this->value,
-            'created_at' => format_datetime($this->created_at),
-            'updated_at' => format_datetime($this->updated_at),
+            'created_at' => \App\Support\Time::formatDateTime($this->created_at),
+            'updated_at' => \App\Support\Time::formatDateTime($this->updated_at),
             'user' => new UserResource($this->whenLoaded('user'))
         ];
     }

@@ -18,7 +18,7 @@ class PostResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'added' => format_datetime($this->added),
+            'added' => \App\Support\Time::formatDateTime($this->added),
             'body' => $this->body,
             'user' => new UserResource($this->whenLoaded('user')),
         ];

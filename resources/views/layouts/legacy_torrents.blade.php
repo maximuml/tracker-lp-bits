@@ -1,7 +1,7 @@
 @php
-stdhead($__env->yieldContent('title'));
+\App\Support\Html::stdhead($__env->yieldContent('title'));
 @endphp
 @yield('content')
 @php
-stdfoot();
+\App\Support\Html::stdfoot();
 @endphp

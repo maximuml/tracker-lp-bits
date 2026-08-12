@@ -10,13 +10,13 @@ $count_limit = (int)$count_limit;
 $count_left = $Attach->get_count_left();
 $size_limit = $Attach->get_size_limit_byte();
 $allowed_exts = $Attach->get_allowed_ext();
-$css_uri = get_css_uri();
+$css_uri = \App\Support\Style::cssUriWithContext();
 $altsize = \App\Support\SupportContext::getPost('altsize') ?? '';
 ?>
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<link rel="stylesheet" href="<?php echo get_font_css_uri()?>" type="text/css">
+<link rel="stylesheet" href="<?php echo \App\Support\Style::fontCssUriWithContext()?>" type="text/css">
 <link rel="stylesheet" href="<?php echo $css_uri."theme.css"?>" type="text/css">
 </head>
 <body class="inframe">

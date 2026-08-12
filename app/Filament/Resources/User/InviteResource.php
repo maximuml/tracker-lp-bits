@@ -89,11 +89,11 @@ class InviteResource extends Resource
                 ,
                 TextColumn::make('expired_at')
                     ->label(__('invite.fields.expired_at'))
-                    ->formatStateUsing(fn ($state) => format_datetime($state))
+                    ->formatStateUsing(fn ($state) => \App\Support\Time::formatDateTime($state))
                 ,
                 TextColumn::make('created_at')
                     ->label(__('label.created_at'))
-                    ->formatStateUsing(fn ($state) => format_datetime($state))
+                    ->formatStateUsing(fn ($state) => \App\Support\Time::formatDateTime($state))
                 ,
             ])
             ->defaultSort('id', 'desc')

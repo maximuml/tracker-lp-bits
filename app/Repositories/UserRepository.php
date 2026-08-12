@@ -961,7 +961,7 @@ class UserRepository extends BaseRepository
      */
     public function saveLoginLog(int $uid, string $ip,  string $client = '', bool $notify = false)
     {
-        $locationInfo = get_ip_location_from_geoip($ip);
+        $locationInfo = \App\Support\Network::geoIpInfo($ip) ?: [];
         $loginLog = LoginLog::query()->create([
             'ip' => $ip,
             'uid' => $uid,

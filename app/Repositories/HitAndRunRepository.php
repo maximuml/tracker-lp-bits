@@ -302,7 +302,7 @@ class HitAndRunRepository extends BaseRepository
             'added' => Carbon::now()->toDateTimeString(),
             'subject' => nexus_trans('hr.reached_message_subject', ['hit_and_run_id' => $hitAndRun->id], $hitAndRun->user->locale),
             'msg' => nexus_trans('hr.reached_message_content', [
-                'completed_at' => format_datetime($snatched->completedat ?: $snatched->startdat),
+                'completed_at' => \App\Support\Time::formatDateTime($snatched->completedat ?: $snatched->startdat),
                 'torrent_id' => $hitAndRun->torrent_id,
                 'torrent_name' => $hitAndRun->torrent->name,
             ], $hitAndRun->user->locale),
@@ -439,7 +439,7 @@ class HitAndRunRepository extends BaseRepository
             'added' => Carbon::now()->toDateTimeString(),
             'subject' => nexus_trans('hr.unreached_message_subject', ['hit_and_run_id' => $hitAndRun->id], $hitAndRun->user->locale),
             'msg' => nexus_trans('hr.unreached_message_content', [
-                'completed_at' => format_datetime($hitAndRun->snatch->completedat),
+                'completed_at' => \App\Support\Time::formatDateTime($hitAndRun->snatch->completedat),
                 'torrent_id' => $hitAndRun->torrent_id,
                 'torrent_name' => $hitAndRun->torrent->name,
             ], $hitAndRun->user->locale),

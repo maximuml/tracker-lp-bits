@@ -20,7 +20,7 @@ class PollResource extends JsonResource
     {
         $out = [
             'id' => $this->id,
-            'added' => format_datetime($this->added),
+            'added' => \App\Support\Time::formatDateTime($this->added),
             'question' => $this->question,
             'answers_count' => $this->answers_count,
             'options' => $this->options,

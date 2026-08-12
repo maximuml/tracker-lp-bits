@@ -914,7 +914,7 @@ print("<td class=\"colhead\">".$lang_offers['col_offered_by']."</td>".
 	print("</table>\n");
 	echo $pagerbottom;
 if(!(isset($CURUSER)) || $CURUSER['showlastcom'] == 'yes')
-create_tooltip_container($lastcom_tooltip, 400);
+echo \App\Support\Html::tooltipContainer($lastcom_tooltip, 400);
 }
 \App\Support\Frame::mainFrameClose();
 if ($CURUSER)

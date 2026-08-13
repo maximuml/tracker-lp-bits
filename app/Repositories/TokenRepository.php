@@ -6,19 +6,16 @@ use App\Models\Setting;
 
 class TokenRepository extends BaseRepository
 {
-    /** @var  array<int|string, mixed> */
-    /** @var  array<int|string, mixed> */
-    /** @var  array<int|string, mixed> */
-    /** @var  array<int|string, mixed> */
-    /** @var  array<int|string, mixed> */
-    private static array $userTokenPermissions = [
-        RoutePermissionEnum::TORRENT_LIST->value,
-        RoutePermissionEnum::TORRENT_VIEW->value,
-        RoutePermissionEnum::TORRENT_UPLOAD->value,
-        RoutePermissionEnum::USER_VIEW->value,
-        RoutePermissionEnum::BOOKMARK_STORE->value,
-        RoutePermissionEnum::BOOKMARK_DELETE->value,
-    ];
+    /**
+     * @return  list<string>
+     */
+    private static function allUserTokenPermissions(): array
+    {
+        return array_map(
+            static fn (RoutePermissionEnum $permission) => $permission->value,
+            RoutePermissionEnum::cases()
+        );
+    }
 
     /**
      * @param  bool  $format
@@ -26,10 +23,11 @@ class TokenRepository extends BaseRepository
      */
     public static function listUserTokenPermissions(bool $format = true): array
     {
+        $permissions = self::allUserTokenPermissions();
         if (!$format) {
-            return self::$userTokenPermissions;
+            return $permissions;
         }
-        return self::formatPermissions(self::$userTokenPermissions);
+        return self::formatPermissions($permissions);
     }
 
     /** @return  array<int|string, mixed> */

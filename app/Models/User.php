@@ -123,6 +123,9 @@
  */
 namespace App\Models;
 
+use App\Auth\Permission;
+use App\Enums\Permission\PermissionEnum;
+use App\Enums\Permission\RoutePermissionEnum;
 use App\Exceptions\NexusException;
 use App\Http\Middleware\Locale;
 use App\Models\Traits\NexusActivityLogTrait;
@@ -955,29 +958,28 @@ class User extends Authenticatable implements FilamentUser, HasName
 
     public function tokenCan(string $ability): bool
     {
-        $redis = NexusDB::redis();
-        $cacheKey = Setting::USER_TOKEN_PERMISSION_ALLOWED_CACHE_KRY;
-        if (!$redis->exists($cacheKey)) {
-            $lockKey = "$cacheKey:lock";
-            if ($redis->set($lockKey, 1, ['nx', 'ex' => 5])) {
-                try {
-                            $abilities = TokenRepository::listUserTokenPermissions(false);
-                    do_log("load user token permissions: " . json_encode($abilities), 'alert');
-                    if (!empty($abilities)) {
-                        $redis->sadd($cacheKey, ...$abilities);
-                    } else {
-                        $redis->sadd($cacheKey, "__NO_USER_TOKEN_PERMISSION__");
-                        $redis->expire($cacheKey, 900);
-                    }
-                } catch (\Throwable $throwable) {
-                    do_log($throwable->getMessage(), 'error');
-                } finally {
-                    $redis->del($lockKey);
-                }
-            }
+        if ($this->accessToken === null) {
+            return false;
         }
-        return $redis->sismember($cacheKey, $ability)
-            && $this->accessToken->can($ability);
+
+        $routePermission = RoutePermissionEnum::tryFrom($ability);
+        if ($routePermission !== null) {
+            $legacyPermission = $routePermission->toPermissionEnum();
+            if ($legacyPermission === null) {
+                return $this->accessToken->can($ability);
+            }
+
+            return Permission::can($legacyPermission, $this)
+                && $this->accessToken->can($ability);
+        }
+
+        $legacyPermission = PermissionEnum::tryFrom($ability);
+        if ($legacyPermission !== null) {
+            return Permission::can($legacyPermission, $this)
+                && $this->accessToken->can($ability);
+        }
+
+        return $this->accessToken->can($ability);
     }
 
 }

@@ -94,6 +94,21 @@ final class LegacyRequestMiddleware
         $page = '';
         $pathInfo = '';
 
+        // Laravel API routes already use the correct path; do not rewrite them
+        // as legacy /script.php/pathinfo requests.
+        if (str_starts_with($requestPath, '/api/') || $requestPath === '/api') {
+            $server['REQUEST_URI'] = $requestUri;
+            $server['REQUEST_METHOD'] = $request->getMethod();
+            $server['SCRIPT_NAME'] = '/index.php';
+            $server['SCRIPT_FILENAME'] = public_path('index.php');
+            if (isset($server['PATH_INFO'])) {
+                unset($server['PATH_INFO']);
+            }
+            $post = $request->getMethod() === 'POST' ? $request->request->all() : [];
+
+            return $request->duplicate($request->query->all(), $post, $request->attributes->all(), $request->cookies->all(), $request->files->all(), $server);
+        }
+
         if ($isWrapper) {
             $page = preg_replace('/\.php$/', '', $executedScript) ?? '';
             $page = preg_replace('/[^a-zA-Z0-9_-]/', '', $page) ?? '';

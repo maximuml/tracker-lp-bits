@@ -1,5 +1,4 @@
 <?php
-error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 \App\Support\Html::stdhead("Video Formats");
 ?>
 <table class=main width=940 border=0 cellspacing=0 cellpadding=0><tr><td class=embedded>

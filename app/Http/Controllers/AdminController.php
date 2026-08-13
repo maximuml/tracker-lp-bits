@@ -172,10 +172,63 @@ class AdminController extends LegacyController
 
     }
 
-    public function fields(Request $request): Response|RedirectResponse
+    public function fields(Request $request): Response|RedirectResponse|View
     {
+        $administratorClass = defined('UC_ADMINISTRATOR') ? \constant('UC_ADMINISTRATOR') : 0;
+        if (UserDisplay::currentClass() < $administratorClass) {
+            return $this->legacyAbortResponse('Error', 'Permission denied.');
+        }
 
-        return $this->legacyPageWithRedirect($request, 'fields');
+        $field = new \Nexus\Field\Field();
+        $langFields = (array) SupportContext::getGlobal('lang_fields', []);
+        $action = (string) (SupportContext::getQuery('action') ?? 'view');
+
+        if ($action === 'submit') {
+            try {
+                $field->save(SupportContext::allRequest());
+            } catch (\Exception $e) {
+                return $this->legacyAbortResponse($langFields['field_management'] ?? 'Field management', $e->getMessage());
+            }
+            return redirect('fields.php?action=view');
+        }
+
+        if ($action === 'del') {
+            $id = (int) (SupportContext::getQuery('id') ?? 0);
+            if ($id <= 0) {
+                return $this->legacyAbortResponse($langFields['field_management'] ?? 'Field management', 'Invalid id');
+            }
+            NexusDB::table('torrents_custom_fields')->where('id', $id)->delete();
+            return redirect('fields.php?action=view');
+        }
+
+        if ($action === 'edit') {
+            $id = (int) (SupportContext::getQuery('id') ?? 0);
+            if ($id <= 0) {
+                return $this->legacyAbortResponse($langFields['field_management'] ?? 'Field management', 'Invalid id');
+            }
+            $row = (array) NexusDB::table('torrents_custom_fields')->where('id', $id)->first();
+            if (empty($row)) {
+                return $this->legacyAbortResponse('', 'Invalid id');
+            }
+            return $this->legacyPage($request, 'fields', true, [
+                'mode' => 'edit',
+                'row' => $row,
+                'lang_fields' => $langFields,
+            ]);
+        }
+
+        if ($action === 'add') {
+            return $this->legacyPage($request, 'fields', true, [
+                'mode' => 'add',
+                'lang_fields' => $langFields,
+            ]);
+        }
+
+        return $this->legacyPage($request, 'fields', true, [
+            'mode' => 'view',
+            'fieldTable' => $field->buildFieldTable(),
+            'lang_fields' => $langFields,
+        ]);
 
     }
 

@@ -1,5 +1,4 @@
 <?php
-error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 \App\Support\Html::stdhead("Downloaded Files");
 ?>
 <table class=main width=737 border=0 cellspacing=0 cellpadding=0><tr><td class=embedded>

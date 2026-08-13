@@ -15,6 +15,7 @@ namespace App\Models;
 
 use App\Enums\HitAndRunMode;
 use App\Enums\ModelEventEnum;
+use App\Support\Settings;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -218,7 +219,7 @@ class HitAndRun extends NexusModel
         } else {
             $key = "hr.$name";
         }
-        $default = Setting::get($key);
+        $default = Settings::get($key);
         return \App\Support\Hooks::applyFilter("nexus_setting_get", $default, $name, ['mode' => $searchBoxId]);
     }
 

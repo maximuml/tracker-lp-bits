@@ -12,7 +12,7 @@ class Local extends Storage {
 
     function getBaseUrl(): string
     {
-        return sprintf("%s/%s", getSchemeAndHttpHost(), trim(\App\Support\Config\SiteConfig::current()->attachment->httpDirectory(), '/'));
+        return sprintf("%s/%s", \App\Support\Url::schemeAndHost(false), trim(\App\Support\Config\SiteConfig::current()->attachment->httpDirectory(), '/'));
     }
 
     function getDriverName(): string

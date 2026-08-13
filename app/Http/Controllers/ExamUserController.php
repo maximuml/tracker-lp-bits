@@ -35,7 +35,7 @@ class ExamUserController extends Controller
         $result = $this->repository->listUser($request->all());
         $resource = ExamUserResource::collection($result);
         $resource->additional([
-            'page_title' => nexus_trans('exam-user.admin.list.page_title'),
+            'page_title' => \App\Support\Locale::trans('exam-user.admin.list.page_title', [], null),
         ]);
         return $this->success($resource);
     }

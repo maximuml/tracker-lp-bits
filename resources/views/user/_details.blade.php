@@ -7,7 +7,7 @@ $userRep = new \App\Repositories\UserRepository();
 if ($user['added'] == "0000-00-00 00:00:00" || $user['added'] == null) {
     $joindate = $lang_userdetails['text_not_available'];
 } else {
-    $weeks = abs(number_format($userInfo->added->diffInWeeks(), 1)) . nexus_trans('nexus.time_units.week');
+    $weeks = abs(number_format($userInfo->added->diffInWeeks(), 1)) . \App\Support\Locale::trans('nexus.time_units.week', [], null);
     $joindate = $user['added']." (" . \App\Support\Time::format($user["added"], true, false, true).", $weeks)";
 }
 $lastseen = $user["last_access"];
@@ -84,7 +84,7 @@ if ($CURUSER['id'] == $user['id'] || \App\Auth\Permission::can(\App\Enums\Permis
 <table width="100%" border="1" cellspacing="0" cellpadding="5">
 <?php
 $userIdDisplay = $user['id'];
-$userManageSystemUrl = sprintf('%s/%s/user/users/%s',getSchemeAndHttpHost(), nexus_env('FILAMENT_PATH', 'nexusphp'), $user['id']);
+$userManageSystemUrl = sprintf('%s/%s/user/users/%s',\App\Support\Url::schemeAndHost(false), \App\Support\Env::get('FILAMENT_PATH', 'nexusphp'), $user['id']);
 $userManageSystemText = sprintf('<a href="%s" target="_blank" class="altlink">%s</a>', $userManageSystemUrl, $lang_functions['text_management_system']);
 $migratedHelp = "&nbsp;&nbsp;".sprintf($lang_userdetails['change_field_value_migrated'], $userManageSystemText);
 if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::MANAGE_USER_BASIC_INFO) && $user["class"] < \App\Support\UserDisplay::currentClass()) {
@@ -183,7 +183,7 @@ if ($user["leechtime"] > 0)
 	$slr = "<tr><td class=\"embedded\"><strong>" . $lang_userdetails['text_seeding_leeching_time_ratio'] . "</strong>:  <font color=\"" . \App\Support\Ratio::color($slr) . "\">" . number_format($slr, 3) . "</font></td><td class=\"embedded\">&nbsp;&nbsp;" . \App\Support\Ratio::image($slr) . "</td></tr>";
 }
 
-$slt = "<tr><td class=\"embedded\"><strong>" . $lang_userdetails['text_seeding_time'] . "</strong>:  ". \App\Support\Format::prettyTimeWithLocale($user["seedtime"]) . "</td><td class=\"embedded\">&nbsp;&nbsp;<strong>" . $lang_userdetails['text_leeching_time'] . "</strong>:  " . \App\Support\Format::prettyTimeWithLocale($user["leechtime"]) . "</td><td class=\"embedded text-muted\">&nbsp;&nbsp;(" . nexus_trans('label.updated_at') . ": " . $user['seed_time_updated_at'] . ")</td></tr>";
+$slt = "<tr><td class=\"embedded\"><strong>" . $lang_userdetails['text_seeding_time'] . "</strong>:  ". \App\Support\Format::prettyTimeWithLocale($user["seedtime"]) . "</td><td class=\"embedded\">&nbsp;&nbsp;<strong>" . $lang_userdetails['text_leeching_time'] . "</strong>:  " . \App\Support\Format::prettyTimeWithLocale($user["leechtime"]) . "</td><td class=\"embedded text-muted\">&nbsp;&nbsp;(" . \App\Support\Locale::trans('label.updated_at', [], null) . ": " . $user['seed_time_updated_at'] . ")</td></tr>";
 
 	\App\Support\Html::trSmall($lang_userdetails['row_sltime'], "<table border=\"0\" cellspacing=\"0\" cellpadding=\"0\">" . ($slr ?? '') . $slt . "</table>", 1);
 
@@ -272,7 +272,7 @@ if (!empty($props)) {
     \App\Support\Html::trSmall($lang_userdetails['row_user_props'], sprintf('<div style="display: flex;align-items: center">%s</div>', implode('&nbsp;|&nbsp;', $props)), 1);
 }
 
-do_action('user_detail_rows', $user['id'], 'web');
+\App\Support\Hooks::doAction('user_detail_rows', $user['id'], 'web');
 
 \App\Support\Html::trSmall($lang_userdetails['row_torrent_comment'], ($torrentcomments && ($user["id"] == $CURUSER["id"] || \App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::VIEW_USER_HISTORY)) ? "<a href=\"userhistory.php?action=viewcomments&amp;id=".$id."\" title=\"".$lang_userdetails['link_view_comments']."\">".$torrentcomments."</a>" : $torrentcomments), 1);
 
@@ -284,9 +284,9 @@ if ($user["id"] == $CURUSER["id"] || \App\Auth\Permission::can(\App\Enums\Permis
         \App\Support\Html::trSmall('H&R', sprintf('<a href="myhr.php?userid=%s" target="_blank">%s</a>', $user['id'], $hrStatus), 1);
     }
 
-    $bonusLogText = sprintf('&nbsp;&nbsp;<a href="bonus-log.php?uid=%s" target="_blank" class="altlink">[%s]</a>', $user['id'], nexus_trans("bonus-log.view_detail"));
+    $bonusLogText = sprintf('&nbsp;&nbsp;<a href="bonus-log.php?uid=%s" target="_blank" class="altlink">[%s]</a>', $user['id'], \App\Support\Locale::trans("bonus-log.view_detail", [], null));
     \App\Support\Html::trSmall($lang_userdetails['row_karma_points'], number_format($user['seedbonus'], 1) . $bonusLogText, 1);
-    \App\Support\Html::trSmall($lang_functions['text_seed_points'], number_format($user['seed_points'], 1) . "&nbsp;&nbsp;<span class='text-muted'>(" . nexus_trans('label.updated_at') . ": " . $user['seed_points_updated_at'] . ")</span>", 1);
+    \App\Support\Html::trSmall($lang_functions['text_seed_points'], number_format($user['seed_points'], 1) . "&nbsp;&nbsp;<span class='text-muted'>(" . \App\Support\Locale::trans('label.updated_at', [], null) . ": " . $user['seed_points_updated_at'] . ")</span>", 1);
 }
 
 if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::MANAGE_USER_BASIC_INFO) && $user["class"] < \App\Support\UserDisplay::currentClass()) {
@@ -525,9 +525,9 @@ JS;
 	}
 }
 
-$claimAllSeedingConfirmation = nexus_trans('claim.claim_all_seeding_confirmation');
+$claimAllSeedingConfirmation = \App\Support\Locale::trans('claim.claim_all_seeding_confirmation', [], null);
 $claimJs = '';
-if ($userInfo->id == $CURUSER['id'] && has_role_work_seeding($userInfo->id)) {
+if ($userInfo->id == $CURUSER['id'] && \App\Support\Permissions::hasRoleWorkSeeding((int) $userInfo->id)) {
     $claimJs = <<<JS
 jQuery("body").on("click", "#claim-all-seeding", function (e) {
     layer.confirm("$claimAllSeedingConfirmation", {}, function () {

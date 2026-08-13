@@ -40,9 +40,9 @@ class ExamCheckoutCronjob extends Command
         $ignoreTimeRange = $this->option('ignore-time-range');
         $this->info('ignore-time-range: ' . var_export($ignoreTimeRange, true));
         $result = $examRep->cronjobCheckout($ignoreTimeRange);
-        $log = sprintf('[%s], %s, result: %s', nexus()->getRequestId(), __METHOD__, var_export($result, true));
+        $log = sprintf('[%s], %s, result: %s', \Nexus\Nexus::instance()->getRequestId(), __METHOD__, var_export($result, true));
         $this->info($log);
-        do_log($log);
+        \App\Support\Logger::writeWithContext((string) $log, (string) 'info', (bool) false);
         return 0;
     }
 }

@@ -40,7 +40,7 @@ class ToolRepository extends BaseRepository
         $dirName = basename($webRoot);
         $excludes = self::BACKUP_EXCLUDES;
         $baseFilename = sprintf('%s/%s.web.%s', $this->getBackupExportPath(), $dirName, date('Ymd.His'));
-        if (command_exists('tar') && ($method === 'tar' || $method === null)) {
+        if (\App\Support\Environment::commandExists('tar') && ($method === 'tar' || $method === null)) {
             $filename = $baseFilename . ".tar.gz";
             $command = "tar";
             foreach ($excludes as $item) {
@@ -53,10 +53,7 @@ class ToolRepository extends BaseRepository
                 escapeshellarg($dirName)
             );
             $result = exec($command, $output, $result_code);
-            do_log(sprintf(
-                "command: %s, output: %s, result_code: %s, result: %s, filename: %s",
-                $command, json_encode($output), $result_code, $result, $filename
-            ));
+            \App\Support\Logger::writeWithContext((string) sprintf("command: %s, output: %s, result_code: %s, result: %s, filename: %s", $command, json_encode($output), $result_code, $result, $filename), (string) 'info', (bool) false);
         } else {
             //use php zip
             $filename = $baseFilename . ".zip";
@@ -77,16 +74,16 @@ class ToolRepository extends BaseRepository
                     if (is_file($name)) {
                         $zip->addFile($name, $localeName);
                     } elseif (is_dir($name)) {
-                        do_log("Is dir: $name.");
+                        \App\Support\Logger::writeWithContext((string) "Is dir: {$name}.", (string) 'info', (bool) false);
                         $zip->addEmptyDir($localeName);
                     } else {
-                        do_log("Not file or dir $name.", 'error');
+                        \App\Support\Logger::writeWithContext((string) "Not file or dir {$name}.", (string) 'error', (bool) false);
                     }
                 }
             }
             $zip->close();
             $result_code = 0;
-            do_log("No tar command, use zip.");
+            \App\Support\Logger::writeWithContext((string) "No tar command, use zip.", (string) 'info', (bool) false);
         }
         if (!$transfer) {
             return compact('result_code', 'filename');
@@ -117,8 +114,8 @@ class ToolRepository extends BaseRepository
         file_put_contents($tmpFile, $optionContent);
         chmod($tmpFile, 0600);
 
-        $dumpCommand = command_exists('mariadb-dump') ? 'mariadb-dump' : 'mysqldump';
-        $sslFlag = command_exists('mariadb-dump') ? '--ssl=0' : '--ssl-mode=DISABLED';
+        $dumpCommand = \App\Support\Environment::commandExists('mariadb-dump') ? 'mariadb-dump' : 'mysqldump';
+        $sslFlag = \App\Support\Environment::commandExists('mariadb-dump') ? '--ssl=0' : '--ssl-mode=DISABLED';
         $command = sprintf(
             '%s --defaults-extra-file=%s --single-transaction --no-create-db --no-tablespaces %s %s >> %s 2>&1',
             $dumpCommand,
@@ -129,10 +126,7 @@ class ToolRepository extends BaseRepository
         );
         $result = exec($command, $output, $result_code);
         @unlink($tmpFile);
-        do_log(sprintf(
-            "command: %s, output: %s, result_code: %s, result: %s, filename: %s",
-            $command, json_encode($output), $result_code, $result, $filename
-        ));
+        \App\Support\Logger::writeWithContext((string) sprintf("command: %s, output: %s, result_code: %s, result: %s, filename: %s", $command, json_encode($output), $result_code, $result, $filename), (string) 'info', (bool) false);
         if (!$transfer) {
             return compact('result_code', 'filename');
         }
@@ -155,7 +149,7 @@ class ToolRepository extends BaseRepository
             throw new \RuntimeException("backup database fail: " . json_encode($backupDatabase));
         }
         $baseFilename = sprintf('%s/%s.%s', $this->getBackupExportPath(), basename(base_path()), date('Ymd.His'));
-        if (command_exists('tar') && ($method === 'tar' || $method === null)) {
+        if (\App\Support\Environment::commandExists('tar') && ($method === 'tar' || $method === null)) {
             $filename = $baseFilename . ".tar.gz";
             $command = sprintf(
                 'tar -czf %s -C %s %s -C %s %s 2>&1',
@@ -166,10 +160,7 @@ class ToolRepository extends BaseRepository
                 escapeshellarg(basename($backupDatabase['filename']))
             );
             $result = exec($command, $output, $result_code);
-            do_log(sprintf(
-                "command: %s, output: %s, result_code: %s, result: %s, filename: %s",
-                $command, json_encode($output), $result_code, $result, $filename
-            ));
+            \App\Support\Logger::writeWithContext((string) sprintf("command: %s, output: %s, result_code: %s, result: %s, filename: %s", $command, json_encode($output), $result_code, $result, $filename), (string) 'info', (bool) false);
         } else {
             //use php zip
             $filename = $baseFilename . ".zip";
@@ -182,7 +173,7 @@ class ToolRepository extends BaseRepository
             $zip->addFile($backupDatabase['filename'], basename($backupDatabase['filename']));
             $zip->close();
             $result_code = 0;
-            do_log("No tar command, use zip.");
+            \App\Support\Logger::writeWithContext((string) "No tar command, use zip.", (string) 'info', (bool) false);
         }
         File::delete($backupWeb['filename']);
         File::delete($backupDatabase['filename']);
@@ -215,7 +206,7 @@ class ToolRepository extends BaseRepository
     {
         $setting = \App\Support\Config\SiteConfig::current()->backup->toArray();
         if ($setting['enabled'] != 'yes' && !$force) {
-            do_log("Backup not enabled.");
+            \App\Support\Logger::writeWithContext((string) "Backup not enabled.", (string) 'info', (bool) false);
             return false;
         }
         $now = now();
@@ -224,20 +215,20 @@ class ToolRepository extends BaseRepository
         $settingMinute = (int)$setting['minute'];
         $nowHour = (int)$now->format('H');
         $nowMinute = (int)$now->format('i');
-        do_log("Backup frequency: $frequency, force: " . strval($force));
+        \App\Support\Logger::writeWithContext((string) ("Backup frequency: {$frequency}, force: " . strval($force)), (string) 'info', (bool) false);
         if (!$force) {
             if ($frequency == 'daily') {
                 if ($settingHour != $nowHour) {
-                    do_log(sprintf('Backup setting hour: %s != now hour: %s', $settingHour, $nowHour));
+                    \App\Support\Logger::writeWithContext((string) sprintf('Backup setting hour: %s != now hour: %s', $settingHour, $nowHour), (string) 'info', (bool) false);
                     return false;
                 }
                 if ($settingMinute != $nowMinute) {
-                    do_log(sprintf('Backup setting minute: %s != now minute: %s', $settingMinute, $nowMinute));
+                    \App\Support\Logger::writeWithContext((string) sprintf('Backup setting minute: %s != now minute: %s', $settingMinute, $nowMinute), (string) 'info', (bool) false);
                     return false;
                 }
             } elseif ($frequency == 'hourly') {
                 if ($settingMinute != $nowMinute) {
-                    do_log(sprintf('Backup setting minute: %s != now minute: %s', $settingMinute, $nowMinute));
+                    \App\Support\Logger::writeWithContext((string) sprintf('Backup setting minute: %s != now minute: %s', $settingMinute, $nowMinute), (string) 'info', (bool) false);
                     return false;
                 }
             } else {
@@ -245,10 +236,10 @@ class ToolRepository extends BaseRepository
             }
         }
         $backupResult = $this->backupAll();
-        do_log("Backup all result: " . json_encode($backupResult));
+        \App\Support\Logger::writeWithContext((string) ("Backup all result: " . json_encode($backupResult)), (string) 'info', (bool) false);
         $transferResult = $this->transfer($backupResult['filename'], $backupResult['result_code'], $setting);
         $backupResult['transfer_result'] = $transferResult;
-        do_log("[BACKUP_ALL_DONE]: " . json_encode($backupResult));
+        \App\Support\Logger::writeWithContext((string) ("[BACKUP_ALL_DONE]: " . json_encode($backupResult)), (string) 'info', (bool) false);
         $this->cleanupBackupFiles(basename($backupResult['filename']));
         return $backupResult;
     }
@@ -270,11 +261,11 @@ class ToolRepository extends BaseRepository
         }
 
         $saveResult = $this->saveToFtp($setting, $filename);
-        do_log("[BACKUP_FTP]: $saveResult");
+        \App\Support\Logger::writeWithContext((string) "[BACKUP_FTP]: {$saveResult}", (string) 'info', (bool) false);
         $result['ftp'] = $saveResult;
 
         $saveResult = $this->saveToSftp($setting, $filename);
-        do_log("[BACKUP_SFTP]: $saveResult");
+        \App\Support\Logger::writeWithContext((string) "[BACKUP_SFTP]: {$saveResult}", (string) 'info', (bool) false);
         $result['sftp'] = $saveResult;
         return $result;
     }
@@ -286,17 +277,17 @@ class ToolRepository extends BaseRepository
     private function saveToFtp(array $setting, $filename): bool|string
     {
         if ($setting['via_ftp'] !== 'yes') {
-            do_log("via_ftp !== 'yes', via_ftp: " . ($setting['via_ftp'] ?? ''));
+            \App\Support\Logger::writeWithContext((string) ("via_ftp !== 'yes', via_ftp: " . ($setting['via_ftp'] ?? '')), (string) 'info', (bool) false);
             return false;
         }
         $config = config('filesystems.disks.ftp');
         if (empty($config)) {
-            do_log("No ftp config.");
+            \App\Support\Logger::writeWithContext((string) "No ftp config.", (string) 'info', (bool) false);
             return false;
         }
         foreach (['host', 'username', 'password', 'root'] as $item) {
             if (empty($config[$item])) {
-                do_log("No ftp $item.");
+                \App\Support\Logger::writeWithContext((string) "No ftp {$item}.", (string) 'info', (bool) false);
                 return false;
             }
         }
@@ -312,17 +303,17 @@ class ToolRepository extends BaseRepository
     public function saveToSftp(array $setting, $filename): bool|string
     {
         if ($setting['via_sftp'] !== 'yes') {
-            do_log("via_sftp !== 'yes', via_sftp: " . ($setting['via_sftp'] ?? ''));
+            \App\Support\Logger::writeWithContext((string) ("via_sftp !== 'yes', via_sftp: " . ($setting['via_sftp'] ?? '')), (string) 'info', (bool) false);
             return false;
         }
         $config = config('filesystems.disks.sftp');
         if (empty($config)) {
-            do_log("No sftp config.");
+            \App\Support\Logger::writeWithContext((string) "No sftp config.", (string) 'info', (bool) false);
             return false;
         }
         foreach (['host', 'username', 'password', 'root'] as $item) {
             if (empty($config[$item])) {
-                do_log("No sftp $item.");
+                \App\Support\Logger::writeWithContext((string) "No sftp {$item}.", (string) 'info', (bool) false);
                 return false;
             }
         }
@@ -344,10 +335,10 @@ class ToolRepository extends BaseRepository
             $speed = !(float)abs($start->diffInSeconds()) ? 0 :filesize($filename) / (float)abs($start->diffInSeconds());
             $log =  'Elapsed time: '.$start->diffForHumans(null, \Carbon\CarbonInterface::DIFF_ABSOLUTE);
             $log .= ', Speed: '. number_format($speed/1024,2) . ' KB/s';
-            do_log($log);
+            \App\Support\Logger::writeWithContext((string) $log, (string) 'info', (bool) false);
             return true;
         } catch (\Throwable $exception) {
-            do_log("Transfer error: " . $exception->getMessage(), 'error');
+            \App\Support\Logger::writeWithContext((string) ("Transfer error: " . $exception->getMessage()), (string) 'error', (bool) false);
             return $exception->getMessage();
         }
     }
@@ -370,14 +361,11 @@ class ToolRepository extends BaseRepository
         // 按创建时间降序排序
         $allFiles = $allFiles->sortByDesc(fn (\Symfony\Component\Finder\SplFileInfo $file) => $file->getCTime());
         $filesToDelete = $allFiles->slice($retentionCount);
-        do_log(sprintf(
-            "retentionCount: %s, path: %s, fileCount: %s",
-            $retentionCount, $path, $allFiles->count()
-        ));
+        \App\Support\Logger::writeWithContext((string) sprintf("retentionCount: %s, path: %s, fileCount: %s", $retentionCount, $path, $allFiles->count()), (string) 'info', (bool) false);
         foreach ($filesToDelete as $file) {
             $realPath = $file->getRealPath();
             File::delete($realPath);
-            do_log(sprintf("delete backup file: %s", $realPath));
+            \App\Support\Logger::writeWithContext((string) sprintf("delete backup file: %s", $realPath), (string) 'info', (bool) false);
         }
     }
 
@@ -393,7 +381,7 @@ class ToolRepository extends BaseRepository
         $log = "[SEND_MAIL]";
         $factory = new EsmtpTransportFactory();
         $smtpConfig = \App\Support\Config\SiteConfig::fromDb()->smtp;
-        do_log("$log, to: $to, subject: $subject, body: $body, smtp: " . json_encode($smtpConfig->toArray()));
+        \App\Support\Logger::writeWithContext((string) ("{$log}, to: {$to}, subject: {$subject}, body: {$body}, smtp: " . json_encode($smtpConfig->toArray())), (string) 'info', (bool) false);
         $encryption = $smtpConfig->encryption();
         if ($encryption !== null && !in_array($encryption, ['ssl', 'tls'])) {
             $encryption = null;
@@ -430,7 +418,7 @@ class ToolRepository extends BaseRepository
             $mailer->send($message);
             return true;
         } catch (\Throwable $e) {
-            do_log("$log, fail: " . $e->getMessage() . "\n" . $e->getTraceAsString(), 'error');
+            \App\Support\Logger::writeWithContext((string) ("{$log}, fail: " . $e->getMessage() . "\n" . $e->getTraceAsString()), (string) 'error', (bool) false);
             if ($exception) {
                 throw $e;
             } else {
@@ -501,13 +489,13 @@ class ToolRepository extends BaseRepository
         $classPermissions = self::listUserClassPermissions($class);
 
         //Role permission
-        $rolePermissions = apply_filter("user_role_permissions", [], $uid);
+        $rolePermissions = \App\Support\Hooks::applyFilter("user_role_permissions", [], $uid);
 
         //Direct permission
-        $directPermissions = apply_filter("user_direct_permissions", [], $uid);
+        $directPermissions = \App\Support\Hooks::applyFilter("user_direct_permissions", [], $uid);
 
         $allPermissions = array_merge($classPermissions, $rolePermissions, $directPermissions);
-        do_log("$log, allPermissions: " . json_encode($allPermissions));
+        \App\Support\Logger::writeWithContext((string) ("{$log}, allPermissions: " . json_encode($allPermissions)), (string) 'info', (bool) false);
         $result = array_combine($allPermissions, $allPermissions);
         $uidPermissionsCached[$uid] = $result;
         return $result;
@@ -522,7 +510,7 @@ class ToolRepository extends BaseRepository
      */
     public function generateUniqueInviteHash(array $hashArr, int $total, int $left, int $deep = 0): array
     {
-        do_log("total: $total, left: $left, deep: $deep");
+        \App\Support\Logger::writeWithContext((string) "total: {$total}, left: {$left}, deep: {$deep}", (string) 'info', (bool) false);
         if ($deep > 10) {
             throw new \RuntimeException("deep: $deep > 10");
         }
@@ -562,14 +550,14 @@ class ToolRepository extends BaseRepository
             if (empty($snatchRes)) {
                 break;
             }
-            do_log("[DELETE_DUPLICATED_SNATCH], count: " . count($snatchRes));
+            \App\Support\Logger::writeWithContext((string) ("[DELETE_DUPLICATED_SNATCH], count: " . count($snatchRes)), (string) 'info', (bool) false);
             foreach ($snatchRes as $snatchRow) {
                 $torrentId = $snatchRow['torrentid'];
                 $userId = $snatchRow['userid'];
                 $idArr = explode(',', $snatchRow['ids']);
                 sort($idArr, SORT_NUMERIC);
                 $remainId = array_pop($idArr);
-                do_log("[DELETE_DUPLICATED_SNATCH], torrent: $torrentId, user: $userId, snatchIdStr: " . implode(',', $idArr));
+                \App\Support\Logger::writeWithContext((string) ("[DELETE_DUPLICATED_SNATCH], torrent: {$torrentId}, user: {$userId}, snatchIdStr: " . implode(',', $idArr)), (string) 'info', (bool) false);
                 if (! empty($idArr)) {
                     NexusDB::table('snatched')->whereIn('id', $idArr)->delete();
                 }
@@ -599,17 +587,17 @@ class ToolRepository extends BaseRepository
                 ->limit($size)
                 ->get();
             if (empty($results)) {
-                do_log("[DELETE_DUPLICATED_PEERS], no data");
+                \App\Support\Logger::writeWithContext((string) "[DELETE_DUPLICATED_PEERS], no data", (string) 'info', (bool) false);
                 break;
             }
-            do_log("[DELETE_DUPLICATED_PEERS], count: " . count($results));
+            \App\Support\Logger::writeWithContext((string) ("[DELETE_DUPLICATED_PEERS], count: " . count($results)), (string) 'info', (bool) false);
             foreach ($results as $row) {
                 $torrentId = $row['torrent'];
                 $userId = $row['userid'];
                 $idArr = explode(',', $row['ids']);
                 sort($idArr, SORT_NUMERIC);
                 $remainId = array_pop($idArr);
-                do_log("[DELETE_DUPLICATED_PEERS], torrent: $torrentId, user: $userId, snatchIdStr: " . implode(',', $idArr));
+                \App\Support\Logger::writeWithContext((string) ("[DELETE_DUPLICATED_PEERS], torrent: {$torrentId}, user: {$userId}, snatchIdStr: " . implode(',', $idArr)), (string) 'info', (bool) false);
                 if (! empty($idArr)) {
                     NexusDB::table('peers')->whereIn('id', $idArr)->delete();
                 }
@@ -628,18 +616,18 @@ class ToolRepository extends BaseRepository
         $receiverUid = \App\Support\Config\SiteConfig::current()->system->alarmEmailReceiver();
         if (empty($receiverUid)) {
             $locale = Locale::getDefault();
-            $subject = nexus_trans($subjectTransKey, $subjectTransContext, $locale);
-            $msg = nexus_trans($msgTransKey, $msgTransContext, $locale);
-            do_log(sprintf("%s - %s", $subject, $msg), "error");
+            $subject = \App\Support\Locale::trans($subjectTransKey, $subjectTransContext, $locale);
+            $msg = \App\Support\Locale::trans($msgTransKey, $msgTransContext, $locale);
+            \App\Support\Logger::writeWithContext((string) sprintf("%s - %s", $subject, $msg), (string) "error", (bool) false);
         } else {
             $receiverUidArr = preg_split("/[\r\n\s,，]+/", $receiverUid);
             $users = User::query()->whereIn("id", $receiverUidArr)->get(User::$commonFields);
             foreach ($users as $user) {
                 $locale = $user->locale;
-                $subject = nexus_trans($subjectTransKey, $subjectTransContext, $locale);
-                $msg = nexus_trans($msgTransKey, $msgTransContext, $locale);
+                $subject = \App\Support\Locale::trans($subjectTransKey, $subjectTransContext, $locale);
+                $msg = \App\Support\Locale::trans($msgTransKey, $msgTransContext, $locale);
                 $result = $this->sendMail($user->email, $subject, $msg);
-                do_log(sprintf("send msg: %s result: %s", $msg, var_export($result, true)), $result ? "info" : "error");
+                \App\Support\Logger::writeWithContext((string) sprintf("send msg: %s result: %s", $msg, var_export($result, true)), (string) ($result ? "info" : "error"), (bool) false);
             }
         }
     }

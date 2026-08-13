@@ -34,6 +34,6 @@ class CheckCleanup
     public function handle()
     {
         CleanupRepository::checkCleanup();
-        do_log("CheckCleanup job run success.");
+        \App\Support\Logger::writeWithContext((string) "CheckCleanup job run success.", (string) 'info', (bool) false);
     }
 }

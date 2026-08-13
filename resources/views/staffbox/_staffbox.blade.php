@@ -31,7 +31,7 @@ if (!$action) {
 	print ("<h1 align=center>".$lang_staffbox['text_staff_pm']."</h1>");
 	if ($count == 0)
 	{
-	    do_log(last_query());
+	    \App\Support\Logger::writeWithContext((string) \App\Support\LegacyDb::lastQuery(false, 'json'), (string) 'info', (bool) false);
 		\App\Support\Html::stdMessage($lang_staffbox['std_sorry'], $lang_staffbox['std_no_messages_yet']);
 	}
 	else
@@ -48,7 +48,7 @@ if (!$action) {
 		</tr>");
 
 	$res = $query->forPage($pageNum + 1, $perpage)->orderBy('id', 'desc')->get()->toArray();
-	do_log(last_query());
+	\App\Support\Logger::writeWithContext((string) \App\Support\LegacyDb::lastQuery(false, 'json'), (string) 'info', (bool) false);
 	foreach ($res as $arr)
 	{
     		if ($arr['answered'])
@@ -186,7 +186,7 @@ $subject = \App\Models\StaffMessage::query()->findOrFail($answeringto)->value('s
 
 \App\Models\StaffMessage::query()->where('id', $answeringto)->update(['answer' => $msg, 'answered' => 1, 'answeredby' => $userid]);
 $Cache->delete_value('staff_new_message_count');
-clear_staff_message_cache();
+\App\Support\Cache::clearStaffMessage();
         header("Location: staffbox.php?action=viewpm&pmid=$answeringto");
         return;
 }
@@ -200,8 +200,8 @@ if ($action == "deletestaffmessage") {
     \App\Models\StaffMessage::query()->where('id', $id)->delete();
 $Cache->delete_value('staff_message_count');
 $Cache->delete_value('staff_new_message_count');
-clear_staff_message_cache();
-  header("Location: " . get_protocol_prefix() . "$BASEURL/staffbox.php");
+\App\Support\Cache::clearStaffMessage();
+  header("Location: " . \App\Support\Http::protocolPrefix(\App\Support\Url::isSecure()) . "$BASEURL/staffbox.php");
   return;
 }
 
@@ -212,14 +212,14 @@ $id = intval(\App\Support\SupportContext::getQuery("id") ?? 0);
     can_access_staff_message($id);
 \App\Models\StaffMessage::query()->where('id', $id)->update(['answered' => 1, 'answeredby' => $CURUSER['id']]);
 $Cache->delete_value('staff_new_message_count');
-    clear_staff_message_cache();
+    \App\Support\Cache::clearStaffMessage();
 header("Location: staffbox.php" . (!empty(\App\Support\SupportContext::getQuery('return')) ? "?" . \App\Support\SupportContext::getQuery('return') : ''));
     return;
 }
 
 if ($action == "takecontactanswered") {
     if (empty(\App\Support\SupportContext::getPost('setanswered'))) {
-        \App\Support\LegacyResponse::abort($lang_staffbox['std_sorry'], nexus_trans('nexus.select_one_please'));
+        \App\Support\LegacyResponse::abort($lang_staffbox['std_sorry'], \App\Support\Locale::trans('nexus.select_one_please', [], null));
     }
 
 if (\App\Support\SupportContext::getPost('setdealt')){
@@ -237,7 +237,7 @@ elseif (\App\Support\SupportContext::getPost('delete')){
     }
 }
 $Cache->delete_value('staff_new_message_count');
-    clear_staff_message_cache();
+    \App\Support\Cache::clearStaffMessage();
 header("Location: staffbox.php");
     return;
 }

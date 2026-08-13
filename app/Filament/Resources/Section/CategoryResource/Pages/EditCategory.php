@@ -27,6 +27,6 @@ class EditCategory extends EditRecord
      */
     protected function afterSave()
     {
-        clear_category_cache();
+        \App\Support\Cache::clearCategory();
     }
 }

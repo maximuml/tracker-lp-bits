@@ -14,12 +14,10 @@ parameters:
         - bootstrap/app.php
 
     scanFiles:
-        - app/Support/Legacy/functions.php
         - config/nexus_constants.php
 
     scanDirectories:
         - vendor
-        - classes
 
     dynamicConstantNames:
         - IN_NEXUS

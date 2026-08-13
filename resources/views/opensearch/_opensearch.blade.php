@@ -7,7 +7,7 @@ if (!function_exists('data_url')) { function data_url($file, $mime)
   $base64   = base64_encode($contents); 
   return ('data:' . $mime . ';base64,' . $base64);
 } }
-$url = get_protocol_prefix().$BASEURL;
+$url = \App\Support\Http::protocolPrefix(\App\Support\Url::isSecure()).$BASEURL;
 $year = substr($datefounded, 0, 4);
 $yearfounded = ($year ? $year : 2007);
 $attribution = "Copyright (c) ".$SITENAME." ".(date("Y") != $yearfounded ? $yearfounded."-" : "").date("Y").", all rights reserved";

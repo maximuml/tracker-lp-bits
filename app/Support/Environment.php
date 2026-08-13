@@ -44,7 +44,7 @@ final class Environment
         $needsAppend = !str_ends_with($command, $append);
 
         if ($artisan) {
-            $phpPath = \nexus_env('PHP_PATH') ?: 'php';
+            $phpPath = \App\Support\Env::get('PHP_PATH', null) ?: 'php';
             $webRoot = rtrim(ROOT_PATH, '/');
             $command = escapeshellcmd($command);
             $command = str_replace('`', '\\`', $command);

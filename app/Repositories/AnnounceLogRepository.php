@@ -20,10 +20,7 @@ class AnnounceLogRepository extends BaseRepository
     public function listAll(array $filters, int $page, int $perPage, ?string $sortColumn, ?string $sortDirection)
     {
         $beginTimestamp = microtime(true);
-        do_log(sprintf(
-            "[REQUEST_CLICKHOUSE] [BEGIN], filters: %s, page: %s, perPage: %s, sortColumn: %s, sortDirection: %s",
-            json_encode($filters), $page, $perPage, $sortColumn, $sortDirection
-        ));
+        \App\Support\Logger::writeWithContext((string) sprintf("[REQUEST_CLICKHOUSE] [BEGIN], filters: %s, page: %s, perPage: %s, sortColumn: %s, sortDirection: %s", json_encode($filters), $page, $perPage, $sortColumn, $sortDirection), (string) 'info', (bool) false);
         $totalAlias = "total";
         $offset = ($page - 1) * $perPage;
         $client = $this->getClient();
@@ -48,10 +45,7 @@ class AnnounceLogRepository extends BaseRepository
         $countSql = sprintf("%s %s", $countPrefix, $whereStr);
         $data = $client->select($selectSql, $bindValues);
         $total = $client->select($countSql, $bindValues)->rows()[0][$totalAlias] ?? 0;
-        do_log(sprintf(
-            "[REQUEST_CLICKHOUSE] [END], selectSql: %s, binds: %s, costTime: %.3f sec.",
-            $selectSql, json_encode($bindValues), microtime(true) - $beginTimestamp
-        ));
+        \App\Support\Logger::writeWithContext((string) sprintf("[REQUEST_CLICKHOUSE] [END], selectSql: %s, binds: %s, costTime: %.3f sec.", $selectSql, json_encode($bindValues), microtime(true) - $beginTimestamp), (string) 'info', (bool) false);
         return [
             'data' => $data->rows(),
             'total' => (int)$total,

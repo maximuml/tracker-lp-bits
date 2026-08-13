@@ -23,7 +23,7 @@ abstract class BasePlugin extends BaseRepository
         foreach (glob("$dir/*.php") as $file) {
             $file = str_replace('\\', '/', $file);
             $toExecute = "$command --path=$file";
-            do_log("command: $toExecute");
+            \App\Support\Logger::writeWithContext((string) "command: {$toExecute}", (string) 'info', (bool) false);
             Artisan::call($toExecute);
         }
     }
@@ -57,7 +57,7 @@ abstract class BasePlugin extends BaseRepository
 
     public function trans($name): string
     {
-        return nexus_trans($this->getTransKey($name));
+        return \App\Support\Locale::trans($this->getTransKey($name), [], null);
     }
 
     public function getTransKey($name): string

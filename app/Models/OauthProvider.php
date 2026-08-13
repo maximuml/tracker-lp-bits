@@ -58,7 +58,7 @@ class OauthProvider extends NexusModel
     /** @param  string  $uuid */
     public static function getCallbackUrl(string $uuid): string
     {
-        return sprintf("%s/oauth/callback/%s", getSchemeAndHttpHost(), $uuid);
+        return sprintf("%s/oauth/callback/%s", \App\Support\Url::schemeAndHost(false), $uuid);
     }
 
     private static function getNewUuid(): string

@@ -25,6 +25,6 @@ class UpdateUserDownloadPrivilege implements ShouldQueue
     {
         $rep = new UserRepository();
         $rep->updateDownloadPrivileges(null, $this->userId, $this->status, $this->reasonKey);
-        do_log("Updating user download privilege for user {$this->userId} to {$this->status} by reason {$this->reasonKey}");
+        \App\Support\Logger::writeWithContext((string) "Updating user download privilege for user {$this->userId} to {$this->status} by reason {$this->reasonKey}", (string) 'info', (bool) false);
     }
 }

@@ -15,10 +15,10 @@ class CreateCodec extends CreateRecord
 
     public function afterCreate()
     {
-        clear_search_box_cache();
+        \App\Support\Cache::clearSearchBox();
         $model = static::$resource::getModel();
         $table = (new $model)->getTable();
-        clear_taxonomy_cache($table);
+        \App\Support\Cache::clearTaxonomy($table);
     }
 
     protected function mutateFormDataBeforeCreate(array $data): array

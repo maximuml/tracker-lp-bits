@@ -46,14 +46,14 @@ $BASEURL = \App\Support\SupportContext::getGlobal('BASEURL');
 $CURUSER = \App\Support\SupportContext::getUser() ?? [];
 	\App\Support\Frame::mainFrameOpen();
 	print ("<div id=\"pmboxnav\"><ul id=\"pmboxmenu\" class=\"menu\">");
-	print ("<li" . ($selected == 1 ? " class=selected" : "") . "><a href=\"" . get_protocol_prefix() . $BASEURL . "/messages.php\" >".$lang_messages['text_inbox']."</a></li>");
-	print ("<li" . ($selected == -1 ? " class=selected" : "") . "><a href=\"" . get_protocol_prefix() . $BASEURL . "/messages.php?action=viewmailbox&box=-1\">".$lang_messages['text_sentbox']."</a></li>");
+	print ("<li" . ($selected == 1 ? " class=selected" : "") . "><a href=\"" . \App\Support\Http::protocolPrefix(\App\Support\Url::isSecure()) . $BASEURL . "/messages.php\" >".$lang_messages['text_inbox']."</a></li>");
+	print ("<li" . ($selected == -1 ? " class=selected" : "") . "><a href=\"" . \App\Support\Http::protocolPrefix(\App\Support\Url::isSecure()) . $BASEURL . "/messages.php?action=viewmailbox&box=-1\">".$lang_messages['text_sentbox']."</a></li>");
 $pmBoxes = \Nexus\Database\NexusDB::table('pmboxes')->where('userid', $CURUSER['id'])->orderBy('boxnumber')->get(['boxnumber','name']);
 if ($pmBoxes->count())
     foreach ($pmBoxes as $row)
     {
     $row = (array) $row;
-    print ("<li" . ($selected == $row['boxnumber'] ? " class=selected" : "") . "><a href=\"" . get_protocol_prefix() . $BASEURL . "/messages.php?action=viewmailbox&box=".$row['boxnumber']."\">".$row['name']."</a></li>");
+    print ("<li" . ($selected == $row['boxnumber'] ? " class=selected" : "") . "><a href=\"" . \App\Support\Http::protocolPrefix(\App\Support\Url::isSecure()) . $BASEURL . "/messages.php?action=viewmailbox&box=".$row['boxnumber']."\">".$row['name']."</a></li>");
     }
 	print ("</ul></div>");
 	\App\Support\Frame::mainFrameClose();

@@ -42,11 +42,11 @@ final class CheaterDetector
 
         $upSpeed = ($upthis / $self['announcetime'] / 1024 / 1024) * 8;
         $upSpeedMbps = number_format($upSpeed, 2, '.', '');
-        do_log("notSeedBoxMaxSpeedMbps: {$notSeedBoxMaxSpeedMbps}, upSpeedMbps: {$upSpeedMbps}");
+        \App\Support\Logger::writeWithContext((string) "notSeedBoxMaxSpeedMbps: {$notSeedBoxMaxSpeedMbps}, upSpeedMbps: {$upSpeedMbps}", (string) 'info', (bool) false);
 
         if ($upSpeed > $notSeedBoxMaxSpeedMbps) {
             (new UserRepository())->updateDownloadPrivileges(null, $userId, 'no', 'upload_over_speed');
-            do_log("user: {$userId} downloading privileges have been disabled! (over speed), upSpeedMbps: {$upSpeedMbps} > notSeedBoxMaxSpeedMbps: {$notSeedBoxMaxSpeedMbps}", 'error');
+            \App\Support\Logger::writeWithContext((string) "user: {$userId} downloading privileges have been disabled! (over speed), upSpeedMbps: {$upSpeedMbps} > notSeedBoxMaxSpeedMbps: {$notSeedBoxMaxSpeedMbps}", (string) 'error', (bool) false);
             $this->responseBuilder->warn('Your downloading privileges have been disabled! (over speed)', 300);
         }
     }

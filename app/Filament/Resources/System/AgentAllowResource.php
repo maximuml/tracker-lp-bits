@@ -87,7 +87,7 @@ class AgentAllowResource extends Resource
                 EditAction::make(),
                 DeleteAction::make()->using(function ($record) {
                     $record->delete();
-                    clear_agent_allow_deny_cache();
+                    \App\Support\Cache::clearAgentAllowDeny();
                     return redirect(self::getUrl());
                 })
             ])

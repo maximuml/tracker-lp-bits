@@ -43,12 +43,12 @@ class PollRepository extends BaseRepository
             ]);
             $affectedRows = $user->where('seedbonus', $user->seedbonus)->decrement('seedbonus', $value);
             if ($affectedRows != 1) {
-                do_log("affectedRows: $affectedRows, query: " . last_query(), 'error');
+                \App\Support\Logger::writeWithContext((string) ("affectedRows: {$affectedRows}, query: " . \App\Support\LegacyDb::lastQuery(false, 'json')), (string) 'error', (bool) false);
                 throw new \RuntimeException("decrement user bonus fail.");
             }
             $affectedRows = $torrentOwner->where('seedbonus', $torrentOwner->seedbonus)->increment('seedbonus', $value);
             if ($affectedRows != 1) {
-                do_log("affectedRows: $affectedRows, query: " . last_query(), 'error');
+                \App\Support\Logger::writeWithContext((string) ("affectedRows: {$affectedRows}, query: " . \App\Support\LegacyDb::lastQuery(false, 'json')), (string) 'error', (bool) false);
                 throw new \RuntimeException("increment owner bonus fail.");
             }
             return $model;

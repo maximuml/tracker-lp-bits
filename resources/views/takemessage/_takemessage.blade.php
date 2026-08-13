@@ -24,17 +24,17 @@ if ($__server_REQUEST_METHOD != "POST")
 		if(!\App\Support\SupportContext::getPost('to'))
 			\App\Support\LegacyResponse::abort($lang_takemessage['std_error'], $lang_takemessage['std_must_enter_username']);
 		$receiver = \App\Support\UserDisplay::userIdFromName(trim(\App\Support\SupportContext::getPost('to')));
-        $locale = get_user_locale($receiver);
+        $locale = \App\Support\Locale::userLocale($receiver);
 		if ($origmsgrow['sender'] == 0)
 		{
-			$origfrom = nexus_trans("message.msg_system", [], $locale);
+			$origfrom = \App\Support\Locale::trans("message.msg_system", [], $locale);
 		}
 		else
 		{
 			$origmsgsendername = \App\Support\UserDisplay::plainUsername($origmsgrow['sender']);
 			$origfrom = "[url=userdetails.php?id=".$origmsgrow['sender']."]".$origmsgsendername."[/url]";
 		}
-		$msg = "-------- ".nexus_trans("message.msg_original_message_from", [], $locale) . $origfrom . " --------\n" . $origmsgrow['msg']."\n\n".($msg ? "-------- [url=userdetails.php?id=".$CURUSER["id"]."]".$CURUSER["username"]."[/url][i] Wrote at ".date("Y-m-d H:i:s").":[/i] --------\n".$msg : "");
+		$msg = "-------- ".\App\Support\Locale::trans("message.msg_original_message_from", [], $locale) . $origfrom . " --------\n" . $origmsgrow['msg']."\n\n".($msg ? "-------- [url=userdetails.php?id=".$CURUSER["id"]."]".$CURUSER["username"]."[/url][i] Wrote at ".date("Y-m-d H:i:s").":[/i] --------\n".$msg : "");
 
 	}
 	else
@@ -133,20 +133,20 @@ if ($emailnotify_smtp=='yes' && $smtptype != 'none'){
 
 		$username = trim($CURUSER["username"]);
 		$msg_receiver = trim($user["username"]);
-		$prefix = get_protocol_prefix();
-        $locale = get_user_locale($user['id']);
-		$title = "$SITENAME ".nexus_trans("message.mail_received_pm_from", [], $locale) . $username . "!";
-        $mailDear = nexus_trans("message.mail_dear", [], $locale);
-        $mailYouReceivedAPm = nexus_trans("message.mail_you_received_a_pm", [], $locale);
-        $mailSender = nexus_trans("message.mail_sender", [], $locale);
-        $mailSubject = nexus_trans("message.mail_subject", [], $locale);
-        $mailDate = nexus_trans("message.mail_date", [], $locale);
-        $mailYouFollowingUrl = nexus_trans("message.mail_use_following_url", [], $locale);
-        $mailHere = nexus_trans("message.mail_here", [], $locale);
-        $mailYouFollowingUrl1 = nexus_trans("message.mail_use_following_url_1", [], $locale);
-        $mailYours = nexus_trans("message.mail_yours", [], $locale);
+		$prefix = \App\Support\Http::protocolPrefix(\App\Support\Url::isSecure());
+        $locale = \App\Support\Locale::userLocale($user['id']);
+		$title = "$SITENAME ".\App\Support\Locale::trans("message.mail_received_pm_from", [], $locale) . $username . "!";
+        $mailDear = \App\Support\Locale::trans("message.mail_dear", [], $locale);
+        $mailYouReceivedAPm = \App\Support\Locale::trans("message.mail_you_received_a_pm", [], $locale);
+        $mailSender = \App\Support\Locale::trans("message.mail_sender", [], $locale);
+        $mailSubject = \App\Support\Locale::trans("message.mail_subject", [], $locale);
+        $mailDate = \App\Support\Locale::trans("message.mail_date", [], $locale);
+        $mailYouFollowingUrl = \App\Support\Locale::trans("message.mail_use_following_url", [], $locale);
+        $mailHere = \App\Support\Locale::trans("message.mail_here", [], $locale);
+        $mailYouFollowingUrl1 = \App\Support\Locale::trans("message.mail_use_following_url_1", [], $locale);
+        $mailYours = \App\Support\Locale::trans("message.mail_yours", [], $locale);
         $siteName = \App\Models\Setting::getSiteName();
-        $mailTheSiteTeam = sprintf(nexus_trans("message.mail_the_site_team", [], $locale), $siteName);
+        $mailTheSiteTeam = sprintf(\App\Support\Locale::trans("message.mail_the_site_team", [], $locale), $siteName);
 		$body = <<<EOD
 		{$mailDear}$msg_receiver,
 
@@ -163,7 +163,7 @@ $prefix$BASEURL/messages.php?action=viewmessage&id=$msgid
 		{$mailTheSiteTeam}
 EOD;
 
-		sent_mail($user["email"],$SITENAME,$SITEEMAIL,$title,str_replace("<br />","<br />",nl2br($body)),"sendmessage",false,false,'');
+		\App\Support\Mail::sentLegacy((string) $user["email"], (string) $SITENAME, (string) $SITEEMAIL, (string) $title, (string) str_replace("<br />", "<br />", nl2br($body)), (string) "sendmessage", (bool) false, (bool) false, '', (string) 'UTF-8');
 
 	}
 }
@@ -187,7 +187,7 @@ EOD;
 			}
 		}
 		if (!$returnto)
-		$returnto = "" . get_protocol_prefix() . "$BASEURL/messages.php";
+		$returnto = "" . \App\Support\Http::protocolPrefix(\App\Support\Url::isSecure()) . "$BASEURL/messages.php";
 	}
 
 	if ($returnto)

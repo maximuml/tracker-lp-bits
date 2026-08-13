@@ -206,7 +206,7 @@ final class Cache
 
         $userInfo = \App\Models\User::query()->find($uid, \App\Models\User::$commonFields);
         if ($userInfo) {
-            \fire_event('user_updated', $userInfo);
+            \App\Support\Events::fire('user_updated', $userInfo, null);
         }
     }
 

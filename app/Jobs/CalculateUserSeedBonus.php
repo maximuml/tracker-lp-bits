@@ -155,7 +155,7 @@ class CalculateUserSeedBonus implements ShouldQueue
                 $this->appendBonusLogInsert($bonusLogInsert, $uid, BonusLogs::BUSINESS_TYPE_SEEDING_MEDAL_ADDITION, $oldValue, $medalAddition);
                 $oldValue += $medalAddition;
             }
-            do_log($bonusLog);
+            \App\Support\Logger::writeWithContext((string) $bonusLog, (string) 'info', (bool) false);
             $dividend = 3600 / $autoclean_interval_one;
             $all_bonus = $all_bonus / $dividend;
             $seed_points = $seedBonusResult['seed_points'] / $dividend;
@@ -178,7 +178,7 @@ class CalculateUserSeedBonus implements ShouldQueue
                 );
                 $logStr .= $log . PHP_EOL;
             } else {
-                do_log("logFile: $logFile is not writeable!", 'error');
+                \App\Support\Logger::writeWithContext((string) "logFile: {$logFile} is not writeable!", (string) 'error', (bool) false);
             }
         }
         $result = NexusDB::table('users')->upsert($rows, ['id'], ['seed_points', 'seed_points_per_hour', 'seed_bonus_per_hour', 'seedbonus', 'seeding_torrent_count', 'seeding_torrent_size', 'seed_points_updated_at']);
@@ -193,11 +193,8 @@ class CalculateUserSeedBonus implements ShouldQueue
             $this->insertIntoClickHouseBulk($bonusLogInsert);
         }
         $costTime = time() - $beginTimestamp;
-        do_log(sprintf(
-            "$logPrefix, [DONE], update user count: %s, result: %s, cost time: %s seconds",
-            count($rows), var_export($result, true), $costTime
-        ));
-        do_log("$logPrefix, upsert users seed bonus done", "debug");
+        \App\Support\Logger::writeWithContext((string) sprintf("{$logPrefix}, [DONE], update user count: %s, result: %s, cost time: %s seconds", count($rows), var_export($result, true), $costTime), (string) 'info', (bool) false);
+        \App\Support\Logger::writeWithContext((string) "{$logPrefix}, upsert users seed bonus done", (string) "debug", (bool) false);
     }
 
     /**
@@ -208,7 +205,7 @@ class CalculateUserSeedBonus implements ShouldQueue
      */
     public function failed(\Throwable $exception)
     {
-        do_log("failed: " . $exception->getMessage() . $exception->getTraceAsString(), 'error');
+        \App\Support\Logger::writeWithContext((string) ("failed: " . $exception->getMessage() . $exception->getTraceAsString()), (string) 'error', (bool) false);
     }
 
     /**
@@ -237,21 +234,21 @@ class CalculateUserSeedBonus implements ShouldQueue
     private function insertIntoClickHouseBulk(array $bonusLogInsert): void
     {
         if (!\App\Support\Config\SiteConfig::current()->system->isRecordSeedingBonusLog()) {
-            do_log("not enabled");
+            \App\Support\Logger::writeWithContext((string) "not enabled", (string) 'info', (bool) false);
             return;
         }
         $host = config('clickhouse.connection.host');
         if (!$host) {
-            do_log("clickhouse no host");
+            \App\Support\Logger::writeWithContext((string) "clickhouse no host", (string) 'info', (bool) false);
             return;
         }
         try {
             $client = app(\ClickHouseDB\Client::class);
             $fields = ['business_type', 'uid', 'old_total_value', 'value', 'new_total_value', 'comment', 'created_at'];
             $client->insert("bonus_logs", $bonusLogInsert, $fields);
-            do_log("insertIntoClickHouseBulk done, created_at: {$bonusLogInsert[0]['created_at']}, count: " . count($bonusLogInsert));
+            \App\Support\Logger::writeWithContext((string) ("insertIntoClickHouseBulk done, created_at: {$bonusLogInsert[0]['created_at']}, count: " . count($bonusLogInsert)), (string) 'info', (bool) false);
         } catch (\Exception $e) {
-            do_log($e->getMessage(), 'error');
+            \App\Support\Logger::writeWithContext((string) $e->getMessage(), (string) 'error', (bool) false);
         }
     }
 }

@@ -136,7 +136,7 @@ class SearchRepository extends BaseRepository
     /** @return  mixed */
     public function __construct()
     {
-        $elasticsearchEnabled = nexus_env('ELASTICSEARCH_ENABLED');
+        $elasticsearchEnabled = \App\Support\Env::get('ELASTICSEARCH_ENABLED', null);
         if ($elasticsearchEnabled) {
             $this->enabled = true;
         } else {
@@ -147,7 +147,7 @@ class SearchRepository extends BaseRepository
     private function getEs(): Client
     {
         if (is_null($this->es)) {
-            $config = nexus_config('nexus.elasticsearch');
+            $config = \App\Support\Config::get('nexus.elasticsearch', null);
             $hosts = array_map([$this, 'buildEsHost'], $config['hosts']);
             $builder = ClientBuilder::create()->setHosts($hosts);
             $sslVerification = $config['ssl_verification'] ?? '';
@@ -269,10 +269,10 @@ class SearchRepository extends BaseRepository
             $log = "page: $page, size: $size";
             $torrentResults = (clone $query)->forPage($page, $size)->get();
             if ($torrentResults->isEmpty()) {
-                do_log("$log, no more data...", 'info', true);
+                \App\Support\Logger::writeWithContext((string) "{$log}, no more data...", (string) 'info', (bool) true);
                 break;
             }
-            do_log("$log, get counts: " . $torrentResults->count(), 'info', true);
+            \App\Support\Logger::writeWithContext((string) ("{$log}, get counts: " . $torrentResults->count()), (string) 'info', (bool) true);
 
             $torrentBodyBulk = $userBodyBulk = $tagBodyBulk = $bookmarkBodyBulk = ['body' => []];
             foreach ($torrentResults as $torrent) {
@@ -375,7 +375,7 @@ class SearchRepository extends BaseRepository
         ];
         $searchBoxId = $torrent->basic_category->mode ?? 0;
         if ($searchBoxId == 0) {
-            do_log(sprintf('[INVALID_CATEGORY], Torrent: %s', $torrent->id), 'error');
+            \App\Support\Logger::writeWithContext((string) sprintf('[INVALID_CATEGORY], Torrent: %s', $torrent->id), (string) 'error', (bool) false);
         }
         $data = Arr::only($torrent->toArray(), $baseFields);
         $data['mode'] = $searchBoxId;
@@ -467,7 +467,7 @@ class SearchRepository extends BaseRepository
         if (isset($response['errors']) && $response['errors'] == true) {
             $msg .= var_export($response, true);
         }
-        do_log($msg, 'info', isRunningInConsole());
+        \App\Support\Logger::writeWithContext((string) $msg, (string) 'info', (bool) \App\Support\Environment::isConsole());
     }
 
     /** @param  mixed  $id */
@@ -539,12 +539,12 @@ class SearchRepository extends BaseRepository
         foreach (self::$queryFieldToTorrentFieldMaps as $queryField => $torrentField) {
             if (isset($params[$queryField]) && $params[$queryField] !== '') {
                 $mustBoolShould[$torrentField][] = ['match' => [$torrentField => $params[$queryField]]];
-                do_log("get mustBoolShould for $torrentField from params through $queryField: {$params[$queryField]}");
+                \App\Support\Logger::writeWithContext((string) "get mustBoolShould for {$torrentField} from params through {$queryField}: {$params[$queryField]}", (string) 'info', (bool) false);
             } elseif (preg_match_all("/{$queryField}([\d]+)=/", $queryString, $matches)) {
                 if (count($matches) == 2 && !empty($matches[1])) {
                     foreach ($matches[1] as $match) {
                         $mustBoolShould[$torrentField][] = ['match' => [$torrentField => $match]];
-                        do_log("get mustBoolShould for $torrentField from params through $queryField: $match");
+                        \App\Support\Logger::writeWithContext((string) "get mustBoolShould for {$torrentField} from params through {$queryField}: {$match}", (string) 'info', (bool) false);
                     }
                 }
             } else {
@@ -554,7 +554,7 @@ class SearchRepository extends BaseRepository
                     if (count($matches) == 2 && !empty($matches[1])) {
                         $match = $matches[1];
                         $mustBoolShould[$torrentField][] = ['match' => [$torrentField => $match]];
-                        do_log("get mustBoolShould for $torrentField from user setting through $queryField: $match");
+                        \App\Support\Logger::writeWithContext((string) "get mustBoolShould for {$torrentField} from user setting through {$queryField}: {$match}", (string) 'info', (bool) false);
                     }
                 }
             }
@@ -563,57 +563,57 @@ class SearchRepository extends BaseRepository
         $includeDead = 1;
         if (isset($params['incldead'])) {
             $includeDead = (int)$params['incldead'];
-            do_log("maybe get must for visible from params");
+            \App\Support\Logger::writeWithContext((string) "maybe get must for visible from params", (string) 'info', (bool) false);
         } elseif (preg_match("/\[incldead=([\d]+)\]/", $userSetting, $matches)) {
             $includeDead = $matches[1];
-            do_log("maybe get must for visible from user setting");
+            \App\Support\Logger::writeWithContext((string) "maybe get must for visible from user setting", (string) 'info', (bool) false);
         }
         if ($includeDead == 1) {
             //active torrent
             $must[] = ['match' => ['visible' => 'yes']];
-            do_log("get must for visible = yes through incldead: $includeDead");
+            \App\Support\Logger::writeWithContext((string) "get must for visible = yes through incldead: {$includeDead}", (string) 'info', (bool) false);
         } elseif ($includeDead == 2) {
             //dead torrent
             $must[] = ['match' => ['visible' => 'no']];
-            do_log("get must for visible = no through incldead: $includeDead");
+            \App\Support\Logger::writeWithContext((string) "get must for visible = no through incldead: {$includeDead}", (string) 'info', (bool) false);
         }
 
 
         $includeBookmarked = 0;
         if (isset($params['inclbookmarked'])) {
             $includeBookmarked = (int)$params['inclbookmarked'];
-            do_log("maybe get must or must_not for has_child.bookmark from params");
+            \App\Support\Logger::writeWithContext((string) "maybe get must or must_not for has_child.bookmark from params", (string) 'info', (bool) false);
         } elseif (preg_match("/\[inclbookmarked=([\d]+)\]/", $userSetting, $matches)) {
             $includeBookmarked = $matches[1];
-            do_log("maybe get must or must_not for has_child.bookmark from user setting");
+            \App\Support\Logger::writeWithContext((string) "maybe get must or must_not for has_child.bookmark from user setting", (string) 'info', (bool) false);
         }
         if ($includeBookmarked == 1) {
             //only bookmark
             $must[] = ['has_child' => ['type' => 'bookmark', 'query' => ['match' => ['user_id' => $user->id]]]];
-            do_log("get must for has_child.bookmark through inclbookmarked: $includeBookmarked");
+            \App\Support\Logger::writeWithContext((string) "get must for has_child.bookmark through inclbookmarked: {$includeBookmarked}", (string) 'info', (bool) false);
         } elseif ($includeBookmarked == 2) {
             //only not bookmark
             $must_not[] = ['has_child' => ['type' => 'bookmark', 'query' => ['match' => ['user_id' => $user->id]]]];
-            do_log("get must_not for has_child.bookmark through inclbookmarked: $includeBookmarked");
+            \App\Support\Logger::writeWithContext((string) "get must_not for has_child.bookmark through inclbookmarked: {$includeBookmarked}", (string) 'info', (bool) false);
         }
 
 
         $spState = 0;
         if (isset($params['spstate'])) {
             $spState = (int)$params['spstate'];
-            do_log("maybe get must for spstate from params");
+            \App\Support\Logger::writeWithContext((string) "maybe get must for spstate from params", (string) 'info', (bool) false);
         } elseif (preg_match("/\[spstate=([\d]+)\]/", $userSetting, $matches)) {
             $spState = $matches[1];
-            do_log("maybe get must for spstate from user setting");
+            \App\Support\Logger::writeWithContext((string) "maybe get must for spstate from user setting", (string) 'info', (bool) false);
         }
         if ($spState > 0) {
             $must[] = ['match' => ['sp_state' => $spState]];
-            do_log("get must for sp_state = $spState through spstate: $spState");
+            \App\Support\Logger::writeWithContext((string) "get must for sp_state = {$spState} through spstate: {$spState}", (string) 'info', (bool) false);
         }
 
         if (!empty($params['tag_id'])) {
             $must[] = ['has_child' => ['type' => 'tag', 'query' => ['match' => ['tag_id' => $params['tag_id']]]]];
-            do_log("get must for has_child.tag through params.tag_id: {$params['tag_id']}");
+            \App\Support\Logger::writeWithContext((string) "get must for has_child.tag through params.tag_id: {$params['tag_id']}", (string) 'info', (bool) false);
         }
 
 
@@ -632,17 +632,17 @@ class SearchRepository extends BaseRepository
                 if ($searchArea == self::SEARCH_AREA_TITLE) {
                     foreach ($keywordsArr as $keyword) {
                         $must[] = ['match' => ["name{$keywordFlag}" => $keyword]];
-                        do_log("get must [SEARCH_MODE_AND + SEARCH_MODE_EXACT] for name match '$keyword' through search");
+                        \App\Support\Logger::writeWithContext((string) "get must [SEARCH_MODE_AND + SEARCH_MODE_EXACT] for name match '{$keyword}' through search", (string) 'info', (bool) false);
                     }
                 } elseif ($searchArea == self::SEARCH_AREA_DESC) {
                     foreach ($keywordsArr as $keyword) {
                         $must[] = ['match' => ["descr{$keywordFlag}" => $keyword]];
-                        do_log("get must [SEARCH_MODE_AND + SEARCH_MODE_EXACT] for descr match '$keyword' through search");
+                        \App\Support\Logger::writeWithContext((string) "get must [SEARCH_MODE_AND + SEARCH_MODE_EXACT] for descr match '{$keyword}' through search", (string) 'info', (bool) false);
                     }
                 } elseif ($searchArea == self::SEARCH_AREA_OWNER) {
                     foreach ($keywordsArr as $keyword) {
                         $must[] = ['has_parent' => ['parent_type' => 'user', 'query' => ['match' => ["username{$keywordFlag}" => $keyword]]]];
-                        do_log("get must [SEARCH_MODE_AND + SEARCH_MODE_EXACT] has_parent.user match '$keyword' through search");
+                        \App\Support\Logger::writeWithContext((string) "get must [SEARCH_MODE_AND + SEARCH_MODE_EXACT] has_parent.user match '{$keyword}' through search", (string) 'info', (bool) false);
                     }
                 }
             } elseif ($searchMode == self::SEARCH_MODE_OR) {
@@ -650,21 +650,21 @@ class SearchRepository extends BaseRepository
                     $tmpMustBoolShould = [];
                     foreach ($keywordsArr as $keyword) {
                         $tmpMustBoolShould[] = ['match' => ['name' => $keyword]];
-                        do_log("get must bool should [SEARCH_MODE_OR] for name match '$keyword' through search");
+                        \App\Support\Logger::writeWithContext((string) "get must bool should [SEARCH_MODE_OR] for name match '{$keyword}' through search", (string) 'info', (bool) false);
                     }
                     $must[]['bool']['should'] = $tmpMustBoolShould;
                 } elseif ($searchArea == self::SEARCH_AREA_DESC) {
                     $tmpMustBoolShould = [];
                     foreach ($keywordsArr as $keyword) {
                         $tmpMustBoolShould[] = ['match' => ['descr' => $keyword]];
-                        do_log("get must bool should [SEARCH_MODE_OR] for descr match '$keyword' through search");
+                        \App\Support\Logger::writeWithContext((string) "get must bool should [SEARCH_MODE_OR] for descr match '{$keyword}' through search", (string) 'info', (bool) false);
                     }
                     $must[]['bool']['should'] = $tmpMustBoolShould;
                 } elseif ($searchArea == self::SEARCH_AREA_OWNER) {
                     $tmpMustBoolShould = [];
                     foreach ($keywordsArr as $keyword) {
                         $tmpMustBoolShould[] = ['has_parent' => ['parent_type' => 'user', 'query' => ['match' => ['username' => $keyword]]]];
-                        do_log("get must bool should [SEARCH_MODE_OR] has_parent.user match '$keyword' through search");
+                        \App\Support\Logger::writeWithContext((string) "get must bool should [SEARCH_MODE_OR] has_parent.user match '{$keyword}' through search", (string) 'info', (bool) false);
                     }
                     $must[]['bool']['should'] = $tmpMustBoolShould;
                 }
@@ -717,10 +717,7 @@ class SearchRepository extends BaseRepository
             'size' => $size,
             '_source' => ['torrent_id', 'name', 'owner']
         ];
-        do_log(sprintf(
-            "params: %s, user: %s, queryString: %s, result: %s",
-            nexus_json_encode($params), $user->id, $queryString, nexus_json_encode($result)
-        ));
+        \App\Support\Logger::writeWithContext((string) sprintf("params: %s, user: %s, queryString: %s, result: %s", \App\Support\Json::encode($params), $user->id, $queryString, \App\Support\Json::encode($result)), (string) 'info', (bool) false);
         return $result;
 
     }
@@ -744,15 +741,15 @@ class SearchRepository extends BaseRepository
             'data' => [],
         ];
         if ($this->isEsResponseError($response)) {
-            do_log("error response: " . nexus_json_encode($response), 'error');
+            \App\Support\Logger::writeWithContext((string) ("error response: " . \App\Support\Json::encode($response)), (string) 'error', (bool) false);
             return $result;
         }
         if (empty($response['hits'])) {
-            do_log("empty response hits: " . nexus_json_encode($response), 'error');
+            \App\Support\Logger::writeWithContext((string) ("empty response hits: " . \App\Support\Json::encode($response)), (string) 'error', (bool) false);
             return $result;
         }
         if ($response['hits']['total']['value'] == 0) {
-            do_log("total = 0, " . nexus_json_encode($response));
+            \App\Support\Logger::writeWithContext((string) ("total = 0, " . \App\Support\Json::encode($response)), (string) 'info', (bool) false);
             return $result;
         }
         $result['total'] = $response['hits']['total']['value'];
@@ -790,11 +787,11 @@ class SearchRepository extends BaseRepository
         $log = "[UPDATE_TORRENT]: $id";
         $result = $this->getTorrent($id);
         if ($this->isEsResponseError($result)) {
-            do_log("$log, fail: " . nexus_json_encode($result), 'error');
+            \App\Support\Logger::writeWithContext((string) ("{$log}, fail: " . \App\Support\Json::encode($result)), (string) 'error', (bool) false);
             return false;
         }
         if ($result['found'] === false) {
-            do_log("$log, not exists, do insert");
+            \App\Support\Logger::writeWithContext((string) "{$log}, not exists, do insert", (string) 'info', (bool) false);
             return $this->addTorrent($id);
         }
 
@@ -805,10 +802,10 @@ class SearchRepository extends BaseRepository
         $params['body']['doc'] = $data['body'];
         $result = $this->getEs()->update($params);
         if ($this->isEsResponseError($result)) {
-            do_log("$log, fail: " . nexus_json_encode($result), 'error');
+            \App\Support\Logger::writeWithContext((string) ("{$log}, fail: " . \App\Support\Json::encode($result)), (string) 'error', (bool) false);
             return false;
         }
-        do_log("$log, success: " . nexus_json_encode($result));
+        \App\Support\Logger::writeWithContext((string) ("{$log}, success: " . \App\Support\Json::encode($result)), (string) 'info', (bool) false);
 
         return $this->syncTorrentTags($torrent);
     }
@@ -828,10 +825,10 @@ class SearchRepository extends BaseRepository
         $params['body'][] = $data['body'];
         $result = $this->getEs()->bulk($params);
         if ($this->isEsResponseError($result)) {
-            do_log("$log, fail: " . nexus_json_encode($result), 'error');
+            \App\Support\Logger::writeWithContext((string) ("{$log}, fail: " . \App\Support\Json::encode($result)), (string) 'error', (bool) false);
             return false;
         }
-        do_log("$log, success: " . nexus_json_encode($result));
+        \App\Support\Logger::writeWithContext((string) ("{$log}, success: " . \App\Support\Json::encode($result)), (string) 'info', (bool) false);
 
         return $this->syncTorrentTags($torrent);
     }
@@ -865,10 +862,10 @@ class SearchRepository extends BaseRepository
         ];
         $result = $this->getEs()->delete($params);
         if ($this->isEsResponseError($result)) {
-            do_log("$log, fail: " . nexus_json_encode($result), 'error');
+            \App\Support\Logger::writeWithContext((string) ("{$log}, fail: " . \App\Support\Json::encode($result)), (string) 'error', (bool) false);
             return false;
         }
-        do_log("$log, success: " . nexus_json_encode($result));
+        \App\Support\Logger::writeWithContext((string) ("{$log}, success: " . \App\Support\Json::encode($result)), (string) 'info', (bool) false);
 
         return $this->syncTorrentTags($id, true);
     }
@@ -902,12 +899,12 @@ class SearchRepository extends BaseRepository
         ];
         $result = $this->getEs()->deleteByQuery($params);
         if ($this->isEsResponseError($result)) {
-            do_log("$log, delete torrent tag fail: " . nexus_json_encode($result), 'error');
+            \App\Support\Logger::writeWithContext((string) ("{$log}, delete torrent tag fail: " . \App\Support\Json::encode($result)), (string) 'error', (bool) false);
             return false;
         }
-        do_log("$log, delete torrent tag success: " . nexus_json_encode($result));
+        \App\Support\Logger::writeWithContext((string) ("{$log}, delete torrent tag success: " . \App\Support\Json::encode($result)), (string) 'info', (bool) false);
         if ($onlyDelete) {
-            do_log("$log, only delete, return true");
+            \App\Support\Logger::writeWithContext((string) "{$log}, only delete, return true", (string) 'info', (bool) false);
             return true;
         }
 
@@ -919,15 +916,15 @@ class SearchRepository extends BaseRepository
             $bulk['body'][] = $body['body'];
         }
         if (empty($bulk['body'])) {
-            do_log("$log, no tags, return true");
+            \App\Support\Logger::writeWithContext((string) "{$log}, no tags, return true", (string) 'info', (bool) false);
             return true;
         }
         $result = $this->getEs()->bulk($bulk);
         if ($this->isEsResponseError($result)) {
-            do_log("$log, insert torrent tag fail: " . nexus_json_encode($result), 'error');
+            \App\Support\Logger::writeWithContext((string) ("{$log}, insert torrent tag fail: " . \App\Support\Json::encode($result)), (string) 'error', (bool) false);
             return false;
         }
-        do_log("$log, insert torrent tag success: " . nexus_json_encode($result));
+        \App\Support\Logger::writeWithContext((string) ("{$log}, insert torrent tag success: " . \App\Support\Json::encode($result)), (string) 'info', (bool) false);
         return true;
     }
 
@@ -946,10 +943,10 @@ class SearchRepository extends BaseRepository
         $params['body']['doc'] = $data['body'];
         $result = $this->getEs()->update($params);
         if ($this->isEsResponseError($result)) {
-            do_log("$log, fail: " . nexus_json_encode($result), 'error');
+            \App\Support\Logger::writeWithContext((string) ("{$log}, fail: " . \App\Support\Json::encode($result)), (string) 'error', (bool) false);
             return false;
         }
-        do_log("$log, success: " . nexus_json_encode($result));
+        \App\Support\Logger::writeWithContext((string) ("{$log}, success: " . \App\Support\Json::encode($result)), (string) 'info', (bool) false);
         return true;
     }
 
@@ -971,10 +968,10 @@ class SearchRepository extends BaseRepository
         $bulk['body'][] = $body['body'];
         $result = $this->getEs()->bulk($bulk);
         if ($this->isEsResponseError($result)) {
-            do_log("$log, fail: " . nexus_json_encode($result), 'error');
+            \App\Support\Logger::writeWithContext((string) ("{$log}, fail: " . \App\Support\Json::encode($result)), (string) 'error', (bool) false);
             return false;
         }
-        do_log("$log, success: " . nexus_json_encode($result));
+        \App\Support\Logger::writeWithContext((string) ("{$log}, success: " . \App\Support\Json::encode($result)), (string) 'info', (bool) false);
         return true;
     }
 
@@ -991,10 +988,10 @@ class SearchRepository extends BaseRepository
         ];
         $result = $this->getEs()->delete($params);
         if ($this->isEsResponseError($result)) {
-            do_log("$log, fail: " . nexus_json_encode($result), 'error');
+            \App\Support\Logger::writeWithContext((string) ("{$log}, fail: " . \App\Support\Json::encode($result)), (string) 'error', (bool) false);
             return false;
         }
-        do_log("$log, success: " . nexus_json_encode($result));
+        \App\Support\Logger::writeWithContext((string) ("{$log}, success: " . \App\Support\Json::encode($result)), (string) 'info', (bool) false);
         return true;
     }
 

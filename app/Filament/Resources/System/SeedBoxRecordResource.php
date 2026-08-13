@@ -100,7 +100,7 @@ class SeedBoxRecordResource extends Resource
                                 return $query->where('ip_begin_numeric', '<=', $ipNumeric)->where('ip_end_numeric', '>=', $ipNumeric);
                             });
                         } catch (Exception $exception) {
-                            do_log("Invalid IP: $search, error: " . $exception->getMessage());
+                            \App\Support\Logger::writeWithContext((string) ("Invalid IP: {$search}, error: " . $exception->getMessage()), (string) 'info', (bool) false);
                         }
                     })
                 ,
@@ -165,7 +165,7 @@ class SeedBoxRecordResource extends Resource
                         try {
                             $rep->updateStatus($record, $data['status'], $data['reason']);
                         } catch (Exception $exception) {
-                            send_admin_fail_notification(class_basename($exception));
+                            \App\Support\Admin::failNotification(class_basename($exception));
                         }
                     })
                 ,

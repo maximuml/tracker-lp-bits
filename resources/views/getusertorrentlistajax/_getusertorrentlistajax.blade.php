@@ -354,7 +354,7 @@ if ($count > 0 && $query)
     $pageSize = 100;
     list($pagertop, $pagerbottom, $limit, $offset) = \App\Support\Pagination::pager($pageSize, $count, "getusertorrentlistajax.php?");
     $rows = $query->offset($offset)->limit($pageSize)->get()->map(fn ($r) => (array) $r)->all();
-    do_log("count: $count, type: $type");
+    \App\Support\Logger::writeWithContext((string) "count: {$count}, type: {$type}", (string) 'info', (bool) false);
     list($torrentlist, $total_size_this_page) = maketable($rows, $type);
 }
 
@@ -368,7 +368,7 @@ if ((isset($total_size)) && $total_size){
     $hasData = true;
 }
 if ($hasData) {
-    $btnArr = apply_filter("user_seeding_top_btn", [], $CURUSER['id']);
+    $btnArr = \App\Support\Hooks::applyFilter("user_seeding_top_btn", [], $CURUSER['id']);
     $header = sprintf('<div style="display: flex;justify-content: space-between"><div>%s</div><div>%s</div></div>', $summary, implode("", $btnArr));
     echo '<br/>' . $header . $table;
 } else {

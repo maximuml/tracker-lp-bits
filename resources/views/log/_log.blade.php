@@ -263,9 +263,9 @@ else {
 		$Cache->delete_value('current_poll_content');
 		$Cache->delete_value('current_poll_result', true);
 		if ($returnto == "main")
-			header("Location: " . get_protocol_prefix() . "$BASEURL");
+			header("Location: " . \App\Support\Http::protocolPrefix(\App\Support\Url::isSecure()) . "$BASEURL");
 		else
-			header("Location: " . get_protocol_prefix() . "$BASEURL/log.php?action=poll&deleted=1");
+			header("Location: " . \App\Support\Http::protocolPrefix(\App\Support\Url::isSecure()) . "$BASEURL/log.php?action=poll&deleted=1");
 		die;
   }
 

@@ -309,7 +309,7 @@ class Torrent extends NexusModel
             throw new \RuntimeException('no select sp_state field');
         }
         $spState = (int) $this->sp_state;
-        $global = (int) get_global_sp_state();
+        $global = (int) \App\Support\Promotion::globalSpecialState();
         $log = sprintf('torrent: %s sp_state: %s, global sp state: %s', $this->id, $spState, $global);
 
         $resolved = TorrentPromotion::fromIntSafe($spState);
@@ -328,19 +328,19 @@ class Torrent extends NexusModel
             $spState = self::PROMOTION_NORMAL;
         }
 
-        do_log($log, 'debug');
+        \App\Support\Logger::writeWithContext((string) $log, (string) 'debug', (bool) false);
         return $spState;
     }
 
     /** @return  mixed */
     protected function getPosStateTextAttribute()
     {
-        $text = nexus_trans('torrent.pos_state_' . $this->pos_state);
+        $text = \App\Support\Locale::trans('torrent.pos_state_' . $this->pos_state, [], null);
         if ($this->pos_state != Torrent::POS_STATE_STICKY_NONE) {
             if ($this->pos_state_until) {
                 $append = \App\Support\Time::formatDateTime($this->pos_state_until);
             } else {
-                $append = nexus_trans('label.permanent');
+                $append = \App\Support\Locale::trans('label.permanent', [], null);
             }
             $text .= "($append)";
         }
@@ -351,7 +351,7 @@ class Torrent extends NexusModel
     protected function approvalStatusText(): Attribute
     {
         return new Attribute(
-            get: fn($value, $attributes) => nexus_trans('torrent.approval.status_text.' . $attributes['approval_status'])
+            get: fn($value, $attributes) => \App\Support\Locale::trans('torrent.approval.status_text.' . $attributes['approval_status'], [], null)
         );
     }
 
@@ -428,7 +428,7 @@ class Torrent extends NexusModel
         $result = self::$approvalStatus;
         $keyValue = [];
         foreach ($result as $status => &$info) {
-            $text = nexus_trans("torrent.approval.status_text.$status");
+            $text = \App\Support\Locale::trans("torrent.approval.status_text.{$status}", [], null);
             $info['text'] = $text;
             $keyValue[$status] = $info[$valueField];
         }
@@ -472,7 +472,7 @@ class Torrent extends NexusModel
     {
         $searchBoxId = $this->basic_category->mode ?? 0;
         if ($searchBoxId == 0) {
-            do_log(sprintf('[INVALID_CATEGORY], Torrent: %s, category: %s invalid', $this->id, $this->category), 'error');
+            \App\Support\Logger::writeWithContext((string) sprintf('[INVALID_CATEGORY], Torrent: %s, category: %s invalid', $this->id, $this->category), (string) 'error', (bool) false);
             return self::HR_NO;
         }
         $hrMode = HitAndRunMode::fromStringSafe(
@@ -515,7 +515,7 @@ class Torrent extends NexusModel
         $result = self::$posStates;
         $keyValues = [];
         foreach ($result as $key => &$value) {
-            $value['text'] = nexus_trans('torrent.pos_state_' . $key);
+            $value['text'] = \App\Support\Locale::trans('torrent.pos_state_' . $key, [], null);
             $keyValues[$key] = $value[$valueField];
         }
         if ($onlyKeyValue) {
@@ -533,7 +533,7 @@ class Torrent extends NexusModel
         ];
         $result = [];
         foreach($fields as $field) {
-            $result[$field] = nexus_trans("torrent.show.{$field}_label");
+            $result[$field] = \App\Support\Locale::trans("torrent.show.{$field}_label", [], null);
         }
         return $result;
     }

@@ -8,7 +8,7 @@ use Nexus\Database\NexusDB;
 /**
  * Legacy settings helpers extracted from `include/globalfunctions.php`.
  *
- * Backs `saveSetting()`, `get_setting()` and `get_setting_from_db()`.
+ * Backs `saveSetting()`, `Settings::get()` and `Settings::fromDb()`.
  */
 final class Settings
 {
@@ -21,7 +21,7 @@ final class Settings
     /**
      * Read a setting from the in-request cache, falling back to the DB.
      *
-     * Mirrors `get_setting()`.
+     * Mirrors the legacy `get_setting()` helper.
      */
     public static function get(?string $name = null, mixed $default = null): mixed
     {
@@ -39,7 +39,7 @@ final class Settings
     /**
      * Read a setting directly from the database (no cache).
      *
-     * Mirrors `get_setting_from_db()`.
+     * Mirrors the legacy `get_setting_from_db()` helper.
      */
     public static function fromDb(?string $name = null, mixed $default = null): mixed
     {

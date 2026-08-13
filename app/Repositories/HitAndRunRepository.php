@@ -100,10 +100,7 @@ class HitAndRunRepository extends BaseRepository
             return 0;
         }
         $result = $baseQuery->delete();
-        do_log(sprintf(
-            'user: %s bulk delete by filter: %s, result: %s',
-            $user->id, json_encode($params), json_encode($result)
-        ), 'alert');
+        \App\Support\Logger::writeWithContext((string) sprintf('user: %s bulk delete by filter: %s, result: %s', $user->id, json_encode($params), json_encode($result)), (string) 'alert', (bool) false);
         if ($result) {
             foreach ($list as $record) {
                 if (!$record instanceof HitAndRun) {
@@ -164,16 +161,16 @@ class HitAndRunRepository extends BaseRepository
      */
     private function doCronjobUpdateStatus(array $setting, $uid = null, $torrentId = null, $ignoreTime = false)
     {
-        do_log("setting: " . json_encode($setting) . ", uid: $uid, torrentId: $torrentId, ignoreTime: " . var_export($ignoreTime, true));
+        \App\Support\Logger::writeWithContext((string) ("setting: " . json_encode($setting) . ", uid: {$uid}, torrentId: {$torrentId}, ignoreTime: " . var_export($ignoreTime, true)), (string) 'info', (bool) false);
         $size = 1000;
         $page = 1;
         $mode = HitAndRunMode::fromStringSafe($setting['mode'] ?? null);
         if ($mode === HitAndRunMode::DISABLED) {
-            do_log("H&R mode is disabled.");
+            \App\Support\Logger::writeWithContext((string) "H&R mode is disabled.", (string) 'info', (bool) false);
             return false;
         }
         if (empty($setting['inspect_time'])) {
-            do_log("H&R inspect_time is not set.");
+            \App\Support\Logger::writeWithContext((string) "H&R inspect_time is not set.", (string) 'info', (bool) false);
             return false;
         }
         $query = HitAndRun::query()
@@ -204,25 +201,25 @@ class HitAndRunRepository extends BaseRepository
         while (true) {
             $logPrefix = "page: $page, size: $size";
             $rows = $query->forPage($page, $size)->get();
-            do_log("$logPrefix, counts: " . $rows->count());
+            \App\Support\Logger::writeWithContext((string) ("{$logPrefix}, counts: " . $rows->count()), (string) 'info', (bool) false);
             if ($rows->isEmpty()) {
-                do_log("$logPrefix, no more data..." . last_query());
+                \App\Support\Logger::writeWithContext((string) ("{$logPrefix}, no more data..." . \App\Support\LegacyDb::lastQuery(false, 'json')), (string) 'info', (bool) false);
                 break;
             }
             foreach ($rows as $row) {
                 $currentLog = "$logPrefix, [HANDLING] " . $row->toJson();
-                do_log($logPrefix);
+                \App\Support\Logger::writeWithContext((string) $logPrefix, (string) 'info', (bool) false);
                 if (!$row->user) {
-                    do_log("$currentLog, user not exists, remove it!", 'error');
+                    \App\Support\Logger::writeWithContext((string) "{$currentLog}, user not exists, remove it!", (string) 'error', (bool) false);
                     $row->delete();
                     continue;
                 }
                 if (!$row->snatch) {
-                    do_log("$currentLog, snatch not exists, skip!", 'error');
+                    \App\Support\Logger::writeWithContext((string) "{$currentLog}, snatch not exists, skip!", (string) 'error', (bool) false);
                     continue;
                 }
                 if (!$row->torrent) {
-                    do_log("$currentLog, torrent not exists, remove it!", 'error');
+                    \App\Support\Logger::writeWithContext((string) "{$currentLog}, torrent not exists, remove it!", (string) 'error', (bool) false);
                     $row->delete();
                     continue;
                 }
@@ -239,7 +236,7 @@ class HitAndRunRepository extends BaseRepository
                 //check seed time
                 $targetSeedTime = $row->snatch->seedtime;
                 $requireSeedTime = bcmul((string)$setting['seed_time_minimum'], '3600');
-                do_log("$currentLog, targetSeedTime: $targetSeedTime, requireSeedTime: $requireSeedTime");
+                \App\Support\Logger::writeWithContext((string) "{$currentLog}, targetSeedTime: {$targetSeedTime}, requireSeedTime: {$requireSeedTime}", (string) 'info', (bool) false);
                 if ($targetSeedTime >= $requireSeedTime) {
                     $result = $this->reachedBySeedTime($row, $setting);
                     if ($result) {
@@ -253,7 +250,7 @@ class HitAndRunRepository extends BaseRepository
                     //use diff, other index should do also, update later @todo
                     $targetLeechTime = $row->snatch->leech_time_no_seeder - $row->leech_time_no_seeder_begin;
                     $requireLeechTime = bcmul((string)$setting['leech_time_minimum'], '3600');
-                    do_log("$currentLog, targetLeechTime: $targetLeechTime, requireLeechTime: $requireLeechTime");
+                    \App\Support\Logger::writeWithContext((string) "{$currentLog}, targetLeechTime: {$targetLeechTime}, requireLeechTime: {$requireLeechTime}", (string) 'info', (bool) false);
                     if ($targetLeechTime >= $requireLeechTime) {
                         $result = $this->reachedByLeechTime($row, $setting);
                         if ($result) {
@@ -266,7 +263,7 @@ class HitAndRunRepository extends BaseRepository
                 //check share ratio
                 $targetShareRatio = bcdiv((string)$row->snatch->uploaded, (string)$row->torrent->size, 4);
                 $requireShareRatio = $setting['ignore_when_ratio_reach'];
-                do_log("$currentLog, targetShareRatio: $targetShareRatio, requireShareRatio: $requireShareRatio");
+                \App\Support\Logger::writeWithContext((string) "{$currentLog}, targetShareRatio: {$targetShareRatio}, requireShareRatio: {$requireShareRatio}", (string) 'info', (bool) false);
                 if ($targetShareRatio >= $requireShareRatio) {
                     $result = $this->reachedByShareRatio($row, $setting);
                     if ($result) {
@@ -286,7 +283,7 @@ class HitAndRunRepository extends BaseRepository
             }
             $page++;
         }
-        do_log("[CRONJOB_UPDATE_HR_DONE]");
+        \App\Support\Logger::writeWithContext((string) "[CRONJOB_UPDATE_HR_DONE]", (string) 'info', (bool) false);
         return $successCounts;
     }
 
@@ -300,12 +297,8 @@ class HitAndRunRepository extends BaseRepository
         return [
             'receiver' => $hitAndRun->uid,
             'added' => Carbon::now()->toDateTimeString(),
-            'subject' => nexus_trans('hr.reached_message_subject', ['hit_and_run_id' => $hitAndRun->id], $hitAndRun->user->locale),
-            'msg' => nexus_trans('hr.reached_message_content', [
-                'completed_at' => \App\Support\Time::formatDateTime($snatched->completedat ?: $snatched->startdat),
-                'torrent_id' => $hitAndRun->torrent_id,
-                'torrent_name' => $hitAndRun->torrent->name,
-            ], $hitAndRun->user->locale),
+            'subject' => \App\Support\Locale::trans('hr.reached_message_subject', ['hit_and_run_id' => $hitAndRun->id], $hitAndRun->user->locale),
+            'msg' => \App\Support\Locale::trans('hr.reached_message_content', ['completed_at' => \App\Support\Time::formatDateTime($snatched->completedat ?: $snatched->startdat), 'torrent_id' => $hitAndRun->torrent_id, 'torrent_name' => $hitAndRun->torrent->name], $hitAndRun->user->locale),
         ];
     }
 
@@ -315,14 +308,8 @@ class HitAndRunRepository extends BaseRepository
      */
     private function reachedByShareRatio(HitAndRun $hitAndRun, array $setting): bool
     {
-        do_log(__METHOD__);
-        $comment = nexus_trans('hr.reached_by_share_ratio_comment', [
-            'now' => Carbon::now()->toDateTimeString(),
-            'seed_time_minimum' => $setting['seed_time_minimum'],
-            'seed_time' => bcdiv((string)$hitAndRun->snatch->seedtime, '3600', 1),
-            'share_ratio' => \App\Support\Ratio::hr($hitAndRun->snatch->uploaded, $hitAndRun->snatch->downloaded),
-            'ignore_when_ratio_reach' => $setting['ignore_when_ratio_reach'],
-        ], $hitAndRun->user->locale);
+        \App\Support\Logger::writeWithContext((string) __METHOD__, (string) 'info', (bool) false);
+        $comment = \App\Support\Locale::trans('hr.reached_by_share_ratio_comment', ['now' => Carbon::now()->toDateTimeString(), 'seed_time_minimum' => $setting['seed_time_minimum'], 'seed_time' => bcdiv((string) $hitAndRun->snatch->seedtime, '3600', 1), 'share_ratio' => \App\Support\Ratio::hr($hitAndRun->snatch->uploaded, $hitAndRun->snatch->downloaded), 'ignore_when_ratio_reach' => $setting['ignore_when_ratio_reach']], $hitAndRun->user->locale);
         $update = [
             'comment' => $comment
         ];
@@ -335,12 +322,8 @@ class HitAndRunRepository extends BaseRepository
      */
     private function reachedBySeedTime(HitAndRun $hitAndRun, array $setting): bool
     {
-        do_log(__METHOD__);
-        $comment = nexus_trans('hr.reached_by_seed_time_comment', [
-            'now' => Carbon::now()->toDateTimeString(),
-            'seed_time' => bcdiv((string)$hitAndRun->snatch->seedtime, '3600', 1),
-            'seed_time_minimum' => $setting['seed_time_minimum'],
-        ], $hitAndRun->user->locale);
+        \App\Support\Logger::writeWithContext((string) __METHOD__, (string) 'info', (bool) false);
+        $comment = \App\Support\Locale::trans('hr.reached_by_seed_time_comment', ['now' => Carbon::now()->toDateTimeString(), 'seed_time' => bcdiv((string) $hitAndRun->snatch->seedtime, '3600', 1), 'seed_time_minimum' => $setting['seed_time_minimum']], $hitAndRun->user->locale);
         $update = [
             'comment' => $comment
         ];
@@ -353,12 +336,8 @@ class HitAndRunRepository extends BaseRepository
      */
     private function reachedByLeechTime(HitAndRun $hitAndRun, array $setting): bool
     {
-        do_log(__METHOD__);
-        $comment = nexus_trans('hr.reached_by_leech_time_comment', [
-            'now' => Carbon::now()->toDateTimeString(),
-            'leech_time' => bcdiv((string)($hitAndRun->snatch->leech_time_no_seeder - $hitAndRun->leech_time_no_seeder_begin), '3600', 1),
-            'leech_time_minimum' => $setting['leech_time_minimum'],
-        ], $hitAndRun->user->locale);
+        \App\Support\Logger::writeWithContext((string) __METHOD__, (string) 'info', (bool) false);
+        $comment = \App\Support\Locale::trans('hr.reached_by_leech_time_comment', ['now' => Carbon::now()->toDateTimeString(), 'leech_time' => bcdiv((string) ($hitAndRun->snatch->leech_time_no_seeder - $hitAndRun->leech_time_no_seeder_begin), '3600', 1), 'leech_time_minimum' => $setting['leech_time_minimum']], $hitAndRun->user->locale);
         $update = [
             'comment' => $comment
         ];
@@ -368,10 +347,8 @@ class HitAndRunRepository extends BaseRepository
     /** @param  \App\Models\HitAndRun  $hitAndRun */
     private function reachedBySpecialUserClass(HitAndRun $hitAndRun): bool
     {
-        do_log(__METHOD__);
-        $comment = nexus_trans('hr.reached_by_special_user_class_comment', [
-            'user_class_text' => $hitAndRun->user->class_text,
-        ], $hitAndRun->user->locale);
+        \App\Support\Logger::writeWithContext((string) __METHOD__, (string) 'info', (bool) false);
+        $comment = \App\Support\Locale::trans('hr.reached_by_special_user_class_comment', ['user_class_text' => $hitAndRun->user->class_text], $hitAndRun->user->locale);
         $update = [
             'comment' => $comment
         ];
@@ -390,16 +367,16 @@ class HitAndRunRepository extends BaseRepository
             ->where('id', $hitAndRun->id)
             ->where('status', HitAndRun::STATUS_INSPECTING)
             ->update($update);
-        do_log("[$logPrefix], " . last_query() . ", affectedRows: $affectedRows");
+        \App\Support\Logger::writeWithContext((string) ("[{$logPrefix}], " . \App\Support\LegacyDb::lastQuery(false, 'json') . ", affectedRows: {$affectedRows}"), (string) 'info', (bool) false);
         if ($affectedRows != 1) {
-            do_log($hitAndRun->toJson() . ", [$logPrefix], affectedRows != 1, skip!", 'notice');
+            \App\Support\Logger::writeWithContext((string) ($hitAndRun->toJson() . ", [{$logPrefix}], affectedRows != 1, skip!"), (string) 'notice', (bool) false);
             return false;
         }
         if ($hitAndRun->user->acceptNotification('hr_reached')) {
             $message = $this->geReachedMessage($hitAndRun);
             Message::query()->insert($message);
         } else {
-            do_log($hitAndRun->toJson() . ", [$logPrefix], user do not accept hr_reached notification", 'notice');
+            \App\Support\Logger::writeWithContext((string) ($hitAndRun->toJson() . ", [{$logPrefix}], user do not accept hr_reached notification"), (string) 'notice', (bool) false);
         }
         HitAndRun::clearCache($hitAndRun);
         return true;
@@ -412,15 +389,8 @@ class HitAndRunRepository extends BaseRepository
      */
     private function unreached(HitAndRun $hitAndRun, array $setting, $disableUser = true): bool
     {
-        do_log(sprintf('hitAndRun: %s, disableUser: %s', $hitAndRun->toJson(), var_export($disableUser, true)));
-        $comment = nexus_trans('hr.unreached_comment', [
-            'now' => Carbon::now()->toDateTimeString(),
-            'seed_time' => bcdiv((string)$hitAndRun->snatch->seedtime, '3600', 1),
-            'seed_time_minimum' => $setting['seed_time_minimum'],
-            'share_ratio' => \App\Support\Ratio::hr($hitAndRun->snatch->uploaded, $hitAndRun->snatch->downloaded),
-            'torrent_size' => \App\Support\Format::size($hitAndRun->torrent->size),
-            'ignore_when_ratio_reach' => $setting['ignore_when_ratio_reach']
-        ], $hitAndRun->user->locale);
+        \App\Support\Logger::writeWithContext((string) sprintf('hitAndRun: %s, disableUser: %s', $hitAndRun->toJson(), var_export($disableUser, true)), (string) 'info', (bool) false);
+        $comment = \App\Support\Locale::trans('hr.unreached_comment', ['now' => Carbon::now()->toDateTimeString(), 'seed_time' => bcdiv((string) $hitAndRun->snatch->seedtime, '3600', 1), 'seed_time_minimum' => $setting['seed_time_minimum'], 'share_ratio' => \App\Support\Ratio::hr($hitAndRun->snatch->uploaded, $hitAndRun->snatch->downloaded), 'torrent_size' => \App\Support\Format::size($hitAndRun->torrent->size), 'ignore_when_ratio_reach' => $setting['ignore_when_ratio_reach']], $hitAndRun->user->locale);
         $update = [
             'status' => HitAndRun::STATUS_UNREACHED,
             'comment' => $comment
@@ -429,20 +399,16 @@ class HitAndRunRepository extends BaseRepository
             ->where('id', $hitAndRun->id)
             ->where('status', HitAndRun::STATUS_INSPECTING)
             ->update($update);
-        do_log("[H&R_UNREACHED], " . last_query() . ", affectedRows: $affectedRows");
+        \App\Support\Logger::writeWithContext((string) ("[H&R_UNREACHED], " . \App\Support\LegacyDb::lastQuery(false, 'json') . ", affectedRows: {$affectedRows}"), (string) 'info', (bool) false);
         if ($affectedRows != 1) {
-            do_log($hitAndRun->toJson() . ", [H&R_UNREACHED], affectedRows != 1, skip!", 'notice');
+            \App\Support\Logger::writeWithContext((string) ($hitAndRun->toJson() . ", [H&R_UNREACHED], affectedRows != 1, skip!"), (string) 'notice', (bool) false);
             return false;
         }
         $message = [
             'receiver' => $hitAndRun->uid,
             'added' => Carbon::now()->toDateTimeString(),
-            'subject' => nexus_trans('hr.unreached_message_subject', ['hit_and_run_id' => $hitAndRun->id], $hitAndRun->user->locale),
-            'msg' => nexus_trans('hr.unreached_message_content', [
-                'completed_at' => \App\Support\Time::formatDateTime($hitAndRun->snatch->completedat),
-                'torrent_id' => $hitAndRun->torrent_id,
-                'torrent_name' => $hitAndRun->torrent->name,
-            ], $hitAndRun->user->locale),
+            'subject' => \App\Support\Locale::trans('hr.unreached_message_subject', ['hit_and_run_id' => $hitAndRun->id], $hitAndRun->user->locale),
+            'msg' => \App\Support\Locale::trans('hr.unreached_message_content', ['completed_at' => \App\Support\Time::formatDateTime($hitAndRun->snatch->completedat), 'torrent_id' => $hitAndRun->torrent_id, 'torrent_name' => $hitAndRun->torrent->name], $hitAndRun->user->locale),
         ];
         Message::query()->insert($message);
         HitAndRun::clearCache($hitAndRun);
@@ -455,7 +421,7 @@ class HitAndRunRepository extends BaseRepository
         $logPrefix = "setting: " . json_encode($setting);
         $disableCounts = HitAndRun::getConfig('ban_user_when_counts_reach', $setting['search_box_id']);
         if ($disableCounts <= 0) {
-            do_log("$logPrefix, disableCounts: $disableCounts <= 0, invalid, return", 'error');
+            \App\Support\Logger::writeWithContext((string) "{$logPrefix}, disableCounts: {$disableCounts} <= 0, invalid, return", (string) 'error', (bool) false);
             return;
         }
         $query = HitAndRun::query()
@@ -471,7 +437,7 @@ class HitAndRunRepository extends BaseRepository
         }
         $result = $query->get();
         if ($result->isEmpty()) {
-            do_log("$logPrefix, No user to disable: " . last_query());
+            \App\Support\Logger::writeWithContext((string) ("{$logPrefix}, No user to disable: " . \App\Support\LegacyDb::lastQuery(false, 'json')), (string) 'info', (bool) false);
             return;
         }
         $users = User::query()
@@ -480,18 +446,16 @@ class HitAndRunRepository extends BaseRepository
             ->where('enabled', User::ENABLED_YES)
             ->where('donor', 'no')
             ->find($result->pluck('uid')->toArray(), ['id', 'username', 'lang']);
-        do_log("$logPrefix, Going to disable user: " . json_encode($users->toArray()));
+        \App\Support\Logger::writeWithContext((string) ("{$logPrefix}, Going to disable user: " . json_encode($users->toArray())), (string) 'info', (bool) false);
         foreach ($users as $user) {
             $locale = $user->locale;
-            $comment = nexus_trans('hr.unreached_disable_comment', [], $locale);
+            $comment = \App\Support\Locale::trans('hr.unreached_disable_comment', [], $locale);
             $user->updateWithModComment(['enabled' => User::ENABLED_NO], sprintf('%s - %s', date('Y-m-d'), $comment));
             $message = [
                 'receiver' => $user->id,
                 'added' => Carbon::now()->toDateTimeString(),
                 'subject' => $comment,
-                'msg' => nexus_trans('hr.unreached_disable_message_content', [
-                    'ban_user_when_counts_reach' => $disableCounts,
-                ], $locale),
+                'msg' => \App\Support\Locale::trans('hr.unreached_disable_message_content', ['ban_user_when_counts_reach' => $disableCounts], $locale),
             ];
             Message::query()->insert($message);
             $userBanLog = [
@@ -500,8 +464,8 @@ class HitAndRunRepository extends BaseRepository
                 'reason' => $comment
             ];
             UserBanLog::query()->insert($userBanLog);
-            fire_event(ModelEventEnum::USER_UPDATED, $user);
-            do_log("Disable user: " . nexus_json_encode($userBanLog));
+            \App\Support\Events::fire(ModelEventEnum::USER_UPDATED, $user, null);
+            \App\Support\Logger::writeWithContext((string) ("Disable user: " . \App\Support\Json::encode($userBanLog)), (string) 'info', (bool) false);
         }
     }
 
@@ -527,7 +491,7 @@ class HitAndRunRepository extends BaseRepository
                 ->groupBy('status');
         }
         $results = $query->get()->map(fn ($row) => (array) $row)->all();
-        do_log("user: $uid, sql: " . $query->toSql() . ", results: " . json_encode($results));
+        \App\Support\Logger::writeWithContext((string) ("user: {$uid}, sql: " . $query->toSql() . ", results: " . json_encode($results)), (string) 'info', (bool) false);
         if (!$formatted) {
             return $results;
         }
@@ -572,7 +536,7 @@ class HitAndRunRepository extends BaseRepository
     {
         $results = [];
         foreach (HitAndRun::$status as $key => $value) {
-            $results[] = ['status' => $key, 'text' => nexus_trans('hr.status_' . $key)];
+            $results[] = ['status' => $key, 'text' => \App\Support\Locale::trans('hr.status_' . $key, [], null)];
         }
         return $results;
     }
@@ -609,10 +573,7 @@ class HitAndRunRepository extends BaseRepository
             'comment' => $this->getCommentUpdateRaw(addslashes('Pardon by ' . $user->username)),
         ];
         $affected =  $baseQuery->update($update);
-        do_log(sprintf(
-            'user: %s bulk pardon by filter: %s, affected: %s',
-            $user->id, json_encode($params), $affected
-        ), 'alert');
+        \App\Support\Logger::writeWithContext((string) sprintf('user: %s bulk pardon by filter: %s, affected: %s', $user->id, json_encode($params), $affected), (string) 'alert', (bool) false);
         if ($affected) {
             foreach ($list as $item) {
                 if (!$item instanceof HitAndRun) {

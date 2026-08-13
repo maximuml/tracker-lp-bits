@@ -45,7 +45,7 @@ class Cleanup extends Command
             UpdateTorrentSeedersEtc::dispatch($beginId, $endId, $idStr, $idRedisKey, $commentRequestId)->delay($delay);
         } else {
             $msg = "[$commentRequestId], Invalid action: $action";
-            do_log($msg, 'error');
+            \App\Support\Logger::writeWithContext((string) $msg, (string) 'error', (bool) false);
             $this->error($msg);
         }
         return Command::SUCCESS;

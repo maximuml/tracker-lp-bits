@@ -80,7 +80,7 @@ class NexusDB
             return null;
         }
         $dbType = self::getConnectionName();
-        $config = nexus_config('nexus.database.connections.' . $dbType);
+        $config = \App\Support\Config::get('nexus.database.connections.' . $dbType, null);
         return $this->connect($config['host'], $config['username'], $config['password'], $config['database'], $config['port'], $dbType);
     }
 
@@ -90,7 +90,7 @@ class NexusDB
             $this->autoConnect();
             return $this->driver->query($sql);
         } catch (\Exception $e) {
-            do_log(sprintf("%s [%s] %s", $e->getMessage(), $sql, $e->getTraceAsString()));
+            \App\Support\Logger::writeWithContext((string) sprintf("%s [%s] %s", $e->getMessage(), $sql, $e->getTraceAsString()), (string) 'info', (bool) false);
             throw new DatabaseException($e->getMessage(), $sql);
         }
 
@@ -228,7 +228,7 @@ class NexusDB
             }
         }
         if (empty($fields)) {
-            do_log("args: " . json_encode(func_get_args()));
+            \App\Support\Logger::writeWithContext((string) ("args: " . json_encode(func_get_args())), (string) 'info', (bool) false);
             throw new DatabaseException("empty fields.");
         }
         $sql = "select $fields from $table where $whereStr limit 1";
@@ -251,7 +251,7 @@ class NexusDB
             }
         }
         if (empty($fields)) {
-            do_log("args: " . json_encode(func_get_args()));
+            \App\Support\Logger::writeWithContext((string) ("args: " . json_encode(func_get_args())), (string) 'info', (bool) false);
             throw new DatabaseException("empty fields.");
         }
         $sql = "select $fields from $table where $whereStr";
@@ -355,10 +355,10 @@ class NexusDB
             $result = $Cache->get_value($key);
             if ($result === false) {
                 $result = $callback();
-                do_log("cache miss [$key]", 'debug');
+                \App\Support\Logger::writeWithContext((string) "cache miss [{$key}]", (string) 'debug', (bool) false);
                 $Cache->cache_value($key, $result, $ttl);
             } else {
-                do_log("cache hit [$key]", 'debug');
+                \App\Support\Logger::writeWithContext((string) "cache hit [{$key}]", (string) 'debug', (bool) false);
             }
             return $result;
         } else {
@@ -401,7 +401,7 @@ class NexusDB
         }
 
         Cache::forget($key);
-        $langList = get_langfolder_list();
+        $langList = \App\Support\Locale::available();
         foreach ($langList as $lf) {
             Cache::forget($lf . '_' . $key);
         }
@@ -418,7 +418,7 @@ class NexusDB
             // Redis may return empty results, so protect against that
             if ($arr_keys !== FALSE) {
                 foreach($arr_keys as $str_key) {
-                    do_log("[SCAN_KEY] $str_key");
+                    \App\Support\Logger::writeWithContext((string) "[SCAN_KEY] {$str_key}", (string) 'info', (bool) false);
                     self::cache_del($str_key);
                 }
             }
@@ -444,7 +444,7 @@ class NexusDB
     public static function getMysqlColumnInfo($table, $column = null)
     {
         static $driver;
-        $config = nexus_config('nexus.mysql');
+        $config = \App\Support\Config::get('nexus.mysql', null);
         if (is_null($driver)) {
             $driver = new DBMysqli();
             $driver->connect($config['host'], $config['username'], $config['password'], 'information_schema', $config['port']);
@@ -491,7 +491,7 @@ class NexusDB
 
     public static function getConnectionName()
     {
-        return nexus_config('nexus.database.default');
+        return \App\Support\Config::get('nexus.database.default', null);
     }
 
     public static function isMysql(): bool

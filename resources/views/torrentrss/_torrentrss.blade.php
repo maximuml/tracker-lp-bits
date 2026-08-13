@@ -22,8 +22,8 @@ foreach (\App\Support\SupportContext::allQuery() as $key => $value) {
 }
 $cacheKey = "nexus_rss:$passkey:" . md5(http_build_query(\App\Support\SupportContext::allQuery()));
 $cacheData = \Nexus\Database\NexusDB::cache_get($cacheKey);
-if ($cacheData && nexus_env('APP_ENV') != 'local') {
-    do_log("rss get from cache");
+if ($cacheData && \App\Support\Env::get('APP_ENV', null) != 'local') {
+    \App\Support\Logger::writeWithContext((string) "rss get from cache", (string) 'info', (bool) false);
     header ("Content-type: text/xml");
     echo $cacheData;
     return;
@@ -65,7 +65,7 @@ if ($passkey) {
 
     $inclbookmarked = intval(\App\Support\SupportContext::getQuery('inclbookmarked') ?? 0);
     if ($inclbookmarked == 1) {
-        $bookmarkarray = return_torrent_bookmark_array($user['id']);
+        $bookmarkarray = \App\Support\TorrentBookmark::bookmarkArray(\App\Support\SupportContext::getCache(), (string) $user['id']);
         if (!empty($bookmarkarray)) {
             $baseQuery->whereIn('torrents.id', $bookmarkarray);
         }
@@ -132,7 +132,7 @@ if (((\App\Support\SupportContext::getQuery('sticky') !== null)) && $inclbookmar
         $prependIdArr = \App\Models\Torrent::query()->whereIn('pos_state', $posStates)->pluck('id')->toArray();
     }
 }
-$prependIdArr = apply_filter("sticky_promotion_torrent_ids", $prependIdArr);
+$prependIdArr = \App\Support\Hooks::applyFilter("sticky_promotion_torrent_ids", ...[$prependIdArr]);
 if ($hasStickyNormal) {
     $stickyWhere = sprintf("torrents.pos_state = '%s'", \App\Models\Torrent::POS_STATE_STICKY_NONE);
 } elseif ($hasStickyFirst || $hasStickySecond) {
@@ -172,7 +172,7 @@ foreach ($normalRows as $row) {
 //dd($prependIdArr, $prependRows, $normalRows, $list, $startindex,last_query());
 
 $torrentRep = new \App\Repositories\TorrentRepository();
-$url = get_protocol_prefix().$BASEURL;
+$url = \App\Support\Http::protocolPrefix(\App\Support\Url::isSecure()).$BASEURL;
 $year = substr($datefounded, 0, 4);
 $yearfounded = ($year ? $year : 2007);
 $copyright = "Copyright (c) ".$SITENAME." ".(date("Y") != $yearfounded ? $yearfounded."-" : "").date("Y").", all rights reserved";
@@ -214,7 +214,7 @@ foreach ($list as $row)
     } elseif (!empty($ownerInfo)) {
         $author = $ownerInfo['username'];
     } else {
-        $author = nexus_trans("nexus.user_not_exists");
+        $author = \App\Support\Locale::trans("nexus.user_not_exists", [], null);
     }
 	$itemurl = $url."/details.php?id=".$row['id'];
 	if ($dllink)
@@ -235,14 +235,14 @@ $xml .= '<author>'.$author.'@'.$__server_HTTP_HOST.' ('.$author.')</author>';
 $xml .= '<category domain="'.$url.'/torrents.php?cat='.$row['category'].'">'.$row['category_name'].'</category>
 			<comments><![CDATA['.$url.'/details.php?id='.$row['id'].'&cmtpage=0#startcomments]]></comments>
 			<enclosure url="'.$itemdlurl.'" length="'.$row['size'].'" type="application/x-bittorrent" />
-			<guid isPermaLink="false">'.preg_replace_callback('/./s', 'hex_esc', hash_pad($row['info_hash'])).'</guid>
+			<guid isPermaLink="false">'.preg_replace_callback('/./s', 'hex_esc', \App\Support\Strings::padHash($row['info_hash'])).'</guid>
 			<pubDate>'.date('r',strtotime($row['added'])).'</pubDate>
 		</item>
 ';
 }
 $xml .= '</channel>
 </rss>';
-do_log("rss cache generated");
+\App\Support\Logger::writeWithContext((string) "rss cache generated", (string) 'info', (bool) false);
 \Nexus\Database\NexusDB::cache_put($cacheKey, $xml, 300);
 header ("Content-type: text/xml");
 echo $xml;

@@ -146,10 +146,10 @@ class BonusLogs extends NexusModel
     public static function listCategoryOptions(bool $includeSeeding): array
     {
         $result = [
-            self::CATEGORY_COMMON => nexus_trans('bonus-log.category_common')
+            self::CATEGORY_COMMON => \App\Support\Locale::trans('bonus-log.category_common', [], null)
         ];
         if ($includeSeeding) {
-            $result[self::CATEGORY_SEEDING] = nexus_trans('bonus-log.category_seeding');
+            $result[self::CATEGORY_SEEDING] = \App\Support\Locale::trans('bonus-log.category_seeding', [], null);
         }
         return $result;
     }
@@ -157,7 +157,7 @@ class BonusLogs extends NexusModel
     /** @return  mixed */
     public function getBusinessTypeTextAttribute()
     {
-        return nexus_trans('bonus-log.business_types.' . $this->business_type);
+        return \App\Support\Locale::trans('bonus-log.business_types.' . $this->business_type, [], null);
     }
 
     /** @return  float */

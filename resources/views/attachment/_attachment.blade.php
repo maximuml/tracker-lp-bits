@@ -74,8 +74,8 @@ if ($Attach->enable_attachment())
                     $savepath = date("Ymd")."/";
                 $filemd5 = md5_file($file['tmp_name']);
                 $filename = date("YmdHis").$filemd5;
-                $file_location = make_folder($savedirectory_attachment."/", $savepath)  . $filename;
-                do_log("file_location: $file_location");
+                $file_location = \App\Support\Path::makeFolder($savedirectory_attachment . "/", $savepath, \ROOT_PATH)  . $filename;
+                \App\Support\Logger::writeWithContext((string) "file_location: {$file_location}", (string) 'info', (bool) false);
                 $db_file_location = $savepath.$filename;
                 $abandonorig = false;
                 $hasthumb = false;
@@ -238,10 +238,10 @@ if ($Attach->enable_attachment())
                 try {
                     $driver = \Nexus\Attachment\Storage::getDriver();
                     $location = $driver->uploadGetLocation($file["tmp_name"], $file['name']);
-                    do_log("location: $location");
+                    \App\Support\Logger::writeWithContext((string) "location: {$location}", (string) 'info', (bool) false);
                     $url = $driver->getImageUrl($location);
                 } catch (\Exception $exception) {
-                    do_log("upload failed: " . $exception->getMessage() . $exception->getTraceAsString(), 'error');
+                    \App\Support\Logger::writeWithContext((string) ("upload failed: " . $exception->getMessage() . $exception->getTraceAsString()), (string) 'error', (bool) false);
                     $warning = $exception->getMessage();
                 }
             }

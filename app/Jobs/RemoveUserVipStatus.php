@@ -43,8 +43,8 @@ class RemoveUserVipStatus
             $user->vip_until = null;
             if ($user->class <= User::CLASS_VIP) {
                 $user->class = User::CLASS_USER;
-                $subject = nexus_trans("cleanup.msg_vip_status_removed", [], $locale);
-                $msg = nexus_trans("cleanup.msg_vip_status_removed_body", [], $locale);
+                $subject = \App\Support\Locale::trans("cleanup.msg_vip_status_removed", [], $locale);
+                $msg = \App\Support\Locale::trans("cleanup.msg_vip_status_removed_body", [], $locale);
                 $message = [
                     'sender' => 0,
                     'receiver' => $user->id,
@@ -53,10 +53,10 @@ class RemoveUserVipStatus
                     'msg' => $msg,
                 ];
             }
-            do_log(sprintf("update user %s => %s", $user->id, json_encode($user->getDirty())));
+            \App\Support\Logger::writeWithContext((string) sprintf("update user %s => %s", $user->id, json_encode($user->getDirty())), (string) 'info', (bool) false);
             $user->save();
-            clear_user_cache($user->id);
-            publish_model_event(ModelEventEnum::USER_UPDATED, $user->id);
+            \App\Support\Cache::clearUser($user->id, '');
+            \App\Support\Events::publishModel(ModelEventEnum::USER_UPDATED, $user->id, "");
             if (!empty($message)) {
                 Message::add($message);
             }
@@ -64,6 +64,6 @@ class RemoveUserVipStatus
         if (!empty($userModifyLogs)) {
             UserModifyLog::query()->insert($userModifyLogs);
         }
-        do_log("remove VIP status if time's up, success handle user count: " . $users->count());
+        \App\Support\Logger::writeWithContext((string) ("remove VIP status if time's up, success handle user count: " . $users->count()), (string) 'info', (bool) false);
     }
 }

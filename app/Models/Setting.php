@@ -287,7 +287,7 @@ class Setting extends NexusModel
 
     public static function getRequireSeedSectionMenuTitle(): string
     {
-        return self::get("require_seed_section.menu_title", nexus_trans("torrent.require_seed_section_menu_title"));
+        return self::get("require_seed_section.menu_title", \App\Support\Locale::trans("torrent.require_seed_section_menu_title", [], null));
     }
 
     public static function getRequireSeedSectionPromotionState(): int

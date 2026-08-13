@@ -41,7 +41,7 @@ class DashboardController extends Controller
         $result = $this->repository->latestUser();
         $resource = UserResource::collection($result);
         $resource->additional([
-            'page_title' => nexus_trans('dashboard.latest_user.page_title'),
+            'page_title' => \App\Support\Locale::trans('dashboard.latest_user.page_title', [], null),
         ]);
         return $this->success($resource);
     }
@@ -52,7 +52,7 @@ class DashboardController extends Controller
         $result = $this->repository->latestTorrent();
         $resource = TorrentResource::collection($result);
         $resource->additional([
-            'page_title' => nexus_trans('dashboard.latest_torrent.page_title'),
+            'page_title' => \App\Support\Locale::trans('dashboard.latest_torrent.page_title', [], null),
         ]);
         return $this->success($resource);
     }

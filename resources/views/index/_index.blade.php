@@ -109,7 +109,7 @@ JS;
 // ------------- end: shoutbox ------------------//
 
 $extraModules = [];
-$extraModules = apply_filter('nexus_home_module', $extraModules);
+$extraModules = \App\Support\Hooks::applyFilter('nexus_home_module', ...[$extraModules]);
 print implode('', $extraModules);
 
 // ------------- start: latest forum posts ------------------//
@@ -250,7 +250,7 @@ if ($showlastxtorrents_main == "yes") {
 				{
 					$detailsUrl = 'details.php?id=' . (int)$torrent->id . '&hit=1';
 					$rawCover = trim((string)($torrent->cover ?? ''));
-					$thumbUrl = $rawCover !== '' ? cover_thumb_url($rawCover, 240, 360) : '';
+					$thumbUrl = $rawCover !== '' ? \App\Support\CoverThumb::urlWithContext((string) $rawCover, (int) 240, (int) 360, (int) 82) : '';
 					$typeLabel = trim((string)($torrent->basic_category->name ?? ''));
 					if (($torrent->anonymous ?? 'no') === 'yes') {
 						$ownerHtml = '<i>Anonymous</i>';

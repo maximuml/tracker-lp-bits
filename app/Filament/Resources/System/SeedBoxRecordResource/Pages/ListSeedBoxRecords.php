@@ -45,9 +45,9 @@ class ListSeedBoxRecords extends PageList
                         ->modalHeading(function () {
                             if (self::$checkResult !== null) {
                                 if (self::$checkResult['result']) {
-                                    return nexus_trans("seed-box.is_seed_box_yes");
+                                    return \App\Support\Locale::trans("seed-box.is_seed_box_yes", [], null);
                                 } else {
-                                    return nexus_trans("seed-box.is_seed_box_no");
+                                    return \App\Support\Locale::trans("seed-box.is_seed_box_no", [], null);
                                 }
                             }
                             return 'Unknown';

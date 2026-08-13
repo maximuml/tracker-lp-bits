@@ -242,7 +242,7 @@ foreach ($locations as $loc) {
 
 	echo("<tr><td class=rowfollow align=center><strong>$id</strong></td>" .
 	"<td class=rowfollow align=left><strong>$name</strong></td>" .
-	"<td class=rowfollow align=center>" . ($flagpic != "" ? "<img src='" . get_protocol_prefix() . "$BASEURL/pic/location/$flagpic' border='0' />" : "-") . "</td>" .
+	"<td class=rowfollow align=center>" . ($flagpic != "" ? "<img src='" . \App\Support\Http::protocolPrefix(\App\Support\Url::isSecure()) . "$BASEURL/pic/location/$flagpic' border='0' />" : "-") . "</td>" .
 	"<td class=rowfollow align=left>$location_main</td>" .
 	"<td class=rowfollow align=left>$location_sub</td>" .
 	"<td class=rowfollow align=left>" . $start_ip . "</td>" .

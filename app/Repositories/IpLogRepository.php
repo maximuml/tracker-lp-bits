@@ -22,7 +22,7 @@ class IpLogRepository extends BaseRepository
     public static function saveToCache($userId, $uri = null, $ipArr = null): void
     {
         if (!is_numeric($userId) || $userId <= 0) {
-            do_log("invalid userId: $userId", "error");
+            \App\Support\Logger::writeWithContext((string) "invalid userId: {$userId}", (string) "error", (bool) false);
             return;
         }
         $redis = NexusDB::redis();
@@ -37,7 +37,7 @@ class IpLogRepository extends BaseRepository
         foreach ($ipArr as $ip) {
             $field = sprintf("%s|%s|%s", $userId, $ip, $uri);
             $result = $redis->hincrby($key, $field, 1);
-            do_log("success hincrby $key $field, result: $result", "debug");
+            \App\Support\Logger::writeWithContext((string) "success hincrby {$key} {$field}, result: {$result}", (string) "debug", (bool) false);
             if ($result === 1) {
                 $redis->expire($key, self::CACHE_TIME);
             }
@@ -53,19 +53,19 @@ class IpLogRepository extends BaseRepository
         $interval =\DateInterval::createFromDateString("1 hour");
         $period = new \DatePeriod($begin->clone(), $interval, $end);
         $size = 2000;
-        do_log(sprintf("begin: %s, end: %s, size: %s", $begin->toDateTimeString(), $end->toDateTimeString(), $size));
+        \App\Support\Logger::writeWithContext((string) sprintf("begin: %s, end: %s, size: %s", $begin->toDateTimeString(), $end->toDateTimeString(), $size), (string) 'info', (bool) false);
         $redis->setOption(\Redis::OPT_SCAN, \Redis::SCAN_RETRY);
         foreach ($period as $dt) {
             $key = sprintf("%s:%s", self::CACHE_KEY_PREFIX, $dt->format('Y-m-d-H'));
             if (!$redis->exists($key)) {
-                do_log("key: $key not found", "debug");
+                \App\Support\Logger::writeWithContext((string) "key: {$key} not found", (string) "debug", (bool) false);
                 continue;
             }
             if ($redis->hlen($key) == 0) {
-                do_log("key: $key length = 0", "debug");
+                \App\Support\Logger::writeWithContext((string) "key: {$key} length = 0", (string) "debug", (bool) false);
                 $redis->unlink($key);
             }
-            do_log("handing key: $key");
+            \App\Support\Logger::writeWithContext((string) "handing key: {$key}", (string) 'info', (bool) false);
             //遍历hash
             $it = NULL;
             while($arr_keys = $redis->hScan($key, $it, "*", $size)) {
@@ -83,12 +83,12 @@ class IpLogRepository extends BaseRepository
                 if (!empty($insert)) {
                     IpLog::query()->insert($insert);
                 }
-                do_log("key: $key, it: $it, count: " . count($insert));
+                \App\Support\Logger::writeWithContext((string) ("key: {$key}, it: {$it}, count: " . count($insert)), (string) 'info', (bool) false);
             }
             $redis->unlink($key);
-            do_log("handle key: $key done!");
+            \App\Support\Logger::writeWithContext((string) "handle key: {$key} done!", (string) 'info', (bool) false);
         }
-        do_log(sprintf("all done! cost time: %.3f sec.", microtime(true) - $beginTimestamp));
+        \App\Support\Logger::writeWithContext((string) sprintf("all done! cost time: %.3f sec.", microtime(true) - $beginTimestamp), (string) 'info', (bool) false);
     }
 
 }

@@ -70,7 +70,7 @@ class PasswordRecoveryService
             throw new AuthenticationException($this->msg($langRecover, 'std_database_error', 'Database error. Please contact an administrator about this.'));
         }
 
-        clear_user_cache((int) $user['id']);
+        \App\Support\Cache::clearUser((int) $user['id'], '');
 
         $hash = md5($sec . $email . $user['passhash'] . $sec);
 
@@ -121,7 +121,7 @@ class PasswordRecoveryService
             throw new AuthenticationException($this->msg($langRecover, 'std_unable_updating_user_data', 'Unable to update user data.'));
         }
 
-        clear_user_cache($id);
+        \App\Support\Cache::clearUser($id, '');
 
         $this->sendNewPasswordEmail($user, $newPassword, $langRecover);
 
@@ -135,7 +135,7 @@ class PasswordRecoveryService
     {
         $baseUrl = \App\Support\Config\SiteConfig::current()->basic->baseUrl();
         if (! str_contains($baseUrl, '://')) {
-            $baseUrl = Http::protocolPrefix(isHttps()) . $baseUrl;
+            $baseUrl = Http::protocolPrefix(\App\Support\Url::isSecure()) . $baseUrl;
         }
         $baseUrl = rtrim($baseUrl, '/');
         $siteName = \App\Support\Config\SiteConfig::current()->basic->siteName();
@@ -178,7 +178,7 @@ class PasswordRecoveryService
     {
         $baseUrl = \App\Support\Config\SiteConfig::current()->basic->baseUrl();
         if (! str_contains($baseUrl, '://')) {
-            $baseUrl = Http::protocolPrefix(isHttps()) . $baseUrl;
+            $baseUrl = Http::protocolPrefix(\App\Support\Url::isSecure()) . $baseUrl;
         }
         $baseUrl = rtrim($baseUrl, '/');
         $siteName = \App\Support\Config\SiteConfig::current()->basic->siteName();

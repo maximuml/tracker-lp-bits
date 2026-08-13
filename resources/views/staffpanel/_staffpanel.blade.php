@@ -1,7 +1,7 @@
 <?php
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
-$langFile = ROOT_PATH . get_langfile_path();
+$langFile = ROOT_PATH . \App\Support\Locale::scriptFilePath((string) "", (bool) false, (string) "");
 if (file_exists($langFile)) {
 	require $langFile;
 }

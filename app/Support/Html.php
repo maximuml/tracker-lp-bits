@@ -506,8 +506,8 @@ final class Html
      */
     public static function stdhead(string $title = "", bool $msgalert = true, string $script = "", string $place = ""): void
     {
-        $context = \page_layout_context();
-        \App\Support\PageLayout::setContext($context);
+        $context = PageLayoutContext::fromSupportContext();
+        PageLayout::setContext($context);
         \App\Support\PageLayout::header($title, $msgalert, $script, $place);
     }
 

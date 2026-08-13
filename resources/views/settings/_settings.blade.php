@@ -30,7 +30,7 @@ $notice = "<h1 align=\"center\"><a class=\"faqlink\" href=\"settings.php\">".$la
 
 if ($action == 'savesettings_main')	// save main
 {
-	do_log(json_encode(\App\Support\SupportContext::allRequest()));
+	\App\Support\Logger::writeWithContext((string) json_encode(\App\Support\SupportContext::allRequest()), (string) 'info', (bool) false);
 	\App\Support\Html::stdhead($lang_settings['head_save_main_settings']);
 	$validConfig = array(
 		'site_online','max_torrent_size','announce_interval', 'annintertwoage', 'annintertwo', 'anninterthreeage', 'anninterthree', 'signup_timeout',
@@ -49,7 +49,7 @@ if ($action == 'savesettings_main')	// save main
 		$MAIN[$config] = \App\Support\SupportContext::getRequestInput($config) ?? null;
 	}
 
-	saveSetting('main', $MAIN);
+	\App\Support\Settings::saveBatch('main', $MAIN, 'yes');
 	$Cache->delete_value('recent_news', true);
 	$Cache->delete_value('stats_users', true);
 	$Cache->delete_value('stats_torrents', true);
@@ -69,7 +69,7 @@ elseif ($action == 'savesettings_basic') 	// save basic
 	foreach($validConfig as $config) {
 		$BASIC[$config] = \App\Support\SupportContext::getRequestInput($config) ?? null;
 	}
-	saveSetting('basic', $BASIC);
+	\App\Support\Settings::saveBatch('basic', $BASIC, 'yes');
 	$actiontime = date("F j, Y, g:i a");
 	\App\Support\Log::writeWithContext("Tracker basic settings updated by {$CURUSER['username']}. $actiontime", 'mod');
 	go_back();
@@ -82,7 +82,7 @@ elseif ($action == 'savesettings_code') 	// save database
 	foreach($validConfig as $config) {
 		$CODE[$config] = \App\Support\SupportContext::getRequestInput($config) ?? null;
 	}
-	saveSetting('code', $CODE);
+	\App\Support\Settings::saveBatch('code', $CODE, 'yes');
 	$actiontime = date("F j, Y, g:i a");
 	\App\Support\Log::writeWithContext("Tracker code settings updated by {$CURUSER['username']}. $actiontime", 'mod');
 	go_back();
@@ -110,7 +110,7 @@ elseif ($action == 'savesettings_bonus') 	// save bonus
 		}
 	}
 	ksort($BONUS['attendance_continuous']);
-	saveSetting('bonus', $BONUS);
+	\App\Support\Settings::saveBatch('bonus', $BONUS, 'yes');
 	$actiontime = date("F j, Y, g:i a");
 	\App\Support\Log::writeWithContext("Tracker bonus settings updated by {$CURUSER['username']}. $actiontime", 'mod');
 	go_back();
@@ -137,7 +137,7 @@ elseif ($action == 'savesettings_account') 	// save account
 	foreach($validConfig as $config) {
 		$ACCOUNT[$config] = \App\Support\SupportContext::getRequestInput($config) ?? null;
 	}
-	saveSetting('account', $ACCOUNT);
+	\App\Support\Settings::saveBatch('account', $ACCOUNT, 'yes');
 	$actiontime = date("F j, Y, g:i a");
 	\App\Support\Log::writeWithContext("Tracker account settings updated by {$CURUSER['username']}. $actiontime", 'mod');
 	\Nexus\Database\NexusDB::cache_del('stats_classes');
@@ -154,13 +154,13 @@ elseif($action == 'savesettings_torrent') 	// save account
         'download_support_passkey', 'approval_status_icon_enabled', 'approval_status_none_visible',
         'nfo_view_style_default', 'tax_factor', 'max_price', 'paid_torrent_enabled', 'reward_bonus_options', 'reward_times_limit'
     );
-	$validConfig = apply_filter('setting_valid_config', $validConfig);
+	$validConfig = \App\Support\Hooks::applyFilter('setting_valid_config', $validConfig);
 	$TORRENT = [];
 	foreach($validConfig as $config) {
 		$TORRENT[$config] = \App\Support\SupportContext::getRequestInput($config) ?? null;
 	}
 
-	saveSetting('torrent', $TORRENT);
+	\App\Support\Settings::saveBatch('torrent', $TORRENT, 'yes');
 	$actiontime = date("F j, Y, g:i a");
 	\App\Support\Log::writeWithContext("Tracker torrent settings updated by {$CURUSER['username']}. $actiontime", 'mod');
 	go_back();
@@ -180,7 +180,7 @@ elseif ($action == 'savesettings_smtp') 	// save smtp
 	foreach($validConfig as $config) {
 		$SMTP[$config] = \App\Support\SupportContext::getRequestInput($config) ?? null;
 	}
-	saveSetting('smtp', $SMTP);
+	\App\Support\Settings::saveBatch('smtp', $SMTP, 'yes');
 	$actiontime = date("F j, Y, g:i a");
 	\App\Support\Log::writeWithContext("Tracker SMTP settings updated by {$CURUSER['username']}. $actiontime", 'mod');
 	go_back();
@@ -202,7 +202,7 @@ elseif ($action == 'savesettings_security') 	// save security
 		$SECURITY['login_secret_deadline'] = date('Y-m-d H:i:s', strtotime("+ $minute minutes"));
 		$SECURITY['login_secret'] = md5(microtime(true));
 	}
-	saveSetting('security', $SECURITY);
+	\App\Support\Settings::saveBatch('security', $SECURITY, 'yes');
 	$actiontime = date("F j, Y, g:i a");
 	\App\Support\Log::writeWithContext("Tracker SECURITY settings updated by {$CURUSER['username']}. $actiontime", 'mod');
 	go_back();
@@ -226,7 +226,7 @@ elseif ($action == 'savesettings_authority') 	// save user authority
             }
         }
 	}
-	saveSetting('authority', $AUTHORITY);
+	\App\Support\Settings::saveBatch('authority', $AUTHORITY, 'yes');
 	$actiontime = date("F j, Y, g:i a");
 	\App\Support\Log::writeWithContext("Tracker USER AUTHORITY settings updated by {$CURUSER['username']}. $actiontime", 'mod');
 	go_back();
@@ -239,7 +239,7 @@ elseif ($action == 'savesettings_tweak')	// save tweak
 	foreach($validConfig as $config) {
 		$TWEAK[$config] = \App\Support\SupportContext::getRequestInput($config) ?? null;
 	}
-	saveSetting('tweak', $TWEAK);
+	\App\Support\Settings::saveBatch('tweak', $TWEAK, 'yes');
 	$actiontime = date("F j, Y, g:i a");
 	\App\Support\Log::writeWithContext("Tracker TWEAK settings updated by {$CURUSER['username']}. $actiontime", 'mod');
 	go_back();
@@ -253,7 +253,7 @@ elseif ($action == 'savesettings_attachment')	// save attachment
 		$ATTACHMENT[$config] = \App\Support\SupportContext::getRequestInput($config) ?? null;
 	}
 
-	saveSetting('attachment', $ATTACHMENT);
+	\App\Support\Settings::saveBatch('attachment', $ATTACHMENT, 'yes');
 	$actiontime = date("F j, Y, g:i a");
 	\App\Support\Log::writeWithContext("Tracker ATTACHMENT settings updated by {$CURUSER['username']}. $actiontime", 'mod');
 	go_back();
@@ -269,14 +269,14 @@ elseif ($action == 'savesettings_misc')
 	if (!empty($data['protected_forum']) && !preg_match("/^[,\\d]*[\\d]+$/", $data['protected_forum'])){
 		\App\Support\LegacyResponse::abort($lang_settings['std_error'], $lang_settings['forum_format_error'].'<br>'.$lang_settings['std_click']."<a class=\"altlink\" href=\"settings.php\">".$lang_settings['std_here']."</a>".$lang_settings['std_to_go_back'], false, false);
 	}
-    saveSetting('misc', $data, 'no');
+    \App\Support\Settings::saveBatch('misc', $data, 'no');
     $actiontime = date("F j, Y, g:i a");
     \App\Support\Log::writeWithContext("Misc settings updated by {$CURUSER['username']}. $actiontime", 'mod');
     go_back();
 }
 elseif ($action == 'tweaksettings')		// tweak settings
 {
-	$TWEAK = get_setting_from_db('tweak');
+	$TWEAK = \App\Support\Settings::fromDb('tweak');
 	\App\Support\Html::stdhead($lang_settings['head_tweak_settings']);
 	print ($notice);
 	print ("<form method='post' action='".$__server_SCRIPT_NAME."'><input type='hidden' name='action' value='savesettings_tweak' />");
@@ -298,7 +298,7 @@ elseif ($action == 'tweaksettings')		// tweak settings
 }
 elseif ($action == 'smtpsettings')	// stmp settings
 {
-	$SMTP = get_setting_from_db('smtp');
+	$SMTP = \App\Support\Settings::fromDb('smtp');
 	\App\Support\Html::stdhead($lang_settings['head_smtp_settings']);
 	print ($notice);
 	print("<tbody>");
@@ -332,7 +332,7 @@ print("</tbody>");
 }
 elseif ($action == 'securitysettings')	//security settings
 {
-	$SECURITY = get_setting_from_db('security');
+	$SECURITY = \App\Support\Settings::fromDb('security');
 	\App\Support\Html::stdhead($lang_settings['head_security_settings']);
 	print ($notice);
 	print("<tbody>");
@@ -380,8 +380,8 @@ elseif ($action == 'securitysettings')	//security settings
 	print '</tbody><tbody id="tbody_login_secret" style="display: ' . (in_array($SECURITY['login_type'], ['secret', 'passkey']) ? 'table-row-group' : 'none') . '">';
 	$loginSecret = sprintf('%s：%s', $lang_settings['text_login_secret_current'], $SECURITY['login_secret'] ?? '');
 	if (!empty($SECURITY['login_secret'])) {
-		$loginSecret .= sprintf('<br/>%s: %s/login.php?secret=%s', $lang_settings['text_login_url_with_secret'], getSchemeAndHttpHost(), $SECURITY['login_secret']);
-		$loginSecret .= sprintf('<br/>%s: %s/%s/{passkey}', $lang_settings['text_login_url_with_passkey'], getSchemeAndHttpHost(), $SECURITY['login_secret']);
+		$loginSecret .= sprintf('<br/>%s: %s/login.php?secret=%s', $lang_settings['text_login_url_with_secret'], \App\Support\Url::schemeAndHost(false), $SECURITY['login_secret']);
+		$loginSecret .= sprintf('<br/>%s: %s/%s/{passkey}', $lang_settings['text_login_url_with_passkey'], \App\Support\Url::schemeAndHost(false), $SECURITY['login_secret']);
 	}
 	$loginSecret .= sprintf('<br/><label><input type="radio" name="login_secret_regenerate" value="no"%s />%s</label>', !empty($SECURITY['login_secret']) ? ' checked' : '', $lang_settings['text_login_secret_regenerate_no']);
 	$loginSecret .= sprintf('<br/><label><input type="radio" name="login_secret_regenerate" value="yes"%s />%s</label>', empty($SECURITY['login_secret']) ? ' checked' : '', $lang_settings['text_login_secret_regenerate_yes']);
@@ -399,7 +399,7 @@ elseif ($action == 'securitysettings')	//security settings
 }
 elseif ($action == 'authoritysettings')	//Authority settings
 {
-	$AUTHORITY = get_setting_from_db('authority');
+	$AUTHORITY = \App\Support\Settings::fromDb('authority');
 	\App\Support\Html::stdhead($lang_settings['head_authority_settings']);
 	print ($notice);
 	$maxclass = UC_SYSOP;
@@ -413,8 +413,8 @@ elseif ($action == 'authoritysettings')	//Authority settings
 	\App\Support\Html::tr($lang_settings['row_comment_management'], $lang_settings['text_minimum_class'].\App\Support\UserClass::classSelectWithContext('commanage', $maxclass, $AUTHORITY['commanage'], 0, true).$lang_settings['text_default'].\App\Support\UserClass::name(UC_MODERATOR,false,true,true).$lang_settings['text_comment_management_note'], 1);
 	\App\Support\Html::tr($lang_settings['row_forum_management'], $lang_settings['text_minimum_class'].\App\Support\UserClass::classSelectWithContext('forummanage', $maxclass, $AUTHORITY['forummanage'], 0, true).$lang_settings['text_default'].\App\Support\UserClass::name(UC_ADMINISTRATOR,false,true,true).$lang_settings['text_forum_management_note'], 1);
 	\App\Support\Html::tr($lang_settings['row_view_userlist'], $lang_settings['text_minimum_class'].\App\Support\UserClass::classSelectWithContext('viewuserlist', $maxclass, $AUTHORITY['viewuserlist'], 0, true).$lang_settings['text_default'].\App\Support\UserClass::name(UC_POWER_USER,false,true,true).$lang_settings['text_view_userlist_note'], 1);
-	\App\Support\Html::tr(nexus_trans('permission.user-delete.text'), $lang_settings['text_minimum_class'].\App\Support\UserClass::classSelectWithContext('user-delete', $maxclass, $AUTHORITY['user-delete'], 0, true).$lang_settings['text_default'].\App\Support\UserClass::name(UC_ADMINISTRATOR,false,true,true).nexus_trans('permission.user-delete.desc'), 1);
-	\App\Support\Html::tr(nexus_trans('permission.user-change-class.text'), $lang_settings['text_minimum_class'].\App\Support\UserClass::classSelectWithContext('user-change-class', $maxclass, $AUTHORITY['user-change-class'], 0, true).$lang_settings['text_default'].\App\Support\UserClass::name(UC_ADMINISTRATOR,false,true,true).nexus_trans('permission.user-change-class.desc'), 1);
+	\App\Support\Html::tr(\App\Support\Locale::trans('permission.user-delete.text', [], null), $lang_settings['text_minimum_class'].\App\Support\UserClass::classSelectWithContext('user-delete', $maxclass, $AUTHORITY['user-delete'], 0, true).$lang_settings['text_default'].\App\Support\UserClass::name(UC_ADMINISTRATOR,false,true,true).\App\Support\Locale::trans('permission.user-delete.desc', [], null), 1);
+	\App\Support\Html::tr(\App\Support\Locale::trans('permission.user-change-class.text', [], null), $lang_settings['text_minimum_class'].\App\Support\UserClass::classSelectWithContext('user-change-class', $maxclass, $AUTHORITY['user-change-class'], 0, true).$lang_settings['text_default'].\App\Support\UserClass::name(UC_ADMINISTRATOR,false,true,true).\App\Support\Locale::trans('permission.user-change-class.desc', [], null), 1);
 
 	\App\Support\Html::tr($lang_settings['row_torrent_management'], $lang_settings['text_minimum_class'].\App\Support\UserClass::classSelectWithContext('torrentmanage', $maxclass, $AUTHORITY['torrentmanage'], 0, true).$lang_settings['text_default'].\App\Support\UserClass::name(UC_MODERATOR,false,true,true).$lang_settings['text_torrent_management_note'], 1);
 	\App\Support\Html::tr($lang_settings['row_torrent_delete'], $lang_settings['text_minimum_class'].\App\Support\UserClass::classSelectWithContext('torrent-delete', $maxclass, $AUTHORITY['torrent-delete'], 0, true).$lang_settings['text_default'].\App\Support\UserClass::name(UC_ADMINISTRATOR,false,true,true).$lang_settings['text_torrent_delete_note'], 1);
@@ -423,10 +423,10 @@ elseif ($action == 'authoritysettings')	//Authority settings
 	\App\Support\Html::tr($lang_settings['row_torrent_sticky'], $lang_settings['text_minimum_class'].\App\Support\UserClass::classSelectWithContext('torrentsticky', $maxclass, $AUTHORITY['torrentsticky'], 0, true).$lang_settings['text_default'].\App\Support\UserClass::name(UC_ADMINISTRATOR,false,true,true).$lang_settings['text_torrent_sticky_note'], 1);
 	\App\Support\Html::tr($lang_settings['row_torrent_on_promotion'], $lang_settings['text_minimum_class'].\App\Support\UserClass::classSelectWithContext('torrentonpromotion', $maxclass, $AUTHORITY['torrentonpromotion'] ?? '', 0, true).$lang_settings['text_default'].\App\Support\UserClass::name(UC_ADMINISTRATOR,false,true,true).$lang_settings['text_torrent_promotion_note'], 1);
 	\App\Support\Html::tr($lang_settings['row_torrent_hr'], $lang_settings['text_minimum_class'].\App\Support\UserClass::classSelectWithContext('torrent_hr', $maxclass, $AUTHORITY['torrent_hr'] ?? '', 0, true).$lang_settings['text_default'].\App\Support\UserClass::name(UC_ADMINISTRATOR,false,true,true).$lang_settings['text_torrent_hr_note'], 1);
-	\App\Support\Html::tr(nexus_trans('permission.torrent-set-special-tag.text'), $lang_settings['text_minimum_class'].\App\Support\UserClass::classSelectWithContext('torrent-set-special-tag', $maxclass, $AUTHORITY['torrent-set-special-tag'] ?? '', 0, true).$lang_settings['text_default'].\App\Support\UserClass::name(UC_ADMINISTRATOR,false,true,true).nexus_trans('permission.torrent-set-special-tag.desc'), 1);
-	\App\Support\Html::tr(nexus_trans('permission.torrent-approval.text'), $lang_settings['text_minimum_class'].\App\Support\UserClass::classSelectWithContext('torrent-approval', $maxclass, $AUTHORITY['torrent-approval'] ?? '', 0, true).$lang_settings['text_default'].\App\Support\UserClass::name(UC_ADMINISTRATOR,false,true,true).nexus_trans('permission.torrent-approval.desc'), 1);
-	\App\Support\Html::tr(nexus_trans('permission.torrent-approval-allow-automatic.text'), $lang_settings['text_minimum_class'].\App\Support\UserClass::classSelectWithContext('torrent-approval-allow-automatic', $maxclass, $AUTHORITY['torrent-approval-allow-automatic'] ?? '', 0, true).$lang_settings['text_default'].\App\Support\UserClass::name(UC_UPLOADER,false,true,true).nexus_trans('permission.torrent-approval-allow-automatic.desc'), 1);
-	\App\Support\Html::tr(nexus_trans('permission.torrent-set-price.text'), $lang_settings['text_minimum_class'].\App\Support\UserClass::classSelectWithContext('torrent-set-price', $maxclass, $AUTHORITY['torrent-set-price'] ?? '', 0, true).$lang_settings['text_default'].\App\Support\UserClass::name(UC_UPLOADER,false,true,true).nexus_trans('permission.torrent-set-price.desc'), 1);
+	\App\Support\Html::tr(\App\Support\Locale::trans('permission.torrent-set-special-tag.text', [], null), $lang_settings['text_minimum_class'].\App\Support\UserClass::classSelectWithContext('torrent-set-special-tag', $maxclass, $AUTHORITY['torrent-set-special-tag'] ?? '', 0, true).$lang_settings['text_default'].\App\Support\UserClass::name(UC_ADMINISTRATOR,false,true,true).\App\Support\Locale::trans('permission.torrent-set-special-tag.desc', [], null), 1);
+	\App\Support\Html::tr(\App\Support\Locale::trans('permission.torrent-approval.text', [], null), $lang_settings['text_minimum_class'].\App\Support\UserClass::classSelectWithContext('torrent-approval', $maxclass, $AUTHORITY['torrent-approval'] ?? '', 0, true).$lang_settings['text_default'].\App\Support\UserClass::name(UC_ADMINISTRATOR,false,true,true).\App\Support\Locale::trans('permission.torrent-approval.desc', [], null), 1);
+	\App\Support\Html::tr(\App\Support\Locale::trans('permission.torrent-approval-allow-automatic.text', [], null), $lang_settings['text_minimum_class'].\App\Support\UserClass::classSelectWithContext('torrent-approval-allow-automatic', $maxclass, $AUTHORITY['torrent-approval-allow-automatic'] ?? '', 0, true).$lang_settings['text_default'].\App\Support\UserClass::name(UC_UPLOADER,false,true,true).\App\Support\Locale::trans('permission.torrent-approval-allow-automatic.desc', [], null), 1);
+	\App\Support\Html::tr(\App\Support\Locale::trans('permission.torrent-set-price.text', [], null), $lang_settings['text_minimum_class'].\App\Support\UserClass::classSelectWithContext('torrent-set-price', $maxclass, $AUTHORITY['torrent-set-price'] ?? '', 0, true).$lang_settings['text_default'].\App\Support\UserClass::name(UC_UPLOADER,false,true,true).\App\Support\Locale::trans('permission.torrent-set-price.desc', [], null), 1);
 
 	\App\Support\Html::tr($lang_settings['row_ask_for_reseed'], $lang_settings['text_minimum_class'].\App\Support\UserClass::classSelectWithContext('askreseed', $maxclass, $AUTHORITY['askreseed'], 0, true).$lang_settings['text_default'].\App\Support\UserClass::name(UC_POWER_USER,false,true,true).$lang_settings['text_ask_for_reseed_note'], 1);
 	\App\Support\Html::tr($lang_settings['row_view_nfo'], $lang_settings['text_minimum_class'].\App\Support\UserClass::classSelectWithContext('viewnfo', $maxclass, $AUTHORITY['viewnfo'], 0, true).$lang_settings['text_default'].\App\Support\UserClass::name(UC_POWER_USER,false,true,true).$lang_settings['text_view_nfo_note'], 1);
@@ -468,7 +468,7 @@ elseif ($action == 'basicsettings')	// basic settings
 {
 	\App\Support\Html::stdhead($lang_settings['head_basic_settings']);
 	print ($notice);
-	$config = get_setting_from_db('basic');
+	$config = \App\Support\Settings::fromDb('basic');
 	print ("<form method='post' action='".$__server_SCRIPT_NAME."'><input type='hidden' name='action' value='savesettings_basic'>");
 	\App\Support\Html::tr($lang_settings['row_site_name'], "<input type='text' style=\"width: 300px\" name=SITENAME value='".($config["SITENAME"] ? $config["SITENAME"]: "Nexus")."'> ".$lang_settings['text_site_name_note'], 1);
 	\App\Support\Html::tr($lang_settings['row_base_url'], "<input type='text' style=\"width: 300px\" name=BASEURL value='".($config["BASEURL"] ? $config["BASEURL"] : $__server_HTTP_HOST)."'> ".$lang_settings['text_it_should_be'] . $__server_HTTP_HOST . $lang_settings['text_base_url_note'], 1);
@@ -487,7 +487,7 @@ elseif ($action == 'basicsettings')	// basic settings
 }
 elseif ($action == 'attachmentsettings')	// basic settings
 {
-	$ATTACHMENT = get_setting_from_db('attachment');
+	$ATTACHMENT = \App\Support\Settings::fromDb('attachment');
 	\App\Support\Html::stdhead($lang_settings['head_attachment_settings']);
 	print ($notice);
 	print ("<form method='post' action='".$__server_SCRIPT_NAME."'><input type='hidden' name='action' value='savesettings_attachment'>");
@@ -509,7 +509,7 @@ elseif ($action == 'attachmentsettings')	// basic settings
 }
 elseif ($action == 'codesettings')	// code settings
 {
-	$CODE = get_setting_from_db('code');
+	$CODE = \App\Support\Settings::fromDb('code');
 	\App\Support\Html::stdhead($lang_settings['head_code_settings']);
 	print ($notice);
 	print ("<form method='post' action='".$__server_SCRIPT_NAME."'><input type='hidden' name='action' value='savesettings_code'>");
@@ -521,7 +521,7 @@ elseif ($action == 'codesettings')	// code settings
 	print ("</form>");
 }
 elseif ($action == 'bonussettings'){
-	$BONUS = get_setting_from_db('bonus');
+	$BONUS = \App\Support\Settings::fromDb('bonus');
 	\App\Support\Html::stdhead($lang_settings['head_bonus_settings']);
 	print ($notice);
 	print ("<form method='post' action='".$__server_SCRIPT_NAME."'><input type='hidden' name='action' value='savesettings_bonus'>");
@@ -603,7 +603,7 @@ elseif ($action == 'bonussettings'){
 	print ("</form>");
 }
 elseif ($action == 'accountsettings'){
-	$ACCOUNT = get_setting_from_db('account');
+	$ACCOUNT = \App\Support\Settings::fromDb('account');
 	\App\Support\Html::stdhead($lang_settings['head_account_settings']);
 	print ($notice);
 	$maxclass = UC_VIP;
@@ -668,7 +668,7 @@ $ACCOUNT = \App\Support\SupportContext::getGlobal('ACCOUNT');
 }
 elseif ($action == 'torrentsettings')
 {
-	$TORRENT = get_setting_from_db('torrent');
+	$TORRENT = \App\Support\Settings::fromDb('torrent');
 	\App\Support\Html::stdhead($lang_settings['head_torrent_settings']);
 	print ($notice);
 	print ("<form method='post' action='".$__server_SCRIPT_NAME."'><input type='hidden' name='action' value='savesettings_torrent'>");
@@ -716,7 +716,7 @@ elseif ($action == 'torrentsettings')
 </ul>".$lang_settings['text_promotion_timeout_note_two'], 1);
 
 
-    do_action('setting_fields', $TORRENT);
+    \App\Support\Hooks::doAction('setting_fields', $TORRENT);
 
 	\App\Support\Html::tr($lang_settings['row_auto_pick_hot'], $lang_settings['text_torrents_uploaded_within']."<input type='text' style=\"width: 50px\" name=hotdays value='".((isset($TORRENT["hotdays"])) ? $TORRENT["hotdays"] : 7 )."'>".$lang_settings['text_days_with_more_than']."<input type='text' style=\"width: 50px\" name=hotseeder value='".((isset($TORRENT["hotseeder"])) ? $TORRENT["hotseeder"] : 10 )."'>".$lang_settings['text_be_picked_as_hot']."<br />".$lang_settings['text_auto_pick_hot_default'], 1);
 	\App\Support\Html::tr($lang_settings['row_uploader_get_double'], $lang_settings['text_torrent_uploader_gets']."<input type='text' style=\"width: 50px\" name=uploaderdouble value='".((isset($TORRENT["uploaderdouble"])) ? $TORRENT["uploaderdouble"] : 1 )."'>".$lang_settings['text_times_uploading_credit'].$lang_settings['text_uploader_get_double_default'], 1);
@@ -726,7 +726,7 @@ elseif ($action == 'torrentsettings')
 }
 elseif ($action == 'mainsettings')	// main settings
 {
-	$MAIN = get_setting_from_db('main');
+	$MAIN = \App\Support\Settings::fromDb('main');
 	\App\Support\Html::stdhead($lang_settings['head_main_settings']);
 	print ($notice);
 	print ("<form method='post' action='".$__server_SCRIPT_NAME."'><input type='hidden' name='action' value='savesettings_main'>");

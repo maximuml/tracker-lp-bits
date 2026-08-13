@@ -211,7 +211,7 @@ final class Strings
 
         static $emoji = null;
         if (is_null($emoji)) {
-            $emoji = nexus_config('emoji');
+            $emoji = \App\Support\Config::get('emoji', null);
         }
         $text = (string) preg_replace_callback('/\[em([1-9][0-9]*)\]/isU', function ($matches) use ($emoji) {
             return $emoji[$matches[1]] ?? '';

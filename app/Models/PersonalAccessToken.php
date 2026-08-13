@@ -25,7 +25,7 @@ class PersonalAccessToken extends SanctumPersonalAccessToken
         $result = [];
         foreach ($this->abilities as $ability) {
             if ($ability != '*') {
-                $result[] = nexus_trans("route-permission.{$ability}.text");
+                $result[] = \App\Support\Locale::trans("route-permission.{$ability}.text", [], null);
             }
         }
         return implode(', ', $result);

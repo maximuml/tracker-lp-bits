@@ -2,7 +2,7 @@
 
 namespace App\Support\Attachment;
 
-use App\Models\Setting;
+use App\Support\Config\SiteConfig;
 
 class AttachmentService
 {
@@ -14,15 +14,13 @@ class AttachmentService
 	/** @var array<int, string> */
 	public array $allowedext = array();
 
-	private function attachmentSetting(string $key, mixed $default = null): mixed
-	{
-		return Setting::get('attachment.' . $key, $default);
-	}
+	private \App\Support\Config\AttachmentConfig $attachmentConfig;
 
 	function __construct(int $userid) {
 		$this->userid = $userid;
 		$this->set_class();
 		$this->set_count_so_far();
+		$this->attachmentConfig = SiteConfig::current()->attachment;
 		$this->set_count_limit();
 		$this->set_size_limit();
 		$this->set_allowed_ext();
@@ -30,7 +28,7 @@ class AttachmentService
 
 	function enable_attachment(): bool
 	{
-		return $this->attachmentSetting('enableattach') == 'yes';
+		return $this->attachmentConfig->isEnabled();
 	}
 
 	function set_class(): void
@@ -59,10 +57,10 @@ class AttachmentService
 	function get_count_limit_class(int $class): int
 	{
 		$limits = [
-			(int) $this->attachmentSetting('classfour', 0) => (int) $this->attachmentSetting('countfour', 0),
-			(int) $this->attachmentSetting('classthree', 0) => (int) $this->attachmentSetting('countthree', 0),
-			(int) $this->attachmentSetting('classtwo', 0) => (int) $this->attachmentSetting('counttwo', 0),
-			(int) $this->attachmentSetting('classone', 0) => (int) $this->attachmentSetting('countone', 0),
+			$this->attachmentConfig->classThreshold(4) => $this->attachmentConfig->countLimit(4),
+			$this->attachmentConfig->classThreshold(3) => $this->attachmentConfig->countLimit(3),
+			$this->attachmentConfig->classThreshold(2) => $this->attachmentConfig->countLimit(2),
+			$this->attachmentConfig->classThreshold(1) => $this->attachmentConfig->countLimit(1),
 		];
 		krsort($limits);
 		foreach ($limits as $classLimit => $countLimit) {
@@ -94,10 +92,10 @@ class AttachmentService
 	function get_size_limit_class(int $class): int
 	{
 		$limits = [
-			(int) $this->attachmentSetting('classfour', 0) => (int) $this->attachmentSetting('sizefour', 0),
-			(int) $this->attachmentSetting('classthree', 0) => (int) $this->attachmentSetting('sizethree', 0),
-			(int) $this->attachmentSetting('classtwo', 0) => (int) $this->attachmentSetting('sizetwo', 0),
-			(int) $this->attachmentSetting('classone', 0) => (int) $this->attachmentSetting('sizeone', 0),
+			$this->attachmentConfig->classThreshold(4) => $this->attachmentConfig->sizeLimit(4),
+			$this->attachmentConfig->classThreshold(3) => $this->attachmentConfig->sizeLimit(3),
+			$this->attachmentConfig->classThreshold(2) => $this->attachmentConfig->sizeLimit(2),
+			$this->attachmentConfig->classThreshold(1) => $this->attachmentConfig->sizeLimit(1),
 		];
 		krsort($limits);
 		foreach ($limits as $classLimit => $sizeLimit) {
@@ -131,10 +129,10 @@ class AttachmentService
 	function get_allowed_ext_class(int $class): array
 	{
 		$tiers = [
-			['class' => (int) $this->attachmentSetting('classone', 0), 'ext' => (string) $this->attachmentSetting('extone', '')],
-			['class' => (int) $this->attachmentSetting('classtwo', 0), 'ext' => (string) $this->attachmentSetting('exttwo', '')],
-			['class' => (int) $this->attachmentSetting('classthree', 0), 'ext' => (string) $this->attachmentSetting('extthree', '')],
-			['class' => (int) $this->attachmentSetting('classfour', 0), 'ext' => (string) $this->attachmentSetting('extfour', '')],
+			['class' => $this->attachmentConfig->classThreshold(1), 'ext' => $this->attachmentConfig->extensions(1)],
+			['class' => $this->attachmentConfig->classThreshold(2), 'ext' => $this->attachmentConfig->extensions(2)],
+			['class' => $this->attachmentConfig->classThreshold(3), 'ext' => $this->attachmentConfig->extensions(3)],
+			['class' => $this->attachmentConfig->classThreshold(4), 'ext' => $this->attachmentConfig->extensions(4)],
 		];
 
 		$allowedext = array();

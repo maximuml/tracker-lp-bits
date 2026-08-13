@@ -56,12 +56,12 @@ class Field
     public function getTypeHuman($type)
     {
         $map = [
-            self::TYPE_TEXT => nexus_trans('field.type.text'),
-            self::TYPE_TEXTAREA => nexus_trans('field.type.textarea'),
-            self::TYPE_RADIO => nexus_trans('field.type.radio'),
-            self::TYPE_CHECKBOX => nexus_trans('field.type.checkbox'),
-            self::TYPE_SELECT => nexus_trans('field.type.select'),
-            self::TYPE_IMAGE => nexus_trans('field.type.image'),
+            self::TYPE_TEXT => \App\Support\Locale::trans('field.type.text', [], null),
+            self::TYPE_TEXTAREA => \App\Support\Locale::trans('field.type.textarea', [], null),
+            self::TYPE_RADIO => \App\Support\Locale::trans('field.type.radio', [], null),
+            self::TYPE_CHECKBOX => \App\Support\Locale::trans('field.type.checkbox', [], null),
+            self::TYPE_SELECT => \App\Support\Locale::trans('field.type.select', [], null),
+            self::TYPE_IMAGE => \App\Support\Locale::trans('field.type.image', [], null),
         ];
         return $map[$type] ?? '';
     }
@@ -100,7 +100,7 @@ class Field
         $trHelp = \App\Support\Html::tr($lang_fields['col_help'], '<textarea name="help" rows="4" cols="80">' . ($row['help'] ?? '') . '</textarea>', 1, '', true);
         $trOptions = \App\Support\Html::tr($lang_fields['col_options'], '<textarea name="options" rows="6" cols="80">' . ($row['options'] ?? '') . '</textarea><br/>' . $lang_fields['col_options_help'], 1, '', true);
         $trIsSingleRow = \App\Support\Html::tr($lang_fields['col_is_single_row'] . '<font color="red">*</font>', $this->radio('is_single_row', ['0' => $lang_functions['text_no'], '1' => $lang_functions['text_yes']], $row['is_single_row'] ?? null), 1, '', true);
-        $trPriority = \App\Support\Html::tr(nexus_trans('label.priority') . '<font color="red">*</font>', '<input type="number" name="priority" value="' . ($row['priority'] ?? '0') . '" style="width: 300px" />', 1, '', true);
+        $trPriority = \App\Support\Html::tr(\App\Support\Locale::trans('label.priority', [], null) . '<font color="red">*</font>', '<input type="number" name="priority" value="' . ($row['priority'] ?? '0') . '" style="width: 300px" />', 1, '', true);
         $trDisplay = \App\Support\Html::tr($lang_fields['col_display'], '<textarea name="display" rows="4" cols="80">' . ($row['display'] ?? '') . '</textarea><br/>' . $lang_catmanage['row_custom_field_display_help'], 1, '', true);
 
         $id = $row['id'] ?? 0;
@@ -150,7 +150,7 @@ HTML;
             'type_text' => $lang_fields['col_type'],
             'required_text' => $lang_fields['col_required'],
             'is_single_row_text' => $lang_fields['col_is_single_row'],
-            'priority' => nexus_trans('label.priority'),
+            'priority' => \App\Support\Locale::trans('label.priority', [], null),
             'action' => $lang_fields['col_action'],
         ];
         $rows = [];
@@ -345,7 +345,7 @@ HEAD;
                 $inputId = "input_$callbackFunc";
                 $imgId = "attach" . $row['id'];
                 $previewBoxId = "preview_$callbackFunc";
-                $y = '<iframe id="' . $iframeId . '" src="' . getSchemeAndHttpHost() . '/attachment.php?callback_func=' . $callbackFunc . '" width="100%" height="24" frameborder="0" scrolling="no" marginheight="0" marginwidth="0"></iframe>';
+                $y = '<iframe id="' . $iframeId . '" src="' . \App\Support\Url::schemeAndHost(false) . '/attachment.php?callback_func=' . $callbackFunc . '" width="100%" height="24" frameborder="0" scrolling="no" marginheight="0" marginwidth="0"></iframe>';
                 $y .= sprintf('<input id="%s" type="text" name="%s" value="%s" style="width: %s;margin: 10px 0">', $inputId, $name, $currentValue, '99%');
                 $y .= '<div id="' . $previewBoxId . '">';
                 if (!empty($currentValue)) {
@@ -532,7 +532,7 @@ JS;
             if (empty($data[$field->id])) {
                 if ($field->required) {
 //                    throw new \InvalidArgumentException(nexus_trans("nexus.require_argument", ['argument' => $field->label]));
-                    do_log("Field: {$field->label} required, but empty");
+                    \App\Support\Logger::writeWithContext((string) "Field: {$field->label} required, but empty", (string) 'info', (bool) false);
                 }
                 continue;
             }

@@ -52,7 +52,7 @@ class ExamUpdateProgress extends Command
             $this->error("specific uid or bulk.");
             return 0;
         }
-        $this->info(nexus()->getRequestId() . ", $log, result: " . var_export($result, true));
+        $this->info(\Nexus\Nexus::instance()->getRequestId() . ", $log, result: " . var_export($result, true));
         return 0;
     }
 }

@@ -114,7 +114,7 @@ class SeedBoxRecord extends NexusModel
     protected function typeText(): Attribute
     {
         return new Attribute(
-            get: fn($value, $attributes) => nexus_trans("seed-box.type_text." . $attributes['type'])
+            get: fn($value, $attributes) => \App\Support\Locale::trans("seed-box.type_text." . $attributes['type'], [], null)
         );
     }
 
@@ -130,7 +130,7 @@ class SeedBoxRecord extends NexusModel
     protected function statusText(): Attribute
     {
         return new Attribute(
-            get: fn($value, $attributes) => nexus_trans("seed-box.status_text." . $attributes['status'])
+            get: fn($value, $attributes) => \App\Support\Locale::trans("seed-box.status_text." . $attributes['status'], [], null)
         );
     }
 
@@ -143,7 +143,7 @@ class SeedBoxRecord extends NexusModel
         $result = self::$types;
         $keyValues = [];
         foreach ($result as $type => &$info) {
-            $info['text'] = nexus_trans("seed-box.type_text.$type");
+            $info['text'] = \App\Support\Locale::trans("seed-box.type_text.{$type}", [], null);
             if ($key !== null) {
                 $keyValues[$type] = $info[$key];
             }
@@ -160,7 +160,7 @@ class SeedBoxRecord extends NexusModel
         $result = self::$status;
         $keyValues = [];
         foreach ($result as $status => &$info) {
-            $info['text'] = nexus_trans("seed-box.status_text.$status");
+            $info['text'] = \App\Support\Locale::trans("seed-box.status_text.{$status}", [], null);
             if ($key !== null) {
                 $keyValues[$status] = $info[$key];
             }

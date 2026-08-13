@@ -41,12 +41,12 @@ class RemoveUserWarning
             ];
             $user->warned = 'no';
             $user->warneduntil = null;
-            do_log(sprintf("update user %s => %s", $user->id, json_encode($user->getDirty())));
+            \App\Support\Logger::writeWithContext((string) sprintf("update user %s => %s", $user->id, json_encode($user->getDirty())), (string) 'info', (bool) false);
             $user->save();
-            clear_user_cache($user->id);
-            publish_model_event(ModelEventEnum::USER_UPDATED, $user->id);
-            $subject = nexus_trans("cleanup.msg_warning_removed", [], $locale);
-            $msg = nexus_trans("cleanup.msg_your_warning_removed", [], $locale);
+            \App\Support\Cache::clearUser($user->id, '');
+            \App\Support\Events::publishModel(ModelEventEnum::USER_UPDATED, $user->id, "");
+            $subject = \App\Support\Locale::trans("cleanup.msg_warning_removed", [], $locale);
+            $msg = \App\Support\Locale::trans("cleanup.msg_your_warning_removed", [], $locale);
             Message::add([
                 'sender' => 0,
                 'receiver' => $user->id,
@@ -58,6 +58,6 @@ class RemoveUserWarning
         if (!empty($userModifyLogs)) {
             UserModifyLog::query()->insert($userModifyLogs);
         }
-        do_log("remove warning of users, success handle user count: " . $users->count());
+        \App\Support\Logger::writeWithContext((string) ("remove warning of users, success handle user count: " . $users->count()), (string) 'info', (bool) false);
     }
 }

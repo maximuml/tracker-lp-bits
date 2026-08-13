@@ -75,12 +75,12 @@ if (((\App\Support\SupportContext::getQuery('new_offer') !== null)) && \App\Supp
 	if (!\App\Support\Validators::isId($cat))
 	offers_bark($lang_offers['std_must_select_category']);
 
-	$descrmain = unesc(\App\Support\SupportContext::getPost("body"));
+	$descrmain = \App\Support\Input::unescape(\App\Support\SupportContext::getPost("body"));
 	if (!$descrmain)
 	offers_bark($lang_offers['std_must_enter_description']);
 
 	if (!empty(\App\Support\SupportContext::getPost('picture'))){
-		$picture = unesc(\App\Support\SupportContext::getPost("picture"));
+		$picture = \App\Support\Input::unescape(\App\Support\SupportContext::getPost("picture"));
 		if(!preg_match("/^https?:\/\/[^\s'\"<>]+\.(jpg|gif|png)$/i", $picture))
 		\App\Support\LegacyResponse::abort($lang_offers['std_error'], $lang_offers['std_wrong_image_format']);
 		$pic = "[img]".$picture."[/img]\n";
@@ -117,13 +117,11 @@ if (((\App\Support\SupportContext::getQuery('new_offer') !== null)) && \App\Supp
 		// add new offer message to staffmessage
 		\App\Models\StaffMessage::query()->insert([
             'sender' => $CURUSER['id'],
-            'subject' => nexus_trans('offer.msg_new_offer_subject'),
-            'msg' => nexus_trans('offer.msg_new_offer_msg', [
-				'username' => "[url=userdetails.php?id={$CURUSER['id']}]{$CURUSER['username']}[/url]",
-				'offername' => "[url=offers.php?id={$id}&off_details=1]{$name}[/url]"]),
+            'subject' => \App\Support\Locale::trans('offer.msg_new_offer_subject', [], null),
+            'msg' => \App\Support\Locale::trans('offer.msg_new_offer_msg', ['username' => "[url=userdetails.php?id={$CURUSER['id']}]{$CURUSER['username']}[/url]", 'offername' => "[url=offers.php?id={$id}&off_details=1]{$name}[/url]"], null),
             'added' => now(),
         ]);
-        clear_staff_message_cache();
+        \App\Support\Cache::clearStaffMessage();
 
 		\App\Support\Log::writeWithContext("offer $name was added by ".$CURUSER['username'], 'normal');
 
@@ -268,15 +266,15 @@ if (((\App\Support\SupportContext::getQuery("allow_offer") !== null)) && \App\Su
     }
     $arr = $offer->toArray();
     $arr['username'] = $offer->user->username ?? '';
-    $locale = get_user_locale($arr["userid"]);
+    $locale = \App\Support\Locale::userLocale($arr["userid"]);
 	if ($offeruptimeout_main){
 		$timeouthour = floor($offeruptimeout_main/3600);
-		$timeoutnote = nexus_trans("offer.msg_you_must_upload_in", [], $locale).$timeouthour.nexus_trans("offer.msg_hours_otherwise", [], $locale);
+		$timeoutnote = \App\Support\Locale::trans("offer.msg_you_must_upload_in", [], $locale).$timeouthour.\App\Support\Locale::trans("offer.msg_hours_otherwise", [], $locale);
 	}
 	else $timeoutnote = "";
-	$msg = $CURUSER['username'].nexus_trans("offer.msg_has_allowed", [], $locale)."[b][url=". get_protocol_prefix() . $BASEURL ."/offers.php?id=$offid&off_details=1]" . $arr['name'] . "[/url][/b]. ".nexus_trans("offer.msg_find_offer_option", [], $locale).$timeoutnote;
+	$msg = $CURUSER['username'].\App\Support\Locale::trans("offer.msg_has_allowed", [], $locale)."[b][url=". \App\Support\Http::protocolPrefix(\App\Support\Url::isSecure()) . $BASEURL ."/offers.php?id=$offid&off_details=1]" . $arr['name'] . "[/url][/b]. ".\App\Support\Locale::trans("offer.msg_find_offer_option", [], $locale).$timeoutnote;
 
-	$subject = nexus_trans("offer.msg_your_offer_allowed", [], $locale);
+	$subject = \App\Support\Locale::trans("offer.msg_your_offer_allowed", [], $locale);
 	$allowedtime = date("Y-m-d H:i:s");
 
 	\App\Models\Message::add([
@@ -290,7 +288,7 @@ if (((\App\Support\SupportContext::getQuery("allow_offer") !== null)) && \App\Su
 	\App\Models\Offer::query()->where('id', $offid)->update(['allowed' => 'allowed', 'allowedtime' => $allowedtime]);
 
 	\App\Support\Log::writeWithContext("{$CURUSER['username']} allowed offer {$arr['name']}", 'normal');
-	header("Location: " . get_protocol_prefix() . "$BASEURL/offers.php?id=$offid&off_details=1");
+	header("Location: " . \App\Support\Http::protocolPrefix(\App\Support\Url::isSecure()) . "$BASEURL/offers.php?id=$offid&off_details=1");
 }
 //=== end allow the offer
 
@@ -314,7 +312,7 @@ if (((\App\Support\SupportContext::getQuery("finish_offer") !== null)) && \App\S
     }
     $arr = $offer->toArray();
     $arr['username'] = $offer->user->username ?? '';
-    $locale = get_user_locale($arr["userid"]);
+    $locale = \App\Support\Locale::userLocale($arr["userid"]);
 
 	$yes = \Nexus\Database\NexusDB::table('offervotes')->where('vote', 'yeah')->where('offerid', $offid)->count();
 	$no = \Nexus\Database\NexusDB::table('offervotes')->where('vote', 'against')->where('offerid', $offid)->count();
@@ -325,18 +323,18 @@ if (((\App\Support\SupportContext::getQuery("finish_offer") !== null)) && \App\S
 	if (($yes - $no)>=$minoffervotes){
 		if ($offeruptimeout_main){
 			$timeouthour = floor($offeruptimeout_main/3600);
-			$timeoutnote = nexus_trans("offer.msg_you_must_upload_in", [], $locale).$timeouthour.nexus_trans("offer.msg_hours_otherwise", [], $locale);
+			$timeoutnote = \App\Support\Locale::trans("offer.msg_you_must_upload_in", [], $locale).$timeouthour.\App\Support\Locale::trans("offer.msg_hours_otherwise", [], $locale);
 		}
 		else $timeoutnote = "";
-		$msg = nexus_trans("offer.msg_offer_voted_on", [], $locale)."[b][url=" . get_protocol_prefix() . $BASEURL."/offers.php?id=$offid&off_details=1]" . $arr['name'] . "[/url][/b].". nexus_trans("offer.msg_find_offer_option", [], $locale).$timeoutnote;
+		$msg = \App\Support\Locale::trans("offer.msg_offer_voted_on", [], $locale)."[b][url=" . \App\Support\Http::protocolPrefix(\App\Support\Url::isSecure()) . $BASEURL."/offers.php?id=$offid&off_details=1]" . $arr['name'] . "[/url][/b].". \App\Support\Locale::trans("offer.msg_find_offer_option", [], $locale).$timeoutnote;
 		\App\Models\Offer::query()->where('id', $offid)->update(['allowed' => 'allowed', 'allowedtime' => $finishvotetime]);
 	}
 	else if(($no - $yes)>=$minoffervotes){
-		$msg = nexus_trans("offer.msg_offer_voted_off", [], $locale)."[b][url=". get_protocol_prefix() . $BASEURL."/offers.php?id=$offid&off_details=1]" . $arr['name'] . "[/url][/b].".nexus_trans("offer.msg_offer_deleted", [], $locale) ;
+		$msg = \App\Support\Locale::trans("offer.msg_offer_voted_off", [], $locale)."[b][url=". \App\Support\Http::protocolPrefix(\App\Support\Url::isSecure()) . $BASEURL."/offers.php?id=$offid&off_details=1]" . $arr['name'] . "[/url][/b].".\App\Support\Locale::trans("offer.msg_offer_deleted", [], $locale) ;
 		\App\Models\Offer::query()->where('id', $offid)->update(['allowed' => 'denied']);
 	}
 			//===use this line if you DO HAVE subject in your PM system
-	$subject = nexus_trans("offer.msg_your_offer", [], $locale).$arr['name'].nexus_trans("offer.msg_voted_on", [], $locale);
+	$subject = \App\Support\Locale::trans("offer.msg_your_offer", [], $locale).$arr['name'].\App\Support\Locale::trans("offer.msg_voted_on", [], $locale);
 
 	\App\Models\Message::add([
 		'sender' => 0,
@@ -349,7 +347,7 @@ if (((\App\Support\SupportContext::getQuery("finish_offer") !== null)) && \App\S
 	//===use this line if you DO NOT subject in your PM system
 	\App\Support\Log::writeWithContext("{$CURUSER['username']} closed poll {$arr['name']}", 'normal');
 
-	header("Location: " . get_protocol_prefix() . "$BASEURL/offers.php?id=$offid&off_details=1");
+	header("Location: " . \App\Support\Http::protocolPrefix(\App\Support\Url::isSecure()) . "$BASEURL/offers.php?id=$offid&off_details=1");
 	die;
 }
 //===end allow offer by vote
@@ -378,7 +376,7 @@ if (((\App\Support\SupportContext::getQuery("edit_offer") !== null)) && \App\Sup
 	if ($CURUSER["id"] != $num["userid"] && !\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::OFFER_MANAGE))
 	\App\Support\LegacyResponse::abort($lang_offers['std_error'], $lang_offers['std_cannot_edit_others_offer']);
 
-	$body = htmlspecialchars(unesc($num["descr"]));
+	$body = htmlspecialchars(\App\Support\Input::unescape($num["descr"]));
 	$s2 = "<select name=\"category\">\n";
 
 	$cats = \App\Support\Category::listByModeWithContext($browsecatmode);
@@ -421,13 +419,13 @@ if (((\App\Support\SupportContext::getQuery("take_off_edit") !== null)) && \App\
 	$name = \App\Support\SupportContext::getPost("name");
 
 	if (!empty(\App\Support\SupportContext::getPost('picture'))){
-		$picture = unesc(\App\Support\SupportContext::getPost("picture"));
+		$picture = \App\Support\Input::unescape(\App\Support\SupportContext::getPost("picture"));
 		if(!preg_match("/^https?:\/\/[^\s'\"<>]+\.(jpg|gif|png)$/i", $picture))
 		\App\Support\LegacyResponse::abort($lang_offers['std_error'], $lang_offers['std_wrong_image_format']);
 		$pic = "[img]".$picture."[/img]\n";
 	}
 	$descr = "$pic";
-	$descr .= unesc(\App\Support\SupportContext::getPost("body"));
+	$descr .= \App\Support\Input::unescape(\App\Support\SupportContext::getPost("body"));
 	if (!$name)
 	offers_bark($lang_offers['std_must_enter_name']);
 	if (!$descr)
@@ -525,7 +523,7 @@ if (((\App\Support\SupportContext::getQuery("vote") !== null)) && \App\Support\S
             }
             $voteColumn = $vote == 'yeah' ? 'yeah' : 'against';
             \App\Models\Offer::query()->where('id', $offerid)->increment($voteColumn);
-            $locale = get_user_locale($offer->userid);
+            $locale = \App\Support\Locale::userLocale($offer->userid);
 
 			$offer = \App\Models\Offer::query()->where('id', $offerid)->first(['yeah', 'against', 'allowed', 'userid', 'name']);
 			$yeah = $offer->yeah;
@@ -536,12 +534,12 @@ if (((\App\Support\SupportContext::getQuery("vote") !== null)) && \App\Support\S
 			{
 				if ($offeruptimeout_main){
 					$timeouthour = floor($offeruptimeout_main/3600);
-					$timeoutnote = nexus_trans("offer.msg_you_must_upload_in", [], $locale).$timeouthour.nexus_trans("offer.msg_hours_otherwise", [], $locale);
+					$timeoutnote = \App\Support\Locale::trans("offer.msg_you_must_upload_in", [], $locale).$timeouthour.\App\Support\Locale::trans("offer.msg_hours_otherwise", [], $locale);
 				}
 				else $timeoutnote = "";
 				\App\Models\Offer::query()->where('id', $offerid)->update(['allowed' => 'allowed', 'allowedtime' => $finishtime]);
-				$msg = nexus_trans("offer.msg_offer_voted_on", [], $locale)."[b][url=". get_protocol_prefix() . $BASEURL."/offers.php?id=$offerid&off_details=1]" . $offer->name . "[/url][/b].". nexus_trans("offer.msg_find_offer_option", [], $locale).$timeoutnote;
-				$subject =  nexus_trans("offer.msg_your_offer_allowed", [], $locale);
+				$msg = \App\Support\Locale::trans("offer.msg_offer_voted_on", [], $locale)."[b][url=". \App\Support\Http::protocolPrefix(\App\Support\Url::isSecure()) . $BASEURL."/offers.php?id=$offerid&off_details=1]" . $offer->name . "[/url][/b].". \App\Support\Locale::trans("offer.msg_find_offer_option", [], $locale).$timeoutnote;
+				$subject =  \App\Support\Locale::trans("offer.msg_your_offer_allowed", [], $locale);
 
 				\App\Models\Message::add([
 					'sender' => 0,
@@ -557,8 +555,8 @@ if (((\App\Support\SupportContext::getQuery("vote") !== null)) && \App\Support\S
 			if(($against-$yeah)>=$minoffervotes && $offer->allowed != "denied")
 			{
 				\App\Models\Offer::query()->where('id', $offerid)->update(['allowed' => 'denied']);
-				$msg = nexus_trans("offer.msg_offer_voted_off", [], $locale)."[b][url=" . get_protocol_prefix() . $BASEURL."/offers.php?id=$offerid&off_details=1]" . $offer->name . "[/url][/b].".nexus_trans("offer.msg_offer_deleted", [], $locale) ;
-				$subject = nexus_trans("offer.msg_offer_deleted", [], $locale);
+				$msg = \App\Support\Locale::trans("offer.msg_offer_voted_off", [], $locale)."[b][url=" . \App\Support\Http::protocolPrefix(\App\Support\Url::isSecure()) . $BASEURL."/offers.php?id=$offerid&off_details=1]" . $offer->name . "[/url][/b].".\App\Support\Locale::trans("offer.msg_offer_deleted", [], $locale) ;
+				$subject = \App\Support\Locale::trans("offer.msg_offer_deleted", [], $locale);
 
 				\App\Models\Message::add([
 					'sender' => 0,
@@ -579,7 +577,7 @@ if (((\App\Support\SupportContext::getQuery("vote") !== null)) && \App\Support\S
 				'userid' => $userid,
 				'vote' => $vote,
 			]);
-			KPS("+",$offervote_bonus,$CURUSER["id"]);
+			\App\Support\Bonus::updatePoints((string) "+", (float) $offervote_bonus, $CURUSER["id"]);
 			\App\Support\Html::stdhead($lang_offers['head_vote_for_offer']);
 			print("<h1 align=center>".$lang_offers['std_vote_accepted']."</h1>");
 			print($lang_offers['std_vote_accepted_note']."<a  href=offers.php?id=$offerid&off_details=1>".$lang_offers['std_back_to_offer_detail']);
@@ -641,9 +639,9 @@ if (((\App\Support\SupportContext::getQuery("del_offer") !== null)) && \App\Supp
 		if ($CURUSER["id"] != $num["userid"])
 		{
 			$added = date("Y-m-d H:i:s");
-            $locale = get_user_locale($num["userid"]);
-			$subject = nexus_trans("offer.msg_offer_deleted", [], $locale);
-			$msg = nexus_trans("offer.msg_your_offer", [], $locale).$num['name'].nexus_trans("offer.msg_was_deleted_by", [], $locale). "[url=userdetails.php?id=".$CURUSER['id']."]".$CURUSER['username']."[/url]".nexus_trans("offer.msg_blank", [], $locale).($reason != "" ? nexus_trans("offer.msg_reason_is", [], $locale).$reason : "");
+            $locale = \App\Support\Locale::userLocale($num["userid"]);
+			$subject = \App\Support\Locale::trans("offer.msg_offer_deleted", [], $locale);
+			$msg = \App\Support\Locale::trans("offer.msg_your_offer", [], $locale).$num['name'].\App\Support\Locale::trans("offer.msg_was_deleted_by", [], $locale). "[url=userdetails.php?id=".$CURUSER['id']."]".$CURUSER['username']."[/url]".\App\Support\Locale::trans("offer.msg_blank", [], $locale).($reason != "" ? \App\Support\Locale::trans("offer.msg_reason_is", [], $locale).$reason : "");
 
 			\App\Models\Message::add([
 				'sender' => 0,

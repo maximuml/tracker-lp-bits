@@ -40,9 +40,9 @@ class MigrateTorrentTag extends Command
     {
         $rep = new TagRepository();
         $result = $rep->migrateTorrentTag();
-        $log = sprintf('[%s], %s, result: %s, query: %s', nexus()->getRequestId(), __METHOD__, var_export($result, true), last_query());
+        $log = sprintf('[%s], %s, result: %s, query: %s', \Nexus\Nexus::instance()->getRequestId(), __METHOD__, var_export($result, true), \App\Support\LegacyDb::lastQuery(false, 'json'));
         $this->info($log);
-        do_log($log);
+        \App\Support\Logger::writeWithContext((string) $log, (string) 'info', (bool) false);
         return 0;
     }
 }

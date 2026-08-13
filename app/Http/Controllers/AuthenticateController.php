@@ -72,7 +72,7 @@ class AuthenticateController extends Controller
             $user = User::query()->where('passkey', $passkey)->first(['id', 'passhash', 'secret', 'auth_key']);
             if ($user) {
                 $ip = \App\Support\Network::clientIp();
-                logincookie($user->id, $user->auth_key);
+                \App\Support\AuthCookie::setLoginCookie((int) $user->id, (string) $user->auth_key, (int) 0);
                 $user->last_login = now();
                 $user->save();
                 $userRep = new UserRepository();
@@ -99,7 +99,7 @@ class AuthenticateController extends Controller
         } catch (\Exception $exception) {
             $msg = $exception->getMessage();
             $params = $request->all();
-            do_log(sprintf("nasToolsApprove fail: %s, params: %s", $msg, nexus_json_encode($params)));
+            \App\Support\Logger::writeWithContext((string) sprintf("nasToolsApprove fail: %s, params: %s", $msg, \App\Support\Json::encode($params)), (string) 'info', (bool) false);
             return $this->fail($params, $msg);
         }
     }
@@ -157,7 +157,7 @@ class AuthenticateController extends Controller
         } catch (\Exception $exception) {
             $msg = $exception->getMessage();
             $params = $request->all();
-            do_log(sprintf("ammdsApprove fail: %s, params: %s", $msg, nexus_json_encode($params)));
+            \App\Support\Logger::writeWithContext((string) sprintf("ammdsApprove fail: %s, params: %s", $msg, \App\Support\Json::encode($params)), (string) 'info', (bool) false);
             return $this->fail($params, $msg);
         }
     }
@@ -173,17 +173,17 @@ class AuthenticateController extends Controller
                 'username' => 'required|string',
             ]);
             $username = $request->username;
-            $challenge = mksecret();
+            $challenge = \App\Support\Token::randomHex((int) 20);
             NexusDB::cache_put(\App\Support\Token::challengeKey($username), $challenge,300);
             $user = User::query()->where("username", $username)->first(['secret']);
             return $this->success([
                 "challenge" => $challenge,
-                'secret' => $user->secret ?? mksecret(),
+                'secret' => $user->secret ?? \App\Support\Token::randomHex((int) 20),
             ]);
         } catch (\Exception $exception) {
             $msg = $exception->getMessage();
             $params = $request->all();
-            do_log(sprintf("challenge fail: %s, params: %s", $msg, nexus_json_encode($params)));
+            \App\Support\Logger::writeWithContext((string) sprintf("challenge fail: %s, params: %s", $msg, \App\Support\Json::encode($params)), (string) 'info', (bool) false);
             return $this->fail($params, $msg);
         }
     }

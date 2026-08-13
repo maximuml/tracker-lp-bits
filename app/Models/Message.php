@@ -46,9 +46,9 @@ class Message extends NexusModel
     /** @param  array<int|string, mixed>  $data */
     public static function add(array $data): self
     {
-        clear_inbox_count_cache($data["receiver"]);
+        \App\Support\Cache::clearInboxCount($data["receiver"]);
         $message =  self::query()->create($data);
-        fire_event(ModelEventEnum::MESSAGE_CREATED, $message);
+        \App\Support\Events::fire(ModelEventEnum::MESSAGE_CREATED, $message, null);
         return $message;
     }
 

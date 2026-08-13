@@ -164,7 +164,7 @@ class WebAuthService
 
         (new UserRepository())->saveLoginLog((int) $row['id'], $ip, 'Web', true);
 
-        clear_user_cache((int) $row['id']);
+        \App\Support\Cache::clearUser((int) $row['id'], '');
 
         return $user;
     }

@@ -12,6 +12,6 @@ class CreateAgentDeny extends CreateRecord
 
     public function afterCreate()
     {
-        clear_agent_allow_deny_cache();
+        \App\Support\Cache::clearAgentAllowDeny();
     }
 }

@@ -19,7 +19,7 @@ if (((\App\Support\SupportContext::getQuery("act") !== null)) && \App\Support\Su
 	print("<tr><td>Title:</td><td align=left><input style=\"width: 400px;\" type=\"text\" name=\"title\"/></td></tr>\n");
 	print("<tr><td style=\"vertical-align: top;\">Rules:</td><td><textarea cols=90 rows=20 name=\"text\"></textarea></td></tr>\n");
 	$s = "<select name=language>";
-	$langs = langlist("rule_lang");
+	$langs = \App\Support\Locale::languageList("rule_lang", null);
 	foreach ($langs as $row)
 	{
 		if($row["site_lang_folder"] == $deflang) $se = " selected"; else $se = "";
@@ -57,7 +57,7 @@ elseif (((\App\Support\SupportContext::getQuery("act") !== null)) && \App\Suppor
 	print("<tr><td>Title:</td><td align=left><input style=\"width: 400px;\" type=\"text\" name=\"title\" value=\"".htmlspecialchars($res['title'])."\" /></td></tr>\n");
 	print("<tr><td style=\"vertical-align: top;\">Rules:</td><td><textarea cols=90 rows=20 name=\"text\">{$res['text']}</textarea></td></tr>\n");
 	$s = "<select name=language>";
-	$langs = langlist("site_lang");
+	$langs = \App\Support\Locale::languageList("site_lang", null);
 	foreach ($langs as $row)
 	{
 		if ($row['id'] == $res['lang_id']) $se = " selected"; else $se = "";

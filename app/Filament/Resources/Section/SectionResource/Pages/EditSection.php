@@ -26,7 +26,7 @@ class EditSection extends EditRecord
 
     protected function afterSave()
     {
-        clear_search_box_cache($this->record->id);
+        \App\Support\Cache::clearSearchBox();
     }
 
     protected function mutateFormDataBeforeFill(array $data): array

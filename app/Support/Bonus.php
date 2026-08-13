@@ -271,19 +271,19 @@ class Bonus
 
         $table = sprintf('<table cellpadding="5" style="%s">', $options['table_style'] ?? '');
         $table .= '<tr>';
-        $table .= sprintf('<td class="colhead">%s</td>', nexus_trans('bonus.table_thead.reward_type'));
-        $table .= sprintf('<td class="colhead">%s</td>', nexus_trans('bonus.table_thead.count'));
-        $table .= sprintf('<td class="colhead">%s</td>', nexus_trans('bonus.table_thead.size'));
-        $table .= sprintf('<td class="colhead">%s</td>', nexus_trans('bonus.table_thead.a_value'));
-        $table .= sprintf('<td class="colhead">%s</td>', nexus_trans('bonus.table_thead.bonus_base'));
-        $table .= sprintf('<td class="colhead">%s</td>', nexus_trans('bonus.table_thead.factor'));
-        $table .= sprintf('<td class="colhead">%s</td>', nexus_trans('bonus.table_thead.got_bonus'));
-        $table .= sprintf('<td class="colhead">%s</td>', nexus_trans('bonus.table_thead.total'));
+        $table .= sprintf('<td class="colhead">%s</td>', \App\Support\Locale::trans('bonus.table_thead.reward_type', [], null));
+        $table .= sprintf('<td class="colhead">%s</td>', \App\Support\Locale::trans('bonus.table_thead.count', [], null));
+        $table .= sprintf('<td class="colhead">%s</td>', \App\Support\Locale::trans('bonus.table_thead.size', [], null));
+        $table .= sprintf('<td class="colhead">%s</td>', \App\Support\Locale::trans('bonus.table_thead.a_value', [], null));
+        $table .= sprintf('<td class="colhead">%s</td>', \App\Support\Locale::trans('bonus.table_thead.bonus_base', [], null));
+        $table .= sprintf('<td class="colhead">%s</td>', \App\Support\Locale::trans('bonus.table_thead.factor', [], null));
+        $table .= sprintf('<td class="colhead">%s</td>', \App\Support\Locale::trans('bonus.table_thead.got_bonus', [], null));
+        $table .= sprintf('<td class="colhead">%s</td>', \App\Support\Locale::trans('bonus.table_thead.total', [], null));
         $table .= '</tr>';
 
         $table .= sprintf(
             '<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td rowspan="%s">%s</td></tr>',
-            nexus_trans('bonus.reward_types.basic'),
+            \App\Support\Locale::trans('bonus.reward_types.basic', [], null),
             $bonusResult['torrent_peer_count'],
             Format::size((float) $bonusResult['size']),
             number_format($bonusResult['A'], 3),
@@ -296,7 +296,7 @@ class Bonus
         if ($hasMedalAddition) {
             $table .= sprintf(
                 '<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>',
-                nexus_trans('bonus.reward_types.medal_addition'),
+                \App\Support\Locale::trans('bonus.reward_types.medal_addition', [], null),
                 $bonusResult['torrent_peer_count'],
                 Format::size((float) $bonusResult['size']),
                 number_format($bonusResult['A'], 3),
@@ -309,7 +309,7 @@ class Bonus
         if ($hasOfficialAddition) {
             $table .= sprintf(
                 '<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>',
-                nexus_trans('bonus.reward_types.official_addition'),
+                \App\Support\Locale::trans('bonus.reward_types.official_addition', [], null),
                 $bonusResult['official_torrent_peer_count'],
                 Format::size((float) $bonusResult['official_size']),
                 number_format($bonusResult['official_a'], 3),
@@ -322,7 +322,7 @@ class Bonus
         if ($hasHaremAddition) {
             $table .= sprintf(
                 '<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>',
-                nexus_trans('bonus.reward_types.harem_addition'),
+                \App\Support\Locale::trans('bonus.reward_types.harem_addition', [], null),
                 '--',
                 '--',
                 '--',
@@ -385,7 +385,7 @@ class Bonus
         $officialAdditionalFactor = (float) \App\Support\Config\SiteConfig::current()->bonus->officialAddition(0);
         $haremFactor = (float) \App\Support\Config\SiteConfig::current()->bonus->haremAddition();
         $haremAddition = self::haremAddition((int) ($user['id'] ?? 0));
-        $isDonor = \is_donor($user);
+        $isDonor = \App\Support\UserDisplay::isDonor($user);
         $donortimesBonus = (float) \App\Support\Config\SiteConfig::current()->bonus->donorTimes();
 
         return self::buildBonusTable(

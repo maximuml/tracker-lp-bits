@@ -46,7 +46,7 @@ final class Security
 
         $dangerScriptsPattern = '/(logout|login|ajax|announce|scrape|adduser|modtask|docleanup|freeleech|take.*)\.php/i';
         if (preg_match($dangerScriptsPattern, $path)) {
-            $msg = sprintf('[DANGER_URL]: %s [%s]', $src, \nexus()->getRequestId());
+            $msg = sprintf('[DANGER_URL]: %s [%s]', $src, \Nexus\Nexus::instance()->getRequestId());
             Logger::writeWithContext($msg, 'alert');
             \App\Support\Log::writeWithContext($msg, 'mod');
         }

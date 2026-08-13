@@ -32,12 +32,12 @@ class SyncTorrentToElasticsearch implements ShouldQueue
     {
         $id = $event->model?->id ?? 0;
         if ($id == 0) {
-            do_log("event: " . get_class($event) . " no model id", 'error');
+            \App\Support\Logger::writeWithContext((string) ("event: " . get_class($event) . " no model id"), (string) 'error', (bool) false);
             return;
         }
         $searchRep = new SearchRepository();
         $result = $searchRep->updateTorrent($id);
-        do_log(sprintf("updateTorrent: %s result: %s", $id, var_export($result, true)));
+        \App\Support\Logger::writeWithContext((string) sprintf("updateTorrent: %s result: %s", $id, var_export($result, true)), (string) 'info', (bool) false);
 
     }
 
@@ -56,10 +56,10 @@ class SyncTorrentToElasticsearch implements ShouldQueue
         try {
             $result = $toolRep->sendMail($to, $subject, $body);
             if ($result === false) {
-                do_log("$subject send mail fail", 'alert');
+                \App\Support\Logger::writeWithContext((string) "{$subject} send mail fail", (string) 'alert', (bool) false);
             }
         } catch (\Throwable $exception) {
-            do_log("$subject send mail fail: " . $exception->getMessage() . $exception->getTraceAsString(), 'alert');
+            \App\Support\Logger::writeWithContext((string) ("{$subject} send mail fail: " . $exception->getMessage() . $exception->getTraceAsString()), (string) 'alert', (bool) false);
         }
     }
 }

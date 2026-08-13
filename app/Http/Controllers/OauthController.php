@@ -80,17 +80,17 @@ class OauthController extends Controller
         $response = Http::asForm()->post($provider->token_endpoint_url, $params);
         $tokenInfo = $response->json();
         if (empty($tokenInfo['access_token'])) {
-            do_log("Get tokenInfo with: " . json_encode($params) . " error: " . $response->body(), 'error');
-            throw new NexusException(nexus_trans('oauth.get_access_token_error', ['error' => $tokenInfo['error'] ?? '']));
+            \App\Support\Logger::writeWithContext((string) ("Get tokenInfo with: " . json_encode($params) . " error: " . $response->body()), (string) 'error', (bool) false);
+            throw new NexusException(\App\Support\Locale::trans('oauth.get_access_token_error', ['error' => $tokenInfo['error'] ?? ''], null));
         }
         //use token get user-info
         $response = Http::withToken($tokenInfo['access_token'])->get($provider->user_info_endpoint_url);
         $userInfo = $response->json();
-        do_log("userInfo: " . $response->body());
-        $homeUrl = getSchemeAndHttpHost() . "/index.php";
+        \App\Support\Logger::writeWithContext((string) ("userInfo: " . $response->body()), (string) 'info', (bool) false);
+        $homeUrl = \App\Support\Url::schemeAndHost(false) . "/index.php";
         $providerUserId = data_get($userInfo, $provider->id_claim);
         if (empty($providerUserId)) {
-            throw new NexusException(nexus_trans('oauth.get_provider_user_id_error', ['id_claim' => $provider->id_claim]));
+            throw new NexusException(\App\Support\Locale::trans('oauth.get_provider_user_id_error', ['id_claim' => $provider->id_claim], null));
         }
         $socialAccount = SocialAccount::query()
             ->where('provider_id', $provider->id)
@@ -103,17 +103,17 @@ class OauthController extends Controller
              */
             $authUser = $socialAccount->user;
             $authUser->checkIsNormal();
-            logincookie($authUser->id, $authUser->auth_key);
+            \App\Support\AuthCookie::setLoginCookie((int) $authUser->id, (string) $authUser->auth_key, (int) 0);
             return redirect($homeUrl);
         }
         $providerEmail = data_get($userInfo, $provider->email_claim);
         if (empty($providerEmail)) {
-            throw new NexusException(nexus_trans('oauth.get_provider_email_error', ['email_claim' => $provider->email_claim]));
+            throw new NexusException(\App\Support\Locale::trans('oauth.get_provider_email_error', ['email_claim' => $provider->email_claim], null));
         }
         $sameEmailUser = User::query()->where('email', $providerEmail)->first();
         if ($sameEmailUser) {
             //login to bind is better, not implement this time
-            throw new NexusException(nexus_trans('oauth.provider_email_already_exists', ['email' => $providerEmail]));
+            throw new NexusException(\App\Support\Locale::trans('oauth.provider_email_already_exists', ['email' => $providerEmail], null));
         }
         $providerUsername = data_get($userInfo, $provider->username_claim);
         $providerLevel = data_get($userInfo, $provider->level_claim);
@@ -121,10 +121,10 @@ class OauthController extends Controller
         $minLevel = $provider->level_limit;
         if ($minLevel) {
             if (!$providerLevel) {
-                throw new NexusException(nexus_trans('oauth.get_provider_level_error', ['level_claim' => $provider->level_claim]));
+                throw new NexusException(\App\Support\Locale::trans('oauth.get_provider_level_error', ['level_claim' => $provider->level_claim], null));
             }
             if ($providerLevel < $minLevel) {
-                throw new NexusException(nexus_trans("oauth.provider_level_not_allowed", ['level_limit' => $provider->level_limit]));
+                throw new NexusException(\App\Support\Locale::trans("oauth.provider_level_not_allowed", ['level_limit' => $provider->level_limit], null));
             }
         }
 
@@ -137,8 +137,8 @@ class OauthController extends Controller
             'provider_email' => $providerEmail,
         ];
         SocialAccount::query()->create($socialAccountData);
-        do_log(sprintf("newUser: %s, socialAccount: %s", json_encode($newUser), json_encode($socialAccountData)));
-        logincookie($newUser->id, $newUser->auth_key);
+        \App\Support\Logger::writeWithContext((string) sprintf("newUser: %s, socialAccount: %s", json_encode($newUser), json_encode($socialAccountData)), (string) 'info', (bool) false);
+        \App\Support\AuthCookie::setLoginCookie((int) $newUser->id, (string) $newUser->auth_key, (int) 0);
         return redirect($homeUrl);
     }
 
@@ -170,7 +170,7 @@ class OauthController extends Controller
             try {
                 return $userRep->store($userData);
             } catch (\Throwable $e) {
-                do_log($e->getMessage(), "error");
+                \App\Support\Logger::writeWithContext((string) $e->getMessage(), (string) "error", (bool) false);
             }
             $username = Str::random(2) . $username;
         }

@@ -29,7 +29,7 @@ abstract class Storage {
         if (empty($extension)) {
             $newFilepath = sprintf("%s/%s", dirname($filepath), trim($originalName));
             $moveResult = move_uploaded_file($filepath, $newFilepath);
-            do_log(sprintf("filepath: %s, newFilepath: %s, moveResult: %s", $filepath, $newFilepath, $moveResult));
+            \App\Support\Logger::writeWithContext((string) sprintf("filepath: %s, newFilepath: %s, moveResult: %s", $filepath, $newFilepath, $moveResult), (string) 'info', (bool) false);
             if (!$moveResult) {
                 throw new \Exception("Failed to move uploaded file.");
             }

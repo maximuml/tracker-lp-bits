@@ -34,7 +34,7 @@ $message = "Message received from ".$SITENAME." on " . date("Y-m-d H:i:s") . ".\
 $message1 . "\n\n" .
 "---------------------------------------------------------------------\n$SITENAME\n";
 
-$success = sent_mail($to,$SITENAME,$SITEEMAIL,$subject,$message,"Mass Mail",false);
+$success = \App\Support\Mail::sentLegacy((string) $to, (string) $SITENAME, (string) $SITEEMAIL, (string) $subject, (string) $message, (string) "Mass Mail", (bool) false, (bool) false, '', (string) 'UTF-8');
 }
 
 

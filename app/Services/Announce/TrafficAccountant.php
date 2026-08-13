@@ -41,8 +41,8 @@ final class TrafficAccountant
         if ($upthis > 0 || $downthis > 0) {
             $queries = $params;
             $queries['ip'] = $ip;
-            $promotionInfo = apply_filter('torrent_promotion', $torrent);
-            $dataTraffic = getDataTraffic($torrent, $queries, $user, $self, $snatchInfo ?: [], $promotionInfo);
+            $promotionInfo = \App\Support\Hooks::applyFilter('torrent_promotion', $torrent);
+            $dataTraffic = \App\Support\TorrentOps::dataTraffic($torrent, $queries, $user, $self, $snatchInfo ?: [], $promotionInfo);
             $uploadedIncrementForUser = (int) $dataTraffic['uploaded_increment_for_user'];
             $downloadedIncrementForUser = (int) $dataTraffic['downloaded_increment_for_user'];
         }

@@ -63,7 +63,7 @@ final class Medal
         }
 
         if ($withActions) {
-            $medalImages[] = sprintf('<div style="display: flex;flex-direction: column;justify-content: space-between;margin-right: 10px"><div></div><div><input type="button" id="save-user-medal-btn" value="%s"/></div></div>', nexus_trans('label.save'));
+            $medalImages[] = sprintf('<div style="display: flex;flex-direction: column;justify-content: space-between;margin-right: 10px"><div></div><div><input type="button" id="save-user-medal-btn" value="%s"/></div></div>', \App\Support\Locale::trans('label.save', [], null));
         }
 
         return $wrapBefore . implode('', $medalImages) . $wrapAfter;

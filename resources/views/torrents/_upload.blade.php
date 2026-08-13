@@ -7,9 +7,9 @@
 			<table border="1" cellspacing="0" cellpadding="5" width="97%">
 				<tr>
 					<td class='colhead' colspan='2' align='center'>
-						<?php echo $lang_upload['text_tracker_url'] ?>: &nbsp;&nbsp;&nbsp;&nbsp;<b><?php echo  get_tracker_schema_and_host($CURUSER['tracker_url_id'], true)?></b>
+						<?php echo $lang_upload['text_tracker_url'] ?>: &nbsp;&nbsp;&nbsp;&nbsp;<b><?php echo  \App\Support\Tracker::schemaAndHost((int) $CURUSER['tracker_url_id'], (bool) true)?></b>
 						<?php
-						if(!is_writable(getFullDirectory($torrent_dir)))
+						if(!is_writable(\App\Support\Path::resolve($torrent_dir, \ROOT_PATH)))
 						print("<br /><br /><b>ATTENTION</b>: Torrent directory isn't writable. Please contact the administrator about this problem!");
 						if(!$max_torrent_size)
 						print("<br /><br /><b>ATTENTION</b>: Max. Torrent Size not set. Please contact the administrator about this problem!");
@@ -32,9 +32,9 @@
                     $maxPrice = \App\Support\Config\SiteConfig::current()->torrent->maxPrice();
                     $pricePlaceholder = "";
                     if ($maxPrice > 0) {
-                        $pricePlaceholder = nexus_trans("label.torrent.max_price_help", ["max_price" => $maxPrice]);
+                        $pricePlaceholder = \App\Support\Locale::trans("label.torrent.max_price_help", ["max_price" => $maxPrice], null);
                     }
-                    \App\Support\Html::tr(nexus_trans('label.torrent.price'), '<input type="number" min="0" name="price" placeholder="'.$pricePlaceholder.'" />&nbsp;&nbsp;' . nexus_trans('label.torrent.price_help', ['tax_factor' => (\App\Support\Config\SiteConfig::current()->torrent->taxFactor() * 100) . '%']), 1);
+                    \App\Support\Html::tr(\App\Support\Locale::trans('label.torrent.price', [], null), '<input type="number" min="0" name="price" placeholder="'.$pricePlaceholder.'" />&nbsp;&nbsp;' . \App\Support\Locale::trans('label.torrent.price_help', ['tax_factor' => \App\Support\Config\SiteConfig::current()->torrent->taxFactor() * 100 . '%'], null), 1);
                 }
 
 				print("<tr><td class=\"rowhead\" style='padding: 3px' valign=\"top\">".$lang_upload['row_description']."<font color=\"red\">*</font></td><td class=\"rowfollow\">");
@@ -142,7 +142,7 @@ JS;
                         $options[] = "<option value=\"" . $key . "\">".$value['text']."</option>";
                     }
                     $pickcontent .= "<b>".$lang_edit['row_torrent_position'].":&nbsp;</b>"."<select name=\"pos_state\" style=\"width: 100px;\">" . implode('', $options) . "</select>&nbsp;&nbsp;&nbsp;";
-                    $pickcontent .= \App\Support\Form::datetimepickerInput('pos_state_until', '', nexus_trans('label.deadline') . ":&nbsp;", ['require_files' => true]);
+                    $pickcontent .= \App\Support\Form::datetimepickerInput('pos_state_until', '', \App\Support\Locale::trans('label.deadline', [], null) . ":&nbsp;", ['require_files' => true]);
                 }
                 if ($pickcontent) {
                     \App\Support\Html::tr($lang_edit['row_pick'], $pickcontent, 1);

@@ -47,7 +47,7 @@ if ($currentStep == 2) {
         ];
 
         try {
-            $timezone = nexus_env('TIMEZONE');
+            $timezone = \App\Support\Env::get('TIMEZONE', null);
         } catch (\Exception $exception) {
             $update->doLog("no .env file, release time is github original");
             $timezone = null;
@@ -124,7 +124,7 @@ if ($currentStep == 2) {
 
 if ($currentStep == 3) {
     $envExampleFile = $rootpath . ".env.example";
-    $envExampleData = readEnvFile($envExampleFile);
+    $envExampleData = \App\Support\Env::load($envExampleFile);
     $envFormControls = $update->listEnvFormControls();
     $newData = array_column($envFormControls, 'value', 'name');
     while ($isPost) {
@@ -199,7 +199,7 @@ if (
 <div class="container mx-auto">
     <?php echo $update->renderSteps()?>
     <div class="mt-10">
-        <form method="post" action="<?php echo getBaseUrl() . '?step=' . $currentStep?>">
+        <form method="post" action="<?php echo \App\Support\Url::baseUrl() . '?step=' . $currentStep?>">
             <input type="hidden" name="step" value="<?php echo $currentStep?>">
             <?php
             echo'<div class="step-' . $currentStep . ' text-center">';
@@ -258,7 +258,7 @@ if (
                 <?php if ($currentStep <= $maxStep) {?>
                     <button class="bg-blue-<?php echo $pass ? 500 : 200;?> p-2 m-4 text-white rounded" type="submit" <?php echo $pass ? '' : 'disabled';?>>Next</button>
                 <?php } else {?>
-                    <a class="bg-blue-500 p-2 m-4 text-white rounded" href="<?php echo getSchemeAndHttpHost()?>">Go to homepage</a>
+                    <a class="bg-blue-500 p-2 m-4 text-white rounded" href="<?php echo \App\Support\Url::schemeAndHost(false)?>">Go to homepage</a>
                 <?php }?>
             </div>
         </form>

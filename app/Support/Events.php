@@ -61,7 +61,7 @@ final class Events
      */
     public static function publishModel(string $event, int $id, string $json = ''): void
     {
-        $channel = \nexus_env('CHANNEL_NAME_MODEL_EVENT');
+        $channel = \App\Support\Env::get('CHANNEL_NAME_MODEL_EVENT', null);
         if (!empty($channel)) {
             \Nexus\Database\NexusDB::redis()->publish($channel, json_encode(['event' => $event, 'id' => $id, 'json' => $json]));
         } else {

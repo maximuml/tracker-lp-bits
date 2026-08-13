@@ -49,13 +49,13 @@ class AgentAllow extends NexusModel
     protected static function booted()
     {
         static::created(function ($model) {
-            fire_event(ModelEventEnum::AGENT_ALLOW_CREATED, $model);
+            \App\Support\Events::fire(ModelEventEnum::AGENT_ALLOW_CREATED, $model, null);
         });
         static::updated(function ($model) {
-            fire_event(ModelEventEnum::AGENT_ALLOW_UPDATED, $model);
+            \App\Support\Events::fire(ModelEventEnum::AGENT_ALLOW_UPDATED, $model, null);
         });
         static::deleted(function ($model) {
-            fire_event(ModelEventEnum::AGENT_ALLOW_DELETED, $model);
+            \App\Support\Events::fire(ModelEventEnum::AGENT_ALLOW_DELETED, $model, null);
         });
     }
 

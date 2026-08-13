@@ -41,11 +41,11 @@ class TorrentController extends Controller
      */
     public function index(Request $request, ?string $section = null)
     {
-        do_log("controller torrent index entry");
+        \App\Support\Logger::writeWithContext((string) "controller torrent index entry", (string) 'info', (bool) false);
         $result = $this->repository->getList($request, Auth::user(), $section);
-        do_log("controller torrent index getList");
+        \App\Support\Logger::writeWithContext((string) "controller torrent index getList", (string) 'info', (bool) false);
         $resource = TorrentResource::collection($result);
-        do_log("controller torrent index prepare resource");
+        \App\Support\Logger::writeWithContext((string) "controller torrent index prepare resource", (string) 'info', (bool) false);
         return $this->success($resource);
     }
 
@@ -69,13 +69,13 @@ class TorrentController extends Controller
      */
     public function show($id)
     {
-        do_log("controller torrent show entry");
+        \App\Support\Logger::writeWithContext((string) "controller torrent show entry", (string) 'info', (bool) false);
         /**
          * @var User
          */
         $user = Auth::user();
         $torrent = $this->repository->getDetail($id, $user);
-        do_log("controller torrent show getDetail");
+        \App\Support\Logger::writeWithContext((string) "controller torrent show getDetail", (string) 'info', (bool) false);
         $resource = new TorrentResource($torrent);
         $additional = [];
         if ($this->hasExtraField('bonus_reward_values')) {
@@ -83,7 +83,7 @@ class TorrentController extends Controller
         }
         $this->appendExtraSettings($additional, []);
         $resource->additional($additional);
-        do_log("controller torrent show prepare resource");
+        \App\Support\Logger::writeWithContext((string) "controller torrent show prepare resource", (string) 'info', (bool) false);
         return $this->success($resource);
     }
 

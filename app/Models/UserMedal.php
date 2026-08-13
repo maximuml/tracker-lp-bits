@@ -26,15 +26,15 @@ class UserMedal extends NexusModel
 
     public function getWearingStatusTextAttribute(): string
     {
-        return nexus_trans("medal.wearing_status_text." . $this->status);
+        return \App\Support\Locale::trans("medal.wearing_status_text." . $this->status, [], null);
     }
 
     /** @return  array<int|string, mixed> */
     public static function listWearingStatusLabels(): array
     {
         return [
-            self::STATUS_WEARING => nexus_trans("medal.wearing_status_text." . self::STATUS_WEARING),
-            self::STATUS_NOT_WEARING => nexus_trans("medal.wearing_status_text." . self::STATUS_NOT_WEARING),
+            self::STATUS_WEARING => \App\Support\Locale::trans("medal.wearing_status_text." . self::STATUS_WEARING, [], null),
+            self::STATUS_NOT_WEARING => \App\Support\Locale::trans("medal.wearing_status_text." . self::STATUS_NOT_WEARING, [], null),
         ];
     }
 

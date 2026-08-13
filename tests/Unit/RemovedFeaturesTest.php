@@ -21,7 +21,6 @@ class RemovedFeaturesTest extends TestCase
             base_path('resources/views/my/_bonus.blade.php'),
             base_path('resources/views/topten/index.blade.php'),
             base_path('resources/views/topten/_topten.blade.php'),
-            base_path('app/Support/Legacy/functions.php'),
         ] as $file) {
             $this->assertFileExists($file);
             $content = file_get_contents($file);
@@ -48,7 +47,6 @@ class RemovedFeaturesTest extends TestCase
             base_path('resources/views/torrent/_edit.blade.php'),
             app_path('Http/Controllers/TorrentUploadController.php'),
             app_path('Http/Controllers/TorrentEditController.php'),
-            base_path('app/Support/Legacy/functions.php'),
         ] as $file) {
             $this->assertFileExists($file);
             $content = file_get_contents($file);

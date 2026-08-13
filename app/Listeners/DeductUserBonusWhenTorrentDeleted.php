@@ -29,6 +29,6 @@ class DeductUserBonusWhenTorrentDeleted implements ShouldQueue
          * Just a test
          */
         $torrent = $event->data;
-        do_log(sprintf("torrent: %d is deleted, and it's pieces_hash is: %s", $torrent['id'], $torrent['pieces_hash']));
+        \App\Support\Logger::writeWithContext((string) sprintf("torrent: %d is deleted, and it's pieces_hash is: %s", $torrent['id'], $torrent['pieces_hash']), (string) 'info', (bool) false);
     }
 }

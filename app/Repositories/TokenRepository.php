@@ -44,7 +44,7 @@ class TokenRepository extends BaseRepository
     {
         $result = [];
         foreach ($permissions as $permission) {
-            $result[$permission] = nexus_trans("route-permission.{$permission}.text");
+            $result[$permission] = \App\Support\Locale::trans("route-permission.{$permission}.text", [], null);
         }
         return $result;
     }

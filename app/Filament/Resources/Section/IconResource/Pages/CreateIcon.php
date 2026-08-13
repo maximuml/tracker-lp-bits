@@ -15,12 +15,12 @@ class CreateIcon extends CreateRecord
     protected function getViewData(): array
     {
         return [
-            'desc' => nexus_trans('label.icon.desc')
+            'desc' => \App\Support\Locale::trans('label.icon.desc', [], null)
         ];
     }
 
     public function afterCreate()
     {
-        clear_icon_cache();
+        \App\Support\Cache::clearIcon();
     }
 }

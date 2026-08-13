@@ -74,7 +74,7 @@ final class LegacyBootstrap
     private static function bootCache(string $rootpath): void
     {
         $Cache = new \App\Support\Cache\LegacyRedisCache();
-        $Cache->setLanguageFolderArray(get_langfolder_list());
+        $Cache->setLanguageFolderArray(\App\Support\Locale::available());
         SupportContext::setCache($Cache);
     }
 
@@ -90,7 +90,7 @@ final class LegacyBootstrap
 
     private static function bootTimezone(): void
     {
-        ini_set('date.timezone', nexus_config('nexus.timezone'));
+        ini_set('date.timezone', \App\Support\Config::get('nexus.timezone', null));
     }
 
     private static function bootSettings(): void
@@ -100,12 +100,12 @@ final class LegacyBootstrap
 
     private static function bootLanguage(string $rootpath): void
     {
-        $script = nexus()->getScript();
+        $script = \Nexus\Nexus::instance()->getScript();
         if (in_array($script, ['announce', 'scrape'], true)) {
             return;
         }
 
-        $langFile = $rootpath . get_langfile_path('functions.php');
+        $langFile = $rootpath . \App\Support\Locale::scriptFilePath((string) 'functions.php', (bool) false, (string) "");
         $langFunctions = [];
         if (is_file($langFile)) {
             require $langFile;
@@ -122,14 +122,14 @@ final class LegacyBootstrap
             return;
         }
 
-        $script = nexus()->getScript();
+        $script = \Nexus\Nexus::instance()->getScript();
         if (in_array($script, ['announce', 'scrape', 'torrentrss', 'download'], true)) {
             return;
         }
 
         defined('TIMENOW') || define('TIMENOW', time());
 
-        checkGuestVisit();
+        \App\Support\SiteAccess::checkGuestVisit();
     }
 
     private static function bootPlugins(string $rootpath): void

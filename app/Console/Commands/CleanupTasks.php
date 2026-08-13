@@ -59,7 +59,7 @@ final class CleanupTasks extends Command
         } catch (\Throwable $e) {
             $lock->release();
             $this->error("Task {$task} failed: " . $e->getMessage());
-            do_log("cleanup task {$task} failed: " . $e->getMessage(), 'error');
+            \App\Support\Logger::writeWithContext((string) ("cleanup task {$task} failed: " . $e->getMessage()), (string) 'error', (bool) false);
 
             return Command::FAILURE;
         } finally {

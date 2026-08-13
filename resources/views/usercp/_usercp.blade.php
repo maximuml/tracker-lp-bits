@@ -39,7 +39,7 @@ if (!function_exists('getimageheight')) { function getimageheight ($imagewidth, 
 } }
 if (!function_exists('form')) { function form($name, $type = "save", $id = "") {
     if ($id == "") {
-        $id = "form" . random_str();
+        $id = "form" . \App\Support\Strings::randomCode((int) 6);
     }
 	return print("<form method=post action=usercp.php id=\"".$id."\"><input type=hidden name=action value=".htmlspecialchars($name)."><input type=hidden name=type value={$type}>");
 } }
@@ -123,7 +123,7 @@ if ($action){
                     $data['notifs'] = '[' . implode('][', array_keys($notifsArr)) . ']';
                 }
 				\App\Models\User::query()->where('id', $CURUSER["id"])->update($data);
-				clear_user_cache($CURUSER["id"], $CURUSER['passkey']);
+				\App\Support\Cache::clearUser($CURUSER["id"], $CURUSER['passkey']);
 				header("Location: usercp.php?action=personal&type=saved");
 			}
 			\App\Support\Html::stdhead($lang_usercp['head_control_panel'].$lang_usercp['head_personal_settings'], true);
@@ -143,7 +143,7 @@ if ($action){
 			$text = '';
 			foreach ($bitbucketRows as $sor)
 			{
-				$text.='<option value="'. get_protocol_prefix() . $BASEURL .'/bitbucket/'.$sor->name.'">'.$sor->name.'</option>';
+				$text.='<option value="'. \App\Support\Http::protocolPrefix(\App\Support\Url::isSecure()) . $BASEURL .'/bitbucket/'.$sor->name.'">'.$sor->name.'</option>';
 			}
 
 			usercpmenu ("personal");
@@ -167,10 +167,10 @@ if ($action){
 <input type=radio name=gender" . ($CURUSER["gender"] == "Male" ? " checked" : "") . " value=Male>".$lang_usercp['radio_male']."<input type=radio name=gender" .  ($CURUSER["gender"] == "Female" ? " checked" : "") . " value=Female>".$lang_usercp['radio_female'], 1);
             \App\Support\Html::trSmall($lang_usercp['row_tracker_url'], "<select name=tracker_url_id>\n$trackerUrls\n</select>" . "<br /><font class=small size=1>".$lang_usercp['row_tracker_url_help']."</font>", 1);
             \App\Support\Html::trSmall($lang_usercp['row_country'], "<select name=country>\n$countries\n</select>", 1);
-			\App\Support\Html::trSmall($lang_usercp['row_avatar_url'], "<img src=".($CURUSER["avatar"] ? "'$CURUSER[avatar]'" : "'" . get_protocol_prefix() . $BASEURL . "/pic/default_avatar.png'")." name='avatarimg'><br />
+			\App\Support\Html::trSmall($lang_usercp['row_avatar_url'], "<img src=".($CURUSER["avatar"] ? "'$CURUSER[avatar]'" : "'" . \App\Support\Http::protocolPrefix(\App\Support\Url::isSecure()) . $BASEURL . "/pic/default_avatar.png'")." name='avatarimg'><br />
   <select name=savatar OnChange=\"document.forms[0].avatarimg.src=this.value;this.form.avatar.value=this.value;\">
   <option value='$CURUSER[avatar]'>".$lang_usercp['select_choose_avatar']."</option>
-  <option value='" . get_protocol_prefix() . $BASEURL . "/pic/default_avatar.png'>".$lang_usercp['select_nothing']."</option>
+  <option value='" . \App\Support\Http::protocolPrefix(\App\Support\Url::isSecure()) . $BASEURL . "/pic/default_avatar.png'>".$lang_usercp['select_nothing']."</option>
   $text
   </select><input type=text name=avatar style=\"width: 400px\" value=\"" . htmlspecialchars($CURUSER["avatar"] ?? '') .
   "\"><br />\n".$lang_usercp['text_avatar_note'].($enablebitbucket_main == 'yes' ? $lang_usercp['text_bitbucket_note'] : ""), 1);
@@ -256,9 +256,9 @@ if ($action){
 				if (\App\Support\Validators::isId($sitelanguage))
 				{
 					$lang_folder = \App\Support\Locale::folderForIdWithContext($sitelanguage);
-					if(get_langfolder_cookie() != $lang_folder)
+					if(\App\Support\Locale::folderFromCookie(\App\Support\SupportContext::getCookieValue('c_lang_folder', ''), (bool) false) != $lang_folder)
 					{
-						set_langfolder_cookie($lang_folder);
+						\App\Support\Locale::setFolderCookie((string) $lang_folder, (int) 0x7fffffff);
 						header("Location: " . $__server_PHP_SELF);
 					}
 					$data['lang'] = (int)$sitelanguage;
@@ -364,11 +364,11 @@ else $special_state = 0;
 
 			$s = "<select name=\"sitelanguage\">\n";
 
-			$langs = langlist("site_lang", true);
+			$langs = \App\Support\Locale::languageList("site_lang", true);
 
 			foreach ($langs as $row)
 			{
-				if ($row["site_lang_folder"] == get_langfolder_cookie()) $se = " selected"; else $se = "";
+				if ($row["site_lang_folder"] == \App\Support\Locale::folderFromCookie(\App\Support\SupportContext::getCookieValue('c_lang_folder', ''), (bool) false)) $se = " selected"; else $se = "";
 				$s .= "<option value=". $row["id"] . $se. ">" . htmlspecialchars($row["lang_name"]) . "</option>\n";
 			}
 			$s .= "\n</select>&nbsp;&nbsp;<font class=small>".$lang_usercp['text_translation_note']."<a href=\"aboutnexus.php#translation\"><b>".$lang_usercp['text_translation_link']."</b></a></font>.</td></tr>";
@@ -480,14 +480,14 @@ if ($showshoutbox_main == "yes") //system side setting for shoutbox
                 }
 
 				if ($chpassword != "") {
-					$sec = mksecret();
+					$sec = \App\Support\Token::randomHex((int) 20);
 					$passhash = hash('sha256', $sec . $chpassword);
 					$data['secret'] = $sec;
 					$data['passhash'] = $passhash;
-                    $authKey = mksecret();
+                    $authKey = \App\Support\Token::randomHex((int) 20);
 					$data['auth_key'] = $authKey;
 
-					logincookie($CURUSER["id"], $authKey);
+					\App\Support\AuthCookie::setLoginCookie((int) $CURUSER["id"], (string) $authKey, (int) 0);
 					$passupdated = 1;
 				}
 
@@ -508,7 +508,7 @@ if ($showshoutbox_main == "yes") //system side setting for shoutbox
 					$data['passkey'] = $passkey;
 				}
 				if ($changedemail == 1) {
-					$sec = mksecret();
+					$sec = \App\Support\Token::randomHex((int) 20);
 					$hash = md5($sec . $email . $sec);
 					$obemail = rawurlencode($email);
 					$data['editsecret'] = $sec;
@@ -529,7 +529,7 @@ http://$BASEURL/confirmemail.php/{$CURUSER["id"]}/$hash/$obemail
 {$changeEmailNine}
 EOD;
 
-					sent_mail($email,$SITENAME,$SITEEMAIL,$subject,str_replace("<br />","<br />",nl2br($body)),"profile change",false,false,'');
+					\App\Support\Mail::sentLegacy((string) $email, (string) $SITENAME, (string) $SITEEMAIL, (string) $subject, (string) str_replace("<br />", "<br />", nl2br($body)), (string) "profile change", (bool) false, (bool) false, '', (string) 'UTF-8');
 
 				}
 				if ($privacy != "normal" && $privacy != "low" && $privacy != "strong")
@@ -546,7 +546,7 @@ EOD;
                         $torrentRep = new \App\Repositories\TorrentRepository();
                         $torrentRep->resetTrackerReportAuthKeySecret($userId);
                     }
-                    do_action("usercp_security_update", \App\Support\SupportContext::allPost());
+                    \App\Support\Hooks::doAction("usercp_security_update", \App\Support\SupportContext::allPost());
                 });
 				$to = "usercp.php?action=security&type=saved";
 				if ($changedemail == 1)
@@ -557,7 +557,7 @@ EOD;
 				$to .= "&password=1";
 				if ($privacyupdated == 1)
 				$to .= "&privacy=1";
-				clear_user_cache($CURUSER["id"]);
+				\App\Support\Cache::clearUser($CURUSER["id"], '');
                 \Nexus\Database\NexusDB::cache_del(\App\Support\Token::challengeKey($userInfo->username));
 				header("Location: $to");
 			}
@@ -588,10 +588,10 @@ EOD;
 				Print("<tr><td class=\"rowhead nowrap\" valign=\"top\" align=\"right\" width=1%>".$lang_usercp['row_security_check']."</td><td valign=\"top\" align=\"left\" width=\"99%\"><input type=password class=oldpassword style=\"width: 200px\"><br /><font class=small>".$lang_usercp['text_security_check_note']."</font></td></tr>\n");
 				print('<input type=hidden name=username value="'.$CURUSER["username"].'">');
                 print('<input type=hidden name=response>');
-                do_action("usercp_security_update_confirm", \App\Support\SupportContext::allPost());
+                \App\Support\Hooks::doAction("usercp_security_update_confirm", \App\Support\SupportContext::allPost());
                 submit("button");
 				print("</table></form>");
-                render_password_challenge_js("security", "username", "oldpassword");
+                \App\Support\Form::passwordChallengeJs("security", "username", "oldpassword");
 				\App\Support\Html::stdfoot();
 				die;
 			}
@@ -621,13 +621,13 @@ EOD;
                 $twoStepY .= '</div>';
                 \App\Support\Html::trSmall($lang_usercp['row_two_step_secret'], $twoStepY, 1);
             }
-            printf('<tr><td class="rowhead" valign="top" align="right">%s</td><td class="rowfollow" valign="top" align="left">', nexus_trans('passkey.passkey'));
+            printf('<tr><td class="rowhead" valign="top" align="right">%s</td><td class="rowfollow" valign="top" align="left">', \App\Support\Locale::trans('passkey.passkey', [], null));
             \App\Repositories\UserPasskeyRepository::renderList($CURUSER['id']);
             printf('</td></tr>');
 
 			if ($disableemailchange != 'no' && $smtptype != 'none') //system-wide setting
 				\App\Support\Html::trSmall($lang_usercp['row_email_address'], "<input type=\"text\" name=\"email\" style=\"width: 200px\" value=\"" . htmlspecialchars($CURUSER["email"]) . "\" /> <br /><font class=small>".$lang_usercp['text_email_address_note']."</font>", 1);
-            do_action("usercp_security_setting_form");
+            \App\Support\Hooks::doAction("usercp_security_setting_form");
             \App\Support\Html::trSmall($lang_usercp['row_change_password'], "<input type=\"password\" class=\"password\" style=\"width: 200px\" />", 1);
             print('<input type="hidden" name="chpassword" />');
 			\App\Support\Html::trSmall($lang_usercp['row_type_password_again'], "<input type=\"password\" class=\"passagain\" style=\"width: 200px\" />", 1);
@@ -635,7 +635,7 @@ EOD;
             submit("button");
 			print("</table></form>");
 
-            render_password_hash_js("security", "password", "chpassword", false,"passagain");
+            \App\Support\Form::passwordHashJs("security", "password", "chpassword", false, "passagain", "username");
 			\App\Support\Html::stdfoot();
 			die;
 			break;
@@ -692,7 +692,7 @@ if ($CURUSER["avatar"])
 \App\Support\Html::trSmall($lang_usercp['row_passkey'], \App\Support\Strings::hidden($CURUSER["passkey"]), 1);
 $loginSecretDeadline = \App\Support\Config\SiteConfig::current()->security->loginSecretDeadline();
 if (\App\Support\Config\SiteConfig::current()->security->loginType() === 'passkey' && $loginSecretDeadline !== null && $loginSecretDeadline > date('Y-m-d H:i:s')) {
-    \App\Support\Html::trSmall($lang_usercp['row_passkey_login_url'], sprintf('%s/%s/%s', getSchemeAndHttpHost(), \App\Support\Config\SiteConfig::current()->security->loginSecret(), $CURUSER['passkey']), 1);
+    \App\Support\Html::trSmall($lang_usercp['row_passkey_login_url'], sprintf('%s/%s/%s', \App\Support\Url::schemeAndHost(false), \App\Support\Config\SiteConfig::current()->security->loginSecret(), $CURUSER['passkey']), 1);
 }
 \App\Support\Html::trSmall($lang_usercp['row_invitations'], $CURUSER['invites']." [<a href=\"invite.php?id=".$CURUSER['id']."\" title=\"".$lang_usercp['link_send_invitation']."\">".$lang_usercp['text_send']."</a>]", 1);
 \App\Support\Html::trSmall($lang_usercp['row_karma_points'], $CURUSER['seedbonus']." [<a href=\"mybonus.php\" title=\"".$lang_usercp['link_use_karma_points']."\">".$lang_usercp['text_use']."</a>]", 1);
@@ -701,14 +701,14 @@ if (\App\Support\Config\SiteConfig::current()->security->loginType() === 'passke
 //start seed box
 if (\App\Support\Config\SiteConfig::current()->seedBox->enabled()) {
     $seedBox = '';
-    $columnOperator = nexus_trans('label.seed_box_record.operator');
-    $columnBandwidth = nexus_trans('label.seed_box_record.bandwidth');
+    $columnOperator = \App\Support\Locale::trans('label.seed_box_record.operator', [], null);
+    $columnBandwidth = \App\Support\Locale::trans('label.seed_box_record.bandwidth', [], null);
 //    $columnIPBegin = nexus_trans('label.seed_box_record.ip_begin');
 //    $columnIPEnd = nexus_trans('label.seed_box_record.ip_end');
-    $columnIP = nexus_trans('label.seed_box_record.ip');
-    $columnIPHelp = nexus_trans('label.seed_box_record.ip_help');
-    $columnComment = nexus_trans('label.comment');
-    $columnStatus = nexus_trans('label.seed_box_record.status');
+    $columnIP = \App\Support\Locale::trans('label.seed_box_record.ip', [], null);
+    $columnIPHelp = \App\Support\Locale::trans('label.seed_box_record.ip_help', [], null);
+    $columnComment = \App\Support\Locale::trans('label.comment', [], null);
+    $columnStatus = \App\Support\Locale::trans('label.seed_box_record.status', [], null);
     $res = \App\Models\SeedBoxRecord::query()->where('uid', $CURUSER['id'])->where('type', \App\Models\SeedBoxRecord::TYPE_USER)->get();
     if ($res->count() > 0)
     {
@@ -800,12 +800,12 @@ foreach ($permissions as $name => $label) {
 }
 $permissionCheckbox = implode("", $permissionOptions);
 $token = '';
-$tokenLabel = nexus_trans("token.label");
-$columnName = nexus_trans('label.name');
-$columnPermission = nexus_trans('token.permission');
-$columnCreatedAt = nexus_trans('label.created_at');
-$actionCreate = nexus_trans('label.create');
-$actionLabel = nexus_trans('label.action');
+$tokenLabel = \App\Support\Locale::trans("token.label", [], null);
+$columnName = \App\Support\Locale::trans('label.name', [], null);
+$columnPermission = \App\Support\Locale::trans('token.permission', [], null);
+$columnCreatedAt = \App\Support\Locale::trans('label.created_at', [], null);
+$actionCreate = \App\Support\Locale::trans('label.create', [], null);
+$actionLabel = \App\Support\Locale::trans('label.action', [], null);
 $res = $userInfo->tokens()->orderBy("id", "desc")->get();
 if ($res->count() > 0)
 {

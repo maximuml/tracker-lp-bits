@@ -111,7 +111,7 @@ class NewsController extends Controller
             $resource = new JsonResource(null);
         }
         $resource->additional([
-            'site_info' => site_info(),
+            'site_info' => \App\Support\Site::info(),
         ]);
 
         /**

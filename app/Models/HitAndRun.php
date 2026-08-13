@@ -95,11 +95,8 @@ class HitAndRun extends NexusModel
     public static function clearCache(HitAndRun $hitAndRun, string $event = ModelEventEnum::HIT_AND_RUN_UPDATED): void
     {
         NexusDB::cache_del(self::getCacheKey($hitAndRun->uid, $hitAndRun->torrent_id));
-        fire_event($event, $hitAndRun);
-        do_log(sprintf(
-            "userId: %s, torrentId: %s hit and run cache cleared, and trigger event: %s",
-            $hitAndRun->uid, $hitAndRun->torrent_id, $event
-        ));
+        \App\Support\Events::fire($event, $hitAndRun, null);
+        \App\Support\Logger::writeWithContext((string) sprintf("userId: %s, torrentId: %s hit and run cache cleared, and trigger event: %s", $hitAndRun->uid, $hitAndRun->torrent_id, $event), (string) 'info', (bool) false);
     }
 
     /** @return  \Illuminate\Database\Eloquent\Casts\Attribute<mixed, mixed> */
@@ -130,7 +127,7 @@ class HitAndRun extends NexusModel
 //        }
         $searchBoxId = $this->torrent->basic_category->mode ?? 0;
         if ($searchBoxId == 0) {
-            do_log(sprintf('[INVALID_CATEGORY], Torrent: %s', $this->torrent_id), 'error');
+            \App\Support\Logger::writeWithContext((string) sprintf('[INVALID_CATEGORY], Torrent: %s', $this->torrent_id), (string) 'error', (bool) false);
             return '---';
         }
         $inspectTime = HitAndRun::getConfig('inspect_time', $searchBoxId);
@@ -145,11 +142,11 @@ class HitAndRun extends NexusModel
         }
         $searchBoxId = $this->torrent->basic_category->mode ?? 0;
         if ($searchBoxId == 0) {
-            do_log(sprintf('[INVALID_CATEGORY], Torrent: %s', $this->torrent_id), 'error');
+            \App\Support\Logger::writeWithContext((string) sprintf('[INVALID_CATEGORY], Torrent: %s', $this->torrent_id), (string) 'error', (bool) false);
             return '---';
         }
         if (!$this->snatch) {
-            do_log("hit and run: {$this->id} no snatch", 'warning');
+            \App\Support\Logger::writeWithContext((string) "hit and run: {$this->id} no snatch", (string) 'warning', (bool) false);
             return '---';
         }
         $seedTimeMinimum = HitAndRun::getConfig('seed_time_minimum', $searchBoxId);
@@ -160,7 +157,7 @@ class HitAndRun extends NexusModel
     /** @return  mixed */
     public function getStatusTextAttribute()
     {
-        return nexus_trans('hr.status_' . $this->status);
+        return \App\Support\Locale::trans('hr.status_' . $this->status, [], null);
     }
 
     /**
@@ -172,7 +169,7 @@ class HitAndRun extends NexusModel
         $result = self::$status;
         $keyValues = [];
         foreach ($result as $key => &$value) {
-            $text = nexus_trans('hr.status_' . $key);
+            $text = \App\Support\Locale::trans('hr.status_' . $key, [], null);
             $value['text'] = $text;
             $keyValues[$key] = $text;
         }
@@ -191,7 +188,7 @@ class HitAndRun extends NexusModel
         $result = self::$modes;
         $keyValues = [];
         foreach ($result as $key => &$value) {
-            $text = nexus_trans('hr.mode_' . $key);
+            $text = \App\Support\Locale::trans('hr.mode_' . $key, [], null);
             $value['text'] = $text;
             $keyValues[$key] = $text;
         }
@@ -205,7 +202,7 @@ class HitAndRun extends NexusModel
     {
         $browseMode = self::getConfig('mode', \App\Support\Config\SiteConfig::current()->main->browseCat());
         $browseEnabled = HitAndRunMode::fromStringSafe(is_string($browseMode) ? $browseMode : null)->isEnabled();
-        do_log("H&R browseEnabled: " . ($browseEnabled ? 'true' : 'false'));
+        \App\Support\Logger::writeWithContext((string) ("H&R browseEnabled: " . ($browseEnabled ? 'true' : 'false')), (string) 'info', (bool) false);
         return $browseEnabled;
     }
 
@@ -222,12 +219,12 @@ class HitAndRun extends NexusModel
             $key = "hr.$name";
         }
         $default = Setting::get($key);
-        return apply_filter("nexus_setting_get", $default, $name, ['mode' => $searchBoxId]);
+        return \App\Support\Hooks::applyFilter("nexus_setting_get", $default, $name, ['mode' => $searchBoxId]);
     }
 
     public static function diffInSection(): bool
     {
-        return apply_filter("hit_and_run_diff_in_section", false);
+        return \App\Support\Hooks::applyFilter("hit_and_run_diff_in_section", false);
     }
 
     /** @return  \Illuminate\Database\Eloquent\Relations\BelongsTo<Torrent, $this> */

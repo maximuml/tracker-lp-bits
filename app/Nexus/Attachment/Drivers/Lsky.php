@@ -26,26 +26,26 @@ class Lsky extends Storage {
         $statusCode = $response->getStatusCode();
         $logPrefix .= ", status code: $statusCode";
         if ($statusCode != 200) {
-            do_log("$logPrefix, statusCode != 200", "error");
+            \App\Support\Logger::writeWithContext((string) "{$logPrefix}, statusCode != 200", (string) "error", (bool) false);
             throw new \Exception("Unable to upload file, status code {$statusCode}");
         }
         $stringBody = (string)$response->getBody();
         $logPrefix .= ", body: $stringBody";
         $result = json_decode($stringBody, true);
         if (!is_array($result)) {
-            do_log("$logPrefix, can not parse to array", "error");
+            \App\Support\Logger::writeWithContext((string) "{$logPrefix}, can not parse to array", (string) "error", (bool) false);
             throw new \Exception("Unable to parse response body");
         }
         if (!isset($result["status"])) {
-            do_log("$logPrefix, no status", "error");
+            \App\Support\Logger::writeWithContext((string) "{$logPrefix}, no status", (string) "error", (bool) false);
             throw new \Exception("Unable to parse response body, no status");
         }
         if ($result["status"] !== true) {
-            do_log("$logPrefix, status != true", "error");
+            \App\Support\Logger::writeWithContext((string) "{$logPrefix}, status != true", (string) "error", (bool) false);
             throw new \Exception("upload fail: " . $result["message"]);
         }
         if (!isset($result["data"]["links"]["url"])) {
-            do_log("$logPrefix, no links url", "error");
+            \App\Support\Logger::writeWithContext((string) "{$logPrefix}, no links url", (string) "error", (bool) false);
             throw new \Exception("upload fail: no links url");
         }
 

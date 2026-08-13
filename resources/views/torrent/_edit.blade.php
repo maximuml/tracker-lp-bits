@@ -47,9 +47,9 @@ else {
         $maxPrice = \App\Support\Config\SiteConfig::current()->torrent->maxPrice();
         $pricePlaceholder = "";
         if ($maxPrice > 0) {
-            $pricePlaceholder = nexus_trans("label.torrent.max_price_help", ["max_price" => $maxPrice]);
+            $pricePlaceholder = \App\Support\Locale::trans("label.torrent.max_price_help", ["max_price" => $maxPrice], null);
         }
-        \App\Support\Html::tr(nexus_trans('label.torrent.price'), '<input type="number" min="0" name="price" value="'.$row['price'].'" placeholder="'.$pricePlaceholder.'" />&nbsp;&nbsp;' . nexus_trans('label.torrent.price_help', ['tax_factor' => (\App\Support\Config\SiteConfig::current()->torrent->taxFactor() * 100) . '%']), 1);
+        \App\Support\Html::tr(\App\Support\Locale::trans('label.torrent.price', [], null), '<input type="number" min="0" name="price" value="'.$row['price'].'" placeholder="'.$pricePlaceholder.'" />&nbsp;&nbsp;' . \App\Support\Locale::trans('label.torrent.price_help', ['tax_factor' => \App\Support\Config\SiteConfig::current()->torrent->taxFactor() * 100 . '%'], null), 1);
     }
 
     print("<tr><td class=\"rowhead\">".$lang_edit['row_description']."<font color=\"red\">*</font></td><td class=\"rowfollow\">");
@@ -150,7 +150,7 @@ else {
                 $options[] = "<option" . (($row["pos_state"] == $key) ? " selected=\"selected\"" : "" ) . " value=\"" . $key . "\">".$value['text']."</option>";
             }
 			$pickcontent .= "<b>".$lang_edit['row_torrent_position']."&nbsp;</b>"."<select name=\"pos_state\" style=\"width: 100px;\">" . implode('', $options) . "</select>&nbsp;&nbsp;&nbsp;";
-            $pickcontent .= \App\Support\Form::datetimepickerInput('pos_state_until', $row['pos_state_until'], nexus_trans('label.deadline') . "&nbsp;", ['require_files' => true]);
+            $pickcontent .= \App\Support\Form::datetimepickerInput('pos_state_until', $row['pos_state_until'], \App\Support\Locale::trans('label.deadline', [], null) . "&nbsp;", ['require_files' => true]);
 		}
 		\App\Support\Html::tr($lang_edit['row_pick'], $pickcontent, 1);
 	}

@@ -73,7 +73,7 @@ class Plugin
                 if (class_exists($className)) {
                     $constantName = "$className::COMPATIBLE_NP_VERSION";
                     if (defined($constantName) && version_compare(VERSION_NUMBER, constant($constantName), '<')) {
-                        do_log(sprintf("class: %s require NP_VERSION: %s > current: %s", $className, constant($constantName), VERSION_NUMBER), "error");
+                        \App\Support\Logger::writeWithContext((string) sprintf("class: %s require NP_VERSION: %s > current: %s", $className, constant($constantName), VERSION_NUMBER), (string) "error", (bool) false);
                         continue;
                     }
                     /**

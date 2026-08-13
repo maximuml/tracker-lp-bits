@@ -20,11 +20,11 @@ if (!empty(\App\Support\SupportContext::getRequestInput('view'))) {
         require $viewFile;
     } else {
         $msg = "viewFile: $viewFile not exists, _REQUEST: " . json_encode(\App\Support\SupportContext::allRequest());
-        do_log($msg, "error");
+        \App\Support\Logger::writeWithContext((string) $msg, (string) "error", (bool) false);
         throw new \RuntimeException($msg);
     }
 } else {
     $msg = "require view parameter, _REQUEST: " . json_encode(\App\Support\SupportContext::allRequest());
-    do_log($msg, "error");
+    \App\Support\Logger::writeWithContext((string) $msg, (string) "error", (bool) false);
     abort(400, 'require view parameter');
 }

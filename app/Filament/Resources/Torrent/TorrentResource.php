@@ -184,7 +184,7 @@ class TorrentResource extends Resource
                         $torrentRep = new TorrentRepository();
                         $torrentRep->setPosState($idArr, $data['pos_state'], $data['pos_state_until']);
                     } catch (Exception $exception) {
-                        do_log($exception->getMessage() . $exception->getTraceAsString(), 'error');
+                        \App\Support\Logger::writeWithContext((string) ($exception->getMessage() . $exception->getTraceAsString()), (string) 'error', (bool) false);
                         Filament::notify('danger', class_basename($exception));
                     }
                 })
@@ -216,7 +216,7 @@ class TorrentResource extends Resource
                         $torrentRep = new TorrentRepository();
                         $torrentRep->setSpState($idArr, $data['sp_state'], $data['promotion_time_type'], $data['promotion_until']);
                     } catch (Exception $exception) {
-                        do_log($exception->getMessage() . $exception->getTraceAsString(), 'error');
+                        \App\Support\Logger::writeWithContext((string) ($exception->getMessage() . $exception->getTraceAsString()), (string) 'error', (bool) false);
                         Filament::notify('danger', $exception->getMessage());
                     }
                 })
@@ -234,7 +234,7 @@ class TorrentResource extends Resource
                         $torrentRep = new TorrentRepository();
                         $torrentRep->syncTags($idArr);
                     } catch (Exception $exception) {
-                        do_log($exception->getMessage() . $exception->getTraceAsString(), 'error');
+                        \App\Support\Logger::writeWithContext((string) ($exception->getMessage() . $exception->getTraceAsString()), (string) 'error', (bool) false);
                         Filament::notify('danger', class_basename($exception));
                     }
                 })
@@ -261,7 +261,7 @@ class TorrentResource extends Resource
                         $torrentRep = new TorrentRepository();
                         $torrentRep->syncTags($idArr, $data['tags'], $data['remove'] ?? false);
                     } catch (Exception $exception) {
-                        do_log($exception->getMessage() . $exception->getTraceAsString(), 'error');
+                        \App\Support\Logger::writeWithContext((string) ($exception->getMessage() . $exception->getTraceAsString()), (string) 'error', (bool) false);
                         Filament::notify('danger', class_basename($exception));
                     }
                 })
@@ -287,7 +287,7 @@ class TorrentResource extends Resource
                         $torrentRep = new TorrentRepository();
                         $torrentRep->setHr($idArr, $data['hr']);
                     } catch (Exception $exception) {
-                        do_log($exception->getMessage() . $exception->getTraceAsString(), 'error');
+                        \App\Support\Logger::writeWithContext((string) ($exception->getMessage() . $exception->getTraceAsString()), (string) 'error', (bool) false);
                         Filament::notify('danger', class_basename($exception));
                     }
                 })
@@ -297,7 +297,7 @@ class TorrentResource extends Resource
 
         if (Permission::canDeleteTorrent()) {
             $actions[] = DeleteBulkAction::make('bulk-delete')->using(function (Collection $records) {
-                deletetorrent($records->pluck('id')->toArray());
+                \App\Support\TorrentOps::deleteTorrents($records->pluck('id')->toArray(), (bool) false);
             });
         }
         return $actions;
@@ -324,14 +324,14 @@ class TorrentResource extends Resource
                         $data['torrent_id'] = $record->id;
                         $torrentRep->approval(Auth::user(), $data);
                     } catch (Exception $exception) {
-                        do_log($exception->getMessage(), 'error');
+                        \App\Support\Logger::writeWithContext((string) $exception->getMessage(), (string) 'error', (bool) false);
                     }
                 });
 
         }
         if (Permission::canDeleteTorrent()) {
             $actions[] = DeleteAction::make('delete')->using(function ($record) {
-                deletetorrent($record->id);
+                \App\Support\TorrentOps::deleteTorrents($record->id, (bool) false);
             });
         }
         return $actions;
@@ -371,7 +371,7 @@ class TorrentResource extends Resource
                 try {
                     $torrentRep->changeCategory($records, $newSectionId, $data['section_info']['section'][$newSectionId]);
                 } catch (Exception $exception) {
-                    do_log($exception->getMessage(), 'error');
+                    \App\Support\Logger::writeWithContext((string) $exception->getMessage(), (string) 'error', (bool) false);
                 }
             });
     }

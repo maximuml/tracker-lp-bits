@@ -64,7 +64,7 @@ class ThankController extends Controller
                     ->where('seedbonus', $user->seedbonus)
                     ->increment('seedbonus', $sayThanksBonus);
                 if ($affectedRows != 1) {
-                    do_log("affectedRows: $affectedRows, query: " . last_query(), 'error');
+                    \App\Support\Logger::writeWithContext((string) ("affectedRows: {$affectedRows}, query: " . \App\Support\LegacyDb::lastQuery(false, 'json')), (string) 'error', (bool) false);
                     throw new \RuntimeException("increment user bonus fail.");
                 }
             }
@@ -74,7 +74,7 @@ class ThankController extends Controller
                     ->where('seedbonus', $torrentOwner->seedbonus)
                     ->increment('seedbonus', $receiveThanksBonus);
                 if ($affectedRows != 1) {
-                    do_log("affectedRows: $affectedRows, query: " . last_query(), 'error');
+                    \App\Support\Logger::writeWithContext((string) ("affectedRows: {$affectedRows}, query: " . \App\Support\LegacyDb::lastQuery(false, 'json')), (string) 'error', (bool) false);
                     throw new \RuntimeException("increment owner bonus fail.");
                 }
             }

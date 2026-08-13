@@ -8,7 +8,7 @@ $lang_details = \App\Support\SupportContext::getGlobal('lang_details') ?? [];
 $lang_functions = \App\Support\SupportContext::getGlobal('lang_functions') ?? [];
 $torrentnameprefix = \App\Support\SupportContext::getGlobal('torrentnameprefix') ?? '';
 
-    $row = apply_filter('torrent_detail', $row);
+    $row = \App\Support\Hooks::applyFilter('torrent_detail', $row);
     if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::TORRENT_MANAGE) || $CURUSER["id"] == $row["owner"])
     $owned = 1;
     else $owned = 0;
@@ -54,7 +54,7 @@ $torrentnameprefix = \App\Support\SupportContext::getGlobal('torrentnameprefix')
                 $dangerIcon = '<svg t="1655242121471" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="46590" width="16" height="16"><path d="M963.555556 856.888889a55.978667 55.978667 0 0 1-55.978667 56.007111c-0.284444 0-0.540444-0.085333-0.824889-0.085333l-0.056889 0.085333H110.734222l-0.654222-1.137778A55.409778 55.409778 0 0 1 56.888889 856.462222c0-9.756444 2.730667-18.773333 7.139555-26.737778l-3.726222-6.599111L453.461333 156.302222A59.335111 59.335111 0 0 1 510.236444 113.777778c26.936889 0 49.436444 18.005333 56.803556 42.552889l389.973333 661.447111-3.669333 6.997333c6.4 9.102222 10.211556 20.138667 10.211556 32.113778z m-497.777778-541.326222l16.014222 312.888889h56.888889l16.014222-312.888889h-88.917333z m44.458666 398.222222a56.888889 56.888889 0 1 0-0.028444 113.749333 56.888889 56.888889 0 0 0 0.028444-113.749333z" p-id="46591" fill="#d81e06" data-spm-anchor-id="a313x.7781069.0.i61" class="selected"></path></svg>';
                 printf(
                     '<div style="display: flex; justify-content: center;margin-bottom: 10px"><div style="display: flex;background-color: black; color: white;font-weight: bold; padding: 10px 100px">%s&nbsp;%s</div></div>',
-                    $dangerIcon, nexus_trans('torrent.approval.deny_comment_show', ['reason' => $torrentOperationLog->comment])
+                    $dangerIcon, \App\Support\Locale::trans('torrent.approval.deny_comment_show', ['reason' => $torrentOperationLog->comment], null)
                 );
             }
         }
@@ -149,7 +149,7 @@ $torrentnameprefix = \App\Support\SupportContext::getGlobal('torrentnameprefix')
                 '<a href="javascript:;"><b><font id="approval" class="small approval" data-torrent_id="%s">%s&nbsp;%s</font></b></a>',
                 $row['id'], $approvalIcon, $lang_details['action_approval']
             );
-            $title = nexus_trans('torrent.approval.modal_title');
+            $title = \App\Support\Locale::trans('torrent.approval.modal_title', [], null);
             $js = <<<JS
 jQuery('#approval').on("click", function () {
     let torrentId = jQuery(this).attr('data-torrent_id')
@@ -163,7 +163,7 @@ jQuery('#approval').on("click", function () {
 JS;
             \Nexus\Nexus::js($js, 'footer', false);
         }
-        $actions = apply_filter('torrent_detail_actions', $actions, $row);
+        $actions = \App\Support\Hooks::applyFilter('torrent_detail_actions', $actions, $row);
         $actions[] = "<a title=\"".$lang_details['title_report_torrent']."\" href=\"report.php?torrent=$id\"><img class=\"dt_report\" src=\"pic/trans.gif\" alt=\"report\" />&nbsp;<b><font class=\"small\">".$lang_details['text_report_torrent']."</font></b></a>";
 		\App\Support\Html::tr($lang_details['row_action'], implode('&nbsp;|&nbsp;', $actions), 1);
 
@@ -172,7 +172,7 @@ JS;
 
 
         //hook before desc
-        do_action('torrent_detail_before_desc', $row['id'], $CURUSER['id']);
+        \App\Support\Hooks::doAction('torrent_detail_before_desc', $row['id'], $CURUSER['id']);
 
         /**************start custom fields****************/
         echo $customField->renderOnTorrentDetailsPage($id, $row['search_box_id']);
@@ -181,7 +181,7 @@ JS;
 
         //technical info
         if (\App\Support\Config\SiteConfig::current()->main->enableTechnicalInfo()) {
-            $technicalData = nexus_escape($row['technical_info'] ?? '');
+            $technicalData = \App\Support\Strings::escapeHtml($row['technical_info'] ?? '');
 
             // 判断是否为BDINFO格式
             $isBdInfo = false;
@@ -211,7 +211,7 @@ JS;
 
 		if ($CURUSER['showdescription'] != 'no' && !empty($row["descr"])){
             $desc = \App\Support\Format::formatComment($row['descr']);
-            $desc = apply_filter('torrent_detail_description', $desc, $row['id'], $CURUSER['id']);
+            $desc = \App\Support\Hooks::applyFilter('torrent_detail_description', $desc, $row['id'], $CURUSER['id']);
             \App\Support\Html::tr("<a href=\"javascript: klappe_news('descr')\"><span class=\"nowrap\"><img class=\"minus\" src=\"pic/trans.gif\" alt=\"Show/Hide\" id=\"picdescr\" title=\"".($lang_details['title_show_or_hide'] ?? '')."\" /> ".$lang_details['row_description']."</span></a>", "<div id='kdescr'>".$desc."</div>", 1);
 		}
 
@@ -229,7 +229,7 @@ JS;
 		if (!empty($files_info)) {
 		    $infoTds[] = "<td class=\"no_border_wide\">" . $files_info . "</td>";
         }
-		$infoTds[] = "<td class=\"no_border_wide\"><b>".$lang_details['row_info_hash'].":</b>&nbsp;".preg_replace_callback('/./s', "hex_esc", hash_pad($row["info_hash"]))."</td>";
+		$infoTds[] = "<td class=\"no_border_wide\"><b>".$lang_details['row_info_hash'].":</b>&nbsp;".preg_replace_callback('/./s', "hex_esc", \App\Support\Strings::padHash($row["info_hash"]))."</td>";
 		if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::TORRENT_STRUCTURE)) {
 		    $infoTds[] = "<td class=\"no_border_wide\"><b>" . $lang_details['text_torrent_structure'] . "</b><a href=\"torrent_info.php?id=".$id."\">".$lang_details['text_torrent_info_note']."</a></td>";
         }

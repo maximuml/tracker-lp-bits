@@ -100,7 +100,7 @@ final class SearchBox
                 '<option value="%s"%s>%s</option>',
                 $item,
                 (int) $item === (int) $searchArea ? ' selected' : '',
-                nexus_trans("search.search_area_options.$item")
+                \App\Support\Locale::trans("search.search_area_options.{$item}", [], null)
             );
         }
         $result .= '</select>';
@@ -161,7 +161,7 @@ final class SearchBox
             $html .= sprintf('<caption><font class="big">%s</font></caption>', $searchBox->section_name[$lang] ?? '');
         }
 
-        $html .= sprintf('<tr><td class="embedded" align="left">%s</td></tr>', nexus_trans('label.search_box.category'));
+        $html .= sprintf('<tr><td class="embedded" align="left">%s</td></tr>', \App\Support\Locale::trans('label.search_box.category', [], null));
 
         $categoryCollection = $searchBox->categories()->with('icon')->orderBy('sort_index', 'desc')->get();
         if (! empty($options['select_unselect'])) {
@@ -214,11 +214,11 @@ TDCONTENT;
                     $tdContent = sprintf(
                         "<input name=\"%s_check\" value=\"%s\" class=\"btn medium\" type=\"button\" onclick=\"javascript:SetChecked('%s','%s_check','%s','%s',-1,10)\">",
                         $checkPrefix,
-                        nexus_trans('nexus.select_all'),
+                        \App\Support\Locale::trans('nexus.select_all', [], null),
                         $checkPrefix,
                         $checkPrefix,
-                        nexus_trans('nexus.select_all'),
-                        nexus_trans('nexus.unselect_all')
+                        \App\Support\Locale::trans('nexus.select_all', [], null),
+                        \App\Support\Locale::trans('nexus.unselect_all', [], null)
                     );
                 }
 
@@ -284,11 +284,11 @@ TDCONTENT;
                         $tdContent = sprintf(
                             "<input name=\"%s_check\" value=\"%s\" class=\"btn medium\" type=\"button\" onclick=\"javascript:SetChecked('%s','%s_check','%s','%s',-1,10)\">",
                             $checkPrefix,
-                            nexus_trans('nexus.select_all'),
+                            \App\Support\Locale::trans('nexus.select_all', [], null),
                             $checkPrefix,
                             $checkPrefix,
-                            nexus_trans('nexus.select_all'),
-                            nexus_trans('nexus.unselect_all')
+                            \App\Support\Locale::trans('nexus.select_all', [], null),
+                            \App\Support\Locale::trans('nexus.unselect_all', [], null)
                         );
                     }
 
@@ -328,7 +328,7 @@ TD;
             'details' => [$setting['browsecat']],
             'search' => [$setting['browsecat']],
         ];
-        $script = \nexus()->getScript();
+        $script = \Nexus\Nexus::instance()->getScript();
 
         return array_map('intval', \Illuminate\Support\Arr::wrap($maps[$script] ?? []));
     }

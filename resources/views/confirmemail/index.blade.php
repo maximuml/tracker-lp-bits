@@ -17,7 +17,7 @@ if (!$user)
 	\App\Support\LegacyResponse::notFound();
 $row = $user->toArray();
 
-$sec = hash_pad($row["editsecret"]);
+$sec = \App\Support\Strings::padHash($row["editsecret"]);
 if (preg_match('/^ *$/s', $sec))
 	\App\Support\LegacyResponse::notFound();
 if ($md5 != md5($sec . $email . $sec))
@@ -28,5 +28,5 @@ $affected = \App\Models\User::query()->where('id', $id)->where('editsecret', $ro
 if (!$affected)
 	\App\Support\LegacyResponse::notFound();
 
-header("Location: " . get_protocol_prefix() . "$BASEURL/usercp.php?action=security&type=saved");
+header("Location: " . \App\Support\Http::protocolPrefix(\App\Support\Url::isSecure()) . "$BASEURL/usercp.php?action=security&type=saved");
 @endphp

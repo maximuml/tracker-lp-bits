@@ -17,7 +17,7 @@ if ($action == "confirmuser")
 	$userid = (int)\App\Support\SupportContext::getPost("userid");
 	$confirm = \App\Support\SupportContext::getPost("confirm");
 	\App\Repositories\ModtaskRepository::confirmUser($userid, $confirm);
-	header("Location: " . get_protocol_prefix() . "$BASEURL/unco.php?status=1");
+	header("Location: " . \App\Support\Http::protocolPrefix(\App\Support\Url::isSecure()) . "$BASEURL/unco.php?status=1");
 	return;
 }
 if ($action == "edituser")
@@ -26,7 +26,7 @@ if ($action == "edituser")
 	$userInfo = \App\Models\User::query()->findOrFail($userid);
 //	$class = intval(\App\Support\SupportContext::getPost("class") ?? 0);
 	$class = $userInfo->class;
-    $locale = get_user_locale($userid);
+    $locale = \App\Support\Locale::userLocale($userid);
 //	$vip_added = (\App\Support\SupportContext::getPost("vip_added") == 'yes' ? 'yes' : 'no');
     $vip_added = $userInfo->vip_added;
 //	$vip_until = !empty(\App\Support\SupportContext::getPost("vip_until")) ? \App\Support\SupportContext::getPost('vip_until') : null;
@@ -108,11 +108,11 @@ if ($action == "edituser")
 			$updateset['email'] = $email;
 //			$modcomment = date("Y-m-d") . " - Email changed from $arr[email] to $email by {$CURUSER['username']}.\n". $modcomment;
 			$modifyLog = "Email changed from $arr[email] to $email by {$CURUSER['username']}.";
-            do_log($modifyLog, "alert");
+            \App\Support\Logger::writeWithContext((string) $modifyLog, (string) "alert", (bool) false);
             $userModifyLogs[] = $modifyLog;
-            $locale = get_user_locale($userid);
-			$subject = nexus_trans("user.msg_email_change", [], $locale);
-			$msg = nexus_trans("user.msg_your_email_changed_from", [], $locale).$arr['email'].nexus_trans("user.msg_to_new", [], $locale) . $email .nexus_trans("user.msg_by", [], $locale).$CURUSER['username'];
+            $locale = \App\Support\Locale::userLocale($userid);
+			$subject = \App\Support\Locale::trans("user.msg_email_change", [], $locale);
+			$msg = \App\Support\Locale::trans("user.msg_your_email_changed_from", [], $locale).$arr['email'].\App\Support\Locale::trans("user.msg_to_new", [], $locale) . $email .\App\Support\Locale::trans("user.msg_by", [], $locale).$CURUSER['username'];
 
 			\App\Models\Message::add([
 			    'sender' => 0,
@@ -127,8 +127,8 @@ if ($action == "edituser")
 //			$modcomment = date("Y-m-d") . " - Username changed from {$arr['username']} to $username by {$CURUSER['username']}.\n". $modcomment;
 			$userModifyLogs[] = "Username changed from {$arr['username']} to $username by {$CURUSER['username']}";
 
-            $subject = nexus_trans("user.msg_username_change", [], $locale);
-			$msg = nexus_trans("user.msg_your_username_changed_from", [], $locale).$arr['username'].nexus_trans("user.msg_to_new", [], $locale) . $username .nexus_trans("user.msg_by", [], $locale).$CURUSER['username'];
+            $subject = \App\Support\Locale::trans("user.msg_username_change", [], $locale);
+			$msg = \App\Support\Locale::trans("user.msg_your_username_changed_from", [], $locale).$arr['username'].\App\Support\Locale::trans("user.msg_to_new", [], $locale) . $username .\App\Support\Locale::trans("user.msg_by", [], $locale).$CURUSER['username'];
 
 			\App\Models\Message::add([
 			    'sender' => 0,
@@ -197,8 +197,8 @@ if ($action == "edituser")
 		$updateset['donoruntil'] = $donoruntil;
 
 		if (($donor != $arr['donor']) && (($donor == 'yes' && $donoruntil && $donoruntil >= date('Y-m-d H:i:s')) || ($donor == 'no'))) {
-            $subject = nexus_trans("user.msg_your_donor_status_changed", [], $locale);
-            $msg = nexus_trans("user.msg_donor_status_changed_by", [], $locale).$CURUSER['username'];
+            $subject = \App\Support\Locale::trans("user.msg_your_donor_status_changed", [], $locale);
+            $msg = \App\Support\Locale::trans("user.msg_donor_status_changed_by", [], $locale).$CURUSER['username'];
             $added = date("Y-m-d H:i:s");
 
 			\App\Models\Message::add([
@@ -276,8 +276,8 @@ if ($action == "edituser")
 		{
 //			$modcomment = date("Y-m-d") . " - Warning removed by {$CURUSER['username']}.\n". $modcomment;
             $userModifyLogs[] = "Warning removed by {$CURUSER['username']}";
-			$subject = nexus_trans("user.msg_warn_removed", [], $locale);
-			$msg = nexus_trans("user.msg_your_warning_removed_by", [], $locale) . $CURUSER['username'] . ".";
+			$subject = \App\Support\Locale::trans("user.msg_warn_removed", [], $locale);
+			$msg = \App\Support\Locale::trans("user.msg_your_warning_removed_by", [], $locale) . $CURUSER['username'] . ".";
 		}
 
 		$added = date("Y-m-d H:i:s");
@@ -297,17 +297,17 @@ if ($action == "edituser")
 //			$modcomment = date("Y-m-d") . " - Warned by " . $CURUSER['username'] . ".\nReason: $warnpm.\n". $modcomment;
             $userModifyLogs[] = "Warned by " . $CURUSER['username'] . ".\nReason: $warnpm.";
 
-			$msg = nexus_trans("user.msg_you_are_warned_by", [], $locale).$CURUSER['username']."." . ($warnpm ? nexus_trans("user.msg_reason", [], $locale).$warnpm : "");
+			$msg = \App\Support\Locale::trans("user.msg_you_are_warned_by", [], $locale).$CURUSER['username']."." . ($warnpm ? \App\Support\Locale::trans("user.msg_reason", [], $locale).$warnpm : "");
 			$updateset['warneduntil'] = null;
 		}else{
 			$warneduntil = date("Y-m-d H:i:s",(strtotime(date("Y-m-d H:i:s")) + $warnlength * 604800));
-			$dur = $warnlength . nexus_trans("user.msg_week", [], $locale) . ($warnlength > 1 ? nexus_trans("user.msg_s", [], $locale) : "");
-			$msg = nexus_trans("user.msg_you_are_warned_for", [], $locale).$dur.nexus_trans("user.msg_by", [], $locale)  . $CURUSER['username'] . "." . ($warnpm ? nexus_trans("user.msg_reason", [], $locale).$warnpm : "");
+			$dur = $warnlength . \App\Support\Locale::trans("user.msg_week", [], $locale) . ($warnlength > 1 ? \App\Support\Locale::trans("user.msg_s", [], $locale) : "");
+			$msg = \App\Support\Locale::trans("user.msg_you_are_warned_for", [], $locale).$dur.\App\Support\Locale::trans("user.msg_by", [], $locale)  . $CURUSER['username'] . "." . ($warnpm ? \App\Support\Locale::trans("user.msg_reason", [], $locale).$warnpm : "");
 //			$modcomment = date("Y-m-d") . " - Warned for $dur by " . $CURUSER['username'] .  ".\nReason: $warnpm.\n". $modcomment;
             $userModifyLogs[] = "Warned for $dur by " . $CURUSER['username'] .  ".Reason: $warnpm";
 			$updateset['warneduntil'] = $warneduntil;
 		}
-		$subject = nexus_trans("user.msg_you_are_warned", [], $locale);
+		$subject = \App\Support\Locale::trans("user.msg_you_are_warned", [], $locale);
 		$added = date("Y-m-d H:i:s");
 
 		\App\Models\Message::add([
@@ -360,8 +360,8 @@ if ($action == "edituser")
 		{
 //			$modcomment = date("Y-m-d") . " - Posting enabled by " . $CURUSER['username'] . ".\n" . $modcomment;
             $userModifyLogs[] = "Posting enabled by " . $CURUSER['username'];
-			$subject = nexus_trans("user.msg_posting_rights_restored", [], $locale);
-			$msg = nexus_trans("user.msg_your_posting_rights_restored", [], $locale). $CURUSER['username'] . nexus_trans("user.msg_you_can_post", [], $locale);
+			$subject = \App\Support\Locale::trans("user.msg_posting_rights_restored", [], $locale);
+			$msg = \App\Support\Locale::trans("user.msg_your_posting_rights_restored", [], $locale). $CURUSER['username'] . \App\Support\Locale::trans("user.msg_you_can_post", [], $locale);
 			$added = date("Y-m-d H:i:s");
 			\App\Models\Message::add([
 		    'sender' => 0,
@@ -375,8 +375,8 @@ if ($action == "edituser")
 		{
 //			$modcomment = date("Y-m-d") . " - Posting disabled by " . $CURUSER['username'] . ".\n" . $modcomment;
             $userModifyLogs[] = "Posting disabled by " . $CURUSER['username'];
-			$subject = nexus_trans("user.msg_posting_rights_removed", [], $locale);
-			$msg = nexus_trans("user.msg_your_posting_rights_removed", [], $locale) . $CURUSER['username'] . nexus_trans("user.msg_probable_reason", [], $locale);
+			$subject = \App\Support\Locale::trans("user.msg_posting_rights_removed", [], $locale);
+			$msg = \App\Support\Locale::trans("user.msg_your_posting_rights_removed", [], $locale) . $CURUSER['username'] . \App\Support\Locale::trans("user.msg_probable_reason", [], $locale);
 			$added = date("Y-m-d H:i:s");
 			\App\Models\Message::add([
 		    'sender' => 0,
@@ -393,8 +393,8 @@ if ($action == "edituser")
 		{
 //			$modcomment = date("Y-m-d") . " - Upload enabled by " . $CURUSER['username'] . ".\n" . $modcomment;
             $userModifyLogs[] = "Upload enabled by " . $CURUSER['username'];
-			$subject = nexus_trans("user.msg_upload_rights_restored", [], $locale);
-			$msg = nexus_trans("user.msg_your_upload_rights_restored", [], $locale) . $CURUSER['username'] . nexus_trans("user.msg_you_upload_can_upload", [], $locale);
+			$subject = \App\Support\Locale::trans("user.msg_upload_rights_restored", [], $locale);
+			$msg = \App\Support\Locale::trans("user.msg_your_upload_rights_restored", [], $locale) . $CURUSER['username'] . \App\Support\Locale::trans("user.msg_you_upload_can_upload", [], $locale);
 			$added = date("Y-m-d H:i:s");
 			\App\Models\Message::add([
 		    'sender' => 0,
@@ -408,8 +408,8 @@ if ($action == "edituser")
 		{
 //			$modcomment = date("Y-m-d") . " - Upload disabled by " . $CURUSER['username'] . ".\n" . $modcomment;
             $userModifyLogs[] = "Upload disabled by " . $CURUSER['username'];
-			$subject = nexus_trans("user.msg_upload_rights_removed", [], $locale);
-			$msg = nexus_trans("user.msg_your_upload_rights_removed", [], $locale) . $CURUSER['username'] . nexus_trans("user.msg_probably_reason_two", [], $locale);
+			$subject = \App\Support\Locale::trans("user.msg_upload_rights_removed", [], $locale);
+			$msg = \App\Support\Locale::trans("user.msg_your_upload_rights_removed", [], $locale) . $CURUSER['username'] . \App\Support\Locale::trans("user.msg_probably_reason_two", [], $locale);
 			$added = date("Y-m-d H:i:s");
 			\App\Models\Message::add([
 		    'sender' => 0,
@@ -426,8 +426,8 @@ if ($action == "edituser")
 		{
 //			$modcomment = date("Y-m-d") . " - Download enabled by " . $CURUSER['username'] . ".\n" . $modcomment;
             $userModifyLogs[] = "Download enabled by " . $CURUSER['username'];
-			$subject = nexus_trans("user.msg_download_rights_restored", [], $locale);
-			$msg = nexus_trans("user.msg_your_download_rights_restored", [], $locale). $CURUSER['username'] . nexus_trans("user.msg_you_can_download", [], $locale);
+			$subject = \App\Support\Locale::trans("user.msg_download_rights_restored", [], $locale);
+			$msg = \App\Support\Locale::trans("user.msg_your_download_rights_restored", [], $locale). $CURUSER['username'] . \App\Support\Locale::trans("user.msg_you_can_download", [], $locale);
 			$added = date("Y-m-d H:i:s");
 
 			\App\Models\Message::add([
@@ -442,8 +442,8 @@ if ($action == "edituser")
 		{
 //			$modcomment = date("Y-m-d") . " - Download disabled by " . $CURUSER['username'] . ".\n" . $modcomment;
             $userModifyLogs[] = "Download disabled by " . $CURUSER['username'];
-			$subject = nexus_trans("user.msg_download_rights_removed", [], $locale);
-			$msg = nexus_trans("user.msg_your_download_rights_removed", [], $locale) . $CURUSER['username'] . nexus_trans("user.msg_probably_reason_three", [], $locale);
+			$subject = \App\Support\Locale::trans("user.msg_download_rights_removed", [], $locale);
+			$msg = \App\Support\Locale::trans("user.msg_your_download_rights_removed", [], $locale) . $CURUSER['username'] . \App\Support\Locale::trans("user.msg_probably_reason_three", [], $locale);
 			$added = date("Y-m-d H:i:s");
 
 			\App\Models\Message::add([
@@ -473,9 +473,9 @@ if ($action == "edituser")
         }
         \App\Models\UserModifyLog::query()->insert($userModifyLogsInsert);
     }
-    clear_user_cache($userid, $userInfo->passkey);
+    \App\Support\Cache::clearUser($userid, $userInfo->passkey);
 	$returnto = htmlspecialchars(\App\Support\SupportContext::getPost("returnto"));
-	header("Location: " . get_protocol_prefix() . "$BASEURL/$returnto");
+	header("Location: " . \App\Support\Http::protocolPrefix(\App\Support\Url::isSecure()) . "$BASEURL/$returnto");
 	return;
 }
 puke();

@@ -11,13 +11,13 @@ if ($do == 'thanks') {
 else
 {
     $custom = trim(\App\Models\Setting::getByName('misc.donation_custom'));
-	$paypal = safe_email($PAYPALACCOUNT);
-	if ($paypal && check_email($paypal))
+	$paypal = \App\Support\Email::sanitizeForDisplay((string) $PAYPALACCOUNT);
+	if ($paypal && \App\Support\Email::isWellFormed((string) $paypal))
 		$showpaypal = true;
 	else
 		$showpaypal = false;
-	$alipay = safe_email($ALIPAYACCOUNT);
-	if ($alipay && check_email($alipay))
+	$alipay = \App\Support\Email::sanitizeForDisplay((string) $ALIPAYACCOUNT);
+	if ($alipay && \App\Support\Email::isWellFormed((string) $alipay))
 		$showalipay = true;
 	else
 		$showalipay = false;
@@ -71,8 +71,8 @@ foreach ($allowedDonationUsdAmounts as $amount) {
     <input type="hidden" name="image_url" value="">
     <input type="hidden" name="shipping" value="0">
     <input type="hidden" name="currency_code" value="USD">
-    <input type="hidden" name="return" value="<?php echo  get_protocol_prefix() . $BASEURL;?>/donate.php?do=thanks">
-<input type="hidden" name="cancel_return" value="<?php echo get_protocol_prefix() . $BASEURL;?>/donate.php">
+    <input type="hidden" name="return" value="<?php echo  \App\Support\Http::protocolPrefix(\App\Support\Url::isSecure()) . $BASEURL;?>/donate.php?do=thanks">
+<input type="hidden" name="cancel_return" value="<?php echo \App\Support\Http::protocolPrefix(\App\Support\Url::isSecure()) . $BASEURL;?>/donate.php">
 <br />
 </p>
 <p align="center">

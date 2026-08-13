@@ -34,7 +34,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(Hook::class, static fn () => SupportContext::getGlobal('hook') ?? new Hook());
         $this->app->singleton(Plugin::class, static fn () => SupportContext::getGlobal('plugin') ?? new Plugin());
 
-        do_action('nexus_register');
+        \App\Support\Hooks::doAction('nexus_register');
     }
 
     /**
@@ -85,12 +85,12 @@ class AppServiceProvider extends ServiceProvider
             $view->with('context', $context);
         });
 
-        do_action('nexus_boot');
+        \App\Support\Hooks::doAction('nexus_boot');
     }
 
     private function customScheduleTask(): void
     {
-        if (!isRunningInConsole()) {
+        if (!\App\Support\Environment::isConsole()) {
             return;
         }
         /** @var Dispatcher $eventDispatcher */

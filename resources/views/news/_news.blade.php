@@ -24,7 +24,7 @@ if ($action == 'delete')
 	if ($returnto != "")
 	header("Location: $returnto");
 	else
-	header("Location: " . get_protocol_prefix() . "$BASEURL/index.php");
+	header("Location: " . \App\Support\Http::protocolPrefix(\App\Support\Url::isSecure()) . "$BASEURL/index.php");
 }
 
 //  Add News Item    /////////////////////////////////////////////////////////
@@ -56,8 +56,8 @@ if ($action == 'add')
 	if (!$newsId) {
         \App\Support\LegacyResponse::abort($lang_news['std_error'], $lang_news['std_something_weird_happened']);
     }
-	fire_event("news_created", \App\Models\News::query()->find($newsId));
-	header("Location: " . get_protocol_prefix() . "$BASEURL/index.php");
+	\App\Support\Events::fire("news_created", \App\Models\News::query()->find($newsId), null);
+	header("Location: " . \App\Support\Http::protocolPrefix(\App\Support\Url::isSecure()) . "$BASEURL/index.php");
 }
 
 //  Edit News Item    ////////////////////////////////////////////////////////
@@ -96,7 +96,7 @@ if ($action == 'edit')
 		    'notify' => $notify,
 		]);
 		$Cache->delete_value('recent_news',true);
-		header("Location: " . get_protocol_prefix() . "$BASEURL/index.php");
+		header("Location: " . \App\Support\Http::protocolPrefix(\App\Support\Url::isSecure()) . "$BASEURL/index.php");
 	}
 	else
 	{

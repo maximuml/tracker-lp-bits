@@ -44,7 +44,7 @@ class Update extends Install
 
     public function getLogFile()
     {
-        return getLogFile("update");
+        return \App\Support\Logger::filePath("update");
     }
 
     public function getUpdateDirectory()
@@ -393,7 +393,7 @@ class Update extends Install
             $this->doLog("torrents table does not has column: tags");
         }
 
-        clear_setting_cache();
+        \App\Support\Cache::clearSettings();
 
     }
 
@@ -456,7 +456,7 @@ class Update extends Install
     public function downAndExtractCode($url, array $includes = []): string
     {
         $requireCommand = 'rsync';
-        if (!command_exists($requireCommand)) {
+        if (!\App\Support\Environment::commandExists($requireCommand)) {
             throw new \RuntimeException("command: $requireCommand not exists!");
         }
         $arr = explode('/', $url);
@@ -533,7 +533,7 @@ class Update extends Install
                     'seed_points' => NexusDB::raw('seedbonus')
                 ]);
             $result += $affectedRows;
-            $this->doLog("affectedRows: $affectedRows, query: " . last_query());
+            $this->doLog("affectedRows: $affectedRows, query: " . \App\Support\LegacyDb::lastQuery(false, 'json'));
         } while ($affectedRows > 0);
 
         return $result;
@@ -580,8 +580,8 @@ class Update extends Install
     {
         $envFile = ROOT_PATH . '.env';
         $envExample = ROOT_PATH . '.env.example';
-        $envData = readEnvFile($envFile);
-        $envExampleData = readEnvFile($envExample);
+        $envData = \App\Support\Env::load($envFile);
+        $envExampleData = \App\Support\Env::load($envExample);
         foreach ($envExampleData as $key => $value) {
             if (!isset($envData[$key])) {
                 $envData[$key] = $value;

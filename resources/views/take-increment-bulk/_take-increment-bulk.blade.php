@@ -35,7 +35,7 @@ $conditions = [];
 if (!empty(\App\Support\SupportContext::getPost('classes'))) {
     $conditions[] = "class IN (" . implode(', ', \App\Support\SupportContext::getPost('classes')) . ")";
 }
-$conditions = apply_filter("role_query_conditions", $conditions, \App\Support\SupportContext::allPost());
+$conditions = \App\Support\Hooks::applyFilter("role_query_conditions", $conditions, \App\Support\SupportContext::allPost());
 if (empty($conditions)) {
     \App\Support\LegacyResponse::abort("Error", "No valid filter");
 }
@@ -78,8 +78,8 @@ while (true) {
             'invite:tmp %s %s %s',
             $idRedisKey, $duration, $amount
         );
-        $output = executeCommand($command, 'string', true);
-        do_log(sprintf('command: %s, output: %s', $command, $output));
+        $output = \App\Support\Environment::run($command, 'string', (bool) true, (bool) true);
+        \App\Support\Logger::writeWithContext((string) sprintf('command: %s, output: %s', $command, $output), (string) 'info', (bool) false);
     } else {
         \Nexus\Database\NexusDB::table('users')->whereIn('id', $idArr)->increment($type, $amount);
     }

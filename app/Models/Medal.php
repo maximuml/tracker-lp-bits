@@ -69,7 +69,7 @@ class Medal extends NexusModel
         $results = self::$getTypeText;
         $keyValues = [];
         foreach ($results as $type => &$info) {
-            $text = nexus_trans("medal.get_types.$type");
+            $text = \App\Support\Locale::trans("medal.get_types.{$type}", [], null);
             $keyValues[$type] = $text;
             $info['text'] = $text;
         }
@@ -82,12 +82,12 @@ class Medal extends NexusModel
     /** @param  mixed  $value */
     public function getGetTypeTextAttribute($value): string
     {
-        return nexus_trans("medal.get_types." . $this->get_type);
+        return \App\Support\Locale::trans("medal.get_types." . $this->get_type, [], null);
     }
 
     public function getInventoryTextAttribute(): string
     {
-        return $this->inventory !== null ? (string) $this->inventory : nexus_trans("label.infinite");
+        return $this->inventory !== null ? (string) $this->inventory : \App\Support\Locale::trans("label.infinite", [], null);
     }
 
     /** @param  mixed  $value */
@@ -96,24 +96,24 @@ class Medal extends NexusModel
         if ($this->duration > 0) {
             return (string) $this->duration;
         }
-        return nexus_trans("label.permanent");
+        return \App\Support\Locale::trans("label.permanent", [], null);
     }
 
     /** @return  mixed */
     public function checkCanBeBuy()
     {
         if ($this->get_type == self::GET_TYPE_GRANT) {
-            throw new \RuntimeException(nexus_trans('medal.grant_only'));
+            throw new \RuntimeException(\App\Support\Locale::trans('medal.grant_only', [], null));
         }
         $now = now();
         if ($this->sale_begin_time && $this->sale_begin_time->gt($now)) {
-            throw new \RuntimeException(nexus_trans('medal.before_sale_begin_time'));
+            throw new \RuntimeException(\App\Support\Locale::trans('medal.before_sale_begin_time', [], null));
         }
         if ($this->sale_end_time && $this->sale_end_time->lt($now)) {
-            throw new \RuntimeException(nexus_trans('medal.after_sale_end_time'));
+            throw new \RuntimeException(\App\Support\Locale::trans('medal.after_sale_end_time', [], null));
         }
         if ($this->inventory !== null && $this->inventory <= 0) {
-            throw new \RuntimeException(nexus_trans('medal.inventory_empty'));
+            throw new \RuntimeException(\App\Support\Locale::trans('medal.inventory_empty', [], null));
         }
     }
 

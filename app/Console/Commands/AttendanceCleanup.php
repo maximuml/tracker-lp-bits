@@ -41,9 +41,9 @@ class AttendanceCleanup extends Command
         $result = $rep->cleanup();
         $log = sprintf(
             '[%s], %s, result: %s',
-            nexus()->getRequestId(), __METHOD__, var_export($result, true)
+            \Nexus\Nexus::instance()->getRequestId(), __METHOD__, var_export($result, true)
         );
         $this->info($log);
-        do_log($log);
+        \App\Support\Logger::writeWithContext((string) $log, (string) 'info', (bool) false);
     }
 }

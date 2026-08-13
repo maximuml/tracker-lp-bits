@@ -30,7 +30,7 @@ class MedalController extends Controller
         $result = $this->repository->getList($request->all());
         $resource = MedalResource::collection($result);
         $resource->additional([
-            'page_title' => nexus_trans('medal.admin.list.page_title'),
+            'page_title' => \App\Support\Locale::trans('medal.admin.list.page_title', [], null),
         ]);
         return $this->success($resource);
     }

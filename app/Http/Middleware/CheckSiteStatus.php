@@ -20,7 +20,7 @@ class CheckSiteStatus
     {
         $user = $request->user();
         if ($user && $user->class < User::CLASS_ADMINISTRATOR && !Setting::getIsSiteOnline()) {
-            throw new NexusException(nexus_trans('misc.site_down_for_maintenance'));
+            throw new NexusException(\App\Support\Locale::trans('misc.site_down_for_maintenance', [], null));
         }
         return $next($request);
     }

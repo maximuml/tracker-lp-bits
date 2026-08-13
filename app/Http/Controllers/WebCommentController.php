@@ -305,9 +305,9 @@ class WebCommentController extends Controller
         }
 
         $locale = Locale::userLocale($ownerId);
-        $subject = nexus_trans('comment.msg_new_comment', [], $locale);
+        $subject = \App\Support\Locale::trans('comment.msg_new_comment', [], $locale);
         $messageKey = 'comment.msg_' . $type . '_receive_comment';
-        $message = nexus_trans($messageKey, [], $locale)
+        $message = \App\Support\Locale::trans($messageKey, [], $locale)
             . ' [url=' . Http::protocolPrefix(Url::isSecure()) . rtrim((string) \App\Support\Config\SiteConfig::current()->basic->baseUrl(), '/') . '/' . $this->buildScript($type, $parentId) . '] ' . $name . '[/url].';
 
         Message::add([

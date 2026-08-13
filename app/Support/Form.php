@@ -415,7 +415,7 @@ foreach ($quickSmilies as $smily) {
 	if ($i%4 == 0 && $i > 0) {
 		print('</tr><tr>');
 	}
-	print("<td class=\"embedded\" style=\"padding: 3px;\">".getSmileIt($form, $text, $smily)."</td>");
+	print("<td class=\"embedded\" style=\"padding: 3px;\">".\App\Support\Smilies::link($form, $text, (int) $smily)."</td>");
 	$i++;
 }
 ?>

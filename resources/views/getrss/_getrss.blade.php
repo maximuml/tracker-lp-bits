@@ -28,13 +28,13 @@ if ($showaudiocodec) $audiocodecs = \App\Support\SearchBox::itemListWithContext(
 $query = [];
 $allowed_showrows=array('10','50');
 $stickyTypes = [
-    0 => nexus_trans('torrent.pos_state_normal'),
-    1 => nexus_trans('torrent.pos_state_sticky'),
-    2 => nexus_trans('torrent.pos_state_r_sticky')
+    0 => \App\Support\Locale::trans('torrent.pos_state_normal', [], null),
+    1 => \App\Support\Locale::trans('torrent.pos_state_sticky', [], null),
+    2 => \App\Support\Locale::trans('torrent.pos_state_r_sticky', [], null)
 ];
 $query[] = "passkey=" . $CURUSER['passkey'];
 if ($__server_REQUEST_METHOD == "POST") {
-	$link = get_protocol_prefix(). $BASEURL ."/torrentrss.php";
+	$link = \App\Support\Http::protocolPrefix(\App\Support\Url::isSecure()). $BASEURL ."/torrentrss.php";
 	if (((\App\Support\SupportContext::getPost('showrows') !== null)) && in_array(\App\Support\SupportContext::getPost('showrows'), $allowed_showrows, 1))
 		$query[] = "rows=".(int)\App\Support\SupportContext::getPost('showrows');
 	else {

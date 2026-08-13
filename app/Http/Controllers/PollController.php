@@ -139,7 +139,7 @@ class PollController extends Controller
         $resource->additional([
             'selection' => $selection,
             'answer_stats' => $answerStats,
-            'site_info' => site_info(),
+            'site_info' => \App\Support\Site::info(),
         ]);
         return $this->success($resource);
     }

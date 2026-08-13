@@ -23,10 +23,10 @@ class EditCodec extends EditRecord
 
     public function afterSave()
     {
-        clear_search_box_cache();
+        \App\Support\Cache::clearSearchBox();
         $model = static::$resource::getModel();
         $table = (new $model)->getTable();
-        clear_taxonomy_cache($table);
+        \App\Support\Cache::clearTaxonomy($table);
     }
 
     protected function mutateFormDataBeforeSave(array $data): array

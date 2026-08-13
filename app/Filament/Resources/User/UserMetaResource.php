@@ -93,8 +93,8 @@ class UserMetaResource extends Resource
             ->recordActions([
                 DeleteAction::make()->using(function (NexusModel $record) {
                     $record->delete();
-                    clear_user_cache($record->uid);
-                    do_log(sprintf("user: %d meta: %s was del by %s", $record->uid, $record->meta_key, Auth::user()->username));
+                    \App\Support\Cache::clearUser($record->uid, '');
+                    \App\Support\Logger::writeWithContext((string) sprintf("user: %d meta: %s was del by %s", $record->uid, $record->meta_key, Auth::user()->username), (string) 'info', (bool) false);
                 }),
             ])
             ->toolbarActions([

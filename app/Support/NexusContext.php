@@ -2,7 +2,7 @@
 
 namespace App\Support;
 
-use App\Models\Setting;
+use App\Support\Config\SiteConfig;
 use Illuminate\Http\Request;
 
 /**
@@ -217,36 +217,17 @@ final class NexusContext
             return $this->siteConfig;
         }
 
-        $config = [
-            'SITENAME' => '',
-            'SITEEMAIL' => '',
-            'smtptype' => '',
-            'smtp' => '',
-            'smtp_host' => '',
-            'smtp_port' => '',
-            'smtp_from' => '',
+        $siteConfig = SiteConfig::current();
+
+        return $this->siteConfig = [
+            'SITENAME' => $siteConfig->basic->siteName(),
+            'SITEEMAIL' => $siteConfig->main->siteEmail(),
+            'smtptype' => $siteConfig->smtp->type(),
+            'smtp' => $siteConfig->smtp->smtp(),
+            'smtp_host' => $siteConfig->smtp->host(),
+            'smtp_port' => $siteConfig->smtp->port(),
+            'smtp_from' => $siteConfig->smtp->from(),
         ];
-
-        $keys = [
-            'SITENAME' => 'basic.SITENAME',
-            'SITEEMAIL' => 'main.SITEEMAIL',
-            'smtptype' => 'smtp.smtptype',
-            'smtp' => 'smtp.smtp',
-            'smtp_host' => 'smtp.smtp_host',
-            'smtp_port' => 'smtp.smtp_port',
-            'smtp_from' => 'smtp.smtp_from',
-        ];
-
-        if (class_exists(Setting::class)) {
-            foreach ($keys as $name => $settingName) {
-                $value = Setting::get($settingName);
-                if (! is_null($value)) {
-                    $config[$name] = (string) $value;
-                }
-            }
-        }
-
-        return $config;
     }
 
     public function setGlobal(string $key, mixed $value): void

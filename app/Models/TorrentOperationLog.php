@@ -47,7 +47,7 @@ class TorrentOperationLog extends NexusModel
     /** @return  mixed */
     public function getActionTypeTextAttribute()
     {
-        return nexus_trans("torrent.operation_log.{$this->action_type}.type_text");
+        return \App\Support\Locale::trans("torrent.operation_log.{$this->action_type}.type_text", [], null);
     }
 
     /** @return  \Illuminate\Database\Eloquent\Relations\BelongsTo<User, $this> */
@@ -86,13 +86,8 @@ class TorrentOperationLog extends NexusModel
         $actionType = $torrentOperationLog->action_type;
         $receiver = $torrentOperationLog->torrent->user;
         $locale = $receiver->locale;
-        $subject = nexus_trans("torrent.operation_log.$actionType.notify_subject", [], $locale);
-        $msg = nexus_trans("torrent.operation_log.$actionType.notify_msg", [
-            'torrent_name' => $torrentOperationLog->torrent->name,
-            'detail_url' => sprintf('details.php?id=%s', $torrentOperationLog->torrent_id),
-            'operator' => $torrentOperationLog->user->username,
-            'reason' => $torrentOperationLog->comment,
-        ], $locale);
+        $subject = \App\Support\Locale::trans("torrent.operation_log.{$actionType}.notify_subject", [], $locale);
+        $msg = \App\Support\Locale::trans("torrent.operation_log.{$actionType}.notify_msg", ['torrent_name' => $torrentOperationLog->torrent->name, 'detail_url' => sprintf('details.php?id=%s', $torrentOperationLog->torrent_id), 'operator' => $torrentOperationLog->user->username, 'reason' => $torrentOperationLog->comment], $locale);
         $message = [
             'sender' => 0,
             'receiver' => $receiver->id,
@@ -103,6 +98,6 @@ class TorrentOperationLog extends NexusModel
         Message::query()->insert($message);
         NexusDB::cache_del("user_{$receiver->id}_unread_message_count");
         NexusDB::cache_del("user_{$receiver->id}_inbox_count");
-        do_log("notify user: {$receiver->id}, $subject");
+        \App\Support\Logger::writeWithContext((string) "notify user: {$receiver->id}, {$subject}", (string) 'info', (bool) false);
     }
 }

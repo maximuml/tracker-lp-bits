@@ -38,7 +38,7 @@ elseif (((\App\Support\SupportContext::getPost('action') !== null)) && \App\Supp
 	$desc = \App\Support\SupportContext::getPost('desc');
 	$id = \App\Support\SupportContext::getPost('id');
 	if (!$name && !$desc && !$id) {
-		header("Location: " . get_protocol_prefix() . "$BASEURL/forummanage.php");
+		header("Location: " . \App\Support\Http::protocolPrefix(\App\Support\Url::isSecure()) . "$BASEURL/forummanage.php");
 	return;
 	}
 	if (!empty(\App\Support\SupportContext::getPost("moderator"))) {
@@ -68,7 +68,7 @@ elseif (((\App\Support\SupportContext::getPost('action') !== null)) && \App\Supp
 	$name = (\App\Support\SupportContext::getPost('name'));
 	$desc = (\App\Support\SupportContext::getPost('desc'));
 	if (!$name && !$desc) {
-		header("Location: " . get_protocol_prefix() . "$BASEURL/forummanage.php");
+		header("Location: " . \App\Support\Http::protocolPrefix(\App\Support\Url::isSecure()) . "$BASEURL/forummanage.php");
 	return;
 	}
 	$id = \Nexus\Database\NexusDB::table('forums')->insertGetId([

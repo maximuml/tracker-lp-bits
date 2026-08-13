@@ -45,7 +45,7 @@ class TorrentDownloadController extends Controller
             }
             $decrypted = $torrentRepository->decryptDownHash($hash, $user);
             if (empty($decrypted)) {
-                do_log('downhash invalid: ' . nexus_json_encode($request->all()), 'error');
+                \App\Support\Logger::writeWithContext((string) ('downhash invalid: ' . \App\Support\Json::encode($request->all())), (string) 'error', (bool) false);
                 throw new NexusException('download.invalid_downhash_decrypt');
             }
             $id = (int) $decrypted[0];
@@ -99,7 +99,7 @@ class TorrentDownloadController extends Controller
             $user->passkey = $passkey;
         }
 
-        $torrentSavePath = getFullDirectory(\App\Support\Config\SiteConfig::current()->main->torrentDir());
+        $torrentSavePath = \App\Support\Path::resolve(\App\Support\Config\SiteConfig::current()->main->torrentDir(), \ROOT_PATH);
         $fn = $torrentSavePath . '/' . $torrent->id . '.torrent';
         if (!is_file($fn) || !is_readable($fn) || filesize($fn) == 0) {
             abort(404);

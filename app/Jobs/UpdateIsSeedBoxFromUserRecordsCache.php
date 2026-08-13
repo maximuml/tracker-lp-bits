@@ -29,11 +29,11 @@ class UpdateIsSeedBoxFromUserRecordsCache implements ShouldQueue
         foreach (IpAsnEnum::cases() as $field) {
             foreach (IsAllowedEnum::cases() as $isAllowed) {
                 $rep->updateUserCacheCronjob($isAllowed, $field);
-                do_log("SeedBoxRepository::updateUserCacheCronjob isAllowed: $isAllowed->name, field: $field->name success");
+                \App\Support\Logger::writeWithContext((string) "SeedBoxRepository::updateUserCacheCronjob isAllowed: {$isAllowed->name}, field: {$field->name} success", (string) 'info', (bool) false);
                 $rep->updateAdminCacheCronjob($isAllowed, $field);
-                do_log("SeedBoxRepository::updateAdminCacheCronjob isAllowed: $isAllowed->name, field: $field->name success");
+                \App\Support\Logger::writeWithContext((string) "SeedBoxRepository::updateAdminCacheCronjob isAllowed: {$isAllowed->name}, field: {$field->name} success", (string) 'info', (bool) false);
             }
         }
-        do_log("UpdateIsSeedBoxFromUserRecordsCache done!");
+        \App\Support\Logger::writeWithContext((string) "UpdateIsSeedBoxFromUserRecordsCache done!", (string) 'info', (bool) false);
     }
 }

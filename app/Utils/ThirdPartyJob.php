@@ -16,10 +16,10 @@ final class ThirdPartyJob {
 
     public function __invoke(): void
     {
-        $lockName = convertNamespaceToSnake(__METHOD__);
+        $lockName = \App\Support\Strings::namespaceToSnake(__METHOD__);
         $lock = new NexusLock($lockName, 600);
         if (!$lock->get()) {
-            do_log("can not get lock: $lockName, return ...");
+            \App\Support\Logger::writeWithContext((string) "can not get lock: {$lockName}, return ...", (string) 'info', (bool) false);
             return;
         }
         $list = NexusDB::redis()->lRange(self::$queueKey, 0, self::$size);
@@ -33,11 +33,11 @@ final class ThirdPartyJob {
                     default => throw new \InvalidArgumentException("invalid name: {$data['name']}")
                 };
             } else {
-                do_log(sprintf("%s no name, skip", $item), "error");
+                \App\Support\Logger::writeWithContext((string) sprintf("%s no name, skip", $item), (string) "error", (bool) false);
             }
             NexusDB::redis()->lRem(self::$queueKey, $item);
         }
-        do_log(sprintf("success dispatch %s jobs", $successCount));
+        \App\Support\Logger::writeWithContext((string) sprintf("success dispatch %s jobs", $successCount), (string) 'info', (bool) false);
         $lock->release();
     }
 
@@ -51,9 +51,9 @@ final class ThirdPartyJob {
                 'torrent_id' => $torrentId,
             ];
             NexusDB::redis()->rPush(self::$queueKey, json_encode($value));
-            do_log("success addBuyTorrent: $key", "debug");
+            \App\Support\Logger::writeWithContext((string) "success addBuyTorrent: {$key}", (string) "debug", (bool) false);
         } else {
-            do_log("no need to addBuyTorrent: $key", "debug");
+            \App\Support\Logger::writeWithContext((string) "no need to addBuyTorrent: {$key}", (string) "debug", (bool) false);
         }
     }
 
@@ -63,7 +63,7 @@ final class ThirdPartyJob {
             $job = new BuyTorrent($params['user_id'], $params['torrent_id']);
             Queue::push($job);
         } else {
-            do_log("no user_id or torrent_id: " . json_encode($params), "error");
+            \App\Support\Logger::writeWithContext((string) ("no user_id or torrent_id: " . json_encode($params)), (string) "error", (bool) false);
         }
     }
 }

@@ -17,13 +17,13 @@ class RequireSeedTorrentRepository extends BaseRepository
         $logPrefix = "[RequireSeedTorrentRepository.autoAddToListCronjob]";
         $enabled = Setting::getIsRequireSeedSectionEnabled();
         if (!$enabled) {
-            do_log("$logPrefix, not enabled");
+            \App\Support\Logger::writeWithContext((string) "{$logPrefix}, not enabled", (string) 'info', (bool) false);
             return;
         }
         $countMaxAllowed = Setting::getRequireSeedSectionTorrentCountMax();
         $countNow = RequireSeedTorrent::query()->count();
         if ($countNow >= $countMaxAllowed) {
-            do_log("$logPrefix, max allowed $countMaxAllowed reached");
+            \App\Support\Logger::writeWithContext((string) "{$logPrefix}, max allowed {$countMaxAllowed} reached", (string) 'info', (bool) false);
             return;
         }
         $count = $countMaxAllowed - $countNow;
@@ -62,7 +62,7 @@ class RequireSeedTorrentRepository extends BaseRepository
             $redis->hset($cacheKey, $item->id, $nowStr);
         }
         RequireSeedTorrent::query()->insert($data);
-        do_log("$logPrefix, success inserted: " . count($data));
+        \App\Support\Logger::writeWithContext((string) ("{$logPrefix}, success inserted: " . count($data)), (string) 'info', (bool) false);
     }
 
     /** @return  void */
@@ -70,7 +70,7 @@ class RequireSeedTorrentRepository extends BaseRepository
     {
         $idArr = RequireSeedTorrent::query()->pluck('torrent_id')->toArray();
         if (empty($idArr)) {
-            do_log("no data to remove");
+            \App\Support\Logger::writeWithContext((string) "no data to remove", (string) 'info', (bool) false);
             return;
         }
         $seederMax = Setting::getRequireSeedSectionSeederLte();
@@ -81,7 +81,7 @@ class RequireSeedTorrentRepository extends BaseRepository
         ;
         if (!empty($torrents)) {
             $this->doRemove($torrents);
-            do_log(sprintf("remove %s seeders < %s", count($torrents), $seederMin));
+            \App\Support\Logger::writeWithContext((string) sprintf("remove %s seeders < %s", count($torrents), $seederMin), (string) 'info', (bool) false);
         }
         $torrents = Torrent::query()->whereIn('id', $idArr)
             ->where('seeders', '>', $seederMax)
@@ -89,7 +89,7 @@ class RequireSeedTorrentRepository extends BaseRepository
         ;
         if (!empty($torrents)) {
             $this->doRemove($torrents);
-            do_log(sprintf("remove %s seeders > %s", count($torrents), $seederMax));
+            \App\Support\Logger::writeWithContext((string) sprintf("remove %s seeders > %s", count($torrents), $seederMax), (string) 'info', (bool) false);
         }
     }
 
@@ -111,7 +111,7 @@ class RequireSeedTorrentRepository extends BaseRepository
         }
         RequireSeedTorrent::query()->whereIn('torrent_id', $idArr)->delete();
         UserRequireSeedTorrent::query()->whereIn('torrent_id', $idArr)->delete();
-        do_log("success removed " . count($idArr));
+        \App\Support\Logger::writeWithContext((string) ("success removed " . count($idArr)), (string) 'info', (bool) false);
     }
 
     private static function getTorrentCacheKey(): string
@@ -135,19 +135,19 @@ class RequireSeedTorrentRepository extends BaseRepository
         $logPrefix = "userId: $userId, torrentId: $torrentId";
         //check enabled or not
         if (!Setting::getIsRequireSeedSectionEnabled()) {
-            do_log("$logPrefix, not enabled", 'debug');
+            \App\Support\Logger::writeWithContext((string) "{$logPrefix}, not enabled", (string) 'debug', (bool) false);
             return false;
         }
         //first, torrent on list
         $onListCacheKey = self::getTorrentCacheKey();
         if (!$redis->hExists($onListCacheKey, $torrentId)) {
-            do_log("$logPrefix, torrent not on list: $onListCacheKey", 'debug');
+            \App\Support\Logger::writeWithContext((string) "{$logPrefix}, torrent not on list: {$onListCacheKey}", (string) 'debug', (bool) false);
             return false;
         }
         //second, torrent user not exists
         $torrentUserCacheKey = self::getTorrentUserCacheKey($torrentId);
         if ($redis->hExists($torrentUserCacheKey, $userId)) {
-            do_log("$logPrefix, user already exists: $torrentUserCacheKey", 'debug');
+            \App\Support\Logger::writeWithContext((string) "{$logPrefix}, user already exists: {$torrentUserCacheKey}", (string) 'debug', (bool) false);
             return false;
         }
         return true;
@@ -174,7 +174,7 @@ class RequireSeedTorrentRepository extends BaseRepository
         $update = ['updated_at'];
         UserRequireSeedTorrent::query()->upsert($values, $uniqueBy, $update);
         $redis->hset($torrentUserCacheKey, $userId, $nowStr);
-        do_log("success insert user: $userId, torrent: $torrentId");
+        \App\Support\Logger::writeWithContext((string) "success insert user: {$userId}, torrent: {$torrentId}", (string) 'info', (bool) false);
     }
 
     public function autoSettlementCronjob(): void

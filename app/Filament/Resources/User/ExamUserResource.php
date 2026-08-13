@@ -147,7 +147,7 @@ class ExamUserResource extends Resource
                             if ($end->isAfter($record->begin)) {
                                 $rep->updateExamUserEnd($record, $end, $data['reason'] ?? '');
                             } else {
-                                do_log(sprintf("examUser: %d end: %s is before begin: %s, skip", $record->id, $end, $record->begin));
+                                \App\Support\Logger::writeWithContext((string) sprintf("examUser: %d end: %s is before begin: %s, skip", $record->id, $end, $record->begin), (string) 'info', (bool) false);
                             }
                         }
                     })

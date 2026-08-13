@@ -45,7 +45,7 @@ if (!$id)
 
 $torrentName = \App\Models\Torrent::query()->where('id', $id)->value('name');
 
-$fn = getFullDirectory("$torrent_dir/$id.torrent");
+$fn = \App\Support\Path::resolve("{$torrent_dir}/{$id}.torrent", \ROOT_PATH);
 
 if (!$torrentName || !is_file($fn) || !is_readable($fn))
 	\App\Support\LegacyResponse::notFound();

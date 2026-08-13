@@ -22,10 +22,10 @@ if ($__server_REQUEST_METHOD == "POST")
 
 	$from_email = substr(htmlspecialchars(trim(\App\Support\SupportContext::getPost("from_email"))), 0, 80);
 	if ($from_email == "") $from_email = "".$SITEEMAIL."";
-	$from_email =  safe_email($from_email);
+	$from_email =  \App\Support\Email::sanitizeForDisplay((string) $from_email);
 	if (!$from_email)
     	\App\Support\LegacyResponse::abort("Error", "You must enter an email address!");
-	if (!check_email($from_email))
+	if (!\App\Support\Email::isWellFormed((string) $from_email))
   	\App\Support\LegacyResponse::abort("Error", "Invalid email address!");
 	$from = "$from <$from_email>";
 
@@ -42,7 +42,7 @@ if ($__server_REQUEST_METHOD == "POST")
 		$message . "\n\n" .
 		"---------------------------------------------------------------------\n$SITENAME E-Mail Gateway\n";
 
-	$success = sent_mail($to,$from,$from_email,$subject,$message,"E-Mail Gateway",false);
+	$success = \App\Support\Mail::sentLegacy((string) $to, (string) $from, (string) $from_email, (string) $subject, (string) $message, (string) "E-Mail Gateway", (bool) false, (bool) false, '', (string) 'UTF-8');
 
 	if ($success)
 		\App\Support\LegacyResponse::abort("Success", "E-mail successfully queued for delivery.");

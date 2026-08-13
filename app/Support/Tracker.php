@@ -26,7 +26,7 @@ final class Tracker
         $url = TrackerUrl::getById($trackerUrlId);
 
         if (empty($url)) {
-            $ssl_torrent = \isHttps() ? 'https://' : 'http://';
+            $ssl_torrent = \App\Support\Url::isSecure() ? 'https://' : 'http://';
             $base_announce_url = sprintf(
                 '%s/%s',
                 trim(Setting::getBaseUrl(), '/'),

@@ -36,9 +36,9 @@ class TorrentUploadController extends Controller
 
         if (empty(SupportContext::getGlobal('lang_upload')) || empty(SupportContext::getGlobal('lang_edit'))) {
             SupportContext::setServerValue('SCRIPT_NAME', '/upload.php');
-            require base_path(get_langfile_path());
+            require base_path(\App\Support\Locale::scriptFilePath((string) "", (bool) false, (string) ""));
             SupportContext::setGlobal('lang_upload', $lang_upload ?? []);
-            require base_path(get_langfile_path('edit.php'));
+            require base_path(\App\Support\Locale::scriptFilePath((string) 'edit.php', (bool) false, (string) ""));
             SupportContext::setGlobal('lang_edit', $lang_edit ?? []);
         }
 

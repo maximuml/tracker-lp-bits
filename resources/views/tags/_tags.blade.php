@@ -110,7 +110,7 @@ insert_tag(
 	$lang_tags['text_hyperlink_one'],
 	$lang_tags['text_hyperlink_one_description'],
 	$lang_tags['text_hyperlink_one_syntax'],
-	sprintf($lang_tags['text_hyperlink_one_example'], getSchemeAndHttpHost()),
+	sprintf($lang_tags['text_hyperlink_one_example'], \App\Support\Url::schemeAndHost(false)),
 	$lang_tags['text_hyperlink_one_remarks']
 );
 
@@ -118,7 +118,7 @@ insert_tag(
 	$lang_tags['text_hyperlink_two'],
 	$lang_tags['text_hyperlink_two_description'],
 	$lang_tags['text_hyperlink_two_syntax'],
-	sprintf($lang_tags['text_hyperlink_two_example'], getSchemeAndHttpHost(), $siteName),
+	sprintf($lang_tags['text_hyperlink_two_example'], \App\Support\Url::schemeAndHost(false), $siteName),
 	$lang_tags['text_hyperlink_two_remarks']
 );
 
@@ -126,7 +126,7 @@ insert_tag(
 	$lang_tags['text_image_one'],
 	$lang_tags['text_image_one_description'],
 	$lang_tags['text_image_one_syntax'],
-	sprintf($lang_tags['text_image_one_example'], getSchemeAndHttpHost()),
+	sprintf($lang_tags['text_image_one_example'], \App\Support\Url::schemeAndHost(false)),
 	$lang_tags['text_image_one_remarks']
 );
 
@@ -134,7 +134,7 @@ insert_tag(
 	$lang_tags['text_image_two'],
 	$lang_tags['text_image_two_description'],
 	$lang_tags['text_image_two_syntax'],
-	sprintf($lang_tags['text_image_two_example'], getSchemeAndHttpHost()),
+	sprintf($lang_tags['text_image_two_example'], \App\Support\Url::schemeAndHost(false)),
 	$lang_tags['text_image_two_remarks']
 );
 

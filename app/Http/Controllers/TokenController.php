@@ -23,17 +23,17 @@ class TokenController extends Controller
             $user = Auth::user();
             $count = $user->tokens()->count();
             if ($count >= 5) {
-                throw new NexusException(nexus_trans("token.maximum_allow_number_reached"));
+                throw new NexusException(\App\Support\Locale::trans("token.maximum_allow_number_reached", [], null));
             }
             $allowed = TokenRepository::listUserTokenPermissionAllowed();
             foreach ($request->permissions as $permission) {
                 if (!isset($allowed[$permission])) {
-                    throw new NexusException(nexus_trans("token.permission_not_allowed", ['permission_text' => nexus_trans("route-permission.{$permission}.text")]));
+                    throw new NexusException(\App\Support\Locale::trans("token.permission_not_allowed", ['permission_text' => \App\Support\Locale::trans("route-permission.{$permission}.text", [], null)], null));
                 }
             }
             $newAccessToken = $user->createToken($request->name, $request->permissions);
             $tokenText = $newAccessToken->plainTextToken;
-            $msg = nexus_trans("token.create_success_tip", ['token' => $tokenText]);
+            $msg = \App\Support\Locale::trans("token.create_success_tip", ['token' => $tokenText], null);
             return $this->success(['token' => $tokenText], $msg);
         } catch (\Exception $exception) {
             return $this->fail(false, $exception->getMessage());

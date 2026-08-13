@@ -107,7 +107,7 @@ final class CleanupService
     public function runAll(bool $forceAll = false, bool $printProgress = false): string|bool
     {
         $now = time();
-        $requestId = nexus()->getRequestId();
+        $requestId = \Nexus\Nexus::instance()->getRequestId();
         $output = '';
 
         foreach (self::CLASSES as $level => $taskList) {
@@ -119,14 +119,14 @@ final class CleanupService
 
                 if ($ts === 0) {
                     NexusDB::table('avps')->insertOrIgnore(['arg' => $arg, 'value_u' => $now]);
-                    do_log("no value for arg: '{$arg}', return");
+                    \App\Support\Logger::writeWithContext((string) "no value for arg: '{$arg}', return", (string) 'info', (bool) false);
 
                     return false;
                 }
 
                 if ($ts + $interval > $now) {
                     $log = "Cleanup ends at Priority Class " . ($level - 1);
-                    do_log("{$log}, {$ts} + {$interval} > {$now}");
+                    \App\Support\Logger::writeWithContext((string) "{$log}, {$ts} + {$interval} > {$now}", (string) 'info', (bool) false);
 
                     return $log;
                 }
@@ -137,7 +137,7 @@ final class CleanupService
                     ->update(['value_u' => $now]);
 
                 if ($claimed === 0) {
-                    do_log("cleanup class {$level} already claimed by another runner");
+                    \App\Support\Logger::writeWithContext((string) "cleanup class {$level} already claimed by another runner", (string) 'info', (bool) false);
 
                     return false;
                 }
@@ -167,7 +167,7 @@ final class CleanupService
 
             if (! $lock->acquire()) {
                 $msg = "Task {$task} is already running.";
-                do_log($msg, 'warning');
+                \App\Support\Logger::writeWithContext((string) $msg, (string) 'warning', (bool) false);
                 if ($printProgress) {
                     $output .= $msg . "\n";
                 }
@@ -179,10 +179,10 @@ final class CleanupService
                 if ($printProgress) {
                     $output .= $this->formatProgress($log);
                 }
-                do_log($log);
+                \App\Support\Logger::writeWithContext((string) $log, (string) 'info', (bool) false);
             } catch (\Throwable $e) {
                 $lock->release();
-                do_log("cleanup task {$task} failed: " . $e->getMessage(), 'error');
+                \App\Support\Logger::writeWithContext((string) ("cleanup task {$task} failed: " . $e->getMessage()), (string) 'error', (bool) false);
                 if ($printProgress) {
                     $output .= "Task {$task} failed: " . $e->getMessage() . "\n";
                 }
@@ -223,6 +223,6 @@ final class CleanupService
 
     private function formatProgress(string $message): string
     {
-        return sprintf("[%s] [%s] %s ... done!\n", date('Y-m-d H:i:s'), nexus()->getRequestId(), $message);
+        return sprintf("[%s] [%s] %s ... done!\n", date('Y-m-d H:i:s'), \Nexus\Nexus::instance()->getRequestId(), $message);
     }
 }

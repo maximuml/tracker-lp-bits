@@ -206,13 +206,13 @@ final class Comment
         $s = \App\Support\Format::formatUrls($s, $newtab);
 
         if (strpos($s, '[quote') !== false && strpos($s, '[/quote]') !== false) {
-            $s = \format_quotes($s);
+            $s = BBCode::quotes($s, Locale::trans('label.text_quote'));
         }
 
         $s = (string) preg_replace_callback(
             '/\[em([1-9][0-9]*)\]/i',
             static function (array $m): string {
-                $smile = \get_smile((int) $m[1]);
+                $smile = \App\Support\Smilies::pathFor((int) (int) $m[1]);
                 return $smile ? '<img src="'.$smile.'" alt="[em'.$m[1].']" />' : '[em'.$m[1].']';
             },
             $s,
@@ -225,7 +225,7 @@ final class Comment
                     return \App\Support\HtmlRenderer::formatSpoiler(
                         $m[3],
                         $m[2],
-                        \nexus()->getScript() != 'preview',
+                        \Nexus\Nexus::instance()->getScript() != 'preview',
                     );
                 },
                 $s,
@@ -238,7 +238,7 @@ final class Comment
             $s = (string) preg_replace_callback(
                 '/\[attach\]([0-9a-zA-z][0-9a-zA-z]*)\[\/attach\]/is',
                 function (array $m) use ($enableimage, $imageresizer): string {
-                    return \print_attachment($m[1], $enableimage, $imageresizer);
+                    return \App\Support\Attachment::renderByKey((string) $m[1], (bool) $enableimage, (bool) $imageresizer);
                 },
                 $s,
                 $limit,

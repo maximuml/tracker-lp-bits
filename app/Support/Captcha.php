@@ -92,7 +92,7 @@ final class Captcha
         bool $maxattemptlog = false,
         bool $head = true,
     ): bool {
-        return LegacyAuth::checkCode($imagehash, $imagestring, $where, $maxattemptlog, $head, \legacy_auth_context());
+        return LegacyAuth::checkCode($imagehash, $imagestring, $where, $maxattemptlog, $head, \App\Support\LegacyAuthContext::fromSupportContext());
     }
 
     /**

@@ -84,7 +84,7 @@ class AppPanelProvider extends PanelProvider
             ])
             ->navigationItems([
                 NavigationItem::make('Horizon')
-                ->label(fn () => nexus_trans('admin.sidebar.queue_monitor', [], Auth::user() ? get_langfolder_cookie(true) : 'en'))
+                ->label(fn () => \App\Support\Locale::trans('admin.sidebar.queue_monitor', [], Auth::user() ? \App\Support\Locale::folderFromCookie(\App\Support\SupportContext::getCookieValue('c_lang_folder', ''), (bool) true) : 'en'))
                 ->icon('heroicon-o-presentation-chart-line')
                 ->group('System')
                 ->sort(99)

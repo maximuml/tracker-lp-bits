@@ -81,9 +81,9 @@ class UserResetIdAutoIncrement extends Command
         ];
         $userRep->store($insert);
 
-        $log = sprintf('[%s], %s, result: %s', nexus()->getRequestId(), __METHOD__, var_export($result, true));
+        $log = sprintf('[%s], %s, result: %s', \Nexus\Nexus::instance()->getRequestId(), __METHOD__, var_export($result, true));
         $this->info($log);
-        do_log($log);
+        \App\Support\Logger::writeWithContext((string) $log, (string) 'info', (bool) false);
 
         return 0;
     }

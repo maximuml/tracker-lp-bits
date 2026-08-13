@@ -48,7 +48,7 @@ if ($search) {
             $resultFromSearchRep = $searchRep->search($searchParams, $CURUSER['id']);
             $count = $resultFromSearchRep['total'];
         } catch (\Throwable $e) {
-            do_log('MeiliSearch search failed, falling back to SQL: ' . $e->getMessage(), 'error');
+            \App\Support\Logger::writeWithContext((string) ('MeiliSearch search failed, falling back to SQL: ' . $e->getMessage()), (string) 'error', (bool) false);
             $shouldUseMeili = false;
         }
     }
@@ -134,7 +134,7 @@ if (((\App\Support\SupportContext::getQuery('sort') !== null)) && \App\Support\S
 
 list($pagertop, $pagerbottom, $limit, $offset, $size, $page) = \App\Support\Pagination::pager($torrentsperpage, $count, $addparam);
 
-\App\Support\Html::stdhead(nexus_trans('search.global_search'));
+\App\Support\Html::stdhead(\App\Support\Locale::trans('search.global_search', [], null));
 print("<table width=\"97%\" class=\"main\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\"><tr><td class=\"embedded\">");
 if ($search && $count > 0) {
     if ($shouldUseMeili) {

@@ -37,7 +37,7 @@ class RewardController extends Controller
         $result = $this->repository->getList($request->all());
         $resource = RewardResource::collection($result);
         $resource->additional([
-            'page_title' => nexus_trans('reward.index.page_title'),
+            'page_title' => \App\Support\Locale::trans('reward.index.page_title', [], null),
         ]);
 
         return $this->success($resource);

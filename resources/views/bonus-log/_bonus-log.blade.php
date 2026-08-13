@@ -26,11 +26,11 @@ if ($businessType && !(isset($businessTypeOptions[$businessType]))) {
     \App\Support\LegacyResponse::abort("Error", "Invalid business_type: $businessType");
 }
 
-\App\Support\Html::stdhead(nexus_trans('bonus-log.title_for_user'));
+\App\Support\Html::stdhead(\App\Support\Locale::trans('bonus-log.title_for_user', [], null));
 $pagerParam = "?uid=$uid&category=$category&business_type=$businessType";
-print("<h1 align=center>".nexus_trans('bonus-log.title_for_user') . "<a href=userdetails.php?id=" . htmlspecialchars($uid) . "><b>&nbsp;".htmlspecialchars($user->username)."</b></a></h1>");
+print("<h1 align=center>".\App\Support\Locale::trans('bonus-log.title_for_user', [], null) . "<a href=userdetails.php?id=" . htmlspecialchars($uid) . "><b>&nbsp;".htmlspecialchars($user->username)."</b></a></h1>");
 
-$textSelectOnePlease = nexus_trans('nexus.select_one_please');
+$textSelectOnePlease = \App\Support\Locale::trans('nexus.select_one_please', [], null);
 $categoryOptionsText = $businessTypeOptionsText = '';
 foreach ($categoryOptions as $name => $text) {
     $categoryOptionsText .= sprintf(
@@ -45,10 +45,10 @@ foreach ($businessTypeOptions as $name => $text) {
     );
 }
 
-$resetText = nexus_trans('label.reset');
-$submitText = nexus_trans('label.submit');
-$categoryText = nexus_trans('bonus-log.category');
-$businessTypeText = nexus_trans('bonus-log.fields.business_type');
+$resetText = \App\Support\Locale::trans('label.reset', [], null);
+$submitText = \App\Support\Locale::trans('label.submit', [], null);
+$categoryText = \App\Support\Locale::trans('bonus-log.category', [], null);
+$businessTypeText = \App\Support\Locale::trans('bonus-log.fields.business_type', [], null);
 $filterForm = <<<FORM
 <div>
     <form id="filterForm" action="{$__server_REQUEST_URI}" method="get">
@@ -85,12 +85,12 @@ $list = $rep->getList($category, $uid, $businessType, $page + 1, $pageSize);
 print($filterForm);
 print("<table id='bonus-log-table' width='100%' cellpadding='5'>");
 print("<tr>
-    <td class='colhead' align='left'>".nexus_trans('bonus-log.fields.business_type')."</td>
-    <td class='colhead' align='left'>".nexus_trans('bonus-log.fields.old_total_value')."</td>
-    <td class='colhead' align='left'>".nexus_trans('bonus-log.fields.value')."</td>
-    <td class='colhead' align='left'>".nexus_trans('bonus-log.fields.new_total_value')."</td>
-    <td class='colhead' align='left'>".nexus_trans('label.comment')."</td>
-    <td class='colhead' align='left'>".nexus_trans('label.created_at')."</td>
+    <td class='colhead' align='left'>".\App\Support\Locale::trans('bonus-log.fields.business_type', [], null)."</td>
+    <td class='colhead' align='left'>".\App\Support\Locale::trans('bonus-log.fields.old_total_value', [], null)."</td>
+    <td class='colhead' align='left'>".\App\Support\Locale::trans('bonus-log.fields.value', [], null)."</td>
+    <td class='colhead' align='left'>".\App\Support\Locale::trans('bonus-log.fields.new_total_value', [], null)."</td>
+    <td class='colhead' align='left'>".\App\Support\Locale::trans('label.comment', [], null)."</td>
+    <td class='colhead' align='left'>".\App\Support\Locale::trans('label.created_at', [], null)."</td>
 </tr>");
 foreach ($list as $row) {
     print("<tr>

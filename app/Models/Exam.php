@@ -122,7 +122,7 @@ class Exam extends NexusModel
         $result = self::$indexes;
         $keyValues = [];
         foreach ($result as $key => &$value) {
-            $text = nexus_trans("exam.index_text_$key");
+            $text = \App\Support\Locale::trans("exam.index_text_{$key}", [], null);
             $value['text'] = $text;
             $keyValues[$key] = $text;
         }
@@ -136,9 +136,9 @@ class Exam extends NexusModel
     public static function listRecurringOptions(): array
     {
         return [
-            self::RECURRING_DAILY => nexus_trans("exam.recurring_daily"),
-            self::RECURRING_WEEKLY => nexus_trans("exam.recurring_weekly"),
-            self::RECURRING_MONTHLY => nexus_trans("exam.recurring_monthly"),
+            self::RECURRING_DAILY => \App\Support\Locale::trans("exam.recurring_daily", [], null),
+            self::RECURRING_WEEKLY => \App\Support\Locale::trans("exam.recurring_weekly", [], null),
+            self::RECURRING_MONTHLY => \App\Support\Locale::trans("exam.recurring_monthly", [], null),
         ];
     }
 
@@ -146,8 +146,8 @@ class Exam extends NexusModel
     public static function listTypeOptions(): array
     {
         return [
-            self::TYPE_EXAM => nexus_trans("exam.type_exam"),
-            self::TYPE_TASK => nexus_trans("exam.type_task"),
+            self::TYPE_EXAM => \App\Support\Locale::trans("exam.type_exam", [], null),
+            self::TYPE_TASK => \App\Support\Locale::trans("exam.type_task", [], null),
         ];
     }
 
@@ -166,7 +166,7 @@ class Exam extends NexusModel
 
     public function getStatusTextAttribute(): string
     {
-        return $this->status == self::STATUS_ENABLED ? nexus_trans('label.enabled') : nexus_trans('label.disabled');
+        return $this->status == self::STATUS_ENABLED ? \App\Support\Locale::trans('label.enabled', [], null) : \App\Support\Locale::trans('label.disabled', [], null);
     }
 
     public function getIsDiscoveredTextAttribute(): string
@@ -190,7 +190,7 @@ class Exam extends NexusModel
             if (isset($index['checked']) && $index['checked']) {
                 $arr[] = sprintf(
                     '%s: %s %s',
-                    nexus_trans("exam.index_text_{$index['index']}"),
+                    \App\Support\Locale::trans("exam.index_text_{$index['index']}", [], null),
                     $index['require_value'],
                     self::$indexes[$index['index']]['unit'] ?? ''
                 );
@@ -208,7 +208,7 @@ class Exam extends NexusModel
             $classes = collect(User::$classes)->only($currentFilters[$filter]);
             $arr[] = sprintf(
                 '%s: %s',
-                nexus_trans("exam.filters.$filter"), $classes->map(fn ($value, $key) => User::getClassText($key))->implode(', ')
+                \App\Support\Locale::trans("exam.filters.{$filter}", [], null), $classes->map(fn ($value, $key) => User::getClassText($key))->implode(', ')
             );
         }
 
@@ -218,7 +218,7 @@ class Exam extends NexusModel
             if (!empty($range[0]) || !empty($range[1])) {
                 $arr[] = sprintf(
                     "%s: <br/>%s ~ %s",
-                    nexus_trans("exam.filters.$filter"),
+                    \App\Support\Locale::trans("exam.filters.{$filter}", [], null),
                     $range[0] ? Carbon::parse($range[0])->toDateTimeString() : '--',
                     $range[1] ? Carbon::parse($range[1])->toDateTimeString() : '--'
                 );
@@ -231,7 +231,7 @@ class Exam extends NexusModel
             if (!empty($range[0]) || !empty($range[1])) {
                 $arr[] = sprintf(
                     "%s: %s ~ %s",
-                    nexus_trans("exam.filters.$filter"),
+                    \App\Support\Locale::trans("exam.filters.{$filter}", [], null),
                     $range[0] ?? "--",
                     $range[1] ?? '--'
                 );
@@ -241,7 +241,7 @@ class Exam extends NexusModel
         $filter = self::FILTER_USER_DONATE;
         if (!empty($currentFilters[$filter])) {
             $donateStatus = collect(User::$donateStatus)->only($currentFilters[$filter]);
-            $arr[] = sprintf('%s: %s', nexus_trans("exam.filters.$filter"), $donateStatus->pluck('text')->implode(', '));
+            $arr[] = sprintf('%s: %s', \App\Support\Locale::trans("exam.filters.{$filter}", [], null), $donateStatus->pluck('text')->implode(', '));
         }
 
         return implode("<br/>", $arr);
@@ -269,7 +269,7 @@ class Exam extends NexusModel
         if (!empty($this->recurring)) {
             return $this->getRecurringEnd(Carbon::now());
         }
-        throw new \RuntimeException(nexus_trans("exam.time_condition_invalid"));
+        throw new \RuntimeException(\App\Support\Locale::trans("exam.time_condition_invalid", [], null));
     }
 
     /** @param  Carbon  $time */

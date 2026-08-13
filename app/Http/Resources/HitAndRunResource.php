@@ -32,7 +32,7 @@ class HitAndRunResource extends JsonResource
             'seed_time_required' => $this->seedTimeRequired,
             'inspect_time_left' => $this->inspectTimeLeft,
         ];
-        if (nexus()->isPlatformAdmin()) {
+        if (\Nexus\Nexus::instance()->isPlatformAdmin()) {
             $out['comment'] = nl2br(trim($out['comment']));
         }
         return $out;

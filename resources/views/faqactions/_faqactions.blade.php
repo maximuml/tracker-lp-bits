@@ -37,7 +37,7 @@ if (((\App\Support\SupportContext::getQuery('action') !== null)) && \App\Support
 	foreach(\App\Support\SupportContext::getPost('order') as $id => $position) {
 		\Nexus\Database\NexusDB::table('faq')->where('id', (int)$id)->update(['order' => (int)$position]);
 	}
-	header("Location: " . get_protocol_prefix() . "$BASEURL/faqmanage.php");
+	header("Location: " . \App\Support\Http::protocolPrefix(\App\Support\Url::isSecure()) . "$BASEURL/faqmanage.php");
 	return;
 }
 
@@ -107,7 +107,7 @@ elseif (((\App\Support\SupportContext::getQuery('action') !== null)) && \App\Sup
 	    'categ' => (int)\App\Support\SupportContext::getPost('categ'),
 	]);
     clear_faq_cache();
-	header("Location: " . get_protocol_prefix() . "$BASEURL/faqmanage.php");
+	header("Location: " . \App\Support\Http::protocolPrefix(\App\Support\Url::isSecure()) . "$BASEURL/faqmanage.php");
 	return;
 }
 
@@ -121,7 +121,7 @@ elseif (((\App\Support\SupportContext::getQuery('action') !== null)) && \App\Sup
 	    'categ' => 0,
 	]);
     clear_faq_cache();
-	header("Location: " . get_protocol_prefix() . "$BASEURL/faqmanage.php");
+	header("Location: " . \App\Support\Http::protocolPrefix(\App\Support\Url::isSecure()) . "$BASEURL/faqmanage.php");
 	return;
 }
 
@@ -129,7 +129,7 @@ elseif (((\App\Support\SupportContext::getQuery('action') !== null)) && \App\Sup
 elseif (((\App\Support\SupportContext::getQuery('action') !== null)) && \App\Support\SupportContext::getQuery('action') == "delete" && ((\App\Support\SupportContext::getQuery('id') !== null))) {
 	if (\App\Support\SupportContext::getQuery('confirm') == "yes") {
 		\Nexus\Database\NexusDB::table('faq')->where('id', (int)(\App\Support\SupportContext::getQuery('id') ?? 0))->delete();
-		header("Location: " . get_protocol_prefix() . "$BASEURL/faqmanage.php");
+		header("Location: " . \App\Support\Http::protocolPrefix(\App\Support\Url::isSecure()) . "$BASEURL/faqmanage.php");
 		return;
 	}
 	else {
@@ -170,7 +170,7 @@ elseif (((\App\Support\SupportContext::getQuery('action') !== null)) && \App\Sup
 	print("<table border=\"1\" cellspacing=\"0\" cellpadding=\"10\" align=\"center\">\n");
 	print("<tr><td>Title:</td><td><input style=\"width: 300px;\" type=\"text\" name=\"title\" value=\"\" /></td></tr>\n");
 	$s = "<select name=language>";
-	$langs = langlist("rule_lang");
+	$langs = \App\Support\Locale::languageList("rule_lang", null);
 	foreach ($langs as $row)
 	{
 		if($row["site_lang_folder"] == $deflang) $se = " selected"; else $se = "";
@@ -216,7 +216,7 @@ elseif (((\App\Support\SupportContext::getQuery('action') !== null)) && \App\Sup
 	    'order' => $order,
 	]);
     clear_faq_cache();
-	header("Location: " . get_protocol_prefix() . "$BASEURL/faqmanage.php");
+	header("Location: " . \App\Support\Http::protocolPrefix(\App\Support\Url::isSecure()) . "$BASEURL/faqmanage.php");
 	return;
 }
 
@@ -248,9 +248,9 @@ elseif (((\App\Support\SupportContext::getQuery('action') !== null)) && \App\Sup
 	    'order' => $order,
 	]);
     clear_faq_cache();
-	header("Location: " . get_protocol_prefix() . "$BASEURL/faqmanage.php");
+	header("Location: " . \App\Support\Http::protocolPrefix(\App\Support\Url::isSecure()) . "$BASEURL/faqmanage.php");
 	return;
 } else {
-	header("Location: " . get_protocol_prefix() . "$BASEURL/faqmanage.php");
+	header("Location: " . \App\Support\Http::protocolPrefix(\App\Support\Url::isSecure()) . "$BASEURL/faqmanage.php");
 	return;
 }

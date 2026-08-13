@@ -15,6 +15,6 @@ class CreateCategory extends CreateRecord
 
     protected function afterCreate()
     {
-        clear_category_cache();
+        \App\Support\Cache::clearCategory();
     }
 }

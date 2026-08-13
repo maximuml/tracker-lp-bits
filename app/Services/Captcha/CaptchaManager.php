@@ -104,7 +104,7 @@ class CaptchaManager
             }
 
             if (!is_array($config) && function_exists('nexus_config')) {
-                $config = nexus_config('captcha', []);
+                $config = \App\Support\Config::get('captcha', []);
             }
 
             if (!is_array($config)) {

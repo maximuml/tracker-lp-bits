@@ -81,14 +81,7 @@ class TorrentPolicy extends BasePolicy
         if ((($torrent->banned == 'yes' || ($approvalNotAllowed && !$allowOwnerDownload)) && !$canSeedBanned)
             || !$canAccessTorrent
         ) {
-            do_log(sprintf(
-                "[DENY_DOWNLOAD], user: %s, approvalNotAllowed: %s, allowOwnerDownload: %s, canSeedBanned: %s, canAccessTorrent: %s",
-                $user->id,
-                $approvalNotAllowed ? 'true' : 'false',
-                $allowOwnerDownload ? 'true' : 'false',
-                $canSeedBanned ? 'true' : 'false',
-                $canAccessTorrent ? 'true' : 'false'
-            ), 'error');
+            \App\Support\Logger::writeWithContext((string) sprintf("[DENY_DOWNLOAD], user: %s, approvalNotAllowed: %s, allowOwnerDownload: %s, canSeedBanned: %s, canAccessTorrent: %s", $user->id, $approvalNotAllowed ? 'true' : 'false', $allowOwnerDownload ? 'true' : 'false', $canSeedBanned ? 'true' : 'false', $canAccessTorrent ? 'true' : 'false'), (string) 'error', (bool) false);
             return false;
         }
 

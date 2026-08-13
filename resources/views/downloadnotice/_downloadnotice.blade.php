@@ -16,18 +16,18 @@ if ($__server_REQUEST_METHOD == "POST")
 		if ($hidenotice){
 			\App\Models\User::query()->where('id', $CURUSER['id'])->update(['showdlnotice' => 0]);
 		}
-		\App\Support\LegacyResponse::redirect(getSchemeAndHttpHost(). "/download.php?id=".$torrentid."&letdown=1");
+		\App\Support\LegacyResponse::redirect(\App\Support\Url::schemeAndHost(false). "/download.php?id=".$torrentid."&letdown=1");
 	}
 	elseif ($type == 'client')
 	{
 		if ($hidenotice){
 			\App\Models\User::query()->where('id', $CURUSER['id'])->update(['showclienterror' => 'no']);
 		}
-        \App\Support\LegacyResponse::redirect(getSchemeAndHttpHost() . "/download.php?id=".$torrentid."&letdown=1");
+        \App\Support\LegacyResponse::redirect(\App\Support\Url::schemeAndHost(false) . "/download.php?id=".$torrentid."&letdown=1");
 	}
 	else
 	{
-        \App\Support\LegacyResponse::redirect(getSchemeAndHttpHost() . "/download.php?id=".$torrentid."&letdown=1");
+        \App\Support\LegacyResponse::redirect(\App\Support\Url::schemeAndHost(false) . "/download.php?id=".$torrentid."&letdown=1");
 	}
 }
 else

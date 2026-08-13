@@ -7,17 +7,12 @@ parameters:
         - app/Support
         - app/Models
 
-    excludePaths:
-        analyse:
-            - app/Support/Legacy
-
     bootstrapFiles:
         - tests/phpstan/bootstrap.php
         - tests/phpstan/constants.stub.php
         - bootstrap/app.php
 
     scanFiles:
-        - app/Support/Legacy/functions.php
         - config/nexus_constants.php
 
     scanDirectories:

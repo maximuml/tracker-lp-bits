@@ -24,10 +24,10 @@ class ClearTorrentCache implements ShouldQueue
         $torrentId = $event->model?->id ?? 0;
         if ($torrentId > 0) {
             $infoHash = Torrent::query()->where('id', $torrentId)->value('info_hash');
-            clear_torrent_cache($infoHash);
-            do_log("success clear torrent: $torrentId cache with info_hash: " . rawurlencode($infoHash));
+            \App\Support\Cache::clearTorrent($infoHash);
+            \App\Support\Logger::writeWithContext((string) ("success clear torrent: {$torrentId} cache with info_hash: " . rawurlencode($infoHash)), (string) 'info', (bool) false);
         } else {
-            do_log("no torrent id", 'error');
+            \App\Support\Logger::writeWithContext((string) "no torrent id", (string) 'error', (bool) false);
         }
     }
 }

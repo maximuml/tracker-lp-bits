@@ -9,20 +9,20 @@ $total = (clone $query)->count();
 $perPage = 20;
 list($paginationTop, $paginationBottom, $limit, $offset) = \App\Support\Pagination::pager($perPage, $total, "?");
 $rows = (clone $query)->offset($offset)->take($perPage)->orderBy('id', 'desc')->withCount("onGoingUsers")->get();
-$title = nexus_trans('exam.type_task');
-$columnNameLabel = nexus_trans('label.name');
-$columnIndexLabel = nexus_trans('exam.index');
-$columnBeginTimeLabel = nexus_trans('label.begin');
-$columnEndTimeLabel = nexus_trans('label.end');
-$columnDurationLabel = nexus_trans('label.duration');
-$columnRecurringLabel = nexus_trans('exam.recurring');
-$columnTargetUserLabel = nexus_trans('label.exam.filter_formatted');
-$columnDescLabel = nexus_trans('label.description');
-$columnSuccessRewardLabel = nexus_trans('exam.success_reward_bonus');
-$columnFailDeductLabel = nexus_trans('exam.fail_deduct_bonus');
-$columnDescriptionDeductLabel = nexus_trans('label.description');
-$columnClaimLabel = nexus_trans('exam.action_claim_task');
-$columnClaimedUserCountLabel = nexus_trans('exam.claimed_user_count');
+$title = \App\Support\Locale::trans('exam.type_task', [], null);
+$columnNameLabel = \App\Support\Locale::trans('label.name', [], null);
+$columnIndexLabel = \App\Support\Locale::trans('exam.index', [], null);
+$columnBeginTimeLabel = \App\Support\Locale::trans('label.begin', [], null);
+$columnEndTimeLabel = \App\Support\Locale::trans('label.end', [], null);
+$columnDurationLabel = \App\Support\Locale::trans('label.duration', [], null);
+$columnRecurringLabel = \App\Support\Locale::trans('exam.recurring', [], null);
+$columnTargetUserLabel = \App\Support\Locale::trans('label.exam.filter_formatted', [], null);
+$columnDescLabel = \App\Support\Locale::trans('label.description', [], null);
+$columnSuccessRewardLabel = \App\Support\Locale::trans('exam.success_reward_bonus', [], null);
+$columnFailDeductLabel = \App\Support\Locale::trans('exam.fail_deduct_bonus', [], null);
+$columnDescriptionDeductLabel = \App\Support\Locale::trans('label.description', [], null);
+$columnClaimLabel = \App\Support\Locale::trans('exam.action_claim_task', [], null);
+$columnClaimedUserCountLabel = \App\Support\Locale::trans('exam.claimed_user_count', [], null);
 
 $header = '<h1 style="text-align: center">'.$title.'</h1>';
 \App\Support\Html::stdhead($title);
@@ -55,10 +55,10 @@ $userTasks = $userInfo->onGoingExamAndTasks()->where("type", \App\Models\Exam::T
 //dd(last_query());
 foreach ($rows as $row) {
     $claimDisabled = $claimClass = '';
-    $claimBtnText = nexus_trans("exam.action_claim_task");
+    $claimBtnText = \App\Support\Locale::trans("exam.action_claim_task", [], null);
     if ($userTasks->has($row->id)) {
         $claimDisabled = " disabled";
-        $claimBtnText = nexus_trans("exam.claimed_already");
+        $claimBtnText = \App\Support\Locale::trans("exam.claimed_already", [], null);
     } else {
         $claimClass = "claim";
     }
@@ -74,7 +74,7 @@ foreach ($rows as $row) {
     $columns[] = sprintf('<td>%s</td>', $row->filterFormatted);
     $columns[] = sprintf('<td>%s</td>', number_format($row->success_reward_bonus));
     $columns[] = sprintf('<td>%s</td>', number_format($row->fail_deduct_bonus));
-    $columns[] = sprintf('<td>%s</td>', sprintf("%s/%s",$row->on_going_users_count ?? 0, $row->max_user_count ?: nexus_trans("label.infinite")));
+    $columns[] = sprintf('<td>%s</td>', sprintf("%s/%s",$row->on_going_users_count ?? 0, $row->max_user_count ?: \App\Support\Locale::trans("label.infinite", [], null)));
     $columns[] = sprintf('<td>%s</td>', $row->description);
     $columns[] = sprintf('<td>%s</td>', $claimAction);
     $table .= sprintf('<tr>%s</tr>', implode("", $columns));
@@ -82,8 +82,8 @@ foreach ($rows as $row) {
 $table .= '</tbody></table>';
 echo $header . $table . $paginationBottom;
 \App\Support\Frame::mainFrameClose();
-$confirmBuyMsg = nexus_trans('exam.confirm_to_claim');
-$confirmGiftMsg = nexus_trans('medal.confirm_to_gift');
+$confirmBuyMsg = \App\Support\Locale::trans('exam.confirm_to_claim', [], null);
+$confirmGiftMsg = \App\Support\Locale::trans('medal.confirm_to_gift', [], null);
 $js = <<<JS
 jQuery('.claim').on('click', function (e) {
     let id = jQuery(this).attr('data-id')

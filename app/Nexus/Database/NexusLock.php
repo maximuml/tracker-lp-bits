@@ -55,7 +55,7 @@ class NexusLock extends RedisLock
     {
         $lock = new self($name, $seconds, $owner);
         if (!$lock->acquire()) {
-            do_log("$name failed to acquire lock", 'error');
+            \App\Support\Logger::writeWithContext((string) "{$name} failed to acquire lock", (string) 'error', (bool) false);
             throw new LockFailException($name, $lock->owner());
         }
         return $lock;

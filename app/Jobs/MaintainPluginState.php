@@ -39,6 +39,6 @@ class MaintainPluginState
         foreach ($enabled as $name => $value) {
             NexusDB::redis()->hSet($key, $name, $nowStr);
         }
-        do_log("$key: " . nexus_json_encode($enabled));
+        \App\Support\Logger::writeWithContext((string) ("{$key}: " . \App\Support\Json::encode($enabled)), (string) 'info', (bool) false);
     }
 }

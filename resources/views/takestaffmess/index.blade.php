@@ -31,7 +31,7 @@ if (!empty(\App\Support\SupportContext::getPost('classes'))) {
     $classIds = array_map('intval', \App\Support\SupportContext::getPost('classes'));
     $conditions[] = "class IN (" . implode(', ', $classIds) . ")";
 }
-$conditions = apply_filter("role_query_conditions", $conditions, \App\Support\SupportContext::allPost());
+$conditions = \App\Support\Hooks::applyFilter("role_query_conditions", $conditions, \App\Support\SupportContext::allPost());
 if (empty($conditions)) {
     \App\Support\LegacyResponse::abort("Error", "No valid filter");
 }

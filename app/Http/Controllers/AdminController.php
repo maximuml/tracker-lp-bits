@@ -251,10 +251,10 @@ class AdminController extends LegacyController
 
     }
 
-    public function settings(Request $request): View|RedirectResponse|Response
+    public function settings(Request $request): RedirectResponse|Response
     {
 
-        return $this->legacyPage($request, 'settings', true);
+        return $this->legacyPageWithRedirect($request, 'settings', true);
 
     }
 

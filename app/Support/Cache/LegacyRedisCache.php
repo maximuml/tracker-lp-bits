@@ -1,22 +1,27 @@
 <?php
 
-class class_cache_redis {
+namespace App\Support\Cache;
 
-    public $isEnabled;
-    public $clearCache = 0;
-    public $language = 'en';
-    public $Page = array();
-    public $Row = 1;
-    public $Part = 0;
-    public $MemKey = "";
-    public $Duration = 0;
-    public $cacheReadTimes = 0;
-    public $cacheWriteTimes = 0;
-    public $keyHits = array();
-    public $languageFolderArray = array();
+class LegacyRedisCache
+{
+    public bool $isEnabled = false;
+    public int $clearCache = 0;
+    public string $language = 'en';
+    /** @var array<int|string, mixed> */
+    public array $Page = [];
+    public int $Row = 1;
+    public int $Part = 0;
+    public string $MemKey = '';
+    public int $Duration = 0;
+    public int $cacheReadTimes = 0;
+    public int $cacheWriteTimes = 0;
+    /** @var array<string, array<string, int>> */
+    public array $keyHits = [];
+    /** @var array<string, string> */
+    public array $languageFolderArray = [];
 
-    /** @var Redis */
-    public $redis;
+    /** @var \Redis|null */
+    public ?\Redis $redis = null;
 
     function __construct() {
         $connectResult = $this->connect(); // Connect to Redis
@@ -30,7 +35,7 @@ class class_cache_redis {
     private function connect(): bool
     {
         $config = nexus_config('nexus.redis');
-        $redis = new Redis();
+        $redis = new \Redis();
         $params = [
             $config['host'],
         ];
@@ -46,7 +51,7 @@ class class_cache_redis {
             } catch (\Exception $e) {
                 do_log("redis pconnect failed: {$e->getMessage()}, retry one time", 'error');
                 $redis->close();
-                $redis = new Redis();
+                $redis = new \Redis();
                 $connectResult = $redis->pconnect(...$params);
             }
             do_log("redis pconnect: $connectResult", 'debug');
@@ -68,35 +73,37 @@ class class_cache_redis {
         return true;
     }
 
-    function getIsEnabled() {
+    function getIsEnabled(): bool {
         return $this->isEnabled;
     }
 
-    function setClearCache($isEnabled) {
+    function setClearCache(int $isEnabled): void {
         $this->clearCache = $isEnabled;
     }
 
-    function getLanguageFolderArray() {
+    /** @return array<string, string> */
+    function getLanguageFolderArray(): array {
         return $this->languageFolderArray;
     }
 
-    function setLanguageFolderArray($languageFolderArray) {
+    /** @param array<string, string> $languageFolderArray */
+    function setLanguageFolderArray(array $languageFolderArray): void {
         $this->languageFolderArray = $languageFolderArray;
     }
 
-    function getClearCache() {
+    function getClearCache(): int {
         return $this->clearCache;
     }
 
-    function setLanguage($language) {
+    function setLanguage(string $language): void {
         $this->language = $language;
     }
 
-    function getLanguage() {
+    function getLanguage(): string {
         return $this->language;
     }
 
-    function new_page($MemKey = '', $Duration = 3600, $Lang = true) {
+    function new_page(string $MemKey = '', int $Duration = 3600, bool $Lang = true): void {
         if ($Lang) {
             $language = $this->getLanguage();
             $this->MemKey = $language."_".$MemKey;
@@ -109,26 +116,26 @@ class class_cache_redis {
         $this->Page = array();
     }
 
-    function set_key(){
+    function set_key(): void {
 
     }
 
     //---------- Adding functions ----------//
 
-    function add_row(){
+    function add_row(): void {
         $this->Part = 0;
         $this->Page[$this->Row] = array();
     }
 
-    function end_row(){
+    function end_row(): void {
         $this->Row++;
     }
 
-    function add_part(){
+    function add_part(): void {
         ob_start();
     }
 
-    function end_part(){
+    function end_part(): void {
         $this->Page[$this->Row][$this->Part]=ob_get_clean();
         $this->Part++;
     }
@@ -138,7 +145,7 @@ class class_cache_redis {
     // add_part();
     // You should only use this function if the row is only going to have one part in it (convention),
     // although it will theoretically work with multiple parts.
-    function add_whole_row(){
+    function add_whole_row(): void {
         $this->Part = 0;
         $this->Page[$this->Row] = array();
         ob_start();
@@ -149,26 +156,26 @@ class class_cache_redis {
     // end_row();
     // You should only use this function if the row is only going to have one part in it (convention),
     // although it will theoretically work with multiple parts.
-    function end_whole_row(){
+    function end_whole_row(): void {
         $this->Page[$this->Row][$this->Part]=ob_get_clean();
         $this->Row++;
     }
 
     // Set a variable that will only be availabe when the system is on its row
     // This variable is stored in the same way as pages, so don't use an integer for the $Key.
-    function set_row_value($Key, $Value){
+    function set_row_value(string|int $Key, mixed $Value): void {
         $this->Page[$this->Row][$Key] = $Value;
     }
 
     // Set a variable that will always be available, no matter what row the system is on.
     // This variable is stored in the same way as rows, so don't use an integer for the $Key.
-    function set_constant_value($Key, $Value){
+    function set_constant_value(string|int $Key, mixed $Value): void {
         $this->Page[$Key] = $Value;
     }
 
     // Inserts a 'false' value into a row, which breaks out of while loops.
     // This is not necessary if the end of $this->Page is also the end of the while loop.
-    function break_loop(){
+    function break_loop(): void {
         if(count($this->Page)>0){
             $this->Page[$this->Row] = FALSE;
             $this->Row++;
@@ -180,11 +187,11 @@ class class_cache_redis {
     // These functions 'lock' a key.
     // Users cannot proceed until it is unlocked.
 
-    function lock($Key){
+    function lock(string $Key): void {
         $this->cache_value('lock_'.$Key, 'true', 3600);
     }
 
-    function unlock($Key) {
+    function unlock(string $Key): void {
 //        $this->delete('lock_'.$Key);
         $this->redis->del('lock_'.$Key);
     }
@@ -192,7 +199,7 @@ class class_cache_redis {
     //---------- Caching functions ----------//
 
     // Cache $this->Page and resets $this->Row and $this->Part
-    function cache_page(){
+    function cache_page(): void {
         $this->cache_value($this->MemKey,$this->Page, $this->Duration);
         $this->Row = 0;
         $this->Part = 0;
@@ -201,13 +208,13 @@ class class_cache_redis {
     // Exact same as cache_page, but does not store the page in cache
     // This is so that we can use classes that normally cache values in
     // situations where caching is not required
-    function setup_page(){
+    function setup_page(): void {
         $this->Row = 0;
         $this->Part = 0;
     }
 
     // Wrapper for Memcache::set, with the zlib option removed and default duration of 1 hour
-    function cache_value($Key, $Value, $Duration = 3600){
+    function cache_value(string $Key, mixed $Value, int $Duration = 3600): void {
         if (!$this->getIsEnabled()) {
             return;
         }
@@ -222,7 +229,7 @@ class class_cache_redis {
 
     // Returns the next row in the page
     // If there's only one part in the row, return that part.
-    function next_row(){
+    function next_row(): mixed {
         $this->Row++;
         $this->Part = 0;
         if(!isset($this->Page[$this->Row]) || $this->Page[$this->Row] == false){
@@ -237,25 +244,25 @@ class class_cache_redis {
     }
 
     // Returns the next part in the row
-    function next_part(){
+    function next_part(): mixed {
         $Return = $this->Page[$this->Row][$this->Part];
         $this->Part++;
         return $Return;
     }
 
     // Returns a 'row value' (a variable that changes for each row - see above).
-    function get_row_value($Key){
+    function get_row_value(string|int $Key): mixed {
         return $this->Page[$this->Row][$Key];
     }
 
     // Returns a 'constant value' (a variable that doesn't change with the rows - see above)
-    function get_constant_value($Key){
+    function get_constant_value(string|int $Key): mixed {
         return $this->Page[$Key];
     }
 
     // If a cached version of the page exists, set $this->Page to it and return true.
     // Otherwise, return false.
-    function get_page(){
+    function get_page(): bool {
         $Result = $this->get_value($this->MemKey);
         if($Result){
             $this->Row = 0;
@@ -268,7 +275,7 @@ class class_cache_redis {
     }
 
     // Wrapper for Memcache::get. Why? Because wrappers are cool.
-    function get_value($Key) {
+    function get_value(string $Key): mixed {
         if (!$this->getIsEnabled()) {
             return false;
         }
@@ -290,27 +297,30 @@ class class_cache_redis {
     }
 
     // Wrapper for Memcache::delete. For a reason, see above.
-    function delete_value($Key, $AllLang = false){
+    function delete_value(string $Key, bool $AllLang = false): int {
         if (!$this->getIsEnabled()) {
             return 0;
         }
-        $this->redis->del($Key);
-        if ($AllLang){
+        $deleted = $this->redis->del($Key);
+        if ($AllLang) {
             $langfolder_array = $this->getLanguageFolderArray();
-            foreach($langfolder_array as $lf)
-                $this->redis->del($lf."_".$Key);
+            foreach ($langfolder_array as $lf) {
+                $this->redis->del($lf . "_" . $Key);
+            }
         }
+        return (int) $deleted;
     }
 
-    function getCacheReadTimes() {
+    function getCacheReadTimes(): int {
         return $this->cacheReadTimes;
     }
 
-    function getCacheWriteTimes() {
+    function getCacheWriteTimes(): int {
         return $this->cacheWriteTimes;
     }
 
-    function getKeyHits ($type='read') {
+    /** @return array<string, int> */
+    function getKeyHits(string $type = 'read'): array {
         return $this->keyHits[$type] ?? [];
     }
 
@@ -340,9 +350,9 @@ class class_cache_redis {
      * get the redis client
      *
      * @date 2021/1/15
-     * @return Redis
+     * @return \Redis|null
      */
-    public function getRedis()
+    public function getRedis(): ?\Redis
     {
         if ($this->getIsEnabled()) {
             return $this->redis;

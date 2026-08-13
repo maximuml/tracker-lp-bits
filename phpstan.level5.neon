@@ -22,7 +22,6 @@ parameters:
 
     scanDirectories:
         - vendor
-        - classes
 
     dynamicConstantNames:
         - IN_NEXUS

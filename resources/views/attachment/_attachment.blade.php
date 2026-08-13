@@ -2,9 +2,8 @@
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
 $__server_REQUEST_METHOD = \App\Support\SupportContext::getServerValue('REQUEST_METHOD');
-include_once($rootpath . 'classes/class_attachment.php');
 
-$Attach = new ATTACHMENT($CURUSER['id']);
+$Attach = new \App\Support\Attachment\AttachmentService($CURUSER['id']);
 $count_limit = $Attach->get_count_limit();
 $count_limit = (int)$count_limit;
 $count_left = $Attach->get_count_left();

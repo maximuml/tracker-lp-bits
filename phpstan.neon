@@ -2,7 +2,6 @@ parameters:
     level: 0
     paths:
         - app
-        - nexus
         - public
         - config
         - database
@@ -16,4 +15,3 @@ parameters:
             - public/vendor (?)
     scanDirectories:
         - vendor
-        - classes

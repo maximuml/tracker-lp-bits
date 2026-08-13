@@ -1,121 +1,66 @@
 <?php
-error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
-if (\App\Support\UserDisplay::currentClass() < UC_ADMINISTRATOR) {
-	\App\Support\LegacyResponse::abort("Error", "Only Administrators and above can modify the Rules, sorry.");
-}
-if (!function_exists('clear_rules_cache')) { function clear_rules_cache()
-{
-    \Nexus\Database\NexusDB::cache_del('rules');
-} }
-
-if (((\App\Support\SupportContext::getQuery("act") !== null)) && \App\Support\SupportContext::getQuery("act") == "newsect")
-{
-	\App\Support\Html::stdhead("Add section");
-	//print("<td valign=top style=\"padding: 10px;\" colspan=2 align=center>");
-	//begin_main_frame();
-	print("<h1 align=center>Add Rules</h1>");
-	print("<form method=\"post\" action=\"modrules.php?act=addsect\">");
-	print("<table border=\"1\" cellspacing=\"0\" cellpadding=\"10\" align=\"center\">\n");
-	print("<tr><td>Title:</td><td align=left><input style=\"width: 400px;\" type=\"text\" name=\"title\"/></td></tr>\n");
-	print("<tr><td style=\"vertical-align: top;\">Rules:</td><td><textarea cols=90 rows=20 name=\"text\"></textarea></td></tr>\n");
-	$s = "<select name=language>";
-	$langs = \App\Support\Locale::languageList("rule_lang", null);
-	foreach ($langs as $row)
-	{
-		if($row["site_lang_folder"] == $deflang) $se = " selected"; else $se = "";
-		$s .= "<option value=". $row["id"] . $se. ">" . htmlspecialchars($row["lang_name"]) . "</option>\n";
-	}
-	$s .= "</select>";
-	print("<tr><td>Language:</td><td align=\"center\">".$s."</td></tr>\n");
-	print("<tr><td colspan=\"2\" align=\"center\"><input type=\"submit\" value=\"Add\" style=\"width: 60px;\"></td></tr>\n");
-	print("</table></form>");
-	print("</td></tr></table>");
-	\App\Support\Html::stdfoot();
-}
-elseif (((\App\Support\SupportContext::getQuery("act") !== null)) && \App\Support\SupportContext::getQuery("act")=="addsect"){
-	$title = \App\Support\SupportContext::getPost("title");
-	$text = \App\Support\SupportContext::getPost("text");
-	$language = \App\Support\SupportContext::getPost("language");
-	\Nexus\Database\NexusDB::table('rules')->insert([
-	    'title' => $title,
-	    'text' => $text,
-	    'lang_id' => $language,
-	]);
-    clear_rules_cache();
-	header("Location: modrules.php");
-	return;
-}
-elseif (((\App\Support\SupportContext::getQuery("act") !== null)) && \App\Support\SupportContext::getQuery("act") == "edit"){
-	$id = intval(\App\Support\SupportContext::getQuery("id"));
-	$res = (array) \Nexus\Database\NexusDB::table('rules')->where('id', $id)->first();
-	\App\Support\Html::stdhead("Edit rules");
-	//print("<td valign=top style=\"padding: 10px;\" colspan=2 align=center>");
-	//begin_main_frame();
-	print("<h1 align=center>Edit Rules</h1>");
-	print("<form method=\"post\" action=\"modrules.php?act=edited\">");
-	print("<table border=\"1\" cellspacing=\"0\" cellpadding=\"10\" align=\"center\">\n");
-	print("<tr><td>Title:</td><td align=left><input style=\"width: 400px;\" type=\"text\" name=\"title\" value=\"".htmlspecialchars($res['title'])."\" /></td></tr>\n");
-	print("<tr><td style=\"vertical-align: top;\">Rules:</td><td><textarea cols=90 rows=20 name=\"text\">{$res['text']}</textarea></td></tr>\n");
-	$s = "<select name=language>";
-	$langs = \App\Support\Locale::languageList("site_lang", null);
-	foreach ($langs as $row)
-	{
-		if ($row['id'] == $res['lang_id']) $se = " selected"; else $se = "";
-		$s .= "<option value=". $row["id"] . $se. ">" . htmlspecialchars($row["lang_name"]) . "</option>\n";
-	}
-	$s .= "</select>";
-	print("<tr><td>Language:</td><td align=\"center\">".$s."</td></tr>\n");
-	print("<tr><td colspan=\"2\" align=\"center\"><input type=hidden value=$res[id] name=id><input type=\"submit\" value=\"Save\" style=\"width: 60px;\"></td></tr>\n");
-	print("</table>");
-	print("</td></tr></table>");
-	\App\Support\Html::stdfoot();
-}
-elseif (((\App\Support\SupportContext::getQuery("act") !== null)) && \App\Support\SupportContext::getQuery("act")=="edited"){
-	$id = intval(\App\Support\SupportContext::getPost("id") ?? 0);
-	$title = \App\Support\SupportContext::getPost("title");
-	$text = \App\Support\SupportContext::getPost("text");
-	$language = \App\Support\SupportContext::getPost("language");
-	\Nexus\Database\NexusDB::table('rules')->where('id', $id)->update([
-	    'title' => $title,
-	    'text' => $text,
-	    'lang_id' => $language,
-	]);
-    clear_rules_cache();
-	header("Location: modrules.php");
-	return;
-}
-elseif (((\App\Support\SupportContext::getQuery("act") !== null)) && \App\Support\SupportContext::getQuery("act")=="del"){
-	$id = (int)\App\Support\SupportContext::getQuery("id");
-	$sure = intval(\App\Support\SupportContext::getQuery("sure") ?? 0);
-	if (!$sure)
-	{
-		\App\Support\LegacyResponse::abort("Delete Rule", "You are about to delete a rule. Click <a class=altlink href=?act=del&id=$id&sure=1>here</a> if you are sure.", false);
-	}
-	\Nexus\Database\NexusDB::table('rules')->where('id', $id)->delete();
-    clear_rules_cache();
-	header("Location: modrules.php");
-	return;
-}
-else{
-	$rules = \Nexus\Database\NexusDB::table('rules')
-	    ->leftJoin('language', 'rules.lang_id', '=', 'language.id')
-	    ->orderBy('lang_name')
-	    ->orderBy('rules.id')
-	    ->get(['rules.*', 'language.lang_name'])
-	    ->map(fn ($r) => (array) $r);
-	\App\Support\Html::stdhead("Rules Manangement");
-	//print("<td valign=top style=\"padding: 10px;\" colspan=2 align=center>");
-	print("<h1 align=center>Rules Manangement</h1>");
-	print("<br /><table width=940 border=0 cellspacing=0 cellpadding=5>");
-	print("<tr><td align=center><a href=modrules.php?act=newsect>Add Section</a></td></tr></table>\n");
-	foreach ($rules as $arr){
-		print("<br /><table width=940 border=1 cellspacing=0 cellpadding=5>");
-		print("<tr><td class=colhead>$arr[title] - $arr[lang_name]</td></tr>\n");
-		print("<tr><td align=left>" . \App\Support\Format::formatComment($arr["text"])."</td></tr>");
-		print("<tr><td align=left><a href=?act=edit&id=$arr[id]>Edit</a>&nbsp;&nbsp;<a href=?act=del&id=$arr[id]>Delete</a></td></tr></table>");
-		//end_main_frame();
-	}
-	//print("");
-	print("</td></tr></table>");
-	\App\Support\Html::stdfoot();
-}
+if ($mode === 'newsect'):
+    \App\Support\Html::stdhead('Add section');
+?>
+<h1 align=center>Add Rules</h1>
+<form method="post" action="modrules.php?act=addsect">
+    @csrf
+    <table border="1" cellspacing="0" cellpadding="10" align="center">
+        <tr><td>Title:</td><td align=left><input style="width: 400px;" type="text" name="title"/></td></tr>
+        <tr><td style="vertical-align: top;">Rules:</td><td><textarea cols=90 rows=20 name="text"></textarea></td></tr>
+        <tr>
+            <td>Language:</td>
+            <td align="center">
+                <select name=language>
+                    <?php foreach ($langs as $row): ?>
+                    <option value="<?php echo (int) $row['id']; ?>"<?php echo ($row['site_lang_folder'] ?? '') == $deflang ? ' selected' : ''; ?>><?php echo htmlspecialchars((string) $row['lang_name']); ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </td>
+        </tr>
+        <tr><td colspan="2" align="center"><input type="submit" value="Add" style="width: 60px;"></td></tr>
+    </table>
+</form>
+<?php
+    \App\Support\Html::stdfoot();
+elseif ($mode === 'edit'):
+    \App\Support\Html::stdhead('Edit rules');
+?>
+<h1 align=center>Edit Rules</h1>
+<form method="post" action="modrules.php?act=edited">
+    @csrf
+    <table border="1" cellspacing="0" cellpadding="10" align="center">
+        <tr><td>Title:</td><td align=left><input style="width: 400px;" type="text" name="title" value="<?php echo htmlspecialchars((string) ($rule['title'] ?? '')); ?>" /></td></tr>
+        <tr><td style="vertical-align: top;">Rules:</td><td><textarea cols=90 rows=20 name="text"><?php echo htmlspecialchars((string) ($rule['text'] ?? '')); ?></textarea></td></tr>
+        <tr>
+            <td>Language:</td>
+            <td align="center">
+                <select name=language>
+                    <?php foreach ($langs as $row): ?>
+                    <option value="<?php echo (int) $row['id']; ?>"<?php echo ($row['id'] ?? 0) == ($rule['lang_id'] ?? 0) ? ' selected' : ''; ?>><?php echo htmlspecialchars((string) $row['lang_name']); ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </td>
+        </tr>
+        <tr><td colspan="2" align="center"><input type=hidden value="<?php echo (int) ($rule['id'] ?? 0); ?>" name=id><input type="submit" value="Save" style="width: 60px;"></td></tr>
+    </table>
+</form>
+<?php
+    \App\Support\Html::stdfoot();
+else:
+    \App\Support\Html::stdhead('Rules Management');
+?>
+<h1 align=center>Rules Management</h1>
+<br /><table width=940 border=0 cellspacing=0 cellpadding=5>
+<tr><td align=center><a href=modrules.php?act=newsect>Add Section</a></td></tr></table>
+<?php foreach ($rows as $arr): ?>
+<br /><table width=940 border=1 cellspacing=0 cellpadding=5>
+    <tr><td class=colhead><?php echo htmlspecialchars((string) $arr['title']); ?> - <?php echo htmlspecialchars((string) $arr['lang_name']); ?></td></tr>
+    <tr><td align=left><?php echo \App\Support\Format::formatComment($arr['text']); ?></td></tr>
+    <tr><td align=left><a href="?act=edit&id=<?php echo (int) $arr['id']; ?>">Edit</a>&nbsp;&nbsp;<a href="?act=del&id=<?php echo (int) $arr['id']; ?>">Delete</a></td></tr>
+</table>
+<?php endforeach; ?>
+<?php
+    \App\Support\Html::stdfoot();
+endif;
+?>

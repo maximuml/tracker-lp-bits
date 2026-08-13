@@ -172,10 +172,86 @@ class StaffController extends LegacyController
 
     }
 
-    public function modrules(Request $request): Response|RedirectResponse
+    public function modrules(Request $request): View|RedirectResponse|Response
     {
+        $administratorClass = defined('UC_ADMINISTRATOR') ? \constant('UC_ADMINISTRATOR') : 0;
+        if (UserDisplay::currentClass() < $administratorClass) {
+            return $this->legacyAbortResponse('Error', 'Only Administrators and above can modify the Rules, sorry.');
+        }
 
-        return $this->legacyPageWithRedirect($request, 'modrules');
+        $act = (string) (SupportContext::getQuery('act') ?? 'list');
+
+        if ($act === 'addsect' && $request->isMethod('post')) {
+            $title = (string) SupportContext::getPost('title');
+            $text = (string) SupportContext::getPost('text');
+            $language = (int) SupportContext::getPost('language');
+            NexusDB::table('rules')->insert([
+                'title' => $title,
+                'text' => $text,
+                'lang_id' => $language,
+            ]);
+            NexusDB::cache_del('rules');
+            return redirect('modrules.php');
+        }
+
+        if ($act === 'edited' && $request->isMethod('post')) {
+            $id = (int) (SupportContext::getPost('id') ?? 0);
+            $title = (string) SupportContext::getPost('title');
+            $text = (string) SupportContext::getPost('text');
+            $language = (int) SupportContext::getPost('language');
+            NexusDB::table('rules')->where('id', $id)->update([
+                'title' => $title,
+                'text' => $text,
+                'lang_id' => $language,
+            ]);
+            NexusDB::cache_del('rules');
+            return redirect('modrules.php');
+        }
+
+        if ($act === 'del') {
+            $id = (int) (SupportContext::getQuery('id') ?? 0);
+            $sure = (int) (SupportContext::getQuery('sure') ?? 0);
+            if (! $sure) {
+                return $this->legacyAbortResponse('Delete Rule', 'You are about to delete a rule. Click <a class=altlink href=?act=del&id=' . $id . '&sure=1>here</a> if you are sure.', false);
+            }
+            NexusDB::table('rules')->where('id', $id)->delete();
+            NexusDB::cache_del('rules');
+            return redirect('modrules.php');
+        }
+
+        if ($act === 'newsect') {
+            $langs = \App\Support\Locale::languageList('rule_lang', null);
+            $defLang = (string) SupportContext::getGlobal('deflang', '');
+            return $this->legacyPage($request, 'modrules', true, [
+                'mode' => 'newsect',
+                'langs' => $langs,
+                'deflang' => $defLang,
+            ]);
+        }
+
+        if ($act === 'edit') {
+            $id = (int) (SupportContext::getQuery('id') ?? 0);
+            $rule = (array) NexusDB::table('rules')->where('id', $id)->first();
+            $langs = \App\Support\Locale::languageList('site_lang', null);
+            return $this->legacyPage($request, 'modrules', true, [
+                'mode' => 'edit',
+                'rule' => $rule,
+                'langs' => $langs,
+            ]);
+        }
+
+        $rules = NexusDB::table('rules')
+            ->leftJoin('language', 'rules.lang_id', '=', 'language.id')
+            ->orderBy('lang_name')
+            ->orderBy('rules.id')
+            ->get(['rules.*', 'language.lang_name'])
+            ->map(fn ($r) => (array) $r)
+            ->all();
+
+        return $this->legacyPage($request, 'modrules', true, [
+            'mode' => 'list',
+            'rows' => $rules,
+        ]);
 
     }
 

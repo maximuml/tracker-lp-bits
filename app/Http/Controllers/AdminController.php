@@ -20,6 +20,7 @@ use App\Support\Logger;
 use App\Support\Pagination;
 use App\Support\Permissions;
 use App\Support\SupportContext;
+use App\Support\UserClass;
 use App\Support\UserDisplay;
 use App\Support\Validators;
 use Illuminate\Http\RedirectResponse;
@@ -199,10 +200,85 @@ class AdminController extends LegacyController
 
     }
 
-    public function users(Request $request): View|RedirectResponse
+    public function users(Request $request): View|RedirectResponse|Response
     {
+        if (! Permissions::userCan(PermissionEnum::VIEW_USER_LIST->value, false, (int) (SupportContext::getUser()['id'] ?? 0))) {
+            return $this->legacyAbortResponse('Error', 'Permission denied.');
+        }
 
-        return $this->legacyPage($request, 'users', true);
+        $langUsers = (array) SupportContext::getGlobal('lang_users', []);
+        $search = trim((string) (SupportContext::getQuery('search') ?? ''));
+        $class = (string) (SupportContext::getQuery('class') ?? '-');
+        $country = (int) (SupportContext::getQuery('country') ?? 0);
+        $letter = trim((string) (SupportContext::getQuery('letter') ?? ''));
+
+        if (strlen($letter) > 1) {
+            return $this->legacyAbortResponse('Error', 'Invalid letter.');
+        }
+
+        if (! \App\Support\User::isValidUserClass($class)) {
+            $class = '-';
+        }
+
+        $q = '';
+        if ($search !== '' && $letter === '') {
+            $q = 'search=' . rawurlencode($search);
+        } elseif ($letter !== '' && strpos('0abcdefghijklmnopqrstuvwxyz', $letter) !== false) {
+            $q = "letter={$letter}";
+        }
+
+        if ($class !== '-') {
+            $q .= ($q ? '&' : '') . "class={$class}";
+        }
+        if ($country > 0) {
+            $q .= ($q ? '&' : '') . "country={$country}";
+        }
+
+        $classOptions = [];
+        for ($i = 0;; $i++) {
+            $c = UserClass::name($i, false, true, true);
+            if (! $c) {
+                break;
+            }
+            $classOptions[] = ['value' => $i, 'label' => $c, 'selected' => $class !== '-' && $class == $i];
+        }
+
+        $countryOptions = [['value' => 0, 'label' => $langUsers['select_any_country'] ?? 'Any country', 'selected' => $country === 0]];
+        foreach (\App\Repositories\UserListingRepository::getCountries() as $ct) {
+            $countryOptions[] = ['value' => (int) $ct['id'], 'label' => (string) $ct['name'], 'selected' => $country === (int) $ct['id']];
+        }
+
+        $perPage = 50;
+        $filters = ['search' => $search, 'class' => $class, 'country' => $country, 'letter' => $letter];
+        $count = \App\Repositories\UserListingRepository::countUsers($filters);
+        [$pagertop, $pagerbottom, , $offset] = Pagination::pager($perPage, $count, 'users.php?' . $q . ($q ? '&' : ''));
+        $userRows = \App\Repositories\UserListingRepository::listUsers($filters, (int) $offset, $perPage);
+
+        $rows = [];
+        foreach ($userRows as $arr) {
+            $rows[] = [
+                'id' => (int) $arr['id'],
+                'username_html' => UserDisplay::username((int) $arr['id']),
+                'added' => $arr['added'],
+                'last_access' => $arr['last_access'],
+                'class_name' => UserClass::name((int) $arr['class'], false, true, true),
+                'country' => $arr['country'],
+            ];
+        }
+
+        return $this->legacyPage($request, 'users', true, [
+            'lang_users' => $langUsers,
+            'search' => $search,
+            'class' => $class,
+            'country' => $country,
+            'letter' => $letter,
+            'classOptions' => $classOptions,
+            'countryOptions' => $countryOptions,
+            'pagerParam' => $q,
+            'pagertop' => $pagertop,
+            'pagerbottom' => $pagerbottom,
+            'rows' => $rows,
+        ]);
 
     }
 
@@ -517,10 +593,30 @@ class AdminController extends LegacyController
 
     }
 
-    public function adduser(Request $request): Response|RedirectResponse
+    public function adduser(Request $request): Response|RedirectResponse|View
     {
+        $administratorClass = defined('UC_ADMINISTRATOR') ? \constant('UC_ADMINISTRATOR') : 0;
+        if (UserDisplay::currentClass() < $administratorClass) {
+            return $this->legacyAbortResponse('Error', 'Access denied.');
+        }
 
-        return $this->legacyPageWithRedirect($request, 'adduser', true);
+        if ($request->isMethod('post')) {
+            $userRep = new UserRepository();
+            try {
+                $newUser = $userRep->store([
+                    'username' => SupportContext::getPost('username'),
+                    'email' => SupportContext::getPost('email'),
+                    'password' => SupportContext::getPost('password'),
+                    'password_confirmation' => SupportContext::getPost('password2'),
+                ]);
+            } catch (\Exception $e) {
+                return $this->legacyAbortResponse('ERROR', $e->getMessage());
+            }
+
+            return redirect('userdetails.php?id=' . (int) $newUser->id);
+        }
+
+        return $this->legacyPage($request, 'adduser', true);
 
     }
 

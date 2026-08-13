@@ -2,11 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\Permission\PermissionEnum;
 use App\Services\CleanupService;
+use App\Support\LegacyResponse;
+use App\Support\Permissions;
+use App\Support\SupportContext;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\View\View;
+use Nexus\Database\NexusDB;
 
 class SystemController extends LegacyController
 {
@@ -40,16 +45,202 @@ class SystemController extends LegacyController
 
     public function takeinvite(Request $request): Response|RedirectResponse
     {
+        $curUser = SupportContext::getUser();
+        if ($curUser === null) {
+            $qs = $request->getQueryString();
+            return redirect('/takeinvite.php' . ($qs ? '?' . $qs : ''));
+        }
 
-        return $this->legacyPageWithRedirect($request, 'takeinvite', true);
+        $currentUserId = (int) ($curUser['id'] ?? 0);
+        $lockName = sprintf('takeinvite:%s', $currentUserId);
+        $lock = new \Nexus\Database\NexusLock($lockName, 10);
+        if (! $lock->get()) {
+            $errMsg = \App\Support\Locale::trans('nexus.do_not_repeat', [], null);
+            return $this->legacyAbortResponse($errMsg, $errMsg);
+        }
 
+        try {
+            \App\Support\LegacyAuth::registrationCheckFromContext('invitesystem', true, false);
+
+            $userRep = new \App\Repositories\UserRepository();
+            try {
+                $sendText = $userRep->getInviteBtnText($currentUserId);
+            } catch (\Exception $exception) {
+                $lang = (array) SupportContext::getGlobal('lang_takeinvite', []);
+                return $this->legacyAbortResponse($lang['std_error'] ?? 'Error', $exception->getMessage());
+            }
+
+            $email = \App\Support\Input::unescape(htmlspecialchars(trim((string) SupportContext::getPost('email'))));
+            $email = \App\Support\Email::sanitizeForDisplay($email);
+            $preRegisterUsername = (string) SupportContext::getPost('pre_register_username');
+            $isPreRegisterEmailAndUsername = \App\Support\Config\SiteConfig::current()->system->isInvitePreEmailAndUsername();
+            $lang = (array) SupportContext::getGlobal('lang_takeinvite', []);
+
+            if (strlen($preRegisterUsername) > 12) {
+                return $this->legacyAbortResponse($lang['head_invitation_failed'] ?? 'Error', $lang['std_username_too_long'] ?? 'Username too long.');
+            }
+            if (! $email) {
+                return $this->legacyAbortResponse($lang['head_invitation_failed'] ?? 'Error', $lang['std_must_enter_email'] ?? 'Enter an email.');
+            }
+            if (! \App\Support\Email::isWellFormed($email)) {
+                return $this->legacyAbortResponse($lang['head_invitation_failed'] ?? 'Error', $lang['std_invalid_email_address'] ?? 'Invalid email.');
+            }
+
+            $body = str_replace('<br />', '<br />', nl2br(trim(strip_tags((string) SupportContext::getPost('body')))));
+            if (! $body) {
+                return $this->legacyAbortResponse($lang['head_invitation_failed'] ?? 'Error', $lang['std_must_enter_personal_message'] ?? 'Enter a message.');
+            }
+
+            if ($isPreRegisterEmailAndUsername) {
+                if (empty($preRegisterUsername)) {
+                    return $this->legacyAbortResponse(
+                        $lang['head_invitation_failed'] ?? 'Error',
+                        \App\Support\Locale::trans('invite.require_pre_register_username', [], null)
+                    );
+                }
+                if (! \App\Support\Validators::isUsername($preRegisterUsername)) {
+                    return $this->legacyAbortResponse(
+                        $lang['head_invitation_failed'] ?? 'Error',
+                        \App\Support\Locale::trans('user.username_invalid', ['username' => $preRegisterUsername], null)
+                    );
+                }
+                if (\App\Models\User::query()->where('username', $preRegisterUsername)->exists()) {
+                    return $this->legacyAbortResponse(
+                        $lang['head_invitation_failed'] ?? 'Error',
+                        \App\Support\Locale::trans('user.username_already_exists', ['username' => $preRegisterUsername], null)
+                    );
+                }
+            }
+
+            if (\App\Models\User::query()->where('email', $email)->count() > 0) {
+                return $this->legacyAbortResponse($lang['head_invitation_failed'] ?? 'Error', $lang['std_email_address'] . htmlspecialchars($email) . $lang['std_is_in_use']);
+            }
+            if (\App\Models\Invite::query()->where('invitee', $email)->count() > 0) {
+                return $this->legacyAbortResponse($lang['head_invitation_failed'] ?? 'Error', $lang['std_invitation_already_sent_to'] . htmlspecialchars($email) . $lang['std_await_user_registeration']);
+            }
+
+            $hashPost = (string) SupportContext::getPost('hash');
+            if ($hashPost === '') {
+                return $this->legacyAbortResponse($lang['head_invitation_failed'] ?? 'Error', $lang['std_must_select_invite'] ?? 'Select an invite.');
+            }
+
+            $hashRecord = null;
+            $timeNow = (int) SupportContext::getGlobal('TIMENOW', time());
+            if ($hashPost === 'permanent') {
+                $hash = md5(mt_rand(1, 10000) . $curUser['username'] . $timeNow . $curUser['passhash']);
+            } else {
+                $hashRecord = \App\Models\Invite::query()->where('inviter', $currentUserId)->where('hash', $hashPost)->first();
+                if (! $hashRecord instanceof \App\Models\Invite) {
+                    return $this->legacyAbortResponse($lang['head_invitation_failed'] ?? 'Error', $lang['hash_not_exists'] ?? 'Hash does not exist.');
+                }
+                if ($hashRecord->invitee !== '') {
+                    return $this->legacyAbortResponse($lang['head_invitation_failed'] ?? 'Error', 'hash ' . $lang['std_is_in_use']);
+                }
+                if ($hashRecord->expired_at !== null && $hashRecord->expired_at->lt(now())) {
+                    return $this->legacyAbortResponse($lang['head_invitation_failed'] ?? 'Error', $lang['hash_expired'] ?? 'Hash expired.');
+                }
+                $hash = $hashPost;
+            }
+
+            $siteName = \App\Models\Setting::getSiteName();
+            $title = $siteName . $lang['mail_tilte'];
+            $signupUrl = \App\Support\Url::schemeAndHost(\App\Support\Url::isSecure()) . "/signup.php?type=invite&invitenumber=$hash";
+            $mailTwo = sprintf($lang['mail_two'], $siteName, $siteName);
+            $mailFour = sprintf($lang['mail_four'], $siteName);
+            $reportMail = (string) SupportContext::getGlobal('REPORTMAIL', '');
+            $mailSix = sprintf($lang['mail_six'], $reportMail, $siteName);
+            $inviteTimeout = (string) SupportContext::getGlobal('invite_timeout', '');
+
+            $message = $lang['mail_one'] . $curUser['username'] . $mailTwo . PHP_EOL
+                . '<b><a href="javascript:void(null)" onclick="window.open(' . $signupUrl . ')">' . $lang['mail_here'] . '</a></b><br />' . PHP_EOL
+                . $signupUrl . PHP_EOL
+                . '<br />' . $lang['mail_three'] . $inviteTimeout . $mailFour . $curUser['username'] . $lang['mail_five'] . '<br />' . PHP_EOL
+                . $body . PHP_EOL
+                . '<br /><br />' . $mailSix;
+
+            $sendResult = \App\Support\Mail::sentLegacy(
+                $email,
+                $siteName,
+                (string) SupportContext::getGlobal('SITEEMAIL', ''),
+                $title,
+                $message,
+                'invitesignup',
+                false,
+                false,
+                '',
+                'UTF-8'
+            );
+
+            if ($sendResult === true) {
+                $update = [
+                    'invitee' => $email,
+                    'time_invited' => now(),
+                    'valid' => 1,
+                ];
+                if ($isPreRegisterEmailAndUsername) {
+                    $update['pre_register_email'] = $email;
+                    $update['pre_register_username'] = $preRegisterUsername;
+                }
+
+                if ($hashRecord instanceof \App\Models\Invite) {
+                    $hashRecord->update($update);
+                } else {
+                    $insert = [
+                        'inviter' => $currentUserId,
+                        'invitee' => $email,
+                        'hash' => $hash,
+                        'time_invited' => now()->toDateTimeString(),
+                    ] + $update;
+                    unset($insert['valid']); // already included
+                    \App\Models\Invite::query()->insert($insert);
+                    \App\Models\User::query()->where('id', $currentUserId)->decrement('invites');
+                }
+            }
+        } finally {
+            $lock->release();
+        }
+
+        return redirect('/invite.php?id=' . $currentUserId . '&sent=1');
     }
 
     public function takeupdate(Request $request): Response|RedirectResponse
     {
+        $curUser = SupportContext::getUser();
+        if ($curUser === null) {
+            $qs = $request->getQueryString();
+            return redirect('/takeupdate.php' . ($qs ? '?' . $qs : ''));
+        }
 
-        return $this->legacyPageWithRedirect($request, 'takeupdate', true);
+        $currentUserId = (int) ($curUser['id'] ?? 0);
+        if (! Permissions::userCan(PermissionEnum::STAFF_MEMBER->value, false, $currentUserId)) {
+            return $this->legacyAbortResponse('Error', 'Permission denied.');
+        }
 
+        $delreport = (array) SupportContext::getPost('delreport');
+        if (empty($delreport)) {
+            $langFunctions = (array) SupportContext::getGlobal('lang_functions', []);
+            return $this->legacyAbortResponse('Error', $langFunctions['select_at_least_one_record'] ?? 'Select at least one record.');
+        }
+
+        $delreportIds = array_map('intval', array_filter($delreport, 'is_numeric'));
+        if (empty($delreportIds)) {
+            return $this->legacyAbortResponse('Error', 'Invalid report ids.');
+        }
+
+        $cache = SupportContext::getCache();
+        if (SupportContext::getPost('setdealt')) {
+            NexusDB::table('reports')
+                ->whereIn('id', $delreportIds)
+                ->where('dealtwith', 0)
+                ->update(['dealtwith' => 1, 'dealtby' => $currentUserId]);
+            $cache?->delete_value('staff_new_report_count', true);
+        } elseif (SupportContext::getPost('delete')) {
+            NexusDB::table('reports')->whereIn('id', $delreportIds)->delete();
+            $cache?->delete_value('staff_new_report_count', true);
+            $cache?->delete_value('staff_report_count', true);
+        }
+
+        return redirect('/reports.php');
     }
 
     public function docleanup(Request $request): Response

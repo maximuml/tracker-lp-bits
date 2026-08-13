@@ -40,7 +40,7 @@ class MyController extends Controller
         $requestedUserId = SupportContext::getQuery('userid');
         if (! empty($requestedUserId)) {
             if (! Permissions::userCan(PermissionEnum::VIEW_USER_HISTORY->value, false, $viewerId) && (int) $requestedUserId != $viewerId) {
-                LegacyResponse::permissionDenied($viewhistory_class ?? null);
+                LegacyResponse::permissionDenied();
             }
             $userid = (int) $requestedUserId;
             $pagerParams['userid'] = $userid;

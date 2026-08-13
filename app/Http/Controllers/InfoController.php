@@ -62,7 +62,7 @@ class InfoController extends LegacyController
             $posts = NexusDB::table('posts as p')
                 ->leftJoin('topics as t', 'p.topicid', '=', 't.id')
                 ->leftJoin('forums as f', 't.forumid', '=', 'f.id')
-                ->leftJoin('readposts as r', function ($join) use ($userid) {
+                ->leftJoin('readposts as r', function ($join) {
                     $join->on('p.topicid', '=', 'r.topicid')->on('p.userid', '=', 'r.userid');
                 })
                 ->where('p.userid', $userid)
@@ -103,23 +103,12 @@ class InfoController extends LegacyController
                 ->map(fn ($row) => (array) $row)
                 ->toArray();
 
-            $torrentIds = array_column($comments, 't_id');
-            $commentIds = array_column($comments, 'id');
             $countsBefore = [];
-            if (! empty($torrentIds) && ! empty($commentIds)) {
-                $placeholdersTorrents = implode(',', array_fill(0, count($torrentIds), '?'));
-                $placeholdersComments = implode(',', array_fill(0, count($commentIds), '?'));
-                $rows = NexusDB::select(
-                    "SELECT c.torrent, c.id, COUNT(c2.id) AS before_count
-                     FROM comments c
-                     LEFT JOIN comments c2 ON c2.torrent = c.torrent AND c2.id < c.id
-                     WHERE c.torrent IN ($placeholdersTorrents) AND c.id IN ($placeholdersComments)
-                     GROUP BY c.torrent, c.id",
-                    array_merge($torrentIds, $commentIds)
-                );
-                foreach ($rows as $row) {
-                    $countsBefore[$row->id] = (int) $row->before_count;
-                }
+            foreach ($comments as $comment) {
+                $countsBefore[$comment['id']] = (int) NexusDB::table('comments')
+                    ->where('torrent', $comment['t_id'])
+                    ->where('id', '<', $comment['id'])
+                    ->count();
             }
 
             $data['commentcount'] = $commentcount;

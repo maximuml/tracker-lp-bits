@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Exceptions\InsufficientPermissionException;
-use App\Models\Setting;
+use App\Support\Settings;
 use App\Utils\ApiQueryBuilder;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Bus\DispatchesJobs;
@@ -151,7 +151,7 @@ class Controller extends BaseController
         $results = [];
         foreach ($names as $name) {
             if (in_array($name, $this->extraSettingNames)) {
-                $results[$name] = \App\Models\Setting::get($name);
+                $results[$name] = Settings::get($name);
             }
         }
         if (!empty($results)) {

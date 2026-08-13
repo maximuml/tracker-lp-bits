@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Support\Config;
 
-use App\Models\Setting;
+use App\Support\Settings;
 
 final class SiteConfig
 {
@@ -55,7 +55,7 @@ final class SiteConfig
     public static function current(): self
     {
         /** @var array<string, mixed> $settings */
-        $settings = Setting::get() ?: [];
+        $settings = Settings::get() ?: [];
 
         return new self($settings);
     }
@@ -63,7 +63,7 @@ final class SiteConfig
     public static function fromDb(): self
     {
         /** @var array<string, mixed> $settings */
-        $settings = Setting::getFromDb() ?: [];
+        $settings = Settings::fromDb() ?: [];
 
         return new self($settings);
     }

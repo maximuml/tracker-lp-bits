@@ -24,6 +24,7 @@ use App\Models\HitAndRun;
 use App\Models\SearchBox;
 use App\Models\Setting;
 use App\Models\Tag;
+use App\Support\Settings;
 use App\Models\Torrent;
 use App\Models\User;
 use App\Repositories\TokenRepository;
@@ -33,7 +34,6 @@ use Filament\Resources\Pages\Page;
 use Filament\Forms;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Arr;
-use Meilisearch\Contracts\Index\Settings;
 use Nexus\Database\NexusDB;
 
 class EditSetting extends Page implements HasForms
@@ -64,7 +64,7 @@ class EditSetting extends Page implements HasForms
 
     private function fillForm()
     {
-        $settings = Setting::getFromDb();
+        $settings = Settings::fromDb();
 
         $fallbackEnabled = (bool) config('captcha.attendance.enabled', true);
         $rawSetting = Arr::get($settings, 'captcha.attendance.enabled', $fallbackEnabled);
@@ -269,46 +269,46 @@ class EditSetting extends Page implements HasForms
             'google_recaptcha_v2' => __('label.setting.captcha.drivers.google_recaptcha_v2'),
         ];
 
-        $defaultDriver = Setting::get('captcha.default');
+        $defaultDriver = Settings::get('captcha.default');
         if (is_null($defaultDriver)) {
-            $defaultDriver = Setting::get('captcha.driver', \App\Support\Env::get('CAPTCHA_DRIVER', 'image'));
+            $defaultDriver = Settings::get('captcha.driver', \App\Support\Env::get('CAPTCHA_DRIVER', 'image'));
         }
 
-        $turnstileSiteKey = Setting::get(
+        $turnstileSiteKey = Settings::get(
             'captcha.drivers.cloudflare_turnstile.site_key',
-            Setting::get('captcha.turnstile.site_key', \App\Support\Env::get('TURNSTILE_SITE_KEY', null))
+            Settings::get('captcha.turnstile.site_key', \App\Support\Env::get('TURNSTILE_SITE_KEY', null))
         );
-        $turnstileSecretKey = Setting::get(
+        $turnstileSecretKey = Settings::get(
             'captcha.drivers.cloudflare_turnstile.secret_key',
-            Setting::get('captcha.turnstile.secret_key', \App\Support\Env::get('TURNSTILE_SECRET_KEY', null))
+            Settings::get('captcha.turnstile.secret_key', \App\Support\Env::get('TURNSTILE_SECRET_KEY', null))
         );
-        $turnstileTheme = Setting::get(
+        $turnstileTheme = Settings::get(
             'captcha.drivers.cloudflare_turnstile.theme',
-            Setting::get('captcha.turnstile.theme', \App\Support\Env::get('TURNSTILE_THEME', 'auto'))
+            Settings::get('captcha.turnstile.theme', \App\Support\Env::get('TURNSTILE_THEME', 'auto'))
         );
-        $turnstileSize = Setting::get(
+        $turnstileSize = Settings::get(
             'captcha.drivers.cloudflare_turnstile.size',
-            Setting::get('captcha.turnstile.size', \App\Support\Env::get('TURNSTILE_SIZE', 'flexible'))
+            Settings::get('captcha.turnstile.size', \App\Support\Env::get('TURNSTILE_SIZE', 'flexible'))
         );
 
-        $recaptchaSiteKey = Setting::get(
+        $recaptchaSiteKey = Settings::get(
             'captcha.drivers.google_recaptcha_v2.site_key',
-            Setting::get('captcha.recaptcha.site_key', \App\Support\Env::get('RECAPTCHA_SITE_KEY', null))
+            Settings::get('captcha.recaptcha.site_key', \App\Support\Env::get('RECAPTCHA_SITE_KEY', null))
         );
-        $recaptchaSecretKey = Setting::get(
+        $recaptchaSecretKey = Settings::get(
             'captcha.drivers.google_recaptcha_v2.secret_key',
-            Setting::get('captcha.recaptcha.secret_key', \App\Support\Env::get('RECAPTCHA_SECRET_KEY', null))
+            Settings::get('captcha.recaptcha.secret_key', \App\Support\Env::get('RECAPTCHA_SECRET_KEY', null))
         );
-        $recaptchaTheme = Setting::get(
+        $recaptchaTheme = Settings::get(
             'captcha.drivers.google_recaptcha_v2.theme',
-            Setting::get('captcha.recaptcha.theme', \App\Support\Env::get('RECAPTCHA_THEME', 'light'))
+            Settings::get('captcha.recaptcha.theme', \App\Support\Env::get('RECAPTCHA_THEME', 'light'))
         );
-        $recaptchaSize = Setting::get(
+        $recaptchaSize = Settings::get(
             'captcha.drivers.google_recaptcha_v2.size',
-            Setting::get('captcha.recaptcha.size', \App\Support\Env::get('RECAPTCHA_SIZE', 'normal'))
+            Settings::get('captcha.recaptcha.size', \App\Support\Env::get('RECAPTCHA_SIZE', 'normal'))
         );
 
-        $attendanceCaptchaSetting = Setting::get('captcha.attendance.enabled', true);
+        $attendanceCaptchaSetting = Settings::get('captcha.attendance.enabled', true);
         if (is_string($attendanceCaptchaSetting)) {
             $attendanceCaptchaEnabled = in_array(strtolower($attendanceCaptchaSetting), ['1', 'true', 'yes'], true);
         } else {

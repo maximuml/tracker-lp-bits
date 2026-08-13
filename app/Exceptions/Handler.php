@@ -5,6 +5,7 @@ namespace App\Exceptions;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\UnauthorizedException;
@@ -47,24 +48,26 @@ class Handler extends ExceptionHandler
             return;
         }
         $request = request();
-        $this->renderable(function (InsufficientPermissionException $e) use ($request) {
+        $permissionDenied = function (InsufficientPermissionException $e) use ($request) {
             if ($request->expectsJson()) {
                 return response()->json(\App\Support\Api::failWithContext($e->getMessage(), $request->all()), 403);
-            } else {
-                \App\Support\LegacyResponse::permissionDenied();
             }
+            try {
+                \App\Support\LegacyResponse::permissionDenied();
+            } catch (HttpResponseException $hre) {
+                return $hre->getResponse();
+            }
+        };
+        $this->renderable(function (InsufficientPermissionException $e) use ($permissionDenied) {
+            return $permissionDenied($e);
         });
-        $this->renderable(function (ViewException $e) use ($request) {
+        $this->renderable(function (ViewException $e) use ($permissionDenied) {
             $previous = $e->getPrevious();
             while ($previous instanceof ViewException && $previous->getPrevious() !== null) {
                 $previous = $previous->getPrevious();
             }
             if ($previous instanceof InsufficientPermissionException) {
-                if ($request->expectsJson()) {
-                    return response()->json(\App\Support\Api::failWithContext($previous->getMessage(), $request->all()), 403);
-                } else {
-                    \App\Support\LegacyResponse::permissionDenied();
-                }
+                return $permissionDenied($previous);
             }
 
             return null;

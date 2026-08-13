@@ -136,7 +136,7 @@ final class LegacyAuth
             ->count();
 
         if ($count == 0) {
-            NexusDB::insert('loginattempts', [
+            NexusDB::table('loginattempts')->insert([
                 'ip' => $ip,
                 'added' => date('Y-m-d H:i:s'),
                 'attempts' => 1,

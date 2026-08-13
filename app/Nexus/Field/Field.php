@@ -229,7 +229,7 @@ HEAD;
             $result = NexusDB::table($table)->where('id', (int) $data['id'])->update($attributes);
         } else {
             $attributes['created_at'] = $now;
-            $result = NexusDB::insert($table, $attributes);
+            $result = NexusDB::table($table)->insertGetId($attributes);
         }
         return $result;
     }

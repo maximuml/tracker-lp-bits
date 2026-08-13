@@ -393,7 +393,7 @@ final class Network
         $redis = \Nexus\Database\NexusDB::redis();
         $key = 'nexus_asn';
         $notFoundCacheValue = '__NOT_FOUND__';
-        $row = null;
+        $id = null;
 
         try {
             $database = \App\Support\Env::get('GEOIP2_ASN_DATABASE', null);
@@ -418,9 +418,9 @@ final class Network
                 return $cacheResult !== $notFoundCacheValue;
             }
 
-            $row = \Nexus\Database\NexusDB::getOne('seed_box_records', "asn = $asn", 'id');
-            if (!empty($row)) {
-                $redis->hSet($key, $asn, $row['id']);
+            $id = \Nexus\Database\NexusDB::table('seed_box_records')->where('asn', $asn)->value('id');
+            if ($id !== null) {
+                $redis->hSet($key, $asn, $id);
             } else {
                 $redis->hSet($key, $asn, $notFoundCacheValue);
             }
@@ -431,9 +431,9 @@ final class Network
             }
         }
 
-        $result = !empty($row);
+        $result = $id !== null;
         if ($result && $exceptionWhenYes) {
-            throw new \App\Exceptions\SeedBoxYesException($row['id']);
+            throw new \App\Exceptions\SeedBoxYesException($id);
         }
 
         return $result;

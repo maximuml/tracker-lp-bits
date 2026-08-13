@@ -122,7 +122,7 @@ class Update extends Install
                 'url' => $url,
                 'info' => 'Manage custom fields',
             ];
-            $id = NexusDB::insert($table, $insert);
+            $id = NexusDB::table($table)->insertGetId($insert);
             $this->doLog("[ADD CUSTOM FIELD MENU] insert: " . json_encode($insert) . " to table: $table, id: $id");
         }
         //since beta8
@@ -222,7 +222,7 @@ class Update extends Install
         foreach ($menus as $menu) {
             $count = NexusDB::table($table)->where('url', $menu['url'])->count();
             if ($count == 0) {
-                $id = NexusDB::insert($table, $menu);
+                $id = NexusDB::table($table)->insertGetId($menu);
                 $this->doLog("[ADD MENU] insert: " . json_encode($menu) . " to table: $table, id: $id");
             }
         }
@@ -402,7 +402,7 @@ class Update extends Install
         foreach ($menus as $menu) {
             $count = NexusDB::table($table)->where('url', $menu['url'])->count();
             if ($count == 0) {
-                $id = NexusDB::insert($table, $menu);
+                $id = NexusDB::table($table)->insertGetId($menu);
                 $this->doLog("[ADD MENU] insert: " . json_encode($menu) . " to table: $table, id: $id");
             }
         }

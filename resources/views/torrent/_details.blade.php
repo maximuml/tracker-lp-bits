@@ -210,7 +210,7 @@ JS;
         }
 
 		if ($CURUSER['showdescription'] != 'no' && !empty($row["descr"])){
-            $desc = \App\Support\Format::formatComment($row['descr']);
+            $desc = \App\Support\Format::formatComment((string) $row['descr']);
             $desc = \App\Support\Hooks::applyFilter('torrent_detail_description', $desc, $row['id'], $CURUSER['id']);
             \App\Support\Html::tr("<a href=\"javascript: klappe_news('descr')\"><span class=\"nowrap\"><img class=\"minus\" src=\"pic/trans.gif\" alt=\"Show/Hide\" id=\"picdescr\" title=\"".($lang_details['title_show_or_hide'] ?? '')."\" /> ".$lang_details['row_description']."</span></a>", "<div id='kdescr'>".$desc."</div>", 1);
 		}

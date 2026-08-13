@@ -46,11 +46,11 @@ class Handler extends ExceptionHandler
             return;
         }
         $request = request();
-        $this->reportable(function (InsufficientPermissionException $e) use ($request) {
+        $this->renderable(function (InsufficientPermissionException $e) use ($request) {
             if ($request->expectsJson()) {
                 return response()->json(\App\Support\Api::failWithContext($e->getMessage(), $request->all()), 403);
             } else {
-                return abort(403);
+                \App\Support\LegacyResponse::permissionDenied();
             }
         });
         $this->renderable(function (PassportAuthenticationException $e) use ($request) {

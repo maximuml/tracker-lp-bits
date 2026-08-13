@@ -224,7 +224,7 @@ foreach ($list as $row)
 	$title .= $row['name'];
 	if (!empty(\App\Support\SupportContext::getQuery('isize'))) $title .= "[".\App\Support\Format::size($row['size'])."]";
 	if (!empty(\App\Support\SupportContext::getQuery('iuplder'))) $title .= "[".$author."]";
-	$content = \App\Support\Format::formatComment($row['descr'], true, false, false, false);
+	$content = \App\Support\Format::formatComment((string) $row['descr'], true, false, false, false);
 	$xml .= '<item>
 			<title><![CDATA['.$title.']]></title>
 			<link>'.$itemurl.'</link>

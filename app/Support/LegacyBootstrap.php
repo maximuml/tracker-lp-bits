@@ -73,8 +73,7 @@ final class LegacyBootstrap
 
     private static function bootCache(string $rootpath): void
     {
-        require_once $rootpath . 'classes/class_cache_redis.php';
-        $Cache = new \class_cache_redis();
+        $Cache = new \App\Support\Cache\LegacyRedisCache();
         $Cache->setLanguageFolderArray(get_langfolder_list());
         SupportContext::setCache($Cache);
     }
@@ -142,7 +141,5 @@ final class LegacyBootstrap
         SupportContext::setGlobal('hook', $hook);
         SupportContext::setGlobal('plugin', $plugin);
         $plugin->start();
-
-        require_once $rootpath . 'classes/class_attendance.php';
     }
 }

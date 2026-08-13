@@ -1,8 +1,11 @@
 <?php
 
+namespace App\Support\Attachment;
+
 use App\Models\Setting;
 
-class ATTACHMENT{
+class AttachmentService
+{
 	public int $userid;
 	public int $class;
 	public int $countlimit;

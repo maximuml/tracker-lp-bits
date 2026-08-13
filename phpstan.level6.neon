@@ -26,7 +26,6 @@ parameters:
     scanDirectories:
         - app/Support/Legacy
         - vendor
-        - classes
 
     dynamicConstantNames:
         - IN_NEXUS

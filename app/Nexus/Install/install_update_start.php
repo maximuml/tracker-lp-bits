@@ -11,8 +11,7 @@ if (file_exists(ROOT_PATH . '.env')) {
     $dbConfig = \App\Support\Config::get('nexus.database');
     $config = $dbConfig['connections'][$dbConfig['default']];
     \Nexus\Database\NexusDB::bootEloquent($config);
-    require ROOT_PATH . 'classes/class_cache_redis.php';
-    $Cache = new class_cache_redis();
+    $Cache = new \App\Support\Cache\LegacyRedisCache();
     $withLaravel = true;
 }
 define('WITH_LARAVEL', $withLaravel);

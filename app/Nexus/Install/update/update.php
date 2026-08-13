@@ -1,7 +1,7 @@
 <?php
 $rootpath = dirname(dirname(__DIR__)) . '/';
 define('ROOT_PATH', $rootpath);
-require ROOT_PATH . 'nexus/Install/install_update_start.php';
+require ROOT_PATH . 'app/Nexus/Install/install_update_start.php';
 
 $isPost = $_SERVER['REQUEST_METHOD'] == 'POST';
 $update = new \Nexus\Install\Update();

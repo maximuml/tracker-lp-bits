@@ -9,6 +9,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\UnauthorizedException;
 use Illuminate\Validation\ValidationException;
+use Illuminate\View\ViewException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Throwable;
 use Laravel\Passport\Exceptions\AuthenticationException as PassportAuthenticationException;
@@ -52,6 +53,18 @@ class Handler extends ExceptionHandler
             } else {
                 \App\Support\LegacyResponse::permissionDenied();
             }
+        });
+        $this->renderable(function (ViewException $e) use ($request) {
+            $previous = $e->getPrevious();
+            if ($previous instanceof InsufficientPermissionException) {
+                if ($request->expectsJson()) {
+                    return response()->json(\App\Support\Api::failWithContext($previous->getMessage(), $request->all()), 403);
+                } else {
+                    \App\Support\LegacyResponse::permissionDenied();
+                }
+            }
+
+            return null;
         });
         $this->renderable(function (PassportAuthenticationException $e) use ($request) {
             return response()->redirectTo(sprintf("%s/login.php?returnto=%s", $request->getSchemeAndHttpHost(), urlencode($request->fullUrl())));

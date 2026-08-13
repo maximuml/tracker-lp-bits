@@ -2,7 +2,11 @@
 
 namespace App\Repositories;
 
+use App\Models\BonusLogs;
+use App\Models\Comment;
+use App\Models\Post;
 use App\Models\User;
+use App\Models\UserModifyLog;
 use Nexus\Database\NexusDB;
 
 class UserDetailRepository
@@ -97,5 +101,57 @@ class UserDetailRepository
         $user = User::query()->where('id', $warnedBy)->select(['id', 'username'])->first();
 
         return $user === null ? null : ['id' => (int) $user->id, 'username' => (string) $user->username];
+    }
+
+    /**
+     * @param  int  $id
+     * @return  ?User
+     */
+    public static function getUserWithMedals(int $id): ?User
+    {
+        return User::query()->with('valid_medals')->find($id);
+    }
+
+    /** @param  int  $userId */
+    public static function getCommentCount(int $userId): int
+    {
+        return Comment::query()->where('user', $userId)->count();
+    }
+
+    /** @param  int  $userId */
+    public static function getPostCount(int $userId): int
+    {
+        return Post::query()->where('userid', $userId)->count();
+    }
+
+    /** @param  User  $user */
+    public static function getTemporaryInviteCount(User $user): int
+    {
+        return $user->temporary_invites()->count();
+    }
+
+    /** @param  int  $userId */
+    public static function getModComment(int $userId): string
+    {
+        return UserModifyLog::query()
+            ->where('user_id', $userId)
+            ->orderBy('id', 'desc')
+            ->limit(20)
+            ->get()
+            ->map(fn ($item) => sprintf('[%s] %s', $item->created_at->format('Y-m-d'), $item->content))
+            ->implode("\n");
+    }
+
+    /** @param  int  $userId */
+    public static function getBonusComment(int $userId): string
+    {
+        return BonusLogs::query()
+            ->where('uid', $userId)
+            ->whereNotIn('business_type', BonusLogs::$businessTypeSeeding)
+            ->orderBy('id', 'desc')
+            ->limit(20)
+            ->get()
+            ->map(fn ($item) => sprintf('[%s] %s', $item->created_at->format('Y-m-d'), $item->comment))
+            ->implode("\n");
     }
 }

@@ -5,24 +5,9 @@
 @section('content')
 @php
 $__server_REQUEST_URI = \App\Support\SupportContext::getServerValue('REQUEST_URI');
-$query = \App\Models\UserBanLog::query();
-$q = htmlspecialchars(\App\Support\SupportContext::getRequestInput('q') ?? '');
-if (! empty($q)) {
-    $query->where('username', 'like', "%{$q}%");
-}
-$total = (clone $query)->count();
-$perPage = 50;
-[$paginationTop, $paginationBottom, $limit, $offset] = \App\Support\Pagination::pager($perPage, $total, '?');
-$rows = (clone $query)->offset($offset)->take($perPage)->orderBy('id', 'desc')->get()->toArray();
-$header = [
-    'id' => 'ID',
-    'uid' => 'UID',
-    'username' => 'Username',
-    'reason' => 'Reason',
-    'created_at' => 'Created at',
-];
-$table = \App\Support\Html::buildTable($header, $rows);
-$q = htmlspecialchars($q);
+$q = (string) ($q ?? '');
+$table = (string) ($table ?? '');
+$paginationBottom = (string) ($paginationBottom ?? '');
 @endphp
 
 <div>

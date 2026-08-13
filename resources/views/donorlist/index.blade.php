@@ -4,19 +4,6 @@
 
 @section('content')
 @php
-if (\App\Support\UserDisplay::currentClass() <= UC_MODERATOR) {
-    \App\Support\LegacyResponse::abort('Sorry', 'Access denied!');
-}
-$count = \App\Models\User::query()->where('donor', 'yes')->count();
-[$pagertop, $pagerbottom, , $offset, $rpp] = \App\Support\Pagination::pager(50, $count, 'donorlist.php?');
-$rows = \App\Models\User::query()
-    ->where('donor', 'yes')
-    ->orderByDesc('id')
-    ->offset($offset)
-    ->limit($rpp)
-    ->get(['id', 'username', 'email', 'added', 'donated'])
-    ->map(fn ($r) => $r->getAttributes());
-$users = number_format($count);
 \App\Support\Html::beginFrame("Donor List ({$users})", true);
 \App\Support\Html::beginTable();
 @endphp

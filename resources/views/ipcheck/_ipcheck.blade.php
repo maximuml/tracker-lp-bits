@@ -1,103 +1,34 @@
 <?php
-error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
-if (\App\Support\UserDisplay::currentClass() < UC_MODERATOR)
-\App\Support\LegacyResponse::abort("Sorry", "Access denied.");
-
-$tabs = ['users', 'peers'];
-$tab = 'users';
-if (!empty(\App\Support\SupportContext::getRequestInput('tab')) && in_array(\App\Support\SupportContext::getRequestInput('tab'), $tabs)) {
-    $tab = \App\Support\SupportContext::getRequestInput('tab');
-}
-$page = \App\Support\SupportContext::getRequestInput('page') ?? 0;
-$title = 'Duplicate IP users';
 \App\Support\Html::stdhead($title);
-print '<h1>'.$title.'</h1>';
-//print '<ul class="menu" style="padding-inline-start: 0">';
-//foreach ($tabs as $item) {
-//    echo sprintf('<li class="%s"><a href="?tab=%s&page=%s">%s</a></li>', $tab == $item ? 'selected' : '', $item, $page, $item);
-//}
-//print '</ul>';
+print '<h1>' . $title . '</h1>';
 \App\Support\Html::beginTable();
-
-if (\App\Support\UserDisplay::currentClass() >= UC_MODERATOR || $CURUSER["guard"] == "yes")
-{
- $res = \Nexus\Database\NexusDB::table('users')
-     ->selectRaw('ip, count(*) AS dupl')
-     ->where('enabled', 'yes')
-     ->where('ip', '!=', '')
-     ->where('ip', '!=', '127.0.0.0')
-     ->groupBy('ip')
-     ->orderByDesc('dupl')
-     ->orderBy('ip')
-     ->get();
-  print("<tr align=center><td class=colhead width=90>User</td>
- <td class=colhead width=70>Email</td>
- <td class=colhead width=70>Registered</td>
- <td class=colhead width=75>Last access</td>
- <td class=colhead width=70>Downloaded</td>
- <td class=colhead width=70>Uploaded</td>
- <td class=colhead width=45>Ratio</td>
- <td class=colhead width=125>IP</td>
- <td class=colhead width=40>Peer</td></tr>\n");
- $uc = 0;
- $ip = '';
-  foreach ($res as $row) {
-	$ras = (array) $row;
-	if ($ras["dupl"] <= 1)
-	  break;
-	if ($ip <> $ras['ip'])
-    {
-	  $users = \App\Models\User::query()
-	      ->where('ip', $ras['ip'])
-	      ->orderBy('id')
-	      ->get(['id', 'username', 'email', 'added', 'last_access', 'downloaded', 'uploaded', 'ip', 'warned', 'donor', 'enabled']);
-	  if ($users->count() > 1)
-	  {
-		$uc++;
-	    foreach ($users as $userRow) {
-	        $arr = $userRow->toArray();
-		  if ($arr['added'] == '0000-00-00 00:00:00' || $arr['added'] == null)
-			$arr['added'] = '-';
-		  if ($arr['last_access'] == '0000-00-00 00:00:00' || $arr['last_access'] == null)
-			$arr['last_access'] = '-';
-		  if($arr["downloaded"] != 0)
-			$ratio = number_format($arr["uploaded"] / $arr["downloaded"], 3);
-		  else
-			$ratio="---";
-
-		  $ratio = "<font color=" . \App\Support\Ratio::color($ratio) . ">$ratio</font>";
-		  $uploaded = \App\Support\Format::size($arr["uploaded"]);
-		  $downloaded = \App\Support\Format::size($arr["downloaded"]);
-		  $added = substr($arr['added'],0,10);
-		  $last_access = substr($arr['last_access'],0,10);
-		  if($uc%2 == 0)
-			$utc = "";
-		  else
-			$utc = " bgcolor=\"ECE9D8\"";
-
-			$peer_count = \Nexus\Database\NexusDB::table('peers')->where('ip', $ras['ip'])->where('userid', $arr['id'])->count();
-		  print("<tr$utc><td align=left>" . \App\Support\UserDisplay::username($arr["id"])."</td>
-				  <td align=center>$arr[email]</td>
-				  <td align=center>$added</td>
-				  <td align=center>$last_access</td>
-				  <td align=center>$downloaded</td>
-				  <td align=center>$uploaded</td>
-				  <td align=center>$ratio</td>
-				  <td align=center><a href=\"http://www.whois.sc/$arr[ip]\" target=\"_blank\">$arr[ip]</a></td>\n<td align=center>" .
-				  ($peer_count ? "ja" : "nein") . "</td></tr>\n");
-		  $ip = $arr["ip"];
-		}
-	  }
-	}
-  }
-}
-else
-{
- print("<br /><table width=60% border=1 cellspacing=0 cellpadding=9><tr><td align=center>");
- print("<h2>Sorry, only for Team</h2></table></td></tr>");
-}
+?>
+<tr align=center>
+    <td class=colhead width=90>User</td>
+    <td class=colhead width=70>Email</td>
+    <td class=colhead width=70>Registered</td>
+    <td class=colhead width=75>Last access</td>
+    <td class=colhead width=70>Downloaded</td>
+    <td class=colhead width=70>Uploaded</td>
+    <td class=colhead width=45>Ratio</td>
+    <td class=colhead width=125>IP</td>
+    <td class=colhead width=40>Peer</td>
+</tr>
+<?php $uc = 0; foreach ($rows as $arr): $uc++; $utc = ($uc % 2 == 0) ? '' : ' bgcolor="ECE9D8"'; ?>
+<tr<?php echo $utc; ?>>
+    <td align="left"><?php echo \App\Support\UserDisplay::username($arr['id']); ?></td>
+    <td align="center"><?php echo htmlspecialchars((string) $arr['email']); ?></td>
+    <td align="center"><?php echo htmlspecialchars((string) $arr['added_date']); ?></td>
+    <td align="center"><?php echo htmlspecialchars((string) $arr['last_access_date']); ?></td>
+    <td align="center"><?php echo htmlspecialchars((string) $arr['downloaded_str']); ?></td>
+    <td align="center"><?php echo htmlspecialchars((string) $arr['uploaded_str']); ?></td>
+    <td align="center"><?php echo $arr['ratio_html']; ?></td>
+    <td align="center"><a href="http://www.whois.sc/<?php echo htmlspecialchars((string) $arr['ip']); ?>" target="_blank"><?php echo htmlspecialchars((string) $arr['ip']); ?></a></td>
+    <td align="center"><?php echo $arr['peer_count'] ? 'ja' : 'nein'; ?></td>
+</tr>
+<?php endforeach; ?>
+<?php
 \App\Support\Html::endFrame();
 \App\Support\Html::endTable();
-
 \App\Support\Html::stdfoot();
 ?>

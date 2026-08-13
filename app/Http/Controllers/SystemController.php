@@ -3,10 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Enums\Permission\PermissionEnum;
+use App\Models\User;
 use App\Services\CleanupService;
 use App\Support\LegacyResponse;
+use App\Support\Pagination;
 use App\Support\Permissions;
 use App\Support\SupportContext;
+use App\Support\UserDisplay;
+use App\Support\Validators;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -286,10 +290,145 @@ class SystemController extends LegacyController
 
     }
 
-    public function maxlogin(Request $request): Response|RedirectResponse
+    public function maxlogin(Request $request): Response|RedirectResponse|View
     {
+        $sysopClass = defined('UC_SYSOP') ? \constant('UC_SYSOP') : 0;
+        if (UserDisplay::currentClass() < $sysopClass) {
+            return $this->legacyAbortResponse('Error', 'Permission denied.');
+        }
 
-        return $this->legacyPageWithRedirect($request, 'maxlogin', true);
+        $action = (string) (SupportContext::getPost('action') ?? SupportContext::getQuery('action') ?? 'showlist');
+        $action = htmlspecialchars($action);
+        $id = (int) (SupportContext::getPost('id') ?? SupportContext::getQuery('id') ?? 0);
+        $update = (string) (SupportContext::getPost('update') ?? SupportContext::getQuery('update') ?? '');
+
+        if ($action === 'ban' || $action === 'unban' || $action === 'delete' || $action === 'edit' || $action === 'save') {
+            if (! Validators::isId($id)) {
+                return $this->legacyAbortResponse('Error', 'Invalid ID');
+            }
+        }
+
+        if ($action === 'ban') {
+            NexusDB::table('loginattempts')->where('id', $id)->update(['banned' => 'yes']);
+            return redirect('maxlogin.php?update=Ban');
+        }
+
+        if ($action === 'unban') {
+            NexusDB::table('loginattempts')->where('id', $id)->update(['banned' => 'no']);
+            return redirect('maxlogin.php?update=Unban');
+        }
+
+        if ($action === 'delete') {
+            NexusDB::table('loginattempts')->where('id', $id)->delete();
+            return redirect('maxlogin.php?update=Delete');
+        }
+
+        if ($action === 'save') {
+            $attempts = (int) SupportContext::getPost('attempts');
+            $type = (string) SupportContext::getPost('type');
+            $banned = (string) SupportContext::getPost('banned');
+            if (! is_numeric($attempts) || $attempts < 0) {
+                return $this->legacyAbortResponse('Error', 'Invalid attempts');
+            }
+            NexusDB::table('loginattempts')->where('id', $id)->update([
+                'attempts' => $attempts,
+                'type' => $type,
+                'banned' => $banned,
+            ]);
+            if (SupportContext::getPost('returnto')) {
+                return redirect((string) SupportContext::getPost('returnto'));
+            }
+            return redirect('maxlogin.php?update=Edit');
+        }
+
+        $order = (string) (SupportContext::getQuery('order') ?? '');
+        $orderColumn = match ($order) {
+            'ip' => 'ip',
+            'added' => 'added',
+            'attempts' => 'attempts',
+            'type' => 'type',
+            'status' => 'banned',
+            default => 'id',
+        };
+
+        $perpage = 50;
+        $msg = $update ? '<h3><b>' . htmlspecialchars($update) . ' Successful!</b></h3>' : '';
+
+        if ($action === 'searchip') {
+            $ip = (string) (SupportContext::getPost('ip') ?? '');
+            $search = NexusDB::table('loginattempts')->where('ip', 'LIKE', '%' . $ip . '%')->get();
+            $rows = [];
+            foreach ($search as $attemptRow) {
+                $arr = (array) $attemptRow;
+                $user = User::query()->where('ip', $arr['ip'])->first(['id', 'username']);
+                $a2 = $user ? $user->toArray() : [];
+                $rows[] = [
+                    'id' => $arr['id'],
+                    'ip' => $arr['ip'],
+                    'added' => $arr['added'],
+                    'attempts' => $arr['attempts'],
+                    'type' => $arr['type'],
+                    'banned' => $arr['banned'],
+                    'userId' => $a2['id'] ?? 0,
+                    'username' => $a2['username'] ?? '',
+                ];
+            }
+
+            return $this->legacyPage($request, 'maxlogin', true, [
+                'action' => 'searchip',
+                'msg' => $msg,
+                'rows' => $rows,
+                'editRow' => null,
+            ]);
+        }
+
+        if ($action !== 'showlist' && $action !== 'edit') {
+            return $this->legacyAbortResponse('Error', 'Invalid Action');
+        }
+
+        if ($action === 'edit') {
+            $editRow = (array) NexusDB::table('loginattempts')->where('id', $id)->first();
+
+            return $this->legacyPage($request, 'maxlogin', true, [
+                'action' => 'edit',
+                'msg' => $msg,
+                'rows' => [],
+                'editRow' => $editRow,
+                'returnto' => SupportContext::getQuery('return') === 'yes' ? 'viewunbaniprequest.php' : '',
+            ]);
+        }
+
+        $countrows = (int) NexusDB::table('loginattempts')->count() + 1;
+        [$pagertop, $pagerbottom, , $offset, $rpp] = Pagination::pager($perpage, $countrows, "maxlogin.php?order={$order}&");
+
+        $loginAttempts = NexusDB::table('loginattempts')->orderByDesc($orderColumn)->offset($offset)->limit($rpp)->get();
+        $rows = [];
+        foreach ($loginAttempts as $attemptRow) {
+            $arr = (array) $attemptRow;
+            $user = User::query()->where('ip', $arr['ip'])->first(['id', 'username']);
+            $a2 = $user ? $user->toArray() : [];
+            $rows[] = [
+                'id' => $arr['id'],
+                'ip' => $arr['ip'],
+                'added' => $arr['added'],
+                'attempts' => $arr['attempts'],
+                'type' => $arr['type'],
+                'banned' => $arr['banned'],
+                'userId' => $a2['id'] ?? 0,
+                'username' => $a2['username'] ?? '',
+            ];
+        }
+
+        return $this->legacyPage($request, 'maxlogin', true, [
+            'action' => 'showlist',
+            'msg' => $msg,
+            'rows' => $rows,
+            'pagertop' => $pagertop,
+            'pagerbottom' => $pagerbottom,
+            'countrows' => $countrows,
+            'perpage' => $rpp,
+            'editRow' => null,
+        ]);
 
     }
 

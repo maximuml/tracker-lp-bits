@@ -2,17 +2,57 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\Permission\PermissionEnum;
+use App\Models\BonusLogs;
+use App\Models\Setting;
+use App\Models\User;
+use App\Models\UserBanLog;
+use App\Repositories\BonusRepository;
+use App\Repositories\UserRepository;
+use App\Support\Format;
+use App\Support\Html;
+use App\Support\Http;
+use App\Support\LegacyResponse;
+use App\Support\Locale;
+use App\Support\Network;
+use App\Support\Log;
+use App\Support\Logger;
+use App\Support\Pagination;
+use App\Support\Permissions;
+use App\Support\SupportContext;
+use App\Support\UserDisplay;
+use App\Support\Validators;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\View\View;
+use Nexus\Database\NexusDB;
 
 class AdminController extends LegacyController
 {
     public function donorlist(Request $request): View|RedirectResponse
     {
+        if (UserDisplay::currentClass() <= (defined('UC_MODERATOR') ? \constant('UC_MODERATOR') : 0)) {
+            return $this->legacyAbortResponse('Sorry', 'Access denied!');
+        }
 
-        return $this->legacyPage($request, 'donorlist');
+        $count = User::query()->where('donor', 'yes')->count();
+        [$pagertop, $pagerbottom, , $offset, $rpp] = Pagination::pager(50, $count, 'donorlist.php?');
+
+        $rows = User::query()
+            ->where('donor', 'yes')
+            ->orderByDesc('id')
+            ->offset($offset)
+            ->limit($rpp)
+            ->get(['id', 'username', 'email', 'added', 'donated'])
+            ->map(fn ($r) => $r->getAttributes());
+
+        return $this->legacyPage($request, 'donorlist', true, [
+            'pagertop' => $pagertop,
+            'pagerbottom' => $pagerbottom,
+            'rows' => $rows,
+            'users' => number_format($count),
+        ]);
 
     }
 
@@ -46,8 +86,60 @@ class AdminController extends LegacyController
 
     public function checkuser(Request $request): View|RedirectResponse
     {
+        $moderatorClass = defined('UC_MODERATOR') ? \constant('UC_MODERATOR') : 0;
+        $langCheckuser = (array) SupportContext::getGlobal('lang_checkuser', []);
 
-        return $this->legacyPage($request, 'checkuser');
+        $id = (int) (SupportContext::getQuery('id') ?? 0);
+        if (! Validators::isId($id)) {
+            return $this->legacyAbortResponse($langCheckuser['std_error'] ?? 'Error', $langCheckuser['std_no_user_id'] ?? 'No user with this ID.');
+        }
+
+        $userObj = User::query()->where('status', 'pending')->where('id', $id)->first();
+        if (! $userObj) {
+            return $this->legacyAbortResponse($langCheckuser['std_error'] ?? 'Error', $langCheckuser['std_no_user_id'] ?? 'No user with this ID.');
+        }
+        $user = $userObj->toArray();
+
+        $curUser = SupportContext::getUser() ?? [];
+        $currentUserId = (int) ($curUser['id'] ?? 0);
+
+        if (UserDisplay::currentClass() < $moderatorClass && (int) $user['invited_by'] !== $currentUserId) {
+            return $this->legacyAbortResponse($langCheckuser['std_error'] ?? 'Error', $langCheckuser['std_no_permission'] ?? 'Permission denied.');
+        }
+
+        if ($user['gender'] === 'Male') {
+            $gender = '<img class="male" src="pic/trans.gif" alt="Male" title="Male" style="margin-left: 4pt">';
+        } elseif ($user['gender'] === 'Female') {
+            $gender = '<img class="female" src="pic/trans.gif" alt="Female" title="Female" style="margin-left: 4pt">';
+        } elseif ($user['gender'] === 'N/A') {
+            $gender = '<img class="no_gender" src="pic/trans.gif" alt="N/A" title="No gender" style="margin-left: 4pt">';
+        } else {
+            $gender = '';
+        }
+
+        if ($user['added'] === '0000-00-00 00:00:00' || $user['added'] === null) {
+            $joindate = 'N/A';
+        } else {
+            $joindate = $user['added'] . ' (' . Format::getElapsedTime(strtotime($user['added'])) . ' ago)';
+        }
+
+        $countryRow = NexusDB::table('countries')->where('id', $user['country'])->first(['name', 'flagpic']);
+        $country = '';
+        if ($countryRow) {
+            $arr = (array) $countryRow;
+            $country = "<td class=embedded><img src=pic/flag/{$arr['flagpic']} alt=\"{$arr['name']}\" style='margin-left: 8pt'></td>";
+        }
+
+        return $this->legacyPage($request, 'checkuser', true, [
+            'id' => $id,
+            'user' => $user,
+            'gender' => $gender,
+            'joindate' => $joindate,
+            'country' => $country,
+            'enabled' => $user['enabled'] === 'yes',
+            'canSeeIp' => UserDisplay::currentClass() >= $moderatorClass && $user['ip'] !== '',
+            'lang_checkuser' => $langCheckuser,
+        ]);
 
     }
 
@@ -114,24 +206,307 @@ class AdminController extends LegacyController
 
     }
 
-    public function location(Request $request): View|RedirectResponse
+    public function location(Request $request): View|RedirectResponse|Response
     {
+        $sysopClass = defined('UC_SYSOP') ? \constant('UC_SYSOP') : 0;
+        if (UserDisplay::currentClass() < $sysopClass) {
+            return $this->legacyAbortResponse('Error', 'Access denied.');
+        }
 
-        return $this->legacyPage($request, 'location', true);
+        $actionUrl = 'location.php';
+        $perpage = 50;
+        $success = false;
+        $error = '';
+        $editRow = [];
+        $mode = 'list';
+        $message = '';
+
+        $rangeStartIp = (string) (SupportContext::getQuery('range_start_ip') ?? '');
+        $rangeEndIp = (string) (SupportContext::getQuery('range_end_ip') ?? '');
+        $hasRangeFilter = false;
+
+        $sure = (string) (SupportContext::getQuery('sure') ?? '');
+        $delid = (int) (SupportContext::getQuery('delid') ?? 0);
+        if ($sure === 'yes' && $delid > 0) {
+            if (Validators::isId($delid)) {
+                NexusDB::table('locations')->where('id', $delid)->delete();
+            }
+            return $this->legacyAbortResponse('Success', 'Location successfully removed, click <a class=altlink href="' . $actionUrl . '">here</a> to go back.', false);
+        }
+
+        if ($delid > 0) {
+            return $this->legacyAbortResponse('Confirm', 'Are you sure you would like to delete this Location?(<strong><a href="' . $actionUrl . '?delid=' . $delid . '&sure=yes">Yes!</a></strong> / <strong><a href="' . $actionUrl . '">No</a></strong>)', false);
+        }
+
+        $edited = (string) (SupportContext::getQuery('edited') ?? '');
+        if ($edited === '1') {
+            $id = (int) (SupportContext::getQuery('id') ?? 0);
+            $name = (string) SupportContext::getQuery('name');
+            $flagpic = (string) SupportContext::getQuery('flagpic');
+            $locationMain = (string) SupportContext::getQuery('location_main');
+            $locationSub = (string) SupportContext::getQuery('location_sub');
+            $startIp = (string) SupportContext::getQuery('start_ip');
+            $endIp = (string) SupportContext::getQuery('end_ip');
+            $theoryUpspeed = (string) SupportContext::getQuery('theory_upspeed');
+            $practicalUpspeed = (string) SupportContext::getQuery('practical_upspeed');
+            $theoryDownspeed = (string) SupportContext::getQuery('theory_downspeed');
+            $practicalDownspeed = (string) SupportContext::getQuery('practical_downspeed');
+
+            if (! Network::isValidIpv4Format($startIp) || ! Network::isValidIpv4Format($endIp)) {
+                $error = 'Invalid IP Address Format !!!';
+            } elseif (ip2long($endIp) <= ip2long($startIp)) {
+                $error = 'The end IP address should be larger than the start one, or equal for single IP check!';
+            } elseif (Validators::isId($id)) {
+                NexusDB::table('locations')->where('id', $id)->update([
+                    'name' => $name,
+                    'flagpic' => $flagpic,
+                    'location_main' => $locationMain,
+                    'location_sub' => $locationSub,
+                    'start_ip' => $startIp,
+                    'end_ip' => $endIp,
+                    'theory_upspeed' => $theoryUpspeed,
+                    'practical_upspeed' => $practicalUpspeed,
+                    'theory_downspeed' => $theoryDownspeed,
+                    'practical_downspeed' => $practicalDownspeed,
+                ]);
+                return $this->legacyAbortResponse('Success!', 'Location has been edited, click <a class=altlink href="' . $actionUrl . '">here</a> to go back', false);
+            }
+        }
+
+        $editid = (int) (SupportContext::getQuery('editid') ?? 0);
+        if ($editid > 0) {
+            $editRow = (array) NexusDB::table('locations')->where('id', $editid)->first();
+            if (empty($editRow)) {
+                $error = 'Location not found.';
+            } else {
+                $mode = 'edit';
+                return $this->legacyPage($request, 'location', true, [
+                    'mode' => $mode,
+                    'editRow' => $editRow,
+                ]);
+            }
+        }
+
+        $add = (string) (SupportContext::getQuery('add') ?? '');
+        if ($add === 'true') {
+            $name = (string) SupportContext::getQuery('name');
+            $flagpic = (string) SupportContext::getQuery('flagpic');
+            $locationMain = (string) SupportContext::getQuery('location_main');
+            $locationSub = (string) SupportContext::getQuery('location_sub');
+            $startIp = (string) SupportContext::getQuery('start_ip');
+            $endIp = (string) SupportContext::getQuery('end_ip');
+            $theoryUpspeed = (string) SupportContext::getQuery('theory_upspeed');
+            $practicalUpspeed = (string) SupportContext::getQuery('practical_upspeed');
+            $theoryDownspeed = (string) SupportContext::getQuery('theory_downspeed');
+            $practicalDownspeed = (string) SupportContext::getQuery('practical_downspeed');
+
+            if (! Network::isValidIpv4Format($startIp) || ! Network::isValidIpv4Format($endIp)) {
+                $error = 'Invalid IP Address Format !!!';
+            } elseif (ip2long($endIp) <= ip2long($startIp)) {
+                $error = 'The end IP address should be larger than the start one, or equal for single IP check!';
+            } else {
+                NexusDB::table('locations')->insert([
+                    'name' => $name,
+                    'flagpic' => $flagpic,
+                    'location_main' => $locationMain,
+                    'location_sub' => $locationSub,
+                    'start_ip' => $startIp,
+                    'end_ip' => $endIp,
+                    'theory_upspeed' => $theoryUpspeed,
+                    'practical_upspeed' => $practicalUpspeed,
+                    'theory_downspeed' => $theoryDownspeed,
+                    'practical_downspeed' => $practicalDownspeed,
+                ]);
+                $success = true;
+            }
+        }
+
+        $checkRange = (string) (SupportContext::getQuery('check_range') ?? '');
+        if ($checkRange === 'true') {
+            if (! Network::isValidIpv4Format($rangeStartIp) || ! Network::isValidIpv4Format($rangeEndIp)) {
+                $error = 'Invalid IP Address Format !!!';
+            } elseif (ip2long($rangeEndIp) <= ip2long($rangeStartIp)) {
+                $error = 'The end IP Address should be larger than the start one, or equal for single IP check!';
+            } else {
+                $hasRangeFilter = true;
+                $message = 'Conforming Locations:';
+            }
+        }
+
+        $baseQuery = NexusDB::table('locations')
+            ->when($hasRangeFilter, function ($query) use ($rangeStartIp, $rangeEndIp) {
+                $start = (int) ip2long($rangeStartIp);
+                $end = (int) ip2long($rangeEndIp);
+                return $query->whereRaw("INET_ATON(start_ip) <= {$start} AND INET_ATON(end_ip) >= {$end}");
+            });
+
+        $count = $baseQuery->count();
+        [$pagertop, $pagerbottom, , $offset, $rpp] = Pagination::pager($perpage, $count, 'location.php?');
+
+        $locations = (clone $baseQuery)
+            ->orderBy('name')
+            ->orderBy('start_ip')
+            ->offset($offset)
+            ->limit($rpp)
+            ->get();
+
+        $rows = [];
+        foreach ($locations as $loc) {
+            $row = (array) $loc;
+            $row['flagpic_url'] = $row['flagpic'] !== '' ? asset('pic/location/' . $row['flagpic']) : '';
+            $countSub = strlen((string) $row['location_sub']);
+            if ($countSub > 40) {
+                $row['location_sub'] = substr((string) $row['location_sub'], 0, 40) . '..';
+            }
+            $rows[] = $row;
+        }
+
+        return $this->legacyPage($request, 'location', true, [
+            'mode' => $mode,
+            'success' => $success,
+            'error' => $error,
+            'message' => $message,
+            'rangeStartIp' => $rangeStartIp,
+            'rangeEndIp' => $rangeEndIp,
+            'hasRangeFilter' => $hasRangeFilter,
+            'pagertop' => $pagertop,
+            'pagerbottom' => $pagerbottom,
+            'rows' => $rows,
+            'actionUrl' => $actionUrl,
+        ]);
 
     }
 
     public function reset(Request $request): View|RedirectResponse
     {
+        $administratorClass = defined('UC_ADMINISTRATOR') ? \constant('UC_ADMINISTRATOR') : 0;
+        if (UserDisplay::currentClass() < $administratorClass) {
+            return $this->legacyAbortResponse('Error', 'Permission denied, Administrator Only.');
+        }
 
-        return $this->legacyPage($request, 'reset', true);
+        $curUser = SupportContext::getUser() ?? [];
+        $currentUsername = (string) ($curUser['username'] ?? '');
+
+        $success = false;
+        $message = '';
+
+        if ($request->isMethod('post')) {
+            $username = trim((string) SupportContext::getPost('username'));
+            $newpassword = trim((string) SupportContext::getPost('newpassword'));
+            $newpasswordagain = trim((string) SupportContext::getPost('newpasswordagain'));
+
+            if ($username === '' || $newpassword === '' || $newpasswordagain === '') {
+                return $this->legacyAbortResponse('Error', "Don't leave any fields blank.");
+            }
+
+            if ($newpassword !== $newpasswordagain) {
+                return $this->legacyAbortResponse('Error', "The passwords didn't match! Must've typoed. Try again.");
+            }
+
+            if (strlen($newpassword) < 6) {
+                return $this->legacyAbortResponse('Error', 'Sorry, password is too short (min is 6 chars)');
+            }
+
+            $user = User::query()->where('username', $username)->first();
+            if (! $user) {
+                return $this->legacyAbortResponse('Error', "Sorry, that username doesn't exist.");
+            }
+            $arr = $user->toArray();
+
+            if (UserDisplay::currentClass() <= (int) $arr['class']) {
+                $log = "Password Reset For {$username} by {$currentUsername} denied: operator class => " . UserDisplay::currentClass() . " is not greater than target user => {$arr['class']}";
+                Log::writeWithContext($log);
+                Logger::writeWithContext($log, 'alert', false);
+                return $this->legacyAbortResponse('Error', "Sorry, you don't have enough permission to reset this user's password.");
+            }
+
+            $userRep = new UserRepository();
+            try {
+                $userRep->resetPassword((int) $arr['id'], $newpassword, $newpasswordagain);
+            } catch (\Exception $e) {
+                return $this->legacyAbortResponse('Error', $e->getMessage());
+            }
+
+            Log::writeWithContext("Password Reset For {$username} by {$currentUsername}");
+            $success = true;
+            $message = "The password of account <b>{$username}</b> is reset, please inform user of this change.";
+        }
+
+        return $this->legacyPage($request, 'reset', true, [
+            'success' => $success,
+            'message' => $message,
+        ]);
 
     }
 
     public function selfEnable(Request $request): View|RedirectResponse
     {
+        $curUser = SupportContext::getUser() ?? [];
+        $currentUserId = (int) ($curUser['id'] ?? 0);
+        $currentUsername = (string) ($curUser['username'] ?? '');
 
-        return $this->legacyPage($request, 'self-enable', true);
+        $title = Locale::trans('self-enable.title', [], null);
+        $unit = Setting::getSelfEnableBonus();
+
+        $viewData = [
+            'title' => $title,
+            'unit' => $unit,
+            'enabled' => ($curUser['enabled'] ?? '') === 'yes',
+            'bonus' => (float) ($curUser['seedbonus'] ?? 0),
+            'latestBanLog' => null,
+            'elapsedDay' => 0,
+            'total' => 0,
+            'isUserBonusEnough' => false,
+            'insufficientMessage' => '',
+        ];
+
+        if ($unit <= 0) {
+            return $this->legacyPage($request, 'self-enable', true, $viewData);
+        }
+
+        if (($curUser['enabled'] ?? '') === 'yes') {
+            return $this->legacyPage($request, 'self-enable', true, $viewData);
+        }
+
+        $latestBanLog = UserBanLog::query()->where('uid', $currentUserId)->orderByDesc('id')->first();
+        if (! $latestBanLog) {
+            $viewData['latestBanLog'] = null;
+            return $this->legacyPage($request, 'self-enable', true, $viewData);
+        }
+
+        $elapsedDay = (int) ceil((time() - $latestBanLog->created_at->getTimestamp()) / 86400);
+        $total = $unit * $elapsedDay;
+        $isUserBonusEnough = (float) ($curUser['seedbonus'] ?? 0) >= $total;
+        $insufficientMessage = Locale::trans('self-enable.bonus_not_enough', ['bonus' => $curUser['seedbonus'] ?? 0], null);
+
+        if (! empty(SupportContext::getPost('submit'))) {
+            if (! $isUserBonusEnough) {
+                $viewData['latestBanLog'] = $latestBanLog;
+                $viewData['elapsedDay'] = $elapsedDay;
+                $viewData['total'] = $total;
+                $viewData['isUserBonusEnough'] = false;
+                $viewData['insufficientMessage'] = $insufficientMessage;
+                return $this->legacyPage($request, 'self-enable', true, $viewData);
+            }
+
+            $userRep = new UserRepository();
+            $bonusRep = new BonusRepository();
+            $operator = User::query()->find($currentUserId);
+            if ($operator) {
+                $bonusRep->consumeUserBonus($currentUserId, $total, BonusLogs::BUSINESS_TYPE_SELF_ENABLE, $title);
+                $userRep->enableUser($operator, $currentUserId, $title);
+            }
+
+            return redirect('index.php');
+        }
+
+        $viewData['latestBanLog'] = $latestBanLog;
+        $viewData['elapsedDay'] = $elapsedDay;
+        $viewData['total'] = $total;
+        $viewData['isUserBonusEnough'] = $isUserBonusEnough;
+        $viewData['insufficientMessage'] = $insufficientMessage;
+
+        return $this->legacyPage($request, 'self-enable', true, $viewData);
 
     }
 
@@ -151,8 +526,55 @@ class AdminController extends LegacyController
 
     public function testip(Request $request): View|RedirectResponse
     {
+        $moderatorClass = defined('UC_MODERATOR') ? \constant('UC_MODERATOR') : 0;
+        if (UserDisplay::currentClass() < $moderatorClass) {
+            return $this->legacyAbortResponse('Error', 'Permission denied');
+        }
 
-        return $this->legacyPage($request, 'testip', true);
+        $langTestip = (array) SupportContext::getGlobal('lang_testip', []);
+
+        if ($request->isMethod('post')) {
+            $ip = (string) SupportContext::getPost('ip');
+        } else {
+            $ip = (string) (SupportContext::getQuery('ip') ?? '');
+        }
+
+        $message = '';
+        $banstable = '';
+        $hasResult = false;
+
+        if ($ip !== '') {
+            $nip = ip2long($ip);
+            if ($nip === false || $nip === -1) {
+                return $this->legacyAbortResponse('Error', 'Bad IP.');
+            }
+            $rows = NexusDB::table('bans')->where('first', '<=', $nip)->where('last', '>=', $nip)->get();
+            if ($rows->isEmpty()) {
+                $message = 'The IP address <b>' . htmlspecialchars($ip) . '</b> is not banned.';
+                $hasResult = true;
+            } else {
+                $hasResult = true;
+                $message = 'The IP address <b>' . $ip . '</b> is banned:';
+                $banstable = "<table class=main border=0 cellspacing=0 cellpadding=5>\n" .
+                    "<tr><td class=colhead>First</td><td class=colhead>Last</td><td class=colhead>Comment</td></tr>\n";
+                foreach ($rows as $row) {
+                    $arr = (array) $row;
+                    $first = long2ip($arr['first']);
+                    $last = long2ip($arr['last']);
+                    $comment = htmlspecialchars((string) $arr['comment']);
+                    $banstable .= "<tr><td>$first</td><td>$last</td><td>$comment</td></tr>\n";
+                }
+                $banstable .= '</table>\n';
+            }
+        }
+
+        return $this->legacyPage($request, 'testip', true, [
+            'ip' => $ip,
+            'message' => $message,
+            'banstable' => $banstable,
+            'hasResult' => $hasResult,
+            'lang_testip' => $langTestip,
+        ]);
 
     }
 

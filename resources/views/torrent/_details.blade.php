@@ -4,6 +4,8 @@ $row = $torrentRow;
 $CURUSER = $currentUser;
 $user = $user;
 $customField = $customField;
+$tagIds = (array) ($tagIds ?? []);
+$denyLog = $denyLog ?? null;
 $lang_details = \App\Support\SupportContext::getGlobal('lang_details') ?? [];
 $lang_functions = \App\Support\SupportContext::getGlobal('lang_functions') ?? [];
 $torrentnameprefix = \App\Support\SupportContext::getGlobal('torrentnameprefix') ?? '';
@@ -44,19 +46,12 @@ $torrentnameprefix = \App\Support\SupportContext::getGlobal('torrentnameprefix')
 		print("<h1 align=\"center\" id=\"top\">".$s."</h1>\n");
 
         //Banned reason
-        if ($row['approval_status'] == \App\Models\Torrent::APPROVAL_STATUS_DENY) {
-            $torrentOperationLog = \App\Models\TorrentOperationLog::query()
-                ->where('torrent_id', $row['id'])
-                ->where('action_type', \App\Models\TorrentOperationLog::ACTION_TYPE_APPROVAL_DENY)
-                ->orderBy('id', 'desc')
-                ->first();
-            if ($torrentOperationLog) {
-                $dangerIcon = '<svg t="1655242121471" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="46590" width="16" height="16"><path d="M963.555556 856.888889a55.978667 55.978667 0 0 1-55.978667 56.007111c-0.284444 0-0.540444-0.085333-0.824889-0.085333l-0.056889 0.085333H110.734222l-0.654222-1.137778A55.409778 55.409778 0 0 1 56.888889 856.462222c0-9.756444 2.730667-18.773333 7.139555-26.737778l-3.726222-6.599111L453.461333 156.302222A59.335111 59.335111 0 0 1 510.236444 113.777778c26.936889 0 49.436444 18.005333 56.803556 42.552889l389.973333 661.447111-3.669333 6.997333c6.4 9.102222 10.211556 20.138667 10.211556 32.113778z m-497.777778-541.326222l16.014222 312.888889h56.888889l16.014222-312.888889h-88.917333z m44.458666 398.222222a56.888889 56.888889 0 1 0-0.028444 113.749333 56.888889 56.888889 0 0 0 0.028444-113.749333z" p-id="46591" fill="#d81e06" data-spm-anchor-id="a313x.7781069.0.i61" class="selected"></path></svg>';
-                printf(
-                    '<div style="display: flex; justify-content: center;margin-bottom: 10px"><div style="display: flex;background-color: black; color: white;font-weight: bold; padding: 10px 100px">%s&nbsp;%s</div></div>',
-                    $dangerIcon, \App\Support\Locale::trans('torrent.approval.deny_comment_show', ['reason' => $torrentOperationLog->comment], null)
-                );
-            }
+        if ($row['approval_status'] == \App\Models\Torrent::APPROVAL_STATUS_DENY && $denyLog !== null) {
+            $dangerIcon = '<svg t="1655242121471" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="46590" width="16" height="16"><path d="M963.555556 856.888889a55.978667 55.978667 0 0 1-55.978667 56.007111c-0.284444 0-0.540444-0.085333-0.824889-0.085333l-0.056889 0.085333H110.734222l-0.654222-1.137778A55.409778 55.409778 0 0 1 56.888889 856.462222c0-9.756444 2.730667-18.773333 7.139555-26.737778l-3.726222-6.599111L453.461333 156.302222A59.335111 59.335111 0 0 1 510.236444 113.777778c26.936889 0 49.436444 18.005333 56.803556 42.552889l389.973333 661.447111-3.669333 6.997333c6.4 9.102222 10.211556 20.138667 10.211556 32.113778z m-497.777778-541.326222l16.014222 312.888889h56.888889l16.014222-312.888889h-88.917333z m44.458666 398.222222a56.888889 56.888889 0 1 0-0.028444 113.749333 56.888889 56.888889 0 0 0 0.028444-113.749333z" p-id="46591" fill="#d81e06" data-spm-anchor-id="a313x.7781069.0.i61" class="selected"></path></svg>';
+            printf(
+                '<div style="display: flex; justify-content: center;margin-bottom: 10px"><div style="display: flex;background-color: black; color: white;font-weight: bold; padding: 10px 100px">%s&nbsp;%s</div></div>',
+                $dangerIcon, \App\Support\Locale::trans('torrent.approval.deny_comment_show', ['reason' => $denyLog->comment], null)
+            );
         }
 
 		print("<table width=\"97%\" cellspacing=\"0\" cellpadding=\"5\">\n");
@@ -91,10 +86,9 @@ $torrentnameprefix = \App\Support\SupportContext::getGlobal('torrentnameprefix')
 		else
 			\App\Support\Html::tr($lang_details['row_download'], $lang_details['text_downloading_not_allowed']);
 		//tag
-        $torrentTags = \App\Models\TorrentTag::query()->where('torrent_id', $row['id'])->get();
-        if ($torrentTags->isNotEmpty()) {
+        if (! empty($tagIds)) {
             $tagRep = new \App\Repositories\TagRepository();
-            \App\Support\Html::tr($lang_details['row_tags'], $tagRep->renderSpan($row['search_box_id'], $torrentTags->pluck('tag_id')->toArray()),true);
+            \App\Support\Html::tr($lang_details['row_tags'], $tagRep->renderSpan($row['search_box_id'], $tagIds), true);
         }
 
 		$size_info =  "<b>".$lang_details['text_size']."</b>" . \App\Support\Format::size($row["size"]);

@@ -4,6 +4,8 @@ namespace App\Repositories;
 
 use App\Models\Comment;
 use App\Models\Torrent;
+use App\Models\TorrentOperationLog;
+use App\Models\TorrentTag;
 use Illuminate\Database\Eloquent\Collection;
 use Nexus\Database\NexusDB;
 
@@ -145,5 +147,33 @@ class TorrentDetailRepository
     public static function incrementViews(int $id): void
     {
         Torrent::query()->where('id', $id)->increment('views');
+    }
+
+    /**
+     * @param  int  $torrentId
+     * @return  array<int, int>
+     */
+    public static function getTagIds(int $torrentId): array
+    {
+        return array_map(
+            fn ($id) => (int) $id,
+            TorrentTag::query()
+                ->where('torrent_id', $torrentId)
+                ->pluck('tag_id')
+                ->toArray()
+        );
+    }
+
+    /**
+     * @param  int  $torrentId
+     * @return  ?TorrentOperationLog
+     */
+    public static function getLatestApprovalDenyLog(int $torrentId): ?TorrentOperationLog
+    {
+        return TorrentOperationLog::query()
+            ->where('torrent_id', $torrentId)
+            ->where('action_type', TorrentOperationLog::ACTION_TYPE_APPROVAL_DENY)
+            ->orderBy('id', 'desc')
+            ->first();
     }
 }

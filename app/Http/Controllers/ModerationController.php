@@ -49,7 +49,7 @@ class ModerationController extends LegacyController
         $takereportofferid = (int) (SupportContext::getPost('takereportofferid') ?? 0);
         $takereason = trim((string) SupportContext::getPost('reason'));
 
-        $doTakeReport = static function (int $reportid, string $type, string $reason) use ($currentUserId, $langReport, $cache): Response {
+        $doTakeReport = function (int $reportid, string $type, string $reason) use ($currentUserId, $langReport, $cache): Response {
             if (! Validators::isId($reportid) || $reason === '') {
                 return $this->legacyAbortResponse($langReport['std_error'] ?? 'Error', $langReport['std_missing_reason'] ?? 'Missing reason.');
             }
@@ -422,7 +422,7 @@ class ModerationController extends LegacyController
 
     }
 
-    public function cheaters(Request $request): View|RedirectResponse
+    public function cheaters(Request $request): View|RedirectResponse|Response
     {
         $moderatorClass = defined('UC_MODERATOR') ? \constant('UC_MODERATOR') : 0;
         if (UserDisplay::currentClass() < $moderatorClass) {

@@ -25,7 +25,7 @@ class ForumController extends LegacyController
      * and is included by forum/index.blade.php so the original HTML/PHP
      * interleaving is preserved as closely as possible.
      */
-    public function legacy(Request $request): View|RedirectResponse
+    public function legacy(Request $request): View|RedirectResponse|Response
     {
         if (SupportContext::getUser() === null) {
             return redirect('/forums.php?' . $request->getQueryString());
@@ -261,7 +261,7 @@ class ForumController extends LegacyController
 
     }
 
-    public function latestcomments(Request $request): View|RedirectResponse
+    public function latestcomments(Request $request): View|RedirectResponse|Response
     {
         return $this->legacyPage($request, 'latestcomments', true);
     }

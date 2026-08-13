@@ -31,7 +31,7 @@ use Nexus\Database\NexusDB;
 
 class AdminController extends LegacyController
 {
-    public function donorlist(Request $request): View|RedirectResponse
+    public function donorlist(Request $request): View|RedirectResponse|Response
     {
         if (UserDisplay::currentClass() <= (defined('UC_MODERATOR') ? \constant('UC_MODERATOR') : 0)) {
             return $this->legacyAbortResponse('Sorry', 'Access denied!');
@@ -57,14 +57,14 @@ class AdminController extends LegacyController
 
     }
 
-    public function stats(Request $request): View|RedirectResponse
+    public function stats(Request $request): View|RedirectResponse|Response
     {
 
         return $this->legacyPage($request, 'stats');
 
     }
 
-    public function warned(Request $request): View|RedirectResponse
+    public function warned(Request $request): View|RedirectResponse|Response
     {
 
         return $this->legacyPage($request, 'warned');
@@ -78,14 +78,14 @@ class AdminController extends LegacyController
 
     }
 
-    public function allagents(Request $request): View|RedirectResponse
+    public function allagents(Request $request): View|RedirectResponse|Response
     {
 
         return $this->legacyPage($request, 'allagents');
 
     }
 
-    public function checkuser(Request $request): View|RedirectResponse
+    public function checkuser(Request $request): View|RedirectResponse|Response
     {
         $moderatorClass = defined('UC_MODERATOR') ? \constant('UC_MODERATOR') : 0;
         $langCheckuser = (array) SupportContext::getGlobal('lang_checkuser', []);
@@ -151,14 +151,14 @@ class AdminController extends LegacyController
 
     }
 
-    public function userBanLog(Request $request): View|RedirectResponse
+    public function userBanLog(Request $request): View|RedirectResponse|Response
     {
 
         return $this->legacyPage($request, 'user-ban-log');
 
     }
 
-    public function clearCache(Request $request): View|RedirectResponse
+    public function clearCache(Request $request): View|RedirectResponse|Response
     {
 
         return $this->legacyPage($request, 'clearcache');
@@ -181,6 +181,11 @@ class AdminController extends LegacyController
 
         $field = new \Nexus\Field\Field();
         $langFields = (array) SupportContext::getGlobal('lang_fields', []);
+        $langCatmanage = (array) SupportContext::getGlobal('lang_catmanage', []);
+        if (empty($langCatmanage['row_custom_field_display_help'])) {
+            $langCatmanage['row_custom_field_display_help'] = '';
+            SupportContext::setGlobal('lang_catmanage', $langCatmanage);
+        }
         $action = (string) (SupportContext::getQuery('action') ?? 'view');
 
         if ($action === 'submit') {
@@ -232,21 +237,21 @@ class AdminController extends LegacyController
 
     }
 
-    public function formats(Request $request): View|RedirectResponse
+    public function formats(Request $request): View|RedirectResponse|Response
     {
 
         return $this->legacyPage($request, 'formats');
 
     }
 
-    public function videoformats(Request $request): View|RedirectResponse
+    public function videoformats(Request $request): View|RedirectResponse|Response
     {
 
         return $this->legacyPage($request, 'videoformats');
 
     }
 
-    public function settings(Request $request): View|RedirectResponse
+    public function settings(Request $request): View|RedirectResponse|Response
     {
 
         return $this->legacyPage($request, 'settings', true);
@@ -506,7 +511,7 @@ class AdminController extends LegacyController
 
     }
 
-    public function reset(Request $request): View|RedirectResponse
+    public function reset(Request $request): View|RedirectResponse|Response
     {
         $administratorClass = defined('UC_ADMINISTRATOR') ? \constant('UC_ADMINISTRATOR') : 0;
         if (UserDisplay::currentClass() < $administratorClass) {
@@ -568,7 +573,7 @@ class AdminController extends LegacyController
 
     }
 
-    public function selfEnable(Request $request): View|RedirectResponse
+    public function selfEnable(Request $request): View|RedirectResponse|Response
     {
         $curUser = SupportContext::getUser() ?? [];
         $currentUserId = (int) ($curUser['id'] ?? 0);
@@ -639,7 +644,7 @@ class AdminController extends LegacyController
 
     }
 
-    public function unco(Request $request): View|RedirectResponse
+    public function unco(Request $request): View|RedirectResponse|Response
     {
 
         return $this->legacyPage($request, 'unco', true);
@@ -673,7 +678,7 @@ class AdminController extends LegacyController
 
     }
 
-    public function testip(Request $request): View|RedirectResponse
+    public function testip(Request $request): View|RedirectResponse|Response
     {
         $moderatorClass = defined('UC_MODERATOR') ? \constant('UC_MODERATOR') : 0;
         if (UserDisplay::currentClass() < $moderatorClass) {

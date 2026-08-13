@@ -1,4 +1,13 @@
 <?php
+$mode = $mode ?? 'list';
+$forums = $forums ?? [];
+$overforums = $overforums ?? [];
+$classOptions = $classOptions ?? [];
+$maxSort = $maxSort ?? 0;
+$id = $id ?? 0;
+$row = $row ?? [];
+$moderatorUsernames = $moderatorUsernames ?? '';
+$currentClass = $currentClass ?? 0;
 \App\Support\Html::stdhead($lang_forummanage['head_forum_management'] ?? 'Forum management');
 \App\Support\Frame::mainFrameOpen();
 
@@ -163,7 +172,7 @@ if ($mode === 'editforum'):
         foreach ($forums as $row) {
             $moderators = $row['moderators_html'] ?: ($lang_forummanage['text_not_available'] ?? 'N/A');
             echo '<tr><td><a href=forums.php?action=viewforum&forumid=' . (int) $row['id'] . '><b>' . htmlspecialchars((string) $row['name']) . '</b></a><br />' . htmlspecialchars((string) $row['description']) . '</td>';
-            echo '<td>' . htmlspecialchars((string) ($row['of_name'] ?? '')) . '</td><td>' . UserClass::name((int) $row['minclassread'], false, true, true) . '</td><td>' . UserClass::name((int) $row['minclasswrite'], false, true, true) . '</td><td>' . UserClass::name((int) $row['minclasscreate'], false, true, true) . '</td><td>' . $moderators . '</td><td><b><a href="forummanage.php?action=editforum&id=' . (int) $row['id'] . '">' . ($lang_forummanage['text_edit'] ?? 'Edit') . '</a>&nbsp;|&nbsp;<a href="javascript:confirm_delete(\'' . (int) $row['id'] . '\', \'' . ($lang_forummanage['js_sure_to_delete_forum'] ?? '') . '\', \'\');"><font color=red>' . ($lang_forummanage['text_delete'] ?? 'Delete') . '</font></a></b></td></tr>';
+            echo '<td>' . htmlspecialchars((string) ($row['of_name'] ?? '')) . '</td><td>' . \App\Support\UserClass::name((int) $row['minclassread'], false, true, true) . '</td><td>' . \App\Support\UserClass::name((int) $row['minclasswrite'], false, true, true) . '</td><td>' . \App\Support\UserClass::name((int) $row['minclasscreate'], false, true, true) . '</td><td>' . $moderators . '</td><td><b><a href="forummanage.php?action=editforum&id=' . (int) $row['id'] . '">' . ($lang_forummanage['text_edit'] ?? 'Edit') . '</a>&nbsp;|&nbsp;<a href="javascript:confirm_delete(\'' . (int) $row['id'] . '\', \'' . ($lang_forummanage['js_sure_to_delete_forum'] ?? '') . '\', \'\');"><font color=red>' . ($lang_forummanage['text_delete'] ?? 'Delete') . '</font></a></b></td></tr>';
         }
     }
     echo '</table>';

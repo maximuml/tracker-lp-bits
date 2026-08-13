@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Support\Frame;
 use App\Support\Html;
+use App\Support\Http;
 use App\Support\Locale;
 use App\Support\SupportContext;
+use App\Support\Url;
 use App\Support\UserDisplay;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -15,62 +17,62 @@ use Nexus\Database\NexusDB;
 
 class InfoController extends LegacyController
 {
-    public function getrss(Request $request): View|RedirectResponse
+    public function getrss(Request $request): View|RedirectResponse|Response
     {
         return $this->legacyPage($request, 'getrss');
     }
 
-    public function userhistory(Request $request): View|RedirectResponse
+    public function userhistory(Request $request): View|RedirectResponse|Response
     {
         return $this->legacyPage($request, 'userhistory');
     }
 
-    public function invite(Request $request): View|RedirectResponse
+    public function invite(Request $request): View|RedirectResponse|Response
     {
         return $this->legacyPage($request, 'invite');
     }
 
-    public function news(Request $request): View|RedirectResponse
+    public function news(Request $request): View|RedirectResponse|Response
     {
         return $this->legacyPage($request, 'news');
     }
 
-    public function makepoll(Request $request): View|RedirectResponse
+    public function makepoll(Request $request): View|RedirectResponse|Response
     {
         return $this->legacyPage($request, 'makepoll');
     }
 
-    public function polloverview(Request $request): View|RedirectResponse
+    public function polloverview(Request $request): View|RedirectResponse|Response
     {
         return $this->legacyPage($request, 'polloverview');
     }
 
-    public function attendance(Request $request): View|RedirectResponse
+    public function attendance(Request $request): View|RedirectResponse|Response
     {
         return $this->legacyPage($request, 'attendance');
     }
 
-    public function aboutNexus(Request $request): View|RedirectResponse
+    public function aboutNexus(Request $request): View|RedirectResponse|Response
     {
         return $this->legacyPage($request, 'aboutnexus', false);
     }
 
-    public function rules(Request $request): View|RedirectResponse
+    public function rules(Request $request): View|RedirectResponse|Response
     {
         return $this->legacyPage($request, 'rules', false);
     }
 
-    public function userAgreement(Request $request): View|RedirectResponse
+    public function userAgreement(Request $request): View|RedirectResponse|Response
     {
         return $this->legacyPage($request, 'useragreement', false);
     }
 
-    public function faq(Request $request): View|RedirectResponse
+    public function faq(Request $request): View|RedirectResponse|Response
     {
         return $this->legacyPage($request, 'faq', false);
     }
 
-    public function donate(Request $request): View|RedirectResponse
+    public function donate(Request $request): View|RedirectResponse|Response
     {
         return $this->legacyPage($request, 'donate', false);
     }
@@ -147,6 +149,7 @@ class InfoController extends LegacyController
         }
 
         $baseUrl = (string) SupportContext::getGlobal('BASEURL', '');
+        $redirectBase = Http::protocolPrefix(Url::isSecure()) . $baseUrl;
         $action = (string) (SupportContext::getQuery('action') ?? '');
 
         if ($action === 'reorder' && $request->isMethod('post')) {
@@ -155,7 +158,7 @@ class InfoController extends LegacyController
                 NexusDB::table('faq')->where('id', (int) $id)->update(['order' => (int) $position]);
             }
             NexusDB::cache_del('faq');
-            return redirect($baseUrl . '/faqmanage.php');
+            return redirect($redirectBase . '/faqmanage.php');
         }
 
         if ($action === 'edititem' && $request->isMethod('post')) {
@@ -168,7 +171,7 @@ class InfoController extends LegacyController
                 'categ' => (int) SupportContext::getPost('categ'),
             ]);
             NexusDB::cache_del('faq');
-            return redirect($baseUrl . '/faqmanage.php');
+            return redirect($redirectBase . '/faqmanage.php');
         }
 
         if ($action === 'editsect' && $request->isMethod('post')) {
@@ -180,7 +183,7 @@ class InfoController extends LegacyController
                 'categ' => 0,
             ]);
             NexusDB::cache_del('faq');
-            return redirect($baseUrl . '/faqmanage.php');
+            return redirect($redirectBase . '/faqmanage.php');
         }
 
         if ($action === 'delete') {
@@ -188,7 +191,7 @@ class InfoController extends LegacyController
             if (SupportContext::getQuery('confirm') === 'yes') {
                 NexusDB::table('faq')->where('id', $id)->delete();
                 NexusDB::cache_del('faq');
-                return redirect($baseUrl . '/faqmanage.php');
+                return redirect($redirectBase . '/faqmanage.php');
             }
             return $this->legacyPage($request, 'faqactions', true, [
                 'mode' => 'confirm_delete',
@@ -220,7 +223,7 @@ class InfoController extends LegacyController
                 'order' => $order,
             ]);
             NexusDB::cache_del('faq');
-            return redirect($baseUrl . '/faqmanage.php');
+            return redirect($redirectBase . '/faqmanage.php');
         }
 
         if ($action === 'addnewsect' && $request->isMethod('post')) {
@@ -244,7 +247,7 @@ class InfoController extends LegacyController
                 'order' => $order,
             ]);
             NexusDB::cache_del('faq');
-            return redirect($baseUrl . '/faqmanage.php');
+            return redirect($redirectBase . '/faqmanage.php');
         }
 
         if ($action === 'edit') {
@@ -296,10 +299,10 @@ class InfoController extends LegacyController
             ]);
         }
 
-        return redirect($baseUrl . '/faqmanage.php');
+        return redirect($redirectBase . '/faqmanage.php');
     }
 
-    public function bitbucketlog(Request $request): View|RedirectResponse
+    public function bitbucketlog(Request $request): View|RedirectResponse|Response
     {
         return $this->legacyPage($request, 'bitbucketlog', true);
     }

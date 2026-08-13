@@ -112,7 +112,7 @@ class TorrentActionController extends LegacyController
         return redirect('/torrents.php');
     }
 
-    public function torrentInfo(Request $request): View|RedirectResponse
+    public function torrentInfo(Request $request): View|RedirectResponse|Response
     {
         return $this->legacyPage($request, 'torrent_info');
     }
@@ -127,12 +127,12 @@ class TorrentActionController extends LegacyController
         return $this->legacyPageRaw($request, 'viewpeerlist', false);
     }
 
-    public function viewSnatches(Request $request): View|RedirectResponse
+    public function viewSnatches(Request $request): View|RedirectResponse|Response
     {
         return $this->legacyPage($request, 'viewsnatches');
     }
 
-    public function takeFlush(Request $request): View|RedirectResponse
+    public function takeFlush(Request $request): View|RedirectResponse|Response
     {
         return $this->legacyPage($request, 'takeflush');
     }

@@ -56,7 +56,7 @@ class StaffController extends LegacyController
             $userId = (int) SupportContext::getPost('userid');
             $confirm = (string) SupportContext::getPost('confirm');
             ModtaskRepository::confirmUser($userId, $confirm);
-            return redirect($baseUrl . '/unco.php?status=1');
+            return redirect(\App\Support\Http::protocolPrefix(\App\Support\Url::isSecure()) . $baseUrl . '/unco.php?status=1');
         }
 
         if ($action !== 'edituser') {
@@ -127,7 +127,6 @@ class StaffController extends LegacyController
             'supportlang' => $supportlang,
         ];
 
-        $banLog = [];
         $userModifyLogs = [];
 
         if (Permission::can(PermissionEnum::MANAGE_USER_CONFIDENTIAL_INFO, User::findOrFail($currentUserId))) {
@@ -340,9 +339,6 @@ class StaffController extends LegacyController
 
         ModtaskRepository::updateUser($userId, $updateset);
 
-        if (! empty($banLog)) {
-            UserBanLog::query()->insert($banLog);
-        }
         if (! empty($userModifyLogs)) {
             $insert = [];
             foreach ($userModifyLogs as $log) {
@@ -502,7 +498,9 @@ class StaffController extends LegacyController
             $receiver = (int) (SupportContext::getPost('receiver') ?? 0);
             $answeringto = (int) (SupportContext::getPost('answeringto') ?? 0);
 
-            Validators::assertId($receiver, true);
+            if (! Validators::isId($receiver)) {
+                return $this->legacyAbortResponse($langStaffbox['std_error'] ?? 'Error', $langStaffbox['std_invalid_id'] ?? 'Invalid ID.');
+            }
 
             if (! User::query()->find($receiver)) {
                 return $this->legacyAbortResponse($langStaffbox['std_error'] ?? 'Error', $langStaffbox['std_no_user_id'] ?? 'No user with that ID.');
@@ -593,7 +591,9 @@ class StaffController extends LegacyController
             $answeringto = (int) (SupportContext::getQuery('answeringto') ?? 0);
             $receiver = (int) (SupportContext::getQuery('receiver') ?? 0);
 
-            Validators::assertId($receiver, true);
+            if (! Validators::isId($receiver)) {
+                return $this->legacyAbortResponse($langStaffbox['std_error'] ?? 'Error', $langStaffbox['std_invalid_id'] ?? 'Invalid ID.');
+            }
 
             $user = User::query()->find($receiver);
             if (! $user) {
@@ -678,16 +678,12 @@ class StaffController extends LegacyController
             return $this->legacyAbortResponse('Error', "Don't leave any fields blank.");
         }
 
-        $classIdsInput = SupportContext::getPost('clases');
-        if (is_array($classIdsInput)) {
-            foreach ($classIdsInput as $class) {
-                $classId = (int) $class;
-                if (! Validators::isId($classId) && $classId !== 0) {
-                    return $this->legacyAbortResponse('Error', 'Invalid Class');
-                }
-            }
-        } else {
-            $classId = (int) $classIdsInput;
+        $selectedClasses = (array) SupportContext::getPost('classes');
+        if (empty($selectedClasses)) {
+            return $this->legacyAbortResponse('Error', 'No valid filter');
+        }
+        foreach ($selectedClasses as $class) {
+            $classId = (int) $class;
             if (! Validators::isId($classId) && $classId !== 0) {
                 return $this->legacyAbortResponse('Error', 'Invalid Class');
             }
@@ -697,11 +693,8 @@ class StaffController extends LegacyController
         $page = 1;
         $dt = now()->toDateTimeString();
         $conditions = [];
-        $selectedClasses = (array) SupportContext::getPost('classes');
-        if (! empty($selectedClasses)) {
-            $classIds = array_map('intval', $selectedClasses);
-            $conditions[] = 'class IN (' . implode(', ', $classIds) . ')';
-        }
+        $classIds = array_map('intval', $selectedClasses);
+        $conditions[] = 'class IN (' . implode(', ', $classIds) . ')';
         $conditions = Hooks::applyFilter('role_query_conditions', $conditions, SupportContext::allPost());
         if (empty($conditions)) {
             return $this->legacyAbortResponse('Error', 'No valid filter');
@@ -741,7 +734,7 @@ class StaffController extends LegacyController
         return redirect('staffmess.php?sent=1');
     }
 
-    public function contactstaff(Request $request): View|RedirectResponse
+    public function contactstaff(Request $request): View|RedirectResponse|Response
     {
         return $this->legacyPage($request, 'contactstaff', true, [
             'lang_contactstaff' => (array) SupportContext::getGlobal('lang_contactstaff', []),
@@ -749,7 +742,7 @@ class StaffController extends LegacyController
 
     }
 
-    public function takecontact(Request $request): Response|RedirectResponse
+    public function takecontact(Request $request): View|RedirectResponse|Response
     {
         $curUser = SupportContext::getUser() ?? [];
         $langTakecontact = (array) SupportContext::getGlobal('lang_takecontact', []);

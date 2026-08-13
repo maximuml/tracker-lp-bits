@@ -140,7 +140,7 @@ class SystemController extends LegacyController
                 \App\Support\Html::stdhead('Add Upload');
                 \App\Support\Html::stdMessage('Success', 'Upload amount has been added successfully.');
                 \App\Support\Html::stdfoot();
-                return response();
+                return response('');
             }
             return $this->legacyAbortResponse('Error', 'Permission denied!');
         }
@@ -397,14 +397,14 @@ class SystemController extends LegacyController
 
     }
 
-    public function mailtest(Request $request): View|RedirectResponse
+    public function mailtest(Request $request): View|RedirectResponse|Response
     {
 
         return $this->legacyPage($request, 'mailtest', true);
 
     }
 
-    public function mysqlStats(Request $request): View|RedirectResponse
+    public function mysqlStats(Request $request): View|RedirectResponse|Response
     {
 
         return $this->legacyPage($request, 'mysql_stats', true);
@@ -422,7 +422,7 @@ class SystemController extends LegacyController
 
     }
 
-    public function incrementBulk(Request $request): View|RedirectResponse
+    public function incrementBulk(Request $request): View|RedirectResponse|Response
     {
 
         return $this->legacyPage($request, 'increment-bulk', true);
@@ -466,7 +466,7 @@ class SystemController extends LegacyController
             $attempts = (int) SupportContext::getPost('attempts');
             $type = (string) SupportContext::getPost('type');
             $banned = (string) SupportContext::getPost('banned');
-            if (! is_numeric($attempts) || $attempts < 0) {
+            if ($attempts < 0) {
                 return $this->legacyAbortResponse('Error', 'Invalid attempts');
             }
             NexusDB::table('loginattempts')->where('id', $id)->update([

@@ -1,4 +1,11 @@
 <?php
+$mode = $mode ?? 'list';
+$overforums = $overforums ?? [];
+$row = $row ?? [];
+$id = $id ?? 0;
+$viewclassOptions = $viewclassOptions ?? [];
+$sortOptions = $sortOptions ?? [];
+$currentClass = $currentClass ?? 0;
 \App\Support\Html::stdhead($lang_moforums['head_overforum_management'] ?? 'Overforum management');
 \App\Support\Frame::mainFrameOpen();
 
@@ -55,7 +62,7 @@ else:
         foreach ($overforums as $forumRow) {
             $row = (array) $forumRow;
             echo '<tr><td><a href=forums.php?action=forumview&forid=' . (int) $row['id'] . '><b>' . htmlspecialchars((string) $row['name']) . '</b></a><br />' . ($row['description'] ?? '') . '</td>';
-            echo '<td>' . UserClass::name((int) $row['minclassview'], false, true, true) . '</td><td><b><a href="moforums.php?action=editforum&id=' . (int) $row['id'] . '">' . ($lang_moforums['text_edit'] ?? 'Edit') . '</a>&nbsp;|&nbsp;<a href="javascript:confirm_delete(\'' . (int) $row['id'] . '\', \'' . ($lang_moforums['js_sure_to_delete_overforum'] ?? '') . '\', \'\');"><font color=red>' . ($lang_moforums['text_delete'] ?? 'Delete') . '</font></a></b></td></tr>';
+            echo '<td>' . \App\Support\UserClass::name((int) $row['minclassview'], false, true, true) . '</td><td><b><a href="moforums.php?action=editforum&id=' . (int) $row['id'] . '">' . ($lang_moforums['text_edit'] ?? 'Edit') . '</a>&nbsp;|&nbsp;<a href="javascript:confirm_delete(\'' . (int) $row['id'] . '\', \'' . ($lang_moforums['js_sure_to_delete_overforum'] ?? '') . '\', \'\');"><font color=red>' . ($lang_moforums['text_delete'] ?? 'Delete') . '</font></a></b></td></tr>';
         }
     }
     echo '</table>';

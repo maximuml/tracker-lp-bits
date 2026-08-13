@@ -1,4 +1,9 @@
 <?php
+$sent = $sent ?? 0;
+$classes = $classes ?? [];
+$body = $body ?? '';
+$username = $username ?? '';
+$receiver = $receiver ?? 0;
 \App\Support\Html::stdhead("Mass PM", false);
 $httpReferer = (string) \App\Support\SupportContext::getServerValue('HTTP_REFERER');
 ?>
@@ -8,9 +13,9 @@ $httpReferer = (string) \App\Support\SupportContext::getServerValue('HTTP_REFERE
 <form method=post action="takestaffmess.php">
 @csrf
 <?php
-if (SupportContext::getQuery('returnto') || $httpReferer) {
+if (\App\Support\SupportContext::getQuery('returnto') || $httpReferer) {
     ?>
-    <input type=hidden name=returnto value="<?php echo htmlspecialchars((string) (SupportContext::getQuery('returnto') ?? $httpReferer)); ?>">
+    <input type=hidden name=returnto value="<?php echo htmlspecialchars((string) (\App\Support\SupportContext::getQuery('returnto') ?? $httpReferer)); ?>">
     <?php
 }
 ?>

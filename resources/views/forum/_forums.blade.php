@@ -206,7 +206,7 @@ $lang_forums = (array) (\App\Support\SupportContext::getGlobal('lang_forums') ??
 			$topicname = $topic ? $topic->subject : '';
 			$title = $lang_forums['text_reply_to_topic']." <a href=\"".htmlspecialchars("?action=viewtopic&topicid=".$topicid)."\">".htmlspecialchars($topicname)."</a> ";
 			$username = \App\Models\User::query()->where('id', $post->userid)->value('username');
-			$body = "[quote=".htmlspecialchars($username)."]".htmlspecialchars(unesc($post->body))."[/quote]";
+			$body = "[quote=".htmlspecialchars($username)."]".htmlspecialchars(\App\Support\Input::unescape($post->body))."[/quote]";
 			print("<input type=\"hidden\" name=\"postid\" value=\"".$id."\" />");
 			$id = $topicid;
 			$type = 'reply';
@@ -224,7 +224,7 @@ $lang_forums = (array) (\App\Support\SupportContext::getGlobal('lang_forums') ??
 				$subject = $topic ? $topic->subject : '';
 				$hassubject = true;
 			}
-			$body = htmlspecialchars(unesc($post->body));
+			$body = htmlspecialchars(\App\Support\Input::unescape($post->body));
 			$title = $lang_forums['text_edit_post'];
 			break;
 		}
@@ -439,8 +439,8 @@ if ($action == "post")
                 $notify = [
                     'sender' => 0,
                     'receiver' => $receiver->id,
-                    'subject' => nexus_trans('forum.post.edited_notify_subject', [], $locale),
-                    'msg' => nexus_trans('forum.post.edited_notify_body', ['topic_subject' => $postUrl, 'editor' => $CURUSER['username']], $locale),
+                    'subject' => \App\Support\Locale::trans('forum.post.edited_notify_subject', [], $locale),
+                    'msg' => \App\Support\Locale::trans('forum.post.edited_notify_body', ['topic_subject' => $postUrl, 'editor' => $CURUSER['username']], $locale),
                     'added' => now(),
                 ];
                 \App\Models\Message::add($notify);
@@ -461,7 +461,7 @@ if ($action == "post")
 		}
 		if ($type == 'new'){ //new topic
 			//add bonus
-			KPS("+",$starttopic_bonus,$userid);
+			\App\Support\Bonus::updatePoints((string) "+", (float) $starttopic_bonus, $userid);
 
 			//---- Create topic
 			$topic = \App\Models\Topic::create([
@@ -484,7 +484,7 @@ if ($action == "post")
 		else // new post
 		{
 			//add bonus
-			KPS("+",$makepost_bonus,$userid);
+			\App\Support\Bonus::updatePoints((string) "+", (float) $makepost_bonus, $userid);
 			\App\Models\Forum::query()->where('id', $forumid)->increment('postcount');
 		}
 
@@ -511,8 +511,8 @@ if ($action == "post")
 					$notify = [
 						'sender' => 0,
 						'receiver' => $receiver->id,
-						'subject' => nexus_trans('forum.topic.replied_notify_subject', [], $locale),
-						'msg' => nexus_trans('forum.topic.replied_notify_body', ['topic_subject' => $postUrl], $locale),
+						'subject' => \App\Support\Locale::trans('forum.topic.replied_notify_subject', [], $locale),
+						'msg' => \App\Support\Locale::trans('forum.topic.replied_notify_body', ['topic_subject' => $postUrl], $locale),
 						'added' => now(),
 					];
                     \App\Models\Message::add($notify);
@@ -528,8 +528,8 @@ if ($action == "post")
                         $notify = [
                             'sender' => 0,
                             'receiver' => $receiver->id,
-                            'subject' => nexus_trans('forum.reply.replied_notify_subject', [], $locale),
-                            'msg' => nexus_trans('forum.reply.replied_notify_body', ['topic_subject' => $postUrl, 'replyer' => $CURUSER['username']], $locale),
+                            'subject' => \App\Support\Locale::trans('forum.reply.replied_notify_subject', [], $locale),
+                            'msg' => \App\Support\Locale::trans('forum.reply.replied_notify_body', ['topic_subject' => $postUrl, 'replyer' => $CURUSER['username']], $locale),
                             'added' => now(),
                         ];
                         \App\Models\Message::add($notify);
@@ -558,7 +558,7 @@ if ($action == "post")
 
 	//------ All done, redirect user to the post
 
-	$headerstr = "Location: " . get_protocol_prefix() . "$BASEURL/forums.php?action=viewtopic&topicid=$topicid";
+	$headerstr = "Location: " . \App\Support\Http::protocolPrefix(\App\Support\Url::isSecure()) . "$BASEURL/forums.php?action=viewtopic&topicid=$topicid";
 
 	if ($type == 'edit')
 		header($headerstr."&page=p".$postid."#pid".$postid);
@@ -842,7 +842,7 @@ if ($action == "viewtopic")
 			$lastedittime = \App\Support\Time::format($arr['editdate'],true,false);
             $bodyContent .= "<br /><p><font class=\"small\">".$lang_forums['text_last_edited_by'].\App\Support\UserDisplay::username($arr['editedby']).$lang_forums['text_last_edit_at'].$lastedittime."</font></p>\n";
 		}
-		$bodyContent = apply_filter('post_body', $bodyContent, $arr, $allPosts);
+		$bodyContent = \App\Support\Hooks::applyFilter('post_body', ...[$bodyContent, $arr, $allPosts]);
 		$body .= $bodyContent . "</div>";
 		if ($signature)
 		$body .= "<p style='vertical-align:bottom'><br />____________________<br />" . \App\Support\Format::formatComment($signature,false,false,false,true,500,true,false, 1,200) . "</p>";
@@ -856,7 +856,7 @@ if ($action == "viewtopic")
 		print("<tr><td class=\"rowfollow\" align=\"center\" valign=\"middle\">".($online?"<img class=\"f_online\" src=\"pic/trans.gif\" alt=\"Online\" title=\"".$lang_forums['title_online']."\" />":"<img class=\"f_offline\" src=\"pic/trans.gif\" alt=\"Offline\" title=\"".$lang_forums['title_offline']."\" />" )."<a href=\"sendmessage.php?receiver=".htmlspecialchars(trim($arr2["id"]))."\"><img class=\"f_pm\" src=\"pic/trans.gif\" alt=\"PM\" title=\"".$lang_forums['title_send_message_to'].htmlspecialchars($arr2["username"])."\" /></a><a href=\"report.php?forumpost=$postid\"><img class=\"f_report\" src=\"pic/trans.gif\" alt=\"Report\" title=\"".$lang_forums['title_report_this_post']."\" /></a></td>");
 		print("<td class=\"toolbox\" align=\"right\">");
 
-		do_action('post_toolbox', $arr, $allPosts, $CURUSER['id']);
+		\App\Support\Hooks::doAction('post_toolbox', ...[$arr, $allPosts, $CURUSER['id']]);
 
 		if ($maypost && $canViewProtected)
 		print("<a href=\"".htmlspecialchars("?action=quotepost&postid=".$postid)."\"><img class=\"f_quote\" src=\"pic/trans.gif\" alt=\"Quote\" title=\"".$lang_forums['title_reply_with_quote']."\" /></a>");
@@ -1013,7 +1013,7 @@ if ($action == "movetopic")
 
 	// Redirect to forum page
 
-	header("Location: " . get_protocol_prefix() . "$BASEURL/forums.php?action=viewforum&forumid=$forumid");
+	header("Location: " . \App\Support\Http::protocolPrefix(\App\Support\Url::isSecure()) . "$BASEURL/forums.php?action=viewforum&forumid=$forumid");
 
 	die;
 }
@@ -1055,10 +1055,10 @@ if ($action == "deletetopic")
 		$Cache->delete_value('forum_'.$forumid.'_last_replied_topic_content');
 
 	//===remove karma
-	KPS("-",$starttopic_bonus,$userid);
+	\App\Support\Bonus::updatePoints((string) "-", (float) $starttopic_bonus, $userid);
 	//===end
 
-	header("Location: " . get_protocol_prefix() . "$BASEURL/forums.php?action=viewforum&forumid=$forumid");
+	header("Location: " . \App\Support\Http::protocolPrefix(\App\Support\Url::isSecure()) . "$BASEURL/forums.php?action=viewforum&forumid=$forumid");
 	die;
 }
 
@@ -1115,9 +1115,9 @@ if ($action == "deletepost")
 	update_topic_last_post($topicid);
 
 	//===remove karma
-	KPS("-",$makepost_bonus,$userid);
+	\App\Support\Bonus::updatePoints((string) "-", (float) $makepost_bonus, $userid);
 
-	header("Location: " . get_protocol_prefix() . "$BASEURL/forums.php?action=viewtopic&topicid=$topicid$redirtopost");
+	header("Location: " . \App\Support\Http::protocolPrefix(\App\Support\Url::isSecure()) . "$BASEURL/forums.php?action=viewtopic&topicid=$topicid$redirtopost");
 	die;
 }
 
@@ -1529,7 +1529,7 @@ if ($action == "search")
 		<tr>
 		<td style="padding-bottom: 3px; border: 0;" valign="top">
 			<input name="keywords" type="text" value="<?php echo $keywords?>" style="width: 400px;" /></td>
-			<td style="padding-bottom: 3px; border: 0;" valign="top"><input name="image" type="image" style="vertical-align: middle; padding-bottom: 0px; margin-left: 0px;" src="<?php echo get_forum_pic_folder()?>/search_button.gif" alt="Search" /></td>
+			<td style="padding-bottom: 3px; border: 0;" valign="top"><input name="image" type="image" style="vertical-align: middle; padding-bottom: 0px; margin-left: 0px;" src="<?php echo \App\Support\Forum::picFolderWithContext()?>/search_button.gif" alt="Search" /></td>
 		</tr>
 		</tbody>
 		</table>

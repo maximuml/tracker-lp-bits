@@ -30,7 +30,7 @@ $arr = $user->toArray();
 if (\App\Support\UserDisplay::currentClass() <= $arr['class']) {
     $log = "Password Reset For $username by {$CURUSER['username']} denied: operator class => " . \App\Support\UserDisplay::currentClass() . " is not greater than target user => {$arr['class']}";
     \App\Support\Log::writeWithContext($log);
-    do_log($log, 'alert');
+    \App\Support\Logger::writeWithContext((string) $log, (string) 'alert', (bool) false);
     \App\Support\LegacyResponse::abort("Error", "Sorry, you don't have enough permission to reset this user's password.");
 }
 

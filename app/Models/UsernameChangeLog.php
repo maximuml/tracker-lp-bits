@@ -32,7 +32,7 @@ class UsernameChangeLog extends NexusModel
     /** @return  mixed */
     public function getChangeTypeTextAttribute()
     {
-        return nexus_trans('username-change-log.change_type.' . $this->change_type);
+        return \App\Support\Locale::trans('username-change-log.change_type.' . $this->change_type, [], null);
     }
 
     /** @return  \Illuminate\Database\Eloquent\Relations\BelongsTo<User, $this> */
@@ -46,7 +46,7 @@ class UsernameChangeLog extends NexusModel
     {
         $result = [];
         foreach (self::$changeTypes as $type => $info) {
-            $result[$type] = nexus_trans('username-change-log.change_type.' . $type);
+            $result[$type] = \App\Support\Locale::trans('username-change-log.change_type.' . $type, [], null);
         }
         return $result;
     }

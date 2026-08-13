@@ -16,7 +16,7 @@ class UserPasskeyRepository extends BaseRepository
     public static function createWebAuthn()
     {
         $formats = ['android-key', 'android-safetynet', 'apple', 'fido-u2f', 'packed', 'tpm', 'none'];
-        $rpId = explode(':', nexus()->getRequestHost())[0];
+        $rpId = explode(':', \Nexus\Nexus::instance()->getRequestHost())[0];
         return new WebAuthn(\App\Support\Config\SiteConfig::current()->basic->siteName(), $rpId, $formats);
     }
 
@@ -36,7 +36,7 @@ class UserPasskeyRepository extends BaseRepository
     {
         $challenge = NexusDB::cache_get("passkey_challenge_{$challengeId}") ?? null;
         if ($challenge == null) {
-            throw new RuntimeException(nexus_trans('passkey.passkey_timeout'));
+            throw new RuntimeException(\App\Support\Locale::trans('passkey.passkey_timeout', [], null));
         }
         NexusDB::cache_del("passkey_challenge_{$challengeId}");
         return $challenge;
@@ -143,7 +143,7 @@ class UserPasskeyRepository extends BaseRepository
         $clientDataJSON = !empty($clientDataJSON) ? base64_decode($clientDataJSON) : null;
         $id = !empty($id) ? base64_decode($id) : null;
         if (!is_string($id) || $id === '') {
-            throw new RuntimeException(nexus_trans('passkey.passkey_invalid'));
+            throw new RuntimeException(\App\Support\Locale::trans('passkey.passkey_invalid', [], null));
         }
         $authenticatorData = !empty($authenticatorData) ? base64_decode($authenticatorData) : null;
         $signature = !empty($signature) ? base64_decode($signature) : null;
@@ -153,22 +153,22 @@ class UserPasskeyRepository extends BaseRepository
 
         $passkey = Passkey::query()->where('credential_id', '=', bin2hex($id))->first();
         if ($passkey === null) {
-            throw new RuntimeException(nexus_trans('passkey.passkey_unknown'));
+            throw new RuntimeException(\App\Support\Locale::trans('passkey.passkey_unknown', [], null));
         }
 
         if ($userHandle !== bin2hex((string)$passkey->user_id)) {
-            throw new RuntimeException(nexus_trans('passkey.passkey_invalid'));
+            throw new RuntimeException(\App\Support\Locale::trans('passkey.passkey_invalid', [], null));
         }
 
         try {
             $WebAuthn->processGet($clientDataJSON, $authenticatorData, $signature, $passkey->public_key, $challenge, null, false, true);
         } catch (Exception $e) {
-            throw new RuntimeException(nexus_trans('passkey.passkey_error') . "\n" . $e->getMessage());
+            throw new RuntimeException(\App\Support\Locale::trans('passkey.passkey_error', [], null) . "\n" . $e->getMessage());
         }
 
         $user = $passkey->user;
         if (!$user) {
-            throw new RuntimeException(nexus_trans('passkey.passkey_user_not_found'));
+            throw new RuntimeException(\App\Support\Locale::trans('passkey.passkey_user_not_found', [], null));
         }
         $user->checkIsNormal();
 
@@ -176,7 +176,7 @@ class UserPasskeyRepository extends BaseRepository
         $userRep = new UserRepository();
         $userRep->saveLoginLog($user->id, $ip, 'Web', true);
 
-        logincookie($user->id, $user->auth_key);
+        \App\Support\AuthCookie::setLoginCookie((int) $user->id, (string) $user->auth_key, (int) 0);
         return true;
     }
 
@@ -213,7 +213,7 @@ class UserPasskeyRepository extends BaseRepository
     /** @return  void */
     public static function renderLogin()
     {
-        printf('<p id="passkey_box"><button type="button" id="passkey_login"><img style="width:32px" src="%s" alt="%s"><br>%s</button></p>', self::$passkeyvg, nexus_trans('passkey.passkey'), nexus_trans('passkey.passkey'));
+        printf('<p id="passkey_box"><button type="button" id="passkey_login"><img style="width:32px" src="%s" alt="%s"><br>%s</button></p>', self::$passkeyvg, \App\Support\Locale::trans('passkey.passkey', [], null), \App\Support\Locale::trans('passkey.passkey', [], null));
         ?>
         <script>
             document.addEventListener("DOMContentLoaded", function () {
@@ -224,7 +224,7 @@ class UserPasskeyRepository extends BaseRepository
                 }
                 document.getElementById('passkey_login').addEventListener('click', () => {
                     if (!Passkey.supported()) {
-                        layer.alert('<?php echo nexus_trans('passkey.passkey_not_supported'); ?>');
+                        layer.alert('<?php echo \App\Support\Locale::trans('passkey.passkey_not_supported', [], null); ?>');
                     } else {
                         startPasskeyLogin(false);
                     }
@@ -260,12 +260,12 @@ class UserPasskeyRepository extends BaseRepository
     public static function renderList($id)
     {
         $passkeys = self::getList($id);
-        printf('<button type="button" id="passkey_create">%s</button><br>%s', nexus_trans('passkey.passkey_create'), nexus_trans('passkey.passkey_desc'));
+        printf('<button type="button" id="passkey_create">%s</button><br>%s', \App\Support\Locale::trans('passkey.passkey_create', [], null), \App\Support\Locale::trans('passkey.passkey_desc', [], null));
         ?>
         <table>
             <?php
             if (empty($passkeys)) {
-                printf('<tr><td>%s</td></tr>', nexus_trans('passkey.passkey_empty'));
+                printf('<tr><td>%s</td></tr>', \App\Support\Locale::trans('passkey.passkey_empty', [], null));
             } else {
                 $AAGUIDS = self::getAaguids();
                 foreach ($passkeys as $passkey) {
@@ -280,8 +280,8 @@ class UserPasskeyRepository extends BaseRepository
                                 } else {
                                     printf('<img style="width: 32px" src="%s" alt="%s" /><div style="margin-right:4px"><b>%s</b>', self::$passkeyvg, $passkey->credential_id, $passkey->credential_id);
                                 }
-                                printf('<br><b>%s</b>%s</div>', nexus_trans('passkey.passkey_created_at'), \App\Support\Time::format($passkey->created_at));
-                                printf('<button type="button" style="margin-left:auto" data-passkey-id="%s">%s</button>', $passkey->credential_id, nexus_trans('passkey.passkey_delete'))
+                                printf('<br><b>%s</b>%s</div>', \App\Support\Locale::trans('passkey.passkey_created_at', [], null), \App\Support\Time::format($passkey->created_at));
+                                printf('<button type="button" style="margin-left:auto" data-passkey-id="%s">%s</button>', $passkey->credential_id, \App\Support\Locale::trans('passkey.passkey_delete', [], null))
                                 ?>
                             </div>
                         </td>
@@ -294,7 +294,7 @@ class UserPasskeyRepository extends BaseRepository
             document.addEventListener("DOMContentLoaded", function () {
                 document.getElementById('passkey_create').addEventListener('click', () => {
                     if (!Passkey.supported()) {
-                        layer.alert('<?php echo nexus_trans('passkey.passkey_not_supported'); ?>');
+                        layer.alert('<?php echo \App\Support\Locale::trans('passkey.passkey_not_supported', [], null); ?>');
                     } else {
                         layer.load(2, {shade: 0.3});
                         Passkey.createRegistration().then(() => {
@@ -309,7 +309,7 @@ class UserPasskeyRepository extends BaseRepository
                 document.querySelectorAll('button[data-passkey-id]').forEach((button) => {
                     button.addEventListener('click', () => {
                         const credentialId = button.getAttribute('data-passkey-id');
-                        layer.confirm('<?php echo nexus_trans('passkey.passkey_delete_confirm'); ?>', {}, function () {
+                        layer.confirm('<?php echo \App\Support\Locale::trans('passkey.passkey_delete_confirm', [], null); ?>', {}, function () {
                             layer.load(2, {shade: 0.3});
                             Passkey.deleteRegistration(credentialId).then(() => {
                                 location.reload();

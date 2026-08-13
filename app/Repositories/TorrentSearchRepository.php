@@ -28,7 +28,7 @@ class TorrentSearchRepository
         $sources = $media = $codecs = $standards = $processings = $audiocodecs = [];
 
 //check searchbox
-switch (nexus()->getScript()) {
+switch (\Nexus\Nexus::instance()->getScript()) {
     case 'torrents':
         $sectiontype = $browsecatmode;
         break;
@@ -75,7 +75,7 @@ if (empty($searchstr)) {
 
 $meilisearchEnabled = \App\Support\Config\SiteConfig::current()->meiliSearch->enabled();
 $shouldUseMeili = $meilisearchEnabled && !empty($searchstr);
-do_log("[SHOULD_USE_MEILI]: $shouldUseMeili");
+\App\Support\Logger::writeWithContext((string) "[SHOULD_USE_MEILI]: {$shouldUseMeili}", (string) 'info', (bool) false);
 // sorting by MarkoStamcar
 $column = '';
 $ascdesc = '';
@@ -254,7 +254,7 @@ elseif ($special_state == 1)	//normal
 
 	$wherea[] = "sp_state = 1";
 
-	if(get_global_sp_state() == 1)
+	if(\App\Support\Promotion::globalSpecialState() == 1)
 	{
 		$wherea[] = "sp_state = 1";
 	}
@@ -263,11 +263,11 @@ elseif ($special_state == 2)	//free
 {
 	$addparam .= "spstate=2&";
 
-	if(get_global_sp_state() == 1)
+	if(\App\Support\Promotion::globalSpecialState() == 1)
 	{
 		$wherea[] = "sp_state = 2";
 	}
-	else if(get_global_sp_state() == 2)
+	else if(\App\Support\Promotion::globalSpecialState() == 2)
 	{
 		;
 	}
@@ -275,11 +275,11 @@ elseif ($special_state == 2)	//free
 elseif ($special_state == 3)	//2x up
 {
 	$addparam .= "spstate=3&";
-	if(get_global_sp_state() == 1)	//only sp state
+	if(\App\Support\Promotion::globalSpecialState() == 1)	//only sp state
 	{
 		$wherea[] = "sp_state = 3";
 	}
-	else if(get_global_sp_state() == 3)	//all
+	else if(\App\Support\Promotion::globalSpecialState() == 3)	//all
 	{
 		;
 	}
@@ -288,11 +288,11 @@ elseif ($special_state == 4)	//2x up and free
 {
 	$addparam .= "spstate=4&";
 
-	if(get_global_sp_state() == 1)	//only sp state
+	if(\App\Support\Promotion::globalSpecialState() == 1)	//only sp state
 	{
 		$wherea[] = "sp_state = 4";
 	}
-	else if(get_global_sp_state() == 4)	//all
+	else if(\App\Support\Promotion::globalSpecialState() == 4)	//all
 	{
 		;
 	}
@@ -301,11 +301,11 @@ elseif ($special_state == 5)	//half down
 {
 	$addparam .= "spstate=5&";
 
-	if(get_global_sp_state() == 1)	//only sp state
+	if(\App\Support\Promotion::globalSpecialState() == 1)	//only sp state
 	{
 		$wherea[] = "sp_state = 5";
 	}
-	else if(get_global_sp_state() == 5)	//all
+	else if(\App\Support\Promotion::globalSpecialState() == 5)	//all
 	{
 		;
 	}
@@ -314,11 +314,11 @@ elseif ($special_state == 6)	//half down
 {
 	$addparam .= "spstate=6&";
 
-	if(get_global_sp_state() == 1)	//only sp state
+	if(\App\Support\Promotion::globalSpecialState() == 1)	//only sp state
 	{
 		$wherea[] = "sp_state = 6";
 	}
-	else if(get_global_sp_state() == 6)	//all
+	else if(\App\Support\Promotion::globalSpecialState() == 6)	//all
 	{
 		;
 	}
@@ -327,11 +327,11 @@ elseif ($special_state == 7)	//30% down
 {
 	$addparam .= "spstate=7&";
 
-	if(get_global_sp_state() == 1)	//only sp state
+	if(\App\Support\Promotion::globalSpecialState() == 1)	//only sp state
 	{
 		$wherea[] = "sp_state = 7";
 	}
-	else if(get_global_sp_state() == 7)	//all
+	else if(\App\Support\Promotion::globalSpecialState() == 7)	//all
 	{
 		;
 	}
@@ -897,7 +897,7 @@ if ($shouldUseMeili) {
         $resultFromSearchRep = $searchRep->search($searchParams, $CURUSER['id']);
         $count = $resultFromSearchRep['total'];
     } catch (\Throwable $e) {
-        do_log('MeiliSearch search failed, falling back to SQL: ' . $e->getMessage(), 'error');
+        \App\Support\Logger::writeWithContext((string) ('MeiliSearch search failed, falling back to SQL: ' . $e->getMessage()), (string) 'error', (bool) false);
         $shouldUseMeili = false;
         $count = \App\Repositories\TorrentListingRepository::getCount($listingOptions);
     }
@@ -919,7 +919,7 @@ $torrentsperpage = min($maxPageSize, $torrentsperpage);
 if ($count)
 {
     if (isset($searchstr) && (!isset($searchParams['notnewword']) || !$searchParams['notnewword'])){
-        insert_suggest($searchstr, $CURUSER['id']);
+        \App\Support\SearchSuggest::add((string) $searchstr, $CURUSER['id'], (bool) true);
     }
 	if ($pagerlink !== '') {
 		if (substr($addparam, -1) === ';') {

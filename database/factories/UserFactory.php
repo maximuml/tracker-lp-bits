@@ -34,7 +34,7 @@ class UserFactory extends Factory
     public function definition(): array
     {
         $password = "123456";
-        $secret = mksecret();
+        $secret = \App\Support\Token::randomHex((int) 20);
         $passhash = md5($secret . $password . $secret);
         if (self::$defaultStyleSheet == "") {
             self::$defaultStyleSheet = \App\Support\Config\SiteConfig::current()->main->defStylesheet();

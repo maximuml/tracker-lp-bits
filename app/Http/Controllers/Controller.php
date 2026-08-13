@@ -46,7 +46,7 @@ class Controller extends BaseController
             $caller = $backtrace[1];
             $msg = $this->getReturnMsg($caller);
         }
-        return success($msg, $data);
+        return \App\Support\Api::successWithContext($msg, $data);
     }
 
     /**
@@ -83,7 +83,7 @@ class Controller extends BaseController
             $caller = $backtrace[1];
             $msg = $this->getReturnMsg($caller);
         }
-        return fail($msg, $data);
+        return \App\Support\Api::failWithContext($msg, $data);
     }
 
     /**
@@ -134,7 +134,7 @@ class Controller extends BaseController
             $extraFieldsStr = request()->input("extra_fields", '');
             $this->extraFields = explode(',', $extraFieldsStr);
         }
-        do_log(sprintf("field: %s, extraFields: %s", $field, json_encode($this->extraFields)));
+        \App\Support\Logger::writeWithContext((string) sprintf("field: %s, extraFields: %s", $field, json_encode($this->extraFields)), (string) 'info', (bool) false);
         return in_array($field, $this->extraFields);
     }
 

@@ -30,9 +30,6 @@ class TestTorrentUpdated
          */
         $torrentNew = $event->model;
         $torrentOld = $event->modelOld;
-        do_log(sprintf(
-            "torrent: %d is updated, old descr: %s, new descr: %s",
-            $torrentNew->id, $torrentOld->descr, $torrentNew->descr
-        ));
+        \App\Support\Logger::writeWithContext((string) sprintf("torrent: %d is updated, old descr: %s, new descr: %s", $torrentNew->id, $torrentOld->descr, $torrentNew->descr), (string) 'info', (bool) false);
     }
 }

@@ -43,7 +43,7 @@ class BookmarkController extends Controller
         ]);
         $result = $this->repository->add(Auth::user(), $request->torrent_id);
         $resource = new BookmarkResource($result);
-        return $this->success($resource, nexus_trans('bookmark.actions.store_success'));
+        return $this->success($resource, \App\Support\Locale::trans('bookmark.actions.store_success', [], null));
     }
 
     /**
@@ -81,7 +81,7 @@ class BookmarkController extends Controller
             'torrent_id' => 'required|integer',
         ]);
         $result = $this->repository->remove(Auth::user(), $request->torrent_id);
-        return $this->success(true, nexus_trans('bookmark.actions.delete_success'));
+        return $this->success(true, \App\Support\Locale::trans('bookmark.actions.delete_success', [], null));
     }
 
 }

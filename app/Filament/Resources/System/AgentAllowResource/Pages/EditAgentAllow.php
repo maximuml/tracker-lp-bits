@@ -17,7 +17,7 @@ class EditAgentAllow extends EditRecord
         return [
             DeleteAction::make()->using(function ($record) {
                 $record->delete();
-                clear_agent_allow_deny_cache();
+                \App\Support\Cache::clearAgentAllowDeny();
                 return redirect(AgentAllowResource::getUrl());
             })
         ];
@@ -25,6 +25,6 @@ class EditAgentAllow extends EditRecord
 
     public function afterSave()
     {
-        clear_agent_allow_deny_cache();
+        \App\Support\Cache::clearAgentAllowDeny();
     }
 }

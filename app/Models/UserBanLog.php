@@ -31,13 +31,13 @@ class UserBanLog extends NexusModel
             ->having("counts", ">", 1)
             ->get();
         if ($lists->isEmpty()) {
-            do_log("sql: " . last_query() . ", no data to delete");
+            \App\Support\Logger::writeWithContext((string) ("sql: " . \App\Support\LegacyDb::lastQuery(false, 'json') . ", no data to delete"), (string) 'info', (bool) false);
             return;
         }
         $idArr = $lists->pluck("id")->toArray();
         $uidArr = $lists->pluck('uid')->toArray();
         $result = UserBanLog::query()->whereIn("uid", $uidArr)->whereNotIn("id", $idArr)->delete();
-        do_log("sql: " . last_query() . ", result: $result");
+        \App\Support\Logger::writeWithContext((string) ("sql: " . \App\Support\LegacyDb::lastQuery(false, 'json') . ", result: {$result}"), (string) 'info', (bool) false);
     }
 
 

@@ -36,7 +36,7 @@ class UserPolicy extends BasePolicy
 
     public function viewEmail(User $user, User $model)
     {
-        do_log(sprintf("user: %s, model: %s", $user->id, $model->id));
+        \App\Support\Logger::writeWithContext((string) sprintf("user: %s, model: %s", $user->id, $model->id), (string) 'info', (bool) false);
         return $model->privacy == "low" || $user->id == $model->id || Permission::canViewUserConfidentialInfo();
     }
 

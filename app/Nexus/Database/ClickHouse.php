@@ -10,7 +10,7 @@ class ClickHouse
     public static function getClient(): Client
     {
         if (is_null(self::$client)) {
-            $config = nexus_config('clickhouse.connection');
+            $config = \App\Support\Config::get('clickhouse.connection', null);
             $client = new Client($config);
             $options = $config['options'];
             $client->database($options['database']);
@@ -36,7 +36,7 @@ class ClickHouse
         $stat = self::getClient()->select($sql, $binds);
         $result = $stat->fetchOne($countAlias) ?? 0;
         $costTime = number_format(microtime(true) - $start, 3);
-        do_log("table: $table, whereStr: $whereStr, binds: " . json_encode($binds) . ", result: $result, cost time: $costTime sec.");
+        \App\Support\Logger::writeWithContext((string) ("table: {$table}, whereStr: {$whereStr}, binds: " . json_encode($binds) . ", result: {$result}, cost time: {$costTime} sec."), (string) 'info', (bool) false);
         return $result;
     }
 
@@ -46,7 +46,7 @@ class ClickHouse
         $stat = self::getClient()->select($sql, $binds);
         $result = $stat->rows();
         $costTime = number_format(microtime(true) - $start, 3);
-        do_log("sql: $sql, binds: " . json_encode($binds) . ", result count: " . count($result) . ", cost time: $costTime sec.");
+        \App\Support\Logger::writeWithContext((string) ("sql: {$sql}, binds: " . json_encode($binds) . ", result count: " . count($result) . ", cost time: {$costTime} sec."), (string) 'info', (bool) false);
         return $result;
     }
 

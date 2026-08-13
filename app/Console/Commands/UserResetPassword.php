@@ -41,13 +41,13 @@ class UserResetPassword extends Command
         $passwordConfirmation = $this->argument('password_confirmation');
         $log = "uid: $uid, password: $password, passwordConfirmation: $passwordConfirmation";
         $this->info($log);
-        do_log($log);
+        \App\Support\Logger::writeWithContext((string) $log, (string) 'info', (bool) false);
 
         $rep = new UserRepository();
         $result = $rep->resetPassword($uid, $password, $passwordConfirmation);
-        $log = sprintf('[%s], %s, result: %s', nexus()->getRequestId(), __METHOD__, var_export($result, true));
+        $log = sprintf('[%s], %s, result: %s', \Nexus\Nexus::instance()->getRequestId(), __METHOD__, var_export($result, true));
         $this->info($log);
-        do_log($log);
+        \App\Support\Logger::writeWithContext((string) $log, (string) 'info', (bool) false);
     
         return 0;
     }

@@ -29,21 +29,21 @@ class TorrentEditRepository extends BaseRepository
     {
         $user = Auth::user();
         if (!$user) {
-            throw new NexusException(nexus_trans('takeedit.missing_form_data'));
+            throw new NexusException(\App\Support\Locale::trans('takeedit.missing_form_data', [], null));
         }
 
         $id = (int) $request->input('id', 0);
         if ($id <= 0) {
-            throw new NexusException(nexus_trans('takeedit.missing_form_data'));
+            throw new NexusException(\App\Support\Locale::trans('takeedit.missing_form_data', [], null));
         }
 
         $torrentOld = Torrent::query()->find($id);
         if (!$torrentOld) {
-            throw new NexusException(nexus_trans('takeedit.missing_form_data'));
+            throw new NexusException(\App\Support\Locale::trans('takeedit.missing_form_data', [], null));
         }
 
         if ($user->id != $torrentOld->owner && !Permission::canManageTorrent($user)) {
-            throw new NexusException(nexus_trans('takeedit.not_owner'));
+            throw new NexusException(\App\Support\Locale::trans('takeedit.not_owner', [], null));
         }
 
         $name = trim((string) $request->input('name', ''));
@@ -51,18 +51,18 @@ class TorrentEditRepository extends BaseRepository
         $categoryId = (int) $request->input('type', 0);
 
         if (empty($name) || empty($descr) || $categoryId <= 0) {
-            throw new NexusException(nexus_trans('takeedit.missing_form_data'));
+            throw new NexusException(\App\Support\Locale::trans('takeedit.missing_form_data', [], null));
         }
 
         $category = Category::query()->find($categoryId);
         if (!$category) {
-            throw new NexusException(nexus_trans('upload.invalid_category'));
+            throw new NexusException(\App\Support\Locale::trans('upload.invalid_category', [], null));
         }
 
         $oldMode = (int) Category::query()->where('id', $torrentOld->category)->value('mode');
         $newMode = (int) $category->mode;
         if ($oldMode != $newMode && !Permission::canMoveTorrent($user)) {
-            throw new NexusException(nexus_trans('takeedit.cannot_move_torrent'));
+            throw new NexusException(\App\Support\Locale::trans('takeedit.cannot_move_torrent', [], null));
         }
 
         $siteConfig = \App\Support\Config\SiteConfig::current();
@@ -71,7 +71,7 @@ class TorrentEditRepository extends BaseRepository
         if ($maxPrice > 0 && $paidTorrentEnabled) {
             $price = (int) $request->input('price', 0);
             if ($price > $maxPrice) {
-                throw new NexusException(nexus_trans('upload.price_too_much'));
+                throw new NexusException(\App\Support\Locale::trans('upload.price_too_much', [], null));
             }
         }
 
@@ -157,7 +157,7 @@ class TorrentEditRepository extends BaseRepository
             $torrentNew->extra()->updateOrCreate(['torrent_id' => $id], $extraUpdate);
 
             $this->uploadRepository->saveCustomFields($request, $category, $id);
-            \insert_torrent_tags($id, $tagIdArr, true);
+            \App\Support\TorrentTags::insert($id, $tagIdArr, (bool) true);
 
             return $torrentNew;
         });
@@ -168,12 +168,12 @@ class TorrentEditRepository extends BaseRepository
         if ($torrentOld->banned == 'yes' && $torrentOld->owner == $user->id) {
             StaffMessage::query()->insert([
                 'sender' => $user->id,
-                'subject' => nexus_trans('torrent.owner_update_torrent_subject', ['detail_url' => $torrentUrl, 'torrent_name' => $name]),
-                'msg' => nexus_trans('torrent.owner_update_torrent_msg', ['detail_url' => $torrentUrl, 'torrent_name' => $name]),
+                'subject' => \App\Support\Locale::trans('torrent.owner_update_torrent_subject', ['detail_url' => $torrentUrl, 'torrent_name' => $name], null),
+                'msg' => \App\Support\Locale::trans('torrent.owner_update_torrent_msg', ['detail_url' => $torrentUrl, 'torrent_name' => $name], null),
                 'added' => now(),
                 'permission' => 'torrent-approval',
             ]);
-            \clear_staff_message_cache();
+            \App\Support\Cache::clearStaffMessage();
         }
 
         if ($torrentOld->owner != $user->id) {
@@ -185,20 +185,20 @@ class TorrentEditRepository extends BaseRepository
             ], true);
         }
 
-        fire_event(ModelEventEnum::TORRENT_UPDATED, $torrentNew, $torrentOld);
+        \App\Support\Events::fire(ModelEventEnum::TORRENT_UPDATED, $torrentNew, $torrentOld);
 
         try {
             $searchRep = new SearchRepository();
             $searchRep->updateTorrent($torrentOld->id);
         } catch (\Throwable $e) {
-            \do_log('Search repository update on edit failed: ' . $e->getMessage(), 'error');
+            \App\Support\Logger::writeWithContext((string) ('Search repository update on edit failed: ' . $e->getMessage()), (string) 'error', (bool) false);
         }
 
         try {
             $meiliSearch = new MeiliSearchRepository();
             $meiliSearch->doImportFromDatabase($torrentOld->id);
         } catch (\Throwable $e) {
-            \do_log('MeiliSearch update on edit failed: ' . $e->getMessage(), 'error');
+            \App\Support\Logger::writeWithContext((string) ('MeiliSearch update on edit failed: ' . $e->getMessage()), (string) 'error', (bool) false);
         }
 
         return $torrentNew;

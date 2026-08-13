@@ -146,7 +146,7 @@ final class Locale
             $expires = time() + $expires;
         }
 
-        setcookie('c_lang_folder', $folder, $expires, '/', '', isHttps(), true);
+        setcookie('c_lang_folder', $folder, $expires, '/', '', \App\Support\Url::isSecure(), true);
     }
 
     /**
@@ -225,7 +225,7 @@ final class Locale
     /**
      * Legacy `nexus_trans()` helper. Delegates to the Nexus translator.
      *
-     * @param  array<string, string>  $replace
+     * @param  array<string, mixed>  $replace
      */
     public static function trans(string $key, array $replace = [], ?string $locale = null): string
     {

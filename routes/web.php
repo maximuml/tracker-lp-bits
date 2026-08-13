@@ -114,7 +114,7 @@ Route::group(['prefix' => 'web', 'middleware' => ['auth.nexus:nexus-web']], func
     Route::post('token/del', [\App\Http\Controllers\TokenController::class, 'delToken']);
 });
 
-if (!isRunningInConsole()) {
+if (!\App\Support\Environment::isConsole()) {
     $passkeyLoginUri = \App\Support\Config\SiteConfig::current()->security->loginSecret();
     if (!empty($passkeyLoginUri) && \App\Support\Config\SiteConfig::current()->security->loginType() === 'passkey') {
         Route::get("$passkeyLoginUri/{passkey}", [\App\Http\Controllers\AuthenticateController::class, 'passkeyLogin']);

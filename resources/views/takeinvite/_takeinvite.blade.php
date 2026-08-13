@@ -1,7 +1,7 @@
 <?php
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
-$langFile = get_langfile_path();
+$langFile = \App\Support\Locale::scriptFilePath((string) "", (bool) false, (string) "");
 if (!is_file(ROOT_PATH . $langFile)) {
 	$langFile = 'lang/en/lang_takeinvite.php';
 }
@@ -10,7 +10,7 @@ $id = $CURUSER['id'];
 $lockName = sprintf("takeinvite:%s", $id);
 $lock = new \Nexus\Database\NexusLock($lockName, 10);
 if (!$lock->get()) {
-    $errMsg = nexus_trans("nexus.do_not_repeat");
+    $errMsg = \App\Support\Locale::trans("nexus.do_not_repeat", [], null);
     \App\Support\LegacyResponse::abort($errMsg, $errMsg);
 }
 \App\Support\LegacyAuth::registrationCheckFromContext('invitesystem', true, false);
@@ -21,15 +21,15 @@ try {
     \App\Support\LegacyResponse::abort($lang_takeinvite['std_error'], $exception->getMessage());
 }
 
-$email = unesc(htmlspecialchars(trim(\App\Support\SupportContext::getPost("email"))));
-$email = safe_email($email);
+$email = \App\Support\Input::unescape(htmlspecialchars(trim(\App\Support\SupportContext::getPost("email"))));
+$email = \App\Support\Email::sanitizeForDisplay((string) $email);
 $preRegisterUsername = \App\Support\SupportContext::getPost('pre_register_username') ?? '';
 $isPreRegisterEmailAndUsername = \App\Support\Config\SiteConfig::current()->system->isInvitePreEmailAndUsername();
 if (strlen($preRegisterUsername) > 12)
 	\App\Support\LegacyResponse::abort($lang_takeinvite['head_invitation_failed'], $lang_takeinvite['std_username_too_long']);
 if (!$email)
     \App\Support\LegacyResponse::abort($lang_takeinvite['head_invitation_failed'], $lang_takeinvite['std_must_enter_email']);
-if (!check_email($email))
+if (!\App\Support\Email::isWellFormed((string) $email))
 	\App\Support\LegacyResponse::abort($lang_takeinvite['head_invitation_failed'], $lang_takeinvite['std_invalid_email_address']);
 
 $body = str_replace("<br />", "<br />", nl2br(trim(strip_tags(\App\Support\SupportContext::getPost("body")))));
@@ -38,14 +38,14 @@ if(!$body)
 
 if ($isPreRegisterEmailAndUsername) {
     if (empty($preRegisterUsername)) {
-        \App\Support\LegacyResponse::abort($lang_takeinvite['head_invitation_failed'], nexus_trans("invite.require_pre_register_username"));
+        \App\Support\LegacyResponse::abort($lang_takeinvite['head_invitation_failed'], \App\Support\Locale::trans("invite.require_pre_register_username", [], null));
     }
     if (!\App\Support\Validators::isUsername($preRegisterUsername)) {
-        \App\Support\LegacyResponse::abort($lang_takeinvite['head_invitation_failed'], nexus_trans("user.username_invalid", ["username" => $preRegisterUsername]));
+        \App\Support\LegacyResponse::abort($lang_takeinvite['head_invitation_failed'], \App\Support\Locale::trans("user.username_invalid", ["username" => $preRegisterUsername], null));
     }
     $exists = \App\Models\User::query()->where('username', $preRegisterUsername)->exists();
     if ($exists) {
-        \App\Support\LegacyResponse::abort($lang_takeinvite['head_invitation_failed'], nexus_trans("user.username_already_exists", ["username" => $preRegisterUsername]));
+        \App\Support\LegacyResponse::abort($lang_takeinvite['head_invitation_failed'], \App\Support\Locale::trans("user.username_already_exists", ["username" => $preRegisterUsername], null));
     }
 }
 
@@ -77,7 +77,7 @@ if (\App\Support\SupportContext::getPost('hash') == 'permanent') {
 
 $title = $SITENAME.$lang_takeinvite['mail_tilte'];
 
-$signupUrl = getSchemeAndHttpHost() . "/signup.php?type=invite&invitenumber=$hash";
+$signupUrl = \App\Support\Url::schemeAndHost(false) . "/signup.php?type=invite&invitenumber=$hash";
 $siteName = \App\Models\Setting::getSiteName();
 $mailTwo = sprintf($lang_takeinvite['mail_two'], $siteName, $siteName);
 $mailFour = sprintf($lang_takeinvite['mail_four'], $siteName);
@@ -91,7 +91,7 @@ $body
 <br /><br />{$mailSix}
 EOD;
 
-$sendResult = sent_mail($email,$SITENAME,$SITEEMAIL,$title,$message,"invitesignup",false,false,'');
+$sendResult = \App\Support\Mail::sentLegacy((string) $email, (string) $SITENAME, (string) $SITEEMAIL, (string) $title, (string) $message, (string) "invitesignup", (bool) false, (bool) false, '', (string) 'UTF-8');
 //this email is sent only when someone give out an invitation
 if ($sendResult === true) {
     if ((isset($hashRecord))) {

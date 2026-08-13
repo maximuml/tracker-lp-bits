@@ -52,11 +52,11 @@ class UserModifyLogResource extends Resource
                 TextColumn::make('id'),
                 TextColumn::make('user_id')->label('UID'),
                 TextColumn::make('user.username')
-                    ->label(nexus_trans("label.username"))
+                    ->label(\App\Support\Locale::trans("label.username", [], null))
                     ->formatStateUsing(fn ($record) => \App\Support\UserDisplay::adminUsername($record->user_id))
                 ,
-                TextColumn::make('content')->label(nexus_trans("user-modify-log.content")),
-                TextColumn::make('created_at')->label(nexus_trans("label.created_at")),
+                TextColumn::make('content')->label(\App\Support\Locale::trans("user-modify-log.content", [], null)),
+                TextColumn::make('created_at')->label(\App\Support\Locale::trans("label.created_at", [], null)),
             ])
             ->filters([
                 Filter::make('user_id')

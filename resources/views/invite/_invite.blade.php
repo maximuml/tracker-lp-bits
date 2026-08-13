@@ -4,7 +4,7 @@ error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 $__server_REQUEST_URI = \App\Support\SupportContext::getServerValue('REQUEST_URI');
 $id = ((\App\Support\SupportContext::getQuery("id") !== null)) ? intval(\App\Support\SupportContext::getQuery("id")) : (int) ($CURUSER['id'] ?? 0);
 \App\Support\SupportContext::setGlobal('id', $id);
-$type = unesc(\App\Support\SupportContext::getQuery("type") ?? '');
+$type = \App\Support\Input::unescape(\App\Support\SupportContext::getQuery("type") ?? '');
 $menuSelected = \App\Support\SupportContext::getRequestInput('menu') ?? 'invitee';
 $pageSize = 50;
 if (($CURUSER['id'] != $id && !\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::VIEW_INVITE)) || !\App\Support\Validators::isId($id))
@@ -90,7 +90,7 @@ if ($type == 'new'){
     }
     $preUsernameTr = "";
     if (\App\Support\Config\SiteConfig::current()->system->isInvitePreEmailAndUsername()) {
-        $preUsernameTr = "<tr><td class=\"rowhead nowrap\" valign=\"top\" align=\"right\">".nexus_trans("invite.pre_register_username")."</td><td align=left><input type=text size=40 name=pre_register_username><br /><font align=left class=small>".nexus_trans("invite.pre_register_username_help")."</font></td></tr>";
+        $preUsernameTr = "<tr><td class=\"rowhead nowrap\" valign=\"top\" align=\"right\">".\App\Support\Locale::trans("invite.pre_register_username", [], null)."</td><td align=left><input type=text size=40 name=pre_register_username><br /><font align=left class=small>".\App\Support\Locale::trans("invite.pre_register_username_help", [], null)."</font></td></tr>";
     }
 	print("<form method=post action=takeinvite.php?id=".htmlspecialchars($id).">".
 	"<table border=1 width=100% cellspacing=0 cellpadding=5>".
@@ -109,7 +109,7 @@ if ($type == 'new'){
             'enabled' => \App\Support\SupportContext::getQuery('enabled') ?? '',
         ];
         $number = \App\Repositories\InviteRepository::countInvitees($id, $filters);
-        $textSelectOnePlease = nexus_trans('nexus.select_one_please');
+        $textSelectOnePlease = \App\Support\Locale::trans('nexus.select_one_please', [], null);
         $enabledOptions = $statusOptions = '';
         foreach (['yes', 'no'] as $item) {
             $enabledOptions .= sprintf(
@@ -124,8 +124,8 @@ if ($type == 'new'){
             );
         }
 
-        $resetText = nexus_trans('label.reset');
-        $submitText = nexus_trans('label.submit');
+        $resetText = \App\Support\Locale::trans('label.reset', [], null);
+        $submitText = \App\Support\Locale::trans('label.submit', [], null);
         $filterForm = <<<FORM
 <div>
     <form id="filterForm" action="{$__server_REQUEST_URI}" method="get">
@@ -267,7 +267,7 @@ JS;
             print "<td class='colhead'>".$lang_invite['text_invitee_user']."</td>";
             if ($menuSelected == 'tmp') {
                 print("<td class='colhead'>".$lang_invite['text_expired_at']."</td>");
-                print("<td class='colhead'>".nexus_trans('label.created_at')."</td>");
+                print("<td class='colhead'>".\App\Support\Locale::trans('label.created_at', [], null)."</td>");
             }
             print("</tr>");
             foreach ($inviteRows as $arr1)

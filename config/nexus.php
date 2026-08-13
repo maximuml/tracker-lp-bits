@@ -2,24 +2,24 @@
 
 return [
 
-    'timezone' => nexus_env('TIMEZONE', 'PRC'),
+    'timezone' => \App\Support\Env::get('TIMEZONE', 'PRC'),
 
-    'log_file' => nexus_env('LOG_FILE', '/tmp/nexus.log'),
+    'log_file' => \App\Support\Env::get('LOG_FILE', '/tmp/nexus.log'),
 
-    'log_split' => nexus_env('LOG_SPLIT', 'daily'),
+    'log_split' => \App\Support\Env::get('LOG_SPLIT', 'daily'),
 
     'database' => [
-        'default' => nexus_env('DB_CONNECTION', 'mysql'),
+        'default' => \App\Support\Env::get('DB_CONNECTION', 'mysql'),
         'connections' => [
             'mysql' => [
                 'driver' => 'mysql',
-                'url' => nexus_env('DATABASE_URL'),
-                'host' => nexus_env('DB_HOST', '127.0.0.1'),
-                'port' => (int)nexus_env('DB_PORT', 3306),
-                'username' => nexus_env('DB_USERNAME', 'root'),
-                'password' => nexus_env('DB_PASSWORD', ''),
-                'database' => nexus_env('DB_DATABASE', 'nexusphp'),
-                'unix_socket' => nexus_env('DB_SOCKET', ''),
+                'url' => \App\Support\Env::get('DATABASE_URL', null),
+                'host' => \App\Support\Env::get('DB_HOST', '127.0.0.1'),
+                'port' => (int)\App\Support\Env::get('DB_PORT', 3306),
+                'username' => \App\Support\Env::get('DB_USERNAME', 'root'),
+                'password' => \App\Support\Env::get('DB_PASSWORD', ''),
+                'database' => \App\Support\Env::get('DB_DATABASE', 'nexusphp'),
+                'unix_socket' => \App\Support\Env::get('DB_SOCKET', ''),
                 'charset' => 'utf8mb4',
                 'collation' => 'utf8mb4_unicode_ci',
                 'prefix' => '',
@@ -27,21 +27,21 @@ return [
                 'strict' => false,
                 'engine' => null,
                 'options' => extension_loaded('pdo_mysql') ? array_filter([
-                    PDO::MYSQL_ATTR_SSL_CA => nexus_env('MYSQL_ATTR_SSL_CA'),
+                    PDO::MYSQL_ATTR_SSL_CA => \App\Support\Env::get('MYSQL_ATTR_SSL_CA', null),
                 ]) : [],
             ],
             'pgsql' => [
                 'driver' => 'pgsql',
-                'url' => nexus_env('DATABASE_URL'),
-                'host' => nexus_env('DB_HOST', '127.0.0.1'),
-                'port' => nexus_env('DB_PORT', '5432'),
-                'database' => nexus_env('DB_DATABASE', 'nexusphp'),
-                'username' => nexus_env('DB_USERNAME', 'nexusphp'),
-                'password' => nexus_env('DB_PASSWORD', ''),
+                'url' => \App\Support\Env::get('DATABASE_URL', null),
+                'host' => \App\Support\Env::get('DB_HOST', '127.0.0.1'),
+                'port' => \App\Support\Env::get('DB_PORT', '5432'),
+                'database' => \App\Support\Env::get('DB_DATABASE', 'nexusphp'),
+                'username' => \App\Support\Env::get('DB_USERNAME', 'nexusphp'),
+                'password' => \App\Support\Env::get('DB_PASSWORD', ''),
                 'charset' => 'utf8',
                 'prefix' => '',
                 'prefix_indexes' => true,
-                'schema' => nexus_env('DB_SCHEMA', 'public'),
+                'schema' => \App\Support\Env::get('DB_SCHEMA', 'public'),
                 'sslmode' => 'prefer',
             ],
         ],
@@ -49,13 +49,13 @@ return [
 
     'mysql' => [
         'driver' => 'mysql',
-        'url' => nexus_env('DATABASE_URL'),
-        'host' => nexus_env('DB_HOST', '127.0.0.1'),
-        'port' => (int)nexus_env('DB_PORT', 3306),
-        'username' => nexus_env('DB_USERNAME', 'root'),
-        'password' => nexus_env('DB_PASSWORD', ''),
-        'database' => nexus_env('DB_DATABASE', 'nexusphp'),
-        'unix_socket' => nexus_env('DB_SOCKET', ''),
+        'url' => \App\Support\Env::get('DATABASE_URL', null),
+        'host' => \App\Support\Env::get('DB_HOST', '127.0.0.1'),
+        'port' => (int)\App\Support\Env::get('DB_PORT', 3306),
+        'username' => \App\Support\Env::get('DB_USERNAME', 'root'),
+        'password' => \App\Support\Env::get('DB_PASSWORD', ''),
+        'database' => \App\Support\Env::get('DB_DATABASE', 'nexusphp'),
+        'unix_socket' => \App\Support\Env::get('DB_SOCKET', ''),
         'charset' => 'utf8mb4',
         'collation' => 'utf8mb4_unicode_ci',
         'prefix' => '',
@@ -63,43 +63,43 @@ return [
         'strict' => false,
         'engine' => null,
         'options' => extension_loaded('pdo_mysql') ? array_filter([
-            PDO::MYSQL_ATTR_SSL_CA => nexus_env('MYSQL_ATTR_SSL_CA'),
+            PDO::MYSQL_ATTR_SSL_CA => \App\Support\Env::get('MYSQL_ATTR_SSL_CA', null),
         ]) : [],
     ],
 
     'redis' => [
-        'host' => nexus_env('REDIS_HOST', '127.0.0.1'),
-        'port' => (int)nexus_env('REDIS_PORT', 6379),
-        'database' => nexus_env('REDIS_DB', 0),
-        'password' => nexus_env('REDIS_PASSWORD'),
+        'host' => \App\Support\Env::get('REDIS_HOST', '127.0.0.1'),
+        'port' => (int)\App\Support\Env::get('REDIS_PORT', 6379),
+        'database' => \App\Support\Env::get('REDIS_DB', 0),
+        'password' => \App\Support\Env::get('REDIS_PASSWORD', null),
     ],
 
     'elasticsearch' => [
         'hosts' => [
             [
-                'host' => nexus_env('ELASTICSEARCH_HOST','localhost'),
-                'port' => (int)nexus_env('ELASTICSEARCH_PORT','9200'),
-                'scheme' => nexus_env('ELASTICSEARCH_SCHEME','https'),
-                'user' => nexus_env('ELASTICSEARCH_USER','elastic'),
-                'pass' => nexus_env('ELASTICSEARCH_PASS',''),
+                'host' => \App\Support\Env::get('ELASTICSEARCH_HOST', 'localhost'),
+                'port' => (int)\App\Support\Env::get('ELASTICSEARCH_PORT', '9200'),
+                'scheme' => \App\Support\Env::get('ELASTICSEARCH_SCHEME', 'https'),
+                'user' => \App\Support\Env::get('ELASTICSEARCH_USER', 'elastic'),
+                'pass' => \App\Support\Env::get('ELASTICSEARCH_PASS', ''),
             ]
         ],
 
-        'ssl_verification' => nexus_env('ELASTICSEARCH_SSL_VERIFICATION', ''),
+        'ssl_verification' => \App\Support\Env::get('ELASTICSEARCH_SSL_VERIFICATION', ''),
     ],
 
     'meilisearch' => [
-        'scheme' => nexus_env('MEILISEARCH_SCHEME', 'http'),
-        'host' => nexus_env('MEILISEARCH_HOST', 'meilisearch'),
-        'port' => (int)nexus_env('MEILISEARCH_PORT', '7700'),
-        'master_key' => nexus_env('MEILISEARCH_MASTER_KEY', ''),
+        'scheme' => \App\Support\Env::get('MEILISEARCH_SCHEME', 'http'),
+        'host' => \App\Support\Env::get('MEILISEARCH_HOST', 'meilisearch'),
+        'port' => (int)\App\Support\Env::get('MEILISEARCH_PORT', '7700'),
+        'master_key' => \App\Support\Env::get('MEILISEARCH_MASTER_KEY', ''),
     ],
 
-    'nas_tools_key' => nexus_env('NAS_TOOLS_KEY', ''),
-    'iyuu_secret' => nexus_env('IYUU_SECRET', ''),
-    'ammds_secret' => nexus_env('AMMDS_SECRET', ''),
+    'nas_tools_key' => \App\Support\Env::get('NAS_TOOLS_KEY', ''),
+    'iyuu_secret' => \App\Support\Env::get('IYUU_SECRET', ''),
+    'ammds_secret' => \App\Support\Env::get('AMMDS_SECRET', ''),
 
-    'trusted_proxies' => nexus_env('TRUSTED_PROXIES', '10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,127.0.0.1,::1'),
+    'trusted_proxies' => \App\Support\Env::get('TRUSTED_PROXIES', '10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,127.0.0.1,::1'),
 
 
 ];

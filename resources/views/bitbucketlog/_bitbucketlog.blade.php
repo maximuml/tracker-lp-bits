@@ -36,7 +36,7 @@ else {
 		$date = substr($arr['added'], 0, strpos($arr['added'], " "));
 		$time = substr($arr['added'], strpos($arr['added'], " ") + 1);
 		$name = $arr["name"];
-		list($width, $height, $type, $attr) = getimagesize("" . get_protocol_prefix() . "$BASEURL/$bitbucket/$name");
+		list($width, $height, $type, $attr) = getimagesize("" . \App\Support\Http::protocolPrefix(\App\Support\Url::isSecure()) . "$BASEURL/$bitbucket/$name");
 		$url = str_replace(" ", "%20", htmlspecialchars("$bitbucket/$name"));
 		print("<tr>");
 		print("<td><center><a href=$url><img src=\"".$url."\" border=0 onLoad='SetSize(this, 400)'></a></center>");

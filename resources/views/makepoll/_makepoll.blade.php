@@ -42,11 +42,11 @@ if ($__server_REQUEST_METHOD == "POST")
 	$Cache->delete_value('current_poll_content');
 	$Cache->delete_value('current_poll_result', true);
   	if ($returnto == "main")
-		header("Location: " . get_protocol_prefix() . "$BASEURL");
+		header("Location: " . \App\Support\Http::protocolPrefix(\App\Support\Url::isSecure()) . "$BASEURL");
   	elseif ($pollid)
-		header("Location: " . get_protocol_prefix() . "$BASEURL/log.php?action=poll#$pollid");
+		header("Location: " . \App\Support\Http::protocolPrefix(\App\Support\Url::isSecure()) . "$BASEURL/log.php?action=poll#$pollid");
 	else
-		header("Location: " . get_protocol_prefix() . "$BASEURL");
+		header("Location: " . \App\Support\Http::protocolPrefix(\App\Support\Url::isSecure()) . "$BASEURL");
 	die;
 }
 

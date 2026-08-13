@@ -18,7 +18,7 @@ if ($query !== '' && strlen($query) >= 2 && \App\Support\Config\SiteConfig::curr
             $torrents = $rep->autocomplete($query, 10, $user);
         }
     } catch (\Throwable $e) {
-        do_log('MeiliSearch autocomplete error: ' . $e->getMessage(), 'error');
+        \App\Support\Logger::writeWithContext((string) ('MeiliSearch autocomplete error: ' . $e->getMessage()), (string) 'error', (bool) false);
     }
 }
 

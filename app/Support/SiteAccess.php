@@ -34,7 +34,7 @@ final class SiteAccess
             return;
         }
 
-        if (in_array(\nexus()->getScript(), ['login', 'takelogin', 'image']) && self::canDoLogin()) {
+        if (in_array(\Nexus\Nexus::instance()->getScript(), ['login', 'takelogin', 'image']) && self::canDoLogin()) {
             return;
         }
 

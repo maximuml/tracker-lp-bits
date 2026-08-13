@@ -11,7 +11,7 @@ enum MessageTemplateNameEnum: string
     public function label(): string
     {
         return match ($this) {
-            self::REGISTER_WELCOME => nexus_trans("message-template.register_welcome"),
+            self::REGISTER_WELCOME => \App\Support\Locale::trans("message-template.register_welcome", [], null),
             default => '',
         };
     }

@@ -50,7 +50,7 @@ class BuyTorrent implements ShouldQueue
         ;
         if ($buyLog) {
             //标记购买成功
-            do_log("$logPrefix, already bought");
+            \App\Support\Logger::writeWithContext((string) "{$logPrefix}, already bought", (string) 'info', (bool) false);
             $torrentRep->addBuySuccessCache($userId, $torrentId, $buyLog->id);
             return;
         }
@@ -58,11 +58,11 @@ class BuyTorrent implements ShouldQueue
             $bonusRep = new BonusRepository();
             $buyLog = $bonusRep->consumeToBuyTorrent($this->userId, $this->torrentId);
             //标记购买成功
-            do_log("$logPrefix, buy torrent success");
+            \App\Support\Logger::writeWithContext((string) "{$logPrefix}, buy torrent success", (string) 'info', (bool) false);
             $torrentRep->addBuySuccessCache($userId, $torrentId, $buyLog->id);
         } catch (\Throwable $throwable) {
             //标记购买失败，缓存 3600 秒，这个时间内不能再次购买
-            do_log("$logPrefix, buy torrent fail: " . $throwable->getMessage(), "error");
+            \App\Support\Logger::writeWithContext((string) ("{$logPrefix}, buy torrent fail: " . $throwable->getMessage()), (string) "error", (bool) false);
             $torrentRep->addBuyFailCache($userId, $torrentId);
             throw $throwable;
         }

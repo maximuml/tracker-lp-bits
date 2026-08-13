@@ -13,7 +13,7 @@ class UserStat extends StatTable
 
     protected function getHeader(): string
     {
-        return nexus_trans('dashboard.user.page_title');
+        return \App\Support\Locale::trans('dashboard.user.page_title', [], null);
     }
 
     protected function getTableRows(): array

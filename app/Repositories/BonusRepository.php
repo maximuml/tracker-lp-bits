@@ -39,10 +39,8 @@ class BonusRepository extends BaseRepository
         }
         $requireBonus = BonusLogs::getBonusForCancelHitAndRun();
         NexusDB::transaction(function () use ($user, $hitAndRun, $requireBonus) {
-            $comment = nexus_trans('hr.bonus_cancel_comment', [
-                'bonus' => $requireBonus,
-            ], $user->locale);
-            do_log("comment: $comment");
+            $comment = \App\Support\Locale::trans('hr.bonus_cancel_comment', ['bonus' => $requireBonus], $user->locale);
+            \App\Support\Logger::writeWithContext((string) "comment: {$comment}", (string) 'info', (bool) false);
 
             $this->consumeUserBonus($user, $requireBonus, BonusLogs::BUSINESS_TYPE_CANCEL_HIT_AND_RUN, "$comment(H&R ID: {$hitAndRun->id})");
 
@@ -66,18 +64,15 @@ class BonusRepository extends BaseRepository
         $user = User::query()->findOrFail($uid);
         $medal = Medal::query()->findOrFail($medalId);
         $exists = $user->valid_medals()->where('medal_id', $medalId)->exists();
-        do_log(last_query());
+        \App\Support\Logger::writeWithContext((string) \App\Support\LegacyDb::lastQuery(false, 'json'), (string) 'info', (bool) false);
         if ($exists) {
             throw new \LogicException("user: $uid already own this medal: $medalId.");
         }
         $medal->checkCanBeBuy();
         $requireBonus = $medal->price;
         NexusDB::transaction(function () use ($user, $medal, $requireBonus) {
-            $comment = nexus_trans('bonus.comment_buy_medal', [
-                'bonus' => $requireBonus,
-                'medal_name' => $medal->name,
-            ], $user->locale);
-            do_log("comment: $comment");
+            $comment = \App\Support\Locale::trans('bonus.comment_buy_medal', ['bonus' => $requireBonus, 'medal_name' => $medal->name], $user->locale);
+            \App\Support\Logger::writeWithContext((string) "comment: {$comment}", (string) 'info', (bool) false);
             $this->consumeUserBonus($user, $requireBonus, BonusLogs::BUSINESS_TYPE_BUY_MEDAL, "$comment(medal ID: {$medal->id})");
             $medalRep = new MedalRepository();
             $medalRep->userAttachMedal($user, $medal);
@@ -109,7 +104,7 @@ class BonusRepository extends BaseRepository
         $toUser = User::query()->findOrFail($toUid);
         $medal = Medal::query()->findOrFail($medalId);
         $exists = $toUser->valid_medals()->where('medal_id', $medalId)->exists();
-        do_log(last_query());
+        \App\Support\Logger::writeWithContext((string) \App\Support\LegacyDb::lastQuery(false, 'json'), (string) 'info', (bool) false);
         if ($exists) {
             throw new \LogicException("user: $toUid already own this medal: $medalId.");
         }
@@ -117,12 +112,8 @@ class BonusRepository extends BaseRepository
         $giftFee = $medal->price * ($medal->gift_fee_factor ?? 0);
         $requireBonus = $medal->price + $giftFee;
         NexusDB::transaction(function () use ($user, $toUser, $medal, $requireBonus, $giftFee) {
-            $comment = nexus_trans('bonus.comment_gift_medal', [
-                'bonus' => $requireBonus,
-                'medal_name' => $medal->name,
-                'to_username' => $toUser->username,
-            ], $user->locale);
-            do_log("comment: $comment");
+            $comment = \App\Support\Locale::trans('bonus.comment_gift_medal', ['bonus' => $requireBonus, 'medal_name' => $medal->name, 'to_username' => $toUser->username], $user->locale);
+            \App\Support\Logger::writeWithContext((string) "comment: {$comment}", (string) 'info', (bool) false);
             $this->consumeUserBonus($user, $requireBonus, BonusLogs::BUSINESS_TYPE_GIFT_MEDAL, "$comment(medal ID: {$medal->id})");
 
             $expireAt = null;
@@ -132,17 +123,8 @@ class BonusRepository extends BaseRepository
             $msg = [
                 'sender' => 0,
                 'receiver' => $toUser->id,
-                'subject' => nexus_trans('message.receive_medal.subject', [], $toUser->locale),
-                'msg' => nexus_trans('message.receive_medal.body', [
-                    'username' => $user->username,
-                    'cost_bonus' => $requireBonus,
-                    'medal_name' => $medal->name,
-                    'price' => $medal->price,
-                    'gift_fee_total' => $giftFee,
-                    'gift_fee_factor' => $medal->gift_fee_factor ?? 0,
-                    'expire_at' => $expireAt ?? nexus_trans('label.permanent'),
-                    'bonus_addition_factor' => $medal->bonus_addition_factor ?? 0,
-                ], $toUser->locale),
+                'subject' => \App\Support\Locale::trans('message.receive_medal.subject', [], $toUser->locale),
+                'msg' => \App\Support\Locale::trans('message.receive_medal.body', ['username' => $user->username, 'cost_bonus' => $requireBonus, 'medal_name' => $medal->name, 'price' => $medal->price, 'gift_fee_total' => $giftFee, 'gift_fee_factor' => $medal->gift_fee_factor ?? 0, 'expire_at' => $expireAt ?? \App\Support\Locale::trans('label.permanent', [], null), 'bonus_addition_factor' => $medal->bonus_addition_factor ?? 0], $toUser->locale),
                 'added' => now()
             ];
             Message::add($msg);
@@ -170,10 +152,8 @@ class BonusRepository extends BaseRepository
         $user = User::query()->findOrFail($uid);
         $requireBonus = BonusLogs::getBonusForBuyAttendanceCard();
         NexusDB::transaction(function () use ($user, $requireBonus) {
-            $comment = nexus_trans('bonus.comment_buy_attendance_card', [
-                'bonus' => $requireBonus,
-            ], $user->locale);
-            do_log("comment: $comment");
+            $comment = \App\Support\Locale::trans('bonus.comment_buy_attendance_card', ['bonus' => $requireBonus], $user->locale);
+            \App\Support\Logger::writeWithContext((string) "comment: {$comment}", (string) 'info', (bool) false);
             $this->consumeUserBonus($user, $requireBonus, BonusLogs::BUSINESS_TYPE_BUY_ATTENDANCE_CARD, $comment);
             User::query()->where('id', $user->id)->increment('attendance_card');
         });
@@ -197,11 +177,8 @@ class BonusRepository extends BaseRepository
         $toolRep = new ToolRepository();
         $hashArr = $toolRep->generateUniqueInviteHash([], $count, $count);
         NexusDB::transaction(function () use ($user, $requireBonus, $hashArr) {
-            $comment = nexus_trans('bonus.comment_buy_temporary_invite', [
-                'bonus' => $requireBonus,
-                'count' => count($hashArr)
-            ], $user->locale);
-            do_log("comment: $comment");
+            $comment = \App\Support\Locale::trans('bonus.comment_buy_temporary_invite', ['bonus' => $requireBonus, 'count' => count($hashArr)], $user->locale);
+            \App\Support\Logger::writeWithContext((string) "comment: {$comment}", (string) 'info', (bool) false);
             $this->consumeUserBonus($user, $requireBonus, BonusLogs::BUSINESS_TYPE_BUY_TEMPORARY_INVITE, $comment);
             $invites = [];
             foreach ($hashArr as $hash) {
@@ -230,11 +207,8 @@ class BonusRepository extends BaseRepository
         $user = User::query()->findOrFail($uid);
         $requireBonus = BonusLogs::getBonusForBuyRainbowId();
         NexusDB::transaction(function () use ($user, $requireBonus, $duration) {
-            $comment = nexus_trans('bonus.comment_buy_rainbow_id', [
-                'bonus' => $requireBonus,
-                'duration' => $duration,
-            ], $user->locale);
-            do_log("comment: $comment");
+            $comment = \App\Support\Locale::trans('bonus.comment_buy_rainbow_id', ['bonus' => $requireBonus, 'duration' => $duration], $user->locale);
+            \App\Support\Logger::writeWithContext((string) "comment: {$comment}", (string) 'info', (bool) false);
             $this->consumeUserBonus($user, $requireBonus, BonusLogs::BUSINESS_TYPE_BUY_RAINBOW_ID, $comment);
             $metaData = [
                 'meta_key' => UserMeta::META_KEY_PERSONALIZED_USERNAME,
@@ -257,10 +231,8 @@ class BonusRepository extends BaseRepository
             throw new NexusException("user already has change username card");
         }
         NexusDB::transaction(function () use ($user, $requireBonus) {
-            $comment = nexus_trans('bonus.comment_buy_change_username_card', [
-                'bonus' => $requireBonus,
-            ], $user->locale);
-            do_log("comment: $comment");
+            $comment = \App\Support\Locale::trans('bonus.comment_buy_change_username_card', ['bonus' => $requireBonus], $user->locale);
+            \App\Support\Logger::writeWithContext((string) "comment: {$comment}", (string) 'info', (bool) false);
             $this->consumeUserBonus($user, $requireBonus, BonusLogs::BUSINESS_TYPE_BUY_CHANGE_USERNAME_CARD, $comment);
             $metaData = [
                 'meta_key' => UserMeta::META_KEY_CHANGE_USERNAME,
@@ -289,11 +261,8 @@ class BonusRepository extends BaseRepository
             }
             $user = $userQuery->findOrFail($uid);
             $buyerLocale = $user->locale;
-            $comment = nexus_trans('bonus.comment_buy_torrent', [
-                'bonus' => $requireBonus,
-                'torrent_id' => $torrent->id,
-            ], $buyerLocale);
-            do_log("comment: $comment");
+            $comment = \App\Support\Locale::trans('bonus.comment_buy_torrent', ['bonus' => $requireBonus, 'torrent_id' => $torrent->id], $buyerLocale);
+            \App\Support\Logger::writeWithContext((string) "comment: {$comment}", (string) 'info', (bool) false);
             $this->consumeUserBonus($user, $requireBonus, BonusLogs::BUSINESS_TYPE_BUY_TORRENT, $comment);
             $buyLog = TorrentBuyLog::query()->create([
                 'uid' => $user->id,
@@ -312,10 +281,7 @@ class BonusRepository extends BaseRepository
                 $nowStr = now()->toDateTimeString();
                 $businessType = BonusLogs::BUSINESS_TYPE_TORRENT_BE_DOWNLOADED;
                 $owner->increment('seedbonus', $increaseBonus);
-                $comment = nexus_trans('bonus.comment_torrent_be_downloaded', [
-                    'username' => $user->username,
-                    'uid' => $user->id,
-                ], $owner->locale);
+                $comment = \App\Support\Locale::trans('bonus.comment_torrent_be_downloaded', ['username' => $user->username, 'uid' => $user->id], $owner->locale);
                 $bonusLog = [
                     'business_type' => $businessType,
                     'uid' => $owner->id,
@@ -332,12 +298,8 @@ class BonusRepository extends BaseRepository
                 'sender' => 0,
                 'receiver' => $user->id,
                 'added' => now(),
-                'subject' => nexus_trans("message.buy_torrent_success.subject", [], $buyerLocale),
-                'msg' => nexus_trans("message.buy_torrent_success.body", [
-                    'torrent_name' => $torrent->name,
-                    'bonus' => $requireBonus,
-                    'url' => sprintf('details.php?id=%s&hit=1', $torrent->id)
-                ], $buyerLocale),
+                'subject' => \App\Support\Locale::trans("message.buy_torrent_success.subject", [], $buyerLocale),
+                'msg' => \App\Support\Locale::trans("message.buy_torrent_success.body", ['torrent_name' => $torrent->name, 'bonus' => $requireBonus, 'url' => sprintf('details.php?id=%s&hit=1', $torrent->id)], $buyerLocale),
             ];
             Message::add($buyTorrentSuccessMessage);
             return $buyLog;
@@ -365,21 +327,21 @@ class BonusRepository extends BaseRepository
         }
         $user = $this->getUser($user);
         if ($user->seedbonus < $requireBonus) {
-            do_log("user: {$user->id}, bonus: {$user->seedbonus} < requireBonus: $requireBonus", 'error');
+            \App\Support\Logger::writeWithContext((string) "user: {$user->id}, bonus: {$user->seedbonus} < requireBonus: {$requireBonus}", (string) 'error', (bool) false);
             throw new \LogicException("User bonus not enough.");
         }
         NexusDB::transaction(function () use ($user, $requireBonus, $logBusinessType, $logComment, $userUpdates) {
             $oldUserBonus = $user->seedbonus;
             $newUserBonus = bcsub((string)$oldUserBonus, (string)$requireBonus);
             $log = "user: {$user->id}, requireBonus: $requireBonus, oldUserBonus: $oldUserBonus, newUserBonus: $newUserBonus, logBusinessType: $logBusinessType, logComment: $logComment";
-            do_log($log);
+            \App\Support\Logger::writeWithContext((string) $log, (string) 'info', (bool) false);
             $userUpdates['seedbonus'] = $newUserBonus;
             $affectedRows = NexusDB::table($user->getTable())
                 ->where('id', $user->id)
                 ->where('seedbonus', $oldUserBonus)
                 ->update($userUpdates);
             if ($affectedRows != 1) {
-                do_log("update user seedbonus affected rows: ".$affectedRows." != 1, query: " . last_query(), 'error');
+                \App\Support\Logger::writeWithContext((string) ("update user seedbonus affected rows: " . $affectedRows . " != 1, query: " . \App\Support\LegacyDb::lastQuery(false, 'json')), (string) 'error', (bool) false);
                 throw new \RuntimeException("Update user seedbonus fail.");
             }
             $nowStr = now()->toDateTimeString();
@@ -394,8 +356,8 @@ class BonusRepository extends BaseRepository
                 'updated_at' => $nowStr,
             ];
             BonusLogs::query()->insert($bonusLog);
-            do_log("bonusLog: " . nexus_json_encode($bonusLog));
-            clear_user_cache($user->id, $user->passkey);
+            \App\Support\Logger::writeWithContext((string) ("bonusLog: " . \App\Support\Json::encode($bonusLog)), (string) 'info', (bool) false);
+            \App\Support\Cache::clearUser($user->id, $user->passkey);
         });
     }
 

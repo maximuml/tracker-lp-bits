@@ -28,7 +28,7 @@ class FireEvent implements ShouldQueue
         $idKey = $this->idKey;
         $idKeyOld = $this->idKeyOld;
         $log = "Job FireEvent, name: $name, idKey: $idKey, idKeyOld: $idKeyOld";
-        do_log("$log, begin ...");
+        \App\Support\Logger::writeWithContext((string) "{$log}, begin ...", (string) 'info', (bool) false);
         if (isset(ModelEventEnum::$eventMaps[$name])) {
             $eventName = ModelEventEnum::$eventMaps[$name]['event'];
             $modelClassName = ModelEventEnum::$eventMaps[$name]['model'];
@@ -47,10 +47,10 @@ class FireEvent implements ShouldQueue
             }
             $result = call_user_func_array([$eventName, "dispatch"], $params);
             $log .= ", success call dispatch, result: " . var_export($result, true);
-            publish_model_event($name, $model->id, $model->toJson());
+            \App\Support\Events::publishModel($name, $model->id, $model->toJson());
         } else {
             $log .= ", no event match this name";
         }
-        do_log($log);
+        \App\Support\Logger::writeWithContext((string) $log, (string) 'info', (bool) false);
     }
 }

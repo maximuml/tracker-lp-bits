@@ -19,6 +19,6 @@ if ((isset($userid)) && (isset($torrentid)))
     'torrentid' => $torrentid,
     'userid' => $userid,
 ]);
-KPS("+",$saythanks_bonus,$CURUSER['id']);//User gets bonus for saying thanks
-KPS("+",$receivethanks_bonus,$torrentowner);//Thanks receiver get bonus
+\App\Support\Bonus::updatePoints((string) "+", (float) $saythanks_bonus, $CURUSER['id']);//User gets bonus for saying thanks
+\App\Support\Bonus::updatePoints((string) "+", (float) $receivethanks_bonus, $torrentowner);//Thanks receiver get bonus
 }

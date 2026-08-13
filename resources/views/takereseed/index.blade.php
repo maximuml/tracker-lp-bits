@@ -20,9 +20,9 @@ $snatchedRows = \Nexus\Database\NexusDB::table('snatched')
     ->map(fn ($r) => (array) $r)
     ->all();
 foreach ($snatchedRows as $row) {
-    $locale = get_user_locale($row['userid']);
-$rs_subject = nexus_trans("torrent.msg_reseed_request", [], $locale);
-$pn_msg = nexus_trans("torrent.msg_reseed_user", [], $locale).$CURUSER["username"].nexus_trans("torrent.msg_ask_reseed", [], $locale)."[url=" . get_protocol_prefix() . "$BASEURL/details.php?id=".$reseedid."]".$row["torrent_name"]."[/url]".nexus_trans("torrent.msg_thank_you", [], $locale);
+    $locale = \App\Support\Locale::userLocale($row['userid']);
+$rs_subject = \App\Support\Locale::trans("torrent.msg_reseed_request", [], $locale);
+$pn_msg = \App\Support\Locale::trans("torrent.msg_reseed_user", [], $locale).$CURUSER["username"].\App\Support\Locale::trans("torrent.msg_ask_reseed", [], $locale)."[url=" . \App\Support\Http::protocolPrefix(\App\Support\Url::isSecure()) . "$BASEURL/details.php?id=".$reseedid."]".$row["torrent_name"]."[/url]".\App\Support\Locale::trans("torrent.msg_thank_you", [], $locale);
 //sql_query("INSERT INTO messages (sender, receiver, added, subject, msg) VALUES(0, $row[userid], '" . date("Y-m-d H:i:s") . "'," . sqlesc($rs_subject) . ", " . sqlesc($pn_msg) . ")") or sqlerr(__FILE__, __LINE__);
     \App\Models\Message::add([
         'sender' => 0,

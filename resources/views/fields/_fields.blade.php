@@ -1,6 +1,6 @@
 <?php
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
-require_once(get_langfile_path('catmanage.php'));
+require_once(\App\Support\Locale::scriptFilePath((string) 'catmanage.php', (bool) false, (string) ""));
 if (\App\Support\UserDisplay::currentClass() < UC_ADMINISTRATOR) {
     \App\Support\LegacyResponse::permissionDenied();
 }

@@ -24,7 +24,7 @@ class Media extends NexusModel
     /** @return  mixed */
     public static function getLabelName()
     {
-        return nexus_trans('searchbox.sub_category_media_label');
+        return \App\Support\Locale::trans('searchbox.sub_category_media_label', [], null);
     }
 
     /** @return  \Illuminate\Database\Eloquent\Relations\BelongsTo<SearchBox, $this> */

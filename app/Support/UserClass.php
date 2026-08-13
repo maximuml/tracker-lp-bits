@@ -224,7 +224,7 @@ final class UserClass
         $lang_functions = [];
 
         if ($enLangFunctions === null) {
-            require \get_langfile_path('functions.php', false, 'en');
+            require \App\Support\Locale::scriptFilePath((string) 'functions.php', (bool) false, (string) 'en');
             $enLangFunctions = $lang_functions;
         }
 
@@ -234,7 +234,7 @@ final class UserClass
 
         if ($I18N) {
             if ($currentLangFunctions === null) {
-                require \get_langfile_path('functions.php');
+                require \App\Support\Locale::scriptFilePath((string) 'functions.php', (bool) false, (string) "");
                 $currentLangFunctions = $lang_functions;
             }
             $thisLangFunctions = $currentLangFunctions;

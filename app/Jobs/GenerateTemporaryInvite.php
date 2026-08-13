@@ -52,13 +52,13 @@ class GenerateTemporaryInvite implements ShouldQueue
         $idStr = NexusDB::cache_get($this->idRedisKey);
         $logPrefix = "idRedisKey: " . $this->idRedisKey;
         if (empty($idStr)) {
-            do_log("$logPrefix, no idStr...");
+            \App\Support\Logger::writeWithContext((string) "{$logPrefix}, no idStr...", (string) 'info', (bool) false);
             return;
         }
         $idArr = explode(",", $idStr);
         $count = count($idArr);
         $logPrefix .= ", count: $count";
-        do_log("$logPrefix, going to handle...");
+        \App\Support\Logger::writeWithContext((string) "{$logPrefix}, going to handle...", (string) 'info', (bool) false);
         $now = Carbon::now();
         $expiredAt = Carbon::now()->addDays($this->days);
         foreach ($idArr as $uid) {
@@ -78,13 +78,13 @@ class GenerateTemporaryInvite implements ShouldQueue
                 if (!empty($data)) {
                     Invite::query()->insert($data);
                 }
-                do_log("$logPrefix, success add $this->count temporary invite ($this->days days) to $uid");
+                \App\Support\Logger::writeWithContext((string) "{$logPrefix}, success add {$this->count} temporary invite ({$this->days} days) to {$uid}", (string) 'info', (bool) false);
             } catch (\Exception $exception) {
-                do_log("$logPrefix, fail add $this->count temporary invite ($this->days days) to $uid: " . $exception->getMessage(), 'error');
+                \App\Support\Logger::writeWithContext((string) ("{$logPrefix}, fail add {$this->count} temporary invite ({$this->days} days) to {$uid}: " . $exception->getMessage()), (string) 'error', (bool) false);
             }
         }
         NexusDB::cache_del($this->idRedisKey);
-        do_log("$logPrefix, handle done, cost time: " . (microtime(true) - $beginTimestamp) . " seconds.");
+        \App\Support\Logger::writeWithContext((string) ("{$logPrefix}, handle done, cost time: " . (microtime(true) - $beginTimestamp) . " seconds."), (string) 'info', (bool) false);
     }
 
     /**
@@ -95,7 +95,7 @@ class GenerateTemporaryInvite implements ShouldQueue
      */
     public function failed(\Throwable $exception)
     {
-        do_log("failed: " . $exception->getMessage() . $exception->getTraceAsString(), 'error');
+        \App\Support\Logger::writeWithContext((string) ("failed: " . $exception->getMessage() . $exception->getTraceAsString()), (string) 'error', (bool) false);
     }
 
 }

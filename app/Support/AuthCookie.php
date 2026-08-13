@@ -149,10 +149,10 @@ final class AuthCookie
         $expires = self::computeExpires($durationSeconds);
         $token = self::buildToken($userId, null, $expires);
 
-        setcookie(self::COOKIE_NAME, $token, $expires, '/', '', isHttps(), true);
+        setcookie(self::COOKIE_NAME, $token, $expires, '/', '', \App\Support\Url::isSecure(), true);
 
         $update = ['last_login' => now()];
-        $langId = get_langid_from_langcookie();
+        $langId = \App\Support\Locale::idFromCookie((string) '');
         if ($langId > 0) {
             $update['lang'] = $langId;
         }
@@ -167,7 +167,7 @@ final class AuthCookie
      */
     public static function clear(): void
     {
-        setcookie(self::COOKIE_NAME, '', time() - 3600, '/', '', isHttps(), true);
+        setcookie(self::COOKIE_NAME, '', time() - 3600, '/', '', \App\Support\Url::isSecure(), true);
     }
 
     /**
@@ -389,7 +389,7 @@ final class AuthCookie
      */
     private static function fetchUser(int $id, bool $isArray, string $log)
     {
-        $isAjax = \nexus()->isAjax();
+        $isAjax = \Nexus\Nexus::instance()->isAjax();
         $selfEnableBonus = \App\Support\Config\SiteConfig::current()->bonus->selfEnable();
         $shouldIgnoreEnabled = defined('IN_NEXUS') && IN_NEXUS && !$isAjax && $selfEnableBonus > 0;
 

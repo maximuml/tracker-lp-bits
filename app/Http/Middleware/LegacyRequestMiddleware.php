@@ -63,7 +63,7 @@ final class LegacyRequestMiddleware
     public function terminate(Request $request, Response $response): void
     {
         if ($this->detectScript($request) === 'index') {
-            \autoclean();
+            \App\Support\Bootstrap::autoClean((bool) false);
         }
     }
 
@@ -222,7 +222,7 @@ final class LegacyRequestMiddleware
         ));
 
         foreach ($scriptLangFiles as $scriptLangFile) {
-            $langPath = $rootpath . get_langfile_path($scriptLangFile);
+            $langPath = $rootpath . \App\Support\Locale::scriptFilePath((string) $scriptLangFile, (bool) false, (string) "");
             if (! is_file($langPath)) {
                 continue;
             }

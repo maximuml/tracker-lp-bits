@@ -32,7 +32,7 @@ class Hook
     public function applyFilter($name, $value = '')
     {
         if (!isset(self::$callbacks[$name])) {
-            do_log("No this hook: $name", 'debug');
+            \App\Support\Logger::writeWithContext((string) "No this hook: {$name}", (string) 'debug', (bool) false);
             return $value;
         }
         $args = func_get_args();
@@ -59,7 +59,7 @@ class Hook
     public function doAction($name, $value = '')
     {
         if (!isset(self::$callbacks[$name])) {
-            do_log("No this hook: $name", 'debug');
+            \App\Support\Logger::writeWithContext((string) "No this hook: {$name}", (string) 'debug', (bool) false);
             return;
         }
         $args = func_get_args();

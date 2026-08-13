@@ -62,6 +62,6 @@ elseif ($type == 'out')
 else
     \App\Support\LegacyResponse::abort("Error", $lang_deletemessage['std_unknown_pm_type']);
 
-header("Location: " . get_protocol_prefix() . "$BASEURL/messages.php" . ($type == 'out' ? "?out=1" : ""));
+header("Location: " . \App\Support\Http::protocolPrefix(\App\Support\Url::isSecure()) . "$BASEURL/messages.php" . ($type == 'out' ? "?out=1" : ""));
 return;
 ?>

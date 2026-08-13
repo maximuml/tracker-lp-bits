@@ -79,7 +79,7 @@ final class Menu
         $customMenu = (string) \App\Support\Hooks::applyFilter('nexus_menu');
 
         $result = self::render(
-            \function_exists('nexus') ? \nexus()->getScript() : '',
+            \function_exists('nexus') ? \Nexus\Nexus::instance()->getScript() : '',
             SupportContext::getLangFunctions(),
             (string) SupportContext::getGlobal('enableoffer', ''),
             $customMenu !== '' ? $customMenu : null,

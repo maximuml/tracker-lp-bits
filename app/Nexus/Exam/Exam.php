@@ -17,17 +17,17 @@ class Exam
         /** @var \App\Models\Exam $exam */
         $exam = $userExam->exam;
         $row = [];
-        $row[] = sprintf('%s：%s', nexus_trans('exam.name'), $exam->name);
-        $row[] = sprintf('%s：%s ~ %s', nexus_trans('exam.time_range'), $userExam->begin, $userExam->end);
+        $row[] = sprintf('%s：%s', \App\Support\Locale::trans('exam.name', [], null), $exam->name);
+        $row[] = sprintf('%s：%s ~ %s', \App\Support\Locale::trans('exam.time_range', [], null), $userExam->begin, $userExam->end);
         foreach ($userExam->progress_formatted as $key => $index) {
             if (isset($index['checked']) && $index['checked']) {
                 $row[] = sprintf(
                     '%s：%s, %s：%s, %s：%s, %s：%s',
-                    nexus_trans('exam.index') . ($key + 1), nexus_trans('exam.index_text_' . $index['index']),
-                    nexus_trans('exam.require_value'), $index['require_value_formatted'],
-                    nexus_trans('exam.current_value'), $index['current_value_formatted'],
-                    nexus_trans('exam.result'),
-                    $index['passed'] ? nexus_trans($exam->getPassResultTransKey("pass")) : nexus_trans($exam->getPassResultTransKey("not_pass"))
+                    \App\Support\Locale::trans('exam.index', [], null) . ($key + 1), \App\Support\Locale::trans('exam.index_text_' . $index['index'], [], null),
+                    \App\Support\Locale::trans('exam.require_value', [], null), $index['require_value_formatted'],
+                    \App\Support\Locale::trans('exam.current_value', [], null), $index['current_value_formatted'],
+                    \App\Support\Locale::trans('exam.result', [], null),
+                    $index['passed'] ? \App\Support\Locale::trans($exam->getPassResultTransKey("pass"), [], null) : \App\Support\Locale::trans($exam->getPassResultTransKey("not_pass"), [], null)
                 );
             }
         }

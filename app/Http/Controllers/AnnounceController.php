@@ -46,7 +46,7 @@ class AnnounceController extends Controller
     {
         $logDict = $dict;
         unset($logDict['peers'], $logDict['peers6']);
-        do_log(nexus_json_encode($logDict));
+        \App\Support\Logger::writeWithContext((string) \App\Support\Json::encode($logDict), (string) 'info', (bool) false);
 
         return response(
             Bencode::encode($dict),

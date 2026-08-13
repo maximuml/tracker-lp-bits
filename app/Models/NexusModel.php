@@ -67,9 +67,9 @@ class NexusModel extends Model
     {
         $raw = $this->getRawOriginal($field);
         if (in_array($raw, [null, '0000-00-00 00:00:00', ''], true)) {
-            return nexus_trans("label.permanent");
+            return \App\Support\Locale::trans("label.permanent", [], null);
         }
-        return sprintf('%s: %s', nexus_trans('label.deadline'), $raw);
+        return sprintf('%s: %s', \App\Support\Locale::trans('label.deadline', [], null), $raw);
     }
 
     /**
@@ -89,7 +89,7 @@ class NexusModel extends Model
             } else {
                 $transKey = "$textTransPrefix.$key";
             }
-            $text = $textTransPrefix ? nexus_trans($transKey) : $info['text'];
+            $text = $textTransPrefix ? \App\Support\Locale::trans($transKey, [], null) : $info['text'];
             $info['text'] = $text;
             $keyValue[$key] = $info[$valueField];
         }

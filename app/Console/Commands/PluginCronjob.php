@@ -33,9 +33,9 @@ class PluginCronjob extends Command
         $force = $this->option('force');
         $pluginRep = new PluginRepository();
         $pluginRep->cronjob($action, $id, $force);
-        $log = sprintf("[%s], action: %s, id: %s, force: %s run done !", nexus()->getRequestId(), $action, $id, $force);
+        $log = sprintf("[%s], action: %s, id: %s, force: %s run done !", \Nexus\Nexus::instance()->getRequestId(), $action, $id, $force);
         $this->info($log);
-        do_log($log);
+        \App\Support\Logger::writeWithContext((string) $log, (string) 'info', (bool) false);
         return 0;
     }
 }

@@ -333,7 +333,7 @@ class User extends Authenticatable implements FilamentUser, HasName
         }
         $classText = self::$classes[$class]['text'];
         if ($class >= self::CLASS_VIP) {
-            $alias = nexus_trans('user.class_names.' . $class);
+            $alias = \App\Support\Locale::trans('user.class_names.' . $class, [], null);
         } else {
             $alias = \App\Support\Config\SiteConfig::current()->account->classAlias($class);
         }
@@ -467,7 +467,7 @@ class User extends Authenticatable implements FilamentUser, HasName
     {
         return [
             'id' => 0,
-            'username' => nexus_trans('user.deleted_username'),
+            'username' => \App\Support\Locale::trans('user.deleted_username', [], null),
             'class' => self::CLASS_PEASANT,
             'email' => '',
             'status' => self::STATUS_CONFIRMED,
@@ -512,7 +512,7 @@ class User extends Authenticatable implements FilamentUser, HasName
     {
         $class_name = self::$classes[$class]['text'] ?? '';
         if ($class >= self::CLASS_VIP && $I18N) {
-            $class_name = nexus_trans("user.class_names.$class");
+            $class_name = \App\Support\Locale::trans("user.class_names.{$class}", [], null);
         }
         $class_name_color = self::$classes[$class]['text'] ?? '';
         if ($compact) {
@@ -535,10 +535,10 @@ class User extends Authenticatable implements FilamentUser, HasName
             'username' => $this->username,
         ];
         if (in_array('status', $fields) && $this->getAttribute('status') != self::STATUS_CONFIRMED) {
-            throw new NexusException(nexus_trans("user.user_is_not_confirmed", $params));
+            throw new NexusException(\App\Support\Locale::trans("user.user_is_not_confirmed", $params, null));
         }
         if (in_array('enabled', $fields) && $this->getAttribute('enabled') != self::ENABLED_YES) {
-            throw new NexusException(nexus_trans("user.user_is_disabled", $params));
+            throw new NexusException(\App\Support\Locale::trans("user.user_is_disabled", $params, null));
         }
         return true;
     }
@@ -558,7 +558,7 @@ class User extends Authenticatable implements FilamentUser, HasName
             $locale = Locale::$languageMaps[$lang] ?? 'en';
             $log .= ", [NO_DATA_FROM_COOKIE], lang from database: $lang, locale: $locale";
         }
-        do_log($log);
+        \App\Support\Logger::writeWithContext((string) $log, (string) 'info', (bool) false);
         return $locale;
     }
 
@@ -592,7 +592,7 @@ class User extends Authenticatable implements FilamentUser, HasName
     protected function genderText(): Attribute
     {
         return new Attribute(
-            get: fn($value, $attributes) => nexus_trans('user.genders.' . $attributes['gender'])
+            get: fn($value, $attributes) => \App\Support\Locale::trans('user.genders.' . $attributes['gender'], [], null)
         );
     }
 
@@ -877,11 +877,11 @@ class User extends Authenticatable implements FilamentUser, HasName
             if (substr($value, 0, 4) == 'http') {
                 return $value;
             } else {
-                do_log("user: {$this->id} avatar: $value is not valid url.");
+                \App\Support\Logger::writeWithContext((string) "user: {$this->id} avatar: {$value} is not valid url.", (string) 'info', (bool) false);
             }
         }
 
-        return getSchemeAndHttpHost() . '/pic/default_avatar.png';
+        return \App\Support\Url::schemeAndHost(false) . '/pic/default_avatar.png';
 
     }
 
@@ -924,7 +924,7 @@ class User extends Authenticatable implements FilamentUser, HasName
     {
         $targetClass = self::getAccessAdminClassMin();
         if (!$this->class || $this->class < $targetClass) {
-            do_log(sprintf('user: %s, no class or class < %s, can not access admin.', $this->id, $targetClass));
+            \App\Support\Logger::writeWithContext((string) sprintf('user: %s, no class or class < %s, can not access admin.', $this->id, $targetClass), (string) 'info', (bool) false);
             return false;
         }
         return true;

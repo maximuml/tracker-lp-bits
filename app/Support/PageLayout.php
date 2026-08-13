@@ -121,7 +121,7 @@ class PageLayout
         if ($context->user) {
             //	$caticonrow = get_category_icon_row($context->user['caticon']);
             //	if($caticonrow['cssfile']){
-            $requireSearchBoxIdAr = list_require_search_box_id();
+            $requireSearchBoxIdAr = \App\Support\SearchBox::requiredIds();
             if (!empty($requireSearchBoxIdAr)) {
                 $icons = (new \App\Repositories\SearchBoxRepository())->listIcon($requireSearchBoxIdAr);
                 foreach ($icons as $icon) {
@@ -157,7 +157,7 @@ class PageLayout
         echo $cssupdatedate;
         ?>"></script>
 <?php 
-        do_action('nexus_header');
+        \App\Support\Hooks::doAction('nexus_header');
         foreach (\Nexus\Nexus::getAppendHeaders() as $value) {
             print $value;
         }
@@ -354,7 +354,7 @@ class PageLayout
             ?>
                 <?php 
             if ($context->userClass() >= \App\Models\User::getAccessAdminClassMin()) {
-                printf('[<a href="%s" target="_blank">%s</a>]', nexus_env('FILAMENT_PATH', 'nexusphp'), $context->lang['text_management_system']);
+                printf('[<a href="%s" target="_blank">%s</a>]', \App\Support\Env::get('FILAMENT_PATH', 'nexusphp'), $context->lang['text_management_system']);
             }
             ?>
                 <br />
@@ -404,7 +404,7 @@ class PageLayout
                 ?>
         <td class="bottom" align="left" style="border: none">
             <form action="search.php" method="get" target="<?php 
-                echo nexus()->getScript() == 'search' ? '_self' : '_blank';
+                echo \Nexus\Nexus::instance()->getScript() == 'search' ? '_self' : '_blank';
                 ?>">
                 <div style="display: flex;align-items: center">
                     <div style="display: flex;flex-direction: column">
@@ -653,18 +653,18 @@ class PageLayout
         }
         // Variables for End Time
         $tend = microtime(true);
-        $totaltime = $tend - nexus()->getStartTimestamp();
+        $totaltime = $tend - \Nexus\Nexus::instance()->getStartTimestamp();
         $year = substr($context->dateFounded, 0, 4);
         $yearfounded = $year ? $year : 2007;
         print " (c) " . " <a href=\"" . Http::protocolPrefix(Url::isSecure()) . $context->baseUrl . "\" target=\"_self\">" . $context->siteName . "</a> " . ($context->icpLicenseMain ? " " . $context->icpLicenseMain . " " : "") . (date("Y") != $yearfounded ? $yearfounded . "-" : "") . date("Y") . " " . VERSION . "<br /><br />";
         printf("[page created in <b> %s </b> sec", sprintf("%.3f", $totaltime));
         $debugQuery = $context->enableSqlDebugTweak == 'yes' && $context->userClass() >= $context->sqlDebugTweak;
         if ($debugQuery) {
-            $query_name_laravel = last_query(true);
+            $query_name_laravel = \App\Support\LegacyDb::lastQuery(true, 'json');
             $dbQueryCount = count($context->queryName) + count($query_name_laravel);
         } else {
             $query_name_laravel = [];
-            $dbQueryCount = count($context->queryName) + last_query('COUNT');
+            $dbQueryCount = count($context->queryName) + \App\Support\LegacyDb::lastQuery('COUNT', 'json');
         }
         print " with <b>" . $dbQueryCount . "</b> db queries, <b>" . $context->cache->getCacheReadTimes() . "</b> reads and <b>" . $context->cache->getCacheWriteTimes() . "</b> writes of Redis and <b>" . \App\Support\Format::size(memory_get_usage()) . "</b> ram]";
         print "</div>\n";
@@ -697,7 +697,7 @@ class PageLayout
             print "\n" . $context->analyticsCodeTweak . "\n";
         }
         //	$hook->dump();
-        do_action('nexus_footer');
+        \App\Support\Hooks::doAction('nexus_footer');
         foreach (\Nexus\Nexus::getAppendFooters() as $value) {
             print $value;
         }

@@ -136,10 +136,10 @@ class TorrentState extends NexusModel
 
     public static function flushCache(): void
     {
-        do_log("cache_del: " . Setting::TORRENT_GLOBAL_STATE_CACHE_KEY);
+        \App\Support\Logger::writeWithContext((string) ("cache_del: " . Setting::TORRENT_GLOBAL_STATE_CACHE_KEY), (string) 'info', (bool) false);
         NexusDB::cache_del(Setting::TORRENT_GLOBAL_STATE_CACHE_KEY);
-        do_log("publish_model_event: global_promotion_state_updated");
-        publish_model_event("global_promotion_state_updated", 0);
+        \App\Support\Logger::writeWithContext((string) "publish_model_event: global_promotion_state_updated", (string) 'info', (bool) false);
+        \App\Support\Events::publishModel("global_promotion_state_updated", 0, "");
     }
 
     /**

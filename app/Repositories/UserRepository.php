@@ -148,8 +148,8 @@ class UserRepository extends BaseRepository
             throw new \InvalidArgumentException("Invalid username: $username");
         }
         $email = htmlspecialchars(trim($params['email']));
-        $email = safe_email($email);
-        if (!check_email($email)) {
+        $email = \App\Support\Email::sanitizeForDisplay((string) $email);
+        if (!\App\Support\Email::isWellFormed((string) $email)) {
             throw new \InvalidArgumentException("Invalid email: $email");
         }
         if (User::query()->where('email', $email)->exists()) {
@@ -177,13 +177,13 @@ class UserRepository extends BaseRepository
             throw new \InvalidArgumentException("Invalid user class: $class");
         }
         $setting = \App\Support\Config\SiteConfig::current()->main->toArray();
-        $secret = mksecret();
+        $secret = \App\Support\Token::randomHex((int) 20);
         $passhash = hash('sha256', $secret . hash('sha256', $password));
         $data = [
             'username' => $username,
             'email' => $email,
             'secret' => $secret,
-            'auth_key' => mksecret(),
+            'auth_key' => \App\Support\Token::randomHex((int) 20),
             'editsecret' => '',
             'passhash' => $passhash,
             'stylesheet' => $setting['defstylesheet'],
@@ -197,18 +197,18 @@ class UserRepository extends BaseRepository
             if (User::query()->where('id', $params['id'])->exists()) {
                 throw new \InvalidArgumentException("uid: {$params['id']} already exists.");
             }
-            do_log("[CREATE_USER], specific id: " . $params['id']);
+            \App\Support\Logger::writeWithContext((string) ("[CREATE_USER], specific id: " . $params['id']), (string) 'info', (bool) false);
             $user->id = $params['id'];
         }
         if (!empty($params['provider_id'])) {
             if (!OauthProvider::query()->find($params['provider_id'])) {
                 throw new \InvalidArgumentException("provider_id: {$params['provider_id']} not exists.");
             }
-            do_log("[CREATE_USER], specific provider_id: " . $params['provider_id']);
+            \App\Support\Logger::writeWithContext((string) ("[CREATE_USER], specific provider_id: " . $params['provider_id']), (string) 'info', (bool) false);
             $user->provider_id = $params['provider_id'];
         }
         $user->save();
-        fire_event("user_created", $user);
+        \App\Support\Events::fire("user_created", $user, null);
         return $user;
     }
 
@@ -228,12 +228,12 @@ class UserRepository extends BaseRepository
         if ($operator) {
             $this->checkPermission($operator, $user);
         }
-        $secret = mksecret();
+        $secret = \App\Support\Token::randomHex((int) 20);
         $passhash = hash('sha256', $secret . hash('sha256', $password));
         $update = [
             'secret' => $secret,
             'passhash' => $passhash,
-            'auth_key' => mksecret(),
+            'auth_key' => \App\Support\Token::randomHex((int) 20),
         ];
         $user->update($update);
         return true;
@@ -261,7 +261,7 @@ class UserRepository extends BaseRepository
             throw new NexusException('Already disabled !');
         }
         if (empty($reason)) {
-            $reason = nexus_trans("user.disable_by_admin");
+            $reason = \App\Support\Locale::trans("user.disable_by_admin", [], null);
         }
         $this->checkPermission($operator, $targetUser);
         $banLog = [
@@ -275,9 +275,9 @@ class UserRepository extends BaseRepository
             $targetUser->updateWithModComment(['enabled' => User::ENABLED_NO], $modCommentText);
             UserBanLog::query()->create($banLog);
         });
-        do_log("user: $uid, $modCommentText");
+        \App\Support\Logger::writeWithContext((string) "user: {$uid}, {$modCommentText}", (string) 'info', (bool) false);
         $this->clearCache($targetUser);
-        fire_event("user_disabled", $targetUser);
+        \App\Support\Events::fire("user_disabled", $targetUser, null);
         return true;
     }
 
@@ -308,9 +308,9 @@ class UserRepository extends BaseRepository
         }
         $modCommentText = sprintf("%s - Enable by %s, reason: %s", now()->format('Y-m-d'), $operator->username, $reason);
         $targetUser->updateWithModComment($update, $modCommentText);
-        do_log("user: $uid, $modCommentText, update: " . nexus_json_encode($update));
+        \App\Support\Logger::writeWithContext((string) ("user: {$uid}, {$modCommentText}, update: " . \App\Support\Json::encode($update)), (string) 'info', (bool) false);
         $this->clearCache($targetUser);
-        fire_event("user_enabled", $targetUser);
+        \App\Support\Events::fire("user_enabled", $targetUser, null);
         $this->setEnableLatelyCache($targetUser->id);
         return true;
     }
@@ -383,31 +383,19 @@ class UserRepository extends BaseRepository
             throw new NexusException("New value($new) lte 0");
         }
         //for administrator, use english
-        $modCommentText = nexus_trans('message.field_value_change_message_body', [
-            'field' => nexus_trans("user.labels.$sourceField", [], 'en'),
-            'operator' => $operator->username,
-            'old' => $formatSize ? \App\Support\Format::size($old) : $old,
-            'new' => $formatSize ?  \App\Support\Format::size($new) : $new,
-            'reason' => $reason,
-        ], 'en');
-        do_log("user: $uid, $modCommentText", 'alert');
+        $modCommentText = \App\Support\Locale::trans('message.field_value_change_message_body', ['field' => \App\Support\Locale::trans("user.labels.{$sourceField}", [], 'en'), 'operator' => $operator->username, 'old' => $formatSize ? \App\Support\Format::size($old) : $old, 'new' => $formatSize ? \App\Support\Format::size($new) : $new, 'reason' => $reason], 'en');
+        \App\Support\Logger::writeWithContext((string) "user: {$uid}, {$modCommentText}", (string) 'alert', (bool) false);
         $update = [
             $sourceField => $new,
 //            'modcomment' => NexusDB::raw("if(modcomment = '', '$modCommentText', concat_ws('\n', '$modCommentText', modcomment))"),
         ];
         $locale = $targetUser->locale;
-        $fieldLabel = nexus_trans("user.labels.$sourceField", [], $locale);
-        $msg = nexus_trans('message.field_value_change_message_body', [
-            'field' => $fieldLabel,
-            'operator' => $operator->username,
-            'old' => $formatSize ? \App\Support\Format::size($old) : $old,
-            'new' => $formatSize ?  \App\Support\Format::size($new) : $new,
-            'reason' => $reason,
-        ], $locale);
+        $fieldLabel = \App\Support\Locale::trans("user.labels.{$sourceField}", [], $locale);
+        $msg = \App\Support\Locale::trans('message.field_value_change_message_body', ['field' => $fieldLabel, 'operator' => $operator->username, 'old' => $formatSize ? \App\Support\Format::size($old) : $old, 'new' => $formatSize ? \App\Support\Format::size($new) : $new, 'reason' => $reason], $locale);
         $message = [
             'sender' => 0,
             'receiver' => $targetUser->id,
-            'subject' => nexus_trans("message.field_value_change_message_subject", ['field' =>  $fieldLabel], $locale),
+            'subject' => \App\Support\Locale::trans("message.field_value_change_message_subject", ['field' => $fieldLabel], $locale),
             'msg' => $msg,
             'added' => Carbon::now(),
         ];
@@ -494,13 +482,13 @@ class UserRepository extends BaseRepository
             if ($disableReasonKey !== null) {
                 $msgTransPrefix .= "_$disableReasonKey";
             }
-            $message['subject'] = nexus_trans("$msgTransPrefix.subject", [], $targetUser->locale);
-            $message['msg'] = nexus_trans("$msgTransPrefix.body", ['operator' => $operatorUsername], $targetUser->locale);
+            $message['subject'] = \App\Support\Locale::trans("{$msgTransPrefix}.subject", [], $targetUser->locale);
+            $message['msg'] = \App\Support\Locale::trans("{$msgTransPrefix}.body", ['operator' => $operatorUsername], $targetUser->locale);
         } else {
             $update = ['downloadpos' => 'yes'];
             $modComment = date('Y-m-d') . " - Download enable by " . $operatorUsername;
-            $message['subject'] = nexus_trans('message.download_enable.subject', [], $targetUser->locale);
-            $message['msg'] = nexus_trans('message.download_enable.body', ['operator' => $operatorUsername], $targetUser->locale);
+            $message['subject'] = \App\Support\Locale::trans('message.download_enable.subject', [], $targetUser->locale);
+            $message['msg'] = \App\Support\Locale::trans('message.download_enable.body', ['operator' => $operatorUsername], $targetUser->locale);
         }
         $result = NexusDB::transaction(function () use ($targetUser, $update, $modComment, $message) {
             Message::add($message);
@@ -538,7 +526,7 @@ class UserRepository extends BaseRepository
      */
     private function clearCache(User $user)
     {
-        clear_user_cache($user->id, $user->passkey);
+        \App\Support\Cache::clearUser($user->id, $user->passkey);
     }
 
     /**
@@ -580,7 +568,7 @@ class UserRepository extends BaseRepository
             if ($changeLog) {
                 $miniDays = \App\Support\Config\SiteConfig::current()->system->changeUsernameMinIntervalInDays(365);
                 if (abs($changeLog->created_at->diffInDays()) <= $miniDays) {
-                    $msg = nexus_trans('user.change_username_lte_min_interval', ['last_change_time' => $changeLog->created_at, 'interval' => $miniDays]);
+                    $msg = \App\Support\Locale::trans('user.change_username_lte_min_interval', ['last_change_time' => $changeLog->created_at, 'interval' => $miniDays], null);
                     throw new \RuntimeException($msg);
                 }
             }
@@ -590,7 +578,7 @@ class UserRepository extends BaseRepository
                     \App\Support\Config\SiteConfig::current()->system->changeUsernameCardAllowCharactersOutsideTheAlphabets()
                 );
                 $meta->delete();
-                clear_user_cache($user->id, $user->passkey);
+                \App\Support\Cache::clearUser($user->id, $user->passkey);
             });
             return true;
         }
@@ -659,13 +647,8 @@ class UserRepository extends BaseRepository
             return  true;
         }
         $locale = $targetUser->locale;
-        $subject = nexus_trans('user.edit_notifications.change_class.subject', [], $locale);
-        $body = nexus_trans('user.edit_notifications.change_class.body', [
-            'action' => nexus_trans( 'user.edit_notifications.change_class.' . ($newClass > $targetUser->class ? 'promote' : 'demote')),
-            'new_class' => User::getClassText($newClass),
-            'operator' => $operator->username ?? '',
-            'reason' => $reason,
-        ], $locale);
+        $subject = \App\Support\Locale::trans('user.edit_notifications.change_class.subject', [], $locale);
+        $body = \App\Support\Locale::trans('user.edit_notifications.change_class.body', ['action' => \App\Support\Locale::trans('user.edit_notifications.change_class.' . ($newClass > $targetUser->class ? 'promote' : 'demote'), [], null), 'new_class' => User::getClassText($newClass), 'operator' => $operator->username ?? '', 'reason' => $reason], $locale);
         $message = [
             'sender' => 0,
             'receiver' => $targetUser->id,
@@ -692,7 +675,7 @@ class UserRepository extends BaseRepository
             $userUpdates['vip_added'] = 'no';
             $userUpdates['vip_until'] = null;
         }
-        do_log("userUpdates: " . json_encode($userUpdates));
+        \App\Support\Logger::writeWithContext((string) ("userUpdates: " . json_encode($userUpdates)), (string) 'info', (bool) false);
         NexusDB::transaction(function () use ($targetUser, $userUpdates, $message) {
             $modComment = date('Y-m-d') . " - " . $message['msg'];
             if ($targetUser->class != $userUpdates['class']) {
@@ -719,22 +702,22 @@ class UserRepository extends BaseRepository
         $user = $this->getUser($user);
         $locale = $user->locale;
         $metaKey = $metaData['meta_key'];
-        $metaName = nexus_trans("label.user_meta.meta_keys.$metaKey", [], $locale);
+        $metaName = \App\Support\Locale::trans("label.user_meta.meta_keys.{$metaKey}", [], $locale);
         $allowMultiple = UserMeta::$metaKeys[$metaKey]['multiple'];
         $log = "user: {$user->id}, locale: $locale, metaKey: $metaKey, allowMultiple: $allowMultiple";
         $message = [
             'receiver' => $user->id,
             'added' => now(),
-            'subject' => nexus_trans('user.grant_props_notification.subject', ['name' => $metaName], $locale),
+            'subject' => \App\Support\Locale::trans('user.grant_props_notification.subject', ['name' => $metaName], $locale),
         ];
         if (!empty($keyExistsUpdates['duration']) && $metaKey != UserMeta::META_KEY_CHANGE_USERNAME) {
             $durationText = $keyExistsUpdates['duration'] . " Days";
         } else {
-            $durationText = nexus_trans('label.permanent', [], $locale);
+            $durationText = \App\Support\Locale::trans('label.permanent', [], $locale);
         }
         $operatorId = \App\Support\UserDisplay::currentId();
         $operatorInfo = \App\Support\UserDisplay::row($operatorId);
-        $message['msg'] = nexus_trans('user.grant_props_notification.body', ['name' => $metaName, 'operator' => $operatorInfo['username'], 'duration' => $durationText], $locale);
+        $message['msg'] = \App\Support\Locale::trans('user.grant_props_notification.body', ['name' => $metaName, 'operator' => $operatorInfo['username'], 'duration' => $durationText], $locale);
         if (!empty($metaData['duration'])) {
             $metaData['deadline'] = now()->addDays((int)$metaData['duration']);
         }
@@ -753,7 +736,7 @@ class UserRepository extends BaseRepository
                 $keyExistsUpdates['updated_at'] = now();
                 if (!empty($keyExistsUpdates['duration'])) {
                     if ($metaExists->deadline === null) {
-                        throw new \RuntimeException(nexus_trans('user.metas.already_valid_forever', ['meta_key_text' => $metaExists->metaKeyText]));
+                        throw new \RuntimeException(\App\Support\Locale::trans('user.metas.already_valid_forever', ['meta_key_text' => $metaExists->metaKeyText], null));
                     }
                     $log .= ", has duration: {$keyExistsUpdates['duration']}";
                     if ($metaExists->deadline && $metaExists->deadline->gte(now())) {
@@ -777,7 +760,7 @@ class UserRepository extends BaseRepository
                 Message::add($message);
             }
         }
-        do_log($log);
+        \App\Support\Logger::writeWithContext((string) $log, (string) 'info', (bool) false);
         return $result;
     }
 
@@ -803,7 +786,7 @@ class UserRepository extends BaseRepository
      */
     public function destroy(Collection|int $id, $reasonKey = 'user.destroy_by_admin')
     {
-        if (!isRunningInConsole()) {
+        if (!\App\Support\Environment::isConsole()) {
             Permission::assertCan(PermissionEnum::USER_DELETE);
         }
         if (is_int($id)) {
@@ -835,13 +818,13 @@ class UserRepository extends BaseRepository
         foreach ($tables as $table => $key) {
             NexusDB::table($table)->whereIn($key, $uidArr)->delete();
         }
-        do_log("[DESTROY_USER]: " . json_encode($uidArr), 'error');
+        \App\Support\Logger::writeWithContext((string) ("[DESTROY_USER]: " . json_encode($uidArr)), (string) 'error', (bool) false);
         $userBanLogs = [];
         foreach ($users as $user) {
             $userBanLogs[] = [
                 'uid' => $user->id,
                 'username' => $user->username,
-                'reason' => nexus_trans($reasonKey, [], $user->locale)
+                'reason' => \App\Support\Locale::trans($reasonKey, [], $user->locale)
             ];
         }
         UserBanLog::query()->insert($userBanLogs);
@@ -853,8 +836,8 @@ class UserRepository extends BaseRepository
             })
             ->delete();
         if (is_int($id)) {
-            do_action("user_delete", $id);
-            fire_event(ModelEventEnum::USER_DELETED, $users->first());
+            \App\Support\Hooks::doAction("user_delete", $id);
+            \App\Support\Events::fire(ModelEventEnum::USER_DELETED, $users->first(), null);
         }
         return true;
     }
@@ -870,7 +853,7 @@ class UserRepository extends BaseRepository
      */
     public function addTemporaryInvite(User|null $operator, int $uid, string $action, int $count, int|null $days, string|null $reason = '')
     {
-        do_log("uid: $uid, action: $action, count: $count, days: $days, reason: $reason");
+        \App\Support\Logger::writeWithContext((string) "uid: {$uid}, action: {$action}, count: {$count}, days: {$days}, reason: {$reason}", (string) 'info', (bool) false);
         $action = strtolower($action);
         if ($count <= 0 || ($action == 'increment' && $days <= 0)) {
             throw new \InvalidArgumentException("days or count lte 0");
@@ -882,14 +865,9 @@ class UserRepository extends BaseRepository
         $toolRep = new ToolRepository();
         $locale = $targetUser->locale;
 
-        $changeType = nexus_trans("nexus.$action", [], $locale);
-        $subject = nexus_trans('message.temporary_invite_change.subject', ['change_type' => $changeType], $locale);
-        $body = nexus_trans('message.temporary_invite_change.body', [
-            'change_type' => $changeType,
-            'count' => $count,
-            'operator' => $operator->username ?? '',
-            'reason' => $reason,
-        ], $locale);
+        $changeType = \App\Support\Locale::trans("nexus.{$action}", [], $locale);
+        $subject = \App\Support\Locale::trans('message.temporary_invite_change.subject', ['change_type' => $changeType], $locale);
+        $body = \App\Support\Locale::trans('message.temporary_invite_change.body', ['change_type' => $changeType, 'count' => $count, 'operator' => $operator->username ?? '', 'reason' => $reason], $locale);
         $message = [
             'sender' => 0,
             'receiver' => $targetUser->id,
@@ -914,7 +892,7 @@ class UserRepository extends BaseRepository
         NexusDB::transaction(function () use ($uid, $message, $inviteData, $count, $operator) {
             if (!empty($inviteData)) {
                 Invite::query()->insert($inviteData);
-                do_log("[INSERT TEMPORARY INVITE] to $uid, count: $count");
+                \App\Support\Logger::writeWithContext((string) "[INSERT TEMPORARY INVITE] to {$uid}, count: {$count}", (string) 'info', (bool) false);
             } else {
                 Invite::query()->where('inviter', $uid)
                     ->where('invitee', '')
@@ -922,7 +900,7 @@ class UserRepository extends BaseRepository
                     ->limit($count)
                     ->delete()
                 ;
-                do_log("[DELETE TEMPORARY INVITE] of $uid, count: $count");
+                \App\Support\Logger::writeWithContext((string) "[DELETE TEMPORARY INVITE] of {$uid}, count: {$count}", (string) 'info', (bool) false);
             }
             if ($operator) {
                 Message::add($message);
@@ -938,18 +916,18 @@ class UserRepository extends BaseRepository
     public function getInviteBtnText(int $uid)
     {
         if (!\App\Support\Config\SiteConfig::current()->main->inviteSystem()) {
-            throw new NexusException(nexus_trans('invite.send_deny_reasons.invite_system_closed'));
+            throw new NexusException(\App\Support\Locale::trans('invite.send_deny_reasons.invite_system_closed', [], null));
         }
         if (!Permission::can(PermissionEnum::SEND_INVITE, User::findOrFail($uid))) {
             $requireClass = \App\Support\Config\SiteConfig::current()->authority->permission(PermissionEnum::SEND_INVITE->value);
-            throw new NexusException(nexus_trans('invite.send_deny_reasons.no_permission', ['class' => User::getClassText($requireClass)]));
+            throw new NexusException(\App\Support\Locale::trans('invite.send_deny_reasons.no_permission', ['class' => User::getClassText($requireClass)], null));
         }
         $userInfo = User::query()->findOrFail($uid, User::$commonFields);
         $temporaryInviteCount = $userInfo->temporary_invites()->count();
         if ($userInfo->invites + $temporaryInviteCount < 1) {
-            throw new NexusException(nexus_trans('invite.send_deny_reasons.invite_not_enough'));
+            throw new NexusException(\App\Support\Locale::trans('invite.send_deny_reasons.invite_not_enough', [], null));
         }
-        return nexus_trans('invite.send_allow_text');
+        return \App\Support\Locale::trans('invite.send_allow_text', [], null);
     }
 
     /**
@@ -971,8 +949,8 @@ class UserRepository extends BaseRepository
         ]);
         if ($notify) {
             $command = sprintf("user:login_notify --this_id=%s", $loginLog->id);
-            do_log("[LOGIN_NOTIFY], user: $uid, $command");
-            executeCommand($command, "string", true, false);
+            \App\Support\Logger::writeWithContext((string) "[LOGIN_NOTIFY], user: {$uid}, {$command}", (string) 'info', (bool) false);
+            \App\Support\Environment::run($command, "string", (bool) true, (bool) false);
         }
         return $loginLog;
     }

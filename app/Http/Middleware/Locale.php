@@ -32,10 +32,10 @@ class Locale
         $user = $request->user();
         if ($user) {
             $locale = $user->locale;
-            do_log("locale from user: {$user->id}, set locale: $locale");
+            \App\Support\Logger::writeWithContext((string) "locale from user: {$user->id}, set locale: {$locale}", (string) 'info', (bool) false);
         } else {
             $locale = self::getLocaleFromCookie() ?? self::getDefault();
-            do_log("locale from cookie, set locale: $locale");
+            \App\Support\Logger::writeWithContext((string) "locale from cookie, set locale: {$locale}", (string) 'info', (bool) false);
         }
         App::setLocale($locale);
         Carbon::setLocale($locale);
@@ -43,7 +43,7 @@ class Locale
         /** @var Response $response */
         $response = $next($request);
         if ($response instanceof Response || $response instanceof JsonResponse) {
-            $response->header('X-Request-Id', nexus()->getRequestId())->header('X-Nexusphp-Version', VERSION_NUMBER);
+            $response->header('X-Request-Id', \Nexus\Nexus::instance()->getRequestId())->header('X-Nexusphp-Version', VERSION_NUMBER);
         }
         return $response;
     }
@@ -52,13 +52,13 @@ class Locale
     public static function getLocaleFromCookie()
     {
         if (IN_NEXUS) {
-            $lang = IN_TRACKER ? null : get_langfolder_cookie();
+            $lang = IN_TRACKER ? null : \App\Support\Locale::folderFromCookie(\App\Support\SupportContext::getCookieValue('c_lang_folder', ''), (bool) false);
             $log = "IN_NEXUS, get_langfolder_cookie() or IN_TRACKER use null: $lang";
         } else {
             $lang = Cookie::get('c_lang_folder');
             $log = "Cookie::get(): $lang";
         }
-        do_log($log);
+        \App\Support\Logger::writeWithContext((string) $log, (string) 'info', (bool) false);
         $lang = $lang ?: 'en';
         return self::$languageMaps[$lang] ?? 'en';
     }

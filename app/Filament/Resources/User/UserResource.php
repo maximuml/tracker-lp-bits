@@ -259,9 +259,9 @@ class UserResource extends Resource
                 $userRep = self::getRep();
                 try {
                     $userRep->changeClass(Auth::user(), $record, $data['class'], $data['reason'], $data);
-                    send_admin_success_notification();
+                    \App\Support\Admin::successNotification("");
                 } catch (Exception $exception) {
-                    send_admin_fail_notification($exception->getMessage());
+                    \App\Support\Admin::failNotification($exception->getMessage());
                 }
             });
     }
@@ -277,13 +277,13 @@ class UserResource extends Resource
             ->visible(fn ($record) => $record->status == User::STATUS_PENDING)
             ->action(function (User $record) {
                 if (Auth::user()->class <= $record->class) {
-                    send_admin_fail_notification("No Permission!");
+                    \App\Support\Admin::failNotification("No Permission!");
                     return;
                 }
                 $record->status = User::STATUS_CONFIRMED;
                 $record->info= null;
                 $record->save();
-                send_admin_success_notification();
+                \App\Support\Admin::successNotification("");
             });
     }
 
@@ -307,9 +307,9 @@ class UserResource extends Resource
                     } elseif ($data['action'] == 'disable') {
                         $userRep->disableUser(Auth::user(), $data['uid'], $data['reason']);
                     }
-                    send_admin_success_notification();
+                    \App\Support\Admin::successNotification("");
                 } catch (Exception $exception) {
-                    send_admin_fail_notification($exception->getMessage());
+                    \App\Support\Admin::failNotification($exception->getMessage());
                 }
             });
     }
@@ -325,9 +325,9 @@ class UserResource extends Resource
                 $userRep = self::getRep();
                 try {
                     $userRep->updateDownloadPrivileges(Auth::user(), $record->id, $record->downloadpos == 'yes' ? 'no' : 'yes');
-                    send_admin_success_notification();
+                    \App\Support\Admin::successNotification("");
                 } catch (Exception $exception) {
-                    send_admin_fail_notification($exception->getMessage());
+                    \App\Support\Admin::failNotification($exception->getMessage());
                 }
             });
 
@@ -345,9 +345,9 @@ class UserResource extends Resource
                 $userRep = self::getRep();
                 try {
                     $userRep->removeTwoStepAuthentication(Auth::user(), $record->id);
-                    send_admin_success_notification();
+                    \App\Support\Admin::successNotification("");
                 } catch (Exception $exception) {
-                    send_admin_fail_notification($exception->getMessage());
+                    \App\Support\Admin::failNotification($exception->getMessage());
                 }
             });
 

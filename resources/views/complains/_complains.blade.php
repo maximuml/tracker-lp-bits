@@ -19,8 +19,8 @@ $uid = $CURUSER['id'] ?? 0;
 if($__server_REQUEST_METHOD === 'POST'){
     switch($action = filter_var(\App\Support\SupportContext::getPost('action'), FILTER_SANITIZE_FULL_SPECIAL_CHARS)){
         case 'new':
-            cur_user_check();
-            check_code (\App\Support\SupportContext::getPost('imagehash') ?? null, \App\Support\SupportContext::getPost('imagestring') ?? null,'complains.php');
+            \App\Support\User::currentUserCheck();
+            \App\Support\Captcha::checkCode(\App\Support\SupportContext::getPost('imagehash') ?? null, \App\Support\SupportContext::getPost('imagestring') ?? null, 'complains.php', false, true, \App\Support\LegacyAuthContext::fromSupportContext());
             \Nexus\Database\NexusLock::lockOrFail("complains:lock:" . \App\Support\Network::clientIp(), 10);
             $email = filter_var(\App\Support\SupportContext::getPost('email'), FILTER_VALIDATE_EMAIL);
             \Nexus\Database\NexusLock::lockOrFail("complains:lock:" . $email, 600);
@@ -55,9 +55,9 @@ if($__server_REQUEST_METHOD === 'POST'){
             if ($uid > 0) {
                 try {
                     $toolRep = new \App\Repositories\ToolRepository();
-                    $toolRep->sendMail($complain->email, $lang_complains['reply_notify_subject'], sprintf($lang_complains['reply_notify_body'], \App\Support\Config\SiteConfig::current()->basic->siteName(), getSchemeAndHttpHost() . '/complains.php?action=view&id=' . $complain->uuid));
+                    $toolRep->sendMail($complain->email, $lang_complains['reply_notify_subject'], sprintf($lang_complains['reply_notify_body'], \App\Support\Config\SiteConfig::current()->basic->siteName(), \App\Support\Url::schemeAndHost(false) . '/complains.php?action=view&id=' . $complain->uuid));
                 } catch (\Exception $exception) {
-                    do_log($exception->getMessage(), 'error');
+                    \App\Support\Logger::writeWithContext((string) $exception->getMessage(), (string) 'error', (bool) false);
                 }
             }
             \App\Support\LegacyResponse::redirect($__server_HTTP_REFERER);
@@ -184,7 +184,7 @@ $lang_complains = (array) (\App\Support\SupportContext::getGlobal('lang_complain
             break;
         case 'compose':
         default:
-            cur_user_check();
+            \App\Support\User::currentUserCheck();
             \App\Support\Html::stdhead($lang_complains['text_complain']);
             ?>
             <h2><?= $lang_complains['text_new_complain'] ?></h2>
@@ -197,7 +197,7 @@ $lang_complains = (array) (\App\Support\SupportContext::getGlobal('lang_complain
                 <table border="0" cellpadding="5">
                     <tr><td class="rowhead"><?php echo $lang_complains['text_new_email']?></td><td class="rowfollow" align="left"><input type="email" name="email" <?php echo $inputStyle; ?> autocomplete="email" /></td></tr>
                     <tr><td class="rowhead"><?php echo $lang_complains['text_new_body']?></td><td class="rowfollow" align="left"><textarea name="body" <?php echo $textareaStyle; ?> placeholder="<?= $lang_complains['text_new_body_placeholder'] ?>"></textarea></td></tr>
-                    <?php show_image_code (); ?>
+                    <?php \App\Support\Captcha::showImageCode(); ?>
                     <tr><td class="toolbox" colspan="2" align="center"><input type="submit" value="<?= $lang_complains['text_new_submit']?>" class="btn" /></td></tr>
                 </table>
             </form>

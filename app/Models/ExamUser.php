@@ -59,7 +59,7 @@ class ExamUser extends NexusModel
 
     public function getStatusTextAttribute(): string
     {
-        return nexus_trans('exam-user.status.' . $this->status);
+        return \App\Support\Locale::trans('exam-user.status.' . $this->status, [], null);
     }
 
     public function getIsDoneTextAttribute(): string
@@ -83,7 +83,7 @@ class ExamUser extends NexusModel
         $result = self::$status;
         $keyValues = [];
         foreach ($result as $key => &$value) {
-            $text = nexus_trans('exam-user.status.' . $key);
+            $text = \App\Support\Locale::trans('exam-user.status.' . $key, [], null);
             $value['text'] = $text;
             $keyValues[$key] = $text;
         }
@@ -98,19 +98,19 @@ class ExamUser extends NexusModel
     {
         $begin = $this->getRawOriginal('begin');
         if ($begin) {
-            do_log(sprintf('examUser: %s, begin from self: %s', $this->id, $begin));
+            \App\Support\Logger::writeWithContext((string) sprintf('examUser: %s, begin from self: %s', $this->id, $begin), (string) 'info', (bool) false);
             return $begin;
         }
 
         $exam = $this->exam;
         $begin = $exam->getRawOriginal('begin');
         if ($begin) {
-            do_log(sprintf('examUser: %s, begin from exam(%s): %s', $this->id, $exam->id, $begin));
+            \App\Support\Logger::writeWithContext((string) sprintf('examUser: %s, begin from exam(%s): %s', $this->id, $exam->id, $begin), (string) 'info', (bool) false);
             return $begin;
         }
 
         if ($exam->duration > 0) {
-            do_log(sprintf('examUser: %s, begin from self created_at(%s)', $this->id, $this->getRawOriginal('created_at')));
+            \App\Support\Logger::writeWithContext((string) sprintf('examUser: %s, begin from self created_at(%s)', $this->id, $this->getRawOriginal('created_at')), (string) 'info', (bool) false);
             return $this->created_at->toDateTimeString();
         }
         return null;
@@ -121,20 +121,20 @@ class ExamUser extends NexusModel
     {
         $end = $this->getRawOriginal('end');
         if ($end) {
-            do_log(sprintf('examUser: %s, end from self: %s', $this->id, $end));
+            \App\Support\Logger::writeWithContext((string) sprintf('examUser: %s, end from self: %s', $this->id, $end), (string) 'info', (bool) false);
             return $end;
         }
 
         $exam = $this->exam;
         $end = $exam->getRawOriginal('end');
         if ($end) {
-            do_log(sprintf('examUser: %s, end from exam(%s): %s', $this->id, $exam->id, $end));
+            \App\Support\Logger::writeWithContext((string) sprintf('examUser: %s, end from exam(%s): %s', $this->id, $exam->id, $end), (string) 'info', (bool) false);
             return $end;
         }
 
         $duration = $exam->duration;
         if ($duration > 0) {
-            do_log(sprintf('examUser: %s, end from self created_at + exam(%s) created_at: %s + %s days', $this->id, $exam->id, $this->getRawOriginal('created_at'), $duration));
+            \App\Support\Logger::writeWithContext((string) sprintf('examUser: %s, end from self created_at + exam(%s) created_at: %s + %s days', $this->id, $exam->id, $this->getRawOriginal('created_at'), $duration), (string) 'info', (bool) false);
             return $this->created_at->addDays((int)$duration)->toDateTimeString();
         }
         return null;

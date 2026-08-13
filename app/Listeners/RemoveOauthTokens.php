@@ -39,6 +39,6 @@ class RemoveOauthTokens implements ShouldQueue
             $model = new $name();
             $model::query()->where("user_id", $uid)->forceDelete();
         }
-        do_log(sprintf("success remove user: %d oauth tokens related.", $uid));
+        \App\Support\Logger::writeWithContext((string) sprintf("success remove user: %d oauth tokens related.", $uid), (string) 'info', (bool) false);
     }
 }

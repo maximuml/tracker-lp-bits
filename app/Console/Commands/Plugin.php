@@ -50,9 +50,9 @@ class Plugin extends Command
             $this->error("Not support action: $action");
             return 1;
         }
-        $log = sprintf("[%s], %s plugin: %s successfully !", nexus()->getRequestId(), $action, $name);
+        $log = sprintf("[%s], %s plugin: %s successfully !", \Nexus\Nexus::instance()->getRequestId(), $action, $name);
         $this->info($log);
-        do_log($log);
+        \App\Support\Logger::writeWithContext((string) $log, (string) 'info', (bool) false);
         return 0;
     }
 }

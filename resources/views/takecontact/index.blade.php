@@ -29,7 +29,7 @@ if (\App\Support\UserDisplay::currentClass() < UC_MODERATOR) {
 \App\Models\User::query()->where('id', $CURUSER['id'])->update(['last_staffmsg' => date('Y-m-d H:i:s')]);
 $Cache->delete_value('staff_message_count');
 $Cache->delete_value('staff_new_message_count');
-clear_staff_message_cache();
+\App\Support\Cache::clearStaffMessage();
 if (\App\Support\SupportContext::getPost("returnto"))
 {
 	header("Location: " . htmlspecialchars(\App\Support\SupportContext::getPost("returnto")));

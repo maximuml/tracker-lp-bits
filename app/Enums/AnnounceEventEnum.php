@@ -15,11 +15,11 @@ enum AnnounceEventEnum: string
     public function label(): string
     {
         return match ($this) {
-            self::STARTED => nexus_trans("announce_log.events.started"),
-            self::STOPPED => nexus_trans("announce_log.events.stopped"),
-            self::PAUSED => nexus_trans("announce_log.events.paused"),
-            self::COMPLETED => nexus_trans("announce_log.events.completed"),
-            self::NONE => nexus_trans("announce_log.events.none"),
+            self::STARTED => \App\Support\Locale::trans("announce_log.events.started", [], null),
+            self::STOPPED => \App\Support\Locale::trans("announce_log.events.stopped", [], null),
+            self::PAUSED => \App\Support\Locale::trans("announce_log.events.paused", [], null),
+            self::COMPLETED => \App\Support\Locale::trans("announce_log.events.completed", [], null),
+            self::NONE => \App\Support\Locale::trans("announce_log.events.none", [], null),
             default => '',
         };
     }

@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'default' => nexus_env('CAPTCHA_DRIVER', 'image'),
+    'default' => \App\Support\Env::get('CAPTCHA_DRIVER', 'image'),
 
     'drivers' => [
         'image' => [
@@ -10,22 +10,22 @@ return [
 
         'cloudflare_turnstile' => [
             'class' => \App\Services\Captcha\Drivers\TurnstileCaptchaDriver::class,
-            'site_key' => nexus_env('TURNSTILE_SITE_KEY'),
-            'secret_key' => nexus_env('TURNSTILE_SECRET_KEY'),
-            'theme' => nexus_env('TURNSTILE_THEME', 'auto'),
-            'size' => nexus_env('TURNSTILE_SIZE', 'auto'),
+            'site_key' => \App\Support\Env::get('TURNSTILE_SITE_KEY', null),
+            'secret_key' => \App\Support\Env::get('TURNSTILE_SECRET_KEY', null),
+            'theme' => \App\Support\Env::get('TURNSTILE_THEME', 'auto'),
+            'size' => \App\Support\Env::get('TURNSTILE_SIZE', 'auto'),
         ],
 
         'google_recaptcha_v2' => [
             'class' => \App\Services\Captcha\Drivers\RecaptchaV2CaptchaDriver::class,
-            'site_key' => nexus_env('RECAPTCHA_SITE_KEY'),
-            'secret_key' => nexus_env('RECAPTCHA_SECRET_KEY'),
-            'theme' => nexus_env('RECAPTCHA_THEME', 'light'),
-            'size' => nexus_env('RECAPTCHA_SIZE', 'normal'),
+            'site_key' => \App\Support\Env::get('RECAPTCHA_SITE_KEY', null),
+            'secret_key' => \App\Support\Env::get('RECAPTCHA_SECRET_KEY', null),
+            'theme' => \App\Support\Env::get('RECAPTCHA_THEME', 'light'),
+            'size' => \App\Support\Env::get('RECAPTCHA_SIZE', 'normal'),
         ],
     ],
 
     'attendance' => [
-        'enabled' => nexus_env('CAPTCHA_ATTENDANCE_ENABLED', true),
+        'enabled' => \App\Support\Env::get('CAPTCHA_ATTENDANCE_ENABLED', true),
     ],
 ];

@@ -31,7 +31,7 @@ final class Bootstrap
         }
 
         if (! $useCronTriggerCleanUp && $autoclean) {
-            register_shutdown_function('autoclean');
+            register_shutdown_function([self::class, 'autoClean']);
         }
     }
 

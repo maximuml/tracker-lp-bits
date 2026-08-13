@@ -58,7 +58,7 @@ class NexusUpdate extends Command
         $fails = $requirements['fails'];
         if (!empty($fails)) {
             foreach ($fails as $value) {
-                $this->doLog("Error: " . nexus_json_encode($value), 'error');
+                $this->doLog("Error: " . \App\Support\Json::encode($value), 'error');
             }
             return 0;
         }
@@ -111,7 +111,7 @@ class NexusUpdate extends Command
 
         if (!empty($fails)) {
             foreach ($fails as $value) {
-                $this->doLog("Error: " . nexus_json_encode($value), 'error');
+                $this->doLog("Error: " . \App\Support\Json::encode($value), 'error');
             }
             return 0;
         }

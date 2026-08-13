@@ -48,15 +48,15 @@ class UserMeta extends NexusModel
     public static function listProps()
     {
         return [
-            self::META_KEY_PERSONALIZED_USERNAME => nexus_trans('label.user_meta.meta_keys.' . self::META_KEY_PERSONALIZED_USERNAME),
-            self::META_KEY_CHANGE_USERNAME => nexus_trans('label.user_meta.meta_keys.' . self::META_KEY_CHANGE_USERNAME),
+            self::META_KEY_PERSONALIZED_USERNAME => \App\Support\Locale::trans('label.user_meta.meta_keys.' . self::META_KEY_PERSONALIZED_USERNAME, [], null),
+            self::META_KEY_CHANGE_USERNAME => \App\Support\Locale::trans('label.user_meta.meta_keys.' . self::META_KEY_CHANGE_USERNAME, [], null),
         ];
     }
 
     /** @return  mixed */
     public function getMetaKeyTextAttribute()
     {
-        return nexus_trans('label.user_meta.meta_keys.' . $this->meta_key);
+        return \App\Support\Locale::trans('label.user_meta.meta_keys.' . $this->meta_key, [], null);
     }
 
     public function isValid(): bool

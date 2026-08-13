@@ -71,7 +71,7 @@ final class Shoutbox
             $secret = (string) (getenv('APP_KEY') ?: '');
         }
         if ($secret === '' && function_exists('nexus_env')) {
-            $secret = (string) (nexus_env('APP_KEY') ?: '');
+            $secret = (string) (\App\Support\Env::get('APP_KEY', null) ?: '');
         }
         return $secret;
     }

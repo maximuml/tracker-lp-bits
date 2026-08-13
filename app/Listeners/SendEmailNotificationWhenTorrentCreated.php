@@ -25,6 +25,6 @@ class SendEmailNotificationWhenTorrentCreated implements ShouldQueue
         $torrent = $event->model;
         $uploadRepo = new UploadRepository();
         $result = $uploadRepo->sendEmailNotification($torrent);
-        do_log("torrent: $torrent->id, sendEmailNotification result: " . var_export($result, true));
+        \App\Support\Logger::writeWithContext((string) ("torrent: {$torrent->id}, sendEmailNotification result: " . var_export($result, true)), (string) 'info', (bool) false);
     }
 }

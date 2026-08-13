@@ -15,8 +15,8 @@ class NexusFormatter
     protected function formatter()
     {
         $id = 'NO_REQUEST_ID';
-        if (nexus()) {
-            $id = nexus()->getRequestId();
+        if (\Nexus\Nexus::instance()) {
+            $id = \Nexus\Nexus::instance()->getRequestId();
         }
         $format = "[%datetime%] [" . $id . "] %channel%.%level_name%: %message% %context% %extra%\n";
         return tap(new LineFormatter($format, "Y-m-d\TH:i:s.vP", true, true), function ($formatter) {

@@ -90,7 +90,7 @@ class MedalRepository extends BaseRepository
         }
         $medal = Medal::query()->findOrFail($medalId);
         $exists = $user->valid_medals()->where('medal_id', $medalId)->exists();
-        Logger::writeWithContext(last_query());
+        Logger::writeWithContext(\App\Support\LegacyDb::lastQuery(false, 'json'));
         if ($exists) {
             throw new \LogicException("user: $uid already own this medal: $medalId.");
         }
@@ -138,7 +138,7 @@ class MedalRepository extends BaseRepository
             $user = User::query()->findOrFail($userId, User::$commonFields);
             $wearCount = $user->wearing_medals()->count();
             if ($maxWearAllow && $wearCount >= $maxWearAllow) {
-                throw new NexusException(nexus_trans('medal.max_allow_wearing', ['count' => $maxWearAllow]));
+                throw new NexusException(\App\Support\Locale::trans('medal.max_allow_wearing', ['count' => $maxWearAllow], null));
             }
             $userMedal->status = UserMedal::STATUS_WEARING;
         } elseif ($current == UserMedal::STATUS_WEARING) {
@@ -182,7 +182,7 @@ class MedalRepository extends BaseRepository
         }
         $maxWearAllow = \App\Support\Config\SiteConfig::current()->system->maximumNumberOfMedalsCanBeWorn();
         if ($maxWearAllow && $wearCount > $maxWearAllow) {
-            throw new NexusException(nexus_trans('medal.max_allow_wearing', ['count' => $maxWearAllow]));
+            throw new NexusException(\App\Support\Locale::trans('medal.max_allow_wearing', ['count' => $maxWearAllow], null));
         }
         Cache::clearUser($userId);
         if (empty($rows)) {

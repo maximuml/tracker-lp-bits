@@ -25,19 +25,19 @@ class EditIcon extends EditRecord
 
     protected function mutateFormDataBeforeFill(array $data): array
     {
-        $data['tip'] = nexus_trans('label.icon.desc');
+        $data['tip'] = \App\Support\Locale::trans('label.icon.desc', [], null);
         return $data;
     }
 
     protected function getViewData(): array
     {
         return [
-            'desc' => nexus_trans('label.icon.desc')
+            'desc' => \App\Support\Locale::trans('label.icon.desc', [], null)
         ];
     }
 
     public function afterSave()
     {
-        clear_icon_cache();
+        \App\Support\Cache::clearIcon();
     }
 }

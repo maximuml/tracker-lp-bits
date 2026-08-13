@@ -31,11 +31,11 @@ class AttendanceRepository extends BaseRepository
         $update = $initialData;
         if (!$attendance) {
             //first time
-            do_log("[DO_INSERT]: " . nexus_json_encode($initialData));
+            \App\Support\Logger::writeWithContext((string) ("[DO_INSERT]: " . \App\Support\Json::encode($initialData)), (string) 'info', (bool) false);
             $attendance = Attendance::query()->create($initialData);
         } else {
             $added = $attendance->added->startOfDay();
-            do_log("[ORIGINAL_DATA]: " . $attendance->toJson());
+            \App\Support\Logger::writeWithContext((string) ("[ORIGINAL_DATA]: " . $attendance->toJson()), (string) 'info', (bool) false);
             if ($added->gte($today)) {
                 //already attended today, do nothing
                 $isUpdated = 0;
@@ -45,7 +45,7 @@ class AttendanceRepository extends BaseRepository
                     //yesterday do it, it's continuous
                     $continuousDays = $this->getContinuousDays($attendance, Carbon::yesterday());
                     $points = $this->getContinuousPoints($continuousDays + 1);
-                    do_log("[CONTINUOUS] continuous days from yesterday: $continuousDays, points: $points");
+                    \App\Support\Logger::writeWithContext((string) "[CONTINUOUS] continuous days from yesterday: {$continuousDays}, points: {$points}", (string) 'info', (bool) false);
                     $update = [
                         'added' => $now,
                         'points' => $points,
@@ -54,10 +54,10 @@ class AttendanceRepository extends BaseRepository
                     ];
                 } else {
                     //not continuous
-                    do_log("[NOT_CONTINUOUS]");
+                    \App\Support\Logger::writeWithContext((string) "[NOT_CONTINUOUS]", (string) 'info', (bool) false);
                     $update['total_days'] = $attendance->total_days + 1;
                 }
-                do_log("[DO_UPDATE]: " . nexus_json_encode($update));
+                \App\Support\Logger::writeWithContext((string) ("[DO_UPDATE]: " . \App\Support\Json::encode($update)), (string) 'info', (bool) false);
                 $attendance->update($update);
             }
         }
@@ -78,7 +78,7 @@ class AttendanceRepository extends BaseRepository
         $attendance->today_counts = (clone $baseQuery)->count();
         $myId = (clone $baseQuery)->where('uid', $uid)->first(['id'])->id;
         $attendance->my_ranking = (clone $baseQuery)->where('id', '<=', $myId)->count();
-        do_log("[FINAL_ATTENDANCE]: " . $attendance->toJson());
+        \App\Support\Logger::writeWithContext((string) ("[FINAL_ATTENDANCE]: " . $attendance->toJson()), (string) 'info', (bool) false);
         return $attendance;
 
     }
@@ -141,23 +141,20 @@ class AttendanceRepository extends BaseRepository
                 ->selectRaw('uid, max(id) as id, count(*) as counts')
                 ->forPage($page, $size)
                 ->get();
-            do_log("$logPrefix, " . last_query() . ", count: " . $result->count());
+            \App\Support\Logger::writeWithContext((string) ("{$logPrefix}, " . \App\Support\LegacyDb::lastQuery(false, 'json') . ", count: " . $result->count()), (string) 'info', (bool) false);
             if ($result->isEmpty()) {
-                do_log("$logPrefix, no more data...");
+                \App\Support\Logger::writeWithContext((string) "{$logPrefix}, no more data...", (string) 'info', (bool) false);
                 break;
             }
             foreach ($result as $row) {
                 $caseWhens[] = sprintf('when %s then %s', $row->id, $row->counts);
                 $idArr[] = $row->id;
-                do_log(sprintf(
-                    "$logPrefix, update user: %s(ID: %s) => %s",
-                    $row->uid, $row->id, $row->counts
-                ));
+                \App\Support\Logger::writeWithContext((string) sprintf("{$logPrefix}, update user: %s(ID: %s) => %s", $row->uid, $row->id, $row->counts), (string) 'info', (bool) false);
             }
             $page++;
         }
         if (empty($caseWhens)) {
-            do_log("no data to update...");
+            \App\Support\Logger::writeWithContext((string) "no data to update...", (string) 'info', (bool) false);
             return 0;
         }
         $caseWhenStr = sprintf('case id %s end', implode(' ', $caseWhens));
@@ -165,7 +162,7 @@ class AttendanceRepository extends BaseRepository
             ->whereIn('id', $idArr)
             ->update(['total_days' => NexusDB::raw($caseWhenStr)]);
 
-        do_log("[MIGRATE_ATTENDANCE] DONE! $caseWhenStr, result: " . var_export($result, true));
+        \App\Support\Logger::writeWithContext((string) ("[MIGRATE_ATTENDANCE] DONE! {$caseWhenStr}, result: " . var_export($result, true)), (string) 'info', (bool) false);
 
         return count($idArr);
     }
@@ -182,11 +179,11 @@ class AttendanceRepository extends BaseRepository
         $deleteCounts = 0;
         while (true) {
             $rows = $query->forPage($page, $size)->get();
-            $log = "sql: " . last_query() . ", count: " . $rows->count();
-            do_log($log, 'info', isRunningInConsole());
+            $log = "sql: " . \App\Support\LegacyDb::lastQuery(false, 'json') . ", count: " . $rows->count();
+            \App\Support\Logger::writeWithContext((string) $log, (string) 'info', (bool) \App\Support\Environment::isConsole());
             if ($rows->isEmpty()) {
                 $log = "no more data....";
-                do_log($log, 'info', isRunningInConsole());
+                \App\Support\Logger::writeWithContext((string) $log, (string) 'info', (bool) \App\Support\Environment::isConsole());
                 break;
             }
             foreach ($rows as $row) {
@@ -196,9 +193,9 @@ class AttendanceRepository extends BaseRepository
                         ->where('id', '<', $row->max_id)
                         ->limit(10000)
                         ->delete();
-                    $log = "delete: $deleted by sql: " . last_query();
+                    $log = "delete: $deleted by sql: " . \App\Support\LegacyDb::lastQuery(false, 'json');
                     $deleteCounts += $deleted;
-                    do_log($log, 'info', isRunningInConsole());
+                    \App\Support\Logger::writeWithContext((string) $log, (string) 'info', (bool) \App\Support\Environment::isConsole());
                 } while ($deleted > 0);
             }
             $page++;
@@ -214,7 +211,7 @@ class AttendanceRepository extends BaseRepository
     public function migrateAttendanceLogs($uid = 0): int
     {
         $cleanUpCounts = $this->cleanup();
-        do_log("cleanup count: $cleanUpCounts", 'info', isRunningInConsole());
+        \App\Support\Logger::writeWithContext((string) "cleanup count: {$cleanUpCounts}", (string) 'info', (bool) \App\Support\Environment::isConsole());
 
         $page = 1;
         $size = 10000;
@@ -229,9 +226,9 @@ class AttendanceRepository extends BaseRepository
                 $query->where('uid', $uid);
             }
             $result = $query->get();
-            do_log("$logPrefix, " . last_query() . ", count: " . $result->count(), 'info', isRunningInConsole());
+            \App\Support\Logger::writeWithContext((string) ("{$logPrefix}, " . \App\Support\LegacyDb::lastQuery(false, 'json') . ", count: " . $result->count()), (string) 'info', (bool) \App\Support\Environment::isConsole());
             if ($result->isEmpty()) {
-                do_log("$logPrefix, no more data...");
+                \App\Support\Logger::writeWithContext((string) "{$logPrefix}, no more data...", (string) 'info', (bool) false);
                 break;
             }
             foreach ($result as $row) {
@@ -252,12 +249,12 @@ class AttendanceRepository extends BaseRepository
             $page++;
         }
         if (empty($rows)) {
-            do_log("no data to insert...", 'info', isRunningInConsole());
+            \App\Support\Logger::writeWithContext((string) "no data to insert...", (string) 'info', (bool) \App\Support\Environment::isConsole());
             return 0;
         }
         NexusDB::table('attendance_logs')->upsert($rows, ['uid', 'date'], ['points', 'updated_at']);
         $insertCount = count($rows);
-        do_log("[MIGRATE_ATTENDANCE_LOGS] DONE! insert count: " . $insertCount, 'info', isRunningInConsole());
+        \App\Support\Logger::writeWithContext((string) ("[MIGRATE_ATTENDANCE_LOGS] DONE! insert count: " . $insertCount), (string) 'info', (bool) \App\Support\Environment::isConsole());
 
         return $insertCount;
     }
@@ -272,7 +269,7 @@ class AttendanceRepository extends BaseRepository
         $logQuery = $attendance->logs()->where('date', '<=', $start->format('Y-m-d'))->orderBy('date', 'desc');
         $attendanceLogs = $logQuery->get(['date'])->keyBy('date');
         $counts = $attendanceLogs->count();
-        do_log(sprintf('user: %s, log counts: %s from query: %s', $attendance->uid, $counts, last_query()));
+        \App\Support\Logger::writeWithContext((string) sprintf('user: %s, log counts: %s from query: %s', $attendance->uid, $counts, \App\Support\LegacyDb::lastQuery(false, 'json')), (string) 'info', (bool) false);
         if ($counts == 0) {
             return 0;
         }
@@ -283,9 +280,9 @@ class AttendanceRepository extends BaseRepository
             $checkDate = $value->format('Y-m-d');
             if ($attendanceLogs->has($checkDate)) {
                 $days++;
-                do_log(sprintf('user: %s, date: %s, [HAS_ATTENDANCE], now days: %s', $attendance->uid, $checkDate, $days));
+                \App\Support\Logger::writeWithContext((string) sprintf('user: %s, date: %s, [HAS_ATTENDANCE], now days: %s', $attendance->uid, $checkDate, $days), (string) 'info', (bool) false);
             } else {
-                do_log(sprintf('user: %s, date: %s, [NOT_ATTENDANCE], now days: %s', $attendance->uid, $checkDate, $days));
+                \App\Support\Logger::writeWithContext((string) sprintf('user: %s, date: %s, [NOT_ATTENDANCE], now days: %s', $attendance->uid, $checkDate, $days), (string) 'info', (bool) false);
                 break;
             }
         }
@@ -305,26 +302,26 @@ class AttendanceRepository extends BaseRepository
         }
         $attendance = $this->getAttendance($user->id);
         if (!$attendance) {
-            throw new \LogicException(nexus_trans('attendance.have_not_attendance_yet'));
+            throw new \LogicException(\App\Support\Locale::trans('attendance.have_not_attendance_yet', [], null));
         }
         $date = Carbon::parse($dateStr);
         $now = Carbon::now();
         if ($date->gte($now) || $now->diffInDays($date, true) > Attendance::MAX_RETROACTIVE_DAYS) {
-            throw new \LogicException(nexus_trans('attendance.target_date_can_no_be_retroactive', ['date' => $date->format('Y-m-d')]));
+            throw new \LogicException(\App\Support\Locale::trans('attendance.target_date_can_no_be_retroactive', ['date' => $date->format('Y-m-d')], null));
         }
         return NexusDB::transaction(function () use ($user, $attendance, $date) {
             if (AttendanceLog::query()->where('uid', $user->id)->where('date', $date->format('Y-m-d'))->exists()) {
-                throw new \RuntimeException(nexus_trans('attendance.already_attendance'));
+                throw new \RuntimeException(\App\Support\Locale::trans('attendance.already_attendance', [], null));
             }
             if ($user->attendance_card < 1) {
-                throw new \RuntimeException(nexus_trans('attendance.card_not_enough'));
+                throw new \RuntimeException(\App\Support\Locale::trans('attendance.card_not_enough', [], null));
             }
             $log = sprintf('user: %s, card: %s, retroactive date: %s', $user->id, $user->attendance_card, $date->format('Y-m-d'));
             $continuousDays = $this->getContinuousDays($attendance, $date->clone()->subDays(1));
             $log .= ", continuousDays from prev day: $continuousDays";
             $points = $this->getContinuousPoints($continuousDays + 1);
             $log .= ", points: $points";
-            do_log($log);
+            \App\Support\Logger::writeWithContext((string) $log, (string) 'info', (bool) false);
             $userUpdates = [
                 'attendance_card' => NexusDB::raw('attendance_card - 1'),
                 'seedbonus' => NexusDB::raw("seedbonus + $points"),
@@ -335,10 +332,10 @@ class AttendanceRepository extends BaseRepository
                 ->update($userUpdates);
             $msg = "Decrement user attendance_card and increment bonus";
             if ($affectedRows != 1) {
-                do_log("$msg fail, query: " . last_query());
+                \App\Support\Logger::writeWithContext((string) ("{$msg} fail, query: " . \App\Support\LegacyDb::lastQuery(false, 'json')), (string) 'info', (bool) false);
                 throw new \RuntimeException("$msg fail");
             }
-            do_log("$msg success, query: " . last_query());
+            \App\Support\Logger::writeWithContext((string) ("{$msg} success, query: " . \App\Support\LegacyDb::lastQuery(false, 'json')), (string) 'info', (bool) false);
             $insert = [
                 'uid' => $user->id,
                 'points' => $points,

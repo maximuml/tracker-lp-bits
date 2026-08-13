@@ -52,7 +52,7 @@ class IndexController extends Controller
 
         $pollvoteBonus = (float) SupportContext::getGlobal('pollvote_bonus', 0);
         if ($pollvoteBonus > 0) {
-            \KPS('+', $pollvoteBonus, $user['id']);
+            \App\Support\Bonus::updatePoints((string) '+', (float) $pollvoteBonus, $user['id']);
         }
 
         return redirect('/');

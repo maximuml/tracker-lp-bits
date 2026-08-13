@@ -25,6 +25,6 @@ try {
     }
     echo json_encode($result, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 } catch (\Throwable $e) {
-    do_log($e->getMessage() . "\n" . $e->getTraceAsString(), 'error');
+    \App\Support\Logger::writeWithContext((string) ($e->getMessage() . "\n" . $e->getTraceAsString()), (string) 'error', (bool) false);
     echo json_encode(['success' => false, 'error' => 'Setlist lookup failed.']);
 }

@@ -32,7 +32,7 @@ class InviteAddTemporary extends Command
         $count = (int) $this->argument('count');
         $log = "idRedisKey: $idRedisKey, days: $days, count: $count";
         $this->info($log);
-        do_log($log);
+        \App\Support\Logger::writeWithContext((string) $log, (string) 'info', (bool) false);
         GenerateTemporaryInvite::dispatch($idRedisKey, $days, $count);
         return Command::SUCCESS;
     }

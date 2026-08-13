@@ -9,7 +9,7 @@ if ($action !== 'regimage') {
     return;
 }
 
-$driver = captcha_manager()->driver('image');
+$driver = \App\Support\Captcha::manager()->driver('image');
 
 if (!method_exists($driver, 'outputImage')) {
     http_response_code(404);

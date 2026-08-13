@@ -17,7 +17,7 @@ class LegacyRedisCache
     public int $cacheWriteTimes = 0;
     /** @var array<string, array<string, int>> */
     public array $keyHits = [];
-    /** @var array<string, string> */
+    /** @var array<int, string> */
     public array $languageFolderArray = [];
 
     /** @var \Redis|null */
@@ -34,7 +34,7 @@ class LegacyRedisCache
 
     private function connect(): bool
     {
-        $config = nexus_config('nexus.redis');
+        $config = \App\Support\Config::get('nexus.redis', null);
         $redis = new \Redis();
         $params = [
             $config['host'],
@@ -45,19 +45,19 @@ class LegacyRedisCache
         if (isset($config['timeout']) && is_numeric($config['timeout'])) {
             $params[] = $config['timeout'];
         }
-        if (is_fpm_mode()) {
+        if (\App\Support\Environment::isFpm()) {
             try {
                 $connectResult = $redis->pconnect(...$params);
             } catch (\Exception $e) {
-                do_log("redis pconnect failed: {$e->getMessage()}, retry one time", 'error');
+                \App\Support\Logger::writeWithContext((string) "redis pconnect failed: {$e->getMessage()}, retry one time", (string) 'error', (bool) false);
                 $redis->close();
                 $redis = new \Redis();
                 $connectResult = $redis->pconnect(...$params);
             }
-            do_log("redis pconnect: $connectResult", 'debug');
+            \App\Support\Logger::writeWithContext((string) "redis pconnect: {$connectResult}", (string) 'debug', (bool) false);
         } else {
             $connectResult = $redis->connect(...$params);
-            do_log("redis connect: $connectResult", 'debug');
+            \App\Support\Logger::writeWithContext((string) "redis connect: {$connectResult}", (string) 'debug', (bool) false);
         }
         if (!empty($config['password'])) {
             $connectResult = $connectResult && $redis->auth($config['password']);
@@ -81,12 +81,12 @@ class LegacyRedisCache
         $this->clearCache = $isEnabled;
     }
 
-    /** @return array<string, string> */
+    /** @return array<int, string> */
     function getLanguageFolderArray(): array {
         return $this->languageFolderArray;
     }
 
-    /** @param array<string, string> $languageFolderArray */
+    /** @param array<int, string> $languageFolderArray */
     function setLanguageFolderArray(array $languageFolderArray): void {
         $this->languageFolderArray = $languageFolderArray;
     }

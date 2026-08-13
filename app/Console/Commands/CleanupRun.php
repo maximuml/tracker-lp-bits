@@ -49,7 +49,7 @@ final class CleanupRun extends Command
         $this->output->write((string) $output, false);
 
         $log = sprintf('[CLEANUP_RUN] DONE, cost time: %d seconds', $cost);
-        do_log($log);
+        \App\Support\Logger::writeWithContext((string) $log, (string) 'info', (bool) false);
         $this->info($log);
 
         return Command::SUCCESS;

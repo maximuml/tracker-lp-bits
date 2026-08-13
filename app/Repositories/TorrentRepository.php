@@ -127,7 +127,7 @@ class TorrentRepository extends BaseRepository
             $searchBox = SearchBox::query()->where('name', $sectionName)->first();
         }
         if (empty($searchBox)) {
-            throw new NexusException(nexus_trans("upload.invalid_section"));
+            throw new NexusException(\App\Support\Locale::trans("upload.invalid_section", [], null));
         }
         $categoryIdList = $searchBox->categories()->pluck('id')->toArray();
         //query this info default
@@ -183,9 +183,9 @@ class TorrentRepository extends BaseRepository
         if (!$apiQueryBuilder->hasSort() || !$apiQueryBuilder->hasSort('id')) {
             $query->orderBy("id", "DESC");
         }
-        do_log("before query torrent list");
+        \App\Support\Logger::writeWithContext((string) "before query torrent list", (string) 'info', (bool) false);
         $torrents = $query->paginate($this->getPerPageFromRequest($request));
-        do_log("after query torrent list");
+        \App\Support\Logger::writeWithContext((string) "after query torrent list", (string) 'info', (bool) false);
         return $this->appendIncludeFields($apiQueryBuilder, $user, $torrents);
     }
 
@@ -203,9 +203,9 @@ class TorrentRepository extends BaseRepository
             ->allowIncludeCounts(self::$allowIncludeCounts)
             ->allowIncludeFields(self::$allowIncludeFields)
         ;
-        do_log("before query torrent detail");
+        \App\Support\Logger::writeWithContext((string) "before query torrent detail", (string) 'info', (bool) false);
         $torrent = $apiQueryBuilder->build()->findOrFail($id);
-        do_log("before query torrent detail");
+        \App\Support\Logger::writeWithContext((string) "before query torrent detail", (string) 'info', (bool) false);
         $torrentList = $this->appendIncludeFields($apiQueryBuilder, $user, [$torrent]);
         return $torrentList[0];
     }
@@ -236,7 +236,7 @@ class TorrentRepository extends BaseRepository
             $torrentModule = new \Nexus\Torrent\Torrent();
             $activeData = $torrentModule->listLeechingSeedingStatus($user->id, $torrentIdArr);
         }
-        do_log("after prepare has data");
+        \App\Support\Logger::writeWithContext((string) "after prepare has data", (string) 'info', (bool) false);
 
         foreach ($torrentList as $torrent) {
             $id = $torrent->id;
@@ -262,7 +262,7 @@ class TorrentRepository extends BaseRepository
                 $torrent->download_url = $this->getDownloadUrl($id, $user);
             }
         }
-        do_log("after fill has data");
+        \App\Support\Logger::writeWithContext((string) "after fill has data", (string) 'info', (bool) false);
         return $torrentList;
     }
 
@@ -274,7 +274,7 @@ class TorrentRepository extends BaseRepository
     {
         return sprintf(
             '%s/download.php?downhash=%s.%s',
-            getSchemeAndHttpHost(), is_array($user) ? $user['id'] : $user->id, $this->encryptDownHash($id, $user)
+            \App\Support\Url::schemeAndHost(false), is_array($user) ? $user['id'] : $user->id, $this->encryptDownHash($id, $user)
         );
     }
 
@@ -680,7 +680,7 @@ class TorrentRepository extends BaseRepository
                 'torrent_id' => 0,
                 'secret' => Str::random(),
             ];
-            do_log("[INSERT_TORRENT_SECRET] " . json_encode($insert));
+            \App\Support\Logger::writeWithContext((string) ("[INSERT_TORRENT_SECRET] " . json_encode($insert)), (string) 'info', (bool) false);
             TorrentSecret::query()->insert($insert);
             return $insert['secret'];
         }
@@ -733,7 +733,7 @@ class TorrentRepository extends BaseRepository
             }
             $radios[] = sprintf(
                 '<label><input type="radio" name="params[approval_status]" value="%s"%s>%s</label>',
-                $key, $checked, nexus_trans("torrent.approval.status_text.$key")
+                $key, $checked, \App\Support\Locale::trans("torrent.approval.status_text.{$key}", [], null)
             );
         }
         $id = "torrent-approval";
@@ -743,11 +743,11 @@ class TorrentRepository extends BaseRepository
         $formId = "$id-form";
         $rows[] = sprintf(
             '<div class="%s-row" style="%s"><div style="%s">%s: </div><div>%s</div></div>',
-            $id, $rowStyle, $labelStyle, nexus_trans('torrent.approval.status_label'), implode('', $radios)
+            $id, $rowStyle, $labelStyle, \App\Support\Locale::trans('torrent.approval.status_label', [], null), implode('', $radios)
         );
         $rows[] = sprintf(
             '<div class="%s-row" style="%s"><div style="%s">%s: </div><div><textarea name="params[comment]" rows="4" cols="40"></textarea></div></div>',
-            $id, $rowStyle, $labelStyle, nexus_trans('torrent.approval.comment_label')
+            $id, $rowStyle, $labelStyle, \App\Support\Locale::trans('torrent.approval.comment_label', [], null)
         );
         $rows[] = sprintf('<input type="hidden" name="params[torrent_id]" value="%s" />', $torrent->id);
 
@@ -756,7 +756,7 @@ class TorrentRepository extends BaseRepository
         return [
             'id' => $id,
             'form_id' => $formId,
-            'title' => nexus_trans('torrent.approval.modal_title'),
+            'title' => \App\Support\Locale::trans('torrent.approval.modal_title', [], null),
             'content' => $html,
         ];
 
@@ -802,7 +802,7 @@ class TorrentRepository extends BaseRepository
                         $log .= ", addSeconds: $diffInSeconds";
                         $torrentUpdate['promotion_until'] = $torrent->promotion_until->addSeconds($diffInSeconds);
                     }
-                    do_log($log);
+                    \App\Support\Logger::writeWithContext((string) $log, (string) 'info', (bool) false);
                 }
             }
             if ($torrent->approval_status == Torrent::APPROVAL_STATUS_DENY) {
@@ -835,13 +835,13 @@ class TorrentRepository extends BaseRepository
 
         NexusDB::transaction(function () use ($torrent, $torrentOperationLog, $torrentUpdate, $notifyUser) {
             $log = "torrent: " . $torrent->id;
-            $log .= ", [UPDATE_TORRENT]: " . nexus_json_encode($torrentUpdate);
+            $log .= ", [UPDATE_TORRENT]: " . \App\Support\Json::encode($torrentUpdate);
             $torrent->update($torrentUpdate);
             if (!empty($torrentOperationLog)) {
-                $log .= ", [ADD_TORRENT_OPERATION_LOG]: " . nexus_json_encode($torrentOperationLog);
+                $log .= ", [ADD_TORRENT_OPERATION_LOG]: " . \App\Support\Json::encode($torrentOperationLog);
                 TorrentOperationLog::add($torrentOperationLog, $notifyUser);
             }
-            do_log($log);
+            \App\Support\Logger::writeWithContext((string) $log, (string) 'info', (bool) false);
         });
 
         return $params;
@@ -860,7 +860,7 @@ class TorrentRepository extends BaseRepository
         if ($show) {
             return sprintf(
                 '<span style="margin-left: 6px" title="%s">%s</span>',
-                nexus_trans("torrent.approval.status_text.$approvalStatus"),
+                \App\Support\Locale::trans("torrent.approval.status_text.{$approvalStatus}", [], null),
                 \App\Models\Torrent::$approvalStatus[$approvalStatus]['icon']
             );
         }
@@ -952,7 +952,7 @@ class TorrentRepository extends BaseRepository
             'hr' => $hrStatus,
         ];
         $idArr = Arr::wrap($id);
-        do_log(sprintf("set torrent: %s hr: %s", implode(",", $idArr), $hrStatus));
+        \App\Support\Logger::writeWithContext((string) sprintf("set torrent: %s hr: %s", implode(",", $idArr), $hrStatus), (string) 'info', (bool) false);
         return Torrent::query()->whereIn('id', $idArr)->update($update);
     }
 
@@ -1029,7 +1029,7 @@ HTML;
         if (!isset($torrentInfo['price']) || $torrentInfo['price'] <= 0) {
             return '';
         }
-        return sprintf('<span title="%s" style="vertical-align: %s"><svg t="1676058062789" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="3406" width="%s" height="%s"><path d="M554.666667 810.666667v42.666666h-85.333334v-42.666666c-93.866667 0-170.666667-76.8-170.666666-170.666667h85.333333c0 46.933333 38.4 85.333333 85.333333 85.333333v-170.666666c-93.866667 0-170.666667-76.8-170.666666-170.666667s76.8-170.666667 170.666666-170.666667V170.666667h85.333334v42.666666c93.866667 0 170.666667 76.8 170.666666 170.666667h-85.333333c0-46.933333-38.4-85.333333-85.333333-85.333333v170.666666h17.066666c29.866667 0 68.266667 17.066667 98.133334 42.666667 34.133333 29.866667 59.733333 76.8 59.733333 128-4.266667 93.866667-81.066667 170.666667-174.933333 170.666667z m0-85.333334c46.933333 0 85.333333-38.4 85.333333-85.333333s-38.4-85.333333-85.333333-85.333333v170.666666zM469.333333 298.666667c-46.933333 0-85.333333 38.4-85.333333 85.333333s38.4 85.333333 85.333333 85.333333V298.666667z" fill="#CD7F32" p-id="3407"></path></svg></span>', nexus_trans('torrent.paid_torrent'), $verticalAlign, $size, $size);
+        return sprintf('<span title="%s" style="vertical-align: %s"><svg t="1676058062789" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="3406" width="%s" height="%s"><path d="M554.666667 810.666667v42.666666h-85.333334v-42.666666c-93.866667 0-170.666667-76.8-170.666666-170.666667h85.333333c0 46.933333 38.4 85.333333 85.333333 85.333333v-170.666666c-93.866667 0-170.666667-76.8-170.666666-170.666667s76.8-170.666667 170.666666-170.666667V170.666667h85.333334v42.666666c93.866667 0 170.666667 76.8 170.666666 170.666667h-85.333333c0-46.933333-38.4-85.333333-85.333333-85.333333v170.666666h17.066666c29.866667 0 68.266667 17.066667 98.133334 42.666667 34.133333 29.866667 59.733333 76.8 59.733333 128-4.266667 93.866667-81.066667 170.666667-174.933333 170.666667z m0-85.333334c46.933333 0 85.333333-38.4 85.333333-85.333333s-38.4-85.333333-85.333333-85.333333v170.666666zM469.333333 298.666667c-46.933333 0-85.333333 38.4-85.333333 85.333333s38.4 85.333333 85.333333 85.333333V298.666667z" fill="#CD7F32" p-id="3407"></path></svg></span>', \App\Support\Locale::trans('torrent.paid_torrent', [], null), $verticalAlign, $size, $size);
     }
 
     /** @param  mixed  $torrentId */
@@ -1048,11 +1048,11 @@ HTML;
                 $key = $this->getBoughtUserCacheKey($torrentId, $item->uid);
                 $redis->set($key, 1, ['EX' => 86400*30]);
                 $total += 1;
-                do_log(sprintf("set %s 1", $key));
+                \App\Support\Logger::writeWithContext((string) sprintf("set %s 1", $key), (string) 'info', (bool) false);
             }
             $page++;
         }
-        do_log("torrent_purchasers:$torrentId LOAD DONE, total: $total");
+        \App\Support\Logger::writeWithContext((string) "torrent_purchasers:{$torrentId} LOAD DONE, total: {$total}", (string) 'info', (bool) false);
         return $total;
     }
 
@@ -1074,9 +1074,9 @@ HTML;
         if ($record) {
             $record->buy_log_id = $buyLogId;
             $record->save();
-            publish_model_event(ModelEventEnum::SNATCHED_UPDATED, $record->id);
+            \App\Support\Events::publishModel(ModelEventEnum::SNATCHED_UPDATED, $record->id, "");
         } else {
-            do_log("addBuySuccessCache, uid: $uid, torrentId: $torrentId, buyLogId: $buyLogId, snatched not exists", 'error');
+            \App\Support\Logger::writeWithContext((string) "addBuySuccessCache, uid: {$uid}, torrentId: {$torrentId}, buyLogId: {$buyLogId}, snatched not exists", (string) 'error', (bool) false);
         }
 
     }
@@ -1236,7 +1236,7 @@ HTML;
             if (is_array($arr) && isset($arr['torrent_id'], $arr['pieces_hash'])) {
                 $out[$arr['pieces_hash']] = $arr['torrent_id'];
             } else {
-                do_log(sprintf("%s, invalid item: %s(%s)", $logPrefix, var_export($item, true), gettype($item)));
+                \App\Support\Logger::writeWithContext((string) sprintf("%s, invalid item: %s(%s)", $logPrefix, var_export($item, true), gettype($item)), (string) 'info', (bool) false);
             }
         }
         return $out;
@@ -1263,7 +1263,7 @@ HTML;
         while (true) {
             $list = (clone $query)->forPage($page, $size)->get(['id', 'pieces_hash']);
             if ($list->isEmpty()) {
-                do_log("page: $page, size: $size, no more data...");
+                \App\Support\Logger::writeWithContext((string) "page: {$page}, size: {$size}, no more data...", (string) 'info', (bool) false);
                 break;
             }
             $pipe = NexusDB::redis()->multi(\Redis::PIPELINE);
@@ -1281,23 +1281,23 @@ HTML;
                             'id' => (int) $item->id,
                             'pieces_hash' => $piecesHash,
                         ];
-                        do_log(sprintf("torrent: %s no pieces hash, load from torrent file: %s, pieces hash: %s", $item->id, $torrentFile, $piecesHash));
+                        \App\Support\Logger::writeWithContext((string) sprintf("torrent: %s no pieces hash, load from torrent file: %s, pieces hash: %s", $item->id, $torrentFile, $piecesHash), (string) 'info', (bool) false);
                     }
                     $pipe->hSet(self::PIECES_HASH_CACHE_KEY, $piecesHash, $this->buildPiecesHashCacheValue($item->id, $piecesHash));
                     $success++;
                     $currentCount++;
                 } catch (\Exception $exception) {
-                    do_log(sprintf("load pieces hash of torrent: %s error: %s", $item->id, $exception->getMessage()), 'error');
+                    \App\Support\Logger::writeWithContext((string) sprintf("load pieces hash of torrent: %s error: %s", $item->id, $exception->getMessage()), (string) 'error', (bool) false);
                 }
             }
             $pipe->exec();
             if (!empty($piecesHashRows)) {
                 NexusDB::table('torrents')->upsert($piecesHashRows, ['id'], ['pieces_hash']);
             }
-            do_log("success load page: $page, size: $size, count: $currentCount");
+            \App\Support\Logger::writeWithContext((string) "success load page: {$page}, size: {$size}, count: {$currentCount}", (string) 'info', (bool) false);
             $page++;
         }
-        do_log("[DONE], total: $total, success: $success");
+        \App\Support\Logger::writeWithContext((string) "[DONE], total: {$total}, success: {$success}", (string) 'info', (bool) false);
         return compact('total', 'success');
     }
 
@@ -1310,26 +1310,26 @@ HTML;
      */
     public function changeCategory(Collection $torrents, int $sectionId, array $specificSubCategoryAndTags): void
     {
-        assert_has_permission(Permission::canManageTorrent());
+        \App\Support\Permissions::assertHasPermission(Permission::canManageTorrent());
         $torrentIdArr = $torrents->pluck('id')->toArray();
         if (empty($torrentIdArr)) {
-            do_log("torrents is empty", 'warn');
+            \App\Support\Logger::writeWithContext((string) "torrents is empty", (string) 'warn', (bool) false);
             return;
         }
         $torrentIdStr = implode(',', $torrentIdArr);
-        do_log("torrentIdStr: $torrentIdStr, sectionId: $sectionId");
+        \App\Support\Logger::writeWithContext((string) "torrentIdStr: {$torrentIdStr}, sectionId: {$sectionId}", (string) 'info', (bool) false);
         $searchBoxRep = new SearchBoxRepository();
         $sections = $searchBoxRep->listSections(SearchBox::listAllSectionId(), true)->keyBy('id');
         if (!$sections->has($sectionId)) {
-            throw new NexusException(nexus_trans('upload.invalid_section'));
+            throw new NexusException(\App\Support\Locale::trans('upload.invalid_section', [], null));
         }
         $section = $sections->get($sectionId);
         if (!$section instanceof SearchBox) {
-            throw new NexusException(nexus_trans('upload.invalid_section'));
+            throw new NexusException(\App\Support\Locale::trans('upload.invalid_section', [], null));
         }
         $validCategoryIdArr = $section->categories->pluck('id')->toArray();
         if (!empty($specificSubCategoryAndTags['category']) && !in_array($specificSubCategoryAndTags['category'], $validCategoryIdArr)) {
-            throw new NexusException(nexus_trans('upload.invalid_category'));
+            throw new NexusException(\App\Support\Locale::trans('upload.invalid_category', [], null));
         }
         $categoryId = $specificSubCategoryAndTags['category'] ?? 0;
         $category = Category::query()->find($categoryId);
@@ -1339,7 +1339,7 @@ HTML;
             $updateCategoryQuery->whereNotIn('category', $validCategoryIdArr);
         }
         $updateCategoryResult = $updateCategoryQuery->update(['category' => 0]);
-        do_log(sprintf("update category = 0 when category not in: %s, result: %s", implode(', ', $validCategoryIdArr), $updateCategoryResult));
+        \App\Support\Logger::writeWithContext((string) sprintf("update category = 0 when category not in: %s, result: %s", implode(', ', $validCategoryIdArr), $updateCategoryResult), (string) 'info', (bool) false);
 
         foreach (SearchBox::$taxonomies as $name => $info) {
             $relationName = "taxonomy_{$name}";
@@ -1349,13 +1349,13 @@ HTML;
             }
             //有指定，看是否有效
             if (!$relation) {
-                do_log("searchBox: {$section->id} no relation of $name");
-                throw new NexusException(nexus_trans('upload.not_supported_sub_category_field', ['field' => $name]));
+                \App\Support\Logger::writeWithContext((string) "searchBox: {$section->id} no relation of {$name}", (string) 'info', (bool) false);
+                throw new NexusException(\App\Support\Locale::trans('upload.not_supported_sub_category_field', ['field' => $name], null));
             }
             $validIdArr = $relation->pluck('id')->toArray();
             if (!in_array($specificSubCategoryAndTags[$name], $validIdArr)) {
-                do_log("taxonomy {$name}, specific: {$specificSubCategoryAndTags[$name]} not in validIdArr: " . implode(', ', $validIdArr));
-                throw new NexusException(nexus_trans('upload.not_supported_sub_category_field', ['field' => $name]));
+                \App\Support\Logger::writeWithContext((string) ("taxonomy {$name}, specific: {$specificSubCategoryAndTags[$name]} not in validIdArr: " . implode(', ', $validIdArr)), (string) 'info', (bool) false);
+                throw new NexusException(\App\Support\Locale::trans('upload.not_supported_sub_category_field', ['field' => $name], null));
             }
 
         }
@@ -1373,9 +1373,9 @@ HTML;
             Torrent::query()->whereIn('id', $torrentIdArr)->update(['category' => $categoryId]);
         });
         foreach ($torrents as $torrent) {
-            fire_event(ModelEventEnum::TORRENT_UPDATED, $torrent);
+            \App\Support\Events::fire(ModelEventEnum::TORRENT_UPDATED, $torrent, null);
         }
-        do_log("success change to section $sectionId, torrent count:" . $torrents->count());
+        \App\Support\Logger::writeWithContext((string) ("success change to section {$sectionId}, torrent count:" . $torrents->count()), (string) 'info', (bool) false);
     }
 
 }

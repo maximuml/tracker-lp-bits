@@ -176,12 +176,12 @@ $seedBoxRep = \App\Support\SupportContext::getGlobal('seedBoxRep');
     $downloaders = array();
     $seeders = array();
     $torrent = \App\Models\Torrent::query()->findOrFail($id, ['id', 'seeders', 'leechers']);
-    $seedersAndLeechers = apply_filter("torrent_seeder_leecher_list", [], $id);
+    $seedersAndLeechers = \App\Support\Hooks::applyFilter("torrent_seeder_leecher_list", [], $id);
     if ((isset($seedersAndLeechers['seeders']) && isset($seedersAndLeechers['leechers']))) {
 //        dd($seedersAndLeechers);
         $seeders = $seedersAndLeechers['seeders'];
         $downloaders = $seedersAndLeechers['leechers'];
-        do_log("SEEDER_LEECHER_FROM_FILTER: torrent_seeder_leecher_list");
+        \App\Support\Logger::writeWithContext((string) "SEEDER_LEECHER_FROM_FILTER: torrent_seeder_leecher_list", (string) 'info', (bool) false);
     } else {
         $startedField = \Nexus\Database\NexusDB::unixTimestampField('started');
         $lastActionField = \Nexus\Database\NexusDB::unixTimestampField('last_action');
@@ -206,7 +206,7 @@ $seedBoxRep = \App\Support\SupportContext::getGlobal('seedBoxRep');
             'leechers' => $leechersCount,
         ];
         $torrent->update($update);
-        do_log("[UPDATE_TORRENT_SEEDERS_LEECHERS], torrent: $id, original: " . $torrent->toJson() . ", update: " . json_encode($update));
+        \App\Support\Logger::writeWithContext((string) ("[UPDATE_TORRENT_SEEDERS_LEECHERS], torrent: {$id}, original: " . $torrent->toJson() . ", update: " . json_encode($update)), (string) 'info', (bool) false);
     }
 
 	if (!function_exists('leech_sort')) { function leech_sort($a,$b) {
@@ -240,7 +240,7 @@ $seedBoxRep = \App\Support\SupportContext::getGlobal('seedBoxRep');
             "case id %s end",
             implode(' ', array_values($isSeedBoxCaseWhens))
         );
-        do_log("[IS_SEED_BOX], caseSql: $caseSql, ids: " . implode(',', array_keys($isSeedBoxCaseWhens)));
+        \App\Support\Logger::writeWithContext((string) ("[IS_SEED_BOX], caseSql: {$caseSql}, ids: " . implode(',', array_keys($isSeedBoxCaseWhens))), (string) 'info', (bool) false);
         \Nexus\Database\NexusDB::table('peers')
             ->whereIn('id', array_keys($isSeedBoxCaseWhens))
             ->update(['is_seed_box' => \Nexus\Database\NexusDB::raw($caseSql)]);

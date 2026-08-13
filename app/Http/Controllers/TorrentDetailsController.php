@@ -42,21 +42,21 @@ class TorrentDetailsController extends Controller
 
         $row = TorrentDetailRepository::getTorrent($id);
         if (empty($row)) {
-            do_log("TorrentDetailsRepository getTorrent empty: $id");
+            \App\Support\Logger::writeWithContext((string) "TorrentDetailsRepository getTorrent empty: {$id}", (string) 'info', (bool) false);
             error_log("TorrentDetailsRepository getTorrent empty: $id");
             abort(404);
         }
 
-        $row = apply_filter('torrent_detail', $row);
+        $row = \App\Support\Hooks::applyFilter('torrent_detail', $row);
 
         $currentUser = SupportContext::getUser() ?? $user->toLegacyArray();
         SupportContext::setUser($currentUser);
 
         if (empty(SupportContext::getGlobal('lang_functions')) || empty(SupportContext::getGlobal('lang_details'))) {
             SupportContext::setServerValue('SCRIPT_NAME', '/details.php');
-            require base_path(get_langfile_path('functions.php'));
+            require base_path(\App\Support\Locale::scriptFilePath((string) 'functions.php', (bool) false, (string) ""));
             SupportContext::setGlobal('lang_functions', $lang_functions ?? []);
-            require base_path(get_langfile_path());
+            require base_path(\App\Support\Locale::scriptFilePath((string) "", (bool) false, (string) ""));
             SupportContext::setGlobal('lang_details', $lang_details ?? []);
         }
 

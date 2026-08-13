@@ -129,7 +129,7 @@ class TagRepository extends BaseRepository
         $page = 1;
         $size = 1000;
         $baseQuery = Torrent::query()->where('tags', '>', 0);
-        do_log("torrent to migrate hr counts: " . (clone $baseQuery)->count());
+        \App\Support\Logger::writeWithContext((string) ("torrent to migrate hr counts: " . (clone $baseQuery)->count()), (string) 'info', (bool) false);
         $dateTimeStringNow = date('Y-m-d H:i:s');
         $tags = [];
         $priority = count(Tag::DEFAULTS);
@@ -146,14 +146,14 @@ class TagRepository extends BaseRepository
             $tags[] = Tag::query()->firstOrCreate($attributes, $values);
             $priority--;
         }
-        do_log("insert default tags done!");
+        \App\Support\Logger::writeWithContext((string) "insert default tags done!", (string) 'info', (bool) false);
 
         $rows = [];
         while (true) {
             $logPrefix = "page: $page, size: $size";
             $results = (clone $baseQuery)->forPage($page, $size)->get();
             if ($results->isEmpty()) {
-                do_log("$logPrefix, no more data...");
+                \App\Support\Logger::writeWithContext((string) "{$logPrefix}, no more data...", (string) 'info', (bool) false);
                 break;
             }
             foreach ($results as $torrent) {
@@ -175,7 +175,7 @@ class TagRepository extends BaseRepository
         if (!empty($rows)) {
             NexusDB::table('torrent_tags')->upsert($rows, ['torrent_id', 'tag_id'], ['updated_at']);
         }
-        do_log("[MIGRATE_TORRENT_TAG] done!");
+        \App\Support\Logger::writeWithContext((string) "[MIGRATE_TORRENT_TAG] done!", (string) 'info', (bool) false);
         return count($rows);
     }
 
@@ -212,7 +212,7 @@ class TagRepository extends BaseRepository
     public function buildSelect(int $searchBoxId, $name, $value): string
     {
         $list = $this->listAll($searchBoxId);
-        $select = sprintf('<select name="%s"><option value="">%s</option>', $name, nexus_trans('nexus.select_one_please'));
+        $select = sprintf('<select name="%s"><option value="">%s</option>', $name, \App\Support\Locale::trans('nexus.select_one_please', [], null));
         foreach ($list as $item) {
             $selected = '';
             if ($item->id == $value) {

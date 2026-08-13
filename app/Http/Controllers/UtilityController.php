@@ -45,17 +45,17 @@ class UtilityController extends LegacyController
             $callable = ['AjaxInterface', $action];
             if (! is_callable($callable)) {
                 $currentUser = SupportContext::getUser() ?? [];
-                do_log("hacking attempt made by " . ($currentUser['username'] ?? 'guest') . ",uid " . ($currentUser['id'] ?? 0), 'error');
+                \App\Support\Logger::writeWithContext((string) ("hacking attempt made by " . ($currentUser['username'] ?? 'guest') . ",uid " . ($currentUser['id'] ?? 0)), (string) 'error', (bool) false);
                 throw new \RuntimeException("Invalid action: {$action}");
             }
 
             $result = call_user_func($callable, $params);
 
-            return response()->json(success($result));
+            return response()->json(\App\Support\Api::successWithContext($result));
         } catch (\Throwable $exception) {
-            do_log($exception->getMessage() . $exception->getTraceAsString(), 'error');
+            \App\Support\Logger::writeWithContext((string) ($exception->getMessage() . $exception->getTraceAsString()), (string) 'error', (bool) false);
 
-            return response()->json(fail($exception->getMessage(), $request->all()));
+            return response()->json(\App\Support\Api::failWithContext($exception->getMessage(), $request->all()));
         }
     }
 

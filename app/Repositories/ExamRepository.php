@@ -108,7 +108,7 @@ class ExamRepository extends BaseRepository
                 continue;
             }
             if (isset($validIndex[$index['index']])) {
-                throw new \InvalidArgumentException(nexus_trans('admin.resources.exam.index_duplicate', ['index' => nexus_trans("exam.index_text_{$index['index']}")]));
+                throw new \InvalidArgumentException(\App\Support\Locale::trans('admin.resources.exam.index_duplicate', ['index' => \App\Support\Locale::trans("exam.index_text_{$index['index']}", [], null)], null));
             }
             if (isset($index['require_value']) && !ctype_digit((string)$index['require_value'])) {
                 throw new \InvalidArgumentException(sprintf(
@@ -117,10 +117,7 @@ class ExamRepository extends BaseRepository
             }
             if ($index['index'] == Exam::INDEX_SEED_TIME_AVERAGE) {
                 if ($index['require_value'] > $examDuration) {
-                    throw new \InvalidArgumentException(nexus_trans(
-                        'admin.resources.exam.index_seed_time_average_require_value_invalid',
-                        ['index_seed_time_average_require_value' => $index['require_value'], 'duration' => $examDuration]
-                    ));
+                    throw new \InvalidArgumentException(\App\Support\Locale::trans('admin.resources.exam.index_seed_time_average_require_value_invalid', ['index_seed_time_average_require_value' => $index['require_value'], 'duration' => $examDuration], null));
                 }
             }
             $validIndex[$index['index']] = $index;
@@ -167,7 +164,7 @@ class ExamRepository extends BaseRepository
             return round($begin->diffInHours($end, true));
         }
 
-        throw new \InvalidArgumentException(nexus_trans("exam.time_condition_invalid"));
+        throw new \InvalidArgumentException(\App\Support\Locale::trans("exam.time_condition_invalid", [], null));
     }
 
     /**
@@ -382,14 +379,14 @@ class ExamRepository extends BaseRepository
         $filter = Exam::FILTER_USER_CLASS;
         $filterValues = $filters[$filter] ?? [];
         if (!empty($filterValues) && !in_array($user->class, $filterValues)) {
-            do_log("$logPrefix, user class: {$user->class} not in: " . json_encode($filterValues));
+            \App\Support\Logger::writeWithContext((string) ("{$logPrefix}, user class: {$user->class} not in: " . json_encode($filterValues)), (string) 'info', (bool) false);
             return false;
         }
 
         $filter = Exam::FILTER_USER_DONATE;
         $filterValues = $filters[$filter] ?? [];
         if (!empty($filterValues) && !in_array($user->donate_status, $filterValues)) {
-            do_log("$logPrefix, user donate status: {$user->donate_status} not in: " . json_encode($filterValues));
+            \App\Support\Logger::writeWithContext((string) ("{$logPrefix}, user donate status: {$user->donate_status} not in: " . json_encode($filterValues)), (string) 'info', (bool) false);
             return false;
         }
 
@@ -399,11 +396,11 @@ class ExamRepository extends BaseRepository
         $registerTimeBegin = isset($filterValues[0]) ? Carbon::parse($filterValues[0])->toDateTimeString() : '';
         $registerTimeEnd = isset($filterValues[1]) ? Carbon::parse($filterValues[1])->toDateTimeString() : '';
         if (!empty($registerTimeBegin) && $added < $registerTimeBegin) {
-            do_log("$logPrefix, user added: $added not bigger than begin: " . $registerTimeBegin);
+            \App\Support\Logger::writeWithContext((string) ("{$logPrefix}, user added: {$added} not bigger than begin: " . $registerTimeBegin), (string) 'info', (bool) false);
             return false;
         }
         if (!empty($registerTimeEnd) && $added > $registerTimeEnd) {
-            do_log("$logPrefix, user added: $added not less than end: " . $registerTimeEnd);
+            \App\Support\Logger::writeWithContext((string) ("{$logPrefix}, user added: {$added} not less than end: " . $registerTimeEnd), (string) 'info', (bool) false);
             return false;
         }
 
@@ -413,11 +410,11 @@ class ExamRepository extends BaseRepository
         $begin = $filterValues[0] ?? null;
         $end = $filterValues[1] ?? null;
         if ($begin !== null && $value < $begin) {
-            do_log("$logPrefix, user registerDays: $value not bigger than begin: " . $begin);
+            \App\Support\Logger::writeWithContext((string) ("{$logPrefix}, user registerDays: {$value} not bigger than begin: " . $begin), (string) 'info', (bool) false);
             return false;
         }
         if ($end !== null && $value > $end) {
-            do_log("$logPrefix, user registerDays: $value not less than end: " . $end);
+            \App\Support\Logger::writeWithContext((string) ("{$logPrefix}, user registerDays: {$value} not less than end: " . $end), (string) 'info', (bool) false);
             return false;
         }
 
@@ -425,7 +422,7 @@ class ExamRepository extends BaseRepository
             $user->checkIsNormal();
             return true;
         } catch (\Throwable $throwable) {
-            do_log("$logPrefix, user is not normal: " . $throwable->getMessage());
+            \App\Support\Logger::writeWithContext((string) ("{$logPrefix}, user is not normal: " . $throwable->getMessage()), (string) 'info', (bool) false);
             return false;
         }
     }
@@ -452,38 +449,38 @@ class ExamRepository extends BaseRepository
         if (!empty($exam->begin)) {
             $specificBegin = Carbon::parse($exam->begin);
             if ($specificBegin->isAfter($now)) {
-                throw new NexusException(nexus_trans("exam.not_between_begin_end_time", [], $locale));
+                throw new NexusException(\App\Support\Locale::trans("exam.not_between_begin_end_time", [], $locale));
             }
         }
         if (!empty($exam->end)) {
             $specificEnd = Carbon::parse($exam->end);
             if ($specificEnd->isBefore($now)) {
-                throw new NexusException(nexus_trans("exam.not_between_begin_end_time", [], $locale));
+                throw new NexusException(\App\Support\Locale::trans("exam.not_between_begin_end_time", [], $locale));
             }
         }
         if ($exam->isTypeExam()) {
             if ($authUserClass <= $user->class) {
                 //exam only can assign by upper class admin
-                throw new NexusException(nexus_trans("nexus.no_permission", [], $locale));
+                throw new NexusException(\App\Support\Locale::trans("nexus.no_permission", [], $locale));
             }
         } elseif ($exam->isTypeTask()) {
             if ($user->id != $authUserId) {
                 //task only can be claimed by self
-                throw new NexusException(nexus_trans('exam.claim_by_yourself_only', [], $locale));
+                throw new NexusException(\App\Support\Locale::trans('exam.claim_by_yourself_only', [], $locale));
             }
             if ($exam->max_user_count > 0) {
                 $claimUserCount = $exam->onGoingUsers()->count();
                 if ($claimUserCount >= $exam->max_user_count) {
-                    throw new NexusException(nexus_trans('exam.reach_max_user_count', [], $locale));
+                    throw new NexusException(\App\Support\Locale::trans('exam.reach_max_user_count', [], $locale));
                 }
             }
         }
 
         if (!$this->isExamMatchUser($exam, $user)) {
-            throw new NexusException(nexus_trans('exam.not_match_target_user', [], $locale));
+            throw new NexusException(\App\Support\Locale::trans('exam.not_match_target_user', [], $locale));
         }
         if ($user->exams()->where('status', ExamUser::STATUS_NORMAL)->exists()) {
-            throw new NexusException(nexus_trans('exam.has_other_on_the_way', ['type_text' => $exam->typeText], $locale));
+            throw new NexusException(\App\Support\Locale::trans('exam.has_other_on_the_way', ['type_text' => $exam->typeText], $locale));
         }
         $exists = ExamUser::query()
             ->where("uid", $uid)
@@ -492,7 +489,7 @@ class ExamRepository extends BaseRepository
             ->exists()
         ;
         if ($exists) {
-            throw new NexusException(nexus_trans('exam.claimed_already', [], $locale));
+            throw new NexusException(\App\Support\Locale::trans('exam.claimed_already', [], $locale));
         }
         $data = [
             'exam_id' => $exam->id,
@@ -509,7 +506,7 @@ class ExamRepository extends BaseRepository
         }
         $data['begin'] = $begin;
         $data['end'] = $end;
-        do_log("$logPrefix, data: " . nexus_json_encode($data));
+        \App\Support\Logger::writeWithContext((string) ("{$logPrefix}, data: " . \App\Support\Json::encode($data)), (string) 'info', (bool) false);
         $examUser = $user->exams()->create($data);
         $this->updateProgress($examUser, $user);
         return $examUser;
@@ -552,7 +549,7 @@ class ExamRepository extends BaseRepository
     public function addProgress(int $uid, int $torrentId, array $indexAndValue)
     {
         $logPrefix = "uid: $uid, torrentId: $torrentId, indexAndValue: " . json_encode($indexAndValue);
-        do_log($logPrefix);
+        \App\Support\Logger::writeWithContext((string) $logPrefix, (string) 'info', (bool) false);
 
         $user = User::query()->findOrFail($uid);
         $user->checkIsNormal();
@@ -560,7 +557,7 @@ class ExamRepository extends BaseRepository
         $now = Carbon::now()->toDateTimeString();
         $examUser = $user->exams()->where('status', ExamUser::STATUS_NORMAL)->orderBy('id', 'desc')->first();
         if (!$examUser) {
-            do_log("no exam is on the way, " . last_query());
+            \App\Support\Logger::writeWithContext((string) ("no exam is on the way, " . \App\Support\LegacyDb::lastQuery(false, 'json')), (string) 'info', (bool) false);
             return false;
         }
         $exam = $examUser->exam;
@@ -570,15 +567,15 @@ class ExamRepository extends BaseRepository
         $begin = $examUser->begin;
         $end = $examUser->end;
         if (!$begin || !$end) {
-            do_log(sprintf("no begin or end, examUser: %s", $examUser->toJson()));
+            \App\Support\Logger::writeWithContext((string) sprintf("no begin or end, examUser: %s", $examUser->toJson()), (string) 'info', (bool) false);
             return false;
         }
         if ($now < $begin || $now > $end) {
-            do_log(sprintf("now: %s, not in exam time range: %s ~ %s", $now, $begin, $end));
+            \App\Support\Logger::writeWithContext((string) sprintf("now: %s, not in exam time range: %s ~ %s", $now, $begin, $end), (string) 'info', (bool) false);
             return false;
         }
         $indexes = collect($exam->indexes)->keyBy('index');
-        do_log("examUser: " . $examUser->toJson() . ", indexes: " . $indexes->toJson());
+        \App\Support\Logger::writeWithContext((string) ("examUser: " . $examUser->toJson() . ", indexes: " . $indexes->toJson()), (string) 'info', (bool) false);
 
         if (!isset($indexAndValue[Exam::INDEX_SEED_BONUS])) {
             //seed bonus is relative to user all torrents, not single one, torrentId = 0
@@ -590,12 +587,12 @@ class ExamRepository extends BaseRepository
         $insert = [];
         foreach ($indexAndValue as $indexId => $value) {
             if (!$indexes->has($indexId)) {
-                do_log(sprintf('Exam: %s does not has index: %s.', $exam->id, $indexId));
+                \App\Support\Logger::writeWithContext((string) sprintf('Exam: %s does not has index: %s.', $exam->id, $indexId), (string) 'info', (bool) false);
                 continue;
             }
             $indexInfo = $indexes->get($indexId);
             if (!isset($indexInfo['checked']) || !$indexInfo['checked']) {
-                do_log(sprintf('Exam: %s index: %s is not checked.', $exam->id, $indexId));
+                \App\Support\Logger::writeWithContext((string) sprintf('Exam: %s index: %s is not checked.', $exam->id, $indexId), (string) 'info', (bool) false);
                 continue;
             }
             $insert[] = [
@@ -610,20 +607,20 @@ class ExamRepository extends BaseRepository
             ];
         }
         if (empty($insert)) {
-            do_log("no progress to insert.");
+            \App\Support\Logger::writeWithContext((string) "no progress to insert.", (string) 'info', (bool) false);
             return false;
         }
         ExamProgress::query()->insert($insert);
-        do_log("[addProgress] " . nexus_json_encode($insert));
+        \App\Support\Logger::writeWithContext((string) ("[addProgress] " . \App\Support\Json::encode($insert)), (string) 'info', (bool) false);
 
         /**
          * Updating progress is more performance intensive and will only be done with a certain probability
          */
-        $probability = (int)nexus_env('EXAM_PROGRESS_UPDATE_PROBABILITY', 60);
+        $probability = (int)\App\Support\Env::get('EXAM_PROGRESS_UPDATE_PROBABILITY', 60);
         $random = mt_rand(1, 100);
-        do_log("probability: $probability, random: $random");
+        \App\Support\Logger::writeWithContext((string) "probability: {$probability}, random: {$random}", (string) 'info', (bool) false);
         if ($random > $probability) {
-            do_log("[SKIP_UPDATE_PROGRESS], random: $random > probability: $probability", 'warning');
+            \App\Support\Logger::writeWithContext((string) "[SKIP_UPDATE_PROGRESS], random: {$random} > probability: {$probability}", (string) 'warning', (bool) false);
             return true;
         }
         $examProgress = $this->calculateProgress($examUser);
@@ -635,7 +632,7 @@ class ExamRepository extends BaseRepository
             'progress' => $examProgress,
             'is_done' => count($examNotPassed) ? ExamUser::IS_DONE_NO : ExamUser::IS_DONE_YES,
         ];
-        do_log("[updateProgress] " . nexus_json_encode($update));
+        \App\Support\Logger::writeWithContext((string) ("[updateProgress] " . \App\Support\Json::encode($update)), (string) 'info', (bool) false);
         $examUser->update($update);
         return true;
     }
@@ -661,12 +658,12 @@ class ExamRepository extends BaseRepository
                 ->where('status', ExamUser::STATUS_NORMAL)
                 ->first();
             if (!$examUser instanceof ExamUser) {
-                do_log("user: $uid no exam.");
+                \App\Support\Logger::writeWithContext((string) "user: {$uid} no exam.", (string) 'info', (bool) false);
                 return false;
             }
         }
         if ($examUser->status != ExamUser::STATUS_NORMAL) {
-            do_log("examUser: {$examUser->id} status not normal, won't update progress.");
+            \App\Support\Logger::writeWithContext((string) "examUser: {$examUser->id} status not normal, won't update progress.", (string) 'info', (bool) false);
             return false;
         }
         if ($examUser->is_done == ExamUser::IS_DONE_YES) {
@@ -707,30 +704,30 @@ class ExamRepository extends BaseRepository
             }
             if (!isset(Exam::$indexes[$index['index']])) {
                 $msg = "Unknown index: {$index['index']}";
-                do_log("$logPrefix, $msg", 'error');
+                \App\Support\Logger::writeWithContext((string) "{$logPrefix}, {$msg}", (string) 'error', (bool) false);
                 throw new \RuntimeException($msg);
             }
-            do_log("$logPrefix, [HANDLING INDEX {$index['index']}]: " . json_encode($index));
+            \App\Support\Logger::writeWithContext((string) ("{$logPrefix}, [HANDLING INDEX {$index['index']}]: " . json_encode($index)), (string) 'info', (bool) false);
             //First, collect data to store/update in table: exam_progress
             $attributes['index'] = $index['index'];
             $attributes['created_at'] = $now;
             $attributes['updated_at'] = $now;
             $attributes['value'] = $this->getProgressValue($user, $index['index'], $examUser);
-            do_log("[GET_TOTAL_VALUE]: " . $attributes['value']);
+            \App\Support\Logger::writeWithContext((string) ("[GET_TOTAL_VALUE]: " . $attributes['value']), (string) 'info', (bool) false);
             $newVersionProgress = ExamProgress::query()
                 ->where('exam_user_id', $examUser->id)
                 ->where('torrent_id', -1)
                 ->where('index', $index['index'])
                 ->orderBy('id', 'desc')
                 ->first();
-            do_log("check newVersionProgress: " . last_query() . ", exists: " . json_encode($newVersionProgress));
+            \App\Support\Logger::writeWithContext((string) ("check newVersionProgress: " . \App\Support\LegacyDb::lastQuery(false, 'json') . ", exists: " . json_encode($newVersionProgress)), (string) 'info', (bool) false);
             if ($newVersionProgress) {
                 //just need to do update the value
                 if ($attributes['value'] != $newVersionProgress->value) {
                     $newVersionProgress->update(['value' => $attributes['value']]);
-                    do_log("newVersionProgress [EXISTS], doUpdate: " . last_query());
+                    \App\Support\Logger::writeWithContext((string) ("newVersionProgress [EXISTS], doUpdate: " . \App\Support\LegacyDb::lastQuery(false, 'json')), (string) 'info', (bool) false);
                 } else {
-                    do_log("newVersionProgress [EXISTS], no change....");
+                    \App\Support\Logger::writeWithContext((string) "newVersionProgress [EXISTS], no change....", (string) 'info', (bool) false);
                 }
                 $attributes['init_value'] = $newVersionProgress->init_value;
             } else {
@@ -738,7 +735,7 @@ class ExamRepository extends BaseRepository
                 $attributes['init_value'] = $attributes['value'];
                 $attributes['torrent_id'] = -1;
                 ExamProgress::query()->insert($attributes);
-                do_log("newVersionProgress [NOT EXISTS], doInsert with: " . json_encode($attributes));
+                \App\Support\Logger::writeWithContext((string) ("newVersionProgress [NOT EXISTS], doInsert with: " . json_encode($attributes)), (string) 'info', (bool) false);
             }
 
             //Second, update exam_user.progress
@@ -749,26 +746,20 @@ class ExamRepository extends BaseRepository
                     ->where('last_action', '<=', $end)
                     ->selectRaw("count(distinct(torrentid)) as counts")
                     ->first();
-                do_log("special index: {$index['index']}, get torrent count by: " . last_query());
+                \App\Support\Logger::writeWithContext((string) ("special index: {$index['index']}, get torrent count by: " . \App\Support\LegacyDb::lastQuery(false, 'json')), (string) 'info', (bool) false);
                 //if just seeding, no download torrent, counts = 1
                 if ($torrentCountsRes && $torrentCountsRes->counts > 0) {
                     $torrentCounts = $torrentCountsRes->counts;
-                    do_log("torrent count: $torrentCounts");
+                    \App\Support\Logger::writeWithContext((string) "torrent count: {$torrentCounts}", (string) 'info', (bool) false);
                 } else {
                     $torrentCounts = 1;
-                    do_log("torrent count is 0, use 1");
+                    \App\Support\Logger::writeWithContext((string) "torrent count is 0, use 1", (string) 'info', (bool) false);
                 }
                 $examUserProgressFieldData[$index['index']] = bcdiv((string)bcsub($attributes['value'], $attributes['init_value']), (string)$torrentCounts);
-                do_log(sprintf(
-                    "torrentCounts > 0, examUserProgress: (total(%s) - init_value(%s)) / %s = %s",
-                    $attributes['value'], $attributes['init_value'], $torrentCounts, $examUserProgressFieldData[$index['index']]
-                ));
+                \App\Support\Logger::writeWithContext((string) sprintf("torrentCounts > 0, examUserProgress: (total(%s) - init_value(%s)) / %s = %s", $attributes['value'], $attributes['init_value'], $torrentCounts, $examUserProgressFieldData[$index['index']]), (string) 'info', (bool) false);
             } else {
                 $examUserProgressFieldData[$index['index']] = bcsub($attributes['value'], $attributes['init_value']);
-                do_log(sprintf(
-                    "normal index: {$index['index']}, examUserProgress: total(%s) - init_value(%s) = %s",
-                    $attributes['value'], $attributes['init_value'], $examUserProgressFieldData[$index['index']]
-                ));
+                \App\Support\Logger::writeWithContext((string) sprintf("normal index: {$index['index']}, examUserProgress: total(%s) - init_value(%s) = %s", $attributes['value'], $attributes['init_value'], $examUserProgressFieldData[$index['index']]), (string) 'info', (bool) false);
             }
         }
         $examProgressFormatted = $this->getProgressFormatted($exam, $examUserProgressFieldData);
@@ -781,10 +772,7 @@ class ExamRepository extends BaseRepository
             'is_done' => count($examNotPassed) ? ExamUser::IS_DONE_NO : ExamUser::IS_DONE_YES,
         ];
         $result = $examUser->update($update);
-        do_log(sprintf(
-            "[UPDATE_PROGRESS] %s, result: %s, cost time: %s sec",
-            json_encode($update), var_export($result, true), sprintf('%.3f', microtime(true) - $beginTimestamp)
-        ));
+        \App\Support\Logger::writeWithContext((string) sprintf("[UPDATE_PROGRESS] %s, result: %s, cost time: %s sec", json_encode($update), var_export($result, true), sprintf('%.3f', microtime(true) - $beginTimestamp)), (string) 'info', (bool) false);
         $examUser->progress_formatted = $examProgressFormatted;
         return $examUser;
     }
@@ -834,28 +822,28 @@ class ExamRepository extends BaseRepository
         }
         $examUsers = $query->get();
         if ($examUsers->isEmpty()) {
-            do_log("$logPrefix, no examUser, query: " . last_query());
+            \App\Support\Logger::writeWithContext((string) ("{$logPrefix}, no examUser, query: " . \App\Support\LegacyDb::lastQuery(false, 'json')), (string) 'info', (bool) false);
             return null;
         }
         if ($examUsers->count() > 1) {
-            do_log("$logPrefix, user exam more than 1.", 'warning');
+            \App\Support\Logger::writeWithContext((string) "{$logPrefix}, user exam more than 1.", (string) 'warning', (bool) false);
         }
         $examUser = $examUsers->first();
         $logPrefix .= ", examUser: " . $examUser->id;
         try {
             $updateResult = $this->updateProgress($examUser);
             if ($updateResult) {
-                do_log("$logPrefix, [UPDATE_PROGRESS_SUCCESS_RETURN_DIRECTLY]");
+                \App\Support\Logger::writeWithContext((string) "{$logPrefix}, [UPDATE_PROGRESS_SUCCESS_RETURN_DIRECTLY]", (string) 'info', (bool) false);
                 return $updateResult;
             } else {
-                do_log("$logPrefix, [UPDATE_PROGRESS_FAIL]");
+                \App\Support\Logger::writeWithContext((string) "{$logPrefix}, [UPDATE_PROGRESS_FAIL]", (string) 'info', (bool) false);
             }
         } catch (\Exception $exception) {
-            do_log("$logPrefix, [UPDATE_PROGRESS_FAIL]: " . $exception->getMessage(), 'error');
+            \App\Support\Logger::writeWithContext((string) ("{$logPrefix}, [UPDATE_PROGRESS_FAIL]: " . $exception->getMessage()), (string) 'error', (bool) false);
         }
         $exam = $examUser->exam;
         $progress = $examUser->progress;
-        do_log("$logPrefix, progress: " . nexus_json_encode($progress));
+        \App\Support\Logger::writeWithContext((string) ("{$logPrefix}, progress: " . \App\Support\Json::encode($progress)), (string) 'info', (bool) false);
         $examUser->progress = $progress;
         $examUser->progress_formatted = $this->getProgressFormatted($exam, (array)$progress);
         return $examUser;
@@ -873,11 +861,11 @@ class ExamRepository extends BaseRepository
         $begin = $examUser->begin;
         $end = $examUser->end;
         if (!$begin) {
-            do_log("$logPrefix, no begin");
+            \App\Support\Logger::writeWithContext((string) "{$logPrefix}, no begin", (string) 'info', (bool) false);
             return null;
         }
         if (!$end) {
-            do_log("$logPrefix, no end");
+            \App\Support\Logger::writeWithContext((string) "{$logPrefix}, no end", (string) 'info', (bool) false);
             return null;
         }
         $progressSum = $examUser->progresses()
@@ -888,9 +876,9 @@ class ExamRepository extends BaseRepository
             ->get()
             ->pluck('sum', 'index')
             ->toArray();
-        $logPrefix .= ", progressSum raw: " . json_encode($progressSum) . ", query: " . last_query();
+        $logPrefix .= ", progressSum raw: " . json_encode($progressSum) . ", query: " . \App\Support\LegacyDb::lastQuery(false, 'json');
         if ($allSum) {
-            do_log($logPrefix);
+            \App\Support\Logger::writeWithContext((string) $logPrefix, (string) 'info', (bool) false);
             return $progressSum;
         }
 
@@ -903,10 +891,10 @@ class ExamRepository extends BaseRepository
                 ->first()
                 ->torrent_count;
             $progressSum[$index] = intval($progressSum[$index] / $torrentCount);
-            $logPrefix .= ", index: INDEX_SEED_TIME_AVERAGE, get torrent count: $torrentCount, from query: " . last_query();
+            $logPrefix .= ", index: INDEX_SEED_TIME_AVERAGE, get torrent count: $torrentCount, from query: " . \App\Support\LegacyDb::lastQuery(false, 'json');
         }
 
-        do_log("$logPrefix, final progressSum: " . json_encode($progressSum));
+        \App\Support\Logger::writeWithContext((string) ("{$logPrefix}, final progressSum: " . json_encode($progressSum)), (string) 'info', (bool) false);
 
         return $progressSum;
 
@@ -946,12 +934,12 @@ class ExamRepository extends BaseRepository
                     $requireValueAtomic = $requireValue;
             }
             $index['name'] = Exam::$indexes[$index['index']]['name'] ?? '';
-            $index['index_formatted'] = nexus_trans('exam.index_text_' . $index['index']);
+            $index['index_formatted'] = \App\Support\Locale::trans('exam.index_text_' . $index['index'], [], null);
             $index['require_value_formatted'] = "$requireValue $unit";
             $index['current_value'] = $currentValue;
             $index['current_value_formatted'] = $currentValueFormatted;
             $index['passed'] = $currentValue >= $requireValueAtomic;
-            $index['index_result'] = $index['passed'] ? nexus_trans($exam->getPassResultTransKey('pass')) : nexus_trans($exam->getPassResultTransKey('not_pass'));
+            $index['index_result'] = $index['passed'] ? \App\Support\Locale::trans($exam->getPassResultTransKey('pass'), [], null) : \App\Support\Locale::trans($exam->getPassResultTransKey('not_pass'), [], null);
             $result[] = $index;
         }
         return $result;
@@ -994,10 +982,10 @@ class ExamRepository extends BaseRepository
     public function updateExamUserEnd(ExamUser $examUser, Carbon $end, string $reason = "")
     {
         if ($end->isBefore($examUser->begin)) {
-            throw new \InvalidArgumentException(nexus_trans("exam-user.end_can_not_before_begin", ['begin' => $examUser->begin, 'end' => $end]));
+            throw new \InvalidArgumentException(\App\Support\Locale::trans("exam-user.end_can_not_before_begin", ['begin' => $examUser->begin, 'end' => $end], null));
         }
         if ($examUser->status != ExamUser::STATUS_NORMAL) {
-            throw new \LogicException(nexus_trans("exam-user.status_not_allow_update_end", ['status_text' => nexus_trans('exam-user.status.' . ExamUser::STATUS_NORMAL)]));
+            throw new \LogicException(\App\Support\Locale::trans("exam-user.status_not_allow_update_end", ['status_text' => \App\Support\Locale::trans('exam-user.status.' . ExamUser::STATUS_NORMAL, [], null)], null));
         }
         $oldEndTime = $examUser->end;
         $locale = $examUser->user->locale;
@@ -1006,16 +994,8 @@ class ExamRepository extends BaseRepository
             'sender' => 0,
             'receiver' => $examUser->uid,
             'added' => now(),
-            'subject' => nexus_trans('message.exam_user_end_time_updated.subject', [
-                'exam_name' => $examName
-            ], $locale),
-            'msg' => nexus_trans('message.exam_user_end_time_updated.body', [
-                'exam_name' => $examName,
-                'old_end_time' => $oldEndTime,
-                'new_end_time' => $end,
-                'operator' => UserDisplay::currentUsername(),
-                'reason' => $reason,
-            ], $locale),
+            'subject' => \App\Support\Locale::trans('message.exam_user_end_time_updated.subject', ['exam_name' => $examName], $locale),
+            'msg' => \App\Support\Locale::trans('message.exam_user_end_time_updated.body', ['exam_name' => $examName, 'old_end_time' => $oldEndTime, 'new_end_time' => $end, 'operator' => UserDisplay::currentUsername(), 'reason' => $reason], $locale),
         ]);
         $examUser->update(['end' => $end]);
     }
@@ -1028,10 +1008,7 @@ class ExamRepository extends BaseRepository
     public function removeExamUserBulk(array $params, User $user)
     {
         $result = $this->getExamUserBulkQuery($params)->delete();
-        do_log(sprintf(
-            'user: %s bulk delete by filter: %s, result: %s',
-            $user->id, json_encode($params), json_encode($result)
-        ), 'alert');
+        \App\Support\Logger::writeWithContext((string) sprintf('user: %s bulk delete by filter: %s, result: %s', $user->id, json_encode($params), json_encode($result)), (string) 'alert', (bool) false);
         return $result;
     }
 
@@ -1046,10 +1023,7 @@ class ExamRepository extends BaseRepository
             'status' => ExamUser::STATUS_AVOIDED,
         ];
         $affected =  $query->update($update);
-        do_log(sprintf(
-            'user: %s bulk avoid by filter: %s, affected: %s',
-            $user->id, json_encode($params), $affected
-        ), 'alert');
+        \App\Support\Logger::writeWithContext((string) sprintf('user: %s bulk avoid by filter: %s, affected: %s', $user->id, json_encode($params), $affected), (string) 'alert', (bool) false);
         return $affected;
     }
 
@@ -1090,7 +1064,7 @@ class ExamRepository extends BaseRepository
     {
         $exams = $this->listValid(null, Exam::DISCOVERED_YES, Exam::TYPE_EXAM);
         if ($exams->isEmpty()) {
-            do_log("No valid and discovered exam.");
+            \App\Support\Logger::writeWithContext((string) "No valid and discovered exam.", (string) 'info', (bool) false);
             return false;
         }
         /**
@@ -1107,10 +1081,7 @@ class ExamRepository extends BaseRepository
         foreach ($exams as $exam) {
             $start = microtime(true);
             $count = $this->fetchUserAndDoAssign($exam);
-            do_log(sprintf(
-                'exam: %s assign to user count: %s -> %s, cost time: %s',
-                $exam->id, gettype($count), $count, number_format(microtime(true) - $start, 3)
-            ));
+            \App\Support\Logger::writeWithContext((string) sprintf('exam: %s assign to user count: %s -> %s, cost time: %s', $exam->id, gettype($count), $count, number_format(microtime(true) - $start, 3)), (string) 'info', (bool) false);
             $result += $count;
         }
         return $result;
@@ -1121,7 +1092,7 @@ class ExamRepository extends BaseRepository
     public function fetchUserAndDoAssign(Exam $exam): bool|int
     {
         $filters = $exam->filters;
-        do_log("exam: {$exam->id}, filters: " . nexus_json_encode($filters));
+        \App\Support\Logger::writeWithContext((string) ("exam: {$exam->id}, filters: " . \App\Support\Json::encode($filters)), (string) 'info', (bool) false);
         $userTable = (new User())->getTable();
         $examUserTable = (new ExamUser())->getTable();
         //Fetch user doesn't has this exam and doesn't has any other unfinished exam
@@ -1152,7 +1123,7 @@ class ExamRepository extends BaseRepository
                     });
                 });
             } else {
-                do_log("{$exam->id} filter $filter: $donateStatus invalid.", "error");
+                \App\Support\Logger::writeWithContext((string) "{$exam->id} filter {$filter}: {$donateStatus} invalid.", (string) "error", (bool) false);
                 return false;
             }
         }
@@ -1196,9 +1167,9 @@ class ExamRepository extends BaseRepository
         while (true) {
             $logPrefix = sprintf('[%s], exam: %s, size: %s', __FUNCTION__, $exam->id , $size);
             $users = (clone $baseQuery)->where("$userTable.id", ">", $minId)->limit($size)->get();
-            do_log("$logPrefix, query: " . last_query() . ", counts: " . $users->count());
+            \App\Support\Logger::writeWithContext((string) ("{$logPrefix}, query: " . \App\Support\LegacyDb::lastQuery(false, 'json') . ", counts: " . $users->count()), (string) 'info', (bool) false);
             if ($users->isEmpty()) {
-                do_log("no more data...");
+                \App\Support\Logger::writeWithContext((string) "no more data...", (string) 'info', (bool) false);
                 break;
             }
             $now = Carbon::now()->toDateTimeString();
@@ -1213,7 +1184,7 @@ class ExamRepository extends BaseRepository
                     'created_at' => $now,
                     'updated_at' => $now,
                 ];
-                do_log("$currentLogPrefix, exam will be assigned to this user.");
+                \App\Support\Logger::writeWithContext((string) "{$currentLogPrefix}, exam will be assigned to this user.", (string) 'info', (bool) false);
                 $examUser = ExamUser::query()->create($insert);
                 $this->updateProgress($examUser, $user);
                 $result++;
@@ -1272,9 +1243,9 @@ class ExamRepository extends BaseRepository
         while (true) {
             $logPrefix = sprintf('[%s], size: %s', __FUNCTION__, $size);
             $examUsers = (clone $baseQuery)->where("$examUserTable.id", ">", $minId)->limit($size)->get();
-            do_log("$logPrefix, fetch exam users: {$examUsers->count()} by: " . last_query());
+            \App\Support\Logger::writeWithContext((string) ("{$logPrefix}, fetch exam users: {$examUsers->count()} by: " . \App\Support\LegacyDb::lastQuery(false, 'json')), (string) 'info', (bool) false);
             if ($examUsers->isEmpty()) {
-                do_log("$logPrefix, no more data...");
+                \App\Support\Logger::writeWithContext((string) "{$logPrefix}, no more data...", (string) 'info', (bool) false);
                 break;
             }
             $result += $examUsers->count();
@@ -1287,12 +1258,12 @@ class ExamRepository extends BaseRepository
                 $minId = $examUser->id;
                 $examUserIdArr[] = $examUser->id;
                 $uid = $examUser->uid;
-                clear_inbox_count_cache($uid);
+                \App\Support\Cache::clearInboxCount($uid);
                 /** @var Exam $exam */
                 $exam = $examUser->exam;
                 $currentLogPrefix = sprintf("$logPrefix, user: %s, exam: %s, examUser: %s", $uid, $examUser->exam_id, $examUser->id);
                 if (!$examUser->user) {
-                    do_log("$currentLogPrefix, user not exists, remove it!", 'error');
+                    \App\Support\Logger::writeWithContext((string) "{$currentLogPrefix}, user not exists, remove it!", (string) 'error', (bool) false);
                     $examUser->progresses()->delete();
                     $examUser->delete();
                     continue;
@@ -1301,7 +1272,7 @@ class ExamRepository extends BaseRepository
                 $examUser = $this->updateProgress($examUser, $examUser->user);
                 $locale = $examUser->user->locale;
                 if ($examUser->is_done) {
-                    do_log("$currentLogPrefix, [is_done]");
+                    \App\Support\Logger::writeWithContext((string) "{$currentLogPrefix}, [is_done]", (string) 'info', (bool) false);
                     $subjectTransKey = $exam->getMessageSubjectTransKey("pass");
                     $msgTransKey = $exam->getMessageContentTransKey("pass");
                     if ($exam->isTypeExam()) {
@@ -1330,19 +1301,15 @@ class ExamRepository extends BaseRepository
                         }
                     }
                 } else {
-                    do_log("$currentLogPrefix, [not_done]");
+                    \App\Support\Logger::writeWithContext((string) "{$currentLogPrefix}, [not_done]", (string) 'info', (bool) false);
                     $subjectTransKey = $exam->getMessageSubjectTransKey("not_pass");
                     $msgTransKey = $exam->getMessageContentTransKey("not_pass");
                     if ($exam->isTypeExam()) {
                         //ban user
-                        do_log("$currentLogPrefix, [will be banned]");
-                        clear_user_cache($examUser->user->id, $examUser->user->passkey);
+                        \App\Support\Logger::writeWithContext((string) "{$currentLogPrefix}, [will be banned]", (string) 'info', (bool) false);
+                        \App\Support\Cache::clearUser($examUser->user->id, $examUser->user->passkey);
                         $uidToDisable[] = $uid;
-                        $userModcomment = nexus_trans('exam.ban_user_modcomment', [
-                            'exam_name' => $exam->name,
-                            'begin' => $examUser->begin,
-                            'end' => $examUser->end
-                        ], $locale);
+                        $userModcomment = \App\Support\Locale::trans('exam.ban_user_modcomment', ['exam_name' => $exam->name, 'begin' => $examUser->begin, 'end' => $examUser->end], $locale);
 //                        $userModcomment = sprintf('%s - %s', date('Y-m-d'), $userModcomment);
 //                        $userModcommentUpdate[] = sprintf("when `id` = %s then concat_ws('\n', '%s', modcomment)", $uid, $userModcomment);
                         $userModifyLogs[] = [
@@ -1351,11 +1318,7 @@ class ExamRepository extends BaseRepository
                             'created_at' => $now,
                             'updated_at' => $now,
                         ];
-                        $banLogReason = nexus_trans('exam.ban_log_reason', [
-                            'exam_name' => $exam->name,
-                            'begin' => $examUser->begin,
-                            'end' => $examUser->end,
-                        ], $locale);
+                        $banLogReason = \App\Support\Locale::trans('exam.ban_log_reason', ['exam_name' => $exam->name, 'begin' => $examUser->begin, 'end' => $examUser->end], $locale);
                         $userBanLog[] = [
                             'uid' => $uid,
                             'username' => $examUser->user->username,
@@ -1376,14 +1339,8 @@ class ExamRepository extends BaseRepository
                         }
                     }
                 }
-                $subject =  nexus_trans($subjectTransKey, [], $locale);
-                $msg = nexus_trans($msgTransKey, [
-                    'exam_name' => $exam->name,
-                    'begin' => $examUser->begin,
-                    'end' => $examUser->end,
-                    'success_reward_bonus' => $exam->success_reward_bonus,
-                    'fail_deduct_bonus' => $exam->fail_deduct_bonus,
-                ], $locale);
+                $subject =  \App\Support\Locale::trans($subjectTransKey, [], $locale);
+                $msg = \App\Support\Locale::trans($msgTransKey, ['exam_name' => $exam->name, 'begin' => $examUser->begin, 'end' => $examUser->end, 'success_reward_bonus' => $exam->success_reward_bonus, 'fail_deduct_bonus' => $exam->fail_deduct_bonus], $locale);
                 $messageToSend[] = [
                     'receiver' => $uid,
                     'added' => $now,
@@ -1395,7 +1352,7 @@ class ExamRepository extends BaseRepository
                 ExamUser::query()->whereIn('id', $examUserIdArr)->update(['status' => ExamUser::STATUS_FINISHED]);
                 do {
                     $deleted = ExamProgress::query()->whereIn('exam_user_id', $examUserIdArr)->limit(10000)->delete();
-                    do_log("$logPrefix, [DELETE_EXAM_PROGRESS], deleted: $deleted");
+                    \App\Support\Logger::writeWithContext((string) "{$logPrefix}, [DELETE_EXAM_PROGRESS], deleted: {$deleted}", (string) 'info', (bool) false);
                 } while($deleted > 0);
                 Message::query()->insert($messageToSend);
                 if (!empty($uidToDisable)) {
@@ -1405,7 +1362,7 @@ class ExamRepository extends BaseRepository
                         $userTable, User::ENABLED_NO, $uidStr
                     );
                     $updateResult = DB::update($sql);
-                    do_log(sprintf("$logPrefix, disable %s users: %s, sql: %s, updateResult: %s", count($uidToDisable), $uidStr, $sql, $updateResult));
+                    \App\Support\Logger::writeWithContext((string) sprintf("{$logPrefix}, disable %s users: %s, sql: %s, updateResult: %s", count($uidToDisable), $uidStr, $sql, $updateResult), (string) 'info', (bool) false);
                 }
                 if (!empty($userBanLog)) {
                     UserBanLog::query()->insert($userBanLog);
@@ -1420,7 +1377,7 @@ class ExamRepository extends BaseRepository
                         $userTable, implode(' ', $userBonusUpdate), $uidStr
                     );
                     $updateResult = DB::update($sql);
-                    do_log(sprintf("$logPrefix, update %s users: %s seedbonus, sql: %s, updateResult: %s", count($uidToUpdateBonus), $uidStr, $sql, $updateResult));
+                    \App\Support\Logger::writeWithContext((string) sprintf("{$logPrefix}, update %s users: %s seedbonus, sql: %s, updateResult: %s", count($uidToUpdateBonus), $uidStr, $sql, $updateResult), (string) 'info', (bool) false);
                 }
                 if (!empty($bonusLog)) {
                     BonusLogs::query()->insert($bonusLog);
@@ -1447,14 +1404,14 @@ class ExamRepository extends BaseRepository
             $rows = $query->forPage($page, $size)->get();
             $count = $rows->count();
             $total += $count;
-            do_log("$logPrefix, " . last_query() . ", count: $count");
+            \App\Support\Logger::writeWithContext((string) ("{$logPrefix}, " . \App\Support\LegacyDb::lastQuery(false, 'json') . ", count: {$count}"), (string) 'info', (bool) false);
             if ($rows->isEmpty()) {
-                do_log("$logPrefix, no more data...");
+                \App\Support\Logger::writeWithContext((string) "{$logPrefix}, no more data...", (string) 'info', (bool) false);
                 break;
             }
             foreach ($rows as $row) {
                 $result = $this->updateProgress($row);
-                do_log("$logPrefix, examUser: " . $row->toJson() . ", result type: " . gettype($result));
+                \App\Support\Logger::writeWithContext((string) ("{$logPrefix}, examUser: " . $row->toJson() . ", result type: " . gettype($result)), (string) 'info', (bool) false);
                 if ($result) {
                     $success += 1;
                 }
@@ -1462,7 +1419,7 @@ class ExamRepository extends BaseRepository
             $page++;
         }
         $result = compact('total', 'success');
-        do_log("$logPrefix, result: " . json_encode($result));
+        \App\Support\Logger::writeWithContext((string) ("{$logPrefix}, result: " . json_encode($result)), (string) 'info', (bool) false);
         return $result;
     }
 

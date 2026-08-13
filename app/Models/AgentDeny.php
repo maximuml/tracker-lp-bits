@@ -29,13 +29,13 @@ class AgentDeny extends NexusModel
     protected static function booted()
     {
         static::created(function ($model) {
-            fire_event(ModelEventEnum::AGENT_DENY_CREATED, $model);
+            \App\Support\Events::fire(ModelEventEnum::AGENT_DENY_CREATED, $model, null);
         });
         static::updated(function ($model) {
-            fire_event(ModelEventEnum::AGENT_DENY_UPDATED, $model);
+            \App\Support\Events::fire(ModelEventEnum::AGENT_DENY_UPDATED, $model, null);
         });
         static::deleted(function ($model) {
-            fire_event(ModelEventEnum::AGENT_DENY_DELETED, $model);
+            \App\Support\Events::fire(ModelEventEnum::AGENT_DENY_DELETED, $model, null);
         });
     }
 

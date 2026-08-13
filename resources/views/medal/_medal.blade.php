@@ -14,18 +14,18 @@ $perPage = 20;
 list($paginationTop, $paginationBottom, $limit, $offset) = \App\Support\Pagination::pager($perPage, $total, "?");
 $rows = (clone $query)->offset($offset)->take($perPage)->orderBy('id', 'desc')->get();
 $q = htmlspecialchars($q);
-$title = nexus_trans('medal.label');
-$columnNameLabel = nexus_trans('label.name');
-$columnImageLargeLabel = nexus_trans('medal.fields.image_large');
-$columnPriceLabel = nexus_trans('medal.fields.price');
-$columnDurationLabel = nexus_trans('medal.fields.duration');
-$columnDescriptionLabel = nexus_trans('medal.fields.description');
-$columnBuyLabel = nexus_trans('medal.buy_btn');
-$columnSaleBeginEndTimeLabel = nexus_trans('medal.fields.sale_begin_end_time');
-$columnInventoryLabel = nexus_trans('medal.fields.inventory');
-$columnBonusAdditionLabel = nexus_trans('medal.fields.bonus_addition');
-$columnGiftLabel = nexus_trans('medal.gift_btn');
-$columnGiftFeeLabel = nexus_trans('medal.fields.gift_fee');
+$title = \App\Support\Locale::trans('medal.label', [], null);
+$columnNameLabel = \App\Support\Locale::trans('label.name', [], null);
+$columnImageLargeLabel = \App\Support\Locale::trans('medal.fields.image_large', [], null);
+$columnPriceLabel = \App\Support\Locale::trans('medal.fields.price', [], null);
+$columnDurationLabel = \App\Support\Locale::trans('medal.fields.duration', [], null);
+$columnDescriptionLabel = \App\Support\Locale::trans('medal.fields.description', [], null);
+$columnBuyLabel = \App\Support\Locale::trans('medal.buy_btn', [], null);
+$columnSaleBeginEndTimeLabel = \App\Support\Locale::trans('medal.fields.sale_begin_end_time', [], null);
+$columnInventoryLabel = \App\Support\Locale::trans('medal.fields.inventory', [], null);
+$columnBonusAdditionLabel = \App\Support\Locale::trans('medal.fields.bonus_addition', [], null);
+$columnGiftLabel = \App\Support\Locale::trans('medal.gift_btn', [], null);
+$columnGiftFeeLabel = \App\Support\Locale::trans('medal.fields.gift_fee', [], null);
 $header = '<h1 style="text-align: center">'.$title.'</h1>';
 $filterForm = <<<FORM
 <div>
@@ -65,18 +65,18 @@ foreach ($rows as $row) {
     try {
         $row->checkCanBeBuy();
         if ($userMedals->has($row->id)) {
-            $buyBtnText = nexus_trans('medal.buy_already');
+            $buyBtnText = \App\Support\Locale::trans('medal.buy_already', [], null);
         } elseif ($CURUSER['seedbonus'] < $row->price) {
-            $buyBtnText = nexus_trans('medal.require_more_bonus');
+            $buyBtnText = \App\Support\Locale::trans('medal.require_more_bonus', [], null);
         } else {
-            $buyBtnText = nexus_trans('medal.buy_btn');
+            $buyBtnText = \App\Support\Locale::trans('medal.buy_btn', [], null);
             $buyDisabled = '';
             $buyClass = 'buy';
         }
         if ($CURUSER['seedbonus'] < $row->price * (1 + ($row->gift_fee_factor ?? 0))) {
-            $giftBtnText = nexus_trans('medal.require_more_bonus');
+            $giftBtnText = \App\Support\Locale::trans('medal.require_more_bonus', [], null);
         } else {
-            $giftBtnText = nexus_trans('medal.gift_btn');
+            $giftBtnText = \App\Support\Locale::trans('medal.gift_btn', [], null);
             $giftDisabled = '';
             $giftClass = 'gift';
         }
@@ -93,14 +93,14 @@ foreach ($rows as $row) {
     );
     $table .= sprintf(
         '<tr><td>%s</td><td><img src="%s" style="max-width: 60px;max-height: 60px;" class="preview" /></td><td><h1>%s</h1>%s</td><td>%s ~<br>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td>',
-        $row->id,$row->image_large, $row->name, $row->description, $row->sale_begin_time ?? nexus_trans('nexus.no_limit'), $row->sale_end_time ?? nexus_trans('nexus.no_limit'), $row->durationText, (($row->bonus_addition_factor ?? 0) * 100).'%', number_format($row->price),  $row->inventory ?? nexus_trans('label.infinite'), $buyAction, $giftAction
+        $row->id,$row->image_large, $row->name, $row->description, $row->sale_begin_time ?? \App\Support\Locale::trans('nexus.no_limit', [], null), $row->sale_end_time ?? \App\Support\Locale::trans('nexus.no_limit', [], null), $row->durationText, (($row->bonus_addition_factor ?? 0) * 100).'%', number_format($row->price),  $row->inventory ?? \App\Support\Locale::trans('label.infinite', [], null), $buyAction, $giftAction
     );
 }
 $table .= '</tbody></table>';
 echo $header . $table . $paginationBottom;
 \App\Support\Frame::mainFrameClose();
-$confirmBuyMsg = nexus_trans('medal.confirm_to_buy');
-$confirmGiftMsg = nexus_trans('medal.confirm_to_gift');
+$confirmBuyMsg = \App\Support\Locale::trans('medal.confirm_to_buy', [], null);
+$confirmGiftMsg = \App\Support\Locale::trans('medal.confirm_to_gift', [], null);
 $js = <<<JS
 jQuery('.buy').on('click', function (e) {
     let medalId = jQuery(this).attr('data-id')

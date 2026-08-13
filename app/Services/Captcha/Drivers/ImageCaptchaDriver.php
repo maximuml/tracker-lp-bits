@@ -61,7 +61,7 @@ class ImageCaptchaDriver implements CaptchaDriverInterface
 
     public function issue(): string
     {
-        $random = random_str();
+        $random = \App\Support\Strings::randomCode((int) 6);
         $imagehash = md5($random);
         $dateline = time();
         RegImage::query()->insert([

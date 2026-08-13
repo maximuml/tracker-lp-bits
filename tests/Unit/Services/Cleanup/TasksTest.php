@@ -21,7 +21,7 @@ final class TasksTest extends TestCase
         parent::setUp();
 
         DB::beginTransaction();
-        \clear_setting_cache();
+        \App\Support\Cache::clearSettings();
 
         $this->tasks = app(Tasks::class);
     }
@@ -29,7 +29,7 @@ final class TasksTest extends TestCase
     protected function tearDown(): void
     {
         DB::rollBack();
-        \clear_setting_cache();
+        \App\Support\Cache::clearSettings();
 
         parent::tearDown();
     }

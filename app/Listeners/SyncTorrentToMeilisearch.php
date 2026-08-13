@@ -23,7 +23,7 @@ class SyncTorrentToMeilisearch implements ShouldQueue
     {
         $torrent = $event->model ?? null;
         if (!$torrent instanceof Torrent) {
-            do_log("event: " . get_class($event) . " no torrent model", 'error');
+            \App\Support\Logger::writeWithContext((string) ("event: " . get_class($event) . " no torrent model"), (string) 'error', (bool) false);
             return;
         }
         try {
@@ -31,9 +31,9 @@ class SyncTorrentToMeilisearch implements ShouldQueue
             if ($torrent->shouldBeSearchable()) {
                 $torrent->searchable();
             }
-            do_log("sync torrent to MeiliSearch: " . $torrent->id);
+            \App\Support\Logger::writeWithContext((string) ("sync torrent to MeiliSearch: " . $torrent->id), (string) 'info', (bool) false);
         } catch (\Throwable $e) {
-            do_log('MeiliSearch sync listener failed: ' . $e->getMessage(), 'error');
+            \App\Support\Logger::writeWithContext((string) ('MeiliSearch sync listener failed: ' . $e->getMessage()), (string) 'error', (bool) false);
         }
     }
 }

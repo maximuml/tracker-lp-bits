@@ -563,7 +563,7 @@ final class Tasks
             $uid = $user->id;
             $enableCacheResult = NexusDB::cache_get(User::getUserEnableLatelyCacheKey($uid));
             if ($enableCacheResult) {
-                do_log(sprintf("user: %s just enable at: %s, skip", $uid, $enableCacheResult));
+                \App\Support\Logger::writeWithContext((string) sprintf("user: %s just enable at: %s, skip", $uid, $enableCacheResult), (string) 'info', (bool) false);
                 continue;
             }
 
@@ -592,7 +592,7 @@ final class Tasks
         \App\Models\UserBanLog::query()->insert($userBanLogData);
         \App\Models\UserModifyLog::query()->insert($userModifyLogs);
 
-        do_log("[DISABLE_USER]({$reasonKey}): " . implode(', ', $uidArr));
+        \App\Support\Logger::writeWithContext((string) ("[DISABLE_USER]({$reasonKey}): " . implode(', ', $uidArr)), (string) 'info', (bool) false);
 
         foreach ($uidArr as $uid) {
             Events::publishModel(ModelEventEnum::USER_DISABLED, $uid);
@@ -735,7 +735,7 @@ final class Tasks
             ->where('added', '<', $maxdt)
             ->get(['id', 'max_class_once']);
 
-        do_log("match user count: " . $res->count());
+        \App\Support\Logger::writeWithContext((string) ("match user count: " . $res->count()), (string) 'info', (bool) false);
 
         if ($res->isEmpty()) {
             return;
@@ -754,10 +754,10 @@ final class Tasks
                 . Locale::trans('cleanup.msg_see_faq', [], $locale);
 
             if ((int) $class <= (int) $arr->max_class_once) {
-                do_log(sprintf('user: %s upgrade to class: %s', $uid, $class));
+                \App\Support\Logger::writeWithContext((string) sprintf('user: %s upgrade to class: %s', $uid, $class), (string) 'info', (bool) false);
                 User::query()->where('id', $uid)->update(['class' => $class]);
             } else {
-                do_log(sprintf('user: %s upgrade to class: %s, and add invites: %s', $uid, $class, $addInvite));
+                \App\Support\Logger::writeWithContext((string) sprintf('user: %s upgrade to class: %s, and add invites: %s', $uid, $class, $addInvite), (string) 'info', (bool) false);
                 User::query()->where('id', $uid)->update([
                     'class' => $class,
                     'max_class_once' => $class,
@@ -808,7 +808,7 @@ final class Tasks
             ->whereRaw('uploaded < downloaded * ?', [$deRatio])
             ->get(['id']);
 
-        do_log("match user count: " . $res->count());
+        \App\Support\Logger::writeWithContext((string) ("match user count: " . $res->count()), (string) 'info', (bool) false);
 
         if ($res->isEmpty()) {
             return;
@@ -949,7 +949,7 @@ final class Tasks
         User::query()->whereIn('id', $uidArr)->update(['enabled' => User::ENABLED_NO]);
         \App\Models\UserBanLog::query()->insert($userBanLogData);
 
-        do_log('ban user: ' . implode(', ', $uidArr));
+        \App\Support\Logger::writeWithContext((string) ('ban user: ' . implode(', ', $uidArr)), (string) 'info', (bool) false);
 
         foreach ($uidArr as $uid) {
             Events::publishModel(ModelEventEnum::USER_UPDATED, $uid);

@@ -70,7 +70,7 @@ class UpdateUserSeedingLeechingTime implements ShouldQueue
             "[CLEANUP_CLI_UPDATE_SEEDING_LEECHING_TIME_HANDLE_JOB], commonRequestId: %s, beginUid: %s, endUid: %s, idStr: %s, idRedisKey: %s",
             $this->requestId, $this->beginUid, $this->endUid, $this->idStr, $this->idRedisKey,
         );
-        do_log("$logPrefix, job start ...");
+        \App\Support\Logger::writeWithContext((string) "{$logPrefix}, job start ...", (string) 'info', (bool) false);
 
         $idStr = $this->idStr;
         $delIdRedisKey = false;
@@ -79,12 +79,12 @@ class UpdateUserSeedingLeechingTime implements ShouldQueue
             $idStr = NexusDB::cache_get($this->idRedisKey);
         }
         if (empty($idStr)) {
-            do_log("$logPrefix, no idStr or idRedisKey", "error");
+            \App\Support\Logger::writeWithContext((string) "{$logPrefix}, no idStr or idRedisKey", (string) "error", (bool) false);
             return;
         }
         $userIdArr = array_filter(array_map('intval', explode(",", $idStr)));
         if (empty($userIdArr)) {
-            do_log("$logPrefix, empty idStr", "error");
+            \App\Support\Logger::writeWithContext((string) "{$logPrefix}, empty idStr", (string) "error", (bool) false);
             return;
         }
         //批量取，简单化
@@ -95,7 +95,7 @@ class UpdateUserSeedingLeechingTime implements ShouldQueue
             ->groupBy("userid")
             ->get();
         if ($res->isEmpty()) {
-            do_log("$logPrefix, no data from idStr: $idStr", "error");
+            \App\Support\Logger::writeWithContext((string) "{$logPrefix}, no data from idStr: {$idStr}", (string) "error", (bool) false);
             return;
         }
         $snatchedMap = [];
@@ -120,11 +120,8 @@ class UpdateUserSeedingLeechingTime implements ShouldQueue
             NexusDB::cache_del($this->idRedisKey);
         }
         $costTime = time() - $beginTimestamp;
-        do_log(sprintf(
-            "$logPrefix, [DONE], update user count: %s, result: %s, cost time: %s seconds",
-            count($rows), var_export($result, true), $costTime
-        ));
-        do_log("$logPrefix, upsert users seedtime/leechtime done", "debug");
+        \App\Support\Logger::writeWithContext((string) sprintf("{$logPrefix}, [DONE], update user count: %s, result: %s, cost time: %s seconds", count($rows), var_export($result, true), $costTime), (string) 'info', (bool) false);
+        \App\Support\Logger::writeWithContext((string) "{$logPrefix}, upsert users seedtime/leechtime done", (string) "debug", (bool) false);
     }
 
     /**
@@ -135,6 +132,6 @@ class UpdateUserSeedingLeechingTime implements ShouldQueue
      */
     public function failed(\Throwable $exception)
     {
-        do_log("failed: " . $exception->getMessage() . $exception->getTraceAsString(), 'error');
+        \App\Support\Logger::writeWithContext((string) ("failed: " . $exception->getMessage() . $exception->getTraceAsString()), (string) 'error', (bool) false);
     }
 }

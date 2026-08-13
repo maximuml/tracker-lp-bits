@@ -5,10 +5,12 @@ namespace App\Exceptions;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\UnauthorizedException;
 use Illuminate\Validation\ValidationException;
+use Illuminate\View\ViewException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Throwable;
 use Laravel\Passport\Exceptions\AuthenticationException as PassportAuthenticationException;
@@ -46,12 +48,29 @@ class Handler extends ExceptionHandler
             return;
         }
         $request = request();
-        $this->reportable(function (InsufficientPermissionException $e) use ($request) {
+        $permissionDenied = function (InsufficientPermissionException $e) use ($request) {
             if ($request->expectsJson()) {
-                return response()->json(fail($e->getMessage(), $request->all()), 403);
-            } else {
-                return abort(403);
+                return response()->json(\App\Support\Api::failWithContext($e->getMessage(), $request->all()), 403);
             }
+            try {
+                \App\Support\LegacyResponse::permissionDenied();
+            } catch (HttpResponseException $hre) {
+                return $hre->getResponse();
+            }
+        };
+        $this->renderable(function (InsufficientPermissionException $e) use ($permissionDenied) {
+            return $permissionDenied($e);
+        });
+        $this->renderable(function (ViewException $e) use ($permissionDenied) {
+            $previous = $e->getPrevious();
+            while ($previous instanceof ViewException && $previous->getPrevious() !== null) {
+                $previous = $previous->getPrevious();
+            }
+            if ($previous instanceof InsufficientPermissionException) {
+                return $permissionDenied($previous);
+            }
+
+            return null;
         });
         $this->renderable(function (PassportAuthenticationException $e) use ($request) {
             return response()->redirectTo(sprintf("%s/login.php?returnto=%s", $request->getSchemeAndHttpHost(), urlencode($request->fullUrl())));
@@ -66,24 +85,24 @@ class Handler extends ExceptionHandler
         }
 
         $this->renderable(function (AuthenticationException $e) {
-            return response()->json(fail($e->getMessage(), ['guards' => $e->guards()]), 401);
+            return response()->json(\App\Support\Api::failWithContext($e->getMessage(), ['guards' => $e->guards()]), 401);
         });
 
         $this->renderable(function (UnauthorizedException $e) {
-            return response()->json(fail($e->getMessage(), request()->all()), 403);
+            return response()->json(\App\Support\Api::failWithContext($e->getMessage(), request()->all()), 403);
         });
 
         $this->renderable(function (ValidationException $exception) {
             $errors = $exception->errors();
             $msg = Arr::first(Arr::first($errors));
-            return response()->json(fail($msg, $errors));
+            return response()->json(\App\Support\Api::failWithContext($msg, $errors));
         });
 
         $this->renderable(function (NotFoundHttpException $e) {
             if ($e->getPrevious() && $e->getPrevious() instanceof ModelNotFoundException) {
                 $exception = $e->getPrevious();
-                do_log(sprintf("NotFoundHttpException: %s, trace: %s", $exception->getMessage(), $exception->getTraceAsString()), 'error');
-                return response()->json(fail($exception->getMessage(), request()->all()));
+                \App\Support\Logger::writeWithContext((string) sprintf("NotFoundHttpException: %s, trace: %s", $exception->getMessage(), $exception->getTraceAsString()), (string) 'error', (bool) false);
+                return response()->json(\App\Support\Api::failWithContext($exception->getMessage(), request()->all()));
             }
         });
     }
@@ -106,10 +125,10 @@ class Handler extends ExceptionHandler
         }
 //        dd($e);
         if ($e instanceof \Error || $e instanceof \ErrorException) {
-            do_log(sprintf(get_class($e) . ": %s, trace: %s", $msg, $e->getTraceAsString()), "error");
+            \App\Support\Logger::writeWithContext((string) sprintf(get_class($e) . ": %s, trace: %s", $msg, $e->getTraceAsString()), (string) "error", (bool) false);
         }
         return new JsonResponse(
-            fail($msg, $data),
+            \App\Support\Api::failWithContext($msg, $data),
             $httpStatusCode,
             $this->isHttpException($e) ? $e->getHeaders() : [],
             JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES

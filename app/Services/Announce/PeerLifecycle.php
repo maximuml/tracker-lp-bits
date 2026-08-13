@@ -117,7 +117,7 @@ final class PeerLifecycle
     private function processNewPeer(): void
     {
         if ($this->event === 'stopped') {
-            do_log("[INSERT PEER] event = 'stopped', ignore.");
+            \App\Support\Logger::writeWithContext((string) "[INSERT PEER] event = 'stopped', ignore.", (string) 'info', (bool) false);
             return;
         }
 
@@ -128,7 +128,7 @@ final class PeerLifecycle
             ->exists();
 
         if ($isPeerExist) {
-            do_log("[INSERT PEER] peer already exists for torrent: {$this->torrentId}, user: {$this->userId}.");
+            \App\Support\Logger::writeWithContext((string) "[INSERT PEER] peer already exists for torrent: {$this->torrentId}, user: {$this->userId}.", (string) 'info', (bool) false);
             return;
         }
 
@@ -181,7 +181,7 @@ final class PeerLifecycle
             $peerInsert['ipv6'] = $this->ipv6;
         }
 
-        do_log("[INSERT PEER] peer not exists for torrent: {$this->torrentId}, user: {$this->userId}, peer_id: " . bin2hex($this->peerId));
+        \App\Support\Logger::writeWithContext((string) ("[INSERT PEER] peer not exists for torrent: {$this->torrentId}, user: {$this->userId}, peer_id: " . bin2hex($this->peerId)), (string) 'info', (bool) false);
 
         try {
             NexusDB::table('peers')->insert($peerInsert);
@@ -216,7 +216,7 @@ final class PeerLifecycle
                 $this->snatchInfo = LegacyDb::snatchInfo($this->torrentId, $this->userId);
             }
         } catch (\Exception $exception) {
-            do_log('[INSERT PEER] error: ' . $exception->getMessage());
+            \App\Support\Logger::writeWithContext((string) ('[INSERT PEER] error: ' . $exception->getMessage()), (string) 'info', (bool) false);
         }
     }
 
@@ -270,7 +270,7 @@ final class PeerLifecycle
 
             if (!empty($this->snatchInfo)) {
                 NexusDB::table('snatched')->where('id', (int) $this->snatchInfo['id'])->update($snatchUpdate);
-                do_action('snatched_saved', $this->torrent, $this->snatchInfo);
+                \App\Support\Hooks::doAction('snatched_saved', $this->torrent, $this->snatchInfo);
             }
         }
     }

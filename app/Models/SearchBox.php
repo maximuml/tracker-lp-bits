@@ -125,7 +125,7 @@ class SearchBox extends NexusModel
             } else {
                 $name = $field;
             }
-            $result[$name] = nexus_trans("searchbox.extras.$field");
+            $result[$name] = \App\Support\Locale::trans("searchbox.extras.{$field}", [], null);
         }
         return $result;
     }
@@ -136,7 +136,7 @@ class SearchBox extends NexusModel
      */
     public static function formatTaxonomyExtra(array $data): array
     {
-        do_log("data: " . json_encode($data));
+        \App\Support\Logger::writeWithContext((string) ("data: " . json_encode($data)), (string) 'info', (bool) false);
         foreach (self::$taxonomies as $field => $table) {
             $data["show{$field}"] = 0;
             foreach ($data['extra'][self::EXTRA_TAXONOMY_LABELS] ?? [] as $item) {
@@ -159,7 +159,7 @@ class SearchBox extends NexusModel
      */
     public function getTaxonomyLabel($torrentField)
     {
-        $lang = get_langfolder_cookie();
+        $lang = \App\Support\Locale::folderFromCookie(\App\Support\SupportContext::getCookieValue('c_lang_folder', ''), (bool) false);
         foreach ($this->extra[self::EXTRA_TAXONOMY_LABELS] ?? [] as $item) {
             if ($item['torrent_field'] == $torrentField) {
                 if (!empty($item['display_text'][$lang])) {
@@ -167,7 +167,7 @@ class SearchBox extends NexusModel
                 }
             }
         }
-        return nexus_trans("searchbox.sub_category_{$torrentField}_label") ?: ucfirst($torrentField);
+        return \App\Support\Locale::trans("searchbox.sub_category_{$torrentField}_label", [], null) ?: ucfirst($torrentField);
     }
 
     /** @return  \Illuminate\Database\Eloquent\Casts\Attribute<mixed, mixed> */
@@ -193,7 +193,7 @@ class SearchBox extends NexusModel
     {
         $result = [];
         foreach (self::$sections as $key => $value) {
-            $value['text'] = nexus_trans("searchbox.sections.$key");
+            $value['text'] = \App\Support\Locale::trans("searchbox.sections.{$key}", [], null);
             $value['mode'] = \App\Support\Config\SiteConfig::current()->main->category($key);
             if ($field !== null && isset($value[$field])) {
                 $result[$key] = $value[$field];
@@ -282,7 +282,7 @@ class SearchBox extends NexusModel
             return $this->section_name[$defaultLang];
         }
         if ($this->isSectionBrowse()) {
-            return nexus_trans("searchbox.sections.browse");
+            return \App\Support\Locale::trans("searchbox.sections.browse", [], null);
         }
         return $this->name;
     }
@@ -292,7 +292,7 @@ class SearchBox extends NexusModel
     {
         $result = [];
         foreach (self::$searchModes as $key => $value) {
-            $result[$key] = nexus_trans("search.search_modes.{$value['text']}");
+            $result[$key] = \App\Support\Locale::trans("search.search_modes.{$value['text']}", [], null);
         }
         return $result;
     }

@@ -32,7 +32,7 @@ class TorrentLoadPiecesHash extends Command
         $rep = new TorrentRepository();
         $this->info("id: $id, going to load pieces hash...");
         $result = $rep->loadPiecesHashCache($id);
-        $this->info(sprintf("%s, result: %s, cost time: %s seconds.", nexus()->getRequestId(), json_encode($result), time() - $begin));
+        $this->info(sprintf("%s, result: %s, cost time: %s seconds.", \Nexus\Nexus::instance()->getRequestId(), json_encode($result), time() - $begin));
         return Command::SUCCESS;
     }
 }

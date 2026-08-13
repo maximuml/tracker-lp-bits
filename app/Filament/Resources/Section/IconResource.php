@@ -52,7 +52,7 @@ class IconResource extends Resource
         return $schema
             ->components([
                 Textarea::make('tip')
-                    ->default(nexus_trans('label.icon.desc'))
+                    ->default(\App\Support\Locale::trans('label.icon.desc', [], null))
                     ->disabled()
                     ->columnSpanFull()
                     ->rows(18)

@@ -22,7 +22,7 @@
                 'limit' => $size,
             ]));
         }
-        $rows = apply_filter('torrent_list', $rows, $page ?? 0, $sectiontype, $searchstr_raw ?? '');
+        $rows = \App\Support\Hooks::applyFilter('torrent_list', $rows, $page ?? 0, $sectiontype, $searchstr_raw ?? '');
     @endphp
 
     {!! $pagertop !!}

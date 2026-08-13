@@ -7,7 +7,7 @@ $__server_REQUEST_METHOD = \App\Support\SupportContext::getServerValue('REQUEST_
 \Nexus\Nexus::css('vendor/fullcalendar-5.10.2/main.min.css', 'header', true);
 \Nexus\Nexus::js('vendor/fullcalendar-5.10.2/main.min.js', 'footer', true);
 
-$lang = get_langfolder_cookie();
+$lang = \App\Support\Locale::folderFromCookie(\App\Support\SupportContext::getCookieValue('c_lang_folder', ''), (bool) false);
 $localesMap = [
     'en' => null,
 ];
@@ -27,7 +27,7 @@ $attendanceCaptchaEnabled = \App\Support\Config\SiteConfig::current()->captcha->
 
 if ($__server_REQUEST_METHOD === 'POST') {
     if ($attendanceCaptchaEnabled && $iv == 'yes') {
-        check_code(\App\Support\SupportContext::getPost('imagehash') ?? null, \App\Support\SupportContext::getPost('imagestring') ?? null, 'attendance.php');
+        \App\Support\Captcha::checkCode(\App\Support\SupportContext::getPost('imagehash') ?? null, \App\Support\SupportContext::getPost('imagestring') ?? null, 'attendance.php', false, true, \App\Support\LegacyAuthContext::fromSupportContext());
     }
     $attendance = $attendanceRepository->attend($CURUSER['id']);
     if (!$attendance->is_updated) {
@@ -73,7 +73,7 @@ if ($hasAttendedToday) {
     $points = $attendance->points;
 
     $headerLeft = sprintf($lang_attendance['attend_info'] . $lang_attendance['retroactive_description'], $count, $cdays, $points, $CURUSER['attendance_card']);
-    $headerRight = nexus_trans('attendance.ranking', ['ranking' => $myRanking, 'counts' => $todayCounts]);
+    $headerRight = \App\Support\Locale::trans('attendance.ranking', ['ranking' => $myRanking, 'counts' => $todayCounts], null);
 
     \App\Support\Html::beginFrame($lang_attendance['success']);
     printf('<p>%s<span style="float:right">%s</span></p>', $headerLeft, $headerRight);
@@ -169,7 +169,7 @@ EOP;
     echo '<form method="post" action="attendance.php" style="display: inline-block;">';
     echo '<table border="0" cellpadding="5">';
     if ($attendanceCaptchaEnabled && $iv == 'yes') {
-        show_image_code();
+        \App\Support\Captcha::showImageCode();
     }
     echo '<tr><td class="toolbox" colspan="2" align="center"><input type="submit" value="' . htmlspecialchars($buttonLabel, ENT_QUOTES, 'UTF-8') . '" class="btn" /></td></tr>';
     echo '</table>';

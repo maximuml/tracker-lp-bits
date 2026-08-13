@@ -43,10 +43,10 @@ class HitAndRunUpdateStatus extends Command
         $rep->cronjobUpdateStatus($uid, $torrentId, $ignoreTime);
         $log = sprintf(
             '[%s], %s, uid: %s, torrentId: %s, ignoreTime: %s',
-            nexus()->getRequestId(), __METHOD__, $uid, $torrentId, $ignoreTime
+            \Nexus\Nexus::instance()->getRequestId(), __METHOD__, $uid, $torrentId, $ignoreTime
         );
         $this->info($log);
-        do_log($log);
+        \App\Support\Logger::writeWithContext((string) $log, (string) 'info', (bool) false);
         return 0;
     }
 }

@@ -707,7 +707,7 @@ class BdInfoExtra
             }
             
             if (!empty($audioInfo)) {
-                $result[nexus_trans('torrent.technicalinfo_audio') . $audioIndex] = implode(' / ', $audioInfo);
+                $result[\App\Support\Locale::trans('torrent.technicalinfo_audio', [], null) . $audioIndex] = implode(' / ', $audioInfo);
                 $audioIndex++;
             }
         }
@@ -732,7 +732,7 @@ class BdInfoExtra
                     }
                 }
                 
-                $result[nexus_trans('torrent.technicalinfo_subtitles') . $subtitleIndex] = implode(' / ', $subtitleInfo);
+                $result[\App\Support\Locale::trans('torrent.technicalinfo_subtitles', [], null) . $subtitleIndex] = implode(' / ', $subtitleInfo);
                 $subtitleIndex++;
             }
         }
@@ -840,15 +840,15 @@ class BdInfoExtra
     public function getSummaryInfo(): array
     {
         $videos = [
-            nexus_trans('torrent.technicalinfo_duration') => $this->getDuration(),
-            nexus_trans('torrent.technicalinfo_resolution') => $this->getResolution(),
-            nexus_trans('torrent.technicalinfo_bit_rate') => $this->getTotalBitrate(),
+            \App\Support\Locale::trans('torrent.technicalinfo_duration', [], null) => $this->getDuration(),
+            \App\Support\Locale::trans('torrent.technicalinfo_resolution', [], null) => $this->getResolution(),
+            \App\Support\Locale::trans('torrent.technicalinfo_bit_rate', [], null) => $this->getTotalBitrate(),
             'HDR' => $this->getHDRFormat(),
-            nexus_trans('torrent.technicalinfo_bit_depth') => $this->getBitDepth(),
-            nexus_trans('torrent.technicalinfo_frame_rate') => $this->getFrameRate(),
-            nexus_trans('torrent.technicalinfo_profile') => $this->getProfile(),
-            nexus_trans('torrent.technicalinfo_format') => $this->getVideoFormat(),
-            nexus_trans('torrent.technicalinfo_extras') => $this->getExtras(),
+            \App\Support\Locale::trans('torrent.technicalinfo_bit_depth', [], null) => $this->getBitDepth(),
+            \App\Support\Locale::trans('torrent.technicalinfo_frame_rate', [], null) => $this->getFrameRate(),
+            \App\Support\Locale::trans('torrent.technicalinfo_profile', [], null) => $this->getProfile(),
+            \App\Support\Locale::trans('torrent.technicalinfo_format', [], null) => $this->getVideoFormat(),
+            \App\Support\Locale::trans('torrent.technicalinfo_extras', [], null) => $this->getExtras(),
         ];
         $videos = array_filter($videos) ?: null;
         $audios = $this->getAudios() ?: null;
@@ -880,7 +880,7 @@ class BdInfoExtra
         
         // 如果没有有效数据，隐藏显示原始BDINFO
         if (!$hasValidData) {
-            $rawBdInfo = sprintf('[spoiler=%s][raw]<pre>%s</pre>[/raw][/spoiler]', nexus_trans('torrent.show_hide_bd_info'), $this->bdInfo);
+            $rawBdInfo = sprintf('[spoiler=%s][raw]<pre>%s</pre>[/raw][/spoiler]', \App\Support\Locale::trans('torrent.show_hide_bd_info', [], null), $this->bdInfo);
             return sprintf('<div class="nexus-media-info-raw">%s</div>', \App\Support\Format::formatComment($rawBdInfo, false));
         }
 
@@ -935,7 +935,7 @@ class BdInfoExtra
         }
         
         // 添加原始BDINFO
-        $rawBdInfo = sprintf('[spoiler=%s][raw]<pre>%s</pre>[/raw][/spoiler]', nexus_trans('torrent.show_hide_bd_info'), $this->bdInfo);
+        $rawBdInfo = sprintf('[spoiler=%s][raw]<pre>%s</pre>[/raw][/spoiler]', \App\Support\Locale::trans('torrent.show_hide_bd_info', [], null), $this->bdInfo);
         if (function_exists('format_comment')) {
             $result .= sprintf('<div class="nexus-media-info-raw" style="margin-top: 15px;">%s</div>', \App\Support\Format::formatComment($rawBdInfo, false));
         } else {
@@ -955,8 +955,8 @@ class BdInfoExtra
         // 检查是否为音频或字幕数据
         $isAudioOrSubtitle = false;
         $audioOrSubtitleCount = 0;
-        $audioPrefix = nexus_trans('torrent.technicalinfo_audio');
-        $subtitlePrefix = nexus_trans('torrent.technicalinfo_subtitles');
+        $audioPrefix = \App\Support\Locale::trans('torrent.technicalinfo_audio', [], null);
+        $subtitlePrefix = \App\Support\Locale::trans('torrent.technicalinfo_subtitles', [], null);
         foreach ($parts as $key => $value) {
             if (strpos($key, $audioPrefix) === 0 || strpos($key, $subtitlePrefix) === 0) {
                 $isAudioOrSubtitle = true;
@@ -998,8 +998,8 @@ class BdInfoExtra
             $hiddenContent = rtrim($hiddenContent, '<br>');
             
             $spoilerTitle = $isAudioOrSubtitle && strpos(array_keys($parts)[0], $audioPrefix) === 0 
-                ? nexus_trans('torrent.collapse_show_more_audio') 
-                : nexus_trans('torrent.collapse_show_more_subtitles');
+                ? \App\Support\Locale::trans('torrent.collapse_show_more_audio', [], null) 
+                : \App\Support\Locale::trans('torrent.collapse_show_more_subtitles', [], null);
             
             $spoiler = sprintf('[spoiler=%s]%s[/spoiler]', $spoilerTitle, $hiddenContent);
             $table .= '<tr>';

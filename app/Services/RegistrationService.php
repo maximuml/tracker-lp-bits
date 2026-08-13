@@ -116,7 +116,7 @@ class RegistrationService
 
             if ((int) $invite->inviter !== $inviter) {
                 Invite::query()->where('id', $invite->id)->update(['valid' => Invite::VALID_NO]);
-                throw new AuthenticationException(nexus_trans('invite.invalid_inviter', [], $langFolder));
+                throw new AuthenticationException(\App\Support\Locale::trans('invite.invalid_inviter', [], $langFolder));
             }
         }
 
@@ -208,7 +208,7 @@ class RegistrationService
         $user = User::query()->findOrFail($id);
         $user->makeVisible(['secret']);
 
-        fire_event(ModelEventEnum::USER_CREATED, $user);
+        \App\Support\Events::fire(ModelEventEnum::USER_CREATED, $user, null);
 
         $this->sendWelcomeMessage($user, $langTakesignup);
         $this->maybeAddTemporaryInvite($id);
@@ -258,8 +258,8 @@ class RegistrationService
 
         $user->refresh();
 
-        fire_event(ModelEventEnum::USER_UPDATED, $user);
-        clear_user_cache($id);
+        \App\Support\Events::fire(ModelEventEnum::USER_UPDATED, $user, null);
+        \App\Support\Cache::clearUser($id, '');
         AuthCookie::setLoginCookie($id);
 
         return $user;
@@ -324,7 +324,7 @@ class RegistrationService
             throw new AuthenticationException($this->msg($langConfirmResend, 'std_database_error', 'Database error. Please contact an administrator about this.'));
         }
 
-        clear_user_cache($user->id);
+        \App\Support\Cache::clearUser($user->id, '');
 
         $this->sendConfirmationEmail($user->username, $email, $user->id, $editsecret, $ip, $langFolder, $langConfirmResend);
 
@@ -471,10 +471,10 @@ class RegistrationService
 
         $inviter = (int) $invite->inviter;
         $locale = Locale::userLocale($inviter);
-        $subject = nexus_trans('user.msg_invited_user_has_registered', [], $locale);
-        $msg = nexus_trans('user.msg_user_you_invited', [], $locale)
+        $subject = \App\Support\Locale::trans('user.msg_invited_user_has_registered', [], $locale);
+        $msg = \App\Support\Locale::trans('user.msg_user_you_invited', [], $locale)
             . $username
-            . nexus_trans('user.msg_has_registered', [], $locale);
+            . \App\Support\Locale::trans('user.msg_has_registered', [], $locale);
 
         Message::add([
             'sender' => 0,
@@ -484,7 +484,7 @@ class RegistrationService
             'msg' => $msg,
         ]);
 
-        clear_user_cache($inviter);
+        \App\Support\Cache::clearUser($inviter, '');
     }
 
     /**
@@ -494,7 +494,7 @@ class RegistrationService
     {
         $baseUrl = \App\Support\Config\SiteConfig::current()->basic->baseUrl();
         if (! str_contains($baseUrl, '://')) {
-            $baseUrl = Http::protocolPrefix(isHttps()) . $baseUrl;
+            $baseUrl = Http::protocolPrefix(\App\Support\Url::isSecure()) . $baseUrl;
         }
         $baseUrl = rtrim($baseUrl, '/');
         $type = $user->invited_by ? 'invite' : 'normal';
@@ -530,7 +530,7 @@ class RegistrationService
     ): void {
         $baseUrl = \App\Support\Config\SiteConfig::current()->basic->baseUrl();
         if (! str_contains($baseUrl, '://')) {
-            $baseUrl = Http::protocolPrefix(isHttps()) . $baseUrl;
+            $baseUrl = Http::protocolPrefix(\App\Support\Url::isSecure()) . $baseUrl;
         }
         $baseUrl = rtrim($baseUrl, '/');
         $psecret = md5(Strings::padHash($secret));

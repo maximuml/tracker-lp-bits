@@ -57,7 +57,7 @@ final class LegacyAuthContext
     {
         $script = '';
         if (\function_exists('nexus')) {
-            $script = \nexus()->getScript();
+            $script = \Nexus\Nexus::instance()->getScript();
         } else {
             $scriptFile = SupportContext::getServerValue('SCRIPT_FILENAME', '');
             $script = basename($scriptFile);
@@ -70,7 +70,7 @@ final class LegacyAuthContext
             user: SupportContext::getUser(),
             lang: SupportContext::getLangFunctions(),
             cache: SupportContext::getCache(),
-            ip: \function_exists('getip') ? \getip() : \App\Support\Network::clientIp(),
+            ip: \function_exists('getip') ? \App\Support\Network::clientIp((bool) true) : \App\Support\Network::clientIp(),
             requestUri: SupportContext::getServerValue('REQUEST_URI'),
             requestBody: SupportContext::allPost(),
             queryParams: SupportContext::allQuery(),

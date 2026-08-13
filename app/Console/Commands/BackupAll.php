@@ -42,10 +42,10 @@ class BackupAll extends Command
         $result = $rep->backupAll($method);
         $log = sprintf(
             '[%s], %s, result: %s',
-            nexus()->getRequestId(), __METHOD__, var_export($result, true)
+            \Nexus\Nexus::instance()->getRequestId(), __METHOD__, var_export($result, true)
         );
         $this->info($log);
-        do_log($log);
+        \App\Support\Logger::writeWithContext((string) $log, (string) 'info', (bool) false);
     
         return 0;
     }

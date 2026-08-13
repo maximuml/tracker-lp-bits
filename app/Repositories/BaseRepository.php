@@ -35,7 +35,7 @@ class BaseRepository
     {
         $perPage =  $request->get('per_page');
         if ($perPage && $perPage > 100) {
-            do_log("per_page: $perPage > 100", "warning");
+            \App\Support\Logger::writeWithContext((string) "per_page: {$perPage} > 100", (string) "warning", (bool) false);
             $perPage = 100;
         }
         return $perPage;
@@ -55,7 +55,7 @@ class BaseRepository
         }
         if($user->privacy == "strong" || ($torrent && $torrent->anonymous == 'yes' && $user->id == $torrent->owner)) {
             //用户强私密，或者种子作者匿名而当前项作者刚好为种子作者
-            $anonymousText = nexus_trans('label.anonymous');
+            $anonymousText = \App\Support\Locale::trans('label.anonymous', [], null);
             if(Permission::can(PermissionEnum::VIEW_ANONYMOUS, $authenticator) || $user->id == $authenticator->id) {
                 //但当前用户权限可以查看匿名者，或当前用户查看自己的数据，显示个匿名，后边加真实用户名
                 return sprintf('%s(%s)', $anonymousText, $username);
@@ -93,7 +93,7 @@ class BaseRepository
      */
     protected function executeCommand($command, $format = 'string'): string|array
     {
-        return executeCommand($command, $format);
+        return \App\Support\Environment::run($command, $format, (bool) false, (bool) true);
     }
 
 }

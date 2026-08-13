@@ -3,7 +3,7 @@ if (!function_exists('purge_neighbors_cache')) {
 function purge_neighbors_cache()
 {
 $CURUSER = \App\Support\SupportContext::getUser() ?? [];
-	$cachefile = "cache/" . get_langfolder_cookie() . "/neighbors/" . $CURUSER['id'] . ".html";
+	$cachefile = "cache/" . \App\Support\Locale::folderFromCookie(\App\Support\SupportContext::getCookieValue('c_lang_folder', ''), (bool) false) . "/neighbors/" . $CURUSER['id'] . ".html";
 	if (file_exists($cachefile))
 		unlink($cachefile);
 }
@@ -49,7 +49,7 @@ if ($action == 'add')
 
 	purge_neighbors_cache();
 
-	header("Location: " . get_protocol_prefix() . "$BASEURL/friends.php?id=$userid#$frag");
+	header("Location: " . \App\Support\Http::protocolPrefix(\App\Support\Url::isSecure()) . "$BASEURL/friends.php?id=$userid#$frag");
 	die;
 }
 
@@ -89,7 +89,7 @@ if ($action == 'delete')
 
 	purge_neighbors_cache();
 
-	header("Location: " . get_protocol_prefix() . "$BASEURL/friends.php?id=$userid#$frag");
+	header("Location: " . \App\Support\Http::protocolPrefix(\App\Support\Url::isSecure()) . "$BASEURL/friends.php?id=$userid#$frag");
 	die;
 }
 

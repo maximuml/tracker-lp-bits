@@ -101,7 +101,7 @@ class AgentAllowRepository extends BaseRepository
     public function checkClient($peerId, $agent, $debug = false)
     {
         //check from high version to low version, if high version allow, stop!
-        $cacheKey = nexus_env("CACHE_KEY_AGENT_ALLOW", "all_agent_allows") . ":php";
+        $cacheKey = \App\Support\Env::get("CACHE_KEY_AGENT_ALLOW", "all_agent_allows") . ":php";
         $allows = NexusDB::remember($cacheKey, 3600, function () {
             return AgentAllow::query()
                 ->orderBy('peer_id_start', 'desc')
@@ -125,13 +125,10 @@ class AgentAllowRepository extends BaseRepository
                 try {
                     $peerIdResult = $this->isAllowed($pattern, $start, $matchNum, $matchType, $peerId, $debug, $logPrefix);
                     if ($debug) {
-                        do_log(
-                            "$logPrefix, peerIdResult: $peerIdResult, with parameters: "
-                            . nexus_json_encode(compact('pattern', 'start', 'matchNum', 'matchType', 'peerId'))
-                        );
+                        \App\Support\Logger::writeWithContext((string) ("{$logPrefix}, peerIdResult: {$peerIdResult}, with parameters: " . \App\Support\Json::encode(compact('pattern', 'start', 'matchNum', 'matchType', 'peerId'))), (string) 'info', (bool) false);
                     }
                 } catch (\Exception $exception) {
-                    do_log("$logPrefix, check peer_id error: " . $exception->getMessage(), 'error');
+                    \App\Support\Logger::writeWithContext((string) ("{$logPrefix}, check peer_id error: " . $exception->getMessage()), (string) 'error', (bool) false);
                     throw new ClientNotAllowedException("regular expression err for peer_id: " . $start . ", please ask sysop to fix this");
                 }
                 if ($peerIdResult == 1) {
@@ -153,13 +150,10 @@ class AgentAllowRepository extends BaseRepository
                 try {
                     $agentResult = $this->isAllowed($pattern, $start, $matchNum, $matchType, $agent, $debug, $logPrefix);
                     if ($debug) {
-                        do_log(
-                            "$logPrefix, agentResult: $agentResult, with parameters: "
-                            . nexus_json_encode(compact('pattern', 'start', 'matchNum', 'matchType', 'agent'))
-                        );
+                        \App\Support\Logger::writeWithContext((string) ("{$logPrefix}, agentResult: {$agentResult}, with parameters: " . \App\Support\Json::encode(compact('pattern', 'start', 'matchNum', 'matchType', 'agent'))), (string) 'info', (bool) false);
                     }
                 } catch (\Exception $exception) {
-                    do_log("$logPrefix, check agent error: " . $exception->getMessage(), 'error');
+                    \App\Support\Logger::writeWithContext((string) ("{$logPrefix}, check agent error: " . $exception->getMessage()), (string) 'error', (bool) false);
                     throw new ClientNotAllowedException("regular expression err for agent: " . $start . ", please ask sysop to fix this");
                 }
                 if ($agentResult == 1) {
@@ -185,11 +179,11 @@ class AgentAllowRepository extends BaseRepository
         }
 
         if (!$agentAllowPassed) {
-            throw new ClientNotAllowedException("Banned Client, Please goto " . getSchemeAndHttpHost() . "/faq.php#id29 for a list of acceptable clients");
+            throw new ClientNotAllowedException("Banned Client, Please goto " . \App\Support\Url::schemeAndHost(false) . "/faq.php#id29 for a list of acceptable clients");
         }
 
         if ($debug) {
-            do_log("agentAllowPassed: " . $agentAllowPassed->toJson());
+            \App\Support\Logger::writeWithContext((string) ("agentAllowPassed: " . $agentAllowPassed->toJson()), (string) 'info', (bool) false);
         }
 
         // check if exclude
@@ -197,7 +191,7 @@ class AgentAllowRepository extends BaseRepository
             $agentDeny = $this->checkIsDenied($peerId, $agent, $agentAllowPassed->id);
             if ($agentDeny) {
                 if ($debug) {
-                    do_log("agentDeny: " . $agentDeny->toJson());
+                    \App\Support\Logger::writeWithContext((string) ("agentDeny: " . $agentDeny->toJson()), (string) 'info', (bool) false);
                 }
                 throw new ClientNotAllowedException(sprintf(
                     "[%s-%s]Client: %s is banned due to: %s",
@@ -205,10 +199,10 @@ class AgentAllowRepository extends BaseRepository
                 ));
             }
         }
-        if (isHttps() && $agentAllowPassed->allowhttps != 'yes') {
+        if (\App\Support\Url::isSecure() && $agentAllowPassed->allowhttps != 'yes') {
             throw new ClientNotAllowedException(sprintf(
                 "[%s]This client does not support https well, Please goto %s/faq.php#id29 for a list of proper clients",
-                $agentAllowPassed->id, getSchemeAndHttpHost()
+                $agentAllowPassed->id, \App\Support\Url::schemeAndHost(false)
             ));
         }
 
@@ -224,7 +218,7 @@ class AgentAllowRepository extends BaseRepository
      */
     private function checkIsDenied($peerId, $agent, $familyId)
     {
-        $cacheKey = nexus_env("CACHE_KEY_AGENT_DENY", "all_agent_denies") . ":php";
+        $cacheKey = \App\Support\Env::get("CACHE_KEY_AGENT_DENY", "all_agent_denies") . ":php";
         /** @var \Illuminate\Support\Collection<int, mixed> $allDenies */
         $allDenies = NexusDB::remember($cacheKey, 3600, function () {
             return AgentDeny::query()->get()->groupBy('family_id');
@@ -256,11 +250,11 @@ class AgentAllowRepository extends BaseRepository
     {
         $matchBench = $this->getPatternMatches($pattern, $start, $matchNum);
         if ($debug) {
-            do_log("$logPrefix, matchBench: " . nexus_json_encode($matchBench));
+            \App\Support\Logger::writeWithContext((string) ("{$logPrefix}, matchBench: " . \App\Support\Json::encode($matchBench)), (string) 'info', (bool) false);
         }
         if (!preg_match($pattern, $value, $matchTarget)) {
             if ($debug) {
-                do_log(sprintf("$logPrefix, pattern: (%s) not match: (%s)", $pattern, $value));
+                \App\Support\Logger::writeWithContext((string) sprintf("{$logPrefix}, pattern: (%s) not match: (%s)", $pattern, $value), (string) 'info', (bool) false);
             }
             return 0;
         }
@@ -269,7 +263,7 @@ class AgentAllowRepository extends BaseRepository
         }
         $matchTarget = array_slice($matchTarget, 1);
         if ($debug) {
-            do_log("$logPrefix, matchTarget: " . nexus_json_encode($matchTarget));
+            \App\Support\Logger::writeWithContext((string) ("{$logPrefix}, matchTarget: " . \App\Support\Json::encode($matchTarget)), (string) 'info', (bool) false);
         }
         for ($i = 0; $i < $matchNum; $i++) {
             if (!isset($matchBench[$i]) || !isset($matchTarget[$i])) {
@@ -306,7 +300,7 @@ class AgentAllowRepository extends BaseRepository
     public function checkClientSimple($peerId, $agent, $debug = false)
     {
         //check from high version to low version, if high version allow, stop!
-        $cacheKey = nexus_env("CACHE_KEY_AGENT_ALLOW", "all_agent_allows") . ":php";
+        $cacheKey = \App\Support\Env::get("CACHE_KEY_AGENT_ALLOW", "all_agent_allows") . ":php";
         $allows = NexusDB::remember($cacheKey, 3600, function () {
             return AgentAllow::query()
                 ->orderBy('peer_id_start', 'desc')
@@ -330,20 +324,20 @@ class AgentAllowRepository extends BaseRepository
             //both OK, passed, client is allowed
             if ($isPeerIdAllowed && $isAgentAllowed) {
                 $agentAllowPassed = $agentAllow;
-                do_log("$agentAllowLogPrefix, PASSED", 'debug');
+                \App\Support\Logger::writeWithContext((string) "{$agentAllowLogPrefix}, PASSED", (string) 'debug', (bool) false);
                 break;
             }
             if ($debug) {
-                do_log("$agentAllowLogPrefix, NOT PASSED", 'debug');
+                \App\Support\Logger::writeWithContext((string) "{$agentAllowLogPrefix}, NOT PASSED", (string) 'debug', (bool) false);
             }
         }
 
         if (!$agentAllowPassed) {
-            throw new ClientNotAllowedException("Banned Client, Please goto " . getSchemeAndHttpHost() . "/faq.php#id29 for a list of acceptable clients");
+            throw new ClientNotAllowedException("Banned Client, Please goto " . \App\Support\Url::schemeAndHost(false) . "/faq.php#id29 for a list of acceptable clients");
         }
 
         if ($debug) {
-            do_log("agentAllowPassed: " . $agentAllowPassed->toJson(), 'debug');
+            \App\Support\Logger::writeWithContext((string) ("agentAllowPassed: " . $agentAllowPassed->toJson()), (string) 'debug', (bool) false);
         }
 
         // check if exclude
@@ -351,7 +345,7 @@ class AgentAllowRepository extends BaseRepository
             $agentDeny = $this->checkIsDenied($peerId, $agent, $agentAllowPassed->id);
             if ($agentDeny) {
                 if ($debug) {
-                    do_log("agentDeny: " . $agentDeny->toJson());
+                    \App\Support\Logger::writeWithContext((string) ("agentDeny: " . $agentDeny->toJson()), (string) 'info', (bool) false);
                 }
                 throw new ClientNotAllowedException(sprintf(
                     "[%s-%s]Client: %s is banned due to: %s",
@@ -359,10 +353,10 @@ class AgentAllowRepository extends BaseRepository
                 ));
             }
         }
-        if (isHttps() && $agentAllowPassed->allowhttps != 'yes') {
+        if (\App\Support\Url::isSecure() && $agentAllowPassed->allowhttps != 'yes') {
             throw new ClientNotAllowedException(sprintf(
                 "[%s]This client does not support https well, Please goto %s/faq.php#id29 for a list of proper clients",
-                $agentAllowPassed->id, getSchemeAndHttpHost()
+                $agentAllowPassed->id, \App\Support\Url::schemeAndHost(false)
             ));
         }
 

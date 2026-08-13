@@ -64,7 +64,7 @@ class CategoryResource extends Resource
                             return function ($attribute, $value, $fail) {
                                 //@todo how to get the editing record ?
                                 $exists = Torrent::query()->where('category', $value)->exists();
-                                do_log("check $attribute: $value torrent if exists: $exists");
+                                \App\Support\Logger::writeWithContext((string) "check {$attribute}: {$value} torrent if exists: {$exists}", (string) 'info', (bool) false);
 //                                if ($exists) {
 //                                    $fail("There are torrents belonging to this category that cannot be changed!");
 //                                }

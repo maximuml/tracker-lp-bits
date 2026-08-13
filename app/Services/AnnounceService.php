@@ -119,7 +119,7 @@ final class AnnounceService
         $repDict = $initialResult->response;
 
         if ($this->isReAnnounce) {
-            do_log('[ANNOUNCE] re-announce, return early.');
+            \App\Support\Logger::writeWithContext((string) '[ANNOUNCE] re-announce, return early.', (string) 'info', (bool) false);
             return $repDict;
         }
 
@@ -245,7 +245,7 @@ final class AnnounceService
         $currentUrl = Url::schemeAndHost();
 
         if (!str_contains($trackerUrl, $currentUrl)) {
-            do_log("announce check tracker url, trackerUrl: {$trackerUrl} does not contains: {$currentUrl}");
+            \App\Support\Logger::writeWithContext((string) "announce check tracker url, trackerUrl: {$trackerUrl} does not contains: {$currentUrl}", (string) 'info', (bool) false);
             $this->responseBuilder->warn("you should announce to: {$trackerUrl}");
         }
     }
@@ -298,7 +298,7 @@ final class AnnounceService
         });
 
         if (!$this->torrent) {
-            do_log('[TORRENT NOT EXISTS] info_hash: ' . $infoHashHex);
+            \App\Support\Logger::writeWithContext((string) ('[TORRENT NOT EXISTS] info_hash: ' . $infoHashHex), (string) 'info', (bool) false);
             NexusDB::redis()->set('torrent_not_exists:' . $this->infoHash, TIMENOW, ['ex' => 24 * 3600]);
             throw TrackerException::failure('torrent not registered with this tracker');
         }
@@ -321,7 +321,7 @@ final class AnnounceService
 
         if ($this->left > (int) $this->torrent['size']) {
             (new UserRepository())->updateDownloadPrivileges(null, $this->userId, 'no', 'fake_announce');
-            do_log(sprintf('fake announce, user: %s, torrent: %s, announce left: %s > size: %s', $this->userId, $this->torrentId, $this->left, $this->torrent['size']), 'warn');
+            \App\Support\Logger::writeWithContext((string) sprintf('fake announce, user: %s, torrent: %s, announce left: %s > size: %s', $this->userId, $this->torrentId, $this->left, $this->torrent['size']), (string) 'warn', (bool) false);
             $this->responseBuilder->warn('fake announce', 300);
         }
     }
@@ -368,10 +368,10 @@ final class AnnounceService
 
         $torrentRep = new TorrentRepository();
         $buyStatus = $torrentRep->getBuyStatus($this->userId, $this->torrentId);
-        do_log("user: {$this->userId} buy torrent: {$this->torrentId}, status: {$buyStatus}");
+        \App\Support\Logger::writeWithContext((string) "user: {$this->userId} buy torrent: {$this->torrentId}, status: {$buyStatus}", (string) 'info', (bool) false);
 
         if ($buyStatus > 0) {
-            do_log(sprintf('user: %s buy torrent： %s fail count: %s', $this->userId, $this->torrentId, $buyStatus), 'error');
+            \App\Support\Logger::writeWithContext((string) sprintf('user: %s buy torrent： %s fail count: %s', $this->userId, $this->torrentId, $buyStatus), (string) 'error', (bool) false);
             if ($buyStatus > 3) {
                 MsgAlert::getInstance()->add(
                     'announce_paid_torrent_too_many_times',
@@ -413,7 +413,7 @@ final class AnnounceService
             $this->torrentUpdate['visible'] = 'yes';
             $this->torrentUpdate['last_action'] = $this->dt;
             NexusDB::table('torrents')->where('id', $this->torrentId)->update($this->torrentUpdate);
-            do_log('[ANNOUNCE_UPDATE_TORRENT], ' . nexus_json_encode($this->torrentUpdate));
+            \App\Support\Logger::writeWithContext((string) ('[ANNOUNCE_UPDATE_TORRENT], ' . \App\Support\Json::encode($this->torrentUpdate)), (string) 'info', (bool) false);
         }
 
         return $this->responseBuilder->peerList($this->torrentId, $this->userId, $this->seeder);
@@ -440,7 +440,7 @@ final class AnnounceService
 
         if (!empty($this->userUpdate) && $this->userId) {
             User::query()->where('id', $this->userId)->update($this->userUpdate);
-            do_log('[ANNOUNCE_UPDATE_USER], ' . nexus_json_encode($this->userUpdate));
+            \App\Support\Logger::writeWithContext((string) ('[ANNOUNCE_UPDATE_USER], ' . \App\Support\Json::encode($this->userUpdate)), (string) 'info', (bool) false);
         }
     }
 
@@ -461,6 +461,6 @@ final class AnnounceService
             }
         }
 
-        do_action('announced', $this->torrent, $this->user, $this->request->all());
+        \App\Support\Hooks::doAction('announced', $this->torrent, $this->user, $this->request->all());
     }
 }

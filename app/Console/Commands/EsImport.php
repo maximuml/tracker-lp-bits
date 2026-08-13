@@ -31,9 +31,9 @@ class EsImport extends Command
         $torrentId = $this->option('torrent_id');
         $this->info("torrent_id: $torrentId");
         $result = $rep->import($torrentId);
-        $log = sprintf("[%s], %s, result: \n%s", nexus()->getRequestId(), __METHOD__, var_export($result, true));
+        $log = sprintf("[%s], %s, result: \n%s", \Nexus\Nexus::instance()->getRequestId(), __METHOD__, var_export($result, true));
         $this->info($log);
-        do_log($log);
+        \App\Support\Logger::writeWithContext((string) $log, (string) 'info', (bool) false);
         return 0;
     }
 }

@@ -138,8 +138,8 @@ class UserMedalResource extends Resource
             ->recordActions([
                 DeleteAction::make()->using(function (NexusModel $record) {
                     $record->delete();
-                    clear_user_cache($record->uid);
-                    send_admin_success_notification();
+                    \App\Support\Cache::clearUser($record->uid, '');
+                    \App\Support\Admin::successNotification("");
                 })
             ])
             ->toolbarActions([
@@ -175,9 +175,9 @@ class UserMedalResource extends Resource
                 try {
                     $rep = new MedalRepository();
                     $rep->increaseExpireAt($collection, $filed, $data['increase_duration']);
-                    send_admin_success_notification();
+                    \App\Support\Admin::successNotification("");
                 } catch (Exception $e) {
-                    send_admin_fail_notification($e->getMessage());
+                    \App\Support\Admin::failNotification($e->getMessage());
                 }
             })
             ->deselectRecordsAfterCompletion()
@@ -200,9 +200,9 @@ class UserMedalResource extends Resource
                     $expireAt = Carbon::parse($data['update_expire_at']);
                     $rep = new MedalRepository();
                     $rep->updateExpireAt($collection, $filed, $expireAt);
-                    send_admin_success_notification();
+                    \App\Support\Admin::successNotification("");
                 } catch (Exception $e) {
-                    send_admin_fail_notification($e->getMessage());
+                    \App\Support\Admin::failNotification($e->getMessage());
                 }
             })
             ->deselectRecordsAfterCompletion()
@@ -219,9 +219,9 @@ class UserMedalResource extends Resource
                 try {
                     $rep = new MedalRepository();
                     $rep->cancelExpireAt($collection, $filed);
-                    send_admin_success_notification();
+                    \App\Support\Admin::successNotification("");
                 } catch (Exception $e) {
-                    send_admin_fail_notification($e->getMessage());
+                    \App\Support\Admin::failNotification($e->getMessage());
                 }
             })
             ->deselectRecordsAfterCompletion()

@@ -120,9 +120,9 @@ class MeiliSearchRepository extends BaseRepository
     public function getClient(): Client
     {
         if (is_null(self::$client)) {
-            $config = nexus_config('nexus.meilisearch');
+            $config = \App\Support\Config::get('nexus.meilisearch', null);
             $url = sprintf('%s://%s:%s', $config['scheme'], $config['host'], $config['port']);
-            do_log("get client with url: $url, master key: " . $config['master_key']);
+            \App\Support\Logger::writeWithContext((string) ("get client with url: {$url}, master key: " . $config['master_key']), (string) 'info', (bool) false);
             self::$client = new Client($url, $config['master_key']);
         }
         return self::$client;
@@ -148,7 +148,7 @@ class MeiliSearchRepository extends BaseRepository
             $doSwap = false;
             $indexName = self::INDEX_NAME;
         }
-        do_log("indexName: $indexName will be created, doSwap: $doSwap");
+        \App\Support\Logger::writeWithContext((string) "indexName: {$indexName} will be created, doSwap: {$doSwap}", (string) 'info', (bool) false);
         $index = $this->createIndex($indexName);
         try {
             $total = $this->doImportFromDatabase(null, $index);
@@ -158,17 +158,17 @@ class MeiliSearchRepository extends BaseRepository
                 while (true) {
                     if ($times == 3600) {
                         $msg = "total: $total, swap too long, times: $times, return false";
-                        do_log($msg);
+                        \App\Support\Logger::writeWithContext((string) $msg, (string) 'info', (bool) false);
                         throw new NexusException($msg);
                     }
                     sleep(1);
                     $task = $client->getTask($swapResult['taskUid']);
                     if ($task['status'] == 'succeeded') {
-                        do_log("total: $total, swap success at times: $times");
+                        \App\Support\Logger::writeWithContext((string) "total: {$total}, swap success at times: {$times}", (string) 'info', (bool) false);
                         $client->deleteIndex($indexName);
                         return $total;
                     }
-                    do_log("waiting swap success, times: $times");
+                    \App\Support\Logger::writeWithContext((string) "waiting swap success, times: {$times}", (string) 'info', (bool) false);
                     $times++;
                 }
             }
@@ -228,7 +228,7 @@ class MeiliSearchRepository extends BaseRepository
     public function doImportFromDatabase($id = null, $index = null)
     {
         if (!$this->isEnabled() && $index === null) {
-            do_log("Not enabled!");
+            \App\Support\Logger::writeWithContext((string) "Not enabled!", (string) 'info', (bool) false);
             return false;
         }
         $page = 1;
@@ -250,16 +250,16 @@ class MeiliSearchRepository extends BaseRepository
             $count = $torrents->count();
             $total += $count;
             if ($count == 0) {
-                do_log("page: $page no data...");
+                \App\Support\Logger::writeWithContext((string) "page: {$page} no data...", (string) 'info', (bool) false);
                 break;
             }
-            do_log(sprintf('importing page: %s with id: %s, %s records...', $page, $id, $count));
+            \App\Support\Logger::writeWithContext((string) sprintf('importing page: %s with id: %s, %s records...', $page, $id, $count), (string) 'info', (bool) false);
             $data = $torrents->map->toSearchableArray()->all();
             $result = $index->updateDocuments($data);
             if (is_array($result) && isset($result['taskUid'])) {
                 $tasks[] = $result['taskUid'];
             }
-            do_log(sprintf('import page: %s with id: %s, %s records success.', $page, $id, $count));
+            \App\Support\Logger::writeWithContext((string) sprintf('import page: %s with id: %s, %s records success.', $page, $id, $count), (string) 'info', (bool) false);
             $page++;
         }
         if ($rebuild && !empty($tasks)) {
@@ -277,7 +277,7 @@ class MeiliSearchRepository extends BaseRepository
     {
         $results = ['total' => 0, 'list' => []];
         if (!$this->isEnabled()) {
-            do_log("Not enabled!");
+            \App\Support\Logger::writeWithContext((string) "Not enabled!", (string) 'info', (bool) false);
             return $results;
         }
         $filters = [];
@@ -313,7 +313,7 @@ class MeiliSearchRepository extends BaseRepository
         $paginator = Torrent::search($query)->options($options)->paginate($perPage, 'page', $page + 1);
         $torrents = new \Illuminate\Database\Eloquent\Collection($paginator->items());
         $total = $paginator->total();
-        do_log("search params: " . nexus_json_encode($options) . ", page: " . ($page + 1) . ", perPage: $perPage, total: $total");
+        \App\Support\Logger::writeWithContext((string) ("search params: " . \App\Support\Json::encode($options) . ", page: " . ($page + 1) . ", perPage: {$perPage}, total: {$total}"), (string) 'info', (bool) false);
         if ($total > 0) {
             $torrents->load('basic_category');
             $list = [];
@@ -392,12 +392,12 @@ class MeiliSearchRepository extends BaseRepository
         foreach (self::$queryFieldToTorrentFieldMaps as $queryField => $torrentField) {
             if (isset($params[$queryField]) && $params[$queryField] !== '') {
                 $taxonomies[$torrentField][] = $params[$queryField];
-                do_log("$torrentField from params through $queryField: {$params[$queryField]}");
+                \App\Support\Logger::writeWithContext((string) "{$torrentField} from params through {$queryField}: {$params[$queryField]}", (string) 'info', (bool) false);
             } elseif (preg_match_all("/{$queryField}(\d+)=/", $queryString, $matches)) {
                 if (count($matches) == 2 && !empty($matches[1])) {
                     foreach ($matches[1] as $match) {
                         $taxonomies[$torrentField][] = $match;
-                        do_log("$torrentField from params through $queryField: $match");
+                        \App\Support\Logger::writeWithContext((string) "{$torrentField} from params through {$queryField}: {$match}", (string) 'info', (bool) false);
                     }
                 }
             } else {
@@ -407,7 +407,7 @@ class MeiliSearchRepository extends BaseRepository
                     if (count($matches) == 2 && !empty($matches[1])) {
                         $match = $matches[1];
                         $taxonomies[$torrentField][] = $match;
-                        do_log("$torrentField from user setting through $queryField: $match");
+                        \App\Support\Logger::writeWithContext((string) "{$torrentField} from user setting through {$queryField}: {$match}", (string) 'info', (bool) false);
                     }
                 }
             }
@@ -431,11 +431,11 @@ class MeiliSearchRepository extends BaseRepository
         if ($includeDead == 1) {
             //active torrent
             $filters[] = "visible = 1";
-            do_log("visible = yes through incldead: $includeDead");
+            \App\Support\Logger::writeWithContext((string) "visible = yes through incldead: {$includeDead}", (string) 'info', (bool) false);
         } elseif ($includeDead == 2) {
             //dead torrent
             $filters[] = "visible = 0";
-            do_log("visible = no through incldead: $includeDead");
+            \App\Support\Logger::writeWithContext((string) "visible = no through incldead: {$includeDead}", (string) 'info', (bool) false);
         }
 
         $includeBookmarked = 0;
@@ -449,42 +449,42 @@ class MeiliSearchRepository extends BaseRepository
             if ($includeBookmarked == 1) {
                 //only bookmark
                 $filters[] = "id IN [$userBookmarkedTorrentIdStr]";
-                do_log("bookmark through inclbookmarked: $includeBookmarked");
+                \App\Support\Logger::writeWithContext((string) "bookmark through inclbookmarked: {$includeBookmarked}", (string) 'info', (bool) false);
             } elseif ($includeBookmarked == 2) {
                 //only not bookmark
                 $filters[] = "id NOT IN [$userBookmarkedTorrentIdStr]";
-                do_log("bookmark through inclbookmarked: $includeBookmarked");
+                \App\Support\Logger::writeWithContext((string) "bookmark through inclbookmarked: {$includeBookmarked}", (string) 'info', (bool) false);
             }
         }
 
         $spState = 0;
         if (isset($params['spstate'])) {
             $spState = (int)$params['spstate'];
-            do_log("spstate from params");
+            \App\Support\Logger::writeWithContext((string) "spstate from params", (string) 'info', (bool) false);
         } elseif (preg_match("/\[spstate=(\d+)\]/", $userSetting, $matches)) {
             $spState = $matches[1];
-            do_log("spstate from user setting");
+            \App\Support\Logger::writeWithContext((string) "spstate from user setting", (string) 'info', (bool) false);
         }
         if ($spState > 0) {
             $filters[] = "sp_state = $spState";
-            do_log("sp_state = $spState through spstate: $spState");
+            \App\Support\Logger::writeWithContext((string) "sp_state = {$spState} through spstate: {$spState}", (string) 'info', (bool) false);
         }
 
         if (isset($params['approval_status']) && is_numeric($params['approval_status'])) {
             $filters[] = "approval_status = " . $params['approval_status'];
-            do_log("approval_status = {$params['approval_status']} through approval_status: {$params['approval_status']}");
+            \App\Support\Logger::writeWithContext((string) "approval_status = {$params['approval_status']} through approval_status: {$params['approval_status']}", (string) 'info', (bool) false);
         }
 
         //size
         if (!empty($params['size_begin'])) {
             $atomicValue = intval($params['size_begin']) * 1024 * 1024 * 1024;
             $filters[] = "size >= $atomicValue";
-            do_log("size >= $atomicValue through size_begin: $atomicValue");
+            \App\Support\Logger::writeWithContext((string) "size >= {$atomicValue} through size_begin: {$atomicValue}", (string) 'info', (bool) false);
         }
         if (!empty($params['size_end'])) {
             $atomicValue = intval($params['size_end']) * 1024 * 1024 * 1024;
             $filters[] = "size <= $atomicValue";
-            do_log("size <= $atomicValue through size_end: $atomicValue");
+            \App\Support\Logger::writeWithContext((string) "size <= {$atomicValue} through size_end: {$atomicValue}", (string) 'info', (bool) false);
         }
 
 
@@ -492,24 +492,24 @@ class MeiliSearchRepository extends BaseRepository
         if (!empty($params['seeders_begin'])) {
             $atomicValue = intval($params['seeders_begin']);
             $filters[] = "seeders >= $atomicValue";
-            do_log("seeders >= $atomicValue through seeders_begin: $atomicValue");
+            \App\Support\Logger::writeWithContext((string) "seeders >= {$atomicValue} through seeders_begin: {$atomicValue}", (string) 'info', (bool) false);
         }
         if (!empty($params['seeders_end'])) {
             $atomicValue = intval($params['seeders_end']);
             $filters[] = "seeders <= $atomicValue";
-            do_log("seeders <= $atomicValue through seeders_end: $atomicValue");
+            \App\Support\Logger::writeWithContext((string) "seeders <= {$atomicValue} through seeders_end: {$atomicValue}", (string) 'info', (bool) false);
         }
 
         //leechers
         if (!empty($params['leechers_begin'])) {
             $atomicValue = intval($params['leechers_begin']);
             $filters[] = "leechers >= $atomicValue";
-            do_log("leechers >= $atomicValue through leechers_begin: $atomicValue");
+            \App\Support\Logger::writeWithContext((string) "leechers >= {$atomicValue} through leechers_begin: {$atomicValue}", (string) 'info', (bool) false);
         }
         if (!empty($params['leechers_end'])) {
             $atomicValue = intval($params['leechers_end']);
             $filters[] = "leechers <= $atomicValue";
-            do_log("leechers <= $atomicValue through leechers_end: $atomicValue");
+            \App\Support\Logger::writeWithContext((string) "leechers <= {$atomicValue} through leechers_end: {$atomicValue}", (string) 'info', (bool) false);
         }
 
 
@@ -517,24 +517,24 @@ class MeiliSearchRepository extends BaseRepository
         if (!empty($params['times_completed_begin'])) {
             $atomicValue = intval($params['times_completed_begin']);
             $filters[] = "times_completed >= $atomicValue";
-            do_log("times_completed >= $atomicValue through times_completed_begin: $atomicValue");
+            \App\Support\Logger::writeWithContext((string) "times_completed >= {$atomicValue} through times_completed_begin: {$atomicValue}", (string) 'info', (bool) false);
         }
         if (!empty($params['times_completed_end'])) {
             $atomicValue = intval($params['times_completed_end']);
             $filters[] = "times_completed <= $atomicValue";
-            do_log("times_completed <= $atomicValue through times_completed_end: $atomicValue");
+            \App\Support\Logger::writeWithContext((string) "times_completed <= {$atomicValue} through times_completed_end: {$atomicValue}", (string) 'info', (bool) false);
         }
 
         //added
         if (!empty($params['added_begin'])) {
             $atomicValue = $params['added_begin'];
             $filters[] = "added >= " . strtotime($atomicValue);
-            do_log("added >= $atomicValue through added_begin: $atomicValue");
+            \App\Support\Logger::writeWithContext((string) "added >= {$atomicValue} through added_begin: {$atomicValue}", (string) 'info', (bool) false);
         }
         if (!empty($params['added_end'])) {
             $atomicValue = Carbon::parse($params['added_end'])->endOfDay()->toDateTimeString();
             $filters[] = "added <= " . strtotime($atomicValue);
-            do_log("added <= $atomicValue through added_end: $atomicValue");
+            \App\Support\Logger::writeWithContext((string) "added <= {$atomicValue} through added_end: {$atomicValue}", (string) 'info', (bool) false);
         }
 
         //permission see banned
@@ -546,7 +546,7 @@ class MeiliSearchRepository extends BaseRepository
             }
         }
 
-        do_log("[GET_FILTERS]: " . json_encode($filters));
+        \App\Support\Logger::writeWithContext((string) ("[GET_FILTERS]: " . json_encode($filters)), (string) 'info', (bool) false);
         return $filters;
     }
 
@@ -558,7 +558,7 @@ class MeiliSearchRepository extends BaseRepository
         if (isset($params['search_mode']) && is_scalar($params['search_mode']) && isset(SearchBox::$searchModes[(string) $params['search_mode']])) {
             $searchMode = (string) $params['search_mode'];
         }
-        do_log("search mode: " . SearchBox::$searchModes[$searchMode]['text']);
+        \App\Support\Logger::writeWithContext((string) ("search mode: " . SearchBox::$searchModes[$searchMode]['text']), (string) 'info', (bool) false);
         if ($searchMode == SearchBox::SEARCH_MODE_AND) {
             return $q;
         }
@@ -664,7 +664,7 @@ class MeiliSearchRepository extends BaseRepository
     /** @return  array<int|string, mixed> */
     private static function getAttributesToRetrieve(): array
     {
-        if (nexus_env("APP_ENV") == 'production') {
+        if (\App\Support\Env::get("APP_ENV", null) == 'production') {
             return ['id'];
         }
         return ['*'];

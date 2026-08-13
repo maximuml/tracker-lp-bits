@@ -32,6 +32,6 @@ class CheckQueueFailedJobs implements ShouldQueue
     public function handle()
     {
         CleanupRepository::checkQueueFailedJobs();
-        do_log("checkQueueFailedJobs run success.");
+        \App\Support\Logger::writeWithContext((string) "checkQueueFailedJobs run success.", (string) 'info', (bool) false);
     }
 }

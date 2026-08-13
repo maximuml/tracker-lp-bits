@@ -17,8 +17,7 @@
             "Database\\Seeders\\": "database/seeders/"
         },
         "files": [
-            "config/nexus_constants.php",
-            "app/Support/Legacy/functions.php"
+            "config/nexus_constants.php"
         ]
     },
     "require": {

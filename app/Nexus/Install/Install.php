@@ -157,7 +157,7 @@ class Install
     public function listExistsTable()
     {
         if (NexusDB::isMysql()) {
-            $schema = nexus_env('DB_DATABASE');
+            $schema = \App\Support\Env::get('DB_DATABASE', null);
         } else if (NexusDB::isPgsql()) {
             $schema = 'public';
         } else {
@@ -337,7 +337,7 @@ class Install
                     $value = '';
                 }
                 if (isset($requireDirs[$prefix]) && in_array($key, $requireDirs[$prefix])) {
-                    $dir = getFullDirectory($value);
+                    $dir = \App\Support\Path::resolve($value, \ROOT_PATH);
                     $tableRows[] = [
                         'label' => "{$prefix}.{$key}",
                         'required' => 'exists && readable',
@@ -370,7 +370,7 @@ class Install
         if ($this->runningInConsole()) {
             $this->currentStep = $step;
         } else {
-            \App\Support\LegacyResponse::redirect(getBaseUrl() . "?step=$step");
+            \App\Support\LegacyResponse::redirect(\App\Support\Url::baseUrl() . "?step=$step");
             die(0);
         }
 
@@ -462,12 +462,12 @@ class Install
     public function listEnvFormControls()
     {
         $envExampleFile = ROOT_PATH . ".env.example";
-        $envExampleData = readEnvFile($envExampleFile);
+        $envExampleData = \App\Support\Env::load($envExampleFile);
         $envFile = ROOT_PATH . '.env';
         $envData = [];
         if (file_exists($envFile) && is_readable($envFile)) {
             //already exists, read it ,and merge
-            $envData = readEnvFile($envFile);
+            $envData = \App\Support\Env::load($envFile);
         }
         $mergeData = array_merge($envExampleData, $envData);
         $formControls = [];
@@ -520,12 +520,12 @@ class Install
     public function createEnvFile($data, $scene = 'install')
     {
         $envExampleFile = ROOT_PATH . ".env.example";
-        $envExampleData = readEnvFile($envExampleFile);
+        $envExampleData = \App\Support\Env::load($envExampleFile);
         $envFile = ROOT_PATH . ".env";
         $newData = [];
         if (file_exists($envFile) && is_readable($envFile)) {
             //already exists, read it ,and merge post data
-            $newData = readEnvFile($envFile);
+            $newData = \App\Support\Env::load($envFile);
             $this->doLog("[CREATE ENV] .env exists, data: " . json_encode($newData));
         }
         $this->doLog("[CREATE ENV] newData: " . json_encode($newData));
@@ -618,7 +618,7 @@ class Install
         }
         foreach ($settings as $prefix => $group) {
             $this->doLog("[SAVE SETTING], prefix: $prefix, nameAndValues: " . json_encode($group));
-            saveSetting($prefix, $group);
+            \App\Support\Settings::saveBatch($prefix, $group, 'yes');
         }
 
     }
@@ -694,7 +694,7 @@ class Install
 
     public function executeCommand($command)
     {
-        executeCommand($command);
+        \App\Support\Environment::run($command, 'string', (bool) false, (bool) true);
 //        $this->doLog("command: $command");
 //        $result = exec($command, $output, $result_code);
 //        $this->doLog(sprintf('result_code: %s, result: %s', $result_code, $result));
@@ -791,7 +791,7 @@ class Install
             );
         }
         if (!str_starts_with($announceUrl, "http")) {
-            $announceUrl = (isHttps() ? "https://" : "http://"). $announceUrl;
+            $announceUrl = (\App\Support\Url::isSecure() ? "https://" : "http://"). $announceUrl;
         }
         TrackerUrl::query()->create([
             "url" => $announceUrl,

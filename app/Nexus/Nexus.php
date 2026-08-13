@@ -324,13 +324,13 @@ final class Nexus
             if (!isset(self::$appendHeaders[$key])) {
                 self::$appendHeaders[$key] = $append;
             } else {
-                do_log("$log, [DUPLICATE]");
+                \App\Support\Logger::writeWithContext((string) "{$log}, [DUPLICATE]", (string) 'info', (bool) false);
             }
         } elseif ($position == 'footer') {
             if (!isset(self::$appendFooters[$key])) {
                 self::$appendFooters[$key] = $append;
             } else {
-                do_log("$log, [DUPLICATE]");
+                \App\Support\Logger::writeWithContext((string) "{$log}, [DUPLICATE]", (string) 'info', (bool) false);
             }
         } else {
             throw new \InvalidArgumentException("Invalid position: $position");
@@ -362,7 +362,7 @@ final class Nexus
     public static function trans($key, $replace = [], $locale = null)
     {
         if (is_null($locale)) {
-            $locale = get_langfolder_cookie(true);
+            $locale = \App\Support\Locale::folderFromCookie(\App\Support\SupportContext::getCookieValue('c_lang_folder', ''), (bool) true);
         }
         if (IN_NEXUS) {
             return self::getTranslator()->trans($key, $replace, $locale);
@@ -383,15 +383,15 @@ final class Nexus
 
     private static function loadTranslations($path, $namespace = null)
     {
-        do_log("path: $path, namespace: $namespace", 'debug');
+        \App\Support\Logger::writeWithContext((string) "path: {$path}, namespace: {$namespace}", (string) 'debug', (bool) false);
         $files = glob($path . '*/*');
         foreach ($files as $file) {
             if (!is_file($file)) {
-                do_log("file: $file, is not file", 'debug');
+                \App\Support\Logger::writeWithContext((string) "file: {$file}, is not file", (string) 'debug', (bool) false);
                 continue;
             }
             if (!is_readable($file)) {
-                do_log("[TRANSLATION_FILE_NOT_READABLE], $file");
+                \App\Support\Logger::writeWithContext((string) "[TRANSLATION_FILE_NOT_READABLE], {$file}", (string) 'info', (bool) false);
             }
             $values = require $file;
             $setKey = substr($file, strlen($path));
@@ -402,29 +402,29 @@ final class Nexus
             if ($namespace !== null) {
                 $setKey = "$namespace.$setKey";
             }
-            do_log("path: $path, namespace: $namespace, file: $file, setKey: $setKey", 'debug');
-            arr_set(self::$translations, $setKey, $values);
+            \App\Support\Logger::writeWithContext((string) "path: {$path}, namespace: {$namespace}, file: {$file}, setKey: {$setKey}", (string) 'debug', (bool) false);
+            \App\Support\Arrays::set(self::$translations, $setKey, $values);
         }
     }
 
     private static function getTranslation($key, $replace = [], $locale = null)
     {
         if (!$locale) {
-            $lang = get_langfolder_cookie();
+            $lang = \App\Support\Locale::folderFromCookie(\App\Support\SupportContext::getCookieValue('c_lang_folder', ''), (bool) false);
             $locale = \App\Http\Middleware\Locale::$languageMaps[$lang] ?? 'en';
         }
         $getKey = self::getTranslationGetKey($key, $locale);
-        $result = arr_get(self::$translations, $getKey);
+        $result = \App\Support\Arrays::get(self::$translations, $getKey, null);
         if (empty($result) && $locale != 'en') {
-            do_log("original getKey: $getKey can not get any translations", 'error');
+            \App\Support\Logger::writeWithContext((string) "original getKey: {$getKey} can not get any translations", (string) 'error', (bool) false);
             $getKey = self::getTranslationGetKey($key, 'en');
-            $result = arr_get(self::$translations, $getKey);
+            $result = \App\Support\Arrays::get(self::$translations, $getKey, null);
         }
         if (!empty($replace)) {
             $search = array_map(function ($value) {return ":$value";}, array_keys($replace));
             $result = str_replace($search, array_values($replace), $result);
         }
-        do_log("key: $key, replace: " . nexus_json_encode($replace) . ", locale: $locale, getKey: $getKey, result: $result", 'debug');
+        \App\Support\Logger::writeWithContext((string) ("key: {$key}, replace: " . \App\Support\Json::encode($replace) . ", locale: {$locale}, getKey: {$getKey}, result: {$result}"), (string) 'debug', (bool) false);
         return $result;
     }
 
@@ -452,7 +452,7 @@ final class Nexus
     {
         if (is_null(self::$queueManager)) {
             $container = Container::getInstance();
-            $redisConfig = nexus_config('nexus.redis');
+            $redisConfig = \App\Support\Config::get('nexus.redis', null);
             $redisConnectionName = "my_redis_connection";
             $container->singleton('redis', function ($app) use ($redisConfig, $redisConnectionName)  {
                 $redisDriver = "phpredis";
@@ -480,7 +480,7 @@ final class Nexus
     public static function dispatchQueueJob(ShouldQueue $job): void
     {
         self::getQueueManager()->connection(self::QUEUE_CONNECTION_NAME)->push($job);
-        do_log("dispatchQueueJob: " . nexus_json_encode($job));
+        \App\Support\Logger::writeWithContext((string) ("dispatchQueueJob: " . \App\Support\Json::encode($job)), (string) 'info', (bool) false);
     }
 
 

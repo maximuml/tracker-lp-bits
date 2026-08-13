@@ -37,24 +37,24 @@ class UploadRepository extends BaseRepository
     {
         $user = $request->user();
         if (empty($request->name)) {
-            throw new NexusException(nexus_trans("upload.require_name"));
+            throw new NexusException(\App\Support\Locale::trans("upload.require_name", [], null));
         }
         if (empty($request->descr)) {
-            throw new NexusException(nexus_trans("upload.blank_description"));
+            throw new NexusException(\App\Support\Locale::trans("upload.blank_description", [], null));
         }
         if (empty($request->type)) {
-            throw new NexusException(nexus_trans("upload.category_unselected"));
+            throw new NexusException(\App\Support\Locale::trans("upload.category_unselected", [], null));
         }
         $category = Category::query()->find($request->type);
         if (!$category) {
-            throw new NexusException(nexus_trans("upload.invalid_category"));
+            throw new NexusException(\App\Support\Locale::trans("upload.invalid_category", [], null));
         }
         $torrentFile = $this->getTorrentFile($request);
         $filepath = $torrentFile->getRealPath();
         try {
             $dict = Bencode::load($filepath);
         } catch (ParseException $e) {
-            do_log("Bencode load error:" . $e->getMessage(), 'error');
+            \App\Support\Logger::writeWithContext((string) ("Bencode load error:" . $e->getMessage()), (string) 'error', (bool) false);
             throw new NexusException("upload.not_bencoded_file");
         }
         $info = $this->checkTorrentDict($dict, 'info');
@@ -65,7 +65,7 @@ class UploadRepository extends BaseRepository
         $dname = $this->checkTorrentDict($info, 'name', 'string');
         $pieces = $this->checkTorrentDict($info, 'pieces', 'string');
         if (strlen($pieces) % 20 != 0) {
-            throw new NexusException(nexus_trans("upload.invalid_pieces"));
+            throw new NexusException(\App\Support\Locale::trans("upload.invalid_pieces", [], null));
         }
         $dict['info']['private'] = 1;
         $siteConfig = \App\Support\Config\SiteConfig::current();
@@ -85,7 +85,7 @@ class UploadRepository extends BaseRepository
         $uploaderUsername = $user->username;
         if ($request->uplver == 'yes') {
             if (!Permission::canBeAnonymous()) {
-                throw new NexusException(nexus_trans('upload.no_permission_to_be_anonymous'));
+                throw new NexusException(\App\Support\Locale::trans('upload.no_permission_to_be_anonymous', [], null));
             }
             $anonymous = "yes";
             $uploaderUsername = "Anonymous";
@@ -135,8 +135,8 @@ class UploadRepository extends BaseRepository
             $torrentFilePath = "$torrentSavePath/$id.torrent";
             $saveResult = Bencode::dump($torrentFilePath, $dict);
             if ($saveResult === false) {
-                do_log("save torrent failed: $torrentFilePath", 'error');
-                throw new NexusException(nexus_trans('upload.save_torrent_file_failed'));
+                \App\Support\Logger::writeWithContext((string) "save torrent failed: {$torrentFilePath}", (string) 'error', (bool) false);
+                throw new NexusException(\App\Support\Locale::trans('upload.save_torrent_file_failed', [], null));
             }
             $extraInsert['torrent_id'] = $id;
             TorrentExtra::query()->insert($extraInsert);
@@ -150,7 +150,7 @@ class UploadRepository extends BaseRepository
             }
             File::query()->insert($fileInsert);
             if (!empty($subCategoriesAngTags['tags'])) {
-                insert_torrent_tags($id, $subCategoriesAngTags['tags']);
+                \App\Support\TorrentTags::insert($id, $subCategoriesAngTags['tags'], (bool) false);
             }
             $this->saveCustomFields($request, $category, $id);
             $this->sendReward($id);
@@ -161,7 +161,7 @@ class UploadRepository extends BaseRepository
         $torrentRep->addPiecesHashCache($id, $newTorrent->pieces_hash);
         $this->handleOffer($request, $newTorrent, $user);
         \App\Support\Log::writeWithContext("Torrent $id ($newTorrent->name) was uploaded by $uploaderUsername");
-        fire_event(ModelEventEnum::TORRENT_CREATED, $newTorrent);
+        \App\Support\Events::fire(ModelEventEnum::TORRENT_CREATED, $newTorrent, null);
         return $newTorrent;
     }
 
@@ -170,19 +170,19 @@ class UploadRepository extends BaseRepository
     {
         $file = $request->file('file');
         if (empty($file)) {
-            throw new NexusException(nexus_trans('upload.missing_torrent_file'));
+            throw new NexusException(\App\Support\Locale::trans('upload.missing_torrent_file', [], null));
         }
         if (!$file->isValid()) {
-            do_log("torrent file is invalid: " . $file->getClientOriginalName() . ' (error: ' . $file->getError() . ')', 'error');
+            \App\Support\Logger::writeWithContext((string) ("torrent file is invalid: " . $file->getClientOriginalName() . ' (error: ' . $file->getError() . ')'), (string) 'error', (bool) false);
             throw new NexusException("upload torrent file error");
         }
         $size = $file->getSize();
         $maxAllowSize = \App\Support\Config\SiteConfig::current()->main->maxTorrentSize();
         if ($size > $maxAllowSize) {
             $msg = sprintf("%s%s%s",
-                nexus_trans("upload.torrent_file_too_big"),
+                \App\Support\Locale::trans("upload.torrent_file_too_big", [], null),
                 number_format($maxAllowSize),
-                nexus_trans("upload.remake_torrent_note")
+                \App\Support\Locale::trans("upload.remake_torrent_note", [], null)
             );
             throw new NexusException($msg);
         }
@@ -211,14 +211,14 @@ class UploadRepository extends BaseRepository
             return '';
         }
         if (!$file->isValid()) {
-            throw new NexusException(nexus_trans("upload.nfo_upload_failed"));
+            throw new NexusException(\App\Support\Locale::trans("upload.nfo_upload_failed", [], null));
         }
         $size = $file->getSize();
         if ($size == 0) {
-            throw new NexusException(nexus_trans("upload.zero_byte_nfo"));
+            throw new NexusException(\App\Support\Locale::trans("upload.zero_byte_nfo", [], null));
         }
         if ($size > 65535) {
-            throw new NexusException(nexus_trans("upload.nfo_too_big"));
+            throw new NexusException(\App\Support\Locale::trans("upload.nfo_too_big", [], null));
         }
         return str_replace("\x0d\x0d\x0a", "\x0d\x0a", $file->getContent());
     }
@@ -237,19 +237,19 @@ class UploadRepository extends BaseRepository
     {
         $price =  $request->price ?: 0;
         if (!is_numeric($price)) {
-            throw new NexusException(nexus_trans('upload.invalid_price', ['price' => $price]));
+            throw new NexusException(\App\Support\Locale::trans('upload.invalid_price', ['price' => $price], null));
         }
         if ($price > 0) {
             if (!Permission::canSetTorrentPrice()) {
-                throw new NexusException(nexus_trans("upload.no_permission_to_set_torrent_price"));
+                throw new NexusException(\App\Support\Locale::trans("upload.no_permission_to_set_torrent_price", [], null));
             }
             $siteConfig = \App\Support\Config\SiteConfig::current();
             if (!$siteConfig->torrent->paidTorrentEnabled()) {
-                throw new NexusException(nexus_trans("upload.paid_torrent_not_enabled"));
+                throw new NexusException(\App\Support\Locale::trans("upload.paid_torrent_not_enabled", [], null));
             }
             $maxPrice = $siteConfig->torrent->maxPrice();
             if ($maxPrice > 0 && $price > $maxPrice) {
-                throw new NexusException(nexus_trans('upload.price_too_much'));
+                throw new NexusException(\App\Support\Locale::trans('upload.price_too_much', [], null));
             }
         }
         return intval($price);
@@ -267,10 +267,10 @@ class UploadRepository extends BaseRepository
         }
         $hr = (int) $hr;
         if ($hr > 0 && !Permission::canSetTorrentHitAndRun()) {
-            throw new NexusException(nexus_trans("upload.no_permission_to_set_torrent_hr"));
+            throw new NexusException(\App\Support\Locale::trans("upload.no_permission_to_set_torrent_hr", [], null));
         }
         if (!in_array($hr, [0, 1])) {
-            throw new NexusException(nexus_trans('upload.invalid_hr'));
+            throw new NexusException(\App\Support\Locale::trans('upload.invalid_hr', [], null));
         }
         return intval($hr);
     }
@@ -288,14 +288,14 @@ class UploadRepository extends BaseRepository
                 throw new NexusException("upload.no_permission_to_set_torrent_pos_state");
             }
             if (!isset(Torrent::$posStates[$posState])) {
-                throw new NexusException(nexus_trans('upload.invalid_pos_state', ['pos_state' => $posState]));
+                throw new NexusException(\App\Support\Locale::trans('upload.invalid_pos_state', ['pos_state' => $posState], null));
             }
         }
         if ($posState == Torrent::POS_STATE_STICKY_NONE) {
             $posStateUntil = null;
         }
         if ($posStateUntil && Carbon::parse($posStateUntil)->lt(Carbon::now())) {
-            throw new NexusException(nexus_trans('upload.invalid_pos_state_until'));
+            throw new NexusException(\App\Support\Locale::trans('upload.invalid_pos_state_until', [], null));
         }
         return compact('posState', 'posStateUntil');
     }
@@ -309,16 +309,16 @@ class UploadRepository extends BaseRepository
     private function checkTorrentDict($dict, $key, $type = null)
     {
         if (!is_array($dict)) {
-            throw new NexusException(nexus_trans("upload.not_a_dictionary"));
+            throw new NexusException(\App\Support\Locale::trans("upload.not_a_dictionary", [], null));
         }
         if (!isset($dict[$key])) {
-            throw new NexusException(nexus_trans("upload.dictionary_is_missing_key"));
+            throw new NexusException(\App\Support\Locale::trans("upload.dictionary_is_missing_key", [], null));
         }
         $value = $dict[$key];
         if (!is_null($type)) {
             $isFunction = 'is_' . $type;
             if (function_exists($isFunction) && !$isFunction($value)) {
-                throw new NexusException(nexus_trans("upload.invalid_entry_in_dictionary"));
+                throw new NexusException(\App\Support\Locale::trans("upload.invalid_entry_in_dictionary", [], null));
             }
         }
         return $value;
@@ -342,7 +342,7 @@ class UploadRepository extends BaseRepository
             $flist = $this->checkTorrentDict($info, 'files', 'array');
 
             if (!count($flist)) {
-                throw new NexusException(nexus_trans("upload.empty_file"));
+                throw new NexusException(\App\Support\Locale::trans("upload.empty_file", [], null));
             }
             foreach ($flist as $fn) {
                 $ll = $this->checkTorrentDict($fn, 'length', 'integer');
@@ -353,13 +353,13 @@ class UploadRepository extends BaseRepository
                 $ffa = array();
                 foreach ($ff as $ffe) {
                     if (!is_string($ffe)) {
-                        throw new NexusException(nexus_trans("upload.filename_errors"));
+                        throw new NexusException(\App\Support\Locale::trans("upload.filename_errors", [], null));
                     }
                     $ffa[] = $ffe;
                 }
 
                 if (!count($ffa)) {
-                    throw new NexusException(nexus_trans("upload.filename_errors"));
+                    throw new NexusException(\App\Support\Locale::trans("upload.filename_errors", [], null));
                 }
                 $ffe = implode("/", $ffa);
                 $filelist[] = array($ffe, $ll);
@@ -381,7 +381,7 @@ class UploadRepository extends BaseRepository
     {
         $user = Auth::user();
         if ($user->uploadpos !== 'yes') {
-            throw new NexusException(nexus_trans('upload.unauthorized_to_upload'));
+            throw new NexusException(\App\Support\Locale::trans('upload.unauthorized_to_upload', [], null));
         }
 
         $uploadDenyApprovalDenyCount = \App\Support\Config\SiteConfig::current()->main->uploadDenyApprovalDenyCount();
@@ -390,7 +390,7 @@ class UploadRepository extends BaseRepository
             ->count()
         ;
         if ($uploadDenyApprovalDenyCount > 0 && $approvalDenyCount >= $uploadDenyApprovalDenyCount) {
-            throw new NexusException(nexus_trans("upload.approval_deny_reach_upper_limit"));
+            throw new NexusException(\App\Support\Locale::trans("upload.approval_deny_reach_upper_limit", [], null));
         }
 
         if ($section->isSectionBrowse()) {
@@ -407,11 +407,11 @@ class UploadRepository extends BaseRepository
                 return true;
             }
             if (!Permission::canUploadToNormalSection()) {
-                throw new NexusException(nexus_trans('upload.unauthorized_upload_freely'));
+                throw new NexusException(\App\Support\Locale::trans('upload.unauthorized_upload_freely', [], null));
             }
             return true;
         }
-        throw new NexusException(nexus_trans('upload.invalid_section'));
+        throw new NexusException(\App\Support\Locale::trans('upload.invalid_section', [], null));
     }
 
     /** @param  mixed  $torrentSize */
@@ -422,10 +422,10 @@ class UploadRepository extends BaseRepository
         if ($largeTorrentSize > 0 && $torrentSize > $largeTorrentSize * 1073741824) {
             $largeTorrentSpState = $siteConfig->torrent->largeSpState();
             if (isset(Torrent::$promotionTypes[$largeTorrentSpState])) {
-                do_log("large torrent, sp state from config: $largeTorrentSpState");
+                \App\Support\Logger::writeWithContext((string) "large torrent, sp state from config: {$largeTorrentSpState}", (string) 'info', (bool) false);
                 return $largeTorrentSpState;
             }
-            do_log("invalid large torrent sp state: $largeTorrentSpState", 'error');
+            \App\Support\Logger::writeWithContext((string) "invalid large torrent sp state: {$largeTorrentSpState}", (string) 'error', (bool) false);
             return Torrent::PROMOTION_NORMAL;
         } else {
             $torrentConfig = \App\Support\Config\SiteConfig::current()->torrent;
@@ -439,7 +439,7 @@ class UploadRepository extends BaseRepository
             ];
             $sum = array_sum($probabilities);
             if ($sum == 0) {
-                do_log("no random sp state", 'warning');
+                \App\Support\Logger::writeWithContext((string) "no random sp state", (string) 'warning', (bool) false);
                 return Torrent::PROMOTION_NORMAL;
             }
             $random = mt_rand(1, $sum);
@@ -447,7 +447,7 @@ class UploadRepository extends BaseRepository
             foreach ($probabilities as $k => $v) {
                 $currentProbability += $v;
                 if ($random <= $currentProbability) {
-                    do_log(sprintf("random sp state, probabilities: %s, get result: %s by probability: %s", json_encode($probabilities), $k, $v));
+                    \App\Support\Logger::writeWithContext((string) sprintf("random sp state, probabilities: %s, get result: %s by probability: %s", json_encode($probabilities), $k, $v), (string) 'info', (bool) false);
                     return $k;
                 }
             }
@@ -467,11 +467,11 @@ class UploadRepository extends BaseRepository
         $searchBoxRep = new SearchBoxRepository();
         $sections = $searchBoxRep->listSections(SearchBox::listAllSectionId())->keyBy('id');
         if (!$sections->has($category->mode)) {
-            throw new NexusException(nexus_trans('upload.invalid_section'));
+            throw new NexusException(\App\Support\Locale::trans('upload.invalid_section', [], null));
         }
         $section = $sections->get($category->mode);
         if (!$section instanceof SearchBox) {
-            throw new NexusException(nexus_trans('upload.invalid_section'));
+            throw new NexusException(\App\Support\Locale::trans('upload.invalid_section', [], null));
         }
         if ($checkUploadPermission) {
             $this->canUploadToSection($request, $section);
@@ -482,7 +482,7 @@ class UploadRepository extends BaseRepository
         $sectionInfo = $sectionData['data'];
         $categories = array_column($sectionInfo['categories'], 'id');
         if (!in_array($category->id, $categories)) {
-            throw new NexusException(nexus_trans('upload.invalid_category'));
+            throw new NexusException(\App\Support\Locale::trans('upload.invalid_category', [], null));
         }
         $subCategoryInfo = array_column($sectionInfo['sub_categories'], null, 'field');
         $subCategories = [];
@@ -491,10 +491,7 @@ class UploadRepository extends BaseRepository
             if ($value > 0 && isset($subCategoryInfo[$name])) {
                 $subCategoryValues = array_column($subCategoryInfo[$name]['data'], 'name', 'id');
                 if (!isset($subCategoryValues[$value])) {
-                    throw new NexusException(nexus_trans(
-                        'upload.invalid_sub_category_value',
-                        ['field' => $name, 'label' => $subCategoryInfo[$name]['label'], 'value' => $value]
-                    ));
+                    throw new NexusException(\App\Support\Locale::trans('upload.invalid_sub_category_value', ['field' => $name, 'label' => $subCategoryInfo[$name]['label'], 'value' => $value], null));
                 }
             }
             $subCategories[$name] = $value > 0 && isset($subCategoryInfo[$name]) ? $value : 0;
@@ -504,7 +501,7 @@ class UploadRepository extends BaseRepository
         $allTags = array_column($sectionInfo['tags'], 'name', 'id');
         foreach ($tags as $tag) {
             if (!isset($allTags[$tag])) {
-                throw new NexusException(nexus_trans('upload.invalid_tag', ['tag' => $tag]));
+                throw new NexusException(\App\Support\Locale::trans('upload.invalid_tag', ['tag' => $tag], null));
             }
         }
         return compact('subCategories', 'tags');
@@ -523,14 +520,14 @@ class UploadRepository extends BaseRepository
 
     private function getTorrentSavePath(): string
     {
-        $torrentSavePath = getFullDirectory(\App\Support\Config\SiteConfig::current()->main->torrentDir());
+        $torrentSavePath = \App\Support\Path::resolve(\App\Support\Config\SiteConfig::current()->main->torrentDir(), \ROOT_PATH);
         if (!is_dir($torrentSavePath)) {
-            do_log(sprintf("torrentSavePath: %s not exists", $torrentSavePath), 'error');
-            throw new NexusException(nexus_trans('upload.torrent_save_dir_not_exists'));
+            \App\Support\Logger::writeWithContext((string) sprintf("torrentSavePath: %s not exists", $torrentSavePath), (string) 'error', (bool) false);
+            throw new NexusException(\App\Support\Locale::trans('upload.torrent_save_dir_not_exists', [], null));
         }
         if (!is_writable($torrentSavePath)) {
-            do_log(sprintf("torrentSavePath: %s not writable", $torrentSavePath), 'error');
-            throw new NexusException(nexus_trans('upload.torrent_save_dir_not_writable'));
+            \App\Support\Logger::writeWithContext((string) sprintf("torrentSavePath: %s not writable", $torrentSavePath), (string) 'error', (bool) false);
+            throw new NexusException(\App\Support\Locale::trans('upload.torrent_save_dir_not_writable', [], null));
         }
         return $torrentSavePath;
     }
@@ -545,9 +542,9 @@ class UploadRepository extends BaseRepository
             $new = $old + $delta;
             $user->increment('seedbonus', $delta);
             BonusLogs::add($user->id, $old, $delta, $new, "Upload torrent: $torrentId", BonusLogs::BUSINESS_TYPE_UPLOAD_TORRENT);
-            do_log("upload torrent: $torrentId, success send reward: $delta");
+            \App\Support\Logger::writeWithContext((string) "upload torrent: {$torrentId}, success send reward: {$delta}", (string) 'info', (bool) false);
         } else {
-            do_log("upload torrent: $torrentId, no reward");
+            \App\Support\Logger::writeWithContext((string) "upload torrent: {$torrentId}, no reward", (string) 'info', (bool) false);
         }
     }
 
@@ -560,7 +557,7 @@ class UploadRepository extends BaseRepository
         $logMsg = sprintf("torrent: %s, category: %s", $torrent->id, $torrent->category);
         $siteConfig = \App\Support\Config\SiteConfig::current();
         if (!$siteConfig->smtp->emailNotify() || $siteConfig->smtp->type() == 'none') {
-            do_log("$logMsg, not allow user receive email notification or smtp type is none");
+            \App\Support\Logger::writeWithContext((string) "{$logMsg}, not allow user receive email notification or smtp type is none", (string) 'info', (bool) false);
             return 0;
         }
         $page = 1;
@@ -575,7 +572,7 @@ class UploadRepository extends BaseRepository
         }
         $total = (clone $query)->count();
         if ($total == 0) {
-            do_log(sprintf("%s, no user receive email notification", $logMsg));
+            \App\Support\Logger::writeWithContext((string) sprintf("%s, no user receive email notification", $logMsg), (string) 'info', (bool) false);
             return 0;
         }
         $toolRep = new ToolRepository();
@@ -586,33 +583,23 @@ class UploadRepository extends BaseRepository
             $logPage = "$logMsg, page: $page";
             $users = (clone $query)->with(['language'])->forPage($page, $size)->get(['id', 'email', 'lang']);
             if ($users->isEmpty()) {
-                do_log(sprintf("%s, no more user", $logPage));
+                \App\Support\Logger::writeWithContext((string) sprintf("%s, no more user", $logPage), (string) 'info', (bool) false);
                 break;
             }
             foreach ($users as $user) {
                 $locale = $user->locale;
                 $logUser = "$logPage, user $user->id, locale: $locale";
-                $subject = nexus_trans("upload.email_notification_subject", [
-                    'site_name' => \App\Support\Config\SiteConfig::current()->basic->siteName()
-                ], $locale);
-                $body = nexus_trans("upload.email_notification_body", [
-                    'site_name' => \App\Support\Config\SiteConfig::current()->basic->siteName(),
-                    'name' => $torrent->name,
-                    'size' => \App\Support\Format::size($torrent->size),
-                    'category' => $categoryName,
-                    'upload_by' => $this->handleAnonymous($torrentUploader->username, $torrentUploader, $user, $torrent),
-                    'description' => Str::limit(strip_tags(\App\Support\Format::formatComment($torrent->extra->descr)), 500),
-                    'torrent_url' => sprintf("%s/details.php?id=%s&hit=1", getBaseUrl(), $torrent->id),
-                ], $locale);
+                $subject = \App\Support\Locale::trans("upload.email_notification_subject", ['site_name' => \App\Support\Config\SiteConfig::current()->basic->siteName()], $locale);
+                $body = \App\Support\Locale::trans("upload.email_notification_body", ['site_name' => \App\Support\Config\SiteConfig::current()->basic->siteName(), 'name' => $torrent->name, 'size' => \App\Support\Format::size($torrent->size), 'category' => $categoryName, 'upload_by' => $this->handleAnonymous($torrentUploader->username, $torrentUploader, $user, $torrent), 'description' => Str::limit(strip_tags(\App\Support\Format::formatComment($torrent->extra->descr)), 500), 'torrent_url' => sprintf("%s/details.php?id=%s&hit=1", \App\Support\Url::baseUrl(), $torrent->id)], $locale);
                 $sendResult = $toolRep->sendMail($user->email, $subject, $body);
-                do_log(sprintf("%s, send result: %s", $logUser, $sendResult));
+                \App\Support\Logger::writeWithContext((string) sprintf("%s, send result: %s", $logUser, $sendResult), (string) 'info', (bool) false);
                 if ($sendResult) {
                     $successCount++;
                 }
             }
             $page++;
         }
-        do_log("$logMsg, receive email notification user total: $total, successCount: $successCount, done!");
+        \App\Support\Logger::writeWithContext((string) "{$logMsg}, receive email notification user total: {$total}, successCount: {$successCount}, done!", (string) 'info', (bool) false);
         return $successCount;
     }
 
@@ -650,17 +637,17 @@ class UploadRepository extends BaseRepository
         $voterIds = TorrentUploadRepository::getOfferVoterIds($offerId, $user->id);
         foreach ($voterIds as $voterId) {
             $locale = Locale::userLocale($voterId);
-            $msg = nexus_trans("torrent.msg_offer_you_voted", [], $locale)
+            $msg = \App\Support\Locale::trans("torrent.msg_offer_you_voted", [], $locale)
                 . $torrent->name
-                . nexus_trans("torrent.msg_was_uploaded_by", [], $locale)
+                . \App\Support\Locale::trans("torrent.msg_was_uploaded_by", [], $locale)
                 . $user->username
-                . nexus_trans("torrent.msg_you_can_download", [], $locale)
+                . \App\Support\Locale::trans("torrent.msg_you_can_download", [], $locale)
                 . "[url=" . Url::schemeAndHost() . "/details.php?id=" . $torrent->id . "&hit=1]"
-                . nexus_trans("torrent.msg_here", [], $locale)
+                . \App\Support\Locale::trans("torrent.msg_here", [], $locale)
                 . "[/url]";
-            $subject = nexus_trans("torrent.msg_offer", [], $locale)
+            $subject = \App\Support\Locale::trans("torrent.msg_offer", [], $locale)
                 . $torrent->name
-                . nexus_trans("torrent.msg_was_just_uploaded", [], $locale);
+                . \App\Support\Locale::trans("torrent.msg_was_just_uploaded", [], $locale);
             Message::add([
                 'sender' => 0,
                 'subject' => $subject,

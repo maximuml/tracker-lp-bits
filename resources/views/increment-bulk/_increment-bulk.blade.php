@@ -61,7 +61,7 @@ $classes = array_chunk(\App\Models\User::listClass(), 4, true);
                                     </table>
                                 </td>
                             </tr>
-                            <?php do_action('form_role_filter', $lang_incrementbulk['labels']['roles']) ?>
+                            <?php \App\Support\Hooks::doAction('form_role_filter', ...[$lang_incrementbulk['labels']['roles']]) ?>
                             <tr><td class="rowhead" valign="top"><?php echo $lang_incrementbulk['labels']['msg_subject'] ?> </td><td class="rowfollow"><input type=text name=subject size=82></td></tr>
                             <tr><td class="rowhead" valign="top"><?php echo $lang_incrementbulk['labels']['msg_body'] ?> </td><td class="rowfollow"><textarea name=msg cols=80 rows=5><?php echo $body ?? ''?></textarea></td></tr>
                             <tr>
@@ -69,7 +69,7 @@ $classes = array_chunk(\App\Models\User::listClass(), 4, true);
                                         <label><input name="sender" type="radio" value="self" checked><?php echo $CURUSER['username']?></label>
                                         &nbsp; <label><input name="sender" type="radio" value="system">System</label>
                                     </div></td></tr>
-                            <tr><td class="rowfollow" colspan=2 align=center><input type=submit value="<?php echo nexus_trans('label.submit') ?>" class=btn></td></tr>
+                            <tr><td class="rowfollow" colspan=2 align=center><input type=submit value="<?php echo \App\Support\Locale::trans('label.submit', [], null) ?>" class=btn></td></tr>
                         </table>
                         <input type=hidden name=receiver value=<?php echo $receiver ?? ''?>>
                     </form>

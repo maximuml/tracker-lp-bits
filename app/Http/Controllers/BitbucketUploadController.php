@@ -89,7 +89,7 @@ class BitbucketUploadController extends Controller
         }
 
         $bitbucket = (string) SupportContext::getGlobal('bitbucket', 'bitbucket');
-        $tgtfile = getFullDirectory("{$bitbucket}/{$filename}");
+        $tgtfile = \App\Support\Path::resolve("{$bitbucket}/{$filename}", \ROOT_PATH);
         if (file_exists($tgtfile)) {
             LegacyResponse::abort(
                 $lang['std_upload_failed'] ?? '',
@@ -145,7 +145,7 @@ class BitbucketUploadController extends Controller
         };
 
         $baseUrl = (string) SupportContext::getGlobal('BASEURL', '');
-        $url = str_replace(' ', '%20', htmlspecialchars(get_protocol_prefix() . "{$baseUrl}/bitbucket/{$filename}"));
+        $url = str_replace(' ', '%20', htmlspecialchars(\App\Support\Http::protocolPrefix(\App\Support\Url::isSecure()) . "{$baseUrl}/bitbucket/{$filename}"));
         $public = $request->input('public') === 'yes' ? '1' : '0';
 
         NexusDB::table('bitbucket')->insert([
@@ -173,7 +173,7 @@ class BitbucketUploadController extends Controller
     {
         if (empty(SupportContext::getGlobal('lang_bitbucketupload'))) {
             SupportContext::setServerValue('SCRIPT_NAME', '/bitbucket-upload.php');
-            require base_path(get_langfile_path());
+            require base_path(\App\Support\Locale::scriptFilePath((string) "", (bool) false, (string) ""));
             SupportContext::setGlobal('lang_bitbucketupload', $lang_bitbucketupload ?? []);
         }
 

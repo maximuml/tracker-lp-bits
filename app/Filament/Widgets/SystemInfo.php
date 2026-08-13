@@ -13,7 +13,7 @@ class SystemInfo extends StatTable
 
     protected function getHeader(): string
     {
-        return nexus_trans('dashboard.system_info.page_title');
+        return \App\Support\Locale::trans('dashboard.system_info.page_title', [], null);
     }
 
     protected function getTableRows(): array

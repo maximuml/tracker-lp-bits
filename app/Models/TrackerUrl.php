@@ -87,7 +87,7 @@ class TrackerUrl extends NexusModel
         if ($result !== false) {
             return $result;
         }
-        do_log("No tracker url found for $trackerUrlId, try default", 'warning');
+        \App\Support\Logger::writeWithContext((string) "No tracker url found for {$trackerUrlId}, try default", (string) 'warning', (bool) false);
         return self::getFromRedisWithRetry($redis, 'get', [self::TRACKER_URL_DEFAULT_CACHE_KEY], $notFoundFlagKey);
     }
 
@@ -121,11 +121,11 @@ class TrackerUrl extends NexusModel
             //只从 db 拉取一次，仍然没有即标记不存在, 有效期 15 分钟
             $redis->setex($notFoundFlagKey, 900, date("Y-m-d H:i:s"));
         } catch (\Throwable $throwable) {
-            do_log($throwable->getMessage(), 'error');
+            \App\Support\Logger::writeWithContext((string) $throwable->getMessage(), (string) 'error', (bool) false);
         } finally {
             $redis->del($lockKey);
         }
-        do_log(sprintf("redis command %s with args %s no result", $command, json_encode($params)), 'error');
+        \App\Support\Logger::writeWithContext((string) sprintf("redis command %s with args %s no result", $command, json_encode($params)), (string) 'error', (bool) false);
         return false;
     }
 }

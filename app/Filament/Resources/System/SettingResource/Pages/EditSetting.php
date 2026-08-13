@@ -123,9 +123,9 @@ class EditSetting extends Page implements HasForms
             'captcha.recaptcha',
         ])->delete();
         $this->doAfterUpdate();
-        do_action("nexus_setting_update");
-        clear_setting_cache();
-        send_admin_success_notification();
+        \App\Support\Hooks::doAction("nexus_setting_update");
+        \App\Support\Cache::clearSettings();
+        \App\Support\Admin::successNotification("");
     }
 
     /**
@@ -255,7 +255,7 @@ class EditSetting extends Page implements HasForms
                 ,
             ])->columns(2);
 
-        $tabs = apply_filter('nexus_setting_tabs', $tabs);
+        $tabs = \App\Support\Hooks::applyFilter('nexus_setting_tabs', $tabs);
         return $tabs;
     }
 
@@ -271,41 +271,41 @@ class EditSetting extends Page implements HasForms
 
         $defaultDriver = Setting::get('captcha.default');
         if (is_null($defaultDriver)) {
-            $defaultDriver = Setting::get('captcha.driver', nexus_env('CAPTCHA_DRIVER', 'image'));
+            $defaultDriver = Setting::get('captcha.driver', \App\Support\Env::get('CAPTCHA_DRIVER', 'image'));
         }
 
         $turnstileSiteKey = Setting::get(
             'captcha.drivers.cloudflare_turnstile.site_key',
-            Setting::get('captcha.turnstile.site_key', nexus_env('TURNSTILE_SITE_KEY'))
+            Setting::get('captcha.turnstile.site_key', \App\Support\Env::get('TURNSTILE_SITE_KEY', null))
         );
         $turnstileSecretKey = Setting::get(
             'captcha.drivers.cloudflare_turnstile.secret_key',
-            Setting::get('captcha.turnstile.secret_key', nexus_env('TURNSTILE_SECRET_KEY'))
+            Setting::get('captcha.turnstile.secret_key', \App\Support\Env::get('TURNSTILE_SECRET_KEY', null))
         );
         $turnstileTheme = Setting::get(
             'captcha.drivers.cloudflare_turnstile.theme',
-            Setting::get('captcha.turnstile.theme', nexus_env('TURNSTILE_THEME', 'auto'))
+            Setting::get('captcha.turnstile.theme', \App\Support\Env::get('TURNSTILE_THEME', 'auto'))
         );
         $turnstileSize = Setting::get(
             'captcha.drivers.cloudflare_turnstile.size',
-            Setting::get('captcha.turnstile.size', nexus_env('TURNSTILE_SIZE', 'flexible'))
+            Setting::get('captcha.turnstile.size', \App\Support\Env::get('TURNSTILE_SIZE', 'flexible'))
         );
 
         $recaptchaSiteKey = Setting::get(
             'captcha.drivers.google_recaptcha_v2.site_key',
-            Setting::get('captcha.recaptcha.site_key', nexus_env('RECAPTCHA_SITE_KEY'))
+            Setting::get('captcha.recaptcha.site_key', \App\Support\Env::get('RECAPTCHA_SITE_KEY', null))
         );
         $recaptchaSecretKey = Setting::get(
             'captcha.drivers.google_recaptcha_v2.secret_key',
-            Setting::get('captcha.recaptcha.secret_key', nexus_env('RECAPTCHA_SECRET_KEY'))
+            Setting::get('captcha.recaptcha.secret_key', \App\Support\Env::get('RECAPTCHA_SECRET_KEY', null))
         );
         $recaptchaTheme = Setting::get(
             'captcha.drivers.google_recaptcha_v2.theme',
-            Setting::get('captcha.recaptcha.theme', nexus_env('RECAPTCHA_THEME', 'light'))
+            Setting::get('captcha.recaptcha.theme', \App\Support\Env::get('RECAPTCHA_THEME', 'light'))
         );
         $recaptchaSize = Setting::get(
             'captcha.drivers.google_recaptcha_v2.size',
-            Setting::get('captcha.recaptcha.size', nexus_env('RECAPTCHA_SIZE', 'normal'))
+            Setting::get('captcha.recaptcha.size', \App\Support\Env::get('RECAPTCHA_SIZE', 'normal'))
         );
 
         $attendanceCaptchaSetting = Setting::get('captcha.attendance.enabled', true);
@@ -408,7 +408,7 @@ class EditSetting extends Page implements HasForms
             TextInput::make('hr.ban_user_when_counts_reach')->helperText(__('label.setting.hr.ban_user_when_counts_reach_help'))->label(__('label.setting.hr.ban_user_when_counts_reach'))->integer(),
             TextInput::make('hr.include_rate')->helperText(__('label.setting.hr.include_rate_help'))->label(__('label.setting.hr.include_rate'))->numeric(),
         ];
-        return apply_filter("hit_and_run_setting_schema", $default);
+        return \App\Support\Hooks::applyFilter("hit_and_run_setting_schema", $default);
     }
 
     private function getRequireSeedSectionSchema(): array

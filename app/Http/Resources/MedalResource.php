@@ -31,7 +31,7 @@ class MedalResource extends JsonResource
             'user_medal_id' => $this->whenPivotLoaded('user_medals', function () {return $this->pivot->id;}),
             'wearing_status' => $this->whenPivotLoaded('user_medals', function () {return $this->pivot->status;}),
             'wearing_status_text' => $this->whenPivotLoaded('user_medals', function () {
-                return nexus_trans("medal.wearing_status_text." . $this->pivot->status);
+                return \App\Support\Locale::trans("medal.wearing_status_text." . $this->pivot->status, [], null);
             }),
         ];
     }

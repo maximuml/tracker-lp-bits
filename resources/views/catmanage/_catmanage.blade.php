@@ -634,7 +634,7 @@ elseif($action == 'del')
 			$Cache->delete_value('category_list_mode_'.$row['mode']);
 		}
 	}
-	header("Location: ".get_protocol_prefix() . $BASEURL."/catmanage.php?action=view&type=".$type);
+	header("Location: ".\App\Support\Http::protocolPrefix(\App\Support\Url::isSecure()) . $BASEURL."/catmanage.php?action=view&type=".$type);
 	return;
 }
 elseif($action == 'edit')

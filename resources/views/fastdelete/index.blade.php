@@ -33,8 +33,8 @@ if ($deleteEsResult === false) {
     \App\Support\LegacyResponse::abort($lang_fastdelete['std_delete_failed'], 'Delete es fail.');
     return;
 }
-deletetorrent($id);
-KPS("-",$uploadtorrent_bonus,$row["owner"]);
+\App\Support\TorrentOps::deleteTorrents($id, (bool) false);
+\App\Support\Bonus::updatePoints((string) "-", (float) $uploadtorrent_bonus, $row["owner"]);
 if ($row['anonymous'] == 'yes' && $CURUSER["id"] == $row["owner"]) {
     \App\Support\Log::writeWithContext("Torrent $id ($row[name]) was deleted by its anonymous uploader", 'normal');
 } else {
@@ -43,12 +43,12 @@ if ($row['anonymous'] == 'yes' && $CURUSER["id"] == $row["owner"]) {
 //Send pm to torrent uploader
 if (\App\Models\User::query()->where("id", $row['owner'])->exists()) {
     if ($CURUSER["id"] != $row['owner']){
-        $locale = get_user_locale($row["owner"]);
+        $locale = \App\Support\Locale::userLocale($row["owner"]);
         $dt = date("Y-m-d H:i:s");
-        $subject = nexus_trans("torrent.msg_torrent_deleted", [], $locale);
-        $msg = nexus_trans("torrent.msg_the_torrent_you_uploaded", [], $locale)
+        $subject = \App\Support\Locale::trans("torrent.msg_torrent_deleted", [], $locale);
+        $msg = \App\Support\Locale::trans("torrent.msg_the_torrent_you_uploaded", [], $locale)
             .$row['name']
-            .nexus_trans("torrent.msg_was_deleted_by", ['admin' => $CURUSER['username']], $locale)
+            .\App\Support\Locale::trans("torrent.msg_was_deleted_by", ['admin' => $CURUSER['username']], $locale)
         ;
         \App\Models\Message::add([
             'sender' => 0,

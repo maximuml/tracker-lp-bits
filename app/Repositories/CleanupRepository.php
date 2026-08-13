@@ -74,7 +74,7 @@ class CleanupRepository extends BaseRepository
         $result  = $redis->eval(self::getAddRecordLuaScript(), $args, 3);
         $err = $redis->getLastError();
         if ($err) {
-            do_log("[REDIS_LUA_ERROR]: $err", "error");
+            \App\Support\Logger::writeWithContext((string) "[REDIS_LUA_ERROR]: {$err}", (string) "error", (bool) false);
         }
         return $result;
     }
@@ -117,14 +117,14 @@ class CleanupRepository extends BaseRepository
         $logPrefix = sprintf("[$batchKey], commonRequestId: %s", $requestId);
         $beginTimestamp = time();
         if (!isset(self::$batchKeyActionsMap[$batchKey])) {
-            do_log("$logPrefix, batchKey: $batchKey invalid", 'error');
+            \App\Support\Logger::writeWithContext((string) "{$logPrefix}, batchKey: {$batchKey} invalid", (string) 'error', (bool) false);
             return;
         }
         $batchKeyInfo = self::$batchKeyActionsMap[$batchKey];
 
         $batch = self::getBatch($redis, $batchKey);
         if (!$batch) {
-            do_log("$logPrefix, batchKey: $batchKey no batch...", 'error');
+            \App\Support\Logger::writeWithContext((string) "{$logPrefix}, batchKey: {$batchKey} no batch...", (string) 'error', (bool) false);
             return;
         }
         //update the batch key
@@ -163,8 +163,8 @@ class CleanupRepository extends BaseRepository
                     'cleanup --action=%s --begin_id=%s --end_id=%s --id_redis_key=%s --request_id=%s --delay=%s',
                     $batchKeyInfo['action'], 0, 0,  $idRedisKey, $requestId, $delay
                 );
-                $output = executeCommand($command, 'string', true);
-                do_log(sprintf('output: %s', $output));
+                $output = \App\Support\Environment::run($command, 'string', (bool) true, (bool) true);
+                \App\Support\Logger::writeWithContext((string) sprintf('output: %s', $output), (string) 'info', (bool) false);
                 $count += count($validFields);
             }
             if (!empty($toRemoveFields)) {
@@ -178,7 +178,7 @@ class CleanupRepository extends BaseRepository
             $redis->unlink($batch);
         }
         $endTimestamp = time();
-        do_log(sprintf("$logPrefix, [DONE], batch: $batch, count: $count, cost time: %d seconds", $endTimestamp - $beginTimestamp));
+        \App\Support\Logger::writeWithContext((string) sprintf("{$logPrefix}, [DONE], batch: {$batch}, count: {$count}, cost time: %d seconds", $endTimestamp - $beginTimestamp), (string) 'info', (bool) false);
     }
 
 
@@ -192,11 +192,11 @@ class CleanupRepository extends BaseRepository
     {
         $batch = $redis->get($batchKey);
         if ($batch === false) {
-            do_log("batchKey: $batchKey, no batch...", 'error');
+            \App\Support\Logger::writeWithContext((string) "batchKey: {$batchKey}, no batch...", (string) 'error', (bool) false);
             return false;
         }
         if (!$redis->exists($batch)) {
-            do_log("batch: $batch, not exists...", 'error');
+            \App\Support\Logger::writeWithContext((string) "batch: {$batch}, not exists...", (string) 'error', (bool) false);
             return false;
         }
         return $batch;
@@ -321,7 +321,7 @@ LUA;
             }
             $interval = self::getInterval($level);
             if ($interval <= 0) {
-                do_log(sprintf("level: %s not set cleanup interval", $level), "error");
+                \App\Support\Logger::writeWithContext((string) sprintf("level: %s not set cleanup interval", $level), (string) "error", (bool) false);
                 continue;
             }
             $lastTime = 0;
@@ -332,12 +332,12 @@ LUA;
                 continue;
             }
             $receiverUid = \App\Support\Config\SiteConfig::current()->system->alarmEmailReceiver();
-            do_log("receiverUid: $receiverUid");
+            \App\Support\Logger::writeWithContext((string) "receiverUid: {$receiverUid}", (string) 'info', (bool) false);
             if (empty($receiverUid)) {
                 $locale = Locale::getDefault();
                 $subject = self::getAlarmEmailSubjectForCleanup($locale);
                 $msg = self::getAlarmEmailBodyForCleanup($now, $level, $lastTime, $interval, $locale);
-                do_log(sprintf("%s - %s", $subject, $msg), "error");
+                \App\Support\Logger::writeWithContext((string) sprintf("%s - %s", $subject, $msg), (string) "error", (bool) false);
             } else {
                 $receiverUidArr = preg_split("/\s+/", $receiverUid);
                 $users = User::query()->whereIn("id", $receiverUidArr)->get(User::$commonFields);
@@ -346,7 +346,7 @@ LUA;
                     $subject = self::getAlarmEmailSubjectForCleanup($locale);
                     $msg = self::getAlarmEmailBodyForCleanup($now, $level, $lastTime, $interval, $locale);
                     $result = $toolRep->sendMail($user->email, $subject, $msg);
-                    do_log(sprintf("send msg: %s result: %s", $msg, var_export($result, true)), $result ? "info" : "error");
+                    \App\Support\Logger::writeWithContext((string) sprintf("send msg: %s result: %s", $msg, var_export($result, true)), (string) ($result ? "info" : "error"), (bool) false);
                 }
             }
             return;
@@ -359,7 +359,7 @@ LUA;
      */
     private static function getAlarmEmailSubjectForCleanup(string|null $locale = null)
     {
-        return nexus_trans("cleanup.alarm_email_subject", ["site_name" => \App\Support\Config\SiteConfig::current()->basic->siteName()], $locale);
+        return \App\Support\Locale::trans("cleanup.alarm_email_subject", ["site_name" => \App\Support\Config\SiteConfig::current()->basic->siteName()], $locale);
     }
 
     /**
@@ -372,15 +372,7 @@ LUA;
      */
     private static function getAlarmEmailBodyForCleanup(Carbon $now, string $level, int $lastTime, int $interval, string|null $locale = null)
     {
-        return  nexus_trans("cleanup.alarm_email_body", [
-            "now_time" => $now->toDateTimeString(),
-            "level" => $level,
-            "last_time" => $lastTime > 0 ? Carbon::createFromTimestamp($lastTime)->toDateTimeString() : "",
-            "elapsed_seconds" => $lastTime > 0 ? $now->getTimestamp() - $lastTime : "",
-            "elapsed_seconds_human" => $lastTime > 0 ? \App\Support\Format::prettyTimeWithLocale($now->getTimestamp() - $lastTime) : "",
-            "interval" => $interval,
-            "interval_human" => \App\Support\Format::prettyTimeWithLocale($interval),
-        ], $locale);
+        return  \App\Support\Locale::trans("cleanup.alarm_email_body", ["now_time" => $now->toDateTimeString(), "level" => $level, "last_time" => $lastTime > 0 ? Carbon::createFromTimestamp($lastTime)->toDateTimeString() : "", "elapsed_seconds" => $lastTime > 0 ? $now->getTimestamp() - $lastTime : "", "elapsed_seconds_human" => $lastTime > 0 ? \App\Support\Format::prettyTimeWithLocale($now->getTimestamp() - $lastTime) : "", "interval" => $interval, "interval_human" => \App\Support\Format::prettyTimeWithLocale($interval)], $locale);
     }
 
     /** @return  void */
@@ -388,20 +380,20 @@ LUA;
     {
         $now = Carbon::now();
         $since = $now->subHours(6)->toDateTimeString();
-        $failedJobsTable = nexus_config("queue.failed.table");
+        $failedJobsTable = \App\Support\Config::get("queue.failed.table", null);
         $failedJobsCount = NexusDB::table($failedJobsTable)->where("failed_at", ">=", $since)->count();
         if ($failedJobsCount == 0) {
-            do_log(sprintf("no failed jobs since: %s", $since));
+            \App\Support\Logger::writeWithContext((string) sprintf("no failed jobs since: %s", $since), (string) 'info', (bool) false);
             return;
         }
         $receiverUid = \App\Support\Config\SiteConfig::current()->system->alarmEmailReceiver();
-        do_log("receiverUid: $receiverUid");
+        \App\Support\Logger::writeWithContext((string) "receiverUid: {$receiverUid}", (string) 'info', (bool) false);
         $toolRep = new ToolRepository();
         if (empty($receiverUid)) {
             $locale = Locale::getDefault();
             $subject = self::getAlarmEmailSubjectForQueueFailedJobs($locale);
             $msg = self::getAlarmEmailBodyForQueueFailedJobs($since, $failedJobsCount, $failedJobsTable, $locale);
-            do_log(sprintf("%s - %s", $subject, $msg), "error");
+            \App\Support\Logger::writeWithContext((string) sprintf("%s - %s", $subject, $msg), (string) "error", (bool) false);
         } else {
             $receiverUidArr = preg_split("/\s+/", $receiverUid);
             $users = User::query()->whereIn("id", $receiverUidArr)->get(User::$commonFields);
@@ -410,7 +402,7 @@ LUA;
                 $subject = self::getAlarmEmailSubjectForQueueFailedJobs($locale);
                 $msg = self::getAlarmEmailBodyForQueueFailedJobs($since, $failedJobsCount, $failedJobsTable, $locale);
                 $result = $toolRep->sendMail($user->email, $subject, $msg);
-                do_log(sprintf("send msg: %s result: %s", $msg, var_export($result, true)), $result ? "info" : "error");
+                \App\Support\Logger::writeWithContext((string) sprintf("send msg: %s result: %s", $msg, var_export($result, true)), (string) ($result ? "info" : "error"), (bool) false);
             }
         }
     }
@@ -421,7 +413,7 @@ LUA;
      */
     private static function getAlarmEmailSubjectForQueueFailedJobs(string|null $locale = null)
     {
-        return nexus_trans("cleanup.alarm_email_subject_for_queue_failed_jobs", ["site_name" => \App\Support\Config\SiteConfig::current()->basic->siteName()], $locale);
+        return \App\Support\Locale::trans("cleanup.alarm_email_subject_for_queue_failed_jobs", ["site_name" => \App\Support\Config\SiteConfig::current()->basic->siteName()], $locale);
     }
 
     /**
@@ -433,10 +425,6 @@ LUA;
      */
     private static function getAlarmEmailBodyForQueueFailedJobs(string $since, int $count, string $failedJobTable, string|null $locale = null)
     {
-        return  nexus_trans("cleanup.alarm_email_body_for_queue_failed_jobs", [
-            "since" => $since,
-            "count" => $count,
-            "failed_job_table" => $failedJobTable,
-        ], $locale);
+        return  \App\Support\Locale::trans("cleanup.alarm_email_body_for_queue_failed_jobs", ["since" => $since, "count" => $count, "failed_job_table" => $failedJobTable], $locale);
     }
 }

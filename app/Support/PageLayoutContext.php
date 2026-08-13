@@ -81,7 +81,7 @@ final class PageLayoutContext
 
         $script = '';
         if (\function_exists('nexus')) {
-            $script = \nexus()->getScript();
+            $script = \Nexus\Nexus::instance()->getScript();
         } else {
             $scriptFile = SupportContext::getServerValue('SCRIPT_FILENAME', '');
             $script = basename($scriptFile);

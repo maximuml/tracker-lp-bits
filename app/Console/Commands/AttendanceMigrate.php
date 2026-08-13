@@ -39,9 +39,9 @@ class AttendanceMigrate extends Command
     {
         $rep = new AttendanceRepository();
         $result = $rep->migrateAttendance();
-        $log = sprintf('[%s], %s, result: %s, query: %s', nexus() ? nexus()->getRequestId() : 'NO_REQUEST_ID', __METHOD__, var_export($result, true), last_query());
+        $log = sprintf('[%s], %s, result: %s, query: %s', \Nexus\Nexus::instance() ? \Nexus\Nexus::instance()->getRequestId() : 'NO_REQUEST_ID', __METHOD__, var_export($result, true), \App\Support\LegacyDb::lastQuery(false, 'json'));
         $this->info($log);
-        do_log($log);
+        \App\Support\Logger::writeWithContext((string) $log, (string) 'info', (bool) false);
         return 0;
     }
 }

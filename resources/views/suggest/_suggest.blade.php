@@ -11,7 +11,7 @@ header("Content-Type: text/xml; charset=utf-8");
 
 if (((\App\Support\SupportContext::getQuery('q') !== null)) && \App\Support\SupportContext::getQuery('q') != '')
 {
-	$searchstr = unesc(trim(\App\Support\SupportContext::getQuery('q')));
+	$searchstr = \App\Support\Input::unescape(trim(\App\Support\SupportContext::getQuery('q')));
 	
 	$suggestRows = \Nexus\Database\NexusDB::table('suggest')
 	    ->selectRaw('keywords AS suggest, COUNT(*) AS count')

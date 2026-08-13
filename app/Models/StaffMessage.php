@@ -56,7 +56,7 @@ class StaffMessage extends NexusModel
             'msg' => $msg,
             'added' => now(),
         ]);
-        fire_event(ModelEventEnum::STAFF_MESSAGE_CREATED, $record);
+        \App\Support\Events::fire(ModelEventEnum::STAFF_MESSAGE_CREATED, $record, null);
         return $record;
     }
 

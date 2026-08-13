@@ -25,7 +25,7 @@ final class User
 
     public static function currentUserCheck(): void
     {
-        LegacyAuth::currentUserCheck(\legacy_auth_context());
+        LegacyAuth::currentUserCheck(\App\Support\LegacyAuthContext::fromSupportContext());
     }
 
     /**

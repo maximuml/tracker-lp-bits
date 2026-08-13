@@ -304,7 +304,7 @@ final class Network
     public static function geoIpInfo(string $ip): array|false
     {
         $locationInfo = \Nexus\Database\NexusDB::remember("locations_{$ip}", 864000, function () use ($ip) {
-            $lang = \get_langfolder_cookie();
+            $lang = \App\Support\Locale::folderFromCookie(\App\Support\SupportContext::getCookieValue('c_lang_folder', ''), (bool) false);
             $langMap = [
                 'chs' => 'zh-CN',
                 'cht' => 'zh-CN',
@@ -322,7 +322,7 @@ final class Network
             ];
 
             try {
-                $database = \nexus_env('GEOIP2_DATABASE');
+                $database = \App\Support\Env::get('GEOIP2_DATABASE', null);
                 if (empty($database)) {
                     Logger::writeWithContext('no geoip2 database.');
 
@@ -396,7 +396,7 @@ final class Network
         $row = null;
 
         try {
-            $database = \nexus_env('GEOIP2_ASN_DATABASE');
+            $database = \App\Support\Env::get('GEOIP2_ASN_DATABASE', null);
             if (!file_exists($database) || !is_readable($database)) {
                 Logger::writeWithContext("GEOIP2_ASN_DATABASE: $database not exists or not readable", 'debug');
                 return false;

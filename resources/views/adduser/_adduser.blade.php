@@ -17,7 +17,7 @@ if ($__server_REQUEST_METHOD == "POST")
     } catch (\Exception $e) {
         \App\Support\LegacyResponse::abort("ERROR", $e->getMessage());
     }
-	header("Location: " . get_protocol_prefix() . "$BASEURL/userdetails.php?id=".htmlspecialchars($newUser->id));
+	header("Location: " . \App\Support\Http::protocolPrefix(\App\Support\Url::isSecure()) . "$BASEURL/userdetails.php?id=".htmlspecialchars($newUser->id));
 	return;
 }
 \App\Support\Html::stdhead("Add user");

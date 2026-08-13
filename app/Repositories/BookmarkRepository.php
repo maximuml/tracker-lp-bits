@@ -18,12 +18,12 @@ class BookmarkRepository extends BaseRepository
     {
         $torrent = Torrent::query()->find($torrentId);
         if (!$torrent) {
-            throw new NexusException(nexus_trans('bookmark.torrent_not_exists', ['torrent_id' => $torrentId]));
+            throw new NexusException(\App\Support\Locale::trans('bookmark.torrent_not_exists', ['torrent_id' => $torrentId], null));
         }
         $torrent->checkIsNormal();
         $exists = $user->bookmarks()->where('torrentid', $torrentId)->exists();
         if ($exists) {
-            throw new NexusException(nexus_trans('bookmark.torrent_already_bookmarked', ['torrent_id' => $torrentId]));
+            throw new NexusException(\App\Support\Locale::trans('bookmark.torrent_already_bookmarked', ['torrent_id' => $torrentId], null));
         }
         $result = $user->bookmarks()->create(['torrentid' => $torrentId]);
         return $result;
@@ -41,9 +41,9 @@ class BookmarkRepository extends BaseRepository
          */
         $record = $user->bookmarks()->where('torrentid', $torrentId)->first();
         if (!$record) {
-            throw new NexusException(nexus_trans('bookmark.torrent_has_not_been_bookmarked', ['torrent_id' => $torrentId]));
+            throw new NexusException(\App\Support\Locale::trans('bookmark.torrent_has_not_been_bookmarked', ['torrent_id' => $torrentId], null));
         }
-        do_log("going to remove bookmark of torrent: $torrentId");
+        \App\Support\Logger::writeWithContext((string) "going to remove bookmark of torrent: {$torrentId}", (string) 'info', (bool) false);
         $record->delete();
         return true;
     }

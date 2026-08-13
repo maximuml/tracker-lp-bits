@@ -78,7 +78,7 @@ class UserProfile extends ViewRecord implements HasActions
             if (Permission::can(PermissionEnum::USER_DELETE)) {
                 $actions[] = $this->buildDeleteAction();
             }
-            $actions = apply_filter('user_profile_actions', $actions);
+            $actions = \App\Support\Hooks::applyFilter('user_profile_actions', $actions);
         }
         return $actions;
     }
@@ -262,7 +262,7 @@ class UserProfile extends ViewRecord implements HasActions
             ->requiresConfirmation()
             ->action(function () {
                 if (Auth::user()->class <= $this->record->class) {
-                    send_admin_fail_notification("No permission!");
+                    \App\Support\Admin::failNotification("No permission!");
                     return;
                 }
                 $this->record->status = User::STATUS_CONFIRMED;

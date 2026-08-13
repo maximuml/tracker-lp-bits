@@ -112,7 +112,7 @@ class SearchBoxRepository extends BaseRepository
                     $taxonomies[] = [
                         'torrent_field' => $torrentField,
                         'display_text' => [
-                            'en' => nexus_trans("searchbox.sub_category_{$torrentField}_label", [], Locale::$languageMaps['en']),
+                            'en' => \App\Support\Locale::trans("searchbox.sub_category_{$torrentField}_label", [], Locale::$languageMaps['en']),
                         ],
                     ];
                 }
@@ -120,7 +120,7 @@ class SearchBoxRepository extends BaseRepository
             if (!empty($taxonomies)) {
                 $searchBox->update(["extra->" . SearchBox::EXTRA_TAXONOMY_LABELS => $taxonomies]);
             }
-            clear_search_box_cache();
+            \App\Support\Cache::clearSearchBox();
         }
     }
 
@@ -227,7 +227,7 @@ class SearchBoxRepository extends BaseRepository
             $table = SearchBox::$taxonomies[$torrentField]['table'];
             $select = sprintf("<b>%s: </b>", $searchBox->getTaxonomyLabel($torrentField));
             $select .= sprintf('<select name="%s_sel[%s]" data-mode="%s_%s">',$torrentField, $searchBoxId, $torrentField, $searchBoxId);
-            $select .= sprintf('<option value="%s">%s</option>', 0, nexus_trans('nexus.select_one_please'));
+            $select .= sprintf('<option value="%s">%s</option>', 0, \App\Support\Locale::trans('nexus.select_one_please', [], null));
             $list = NexusDB::table($table)->where(function (Builder $query) use ($searchBox) {
                 return $query->where('mode', $searchBox->id)->orWhere('mode', 0);
             })->orderBy('sort_index', 'desc')->get();
@@ -337,8 +337,8 @@ class SearchBoxRepository extends BaseRepository
      */
     public function buildSearchBoxFormSchema(SearchBox $searchBox, string $namePrefix): Section
     {
-        $lang = get_langfolder_cookie();
-        $heading = $searchBox->section_name[$lang] ?? nexus_trans('searchbox.sections.browse');
+        $lang = \App\Support\Locale::folderFromCookie(\App\Support\SupportContext::getCookieValue('c_lang_folder', ''), (bool) false);
+        $heading = $searchBox->section_name[$lang] ?? \App\Support\Locale::trans('searchbox.sections.browse', [], null);
         return Section::make($heading)
             ->schema($this->buildCategoryTaxonomyTagSchema($searchBox, false, $namePrefix));
     }
@@ -357,16 +357,16 @@ class SearchBoxRepository extends BaseRepository
         if ($multiple) {
             $schema[] = Forms\Components\CheckboxList::make("$namePrefix.category")
                 ->options($searchBox->categories()->orderBy('sort_index', 'desc')->orderBy('id')->pluck('name', 'id'))
-                ->label(nexus_trans('label.search_box.category'))
+                ->label(\App\Support\Locale::trans('label.search_box.category', [], null))
                 ->columns(6);
         } else {
             $schema[] = Forms\Components\Radio::make("$namePrefix.category")
                 ->options($searchBox->categories()->orderBy('sort_index', 'desc')->orderBy('id')->pluck('name', 'id'))
-                ->label(nexus_trans('label.search_box.category'))
+                ->label(\App\Support\Locale::trans('label.search_box.category', [], null))
                 ->columns(6);
         }
 
-        $fieldset = Fieldset::make(nexus_trans('searchbox.sub_categories_label'));
+        $fieldset = Fieldset::make(\App\Support\Locale::trans('searchbox.sub_categories_label', [], null));
         $fieldsetSchema = [];
         //Keep the order
         if (!empty($searchBox->extra[SearchBox::EXTRA_TAXONOMY_LABELS])) {
@@ -408,7 +408,7 @@ class SearchBoxRepository extends BaseRepository
         $tags = $tagRep->listAll($searchBox->id);
         $schema[] = Forms\Components\CheckboxList::make("$namePrefix.tag")
             ->options($tags->pluck('name', 'id'))
-            ->label(nexus_trans('label.tag.label'))
+            ->label(\App\Support\Locale::trans('label.tag.label', [], null))
             ->columns(6)
         ;
 

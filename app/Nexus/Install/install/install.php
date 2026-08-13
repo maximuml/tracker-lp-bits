@@ -24,7 +24,7 @@ if ($currentStep == 1) {
 
 if ($currentStep == 2) {
     $envExampleFile = $rootpath . ".env.example";
-    $envExampleData = readEnvFile($envExampleFile);
+    $envExampleData = \App\Support\Env::load($envExampleFile);
     $envFormControls = $install->listEnvFormControls();
     $newData = array_column($envFormControls, 'value', 'name');
     while ($isPost) {
@@ -161,7 +161,7 @@ if (
       <div class="container mx-auto">
           <?php echo $install->renderSteps()?>
           <div class="mt-10">
-              <form method="post" action="<?php echo getBaseUrl() . '?step=' . $currentStep?>">
+              <form method="post" action="<?php echo \App\Support\Url::baseUrl() . '?step=' . $currentStep?>">
               <input type="hidden" name="step" value="<?php echo $currentStep?>">
               <?php
               echo'<div class="step-' . $currentStep . ' text-center">';
@@ -219,7 +219,7 @@ if (
                   <?php if ($currentStep <= $maxStep) {?>
                   <button class="bg-blue-<?php echo $pass ? 500 : 200;?> p-2 m-4 text-white rounded" type="submit" <?php echo $pass ? '' : 'disabled';?>>Next</button>
                   <?php } else {?>
-                   <a class="bg-blue-500 p-2 m-4 text-white rounded" href="<?php echo getSchemeAndHttpHost()?>">Go to homepage</a>
+                   <a class="bg-blue-500 p-2 m-4 text-white rounded" href="<?php echo \App\Support\Url::schemeAndHost(false)?>">Go to homepage</a>
                   <?php }?>
               </div>
               </form>

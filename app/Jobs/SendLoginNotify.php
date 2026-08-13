@@ -41,7 +41,7 @@ class SendLoginNotify implements ShouldQueue
         $thisLoginLog = LoginLog::query()->findOrFail($this->thisLoginLogId);
         $log = "handling login log: " . $thisLoginLog->toJson();
         if (!$thisLoginLog->country || !$thisLoginLog->city) {
-            do_log("$log, this login log no country or city");
+            \App\Support\Logger::writeWithContext((string) "{$log}, this login log no country or city", (string) 'info', (bool) false);
             return;
         }
         $lastLoginLog = LoginLog::query()
@@ -50,35 +50,25 @@ class SendLoginNotify implements ShouldQueue
             ->orderBy('id', 'desc')
             ->first();
         if (!$lastLoginLog) {
-            do_log("$log, no last login log");
+            \App\Support\Logger::writeWithContext((string) "{$log}, no last login log", (string) 'info', (bool) false);
             return;
         }
         $log .= sprintf(", last login: %s", $lastLoginLog->toJson());
         if (!$lastLoginLog->country || !$lastLoginLog->city) {
-            do_log("$log, last login log no country or city");
+            \App\Support\Logger::writeWithContext((string) "{$log}, last login log no country or city", (string) 'info', (bool) false);
             return;
         }
         if ($thisLoginLog->country == $lastLoginLog->country && $thisLoginLog->city == $lastLoginLog->city) {
-            do_log("$log, country and city are equals");
+            \App\Support\Logger::writeWithContext((string) "{$log}, country and city are equals", (string) 'info', (bool) false);
             return;
         }
         $user = User::query()->findOrFail($thisLoginLog->uid, User::$commonFields);
         $locale = $user->locale;
         $toolRep = new ToolRepository();
-        $subject = nexus_trans('message.login_notify.subject', ['site_name' => \App\Support\Config\SiteConfig::current()->basic->siteName()], $locale);
-        $body = nexus_trans('message.login_notify.body', [
-            'this_login_time' => $thisLoginLog->created_at,
-            'this_ip' => $thisLoginLog->ip,
-            'this_location' => sprintf('%s·%s', $thisLoginLog->city, $thisLoginLog->country),
-            'last_login_time' => $lastLoginLog->created_at,
-            'last_ip' => $lastLoginLog->ip,
-            'last_location' => sprintf('%s·%s', $lastLoginLog->city, $lastLoginLog->country),
-        ], $locale);
+        $subject = \App\Support\Locale::trans('message.login_notify.subject', ['site_name' => \App\Support\Config\SiteConfig::current()->basic->siteName()], $locale);
+        $body = \App\Support\Locale::trans('message.login_notify.body', ['this_login_time' => $thisLoginLog->created_at, 'this_ip' => $thisLoginLog->ip, 'this_location' => sprintf('%s·%s', $thisLoginLog->city, $thisLoginLog->country), 'last_login_time' => $lastLoginLog->created_at, 'last_ip' => $lastLoginLog->ip, 'last_location' => sprintf('%s·%s', $lastLoginLog->city, $lastLoginLog->country)], $locale);
         $result = $toolRep->sendMail($user->email, $subject, $body);
-        do_log(sprintf(
-            '%s, user: %s login notify result: %s',
-            $log, $user->username, var_export($result, true)
-        ));
+        \App\Support\Logger::writeWithContext((string) sprintf('%s, user: %s login notify result: %s', $log, $user->username, var_export($result, true)), (string) 'info', (bool) false);
 
     }
 
@@ -90,6 +80,6 @@ class SendLoginNotify implements ShouldQueue
      */
     public function failed(\Throwable $exception)
     {
-        do_log("failed: " . $exception->getMessage() . $exception->getTraceAsString(), 'error');
+        \App\Support\Logger::writeWithContext((string) ("failed: " . $exception->getMessage() . $exception->getTraceAsString()), (string) 'error', (bool) false);
     }
 }

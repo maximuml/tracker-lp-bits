@@ -37,7 +37,7 @@ class Category extends NexusModel
     /** @return  mixed */
     public static function getLabelName()
     {
-        return nexus_trans('searchbox.category_label');
+        return \App\Support\Locale::trans('searchbox.category_label', [], null);
     }
 
     /** @return  \Illuminate\Database\Eloquent\Relations\BelongsTo<Icon, $this> */

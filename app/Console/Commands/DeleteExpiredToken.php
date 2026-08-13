@@ -49,13 +49,13 @@ class DeleteExpiredToken extends Command
         }
         $log = sprintf('uid: %s, days: %s', $uid, $days);
         $this->info($log);
-        do_log($log);
+        \App\Support\Logger::writeWithContext((string) $log, (string) 'info', (bool) false);
 
         $query->where('last_used_at', '<', Carbon::now()->subDays($days));
         $result = $query->delete();
-        $log = sprintf('[%s], %s, result: %s, query: %s', nexus()->getRequestId(), __METHOD__, var_export($result, true), last_query());
+        $log = sprintf('[%s], %s, result: %s, query: %s', \Nexus\Nexus::instance()->getRequestId(), __METHOD__, var_export($result, true), \App\Support\LegacyDb::lastQuery(false, 'json'));
         $this->info($log);
-        do_log($log);
+        \App\Support\Logger::writeWithContext((string) $log, (string) 'info', (bool) false);
         return 0;
     }
 }

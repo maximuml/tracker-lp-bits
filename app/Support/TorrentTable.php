@@ -174,7 +174,7 @@ foreach ($rows as $row)
     } else {
         $stickyicon = "";
     }
-	$stickyicon = apply_filter('sticky_icon', $stickyicon, $row);
+	$stickyicon = \App\Support\Hooks::applyFilter('sticky_icon', $stickyicon, $row);
     $sp_torrent = \App\Support\Promotion::appendWithContext($row['sp_state'],"",true,$row["added"], $row['promotion_time_type'], $row['promotion_until'], $row['__ignore_global_sp_state'] ?? false);
 	$hrImg = \App\Support\TorrentAccess::hrImage($row, $row['search_box_id']);
 
@@ -202,7 +202,7 @@ foreach ($rows as $row)
     }
     $paidIcon = $torrentRep->getPaidIcon($row);
 	$titleSuffix = $banned_torrent.$paidIcon.$sp_torrent.$sp_torrent_sub. $hrImg . $seedBoxIcon . $approvalStatusIcon;
-	$titleSuffix = apply_filter('torrent_title_suffix', $titleSuffix, $row);
+	$titleSuffix = \App\Support\Hooks::applyFilter('torrent_title_suffix', $titleSuffix, $row);
 	print($titleSuffix);
     /**
      * render tags
@@ -299,7 +299,7 @@ foreach ($rows as $row)
 			$ratiocolor . "\">" . number_format($row["seeders"]) . "</font>" : number_format($row["seeders"]))."</a></b></td>\n");
 	}
 	else
-		print("<td class=\"rowfollow\"><span class=\"" . linkcolor($row["seeders"]) . "\">" . number_format($row["seeders"]) . "</span></td>\n");
+		print("<td class=\"rowfollow\"><span class=\"" . \App\Support\Palette::seederLink($row["seeders"]) . "\">" . number_format($row["seeders"]) . "</span></td>\n");
 
 	if ($row["leechers"]) {
 		print("<td class=\"rowfollow\"><b><a href=\"details.php?id=".$id."&amp;hit=1&amp;dllist=1#leechers\">" .

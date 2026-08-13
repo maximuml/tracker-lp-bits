@@ -51,7 +51,7 @@ class SeedBoxRepository extends BaseRepository
         $params = $this->formatParams($params);
         $seedBoxRecord = SeedBoxRecord::query()->create($params);
         $this->clearApprovalCountCache();
-        publish_model_event("seed_box_record_created", $seedBoxRecord->id);
+        \App\Support\Events::publishModel("seed_box_record_created", $seedBoxRecord->id, "");
         return $seedBoxRecord;
     }
 
@@ -74,7 +74,7 @@ class SeedBoxRepository extends BaseRepository
                 $params['ip_end_numeric'] = $ipBlock->getLastIp()->numeric();
                 $params['version'] = $ipBlock->getVersion();
             } catch (\Exception $exception) {
-                do_log("[NOT_IP_BLOCK], {$params['ip']}" . $exception->getMessage());
+                \App\Support\Logger::writeWithContext((string) ("[NOT_IP_BLOCK], {$params['ip']}" . $exception->getMessage()), (string) 'info', (bool) false);
             }
             if (empty($params['version'])) {
                 try {
@@ -83,7 +83,7 @@ class SeedBoxRepository extends BaseRepository
                     $params['ip_end_numeric'] = $ip->numeric();
                     $params['version'] = $ip->getVersion();
                 } catch (\Exception $exception) {
-                    do_log("[NOT_IP], {$params['ip']}" . $exception->getMessage());
+                    \App\Support\Logger::writeWithContext((string) ("[NOT_IP], {$params['ip']}" . $exception->getMessage()), (string) 'info', (bool) false);
                 }
             }
             if (empty($params['version'])) {
@@ -110,9 +110,9 @@ class SeedBoxRepository extends BaseRepository
             && empty($params['ip_begin'])
             && empty($params['ip_end'])
         ) {
-            do_log("only asn: " . $params['asn']);
+            \App\Support\Logger::writeWithContext((string) ("only asn: " . $params['asn']), (string) 'info', (bool) false);
         } else {
-            throw new \InvalidArgumentException(nexus_trans('label.seed_box_record.ip_help'));
+            throw new \InvalidArgumentException(\App\Support\Locale::trans('label.seed_box_record.ip_help', [], null));
         }
 
         return $params;
@@ -129,7 +129,7 @@ class SeedBoxRepository extends BaseRepository
         $params = $this->formatParams($params);
         $model->update($params);
         $this->clearApprovalCountCache();
-        publish_model_event("seed_box_record_updated", $id);
+        \App\Support\Events::publishModel("seed_box_record_updated", $id, "");
         return $model;
     }
 
@@ -158,7 +158,7 @@ class SeedBoxRepository extends BaseRepository
         $baseQuery->delete();
         $this->clearApprovalCountCache();
         foreach ($list as $record) {
-            publish_model_event("seed_box_record_deleted", $record->id, $record->toJson());
+            \App\Support\Events::publishModel("seed_box_record_deleted", $record->id, $record->toJson());
         }
         return true;
     }
@@ -182,14 +182,8 @@ class SeedBoxRepository extends BaseRepository
         }
         $message = [
             'receiver' => $seedBoxRecord->uid,
-            'subject' => nexus_trans('seed-box.status_change_message.subject'),
-            'msg' => nexus_trans('seed-box.status_change_message.body', [
-                'id' => $seedBoxRecord->id,
-                'operator' => Auth::user()->username,
-                'old_status' => $seedBoxRecord->statusText,
-                'new_status' => nexus_trans('seed-box.status_text.' . $status),
-                'reason' => $reason,
-            ]),
+            'subject' => \App\Support\Locale::trans('seed-box.status_change_message.subject', [], null),
+            'msg' => \App\Support\Locale::trans('seed-box.status_change_message.body', ['id' => $seedBoxRecord->id, 'operator' => Auth::user()->username, 'old_status' => $seedBoxRecord->statusText, 'new_status' => \App\Support\Locale::trans('seed-box.status_text.' . $status, [], null), 'reason' => $reason], null),
             'added' => now()
         ];
         return NexusDB::transaction(function () use ($seedBoxRecord, $status, $message) {
@@ -249,19 +243,19 @@ class SeedBoxRepository extends BaseRepository
                 ->forPage($page, $size)
                 ->get();
             if ($list->isEmpty()) {
-                do_log("$logPrefix, no more data ...");
+                \App\Support\Logger::writeWithContext((string) "{$logPrefix}, no more data ...", (string) 'info', (bool) false);
                 break;
             }
             foreach ($list as $record) {
                 $uid = $record->uid;
                 $str = $record->str;
-                do_log("$logPrefix, handling user: $uid with $field->name: $str");
+                \App\Support\Logger::writeWithContext((string) "{$logPrefix}, handling user: {$uid} with {$field->name}: {$str}", (string) 'info', (bool) false);
                 self::updateCache($record->uid, TypeEnum::USER, $isAllowed, $field, $str);
-                do_log("$logPrefix, handling user: $uid with $field->name: $str done!");
+                \App\Support\Logger::writeWithContext((string) "{$logPrefix}, handling user: {$uid} with {$field->name}: {$str} done!", (string) 'info', (bool) false);
             }
             $page++;
         }
-        do_log("$logPrefix, all done!");
+        \App\Support\Logger::writeWithContext((string) "{$logPrefix}, all done!", (string) 'info', (bool) false);
     }
 
     /**
@@ -280,13 +274,13 @@ class SeedBoxRepository extends BaseRepository
                 ->forPage($page, $size)
                 ->get();
             if ($list->isEmpty()) {
-                do_log("$logPrefix, no more data ...");
+                \App\Support\Logger::writeWithContext((string) "{$logPrefix}, no more data ...", (string) 'info', (bool) false);
                 break;
             }
             self::updateCache(0, TypeEnum::ADMIN, $isAllowed, $field, $list->pluck($fieldName)->join(","));
             $page++;
         }
-        do_log("$logPrefix, all done!");
+        \App\Support\Logger::writeWithContext((string) "{$logPrefix}, all done!", (string) 'info', (bool) false);
     }
 
     /**
@@ -313,7 +307,7 @@ class SeedBoxRepository extends BaseRepository
         }
         $list = array_filter($list);
         $key = self::getCacheKey($userId, $isAllowed, $field);
-        do_log("userId: $userId, type: $type->name, isAllowed: $isAllowed->name, ipOrAsn: $field->name, key: $key, list: " . json_encode($list));
+        \App\Support\Logger::writeWithContext((string) ("userId: {$userId}, type: {$type->name}, isAllowed: {$isAllowed->name}, ipOrAsn: {$field->name}, key: {$key}, list: " . json_encode($list)), (string) 'info', (bool) false);
         NexusDB::cache_del($key);
         if (!empty($list)) {
             NexusDB::redis()->sadd($key, ...$list);
@@ -380,7 +374,7 @@ class SeedBoxRepository extends BaseRepository
             'result' => $isSeedBox,
             'desc' => $desc,
         ];
-        do_log(json_encode($result));
+        \App\Support\Logger::writeWithContext((string) json_encode($result), (string) 'info', (bool) false);
         return $result;
     }
 
@@ -397,7 +391,7 @@ class SeedBoxRepository extends BaseRepository
                 $asnObj = $reader->asn($ip);
                 return $asnObj->autonomousSystemNumber ?? 0;
             } catch (\Exception $e) {
-                do_log("ip: $ip, error: " . $e->getMessage());
+                \App\Support\Logger::writeWithContext((string) ("ip: {$ip}, error: " . $e->getMessage()), (string) 'info', (bool) false);
                 return 0;
             }
         });
@@ -434,9 +428,9 @@ class SeedBoxRepository extends BaseRepository
     private static function getAsnReader(): ?Reader
     {
         if (is_null(self::$asnReader)) {
-            $database = nexus_env('GEOIP2_ASN_DATABASE');
+            $database = \App\Support\Env::get('GEOIP2_ASN_DATABASE', null);
             if (!file_exists($database) || !is_readable($database)) {
-                do_log("GEOIP2_ASN_DATABASE: $database not exists or not readable", "debug");
+                \App\Support\Logger::writeWithContext((string) "GEOIP2_ASN_DATABASE: {$database} not exists or not readable", (string) "debug", (bool) false);
                 return null;
             }
             self::$asnReader = new Reader($database);

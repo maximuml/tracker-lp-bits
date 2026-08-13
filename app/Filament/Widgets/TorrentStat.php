@@ -13,7 +13,7 @@ class TorrentStat extends StatTable
 
     protected function getHeader(): string
     {
-        return nexus_trans('dashboard.torrent.page_title');
+        return \App\Support\Locale::trans('dashboard.torrent.page_title', [], null);
     }
 
     protected function getTableRows(): array

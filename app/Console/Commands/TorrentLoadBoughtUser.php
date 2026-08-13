@@ -30,7 +30,7 @@ class TorrentLoadBoughtUser extends Command
     {
         $torrentId = (int) $this->argument('torrent_id');
         LoadTorrentBoughtUsers::dispatch($torrentId);
-        do_log("torrentId: $torrentId");
+        \App\Support\Logger::writeWithContext((string) "torrentId: {$torrentId}", (string) 'info', (bool) false);
         return Command::SUCCESS;
     }
 }

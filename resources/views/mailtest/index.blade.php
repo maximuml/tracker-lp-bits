@@ -14,13 +14,13 @@ $action = (\App\Support\SupportContext::getPost('action') !== null)
 
 if ($action == 'sendmail') {
     $email = htmlspecialchars(trim(\App\Support\SupportContext::getPost('email')));
-    $email = safe_email($email);
-    if (! check_email($email)) {
+    $email = \App\Support\Email::sanitizeForDisplay((string) $email);
+    if (! \App\Support\Email::isWellFormed((string) $email)) {
         \App\Support\LegacyResponse::abort($lang_mailtest['std_error'], $lang_mailtest['std_invalid_email_address']);
     }
     $title = $SITENAME . $lang_mailtest['text_smtp_testing_mail'];
     $body = $lang_mailtest['mail_test_mail_content'];
-    $sendResult = sent_mail($email, $SITENAME, $SITEEMAIL, $title, $body, 'mailtest', false, false, '', 'UTF-8');
+    $sendResult = \App\Support\Mail::sentLegacy((string) $email, (string) $SITENAME, (string) $SITEEMAIL, (string) $title, (string) $body, (string) 'mailtest', (bool) false, (bool) false, '', (string) 'UTF-8');
     if ($sendResult === true) {
         \App\Support\LegacyResponse::abort($lang_mailtest['std_success'], $lang_mailtest['std_success_note']);
     } else {

@@ -384,20 +384,20 @@ for ($i=0; $i < count($allBonus); $i++)
 		elseif($bonusarray['art'] == 'invite')
 		{
 			if (!\App\Support\Config\SiteConfig::current()->main->inviteSystem())
-				print("<td class=\"rowfollow\" align=\"center\"><input type=\"submit\" name=\"submit\" value=\"".nexus_trans('invite.send_deny_reasons.invite_system_closed')."\" disabled=\"disabled\" /></td>");
+				print("<td class=\"rowfollow\" align=\"center\"><input type=\"submit\" name=\"submit\" value=\"".\App\Support\Locale::trans('invite.send_deny_reasons.invite_system_closed', [], null)."\" disabled=\"disabled\" /></td>");
 			elseif(!\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::SEND_INVITE)){
 			$requireClass = \App\Support\Config\SiteConfig::current()->authority->permission($sendInvitePermission->value);
-				print("<td class=\"rowfollow\" align=\"center\"><input type=\"submit\" name=\"submit\" value=\"".nexus_trans('invite.send_deny_reasons.no_permission', ['class' => \App\Models\User::getClassText($requireClass)])."\" disabled=\"disabled\" /></td>");}
+				print("<td class=\"rowfollow\" align=\"center\"><input type=\"submit\" name=\"submit\" value=\"".\App\Support\Locale::trans('invite.send_deny_reasons.no_permission', ['class' => \App\Models\User::getClassText($requireClass)], null)."\" disabled=\"disabled\" /></td>");}
 			else
 				print("<td class=\"rowfollow\" align=\"center\"><input type=\"submit\" name=\"submit\" value=\"".$lang_mybonus['submit_exchange']."\" /></td>");
 		}
 		elseif($bonusarray['art'] == 'tmp_invite')
 		{
 			if (!\App\Support\Config\SiteConfig::current()->main->inviteSystem())
-				print("<td class=\"rowfollow\" align=\"center\"><input type=\"submit\" name=\"submit\" value=\"".nexus_trans('invite.send_deny_reasons.invite_system_closed')."\" disabled=\"disabled\" /></td>");
+				print("<td class=\"rowfollow\" align=\"center\"><input type=\"submit\" name=\"submit\" value=\"".\App\Support\Locale::trans('invite.send_deny_reasons.invite_system_closed', [], null)."\" disabled=\"disabled\" /></td>");
 			elseif(!\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::SEND_INVITE)){
 			$requireClass = \App\Support\Config\SiteConfig::current()->authority->permission($sendInvitePermission->value);
-				print("<td class=\"rowfollow\" align=\"center\"><input type=\"submit\" name=\"submit\" value=\"".nexus_trans('invite.send_deny_reasons.no_permission', ['class' => \App\Models\User::getClassText($requireClass)])."\" disabled=\"disabled\" /></td>");}
+				print("<td class=\"rowfollow\" align=\"center\"><input type=\"submit\" name=\"submit\" value=\"".\App\Support\Locale::trans('invite.send_deny_reasons.no_permission', ['class' => \App\Models\User::getClassText($requireClass)], null)."\" disabled=\"disabled\" /></td>");}
 			else
 				print("<td class=\"rowfollow\" align=\"center\"><input type=\"submit\" name=\"submit\" value=\"".$lang_mybonus['submit_exchange']."\" /></td>");
 		}
@@ -468,7 +468,7 @@ if ($donortimes_bonus)
 
 print("</ul>");
 
-$seedBonusResult = calculate_seed_bonus($CURUSER['id']);
+$seedBonusResult = \App\Support\Bonus::calculateForUser($CURUSER['id'], null);
 $A = $seedBonusResult['A'];
 
 $bonusTableResult = \App\Support\Bonus::buildBonusTableForUser($CURUSER, $seedBonusResult, ['table_style' => 'width: 50%']);
@@ -557,7 +557,7 @@ if ($action == "exchange") {
         $lockName = "user:$userid:exchange:bonus";
         $lock = new \Nexus\Database\NexusLock($lockName, $lockSeconds);
         if (!$lock->get()) {
-            do_log("[LOCKED], $lockName, $lockText");
+            \App\Support\Logger::writeWithContext((string) "[LOCKED], {$lockName}, {$lockText}", (string) 'info', (bool) false);
             \App\Support\LegacyResponse::redirect('mybonus.php?do=duplicated');
         }
 		//=== trade for upload
@@ -577,25 +577,19 @@ if ($action == "exchange") {
 			else {
 			$upload = $CURUSER['uploaded'];
 			$up = $upload + $bonusarray['menge'];
-            do_log(sprintf(
-                "user: %s going to use %s bonus to exchange uploaded from %s to %s",
-                $CURUSER['id'], $points, $CURUSER['uploaded'], $up
-            ));
+            \App\Support\Logger::writeWithContext((string) sprintf("user: %s going to use %s bonus to exchange uploaded from %s to %s", $CURUSER['id'], $points, $CURUSER['uploaded'], $up), (string) 'info', (bool) false);
 //			$bonuscomment = date("Y-m-d") . " - " .$points. " Points for upload bonus.\n " .$bonuscomment;
 //			sql_query("UPDATE users SET uploaded = ".sqlesc($up).", seedbonus = seedbonus - $points, bonuscomment = ".sqlesc($bonuscomment)." WHERE id = ".sqlesc($userid)) or sqlerr(__FILE__, __LINE__);
             $bonusRep->consumeUserBonus($CURUSER['id'], $points, \App\Models\BonusLogs::BUSINESS_TYPE_EXCHANGE_UPLOAD, $points. " Points for uploaded.", ['uploaded' => $up]);
-			\App\Support\LegacyResponse::redirect("" . get_protocol_prefix() . "$BASEURL/mybonus.php?do=upload");
+			\App\Support\LegacyResponse::redirect("" . \App\Support\Http::protocolPrefix(\App\Support\Url::isSecure()) . "$BASEURL/mybonus.php?do=upload");
 			}
 		}
         if($art == "traffic_downloaded") {
             $downloaded = $CURUSER['downloaded'];
             $down = $downloaded + $bonusarray['menge'];
-            do_log(sprintf(
-                "user: %s going to use %s bonus to exchange downloaded from %s to %s",
-                $CURUSER['id'], $points, $CURUSER['downloaded'], $down
-            ));
+            \App\Support\Logger::writeWithContext((string) sprintf("user: %s going to use %s bonus to exchange downloaded from %s to %s", $CURUSER['id'], $points, $CURUSER['downloaded'], $down), (string) 'info', (bool) false);
             $bonusRep->consumeUserBonus($CURUSER['id'], $points, \App\Models\BonusLogs::BUSINESS_TYPE_EXCHANGE_DOWNLOAD, $points. " Points for downloaded.", ['downloaded' => $down]);
-            \App\Support\LegacyResponse::redirect("" . get_protocol_prefix() . "$BASEURL/mybonus.php?do=download");
+            \App\Support\LegacyResponse::redirect("" . \App\Support\Http::protocolPrefix(\App\Support\Url::isSecure()) . "$BASEURL/mybonus.php?do=download");
         }
 		//=== trade for one month VIP status ***note "SET class = '10'" change "10" to whatever your VIP class number is
 		elseif($art == "class") {
@@ -608,7 +602,7 @@ if ($action == "exchange") {
 //			$bonuscomment = date("Y-m-d") . " - " .$points. " Points for 1 month VIP Status.\n " .htmlspecialchars($bonuscomment);
 //			sql_query("UPDATE users SET class = '".UC_VIP."', vip_added = 'yes', vip_until = ".sqlesc($vip_until).", seedbonus = seedbonus - $points, bonuscomment=".sqlesc($bonuscomment)." WHERE id = ".sqlesc($userid)) or sqlerr(__FILE__, __LINE__);
             $bonusRep->consumeUserBonus($CURUSER['id'], $points, \App\Models\BonusLogs::BUSINESS_TYPE_BUY_VIP, $points. " Points for 1 month VIP Status.", ['class' => UC_VIP, 'vip_added' => 'yes', 'vip_until' => $vip_until]);
-			\App\Support\LegacyResponse::redirect("" . get_protocol_prefix() . "$BASEURL/mybonus.php?do=vip");
+			\App\Support\LegacyResponse::redirect("" . \App\Support\Http::protocolPrefix(\App\Support\Url::isSecure()) . "$BASEURL/mybonus.php?do=vip");
 		}
 		//=== trade for invites
 		elseif($art == "invite") {
@@ -619,7 +613,7 @@ if ($action == "exchange") {
 //			$bonuscomment = date("Y-m-d") . " - " .$points. " Points for invites.\n " .htmlspecialchars($bonuscomment);
 //			sql_query("UPDATE users SET invites = ".sqlesc($inv).", seedbonus = seedbonus - $points, bonuscomment=".sqlesc($bonuscomment)." WHERE id = ".sqlesc($userid)) or sqlerr(__FILE__, __LINE__);
             $bonusRep->consumeUserBonus($CURUSER['id'], $points, \App\Models\BonusLogs::BUSINESS_TYPE_EXCHANGE_INVITE, $points. " Points for invites.", ['invites' => $inv, ]);
-            \App\Support\LegacyResponse::redirect("" . get_protocol_prefix() . "$BASEURL/mybonus.php?do=invite");
+            \App\Support\LegacyResponse::redirect("" . \App\Support\Http::protocolPrefix(\App\Support\Url::isSecure()) . "$BASEURL/mybonus.php?do=invite");
 		}
         //=== temporary invite
         elseif($art == "tmp_invite") {
@@ -630,7 +624,7 @@ if ($action == "exchange") {
 //			$bonuscomment = date("Y-m-d") . " - " .$points. " Points for invites.\n " .htmlspecialchars($bonuscomment);
 //			sql_query("UPDATE users SET invites = ".sqlesc($inv).", seedbonus = seedbonus - $points, bonuscomment=".sqlesc($bonuscomment)." WHERE id = ".sqlesc($userid)) or sqlerr(__FILE__, __LINE__);
             $bonusRep->consumeToBuyTemporaryInvite($CURUSER['id']);
-            \App\Support\LegacyResponse::redirect("" . get_protocol_prefix() . "$BASEURL/mybonus.php?do=tmp_invite");
+            \App\Support\LegacyResponse::redirect("" . \App\Support\Http::protocolPrefix(\App\Support\Url::isSecure()) . "$BASEURL/mybonus.php?do=tmp_invite");
         }
 		//=== trade for special title
 		/**** the $words array are words that you DO NOT want the user to have... use to filter "bad words" & user class...
@@ -644,7 +638,7 @@ if ($action == "exchange") {
 //			$bonuscomment = date("Y-m-d") . " - " .$points. " Points for custom title. Old title is ".htmlspecialchars(trim($CURUSER["title"]))." and new title is $title\n " .htmlspecialchars($bonuscomment);
 //			sql_query("UPDATE users SET title = ".sqlesc($title).", seedbonus = seedbonus - $points, bonuscomment = ".sqlesc($bonuscomment)." WHERE id = ".sqlesc($userid)) or sqlerr(__FILE__, __LINE__);
             $bonusRep->consumeUserBonus($CURUSER['id'], $points, \App\Models\BonusLogs::BUSINESS_TYPE_CUSTOM_TITLE, $points. " Points for custom title. Old title is ".htmlspecialchars(trim($CURUSER["title"]))." and new title is $title.", ['title' => $title, ]);
-			\App\Support\LegacyResponse::redirect("" . get_protocol_prefix() . "$BASEURL/mybonus.php?do=title");
+			\App\Support\LegacyResponse::redirect("" . \App\Support\Http::protocolPrefix(\App\Support\Url::isSecure()) . "$BASEURL/mybonus.php?do=title");
 		}
 		elseif($art == 'gift_2') // charity giving
 		{
@@ -677,7 +671,7 @@ if ($action == "exchange") {
 				    ->whereRaw('downloaded > 10737418240')
 				    ->whereRaw('? > uploaded/downloaded', [$ratiocharity])
 				    ->increment('seedbonus', $charityPerUser);
-					\App\Support\LegacyResponse::redirect("" . get_protocol_prefix() . "$BASEURL/mybonus.php?do=charity");
+					\App\Support\LegacyResponse::redirect("" . \App\Support\Http::protocolPrefix(\App\Support\Url::isSecure()) . "$BASEURL/mybonus.php?do=charity");
 				}
 				else
 				{
@@ -733,12 +727,12 @@ if ($action == "exchange") {
                 \App\Models\BonusLogs::add($useridgift, $userseedbonus, $aftertaxpoint, $userseedbonus + $aftertaxpoint, " + " .$points2receiver. " Points (after tax) as a gift from ".($CURUSER["username"]), \App\Models\BonusLogs::BUSINESS_TYPE_RECEIVE_GIFT);
 
 				//===send message
-                $locale = get_user_locale($useridgift);
-				$subject = nexus_trans("bonus.msg_someone_loves_you", [], $locale);
-				$msg = nexus_trans("bonus.msg_you_have_been_given", [], $locale).$points2.nexus_trans("bonus.msg_after_tax", [], $locale).$points2receiver.nexus_trans("bonus.msg_karma_points_by", [], $locale).$CURUSER['username'];
+                $locale = \App\Support\Locale::userLocale($useridgift);
+				$subject = \App\Support\Locale::trans("bonus.msg_someone_loves_you", [], $locale);
+				$msg = \App\Support\Locale::trans("bonus.msg_you_have_been_given", [], $locale).$points2.\App\Support\Locale::trans("bonus.msg_after_tax", [], $locale).$points2receiver.\App\Support\Locale::trans("bonus.msg_karma_points_by", [], $locale).$CURUSER['username'];
 				if ($message)
 				{
-					$msg .= "\n".nexus_trans("bonus.msg_personal_message_from", [], $locale).$CURUSER['username'].nexus_trans("bonus.msg_colon", [], $locale).$message;
+					$msg .= "\n".\App\Support\Locale::trans("bonus.msg_personal_message_from", [], $locale).$CURUSER['username'].\App\Support\Locale::trans("bonus.msg_colon", [], $locale).$message;
 				}
 				\App\Models\Message::add([
 					'sender' => 0,
@@ -747,8 +741,8 @@ if ($action == "exchange") {
 					'msg' => $msg,
 					'receiver' => $useridgift,
 				]);
-				$usernamegift = unesc(\App\Support\SupportContext::getPost("username"));
-                \App\Support\LegacyResponse::redirect("" . get_protocol_prefix() . "$BASEURL/mybonus.php?do=transfer");
+				$usernamegift = \App\Support\Input::unescape(\App\Support\SupportContext::getPost("username"));
+                \App\Support\LegacyResponse::redirect("" . \App\Support\Http::protocolPrefix(\App\Support\Url::isSecure()) . "$BASEURL/mybonus.php?do=transfer");
 			}
 			else{
 				print("<table width=\"97%\"><tr><td class=\"colhead\" align=\"left\" colspan=\"2\"><h1>".$lang_mybonus['text_oups']."</h1></td></tr>");
@@ -759,7 +753,7 @@ if ($action == "exchange") {
 		        \App\Support\LegacyResponse::abort("Error", "Invalid H&R ID: " . (\App\Support\SupportContext::getPost('hr_id') ?? ''), false, false);
             }
             $bonusRep->consumeToCancelHitAndRun($userid, \App\Support\SupportContext::getPost('hr_id'));
-            \App\Support\LegacyResponse::redirect("" . get_protocol_prefix() . "$BASEURL/mybonus.php?do=cancel_hr");
+            \App\Support\LegacyResponse::redirect("" . \App\Support\Http::protocolPrefix(\App\Support\Url::isSecure()) . "$BASEURL/mybonus.php?do=cancel_hr");
 //        } elseif ($art == 'buy_medal') {
 //            if (empty(\App\Support\SupportContext::getPost('medal_id'))) {
 
@@ -768,13 +762,13 @@ if ($action == "exchange") {
 //            nexus_redirect("" . get_protocol_prefix() . "$BASEURL/mybonus.php?do=buy_medal");
         } elseif ($art == 'attendance_card') {
             $bonusRep->consumeToBuyAttendanceCard($userid);
-            \App\Support\LegacyResponse::redirect("" . get_protocol_prefix() . "$BASEURL/mybonus.php?do=attendance_card");
+            \App\Support\LegacyResponse::redirect("" . \App\Support\Http::protocolPrefix(\App\Support\Url::isSecure()) . "$BASEURL/mybonus.php?do=attendance_card");
         } elseif ($art == 'rainbow_id') {
             $bonusRep->consumeToBuyRainbowId($userid);
-            \App\Support\LegacyResponse::redirect("" . get_protocol_prefix() . "$BASEURL/mybonus.php?do=rainbow_id");
+            \App\Support\LegacyResponse::redirect("" . \App\Support\Http::protocolPrefix(\App\Support\Url::isSecure()) . "$BASEURL/mybonus.php?do=rainbow_id");
         } elseif ($art == 'change_username_card') {
             $bonusRep->consumeToBuyChangeUsernameCard($userid);
-            \App\Support\LegacyResponse::redirect("" . get_protocol_prefix() . "$BASEURL/mybonus.php?do=change_username_card");
+            \App\Support\LegacyResponse::redirect("" . \App\Support\Http::protocolPrefix(\App\Support\Url::isSecure()) . "$BASEURL/mybonus.php?do=change_username_card");
         }
 	}
 }

@@ -39,7 +39,7 @@ class LoadTorrentBoughtUsers implements ShouldQueue
     {
         $rep = new TorrentRepository();
         $result = $rep->loadBoughtUser($this->torrentId);
-        do_log("result: $result");
+        \App\Support\Logger::writeWithContext((string) "result: {$result}", (string) 'info', (bool) false);
     }
 
     /**
@@ -50,6 +50,6 @@ class LoadTorrentBoughtUsers implements ShouldQueue
      */
     public function failed(\Throwable $exception)
     {
-        do_log("failed: " . $exception->getMessage() . $exception->getTraceAsString(), 'error');
+        \App\Support\Logger::writeWithContext((string) ("failed: " . $exception->getMessage() . $exception->getTraceAsString()), (string) 'error', (bool) false);
     }
 }

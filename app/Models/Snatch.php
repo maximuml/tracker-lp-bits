@@ -136,7 +136,7 @@ class Snatch extends NexusModel
         if ($this->downloaded) {
             $ratio = floor(($this->uploaded / $this->downloaded) * 1000) / 1000;
         } elseif ($this->uploaded) {
-            $ratio = nexus_trans('snatch.share_ratio_infinity');
+            $ratio = \App\Support\Locale::trans('snatch.share_ratio_infinity', [], null);
         } else {
             $ratio = '---';
         }

@@ -24,12 +24,12 @@ return [
     */
 
     'connection' => [
-        'host' => nexus_env('CLICKHOUSE_HOST', 'localhost'),
-        'port' => nexus_env('CLICKHOUSE_HTTP_PORT', 8123),
-        'username' => nexus_env('CLICKHOUSE_USER', 'default'),
-        'password' => nexus_env('CLICKHOUSE_PASSWORD', ''),
+        'host' => \App\Support\Env::get('CLICKHOUSE_HOST', 'localhost'),
+        'port' => \App\Support\Env::get('CLICKHOUSE_HTTP_PORT', 8123),
+        'username' => \App\Support\Env::get('CLICKHOUSE_USER', 'default'),
+        'password' => \App\Support\Env::get('CLICKHOUSE_PASSWORD', ''),
         'options' => [
-            'database' => nexus_env('CLICKHOUSE_DATABASE', 'default'),
+            'database' => \App\Support\Env::get('CLICKHOUSE_DATABASE', 'default'),
             'timeout' => 1,
             'connectTimeOut' => 2,
         ],
@@ -42,7 +42,7 @@ return [
     */
 
     'migrations' => [
-        'table' => nexus_env('CLICKHOUSE_MIGRATION_TABLE', 'migrations'),
+        'table' => \App\Support\Env::get('CLICKHOUSE_MIGRATION_TABLE', 'migrations'),
         'path' => __DIR__ . '/../database/clickhouse-migrations',
     ],
 ];

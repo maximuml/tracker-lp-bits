@@ -21,38 +21,38 @@ class DashboardRepository extends BaseRepository
         $name = 'nexus_version';
         $result[$name] = [
             'name' => $name,
-            'text' => nexus_trans("dashboard.system_info.$name"),
+            'text' => \App\Support\Locale::trans("dashboard.system_info.{$name}", [], null),
             'value' => VERSION_NUMBER,
         ];
         $name = 'nexus_release_date';
         $result[$name] = [
             'name' => $name,
-            'text' => nexus_trans("dashboard.system_info.$name"),
+            'text' => \App\Support\Locale::trans("dashboard.system_info.{$name}", [], null),
             'value' => RELEASE_DATE,
         ];
         $name = 'laravel_version';
         $result[$name] = [
             'name' => $name,
-            'text' => nexus_trans("dashboard.system_info.$name"),
+            'text' => \App\Support\Locale::trans("dashboard.system_info.{$name}", [], null),
             'value' => \Illuminate\Foundation\Application::VERSION,
         ];
         $name = 'filament_version';
         $result[$name] = [
             'name' => $name,
-            'text' => nexus_trans("dashboard.system_info.$name"),
+            'text' => \App\Support\Locale::trans("dashboard.system_info.{$name}", [], null),
             'value' => \Composer\InstalledVersions::getPrettyVersion('filament/filament'),
         ];
         $name = 'php_version';
         $result[$name] = [
             'name' => $name,
-            'text' => nexus_trans("dashboard.system_info.$name"),
+            'text' => \App\Support\Locale::trans("dashboard.system_info.{$name}", [], null),
             'value' => PHP_VERSION,
         ];
         $name = 'mysql_version';
         $databaseInfo = NexusDB::getDatabaseVersionInfo();
         $result[$name] = [
             'name' => $name,
-            'text' => nexus_trans("dashboard.system_info.$name"),
+            'text' => \App\Support\Locale::trans("dashboard.system_info.{$name}", [], null),
             'value' => sprintf("%s: %s", $databaseInfo['dbType'], $databaseInfo['version']),
         ];
 //        $name = 'os';
@@ -64,21 +64,21 @@ class DashboardRepository extends BaseRepository
         $name = 'redis_version';
         $result[$name] = [
             'name' => $name,
-            'text' => nexus_trans("dashboard.system_info.$name"),
+            'text' => \App\Support\Locale::trans("dashboard.system_info.{$name}", [], null),
             'value' =>  NexusDB::redis()->info()['redis_version'],
         ];
 
         $name = 'server_software';
         $result[$name] = [
             'name' => $name,
-            'text' => nexus_trans("dashboard.system_info.$name"),
+            'text' => \App\Support\Locale::trans("dashboard.system_info.{$name}", [], null),
             'value' => SupportContext::getServerValue('SERVER_SOFTWARE', ''),
         ];
 
         $name = 'load_average';
         $result[$name] = [
             'name' => $name,
-            'text' => nexus_trans("dashboard.system_info.$name"),
+            'text' => \App\Support\Locale::trans("dashboard.system_info.{$name}", [], null),
             'value' =>  function_exists('sys_getloadavg') ? implode(', ', sys_getloadavg()) : 'N/A',
         ];
         return $result;
@@ -89,19 +89,19 @@ class DashboardRepository extends BaseRepository
     {
         return [
             'user_class' => [
-                'text' => nexus_trans('dashboard.user_class.page_title'),
+                'text' => \App\Support\Locale::trans('dashboard.user_class.page_title', [], null),
                 'data' => $this->statUserClass()
             ],
             'user' => [
-                'text' => nexus_trans('dashboard.user.page_title'),
+                'text' => \App\Support\Locale::trans('dashboard.user.page_title', [], null),
                 'data' => $this->statUsers()
             ],
             'torrent' => [
-                'text' => nexus_trans('dashboard.torrent.page_title'),
+                'text' => \App\Support\Locale::trans('dashboard.torrent.page_title', [], null),
                 'data' => $this->statTorrents()
             ],
             'system_info' => [
-                'text' => nexus_trans('dashboard.system_info.page_title'),
+                'text' => \App\Support\Locale::trans('dashboard.system_info.page_title', [], null),
                 'data' => $this->getSystemInfo()
             ],
         ];
@@ -138,55 +138,55 @@ class DashboardRepository extends BaseRepository
         $name = 'total';
         $result[$name] = [
             'name' => $name,
-            'text' => nexus_trans("dashboard.user.$name"),
+            'text' => \App\Support\Locale::trans("dashboard.user.{$name}", [], null),
             'value' => sprintf('%s / %s', number_format(User::query()->count()), number_format(intval(\App\Support\Config\SiteConfig::current()->main->maxUsers()))),
         ];
         $name = 'unconfirmed';
         $result[$name] = [
             'name' => $name,
-            'text' => nexus_trans("dashboard.user.$name"),
+            'text' => \App\Support\Locale::trans("dashboard.user.{$name}", [], null),
             'value' => number_format(User::query()->where('status', User::STATUS_PENDING)->count()),
         ];
         $name = 'visit_last_one_day';
         $result[$name] = [
             'name' => $name,
-            'text' => nexus_trans("dashboard.user.$name"),
+            'text' => \App\Support\Locale::trans("dashboard.user.{$name}", [], null),
             'value' => number_format(User::query()->where('last_access', '>', $now->subDays(1))->count()),
         ];
         $name = 'visit_last_one_week';
         $result[$name] = [
             'name' => $name,
-            'text' => nexus_trans("dashboard.user.$name"),
+            'text' => \App\Support\Locale::trans("dashboard.user.{$name}", [], null),
             'value' => number_format(User::query()->where('last_access', '>', $now->subDays(7))->count()),
         ];
         $name = 'visit_last_30_days';
         $result[$name] = [
             'name' => $name,
-            'text' => nexus_trans("dashboard.user.$name"),
+            'text' => \App\Support\Locale::trans("dashboard.user.{$name}", [], null),
             'value' => number_format(User::query()->where('last_access', '>', $now->subDays(30))->count()),
         ];
         $name = 'vip';
         $result[$name] = [
             'name' => $name,
-            'text' => nexus_trans("dashboard.user.$name"),
+            'text' => \App\Support\Locale::trans("dashboard.user.{$name}", [], null),
             'value' => number_format(User::query()->where('class', User::CLASS_VIP)->count()),
         ];
         $name = 'donated';
         $result[$name] = [
             'name' => $name,
-            'text' => nexus_trans("dashboard.user.$name"),
+            'text' => \App\Support\Locale::trans("dashboard.user.{$name}", [], null),
             'value' => number_format(User::query()->where('donor', 'yes')->count()),
         ];
         $name = 'warned';
         $result[$name] = [
             'name' => $name,
-            'text' => nexus_trans("dashboard.user.$name"),
+            'text' => \App\Support\Locale::trans("dashboard.user.{$name}", [], null),
             'value' => number_format(User::query()->where('warned', 'yes')->count()),
         ];
         $name = 'disabled';
         $result[$name] = [
             'name' => $name,
-            'text' => nexus_trans("dashboard.user.$name"),
+            'text' => \App\Support\Locale::trans("dashboard.user.{$name}", [], null),
             'value' => number_format(User::query()->where('enabled', 'no')->count()),
         ];
 
@@ -198,7 +198,7 @@ class DashboardRepository extends BaseRepository
             $name = "gender_$gender";
             $result[$name] = [
                 'name' => $name,
-                'text' => nexus_trans("dashboard.user.$name"),
+                'text' => \App\Support\Locale::trans("dashboard.user.{$name}", [], null),
                 'value' => $statGender->has($gender) ? number_format($statGender->get($gender)) : 0,
             ];
         }
@@ -212,13 +212,13 @@ class DashboardRepository extends BaseRepository
         $name = 'total';
         $result[$name] = [
             'name' => $name,
-            'text' => nexus_trans("dashboard.torrent.$name"),
+            'text' => \App\Support\Locale::trans("dashboard.torrent.{$name}", [], null),
             'value' => number_format(Torrent::query()->count()),
         ];
         $name = 'dead';
         $result[$name] = [
             'name' => $name,
-            'text' => nexus_trans("dashboard.torrent.$name"),
+            'text' => \App\Support\Locale::trans("dashboard.torrent.{$name}", [], null),
             'value' => number_format(Torrent::query()->where('visible', '=', Torrent::VISIBLE_NO)->count()),
         ];
 
@@ -226,7 +226,7 @@ class DashboardRepository extends BaseRepository
         $name = 'seeders';
         $result[$name] = [
             'name' => $name,
-            'text' => nexus_trans("dashboard.torrent.$name"),
+            'text' => \App\Support\Locale::trans("dashboard.torrent.{$name}", [], null),
             'value' => number_format($seeders),
         ];
 
@@ -234,38 +234,38 @@ class DashboardRepository extends BaseRepository
         $name = 'leechers';
         $result[$name] = [
             'name' => $name,
-            'text' => nexus_trans("dashboard.torrent.$name"),
+            'text' => \App\Support\Locale::trans("dashboard.torrent.{$name}", [], null),
             'value' => number_format($leechers),
         ];
         $name = 'seeders_leechers';
         $result[$name] = [
             'name' => $name,
-            'text' => nexus_trans("dashboard.torrent.$name"),
+            'text' => \App\Support\Locale::trans("dashboard.torrent.{$name}", [], null),
             'value' => number_format($seeders + $leechers),
         ];
         $name = 'seeders_leechers_ratio';
         $result[$name] = [
             'name' => $name,
-            'text' => nexus_trans("dashboard.torrent.$name"),
+            'text' => \App\Support\Locale::trans("dashboard.torrent.{$name}", [], null),
             'value' => $leechers == 0 ? 0 : number_format(($seeders / $leechers) * 100) . '%',
         ];
         $name = 'active_web_users';
         $result[$name] = [
             'name' => $name,
-            'text' => nexus_trans("dashboard.torrent.$name"),
+            'text' => \App\Support\Locale::trans("dashboard.torrent.{$name}", [], null),
             'value' => number_format(User::query()->where('last_access', '>', $now->subSeconds(900))->count()),
         ];
         $name = 'active_tracker_users';
         $result[$name] = [
             'name' => $name,
-            'text' => nexus_trans("dashboard.torrent.$name"),
+            'text' => \App\Support\Locale::trans("dashboard.torrent.{$name}", [], null),
             'value' => number_format(Peer::query()->selectRaw('count(distinct(userid)) as counts')->first()->counts),
         ];
 
         $name = 'total_torrent_size';
         $result[$name] = [
             'name' => $name,
-            'text' => nexus_trans("dashboard.torrent.$name"),
+            'text' => \App\Support\Locale::trans("dashboard.torrent.{$name}", [], null),
             'value' => \App\Support\Format::size(Torrent::query()->sum('size')),
         ];
 
@@ -276,19 +276,19 @@ class DashboardRepository extends BaseRepository
         $name = 'total_uploaded';
         $result[$name] = [
             'name' => $name,
-            'text' => nexus_trans("dashboard.torrent.$name"),
+            'text' => \App\Support\Locale::trans("dashboard.torrent.{$name}", [], null),
             'value' => \App\Support\Format::size($total_uploaded_byte),
         ];
         $name = 'total_downloaded';
         $result[$name] = [
             'name' => $name,
-            'text' => nexus_trans("dashboard.torrent.$name"),
+            'text' => \App\Support\Locale::trans("dashboard.torrent.{$name}", [], null),
             'value' => \App\Support\Format::size($total_downloaded_byte),
         ];
         $name = 'total_uploaded_downloaded';
         $result[$name] = [
             'name' => $name,
-            'text' => nexus_trans("dashboard.torrent.$name"),
+            'text' => \App\Support\Locale::trans("dashboard.torrent.{$name}", [], null),
             'value' => \App\Support\Format::size($total_byte),
         ];
 

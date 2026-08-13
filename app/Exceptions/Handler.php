@@ -56,6 +56,9 @@ class Handler extends ExceptionHandler
         });
         $this->renderable(function (ViewException $e) use ($request) {
             $previous = $e->getPrevious();
+            while ($previous instanceof ViewException && $previous->getPrevious() !== null) {
+                $previous = $previous->getPrevious();
+            }
             if ($previous instanceof InsufficientPermissionException) {
                 if ($request->expectsJson()) {
                     return response()->json(\App\Support\Api::failWithContext($previous->getMessage(), $request->all()), 403);

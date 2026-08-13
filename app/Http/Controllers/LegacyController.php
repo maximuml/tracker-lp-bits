@@ -10,7 +10,10 @@ use Illuminate\View\View;
 
 abstract class LegacyController extends Controller
 {
-    protected function legacyPage(Request $request, string $page, bool $auth = true): View|RedirectResponse
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    protected function legacyPage(Request $request, string $page, bool $auth = true, array $data = []): View|RedirectResponse
     {
         if ($auth && SupportContext::getUser() === null) {
             $qs = $request->getQueryString();
@@ -18,10 +21,13 @@ abstract class LegacyController extends Controller
             return redirect('/' . $page . '.php' . ($qs ? '?' . $qs : ''));
         }
 
-        return view($page . '.index');
+        return view($page . '.index', $data);
     }
 
-    protected function legacyPageWithRedirect(Request $request, string $page, bool $auth = true): Response|RedirectResponse
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    protected function legacyPageWithRedirect(Request $request, string $page, bool $auth = true, array $data = []): Response|RedirectResponse
     {
         if ($auth && SupportContext::getUser() === null) {
             $qs = $request->getQueryString();
@@ -29,7 +35,7 @@ abstract class LegacyController extends Controller
             return redirect('/' . $page . '.php' . ($qs ? '?' . $qs : ''));
         }
 
-        $content = view($page . '.index')->render();
+        $content = view($page . '.index', $data)->render();
 
         $headers = headers_list();
         $status = http_response_code();
@@ -45,7 +51,10 @@ abstract class LegacyController extends Controller
         return response($content);
     }
 
-    protected function legacyPageRaw(Request $request, string $page, bool $auth = true): Response|RedirectResponse
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    protected function legacyPageRaw(Request $request, string $page, bool $auth = true, array $data = []): Response|RedirectResponse
     {
         if ($auth && SupportContext::getUser() === null) {
             $qs = $request->getQueryString();
@@ -53,7 +62,7 @@ abstract class LegacyController extends Controller
             return redirect('/' . $page . '.php' . ($qs ? '?' . $qs : ''));
         }
 
-        $content = view($page . '.index')->render();
+        $content = view($page . '.index', $data)->render();
 
         $headers = headers_list();
         $responseHeaders = [];

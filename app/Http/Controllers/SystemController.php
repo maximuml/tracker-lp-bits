@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enums\Permission\PermissionEnum;
+use App\Models\User;
 use App\Services\CleanupService;
 use App\Support\LegacyResponse;
 use App\Support\Permissions;
@@ -127,7 +128,8 @@ class SystemController extends LegacyController
             $hashRecord = null;
             $timeNow = (int) SupportContext::getGlobal('TIMENOW', time());
             if ($hashPost === 'permanent') {
-                $hash = md5(mt_rand(1, 10000) . $curUser['username'] . $timeNow . $curUser['passhash']);
+                $inviter = User::query()->findOrFail($currentUserId);
+                $hash = md5(mt_rand(1, 10000) . $inviter->username . $timeNow . $inviter->passhash);
             } else {
                 $hashRecord = \App\Models\Invite::query()->where('inviter', $currentUserId)->where('hash', $hashPost)->first();
                 if (! $hashRecord instanceof \App\Models\Invite) {

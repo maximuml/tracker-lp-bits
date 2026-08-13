@@ -380,3 +380,27 @@ PR #299 converts the remaining `resources/views/**/_*_legacy.php` partials to `*
 - `CriticalPathTest` sets `basic.BASEURL='openresty'` and must be followed by a restore to `localhost` plus Redis/Laravel cache clears before host-side browser/curl tests.
 - After clearing caches, run `docker compose exec -T php php artisan view:cache` and `docker compose exec -T php php artisan route:cache` so legacy pages do not recompile on every request.
 
+## Testing PR #308 / Phase 14 final-polish (`devin/phase14-final-polish`)
+
+PR #308 removes `app/Support/Legacy/functions.php` and inlines helpers into typed `\App\Support\*` static methods.
+
+### What to verify
+
+- `composer validate --strict`, `php -l` on changed files, `php artisan view:cache`, `php artisan route:cache`, PHPStan default + level6.
+- `phpunit --testsuite Unit` (bump memory to `-d memory_limit=1G`) and `tests/Feature/CriticalPathTest.php` with `CRITICAL_PATH_BASE_URL=http://openresty`.
+- `/torrentrss.php?passkey=<passkey>` returns valid RSS when a torrent has a `null` `descr` (the fix coerces `$row['descr']` to `(string)` in the view).
+- `/staff.php` and `/users.php` for a normal user return a graceful legacy `Permission denied!` page via `app/Exceptions/Handler.php`.
+- `/staff.php` and `/users.php` for `sysop` still render the staff/user list.
+- Legacy public pages (`forums`, `messages`, `usercp`, `mybonus`, `donate`, `shoutbox`, `shoutbox_history`, `opensearch`) and staff pages (`settings`, `staffpanel`, `staffmess`, `staffbox`, `topten`, `catmanage`, `forummanage`) return `200`.
+- API smoke for `normaluser`, `sysop`, and a freshly factory-created user if relevant.
+
+### Common gotchas
+
+- The `InsufficientPermissionException` thrown inside Blade partials is wrapped in nested `Illuminate\View\ViewException` objects; the exception handler must recursively unwrap `ViewException::getPrevious()` and catch `HttpResponseException` from `LegacyResponse::permissionDenied()`.
+- After `CriticalPathTest`, restore `basic.BASEURL='localhost'` and clear the Redis keys `nexus_settings_in_nexus` and `nexus_settings_in_laravel` plus Laravel caches before host-side tests.
+- The Unit suite may need `php -d memory_limit=1G` to avoid exhausting the default 128 M limit in `RouteServiceProvider`.
+- `php -l` on changed files must run from the host because `.git` is not mounted in the `php` container:
+  ```bash
+  git diff --diff-filter=ACMR --name-only origin/php8...HEAD -- '*.php' '*.blade.php' | sed 's|^|/var/www/html/|' | xargs -P4 -n1 docker compose exec -T php php -l
+  ```
+

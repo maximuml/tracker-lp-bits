@@ -164,6 +164,9 @@ class SearchBoxRepository extends BaseRepository
         if (!$searchBox instanceof SearchBox) {
             $searchBox = SearchBox::get(intval($searchBox));
         }
+        if (!$searchBox instanceof SearchBox) {
+            return [];
+        }
         $results = [];
         //Keep the order
         if (!empty($searchBox->extra[SearchBox::EXTRA_TAXONOMY_LABELS])) {

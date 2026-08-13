@@ -18,6 +18,8 @@ final class LegacyBootstrap
 {
     public static function boot(?Request $request = null, string $rootpath = ''): void
     {
+        defined('IN_NEXUS') || define('IN_NEXUS', false);
+
         self::resetAndCapture($request);
 
         ini_set('error_reporting', E_ALL);
@@ -35,6 +37,8 @@ final class LegacyBootstrap
 
     public static function bootConsole(string $rootpath = ''): void
     {
+        defined('IN_NEXUS') || define('IN_NEXUS', false);
+
         self::resetAndCapture(null);
 
         ini_set('error_reporting', E_ALL);
@@ -77,9 +81,12 @@ final class LegacyBootstrap
 
     private static function bootDatabase(): void
     {
-        $dbConfig = Config::get('nexus.database');
-        $config = $dbConfig['connections'][$dbConfig['default']];
-        \Nexus\Database\NexusDB::bootEloquent($config);
+        if (defined('IN_NEXUS') && IN_NEXUS) {
+            $dbConfig = Config::get('nexus.database');
+            $config = $dbConfig['connections'][$dbConfig['default']];
+            \Nexus\Database\NexusDB::bootEloquent($config);
+        }
+        \Nexus\Database\NexusDB::customModel();
     }
 
     private static function bootTimezone(): void
@@ -102,7 +109,7 @@ final class LegacyBootstrap
         $langFile = $rootpath . get_langfile_path('functions.php');
         $langFunctions = [];
         if (is_file($langFile)) {
-            require_once $langFile;
+            require $langFile;
             if (isset($lang_functions) && is_array($lang_functions)) {
                 $langFunctions = $lang_functions;
             }
@@ -112,7 +119,7 @@ final class LegacyBootstrap
 
     private static function bootUser(?Request $request): void
     {
-        if ($request === null || isRunningInConsole()) {
+        if ($request === null) {
             return;
         }
 

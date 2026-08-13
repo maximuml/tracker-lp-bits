@@ -23,7 +23,7 @@ class UtilityController extends LegacyController
 
     public function ajax(Request $request): JsonResponse|RedirectResponse
     {
-        if (! defined('IN_NEXUS') || ! IN_NEXUS) {
+        if (SupportContext::getCache() === null) {
             $qs = $request->getQueryString();
 
             return redirect('/ajax.php' . ($qs ? '?' . $qs : ''));

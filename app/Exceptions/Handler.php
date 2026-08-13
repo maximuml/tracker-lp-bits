@@ -118,6 +118,10 @@ class Handler extends ExceptionHandler
 
     protected function getHttpStatusCode(Throwable $e)
     {
+        if ($this->isHttpException($e)) {
+            return $e->getStatusCode();
+        }
+
         if (
             $e instanceof NexusException
             || $e instanceof \InvalidArgumentException
@@ -126,11 +130,8 @@ class Handler extends ExceptionHandler
         ) {
             return 200;
         }
-        if ($this->isHttpException($e)) {
-            return $e->getStatusCode();
-        }
-        return 500;
 
+        return 500;
     }
 
 

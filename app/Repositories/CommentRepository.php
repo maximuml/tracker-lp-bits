@@ -7,6 +7,7 @@ use App\Models\Offer;
 use App\Models\Torrent;
 use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
 use Nexus\Database\NexusDB;
 
 class CommentRepository
@@ -141,6 +142,34 @@ class CommentRepository
     public static function getCommentPmSetting(int $userId): ?string
     {
         return User::query()->where('id', $userId)->value('commentpm');
+    }
+
+    /**
+     * Fetch a paginated list of comments for the given parent and type.
+     *
+     * @return \Illuminate\Pagination\LengthAwarePaginator<int, Comment>
+     */
+    public static function getList(Request $request, User $user)
+    {
+        $type = $request->input('type', Comment::TYPE_TORRENT);
+        $parentId = (int) $request->input('parent_id', 0);
+
+        $query = Comment::query()->with(['create_user', 'update_user']);
+
+        $typeMap = Comment::TYPE_MAPS[$type] ?? null;
+        if ($typeMap !== null) {
+            foreach (Comment::TYPE_MAPS as $key => $value) {
+                if ($type === $key) {
+                    $query->where($value['foreign_key'], $parentId);
+                } else {
+                    $query->where($value['foreign_key'], 0);
+                }
+            }
+        } else {
+            $query->where('torrent', 0)->where('offer', 0);
+        }
+
+        return $query->orderBy('id', 'desc')->paginate((int) $request->input('per_page', 20));
     }
 
     /**

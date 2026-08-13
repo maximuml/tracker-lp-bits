@@ -32,7 +32,7 @@ class HitAndRun extends NexusModel
     protected $table = 'hit_and_runs';
 
     /** @var  list<string> */
-    protected $fillable = ['uid', 'snatch_id', 'torrent_id', 'status', 'comment'];
+    protected $fillable = ['uid', 'snatched_id', 'torrent_id', 'status', 'comment'];
 
     /** @var  bool */
     public $timestamps = true;

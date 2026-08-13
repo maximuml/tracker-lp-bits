@@ -19,7 +19,7 @@ class ForumController extends LegacyController
      */
     public function legacy(Request $request): View|RedirectResponse
     {
-        if (! defined('IN_NEXUS') || ! IN_NEXUS || SupportContext::getUser() === null) {
+        if (SupportContext::getUser() === null) {
             return redirect('/forums.php?' . $request->getQueryString());
         }
 

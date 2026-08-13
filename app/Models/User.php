@@ -486,6 +486,18 @@ class User extends Authenticatable implements FilamentUser, HasName
     }
 
     /**
+     * Return the user as an array with the legacy columns that are normally
+     * hidden (passkey, auth_key) included. Used when populating SupportContext
+     * for legacy views that need those values.
+     *
+     * @return array<string, mixed>
+     */
+    public function toLegacyArray(): array
+    {
+        return $this->makeVisible(['passkey', 'auth_key'])->toArray();
+    }
+
+    /**
      * @param  int|string  $class
      * @param  bool  $compact
      * @param  bool  $b_colored

@@ -23,7 +23,7 @@ class TorrentListingController extends Controller
             return redirect('/login.php?returnto=' . urlencode($request->fullUrl()));
         }
 
-        $currentUser = SupportContext::getUser() ?? $user->toArray();
+        $currentUser = SupportContext::getUser() ?? $user->toLegacyArray();
         SupportContext::setUser($currentUser);
 
         $data = TorrentSearchRepository::getListingData($request->query->all());

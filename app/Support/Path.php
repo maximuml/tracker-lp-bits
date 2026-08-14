@@ -38,11 +38,17 @@ final class Path
 {
     public static function resolve(string $dir, string $rootPath): string
     {
+        $rootPath = rtrim($rootPath, '/').'/';
+
+        // Treat an empty segment as the root directory itself.
+        if ($dir === '') {
+            $dir = $rootPath;
+        } elseif (! self::isAbsolutePath($dir)) {
+            $dir = $rootPath.$dir;
+        }
+
         if (is_file($dir) && file_exists($dir)) {
             return $dir;
-        }
-        if (! is_dir($dir)) {
-            $dir = $rootPath.$dir;
         }
         if (is_dir($dir)) {
             $real = realpath($dir);
@@ -52,6 +58,11 @@ final class Path
         }
 
         return $dir;
+    }
+
+    private static function isAbsolutePath(string $path): bool
+    {
+        return str_starts_with($path, '/') || (strlen($path) > 1 && $path[1] === ':');
     }
 
     public static function makeFolder(string $prefix, string $folderName, string $rootPath): string

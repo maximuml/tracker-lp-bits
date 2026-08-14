@@ -5,7 +5,6 @@ namespace App\Support;
 use App\Http\Middleware\Locale as LocaleMiddleware;
 use App\Models\Language;
 use App\Models\Setting;
-use Nexus\Database\NexusDB;
 
 /**
  * Legacy locale helpers extracted from `include/functions.php`.
@@ -71,14 +70,7 @@ final class Locale
      */
     public static function userFolder(int|string $userId): string
     {
-        $folder = \App\Models\Language::query()
-            ->select('language.site_lang_folder')
-            ->leftJoin('users', 'language.id', '=', 'users.lang')
-            ->where('language.site_lang', 1)
-            ->where('users.id', $userId)
-            ->value('site_lang_folder');
-
-        return $folder ?? 'en';
+        return app(\App\Repositories\LanguageRepository::class)->getUserFolder((int) $userId);
     }
 
     /**
@@ -89,10 +81,7 @@ final class Locale
      */
     public static function folderForId(int|string $langId, string $default = 'en'): string
     {
-        return \App\Models\Language::query()
-            ->where('site_lang', 1)
-            ->where('id', $langId)
-            ->value('site_lang_folder') ?? $default;
+        return app(\App\Repositories\LanguageRepository::class)->getFolderForId((int) $langId, $default);
     }
 
     /**
@@ -169,13 +158,7 @@ final class Locale
      */
     public static function idFromFolder(string $lang): int
     {
-        $row = Language::query()
-            ->where('site_lang', 1)
-            ->where('site_lang_folder', $lang)
-            ->orderBy('id')
-            ->first();
-
-        return (int) ($row->id ?? 0);
+        return app(\App\Repositories\LanguageRepository::class)->getIdFromFolder($lang);
     }
 
     /**
@@ -188,16 +171,7 @@ final class Locale
      */
     public static function languageList(string $type, ?bool $enabled = null): array
     {
-        $cacheKey = $type . '_lang_list';
-
-        return NexusDB::remember($cacheKey, 600, function () use ($type, $enabled) {
-            $query = Language::query()->where($type, 1);
-            if ($enabled !== null) {
-                $query->whereIn('site_lang_folder', Language::listEnabled(true));
-            }
-
-            return $query->get()->toArray();
-        });
+        return app(\App\Repositories\LanguageRepository::class)->getLanguageList($type, $enabled);
     }
 
     /**
@@ -208,10 +182,7 @@ final class Locale
      */
     public static function guestId(string $langFolder): int
     {
-        return (int) (\App\Models\Language::query()
-            ->where('site_lang_folder', $langFolder)
-            ->where('site_lang', 1)
-            ->value('id') ?? 6);
+        return app(\App\Repositories\LanguageRepository::class)->getGuestId($langFolder);
     }
 
     /**
@@ -239,16 +210,6 @@ final class Locale
      */
     public static function userLocale(int $uid): string
     {
-        $folder = \App\Models\Language::query()
-            ->select('language.site_lang_folder')
-            ->join('users', 'users.lang', '=', 'language.id')
-            ->where('users.id', $uid)
-            ->value('site_lang_folder');
-
-        if (empty($folder)) {
-            return 'en';
-        }
-
-        return LocaleMiddleware::$languageMaps[$folder] ?? $folder;
+        return app(\App\Repositories\LanguageRepository::class)->getUserLocale($uid);
     }
 }

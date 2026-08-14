@@ -2,7 +2,6 @@
 
 namespace App\Support;
 
-use Nexus\Database\NexusDB;
 
 /**
  * Legacy torrent-bookmark helpers extracted from `include/functions.php`.
@@ -31,12 +30,7 @@ final class TorrentBookmark
             }
         }
 
-        $rows = NexusDB::table('bookmarks')->where('userid', $userId)->get()->map(fn ($row) => (array) $row)->all();
-        if (empty($rows)) {
-            $ret = [0];
-        } else {
-            $ret = array_map(fn ($row) => (int) $row['torrentid'], $rows);
-        }
+        $ret = app(\App\Repositories\TorrentRepository::class)->getBookmarkTorrentIds($userId);
 
         if (method_exists($cache, 'cache_value')) {
             $cache->cache_value($cacheKey, $ret, 132800);

@@ -8,6 +8,7 @@ use App\Models\Comment;
 use App\Models\Offer;
 use App\Models\Torrent;
 use App\Models\User;
+use App\Repositories\ModerationRepository;
 use App\Support\Format;
 use App\Support\LegacyResponse;
 use App\Support\Log;
@@ -23,7 +24,6 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\View\View;
-use Nexus\Database\NexusDB;
 
 class ModerationController extends LegacyController
 {
@@ -49,22 +49,17 @@ class ModerationController extends LegacyController
         $takereportofferid = (int) (SupportContext::getPost('takereportofferid') ?? 0);
         $takereason = trim((string) SupportContext::getPost('reason'));
 
-        $doTakeReport = function (int $reportid, string $type, string $reason) use ($currentUserId, $langReport, $cache): Response {
+        $repo = app(ModerationRepository::class);
+        $doTakeReport = function (int $reportid, string $type, string $reason) use ($currentUserId, $langReport, $cache, $repo): Response {
             if (! Validators::isId($reportid) || $reason === '') {
                 return $this->legacyAbortResponse($langReport['std_error'] ?? 'Error', $langReport['std_missing_reason'] ?? 'Missing reason.');
             }
 
-            $existing = NexusDB::table('reports')
-                ->where('addedby', $currentUserId)
-                ->where('reportid', $reportid)
-                ->where('type', $type)
-                ->exists();
-
-            if ($existing) {
+            if ($repo->reportExists($currentUserId, $reportid, $type)) {
                 return $this->legacyAbortResponse($langReport['std_error'] ?? 'Error', $langReport['std_already_reported_this'] ?? 'You already reported this.');
             }
 
-            NexusDB::table('reports')->insert([
+            $repo->createReport([
                 'addedby' => $currentUserId,
                 'reportid' => $reportid,
                 'type' => $type,
@@ -122,11 +117,8 @@ class ModerationController extends LegacyController
         }
 
         if ($forumpost && Validators::isId($forumpost)) {
-            $arr = (array) NexusDB::table('topics')
-                ->leftJoin('posts', 'posts.topicid', '=', 'topics.id')
-                ->where('posts.id', $forumpost)
-                ->first(['topics.id AS topicid', 'topics.subject AS subject', 'posts.userid AS postuserid']);
-            if (empty($arr)) {
+            $arr = app(ModerationRepository::class)->getForumPost($forumpost);
+            if ($arr === null) {
                 return $this->legacyAbortResponse($langReport['std_error'] ?? 'Error', $langReport['std_invalid_post_id'] ?? 'Invalid post ID.');
             }
             $form = ($langReport['text_are_you_sure_post'] ?? 'Are you sure you want to report post #') . $forumpost . ($langReport['text_of_topic'] ?? ' of topic ') . '<b><a href="forums.php?action=viewtopic&topicid=' . $arr['topicid'] . '&page=p' . htmlspecialchars((string) $forumpost) . '#' . htmlspecialchars((string) $forumpost) . '">' . htmlspecialchars($arr['subject']) . '</a></b>' . ($langReport['text_by'] ?? ' by ') . UserDisplay::username($arr['postuserid']) . ($langReport['text_to_staff'] ?? ' to staff?') . '<br />' . ($langReport['text_reason_note'] ?? '') . '<br /><form method=post action=report.php><input type=hidden name=takeforumpost value="' . htmlspecialchars((string) $forumpost) . '">' . ($langReport['text_reason_is'] ?? 'Reason: ') . '<input type=text style="width: 200px" name=reason><input type=submit value="' . ($langReport['submit_confirm'] ?? 'Confirm') . '"></form>';
@@ -179,7 +171,8 @@ class ModerationController extends LegacyController
 
         $langReports = (array) SupportContext::getGlobal('lang_reports', []);
 
-        $count = (int) NexusDB::table('reports')->count();
+        $repo = app(ModerationRepository::class);
+        $count = $repo->countReports();
         if (! $count) {
             return $this->legacyAbortResponse($langReports['std_oho'] ?? 'Oho', $langReports['std_no_report'] ?? 'No report.');
         }
@@ -187,12 +180,7 @@ class ModerationController extends LegacyController
         $perpage = 10;
         [$pagertop, $pagerbottom, , $offset, $rpp] = Pagination::pager($perpage, $count, 'reports.php?');
 
-        $reportRows = NexusDB::table('reports')
-            ->orderBy('dealtwith')
-            ->orderByDesc('id')
-            ->offset($offset)
-            ->limit($rpp)
-            ->get();
+        $reportRows = $repo->getReports($offset, $rpp);
 
         $rows = [];
         foreach ($reportRows as $reportRow) {
@@ -238,11 +226,8 @@ class ModerationController extends LegacyController
                     break;
                 case 'post':
                     $type = $langReports['text_forum_post'] ?? 'Forum post';
-                    $arr = (array) NexusDB::table('topics')
-                        ->leftJoin('posts', 'posts.topicid', '=', 'topics.id')
-                        ->where('posts.id', $row['reportid'])
-                        ->first(['topics.id AS topicid', 'topics.subject AS subject', 'posts.userid AS postuserid']);
-                    if (empty($arr)) {
+                    $arr = app(ModerationRepository::class)->getForumPost((int) $row['reportid']);
+                    if ($arr === null) {
                         $reporting = $langReports['text_post_does_not_exist'] ?? 'Post does not exist';
                     } else {
                         $reporting = ($langReports['text_post_id'] ?? 'Post #') . $row['reportid'] . ($langReports['text_of_topic'] ?? ' of topic ') . '<b><a href="forums.php?action=viewtopic&topicid=' . $arr['topicid'] . '&page=p' . htmlspecialchars((string) $row['reportid']) . '#pid' . htmlspecialchars((string) $row['reportid']) . '">' . htmlspecialchars($arr['subject']) . '</a></b>' . ($langReports['text_by'] ?? ' by ') . UserDisplay::username($arr['postuserid']);
@@ -302,7 +287,7 @@ class ModerationController extends LegacyController
 
         $remove = (int) (SupportContext::getQuery('remove') ?? 0);
         if (SupportContext::getQuery('remove') !== null && Validators::isId($remove)) {
-            NexusDB::table('bans')->where('id', $remove)->delete();
+            app(ModerationRepository::class)->deleteBan($remove);
             Log::writeWithContext("Ban ".htmlspecialchars((string) $remove)." was removed by {$currentUserId} ({$username})", 'mod');
         }
 
@@ -318,7 +303,7 @@ class ModerationController extends LegacyController
             if ($firstlong === false || $lastlong === false || $firstlong === -1 || $lastlong === -1) {
                 return $this->legacyAbortResponse('Error', 'Bad IP address.');
             }
-            NexusDB::table('bans')->insert([
+            app(ModerationRepository::class)->createBan([
                 'added' => date('Y-m-d H:i:s'),
                 'addedby' => $currentUserId,
                 'first' => $firstlong,
@@ -329,7 +314,7 @@ class ModerationController extends LegacyController
             return redirect($request->getRequestUri());
         }
 
-        $bans = NexusDB::table('bans')->orderByDesc('added')->get();
+        $bans = app(ModerationRepository::class)->getBans();
 
         return $this->legacyPage($request, 'bans', true, [
             'bans' => $bans,
@@ -548,24 +533,14 @@ class ModerationController extends LegacyController
             return $this->legacyAbortResponse($langIphistory['error'] ?? 'Error', $langIphistory['text_user_not_found'] ?? 'User not found.');
         }
 
+        $repo = app(ModerationRepository::class);
         $perpage = 20;
-        $iplogDistinct = (int) NexusDB::table('iplog')->where('userid', $userid)->distinct('access')->count('access');
-        $countrows = $iplogDistinct + 1;
+        $countrows = $repo->countIplogDistinct($userid) + 1;
         $order = (string) (SupportContext::getQuery('order') ?? '');
 
         [$pagertop, $pagerbottom, , $offset, $rpp] = Pagination::pager($perpage, $countrows, "iphistory.php?id={$userid}&order={$order}&");
 
-        $userHistory = NexusDB::table('users as u')
-            ->select('u.id', 'u.ip as ip', 'last_access as access')
-            ->where('u.id', $userid);
-        $ipLogHistory = NexusDB::table('iplog')
-            ->select('iplog.userid as id', 'iplog.ip as ip', 'iplog.access as access')
-            ->where('iplog.userid', $userid);
-        $rawRows = $userHistory->union($ipLogHistory)
-            ->orderBy('access', 'desc')
-            ->limit($rpp)
-            ->offset($offset)
-            ->get();
+        $rawRows = $repo->getIphistoryRows($userid, $offset, $rpp);
 
         $rows = [];
         foreach ($rawRows as $row) {
@@ -581,8 +556,8 @@ class ModerationController extends LegacyController
                     $addr = $dom;
                 }
 
-                $usersIp = NexusDB::table('users')->where('ip', $ip)->pluck('id')->all();
-                $iplogIp = NexusDB::table('iplog')->where('ip', $ip)->pluck('userid')->all();
+                $usersIp = $repo->getUserIdsByIp($ip);
+                $iplogIp = $repo->getIplogUserIdsByIp($ip);
                 $ipcount = count(array_unique(array_merge($usersIp, $iplogIp)));
 
                 if ($ipcount > 1) {
@@ -620,15 +595,7 @@ class ModerationController extends LegacyController
 
         $title = 'Duplicate IP users';
 
-        $duplicateIps = NexusDB::table('users')
-            ->selectRaw('ip, count(*) AS dupl')
-            ->where('enabled', 'yes')
-            ->where('ip', '!=', '')
-            ->where('ip', '!=', '127.0.0.0')
-            ->groupBy('ip')
-            ->orderByDesc('dupl')
-            ->orderBy('ip')
-            ->get();
+        $duplicateIps = app(ModerationRepository::class)->getDuplicateIps();
 
         $rows = [];
         foreach ($duplicateIps as $dupRow) {
@@ -644,10 +611,7 @@ class ModerationController extends LegacyController
                 ->all();
 
             if (count($users) > 1) {
-                $peerCounts = [];
-                foreach (NexusDB::table('peers')->where('ip', $ras['ip'])->pluck('userid') as $uid) {
-                    $peerCounts[(int) $uid] = ($peerCounts[(int) $uid] ?? 0) + 1;
-                }
+                $peerCounts = app(ModerationRepository::class)->getPeerCountsByIp($ras['ip']);
 
                 foreach ($users as $arr) {
                     if ($arr['added'] === '0000-00-00 00:00:00' || $arr['added'] === null) {
@@ -723,35 +687,7 @@ class ModerationController extends LegacyController
             }
         }
 
-        $columns = ['u.id', 'u.username', 'u.ip as ip', 'u.ip as last_ip', 'u.last_access', 'u.last_access as access', 'u.email', 'u.invited_by', 'u.added', 'u.class', 'u.uploaded', 'u.downloaded', 'u.donor', 'u.enabled', 'u.warned'];
-
-        $applyUserIp = function ($query) use ($ip, $mask, $singleIp) {
-            if ($singleIp) {
-                $query->where('u.ip', $ip);
-            } else {
-                $query->whereRaw('INET_ATON(u.ip) & INET_ATON(?) = INET_ATON(?) & INET_ATON(?)', [$mask, $ip, $mask]);
-            }
-        };
-
-        $applyIplogIp = function ($query) use ($ip, $mask, $singleIp) {
-            if ($singleIp) {
-                $query->where('iplog.ip', $ip);
-            } else {
-                $query->whereRaw('INET_ATON(iplog.ip) & INET_ATON(?) = INET_ATON(?) & INET_ATON(?)', [$mask, $ip, $mask]);
-            }
-        };
-
-        $userQuery = NexusDB::table('users as u')->select($columns);
-        $applyUserIp($userQuery);
-
-        $iplogQuery = NexusDB::table('users as u')
-            ->rightJoin('iplog', 'u.id', '=', 'iplog.userid')
-            ->select($columns);
-        $applyIplogIp($iplogQuery);
-        $iplogQuery->groupBy('u.id');
-
-        $union = $userQuery->union($iplogQuery);
-        $unionSql = $union->toSql();
+        $repo = app(ModerationRepository::class);
 
         $count = 0;
         $rows = [];
@@ -759,34 +695,14 @@ class ModerationController extends LegacyController
         $pagerbottom = '';
 
         if ($ip !== '') {
-            $countRow = (array) NexusDB::table(NexusDB::raw("({$unionSql}) as ipsearch"))
-                ->mergeBindings($union)
-                ->selectRaw('count(DISTINCT id) as c')
-                ->first();
-            $count = (int) ($countRow['c'] ?? 0);
+            $order = (string) (SupportContext::getQuery('order') ?? '');
+            $count = $repo->countIpsearch($ip, $mask, $singleIp);
 
             if ($count > 0) {
-                $order = (string) (SupportContext::getQuery('order') ?? '');
-                $orderby = match ($order) {
-                    'added' => 'added DESC',
-                    'username' => 'UPPER(username) ASC',
-                    'email' => 'email ASC',
-                    'last_ip' => 'last_ip ASC',
-                    'last_access' => 'last_ip ASC',
-                    default => 'access DESC',
-                };
-
                 $perpage = 20;
                 [$pagertop, $pagerbottom, , $offset, $rpp] = Pagination::pager($perpage, $count, "ipsearch.php?ip={$ip}&mask={$mask}&order={$order}&");
 
-                $users = NexusDB::table(NexusDB::raw("({$unionSql}) as ipsearch"))
-                    ->mergeBindings($union)
-                    ->select('*')
-                    ->groupBy('id')
-                    ->orderByRaw($orderby)
-                    ->limit($rpp)
-                    ->offset($offset)
-                    ->get();
+                $users = $repo->getIpsearchRows($ip, $mask, $singleIp, $order, $offset, $rpp);
 
                 foreach ($users as $userRow) {
                     $user = (array) $userRow;
@@ -802,7 +718,7 @@ class ModerationController extends LegacyController
                     }
 
                     $ipstr = $user['last_ip'] ? (string) $user['last_ip'] : ($langIpsearch['text_not_available'] ?? 'N/A');
-                    $iphistory = (int) NexusDB::table('iplog')->where('userid', (int) $user['id'])->distinct('ip')->count('ip');
+                    $iphistory = $repo->countIplogDistinctByUser((int) $user['id']);
                     $invitedBy = ((int) $user['invited_by']) > 0 ? UserDisplay::username((int) $user['invited_by']) : ($langIpsearch['text_not_available'] ?? 'N/A');
 
                     $rows[] = [

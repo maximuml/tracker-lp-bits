@@ -1,8 +1,5 @@
 <?php
 $lang_reports = (array) (\App\Support\SupportContext::getGlobal('lang_reports') ?? []);
-
-\App\Support\Html::stdhead($lang_reports['head_reports'] ?? 'Reports');
-\App\Support\Frame::mainFrameOpen();
 print('<h1 align="center">' . ($lang_reports['text_reports'] ?? 'Reports') . '</h1>');
 print("<table border=1 cellspacing=0 cellpadding=5 align=center>\n");
 print("<form method=post action=takeupdate.php>");
@@ -37,6 +34,4 @@ print("<form method=post action=takeupdate.php>");
 <?php
 print("</table>");
 print($pagerbottom);
-\App\Support\Frame::mainFrameClose();
-\App\Support\Html::stdfoot();
 ?>

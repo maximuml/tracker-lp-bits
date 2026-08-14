@@ -1,1 +1,3 @@
-<?php echo \App\Repositories\LegacyViewRepository::render('nowarn', get_defined_vars()); ?>
+@php
+// Nowarn actions are handled by AdminController::nowarn; this view is intentionally empty.
+@endphp

@@ -3,6 +3,7 @@ $id = $torrentId;
 $row = $torrentRow;
 $row['cat_mode'] = $row['search_box_id'] ?? $row['cat_mode'] ?? null;
 $CURUSER = $currentUser;
+$tagIds = (array) ($tagIds ?? []);
 $__server_REQUEST_URI = \App\Support\SupportContext::getServerValue('REQUEST_URI');
 if (!$id) {
     \App\Support\LegacyResponse::abort('Error', 'Invalid torrent id', true, false);
@@ -18,7 +19,7 @@ if (empty($row)) {
 $customField = new \Nexus\Field\Field();
 $hitAndRunRep = new \App\Repositories\HitAndRunRepository();
 $tagRep = new \App\Repositories\TagRepository();
-$tagIdArr = \App\Models\TorrentTag::query()->where('torrent_id', $id)->get()->pluck('tag_id')->toArray();
+$tagIdArr = $tagIds;
 $searchBoxRep = new \App\Repositories\SearchBoxRepository();
 $sectionmode = $row['cat_mode'];
 /*

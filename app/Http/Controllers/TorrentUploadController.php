@@ -57,11 +57,15 @@ class TorrentUploadController extends Controller
 
         $enableoffer = SupportContext::getGlobal('enableoffer', 'no');
         $has_allowed_offer = 0;
+        $offerRows = [];
         if ($enableoffer === 'yes') {
-            $has_allowed_offer = (int) Offer::query()
+            $offerRows = Offer::query()
                 ->where('allowed', 'allowed')
                 ->where('userid', $currentUser['id'])
-                ->count();
+                ->orderBy('name')
+                ->get()
+                ->toArray();
+            $has_allowed_offer = count($offerRows);
         }
 
         $uploadFreely = LegacyResponse::canUpload('torrents');
@@ -73,6 +77,7 @@ class TorrentUploadController extends Controller
         return view('torrents.upload', [
             'uploadFreely' => $uploadFreely,
             'allowtorrents' => $allowtorrents,
+            'offerRows' => $offerRows,
             'torrentRep' => new TorrentRepository(),
             'searchBoxRep' => new SearchBoxRepository(),
             'tagRep' => new TagRepository(),

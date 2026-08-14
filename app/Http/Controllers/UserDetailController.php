@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use App\Repositories\UserDetailRepository;
 use App\Support\LegacyResponse;
 use App\Support\SupportContext;
@@ -45,10 +46,19 @@ class UserDetailController extends Controller
             );
         }
 
+        $userModel = UserDetailRepository::getUserWithMedals($id);
+        $temporaryInviteCount = $userModel instanceof User ? UserDetailRepository::getTemporaryInviteCount($userModel) : 0;
+
         return view('user.details', [
             'id' => $id,
             'user' => $user,
             'lang' => $lang,
+            'userModel' => $userModel,
+            'torrentcomments' => UserDetailRepository::getCommentCount($id),
+            'forumposts' => UserDetailRepository::getPostCount($id),
+            'temporaryInviteCount' => $temporaryInviteCount,
+            'modcomment' => UserDetailRepository::getModComment($id),
+            'bonuscomment' => UserDetailRepository::getBonusComment($id),
         ]);
     }
 }

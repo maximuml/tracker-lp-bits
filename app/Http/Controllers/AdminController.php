@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\UserBanLog;
 use App\Repositories\AdminStatsRepository;
 use App\Support\SupportContext;
 use App\Support\UserDisplay;
@@ -44,9 +45,30 @@ class AdminController extends LegacyController
 
     public function warned(Request $request): View|RedirectResponse
     {
+        if (SupportContext::getUser() === null) {
+            $qs = $request->getQueryString();
 
-        return $this->legacyPage($request, 'warned');
+            return redirect('/warned.php' . ($qs ? '?' . $qs : ''));
+        }
 
+        if (UserDisplay::currentClass() < UC_MODERATOR) {
+            abort(403);
+        }
+
+        $count = (int) User::query()->where('warned', 'yes')->count();
+        $rows = User::query()
+            ->where('warned', 1)
+            ->where('enabled', 'yes')
+            ->orderByRaw('(uploaded/downloaded)')
+            ->get()
+            ->map(fn ($r) => $r->getAttributes())
+            ->toArray();
+
+        return $this->legacyPage($request, 'warned', true, [
+            'count' => $count,
+            'warnedCount' => number_format($count),
+            'rows' => $rows,
+        ]);
     }
 
     public function nowarn(Request $request): Response|RedirectResponse
@@ -121,9 +143,44 @@ class AdminController extends LegacyController
 
     public function userBanLog(Request $request): View|RedirectResponse
     {
+        if (SupportContext::getUser() === null) {
+            $qs = $request->getQueryString();
 
-        return $this->legacyPage($request, 'user-ban-log');
+            return redirect('/user-ban-log.php' . ($qs ? '?' . $qs : ''));
+        }
 
+        $qRaw = is_scalar($request->input('q', '')) ? (string) $request->input('q', '') : '';
+        $q = htmlspecialchars($qRaw);
+
+        $query = UserBanLog::query();
+        if (! empty($q)) {
+            $query->where('username', 'like', "%{$q}%");
+        }
+        $total = (int) (clone $query)->count();
+        $perPage = 50;
+        [$paginationTop, $paginationBottom, $limit, $offset] = \App\Support\Pagination::pager($perPage, $total, '?');
+        $rows = (clone $query)
+            ->offset($offset)
+            ->take($perPage)
+            ->orderBy('id', 'desc')
+            ->get()
+            ->toArray();
+
+        $header = [
+            'id' => 'ID',
+            'uid' => 'UID',
+            'username' => 'Username',
+            'reason' => 'Reason',
+            'created_at' => 'Created at',
+        ];
+        $table = \App\Support\Html::buildTable($header, $rows);
+
+        return $this->legacyPage($request, 'user-ban-log', true, [
+            'q' => $q,
+            'table' => $table,
+            'paginationTop' => $paginationTop,
+            'paginationBottom' => $paginationBottom,
+        ]);
     }
 
     public function clearCache(Request $request): View|RedirectResponse
@@ -198,9 +255,28 @@ class AdminController extends LegacyController
 
     public function unco(Request $request): View|RedirectResponse
     {
+        if (SupportContext::getUser() === null) {
+            $qs = $request->getQueryString();
 
-        return $this->legacyPage($request, 'unco', true);
+            return redirect('/unco.php' . ($qs ? '?' . $qs : ''));
+        }
 
+        $status = SupportContext::getQuery('status');
+        if ($status) {
+            \App\Support\LegacyResponse::assertId($status, true);
+        }
+
+        $rows = User::query()
+            ->where('status', 'pending')
+            ->orderBy('username')
+            ->get()
+            ->map(fn ($user) => $user->getAttributes())
+            ->toArray();
+
+        return $this->legacyPage($request, 'unco', true, [
+            'status' => $status,
+            'rows' => $rows,
+        ]);
     }
 
     public function adduser(Request $request): Response|RedirectResponse

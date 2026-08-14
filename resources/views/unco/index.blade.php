@@ -7,14 +7,11 @@
 if (\App\Support\UserDisplay::currentClass() < UC_MODERATOR) {
     \App\Support\LegacyResponse::abort('Sorry', 'Access denied.');
 }
-$status = \App\Support\SupportContext::getQuery('status');
-if ($status) {
-    \App\Support\LegacyResponse::assertId($status, true);
-}
-$rows = \App\Models\User::query()->where('status', 'pending')->orderBy('username')->get();
+$status = $status ?? '';
+$rows = (array) ($rows ?? []);
 @endphp
 
-@if ($rows->isNotEmpty())
+@if (! empty($rows))
     @php \App\Support\Html::beginFrame(''); @endphp
     <table width="100%" border="1" cellspacing="0" cellpadding="5">
         @if ($status)
@@ -29,9 +26,8 @@ $rows = \App\Models\User::query()->where('status', 'pending')->orderBy('username
             <td class="rowhead"><center>Set Status</center></td>
             <td class="rowhead"><center>Confirm</center></td>
         </tr>
-        @foreach ($rows as $userRow)
+        @foreach ($rows as $row)
             @php
-            $row = $userRow->getAttributes();
             $id = $row['id'];
             @endphp
             <tr>

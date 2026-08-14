@@ -36,6 +36,9 @@ class ForumRepository extends BaseRepository
         return $id;
     }
 
+    /**
+     * @param  array<int>  $userIds
+     */
     public function replaceModerators(int $forumId, array $userIds, int $limit = 3): void
     {
         NexusDB::table('forummods')->where('forumid', $forumId)->delete();
@@ -52,6 +55,9 @@ class ForumRepository extends BaseRepository
         $this->clearModeratorCache();
     }
 
+    /**
+     * @return  array<int, array<string, mixed>>
+     */
     public function getOverforums(): array
     {
         return NexusDB::table('overforums')
@@ -116,7 +122,9 @@ class ForumRepository extends BaseRepository
         return empty($row) ? null : $row;
     }
 
-    /** @return  array<int, array<string, mixed>> */
+    /**
+     * @return  array<int, array<string, mixed>>
+     */
     public function getAllOverforums(): array
     {
         return NexusDB::table('overforums')

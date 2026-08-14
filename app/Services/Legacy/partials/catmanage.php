@@ -116,8 +116,6 @@ $lang_catmanage = (array) (\App\Support\SupportContext::getGlobal('lang_catmanag
 if (!function_exists('print_type_list')) { function print_type_list($type){
 $lang_catmanage = (array) (\App\Support\SupportContext::getGlobal('lang_catmanage') ?? []);
 	$typename=return_type_name($type);
-	\App\Support\Html::stdhead($lang_catmanage['head_category_management']." - ".$typename);
-	\App\Support\Frame::mainFrameOpen();
 ?>
 <h1 align="center"><?php echo $lang_catmanage['text_category_management']?> - <?php echo $typename?></h1>
 <div>
@@ -610,8 +608,6 @@ print($pagerbottom);
 ?>
 </div>
 <?php
-	\App\Support\Frame::mainFrameClose();
-	\App\Support\Html::stdfoot();
 }
 elseif($action == 'del')
 {
@@ -657,25 +653,21 @@ elseif($action == 'edit')
 		else
 		{
 			$typename=return_type_name($type);
-			\App\Support\Html::stdhead($typename);
 			print("<form method=\"post\" action=\"?action=submit&amp;type=".$type."\">");
 			print("<input type=\"hidden\" name=\"isedit\" value=\"1\" />");
 			print("<input type=\"hidden\" name=\"id\" value=\"".$id."\" />");
 			print_category_editor($type, $row);
 			print("</form>");
-			\App\Support\Html::stdfoot();
 		}
 	}
 }
 elseif($action == 'add')
 {
 	$typename=return_type_name($type);
-	\App\Support\Html::stdhead($lang_catmanage['head_add']." - ".$typename);
 	print("<form method=\"post\" action=\"?action=submit&amp;type=".$type."\">");
 	print("<input type=\"hidden\" name=\"isedit\" value=\"0\" />");
 	print_category_editor($type);
 	print("</form>");
-	\App\Support\Html::stdfoot();
 }
 elseif($action == 'submit')
 {

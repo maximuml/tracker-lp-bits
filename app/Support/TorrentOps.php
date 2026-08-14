@@ -3,11 +3,8 @@
 namespace App\Support;
 
 use App\Enums\TorrentPromotion;
-use App\Models\Torrent;
-use App\Models\TorrentOperationLog;
-use App\Repositories\MeiliSearchRepository;
 use App\Repositories\TorrentRepository;
-use Nexus\Database\NexusDB;
+
 
 /**
  * Legacy torrent operations helpers extracted from `include/functions.php`.
@@ -25,56 +22,7 @@ final class TorrentOps
      */
     public static function deleteTorrents($id, bool $notify = false): void
     {
-        $idArr = is_array($id) ? $id : [$id];
-
-        $torrentInfo = Torrent::query()
-            ->whereIn('id', $idArr)
-            ->get()
-            ->keyBy('id');
-
-        $torrentRep = new TorrentRepository();
-        $torrentDir = \App\Support\Config\SiteConfig::current()->main->torrentDir();
-
-        NexusDB::table('torrents')->whereIn('id', $idArr)->delete();
-        NexusDB::table('torrent_extras')->whereIn('torrent_id', $idArr)->delete();
-        NexusDB::table('snatched')
-            ->whereIn('torrentid', $idArr)
-            ->whereNotExists(function ($query) {
-                $query->selectRaw('1')->from('users')->whereColumn('users.id', '=', 'snatched.userid');
-            })
-            ->delete();
-
-        foreach (['peers', 'files', 'comments'] as $x) {
-            NexusDB::table($x)->whereIn('torrent', $idArr)->delete();
-        }
-
-        NexusDB::table('hit_and_runs')->whereIn('torrent_id', $idArr)->delete();
-
-        foreach ($idArr as $_id) {
-            if ($torrentInfo->has($_id)) {
-                $torrentRep->delPiecesHashCache($torrentInfo->get($_id)->pieces_hash);
-            }
-
-            Logger::writeWithContext("delete torrent: $_id", 'error');
-            @unlink(Path::resolve("$torrentDir/$_id.torrent", defined('ROOT_PATH') ? (string) ROOT_PATH : ''));
-
-            TorrentOperationLog::add([
-                'torrent_id' => $_id,
-                'uid' => UserDisplay::currentId(),
-                'action_type' => TorrentOperationLog::ACTION_TYPE_DELETE,
-                'comment' => '',
-            ], $notify);
-
-            Hooks::doAction('torrent_delete', $_id);
-            Events::fire('torrent_deleted', $torrentInfo->get($_id));
-        }
-
-        try {
-            $meiliSearchRep = new MeiliSearchRepository();
-            $meiliSearchRep->deleteDocuments($idArr);
-        } catch (\Throwable $e) {
-            Logger::writeWithContext('MeiliSearch delete on torrent delete failed: ' . $e->getMessage(), 'error');
-        }
+        app(TorrentRepository::class)->deleteTorrents($id, $notify);
     }
 
     /**
@@ -88,7 +36,7 @@ final class TorrentOps
     {
         $torrent2UserValue = 1.0;
 
-        $torrentArr = Torrent::query()->find($userSnatched['torrentid'] ?? 0)?->toArray();
+        $torrentArr = app(TorrentRepository::class)->findForUserValue((int) ($userSnatched['torrentid'] ?? 0));
 
         if ($torrentArr) {
             if ($torrentArr['owner'] == $userSnatched['userid']) {

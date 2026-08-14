@@ -1,5 +1,4 @@
 <?php
-\App\Support\Html::stdhead('Mass E-mail Gateway');
 ?>
 <p><table border=0 class=main cellspacing=0 cellpadding=0><tr>
 <td class=embedded style='padding-left: 10px'><font size=3><b>Send mass e-mail to all members</b></font></td>
@@ -32,5 +31,4 @@
 </table>
 
 <?php
-\App\Support\Html::stdfoot();
 ?>

@@ -1,6 +1,5 @@
 <?php
 if ($mode === 'newsect'):
-    \App\Support\Html::stdhead('Add section');
 ?>
 <h1 align=center>Add Rules</h1>
 <form method="post" action="modrules.php?act=addsect">
@@ -22,9 +21,7 @@ if ($mode === 'newsect'):
     </table>
 </form>
 <?php
-    \App\Support\Html::stdfoot();
 elseif ($mode === 'edit'):
-    \App\Support\Html::stdhead('Edit rules');
 ?>
 <h1 align=center>Edit Rules</h1>
 <form method="post" action="modrules.php?act=edited">
@@ -46,9 +43,7 @@ elseif ($mode === 'edit'):
     </table>
 </form>
 <?php
-    \App\Support\Html::stdfoot();
 else:
-    \App\Support\Html::stdhead('Rules Management');
 ?>
 <h1 align=center>Rules Management</h1>
 <br /><table width=940 border=0 cellspacing=0 cellpadding=5>
@@ -61,6 +56,5 @@ else:
 </table>
 <?php endforeach; ?>
 <?php
-    \App\Support\Html::stdfoot();
 endif;
 ?>

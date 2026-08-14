@@ -6,8 +6,6 @@ $id = $id ?? 0;
 $viewclassOptions = $viewclassOptions ?? [];
 $sortOptions = $sortOptions ?? [];
 $currentClass = $currentClass ?? 0;
-\App\Support\Html::stdhead($lang_moforums['head_overforum_management'] ?? 'Overforum management');
-\App\Support\Frame::mainFrameOpen();
 
 if ($mode === 'editforum'):
 ?>
@@ -106,6 +104,4 @@ else:
 </form>
 <?php
 endif;
-\App\Support\Frame::mainFrameClose();
-\App\Support\Html::stdfoot();
 ?>

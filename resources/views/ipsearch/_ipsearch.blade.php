@@ -1,8 +1,6 @@
 <?php
 $lang_ipsearch = (array) ($lang_ipsearch ?? \App\Support\SupportContext::getGlobal('lang_ipsearch', []));
 
-\App\Support\Html::stdhead($lang_ipsearch['head_search_ip_history'] ?? 'Search IP History');
-\App\Support\Frame::mainFrameOpen();
 
 print('<h1 align="center">' . ($lang_ipsearch['text_search_ip_history'] ?? 'Search IP History') . '</h1>' . "\n");
 print('<form method="get" action="">');
@@ -42,6 +40,4 @@ if ($ip) {
     }
 }
 
-\App\Support\Frame::mainFrameClose();
-\App\Support\Html::stdfoot();
 ?>

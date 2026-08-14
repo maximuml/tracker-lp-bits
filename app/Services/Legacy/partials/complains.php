@@ -97,8 +97,6 @@ $lang_complains = (array) (\App\Support\SupportContext::getGlobal('lang_complain
                 }
                 echo '</table>';
             };
-            \App\Support\Html::stdhead($lang_complains['text_complain']);
-            \App\Support\Frame::mainFrameOpen();
             if(!((\App\Support\SupportContext::getQuery('page') !== null))){
                 $pendingRows = \Nexus\Database\NexusDB::table('complains')->where('answered', 0)->orderByDesc('id')->get(['added', 'uuid', 'email']);
                 \App\Support\Html::beginFrame($lang_complains['pending_complaints']);
@@ -125,8 +123,6 @@ $lang_complains = (array) (\App\Support\SupportContext::getGlobal('lang_complain
                 echo $lang_complains['no_complaints_have_been_processed'];
             }
             \App\Support\Html::endFrame();
-            \App\Support\Frame::mainFrameClose();
-            \App\Support\Html::stdfoot();
             break;
         case 'view':
             $uuid = filter_var(\App\Support\SupportContext::getQuery('id'), FILTER_SANITIZE_FULL_SPECIAL_CHARS);
@@ -134,8 +130,6 @@ $lang_complains = (array) (\App\Support\SupportContext::getGlobal('lang_complain
             $complain = (array) \Nexus\Database\NexusDB::table('complains')->where('uuid', $uuid)->first();
             if(!$complain) \App\Support\LegacyResponse::permissionDenied();
             $user = \App\Models\User::query()->where('email', $complain['email'])->first();
-            \App\Support\Html::stdhead($lang_complains['text_complain']);
-            \App\Support\Frame::mainFrameOpen();
             if(!$isLogin){
                 \App\Support\Html::beginFrame($lang_complains['text_created_title']);
                 printf('<p style="font-weight: bold; color: red">%s</p>', $lang_complains['text_created_note']);
@@ -182,13 +176,10 @@ $lang_complains = (array) (\App\Support\SupportContext::getGlobal('lang_complain
             if($isAdmin){
                 printf('<form action="" method="post" style="text-align: center; margin-top: 2em"><input type="hidden" name="action" value="%s" /><input type="hidden" name="id" value="%u" /><button>%s</button></form>', $complain['answered'] ? 'unanswered' : 'answered', $complain['id'],$complain['answered'] ? $lang_complains['text_unanswer_it'] : $lang_complains['text_answer_it']);
             }
-            \App\Support\Frame::mainFrameClose();
-            \App\Support\Html::stdfoot();
             break;
         case 'compose':
         default:
             \App\Support\User::currentUserCheck();
-            \App\Support\Html::stdhead($lang_complains['text_complain']);
             ?>
             <h2><?= $lang_complains['text_new_complain'] ?></h2>
             <form action="" method="post">
@@ -205,6 +196,5 @@ $lang_complains = (array) (\App\Support\SupportContext::getGlobal('lang_complain
                 </table>
             </form>
             <?php
-            \App\Support\Html::stdfoot();
     }
 }

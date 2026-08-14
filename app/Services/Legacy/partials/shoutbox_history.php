@@ -4,11 +4,7 @@ error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 // Auto-generated legacy bridge shims
 if (!isset($CURUSER)) $CURUSER = (array) (\App\Support\SupportContext::getUser() ?? []);
 if (!isset($lang_shoutbox)) $lang_shoutbox = (array) (\App\Support\SupportContext::getGlobal('lang_shoutbox') ?? []);
-\Nexus\Nexus::css('styles/shoutbox.css', 'header', true);
-\Nexus\Nexus::js('js/shoutbox.js', 'footer', true);
 
-\App\Support\Html::stdhead($lang_shoutbox['text_history_title'] ?? 'Shoutbox history');
-\App\Support\Frame::mainFrameOpen();
 
 $perPage = 50;
 $page = max(1, (int) (\App\Support\SupportContext::getQuery('page') ?? 1));
@@ -130,6 +126,3 @@ if ($totalPages > 1) {
     }
     echo '</div>';
 }
-
-\App\Support\Frame::mainFrameClose();
-\App\Support\Html::stdfoot();

@@ -104,9 +104,7 @@ if ($action == 'edit')
 	}
 	else
 	{
-		\App\Support\Html::stdhead($lang_news['head_edit_site_news']);
-		\App\Support\Frame::mainFrameOpen();
-		$body = $arr["body"];
+			$body = $arr["body"];
 		$subject = htmlspecialchars($arr['title']);
 		$title = $lang_news['text_edit_site_news'];
 		print("<form id=\"compose\" name=\"compose\" method=\"post\" action=\"".htmlspecialchars("?action=edit&newsid=".$newsid)."\">");
@@ -114,8 +112,6 @@ if ($action == 'edit')
 		\App\Support\Frame::composeBeginVoid($title, "edit", $body, true, $subject);
 		print("<tr><td class=\"toolbox\" align=\"center\" colspan=\"2\"><input type=\"checkbox\" name=\"notify\" value=\"yes\" ".($arr['notify'] == 'yes' ? " checked=\"checked\"" : "")." />".$lang_news['text_notify_users_of_this']."</td></tr>\n");
 		\App\Support\Frame::composeEndVoid();
-		\App\Support\Frame::mainFrameClose();
-		\App\Support\Html::stdfoot();
 		return;
 	}
 
@@ -123,16 +119,12 @@ if ($action == 'edit')
 
 //  Other Actions and followup    ////////////////////////////////////////////
 
-\App\Support\Html::stdhead($lang_news['head_site_news']);
-\App\Support\Frame::mainFrameOpen();
 $title = $lang_news['text_submit_news_item'];
 print("<form id=\"compose\" method=\"post\" name=\"compose\" action=\"?action=add\">\n");
 \App\Support\Frame::composeBeginVoid($title, 'new');
 print("<tr><td class=\"toolbox\" align=\"center\" colspan=\"2\"><input type=\"checkbox\" name=\"notify\" value=\"yes\" />".$lang_news['text_notify_users_of_this']."</td></tr>\n");
 \App\Support\Frame::composeEndVoid();
 print("</form>");
-\App\Support\Frame::mainFrameClose();
-\App\Support\Html::stdfoot();
 return;
 
 ?>

@@ -5,6 +5,8 @@ use App\Auth\Permission;
 use App\Models\Tag;
 use App\Models\Torrent;
 use App\Models\TorrentTag;
+use App\Support\Json;
+use App\Support\Logger;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Collection;
 use Nexus\Database\NexusDB;
@@ -186,6 +188,55 @@ class TagRepository extends BaseRepository
             self::$orderByFieldIdString = $results->isEmpty() ? '0' : $results->implode('id', ',');
         }
         return self::$orderByFieldIdString;
+    }
+
+    /**
+     * Persist tag assignments for a torrent.
+     *
+     * Mirrors the legacy {@see \App\Support\TorrentTags::insert()}.
+     *
+     * @param  array<int, int>  $tagIdArr
+     */
+    public function syncTorrentTags(int|string $torrentId, array $tagIdArr, bool $sync = false): void
+    {
+        $specialTags = Tag::listSpecial();
+        $canSetSpecialTag = Permission::canSetTorrentSpecialTag();
+        $dateTimeStringNow = date('Y-m-d H:i:s');
+
+        if ($sync) {
+            $delQuery = TorrentTag::query()->where('torrent_id', $torrentId);
+            if (! $canSetSpecialTag) {
+                $delQuery->whereNotIn('tag_id', $specialTags);
+            }
+            $delQuery->delete();
+        }
+
+        if (empty($tagIdArr)) {
+            return;
+        }
+
+        $records = [];
+        foreach ($tagIdArr as $tagId) {
+            if (in_array($tagId, $specialTags) && ! $canSetSpecialTag) {
+                Logger::writeWithContext("special tag: $tagId, and user no permission");
+                continue;
+            }
+            if (! isset($records[$tagId])) {
+                $records[$tagId] = [
+                    'torrent_id' => $torrentId,
+                    'tag_id' => $tagId,
+                    'created_at' => $dateTimeStringNow,
+                    'updated_at' => $dateTimeStringNow,
+                ];
+            }
+        }
+
+        if (empty($records)) {
+            return;
+        }
+
+        Logger::writeWithContext("[INSERT_TAGS], torrent: $torrentId with tags: " . Json::encode($tagIdArr));
+        TorrentTag::query()->insert(array_values($records));
     }
 
     /**

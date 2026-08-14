@@ -3,8 +3,8 @@
 namespace App\Support;
 
 use App\Models\Setting;
+use App\Repositories\AuthRepository;
 use App\Services\Captcha\Exceptions\CaptchaValidationException;
-use Nexus\Database\NexusDB;
 
 /**
  * Temporary Phase 5 migration shim for legacy authentication / captcha helpers.
@@ -26,14 +26,10 @@ final class LegacyAuth
         $maxAttempts = $context->maxLoginAttempts;
         $ip = $context->ip;
 
-        $total = (int) NexusDB::table('loginattempts')
-            ->where('ip', $ip)
-            ->sum('attempts');
+        $total = app(AuthRepository::class)->getLoginAttemptsSum($ip);
 
         if ($total >= $maxAttempts) {
-            NexusDB::table('loginattempts')
-                ->where('ip', $ip)
-                ->update(['banned' => 'yes']);
+            app(AuthRepository::class)->banLoginAttempts($ip);
 
             LegacyResponse::abort(
                 $type.($lang['std_locked'] ?? '').$maxAttempts.($lang['std_attempts_reached'] ?? ''),
@@ -131,27 +127,7 @@ final class LegacyAuth
         $lang = $context->lang;
         $ip = $context->ip;
 
-        $count = (int) NexusDB::table('loginattempts')
-            ->where('ip', $ip)
-            ->count();
-
-        if ($count == 0) {
-            NexusDB::table('loginattempts')->insert([
-                'ip' => $ip,
-                'added' => date('Y-m-d H:i:s'),
-                'attempts' => 1,
-            ]);
-        } else {
-            NexusDB::table('loginattempts')
-                ->where('ip', $ip)
-                ->update(['attempts' => NexusDB::raw('attempts + 1')]);
-        }
-
-        if ($recover) {
-            NexusDB::table('loginattempts')
-                ->where('ip', $ip)
-                ->update(['type' => 'recover']);
-        }
+        app(AuthRepository::class)->recordFailedLogin($ip, $recover);
 
         if ($type === 'silent') {
             return;
@@ -182,9 +158,7 @@ final class LegacyAuth
         $lang = $context->lang;
 
         if ($context->isLoggedIn()) {
-            NexusDB::table('users')
-                ->where('id', $context->user['id'] ?? 0)
-                ->update(['lang' => $context->langId()]);
+            app(AuthRepository::class)->updateUserLang((int) ($context->user['id'] ?? 0), $context->langId());
 
             LegacyResponse::abort(
                 (string) ($lang['std_permission_denied'] ?? ''),
@@ -243,7 +217,7 @@ final class LegacyAuth
         }
 
         if ($maxuserscheck) {
-            $userCount = (int) NexusDB::table('users')->count();
+            $userCount = app(AuthRepository::class)->countUsers();
             if ($userCount >= $settings['maxusers']) {
                 LegacyResponse::abort(
                     (string) ($lang['std_sorry'] ?? ''),
@@ -256,7 +230,7 @@ final class LegacyAuth
 
         if ($ipcheck) {
             $ip = $context->ip;
-            $ipCount = (int) NexusDB::table('users')->where('ip', $ip)->count();
+            $ipCount = app(AuthRepository::class)->countUsersByIp($ip);
             if ($ipCount > $settings['maxip']) {
                 LegacyResponse::abort(
                     (string) ($lang['std_sorry'] ?? ''),
@@ -286,9 +260,7 @@ final class LegacyAuth
 
     public static function remainingAttempts(string $type, int $maxAttempts, string $ip): string
     {
-        $total = (int) NexusDB::table('loginattempts')
-            ->where('ip', $ip)
-            ->sum('attempts');
+        $total = app(AuthRepository::class)->getLoginAttemptsSum($ip);
 
         $remaining = $maxAttempts - $total;
 
@@ -338,9 +310,7 @@ final class LegacyAuth
     {
         $lang = $context->lang;
 
-        $id = NexusDB::table('users')
-            ->whereRaw('LOWER(username) = LOWER(?)', [$username])
-            ->value('id');
+        $id = app(AuthRepository::class)->getUserIdByUsername($username);
 
         if ($id === null) {
             LegacyResponse::abort(
@@ -370,12 +340,10 @@ final class LegacyAuth
         $ip = $context->ip;
         $nip = ip2long($ip);
 
-        if ($nip) {
-            if (NexusDB::table('bans')->where('first', '<=', $nip)->where('last', '>=', $nip)->exists()) {
-                header('HTTP/1.1 403 Forbidden');
-                print('<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"></head><body>' . ($lang['text_unauthorized_ip'] ?? '') . "</body></html>\n");
-                die;
-            }
+        if ($nip && app(AuthRepository::class)->isIpBanned($nip)) {
+            header('HTTP/1.1 403 Forbidden');
+            print('<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"></head><body>' . ($lang['text_unauthorized_ip'] ?? '') . "</body></html>\n");
+            die;
         }
 
         $row = AuthCookie::userFromCookie($context->cookies, true);
@@ -385,7 +353,7 @@ final class LegacyAuth
 
         if (! $row['passkey']) {
             $passkey = md5($row['username'] . date('Y-m-d H:i:s') . $row['passhash']);
-            NexusDB::table('users')->where('id', $row['id'])->update(['passkey' => $passkey]);
+            app(AuthRepository::class)->updateUserPasskey((int) $row['id'], $passkey);
         }
 
         $row['old_ip'] = $row['ip'];

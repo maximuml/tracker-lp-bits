@@ -53,12 +53,11 @@ if ($__server_REQUEST_METHOD == "POST")
 }
 
 if ($pollid){
-	\App\Support\Html::stdhead($lang_makepoll['head_edit_poll']);
 	print("<h1>".$lang_makepoll['text_edit_poll']."</h1>");
 }
 else
 {
-	\App\Support\Html::stdhead($lang_makepoll['head_new_poll']);
+
 	// Warn if current poll is less than 3 days old
 	$lastPoll = (array) \Nexus\Database\NexusDB::table('polls')->orderByDesc('added')->first(['question', 'added']);
 	if ($lastPoll)
@@ -78,14 +77,14 @@ else
 }
 ?>
 
-<table border=1 cellspacing=0 cellpadding=5>
-<form method=post action=makepoll.php>
+<form method="post" action="makepoll.php">
 <style type="text/css">
 input.mp
 {
 	width: 450px;
 }
 </style>
+<table border=1 cellspacing=0 cellpadding=5>
 <tr><td class=rowhead><?php echo $lang_makepoll['text_question']?> <font color=red>*</font></td><td align=left><input name=question class=mp maxlength=255 value="<?php echo $poll['question'] ?? ''?>"></td></tr>
 <?php for ($i = 0; $i <= 19; $i++) { ?>
 <tr><td class=rowhead><?php echo $lang_makepoll['text_option']?><?php echo $i + 1?><?php echo $i < 2 ? ' <font color=red>*</font>' : ''?></td><td align=left><input name=option<?php echo $i?> class=mp maxlength=40 value="<?php echo $poll["option$i"] ?? ''?>"><br /></td></tr>
@@ -93,13 +92,8 @@ input.mp
 <tr><td colspan=2 align=center><input type=submit value="<?php echo $pollid ? $lang_makepoll['submit_edit_poll'] : $lang_makepoll['submit_create_poll']?>" style='height: 20pt'></td></tr>
 </table>
 <p><font color=red>*</font><?php echo $lang_makepoll['text_required']?></p>
-<?php
-if ($pollid)
-print("<input type=hidden name=pollid value=\"".$poll["id"]."\">");
-?>
-<input type=hidden name=returnto value="<?php echo htmlspecialchars(\App\Support\SupportContext::getQuery("returnto") ?? '') ? htmlspecialchars(\App\Support\SupportContext::getQuery("returnto") ?? '') : htmlspecialchars($__server_HTTP_REFERER ?? '')?>">
+<?php if ($pollid): ?>
+<input type=hidden name=pollid value="<?php echo $poll["id"]?>">
+<?php endif; ?>
+<input type=hidden name=returnto value="<?php echo htmlspecialchars(\App\Support\SupportContext::getQuery("returnto") ?? '') ?: htmlspecialchars($__server_HTTP_REFERER ?? '')?>">
 </form>
-
-<?php
-\App\Support\Html::stdfoot();
-?>

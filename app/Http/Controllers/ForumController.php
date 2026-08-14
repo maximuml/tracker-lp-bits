@@ -8,13 +8,13 @@ use App\Models\Forum;
 use App\Support\Forum as SupportForum;
 use App\Support\Permissions;
 use App\Support\SupportContext;
+use App\Repositories\ForumRepository;
 use App\Support\UserClass;
 use App\Support\UserDisplay;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\View\View;
-use Nexus\Database\NexusDB;
 
 class ForumController extends LegacyController
 {
@@ -48,15 +48,7 @@ class ForumController extends LegacyController
             if ($id <= 0) {
                 return redirect('forummanage.php');
             }
-            $topics = NexusDB::table('topics')->where('forumid', $id)->get(['id']);
-            foreach ($topics as $topic) {
-                NexusDB::table('posts')->where('topicid', $topic->id)->delete();
-            }
-            NexusDB::table('topics')->where('forumid', $id)->delete();
-            NexusDB::table('forums')->where('id', $id)->delete();
-            NexusDB::table('forummods')->where('forumid', $id)->delete();
-            NexusDB::cache_del('forums_list');
-            NexusDB::cache_del('forum_moderator_array');
+            app(ForumRepository::class)->deleteForum($id);
             return redirect('forummanage.php');
         }
 
@@ -68,12 +60,7 @@ class ForumController extends LegacyController
                 return redirect('forummanage.php');
             }
             $moderator = (string) SupportContext::getPost('moderator');
-            if ($moderator !== '') {
-                SupportForum::setModerators($moderator, $id);
-            } else {
-                NexusDB::table('forummods')->where('forumid', $id)->delete();
-            }
-            NexusDB::table('forums')->where('id', $id)->update([
+            $data = [
                 'sort' => (int) SupportContext::getPost('sort'),
                 'name' => $name,
                 'description' => $desc,
@@ -81,9 +68,13 @@ class ForumController extends LegacyController
                 'minclassread' => (int) SupportContext::getPost('readclass'),
                 'minclasswrite' => (int) SupportContext::getPost('writeclass'),
                 'minclasscreate' => (int) SupportContext::getPost('createclass'),
-            ]);
-            NexusDB::cache_del('forums_list');
-            NexusDB::cache_del('forum_moderator_array');
+            ];
+            app(ForumRepository::class)->updateForum($id, $data);
+            if ($moderator !== '') {
+                SupportForum::setModerators($moderator, $id);
+            } else {
+                app(ForumRepository::class)->replaceModerators($id, []);
+            }
             return redirect('forummanage.php');
         }
 
@@ -93,7 +84,7 @@ class ForumController extends LegacyController
             if ($name === '' && $desc === '') {
                 return redirect('forummanage.php');
             }
-            $id = NexusDB::table('forums')->insertGetId([
+            $data = [
                 'sort' => (int) SupportContext::getPost('sort'),
                 'name' => $name,
                 'description' => $desc,
@@ -101,8 +92,8 @@ class ForumController extends LegacyController
                 'minclasswrite' => (int) SupportContext::getPost('writeclass'),
                 'minclasscreate' => (int) SupportContext::getPost('createclass'),
                 'forid' => (int) SupportContext::getPost('overforums'),
-            ]);
-            NexusDB::cache_del('forums_list');
+            ];
+            $id = app(ForumRepository::class)->createForum($data);
             $moderator = (string) SupportContext::getPost('moderator');
             if ($moderator !== '') {
                 SupportForum::setModerators($moderator, $id);
@@ -110,8 +101,8 @@ class ForumController extends LegacyController
             return redirect('forummanage.php');
         }
 
-        $overforums = NexusDB::table('overforums')->orderBy('sort')->get(['id', 'name'])->map(fn ($r) => (array) $r)->all();
-        $maxSort = NexusDB::table('forums')->count();
+        $overforums = app(ForumRepository::class)->getOverforums();
+        $maxSort = app(ForumRepository::class)->getMaxForumSort();
 
         $classOptions = [];
         $currentClass = UserDisplay::currentClass();
@@ -121,8 +112,8 @@ class ForumController extends LegacyController
 
         if ($action === 'editforum') {
             $id = (int) (SupportContext::getQuery('id') ?? 0);
-            $row = (array) NexusDB::table('forums')->where('id', $id)->first();
-            if (empty($row)) {
+            $row = app(ForumRepository::class)->getForumRow($id);
+            if ($row === null) {
                 return $this->legacyAbortResponse('Error', 'No records found.');
             }
 
@@ -151,16 +142,11 @@ class ForumController extends LegacyController
             ]);
         }
 
-        $forums = NexusDB::table('forums')
-            ->leftJoin('overforums', 'forums.forid', '=', 'overforums.id')
-            ->orderBy('forums.sort')
-            ->get(['forums.*', 'overforums.name AS of_name'])
-            ->map(function ($r) {
-                $arr = (array) $r;
-                $arr['moderators_html'] = SupportForum::moderatorsWithContext($arr['id'], false);
-                return $arr;
-            })
-            ->all();
+        $forums = app(ForumRepository::class)->getForumsWithOverforum();
+        foreach ($forums as &$arr) {
+            $arr['moderators_html'] = SupportForum::moderatorsWithContext($arr['id'], false);
+        }
+        unset($arr);
 
         return $this->legacyPage($request, 'forummanage', true, [
             'mode' => 'list',
@@ -184,8 +170,7 @@ class ForumController extends LegacyController
             if ($id <= 0) {
                 return redirect('moforums.php?action=forum');
             }
-            NexusDB::table('overforums')->where('id', $id)->delete();
-            NexusDB::cache_del('overforums_list');
+            app(ForumRepository::class)->deleteOverforum($id);
             return redirect('moforums.php?action=forum');
         }
 
@@ -196,13 +181,13 @@ class ForumController extends LegacyController
             if ($postId <= 0 || ($name === '' && $desc === '')) {
                 return redirect('moforums.php?action=forum');
             }
-            NexusDB::table('overforums')->where('id', $postId)->update([
+            $data = [
                 'sort' => (int) SupportContext::getPost('sort'),
                 'name' => $name,
                 'description' => $desc,
                 'minclassview' => (int) SupportContext::getPost('viewclass'),
-            ]);
-            NexusDB::cache_del('overforums_list');
+            ];
+            app(ForumRepository::class)->updateOverforum($postId, $data);
             return redirect('moforums.php?action=forum');
         }
 
@@ -212,21 +197,21 @@ class ForumController extends LegacyController
             if ($name === '' && $desc === '') {
                 return redirect('moforums.php?action=forum');
             }
-            NexusDB::table('overforums')->insert([
+            $data = [
                 'sort' => (int) SupportContext::getPost('sort'),
                 'name' => $name,
                 'description' => $desc,
                 'minclassview' => (int) SupportContext::getPost('viewclass'),
-            ]);
-            NexusDB::cache_del('overforums_list');
+            ];
+            app(ForumRepository::class)->createOverforum($data);
             return redirect('moforums.php?action=forum');
         }
 
-        $maxSort = NexusDB::table('overforums')->count();
+        $maxSort = app(ForumRepository::class)->getMaxOverforumSort();
 
         if ($action === 'editforum') {
-            $row = (array) NexusDB::table('overforums')->where('id', $id)->first();
-            if (empty($row)) {
+            $row = app(ForumRepository::class)->getOverforumRow($id);
+            if ($row === null) {
                 return $this->legacyAbortResponse('Error', 'No records found.');
             }
             return $this->legacyPage($request, 'moforums', true, [
@@ -238,7 +223,7 @@ class ForumController extends LegacyController
             ]);
         }
 
-        $overforums = NexusDB::table('overforums')->orderBy('sort')->get()->map(fn ($r) => (array) $r)->all();
+        $overforums = app(ForumRepository::class)->getAllOverforums();
         $viewclassOptions = [];
         $currentClass = UserDisplay::currentClass();
         for ($i = 0; $i <= $currentClass; ++$i) {

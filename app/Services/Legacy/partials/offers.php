@@ -11,9 +11,7 @@ if ($enableoffer == 'no')
 \App\Support\LegacyResponse::permissionDenied();
 if (!function_exists('offers_bark')) { function offers_bark($msg) {
 $lang_offers = (array) (\App\Support\SupportContext::getGlobal('lang_offers') ?? []);
-	\App\Support\Html::stdhead($lang_offers['head_offer_error']);
 	\App\Support\Html::stdMessage($lang_offers['std_error'], $msg);
-	\App\Support\Html::stdfoot();
 	return;
 } }
 
@@ -36,7 +34,6 @@ if (((\App\Support\SupportContext::getQuery('add_offer') !== null)) && \App\Supp
 	if($add_offer != '1')
 	\App\Support\LegacyResponse::abort($lang_offers['std_error'], $lang_offers['std_smell_rat']);
 
-	\App\Support\Html::stdhead($lang_offers['head_offer']);
 
 	print("<p>".$lang_offers['text_red_star_required']."</p>");
 
@@ -55,7 +52,6 @@ if (((\App\Support\SupportContext::getQuery('add_offer') !== null)) && \App\Supp
 	"<tr><td class=rowhead align=right valign=top><b>".$lang_offers['row_description']."<b><font color=red>*</font></td><td class=rowfollow align=left>\n");
 	echo \App\Support\Form::bbcodeEditor("compose","body",$body,false, 130, true);
 	print("</td></tr><tr><td class=toolbox align=center colspan=2><input id=qr type=submit class=btn value=".$lang_offers['submit_add_offer']." ></td></tr></table></form><br />\n");
-	\App\Support\Html::stdfoot();
 	return;
 }
 //=== end add offer
@@ -131,12 +127,10 @@ if (((\App\Support\SupportContext::getQuery('new_offer') !== null)) && \App\Supp
 
 		header("Location: offers.php?id=$id&off_details=1");
 
-		\App\Support\Html::stdhead($lang_offers['head_success']);
 	}
 	else{
 		\App\Support\LegacyResponse::abort($lang_offers['std_error'], $lang_offers['std_offer_exists']."<a class=altlink href=offers.php>".$lang_offers['text_view_all_offers']."</a>", false);
 	}
-	\App\Support\Html::stdfoot();
 	return;
 }
 //==end take new offer
@@ -160,7 +154,6 @@ if (((\App\Support\SupportContext::getQuery('off_details') !== null)) && \App\Su
 
 	$s = $num["name"];
 
-	\App\Support\Html::stdhead($lang_offers['head_offer_detail_for']." \"".$s."\"");
 	print("<h1 align=\"center\" id=\"top\">".htmlspecialchars($s)."</h1>");
 
 	print("<table width=\"97%\" cellspacing=\"0\" cellpadding=\"5\">");
@@ -244,7 +237,6 @@ if (((\App\Support\SupportContext::getQuery('off_details') !== null)) && \App\Su
 	\App\Support\Html::quickReplyVoid('comment', 'body', $lang_offers['submit_add_comment']);
 	print("</form></td></tr></table>");
 	print($commentbar);
-	\App\Support\Html::stdfoot();
 	return;
 }
 //=== end offer details
@@ -389,7 +381,6 @@ if (((\App\Support\SupportContext::getQuery("edit_offer") !== null)) && \App\Sup
 	$s2 .= "<option value=\"" . $row["id"] . "\" ".($row['id'] == $id2 ? " selected=\"selected\"" : "").">" . htmlspecialchars($row["name"]) . "</option>\n";
 	$s2 .= "</select>\n";
 
-	\App\Support\Html::stdhead($lang_offers['head_edit_offer'].": $s");
 	$title = htmlspecialchars(trim($s));
 
 	print("<form id=\"compose\" method=\"post\" name=\"compose\" action=\"?id=".$id."&amp;take_off_edit=1\">".
@@ -401,7 +392,6 @@ if (((\App\Support\SupportContext::getQuery("edit_offer") !== null)) && \App\Sup
 	echo \App\Support\Form::bbcodeEditor("compose","body",$body, false, 130, true);
 	print("</td></tr>");
 	print("<tr><td class=\"toolbox\" style=\"vertical-align: middle; padding-top: 10px; padding-bottom: 10px;\" align=\"center\" colspan=\"2\"><input id=\"qr\" type=\"submit\" value=\"".$lang_offers['submit_edit_offer']."\" class=\"btn\" /></td></tr></table></form><br />\n");
-	\App\Support\Html::stdfoot();
 	return;
 }
 //=== end edit offer
@@ -460,7 +450,6 @@ if (((\App\Support\SupportContext::getQuery("offer_vote") !== null)) && \App\Sup
 	$count = \Nexus\Database\NexusDB::table('offervotes')->where('offerid', $offerid)->count();
 
 	$offername = \App\Models\Offer::query()->where('id', $offerid)->value('name');
-	\App\Support\Html::stdhead($lang_offers['head_offer_voters']." - \"".$offername."\"");
 
 	print("<h1 align=center>".$lang_offers['text_vote_results_for']." <a  href=offers.php?id=$offerid&off_details=1><b>".htmlspecialchars($offername)."</b></a></h1>");
 
@@ -495,7 +484,6 @@ if (((\App\Support\SupportContext::getQuery("offer_vote") !== null)) && \App\Sup
 		echo $pagerbottom;
 	}
 
-	\App\Support\Html::stdfoot();
 	return;
 }
 //=== end offer votes list
@@ -582,10 +570,8 @@ if (((\App\Support\SupportContext::getQuery("vote") !== null)) && \App\Support\S
 				'vote' => $vote,
 			]);
 			\App\Support\Bonus::updatePoints((string) "+", (float) $offervote_bonus, $CURUSER["id"]);
-			\App\Support\Html::stdhead($lang_offers['head_vote_for_offer']);
 			print("<h1 align=center>".$lang_offers['std_vote_accepted']."</h1>");
 			print($lang_offers['std_vote_accepted_note']."<a  href=offers.php?id=$offerid&off_details=1>".$lang_offers['std_back_to_offer_detail']);
-			\App\Support\Html::stdfoot();
 			return;
 		}
 	}
@@ -771,8 +757,6 @@ $offerRows = (clone $offerQuery)
 	->get();
 $num = $offerRows->count();
 
-\App\Support\Html::stdhead($lang_offers['head_offers']);
-\App\Support\Frame::mainFrameOpen();
 \App\Support\Html::beginFrame($lang_offers['text_offers_section'], true, 10, "100%", "center");
 
 print("<p align=\"left\"><b><font size=\"5\">".$lang_offers['text_rules']."</font></b></p>\n");
@@ -918,8 +902,6 @@ print("<td class=\"colhead\">".$lang_offers['col_offered_by']."</td>".
 if(!(isset($CURUSER)) || $CURUSER['showlastcom'] == 'yes')
 echo \App\Support\Html::tooltipContainer($lastcom_tooltip, 400);
 }
-\App\Support\Frame::mainFrameClose();
 if ($CURUSER)
 	\App\Models\User::query()->where('id', $CURUSER['id'])->update(['last_offer' => date("Y-m-d H:i:s")]);
-\App\Support\Html::stdfoot();
 ?>

@@ -1,6 +1,4 @@
 <?php
-\App\Support\Html::stdhead($lang_uploaders['head_uploaders'] ?? 'Uploaders');
-\App\Support\Frame::mainFrameOpen();
 ?>
 <div style="width: 940px">
 <h1 align="center"><?php echo $lang_uploaders['text_uploaders'] ?? 'Uploaders'; ?> - <?php echo date('Y-m', $timeStart); ?></h1>
@@ -54,6 +52,4 @@
 <?php endif; ?>
 </div>
 <?php
-\App\Support\Frame::mainFrameClose();
-\App\Support\Html::stdfoot();
 ?>

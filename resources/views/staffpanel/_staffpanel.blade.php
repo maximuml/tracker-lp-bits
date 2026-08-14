@@ -1,7 +1,5 @@
 <?php
-\App\Support\Html::stdhead($lang_staffpanel['Administration'] ?? 'Administration');
 print('<h1 align=center>' . ($lang_staffpanel['Administration'] ?? 'Administration') . '</h1>');
-\App\Support\Frame::mainFrameOpen();
 
 if (! empty($sysopPanels)):
 ?>
@@ -54,6 +52,4 @@ if (! empty($modPanels)):
 <?php
 endif;
 
-\App\Support\Frame::mainFrameClose();
-\App\Support\Html::stdfoot();
 ?>

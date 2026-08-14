@@ -327,7 +327,6 @@ if ((isset($do))) {
 	else
 	$msg = '';
 }
-	\App\Support\Html::stdhead($CURUSER['username'] . $lang_mybonus['head_karma_page']);
 
 	$bonus = number_format($CURUSER['seedbonus'], 1);
 if (!$action) {
@@ -600,7 +599,6 @@ if ($action == "exchange") {
 		elseif($art == "class") {
 			if (\App\Support\UserDisplay::currentClass() >= UC_VIP) {
 				\App\Support\Html::stdMessage($lang_mybonus['std_no_permission'], $lang_mybonus['std_class_above_vip'], 0);
-				\App\Support\Html::stdfoot();
 				return;
 			}
 			$vip_until = date("Y-m-d H:i:s",(strtotime(date("Y-m-d H:i:s")) + 28*86400));
@@ -650,13 +648,11 @@ if ($action == "exchange") {
 			$points = intval(\App\Support\SupportContext::getPost("bonuscharity") ?? 0);
 			if ($points < 1000 || $points > 50000){
 				\App\Support\Html::stdMessage($lang_mybonus['text_error'], $lang_mybonus['bonus_amount_not_allowed_two'], 0);
-				\App\Support\Html::stdfoot();
 				return;
 			}
 			$ratiocharity = \App\Support\SupportContext::getPost("ratiocharity");
 			if ($ratiocharity < 0.1 || $ratiocharity > 0.8){
 				\App\Support\Html::stdMessage($lang_mybonus['text_error'], $lang_mybonus['bonus_ratio_not_allowed']);
-				\App\Support\Html::stdfoot();
 				return;
 			}
 			if($CURUSER['seedbonus'] >= $points) {
@@ -681,7 +677,6 @@ if ($action == "exchange") {
 				else
 				{
 					\App\Support\Html::stdMessage($lang_mybonus['std_sorry'], $lang_mybonus['std_no_users_need_charity']);
-					\App\Support\Html::stdfoot();
 					return;
 				}
 			}
@@ -696,7 +691,6 @@ if ($action == "exchange") {
 			$arr = $receiver ? $receiver->toArray() : [];
             if (empty($arr)) {
                 \App\Support\Html::stdMessage($lang_mybonus['text_error'], $lang_mybonus['text_receiver_not_exists'], 0);
-                \App\Support\Html::stdfoot();
                 return;
             }
 			$useridgift = $arr['id'];
@@ -705,7 +699,6 @@ if ($action == "exchange") {
 			if (!is_numeric($points) || $points < $bonusarray['points']) {
 				//write_log("User " . $CURUSER["username"] . "," . $CURUSER["ip"] . " is hacking bonus system",'mod');
 				\App\Support\Html::stdMessage($lang_mybonus['text_error'], $lang_mybonus['bonus_amount_not_allowed']);
-				\App\Support\Html::stdfoot();
 				return;
 			}
 			if($CURUSER['seedbonus'] >= $points) {
@@ -722,7 +715,6 @@ if ($action == "exchange") {
 //				$newreceiverbonuscomment = date("Y-m-d") . " + " .$points2receiver. " Points (after tax) as a gift from ".($CURUSER["username"]).".\n " .htmlspecialchars($receiverbonuscomment);
 				if ($userid==$useridgift){
 					\App\Support\Html::stdMessage($lang_mybonus['text_huh'], $lang_mybonus['text_karma_self_giving_warning'], 0);
-					\App\Support\Html::stdfoot();
 					return;
 				}
 
@@ -777,5 +769,4 @@ if ($action == "exchange") {
         }
 	}
 }
-\App\Support\Html::stdfoot();
 ?>

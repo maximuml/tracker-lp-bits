@@ -993,4 +993,14 @@ class UserRepository extends BaseRepository
         return $result;
     }
 
+    /**
+     * Find a user by id with the common field subset used by cache clearing.
+     *
+     * @return \App\Models\User|null
+     */
+    public function findForCacheClear(int|string $id)
+    {
+        return User::query()->find($id, User::$commonFields);
+    }
+
 }

@@ -511,6 +511,7 @@ All active legacy PHP partials under `app/Services/Legacy/partials/` are now ren
 - `donated.php` was originally missing `resources/views/donated/_donated.blade.php`; the fix is a one-line view that calls `\App\Repositories\LegacyViewRepository::render('donated', get_defined_vars())`.
 - `makepoll.php` had `<table><form>` HTML nesting; the browser ejected the `<form>` before its `<input>` elements, preventing submission. The fix is to wrap the `<table>` inside the `<form>`.
 - `/my_bonus.php` needs more than a Laravel route alias. `LegacyRequestMiddleware::EXTRA_LANG_FILES` maps the detected `SCRIPT_NAME` to language files. Because `/my_bonus.php` resolves to script `my_bonus` and there is no `lang_my_bonus.php`, `$lang_mybonus` strings are empty. Add `'my_bonus' => ['mybonus.php']` to `EXTRA_LANG_FILES` so the page renders identically to `/mybonus.php`.
+- The Filament admin panel at `/nexusphp` must be excluded from legacy URL rewriting. If `LegacyRequestMiddleware` rewrites `/nexusphp` (or `/nexusphp/user/users`, `/livewire/update`, `/api/*`, `/horizon`) to a legacy `SCRIPT_NAME`, Filament returns a 404. Add a `LARAVEL_ONLY_PREFIXES` list (`api`, `livewire`, `filament`, `nexusphp`, `horizon`) and a `passthroughRequest()` path that sets `SCRIPT_NAME=/index.php` and drops `PATH_INFO`.
 
 ### Quick pass/fail gate
 

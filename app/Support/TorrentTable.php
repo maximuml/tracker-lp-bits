@@ -31,8 +31,7 @@ final class TorrentTable
 
 	$torrentSeedingLeechingStatus = $torrent->listLeechingSeedingStatus($user['id'], $torrentIdArr);
     $tagRep = new \App\Repositories\TagRepository();
-	$torrentTagCollection = \App\Models\TorrentTag::query()->whereIn('torrent_id', $torrentIdArr)->get();
-	$torrentTagResult = $torrentTagCollection->groupBy('torrent_id');
+	$torrentTagResult = $torrentRep->getTorrentTagsGrouped($torrentIdArr);
 	$showCover = false;
     $showSeedBoxIcon = false;
 	if ($searchBoxId) {
@@ -48,12 +47,7 @@ final class TorrentTable
 	//seedBoxIcon
 	if ($showSeedBoxIcon) {
 	    $seedBoxRep = new \App\Repositories\SeedBoxRepository();
-	    $seedBoxPeerInfo = \App\Models\Peer::query()
-            ->whereIn('torrent', $torrentIdArr)
-            ->where('seeder', 'yes')
-            ->where('is_seed_box', '1')
-            ->get(['torrent', 'is_seed_box'])
-            ->keyBy('torrent');
+	    $seedBoxPeerInfo = $torrentRep->getSeedBoxPeerInfo($torrentIdArr);
     }
 
 
@@ -80,28 +74,14 @@ final class TorrentTable
 <table class="torrents" cellspacing="0" cellpadding="5" width="100%">
 <tr>
 <?php
-$count_get = 0;
-$oldlink = "";
+$queryParams = [];
 foreach (SupportContext::allQuery() as $get_name => $get_value) {
-    if (is_array($get_value)) {
+    if (is_array($get_value) || in_array($get_name, ['sort', 'type'], true)) {
         continue;
     }
-	$get_name = \Nexus\Database\NexusDB::getInstance()->escapeString(strip_tags(str_replace(array("\"","'"),array("",""),(string) $get_name)));
-	$get_value = \Nexus\Database\NexusDB::getInstance()->escapeString(strip_tags(str_replace(array("\"","'"),array("",""),(string) $get_value)));
-
-	if ($get_name != "sort" && $get_name != "type") {
-		if ($count_get > 0) {
-			$oldlink .= "&amp;" . $get_name . "=" . $get_value;
-		}
-		else {
-			$oldlink .= $get_name . "=" . $get_value;
-		}
-		$count_get++;
-	}
+    $queryParams[(string) $get_name] = (string) $get_value;
 }
-if ($count_get > 0) {
-	$oldlink = $oldlink . "&amp;";
-}
+$oldlink = $queryParams ? str_replace('&', '&amp;', http_build_query($queryParams, '', '&')) . '&amp;' : "";
 $sort = SupportContext::getQuery('sort', '');
 $link = array();
 for ($i=1; $i<=9; $i++){
@@ -258,8 +238,7 @@ foreach ($rows as $row)
 		if ($enabletooltip_tweak == 'yes' && $user['showlastcom'] != 'no')
 		{
 			if (!$lastcom = $cache->get_value('torrent_'.$id.'_last_comment_content')){
-				$lastcom = \Nexus\Database\NexusDB::table('comments')->where('torrent', $id)->orderBy('id', 'desc')->first();
-				$lastcom = $lastcom ? array_merge((array) $lastcom, array_values((array) $lastcom)) : null;
+				$lastcom = $torrentRep->getLastComment((int) $id);
 				$cache->cache_value('torrent_'.$id.'_last_comment_content', $lastcom, 1855);
 			}
 			$timestamp = strtotime($lastcom["added"]);

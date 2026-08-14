@@ -1,5 +1,4 @@
 <?php
-\App\Support\Html::stdhead($title);
 print '<h1>' . $title . '</h1>';
 \App\Support\Html::beginTable();
 ?>
@@ -30,5 +29,4 @@ print '<h1>' . $title . '</h1>';
 <?php
 \App\Support\Html::endFrame();
 \App\Support\Html::endTable();
-\App\Support\Html::stdfoot();
 ?>

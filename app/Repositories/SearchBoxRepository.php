@@ -24,6 +24,57 @@ use Filament\Schemas\Components\Section;
 class SearchBoxRepository extends BaseRepository
 {
     /**
+     * Fetch all search-box rows, decoding JSON columns.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public function getAllRows(): array
+    {
+        $rows = [];
+        foreach (NexusDB::table('searchbox')->orderBy('id')->get() as $row) {
+            $row = (array) $row;
+            if (isset($row['extra'])) {
+                $row['extra'] = json_decode($row['extra'], true);
+            }
+            if (isset($row['section_name'])) {
+                $row['section_name'] = json_decode($row['section_name'], true);
+            }
+            $rows[(int) $row['id']] = $row;
+        }
+
+        return $rows;
+    }
+
+    /**
+     * Fetch taxonomy rows for a search-box mode.
+     *
+     * @param  string  $tableName
+     * @param  int  $mode
+     * @return \Illuminate\Support\Collection<int, \stdClass>
+     */
+    public function getTaxonomyRows(string $tableName, int $mode)
+    {
+        return NexusDB::table($tableName)
+            ->where(function (Builder $query) use ($mode) {
+                return $query->whereIn('mode', [$mode, 0]);
+            })
+            ->orderBy('sort_index', 'desc')
+            ->get();
+    }
+
+    /**
+     * Fetch taxonomy rows as an array for legacy item list.
+     *
+     * @param  string  $tableName
+     * @param  int  $mode
+     * @return array<int, array<string, mixed>>
+     */
+    public function getTaxonomyList(string $tableName, int $mode): array
+    {
+        return $this->getTaxonomyRows($tableName, $mode)->map(fn ($row) => (array) $row)->all();
+    }
+
+    /**
      * @param  array<int|string, mixed>  $params
      * @return  \Illuminate\Contracts\Pagination\LengthAwarePaginator<int, SearchBox>
      */

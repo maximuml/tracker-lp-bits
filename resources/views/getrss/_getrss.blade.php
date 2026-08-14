@@ -1,7 +1,6 @@
 <?php
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
-\App\Support\Html::stdhead($lang_getrss['head_rss_feeds']);
 $allowed_showrows=array('10','50');
 $stickyTypes = [
     0 => \App\Support\Locale::trans('torrent.pos_state_normal', [], null),
@@ -160,4 +159,3 @@ print($categories);
 </table>
 </form>
 <?php
-\App\Support\Html::stdfoot();

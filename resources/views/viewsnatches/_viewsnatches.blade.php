@@ -1,6 +1,4 @@
 <?php
-\App\Support\Html::stdhead($lang_viewsnatches['head_snatch_detail']);
-\App\Support\Frame::mainFrameOpen();
 
 print("<h1 align=center>".$lang_viewsnatches['text_snatch_detail_for'] . "<a href=details.php?id=" . htmlspecialchars((string) $id) . "><b>".htmlspecialchars($torrentName)."</b></a></h1>");
 $seedBoxRep = new \App\Repositories\SeedBoxRepository();
@@ -48,5 +46,3 @@ else
 {
 	\App\Support\Html::stdMessage($lang_viewsnatches['std_sorry'], $lang_viewsnatches['std_no_snatched_users']);
 }
-\App\Support\Frame::mainFrameClose();
-\App\Support\Html::stdfoot();

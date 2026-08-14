@@ -31,6 +31,12 @@ use App\Models\TorrentOperationLog;
 use App\Models\TorrentSecret;
 use App\Models\TorrentTag;
 use App\Models\User;
+use App\Support\Config\SiteConfig;
+use App\Support\Events;
+use App\Support\Hooks;
+use App\Support\Logger;
+use App\Support\Path;
+use App\Support\UserDisplay;
 use App\Utils\ApiQueryBuilder;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
@@ -1376,6 +1382,151 @@ HTML;
             \App\Support\Events::fire(ModelEventEnum::TORRENT_UPDATED, $torrent, null);
         }
         \App\Support\Logger::writeWithContext((string) ("success change to section {$sectionId}, torrent count:" . $torrents->count()), (string) 'info', (bool) false);
+    }
+
+    /**
+     * Get the latest comment for a torrent, or null if none exists.
+     *
+     * @return  array<string, mixed>|null
+     */
+    public function getLastComment(int $torrentId): ?array
+    {
+        $lastcom = NexusDB::table('comments')->where('torrent', $torrentId)->orderBy('id', 'desc')->first();
+
+        return $lastcom ? array_merge((array) $lastcom, array_values((array) $lastcom)) : null;
+    }
+
+    /**
+     * Get torrent tag records keyed by torrent id.
+     *
+     * @param  array<int, int>  $torrentIds
+     * @return  \Illuminate\Support\Collection<int|string, \Illuminate\Database\Eloquent\Collection<int, TorrentTag>>
+     */
+    public function getTorrentTagsGrouped(array $torrentIds)
+    {
+        return TorrentTag::query()->whereIn('torrent_id', $torrentIds)->get()->groupBy('torrent_id');
+    }
+
+    /**
+     * Get seed-box peer info keyed by torrent id for the torrent list table.
+     *
+     * @param  array<int, int>  $torrentIds
+     * @return  \Illuminate\Support\Collection<int|string, mixed>
+     */
+    public function getSeedBoxPeerInfo(array $torrentIds)
+    {
+        return Peer::query()
+            ->whereIn('torrent', $torrentIds)
+            ->where('seeder', 'yes')
+            ->where('is_seed_box', '1')
+            ->get()
+            ->keyBy('torrent');
+    }
+
+    /**
+     * Fetch a torrent as an array for the legacy "torrent to user" value calculation.
+     *
+     * @return  array<string, mixed>|null
+     */
+    public function findForUserValue(int $torrentId): ?array
+    {
+        return Torrent::query()->find($torrentId)?->toArray();
+    }
+
+    /**
+     * Return the bookmarked torrent ids for a user.
+     *
+     * Mirrors the legacy {@see \App\Support\TorrentBookmark::bookmarkArray()}.
+     *
+     * @return  array<int, int>
+     */
+    public function getBookmarkTorrentIds(int $userId): array
+    {
+        $rows = Bookmark::query()->where('userid', $userId)->pluck('torrentid')->all();
+
+        if (empty($rows)) {
+            return [0];
+        }
+
+        return array_map(fn ($id) => (int) $id, $rows);
+    }
+
+    /**
+     * Delete one or more torrents and related records.
+     *
+     * Mirrors the legacy {@see \App\Support\TorrentOps::deleteTorrents()}.
+     *
+     * @param  int|int[]  $id
+     */
+    public function deleteTorrents(int|array $id, bool $notify = false): void
+    {
+        $idArr = is_array($id) ? $id : [$id];
+
+        $torrentInfo = Torrent::query()
+            ->whereIn('id', $idArr)
+            ->get()
+            ->keyBy('id');
+
+        $torrentDir = SiteConfig::current()->main->torrentDir();
+
+        NexusDB::table('torrents')->whereIn('id', $idArr)->delete();
+        NexusDB::table('torrent_extras')->whereIn('torrent_id', $idArr)->delete();
+        NexusDB::table('snatched')
+            ->whereIn('torrentid', $idArr)
+            ->whereNotExists(function ($query) {
+                $query->selectRaw('1')->from('users')->whereColumn('users.id', '=', 'snatched.userid');
+            })
+            ->delete();
+
+        foreach (['peers', 'files', 'comments'] as $x) {
+            NexusDB::table($x)->whereIn('torrent', $idArr)->delete();
+        }
+
+        NexusDB::table('hit_and_runs')->whereIn('torrent_id', $idArr)->delete();
+
+        foreach ($idArr as $_id) {
+            /** @var Torrent|null $torrent */
+            $torrent = $torrentInfo->get($_id);
+
+            if ($torrent instanceof Torrent) {
+                $this->delPiecesHashCache((string) $torrent->getAttribute('pieces_hash'));
+            }
+
+            Logger::writeWithContext("delete torrent: $_id", 'error');
+            @unlink(Path::resolve("$torrentDir/$_id.torrent", defined('ROOT_PATH') ? (string) ROOT_PATH : ''));
+
+            TorrentOperationLog::add([
+                'torrent_id' => $_id,
+                'uid' => UserDisplay::currentId(),
+                'action_type' => TorrentOperationLog::ACTION_TYPE_DELETE,
+                'comment' => '',
+            ], $notify);
+
+            Hooks::doAction('torrent_delete', $_id);
+            if ($torrent instanceof Torrent) {
+                Events::fire('torrent_deleted', $torrent);
+            }
+        }
+
+        try {
+            $meiliSearchRep = new MeiliSearchRepository();
+            $meiliSearchRep->deleteDocuments($idArr);
+        } catch (\Throwable $e) {
+            Logger::writeWithContext('MeiliSearch delete on torrent delete failed: ' . $e->getMessage(), 'error');
+        }
+    }
+    public function touchCacheStamp(int|string $torrentId, string $field = 'cache_stamp'): void
+    {
+        NexusDB::table('torrents')
+            ->where('id', $torrentId)
+            ->update([$field => time()]);
+    }
+
+    public function resetCacheStamp(int|string $torrentId, string $field = 'cache_stamp'): void
+    {
+        NexusDB::table('torrents')
+            ->where('id', $torrentId)
+            ->update([$field => 0]);
     }
 
 }

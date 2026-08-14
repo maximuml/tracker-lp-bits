@@ -11,7 +11,6 @@ if ($pollid)
 	if (!$poll)
 		\App\Support\LegacyResponse::abort($lang_polloverview['std_error'], $lang_polloverview['text_no_poll_id']);
 
-	\App\Support\Html::stdhead($lang_polloverview['head_poll_overview']);
 	print("<h1 align=\"center\">".$lang_polloverview['text_polls_overview']."</h1>\n");
 
 	print("<table width=737 border=1 cellspacing=0 cellpadding=5><tr>\n" .
@@ -58,14 +57,12 @@ if ($pollid)
 		print("</table>\n");
 		print($pagerbottom);
 	}
-	\App\Support\Html::stdfoot();
 }
 else
 {
 	$polls = \Nexus\Database\NexusDB::table('polls')->orderByDesc('id')->get(['id', 'added', 'question']);
  	if ($polls->isEmpty())
   		\App\Support\LegacyResponse::abort($lang_polloverview['std_error'], $lang_polloverview['text_no_users_voted']);
-	\App\Support\Html::stdhead($lang_polloverview['head_poll_overview']);
 	print("<h1 align=\"center\">".$lang_polloverview['text_polls_overview']."</h1>\n");
 
 	print("<table width=737 border=1 cellspacing=0 cellpadding=5><tr>\n" .
@@ -76,6 +73,5 @@ else
 		print("<tr><td align=center><a href=\"polloverview.php?id=".$poll['id']."\">".$poll['id']."</a></td><td>".$added."</td><td><a href=\"polloverview.php?id=".$poll['id']."\">".$poll['question']."</a></td></tr>\n");
 	}
 	print("</table>\n");
-	\App\Support\Html::stdfoot();
 }
 ?>

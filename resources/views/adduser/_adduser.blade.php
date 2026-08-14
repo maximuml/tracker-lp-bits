@@ -1,5 +1,4 @@
 <?php
-\App\Support\Html::stdhead("Add user");
 ?>
 <h1>Add user</h1>
 <form method=post action=adduser.php>
@@ -12,5 +11,4 @@
 </table>
 </form>
 <?php
-\App\Support\Html::stdfoot();
 ?>

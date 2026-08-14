@@ -1,6 +1,4 @@
 <?php
-\App\Support\Html::stdhead("FAQ Management");
-\App\Support\Frame::mainFrameOpen();
 
 if ($mode === 'edit'):
     ?>
@@ -107,6 +105,4 @@ elseif ($mode === 'addsection'):
     <?php
 endif;
 
-\App\Support\Frame::mainFrameClose();
-\App\Support\Html::stdfoot();
 ?>

@@ -26,6 +26,7 @@ final class LegacyRequestMiddleware
         'shoutbox_history' => ['shoutbox.php'],
         'take-increment-bulk' => ['increment-bulk.php'],
         'upload' => ['edit.php'],
+        'my_bonus' => ['mybonus.php'],
     ];
 
     /** @var array<int, string> */
@@ -67,6 +68,9 @@ final class LegacyRequestMiddleware
         }
     }
 
+    /** Paths that are routed directly by Laravel/Filament/Livewire and must not be rewritten to legacy /script.php. */
+    private const LARAVEL_ONLY_PREFIXES = ['api', 'livewire', 'filament', 'nexusphp', 'horizon'];
+
     private function prepareRequest(Request $request): Request
     {
         $server = $request->server->all();
@@ -77,8 +81,8 @@ final class LegacyRequestMiddleware
         }
         $requestPath = $parsedUrl['path'] ?? '/';
 
-        if (str_starts_with($requestPath, '/api/v1/')) {
-            return $request;
+        if ($this->isLaravelOnlyPath($requestPath)) {
+            return $this->passthroughRequest($request, $server, $requestUri);
         }
 
         $scriptFilename = (string) ($server['SCRIPT_FILENAME'] ?? public_path('index.php'));
@@ -142,7 +146,7 @@ final class LegacyRequestMiddleware
             $script = $page;
         } else {
             $segments = explode('/', trim($routePath, '/'));
-            $script = $segments[0] ?? '';
+            $script = $segments[0];
             $script = preg_replace('/[^a-zA-Z0-9_-]/', '', $script) ?? '';
             if ($script === '') {
                 $script = 'index';
@@ -194,6 +198,34 @@ final class LegacyRequestMiddleware
         $post = $method === 'POST' ? $request->request->all() : [];
 
         return $request->duplicate($query, $post, $request->attributes->all(), $request->cookies->all(), $request->files->all(), $server);
+    }
+
+    private function isLaravelOnlyPath(string $requestPath): bool
+    {
+        foreach (self::LARAVEL_ONLY_PREFIXES as $prefix) {
+            if ($requestPath === '/' . $prefix || str_starts_with($requestPath, '/' . $prefix)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * @param  array<string, mixed>  $server
+     */
+    private function passthroughRequest(Request $request, array $server, string $requestUri): Request
+    {
+        $server['REQUEST_URI'] = $requestUri;
+        $server['REQUEST_METHOD'] = $request->getMethod();
+        $server['SCRIPT_NAME'] = '/index.php';
+        $server['SCRIPT_FILENAME'] = public_path('index.php');
+        if (isset($server['PATH_INFO'])) {
+            unset($server['PATH_INFO']);
+        }
+        $post = $request->getMethod() === 'POST' ? $request->request->all() : [];
+
+        return $request->duplicate($request->query->all(), $post, $request->attributes->all(), $request->cookies->all(), $request->files->all(), $server);
     }
 
     private function bindRequest(Request $request): void

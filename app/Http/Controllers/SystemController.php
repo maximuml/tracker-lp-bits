@@ -4,10 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Enums\Permission\PermissionEnum;
 use App\Models\User;
+use App\Repositories\MysqlStatsRepository;
 use App\Services\CleanupService;
 use App\Support\LegacyResponse;
 use App\Support\Permissions;
 use App\Support\SupportContext;
+use App\Support\UserDisplay;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -265,9 +267,17 @@ class SystemController extends LegacyController
 
     public function mysqlStats(Request $request): View|RedirectResponse
     {
+        if (SupportContext::getUser() === null) {
+            $qs = $request->getQueryString();
 
-        return $this->legacyPage($request, 'mysql_stats', true);
+            return redirect('/mysql_stats.php' . ($qs ? '?' . $qs : ''));
+        }
 
+        if (UserDisplay::currentClass() < UC_SYSOP) {
+            abort(403);
+        }
+
+        return $this->legacyPage($request, 'mysql_stats', true, MysqlStatsRepository::status());
     }
 
     public function cron(Request $request): Response

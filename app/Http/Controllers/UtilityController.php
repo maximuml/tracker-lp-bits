@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
+use App\Repositories\SearchPageRepository;
 use App\Support\SupportContext;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -13,7 +15,17 @@ class UtilityController extends LegacyController
 {
     public function search(Request $request): View|RedirectResponse
     {
-        return $this->legacyPage($request, 'search');
+        $curUser = SupportContext::getUser() ?? [];
+        $currentUser = ! empty($curUser) ? User::query()->find($curUser['id'] ?? 0) : null;
+        if ($currentUser === null) {
+            $qs = $request->getQueryString();
+
+            return redirect('/search.php' . ($qs ? '?' . $qs : ''));
+        }
+
+        $data = SearchPageRepository::dataForSearch($request, $currentUser);
+
+        return $this->legacyPage($request, 'search', true, $data);
     }
 
     public function usersearch(Request $request): View|RedirectResponse

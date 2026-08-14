@@ -119,17 +119,37 @@ class TorrentActionController extends LegacyController
 
     public function viewFileList(Request $request): Response|RedirectResponse
     {
-        return $this->legacyPageRaw($request, 'viewfilelist', false);
+        $torrentId = (int) $request->input('id', 0);
+        if ($torrentId <= 0) {
+            return response('', 400, ['Content-Type' => 'text/html; charset=utf-8']);
+        }
+
+        $files = TorrentAjaxRepository::fileList($torrentId);
+
+        return $this->legacyPageRaw($request, 'viewfilelist', false, ['files' => $files]);
     }
 
     public function viewPeerList(Request $request): Response|RedirectResponse
     {
-        return $this->legacyPageRaw($request, 'viewpeerlist', false);
+        $torrentId = (int) $request->input('id', 0);
+        if ($torrentId <= 0) {
+            return response('', 400, ['Content-Type' => 'text/html; charset=utf-8']);
+        }
+
+        $curUser = SupportContext::getUser() ?? [];
+        $currentUser = ! empty($curUser) ? User::query()->find($curUser['id'] ?? 0) : null;
+
+        return $this->legacyPageRaw($request, 'viewpeerlist', false, TorrentAjaxRepository::peerList($torrentId, $currentUser));
     }
 
     public function viewSnatches(Request $request): View|RedirectResponse
     {
-        return $this->legacyPage($request, 'viewsnatches');
+        $torrentId = (int) $request->input('id', 0);
+        if ($torrentId <= 0) {
+            return redirect('/torrents.php');
+        }
+
+        return $this->legacyPage($request, 'viewsnatches', true, TorrentAjaxRepository::snatchList($torrentId));
     }
 
     public function takeFlush(Request $request): View|RedirectResponse
@@ -207,17 +227,54 @@ class TorrentActionController extends LegacyController
 
     public function getUserTorrentListAjax(Request $request): Response|RedirectResponse
     {
-        return $this->legacyPageRaw($request, 'getusertorrentlistajax', false);
+        $targetUserId = (int) $request->input('userid', 0);
+        $type = (string) $request->input('type', '');
+
+        if ($targetUserId <= 0 || ! in_array($type, ['uploaded', 'seeding', 'leeching', 'completed', 'incomplete'], true)) {
+            return response('', 400, ['Content-Type' => 'text/html; charset=utf-8']);
+        }
+
+        $curUser = SupportContext::getUser() ?? [];
+        $currentUser = ! empty($curUser) ? User::query()->find($curUser['id'] ?? 0) : null;
+
+        if ($currentUser === null || (! Permissions::userCan(PermissionEnum::TORRENT_HISTORY->value, false, $currentUser->id) && $currentUser->id !== $targetUserId)) {
+            return response('', 403, ['Content-Type' => 'text/html; charset=utf-8']);
+        }
+
+        $page = (int) $request->input('page', 0);
+
+        return $this->legacyPageRaw($request, 'getusertorrentlistajax', false, TorrentAjaxRepository::userTorrentList($targetUserId, $type, $page, $currentUser));
     }
 
     public function searchSuggest(Request $request): Response|RedirectResponse
     {
-        return $this->legacyPageRaw($request, 'searchsuggest', false);
+        $searchstr = (string) $request->input('q', '');
+        if ($searchstr === '') {
+            return response(json_encode([], JSON_UNESCAPED_UNICODE), 200, ['Content-Type' => 'application/json; charset=utf-8']);
+        }
+
+        return response(
+            json_encode(TorrentAjaxRepository::searchSuggest($searchstr), JSON_UNESCAPED_UNICODE),
+            200,
+            ['Content-Type' => 'application/x-suggestions+json; charset=utf-8']
+        );
     }
 
-    public function autocompleteTorrents(Request $request): Response|RedirectResponse
+    public function autocompleteTorrents(Request $request): Response|RedirectResponse|JsonResponse
     {
-        return $this->legacyPageRaw($request, 'autocomplete_torrents');
+        $query = (string) $request->input('q', '');
+        if ($query === '') {
+            return response()->json(['torrents' => []]);
+        }
+
+        $userId = (int) (SupportContext::getUser()['id'] ?? 0);
+        $user = User::query()->find($userId);
+
+        if ($user === null) {
+            return response()->json(['torrents' => []]);
+        }
+
+        return response()->json(TorrentAjaxRepository::autocompleteTorrents($query, $user));
     }
 
     public function torrentrss(Request $request): Response|RedirectResponse

@@ -2,8 +2,6 @@
 
 namespace App\Support;
 
-use Nexus\Database\NexusDB;
-
 /**
  * Legacy forum helpers extracted from `include/functions.php`.
  *
@@ -47,11 +45,7 @@ final class Forum
             if ($cached !== false && is_array($cached)) {
                 $moderatorsArray = $cached;
             } else {
-                $moderatorsArray = [];
-                foreach (NexusDB::table('forummods')->orderBy('forumid')->get(['forumid', 'userid']) as $row) {
-                    $row = (array) $row;
-                    $moderatorsArray[$row['forumid']][] = $row['userid'];
-                }
+                $moderatorsArray = app(\App\Repositories\ForumRepository::class)->getModeratorArray();
                 if (method_exists($cache, 'cache_value')) {
                     $cache->cache_value('forum_moderator_array', $moderatorsArray, 86200);
                 }
@@ -81,15 +75,7 @@ final class Forum
             $userIds[] = \App\Support\UserDisplay::userIdFromName(trim($user));
         }
 
-        $max = count($userIds);
-        \App\Models\ForumMod::query()->where('forumid', $forumId)->delete();
-        $records = [];
-        for ($i = 0; $i < $limit && $i < $max; $i++) {
-            $records[] = ['forumid' => $forumId, 'userid' => $userIds[$i]];
-        }
-        if (! empty($records)) {
-            \App\Models\ForumMod::query()->insert($records);
-        }
+        app(\App\Repositories\ForumRepository::class)->replaceModerators($forumId, $userIds, $limit);
     }
 
     /**
@@ -102,28 +88,22 @@ final class Forum
     {
         $CURUSER = SupportContext::getUser() ?? [];
 
+        $forumRep = app(\App\Repositories\ForumRepository::class);
+        $userId = (int) ($CURUSER['id'] ?? 0);
+
         switch ($in) {
             case 'post':
-                $topicId = \App\Models\Post::query()->where('id', $id)->value('topicid');
-                if ($topicId) {
+                $topicId = $forumRep->getTopicIdByPost((int) $id);
+                if ($topicId !== null) {
                     return self::isModerator($topicId, 'topic');
                 }
                 return false;
 
             case 'topic':
-                $count = (int) NexusDB::table('forummods')
-                    ->selectRaw('COUNT(forummods.userid) AS count')
-                    ->leftJoin('topics', 'forummods.forumid', '=', 'topics.forumid')
-                    ->where('topics.id', $id)
-                    ->where('forummods.userid', $CURUSER['id'] ?? 0)
-                    ->value('count');
-                return $count > 0;
+                return $forumRep->isModeratorOfTopic((int) $id, $userId);
 
             case 'forum':
-                return \App\Models\ForumMod::query()
-                    ->where('forumid', $id)
-                    ->where('userid', $CURUSER['id'] ?? 0)
-                    ->exists();
+                return $forumRep->isModeratorOfForum((int) $id, $userId);
 
             default:
                 return false;

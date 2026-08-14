@@ -275,6 +275,9 @@ final class InfoRepository
         ];
     }
 
+    /**
+     * @param  array<int|string, int>  $order
+     */
     public static function reorderFaq(array $order): void
     {
         foreach ($order as $id => $position) {

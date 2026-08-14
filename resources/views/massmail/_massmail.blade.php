@@ -1,76 +1,29 @@
 <?php
-error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
-
-
-$__server_REQUEST_METHOD = \App\Support\SupportContext::getServerValue('REQUEST_METHOD');
-if (\App\Support\UserDisplay::currentClass() < UC_SYSOP)
-\App\Support\LegacyResponse::abort("Error", "Permission denied.");
-$class = intval(\App\Support\SupportContext::getPost("class") ?? 0);
-	if ($class)
-		\App\Support\LegacyResponse::assertId($class, true);
-
-if ($__server_REQUEST_METHOD == "POST")
-{
-    $or = \App\Support\SupportContext::getPost("or") ?? '';
-    if (!in_array($or, ["<", ">", "=", "<=", ">="], true)) {
-        \App\Support\LegacyResponse::abort("Error", "Invalid symbol!");
-    }
-$rows = \App\Models\User::query()->where('class', $or, $class)->get(['id', 'username', 'email']);
-
-$subject = substr(htmlspecialchars(trim(\App\Support\SupportContext::getPost("subject"))), 0, 80);
-if ($subject == "") $subject = "(no subject)";
-$subject = "Fw: $subject";
-
-$message1 = htmlspecialchars(trim(\App\Support\SupportContext::getPost("message")));
-if ($message1 == "") \App\Support\LegacyResponse::abort("Error", "Empty message!");
-
-foreach ($rows as $userRow) {
-$arr = (array) $userRow;
-$to = $arr["email"];
-
-
-$message = "Message received from ".$SITENAME." on " . date("Y-m-d H:i:s") . ".\n" .
-"---------------------------------------------------------------------\n\n" .
-$message1 . "\n\n" .
-"---------------------------------------------------------------------\n$SITENAME\n";
-
-$success = \App\Support\Mail::sentLegacy((string) $to, (string) $SITENAME, (string) $SITEEMAIL, (string) $subject, (string) $message, (string) "Mass Mail", (bool) false, (bool) false, '', (string) 'UTF-8');
-}
-
-
-if ($success)
-\App\Support\LegacyResponse::abort("Success", "Messages sent.");
-else
-\App\Support\LegacyResponse::abort("Error", "Try again.");
-
-}
-
-\App\Support\Html::stdhead("Mass E-mail Gateway");
+\App\Support\Html::stdhead('Mass E-mail Gateway');
 ?>
-
 <p><table border=0 class=main cellspacing=0 cellpadding=0><tr>
 <td class=embedded style='padding-left: 10px'><font size=3><b>Send mass e-mail to all members</b></font></td>
 </tr></table></p>
 <table border=1 cellspacing=0 cellpadding=5>
 <form method=post action=massmail.php>
 
-<?php
-if (\App\Support\UserDisplay::currentClass() == UC_MODERATOR && $CURUSER["class"] > UC_POWER_USER)
-printf("<input type=hidden name=class value={$CURUSER['class']}\n");
-else
-{
-    $prefix = '';
-print("<tr><td class=rowhead>Classe</td><td colspan=2 align=left><select name=or><option value='<'><<option value='>'>><option value='='>=<option value='<='><=<option value='>='>>=</select><select name=class>\n");
-if (\App\Support\UserDisplay::currentClass() == UC_MODERATOR)
-$maxclass = UC_POWER_USER;
-else
-$maxclass = \App\Support\UserDisplay::currentClass() - 1;
-for ($i = 0; $i <= $maxclass; ++$i)
-print("<option value=$i" . ($CURUSER["class"] == $i ? " selected" : "") . ">$prefix" . \App\Support\UserClass::name($i,false,true,true) . "\n");
-print("</select></td></tr>\n");
-}
-?>
-
+<?php if ($currentUserIsModerator && $currentClass > UC_POWER_USER): ?>
+<input type=hidden name=class value="<?php echo (int) $currentClass; ?>">
+<?php else: ?>
+<tr><td class=rowhead>Classe</td><td colspan=2 align=left>
+<select name=or>
+<option value='<'><</option>
+<option value='>'>></option>
+<option value='='>=</option>
+<option value='<='><=</option>
+<option value='>='>>=</option>
+</select>
+<select name=class>
+<?php foreach ($classOptions as $opt): ?>
+<option value="<?php echo (int) $opt['value']; ?>"<?php echo $opt['selected'] ? ' selected' : ''; ?>><?php echo $opt['label']; ?></option>
+<?php endforeach; ?>
+</select></td></tr>
+<?php endif; ?>
 
 <tr><td class=rowhead>Subject</td><td><input type=text name=subject size=80></td></tr>
 <tr><td class=rowhead>Body</td><td><textarea name=message cols=80 rows=20></textarea></td></tr>
@@ -80,3 +33,4 @@ print("</select></td></tr>\n");
 
 <?php
 \App\Support\Html::stdfoot();
+?>

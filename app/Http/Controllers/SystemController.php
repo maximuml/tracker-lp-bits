@@ -6,10 +6,15 @@ use App\Enums\Permission\PermissionEnum;
 use App\Models\User;
 use App\Repositories\MysqlStatsRepository;
 use App\Services\CleanupService;
+use App\Support\Format;
 use App\Support\LegacyResponse;
+use App\Support\Mail;
+use App\Support\Pagination;
 use App\Support\Permissions;
 use App\Support\SupportContext;
+use App\Support\UserClass;
 use App\Support\UserDisplay;
+use App\Support\Validators;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -18,31 +23,166 @@ use Nexus\Database\NexusDB;
 
 class SystemController extends LegacyController
 {
-    public function delacctadmin(Request $request): View|RedirectResponse
+    public function delacctadmin(Request $request): View|RedirectResponse|Response
     {
+        if (! Permissions::userCan(PermissionEnum::USER_DELETE->value, false, (int) (SupportContext::getUser()['id'] ?? 0))) {
+            return $this->legacyAbortResponse('Error', 'Permission denied.');
+        }
+
+        if ($request->isMethod('post')) {
+            $userid = trim((string) SupportContext::getPost('userid'));
+            if ($userid === '') {
+                return $this->legacyAbortResponse('Error', 'Please fill out the form correctly.');
+            }
+
+            $user = User::query()->where('id', $userid)->first();
+            if (! $user) {
+                return $this->legacyAbortResponse('Error', 'Bad user id or password. Please verify that all entered information is correct.');
+            }
+
+            $id = (int) $user->id;
+            $name = $user->username;
+            $userRep = new \App\Repositories\UserRepository();
+            $userRep->destroy($id);
+
+            return $this->legacyAbortResponse('Success', 'The account <b>' . htmlspecialchars((string) $name) . '</b> was deleted.', false);
+        }
 
         return $this->legacyPage($request, 'delacctadmin', true);
 
     }
 
-    public function deletedisabled(Request $request): View|RedirectResponse
+    public function deletedisabled(Request $request): View|RedirectResponse|Response
     {
+        $sysopClass = defined('UC_SYSOP') ? \constant('UC_SYSOP') : 0;
+        if (UserDisplay::currentClass() < $sysopClass) {
+            return $this->legacyAbortResponse('Error', 'Permission denied.');
+        }
 
-        return $this->legacyPage($request, 'deletedisabled', true);
+        return $this->legacyAbortResponse('Error', 'Hard deletion of users is not recommended and can cause many problems.');
 
     }
 
-    public function massmail(Request $request): View|RedirectResponse
+    public function massmail(Request $request): View|RedirectResponse|Response
     {
+        $sysopClass = defined('UC_SYSOP') ? \constant('UC_SYSOP') : 0;
+        if (UserDisplay::currentClass() < $sysopClass) {
+            return $this->legacyAbortResponse('Error', 'Permission denied.');
+        }
 
-        return $this->legacyPage($request, 'massmail', true);
+        if ($request->isMethod('post')) {
+            $class = (int) (SupportContext::getPost('class') ?? 0);
+            $or = (string) (SupportContext::getPost('or') ?? '');
+            if (! in_array($or, ['<', '>', '=', '<=', '>='], true)) {
+                return $this->legacyAbortResponse('Error', 'Invalid symbol!');
+            }
+
+            $users = User::query()->where('class', $or, $class)->get(['id', 'username', 'email']);
+            $subject = substr(htmlspecialchars(trim((string) SupportContext::getPost('subject'))), 0, 80);
+            if ($subject === '') {
+                $subject = '(no subject)';
+            }
+            $subject = "Fw: {$subject}";
+
+            $messageBody = htmlspecialchars(trim((string) SupportContext::getPost('message')));
+            if ($messageBody === '') {
+                return $this->legacyAbortResponse('Error', 'Empty message!');
+            }
+
+            $siteName = (string) SupportContext::getGlobal('SITENAME', '');
+            $siteEmail = (string) SupportContext::getGlobal('SITEEMAIL', '');
+            $sent = false;
+            foreach ($users as $userRow) {
+                $to = (string) $userRow->email;
+                $message = "Message received from {$siteName} on " . date('Y-m-d H:i:s') . ".\n" .
+                    "---------------------------------------------------------------------\n\n" .
+                    $messageBody . "\n\n" .
+                    "---------------------------------------------------------------------\n{$siteName}\n";
+                $sent = Mail::sentLegacy($to, $siteName, $siteEmail, $subject, $message, 'Mass Mail', false, false, '', 'UTF-8');
+            }
+
+            return $sent
+                ? $this->legacyAbortResponse('Success', 'Messages sent.')
+                : $this->legacyAbortResponse('Error', 'Try again.');
+        }
+
+        $curUser = SupportContext::getUser() ?? [];
+        $currentClass = (int) ($curUser['class'] ?? 0);
+        $currentUserIsModerator = UserDisplay::currentClass() == (defined('UC_MODERATOR') ? \constant('UC_MODERATOR') : 0);
+
+        $classOptions = [];
+        if ($currentUserIsModerator && $currentClass > (defined('UC_POWER_USER') ? \constant('UC_POWER_USER') : 0)) {
+            $classOptions[] = ['value' => $currentClass, 'label' => UserClass::name($currentClass, false, true, true), 'selected' => true];
+        } else {
+            $maxClass = UserDisplay::currentClass() - 1;
+            for ($i = 0; $i <= $maxClass; $i++) {
+                $selected = ($curUser['class'] ?? 0) == $i;
+                $classOptions[] = ['value' => $i, 'label' => UserClass::name($i, false, true, true), 'selected' => $selected];
+            }
+        }
+
+        return $this->legacyPage($request, 'massmail', true, [
+            'currentUserIsModerator' => $currentUserIsModerator,
+            'currentClass' => $currentClass,
+            'classOptions' => $classOptions,
+        ]);
 
     }
 
-    public function takeamountupload(Request $request): Response|RedirectResponse
+    public function takeamountupload(Request $request): Response|RedirectResponse|View
     {
+        $sysopClass = defined('UC_SYSOP') ? \constant('UC_SYSOP') : 0;
+        if (UserDisplay::currentClass() < $sysopClass) {
+            return $this->legacyAbortResponse('Sorry', 'Permission denied.');
+        }
 
-        return $this->legacyPageWithRedirect($request, 'takeamountupload', true);
+        if ($request->isMethod('get')) {
+            if (SupportContext::getQuery('sent') == '1') {
+                \App\Support\Html::stdhead('Add Upload');
+                \App\Support\Html::stdMessage('Success', 'Upload amount has been added successfully.');
+                \App\Support\Html::stdfoot();
+                return response('');
+            }
+            return $this->legacyAbortResponse('Error', 'Permission denied!');
+        }
+
+        $curUser = SupportContext::getUser() ?? [];
+        $senderId = SupportContext::getPost('sender') === 'system' ? 0 : (int) ($curUser['id'] ?? 0);
+        $added = date('Y-m-d H:i:s');
+        $msg = trim((string) SupportContext::getPost('msg'));
+        $amount = SupportContext::getPost('amount');
+
+        if ($msg === '' || $amount === null || $amount === '') {
+            return $this->legacyAbortResponse('Error', 'Don\'t leave any fields blank.');
+        }
+        if (! is_numeric($amount)) {
+            return $this->legacyAbortResponse('Error', 'amount must be numeric');
+        }
+
+        $classSet = (array) SupportContext::getPost('clases');
+        foreach ($classSet as $class) {
+            if (! Validators::isId($class) && $class != 0) {
+                return $this->legacyAbortResponse('Error', 'Invalid Class');
+            }
+        }
+
+        $subject = trim((string) SupportContext::getPost('subject'));
+        $bytes = Format::bytesFromUnit($amount, 'G');
+
+        User::query()->whereIn('class', $classSet)->increment('uploaded', $bytes);
+
+        $userIds = User::query()->whereIn('class', $classSet)->pluck('id')->all();
+        foreach ($userIds as $userId) {
+            NexusDB::table('messages')->insert([
+                'sender' => $senderId,
+                'receiver' => (int) $userId,
+                'added' => $added,
+                'subject' => $subject,
+                'msg' => $msg,
+            ]);
+        }
+
+        return redirect('takeamountupload.php?sent=1');
 
     }
 
@@ -258,14 +398,14 @@ class SystemController extends LegacyController
 
     }
 
-    public function mailtest(Request $request): View|RedirectResponse
+    public function mailtest(Request $request): View|RedirectResponse|Response
     {
 
         return $this->legacyPage($request, 'mailtest', true);
 
     }
 
-    public function mysqlStats(Request $request): View|RedirectResponse
+    public function mysqlStats(Request $request): View|RedirectResponse|Response
     {
         if (SupportContext::getUser() === null) {
             $qs = $request->getQueryString();
@@ -291,17 +431,152 @@ class SystemController extends LegacyController
 
     }
 
-    public function incrementBulk(Request $request): View|RedirectResponse
+    public function incrementBulk(Request $request): View|RedirectResponse|Response
     {
 
         return $this->legacyPage($request, 'increment-bulk', true);
 
     }
 
-    public function maxlogin(Request $request): Response|RedirectResponse
+    public function maxlogin(Request $request): Response|RedirectResponse|View
     {
+        $sysopClass = defined('UC_SYSOP') ? \constant('UC_SYSOP') : 0;
+        if (UserDisplay::currentClass() < $sysopClass) {
+            return $this->legacyAbortResponse('Error', 'Permission denied.');
+        }
 
-        return $this->legacyPageWithRedirect($request, 'maxlogin', true);
+        $action = (string) (SupportContext::getPost('action') ?? SupportContext::getQuery('action') ?? 'showlist');
+        $action = htmlspecialchars($action);
+        $id = (int) (SupportContext::getPost('id') ?? SupportContext::getQuery('id') ?? 0);
+        $update = (string) (SupportContext::getPost('update') ?? SupportContext::getQuery('update') ?? '');
+
+        if ($action === 'ban' || $action === 'unban' || $action === 'delete' || $action === 'edit' || $action === 'save') {
+            if (! Validators::isId($id)) {
+                return $this->legacyAbortResponse('Error', 'Invalid ID');
+            }
+        }
+
+        if ($action === 'ban') {
+            NexusDB::table('loginattempts')->where('id', $id)->update(['banned' => 'yes']);
+            return redirect('maxlogin.php?update=Ban');
+        }
+
+        if ($action === 'unban') {
+            NexusDB::table('loginattempts')->where('id', $id)->update(['banned' => 'no']);
+            return redirect('maxlogin.php?update=Unban');
+        }
+
+        if ($action === 'delete') {
+            NexusDB::table('loginattempts')->where('id', $id)->delete();
+            return redirect('maxlogin.php?update=Delete');
+        }
+
+        if ($action === 'save') {
+            $attempts = (int) SupportContext::getPost('attempts');
+            $type = (string) SupportContext::getPost('type');
+            $banned = (string) SupportContext::getPost('banned');
+            if ($attempts < 0) {
+                return $this->legacyAbortResponse('Error', 'Invalid attempts');
+            }
+            NexusDB::table('loginattempts')->where('id', $id)->update([
+                'attempts' => $attempts,
+                'type' => $type,
+                'banned' => $banned,
+            ]);
+            if (SupportContext::getPost('returnto')) {
+                return redirect((string) SupportContext::getPost('returnto'));
+            }
+            return redirect('maxlogin.php?update=Edit');
+        }
+
+        $order = (string) (SupportContext::getQuery('order') ?? '');
+        $orderColumn = match ($order) {
+            'ip' => 'ip',
+            'added' => 'added',
+            'attempts' => 'attempts',
+            'type' => 'type',
+            'status' => 'banned',
+            default => 'id',
+        };
+
+        $perpage = 50;
+        $msg = $update ? '<h3><b>' . htmlspecialchars($update) . ' Successful!</b></h3>' : '';
+
+        if ($action === 'searchip') {
+            $ip = (string) (SupportContext::getPost('ip') ?? '');
+            $search = NexusDB::table('loginattempts')->where('ip', 'LIKE', '%' . $ip . '%')->get();
+            $rows = [];
+            foreach ($search as $attemptRow) {
+                $arr = (array) $attemptRow;
+                $user = User::query()->where('ip', $arr['ip'])->first(['id', 'username']);
+                $a2 = $user ? $user->toArray() : [];
+                $rows[] = [
+                    'id' => $arr['id'],
+                    'ip' => $arr['ip'],
+                    'added' => $arr['added'],
+                    'attempts' => $arr['attempts'],
+                    'type' => $arr['type'],
+                    'banned' => $arr['banned'],
+                    'userId' => $a2['id'] ?? 0,
+                    'username' => $a2['username'] ?? '',
+                ];
+            }
+
+            return $this->legacyPage($request, 'maxlogin', true, [
+                'action' => 'searchip',
+                'msg' => $msg,
+                'rows' => $rows,
+                'editRow' => null,
+            ]);
+        }
+
+        if ($action !== 'showlist' && $action !== 'edit') {
+            return $this->legacyAbortResponse('Error', 'Invalid Action');
+        }
+
+        if ($action === 'edit') {
+            $editRow = (array) NexusDB::table('loginattempts')->where('id', $id)->first();
+
+            return $this->legacyPage($request, 'maxlogin', true, [
+                'action' => 'edit',
+                'msg' => $msg,
+                'rows' => [],
+                'editRow' => $editRow,
+                'returnto' => SupportContext::getQuery('return') === 'yes' ? 'viewunbaniprequest.php' : '',
+            ]);
+        }
+
+        $countrows = (int) NexusDB::table('loginattempts')->count() + 1;
+        [$pagertop, $pagerbottom, , $offset, $rpp] = Pagination::pager($perpage, $countrows, "maxlogin.php?order={$order}&");
+
+        $loginAttempts = NexusDB::table('loginattempts')->orderByDesc($orderColumn)->offset($offset)->limit($rpp)->get();
+        $rows = [];
+        foreach ($loginAttempts as $attemptRow) {
+            $arr = (array) $attemptRow;
+            $user = User::query()->where('ip', $arr['ip'])->first(['id', 'username']);
+            $a2 = $user ? $user->toArray() : [];
+            $rows[] = [
+                'id' => $arr['id'],
+                'ip' => $arr['ip'],
+                'added' => $arr['added'],
+                'attempts' => $arr['attempts'],
+                'type' => $arr['type'],
+                'banned' => $arr['banned'],
+                'userId' => $a2['id'] ?? 0,
+                'username' => $a2['username'] ?? '',
+            ];
+        }
+
+        return $this->legacyPage($request, 'maxlogin', true, [
+            'action' => 'showlist',
+            'msg' => $msg,
+            'rows' => $rows,
+            'pagertop' => $pagertop,
+            'pagerbottom' => $pagerbottom,
+            'countrows' => $countrows,
+            'perpage' => $rpp,
+            'editRow' => null,
+        ]);
 
     }
 

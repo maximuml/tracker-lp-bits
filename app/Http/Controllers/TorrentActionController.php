@@ -113,7 +113,7 @@ class TorrentActionController extends LegacyController
         return redirect('/torrents.php');
     }
 
-    public function torrentInfo(Request $request): View|RedirectResponse
+    public function torrentInfo(Request $request): View|RedirectResponse|Response
     {
         $id = (int) $request->input('id', 0);
         if ($id <= 0) {
@@ -170,7 +170,7 @@ class TorrentActionController extends LegacyController
         return $this->legacyPageRaw($request, 'viewpeerlist', false, TorrentAjaxRepository::peerList($torrentId, $currentUser));
     }
 
-    public function viewSnatches(Request $request): View|RedirectResponse
+    public function viewSnatches(Request $request): View|RedirectResponse|Response
     {
         $torrentId = (int) $request->input('id', 0);
         if ($torrentId <= 0) {
@@ -180,7 +180,7 @@ class TorrentActionController extends LegacyController
         return $this->legacyPage($request, 'viewsnatches', true, TorrentAjaxRepository::snatchList($torrentId));
     }
 
-    public function takeFlush(Request $request): View|RedirectResponse
+    public function takeFlush(Request $request): View|RedirectResponse|Response
     {
         return $this->legacyPage($request, 'takeflush');
     }

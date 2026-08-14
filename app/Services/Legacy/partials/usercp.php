@@ -16,7 +16,6 @@ $siteName = \App\Models\Setting::getSiteName();
 
 if (!function_exists('usercpmenu')) { function usercpmenu ($selected = "home") {
 $lang_usercp = (array) (\App\Support\SupportContext::getGlobal('lang_usercp') ?? []);
-	\App\Support\Frame::mainFrameOpen();
 	print ("<div id=\"usercpnav\"><ul id=\"usercpmenu\" class=\"menu\">");
 	print ("<li" . ($selected == "home" ? " class=selected" : "") . "><a href=\"usercp.php\">".$lang_usercp['text_user_cp_home']."</a></li>");
 	print ("<li" . ($selected == "personal" ? " class=selected" : "") . "><a href=\"?action=personal\">".$lang_usercp['text_personal_settings']."</a></li>");
@@ -24,7 +23,6 @@ $lang_usercp = (array) (\App\Support\SupportContext::getGlobal('lang_usercp') ??
 	print ("<li" . ($selected == "forum" ? " class=selected" : "") . "><a href=\"?action=forum\">".$lang_usercp['text_forum_settings']."</a></li>");
 	print ("<li" . ($selected == "security" ? " class=selected" : "") . "><a href=\"?action=security\">".$lang_usercp['text_security_settings']."</a></li>");
 	print ("</ul></div>");
-	\App\Support\Frame::mainFrameClose();
 } }
 if (!function_exists('getimagewidth')) { function getimagewidth ($imagewidth, $imageheight)
 {
@@ -133,7 +131,6 @@ if ($action){
 				\App\Support\Cache::clearUser($CURUSER["id"], $CURUSER['passkey']);
 				header("Location: usercp.php?action=personal&type=saved");
 			}
-			\App\Support\Html::stdhead($lang_usercp['head_control_panel'].$lang_usercp['head_personal_settings'], true);
 
 			$countries = "<option value=0>---- ".$lang_usercp['select_none_selected']." ----</option>\n";
 			$countryRows = \Nexus\Database\NexusDB::table('countries')->orderBy('name')->get(['id','name']);
@@ -184,7 +181,6 @@ if ($action){
   \App\Support\Html::tr($lang_usercp['row_info'], "<textarea name=\"info\" style=\"width:700px\" rows=\"10\" >" . htmlspecialchars($CURUSER["info"] ?? '') . "</textarea><br />".$lang_usercp['text_info_note'], 1);
   submit();
   print("</table></form>");
-  \App\Support\Html::stdfoot();
   return;
   break;
 		case "tracker":
@@ -309,7 +305,6 @@ if ($action){
 				\App\Models\User::query()->where('id', $CURUSER["id"])->update($data);
 				header("Location: usercp.php?action=tracker&type=saved");
 			}
-			\App\Support\Html::stdhead($lang_usercp['head_control_panel'].$lang_usercp['head_tracker_settings']);
 			usercpmenu ("tracker");
             form ("tracker");
 if (strpos($CURUSER['notifs'], "[spstate=0]") !== false)
@@ -399,7 +394,6 @@ if ($showshoutbox_main == "yes") //system side setting for shoutbox
 
 			submit();
 			print("</table></form>");
-			\App\Support\Html::stdfoot();
 			return;
 			break;
 		case "forum":
@@ -422,7 +416,6 @@ if ($showshoutbox_main == "yes") //system side setting for shoutbox
 				\App\Models\User::query()->where('id', $CURUSER["id"])->update($data);
 				header("Location: usercp.php?action=forum&type=saved");
 			}
-			\App\Support\Html::stdhead($lang_usercp['head_control_panel'].$lang_usercp['head_forum_settings'], true);
 			usercpmenu ("forum");
             form ("forum");
 			print ("<table border=0 cellspacing=0 cellpadding=5 width=".CONTENT_WIDTH.">");
@@ -439,7 +432,6 @@ if ($showshoutbox_main == "yes") //system side setting for shoutbox
 			\App\Support\Html::trSmall($lang_usercp['row_forum_signature'], "<textarea name=signature style=\"width:700px\" rows=10>" . $CURUSER['signature'] . "</textarea><br />".$lang_usercp['text_signature_note'], 1);
 			submit();
 			print("</table></form>");
-			\App\Support\Html::stdfoot();
 			return;
 			break;
 		case "security":
@@ -568,7 +560,6 @@ EOD;
                 \Nexus\Database\NexusDB::cache_del(\App\Support\Token::challengeKey($userInfo->username));
 				header("Location: $to");
 			}
-			\App\Support\Html::stdhead($lang_usercp['head_control_panel'].$lang_usercp['head_security_settings']);
 			usercpmenu ("security");
             form ("security", $type == "save" ? "confirm" : "save","security");
 			print ("<table border=0 cellspacing=0 cellpadding=5 width=".CONTENT_WIDTH.">");
@@ -599,7 +590,6 @@ EOD;
                 submit("button");
 				print("</table></form>");
                 \App\Support\Form::passwordChallengeJs("security", "username", "oldpassword");
-				\App\Support\Html::stdfoot();
 				return;
 			}
 			if ($type == 'saved')
@@ -643,14 +633,12 @@ EOD;
 			print("</table></form>");
 
             \App\Support\Form::passwordHashJs("security", "password", "chpassword", false, "passagain", "username");
-			\App\Support\Html::stdfoot();
 			return;
 			break;
 	}
 }
 }
 
-\App\Support\Html::stdhead($lang_usercp['head_control_panel'].$lang_usercp['head_home']);
 \Nexus\Nexus::js('vendor/jquery-loading/jquery.loading.min.js', 'footer', true);
 usercpmenu ();
 //Comment Results
@@ -953,4 +941,3 @@ foreach ($topicRows as $topicarr)
 </td>
 </tr>
 <?php
-\App\Support\Html::stdfoot();

@@ -172,9 +172,7 @@ final class Cache
      */
     public static function touchTorrent(int|string $torrentId, string $field = 'cache_stamp'): void
     {
-        NexusDB::table('torrents')
-            ->where('id', $torrentId)
-            ->update([$field => time()]);
+        app(\App\Repositories\TorrentRepository::class)->touchCacheStamp($torrentId, $field);
     }
 
     /**
@@ -184,9 +182,7 @@ final class Cache
      */
     public static function resetTorrent(int|string $torrentId, string $field = 'cache_stamp'): void
     {
-        NexusDB::table('torrents')
-            ->where('id', $torrentId)
-            ->update([$field => 0]);
+        app(\App\Repositories\TorrentRepository::class)->resetCacheStamp($torrentId, $field);
     }
 
     public static function clearUser(int|string $uid, string $passkey = ''): void
@@ -204,7 +200,7 @@ final class Cache
             NexusDB::cache_del('user_passkey_'.$passkey.'_rss');
         }
 
-        $userInfo = \App\Models\User::query()->find($uid, \App\Models\User::$commonFields);
+        $userInfo = app(\App\Repositories\UserRepository::class)->findForCacheClear($uid);
         if ($userInfo) {
             \App\Support\Events::fire('user_updated', $userInfo, null);
         }

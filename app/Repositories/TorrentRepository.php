@@ -1515,4 +1515,18 @@ HTML;
             Logger::writeWithContext('MeiliSearch delete on torrent delete failed: ' . $e->getMessage(), 'error');
         }
     }
+    public function touchCacheStamp(int|string $torrentId, string $field = 'cache_stamp'): void
+    {
+        NexusDB::table('torrents')
+            ->where('id', $torrentId)
+            ->update([$field => time()]);
+    }
+
+    public function resetCacheStamp(int|string $torrentId, string $field = 'cache_stamp'): void
+    {
+        NexusDB::table('torrents')
+            ->where('id', $torrentId)
+            ->update([$field => 0]);
+    }
+
 }

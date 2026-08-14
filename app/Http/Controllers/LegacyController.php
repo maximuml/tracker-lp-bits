@@ -88,4 +88,11 @@ abstract class LegacyController extends Controller
 
         return response($content, $responseStatus, $responseHeaders);
     }
+
+    protected function legacyAbortResponse(string $heading, string $text, bool $htmlstrip = true): Response
+    {
+        ob_start();
+        \App\Support\LegacyResponse::abort($heading, $text, $htmlstrip, true, true, false);
+        return response((string) ob_get_clean());
+    }
 }

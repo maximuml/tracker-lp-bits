@@ -1,1 +1,0 @@
-@include('takeinvite._takeinvite')

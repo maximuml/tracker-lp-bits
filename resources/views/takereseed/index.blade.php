@@ -1,46 +1,10 @@
 @php
-\App\Auth\Permission::assertCan(\App\Enums\Permission\PermissionEnum::ASK_RESEED);
+$lang_takereseed = (array) (\App\Support\SupportContext::getGlobal('lang_takereseed') ?? []);
+$message = (string) ($message ?? $lang_takereseed['std_it_worked'] ?? 'Reseed request sent.');
 
-$reseedid = intval(\App\Support\SupportContext::getQuery("reseedid") ?? \App\Support\SupportContext::getQuery("id") ?? 0);
-$torrent = \App\Models\Torrent::query()->find($reseedid);
-$row = $torrent === null ? null : $torrent->toArray();
-$seederCount = \App\Models\Peer::query()->where('torrent', $reseedid)->count();
-if ($seederCount > 0)
-	\App\Support\LegacyResponse::abort($lang_takereseed['std_error'], $lang_takereseed['std_torrent_not_dead']);
-elseif ($row !== null && strtotime($row['last_reseed'] ?? '') > (TIMENOW - 900))
-	\App\Support\LegacyResponse::abort($lang_takereseed['std_error'], $lang_takereseed['std_reseed_sent_recently']);
-else{
-$snatchedRows = \Nexus\Database\NexusDB::table('snatched')
-    ->join('users', 'snatched.userid', '=', 'users.id')
-    ->join('torrents', 'snatched.torrentid', '=', 'torrents.id')
-    ->where('snatched.finished', 'Yes')
-    ->where('snatched.torrentid', $reseedid)
-    ->select('snatched.userid', 'snatched.torrentid', 'torrents.name as torrent_name', 'users.id')
-    ->get()
-    ->map(fn ($r) => (array) $r)
-    ->all();
-foreach ($snatchedRows as $row) {
-    $locale = \App\Support\Locale::userLocale($row['userid']);
-$rs_subject = \App\Support\Locale::trans("torrent.msg_reseed_request", [], $locale);
-$pn_msg = \App\Support\Locale::trans("torrent.msg_reseed_user", [], $locale).$CURUSER["username"].\App\Support\Locale::trans("torrent.msg_ask_reseed", [], $locale)."[url=" . \App\Support\Http::protocolPrefix(\App\Support\Url::isSecure()) . "$BASEURL/details.php?id=".$reseedid."]".$row["torrent_name"]."[/url]".\App\Support\Locale::trans("torrent.msg_thank_you", [], $locale);
-//sql_query("INSERT INTO messages (sender, receiver, added, subject, msg) VALUES(0, $row[userid], '" . date("Y-m-d H:i:s") . "'," . sqlesc($rs_subject) . ", " . sqlesc($pn_msg) . ")") or sqlerr(__FILE__, __LINE__);
-    \App\Models\Message::add([
-        'sender' => 0,
-        'receiver' => $row['userid'],
-        'subject' => $rs_subject,
-        'msg' => $pn_msg,
-        'added' => now(),
-    ]);
-}
-//sql_query("UPDATE torrents SET last_reseed = ".sqlesc(date("Y-m-d H:i:s"))." WHERE id=".sqlesc($reseedid));
-\App\Models\Torrent::query()->where("id", $reseedid)->update([
-    "last_reseed" => now(),
-    "seeders" => $seederCount,
-]);
-\App\Support\Html::stdhead($lang_takereseed['head_reseed_request']);
+\App\Support\Html::stdhead($lang_takereseed['head_reseed_request'] ?? 'Reseed request');
 \App\Support\Frame::mainFrameOpen();
-print("<center>".$lang_takereseed['std_it_worked']."</center>");
+print('<center>' . $message . '</center>');
 \App\Support\Frame::mainFrameClose();
 \App\Support\Html::stdfoot();
-}
 @endphp

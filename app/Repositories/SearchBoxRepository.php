@@ -50,7 +50,7 @@ class SearchBoxRepository extends BaseRepository
      *
      * @param  string  $tableName
      * @param  int  $mode
-     * @return \Illuminate\Support\Collection
+     * @return \Illuminate\Support\Collection<int, \stdClass>
      */
     public function getTaxonomyRows(string $tableName, int $mode)
     {

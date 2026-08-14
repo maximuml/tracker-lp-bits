@@ -107,7 +107,6 @@ if ($mailbox != PM_SENTBOX)
 else
 	$sender_receiver = $lang_messages['text_receiver'];
 // Start Page
-\App\Support\Html::stdhead($mailbox_name);
 ?>
 <?php messagemenu($mailbox)?>
 <table border="0" cellpadding="4" cellspacing="0" width="737">
@@ -316,7 +315,7 @@ $subject = $lang_messages['text_no_subject'];
 \App\Models\Message::query()->where('id', $pm_id)->where('receiver', $CURUSER['id'])->update(['unread' => 'no']);
 $Cache->delete_value('user_'.$CURUSER['id'].'_unread_message_count');
 // Display message
-\App\Support\Html::stdhead("PM ($subject)"); ?>
+?>
 <h1><?php echo $subject?></h1>
 <?php
 $mailbox = ($message['sender'] == $CURUSER['id'] ? -1 : $message['location']);
@@ -523,7 +522,7 @@ $orig_name2 = \App\Models\User::query()->where('id', $orig)->value('username') ?
 
 $body = "-------- Original Message from " . $orig_name2 . " --------<br />" . \App\Support\Format::formatComment($message['msg']);
 
-\App\Support\Html::stdhead($subject);?>
+?>
 <h1 align="center"><?php echo $lang_messages['text_forward_pm'] ?></h1>
 <table border="0" cellpadding="4" cellspacing="0"  width="737">
 <form action="takemessage.php" method="post">
@@ -562,7 +561,7 @@ if ($action == "editmailboxes")
 {
 $pmBoxes = \Nexus\Database\NexusDB::table('pmboxes')->where('userid', $CURUSER['id'])->orderBy('boxnumber')->get(['id','boxnumber','name']);
 
-\App\Support\Html::stdhead($lang_messages['head_editing_mailboxes']); ?>
+?>
 <h1><?php echo $lang_messages['text_editing_mailboxes'] ?></h1>
 <table width="737" border="0" cellpadding="4" cellspacing="0">
 <tr>

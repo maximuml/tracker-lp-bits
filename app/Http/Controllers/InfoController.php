@@ -4,13 +4,16 @@ namespace App\Http\Controllers;
 
 use App\Enums\Permission\PermissionEnum;
 use App\Models\User;
+use App\Repositories\InfoRepository;
 use App\Support\LegacyResponse;
+use App\Support\Locale;
 use App\Support\Pagination;
 use App\Support\Permissions;
 use App\Support\SupportContext;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\View\View;
 use Nexus\Database\NexusDB;
 
@@ -149,12 +152,21 @@ class InfoController extends LegacyController
 
     public function aboutNexus(Request $request): View|RedirectResponse
     {
-        return $this->legacyPage($request, 'aboutnexus', false);
+        return $this->legacyPage($request, 'aboutnexus', false, InfoRepository::aboutNexus());
     }
 
-    public function rules(Request $request): View|RedirectResponse
+    public function rules(Request $request): Response|RedirectResponse
     {
-        return $this->legacyPage($request, 'rules', false);
+        $langFolder = (string) SupportContext::getGlobal('CURLANGDIR', 'en');
+        $cacheKey = "{$langFolder}_rules";
+
+        $html = Cache::remember($cacheKey, 900, function () {
+            $langId = InfoRepository::resolveRuleLangId(Locale::guestIdWithContext());
+
+            return view('rules.index', ['rules' => InfoRepository::rules($langId)])->render();
+        });
+
+        return response($html);
     }
 
     public function userAgreement(Request $request): View|RedirectResponse
@@ -162,14 +174,26 @@ class InfoController extends LegacyController
         return $this->legacyPage($request, 'useragreement', false);
     }
 
-    public function faq(Request $request): View|RedirectResponse
+    public function faq(Request $request): Response|RedirectResponse
     {
-        return $this->legacyPage($request, 'faq', false);
+        $langFolder = (string) SupportContext::getGlobal('CURLANGDIR', 'en');
+        $cacheKey = "{$langFolder}_faq";
+
+        $html = Cache::remember($cacheKey, 900, function () {
+            $langId = InfoRepository::resolveRuleLangId(Locale::guestIdWithContext());
+
+            return view('faq.index', ['faqCategories' => InfoRepository::faqCategories($langId)])->render();
+        });
+
+        return response($html);
     }
 
     public function donate(Request $request): View|RedirectResponse
     {
-        return $this->legacyPage($request, 'donate', false);
+        $data = InfoRepository::donationPageData();
+        $data['thanks'] = $request->query('do') === 'thanks';
+
+        return $this->legacyPage($request, 'donate', false, $data);
     }
 
     public function donated(Request $request): Response|RedirectResponse

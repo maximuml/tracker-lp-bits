@@ -65,6 +65,10 @@ class TorrentDetailsController extends Controller
             ? ($langDetails['head_details_for_torrent'] ?? '') . '"' . $row['name'] . '"'
             : ($langDetails['head_comments_for_torrent'] ?? '') . '"' . $row['name'] . '"';
 
+        $denyLog = $row['approval_status'] == \App\Models\Torrent::APPROVAL_STATUS_DENY
+            ? \App\Repositories\TorrentDetailRepository::getLatestApprovalDenyLog($id)
+            : null;
+
         return view('torrent.details', [
             'torrentId' => $id,
             'torrentRow' => $row,
@@ -72,6 +76,8 @@ class TorrentDetailsController extends Controller
             'currentUser' => $currentUser,
             'customField' => new Field(),
             'headTitle' => $headTitle,
+            'tagIds' => \App\Repositories\TorrentDetailRepository::getTagIds($id),
+            'denyLog' => $denyLog,
         ]);
     }
 }

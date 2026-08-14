@@ -25,6 +25,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\View\View;
 use Nexus\Database\NexusDB;
+use Rhilip\Bencode\Bencode;
 
 class TorrentActionController extends LegacyController
 {
@@ -114,7 +115,34 @@ class TorrentActionController extends LegacyController
 
     public function torrentInfo(Request $request): View|RedirectResponse
     {
-        return $this->legacyPage($request, 'torrent_info');
+        $id = (int) $request->input('id', 0);
+        if ($id <= 0) {
+            abort(404);
+        }
+
+        $torrent = Torrent::query()->find($id, ['id', 'name']);
+        if (! $torrent instanceof Torrent) {
+            abort(404);
+        }
+
+        $curUser = SupportContext::getUser() ?? [];
+        $currentUserId = (int) ($curUser['id'] ?? 0);
+        if (! Permissions::userCan(PermissionEnum::TORRENT_STRUCTURE->value, false, $currentUserId)) {
+            abort(403);
+        }
+
+        $torrentDir = \App\Support\Config\SiteConfig::current()->main->torrentDir();
+        $filePath = \App\Support\Path::resolve("{$torrentDir}/{$id}.torrent", \ROOT_PATH);
+        if (! is_file($filePath) || ! is_readable($filePath)) {
+            abort(404);
+        }
+
+        $dict = Bencode::load($filePath);
+
+        return $this->legacyPage($request, 'torrent_info', true, [
+            'torrentName' => (string) $torrent->name,
+            'dict' => $dict,
+        ]);
     }
 
     public function viewFileList(Request $request): Response|RedirectResponse
@@ -407,6 +435,44 @@ class TorrentActionController extends LegacyController
 
     public function thanks(Request $request): Response|RedirectResponse
     {
-        return $this->legacyPageRaw($request, 'thanks', true);
+        if (SupportContext::getUser() === null) {
+            return redirect('/thanks.php' . ($request->getQueryString() ? '?' . $request->getQueryString() : ''));
+        }
+
+        $curUser = SupportContext::getUser();
+        $userid = (int) ($curUser['id'] ?? 0);
+
+        if ($request->query('id') !== null) {
+            \App\Support\LegacyResponse::abort('Party is over!', "This trick doesn't work anymore. You need to click the button!");
+        }
+
+        $torrentid = (int) SupportContext::getPost('id');
+        $torrentowner = Torrent::query()->where('id', $torrentid)->value('owner');
+        if (! $torrentowner) {
+            \App\Support\LegacyResponse::abort('Error', 'Invalid torrent id!');
+        }
+
+        $existing = NexusDB::table('thanks')
+            ->where('torrentid', $torrentid)
+            ->where('userid', $userid)
+            ->count();
+        if ($existing != 0) {
+            \App\Support\LegacyResponse::abort('Error', 'You already said thanks!');
+        }
+
+        NexusDB::table('thanks')->insert([
+            'torrentid' => $torrentid,
+            'userid' => $userid,
+        ]);
+
+        $saythanksBonus = (float) SupportContext::getGlobal('saythanks_bonus', 0);
+        $receivethanksBonus = (float) SupportContext::getGlobal('receivethanks_bonus', 0);
+        Bonus::updatePoints('+', $saythanksBonus, $userid);
+        Bonus::updatePoints('+', $receivethanksBonus, (int) $torrentowner);
+
+        return $this->legacyPageRaw($request, 'thanks', true, [
+            'torrentid' => $torrentid,
+            'message' => 'Thank you has been recorded.',
+        ]);
     }
 }

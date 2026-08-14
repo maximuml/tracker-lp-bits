@@ -59,6 +59,7 @@ class TorrentEditController extends Controller
             'torrentRow' => $row,
             'currentUser' => $currentUser,
             'headTitle' => $headTitle,
+            'tagIds' => \App\Repositories\TorrentDetailRepository::getTagIds($id),
         ]);
     }
 

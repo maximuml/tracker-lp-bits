@@ -26,6 +26,7 @@ final class LegacyRequestMiddleware
         'shoutbox_history' => ['shoutbox.php'],
         'take-increment-bulk' => ['increment-bulk.php'],
         'upload' => ['edit.php'],
+        'my_bonus' => ['mybonus.php'],
     ];
 
     /** @var array<int, string> */

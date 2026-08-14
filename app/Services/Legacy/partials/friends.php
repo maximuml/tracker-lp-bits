@@ -99,7 +99,6 @@ if ($action == 'delete')
 
 // main body  -----------------------------------------------------------------
 
-\App\Support\Html::stdhead($lang_friends['head_personal_lists_for']. $user['username']);
 
 print("<p><table class=main border=0 cellspacing=0 cellpadding=0>".
 "<tr><td class=embedded><h1 style='margin:0px'> " . $lang_friends['text_personallist'] . " ".\App\Support\UserDisplay::username($user['id'])."</h1></td></tr></table></p>\n");
@@ -349,4 +348,3 @@ print("</td></tr></table>\n");
 print("</td></tr></table>\n");
 if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::VIEW_USER_LIST))
 	print("<p><a href=users.php><b>".$lang_friends['text_find_user']."</b></a></p>");
-\App\Support\Html::stdfoot();

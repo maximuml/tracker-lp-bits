@@ -8,8 +8,6 @@ if (! isset($lang_downloadnotice)) {
     $lang_downloadnotice = (array) (\App\Support\SupportContext::getGlobal('lang_downloadnotice') ?? []);
 }
 
-\App\Support\Html::stdhead($lang_downloadnotice['head_download_notice'] ?? 'Download Notice');
-\App\Support\Frame::mainFrameOpen();
 ?>
 <h2><?php echo $title ?? '' ?></h2>
 <table width="100%"><tr>
@@ -89,5 +87,3 @@ if (! empty($forcecheck))
 ?>
 </table>
 <?php
-\App\Support\Frame::mainFrameClose();
-\App\Support\Html::stdfoot();

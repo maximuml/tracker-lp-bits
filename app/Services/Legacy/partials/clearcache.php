@@ -6,13 +6,7 @@ if (!isset($CURUSER)) $CURUSER = (array) (\App\Support\SupportContext::getUser()
 if (!isset($Cache)) $Cache = \App\Support\SupportContext::getCache();
 if (!isset($BASEURL)) $BASEURL = \App\Support\SupportContext::getGlobal('BASEURL', '');
 if (!isset($lang_clearcache)) $lang_clearcache = (array) (\App\Support\SupportContext::getGlobal('lang_clearcache') ?? []);
-?>
-<?php
-        $title = 'Clear cache';
-        \App\Support\Html::stdhead($title);
-        \App\Support\Frame::mainFrameOpen();
-        ?>
-        <?php
+
 $__server_REQUEST_METHOD = \App\Support\SupportContext::getServerValue('REQUEST_METHOD');
 if (\App\Support\UserDisplay::currentClass() < UC_MODERATOR) {
     \App\Support\LegacyResponse::abort('Error', 'Permission denied.');
@@ -44,8 +38,3 @@ if ($__server_REQUEST_METHOD == 'POST') {
     <tr><td colspan="2" align="center"><input type="submit" value="Okay" class="btn"></td></tr>
 </table>
 </form>
-
-        <?php
-        \App\Support\Frame::mainFrameClose();
-        \App\Support\Html::stdfoot();
-        ?>

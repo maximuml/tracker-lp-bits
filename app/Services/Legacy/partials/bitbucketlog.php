@@ -21,7 +21,6 @@ if (\App\Support\UserDisplay::currentClass() >= UC_MODERATOR)
 				 \App\Support\LegacyResponse::abort("Warning", "Unable to unlink file: <b>{$a['name']}</b>. You should contact an administrator about this error.", false);
 				 			} } }
 }
-\App\Support\Html::stdhead("BitBucket Log");
 $count = \Nexus\Database\NexusDB::table('bitbucket')->count();
 $perpage = 10;
 list($pagertop, $pagerbottom, , $offset, $rpp) = \App\Support\Pagination::pager($perpage, $count, $__server_PHP_SELF . "?out=" . (\App\Support\SupportContext::getQuery("out") ?? '') . "&");
@@ -53,4 +52,3 @@ else {
 		}
 		echo
 		$pagerbottom;
-		\App\Support\Html::stdfoot();

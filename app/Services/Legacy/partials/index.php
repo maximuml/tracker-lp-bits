@@ -5,21 +5,6 @@ error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 if (!isset($CURUSER)) $CURUSER = (array) (\App\Support\SupportContext::getUser() ?? []);
 if (!isset($Cache)) $Cache = \App\Support\SupportContext::getCache();
 if (!isset($lang_index)) $lang_index = (array) (\App\Support\SupportContext::getGlobal('lang_index') ?? []);
-\Nexus\Nexus::css('styles/shoutbox.css', 'header', true);
-\Nexus\Nexus::js('js/shoutbox.js', 'footer', true);
-$toastLang = json_encode([
-    'newMessage' => $lang_index['toast_new_message'] ?? 'New message',
-    'shoutboxMention' => $lang_index['toast_shoutbox_mention'] ?? 'Shoutbox mention',
-    'from' => $lang_index['toast_from'] ?? 'From',
-    'close' => $lang_index['toast_close'] ?? 'Close',
-    'userId' => (int) ($CURUSER['id'] ?? 0),
-], JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
-\Nexus\Nexus::js("window.TOAST_LANG = $toastLang;", 'footer', false, 'toast-lang');
-\Nexus\Nexus::css('styles/toast.css', 'header', true);
-\Nexus\Nexus::js('js/toast.js', 'footer', true);
-\App\Support\Html::stdhead($lang_index['head_home']);
-\App\Support\Frame::mainFrameOpen();
-
 // ------------- start: recent news ------------------//
 print("<h2>".$lang_index['text_recent_news'].(\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::NEWS_MANAGE) ? " - <font class=\"small\">[<a class=\"altlink\" href=\"news.php\"><b>".$lang_index['text_news_page']."</b></a>]</font>" : "")."</h2>");
 
@@ -643,6 +628,4 @@ if ($CURUSER) {
 	\App\Models\User::where('id', $CURUSER["id"])->update(['last_home' => now()]);
 }
 $Cache->delete_value('user_'.$CURUSER["id"].'_unread_news_count');
-\App\Support\Frame::mainFrameClose();
-\App\Support\Html::stdfoot();
 ?>

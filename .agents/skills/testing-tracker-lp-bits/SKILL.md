@@ -482,3 +482,39 @@ Phase 17 migrates the remaining public/admin/listing Blade/PHP views into `resou
 - `LegacyRequestMiddleware` rewrites `.php` URLs (`/details.php?id=3` → `/details/3`, `/viewfilelist.php?id=3` → `/viewfilelist?id=3`) before routing, so no per-page `public/*.php` wrappers are needed for these paths.
 - `basic.BASEURL` may be reset to `openresty` after `CriticalPathTest` or `cleanup:run`. Re-set it to `localhost` and clear caches for host-side tests; only the announce/comment URL inside the generated `.torrent` is affected, not the download itself.
 
+## Testing PR #322-#337 (Phase 19 legacy layout migration)
+
+### Scope
+
+All active legacy PHP partials under `app/Services/Legacy/partials/` are now rendered through `resources/views/layouts/legacy.blade.php` with per-page `resources/views/<name>/index.blade.php` wrappers. Affected routes include `/index.php`, `/forums.php`, `/usercp.php`, `/messages.php`, `/sendmessage.php`, `/log.php`, `/news.php`, `/makepoll.php`, `/polloverview.php`, `/catmanage.php`, `/complains.php`, `/offers.php`, `/latestcomments.php`, `/shoutbox_history.php`, `/friends.php`, `/bitbucketlog.php`, `/downloadnotice.php`, `/donated.php`, `/clearcache.php`, `/invite.php`, `/mybonus.php`/`/my_bonus.php`, `/usersearch.php`, and the Filament `/nexusphp` admin panel.
+
+### Environment setup
+
+- Ensure the `nexusphp_php` / `nexusphp-openresty` containers mount `/home/ubuntu/repos/tracker-lp-bits` at `/var/www/html`.
+- Set `basic.BASEURL` to `openresty` and clear Laravel/Redis caches.
+- Generate a `c_secure_pass` cookie for `id=1` (sysop) using the known `APP_KEY`:
+  ```bash
+  docker compose -p tracker-lp-bits exec -T -e APP_KEY='base64:WUbN2wa2kl3E1VDW4iKaH3RBHw3hKY7BK0hWEkBZmGg=' php php -r \
+    'require "/var/www/html/vendor/autoload.php"; require "/var/www/html/bootstrap/app.php"; echo \App\Support\AuthCookie::buildToken(1, null, time()+3600);' \
+    > /home/ubuntu/phase19-cookie.txt
+  ```
+- Add a minimal forum fixture (`forums.id=179`, `topics.id=185`, `posts.id=139`) so `viewforum`/`viewtopic`/`newtopic` can be exercised.
+
+### Automation notes
+
+- Use Playwright over CDP (`http://localhost:29229`) or launch headful with the Devin Chrome binary at `/opt/.devin/playwright_browsers/chromium-1097/chrome-linux/chrome`.
+- The legacy layout wrapper means every rendered page should have exactly one `<html>`, `<head>`, and `<body>` block. Check `page.content()` for `Internal Server Error`, `Fatal error`, `Whoops`, or `Page Expired`.
+- Theme switching is exercised via `/usercp.php?action=tracker` by selecting `stylesheet=4` (Classic) or `stylesheet=6` (Dark Passion) and submitting the form; the redirect target is `/usercp.php?action=tracker&type=saved`.
+
+### Known route/shim issues
+
+- `donated.php` was originally missing `resources/views/donated/_donated.blade.php`; the fix is a one-line view that calls `\App\Repositories\LegacyViewRepository::render('donated', get_defined_vars())`.
+- `makepoll.php` had `<table><form>` HTML nesting; the browser ejected the `<form>` before its `<input>` elements, preventing submission. The fix is to wrap the `<table>` inside the `<form>`.
+- `/my_bonus.php` needs more than a Laravel route alias. `LegacyRequestMiddleware::EXTRA_LANG_FILES` maps the detected `SCRIPT_NAME` to language files. Because `/my_bonus.php` resolves to script `my_bonus` and there is no `lang_my_bonus.php`, `$lang_mybonus` strings are empty. Add `'my_bonus' => ['mybonus.php']` to `EXTRA_LANG_FILES` so the page renders identically to `/mybonus.php`.
+
+### Quick pass/fail gate
+
+- All listed routes return HTTP `200` (or `302` for form save redirects) and no fatal text.
+- `php artisan view:cache`, `php artisan route:cache`, and `openresty -t` succeed after browsing.
+- Screenshot key pages in both desktop (1280x900) and mobile (375x667) viewports; legacy fixed-width themes may overflow horizontally on mobile but must not hide primary content.
+

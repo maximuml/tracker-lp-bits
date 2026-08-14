@@ -1,5 +1,7 @@
 <?php
-error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
+
+$torrentName = (string) ($torrentName ?? '');
+$dict = (array) ($dict ?? []);
 
 if (!function_exists('is_indexed_array')) {
     /** 索引数组：所有键名都为数值型，注意字符串类型的数字键名会被转换为数值型。
@@ -34,25 +36,6 @@ if (!function_exists('torrent_structure_builder')) { function torrent_structure_
     return $ret;
 } }
 
-
-
-\App\Auth\Permission::assertCan(\App\Enums\Permission\PermissionEnum::TORRENT_STRUCTURE);
-
-$id = (int)\App\Support\SupportContext::getQuery("id");
-
-if (!$id)
-	\App\Support\LegacyResponse::notFound();
-
-$torrentName = \App\Models\Torrent::query()->where('id', $id)->value('name');
-
-$fn = \App\Support\Path::resolve("{$torrent_dir}/{$id}.torrent", \ROOT_PATH);
-
-if (!$torrentName || !is_file($fn) || !is_readable($fn))
-	\App\Support\LegacyResponse::notFound();
-
-
-
-// Standard html headers
 \App\Support\Html::stdhead("Torrent Info");
 ?>
 
@@ -83,8 +66,7 @@ li span.title {font-weight: bold;}
 \App\Support\Frame::mainFrameOpen();
 
 
-$dict = \Rhilip\Bencode\Bencode::load($fn);
-print("<div align=center><h1>$torrentName</h1>");  // Heading
+print("<div align=center><h1>" . htmlspecialchars($torrentName) . "</h1>");  // Heading
 print("<table width=750 border=1 cellspacing=0 cellpadding=5><td>");  // Start table
 echo "<ul id='torrent-structure'>";
 echo torrent_structure_builder(['root' => $dict]);

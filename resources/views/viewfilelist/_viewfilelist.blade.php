@@ -1,6 +1,4 @@
 <?php
-error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
-
 //Send some headers to keep the user's browser from caching the response.
 header("Expires: Mon, 26 Jul 1997 05:00:00 GMT" );
 header("Last-Modified: " . gmdate( "D, d M Y H:i:s" ) . "GMT" );
@@ -58,7 +56,6 @@ if (!function_exists('viewfilelist_render_badge')) {
 	}
 }
 
-$id = intval(\App\Support\SupportContext::getQuery('id') ?? 0);
 if((isset($CURUSER)))
 {
 	$css = '<style>
@@ -81,8 +78,7 @@ if((isset($CURUSER)))
 	$s  = $css;
 	$s .= "<table class=\"main\" border=\"1\" cellspacing=0 cellpadding=\"5\">\n";
 
-	$files = \Nexus\Database\NexusDB::table('files')->where('torrent', $id)->orderBy('id')->get();
-	$s.="<tr><td class=colhead>".$lang_viewfilelist['col_path']."</td><td class=colhead align=center><img class=\"size\" src=\"pic/trans.gif\" alt=\"size\" /></td></tr>\n";
+	$s .= "<tr><td class=colhead>".$lang_viewfilelist['col_path']."</td><td class=colhead align=center><img class=\"size\" src=\"pic/trans.gif\" alt=\"size\" /></td></tr>\n";
 	foreach ($files as $fileRow) {
 		$subrow = (array) $fileRow;
 		$badge = viewfilelist_render_badge((string)$subrow["filename"]);

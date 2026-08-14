@@ -1,79 +1,57 @@
 <?php
-error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
 $__server_PHP_SELF = \App\Support\SupportContext::getServerValue('PHP_SELF');
-$userid = intval(\App\Support\SupportContext::getQuery("id") ?? 0);
+$userid = (int) ($userid ?? 0);
+$action = (string) ($action ?? '');
+$subject = (string) ($subject ?? \App\Support\UserDisplay::username($userid));
+$lang_userhistory = (array) \App\Support\SupportContext::getGlobal('lang_userhistory', []);
+
 \App\Support\LegacyResponse::assertId($userid, true);
-
-if ($CURUSER["id"] != $userid && !\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::VIEW_USER_HISTORY))
-\App\Support\LegacyResponse::permissionDenied();
-
-$action = htmlspecialchars(\App\Support\SupportContext::getQuery("action"));
-
-$perpage = 15;
 
 if ($action == "viewposts")
 {
-	$postcount = \Nexus\Database\NexusDB::table('posts as p')
-	    ->leftJoin('topics as t', 'p.topicid', '=', 't.id')
-	    ->leftJoin('forums as f', 't.forumid', '=', 'f.id')
-	    ->where('p.userid', $userid)
-	    ->where('f.minclassread', '<=', $CURUSER['class'])
-	    ->distinct()
-	    ->count('p.id');
+    $postcount = (int) ($postcount ?? 0);
+    $pagertop = (string) ($pagertop ?? '');
+    $pagerbottom = (string) ($pagerbottom ?? '');
+    $perpage = (int) ($perpage ?? 15);
+    $posts = (array) ($posts ?? []);
+    $editorNames = (array) ($editorNames ?? []);
 
-	list($pagertop, $pagerbottom, , $offset, $perpage) = \App\Support\Pagination::pager($perpage, $postcount, $__server_PHP_SELF . "?action=viewposts&id=$userid&");
+    if (empty($posts)) \App\Support\LegacyResponse::abort($lang_userhistory['std_error'], $lang_userhistory['std_no_posts_found']);
 
-	$subject = \App\Support\UserDisplay::username($userid);
+    \App\Support\Html::stdhead($lang_userhistory['head_posts_history']);
 
-	$posts = \Nexus\Database\NexusDB::table('posts as p')
-	    ->leftJoin('topics as t', 'p.topicid', '=', 't.id')
-	    ->leftJoin('forums as f', 't.forumid', '=', 'f.id')
-	    ->leftJoin('readposts as r', function ($join) use ($userid) {
-	        $join->on('p.topicid', '=', 'r.topicid')->on('p.userid', '=', 'r.userid');
-	    })
-	    ->where('p.userid', $userid)
-	    ->where('f.minclassread', '<=', $CURUSER['class'])
-	    ->orderByDesc('p.id')
-	    ->offset($offset)
-	    ->limit($perpage)
-	    ->get(['f.id AS f_id', 'f.name', 't.id AS t_id', 't.subject', 't.lastpost', 'r.lastpostread', 'p.*']);
+    print("<h1>".$lang_userhistory['text_posts_history_for'].$subject."</h1>\n");
 
-	if ($posts->isEmpty()) \App\Support\LegacyResponse::abort($lang_userhistory['std_error'], $lang_userhistory['std_no_posts_found']);
+    if ($postcount > $perpage) echo $pagertop;
 
-	\App\Support\Html::stdhead($lang_userhistory['head_posts_history']);
+    \App\Support\Frame::mainFrameOpen();
 
-	print("<h1>".$lang_userhistory['text_posts_history_for'].$subject."</h1>\n");
+    \App\Support\Html::beginFrame();
 
-	if ($postcount > $perpage) echo $pagertop;
+    foreach ($posts as $postRow) {
+        $arr = $postRow;
+        $postid = $arr["id"];
 
-	\App\Support\Frame::mainFrameOpen();
+        $posterid = $arr["userid"];
 
-	\App\Support\Html::beginFrame();
+        $topicid = $arr["t_id"];
 
-	foreach ($posts as $postRow) {
-		$arr = (array) $postRow;
-		$postid = $arr["id"];
+        $topicname = $arr["subject"];
 
-		$posterid = $arr["userid"];
+        $forumid = $arr["f_id"];
 
-		$topicid = $arr["t_id"];
+        $forumname = $arr["name"];
 
-		$topicname = $arr["subject"];
+        $newposts = ($arr["lastpostread"] < $arr["lastpost"]) && $CURUSER["id"] == $userid;
 
-		$forumid = $arr["f_id"];
+        $added = \App\Support\Time::format($arr["added"], true, false, false);
 
-		$forumname = $arr["name"];
-
-		$newposts = ($arr["lastpostread"] < $arr["lastpost"]) && $CURUSER["id"] == $userid;
-
-		$added = \App\Support\Time::format($arr["added"], true, false, false);
-
-		print("<p class=sub><table border=0 cellspacing=0 cellpadding=0><tr><td class=embedded>
-	    $added&nbsp;--&nbsp;".$lang_userhistory['text_forum'].
-	    "<a href=forums.php?action=viewforum&forumid=$forumid>$forumname</a>
-	    &nbsp;--&nbsp;".$lang_userhistory['text_topic'].
-	    "<a href=forums.php?action=viewtopic&topicid=$topicid>$topicname</a>
+        print("<p class=sub><table border=0 cellspacing=0 cellpadding=0><tr><td class=embedded>
+    $added&nbsp;--&nbsp;".$lang_userhistory['text_forum'].
+    "<a href=forums.php?action=viewforum&forumid=$forumid>$forumname</a>
+    &nbsp;--&nbsp;".$lang_userhistory['text_topic'].
+    "<a href=forums.php?action=viewtopic&topicid=$topicid>$topicname</a>
       &nbsp;--&nbsp;".$lang_userhistory['text_post'].
       "<a href=forums.php?action=viewtopic&topicid=$topicid&page=p$postid#pid$postid>#$postid</a>" .
       ($newposts ? " &nbsp;<b>(<font class=new>".$lang_userhistory['text_new']."</font>)</b>" : "") .
@@ -87,11 +65,11 @@ if ($action == "viewposts")
 
       if (\App\Support\Validators::isId($arr['editedby']))
       {
-      	$editor = \App\Models\User::query()->where('id', $arr['editedby'])->value('username');
-      	if ($editor)
-      	{
-      		$body .= "<p><font size=1 class=small>".$lang_userhistory['text_last_edited'].\App\Support\UserDisplay::username($arr['editedby']).$lang_userhistory['text_at']."$arr[editdate]</font></p>\n";
-      	}
+          $editor = $editorNames[$arr['editedby']] ?? null;
+          if ($editor)
+          {
+              $body .= "<p><font size=1 class=small>".$lang_userhistory['text_last_edited'].\App\Support\UserDisplay::username($arr['editedby']).$lang_userhistory['text_at']."$arr[editdate]</font></p>\n";
+          }
       }
 
       print("<tr valign=top><td class=comment>$body</td></tr>\n");
@@ -108,85 +86,75 @@ if ($action == "viewposts")
 
 	\App\Support\Html::stdfoot();
 
-	die;
+	return;
 }
 
 if ($action == "viewcomments")
 {
-	$commentcount = \Nexus\Database\NexusDB::table('comments as c')
-	    ->leftJoin('torrents as t', 'c.torrent', '=', 't.id')
-	    ->where('c.user', $userid)
-	    ->count();
+    $commentcount = (int) ($commentcount ?? 0);
+    $pagertop = (string) ($pagertop ?? '');
+    $pagerbottom = (string) ($pagerbottom ?? '');
+    $perpage = (int) ($perpage ?? 15);
+    $comments = (array) ($comments ?? []);
+    $commentPageMap = (array) ($commentPageMap ?? []);
 
-	list($pagertop, $pagerbottom, , $offset, $perpage) = \App\Support\Pagination::pager($perpage, $commentcount, $__server_PHP_SELF . "?action=viewcomments&id=$userid&");
+    if (empty($comments)) \App\Support\LegacyResponse::abort($lang_userhistory['std_error'], $lang_userhistory['std_no_comments_found']);
 
-	$subject = \App\Support\UserDisplay::username($userid);
+    \App\Support\Html::stdhead($lang_userhistory['head_comments_history']);
 
-	$comments = \Nexus\Database\NexusDB::table('comments as c')
-	    ->leftJoin('torrents as t', 'c.torrent', '=', 't.id')
-	    ->where('c.user', $userid)
-	    ->orderByDesc('c.id')
-	    ->offset($offset)
-	    ->limit($perpage)
-	    ->get(['t.name', 'c.torrent AS t_id', 'c.id', 'c.added', 'c.text']);
+    print("<h1>".$lang_userhistory['text_comments_history_for']."$subject</h1>\n");
 
-	if ($comments->isEmpty()) \App\Support\LegacyResponse::abort($lang_userhistory['std_error'], $lang_userhistory['std_no_comments_found']);
+    if ($commentcount > $perpage) echo $pagertop;
 
-	\App\Support\Html::stdhead($lang_userhistory['head_comments_history']);
+    \App\Support\Frame::mainFrameOpen();
 
-	print("<h1>".$lang_userhistory['text_comments_history_for']."$subject</h1>\n");
+    \App\Support\Html::beginFrame();
 
-	if ($commentcount > $perpage) echo $pagertop;
+    foreach ($comments as $commentRow)
+    {
+        $arr = $commentRow;
 
-	\App\Support\Frame::mainFrameOpen();
+        $commentid = $arr["id"];
 
-	\App\Support\Html::beginFrame();
+        $torrent = $arr["name"];
 
-	foreach ($comments as $commentRow)
-	{
-		$arr = (array) $commentRow;
+        if (strlen($torrent) > 55) $torrent = substr($torrent,0,52) . "...";
 
-		$commentid = $arr["id"];
+        $torrentid = $arr["t_id"];
 
-		$torrent = $arr["name"];
+        $count = $commentPageMap[$commentid] ?? 0;
+        $comm_page = floor($count/20);
+        $page_url = $comm_page?"&page=$comm_page":"";
 
-		if (strlen($torrent) > 55) $torrent = substr($torrent,0,52) . "...";
+        $added = \App\Support\Time::format($arr["added"], true, false, false);
 
-		$torrentid = $arr["t_id"];
+        print("<p class=sub><table border=0 cellspacing=0 cellpadding=0><tr><td class=embedded>".
+        "$added&nbsp;---&nbsp;".$lang_userhistory['text_torrent'].
+        ($torrent?("<a href=details.php?id=$torrentid&tocomm=1&hit=1>$torrent</a>"):" [Deleted] ").
+        "&nbsp;---&nbsp;".$lang_userhistory['text_comment']."</b>#<a href=details.php?id=$torrentid&tocomm=1&hit=1$page_url>$commentid</a>
+      </td></tr></table></p>\n");
+        print("<br />");
 
-		$count = \Nexus\Database\NexusDB::table('comments')->where('torrent', $torrentid)->where('id', '<', $commentid)->count();
-		$comm_page = floor($count/20);
-		$page_url = $comm_page?"&page=$comm_page":"";
+        print("<table class=main width=100% border=1 cellspacing=0 cellpadding=5>\n");
 
-		$added = \App\Support\Time::format($arr["added"], true, false, false);
+        $body = \App\Support\Format::formatComment($arr["text"]);
 
-		print("<p class=sub><table border=0 cellspacing=0 cellpadding=0><tr><td class=embedded>".
-		"$added&nbsp;---&nbsp;".$lang_userhistory['text_torrent'].
-		($torrent?("<a href=details.php?id=$torrentid&tocomm=1&hit=1>$torrent</a>"):" [Deleted] ").
-		"&nbsp;---&nbsp;".$lang_userhistory['text_comment']."</b>#<a href=details.php?id=$torrentid&tocomm=1&hit=1$page_url>$commentid</a>
-	  </td></tr></table></p>\n");
-		print("<br />");
+        print("<tr valign=top><td class=comment>$body</td></tr>\n");
 
-		print("<table class=main width=100% border=1 cellspacing=0 cellpadding=5>\n");
+        print("</td></tr></table>\n");
 
-		$body = \App\Support\Format::formatComment($arr["text"]);
+        print("<br />");
+    }
 
-		print("<tr valign=top><td class=comment>$body</td></tr>\n");
+    \App\Support\Html::endFrame();
 
-		print("</td></tr></table>\n");
+    \App\Support\Frame::mainFrameClose();
 
-		print("<br />");
-	}
+    if ($commentcount > $perpage) echo $pagerbottom;
 
-	\App\Support\Html::endFrame();
+    \App\Support\Html::stdfoot();
 
-	\App\Support\Frame::mainFrameClose();
-
-	if ($commentcount > $perpage) echo $pagerbottom;
-
-	\App\Support\Html::stdfoot();
-
-	die;
+    return;
 }
 
 if ($action != "")
@@ -195,4 +163,3 @@ if ($action != "")
 \App\Support\Html::stdhead($lang_userhistory['head_user_history']);
 \App\Support\Html::stdMessage($lang_userhistory['std_history_error'], $lang_userhistory['std_unkown_action']);
 \App\Support\Html::stdfoot();
-?>

@@ -7,16 +7,11 @@
 if (\App\Support\UserDisplay::currentClass() < UC_MODERATOR) {
     \App\Support\LegacyResponse::abort('Sorry', 'Access denied.');
 }
-$count = \App\Models\User::query()->where('warned', 'yes')->count();
-$warned = number_format($count);
+$count = (int) ($count ?? 0);
+$warned = $warnedCount ?? number_format($count);
+$rows = (array) ($rows ?? []);
 \App\Support\Html::beginFrame("Warned Users: ({$warned})", true);
 \App\Support\Html::beginTable();
-$rows = \App\Models\User::query()
-    ->where('warned', 1)
-    ->where('enabled', 'yes')
-    ->orderByRaw('(uploaded/downloaded)')
-    ->get()
-    ->map(fn ($r) => $r->getAttributes());
 @endphp
 
 <table border="1" width="675" cellspacing="0" cellpadding="2">

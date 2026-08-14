@@ -1,4 +1,5 @@
 <?php
+$offerRows = (array) ($offerRows ?? []);
 ?>
 	<form id="compose" enctype="multipart/form-data" action="takeupload.php" method="post" name="upload">
 			<?php
@@ -100,12 +101,11 @@
 
 
 				//==== offer dropdown for offer mod  from code by S4NE
-				$offerRows = \App\Models\Offer::query()->where('userid', $CURUSER['id'])->where('allowed', 'allowed')->orderBy('name')->get();
-				if ($offerRows->count() > 0)
+				if (! empty($offerRows))
 				{
 					$offer = "<select name=\"offer\"><option value=\"0\">".$lang_upload['select_choose_one']."</option>";
 					foreach ($offerRows as $offerrow)
-						$offer .= "<option value=\"" . $offerrow->id . "\">" . htmlspecialchars($offerrow->name) . "</option>";
+						$offer .= "<option value=\"" . (int) $offerrow['id'] . "\">" . htmlspecialchars($offerrow['name']) . "</option>";
 					$offer .= "</select>";
 					\App\Support\Html::tr($lang_upload['row_your_offer']. (!$uploadFreely ? "<font color=red>*</font>" : ""), $offer.$lang_upload['text_please_select_offer'], 1);
 					$getOfferJs = <<<JS

@@ -1,8 +1,17 @@
 <?php
 
 $medalType = 'valid_medals';
-$userInfo = \App\Models\User::query()->with($medalType)->findOrFail($user['id']);
+$userInfo = $userModel ?? null;
+if (! $userInfo instanceof \App\Models\User) {
+    \App\Support\LegacyResponse::abort('Error', 'No user with this ID!');
+}
 $userRep = new \App\Repositories\UserRepository();
+
+$torrentcomments = (int) ($torrentcomments ?? 0);
+$forumposts = (int) ($forumposts ?? 0);
+$temporaryInviteCount = (int) ($temporaryInviteCount ?? 0);
+$modcomment = (string) ($modcomment ?? '');
+$bonuscomment = (string) ($bonuscomment ?? '');
 
 if ($user['added'] == "0000-00-00 00:00:00" || $user['added'] == null) {
     $joindate = $lang_userdetails['text_not_available'];
@@ -20,11 +29,9 @@ else
 //$res = sql_query("SELECT COUNT(*) FROM comments WHERE user=" . $user['id']) or sqlerr();
 //$arr3 = mysql_fetch_row($res);
 //$torrentcomments = $arr3[0];
-$torrentcomments = \App\Models\Comment::query()->where('user', $user['id'])->count();
 //$res = sql_query("SELECT COUNT(*) FROM posts WHERE userid=" . $user['id']) or sqlerr();
 //$arr3 = mysql_fetch_row($res);
 //$forumposts = $arr3[0];
-$forumposts = \App\Models\Post::query()->where('userid', $user['id'])->count();
 
 	$arr = \App\Support\Country::rowWithContext($user['country']);
 	$country = "<img src=\"pic/flag/".$arr['flagpic']."\" alt=\"".$arr['name']."\" style='margin-left: 8pt' />";
@@ -92,7 +99,7 @@ if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::MANAGE_USER_
 }
 if (($user["privacy"] != "strong") OR (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::MANAGE_USER_BASIC_INFO)) || $CURUSER['id'] == $user['id']){
     \App\Support\Html::trSmall($lang_userdetails['text_user_id'], $userIdDisplay, 1);
-    $tmpInviteCount = $userInfo->temporary_invites()->count();
+    $tmpInviteCount = $temporaryInviteCount;
 	if ($CURUSER['id'] == $user['id'] || \App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::VIEW_INVITE)){
 	if ($user["invites"] <= 0 && $tmpInviteCount <= 0)
 	\App\Support\Html::trSmall($lang_userdetails['row_invitation'], $lang_userdetails['text_no_invitation'], 1);
@@ -383,24 +390,7 @@ if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::MANAGE_USER_
 
 	if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::MANAGE_USER_CONFIDENTIAL_INFO))
 	{
-        $modcomment = \App\Models\UserModifyLog::query()
-            ->where("user_id", $user["id"])
-            ->orderBy("id", "desc")
-            ->limit(20)
-            ->get()
-            ->map(fn ($item) => sprintf("[%s] %s", $item->created_at->format("Y-m-d"), $item->content))
-            ->implode("\n")
-        ;
 		\App\Support\Html::tr($lang_userdetails['row_comment'], "<textarea cols=\"60\" rows=\"6\" name=\"modcomment\">".$modcomment."</textarea>", 1);
-        $bonuscomment = \App\Models\BonusLogs::query()
-            ->where("uid", $user["id"])
-            ->whereNotIn("business_type", \App\Models\BonusLogs::$businessTypeSeeding)
-            ->orderBy("id", "desc")
-            ->limit(20)
-            ->get()
-            ->map(fn ($item) => sprintf("[%s] %s", $item->created_at->format("Y-m-d"), $item->comment))
-            ->implode("\n")
-        ;
 		\App\Support\Html::tr($lang_userdetails['row_seeding_karma'], "<textarea cols=\"60\" rows=\"6\" name=\"bonuscomment\" readonly=\"readonly\">".$bonuscomment."</textarea>", 1);
 	}
 	$warned = $user["warned"] == "yes";

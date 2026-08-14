@@ -1,5 +1,4 @@
 <?php
-\App\Support\Html::stdhead('Cheaters');
 \App\Support\Html::beginFrame('Cheaters');
 ?>
 <center><form method="get" action="cheaters.php">
@@ -51,4 +50,3 @@ the future. A true cheater will stay consistantly high...
 <?php \App\Support\Html::endTable(); ?>
 {!! $pagerbottom !!}
 <?php \App\Support\Html::endFrame(); ?>
-<?php \App\Support\Html::stdfoot(); ?>

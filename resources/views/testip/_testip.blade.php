@@ -1,7 +1,6 @@
 <?php
 $lang_testip = (array) ($lang_testip ?? \App\Support\SupportContext::getGlobal('lang_testip', []));
 
-\App\Support\Html::stdhead();
 print('<h1>' . ($lang_testip['head_test_ip'] ?? 'Test IP address') . '</h1>');
 
 if ($hasResult) {
@@ -17,5 +16,4 @@ print('<tr><td class=rowhead>' . ($lang_testip['text_ip_address'] ?? 'IP address
 print('<tr><td colspan=2 align=center><input type=submit class=btn value=\'OK\'></td></tr>');
 print('</form>');
 print('</table>');
-\App\Support\Html::stdfoot();
 ?>

@@ -1,5 +1,4 @@
 <?php
-\App\Support\Html::stdhead($title ?? 'Bonus log');
 ?>
 <h1 align=center><?php echo $title; ?><a href="userdetails.php?id=<?php echo (int) $uid; ?>"><b>&nbsp;<?php echo htmlspecialchars((string) $username); ?></b></a></h1>
 
@@ -22,7 +21,6 @@
     </form>
 </div>
 
-<?php \App\Support\Frame::mainFrameOpen(); ?>
 <table id='bonus-log-table' width='100%' cellpadding='5'>
 <tr>
     <td class='colhead' align='left'><?php echo \App\Support\Locale::trans('bonus-log.fields.business_type', [], null); ?></td>
@@ -44,5 +42,3 @@
 <?php endforeach; ?>
 </table>
 <?php echo $pagerbottom; ?>
-<?php \App\Support\Frame::mainFrameClose(); ?>
-<?php \App\Support\Html::stdfoot(); ?>

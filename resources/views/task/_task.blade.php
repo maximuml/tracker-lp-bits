@@ -1,6 +1,4 @@
 <?php
-\App\Support\Html::stdhead($title);
-\App\Support\Frame::mainFrameOpen();
 ?>
 <h1 style="text-align: center"><?php echo $title; ?></h1>
 
@@ -47,6 +45,4 @@ $claimedCount = $row['on_going_users_count'] . '/' . ($row['max_user_count'] ?: 
 <?php echo $pagerbottom; ?>
 
 <?php
-\App\Support\Frame::mainFrameClose();
-\App\Support\Html::stdfoot();
 ?>

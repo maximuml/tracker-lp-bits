@@ -8,7 +8,6 @@ if (\App\Support\UserDisplay::currentClass() < UC_SYSOP)
 
 $validTypeMap = $lang_incrementbulk['types'];
 $type = \App\Support\SupportContext::getRequestInput('type') ?? '';
-\App\Support\Html::stdhead($lang_incrementbulk['page_title'], false);
 $classes = array_chunk(\App\Models\User::listClass(), 4, true);
 ?>
     <table class=main width=737 border=0 cellspacing=0 cellpadding=0><tr><td class=embedded>
@@ -76,4 +75,3 @@ $classes = array_chunk(\App\Models\User::listClass(), 4, true);
 
                 </div></td></tr></table>
 <?php
-\App\Support\Html::stdfoot();

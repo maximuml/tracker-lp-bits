@@ -1,6 +1,4 @@
 <?php
-\App\Support\Html::stdhead($title);
-\App\Support\Frame::mainFrameOpen();
 ?>
 <h1 style="text-align: center"><?php echo $title; ?></h1>
 
@@ -48,6 +46,4 @@
 <?php echo $pagerbottom; ?>
 
 <?php
-\App\Support\Frame::mainFrameClose();
-\App\Support\Html::stdfoot();
 ?>

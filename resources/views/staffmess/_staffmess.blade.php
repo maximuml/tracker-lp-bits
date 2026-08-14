@@ -4,7 +4,6 @@ $classes = $classes ?? [];
 $body = $body ?? '';
 $username = $username ?? '';
 $receiver = $receiver ?? 0;
-\App\Support\Html::stdhead("Mass PM", false);
 $httpReferer = (string) \App\Support\SupportContext::getServerValue('HTTP_REFERER');
 ?>
 <table class=main width=737 border=0 cellspacing=0 cellpadding=0><tr><td class=embedded>
@@ -64,5 +63,4 @@ if (\App\Support\SupportContext::getQuery('returnto') || $httpReferer) {
 <br />
 NOTE: Do not user BB codes. (NO HTML)
 <?php
-\App\Support\Html::stdfoot();
 ?>

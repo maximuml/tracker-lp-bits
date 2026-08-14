@@ -20,7 +20,6 @@ if (! $userInfo instanceof \App\Models\User) {
 }
 
 $pageTitle = $userInfo->username . ' - H&R';
-\App\Support\Html::stdhead($pageTitle);
 print("<h1>$pageTitle</h1>");
 
 print("<p>" . implode(' | ', $headerFilters) . "</p>");
@@ -32,8 +31,6 @@ $filterForm = <<<FORM
     <input type="reset" onclick="document.getElementById('q').value='';document.getElementById('filterForm').submit();">
 </form>
 FORM;
-
-\App\Support\Frame::mainFrameOpen("", true);
 
 print $filterForm;
 
@@ -95,5 +92,3 @@ JS;
 
 print("</table>");
 print($pagerbottom);
-\App\Support\Frame::mainFrameClose();
-\App\Support\Html::stdfoot();

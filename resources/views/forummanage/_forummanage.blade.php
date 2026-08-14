@@ -8,8 +8,6 @@ $id = $id ?? 0;
 $row = $row ?? [];
 $moderatorUsernames = $moderatorUsernames ?? '';
 $currentClass = $currentClass ?? 0;
-\App\Support\Html::stdhead($lang_forummanage['head_forum_management'] ?? 'Forum management');
-\App\Support\Frame::mainFrameOpen();
 
 if ($mode === 'editforum'):
 ?>
@@ -177,6 +175,4 @@ if ($mode === 'editforum'):
     }
     echo '</table>';
 endif;
-\App\Support\Frame::mainFrameClose();
-\App\Support\Html::stdfoot();
 ?>

@@ -438,8 +438,6 @@ function topten_link_line(int $type, string $subtype, array $limits, array $lang
     return ' <font class="small"> - [' . implode('] - [', $links) . ']</font>';
 }
 
-\App\Support\Html::stdhead($lang_topten['head_top_ten'] ?? 'Top 10');
-\App\Support\Frame::mainFrameOpen();
 
 $isDefault = ($limit === 10 && $subtype === null);
 
@@ -464,6 +462,4 @@ foreach ($sections as $section) {
     $renderer(...$args);
 }
 
-\App\Support\Frame::mainFrameClose();
 print("<p><font class=\"small\">" . ($lang['text_this_page_last_updated'] ?? 'This page last updated ') . date('Y-m-d H:i:s') . ', ' . ($lang['text_started_recording_date'] ?? 'Started recording account xfer stats on ') . ($dateFounded ?? '') . ($lang['text_update_interval'] ?? '') . "</font></p>\n");
-\App\Support\Html::stdfoot();

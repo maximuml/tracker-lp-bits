@@ -1,5 +1,4 @@
 <?php
-\App\Support\Html::stdhead($lang_users['head_users'] ?? 'Users');
 ?>
 <?php echo $lang_users['text_users'] ?? 'Users'; ?>
 
@@ -62,5 +61,4 @@ if ($l == $letter) {
 <?php echo $pagerbottom; ?>
 
 <?php
-\App\Support\Html::stdfoot();
 ?>

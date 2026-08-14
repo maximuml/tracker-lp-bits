@@ -1,8 +1,6 @@
 <?php
 \Nexus\Nexus::css('#ban-info td {border: none}', 'header', false);
 
-\App\Support\Html::stdhead($title);
-\App\Support\Frame::mainFrameOpen();
 \App\Support\Html::beginFrame($title, true, 10, '100%', 'center');
 
 if ($unit <= 0) {
@@ -39,6 +37,4 @@ if ($unit <= 0) {
     }
 }
 \App\Support\Html::endFrame();
-\App\Support\Frame::mainFrameClose();
-\App\Support\Html::stdfoot();
 ?>

@@ -1,6 +1,4 @@
 <?php
-\App\Support\Html::stdhead($lang_staff['head_staff'] ?? 'Staff');
-\App\Support\Frame::mainFrameOpen();
 ?>
 
 <?php \App\Support\Html::beginFrame(($lang_staff['text_firstline_support'] ?? 'Firstline Support') . '<font class=small> - [<a class=altlink href=contactstaff.php><b>' . ($lang_staff['text_apply_for_it'] ?? 'Apply') . '</b></a>]</font>'); ?>
@@ -131,6 +129,4 @@
 <?php \App\Support\Html::endFrame(); ?>
 
 <?php
-\App\Support\Frame::mainFrameClose();
-\App\Support\Html::stdfoot();
 ?>

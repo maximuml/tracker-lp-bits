@@ -1,7 +1,6 @@
 <?php
 $lang_checkuser = (array) ($lang_checkuser ?? \App\Support\SupportContext::getGlobal('lang_checkuser', []));
 
-\App\Support\Html::stdhead($lang_checkuser['head_detail_for'] . $user['username']);
 
 print('<p><table class=main border=0 cellspacing=0 cellpadding=0>'.
 '<tr><td class=embedded><h1 style=\'margin:0px\'>' . \App\Support\UserDisplay::username($user['id'], true, false) . '</h1></td>'.$country.'</tr></table></p><br />\n');
@@ -21,5 +20,4 @@ if (! $enabled)
 <tr><td class=rowhead width=1%><input type="checkbox" name="conusr[]" value="<?php echo $id; ?>" checked/></td>
 <td align=left width=99%><input type=submit style='height: 20px' value="<?php echo $lang_checkuser['submit_confirm_this_user']; ?>"></form></tr></td></table>
 <?php
-\App\Support\Html::stdfoot();
 ?>

@@ -1,6 +1,4 @@
-<?php
-\App\Support\Html::stdhead("Downloaded Files");
-?>
+
 <table class=main width=737 border=0 cellspacing=0 cellpadding=0><tr><td class=embedded>
 <h2>A Handy Guide to Using the Files You've Downloaded</h2>
 <table width=100% border=1 cellspacing=0 cellpadding=10><tr><td class=text> 

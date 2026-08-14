@@ -1,31 +1,13 @@
 <?php
-error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
-
-$__server_SCRIPT_NAME = \App\Support\SupportContext::getServerValue('SCRIPT_NAME');
-$id = \App\Support\SupportContext::getQuery("id");
-\App\Support\LegacyResponse::assertId($id, true);
-
 \App\Support\Html::stdhead($lang_viewsnatches['head_snatch_detail']);
 \App\Support\Frame::mainFrameOpen();
 
-$torrent_name = \App\Models\Torrent::query()->where('id', $id)->value('name');
-print("<h1 align=center>".$lang_viewsnatches['text_snatch_detail_for'] . "<a href=details.php?id=" . htmlspecialchars($id) . "><b>".htmlspecialchars($torrent_name)."</b></a></h1>");
-$count = \Nexus\Database\NexusDB::table('snatched')->where('finished', 'yes')->where('torrentid', $id)->count();
+print("<h1 align=center>".$lang_viewsnatches['text_snatch_detail_for'] . "<a href=details.php?id=" . htmlspecialchars((string) $id) . "><b>".htmlspecialchars($torrentName)."</b></a></h1>");
 $seedBoxRep = new \App\Repositories\SeedBoxRepository();
 if ($count){
-	$perpage = 25;
-	list($pagertop, $pagerbottom, , $offset, $rpp) = \App\Support\Pagination::pager($perpage, $count, $__server_SCRIPT_NAME . "?id=" . htmlspecialchars($id) . "&");
 	print("<p align=center>".$lang_viewsnatches['text_users_top_finished_recently']."</p>");
 	print("<table border=1 cellspacing=0 cellpadding=5 align=center width=940>\n");
 	print("<tr><td class=colhead align=center>".$lang_viewsnatches['col_username']."</td>".(\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::VIEW_USER_CONFIDENTIAL_INFO) ? "<td class=colhead align=center>".$lang_viewsnatches['col_ip']."</td>" : "")."<td class=colhead align=center>".$lang_viewsnatches['col_uploaded']."/".$lang_viewsnatches['col_downloaded']."</td><td class=colhead align=center>".$lang_viewsnatches['col_ratio']."</td><td class=colhead align=center>".$lang_viewsnatches['col_se_time']."</td><td class=colhead align=center>".$lang_viewsnatches['col_le_time']."</td><td class=colhead align=center>".$lang_viewsnatches['col_when_completed']."</td><td class=colhead align=center>".$lang_viewsnatches['col_last_action']."</td><td class=colhead align=center>".$lang_viewsnatches['col_report_user']."</td></tr>");
-
-	$snatchedRows = \Nexus\Database\NexusDB::table('snatched')
-	    ->where('finished', 'yes')
-	    ->where('torrentid', $id)
-	    ->orderByDesc('completedat')
-	    ->offset($offset)
-	    ->limit($rpp)
-	    ->get();
 
 	foreach ($snatchedRows as $snatchRow) {
 	    $arr = (array) $snatchRow;
@@ -53,7 +35,7 @@ if ($count){
 		if ($userrow['privacy'] == 'strong'){
 			$username = $lang_viewsnatches['text_anonymous'];
 			if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::VIEW_ANONYMOUS) || $arr["id"] == $CURUSER['id'])
-				$username .= "<br />(".\App\Support\UserDisplay::username($arr['userid']).")";
+				$username .= "<br />(" . \App\Support\UserDisplay::username($arr['userid']) . ")";
 		}
 		else $username = \App\Support\UserDisplay::username($arr['userid']);
 		$reportImage = "<img class=\"f_report\" src=\"pic/trans.gif\" alt=\"Report\" title=\"".$lang_viewsnatches['title_report']."\" />";

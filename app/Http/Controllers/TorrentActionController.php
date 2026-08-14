@@ -2,6 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
+use App\Repositories\TorrentAjaxRepository;
+use App\Support\SupportContext;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -31,7 +35,14 @@ class TorrentActionController extends LegacyController
 
     public function viewFileList(Request $request): Response|RedirectResponse
     {
-        return $this->legacyPageRaw($request, 'viewfilelist', false);
+        $torrentId = (int) $request->input('id', 0);
+        if ($torrentId <= 0) {
+            return response('', 400, ['Content-Type' => 'text/html; charset=utf-8']);
+        }
+
+        $files = TorrentAjaxRepository::fileList($torrentId);
+
+        return $this->legacyPageRaw($request, 'viewfilelist', false, ['files' => $files]);
     }
 
     public function viewPeerList(Request $request): Response|RedirectResponse
@@ -41,7 +52,12 @@ class TorrentActionController extends LegacyController
 
     public function viewSnatches(Request $request): View|RedirectResponse
     {
-        return $this->legacyPage($request, 'viewsnatches');
+        $torrentId = (int) $request->input('id', 0);
+        if ($torrentId <= 0) {
+            return redirect('/torrents.php');
+        }
+
+        return $this->legacyPage($request, 'viewsnatches', true, TorrentAjaxRepository::snatchList($torrentId));
     }
 
     public function takeFlush(Request $request): View|RedirectResponse
@@ -61,12 +77,33 @@ class TorrentActionController extends LegacyController
 
     public function searchSuggest(Request $request): Response|RedirectResponse
     {
-        return $this->legacyPageRaw($request, 'searchsuggest', false);
+        $searchstr = (string) $request->input('q', '');
+        if ($searchstr === '') {
+            return response(json_encode([], JSON_UNESCAPED_UNICODE), 200, ['Content-Type' => 'application/json; charset=utf-8']);
+        }
+
+        return response(
+            json_encode(TorrentAjaxRepository::searchSuggest($searchstr), JSON_UNESCAPED_UNICODE),
+            200,
+            ['Content-Type' => 'application/x-suggestions+json; charset=utf-8']
+        );
     }
 
-    public function autocompleteTorrents(Request $request): Response|RedirectResponse
+    public function autocompleteTorrents(Request $request): Response|RedirectResponse|JsonResponse
     {
-        return $this->legacyPageRaw($request, 'autocomplete_torrents');
+        $query = (string) $request->input('q', '');
+        if ($query === '') {
+            return response()->json(['torrents' => []]);
+        }
+
+        $userId = (int) (SupportContext::getUser()['id'] ?? 0);
+        $user = User::query()->find($userId);
+
+        if ($user === null) {
+            return response()->json(['torrents' => []]);
+        }
+
+        return response()->json(TorrentAjaxRepository::autocompleteTorrents($query, $user));
     }
 
     public function torrentrss(Request $request): Response|RedirectResponse

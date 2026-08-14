@@ -21,7 +21,6 @@ $id = \App\Support\SupportContext::getGlobal('id');
 $CURUSER = \App\Support\SupportContext::getUser() ?? [];
 $invitesystem = \App\Support\SupportContext::getGlobal('invitesystem');
 $userRep = \App\Support\SupportContext::getGlobal('userRep');
-    \App\Support\Frame::mainFrameOpen("", false, "100%");
     print ("<div id=\"invitenav\" style='position: relative'><ul id=\"invitemenu\" class=\"menu\">");
     print ("<li" . ($selected == "invitee" ? " class=selected" : "") . "><a href=\"?id=".$id."&menu=invitee\">".$lang_invite['text_invite_status']."</a></li>");
     print ("<li" . ($selected == "sent" ? " class=selected" : "") . "><a href=\"?id=".$id."&menu=sent\">".$lang_invite['text_sent_invites_status']."</a></li>");
@@ -36,7 +35,6 @@ $userRep = \App\Support\SupportContext::getGlobal('userRep');
     if ($CURUSER['id'] == $id) {
         print ("</ul><form style='position: absolute;top:0;right:0' method=post action=invite.php?id=".htmlspecialchars($id)."&type=new><input type=submit ".$disabled." value='".$sendBtnText."'></form></div>");
     }
-    \App\Support\Frame::mainFrameClose();
 } }
 
 $user = \App\Models\User::query()->find($id);
@@ -44,7 +42,6 @@ if (!$user) {
     \App\Support\LegacyResponse::abort($lang_invite['std_sorry'], 'Invalid id');
 }
 $user = $user->toArray();
-\App\Support\Html::stdhead($lang_invite['head_invites']);
 print("<table width=100% class=main border=0 cellspacing=0 cellpadding=0><tr><td class=embedded>");
 
 print("<h1 align=center><a href=\"invite.php?id=".$id."\">".$user['username'].$lang_invite['text_invite_system']."</a></h1>");
@@ -73,7 +70,6 @@ if ($type == 'new'){
         \App\Support\Html::stdMessage($lang_invite['std_sorry'], $exception->getMessage().
             "  <a class=altlink href=invite.php?id={$CURUSER['id']}>".$lang_invite['here_to_go_back'], false);
         print("</td></tr></table>");
-        \App\Support\Html::stdfoot();
         return;
     }
     \App\Support\LegacyAuth::registrationCheckFromContext('invitesystem', true, false);
@@ -306,6 +302,5 @@ JS;
     }
 
 }
-\App\Support\Html::stdfoot();
 return;
 ?>

@@ -4,8 +4,6 @@ error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 // Auto-generated legacy bridge shims
 if (!isset($CURUSER)) $CURUSER = (array) (\App\Support\SupportContext::getUser() ?? []);
 if (!isset($lang_functions)) $lang_functions = (array) (\App\Support\SupportContext::getGlobal('lang_functions') ?? []);
-\App\Support\Html::stdhead($lang_functions['text_latest_comments'] ?? 'Latest Comments');
-\App\Support\Frame::mainFrameOpen();
 
 $perpage = 20;
 $count = \App\Repositories\CommentRepository::countLatest();
@@ -77,6 +75,3 @@ if ($count == 0) {
     }
     print($pagerbottom);
 }
-
-\App\Support\Frame::mainFrameClose();
-\App\Support\Html::stdfoot();

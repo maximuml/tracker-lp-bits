@@ -31,7 +31,7 @@ class MessageController extends LegacyController
 
     public function sendmessage(Request $request): Response|RedirectResponse
     {
-        return $this->legacyService->sendmessage($request);
+        return $this->legacyPageRaw($request, 'sendmessage');
     }
 
     public function takeMessage(Request $request): Response|RedirectResponse

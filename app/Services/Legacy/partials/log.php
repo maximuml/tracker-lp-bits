@@ -20,14 +20,12 @@ $lang_log = (array) (\App\Support\SupportContext::getGlobal('lang_log') ?? []);
 
 if (!function_exists('logmenu')) { function logmenu($selected = "dailylog"){
 $lang_log = (array) (\App\Support\SupportContext::getGlobal('lang_log') ?? []);
-		\App\Support\Frame::mainFrameOpen();
 		print ("<div id=\"lognav\"><ul id=\"logmenu\" class=\"menu\">");
 		print ("<li" . ($selected == "dailylog" ? " class=selected" : "") . "><a href=\"?action=dailylog\">".$lang_log['text_daily_log']."</a></li>");
 		print ("<li" . ($selected == "chronicle" ? " class=selected" : "") . "><a href=\"?action=chronicle\">".$lang_log['text_chronicle']."</a></li>");
 		print ("<li" . ($selected == "news" ? " class=selected" : "") . "><a href=\"?action=news\">".$lang_log['text_news']."</a></li>");
 		print ("<li" . ($selected == "poll" ? " class=selected" : "") . "><a href=\"?action=poll\">".$lang_log['text_poll']."</a></li>");
 		print ("</ul></div>");
-		\App\Support\Frame::mainFrameClose();
 } }
 
 if (!function_exists('searchtable')) { function searchtable($title, $action, $opts = array()){
@@ -87,7 +85,6 @@ if (!in_array($action, $allowed_actions))
 else {
 	switch ($action){
 	case "dailylog":
-		\App\Support\Html::stdhead($lang_log['head_site_log']);
 
 		$search = \App\Support\SupportContext::getQuery("search") ?? '';
 
@@ -148,11 +145,9 @@ else {
 
 		print($lang_log['time_zone_note']);
 
-		\App\Support\Html::stdfoot();
 		return;
 		break;
 	case "chronicle":
-		\App\Support\Html::stdhead($lang_log['head_chronicle']);
 		$addparam = $q ? "query=".rawurlencode($q)."&" : "";
 		logmenu("chronicle");
 		searchtable($lang_log['text_search_chronicle'], 'chronicle');
@@ -209,11 +204,9 @@ else {
 
 		print($lang_log['time_zone_note']);
 
-		\App\Support\Html::stdfoot();
 		return;
 		break;
 	case "news":
-		\App\Support\Html::stdhead($lang_log['head_news']);
 		$search = \App\Support\SupportContext::getQuery("search") ?? '';
 		$addparam = $q ? "search=".rawurlencode($search)."&query=".rawurlencode($q)."&" : "";
 		logmenu("news");
@@ -244,7 +237,6 @@ else {
 
 		print($lang_log['time_zone_note']);
 
-		\App\Support\Html::stdfoot();
 		return;
 		break;
 	case "poll":
@@ -277,7 +269,6 @@ else {
   if ($pollcount == 0)
   	\App\Support\LegacyResponse::abort($lang_log['std_sorry'], $lang_log['std_no_polls']);
   $polls = \App\Repositories\LogRepository::getPollsExceptFirst();
-  \App\Support\Html::stdhead($lang_log['head_previous_polls']);
   		logmenu("poll");
   		print("<table border=1 cellspacing=0 width=940 cellpadding=5>\n");
 		//print("<tr><td class=colhead align=center>".$lang_log['text_previous_polls']."</td></tr>\n");
@@ -350,7 +341,6 @@ else {
 }
 	print("</table>");
 		print($lang_log['time_zone_note']);
-		\App\Support\Html::stdfoot();
 		return;
 		break;
 	}

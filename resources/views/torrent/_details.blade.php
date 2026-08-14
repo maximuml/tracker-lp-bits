@@ -119,7 +119,7 @@ $torrentnameprefix = \App\Support\SupportContext::getGlobal('torrentnameprefix')
         \App\Support\Html::tr($lang_details['row_basic_info'], $size_info.$type_info.$taxonomyRendered, 1);
 		$actions = [];
         if ($CURUSER["downloadpos"] != "no") {
-            $hasBuy = \App\Models\TorrentBuyLog::query()->where('uid', $CURUSER['id'])->where('torrent_id', $id)->exists();
+            $hasBuy = (bool) ($hasBuy ?? false);
             if ($row['price'] > 0) {
                 if ($hasBuy) {
                     $downloadBtn = $lang_details['text_download_bought_torrent'];

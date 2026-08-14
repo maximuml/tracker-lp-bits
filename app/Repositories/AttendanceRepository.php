@@ -351,4 +351,86 @@ class AttendanceRepository extends BaseRepository
             return $attendanceLog;
         });
     }
+
+    /**
+     * Build all data required by the attendance page view.
+     *
+     * @param  \App\Models\Attendance|null  $attendance
+     * @return array<string, mixed>
+     */
+    public function buildViewData(?Attendance $attendance, int $uid): array
+    {
+        $today = Carbon::today();
+        $tomorrow = $today->clone()->addDay();
+        $end = $today->clone()->endOfMonth();
+        $start = $today->clone()->subMonths(2);
+
+        $hasAttendedToday = $attendance !== null && $attendance->added && $attendance->added->isSameDay($today);
+
+        $todayCounts = 0;
+        $myRanking = 0;
+        $logs = collect();
+        $events = [];
+        $validRange = [
+            'start' => $start->format('Y-m-d'),
+            'end' => $end->clone()->addDay()->format('Y-m-d'),
+        ];
+
+        if ($hasAttendedToday) {
+            $todayDate = $today->format('Y-m-d');
+            $baseQuery = AttendanceLog::query()->where('date', $todayDate);
+            $todayCounts = $baseQuery->count();
+            $myLog = (clone $baseQuery)->where('uid', $uid)->first(['id']);
+            if ($myLog) {
+                $myRanking = (clone $baseQuery)->where('id', '<=', $myLog->id)->count();
+            }
+
+            $logs = AttendanceLog::query()
+                ->where('uid', $uid)
+                ->where('date', '>=', $start->format('Y-m-d'))
+                ->get()
+                ->keyBy('date');
+
+            $interval = new \DateInterval('P1D');
+            $period = new \DatePeriod($start, $interval, $end);
+            foreach ($period as $value) {
+                if ($value >= $tomorrow) {
+                    continue;
+                }
+                $checkDate = $value->format('Y-m-d');
+                $eventBase = ['start' => $checkDate, 'end' => $checkDate];
+                if ($logs->has($checkDate)) {
+                    $logValue = $logs->get($checkDate);
+                    $events[] = array_merge($eventBase, ['display' => 'background']);
+                    if ($logValue->points > 0) {
+                        $events[] = array_merge($eventBase, ['title' => $logValue->points]);
+                    }
+                    if ($logValue->is_retroactive) {
+                        $events[] = array_merge($eventBase, ['title' => \App\Support\Locale::trans('attendance.retroactive_event_text', [], null), 'display' => 'list-item']);
+                    }
+                } elseif ($value <= $today && $value->diffInDays($today, true) <= Attendance::MAX_RETROACTIVE_DAYS) {
+                    $events[] = array_merge($eventBase, ['groupId' => 'to_do', 'display' => 'list-item']);
+                }
+            }
+        }
+
+        $lang = \App\Support\Locale::folderFromCookie(\App\Support\SupportContext::getCookieValue('c_lang_folder', ''), false);
+        $localesMap = ['en' => null];
+        $localeJs = $localesMap[$lang] ?? null;
+
+        return [
+            'today' => $today,
+            'tomorrow' => $tomorrow,
+            'end' => $end,
+            'start' => $start,
+            'attendance' => $attendance,
+            'hasAttendedToday' => $hasAttendedToday,
+            'todayCounts' => $todayCounts,
+            'myRanking' => $myRanking,
+            'logs' => $logs,
+            'events' => $events,
+            'validRange' => $validRange,
+            'localeJs' => $localeJs,
+        ];
+    }
 }

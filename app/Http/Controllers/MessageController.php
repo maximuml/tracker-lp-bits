@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Resources\MessageResource;
 use App\Models\Message;
 use App\Repositories\MessageRepository;
+use App\Services\Legacy\MessageService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -15,29 +16,32 @@ class MessageController extends LegacyController
 {
     private MessageRepository $repository;
 
-    public function __construct(MessageRepository $repository)
+    private MessageService $legacyService;
+
+    public function __construct(MessageRepository $repository, MessageService $legacyService)
     {
         $this->repository = $repository;
+        $this->legacyService = $legacyService;
     }
 
     public function messages(Request $request): Response|RedirectResponse
     {
-        return $this->legacyPageRaw($request, 'messages');
+        return $this->legacyService->messages($request);
     }
 
     public function sendmessage(Request $request): Response|RedirectResponse
     {
-        return $this->legacyPageRaw($request, 'sendmessage');
+        return $this->legacyService->sendmessage($request);
     }
 
     public function takeMessage(Request $request): Response|RedirectResponse
     {
-        return $this->legacyPageRaw($request, 'takemessage');
+        return $this->legacyService->takeMessage($request);
     }
 
     public function deletemessage(Request $request): Response|RedirectResponse
     {
-        return $this->legacyPageRaw($request, 'deletemessage');
+        return $this->legacyService->deletemessage($request);
     }
 
     /**

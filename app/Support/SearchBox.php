@@ -2,7 +2,6 @@
 
 namespace App\Support;
 
-use Nexus\Database\NexusDB;
 
 /**
  * Legacy searchbox helper extracted from `include/functions.php`.
@@ -29,17 +28,7 @@ final class SearchBox
             if ($cached !== false && is_array($cached)) {
                 self::$rows = $cached;
             } else {
-                self::$rows = [];
-                foreach (NexusDB::table('searchbox')->orderBy('id')->get() as $row) {
-                    $row = (array) $row;
-                    if (isset($row['extra'])) {
-                        $row['extra'] = json_decode($row['extra'], true);
-                    }
-                    if (isset($row['section_name'])) {
-                        $row['section_name'] = json_decode($row['section_name'], true);
-                    }
-                    self::$rows[$row['id']] = $row;
-                }
+                self::$rows = app(\App\Repositories\SearchBoxRepository::class)->getAllRows();
                 if (method_exists($cache, 'cache_value')) {
                     $cache->cache_value('search_box_content', self::$rows, 100500);
                 }
@@ -69,13 +58,11 @@ final class SearchBox
             }
         }
 
-        $query = NexusDB::table($table);
         if ($mode > 0) {
-            $query->where(function ($query) use ($mode) {
-                $query->where('mode', $mode)->orWhere('mode', 0);
-            });
+            $ret = app(\App\Repositories\SearchBoxRepository::class)->getTaxonomyList($table, $mode);
+        } else {
+            $ret = app(\App\Repositories\SearchBoxRepository::class)->getTaxonomyList($table, 0);
         }
-        $ret = $query->orderBy('sort_index')->orderBy('id')->get()->map(fn ($row) => (array) $row)->all();
 
         if (method_exists($cache, 'cache_value')) {
             $cache->cache_value($cacheKey, $ret, 3600);
@@ -236,12 +223,7 @@ TD;
             $namePrefix = $taxonomyNameLength > 0 ? substr($torrentField, 0, $taxonomyNameLength) : $torrentField;
             $html .= sprintf('<tr><td class="embedded" align="left">%s</td></tr>', $searchBox->getTaxonomyLabel($torrentField));
 
-            $taxonomyCollection = NexusDB::table($tableName)
-                ->where(function (\Illuminate\Database\Query\Builder $query) use ($mode) {
-                    return $query->whereIn('mode', [$mode, 0]);
-                })
-                ->orderBy('sort_index', 'desc')
-                ->get();
+            $taxonomyCollection = app(\App\Repositories\SearchBoxRepository::class)->getTaxonomyRows($tableName, $mode);
 
             $modelName = \App\Models\SearchBox::$taxonomies[$torrentField]['model'];
             $checkPrefix = $torrentField;

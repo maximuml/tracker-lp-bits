@@ -34,6 +34,22 @@ docker compose -p tracker-lp-bits exec -T openresty openresty -t
 5. **`fields.php` PageLayout context** — the `view` branch must call `Html::stdhead()` before `Html::stdfoot()`/`Frame::mainFrameClose()`.
 6. **`Nexus\Field\Field->buildFieldForm()` language keys** — ensure `lang_fields` contains all keys the form expects.
 
+## PR #319 `catmanage` / `settings` bridge repositories
+
+These pages are rendered through `AdminController::catmanage` / `AdminController::settings` via `legacyPageWithRedirect`.
+The Blade view now only echoes `CategoryRepository::render()` / `SettingsRepository::render()`, which `ob_start`/`include`s a legacy partial in `resources/legacy/`.
+
+### `catmanage.php`
+- GET routes use `action=view&type=<searchbox|category|source|secondicon>` and `action=edit&type=<...>&id=<id>`.
+- `action=submit` is hard-coded to print a deprecation message and return.
+- The legacy partial checks `UserDisplay::currentClass() < UC_ADMINISTRATOR`.
+
+### `settings.php`
+- **Important:** the legacy partial reads `action` from `$_POST` (`SupportContext::getPost('action')`) rather than the query string.
+- Use a POST request (not `?action=basicsettings`) to open `basicsettings`/`mainsettings` forms.
+- `savesettings_basic` accepts `SITENAME` and `BASEURL`; the success page is rendered by `Html::stdMessage()`.
+- Settings are cached; use `Settings::saveBatch` / `Cache::clearSettings` path, so changing `basic.SITENAME` is reflected in the page title after cache refresh.
+
 ## Smoke-test checklist
 
 ### GET

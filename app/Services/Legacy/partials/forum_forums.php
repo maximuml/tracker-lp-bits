@@ -273,11 +273,7 @@ if ($action == "newtopic")
 {
 	$forumid = intval(\App\Support\SupportContext::getQuery("forumid") ?? 0);
 	check_whether_exist($forumid, 'forum');
-	\App\Support\Html::stdhead($lang_forums['head_new_topic']);
-	\App\Support\Frame::mainFrameOpen();
 	insert_compose_frame($forumid,'new');
-	\App\Support\Frame::mainFrameClose();
-	\App\Support\Html::stdfoot();
 	return;
 }
 if ($action == "quotepost")
@@ -287,11 +283,7 @@ if ($action == "quotepost")
     if (!\App\Support\Forum::canViewPost($CURUSER['id'], $postid)) {
         \App\Support\LegacyResponse::permissionDenied();
     }
-	\App\Support\Html::stdhead($lang_forums['head_post_reply']);
-	\App\Support\Frame::mainFrameOpen();
 	insert_compose_frame($postid, 'quote');
-	\App\Support\Frame::mainFrameClose();
-	\App\Support\Html::stdfoot();
 	return;
 }
 
@@ -301,11 +293,7 @@ if ($action == "reply")
 {
 	$topicid = intval(\App\Support\SupportContext::getQuery("topicid") ?? 0);
 	check_whether_exist($topicid, 'topic');
-	\App\Support\Html::stdhead($lang_forums['head_post_reply']);
-	\App\Support\Frame::mainFrameOpen();
 	insert_compose_frame($topicid, 'reply');
-	\App\Support\Frame::mainFrameClose();
-	\App\Support\Html::stdfoot();
 	return;
 }
 
@@ -327,11 +315,7 @@ if ($action == "editpost")
 	if (($CURUSER["id"] != $post->userid || $locked) && !\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::POST_MANAGE) && !$ismod)
 		\App\Support\LegacyResponse::permissionDenied();
 
-	\App\Support\Html::stdhead($lang_forums['text_edit_post']);
-	\App\Support\Frame::mainFrameOpen();
 	insert_compose_frame($postid, 'edit');
-	\App\Support\Frame::mainFrameClose();
-	\App\Support\Html::stdfoot();
 	return;
 }
 
@@ -716,16 +700,12 @@ if ($action == "viewtopic")
 	$uidArr = array_keys($uidArr);
 	unset($arr);
 
-	\App\Support\Html::stdhead($lang_forums['head_view_topic']." \"".$orgsubject."\"");
-	\App\Support\Frame::mainFrameOpen("", true);
 
 	print("<h1 align=\"center\"><a class=\"faqlink\" href=\"forums.php\">".$SITENAME."&nbsp;".$lang_forums['text_forums']."</a>--><a class=\"faqlink\" href=\"".htmlspecialchars("?action=viewforum&forumid=".$forumid)."\">".$forumname."</a><b>--></b><span id=\"top\">".$subject.($locked ? "&nbsp;&nbsp;<b>[<font class=\"striking\">".$lang_forums['text_locked']."</font>]</b>" : "")."</span></h1>\n");
-	\App\Support\Frame::mainFrameClose();
 	print($pagertop);
 
 	//------ Print table
 
-	\App\Support\Frame::mainFrameOpen();
 	print("<table border=\"0\" class=\"main\" cellspacing=\"0\" cellpadding=\"5\" width=\"97%\"><tr>\n");
 	print("<td class=\"embedded\" width=\"99%\">&nbsp;&nbsp;".$lang_forums['there_is']."<b>".$views."</b>".$lang_forums['hits_on_this_topic']);
 	print("</td>\n");
@@ -951,7 +931,6 @@ if ($action == "viewtopic")
 
 	\App\Support\Html::endFrame();
 
-	\App\Support\Frame::mainFrameClose();
 
 	print($pagerbottom);
 	if ($maypost){
@@ -968,7 +947,6 @@ if ($action == "viewtopic")
 	else print($lang_forums['text_unpermitted_posting_here']);
 
 	print(\App\Support\Html::keyShortcutScript($page,$pages-1));
-	\App\Support\Html::stdfoot();
 	return;
 }
 
@@ -1242,10 +1220,7 @@ if ($action == "viewforum")
 	$orderParts = explode(' ', $orderby);
 	$topicRows = (clone $topicQuery)->orderBy('sticky', 'desc')->orderBy($orderParts[0], $orderParts[1] ?? 'desc')->offset($offset)->limit($perpage)->get();
 	$numtopics = $topicRows->count();
-	\App\Support\Html::stdhead($lang_forums['head_forum']." ".$forumname);
-	\App\Support\Frame::mainFrameOpen("", true);
 	print("<h1 align=\"center\"><a class=\"faqlink\" href=\"forums.php\">".$SITENAME."&nbsp;".$lang_forums['text_forums'] ."</a>--><a class=\"faqlink\" href=\"".htmlspecialchars("forums.php?action=viewforum&forumid=".$forumid)."\">".$forumname."</a></h1>\n");
-	\App\Support\Frame::mainFrameClose();
 	print("<br />");
 	$maypost = \App\Support\UserDisplay::currentClass() >= $row["minclasswrite"] && \App\Support\UserDisplay::currentClass() >= $row["minclasscreate"] && $CURUSER["forumpost"] == 'yes';
 
@@ -1397,7 +1372,6 @@ if ($action == "viewforum")
 	} // if
 	else
 		print("<p>".$lang_forums['text_no_topics_found']."</p>");
-	\App\Support\Html::stdfoot();
 	return;
 }
 
@@ -1417,7 +1391,6 @@ if ($action == "viewunread")
 	}
 	$unreadTopics = $unreadQuery->orderByDesc('lastpost')->limit(100)->get();
 
-	\App\Support\Html::stdhead($lang_forums['head_view_unread']);
 	print("<h1 align=\"center\"><a class=\"faqlink\" href=\"forums.php\">".$SITENAME."&nbsp;".$lang_forums['text_forums']."</a>-->".$lang_forums['text_topics_with_unread_posts']."</h1>");
 
 	$n = 0;
@@ -1466,13 +1439,11 @@ if ($action == "viewunread")
 	}
 	else
 		print("<p>".$lang_forums['text_nothing_found']."</p>");
-	\App\Support\Html::stdfoot();
 	return;
 }
 
 if ($action == "search")
 {
-	\App\Support\Html::stdhead($lang_forums['head_forum_search']);
 	unset($error);
 	$error = true;
 	$found = "";
@@ -1567,7 +1538,6 @@ if ($action == "search")
 		print("</table>\n");
 		print($pagerbottom);
 	}
-\App\Support\Html::stdfoot();
 return;
 }
 
@@ -1585,8 +1555,6 @@ if ($action != "")
 if ($CURUSER)
 	\App\Models\User::query()->where('id', $CURUSER['id'])->update(['forum_access' => date("Y-m-d H:i:s")]);
 
-\App\Support\Html::stdhead($lang_forums['head_forums']);
-\App\Support\Frame::mainFrameOpen();
 print("<h1 align=\"center\">".$SITENAME."&nbsp;".$lang_forums['text_forums']."</h1>");
 print("<p align=\"center\"><a href=\"?action=search\"><b>".$lang_forums['text_search']."</b></a> | <a href=\"?action=viewunread\"><b>".$lang_forums['text_view_unread']."</b></a> | <a href=\"?catchup=1\"><b>".$lang_forums['text_catch_up']."</b></a> ".(\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::FORUM_MANAGE) ? "| <a href=\"forummanage.php\"><b>".$lang_forums['text_forum_manager']."</b></a>":"")."</p>");
 print("<table border=\"1\" cellspacing=\"0\" cellpadding=\"5\" width=\"100%\">\n");
@@ -1684,6 +1652,4 @@ foreach ($overforums as $a)
 print("</table>");
 if ($showforumstats_main == "yes")
 	forum_stats();
-\App\Support\Frame::mainFrameClose();
-\App\Support\Html::stdfoot();
 ?>

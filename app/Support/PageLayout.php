@@ -3,7 +3,8 @@
 namespace App\Support;
 
 use App\Models\SearchBox;
-use Nexus\Database\NexusDB;
+use App\Repositories\PageLayoutRepository;
+
 class PageLayout
 {
     /**
@@ -249,16 +250,16 @@ class PageLayout
             //// check every 15 minutes //////////////////
             $messages = $context->cache->get_value('user_' . $context->user["id"] . '_inbox_count');
             if ($messages == "") {
-                $messages = NexusDB::table('messages')->where('receiver', $context->user["id"])->where('location', '<>', 0)->count();
+                $messages = app(PageLayoutRepository::class)->getInboxCount((int) $context->user["id"]);
                 $context->cache->cache_value('user_' . $context->user["id"] . '_inbox_count', $messages, 900);
             }
             $outmessages = $context->cache->get_value('user_' . $context->user["id"] . '_outbox_count');
             if ($outmessages == "") {
-                $outmessages = NexusDB::table('messages')->where('sender', $context->user["id"])->where('saved', 'yes')->count();
+                $outmessages = app(PageLayoutRepository::class)->getOutboxCount((int) $context->user["id"]);
                 $context->cache->cache_value('user_' . $context->user["id"] . '_outbox_count', $outmessages, 900);
             }
             if (!$connect = $context->cache->get_value('user_' . $context->user["id"] . '_connect')) {
-                $connect = NexusDB::table('peers')->where('userid', $context->user["id"])->orderBy('id', 'desc')->value('connectable') ?? 'unknown';
+                $connect = app(PageLayoutRepository::class)->getConnectable((int) $context->user["id"]);
                 $context->cache->cache_value('user_' . $context->user["id"] . '_connect', $connect, 900);
             }
             if ($connect == "yes") {
@@ -271,17 +272,17 @@ class PageLayout
             //// check every 60 seconds //////////////////
             $activeseed = $context->cache->get_value('user_' . $context->user["id"] . '_active_seed_count');
             if ($activeseed == "") {
-                $activeseed = NexusDB::table('peers')->where('userid', $context->user["id"])->where('seeder', 'yes')->count();
+                $activeseed = app(PageLayoutRepository::class)->getActiveSeedCount((int) $context->user["id"]);
                 $context->cache->cache_value('user_' . $context->user["id"] . '_active_seed_count', $activeseed, 60);
             }
             $activeleech = $context->cache->get_value('user_' . $context->user["id"] . '_active_leech_count');
             if ($activeleech == "") {
-                $activeleech = NexusDB::table('peers')->where('userid', $context->user["id"])->where('seeder', 'no')->count();
+                $activeleech = app(PageLayoutRepository::class)->getActiveLeechCount((int) $context->user["id"]);
                 $context->cache->cache_value('user_' . $context->user["id"] . '_active_leech_count', $activeleech, 60);
             }
             $unread = $context->cache->get_value('user_' . $context->user["id"] . '_unread_message_count');
             if ($unread == "") {
-                $unread = NexusDB::table('messages')->where('receiver', $context->user["id"])->where('unread', 'yes')->count();
+                $unread = app(PageLayoutRepository::class)->getUnreadMessageCount((int) $context->user["id"]);
                 $context->cache->cache_value('user_' . $context->user["id"] . '_unread_message_count', $unread, 60);
             }
             $inboxpic = "<img class=\"" . ($unread ? "inboxnew" : "inbox") . "\" src=\"pic/trans.gif\" alt=\"inbox\" title=\"" . ($unread ? $context->lang['title_inbox_new_messages'] : $context->lang['title_inbox_no_new_messages']) . "\" />";
@@ -435,12 +436,12 @@ class PageLayout
             if (Permissions::userCan('staffmem', false, (int) ($context->user['id'] ?? 0))) {
                 $totalreports = $context->cache->get_value('staff_report_count');
                 if ($totalreports == "") {
-                    $totalreports = NexusDB::table('reports')->count();
+                    $totalreports = app(PageLayoutRepository::class)->getTotalReports();
                     $context->cache->cache_value('staff_report_count', $totalreports, 900);
                 }
                 $totalcheaters = $context->cache->get_value('staff_cheater_count');
                 if ($totalcheaters == "") {
-                    $totalcheaters = NexusDB::table('cheaters')->count();
+                    $totalcheaters = app(PageLayoutRepository::class)->getTotalCheaters();
                     $context->cache->cache_value('staff_cheater_count', $totalcheaters, 900);
                 }
                 print "<a href=\"cheaterbox.php\"><img class=\"cheaterbox\" alt=\"cheaterbox\" title=\"" . $context->lang['title_cheaterbox'] . "\" src=\"pic/trans.gif\" />  </a>" . $totalcheaters . "  <a href=\"reports.php\"><img class=\"reportbox\" alt=\"reportbox\" title=\"" . $context->lang['title_reportbox'] . "\" src=\"pic/trans.gif\" />  </a>" . $totalreports;
@@ -545,11 +546,7 @@ class PageLayout
                     $new_news = $context->cache->get_value('user_' . $context->user["id"] . '_unread_news_count');
                     if ($new_news == "") {
                         $lastHome = $context->user['last_home'] ?? null;
-                        $newNewsQuery = NexusDB::table('news')->where('notify', 'yes');
-                        if (!empty($lastHome) && $lastHome !== '0000-00-00 00:00:00') {
-                            $newNewsQuery->where('added', '>', $lastHome);
-                        }
-                        $new_news = $newNewsQuery->count();
+                        $new_news = app(PageLayoutRepository::class)->getUnreadNewsCount($lastHome);
                         $context->cache->cache_value('user_' . $context->user["id"] . '_unread_news_count', $new_news, 300);
                     }
                     if ($new_news > 0) {
@@ -575,7 +572,7 @@ class PageLayout
                     $cacheKey = 'TORRENT_APPROVAL_NONE';
                     $toApprovalCounts = $context->cache->get_value($cacheKey);
                     if ($toApprovalCounts === false) {
-                        $toApprovalCounts = NexusDB::table('torrents')->where('approval_status', 0)->count();
+                        $toApprovalCounts = app(PageLayoutRepository::class)->getTorrentApprovalNoneCount();
                         $context->cache->cache_value($cacheKey, $toApprovalCounts, 60);
                     }
                     if ($toApprovalCounts) {
@@ -587,7 +584,7 @@ class PageLayout
                     $cacheKey = \App\Repositories\SeedBoxRepository::APPROVAL_COUNT_CACHE_KEY;
                     $toApprovalCounts = $context->cache->get_value($cacheKey);
                     if ($toApprovalCounts === false) {
-                        $toApprovalCounts = NexusDB::table('seed_box_records')->where('status', 0)->count();
+                        $toApprovalCounts = app(PageLayoutRepository::class)->getSeedBoxApprovalCount();
                         $context->cache->cache_value($cacheKey, $toApprovalCounts, 60);
                     }
                     if ($toApprovalCounts) {
@@ -596,7 +593,7 @@ class PageLayout
                 }
                 if (Permissions::userCan('staffmem', false, (int) ($context->user['id'] ?? 0))) {
                     if (($complaints = $context->cache->get_value('COMPLAINTS_COUNT_CACHE')) === false) {
-                        $complaints = NexusDB::table('complains')->where('answered', 0)->count();
+                        $complaints = app(PageLayoutRepository::class)->getOpenComplaintsCount();
                         $context->cache->cache_value('COMPLAINTS_COUNT_CACHE', $complaints, 600);
                     }
                     if ($complaints) {
@@ -604,7 +601,7 @@ class PageLayout
                     }
                     $numreports = $context->cache->get_value('staff_new_report_count');
                     if ($numreports == "") {
-                        $numreports = NexusDB::table('reports')->where('dealtwith', 0)->count();
+                        $numreports = app(PageLayoutRepository::class)->getOpenReportsCount();
                         $context->cache->cache_value('staff_new_report_count', $numreports, 900);
                     }
                     if ($numreports) {
@@ -613,7 +610,7 @@ class PageLayout
                     }
                     $numcheaters = $context->cache->get_value('staff_new_cheater_count');
                     if ($numcheaters == "") {
-                        $numcheaters = NexusDB::table('cheaters')->where('dealtwith', 0)->count();
+                        $numcheaters = app(PageLayoutRepository::class)->getOpenCheatersCount();
                         $context->cache->cache_value('staff_new_cheater_count', $numcheaters, 900);
                     }
                     if ($numcheaters) {
@@ -649,7 +646,7 @@ class PageLayout
         print "<div id=\"footer\">";
         print "<div style=\"margin-top: 10px; margin-bottom: 30px;\" align=\"center\">";
         if ($context->user && !empty($context->userUpdateSet)) {
-            NexusDB::table('users')->where('id', $context->user['id'])->update($context->userUpdateSet);
+            app(PageLayoutRepository::class)->updateUser((int) $context->user['id'], $context->userUpdateSet);
         }
         // Variables for End Time
         $tend = microtime(true);

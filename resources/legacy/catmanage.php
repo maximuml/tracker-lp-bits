@@ -1,4 +1,5 @@
 <?php
+error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
 if (\App\Support\UserDisplay::currentClass() < UC_ADMINISTRATOR)
     \App\Support\LegacyResponse::permissionDenied();

@@ -4,12 +4,12 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\View\View;
+use Illuminate\Http\Response;
 
 class FriendsController extends LegacyController
 {
-    public function friends(Request $request): View|RedirectResponse
+    public function friends(Request $request): Response|RedirectResponse
     {
-        return $this->legacyPage($request, 'friends');
+        return $this->legacyPageRaw($request, 'friends');
     }
 }

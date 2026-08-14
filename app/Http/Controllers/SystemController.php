@@ -581,7 +581,7 @@ class SystemController extends LegacyController
     public function takeIncrementBulk(Request $request): Response|RedirectResponse
     {
 
-        return $this->legacyPageWithRedirect($request, 'take-increment-bulk', true);
+        return $this->legacyPageRaw($request, 'take-increment-bulk', true);
 
     }
 

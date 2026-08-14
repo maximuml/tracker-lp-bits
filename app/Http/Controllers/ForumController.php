@@ -25,13 +25,13 @@ class ForumController extends LegacyController
      * and is included by forum/index.blade.php so the original HTML/PHP
      * interleaving is preserved as closely as possible.
      */
-    public function legacy(Request $request): View|RedirectResponse|Response
+    public function legacy(Request $request): Response|RedirectResponse
     {
         if (SupportContext::getUser() === null) {
             return redirect('/forums.php?' . $request->getQueryString());
         }
 
-        return view('forum.index');
+        return $this->legacyPageRaw($request, 'forum');
     }
 
     public function forummanage(Request $request): View|RedirectResponse|Response

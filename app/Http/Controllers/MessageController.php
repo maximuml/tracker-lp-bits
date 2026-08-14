@@ -20,24 +20,24 @@ class MessageController extends LegacyController
         $this->repository = $repository;
     }
 
-    public function messages(Request $request): View|RedirectResponse
+    public function messages(Request $request): Response|RedirectResponse
     {
-        return $this->legacyPage($request, 'messages');
+        return $this->legacyPageRaw($request, 'messages');
     }
 
-    public function sendmessage(Request $request): View|RedirectResponse
+    public function sendmessage(Request $request): Response|RedirectResponse
     {
-        return $this->legacyPage($request, 'sendmessage');
+        return $this->legacyPageRaw($request, 'sendmessage');
     }
 
     public function takeMessage(Request $request): Response|RedirectResponse
     {
-        return $this->legacyPageWithRedirect($request, 'takemessage');
+        return $this->legacyPageRaw($request, 'takemessage');
     }
 
     public function deletemessage(Request $request): Response|RedirectResponse
     {
-        return $this->legacyPageWithRedirect($request, 'deletemessage');
+        return $this->legacyPageRaw($request, 'deletemessage');
     }
 
     /**

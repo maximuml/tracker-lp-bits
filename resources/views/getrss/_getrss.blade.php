@@ -11,6 +11,7 @@ $stickyTypes = [
 ?>
 <h1 align="center"><?php echo $lang_getrss['text_rss_feeds']?></h1>
 <form method="post" action="getrss.php">
+@csrf
 <table cellspacing="1" cellpadding="5" width="97%">
 <tr>
 <td class="rowhead"><?php echo $lang_getrss['row_categories_to_retrieve']?>

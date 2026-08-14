@@ -51,7 +51,6 @@ if (!function_exists('messagemenu')) { function messagemenu ($selected = 1) {
 $lang_messages = (array) (\App\Support\SupportContext::getGlobal('lang_messages') ?? []);
 $BASEURL = \App\Support\SupportContext::getGlobal('BASEURL');
 $CURUSER = \App\Support\SupportContext::getUser() ?? [];
-	\App\Support\Frame::mainFrameOpen();
 	print ("<div id=\"pmboxnav\"><ul id=\"pmboxmenu\" class=\"menu\">");
 	print ("<li" . ($selected == 1 ? " class=selected" : "") . "><a href=\"" . \App\Support\Http::protocolPrefix(\App\Support\Url::isSecure()) . $BASEURL . "/messages.php\" >".$lang_messages['text_inbox']."</a></li>");
 	print ("<li" . ($selected == -1 ? " class=selected" : "") . "><a href=\"" . \App\Support\Http::protocolPrefix(\App\Support\Url::isSecure()) . $BASEURL . "/messages.php?action=viewmailbox&box=-1\">".$lang_messages['text_sentbox']."</a></li>");
@@ -63,7 +62,6 @@ if ($pmBoxes->count())
     print ("<li" . ($selected == $row['boxnumber'] ? " class=selected" : "") . "><a href=\"" . \App\Support\Http::protocolPrefix(\App\Support\Url::isSecure()) . $BASEURL . "/messages.php?action=viewmailbox&box=".$row['boxnumber']."\">".$row['name']."</a></li>");
     }
 	print ("</ul></div>");
-	\App\Support\Frame::mainFrameClose();
 } }
 
 // Determine action
@@ -248,7 +246,6 @@ print("</form>");
 <a href="messages.php?action=editmailboxes"><b><?php echo $lang_messages['text_mailbox_manager'] ?></a></b></div></td></tr></table>
 <?php
 }
-\App\Support\Html::stdfoot();
 }
 if ($action == "viewmessage")
 {
@@ -353,7 +350,6 @@ href="messages.php?action=forward&id=<?php echo $pm_id?>"><?php echo $lang_messa
 </tr>
 </table>
 <?php
-\App\Support\Html::stdfoot();
 }
 if ($action == "moveordel")
 {
@@ -555,7 +551,6 @@ $body = "-------- Original Message from " . $orig_name2 . " --------<br />" . \A
 </table>
 </form>
 <?php
-\App\Support\Html::stdfoot();
 }
 if ($action == "editmailboxes")
 {
@@ -608,7 +603,6 @@ echo("<input type=\"submit\" value=".$lang_messages['submit_edit'].">");
 </tr>
 </table>
 <?php
-\App\Support\Html::stdfoot();
 }
 if ($action == "editmailboxes2")
 {

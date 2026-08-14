@@ -404,3 +404,81 @@ PR #308 removes `app/Support/Legacy/functions.php` and inlines helpers into type
   git diff --diff-filter=ACMR --name-only origin/php8...HEAD -- '*.php' '*.blade.php' | sed 's|^|/var/www/html/|' | xargs -P4 -n1 docker compose exec -T php php -l
   ```
 
+## Testing Phase 17 full DB-in-views bridge (PR #320)
+
+Phase 17 migrates the remaining public/admin/listing Blade/PHP views into `resources/legacy/*.php` partials rendered through `App\Repositories\LegacyViewRepository` and routes in `routes/legacy/{public,auth}.php`. The four key runtime fixes are:
+
+1. `App\Auth\Permission::user()` resolves the `nexus-web` guard first, falls back to the default guard, and returns `?User` so legacy cookie-auth routes do not throw `Return value must be of type App\Models\User, null returned`.
+2. `.docker/openresty/sites/app.conf.template` removes `$uri/` from `location / try_files`, so the `/torrents` route is not shadowed by the `public/torrents/` directory.
+3. `lang/en/lang_userhistory.php` adds the missing `head_user_history` key.
+4. `TorrentActionController::downloadnotice` handles POST, writes the `showdlnotice` preference, and redirects to `/download?id=<id>&letdown=1`; `Path::resolve` resolves relative paths against `ROOT_PATH` so the torrent file is served with `Content-Type: application/x-bittorrent`.
+
+### Environment / fixtures
+
+- The `php` container cannot run `git diff` in a worktree, so `php -l` on changed files must be driven from the host:
+  ```bash
+  git diff --diff-filter=ACMR --name-only origin/php8..HEAD -- '*.php' '*.blade.php' \
+    | sed 's|^|/var/www/html/|' \
+    | xargs -P4 -n1 docker compose -p tracker-lp-bits exec -T php php -l
+  ```
+- Many Phase 17 golden paths reference `torrents.id=3` and `users.id=10322` (which does not exist). Create a test torrent fixture:
+  ```bash
+  cp /home/ubuntu/repos/phase17i-worktree2/torrents/39.torrent \
+     /home/ubuntu/repos/phase17i-worktree2/torrents/3.torrent
+  ```
+  Then in MySQL:
+  ```sql
+  INSERT INTO torrents (id, info_hash, name, filename, save_as, owner, category,
+    source, medium, codec, standard, processing, audiocodec, size, added, type,
+    numfiles, sp_state, visible, banned, approval_status, anonymous, url,
+    pos_state, cache_stamp, hr, price, pieces_hash)
+  VALUES (3, NULL, 'Phase17 Fixture 3', 'phase17_fixture3.torrent',
+    'Phase17 Fixture 3', 1, 401, 0, 0, 0, 0, 0, 0, 1234, NOW(), 'single', 1,
+    1, 'yes', 'no', 1, 'no', NULL, 'normal', 0, 0, 0, '')
+  ON DUPLICATE KEY UPDATE name=VALUES(name), filename=VALUES(filename),
+    save_as=VALUES(save_as), owner=VALUES(owner), category=VALUES(category);
+
+  INSERT INTO torrent_extras (torrent_id, descr) VALUES (3, '')
+  ON DUPLICATE KEY UPDATE descr=VALUES(descr);
+  ```
+  For regression tests, insert a `torrent_extras` row with `descr=''` for the fixture torrent so the edit form renders a pre-filled description. The view now casts missing/null `descr` and `technical_info` to strings, so a missing row no longer causes a `TypeError`.
+- Generate a fresh sysop cookie for curl/Puppeteer:
+  ```bash
+  APP_KEY='base64:WUbN2wa2kl3E1VDW4iKaH3RBHw3hKY7BK0hWEkBZmGg='
+  docker compose -p tracker-lp-bits exec -T -e APP_KEY="$APP_KEY" php php -r \
+    'require "/var/www/html/vendor/autoload.php"; require "/var/www/html/bootstrap/app.php"; echo \App\Support\AuthCookie::buildToken(1, null, time()+3600);' \
+    > /home/ubuntu/phase17-cookie.txt
+  ```
+- `basic.BASEURL` should match the test host. For host-side tests against `http://localhost`:
+  ```sql
+  UPDATE settings SET value='localhost' WHERE name='basic.BASEURL';
+  ```
+  Then clear Laravel/Redis caches and rebuild view/route caches.
+
+### Golden-path smoke list
+
+- **Phase 17a**: `/aboutnexus.php`, `/faq.php`, `/rules.php`, `/donate.php`.
+- **17b**: `/topten.php?type=1&subtype=0&lim=10`.
+- **17c**: `/stats.php`, `/allagents.php`, `/mysql_stats.php`, `/viewfilelist.php?id=3`, `/viewsnatches.php?id=3`, `/searchsuggest.php?q=test`, `/autocomplete_torrents.php?q=test`, `/nowarn.php`.
+- **17d**: `/viewpeerlist.php?id=3`, `/getusertorrentlistajax.php?userid=1&type=uploaded|seeding|leeching|completed|incomplete` (use `userid=1` because `10322` does not exist).
+- **17e**: `/search.php`.
+- **17f**: `/details.php?id=3`, `/edit.php?id=3`, `/upload.php`, `/torrent_info.php?id=3`.
+- **17i**: `/staffpanel.php`, `/reports.php`, `/bans.php`, `/cheaterbox.php`, `/iphistory.php`, `/catmanage.php?action=view&type=searchbox|category|source|secondicon`, `/forummanage.php`, `/settings.php`, `/modtask.php`.
+- **17j/k/l**: `/downloadnotice.php?torrentid=1&type=firsttime` (GET form, then `POST` with `id=1&type=firsttime&hidenotice=1`), `/download?id=1&letdown=1` and `/download?id=3&letdown=1` (should return `application/x-bittorrent`), `/usercp.php`, `/userdetails.php?id=1`, `/myhr.php`, `/warned.php`, `/user-ban-log.php`.
+- **Regression**: `/login.php`, `/signup.php`, `/index.php`, `/torrents.php`, `/torrents`, `/staffpanel.php`.
+- **Previously failing routes**: `/userhistory.php?id=1`, `/viewpeerlist.php?id=1`.
+
+### Pass criteria
+
+- All GET/POST routes return HTTP `200` (or `302` for explicit redirects) with no `Whoops`, `Fatal error`, `Parse error`, `Server Error`, `Stack trace`, `Internal Server Error`, or `Return value must be of type` text.
+- `/download` and the redirect from `POST /downloadnotice` return `Content-Type: application/x-bittorrent` with a non-empty bencode body.
+- `/searchsuggest.php?q=test` returns a JSON array (`["test",[],[]]`); `/autocomplete_torrents.php?q=test` returns a JSON object (`{"torrents":[]}`).
+- `/viewfilelist.php?id=3` and `/getusertorrentlistajax.php?userid=1&type=uploaded` return HTML containing a `<table>` or `text_no_record`.
+- After browsing, `php artisan view:cache`, `php artisan route:cache`, and `openresty -t` all pass.
+
+### Common gotchas
+
+- `/edit.php?id=<torrent>` needs a matching `torrents` row. A `torrent_extras` row with a non-null `descr` is needed only to pre-fill the description; the view now casts missing/null `descr` and `technical_info` to strings, so `Form::bbcodeEditor()` no longer throws a `TypeError`.
+- `LegacyRequestMiddleware` rewrites `.php` URLs (`/details.php?id=3` → `/details/3`, `/viewfilelist.php?id=3` → `/viewfilelist?id=3`) before routing, so no per-page `public/*.php` wrappers are needed for these paths.
+- `basic.BASEURL` may be reset to `openresty` after `CriticalPathTest` or `cleanup:run`. Re-set it to `localhost` and clear caches for host-side tests; only the announce/comment URL inside the generated `.torrent` is affected, not the download itself.
+

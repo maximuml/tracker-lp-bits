@@ -14,7 +14,7 @@ final class LegacyViewRepository
      */
     public static function render(string $partial, array $data = []): string
     {
-        $path = base_path('resources/legacy/'.ltrim($partial, '/').'.php');
+        $path = base_path('app/Services/Legacy/partials/'.ltrim($partial, '/').'.php');
         if (! File::exists($path)) {
             return 'Legacy partial missing: '.$partial;
         }

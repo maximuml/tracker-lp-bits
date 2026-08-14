@@ -10,6 +10,7 @@ use App\Repositories\SearchBoxRepository;
 use App\Repositories\TagRepository;
 use App\Repositories\TorrentRepository;
 use App\Repositories\UploadRepository;
+use App\Support\Category;
 use App\Support\LegacyResponse;
 use App\Support\SupportContext;
 use Illuminate\Contracts\View\View;
@@ -74,6 +75,8 @@ class TorrentUploadController extends Controller
             LegacyResponse::abort($lang_upload['std_sorry'] ?? '', $lang_upload['std_please_offer'] ?? '', false);
         }
 
+        $browsecatmode = (int) (SupportContext::getGlobal('browsecatmode') ?? 1);
+
         return view('torrents.upload', [
             'uploadFreely' => $uploadFreely,
             'allowtorrents' => $allowtorrents,
@@ -84,6 +87,7 @@ class TorrentUploadController extends Controller
             'customField' => new Field(),
             'hitAndRunRep' => new HitAndRunRepository(),
             'pageTitle' => $lang_upload['head_upload'] ?? '',
+            'cats' => Category::listByModeWithContext($browsecatmode),
         ]);
     }
 

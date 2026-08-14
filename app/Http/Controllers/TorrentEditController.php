@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Torrent;
 use App\Repositories\TorrentDetailRepository;
 use App\Repositories\TorrentEditRepository;
+use App\Support\Category;
 use App\Support\SupportContext;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -54,12 +55,15 @@ class TorrentEditController extends Controller
         $langEdit = SupportContext::getGlobal('lang_edit') ?? [];
         $headTitle = ($langEdit['head_edit_torrent'] ?? '') . '"' . $row['name'] . '"';
 
+        $sectionmode = (int) ($row['cat_mode'] ?? 0);
+
         return view('torrent.edit', [
             'torrentId' => $id,
             'torrentRow' => $row,
             'currentUser' => $currentUser,
             'headTitle' => $headTitle,
             'tagIds' => \App\Repositories\TorrentDetailRepository::getTagIds($id),
+            'cats' => Category::listByModeWithContext($sectionmode),
         ]);
     }
 

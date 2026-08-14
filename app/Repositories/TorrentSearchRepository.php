@@ -932,6 +932,18 @@ if ($count)
 	//echo $addparam;
 
 	list($pagertop, $pagerbottom, $limit, $offset, $size, $page) = \App\Support\Pagination::pager($torrentsperpage, $count, "?" . $addparam);
+
+    $fieldsArr = \App\Models\Torrent::getFieldsForList(true);
+    $rows = $shouldUseMeili
+        ? $resultFromSearchRep['list']
+        : \App\Repositories\TorrentListingRepository::getList(array_merge($listingOptions, [
+            'fields' => $fieldsArr,
+            'search_box_id' => $sectiontype,
+            'order_by' => $orderby,
+            'offset' => $offset,
+            'limit' => $size,
+        ]));
+    $rows = \App\Support\Hooks::applyFilter('torrent_list', $rows, $page ?? 0, $sectiontype, $searchstr_raw);
 }
 
         if (isset($searchstr)) {

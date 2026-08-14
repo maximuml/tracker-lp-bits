@@ -8,22 +8,7 @@
     <h1 align="center">{!! \App\Support\UserDisplay::username($CURUSER['id']) !!}{{ $lang_torrents['text_s_not_bookmarked_torrent'] }}</h1>
 @endif
 
-@if ($count)
-    @php
-        if ($shouldUseMeili) {
-            $rows = $resultFromSearchRep['list'];
-        } else {
-            $fieldsArr = \App\Models\Torrent::getFieldsForList(true);
-            $rows = \App\Repositories\TorrentListingRepository::getList(array_merge($listingOptions, [
-                'fields' => $fieldsArr,
-                'search_box_id' => $sectiontype,
-                'order_by' => $orderby,
-                'offset' => $offset,
-                'limit' => $size,
-            ]));
-        }
-        $rows = \App\Support\Hooks::applyFilter('torrent_list', $rows, $page ?? 0, $sectiontype, $searchstr_raw ?? '');
-    @endphp
+@if ($count && isset($rows))
 
     {!! $pagertop !!}
     @if ($sectiontype == $browsecatmode)

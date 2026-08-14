@@ -1,163 +1,13 @@
 <?php
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
-$__server_REQUEST_METHOD = \App\Support\SupportContext::getServerValue('REQUEST_METHOD');
-$brsectiontype = $browsecatmode;
-$showsubcat = \App\Support\SearchBox::valueWithContext($brsectiontype, 'showsubcat');
-$showsource = \App\Support\SearchBox::valueWithContext($brsectiontype, 'showsource'); //whether show sources or not
-$showmedium = \App\Support\SearchBox::valueWithContext($brsectiontype, 'showmedium'); //whether show media or not
-$showcodec = \App\Support\SearchBox::valueWithContext($brsectiontype, 'showcodec'); //whether show codecs or not
-$showstandard = \App\Support\SearchBox::valueWithContext($brsectiontype, 'showstandard'); //whether show standards or not
-$showprocessing = \App\Support\SearchBox::valueWithContext($brsectiontype, 'showprocessing'); //whether show processings or not
-$showaudiocodec = \App\Support\SearchBox::valueWithContext($brsectiontype, 'showaudiocodec'); //whether show audio codecs or not
-$catsperrow = (int)\App\Support\SearchBox::valueWithContext($brsectiontype, 'catsperrow'); //show how many cats per line
-
-$catpadding = \App\Support\SearchBox::valueWithContext($brsectiontype, 'catpadding'); //padding space between categories in pixel
-
-$brcats = \App\Support\Category::listByModeWithContext($brsectiontype);
-
-if ($showsubcat){
-if ($showsource) $sources = \App\Support\SearchBox::itemListWithContext("sources", $brsectiontype);
-if ($showmedium) $media = \App\Support\SearchBox::itemListWithContext("media", $brsectiontype);
-if ($showcodec) $codecs = \App\Support\SearchBox::itemListWithContext("codecs", $brsectiontype);
-if ($showstandard) $standards = \App\Support\SearchBox::itemListWithContext("standards", $brsectiontype);
-if ($showprocessing) $processings = \App\Support\SearchBox::itemListWithContext("processings", $brsectiontype);
-if ($showaudiocodec) $audiocodecs = \App\Support\SearchBox::itemListWithContext("audiocodecs", $brsectiontype);
-}
 \App\Support\Html::stdhead($lang_getrss['head_rss_feeds']);
-$query = [];
 $allowed_showrows=array('10','50');
 $stickyTypes = [
     0 => \App\Support\Locale::trans('torrent.pos_state_normal', [], null),
     1 => \App\Support\Locale::trans('torrent.pos_state_sticky', [], null),
     2 => \App\Support\Locale::trans('torrent.pos_state_r_sticky', [], null)
 ];
-$query[] = "passkey=" . $CURUSER['passkey'];
-if ($__server_REQUEST_METHOD == "POST") {
-	$link = \App\Support\Http::protocolPrefix(\App\Support\Url::isSecure()). $BASEURL ."/torrentrss.php";
-	if (((\App\Support\SupportContext::getPost('showrows') !== null)) && in_array(\App\Support\SupportContext::getPost('showrows'), $allowed_showrows, 1))
-		$query[] = "rows=".(int)\App\Support\SupportContext::getPost('showrows');
-	else {
-		\App\Support\Html::stdMessage($lang_getrss['std_error'], $lang_getrss['std_no_row']);
-		\App\Support\Html::stdfoot();
-		die();
-	}
-	foreach ($brcats as $cat)
-	{
-		if (!empty(\App\Support\SupportContext::getPost("cat{$cat['id']}")))
-		{
-			$query[] = "cat{$cat['id']}=1";
-		}
-	}
-	if ($showsubcat){
-		if ($showsource)
-		foreach ($sources as $source)
-		{
-			if (!empty(\App\Support\SupportContext::getPost("sou{$source['id']}")))
-			{
-				$query[] = "sou{$source['id']}=1";
-			}
-		}
-		if ($showmedium)
-		foreach ($media as $medium)
-		{
-			if (!empty(\App\Support\SupportContext::getPost("med{$medium['id']}")))
-			{
-				$query[] = "med{$medium['id']}=1";
-			}
-		}
-		if ($showcodec)
-		foreach ($codecs as $codec)
-		{
-			if (!empty(\App\Support\SupportContext::getPost("cod{$codec['id']}")))
-			{
-				$query[] = "cod{$codec['id']}=1";
-			}
-		}
-		if ($showstandard)
-		foreach ($standards as $standard)
-		{
-			if (!empty(\App\Support\SupportContext::getPost("sta{$standard['id']}")))
-			{
-				$query[] = "sta{$standard['id']}=1";
-			}
-		}
-		if ($showprocessing)
-		foreach ($processings as $processing)
-		{
-			if (!empty(\App\Support\SupportContext::getPost("pro{$processing['id']}")))
-			{
-				$query[] = "pro{$processing['id']}=1";
-			}
-		}
-		if ($showaudiocodec)
-		foreach ($audiocodecs as $audiocodec)
-		{
-			if (!empty(\App\Support\SupportContext::getPost("aud{$audiocodec['id']}")))
-			{
-				$query[] = "aud{$audiocodec['id']}=1";
-			}
-		}
-	}
-	if (!empty(\App\Support\SupportContext::getPost("itemcategory")))
-	{
-		$query[] = "icat=1";
-	}
-	if (!empty(\App\Support\SupportContext::getPost("itemsmalldescr")))
-	{
-		$query[] = "ismalldescr=1";
-	}
-	if (!empty(\App\Support\SupportContext::getPost("itemsize")))
-	{
-		$query[] = "isize=1";
-	}
-	if (!empty(\App\Support\SupportContext::getPost("itemuploader")))
-	{
-		$query[] = "iuplder=1";
-	}
-	$searchstr = \Nexus\Database\NexusDB::getInstance()->escapeString(trim(\App\Support\SupportContext::getPost("search") ?? ''));
-//	if (empty($searchstr))
-//		unset($searchstr);
-	if ($searchstr)
-	{
-		$query[] = "search=".rawurlencode($searchstr);
-		if (\App\Support\SupportContext::getPost("search_mode")){
-			$search_mode = intval(\App\Support\SupportContext::getPost("search_mode") ?? 0);
-			if (!in_array($search_mode,array(0,2)))
-			{
-				$search_mode = 0;
-			}
-			$query[] = "search_mode=".$search_mode;
-		}
-	}
-	if (!empty(\App\Support\SupportContext::getPost('sticky')) && is_array(\App\Support\SupportContext::getPost('sticky'))) {
-	    $query[] = "sticky=" . implode(',', \App\Support\SupportContext::getPost('sticky'));
-    }
-    if (((\App\Support\SupportContext::getPost('paid') !== null))) {
-        $query[] = "paid=" . \App\Support\SupportContext::getPost('paid');
-    }
-	$inclbookmarked=intval(\App\Support\SupportContext::getPost('inclbookmarked') ?? 0);
-	if($inclbookmarked)
-	{
-		if (!in_array($inclbookmarked,array(0,1)))
-		{
-			$inclbookmarked = 0;
-		}
-		$addinclbm = "&inclbookmarked=".$inclbookmarked;
-	}
-	else
-	{
-		$addinclbm="";
-	}
-	$queries = implode("&", $query);
-	if ($queries)
-		$link .= "?".$queries;
-	$msg = $lang_getrss['std_use_following_url'] ."\n".$link."\n\n".$lang_getrss['std_utorrent_feed_url']."\n".$link."&linktype=dl".$addinclbm;
-	\App\Support\Html::stdMessage($lang_getrss['std_done'], \App\Support\Format::formatComment($msg));
-	\App\Support\Html::stdfoot();
-	die();
-}
-
 ?>
 <h1 align="center"><?php echo $lang_getrss['text_rss_feeds']?></h1>
 <form method="post" action="getrss.php">
@@ -253,7 +103,6 @@ $categories .= "</tr>";
 $categories .= "</table>";
 */
 
-$categories = \App\Support\SearchBox::buildCategoryTableWithContext($browsecatmode, 'yes', 'torrents.php?allsec=1&', false, 3, '', ['section_name' => true]);
 print($categories);
 ?>
 </td>

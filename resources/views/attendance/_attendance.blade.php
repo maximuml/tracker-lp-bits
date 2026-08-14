@@ -1,73 +1,19 @@
 <?php
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
-
-
-$__server_REQUEST_METHOD = \App\Support\SupportContext::getServerValue('REQUEST_METHOD');
 \Nexus\Nexus::css('vendor/fullcalendar-5.10.2/main.min.css', 'header', true);
 \Nexus\Nexus::js('vendor/fullcalendar-5.10.2/main.min.js', 'footer', true);
 
-$lang = \App\Support\Locale::folderFromCookie(\App\Support\SupportContext::getCookieValue('c_lang_folder', ''), (bool) false);
-$localesMap = [
-    'en' => null,
-];
-$localeJs = $localesMap[$lang] ?? null;
+$iv = $iv ?? '';
+
 if ($localeJs !== null) {
     \Nexus\Nexus::js("vendor/fullcalendar-5.10.2/locales/{$localeJs}.js", 'footer', true);
-}
-
-$today = \Carbon\Carbon::today();
-$tomorrow = \Carbon\Carbon::tomorrow();
-$end = $today->clone()->endOfMonth();
-$start = $today->clone()->subMonth(2);
-
-$attendanceRepository = new \App\Repositories\AttendanceRepository();
-
-$attendanceCaptchaEnabled = \App\Support\Config\SiteConfig::current()->captcha->attendanceEnabled((bool) config('captcha.attendance.enabled', true));
-
-if ($__server_REQUEST_METHOD === 'POST') {
-    if ($attendanceCaptchaEnabled && $iv == 'yes') {
-        \App\Support\Captcha::checkCode(\App\Support\SupportContext::getPost('imagehash') ?? null, \App\Support\SupportContext::getPost('imagestring') ?? null, 'attendance.php', false, true, \App\Support\LegacyAuthContext::fromSupportContext());
-    }
-    $attendance = $attendanceRepository->attend($CURUSER['id']);
-    if (!$attendance->is_updated) {
-        \App\Support\LegacyResponse::abort($lang_attendance['sorry'], $lang_attendance['already_attended']);
-    }
-} else {
-    $attendance = $attendanceRepository->getAttendance($CURUSER['id']);
-}
-
-$hasAttendedToday = $attendance && $attendance->added && $attendance->added->isSameDay($today);
-
-if (!$attendanceCaptchaEnabled && !$hasAttendedToday) {
-    $attendance = $attendanceRepository->attend($CURUSER['id']);
-    $hasAttendedToday = $attendance && $attendance->added && $attendance->added->isSameDay($today);
-}
-
-if (!$attendance) {
-    $attendance = new \App\Models\Attendance([
-        'uid' => $CURUSER['id'],
-        'points' => 0,
-        'days' => 0,
-        'total_days' => 0,
-    ]);
-    $attendance->added = null;
-    $hasAttendedToday = false;
 }
 
 \App\Support\Html::stdhead($lang_attendance['title']);
 \App\Support\Frame::mainFrameOpen();
 
 if ($hasAttendedToday) {
-    $todayDate = $today->format('Y-m-d');
-    $baseQuery = \App\Models\AttendanceLog::query()->where('date', $todayDate);
-    $todayCounts = $baseQuery->count();
-    $myLog = (clone $baseQuery)->where('uid', $CURUSER['id'])->first(['id']);
-    $myRanking = 0;
-    if ($myLog) {
-        $myRanking = (clone $baseQuery)->where('id', '<=', $myLog->id)->count();
-    }
-
     $count = $attendance->total_days;
     $cdays = $attendance->days;
     $points = $attendance->points;
@@ -79,40 +25,8 @@ if ($hasAttendedToday) {
     printf('<p>%s<span style="float:right">%s</span></p>', $headerLeft, $headerRight);
     \App\Support\Html::endFrame();
 
-    $logs = \App\Models\AttendanceLog::query()
-        ->where('uid', $CURUSER['id'])
-        ->where('date', '>=', $start->format('Y-m-d'))
-        ->get()
-        ->keyBy('date');
-
-    $interval = new \DateInterval('P1D');
-    $period = new \DatePeriod($start, $interval, $end);
-
-    $interval = \Carbon\CarbonInterval::make($interval);
-    $period = \Carbon\CarbonPeriod::make($period);
-    $events = [];
-    foreach ($period as $value) {
-        if ($value->gte($tomorrow)) {
-            continue;
-        }
-        $checkDate = $value->format('Y-m-d');
-        $eventBase = ['start' => $checkDate, 'end' => $checkDate];
-        if ($logs->has($checkDate)) {
-            $logValue = $logs->get($checkDate);
-            $events[] = array_merge($eventBase, ['display' => 'background']);
-            if ($logValue->points > 0) {
-                $events[] = array_merge($eventBase, ['title' => $logValue->points]);
-            }
-            if ($logValue->is_retroactive) {
-                $events[] = array_merge($eventBase, ['title' => $lang_attendance['retroactive_event_text'], 'display' => 'list-item']);
-            }
-        } elseif ($value->lte($today) && $value->diffInDays($today, true) <= \App\Models\Attendance::MAX_RETROACTIVE_DAYS) {
-            $events[] = array_merge($eventBase, ['groupId' => 'to_do', 'display' => 'list-item']);
-        }
-    }
-
     $eventStr = json_encode($events);
-    $validRangeStr = json_encode(['start' => $start->format('Y-m-d'), 'end' => $end->clone()->addDays(1)->format('Y-m-d')]);
+    $validRangeStr = json_encode($validRange);
 
     $calendarScript = <<<EOP
 let events = JSON.parse('$eventStr')

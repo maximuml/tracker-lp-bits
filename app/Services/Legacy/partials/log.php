@@ -6,7 +6,6 @@ if (!isset($CURUSER)) $CURUSER = (array) (\App\Support\SupportContext::getUser()
 if (!isset($Cache)) $Cache = \App\Support\SupportContext::getCache();
 if (!isset($BASEURL)) $BASEURL = \App\Support\SupportContext::getGlobal('BASEURL', '');
 if (!isset($lang_log)) $lang_log = (array) (\App\Support\SupportContext::getGlobal('lang_log') ?? []);
-$__server_REQUEST_URI = \App\Support\SupportContext::getServerValue('REQUEST_URI');
 if (!\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::LOG))
 {
 \App\Support\LegacyResponse::abort($lang_log['std_sorry'], $lang_log['std_permission_denied_only'].\App\Support\UserClass::name($log_class,false,true,true).sprintf($lang_log['std_or_above_can_view'], \App\Models\Setting::getSiteName()), false);
@@ -36,7 +35,7 @@ $lang_log = (array) (\App\Support\SupportContext::getGlobal('lang_log') ?? []);
 $q = \App\Support\SupportContext::getGlobal('q');
 		print("<table border=1 cellspacing=0 width=940 cellpadding=5>\n");
 		print("<tr><td class=colhead align=left>".$title."</td></tr>\n");
-		print("<tr><td class=toolbox align=left><form method=\"get\" action='" . $__server_REQUEST_URI . "'>\n");
+		print("<tr><td class=toolbox align=left><form method=\"get\" action='" . \App\Support\SupportContext::getServerValue('REQUEST_URI') . "'>\n");
 		print("<input type=\"text\" name=\"query\" style=\"width:500px\" value=\"".$q."\">\n");
 		if ($opts) {
 			print($lang_log['text_in']."<select name=search>");
@@ -55,7 +54,7 @@ if (!function_exists('additem')) { function additem($title, $action){
 $lang_log = (array) (\App\Support\SupportContext::getGlobal('lang_log') ?? []);
 		print("<table border=1 cellspacing=0 width=940 cellpadding=5>\n");
 		print("<tr><td class=colhead align=left>".$title."</td></tr>\n");
-		print("<tr><td class=toolbox align=left><form method=\"post\" action='" . $__server_REQUEST_URI . "'>\n");
+		print("<tr><td class=toolbox align=left><form method=\"post\" action='" . \App\Support\SupportContext::getServerValue('REQUEST_URI') . "'>\n");
 		print("<textarea name=\"txt\" style=\"width:500px\" rows=\"3\" >".$title."</textarea>\n");
 		print("<input type=\"hidden\" name=\"action\" value=".$action.">");
 		print("<input type=\"hidden\" name=\"do\" value=\"add\">");
@@ -69,7 +68,7 @@ $lang_log = (array) (\App\Support\SupportContext::getGlobal('lang_log') ?? []);
 		if ($row) {
 		print("<table border=1 cellspacing=0 width=940 cellpadding=5>\n");
 		print("<tr><td class=colhead align=left>".$title."</td></tr>\n");
-		print("<tr><td class=toolbox align=left><form method=\"post\" action='" . $__server_REQUEST_URI . "'>\n");
+		print("<tr><td class=toolbox align=left><form method=\"post\" action='" . \App\Support\SupportContext::getServerValue('REQUEST_URI') . "'>\n");
 		print("<textarea name=\"txt\" style=\"width:500px\" rows=\"3\" >".$row["txt"]."</textarea>\n");
 		print("<input type=\"hidden\" name=\"action\" value=".$action.">");
 		print("<input type=\"hidden\" name=\"do\" value=\"update\">");

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Torrent;
+use App\Models\TorrentBuyLog;
 use App\Models\User;
 use App\Repositories\TorrentDetailRepository;
 use App\Support\SupportContext;
@@ -69,6 +70,8 @@ class TorrentDetailsController extends Controller
             ? \App\Repositories\TorrentDetailRepository::getLatestApprovalDenyLog($id)
             : null;
 
+        $hasBuy = TorrentBuyLog::query()->where('uid', $currentUser['id'] ?? 0)->where('torrent_id', $id)->exists();
+
         return view('torrent.details', [
             'torrentId' => $id,
             'torrentRow' => $row,
@@ -78,6 +81,7 @@ class TorrentDetailsController extends Controller
             'headTitle' => $headTitle,
             'tagIds' => \App\Repositories\TorrentDetailRepository::getTagIds($id),
             'denyLog' => $denyLog,
+            'hasBuy' => $hasBuy,
         ]);
     }
 }

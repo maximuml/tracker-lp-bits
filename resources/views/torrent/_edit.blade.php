@@ -63,7 +63,6 @@ else {
 
 	$s = "<select name=\"type\" data-mode='$sectionmode'>";
 
-	$cats = \App\Support\Category::listByModeWithContext($sectionmode);
 	foreach ($cats as $subrow) {
 		$s .= "<option value=\"" . $subrow["id"] . "\"";
 		if ($subrow["id"] == $row["category"])

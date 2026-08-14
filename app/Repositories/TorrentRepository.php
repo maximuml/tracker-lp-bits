@@ -1378,4 +1378,18 @@ HTML;
         \App\Support\Logger::writeWithContext((string) ("success change to section {$sectionId}, torrent count:" . $torrents->count()), (string) 'info', (bool) false);
     }
 
+    public function touchCacheStamp(int|string $torrentId, string $field = 'cache_stamp'): void
+    {
+        NexusDB::table('torrents')
+            ->where('id', $torrentId)
+            ->update([$field => time()]);
+    }
+
+    public function resetCacheStamp(int|string $torrentId, string $field = 'cache_stamp'): void
+    {
+        NexusDB::table('torrents')
+            ->where('id', $torrentId)
+            ->update([$field => 0]);
+    }
+
 }

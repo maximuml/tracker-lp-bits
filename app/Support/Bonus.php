@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace App\Support;
 
-use Nexus\Database\NexusDB;
-
 /**
  * Seeding-bonus helpers drained out of `include/functions.php` as part of
  * Phase 5 of the legacy migration.
@@ -38,36 +36,15 @@ class Bonus
         $nowStr = date('Y-m-d H:i:s');
         $logPrefix = "[CALCULATE_SEED_BONUS], uid: $uid, torrentIdArr: " . json_encode($torrentIdArr);
 
-        if ($torrentIdArr !== null) {
-            if (empty($torrentIdArr)) {
-                $torrentIdArr = [-1];
-            }
-            $torrentQuery = NexusDB::table('torrents')
-                ->whereIn('id', $torrentIdArr)
-                ->where('size', '>=', $minSize)
-                ->select('id', 'added', 'size', 'seeders', NexusDB::raw("'NO_PEER_ID' as peerID"), NexusDB::raw("'' as last_action"), NexusDB::raw("'' as ip"));
-        } else {
-            $torrentQuery = NexusDB::table('torrents')
-                ->leftJoin('peers', 'peers.torrent', '=', 'torrents.id')
-                ->where('peers.userid', $uid)
-                ->where('peers.seeder', 'yes')
-                ->where('torrents.size', '>', $minSize)
-                ->groupBy('torrents.id', 'peers.id')
-                ->select('torrents.id', 'torrents.added', 'torrents.size', 'torrents.seeders', 'peers.id as peerID', 'peers.last_action', 'peers.ip');
-        }
-        $sql = $torrentQuery->toSql();
+        $bonusRep = app(\App\Repositories\BonusRepository::class);
+        $torrentData = $bonusRep->getTorrentRowsForBonusCalculation($uid, $torrentIdArr, $minSize);
+        $sql = $torrentData['sql'];
+        $torrentResult = $torrentData['torrentResult'];
 
         $tagGrouped = [];
-        $torrentResult = $torrentQuery->get()->map(fn ($row) => (array) $row)->all();
         if (! empty($torrentResult)) {
             $torrentIdArrReal = array_column($torrentResult, 'id');
-            $tagResult = NexusDB::table('torrent_tags')
-                ->whereIn('torrent_id', $torrentIdArrReal)
-                ->select('torrent_id', 'tag_id')
-                ->get();
-            foreach ($tagResult as $tagItem) {
-                $tagGrouped[$tagItem->torrent_id][$tagItem->tag_id] = 1;
-            }
+            $tagGrouped = $bonusRep->getTagGrouped($torrentIdArrReal);
         }
 
         $officialTag = \App\Support\Config\SiteConfig::current()->bonus->officialTag();
@@ -75,26 +52,7 @@ class Bonus
         $zeroBonusTag = \App\Support\Config\SiteConfig::current()->bonus->zeroBonusTag();
         $zeroBonusFactor = \App\Support\Config\SiteConfig::current()->bonus->zeroBonusFactor();
 
-        $medalQuery = NexusDB::table('medals')
-            ->whereIn('id', function ($query) use ($uid, $nowStr) {
-                $query->select('medal_id')
-                    ->from('user_medals')
-                    ->where('uid', $uid)
-                    ->where(function ($q) use ($nowStr) {
-                        $q->whereNull('expire_at')->orWhere('expire_at', '>', $nowStr);
-                    })
-                    ->where(function ($q) use ($nowStr) {
-                        $q->whereNull('bonus_addition_expire_at')->orWhere('bonus_addition_expire_at', '>', $nowStr);
-                    });
-            });
-        if (NexusDB::isMysql()) {
-            $medalQuery->selectRaw('round(sum(bonus_addition_factor), 5) as factor');
-        } elseif (NexusDB::isPgsql()) {
-            $medalQuery->selectRaw('round(sum(bonus_addition_factor)::numeric, 5) as factor');
-        } else {
-            throw new \RuntimeException('Not supported database');
-        }
-        $medalAdditionalFactor = floatval($medalQuery->value('factor') ?? 0);
+        $medalAdditionalFactor = $bonusRep->getMedalAdditionalFactor($uid, $nowStr);
 
         Logger::writeWithContext("$logPrefix, sql: $sql, count: " . count($torrentResult) . ", officialTag: $officialTag, officialAdditionalFactor: $officialAdditionalFactor, zeroBonusTag: $zeroBonusTag, zeroBonusFactor: $zeroBonusFactor, medalAdditionalFactor: $medalAdditionalFactor");
 
@@ -352,15 +310,7 @@ class Bonus
      */
     public static function haremAddition(int|string $uid): float|int|string
     {
-        $addition = \Nexus\Database\NexusDB::table('users')
-            ->where('invited_by', $uid)
-            ->where('status', \App\Models\User::STATUS_CONFIRMED)
-            ->where('enabled', \App\Models\User::ENABLED_YES)
-            ->sum('seed_points_per_hour');
-
-        Logger::writeWithContext("[HAREM_ADDITION], user: $uid, addition: $addition");
-
-        return $addition;
+        return app(\App\Repositories\BonusRepository::class)->getHaremAddition($uid);
     }
 
     /**
@@ -423,10 +373,6 @@ class Bonus
 
         $op = $type === '-' ? '-' : '+';
 
-        NexusDB::table('users')
-            ->where('id', $id)
-            ->update([
-                'seedbonus' => NexusDB::raw('seedbonus '.$op.' '.$point),
-            ]);
+        app(\App\Repositories\BonusRepository::class)->updateSeedBonus($op, $point, $id);
     }
 }

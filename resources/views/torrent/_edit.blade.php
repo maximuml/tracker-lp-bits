@@ -54,11 +54,11 @@ else {
     }
 
     print("<tr><td class=\"rowhead\">".$lang_edit['row_description']."<font color=\"red\">*</font></td><td class=\"rowfollow\">");
-	echo \App\Support\Form::bbcodeEditor("edittorrent","descr",($row["descr"]), false, 130, true);
+	echo \App\Support\Form::bbcodeEditor("edittorrent","descr", (string) ($row["descr"] ?? ''), false, 130, true);
 	print("</td></tr>");
 
     if (\App\Support\Config\SiteConfig::current()->main->enableTechnicalInfo()) {
-        \App\Support\Html::tr($lang_functions['text_technical_info'], '<textarea name="technical_info" rows="8" style="width: 99%;">' . $row['technical_info'] . '</textarea><br/>' . $lang_functions['text_technical_info_help_text'], 1);
+        \App\Support\Html::tr($lang_functions['text_technical_info'], '<textarea name="technical_info" rows="8" style="width: 99%;">' . (string) ($row['technical_info'] ?? '') . '</textarea><br/>' . $lang_functions['text_technical_info_help_text'], 1);
     }
 
 	$s = "<select name=\"type\" data-mode='$sectionmode'>";

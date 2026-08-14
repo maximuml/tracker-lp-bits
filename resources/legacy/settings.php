@@ -1,4 +1,5 @@
 <?php
+error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 $__curUser = (array) \App\Support\SupportContext::getUser();
 $lang_settings = (array) (\App\Support\SupportContext::getGlobal('lang_settings') ?? []);
 $__server_HTTP_HOST = \App\Support\SupportContext::getServerValue('HTTP_HOST');

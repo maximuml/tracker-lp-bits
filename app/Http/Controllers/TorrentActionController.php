@@ -423,9 +423,90 @@ class TorrentActionController extends LegacyController
         ]);
     }
 
-    public function downloadnotice(Request $request): Response|RedirectResponse
+    public function downloadnotice(Request $request): Response|RedirectResponse|View
     {
-        return $this->legacyPageWithRedirect($request, 'downloadnotice', true);
+        $curUser = SupportContext::getUser();
+        if ($curUser === null) {
+            $qs = $request->getQueryString();
+            return redirect('/downloadnotice.php' . ($qs ? '?' . $qs : ''));
+        }
+
+        if ($request->isMethod('POST')) {
+            $torrentid = (int) $request->input('id', 0);
+            $type = $request->input('type');
+            $hidenotice = $request->input('hidenotice');
+            if (! $torrentid || ! in_array($type, ['firsttime', 'client', 'ratio'], true)) {
+                return response('error');
+            }
+
+            $userId = (int) ($curUser['id'] ?? 0);
+            if ($hidenotice && $userId > 0) {
+                $update = [];
+                if ($type === 'firsttime') {
+                    $update['showdlnotice'] = 0;
+                } elseif ($type === 'client') {
+                    $update['showclienterror'] = 'no';
+                }
+                if (! empty($update)) {
+                    User::query()->where('id', $userId)->update($update);
+                }
+            }
+
+            return redirect('/download?id=' . $torrentid . '&letdown=1');
+        }
+
+        $torrentid = (int) $request->input('torrentid');
+        $type = $request->input('type');
+        $lang = (array) (SupportContext::getGlobal('lang_downloadnotice') ?? []);
+        $timenow = time();
+
+        switch ($type) {
+            case 'client':
+                $title = $lang['text_client_banned_notice'] ?? '';
+                $note = $lang['text_client_banned_note'] ?? '';
+                $noticenexttime = $lang['text_notice_not_show_again'] ?? '';
+                $showrationotice = false;
+                $showclientnotice = true;
+                $forcecheck = false;
+                break;
+            case 'ratio':
+                $leechwarnuntiltime = strtotime((string) ($curUser['leechwarnuntil'] ?? ''));
+                $note = '';
+                if ($leechwarnuntiltime && $timenow < $leechwarnuntiltime) {
+                    $kicktimeout = \App\Support\Time::format($curUser['leechwarnuntil'], false, false, true);
+                    $note = ($lang['text_low_ratio_note_one'] ?? '') . $kicktimeout . ($lang['text_low_ratio_note_two'] ?? '');
+                }
+                $title = $lang['text_low_ratio_notice'] ?? '';
+                $noticenexttime = $lang['text_notice_always_show'] ?? '';
+                $showrationotice = true;
+                $showclientnotice = false;
+                $forcecheck = true;
+                break;
+            case 'firsttime':
+            default:
+                $type = 'firsttime';
+                $title = $lang['text_first_time_download_notice'] ?? '';
+                $note = $lang['text_first_time_download_note'] ?? '';
+                $noticenexttime = $lang['text_notice_not_show_again'] ?? '';
+                $showrationotice = true;
+                $showclientnotice = true;
+                $forcecheck = false;
+        }
+
+        $tdattr = ($showrationotice && $showclientnotice) ? 'width="50%"' : 'colspan="2" width="100%"';
+
+        return $this->legacyPage($request, 'downloadnotice', true, [
+            'torrentid' => $torrentid,
+            'type' => $type,
+            'title' => $title,
+            'note' => $note,
+            'noticenexttime' => $noticenexttime,
+            'showrationotice' => $showrationotice,
+            'showclientnotice' => $showclientnotice,
+            'forcecheck' => $forcecheck,
+            'tdattr' => $tdattr,
+            'lang_downloadnotice' => $lang,
+        ]);
     }
 
     public function emailGateway(Request $request): Response|RedirectResponse

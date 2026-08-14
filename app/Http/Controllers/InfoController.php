@@ -135,14 +135,14 @@ class InfoController extends LegacyController
         return $this->legacyPage($request, 'invite');
     }
 
-    public function news(Request $request): View|RedirectResponse|Response
+    public function news(Request $request): Response|RedirectResponse
     {
-        return $this->legacyPage($request, 'news');
+        return $this->legacyPageRaw($request, 'news');
     }
 
-    public function makepoll(Request $request): View|RedirectResponse|Response
+    public function makepoll(Request $request): Response|RedirectResponse
     {
-        return $this->legacyPage($request, 'makepoll');
+        return $this->legacyPageRaw($request, 'makepoll');
     }
 
     public function polloverview(Request $request): View|RedirectResponse|Response

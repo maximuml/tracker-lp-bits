@@ -18,6 +18,7 @@ $lang_userhistory = array
 	'text_comments_history_for' => "Comments history for ",
 	'text_torrent' => "<b>Torrent:&nbsp;</b>",
 	'text_comment' => "<b>Comment:&nbsp;",
+	'head_user_history' => "User history",
 	'std_history_error' => "History Error",
 	'std_unkown_action' => "Unknown action",
 	'std_invalid_or_no_query' => "Invalid or no query."

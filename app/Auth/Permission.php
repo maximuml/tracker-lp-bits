@@ -25,7 +25,7 @@ class Permission
     public static function canUploadToNormalSection(?User $user = null): bool
     {
         $user = self::user($user);
-        return $user->uploadpos == 'yes' && self::userCan($user, PermissionEnum::UPLOAD);
+        return $user instanceof User && $user->uploadpos == 'yes' && self::userCan($user, PermissionEnum::UPLOAD);
     }
 
     public static function canBeAnonymous(?User $user = null): bool
@@ -66,7 +66,7 @@ class Permission
     public static function canPickTorrent(?User $user = null): bool
     {
         $user = self::user($user);
-        return $user->picker == 'yes' && self::canManageTorrent($user) || $user->class >= User::CLASS_SYSOP;
+        return $user instanceof User && ($user->picker == 'yes' && self::canManageTorrent($user) || $user->class >= User::CLASS_SYSOP);
     }
 
     public static function canSetTorrentSpecialTag(?User $user = null): bool
@@ -129,13 +129,22 @@ class Permission
         return self::userCan($user, PermissionEnum::TORRENT_STRUCTURE);
     }
 
-    private static function user(?User $user = null): User
+    private static function user(?User $user = null): ?User
     {
-        return $user ?? Auth::user();
+        if ($user instanceof User) {
+            return $user;
+        }
+
+        $user = Auth::guard('nexus-web')->user();
+        if ($user instanceof User) {
+            return $user;
+        }
+
+        return Auth::user();
     }
 
     private static function userCan(?User $user, PermissionEnum $permission): bool
     {
-        return Permissions::userCan($permission->value, false, $user?->id ?? 0);
+        return Permissions::userCan($permission->value, false, $user instanceof User ? $user->id : 0);
     }
 }

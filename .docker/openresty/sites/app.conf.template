@@ -29,8 +29,10 @@ server {
     }
 
     # All non-static requests fall back to the single Laravel entry point.
+    # Avoid $uri/ so directories like public/torrents/ do not return 403 before
+    # the Laravel route can be matched.
     location / {
-        try_files $uri $uri/ /index.php?$query_string;
+        try_files $uri /index.php?$query_string;
     }
 
     # Tracker announce with Lua validation.

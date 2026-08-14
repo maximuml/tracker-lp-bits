@@ -53,12 +53,11 @@ if ($__server_REQUEST_METHOD == "POST")
 }
 
 if ($pollid){
-	\App\Support\Html::stdhead($lang_makepoll['head_edit_poll']);
 	print("<h1>".$lang_makepoll['text_edit_poll']."</h1>");
 }
 else
 {
-	\App\Support\Html::stdhead($lang_makepoll['head_new_poll']);
+	
 	// Warn if current poll is less than 3 days old
 	$lastPoll = (array) \Nexus\Database\NexusDB::table('polls')->orderByDesc('added')->first(['question', 'added']);
 	if ($lastPoll)
@@ -99,7 +98,3 @@ print("<input type=hidden name=pollid value=\"".$poll["id"]."\">");
 ?>
 <input type=hidden name=returnto value="<?php echo htmlspecialchars(\App\Support\SupportContext::getQuery("returnto") ?? '') ? htmlspecialchars(\App\Support\SupportContext::getQuery("returnto") ?? '') : htmlspecialchars($__server_HTTP_REFERER ?? '')?>">
 </form>
-
-<?php
-\App\Support\Html::stdfoot();
-?>

@@ -1,6 +1,4 @@
 <?php
-\App\Support\Html::stdhead("Manage Locations");
-\App\Support\Frame::mainFrameOpen("", false, 100);
 \App\Support\Html::beginFrame("Manage Locations", true, 10, "100%", "center");
 
 if ($error) {
@@ -30,7 +28,6 @@ if ($mode === 'edit' && ! empty($editRow)):
 </form>
 <?php
 \App\Support\Html::endFrame();
-\App\Support\Html::stdfoot();
 return;
 endif;
 ?>
@@ -107,6 +104,4 @@ if ($hasRangeFilter) {
 <?php
 print($pagerbottom);
 \App\Support\Html::endFrame();
-\App\Support\Html::endFrame();
-\App\Support\Html::stdfoot();
 ?>

@@ -10,8 +10,6 @@ if ($localeJs !== null) {
     \Nexus\Nexus::js("vendor/fullcalendar-5.10.2/locales/{$localeJs}.js", 'footer', true);
 }
 
-\App\Support\Html::stdhead($lang_attendance['title']);
-\App\Support\Frame::mainFrameOpen();
 
 if ($hasAttendedToday) {
     $count = $attendance->total_days;
@@ -94,5 +92,3 @@ EOP;
     \App\Support\Html::endFrame();
 }
 
-\App\Support\Frame::mainFrameClose();
-\App\Support\Html::stdfoot();

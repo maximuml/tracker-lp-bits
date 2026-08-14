@@ -1,5 +1,4 @@
 <?php
-\App\Support\Html::stdhead("Reset User's Lost Password");
 
 if ($success) {
     print('<p>' . $message . '</p>');
@@ -15,5 +14,4 @@ if ($success) {
 </form>
 </table>
 <?php
-\App\Support\Html::stdfoot();
 ?>

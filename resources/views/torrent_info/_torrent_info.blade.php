@@ -36,7 +36,6 @@ if (!function_exists('torrent_structure_builder')) { function torrent_structure_
     return $ret;
 } }
 
-\App\Support\Html::stdhead("Torrent Info");
 ?>
 
 <style type="text/css">
@@ -63,7 +62,6 @@ li span.title {font-weight: bold;}
 
 <?php
 
-\App\Support\Frame::mainFrameOpen();
 
 
 print("<div align=center><h1>" . htmlspecialchars($torrentName) . "</h1>");  // Heading
@@ -74,5 +72,3 @@ echo "</ul>";
 print("</td></table>"); // End table
 
 // Standard html footers
-\App\Support\Frame::mainFrameClose();
-\App\Support\Html::stdfoot();

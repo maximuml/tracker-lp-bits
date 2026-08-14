@@ -1,7 +1,4 @@
-<?php
-\App\Support\Html::stdhead("FAQ Management");
-\App\Support\Frame::mainFrameOpen();
-?>
+
 <h1 align="center">FAQ Management</h1>
 <form method="post" action="faqactions.php?action=reorder">
 @csrf
@@ -66,7 +63,4 @@ if (! empty($faqOrphaned)) {
 <p align="center"><input type="submit" name="reorder" value="Reorder"></p>
 </form>
 <p>When the position numbers don't reflect the position in the table, it means the order id is bigger than the total number of sections/items and you should check all the order id's in the table and click "reorder"</p>
-<?php
-\App\Support\Frame::mainFrameClose();
-\App\Support\Html::stdfoot();
-?>
+

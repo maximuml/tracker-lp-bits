@@ -9,7 +9,6 @@ function searchformMaxlogin() {
 }
 
 if ($action === 'showlist') {
-    \App\Support\Html::stdhead('Max. Login Attemps - Show List');
     print('<h1>Failed Login Attempts</h1>');
     print($msg);
     print('<table border=1 cellspacing=0 cellpadding=5 width=100%>\n');
@@ -34,9 +33,7 @@ if ($action === 'showlist') {
         echo $pagerbottom;
     }
     searchformMaxlogin();
-    \App\Support\Html::stdfoot();
 } elseif ($action === 'edit') {
-    \App\Support\Html::stdhead('Max. Login Attemps - EDIT (' . htmlspecialchars((string) $editRow['id']) . ')');
     print('<table border=1 cellspacing=0 cellpadding=5 width=100%>\n');
     print('<tr><td><p>IP Address: <b>' . htmlspecialchars($editRow['ip']) . '</b></p>');
     print('<p>Action Time: <b>' . htmlspecialchars($editRow['added']) . '</b></p></tr></td>');
@@ -52,9 +49,7 @@ if ($action === 'showlist') {
     print('<tr><td>Current Status <select name=\'banned\'><option value=\'yes\' ' . ($editRow['banned'] === 'yes' ? 'selected' : '') . '>Banned!</option><option value=\'no\' ' . ($editRow['banned'] === 'no' ? 'selected' : '') . '>Not Banned!</option></select></tr></td>');
     print('<tr><td><input type=\'submit\' name=\'submit\' value=\'Save\' class=btn></tr></td>');
     print('</table>');
-    \App\Support\Html::stdfoot();
 } elseif ($action === 'searchip') {
-    \App\Support\Html::stdhead('Max. Login Attemps - Search');
     print('<h2>Failed Login Attempts</h2>');
     print('<table border=1 cellspacing=0 cellpadding=5 width=100%>\n');
     if (empty($rows)) {
@@ -74,6 +69,5 @@ if ($action === 'showlist') {
     }
     print('</table>\n');
     searchformMaxlogin();
-    \App\Support\Html::stdfoot();
 }
 ?>

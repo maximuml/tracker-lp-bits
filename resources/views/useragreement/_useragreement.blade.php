@@ -1,7 +1,5 @@
 <?php
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
-\App\Support\Html::stdhead("User Agreement");
-\App\Support\Frame::mainFrameOpen();
 \App\Support\Html::beginFrame("user agreement");
 $baseUrl = \App\Support\Url::schemeAndHost(false);
 ?>
@@ -96,5 +94,3 @@ The "<?php echo $SITENAME ?>" is the title of this publication only.
 Copyright © 2007 by <?php echo $BASEURL ?>.  All rights reserved.
 <?php
 \App\Support\Html::endFrame();
-\App\Support\Frame::mainFrameClose();
-\App\Support\Html::stdfoot();

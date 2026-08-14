@@ -4,8 +4,6 @@ $__server_PHP_SELF = \App\Support\SupportContext::getServerValue('PHP_SELF');
 $userid = (int) ($userid ?? 0);
 $action = (string) ($action ?? '');
 $subject = (string) ($subject ?? \App\Support\UserDisplay::username($userid));
-$lang_userhistory = (array) \App\Support\SupportContext::getGlobal('lang_userhistory', []);
-
 \App\Support\LegacyResponse::assertId($userid, true);
 
 if ($action == "viewposts")
@@ -19,13 +17,9 @@ if ($action == "viewposts")
 
     if (empty($posts)) \App\Support\LegacyResponse::abort($lang_userhistory['std_error'], $lang_userhistory['std_no_posts_found']);
 
-    \App\Support\Html::stdhead($lang_userhistory['head_posts_history']);
-
     print("<h1>".$lang_userhistory['text_posts_history_for'].$subject."</h1>\n");
 
     if ($postcount > $perpage) echo $pagertop;
-
-    \App\Support\Frame::mainFrameOpen();
 
     \App\Support\Html::beginFrame();
 
@@ -80,11 +74,7 @@ if ($action == "viewposts")
 
 	\App\Support\Html::endFrame();
 
-	\App\Support\Frame::mainFrameClose();
-
 	if ($postcount > $perpage) echo $pagerbottom;
-
-	\App\Support\Html::stdfoot();
 
 	return;
 }
@@ -100,13 +90,9 @@ if ($action == "viewcomments")
 
     if (empty($comments)) \App\Support\LegacyResponse::abort($lang_userhistory['std_error'], $lang_userhistory['std_no_comments_found']);
 
-    \App\Support\Html::stdhead($lang_userhistory['head_comments_history']);
-
     print("<h1>".$lang_userhistory['text_comments_history_for']."$subject</h1>\n");
 
     if ($commentcount > $perpage) echo $pagertop;
-
-    \App\Support\Frame::mainFrameOpen();
 
     \App\Support\Html::beginFrame();
 
@@ -148,11 +134,7 @@ if ($action == "viewcomments")
 
     \App\Support\Html::endFrame();
 
-    \App\Support\Frame::mainFrameClose();
-
     if ($commentcount > $perpage) echo $pagerbottom;
-
-    \App\Support\Html::stdfoot();
 
     return;
 }
@@ -160,6 +142,4 @@ if ($action == "viewcomments")
 if ($action != "")
 \App\Support\LegacyResponse::abort($lang_userhistory['std_history_error'], $lang_userhistory['std_unkown_action']);
 
-\App\Support\Html::stdhead($lang_userhistory['head_user_history']);
 \App\Support\Html::stdMessage($lang_userhistory['std_history_error'], $lang_userhistory['std_unkown_action']);
-\App\Support\Html::stdfoot();

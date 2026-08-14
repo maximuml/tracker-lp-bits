@@ -12,7 +12,6 @@ $hasResults = (bool) ($hasResults ?? false);
 
 $lang_torrents = \App\Support\SupportContext::getGlobal('lang_torrents', []);
 
-\App\Support\Html::stdhead(\App\Support\Locale::trans('search.global_search', [], null));
 print("<table width=\"97%\" class=\"main\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\"><tr><td class=\"embedded\">");
 
 if ($hasResults) {
@@ -24,4 +23,3 @@ if ($hasResults) {
 }
 
 print("</td></tr></table>");
-\App\Support\Html::stdfoot();

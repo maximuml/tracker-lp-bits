@@ -1,13 +1,11 @@
 <?php
 if ($mode === 'list'):
-    \App\Support\Html::stdhead($lang_staffbox['head_staff_pm'] ?? 'Staff PM');
     ?>
     <h1 align=center><?php echo $lang_staffbox['text_staff_pm'] ?? 'Staff PM'; ?></h1>
     <?php
     if (empty($rows)) {
         \App\Support\Html::stdMessage($lang_staffbox['std_sorry'] ?? 'Sorry', $lang_staffbox['std_no_messages_yet'] ?? 'No messages yet.');
     } else {
-        \App\Support\Frame::mainFrameOpen();
         ?>
         <form method=post action="staffbox.php?action=takecontactanswered">
             @csrf
@@ -47,12 +45,9 @@ if ($mode === 'list'):
         </form>
         <?php echo $pagerbottom; ?>
         <?php
-        \App\Support\Frame::mainFrameClose();
     }
-    \App\Support\Html::stdfoot();
 
 elseif ($mode === 'viewpm'):
-    \App\Support\Html::stdhead($lang_staffbox['head_view_staff_pm'] ?? 'View staff PM');
     $colspan = $arr['answered'] == 1 ? '3' : '2';
     $width = $arr['answered'] == 1 ? '33' : '50';
     $subject = htmlspecialchars((string) $arr['subject']);
@@ -87,11 +82,8 @@ elseif ($mode === 'viewpm'):
     </td></tr>
     </table>
     <?php
-    \App\Support\Html::stdfoot();
 
 elseif ($mode === 'answermessage'):
-    \App\Support\Html::stdhead($lang_staffbox['head_answer_to_staff_pm'] ?? 'Answer to staff PM');
-    \App\Support\Frame::mainFrameOpen();
     ?>
     <form method="post" id="compose" name="message" action="staffbox.php?action=takeanswer">
         @csrf
@@ -107,7 +99,5 @@ elseif ($mode === 'answermessage'):
         ?>
     </form>
     <?php
-    \App\Support\Frame::mainFrameClose();
-    \App\Support\Html::stdfoot();
 endif;
 ?>

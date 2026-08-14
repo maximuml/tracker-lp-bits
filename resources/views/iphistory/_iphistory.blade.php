@@ -1,9 +1,6 @@
 <?php
 $lang_iphistory = (array) (\App\Support\SupportContext::getGlobal('lang_iphistory') ?? []);
 
-\App\Support\Html::stdhead($lang_iphistory['head_ip_history_log_for'].$username);
-\App\Support\Frame::mainFrameOpen();
-
 print('<h1 align="center">'.$lang_iphistory['text_historical_ip_by'] . \App\Support\UserDisplay::username($userid).'</h1>');
 
 if ($countrows > $perpage)
@@ -25,6 +22,5 @@ print('</table>');
 
 echo $pagerbottom;
 
-\App\Support\Frame::mainFrameClose();
-\App\Support\Html::stdfoot();
+
 ?>

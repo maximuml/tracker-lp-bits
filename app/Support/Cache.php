@@ -222,18 +222,16 @@ final class Cache
     {
         Logger::writeWithContext('clear_category_cache');
         NexusDB::cache_del('category_content');
-        $searchBoxList = \App\Models\SearchBox::query()->get(['id']);
-        foreach ($searchBoxList as $item) {
-            NexusDB::cache_del("category_list_mode_{$item->id}");
+        foreach (\App\Repositories\SearchBoxRepository::getOrderedIds() as $id) {
+            NexusDB::cache_del("category_list_mode_{$id}");
         }
     }
 
     public static function clearTaxonomy(string $table): void
     {
         Logger::writeWithContext("clear_taxonomy_cache: $table");
-        $list = \App\Models\SearchBox::query()->get(['id']);
-        foreach ($list as $item) {
-            NexusDB::cache_del("{$table}_list_mode_{$item->id}");
+        foreach (\App\Repositories\SearchBoxRepository::getOrderedIds() as $id) {
+            NexusDB::cache_del("{$table}_list_mode_{$id}");
         }
         NexusDB::cache_del("{$table}_list_mode_0");
     }

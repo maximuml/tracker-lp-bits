@@ -1003,4 +1003,12 @@ class UserRepository extends BaseRepository
         return User::query()->find($id, User::$commonFields);
     }
 
+    public static function logModify(int|string $userId, string $comment): void
+    {
+        UserModifyLog::query()->create([
+            'user_id' => $userId,
+            'content' => $comment,
+        ]);
+    }
+
 }

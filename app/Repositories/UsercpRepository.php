@@ -4,15 +4,84 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
+use App\Models\Comment;
+use App\Models\Post;
+use App\Models\SeedBoxRecord;
 use App\Models\User;
 use App\Support\Cache;
 use App\Support\Validators;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Nexus\Database\NexusDB;
 
 final class UsercpRepository extends BaseRepository
 {
+    public static function getUserById(int $userId): User
+    {
+        return User::query()->findOrFail($userId);
+    }
+
+    public static function updateUser(int $userId, array $data): bool
+    {
+        return (bool) User::query()->where('id', $userId)->update($data);
+    }
+
+    public static function emailExistsForOther(string $email, int $userId): bool
+    {
+        return User::query()->where('email', $email)->where('id', '!=', $userId)->exists();
+    }
+
+    public static function getCommentCount(int $userId): int
+    {
+        return (int) Comment::query()->where('user', $userId)->count();
+    }
+
+    public static function getForumPostCount(int $userId): int
+    {
+        return (int) Post::query()->where('userid', $userId)->count();
+    }
+
+    public static function getTotalPostCount(): int
+    {
+        return (int) Post::query()->count();
+    }
+
+    public static function getTopicPostCount(int $topicId): int
+    {
+        return (int) Post::query()->where('topicid', $topicId)->count();
+    }
+
+    /**
+     * @return  array<int, int>
+     */
+    public static function getTableIds(string $table): array
+    {
+        return NexusDB::table($table)->pluck('id')->all();
+    }
+
+    public static function getSeedBoxRecords(int $userId): Collection
+    {
+        return SeedBoxRecord::query()
+            ->where('uid', $userId)
+            ->where('type', SeedBoxRecord::TYPE_USER)
+            ->get();
+    }
+
+    /**
+     * @return  array<int, array<string, mixed>>
+     */
+    public static function getReadTopics(int $userId, int $limit = 5): array
+    {
+        return NexusDB::table('readposts')
+            ->join('topics', 'topics.id', '=', 'readposts.topicid')
+            ->where('readposts.userid', $userId)
+            ->orderByDesc('readposts.id')
+            ->limit($limit)
+            ->get(['topics.id as id', 'topics.userid', 'topics.subject', 'topics.lastpost', 'topics.views'])
+            ->map(fn ($row) => (array) $row)
+            ->all();
+    }
     /**
      * @return  array<int, \stdClass>
      */

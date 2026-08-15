@@ -11,7 +11,7 @@ if (!isset($lang_usercp)) $lang_usercp = (array) (\App\Support\SupportContext::g
 $__server_PHP_SELF = \App\Support\SupportContext::getServerValue('PHP_SELF');
 $__server_REMOTE_ADDR = \App\Support\SupportContext::getServerValue('REMOTE_ADDR');
 $CURUSER['notifs'] = (string) ($CURUSER['notifs'] ?? '');
-$userInfo = \App\Models\User::query()->findOrFail($CURUSER["id"]);
+$userInfo = \App\Repositories\UsercpRepository::getUserById((int) $CURUSER["id"]);
 $siteName = \App\Models\Setting::getSiteName();
 
 if (!function_exists('usercpmenu')) { function usercpmenu ($selected = "home") {
@@ -127,7 +127,7 @@ if ($action){
                     }
                     $data['notifs'] = '[' . implode('][', array_keys($notifsArr)) . ']';
                 }
-				\App\Models\User::query()->where('id', $CURUSER["id"])->update($data);
+				\App\Repositories\UsercpRepository::updateUser((int) $CURUSER["id"], $data);
 				\App\Support\Cache::clearUser($CURUSER["id"], $CURUSER['passkey']);
 				header("Location: usercp.php?action=personal&type=saved");
 			}
@@ -215,7 +215,7 @@ if ($action){
                 }
 
 			if (!function_exists('browsecheck')) { function browsecheck($dbtable, $cbname, array &$result){
-				$ids = \Nexus\Database\NexusDB::table($dbtable)->pluck('id');
+				$ids = \App\Repositories\UsercpRepository::getTableIds($dbtable);
 				foreach ($ids as $id) {
 					if (((\App\Support\SupportContext::getPost($cbname.$id) !== null)) && \App\Support\SupportContext::getPost($cbname.$id) == 'yes') {
 					    $result[$cbname.$id] = 1;
@@ -302,7 +302,7 @@ if ($action){
 				else
 					$data['showcomment'] = 'no';
 
-				\App\Models\User::query()->where('id', $CURUSER["id"])->update($data);
+				\App\Repositories\UsercpRepository::updateUser((int) $CURUSER["id"], $data);
 				header("Location: usercp.php?action=tracker&type=saved");
 			}
 			usercpmenu ("tracker");
@@ -410,7 +410,7 @@ if ($showshoutbox_main == "yes") //system side setting for shoutbox
 				if ($showtooltipsetting)
 					$data['showlastpost'] = (\App\Support\SupportContext::getPost("ttlastpost") != "" ? "yes" : "no");
 
-				\App\Models\User::query()->where('id', $CURUSER["id"])->update($data);
+				\App\Repositories\UsercpRepository::updateUser((int) $CURUSER["id"], $data);
 				header("Location: usercp.php?action=forum&type=saved");
 			}
 			usercpmenu ("forum");
@@ -493,7 +493,7 @@ if ($showshoutbox_main == "yes") //system side setting for shoutbox
 						\App\Support\LegacyResponse::abort($lang_usercp['std_error'], $lang_usercp['std_wrong_email_address_format'].goback("-2"), 0);
 						return;
 					}
-					if (\App\Models\User::query()->where('email', $email)->where('id', '!=', $CURUSER['id'])->exists()){
+					if (\App\Repositories\UsercpRepository::emailExistsForOther((string) $email, (int) $CURUSER['id'])){
 						\App\Support\LegacyResponse::abort($lang_usercp['std_error'], $lang_usercp['std_email_in_use'].goback("-2"), 0);
 						return;
 					}
@@ -536,7 +536,7 @@ EOD;
 
 				$userId = $CURUSER["id"];
                 \Nexus\Database\NexusDB::transaction(function () use ($userId, $data) {
-                    \App\Models\User::query()->where('id', $userId)->update($data);
+                    \App\Repositories\UsercpRepository::updateUser($userId, $data);
                     if (!empty(\App\Support\SupportContext::getRequestInput('resetauthkey')) && \App\Support\SupportContext::getRequestInput('resetauthkey') == 1) {
                         //reset authkey
                         $torrentRep = new \App\Repositories\TorrentRepository();
@@ -639,7 +639,7 @@ EOD;
 \Nexus\Nexus::js('vendor/jquery-loading/jquery.loading.min.js', 'footer', true);
 usercpmenu ();
 //Comment Results
-$commentcount = \App\Models\Comment::query()->where('user', $CURUSER["id"])->count();
+$commentcount = \App\Repositories\UsercpRepository::getCommentCount((int) $CURUSER["id"]);
 
 //Join Date
 if ($CURUSER['added'] == "0000-00-00 00:00:00" || $CURUSER['added'] == null)
@@ -649,7 +649,7 @@ else
 
 //Forum Posts
 if (!$forumposts = $Cache->get_value('user_'.$CURUSER['id'].'_post_count')){
-	$forumposts = \App\Models\Post::query()->where('userid', $CURUSER['id'])->count();
+	$forumposts = \App\Repositories\UsercpRepository::getForumPostCount((int) $CURUSER['id']);
 	$Cache->cache_value('user_'.$CURUSER['id'].'_post_count', $forumposts, 3600);
 }
 $dayposts = 0;
@@ -661,7 +661,7 @@ if ($forumposts)
 		$dayposts  = round(($forumposts / $days), 1);
 	}
 	if (!$postcount = $Cache->get_value('total_posts_count')){
-		$postcount = \App\Models\Post::query()->count();
+		$postcount = \App\Repositories\UsercpRepository::getTotalPostCount();
 		$Cache->cache_value('total_posts_count', $postcount, 96400);
 	}
 	$percentages = round($forumposts*100/$postcount, 3)."%";
@@ -701,7 +701,7 @@ if (\App\Support\Config\SiteConfig::current()->seedBox->enabled()) {
     $columnIPHelp = \App\Support\Locale::trans('label.seed_box_record.ip_help', [], null);
     $columnComment = \App\Support\Locale::trans('label.comment', [], null);
     $columnStatus = \App\Support\Locale::trans('label.seed_box_record.status', [], null);
-    $res = \App\Models\SeedBoxRecord::query()->where('uid', $CURUSER['id'])->where('type', \App\Models\SeedBoxRecord::TYPE_USER)->get();
+    $res = \App\Repositories\UsercpRepository::getSeedBoxRecords((int) $CURUSER['id']);
     if ($res->count() > 0)
     {
         $seedBox .= "<table border='1' cellspacing='0' cellpadding='5' id='seed-box-table'><tr><td class='colhead'>ID</td><td class='colhead'>{$columnOperator}</td><td class='colhead'>{$columnBandwidth}</td><td class='colhead'>{$columnIP}</td><td class='colhead'>{$columnComment}</td><td class='colhead'>{$columnStatus}</td><td class='colhead'></td></tr>";
@@ -894,29 +894,24 @@ print("<table border=0 cellspacing=0 cellpadding=3 width=".CONTENT_WIDTH."><tr>"
 "<td class=colhead align=center>".$lang_usercp['col_topic_starter']."</td>".
 "<td class=colhead align=center width=20%>".$lang_usercp['col_last_post']."</td>".
 "</tr>");
-$topicRows = \Nexus\Database\NexusDB::table('readposts')
-    ->join('topics', 'topics.id', '=', 'readposts.topicid')
-    ->where('readposts.userid', $CURUSER['id'])
-    ->orderByDesc('readposts.id')
-    ->limit(5)
-    ->get();
+$topicRows = \App\Repositories\UsercpRepository::getReadTopics((int) $CURUSER['id']);
 foreach ($topicRows as $topicarr)
 {
-	$topicid = $topicarr->id;
-	$topic_title = $topicarr->subject;
-	$topic_userid = $topicarr->userid;
-	$topic_views = $topicarr->views;
+	$topicid = $topicarr['id'];
+	$topic_title = $topicarr['subject'];
+	$topic_userid = $topicarr['userid'];
+	$topic_views = $topicarr['views'];
 	$views = number_format($topic_views);
 
 	/// GETTING TOTAL NUMBER OF POSTS ///
 	if (!$posts = $Cache->get_value('topic_'.$topicid.'_post_count')){
-		$posts = \App\Models\Post::query()->where('topicid', $topicid)->count();
+		$posts = \App\Repositories\UsercpRepository::getTopicPostCount($topicid);
 		$Cache->cache_value('topic_'.$topicid.'_post_count', $posts, 3600);
 	}
 	$replies = max(0, $posts - 1);
 
 	/// GETTING USERID AND DATE OF LAST POST ///
-	$arr = \App\Support\Forum::postRowWithContext($topicarr->lastpost);
+	$arr = \App\Support\Forum::postRowWithContext($topicarr['lastpost']);
 	$postid = intval($arr["id"] ?? 0);
 	$userid = intval($arr["userid"] ?? 0);
 	$added = \App\Support\Time::format($arr['added'],true,false);
@@ -926,7 +921,7 @@ foreach ($topicRows as $topicarr)
 
 	/// GET NAME OF THE AUTHOR ///
 	$author = \App\Support\UserDisplay::username($topic_userid);
-	$subject = "<a href=forums.php?action=viewtopic&topicid=$topicid><b>" . htmlspecialchars($topicarr->subject) . "</b></a>";
+	$subject = "<a href=forums.php?action=viewtopic&topicid=$topicid><b>" . htmlspecialchars($topicarr['subject']) . "</b></a>";
 
 	print("<tr class=tableb><td style='padding-left: 10px' align=left class=rowfollow>$subject</td>".
 	"<td align=center class=rowfollow>".$replies."/".$views."</td>" .

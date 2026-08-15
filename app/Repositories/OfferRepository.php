@@ -95,7 +95,7 @@ final class OfferRepository extends BaseRepository
                 'search' => $search,
                 'sort' => $sort,
                 'type' => $direction,
-            ], fn ($v) => $v !== '' && $v !== 0 && $v !== []),
+            ]),
         ];
     }
 }

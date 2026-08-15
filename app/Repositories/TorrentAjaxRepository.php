@@ -156,6 +156,7 @@ final class TorrentAjaxRepository
 
         $seedersCount = count($seeders);
         $leechersCount = count($leechers);
+        /** @phpstan-ignore-next-line */
         if ($torrent->seeders != $seedersCount || $torrent->leechers != $leechersCount) {
             $update = ['seeders' => $seedersCount, 'leechers' => $leechersCount];
             $torrent->update($update);
@@ -184,6 +185,35 @@ final class TorrentAjaxRepository
             $caseWhens[$peer['id']] = sprintf('when %s then %s', $peer['id'], intval($isSeedBox));
         }
 
+        $peerIpInfo = [];
+        $usernameSeedBoxIconMap = [];
+        $locationMap = [];
+        foreach (array_merge($seeders, $leechers) as $peer) {
+            $peerId = (int) $peer['id'];
+            $userId = (int) $peer['userid'];
+            $ips = array_filter([$peer['ipv4'] ?? '', $peer['ipv6'] ?? '']);
+            $usernameSeedBoxIconMap[$peerId] = $seedBoxRep->renderIcon($ips, $userId);
+            $peerIpInfo[$peerId] = [];
+            foreach ($ips as $ip) {
+                if (! isset($locationMap[$ip])) {
+                    $locationMap[$ip] = \App\Support\Network::ipLocationWithContext($ip);
+                }
+                [$locPub, $locMod] = $locationMap[$ip];
+                $peerIpInfo[$peerId][] = [
+                    'ip' => $ip,
+                    'public' => $locPub,
+                    'mod' => $locMod,
+                    'seedBoxIcon' => $seedBoxRep->renderIcon($ip, $userId),
+                ];
+            }
+        }
+
+        $userIds = array_unique(array_filter(array_column(array_merge($seeders, $leechers), 'userid')));
+        $usernameHtmlMap = [];
+        foreach ($userIds as $uid) {
+            $usernameHtmlMap[(int) $uid] = \App\Support\UserDisplay::username((int) $uid, false, true, true, true);
+        }
+
         if (! empty($caseWhens) && \App\Support\Config\SiteConfig::current()->seedBox->enabled()) {
             $caseSql = sprintf('case id %s end', implode(' ', array_values($caseWhens)));
             \App\Support\Logger::writeWithContext("[IS_SEED_BOX], caseSql: {$caseSql}, ids: " . implode(',', array_keys($caseWhens)), 'info', false);
@@ -200,7 +230,9 @@ final class TorrentAjaxRepository
             'privacyData' => $privacyData,
             'isSeedBoxMap' => $isSeedBoxMap,
             'showLocationColumn' => $showLocationColumn,
-            'seedBoxRep' => $seedBoxRep,
+            'peerIpInfo' => $peerIpInfo,
+            'usernameSeedBoxIconMap' => $usernameSeedBoxIconMap,
+            'usernameHtmlMap' => $usernameHtmlMap,
             'enablelocationTweak' => $enablelocationTweak,
             'currentUser' => $currentUser,
         ];

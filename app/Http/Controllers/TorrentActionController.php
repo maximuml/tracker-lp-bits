@@ -173,7 +173,15 @@ class TorrentActionController extends LegacyController
         $curUser = SupportContext::getUser() ?? [];
         $currentUser = ! empty($curUser) ? User::query()->find($curUser['id'] ?? 0) : null;
 
-        return $this->legacyPageRaw($request, 'viewpeerlist', false, TorrentAjaxRepository::peerList($torrentId, $currentUser));
+        $headers = [
+            'Expires' => 'Mon, 26 Jul 1997 05:00:00 GMT',
+            'Last-Modified' => gmdate('D, d M Y H:i:s') . ' GMT',
+            'Cache-Control' => 'no-cache, must-revalidate',
+            'Pragma' => 'no-cache',
+            'Content-Type' => 'text/html; charset=utf-8',
+        ];
+
+        return response()->view('viewpeerlist.index', TorrentAjaxRepository::peerList($torrentId, $currentUser), 200, $headers);
     }
 
     public function viewSnatches(Request $request): View|RedirectResponse|Response

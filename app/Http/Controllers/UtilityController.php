@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Setting;
 use App\Models\User;
 use App\Repositories\SearchPageRepository;
+use App\Services\Legacy\AjaxService;
 use App\Services\Legacy\LegacyPartialRenderer;
 use App\Support\SupportContext;
 use Illuminate\Http\JsonResponse;
@@ -13,6 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\View\View;
+use Nexus\Database\NexusDB;
 
 class UtilityController extends LegacyController
 {
@@ -64,19 +66,14 @@ class UtilityController extends LegacyController
             \App\Support\LegacyAuth::requireLoginFromContext();
         }
 
-        if (! class_exists('AjaxInterface')) {
-            view('ajax._ajax')->render();
-        }
-
         try {
-            $callable = ['AjaxInterface', $action];
-            if (! is_callable($callable)) {
+            if (! method_exists(AjaxService::class, $action)) {
                 $currentUser = SupportContext::getUser() ?? [];
                 \App\Support\Logger::writeWithContext((string) ("hacking attempt made by " . ($currentUser['username'] ?? 'guest') . ",uid " . ($currentUser['id'] ?? 0)), (string) 'error', (bool) false);
                 throw new \RuntimeException("Invalid action: {$action}");
             }
 
-            $result = call_user_func($callable, $params);
+            $result = AjaxService::{$action}($params);
 
             return response()->json(\App\Support\Api::successWithContext($result));
         } catch (\Throwable $exception) {
@@ -142,9 +139,45 @@ class UtilityController extends LegacyController
         return $this->legacyPage($request, 'tags', false);
     }
 
-    public function suggest(Request $request): Response|RedirectResponse
+    public function suggest(Request $request): Response
     {
-        return $this->legacyPageRaw($request, 'suggest', false);
+        $headers = [
+            'Expires' => 'Mon, 26 Jul 1997 05:00:00 GMT',
+            'Last-Modified' => gmdate('D, d M Y H:i:s') . ' GMT',
+            'Cache-Control' => 'no-cache, must-revalidate',
+            'Pragma' => 'no-cache',
+            'Content-Type' => 'text/xml; charset=utf-8',
+        ];
+
+        $q = trim((string) $request->input('q', ''));
+        if ($q === '') {
+            return response('', 200, $headers);
+        }
+
+        $suggestRows = NexusDB::table('suggest')
+            ->selectRaw('keywords AS suggest, COUNT(*) AS count')
+            ->where('keywords', 'like', $q . '%')
+            ->groupBy('keywords')
+            ->orderByDesc('count')
+            ->orderByDesc('keywords')
+            ->limit(10)
+            ->get();
+
+        $result = '';
+        $i = 0;
+        foreach ($suggestRows as $suggest) {
+            $suggest = (array) $suggest;
+            if (strlen((string) $suggest['suggest']) > 25) {
+                continue;
+            }
+            $result .= ($result === '' ? '' : "\r\n") . $suggest['suggest'] . "\r\n" . $suggest['count'];
+            $i++;
+            if ($i >= 5) {
+                break;
+            }
+        }
+
+        return response($result, 200, $headers);
     }
 
     public function preview(Request $request): View|RedirectResponse

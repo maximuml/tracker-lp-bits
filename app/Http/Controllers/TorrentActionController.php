@@ -29,14 +29,50 @@ use Rhilip\Bencode\Bencode;
 
 class TorrentActionController extends LegacyController
 {
-    public function bookmark(Request $request): Response|RedirectResponse
+    public function bookmark(Request $request): Response
     {
-        $torrentId = (int) $request->input('torrentid', 0);
-        if ($torrentId <= 0) {
-            return redirect('/torrents.php');
+        $headers = [
+            'Expires' => 'Mon, 26 Jul 1997 05:00:00 GMT',
+            'Last-Modified' => gmdate('D, d M Y H:i:s') . ' GMT',
+            'Cache-Control' => 'no-cache, must-revalidate',
+            'Pragma' => 'no-cache',
+            'Content-Type' => 'text/xml; charset=utf-8',
+        ];
+
+        $user = SupportContext::getUser();
+        if ($user === null) {
+            return response('failed', 200, $headers);
         }
 
-        return $this->legacyPageRaw($request, 'bookmark', false);
+        $torrentId = (int) $request->input('torrentid', 0);
+        if ($torrentId <= 0) {
+            return response('failed', 200, $headers);
+        }
+
+        $userId = (int) $user['id'];
+        $bookmark = NexusDB::table('bookmarks')->where('torrentid', $torrentId)->where('userid', $userId)->first();
+
+        $searchRep = new SearchRepository();
+        if ($bookmark) {
+            $bookmarkId = (int) $bookmark->id;
+            $searchRep->deleteBookmark($bookmarkId);
+            NexusDB::table('bookmarks')->where('id', $bookmarkId)->delete();
+            $status = 'deleted';
+        } else {
+            $bookmarkId = NexusDB::table('bookmarks')->insertGetId([
+                'torrentid' => $torrentId,
+                'userid' => $userId,
+            ]);
+            $searchRep->addBookmark($bookmarkId);
+            $status = 'added';
+        }
+
+        $cache = SupportContext::getCache();
+        if ($cache !== null && method_exists($cache, 'delete_value')) {
+            $cache->delete_value('user_' . $userId . '_bookmark_array');
+        }
+
+        return response($status, 200, $headers);
     }
 
     public function fastDelete(Request $request): Response|RedirectResponse

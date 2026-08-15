@@ -1,11 +1,13 @@
 <?php
-error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
-// Auto-generated legacy bridge shims
-if (!isset($CURUSER)) $CURUSER = (array) (\App\Support\SupportContext::getUser() ?? []);
-if (!class_exists('AjaxInterface')) {
+declare(strict_types=1);
 
-class AjaxInterface{
+namespace App\Services\Legacy;
+
+
+
+final class AjaxService
+{
 
     public static function toggleUserMedalStatus($params)
     {
@@ -323,5 +325,4 @@ $CURUSER = \App\Support\SupportContext::getUser() ?? [];
 
         return \App\Support\ToastNotifications::get((int) $CURUSER['id'], $lastPmId, $lastShoutId, $init);
     }
-}
 }

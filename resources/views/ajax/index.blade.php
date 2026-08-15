@@ -1,1 +1,0 @@
-@include('ajax._ajax')

@@ -22,6 +22,9 @@ final class UsercpRepository extends BaseRepository
         return User::query()->findOrFail($userId);
     }
 
+    /**
+     * @param  array<string, mixed>  $data
+     */
     public static function updateUser(int $userId, array $data): bool
     {
         return (bool) User::query()->where('id', $userId)->update($data);
@@ -60,6 +63,9 @@ final class UsercpRepository extends BaseRepository
         return NexusDB::table($table)->pluck('id')->all();
     }
 
+    /**
+     * @return  Collection<int, SeedBoxRecord>
+     */
     public static function getSeedBoxRecords(int $userId): Collection
     {
         return SeedBoxRecord::query()

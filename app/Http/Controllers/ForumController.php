@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Enums\Permission\PermissionEnum;
 use App\Http\Resources\ForumResource;
 use App\Models\Forum;
+use App\Services\Legacy\LegacyPartialRenderer;
 use App\Support\Forum as SupportForum;
 use App\Support\Permissions;
 use App\Support\SupportContext;
@@ -18,6 +19,13 @@ use Illuminate\View\View;
 
 class ForumController extends LegacyController
 {
+    private LegacyPartialRenderer $renderer;
+
+    public function __construct(LegacyPartialRenderer $renderer)
+    {
+        $this->renderer = $renderer;
+    }
+
     /**
      * Serve the legacy forums.php page from a Laravel view.
      *
@@ -25,13 +33,18 @@ class ForumController extends LegacyController
      * and is included by forum/index.blade.php so the original HTML/PHP
      * interleaving is preserved as closely as possible.
      */
-    public function legacy(Request $request): Response|RedirectResponse
+    public function legacy(Request $request): View|RedirectResponse
     {
         if (SupportContext::getUser() === null) {
             return redirect('/forums.php?' . $request->getQueryString());
         }
 
-        return $this->legacyPageRaw($request, 'forum');
+        $result = $this->renderer->render('forum_forums');
+        if ($result instanceof RedirectResponse) {
+            return $result;
+        }
+
+        return $this->legacyPage($request, 'forum', true, $result);
     }
 
     public function forummanage(Request $request): View|RedirectResponse|Response

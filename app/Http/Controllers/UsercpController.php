@@ -3,18 +3,22 @@
 namespace App\Http\Controllers;
 
 use App\Repositories\UsercpRepository;
+use App\Services\Legacy\LegacyPartialRenderer;
 use App\Support\SupportContext;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
+use Illuminate\View\View;
 
 class UsercpController extends LegacyController
 {
     private UsercpRepository $repository;
 
-    public function __construct(UsercpRepository $repository)
+    private LegacyPartialRenderer $renderer;
+
+    public function __construct(UsercpRepository $repository, LegacyPartialRenderer $renderer)
     {
         $this->repository = $repository;
+        $this->renderer = $renderer;
     }
 
     /**
@@ -32,7 +36,7 @@ class UsercpController extends LegacyController
     /**
      * Serve the legacy usercp.php page from a Laravel view.
      */
-    public function legacy(Request $request): Response|RedirectResponse
+    public function legacy(Request $request): View|RedirectResponse
     {
         if (SupportContext::getUser() === null) {
             $qs = $request->getQueryString();
@@ -40,6 +44,11 @@ class UsercpController extends LegacyController
             return redirect('/usercp.php' . ($qs ? '?' . $qs : ''));
         }
 
-        return $this->legacyPageRaw($request, 'usercp');
+        $result = $this->renderer->render('usercp');
+        if ($result instanceof RedirectResponse) {
+            return $result;
+        }
+
+        return $this->legacyPage($request, 'usercp', true, $result);
     }
 }

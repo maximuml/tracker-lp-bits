@@ -116,6 +116,9 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
         Route::get('offers', [\App\Http\Controllers\OfferController::class, 'index'])
             ->middleware(Permissions::abilityLabel(RoutePermissionEnum::OFFER_LIST));
 
+        Route::get('usercp/settings', [\App\Http\Controllers\UsercpController::class, 'settings'])
+            ->middleware(Permissions::abilityLabel(RoutePermissionEnum::USERCP_SETTINGS));
+
     });
 
     Route::group(['middleware' => ['checkUserStatus']], function () {

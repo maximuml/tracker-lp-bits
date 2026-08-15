@@ -94,6 +94,9 @@ enum RoutePermissionEnum: string
     /* Notifications */
     case NOTIFICATION_LIST = 'notification:list';
 
+    /* Offers */
+    case OFFER_LIST = 'offer:list';
+
     /* Forums */
     case OVER_FORUM_LIST = 'over_forum:list';
     case OVER_FORUM_MANAGE = 'over_forum:manage';

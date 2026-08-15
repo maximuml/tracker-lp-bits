@@ -222,6 +222,16 @@ class BonusRepository extends BaseRepository
 
     }
 
+    public function hasChangeUsernameCard(int $userId): bool
+    {
+        return UserMeta::query()->where('uid', $userId)->where('meta_key', UserMeta::META_KEY_CHANGE_USERNAME)->exists();
+    }
+
+    public function hasRainbowIdForever(int $userId): bool
+    {
+        return UserMeta::query()->where('uid', $userId)->where('meta_key', UserMeta::META_KEY_PERSONALIZED_USERNAME)->whereNull('deadline')->exists();
+    }
+
     /** @param  mixed  $uid */
     public function consumeToBuyChangeUsernameCard($uid): bool
     {

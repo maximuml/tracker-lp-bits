@@ -5,6 +5,7 @@ error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 if (!isset($CURUSER)) $CURUSER = (array) (\App\Support\SupportContext::getUser() ?? []);
 if (!isset($BASEURL)) $BASEURL = \App\Support\SupportContext::getGlobal('BASEURL', '');
 if (!isset($lang_mybonus)) $lang_mybonus = (array) (\App\Support\SupportContext::getGlobal('lang_mybonus') ?? []);
+$bonusRep = new \App\Repositories\BonusRepository();
 if (!function_exists('bonusarray')) { function bonusarray($option = 0){
 $onegbupload_bonus = \App\Support\SupportContext::getGlobal('onegbupload_bonus');
 $fivegbupload_bonus = \App\Support\SupportContext::getGlobal('fivegbupload_bonus');
@@ -427,13 +428,13 @@ for ($i=0; $i < count($allBonus); $i++)
 			}
 			else print("<td class=\"rowfollow\" align=\"center\"><input type=\"submit\" name=\"submit\" value=\"".$lang_mybonus['submit_exchange']."\" /></td>");
 		} elseif ($bonusarray['art'] == 'change_username_card') {
-		    if (\App\Models\UserMeta::query()->where('uid', $CURUSER['id'])->where('meta_key', \App\Models\UserMeta::META_KEY_CHANGE_USERNAME)->exists()) {
+		    if ($bonusRep->hasChangeUsernameCard((int) $CURUSER['id'])) {
                 print("<td class=\"rowfollow\" align=\"center\"><input type=\"submit\" name=\"submit\" value=\"".$lang_mybonus['text_change_username_card_already_has']."\" disabled=\"disabled\"/></td>");
             } else {
                 print("<td class=\"rowfollow\" align=\"center\"><input type=\"submit\" name=\"submit\" value=\"".$lang_mybonus['submit_exchange']."\" /></td>");
             }
         } elseif ($bonusarray['art'] == 'rainbow_id') {
-            if (\App\Models\UserMeta::query()->where('uid', $CURUSER['id'])->where('meta_key', \App\Models\UserMeta::META_KEY_PERSONALIZED_USERNAME)->whereNull('deadline')->exists()) {
+            if ($bonusRep->hasRainbowIdForever((int) $CURUSER['id'])) {
                 print("<td class=\"rowfollow\" align=\"center\"><input type=\"submit\" name=\"submit\" value=\"".$lang_mybonus['text_rainbow_id_already_valid_forever']."\" disabled=\"disabled\"/></td>");
             } else {
                 print("<td class=\"rowfollow\" align=\"center\"><input type=\"submit\" name=\"submit\" value=\"".$lang_mybonus['submit_exchange']."\" /></td>");
@@ -557,7 +558,6 @@ if ($action == "exchange") {
 	$seedbonus=$CURUSER['seedbonus']-$points;
 
 	if($CURUSER['seedbonus'] >= $points) {
-        $bonusRep = new \App\Repositories\BonusRepository();
         $lockName = "user:$userid:exchange:bonus";
         $lock = new \Nexus\Database\NexusLock($lockName, $lockSeconds);
         if (!$lock->get()) {

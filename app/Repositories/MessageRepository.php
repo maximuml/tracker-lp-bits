@@ -16,6 +16,9 @@ class MessageRepository extends BaseRepository
 
     const STAFF_MESSAGE_NEW_CACHE_KEY = 'staff_new_message_count';
 
+    /**
+     * @return  \Illuminate\Support\Collection<int, \stdClass>
+     */
     public static function getUserMailboxes(int $userId): \Illuminate\Support\Collection
     {
         return NexusDB::table('pmboxes')

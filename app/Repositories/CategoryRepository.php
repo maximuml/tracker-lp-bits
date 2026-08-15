@@ -57,6 +57,39 @@ final class CategoryRepository
     }
 
     /**
+     * @return  array<int, array<string, mixed>>
+     */
+    public static function getCategoryList(int $offset, int $perPage): array
+    {
+        return NexusDB::table('categories')
+            ->select(['categories.*', 'searchbox.name as catmodename', 'caticons.name as icon_name'])
+            ->leftJoin('searchbox', 'categories.mode', '=', 'searchbox.id')
+            ->leftJoin('caticons', 'caticons.id', '=', 'categories.icon_id')
+            ->orderBy('categories.mode')
+            ->orderBy('categories.id')
+            ->offset($offset)
+            ->limit($perPage)
+            ->get()
+            ->map(fn ($row) => (array) $row)
+            ->all();
+    }
+
+    /**
+     * @return  array<string, array<int|string, string>>
+     */
+    public static function getSecondiconLookups(): array
+    {
+        return [
+            'source' => NexusDB::table('sources')->pluck('name', 'id')->all(),
+            'media' => NexusDB::table('media')->pluck('name', 'id')->all(),
+            'codec' => NexusDB::table('codecs')->pluck('name', 'id')->all(),
+            'standard' => NexusDB::table('standards')->pluck('name', 'id')->all(),
+            'processing' => NexusDB::table('processings')->pluck('name', 'id')->all(),
+            'audiocodec' => NexusDB::table('audiocodecs')->pluck('name', 'id')->all(),
+        ];
+    }
+
+    /**
      * Render the legacy catmanage page.
      *
      * @param array<string, mixed> $data

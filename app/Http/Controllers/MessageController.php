@@ -24,9 +24,14 @@ class MessageController extends LegacyController
         $this->legacyService = $legacyService;
     }
 
-    public function messages(Request $request): Response|RedirectResponse
+    public function messages(Request $request): View|RedirectResponse
     {
-        return $this->legacyPageRaw($request, 'messages');
+        $result = $this->legacyService->messages($request);
+        if ($result instanceof RedirectResponse) {
+            return $result;
+        }
+
+        return $this->legacyPage($request, 'messages', true, $result);
     }
 
     public function sendmessage(Request $request): Response|RedirectResponse

@@ -153,6 +153,19 @@ final class LegacyRequestMiddleware
             }
         }
 
+        // confirmemail.php/<id>/<md5>/<email> is a segment-style legacy URL.
+        // Keep the path segments in REQUEST_URI so Laravel routes it, and do
+        // not set PATH_INFO (which Symfony uses for getPathInfo and would break
+        // the /confirmemail/{path?} route). The controller reads the remainder
+        // from the request path info / route parameter instead.
+        if ($script === 'confirmemail' && $pathInfo !== '') {
+            $routePath = '/confirmemail' . $pathInfo;
+            $pathInfo = '';
+            if (isset($server['PATH_INFO'])) {
+                unset($server['PATH_INFO']);
+            }
+        }
+
         $method = $request->getMethod();
         $query = $request->query->all();
 

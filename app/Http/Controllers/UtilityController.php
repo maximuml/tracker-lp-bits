@@ -365,7 +365,8 @@ XML;
 
     public function confirmemail(Request $request): Response|RedirectResponse
     {
-        $pathInfo = (string) ($request->server->get('PATH_INFO') ?: $request->getPathInfo() ?: '');
+        $routePath = $request->route('path') ?? '';
+        $pathInfo = $routePath !== '' ? '/' . ltrim((string) $routePath, '/') : '';
         if (! preg_match(':^/(\d{1,10})/([\w]{32})/(.+)$:', $pathInfo, $matches)) {
             abort(404);
         }

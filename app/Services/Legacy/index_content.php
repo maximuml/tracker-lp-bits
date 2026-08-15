@@ -609,7 +609,6 @@ if ($showtrackerload == "yes") {
 <?php
 // ------------- end: browser, client and code note ------------------//
 if ($CURUSER) {
-	\App\Models\User::where('id', $CURUSER["id"])->update(['last_home' => now()]);
+	$Cache->delete_value('user_'.$CURUSER["id"].'_unread_news_count');
 }
-$Cache->delete_value('user_'.$CURUSER["id"].'_unread_news_count');
 ?>

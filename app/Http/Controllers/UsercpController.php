@@ -46,13 +46,15 @@ class UsercpController extends LegacyController
      */
     public function legacy(Request $request): View|RedirectResponse
     {
-        if (SupportContext::getUser() === null) {
+        $user = SupportContext::getUser();
+        if ($user === null) {
             $qs = $request->getQueryString();
 
             return redirect('/usercp.php' . ($qs ? '?' . $qs : ''));
         }
 
-        $result = $this->renderer->render('usercp');
+        $userInfo = $this->repository->getUserById((int) $user['id']);
+        $result = $this->renderer->render('usercp', ['tokens' => $this->repository->getUserTokens($userInfo)]);
         if ($result instanceof RedirectResponse) {
             return $result;
         }

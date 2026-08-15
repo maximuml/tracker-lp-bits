@@ -74,6 +74,11 @@ class IndexRepository
         ];
     }
 
+    public static function touchLastHome(int $userId): bool
+    {
+        return (bool) User::query()->where('id', $userId)->update(['last_home' => now()]);
+    }
+
     /** @return  array<int|string, mixed> */
     public static function getTorrentStats(): array
     {

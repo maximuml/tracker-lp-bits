@@ -791,18 +791,18 @@ $columnPermission = \App\Support\Locale::trans('token.permission', [], null);
 $columnCreatedAt = \App\Support\Locale::trans('label.created_at', [], null);
 $actionCreate = \App\Support\Locale::trans('label.create', [], null);
 $actionLabel = \App\Support\Locale::trans('label.action', [], null);
-$res = $userInfo->tokens()->orderBy("id", "desc")->get();
-if ($res->count() > 0)
+$tokens = $tokens ?? [];
+if (!empty($tokens))
 {
     $token .= "<table border='1' cellspacing='0' cellpadding='5' id='token-table'><tr><td class='colhead'>ID</td><td class='colhead'>{$columnName}</td><td class='colhead'>{$columnPermission}</td><td class='colhead'>{$columnCreatedAt}</td><td class='colhead'>{$actionLabel}</td></tr>";
-    foreach ($res as $tokenRecord)
+    foreach ($tokens as $tokenRecord)
     {
         $token .= "<tr>";
-        $token .= sprintf('<td>%s</td>', $tokenRecord->id);
-        $token .= sprintf('<td>%s</td>', $tokenRecord->name);
-        $token .= sprintf('<td>%s</td>', $tokenRecord->abilitiesText);
-        $token .= sprintf('<td>%s</td>', $tokenRecord->created_at);
-        $token .= sprintf('<td><img style="cursor: pointer" class="staff_delete token-del" src="pic/trans.gif" alt="D" title="%s" data-id="%s"></td>', $lang_functions['text_delete'], $tokenRecord->id);
+        $token .= sprintf('<td>%s</td>', $tokenRecord['id']);
+        $token .= sprintf('<td>%s</td>', $tokenRecord['name']);
+        $token .= sprintf('<td>%s</td>', $tokenRecord['abilitiesText']);
+        $token .= sprintf('<td>%s</td>', $tokenRecord['created_at']);
+        $token .= sprintf('<td><img style="cursor: pointer" class="staff_delete token-del" src="pic/trans.gif" alt="D" title="%s" data-id="%s"></td>', $lang_functions['text_delete'], $tokenRecord['id']);
         $token .= "</tr>";
     }
     $token .= '</table>';

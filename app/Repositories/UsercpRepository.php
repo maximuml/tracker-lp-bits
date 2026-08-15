@@ -23,6 +23,35 @@ final class UsercpRepository extends BaseRepository
     }
 
     /**
+     * @return  array<int, array<string, mixed>>
+     */
+    public static function getUserTokens(User $user): array
+    {
+        $tokens = [];
+        foreach ($user->tokens()->orderBy('id', 'desc')->get() as $token) {
+            $abilities = $token->abilities ?? [];
+            if (in_array('*', $abilities, true)) {
+                $abilitiesText = 'ALL';
+            } else {
+                $parts = [];
+                foreach ($abilities as $ability) {
+                    $parts[] = \App\Support\Locale::trans("route-permission.{$ability}.text", [], null);
+                }
+                $abilitiesText = implode(', ', $parts);
+            }
+
+            $tokens[] = [
+                'id' => $token->id,
+                'name' => $token->name,
+                'abilitiesText' => $abilitiesText,
+                'created_at' => $token->created_at,
+            ];
+        }
+
+        return $tokens;
+    }
+
+    /**
      * @param  array<string, mixed>  $data
      */
     public static function updateUser(int $userId, array $data): bool

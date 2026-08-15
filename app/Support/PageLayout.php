@@ -351,7 +351,7 @@ class PageLayout
             ?>"><?php 
             echo $context->lang['text_send'];
             ?></a>]: <?php 
-            echo sprintf('%s(%s)', $context->user['invites'], \App\Models\Invite::query()->where('inviter', $context->user['id'])->where('invitee', '')->where('expired_at', '>', now())->count());
+            echo sprintf('%s(%s)', $context->user['invites'], (new \App\Repositories\PageLayoutRepository())->getPendingInviteCount((int) $context->user['id']));
             ?>
                 <?php 
             if ($context->userClass() >= \App\Models\User::getAccessAdminClassMin()) {

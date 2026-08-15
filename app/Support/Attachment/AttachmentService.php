@@ -40,13 +40,7 @@ class AttachmentService
 
 	function set_count_so_far(): void
 	{
-		$userid = $this->userid;
-		$now = date("Y-m-d H:i:s", TIMENOW-86400);
-		$countsofar = \Nexus\Database\NexusDB::table('attachments')
-			->where('userid', $userid)
-			->where('added', '>', $now)
-			->count();
-		$this->countsofar = (int) $countsofar;
+		$this->countsofar = \App\Repositories\AttachmentRepository::countRecentForUser($this->userid);
 	}
 
 	function get_count_so_far(): int

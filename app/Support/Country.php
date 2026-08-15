@@ -2,8 +2,6 @@
 
 namespace App\Support;
 
-use Nexus\Database\NexusDB;
-
 /**
  * Legacy country helper extracted from `include/functions.php`.
  *
@@ -26,8 +24,7 @@ final class Country
         $row = method_exists($cache, 'get_value') ? $cache->get_value($cacheKey) : false;
 
         if ($row === false) {
-            $result = NexusDB::table('countries')->where('id', $id)->first();
-            $row = $result ? (array) $result : null;
+            $row = \App\Repositories\CountryRepository::findById($id);
             if (method_exists($cache, 'cache_value')) {
                 $cache->cache_value($cacheKey, $row, 86400);
             }

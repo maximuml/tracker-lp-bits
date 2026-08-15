@@ -2,7 +2,7 @@
 
 namespace App\Support;
 
-use Nexus\Database\NexusDB;
+use App\Repositories\StyleRepository;
 
 /**
  * Legacy stylesheet helpers extracted from `include/functions.php`.
@@ -36,11 +36,7 @@ final class Style
             if ($cached !== false) {
                 self::$stylesheetRows = is_array($cached) ? $cached : [];
             } else {
-                self::$stylesheetRows = [];
-                foreach (NexusDB::table('stylesheets')->orderBy('id')->get() as $row) {
-                    $row = (array) $row;
-                    self::$stylesheetRows[$row['id']] = $row;
-                }
+                self::$stylesheetRows = StyleRepository::all();
                 if ((is_object($cache) || is_string($cache)) && method_exists($cache, 'cache_value')) {
                     $cache->cache_value('stylesheet_content', self::$stylesheetRows, 95400);
                 }
@@ -62,7 +58,7 @@ final class Style
     public static function cssUri(mixed $cache, int|string $cssId, int|string $defaultId, string $file = ''): string
     {
         $row = self::cssRow($cache, $cssId, $defaultId);
-        $uri = $row['uri'] ?? NexusDB::table('stylesheets')->where('id', $defaultId)->value('uri');
+        $uri = $row['uri'] ?? StyleRepository::uri($defaultId);
 
         return $file === '' ? (string) $uri : (string) $uri . $file;
     }
@@ -106,14 +102,15 @@ final class Style
      */
     public static function highlightColor(?int $userStyleId): string
     {
+        $fallback = StyleRepository::highlightColor(5) ?? '';
         if ($userStyleId !== null && $userStyleId > 0) {
-            $hltr = NexusDB::table('stylesheets')->where('id', $userStyleId)->value('hltr');
+            $hltr = StyleRepository::highlightColor($userStyleId) ?? '';
             if (! empty($hltr)) {
                 return (string) $hltr;
             }
         }
 
-        return (string) (NexusDB::table('stylesheets')->where('id', 5)->value('hltr') ?? '');
+        return (string) $fallback;
     }
 
     /**

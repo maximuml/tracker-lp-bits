@@ -995,9 +995,12 @@ class SearchRepository extends BaseRepository
         return true;
     }
 
-
-
-
-
-
+    public static function addSuggestion(string $keyword, int $userId, bool $preEscaped = false): void
+    {
+        NexusDB::table('suggest')->insert([
+            'keywords' => $preEscaped ? stripslashes($keyword) : $keyword,
+            'userid' => $userId,
+            'adddate' => date('Y-m-d H:i:s'),
+        ]);
+    }
 }

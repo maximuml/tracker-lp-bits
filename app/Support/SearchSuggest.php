@@ -27,10 +27,6 @@ final class SearchSuggest
             return;
         }
 
-        NexusDB::table('suggest')->insert([
-            'keywords' => $preEscaped ? stripslashes($keyword) : $keyword,
-            'userid' => $userId,
-            'adddate' => date('Y-m-d H:i:s'),
-        ]);
+        \App\Repositories\SearchRepository::addSuggestion($keyword, $userId, $preEscaped);
     }
 }

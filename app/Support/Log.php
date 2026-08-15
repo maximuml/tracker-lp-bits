@@ -15,12 +15,7 @@ final class Log
 {
     public static function write(string $text, string $security = 'normal', ?int $userId = null): void
     {
-        SiteLog::query()->insert([
-            'added' => now(),
-            'txt' => $text,
-            'security_level' => $security,
-            'uid' => $userId ?? 0,
-        ]);
+        \App\Repositories\SiteLogRepository::create($text, $security, $userId);
     }
 
     public static function writeWithContext(string $text, string $security = 'normal'): void

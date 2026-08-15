@@ -126,10 +126,9 @@ class TorrentDetailsController extends Controller
     /**
      * @param array<int|string, mixed> $row
      * @param array<int|string, mixed> $currentUser
+     * @param array<int, int> $tagIds
+     * @param array<string, mixed> $requestFlags
      * @return array<string, mixed>
-     */
-    /**
-     * @param array<int|string, mixed> $requestFlags
      */
     private function buildDetailsViewData(int $id, array $row, array $currentUser, User $user, ?TorrentOperationLog $denyLog, bool $hasBuy, array $tagIds, array $requestFlags): array
     {

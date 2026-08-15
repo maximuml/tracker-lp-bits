@@ -4,7 +4,7 @@ $row = $torrentRow;
 $row['cat_mode'] = $row['search_box_id'] ?? $row['cat_mode'] ?? null;
 $CURUSER = $currentUser;
 $tagIds = (array) ($tagIds ?? []);
-$__server_REQUEST_URI = \App\Support\SupportContext::getServerValue('REQUEST_URI');
+$__server_REQUEST_URI = (string) ($requestUri ?? '');
 if (!$id) {
     \App\Support\LegacyResponse::abort('Error', 'Invalid torrent id', true, false);
 }
@@ -16,11 +16,7 @@ if (empty($row)) {
  * custom fields
  * @since v1.6
  */
-$customField = new \Nexus\Field\Field();
-$hitAndRunRep = new \App\Repositories\HitAndRunRepository();
-$tagRep = new \App\Repositories\TagRepository();
-$tagIdArr = $tagIds;
-$searchBoxRep = new \App\Repositories\SearchBoxRepository();
+$tagIdArr = (array) ($tagIds ?? []);
 $sectionmode = $row['cat_mode'];
 /*
 $showsource = (get_searchbox_value($sectionmode, 'showsource') || ($allowmove && get_searchbox_value($othermode, 'showsource'))); //whether show sources or not
@@ -37,8 +33,8 @@ if (!(isset($CURUSER)) || ($CURUSER["id"] != $row["owner"] && !\App\Auth\Permiss
 else {
 	print("<form method=\"post\" id=\"compose\" name=\"edittorrent\" action=\"takeedit.php\" enctype=\"multipart/form-data\">");
 	print("<input type=\"hidden\" name=\"id\" value=\"$id\" />");
-	if (((\App\Support\SupportContext::getQuery("returnto") !== null)))
-	print("<input type=\"hidden\" name=\"returnto\" value=\"" . htmlspecialchars(\App\Support\SupportContext::getQuery("returnto")) . "\" />");
+	if (($returnto ?? '') !== '')
+	print("<input type=\"hidden\" name=\"returnto\" value=\"" . htmlspecialchars($returnto) . "\" />");
 	print("<table border=\"1\" cellspacing=\"0\" cellpadding=\"5\" width=\"97%\">\n");
 	print("<tr><td class='colhead' colspan='2' align='center'>".htmlspecialchars($row["name"])."</td></tr>");
 	\App\Support\Html::tr($lang_edit['row_torrent_name']."<font color=\"red\">*</font>", "<input type=\"text\" style=\"width: 99%;\" name=\"name\" value=\"" . htmlspecialchars($row["name"]) . "\" />", 1);
@@ -109,11 +105,11 @@ else {
 
 */
 
-    $select = $searchBoxRep->renderTaxonomySelect($sectionmode, $row);
+    $select = (string) ($taxonomySelect ?? '');
     \App\Support\Html::tr($lang_edit['row_quality'], $select, 1, "mode_$sectionmode");
-    echo $customField->renderOnUploadPage($id, $sectionmode);
-    echo $hitAndRunRep->renderOnUploadPage($row['hr'], $sectionmode);
-    \App\Support\Html::tr($lang_functions['text_tags'], $tagRep->renderCheckbox($sectionmode, $tagIdArr), 1, "mode_$sectionmode");
+    echo (string) ($customFieldsHtml ?? '');
+    echo (string) ($hitAndRunHtml ?? '');
+    \App\Support\Html::tr($lang_functions['text_tags'], (string) ($tagCheckbox ?? ''), 1, "mode_$sectionmode");
 
 	$rowChecks = [];
 	if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::BE_ANONYMOUS) || \App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::TORRENT_MANAGE)) {
@@ -162,8 +158,8 @@ else {
         print("<br /><br />");
         print("<form method=\"post\" action=\"delete.php\">\n");
         print("<input type=\"hidden\" name=\"id\" value=\"$id\" />\n");
-        if (((\App\Support\SupportContext::getQuery("returnto") !== null)))
-            print("<input type=\"hidden\" name=\"returnto\" value=\"" . htmlspecialchars(\App\Support\SupportContext::getQuery("returnto")) . "\" />\n");
+        if (($returnto ?? '') !== '')
+            print("<input type=\"hidden\" name=\"returnto\" value=\"" . htmlspecialchars($returnto) . "\" />\n");
         print("<table border=\"1\" cellspacing=\"0\" cellpadding=\"5\">\n");
         print("<tr><td class=\"colhead\" align=\"left\" style='padding-bottom: 3px' colspan=\"2\">".$lang_edit['text_delete_torrent']."</td></tr>");
         \App\Support\Html::tr("<input name=\"reasontype\" type=\"radio\" value=\"1\" />&nbsp;".$lang_edit['radio_dead'], $lang_edit['text_dead_note'], 1);

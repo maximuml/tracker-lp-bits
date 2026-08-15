@@ -20,8 +20,12 @@ class UsercpController extends LegacyController
     /**
      * @return array<string, mixed>
      */
-    public function settings(): array
+    public function settings(Request $request): array
     {
+        if ($request->isMethod('POST')) {
+            return $this->success($this->repository->updatePersonal($request));
+        }
+
         return $this->success($this->repository->settings());
     }
 

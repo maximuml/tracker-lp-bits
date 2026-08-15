@@ -77,6 +77,19 @@ class ModerationRepository extends BaseRepository
             ->all();
     }
 
+    /**
+     * @return  array<int, array<string, mixed>>
+     */
+    public function findMatchingBans(int $nip): array
+    {
+        return NexusDB::table('bans')
+            ->where('first', '<=', $nip)
+            ->where('last', '>=', $nip)
+            ->get(['first', 'last', 'comment'])
+            ->map(fn ($r) => (array) $r)
+            ->all();
+    }
+
     public function countIplogDistinct(int $userId): int
     {
         return (int) NexusDB::table('iplog')->where('userid', $userId)->distinct('access')->count('access');

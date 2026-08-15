@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Models\UserBanLog;
 use App\Repositories\AdminStatsRepository;
 use App\Repositories\BonusRepository;
+use App\Repositories\ModerationRepository;
 use App\Repositories\UserRepository;
 use App\Support\Format;
 use App\Support\Html;
@@ -37,6 +38,13 @@ use Nexus\Database\NexusDB;
 
 class AdminController extends LegacyController
 {
+    private ModerationRepository $moderationRepository;
+
+    public function __construct(ModerationRepository $moderationRepository)
+    {
+        $this->moderationRepository = $moderationRepository;
+    }
+
     public function donorlist(Request $request): View|RedirectResponse|Response
     {
         if (UserDisplay::currentClass() <= (defined('UC_MODERATOR') ? \constant('UC_MODERATOR') : 0)) {
@@ -933,8 +941,8 @@ EOD;
             if ($nip === false || $nip === -1) {
                 return $this->legacyAbortResponse('Error', 'Bad IP.');
             }
-            $rows = NexusDB::table('bans')->where('first', '<=', $nip)->where('last', '>=', $nip)->get();
-            if ($rows->isEmpty()) {
+            $rows = $this->moderationRepository->findMatchingBans((int) $nip);
+            if (empty($rows)) {
                 $message = 'The IP address <b>' . htmlspecialchars($ip) . '</b> is not banned.';
                 $hasResult = true;
             } else {

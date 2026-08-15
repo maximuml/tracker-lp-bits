@@ -18,6 +18,7 @@ use App\Support\SupportContext;
 use App\Support\UserClass;
 use App\Support\UserDisplay;
 use App\Support\Validators;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -583,11 +584,32 @@ class SystemController extends LegacyController
 
     }
 
-    public function setlistLookup(Request $request): Response|RedirectResponse
+    public function setlistLookup(Request $request): JsonResponse
     {
+        $name = trim((string) $request->input('name', ''));
+        $url = trim((string) $request->input('url', ''));
 
-        return $this->legacyPageRaw($request, 'setlist_lookup', true);
+        if ($name === '' && $url === '') {
+            return response()->json(['success' => false, 'error' => 'Torrent name or setlist URL is required.']);
+        }
 
+        try {
+            if ($url !== '') {
+                $host = parse_url($url, PHP_URL_HOST) ?: '';
+                if (! in_array(strtolower($host), ['www.setlist.fm', 'setlist.fm'], true)) {
+                    return response()->json(['success' => false, 'error' => 'Only setlist.fm URLs are allowed.']);
+                }
+                $result = \App\Support\SetlistLookup::fromUrl($url);
+            } else {
+                $result = \App\Support\SetlistLookup::fromTorrentName($name);
+            }
+
+            return response()->json($result);
+        } catch (\Throwable $e) {
+            \App\Support\Logger::writeWithContext((string) ($e->getMessage() . "\n" . $e->getTraceAsString()), (string) 'error', (bool) false);
+
+            return response()->json(['success' => false, 'error' => 'Setlist lookup failed.']);
+        }
     }
 
     public function takeIncrementBulk(Request $request): Response|RedirectResponse

@@ -22,6 +22,7 @@ enum RoutePermissionEnum: string
 
     /* Users (profile / self) */
     case USER_ME = 'user:me';
+    case USERCP_SETTINGS = 'usercp:settings';
     case USER_VIEW = 'user:view';
     case USER_TORRENTS = 'user:torrents';
     case USER_CLASSES = 'user:classes';

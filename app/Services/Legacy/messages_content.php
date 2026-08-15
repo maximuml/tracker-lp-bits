@@ -223,10 +223,6 @@ if (!$pm_id)
 
 // Get the message
 $messageModel = \App\Repositories\MessageRepository::getMessageForUser($pm_id, (int) $CURUSER['id']);
-if (!$messageModel) {
-    header("Location: messages.php");
-    return;
-}
 $message = $messageModel->toArray();
 // Prepare for displaying message
 if ($message['sender'] == $CURUSER['id'])
@@ -308,93 +304,6 @@ href="messages.php?action=forward&id=<?php echo $pm_id?>"><?php echo $lang_messa
 </tr>
 </table>
 <?php
-}
-if ($action == "moveordel")
-{
-$pm_id = intval(\App\Support\SupportContext::getPost('id') ?? 0);
-$pm_box = intval(\App\Support\SupportContext::getPost('box') ?? 0);
-$pm_messages = \App\Support\SupportContext::getPost('messages');
-if (\App\Support\SupportContext::getPost('markread'))
-{
-	if ($pm_id)
-	{
-//Mark a single message as read
-$updated = \App\Repositories\MessageRepository::markAsRead($pm_id, (int) $CURUSER['id']);
-	}
-	else
-	{
-        if (empty($pm_messages)) {
-            \App\Support\LegacyResponse::abort('Error', $lang_functions['select_at_least_one_record']);
-        }
-// Mark multiple messages as read
-$updated = \App\Repositories\MessageRepository::markAsRead($pm_messages, (int) $CURUSER['id']);
-	}
-	$Cache->delete_value('user_'.$CURUSER['id'].'_unread_message_count');
-// Check if messages were moved
-if ($updated == 0)
-	{
-	\App\Support\LegacyResponse::abort($lang_messages['std_error'], $lang_messages['std_cannot_mark_messages']);
-	}
-
-	header("Location: messages.php?action=viewmailbox&box=" . $pm_box);
-	return;
-}
-elseif (\App\Support\SupportContext::getPost('move'))
-{
-if ($pm_id)
-{
-// Move a single message
-$updated = \App\Repositories\MessageRepository::moveMessages($pm_id, (int) $CURUSER['id'], (int) $pm_box);
-
-}
-else
-{
-// Move multiple messages
-$updated = \App\Repositories\MessageRepository::moveMessages($pm_messages, (int) $CURUSER['id'], (int) $pm_box);
-}
-// Check if messages were moved
-if ($updated == 0)
-{
-\App\Support\LegacyResponse::abort($lang_messages['std_error'], $lang_messages['std_cannot_move_messages']);
-}
-	$Cache->delete_value('user_'.$CURUSER['id'].'_unread_message_count');
-	$Cache->delete_value('user_'.$CURUSER['id'].'_inbox_count');
-	$Cache->delete_value('user_'.$CURUSER["id"].'_outbox_count');
-header("Location: messages.php?action=viewmailbox&box=" . $pm_box);
-return;
-}
-elseif (\App\Support\SupportContext::getPost('delete'))
-{
-if ($pm_id)
-{
-// Delete a single message
-$message = \App\Repositories\MessageRepository::deleteSingleMessage($pm_id, (int) $CURUSER['id']);
-$deletedCount = $message ? 1 : 0;
-if (!$message)
-    \App\Support\LegacyResponse::abort($lang_messages['std_error'], $lang_messages['std_cannot_delete_messages']);
-}
-else
-{
-if (!$pm_messages)
-\App\Support\LegacyResponse::abort($lang_messages['std_error'], $lang_messages['std_no_message_selected']);
-// Delete multiple messages
-$deletedCount = \App\Repositories\MessageRepository::deleteMultipleMessages($pm_messages, (int) $CURUSER['id']);
-}
-$Cache->delete_value('user_'.$CURUSER['id'].'_unread_message_count');
-$Cache->delete_value('user_'.$CURUSER['id'].'_inbox_count');
-$Cache->delete_value('user_'.$CURUSER["id"].'_outbox_count');
-// Check if messages were moved
-if ($deletedCount == 0)
-{
-\App\Support\LegacyResponse::abort($lang_messages['std_error'], $lang_messages['std_cannot_delete_messages']);
-}
-else
-{
-header("Location: messages.php?action=viewmailbox");
-return;
-}
-}
-\App\Support\LegacyResponse::abort($lang_messages['std_error'], $lang_messages['std_no_action']);
 }
 
 
@@ -512,63 +421,4 @@ echo("<input type=\"submit\" value=".$lang_messages['submit_edit'].">");
 </tr>
 </table>
 <?php
-}
-if ($action == "editmailboxes2")
-{
-$action2 = (string) \App\Support\SupportContext::getQuery('action2');
-if (!$action2)
-{
-\App\Support\LegacyResponse::abort($lang_messages['std_error'], $lang_messages['std_no_action']);
-}
-if ($action2 == "add")
-{
-$nameone = \App\Support\SupportContext::getQuery('new1');
-$nametwo = \App\Support\SupportContext::getQuery('new2');
-$namethree = \App\Support\SupportContext::getQuery('new3');
-
-\App\Repositories\MessageRepository::addMailboxes((int) $CURUSER['id'], [$nameone, $nametwo, $namethree]);
-header("Location: messages.php?action=editmailboxes");
-return;
-}
-if ($action2 == "edit");
-{
-$pmBoxes = \App\Repositories\MessageRepository::getUserMailboxes((int) $CURUSER['id']);
-if ($pmBoxes->isEmpty())
-{
-\App\Support\LegacyResponse::abort($lang_messages['std_error'], $lang_messages['text_no_mailboxes_to_edit']);
-}
-foreach ($pmBoxes as $pmBox)
-{
-$newValue = (string) (\App\Support\SupportContext::getQuery('edit' . $pmBox->id) ?? '');
-if ($newValue !== '' && $newValue !== $pmBox->name)
-{
-\App\Repositories\MessageRepository::updateMailbox((int) $CURUSER['id'], (int) $pmBox->id, $newValue);
-}
-elseif ($newValue === '')
-{
-\App\Repositories\MessageRepository::deleteMailbox((int) $CURUSER['id'], (int) $pmBox->id, (int) $pmBox->boxnumber);
-}
-}
-header("Location: messages.php?action=editmailboxes");
-return;
-}
-}
-if ($action == "deletemessage")
-{
-$pm_id = (int) \App\Support\SupportContext::getQuery('id');
-
-// Delete message
-// Delete message
-$message = \App\Repositories\MessageRepository::deleteSingleMessage($pm_id, (int) $CURUSER['id']);
-if (!$message)
-    \App\Support\LegacyResponse::abort($lang_messages['std_error'], $lang_messages['std_no_message_id']);
-if ($message === null)
-{
-\App\Support\LegacyResponse::abort($lang_messages['std_error'], $lang_messages['std_could_not_delete_message']);
-}
-else
-{
-header("Location: messages.php?action=viewmailbox&id=" . $message['location']);
-return;
-}
 }

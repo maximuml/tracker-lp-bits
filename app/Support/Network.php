@@ -418,7 +418,7 @@ final class Network
                 return $cacheResult !== $notFoundCacheValue;
             }
 
-            $id = \Nexus\Database\NexusDB::table('seed_box_records')->where('asn', $asn)->value('id');
+            $id = \App\Repositories\SeedBoxRepository::findIdByAsn($asn);
             if ($id !== null) {
                 $redis->hSet($key, $asn, $id);
             } else {

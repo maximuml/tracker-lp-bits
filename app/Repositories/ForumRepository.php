@@ -763,4 +763,40 @@ class ForumRepository extends BaseRepository
             ->where('topics.forumid', $forumid)
             ->count('posts.id');
     }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public static function getPostArrayById(int $id): array
+    {
+        return Post::query()->findOrFail($id)->toArray();
+    }
+
+    public static function getTopicById(int $id): Topic
+    {
+        return Topic::query()->findOrFail($id);
+    }
+
+    /**
+     * @return array<int, int>
+     */
+    public static function getForumMods(): array
+    {
+        $mods = [];
+        foreach (\App\Models\ForumMod::query()->get() as $item) {
+            $mods[(int) $item->forumid] = (int) $item->userid;
+        }
+
+        return $mods;
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    public static function findPostArrayById(int $id): ?array
+    {
+        $post = Post::query()->where('id', $id)->first();
+
+        return $post ? $post->toArray() : null;
+    }
 }

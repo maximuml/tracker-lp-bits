@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Repositories\IndexRepository;
+use App\Services\Legacy\LegacyPartialRenderer;
 use App\Support\SupportContext;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -10,6 +11,13 @@ use Illuminate\View\View;
 
 class IndexController extends Controller
 {
+    private LegacyPartialRenderer $renderer;
+
+    public function __construct(LegacyPartialRenderer $renderer)
+    {
+        $this->renderer = $renderer;
+    }
+
     public function legacy(Request $request): View|RedirectResponse
     {
         if (SupportContext::getUser() === null) {
@@ -21,7 +29,12 @@ class IndexController extends Controller
             return $this->handlePollVote($request);
         }
 
-        return view('index.index');
+        $result = $this->renderer->render('index');
+        if ($result instanceof RedirectResponse) {
+            return $result;
+        }
+
+        return view('index.index', $result);
     }
 
     private function handlePollVote(Request $request): RedirectResponse

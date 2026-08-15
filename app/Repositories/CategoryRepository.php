@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
-use Illuminate\Support\Facades\File;
+use App\Support\SupportContext;
 
 /**
  * Bridge for legacy category management pages until full Blade migration.
@@ -18,14 +18,18 @@ final class CategoryRepository
      */
     public static function render(array $data = []): string
     {
-        extract($data);
-        $partial = base_path('resources/legacy/catmanage.php');
-        if (! File::exists($partial)) {
+        $partial = __DIR__ . '/../Services/Legacy/catmanage_content.php';
+        if (! is_file($partial)) {
             return 'Legacy catmanage partial missing.';
         }
+
+        extract(SupportContext::getGlobalsForView());
+        extract($data);
+
         ob_start();
         /** @noinspection PhpIncludeInspection */
         include $partial;
+
         return (string) ob_get_clean();
     }
 }

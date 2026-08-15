@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Setting;
 use App\Models\User;
 use App\Repositories\SearchPageRepository;
+use App\Services\Legacy\LegacyPartialRenderer;
 use App\Support\SupportContext;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -15,6 +16,13 @@ use Illuminate\View\View;
 
 class UtilityController extends LegacyController
 {
+    private LegacyPartialRenderer $renderer;
+
+    public function __construct(LegacyPartialRenderer $renderer)
+    {
+        $this->renderer = $renderer;
+    }
+
     public function search(Request $request): View|RedirectResponse
     {
         $curUser = SupportContext::getUser() ?? [];
@@ -32,7 +40,12 @@ class UtilityController extends LegacyController
 
     public function usersearch(Request $request): View|RedirectResponse
     {
-        return $this->legacyPage($request, 'usersearch');
+        $result = $this->renderer->render('usersearch');
+        if ($result instanceof RedirectResponse) {
+            return $result;
+        }
+
+        return $this->legacyPage($request, 'usersearch', true, $result);
     }
 
     public function ajax(Request $request): JsonResponse|RedirectResponse

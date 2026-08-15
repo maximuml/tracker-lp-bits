@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\HitAndRun;
 use App\Models\User;
+use App\Services\Legacy\LegacyPartialRenderer;
 use App\Support\LegacyResponse;
 use App\Support\Pagination;
 use App\Support\Permissions;
@@ -15,6 +16,13 @@ use Illuminate\View\View;
 
 class MyController extends Controller
 {
+    private LegacyPartialRenderer $renderer;
+
+    public function __construct(LegacyPartialRenderer $renderer)
+    {
+        $this->renderer = $renderer;
+    }
+
     public function bonus(Request $request): View|RedirectResponse
     {
         if (SupportContext::getUser() === null) {
@@ -22,7 +30,12 @@ class MyController extends Controller
             return redirect('/mybonus.php' . ($qs ? '?' . $qs : ''));
         }
 
-        return view('my.bonus');
+        $result = $this->renderer->render('my_bonus');
+        if ($result instanceof RedirectResponse) {
+            return $result;
+        }
+
+        return view('my.bonus', $result);
     }
 
     public function hr(Request $request): View|RedirectResponse

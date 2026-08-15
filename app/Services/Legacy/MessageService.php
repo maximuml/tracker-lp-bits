@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Legacy;
 
+use App\Repositories\MessageRepository;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -19,9 +20,24 @@ use Illuminate\Http\Response;
  */
 final class MessageService
 {
-    public function messages(Request $request): Response|RedirectResponse
+    private MessageRepository $repository;
+
+    public function __construct(MessageRepository $repository)
     {
-        return $this->renderPartial('messages');
+        $this->repository = $repository;
+    }
+
+    /**
+     * @return array<string, mixed>|RedirectResponse
+     */
+    public function messages(Request $request): array|RedirectResponse
+    {
+        $result = $this->renderMessages();
+        if ($result instanceof RedirectResponse) {
+            return $result;
+        }
+
+        return ['content' => $result->getContent()];
     }
 
     public function sendmessage(Request $request): Response|RedirectResponse
@@ -37,6 +53,37 @@ final class MessageService
     public function deletemessage(Request $request): Response|RedirectResponse
     {
         return $this->renderPartial('deletemessage');
+    }
+
+    private function renderMessages(): Response|RedirectResponse
+    {
+        $path = __DIR__ . '/messages_content.php';
+
+        if (! file_exists($path)) {
+            return response('Legacy content missing: messages', 500);
+        }
+
+        ob_start();
+        try {
+            include $path;
+        } catch (HttpResponseException $e) {
+            ob_get_clean();
+
+            throw $e;
+        }
+
+        $content = (string) ob_get_clean();
+
+        foreach (headers_list() as $header) {
+            if (stripos($header, 'Location:') === 0) {
+                $url = trim(substr($header, 9));
+                header_remove('Location');
+
+                return redirect($url);
+            }
+        }
+
+        return response($content);
     }
 
     private function renderPartial(string $name): Response|RedirectResponse

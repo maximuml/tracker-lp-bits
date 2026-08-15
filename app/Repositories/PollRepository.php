@@ -1,100 +1,124 @@
 <?php
+
 namespace App\Repositories;
 
-use App\Models\Poll;
-use App\Models\Torrent;
-use App\Models\User;
-use Illuminate\Support\Facades\DB;
+use App\Support\SupportContext;
+use App\Support\UserDisplay;
+use Illuminate\Support\Facades\Cache;
+use Nexus\Database\NexusDB;
 
-class PollRepository extends BaseRepository
+class PollRepository
 {
     /**
-     * @param  array<int|string, mixed>  $params
-     * @return  mixed
+     * @return array<string, mixed>|null
      */
-    public function getList(array $params)
+    public static function findForEdit(int $id): ?array
     {
-        $query = Poll::query();
-        list($sortField, $sortType) = $this->getSortFieldAndType($params);
-        $query->orderBy($sortField, $sortType);
-        return $query->paginate();
-    }
-
-    /**
-     * @param  mixed  $torrentId
-     * @param  mixed  $value
-     * @param  \App\Models\User  $user
-     * @return  mixed
-     */
-    public function store($torrentId, $value, User $user)
-    {
-        if ($user->seedbonus < $value) {
-            throw new \LogicException("user bonus not enough.");
+        if ($id <= 0) {
+            return null;
         }
-        if ($user->reward_torrent_logs()->where('torrentid', $torrentId)->exists()) {
-            throw new \LogicException("user already reward this torrent.");
+        $row = NexusDB::table('polls')->where('id', $id)->first();
+        return $row ? (array) $row : null;
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    public static function lastPoll(): ?array
+    {
+        $row = NexusDB::table('polls')->orderByDesc('added')->first(['question', 'added']);
+        return $row ? (array) $row : null;
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    public static function createOrUpdate(array $data, ?int $id = null): int
+    {
+        if ($id) {
+            NexusDB::table('polls')->where('id', $id)->update($data);
+            $cache = SupportContext::getCache();
+            if ($cache !== null) {
+                $cache->delete_value('current_poll_content');
+                $cache->delete_value('current_poll_result', true);
+            }
+
+            return $id;
         }
-        $torrent = Torrent::query()->findOrFail($torrentId, ['owner']);
-        $torrentOwner = User::query()->findOrFail($torrent->owner, ['id', 'seedbonus']);
-        return DB::transaction(function () use ($torrentId, $value, $user, $torrentOwner) {
-            $model = $user->reward_torrent_logs()->create([
-                'torrentid' => $torrentId,
-                'value' => $value,
-            ]);
-            $affectedRows = $user->where('seedbonus', $user->seedbonus)->decrement('seedbonus', $value);
-            if ($affectedRows != 1) {
-                \App\Support\Logger::writeWithContext((string) ("affectedRows: {$affectedRows}, query: " . \App\Support\LegacyDb::lastQuery(false, 'json')), (string) 'error', (bool) false);
-                throw new \RuntimeException("decrement user bonus fail.");
+
+        $data['added'] = now()->toDateTimeString();
+        $newId = (int) NexusDB::table('polls')->insertGetId($data);
+
+        $cache = SupportContext::getCache();
+        if ($cache !== null) {
+            $cache->delete_value('current_poll_content');
+            $cache->delete_value('current_poll_result', true);
+        }
+
+        return $newId;
+    }
+
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    public static function listAll(): array
+    {
+        return NexusDB::table('polls')
+            ->orderByDesc('id')
+            ->get(['id', 'added', 'question'])
+            ->map(fn ($row) => (array) $row)
+            ->all();
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    public static function findWithOptions(int $id): ?array
+    {
+        $row = NexusDB::table('polls')->where('id', $id)->first();
+        return $row ? (array) $row : null;
+    }
+
+    public static function countAnswers(int $pollId): int
+    {
+        return (int) NexusDB::table('pollanswers')
+            ->where('pollid', $pollId)
+            ->where('selection', '<', 20)
+            ->count();
+    }
+
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    public static function answers(int $pollId, int $offset, int $perPage): array
+    {
+        return NexusDB::table('pollanswers')
+            ->leftJoin('users', 'pollanswers.userid', '=', 'users.id')
+            ->where('pollanswers.pollid', $pollId)
+            ->where('pollanswers.selection', '<', 20)
+            ->orderBy('users.username')
+            ->offset($offset)
+            ->limit($perPage)
+            ->get(['pollanswers.*', 'users.username'])
+            ->map(fn ($row) => (array) $row)
+            ->all();
+    }
+
+    /**
+     * @param  array<int, array<string, mixed>>  $answers
+     * @return array<int, string>
+     */
+    public static function userDisplayMap(array $answers): array
+    {
+        $ids = array_filter(array_unique(array_column($answers, 'userid')));
+        $map = [];
+        foreach ($ids as $id) {
+            $uid = (int) $id;
+            if ($uid > 0) {
+                $map[$uid] = UserDisplay::username($uid);
             }
-            $affectedRows = $torrentOwner->where('seedbonus', $torrentOwner->seedbonus)->increment('seedbonus', $value);
-            if ($affectedRows != 1) {
-                \App\Support\Logger::writeWithContext((string) ("affectedRows: {$affectedRows}, query: " . \App\Support\LegacyDb::lastQuery(false, 'json')), (string) 'error', (bool) false);
-                throw new \RuntimeException("increment owner bonus fail.");
-            }
-            return $model;
-        });
-    }
+        }
 
-    /**
-     * @param  array<int|string, mixed>  $params
-     * @param  mixed  $id
-     * @return  mixed
-     */
-    public function update(array $params, $id)
-    {
-        $model = Poll::query()->findOrFail($id);
-        $model->update($params);
-        return $model;
-    }
-
-    /**
-     * @param  mixed  $id
-     * @return  mixed
-     */
-    public function getDetail($id)
-    {
-        $model = Poll::query()->findOrFail($id);
-        return $model;
-    }
-
-    /**
-     * @param  mixed  $id
-     * @return  mixed
-     */
-    public function delete($id)
-    {
-        $model = Poll::query()->findOrFail($id);
-        $result = $model->delete();
-        return $result;
-    }
-
-    /**
-     * @param  mixed  $selection
-     * @param  \App\Models\User  $user
-     * @return  mixed
-     */
-    public function vote($selection, User $user)
-    {
-
+        return $map;
     }
 }

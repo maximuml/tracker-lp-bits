@@ -8,6 +8,7 @@ use App\Models\Forum;
 use App\Support\Forum as SupportForum;
 use App\Support\Permissions;
 use App\Support\SupportContext;
+use App\Repositories\CommentRepository;
 use App\Repositories\ForumRepository;
 use App\Support\UserClass;
 use App\Support\UserDisplay;
@@ -248,7 +249,27 @@ class ForumController extends LegacyController
 
     public function latestcomments(Request $request): View|RedirectResponse|Response
     {
-        return $this->legacyPage($request, 'latestcomments', true);
+        $perpage = 20;
+        $count = CommentRepository::countLatest();
+
+        [$pagertop, $pagerbottom, , $offset, $perpage] = \App\Support\Pagination::pager($perpage, $count, 'latestcomments.php?');
+        $rows = CommentRepository::getLatest($perpage, $offset);
+
+        $userIds = array_filter(array_unique(array_column($rows, 'user')));
+        $userDisplayMap = [];
+        foreach ($userIds as $uid) {
+            $userDisplayMap[(int) $uid] = UserDisplay::username((int) $uid, false, true, true, false, false, true);
+        }
+
+        return $this->legacyPage($request, 'latestcomments', true, [
+            'rows' => $rows,
+            'count' => $count,
+            'pagertop' => $pagertop,
+            'pagerbottom' => $pagerbottom,
+            'offset' => $offset,
+            'perpage' => $perpage,
+            'userDisplayMap' => $userDisplayMap,
+        ]);
     }
 
     /**

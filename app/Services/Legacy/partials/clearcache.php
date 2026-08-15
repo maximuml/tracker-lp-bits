@@ -1,40 +1,26 @@
 <?php
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
-// Auto-generated legacy bridge shims
 if (!isset($CURUSER)) $CURUSER = (array) (\App\Support\SupportContext::getUser() ?? []);
-if (!isset($Cache)) $Cache = \App\Support\SupportContext::getCache();
-if (!isset($BASEURL)) $BASEURL = \App\Support\SupportContext::getGlobal('BASEURL', '');
 if (!isset($lang_clearcache)) $lang_clearcache = (array) (\App\Support\SupportContext::getGlobal('lang_clearcache') ?? []);
 
-$__server_REQUEST_METHOD = \App\Support\SupportContext::getServerValue('REQUEST_METHOD');
-if (\App\Support\UserDisplay::currentClass() < UC_MODERATOR) {
-    \App\Support\LegacyResponse::abort('Error', 'Permission denied.');
-}
-$done = false;
-if ($__server_REQUEST_METHOD == 'POST') {
-    $cachename = \App\Support\SupportContext::getPost('cachename');
-    if ($cachename == '') {
-        \App\Support\LegacyResponse::abort('Error', 'You must fill in cache name.');
-    }
-    if (\App\Support\SupportContext::getPost('multilang') == 'yes') {
-        $Cache->delete_value($cachename, true);
-    } else {
-        $Cache->delete_value($cachename);
-    }
-    $done = true;
-}
+$done = (bool) ($done ?? false);
+$error = (string) ($error ?? '');
 ?>
 
 <h1>Clear cache</h1>
 <?php if ($done): ?>
     <p align="center"><font class="striking">Cache cleared</font></p>
 <?php endif; ?>
+<?php if ($error !== ''): ?>
+    <p align="center"><font class="striking"><?php echo htmlspecialchars($error); ?></font></p>
+<?php endif; ?>
 
 <form method="post" action="clearcache.php">
+<?php echo csrf_field(); ?>
 <table border="1" cellspacing="0" cellpadding="5">
     <tr><td class="rowhead">Cache name</td><td><input type="text" name="cachename" size="40"></td></tr>
-    <tr><td class="rowhead">Multi languages</td><td><input type="checkbox" name="multilang">Yes</td></tr>
+    <tr><td class="rowhead">Multi languages</td><td><input type="checkbox" name="multilang" value="yes">Yes</td></tr>
     <tr><td colspan="2" align="center"><input type="submit" value="Okay" class="btn"></td></tr>
 </table>
 </form>

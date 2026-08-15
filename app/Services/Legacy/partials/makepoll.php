@@ -1,99 +1,39 @@
 <?php
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
-// Auto-generated legacy bridge shims
 if (!isset($Cache)) $Cache = \App\Support\SupportContext::getCache();
-if (!isset($BASEURL)) $BASEURL = \App\Support\SupportContext::getGlobal('BASEURL', '');
 if (!isset($lang_makepoll)) $lang_makepoll = (array) (\App\Support\SupportContext::getGlobal('lang_makepoll') ?? []);
-$__server_HTTP_REFERER = \App\Support\SupportContext::getServerValue('HTTP_REFERER');
-$__server_REQUEST_METHOD = \App\Support\SupportContext::getServerValue('REQUEST_METHOD');
-$action = \App\Support\SupportContext::getQuery("action") ?? '';
-$pollid = intval(\App\Support\SupportContext::getQuery("pollid") ?? 0);
-$poll = [];
 
-if ($action == "edit")
-{
-	\App\Support\LegacyResponse::assertId($pollid, true);
-	$poll = (array) \Nexus\Database\NexusDB::table('polls')->where('id', $pollid)->first();
-	if (!$poll)
-		\App\Support\LegacyResponse::abort($lang_makepoll['std_error'], $lang_makepoll['std_no_poll_id']);
-}
+$poll = (array) ($poll ?? []);
+$pollid = (int) ($poll['id'] ?? 0);
+$ageWarning = (string) ($ageWarning ?? '');
+$returnto = (string) ($returnto ?? '');
 
-if ($__server_REQUEST_METHOD == "POST")
-{
-	$pollid = intval(\App\Support\SupportContext::getPost("pollid") ?? 0);
-	$question = htmlspecialchars(\App\Support\SupportContext::getPost("question"));
-	$returnto = htmlspecialchars(\App\Support\SupportContext::getPost("returnto"));
-	$options = [];
-	for ($i = 0; $i <= 19; $i++) {
-	    $key = "option$i";
-	    $options[$key] = htmlspecialchars(\App\Support\SupportContext::getPost($key) ?? '');
-	}
-
-	if (!$question || !$options['option0'] || !$options['option1'])
-		\App\Support\LegacyResponse::abort($lang_makepoll['std_error'], $lang_makepoll['std_missing_form_data']);
-
-	$data = array_merge(['question' => $question], $options);
-	if ($pollid) {
-	    \Nexus\Database\NexusDB::table('polls')->where('id', $pollid)->update($data);
-	} else {
-	    $data['added'] = date("Y-m-d H:i:s");
-	    \Nexus\Database\NexusDB::table('polls')->insert($data);
-	}
-
-	$Cache->delete_value('current_poll_content');
-	$Cache->delete_value('current_poll_result', true);
-  	if ($returnto == "main")
-		header("Location: " . \App\Support\Http::protocolPrefix(\App\Support\Url::isSecure()) . "$BASEURL");
-  	elseif ($pollid)
-		header("Location: " . \App\Support\Http::protocolPrefix(\App\Support\Url::isSecure()) . "$BASEURL/log.php?action=poll#$pollid");
-	else
-		header("Location: " . \App\Support\Http::protocolPrefix(\App\Support\Url::isSecure()) . "$BASEURL");
-	return;
-}
-
-if ($pollid){
-	print("<h1>".$lang_makepoll['text_edit_poll']."</h1>");
-}
-else
-{
-
-	// Warn if current poll is less than 3 days old
-	$lastPoll = (array) \Nexus\Database\NexusDB::table('polls')->orderByDesc('added')->first(['question', 'added']);
-	if ($lastPoll)
-	{
-		$hours = floor((strtotime(date("Y-m-d H:i:s")) - strtotime($lastPoll["added"])) / 3600);
-		$days = floor($hours / 24);
-		if ($days < 3)
-		{
-			if ($days >= 1)
-				$t = $days.$lang_makepoll['text_day'] . \App\Support\Strings::addS($days);
-			else
-				$t = $hours.$lang_makepoll['text_hour'] . \App\Support\Strings::addS($hours);
-			print("<p><font class=striking><b>".$lang_makepoll['text_current_poll']."(<i>" . $lastPoll["question"] . "</i>)".$lang_makepoll['text_is_only'].$t.$lang_makepoll['text_old']."</b></font></p>");
-		}
-	}
-	print("<h1>".$lang_makepoll['text_make_poll']."</h1>");
+if ($pollid > 0) {
+    print("<h1>" . ($lang_makepoll['text_edit_poll'] ?? 'Edit poll') . "</h1>");
+} else {
+    if ($ageWarning !== '') {
+        print("<p><font class=striking><b>" . $ageWarning . "</b></font></p>");
+    }
+    print("<h1>" . ($lang_makepoll['text_make_poll'] ?? 'Make poll') . "</h1>");
 }
 ?>
 
 <form method="post" action="makepoll.php">
+<?php echo csrf_field(); ?>
 <style type="text/css">
-input.mp
-{
-	width: 450px;
-}
+input.mp { width: 450px; }
 </style>
 <table border=1 cellspacing=0 cellpadding=5>
-<tr><td class=rowhead><?php echo $lang_makepoll['text_question']?> <font color=red>*</font></td><td align=left><input name=question class=mp maxlength=255 value="<?php echo $poll['question'] ?? ''?>"></td></tr>
+<tr><td class=rowhead><?php echo $lang_makepoll['text_question'] ?? 'Question'; ?> <font color=red>*</font></td><td align=left><input name=question class=mp maxlength=255 value="<?php echo htmlspecialchars((string) ($poll['question'] ?? '')); ?>"></td></tr>
 <?php for ($i = 0; $i <= 19; $i++) { ?>
-<tr><td class=rowhead><?php echo $lang_makepoll['text_option']?><?php echo $i + 1?><?php echo $i < 2 ? ' <font color=red>*</font>' : ''?></td><td align=left><input name=option<?php echo $i?> class=mp maxlength=40 value="<?php echo $poll["option$i"] ?? ''?>"><br /></td></tr>
+<tr><td class=rowhead><?php echo ($lang_makepoll['text_option'] ?? 'Option') . ($i + 1); ?><?php echo $i < 2 ? ' <font color=red>*</font>' : ''; ?></td><td align=left><input name=option<?php echo $i; ?> class=mp maxlength=40 value="<?php echo htmlspecialchars((string) ($poll["option{$i}"] ?? '')); ?>"><br /></td></tr>
 <?php } ?>
-<tr><td colspan=2 align=center><input type=submit value="<?php echo $pollid ? $lang_makepoll['submit_edit_poll'] : $lang_makepoll['submit_create_poll']?>" style='height: 20pt'></td></tr>
+<tr><td colspan=2 align=center><input type=submit value="<?php echo $pollid ? ($lang_makepoll['submit_edit_poll'] ?? 'Edit poll') : ($lang_makepoll['submit_create_poll'] ?? 'Create poll'); ?>" style='height: 20pt'></td></tr>
 </table>
-<p><font color=red>*</font><?php echo $lang_makepoll['text_required']?></p>
-<?php if ($pollid): ?>
-<input type=hidden name=pollid value="<?php echo $poll["id"]?>">
+<p><font color=red>*</font><?php echo $lang_makepoll['text_required'] ?? 'Required'; ?></p>
+<?php if ($pollid > 0): ?>
+<input type=hidden name=pollid value="<?php echo $pollid; ?>">
 <?php endif; ?>
-<input type=hidden name=returnto value="<?php echo htmlspecialchars(\App\Support\SupportContext::getQuery("returnto") ?? '') ?: htmlspecialchars($__server_HTTP_REFERER ?? '')?>">
+<input type=hidden name=returnto value="<?php echo htmlspecialchars($returnto); ?>">
 </form>

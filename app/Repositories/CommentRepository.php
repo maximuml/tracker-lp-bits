@@ -42,7 +42,7 @@ class CommentRepository
             ->orderByDesc('c.id')
             ->offset($offset)
             ->limit($limit)
-            ->selectRaw('c.*, u.username, COALESCE(t.name, o.name) as parent_name, CASE WHEN c.torrent > 0 THEN "torrent" WHEN c.offer > 0 THEN "offer" ELSE NULL END as parent_type, COALESCE(c.torrent, c.offer) as parent_id')
+            ->selectRaw('c.*, u.username, u.avatar, COALESCE(t.name, o.name) as parent_name, CASE WHEN c.torrent > 0 THEN "torrent" WHEN c.offer > 0 THEN "offer" ELSE NULL END as parent_type, COALESCE(c.torrent, c.offer) as parent_id')
             ->get()
             ->toArray();
     }

@@ -2,13 +2,16 @@
 
 namespace App\Repositories;
 
+use App\Models\News;
 use App\Models\Peer;
 use App\Models\Poll;
 use App\Models\PollAnswer;
+use App\Models\Post;
 use App\Models\Torrent;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Collection as SupportCollection;
 
 class IndexRepository
 {
@@ -196,5 +199,42 @@ class IndexRepository
         });
 
         return $items;
+    }
+
+    /**
+     * @return  array<int, array<string, mixed>>
+     */
+    public static function getLatestNews(int $limit): array
+    {
+        return News::query()
+            ->orderByDesc('added')
+            ->limit($limit)
+            ->get()
+            ->map(fn ($news) => $news->toArray())
+            ->all();
+    }
+
+    /**
+     * @return  array<int, array<string, mixed>>
+     */
+    public static function getLatestForumPosts(int $limit, int $minClassRead): array
+    {
+        return Post::query()
+            ->join('topics', 'posts.topicid', '=', 'topics.id')
+            ->join('forums', 'topics.forumid', '=', 'forums.id')
+            ->where('forums.minclassread', '<=', $minClassRead)
+            ->orderByDesc('posts.id')
+            ->limit($limit)
+            ->get([
+                'posts.id as pid',
+                'posts.userid as userpost',
+                'posts.added',
+                'topics.id as tid',
+                'topics.subject',
+                'topics.forumid',
+                'topics.views',
+                'forums.name',
+            ])
+            ->toArray();
     }
 }

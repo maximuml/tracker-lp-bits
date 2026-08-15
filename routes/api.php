@@ -113,6 +113,9 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
         Route::get('shoutbox', [\App\Http\Controllers\ShoutboxController::class, 'index'])
             ->middleware(Permissions::abilityLabel(RoutePermissionEnum::SHOUTBOX_LIST));
 
+        Route::get('offers', [\App\Http\Controllers\OfferController::class, 'index'])
+            ->middleware(Permissions::abilityLabel(RoutePermissionEnum::OFFER_LIST));
+
     });
 
     Route::group(['middleware' => ['checkUserStatus']], function () {

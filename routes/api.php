@@ -110,6 +110,9 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
         Route::apiResource('topics', \App\Http\Controllers\TopicController::class)->only(['index', 'show'])->middleware(Permissions::abilityLabel(RoutePermissionEnum::TOPIC_LIST));
         Route::apiResource('topics', \App\Http\Controllers\TopicController::class)->only(['store', 'update', 'destroy'])->middleware(Permissions::abilityLabel(RoutePermissionEnum::TOPIC_MANAGE));
 
+        Route::get('shoutbox', [\App\Http\Controllers\ShoutboxController::class, 'index'])
+            ->middleware(Permissions::abilityLabel(RoutePermissionEnum::SHOUTBOX_LIST));
+
     });
 
     Route::group(['middleware' => ['checkUserStatus']], function () {

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Repositories\ShoutboxRepository;
 use App\Support\Shoutbox;
 use App\Support\SupportContext;
 use Illuminate\Http\RedirectResponse;
@@ -14,6 +15,21 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ShoutboxController extends LegacyController
 {
+    private ShoutboxRepository $repository;
+
+    public function __construct(ShoutboxRepository $repository)
+    {
+        $this->repository = $repository;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function index(Request $request): array
+    {
+        return $this->success($this->repository->history($request));
+    }
+
     public function shoutbox(Request $request): Response|RedirectResponse
     {
         return $this->legacyPageRaw($request, 'shoutbox', false);

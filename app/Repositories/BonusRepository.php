@@ -54,6 +54,45 @@ class BonusRepository extends BaseRepository
 
     }
 
+    public function getCharityReceiverCount(float $ratioCharity): int
+    {
+        return (int) User::query()
+            ->where('enabled', 'yes')
+            ->whereRaw('downloaded > 10737418240')
+            ->whereRaw('? > uploaded/downloaded', [$ratioCharity])
+            ->count();
+    }
+
+    /**
+     * @return  int  number of affected rows
+     */
+    public function incrementSeedbonusForLowRatioReceivers(float $ratioCharity, float $amount): int
+    {
+        return User::query()
+            ->where('enabled', 'yes')
+            ->whereRaw('downloaded > 10737418240')
+            ->whereRaw('? > uploaded/downloaded', [$ratioCharity])
+            ->increment('seedbonus', $amount);
+    }
+
+    /**
+     * @return  array<string, mixed>|null
+     */
+    public function findGiftReceiver(string $username): ?array
+    {
+        $receiver = User::query()->where('username', $username)->first(['id', 'seedbonus']);
+
+        return $receiver ? $receiver->toArray() : null;
+    }
+
+    /**
+     * @return  bool
+     */
+    public function incrementUserSeedbonus(int $userId, float $amount): bool
+    {
+        return (bool) User::query()->where('id', $userId)->increment('seedbonus', $amount);
+    }
+
 
     /**
      * @param  mixed  $uid

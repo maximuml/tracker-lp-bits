@@ -868,9 +868,9 @@ class TorrentActionController extends LegacyController
         ]);
     }
 
-    public function emailGateway(Request $request): Response|RedirectResponse
+    public function emailGateway(Request $request): Response
     {
-        return $this->legacyPageRaw($request, 'email-gateway', false);
+        return response('');
     }
 
     public function thanks(Request $request): Response|RedirectResponse

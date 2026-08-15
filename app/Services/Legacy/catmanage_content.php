@@ -50,7 +50,7 @@ if (!function_exists('return_category_db_table_name')) { function return_categor
 } }
 if (!function_exists('return_category_mode_selection')) { function return_category_mode_selection($selname, $selectedid)
 {
-	$rows = \Nexus\Database\NexusDB::table('searchbox')->orderBy('id')->get(['id','name']);
+	$rows = \App\Repositories\CategoryRepository::getSearchboxOptions();
 	$selection = "<select name=\"".$selname."\">";
 	foreach ($rows as $row) {
 		$row = (array) $row;
@@ -62,7 +62,7 @@ if (!function_exists('return_category_mode_selection')) { function return_catego
 
 if (!function_exists('category_icon_selection')) { function category_icon_selection($iconId = 0)
 {
-    $rows = \Nexus\Database\NexusDB::table('caticons')->orderBy('id')->get(['id','name']);
+    $rows = \App\Repositories\CategoryRepository::getCaticonOptions();
     $selection = "<select name=\"icon_id\">";
     foreach ($rows as $row) {
         $row = (array) $row;

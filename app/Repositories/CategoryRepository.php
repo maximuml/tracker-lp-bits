@@ -5,12 +5,36 @@ declare(strict_types=1);
 namespace App\Repositories;
 
 use App\Support\SupportContext;
+use Nexus\Database\NexusDB;
 
 /**
  * Bridge for legacy category management pages until full Blade migration.
  */
 final class CategoryRepository
 {
+    /**
+     * @return  array<int, array<string, mixed>>
+     */
+    public static function getSearchboxOptions(): array
+    {
+        return NexusDB::table('searchbox')
+            ->orderBy('id')
+            ->get(['id', 'name'])
+            ->map(fn ($row) => (array) $row)
+            ->all();
+    }
+
+    /**
+     * @return  array<int, array<string, mixed>>
+     */
+    public static function getCaticonOptions(): array
+    {
+        return NexusDB::table('caticons')
+            ->orderBy('id')
+            ->get(['id', 'name'])
+            ->map(fn ($row) => (array) $row)
+            ->all();
+    }
     /**
      * Render the legacy catmanage page.
      *

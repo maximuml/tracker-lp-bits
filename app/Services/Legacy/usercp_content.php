@@ -82,55 +82,6 @@ if ($action){
 	else {
 	switch ($action) {
 		case "personal":
-			if ($type == 'save') {
-				$data = [];
-				$parked = \App\Support\SupportContext::getPost("parked");
-				if ($parked != 'yes')
-					$parked = 'no';
-				$acceptpms = \App\Support\SupportContext::getPost("acceptpms");
-				$deletepms = (\App\Support\SupportContext::getPost("deletepms") != "" ? "yes" : "no");
-				$savepms = (\App\Support\SupportContext::getPost("savepms") != "" ? "yes" : "no");
-				$commentpm = \App\Support\SupportContext::getPost("commentpm");
-				$gender = \App\Support\SupportContext::getPost("gender");
-				$country = \App\Support\SupportContext::getPost("country");
-				//	$tzoffset = \App\Support\SupportContext::getPost("tzoffset");
-				$avatar = (\App\Support\SupportContext::getPost("avatar") ?? '') == '' ? (\App\Support\SupportContext::getPost("savatar") ?? '') : (\App\Support\SupportContext::getPost("avatar") ?? '');
-
-				if(preg_match("/^https?:\/\/[^\s'\"<>]+\.(jpg|gif|png|jpeg)$/i", $avatar) && !preg_match("/\.php/i",$avatar) && !preg_match("/\.js/i",$avatar) && !preg_match("/\.cgi/i",$avatar)) {
-					$data['avatar'] = htmlspecialchars( trim( $avatar ) );
-				}
-				$info = htmlspecialchars(trim(\App\Support\SupportContext::getPost("info") ?? ''));
-
-				$data['parked'] = $parked;
-				$data['acceptpms'] = $acceptpms;
-				$data['deletepms'] = $deletepms;
-				$data['savepms'] = $savepms;
-				$data['commentpm'] = $commentpm;
-				$data['gender'] = $gender;
-				if (\App\Support\Validators::isId($country))
-					$data['country'] = (int)$country;
-				//	$data['tzoffset'] = $tzoffset;
-
-				$data['info'] = $info;
-				$data['tracker_url_id'] = \App\Support\SupportContext::getPost("tracker_url_id");
-
-				//notifs
-                if (!empty(\App\Support\SupportContext::getPost('notifs'))) {
-                    preg_match_all('/\[(.*)\]/Ui', (string) $CURUSER['notifs'], $notifsArr);
-                    $notifsArr = array_fill_keys($notifsArr[1], 1);
-                    foreach (\App\Models\User::$notificationOptions as $option) {
-                        if (((\App\Support\SupportContext::getPost('notifs') !== null))) {
-                            $notifsArr[$option] = 1;
-                        } else {
-                            unset($notifsArr[$option]);
-                        }
-                    }
-                    $data['notifs'] = '[' . implode('][', array_keys($notifsArr)) . ']';
-                }
-				\App\Repositories\UsercpRepository::updateUser((int) $CURUSER["id"], $data);
-				\App\Support\Cache::clearUser($CURUSER["id"], $CURUSER['passkey']);
-				header("Location: usercp.php?action=personal&type=saved");
-			}
 
 			$countries = "<option value=0>---- ".$lang_usercp['select_none_selected']." ----</option>\n";
 			$countryRows = \App\Repositories\UsercpRepository::getCountryOptions();
@@ -398,21 +349,6 @@ if ($showshoutbox_main == "yes") //system side setting for shoutbox
 				$showtooltipsetting = true;
 			else
 				$showtooltipsetting = false;
-			if ($type == 'save') {
-				$data = [
-				    'topicsperpage' => min(100, intval(\App\Support\SupportContext::getPost("topicsperpage") ?? 0)),
-				    'postsperpage' => min(100, intval(\App\Support\SupportContext::getPost("postsperpage") ?? 0)),
-				    'avatars' => (\App\Support\SupportContext::getPost("avatars") != "" ? "yes" : "no"),
-				    'signatures' => (\App\Support\SupportContext::getPost("signatures") != "" ? "yes" : "no"),
-				    'clicktopic' => \App\Support\SupportContext::getPost("clicktopic"),
-				    'signature' => htmlspecialchars(trim(\App\Support\SupportContext::getPost("signature"))),
-                ];
-				if ($showtooltipsetting)
-					$data['showlastpost'] = (\App\Support\SupportContext::getPost("ttlastpost") != "" ? "yes" : "no");
-
-				\App\Repositories\UsercpRepository::updateUser((int) $CURUSER["id"], $data);
-				header("Location: usercp.php?action=forum&type=saved");
-			}
 			usercpmenu ("forum");
             form ("forum");
 			print ("<table border=0 cellspacing=0 cellpadding=5 width=".CONTENT_WIDTH.">");

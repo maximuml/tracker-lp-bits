@@ -1,23 +1,19 @@
 <?php
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
-// Auto-generated legacy bridge shims
 if (!isset($CURUSER)) $CURUSER = (array) (\App\Support\SupportContext::getUser() ?? []);
 if (!isset($lang_functions)) $lang_functions = (array) (\App\Support\SupportContext::getGlobal('lang_functions') ?? []);
 
-$perpage = 20;
-$count = \App\Repositories\CommentRepository::countLatest();
+$perpage = (int) ($perpage ?? 20);
+$count = (int) ($count ?? 0);
+$rows = (array) ($rows ?? []);
+$pagertop = (string) ($pagertop ?? '');
+$pagerbottom = (string) ($pagerbottom ?? '');
+$userDisplayMap = (array) ($userDisplayMap ?? []);
 
 if ($count == 0) {
     \App\Support\Html::stdMessage($lang_functions['text_sorry'] ?? 'Sorry', $lang_functions['text_no_comments'] ?? 'No comments yet.');
 } else {
-    [$pagertop, $pagerbottom, , $offset, $perpage] = \App\Support\Pagination::pager($perpage, $count, 'latestcomments.php?');
-    $rows = \App\Repositories\CommentRepository::getLatest($perpage, $offset);
-
-    $uidArr = array_unique(array_column($rows, 'user'));
-    $neededColumns = ['id', 'username', 'avatar', 'donor', 'warned', 'enabled', 'title', 'class', 'leechwarn'];
-    $userInfoArr = \App\Models\User::query()->find($uidArr, $neededColumns)->keyBy('id');
-
     print($pagertop);
     ?>
     <h1 align="center"><?php echo $lang_functions['text_latest_comments'] ?? 'Latest Comments'; ?></h1>
@@ -37,9 +33,7 @@ if ($count == 0) {
             $parentUrl = "offers.php?id={$parentId}&off_details=1#cid{$commentId}";
         }
 
-        $userInfo = $userInfoArr->get($userId);
-        $userRow = $userInfo ? $userInfo->toArray() : [];
-        $avatar = ($CURUSER['avatars'] ?? '') === 'yes' ? htmlspecialchars(trim((string) ($userRow['avatar'] ?? ''))) : '';
+        $avatar = ($CURUSER['avatars'] ?? '') === 'yes' ? htmlspecialchars(trim((string) ($row['avatar'] ?? ''))) : '';
         if (!$avatar) {
             $avatar = 'pic/default_avatar.png';
         }
@@ -52,7 +46,7 @@ if ($count == 0) {
                     <td class="embedded" width="99%">
                         #<?php echo $commentId; ?>&nbsp;&nbsp;
                         <font color="gray"><?php echo $lang_functions['text_by'] ?? 'by'; ?></font>
-                        <?php echo \App\Support\UserDisplay::username($userId, false, true, true, false, false, true); ?>
+                        <?php echo $userDisplayMap[$userId] ?? \App\Support\UserDisplay::username($userId, false, true, true, false, false, true); ?>
                         &nbsp;&nbsp;<font color="gray"><?php echo $lang_functions['text_at'] ?? 'at'; ?></font>
                         <?php echo \App\Support\Time::format($row['added'] ?? ''); ?>
                         <?php echo $parentLink; ?>

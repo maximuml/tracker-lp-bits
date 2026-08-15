@@ -274,9 +274,30 @@ class AdminController extends LegacyController
 
     public function clearCache(Request $request): View|RedirectResponse|Response
     {
+        if (\App\Support\UserDisplay::currentClass() < (defined('UC_MODERATOR') ? \constant('UC_MODERATOR') : 0)) {
+            return $this->legacyAbortResponse('Error', 'Permission denied.');
+        }
 
-        return $this->legacyPage($request, 'clearcache');
+        $done = false;
+        $error = '';
+        if ($request->isMethod('post')) {
+            $cachename = (string) $request->input('cachename', '');
+            if ($cachename === '') {
+                $error = 'You must fill in cache name.';
+            } else {
+                $multilang = $request->input('multilang') === 'yes';
+                $cache = SupportContext::getCache();
+                if ($cache !== null) {
+                    $cache->delete_value($cachename, $multilang);
+                }
+                $done = true;
+            }
+        }
 
+        return $this->legacyPage($request, 'clearcache', true, [
+            'done' => $done,
+            'error' => $error,
+        ]);
     }
 
     public function catmanage(Request $request): Response|RedirectResponse

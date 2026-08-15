@@ -29,6 +29,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\View\View;
+use Nexus\Database\NexusDB;
 
 class InfoController extends LegacyController
 {
@@ -649,8 +650,76 @@ class InfoController extends LegacyController
         return redirect($redirectBase . '/faqmanage.php');
     }
 
-    public function bitbucketlog(Request $request): View|RedirectResponse|Response
+    public function bitbucketlog(Request $request): Response|RedirectResponse|View
     {
-        return $this->legacyPage($request, 'bitbucketlog', true);
+        $currentUser = (array) (SupportContext::getUser() ?? []);
+        $currentClass = (int) UserDisplay::currentClass();
+
+        if ($currentClass < (defined('UC_ADMINISTRATOR') ? \constant('UC_ADMINISTRATOR') : 0)) {
+            return $this->legacyAbortResponse('Sorry', 'Access denied.');
+        }
+
+        $bucketPath = public_path('bitbucket');
+
+        $delete = (int) $request->input('delete', 0);
+        if ($currentClass >= (defined('UC_MODERATOR') ? \constant('UC_MODERATOR') : 0) && $delete > 0) {
+            $bitbucket = NexusDB::table('bitbucket')->where('id', $delete)->first(['name', 'owner']);
+            if ($bitbucket) {
+                $file = $bucketPath . '/' . $bitbucket->name;
+                NexusDB::table('bitbucket')->where('id', $delete)->delete();
+                if (file_exists($file) && ! unlink($file)) {
+                    return $this->legacyAbortResponse('Warning', "Unable to unlink file: <b>" . htmlspecialchars((string) $bitbucket->name) . "</b>. You should contact an administrator about this error.", false);
+                }
+            }
+
+            return redirect($request->url());
+        }
+
+        $count = (int) NexusDB::table('bitbucket')->count();
+        $perpage = 10;
+        [$pagertop, $pagerbottom, , $offset, $perpage] = \App\Support\Pagination::pager($perpage, $count, 'bitbucketlog.php?');
+        $bitbucketRows = NexusDB::table('bitbucket')->orderByDesc('added')->offset($offset)->limit($perpage)->get();
+
+        $userIds = [];
+        $rows = [];
+        foreach ($bitbucketRows as $row) {
+            $arr = (array) $row;
+            $rows[] = $arr;
+            if ((int) ($arr['owner'] ?? 0) > 0) {
+                $userIds[] = (int) $arr['owner'];
+            }
+        }
+
+        $userDisplayMap = [];
+        foreach (array_unique($userIds) as $uid) {
+            $userDisplayMap[$uid] = UserDisplay::username($uid);
+        }
+
+        $imageDimensions = [];
+        foreach ($rows as $row) {
+            $file = $bucketPath . '/' . $row['name'];
+            if (file_exists($file)) {
+                $size = @getimagesize($file);
+                $imageDimensions[$row['id']] = [
+                    'width' => $size[0] ?? 0,
+                    'height' => $size[1] ?? 0,
+                ];
+            } else {
+                $imageDimensions[$row['id']] = ['width' => 0, 'height' => 0];
+            }
+        }
+
+        return $this->legacyPage($request, 'bitbucketlog', true, [
+            'rows' => $rows,
+            'count' => $count,
+            'pagertop' => $pagertop,
+            'pagerbottom' => $pagerbottom,
+            'userDisplayMap' => $userDisplayMap,
+            'imageDimensions' => $imageDimensions,
+        ]);
     }
+
+    /**
+     * @param  array<string, mixed>  $params
+     */
 }

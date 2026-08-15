@@ -30,6 +30,11 @@ final class UsercpRepository extends BaseRepository
         return (bool) User::query()->where('id', $userId)->update($data);
     }
 
+    public static function updateLastOffer(int $userId): bool
+    {
+        return (bool) User::query()->where('id', $userId)->update(['last_offer' => date("Y-m-d H:i:s")]);
+    }
+
     public static function emailExistsForOther(string $email, int $userId): bool
     {
         return User::query()->where('email', $email)->where('id', '!=', $userId)->exists();

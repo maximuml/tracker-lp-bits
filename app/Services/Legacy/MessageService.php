@@ -215,7 +215,7 @@ final class MessageService
         $type = (string) $request->input('type', '');
 
         if ($type === 'in') {
-            $msg = Message::query()->where('id', $id)->first(['receiver', 'sender', 'location', 'saved', 'unread']);
+            $msg = Message::query()->where('id', $id)->first(['id', 'receiver', 'sender', 'location', 'saved', 'unread']);
             if (! $msg || $msg->receiver != $sender->id) {
                 LegacyResponse::abort($lang['std_error'] ?? 'Error', $lang['std_not_suggested'] ?? 'Not suggested.');
             }
@@ -232,7 +232,7 @@ final class MessageService
 
             Cache::clearInboxCount($sender->id);
         } elseif ($type === 'out') {
-            $msg = Message::query()->where('id', $id)->first(['receiver', 'sender', 'location', 'saved', 'unread']);
+            $msg = Message::query()->where('id', $id)->first(['id', 'receiver', 'sender', 'location', 'saved', 'unread']);
             if (! $msg || $msg->sender != $sender->id) {
                 LegacyResponse::abort($lang['std_error'] ?? 'Error', $lang['std_not_suggested'] ?? 'Not suggested.');
             }

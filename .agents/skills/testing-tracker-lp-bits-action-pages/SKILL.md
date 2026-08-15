@@ -68,6 +68,27 @@ Important: Submitting the form with `form.submit()` in automation does not inclu
 3. Submit to `/takeinvite.php?id=<uid>` and expect a redirect to `/invite.php?id=<uid>&sent=1`.
 4. Verify the invite row is updated (`invitee` set, `time_invited` set) and, for temporary hashes, `invites` count is decremented.
 
+## PR #355 action pages
+
+PR #355 migrated 15 legacy partials into Laravel controllers/services. Key test details:
+
+- `/deletemessage.php` and `/takemessage.php` are now `MessageController`/`MessageService`.
+  - `takemessage.php` POST works and returns a redirect to `/messages.php`.
+  - `/deletemessage.php?id=<id>&type=in` returns HTTP 302, but as of the tested branch the message row is **not removed** because `MessageService::deletemessage` loads the row with `first(['receiver','sender','location','saved','unread'])` (missing `id`), so the subsequent `$msg->delete()` and `$msg->update(...)` calls no-op. The fix is to include `'id'` in the selected columns (or switch to `Message::query()->where('id', $id)->delete()`).
+- `/bookmark.php?torrentid=<id>` toggles `bookmarks`; the legacy parameter is `torrentid`, **not** `id`.
+- `/suggest.php` reads `q`, not `keyword` (the legacy JS sends `suggest.php?q=...`).
+- `/attachment.php` (GET upload form and POST multipart) is now `UtilityController::attachment` + `AttachmentLegacyService`. For class 15, `.doc` files are accepted; the uploaded file is stored in `attachments/YYYYMM/` and a row is inserted in `attachments`.
+- `/getattachment.php?id=<id>&dlkey=<dlkey>` downloads the file; `/getattachment.php?id=0` returns HTTP 400.
+- `/takeflush.php?id=<uid>` returns HTTP 200 with the message `X ghost torrents were sucessfully cleaned.` (note typo in `sucessfully`).
+- `/take-increment-bulk.php` POST returns HTTP 302 redirect to `/increment-bulk.php?sent=1&type=<type>` on success. Use `classes[]` to filter by user class.
+- `/takeconfirm.php?id=<uid>` returns a staff confirmation page; without selected users it just says there is no buddy to confirm.
+- `/torrentrss.php` requires a `passkey`; without it returns HTTP 400 `require passkey`.
+- `/confirmemail/<id>/<md5>/<email>` requires `users.editsecret` to match the hashed value. A valid confirmation returns HTTP 302 to `/usercp.php?action=security&type=saved`; invalid returns 404.
+- `/shoutbox.php` GET/POST and `/shoutbox_history.php` are now `ShoutboxController`. Posting uses `sent=yes&shbox_text=...`; a 60-second per-user `shoutbox:<uid>` lock in Redis can produce a 429 if hit too frequently.
+- `/email-gateway.php` now returns an empty HTTP 200 response.
+- `/ajax.php?action=getOffer&params[id]=1` returns a JSON `ret:0` response.
+- `/invite.php?id=<uid>` and `?id=<uid>&type=new`, `?id=<uid>&menu=sent|tmp|invitee` are now `InfoController::invite`; ensure `main.invitesystem = yes` and the user has invites > 0.
+
 ## Mobile viewport regression
 
 Set viewport to `375x812`, visit the tested action pages, and check `document.body.scrollWidth <= window.innerWidth` to confirm no horizontal overflow.

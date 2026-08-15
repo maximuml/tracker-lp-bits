@@ -114,22 +114,8 @@ final class UserDisplay
             return $userRows[$id];
         }
 
-        $neededColumns = [
-            'id', 'class', 'enabled', 'privacy', 'avatar', 'signature', 'uploaded', 'downloaded',
-            'last_access', 'username', 'donor', 'donoruntil', 'leechwarn', 'warned', 'title',
-            'downloadpos', 'parked', 'clientselect', 'showclienterror',
-        ];
-
-        $row = \Nexus\Database\NexusDB::remember("user_{$id}_content", 3600, function () use ($id, $neededColumns) {
-            $user = \App\Models\User::query()
-                ->with([
-                    'wearing_medals' => function ($query) {
-                        $query->orderBy('user_medals.priority', 'desc')
-                            ->orderBy('user_medals.id', 'desc')
-                            ->limit((int) \App\Support\Config\SiteConfig::current()->system->maximumNumberOfMedalsCanBeWorn(3));
-                    },
-                ])
-                ->find($id, $neededColumns);
+        $row = \Nexus\Database\NexusDB::remember("user_{$id}_content", 3600, function () use ($id) {
+            $user = \App\Repositories\UserRepository::findForDisplay($id);
 
             if (!$user) {
                 return null;

@@ -87,4 +87,35 @@ final class UsercpRepository extends BaseRepository
 
         return $user->fresh()->toArray();
     }
+
+    /**
+     * Update forum settings for the authenticated user.
+     *
+     * @return array<string, mixed>
+     */
+    public function updateForum(Request $request): array
+    {
+        /** @var User $user */
+        $user = Auth::user();
+
+        $data = [
+            'topicsperpage' => max(0, min(100, (int) $request->input('topicsperpage', 0))),
+            'postsperpage' => max(0, min(100, (int) $request->input('postsperpage', 0))),
+            'avatars' => $request->input('avatars') === 'yes' ? 'yes' : 'no',
+            'signatures' => $request->input('signatures') === 'yes' ? 'yes' : 'no',
+            'clicktopic' => in_array((string) $request->input('clicktopic'), ['firstpage', 'lastpage'], true)
+                ? (string) $request->input('clicktopic')
+                : $user->clicktopic,
+            'signature' => htmlspecialchars(trim((string) $request->input('signature', ''))),
+        ];
+
+        if ($request->has('ttlastpost')) {
+            $data['showlastpost'] = $request->input('ttlastpost') === 'yes' ? 'yes' : 'no';
+        }
+
+        $user->update($data);
+        Cache::clearUser($user->id, $user->passkey);
+
+        return $user->fresh()->toArray();
+    }
 }

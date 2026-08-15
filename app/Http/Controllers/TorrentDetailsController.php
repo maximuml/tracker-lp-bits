@@ -12,7 +12,7 @@ use App\Repositories\TorrentDetailRepository;
 use App\Repositories\TorrentRepository;
 use App\Support\Format;
 use App\Support\Promotion;
-use App\Support\Setting;
+use App\Models\Setting;
 use App\Support\Strings;
 use App\Support\SupportContext;
 use App\Support\TorrentAccess;

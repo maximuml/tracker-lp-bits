@@ -594,18 +594,19 @@ if (((\App\Support\SupportContext::getQuery("del_offer") !== null)) && \App\Supp
 	if (!\App\Support\Validators::isId($userid))
 	\App\Support\LegacyResponse::abort($lang_offers['std_error'], $lang_offers['std_smell_rat']);
 
-	$offer = \App\Models\Offer::query()->where('id', $offer)->first();
-	if (!$offer) {
+	$offerRecord = \App\Models\Offer::query()->where('id', $offer)->first();
+	if (!$offerRecord) {
 		offers_bark($lang_offers['text_nothing_found']);
 	}
-	$num = $offer->toArray();
+	$num = $offerRecord->toArray();
 
 	$name = $num["name"];
 
 	if ($userid != $num["userid"] && !\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::OFFER_MANAGE))
 	\App\Support\LegacyResponse::abort($lang_offers['std_error'], $lang_offers['std_cannot_delete_others_offer']);
 
-	if (\App\Support\SupportContext::getQuery("sure"))
+	$sure = 0;
+	if (\App\Support\SupportContext::getQuery("sure") !== null)
 	{
 		$sure = \App\Support\SupportContext::getQuery("sure");
 		if($sure == '0' || $sure == '1')

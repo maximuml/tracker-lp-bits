@@ -82,10 +82,10 @@ final class UsercpRepository extends BaseRepository
             $data['notifs'] = '[' . implode('][', array_keys($notifsArr)) . ']';
         }
 
-        $user->update($data);
+        User::query()->where('id', $user->id)->update($data);
         Cache::clearUser($user->id, $user->passkey);
 
-        return $user->fresh()->toArray();
+        return User::query()->find($user->id)?->toArray() ?? [];
     }
 
     /**
@@ -113,9 +113,9 @@ final class UsercpRepository extends BaseRepository
             $data['showlastpost'] = $request->input('ttlastpost') === 'yes' ? 'yes' : 'no';
         }
 
-        $user->update($data);
+        User::query()->where('id', $user->id)->update($data);
         Cache::clearUser($user->id, $user->passkey);
 
-        return $user->fresh()->toArray();
+        return User::query()->find($user->id)?->toArray() ?? [];
     }
 }

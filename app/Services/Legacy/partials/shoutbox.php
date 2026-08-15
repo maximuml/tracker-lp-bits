@@ -6,8 +6,13 @@ if (!isset($CURUSER)) $CURUSER = (array) (\App\Support\SupportContext::getUser()
 if (!isset($lang_shoutbox)) $lang_shoutbox = (array) (\App\Support\SupportContext::getGlobal('lang_shoutbox') ?? []);
 // Delete action is handled by ShoutboxController before rendering.
 $isAjax = $isAjax ?? !empty(\App\Support\SupportContext::getQuery('ajax'));
-$where = 'shoutbox';
-$refresh = ($CURUSER['sbrefresh'] ?? 120);
+$where = $where ?? 'shoutbox';
+$refresh = $refresh ?? ($CURUSER['sbrefresh'] ?? 120);
+$lastId = $lastId ?? 0;
+$rows = $rows ?? collect();
+$currentUserId = $currentUserId ?? (int)($CURUSER['id'] ?? 0);
+$isStaff = $isStaff ?? false;
+$reactionData = $reactionData ?? ['counts' => [], 'mine' => [], 'users' => []];
 if (!$isAjax):
 ?>
 <html><head>
@@ -20,7 +25,6 @@ if (!$isAjax):
 <?php
 print(\App\Support\Style::addiCodeWithContext());
 // $lastId is precomputed by ShoutboxController.
-$lastId = $lastId ?? 0;
 $startcountdown = "startcountdown(".$refresh.");shoutboxInitSSE(" . htmlspecialchars(json_encode($where, JSON_UNESCAPED_UNICODE), ENT_QUOTES, 'UTF-8') . "," . $lastId . ");shoutAttachToggleHandler();";
 ?>
 <script type="text/javascript">
@@ -115,15 +119,11 @@ endif; // if (!$isAjax)
 <?php
 // Insert action is handled by ShoutboxController before rendering.
 
-if (!(isset($CURUSER))) {
-    echo '<h1>' . $lang_shoutbox['std_access_denied'] . '</h1><p>' . $lang_shoutbox['std_access_denied_note'] . '</p></body></html>'; return;
-}
-
 /**
  * Build a small role badge for staff/VIP-tier classes. Returns empty string for
  * regular users so the shoutbox doesn't get cluttered with badges on every row.
  */
-if (!function_exists('shoutbox_class_badge')) { function shoutbox_class_badge($class)
+if (!function_exists('shoutbox_class_badge')) { function shoutbox_class_badge(int $class): string
 {
 	static $map = null;
 	if ($map === null) {
@@ -167,8 +167,6 @@ else
 	$groupWindowSec = 120;
 	$prevUserId = 0;
 	$prevDate = 0;
-	$currentUserId = $currentUserId ?? (int)($CURUSER['id'] ?? 0);
-	$isStaff = $isStaff ?? \App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::SB_MANAGE);
 
 	$reactionCounts = $reactionData['counts'];
 	$reactionMine = $reactionData['mine'];

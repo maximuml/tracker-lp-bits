@@ -444,42 +444,39 @@ class TorrentActionController extends LegacyController
 
         $dllink = false;
         $inclbookmarked = 0;
-        $rssUser = [];
-        if ($passkey !== '') {
-            $rssUser = (array) NexusDB::remember('user_passkey_' . $passkey . '_rss', 3600, function () use ($passkey) {
-                $row = NexusDB::table('users')->where('passkey', $passkey)->first(['id', 'enabled', 'parked', 'passkey']);
+        $rssUser = (array) NexusDB::remember('user_passkey_' . $passkey . '_rss', 3600, function () use ($passkey) {
+            $row = NexusDB::table('users')->where('passkey', $passkey)->first(['id', 'enabled', 'parked', 'passkey']);
 
-                return $row ? (array) $row : [];
-            });
+            return $row ? (array) $row : [];
+        });
 
-            if (empty($rssUser)) {
-                return response('invalid passkey', 400, ['Content-Type' => 'text/plain; charset=utf-8']);
-            }
-
-            if ($rssUser['enabled'] === 'no' || $rssUser['parked'] === 'yes') {
-                return response('account disabed or parked', 403, ['Content-Type' => 'text/plain; charset=utf-8']);
-            }
-
-            if ($request->input('linktype') === 'dl') {
-                $dllink = true;
-            }
-
-            $inclbookmarked = (int) $request->input('inclbookmarked', 0);
-            if ($inclbookmarked === 1) {
-                $bookmarkarray = TorrentBookmark::bookmarkArray($cache, (int) ($rssUser['id'] ?? 0));
-                if (! empty($bookmarkarray)) {
-                    $baseQuery->whereIn('torrents.id', $bookmarkarray);
-                }
-            }
-
-            if (! SiteConfig::current()->torrent->approvalStatusNoneVisible() && ! Permissions::userCan(PermissionEnum::STAFF_MEMBER->value, false, (int) ($rssUser['id'] ?? 0))) {
-                $baseQuery->where('torrents.approval_status', Torrent::APPROVAL_STATUS_ALLOW);
-            }
-
-            $browseMode = SiteConfig::current()->main->browseCat();
-            $allBrowseCategoryId = SearchBox::listCategoryId($browseMode);
-            $baseQuery->whereIn('torrents.category', $allBrowseCategoryId);
+        if (empty($rssUser)) {
+            return response('invalid passkey', 400, ['Content-Type' => 'text/plain; charset=utf-8']);
         }
+
+        if ($rssUser['enabled'] === 'no' || $rssUser['parked'] === 'yes') {
+            return response('account disabed or parked', 403, ['Content-Type' => 'text/plain; charset=utf-8']);
+        }
+
+        if ($request->input('linktype') === 'dl') {
+            $dllink = true;
+        }
+
+        $inclbookmarked = (int) $request->input('inclbookmarked', 0);
+        if ($inclbookmarked === 1) {
+            $bookmarkarray = TorrentBookmark::bookmarkArray($cache, (int) ($rssUser['id'] ?? 0));
+            if (! empty($bookmarkarray)) {
+                $baseQuery->whereIn('torrents.id', $bookmarkarray);
+            }
+        }
+
+        if (! SiteConfig::current()->torrent->approvalStatusNoneVisible() && ! Permissions::userCan(PermissionEnum::STAFF_MEMBER->value, false, (int) ($rssUser['id'] ?? 0))) {
+            $baseQuery->where('torrents.approval_status', Torrent::APPROVAL_STATUS_ALLOW);
+        }
+
+        $browseMode = SiteConfig::current()->main->browseCat();
+        $allBrowseCategoryId = SearchBox::listCategoryId($browseMode);
+        $baseQuery->whereIn('torrents.category', $allBrowseCategoryId);
 
         $baseQuery->where('torrents.visible', 'yes');
 

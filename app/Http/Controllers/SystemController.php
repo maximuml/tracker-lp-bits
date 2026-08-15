@@ -695,7 +695,7 @@ class SystemController extends LegacyController
             if ($isTypeTmpInvite) {
                 $command = sprintf('invite:tmp %s %s %s', $idRedisKey, $duration, $amount);
                 $output = Environment::run($command, 'string', true, true);
-                Log::writeWithContext((string) sprintf('command: %s, output: %s', $command, $output), 'info', false);
+                Log::writeWithContext((string) sprintf('command: %s, output: %s', $command, $output), 'info');
             } else {
                 NexusDB::table('users')->whereIn('id', $idArr)->increment($type, $amount);
             }

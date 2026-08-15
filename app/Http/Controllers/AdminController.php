@@ -247,7 +247,7 @@ class AdminController extends LegacyController
         if ($currentUserId !== $id && ! Permissions::userCan(PermissionEnum::VIEW_INVITE->value, false, $currentUserId)) {
             $langFunctions = SupportContext::getLangFunctions();
 
-            return $this->legacyAbortResponse($langFunctions['std_sorry'] ?? 'Sorry', $langFunctions['std_permission_denied'] ?? 'Permission denied.', true, false);
+            return $this->legacyAbortResponse($langFunctions['std_sorry'] ?? 'Sorry', $langFunctions['std_permission_denied'] ?? 'Permission denied.');
         }
 
         $conusr = $request->input('conusr', []);

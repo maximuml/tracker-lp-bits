@@ -89,7 +89,7 @@ class UtilityController extends LegacyController
         return $this->legacyPage($request, 'attachment', true);
     }
 
-    public function getattachment(Request $request): Response|RedirectResponse
+    public function getattachment(Request $request): Response|RedirectResponse|StreamedResponse
     {
         $id = (int) $request->input('id', 0);
         $dlkey = (string) $request->input('dlkey', '');
@@ -314,12 +314,12 @@ XML;
 
     public function confirmemail(Request $request): Response|RedirectResponse
     {
-        $pathInfo = (string) ($request->server->get('PATH_INFO') ?? $request->getPathInfo() ?? '');
+        $pathInfo = (string) ($request->server->get('PATH_INFO') ?: $request->getPathInfo() ?: '');
         if (! preg_match(':^/(\d{1,10})/([\w]{32})/(.+)$:', $pathInfo, $matches)) {
             abort(404);
         }
 
-        $id = (int) ($matches[1] ?? 0);
+        $id = (int) $matches[1];
         $md5 = $matches[2];
         $email = urldecode($matches[3]);
 

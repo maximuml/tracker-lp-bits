@@ -5,8 +5,6 @@ $userInfo = $userModel ?? null;
 if (! $userInfo instanceof \App\Models\User) {
     \App\Support\LegacyResponse::abort('Error', 'No user with this ID!');
 }
-$userRep = new \App\Repositories\UserRepository();
-
 $torrentcomments = (int) ($torrentcomments ?? 0);
 $forumposts = (int) ($forumposts ?? 0);
 $temporaryInviteCount = (int) ($temporaryInviteCount ?? 0);
@@ -33,8 +31,7 @@ else
 //$arr3 = mysql_fetch_row($res);
 //$forumposts = $arr3[0];
 
-	$arr = \App\Support\Country::rowWithContext($user['country']);
-	$country = "<img src=\"pic/flag/".$arr['flagpic']."\" alt=\"".$arr['name']."\" style='margin-left: 8pt' />";
+	$country = (string) ($countryHtml ?? '');
 
 
 if ($user["gender"] == "Male")
@@ -47,7 +44,7 @@ $gender = "<img class='no_gender' src='pic/trans.gif' alt='N/A' title='".$lang_u
 $enabled = $user["enabled"] == 'yes';
 $moviepicker = $user["picker"] == 'yes';
 
-print("<h1 style='margin:0px'>" . \App\Support\UserDisplay::username($user['id'], true,false) . $country."</h1>");
+print("<h1 style='margin:0px'>" . (string) ($usernameHtml ?? '') . $country."</h1>");
 if ($userInfo->valid_medals->isNotEmpty()) {
     print \App\Support\Medal::buildImages($userInfo->{$medalType}, 120, $CURUSER['id'] == $user['id']);
     $warnMedalJs = <<<JS
@@ -72,8 +69,8 @@ if (!$enabled)
 print("<p><b>".$lang_userdetails['text_account_disabled_note']."</b></p>");
 elseif ($CURUSER["id"] <> $user["id"])
 {
-	$friend = \App\Repositories\UserDetailRepository::isFriend((int)$CURUSER['id'], $id) ? 1 : 0;
-	$block = \App\Repositories\UserDetailRepository::isBlocked((int)$CURUSER['id'], $id) ? 1 : 0;
+	$friend = !empty($isFriend) ? 1 : 0;
+	$block = !empty($currentUserBlockedTarget) ? 1 : 0;
 
 	if ($friend)
 	print("<p>(<a href=\"friends.php?action=delete&amp;type=friend&amp;targetid=".$id."\">".$lang_userdetails['text_remove_from_friends']."</a>)</p>\n");
@@ -91,7 +88,7 @@ if ($CURUSER['id'] == $user['id'] || \App\Auth\Permission::can(\App\Enums\Permis
 <table width="100%" border="1" cellspacing="0" cellpadding="5">
 <?php
 $userIdDisplay = $user['id'];
-$userManageSystemUrl = sprintf('%s/%s/user/users/%s',\App\Support\Url::schemeAndHost(false), \App\Support\Env::get('FILAMENT_PATH', 'nexusphp'), $user['id']);
+$userManageSystemUrl = (string) ($userManageSystemUrl ?? '');
 $userManageSystemText = sprintf('<a href="%s" target="_blank" class="altlink">%s</a>', $userManageSystemUrl, $lang_functions['text_management_system']);
 $migratedHelp = "&nbsp;&nbsp;".sprintf($lang_userdetails['change_field_value_migrated'], $userManageSystemText);
 if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::MANAGE_USER_BASIC_INFO) && $user["class"] < \App\Support\UserDisplay::currentClass()) {
@@ -113,7 +110,7 @@ if (($user["privacy"] != "strong") OR (\App\Auth\Permission::can(\App\Enums\Perm
 	\App\Support\Html::tr($lang_userdetails['row_invitation'], $user['invites'], 1);}
 	}
 	if ($user["invited_by"] > 0) {
-		\App\Support\Html::trSmall($lang_userdetails['row_invited_by'], \App\Support\UserDisplay::username($user['invited_by']), 1);
+		\App\Support\Html::trSmall($lang_userdetails['row_invited_by'], (string) ($invitedByHtml ?? ''), 1);
 	}
 	\App\Support\Html::trSmall($lang_userdetails['row_join_date'], $joindate, 1);
 	\App\Support\Html::trSmall($lang_userdetails['row_last_seen'], $lastseen, 1);
@@ -124,52 +121,29 @@ if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::VIEW_USER_CO
 	\App\Support\Html::trSmall($lang_userdetails['row_email'], "<a href=\"mailto:".$user['email']."\">".$user['email']."</a>", 1);
 }
 if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::VIEW_USER_CONFIDENTIAL_INFO)) {
-	$iphistory = \App\Repositories\UserDetailRepository::getIplogCount($id);
-
-	if ($iphistory > 0)
-	\App\Support\Html::trSmall($lang_userdetails['row_ip_history'], $lang_userdetails['text_user_earlier_used']."<b><a href=\"iphistory.php?id=" . $user['id'] . "\">" . $iphistory. $lang_userdetails['text_different_ips'].\App\Support\Strings::addS($iphistory, true)."</a></b>", 1);
+	if (($ipHistoryCount ?? 0) > 0)
+	\App\Support\Html::trSmall($lang_userdetails['row_ip_history'], $lang_userdetails['text_user_earlier_used']."<b><a href=\"iphistory.php?id=" . $user['id'] . "\">" . ($ipHistoryCount ?? 0). $lang_userdetails['text_different_ips'].\App\Support\Strings::addS(($ipHistoryCount ?? 0), true)."</a></b>", 1);
 }
-$seedBoxRep = new \App\Repositories\SeedBoxRepository();
 if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::VIEW_USER_CONFIDENTIAL_INFO) ||  $user["id"] == $CURUSER["id"])
 {
-    $seedBoxIcon = $seedBoxRep->renderIcon($CURUSER['ip'], $CURUSER['id']);
+    $seedBoxIcon = (string) ($seedBoxIconCurrentUser ?? '');
 	if ($enablelocation_tweak == 'yes'){
-		list($loc_pub, $loc_mod) = \App\Support\Network::ipLocationWithContext($user['ip']);
-		$locationinfo = "<span title=\"" . $loc_mod . "\">[" . $loc_pub . "]</span>";
+		list($loc_pub, $loc_mod) = (array) ($locationInfo ?? [null, null]);
+		$locationinfo = "<span title=\"" . (string) $loc_mod . "\">[" . (string) $loc_pub . "]</span>";
 	}
 	else $locationinfo = "";
-//    $ip = $user["id"] == $CURUSER["id"] ? hide_text($user['ip']) : $user['ip'];
     $ip = $user["ip"];
 	\App\Support\Html::trSmall($lang_userdetails['row_ip_address'], \App\Support\Strings::hidden($ip.$locationinfo.$seedBoxIcon), 1);
 }
-$clientselect = '';
-$peerRows = \App\Repositories\UserDetailRepository::getPeers((int)$user['id']);
-if (!empty($peerRows))
-{
-    $clientselect .= "<table border='1' cellspacing='0' cellpadding='5'><tr><td class='colhead'>Agent</td><td class='colhead'>IPV4</td><td class='colhead'>IPV6</td><td class='colhead'>Port</td></tr>";
-	foreach ($peerRows as $arr)
-	{
-	    $clientselect .= "<tr>";
-		$clientselect .= sprintf('<td>%s</td>', \App\Support\Strings::userAgentClient( $arr['agent']));
-		if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::VIEW_USER_CONFIDENTIAL_INFO) ||  $user["id"] == $CURUSER["id"]) {
-            $v4 = $user["id"] == $CURUSER["id"] ? \App\Support\Strings::hidden($arr['ipv4']) : $arr['ipv4'];
-            $v6 = $user["id"] == $CURUSER["id"] ? \App\Support\Strings::hidden($arr['ipv6']) : $arr['ipv6'];
-            $clientselect .= sprintf('<td>%s</td><td>%s</td><td>%s</td>', $v4.$seedBoxRep->renderIcon($arr['ipv4'], $user['id']), $v6.$seedBoxRep->renderIcon($arr['ipv6'], $user['id']), $arr['port']);
-        } else {
-            $clientselect .= sprintf('<td>%s</td><td>%s</td><td>%s</td>', '---', '---', '---');
-        }
-        $clientselect .= "</tr>";
-	}
-	$clientselect .= '</table>';
-}
+$clientselect = (string) ($clientSelectHtml ?? '');
 if ($clientselect)
 	\App\Support\Html::trSmall($lang_userdetails['row_bt_client'], $clientselect, 1);
 
 
 //真实分享、上传、下载率显示
-$trueTraffic = \App\Repositories\UserDetailRepository::getTrueTraffic((int)$user['id']);
-$true_download = $trueTraffic['downloaded'];
-$true_upload = $trueTraffic['uploaded'];
+$trueTraffic = (array) ($trueTraffic ?? []);
+$true_download = $trueTraffic['downloaded'] ?? 0;
+$true_upload = $trueTraffic['uploaded'] ?? 0;
 if ($user["downloaded"] > 0 && $true_download > 0)
 {
 	$sr = floor($user["uploaded"] / $user["downloaded"] * 1000) / 1000;
@@ -200,7 +174,7 @@ if (($user['donated'] > 0 || $user['donated_cny'] > 0 )&& (\App\Auth\Permission:
 \App\Support\Html::trSmall($lang_userdetails['row_donated'], "$".htmlspecialchars($user['donated'])."&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;".htmlspecialchars($user['donated_cny']), 1);
 
 if ($user["avatar"])
-\App\Support\Html::trSmall($lang_userdetails['row_avatar'], \App\Support\UserDisplay::avatarImageWithContext(htmlspecialchars(trim($user["avatar"]))), 1);
+\App\Support\Html::trSmall($lang_userdetails['row_avatar'], (string) ($avatarHtml ?? ''), 1);
 
 $uclass = \App\Support\UserClass::imagePath($user["class"]);
 $utitle = \App\Support\UserClass::name($user["class"],false,false,true);
@@ -210,73 +184,11 @@ if ($user['class'] == UC_VIP && !empty($user['vip_until']) && strtotime($user['v
 }
 \App\Support\Html::trSmall($lang_userdetails['row_class'], $uclassImg, 1);
 
-//User meta
-$metas = $userRep->listMetas($user['id']);
-$props = [];
-$metaKey = \App\Models\UserMeta::META_KEY_CHANGE_USERNAME;
-if ($metas->has($metaKey)) {
-    $triggerId = "consume-$metaKey";
-    $changeUsernameCards = $metas->get($metaKey);
-    $cardName = $changeUsernameCards->first()->meta_key_text;
-    $useInput = '';
-    if ($CURUSER['id'] == $user['id']) {
-        $useInput = sprintf('<input type="button" value="%s" id="%s">', $lang_userdetails['consume'], $triggerId);
-    }
-    $props[] = sprintf(
-        '<div><strong>[%s]</strong>(%s)</div>%s',
-        $cardName, $changeUsernameCards->count(), $useInput
-    );
-    if ($useInput) {
-        $consumeChangeUsernameForm = <<<HTML
-<div class="layer-form">
-<form id="layer-form-$metaKey">
-    <input type="hidden" name="params[meta_key]" value="$metaKey">
-    <div class="form-control-row">
-        <div class="label">{$lang_userdetails['meta_key_change_username_username']}</div>
-        <div class="field"><input type="text" name="params[username]"></div>
-    </div>
-</form>
-</div>
-HTML;
-        $consumeChangeUsernameJs = <<<JS
-jQuery('#{$triggerId}').on("click", function () {
-    layer.open({
-        type: 1,
-        title: "{$lang_userdetails['consume']} {$cardName}",
-        content: `$consumeChangeUsernameForm`,
-        btn: ['OK'],
-        btnAlign: 'c',
-        yes: function () {
-            let params = jQuery('#layer-form-{$metaKey}').serialize()
-            jQuery.post('ajax.php', params + "&action=consumeBenefit", function (response) {
-                console.log(response)
-                if (response.ret != 0) {
-                    layer.alert(response.msg)
-                    return
-                }
-                window.location.reload()
-            }, 'json')
-        }
-    })
-})
-JS;
-        \Nexus\Nexus::js($consumeChangeUsernameJs, 'footer', false);
-    }
+if (!empty($userPropsHtml)) {
+    \App\Support\Html::trSmall($lang_userdetails['row_user_props'], (string) $userPropsHtml, 1);
 }
-
-$metaKey = \App\Models\UserMeta::META_KEY_PERSONALIZED_USERNAME;
-if ($metas->has($metaKey)) {
-    $rainbowID = $metas->get($metaKey)->first();
-    if ($rainbowID->isValid()) {
-        $props[] = sprintf(
-            '<div><strong>[%s]</strong>(%s)</div>',
-            $rainbowID->metaKeyText, $rainbowID->getDeadlineText()
-        );
-    }
-}
-
-if (!empty($props)) {
-    \App\Support\Html::trSmall($lang_userdetails['row_user_props'], sprintf('<div style="display: flex;align-items: center">%s</div>', implode('&nbsp;|&nbsp;', $props)), 1);
+if (!empty($consumeChangeUsernameJs)) {
+    \Nexus\Nexus::js((string) $consumeChangeUsernameJs, 'footer', false);
 }
 
 \App\Support\Hooks::doAction('user_detail_rows', $user['id'], 'web');
@@ -286,9 +198,8 @@ if (!empty($props)) {
 \App\Support\Html::trSmall($lang_userdetails['row_forum_posts'], ($forumposts && ($user["id"] == $CURUSER["id"] || \App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::VIEW_USER_HISTORY)) ? "<a href=\"userhistory.php?action=viewposts&amp;id=".$id."\" title=\"".$lang_userdetails['link_view_posts']."\">".$forumposts."</a>" : $forumposts), 1);
 
 if ($user["id"] == $CURUSER["id"] || \App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::VIEW_USER_HISTORY)) {
-    if (\App\Models\HitAndRun::getIsEnabled()) {
-        $hrStatus = (new \App\Repositories\HitAndRunRepository())->getStatusStats($user['id']);
-        \App\Support\Html::trSmall('H&R', sprintf('<a href="myhr.php?userid=%s" target="_blank">%s</a>', $user['id'], $hrStatus), 1);
+    if (\App\Models\HitAndRun::getIsEnabled() && !empty($hrStatusHtml)) {
+        \App\Support\Html::trSmall('H&R', sprintf('<a href="myhr.php?userid=%s" target="_blank">%s</a>', $user['id'], (string) $hrStatusHtml), 1);
     }
 
     $bonusLogText = sprintf('&nbsp;&nbsp;<a href="bonus-log.php?uid=%s" target="_blank" class="altlink">[%s]</a>', $user['id'], \App\Support\Locale::trans("bonus-log.view_detail", [], null));
@@ -296,9 +207,8 @@ if ($user["id"] == $CURUSER["id"] || \App\Auth\Permission::can(\App\Enums\Permis
     \App\Support\Html::trSmall($lang_functions['text_seed_points'], number_format($user['seed_points'], 1) . "&nbsp;&nbsp;<span class='text-muted'>(" . \App\Support\Locale::trans('label.updated_at', [], null) . ": " . $user['seed_points_updated_at'] . ")</span>", 1);
 }
 
-if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::MANAGE_USER_BASIC_INFO) && $user["class"] < \App\Support\UserDisplay::currentClass()) {
-    $bonusTable = \App\Support\Bonus::buildBonusTableForUser($user);
-    \App\Support\Html::trSmall($lang_userdetails['text_bonus_table'], $bonusTable['table'], 1);
+if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::MANAGE_USER_BASIC_INFO) && $user["class"] < \App\Support\UserDisplay::currentClass() && !empty($bonusTableHtml)) {
+    \App\Support\Html::trSmall($lang_userdetails['text_bonus_table'], (string) $bonusTableHtml, 1);
 }
 
 if ($user["ip"] && (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::TORRENT_HISTORY) || $user["id"] == $CURUSER["id"])){
@@ -324,18 +234,7 @@ else
 {
 	print("<tr><td align=\"left\" colspan=\"2\" class=\"text\"><font color=\"blue\">".$lang_userdetails['text_public_access_denied'].$user['username'].$lang_userdetails['text_user_wants_privacy']."</font></td></tr>\n");
 }
-$showpmbutton = 0;
-if ($CURUSER["id"] != $user["id"])
-if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::STAFF_MEMBER))
-$showpmbutton = 1;
-elseif ($user["acceptpms"] == "yes")
-{
-	$showpmbutton = \App\Repositories\UserDetailRepository::isBlocked((int)$user['id'], (int)$CURUSER['id']) ? 0 : 1;
-}
-elseif ($user["acceptpms"] == "friends")
-{
-	$showpmbutton = \App\Repositories\UserDetailRepository::isFriend((int)$user['id'], (int)$CURUSER['id']) ? 1 : 0;
-}
+$showpmbutton = !empty($showPmButton) ? 1 : 0;
 if ($CURUSER["id"] != $user["id"]){
 print("<tr><td colspan=\"2\" align=\"center\">");
 if ($showpmbutton)
@@ -432,8 +331,7 @@ if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::MANAGE_USER_
 	}else{
 		if ($user["warnedby"] != "System")
 		{
-			$arr = \App\Repositories\UserDetailRepository::getWarnedBy((int)$user['warnedby']);
-			$warnedby = $arr ? "<br />[".$lang_userdetails['text_by']."<u>" . \App\Support\UserDisplay::username($arr['id']) . "</u></a>]" : "";
+			$warnedby = (string) ($warnedByHtml ?? '');
 		}else{
 			$warnedby = "<br />[".$lang_userdetails['text_by_system']."]";
 			print("<tr><td class=\"rowfollow\">".$lang_userdetails['text_last_warning']."</td><td align=\"left\" class=\"rowfollow\"> {$user['lastwarned']} .(".$lang_userdetails['text_until'] ."$elapsedlw)   $warnedby</td></tr>\n");
@@ -515,23 +413,6 @@ JS;
 	}
 }
 
-$claimAllSeedingConfirmation = \App\Support\Locale::trans('claim.claim_all_seeding_confirmation', [], null);
-$claimJs = '';
-if ($userInfo->id == $CURUSER['id'] && \App\Support\Permissions::hasRoleWorkSeeding((int) $userInfo->id)) {
-    $claimJs = <<<JS
-jQuery("body").on("click", "#claim-all-seeding", function (e) {
-    layer.confirm("$claimAllSeedingConfirmation", {}, function () {
-        jQuery.post('/plugin/claim_all_seeding', {"action": "claimAllSeeding"}, function (response) {
-            if (response.ret == 0) {
-                window.location.reload()
-            } else {
-                layer.alert(response.msg)
-            }
-        }, 'json')
-    })
-})
-JS;
-}
 $paginationJs = <<<JS
 jQuery("body").on("click", ".nexus-pagination a", function (e) {
     e.preventDefault()

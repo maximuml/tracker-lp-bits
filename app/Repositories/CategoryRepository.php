@@ -35,6 +35,27 @@ final class CategoryRepository
             ->map(fn ($row) => (array) $row)
             ->all();
     }
+
+    public static function countByTable(string $table): int
+    {
+        return (int) NexusDB::table($table)->count();
+    }
+
+    /**
+     * @param  'asc'|'desc'  $direction
+     * @return  array<int, array<string, mixed>>
+     */
+    public static function listByTable(string $table, int $offset, int $perPage, string $sort = 'id', string $direction = 'desc'): array
+    {
+        return NexusDB::table($table)
+            ->orderBy($sort, $direction)
+            ->offset($offset)
+            ->limit($perPage)
+            ->get()
+            ->map(fn ($row) => (array) $row)
+            ->all();
+    }
+
     /**
      * Render the legacy catmanage page.
      *

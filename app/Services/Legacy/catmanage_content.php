@@ -154,12 +154,12 @@ $lang_catmanage = (array) (\App\Support\SupportContext::getGlobal('lang_catmanag
 $perpage = \App\Support\SupportContext::getGlobal('perpage');
 $pagerParam = \App\Support\SupportContext::getGlobal('pagerParam');
 	$dbtablename = return_category_db_table_name($type);
-	$num = \Nexus\Database\NexusDB::table($dbtablename)->count();
+	$num = \App\Repositories\CategoryRepository::countByTable($dbtablename);
 	if (!$num)
 		print("<p align=\"center\">".$lang_catmanage['text_no_record_yet']."</p>");
 	else{
 		[$pagertop, $pagerbottom, , $offset, $perpage, ] = \App\Support\Pagination::pager($perpage, $num, $pagerParam);
-		$rows = \Nexus\Database\NexusDB::table($dbtablename)->orderByDesc('id')->offset($offset)->limit($perpage)->get();
+		$rows = \App\Repositories\CategoryRepository::listByTable($dbtablename, (int) $offset, (int) $perpage, 'id', 'desc');
 ?>
 <table border="1" cellspacing="0" cellpadding="5" width="97%">
 <tr>

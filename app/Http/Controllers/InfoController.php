@@ -4,12 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Enums\Permission\PermissionEnum;
 use App\Models\Attendance;
+use App\Models\News;
 use App\Models\User;
 use App\Repositories\AttendanceRepository;
 use App\Repositories\InfoRepository;
 use App\Repositories\PollRepository;
 use App\Support\Captcha;
 use App\Support\Config\SiteConfig;
+use App\Support\Events;
 use App\Support\LegacyAuthContext;
 use App\Support\Category;
 use App\Support\Format;
@@ -29,6 +31,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\View\View;
+use Nexus\Database\NexusDB;
 
 class InfoController extends LegacyController
 {
@@ -267,9 +270,139 @@ class InfoController extends LegacyController
         return $this->legacyPage($request, 'invite');
     }
 
-    public function news(Request $request): Response|RedirectResponse
+    public function news(Request $request): Response|RedirectResponse|View
     {
-        return $this->legacyPageRaw($request, 'news');
+        $langNews = (array) (SupportContext::getGlobal('lang_news') ?? []);
+        $baseUrl = (string) SupportContext::getGlobal('BASEURL', '');
+
+        $action = htmlspecialchars((string) ($request->input('action') ?? ''));
+
+        if ($action === 'delete') {
+            $newsid = (int) $request->input('newsid', 0);
+            if ($newsid <= 0) {
+                return $this->legacyAbortResponse($langNews['std_error'] ?? 'Error', $langNews['std_invalid_news_id'] ?? 'Invalid news ID.');
+            }
+
+            $returnto = $request->input('returnto') !== null && $request->input('returnto') !== ''
+                ? htmlspecialchars((string) $request->input('returnto'))
+                : htmlspecialchars((string) $request->headers->get('referer', ''));
+
+            if ((int) $request->input('sure', 0) !== 1) {
+                $confirm = ($langNews['std_are_you_sure'] ?? 'Are you sure? ') . "<a class=altlink href=\"?action=delete&newsid={$newsid}&returnto=" . urlencode($returnto) . "&sure=1\">" . ($langNews['std_here'] ?? 'here') . "</a>" . ($langNews['std_if_sure'] ?? '.');
+                return $this->legacyAbortResponse($langNews['std_delete_news_item'] ?? 'Delete news item', $confirm, false);
+            }
+
+            News::query()->where('id', $newsid)->delete();
+            $cache = SupportContext::getCache();
+            if ($cache !== null) {
+                $cache->delete_value('recent_news', true);
+            }
+
+            if ($returnto !== '') {
+                return redirect($returnto);
+            }
+
+            return redirect('/');
+        }
+
+        if ($action === 'add') {
+            if (! $request->isMethod('post')) {
+                return $this->legacyAbortResponse($langNews['std_error'] ?? 'Error', $langNews['std_news_body_empty'] ?? 'News body empty.');
+            }
+            $body = htmlspecialchars((string) $request->input('body'), ENT_QUOTES);
+            if ($body === '') {
+                return $this->legacyAbortResponse($langNews['std_error'] ?? 'Error', $langNews['std_news_body_empty'] ?? 'News body empty.');
+            }
+            $title = htmlspecialchars((string) $request->input('subject'));
+            if ($title === '') {
+                return $this->legacyAbortResponse($langNews['std_error'] ?? 'Error', $langNews['std_news_title_empty'] ?? 'News title empty.');
+            }
+            $added = (int) $request->input('added', 0);
+            if ($added <= 0) {
+                $added = now()->toDateTimeString();
+            }
+            $notify = $request->input('notify') === 'yes' ? 'yes' : 'no';
+
+            $currentUser = (array) (SupportContext::getUser() ?? []);
+            $newsId = (int) News::query()->insertGetId([
+                'userid' => (int) ($currentUser['id'] ?? 0),
+                'added' => $added,
+                'body' => $body,
+                'title' => $title,
+                'notify' => $notify,
+            ]);
+
+            if (! $newsId) {
+                return $this->legacyAbortResponse($langNews['std_error'] ?? 'Error', $langNews['std_something_weird_happened'] ?? 'Something weird happened.');
+            }
+
+            $cache = SupportContext::getCache();
+            if ($cache !== null) {
+                $cache->delete_value('recent_news', true);
+            }
+
+            Events::fire('news_created', News::query()->find($newsId), null);
+
+            return redirect('/');
+        }
+
+        if ($action === 'edit') {
+            $newsid = (int) $request->input('newsid', 0);
+            if ($newsid <= 0) {
+                return $this->legacyAbortResponse($langNews['std_error'] ?? 'Error', $langNews['std_invalid_news_id'] ?? 'Invalid news ID.');
+            }
+
+            $news = News::query()->where('id', $newsid)->first();
+            if (! $news) {
+                return $this->legacyAbortResponse($langNews['std_error'] ?? 'Error', $langNews['std_invalid_news_id'] . $newsid);
+            }
+
+            if ($request->isMethod('post')) {
+                $body = htmlspecialchars((string) $request->input('body'), ENT_QUOTES);
+                if ($body === '') {
+                    return $this->legacyAbortResponse($langNews['std_error'] ?? 'Error', $langNews['std_news_body_empty'] ?? 'News body empty.');
+                }
+                $title = htmlspecialchars((string) $request->input('subject'));
+                if ($title === '') {
+                    return $this->legacyAbortResponse($langNews['std_error'] ?? 'Error', $langNews['std_news_title_empty'] ?? 'News title empty.');
+                }
+                $notify = $request->input('notify') === 'yes' ? 'yes' : 'no';
+
+                News::query()->where('id', $newsid)->update([
+                    'body' => $body,
+                    'title' => $title,
+                    'notify' => $notify,
+                ]);
+
+                $cache = SupportContext::getCache();
+                if ($cache !== null) {
+                    $cache->delete_value('recent_news', true);
+                }
+
+                return redirect('/');
+            }
+
+            $arr = $news->toArray();
+            $newsTitle = $langNews['text_edit_site_news'] ?? 'Edit site news';
+            $returnto = htmlspecialchars((string) ($request->input('returnto') ?? $request->headers->get('referer', '')));
+
+            return $this->legacyPageRaw($request, 'news', true, [
+                'mode' => 'edit',
+                'newsid' => $newsid,
+                'body' => $arr['body'] ?? '',
+                'subject' => htmlspecialchars((string) ($arr['title'] ?? '')),
+                'notify' => (string) ($arr['notify'] ?? 'no'),
+                'returnto' => $returnto,
+                'title' => $newsTitle,
+            ]);
+        }
+
+        // Default: show compose form
+        $composeTitle = $langNews['text_submit_news_item'] ?? 'Submit news item';
+        return $this->legacyPageRaw($request, 'news', true, [
+            'mode' => 'add',
+            'title' => $composeTitle,
+        ]);
     }
 
     public function makepoll(Request $request): Response|RedirectResponse|View
@@ -648,8 +781,76 @@ class InfoController extends LegacyController
         return redirect($redirectBase . '/faqmanage.php');
     }
 
-    public function bitbucketlog(Request $request): View|RedirectResponse|Response
+    public function bitbucketlog(Request $request): Response|RedirectResponse|View
     {
-        return $this->legacyPage($request, 'bitbucketlog', true);
+        $currentUser = (array) (SupportContext::getUser() ?? []);
+        $currentClass = (int) UserDisplay::currentClass();
+
+        if ($currentClass < (defined('UC_ADMINISTRATOR') ? \constant('UC_ADMINISTRATOR') : 0)) {
+            return $this->legacyAbortResponse('Sorry', 'Access denied.');
+        }
+
+        $bucketPath = public_path('bitbucket');
+
+        $delete = (int) $request->input('delete', 0);
+        if ($currentClass >= (defined('UC_MODERATOR') ? \constant('UC_MODERATOR') : 0) && $delete > 0) {
+            $bitbucket = NexusDB::table('bitbucket')->where('id', $delete)->first(['name', 'owner']);
+            if ($bitbucket) {
+                $file = $bucketPath . '/' . $bitbucket->name;
+                NexusDB::table('bitbucket')->where('id', $delete)->delete();
+                if (file_exists($file) && ! unlink($file)) {
+                    return $this->legacyAbortResponse('Warning', "Unable to unlink file: <b>" . htmlspecialchars((string) $bitbucket->name) . "</b>. You should contact an administrator about this error.", false);
+                }
+            }
+
+            return redirect($request->url());
+        }
+
+        $count = (int) NexusDB::table('bitbucket')->count();
+        $perpage = 10;
+        [$pagertop, $pagerbottom, , $offset, $perpage] = \App\Support\Pagination::pager($perpage, $count, 'bitbucketlog.php?');
+        $bitbucketRows = NexusDB::table('bitbucket')->orderByDesc('added')->offset($offset)->limit($perpage)->get();
+
+        $userIds = [];
+        $rows = [];
+        foreach ($bitbucketRows as $row) {
+            $arr = (array) $row;
+            $rows[] = $arr;
+            if ((int) ($arr['owner'] ?? 0) > 0) {
+                $userIds[] = (int) $arr['owner'];
+            }
+        }
+
+        $userDisplayMap = [];
+        foreach (array_unique($userIds) as $uid) {
+            $userDisplayMap[$uid] = UserDisplay::username($uid);
+        }
+
+        $imageDimensions = [];
+        foreach ($rows as $row) {
+            $file = $bucketPath . '/' . $row['name'];
+            if (file_exists($file)) {
+                $size = @getimagesize($file);
+                $imageDimensions[$row['id']] = [
+                    'width' => $size[0] ?? 0,
+                    'height' => $size[1] ?? 0,
+                ];
+            } else {
+                $imageDimensions[$row['id']] = ['width' => 0, 'height' => 0];
+            }
+        }
+
+        return $this->legacyPage($request, 'bitbucketlog', true, [
+            'rows' => $rows,
+            'count' => $count,
+            'pagertop' => $pagertop,
+            'pagerbottom' => $pagerbottom,
+            'userDisplayMap' => $userDisplayMap,
+            'imageDimensions' => $imageDimensions,
+        ]);
     }
+
+    /**
+     * @param  array<string, mixed>  $params
+     */
 }

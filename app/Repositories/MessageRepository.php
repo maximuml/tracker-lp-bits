@@ -325,4 +325,39 @@ class MessageRepository extends BaseRepository
             default => throw new \InvalidArgumentException("Invalid type: $type")
         };
     }
+
+    public static function getLastPmId(int $userId): int
+    {
+        return (int) (Message::query()->where('receiver', $userId)->max('id') ?? 0);
+    }
+
+    /**
+     * @return list<array<string, mixed>>
+     */
+    public static function getUnreadPmNotifications(int $userId, int $lastPmId, int $limit): array
+    {
+        $rows = Message::query()
+            ->where('receiver', $userId)
+            ->where('unread', 'yes')
+            ->where('id', '>', $lastPmId)
+            ->with('send_user')
+            ->orderByDesc('id')
+            ->limit($limit)
+            ->get();
+
+        $notifications = [];
+        foreach ($rows as $row) {
+            $notifications[] = [
+                'id' => 'pm_' . $row->id,
+                'type' => 'pm',
+                'title' => 'New message',
+                'body' => $row->subject,
+                'from' => (string) ($row->send_user->username ?? 'System'),
+                'url' => 'messages.php?action=viewmessage&id=' . $row->id,
+                'timestamp' => (int) strtotime((string) $row->added),
+            ];
+        }
+
+        return $notifications;
+    }
 }

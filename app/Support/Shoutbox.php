@@ -2,10 +2,6 @@
 
 namespace App\Support;
 
-use App\Models\Torrent;
-use App\Models\User;
-use Nexus\Database\NexusDB;
-
 /**
  * Helpers for the shoutbox / live chat UI: formatting, reactions,
  * edit/delete controls, toolbar markup and shared rendering.
@@ -86,7 +82,7 @@ final class Shoutbox
      */
     public static function applyTypeFilter($query, string $type, $user = null): void
     {
-        $query->where('type', 'sb');
+        \App\Repositories\ShoutboxRepository::applyTypeFilter($query, $type, $user);
     }
 
     /**
@@ -203,55 +199,7 @@ final class Shoutbox
             return ['counts' => [], 'mine' => [], 'users' => []];
         }
 
-        $ids = array_map('intval', $shoutIds);
-
-        /** @var array<int, array<string, int>> $counts */
-        $counts = [];
-        $rawCounts = NexusDB::table('shoutbox_reactions')
-            ->select('shoutbox_id', 'reaction', NexusDB::raw('COUNT(*) as cnt'))
-            ->whereIn('shoutbox_id', $ids)
-            ->groupBy('shoutbox_id', 'reaction')
-            ->get();
-        foreach ($rawCounts as $row) {
-            $id = (int) $row->shoutbox_id;
-            $emoji = (string) $row->reaction;
-            $counts[$id][$emoji] = (int) $row->cnt;
-        }
-
-        /** @var array<int, list<string>> $mine */
-        $mine = [];
-        $rawMine = NexusDB::table('shoutbox_reactions')
-            ->whereIn('shoutbox_id', $ids)
-            ->where('user_id', $currentUserId)
-            ->get(['shoutbox_id', 'reaction']);
-        foreach ($rawMine as $row) {
-            $id = (int) $row->shoutbox_id;
-            $mine[$id][] = (string) $row->reaction;
-        }
-
-        /** @var array<int, array<string, list<string>>> $users */
-        $users = [];
-        $rawUsers = NexusDB::table('shoutbox_reactions as sr')
-            ->select('sr.shoutbox_id', 'sr.reaction', 'u.username')
-            ->join('users as u', 'u.id', '=', 'sr.user_id')
-            ->whereIn('sr.shoutbox_id', $ids)
-            ->whereIn('sr.reaction', self::REACTIONS)
-            ->orderBy('sr.id')
-            ->limit(100 * count($ids))
-            ->get();
-        foreach ($rawUsers as $row) {
-            $id = (int) $row->shoutbox_id;
-            $emoji = (string) $row->reaction;
-            $name = (string) $row->username;
-            if (! isset($users[$id][$emoji])) {
-                $users[$id][$emoji] = [];
-            }
-            if (count($users[$id][$emoji]) < 20) {
-                $users[$id][$emoji][] = $name;
-            }
-        }
-
-        return ['counts' => $counts, 'mine' => $mine, 'users' => $users];
+        return \App\Repositories\ShoutboxRepository::prefetchReactions($shoutIds, $currentUserId);
     }
 
     /**
@@ -274,20 +222,8 @@ final class Shoutbox
             $myReactions = $myReactionsMap ?? [];
             $reactors = $reactorMap ?? [];
         } else {
-            /** @var array<string, int> $counts */
-            $counts = NexusDB::table('shoutbox_reactions')
-                ->select('reaction', NexusDB::raw('COUNT(*) as cnt'))
-                ->where('shoutbox_id', $shoutId)
-                ->groupBy('reaction')
-                ->pluck('cnt', 'reaction')
-                ->toArray();
-
-            /** @var list<string> $myReactions */
-            $myReactions = NexusDB::table('shoutbox_reactions')
-                ->where('shoutbox_id', $shoutId)
-                ->where('user_id', $currentUserId)
-                ->pluck('reaction')
-                ->toArray();
+            $counts = \App\Repositories\ShoutboxRepository::getReactionCounts($shoutId);
+            $myReactions = \App\Repositories\ShoutboxRepository::getMyReactions($shoutId, $currentUserId);
 
             $reactors = [];
         }
@@ -375,8 +311,7 @@ final class Shoutbox
                 $nick = $m[1];
                 $key = strtolower($nick);
                 if (! array_key_exists($key, $cache)) {
-                    $row = User::query()->whereRaw('LOWER(username) = LOWER(?)', [$nick])->first(['id', 'username']);
-                    $cache[$key] = $row ? ['id' => (int) $row->id, 'name' => (string) $row->username] : false;
+                    $cache[$key] = \App\Repositories\ShoutboxRepository::findUserByUsername($nick) ?? false;
                 }
                 if (! $cache[$key]) {
                     return $m[0];
@@ -422,7 +357,7 @@ final class Shoutbox
                     return $m[0];
                 }
                 if (! array_key_exists($id, $cache)) {
-                    $cache[$id] = Torrent::query()->where('id', $id)->exists();
+                    $cache[$id] = \App\Repositories\ShoutboxRepository::torrentExists($id);
                 }
                 if (! $cache[$id]) {
                     return $m[0];

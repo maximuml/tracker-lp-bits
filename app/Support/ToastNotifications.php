@@ -2,10 +2,8 @@
 
 namespace App\Support;
 
-use App\Models\Message;
-use App\Models\User;
-use Nexus\Database\NexusDB;
-use App\Support\Shoutbox;
+use App\Repositories\MessageRepository;
+use App\Repositories\ShoutboxRepository;
 
 /**
  * Fetch lightweight real-time toast notifications for the current user.
@@ -17,8 +15,6 @@ use App\Support\Shoutbox;
 final class ToastNotifications
 {
     private const LIMIT_PM = 10;
-
-    private const LIMIT_SHOUT = 50;
 
     private const MAX_BODY_LENGTH = 120;
 
@@ -33,9 +29,18 @@ final class ToastNotifications
             return ['cursors' => $cursors, 'notifications' => []];
         }
 
-        $notifications = [];
-        self::appendPmNotifications($userId, $lastPmId, $notifications);
-        self::appendShoutboxMentions($userId, $lastShoutId, $notifications);
+        $notifications = MessageRepository::getUnreadPmNotifications($userId, $lastPmId, self::LIMIT_PM);
+        foreach (ShoutboxRepository::getMentions($userId, $lastShoutId) as $mention) {
+            $notifications[] = [
+                'id' => 'shout_' . $mention['id'],
+                'type' => 'shoutbox-mention',
+                'title' => 'Shoutbox mention',
+                'body' => self::truncate((string) $mention['text']),
+                'from' => (string) ($mention['author_name'] ?? 'System'),
+                'url' => 'shoutbox_history.php',
+                'timestamp' => (int) $mention['date'],
+            ];
+        }
 
         usort($notifications, static fn (array $a, array $b): int => ($b['timestamp'] ?? 0) <=> ($a['timestamp'] ?? 0));
 
@@ -47,81 +52,10 @@ final class ToastNotifications
      */
     private static function cursors(int $userId): array
     {
-        $lastPmId = (int) (Message::query()->where('receiver', $userId)->max('id') ?? 0);
-        $lastShoutId = (int) (NexusDB::table('shoutbox')->max('id') ?? 0);
-
-        return ['last_pm_id' => $lastPmId, 'last_shout_id' => $lastShoutId];
-    }
-
-    /**
-     * @param list<array<string, mixed>> $notifications
-     */
-    private static function appendPmNotifications(int $userId, int $lastPmId, array &$notifications): void
-    {
-        $rows = Message::query()
-            ->where('receiver', $userId)
-            ->where('unread', 'yes')
-            ->where('id', '>', $lastPmId)
-            ->with('send_user')
-            ->orderByDesc('id')
-            ->limit(self::LIMIT_PM)
-            ->get();
-
-        foreach ($rows as $row) {
-            $notifications[] = [
-                'id' => 'pm_' . $row->id,
-                'type' => 'pm',
-                'title' => 'New message',
-                'body' => self::truncate((string) $row->subject),
-                'from' => (string) ($row->send_user->username ?? 'System'),
-                'url' => 'messages.php?action=viewmessage&id=' . $row->id,
-                'timestamp' => (int) strtotime((string) $row->added),
-            ];
-        }
-    }
-
-    /**
-     * @param list<array<string, mixed>> $notifications
-     */
-    private static function appendShoutboxMentions(int $userId, int $lastShoutId, array &$notifications): void
-    {
-        $user = User::query()->find($userId, ['username']);
-        if (!$user || $user->username === null || $user->username === '') {
-            return;
-        }
-
-        $username = (string) $user->username;
-        $pattern = '/(?<![\w\-\[\]\(\)])@' . preg_quote($username, '/') . '(?![\w\-\[\]\(\)])/ui';
-        $like = '%@' . strtolower($username) . '%';
-
-        $query = NexusDB::table('shoutbox')
-            ->leftJoin('users', 'shoutbox.userid', '=', 'users.id')
-            ->where('shoutbox.id', '>', $lastShoutId)
-            ->where('shoutbox.userid', '!=', $userId)
-            ->whereRaw('LOWER(shoutbox.text) LIKE ?', [$like])
-            ->select('shoutbox.id', 'shoutbox.date', 'shoutbox.text', 'users.username as author_name')
-            ->orderBy('shoutbox.id')
-            ->limit(self::LIMIT_SHOUT);
-
-        Shoutbox::applyTypeFilter($query, 'shoutbox', $user);
-        $rows = $query->get();
-
-        foreach ($rows as $row) {
-            $text = (string) ($row->text ?? '');
-            if (!preg_match($pattern, $text)) {
-                continue;
-            }
-
-            $notifications[] = [
-                'id' => 'shout_' . $row->id,
-                'type' => 'shoutbox-mention',
-                'title' => 'Shoutbox mention',
-                'body' => self::truncate($text),
-                'from' => (string) ($row->author_name ?? 'System'),
-                'url' => 'shoutbox_history.php',
-                'timestamp' => (int) $row->date,
-            ];
-        }
+        return [
+            'last_pm_id' => MessageRepository::getLastPmId($userId),
+            'last_shout_id' => ShoutboxRepository::getLastShoutId(),
+        ];
     }
 
     private static function truncate(string $text, int $length = self::MAX_BODY_LENGTH): string

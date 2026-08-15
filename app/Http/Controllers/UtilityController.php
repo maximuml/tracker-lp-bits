@@ -4,8 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Models\Setting;
 use App\Models\User;
+use App\Repositories\LegacyViewRepository;
 use App\Repositories\SearchPageRepository;
+use App\Services\Legacy\AjaxService;
+use App\Services\Legacy\AttachmentLegacyService;
 use App\Services\Legacy\LegacyPartialRenderer;
+use App\Support\Attachment\AttachmentService;
+use App\Support\Style;
 use App\Support\SupportContext;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -13,6 +18,8 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\View\View;
+use Nexus\Database\NexusDB;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class UtilityController extends LegacyController
 {
@@ -64,19 +71,14 @@ class UtilityController extends LegacyController
             \App\Support\LegacyAuth::requireLoginFromContext();
         }
 
-        if (! class_exists('AjaxInterface')) {
-            view('ajax._ajax')->render();
-        }
-
         try {
-            $callable = ['AjaxInterface', $action];
-            if (! is_callable($callable)) {
+            if (! method_exists(AjaxService::class, $action)) {
                 $currentUser = SupportContext::getUser() ?? [];
                 \App\Support\Logger::writeWithContext((string) ("hacking attempt made by " . ($currentUser['username'] ?? 'guest') . ",uid " . ($currentUser['id'] ?? 0)), (string) 'error', (bool) false);
                 throw new \RuntimeException("Invalid action: {$action}");
             }
 
-            $result = call_user_func($callable, $params);
+            $result = AjaxService::{$action}($params);
 
             return response()->json(\App\Support\Api::successWithContext($result));
         } catch (\Throwable $exception) {
@@ -86,14 +88,109 @@ class UtilityController extends LegacyController
         }
     }
 
-    public function attachment(Request $request): View|RedirectResponse
+    public function attachment(Request $request): Response
     {
-        return $this->legacyPage($request, 'attachment', true);
+        $currentUser = SupportContext::getUser() ?? [];
+        $Attach = new AttachmentService((int) ($currentUser['id'] ?? 0));
+
+        $count_limit = (int) $Attach->get_count_limit();
+        $count_left = $Attach->get_count_left();
+        $size_limit = $Attach->get_size_limit_byte();
+        $allowed_exts = $Attach->get_allowed_ext();
+
+        $altsize = (string) $request->input('altsize', '');
+        $callback_func = (string) $request->input('callback_func', '');
+        $warning = '';
+        $script = '';
+
+        if ($request->isMethod('POST') && $Attach->enable_attachment()) {
+            $uploaded = $request->file('file');
+            $file = null;
+            if ($uploaded !== null) {
+                $file = [
+                    'tmp_name' => $uploaded->getPathname(),
+                    'size' => $uploaded->getSize(),
+                    'type' => $uploaded->getMimeType(),
+                    'name' => $uploaded->getClientOriginalName(),
+                ];
+            }
+
+            $lang_attachment = (array) (SupportContext::getGlobal('lang_attachment') ?? []);
+            $result = AttachmentLegacyService::processUpload($currentUser, $Attach, $lang_attachment, $altsize, $callback_func, $file);
+            $warning = (string) ($result['warning'] ?? '');
+            $script = (string) ($result['script'] ?? '');
+            $count_left = (int) ($result['count_left'] ?? $count_left);
+        }
+
+        $content = LegacyViewRepository::render('attachment', [
+            'CURUSER' => $currentUser,
+            'lang_attachment' => (array) (SupportContext::getGlobal('lang_attachment') ?? []),
+            'Attach' => $Attach,
+            'count_limit' => $count_limit,
+            'count_left' => $count_left,
+            'size_limit' => $size_limit,
+            'allowed_exts' => $allowed_exts,
+            'css_uri' => Style::cssUriWithContext(),
+            'altsize' => $altsize,
+            'callback_func' => $callback_func,
+            'warning' => $warning,
+            'script' => $script,
+        ]);
+
+        return response($content, 200, ['Content-Type' => 'text/html; charset=utf-8']);
     }
 
-    public function getattachment(Request $request): Response|RedirectResponse
+    public function getattachment(Request $request): Response|RedirectResponse|StreamedResponse
     {
-        return $this->legacyPageRaw($request, 'getattachment', true);
+        $id = (int) $request->input('id', 0);
+        $dlkey = (string) $request->input('dlkey', '');
+
+        if ($id <= 0 || $dlkey === '') {
+            return response('Invalid id or key.', 400, ['Content-Type' => 'text/plain; charset=utf-8']);
+        }
+
+        $row = (array) NexusDB::table('attachments')->where('id', $id)->where('dlkey', $dlkey)->first();
+        if (! $row) {
+            return response('No attachment found.', 404, ['Content-Type' => 'text/plain; charset=utf-8']);
+        }
+
+        $httpdirectory = (string) SupportContext::getGlobal('httpdirectory_attachment', '');
+        $basePath = realpath($httpdirectory);
+        $filelocation = $httpdirectory . '/' . $row['location'];
+        $realFile = realpath($filelocation);
+
+        if ($basePath === false || $realFile === false || ! str_starts_with($realFile, $basePath) || ! is_file($realFile) || ! is_readable($realFile)) {
+            return response('File not found or cannot be read.', 404, ['Content-Type' => 'text/plain; charset=utf-8']);
+        }
+
+        $filename = basename((string) ($row['filename'] ?? ''));
+        $filename = str_replace(['"', '\\', "\r", "\n"], '', $filename);
+        if ($filename === '') {
+            $filename = 'attachment';
+        }
+
+        NexusDB::table('attachments')->where('id', $id)->increment('downloads');
+
+        $cache = SupportContext::getCache();
+        if ($cache !== null && method_exists($cache, 'delete_value')) {
+            $cache->delete_value('attachment_' . $dlkey . '_content');
+        }
+
+        return new StreamedResponse(function () use ($realFile) {
+            $f = fopen($realFile, 'rb');
+            if (! $f) {
+                return;
+            }
+
+            while (! feof($f)) {
+                echo fread($f, 4096);
+            }
+
+            fclose($f);
+        }, 200, [
+            'Content-Type' => 'application/octet-stream',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ]);
     }
 
     public function image(Request $request): Response|RedirectResponse
@@ -142,9 +239,45 @@ class UtilityController extends LegacyController
         return $this->legacyPage($request, 'tags', false);
     }
 
-    public function suggest(Request $request): Response|RedirectResponse
+    public function suggest(Request $request): Response
     {
-        return $this->legacyPageRaw($request, 'suggest', false);
+        $headers = [
+            'Expires' => 'Mon, 26 Jul 1997 05:00:00 GMT',
+            'Last-Modified' => gmdate('D, d M Y H:i:s') . ' GMT',
+            'Cache-Control' => 'no-cache, must-revalidate',
+            'Pragma' => 'no-cache',
+            'Content-Type' => 'text/xml; charset=utf-8',
+        ];
+
+        $q = trim((string) $request->input('q', ''));
+        if ($q === '') {
+            return response('', 200, $headers);
+        }
+
+        $suggestRows = NexusDB::table('suggest')
+            ->selectRaw('keywords AS suggest, COUNT(*) AS count')
+            ->where('keywords', 'like', $q . '%')
+            ->groupBy('keywords')
+            ->orderByDesc('count')
+            ->orderByDesc('keywords')
+            ->limit(10)
+            ->get();
+
+        $result = '';
+        $i = 0;
+        foreach ($suggestRows as $suggest) {
+            $suggest = (array) $suggest;
+            if (strlen((string) $suggest['suggest']) > 25) {
+                continue;
+            }
+            $result .= ($result === '' ? '' : "\r\n") . $suggest['suggest'] . "\r\n" . $suggest['count'];
+            $i++;
+            if ($i >= 5) {
+                break;
+            }
+        }
+
+        return response($result, 200, $headers);
     }
 
     public function preview(Request $request): View|RedirectResponse
@@ -232,7 +365,36 @@ XML;
 
     public function confirmemail(Request $request): Response|RedirectResponse
     {
-        return $this->legacyPageWithRedirect($request, 'confirmemail', false);
+        $routePath = $request->route('path') ?? '';
+        $pathInfo = $routePath !== '' ? '/' . ltrim((string) $routePath, '/') : '';
+        if (! preg_match(':^/(\d{1,10})/([\w]{32})/(.+)$:', $pathInfo, $matches)) {
+            abort(404);
+        }
+
+        $id = (int) $matches[1];
+        $md5 = $matches[2];
+        $email = urldecode($matches[3]);
+
+        if ($id <= 0) {
+            abort(404);
+        }
+
+        $user = User::query()->where('id', $id)->first(['editsecret']);
+        if (! $user) {
+            abort(404);
+        }
+
+        $sec = \App\Support\Strings::padHash($user->editsecret);
+        if (preg_match('/^ *$/s', $sec) || $md5 !== md5($sec . $email . $sec)) {
+            abort(404);
+        }
+
+        $affected = User::query()->where('id', $id)->where('editsecret', $user->editsecret)->update(['editsecret' => '', 'email' => $email]);
+        if (! $affected) {
+            abort(404);
+        }
+
+        return redirect('/usercp.php?action=security&type=saved');
     }
 
     public function ok(Request $request): View|RedirectResponse

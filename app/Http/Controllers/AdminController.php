@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\ModelEventEnum;
 use App\Enums\Permission\PermissionEnum;
 use App\Models\BonusLogs;
 use App\Models\Setting;
@@ -20,7 +21,10 @@ use App\Support\Log;
 use App\Support\Logger;
 use App\Support\Pagination;
 use App\Support\Permissions;
+use App\Support\Events;
+use App\Support\Mail;
 use App\Support\SupportContext;
+use App\Support\Url;
 use App\Support\UserClass;
 use App\Support\UserDisplay;
 use App\Support\Validators;
@@ -225,9 +229,82 @@ class AdminController extends LegacyController
 
     public function takeconfirm(Request $request): Response|RedirectResponse
     {
+        if ($request->input('id') !== null) {
+            $id = (int) $request->input('id');
+        } elseif ($request->query('id') !== null) {
+            $id = (int) $request->query('id');
+        } else {
+            return $this->legacyAbortResponse('Error', 'Invalid id');
+        }
 
-        return $this->legacyPageWithRedirect($request, 'takeconfirm');
+        if ($id <= 0 || ! Validators::isId($id)) {
+            return $this->legacyAbortResponse('Error', 'Invalid id');
+        }
 
+        $currentUser = SupportContext::getUser() ?? [];
+        $currentUserId = (int) ($currentUser['id'] ?? 0);
+
+        if ($currentUserId !== $id && ! Permissions::userCan(PermissionEnum::VIEW_INVITE->value, false, $currentUserId)) {
+            $langFunctions = SupportContext::getLangFunctions();
+
+            return $this->legacyAbortResponse($langFunctions['std_sorry'] ?? 'Sorry', $langFunctions['std_permission_denied'] ?? 'Permission denied.');
+        }
+
+        $conusr = $request->input('conusr', []);
+        if (! is_array($conusr) || empty($conusr)) {
+            $lang = (array) (SupportContext::getGlobal('lang_takeconfirm') ?? []);
+
+            return $this->legacyAbortResponse(
+                $lang['std_sorry'] ?? 'Sorry',
+                ($lang['std_no_buddy_to_confirm'] ?? 'No buddy to confirm.') . '<a class=altlink href=invite.php?id=' . $currentUserId . '>' . ($lang['std_here_to_go_back'] ?? 'here to go back') . '</a>',
+                false
+            );
+        }
+
+        $userList = User::query()->whereIn('id', $conusr)
+            ->where('status', 'pending')
+            ->where('invited_by', $id)
+            ->get(User::$commonFields);
+
+        if ($userList->isEmpty()) {
+            $lang = (array) (SupportContext::getGlobal('lang_takeconfirm') ?? []);
+
+            return $this->legacyAbortResponse(
+                $lang['std_sorry'] ?? 'Sorry',
+                ($lang['std_no_buddy_to_confirm'] ?? 'No buddy to confirm.') . '<a class=altlink href=invite.php?id=' . $currentUserId . '>' . ($lang['std_here_to_go_back'] ?? 'here to go back') . '</a>',
+                false
+            );
+        }
+
+        $uidArr = [];
+        foreach ($userList as $user) {
+            $uidArr[] = $user->id;
+            Events::fire(ModelEventEnum::USER_UPDATED, $user, null);
+        }
+
+        User::query()->whereIn('id', $uidArr)->update(['status' => 'confirmed', 'editsecret' => '']);
+
+        $email = (string) $request->input('email', '');
+        if ($email !== '') {
+            $lang = (array) (SupportContext::getGlobal('lang_takeconfirm') ?? []);
+            $siteName = Setting::getSiteName();
+            $baseUrl = Url::schemeAndHost(false);
+            $reportMail = (string) SupportContext::getGlobal('REPORTMAIL', '');
+            $mailContentOne = $lang['mail_content_1'] ?? '';
+            $mailHere = $lang['mail_here'] ?? '';
+            $mailContentTwo = sprintf($lang['mail_content_two'] ?? '', $siteName, $reportMail, $siteName);
+            $body = <<<EOD
+{$mailContentOne}
+<b><a href="javascript:void(null)" onclick="window.open('{$baseUrl}/login.php')">{$mailHere}</a></b><br />
+{$baseUrl}/login.php
+{$mailContentTwo}
+EOD;
+
+            $title = $siteName . ($lang['mail_title'] ?? '');
+            Mail::sentLegacy($email, $siteName, (string) SupportContext::getGlobal('SITEEMAIL', ''), $title, $body, 'invite confirm', false, false, '', 'UTF-8');
+        }
+
+        return redirect('/invite.php?id=' . $currentUserId);
     }
 
     public function userBanLog(Request $request): View|RedirectResponse|Response

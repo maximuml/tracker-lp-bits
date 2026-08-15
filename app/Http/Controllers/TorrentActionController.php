@@ -154,7 +154,13 @@ class TorrentActionController extends LegacyController
 
         $files = TorrentAjaxRepository::fileList($torrentId);
 
-        return $this->legacyPageRaw($request, 'viewfilelist', false, ['files' => $files]);
+        return response()->view('viewfilelist.index', ['files' => $files], 200, [
+            'Expires' => 'Mon, 26 Jul 1997 05:00:00 GMT',
+            'Last-Modified' => gmdate('D, d M Y H:i:s') . ' GMT',
+            'Cache-Control' => 'no-cache, must-revalidate',
+            'Pragma' => 'no-cache',
+            'Content-Type' => 'text/html; charset=utf-8',
+        ]);
     }
 
     public function viewPeerList(Request $request): Response|RedirectResponse
@@ -167,7 +173,15 @@ class TorrentActionController extends LegacyController
         $curUser = SupportContext::getUser() ?? [];
         $currentUser = ! empty($curUser) ? User::query()->find($curUser['id'] ?? 0) : null;
 
-        return $this->legacyPageRaw($request, 'viewpeerlist', false, TorrentAjaxRepository::peerList($torrentId, $currentUser));
+        $headers = [
+            'Expires' => 'Mon, 26 Jul 1997 05:00:00 GMT',
+            'Last-Modified' => gmdate('D, d M Y H:i:s') . ' GMT',
+            'Cache-Control' => 'no-cache, must-revalidate',
+            'Pragma' => 'no-cache',
+            'Content-Type' => 'text/html; charset=utf-8',
+        ];
+
+        return response()->view('viewpeerlist.index', TorrentAjaxRepository::peerList($torrentId, $currentUser), 200, $headers);
     }
 
     public function viewSnatches(Request $request): View|RedirectResponse|Response
@@ -271,7 +285,15 @@ class TorrentActionController extends LegacyController
 
         $page = (int) $request->input('page', 0);
 
-        return $this->legacyPageRaw($request, 'getusertorrentlistajax', false, TorrentAjaxRepository::userTorrentList($targetUserId, $type, $page, $currentUser));
+        $headers = [
+            'Expires' => 'Mon, 26 Jul 1997 05:00:00 GMT',
+            'Last-Modified' => gmdate('D, d M Y H:i:s') . ' GMT',
+            'Cache-Control' => 'no-cache, must-revalidate',
+            'Pragma' => 'no-cache',
+            'Content-Type' => 'text/html; charset=utf-8',
+        ];
+
+        return response()->view('getusertorrentlistajax.index', TorrentAjaxRepository::userTorrentList($targetUserId, $type, $page, $currentUser), 200, $headers);
     }
 
     public function searchSuggest(Request $request): Response|RedirectResponse
@@ -340,8 +362,8 @@ class TorrentActionController extends LegacyController
             return $this->legacyAbortResponse($lang['std_delete_failed'] ?? 'Error', $lang['std_not_owner'] ?? 'Not owner.');
         }
 
-        $torrent = Torrent::query()->select('name', 'owner', 'seeders', 'anonymous')->where('id', $id)->first();
-        if (! $torrent instanceof Torrent) {
+        $torrent = Torrent::query()->find($id, ['name', 'owner', 'seeders', 'anonymous']);
+        if ($torrent === null) {
             return $this->legacyPage($request, 'delete', true);
         }
         $row = $torrent->toArray();

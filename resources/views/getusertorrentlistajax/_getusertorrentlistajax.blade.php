@@ -1,31 +1,13 @@
 <?php
-//Send some headers to keep the user's browser from caching the response.
-header("Expires: Mon, 26 Jul 1997 05:00:00 GMT");
-header("Last-Modified: " . gmdate("D, d M Y H:i:s") . "GMT");
-header("Cache-Control: no-cache, must-revalidate");
-header("Pragma: no-cache");
-
-$CURUSER = \App\Support\SupportContext::getUser() ?? [];
-if (empty($CURUSER)) {
-    return;
-}
-
-$lang_functions = \App\Support\SupportContext::getLangFunctions();
-$lang_getusertorrentlistajax = (array) (\App\Support\SupportContext::getGlobal('lang_getusertorrentlistajax') ?? []);
-
 $type = (string) ($type ?? '');
-if (! in_array($type, ['uploaded', 'seeding', 'leeching', 'completed', 'incomplete'], true)) {
-    return;
-}
-
 $id = (int) ($id ?? 0);
 $count = (int) ($count ?? 0);
 $total_size = (float) ($total_size ?? 0);
 $rows = (array) ($rows ?? []);
 $pagertop = (string) ($pagertop ?? '');
 $pagerbottom = (string) ($pagerbottom ?? '');
-$torrentRep = $torrentRep ?? new \App\Repositories\TorrentRepository();
-$seedBoxRep = $seedBoxRep ?? new \App\Repositories\SeedBoxRepository();
+$torrentRep = $torrentRep ?? null;
+$seedBoxRep = $seedBoxRep ?? null;
 $seedTimeAndUploaded = $seedTimeAndUploaded ?? collect();
 
 if (! function_exists('maketable')) {

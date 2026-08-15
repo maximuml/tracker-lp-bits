@@ -4,9 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Models\Setting;
 use App\Models\User;
+use App\Repositories\LegacyViewRepository;
 use App\Repositories\SearchPageRepository;
 use App\Services\Legacy\AjaxService;
+use App\Services\Legacy\AttachmentLegacyService;
 use App\Services\Legacy\LegacyPartialRenderer;
+use App\Support\Attachment\AttachmentService;
+use App\Support\Style;
 use App\Support\SupportContext;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -84,9 +88,56 @@ class UtilityController extends LegacyController
         }
     }
 
-    public function attachment(Request $request): View|RedirectResponse
+    public function attachment(Request $request): Response
     {
-        return $this->legacyPage($request, 'attachment', true);
+        $currentUser = SupportContext::getUser() ?? [];
+        $Attach = new AttachmentService((int) ($currentUser['id'] ?? 0));
+
+        $count_limit = (int) $Attach->get_count_limit();
+        $count_left = $Attach->get_count_left();
+        $size_limit = $Attach->get_size_limit_byte();
+        $allowed_exts = $Attach->get_allowed_ext();
+
+        $altsize = (string) $request->input('altsize', '');
+        $callback_func = (string) $request->input('callback_func', '');
+        $warning = '';
+        $script = '';
+
+        if ($request->isMethod('POST') && $Attach->enable_attachment()) {
+            $uploaded = $request->file('file');
+            $file = null;
+            if ($uploaded !== null) {
+                $file = [
+                    'tmp_name' => $uploaded->getPathname(),
+                    'size' => $uploaded->getSize(),
+                    'type' => $uploaded->getMimeType(),
+                    'name' => $uploaded->getClientOriginalName(),
+                ];
+            }
+
+            $lang_attachment = (array) (SupportContext::getGlobal('lang_attachment') ?? []);
+            $result = AttachmentLegacyService::processUpload($currentUser, $Attach, $lang_attachment, $altsize, $callback_func, $file);
+            $warning = (string) ($result['warning'] ?? '');
+            $script = (string) ($result['script'] ?? '');
+            $count_left = (int) ($result['count_left'] ?? $count_left);
+        }
+
+        $content = LegacyViewRepository::render('attachment', [
+            'CURUSER' => $currentUser,
+            'lang_attachment' => (array) (SupportContext::getGlobal('lang_attachment') ?? []),
+            'Attach' => $Attach,
+            'count_limit' => $count_limit,
+            'count_left' => $count_left,
+            'size_limit' => $size_limit,
+            'allowed_exts' => $allowed_exts,
+            'css_uri' => Style::cssUriWithContext(),
+            'altsize' => $altsize,
+            'callback_func' => $callback_func,
+            'warning' => $warning,
+            'script' => $script,
+        ]);
+
+        return response($content, 200, ['Content-Type' => 'text/html; charset=utf-8']);
     }
 
     public function getattachment(Request $request): Response|RedirectResponse|StreamedResponse

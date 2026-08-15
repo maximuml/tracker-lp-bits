@@ -438,7 +438,7 @@ if ($showshoutbox_main == "yes") //system side setting for shoutbox
 					\App\Support\LegacyResponse::abort($lang_usercp['std_error'], $lang_usercp['std_enter_old_password'].goback(), 0);
 				}
                 //验证旧密码
-                $challenge = \Nexus\Database\NexusDB::cache_get(\App\Support\Token::challengeKey($userInfo->username));
+                $challenge = \App\Repositories\UsercpRepository::getChallenge($userInfo->username);
                 if (empty($challenge)) {
                     \App\Support\LegacyResponse::abort($lang_usercp['std_error'], "expired!".goback(), 0);
                 }
@@ -535,15 +535,8 @@ EOD;
 				if ($CURUSER['privacy'] != $privacy) $privacyupdated = 1;
 
 				$userId = $CURUSER["id"];
-                \Nexus\Database\NexusDB::transaction(function () use ($userId, $data) {
-                    \App\Repositories\UsercpRepository::updateUser($userId, $data);
-                    if (!empty(\App\Support\SupportContext::getRequestInput('resetauthkey')) && \App\Support\SupportContext::getRequestInput('resetauthkey') == 1) {
-                        //reset authkey
-                        $torrentRep = new \App\Repositories\TorrentRepository();
-                        $torrentRep->resetTrackerReportAuthKeySecret($userId);
-                    }
-                    \App\Support\Hooks::doAction("usercp_security_update", \App\Support\SupportContext::allPost());
-                });
+				$resetAuthKey = !empty(\App\Support\SupportContext::getRequestInput('resetauthkey')) && \App\Support\SupportContext::getRequestInput('resetauthkey') == 1;
+                \App\Repositories\UsercpRepository::updateSecurity((int) $userId, $data, $resetAuthKey, (array) \App\Support\SupportContext::allPost());
 				$to = "usercp.php?action=security&type=saved";
 				if ($changedemail == 1)
 				$to .= "&mail=1";
@@ -554,7 +547,7 @@ EOD;
 				if ($privacyupdated == 1)
 				$to .= "&privacy=1";
 				\App\Support\Cache::clearUser($CURUSER["id"], '');
-                \Nexus\Database\NexusDB::cache_del(\App\Support\Token::challengeKey($userInfo->username));
+                \App\Repositories\UsercpRepository::deleteChallenge($userInfo->username);
 				header("Location: $to");
 			}
 			usercpmenu ("security");

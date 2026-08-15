@@ -40,6 +40,34 @@ final class UsercpRepository extends BaseRepository
         return User::query()->where('email', $email)->where('id', '!=', $userId)->exists();
     }
 
+    public static function getChallenge(string $username): ?string
+    {
+        return \Nexus\Database\NexusDB::cache_get(\App\Support\Token::challengeKey($username));
+    }
+
+    public static function deleteChallenge(string $username): bool
+    {
+        return (bool) \Nexus\Database\NexusDB::cache_del(\App\Support\Token::challengeKey($username));
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     * @param  array<string, mixed>  $allPost
+     */
+    public static function updateSecurity(int $userId, array $data, bool $resetAuthKey, array $allPost): bool
+    {
+        return (bool) \Nexus\Database\NexusDB::transaction(function () use ($userId, $data, $resetAuthKey, $allPost) {
+            self::updateUser($userId, $data);
+            if ($resetAuthKey) {
+                $torrentRep = new \App\Repositories\TorrentRepository();
+                $torrentRep->resetTrackerReportAuthKeySecret($userId);
+            }
+            \App\Support\Hooks::doAction("usercp_security_update", $allPost);
+
+            return true;
+        });
+    }
+
     public static function getCommentCount(int $userId): int
     {
         return (int) Comment::query()->where('user', $userId)->count();

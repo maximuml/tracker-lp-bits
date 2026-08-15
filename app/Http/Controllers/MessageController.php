@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\MessageResource;
 use App\Models\Message;
+use App\Models\User;
 use App\Repositories\MessageRepository;
 use App\Services\Legacy\MessageService;
 use Illuminate\Http\RedirectResponse;
@@ -11,6 +12,8 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
+use App\Support\SupportContext;
+use App\Support\UserDisplay;
 
 class MessageController extends LegacyController
 {
@@ -29,9 +32,69 @@ class MessageController extends LegacyController
         return $this->legacyPageRaw($request, 'messages');
     }
 
-    public function sendmessage(Request $request): Response|RedirectResponse
+    public function sendmessage(Request $request): Response|RedirectResponse|View
     {
-        return $this->legacyPageRaw($request, 'sendmessage');
+        $langSendmessage = (array) (SupportContext::getGlobal('lang_sendmessage') ?? []);
+
+        $receiver = (int) $request->input('receiver', 0);
+        if ($receiver <= 0) {
+            return $this->legacyAbortResponse($langSendmessage['std_error'] ?? 'Error', $langSendmessage['std_permission_denied'] ?? 'Permission denied.');
+        }
+
+        $replyto = $request->input('replyto');
+        if ($replyto !== null && $replyto !== '' && ! \App\Support\Validators::isId($replyto)) {
+            return $this->legacyAbortResponse($langSendmessage['std_error'] ?? 'Error', $langSendmessage['std_permission_denied'] ?? 'Permission denied.');
+        }
+        $replyto = $replyto !== null && $replyto !== '' ? (int) $replyto : 0;
+
+        $user = User::query()->find($receiver);
+        if (! $user) {
+            return $this->legacyAbortResponse($langSendmessage['std_error'] ?? 'Error', $langSendmessage['std_no_user_id'] ?? 'No user with that ID.');
+        }
+
+        $subject = '';
+        $body = '';
+        if ($replyto > 0) {
+            $msg = Message::query()->find($replyto);
+            if (! $msg) {
+                return $this->legacyAbortResponse($langSendmessage['std_error'] ?? 'Error', $langSendmessage['std_permission_denied'] ?? 'Permission denied.');
+            }
+            $msga = $msg->toArray();
+            $currentUser = (array) (SupportContext::getUser() ?? []);
+            if ((int) ($msga['receiver'] ?? 0) !== (int) ($currentUser['id'] ?? 0)) {
+                return $this->legacyAbortResponse($langSendmessage['std_error'] ?? 'Error', $langSendmessage['std_permission_denied'] ?? 'Permission denied.');
+            }
+            $body .= $msga['msg'] . "\n\n-------- [url=userdetails.php?id=" . $currentUser['id'] . "]" . $currentUser['username'] . "[/url][i] Wrote at " . date("Y-m-d H:i:s") . ":[/i] --------\n";
+            $subject = (string) $msga['subject'];
+            if (preg_match('/^Re:\\s/', $subject)) {
+                $subject = preg_replace('/^Re:\\s(.*)$/', 'Re(2): \\1', $subject) ?? $subject;
+            } elseif (preg_match('/^Re\\([0-9]*\\):\\s/', $subject)) {
+                $replycount = (int) preg_replace('/^Re\\(([0-9]*)\\):\\s/', '\\1', $subject);
+                $replycount++;
+                $subject = preg_replace('/^Re\\(([0-9]*)\\):\\s(.*)$/', 'Re(' . $replycount . '): \\2', $subject) ?? $subject;
+            } else {
+                $subject = 'Re: ' . $subject;
+            }
+            $subject = htmlspecialchars($subject);
+        }
+
+        $returnto = '';
+        if ($request->input('returnto') !== null && $request->input('returnto') !== '') {
+            $returnto = htmlspecialchars((string) $request->input('returnto'));
+        } elseif ($request->headers->get('referer') !== null) {
+            $returnto = htmlspecialchars((string) $request->headers->get('referer'));
+        }
+
+        $title = ($langSendmessage['text_message_to'] ?? 'Message to ') . UserDisplay::username($receiver);
+
+        return $this->legacyPageRaw($request, 'sendmessage', true, [
+            'receiver' => $receiver,
+            'replyto' => $replyto,
+            'subject' => $subject,
+            'body' => $body,
+            'returnto' => $returnto,
+            'title' => $title,
+        ]);
     }
 
     public function takeMessage(Request $request): Response|RedirectResponse

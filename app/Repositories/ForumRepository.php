@@ -131,6 +131,14 @@ class ForumRepository extends BaseRepository
      */
     public function getAllOverforums(): array
     {
+        return self::getOverforumsList();
+    }
+
+    /**
+     * @return  array<int, array<string, mixed>>
+     */
+    public static function getOverforumsList(): array
+    {
         return NexusDB::table('overforums')
             ->orderBy('sort')
             ->get()
@@ -295,5 +303,464 @@ class ForumRepository extends BaseRepository
     public static function getTopicSubject(int $id): ?string
     {
         return Topic::query()->where('id', $id)->value('subject');
+    }
+
+    /**
+     * @return  array<string, mixed>|null
+     */
+    public static function getPostForQuote(int $id): ?array
+    {
+        $post = Post::query()->where('id', $id)->first(['topicid', 'body', 'userid']);
+        if (!$post) {
+            return null;
+        }
+        $topic = Topic::query()->where('id', $post->topicid)->first(['subject']);
+        $username = User::query()->where('id', $post->userid)->value('username');
+
+        return [
+            'topicid' => (int) $post->topicid,
+            'body' => (string) $post->body,
+            'userid' => (int) $post->userid,
+            'username' => $username,
+            'topic_subject' => $topic ? $topic->subject : null,
+        ];
+    }
+
+    /**
+     * @return  array<string, mixed>|null
+     */
+    public static function getPostForEdit(int $id): ?array
+    {
+        $post = Post::query()->where('id', $id)->first(['topicid', 'body']);
+        if (!$post) {
+            return null;
+        }
+        $topicid = (int) $post->topicid;
+        $firstpost = (int) Post::query()->where('topicid', $topicid)->min('id');
+        $topic = Topic::query()->where('id', $topicid)->first(['subject']);
+
+        return [
+            'topicid' => $topicid,
+            'body' => (string) $post->body,
+            'firstpost' => $firstpost,
+            'topic_subject' => $topic ? $topic->subject : null,
+            'is_first_post' => $firstpost == $id,
+        ];
+    }
+
+    /**
+     * @return  array<string, mixed>|null
+     */
+    public static function getPostWithTopic(int $postid): ?array
+    {
+        $post = Post::query()->where('id', $postid)->first(['userid', 'topicid']);
+        if (!$post) {
+            return null;
+        }
+        $topic = Topic::query()->where('id', $post->topicid)->first(['locked']);
+
+        return [
+            'userid' => (int) $post->userid,
+            'topicid' => (int) $post->topicid,
+            'locked' => $topic ? $topic->locked : null,
+        ];
+    }
+
+    public static function getTopicForumId(int $topicid): ?int
+    {
+        return Topic::query()->where('id', $topicid)->value('forumid');
+    }
+
+    /**
+     * @return  array<string, mixed>|null
+     */
+    public static function getPostEditInfo(int $postid): ?array
+    {
+        $post = Post::query()->where('id', $postid)->first(['topicid']);
+        if (!$post) {
+            return null;
+        }
+        $topicid = (int) $post->topicid;
+        $topic = Topic::query()->where('id', $topicid)->first(['forumid']);
+        $firstpost = (int) Post::query()->where('topicid', $topicid)->min('id');
+
+        return [
+            'topicid' => $topicid,
+            'forumid' => $topic ? (int) $topic->forumid : 0,
+            'is_first_post' => $firstpost == $postid,
+        ];
+    }
+
+    public static function isTopicLocked(int $topicid): ?string
+    {
+        return Topic::query()->where('id', $topicid)->value('locked');
+    }
+
+    public static function getTopic(int $id): ?Topic
+    {
+        return Topic::query()->where('id', $id)->first();
+    }
+
+    public static function getPost(int $id): ?Post
+    {
+        return Post::query()->where('id', $id)->first();
+    }
+
+    public static function getTopicWithUser(int $id): ?Topic
+    {
+        return Topic::query()->with('user')->where('id', $id)->first();
+    }
+
+    public static function getPostWithUser(int $id): ?Post
+    {
+        return Post::query()->with('user')->where('id', $id)->first();
+    }
+
+    public static function updateTopicSubject(int $topicid, string $subject): bool
+    {
+        return (bool) Topic::query()->where('id', $topicid)->update(['subject' => $subject]);
+    }
+
+    public static function updatePostBody(int $postid, string $body, string $date, int $editedBy): bool
+    {
+        return (bool) Post::query()->where('id', $postid)->update([
+            'body' => $body,
+            'editdate' => $date,
+            'editedby' => $editedBy,
+        ]);
+    }
+
+    public static function getFirstPostId(int $topicid): int
+    {
+        return (int) Post::query()->where('topicid', $topicid)->min('id');
+    }
+
+    public static function createTopic(int $userId, int $forumId, string $subject): int
+    {
+        $topic = Topic::create([
+            'userid' => $userId,
+            'forumid' => $forumId,
+            'subject' => $subject,
+            'locked' => 'no',
+            'sticky' => 'no',
+            'hlcolor' => 0,
+            'views' => 0,
+            'firstpost' => 0,
+            'lastpost' => 0,
+        ]);
+
+        return (int) $topic->id;
+    }
+
+    public static function incrementForumTopicCount(int $forumid): bool
+    {
+        return (bool) Forum::query()->where('id', $forumid)->increment('topiccount');
+    }
+
+    public static function incrementForumPostCount(int $forumid, int $amount = 1): bool
+    {
+        return (bool) Forum::query()->where('id', $forumid)->increment('postcount', $amount);
+    }
+
+    public static function createPost(int $topicId, int $userId, string $body, string $date): int
+    {
+        return (int) NexusDB::table('posts')->insertGetId([
+            'topicid' => $topicId,
+            'userid' => $userId,
+            'added' => $date,
+            'body' => $body,
+            'ori_body' => $body,
+        ]);
+    }
+
+    public static function updateTopicFirstLastPost(int $topicid, int $postid): bool
+    {
+        return (bool) Topic::query()->where('id', $topicid)->update(['firstpost' => $postid, 'lastpost' => $postid]);
+    }
+
+    public static function setTopicLastPost(int $topicid, int $postid): bool
+    {
+        return (bool) Topic::query()->where('id', $topicid)->update(['lastpost' => $postid]);
+    }
+
+    public static function incrementTopicViews(int $topicid): bool
+    {
+        return (bool) Topic::query()->where('id', $topicid)->increment('views');
+    }
+
+    public static function countTopicPosts(int $topicid, ?int $authorId = null): int
+    {
+        $query = Post::query()->where('topicid', $topicid);
+        if ($authorId) {
+            $query->where('userid', $authorId);
+        }
+
+        return (int) $query->count();
+    }
+
+    /**
+     * @return  array<int>
+     */
+    public static function getTopicPostIds(int $topicid, ?int $authorId = null): array
+    {
+        $query = Post::query()->where('topicid', $topicid)->orderBy('added');
+        if ($authorId) {
+            $query->where('userid', $authorId);
+        }
+
+        return $query->pluck('id')->all();
+    }
+
+    /**
+     * @return  \Illuminate\Support\Collection<int, \App\Models\Post>
+     */
+    public static function getTopicPosts(int $topicid, ?int $authorId, int $offset, int $perPage): \Illuminate\Support\Collection
+    {
+        $query = Post::query()->where('topicid', $topicid)->orderBy('id');
+        if ($authorId) {
+            $query->where('userid', $authorId);
+        }
+
+        return $query->offset($offset)->limit($perPage)->get();
+    }
+
+    /**
+     * @param  array<int> $ids
+     * @param  list<string> $columns
+     * @return \Illuminate\Support\Collection<int, \App\Models\User>
+     */
+    public static function getUsersByIds(array $ids, array $columns): \Illuminate\Support\Collection
+    {
+        return User::query()->find($ids, $columns)->keyBy('id');
+    }
+
+    public static function getReadPost(int $userId, int $topicId): ?\stdClass
+    {
+        return NexusDB::table('readposts')
+            ->where('userid', $userId)
+            ->where('topicid', $topicId)
+            ->first();
+    }
+
+    public static function insertReadPost(int $userId, int $topicId, int $postId): bool
+    {
+        return (bool) NexusDB::table('readposts')->insert([
+            'userid' => $userId,
+            'topicid' => $topicId,
+            'lastpostread' => $postId,
+        ]);
+    }
+
+    public static function updateReadPost(int $userId, int $topicId, int $postId): bool
+    {
+        return (bool) NexusDB::table('readposts')
+            ->where('userid', $userId)
+            ->where('topicid', $topicId)
+            ->update(['lastpostread' => $postId]);
+    }
+
+    public static function countUserPosts(int $userId): int
+    {
+        return (int) Post::query()->where('userid', $userId)->count();
+    }
+
+    public static function markPostRead(int $userId, int $topicId, int $postId, int $lastCatchup): bool
+    {
+        $readPost = NexusDB::table('readposts')
+            ->where('userid', $userId)
+            ->where('topicid', $topicId)
+            ->first();
+
+        if (!$readPost) {
+            return (bool) NexusDB::table('readposts')->insert([
+                'userid' => $userId,
+                'topicid' => $topicId,
+                'lastpostread' => $postId,
+            ]);
+        }
+
+        if ($lastCatchup < $postId) {
+            return (bool) NexusDB::table('readposts')
+                ->where('userid', $userId)
+                ->where('topicid', $topicId)
+                ->update(['lastpostread' => $postId]);
+        }
+
+        return true;
+    }
+
+    public static function updateUserLastPost(int $userId, string $date): bool
+    {
+        return (bool) User::query()->where('id', $userId)->update(['last_post' => $date]);
+    }
+
+    public static function getForumMinclasswrite(int $forumid): ?int
+    {
+        $forum = Forum::query()->where('id', $forumid)->first(['minclasswrite']);
+
+        return $forum ? (int) $forum->minclasswrite : null;
+    }
+
+    public static function moveTopic(int $topicid, int $newForumid, int $postCount, int $oldForumid): bool
+    {
+        if ($oldForumid == $newForumid) {
+            return true;
+        }
+
+        Topic::query()->where('id', $topicid)->update(['forumid' => $newForumid]);
+        Forum::query()->where('id', $oldForumid)->decrement('topiccount');
+        Forum::query()->where('id', $oldForumid)->decrement('postcount', $postCount);
+        Forum::query()->where('id', $newForumid)->increment('topiccount');
+        Forum::query()->where('id', $newForumid)->increment('postcount', $postCount);
+
+        return true;
+    }
+
+    /**
+     * @return  array<string, int>|null
+     */
+    public static function getTopicForumAndUser(int $topicid): ?array
+    {
+        $topic = Topic::query()->where('id', $topicid)->first(['forumid', 'userid']);
+
+        return $topic ? [
+            'forumid' => (int) $topic->forumid,
+            'userid' => (int) $topic->userid,
+        ] : null;
+    }
+
+    public static function deleteTopic(int $topicid, int $forumid, int $postCount): bool
+    {
+        Topic::query()->where('id', $topicid)->delete();
+        Post::query()->where('topicid', $topicid)->delete();
+        NexusDB::table('readposts')->where('topicid', $topicid)->delete();
+        Forum::query()->where('id', $forumid)->decrement('topiccount');
+        Forum::query()->where('id', $forumid)->decrement('postcount', $postCount);
+
+        return true;
+    }
+
+    /**
+     * @return  array<string, int>|null
+     */
+    public static function getPostTopicAndUser(int $postid): ?array
+    {
+        $post = Post::query()->where('id', $postid)->first(['topicid', 'userid']);
+
+        return $post ? [
+            'topicid' => (int) $post->topicid,
+            'userid' => (int) $post->userid,
+        ] : null;
+    }
+
+    public static function getPreviousPostId(int $topicid, int $postid): ?int
+    {
+        return Post::query()
+            ->where('topicid', $topicid)
+            ->where('id', '<', $postid)
+            ->orderByDesc('id')
+            ->value('id');
+    }
+
+    public static function deletePost(int $postid, int $topicid, int $forumid): bool
+    {
+        Post::query()->where('id', $postid)->delete();
+        Forum::query()->where('id', $forumid)->decrement('postcount');
+
+        return true;
+    }
+
+    public static function updateTopicLocked(int $topicid, string $locked): bool
+    {
+        return (bool) Topic::query()->where('id', $topicid)->update(['locked' => $locked]);
+    }
+
+    public static function updateTopicSticky(int $topicid, string $sticky): bool
+    {
+        return (bool) Topic::query()->where('id', $topicid)->update(['sticky' => $sticky]);
+    }
+
+    public static function updateTopicHighlight(int $topicid, int $color): bool
+    {
+        return (bool) Topic::query()->where('id', $topicid)->update(['hlcolor' => $color]);
+    }
+
+    public static function updateUserForumAccess(int $userId, string $date): bool
+    {
+        return (bool) User::query()->where('id', $userId)->update(['forum_access' => $date]);
+    }
+
+    /**
+     * @return  array{count: int, rows: \Illuminate\Support\Collection<int, \App\Models\Topic>}
+     */
+    public static function getTopicsByForum(int $forumid, string $search, string $sortColumn, string $direction, int $offset, int $perPage): array
+    {
+        $allowed = ['firstpost' => 'firstpost', 'lastpost' => 'lastpost'];
+        $column = $allowed[$sortColumn] ?? 'lastpost';
+        $direction = in_array(strtolower($direction), ['asc', 'desc'], true) ? strtolower($direction) : 'desc';
+
+        $query = Topic::query()->where('forumid', $forumid);
+        if ($search !== '') {
+            $query->where('subject', 'like', '%'.$search.'%');
+        }
+
+        $count = (int) $query->count();
+        $rows = $query->orderBy('sticky', 'desc')->orderBy($column, $direction)->offset($offset)->limit($perPage)->get();
+
+        return ['count' => $count, 'rows' => $rows];
+    }
+
+    /**
+     * @return  \Illuminate\Support\Collection<int, \App\Models\Topic>
+     */
+    public static function getUnreadTopics(int $lastCatchup, ?int $beforePostId, int $limit): \Illuminate\Support\Collection
+    {
+        $query = Topic::query()->where('lastpost', '>', $lastCatchup);
+        if ($beforePostId) {
+            $query->where('lastpost', '<', $beforePostId);
+        }
+
+        return $query->orderByDesc('lastpost')->limit($limit)->get();
+    }
+
+    /**
+     * @return  array{hits: int, rows: \Illuminate\Support\Collection<int, \stdClass>}
+     */
+    public static function searchForumPosts(string $keywords, int $minClass, int $offset, int $perPage): array
+    {
+        $term = '%'.$keywords.'%';
+        $query = NexusDB::table('posts')
+            ->leftJoin('topics', 'posts.topicid', '=', 'topics.id')
+            ->leftJoin('forums', 'topics.forumid', '=', 'forums.id')
+            ->where('forums.minclassread', '<=', $minClass)
+            ->where(function ($q) use ($term) {
+                $q->where(function ($sub) use ($term) {
+                    $sub->where('topics.subject', 'like', $term)->whereColumn('posts.id', 'topics.firstpost');
+                })->orWhere('posts.body', 'like', $term);
+            });
+
+        $hits = (int) $query->count('posts.id');
+        $rows = $query
+            ->select('posts.id', 'posts.topicid', 'posts.userid', 'posts.added', 'topics.subject', 'topics.hlcolor', 'forums.id AS forumid', 'forums.name AS forumname')
+            ->orderByDesc('posts.id')
+            ->offset($offset)
+            ->limit($perPage)
+            ->get();
+
+        return ['hits' => $hits, 'rows' => $rows];
+    }
+
+    public static function getLastTopicByForum(int $forumid): ?Topic
+    {
+        return Topic::query()->where('forumid', $forumid)->orderByDesc('lastpost')->first();
+    }
+
+    public static function getForumTodayPostCount(int $forumid, string $todayDate): int
+    {
+        return (int) NexusDB::table('posts')
+            ->leftJoin('topics', 'posts.topicid', '=', 'topics.id')
+            ->where('posts.added', '>', $todayDate)
+            ->where('topics.forumid', $forumid)
+            ->count('posts.id');
     }
 }

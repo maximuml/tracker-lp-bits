@@ -9,9 +9,42 @@ use App\Support\Cache;
 use App\Support\Validators;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Nexus\Database\NexusDB;
 
 final class UsercpRepository extends BaseRepository
 {
+    /**
+     * @return  array<int, \stdClass>
+     */
+    public static function getCountryOptions(): array
+    {
+        return NexusDB::table('countries')
+            ->orderBy('name')
+            ->get(['id', 'name'])
+            ->all();
+    }
+
+    /**
+     * @return  array<int, \stdClass>
+     */
+    public static function getBitbucketOptions(): array
+    {
+        return NexusDB::table('bitbucket')
+            ->where('public', '1')
+            ->get()
+            ->all();
+    }
+
+    /**
+     * @return  array<string, int>
+     */
+    public static function getStylesheetOptions(): array
+    {
+        return NexusDB::table('stylesheets')
+            ->orderBy('name')
+            ->pluck('id', 'name')
+            ->all();
+    }
     /**
      * @return array<string, mixed>
      */

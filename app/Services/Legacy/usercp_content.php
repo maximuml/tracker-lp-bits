@@ -133,7 +133,7 @@ if ($action){
 			}
 
 			$countries = "<option value=0>---- ".$lang_usercp['select_none_selected']." ----</option>\n";
-			$countryRows = \Nexus\Database\NexusDB::table('countries')->orderBy('name')->get(['id','name']);
+			$countryRows = \App\Repositories\UsercpRepository::getCountryOptions();
 			foreach ($countryRows as $ct_a)
 			$countries .= "<option value=".htmlspecialchars($ct_a->id)."" . (htmlspecialchars($CURUSER["country"]) == htmlspecialchars($ct_a->id) ? " selected" : "") . ">".htmlspecialchars($ct_a->name)."</option>\n";
 
@@ -142,7 +142,7 @@ if ($action){
             foreach ($trackerUrlList as $item) {
                 $trackerUrls .= "<option value=".htmlspecialchars($item->id)."" . (htmlspecialchars($CURUSER["tracker_url_id"]) == htmlspecialchars($item->id) ? " selected" : "") . ">".htmlspecialchars($item->url)."</option>\n";
             }
-			$bitbucketRows = \Nexus\Database\NexusDB::table('bitbucket')->where('public', '1')->get();
+			$bitbucketRows = \App\Repositories\UsercpRepository::getBitbucketOptions();
 			$options='';
 			$text = '';
 			foreach ($bitbucketRows as $sor)
@@ -338,10 +338,7 @@ else $special_state = 0;
             $delimiter = '<div style="height: 1px;background-color: #eee;margin: 10px 0"></div>';
             $categories .= $delimiter . "<table><caption><font class='big'>{$lang_usercp['text_additional_selection']}</font></caption><tr><td class=bottom><b>".$lang_usercp['text_show_dead_active']."</b><br /><select name=\"incldead\"><option value=\"0\" ".(strpos($CURUSER['notifs'], "[incldead=0]") !== false ? " selected" : "").">".$lang_usercp['select_including_dead']."</option><option value=\"1\" ".(strpos($CURUSER['notifs'], "[incldead=1]") !== false ||  strpos($CURUSER['notifs'], "incldead") == false ? " selected" : "").">".$lang_usercp['select_active']."</option><option value=\"2\" ".(strpos($CURUSER['notifs'], "[incldead=2]") !== false  ? " selected" : "").">".$lang_usercp['select_dead']."</option></select></td><td class=bottom align=left><b>".$lang_usercp['text_show_special_torrents']."</b><br /><select name=\"spstate\"><option value=\"0\" ".($special_state == 0 ? " selected" : "").">".$lang_usercp['select_all']."</option>".\App\Support\Html::promotionSelection($special_state)."</select></td><td class=bottom><b>".$lang_usercp['text_show_bookmarked']."</b><br /><select name=\"inclbookmarked\"><option value=\"0\" ".(strpos($CURUSER['notifs'], "[inclbookmarked=0]") !== false ? " selected" : "").">".$lang_usercp['select_all']."</option><option value=\"1\" ".(strpos($CURUSER['notifs'], "[inclbookmarked=1]") !== false ? " selected" : "")." >".$lang_usercp['select_bookmarked']."</option><option value=\"2\" ".(strpos($CURUSER['notifs'], "[inclbookmarked=2]") !== false ? " selected" : "").">".$lang_usercp['select_bookmarked_exclude']."</option></select></td></tr></table>";
             \App\Support\Html::trSmall($lang_usercp['row_browse_default_categories'], $categories, 1);
-			$ss_sa = \Nexus\Database\NexusDB::table('stylesheets')
-			    ->orderBy('name')
-			    ->pluck('id', 'name')
-			    ->all();
+			$ss_sa = \App\Repositories\UsercpRepository::getStylesheetOptions();
 			ksort($ss_sa);
             $stylesheets = $categoryicons = '';
 //			while (list($ss_name, $ss_id) = each($ss_sa))

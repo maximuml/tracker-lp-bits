@@ -602,33 +602,6 @@ print($pagerbottom);
 </div>
 <?php
 }
-elseif($action == 'del')
-{
-	$id = intval(\App\Support\SupportContext::getQuery('id') ?? 0);
-	if (!$id)
-	{
-		\App\Support\LegacyResponse::abort($lang_catmanage['std_error'], $lang_catmanage['std_invalid_id']);
-	}
-	$dbtablename=return_category_db_table_name($type);
-	$row = \App\Repositories\CategoryRepository::getRecord($dbtablename, $id);
-	if ($row) {
-		\App\Repositories\CategoryRepository::deleteRecord($dbtablename, $row['id']);
-		if(in_array($type, $validsubcattype))
-			\App\Support\SupportContext::getCache()->delete_value($dbtablename.'_list');
-		elseif ($type=='searchbox')
-			\App\Support\SupportContext::getCache()->delete_value('searchbox_content');
-		elseif ($type=='caticon')
-			\App\Support\SupportContext::getCache()->delete_value('category_icon_content');
-		elseif ($type=='secondicon')
-			\App\Support\SupportContext::getCache()->delete_value('secondicon_'.$row['source'].'_'.$row['medium'].'_'.$row['codec'].'_'.$row['standard'].'_'.$row['processing'].'_'.$row['audiocodec'].'_content');
-		elseif ($type=='category'){
-			\App\Support\SupportContext::getCache()->delete_value('category_content');
-			\App\Support\SupportContext::getCache()->delete_value('category_list_mode_'.$row['mode']);
-		}
-	}
-	header("Location: ".\App\Support\Http::protocolPrefix(\App\Support\Url::isSecure()) . \App\Support\SupportContext::getGlobal('BASEURL', '')."/catmanage.php?action=view&type=".$type);
-	return;
-}
 elseif($action == 'edit')
 {
 	$id = intval(\App\Support\SupportContext::getQuery('id') ?? 0);

@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Models\UserBanLog;
 use App\Repositories\AdminStatsRepository;
 use App\Repositories\BonusRepository;
+use App\Repositories\CategoryRepository;
 use App\Repositories\ModerationRepository;
 use App\Repositories\UserRepository;
 use App\Support\Format;
@@ -387,9 +388,35 @@ EOD;
 
     public function catmanage(Request $request): Response|RedirectResponse
     {
+        if (UserDisplay::currentClass() < (defined('UC_ADMINISTRATOR') ? \constant('UC_ADMINISTRATOR') : 0)) {
+            return $this->legacyAbortResponse('Error', 'Permission denied.');
+        }
+
+        if ($request->input('action') === 'del') {
+            $id = (int) $request->input('id');
+            $type = (string) $request->input('type');
+            if ($id <= 0) {
+                return $this->legacyAbortResponse($this->getLangCatmanage('std_error'), $this->getLangCatmanage('std_invalid_id'));
+            }
+
+            $table = CategoryRepository::tableNameForType($type);
+            $row = CategoryRepository::getRecord($table, $id);
+            if ($row) {
+                CategoryRepository::deleteRecord($table, (int) $row['id']);
+                CategoryRepository::clearCacheAfterDelete($type, $row);
+            }
+
+            return redirect('/catmanage.php?action=view&type=' . urlencode($type));
+        }
 
         return $this->legacyPageWithRedirect($request, 'catmanage');
+    }
 
+    private function getLangCatmanage(string $key): string
+    {
+        $lang = (array) (SupportContext::getGlobal('lang_catmanage') ?? []);
+
+        return (string) ($lang[$key] ?? '');
     }
 
     public function fields(Request $request): Response|RedirectResponse|View

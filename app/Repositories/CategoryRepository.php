@@ -12,6 +12,54 @@ use Nexus\Database\NexusDB;
  */
 final class CategoryRepository
 {
+    private const VALID_SUBCAT_TYPES = ['source', 'medium', 'codec', 'standard', 'processing', 'audiocodec'];
+
+    public static function tableNameForType(string $type): string
+    {
+        return match ($type) {
+            'category' => 'categories',
+            'source' => 'sources',
+            'medium' => 'media',
+            'codec' => 'codecs',
+            'standard' => 'standards',
+            'processing' => 'processings',
+            'audiocodec' => 'audiocodecs',
+            'searchbox' => 'searchbox',
+            'caticon' => 'caticons',
+            'secondicon' => 'secondicons',
+            default => $type,
+        };
+    }
+
+    /**
+     * @return list<string>
+     */
+    public static function validSubcatTypes(): array
+    {
+        return self::VALID_SUBCAT_TYPES;
+    }
+
+    /**
+     * @param  array<string, mixed>  $row
+     */
+    public static function clearCacheAfterDelete(string $type, array $row): void
+    {
+        $cache = SupportContext::getCache();
+        $dbtablename = self::tableNameForType($type);
+
+        if (in_array($type, self::VALID_SUBCAT_TYPES, true)) {
+            $cache?->delete_value($dbtablename . '_list');
+        } elseif ($type === 'searchbox') {
+            $cache?->delete_value('searchbox_content');
+        } elseif ($type === 'caticon') {
+            $cache?->delete_value('category_icon_content');
+        } elseif ($type === 'secondicon') {
+            $cache?->delete_value('secondicon_' . $row['source'] . '_' . $row['medium'] . '_' . $row['codec'] . '_' . $row['standard'] . '_' . $row['processing'] . '_' . $row['audiocodec'] . '_content');
+        } elseif ($type === 'category') {
+            $cache?->delete_value('category_content');
+            $cache?->delete_value('category_list_mode_' . $row['mode']);
+        }
+    }
     /**
      * @return  array<int, array<string, mixed>>
      */

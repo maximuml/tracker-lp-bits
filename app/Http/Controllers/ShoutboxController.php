@@ -2,9 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\Permission\PermissionEnum;
+use App\Repositories\LegacyViewRepository;
 use App\Repositories\ShoutboxRepository;
+use App\Support\Permissions;
 use App\Support\Shoutbox;
 use App\Support\SupportContext;
+use App\Support\UserDisplay;
+use App\Support\Validators;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -30,9 +35,76 @@ class ShoutboxController extends LegacyController
         return $this->success($this->repository->history($request));
     }
 
-    public function shoutbox(Request $request): Response|RedirectResponse
+    public function shoutbox(Request $request): Response
     {
-        return $this->legacyPageRaw($request, 'shoutbox', false);
+        $currentUser = SupportContext::getUser() ?? [];
+        $currentUserId = (int) ($currentUser['id'] ?? 0);
+
+        $del = (int) $request->input('del', 0);
+        if ($del > 0 && Validators::isId($del) && Permissions::userCan(PermissionEnum::SB_MANAGE->value, false, $currentUserId)) {
+            NexusDB::table('shoutbox')->where('id', $del)->delete();
+            NexusDB::table('shoutbox_reactions')->where('shoutbox_id', $del)->delete();
+        }
+
+        if ($request->input('sent') === 'yes' && $request->filled('shbox_text') && $currentUserId > 0) {
+            $text = trim((string) $request->input('shbox_text'));
+            if (mb_strlen($text) > Shoutbox::MAX_MESSAGE_LENGTH) {
+                return response('Message too long', 400, ['Content-Type' => 'text/plain; charset=utf-8']);
+            }
+
+            $lock = new \Nexus\Database\NexusLock("shoutbox:{$currentUserId}", 60);
+            if (! $lock->acquire()) {
+                return response('speaking too often', 429, ['Content-Type' => 'text/plain; charset=utf-8']);
+            }
+
+            NexusDB::table('shoutbox')->insert([
+                'userid' => $currentUserId,
+                'date' => time(),
+                'text' => $text,
+                'type' => 'sb',
+            ]);
+        }
+
+        $isAjax = ! empty($request->input('ajax'));
+        $where = 'shoutbox';
+        $refresh = (int) ($currentUser['sbrefresh'] ?? 120);
+        $limit = (int) ($currentUser['sbnum'] ?? 70);
+
+        $lastIdQuery = NexusDB::table('shoutbox');
+        Shoutbox::applyTypeFilter($lastIdQuery, $where, $currentUser ?: null);
+        $lastId = (int) $lastIdQuery->max('id');
+
+        $query = NexusDB::table('shoutbox')->orderByDesc('date')->limit($limit);
+        Shoutbox::applyTypeFilter($query, $where, $currentUser ?: null);
+        $rows = $query->get();
+
+        $shoutIds = $rows->pluck('id')->map(fn ($id) => (int) $id)->all();
+        $reactionData = Shoutbox::prefetchReactions($shoutIds, $currentUserId);
+
+        $userIds = array_filter(array_unique($rows->pluck('userid')->map(fn ($id) => (int) $id)->all()));
+        foreach ($userIds as $userId) {
+            if ($userId > 0) {
+                UserDisplay::row($userId);
+            }
+        }
+
+        $langShoutbox = (array) (SupportContext::getGlobal('lang_shoutbox') ?? []);
+        $isStaff = Permissions::userCan(PermissionEnum::SB_MANAGE->value, false, $currentUserId);
+
+        $content = LegacyViewRepository::render('shoutbox', [
+            'CURUSER' => $currentUser,
+            'lang_shoutbox' => $langShoutbox,
+            'isAjax' => $isAjax,
+            'where' => $where,
+            'refresh' => $refresh,
+            'lastId' => $lastId,
+            'rows' => $rows,
+            'currentUserId' => $currentUserId,
+            'isStaff' => $isStaff,
+            'reactionData' => $reactionData,
+        ]);
+
+        return response($content, 200, ['Content-Type' => 'text/html; charset=utf-8']);
     }
 
     public function shoutboxHistory(Request $request): View|RedirectResponse

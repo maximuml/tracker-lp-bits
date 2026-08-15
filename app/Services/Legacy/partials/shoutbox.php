@@ -4,19 +4,8 @@ error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 // Auto-generated legacy bridge shims
 if (!isset($CURUSER)) $CURUSER = (array) (\App\Support\SupportContext::getUser() ?? []);
 if (!isset($lang_shoutbox)) $lang_shoutbox = (array) (\App\Support\SupportContext::getGlobal('lang_shoutbox') ?? []);
-if (((\App\Support\SupportContext::getQuery('del') !== null)))
-{
-	if (\App\Support\Validators::isId(\App\Support\SupportContext::getQuery('del')))
-	{
-		if(\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::SB_MANAGE))
-		{
-			$delId = (int)\App\Support\SupportContext::getQuery('del');
-			\Nexus\Database\NexusDB::table('shoutbox')->where('id', $delId)->delete();
-			\Nexus\Database\NexusDB::table('shoutbox_reactions')->where('shoutbox_id', $delId)->delete();
-		}
-	}
-}
-$isAjax = !empty(\App\Support\SupportContext::getQuery('ajax'));
+// Delete action is handled by ShoutboxController before rendering.
+$isAjax = $isAjax ?? !empty(\App\Support\SupportContext::getQuery('ajax'));
 $where = 'shoutbox';
 $refresh = ($CURUSER['sbrefresh'] ?? 120);
 if (!$isAjax):
@@ -30,9 +19,8 @@ if (!$isAjax):
 <script src="js/curtain_imageresizer.js" type="text/javascript"></script><script>var SHOUT_CSRF = '<?php echo htmlspecialchars(\App\Support\Shoutbox::csrfToken((int)($CURUSER['id'] ?? 0))); ?>';</script><script src="js/shoutbox.js" type="text/javascript"></script><link rel="stylesheet" href="styles/shoutbox.css" type="text/css">
 <?php
 print(\App\Support\Style::addiCodeWithContext());
-$lastIdQuery = \Nexus\Database\NexusDB::table('shoutbox');
-\App\Support\Shoutbox::applyTypeFilter($lastIdQuery, $where, $CURUSER ?? null);
-$lastId = (int)$lastIdQuery->max('id');
+// $lastId is precomputed by ShoutboxController.
+$lastId = $lastId ?? 0;
 $startcountdown = "startcountdown(".$refresh.");shoutboxInitSSE(" . htmlspecialchars(json_encode($where, JSON_UNESCAPED_UNICODE), ENT_QUOTES, 'UTF-8') . "," . $lastId . ");shoutAttachToggleHandler();";
 ?>
 <script type="text/javascript">
@@ -125,38 +113,12 @@ function shoutAttachToggleHandler() {
 endif; // if (!$isAjax)
 ?>
 <?php
-if (((\App\Support\SupportContext::getQuery('sent') !== null)) && \App\Support\SupportContext::getQuery('sent') === 'yes' && !empty(\App\Support\SupportContext::getQuery('shbox_text'))) {
-    $userid = (int) ($CURUSER['id'] ?? 0);
-    if (!$userid) {
-        \App\Support\Logger::writeWithContext((string) ('Someone is hacking shoutbox. no_permission_to_shoutbox - IP : ' . \App\Support\Network::clientIp()), (string) 'info', (bool) false);
-        echo $lang_shoutbox['text_no_permission_to_shoutbox']; return;
-    }
-    $type = 'sb';
-    $date = time();
-    $text = trim(\App\Support\SupportContext::getQuery('shbox_text'));
-    if (mb_strlen($text) > \App\Support\Shoutbox::MAX_MESSAGE_LENGTH) {
-        echo ($lang_shoutbox['text_message_too_long'] ?? 'Message too long'); return;
-    }
-    $lock = new \Nexus\Database\NexusLock("shoutbox:$userid", 60);
-    if (! $lock->acquire()) {
-        echo $lang_shoutbox['speaking_too_often']; return;
-    }
-    \Nexus\Database\NexusDB::table('shoutbox')->insert([
-        'userid' => $userid,
-        'date' => $date,
-        'text' => $text,
-        'type' => $type,
-    ]);
-    print "<script type=\"text/javascript\">parent.document.forms['shbox'].shbox_text.value='';</script>";
-}
+// Insert action is handled by ShoutboxController before rendering.
 
 if (!(isset($CURUSER))) {
     echo '<h1>' . $lang_shoutbox['std_access_denied'] . '</h1><p>' . $lang_shoutbox['std_access_denied_note'] . '</p></body></html>'; return;
 }
 
-$limit = ($CURUSER['sbnum'] ?? 70);
-$query = \Nexus\Database\NexusDB::table('shoutbox')->orderByDesc('date')->limit($limit);
-\App\Support\Shoutbox::applyTypeFilter($query, $where, $CURUSER ?? null);
 /**
  * Build a small role badge for staff/VIP-tier classes. Returns empty string for
  * regular users so the shoutbox doesn't get cluttered with badges on every row.
@@ -188,7 +150,7 @@ if (!function_exists('shoutbox_class_badge')) { function shoutbox_class_badge($c
 	return '<span class="shout-class-badge" style="background:' . $color . '" title="' . htmlspecialchars($tooltip, ENT_QUOTES) . '">' . $label . '</span>';
 } }
 
-$rows = $query->get();
+// $rows, $currentUserId, $isStaff and $reactionData are precomputed by ShoutboxController.
 if ($rows->isEmpty())
 print("\n");
 else
@@ -205,11 +167,9 @@ else
 	$groupWindowSec = 120;
 	$prevUserId = 0;
 	$prevDate = 0;
-	$currentUserId = (int)($CURUSER['id'] ?? 0);
-	$isStaff = \App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::SB_MANAGE);
+	$currentUserId = $currentUserId ?? (int)($CURUSER['id'] ?? 0);
+	$isStaff = $isStaff ?? \App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::SB_MANAGE);
 
-	$shoutIds = $rows->pluck('id')->map(fn ($id) => (int) $id)->all();
-	$reactionData = \App\Support\Shoutbox::prefetchReactions($shoutIds, $currentUserId);
 	$reactionCounts = $reactionData['counts'];
 	$reactionMine = $reactionData['mine'];
 	$reactionUsers = $reactionData['users'];

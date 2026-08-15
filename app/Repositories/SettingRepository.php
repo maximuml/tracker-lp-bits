@@ -19,6 +19,11 @@ class SettingRepository extends BaseRepository
         return Setting::getFromDb();
     }
 
+    public static function getByName(string $name, mixed $default = null): mixed
+    {
+        return Setting::getByName($name, $default);
+    }
+
     /**
      * @param  array<int|string, mixed>  $params
      * @return  array<int|string, mixed>

@@ -495,5 +495,23 @@ class SearchBoxRepository extends BaseRepository
         return SearchBox::query()->orderBy('id')->pluck('id')->all();
     }
 
+    public static function findForCategoryTable(int|string $mode): SearchBox
+    {
+        return SearchBox::query()->with(['categories', 'categories.icon'])->findOrFail((int) $mode);
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Collection<int, Category>
+     */
+    public static function getCategoriesForTable(SearchBox $searchBox, bool $selectUnselect = false): \Illuminate\Database\Eloquent\Collection
+    {
+        $categories = $searchBox->categories()->with('icon')->orderBy('sort_index', 'desc')->get();
+        if ($selectUnselect) {
+            $categories->push(new Category(['mode' => -1]));
+        }
+
+        return $categories;
+    }
+
 
 }

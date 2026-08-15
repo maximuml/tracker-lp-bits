@@ -2,7 +2,6 @@
 
 namespace App\Support;
 
-use App\Models\User;
 use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Encryption\Encrypter;
 use Nexus\Database\NexusDB;
@@ -157,7 +156,7 @@ final class AuthCookie
             $update['lang'] = $langId;
         }
 
-        User::query()->where('id', $userId)->update($update);
+        \App\Repositories\AuthRepository::updateLogin($userId, $update);
     }
 
     /**
@@ -260,11 +259,7 @@ final class AuthCookie
             if (empty($decrypted)) {
                 throw new \InvalidArgumentException("Invalid authkey: $authkey");
             }
-            $userInfo = \Nexus\Database\NexusDB::remember("announce_user_passkey_$uid", 3600, function () use ($uid) {
-                return \App\Models\User::query()->where('id', $uid)->first(['id', 'passkey']);
-            });
-
-            return $userInfo === null ? '' : $userInfo->passkey;
+            return \App\Repositories\AuthRepository::getPasskeyByUserId((int) $uid) ?? '';
         });
     }
 
@@ -394,31 +389,19 @@ final class AuthCookie
         $shouldIgnoreEnabled = defined('IN_NEXUS') && IN_NEXUS && !$isAjax && $selfEnableBonus > 0;
 
         if ($isArray) {
-            $query = NexusDB::table('users')
-                ->where('id', $id)
-                ->where('status', 'confirmed');
-            if (!$shouldIgnoreEnabled) {
-                $query->where('enabled', 'yes');
-            }
-            $result = $query->first();
-            $row = $result ? array_merge((array) $result, array_values((array) $result)) : null;
-            if (!$row) {
+            $row = \App\Repositories\AuthRepository::findUserArrayForCookie($id, $shouldIgnoreEnabled);
+            if ($row === null) {
                 Logger::writeWithContext("$log, user not exists");
                 return null;
             }
             return $row;
         }
 
-        $row = \App\Models\User::query()->find($id);
-        if (!$row) {
+        $row = \App\Repositories\AuthRepository::findUserModelForCookie($id, $shouldIgnoreEnabled);
+        if ($row === null) {
             Logger::writeWithContext("$log, user not exists");
             return null;
         }
-        $checkFields = ['status'];
-        if (!$shouldIgnoreEnabled) {
-            $checkFields[] = 'enabled';
-        }
-        $row->checkIsNormal($checkFields);
         return $row;
     }
 }

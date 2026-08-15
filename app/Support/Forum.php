@@ -141,7 +141,7 @@ final class Forum
 
         if ($protectedForumIds === null) {
             $protected = \Nexus\Database\NexusDB::remember('setting_protected_forum', 600, function () {
-                return \App\Models\Setting::getByName('misc.protected_forum');
+                return \App\Repositories\SettingRepository::getByName('misc.protected_forum');
             });
             $protectedForumIds = $protected ? preg_split('/[,\s]+/', $protected) : [];
         }

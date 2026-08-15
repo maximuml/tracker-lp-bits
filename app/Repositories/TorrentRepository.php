@@ -1537,4 +1537,18 @@ HTML;
             ->count();
     }
 
+    /**
+     * @return array<string, mixed>|false
+     */
+    public static function getSnatchInfo(int|string $torrentId, int|string $userId): array|false
+    {
+        $record = NexusDB::table('snatched')
+            ->where('torrentid', (int) $torrentId)
+            ->where('userid', (int) $userId)
+            ->orderBy('id', 'desc')
+            ->first();
+
+        return $record ? (array) $record : false;
+    }
+
 }

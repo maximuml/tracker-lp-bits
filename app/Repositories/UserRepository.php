@@ -1030,4 +1030,14 @@ class UserRepository extends BaseRepository
         ]);
     }
 
+    /**
+     * @param  list<int>  $ids
+     * @param  list<string>  $columns
+     * @return \Illuminate\Database\Eloquent\Collection<int, User>
+     */
+    public static function getByIds(array $ids, array $columns = ['*']): \Illuminate\Database\Eloquent\Collection
+    {
+        return User::query()->find($ids, $columns)->keyBy('id');
+    }
+
 }

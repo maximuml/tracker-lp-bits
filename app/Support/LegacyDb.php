@@ -87,12 +87,6 @@ final class LegacyDb
      */
     public static function snatchInfo(int|string $torrentId, int|string $userId): array|false
     {
-        $record = NexusDB::table('snatched')
-            ->where('torrentid', (int) $torrentId)
-            ->where('userid', (int) $userId)
-            ->orderBy('id', 'desc')
-            ->first();
-
-        return $record ? (array) $record : false;
+        return \App\Repositories\TorrentRepository::getSnatchInfo($torrentId, $userId);
     }
 }

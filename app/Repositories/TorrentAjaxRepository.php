@@ -156,8 +156,7 @@ final class TorrentAjaxRepository
 
         $seedersCount = count($seeders);
         $leechersCount = count($leechers);
-        /** @phpstan-ignore-next-line */
-        if ($torrent->seeders != $seedersCount || $torrent->leechers != $leechersCount) {
+        if (($torrentArr['seeders'] ?? 0) != $seedersCount || ($torrentArr['leechers'] ?? 0) != $leechersCount) {
             $update = ['seeders' => $seedersCount, 'leechers' => $leechersCount];
             $torrent->update($update);
             \App\Support\Logger::writeWithContext("[UPDATE_TORRENT_SEEDERS_LEECHERS], torrent: {$torrentId}, original: " . $torrent->toJson() . ", update: " . json_encode($update), 'info', false);

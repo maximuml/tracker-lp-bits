@@ -53,24 +53,32 @@ class UsercpController extends LegacyController
             return redirect('/usercp.php' . ($qs ? '?' . $qs : ''));
         }
 
-        if ($request->isMethod('POST') && $request->input('type') === 'save') {
+        if ($request->isMethod('POST')) {
             $action = (string) $request->input('action');
-            if ($action === 'personal') {
+            $type = (string) $request->input('type');
+
+            if ($type === 'save' && $action === 'personal') {
                 $this->repository->updatePersonal($request);
 
                 return redirect('/usercp.php?action=personal&type=saved');
             }
 
-            if ($action === 'forum') {
+            if ($type === 'save' && $action === 'forum') {
                 $this->repository->updateForum($request);
 
                 return redirect('/usercp.php?action=forum&type=saved');
             }
 
-            if ($action === 'tracker') {
+            if ($type === 'save' && $action === 'tracker') {
                 $this->repository->updateTracker($request);
 
                 return redirect('/usercp.php?action=tracker&type=saved');
+            }
+
+            if ($type === 'confirm' && $action === 'security') {
+                $to = $this->repository->updateSecurityFromLegacyRequest($request);
+
+                return redirect($to);
             }
         }
 

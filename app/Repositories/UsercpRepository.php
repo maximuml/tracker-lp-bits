@@ -8,9 +8,15 @@ use App\Models\Comment;
 use App\Models\Post;
 use App\Models\SeedBoxRecord;
 use App\Models\User;
+use App\Support\AuthCookie;
 use App\Support\Cache;
+use App\Support\LegacyResponse;
 use App\Support\Locale;
+use App\Support\Mail;
 use App\Support\SupportContext;
+use App\Support\Token;
+use App\Support\TwoFactorAuthHelper;
+use App\Support\Url;
 use App\Support\Validators;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -411,5 +417,149 @@ final class UsercpRepository extends BaseRepository
         Cache::clearUser($user->id, $user->passkey);
 
         return User::query()->find($user->id)?->toArray() ?? [];
+    }
+
+    /**
+     * Process the legacy usercp security "confirm" form and return the redirect URL.
+     */
+    public function updateSecurityFromLegacyRequest(Request $request): string
+    {
+        /** @var User $user */
+        $user = Auth::user();
+        $lang = (array) (SupportContext::getGlobal('lang_usercp') ?? []);
+
+        $response = (string) $request->input('response', '');
+        if ($response === '') {
+            LegacyResponse::abort((string) ($lang['std_error'] ?? 'Error'), (string) ($lang['std_enter_old_password'] ?? 'Please enter old password.'));
+        }
+
+        $challenge = self::getChallenge($user->username);
+        if (empty($challenge)) {
+            LegacyResponse::abort((string) ($lang['std_error'] ?? 'Error'), 'expired!');
+        }
+
+        $expectedResponse = hash_hmac('sha256', (string) $user->passhash, (string) $challenge);
+        if (! hash_equals($expectedResponse, $response)) {
+            LegacyResponse::abort((string) ($lang['std_error'] ?? 'Error'), (string) ($lang['std_wrong_password_note'] ?? 'Wrong password.'));
+        }
+
+        $data = [];
+        $changedemail = 0;
+        $passupdated = 0;
+        $privacyupdated = 0;
+        $resetpasskey = $request->input('resetpasskey') == 1 ? 1 : 0;
+        $resetAuthKey = $request->input('resetauthkey') == 1;
+
+        $email = htmlspecialchars(trim((string) $request->input('email', '')));
+        $chpassword = (string) $request->input('chpassword', '');
+        $privacy = (string) $request->input('privacy', '');
+
+        $twoStepSecret = (string) ($request->input('two_step_secret') ?? '');
+        $twoStepSecretHash = (string) ($request->input('two_step_code') ?? '');
+
+        if ($twoStepSecretHash !== '') {
+            if (empty($user->two_step_secret)) {
+                $secretToVerify = $twoStepSecret;
+                $data['two_step_secret'] = $twoStepSecret;
+            } else {
+                $secretToVerify = $user->two_step_secret;
+                $data['two_step_secret'] = '';
+            }
+
+            if (! TwoFactorAuthHelper::verifyCode($secretToVerify, $twoStepSecretHash)) {
+                LegacyResponse::abort((string) ($lang['std_error'] ?? 'Error'), 'Invalid two step code');
+            }
+        }
+
+        if ($chpassword !== '') {
+            $sec = Token::randomHex(20);
+            $passhash = hash('sha256', $sec . $chpassword);
+            $data['secret'] = $sec;
+            $data['passhash'] = $passhash;
+            $authKey = Token::randomHex(20);
+            $data['auth_key'] = $authKey;
+
+            AuthCookie::setLoginCookie((int) $user->id, $authKey, 0);
+            $passupdated = 1;
+        }
+
+        $disableEmailChange = (string) SupportContext::getGlobal('disableemailchange', 'no');
+        $smtpType = (string) SupportContext::getGlobal('smtptype', 'none');
+
+        if ($disableEmailChange !== 'no' && $smtpType !== 'none' && $email !== '' && $email !== $user->email) {
+            if (! Validators::isEmail($email)) {
+                LegacyResponse::abort((string) ($lang['std_error'] ?? 'Error'), (string) ($lang['std_wrong_email_address_format'] ?? 'Wrong email format.'));
+            }
+
+            if (self::emailExistsForOther($email, (int) $user->id)) {
+                LegacyResponse::abort((string) ($lang['std_error'] ?? 'Error'), (string) ($lang['std_email_in_use'] ?? 'Email in use.'));
+            }
+
+            $changedemail = 1;
+        }
+
+        if ($resetpasskey === 1) {
+            $data['passkey'] = md5($user->username . date('Y-m-d H:i:s') . $user->passhash);
+        }
+
+        $siteName = (string) SupportContext::getGlobal('SITENAME', '');
+        $siteEmail = (string) SupportContext::getGlobal('SITEEMAIL', '');
+        $baseUrl = (string) SupportContext::getGlobal('BASEURL', '');
+
+        if ($changedemail === 1) {
+            $sec = Token::randomHex(20);
+            $hash = md5($sec . $email . $sec);
+            $obemail = rawurlencode($email);
+            $data['editsecret'] = $sec;
+
+            $subject = $siteName . ($lang['mail_profile_change_confirmation'] ?? '');
+            $changeEmailOne = sprintf($lang['mail_change_email_one'] ?? '', $siteName);
+            $changeEmailNine = sprintf($lang['mail_change_email_nine'] ?? '', $siteName);
+
+            $body = $changeEmailOne . $user->username
+                . ($lang['mail_change_email_two'] ?? '') . '(' . $email . ')'
+                . ($lang['mail_change_email_three'] ?? '') . "\n\n"
+                . ($lang['mail_change_email_four'] ?? '') . $request->ip()
+                . ($lang['mail_change_email_five'] ?? '') . "\n\n"
+                . ($lang['mail_change_email_six'] ?? '')
+                . '<b><a href="javascript:void(null)" onclick="window.open(\'http://' . $baseUrl . '/confirmemail.php/' . $user->id . '/' . $hash . '/' . $obemail . '\')">' . ($lang['mail_here'] ?? '') . '</a></b>'
+                . ($lang['mail_change_email_six_1'] ?? '') . '<br />' . "\n"
+                . 'http://' . $baseUrl . '/confirmemail.php/' . $user->id . '/' . $hash . '/' . $obemail . "\n\n"
+                . ($lang['mail_change_email_seven'] ?? '') . "\n\n"
+                . '------' . ($lang['mail_change_email_eight'] ?? '') . "\n"
+                . $changeEmailNine;
+
+            Mail::sentLegacy($email, $siteName, $siteEmail, $subject, str_replace('<br />', '<br />', nl2br($body)), 'profile change', false, false, '', 'UTF-8');
+        }
+
+        if (! in_array($privacy, ['normal', 'low', 'strong'], true)) {
+            $privacy = 'normal';
+        }
+
+        $data['privacy'] = $privacy;
+        if ($user->privacy !== $privacy) {
+            $privacyupdated = 1;
+        }
+
+        self::updateSecurity((int) $user->id, $data, $resetAuthKey, (array) $request->all());
+
+        $to = 'usercp.php?action=security&type=saved';
+        if ($changedemail === 1) {
+            $to .= '&mail=1';
+        }
+        if ($resetpasskey === 1) {
+            $to .= '&passkey=1';
+        }
+        if ($passupdated === 1) {
+            $to .= '&password=1';
+        }
+        if ($privacyupdated === 1) {
+            $to .= '&privacy=1';
+        }
+
+        Cache::clearUser($user->id, '');
+        self::deleteChallenge($user->username);
+
+        return $to;
     }
 }

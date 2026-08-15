@@ -2,6 +2,10 @@
 
 namespace App\Repositories;
 
+use App\Models\Forum;
+use App\Models\Post;
+use App\Models\Topic;
+use App\Models\User;
 use Nexus\Database\NexusDB;
 
 class ForumRepository extends BaseRepository
@@ -184,5 +188,112 @@ class ForumRepository extends BaseRepository
             ->where('forumid', $forumId)
             ->where('userid', $userId)
             ->exists();
+    }
+
+    public static function getActiveForumUserCount(): int
+    {
+        $secs = 900;
+        $dt = date("Y-m-d H:i:s", (time() - $secs));
+
+        return (int) User::query()->where('forum_access', '>=', $dt)->count();
+    }
+
+    public static function getTotalPostsCount(): int
+    {
+        return (int) Post::query()->count();
+    }
+
+    public static function getTotalTopicsCount(): int
+    {
+        return (int) Topic::query()->count();
+    }
+
+    public static function getTodayPostsCount(string $todayDate): int
+    {
+        return (int) Post::query()->where('added', '>', date("Y-m-d"))->count();
+    }
+
+    public static function clearReadPosts(int $userId): void
+    {
+        NexusDB::table('readposts')->where('userid', $userId)->delete();
+    }
+
+    public static function getLastPostId(): ?int
+    {
+        $value = Post::query()->orderByDesc('id')->value('id');
+
+        return $value === null ? null : (int) $value;
+    }
+
+    public static function updateLastCatchup(int $userId, int $lastPostId): bool
+    {
+        return (bool) User::query()->where('id', $userId)->update(['last_catchup' => $lastPostId]);
+    }
+
+    public static function forumExists(int $id): bool
+    {
+        return (bool) Forum::query()->where('id', $id)->exists();
+    }
+
+    public static function topicExists(int $id): ?int
+    {
+        $topic = Topic::query()->where('id', $id)->first(['forumid']);
+
+        return $topic ? (int) $topic->forumid : null;
+    }
+
+    public static function postExists(int $id): ?int
+    {
+        $post = Post::query()->where('id', $id)->first(['topicid']);
+
+        return $post ? (int) $post->topicid : null;
+    }
+
+    public static function updateTopicLastPost(int $topicId): bool
+    {
+        $postId = Post::query()->where('topicid', $topicId)->orderByDesc('id')->value('id');
+
+        if (!$postId) {
+            return false;
+        }
+
+        return (bool) Topic::query()->where('id', $topicId)->update(['lastpost' => $postId]);
+    }
+
+    /**
+     * @return  array<int, array<string, mixed>>
+     */
+    public static function getForumsList(): array
+    {
+        return Forum::query()->orderBy('forid')->orderBy('sort')->get()->keyBy('id')->map(fn ($f) => $f->toArray())->all();
+    }
+
+    /**
+     * @return  array<int, int>|null
+     */
+    public static function getLastReadPosts(int $userId): ?array
+    {
+        $rows = NexusDB::table('readposts')->where('userid', $userId)->get(['topicid', 'lastpostread']);
+
+        if ($rows->isEmpty()) {
+            return null;
+        }
+
+        $ret = [];
+        foreach ($rows as $row) {
+            $ret[(int) $row->topicid] = (int) $row->lastpostread;
+        }
+
+        return $ret;
+    }
+
+    public static function getForumName(int $id): ?string
+    {
+        return Forum::query()->where('id', $id)->value('name');
+    }
+
+    public static function getTopicSubject(int $id): ?string
+    {
+        return Topic::query()->where('id', $id)->value('subject');
     }
 }

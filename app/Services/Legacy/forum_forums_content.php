@@ -20,9 +20,7 @@ $Cache = \App\Support\SupportContext::getCache();
 $today_date = \App\Support\SupportContext::getGlobal('today_date', '');
 
 	if (!$activeforumuser_num = $Cache->get_value('active_forum_user_count')){
-		$secs = 900;
-		$dt = date("Y-m-d H:i:s",(TIMENOW - $secs));
-		$activeforumuser_num = \App\Models\User::query()->where('forum_access', '>=', $dt)->count();
+		$activeforumuser_num = \App\Repositories\ForumRepository::getActiveForumUserCount();
 		$Cache->cache_value('active_forum_user_count', $activeforumuser_num, 300);
 	}
 	if ($activeforumuser_num){
@@ -35,15 +33,15 @@ $today_date = \App\Support\SupportContext::getGlobal('today_date', '');
 <table width="100%"><tr><td class="text">
 <?php
 	if (!$postcount = $Cache->get_value('total_posts_count')){
-		$postcount = \App\Models\Post::query()->count();
+		$postcount = \App\Repositories\ForumRepository::getTotalPostsCount();
 		$Cache->cache_value('total_posts_count', $postcount, 96400);
 	}
 	if (!$topiccount = $Cache->get_value('total_topics_count')){
-		$topiccount = \App\Models\Topic::query()->count();
+		$topiccount = \App\Repositories\ForumRepository::getTotalTopicsCount();
 		$Cache->cache_value('total_topics_count', $topiccount, 96500);
 	}
 	if (!$todaypostcount = $Cache->get_value('today_'.$today_date.'_posts_count')) {
-		$todaypostcount = \App\Models\Post::query()->where('added', '>', date("Y-m-d"))->count();
+		$todaypostcount = \App\Repositories\ForumRepository::getTodayPostsCount($today_date);
 		$Cache->cache_value('today_'.$today_date.'_posts_count', $todaypostcount, 700);
 	}
 	print($lang_forums['text_our_members_have'] ."<b>".$postcount."</b>". $lang_forums['text_posts_in_topics']."<b>".$topiccount."</b>".$lang_forums['text_in_topics']."<b><font class=\"new\">".$todaypostcount."</font></b>".$lang_forums['text_new_post'].\App\Support\Strings::addS($todaypostcount).$lang_forums['text_posts_today']."<br /><br />");
@@ -61,12 +59,12 @@ $Cache = \App\Support\SupportContext::getCache();
 
 	if (!$CURUSER)
 		return;
-	\Nexus\Database\NexusDB::table('readposts')->where('userid', $CURUSER['id'])->delete();
+	\App\Repositories\ForumRepository::clearReadPosts((int) $CURUSER['id']);
 	$Cache->delete_value('user_'.$CURUSER['id'].'_last_read_post_list');
-	$lastpostid = \App\Models\Post::query()->orderByDesc('id')->value('id');
+	$lastpostid = \App\Repositories\ForumRepository::getLastPostId();
 	if ($lastpostid){
 		$CURUSER['last_catchup'] = $lastpostid;
-		\App\Models\User::query()->where('id', $CURUSER['id'])->update(['last_catchup' => $lastpostid]);
+		\App\Repositories\ForumRepository::updateLastCatchup((int) $CURUSER['id'], $lastpostid);
 	}
 } }
 
@@ -107,24 +105,24 @@ $lang_forums = (array) (\App\Support\SupportContext::getGlobal('lang_forums') ??
 	switch ($place){
 		case 'forum':
 		{
-			if (!\App\Models\Forum::query()->where('id', $id)->exists())
+			if (!\App\Repositories\ForumRepository::forumExists((int) $id))
 				\App\Support\LegacyResponse::abort($lang_forums['std_error'], $lang_forums['std_no_forum_id']);
 			break;
 		}
 		case 'topic':
 		{
-			$topic = \App\Models\Topic::query()->where('id', $id)->first(['forumid']);
-			if (!$topic)
+			$forumid = \App\Repositories\ForumRepository::topicExists((int) $id);
+			if (!$forumid)
 				\App\Support\LegacyResponse::abort($lang_forums['std_error'], $lang_forums['std_bad_topic_id']);
-			check_whether_exist($topic->forumid, 'forum');
+			check_whether_exist($forumid, 'forum');
 			break;
 		}
 		case 'post':
 		{
-			$post = \App\Models\Post::query()->where('id', $id)->first(['topicid']);
-			if (!$post)
+			$topicid = \App\Repositories\ForumRepository::postExists((int) $id);
+			if (!$topicid)
 				\App\Support\LegacyResponse::abort($lang_forums['std_error'], $lang_forums['std_no_post_id']);
-			check_whether_exist($post->topicid, 'topic');
+			check_whether_exist($topicid, 'topic');
 			break;
 		}
 	}
@@ -134,18 +132,14 @@ $lang_forums = (array) (\App\Support\SupportContext::getGlobal('lang_forums') ??
 if (!function_exists('update_topic_last_post')) { function update_topic_last_post($topicid)
 {
 $lang_forums = (array) (\App\Support\SupportContext::getGlobal('lang_forums') ?? []);
-	$postid = \App\Models\Post::query()->where('topicid', $topicid)->orderByDesc('id')->value('id');
-	if (!$postid) {
-		return;
-	}
-	\App\Models\Topic::query()->where('id', $topicid)->update(['lastpost' => $postid]);
+	\App\Repositories\ForumRepository::updateTopicLastPost((int) $topicid);
 } }
 
 if (!function_exists('get_forum_row')) { function get_forum_row($forumid = 0)
 {
 $Cache = \App\Support\SupportContext::getCache();
 	if (!$forums = $Cache->get_value('forums_list')){
-		$forums = \App\Models\Forum::query()->orderBy('forid')->orderBy('sort')->get()->keyBy('id')->map(fn($f) => $f->toArray())->all();
+		$forums = \App\Repositories\ForumRepository::getForumsList();
 		$Cache->cache_value('forums_list', $forums, 86400);
 	}
 	if (!$forumid)
@@ -157,16 +151,13 @@ $CURUSER = \App\Support\SupportContext::getUser() ?? [];
 $Cache = \App\Support\SupportContext::getCache();
 	static $ret;
 	if (!$ret && !$ret = $Cache->get_value('user_'.$CURUSER['id'].'_last_read_post_list')){
-		$ret = [];
-		$rows = \Nexus\Database\NexusDB::table('readposts')->where('userid', $CURUSER['id'])->get(['topicid', 'lastpostread']);
-		if ($rows->isNotEmpty()){
-			foreach ($rows as $row)
-				$ret[$row->topicid] = $row->lastpostread;
+		$ret = \App\Repositories\ForumRepository::getLastReadPosts((int) $CURUSER['id']);
+		if ($ret !== null){
 			$Cache->cache_value('user_'.$CURUSER['id'].'_last_read_post_list', $ret, 900);
 		}
 		else $Cache->cache_value('user_'.$CURUSER['id'].'_last_read_post_list', 'no record', 900);
 	}
-	if ($ret != "no record" && (isset($ret[$topicid])) && $CURUSER['last_catchup'] < $ret[$topicid]){
+	if (is_array($ret) && (isset($ret[$topicid])) && $CURUSER['last_catchup'] < $ret[$topicid]){
 		return $ret[$topicid];
 	}
 	elseif ($CURUSER['last_catchup'])
@@ -187,16 +178,14 @@ $lang_forums = (array) (\App\Support\SupportContext::getGlobal('lang_forums') ??
 	switch ($type){
 		case 'new':
 		{
-			$forum = \App\Models\Forum::query()->where('id', $id)->first(['name']);
-			$forumname = $forum ? $forum->name : '';
+			$forumname = \App\Repositories\ForumRepository::getForumName((int) $id) ?? '';
 			$title = $lang_forums['text_new_topic_in']." <a href=\"".htmlspecialchars("?action=viewforum&forumid=".$id)."\">".htmlspecialchars($forumname)."</a> ".$lang_forums['text_forum'];
 			$hassubject = true;
 			break;
 		}
 		case 'reply':
 		{
-			$topic = \App\Models\Topic::query()->where('id', $id)->first(['subject']);
-			$topicname = $topic ? $topic->subject : '';
+			$topicname = \App\Repositories\ForumRepository::getTopicSubject((int) $id) ?? '';
 			$title = $lang_forums['text_reply_to_topic']." <a href=\"".htmlspecialchars("?action=viewtopic&topicid=".$id)."\">".htmlspecialchars($topicname)."</a> ";
 			break;
 		}

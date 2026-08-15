@@ -6,8 +6,11 @@ use App\Enums\Permission\PermissionEnum;
 use App\Models\User;
 use App\Repositories\MysqlStatsRepository;
 use App\Services\CleanupService;
+use App\Support\Environment;
 use App\Support\Format;
+use App\Support\Hooks;
 use App\Support\LegacyResponse;
+use App\Support\Log;
 use App\Support\Mail;
 use App\Support\Pagination;
 use App\Support\Permissions;
@@ -589,9 +592,122 @@ class SystemController extends LegacyController
 
     public function takeIncrementBulk(Request $request): Response|RedirectResponse
     {
+        if (! $request->isMethod('POST')) {
+            return $this->legacyAbortResponse('Error', 'Permission denied!');
+        }
 
-        return $this->legacyPageRaw($request, 'take-increment-bulk', true);
+        if ((int) UserDisplay::currentClass() < User::CLASS_SYSOP) {
+            return $this->legacyAbortResponse('Sorry', 'Permission denied.');
+        }
 
+        $lang = (array) (SupportContext::getGlobal('lang_incrementbulk') ?? []);
+        $validTypeMap = (array) ($lang['types'] ?? []);
+
+        $currentUser = SupportContext::getUser() ?? [];
+        $senderId = $request->input('sender') === 'system' ? 0 : ((int) ($currentUser['id'] ?? 0));
+        $added = date('Y-m-d H:i:s');
+        $msg = trim((string) $request->input('msg', ''));
+        $amount = $request->input('amount');
+        $type = (string) $request->input('type', '');
+
+        if ($msg === '' || $amount === '' || $amount === null || $type === '') {
+            return $this->legacyAbortResponse('Error', "Don't leave any fields blank.");
+        }
+
+        if (! is_numeric($amount)) {
+            return $this->legacyAbortResponse('Error', 'amount must be numeric');
+        }
+
+        if (! isset($validTypeMap[$type])) {
+            return $this->legacyAbortResponse('Error', 'Invalid type');
+        }
+
+        if ($type === 'uploaded') {
+            $amount = (int) Format::bytesFromUnit($amount, 'G');
+        } else {
+            $amount = (int) $amount;
+        }
+
+        $isTypeTmpInvite = $type === 'tmp_invites';
+        $subject = trim((string) $request->input('subject', ''));
+        $duration = 0;
+        $size = 2000;
+        $page = 1;
+
+        $conditions = [];
+        $classes = $request->input('classes', []);
+        if (is_array($classes) && ! empty($classes)) {
+            $sanitized = array_filter(array_map('intval', $classes), fn ($v) => $v > 0);
+            if (! empty($sanitized)) {
+                $conditions[] = 'class IN (' . implode(', ', $sanitized) . ')';
+            }
+        }
+
+        $conditions = Hooks::applyFilter('role_query_conditions', $conditions, $request->all());
+
+        if (empty($conditions)) {
+            return $this->legacyAbortResponse('Error', 'No valid filter');
+        }
+
+        if ($isTypeTmpInvite) {
+            $duration = (int) $request->input('duration', 0);
+            if ($duration <= 0) {
+                return $this->legacyAbortResponse('Sorry', 'Invalid duration: ' . $duration);
+            }
+        }
+
+        set_time_limit(300);
+        $whereStr = implode(' OR ', $conditions);
+
+        while (true) {
+            $msgRows = [];
+            $idArr = [];
+            $offset = ($page - 1) * $size;
+
+            $users = NexusDB::table('users')
+                ->whereRaw("({$whereStr})")
+                ->where('enabled', 'yes')
+                ->where('status', 'confirmed')
+                ->offset($offset)
+                ->limit($size)
+                ->get(['id']);
+
+            foreach ($users as $userRow) {
+                $id = (int) $userRow->id;
+                $idArr[] = $id;
+                $msgRows[] = [
+                    'sender' => $senderId,
+                    'receiver' => $id,
+                    'added' => $added,
+                    'subject' => $subject,
+                    'msg' => $msg,
+                ];
+            }
+
+            if (empty($idArr)) {
+                break;
+            }
+
+            $idStr = implode(',', $idArr);
+            $idRedisKey = sprintf('temporary_invite:%s', microtime(true));
+            NexusDB::cache_put($idRedisKey, $idStr);
+
+            if ($isTypeTmpInvite) {
+                $command = sprintf('invite:tmp %s %s %s', $idRedisKey, $duration, $amount);
+                $output = Environment::run($command, 'string', true, true);
+                Log::writeWithContext((string) sprintf('command: %s, output: %s', $command, $output), 'info', false);
+            } else {
+                NexusDB::table('users')->whereIn('id', $idArr)->increment($type, $amount);
+            }
+
+            if (! empty($msgRows)) {
+                NexusDB::table('messages')->insert($msgRows);
+            }
+
+            $page++;
+        }
+
+        return redirect('/increment-bulk.php?sent=1&type=' . $type);
     }
 
 }

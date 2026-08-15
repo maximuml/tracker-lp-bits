@@ -15,6 +15,7 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\View\View;
 use Nexus\Database\NexusDB;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class UtilityController extends LegacyController
 {
@@ -90,7 +91,55 @@ class UtilityController extends LegacyController
 
     public function getattachment(Request $request): Response|RedirectResponse
     {
-        return $this->legacyPageRaw($request, 'getattachment', true);
+        $id = (int) $request->input('id', 0);
+        $dlkey = (string) $request->input('dlkey', '');
+
+        if ($id <= 0 || $dlkey === '') {
+            return response('Invalid id or key.', 400, ['Content-Type' => 'text/plain; charset=utf-8']);
+        }
+
+        $row = (array) NexusDB::table('attachments')->where('id', $id)->where('dlkey', $dlkey)->first();
+        if (! $row) {
+            return response('No attachment found.', 404, ['Content-Type' => 'text/plain; charset=utf-8']);
+        }
+
+        $httpdirectory = (string) SupportContext::getGlobal('httpdirectory_attachment', '');
+        $basePath = realpath($httpdirectory);
+        $filelocation = $httpdirectory . '/' . $row['location'];
+        $realFile = realpath($filelocation);
+
+        if ($basePath === false || $realFile === false || ! str_starts_with($realFile, $basePath) || ! is_file($realFile) || ! is_readable($realFile)) {
+            return response('File not found or cannot be read.', 404, ['Content-Type' => 'text/plain; charset=utf-8']);
+        }
+
+        $filename = basename((string) ($row['filename'] ?? ''));
+        $filename = str_replace(['"', '\\', "\r", "\n"], '', $filename);
+        if ($filename === '') {
+            $filename = 'attachment';
+        }
+
+        NexusDB::table('attachments')->where('id', $id)->increment('downloads');
+
+        $cache = SupportContext::getCache();
+        if ($cache !== null && method_exists($cache, 'delete_value')) {
+            $cache->delete_value('attachment_' . $dlkey . '_content');
+        }
+
+        return new StreamedResponse(function () use ($realFile) {
+            $f = fopen($realFile, 'rb');
+            if (! $f) {
+                return;
+            }
+
+            while (! feof($f)) {
+                echo fread($f, 4096);
+            }
+
+            fclose($f);
+        }, 200, [
+            'Content-Type' => 'application/octet-stream',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ]);
     }
 
     public function image(Request $request): Response|RedirectResponse
@@ -265,7 +314,35 @@ XML;
 
     public function confirmemail(Request $request): Response|RedirectResponse
     {
-        return $this->legacyPageWithRedirect($request, 'confirmemail', false);
+        $pathInfo = (string) ($request->server->get('PATH_INFO') ?? $request->getPathInfo() ?? '');
+        if (! preg_match(':^/(\d{1,10})/([\w]{32})/(.+)$:', $pathInfo, $matches)) {
+            abort(404);
+        }
+
+        $id = (int) ($matches[1] ?? 0);
+        $md5 = $matches[2];
+        $email = urldecode($matches[3]);
+
+        if ($id <= 0) {
+            abort(404);
+        }
+
+        $user = User::query()->where('id', $id)->first(['editsecret']);
+        if (! $user) {
+            abort(404);
+        }
+
+        $sec = \App\Support\Strings::padHash($user->editsecret);
+        if (preg_match('/^ *$/s', $sec) || $md5 !== md5($sec . $email . $sec)) {
+            abort(404);
+        }
+
+        $affected = User::query()->where('id', $id)->where('editsecret', $user->editsecret)->update(['editsecret' => '', 'email' => $email]);
+        if (! $affected) {
+            abort(404);
+        }
+
+        return redirect('/usercp.php?action=security&type=saved');
     }
 
     public function ok(Request $request): View|RedirectResponse

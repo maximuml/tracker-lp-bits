@@ -66,6 +66,12 @@ class UsercpController extends LegacyController
 
                 return redirect('/usercp.php?action=forum&type=saved');
             }
+
+            if ($action === 'tracker') {
+                $this->repository->updateTracker($request);
+
+                return redirect('/usercp.php?action=tracker&type=saved');
+            }
         }
 
         $userInfo = $this->repository->getUserById((int) $user['id']);

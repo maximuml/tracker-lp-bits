@@ -9,6 +9,8 @@ use App\Models\Post;
 use App\Models\SeedBoxRecord;
 use App\Models\User;
 use App\Support\Cache;
+use App\Support\Locale;
+use App\Support\SupportContext;
 use App\Support\Validators;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -281,6 +283,128 @@ final class UsercpRepository extends BaseRepository
 
         if ($request->has('ttlastpost')) {
             $data['showlastpost'] = $request->input('ttlastpost') === 'yes' ? 'yes' : 'no';
+        }
+
+        User::query()->where('id', $user->id)->update($data);
+        Cache::clearUser($user->id, $user->passkey);
+
+        return User::query()->find($user->id)?->toArray() ?? [];
+    }
+
+    /**
+     * Update tracker/browse settings for the authenticated user.
+     *
+     * @return array<string, mixed>
+     */
+    public function updateTracker(Request $request): array
+    {
+        /** @var User $user */
+        $user = Auth::user();
+
+        $notifsString = (string) $user->notifs;
+        preg_match_all('/\[(.*)\]/Ui', $notifsString, $matches);
+        $notifsArr = array_fill_keys($matches[1], 1);
+
+        foreach (array_keys($notifsArr) as $key) {
+            foreach (['incldead', 'spstate', 'inclbookmarked'] as $prefix) {
+                if (str_starts_with((string) $key, $prefix)) {
+                    unset($notifsArr[$key]);
+                    break;
+                }
+            }
+        }
+
+        if ($request->input('pmnotif') === 'yes') {
+            $notifsArr['pm'] = 1;
+        } else {
+            unset($notifsArr['pm']);
+        }
+
+        if ($request->input('emailnotif') === 'yes') {
+            $notifsArr['email'] = 1;
+        } else {
+            unset($notifsArr['email']);
+        }
+
+        foreach ([
+            'categories' => 'cat',
+            'sources' => 'sou',
+            'media' => 'med',
+            'codecs' => 'cod',
+            'standards' => 'sta',
+            'processings' => 'pro',
+            'audiocodecs' => 'aud',
+        ] as $table => $cbname) {
+            foreach (self::getTableIds($table) as $id) {
+                if ($request->input($cbname . $id) === 'yes') {
+                    $notifsArr[$cbname . $id] = 1;
+                } else {
+                    unset($notifsArr[$cbname . $id]);
+                }
+            }
+        }
+
+        $incldead = $request->input('incldead');
+        if ($incldead !== null && $incldead != 1) {
+            $notifsArr["incldead=$incldead"] = 1;
+        }
+
+        $spstate = $request->input('spstate');
+        if ($spstate) {
+            $notifsArr["spstate=$spstate"] = 1;
+        }
+
+        $inclbookmarked = $request->input('inclbookmarked');
+        if ($inclbookmarked) {
+            $notifsArr["inclbookmarked=$inclbookmarked"] = 1;
+        }
+
+        $data = [
+            'notifs' => '[' . implode('][', array_keys($notifsArr)) . ']',
+        ];
+
+        $stylesheet = (int) $request->input('stylesheet', 0);
+        if (Validators::isId($stylesheet)) {
+            $data['stylesheet'] = $stylesheet;
+        }
+
+        $sitelanguage = (int) $request->input('sitelanguage', 0);
+        if (Validators::isId($sitelanguage)) {
+            $langFolder = Locale::folderForIdWithContext($sitelanguage);
+            $currentFolder = Locale::folderFromCookie($request->cookie('c_lang_folder') ?? '', false);
+            if ($currentFolder !== $langFolder) {
+                Locale::setFolderCookie($langFolder, 0x7fffffff);
+            }
+            $data['lang'] = $sitelanguage;
+        }
+
+        $data['torrentsperpage'] = max(0, min(100, (int) $request->input('torrentsperpage', 0)));
+        $data['timetype'] = (string) $request->input('timetype', '');
+        $data['appendsticky'] = $request->input('appendsticky') === 'yes' ? 'yes' : 'no';
+        $data['appendnew'] = $request->input('appendnew') === 'yes' ? 'yes' : 'no';
+        $data['appendpromotion'] = (string) $request->input('appendpromotion', '');
+        $data['appendpicked'] = $request->input('appendpicked') === 'yes' ? 'yes' : 'no';
+        $data['dlicon'] = $request->input('dlicon') === 'yes' ? 'yes' : 'no';
+        $data['bmicon'] = $request->input('bmicon') === 'yes' ? 'yes' : 'no';
+        $data['showcomnum'] = $request->input('showcomnum') === 'yes' ? 'yes' : 'no';
+        $data['showdescription'] = $request->input('showdescription') === 'yes' ? 'yes' : 'no';
+        $data['showsmalldescr'] = $request->input('smalldescr') === 'yes' ? 'yes' : 'no';
+        $data['showcomment'] = $request->input('showcomment') === 'yes' ? 'yes' : 'no';
+        $data['pmnum'] = max(1, min(100, (int) $request->input('pmnum', 20)));
+        $data['sbnum'] = max(10, min(500, (int) $request->input('sbnum', 70)));
+        $data['sbrefresh'] = max(10, min(3600, (int) $request->input('sbrefresh', 120)));
+
+        $showTooltip = (string) SupportContext::getGlobal('enabletooltip_tweak', '') === 'yes';
+        if ($showTooltip) {
+            $data['tooltip'] = (string) $request->input('tooltip', '');
+            $data['showlastcom'] = $request->input('showlastcom') === 'yes' ? 'yes' : 'no';
+        }
+
+        $fontsize = (string) $request->input('fontsize', '');
+        if (in_array($fontsize, ['small', 'medium', 'large'], true)) {
+            $data['fontsize'] = $fontsize;
+        } else {
+            $data['fontsize'] = 'medium';
         }
 
         User::query()->where('id', $user->id)->update($data);

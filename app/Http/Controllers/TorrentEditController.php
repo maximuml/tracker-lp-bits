@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Torrent;
+use App\Repositories\HitAndRunRepository;
+use App\Repositories\SearchBoxRepository;
+use App\Repositories\TagRepository;
 use App\Repositories\TorrentDetailRepository;
 use App\Repositories\TorrentEditRepository;
 use App\Support\Category;
@@ -35,6 +38,8 @@ class TorrentEditController extends Controller
         if (empty($row)) {
             abort(404);
         }
+        $sectionmode = (int) ($row['search_box_id'] ?? 0);
+        $row['cat_mode'] = $sectionmode;
 
         $user = Auth::guard('nexus-web')->user();
         if ($user === null) {
@@ -55,15 +60,19 @@ class TorrentEditController extends Controller
         $langEdit = SupportContext::getGlobal('lang_edit') ?? [];
         $headTitle = ($langEdit['head_edit_torrent'] ?? '') . '"' . $row['name'] . '"';
 
-        $sectionmode = (int) ($row['cat_mode'] ?? 0);
-
         return view('torrent.edit', [
             'torrentId' => $id,
             'torrentRow' => $row,
             'currentUser' => $currentUser,
             'headTitle' => $headTitle,
-            'tagIds' => \App\Repositories\TorrentDetailRepository::getTagIds($id),
+            'tagIds' => TorrentDetailRepository::getTagIds($id),
             'cats' => Category::listByModeWithContext($sectionmode),
+            'returnto' => (string) $request->input('returnto', ''),
+            'requestUri' => (string) $request->server('REQUEST_URI', ''),
+            'taxonomySelect' => (new SearchBoxRepository())->renderTaxonomySelect($sectionmode, $row),
+            'tagCheckbox' => (new TagRepository())->renderCheckbox($sectionmode, (array) TorrentDetailRepository::getTagIds($id)),
+            'customFieldsHtml' => (new \Nexus\Field\Field())->renderOnUploadPage($id, $sectionmode),
+            'hitAndRunHtml' => (new HitAndRunRepository())->renderOnUploadPage($row['hr'] ?? 0, $sectionmode),
         ]);
     }
 

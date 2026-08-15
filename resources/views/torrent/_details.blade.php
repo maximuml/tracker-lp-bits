@@ -3,47 +3,50 @@ $id = $torrentId;
 $row = $torrentRow;
 $CURUSER = $currentUser;
 $user = $user;
-$customField = $customField;
 $tagIds = (array) ($tagIds ?? []);
 $denyLog = $denyLog ?? null;
 $lang_details = \App\Support\SupportContext::getGlobal('lang_details') ?? [];
 $lang_functions = \App\Support\SupportContext::getGlobal('lang_functions') ?? [];
 $torrentnameprefix = \App\Support\SupportContext::getGlobal('torrentnameprefix') ?? '';
 
-    $row = \App\Support\Hooks::applyFilter('torrent_detail', $row);
-    if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::TORRENT_MANAGE) || $CURUSER["id"] == $row["owner"])
-    $owned = 1;
-    else $owned = 0;
-    $torrentRep = new \App\Repositories\TorrentRepository();
-    $searchBoxRep = new \App\Repositories\SearchBoxRepository();
-	if (!empty(\App\Support\SupportContext::getQuery("hit"))) {
-        \App\Repositories\TorrentDetailRepository::incrementViews($id);
-	}
+$requestFlags = (array) ($requestFlags ?? []);
+$torrentTopHtml = (string) ($torrentTopHtml ?? '');
+$editUrl = (string) ($editUrl ?? '');
+$uprow = (string) ($uprow ?? '');
+$bookmarkMarkup = (string) ($bookmarkMarkup ?? '');
+$tagHtml = (string) ($tagHtml ?? '');
+$taxonomyRendered = (string) ($taxonomyRendered ?? '');
+$downloadUrl = (string) ($downloadUrl ?? '');
+$customFieldsHtml = (string) ($customFieldsHtml ?? '');
+$technicalInfoResult = (string) ($technicalInfoResult ?? '');
+$descr = (string) ($descr ?? '');
+$bonusOptions = (array) ($bonusOptions ?? []);
+$magicInfo = (array) ($magicInfo ?? []);
+$thanksInfo = (array) ($thanksInfo ?? []);
+$userDisplayMap = (array) ($userDisplayMap ?? []);
+$currentUserHtml = (string) ($currentUserHtml ?? '');
 
-	if (!((\App\Support\SupportContext::getQuery("cmtpage") !== null))) {
-		if (!empty(\App\Support\SupportContext::getQuery("uploaded")))
-		{
-			print("<h1 align=\"center\">".$lang_details['text_successfully_uploaded']."</h1>");
-			print("<p>".$lang_details['text_redownload_torrent_note']."</p>");
-			header("refresh: 1; url=download.php?id=$id");
-		}
-		elseif (!empty(\App\Support\SupportContext::getQuery("edited"))) {
-			print("<h1 align=\"center\">".$lang_details['text_successfully_edited']."</h1>");
-			if (((\App\Support\SupportContext::getQuery("returnto") !== null)))
-				print("<p><b>".$lang_details['text_go_back'] . "<a href=\"".htmlspecialchars(\App\Support\SupportContext::getQuery("returnto"))."\">" . $lang_details['text_whence_you_came']."</a></b></p>");
-		} elseif (!empty(\App\Support\SupportContext::getQuery('existed'))) {
-            print("<h1 align=\"center\" style='color: red'>".$lang_details['torrent_existed']."</h1>");
-            if (((\App\Support\SupportContext::getQuery("returnto") !== null)))
-                print("<p><b>".$lang_details['text_go_back'] . "<a href=\"".htmlspecialchars(\App\Support\SupportContext::getQuery("returnto"))."\">" . $lang_details['text_whence_you_came']."</a></b></p>");
+if (\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::TORRENT_MANAGE) || $CURUSER["id"] == $row["owner"])
+    $owned = 1;
+else $owned = 0;
+
+if (empty($requestFlags['cmtpage'])) {
+    if (! empty($requestFlags['uploaded'])) {
+        print("<h1 align=\"center\">".$lang_details['text_successfully_uploaded']."</h1>");
+        print("<p>".$lang_details['text_redownload_torrent_note']."</p>");
+    } elseif (! empty($requestFlags['edited'])) {
+        print("<h1 align=\"center\">".$lang_details['text_successfully_edited']."</h1>");
+        if (! empty($requestFlags['returnto'])) {
+            print("<p><b>".$lang_details['text_go_back'] . "<a href=\"".htmlspecialchars($requestFlags['returnto'])."\">" . $lang_details['text_whence_you_came']."</a></b></p>");
         }
-        $banned_torrent = ($row["banned"] == 'yes' ? " <b>(<font class=\"striking\">".$lang_functions['text_banned']."</font>)</b>" : "");
-		$sp_torrent = \App\Support\Promotion::appendWithContext($row['sp_state'],'word', false, '', 0, '', $row['__ignore_global_sp_state'] ?? false);
-		$sp_torrent_sub = \App\Support\Promotion::appendSubWithContext($row['sp_state'],"",true,$row['added'], $row['promotion_time_type'], $row['promotion_until'], $row['__ignore_global_sp_state'] ?? false);
-        $hrImg = \App\Support\TorrentAccess::hrImage($row, $row['search_box_id']);
-        $approvalStatusIcon = $torrentRep->renderApprovalStatus($row["approval_status"]);
-        $paidIcon = $torrentRep->getPaidIcon($row, 20);
-		$s=htmlspecialchars($row["name"]).$banned_torrent.$paidIcon.($sp_torrent ? "&nbsp;&nbsp;&nbsp;".$sp_torrent : "").($sp_torrent_sub) . $hrImg . $approvalStatusIcon;
-		print("<h1 align=\"center\" id=\"top\">".$s."</h1>\n");
+    } elseif (! empty($requestFlags['existed'])) {
+        print("<h1 align=\"center\" style='color: red'>".$lang_details['torrent_existed']."</h1>");
+        if (! empty($requestFlags['returnto'])) {
+            print("<p><b>".$lang_details['text_go_back'] . "<a href=\"".htmlspecialchars($requestFlags['returnto'])."\">" . $lang_details['text_whence_you_came']."</a></b></p>");
+        }
+    }
+
+    print("<h1 align=\"center\" id=\"top\">".$torrentTopHtml."</h1>\n");
 
         //Banned reason
         if ($row['approval_status'] == \App\Models\Torrent::APPROVAL_STATUS_DENY && $denyLog !== null) {
@@ -56,22 +59,9 @@ $torrentnameprefix = \App\Support\SupportContext::getGlobal('torrentnameprefix')
 
 		print("<table width=\"97%\" cellspacing=\"0\" cellpadding=\"5\">\n");
 
-		$url = "edit.php?id=" . $row["id"];
-		if (((\App\Support\SupportContext::getQuery("returnto") !== null))) {
-			$url .= "&returnto=" . rawurlencode(\App\Support\SupportContext::getQuery("returnto"));
-		}
-		$editlink = "a title=\"".$lang_details['title_edit_torrent']."\" href=\"$url\"";
+		$editlink = "a title=\"".$lang_details['title_edit_torrent']."\" href=\"$editUrl\"";
 
 		// ------------- start upped by block ------------------//
-		if($row['anonymous'] == 'yes') {
-			if (!\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::VIEW_ANONYMOUS) && $row['owner'] != $CURUSER['id'])
-			$uprow = "<i>".$lang_details['text_anonymous']."</i>";
-			else
-			$uprow = "<i>".$lang_details['text_anonymous']."</i> (" . \App\Support\UserDisplay::username($row['owner'], false, true, true, false, false, true) . ")";
-		}
-		else {
-			$uprow = ((isset($row['owner'])) ? \App\Support\UserDisplay::username($row['owner'], false, true, true, false, false, true) : "<i>".$lang_details['text_unknown']."</i>");
-		}
 		if ($CURUSER["id"] == $row["owner"])
 			$CURUSER["downloadpos"] = "yes";
 		if ($CURUSER["downloadpos"] != "no")
@@ -80,42 +70,18 @@ $torrentnameprefix = \App\Support\SupportContext::getGlobal('torrentnameprefix')
 			if ($CURUSER['timetype'] != 'timealive')
 				$uploadtime = $lang_details['text_at'].$row['added'];
 			else $uploadtime = $lang_details['text_blank'].\App\Support\Time::format($row['added'],true,false);
-			print("<a class=\"index\" href=\"download.php?id=$id\">" . htmlspecialchars($torrentnameprefix ."." .$row["save_as"]) . ".torrent</a>&nbsp;&nbsp;<a id=\"bookmark0\" href=\"javascript: bookmark(".$row['id'].",0);\">".\App\Support\TorrentBookmark::stateMarkupWithContext($CURUSER['id'], $row['id'], false)."</a>&nbsp;&nbsp;&nbsp;".$lang_details['row_upped_by']."&nbsp;".$uprow.$uploadtime);
+			print("<a class=\"index\" href=\"download.php?id=$id\">" . htmlspecialchars($torrentnameprefix ."." .$row["save_as"]) . ".torrent</a>&nbsp;&nbsp;<a id=\"bookmark0\" href=\"javascript: bookmark(".$row['id'].",0);\">".$bookmarkMarkup."</a>&nbsp;&nbsp;&nbsp;".$lang_details['row_upped_by']."&nbsp;".$uprow.$uploadtime);
 			print("</td></tr>");
 		}
 		else
 			\App\Support\Html::tr($lang_details['row_download'], $lang_details['text_downloading_not_allowed']);
 		//tag
-        if (! empty($tagIds)) {
-            $tagRep = new \App\Repositories\TagRepository();
-            \App\Support\Html::tr($lang_details['row_tags'], $tagRep->renderSpan($row['search_box_id'], $tagIds), true);
+        if (! empty($tagHtml)) {
+            \App\Support\Html::tr($lang_details['row_tags'], $tagHtml, true);
         }
 
 		$size_info =  "<b>".$lang_details['text_size']."</b>" . \App\Support\Format::size($row["size"]);
 		$type_info = "&nbsp;&nbsp;&nbsp;<b>".$lang_details['row_type'].":</b>&nbsp;".$row["cat_name"];
-//        $source_info = $medium_info = $codec_info = $audiocodec_info = $standard_info = $processing_info = $team_info = '';
-//		if ((isset($row["source_name"])))
-//			$source_info = "&nbsp;&nbsp;&nbsp;<b>".$lang_details['text_source']."&nbsp;</b>".$row['source_name'];
-//		if ((isset($row["medium_name"])))
-//			$medium_info = "&nbsp;&nbsp;&nbsp;<b>".$lang_details['text_medium']."&nbsp;</b>".$row['medium_name'];
-//		if ((isset($row["codec_name"])))
-//			$codec_info = "&nbsp;&nbsp;&nbsp;<b>".$lang_details['text_codec']."&nbsp;</b>".$row['codec_name'];
-//		if ((isset($row["standard_name"])))
-//			$standard_info = "&nbsp;&nbsp;&nbsp;<b>".$lang_details['text_stardard']."&nbsp;</b>".$row['standard_name'];
-//		if ((isset($row["processing_name"])))
-//			$processing_info = "&nbsp;&nbsp;&nbsp;<b>".$lang_details['text_processing']."&nbsp;</b>".$row['processing_name'];
-//		if ((isset($row["team_name"])))
-//			$team_info = "&nbsp;&nbsp;&nbsp;<b>".$lang_details['text_team']."&nbsp;</b>".$row['team_name'];
-//		if ((isset($row["audiocodec_name"])))
-//			$audiocodec_info = "&nbsp;&nbsp;&nbsp;<b>".$lang_details['text_audio_codec']."&nbsp;</b>".$row['audiocodec_name'];
-
-//		tr($lang_details['row_basic_info'], $size_info.$type_info.$source_info . $medium_info. $codec_info . $audiocodec_info. $standard_info . $processing_info . $team_info, 1);
-
-        $taxonomyInfo = $searchBoxRep->listTaxonomyInfo($row['search_box_id'], $row);
-        $taxonomyRendered = '';
-        foreach ($taxonomyInfo as $item) {
-            $taxonomyRendered .= sprintf('&nbsp;&nbsp;&nbsp;<b>%s: </b>%s', $item['label'], $item['value']);
-        }
         \App\Support\Html::tr($lang_details['row_basic_info'], $size_info.$type_info.$taxonomyRendered, 1);
 		$actions = [];
         if ($CURUSER["downloadpos"] != "no") {
@@ -161,7 +127,7 @@ JS;
         $actions[] = "<a title=\"".$lang_details['title_report_torrent']."\" href=\"report.php?torrent=$id\"><img class=\"dt_report\" src=\"pic/trans.gif\" alt=\"report\" />&nbsp;<b><font class=\"small\">".$lang_details['text_report_torrent']."</font></b></a>";
 		\App\Support\Html::tr($lang_details['row_action'], implode('&nbsp;|&nbsp;', $actions), 1);
 
-        \App\Support\Html::tr($lang_details['torrent_dl_url'],sprintf('<a title="%s" href="%s">%s</a>',$lang_details['torrent_dl_url_notice'], $torrentRep->getDownloadUrl($id, $CURUSER), $lang_details['torrent_dl_url_text']),1);
+        \App\Support\Html::tr($lang_details['torrent_dl_url'],sprintf('<a title="%s" href="%s">%s</a>',$lang_details['torrent_dl_url_notice'], $downloadUrl, $lang_details['torrent_dl_url_text']),1);
 
 
 
@@ -169,43 +135,17 @@ JS;
         \App\Support\Hooks::doAction('torrent_detail_before_desc', $row['id'], $CURUSER['id']);
 
         /**************start custom fields****************/
-        echo $customField->renderOnTorrentDetailsPage($id, $row['search_box_id']);
+        echo $customFieldsHtml;
 
         /**************end custom fields****************/
 
         //technical info
-        if (\App\Support\Config\SiteConfig::current()->main->enableTechnicalInfo()) {
-            $technicalData = \App\Support\Strings::escapeHtml($row['technical_info'] ?? '');
-
-            // 判断是否为BDINFO格式
-            $isBdInfo = false;
-            if (!empty($technicalData)) {
-                $firstLine = strtok($technicalData, "\n");
-                if (strpos($firstLine, 'DISC INFO') !== false
-				|| strpos($firstLine, 'Disc Title') !== false
-				|| strpos($firstLine, 'Disc Label') !== false
-				) {
-                    $isBdInfo = true;
-                }
-            }
-
-            if ($isBdInfo) {
-                // 使用BdInfoExtra处理BDINFO格式
-                $technicalInfo = new \Nexus\Torrent\BdInfoExtra($technicalData);
-            } else {
-                // 使用TechnicalInformation处理MediaInfo格式
-                $technicalInfo = new \Nexus\Torrent\TechnicalInformation($technicalData);
-            }
-
-            $technicalInfoResult = $technicalInfo->renderOnDetailsPage();
-            if (!empty($technicalInfoResult)) {
-                \App\Support\Html::tr($lang_functions['text_technical_info'], $technicalInfoResult, 1);
-            }
+        if (! empty($technicalInfoResult)) {
+            \App\Support\Html::tr($lang_functions['text_technical_info'], $technicalInfoResult, 1);
         }
 
-		if ($CURUSER['showdescription'] != 'no' && !empty($row["descr"])){
-            $desc = \App\Support\Format::formatComment((string) $row['descr']);
-            $desc = \App\Support\Hooks::applyFilter('torrent_detail_description', $desc, $row['id'], $CURUSER['id']);
+		if ($CURUSER['showdescription'] != 'no' && !empty($descr)){
+            $desc = \App\Support\Hooks::applyFilter('torrent_detail_description', $descr, $row['id'], $CURUSER['id']);
             \App\Support\Html::tr("<a href=\"javascript: klappe_news('descr')\"><span class=\"nowrap\"><img class=\"minus\" src=\"pic/trans.gif\" alt=\"Show/Hide\" id=\"picdescr\" title=\"".($lang_details['title_show_or_hide'] ?? '')."\" /> ".$lang_details['row_description']."</span></a>", "<div id='kdescr'>".$desc."</div>", 1);
 		}
 
@@ -231,7 +171,7 @@ JS;
 		\App\Support\Html::tr($lang_details['row_hot_meter'], "<table><tr><td class=\"no_border_wide\"><b>" . $lang_details['text_views']."</b>". $row["views"] . "</td><td class=\"no_border_wide\"><b>" . $lang_details['text_hits']. "</b>" . $row["hits"] . "</td><td class=\"no_border_wide\"><b>" .$lang_details['text_snatched'] . "</b><a href=\"viewsnatches.php?id=".$id."\"><b>" . $row["times_completed"]. $lang_details['text_view_snatches'] . "</td><td class=\"no_border_wide\"><b>" . $lang_details['row_last_seeder']. "</b>" . \App\Support\Time::format($row["last_action"]) . "</td></tr></table>",1);
 
 		\App\Support\Html::tr("<span id=\"seeders\"></span><span id=\"leechers\"></span>".$lang_details['row_peers']."<br /><span id=\"showpeer\"><a href=\"javascript: viewpeerlist(".$row['id'].");\" class=\"sublink\">".$lang_details['text_see_full_list']."</a></span><span id=\"hidepeer\" style=\"display: none;\"><a href=\"javascript: hidepeerlist();\" class=\"sublink\">".$lang_details['text_hide_list']."</a></span>", "<div id=\"peercount\"><b>".$row['seeders'].$lang_details['text_seeders'].\App\Support\Strings::addS($row['seeders'])."</b> | <b>".$row['leechers'].$lang_details['text_leechers'].\App\Support\Strings::addS($row['leechers'])."</b></div><div id=\"peerlist\"></div>" , 1);
-		if (((\App\Support\SupportContext::getQuery('dllist') !== null)) && \App\Support\SupportContext::getQuery('dllist') == 1)
+		if ($requestFlags['dllist'] ?? false)
 		{
 			$scronload = "viewpeerlist(".$row['id'].")";
 
@@ -241,7 +181,7 @@ echo "</script>";
 		}
 
         //Add 魔力值奖励功能
-        $bonus_array = \App\Models\Setting::getBonusRewardOptions();
+        $bonus_array = $bonusOptions;
         echo '<style type="text/css">
 					ul.magic
 					{
@@ -293,14 +233,13 @@ echo "</script>";
         $no_give = "";
         $add_value ="";
 
-        $magicInfo = \App\Repositories\TorrentDetailRepository::getMagicInfo($id, (int) $CURUSER['id']);
         $count_user_number = $magicInfo['count_user_number'];
         $sum_value = $magicInfo['sum_value'];
         $whether_have_give_value = $magicInfo['whether_have_give_value'];
         $add_value = $magicInfo['add_value'];
         foreach ($magicInfo['givers'] as $giver) {
             $give_value_userid = $giver->userid;
-            $give_value[] = \App\Support\UserDisplay::username($give_value_userid)." ";
+            $give_value[] = ($userDisplayMap[$give_value_userid] ?? '') . " ";
         }
         if ($magicInfo['givers']->isEmpty()) {
             $no_give = $lang_details['text_no_magic_added'];
@@ -345,7 +284,7 @@ echo "</script>";
             $show_list_description = null;
             $haveGotBonus = $no_give;
         }
-        $current_user_magic = "<span id='current_user_magic' style='display:none'>".\App\Support\UserDisplay::username($CURUSER['id'])."</span>&nbsp;";
+        $current_user_magic = "<span id='current_user_magic' style='display:none'>".$currentUserHtml."</span>&nbsp;";
         $haveGotBonus = $lang_details['magic_haveGotBonus'].'&nbsp';
         $spanSumAll = '<span id="spanSumAll">'.$sum_value.'</span>';
         $haveGotBonus = str_replace('Number',$spanSumAll,$haveGotBonus);
@@ -361,15 +300,14 @@ echo "</script>";
 		$nothanks = "";
 		$thanks_said = 0;
 
-		$thanksInfo = \App\Repositories\TorrentDetailRepository::getThanksInfo($torrentid, (int) $CURUSER['id']);
 		$thanksCount = $thanksInfo['count'];
-		$thanks_all = $thanksInfo['thanks']->count();
+		$thanks_all = count($thanksInfo['thanks']);
 		foreach ($thanksInfo['thanks'] as $t) {
 			$thanks_userid = $t->userid;
 			if ((int) $t->userid == $CURUSER['id']) {
 				$thanks_said = 1;
 			} else {
-				$thanksby .= \App\Support\UserDisplay::username($thanks_userid)." ";
+				$thanksby .= ($userDisplayMap[$thanks_userid] ?? '')." ";
 			}
 		}
 		if ($thanks_all == 0) {
@@ -380,10 +318,10 @@ echo "</script>";
 			$buttonvalue = " value=\"".$lang_details['submit_say_thanks']."\"";
 		} else {
 			$buttonvalue = " value=\"".$lang_details['submit_you_said_thanks']."\" disabled=\"disabled\"";
-			$thanksby = \App\Support\UserDisplay::username($CURUSER['id'])." ".$thanksby;
+			$thanksby = $currentUserHtml." ".$thanksby;
 		}
 		$thanksbutton = "<input class=\"btn\" type=\"button\" id=\"saythanks\"  onclick=\"saythanks(".$torrentid.");\" ".$buttonvalue." />";
-		\App\Support\Html::tr($lang_details['row_thanks_by'],"<span id=\"thanksadded\" style=\"display: none;\"><input class=\"btn\" type=\"button\" value=\"".$lang_details['text_thanks_added']."\" disabled=\"disabled\" /></span><span id=\"curuser\" style=\"display: none;\">".\App\Support\UserDisplay::username($CURUSER['id'])." </span><span id=\"thanksbutton\">".$thanksbutton."</span>&nbsp;&nbsp;<span id=\"nothanks\">".$nothanks."</span><span id=\"addcuruser\"></span>".$thanksby.($thanks_all < $thanksCount ? $lang_details['text_and_more'].$thanksCount.$lang_details['text_users_in_total'] : ""),1);
+		\App\Support\Html::tr($lang_details['row_thanks_by'],"<span id=\"thanksadded\" style=\"display: none;\"><input class=\"btn\" type=\"button\" value=\"".$lang_details['text_thanks_added']."\" disabled=\"disabled\" /></span><span id=\"curuser\" style=\"display: none;\">".$currentUserHtml." </span><span id=\"thanksbutton\">".$thanksbutton."</span>&nbsp;&nbsp;<span id=\"nothanks\">".$nothanks."</span><span id=\"addcuruser\"></span>".$thanksby.($thanks_all < $thanksCount ? $lang_details['text_and_more'].$thanksCount.$lang_details['text_users_in_total'] : ""),1);
 		// ------------- end thanked-by block--------------//
 
 		print("</table>\n");

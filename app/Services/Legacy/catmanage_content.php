@@ -610,10 +610,9 @@ elseif($action == 'del')
 		\App\Support\LegacyResponse::abort($lang_catmanage['std_error'], $lang_catmanage['std_invalid_id']);
 	}
 	$dbtablename=return_category_db_table_name($type);
-	$row = \Nexus\Database\NexusDB::table($dbtablename)->where('id', $id)->first();
+	$row = \App\Repositories\CategoryRepository::getRecord($dbtablename, $id);
 	if ($row) {
-		$row = (array) $row;
-		\Nexus\Database\NexusDB::table($dbtablename)->where('id', $row['id'])->delete();
+		\App\Repositories\CategoryRepository::deleteRecord($dbtablename, $row['id']);
 		if(in_array($type, $validsubcattype))
 			\App\Support\SupportContext::getCache()->delete_value($dbtablename.'_list');
 		elseif ($type=='searchbox')
@@ -640,7 +639,7 @@ elseif($action == 'edit')
 	else
 	{
 		$dbtablename=return_category_db_table_name($type);
-		$row = (array) \Nexus\Database\NexusDB::table($dbtablename)->where('id', $id)->first();
+		$row = \App\Repositories\CategoryRepository::getRecord($dbtablename, $id);
 		if (!$row)
 			\App\Support\LegacyResponse::abort($lang_catmanage['std_error'], $lang_catmanage['std_invalid_id']);
 		else

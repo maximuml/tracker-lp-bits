@@ -411,6 +411,18 @@ class BonusRepository extends BaseRepository
     }
 
     /**
+     * Consume bonus and atomically increment the user's charity field.
+     *
+     * @param  \App\Models\User|int  $user
+     */
+    public function consumeUserBonusAndIncrementCharity($user, float $requireBonus, int $logBusinessType, string $logComment, float $charityIncrement): void
+    {
+        $this->consumeUserBonus($user, $requireBonus, $logBusinessType, $logComment, [
+            'charity' => NexusDB::raw("charity + $charityIncrement"),
+        ]);
+    }
+
+    /**
      * @param  string  $category
      * @param  int  $userId
      * @param  int  $businessType

@@ -661,7 +661,7 @@ if ($action == "exchange") {
 				$charityReceiverCount = $bonusRep->getCharityReceiverCount((float) $ratiocharity);
 				if ($charityReceiverCount) {
 //					sql_query("UPDATE users SET seedbonus = seedbonus - $points, charity = charity + $points, bonuscomment = ".sqlesc($bonuscomment)." WHERE id = ".sqlesc($userid)) or sqlerr(__FILE__, __LINE__);
-                    $bonusRep->consumeUserBonus($CURUSER['id'], $points, \App\Models\BonusLogs::BUSINESS_TYPE_GIFT_TO_LOW_SHARE_RATIO, $points. " Points as charity to users with ratio below ".htmlspecialchars(trim($ratiocharity)).".", ['charity' => \Nexus\Database\NexusDB::raw("charity + $points"), ]);
+                    $bonusRep->consumeUserBonusAndIncrementCharity($CURUSER['id'], (float) $points, \App\Models\BonusLogs::BUSINESS_TYPE_GIFT_TO_LOW_SHARE_RATIO, $points. " Points as charity to users with ratio below ".htmlspecialchars(trim($ratiocharity)).".", (float) $points);
 					$charityPerUser = $points/$charityReceiverCount;
 					$bonusRep->incrementSeedbonusForLowRatioReceivers((float) $ratiocharity, (float) $charityPerUser);
 					\App\Support\LegacyResponse::redirect("" . \App\Support\Http::protocolPrefix(\App\Support\Url::isSecure()) . "$BASEURL/mybonus.php?do=charity");

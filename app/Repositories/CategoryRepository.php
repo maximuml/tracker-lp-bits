@@ -42,6 +42,21 @@ final class CategoryRepository
     }
 
     /**
+     * @return  array<string, mixed>|null
+     */
+    public static function getRecord(string $table, int $id): ?array
+    {
+        $row = NexusDB::table($table)->where('id', $id)->first();
+
+        return $row ? (array) $row : null;
+    }
+
+    public static function deleteRecord(string $table, int $id): bool
+    {
+        return (bool) NexusDB::table($table)->where('id', $id)->delete();
+    }
+
+    /**
      * @param  'asc'|'desc'  $direction
      * @return  array<int, array<string, mixed>>
      */

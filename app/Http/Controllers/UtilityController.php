@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Setting;
 use App\Models\User;
 use App\Repositories\SearchPageRepository;
 use App\Support\SupportContext;
@@ -83,7 +84,38 @@ class UtilityController extends LegacyController
 
     public function image(Request $request): Response|RedirectResponse
     {
-        return $this->legacyPageRaw($request, 'image', false);
+        $action = (string) $request->input('action', '');
+        $imagehash = (string) $request->input('imagehash', '');
+
+        if ($action !== 'regimage') {
+            return response('Invalid captcha action', 404);
+        }
+
+        $driver = \App\Support\Captcha::manager()->driver('image');
+
+        if (! method_exists($driver, 'outputImage')) {
+            return response('Captcha driver does not support image rendering', 404);
+        }
+
+        ob_start();
+        $driver->outputImage($imagehash);
+        $content = ob_get_clean();
+
+        $headers = [];
+        $status = http_response_code();
+        foreach (headers_list() as $header) {
+            $parts = explode(':', $header, 2);
+            if (count($parts) === 2) {
+                $name = trim($parts[0]);
+                $value = trim($parts[1]);
+                $headers[$name] = ($headers[$name] ?? '') !== '' ? $headers[$name] . ', ' . $value : $value;
+                header_remove($name);
+            }
+        }
+
+        $responseStatus = ($status >= 100) ? $status : 200;
+
+        return response($content, $responseStatus, $headers);
     }
 
     public function page(Request $request): Response|RedirectResponse
@@ -128,6 +160,28 @@ class UtilityController extends LegacyController
 
     public function ok(Request $request): View|RedirectResponse
     {
-        return $this->legacyPage($request, 'ok', false);
+        $type = (string) $request->input('type', '');
+        $email = '';
+        if ($type === 'signup') {
+            $email = (string) $request->input('email', '');
+        }
+
+        /** @var array<string, string> $langOk */
+        $langOk = (array) SupportContext::getGlobal('lang_ok', []);
+        $title = match ($type) {
+            'adminactivate', 'inviter', 'signup' => $langOk['head_user_signup'] ?? '',
+            'sysop' => $langOk['head_sysop_activation'] ?? '',
+            'confirmed' => $langOk['head_already_confirmed'] ?? '',
+            'confirm' => $langOk['head_signup_confirmation'] ?? '',
+            default => '',
+        };
+
+        return $this->legacyPage($request, 'ok', false, [
+            'type' => $type,
+            'email' => $email,
+            'title' => $title,
+            'siteName' => Setting::getSiteName(),
+            'CURUSER' => SupportContext::getUser(),
+        ]);
     }
 }

@@ -17,7 +17,7 @@ if (!function_exists('insertJumpTo')) { function insertJumpTo($selected = 0)
 {
 $lang_messages = (array) (\App\Support\SupportContext::getGlobal('lang_messages') ?? []);
 $CURUSER = \App\Support\SupportContext::getUser() ?? [];
-$pmBoxes = \Nexus\Database\NexusDB::table('pmboxes')->where('userid', $CURUSER['id'])->orderBy('boxnumber')->get(['boxnumber','name']);
+$pmBoxes = \App\Repositories\MessageRepository::getUserMailboxes((int) $CURUSER['id']);
 $place = \App\Support\SupportContext::getQuery('place') ?? '';
 ?>
 <form action="messages.php" method="get">
@@ -54,7 +54,7 @@ $CURUSER = \App\Support\SupportContext::getUser() ?? [];
 	print ("<div id=\"pmboxnav\"><ul id=\"pmboxmenu\" class=\"menu\">");
 	print ("<li" . ($selected == 1 ? " class=selected" : "") . "><a href=\"" . \App\Support\Http::protocolPrefix(\App\Support\Url::isSecure()) . $BASEURL . "/messages.php\" >".$lang_messages['text_inbox']."</a></li>");
 	print ("<li" . ($selected == -1 ? " class=selected" : "") . "><a href=\"" . \App\Support\Http::protocolPrefix(\App\Support\Url::isSecure()) . $BASEURL . "/messages.php?action=viewmailbox&box=-1\">".$lang_messages['text_sentbox']."</a></li>");
-$pmBoxes = \Nexus\Database\NexusDB::table('pmboxes')->where('userid', $CURUSER['id'])->orderBy('boxnumber')->get(['boxnumber','name']);
+$pmBoxes = \App\Repositories\MessageRepository::getUserMailboxes((int) $CURUSER['id']);
 if ($pmBoxes->count())
     foreach ($pmBoxes as $row)
     {
@@ -225,7 +225,7 @@ echo("<td class=rowfollow><input class=checkbox type=\"checkbox\" name=\"message
 if($mailbox != PM_SENTBOX){
 	echo $lang_messages['text_or'];
 	print("<input class=btn type=\"submit\" name=\"move\" value=\"".$lang_messages['submit_move_to']."\"> <select name=\"box\"><option value=\"1\">".$lang_messages['text_inbox']."</option>");
-        $pmBoxes = \Nexus\Database\NexusDB::table('pmboxes')->where('userid', $CURUSER['id'])->orderBy('boxnumber')->get(['boxnumber','name']);
+        $pmBoxes = \App\Repositories\MessageRepository::getUserMailboxes((int) $CURUSER['id']);
         foreach ($pmBoxes as $row)
         {
           $row = (array) $row;
@@ -336,7 +336,7 @@ messagemenu($mailbox);
 <?php if($message['sender'] != $CURUSER['id']){
 print("<form action=\"messages.php\" method=\"post\">" . csrf_field() . "<input type=\"hidden\" name=\"action\" value=\"moveordel\"><input type=\"hidden\" name=\"id\" value=".$pm_id.">
 <input type=\"submit\" name=\"move\" value=".$lang_messages['submit_move_to']."><select name=\"box\"><option value=\"1\">".$lang_messages['text_inbox']."</option>");
-$pmBoxes = \Nexus\Database\NexusDB::table('pmboxes')->where('userid', $CURUSER['id'])->orderBy('boxnumber')->get(['boxnumber','name']);
+$pmBoxes = \App\Repositories\MessageRepository::getUserMailboxes((int) $CURUSER['id']);
 foreach ($pmBoxes as $row)
 {
 $row = (array) $row;
@@ -555,7 +555,7 @@ $body = "-------- Original Message from " . $orig_name2 . " --------<br />" . \A
 }
 if ($action == "editmailboxes")
 {
-$pmBoxes = \Nexus\Database\NexusDB::table('pmboxes')->where('userid', $CURUSER['id'])->orderBy('boxnumber')->get(['id','boxnumber','name']);
+$pmBoxes = \App\Repositories\MessageRepository::getUserMailboxes((int) $CURUSER['id']);
 
 ?>
 <h1><?php echo $lang_messages['text_editing_mailboxes'] ?></h1>
@@ -645,7 +645,7 @@ return;
 }
 if ($action2 == "edit");
 {
-$pmBoxes = \Nexus\Database\NexusDB::table('pmboxes')->where('userid', $CURUSER['id'])->get(['id','boxnumber','name']);
+$pmBoxes = \App\Repositories\MessageRepository::getUserMailboxes((int) $CURUSER['id']);
 if ($pmBoxes->isEmpty())
 {
 \App\Support\LegacyResponse::abort($lang_messages['std_error'], $lang_messages['text_no_mailboxes_to_edit']);

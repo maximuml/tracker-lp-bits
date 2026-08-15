@@ -9,6 +9,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\View\View;
 
 class UtilityController extends LegacyController
@@ -116,9 +117,72 @@ class UtilityController extends LegacyController
         return $this->legacyPage($request, 'smilies', true);
     }
 
-    public function opensearch(Request $request): Response|RedirectResponse
+    public function opensearch(Request $request): Response
     {
-        return $this->legacyPageRaw($request, 'opensearch', false);
+        $xml = Cache::remember('opensearch_description', 86400, function () {
+            return $this->buildOpensearchXml();
+        });
+
+        return response((string) $xml, 200, ['Content-Type' => 'text/xml']);
+    }
+
+    private function buildOpensearchXml(): string
+    {
+        $siteName = (string) (SupportContext::getGlobal('SITENAME', '') ?? '');
+        $siteEmail = (string) (SupportContext::getGlobal('SITEEMAIL', '') ?? '');
+        $slogan = (string) (SupportContext::getGlobal('SLOGAN', '') ?? '');
+        $baseUrl = (string) (SupportContext::getGlobal('BASEURL', '') ?? '');
+        $dateFounded = (string) (SupportContext::getGlobal('datefounded', '') ?? '');
+        $projectName = (string) (SupportContext::getGlobal('PROJECTNAME', '') ?? '');
+
+        $url = \App\Support\Http::protocolPrefix(\App\Support\Url::isSecure()) . $baseUrl;
+        $year = substr($dateFounded, 0, 4);
+        $yearFounded = $year !== '' ? $year : '2007';
+        $attribution = "Copyright (c) " . $siteName . " " . (date("Y") != $yearFounded ? $yearFounded . "-" : "") . date("Y") . ", all rights reserved";
+
+        $faviconPath = public_path('favicon.ico');
+        $faviconData = is_file($faviconPath)
+            ? 'data:image/x-icon;base64,' . base64_encode((string) file_get_contents($faviconPath))
+            : $url . '/favicon.ico';
+
+        $siteNameEsc = htmlspecialchars($siteName);
+        $sloganEsc = htmlspecialchars($slogan);
+
+        return <<<XML
+<?xml version="1.0" encoding="utf-8"?>
+<OpenSearchDescription xmlns="http://a9.com/-/spec/opensearch/1.1/"
+    xmlns:moz="http://www.mozilla.org/2006/browser/search/">
+    <ShortName>{$siteNameEsc} Torrents</ShortName>
+    <Description>Search Torrents at {$siteNameEsc} - {$sloganEsc}.</Description>
+    <Url type="text/html"
+        rel="results"
+        pageOffset="0"
+              template="{$url}/torrents.php?search={searchTerms}&amp;page={startPage?}" />
+    <Url type="application/rss+xml"
+        rel="results"
+        indexOffset="0"
+        template="{$url}/torrentrss.php?search={searchTerms}&amp;rows={count?}&amp;startindex={startIndex?}" />
+    <Url type="application/opensearchdescription+xml"
+        rel="self"
+        template="{$url}/opensearch.php" />
+    <Url type="application/x-suggestions+json"
+        rel="suggestions"
+        template="{$url}/searchsuggest.php?q={searchTerms}" />
+    <Contact>{$siteEmail}</Contact>
+    <Tags>Torrents {$projectName}</Tags>
+    <LongName>{$siteNameEsc} Torrents Search</LongName>
+    <Image height="32" width="32" type="image/x-icon">{$faviconData}</Image>
+    <Image height="32" width="32" type="image/x-icon">{$url}/favicon.ico</Image>
+    <moz:SearchForm>{$url}/torrents.php</moz:SearchForm>
+    <Query role="example" searchTerms="batman" />
+    <Developer>{$siteNameEsc} Staff</Developer>
+    <Attribution>{$attribution}</Attribution>
+    <SyndicationRight>limited</SyndicationRight>
+    <Language>*</Language>
+    <InputEncoding>UTF-8</InputEncoding>
+    <OutputEncoding>UTF-8</OutputEncoding>
+</OpenSearchDescription>
+XML;
     }
 
     public function confirmemail(Request $request): Response|RedirectResponse

@@ -37,7 +37,33 @@ class ShoutboxController extends LegacyController
 
     public function shoutboxHistory(Request $request): View|RedirectResponse
     {
-        return $this->legacyPage($request, 'shoutbox_history', true);
+        $result = $this->repository->history($request);
+
+        $currentUser = SupportContext::getUser() ?? [];
+        $currentUserId = (int) ($currentUser['id'] ?? 0);
+        $rows = (array) ($result['data'] ?? []);
+        $shoutIds = array_map(fn ($r) => (int) ($r['id'] ?? 0), $rows);
+        $userIds = array_filter(array_unique(array_map(fn ($r) => (int) ($r['userid'] ?? 0), $rows)));
+
+        $userDisplayMap = [];
+        foreach ($userIds as $uid) {
+            if ($uid > 0) {
+                $userDisplayMap[$uid] = \App\Support\UserDisplay::username($uid, false, true, true, true, false, false, '', true);
+            }
+        }
+
+        return $this->legacyPage($request, 'shoutbox_history', true, [
+            'rows' => $rows,
+            'total' => (int) ($result['total'] ?? 0),
+            'page' => (int) ($result['page'] ?? 1),
+            'perPage' => (int) ($result['per_page'] ?? 50),
+            'filters' => (array) ($result['filters'] ?? []),
+            'currentUserId' => $currentUserId,
+            'isStaff' => \App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::SB_MANAGE),
+            'csrfToken' => \App\Support\Shoutbox::csrfToken($currentUserId),
+            'reactionData' => \App\Support\Shoutbox::prefetchReactions($shoutIds, $currentUserId),
+            'userDisplayMap' => $userDisplayMap,
+        ]);
     }
 
     public function shoutboxSse(Request $request): SymfonyResponse

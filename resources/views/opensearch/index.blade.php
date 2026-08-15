@@ -1,1 +1,0 @@
-@include('opensearch._opensearch')

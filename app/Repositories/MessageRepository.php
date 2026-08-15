@@ -27,6 +27,186 @@ class MessageRepository extends BaseRepository
             ->get(['id', 'boxnumber', 'name']);
     }
 
+    public static function getMailboxName(int $userId, int $mailbox): ?string
+    {
+        return NexusDB::table('pmboxes')
+            ->where('userid', $userId)
+            ->where('boxnumber', $mailbox)
+            ->value('name');
+    }
+
+    /**
+     * @return  array{count: int, messages: \Illuminate\Database\Eloquent\Collection<int, Message>}
+     */
+    public static function getMailboxMessages(int $userId, int $mailbox, string $keyword, string $place, ?string $unread, int $offset, int $perPage): array
+    {
+        $query = Message::query();
+        if ($keyword !== '') {
+            switch ($place) {
+                case 'body':
+                    $query->where('msg', 'like', '%'.$keyword.'%');
+                    break;
+                case 'title':
+                    $query->where('subject', 'like', '%'.$keyword.'%');
+                    break;
+                default:
+                    $query->where(function ($q) use ($keyword) {
+                        $q->where('msg', 'like', '%'.$keyword.'%')
+                          ->orWhere('subject', 'like', '%'.$keyword.'%');
+                    });
+            }
+        }
+        if ($unread === 'yes' || $unread === 'no') {
+            $query->where('unread', $unread);
+        }
+
+        if ($mailbox != -1) { // PM_SENTBOX
+            $countQuery = clone $query;
+            $countQuery->where('receiver', $userId)->where('location', $mailbox);
+            $messages = (clone $query)
+                ->where('receiver', $userId)
+                ->where('location', $mailbox)
+                ->orderByDesc('id')
+                ->offset($offset)
+                ->limit($perPage)
+                ->get();
+        } else {
+            $countQuery = clone $query;
+            $countQuery->where('sender', $userId)->where('saved', 'yes');
+            $messages = (clone $query)
+                ->where('sender', $userId)
+                ->where('saved', 'yes')
+                ->orderByDesc('id')
+                ->offset($offset)
+                ->limit($perPage)
+                ->get();
+        }
+
+        return ['count' => (int) $countQuery->count(), 'messages' => $messages];
+    }
+
+    public static function getMessageForUser(int $messageId, int $userId): ?Message
+    {
+        return Message::query()
+            ->where('id', $messageId)
+            ->where(function ($q) use ($userId) {
+                $q->where('receiver', $userId)
+                  ->orWhere(function ($sub) use ($userId) {
+                      $sub->where('sender', $userId)->where('saved', 'yes');
+                  });
+            })
+            ->first();
+    }
+
+    public static function getMessageForForward(int $messageId, int $userId): ?Message
+    {
+        return Message::query()
+            ->where('id', $messageId)
+            ->where(function ($q) use ($userId) {
+                $q->where('receiver', $userId)->orWhere('sender', $userId);
+            })
+            ->first();
+    }
+
+    /**
+     * @param  int|array<int>  $ids
+     */
+    public static function markAsRead(int|array $ids, int $userId): int
+    {
+        return Message::query()->whereIn('id', (array) $ids)->where('receiver', $userId)->update(['unread' => 'no']);
+    }
+
+    /**
+     * @param  int|array<int>  $ids
+     */
+    public static function moveMessages(int|array $ids, int $userId, int $box): int
+    {
+        return Message::query()->whereIn('id', (array) $ids)->where('receiver', $userId)->update(['location' => $box]);
+    }
+
+    /**
+     * @return  array<string, mixed>|null
+     */
+    public static function deleteSingleMessage(int $messageId, int $userId): ?array
+    {
+        $message = Message::query()->where('id', $messageId)->first();
+        if (! $message) {
+            return null;
+        }
+
+        $messageArr = $message->toArray();
+        if ($messageArr['receiver'] == $userId && $messageArr['saved'] == 'no') {
+            $message->delete();
+        } elseif ($messageArr['sender'] == $userId && $messageArr['location'] == 0) { // PM_DELETED
+            $message->delete();
+        } elseif ($messageArr['receiver'] == $userId && $messageArr['saved'] == 'yes') {
+            $message->update(['location' => 0]);
+        } elseif ($messageArr['sender'] == $userId && $messageArr['location'] != 0) { // not PM_DELETED
+            $message->update(['saved' => 'no']);
+        } else {
+            return null;
+        }
+
+        return $messageArr;
+    }
+
+    /**
+     * @param  array<int>  $ids
+     */
+    public static function deleteMultipleMessages(array $ids, int $userId): int
+    {
+        $deleted = 0;
+        foreach ($ids as $id) {
+            if (self::deleteSingleMessage((int) $id, $userId) !== null) {
+                $deleted++;
+            }
+        }
+
+        return $deleted;
+    }
+
+    public static function getNextMailboxNumber(int $userId): int
+    {
+        $max = (int) NexusDB::table('pmboxes')->where('userid', $userId)->max('boxnumber');
+
+        return max(1, $max);
+    }
+
+    /**
+     * @param  array<int|string, mixed>  $names
+     */
+    public static function addMailboxes(int $userId, array $names): void
+    {
+        $box = self::getNextMailboxNumber($userId);
+        foreach ($names as $name) {
+            $name = trim((string) $name);
+            if ($name === '') {
+                continue;
+            }
+            $box++;
+            NexusDB::table('pmboxes')->insert(['userid' => $userId, 'name' => $name, 'boxnumber' => $box]);
+        }
+    }
+
+    public static function updateMailbox(int $userId, int $boxId, string $newName): void
+    {
+        NexusDB::table('pmboxes')->where('id', $boxId)->where('userid', $userId)->update(['name' => $newName]);
+    }
+
+    public static function deleteMailbox(int $userId, int $boxId, int $boxNumber): void
+    {
+        NexusDB::table('pmboxes')->where('id', $boxId)->where('userid', $userId)->delete();
+        Message::query()->where('saved', 'yes')->where('location', $boxNumber)->where('receiver', $userId)->update(['location' => 0]);
+        Message::query()->where('saved', 'yes')->where('sender', $userId)->update(['saved' => 'no']);
+        Message::query()->where('saved', 'no')->where('location', $boxNumber)->where('receiver', $userId)->delete();
+        Message::query()->where('location', 0)->where('saved', 'yes')->where('sender', $userId)->delete();
+    }
+
+    public static function getUsername(int $userId): ?string
+    {
+        return User::query()->where('id', $userId)->value('username');
+    }
+
     /**
      * @param  array<int|string, mixed>  $params
      * @return  mixed

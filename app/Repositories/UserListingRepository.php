@@ -71,4 +71,70 @@ class UserListingRepository
 
         return $query;
     }
+
+    /**
+     * @param  array<int>  $userIds
+     * @param  array<int|string, string>  $ips
+     * @return  array<string, mixed>
+     */
+    public static function getSearchExtraStats(array $userIds, array $ips, int $minClassRead): array
+    {
+        $userIds = array_values(array_filter(array_map('intval', $userIds)));
+
+        if ($userIds === []) {
+            return ['peers' => [], 'posts' => [], 'comments' => [], 'bannedIps' => []];
+        }
+
+        $peers = NexusDB::table('peers')
+            ->whereIn('userid', $userIds)
+            ->selectRaw('userid, SUM(uploaded) AS pul, SUM(downloaded) AS pdl')
+            ->groupBy('userid')
+            ->get()
+            ->mapWithKeys(fn ($row) => [(int) $row->userid => ['pul' => (float) ($row->pul ?? 0), 'pdl' => (float) ($row->pdl ?? 0)]])
+            ->all();
+
+        $posts = NexusDB::table('posts as p')
+            ->leftJoin('topics as t', 'p.topicid', '=', 't.id')
+            ->leftJoin('forums as f', 't.forumid', '=', 'f.id')
+            ->whereIn('p.userid', $userIds)
+            ->where('f.minclassread', '<=', $minClassRead)
+            ->selectRaw('p.userid, COUNT(DISTINCT p.id) AS count')
+            ->groupBy('p.userid')
+            ->get()
+            ->mapWithKeys(fn ($row) => [(int) $row->userid => (int) $row->count])
+            ->all();
+
+        $comments = NexusDB::table('comments')
+            ->whereIn('user', $userIds)
+            ->selectRaw('user, COUNT(id) AS count')
+            ->groupBy('user')
+            ->get()
+            ->mapWithKeys(fn ($row) => [(int) $row->user => (int) $row->count])
+            ->all();
+
+        $bannedIps = [];
+        $ipLongs = [];
+        foreach ($ips as $ip) {
+            $ip = (string) $ip;
+            if ($ip !== '' && filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
+                $ipLongs[$ip] = (int) ip2long($ip);
+            }
+        }
+
+        if ($ipLongs !== []) {
+            $bans = NexusDB::table('bans')->get(['first', 'last'])->all();
+            foreach ($ipLongs as $ip => $nip) {
+                foreach ($bans as $ban) {
+                    $first = (int) $ban->first;
+                    $last = (int) $ban->last;
+                    if ($nip >= $first && $nip <= $last) {
+                        $bannedIps[$ip] = true;
+                        break;
+                    }
+                }
+            }
+        }
+
+        return compact('peers', 'posts', 'comments', 'bannedIps');
+    }
 }

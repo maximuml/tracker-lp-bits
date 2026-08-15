@@ -712,6 +712,14 @@ list($pagertop, $pagerbottom, , $offset, $rpp, ) = \App\Support\Pagination::page
 
 $res = (clone $userQuery)->distinct()->selectRaw($select_is)->offset($offset)->limit($rpp)->get()->map(fn ($row) => (array)$row)->all();
 
+$userIds = array_map(fn ($row) => (int) ($row['id'] ?? 0), $res);
+$ips = array_map(fn ($row) => (string) ($row['ip'] ?? ''), $res);
+$extraStats = \App\Repositories\UserListingRepository::getSearchExtraStats($userIds, $ips, (int) $CURUSER['class']);
+$peerTotals = $extraStats['peers'];
+$postCounts = $extraStats['posts'];
+$commentCounts = $extraStats['comments'];
+$bannedIps = $extraStats['bannedIps'];
+
   if (count($res) == 0)
   	\App\Support\Html::stdMessage("Warning", "No user was found.");
   else
@@ -739,42 +747,19 @@ $res = (clone $userQuery)->distinct()->selectRaw($select_is)->offset($offset)->l
 
       if ($user['ip']) {
           $ipstr = $user['ip'];
-          if (filter_var($user['ip'], FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
-              $nip = ip2long($user['ip']);
-              $array = (array) \Nexus\Database\NexusDB::table('bans')
-                  ->where('first', '<=', $nip)
-                  ->where('last', '>=', $nip)
-                  ->first(['count' => \Nexus\Database\NexusDB::raw('COUNT(*)')]);
-              if ($array['count'] > 0) {
-                  $ipstr = "<a href='testip.php?ip=" . $user['ip'] . "'><font color='#FF0000'><b>" . $user['ip'] . "</b></font></a>";
-              }
+          if (filter_var($user['ip'], FILTER_VALIDATE_IP, FILTER_FLAG_IPV4) && isset($bannedIps[$user['ip']])) {
+              $ipstr = "<a href='testip.php?ip=" . $user['ip'] . "'><font color='#FF0000'><b>" . $user['ip'] . "</b></font></a>";
           }
       } else {
           $ipstr = "---";
       }
-      $array = (array) (\Nexus\Database\NexusDB::table('peers')
-          ->where('userid', $user['id'])
-          ->selectRaw('SUM(uploaded) AS pul, SUM(downloaded) AS pdl')
-          ->first() ?? []);
 
-      $pul = $array['pul'] ?? 0;
-      $pdl = $array['pdl'] ?? 0;
+      $peerTotal = $peerTotals[(int) $user['id']] ?? ['pul' => 0, 'pdl' => 0];
+      $pul = $peerTotal['pul'];
+      $pdl = $peerTotal['pdl'];
 
-      $n = (array) \Nexus\Database\NexusDB::table('posts as p')
-          ->leftJoin('topics as t', 'p.topicid', '=', 't.id')
-          ->leftJoin('forums as f', 't.forumid', '=', 'f.id')
-          ->where('p.userid', $user['id'])
-          ->where('f.minclassread', '<=', $CURUSER['class'])
-          ->selectRaw('COUNT(DISTINCT p.id) AS count')
-          ->first();
-
-      $n_posts = $n['count'] ?? 0;
-
-      $n = (array) \Nexus\Database\NexusDB::table('comments')
-          ->where('user', $user['id'])
-          ->selectRaw('COUNT(id) AS count')
-          ->first();
-      $n_comments = $n['count'] ?? 0;
+      $n_posts = $postCounts[(int) $user['id']] ?? 0;
+      $n_comments = $commentCounts[(int) $user['id']] ?? 0;
 
     	echo "<tr><td>" .
       		\App\Support\UserDisplay::username($user['id']) . "</td>" .

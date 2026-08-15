@@ -49,4 +49,11 @@ final class StyleRepository
 
         return $row !== null ? ($row['hltr'] ?? null) : null;
     }
+
+    public static function firstId(): ?int
+    {
+        $rows = self::all();
+
+        return $rows === [] ? null : (int) array_key_first($rows);
+    }
 }

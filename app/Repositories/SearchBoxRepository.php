@@ -487,5 +487,13 @@ class SearchBoxRepository extends BaseRepository
             ;
     }
 
+    /**
+     * @return list<int>
+     */
+    public static function getOrderedIds(): array
+    {
+        return SearchBox::query()->orderBy('id')->pluck('id')->all();
+    }
+
 
 }

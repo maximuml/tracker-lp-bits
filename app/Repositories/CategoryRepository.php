@@ -125,4 +125,86 @@ final class CategoryRepository
 
         return (string) ob_get_clean();
     }
+
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    public static function getIconRows(): array
+    {
+        $rows = [];
+        foreach (NexusDB::table('caticons')->orderBy('id')->get() as $row) {
+            $row = (array) $row;
+            $rows[(int) $row['id']] = $row;
+        }
+
+        return $rows;
+    }
+
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    public static function getCategoryRows(): array
+    {
+        $rows = [];
+        foreach (NexusDB::table('categories')->leftJoin('searchbox', 'categories.mode', '=', 'searchbox.id')->select('categories.*', 'searchbox.name as catmodename')->get() as $row) {
+            $row = (array) $row;
+            $rows[(int) $row['id']] = $row;
+        }
+
+        return $rows;
+    }
+
+    /**
+     * @param  array<string, mixed>  $row
+     * @return array<string, mixed>|null
+     */
+    public static function findSecondIcon(array $row): ?array
+    {
+        $source = $row['source'] ?? '';
+        $medium = $row['medium'] ?? '';
+        $codec = $row['codec'] ?? '';
+        $standard = $row['standard'] ?? '';
+        $processing = $row['processing'] ?? '';
+        $audiocodec = $row['audiocodec'] ?? '';
+        $mode = $row['search_box_id'] ?? 0;
+
+        $sirow = NexusDB::table('secondicons')
+            ->where(function ($query) use ($mode) {
+                $query->where('mode', $mode)->orWhere('mode', 0);
+            })
+            ->where(function ($query) use ($source) {
+                $query->where('source', $source)->orWhere('source', 0);
+            })
+            ->where(function ($query) use ($medium) {
+                $query->where('medium', $medium)->orWhere('medium', 0);
+            })
+            ->where(function ($query) use ($codec) {
+                $query->where('codec', $codec)->orWhere('codec', 0);
+            })
+            ->where(function ($query) use ($standard) {
+                $query->where('standard', $standard)->orWhere('standard', 0);
+            })
+            ->where(function ($query) use ($processing) {
+                $query->where('processing', $processing)->orWhere('processing', 0);
+            })
+            ->where(function ($query) use ($audiocodec) {
+                $query->where('audiocodec', $audiocodec)->orWhere('audiocodec', 0);
+            })
+            ->first();
+
+        return $sirow ? (array) $sirow : null;
+    }
+
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    public static function getCategoriesByMode(int $catmode): array
+    {
+        return NexusDB::table('categories')
+            ->where('mode', $catmode)
+            ->orderBy('sort_index', 'desc')
+            ->get()
+            ->map(fn ($row) => (array) $row)
+            ->all();
+    }
 }

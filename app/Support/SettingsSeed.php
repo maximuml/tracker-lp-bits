@@ -2,7 +2,8 @@
 
 namespace App\Support;
 
-use App\Models\SearchBox;
+use App\Repositories\SearchBoxRepository;
+use App\Repositories\StyleRepository;
 
 /**
  * Generated settings seed migrated from `include/config.php`.
@@ -85,10 +86,10 @@ final class SettingsSeed
         SupportContext::setGlobal('enablebitbucket_main', $MAIN['enablebitbucket']);
         SupportContext::setGlobal('altname_main', $MAIN['altname'] ?? '');
         SupportContext::setGlobal('deflang', $MAIN['defaultlang']);
-        $firstStylesheetId = (int) (\Nexus\Database\NexusDB::table('stylesheets')->orderBy('id')->value('id') ?? 3);
+        $firstStylesheetId = StyleRepository::firstId() ?? 3;
         SupportContext::setGlobal('defcss', (int) ($MAIN['defstylesheet'] ?: $firstStylesheetId));
         SupportContext::setGlobal('enabledonation', $MAIN['donation']);
-        $searchBoxIds = SearchBox::query()->orderBy('id')->pluck('id')->all();
+        $searchBoxIds = SearchBoxRepository::getOrderedIds();
         $defaultBrowsecat = (int) ($searchBoxIds[0] ?? 1);
         SupportContext::setGlobal('browsecatmode', (int) ($MAIN['browsecat'] ?? $defaultBrowsecat));
         SupportContext::setGlobal('waitsystem', $MAIN['waitsystem']);

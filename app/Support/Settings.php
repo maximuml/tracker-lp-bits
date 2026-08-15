@@ -2,8 +2,7 @@
 
 namespace App\Support;
 
-use App\Models\Setting;
-use Nexus\Database\NexusDB;
+use App\Repositories\SettingRepository;
 
 /**
  * Legacy settings helpers extracted from `include/globalfunctions.php`.
@@ -26,7 +25,7 @@ final class Settings
     public static function get(?string $name = null, mixed $default = null): mixed
     {
         if (self::$settings === null) {
-            self::$settings = NexusDB::remember('nexus_settings_in_nexus', 600, fn () => Setting::getFromDb());
+            self::$settings = SettingRepository::getAll();
         }
 
         if ($name === null) {
@@ -44,7 +43,7 @@ final class Settings
     public static function fromDb(?string $name = null, mixed $default = null): mixed
     {
         if (self::$fromDb === null) {
-            self::$fromDb = Setting::getFromDb();
+            self::$fromDb = SettingRepository::getAll();
         }
 
         if ($name === null) {
@@ -63,27 +62,6 @@ final class Settings
      */
     public static function saveBatch(string $prefix, array $nameAndValue, string $autoload = 'yes'): void
     {
-        $prefix = strtolower($prefix);
-        $datetimeNow = date('Y-m-d H:i:s');
-        $records = [];
-
-        foreach ($nameAndValue as $name => $value) {
-            if (is_array($value)) {
-                $value = json_encode($value);
-            }
-            $records[] = [
-                'name' => "$prefix.$name",
-                'value' => $value,
-                'created_at' => $datetimeNow,
-                'updated_at' => $datetimeNow,
-                'autoload' => $autoload,
-            ];
-        }
-
-        if (! empty($records)) {
-            Setting::query()->upsert($records, ['name'], ['value', 'updated_at']);
-        }
-        Cache::clearSettings();
-        Hooks::doAction('nexus_setting_update');
+        SettingRepository::saveBatch($prefix, $nameAndValue, $autoload);
     }
 }

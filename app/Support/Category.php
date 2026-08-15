@@ -2,8 +2,6 @@
 
 namespace App\Support;
 
-use Nexus\Database\NexusDB;
-
 /**
  * Legacy category / icon helpers extracted from `include/functions.php`.
  *
@@ -35,11 +33,7 @@ final class Category
             if ($cached !== false && is_array($cached)) {
                 self::$iconRows = $cached;
             } else {
-                self::$iconRows = [];
-                foreach (NexusDB::table('caticons')->orderBy('id')->get() as $row) {
-                    $row = (array) $row;
-                    self::$iconRows[$row['id']] = $row;
-                }
+                self::$iconRows = \App\Repositories\CategoryRepository::getIconRows();
                 if (method_exists($cache, 'cache_value')) {
                     $cache->cache_value('category_icon_content', self::$iconRows, 156400);
                 }
@@ -64,11 +58,7 @@ final class Category
             if ($cached !== false && is_array($cached)) {
                 self::$categoryRows = $cached;
             } else {
-                self::$categoryRows = [];
-                foreach (NexusDB::table('categories')->leftJoin('searchbox', 'categories.mode', '=', 'searchbox.id')->select('categories.*', 'searchbox.name as catmodename')->get() as $row) {
-                    $row = (array) $row;
-                    self::$categoryRows[$row['id']] = $row;
-                }
+                self::$categoryRows = \App\Repositories\CategoryRepository::getCategoryRows();
                 if (method_exists($cache, 'cache_value')) {
                     $cache->cache_value('category_content', self::$categoryRows, 126400);
                 }
@@ -135,34 +125,8 @@ final class Category
         $sirow = method_exists($cache, 'get_value') ? $cache->get_value($cacheKey) : false;
 
         if ($sirow === false) {
-            $sirow = NexusDB::table('secondicons')
-                ->where(function ($query) use ($mode) {
-                    $query->where('mode', $mode)->orWhere('mode', 0);
-                })
-                ->where(function ($query) use ($source) {
-                    $query->where('source', $source)->orWhere('source', 0);
-                })
-                ->where(function ($query) use ($medium) {
-                    $query->where('medium', $medium)->orWhere('medium', 0);
-                })
-                ->where(function ($query) use ($codec) {
-                    $query->where('codec', $codec)->orWhere('codec', 0);
-                })
-                ->where(function ($query) use ($standard) {
-                    $query->where('standard', $standard)->orWhere('standard', 0);
-                })
-                ->where(function ($query) use ($processing) {
-                    $query->where('processing', $processing)->orWhere('processing', 0);
-                })
-                ->where(function ($query) use ($audiocodec) {
-                    $query->where('audiocodec', $audiocodec)->orWhere('audiocodec', 0);
-                })
-                ->first();
-            if (! $sirow) {
-                $sirow = 'not allowed';
-            } else {
-                $sirow = (array) $sirow;
-            }
+            $sirowData = \App\Repositories\CategoryRepository::findSecondIcon($row);
+            $sirow = $sirowData ?? 'not allowed';
             if (method_exists($cache, 'cache_value')) {
                 $cache->cache_value($cacheKey, $sirow, 600);
             }
@@ -212,12 +176,7 @@ final class Category
             }
         }
 
-        $ret = NexusDB::table('categories')
-            ->where('mode', $catmode)
-            ->orderBy('sort_index', 'desc')
-            ->get()
-            ->map(fn ($row) => (array) $row)
-            ->all();
+        $ret = \App\Repositories\CategoryRepository::getCategoriesByMode($catmode);
 
         if (method_exists($cache, 'cache_value')) {
             $cache->cache_value($cacheKey, $ret, 3600);

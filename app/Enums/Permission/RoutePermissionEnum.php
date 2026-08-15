@@ -102,6 +102,9 @@ enum RoutePermissionEnum: string
     case TOPIC_LIST = 'topic:list';
     case TOPIC_MANAGE = 'topic:manage';
 
+    /* Shoutbox */
+    case SHOUTBOX_LIST = 'shoutbox:list';
+
     /* Agent allow / deny */
     case AGENT_ALLOW_LIST = 'agent_allow:list';
     case AGENT_ALLOW_MANAGE = 'agent_allow:manage';

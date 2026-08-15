@@ -30,6 +30,14 @@ class UsercpController extends LegacyController
     }
 
     /**
+     * @return array<string, mixed>
+     */
+    public function forum(Request $request): array
+    {
+        return $this->success($this->repository->updateForum($request));
+    }
+
+    /**
      * Serve the legacy usercp.php page from a Laravel view.
      */
     public function legacy(Request $request): Response|RedirectResponse

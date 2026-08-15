@@ -5,17 +5,14 @@ error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 if (!isset($CURUSER)) $CURUSER = (array) (\App\Support\SupportContext::getUser() ?? []);
 if (!isset($lang_functions)) $lang_functions = (array) (\App\Support\SupportContext::getGlobal('lang_functions') ?? []);
 if (!isset($lang_invite)) $lang_invite = (array) (\App\Support\SupportContext::getGlobal('lang_invite') ?? []);
-$__server_REQUEST_URI = \App\Support\SupportContext::getServerValue('REQUEST_URI');
-$id = ((\App\Support\SupportContext::getQuery("id") !== null)) ? intval(\App\Support\SupportContext::getQuery("id")) : (int) ($CURUSER['id'] ?? 0);
-\App\Support\SupportContext::setGlobal('id', $id);
-$type = \App\Support\Input::unescape(\App\Support\SupportContext::getQuery("type") ?? '');
-$menuSelected = \App\Support\SupportContext::getRequestInput('menu') ?? 'invitee';
+$__server_REQUEST_URI = $__server_REQUEST_URI ?? \App\Support\SupportContext::getServerValue('REQUEST_URI');
+$id = $id ?? (int) ($CURUSER['id'] ?? 0);
+$type = $type ?? '';
+$menuSelected = $menuSelected ?? 'invitee';
 $pageSize = 50;
-if (($CURUSER['id'] != $id && !\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::VIEW_INVITE)) || !\App\Support\Validators::isId($id))
-    \App\Support\LegacyResponse::abort($lang_invite['std_sorry'], $lang_invite['std_permission_denied'], true, false);
-$userRep = new \App\Repositories\UserRepository();
-\App\Support\SupportContext::setGlobal('userRep', $userRep);
-if (!function_exists('inviteMenu')) { function inviteMenu ($selected = "invitee") {
+$userRep = $userRep ?? new \App\Repositories\UserRepository();
+
+if (!function_exists('inviteMenu')) { function inviteMenu (string $selected = "invitee"): void {
 $lang_invite = (array) (\App\Support\SupportContext::getGlobal('lang_invite') ?? []);
 $id = \App\Support\SupportContext::getGlobal('id');
 $CURUSER = \App\Support\SupportContext::getUser() ?? [];
@@ -37,64 +34,30 @@ $userRep = \App\Support\SupportContext::getGlobal('userRep');
     }
 } }
 
-$user = \App\Models\User::query()->find($id);
-if (!$user) {
-    \App\Support\LegacyResponse::abort($lang_invite['std_sorry'], 'Invalid id');
-}
-$user = $user->toArray();
+// $user is supplied as an array by InfoController::invite.
+$user = $user ?? [];
 print("<table width=100% class=main border=0 cellspacing=0 cellpadding=0><tr><td class=embedded>");
 
 print("<h1 align=center><a href=\"invite.php?id=".$id."\">".$user['username'].$lang_invite['text_invite_system']."</a></h1>");
-	$sent = htmlspecialchars(\App\Support\SupportContext::getQuery('sent') ?? '');
+	$sent = $sent ?? htmlspecialchars((string) (\App\Support\SupportContext::getQuery('sent') ?? ''));
 	if ($sent == 1){
 		$msg = $lang_invite['text_invite_code_sent'];
 		print("<p align=center><font color=red>".$msg."</font></p>");
 	}
 
-$inv = $user;
-
-//for one or more. "invite"/"invites"
-if ($inv["invites"] != 1){
-	$_s = $lang_invite['text_s'];
-} else {
-	$_s = "";
-}
+$inv = $inv ?? $user;
+$_s = $_s ?? (($inv["invites"] != 1) ? ($lang_invite['text_s'] ?? 's') : "");
 
 if ($type == 'new'){
-    if ($CURUSER['id'] != $id) {
-        \App\Support\LegacyResponse::abort($lang_invite['std_sorry'], $lang_invite['std_permission_denied'], true, false);
-    }
-    try {
-        $sendBtnText = $userRep->getInviteBtnText($CURUSER['id']);
-    } catch (\Exception $exception) {
-        \App\Support\Html::stdMessage($lang_invite['std_sorry'], $exception->getMessage().
-            "  <a class=altlink href=invite.php?id={$CURUSER['id']}>".$lang_invite['here_to_go_back'], false);
-        print("</td></tr></table>");
-        return;
-    }
-    \App\Support\LegacyAuth::registrationCheckFromContext('invitesystem', true, false);
-    $temporaryInvites = \App\Models\Invite::query()->where('inviter', $CURUSER['id'])
-        ->where('invitee', '')
-        ->where('expired_at', '>', now())
-        ->orderBy('expired_at', 'asc')
-        ->get()
-    ;
-	$invitation_body =  sprintf($lang_invite['text_invitation_body'], \App\Models\Setting::getSiteName()).$CURUSER['username'];
-	//$invitation_body_insite = str_replace("<br />","\n",$invitation_body);
-    $inviteSelectOptions = '';
-    if ($inv['invites'] > 0) {
-        $inviteSelectOptions = '<option value="permanent">'.$lang_invite['text_permanent'].'</option>';
-    }
-    foreach ($temporaryInvites as $tmp) {
-        $inviteSelectOptions .= sprintf('<option value="%s">%s (%s: %s)</option>', $tmp->hash, $tmp->hash, $lang_invite['text_expired_at'], $tmp->expired_at);
-    }
-    $preUsernameTr = "";
-    if (\App\Support\Config\SiteConfig::current()->system->isInvitePreEmailAndUsername()) {
-        $preUsernameTr = "<tr><td class=\"rowhead nowrap\" valign=\"top\" align=\"right\">".\App\Support\Locale::trans("invite.pre_register_username", [], null)."</td><td align=left><input type=text size=40 name=pre_register_username><br /><font align=left class=small>".\App\Support\Locale::trans("invite.pre_register_username_help", [], null)."</font></td></tr>";
-    }
+    $SITENAME = $SITENAME ?? \App\Models\Setting::getSiteName();
+    $temporaryInvites = $temporaryInvites ?? collect();
+    $inviteSelectOptions = $inviteSelectOptions ?? '';
+    $preUsernameTr = $preUsernameTr ?? '';
+    $invitation_body = $invitation_body ?? sprintf($lang_invite['text_invitation_body'], $SITENAME).($CURUSER['username'] ?? '');
+
 	print("<form method=post action=takeinvite.php?id=".htmlspecialchars($id).">".
 	"<table border=1 width=100% cellspacing=0 cellpadding=5>".
-	"<tr align=center><td colspan=2><b>".$lang_invite['text_invite_someone']."$SITENAME ({$inv['invites']}".$lang_invite['text_invitation'].$_s.$lang_invite['text_left'] .' + '.sprintf($lang_invite['text_temporary_left'], $temporaryInvites->count()).")</b></td></tr>".
+	"<tr align=center><td colspan=2><b>".$lang_invite['text_invite_someone']."$SITENAME ({$inv['invites']}".$lang_invite['text_invitation'].$_s.$lang_invite['text_left'] .' + '.sprintf($lang_invite['text_temporary_left'], count($temporaryInvites)).")</b></td></tr>".
 	"<tr><td class=\"rowhead nowrap\" valign=\"top\" align=\"right\">".$lang_invite['text_email_address']."</td><td align=left><input type=text size=40 name=email><br /><font align=left class=small>".$lang_invite['text_email_address_note']."</font></td></tr>".$preUsernameTr.
 	"<tr><td class=\"rowhead nowrap\" valign=\"top\" align=\"right\">".$lang_invite['text_consume_invite']."</td><td align=left><select name='hash'>".$inviteSelectOptions."</select></td></tr>".
 	"<tr><td class=\"rowhead nowrap\" valign=\"top\" align=\"right\">".$lang_invite['text_message']."</td><td align=left><textarea name=body rows=10 style='width: 100%'>" .$invitation_body. "</textarea></td></tr>".
@@ -104,9 +67,11 @@ if ($type == 'new'){
 } else {
     inviteMenu($menuSelected);
     if ($menuSelected == 'invitee') {
+        $status = $status ?? '';
+        $enabled = $enabled ?? '';
         $filters = [
-            'status' => \App\Support\SupportContext::getQuery('status') ?? '',
-            'enabled' => \App\Support\SupportContext::getQuery('enabled') ?? '',
+            'status' => $status,
+            'enabled' => $enabled,
         ];
         $number = \App\Repositories\InviteRepository::countInvitees($id, $filters);
         $textSelectOnePlease = \App\Support\Locale::trans('nexus.select_one_please', [], null);
@@ -114,13 +79,13 @@ if ($type == 'new'){
         foreach (['yes', 'no'] as $item) {
             $enabledOptions .= sprintf(
                 '<option value="%s"%s>%s</option>',
-                $item, ((\App\Support\SupportContext::getQuery('enabled') !== null)) && \App\Support\SupportContext::getQuery('enabled') == $item ? ' selected' : '', strtoupper($item)
+                $item, ($enabled !== '' && $enabled == $item) ? ' selected' : '', strtoupper($item)
             );
         }
         foreach (['pending' => $lang_invite['text_pending'], 'confirmed' => $lang_invite['text_confirmed']] as $name => $text) {
             $statusOptions .= sprintf(
                 '<option value="%s"%s>%s</option>',
-                $name, ((\App\Support\SupportContext::getQuery('status') !== null)) && \App\Support\SupportContext::getQuery('status') == $name ? ' selected' : '', $text
+                $name, ($status !== '' && $status == $name) ? ' selected' : '', $text
             );
         }
 
@@ -234,6 +199,7 @@ JS;
             }
         }
 
+        $arr = $arr ?? [];
         if ($CURUSER['id'] == $id || \App\Support\UserDisplay::currentClass() >= UC_SYSOP)
         {
             $pendingcount = number_format(\App\Repositories\InviteRepository::countPendingInvitees((int)$CURUSER['id']));
@@ -242,7 +208,7 @@ JS;
                 $colSpan += 1;
             }
             if ($pendingcount){
-                print("<input type=hidden name=email value={$arr['email']}>");
+                print("<input type=hidden name=email value=".htmlspecialchars($arr['email'] ?? '').">");
                 print("<tr><td colspan=$colSpan align=right><input type=submit style='height: 20px' value=".$lang_invite['submit_confirm_users']."></td></tr>");
             }
             print("</form>");
@@ -252,6 +218,8 @@ JS;
     } elseif (in_array($menuSelected, ['sent', 'tmp'])) {
         $number1 = \App\Repositories\InviteRepository::countInvites($id, $menuSelected);
         print("<table border=1 width=100% cellspacing=0 cellpadding=5>");
+        $pagertop = '';
+        $pagerbottom = '';
 
         if(!$number1){
             print("<tr align=center><td colspan=6>".$lang_functions['text_none']."</tr>");

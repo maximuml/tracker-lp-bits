@@ -512,11 +512,11 @@ class ForumRepository extends BaseRepository
     }
 
     /**
-     * @return  \Illuminate\Support\Collection<int, \App\Models\Post>
+     * @return  \Illuminate\Database\Eloquent\Collection<int, \App\Models\Post>
      */
-    public static function getTopicPosts(int $topicid, ?int $authorId, int $offset, int $perPage): \Illuminate\Support\Collection
+    public static function getTopicPosts(int $topicid, ?int $authorId, int $offset, int $perPage): \Illuminate\Database\Eloquent\Collection
     {
-        $query = Post::query()->where('topicid', $topicid)->orderBy('id');
+        $query = Post::query()->with('user')->where('topicid', $topicid)->orderBy('id');
         if ($authorId) {
             $query->where('userid', $authorId);
         }

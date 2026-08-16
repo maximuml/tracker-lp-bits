@@ -117,9 +117,31 @@ class MessageController extends LegacyController
      */
     public function index(Request $request): array
     {
-        $list = $this->repository->getList($request->all());
+        $userId = (int) Auth::id();
+        $mailbox = (int) $request->input('mailbox', 0);
+        $unread = $request->input('unread');
+        if ($unread !== null && ! in_array((string) $unread, ['yes', 'no'], true)) {
+            $unread = null;
+        }
 
-        return $this->success(MessageResource::collection($list));
+        $keyword = (string) $request->input('keyword', '');
+        $place = (string) $request->input('place', '');
+
+        $perPage = max(1, min(100, (int) $request->input('per_page', 20)));
+        $page = max(1, (int) $request->input('page', 1));
+        $offset = ($page - 1) * $perPage;
+
+        $result = MessageRepository::getMailboxMessages($userId, $mailbox, $keyword, $place, $unread === null ? null : (string) $unread, $offset, $perPage);
+
+        $paginator = new \Illuminate\Pagination\LengthAwarePaginator(
+            $result['messages'],
+            $result['count'],
+            $perPage,
+            $page,
+            ['path' => $request->url()]
+        );
+
+        return $this->success(MessageResource::collection($paginator));
     }
 
     /**
@@ -128,57 +150,88 @@ class MessageController extends LegacyController
     public function store(Request $request): array
     {
         $validated = $request->validate([
-            'receiver' => 'required|integer',
+            'receiver' => 'required|integer|exists:users,id',
             'subject' => 'required|string|max:255',
             'msg' => 'required|string',
         ]);
 
         $validated['sender'] = Auth::id();
         $validated['added'] = now();
+        $validated['unread'] = 'yes';
+        $validated['location'] = 0;
+        $validated['saved'] = 'no';
 
         $message = $this->repository->store($validated);
+        $message->load('send_user');
 
         return $this->success(new MessageResource($message), 'Message sent');
     }
 
     /**
-     * @param  mixed  $id
+     * @param  \App\Models\Message  $message
      * @return  array<string, mixed>
      */
-    public function show($id): array
+    public function show(Message $message): array
     {
-        $message = $this->repository->getDetail($id);
+        $userId = (int) Auth::id();
+
+        if (! MessageRepository::getMessageForUser((int) $message->id, $userId)) {
+            abort(404);
+        }
+
+        if ($message->receiver == $userId && $message->unread === 'yes') {
+            MessageRepository::markAsRead([(int) $message->id], $userId);
+            $message->refresh();
+        }
+
+        $message->load('send_user');
 
         return $this->success(new MessageResource($message));
     }
 
     /**
      * @param  \Illuminate\Http\Request  $request
-     * @param  mixed  $id
+     * @param  \App\Models\Message  $message
      * @return  array<string, mixed>
      */
-    public function update(Request $request, $id): array
+    public function update(Request $request, Message $message): array
     {
-        $message = $this->repository->getDetail($id);
-        $validated = $request->validate([
-            'subject' => 'sometimes|string|max:255',
-            'msg' => 'sometimes|string',
-        ]);
+        $userId = (int) Auth::id();
 
-        if (!empty($validated)) {
-            $message->update($validated);
+        if (! MessageRepository::getMessageForUser((int) $message->id, $userId)) {
+            abort(404);
         }
 
-        return $this->success(new MessageResource($message->fresh()));
+        $validated = $request->validate([
+            'unread' => 'sometimes|in:yes,no',
+            'location' => 'sometimes|integer',
+        ]);
+
+        if (isset($validated['unread'])) {
+            Message::query()->where('id', (int) $message->id)->where(function ($q) use ($userId) {
+                $q->where('receiver', $userId)->orWhere('sender', $userId);
+            })->update(['unread' => (string) $validated['unread']]);
+        }
+
+        if (isset($validated['location'])) {
+            MessageRepository::moveMessages([(int) $message->id], $userId, (int) $validated['location']);
+        }
+
+        $message->refresh()->load('send_user');
+
+        return $this->success(new MessageResource($message));
     }
 
     /**
-     * @param  mixed  $id
+     * @param  \App\Models\Message  $message
      * @return  array<string, mixed>
      */
-    public function destroy($id): array
+    public function destroy(Message $message): array
     {
-        $this->repository->delete($id);
+        $userId = (int) Auth::id();
+        if (MessageRepository::deleteSingleMessage((int) $message->id, $userId) === null) {
+            abort(404);
+        }
 
         return $this->success(['success' => true], 'Message deleted');
     }
@@ -186,12 +239,16 @@ class MessageController extends LegacyController
     /**
      * @return  array<string, mixed>
      */
-    public function listUnread(): array
+    public function listUnread(Request $request): array
     {
+        $perPage = max(1, min(100, (int) $request->input('per_page', 20)));
+
         $messages = Message::query()
             ->where('receiver', Auth::id())
             ->where('unread', 'yes')
-            ->paginate();
+            ->with('send_user')
+            ->orderByDesc('id')
+            ->paginate($perPage);
 
         return $this->success(MessageResource::collection($messages));
     }

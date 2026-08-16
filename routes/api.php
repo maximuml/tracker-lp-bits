@@ -110,6 +110,17 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
         Route::apiResource('topics', \App\Http\Controllers\TopicController::class)->only(['index', 'show'])->middleware(Permissions::abilityLabel(RoutePermissionEnum::TOPIC_LIST));
         Route::apiResource('topics', \App\Http\Controllers\TopicController::class)->only(['store', 'update', 'destroy'])->middleware(Permissions::abilityLabel(RoutePermissionEnum::TOPIC_MANAGE));
 
+        Route::get('topics/{topic}/posts', [\App\Http\Controllers\PostController::class, 'index'])
+            ->middleware(Permissions::abilityLabel(RoutePermissionEnum::TOPIC_LIST));
+        Route::post('topics/{topic}/posts', [\App\Http\Controllers\PostController::class, 'store'])
+            ->middleware(Permissions::abilityLabel(RoutePermissionEnum::TOPIC_LIST));
+        Route::get('topics/{topic}/posts/{post}', [\App\Http\Controllers\PostController::class, 'show'])
+            ->middleware(Permissions::abilityLabel(RoutePermissionEnum::TOPIC_LIST));
+        Route::match(['put', 'patch'], 'topics/{topic}/posts/{post}', [\App\Http\Controllers\PostController::class, 'update'])
+            ->middleware(Permissions::abilityLabel(RoutePermissionEnum::TOPIC_LIST));
+        Route::delete('topics/{topic}/posts/{post}', [\App\Http\Controllers\PostController::class, 'destroy'])
+            ->middleware(Permissions::abilityLabel(RoutePermissionEnum::TOPIC_LIST));
+
         Route::get('shoutbox', [\App\Http\Controllers\ShoutboxController::class, 'index'])
             ->middleware(Permissions::abilityLabel(RoutePermissionEnum::SHOUTBOX_LIST));
 
@@ -120,6 +131,12 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
             ->middleware(Permissions::abilityLabel(RoutePermissionEnum::USERCP_SETTINGS));
 
         Route::post('usercp/forum', [\App\Http\Controllers\UsercpController::class, 'forum'])
+            ->middleware(Permissions::abilityLabel(RoutePermissionEnum::USERCP_SETTINGS));
+
+        Route::post('usercp/tracker', [\App\Http\Controllers\UsercpController::class, 'tracker'])
+            ->middleware(Permissions::abilityLabel(RoutePermissionEnum::USERCP_SETTINGS));
+
+        Route::post('usercp/security', [\App\Http\Controllers\UsercpController::class, 'security'])
             ->middleware(Permissions::abilityLabel(RoutePermissionEnum::USERCP_SETTINGS));
 
     });

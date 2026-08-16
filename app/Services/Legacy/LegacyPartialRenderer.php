@@ -18,9 +18,9 @@ final class LegacyPartialRenderer
 {
     /**
      * @param  array<string, mixed>  $data
-     * @return array<string, mixed>|RedirectResponse
+     * @return array<string, mixed>|Response|RedirectResponse
      */
-    public function render(string $name, array $data = []): array|RedirectResponse
+    public function render(string $name, array $data = []): array|Response|RedirectResponse
     {
         $path = __DIR__ . '/' . $name . '_content.php';
 

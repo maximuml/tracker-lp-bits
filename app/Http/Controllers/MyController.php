@@ -12,6 +12,7 @@ use App\Support\SupportContext;
 use App\Enums\Permission\PermissionEnum;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\View\View;
 
 class MyController extends Controller
@@ -23,7 +24,7 @@ class MyController extends Controller
         $this->renderer = $renderer;
     }
 
-    public function bonus(Request $request): View|RedirectResponse
+    public function bonus(Request $request): View|Response|RedirectResponse
     {
         if (SupportContext::getUser() === null) {
             $qs = $request->getQueryString();
@@ -31,7 +32,7 @@ class MyController extends Controller
         }
 
         $result = $this->renderer->render('my_bonus');
-        if ($result instanceof RedirectResponse) {
+        if (! is_array($result)) {
             return $result;
         }
 

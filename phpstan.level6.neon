@@ -24,8 +24,8 @@ parameters:
 
     excludePaths:
         analyse:
-            - app/Services/Legacy
-            - app/Services/Captcha
+            - app/Services/Legacy/partials
+            - app/Services/Legacy/*_content.php
 
     bootstrapFiles:
         - tests/phpstan/bootstrap.php

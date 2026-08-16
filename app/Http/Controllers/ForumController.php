@@ -34,14 +34,14 @@ class ForumController extends LegacyController
      * and is included by forum/index.blade.php so the original HTML/PHP
      * interleaving is preserved as closely as possible.
      */
-    public function legacy(Request $request): View|RedirectResponse
+    public function legacy(Request $request): View|Response|RedirectResponse
     {
         if (SupportContext::getUser() === null) {
             return redirect('/forums.php?' . $request->getQueryString());
         }
 
         $result = $this->service->legacy($request);
-        if ($result instanceof RedirectResponse) {
+        if (! is_array($result)) {
             return $result;
         }
 

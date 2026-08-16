@@ -11,6 +11,7 @@ use App\Services\Legacy\LegacyPartialRenderer;
 use App\Support\SupportContext;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\View\View;
 
 class UsercpController extends LegacyController
@@ -64,7 +65,7 @@ class UsercpController extends LegacyController
     /**
      * Serve the legacy usercp.php page from a Laravel view.
      */
-    public function legacy(Request $request): View|RedirectResponse
+    public function legacy(Request $request): View|Response|RedirectResponse
     {
         $user = SupportContext::getUser();
         if ($user === null) {
@@ -104,7 +105,7 @@ class UsercpController extends LegacyController
 
         $userInfo = $this->repository->getUserById((int) $user['id']);
         $result = $this->renderer->render('usercp', ['tokens' => $this->repository->getUserTokens($userInfo)]);
-        if ($result instanceof RedirectResponse) {
+        if (! is_array($result)) {
             return $result;
         }
 

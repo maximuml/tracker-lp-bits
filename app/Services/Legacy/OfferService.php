@@ -99,7 +99,7 @@ final class OfferService
 
     private function abort(string $heading, string $text, bool $htmlstrip = true): void
     {
-        LegacyResponse::abort($heading, $text, $htmlstrip, true, true, false);
+        LegacyResponse::abort($heading, $text, $htmlstrip);
     }
 
     private function handleCreate(Request $request): RedirectResponse
@@ -189,6 +189,7 @@ final class OfferService
         if (! $offer) {
             $this->abort($this->lang('std_error'), $this->lang('text_nothing_found'));
         }
+        assert($offer !== null);
 
         $arr = $offer->toArray();
         $arr['username'] = $offer->user->username ?? '';
@@ -241,6 +242,7 @@ final class OfferService
         if (! $offer) {
             $this->abort($this->lang('std_error'), $this->lang('text_nothing_found'));
         }
+        assert($offer !== null);
 
         $arr = $offer->toArray();
         $arr['username'] = $offer->user->username ?? '';
@@ -308,6 +310,7 @@ final class OfferService
         if (! $offerRecord) {
             $this->abort($this->lang('std_error'), $this->lang('text_nothing_found'));
         }
+        assert($offerRecord !== null);
 
         $num = $offerRecord->toArray();
         $curuser = $this->curUser();

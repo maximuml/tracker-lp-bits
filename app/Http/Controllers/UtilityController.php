@@ -45,10 +45,10 @@ class UtilityController extends LegacyController
         return $this->legacyPage($request, 'search', true, $data);
     }
 
-    public function usersearch(Request $request): View|RedirectResponse
+    public function usersearch(Request $request): View|Response|RedirectResponse
     {
         $result = $this->renderer->render('usersearch');
-        if ($result instanceof RedirectResponse) {
+        if (! is_array($result)) {
             return $result;
         }
 

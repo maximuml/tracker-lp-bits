@@ -35,23 +35,11 @@ use Nexus\Database\NexusDB;
 
 class UserRepository extends BaseRepository
 {
-    /** @var  array<int|string, mixed> */
-    /** @var  array<int|string, mixed> */
-    /** @var  array<int|string, mixed> */
-    /** @var  array<int|string, mixed> */
-    /** @var  array<int|string, mixed> */
+    /** @var array<int, string> */
     private static array $allowIncludes = ['inviter', 'valid_medals'];
-    /** @var  array<int|string, mixed> */
-    /** @var  array<int|string, mixed> */
-    /** @var  array<int|string, mixed> */
-    /** @var  array<int|string, mixed> */
-    /** @var  array<int|string, mixed> */
+    /** @var array<int, string> */
     private static array $allowIncludeFields = ['seeding_leeching_data'];
-    /** @var  array<int|string, mixed> */
-    /** @var  array<int|string, mixed> */
-    /** @var  array<int|string, mixed> */
-    /** @var  array<int|string, mixed> */
-    /** @var  array<int|string, mixed> */
+    /** @var array<int, string> */
     private static array $allowIncludeCounts = [];
     /**
      * @param  array<int|string, mixed>  $params

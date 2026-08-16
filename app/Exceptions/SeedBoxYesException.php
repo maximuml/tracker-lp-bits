@@ -6,7 +6,7 @@ class SeedBoxYesException extends NexusException
 {
     private int $id;
 
-    public function __construct($id)
+    public function __construct(int $id)
     {
         parent::__construct();
         $this->id = $id;

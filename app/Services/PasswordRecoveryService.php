@@ -186,7 +186,7 @@ class PasswordRecoveryService
         $mailTwoFour = sprintf($langRecover['mail_two_four'] ?? '<br /><br />You may change your password in User CP - Security Settings after logging in.<br />------<br />Yours,<br />The %s Team.', $siteName);
 
         $body = ($langRecover['mail_two_one'] ?? 'Hi,<br /><br />As per your request we have generated a new password for your account.<br /><br />Here is the information we now have on file for this account:<br /><br />User name: ')
-            . $user->username
+            . (string) $user->username
             . ($langRecover['mail_two_two'] ?? '<br />Password:  ')
             . $newPassword
             . ($langRecover['mail_two_three'] ?? '<br /><br />You may login from ')
@@ -194,7 +194,7 @@ class PasswordRecoveryService
             . $mailTwoFour;
 
         Mail::sentLegacy(
-            $user->email,
+            (string) $user->email,
             $siteName,
             \App\Support\Config\SiteConfig::current()->main->siteEmail(''),
             $siteName . $this->msg($langRecover, 'mail_two_title', ' account details'),

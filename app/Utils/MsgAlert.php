@@ -7,6 +7,7 @@ final class MsgAlert {
 
     private static ?self $instance = null;
 
+    /** @var array<string, array<string, mixed>> */
     private static array $alerts = [];
 
     private string $redisKeyPrefix = "nexus_alerts";
@@ -70,7 +71,7 @@ final class MsgAlert {
         }
     }
 
-    public function remove($name): void
+    public function remove(string $name): void
     {
         foreach (self::$alerts as $item) {
             if ($item['name'] == $name) {

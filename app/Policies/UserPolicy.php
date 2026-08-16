@@ -34,7 +34,7 @@ class UserPolicy extends BasePolicy
         return $model->privacy != "strong" || $user->id == $model->id || Permission::canManageUserBasicInfo();
     }
 
-    public function viewEmail(User $user, User $model)
+    public function viewEmail(User $user, User $model): bool
     {
         \App\Support\Logger::writeWithContext((string) sprintf("user: %s, model: %s", $user->id, $model->id), (string) 'info', (bool) false);
         return $model->privacy == "low" || $user->id == $model->id || Permission::canViewUserConfidentialInfo();
@@ -103,7 +103,7 @@ class UserPolicy extends BasePolicy
         return false;
     }
 
-    private function can(User $user)
+    private function can(User $user): bool
     {
         if ($user->class >= User::CLASS_ADMINISTRATOR) {
             return true;

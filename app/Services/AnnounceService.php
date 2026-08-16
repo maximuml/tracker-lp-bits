@@ -70,7 +70,6 @@ final class AnnounceService
     private int $clientFamilyId = 0;
     private bool $isReAnnounce = false;
     private ResponseBuilder $responseBuilder;
-    private int $realAnnounceInterval = MIN_ANNOUNCE_WAIT_SECOND;
     private string $dt = '';
     private int $userId = 0;
     private int $torrentId = 0;
@@ -79,11 +78,13 @@ final class AnnounceService
     private string $seeder = 'no';
     private int $left = 0;
     private ?string $event = null;
-    private int $rsize = 50;
-    private bool $compact = false;
     private int $announceWait = MIN_ANNOUNCE_WAIT_SECOND;
     private int $autocleanIntervalOne = 900;
 
+    /**
+     * @param array<string, mixed> $params
+     * @return array<string, mixed>
+     */
     public function handle(Request $request, array $params): array
     {
         $this->request = $request;
@@ -97,8 +98,6 @@ final class AnnounceService
         $this->infoHash = $this->dto->infoHash->toBinary();
         $this->left = $this->dto->left;
         $this->event = $this->dto->event;
-        $this->compact = $this->dto->compact;
-        $this->rsize = $this->dto->numWant;
         $this->seeder = $this->dto->isSeeder() ? 'yes' : 'no';
         $this->dt = date('Y-m-d H:i:s', TIMENOW);
 
@@ -112,9 +111,13 @@ final class AnnounceService
         $this->checkClient();
         $this->loadTorrent();
 
-        $this->responseBuilder = $this->responseBuilder->withTorrent($this->torrent);
+        $torrent = $this->torrent;
+        if ($torrent === null) {
+            throw TrackerException::failure('torrent not registered with this tracker');
+        }
+
+        $this->responseBuilder = $this->responseBuilder->withTorrent($torrent);
         $initialResult = $this->responseBuilder->initial($this->torrentId);
-        $this->realAnnounceInterval = $initialResult->realAnnounceInterval;
         $this->autocleanIntervalOne = $initialResult->autocleanIntervalOne;
         $repDict = $initialResult->response;
 
@@ -124,31 +127,31 @@ final class AnnounceService
         }
 
         $this->userId = (int) $this->user['id'];
-        $this->torrentId = (int) $this->torrent['id'];
+        $this->torrentId = (int) $torrent['id'];
 
         $this->detectSeedBox();
 
-        $peerLifecycle = new PeerLifecycle($this->dto, $this->torrent, $this->user, $this->isIPSeedBox, $this->dt);
+        $peerLifecycle = new PeerLifecycle($this->dto, $torrent, $this->user, $this->isIPSeedBox, $this->dt);
         $this->self = $peerLifecycle->findSelf();
         $this->loadSnatchInfo();
         $peerLifecycle->setSnatchInfo($this->snatchInfo ?: false);
 
         $this->validateAnnounceTime();
-        $this->handlePaidTorrent();
+        $this->handlePaidTorrent($torrent);
 
-        $traffic = (new TrafficAccountant())->calculate($this->self, $this->params, $this->torrent, $this->user, $this->snatchInfo ?: false, $this->ip, $this->seeder);
+        $traffic = (new TrafficAccountant())->calculate($this->self, $this->params, $torrent, $this->user, $this->snatchInfo ?: false, $this->ip, $this->seeder);
         $this->uploadedIncrementForUser = $traffic->uploadedIncrementForUser;
         $this->downloadedIncrementForUser = $traffic->downloadedIncrementForUser;
 
         $cheaterDetector = new CheaterDetector($this->responseBuilder);
         $cheaterDetector->checkSpeed($traffic->upthis, $this->self, $this->user, $this->userId, $this->isDonor, $this->isIPSeedBox);
-        $cheaterDetector->checkCheating($traffic->upthis, $traffic->downthis, $this->self, $this->user, $this->torrent, $this->userId, $this->torrentId, $this->dt);
+        $cheaterDetector->checkCheating($traffic->upthis, $traffic->downthis, $this->self, $this->user, $torrent, $this->userId, $this->torrentId, $this->dt);
 
         $response = NexusDB::transaction(function () use ($peerLifecycle, $traffic) {
             return $this->process($peerLifecycle, $traffic);
         });
 
-        $this->postProcess();
+        $this->postProcess($torrent);
 
         return $response;
     }
@@ -241,7 +244,8 @@ final class AnnounceService
 
     private function checkTrackerUrl(): void
     {
-        $trackerUrl = Tracker::schemaAndHost((int) $this->user['tracker_url_id'], true);
+        $trackerUrlRaw = Tracker::schemaAndHost((int) $this->user['tracker_url_id'], true);
+        $trackerUrl = is_array($trackerUrlRaw) ? implode('', $trackerUrlRaw) : $trackerUrlRaw;
         $currentUrl = Url::schemeAndHost();
 
         if (!str_contains($trackerUrl, $currentUrl)) {
@@ -297,31 +301,32 @@ final class AnnounceService
             return $torrent ? (array) $torrent : null;
         });
 
-        if (!$this->torrent) {
+        if ($this->torrent === null) {
             \App\Support\Logger::writeWithContext((string) ('[TORRENT NOT EXISTS] info_hash: ' . $infoHashHex), (string) 'info', (bool) false);
             NexusDB::redis()->set('torrent_not_exists:' . $this->infoHash, TIMENOW, ['ex' => 24 * 3600]);
             throw TrackerException::failure('torrent not registered with this tracker');
         }
 
-        $this->torrentId = (int) $this->torrent['id'];
+        $torrent = $this->torrent;
 
-        if ($this->torrent['banned'] === 'yes' && !Permissions::userCan(PermissionEnum::TORRENT_VIEW_BANNED->value, false, $this->userId)) {
+        $this->torrentId = (int) $torrent['id'];
+
+        if ($torrent['banned'] === 'yes' && !Permissions::userCan(PermissionEnum::TORRENT_VIEW_BANNED->value, false, $this->userId)) {
             throw TrackerException::failure('torrent banned');
         }
 
-        if ($this->torrent['approval_status'] != Torrent::APPROVAL_STATUS_ALLOW
+        if ($torrent['approval_status'] != Torrent::APPROVAL_STATUS_ALLOW
             && !\App\Support\Config\SiteConfig::current()->torrent->approvalStatusNoneVisible()
             && !Permissions::userCan(PermissionEnum::TORRENT_VIEW_BANNED->value, false, $this->userId)
         ) {
             throw TrackerException::failure('torrent review not approved');
         }
 
-        assert($this->torrent !== null);
-        $this->responseBuilder = $this->responseBuilder->withTorrent($this->torrent);
+        $this->responseBuilder = $this->responseBuilder->withTorrent($torrent);
 
-        if ($this->left > (int) $this->torrent['size']) {
+        if ($this->left > (int) $torrent['size']) {
             (new UserRepository())->updateDownloadPrivileges(null, $this->userId, 'no', 'fake_announce');
-            \App\Support\Logger::writeWithContext((string) sprintf('fake announce, user: %s, torrent: %s, announce left: %s > size: %s', $this->userId, $this->torrentId, $this->left, $this->torrent['size']), (string) 'warn', (bool) false);
+            \App\Support\Logger::writeWithContext((string) sprintf('fake announce, user: %s, torrent: %s, announce left: %s > size: %s', $this->userId, $this->torrentId, $this->left, $torrent['size']), (string) 'warn', (bool) false);
             $this->responseBuilder->warn('fake announce', 300);
         }
     }
@@ -354,13 +359,16 @@ final class AnnounceService
         }
     }
 
-    private function handlePaidTorrent(): void
+    /**
+     * @param array<string, mixed> $torrent
+     */
+    private function handlePaidTorrent(array $torrent): void
     {
         if ($this->seeder === 'yes'
             || !isset($this->user['seedbonus'])
-            || !isset($this->torrent['price'])
-            || (int) $this->torrent['price'] <= 0
-            || (int) $this->torrent['owner'] == $this->userId
+            || !isset($torrent['price'])
+            || (int) $torrent['price'] <= 0
+            || (int) $torrent['owner'] == $this->userId
             || !\App\Support\Config\SiteConfig::current()->torrent->paidTorrentEnabled()
         ) {
             return;
@@ -395,14 +403,22 @@ final class AnnounceService
         }
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     private function process(PeerLifecycle $peerLifecycle, TrafficResult $traffic): array
     {
+        $torrent = $this->torrent;
+        if ($torrent === null) {
+            throw TrackerException::failure('torrent not registered with this tracker');
+        }
+
         $result = $peerLifecycle->process($traffic->upthis, $traffic->downthis, $traffic->snatchTimeColumn, $traffic->snatchTimeIncrement, $traffic->leechTimeNoSeederIncrement);
         $this->self = $result->self;
         $this->snatchInfo = $result->snatchInfo;
         $this->torrentUpdate = $result->torrentUpdate;
 
-        $hitAndRunResult = (new HitAndRunHandler())->handle($this->left, $this->event, $this->user, $this->torrent, $this->userId, $this->torrentId, $this->isDonor, $this->dt, $this->snatchInfo ?: false);
+        $hitAndRunResult = (new HitAndRunHandler())->handle($this->left, $this->event, $this->user, $torrent, $this->userId, $this->torrentId, $this->isDonor, $this->dt, $this->snatchInfo ?: false);
         if ($hitAndRunResult !== null) {
             $this->snatchInfo = $hitAndRunResult;
         }
@@ -444,7 +460,10 @@ final class AnnounceService
         }
     }
 
-    private function postProcess(): void
+    /**
+     * @param array<string, mixed> $torrent
+     */
+    private function postProcess(array $torrent): void
     {
         $redis = NexusDB::redis();
 
@@ -461,6 +480,6 @@ final class AnnounceService
             }
         }
 
-        \App\Support\Hooks::doAction('announced', $this->torrent, $this->user, $this->request->all());
+        \App\Support\Hooks::doAction('announced', $torrent, $this->user, $this->request->all());
     }
 }

@@ -189,7 +189,7 @@ class RegistrationService
             'country' => $country,
             'gender' => $gender,
             'status' => 'pending',
-            'class' => \App\Support\Config\SiteConfig::current()->authority->defaultClass(User::CLASS_USER),
+            'class' => \App\Support\Config\SiteConfig::current()->authority->defaultClass((int) User::CLASS_USER),
             'invites' => (int) \App\Support\Config\SiteConfig::current()->main->inviteCount(0),
             'added' => now()->toDateTimeString(),
             'last_access' => now()->toDateTimeString(),
@@ -306,7 +306,7 @@ class RegistrationService
             throw new AuthenticationException($this->msg($langConfirmResend, 'std_user_already_confirm', 'User using this email address is already confirmed.'));
         }
 
-        $this->validatePassword($password, $passAgain, $user->username, $langConfirmResend);
+        $this->validatePassword($password, $passAgain, (string) $user->username, $langConfirmResend);
 
         $secret = Token::randomHex();
         $clientHashedPassword = hash('sha256', $password);
@@ -326,7 +326,7 @@ class RegistrationService
 
         \App\Support\Cache::clearUser($user->id, '');
 
-        $this->sendConfirmationEmail($user->username, $email, $user->id, $editsecret, $ip, $langFolder, $langConfirmResend);
+        $this->sendConfirmationEmail((string) $user->username, $email, $user->id, $editsecret, $ip, $langFolder, $langConfirmResend);
 
         return 'ok.php?type=signup&email=' . rawurlencode($email);
     }
@@ -511,7 +511,7 @@ class RegistrationService
             return $baseUrl . '/confirm.php?id=' . $userId . '&secret=' . $psecret;
         }
 
-        $this->sendConfirmationEmail($user->username, $email, $userId, $secret, Network::clientIp(), $langFolder, $langTakesignup);
+        $this->sendConfirmationEmail((string) $user->username, $email, $userId, $secret, Network::clientIp(), $langFolder, $langTakesignup);
 
         return 'ok.php?type=signup&email=' . rawurlencode($email);
     }

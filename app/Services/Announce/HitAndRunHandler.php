@@ -17,6 +17,7 @@ final class HitAndRunHandler
      * @param array<string, mixed> $user
      * @param array<string, mixed> $torrent
      * @param array<string, mixed>|false $snatchInfo
+     * @return array<string, mixed>|null
      */
     public function handle(
         int $left,

@@ -105,7 +105,9 @@ final class Tasks
         }
 
         $cache = \App\Support\SupportContext::getCache();
-        $cache->delete_value('forums_list');
+        if ($cache !== null) {
+            $cache->delete_value('forums_list');
+        }
 
         return 'update forum post/topic count';
     }
@@ -272,13 +274,16 @@ final class Tasks
     // Offer helpers
     // ------------------------------------------------------------------------
 
+    /**
+     * @param array<string, mixed> $offerIds
+     */
     private function deleteOffers(array $offerIds, string $reason): void
     {
         if ($offerIds === []) {
             return;
         }
 
-        $ids = array_keys($offerIds);
+        $ids = array_values($offerIds);
 
         NexusDB::table('offervotes')->whereIn('offerid', $ids)->delete();
         NexusDB::table('comments')->whereIn('offer', $ids)->delete();
@@ -320,7 +325,7 @@ final class Tasks
             Torrent::PROMOTION_HALF_DOWN => '50%',
             Torrent::PROMOTION_HALF_DOWN_TWO_TIMES_UP => '2X 50%',
         ];
-        $become = $becomeMap[$targetState] ?? 'normal';
+        $become = $becomeMap[$targetState];
 
         $torrents = NexusDB::table('torrents')
             ->where('added', '<', $dt)
@@ -943,7 +948,11 @@ final class Tasks
                 'reason' => Locale::trans('cleanup.ban_user_with_leech_warning_expired', [], $user->locale),
             ];
 
-            UserOps::logModify($uid, 'Banned by System because of Leech Warning expired.', $user->modcomment);
+            $comment = 'Banned by System because of Leech Warning expired.';
+            if (! empty($user->modcomment)) {
+                $comment .= ' ' . $user->modcomment;
+            }
+            UserOps::logModify($uid, $comment);
         }
 
         User::query()->whereIn('id', $uidArr)->update(['enabled' => User::ENABLED_NO]);

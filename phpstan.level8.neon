@@ -15,6 +15,18 @@ parameters:
         - app/Providers
         - app/ValueObjects
         - app/DTOs
+        - app/Services
+        - app/Utils
+        - app/Auth
+        - app/Events
+        - app/Exceptions
+        - app/Logging
+        - app/Policies
+
+    excludePaths:
+        analyse:
+            - app/Services/Legacy
+            - app/Services/Captcha
 
     bootstrapFiles:
         - tests/phpstan/bootstrap.php
@@ -36,6 +48,9 @@ parameters:
     treatPhpDocTypesAsCertain: false
 
     ignoreErrors:
+        -
+            message: '#does not specify its types: TModel#'
+            path: app/Utils/ApiQueryBuilder.php
 
     universalObjectCratesClasses:
         - Illuminate\Http\Resources\Json\JsonResource

@@ -15,12 +15,15 @@ class TorrentDeleted
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
+    /**
+     * @var array<string, mixed>
+     */
     public ?array $data = null;
 
     /**
      * Create a new event instance.
      *
-     * @return void
+     * @param array<string, mixed> $data
      */
     public function __construct(array $data)
     {
@@ -30,10 +33,10 @@ class TorrentDeleted
     /**
      * Get the channels the event should broadcast on.
      *
-     * @return \Illuminate\Broadcasting\Channel|array
+     * @return array<int, \Illuminate\Broadcasting\Channel>
      */
-    public function broadcastOn()
+    public function broadcastOn(): array
     {
-        return new PrivateChannel('channel-name');
+        return [new PrivateChannel('channel-name')];
     }
 }

@@ -66,56 +66,32 @@ class TorrentRepository extends BaseRepository
     const BUY_STATUS_NOT_YET = -1;
     const BUY_STATUS_UNKNOWN = -2;
 
-    /** @var  array<int|string, mixed> */
-    /** @var  array<int|string, mixed> */
-    /** @var  array<int|string, mixed> */
-    /** @var  array<int|string, mixed> */
-    /** @var  array<int|string, mixed> */
+    /** @var array<int, string> */
     private static array $defaultLoadRelationships = [
         'basic_category', 'basic_category.search_box',
         'basic_audiocodec', 'basic_codec', 'basic_medium',
         'basic_source', 'basic_processing', 'basic_standard', ];
 
-    /** @var  array<int|string, mixed> */
-    /** @var  array<int|string, mixed> */
-    /** @var  array<int|string, mixed> */
-    /** @var  array<int|string, mixed> */
-    /** @var  array<int|string, mixed> */
+    /** @var array<int, string> */
     private static array $allowIncludes = ['user', 'extra', 'tags'];
 
-    /** @var  array<int|string, mixed> */
-    /** @var  array<int|string, mixed> */
-    /** @var  array<int|string, mixed> */
-    /** @var  array<int|string, mixed> */
-    /** @var  array<int|string, mixed> */
+    /** @var array<int, string> */
     private static array $allowIncludeCounts = ['thank_users', 'reward_logs'];
 
-    /** @var  array<int|string, mixed> */
-    /** @var  array<int|string, mixed> */
-    /** @var  array<int|string, mixed> */
-    /** @var  array<int|string, mixed> */
-    /** @var  array<int|string, mixed> */
+    /** @var array<int, string> */
     private static array $allowIncludeFields = [
         'has_bookmarked', 'has_thanked', 'has_rewarded',
         'description', 'download_url', 'active_status'
     ];
 
-    /** @var  array<int|string, mixed> */
-    /** @var  array<int|string, mixed> */
-    /** @var  array<int|string, mixed> */
-    /** @var  array<int|string, mixed> */
-    /** @var  array<int|string, mixed> */
-    private static array  $allowFilters = [
+    /** @var array<int, string> */
+    private static array $allowFilters = [
         'title', 'category', 'source', 'medium', 'codec', 'audiocodec', 'standard', 'processing',
         'owner', 'visible', 'added', 'size', 'sp_state', 'leechers', 'seeders', 'times_completed',
         'bookmark',
     ];
 
-    /** @var  array<int|string, mixed> */
-    /** @var  array<int|string, mixed> */
-    /** @var  array<int|string, mixed> */
-    /** @var  array<int|string, mixed> */
-    /** @var  array<int|string, mixed> */
+    /** @var array<int, string> */
     private static array $allowSorts = ['id', 'comments', 'size', 'seeders', 'leechers', 'times_completed'];
 
     /**

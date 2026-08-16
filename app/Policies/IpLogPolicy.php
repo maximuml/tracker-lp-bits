@@ -66,7 +66,7 @@ class IpLogPolicy extends BasePolicy
         return $this->can($user);
     }
 
-    private function can(User $user)
+    private function can(User $user): bool
     {
         if ($user->class >= User::CLASS_SYSOP) {
             return true;

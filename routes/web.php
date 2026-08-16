@@ -79,34 +79,35 @@ Route::post('/takeupload', [TorrentUploadController::class, 'legacyStore'])
     ->name('torrents.legacy-store');
 
 Route::get('/edit', [TorrentEditController::class, 'legacy'])
-    ->middleware('auth.nexus:nexus-web')
+    ->middleware(['auth.nexus:nexus-web', 'throttle:legacy'])
     ->name('torrents.legacy-edit');
 
 Route::post('/takeedit', [TorrentEditController::class, 'legacyUpdate'])
-    ->middleware('auth.nexus:nexus-web')
+    ->middleware(['auth.nexus:nexus-web', 'throttle:legacy'])
     ->name('torrents.legacy-update');
 
 Route::get('/download', [TorrentDownloadController::class, 'download'])
+    ->middleware('throttle:download')
     ->name('torrents.download');
 
 
-Route::middleware(['web', 'locale'])->group(base_path('routes/legacy/public.php'));
+Route::middleware(['web', 'locale', 'throttle:legacy'])->group(base_path('routes/legacy/public.php'));
 
-Route::group(['middleware' => ['auth.nexus:nexus-web']], base_path('routes/legacy/auth.php'));
+Route::group(['middleware' => ['auth.nexus:nexus-web', 'throttle:legacy']], base_path('routes/legacy/auth.php'));
 
 Route::match(['get', 'post'], '/forums', [ForumController::class, 'legacy'])
-    ->middleware('auth.nexus:nexus-web')
+    ->middleware(['auth.nexus:nexus-web', 'throttle:legacy'])
     ->name('forums.legacy');
 
 Route::get('/userdetails', [UserDetailController::class, 'show'])
-    ->middleware('auth.nexus:nexus-web')
+    ->middleware(['auth.nexus:nexus-web', 'throttle:legacy'])
     ->name('user.details');
 
 Route::match(['get', 'post'], '/usercp', [UsercpController::class, 'legacy'])
-    ->middleware('auth.nexus:nexus-web')
+    ->middleware(['auth.nexus:nexus-web', 'throttle:legacy'])
     ->name('usercp.legacy');
 
-Route::group(['prefix' => 'web', 'middleware' => ['auth.nexus:nexus-web']], function () {
+Route::group(['prefix' => 'web', 'middleware' => ['auth.nexus:nexus-web', 'throttle:legacy']], function () {
     Route::get('torrent-approval-page', [\App\Http\Controllers\TorrentController::class, 'approvalPage']);
     Route::get('torrent-approval-logs', [\App\Http\Controllers\TorrentController::class, 'approvalLogs']);
     Route::post('torrent-approval', [\App\Http\Controllers\TorrentController::class, 'approval']);

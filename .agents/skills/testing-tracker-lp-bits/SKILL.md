@@ -519,3 +519,45 @@ All active legacy PHP partials under `app/Services/Legacy/partials/` are now ren
 - `php artisan view:cache`, `php artisan route:cache`, and `openresty -t` succeed after browsing.
 - Screenshot key pages in both desktop (1280x900) and mobile (375x667) viewports; legacy fixed-width themes may overflow horizontally on mobile but must not hide primary content.
 
+## Testing PR #359-#362 (Phase 21 performance / profiling / queue)
+
+### Scope
+
+Phase 21 combines:
+
+- `devin/phase21-perf` (#359, cache/eager-load)
+- `devin/phase21-5-3-octane` (#360, MySQL read/write split + stateless `SupportContext`)
+- `devin/phase21-4-jobs` (#361, Horizon queue jobs, `cleanup` container removed)
+- `devin/phase21-6-profiling` (#362, `X-Queries-Count` header)
+
+### Quick verification checklist
+
+1. `docker compose -p tracker-lp-bits up -d --remove-orphans` must remove the `nexusphp-cleanup` container.
+2. `docker exec -i nexusphp-queue pgrep -f horizon` must show `php artisan horizon` and worker processes.
+3. Static gates: `composer validate --strict`, `php -l` (inside the `php` container on `/var/www/html/app` and `/var/www/html/routes`), `phpstan` default/level5.app/level6, `phpunit --testsuite Unit`, `php artisan view:cache`, `php artisan route:cache`, `openresty -t`.
+4. `X-Queries-Count` header must be present on legacy pages and contain a non-negative integer. Verify with:
+   ```bash
+   curl -s -D - -o /dev/null -b "c_secure_pass=$(cat cookie.txt)" http://openresty/index.php
+   curl -s -D - -o /dev/null -b "c_secure_pass=$(cat cookie.txt)" http://openresty/forums.php
+   ```
+5. Read/write split sticky behavior: create a temporary `public/rw_test.php` that boots Laravel, runs a `users` `UPDATE`, and compares `DB::connection('mysql')->getReadPdo()` with `getPdo()` in the same request. The two PDO objects must be identical after a write:
+   ```php
+   $conn = DB::connection('mysql');
+   $conn->table('users')->where('id', $sysopId)->update(['last_access' => now()->toDateTimeString()]);
+   echo json_encode(['read_is_write' => $conn->getReadPdo() === $conn->getPdo()]);
+   ```
+6. Stateless `SupportContext`: hit `/index.php` with a sysop cookie and then with a second-user cookie in sequence; each response must contain the matching username (`<b>devintest</b>` vs `<b>crit63522073</b>`) and no cross-request leakage.
+7. DB mutations still work: forum new topic (`POST /forums.php action=post&type=new&id=179`), offer add/vote/delete (`/offers.php`), PM send/delete (`/takemessage.php`, `/deletemessage.php`), `usercp.php` personal/forum/tracker save forms, `catmanage.php?action=del`, and shoutbox post/delete.
+8. API `POST /api/v1/usercp/settings` and `POST /api/v1/usercp/forum` with a Sanctum Bearer token must return `{"ret":0,...}`.
+9. Queue jobs: `AttendanceJob`, `CleanupJob`, `HrCheckJob`, `SeedBonusJob`, `UpdateTorrentSeedersEtc`, `UpdateUserSeedingLeechingTime` should dispatch without throwing. A helper script using `dispatch_sync()` inside the `php` container is fine for E2E verification. Check `failed_jobs` is empty afterwards.
+10. `php artisan cleanup:run --force` must complete and print `Full cleanup is done`.
+11. Benchmark with `ab` (or `curl` loop) for `/index.php` and `/forums.php` using the sysop cookie; capture `Requests per second`, `Failed requests`, and `X-Queries-Count` values.
+
+### Common gotchas
+
+- `php -l` on the host will fail because `php` is not installed on the VM; run it inside `nexusphp-php` against `/var/www/html/app` and `/var/www/html/routes`.
+- Temporary helper scripts that need to be hit from the browser (`rw_test.php`) must be placed under `public/`, not the repo root, because the web root is `/var/www/html/public`.
+- `php artisan cleanup:run --force` may report 0 cost time if all cleanup classes ran recently; the important signal is `Full cleanup is done` and no exceptions.
+- `ab` cannot pass cookie values containing `=` using `-C`; use `-H "Cookie: c_secure_pass=<token>"` instead.
+- `composer validate` must be run from `/var/www/html` inside the `php` container.
+

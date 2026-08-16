@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Jobs\CalculateUserSeedBonus;
+use App\Jobs\SeedBonusJob;
 use App\Jobs\UpdateTorrentSeedersEtc;
 use App\Jobs\UpdateUserSeedingLeechingTime;
 use Illuminate\Console\Command;
@@ -38,7 +38,7 @@ class Cleanup extends Command
         $delay = (int) ($this->option('delay') ?: 0);
         $this->info("beginId: $beginId, endId: $endId, idStr: $idStr, idRedisKey: $idRedisKey, commentRequestId: $commentRequestId, delay: $delay, action: $action");
         if ($action == 'seed_bonus') {
-            CalculateUserSeedBonus::dispatch($beginId, $endId, $idStr, $idRedisKey, $commentRequestId)->delay($delay);
+            SeedBonusJob::dispatch($beginId, $endId, $idStr, $idRedisKey, $commentRequestId)->delay($delay);
         } elseif ($action == 'seeding_leeching_time') {
             UpdateUserSeedingLeechingTime::dispatch($beginId, $endId, $idStr, $idRedisKey, $commentRequestId)->delay($delay);
         }elseif ($action == 'seeders_etc') {

@@ -2,6 +2,9 @@
 namespace App\Repositories;
 
 use App\Http\Middleware\Locale;
+use App\Jobs\SeedBonusJob;
+use App\Jobs\UpdateTorrentSeedersEtc;
+use App\Jobs\UpdateUserSeedingLeechingTime;
 use App\Models\Avp;
 use App\Models\NexusModel;
 use App\Models\Setting;
@@ -159,12 +162,16 @@ class CleanupRepository extends BaseRepository
                 $idStr = implode(",", $validFields);
                 $idRedisKey = self::IDS_KEY_PREFIX . Str::random();
                 NexusDB::cache_put($idRedisKey, $idStr);
-                $command = sprintf(
-                    'cleanup --action=%s --begin_id=%s --end_id=%s --id_redis_key=%s --request_id=%s --delay=%s',
-                    $batchKeyInfo['action'], 0, 0,  $idRedisKey, $requestId, $delay
-                );
-                $output = \App\Support\Environment::run($command, 'string', (bool) true, (bool) true);
-                \App\Support\Logger::writeWithContext((string) sprintf('output: %s', $output), (string) 'info', (bool) false);
+                $action = $batchKeyInfo['action'];
+                $delaySeconds = (int) $delay;
+                if ($action === 'seed_bonus') {
+                    SeedBonusJob::dispatch(0, 0, '', $idRedisKey, $requestId)->delay($delaySeconds);
+                } elseif ($action === 'seeding_leeching_time') {
+                    UpdateUserSeedingLeechingTime::dispatch(0, 0, '', $idRedisKey, $requestId)->delay($delaySeconds);
+                } elseif ($action === 'seeders_etc') {
+                    UpdateTorrentSeedersEtc::dispatch(0, 0, '', $idRedisKey, $requestId)->delay($delaySeconds);
+                }
+                \App\Support\Logger::writeWithContext((string) sprintf('[runBatchJob] dispatched %s job, idRedisKey: %s', $action, $idRedisKey), (string) 'info', (bool) false);
                 $count += count($validFields);
             }
             if (!empty($toRemoveFields)) {

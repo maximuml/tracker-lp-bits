@@ -84,31 +84,6 @@ services:
       - appnet
     restart: always
 
-  cleanup:
-    image: nexusphp_php
-    container_name: nexusphp-cleanup
-    environment:
-      SERVICE_NAME: cleanup
-      MEILISEARCH_HOST: ${MEILISEARCH_HOST:-meilisearch}
-      MEILISEARCH_MASTER_KEY: ${MEILISEARCH_MASTER_KEY:-nexusphp_default_key}
-    volumes:
-      - .:/var/www/html
-    depends_on:
-      php:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-      mysql:
-        condition: service_healthy
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "1024m"
-        max-file: "3"
-    networks:
-      - appnet
-    restart: always
-
   openresty:
     build:
       dockerfile: .docker/openresty/Dockerfile

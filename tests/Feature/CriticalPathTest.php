@@ -2,7 +2,7 @@
 
 namespace Tests\Feature;
 
-use App\Jobs\CalculateUserSeedBonus;
+use App\Jobs\SeedBonusJob;
 use App\Models\Torrent;
 use App\Models\User;
 use App\Support\Settings;
@@ -286,7 +286,7 @@ class CriticalPathTest extends TestCase
         $this->assertArrayHasKey('interval', $startResponse, 'Start announce response missing interval');
 
         // 6. Calculate seed bonus for the user
-        dispatch_sync(new CalculateUserSeedBonus($user->id, $user->id, (string) $user->id, ''));
+        dispatch_sync(new SeedBonusJob($user->id, $user->id, (string) $user->id, ''));
         $user->refresh();
         $this->assertGreaterThan(0, (float) $user->seed_points_per_hour, 'Seed points per hour were not updated');
 

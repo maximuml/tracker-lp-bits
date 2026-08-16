@@ -20,7 +20,7 @@ use Illuminate\Queue\SerializesModels;
 use Nexus\Database\NexusDB;
 use Nexus\Nexus;
 
-class CalculateUserSeedBonus implements ShouldQueue
+class SeedBonusJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 

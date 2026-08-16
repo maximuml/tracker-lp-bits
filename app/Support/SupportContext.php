@@ -15,7 +15,7 @@ final class SupportContext
 {
     public static function fromRequest(Request $request): void
     {
-        app()->instance(NexusContext::class, NexusContext::fromRequest($request));
+        self::context()->setFromRequest($request);
     }
 
     public static function reset(): void

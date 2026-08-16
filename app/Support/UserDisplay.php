@@ -212,7 +212,10 @@ final class UserDisplay
             }
 
             $medal = $userMedal->medal;
-            $medalsByUser[$uid][] = $medal ? $medal->toArray() : [];
+            if (! $medal) {
+                continue;
+            }
+            $medalsByUser[$uid][] = $medal->toArray();
         }
 
         foreach ($users as $user) {

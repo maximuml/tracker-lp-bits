@@ -1460,7 +1460,7 @@ HTML;
      */
     public function deleteTorrents(int|array $id, bool $notify = false): void
     {
-        $idArr = is_array($id) ? $id : [$id];
+        $idArr = array_map('intval', is_array($id) ? $id : [$id]);
 
         $torrentInfo = Torrent::query()
             ->whereIn('id', $idArr)

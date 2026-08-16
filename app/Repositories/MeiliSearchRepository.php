@@ -418,7 +418,7 @@ class MeiliSearchRepository extends BaseRepository
         }
         foreach ($taxonomies as $key => $values) {
             if (!empty($values)) {
-                $filters[] = sprintf("%s IN [%s]", $key, implode(', ', $values));
+                $filters[] = sprintf("%s IN [%s]", $key, implode(', ', array_map('intval', $values)));
             }
         }
 
@@ -471,7 +471,7 @@ class MeiliSearchRepository extends BaseRepository
         }
 
         if (isset($params['approval_status']) && is_numeric($params['approval_status'])) {
-            $filters[] = "approval_status = " . $params['approval_status'];
+            $filters[] = "approval_status = " . (int) $params['approval_status'];
             \App\Support\Logger::writeWithContext((string) "approval_status = {$params['approval_status']} through approval_status: {$params['approval_status']}", (string) 'info', (bool) false);
         }
 

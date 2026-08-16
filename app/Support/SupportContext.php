@@ -13,18 +13,14 @@ use Illuminate\Http\Request;
  */
 final class SupportContext
 {
-    private static ?NexusContext $context = null;
-
     public static function fromRequest(Request $request): void
     {
-        $context = self::$context ?? new NexusContext();
-        $context->setFromRequest($request);
-        self::$context = $context;
+        self::context()->setFromRequest($request);
     }
 
     public static function reset(): void
     {
-        self::$context = new NexusContext();
+        app()->instance(NexusContext::class, new NexusContext());
     }
 
     public static function getContext(): NexusContext
@@ -34,7 +30,11 @@ final class SupportContext
 
     private static function context(): NexusContext
     {
-        return self::$context ?? (self::$context = new NexusContext());
+        if (! app()->bound(NexusContext::class)) {
+            app()->instance(NexusContext::class, new NexusContext());
+        }
+
+        return app(NexusContext::class);
     }
 
     /** @param array<string, mixed>|null $user */

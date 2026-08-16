@@ -82,7 +82,7 @@ final class Permissions
         if (defined('IN_NEXUS') && IN_NEXUS && !(defined('IN_TRACKER') && IN_TRACKER)) {
             $lang_functions = SupportContext::getLangFunctions();
             $requireClass = \App\Support\Config\SiteConfig::current()->authority->permission($permission);
-            if (isset(User::$classes[$requireClass])) {
+            if ($requireClass !== null && isset(User::$classes[$requireClass])) {
                 \App\Support\LegacyResponse::abort($lang_functions['std_sorry'], $lang_functions['std_permission_denied_only'] . \App\Support\UserClass::name($requireClass, false, true, true) . sprintf($lang_functions['std_or_above_can_view'], \App\Support\Config\SiteConfig::current()->basic->siteName()), false);
             } else {
                 \App\Support\LegacyResponse::abort($lang_functions['std_error'], $lang_functions['std_permission_denied']);

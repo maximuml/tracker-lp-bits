@@ -21,11 +21,11 @@ final class Country
     public static function row(mixed $cache, int|string $id): ?array
     {
         $cacheKey = 'country_' . $id . '_content';
-        $row = method_exists($cache, 'get_value') ? $cache->get_value($cacheKey) : false;
+        $row = is_object($cache) && method_exists($cache, 'get_value') ? $cache->get_value($cacheKey) : false;
 
         if ($row === false) {
             $row = \App\Repositories\CountryRepository::findById($id);
-            if (method_exists($cache, 'cache_value')) {
+            if (is_object($cache) && method_exists($cache, 'cache_value')) {
                 $cache->cache_value($cacheKey, $row, 86400);
             }
         }

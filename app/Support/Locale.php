@@ -31,7 +31,7 @@ final class Locale
      */
     public static function available(): array
     {
-        return Language::listAvailable();
+        return array_values(array_map('strval', Language::listAvailable()));
     }
 
     public static function folderFromCookie(?string $cookieValue, bool $transToLocale = false): string
@@ -118,7 +118,7 @@ final class Locale
     {
         $folder = $target ? '_target' : $langFolder;
         if ($scriptName === '') {
-            $scriptName = substr(strrchr($serverScriptName, '/'), 1) ?: '';
+            $scriptName = substr((string) strrchr($serverScriptName, '/'), 1) ?: '';
         }
 
         return 'lang/' . $folder . '/lang_' . $scriptName;

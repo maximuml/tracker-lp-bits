@@ -23,7 +23,7 @@ final class TorrentBookmark
         $userId = (int) $userId;
         $cacheKey = 'user_' . $userId . '_bookmark_array';
 
-        if (method_exists($cache, 'get_value')) {
+        if (is_object($cache) && method_exists($cache, 'get_value')) {
             $ret = $cache->get_value($cacheKey);
             if ($ret !== false && is_array($ret)) {
                 return $ret;
@@ -32,7 +32,7 @@ final class TorrentBookmark
 
         $ret = app(\App\Repositories\TorrentRepository::class)->getBookmarkTorrentIds($userId);
 
-        if (method_exists($cache, 'cache_value')) {
+        if (is_object($cache) && method_exists($cache, 'cache_value')) {
             $cache->cache_value($cacheKey, $ret, 132800);
         }
 

@@ -37,6 +37,7 @@ final class Events
             Logger::writeWithContext("success fire_event in nexus, name: $name, idKey: $idKey, idKeyOld: $idKeyOld");
         } else {
             $eventClass = \App\Enums\ModelEventEnum::$eventMaps[$name]['event'];
+            /** @var class-string $eventClass */
             if (str_ends_with($name, '_deleted')) {
                 $params = [$model->toArray()];
                 if ($oldModel) {
@@ -48,7 +49,7 @@ final class Events
                     $params[] = $oldModel;
                 }
             }
-            call_user_func_array([$eventClass, 'dispatch'], $params);
+            app(\Illuminate\Contracts\Events\Dispatcher::class)->dispatch(new $eventClass(...$params));
             self::publishModel($name, (int) $model->getKey(), $model->toJson());
             Logger::writeWithContext('success fire_event in laravel, name: ' . $name . ', id: ' . $model->getKey() . ', oldId: ' . ($oldModel ? $oldModel->getKey() : ''));
         }
@@ -65,7 +66,7 @@ final class Events
         if (!empty($channel)) {
             \Nexus\Database\NexusDB::redis()->publish($channel, json_encode(['event' => $event, 'id' => $id, 'json' => $json]));
         } else {
-            Logger::writeWithContext("event: $event, id: $id, channel: $channel, channel is empty!", 'error');
+            Logger::writeWithContext("event: $event, id: $id, channel: " . (is_scalar($channel) ? (string) $channel : '') . ", channel is empty!", 'error');
         }
     }
 }

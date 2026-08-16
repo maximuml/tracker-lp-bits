@@ -667,12 +667,12 @@ class PageLayout
             }
             print "</ul>";
             print "Redis key read: <ul>";
-            foreach ($context->cache?->getKeyHits('read') as $keyName => $hits) {
+            foreach (($context->cache?->getKeyHits('read') ?? []) as $keyName => $hits) {
                 print "<li>" . htmlspecialchars($keyName) . " : " . $hits . "</li>";
             }
             print "</ul>";
             print "Redis key write: <ul>";
-            foreach ($context->cache?->getKeyHits('write') as $keyName => $hits) {
+            foreach (($context->cache?->getKeyHits('write') ?? []) as $keyName => $hits) {
                 print "<li>" . htmlspecialchars($keyName) . " : " . $hits . "</li>";
             }
             print "</ul>";

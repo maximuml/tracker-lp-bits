@@ -17,7 +17,7 @@ final class Menu
      *
      * @param  array<string, string>  $langFunctions
      * @param  array<string, mixed>|null  $user
-     * @param  object|null  $cache
+     * @param  \App\Support\Cache\LegacyRedisCache|null  $cache
      * @return array{html: string, selected: string}
      */
     public static function render(
@@ -26,7 +26,7 @@ final class Menu
         string $enableOffer,
         ?string $customMenu,
         ?array $user = null,
-        ?object $cache = null,
+        ?\App\Support\Cache\LegacyRedisCache $cache = null,
         string $langDir = '',
     ): array {
         $selected = self::selectedItem($scriptName);

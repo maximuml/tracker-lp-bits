@@ -31,12 +31,15 @@ class TorrentNameParser
         }
 
         // 2. Remove the date block and common quality/format tags
-        $cleaned = preg_replace('/\s*\(\d{2}\.\d{2}\.\d{4}\)\s*$/', '', $name);
-        $cleaned = preg_replace('/\s*[\[(].*?[\])]/s', '', $cleaned);
+        $cleaned = (string) preg_replace('/\s*\(\d{2}\.\d{2}\.\d{4}\)\s*$/', '', $name);
+        $cleaned = (string) preg_replace('/\s*[\[(].*?[\])]/s', '', $cleaned);
         $cleaned = trim($cleaned);
 
         // 3. Split artist from the rest: "Artist - rest"
         $parts = preg_split('/\s+-\s+/', $cleaned, 2);
+        if ($parts === false) {
+            $parts = [];
+        }
         $artist = trim($parts[0] ?? '');
         $remainder = trim($parts[1] ?? '');
 

@@ -186,6 +186,9 @@ class AttachmentService
 	// at least 2 frame headers
     		while(!feof($fh) && $count < 2){
         		$chunk = fread($fh, 1024 * 100); //read 100kb at a time
+                if ($chunk === false) {
+                    break;
+                }
         		$count += preg_match_all('#\x00\x21\xF9\x04.{4}\x00\x2C#s', $chunk, $matches);
 		}
     		return $count > 1;

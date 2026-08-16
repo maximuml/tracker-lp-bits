@@ -16,7 +16,7 @@ use Illuminate\Support\HtmlString;
  */
 final class UserDisplay
 {
-    /** @var array<int, array<string, mixed>|false> */
+    /** @var array<int|string, array<int|string, mixed>|false> */
     private static array $rowCache = [];
 
     /** @var array<int, string> */
@@ -114,7 +114,7 @@ final class UserDisplay
      *
      * Mirrors `get_user_row()`.
      *
-     * @return array<string, mixed>|false
+     * @return array<int|string, mixed>|false
      */
     public static function row(int|string $id): array|false
     {
@@ -137,7 +137,14 @@ final class UserDisplay
             return Hooks::applyFilter('user_row', $arr);
         });
 
-        return self::$rowCache[$id] = ($row ?: false);
+        if (is_array($row)) {
+            /** @var array<int|string, mixed> $row */
+            self::$rowCache[$id] = $row;
+            return $row;
+        }
+
+        self::$rowCache[$id] = false;
+        return false;
     }
 
     /**
@@ -156,7 +163,7 @@ final class UserDisplay
             return;
         }
 
-        $missing = array_diff($ids, array_keys(self::$rowCache));
+        $missing = array_values(array_diff($ids, array_keys(self::$rowCache)));
         if ($missing === []) {
             return;
         }

@@ -18,14 +18,19 @@ final class SettingsRepository
      */
     public static function render(array $data = []): string
     {
-        extract($data, EXTR_SKIP);
-        $partial = base_path('resources/legacy/settings.php');
-        if (! File::exists($partial)) {
+        $__renderer_partial = base_path('resources/legacy/settings.php');
+        $__renderer_data = $data;
+        unset($__renderer_data['__renderer_partial'], $__renderer_data['__renderer_data']);
+        if (! File::exists($__renderer_partial)) {
             return 'Legacy settings partial missing.';
         }
+        $render = static function () use ($__renderer_partial, $__renderer_data): void {
+            extract($__renderer_data);
+            /** @noinspection PhpIncludeInspection */
+            include $__renderer_partial;
+        };
         ob_start();
-        /** @noinspection PhpIncludeInspection */
-        include $partial;
+        $render();
         return (string) ob_get_clean();
     }
 }

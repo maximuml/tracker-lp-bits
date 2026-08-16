@@ -78,10 +78,11 @@ class AttachmentLegacyService
 		}
 		$banned_ext = array(
 		    'exe', 'com', 'bat', 'msi',
-		    'php', 'php3', 'php4', 'php5', 'phtml', 'phar', 'phtm',
+		    'php', 'php3', 'php4', 'php5', 'php7', 'php8', 'phtml', 'phar', 'phtm', 'pht', 'phps',
 		    'pl', 'py', 'sh', 'cgi', 'cmd', 'scr', 'vbs', 'wsf',
 		    'html', 'htm', 'xhtml', 'shtml', 'js', 'css',
 		    'htaccess', 'htpasswd', 'ini', 'json', 'log',
+		    'jsp', 'asp', 'aspx', 'asa', 'cer', 'xml', 'svg',
 		);
 		$img_ext = \App\Models\Attachment::IMG_EXTENSIONS;
 
@@ -98,6 +99,10 @@ class AttachmentLegacyService
 			$warning = $lang['text_file_size_too_big'];
 		}
 		elseif (!in_array($ext, $allowed_exts) || in_array($ext, $banned_ext)) //the file extension is banned
+		{
+			$warning = $lang['text_file_extension_not_allowed'];
+		}
+		elseif (self::isDangerousMimeType($file['tmp_name'])) //actual file content is a script/executable
 		{
 			$warning = $lang['text_file_extension_not_allowed'];
 		}
@@ -326,5 +331,50 @@ class AttachmentLegacyService
 	
 
         return compact('warning', 'script', 'count_left');
+    }
+
+    /**
+     * Reject files whose actual content is a script/executable regardless of
+     * the allowed extension list configured by an admin.
+     */
+    private static function isDangerousMimeType(string $tmpName): bool
+    {
+        if (! file_exists($tmpName)) {
+            return false;
+        }
+
+        if (function_exists('finfo_open')) {
+            $finfo = finfo_open(FILEINFO_MIME_TYPE);
+            $mime = $finfo !== false ? finfo_file($finfo, $tmpName) : false;
+            if ($finfo !== false) {
+                finfo_close($finfo);
+            }
+        } elseif (function_exists('mime_content_type')) {
+            $mime = mime_content_type($tmpName);
+        } else {
+            $mime = false;
+        }
+
+        if ($mime === false) {
+            return false;
+        }
+
+        $dangerous = [
+            'text/x-php', 'application/x-php', 'application/php',
+            'text/x-perl', 'text/x-python', 'application/x-python',
+            'application/x-sh', 'application/x-shellscript',
+            'application/x-msdownload', 'application/x-msdos-program', 'application/x-exe',
+            'application/javascript', 'text/javascript', 'application/x-javascript',
+            'text/html', 'application/xhtml+xml', 'text/x-asp', 'application/x-asp',
+            'application/x-java-archive', 'application/java-archive',
+        ];
+
+        foreach ($dangerous as $prefix) {
+            if (str_starts_with((string) $mime, $prefix)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

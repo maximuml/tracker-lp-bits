@@ -154,7 +154,7 @@ final class AuthCookie
             'path' => '/',
             'secure' => $secure,
             'httponly' => true,
-            'samesite' => 'Strict',
+            'samesite' => 'Lax',
         ];
         setcookie(self::COOKIE_NAME, $token, $options);
 
@@ -179,7 +179,7 @@ final class AuthCookie
             'path' => '/',
             'secure' => \App\Support\Url::isSecure(),
             'httponly' => true,
-            'samesite' => 'Strict',
+            'samesite' => 'Lax',
         ];
         setcookie(self::COOKIE_NAME, '', $options);
     }

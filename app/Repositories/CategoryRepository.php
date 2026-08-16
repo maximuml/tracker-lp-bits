@@ -164,12 +164,18 @@ final class CategoryRepository
             return 'Legacy catmanage partial missing.';
         }
 
-        extract(SupportContext::getGlobalsForView(), EXTR_SKIP);
-        extract($data, EXTR_SKIP);
+        $__renderer_partial = $partial;
+        $__renderer_data = $data;
+        unset($__renderer_data['__renderer_partial'], $__renderer_data['__renderer_data']);
+        $render = static function () use ($__renderer_partial, $__renderer_data): void {
+            extract(SupportContext::getGlobalsForView(), EXTR_SKIP);
+            extract($__renderer_data);
+            /** @noinspection PhpIncludeInspection */
+            include $__renderer_partial;
+        };
 
         ob_start();
-        /** @noinspection PhpIncludeInspection */
-        include $partial;
+        $render();
 
         return (string) ob_get_clean();
     }

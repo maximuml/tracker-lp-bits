@@ -574,8 +574,8 @@ class HitAndRunRepository extends BaseRepository
         $ids = $list->pluck('id')->map('intval')->all();
         $placeholders = implode(',', array_fill(0, count($ids), '?'));
         $affected = DB::update(
-            "UPDATE hit_and_runs SET status = ?, comment = CASE WHEN comment = '' THEN ? ELSE CONCAT('\\n', ?, comment) END WHERE id IN ({$placeholders})",
-            array_merge([HitAndRun::STATUS_PARDONED, $prefix, $prefix], $ids)
+            "UPDATE hit_and_runs SET status = ?, updated_at = ?, comment = CASE WHEN comment = '' THEN ? ELSE CONCAT('\\n', ?, comment) END WHERE id IN ({$placeholders})",
+            array_merge([HitAndRun::STATUS_PARDONED, Carbon::now()->toDateTimeString(), $prefix, $prefix], $ids)
         );
         \App\Support\Logger::writeWithContext((string) sprintf('user: %s bulk pardon by filter: %s, affected: %s', $user->id, json_encode($params), $affected), (string) 'alert', (bool) false);
         if ($affected) {

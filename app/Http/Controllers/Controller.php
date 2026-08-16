@@ -20,24 +20,17 @@ class Controller extends BaseController
 {
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
 
-    /** @var  ?array<int|string, mixed> */
-    /** @var  ?array<int|string, mixed> */
-    /** @var  ?array<int|string, mixed> */
-    /** @var  ?array<int|string, mixed> */
-    /** @var  ?array<int|string, mixed> */
+    /** @var  ?list<string>  */
     protected ?array $extraFields = null;
-    /** @var  ?array<int|string, mixed> */
-    /** @var  ?array<int|string, mixed> */
-    /** @var  ?array<int|string, mixed> */
-    /** @var  ?array<int|string, mixed> */
-    /** @var  ?array<int|string, mixed> */
+
+    /** @var  ?list<string>  */
     protected ?array $extraSettingNames = null;
 
     /**
      * 返回成功信息
      * @param  mixed  $data
      * @param  mixed  $msg
-     * @return  array<int|string, mixed>
+     * @return  array<string, mixed>
      */
     public function success($data, $msg = null): array
     {
@@ -53,7 +46,7 @@ class Controller extends BaseController
      * 返回成功信息，对于不是 JsonResource 的数据，进行包装。返回的数据在 data.data 中
      * @param  mixed  $data
      * @param  mixed  $msg
-     * @return  array<int|string, mixed>
+     * @return  array<string, mixed>
      * @deprecated 没有必要，已经在 api() 中添加 data 包裹，使用 success() 即可
      */
     public function successJsonResource($data, $msg = null): array
@@ -74,7 +67,7 @@ class Controller extends BaseController
      * 返回失败信息，目前对于失败信息不需要包装
      * @param  mixed  $data
      * @param  mixed  $msg
-     * @return  array<int|string, mixed>
+     * @return  array<string, mixed>
      */
     public function fail($data, $msg = null)
     {

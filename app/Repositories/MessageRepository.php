@@ -2,6 +2,7 @@
 namespace App\Repositories;
 
 use App\Auth\Permission;
+use App\DTOs\Message\StoreMessageDto;
 use App\Enums\Permission\PermissionEnum;
 use App\Models\Message;
 use App\Models\Setting;
@@ -219,14 +220,9 @@ class MessageRepository extends BaseRepository
         return $query->paginate();
     }
 
-    /**
-     * @param  array<int|string, mixed>  $params
-     * @return  mixed
-     */
-    public function store(array $params)
+    public function store(StoreMessageDto $dto): Message
     {
-        $model = Message::query()->create($params);
-        return $model;
+        return Message::query()->create($dto->toArray());
     }
 
     /**

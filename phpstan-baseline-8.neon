@@ -91,114 +91,6 @@ parameters:
 			path: app/Http/Controllers/AdminController.php
 
 		-
-			message: '#^Method App\\Http\\Controllers\\AgentAllowController\:\:all\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/AgentAllowController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\AgentAllowController\:\:check\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/AgentAllowController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\AgentAllowController\:\:destroy\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/AgentAllowController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\AgentAllowController\:\:index\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/AgentAllowController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\AgentAllowController\:\:show\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/AgentAllowController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\AgentAllowController\:\:store\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/AgentAllowController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\AgentAllowController\:\:update\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/AgentAllowController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\AgentDenyController\:\:destroy\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/AgentDenyController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\AgentDenyController\:\:index\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/AgentDenyController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\AgentDenyController\:\:show\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/AgentDenyController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\AgentDenyController\:\:store\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/AgentDenyController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\AgentDenyController\:\:update\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/AgentDenyController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\AttendanceController\:\:attend\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/AttendanceController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\AuthenticateController\:\:ammdsApprove\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 2
-			path: app/Http/Controllers/AuthenticateController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\AuthenticateController\:\:challenge\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 2
-			path: app/Http/Controllers/AuthenticateController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\AuthenticateController\:\:login\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/AuthenticateController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\AuthenticateController\:\:logout\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/AuthenticateController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\AuthenticateController\:\:nasToolsApprove\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 2
-			path: app/Http/Controllers/AuthenticateController.php
-
-		-
 			message: '#^Cannot access offset 0 on array\{0\: int\<0, max\>, 1\: int\<0, max\>, 2\: int, 3\: string, mime\: string, channels\?\: int, bits\?\: int\}\|false\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
@@ -289,196 +181,10 @@ parameters:
 			path: app/Http/Controllers/BonusController.php
 
 		-
-			message: '#^Method App\\Http\\Controllers\\BookmarkController\:\:destroy\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/BookmarkController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\BookmarkController\:\:store\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/BookmarkController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\CommentController\:\:index\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/CommentController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\CommentController\:\:store\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/CommentController.php
-
-		-
 			message: '#^Offset ''type'' might not exist on array\{type\?\: mixed, torrent\?\: mixed, text\?\: mixed, ori_text\?\: mixed, offer\?\: mixed, request\?\: mixed, anonymous\?\: mixed\}\.$#'
 			identifier: offsetAccess.notFound
 			count: 1
 			path: app/Http/Controllers/CommentController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\DashboardController\:\:latestTorrent\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/DashboardController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\DashboardController\:\:latestUser\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/DashboardController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\DashboardController\:\:statData\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/DashboardController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\DashboardController\:\:systemInfo\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/DashboardController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\ExamController\:\:all\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/ExamController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\ExamController\:\:destroy\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/ExamController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\ExamController\:\:index\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/ExamController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\ExamController\:\:indexes\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/ExamController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\ExamController\:\:show\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/ExamController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\ExamController\:\:store\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/ExamController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\ExamController\:\:update\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/ExamController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\ExamUserController\:\:avoid\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/ExamUserController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\ExamUserController\:\:destroy\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/ExamUserController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\ExamUserController\:\:index\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/ExamUserController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\ExamUserController\:\:recover\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/ExamUserController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\ExamUserController\:\:store\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/ExamUserController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\FileController\:\:index\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/FileController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\ForumController\:\:destroy\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/ForumController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\ForumController\:\:index\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/ForumController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\ForumController\:\:show\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/ForumController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\ForumController\:\:store\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/ForumController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\ForumController\:\:update\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/ForumController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\HitAndRunController\:\:destroy\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/HitAndRunController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\HitAndRunController\:\:index\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/HitAndRunController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\HitAndRunController\:\:show\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/HitAndRunController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\HitAndRunController\:\:store\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/HitAndRunController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\HitAndRunController\:\:update\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/HitAndRunController.php
 
 		-
 			message: '#^Cannot call method delete_value\(\) on object\|null\.$#'
@@ -529,72 +235,6 @@ parameters:
 			path: app/Http/Controllers/LogController.php
 
 		-
-			message: '#^Method App\\Http\\Controllers\\MedalController\:\:destroy\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/MedalController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\MedalController\:\:index\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/MedalController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\MedalController\:\:show\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/MedalController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\MedalController\:\:store\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/MedalController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\MedalController\:\:update\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/MedalController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\MessageController\:\:destroy\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/MessageController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\MessageController\:\:index\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/MessageController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\MessageController\:\:listUnread\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/MessageController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\MessageController\:\:show\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/MessageController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\MessageController\:\:store\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/MessageController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\MessageController\:\:update\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/MessageController.php
-
-		-
 			message: '#^Binary operation "\-" between ''''\|int\<2, 7\> and 1 results in an error\.$#'
 			identifier: binaryOp.invalid
 			count: 1
@@ -619,60 +259,6 @@ parameters:
 			path: app/Http/Controllers/NewsController.php
 
 		-
-			message: '#^Method App\\Http\\Controllers\\NewsController\:\:destroy\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/NewsController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\NewsController\:\:index\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/NewsController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\NewsController\:\:latest\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/NewsController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\NewsController\:\:show\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/NewsController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\NewsController\:\:store\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/NewsController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\NewsController\:\:update\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/NewsController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\OfferController\:\:index\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/OfferController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\OverForumController\:\:index\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/OverForumController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\PeerController\:\:index\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/PeerController.php
-
-		-
 			message: '#^Call to an undefined method App\\Models\\Poll\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\Poll\>\:\:answers\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -685,80 +271,8 @@ parameters:
 			path: app/Http/Controllers/PollController.php
 
 		-
-			message: '#^Method App\\Http\\Controllers\\PollController\:\:destroy\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/PollController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\PollController\:\:index\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/PollController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\PollController\:\:latest\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/PollController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\PollController\:\:show\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/PollController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\PollController\:\:store\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/PollController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\PollController\:\:update\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/PollController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\PollController\:\:vote\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/PollController.php
-
-		-
 			message: '#^Cannot access property \$id on App\\Models\\Forum\|null\.$#'
 			identifier: property.nonObject
-			count: 1
-			path: app/Http/Controllers/PostController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\PostController\:\:destroy\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/PostController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\PostController\:\:index\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/PostController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\PostController\:\:show\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/PostController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\PostController\:\:store\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/PostController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\PostController\:\:update\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
 			count: 1
 			path: app/Http/Controllers/PostController.php
 
@@ -775,46 +289,10 @@ parameters:
 			path: app/Http/Controllers/PostController.php
 
 		-
-			message: '#^Method App\\Http\\Controllers\\RewardController\:\:index\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/RewardController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\RewardController\:\:store\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/RewardController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\SettingController\:\:index\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/SettingController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\SettingController\:\:store\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/SettingController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\ShoutboxController\:\:index\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/ShoutboxController.php
-
-		-
 			message: '#^Parameter \#1 \$shoutIds of static method App\\Support\\Shoutbox\:\:prefetchReactions\(\) expects list\<int\>, array\<int\> given\.$#'
 			identifier: argument.type
 			count: 2
 			path: app/Http/Controllers/ShoutboxController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\SnatchController\:\:index\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/SnatchController.php
 
 		-
 			message: '#^Cannot access offset ''id'' on stdClass\.$#'
@@ -871,36 +349,6 @@ parameters:
 			path: app/Http/Controllers/SystemController.php
 
 		-
-			message: '#^Method App\\Http\\Controllers\\TagController\:\:destroy\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/TagController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\TagController\:\:index\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/TagController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\TagController\:\:show\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/TagController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\TagController\:\:store\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/TagController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\TagController\:\:update\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/TagController.php
-
-		-
 			message: '#^Access to an undefined property App\\Models\\Torrent\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\Torrent\>\:\:\$id\.$#'
 			identifier: property.notFound
 			count: 1
@@ -937,18 +385,6 @@ parameters:
 			path: app/Http/Controllers/ThankController.php
 
 		-
-			message: '#^Method App\\Http\\Controllers\\ThankController\:\:index\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/ThankController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\ThankController\:\:store\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/ThankController.php
-
-		-
 			message: '#^Cannot call method createToken\(\) on App\\Models\\User\|null\.$#'
 			identifier: method.nonObject
 			count: 1
@@ -961,50 +397,8 @@ parameters:
 			path: app/Http/Controllers/TokenController.php
 
 		-
-			message: '#^Method App\\Http\\Controllers\\TokenController\:\:addToken\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 2
-			path: app/Http/Controllers/TokenController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\TokenController\:\:delToken\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 2
-			path: app/Http/Controllers/TokenController.php
-
-		-
 			message: '#^Cannot call method load\(\) on App\\Models\\Topic\|null\.$#'
 			identifier: method.nonObject
-			count: 1
-			path: app/Http/Controllers/TopicController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\TopicController\:\:destroy\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/TopicController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\TopicController\:\:index\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/TopicController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\TopicController\:\:show\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/TopicController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\TopicController\:\:store\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/TopicController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\TopicController\:\:update\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
 			count: 1
 			path: app/Http/Controllers/TopicController.php
 
@@ -1043,48 +437,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: app/Http/Controllers/TorrentActionController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\TorrentController\:\:approval\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/TorrentController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\TorrentController\:\:approvalLogs\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/TorrentController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\TorrentController\:\:index\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/TorrentController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\TorrentController\:\:queryByPiecesHash\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/TorrentController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\TorrentController\:\:searchBox\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/TorrentController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\TorrentController\:\:show\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/TorrentController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\TorrentController\:\:store\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/TorrentController.php
 
 		-
 			message: '#^Parameter \#1 \$bdInfo of class Nexus\\Torrent\\BdInfoExtra constructor expects string, array\<mixed\>\|string given\.$#'
@@ -1135,12 +487,6 @@ parameters:
 			path: app/Http/Controllers/TorrentEditController.php
 
 		-
-			message: '#^Method App\\Http\\Controllers\\UploadController\:\:sections\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/UploadController.php
-
-		-
 			message: '#^Cannot access property \$id on App\\Models\\User\|null\.$#'
 			identifier: property.nonObject
 			count: 4
@@ -1165,78 +511,6 @@ parameters:
 			path: app/Http/Controllers/UserController.php
 
 		-
-			message: '#^Method App\\Http\\Controllers\\UserController\:\:base\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/UserController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\UserController\:\:classes\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/UserController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\UserController\:\:disable\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/UserController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\UserController\:\:enable\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/UserController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\UserController\:\:index\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/UserController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\UserController\:\:inviteInfo\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/UserController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\UserController\:\:matchExams\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/UserController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\UserController\:\:me\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/UserController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\UserController\:\:modComment\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/UserController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\UserController\:\:resetPassword\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/UserController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\UserController\:\:show\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/UserController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\UserController\:\:store\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/UserController.php
-
-		-
 			message: '#^Parameter \#1 \$user of static method App\\Support\\Bonus\:\:buildBonusTableForUser\(\) expects array\<string, mixed\>, array\<int\|string, mixed\> given\.$#'
 			identifier: argument.type
 			count: 1
@@ -1253,60 +527,6 @@ parameters:
 			identifier: method.notFound
 			count: 1
 			path: app/Http/Controllers/UserMedalController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\UserMedalController\:\:destroy\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/UserMedalController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\UserMedalController\:\:index\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/UserMedalController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\UserMedalController\:\:show\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/UserMedalController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\UserMedalController\:\:store\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/UserMedalController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\UserMedalController\:\:update\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/UserMedalController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\UsercpController\:\:forum\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/UsercpController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\UsercpController\:\:security\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/UsercpController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\UsercpController\:\:settings\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 2
-			path: app/Http/Controllers/UsercpController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\UsercpController\:\:tracker\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/UsercpController.php
 
 		-
 			message: '#^Parameter \#2 \$currentUser of static method App\\Repositories\\SearchPageRepository\:\:dataForSearch\(\) expects App\\Models\\User, App\\Models\\User\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\User\> given\.$#'
@@ -1915,12 +1135,6 @@ parameters:
 			path: app/Repositories/MessageRepository.php
 
 		-
-			message: '#^Parameter \#1 \$attributes of method Illuminate\\Database\\Eloquent\\Builder\<App\\Models\\Message\>\:\:create\(\) expects array\<string, mixed\>, array\<int\|string, mixed\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Repositories/MessageRepository.php
-
-		-
 			message: '#^Parameter \#2 \$user of static method App\\Auth\\Permission\:\:can\(\) expects App\\Models\\User\|null, App\\Models\\User\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\User\> given\.$#'
 			identifier: argument.type
 			count: 1
@@ -2501,12 +1715,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: app/Repositories/UserSearchRepository.php
-
-		-
-			message: '#^Parameter \#1 \$cookieValue of static method App\\Support\\Locale\:\:folderFromCookie\(\) expects string\|null, array\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Repositories/UsercpRepository.php
 
 		-
 			message: '#^Parameter \#1 \$username of static method App\\Repositories\\UsercpRepository\:\:deleteChallenge\(\) expects string, string\|null given\.$#'

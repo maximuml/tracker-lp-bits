@@ -2,6 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\DTOs\Usercp\ForumSettingsDto;
+use App\DTOs\Usercp\PersonalSettingsDto;
+use App\DTOs\Usercp\SecuritySettingsDto;
+use App\DTOs\Usercp\TrackerSettingsDto;
 use App\Repositories\UsercpRepository;
 use App\Services\Legacy\LegacyPartialRenderer;
 use App\Support\SupportContext;
@@ -27,7 +31,7 @@ class UsercpController extends LegacyController
     public function settings(Request $request): array
     {
         if ($request->isMethod('POST')) {
-            return $this->success($this->repository->updatePersonal($request));
+            return $this->success($this->repository->updatePersonal(PersonalSettingsDto::fromRequest($request)));
         }
 
         return $this->success($this->repository->settings());
@@ -38,7 +42,7 @@ class UsercpController extends LegacyController
      */
     public function forum(Request $request): array
     {
-        return $this->success($this->repository->updateForum($request));
+        return $this->success($this->repository->updateForum(ForumSettingsDto::fromRequest($request)));
     }
 
     /**
@@ -46,7 +50,7 @@ class UsercpController extends LegacyController
      */
     public function tracker(Request $request): array
     {
-        return $this->success($this->repository->updateTracker($request));
+        return $this->success($this->repository->updateTracker(TrackerSettingsDto::fromRequest($request)));
     }
 
     /**
@@ -54,7 +58,7 @@ class UsercpController extends LegacyController
      */
     public function security(Request $request): array
     {
-        return $this->success($this->repository->updateSecurityApi($request));
+        return $this->success($this->repository->updateSecurityApi(SecuritySettingsDto::fromRequest($request)));
     }
 
     /**
@@ -74,19 +78,19 @@ class UsercpController extends LegacyController
             $type = (string) $request->input('type');
 
             if ($type === 'save' && $action === 'personal') {
-                $this->repository->updatePersonal($request);
+                $this->repository->updatePersonal(PersonalSettingsDto::fromRequest($request));
 
                 return redirect('/usercp.php?action=personal&type=saved');
             }
 
             if ($type === 'save' && $action === 'forum') {
-                $this->repository->updateForum($request);
+                $this->repository->updateForum(ForumSettingsDto::fromRequest($request));
 
                 return redirect('/usercp.php?action=forum&type=saved');
             }
 
             if ($type === 'save' && $action === 'tracker') {
-                $this->repository->updateTracker($request);
+                $this->repository->updateTracker(TrackerSettingsDto::fromRequest($request));
 
                 return redirect('/usercp.php?action=tracker&type=saved');
             }

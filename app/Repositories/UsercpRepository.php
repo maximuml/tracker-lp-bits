@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
+use App\DTOs\Usercp\ForumSettingsDto;
+use App\DTOs\Usercp\PersonalSettingsDto;
+use App\DTOs\Usercp\SecuritySettingsDto;
+use App\DTOs\Usercp\TrackerSettingsDto;
 use App\Models\Comment;
 use App\Models\Post;
 use App\Models\SeedBoxRecord;
@@ -208,58 +212,35 @@ final class UsercpRepository extends BaseRepository
      *
      * @return array<string, mixed>
      */
-    public function updatePersonal(Request $request): array
+    public function updatePersonal(PersonalSettingsDto $dto): array
     {
         /** @var User $user */
         $user = Auth::user();
 
-        $data = [];
+        $data = [
+            'parked' => $dto->parked,
+            'acceptpms' => $dto->acceptpms,
+            'deletepms' => $dto->deletepms,
+            'savepms' => $dto->savepms,
+            'commentpm' => $dto->commentpm,
+            'gender' => $dto->gender,
+            'info' => $dto->info,
+        ];
 
-        $data['parked'] = $request->input('parked') === 'yes' ? 'yes' : 'no';
-        $data['acceptpms'] = in_array((string) $request->input('acceptpms'), ['yes', 'friends', 'no'], true)
-            ? (string) $request->input('acceptpms')
-            : 'yes';
-        $data['deletepms'] = $request->has('deletepms') ? 'yes' : 'no';
-        $data['savepms'] = $request->has('savepms') ? 'yes' : 'no';
-        $data['commentpm'] = $request->input('commentpm') === 'yes' ? 'yes' : 'no';
-        $data['gender'] = in_array((string) $request->input('gender'), ['N/A', 'Male', 'Female'], true)
-            ? (string) $request->input('gender')
-            : 'N/A';
-
-        $country = (int) $request->input('country', 0);
-        if (Validators::isId($country)) {
-            $data['country'] = $country;
+        if ($dto->notifs !== null) {
+            $data['notifs'] = $dto->notifs;
         }
 
-        $trackerUrlId = (int) $request->input('tracker_url_id', 0);
-        if (Validators::isId($trackerUrlId)) {
-            $data['tracker_url_id'] = $trackerUrlId;
+        if ($dto->country !== null) {
+            $data['country'] = $dto->country;
         }
 
-        $avatar = (string) $request->input('avatar', '');
-        if ($avatar === '') {
-            $avatar = (string) $request->input('savatar', '');
-        }
-        if (preg_match('/^https?:\/\/[^\s\'"<>]+\.(jpg|gif|png|jpeg)$/i', $avatar)
-            && ! preg_match('/\.php/i', $avatar)
-            && ! preg_match('/\.js/i', $avatar)
-            && ! preg_match('/\.cgi/i', $avatar)) {
-            $data['avatar'] = htmlspecialchars(trim($avatar));
+        if ($dto->trackerUrlId !== null) {
+            $data['tracker_url_id'] = $dto->trackerUrlId;
         }
 
-        $data['info'] = htmlspecialchars(trim((string) $request->input('info', '')));
-
-        $notifs = $request->input('notifs');
-        if (is_array($notifs) || is_string($notifs)) {
-            $notifsArr = [];
-            if (is_array($notifs)) {
-                foreach (User::$notificationOptions as $option) {
-                    if (isset($notifs[$option]) && $notifs[$option]) {
-                        $notifsArr[$option] = 1;
-                    }
-                }
-            }
-            $data['notifs'] = '[' . implode('][', array_keys($notifsArr)) . ']';
+        if ($dto->avatar !== null) {
+            $data['avatar'] = $dto->avatar;
         }
 
         User::query()->where('id', $user->id)->update($data);
@@ -273,24 +254,22 @@ final class UsercpRepository extends BaseRepository
      *
      * @return array<string, mixed>
      */
-    public function updateForum(Request $request): array
+    public function updateForum(ForumSettingsDto $dto): array
     {
         /** @var User $user */
         $user = Auth::user();
 
         $data = [
-            'topicsperpage' => max(0, min(100, (int) $request->input('topicsperpage', 0))),
-            'postsperpage' => max(0, min(100, (int) $request->input('postsperpage', 0))),
-            'avatars' => $request->input('avatars') === 'yes' ? 'yes' : 'no',
-            'signatures' => $request->input('signatures') === 'yes' ? 'yes' : 'no',
-            'clicktopic' => in_array((string) $request->input('clicktopic'), ['firstpage', 'lastpage'], true)
-                ? (string) $request->input('clicktopic')
-                : $user->clicktopic,
-            'signature' => htmlspecialchars(trim((string) $request->input('signature', ''))),
+            'topicsperpage' => $dto->topicsperpage,
+            'postsperpage' => $dto->postsperpage,
+            'avatars' => $dto->avatars,
+            'signatures' => $dto->signatures,
+            'clicktopic' => $dto->clicktopic !== '' ? $dto->clicktopic : $user->clicktopic,
+            'signature' => $dto->signature,
         ];
 
-        if ($request->has('ttlastpost')) {
-            $data['showlastpost'] = $request->input('ttlastpost') === 'yes' ? 'yes' : 'no';
+        if ($dto->showlastpost !== null) {
+            $data['showlastpost'] = $dto->showlastpost;
         }
 
         User::query()->where('id', $user->id)->update($data);
@@ -304,7 +283,7 @@ final class UsercpRepository extends BaseRepository
      *
      * @return array<string, mixed>
      */
-    public function updateTracker(Request $request): array
+    public function updateTracker(TrackerSettingsDto $dto): array
     {
         /** @var User $user */
         $user = Auth::user();
@@ -313,8 +292,12 @@ final class UsercpRepository extends BaseRepository
         preg_match_all('/\[(.*)\]/Ui', $notifsString, $matches);
         $notifsArr = array_fill_keys($matches[1], 1);
 
+        $dynamicPrefixes = array_merge(
+            ['incldead=', 'spstate=', 'inclbookmarked='],
+            ['cat', 'sou', 'med', 'cod', 'sta', 'pro', 'aud']
+        );
         foreach (array_keys($notifsArr) as $key) {
-            foreach (['incldead', 'spstate', 'inclbookmarked'] as $prefix) {
+            foreach ($dynamicPrefixes as $prefix) {
                 if (str_starts_with((string) $key, $prefix)) {
                     unset($notifsArr[$key]);
                     break;
@@ -322,13 +305,13 @@ final class UsercpRepository extends BaseRepository
             }
         }
 
-        if ($request->input('pmnotif') === 'yes') {
+        if ($dto->pmnotif) {
             $notifsArr['pm'] = 1;
         } else {
             unset($notifsArr['pm']);
         }
 
-        if ($request->input('emailnotif') === 'yes') {
+        if ($dto->emailnotif) {
             $notifsArr['email'] = 1;
         } else {
             unset($notifsArr['email']);
@@ -344,75 +327,61 @@ final class UsercpRepository extends BaseRepository
             'audiocodecs' => 'aud',
         ] as $table => $cbname) {
             foreach (self::getTableIds($table) as $id) {
-                if ($request->input($cbname . $id) === 'yes') {
+                if ($dto->notifPreferences[$cbname . $id] ?? false) {
                     $notifsArr[$cbname . $id] = 1;
-                } else {
-                    unset($notifsArr[$cbname . $id]);
                 }
             }
         }
 
-        $incldead = $request->input('incldead');
-        if ($incldead !== null && $incldead != 1) {
-            $notifsArr["incldead=$incldead"] = 1;
+        if ($dto->incldead !== null) {
+            $notifsArr["incldead={$dto->incldead}"] = 1;
         }
 
-        $spstate = $request->input('spstate');
-        if ($spstate) {
-            $notifsArr["spstate=$spstate"] = 1;
+        if ($dto->spstate !== null && $dto->spstate !== '') {
+            $notifsArr["spstate={$dto->spstate}"] = 1;
         }
 
-        $inclbookmarked = $request->input('inclbookmarked');
-        if ($inclbookmarked) {
-            $notifsArr["inclbookmarked=$inclbookmarked"] = 1;
+        if ($dto->inclbookmarked !== null && $dto->inclbookmarked !== '') {
+            $notifsArr["inclbookmarked={$dto->inclbookmarked}"] = 1;
         }
 
         $data = [
             'notifs' => '[' . implode('][', array_keys($notifsArr)) . ']',
+            'torrentsperpage' => $dto->torrentsperpage,
+            'timetype' => $dto->timetype,
+            'appendsticky' => $dto->appendsticky,
+            'appendnew' => $dto->appendnew,
+            'appendpromotion' => $dto->appendpromotion,
+            'appendpicked' => $dto->appendpicked,
+            'dlicon' => $dto->dlicon,
+            'bmicon' => $dto->bmicon,
+            'showcomnum' => $dto->showcomnum,
+            'showdescription' => $dto->showdescription,
+            'showsmalldescr' => $dto->showsmalldescr,
+            'showcomment' => $dto->showcomment,
+            'pmnum' => $dto->pmnum,
+            'sbnum' => $dto->sbnum,
+            'sbrefresh' => $dto->sbrefresh,
+            'fontsize' => $dto->fontsize,
         ];
 
-        $stylesheet = (int) $request->input('stylesheet', 0);
-        if (Validators::isId($stylesheet)) {
-            $data['stylesheet'] = $stylesheet;
+        if ($dto->stylesheet !== null) {
+            $data['stylesheet'] = $dto->stylesheet;
         }
 
-        $sitelanguage = (int) $request->input('sitelanguage', 0);
-        if (Validators::isId($sitelanguage)) {
-            $langFolder = Locale::folderForIdWithContext($sitelanguage);
-            $currentFolder = Locale::folderFromCookie($request->cookie('c_lang_folder') ?? '', false);
+        if ($dto->sitelanguage !== null) {
+            $langFolder = Locale::folderForIdWithContext($dto->sitelanguage);
+            $currentFolder = Locale::folderFromCookie($dto->currentLangFolder, false);
             if ($currentFolder !== $langFolder) {
                 Locale::setFolderCookie($langFolder, 0x7fffffff);
             }
-            $data['lang'] = $sitelanguage;
+            $data['lang'] = $dto->sitelanguage;
         }
-
-        $data['torrentsperpage'] = max(0, min(100, (int) $request->input('torrentsperpage', 0)));
-        $data['timetype'] = (string) $request->input('timetype', '');
-        $data['appendsticky'] = $request->input('appendsticky') === 'yes' ? 'yes' : 'no';
-        $data['appendnew'] = $request->input('appendnew') === 'yes' ? 'yes' : 'no';
-        $data['appendpromotion'] = (string) $request->input('appendpromotion', '');
-        $data['appendpicked'] = $request->input('appendpicked') === 'yes' ? 'yes' : 'no';
-        $data['dlicon'] = $request->input('dlicon') === 'yes' ? 'yes' : 'no';
-        $data['bmicon'] = $request->input('bmicon') === 'yes' ? 'yes' : 'no';
-        $data['showcomnum'] = $request->input('showcomnum') === 'yes' ? 'yes' : 'no';
-        $data['showdescription'] = $request->input('showdescription') === 'yes' ? 'yes' : 'no';
-        $data['showsmalldescr'] = $request->input('smalldescr') === 'yes' ? 'yes' : 'no';
-        $data['showcomment'] = $request->input('showcomment') === 'yes' ? 'yes' : 'no';
-        $data['pmnum'] = max(1, min(100, (int) $request->input('pmnum', 20)));
-        $data['sbnum'] = max(10, min(500, (int) $request->input('sbnum', 70)));
-        $data['sbrefresh'] = max(10, min(3600, (int) $request->input('sbrefresh', 120)));
 
         $showTooltip = (string) SupportContext::getGlobal('enabletooltip_tweak', '') === 'yes';
         if ($showTooltip) {
-            $data['tooltip'] = (string) $request->input('tooltip', '');
-            $data['showlastcom'] = $request->input('showlastcom') === 'yes' ? 'yes' : 'no';
-        }
-
-        $fontsize = (string) $request->input('fontsize', '');
-        if (in_array($fontsize, ['small', 'medium', 'large'], true)) {
-            $data['fontsize'] = $fontsize;
-        } else {
-            $data['fontsize'] = 'medium';
+            $data['tooltip'] = $dto->tooltip ?? '';
+            $data['showlastcom'] = $dto->showlastcom ?? 'no';
         }
 
         User::query()->where('id', $user->id)->update($data);
@@ -570,42 +539,29 @@ final class UsercpRepository extends BaseRepository
      *
      * @return array<string, mixed>
      */
-    public function updateSecurityApi(Request $request): array
+    public function updateSecurityApi(SecuritySettingsDto $dto): array
     {
         /** @var User $user */
         $user = Auth::user();
 
-        $validated = $request->validate([
-            'current_password' => 'required|string',
-            'email' => 'sometimes|nullable|email',
-            'new_password' => 'sometimes|nullable|string|min:6|max:40',
-            'new_password_confirmation' => 'sometimes|same:new_password',
-            'privacy' => 'sometimes|in:normal,low,strong',
-            'resetpasskey' => 'sometimes|boolean',
-            'resetauthkey' => 'sometimes|boolean',
-            'two_step_secret' => 'sometimes|nullable|string',
-            'two_step_code' => 'sometimes|nullable|string',
-        ]);
-
-        if (! app(WebAuthService::class)->validatePassword($user, (string) $validated['current_password'])) {
+        if (! app(WebAuthService::class)->validatePassword($user, $dto->currentPassword)) {
             throw ValidationException::withMessages(['current_password' => ['Wrong password.']]);
         }
 
         $data = [];
         $changedemail = 0;
-        $resetpasskey = ! empty($validated['resetpasskey']);
-        $resetAuthKey = ! empty($validated['resetauthkey']);
+        $resetpasskey = $dto->resetpasskey;
+        $resetAuthKey = $dto->resetauthkey;
 
-        $newPassword = (string) ($validated['new_password'] ?? '');
-        if ($newPassword !== '') {
+        if ($dto->newPassword !== null && $dto->newPassword !== '') {
             $sec = Token::randomHex(20);
-            $clientHashedPassword = hash('sha256', $newPassword);
+            $clientHashedPassword = hash('sha256', $dto->newPassword);
             $data['secret'] = $sec;
             $data['passhash'] = hash('sha256', $sec . $clientHashedPassword);
             $data['auth_key'] = Token::randomHex(20);
         }
 
-        $email = (string) ($validated['email'] ?? '');
+        $email = (string) ($dto->email ?? '');
         $disableEmailChange = (string) SupportContext::getGlobal('disableemailchange', 'no');
         $smtpType = (string) SupportContext::getGlobal('smtptype', 'none');
         $siteName = (string) SupportContext::getGlobal('SITENAME', '');
@@ -632,7 +588,7 @@ final class UsercpRepository extends BaseRepository
             $body = ($lang['mail_change_email_one'] ?? '') . $user->username
                 . ($lang['mail_change_email_two'] ?? '') . '(' . $email . ')'
                 . ($lang['mail_change_email_three'] ?? '') . "\n\n"
-                . ($lang['mail_change_email_four'] ?? '') . $request->ip()
+                . ($lang['mail_change_email_four'] ?? '') . $dto->ip
                 . ($lang['mail_change_email_five'] ?? '') . "\n\n"
                 . ($lang['mail_change_email_six'] ?? '')
                 . '<b><a href="javascript:void(null)" onclick="window.open(\'http://' . $baseUrl . '/confirmemail.php/' . $user->id . '/' . $hash . '/' . $obemail . '\')">' . ($lang['mail_here'] ?? '') . '</a></b>'
@@ -649,28 +605,24 @@ final class UsercpRepository extends BaseRepository
             $data['passkey'] = md5($user->username . date('Y-m-d H:i:s') . $user->passhash);
         }
 
-        $twoStepSecret = (string) ($validated['two_step_secret'] ?? '');
-        $twoStepCode = (string) ($validated['two_step_code'] ?? '');
-
-        if ($twoStepCode !== '') {
-            $secretToVerify = empty($user->two_step_secret) ? $twoStepSecret : $user->two_step_secret;
-            if ($secretToVerify === '' || ! TwoFactorAuthHelper::verifyCode($secretToVerify, $twoStepCode)) {
+        if ($dto->twoStepCode !== null && $dto->twoStepCode !== '') {
+            $secretToVerify = empty($user->two_step_secret) ? ($dto->twoStepSecret ?? '') : $user->two_step_secret;
+            if ($secretToVerify === '' || ! TwoFactorAuthHelper::verifyCode($secretToVerify, $dto->twoStepCode)) {
                 throw ValidationException::withMessages(['two_step_code' => ['Invalid two step code']]);
             }
 
             $data['two_step_secret'] = empty($user->two_step_secret) ? $secretToVerify : '';
         }
 
-        $privacy = (string) ($validated['privacy'] ?? '');
-        if ($privacy !== '') {
-            if (! in_array($privacy, ['normal', 'low', 'strong'], true)) {
-                $privacy = 'normal';
-            }
+        if ($dto->privacy !== null && $dto->privacy !== '') {
+            $privacy = in_array($dto->privacy, ['normal', 'low', 'strong'], true)
+                ? $dto->privacy
+                : 'normal';
             $data['privacy'] = $privacy;
         }
 
         if ($data !== []) {
-            self::updateSecurity((int) $user->id, $data, $resetAuthKey, (array) $request->all());
+            self::updateSecurity((int) $user->id, $data, $resetAuthKey, $dto->allInputs);
             Cache::clearUser($user->id, '');
         }
 

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Auth\Permission;
 use App\Enums\Permission\PermissionEnum;
+use App\Http\Requests\TorrentRequest;
 use App\Http\Resources\RewardResource;
 use App\Http\Resources\TorrentOperationLogResource;
 use App\Http\Resources\TorrentResource;
@@ -51,10 +52,10 @@ class TorrentController extends Controller
 
     /**
      * Store a newly created resource in storage.
-     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Http\Requests\TorrentRequest  $request
      * @return  array<string, mixed>
      */
-    public function store(Request $request)
+    public function store(TorrentRequest $request)
     {
         $uploadRep = new UploadRepository();
         $newTorrent = $uploadRep->upload($request);

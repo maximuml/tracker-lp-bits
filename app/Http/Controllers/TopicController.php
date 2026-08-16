@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Auth\Permission;
+use App\DTOs\Forum\ListTopicsDto;
+use App\DTOs\Forum\StoreTopicDto;
+use App\DTOs\Forum\UpdateTopicDto;
 use App\Enums\Permission\PermissionEnum;
 use App\Http\Resources\ForumResource;
 use App\Http\Resources\TopicResource;
@@ -26,13 +29,12 @@ class TopicController extends Controller
      */
     public function index(Request $request)
     {
-        $forumId = $request->forum_id;
+        $dto = ListTopicsDto::fromRequest($request);
         $query = Topic::query()
-            ->orderBy("sticky", "desc")
-            ->with("user", "firstPost", "lastPost")
-        ;
-        if ($forumId) {
-            $query->where("forumid", $forumId);
+            ->orderBy('sticky', 'desc')
+            ->with('user', 'firstPost', 'lastPost');
+        if ($dto->forumId !== null) {
+            $query->where('forumid', $dto->forumId);
         }
         $list = $query->get();
         $resource = TopicResource::collection($list);
@@ -53,20 +55,16 @@ class TopicController extends Controller
 
         SupportContext::setUser($user->toLegacyArray());
 
-        $validated = $request->validate([
-            'forumid' => 'required|integer|exists:forums,id',
-            'subject' => 'required|string|max:255',
-            'body' => 'required|string',
-        ]);
+        $dto = StoreTopicDto::fromRequest($request);
 
-        $forum = Forum::query()->findOrFail((int) $validated['forumid']);
+        $forum = Forum::query()->findOrFail($dto->forumId);
         if ((int) $user->class < (int) $forum->minclassread || (int) $user->class < (int) $forum->minclasscreate) {
             throw ValidationException::withMessages(['forum' => ['Permission denied.']]);
         }
 
         $date = now()->toDateTimeString();
-        $topicId = ForumRepository::createTopic((int) $user->id, (int) $forum->id, (string) $validated['subject']);
-        $postId = ForumRepository::createPost($topicId, (int) $user->id, (string) $validated['body'], $date);
+        $topicId = ForumRepository::createTopic((int) $user->id, (int) $forum->id, $dto->subject);
+        $postId = ForumRepository::createPost($topicId, (int) $user->id, $dto->body, $date);
 
         ForumRepository::updateTopicFirstLastPost($topicId, $postId);
         ForumRepository::incrementForumTopicCount((int) $forum->id);
@@ -105,35 +103,30 @@ class TopicController extends Controller
 
         SupportContext::setUser($user->toLegacyArray());
 
-        $validated = $request->validate([
-            'subject' => 'sometimes|string|max:255',
-            'locked' => 'sometimes|boolean',
-            'sticky' => 'sometimes|boolean',
-            'hlcolor' => 'sometimes|integer',
-        ]);
+        $dto = UpdateTopicDto::fromRequest($request);
 
         $canModerate = SupportForum::isModerator((int) $topic->id, 'topic')
             || Permission::can(PermissionEnum::POST_MANAGE, $user);
 
-        if (! $canModerate && (isset($validated['locked']) || isset($validated['sticky']) || isset($validated['hlcolor']))) {
+        if (! $canModerate && ($dto->locked !== null || $dto->sticky !== null || $dto->hlcolor !== null)) {
             throw ValidationException::withMessages(['topic' => ['Permission denied.']]);
         }
 
-        if (isset($validated['subject'])) {
+        if ($dto->subject !== null) {
             if (! $canModerate && (int) $topic->userid !== (int) $user->id) {
                 throw ValidationException::withMessages(['subject' => ['Permission denied.']]);
             }
-            $topic->subject = (string) $validated['subject'];
+            $topic->subject = $dto->subject;
         }
 
-        if (isset($validated['locked'])) {
-            $topic->locked = $validated['locked'] ? 'yes' : 'no';
+        if ($dto->locked !== null) {
+            $topic->locked = $dto->locked ? 'yes' : 'no';
         }
-        if (isset($validated['sticky'])) {
-            $topic->sticky = $validated['sticky'] ? 'yes' : 'no';
+        if ($dto->sticky !== null) {
+            $topic->sticky = $dto->sticky ? 'yes' : 'no';
         }
-        if (isset($validated['hlcolor'])) {
-            $topic->hlcolor = (int) $validated['hlcolor'];
+        if ($dto->hlcolor !== null) {
+            $topic->hlcolor = $dto->hlcolor;
         }
 
         $topic->save();

@@ -121,24 +121,6 @@ parameters:
 			path: app/Http/Resources/TorrentResource.php
 
 		-
-			message: '#^Cannot call method addDays\(\) on Carbon\\Carbon\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: app/Models/ExamUser.php
-
-		-
-			message: '#^Cannot call method toDateTimeString\(\) on Carbon\\Carbon\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: app/Models/ExamUser.php
-
-		-
-			message: '#^Parameter \#2 \$progress of method App\\Repositories\\ExamRepository\:\:getProgressFormatted\(\) expects array\<int\|string, mixed\>, array\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Models/ExamUser.php
-
-		-
 			message: '#^Parameter \#1 \$attributes of method Illuminate\\Database\\Eloquent\\Builder\<App\\Models\\Message\>\:\:create\(\) expects array\<string, mixed\>, array\<int\|string, mixed\> given\.$#'
 			identifier: argument.type
 			count: 1
@@ -181,66 +163,6 @@ parameters:
 			path: app/Models/TorrentOperationLog.php
 
 		-
-			message: '#^Cannot call method gte\(\) on Carbon\\Carbon\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: app/Models/User.php
-
-		-
-			message: '#^Method App\\Models\\User\:\:getFilamentName\(\) should return string but returns string\|null\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Models/User.php
-
-		-
-			message: '#^Parameter \#1 \$class of static method App\\Models\\User\:\:getClassText\(\) expects int\|string, int\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Models/User.php
-
-		-
-			message: '#^Parameter \#1 \$haystack of function str_contains expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Models/User.php
-
-		-
-			message: '#^Call to an undefined method App\\Models\\AgentDeny\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\AgentDeny\>\:\:delete\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: app/Repositories/AgentDenyRepository.php
-
-		-
-			message: '#^Call to an undefined method App\\Models\\AgentDeny\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\AgentDeny\>\:\:update\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: app/Repositories/AgentDenyRepository.php
-
-		-
-			message: '#^Parameter \#1 \$attributes of method Illuminate\\Database\\Eloquent\\Builder\<App\\Models\\AgentDeny\>\:\:create\(\) expects array\<string, mixed\>, array\<int\|string, mixed\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Repositories/AgentDenyRepository.php
-
-		-
-			message: '#^Cannot access property \$id on App\\Models\\AttendanceLog\|null\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: app/Repositories/AttendanceRepository.php
-
-		-
-			message: '#^Cannot access property \$is_retroactive on App\\Models\\AttendanceLog\|null\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: app/Repositories/AttendanceRepository.php
-
-		-
-			message: '#^Cannot access property \$points on App\\Models\\AttendanceLog\|null\.$#'
-			identifier: property.nonObject
-			count: 2
-			path: app/Repositories/AttendanceRepository.php
-
-		-
 			message: '#^Parameter \#1 \$string of function sha1 expects string, string\|null given\.$#'
 			identifier: argument.type
 			count: 1
@@ -277,36 +199,6 @@ parameters:
 			path: app/Repositories/CommentRepository.php
 
 		-
-			message: '#^Cannot access property \$id on App\\Models\\User\|null\.$#'
-			identifier: property.nonObject
-			count: 2
-			path: app/Repositories/ExamRepository.php
-
-		-
-			message: '#^Cannot access property \$torrent_count on App\\Models\\ExamProgress\|null\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: app/Repositories/ExamRepository.php
-
-		-
-			message: '#^Parameter \#1 \$user of method App\\Repositories\\ExamRepository\:\:getProgressValue\(\) expects App\\Models\\User, App\\Models\\User\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Repositories/ExamRepository.php
-
-		-
-			message: '#^Parameter \#2 \$passkey of static method App\\Support\\Cache\:\:clearUser\(\) expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Repositories/ExamRepository.php
-
-		-
-			message: '#^Parameter \#2 \$progress of method App\\Repositories\\ExamRepository\:\:getProgressFormatted\(\) expects array\<int\|string, mixed\>, array\<int\|string, mixed\>\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Repositories/ExamRepository.php
-
-		-
 			message: '#^Cannot access property \$class on App\\Models\\User\|null\.$#'
 			identifier: property.nonObject
 			count: 1
@@ -319,24 +211,6 @@ parameters:
 			path: app/Repositories/MeiliSearchRepository.php
 
 		-
-			message: '#^Call to an undefined method App\\Models\\Message\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\Message\>\:\:delete\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: app/Repositories/MessageRepository.php
-
-		-
-			message: '#^Call to an undefined method App\\Models\\Message\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\Message\>\:\:update\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: app/Repositories/MessageRepository.php
-
-		-
-			message: '#^Parameter \#2 \$user of static method App\\Auth\\Permission\:\:can\(\) expects App\\Models\\User\|null, App\\Models\\User\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\User\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Repositories/MessageRepository.php
-
-		-
 			message: '#^Parameter \#1 \$values of method Illuminate\\Database\\Eloquent\\Builder\<App\\Models\\User\>\:\:update\(\) expects array\<string, mixed\>, array\<int\|string, mixed\> given\.$#'
 			identifier: argument.type
 			count: 1
@@ -347,24 +221,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: app/Repositories/ModtaskRepository.php
-
-		-
-			message: '#^Call to an undefined method App\\Models\\News\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\News\>\:\:delete\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: app/Repositories/NewsRepository.php
-
-		-
-			message: '#^Call to an undefined method App\\Models\\News\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\News\>\:\:update\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: app/Repositories/NewsRepository.php
-
-		-
-			message: '#^Parameter \#1 \$attributes of method Illuminate\\Database\\Eloquent\\Builder\<App\\Models\\News\>\:\:create\(\) expects array\<string, mixed\>, array\<int\|string, mixed\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Repositories/NewsRepository.php
 
 		-
 			message: '#^Parameter \#1 \$attributes of method Illuminate\\Database\\Eloquent\\Model\:\:update\(\) expects array\<string, mixed\>, array\<int\|string, mixed\> given\.$#'
@@ -391,52 +247,10 @@ parameters:
 			path: app/Repositories/SearchRepository.php
 
 		-
-			message: '#^Call to an undefined method App\\Models\\SeedBoxRecord\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\SeedBoxRecord\>\:\:update\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: app/Repositories/SeedBoxRepository.php
-
-		-
-			message: '#^Cannot access property \$class on App\\Models\\User\|null\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: app/Repositories/SeedBoxRepository.php
-
-		-
-			message: '#^Cannot access property \$username on App\\Models\\User\|null\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: app/Repositories/SeedBoxRepository.php
-
-		-
-			message: '#^Parameter \#1 \$attributes of method Illuminate\\Database\\Eloquent\\Builder\<App\\Models\\SeedBoxRecord\>\:\:create\(\) expects array\<string, mixed\>, array\<int\|string, mixed\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Repositories/SeedBoxRepository.php
-
-		-
 			message: '#^Method App\\Repositories\\ShoutboxRepository\:\:getMyReactions\(\) should return list\<string\> but returns array\<mixed\>\.$#'
 			identifier: return.type
 			count: 1
 			path: app/Repositories/ShoutboxRepository.php
-
-		-
-			message: '#^Call to an undefined method App\\Models\\Tag\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\Tag\>\:\:delete\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: app/Repositories/TagRepository.php
-
-		-
-			message: '#^Call to an undefined method App\\Models\\Tag\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\Tag\>\:\:update\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: app/Repositories/TagRepository.php
-
-		-
-			message: '#^Parameter \#1 \$attributes of method Illuminate\\Database\\Eloquent\\Builder\<App\\Models\\Tag\>\:\:create\(\) expects array\<string, mixed\>, array\<int\|string, mixed\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Repositories/TagRepository.php
 
 		-
 			message: '#^Cannot access property \$counts on App\\Models\\PollAnswer\|null\.$#'
@@ -449,24 +263,6 @@ parameters:
 			identifier: return.type
 			count: 1
 			path: app/Repositories/ToptenRepository.php
-
-		-
-			message: '#^Cannot access offset ''count'' on stdClass\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: app/Repositories/TorrentAjaxRepository.php
-
-		-
-			message: '#^Cannot access offset ''suggest'' on stdClass\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: app/Repositories/TorrentAjaxRepository.php
-
-		-
-			message: '#^Method App\\Repositories\\TorrentAjaxRepository\:\:searchSuggest\(\) should return array\{string, list\<string\>, list\<int\>\} but returns non\-empty\-array\<mixed, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Repositories/TorrentAjaxRepository.php
 
 		-
 			message: '#^Parameter \#1 \$datetime of function strtotime expects string, Carbon\\Carbon\|null given\.$#'
@@ -521,24 +317,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: app/Repositories/UserSearchRepository.php
-
-		-
-			message: '#^Parameter \#1 \$username of static method App\\Repositories\\UsercpRepository\:\:deleteChallenge\(\) expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Repositories/UsercpRepository.php
-
-		-
-			message: '#^Parameter \#1 \$username of static method App\\Repositories\\UsercpRepository\:\:getChallenge\(\) expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Repositories/UsercpRepository.php
-
-		-
-			message: '#^Parameter \#2 \$passkey of static method App\\Support\\Cache\:\:clearUser\(\) expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 3
-			path: app/Repositories/UsercpRepository.php
 
 		-
 			message: '#^Parameter \#2 \$subject of function preg_match_all expects string, string\|false given\.$#'

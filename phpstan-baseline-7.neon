@@ -85,24 +85,6 @@ parameters:
 			path: app/Models/TorrentOperationLog.php
 
 		-
-			message: '#^Call to an undefined method App\\Models\\AgentDeny\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\AgentDeny\>\:\:delete\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: app/Repositories/AgentDenyRepository.php
-
-		-
-			message: '#^Call to an undefined method App\\Models\\AgentDeny\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\AgentDeny\>\:\:update\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: app/Repositories/AgentDenyRepository.php
-
-		-
-			message: '#^Parameter \#1 \$attributes of method Illuminate\\Database\\Eloquent\\Builder\<App\\Models\\AgentDeny\>\:\:create\(\) expects array\<string, mixed\>, array\<int\|string, mixed\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Repositories/AgentDenyRepository.php
-
-		-
 			message: '#^Call to an undefined method App\\Models\\Torrent\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\Torrent\>\:\:checkIsNormal\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -133,24 +115,6 @@ parameters:
 			path: app/Repositories/MeiliSearchRepository.php
 
 		-
-			message: '#^Call to an undefined method App\\Models\\Message\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\Message\>\:\:delete\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: app/Repositories/MessageRepository.php
-
-		-
-			message: '#^Call to an undefined method App\\Models\\Message\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\Message\>\:\:update\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: app/Repositories/MessageRepository.php
-
-		-
-			message: '#^Parameter \#2 \$user of static method App\\Auth\\Permission\:\:can\(\) expects App\\Models\\User\|null, App\\Models\\User\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\User\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Repositories/MessageRepository.php
-
-		-
 			message: '#^Parameter \#1 \$values of method Illuminate\\Database\\Eloquent\\Builder\<App\\Models\\User\>\:\:update\(\) expects array\<string, mixed\>, array\<int\|string, mixed\> given\.$#'
 			identifier: argument.type
 			count: 1
@@ -161,24 +125,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: app/Repositories/ModtaskRepository.php
-
-		-
-			message: '#^Call to an undefined method App\\Models\\News\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\News\>\:\:delete\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: app/Repositories/NewsRepository.php
-
-		-
-			message: '#^Call to an undefined method App\\Models\\News\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\News\>\:\:update\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: app/Repositories/NewsRepository.php
-
-		-
-			message: '#^Parameter \#1 \$attributes of method Illuminate\\Database\\Eloquent\\Builder\<App\\Models\\News\>\:\:create\(\) expects array\<string, mixed\>, array\<int\|string, mixed\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Repositories/NewsRepository.php
 
 		-
 			message: '#^Parameter \#1 \$attributes of method Illuminate\\Database\\Eloquent\\Model\:\:update\(\) expects array\<string, mixed\>, array\<int\|string, mixed\> given\.$#'
@@ -193,64 +139,16 @@ parameters:
 			path: app/Repositories/PluginRepository.php
 
 		-
-			message: '#^Call to an undefined method App\\Models\\SeedBoxRecord\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\SeedBoxRecord\>\:\:update\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: app/Repositories/SeedBoxRepository.php
-
-		-
-			message: '#^Parameter \#1 \$attributes of method Illuminate\\Database\\Eloquent\\Builder\<App\\Models\\SeedBoxRecord\>\:\:create\(\) expects array\<string, mixed\>, array\<int\|string, mixed\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Repositories/SeedBoxRepository.php
-
-		-
 			message: '#^Method App\\Repositories\\ShoutboxRepository\:\:getMyReactions\(\) should return list\<string\> but returns array\<mixed\>\.$#'
 			identifier: return.type
 			count: 1
 			path: app/Repositories/ShoutboxRepository.php
 
 		-
-			message: '#^Call to an undefined method App\\Models\\Tag\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\Tag\>\:\:delete\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: app/Repositories/TagRepository.php
-
-		-
-			message: '#^Call to an undefined method App\\Models\\Tag\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\Tag\>\:\:update\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: app/Repositories/TagRepository.php
-
-		-
-			message: '#^Parameter \#1 \$attributes of method Illuminate\\Database\\Eloquent\\Builder\<App\\Models\\Tag\>\:\:create\(\) expects array\<string, mixed\>, array\<int\|string, mixed\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Repositories/TagRepository.php
-
-		-
 			message: '#^Method App\\Repositories\\ToptenRepository\:\:toArray\(\) should return list\<array\<string, mixed\>\> but returns array\<int, array\>\.$#'
 			identifier: return.type
 			count: 1
 			path: app/Repositories/ToptenRepository.php
-
-		-
-			message: '#^Cannot access offset ''count'' on stdClass\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: app/Repositories/TorrentAjaxRepository.php
-
-		-
-			message: '#^Cannot access offset ''suggest'' on stdClass\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: app/Repositories/TorrentAjaxRepository.php
-
-		-
-			message: '#^Method App\\Repositories\\TorrentAjaxRepository\:\:searchSuggest\(\) should return array\{string, list\<string\>, list\<int\>\} but returns non\-empty\-array\<mixed, mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Repositories/TorrentAjaxRepository.php
 
 		-
 			message: '#^Parameter \#1 \$values of method Illuminate\\Database\\Eloquent\\Builder\<App\\Models\\Torrent\>\:\:update\(\) expects array\<string, mixed\>, array\<int\|string, mixed\> given\.$#'

@@ -76,7 +76,8 @@ class AttendanceRepository extends BaseRepository
         $attendance->is_updated = $isUpdated;
         $baseQuery = AttendanceLog::query()->where('date', $today->format('Y-m-d'));
         $attendance->today_counts = (clone $baseQuery)->count();
-        $myId = (clone $baseQuery)->where('uid', $uid)->first(['id'])->id;
+        $myLog = (clone $baseQuery)->where('uid', $uid)->first(['id']);
+        $myId = $myLog instanceof \App\Models\AttendanceLog ? $myLog->id : 0;
         $attendance->my_ranking = (clone $baseQuery)->where('id', '<=', $myId)->count();
         \App\Support\Logger::writeWithContext((string) ("[FINAL_ATTENDANCE]: " . $attendance->toJson()), (string) 'info', (bool) false);
         return $attendance;
@@ -401,6 +402,9 @@ class AttendanceRepository extends BaseRepository
                 $eventBase = ['start' => $checkDate, 'end' => $checkDate];
                 if ($logs->has($checkDate)) {
                     $logValue = $logs->get($checkDate);
+                    if (! $logValue instanceof \App\Models\AttendanceLog) {
+                        continue;
+                    }
                     $events[] = array_merge($eventBase, ['display' => 'background']);
                     if ($logValue->points > 0) {
                         $events[] = array_merge($eventBase, ['title' => $logValue->points]);

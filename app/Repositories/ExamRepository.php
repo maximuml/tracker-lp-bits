@@ -630,6 +630,9 @@ class ExamRepository extends BaseRepository
             return true;
         }
         $examProgress = $this->calculateProgress($examUser);
+        if (! is_array($examProgress)) {
+            $examProgress = [];
+        }
         $examProgressFormatted = $this->getProgressFormatted($exam, $examProgress);
         $examNotPassed = array_filter($examProgressFormatted, function ($item) {
             return !$item['passed'];
@@ -683,6 +686,12 @@ class ExamRepository extends BaseRepository
         $exam = $examUser->exam;
         if (!$user instanceof User) {
             $user = $examUser->user()->select(['id', 'uploaded', 'downloaded', 'seedtime', 'leechtime', 'seedbonus', 'seed_points'])->first();
+        }
+        if (!$user instanceof User) {
+            throw new \InvalidArgumentException("examUser: {$examUser->id} no user.");
+        }
+        if (!$exam instanceof \App\Models\Exam) {
+            throw new \InvalidArgumentException("examUser: {$examUser->id} no exam.");
         }
         $attributes = [
             'exam_user_id' => $examUser->id,
@@ -890,12 +899,12 @@ class ExamRepository extends BaseRepository
 
         $index = Exam::INDEX_SEED_TIME_AVERAGE;
         if (isset($progressSum[$index])) {
-            $torrentCount = $examUser->progresses()
+            $torrentCountRow = $examUser->progresses()
                 ->where('index', $index)
                 ->where('torrent_id', '>=', 0)
                 ->selectRaw('count(distinct(torrent_id)) as torrent_count')
-                ->first()
-                ->torrent_count;
+                ->first();
+            $torrentCount = $torrentCountRow instanceof \App\Models\ExamProgress ? (int) $torrentCountRow->torrent_count : 0;
             $progressSum[$index] = intval($progressSum[$index] / $torrentCount);
             $logPrefix .= ", index: INDEX_SEED_TIME_AVERAGE, get torrent count: $torrentCount, from query: " . \App\Support\LegacyDb::lastQuery(false, 'json');
         }
@@ -1316,7 +1325,10 @@ class ExamRepository extends BaseRepository
                     if ($exam->isTypeExam()) {
                         //ban user
                         \App\Support\Logger::writeWithContext((string) "{$currentLogPrefix}, [will be banned]", (string) 'info', (bool) false);
-                        \App\Support\Cache::clearUser($examUser->user->id, $examUser->user->passkey);
+                        $clearUser = $examUser->user;
+                        if ($clearUser instanceof User) {
+                            \App\Support\Cache::clearUser($clearUser->id, (string) $clearUser->passkey);
+                        }
                         $uidToDisable[] = $uid;
                         $userModcomment = \App\Support\Locale::trans('exam.ban_user_modcomment', ['exam_name' => $exam->name, 'begin' => $examUser->begin, 'end' => $examUser->end], $locale);
 //                        $userModcomment = sprintf('%s - %s', date('Y-m-d'), $userModcomment);

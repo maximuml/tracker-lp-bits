@@ -82,7 +82,11 @@ final class TorrentAjaxRepository
         $cacheKey = 'searchsuggest_' . md5($searchstr);
         $cached = Cache::get($cacheKey);
         if (is_array($cached) && count($cached) === 3) {
-            return $cached;
+            return [
+                (string) ($cached[0] ?? $searchstr),
+                array_values((array) ($cached[1] ?? [])),
+                array_values(array_map('intval', (array) ($cached[2] ?? []))),
+            ];
         }
 
         $rows = NexusDB::table('suggest')
@@ -95,8 +99,8 @@ final class TorrentAjaxRepository
             ->get();
 
         foreach ($rows as $row) {
-            $result[1][] = (string) $row['suggest'];
-            $result[2][] = (int) $row['count'];
+            $result[1][] = (string) $row->suggest;
+            $result[2][] = (int) $row->count;
         }
 
         Cache::put($cacheKey, $result, now()->addMinutes(10));

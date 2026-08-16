@@ -244,7 +244,7 @@ final class UsercpRepository extends BaseRepository
         }
 
         User::query()->where('id', $user->id)->update($data);
-        Cache::clearUser($user->id, $user->passkey);
+        Cache::clearUser($user->id, (string) $user->passkey);
 
         return User::query()->find($user->id)?->toArray() ?? [];
     }
@@ -258,6 +258,9 @@ final class UsercpRepository extends BaseRepository
     {
         /** @var User $user */
         $user = Auth::user();
+        if (! $user instanceof User) {
+            throw new \RuntimeException('Unauthenticated');
+        }
 
         $data = [
             'topicsperpage' => $dto->topicsperpage,
@@ -273,7 +276,7 @@ final class UsercpRepository extends BaseRepository
         }
 
         User::query()->where('id', $user->id)->update($data);
-        Cache::clearUser($user->id, $user->passkey);
+        Cache::clearUser($user->id, (string) $user->passkey);
 
         return User::query()->find($user->id)?->toArray() ?? [];
     }
@@ -287,6 +290,9 @@ final class UsercpRepository extends BaseRepository
     {
         /** @var User $user */
         $user = Auth::user();
+        if (! $user instanceof User) {
+            throw new \RuntimeException('Unauthenticated');
+        }
 
         $notifsString = (string) $user->notifs;
         preg_match_all('/\[(.*)\]/Ui', $notifsString, $matches);
@@ -385,7 +391,7 @@ final class UsercpRepository extends BaseRepository
         }
 
         User::query()->where('id', $user->id)->update($data);
-        Cache::clearUser($user->id, $user->passkey);
+        Cache::clearUser($user->id, (string) $user->passkey);
 
         return User::query()->find($user->id)?->toArray() ?? [];
     }
@@ -397,6 +403,9 @@ final class UsercpRepository extends BaseRepository
     {
         /** @var User $user */
         $user = Auth::user();
+        if (! $user instanceof User) {
+            throw new \RuntimeException('Unauthenticated');
+        }
         $lang = (array) (SupportContext::getGlobal('lang_usercp') ?? []);
 
         $response = (string) $request->input('response', '');
@@ -404,7 +413,7 @@ final class UsercpRepository extends BaseRepository
             LegacyResponse::abort((string) ($lang['std_error'] ?? 'Error'), (string) ($lang['std_enter_old_password'] ?? 'Please enter old password.'));
         }
 
-        $challenge = self::getChallenge($user->username);
+        $challenge = self::getChallenge((string) $user->username);
         if (empty($challenge)) {
             LegacyResponse::abort((string) ($lang['std_error'] ?? 'Error'), 'expired!');
         }
@@ -529,7 +538,7 @@ final class UsercpRepository extends BaseRepository
         }
 
         Cache::clearUser($user->id, '');
-        self::deleteChallenge($user->username);
+        self::deleteChallenge((string) $user->username);
 
         return $to;
     }
@@ -543,6 +552,9 @@ final class UsercpRepository extends BaseRepository
     {
         /** @var User $user */
         $user = Auth::user();
+        if (! $user instanceof User) {
+            throw new \RuntimeException('Unauthenticated');
+        }
 
         if (! app(WebAuthService::class)->validatePassword($user, $dto->currentPassword)) {
             throw ValidationException::withMessages(['current_password' => ['Wrong password.']]);

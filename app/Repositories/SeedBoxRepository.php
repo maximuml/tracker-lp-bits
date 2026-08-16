@@ -49,6 +49,7 @@ class SeedBoxRepository extends BaseRepository
     public function store(array $params)
     {
         $params = $this->formatParams($params);
+        /** @var array<string, mixed> $params */
         $seedBoxRecord = SeedBoxRecord::query()->create($params);
         $this->clearApprovalCountCache();
         \App\Support\Events::publishModel("seed_box_record_created", $seedBoxRecord->id, "");
@@ -125,8 +126,9 @@ class SeedBoxRepository extends BaseRepository
      */
     public function update(array $params, $id)
     {
-        $model = SeedBoxRecord::query()->findOrFail($id);
+        $model = SeedBoxRecord::query()->findOrFail((int) $id);
         $params = $this->formatParams($params);
+        /** @var array<string, mixed> $params */
         $model->update($params);
         $this->clearApprovalCountCache();
         \App\Support\Events::publishModel("seed_box_record_updated", $id, "");
@@ -139,7 +141,7 @@ class SeedBoxRepository extends BaseRepository
      */
     public function getDetail($id)
     {
-        $model = Poll::query()->findOrFail($id);
+        $model = SeedBoxRecord::query()->findOrFail((int) $id);
         return $model;
     }
 
@@ -171,7 +173,8 @@ class SeedBoxRepository extends BaseRepository
      */
     public function updateStatus(SeedBoxRecord $seedBoxRecord, $status, $reason = '')
     {
-        if (Auth::user()->class < User::CLASS_ADMINISTRATOR) {
+        $operator = Auth::user();
+        if (! $operator instanceof User || $operator->class < User::CLASS_ADMINISTRATOR) {
             throw new InsufficientPermissionException();
         }
         if (!isset(SeedBoxRecord::$status[$status])) {
@@ -183,7 +186,7 @@ class SeedBoxRepository extends BaseRepository
         $message = [
             'receiver' => $seedBoxRecord->uid,
             'subject' => \App\Support\Locale::trans('seed-box.status_change_message.subject', [], null),
-            'msg' => \App\Support\Locale::trans('seed-box.status_change_message.body', ['id' => $seedBoxRecord->id, 'operator' => Auth::user()->username, 'old_status' => $seedBoxRecord->statusText, 'new_status' => \App\Support\Locale::trans('seed-box.status_text.' . $status, [], null), 'reason' => $reason], null),
+            'msg' => \App\Support\Locale::trans('seed-box.status_change_message.body', ['id' => $seedBoxRecord->id, 'operator' => $operator->username, 'old_status' => $seedBoxRecord->statusText, 'new_status' => \App\Support\Locale::trans('seed-box.status_text.' . $status, [], null), 'reason' => $reason], null),
             'added' => now()
         ];
         return NexusDB::transaction(function () use ($seedBoxRecord, $status, $message) {

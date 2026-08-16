@@ -289,6 +289,15 @@ class NexusDB
         self::customModel();
     }
 
+    public static function eloquentConnection(): \Illuminate\Database\Connection
+    {
+        if (self::$eloquentConnection !== null) {
+            return self::$eloquentConnection;
+        }
+
+        return DB::connection(self::getConnectionName());
+    }
+
     private static function schema(): \Illuminate\Database\Schema\Builder
     {
         if (IN_NEXUS) {

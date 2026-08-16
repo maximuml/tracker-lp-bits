@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Repositories\PageLayoutRepository;
 use App\Support\LegacyBootstrap;
 use App\Support\SupportContext;
 use Closure;
@@ -58,11 +59,15 @@ final class LegacyRequestMiddleware
             \App\Support\LegacyAuth::parkedFromContext();
         }
 
+        app(PageLayoutRepository::class)->prepareAccess();
+
         return $next($request);
     }
 
     public function terminate(Request $request, Response $response): void
     {
+        app(PageLayoutRepository::class)->flushAccess();
+
         if ($this->detectScript($request) === 'index') {
             \App\Support\Bootstrap::autoClean((bool) false);
         }

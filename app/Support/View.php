@@ -2,6 +2,9 @@
 
 namespace App\Support;
 
+use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Http\Response;
+
 /**
  * Legacy view-rendering helper extracted from `include/functions.php`.
  *
@@ -44,6 +47,6 @@ final class View
             return $result;
         }
 
-        die($result);
+        throw new HttpResponseException(new Response($result));
     }
 }

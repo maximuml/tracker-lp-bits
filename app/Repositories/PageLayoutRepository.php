@@ -2,6 +2,9 @@
 
 namespace App\Repositories;
 
+use App\Repositories\IpLogRepository;
+use App\Support\Menu;
+use App\Support\SupportContext;
 use Nexus\Database\NexusDB;
 
 class PageLayoutRepository extends BaseRepository
@@ -112,5 +115,62 @@ class PageLayoutRepository extends BaseRepository
     public function updateUser(int $userId, array $data): void
     {
         NexusDB::table('users')->where('id', $userId)->update($data);
+    }
+
+    /**
+     * Record per-request user access data and precompute the main menu so
+     * the header view helper does not have to mutate state or touch Redis.
+     */
+    public function prepareAccess(): void
+    {
+        $user = SupportContext::getUser();
+        if ($user === null || empty($user['id'])) {
+            return;
+        }
+
+        $script = \Nexus\Nexus::instance()->getScript();
+        if (in_array($script, ['announce', 'scrape', 'torrentrss', 'download'], true)) {
+            return;
+        }
+
+        SupportContext::addUserUpdate('last_access', date('Y-m-d H:i:s'));
+        SupportContext::addUserUpdate('ip', $user['ip'] ?? SupportContext::getServerValue('REMOTE_ADDR', ''));
+
+        IpLogRepository::saveToCache((int) $user['id']);
+
+        $menuResult = Menu::render(
+            $script,
+            SupportContext::getLangFunctions(),
+            (string) SupportContext::getGlobal('enableoffer', ''),
+            (string) \App\Support\Hooks::applyFilter('nexus_menu') ?: null,
+            $user,
+            SupportContext::getCache(),
+            (string) SupportContext::getGlobal('CURLANGDIR', ''),
+        );
+
+        SupportContext::setGlobal('nexus_menu_html', $menuResult['html']);
+        SupportContext::setGlobal('nexus_menu_selected', $menuResult['selected']);
+
+        if ((string) SupportContext::getGlobal('where_tweak', '') === 'yes') {
+            SupportContext::addUserUpdate('page', $menuResult['selected']);
+        }
+    }
+
+    /**
+     * Flush any pending user updates to the database at the end of the request.
+     */
+    public function flushAccess(): void
+    {
+        $user = SupportContext::getUser();
+        if ($user === null || empty($user['id'])) {
+            return;
+        }
+
+        $userUpdateSet = SupportContext::getUserUpdateSet();
+        if (empty($userUpdateSet)) {
+            return;
+        }
+
+        $this->updateUser((int) $user['id'], $userUpdateSet);
     }
 }

@@ -4,6 +4,8 @@ namespace App\Support;
 
 use App\Models\SearchBox;
 use App\Repositories\PageLayoutRepository;
+use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Http\Response;
 
 class PageLayout
 {
@@ -41,12 +43,9 @@ class PageLayout
             //			if (($oldip != $context->user["ip"]) && $context->user["ip"])
             //			sql_query("INSERT INTO iplog (ip, userid, access) VALUES (" . sqlesc($context->user['ip']) . ", " . $context->user['id'] . ", '" . $context->user['last_access'] . "')");
             //		}
-            //record always
-            \App\Repositories\IpLogRepository::saveToCache($context->user['id']);
-            $context->userUpdateSet['last_access'] = date("Y-m-d H:i:s");
-            $context->userUpdateSet['ip'] = $context->user['ip'];
+            // Per-request access tracking is handled by PageLayoutRepository::prepareAccess().
         }
-        header("Content-Type: text/html; charset=utf-8; Cache-control:private");
+        //header("Content-Type: text/html; charset=utf-8; Cache-control:private");
         //header("Pragma: No-cache");
         if ($title == "") {
             $title = $context->siteName;
@@ -59,7 +58,7 @@ class PageLayout
         $title .= " - Powered by " . PROJECTNAME;
         if ($context->siteOnline == "no") {
             if ($context->userClass() < $context->adminClass) {
-                die($context->lang['std_site_down_for_maintenance']);
+                throw new HttpResponseException(new Response((string) ($context->lang['std_site_down_for_maintenance'] ?? 'Site down for maintenance'), 503));
             } else {
                 $context->offlineMsg = true;
             }
@@ -237,11 +236,7 @@ class PageLayout
 <?php 
         } else {
             \App\Support\Frame::mainFrameOpen();
-            $menuResult = Menu::render($context->script, $context->lang, $context->enableOffer, $context->customMenu, $context->user, $context->cache, $context->langDir);
-            print $menuResult['html'];
-            if ($context->whereTweak === 'yes') {
-                $context->userUpdateSet['page'] = $menuResult['selected'];
-            }
+            print $context->menuHtml;
             \App\Support\Frame::mainFrameClose();
             $datum = getdate();
             $datum["hours"] = sprintf("%02.0f", $datum["hours"]);
@@ -645,9 +640,6 @@ class PageLayout
         print "</td></tr></table>";
         print "<div id=\"footer\">";
         print "<div style=\"margin-top: 10px; margin-bottom: 30px;\" align=\"center\">";
-        if ($context->user && !empty($context->userUpdateSet)) {
-            app(PageLayoutRepository::class)->updateUser((int) $context->user['id'], $context->userUpdateSet);
-        }
         // Variables for End Time
         $tend = microtime(true);
         $totaltime = $tend - \Nexus\Nexus::instance()->getStartTimestamp();

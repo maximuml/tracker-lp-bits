@@ -9,6 +9,7 @@ use Filament\Support\Assets\Css;
 use Filament\Support\Facades\FilamentAsset;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Console\Events\ScheduledTaskStarting;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\URL;
@@ -47,6 +48,8 @@ class AppServiceProvider extends ServiceProvider
         app(Plugin::class)->start();
         NexusDB::customModel();
         DB::connection(config('database.default'))->enableQueryLog();
+
+        Model::preventLazyLoading(! app()->isProduction());
         $forceScheme = strtolower(env('FORCE_SCHEME'));
         if (env('APP_ENV') == "production" && in_array($forceScheme, ['https', 'http'])) {
             URL::forceScheme($forceScheme);

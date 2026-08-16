@@ -2,6 +2,10 @@
 
 namespace App\Support;
 
+use App\Models\UserMedal;
+use App\Models\UserMeta;
+use App\Repositories\UserRepository;
+use App\Support\Config\SiteConfig;
 use Illuminate\Support\HtmlString;
 
 /**
@@ -12,6 +16,12 @@ use Illuminate\Support\HtmlString;
  */
 final class UserDisplay
 {
+    /** @var array<int, array<string, mixed>|false> */
+    private static array $rowCache = [];
+
+    /** @var array<int, string> */
+    private static array $usernameCache = [];
+
     /**
      * Return the current user's class value, or '' in the legacy context
      * when the user is not loaded.
@@ -108,36 +118,128 @@ final class UserDisplay
      */
     public static function row(int|string $id): array|false
     {
-        static $userRows = [];
-
-        if (isset($userRows[$id])) {
-            return $userRows[$id];
+        if (isset(self::$rowCache[$id])) {
+            return self::$rowCache[$id];
         }
 
         $row = \Nexus\Database\NexusDB::remember("user_{$id}_content", 3600, function () use ($id) {
-            $user = \App\Repositories\UserRepository::findForDisplay($id);
+            $user = UserRepository::findForDisplay($id);
 
-            if (!$user) {
+            if (! $user) {
                 return null;
             }
 
             $arr = $user->toArray();
-            $metas = (new \App\Repositories\UserRepository())->listMetas($id, \App\Models\UserMeta::META_KEY_PERSONALIZED_USERNAME);
+            $metas = (new UserRepository())->listMetas($id, UserMeta::META_KEY_PERSONALIZED_USERNAME);
             $arr['__is_rainbow'] = $metas->isNotEmpty() ? 1 : 0;
             $arr['__is_donor'] = self::isDonor($arr);
 
             return Hooks::applyFilter('user_row', $arr);
         });
 
-        return $userRows[$id] = ($row ?: false);
+        return self::$rowCache[$id] = ($row ?: false);
+    }
+
+    /**
+     * Preload user display rows for a list of ids in a single query.
+     *
+     * This warms the in-request cache used by {@see row()} and therefore
+     * by {@see username()}, avoiding N+1 queries when rendering tables
+     * with many distinct owners/posters.
+     *
+     * @param  array<int, int|string>  $ids
+     */
+    public static function preload(array $ids): void
+    {
+        $ids = array_values(array_unique(array_filter(array_map('intval', $ids))));
+        if ($ids === []) {
+            return;
+        }
+
+        $missing = array_diff($ids, array_keys(self::$rowCache));
+        if ($missing === []) {
+            return;
+        }
+
+        $columns = [
+            'id', 'class', 'enabled', 'privacy', 'avatar', 'signature', 'uploaded', 'downloaded',
+            'last_access', 'username', 'donor', 'donoruntil', 'leechwarn', 'warned', 'title',
+            'downloadpos', 'parked', 'clientselect', 'showclienterror',
+        ];
+
+        $users = UserRepository::getByIds($missing, $columns);
+        if ($users->isEmpty()) {
+            foreach ($missing as $id) {
+                self::$rowCache[$id] = false;
+            }
+
+            return;
+        }
+
+        $maxMedals = (int) SiteConfig::current()->system->maximumNumberOfMedalsCanBeWorn(3);
+
+        $rainbowIds = array_flip(
+            UserMeta::query()
+                ->whereIn('uid', $missing)
+                ->where('meta_key', UserMeta::META_KEY_PERSONALIZED_USERNAME)
+                ->where('status', 0)
+                ->where(function ($query) {
+                    $query->whereNull('deadline')->orWhere('deadline', '>=', now());
+                })
+                ->pluck('uid')
+                ->toArray()
+        );
+
+        $medalRows = UserMedal::query()
+            ->whereIn('uid', $missing)
+            ->where('status', UserMedal::STATUS_WEARING)
+            ->where(function ($query) {
+                $query->whereNull('expire_at')->orWhere('expire_at', '>=', now());
+            })
+            ->with('medal')
+            ->orderByDesc('priority')
+            ->orderByDesc('id')
+            ->get();
+
+        $medalsByUser = [];
+        foreach ($medalRows as $userMedal) {
+            $uid = (int) $userMedal->uid;
+            if (! isset($medalsByUser[$uid])) {
+                $medalsByUser[$uid] = [];
+            }
+            if (count($medalsByUser[$uid]) >= $maxMedals) {
+                continue;
+            }
+
+            $medal = $userMedal->medal;
+            if (! $medal) {
+                continue;
+            }
+            $medalsByUser[$uid][] = $medal->toArray();
+        }
+
+        foreach ($users as $user) {
+            $id = (int) $user->id;
+            $arr = $user->toArray();
+            $arr['wearing_medals'] = $medalsByUser[$id] ?? [];
+            $arr['__is_rainbow'] = isset($rainbowIds[$id]) ? 1 : 0;
+            $arr['__is_donor'] = self::isDonor($arr);
+
+            self::$rowCache[$id] = Hooks::applyFilter('user_row', $arr);
+        }
+
+        foreach ($missing as $id) {
+            if (! isset(self::$rowCache[$id])) {
+                self::$rowCache[$id] = false;
+            }
+        }
     }
 
     /**
      * Check whether the user is a donor with an active donoruntil window.
      *
      * Mirrors `is_donor()`.
-     */
-    /**
+     *
      * @param  array<string, mixed>  $userInfo
      */
     public static function isDonor(array $userInfo): bool
@@ -210,11 +312,10 @@ final class UserDisplay
         string $link_ext = '',
         bool $underline = false,
     ): string {
-        static $usernameArray = [];
         $id = (int) $id;
 
-        if (func_num_args() === 1 && isset($usernameArray[$id])) {
-            return $usernameArray[$id];
+        if (func_num_args() === 1 && isset(self::$usernameCache[$id])) {
+            return self::$usernameCache[$id];
         }
 
         $arr = \App\Support\UserDisplay::row($id);
@@ -303,7 +404,7 @@ final class UserDisplay
         }
 
         if (func_num_args() === 1) {
-            $usernameArray[$id] = $username;
+            self::$usernameCache[$id] = $username;
         }
 
         return $username;

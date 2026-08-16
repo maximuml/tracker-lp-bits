@@ -29,6 +29,8 @@ final class TorrentTable
     }
 	unset($row);
 
+	\App\Support\UserDisplay::preload($ownerIdArr);
+
 	$torrentSeedingLeechingStatus = $torrent->listLeechingSeedingStatus($user['id'], $torrentIdArr);
     $tagRep = new \App\Repositories\TagRepository();
 	$torrentTagResult = $torrentRep->getTorrentTagsGrouped($torrentIdArr);

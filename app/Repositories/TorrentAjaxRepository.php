@@ -53,6 +53,11 @@ final class TorrentAjaxRepository
             ->limit($rpp)
             ->get();
 
+        $snatchUserIds = $snatchedRows->pluck('userid')->filter()->unique()->map('intval')->toArray();
+        if ($snatchUserIds !== []) {
+            \App\Support\UserDisplay::preload($snatchUserIds);
+        }
+
         return [
             'id' => $torrentId,
             'torrentName' => $torrentName,
@@ -163,16 +168,23 @@ final class TorrentAjaxRepository
             $torrentArr = array_merge($torrentArr, $update);
         }
 
-        $userIds = array_unique(array_filter(array_column(array_merge($seeders, $leechers), 'userid')));
+        $allPeers = array_merge($seeders, $leechers);
+        $userIds = array_unique(array_filter(array_column($allPeers, 'userid')));
+
+        if ($userIds !== []) {
+            \App\Support\UserDisplay::preload($userIds);
+        }
+
         $privacyData = [];
-        if (! empty($userIds)) {
-            $privacyData = User::query()->whereIn('id', $userIds)->pluck('privacy', 'id')->toArray();
+        foreach ($userIds as $uid) {
+            $row = \App\Support\UserDisplay::row((int) $uid);
+            $privacyData[$uid] = is_array($row) ? (string) ($row['privacy'] ?? '') : '';
         }
 
         $seedBoxRep = new SeedBoxRepository();
         $isSeedBoxMap = [];
         $caseWhens = [];
-        foreach (array_merge($seeders, $leechers) as $peer) {
+        foreach ($allPeers as $peer) {
             $isSeedBox = false;
             foreach (array_filter([$peer['ipv4'] ?? '', $peer['ipv6'] ?? '']) as $ip) {
                 if ($seedBoxRep->renderIcon($ip, (int) $peer['userid']) !== '') {
@@ -207,7 +219,6 @@ final class TorrentAjaxRepository
             }
         }
 
-        $userIds = array_unique(array_filter(array_column(array_merge($seeders, $leechers), 'userid')));
         $usernameHtmlMap = [];
         foreach ($userIds as $uid) {
             $usernameHtmlMap[(int) $uid] = \App\Support\UserDisplay::username((int) $uid, false, true, true, true);

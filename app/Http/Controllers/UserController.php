@@ -145,7 +145,7 @@ class UserController extends Controller
             'uid' => 'required',
         ]);
         $examRepository = new ExamRepository();
-        $result = $examRepository->listMatchExam($request->uid);
+        $result = $examRepository->listMatchExam((int) $request->uid);
         $resource = ExamResource::collection($result);
         return $this->success($resource);
     }

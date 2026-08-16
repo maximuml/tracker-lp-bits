@@ -35,9 +35,9 @@ class ExamRepository extends BaseRepository
 
     /**
      * @param  array<int|string, mixed>  $params
-     * @return  mixed
+     * @return  \App\Models\Exam
      */
-    public function store(array $params)
+    public function store(array $params): Exam
     {
         $diffInHours = $this->checkBeginEnd($params);
         $this->checkIndexes($params, $diffInHours);
@@ -50,16 +50,19 @@ class ExamRepository extends BaseRepository
 //        if ($valid->isNotEmpty() && $params['status'] == Exam::STATUS_ENABLED) {
 //            throw new NexusException("Enabled and discovered exam already exists.");
 //        }
-        $exam = Exam::query()->create($this->formatParams($params));
+        $formatted = $this->formatParams($params);
+        /** @var array<string, mixed> $data */
+        $data = $formatted;
+        $exam = Exam::query()->create($data);
         return $exam;
     }
 
     /**
      * @param  array<int|string, mixed>  $params
-     * @param  mixed  $id
-     * @return  mixed
+     * @param  int  $id
+     * @return  \App\Models\Exam
      */
-    public function update(array $params, $id)
+    public function update(array $params, int $id): Exam
     {
         $diffInHours = $this->checkBeginEnd($params);
         $this->checkIndexes($params, $diffInHours);
@@ -73,7 +76,10 @@ class ExamRepository extends BaseRepository
 //            throw new NexusException("Enabled and discovered exam already exists.");
 //        }
         $exam = Exam::query()->findOrFail($id);
-        $exam->update($this->formatParams($params));
+        $formatted = $this->formatParams($params);
+        /** @var array<string, mixed> $data */
+        $data = $formatted;
+        $exam->update($data);
         return $exam;
     }
 
@@ -244,10 +250,10 @@ class ExamRepository extends BaseRepository
     }
 
     /**
-     * @param  mixed  $id
-     * @return  mixed
+     * @param  int  $id
+     * @return  \App\Models\Exam
      */
-    public function getDetail($id)
+    public function getDetail(int $id): Exam
     {
         $exam = Exam::query()->findOrFail($id);
         return $exam;
@@ -255,10 +261,10 @@ class ExamRepository extends BaseRepository
 
     /**
      * delete an exam task, also will delete all exam user and progress.
-     * @param  mixed  $id
+     * @param  int  $id
      * @return  bool
      */
-    public function delete($id)
+    public function delete(int $id)
     {
         $exam = Exam::query()->findOrFail($id);
         DB::transaction(function () use ($exam) {
@@ -331,31 +337,31 @@ class ExamRepository extends BaseRepository
 
     /**
      * list user match exams
-     * @param  mixed  $uid
-     * @return  \Illuminate\Database\Eloquent\Collection<int, Exam>
+     * @param  int  $uid
+     * @return  \Illuminate\Support\Collection<int, Exam>
      */
-    public function listMatchExam($uid)
+    public function listMatchExam(int $uid)
     {
         $exams = $this->listValid(null, null, Exam::TYPE_EXAM);
         return $this->filterForUser($exams, $uid);
     }
 
     /**
-     * @param  mixed  $uid
-     * @return  mixed
+     * @param  int  $uid
+     * @return  \Illuminate\Support\Collection<int, Exam>
      */
-    public function listMatchTask($uid)
+    public function listMatchTask(int $uid)
     {
         $exams = $this->listValid(null, null, Exam::TYPE_TASK);
         return $this->filterForUser($exams, $uid);
     }
 
     /**
-     * @param  \Illuminate\Support\Collection<int, mixed>  $exams
-     * @param  mixed  $uid
-     * @return  \Illuminate\Support\Collection<int, mixed>
+     * @param  \Illuminate\Support\Collection<int, Exam>  $exams
+     * @param  int  $uid
+     * @return  \Illuminate\Support\Collection<int, Exam>
      */
-    private function filterForUser(Collection $exams, $uid): Collection
+    private function filterForUser(Collection $exams, int $uid): Collection
     {
         $userInfo = User::query()->findOrFail($uid, User::$commonFields);
         return $exams->filter(function (Exam $exam) use ($userInfo) {
@@ -366,9 +372,9 @@ class ExamRepository extends BaseRepository
 
     /**
      * @param  \App\Models\Exam  $exam
-     * @param  mixed  $user
+     * @param  \App\Models\User|int  $user
      */
-    private function isExamMatchUser(Exam $exam, $user): bool
+    private function isExamMatchUser(Exam $exam, User|int $user): bool
     {
         if (!$user instanceof User) {
             $user = User::query()->findOrFail(intval($user), ['id', 'username', 'added', 'class']);
@@ -1270,6 +1276,9 @@ class ExamRepository extends BaseRepository
                 }
                 //update to the newest progress
                 $examUser = $this->updateProgress($examUser, $examUser->user);
+                if (!$examUser instanceof ExamUser) {
+                    continue;
+                }
                 $locale = $examUser->user->locale;
                 if ($examUser->is_done) {
                     \App\Support\Logger::writeWithContext((string) "{$currentLogPrefix}, [is_done]", (string) 'info', (bool) false);

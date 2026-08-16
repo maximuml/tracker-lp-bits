@@ -65,10 +65,10 @@ class TorrentController extends Controller
 
     /**
      * Display the specified resource.
-     * @param  mixed  $id
+     * @param  int  $id
      * @return  array<string, mixed>
      */
-    public function show($id)
+    public function show(int $id)
     {
         \App\Support\Logger::writeWithContext((string) "controller torrent show entry", (string) 'info', (bool) false);
         /**

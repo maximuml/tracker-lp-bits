@@ -127,12 +127,12 @@ class TorrentRepository extends BaseRepository
     public function getList(Request $request, User $user, ?string $sectionName = null)
     {
         if (empty($sectionName)) {
-            $sectionId = SearchBox::getBrowseMode();
+            $sectionId = (int) SearchBox::getBrowseMode();
             $searchBox = SearchBox::query()->find($sectionId);
         } else {
             $searchBox = SearchBox::query()->where('name', $sectionName)->first();
         }
-        if (empty($searchBox)) {
+        if (! $searchBox instanceof SearchBox) {
             throw new NexusException(\App\Support\Locale::trans("upload.invalid_section", [], null));
         }
         $categoryIdList = $searchBox->categories()->pluck('id')->toArray();
@@ -196,11 +196,11 @@ class TorrentRepository extends BaseRepository
     }
 
     /**
-     * @param  mixed  $id
+     * @param  int  $id
      * @param  \App\Models\User  $user
      * @return  mixed
      */
-    public function getDetail($id, User $user)
+    public function getDetail(int $id, User $user)
     {
         //query this info default
         $query = Torrent::query()->with(self::$defaultLoadRelationships);
@@ -722,10 +722,10 @@ class TorrentRepository extends BaseRepository
 
     /**
      * @param  mixed  $user
-     * @param  mixed  $torrentId
+     * @param  int  $torrentId
      * @return  array<int|string, mixed>
      */
-    public function buildApprovalModal($user, $torrentId)
+    public function buildApprovalModal($user, int $torrentId)
     {
         $user = $this->getUser($user);
         Permission::assertCan(PermissionEnum::TORRENT_APPROVAL, $user);
@@ -777,23 +777,26 @@ class TorrentRepository extends BaseRepository
     {
         $user = $this->getUser($user);
         Permission::assertCan(PermissionEnum::TORRENT_APPROVAL, $user);
-        $torrent = Torrent::query()->findOrFail($params['torrent_id'], Torrent::$commentFields);
+        $torrentId = (int) $params['torrent_id'];
+        $approvalStatus = (int) $params['approval_status'];
+        $comment = (string) ($params['comment'] ?? '');
+        $torrent = Torrent::query()->findOrFail($torrentId, Torrent::$commentFields);
         $lastLog = TorrentOperationLog::query()
-            ->where('torrent_id', $params['torrent_id'])
+            ->where('torrent_id', $torrentId)
             ->where('uid', $user->id)
             ->orderBy('id', 'desc')
             ->first();
-        if ($torrent->approval_status == $params['approval_status'] && $lastLog && $lastLog->comment == $params['comment']) {
+        if ($torrent->approval_status == $approvalStatus && $lastLog && $lastLog->comment == $comment) {
             //No change
             return $params;
         }
         $torrentUpdate = $torrentOperationLog = [];
-        $torrentUpdate['approval_status'] = $params['approval_status'];
+        $torrentUpdate['approval_status'] = $approvalStatus;
         $notifyUser = false;
-        if ($params['approval_status'] == Torrent::APPROVAL_STATUS_ALLOW) {
+        if ($approvalStatus == Torrent::APPROVAL_STATUS_ALLOW) {
             $torrentUpdate['banned'] = 'no';
             $torrentUpdate['visible'] = 'yes';
-            if ($torrent->approval_status != $params['approval_status']) {
+            if ($torrent->approval_status != $approvalStatus) {
                 $torrentOperationLog['action_type'] = TorrentOperationLog::ACTION_TYPE_APPROVAL_ALLOW;
                 //increase promotion time
                 if (
@@ -814,33 +817,34 @@ class TorrentRepository extends BaseRepository
             if ($torrent->approval_status == Torrent::APPROVAL_STATUS_DENY) {
                 $notifyUser = true;
             }
-        } elseif ($params['approval_status'] == Torrent::APPROVAL_STATUS_DENY) {
+        } elseif ($approvalStatus == Torrent::APPROVAL_STATUS_DENY) {
             $torrentUpdate['banned'] = 'yes';
             $torrentUpdate['visible'] = 'no';
             //Deny, record and notify all the time
             $torrentOperationLog['action_type'] = TorrentOperationLog::ACTION_TYPE_APPROVAL_DENY;
             $notifyUser = true;
-        } elseif ($params['approval_status'] == Torrent::APPROVAL_STATUS_NONE) {
+        } elseif ($approvalStatus == Torrent::APPROVAL_STATUS_NONE) {
             $torrentUpdate['banned'] = 'no';
             $torrentUpdate['visible'] = 'yes';
-            if ($torrent->approval_status != $params['approval_status']) {
+            if ($torrent->approval_status != $approvalStatus) {
                 $torrentOperationLog['action_type'] = TorrentOperationLog::ACTION_TYPE_APPROVAL_NONE;
             }
             if ($torrent->approval_status == Torrent::APPROVAL_STATUS_DENY) {
                 $notifyUser = true;
             }
         } else {
-            throw new \InvalidArgumentException("Invalid approval_status: " . $params['approval_status']);
+            throw new \InvalidArgumentException("Invalid approval_status: " . $approvalStatus);
         }
 
         if (isset($torrentOperationLog['action_type'])) {
             $torrentOperationLog['uid'] = $user->id;
             $torrentOperationLog['torrent_id'] = $torrent->id;
-            $torrentOperationLog['comment'] = $params['comment'] ?? '';
+            $torrentOperationLog['comment'] = $comment;
         }
 
         NexusDB::transaction(function () use ($torrent, $torrentOperationLog, $torrentUpdate, $notifyUser) {
             $log = "torrent: " . $torrent->id;
+            /** @var array<string, mixed> $torrentUpdate */
             $log .= ", [UPDATE_TORRENT]: " . \App\Support\Json::encode($torrentUpdate);
             $torrent->update($torrentUpdate);
             if (!empty($torrentOperationLog)) {
@@ -1337,8 +1341,11 @@ HTML;
         if (!empty($specificSubCategoryAndTags['category']) && !in_array($specificSubCategoryAndTags['category'], $validCategoryIdArr)) {
             throw new NexusException(\App\Support\Locale::trans('upload.invalid_category', [], null));
         }
-        $categoryId = $specificSubCategoryAndTags['category'] ?? 0;
+        $categoryId = (int) ($specificSubCategoryAndTags['category'] ?? 0);
         $category = Category::query()->find($categoryId);
+        if (!$category instanceof Category) {
+            $category = null;
+        }
         $baseUpdateQuery = Torrent::query()->whereIn('id', $torrentIdArr);
         $updateCategoryQuery = $baseUpdateQuery->clone();
         if (!empty($validCategoryIdArr)) {
@@ -1359,8 +1366,9 @@ HTML;
                 throw new NexusException(\App\Support\Locale::trans('upload.not_supported_sub_category_field', ['field' => $name], null));
             }
             $validIdArr = $relation->pluck('id')->toArray();
-            if (!in_array($specificSubCategoryAndTags[$name], $validIdArr)) {
-                \App\Support\Logger::writeWithContext((string) ("taxonomy {$name}, specific: {$specificSubCategoryAndTags[$name]} not in validIdArr: " . implode(', ', $validIdArr)), (string) 'info', (bool) false);
+            $taxonomyId = (int) $specificSubCategoryAndTags[$name];
+            if (!in_array($taxonomyId, $validIdArr)) {
+                \App\Support\Logger::writeWithContext((string) ("taxonomy {$name}, specific: {$taxonomyId} not in validIdArr: " . implode(', ', $validIdArr)), (string) 'info', (bool) false);
                 throw new NexusException(\App\Support\Locale::trans('upload.not_supported_sub_category_field', ['field' => $name], null));
             }
 

@@ -12,13 +12,8 @@ use Illuminate\Validation\Rule;
 
 class HitAndRunController extends Controller
 {
-    /** @var  mixed */
-    private $repository;
+    private HitAndRunRepository $repository;
 
-    /**
-     * @param  \App\Repositories\HitAndRunRepository  $repository
-     * @return  mixed
-     */
     public function __construct(HitAndRunRepository $repository)
     {
         $this->repository = $repository;
@@ -55,18 +50,18 @@ class HitAndRunController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate($this->getRules());
-        $result = $this->repository->store($request->all());
+        $data = $request->validate($this->getRules());
+        $result = $this->repository->store($data);
         $resource = new HitAndRunResource($result);
         return $this->success($resource);
     }
 
     /**
      * Display the specified resource.
-     * @param  mixed  $id
+     * @param  int  $id
      * @return  array<string, mixed>
      */
-    public function show($id)
+    public function show(int $id)
     {
         $result = $this->repository->getDetail($id);
         $resource = new HitAndRunResource($result);
@@ -76,23 +71,23 @@ class HitAndRunController extends Controller
     /**
      * Update the specified resource in storage.
      * @param  \Illuminate\Http\Request  $request
-     * @param  mixed  $id
+     * @param  int  $id
      * @return  array<string, mixed>
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, int $id)
     {
-        $request->validate($this->getRules());
-        $result = $this->repository->update($request->all(), $id);
+        $data = $request->validate($this->getRules());
+        $result = $this->repository->update($data, $id);
         $resource = new HitAndRunResource($result);
         return $this->success($resource);
     }
 
     /**
      * Remove the specified resource from storage.
-     * @param  mixed  $id
+     * @param  int  $id
      * @return  array<string, mixed>
      */
-    public function destroy($id)
+    public function destroy(int $id)
     {
         $result = $this->repository->delete($id);
         return $this->success($result);
@@ -106,10 +101,10 @@ class HitAndRunController extends Controller
     }
 
     /**
-     * @param  mixed  $id
+     * @param  int  $id
      * @return  array<int|string, mixed>
      */
-    public function pardon($id): array
+    public function pardon(int $id): array
     {
         $result = $this->repository->pardon($id, Auth::user());
         return $this->success($result);

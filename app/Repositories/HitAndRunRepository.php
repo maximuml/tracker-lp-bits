@@ -45,41 +45,45 @@ class HitAndRunRepository extends BaseRepository
 
     /**
      * @param  array<int|string, mixed>  $params
-     * @return  mixed
+     * @return  \App\Models\HitAndRun
      */
-    public function store(array $params)
+    public function store(array $params): HitAndRun
     {
-        $model = HitAndRun::query()->create($params);
+        /** @var array<string, mixed> $data */
+        $data = $params;
+        $model = HitAndRun::query()->create($data);
         return $model;
     }
 
     /**
      * @param  array<int|string, mixed>  $params
-     * @param  mixed  $id
-     * @return  mixed
+     * @param  int  $id
+     * @return  \App\Models\HitAndRun
      */
-    public function update(array $params, $id)
+    public function update(array $params, int $id): HitAndRun
     {
         $model = HitAndRun::query()->findOrFail($id);
-        $model->update($params);
+        /** @var array<string, mixed> $data */
+        $data = $params;
+        $model->update($data);
         return $model;
     }
 
     /**
-     * @param  mixed  $id
-     * @return  mixed
+     * @param  int  $id
+     * @return  \App\Models\HitAndRun
      */
-    public function getDetail($id)
+    public function getDetail(int $id): HitAndRun
     {
         $model = HitAndRun::query()->with(['user', 'torrent', 'snatch'])->findOrFail($id);
         return $model;
     }
 
     /**
-     * @param  mixed  $id
-     * @return  mixed
+     * @param  int  $id
+     * @return  bool
      */
-    public function delete($id)
+    public function delete(int $id): bool
     {
         $model = HitAndRun::query()->findOrFail($id);
         $result = $model->delete();
@@ -235,7 +239,7 @@ class HitAndRunRepository extends BaseRepository
 
                 //check seed time
                 $targetSeedTime = $row->snatch->seedtime;
-                $requireSeedTime = bcmul((string)$setting['seed_time_minimum'], '3600');
+                $requireSeedTime = bcmul((string) (float) $setting['seed_time_minimum'], '3600');
                 \App\Support\Logger::writeWithContext((string) "{$currentLog}, targetSeedTime: {$targetSeedTime}, requireSeedTime: {$requireSeedTime}", (string) 'info', (bool) false);
                 if ($targetSeedTime >= $requireSeedTime) {
                     $result = $this->reachedBySeedTime($row, $setting);
@@ -249,7 +253,7 @@ class HitAndRunRepository extends BaseRepository
                 if (isset($setting['leech_time_minimum']) && $setting['leech_time_minimum'] > 0) {
                     //use diff, other index should do also, update later @todo
                     $targetLeechTime = $row->snatch->leech_time_no_seeder - $row->leech_time_no_seeder_begin;
-                    $requireLeechTime = bcmul((string)$setting['leech_time_minimum'], '3600');
+                    $requireLeechTime = bcmul((string) (float) $setting['leech_time_minimum'], '3600');
                     \App\Support\Logger::writeWithContext((string) "{$currentLog}, targetLeechTime: {$targetLeechTime}, requireLeechTime: {$requireLeechTime}", (string) 'info', (bool) false);
                     if ($targetLeechTime >= $requireLeechTime) {
                         $result = $this->reachedByLeechTime($row, $setting);
@@ -357,7 +361,7 @@ class HitAndRunRepository extends BaseRepository
 
     /**
      * @param  \App\Models\HitAndRun  $hitAndRun
-     * @param  array<int|string, mixed>  $update
+     * @param  array<string, mixed>  $update
      * @param  string  $logPrefix
      */
     private function inspectingToReached(HitAndRun $hitAndRun, array $update, string $logPrefix = ''): bool
@@ -385,9 +389,9 @@ class HitAndRunRepository extends BaseRepository
     /**
      * @param  \App\Models\HitAndRun  $hitAndRun
      * @param  array<int|string, mixed>  $setting
-     * @param  mixed  $disableUser
+     * @param  bool  $disableUser
      */
-    private function unreached(HitAndRun $hitAndRun, array $setting, $disableUser = true): bool
+    private function unreached(HitAndRun $hitAndRun, array $setting, bool $disableUser = true): bool
     {
         \App\Support\Logger::writeWithContext((string) sprintf('hitAndRun: %s, disableUser: %s', $hitAndRun->toJson(), var_export($disableUser, true)), (string) 'info', (bool) false);
         $comment = \App\Support\Locale::trans('hr.unreached_comment', ['now' => Carbon::now()->toDateTimeString(), 'seed_time' => bcdiv((string) $hitAndRun->snatch->seedtime, '3600', 1), 'seed_time_minimum' => $setting['seed_time_minimum'], 'share_ratio' => \App\Support\Ratio::hr($hitAndRun->snatch->uploaded, $hitAndRun->snatch->downloaded), 'torrent_size' => \App\Support\Format::size($hitAndRun->torrent->size), 'ignore_when_ratio_reach' => $setting['ignore_when_ratio_reach']], $hitAndRun->user->locale);
@@ -542,10 +546,10 @@ class HitAndRunRepository extends BaseRepository
     }
 
     /**
-     * @param  mixed  $id
+     * @param  int  $id
      * @param  \App\Models\User  $user
      */
-    public function pardon($id, User $user): bool
+    public function pardon(int $id, User $user): bool
     {
         $model = HitAndRun::query()->findOrFail($id);
         if (!in_array($model->status, $this->getCanPardonStatus())) {

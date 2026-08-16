@@ -41,7 +41,7 @@ $CURUSER = \App\Support\SupportContext::getUser() ?? [];
     public static function approvalModal(array $params): mixed {
 $CURUSER = \App\Support\SupportContext::getUser() ?? [];
         $rep = new \App\Repositories\TorrentRepository();
-        return $rep->buildApprovalModal($CURUSER['id'], $params['torrent_id']);
+        return $rep->buildApprovalModal($CURUSER['id'], (int) $params['torrent_id']);
     }
 
     /** @param array<string, mixed> $params */
@@ -91,7 +91,7 @@ $CURUSER = \App\Support\SupportContext::getUser() ?? [];
     public static function clearShoutBox(array $params): mixed {
 $CURUSER = \App\Support\SupportContext::getUser() ?? [];
         $user = \App\Models\User::query()->find($CURUSER['id'] ?? 0);
-        if (! $user || ! \App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::SB_MANAGE, $user)) {
+        if (! $user instanceof \App\Models\User || ! \App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::SB_MANAGE, $user)) {
             throw new \RuntimeException('No permission');
         }
         \Nexus\Database\NexusDB::table('shoutbox')->delete();
@@ -249,7 +249,8 @@ $CURUSER = \App\Support\SupportContext::getUser() ?? [];
         if (empty($params['name'])) {
             throw new \InvalidArgumentException("Name is required");
         }
-        $user = \App\Models\User::query()->findOrFail($CURUSER['id'], \App\Models\User::$commonFields);
+        $userId = (int) ($CURUSER['id'] ?? 0);
+        $user = \App\Models\User::query()->findOrFail($userId, \App\Models\User::$commonFields);
         $user->createToken($params['name']);
         return true;
     }
@@ -260,7 +261,8 @@ $CURUSER = \App\Support\SupportContext::getUser() ?? [];
         if (empty($params['id'])) {
             throw new \InvalidArgumentException("id is required");
         }
-        $user = \App\Models\User::query()->findOrFail($CURUSER['id'], \App\Models\User::$commonFields);
+        $userId = (int) ($CURUSER['id'] ?? 0);
+        $user = \App\Models\User::query()->findOrFail($userId, \App\Models\User::$commonFields);
         $user->tokens()->where('id', $params['id'])->delete();
         return true;
     }

@@ -92,37 +92,41 @@ class SearchBoxRepository extends BaseRepository
      */
     public function store(array $params)
     {
-        $result = SearchBox::query()->create($params);
+        /** @var array<string, mixed> $data */
+        $data = $params;
+        $result = SearchBox::query()->create($data);
         return $result;
     }
 
     /**
      * @param  array<int|string, mixed>  $params
-     * @param  mixed  $id
+     * @param  int  $id
      * @return  mixed
      */
-    public function update(array $params, $id)
+    public function update(array $params, int $id)
     {
         $result = SearchBox::query()->findOrFail($id);
-        $result->update($params);
+        /** @var array<string, mixed> $data */
+        $data = $params;
+        $result->update($data);
         return $result;
     }
 
     /**
-     * @param  mixed  $id
+     * @param  int  $id
      * @return  mixed
      */
-    public function getDetail($id)
+    public function getDetail(int $id)
     {
         $result = SearchBox::query()->findOrFail($id);
         return $result;
     }
 
     /**
-     * @param  mixed  $id
+     * @param  int  $id
      * @return  mixed
      */
-    public function delete($id)
+    public function delete(int $id)
     {
         $result = SearchBox::query()->findOrFail($id);
         $success = $result->delete();
@@ -183,6 +187,9 @@ class SearchBoxRepository extends BaseRepository
     {
         if (!$searchBox instanceof SearchBox) {
             $searchBox = SearchBox::get(intval($searchBox));
+        }
+        if (!$searchBox instanceof SearchBox) {
+            return '';
         }
         $results = [];
         //Keep the order
@@ -303,6 +310,9 @@ class SearchBoxRepository extends BaseRepository
         if (!$searchBox instanceof SearchBox) {
             $searchBox = SearchBox::get(intval($searchBox));
         }
+        if (!$searchBox instanceof SearchBox) {
+            return [];
+        }
         $results = [];
         //Keep the order
         if (!empty($searchBox->extra[SearchBox::EXTRA_TAXONOMY_LABELS])) {
@@ -364,13 +374,13 @@ class SearchBoxRepository extends BaseRepository
     }
 
     /**
-     * @param  mixed  $id
-     * @param  mixed  $withCategoryAndTags
-     * @return  mixed
+     * @param  array<int>|int  $id
+     * @param  bool  $withCategoryAndTags
+     * @return  \Illuminate\Database\Eloquent\Collection<int, SearchBox>
      */
     public function listSections($id, $withCategoryAndTags = true)
     {
-        $searchBoxList = SearchBox::query()->with($withCategoryAndTags ? ['categories'] : [])->find($id);
+        $searchBoxList = SearchBox::query()->with($withCategoryAndTags ? ['categories'] : [])->whereIn('id', Arr::wrap($id))->get();
         if ($withCategoryAndTags) {
             foreach ($searchBoxList as $searchBox) {
                 if ($searchBox->showsubcat) {
@@ -492,7 +502,7 @@ class SearchBoxRepository extends BaseRepository
      */
     public static function getOrderedIds(): array
     {
-        return SearchBox::query()->orderBy('id')->pluck('id')->all();
+        return array_values(array_map('intval', SearchBox::query()->orderBy('id')->pluck('id')->all()));
     }
 
     public static function findForCategoryTable(int|string $mode): SearchBox

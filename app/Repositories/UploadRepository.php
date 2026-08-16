@@ -45,8 +45,8 @@ class UploadRepository extends BaseRepository
         if (empty($request->type)) {
             throw new NexusException(\App\Support\Locale::trans("upload.category_unselected", [], null));
         }
-        $category = Category::query()->find($request->type);
-        if (!$category) {
+        $category = Category::query()->find((int) $request->type);
+        if (!$category instanceof Category) {
             throw new NexusException(\App\Support\Locale::trans("upload.invalid_category", [], null));
         }
         $torrentFile = $this->getTorrentFile($request);
@@ -487,7 +487,7 @@ class UploadRepository extends BaseRepository
         $subCategoryInfo = array_column($sectionInfo['sub_categories'], null, 'field');
         $subCategories = [];
         foreach (SearchBox::$taxonomies as $name => $info) {
-            $value = $this->getSubCategoryValue($request, $name, $category->mode);
+            $value = $this->getSubCategoryValue($request, (string) $name, $category->mode);
             if ($value > 0 && isset($subCategoryInfo[$name])) {
                 $subCategoryValues = array_column($subCategoryInfo[$name]['data'], 'name', 'id');
                 if (!isset($subCategoryValues[$value])) {
@@ -515,7 +515,7 @@ class UploadRepository extends BaseRepository
             return '';
         }
         $descriptionArr = \App\Support\Description::parse($descr);
-        return \App\Support\Description::imageFromDescription($descriptionArr, true, false);
+        return \App\Support\Description::firstImageUrl($descriptionArr, '');
     }
 
     private function getTorrentSavePath(): string

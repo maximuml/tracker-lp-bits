@@ -32,39 +32,43 @@ class AgentAllowRepository extends BaseRepository
     {
         $this->getPatternMatches($params['peer_id_pattern'], $params['peer_id_start'], $params['peer_id_match_num']);
         $this->getPatternMatches($params['agent_pattern'], $params['agent_start'], $params['agent_match_num']);
-        $model = AgentAllow::query()->create($params);
+        /** @var array<string, mixed> $data */
+        $data = $params;
+        $model = AgentAllow::query()->create($data);
         return $model;
     }
 
     /**
      * @param  array<int|string, mixed>  $params
-     * @param  mixed  $id
+     * @param  int  $id
      * @return  mixed
      */
-    public function update(array $params, $id)
+    public function update(array $params, int $id)
     {
         $this->getPatternMatches($params['peer_id_pattern'], $params['peer_id_start'], $params['peer_id_match_num']);
         $this->getPatternMatches($params['agent_pattern'], $params['agent_start'], $params['agent_match_num']);
         $model = AgentAllow::query()->findOrFail($id);
-        $model->update($params);
+        /** @var array<string, mixed> $data */
+        $data = $params;
+        $model->update($data);
         return $model;
     }
 
     /**
-     * @param  mixed  $id
+     * @param  int  $id
      * @return  mixed
      */
-    public function getDetail($id)
+    public function getDetail(int $id)
     {
         $model = AgentAllow::query()->findOrFail($id);
         return $model;
     }
 
     /**
-     * @param  mixed  $id
+     * @param  int  $id
      * @return  mixed
      */
-    public function delete($id)
+    public function delete(int $id)
     {
         $model = AgentAllow::query()->findOrFail($id);
         $model->denies()->delete();
@@ -273,8 +277,8 @@ class AgentAllowRepository extends BaseRepository
                 $matchBench[$i] = intval($matchBench[$i]);
                 $matchTarget[$i] = intval($matchTarget[$i]);
             } elseif ($matchType == 'hex') {
-                $matchBench[$i] = hexdec($matchBench[$i]);
-                $matchTarget[$i] = hexdec($matchTarget[$i]);
+                $matchBench[$i] = hexdec((string) $matchBench[$i]);
+                $matchTarget[$i] = hexdec((string) $matchTarget[$i]);
             } else {
                 throw new ClientNotAllowedException(sprintf("Invalid match type: %s", $matchType));
             }

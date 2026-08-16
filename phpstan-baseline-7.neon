@@ -301,12 +301,6 @@ parameters:
 			path: app/Models/Setting.php
 
 		-
-			message: '#^Argument of an invalid type list\<string\>\|false supplied for foreach, only iterables are supported\.$#'
-			identifier: foreach.nonIterable
-			count: 1
-			path: app/Models/Torrent.php
-
-		-
 			message: '#^Parameter \#1 \$attributes of method Illuminate\\Database\\Eloquent\\Builder\<App\\Models\\TorrentOperationLog\>\:\:create\(\) expects array\<string, mixed\>, array\<int\|string, mixed\> given\.$#'
 			identifier: argument.type
 			count: 1
@@ -317,36 +311,6 @@ parameters:
 			identifier: argument.type
 			count: 2
 			path: app/Models/TrackerUrl.php
-
-		-
-			message: '#^Call to an undefined method App\\Models\\AgentAllow\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\AgentAllow\>\:\:delete\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: app/Repositories/AgentAllowRepository.php
-
-		-
-			message: '#^Call to an undefined method App\\Models\\AgentAllow\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\AgentAllow\>\:\:denies\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: app/Repositories/AgentAllowRepository.php
-
-		-
-			message: '#^Call to an undefined method App\\Models\\AgentAllow\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\AgentAllow\>\:\:update\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: app/Repositories/AgentAllowRepository.php
-
-		-
-			message: '#^Parameter \#1 \$attributes of method Illuminate\\Database\\Eloquent\\Builder\<App\\Models\\AgentAllow\>\:\:create\(\) expects array\<string, mixed\>, array\<int\|string, mixed\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Repositories/AgentAllowRepository.php
-
-		-
-			message: '#^Parameter \#1 \$hex_string of function hexdec expects string, float\|int\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Repositories/AgentAllowRepository.php
 
 		-
 			message: '#^Call to an undefined method App\\Models\\AgentDeny\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\AgentDeny\>\:\:delete\(\)\.$#'
@@ -365,30 +329,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: app/Repositories/AgentDenyRepository.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\User\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\User\>\:\:\$id\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Repositories/AuthenticateRepository.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\User\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\User\>\:\:\$passkey\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Repositories/AuthenticateRepository.php
-
-		-
-			message: '#^Call to an undefined method App\\Models\\User\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\User\>\:\:checkIsNormal\(\)\.$#'
-			identifier: method.notFound
-			count: 2
-			path: app/Repositories/AuthenticateRepository.php
-
-		-
-			message: '#^Call to an undefined method App\\Models\\User\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\User\>\:\:tokens\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: app/Repositories/AuthenticateRepository.php
 
 		-
 			message: '#^Call to an undefined method App\\Models\\Torrent\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\Torrent\>\:\:checkIsNormal\(\)\.$#'
@@ -413,66 +353,6 @@ parameters:
 			identifier: method.nonObject
 			count: 1
 			path: app/Repositories/CommentRepository.php
-
-		-
-			message: '#^Parameter \#1 \$bytes of static method App\\Support\\Format\:\:size\(\) expects float\|int, float\|int\|string given\.$#'
-			identifier: argument.type
-			count: 3
-			path: app/Repositories/DashboardRepository.php
-
-		-
-			message: '#^Parameter \#2 \$array of function implode expects array, list\<float\>\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Repositories/DashboardRepository.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Medal\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\Medal\>\:\:\$id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Repositories/MedalRepository.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\UserMedal\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\UserMedal\>\:\:\$status\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Repositories/MedalRepository.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\UserMedal\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\UserMedal\>\:\:\$uid\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Repositories/MedalRepository.php
-
-		-
-			message: '#^Call to an undefined method App\\Models\\Medal\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\Medal\>\:\:delete\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: app/Repositories/MedalRepository.php
-
-		-
-			message: '#^Call to an undefined method App\\Models\\Medal\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\Medal\>\:\:update\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: app/Repositories/MedalRepository.php
-
-		-
-			message: '#^Call to an undefined method App\\Models\\UserMedal\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\UserMedal\>\:\:save\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: app/Repositories/MedalRepository.php
-
-		-
-			message: '#^Call to an undefined method App\\Models\\User\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\User\>\:\:wearing_medals\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: app/Repositories/MedalRepository.php
-
-		-
-			message: '#^Parameter \#1 \$attributes of method Illuminate\\Database\\Eloquent\\Builder\<App\\Models\\Medal\>\:\:create\(\) expects array\<string, mixed\>, array\<int\|string, mixed\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Repositories/MedalRepository.php
 
 		-
 			message: '#^Parameter \#1 \$string of function substr expects string, int\|string given\.$#'
@@ -541,126 +421,6 @@ parameters:
 			path: app/Repositories/PluginRepository.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\Torrent\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\Torrent\>\:\:\$owner\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Repositories/RewardRepository.php
-
-		-
-			message: '#^Call to an undefined method App\\Models\\Reward\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\Reward\>\:\:delete\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: app/Repositories/RewardRepository.php
-
-		-
-			message: '#^Call to an undefined method App\\Models\\Reward\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\Reward\>\:\:update\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: app/Repositories/RewardRepository.php
-
-		-
-			message: '#^Call to an undefined method App\\Models\\Torrent\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\Torrent\>\:\:checkIsNormal\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: app/Repositories/RewardRepository.php
-
-		-
-			message: '#^Argument of an invalid type App\\Models\\SearchBox\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\SearchBox\> supplied for foreach, only iterables are supported\.$#'
-			identifier: foreach.nonIterable
-			count: 1
-			path: app/Repositories/SearchBoxRepository.php
-
-		-
-			message: '#^Call to an undefined method App\\Models\\SearchBox\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\SearchBox\>\:\:delete\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: app/Repositories/SearchBoxRepository.php
-
-		-
-			message: '#^Call to an undefined method App\\Models\\SearchBox\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\SearchBox\>\:\:update\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: app/Repositories/SearchBoxRepository.php
-
-		-
-			message: '#^Method App\\Repositories\\SearchBoxRepository\:\:getOrderedIds\(\) should return list\<int\> but returns array\<mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Repositories/SearchBoxRepository.php
-
-		-
-			message: '#^Parameter \#1 \$attributes of method Illuminate\\Database\\Eloquent\\Builder\<App\\Models\\SearchBox\>\:\:create\(\) expects array\<string, mixed\>, array\<int\|string, mixed\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Repositories/SearchBoxRepository.php
-
-		-
-			message: '#^Parameter \#1 \$searchBox of method App\\Repositories\\SearchBoxRepository\:\:buildTaxonomyFormSchema\(\) expects App\\Models\\SearchBox, object given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Repositories/SearchBoxRepository.php
-
-		-
-			message: '#^Parameter \#1 \$searchBox of method App\\Repositories\\SearchBoxRepository\:\:buildTaxonomySelect\(\) expects App\\Models\\SearchBox, object given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Repositories/SearchBoxRepository.php
-
-		-
-			message: '#^Parameter \#1 \.\.\.\$arrays of function array_merge expects array, array\<int\|string, mixed\>\|bool given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Repositories/SearchPageRepository.php
-
-		-
-			message: '#^Parameter \#2 \$searchArea of static method App\\Repositories\\SearchPageRepository\:\:buildFallbackQuery\(\) expects int, int\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Repositories/SearchPageRepository.php
-
-		-
-			message: '#^Parameter \#2 \$searchArea of static method App\\Repositories\\SearchPageRepository\:\:formatResult\(\) expects int, int\|string given\.$#'
-			identifier: argument.type
-			count: 2
-			path: app/Repositories/SearchPageRepository.php
-
-		-
-			message: '#^Cannot access offset ''found'' on array\<int\|string, mixed\>\|bool\|\(callable\(\)\: mixed\)\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: app/Repositories/SearchRepository.php
-
-		-
-			message: '#^Cannot access offset ''hits'' on Elastic\\Elasticsearch\\Response\\Elasticsearch\|Http\\Promise\\Promise\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: app/Repositories/SearchRepository.php
-
-		-
-			message: '#^Method App\\Repositories\\SearchRepository\:\:getTorrent\(\) should return array\<int\|string, mixed\>\|bool\|\(callable\(\)\: mixed\) but returns Elastic\\Elasticsearch\\Response\\Elasticsearch\|Http\\Promise\\Promise\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Repositories/SearchRepository.php
-
-		-
-			message: '#^Parameter \#1 \$array of function array_slice expects array, list\<string\>\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Repositories/SearchRepository.php
-
-		-
-			message: '#^Parameter \#1 \$params of method Elastic\\Elasticsearch\\Endpoints\\Indices\:\:create\(\) expects array\{index\: string, wait_for_active_shards\?\: string, timeout\?\: int\|string, master_timeout\?\: int\|string, pretty\?\: bool, human\?\: bool, error_trace\?\: bool, source\?\: string, \.\.\.\}\|null, non\-empty\-array\<int\|string, mixed\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Repositories/SearchRepository.php
-
-		-
-			message: '#^Parameter \#1 \$string of function substr expects string, int\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Repositories/SearchRepository.php
-
-		-
 			message: '#^Call to an undefined method App\\Models\\SeedBoxRecord\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\SeedBoxRecord\>\:\:update\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -697,42 +457,6 @@ parameters:
 			path: app/Repositories/TagRepository.php
 
 		-
-			message: '#^Cannot access offset ''class'' on array\<string, mixed\>\|false\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: app/Repositories/ToolRepository.php
-
-		-
-			message: '#^Cannot access offset ''ids'' on stdClass\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 2
-			path: app/Repositories/ToolRepository.php
-
-		-
-			message: '#^Cannot access offset ''torrent'' on stdClass\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: app/Repositories/ToolRepository.php
-
-		-
-			message: '#^Cannot access offset ''torrentid'' on stdClass\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: app/Repositories/ToolRepository.php
-
-		-
-			message: '#^Cannot access offset ''userid'' on stdClass\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 2
-			path: app/Repositories/ToolRepository.php
-
-		-
-			message: '#^Parameter \#2 \$replace of static method App\\Support\\Locale\:\:trans\(\) expects array\<string, mixed\>, array\<int\|string, mixed\> given\.$#'
-			identifier: argument.type
-			count: 4
-			path: app/Repositories/ToolRepository.php
-
-		-
 			message: '#^Method App\\Repositories\\ToptenRepository\:\:toArray\(\) should return list\<array\<string, mixed\>\> but returns array\<int, array\>\.$#'
 			identifier: return.type
 			count: 1
@@ -767,42 +491,6 @@ parameters:
 			identifier: argument.type
 			count: 2
 			path: app/Repositories/TorrentSearchRepository.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Category\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\Category\>\:\:\$id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Repositories/UploadRepository.php
-
-		-
-			message: '#^Method App\\Repositories\\UploadRepository\:\:getCover\(\) should return string but returns array\<int, string\>\|string\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Repositories/UploadRepository.php
-
-		-
-			message: '#^Parameter \#2 \$category of method App\\Repositories\\UploadRepository\:\:getHitAndRun\(\) expects App\\Models\\Category, App\\Models\\Category\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\Category\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Repositories/UploadRepository.php
-
-		-
-			message: '#^Parameter \#2 \$category of method App\\Repositories\\UploadRepository\:\:getSubCategoriesAndTags\(\) expects App\\Models\\Category, App\\Models\\Category\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\Category\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Repositories/UploadRepository.php
-
-		-
-			message: '#^Parameter \#2 \$category of method App\\Repositories\\UploadRepository\:\:saveCustomFields\(\) expects App\\Models\\Category, App\\Models\\Category\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\Category\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Repositories/UploadRepository.php
-
-		-
-			message: '#^Parameter \#2 \$name of method App\\Repositories\\UploadRepository\:\:getSubCategoryValue\(\) expects string, int\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Repositories/UploadRepository.php
 
 		-
 			message: '#^Parameter \#1 \$json of function json_decode expects string, string\|false given\.$#'

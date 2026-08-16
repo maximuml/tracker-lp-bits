@@ -17,7 +17,7 @@ class RewardRepository extends BaseRepository
     {
         $query = Reward::query()->with(['user']);
         if (!empty($params['torrent_id'])) {
-            $query->where('torrentid', $params['torrent_id']);
+            $query->where('torrentid', (int) $params['torrent_id']);
         }
         list($sortField, $sortType) = $this->getSortFieldAndType($params);
         $query->orderBy($sortField, $sortType);
@@ -25,12 +25,12 @@ class RewardRepository extends BaseRepository
     }
 
     /**
-     * @param  mixed  $torrentId
-     * @param  mixed  $value
+     * @param  int  $torrentId
+     * @param  float  $value
      * @param  \App\Models\User  $user
      * @return  mixed
      */
-    public function store($torrentId, $value, User $user)
+    public function store(int $torrentId, float $value, User $user)
     {
         if ($user->seedbonus < $value) {
             throw new \LogicException("your bonus not enough.");
@@ -72,31 +72,33 @@ class RewardRepository extends BaseRepository
 
     /**
      * @param  array<int|string, mixed>  $params
-     * @param  mixed  $id
+     * @param  int  $id
      * @return  mixed
      */
-    public function update(array $params, $id)
+    public function update(array $params, int $id)
     {
         $model = Reward::query()->findOrFail($id);
-        $model->update($params);
+        /** @var array<string, mixed> $data */
+        $data = $params;
+        $model->update($data);
         return $model;
     }
 
     /**
-     * @param  mixed  $id
+     * @param  int  $id
      * @return  mixed
      */
-    public function getDetail($id)
+    public function getDetail(int $id)
     {
         $model = Reward::query()->findOrFail($id);
         return $model;
     }
 
     /**
-     * @param  mixed  $id
+     * @param  int  $id
      * @return  mixed
      */
-    public function delete($id)
+    public function delete(int $id)
     {
         $model = Reward::query()->findOrFail($id);
         $result = $model->delete();

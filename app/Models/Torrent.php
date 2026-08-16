@@ -103,7 +103,7 @@ class Torrent extends NexusModel
         'info_hash',
     ];
 
-    /** @var  array<int|string, mixed> */
+    /** @var  list<string> */
     public static $commentFields = [
         'id', 'name', 'added', 'visible', 'banned', 'owner', 'sp_state', 'promotion_time_type', 'promotion_until', 'pos_state',
         'hr', 'last_action', 'leechers', 'seeders', 'times_completed', 'views', 'size', 'cover', 'anonymous',

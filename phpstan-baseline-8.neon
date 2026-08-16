@@ -949,12 +949,6 @@ parameters:
 			path: app/Http/Controllers/ThankController.php
 
 		-
-			message: '#^Parameter \#2 \$columns of method Illuminate\\Database\\Eloquent\\Builder\<App\\Models\\Torrent\>\:\:findOrFail\(\) expects array\<int, Illuminate\\Contracts\\Database\\Query\\Expression\|string\>\|Illuminate\\Contracts\\Database\\Query\\Expression\|string, array\<int\|string, mixed\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Http/Controllers/ThankController.php
-
-		-
 			message: '#^Cannot call method createToken\(\) on App\\Models\\User\|null\.$#'
 			identifier: method.nonObject
 			count: 1
@@ -1089,12 +1083,6 @@ parameters:
 		-
 			message: '#^Method App\\Http\\Controllers\\TorrentController\:\:store\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
 			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/TorrentController.php
-
-		-
-			message: '#^Parameter \#2 \$columns of method Illuminate\\Database\\Eloquent\\Builder\<App\\Models\\Torrent\>\:\:findOrFail\(\) expects array\<int, Illuminate\\Contracts\\Database\\Query\\Expression\|string\>\|Illuminate\\Contracts\\Database\\Query\\Expression\|string, array\<int\|string, mixed\> given\.$#'
-			identifier: argument.type
 			count: 1
 			path: app/Http/Controllers/TorrentController.php
 
@@ -1591,126 +1579,6 @@ parameters:
 			path: app/Repositories/AuthenticateRepository.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\HitAndRun\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\HitAndRun\>\:\:\$comment\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Repositories/BonusRepository.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\HitAndRun\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\HitAndRun\>\:\:\$id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Repositories/BonusRepository.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\HitAndRun\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\HitAndRun\>\:\:\$status\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Repositories/BonusRepository.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\HitAndRun\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\HitAndRun\>\:\:\$uid\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Repositories/BonusRepository.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Medal\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\Medal\>\:\:\$duration\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Repositories/BonusRepository.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Medal\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\Medal\>\:\:\$id\.$#'
-			identifier: property.notFound
-			count: 7
-			path: app/Repositories/BonusRepository.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Medal\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\Medal\>\:\:\$inventory\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Repositories/BonusRepository.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Medal\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\Medal\>\:\:\$name\.$#'
-			identifier: property.notFound
-			count: 3
-			path: app/Repositories/BonusRepository.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Medal\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\Medal\>\:\:\$price\.$#'
-			identifier: property.notFound
-			count: 4
-			path: app/Repositories/BonusRepository.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Torrent\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\Torrent\>\:\:\$id\.$#'
-			identifier: property.notFound
-			count: 3
-			path: app/Repositories/BonusRepository.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Torrent\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\Torrent\>\:\:\$name\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Repositories/BonusRepository.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Torrent\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\Torrent\>\:\:\$price\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Repositories/BonusRepository.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Torrent\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\Torrent\>\:\:\$user\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Repositories/BonusRepository.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\User\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\User\>\:\:\$id\.$#'
-			identifier: property.notFound
-			count: 6
-			path: app/Repositories/BonusRepository.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\User\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\User\>\:\:\$locale\.$#'
-			identifier: property.notFound
-			count: 10
-			path: app/Repositories/BonusRepository.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\User\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\User\>\:\:\$username\.$#'
-			identifier: property.notFound
-			count: 3
-			path: app/Repositories/BonusRepository.php
-
-		-
-			message: '#^Call to an undefined method App\\Models\\HitAndRun\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\HitAndRun\>\:\:update\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: app/Repositories/BonusRepository.php
-
-		-
-			message: '#^Call to an undefined method App\\Models\\Medal\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\Medal\>\:\:checkCanBeBuy\(\)\.$#'
-			identifier: method.notFound
-			count: 2
-			path: app/Repositories/BonusRepository.php
-
-		-
-			message: '#^Call to an undefined method App\\Models\\User\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\User\>\:\:medals\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: app/Repositories/BonusRepository.php
-
-		-
-			message: '#^Call to an undefined method App\\Models\\User\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\User\>\:\:valid_medals\(\)\.$#'
-			identifier: method.notFound
-			count: 2
-			path: app/Repositories/BonusRepository.php
-
-		-
 			message: '#^Cannot access property \$id on App\\Models\\User\|null\.$#'
 			identifier: property.nonObject
 			count: 5
@@ -1731,36 +1599,6 @@ parameters:
 		-
 			message: '#^Cannot call method getTable\(\) on App\\Models\\User\|null\.$#'
 			identifier: method.nonObject
-			count: 1
-			path: app/Repositories/BonusRepository.php
-
-		-
-			message: '#^Parameter \#1 \$user of method App\\Repositories\\MedalRepository\:\:userAttachMedal\(\) expects App\\Models\\User, App\\Models\\User\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\User\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Repositories/BonusRepository.php
-
-		-
-			message: '#^Parameter \#1 \$values of method Illuminate\\Database\\Query\\Builder\:\:update\(\) expects array\<string, mixed\>, array\<int\|string, mixed\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Repositories/BonusRepository.php
-
-		-
-			message: '#^Parameter \#2 \$columns of method Illuminate\\Database\\Eloquent\\Builder\<App\\Models\\Torrent\>\:\:findOrFail\(\) expects array\<int, Illuminate\\Contracts\\Database\\Query\\Expression\|string\>\|Illuminate\\Contracts\\Database\\Query\\Expression\|string, array\<int\|string, mixed\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Repositories/BonusRepository.php
-
-		-
-			message: '#^Parameter \#2 \$medal of method App\\Repositories\\MedalRepository\:\:userAttachMedal\(\) expects App\\Models\\Medal, App\\Models\\Medal\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\Medal\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Repositories/BonusRepository.php
-
-		-
-			message: '#^Parameter \#2 \$num2 of function bcsub expects numeric\-string, string given\.$#'
-			identifier: argument.type
 			count: 1
 			path: app/Repositories/BonusRepository.php
 
@@ -1810,12 +1648,6 @@ parameters:
 			message: '#^Parameter \#1 \$bytes of static method App\\Support\\Format\:\:size\(\) expects float\|int, float\|int\|string given\.$#'
 			identifier: argument.type
 			count: 3
-			path: app/Repositories/DashboardRepository.php
-
-		-
-			message: '#^Parameter \#1 \$columns of method Illuminate\\Database\\Eloquent\\Builder\<App\\Models\\Torrent\>\:\:get\(\) expects array\<int, Illuminate\\Contracts\\Database\\Query\\Expression\|string\>\|Illuminate\\Contracts\\Database\\Query\\Expression\|string, array\<int\|string, mixed\> given\.$#'
-			identifier: argument.type
-			count: 1
 			path: app/Repositories/DashboardRepository.php
 
 		-
@@ -2167,12 +1999,6 @@ parameters:
 			path: app/Repositories/RewardRepository.php
 
 		-
-			message: '#^Parameter \#2 \$columns of method Illuminate\\Database\\Eloquent\\Builder\<App\\Models\\Torrent\>\:\:findOrFail\(\) expects array\<int, Illuminate\\Contracts\\Database\\Query\\Expression\|string\>\|Illuminate\\Contracts\\Database\\Query\\Expression\|string, array\<int\|string, mixed\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Repositories/RewardRepository.php
-
-		-
 			message: '#^Argument of an invalid type App\\Models\\SearchBox\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\SearchBox\>\|null supplied for foreach, only iterables are supported\.$#'
 			identifier: foreach.nonIterable
 			count: 1
@@ -2473,12 +2299,6 @@ parameters:
 			path: app/Repositories/TorrentRepository.php
 
 		-
-			message: '#^Parameter \#2 \$columns of method Illuminate\\Database\\Eloquent\\Builder\<App\\Models\\Torrent\>\:\:findOrFail\(\) expects array\<int, Illuminate\\Contracts\\Database\\Query\\Expression\|string\>\|Illuminate\\Contracts\\Database\\Query\\Expression\|string, array\<int\|string, mixed\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Repositories/TorrentRepository.php
-
-		-
 			message: '#^Offset 0 might not exist on array\<int\|string, mixed\>\|string\|null\.$#'
 			identifier: offsetAccess.notFound
 			count: 1
@@ -2593,126 +2413,6 @@ parameters:
 			path: app/Repositories/UserPasskeyRepository.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\User\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\User\>\:\:\$attendance_card\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Repositories/UserRepository.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\User\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\User\>\:\:\$class\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Repositories/UserRepository.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\User\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\User\>\:\:\$downloaded\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Repositories/UserRepository.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\User\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\User\>\:\:\$enabled\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Repositories/UserRepository.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\User\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\User\>\:\:\$id\.$#'
-			identifier: property.notFound
-			count: 3
-			path: app/Repositories/UserRepository.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\User\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\User\>\:\:\$invites\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Repositories/UserRepository.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\User\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\User\>\:\:\$leechwarn\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Repositories/UserRepository.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\User\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\User\>\:\:\$leechwarnuntil\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Repositories/UserRepository.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\User\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\User\>\:\:\$locale\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Repositories/UserRepository.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\User\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\User\>\:\:\$passkey\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Repositories/UserRepository.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\User\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\User\>\:\:\$seedbonus\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Repositories/UserRepository.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\User\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\User\>\:\:\$two_step_secret\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Repositories/UserRepository.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\User\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\User\>\:\:\$uploaded\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Repositories/UserRepository.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\User\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\User\>\:\:\$username\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Repositories/UserRepository.php
-
-		-
-			message: '#^Call to an undefined method App\\Models\\User\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\User\>\:\:invitee_code\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: app/Repositories/UserRepository.php
-
-		-
-			message: '#^Call to an undefined method App\\Models\\User\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\User\>\:\:save\(\)\.$#'
-			identifier: method.notFound
-			count: 2
-			path: app/Repositories/UserRepository.php
-
-		-
-			message: '#^Call to an undefined method App\\Models\\User\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\User\>\:\:update\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: app/Repositories/UserRepository.php
-
-		-
-			message: '#^Call to an undefined method App\\Models\\User\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\User\>\:\:updateWithModComment\(\)\.$#'
-			identifier: method.notFound
-			count: 2
-			path: app/Repositories/UserRepository.php
-
-		-
-			message: '#^Call to an undefined method App\\Models\\User\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\User\>\:\:usernameChangeLogs\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: app/Repositories/UserRepository.php
-
-		-
-			message: '#^Cannot access offset ''username'' on array\<string, mixed\>\|false\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: app/Repositories/UserRepository.php
-
-		-
 			message: '#^Cannot access property \$class on App\\Models\\User\|null\.$#'
 			identifier: property.nonObject
 			count: 6
@@ -2721,13 +2421,13 @@ parameters:
 		-
 			message: '#^Cannot access property \$id on App\\Models\\User\|null\.$#'
 			identifier: property.nonObject
-			count: 7
+			count: 5
 			path: app/Repositories/UserRepository.php
 
 		-
 			message: '#^Cannot access property \$locale on App\\Models\\User\|null\.$#'
 			identifier: property.nonObject
-			count: 6
+			count: 5
 			path: app/Repositories/UserRepository.php
 
 		-
@@ -2740,12 +2440,6 @@ parameters:
 			message: '#^Cannot call method diffInDays\(\) on Carbon\\Carbon\|null\.$#'
 			identifier: method.nonObject
 			count: 1
-			path: app/Repositories/UserRepository.php
-
-		-
-			message: '#^Cannot call method metas\(\) on App\\Models\\User\|null\.$#'
-			identifier: method.nonObject
-			count: 3
 			path: app/Repositories/UserRepository.php
 
 		-
@@ -2773,18 +2467,6 @@ parameters:
 			path: app/Repositories/UserRepository.php
 
 		-
-			message: '#^Parameter \#1 \$attributes of method Illuminate\\Database\\Eloquent\\Model\:\:update\(\) expects array\<string, mixed\>, array\<int\|string, mixed\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Repositories/UserRepository.php
-
-		-
-			message: '#^Parameter \#1 \$attributes of method Illuminate\\Database\\Eloquent\\Relations\\HasOneOrMany\<App\\Models\\UserMeta,App\\Models\\User,Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\UserMeta\>\>\:\:create\(\) expects array\<string, mixed\>, array\<int\|string, mixed\> given\.$#'
-			identifier: argument.type
-			count: 2
-			path: app/Repositories/UserRepository.php
-
-		-
 			message: '#^Parameter \#1 \$bytes of static method App\\Support\\Format\:\:size\(\) expects float\|int, float\|int\|null given\.$#'
 			identifier: argument.type
 			count: 2
@@ -2797,33 +2479,15 @@ parameters:
 			path: app/Repositories/UserRepository.php
 
 		-
-			message: '#^Parameter \#1 \$user of method App\\Repositories\\UserRepository\:\:clearCache\(\) expects App\\Models\\User, App\\Models\\User\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\User\> given\.$#'
-			identifier: argument.type
-			count: 5
-			path: app/Repositories/UserRepository.php
-
-		-
 			message: '#^Parameter \#1 \$user of method App\\Repositories\\UserRepository\:\:clearCache\(\) expects App\\Models\\User, App\\Models\\User\|null given\.$#'
 			identifier: argument.type
-			count: 4
-			path: app/Repositories/UserRepository.php
-
-		-
-			message: '#^Parameter \#2 \$model of static method App\\Support\\Events\:\:fire\(\) expects Illuminate\\Database\\Eloquent\\Model, App\\Models\\User\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\User\> given\.$#'
-			identifier: argument.type
-			count: 2
+			count: 3
 			path: app/Repositories/UserRepository.php
 
 		-
 			message: '#^Parameter \#2 \$passkey of static method App\\Support\\Cache\:\:clearUser\(\) expects string, string\|null given\.$#'
 			identifier: argument.type
 			count: 2
-			path: app/Repositories/UserRepository.php
-
-		-
-			message: '#^Parameter \#2 \$user of method App\\Repositories\\UserRepository\:\:checkPermission\(\) expects App\\Models\\User, App\\Models\\User\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\User\> given\.$#'
-			identifier: argument.type
-			count: 6
 			path: app/Repositories/UserRepository.php
 
 		-

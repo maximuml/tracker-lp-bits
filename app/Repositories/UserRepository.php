@@ -83,7 +83,7 @@ class UserRepository extends BaseRepository
      */
     public function getBase($id)
     {
-        $user = User::query()->findOrFail($id, ['id', 'username', 'email', 'avatar']);
+        $user = User::query()->findOrFail((int) $id, ['id', 'username', 'email', 'avatar']);
         return $user;
     }
 
@@ -102,7 +102,7 @@ class UserRepository extends BaseRepository
             ->allowIncludeFields(self::$allowIncludeFields)
         ;
         $query = $apiQueryBuilder->build();
-        $user = $query->findOrFail($id);
+        $user = $query->findOrFail((int) $id);
         Gate::authorize('view', $user);
         $userList =  $this->appendIncludeFields($apiQueryBuilder, $currentUser, [$user]);
         return $userList[0];
@@ -223,7 +223,7 @@ class UserRepository extends BaseRepository
         if ($password != $passwordConfirmation) {
             throw new \InvalidArgumentException("password confirmation != password");
         }
-        $user = User::query()->findOrFail($id, ['id', 'username', 'class']);
+        $user = User::query()->findOrFail((int) $id, ['id', 'username', 'class']);
         $operator = \App\Support\UserDisplay::currentId();
         if ($operator) {
             $this->checkPermission($operator, $user);
@@ -256,7 +256,7 @@ class UserRepository extends BaseRepository
      */
     public function disableUser(User $operator, $uid, $reason = '')
     {
-        $targetUser = User::query()->findOrFail($uid, ['id', 'enabled', 'username', 'class']);
+        $targetUser = User::query()->findOrFail((int) $uid, ['id', 'enabled', 'username', 'class']);
         if ($targetUser->enabled == User::ENABLED_NO) {
             throw new NexusException('Already disabled !');
         }
@@ -289,7 +289,7 @@ class UserRepository extends BaseRepository
      */
     public function enableUser(User $operator, $uid, $reason = '')
     {
-        $targetUser = User::query()->findOrFail($uid, ['id', 'enabled', 'username', 'class']);
+        $targetUser = User::query()->findOrFail((int) $uid, ['id', 'enabled', 'username', 'class']);
         if ($targetUser->enabled == User::ENABLED_YES) {
             throw new NexusException('Already enabled !');
         }
@@ -327,7 +327,7 @@ class UserRepository extends BaseRepository
      */
     public function getInviteInfo($id)
     {
-        $user = User::query()->findOrFail($id, ['id']);
+        $user = User::query()->findOrFail((int) $id, ['id']);
         return $user->invitee_code()->with('inviter_user')->first();
     }
 
@@ -337,7 +337,7 @@ class UserRepository extends BaseRepository
      */
     public function getModComment(int $id)
     {
-        $user = User::query()->findOrFail($id, ['modcomment']);
+        $user = User::query()->findOrFail((int) $id, ['modcomment']);
         return $user->modcomment;
     }
 
@@ -362,7 +362,7 @@ class UserRepository extends BaseRepository
             throw new \InvalidArgumentException("Invalid field: $field, only support: " . implode(', ', array_keys($fieldMap)));
         }
         $sourceField = $fieldMap[$field];
-        $targetUser = User::query()->findOrFail($uid, User::$commonFields);
+        $targetUser = User::query()->findOrFail((int) $uid, User::$commonFields);
         $this->checkPermission($operator, $targetUser);
         $old = $targetUser->{$sourceField};
         $valueAtomic = $value;
@@ -427,7 +427,7 @@ class UserRepository extends BaseRepository
     public function removeLeechWarn($operator, $uid): bool
     {
         $operator = $this->getUser($operator);
-        $user = User::query()->findOrFail($uid, User::$commonFields);
+        $user = User::query()->findOrFail((int) $uid, User::$commonFields);
         $this->checkPermission($operator, $user);
         $this->clearCache($user);
         $user->leechwarn = 'no';
@@ -444,7 +444,7 @@ class UserRepository extends BaseRepository
         if (!$operator->canAccessAdmin()) {
             throw new \RuntimeException("No permission.");
         }
-        $user = User::query()->findOrFail($uid, User::$commonFields);
+        $user = User::query()->findOrFail((int) $uid, User::$commonFields);
         $this->checkPermission($operator, $user);
         $this->clearCache($user);
         $user->two_step_secret = '';
@@ -562,7 +562,7 @@ class UserRepository extends BaseRepository
         }
         /** @var UserMeta $meta */
         $meta = $records->get($metaKey)->first();
-        $user = User::query()->findOrFail($uid, User::$commonFields);
+        $user = User::query()->findOrFail((int) $uid, User::$commonFields);
         if ($metaKey == UserMeta::META_KEY_CHANGE_USERNAME) {
             $changeLog = $user->usernameChangeLogs()->orderBy('id', 'desc')->first();
             if ($changeLog) {
@@ -692,14 +692,17 @@ class UserRepository extends BaseRepository
 
     /**
      * @param  mixed  $user
-     * @param  array<int|string, mixed>  $metaData
-     * @param  array<int|string, mixed>  $keyExistsUpdates
+     * @param  array<string, mixed>  $metaData
+     * @param  array<string, mixed>  $keyExistsUpdates
      * @param  mixed  $notify
      * @return  mixed
      */
     public function addMeta($user, array $metaData, array $keyExistsUpdates = [], $notify = true)
     {
         $user = $this->getUser($user);
+        if ($user === null) {
+            throw new \InvalidArgumentException('User not found');
+        }
         $locale = $user->locale;
         $metaKey = $metaData['meta_key'];
         $metaName = \App\Support\Locale::trans("label.user_meta.meta_keys.{$metaKey}", [], $locale);
@@ -717,7 +720,8 @@ class UserRepository extends BaseRepository
         }
         $operatorId = \App\Support\UserDisplay::currentId();
         $operatorInfo = \App\Support\UserDisplay::row($operatorId);
-        $message['msg'] = \App\Support\Locale::trans('user.grant_props_notification.body', ['name' => $metaName, 'operator' => $operatorInfo['username'], 'duration' => $durationText], $locale);
+        $operatorName = is_array($operatorInfo) ? (string) ($operatorInfo['username'] ?? '') : '';
+        $message['msg'] = \App\Support\Locale::trans('user.grant_props_notification.body', ['name' => $metaName, 'operator' => $operatorName, 'duration' => $durationText], $locale);
         if (!empty($metaData['duration'])) {
             $metaData['deadline'] = now()->addDays((int)$metaData['duration']);
         }
@@ -858,7 +862,7 @@ class UserRepository extends BaseRepository
         if ($count <= 0 || ($action == 'increment' && $days <= 0)) {
             throw new \InvalidArgumentException("days or count lte 0");
         }
-        $targetUser = User::query()->findOrFail($uid, User::$commonFields);
+        $targetUser = User::query()->findOrFail((int) $uid, User::$commonFields);
         if ($operator) {
             $this->checkPermission($operator, $targetUser);
         }
@@ -918,11 +922,11 @@ class UserRepository extends BaseRepository
         if (!\App\Support\Config\SiteConfig::current()->main->inviteSystem()) {
             throw new NexusException(\App\Support\Locale::trans('invite.send_deny_reasons.invite_system_closed', [], null));
         }
-        if (!Permission::can(PermissionEnum::SEND_INVITE, User::findOrFail($uid))) {
+        if (!Permission::can(PermissionEnum::SEND_INVITE, User::findOrFail((int) $uid))) {
             $requireClass = \App\Support\Config\SiteConfig::current()->authority->permission(PermissionEnum::SEND_INVITE->value);
             throw new NexusException(\App\Support\Locale::trans('invite.send_deny_reasons.no_permission', ['class' => User::getClassText($requireClass)], null));
         }
-        $userInfo = User::query()->findOrFail($uid, User::$commonFields);
+        $userInfo = User::query()->findOrFail((int) $uid, User::$commonFields);
         $temporaryInviteCount = $userInfo->temporary_invites()->count();
         if ($userInfo->invites + $temporaryInviteCount < 1) {
             throw new NexusException(\App\Support\Locale::trans('invite.send_deny_reasons.invite_not_enough', [], null));

@@ -54,6 +54,45 @@ class BonusRepository extends BaseRepository
 
     }
 
+    public function getCharityReceiverCount(float $ratioCharity): int
+    {
+        return (int) User::query()
+            ->where('enabled', 'yes')
+            ->whereRaw('downloaded > 10737418240')
+            ->whereRaw('? > uploaded/downloaded', [$ratioCharity])
+            ->count();
+    }
+
+    /**
+     * @return  int  number of affected rows
+     */
+    public function incrementSeedbonusForLowRatioReceivers(float $ratioCharity, float $amount): int
+    {
+        return User::query()
+            ->where('enabled', 'yes')
+            ->whereRaw('downloaded > 10737418240')
+            ->whereRaw('? > uploaded/downloaded', [$ratioCharity])
+            ->increment('seedbonus', $amount);
+    }
+
+    /**
+     * @return  array<string, mixed>|null
+     */
+    public function findGiftReceiver(string $username): ?array
+    {
+        $receiver = User::query()->where('username', $username)->first(['id', 'seedbonus']);
+
+        return $receiver ? $receiver->toArray() : null;
+    }
+
+    /**
+     * @return  bool
+     */
+    public function incrementUserSeedbonus(int $userId, float $amount): bool
+    {
+        return (bool) User::query()->where('id', $userId)->increment('seedbonus', $amount);
+    }
+
 
     /**
      * @param  mixed  $uid
@@ -222,6 +261,16 @@ class BonusRepository extends BaseRepository
 
     }
 
+    public function hasChangeUsernameCard(int $userId): bool
+    {
+        return UserMeta::query()->where('uid', $userId)->where('meta_key', UserMeta::META_KEY_CHANGE_USERNAME)->exists();
+    }
+
+    public function hasRainbowIdForever(int $userId): bool
+    {
+        return UserMeta::query()->where('uid', $userId)->where('meta_key', UserMeta::META_KEY_PERSONALIZED_USERNAME)->whereNull('deadline')->exists();
+    }
+
     /** @param  mixed  $uid */
     public function consumeToBuyChangeUsernameCard($uid): bool
     {
@@ -359,6 +408,18 @@ class BonusRepository extends BaseRepository
             \App\Support\Logger::writeWithContext((string) ("bonusLog: " . \App\Support\Json::encode($bonusLog)), (string) 'info', (bool) false);
             \App\Support\Cache::clearUser($user->id, $user->passkey);
         });
+    }
+
+    /**
+     * Consume bonus and atomically increment the user's charity field.
+     *
+     * @param  \App\Models\User|int  $user
+     */
+    public function consumeUserBonusAndIncrementCharity($user, float $requireBonus, int $logBusinessType, string $logComment, float $charityIncrement): void
+    {
+        $this->consumeUserBonus($user, $requireBonus, $logBusinessType, $logComment, [
+            'charity' => NexusDB::raw("charity + $charityIncrement"),
+        ]);
     }
 
     /**

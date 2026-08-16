@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Enums\Permission\PermissionEnum;
 use App\Http\Resources\ForumResource;
 use App\Models\Forum;
-use App\Services\Legacy\LegacyPartialRenderer;
+use App\Services\Legacy\ForumService;
 use App\Support\Forum as SupportForum;
 use App\Support\Permissions;
 use App\Support\SupportContext;
@@ -20,11 +20,9 @@ use Illuminate\View\View;
 
 class ForumController extends LegacyController
 {
-    private LegacyPartialRenderer $renderer;
-
-    public function __construct(LegacyPartialRenderer $renderer)
-    {
-        $this->renderer = $renderer;
+    public function __construct(
+        private readonly ForumService $service,
+    ) {
     }
 
     /**
@@ -40,7 +38,7 @@ class ForumController extends LegacyController
             return redirect('/forums.php?' . $request->getQueryString());
         }
 
-        $result = $this->renderer->render('forum_forums');
+        $result = $this->service->legacy($request);
         if ($result instanceof RedirectResponse) {
             return $result;
         }

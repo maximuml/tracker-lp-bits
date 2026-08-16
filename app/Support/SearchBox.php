@@ -120,7 +120,7 @@ final class SearchBox
         $checkedValues = (string) $checkedValues;
 
         parse_str($checkedValues, $checkedValuesArr);
-        $searchBox = \App\Models\SearchBox::query()->with(['categories', 'categories.icon'])->findOrFail($mode);
+        $searchBox = \App\Repositories\SearchBoxRepository::findForCategoryTable($mode);
         $lang = Locale::folderFromCookie(SupportContext::getCookieValue('c_lang_folder'));
         $withTaxonomies = [];
 
@@ -150,10 +150,7 @@ final class SearchBox
 
         $html .= sprintf('<tr><td class="embedded" align="left">%s</td></tr>', \App\Support\Locale::trans('label.search_box.category', [], null));
 
-        $categoryCollection = $searchBox->categories()->with('icon')->orderBy('sort_index', 'desc')->get();
-        if (! empty($options['select_unselect'])) {
-            $categoryCollection->push(new \App\Models\Category(['mode' => -1]));
-        }
+        $categoryCollection = \App\Repositories\SearchBoxRepository::getCategoriesForTable($searchBox, ! empty($options['select_unselect']));
         $categoryChunks = $categoryCollection->chunk($searchBox->catsperrow);
         $checkPrefix = 'cat';
 

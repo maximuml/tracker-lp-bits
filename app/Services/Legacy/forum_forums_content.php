@@ -20,9 +20,7 @@ $Cache = \App\Support\SupportContext::getCache();
 $today_date = \App\Support\SupportContext::getGlobal('today_date', '');
 
 	if (!$activeforumuser_num = $Cache->get_value('active_forum_user_count')){
-		$secs = 900;
-		$dt = date("Y-m-d H:i:s",(TIMENOW - $secs));
-		$activeforumuser_num = \App\Models\User::query()->where('forum_access', '>=', $dt)->count();
+		$activeforumuser_num = \App\Repositories\ForumRepository::getActiveForumUserCount();
 		$Cache->cache_value('active_forum_user_count', $activeforumuser_num, 300);
 	}
 	if ($activeforumuser_num){
@@ -35,15 +33,15 @@ $today_date = \App\Support\SupportContext::getGlobal('today_date', '');
 <table width="100%"><tr><td class="text">
 <?php
 	if (!$postcount = $Cache->get_value('total_posts_count')){
-		$postcount = \App\Models\Post::query()->count();
+		$postcount = \App\Repositories\ForumRepository::getTotalPostsCount();
 		$Cache->cache_value('total_posts_count', $postcount, 96400);
 	}
 	if (!$topiccount = $Cache->get_value('total_topics_count')){
-		$topiccount = \App\Models\Topic::query()->count();
+		$topiccount = \App\Repositories\ForumRepository::getTotalTopicsCount();
 		$Cache->cache_value('total_topics_count', $topiccount, 96500);
 	}
 	if (!$todaypostcount = $Cache->get_value('today_'.$today_date.'_posts_count')) {
-		$todaypostcount = \App\Models\Post::query()->where('added', '>', date("Y-m-d"))->count();
+		$todaypostcount = \App\Repositories\ForumRepository::getTodayPostsCount($today_date);
 		$Cache->cache_value('today_'.$today_date.'_posts_count', $todaypostcount, 700);
 	}
 	print($lang_forums['text_our_members_have'] ."<b>".$postcount."</b>". $lang_forums['text_posts_in_topics']."<b>".$topiccount."</b>".$lang_forums['text_in_topics']."<b><font class=\"new\">".$todaypostcount."</font></b>".$lang_forums['text_new_post'].\App\Support\Strings::addS($todaypostcount).$lang_forums['text_posts_today']."<br /><br />");
@@ -61,12 +59,12 @@ $Cache = \App\Support\SupportContext::getCache();
 
 	if (!$CURUSER)
 		return;
-	\Nexus\Database\NexusDB::table('readposts')->where('userid', $CURUSER['id'])->delete();
+	\App\Repositories\ForumRepository::clearReadPosts((int) $CURUSER['id']);
 	$Cache->delete_value('user_'.$CURUSER['id'].'_last_read_post_list');
-	$lastpostid = \App\Models\Post::query()->orderByDesc('id')->value('id');
+	$lastpostid = \App\Repositories\ForumRepository::getLastPostId();
 	if ($lastpostid){
 		$CURUSER['last_catchup'] = $lastpostid;
-		\App\Models\User::query()->where('id', $CURUSER['id'])->update(['last_catchup' => $lastpostid]);
+		\App\Repositories\ForumRepository::updateLastCatchup((int) $CURUSER['id'], $lastpostid);
 	}
 } }
 
@@ -107,24 +105,24 @@ $lang_forums = (array) (\App\Support\SupportContext::getGlobal('lang_forums') ??
 	switch ($place){
 		case 'forum':
 		{
-			if (!\App\Models\Forum::query()->where('id', $id)->exists())
+			if (!\App\Repositories\ForumRepository::forumExists((int) $id))
 				\App\Support\LegacyResponse::abort($lang_forums['std_error'], $lang_forums['std_no_forum_id']);
 			break;
 		}
 		case 'topic':
 		{
-			$topic = \App\Models\Topic::query()->where('id', $id)->first(['forumid']);
-			if (!$topic)
+			$forumid = \App\Repositories\ForumRepository::topicExists((int) $id);
+			if (!$forumid)
 				\App\Support\LegacyResponse::abort($lang_forums['std_error'], $lang_forums['std_bad_topic_id']);
-			check_whether_exist($topic->forumid, 'forum');
+			check_whether_exist($forumid, 'forum');
 			break;
 		}
 		case 'post':
 		{
-			$post = \App\Models\Post::query()->where('id', $id)->first(['topicid']);
-			if (!$post)
+			$topicid = \App\Repositories\ForumRepository::postExists((int) $id);
+			if (!$topicid)
 				\App\Support\LegacyResponse::abort($lang_forums['std_error'], $lang_forums['std_no_post_id']);
-			check_whether_exist($post->topicid, 'topic');
+			check_whether_exist($topicid, 'topic');
 			break;
 		}
 	}
@@ -134,18 +132,14 @@ $lang_forums = (array) (\App\Support\SupportContext::getGlobal('lang_forums') ??
 if (!function_exists('update_topic_last_post')) { function update_topic_last_post($topicid)
 {
 $lang_forums = (array) (\App\Support\SupportContext::getGlobal('lang_forums') ?? []);
-	$postid = \App\Models\Post::query()->where('topicid', $topicid)->orderByDesc('id')->value('id');
-	if (!$postid) {
-		return;
-	}
-	\App\Models\Topic::query()->where('id', $topicid)->update(['lastpost' => $postid]);
+	\App\Repositories\ForumRepository::updateTopicLastPost((int) $topicid);
 } }
 
 if (!function_exists('get_forum_row')) { function get_forum_row($forumid = 0)
 {
 $Cache = \App\Support\SupportContext::getCache();
 	if (!$forums = $Cache->get_value('forums_list')){
-		$forums = \App\Models\Forum::query()->orderBy('forid')->orderBy('sort')->get()->keyBy('id')->map(fn($f) => $f->toArray())->all();
+		$forums = \App\Repositories\ForumRepository::getForumsList();
 		$Cache->cache_value('forums_list', $forums, 86400);
 	}
 	if (!$forumid)
@@ -157,16 +151,13 @@ $CURUSER = \App\Support\SupportContext::getUser() ?? [];
 $Cache = \App\Support\SupportContext::getCache();
 	static $ret;
 	if (!$ret && !$ret = $Cache->get_value('user_'.$CURUSER['id'].'_last_read_post_list')){
-		$ret = [];
-		$rows = \Nexus\Database\NexusDB::table('readposts')->where('userid', $CURUSER['id'])->get(['topicid', 'lastpostread']);
-		if ($rows->isNotEmpty()){
-			foreach ($rows as $row)
-				$ret[$row->topicid] = $row->lastpostread;
+		$ret = \App\Repositories\ForumRepository::getLastReadPosts((int) $CURUSER['id']);
+		if ($ret !== null){
 			$Cache->cache_value('user_'.$CURUSER['id'].'_last_read_post_list', $ret, 900);
 		}
 		else $Cache->cache_value('user_'.$CURUSER['id'].'_last_read_post_list', 'no record', 900);
 	}
-	if ($ret != "no record" && (isset($ret[$topicid])) && $CURUSER['last_catchup'] < $ret[$topicid]){
+	if (is_array($ret) && (isset($ret[$topicid])) && $CURUSER['last_catchup'] < $ret[$topicid]){
 		return $ret[$topicid];
 	}
 	elseif ($CURUSER['last_catchup'])
@@ -187,30 +178,26 @@ $lang_forums = (array) (\App\Support\SupportContext::getGlobal('lang_forums') ??
 	switch ($type){
 		case 'new':
 		{
-			$forum = \App\Models\Forum::query()->where('id', $id)->first(['name']);
-			$forumname = $forum ? $forum->name : '';
+			$forumname = \App\Repositories\ForumRepository::getForumName((int) $id) ?? '';
 			$title = $lang_forums['text_new_topic_in']." <a href=\"".htmlspecialchars("?action=viewforum&forumid=".$id)."\">".htmlspecialchars($forumname)."</a> ".$lang_forums['text_forum'];
 			$hassubject = true;
 			break;
 		}
 		case 'reply':
 		{
-			$topic = \App\Models\Topic::query()->where('id', $id)->first(['subject']);
-			$topicname = $topic ? $topic->subject : '';
+			$topicname = \App\Repositories\ForumRepository::getTopicSubject((int) $id) ?? '';
 			$title = $lang_forums['text_reply_to_topic']." <a href=\"".htmlspecialchars("?action=viewtopic&topicid=".$id)."\">".htmlspecialchars($topicname)."</a> ";
 			break;
 		}
 		case 'quote':
 		{
-			$post = \App\Models\Post::query()->where('id', $id)->first(['topicid', 'body', 'userid']);
+			$post = \App\Repositories\ForumRepository::getPostForQuote((int) $id);
 			if (!$post)
 				\App\Support\LegacyResponse::abort($lang_forums['std_error'], $lang_forums['std_no_post_id']);
-			$topicid = $post->topicid;
-			$topic = \App\Models\Topic::query()->where('id', $topicid)->first(['subject']);
-			$topicname = $topic ? $topic->subject : '';
+			$topicid = $post['topicid'];
+			$topicname = $post['topic_subject'] ?? '';
 			$title = $lang_forums['text_reply_to_topic']." <a href=\"".htmlspecialchars("?action=viewtopic&topicid=".$topicid)."\">".htmlspecialchars($topicname)."</a> ";
-			$username = \App\Models\User::query()->where('id', $post->userid)->value('username');
-			$body = "[quote=".htmlspecialchars($username)."]".htmlspecialchars(\App\Support\Input::unescape($post->body))."[/quote]";
+			$body = "[quote=".htmlspecialchars($post['username'])."]".htmlspecialchars(\App\Support\Input::unescape($post['body']))."[/quote]";
 			print("<input type=\"hidden\" name=\"postid\" value=\"".$id."\" />");
 			$id = $topicid;
 			$type = 'reply';
@@ -218,17 +205,15 @@ $lang_forums = (array) (\App\Support\SupportContext::getGlobal('lang_forums') ??
 		}
 		case 'edit':
 		{
-			$post = \App\Models\Post::query()->where('id', $id)->first(['topicid', 'body']);
+			$post = \App\Repositories\ForumRepository::getPostForEdit((int) $id);
 			if (!$post)
 				return;
-			$topicid = $post->topicid;
-			$firstpost = \App\Models\Post::query()->where('topicid', $topicid)->min('id');
-			if ($firstpost == $id){
-				$topic = \App\Models\Topic::query()->where('id', $topicid)->first(['subject']);
-				$subject = $topic ? $topic->subject : '';
+			$topicid = $post['topicid'];
+			if ($post['is_first_post']){
+				$subject = $post['topic_subject'] ?? '';
 				$hassubject = true;
 			}
-			$body = htmlspecialchars(\App\Support\Input::unescape($post->body));
+			$body = htmlspecialchars(\App\Support\Input::unescape($post['body']));
 			$title = $lang_forums['text_edit_post'];
 			break;
 		}
@@ -304,257 +289,20 @@ if ($action == "editpost")
 	$postid = intval(\App\Support\SupportContext::getQuery("postid") ?? 0);
 	check_whether_exist($postid, 'post');
 
-	$post = \App\Models\Post::query()->where('id', $postid)->first(['userid', 'topicid']);
+	$post = \App\Repositories\ForumRepository::getPostWithTopic((int) $postid);
 	if (!$post)
 		\App\Support\LegacyResponse::abort($lang_forums['std_error'], $lang_forums['std_no_post_id']);
 
-	$topic = \App\Models\Topic::query()->where('id', $post->topicid)->first(['locked']);
-	$locked = $topic && ($topic->locked == 'yes');
+	$locked = $post['locked'] == 'yes';
 
 	$ismod = \App\Support\Forum::isModerator($postid, 'post');
-	if (($CURUSER["id"] != $post->userid || $locked) && !\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::POST_MANAGE) && !$ismod)
+	if (($CURUSER["id"] != $post['userid'] || $locked) && !\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::POST_MANAGE) && !$ismod)
 		\App\Support\LegacyResponse::permissionDenied();
 
 	insert_compose_frame($postid, 'edit');
 	return;
 }
 
-//-------- Action: Post
-if ($action == "post")
-{
-	if ($CURUSER["forumpost"] == 'no')
-	{
-		\App\Support\LegacyResponse::abort($lang_forums['std_sorry'], $lang_forums['std_unauthorized_to_post'], false);
-		return;
-	}
-	$id = \App\Support\SupportContext::getPost("id");
-	$type = \App\Support\SupportContext::getPost("type");
-	$subject = \App\Support\SupportContext::getPost("subject") ?? '';
-	$body = trim(\App\Support\SupportContext::getPost("body"));
-	$hassubject = false;
-	switch ($type){
-		case 'new':
-		{
-			check_whether_exist($id, 'forum');
-			$forumid = $id;
-			$hassubject = true;
-			break;
-		}
-		case 'reply':
-		{
-			check_whether_exist($id, 'topic');
-			$topicid = $id;
-			$forumid = \App\Models\Topic::query()->where('id', $topicid)->value('forumid');
-			$quotepostid = \App\Support\SupportContext::getPost("postid");
-			break;
-		}
-		case 'edit':
-		{
-			check_whether_exist($id, 'post');
-			$post = \App\Models\Post::query()->where('id', $id)->first(['topicid']);
-			if (!$post) return;
-			$topicid = $post->topicid;
-			$forum = \App\Models\Topic::query()->where('id', $topicid)->first(['forumid']);
-			$forumid = $forum ? $forum->forumid : 0;
-			$firstpost = \App\Models\Post::query()->where('topicid', $topicid)->min('id');
-			if ($firstpost == $id){
-				$hassubject = true;
-			}
-			break;
-		}
-		default:
-		{
-			return;
-		}
-	}
-
-	if ($hassubject){
-		$subject = trim($subject);
-		if (!$subject)
-			\App\Support\LegacyResponse::abort($lang_forums['std_error'], $lang_forums['std_must_enter_subject']);
-		if (strlen($subject) > $maxsubjectlength)
-			\App\Support\LegacyResponse::abort($lang_forums['std_error'], $lang_forums['std_subject_limited']);
-	}
-
-	//------ Make sure sure user has write access in forum
-	$arr = get_forum_row($forumid);
-	if (!$arr) return;
-
-	if (
-	    \App\Support\UserDisplay::currentClass() < $arr["minclassread"]
-        || \App\Support\UserDisplay::currentClass() < $arr["minclasswrite"]
-        || ($type =='new' && \App\Support\UserDisplay::currentClass() < $arr["minclasscreate"])
-    ) {
-        \App\Support\LegacyResponse::permissionDenied();
-    }
-	if ($body == "")
-		\App\Support\LegacyResponse::abort($lang_forums['std_error'], $lang_forums['std_no_body_text']);
-
-	$userid = intval($CURUSER["id"] ?? 0);
-	$date = date("Y-m-d H:i:s");
-
-	if ($type != 'new'){
-		//---- Make sure topic is unlocked
-
-		$topicLocked = \App\Models\Topic::query()->where('id', $topicid)->value('locked');
-		if ($topicLocked === null)
-			return;
-		if ($topicLocked == 'yes' && !\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::POST_MANAGE) && !\App\Support\Forum::isModerator($topicid, 'topic'))
-			\App\Support\LegacyResponse::abort($lang_forums['std_error'], $lang_forums['std_topic_locked']);
-	}
-
-	if ($type == 'edit')
-	{
-        $postid = $id;
-        $topicInfo = \App\Models\Topic::query()->findOrFail($topicid);
-        $postInfo = \App\Models\Post::query()->findOrFail($id);
-        if ($postInfo->userid != $CURUSER['id'] && !\App\Support\Forum::isModerator($postid, 'post') && !\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::POST_MANAGE)) {
-            \App\Support\LegacyResponse::permissionDenied();
-        }
-		if ($hassubject){
-			\App\Models\Topic::query()->where('id', $topicid)->update(['subject' => $subject]);
-			$forum_last_replied_topic_row = $Cache->get_value('forum_'.$forumid.'_last_replied_topic_content');
-			if (is_array($forum_last_replied_topic_row) && ($forum_last_replied_topic_row['id'] ?? null) == $topicid)
-				$Cache->delete_value('forum_'.$forumid.'_last_replied_topic_content');
-		}
-		\App\Models\Post::query()->where('id', $id)->update(['body' => $body, 'editdate' => $date, 'editedby' => $CURUSER['id']]);
-		$Cache->delete_value('post_'.$postid.'_content');
-        //send pm
-        $postUrl = sprintf('[url=forums.php?action=viewtopic&topicid=%s&page=p%s#pid%s]%s[/url]', $topicid, $id, $id, $topicInfo->subject);
-        if (!empty($postInfo->userid) && $postInfo->userid != $CURUSER['id']) {
-            $receiver = $postInfo->user;
-            if ($receiver) {
-                $locale = $receiver->locale;
-                $notify = [
-                    'sender' => 0,
-                    'receiver' => $receiver->id,
-                    'subject' => \App\Support\Locale::trans('forum.post.edited_notify_subject', [], $locale),
-                    'msg' => \App\Support\Locale::trans('forum.post.edited_notify_body', ['topic_subject' => $postUrl, 'editor' => $CURUSER['username']], $locale),
-                    'added' => now(),
-                ];
-                \App\Models\Message::add($notify);
-            }
-        }
-	}
-	else
-	{
-		// Anti Flood Code
-		// To ensure that posts are not entered within 10 seconds limiting posts
-		// to a maximum of 360*6 per hour.
-		if (!\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::POST_MANAGE)) {
-			if (strtotime($CURUSER['last_post']) > (TIMENOW - 10))
-			{
-				$secs = 10 - (TIMENOW - strtotime($CURUSER['last_post']));
-				\App\Support\LegacyResponse::abort($lang_forums['std_error'], $lang_forums['std_post_flooding'].$secs.$lang_forums['std_seconds_before_making'], false);
-			}
-		}
-		if ($type == 'new'){ //new topic
-			//add bonus
-			\App\Support\Bonus::updatePoints((string) "+", (float) $starttopic_bonus, $userid);
-
-			//---- Create topic
-			$topic = \App\Models\Topic::create([
-				'userid' => $userid,
-				'forumid' => $forumid,
-				'subject' => $subject,
-				'locked' => 'no',
-				'sticky' => 'no',
-				'hlcolor' => 0,
-				'views' => 0,
-				'firstpost' => 0,
-				'lastpost' => 0,
-			]);
-			$topicid = $topic ? $topic->id : 0;
-			if (!$topicid)
-				\App\Support\LegacyResponse::abort($lang_forums['std_error'], $lang_forums['std_no_topic_id_returned']);
-			\App\Models\Forum::query()->where('id', $forumid)->increment('topiccount');
-			\App\Models\Forum::query()->where('id', $forumid)->increment('postcount');
-		}
-		else // new post
-		{
-			//add bonus
-			\App\Support\Bonus::updatePoints((string) "+", (float) $makepost_bonus, $userid);
-			\App\Models\Forum::query()->where('id', $forumid)->increment('postcount');
-		}
-
-		$postid = \Nexus\Database\NexusDB::table('posts')->insertGetId([
-			'topicid' => $topicid,
-			'userid' => $userid,
-			'added' => $date,
-			'body' => $body,
-			'ori_body' => $body,
-		]);
-		if (!$postid)
-			return;
-		//send pm
-        $topicInfo = \App\Models\Topic::query()->findOrFail($topicid);
-        $postUrl = sprintf('[url=forums.php?action=viewtopic&topicid=%s&page=p%s#pid%s]%s[/url]', $topicid, $postid, $postid, $topicInfo->subject);
-
-		if ($type == 'reply') {
-			/** @var \App\Models\User $receiver */
-			if (!empty($topicInfo->userid) && $topicInfo->userid != $CURUSER['id'])
-			{
-				$receiver = $topicInfo->user;
-				if ($receiver && $receiver->acceptNotification('topic_reply')) {
-					$locale = $receiver->locale;
-					$notify = [
-						'sender' => 0,
-						'receiver' => $receiver->id,
-						'subject' => \App\Support\Locale::trans('forum.topic.replied_notify_subject', [], $locale),
-						'msg' => \App\Support\Locale::trans('forum.topic.replied_notify_body', ['topic_subject' => $postUrl], $locale),
-						'added' => now(),
-					];
-                    \App\Models\Message::add($notify);
-				}
-			}
-
-            if (!empty($quotepostid)) {
-                $quotePostInfo = \App\Models\Post::query()->find($quotepostid);
-                if ($quotePostInfo && $quotePostInfo->userid != $CURUSER['id']) {
-                    $receiver = $quotePostInfo->user;
-                    if($receiver && $receiver->acceptNotification('topic_reply')) {
-                        $locale = $receiver->locale;
-                        $notify = [
-                            'sender' => 0,
-                            'receiver' => $receiver->id,
-                            'subject' => \App\Support\Locale::trans('forum.reply.replied_notify_subject', [], $locale),
-                            'msg' => \App\Support\Locale::trans('forum.reply.replied_notify_body', ['topic_subject' => $postUrl, 'replyer' => $CURUSER['username']], $locale),
-                            'added' => now(),
-                        ];
-                        \App\Models\Message::add($notify);
-                    }
-                }
-            }
-        }
-
-		$Cache->delete_value('forum_'.$forumid.'_post_'.$today_date.'_count');
-		$Cache->delete_value('today_'.$today_date.'_posts_count');
-		$Cache->delete_value('forum_'.$forumid.'_last_replied_topic_content');
-		$Cache->delete_value('topic_'.$topicid.'_post_count');
-		$Cache->delete_value('user_'.$userid.'_post_count');
-
-		if ($type == 'new')
-		{
-			// update the first post of topic
-			\App\Models\Topic::query()->where('id', $topicid)->update(['firstpost' => $postid, 'lastpost' => $postid]);
-		}
-		else
-		{
-			\App\Models\Topic::query()->where('id', $topicid)->update(['lastpost' => $postid]);
-		}
-		\App\Models\User::query()->where('id', $CURUSER['id'])->update(['last_post' => $date]);
-	}
-
-	//------ All done, redirect user to the post
-
-	$headerstr = "Location: " . \App\Support\Http::protocolPrefix(\App\Support\Url::isSecure()) . "$BASEURL/forums.php?action=viewtopic&topicid=$topicid";
-
-	if ($type == 'edit')
-		header($headerstr."&page=p".$postid."#pid".$postid);
-	else
-		header($headerstr."&page=last#pid$postid");
-	return;
-}
 
 //-------- Action: View topic
 
@@ -566,10 +314,8 @@ if ($action == "viewtopic")
 	\App\Support\LegacyResponse::assertId($topicid, true);
 	$page = \App\Support\SupportContext::getQuery("page") ?? 0;
 	$authorid = intval(\App\Support\SupportContext::getQuery("authorid") ?? 0);
-	$postQuery = \App\Models\Post::query()->where('topicid', $topicid);
 	if ($authorid)
 	{
-		$postQuery->where('userid', $authorid);
 		$addparam = "action=viewtopic&topicid=".$topicid."&authorid=".$authorid;
 	}
 	else
@@ -580,7 +326,7 @@ if ($action == "viewtopic")
 
 	//------ Get topic info
 
-	$topic = \App\Models\Topic::query()->where('id', $topicid)->first();
+	$topic = \App\Repositories\ForumRepository::getTopic((int) $topicid);
 	if (!$topic)
 		\App\Support\LegacyResponse::abort($lang_forums['std_forum_error'], $lang_forums['std_topic_not_found']);
 	$arr = $topic->toArray();
@@ -610,10 +356,10 @@ if ($action == "viewtopic")
 	else $maypost = false;
 
 	//------ Update hits column
-	\App\Models\Topic::query()->where('id', $topicid)->increment('views');
+	\App\Repositories\ForumRepository::incrementTopicViews((int) $topicid);
 
 	//------ Get post count
-	$postcount = (clone $postQuery)->count();
+	$postcount = \App\Repositories\ForumRepository::countTopicPosts((int) $topicid, $authorid ?: null);
 	if (!$authorid)
 		$Cache->cache_value('topic_'.$topicid.'_post_count', $postcount, 3600);
 
@@ -628,7 +374,7 @@ if ($action == "viewtopic")
 	if ((isset($page[0])) && $page[0] == "p")
 	{
 		$findpost = substr($page, 1);
-		$postIds = (clone $postQuery)->orderBy('added')->pluck('id')->all();
+		$postIds = \App\Repositories\ForumRepository::getTopicPostIds((int) $topicid, $authorid ?: null);
 		$i = array_search($findpost, $postIds);
 		if ($i === false)
 			$i = 0;
@@ -688,7 +434,7 @@ if ($action == "viewtopic")
 	$pagerbottom = "<p align=\"center\">".$pagerstr."<br />".$pager."</p>\n";
 	//------ Get posts
 
-	$postRows = (clone $postQuery)->orderBy('id')->offset($offset)->limit($perpage)->get();
+	$postRows = \App\Repositories\ForumRepository::getTopicPosts((int) $topicid, $authorid ?: null, (int) $offset, (int) $perpage);
 	$pc = $postRows->count();
 	$allPosts = [];
 	$uidArr = [];
@@ -719,7 +465,7 @@ if ($action == "viewtopic")
 	\App\Support\Html::beginFrame();
 
 	$neededColumns = array('id', 'class', 'enabled', 'privacy', 'avatar', 'signature', 'uploaded', 'downloaded', 'last_access', 'username', 'donor', 'leechwarn', 'warned', 'title');
-    $userInfoArr = \App\Models\User::query()->find($uidArr, $neededColumns)->keyBy('id');
+    $userInfoArr = \App\Repositories\ForumRepository::getUsersByIds($uidArr, $neededColumns);
 	$pn = 0;
 	$lpr = get_last_read_post_id($topicid);
 
@@ -755,7 +501,7 @@ if ($action == "viewtopic")
 		$ratio = \App\Support\Ratio::forUserId($arr2['id']);
 
 		if (!$forumposts = $Cache->get_value('user_'.$posterid.'_post_count')){
-			$forumposts = \App\Models\Post::query()->where('userid', $posterid)->count();
+			$forumposts = \App\Repositories\ForumRepository::countUserPosts((int) $posterid);
 			$Cache->cache_value('user_'.$posterid.'_post_count', $forumposts, 3600);
 		}
 
@@ -772,22 +518,7 @@ if ($action == "viewtopic")
 		{
 			print("<span id=\"last\"></span>\n");
 			if ($postid > $lpr){
-				$readPost = \Nexus\Database\NexusDB::table('readposts')
-					->where('userid', $userid)
-					->where('topicid', $topicid)
-					->first();
-				if (!$readPost) { // There is no record of this topic
-					\Nexus\Database\NexusDB::table('readposts')->insert([
-						'userid' => $userid,
-						'topicid' => $topicid,
-						'lastpostread' => $postid,
-					]);
-				} elseif ($lpr > $CURUSER['last_catchup']) { //There is record of this topic
-					\Nexus\Database\NexusDB::table('readposts')
-						->where('userid', $userid)
-						->where('topicid', $topicid)
-						->update(['lastpostread' => $postid]);
-				}
+				\App\Repositories\ForumRepository::markPostRead((int) $userid, (int) $topicid, (int) $postid, (int) ($CURUSER['last_catchup'] ?? 0));
 				$Cache->delete_value('user_'.$CURUSER['id'].'_last_read_post_list');
 			}
 		}
@@ -950,209 +681,11 @@ if ($action == "viewtopic")
 	return;
 }
 
-//-------- Action: Move topic
 
-if ($action == "movetopic")
-{
-	$forumid = intval(\App\Support\SupportContext::getPost("forumid") ?? 0);
 
-	$topicid = intval(\App\Support\SupportContext::getQuery("topicid") ?? 0);
-	$ismod = \App\Support\Forum::isModerator($topicid,'topic');
-	if (!\App\Support\Validators::isId($forumid) || !\App\Support\Validators::isId($topicid) || (!\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::POST_MANAGE) && !$ismod))
-		\App\Support\LegacyResponse::permissionDenied();
 
-	// Make sure topic and forum is valid
 
-	$forum = \App\Models\Forum::query()->where('id', $forumid)->first(['minclasswrite']);
 
-	if (!$forum)
-	\App\Support\LegacyResponse::abort($lang_forums['std_error'], $lang_forums['std_forum_not_found']);
-
-	if (\App\Support\UserDisplay::currentClass() < $forum->minclasswrite)
-		\App\Support\LegacyResponse::permissionDenied();
-
-	$topic = \App\Models\Topic::query()->where('id', $topicid)->first(['forumid']);
-	if (!$topic)
-		\App\Support\LegacyResponse::abort($lang_forums['std_error'], $lang_forums['std_topic_not_found']);
-	$old_forumid = $topic->forumid;
-
-	// get posts count
-	$nb_posts = \App\Models\Post::query()->where('topicid', $topicid)->count();
-
-	// move topic
-	if ($old_forumid != $forumid)
-	{
-		\App\Models\Topic::query()->where('id', $topicid)->update(['forumid' => $forumid]);
-		// update counts
-		\App\Models\Forum::query()->where('id', $old_forumid)->decrement('topiccount');
-		\App\Models\Forum::query()->where('id', $old_forumid)->decrement('postcount', $nb_posts);
-		$Cache->delete_value('forum_'.$old_forumid.'_post_'.$today_date.'_count');
-		$Cache->delete_value('forum_'.$old_forumid.'_last_replied_topic_content');
-		\App\Models\Forum::query()->where('id', $forumid)->increment('topiccount');
-		\App\Models\Forum::query()->where('id', $forumid)->increment('postcount', $nb_posts);
-		$Cache->delete_value('forum_'.$forumid.'_post_'.$today_date.'_count');
-		$Cache->delete_value('forum_'.$forumid.'_last_replied_topic_content');
-	}
-
-	// Redirect to forum page
-
-	header("Location: " . \App\Support\Http::protocolPrefix(\App\Support\Url::isSecure()) . "$BASEURL/forums.php?action=viewforum&forumid=$forumid");
-
-	return;
-}
-
-//-------- Action: Delete topic
-
-if ($action == "deletetopic")
-{
-	$topicid = intval(\App\Support\SupportContext::getQuery("topicid") ?? 0);
-	$topic = \App\Models\Topic::query()->where('id', $topicid)->first(['forumid', 'userid']);
-	if (!$topic){
-		return;
-	}
-	else {
-		$forumid = $topic->forumid;
-		$userid = $topic->userid;
-	}
-	$ismod = \App\Support\Forum::isModerator($topicid,'topic');
-	if (!\App\Support\Validators::isId($topicid) || (!\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::POST_MANAGE) && !$ismod))
-		\App\Support\LegacyResponse::permissionDenied();
-
-	$sure = intval(\App\Support\SupportContext::getQuery("sure") ?? 0);
-	if (!$sure)
-	{
-		\App\Support\LegacyResponse::abort($lang_forums['std_delete_topic'], $lang_forums['std_delete_topic_note'] .
-		"<a class=altlink href=?action=deletetopic&topicid=$topicid&sure=1>".$lang_forums['std_here_if_sure'], false);
-	}
-
-	$postcount = \App\Models\Post::query()->where('topicid', $topicid)->count();
-
-	\App\Models\Topic::query()->where('id', $topicid)->delete();
-	\App\Models\Post::query()->where('topicid', $topicid)->delete();
-	\Nexus\Database\NexusDB::table('readposts')->where('topicid', $topicid)->delete();
-	\App\Models\Forum::query()->where('id', $forumid)->decrement('topiccount');
-	\App\Models\Forum::query()->where('id', $forumid)->decrement('postcount', $postcount);
-	$Cache->delete_value('forum_'.$forumid.'_post_'.$today_date.'_count');
-	$forum_last_replied_topic_row = $Cache->get_value('forum_'.$forumid.'_last_replied_topic_content');
-	if ($forum_last_replied_topic_row && $forum_last_replied_topic_row['id'] == $topicid)
-		$Cache->delete_value('forum_'.$forumid.'_last_replied_topic_content');
-
-	//===remove karma
-	\App\Support\Bonus::updatePoints((string) "-", (float) $starttopic_bonus, $userid);
-	//===end
-
-	header("Location: " . \App\Support\Http::protocolPrefix(\App\Support\Url::isSecure()) . "$BASEURL/forums.php?action=viewforum&forumid=$forumid");
-	return;
-}
-
-//-------- Action: Delete post
-
-if ($action == "deletepost")
-{
-	$postid = intval(\App\Support\SupportContext::getQuery("postid") ?? 0);
-	$sure = intval(\App\Support\SupportContext::getQuery("sure") ?? 0);
-
-	$ismod = \App\Support\Forum::isModerator($postid, 'post');
-	if ((!\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::POST_MANAGE) && !$ismod) || !\App\Support\Validators::isId($postid))
-		\App\Support\LegacyResponse::permissionDenied();
-
-	//------- Get topic id
-	$post = \App\Models\Post::query()->where('id', $postid)->first(['topicid', 'userid']);
-	if (!$post)
-		\App\Support\LegacyResponse::abort($lang_forums['std_error'], $lang_forums['std_post_not_found']);
-	$topicid = $post->topicid;
-	$userid = $post->userid;
-
-	//------- Get the id of the last post before the one we're deleting
-	$prevPostId = \App\Models\Post::query()->where('topicid', $topicid)->where('id', '<', $postid)->orderByDesc('id')->value('id');
-	if (!$prevPostId) // This is the first post of a topic
-		\App\Support\LegacyResponse::abort($lang_forums['std_error'], $lang_forums['std_cannot_delete_post'] .
-	"<a class=altlink href=?action=deletetopic&topicid=$topicid&sure=1>".$lang_forums['std_delete_topic_instead'], false);
-	else
-	{
-		$redirtopost = "&page=p$prevPostId#pid$prevPostId";
-	}
-
-	//------- Make sure we know what we do :-)
-	if (!$sure)
-	{
-		\App\Support\LegacyResponse::abort($lang_forums['std_delete_post'], $lang_forums['std_delete_post_note'] .
-		"<a class=altlink href=?action=deletepost&postid=$postid&sure=1>".$lang_forums['std_here_if_sure'], false);
-	}
-
-	//------- Delete post
-	\App\Models\Post::query()->where('id', $postid)->delete();
-	$Cache->delete_value('user_'.$userid.'_post_count');
-	$Cache->delete_value('topic_'.$topicid.'_post_count');
-	// update forum
-	$forumid = \App\Models\Topic::query()->where('id', $topicid)->value('forumid');
-	if (!$forumid)
-		return;
-	else{
-		\App\Models\Forum::query()->where('id', $forumid)->decrement('postcount');
-	}
-	$forum_last_replied_topic_row = $Cache->get_value('forum_'.$forumid.'_last_replied_topic_content');
-	if ($forum_last_replied_topic_row && $forum_last_replied_topic_row['lastpost'] == $postid)
-		$Cache->delete_value('forum_'.$forumid.'_last_replied_topic_content');
-	//------- Update topic
-	update_topic_last_post($topicid);
-
-	//===remove karma
-	\App\Support\Bonus::updatePoints((string) "-", (float) $makepost_bonus, $userid);
-
-	header("Location: " . \App\Support\Http::protocolPrefix(\App\Support\Url::isSecure()) . "$BASEURL/forums.php?action=viewtopic&topicid=$topicid$redirtopost");
-	return;
-}
-
-//-------- Action: Set locked on/off
-
-if ($action == "setlocked")
-{
-	$topicid = intval(\App\Support\SupportContext::getPost("topicid") ?? 0);
-	$ismod = \App\Support\Forum::isModerator($topicid,'topic');
-	if (!$topicid || (!\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::POST_MANAGE) && !$ismod))
-		\App\Support\LegacyResponse::permissionDenied();
-
-	$locked = \App\Support\SupportContext::getPost("locked");
-	\App\Models\Topic::query()->where('id', $topicid)->update(['locked' => $locked]);
-
-	header('Location: ' . \App\Support\SupportContext::getPost('returnto'));
-	return;
-}
-
-if ($action == 'hltopic')
-{
-	$topicid = intval(\App\Support\SupportContext::getQuery("topicid") ?? 0);
-	$ismod = \App\Support\Forum::isModerator($topicid,'topic');
-	if (!$topicid || (!\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::POST_MANAGE) && !$ismod))
-		\App\Support\LegacyResponse::permissionDenied();
-	$color = intval(\App\Support\SupportContext::getPost("color"));
-	if ($color==0 || \App\Support\Palette::forumHighlight($color))
-		\App\Models\Topic::query()->where('id', $topicid)->update(['hlcolor' => $color]);
-
-	$forumid = \App\Models\Topic::query()->where('id', $topicid)->value('forumid');
-	$forum_last_replied_topic_row = $Cache->get_value('forum_'.$forumid.'_last_replied_topic_content');
-	if ($forum_last_replied_topic_row && $forum_last_replied_topic_row['id'] == $topicid)
-		$Cache->delete_value('forum_'.$forumid.'_last_replied_topic_content');
-	header('Location: ' . \App\Support\SupportContext::getPost('returnto'));
-	return;
-}
-
-//-------- Action: Set sticky on/off
-
-if ($action == "setsticky")
-{
-	$topicid = intval(\App\Support\SupportContext::getPost("topicid") ?? 0);
-	$ismod = \App\Support\Forum::isModerator($topicid,'topic');
-	if (!$topicid || (!\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::POST_MANAGE) && !$ismod))
-		\App\Support\LegacyResponse::permissionDenied();
-
-	$sticky = \App\Support\SupportContext::getPost("sticky");
-	\App\Models\Topic::query()->where('id', $topicid)->update(['sticky' => $sticky]);
-
-	header('Location: ' . \App\Support\SupportContext::getPost('returnto'));
-	return;
-}
 
 //-------- Action: View forum
 
@@ -1173,52 +706,48 @@ if ($action == "viewforum")
 	$forumname = $row['name'];
 	$forummoderators = \App\Support\Forum::moderatorsWithContext($forumid,false);
 	$search = trim(is_scalar(\App\Support\SupportContext::getQuery("search") ?? '') ? (string) (\App\Support\SupportContext::getQuery("search") ?? '') : '');
-	$topicQuery = \App\Models\Topic::query()->where('forumid', $forumid);
 	if ($search){
-		$topicQuery->where('subject', 'like', '%'.$search.'%');
-		$addparam .= "&search=".rawurlencode($search);
+		$addparam = "&search=".rawurlencode($search);
 	}
 	else{
 		$addparam = "";
 	}
-	$num = $topicQuery->count();
 
-	[$pagertop, $pagerbottom, , $offset, $perpage, ] = \App\Support\Pagination::pager($topicsperpage, $num, "?"."action=viewforum&forumid=".$forumid.$addparam."&");
-	if (((\App\Support\SupportContext::getQuery("sort") !== null))){
-		switch (\App\Support\SupportContext::getQuery("sort")){
-			case 'firstpostasc':
-			{
-				$orderby = "firstpost ASC";
-				break;
-			}
-			case 'firstpostdesc':
-			{
-				$orderby = "firstpost DESC";
-				break;
-			}
-			case 'lastpostasc':
-			{
-				$orderby = "lastpost ASC";
-				break;
-			}
-			case 'lastpostdesc':
-			{
-				$orderby = "lastpost DESC";
-				break;
-			}
-			default:
-			{
-				$orderby = "lastpost DESC";
-			}
+	$sort = (string) (\App\Support\SupportContext::getQuery("sort") ?? 'lastpostdesc');
+	switch ($sort){
+		case 'firstpostasc':
+		{
+			$sortColumn = 'firstpost'; $sortDirection = 'asc';
+			break;
+		}
+		case 'firstpostdesc':
+		{
+			$sortColumn = 'firstpost'; $sortDirection = 'desc';
+			break;
+		}
+		case 'lastpostasc':
+		{
+			$sortColumn = 'lastpost'; $sortDirection = 'asc';
+			break;
+		}
+		case 'lastpostdesc':
+		{
+			$sortColumn = 'lastpost'; $sortDirection = 'desc';
+			break;
+		}
+		default:
+		{
+			$sortColumn = 'lastpost'; $sortDirection = 'desc';
 		}
 	}
-	else
-	{
-		$orderby = "lastpost DESC";
-	}
+
+	$topicResult = \App\Repositories\ForumRepository::getTopicsByForum((int) $forumid, (string) $search, (string) $sortColumn, (string) $sortDirection, 0, 0);
+	$num = $topicResult['count'];
+
+	[$pagertop, $pagerbottom, , $offset, $perpage, ] = \App\Support\Pagination::pager($topicsperpage, $num, "?"."action=viewforum&forumid=".$forumid.$addparam."&");
 	//------ Get topics data
-	$orderParts = explode(' ', $orderby);
-	$topicRows = (clone $topicQuery)->orderBy('sticky', 'desc')->orderBy($orderParts[0], $orderParts[1] ?? 'desc')->offset($offset)->limit($perpage)->get();
+	$topicResult = \App\Repositories\ForumRepository::getTopicsByForum((int) $forumid, (string) $search, (string) $sortColumn, (string) $sortDirection, (int) $offset, (int) $perpage);
+	$topicRows = $topicResult['rows'];
 	$numtopics = $topicRows->count();
 	print("<h1 align=\"center\"><a class=\"faqlink\" href=\"forums.php\">".$SITENAME."&nbsp;".$lang_forums['text_forums'] ."</a>--><a class=\"faqlink\" href=\"".htmlspecialchars("forums.php?action=viewforum&forumid=".$forumid)."\">".$forumname."</a></h1>\n");
 	print("<br />");
@@ -1263,7 +792,7 @@ if ($action == "viewforum")
 
 			//---- Get reply count
 			if (!$posts = $Cache->get_value('topic_'.$topicid.'_post_count')){
-				$posts = \App\Models\Post::query()->where('topicid', $topicid)->count();
+				$posts = \App\Repositories\ForumRepository::countTopicPosts((int) $topicid);
 				$Cache->cache_value('topic_'.$topicid.'_post_count', $posts, 3600);
 			}
 
@@ -1384,12 +913,7 @@ if ($action == "viewunread")
 	$beforepostid = intval(\App\Support\SupportContext::getQuery('beforepostid') ?? 0);
 	$maxresults = 25;
 	$lastCatchup = (int) ($CURUSER['last_catchup'] ?? 0);
-	$unreadQuery = \App\Models\Topic::query()
-		->where('lastpost', '>', $lastCatchup);
-	if ($beforepostid) {
-		$unreadQuery->where('lastpost', '<', $beforepostid);
-	}
-	$unreadTopics = $unreadQuery->orderByDesc('lastpost')->limit(100)->get();
+	$unreadTopics = \App\Repositories\ForumRepository::getUnreadTopics($lastCatchup, $beforepostid ?: null, 100);
 
 	print("<h1 align=\"center\"><a class=\"faqlink\" href=\"forums.php\">".$SITENAME."&nbsp;".$lang_forums['text_forums']."</a>-->".$lang_forums['text_topics_with_unread_posts']."</h1>");
 
@@ -1447,20 +971,11 @@ if ($action == "search")
 	unset($error);
 	$error = true;
 	$found = "";
-	$keywords = htmlspecialchars(trim(\App\Support\SupportContext::getQuery("keywords")));
+	$keywords = htmlspecialchars(trim((string) (\App\Support\SupportContext::getQuery("keywords") ?? '')));
 	if ($keywords != "")
 	{
-		$term = '%'.$keywords.'%';
-		$searchQuery = \Nexus\Database\NexusDB::table('posts')
-			->leftJoin('topics', 'posts.topicid', '=', 'topics.id')
-			->leftJoin('forums', 'topics.forumid', '=', 'forums.id')
-			->where('forums.minclassread', '<=', \App\Support\UserDisplay::currentClass())
-			->where(function ($q) use ($term) {
-				$q->where(function ($sub) use ($term) {
-					$sub->where('topics.subject', 'like', $term)->whereColumn('posts.id', 'topics.firstpost');
-				})->orWhere('posts.body', 'like', $term);
-			});
-		$hits = $searchQuery->count('posts.id');
+		$searchResult = \App\Repositories\ForumRepository::searchForumPosts((string) $keywords, (int) \App\Support\UserDisplay::currentClass(), 0, 0);
+		$hits = $searchResult['hits'];
 		if ($hits){
 			$error = false;
 			$found = "[<b><font class=\"striking\"> ".$lang_forums['text_found'].$hits.$lang_forums['text_num_posts']." </font></b>]";
@@ -1518,12 +1033,8 @@ if ($action == "search")
 	{
 		$perpage = $topicsperpage;
 		[$pagertop, $pagerbottom, , $offset, $perpage, ] = \App\Support\Pagination::pager($perpage, $hits, "forums.php?action=search&keywords=".rawurlencode($keywords)."&");
-		$posts = (clone $searchQuery)
-			->select('posts.id', 'posts.topicid', 'posts.userid', 'posts.added', 'topics.subject', 'topics.hlcolor', 'forums.id AS forumid', 'forums.name AS forumname')
-			->orderByDesc('posts.id')
-			->offset($offset)
-			->limit($perpage)
-			->get();
+		$searchResult = \App\Repositories\ForumRepository::searchForumPosts((string) $keywords, (int) \App\Support\UserDisplay::currentClass(), (int) $offset, (int) $perpage);
+		$posts = $searchResult['rows'];
 
 		print($pagertop);
 		print("<table border=\"1\" cellspacing=\"0\" cellpadding=\"5\" width=\"97%\">\n");
@@ -1553,14 +1064,14 @@ if ($action != "")
 
 //-------- Get forums
 if ($CURUSER)
-	\App\Models\User::query()->where('id', $CURUSER['id'])->update(['forum_access' => date("Y-m-d H:i:s")]);
+	\App\Repositories\ForumRepository::updateUserForumAccess((int) $CURUSER['id'], date("Y-m-d H:i:s"));
 
 print("<h1 align=\"center\">".$SITENAME."&nbsp;".$lang_forums['text_forums']."</h1>");
 print("<p align=\"center\"><a href=\"?action=search\"><b>".$lang_forums['text_search']."</b></a> | <a href=\"?action=viewunread\"><b>".$lang_forums['text_view_unread']."</b></a> | <a href=\"?catchup=1\"><b>".$lang_forums['text_catch_up']."</b></a> ".(\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::FORUM_MANAGE) ? "| <a href=\"forummanage.php\"><b>".$lang_forums['text_forum_manager']."</b></a>":"")."</p>");
 print("<table border=\"1\" cellspacing=\"0\" cellpadding=\"5\" width=\"100%\">\n");
 
 if (!$overforums = $Cache->get_value('overforums_list')){
-	$overforums = \App\Models\OverForum::query()->orderBy('sort')->get()->toArray();
+	$overforums = \App\Repositories\ForumRepository::getOverforumsList();
 	$Cache->cache_value('overforums_list', $overforums, 86400);
 }
 foreach ($overforums as $a)
@@ -1596,7 +1107,7 @@ foreach ($overforums as $a)
 		// Find last post ID
 		//Returns the ID of the last post of a forum
 		if (!$arr = $Cache->get_value('forum_'.$forumid.'_last_replied_topic_content')){
-			$lastTopic = \App\Models\Topic::query()->where('forumid', $forumid)->orderByDesc('lastpost')->first();
+			$lastTopic = \App\Repositories\ForumRepository::getLastTopicByForum((int) $forumid);
 			$arr = $lastTopic ? $lastTopic->toArray() : false;
 			$Cache->cache_value('forum_'.$forumid.'_last_replied_topic_content', $arr, 900);
 		}
@@ -1633,11 +1144,7 @@ foreach ($overforums as $a)
 		}
 		$posttodaycount = $Cache->get_value('forum_'.$forumid.'_post_'.$today_date.'_count');
 		if ($posttodaycount == ""){
-			$posttodaycount = \Nexus\Database\NexusDB::table('posts')
-				->leftJoin('topics', 'posts.topicid', '=', 'topics.id')
-				->where('posts.added', '>', date("Y-m-d"))
-				->where('topics.forumid', $forumid)
-				->count('posts.id');
+			$posttodaycount = \App\Repositories\ForumRepository::getForumTodayPostCount((int) $forumid, date("Y-m-d"));
 			$Cache->cache_value('forum_'.$forumid.'_post_'.$today_date.'_count', $posttodaycount, 1800);
 		}
 		if ($posttodaycount > 0)

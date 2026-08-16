@@ -49,15 +49,15 @@ final class Description
         $pattern = '/(\[attach\](.*)\[\/attach\])/isU';
         $matchCount = preg_match_all($pattern, $description, $matches);
         if ($matchCount) {
-            $attachments = \App\Models\Attachment::query()->whereIn('dlkey', $matches[2])->get()->keyBy('dlkey');
-            if ($attachments->isNotEmpty()) {
+            $attachments = \App\Repositories\AttachmentRepository::findByDlkeys($matches[2]);
+            if (! empty($attachments)) {
                 $description = (string) preg_replace_callback($pattern, function ($matches) use ($attachments) {
-                    $item = $attachments->get($matches[2]);
+                    $item = $attachments[$matches[2]] ?? null;
                     if ($item === null) {
                         return $matches[1];
                     }
-                    $url = \Nexus\Attachment\Storage::getDriver($item->driver)->getImageUrl($item->location);
-                    Logger::writeWithContext(sprintf('location: %s, driver: %s, url: %s', $item->location, $item->driver, $url));
+                    $url = \Nexus\Attachment\Storage::getDriver($item['driver'])->getImageUrl($item['location']);
+                    Logger::writeWithContext(sprintf('location: %s, driver: %s, url: %s', $item['location'], $item['driver'], $url));
 
                     return str_replace($matches[2], $url, $matches[1]);
                 }, $description);

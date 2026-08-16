@@ -1003,4 +1003,41 @@ class UserRepository extends BaseRepository
         return User::query()->find($id, User::$commonFields);
     }
 
+    public static function findForDisplay(int|string $id): ?User
+    {
+        $neededColumns = [
+            'id', 'class', 'enabled', 'privacy', 'avatar', 'signature', 'uploaded', 'downloaded',
+            'last_access', 'username', 'donor', 'donoruntil', 'leechwarn', 'warned', 'title',
+            'downloadpos', 'parked', 'clientselect', 'showclienterror',
+        ];
+
+        return User::query()
+            ->with([
+                'wearing_medals' => function ($query) {
+                    $query->orderBy('user_medals.priority', 'desc')
+                        ->orderBy('user_medals.id', 'desc')
+                        ->limit((int) \App\Support\Config\SiteConfig::current()->system->maximumNumberOfMedalsCanBeWorn(3));
+                },
+            ])
+            ->find($id, $neededColumns);
+    }
+
+    public static function logModify(int|string $userId, string $comment): void
+    {
+        UserModifyLog::query()->create([
+            'user_id' => $userId,
+            'content' => $comment,
+        ]);
+    }
+
+    /**
+     * @param  list<int>  $ids
+     * @param  list<string>  $columns
+     * @return \Illuminate\Database\Eloquent\Collection<int, User>
+     */
+    public static function getByIds(array $ids, array $columns = ['*']): \Illuminate\Database\Eloquent\Collection
+    {
+        return User::query()->find($ids, $columns)->keyBy('id');
+    }
+
 }

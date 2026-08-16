@@ -46,13 +46,44 @@ class UsercpController extends LegacyController
      */
     public function legacy(Request $request): View|RedirectResponse
     {
-        if (SupportContext::getUser() === null) {
+        $user = SupportContext::getUser();
+        if ($user === null) {
             $qs = $request->getQueryString();
 
             return redirect('/usercp.php' . ($qs ? '?' . $qs : ''));
         }
 
-        $result = $this->renderer->render('usercp');
+        if ($request->isMethod('POST')) {
+            $action = (string) $request->input('action');
+            $type = (string) $request->input('type');
+
+            if ($type === 'save' && $action === 'personal') {
+                $this->repository->updatePersonal($request);
+
+                return redirect('/usercp.php?action=personal&type=saved');
+            }
+
+            if ($type === 'save' && $action === 'forum') {
+                $this->repository->updateForum($request);
+
+                return redirect('/usercp.php?action=forum&type=saved');
+            }
+
+            if ($type === 'save' && $action === 'tracker') {
+                $this->repository->updateTracker($request);
+
+                return redirect('/usercp.php?action=tracker&type=saved');
+            }
+
+            if ($type === 'confirm' && $action === 'security') {
+                $to = $this->repository->updateSecurityFromLegacyRequest($request);
+
+                return redirect($to);
+            }
+        }
+
+        $userInfo = $this->repository->getUserById((int) $user['id']);
+        $result = $this->renderer->render('usercp', ['tokens' => $this->repository->getUserTokens($userInfo)]);
         if ($result instanceof RedirectResponse) {
             return $result;
         }

@@ -14,9 +14,6 @@ final class UserOps
      */
     public static function logModify(int|string $userId, string $comment): void
     {
-        \App\Models\UserModifyLog::query()->create([
-            'user_id' => $userId,
-            'content' => $comment,
-        ]);
+        \App\Repositories\UserRepository::logModify($userId, $comment);
     }
 }

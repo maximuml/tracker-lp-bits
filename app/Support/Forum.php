@@ -128,12 +128,12 @@ final class Forum
         static $forumMods = null;
 
         if (! is_array($post)) {
-            $post = \App\Models\Post::query()->findOrFail((int) $post)->toArray();
+            $post = \App\Repositories\ForumRepository::getPostArrayById((int) $post);
         }
 
         $topicId = $post['topicid'];
         if (! isset($topics[$topicId])) {
-            $topics[$topicId] = \App\Models\Topic::query()->findOrFail($topicId);
+            $topics[$topicId] = \App\Repositories\ForumRepository::getTopicById($topicId);
         }
         /** @var \App\Models\Topic $topicInfo */
         $topicInfo = $topics[$topicId];
@@ -141,16 +141,13 @@ final class Forum
 
         if ($protectedForumIds === null) {
             $protected = \Nexus\Database\NexusDB::remember('setting_protected_forum', 600, function () {
-                return \App\Models\Setting::getByName('misc.protected_forum');
+                return \App\Repositories\SettingRepository::getByName('misc.protected_forum');
             });
             $protectedForumIds = $protected ? preg_split('/[,\s]+/', $protected) : [];
         }
 
         if ($forumMods === null) {
-            $forumMods = [];
-            foreach (\App\Models\ForumMod::query()->get() as $item) {
-                $forumMods[$item->forumid] = $item->userid;
-            }
+            $forumMods = \App\Repositories\ForumRepository::getForumMods();
         }
 
         $isForumMod = isset($forumMods[$forumId]) && $forumMods[$forumId] == $uid;
@@ -195,8 +192,7 @@ final class Forum
         $row = method_exists($cache, 'get_value') ? $cache->get_value($cacheKey) : false;
 
         if ($row === false) {
-            $result = \App\Models\Post::query()->where('id', $postId)->first();
-            $row = $result ? $result->toArray() : null;
+            $row = \App\Repositories\ForumRepository::findPostArrayById((int) $postId);
             if (method_exists($cache, 'cache_value')) {
                 $cache->cache_value($cacheKey, $row, 7200);
             }

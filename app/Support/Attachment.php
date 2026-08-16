@@ -84,8 +84,7 @@ final class Attachment
         $row = \Nexus\Database\NexusDB::cache_get('attachment_' . $dlkey . '_content');
 
         if (empty($row) && strlen($dlkey) == 32) {
-            $result = \Nexus\Database\NexusDB::table('attachments')->where('dlkey', $dlkey)->first();
-            $row = $result ? (array) $result : null;
+            $row = \App\Repositories\AttachmentRepository::findByDlkey($dlkey);
             \Nexus\Database\NexusDB::cache_put('attachment_' . $dlkey . '_content', $row, 86400);
         }
 
@@ -187,11 +186,9 @@ final class Attachment
         return preg_replace_callback($pattern, function ($matches) {
             $dlkey = $matches[1];
             $httpdirectory = \App\Support\Config\SiteConfig::current()->attachment->httpDirectory();
-            $row = \Nexus\Database\NexusDB::remember('attachment_' . $dlkey . '_content', 86400, function () use ($dlkey) {
-                $record = \App\Models\Attachment::query()->where('dlkey', $dlkey)->first();
-
-                return $record ? $record->toArray() : [];
-            });
+            $cached = \Nexus\Database\NexusDB::cache_get('attachment_' . $dlkey . '_content');
+            $row = is_array($cached) ? $cached : (\App\Repositories\AttachmentRepository::findByDlkey($dlkey) ?? []);
+            \Nexus\Database\NexusDB::cache_put('attachment_' . $dlkey . '_content', $row, 86400);
 
             if (empty($row) || ($row['isimage'] ?? 0) != 1) {
                 Logger::writeWithContext(sprintf('dlkey: %s get attachment %s not exists or not image', $dlkey, Json::encode($row)));

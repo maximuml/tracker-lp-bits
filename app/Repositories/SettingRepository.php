@@ -12,6 +12,19 @@ use Nexus\Database\NexusDB;
 class SettingRepository extends BaseRepository
 {
     /**
+     * @return array<string, mixed>
+     */
+    public static function getAll(): array
+    {
+        return Setting::getFromDb();
+    }
+
+    public static function getByName(string $name, mixed $default = null): mixed
+    {
+        return Setting::getByName($name, $default);
+    }
+
+    /**
      * @param  array<int|string, mixed>  $params
      * @return  array<int|string, mixed>
      */
@@ -62,6 +75,36 @@ class SettingRepository extends BaseRepository
         NexusDB::cache_del("nexus_settings_in_nexus");
         NexusDB::cache_del('setting_protected_forum');
         return $result;
+    }
+
+    /**
+     * @param  array<string, mixed>  $nameAndValue
+     */
+    public static function saveBatch(string $prefix, array $nameAndValue, string $autoload = 'yes'): void
+    {
+        $prefix = strtolower($prefix);
+        $datetimeNow = date('Y-m-d H:i:s');
+        $records = [];
+
+        foreach ($nameAndValue as $name => $value) {
+            if (is_array($value)) {
+                $value = json_encode($value);
+            }
+            $records[] = [
+                'name' => "$prefix.$name",
+                'value' => $value,
+                'created_at' => $datetimeNow,
+                'updated_at' => $datetimeNow,
+                'autoload' => $autoload,
+            ];
+        }
+
+        if (! empty($records)) {
+            Setting::query()->upsert($records, ['name'], ['value', 'updated_at']);
+        }
+
+        \App\Support\Cache::clearSettings();
+        \App\Support\Hooks::doAction('nexus_setting_update');
     }
 
 }

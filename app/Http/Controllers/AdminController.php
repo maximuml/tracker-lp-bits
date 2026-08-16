@@ -10,6 +10,8 @@ use App\Models\User;
 use App\Models\UserBanLog;
 use App\Repositories\AdminStatsRepository;
 use App\Repositories\BonusRepository;
+use App\Repositories\CategoryRepository;
+use App\Repositories\ModerationRepository;
 use App\Repositories\UserRepository;
 use App\Support\Format;
 use App\Support\Html;
@@ -37,6 +39,13 @@ use Nexus\Database\NexusDB;
 
 class AdminController extends LegacyController
 {
+    private ModerationRepository $moderationRepository;
+
+    public function __construct(ModerationRepository $moderationRepository)
+    {
+        $this->moderationRepository = $moderationRepository;
+    }
+
     public function donorlist(Request $request): View|RedirectResponse|Response
     {
         if (UserDisplay::currentClass() <= (defined('UC_MODERATOR') ? \constant('UC_MODERATOR') : 0)) {
@@ -379,9 +388,35 @@ EOD;
 
     public function catmanage(Request $request): Response|RedirectResponse
     {
+        if (UserDisplay::currentClass() < (defined('UC_ADMINISTRATOR') ? \constant('UC_ADMINISTRATOR') : 0)) {
+            return $this->legacyAbortResponse('Error', 'Permission denied.');
+        }
+
+        if ($request->input('action') === 'del') {
+            $id = (int) $request->input('id');
+            $type = (string) $request->input('type');
+            if ($id <= 0) {
+                return $this->legacyAbortResponse($this->getLangCatmanage('std_error'), $this->getLangCatmanage('std_invalid_id'));
+            }
+
+            $table = CategoryRepository::tableNameForType($type);
+            $row = CategoryRepository::getRecord($table, $id);
+            if ($row) {
+                CategoryRepository::deleteRecord($table, (int) $row['id']);
+                CategoryRepository::clearCacheAfterDelete($type, $row);
+            }
+
+            return redirect('/catmanage.php?action=view&type=' . urlencode($type));
+        }
 
         return $this->legacyPageWithRedirect($request, 'catmanage');
+    }
 
+    private function getLangCatmanage(string $key): string
+    {
+        $lang = (array) (SupportContext::getGlobal('lang_catmanage') ?? []);
+
+        return (string) ($lang[$key] ?? '');
     }
 
     public function fields(Request $request): Response|RedirectResponse|View
@@ -933,8 +968,8 @@ EOD;
             if ($nip === false || $nip === -1) {
                 return $this->legacyAbortResponse('Error', 'Bad IP.');
             }
-            $rows = NexusDB::table('bans')->where('first', '<=', $nip)->where('last', '>=', $nip)->get();
-            if ($rows->isEmpty()) {
+            $rows = $this->moderationRepository->findMatchingBans((int) $nip);
+            if (empty($rows)) {
                 $message = 'The IP address <b>' . htmlspecialchars($ip) . '</b> is not banned.';
                 $hasResult = true;
             } else {

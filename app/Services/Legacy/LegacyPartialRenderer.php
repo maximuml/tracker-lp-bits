@@ -17,9 +17,10 @@ use Illuminate\Http\Response;
 final class LegacyPartialRenderer
 {
     /**
+     * @param  array<string, mixed>  $data
      * @return array<string, mixed>|RedirectResponse
      */
-    public function render(string $name): array|RedirectResponse
+    public function render(string $name, array $data = []): array|RedirectResponse
     {
         $path = __DIR__ . '/' . $name . '_content.php';
 
@@ -30,6 +31,7 @@ final class LegacyPartialRenderer
         ob_start();
         try {
             extract(SupportContext::getGlobalsForView());
+            extract($data);
             include $path;
         } catch (HttpResponseException $e) {
             ob_get_clean();

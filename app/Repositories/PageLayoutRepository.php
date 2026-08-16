@@ -99,6 +99,15 @@ class PageLayoutRepository extends BaseRepository
         return (int) NexusDB::table('cheaters')->where('dealtwith', 0)->count();
     }
 
+    public function getPendingInviteCount(int $userId): int
+    {
+        return (int) \App\Models\Invite::query()
+            ->where('inviter', $userId)
+            ->where('invitee', '')
+            ->where('expired_at', '>', now())
+            ->count();
+    }
+
     /** @param  array<string, mixed>  $data */
     public function updateUser(int $userId, array $data): void
     {

@@ -20,10 +20,13 @@ class IndexController extends Controller
 
     public function legacy(Request $request): View|RedirectResponse
     {
-        if (SupportContext::getUser() === null) {
+        $user = SupportContext::getUser();
+        if ($user === null) {
             $qs = $request->getQueryString();
             return redirect('/index.php' . ($qs ? '?' . $qs : ''));
         }
+
+        IndexRepository::touchLastHome((int) $user['id']);
 
         if ($request->isMethod('post') && SupportContext::getGlobal('showpolls_main', '') === 'yes') {
             return $this->handlePollVote($request);

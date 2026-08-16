@@ -5,6 +5,7 @@ error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 if (!isset($CURUSER)) $CURUSER = (array) (\App\Support\SupportContext::getUser() ?? []);
 if (!isset($BASEURL)) $BASEURL = \App\Support\SupportContext::getGlobal('BASEURL', '');
 if (!isset($lang_mybonus)) $lang_mybonus = (array) (\App\Support\SupportContext::getGlobal('lang_mybonus') ?? []);
+$bonusRep = new \App\Repositories\BonusRepository();
 if (!function_exists('bonusarray')) { function bonusarray($option = 0){
 $onegbupload_bonus = \App\Support\SupportContext::getGlobal('onegbupload_bonus');
 $fivegbupload_bonus = \App\Support\SupportContext::getGlobal('fivegbupload_bonus');
@@ -427,13 +428,13 @@ for ($i=0; $i < count($allBonus); $i++)
 			}
 			else print("<td class=\"rowfollow\" align=\"center\"><input type=\"submit\" name=\"submit\" value=\"".$lang_mybonus['submit_exchange']."\" /></td>");
 		} elseif ($bonusarray['art'] == 'change_username_card') {
-		    if (\App\Models\UserMeta::query()->where('uid', $CURUSER['id'])->where('meta_key', \App\Models\UserMeta::META_KEY_CHANGE_USERNAME)->exists()) {
+		    if ($bonusRep->hasChangeUsernameCard((int) $CURUSER['id'])) {
                 print("<td class=\"rowfollow\" align=\"center\"><input type=\"submit\" name=\"submit\" value=\"".$lang_mybonus['text_change_username_card_already_has']."\" disabled=\"disabled\"/></td>");
             } else {
                 print("<td class=\"rowfollow\" align=\"center\"><input type=\"submit\" name=\"submit\" value=\"".$lang_mybonus['submit_exchange']."\" /></td>");
             }
         } elseif ($bonusarray['art'] == 'rainbow_id') {
-            if (\App\Models\UserMeta::query()->where('uid', $CURUSER['id'])->where('meta_key', \App\Models\UserMeta::META_KEY_PERSONALIZED_USERNAME)->whereNull('deadline')->exists()) {
+            if ($bonusRep->hasRainbowIdForever((int) $CURUSER['id'])) {
                 print("<td class=\"rowfollow\" align=\"center\"><input type=\"submit\" name=\"submit\" value=\"".$lang_mybonus['text_rainbow_id_already_valid_forever']."\" disabled=\"disabled\"/></td>");
             } else {
                 print("<td class=\"rowfollow\" align=\"center\"><input type=\"submit\" name=\"submit\" value=\"".$lang_mybonus['submit_exchange']."\" /></td>");
@@ -557,7 +558,6 @@ if ($action == "exchange") {
 	$seedbonus=$CURUSER['seedbonus']-$points;
 
 	if($CURUSER['seedbonus'] >= $points) {
-        $bonusRep = new \App\Repositories\BonusRepository();
         $lockName = "user:$userid:exchange:bonus";
         $lock = new \Nexus\Database\NexusLock($lockName, $lockSeconds);
         if (!$lock->get()) {
@@ -658,20 +658,12 @@ if ($action == "exchange") {
 			if($CURUSER['seedbonus'] >= $points) {
 				$points2= number_format($points,1);
 //				$bonuscomment = date("Y-m-d") . " - " .$points2. " Points as charity to users with ratio below ".htmlspecialchars(trim($ratiocharity)).".\n " .htmlspecialchars($bonuscomment);
-				$charityReceiverCount = \App\Models\User::query()
-				    ->where('enabled', 'yes')
-				    ->whereRaw('downloaded > 10737418240')
-				    ->whereRaw('? > uploaded/downloaded', [$ratiocharity])
-				    ->count();
+				$charityReceiverCount = $bonusRep->getCharityReceiverCount((float) $ratiocharity);
 				if ($charityReceiverCount) {
 //					sql_query("UPDATE users SET seedbonus = seedbonus - $points, charity = charity + $points, bonuscomment = ".sqlesc($bonuscomment)." WHERE id = ".sqlesc($userid)) or sqlerr(__FILE__, __LINE__);
-                    $bonusRep->consumeUserBonus($CURUSER['id'], $points, \App\Models\BonusLogs::BUSINESS_TYPE_GIFT_TO_LOW_SHARE_RATIO, $points. " Points as charity to users with ratio below ".htmlspecialchars(trim($ratiocharity)).".", ['charity' => \Nexus\Database\NexusDB::raw("charity + $points"), ]);
+                    $bonusRep->consumeUserBonusAndIncrementCharity($CURUSER['id'], (float) $points, \App\Models\BonusLogs::BUSINESS_TYPE_GIFT_TO_LOW_SHARE_RATIO, $points. " Points as charity to users with ratio below ".htmlspecialchars(trim($ratiocharity)).".", (float) $points);
 					$charityPerUser = $points/$charityReceiverCount;
-					\App\Models\User::query()
-				    ->where('enabled', 'yes')
-				    ->whereRaw('downloaded > 10737418240')
-				    ->whereRaw('? > uploaded/downloaded', [$ratiocharity])
-				    ->increment('seedbonus', $charityPerUser);
+					$bonusRep->incrementSeedbonusForLowRatioReceivers((float) $ratiocharity, (float) $charityPerUser);
 					\App\Support\LegacyResponse::redirect("" . \App\Support\Http::protocolPrefix(\App\Support\Url::isSecure()) . "$BASEURL/mybonus.php?do=charity");
 				}
 				else
@@ -687,8 +679,7 @@ if ($action == "exchange") {
 			$message = \App\Support\SupportContext::getPost("message");
 			//==gift for peeps with no more options
 			$usernamegift = trim(\App\Support\SupportContext::getPost("username"));
-			$receiver = \App\Models\User::query()->where('username', $usernamegift)->first(['id', 'seedbonus']);
-			$arr = $receiver ? $receiver->toArray() : [];
+			$arr = $bonusRep->findGiftReceiver($usernamegift);
             if (empty($arr)) {
                 \App\Support\Html::stdMessage($lang_mybonus['text_error'], $lang_mybonus['text_receiver_not_exists'], 0);
                 return;
@@ -720,7 +711,7 @@ if ($action == "exchange") {
 
 //				sql_query("UPDATE users SET seedbonus = seedbonus - $points, bonuscomment = ".sqlesc($bonuscomment)." WHERE id = ".sqlesc($userid)) or sqlerr(__FILE__, __LINE__);
                 $bonusRep->consumeUserBonus($CURUSER['id'], $points, \App\Models\BonusLogs::BUSINESS_TYPE_GIFT_TO_SOMEONE, $points2 . " Points as gift to ".htmlspecialchars(trim(\App\Support\SupportContext::getPost("username"))));
-				\App\Models\User::query()->where('id', $useridgift)->increment('seedbonus', $aftertaxpoint);
+				$bonusRep->incrementUserSeedbonus((int) $useridgift, (float) $aftertaxpoint);
                 \App\Models\BonusLogs::add($useridgift, $userseedbonus, $aftertaxpoint, $userseedbonus + $aftertaxpoint, " + " .$points2receiver. " Points (after tax) as a gift from ".($CURUSER["username"]), \App\Models\BonusLogs::BUSINESS_TYPE_RECEIVE_GIFT);
 
 				//===send message

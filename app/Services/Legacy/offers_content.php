@@ -57,84 +57,6 @@ if (((\App\Support\SupportContext::getQuery('add_offer') !== null)) && \App\Supp
 }
 //=== end add offer
 
-//=== take new offer
-if (((\App\Support\SupportContext::getQuery('new_offer') !== null)) && \App\Support\SupportContext::getQuery("new_offer")){
-	\App\Auth\Permission::assertCan(\App\Enums\Permission\PermissionEnum::ADD_OFFER);
-	$new_offer = intval(\App\Support\SupportContext::getQuery("new_offer") ?? 0);
-	if($new_offer != '1')
-	\App\Support\LegacyResponse::abort($lang_offers['std_error'], $lang_offers['std_smell_rat']);
-
-	$userid = intval($CURUSER["id"] ?? 0);
-	if (preg_match("/^[0-9]+$/", !$userid))
-	\App\Support\LegacyResponse::abort($lang_offers['std_error'], $lang_offers['std_smell_rat']);
-
-	$name = \App\Support\SupportContext::getPost("name");
-	if ($name == "")
-	offers_bark($lang_offers['std_must_enter_name']);
-
-	$cat = intval(\App\Support\SupportContext::getPost("type") ?? 0);
-	if (!\App\Support\Validators::isId($cat))
-	offers_bark($lang_offers['std_must_select_category']);
-
-	$descrmain = \App\Support\Input::unescape(\App\Support\SupportContext::getPost("body"));
-	if (!$descrmain)
-	offers_bark($lang_offers['std_must_enter_description']);
-
-	if (!empty(\App\Support\SupportContext::getPost('picture'))){
-		$picture = \App\Support\Input::unescape(\App\Support\SupportContext::getPost("picture"));
-		if(!preg_match("/^https?:\/\/[^\s'\"<>]+\.(jpg|gif|png)$/i", $picture))
-		\App\Support\LegacyResponse::abort($lang_offers['std_error'], $lang_offers['std_wrong_image_format']);
-		$pic = "[img]".$picture."[/img]\n";
-	}
-
-	$descr = $pic;
-	$descr .= $descrmain;
-
-	$existing = \App\Models\Offer::query()->where('name', \App\Support\SupportContext::getPost('name'))->first(['name']);
-	if (!$existing){
-		//===add karma //=== uncomment if you use the mod
-		//\App\Models\User::query()->where('id', $CURUSER['id'])->increment('seedbonus', 10.0);
-		//===end
-
-		try {
-			$id = \App\Models\Offer::query()->insertGetId([
-				'userid' => $CURUSER["id"],
-				'name' => $name,
-				'descr' => $descr,
-				'category' => intval(\App\Support\SupportContext::getPost("type") ?? 0),
-				'added' => date("Y-m-d H:i:s"),
-				'allowed' => 'pending',
-				'yeah' => 0,
-				'against' => 0,
-				'comments' => 0,
-			]);
-		} catch (\Illuminate\Database\QueryException $e) {
-			if (str_contains($e->getMessage(), '1062') || str_contains($e->getMessage(), 'Duplicate'))
-				offers_bark("!!!");
-			offers_bark("mysql puked: ".$e->getMessage());
-		}
-		if (!$id) offers_bark("mysql puked");
-
-		// add new offer message to staffmessage
-		\App\Models\StaffMessage::query()->insert([
-            'sender' => $CURUSER['id'],
-            'subject' => \App\Support\Locale::trans('offer.msg_new_offer_subject', [], null),
-            'msg' => \App\Support\Locale::trans('offer.msg_new_offer_msg', ['username' => "[url=userdetails.php?id={$CURUSER['id']}]{$CURUSER['username']}[/url]", 'offername' => "[url=offers.php?id={$id}&off_details=1]{$name}[/url]"], null),
-            'added' => now(),
-        ]);
-        \App\Support\Cache::clearStaffMessage();
-
-		\App\Support\Log::writeWithContext("offer $name was added by ".$CURUSER['username'], 'normal');
-
-		header("Location: offers.php?id=$id&off_details=1");
-
-	}
-	else{
-		\App\Support\LegacyResponse::abort($lang_offers['std_error'], $lang_offers['std_offer_exists']."<a class=altlink href=offers.php>".$lang_offers['text_view_all_offers']."</a>", false);
-	}
-	return;
-}
-//==end take new offer
 
 //=== offer details
 if (((\App\Support\SupportContext::getQuery('off_details') !== null)) && \App\Support\SupportContext::getQuery("off_details")){
@@ -147,11 +69,11 @@ if (((\App\Support\SupportContext::getQuery('off_details') !== null)) && \App\Su
 	if(!$id)
 		\App\Support\LegacyResponse::abort($lang_offers['std_error'], $lang_offers['std_smell_rat']);
 
-	$num = \App\Models\Offer::query()->where('id', $id)->first();
-    if (!$num) {
+	$offerModel = \App\Repositories\OfferRepository::findOffer((int) $id);
+    if (!$offerModel) {
         offers_bark($lang_offers['text_nothing_found']);
     }
-    $num = $num->toArray();
+    $num = $offerModel->toArray();
 
 	$s = $num["name"];
 
@@ -176,8 +98,9 @@ if (((\App\Support\SupportContext::getQuery('off_details') !== null)) && \App\Su
 	"<input class=\"btn\" type=\"submit\" value=\"".$lang_offers['submit_allow']."\" />&nbsp;&nbsp;</form></td><td class=\"embedded\"><form method=\"post\" action=\"?id=".$id."&amp;finish_offer=1\">".
 	"<input type=\"hidden\" value=\"".$id."\" name=\"finish\" /><input class=\"btn\" type=\"submit\" value=\"".$lang_offers['submit_let_votes_decide']."\" /></form></td></tr></table>", 1);
 
-	$za = \Nexus\Database\NexusDB::table('offervotes')->where('vote', 'yeah')->where('offerid', $id)->count();
-	$protiv = \Nexus\Database\NexusDB::table('offervotes')->where('vote', 'against')->where('offerid', $id)->count();
+	$voteCounts = \App\Repositories\OfferRepository::getVoteCounts((int) $id);
+	$za = $voteCounts['yeah'];
+	$protiv = $voteCounts['against'];
 	//=== in the following section, there is a line to report comment... either remove the link or change it to work with your report script :)
 
 	//if pending
@@ -206,7 +129,7 @@ if (((\App\Support\SupportContext::getQuery('off_details') !== null)) && \App\Su
 	print("</table>");
 	// -----------------COMMENT SECTION ---------------------//
 	$commentbar = "<p align=\"center\"><a class=\"index\" href=\"comment.php?action=add&amp;pid=".$id."&amp;type=offer\">".$lang_offers['text_add_comment']."</a></p>\n";
-	$count = \App\Models\Comment::query()->where('offer', $id)->count();
+	$count = \App\Repositories\OfferRepository::countComments((int) $id);
 	if (!$count) {
 		print("<h1 id=\"startcomments\" align=\"center\">".$lang_offers['text_no_comments']."</h1>\n");
 	}
@@ -214,12 +137,7 @@ if (((\App\Support\SupportContext::getQuery('off_details') !== null)) && \App\Su
 	else {
 		[$pagertop, $pagerbottom, , $offset, $perpage, ] = \App\Support\Pagination::pager(10, $count, "offers.php?id=$id&off_details=1&", array('lastpagedefault' => 1));
 
-		$commentRows = \App\Models\Comment::query()
-			->where('offer', $id)
-			->orderBy('id')
-			->offset($offset)
-			->limit($perpage)
-			->get(['id', 'text', 'user', 'added', 'editedby', 'editdate']);
+		$commentRows = \App\Repositories\OfferRepository::getComments((int) $id, (int) $offset, (int) $perpage);
 		$allrows = array();
 		foreach ($commentRows as $commentObj)
 			$allrows[] = $commentObj->toArray();
@@ -241,113 +159,6 @@ if (((\App\Support\SupportContext::getQuery('off_details') !== null)) && \App\Su
 	return;
 }
 //=== end offer details
-//=== allow offer by staff
-if (((\App\Support\SupportContext::getQuery("allow_offer") !== null)) && \App\Support\SupportContext::getQuery("allow_offer")) {
-
-	if (!\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::OFFER_MANAGE))
-	\App\Support\LegacyResponse::abort($lang_offers['std_access_denied'], $lang_offers['std_mans_job']);
-
-	$allow_offer = intval(\App\Support\SupportContext::getQuery("allow_offer") ?? 0);
-	if($allow_offer != '1')
-	\App\Support\LegacyResponse::abort($lang_offers['std_error'], $lang_offers['std_smell_rat']);
-
-	//=== to allow the offer  credit to S4NE for this next bit :)
-	//if (\App\Support\SupportContext::getPost("offerid")){
-	$offid = intval(\App\Support\SupportContext::getPost("offerid") ?? 0);
-	if(!\App\Support\Validators::isId($offid))
-	\App\Support\LegacyResponse::abort($lang_offers['std_error'], $lang_offers['std_smell_rat']);
-
-	$offer = \App\Models\Offer::query()->with('user')->where('offers.id', $offid)->first(['offers.userid', 'offers.name']);
-    if (!$offer) {
-        offers_bark($lang_offers['text_nothing_found']);
-    }
-    $arr = $offer->toArray();
-    $arr['username'] = $offer->user->username ?? '';
-    $locale = \App\Support\Locale::userLocale($arr["userid"]);
-	if ($offeruptimeout_main){
-		$timeouthour = floor($offeruptimeout_main/3600);
-		$timeoutnote = \App\Support\Locale::trans("offer.msg_you_must_upload_in", [], $locale).$timeouthour.\App\Support\Locale::trans("offer.msg_hours_otherwise", [], $locale);
-	}
-	else $timeoutnote = "";
-	$msg = $CURUSER['username'].\App\Support\Locale::trans("offer.msg_has_allowed", [], $locale)."[b][url=". \App\Support\Http::protocolPrefix(\App\Support\Url::isSecure()) . $BASEURL ."/offers.php?id=$offid&off_details=1]" . $arr['name'] . "[/url][/b]. ".\App\Support\Locale::trans("offer.msg_find_offer_option", [], $locale).$timeoutnote;
-
-	$subject = \App\Support\Locale::trans("offer.msg_your_offer_allowed", [], $locale);
-	$allowedtime = date("Y-m-d H:i:s");
-
-	\App\Models\Message::add([
-		'sender' => 0,
-		'receiver' => $arr['userid'],
-		'msg' => $msg,
-		'subject' => $subject,
-		'added' => $allowedtime,
-	]);
-
-	\App\Models\Offer::query()->where('id', $offid)->update(['allowed' => 'allowed', 'allowedtime' => $allowedtime]);
-
-	\App\Support\Log::writeWithContext("{$CURUSER['username']} allowed offer {$arr['name']}", 'normal');
-	header("Location: " . \App\Support\Http::protocolPrefix(\App\Support\Url::isSecure()) . "$BASEURL/offers.php?id=$offid&off_details=1");
-}
-//=== end allow the offer
-
-//=== allow offer by vote
-if (((\App\Support\SupportContext::getQuery("finish_offer") !== null)) && \App\Support\SupportContext::getQuery("finish_offer")) {
-
-	if (!\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::OFFER_MANAGE))
-	\App\Support\LegacyResponse::abort($lang_offers['std_access_denied'], $lang_offers['std_have_no_permission']);
-
-	$finish_offer = intval(\App\Support\SupportContext::getQuery("finish_offer") ?? 0);
-	if($finish_offer != '1')
-	\App\Support\LegacyResponse::abort($lang_offers['std_error'], $lang_offers['std_smell_rat']);
-
-	$offid = intval(\App\Support\SupportContext::getPost("finish") ?? 0);
-	if(!\App\Support\Validators::isId($offid))
-		\App\Support\LegacyResponse::abort($lang_offers['std_error'], $lang_offers['std_smell_rat']);
-
-	$offer = \App\Models\Offer::query()->with('user')->where('offers.id', $offid)->first(['offers.userid', 'offers.name']);
-    if (!$offer) {
-        offers_bark($lang_offers['text_nothing_found']);
-    }
-    $arr = $offer->toArray();
-    $arr['username'] = $offer->user->username ?? '';
-    $locale = \App\Support\Locale::userLocale($arr["userid"]);
-
-	$yes = \Nexus\Database\NexusDB::table('offervotes')->where('vote', 'yeah')->where('offerid', $offid)->count();
-	$no = \Nexus\Database\NexusDB::table('offervotes')->where('vote', 'against')->where('offerid', $offid)->count();
-
-	if($yes == '0' && $no == '0')
-	\App\Support\LegacyResponse::abort($lang_offers['std_sorry'], $lang_offers['std_no_votes_yet']."<a  href=offers.php?id=$offid&off_details=1>".$lang_offers['std_back_to_offer_detail']."</a>", false);
-	$finishvotetime = date("Y-m-d H:i:s");
-	if (($yes - $no)>=$minoffervotes){
-		if ($offeruptimeout_main){
-			$timeouthour = floor($offeruptimeout_main/3600);
-			$timeoutnote = \App\Support\Locale::trans("offer.msg_you_must_upload_in", [], $locale).$timeouthour.\App\Support\Locale::trans("offer.msg_hours_otherwise", [], $locale);
-		}
-		else $timeoutnote = "";
-		$msg = \App\Support\Locale::trans("offer.msg_offer_voted_on", [], $locale)."[b][url=" . \App\Support\Http::protocolPrefix(\App\Support\Url::isSecure()) . $BASEURL."/offers.php?id=$offid&off_details=1]" . $arr['name'] . "[/url][/b].". \App\Support\Locale::trans("offer.msg_find_offer_option", [], $locale).$timeoutnote;
-		\App\Models\Offer::query()->where('id', $offid)->update(['allowed' => 'allowed', 'allowedtime' => $finishvotetime]);
-	}
-	else if(($no - $yes)>=$minoffervotes){
-		$msg = \App\Support\Locale::trans("offer.msg_offer_voted_off", [], $locale)."[b][url=". \App\Support\Http::protocolPrefix(\App\Support\Url::isSecure()) . $BASEURL."/offers.php?id=$offid&off_details=1]" . $arr['name'] . "[/url][/b].".\App\Support\Locale::trans("offer.msg_offer_deleted", [], $locale) ;
-		\App\Models\Offer::query()->where('id', $offid)->update(['allowed' => 'denied']);
-	}
-			//===use this line if you DO HAVE subject in your PM system
-	$subject = \App\Support\Locale::trans("offer.msg_your_offer", [], $locale).$arr['name'].\App\Support\Locale::trans("offer.msg_voted_on", [], $locale);
-
-	\App\Models\Message::add([
-		'sender' => 0,
-		'subject' => $subject,
-		'receiver' => $arr['userid'],
-		'added' => $finishvotetime,
-		'msg' => $msg,
-	]);
-
-	//===use this line if you DO NOT subject in your PM system
-	\App\Support\Log::writeWithContext("{$CURUSER['username']} closed poll {$arr['name']}", 'normal');
-
-	header("Location: " . \App\Support\Http::protocolPrefix(\App\Support\Url::isSecure()) . "$BASEURL/offers.php?id=$offid&off_details=1");
-	return;
-}
-//===end allow offer by vote
 
 //=== edit offer
 
@@ -359,7 +170,7 @@ if (((\App\Support\SupportContext::getQuery("edit_offer") !== null)) && \App\Sup
 
 	$id = intval(\App\Support\SupportContext::getQuery("id") ?? 0);
 
-	$offerRow = \App\Models\Offer::query()->where('id', $id)->first();
+	$offerRow = \App\Repositories\OfferRepository::findOffer((int) $id);
 	if (!$offerRow) {
 		offers_bark($lang_offers['text_nothing_found']);
 	}
@@ -397,47 +208,6 @@ if (((\App\Support\SupportContext::getQuery("edit_offer") !== null)) && \App\Sup
 }
 //=== end edit offer
 
-//==== take offer edit
-if (((\App\Support\SupportContext::getQuery("take_off_edit") !== null)) && \App\Support\SupportContext::getQuery("take_off_edit")){
-
-	$take_off_edit = intval(\App\Support\SupportContext::getQuery("take_off_edit") ?? 0);
-	if($take_off_edit != '1')
-	\App\Support\LegacyResponse::abort($lang_offers['std_error'], $lang_offers['std_smell_rat']);
-
-	$id = intval(\App\Support\SupportContext::getQuery("id") ?? 0);
-
-	$offerOwner = \App\Models\Offer::query()->where('id', $id)->value('userid');
-
-	if ($CURUSER['id'] != $offerOwner && !\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::OFFER_MANAGE))
-	\App\Support\LegacyResponse::abort($lang_offers['std_error'], $lang_offers['std_access_denied']);
-
-	$name = \App\Support\SupportContext::getPost("name");
-
-	if (!empty(\App\Support\SupportContext::getPost('picture'))){
-		$picture = \App\Support\Input::unescape(\App\Support\SupportContext::getPost("picture"));
-		if(!preg_match("/^https?:\/\/[^\s'\"<>]+\.(jpg|gif|png)$/i", $picture))
-		\App\Support\LegacyResponse::abort($lang_offers['std_error'], $lang_offers['std_wrong_image_format']);
-		$pic = "[img]".$picture."[/img]\n";
-	}
-	$descr = "$pic";
-	$descr .= \App\Support\Input::unescape(\App\Support\SupportContext::getPost("body"));
-	if (!$name)
-	offers_bark($lang_offers['std_must_enter_name']);
-	if (!$descr)
-	offers_bark($lang_offers['std_must_enter_description']);
-	$cat = intval(\App\Support\SupportContext::getPost("category") ?? 0);
-	if (!\App\Support\Validators::isId($cat))
-	offers_bark($lang_offers['std_must_select_category']);
-
-	\App\Models\Offer::query()->where('id', $id)->update([
-		'category' => $cat,
-		'name' => $name,
-		'descr' => $descr,
-	]);
-
-	//header("Location: offers.php?id=$id&off_details=1");
-}
-//======end take offer edit
 
 //=== offer votes list
 if (((\App\Support\SupportContext::getQuery("offer_vote") !== null)) && \App\Support\SupportContext::getQuery("offer_vote")){
@@ -448,20 +218,15 @@ if (((\App\Support\SupportContext::getQuery("offer_vote") !== null)) && \App\Sup
 
 	$offerid = htmlspecialchars(intval(\App\Support\SupportContext::getQuery('id') ?? 0));
 
-	$count = \Nexus\Database\NexusDB::table('offervotes')->where('offerid', $offerid)->count();
+	$count = \App\Repositories\OfferRepository::getVoteCount((int) $offerid);
 
-	$offername = \App\Models\Offer::query()->where('id', $offerid)->value('name');
+	$offername = \App\Repositories\OfferRepository::getOfferName((int) $offerid);
 
 	print("<h1 align=center>".$lang_offers['text_vote_results_for']." <a  href=offers.php?id=$offerid&off_details=1><b>".htmlspecialchars($offername)."</b></a></h1>");
 
 	$perpage = 25;
 	[$pagertop, $pagerbottom, , $offset, $perpage, ] = \App\Support\Pagination::pager($perpage, $count, $__server_PHP_SELF ."?id=".$offerid."&offer_vote=1&");
-	$voteRows = \Nexus\Database\NexusDB::table('offervotes')
-		->where('offerid', $offerid)
-		->orderBy('id')
-		->offset($offset)
-		->limit($perpage)
-		->get();
+	$voteRows = \App\Repositories\OfferRepository::getVoteRows((int) $offerid, (int) $offset, (int) $perpage);
 
 	if ($voteRows->isEmpty())
 	print("<p align=center><b>".$lang_offers['std_no_votes_yet']."</b></p>\n");
@@ -498,8 +263,8 @@ if (((\App\Support\SupportContext::getQuery("vote") !== null)) && \App\Support\S
 	if ($vote =='yeah' || $vote =='against')
 	{
 		$userid = intval($CURUSER["id"] ?? 0);
-		$voted = \Nexus\Database\NexusDB::table('offervotes')->where('offerid', $offerid)->where('userid', $userid)->exists();
-		$offerOwner = \App\Models\Offer::query()->where('id', $offerid)->value('userid');
+		$voted = \App\Repositories\OfferRepository::userVoted((int) $offerid, (int) $userid);
+		$offerOwner = \App\Repositories\OfferRepository::getOfferOwner((int) $offerid);
 		if ($offerOwner == $CURUSER['id'])
 		{
 			\App\Support\LegacyResponse::abort($lang_offers['std_error'], $lang_offers['std_cannot_vote_youself']);
@@ -510,15 +275,15 @@ if (((\App\Support\SupportContext::getQuery("vote") !== null)) && \App\Support\S
 		}
 		else
 		{
-			$offer = \App\Models\Offer::query()->with('user')->where('id', $offerid)->first(['offers.userid', 'offers.name']);
+			$offer = \App\Repositories\OfferRepository::findOfferWithUser((int) $offerid);
             if (!$offer) {
                 offers_bark($lang_offers['text_nothing_found']);
             }
             $voteColumn = $vote == 'yeah' ? 'yeah' : 'against';
-            \App\Models\Offer::query()->where('id', $offerid)->increment($voteColumn);
+            \App\Repositories\OfferRepository::incrementVote((int) $offerid, (string) $voteColumn);
             $locale = \App\Support\Locale::userLocale($offer->userid);
 
-			$offer = \App\Models\Offer::query()->where('id', $offerid)->first(['yeah', 'against', 'allowed', 'userid', 'name']);
+			$offer = \App\Repositories\OfferRepository::findOfferWithVotes((int) $offerid);
 			$yeah = $offer->yeah;
 			$against = $offer->against;
 			$finishtime = date("Y-m-d H:i:s");
@@ -530,7 +295,7 @@ if (((\App\Support\SupportContext::getQuery("vote") !== null)) && \App\Support\S
 					$timeoutnote = \App\Support\Locale::trans("offer.msg_you_must_upload_in", [], $locale).$timeouthour.\App\Support\Locale::trans("offer.msg_hours_otherwise", [], $locale);
 				}
 				else $timeoutnote = "";
-				\App\Models\Offer::query()->where('id', $offerid)->update(['allowed' => 'allowed', 'allowedtime' => $finishtime]);
+				\App\Repositories\OfferRepository::allowOffer((int) $offerid, (string) $finishtime);
 				$msg = \App\Support\Locale::trans("offer.msg_offer_voted_on", [], $locale)."[b][url=". \App\Support\Http::protocolPrefix(\App\Support\Url::isSecure()) . $BASEURL."/offers.php?id=$offerid&off_details=1]" . $offer->name . "[/url][/b].". \App\Support\Locale::trans("offer.msg_find_offer_option", [], $locale).$timeoutnote;
 				$subject =  \App\Support\Locale::trans("offer.msg_your_offer_allowed", [], $locale);
 
@@ -547,7 +312,7 @@ if (((\App\Support\SupportContext::getQuery("vote") !== null)) && \App\Support\S
 			//denied and send offer voted off message
 			if(($against-$yeah)>=$minoffervotes && $offer->allowed != "denied")
 			{
-				\App\Models\Offer::query()->where('id', $offerid)->update(['allowed' => 'denied']);
+				\App\Repositories\OfferRepository::denyOffer((int) $offerid);
 				$msg = \App\Support\Locale::trans("offer.msg_offer_voted_off", [], $locale)."[b][url=" . \App\Support\Http::protocolPrefix(\App\Support\Url::isSecure()) . $BASEURL."/offers.php?id=$offerid&off_details=1]" . $offer->name . "[/url][/b].".\App\Support\Locale::trans("offer.msg_offer_deleted", [], $locale) ;
 				$subject = \App\Support\Locale::trans("offer.msg_offer_deleted", [], $locale);
 
@@ -565,11 +330,7 @@ if (((\App\Support\SupportContext::getQuery("vote") !== null)) && \App\Support\S
 			}
 
 
-			\Nexus\Database\NexusDB::table('offervotes')->insert([
-				'offerid' => $offerid,
-				'userid' => $userid,
-				'vote' => $vote,
-			]);
+			\App\Repositories\OfferRepository::recordVote((int) $offerid, (int) $userid, (string) $vote);
 			\App\Support\Bonus::updatePoints((string) "+", (float) $offervote_bonus, $CURUSER["id"]);
 			print("<h1 align=center>".$lang_offers['std_vote_accepted']."</h1>");
 			print($lang_offers['std_vote_accepted_note']."<a  href=offers.php?id=$offerid&off_details=1>".$lang_offers['std_back_to_offer_detail']);
@@ -581,76 +342,6 @@ if (((\App\Support\SupportContext::getQuery("vote") !== null)) && \App\Support\S
 }
 //=== end offer votes
 
-//=== delete offer
-if (((\App\Support\SupportContext::getQuery("del_offer") !== null)) && \App\Support\SupportContext::getQuery("del_offer")){
-
-	$del_offer = intval(\App\Support\SupportContext::getQuery("del_offer") ?? 0);
-	if($del_offer != '1')
-	\App\Support\LegacyResponse::abort($lang_offers['std_error'], $lang_offers['std_smell_rat']);
-
-	$offer = intval(\App\Support\SupportContext::getQuery("id") ?? 0);
-
-	$userid = intval($CURUSER["id"] ?? 0);
-	if (!\App\Support\Validators::isId($userid))
-	\App\Support\LegacyResponse::abort($lang_offers['std_error'], $lang_offers['std_smell_rat']);
-
-	$offerRecord = \App\Models\Offer::query()->where('id', $offer)->first();
-	if (!$offerRecord) {
-		offers_bark($lang_offers['text_nothing_found']);
-	}
-	$num = $offerRecord->toArray();
-
-	$name = $num["name"];
-
-	if ($userid != $num["userid"] && !\App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::OFFER_MANAGE))
-	\App\Support\LegacyResponse::abort($lang_offers['std_error'], $lang_offers['std_cannot_delete_others_offer']);
-
-	$sure = 0;
-	if (\App\Support\SupportContext::getQuery("sure") !== null)
-	{
-		$sure = \App\Support\SupportContext::getQuery("sure");
-		if($sure == '0' || $sure == '1')
-		$sure = intval(\App\Support\SupportContext::getQuery("sure") ?? 0);
-		else
-		\App\Support\LegacyResponse::abort($lang_offers['std_error'], $lang_offers['std_smell_rat']);
-	}
-
-
-	if ($sure == 0)
-	\App\Support\LegacyResponse::abort($lang_offers['std_delete_offer'], $lang_offers['std_delete_offer_note']."<br /><form method=post action=offers.php?id=$offer&del_offer=1&sure=1>".$lang_offers['text_reason_is']."<input type=text style=\"width: 200px\" name=reason><input type=submit value=\"".$lang_offers['submit_confirm']."\"></form>", false);
-	elseif ($sure == 1)
-	{
-		$reason = \App\Support\SupportContext::getPost("reason");
-		\App\Models\Offer::query()->where('id', $offer)->delete();
-		\Nexus\Database\NexusDB::table('offervotes')->where('offerid', $offer)->delete();
-		\App\Models\Comment::query()->where('offer', $offer)->delete();
-
-		//===add karma	//=== use this if you use the karma mod
-		//===end
-
-		if ($CURUSER["id"] != $num["userid"])
-		{
-			$added = date("Y-m-d H:i:s");
-            $locale = \App\Support\Locale::userLocale($num["userid"]);
-			$subject = \App\Support\Locale::trans("offer.msg_offer_deleted", [], $locale);
-			$msg = \App\Support\Locale::trans("offer.msg_your_offer", [], $locale).$num['name'].\App\Support\Locale::trans("offer.msg_was_deleted_by", [], $locale). "[url=userdetails.php?id=".$CURUSER['id']."]".$CURUSER['username']."[/url]".\App\Support\Locale::trans("offer.msg_blank", [], $locale).($reason != "" ? \App\Support\Locale::trans("offer.msg_reason_is", [], $locale).$reason : "");
-
-			\App\Models\Message::add([
-				'sender' => 0,
-				'receiver' => $num['userid'],
-				'msg' => $msg,
-				'subject' => $subject,
-				'added' => now(),
-			]);
-		}
-		\App\Support\Log::writeWithContext("Offer: $offer ({$num['name']}) was deleted by {$CURUSER['username']}".($reason != "" ? " (".$reason.")" : ""), 'normal');
-		header("Location: offers.php");
-		return;
-	}
-	else
-	\App\Support\LegacyResponse::abort($lang_offers['std_error'], $lang_offers['std_smell_rat']);
-}
-//== end  delete offer
 
 //=== prolly not needed, but what the hell... basically stopping the page getting screwed up
 $sort = '';
@@ -723,40 +414,17 @@ else if ($sort == "v_res")
 
 
 
-$offerQuery = \Nexus\Database\NexusDB::table('offers')
-	->join('categories', 'offers.category', '=', 'categories.id')
-	->join('users', 'offers.userid', '=', 'users.id');
-if ($offerorid) {
-	$offerQuery->where('offers.userid', $offerorid);
-	if ($categ) {
-		$offerQuery->where('offers.category', $categ);
-	}
-} elseif ($categ) {
-	$offerQuery->where('offers.category', $categ);
-}
-if ($search) {
-	$offerQuery->where('offers.name', 'like', '%'.$search.'%');
-}
-
-$count = $offerQuery->count('offers.id');
-
+$sortColumn = $sort;
+$direction = strtolower((string) (\App\Support\SupportContext::getQuery('type') ?? '')) === 'asc' ? 'asc' : 'desc';
 $perpage = 25;
+
+$offerResult = \App\Repositories\OfferRepository::getLegacyList((int) $categ, (int) $offerorid, (string) $search, (string) $sortColumn, (string) $direction, 0, 0);
+$count = $offerResult['count'];
 
 [$pagertop, $pagerbottom, , $offset, $perpage, ] = \App\Support\Pagination::pager($perpage, $count, $__server_PHP_SELF ."?" . "category=" . (\App\Support\SupportContext::getQuery("category") ?? '') . "&sort=" . (\App\Support\SupportContext::getQuery("sort") ?? '') . "&");
 
-
-if($sort == "")
-$sort =  "ORDER BY added desc ";
-
-$pos = stripos($sort, 'ORDER BY');
-$rawSort = trim(substr($sort, $pos + 8));
-
-$offerRows = (clone $offerQuery)
-	->select('offers.id', 'offers.userid', 'offers.name', 'offers.added', 'offers.allowedtime', 'offers.comments', 'offers.yeah', 'offers.against', 'offers.category as cat_id', 'offers.allowed', 'categories.image', 'categories.name as cat')
-	->orderByRaw($rawSort)
-	->offset($offset)
-	->limit($perpage)
-	->get();
+$offerResult = \App\Repositories\OfferRepository::getLegacyList((int) $categ, (int) $offerorid, (string) $search, (string) $sortColumn, (string) $direction, (int) $offset, (int) $perpage);
+$offerRows = $offerResult['rows'];
 $num = $offerRows->count();
 
 \App\Support\Html::beginFrame($lang_offers['text_offers_section'], true, 10, "100%", "center");
@@ -817,8 +485,7 @@ print("<td class=\"colhead\">".$lang_offers['col_offered_by']."</td>".
 	else
 	{
 		if (!$lastcom = $Cache->get_value('offer_'.$arr['id'].'_last_comment_content')){
-			$lastComment = \App\Models\Comment::query()->where('offer', $arr['id'])->orderByDesc('added')->first(['user', 'added', 'text']);
-			$lastcom = $lastComment ? $lastComment->toArray() : false;
+			$lastcom = \App\Repositories\OfferRepository::getLastComment((int) $arr['id']);
 			$Cache->cache_value('offer_'.$arr['id'].'_last_comment_content', $lastcom, 1855);
 		}
 		$timestamp = strtotime($lastcom["added"]);
@@ -905,5 +572,5 @@ if(!(isset($CURUSER)) || $CURUSER['showlastcom'] == 'yes')
 echo \App\Support\Html::tooltipContainer($lastcom_tooltip, 400);
 }
 if ($CURUSER)
-	\App\Models\User::query()->where('id', $CURUSER['id'])->update(['last_offer' => date("Y-m-d H:i:s")]);
+	\App\Repositories\UsercpRepository::updateLastOffer((int) $CURUSER['id']);
 ?>

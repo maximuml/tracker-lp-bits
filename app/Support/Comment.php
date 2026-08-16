@@ -286,7 +286,7 @@ final class Comment
 
         $uidArr = array_unique(array_column($rows, 'user'));
         $neededColumns = ['id', 'class', 'enabled', 'privacy', 'avatar', 'signature', 'uploaded', 'downloaded', 'last_access', 'username', 'donor', 'leechwarn', 'warned', 'title'];
-        $userInfoArr = \App\Models\User::query()->find($uidArr, $neededColumns)->keyBy('id');
+        $userInfoArr = \App\Repositories\UserRepository::getByIds($uidArr, $neededColumns);
 
         foreach ($rows as $row) {
             $userInfo = $userInfoArr->get($row['user'], \App\Models\User::defaultUser());

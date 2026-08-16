@@ -75,4 +75,50 @@ class AuthRepository extends BaseRepository
     {
         NexusDB::table('users')->where('id', $userId)->update(['passkey' => $passkey]);
     }
+
+    /**
+     * @param  array<string, mixed>  $update
+     */
+    public static function updateLogin(int $userId, array $update): void
+    {
+        User::query()->where('id', $userId)->update($update);
+    }
+
+    public static function getPasskeyByUserId(int $userId): ?string
+    {
+        $user = User::query()->where('id', $userId)->first(['id', 'passkey']);
+
+        return $user?->passkey;
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    public static function findUserArrayForCookie(int $userId, bool $shouldIgnoreEnabled): ?array
+    {
+        $query = NexusDB::table('users')
+            ->where('id', $userId)
+            ->where('status', 'confirmed');
+        if (! $shouldIgnoreEnabled) {
+            $query->where('enabled', 'yes');
+        }
+        $result = $query->first();
+
+        return $result ? array_merge((array) $result, array_values((array) $result)) : null;
+    }
+
+    public static function findUserModelForCookie(int $userId, bool $shouldIgnoreEnabled): ?User
+    {
+        $row = User::query()->find($userId);
+        if (! $row) {
+            return null;
+        }
+        $checkFields = ['status'];
+        if (! $shouldIgnoreEnabled) {
+            $checkFields[] = 'enabled';
+        }
+        $row->checkIsNormal($checkFields);
+
+        return $row;
+    }
 }

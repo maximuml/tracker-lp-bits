@@ -438,5 +438,12 @@ class SeedBoxRepository extends BaseRepository
         return self::$asnReader;
     }
 
+    public static function findIdByAsn(int $asn): ?int
+    {
+        $id = NexusDB::table('seed_box_records')->where('asn', $asn)->value('id');
+
+        return $id !== null ? (int) $id : null;
+    }
+
 
 }

@@ -50,7 +50,7 @@ if (!function_exists('return_category_db_table_name')) { function return_categor
 } }
 if (!function_exists('return_category_mode_selection')) { function return_category_mode_selection($selname, $selectedid)
 {
-	$rows = \Nexus\Database\NexusDB::table('searchbox')->orderBy('id')->get(['id','name']);
+	$rows = \App\Repositories\CategoryRepository::getSearchboxOptions();
 	$selection = "<select name=\"".$selname."\">";
 	foreach ($rows as $row) {
 		$row = (array) $row;
@@ -62,7 +62,7 @@ if (!function_exists('return_category_mode_selection')) { function return_catego
 
 if (!function_exists('category_icon_selection')) { function category_icon_selection($iconId = 0)
 {
-    $rows = \Nexus\Database\NexusDB::table('caticons')->orderBy('id')->get(['id','name']);
+    $rows = \App\Repositories\CategoryRepository::getCaticonOptions();
     $selection = "<select name=\"icon_id\">";
     foreach ($rows as $row) {
         $row = (array) $row;
@@ -154,12 +154,12 @@ $lang_catmanage = (array) (\App\Support\SupportContext::getGlobal('lang_catmanag
 $perpage = \App\Support\SupportContext::getGlobal('perpage');
 $pagerParam = \App\Support\SupportContext::getGlobal('pagerParam');
 	$dbtablename = return_category_db_table_name($type);
-	$num = \Nexus\Database\NexusDB::table($dbtablename)->count();
+	$num = \App\Repositories\CategoryRepository::countByTable($dbtablename);
 	if (!$num)
 		print("<p align=\"center\">".$lang_catmanage['text_no_record_yet']."</p>");
 	else{
 		[$pagertop, $pagerbottom, , $offset, $perpage, ] = \App\Support\Pagination::pager($perpage, $num, $pagerParam);
-		$rows = \Nexus\Database\NexusDB::table($dbtablename)->orderByDesc('id')->offset($offset)->limit($perpage)->get();
+		$rows = \App\Repositories\CategoryRepository::listByTable($dbtablename, (int) $offset, (int) $perpage, 'id', 'desc');
 ?>
 <table border="1" cellspacing="0" cellpadding="5" width="97%">
 <tr>
@@ -405,12 +405,12 @@ if ($action == 'view')
 	elseif ($type=='searchbox')
 	{
 	$dbtablename=return_category_db_table_name($type);
-	$num = \Nexus\Database\NexusDB::table($dbtablename)->count();
+	$num = \App\Repositories\CategoryRepository::countByTable($dbtablename);
 	if (!$num)
 		print("<p align=\"center\">".$lang_catmanage['text_no_record_yet']."</p>");
 	else{
 		[$pagertop, $pagerbottom, , $offset, $perpage, ] = \App\Support\Pagination::pager($perpage, $num, $pagerParam);
-		$rows = \Nexus\Database\NexusDB::table($dbtablename)->orderBy('id')->offset($offset)->limit($perpage)->get();
+		$rows = \App\Repositories\CategoryRepository::listByTable($dbtablename, (int) $offset, (int) $perpage, 'id', 'asc');
 ?>
 <table border="1" cellspacing="0" cellpadding="5" width="97%">
 <tr>
@@ -456,12 +456,12 @@ print($pagerbottom);
 	elseif($type=='caticon')
 	{
 	$dbtablename=return_category_db_table_name($type);
-	$num = \Nexus\Database\NexusDB::table($dbtablename)->count();
+	$num = \App\Repositories\CategoryRepository::countByTable($dbtablename);
 	if (!$num)
 		print("<p align=\"center\">".$lang_catmanage['text_no_record_yet']."</p>");
 	else{
 		[$pagertop, $pagerbottom, , $offset, $perpage, ] = \App\Support\Pagination::pager($perpage, $num, $pagerParam);
-		$rows = \Nexus\Database\NexusDB::table($dbtablename)->orderBy('id')->offset($offset)->limit($perpage)->get();
+		$rows = \App\Repositories\CategoryRepository::listByTable($dbtablename, (int) $offset, (int) $perpage, 'id', 'asc');
 ?>
 <table border="1" cellspacing="0" cellpadding="5" width="97%">
 <tr>
@@ -500,19 +500,20 @@ print($pagerbottom);
 	}
 	elseif($type=='secondicon')
 	{
-	    $allSource = \App\Models\Source::query()->get()->keyBy('id');
-	    $allMedia = \App\Models\Media::query()->get()->keyBy('id');
-	    $allCodec = \App\Models\Codec::query()->get()->keyBy('id');
-	    $allStandard = \App\Models\Standard::query()->get()->keyBy('id');
-	    $allProcessing = \App\Models\Processing::query()->get()->keyBy('id');
-		    $allAudioCodec = \App\Models\AudioCodec::query()->get()->keyBy('id');
+	    $lookups = \App\Repositories\CategoryRepository::getSecondiconLookups();
+	    $allSource = $lookups['source'];
+	    $allMedia = $lookups['media'];
+	    $allCodec = $lookups['codec'];
+	    $allStandard = $lookups['standard'];
+	    $allProcessing = $lookups['processing'];
+	    $allAudioCodec = $lookups['audiocodec'];
 	$dbtablename=return_category_db_table_name($type);
-	$num = \Nexus\Database\NexusDB::table($dbtablename)->count();
+	$num = \App\Repositories\CategoryRepository::countByTable($dbtablename);
 	if (!$num)
 		print("<p align=\"center\">".$lang_catmanage['text_no_record_yet']."</p>");
 	else{
 		[$pagertop, $pagerbottom, , $offset, $perpage, ] = \App\Support\Pagination::pager($perpage, $num, $pagerParam);
-		$rows = \Nexus\Database\NexusDB::table($dbtablename)->orderBy('id')->offset($offset)->limit($perpage)->get();
+		$rows = \App\Repositories\CategoryRepository::listByTable($dbtablename, (int) $offset, (int) $perpage, 'id', 'asc');
 ?>
 <table border="1" cellspacing="0" cellpadding="5" width="97%">
 <tr>
@@ -537,12 +538,12 @@ print($pagerbottom);
 <td class="colfollow"><?php echo htmlspecialchars($row['name'])?></td>
 <td class="colfollow"><?php echo htmlspecialchars($row['image'])?></td>
 <td class="colfollow"><?php echo $row['class_name'] ? htmlspecialchars($row['class_name']) : $lang_catmanage['text_none']?></td>
-<td class="colfollow"><?php echo optional($allSource->get($row['source']))->name?></td>
-<td class="colfollow"><?php echo optional($allMedia->get($row['medium']))->name?></td>
-<td class="colfollow"><?php echo optional($allCodec->get($row['codec']))->name?></td>
-<td class="colfollow"><?php echo optional($allStandard->get($row['standard']))->name?></td>
-<td class="colfollow"><?php echo optional($allProcessing->get($row['processing']))->name?></td>
-<td class="colfollow"><?php echo optional($allAudioCodec->get($row['audiocodec']))->name?></td>
+<td class="colfollow"><?php echo htmlspecialchars((string) ($allSource[$row['source']] ?? ''))?></td>
+<td class="colfollow"><?php echo htmlspecialchars((string) ($allMedia[$row['medium']] ?? ''))?></td>
+<td class="colfollow"><?php echo htmlspecialchars((string) ($allCodec[$row['codec']] ?? ''))?></td>
+<td class="colfollow"><?php echo htmlspecialchars((string) ($allStandard[$row['standard']] ?? ''))?></td>
+<td class="colfollow"><?php echo htmlspecialchars((string) ($allProcessing[$row['processing']] ?? ''))?></td>
+<td class="colfollow"><?php echo htmlspecialchars((string) ($allAudioCodec[$row['audiocodec']] ?? ''))?></td>
 <td class="colfollow"><a href="javascript:confirm_delete('<?php echo $row['id']?>', '<?php echo $lang_catmanage['js_sure_to_delete_this']?>', 'type=<?php echo $type?>');"><?php echo $lang_catmanage['text_delete']?></a> | <a href="?action=edit&amp;type=<?php echo $type?>&amp;id=<?php echo $row['id']?>"><?php echo $lang_catmanage['text_edit']?></a></td>
 </tr>
 <?php
@@ -556,20 +557,12 @@ print($pagerbottom);
 	elseif($type=='category')
 	{
 	$dbtablename=return_category_db_table_name($type);
-	$num = \Nexus\Database\NexusDB::table($dbtablename)->count();
+	$num = \App\Repositories\CategoryRepository::countByTable($dbtablename);
 	if (!$num)
 		print("<p align=\"center\">".$lang_catmanage['text_no_record_yet']."</p>");
 	else{
 		[$pagertop, $pagerbottom, , $offset, $perpage, ] = \App\Support\Pagination::pager($perpage, $num, $pagerParam);
-		$rows = \Nexus\Database\NexusDB::table($dbtablename)
-			->select([$dbtablename.'.*', 'searchbox.name as catmodename', 'caticons.name as icon_name'])
-			->leftJoin('searchbox', $dbtablename.'.mode', '=', 'searchbox.id')
-			->leftJoin('caticons', 'caticons.id', '=', $dbtablename.'.icon_id')
-			->orderBy($dbtablename.'.mode')
-			->orderBy($dbtablename.'.id')
-			->offset($offset)
-			->limit($perpage)
-			->get();
+		$rows = \App\Repositories\CategoryRepository::getCategoryList((int) $offset, (int) $perpage);
 
 ?>
 <table border="1" cellspacing="0" cellpadding="5" width="97%">
@@ -609,34 +602,6 @@ print($pagerbottom);
 </div>
 <?php
 }
-elseif($action == 'del')
-{
-	$id = intval(\App\Support\SupportContext::getQuery('id') ?? 0);
-	if (!$id)
-	{
-		\App\Support\LegacyResponse::abort($lang_catmanage['std_error'], $lang_catmanage['std_invalid_id']);
-	}
-	$dbtablename=return_category_db_table_name($type);
-	$row = \Nexus\Database\NexusDB::table($dbtablename)->where('id', $id)->first();
-	if ($row) {
-		$row = (array) $row;
-		\Nexus\Database\NexusDB::table($dbtablename)->where('id', $row['id'])->delete();
-		if(in_array($type, $validsubcattype))
-			\App\Support\SupportContext::getCache()->delete_value($dbtablename.'_list');
-		elseif ($type=='searchbox')
-			\App\Support\SupportContext::getCache()->delete_value('searchbox_content');
-		elseif ($type=='caticon')
-			\App\Support\SupportContext::getCache()->delete_value('category_icon_content');
-		elseif ($type=='secondicon')
-			\App\Support\SupportContext::getCache()->delete_value('secondicon_'.$row['source'].'_'.$row['medium'].'_'.$row['codec'].'_'.$row['standard'].'_'.$row['processing'].'_'.$row['audiocodec'].'_content');
-		elseif ($type=='category'){
-			\App\Support\SupportContext::getCache()->delete_value('category_content');
-			\App\Support\SupportContext::getCache()->delete_value('category_list_mode_'.$row['mode']);
-		}
-	}
-	header("Location: ".\App\Support\Http::protocolPrefix(\App\Support\Url::isSecure()) . \App\Support\SupportContext::getGlobal('BASEURL', '')."/catmanage.php?action=view&type=".$type);
-	return;
-}
 elseif($action == 'edit')
 {
 	$id = intval(\App\Support\SupportContext::getQuery('id') ?? 0);
@@ -647,7 +612,7 @@ elseif($action == 'edit')
 	else
 	{
 		$dbtablename=return_category_db_table_name($type);
-		$row = (array) \Nexus\Database\NexusDB::table($dbtablename)->where('id', $id)->first();
+		$row = \App\Repositories\CategoryRepository::getRecord($dbtablename, $id);
 		if (!$row)
 			\App\Support\LegacyResponse::abort($lang_catmanage['std_error'], $lang_catmanage['std_invalid_id']);
 		else

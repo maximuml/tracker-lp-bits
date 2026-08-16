@@ -10,7 +10,7 @@ print("<h2>".$lang_index['text_recent_news'].(\App\Auth\Permission::can(\App\Enu
 
 $Cache->new_page('recent_news', 86400, true);
 if (!$Cache->get_page()){
-$latestNews = \App\Models\News::query()->orderByDesc('added')->limit((int)$maxnewsnum_main)->get()->toArray();
+$latestNews = \App\Repositories\IndexRepository::getLatestNews((int) $maxnewsnum_main);
 if (count($latestNews) > 0)
 {
 	$Cache->add_whole_row();
@@ -106,23 +106,7 @@ print implode('', $extraModules);
 
 if ($showlastxforumposts_main == "yes" && $CURUSER)
 {
-	$latestPosts = \App\Models\Post::query()
-		->join('topics', 'posts.topicid', '=', 'topics.id')
-		->join('forums', 'topics.forumid', '=', 'forums.id')
-		->where('forums.minclassread', '<=', \App\Support\UserDisplay::currentClass())
-		->orderByDesc('posts.id')
-		->limit(5)
-		->get([
-			'posts.id as pid',
-			'posts.userid as userpost',
-			'posts.added',
-			'topics.id as tid',
-			'topics.subject',
-			'topics.forumid',
-			'topics.views',
-			'forums.name',
-		])
-		->toArray();
+	$latestPosts = \App\Repositories\IndexRepository::getLatestForumPosts(5, (int) \App\Support\UserDisplay::currentClass());
 	if (count($latestPosts) > 0)
 	{
 		print("<h2>".$lang_index['text_last_five_posts']."</h2>");
@@ -625,7 +609,6 @@ if ($showtrackerload == "yes") {
 <?php
 // ------------- end: browser, client and code note ------------------//
 if ($CURUSER) {
-	\App\Models\User::where('id', $CURUSER["id"])->update(['last_home' => now()]);
+	$Cache->delete_value('user_'.$CURUSER["id"].'_unread_news_count');
 }
-$Cache->delete_value('user_'.$CURUSER["id"].'_unread_news_count');
 ?>

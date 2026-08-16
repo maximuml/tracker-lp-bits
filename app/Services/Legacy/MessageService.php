@@ -8,6 +8,7 @@ use App\Auth\Permission;
 use App\Enums\Permission\PermissionEnum;
 use App\Models\Message;
 use App\Models\User;
+use App\Repositories\MessageRepository;
 use App\Support\Cache;
 use App\Support\Config\SiteConfig;
 use App\Support\LegacyResponse;
@@ -38,6 +39,11 @@ final class MessageService
      */
     public function messages(Request $request): array|RedirectResponse
     {
+        $actionRedirect = $this->handleMessagesAction($request);
+        if ($actionRedirect instanceof RedirectResponse) {
+            return $actionRedirect;
+        }
+
         $result = $this->renderMessages();
         if ($result instanceof RedirectResponse) {
             return $result;
@@ -307,6 +313,176 @@ final class MessageService
             '',
             'UTF-8'
         );
+    }
+
+    private function handleMessagesAction(Request $request): ?RedirectResponse
+    {
+        $action = (string) $request->input('action', '');
+        if ($action === '') {
+            $action = (string) $request->input('action', 'viewmailbox');
+        }
+
+        if ($action === 'viewmessage') {
+            $id = (int) $request->input('id', 0);
+            $user = Auth::user();
+            if ($id <= 0 || ! $user instanceof User || ! MessageRepository::getMessageForUser($id, (int) $user->id)) {
+                return redirect('/messages.php');
+            }
+
+            return null;
+        }
+
+        if ($action === 'moveordel') {
+            return $this->handleMoveOrDel($request);
+        }
+
+        if ($action === 'editmailboxes2') {
+            return $this->handleEditMailboxes($request);
+        }
+
+        if ($action === 'deletemessage') {
+            return $this->handleDeleteMessage($request);
+        }
+
+        return null;
+    }
+
+    private function handleMoveOrDel(Request $request): RedirectResponse
+    {
+        $user = Auth::user();
+        if (! $user instanceof User) {
+            LegacyResponse::abort('Error', 'Permission denied.');
+        }
+        $userId = (int) $user->id;
+
+        $pmId = (int) $request->input('id', 0);
+        $pmBox = (int) $request->input('box', 0);
+        /** @var array<int, mixed> $pmMessages */
+        $pmMessages = (array) $request->input('messages', []);
+
+        if ($request->has('markread')) {
+            if ($pmId > 0) {
+                $updated = MessageRepository::markAsRead($pmId, $userId);
+            } else {
+                if ($pmMessages === []) {
+                    $lang = (array) SupportContext::getLangFunctions();
+                    LegacyResponse::abort('Error', (string) ($lang['select_at_least_one_record'] ?? 'Please select at least one record.'));
+                }
+                $updated = MessageRepository::markAsRead($pmMessages, $userId);
+            }
+            Cache::clearInboxCount($userId);
+            if ($updated == 0) {
+                $lang = (array) (SupportContext::getGlobal('lang_messages') ?? []);
+                LegacyResponse::abort((string) ($lang['std_error'] ?? 'Error'), (string) ($lang['std_cannot_mark_messages'] ?? 'Cannot mark messages.'));
+            }
+
+            return redirect("/messages.php?action=viewmailbox&box={$pmBox}");
+        }
+
+        if ($request->has('move')) {
+            if ($pmId > 0) {
+                $updated = MessageRepository::moveMessages($pmId, $userId, $pmBox);
+            } else {
+                $updated = MessageRepository::moveMessages($pmMessages, $userId, $pmBox);
+            }
+            if ($updated == 0) {
+                $lang = (array) (SupportContext::getGlobal('lang_messages') ?? []);
+                LegacyResponse::abort((string) ($lang['std_error'] ?? 'Error'), (string) ($lang['std_cannot_move_messages'] ?? 'Cannot move messages.'));
+            }
+            Cache::clearInboxCount($userId);
+            NexusDB::cache_del('user_' . $userId . '_outbox_count');
+
+            return redirect("/messages.php?action=viewmailbox&box={$pmBox}");
+        }
+
+        if ($request->has('delete')) {
+            if ($pmId > 0) {
+                $deletedCount = MessageRepository::deleteSingleMessage($pmId, $userId) ? 1 : 0;
+            } else {
+                if ($pmMessages === []) {
+                    $lang = (array) (SupportContext::getGlobal('lang_messages') ?? []);
+                    LegacyResponse::abort((string) ($lang['std_error'] ?? 'Error'), (string) ($lang['std_no_message_selected'] ?? 'No message selected.'));
+                }
+                $deletedCount = MessageRepository::deleteMultipleMessages($pmMessages, $userId);
+            }
+            Cache::clearInboxCount($userId);
+            NexusDB::cache_del('user_' . $userId . '_outbox_count');
+            if ($deletedCount == 0) {
+                $lang = (array) (SupportContext::getGlobal('lang_messages') ?? []);
+                LegacyResponse::abort((string) ($lang['std_error'] ?? 'Error'), (string) ($lang['std_cannot_delete_messages'] ?? 'Cannot delete messages.'));
+            }
+
+            return redirect('/messages.php?action=viewmailbox');
+        }
+
+        $lang = (array) (SupportContext::getGlobal('lang_messages') ?? []);
+        LegacyResponse::abort((string) ($lang['std_error'] ?? 'Error'), (string) ($lang['std_no_action'] ?? 'No action.'));
+
+        return redirect('/messages.php');
+    }
+
+    private function handleEditMailboxes(Request $request): RedirectResponse
+    {
+        $user = Auth::user();
+        if (! $user instanceof User) {
+            LegacyResponse::abort('Error', 'Permission denied.');
+        }
+        $userId = (int) $user->id;
+
+        $action2 = (string) $request->input('action2', '');
+        $lang = (array) (SupportContext::getGlobal('lang_messages') ?? []);
+
+        if ($action2 === 'add') {
+            MessageRepository::addMailboxes($userId, [
+                $request->input('new1'),
+                $request->input('new2'),
+                $request->input('new3'),
+            ]);
+
+            return redirect('/messages.php?action=editmailboxes');
+        }
+
+        if ($action2 === 'edit') {
+            $pmBoxes = MessageRepository::getUserMailboxes($userId);
+            if ($pmBoxes->isEmpty()) {
+                LegacyResponse::abort((string) ($lang['std_error'] ?? 'Error'), (string) ($lang['text_no_mailboxes_to_edit'] ?? 'No mailboxes to edit.'));
+            }
+            foreach ($pmBoxes as $pmBox) {
+                $newValue = (string) ($request->input('edit' . $pmBox->id) ?? '');
+                if ($newValue !== '' && $newValue !== $pmBox->name) {
+                    MessageRepository::updateMailbox($userId, (int) $pmBox->id, $newValue);
+                } elseif ($newValue === '') {
+                    MessageRepository::deleteMailbox($userId, (int) $pmBox->id, (int) $pmBox->boxnumber);
+                }
+            }
+
+            return redirect('/messages.php?action=editmailboxes');
+        }
+
+        LegacyResponse::abort((string) ($lang['std_error'] ?? 'Error'), (string) ($lang['std_no_action'] ?? 'No action.'));
+
+        return redirect('/messages.php');
+    }
+
+    private function handleDeleteMessage(Request $request): RedirectResponse
+    {
+        $user = Auth::user();
+        if (! $user instanceof User) {
+            LegacyResponse::abort('Error', 'Permission denied.');
+        }
+        $userId = (int) $user->id;
+
+        $pmId = (int) $request->input('id', 0);
+        $message = MessageRepository::deleteSingleMessage($pmId, $userId);
+        if (! $message) {
+            $lang = (array) (SupportContext::getGlobal('lang_messages') ?? []);
+            LegacyResponse::abort((string) ($lang['std_error'] ?? 'Error'), (string) ($lang['std_no_message_id'] ?? 'No message ID.'));
+        }
+
+        Cache::clearInboxCount($userId);
+        NexusDB::cache_del('user_' . $userId . '_outbox_count');
+
+        return redirect('/messages.php?action=viewmailbox&id=' . (int) $message['location']);
     }
 
     private function renderMessages(): Response|RedirectResponse

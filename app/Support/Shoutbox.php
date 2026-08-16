@@ -240,7 +240,7 @@ final class Shoutbox
                 continue;
             }
             $active = in_array($emoji, $myReactions, true) ? ' active' : '';
-            $encoded = json_encode($emoji, JSON_UNESCAPED_UNICODE);
+            $encoded = (string) json_encode($emoji, JSON_UNESCAPED_UNICODE);
             $title = self::buildReactorTooltip($cnt, $reactors[$emoji] ?? []);
             $html .= '<button type="button" class="shout-reaction' . $active . '" onclick="shoutboxReact(' . $shoutId . ', ' . htmlspecialchars($encoded, ENT_QUOTES, 'UTF-8') . ')" title="' . htmlspecialchars($title, ENT_QUOTES, 'UTF-8') . '">' . $emoji . ' ' . $cnt . '</button>';
         }
@@ -249,7 +249,7 @@ final class Shoutbox
             $html .= '<button type="button" class="shout-reaction shout-reaction-add" onclick="shoutboxToggleReactionPicker(' . $shoutId . ')" title="' . htmlspecialchars($titleAdd, ENT_QUOTES, 'UTF-8') . '">+</button>';
             $html .= '<span class="shout-reaction-picker" id="shout-reaction-picker-' . $shoutId . '" style="display:none">';
             foreach (self::REACTIONS as $emoji) {
-                $encoded = json_encode($emoji, JSON_UNESCAPED_UNICODE);
+                $encoded = (string) json_encode($emoji, JSON_UNESCAPED_UNICODE);
                 $html .= '<button type="button" class="shout-reaction" onclick="shoutboxReact(' . $shoutId . ', ' . htmlspecialchars($encoded, ENT_QUOTES, 'UTF-8') . '); shoutboxToggleReactionPicker(' . $shoutId . ')" title="' . htmlspecialchars($titleReact, ENT_QUOTES, 'UTF-8') . '">' . $emoji . '</button>';
             }
             $html .= '</span>';
@@ -286,7 +286,7 @@ final class Shoutbox
     {
         $timeString = date('Y-m-d H:i:s', $timestamp);
 
-        return \App\Support\Time::format($timeString, true, false, true, $oneUnit);
+        return (string) \App\Support\Time::format($timeString, true, false, true, $oneUnit);
     }
 
     /**
@@ -328,7 +328,7 @@ final class Shoutbox
                     $title = ' title="' . htmlspecialchars((string) $shoutboxLang['tooltip_nick_reply'], ENT_QUOTES) . '"';
                 }
                 if ($currentUserId > 0) {
-                    $onclick = 'return shoutReply(' . htmlspecialchars(json_encode($name, JSON_UNESCAPED_UNICODE), ENT_QUOTES) . ')';
+                    $onclick = 'return shoutReply(' . htmlspecialchars((string) json_encode($name, JSON_UNESCAPED_UNICODE), ENT_QUOTES) . ')';
                     return '<a class="' . $cls . '" href="userdetails.php?id=' . $cache[$key]['id'] . '" onclick="' . $onclick . '"' . $title . '>@' . htmlspecialchars($name) . '</a>';
                 }
                 return '<a class="' . $cls . '" href="userdetails.php?id=' . $cache[$key]['id'] . '">@' . htmlspecialchars($name) . '</a>';

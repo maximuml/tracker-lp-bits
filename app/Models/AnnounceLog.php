@@ -88,6 +88,9 @@ class AnnounceLog extends NexusModel
         }
         // 创建 DateTime 对象
         $date = DateTime::createFromFormat($format, $time, $fromTimezone);
+        if ($date === false) {
+            return $time;
+        }
         // 转换时区
         $date->setTimezone($toTimezone);
         // 输出转换后的时间

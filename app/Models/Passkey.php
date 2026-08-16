@@ -42,7 +42,10 @@ class Passkey extends NexusModel
 
     public function getAaguidFormatted(): string
     {
-        $guid = $this->aaguid;
+        $guid = (string) $this->aaguid;
+        if ($guid === '') {
+            return '';
+        }
         return sprintf(
             '%s-%s-%s-%s-%s',
             substr($guid, 0, 8),

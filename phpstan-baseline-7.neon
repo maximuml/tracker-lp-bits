@@ -61,18 +61,6 @@ parameters:
 			path: app/Http/Controllers/UserMedalController.php
 
 		-
-			message: '#^Cannot call method format\(\) on DateTime\|false\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: app/Models/AnnounceLog.php
-
-		-
-			message: '#^Cannot call method setTimezone\(\) on DateTime\|false\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: app/Models/AnnounceLog.php
-
-		-
 			message: '#^Parameter \#1 \$attributes of method Illuminate\\Database\\Eloquent\\Builder\<App\\Models\\Message\>\:\:create\(\) expects array\<string, mixed\>, array\<int\|string, mixed\> given\.$#'
 			identifier: argument.type
 			count: 1
@@ -95,12 +83,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: app/Models/TorrentOperationLog.php
-
-		-
-			message: '#^Parameter \#1 \$callback of function call_user_func_array expects callable\(\)\: mixed, array\{Redis, string\} given\.$#'
-			identifier: argument.type
-			count: 2
-			path: app/Models/TrackerUrl.php
 
 		-
 			message: '#^Call to an undefined method App\\Models\\AgentDeny\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\AgentDeny\>\:\:delete\(\)\.$#'
@@ -295,34 +277,10 @@ parameters:
 			path: app/Repositories/UserSearchRepository.php
 
 		-
-			message: '#^Method App\\Support\\Attachment\:\:keyFromUrl\(\) should return string but returns string\|false\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Support/Attachment.php
-
-		-
-			message: '#^Parameter \#7 \$timeText of static method App\\Support\\Attachment\:\:render\(\) expects string, string\|false\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Support/Attachment.php
-
-		-
 			message: '#^Parameter \#2 \$subject of function preg_match_all expects string, string\|false given\.$#'
 			identifier: argument.type
 			count: 1
 			path: app/Support/Attachment/AttachmentService.php
-
-		-
-			message: '#^Cannot access property \$auth_key on App\\Models\\User\|array\<string, mixed\>\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: app/Support/AuthCookie.php
-
-		-
-			message: '#^Parameter \#1 \$value of method Illuminate\\Encryption\\Encrypter\:\:encryptString\(\) expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Support/AuthCookie.php
 
 		-
 			message: '#^Cannot cast array\<mixed\>\|string to string\.$#'
@@ -331,34 +289,10 @@ parameters:
 			path: app/Support/BBCode.php
 
 		-
-			message: '#^Parameter \#2 \$num2 of function bcadd expects numeric\-string, string given\.$#'
-			identifier: argument.type
-			count: 2
-			path: app/Support/Bonus.php
-
-		-
-			message: '#^Parameter \#7 \$haremAddition of static method App\\Support\\Bonus\:\:buildBonusTable\(\) expects float, float\|int\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Support/Bonus.php
-
-		-
 			message: '#^Parameter \#2 \$timestamp of function date expects int\|null, int\<0, max\>\|false given\.$#'
 			identifier: argument.type
 			count: 1
 			path: app/Support/Cache.php
-
-		-
-			message: '#^Parameter \#1 \$db of method Redis\:\:select\(\) expects int, float\|int\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Support/Cache/LegacyRedisCache.php
-
-		-
-			message: '#^Parameter \#1 \$num of function is_nan expects float, float\|int\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Support/Cache/LegacyRedisCache.php
 
 		-
 			message: '#^Parameter \#1 \$ids of static method App\\Repositories\\UserRepository\:\:getByIds\(\) expects list\<int\>, array\<int\<0, max\>, mixed\> given\.$#'
@@ -463,18 +397,6 @@ parameters:
 			path: app/Support/Promotion.php
 
 		-
-			message: '#^Method App\\Support\\Shoutbox\:\:formatTime\(\) should return string but returns string\|false\|null\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Support/Shoutbox.php
-
-		-
-			message: '#^Parameter \#1 \$string of function htmlspecialchars expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 3
-			path: app/Support/Shoutbox.php
-
-		-
 			message: '#^Cannot call method cache_value\(\) on class\-string\|object\.$#'
 			identifier: method.nonObject
 			count: 1
@@ -497,30 +419,6 @@ parameters:
 			identifier: method.nonObject
 			count: 1
 			path: app/Support/TorrentBookmark.php
-
-		-
-			message: '#^Binary operation "\." between non\-falsy\-string and 0\|0\.0\|''''\|''0''\|array\{\}\|false\|null results in an error\.$#'
-			identifier: binaryOp.invalid
-			count: 1
-			path: app/Support/TorrentTable.php
-
-		-
-			message: '#^Method App\\Support\\TorrentTable\:\:render\(\) should return string but returns string\|false\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Support/TorrentTable.php
-
-		-
-			message: '#^Parameter \#1 \$num of function number_format expects float, array\|float\|int\|string\|false\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Support/TorrentTable.php
-
-		-
-			message: '#^Parameter \#1 \$num of static method App\\Support\\Palette\:\:seederLink\(\) expects int\|string\|null, array\|float\|int\|string\|false\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Support/TorrentTable.php
 
 		-
 			message: '#^Parameter \#1 \$ids of static method App\\Repositories\\UserRepository\:\:getByIds\(\) expects list\<int\>, non\-empty\-array\<int\<0, max\>, int\<min, \-1\>\|int\<1, max\>\> given\.$#'

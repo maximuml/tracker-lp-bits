@@ -128,7 +128,7 @@ final class Attachment
             $imageResizer,
             $url,
             \App\Support\Format::size($row['filesize']),
-            \App\Support\Time::format($row['added']),
+            (string) \App\Support\Time::format($row['added']),
             [
                 'size' => Locale::trans('attachment.size'),
                 'downloads' => Locale::trans('attachment.downloads'),
@@ -148,15 +148,18 @@ final class Attachment
         }
 
         $parsed = parse_url($url);
+        if (! is_array($parsed)) {
+            throw new \RuntimeException("URL: '$url' could not be parsed.");
+        }
         $driver = config('admin.upload.disk');
 
         return match ($driver) {
             'qiniu' => trim($parsed['path'] ?? '', '/'),
             'cloudinary' => (function () use ($parsed) {
                 $parts = explode('/', $parsed['path'] ?? '');
-                $key = end($parts);
+                $key = (string) end($parts);
                 if (\Illuminate\Support\Str::contains($key, '.')) {
-                    $key = strstr($key, '.', true);
+                    $key = (string) strstr($key, '.', true);
                 }
                 return $key;
             })(),
@@ -183,7 +186,7 @@ final class Attachment
     {
         $pattern = '/\[attach\]([0-9a-zA-z][0-9a-zA-z]*)\[\/attach\]/is';
 
-        return preg_replace_callback($pattern, function ($matches) {
+        return (string) preg_replace_callback($pattern, function ($matches) {
             $dlkey = $matches[1];
             $httpdirectory = \App\Support\Config\SiteConfig::current()->attachment->httpDirectory();
             $cached = \Nexus\Database\NexusDB::cache_get('attachment_' . $dlkey . '_content');

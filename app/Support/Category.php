@@ -2,6 +2,8 @@
 
 namespace App\Support;
 
+use App\Support\Cache\LegacyRedisCache;
+
 /**
  * Legacy category / icon helpers extracted from `include/functions.php`.
  *
@@ -21,20 +23,20 @@ final class Category
      * Mirrors `get_category_icon_row()`.
      */
     /**
-     * @param  mixed  $cache
+     * @param  \App\Support\Cache\LegacyRedisCache|null  $cache
      * @return array<string, mixed>|null
      */
-    public static function iconRow(mixed $cache, int|string $typeId): ?array
+    public static function iconRow(?LegacyRedisCache $cache, int|string $typeId): ?array
     {
         $typeId = (int) $typeId ?: 1;
 
         if (self::$iconRows === null) {
-            $cached = method_exists($cache, 'get_value') ? $cache->get_value('category_icon_content') : false;
+            $cached = $cache !== null ? $cache->get_value('category_icon_content') : false;
             if ($cached !== false && is_array($cached)) {
                 self::$iconRows = $cached;
             } else {
                 self::$iconRows = \App\Repositories\CategoryRepository::getIconRows();
-                if (method_exists($cache, 'cache_value')) {
+                if ($cache !== null) {
                     $cache->cache_value('category_icon_content', self::$iconRows, 156400);
                 }
             }
@@ -48,18 +50,18 @@ final class Category
      *
      * Mirrors `get_category_row($catid)`.
      *
-     * @param  mixed  $cache
+     * @param  \App\Support\Cache\LegacyRedisCache|null  $cache
      * @return array<string, mixed>|null
      */
-    public static function row(mixed $cache, int|string|null $catId = null): ?array
+    public static function row(?LegacyRedisCache $cache, int|string|null $catId = null): ?array
     {
         if (self::$categoryRows === null) {
-            $cached = method_exists($cache, 'get_value') ? $cache->get_value('category_content') : false;
+            $cached = $cache !== null ? $cache->get_value('category_content') : false;
             if ($cached !== false && is_array($cached)) {
                 self::$categoryRows = $cached;
             } else {
                 self::$categoryRows = \App\Repositories\CategoryRepository::getCategoryRows();
-                if (method_exists($cache, 'cache_value')) {
+                if ($cache !== null) {
                     $cache->cache_value('category_content', self::$categoryRows, 126400);
                 }
             }
@@ -108,10 +110,10 @@ final class Category
      * Mirrors `get_second_icon()`.
      */
     /**
-     * @param  mixed  $cache
+     * @param  \App\Support\Cache\LegacyRedisCache|null  $cache
      * @param  array<string, mixed>  $row
      */
-    public static function secondIcon(mixed $cache, array $row, string $catFolder): string
+    public static function secondIcon(?LegacyRedisCache $cache, array $row, string $catFolder): string
     {
         $source = $row['source'] ?? '';
         $medium = $row['medium'] ?? '';
@@ -122,12 +124,12 @@ final class Category
         $mode = $row['search_box_id'] ?? 0;
 
         $cacheKey = 'secondicon_' . $source . '_' . $medium . '_' . $codec . '_' . $standard . '_' . $processing . '_' . $audiocodec . '_content';
-        $sirow = method_exists($cache, 'get_value') ? $cache->get_value($cacheKey) : false;
+        $sirow = $cache !== null ? $cache->get_value($cacheKey) : false;
 
         if ($sirow === false) {
             $sirowData = \App\Repositories\CategoryRepository::findSecondIcon($row);
             $sirow = $sirowData ?? 'not allowed';
-            if (method_exists($cache, 'cache_value')) {
+            if ($cache !== null) {
                 $cache->cache_value($cacheKey, $sirow, 600);
             }
         }
@@ -161,15 +163,15 @@ final class Category
      * @return array<int, array<string, mixed>>
      */
     /**
-     * @param  mixed  $cache
+     * @param  \App\Support\Cache\LegacyRedisCache|null  $cache
      * @return array<int, array<string, mixed>>
      */
-    public static function listByMode(mixed $cache, int|string $catmode = 1): array
+    public static function listByMode(?LegacyRedisCache $cache, int|string $catmode = 1): array
     {
         $catmode = (int) $catmode;
         $cacheKey = 'category_list_mode_' . $catmode;
 
-        if (method_exists($cache, 'get_value')) {
+        if ($cache !== null) {
             $ret = $cache->get_value($cacheKey);
             if ($ret !== false && is_array($ret)) {
                 return $ret;
@@ -178,7 +180,7 @@ final class Category
 
         $ret = \App\Repositories\CategoryRepository::getCategoriesByMode($catmode);
 
-        if (method_exists($cache, 'cache_value')) {
+        if ($cache !== null) {
             $cache->cache_value($cacheKey, $ret, 3600);
         }
 

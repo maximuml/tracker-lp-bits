@@ -36,6 +36,9 @@ class UploadRepository extends BaseRepository
     public function upload(Request $request)
     {
         $user = $request->user();
+        if (!$user instanceof User) {
+            throw new NexusException('Unauthenticated');
+        }
         if (empty($request->name)) {
             throw new NexusException(\App\Support\Locale::trans("upload.require_name", [], null));
         }
@@ -380,6 +383,9 @@ class UploadRepository extends BaseRepository
     private function canUploadToSection(Request $request, SearchBox $section): bool
     {
         $user = Auth::user();
+        if (!$user instanceof User) {
+            throw new NexusException('Unauthenticated');
+        }
         if ($user->uploadpos !== 'yes') {
             throw new NexusException(\App\Support\Locale::trans('upload.unauthorized_to_upload', [], null));
         }
@@ -536,6 +542,9 @@ class UploadRepository extends BaseRepository
     private function sendReward($torrentId): void
     {
         $user = Auth::user();
+        if (!$user instanceof User) {
+            throw new NexusException('Unauthenticated');
+        }
         $old = $user->seedbonus;
         $delta = \App\Support\Config\SiteConfig::current()->bonus->uploadTorrent();
         if ($delta > 0) {
@@ -590,7 +599,9 @@ class UploadRepository extends BaseRepository
                 $locale = $user->locale;
                 $logUser = "$logPage, user $user->id, locale: $locale";
                 $subject = \App\Support\Locale::trans("upload.email_notification_subject", ['site_name' => \App\Support\Config\SiteConfig::current()->basic->siteName()], $locale);
-                $body = \App\Support\Locale::trans("upload.email_notification_body", ['site_name' => \App\Support\Config\SiteConfig::current()->basic->siteName(), 'name' => $torrent->name, 'size' => \App\Support\Format::size($torrent->size), 'category' => $categoryName, 'upload_by' => $this->handleAnonymous($torrentUploader->username, $torrentUploader, $user, $torrent), 'description' => Str::limit(strip_tags(\App\Support\Format::formatComment($torrent->extra->descr)), 500), 'torrent_url' => sprintf("%s/details.php?id=%s&hit=1", \App\Support\Url::baseUrl(), $torrent->id)], $locale);
+                $uploadByUsername = $torrentUploader instanceof User ? $torrentUploader->username : '';
+                $description = $torrent->extra !== null ? ($torrent->extra->descr ?? '') : '';
+                $body = \App\Support\Locale::trans("upload.email_notification_body", ['site_name' => \App\Support\Config\SiteConfig::current()->basic->siteName(), 'name' => $torrent->name, 'size' => \App\Support\Format::size($torrent->size), 'category' => $categoryName, 'upload_by' => $this->handleAnonymous($uploadByUsername, $torrentUploader, $user, $torrent), 'description' => Str::limit(strip_tags(\App\Support\Format::formatComment($description)), 500), 'torrent_url' => sprintf("%s/details.php?id=%s&hit=1", \App\Support\Url::baseUrl(), $torrent->id)], $locale);
                 $sendResult = $toolRep->sendMail($user->email, $subject, $body);
                 \App\Support\Logger::writeWithContext((string) sprintf("%s, send result: %s", $logUser, $sendResult), (string) 'info', (bool) false);
                 if ($sendResult) {

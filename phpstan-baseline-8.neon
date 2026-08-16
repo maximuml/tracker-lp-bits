@@ -271,42 +271,6 @@ parameters:
 			path: app/Http/Controllers/SystemController.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\Torrent\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\Torrent\>\:\:\$id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Http/Controllers/ThankController.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Torrent\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\Torrent\>\:\:\$owner\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Http/Controllers/ThankController.php
-
-		-
-			message: '#^Call to an undefined method App\\Models\\Torrent\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\Torrent\>\:\:checkIsNormal\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: app/Http/Controllers/ThankController.php
-
-		-
-			message: '#^Cannot access property \$id on App\\Models\\User\|null\.$#'
-			identifier: property.nonObject
-			count: 2
-			path: app/Http/Controllers/ThankController.php
-
-		-
-			message: '#^Cannot access property \$seedbonus on App\\Models\\User\|null\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: app/Http/Controllers/ThankController.php
-
-		-
-			message: '#^Cannot call method thank_torrent_logs\(\) on App\\Models\\User\|null\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: app/Http/Controllers/ThankController.php
-
-		-
 			message: '#^Cannot call method createToken\(\) on App\\Models\\User\|null\.$#'
 			identifier: method.nonObject
 			count: 1
@@ -329,36 +293,6 @@ parameters:
 			identifier: assign.propertyType
 			count: 1
 			path: app/Http/Controllers/TopicController.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\User\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\User\>\:\:\$id\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Http/Controllers/TorrentActionController.php
-
-		-
-			message: '#^Parameter \#1 \$content of function response expects array\|Illuminate\\Contracts\\View\\View\|string\|null, string\|false given\.$#'
-			identifier: argument.type
-			count: 2
-			path: app/Http/Controllers/TorrentActionController.php
-
-		-
-			message: '#^Parameter \#2 \$currentUser of static method App\\Repositories\\TorrentAjaxRepository\:\:peerList\(\) expects App\\Models\\User\|null, App\\Models\\User\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\User\>\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Http/Controllers/TorrentActionController.php
-
-		-
-			message: '#^Parameter \#2 \$timestamp of function date expects int\|null, int\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Http/Controllers/TorrentActionController.php
-
-		-
-			message: '#^Parameter \#4 \$currentUser of static method App\\Repositories\\TorrentAjaxRepository\:\:userTorrentList\(\) expects App\\Models\\User\|null, App\\Models\\User\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\User\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Http/Controllers/TorrentActionController.php
 
 		-
 			message: '#^Parameter \#1 \$bdInfo of class Nexus\\Torrent\\BdInfoExtra constructor expects string, array\<mixed\>\|string given\.$#'
@@ -407,30 +341,6 @@ parameters:
 			identifier: cast.string
 			count: 1
 			path: app/Http/Controllers/TorrentEditController.php
-
-		-
-			message: '#^Cannot access property \$id on App\\Models\\User\|null\.$#'
-			identifier: property.nonObject
-			count: 4
-			path: app/Http/Controllers/UserController.php
-
-		-
-			message: '#^Cannot call method peers_torrents\(\) on App\\Models\\User\|null\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: app/Http/Controllers/UserController.php
-
-		-
-			message: '#^Cannot call method snatched_torrents\(\) on App\\Models\\User\|null\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: app/Http/Controllers/UserController.php
-
-		-
-			message: '#^Cannot call method torrents\(\) on App\\Models\\User\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: app/Http/Controllers/UserController.php
 
 		-
 			message: '#^Parameter \#1 \$user of static method App\\Support\\Bonus\:\:buildBonusTableForUser\(\) expects array\<string, mixed\>, array\<int\|string, mixed\> given\.$#'
@@ -661,36 +571,6 @@ parameters:
 			path: app/Repositories/AuthenticateRepository.php
 
 		-
-			message: '#^Cannot access property \$id on App\\Models\\User\|null\.$#'
-			identifier: property.nonObject
-			count: 5
-			path: app/Repositories/BonusRepository.php
-
-		-
-			message: '#^Cannot access property \$passkey on App\\Models\\User\|null\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: app/Repositories/BonusRepository.php
-
-		-
-			message: '#^Cannot access property \$seedbonus on App\\Models\\User\|null\.$#'
-			identifier: property.nonObject
-			count: 3
-			path: app/Repositories/BonusRepository.php
-
-		-
-			message: '#^Cannot call method getTable\(\) on App\\Models\\User\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: app/Repositories/BonusRepository.php
-
-		-
-			message: '#^Parameter \#2 \$passkey of static method App\\Support\\Cache\:\:clearUser\(\) expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Repositories/BonusRepository.php
-
-		-
 			message: '#^Call to an undefined method App\\Models\\Torrent\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\Torrent\>\:\:checkIsNormal\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -743,54 +623,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: app/Repositories/ExamRepository.php
-
-		-
-			message: '#^Cannot access property \$completedat on App\\Models\\Snatch\|null\.$#'
-			identifier: property.nonObject
-			count: 2
-			path: app/Repositories/HitAndRunRepository.php
-
-		-
-			message: '#^Cannot access property \$downloaded on App\\Models\\Snatch\|null\.$#'
-			identifier: property.nonObject
-			count: 2
-			path: app/Repositories/HitAndRunRepository.php
-
-		-
-			message: '#^Cannot access property \$leech_time_no_seeder on App\\Models\\Snatch\|null\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: app/Repositories/HitAndRunRepository.php
-
-		-
-			message: '#^Cannot access property \$seedtime on App\\Models\\Snatch\|null\.$#'
-			identifier: property.nonObject
-			count: 3
-			path: app/Repositories/HitAndRunRepository.php
-
-		-
-			message: '#^Cannot access property \$startdat on App\\Models\\Snatch\|null\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: app/Repositories/HitAndRunRepository.php
-
-		-
-			message: '#^Cannot access property \$uploaded on App\\Models\\Snatch\|null\.$#'
-			identifier: property.nonObject
-			count: 2
-			path: app/Repositories/HitAndRunRepository.php
-
-		-
-			message: '#^Method App\\Repositories\\HitAndRunRepository\:\:delete\(\) should return bool but returns bool\|null\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Repositories/HitAndRunRepository.php
-
-		-
-			message: '#^Method App\\Repositories\\HitAndRunRepository\:\:renderOnUploadPage\(\) should return string but returns string\|null\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Repositories/HitAndRunRepository.php
 
 		-
 			message: '#^Cannot access property \$class on App\\Models\\User\|null\.$#'
@@ -991,60 +823,6 @@ parameters:
 			path: app/Repositories/TorrentSearchRepository.php
 
 		-
-			message: '#^Cannot access property \$descr on App\\Models\\TorrentExtra\|null\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: app/Repositories/UploadRepository.php
-
-		-
-			message: '#^Cannot access property \$id on App\\Models\\User\|null\.$#'
-			identifier: property.nonObject
-			count: 4
-			path: app/Repositories/UploadRepository.php
-
-		-
-			message: '#^Cannot access property \$offer_allowed_count on App\\Models\\User\|null\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: app/Repositories/UploadRepository.php
-
-		-
-			message: '#^Cannot access property \$seedbonus on App\\Models\\User\|null\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: app/Repositories/UploadRepository.php
-
-		-
-			message: '#^Cannot access property \$uploadpos on App\\Models\\User\|null\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: app/Repositories/UploadRepository.php
-
-		-
-			message: '#^Cannot access property \$username on App\\Models\\User\|null\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: app/Repositories/UploadRepository.php
-
-		-
-			message: '#^Cannot call method increment\(\) on App\\Models\\User\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: app/Repositories/UploadRepository.php
-
-		-
-			message: '#^Parameter \#1 \$text of static method App\\Support\\Format\:\:formatComment\(\) expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Repositories/UploadRepository.php
-
-		-
-			message: '#^Parameter \#3 \$user of method App\\Repositories\\UploadRepository\:\:handleOffer\(\) expects App\\Models\\User, App\\Models\\User\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Repositories/UploadRepository.php
-
-		-
 			message: '#^Cannot call method format\(\) on Carbon\\Carbon\|null\.$#'
 			identifier: method.nonObject
 			count: 1
@@ -1055,90 +833,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: app/Repositories/UserPasskeyRepository.php
-
-		-
-			message: '#^Cannot access property \$class on App\\Models\\User\|null\.$#'
-			identifier: property.nonObject
-			count: 6
-			path: app/Repositories/UserRepository.php
-
-		-
-			message: '#^Cannot access property \$id on App\\Models\\User\|null\.$#'
-			identifier: property.nonObject
-			count: 5
-			path: app/Repositories/UserRepository.php
-
-		-
-			message: '#^Cannot access property \$locale on App\\Models\\User\|null\.$#'
-			identifier: property.nonObject
-			count: 5
-			path: app/Repositories/UserRepository.php
-
-		-
-			message: '#^Cannot access property \$username on App\\Models\\User\|null\.$#'
-			identifier: property.nonObject
-			count: 4
-			path: app/Repositories/UserRepository.php
-
-		-
-			message: '#^Cannot call method diffInDays\(\) on Carbon\\Carbon\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: app/Repositories/UserRepository.php
-
-		-
-			message: '#^Cannot call method save\(\) on App\\Models\\User\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: app/Repositories/UserRepository.php
-
-		-
-			message: '#^Cannot call method update\(\) on App\\Models\\User\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: app/Repositories/UserRepository.php
-
-		-
-			message: '#^Cannot call method updateWithModComment\(\) on App\\Models\\User\|null\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: app/Repositories/UserRepository.php
-
-		-
-			message: '#^Cannot call method usernameChangeLogs\(\) on App\\Models\\User\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: app/Repositories/UserRepository.php
-
-		-
-			message: '#^Parameter \#1 \$bytes of static method App\\Support\\Format\:\:size\(\) expects float\|int, float\|int\|null given\.$#'
-			identifier: argument.type
-			count: 2
-			path: app/Repositories/UserRepository.php
-
-		-
-			message: '#^Parameter \#1 \$class of static method App\\Models\\User\:\:getClassText\(\) expects int\|string, int\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Repositories/UserRepository.php
-
-		-
-			message: '#^Parameter \#1 \$user of method App\\Repositories\\UserRepository\:\:clearCache\(\) expects App\\Models\\User, App\\Models\\User\|null given\.$#'
-			identifier: argument.type
-			count: 3
-			path: app/Repositories/UserRepository.php
-
-		-
-			message: '#^Parameter \#2 \$passkey of static method App\\Support\\Cache\:\:clearUser\(\) expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 2
-			path: app/Repositories/UserRepository.php
-
-		-
-			message: '#^Parameter \#2 \$user of method App\\Repositories\\UserRepository\:\:checkPermission\(\) expects App\\Models\\User, App\\Models\\User\|null given\.$#'
-			identifier: argument.type
-			count: 2
-			path: app/Repositories/UserRepository.php
 
 		-
 			message: '#^Parameter \#2 \$timestamp of function date expects int\|null, int\|false given\.$#'
@@ -1261,18 +955,6 @@ parameters:
 			path: app/Support/Cache/LegacyRedisCache.php
 
 		-
-			message: '#^Cannot call method cache_value\(\) on class\-string\|object\.$#'
-			identifier: method.nonObject
-			count: 4
-			path: app/Support/Category.php
-
-		-
-			message: '#^Cannot call method get_value\(\) on class\-string\|object\.$#'
-			identifier: method.nonObject
-			count: 4
-			path: app/Support/Category.php
-
-		-
 			message: '#^Offset ''id'' might not exist on array\<string, mixed\>\|null\.$#'
 			identifier: offsetAccess.notFound
 			count: 1
@@ -1333,30 +1015,6 @@ parameters:
 			path: app/Support/Form.php
 
 		-
-			message: '#^Cannot call method cache_value\(\) on class\-string\|object\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: app/Support/Forum.php
-
-		-
-			message: '#^Cannot call method get_value\(\) on class\-string\|object\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: app/Support/Forum.php
-
-		-
-			message: '#^Parameter \#1 \$forumId of method App\\Repositories\\ForumRepository\:\:replaceModerators\(\) expects int, int\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Support/Forum.php
-
-		-
-			message: '#^Parameter \#2 \$haystack of function in_array expects array, array\<int, string\>\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Support/Forum.php
-
-		-
 			message: '#^Method App\\Support\\Json\:\:encode\(\) should return string but returns string\|false\.$#'
 			identifier: return.type
 			count: 1
@@ -1387,6 +1045,12 @@ parameters:
 			path: app/Support/Logger.php
 
 		-
+			message: '#^Parameter \#1 \$cache of static method App\\Support\\SearchBox\:\:value\(\) expects App\\Support\\Cache\\LegacyRedisCache\|null, object\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Support/Menu.php
+
+		-
 			message: '#^Argument of an invalid type array\<string, int\>\|null supplied for foreach, only iterables are supported\.$#'
 			identifier: foreach.nonIterable
 			count: 2
@@ -1409,78 +1073,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: app/Support/Promotion.php
-
-		-
-			message: '#^Cannot call method cache_value\(\) on class\-string\|object\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: app/Support/SearchBox.php
-
-		-
-			message: '#^Cannot call method get_value\(\) on class\-string\|object\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: app/Support/SearchBox.php
-
-		-
-			message: '#^Method App\\Support\\SearchBox\:\:requiredIds\(\) should return list\<int\> but returns array\<0, int\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Support/SearchBox.php
-
-		-
-			message: '#^Parameter \#1 \.\.\.\$values of method Illuminate\\Support\\Collection\<int,stdClass\>\:\:push\(\) expects stdClass, object given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Support/SearchBox.php
-
-		-
-			message: '#^Argument of an invalid type list\<string\>\|false supplied for foreach, only iterables are supported\.$#'
-			identifier: foreach.nonIterable
-			count: 1
-			path: app/Support/SetlistLookup.php
-
-		-
-			message: '#^Method App\\Support\\SetlistLookup\:\:parseSetlistSongLine\(\) should return array\<string, string\>\|null but returns array\<string, string\|null\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Support/SetlistLookup.php
-
-		-
-			message: '#^Method App\\Support\\SetlistLookup\:\:stripMarkdownLinks\(\) should return string but returns string\|null\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Support/SetlistLookup.php
-
-		-
-			message: '#^Parameter \#1 \$haystack of function str_contains expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 4
-			path: app/Support/SetlistLookup.php
-
-		-
-			message: '#^Parameter \#1 \$string of function trim expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 3
-			path: app/Support/SetlistLookup.php
-
-		-
-			message: '#^Parameter \#2 \$subject of function preg_match expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Support/SetlistLookup.php
-
-		-
-			message: '#^Parameter \#2 \$timestamp of function date expects int\|null, int\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Support/SetlistLookup.php
-
-		-
-			message: '#^Parameter \#3 \$subject of function preg_replace expects array\<float\|int\|string\>\|string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Support/SetlistLookup.php
 
 		-
 			message: '#^Method App\\Support\\Shoutbox\:\:formatTime\(\) should return string but returns string\|false\|null\.$#'

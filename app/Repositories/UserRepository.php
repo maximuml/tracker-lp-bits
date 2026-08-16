@@ -364,12 +364,12 @@ class UserRepository extends BaseRepository
         $sourceField = $fieldMap[$field];
         $targetUser = User::query()->findOrFail((int) $uid, User::$commonFields);
         $this->checkPermission($operator, $targetUser);
-        $old = $targetUser->{$sourceField};
-        $valueAtomic = $value;
+        $old = (float) $targetUser->{$sourceField};
+        $valueAtomic = (float) $value;
         $formatSize = false;
         if (in_array($field, ['uploaded', 'downloaded'])) {
             //Frontend unit: GB
-            $valueAtomic = $value * 1024 * 1024 * 1024;
+            $valueAtomic = $valueAtomic * 1024 * 1024 * 1024;
             $formatSize = true;
         }
         if ($action == 'Increment') {
@@ -383,7 +383,7 @@ class UserRepository extends BaseRepository
             throw new NexusException("New value($new) lte 0");
         }
         //for administrator, use english
-        $modCommentText = \App\Support\Locale::trans('message.field_value_change_message_body', ['field' => \App\Support\Locale::trans("user.labels.{$sourceField}", [], 'en'), 'operator' => $operator->username, 'old' => $formatSize ? \App\Support\Format::size($old) : $old, 'new' => $formatSize ? \App\Support\Format::size($new) : $new, 'reason' => $reason], 'en');
+        $modCommentText = \App\Support\Locale::trans('message.field_value_change_message_body', ['field' => \App\Support\Locale::trans("user.labels.{$sourceField}", [], 'en'), 'operator' => $operator->username, 'old' => $formatSize ? \App\Support\Format::size((float) $old) : $old, 'new' => $formatSize ? \App\Support\Format::size((float) $new) : $new, 'reason' => $reason], 'en');
         \App\Support\Logger::writeWithContext((string) "user: {$uid}, {$modCommentText}", (string) 'alert', (bool) false);
         $update = [
             $sourceField => $new,
@@ -391,7 +391,7 @@ class UserRepository extends BaseRepository
         ];
         $locale = $targetUser->locale;
         $fieldLabel = \App\Support\Locale::trans("user.labels.{$sourceField}", [], $locale);
-        $msg = \App\Support\Locale::trans('message.field_value_change_message_body', ['field' => $fieldLabel, 'operator' => $operator->username, 'old' => $formatSize ? \App\Support\Format::size($old) : $old, 'new' => $formatSize ? \App\Support\Format::size($new) : $new, 'reason' => $reason], $locale);
+        $msg = \App\Support\Locale::trans('message.field_value_change_message_body', ['field' => $fieldLabel, 'operator' => $operator->username, 'old' => $formatSize ? \App\Support\Format::size((float) $old) : $old, 'new' => $formatSize ? \App\Support\Format::size((float) $new) : $new, 'reason' => $reason], $locale);
         $message = [
             'sender' => 0,
             'receiver' => $targetUser->id,
@@ -465,6 +465,9 @@ class UserRepository extends BaseRepository
             throw new \InvalidArgumentException("Invalid status: $status");
         }
         $targetUser = $this->getUser($user);
+        if ($targetUser === null) {
+            throw new \InvalidArgumentException('Target user not found');
+        }
         $operator = $this->getUser($operator);
         $operatorUsername = 'System';
         if ($operator) {
@@ -508,6 +511,9 @@ class UserRepository extends BaseRepository
     private function checkPermission($operator, User $user, $minAuthClass = 'authority.prfmanage')
     {
         $operator = $this->getUser($operator);
+        if ($operator === null) {
+            throw new \RuntimeException('Operator not found');
+        }
         if ($operator->id == $user->id) {
             return;
         }
@@ -526,7 +532,7 @@ class UserRepository extends BaseRepository
      */
     private function clearCache(User $user)
     {
-        \App\Support\Cache::clearUser($user->id, $user->passkey);
+        \App\Support\Cache::clearUser($user->id, (string) $user->passkey);
     }
 
     /**
@@ -565,7 +571,7 @@ class UserRepository extends BaseRepository
         $user = User::query()->findOrFail((int) $uid, User::$commonFields);
         if ($metaKey == UserMeta::META_KEY_CHANGE_USERNAME) {
             $changeLog = $user->usernameChangeLogs()->orderBy('id', 'desc')->first();
-            if ($changeLog) {
+            if ($changeLog && $changeLog->created_at !== null) {
                 $miniDays = \App\Support\Config\SiteConfig::current()->system->changeUsernameMinIntervalInDays(365);
                 if (abs($changeLog->created_at->diffInDays()) <= $miniDays) {
                     $msg = \App\Support\Locale::trans('user.change_username_lte_min_interval', ['last_change_time' => $changeLog->created_at, 'interval' => $miniDays], null);
@@ -578,7 +584,7 @@ class UserRepository extends BaseRepository
                     \App\Support\Config\SiteConfig::current()->system->changeUsernameCardAllowCharactersOutsideTheAlphabets()
                 );
                 $meta->delete();
-                \App\Support\Cache::clearUser($user->id, $user->passkey);
+                \App\Support\Cache::clearUser($user->id, (string) $user->passkey);
             });
             return true;
         }
@@ -597,6 +603,9 @@ class UserRepository extends BaseRepository
     {
         $operator = $this->getUser($operator);
         $targetUser = $this->getUser($targetUser);
+        if ($operator === null || $targetUser === null) {
+            throw new \InvalidArgumentException('Operator or target user not found');
+        }
         $this->checkPermission($operator, $targetUser);
         if ($targetUser->username == $newUsername) {
             throw new \RuntimeException("New username can not be the same with current username !");
@@ -637,10 +646,13 @@ class UserRepository extends BaseRepository
     public function changeClass($operator, $targetUser, $newClass, $reason = '', array $extra = []): bool
     {
         Permission::assertCan(PermissionEnum::USER_CHANGE_CLASS);
+        $newClass = (int) $newClass;
         $operator = $this->getUser($operator);
         $targetUser = $this->getUser($targetUser);
-        if ($operator) {
-            if ($operator->class <= $targetUser->class || $operator->class <= $newClass)
+        if ($operator === null || $targetUser === null) {
+            throw new \InvalidArgumentException('Operator or target user not found');
+        }
+        if ($operator->class <= $targetUser->class || $operator->class <= $newClass) {
             throw new InsufficientPermissionException();
         }
         if ($targetUser->class == $newClass && $newClass != User::CLASS_VIP) {
@@ -648,7 +660,7 @@ class UserRepository extends BaseRepository
         }
         $locale = $targetUser->locale;
         $subject = \App\Support\Locale::trans('user.edit_notifications.change_class.subject', [], $locale);
-        $body = \App\Support\Locale::trans('user.edit_notifications.change_class.body', ['action' => \App\Support\Locale::trans('user.edit_notifications.change_class.' . ($newClass > $targetUser->class ? 'promote' : 'demote'), [], null), 'new_class' => User::getClassText($newClass), 'operator' => $operator->username ?? '', 'reason' => $reason], $locale);
+        $body = \App\Support\Locale::trans('user.edit_notifications.change_class.body', ['action' => \App\Support\Locale::trans('user.edit_notifications.change_class.' . ($newClass > $targetUser->class ? 'promote' : 'demote'), [], null), 'new_class' => User::getClassText($newClass), 'operator' => $operator->username, 'reason' => $reason], $locale);
         $message = [
             'sender' => 0,
             'receiver' => $targetUser->id,
@@ -924,7 +936,7 @@ class UserRepository extends BaseRepository
         }
         if (!Permission::can(PermissionEnum::SEND_INVITE, User::findOrFail((int) $uid))) {
             $requireClass = \App\Support\Config\SiteConfig::current()->authority->permission(PermissionEnum::SEND_INVITE->value);
-            throw new NexusException(\App\Support\Locale::trans('invite.send_deny_reasons.no_permission', ['class' => User::getClassText($requireClass)], null));
+            throw new NexusException(\App\Support\Locale::trans('invite.send_deny_reasons.no_permission', ['class' => User::getClassText((int) $requireClass)], null));
         }
         $userInfo = User::query()->findOrFail((int) $uid, User::$commonFields);
         $temporaryInviteCount = $userInfo->temporary_invites()->count();

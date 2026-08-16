@@ -41,11 +41,14 @@ class ThankController extends Controller
     public function store(Request $request)
     {
         $user = Auth::user();
+        if (!$user instanceof User) {
+            throw new \RuntimeException("unauthenticated");
+        }
         $request->validate(['torrent_id' => 'required']);
-        $torrentId = $request->torrent_id;
+        $torrentId = (int) $request->torrent_id;
         $torrent = Torrent::query()->findOrFail($torrentId, Torrent::$commentFields);
         $torrent->checkIsNormal();
-        $torrentOwner = User::query()->findOrFail($torrent->owner);
+        $torrentOwner = User::query()->findOrFail((int) $torrent->owner);
         if ($user->id == $torrentOwner->id) {
             throw new \LogicException("you can't thank to yourself");
         }

@@ -8,6 +8,7 @@ use App\Models\HitAndRun;
 use App\Models\Message;
 use App\Models\SearchBox;
 use App\Models\Setting;
+use App\Models\Snatch;
 use App\Models\User;
 use App\Models\UserBanLog;
 use Carbon\Carbon;
@@ -88,7 +89,7 @@ class HitAndRunRepository extends BaseRepository
         $model = HitAndRun::query()->findOrFail($id);
         $result = $model->delete();
         HitAndRun::clearCache($model, ModelEventEnum::HIT_AND_RUN_DELETED);
-        return $result;
+        return $result ?? true;
     }
 
     /**
@@ -298,11 +299,18 @@ class HitAndRunRepository extends BaseRepository
     private function geReachedMessage(HitAndRun $hitAndRun): array
     {
         $snatched = $hitAndRun->snatch;
+        if (!$snatched instanceof Snatch) {
+            throw new \InvalidArgumentException('Snatch not found');
+        }
+        $user = $hitAndRun->user;
+        if (!$user instanceof User) {
+            throw new \InvalidArgumentException('User not found');
+        }
         return [
             'receiver' => $hitAndRun->uid,
             'added' => Carbon::now()->toDateTimeString(),
-            'subject' => \App\Support\Locale::trans('hr.reached_message_subject', ['hit_and_run_id' => $hitAndRun->id], $hitAndRun->user->locale),
-            'msg' => \App\Support\Locale::trans('hr.reached_message_content', ['completed_at' => \App\Support\Time::formatDateTime($snatched->completedat ?: $snatched->startdat), 'torrent_id' => $hitAndRun->torrent_id, 'torrent_name' => $hitAndRun->torrent->name], $hitAndRun->user->locale),
+            'subject' => \App\Support\Locale::trans('hr.reached_message_subject', ['hit_and_run_id' => $hitAndRun->id], $user->locale),
+            'msg' => \App\Support\Locale::trans('hr.reached_message_content', ['completed_at' => \App\Support\Time::formatDateTime($snatched->completedat ?: $snatched->startdat), 'torrent_id' => $hitAndRun->torrent_id, 'torrent_name' => $hitAndRun->torrent->name], $user->locale),
         ];
     }
 
@@ -313,7 +321,15 @@ class HitAndRunRepository extends BaseRepository
     private function reachedByShareRatio(HitAndRun $hitAndRun, array $setting): bool
     {
         \App\Support\Logger::writeWithContext((string) __METHOD__, (string) 'info', (bool) false);
-        $comment = \App\Support\Locale::trans('hr.reached_by_share_ratio_comment', ['now' => Carbon::now()->toDateTimeString(), 'seed_time_minimum' => $setting['seed_time_minimum'], 'seed_time' => bcdiv((string) $hitAndRun->snatch->seedtime, '3600', 1), 'share_ratio' => \App\Support\Ratio::hr($hitAndRun->snatch->uploaded, $hitAndRun->snatch->downloaded), 'ignore_when_ratio_reach' => $setting['ignore_when_ratio_reach']], $hitAndRun->user->locale);
+        $snatch = $hitAndRun->snatch;
+        if (!$snatch instanceof Snatch) {
+            throw new \InvalidArgumentException('Snatch not found');
+        }
+        $user = $hitAndRun->user;
+        if (!$user instanceof User) {
+            throw new \InvalidArgumentException('User not found');
+        }
+        $comment = \App\Support\Locale::trans('hr.reached_by_share_ratio_comment', ['now' => Carbon::now()->toDateTimeString(), 'seed_time_minimum' => $setting['seed_time_minimum'], 'seed_time' => bcdiv((string) $snatch->seedtime, '3600', 1), 'share_ratio' => \App\Support\Ratio::hr($snatch->uploaded, $snatch->downloaded), 'ignore_when_ratio_reach' => $setting['ignore_when_ratio_reach']], $user->locale);
         $update = [
             'comment' => $comment
         ];
@@ -327,7 +343,15 @@ class HitAndRunRepository extends BaseRepository
     private function reachedBySeedTime(HitAndRun $hitAndRun, array $setting): bool
     {
         \App\Support\Logger::writeWithContext((string) __METHOD__, (string) 'info', (bool) false);
-        $comment = \App\Support\Locale::trans('hr.reached_by_seed_time_comment', ['now' => Carbon::now()->toDateTimeString(), 'seed_time' => bcdiv((string) $hitAndRun->snatch->seedtime, '3600', 1), 'seed_time_minimum' => $setting['seed_time_minimum']], $hitAndRun->user->locale);
+        $snatch = $hitAndRun->snatch;
+        if (!$snatch instanceof Snatch) {
+            throw new \InvalidArgumentException('Snatch not found');
+        }
+        $user = $hitAndRun->user;
+        if (!$user instanceof User) {
+            throw new \InvalidArgumentException('User not found');
+        }
+        $comment = \App\Support\Locale::trans('hr.reached_by_seed_time_comment', ['now' => Carbon::now()->toDateTimeString(), 'seed_time' => bcdiv((string) $snatch->seedtime, '3600', 1), 'seed_time_minimum' => $setting['seed_time_minimum']], $user->locale);
         $update = [
             'comment' => $comment
         ];
@@ -341,7 +365,15 @@ class HitAndRunRepository extends BaseRepository
     private function reachedByLeechTime(HitAndRun $hitAndRun, array $setting): bool
     {
         \App\Support\Logger::writeWithContext((string) __METHOD__, (string) 'info', (bool) false);
-        $comment = \App\Support\Locale::trans('hr.reached_by_leech_time_comment', ['now' => Carbon::now()->toDateTimeString(), 'leech_time' => bcdiv((string) ($hitAndRun->snatch->leech_time_no_seeder - $hitAndRun->leech_time_no_seeder_begin), '3600', 1), 'leech_time_minimum' => $setting['leech_time_minimum']], $hitAndRun->user->locale);
+        $snatch = $hitAndRun->snatch;
+        if (!$snatch instanceof Snatch) {
+            throw new \InvalidArgumentException('Snatch not found');
+        }
+        $user = $hitAndRun->user;
+        if (!$user instanceof User) {
+            throw new \InvalidArgumentException('User not found');
+        }
+        $comment = \App\Support\Locale::trans('hr.reached_by_leech_time_comment', ['now' => Carbon::now()->toDateTimeString(), 'leech_time' => bcdiv((string) ($snatch->leech_time_no_seeder - $hitAndRun->leech_time_no_seeder_begin), '3600', 1), 'leech_time_minimum' => $setting['leech_time_minimum']], $user->locale);
         $update = [
             'comment' => $comment
         ];
@@ -394,7 +426,15 @@ class HitAndRunRepository extends BaseRepository
     private function unreached(HitAndRun $hitAndRun, array $setting, bool $disableUser = true): bool
     {
         \App\Support\Logger::writeWithContext((string) sprintf('hitAndRun: %s, disableUser: %s', $hitAndRun->toJson(), var_export($disableUser, true)), (string) 'info', (bool) false);
-        $comment = \App\Support\Locale::trans('hr.unreached_comment', ['now' => Carbon::now()->toDateTimeString(), 'seed_time' => bcdiv((string) $hitAndRun->snatch->seedtime, '3600', 1), 'seed_time_minimum' => $setting['seed_time_minimum'], 'share_ratio' => \App\Support\Ratio::hr($hitAndRun->snatch->uploaded, $hitAndRun->snatch->downloaded), 'torrent_size' => \App\Support\Format::size($hitAndRun->torrent->size), 'ignore_when_ratio_reach' => $setting['ignore_when_ratio_reach']], $hitAndRun->user->locale);
+        $snatch = $hitAndRun->snatch;
+        if (!$snatch instanceof Snatch) {
+            throw new \InvalidArgumentException('Snatch not found');
+        }
+        $user = $hitAndRun->user;
+        if (!$user instanceof User) {
+            throw new \InvalidArgumentException('User not found');
+        }
+        $comment = \App\Support\Locale::trans('hr.unreached_comment', ['now' => Carbon::now()->toDateTimeString(), 'seed_time' => bcdiv((string) $snatch->seedtime, '3600', 1), 'seed_time_minimum' => $setting['seed_time_minimum'], 'share_ratio' => \App\Support\Ratio::hr($snatch->uploaded, $snatch->downloaded), 'torrent_size' => \App\Support\Format::size($hitAndRun->torrent->size), 'ignore_when_ratio_reach' => $setting['ignore_when_ratio_reach']], $user->locale);
         $update = [
             'status' => HitAndRun::STATUS_UNREACHED,
             'comment' => $comment
@@ -412,7 +452,7 @@ class HitAndRunRepository extends BaseRepository
             'receiver' => $hitAndRun->uid,
             'added' => Carbon::now()->toDateTimeString(),
             'subject' => \App\Support\Locale::trans('hr.unreached_message_subject', ['hit_and_run_id' => $hitAndRun->id], $hitAndRun->user->locale),
-            'msg' => \App\Support\Locale::trans('hr.unreached_message_content', ['completed_at' => \App\Support\Time::formatDateTime($hitAndRun->snatch->completedat), 'torrent_id' => $hitAndRun->torrent_id, 'torrent_name' => $hitAndRun->torrent->name], $hitAndRun->user->locale),
+            'msg' => \App\Support\Locale::trans('hr.unreached_message_content', ['completed_at' => \App\Support\Time::formatDateTime($snatch->completedat), 'torrent_id' => $hitAndRun->torrent_id, 'torrent_name' => $hitAndRun->torrent->name], $user->locale),
         ];
         Message::query()->insert($message);
         HitAndRun::clearCache($hitAndRun);
@@ -610,7 +650,7 @@ class HitAndRunRepository extends BaseRepository
             ) === HitAndRunMode::MANUAL && Permission::canSetTorrentHitAndRun()) {
             $hrRadio = sprintf('<label><input type="radio" name="hr[%s]" value="0"%s />NO</label>', $searchBoxId, $value == 0 ? ' checked' : '');
             $hrRadio .= sprintf('<label><input type="radio" name="hr[%s]" value="1"%s />YES</label>', $searchBoxId, $value == 1 ? ' checked' : '');
-            return \App\Support\Html::tr('H&R', $hrRadio, 1, "mode_$searchBoxId", true);
+            return (string) \App\Support\Html::tr('H&R', $hrRadio, 1, "mode_$searchBoxId", true);
         }
         return '';
     }

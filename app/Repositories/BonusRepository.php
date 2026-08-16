@@ -377,6 +377,9 @@ class BonusRepository extends BaseRepository
             return;
         }
         $user = $this->getUser($user);
+        if ($user === null) {
+            throw new \InvalidArgumentException('User not found');
+        }
         if ($user->seedbonus < $requireBonus) {
             \App\Support\Logger::writeWithContext((string) "user: {$user->id}, bonus: {$user->seedbonus} < requireBonus: {$requireBonus}", (string) 'error', (bool) false);
             throw new \LogicException("User bonus not enough.");
@@ -408,7 +411,7 @@ class BonusRepository extends BaseRepository
             ];
             BonusLogs::query()->insert($bonusLog);
             \App\Support\Logger::writeWithContext((string) ("bonusLog: " . \App\Support\Json::encode($bonusLog)), (string) 'info', (bool) false);
-            \App\Support\Cache::clearUser($user->id, $user->passkey);
+            \App\Support\Cache::clearUser($user->id, (string) $user->passkey);
         });
     }
 

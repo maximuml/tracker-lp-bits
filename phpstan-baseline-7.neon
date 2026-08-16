@@ -145,58 +145,10 @@ parameters:
 			path: app/Http/Controllers/SystemController.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\Torrent\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\Torrent\>\:\:\$id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Http/Controllers/ThankController.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Torrent\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\Torrent\>\:\:\$owner\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Http/Controllers/ThankController.php
-
-		-
-			message: '#^Call to an undefined method App\\Models\\Torrent\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\Torrent\>\:\:checkIsNormal\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: app/Http/Controllers/ThankController.php
-
-		-
 			message: '#^Property App\\Models\\Topic\:\:\$hlcolor \(int\<0, max\>\) does not accept int\.$#'
 			identifier: assign.propertyType
 			count: 1
 			path: app/Http/Controllers/TopicController.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\User\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\User\>\:\:\$id\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Http/Controllers/TorrentActionController.php
-
-		-
-			message: '#^Parameter \#1 \$content of function response expects array\|Illuminate\\Contracts\\View\\View\|string\|null, string\|false given\.$#'
-			identifier: argument.type
-			count: 2
-			path: app/Http/Controllers/TorrentActionController.php
-
-		-
-			message: '#^Parameter \#2 \$currentUser of static method App\\Repositories\\TorrentAjaxRepository\:\:peerList\(\) expects App\\Models\\User\|null, App\\Models\\User\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\User\>\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Http/Controllers/TorrentActionController.php
-
-		-
-			message: '#^Parameter \#2 \$timestamp of function date expects int\|null, int\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Http/Controllers/TorrentActionController.php
-
-		-
-			message: '#^Parameter \#4 \$currentUser of static method App\\Repositories\\TorrentAjaxRepository\:\:userTorrentList\(\) expects App\\Models\\User\|null, App\\Models\\User\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\User\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Http/Controllers/TorrentActionController.php
 
 		-
 			message: '#^Parameter \#1 \$bdInfo of class Nexus\\Torrent\\BdInfoExtra constructor expects string, array\<mixed\>\|string given\.$#'
@@ -571,18 +523,6 @@ parameters:
 			path: app/Support/Cache/LegacyRedisCache.php
 
 		-
-			message: '#^Cannot call method cache_value\(\) on class\-string\|object\.$#'
-			identifier: method.nonObject
-			count: 4
-			path: app/Support/Category.php
-
-		-
-			message: '#^Cannot call method get_value\(\) on class\-string\|object\.$#'
-			identifier: method.nonObject
-			count: 4
-			path: app/Support/Category.php
-
-		-
 			message: '#^Parameter \#1 \$ids of static method App\\Repositories\\UserRepository\:\:getByIds\(\) expects list\<int\>, array\<int\<0, max\>, mixed\> given\.$#'
 			identifier: argument.type
 			count: 1
@@ -637,30 +577,6 @@ parameters:
 			path: app/Support/Form.php
 
 		-
-			message: '#^Cannot call method cache_value\(\) on class\-string\|object\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: app/Support/Forum.php
-
-		-
-			message: '#^Cannot call method get_value\(\) on class\-string\|object\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: app/Support/Forum.php
-
-		-
-			message: '#^Parameter \#1 \$forumId of method App\\Repositories\\ForumRepository\:\:replaceModerators\(\) expects int, int\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Support/Forum.php
-
-		-
-			message: '#^Parameter \#2 \$haystack of function in_array expects array, array\<int, string\>\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Support/Forum.php
-
-		-
 			message: '#^Method App\\Support\\Json\:\:encode\(\) should return string but returns string\|false\.$#'
 			identifier: return.type
 			count: 1
@@ -691,6 +607,12 @@ parameters:
 			path: app/Support/Logger.php
 
 		-
+			message: '#^Parameter \#1 \$cache of static method App\\Support\\SearchBox\:\:value\(\) expects App\\Support\\Cache\\LegacyRedisCache\|null, object\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Support/Menu.php
+
+		-
 			message: '#^Parameter \#1 \$raw of static method App\\Support\\Pagination\:\:resolvePage\(\) expects int\|string\|null, bool\|float\|int\|string\|null given\.$#'
 			identifier: argument.type
 			count: 1
@@ -701,54 +623,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: app/Support/Promotion.php
-
-		-
-			message: '#^Cannot call method cache_value\(\) on class\-string\|object\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: app/Support/SearchBox.php
-
-		-
-			message: '#^Cannot call method get_value\(\) on class\-string\|object\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: app/Support/SearchBox.php
-
-		-
-			message: '#^Method App\\Support\\SearchBox\:\:requiredIds\(\) should return list\<int\> but returns array\<0, int\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Support/SearchBox.php
-
-		-
-			message: '#^Parameter \#1 \.\.\.\$values of method Illuminate\\Support\\Collection\<int,stdClass\>\:\:push\(\) expects stdClass, object given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Support/SearchBox.php
-
-		-
-			message: '#^Argument of an invalid type list\<string\>\|false supplied for foreach, only iterables are supported\.$#'
-			identifier: foreach.nonIterable
-			count: 1
-			path: app/Support/SetlistLookup.php
-
-		-
-			message: '#^Parameter \#1 \$haystack of function str_contains expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 4
-			path: app/Support/SetlistLookup.php
-
-		-
-			message: '#^Parameter \#2 \$subject of function preg_match expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Support/SetlistLookup.php
-
-		-
-			message: '#^Parameter \#2 \$timestamp of function date expects int\|null, int\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Support/SetlistLookup.php
 
 		-
 			message: '#^Method App\\Support\\Shoutbox\:\:formatTime\(\) should return string but returns string\|false\|null\.$#'

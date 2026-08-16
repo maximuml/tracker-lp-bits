@@ -2,6 +2,8 @@
 
 namespace App\Support;
 
+use App\Support\Cache\LegacyRedisCache;
+
 /**
  * Legacy forum helpers extracted from `include/functions.php`.
  *
@@ -34,19 +36,19 @@ final class Forum
      * Mirrors `get_forum_moderators()`.
      */
     /**
-     * @param  mixed  $cache
+     * @param  \App\Support\Cache\LegacyRedisCache|null  $cache
      */
-    public static function moderators(mixed $cache, int|string $forumId, bool $plainText = true): string
+    public static function moderators(?LegacyRedisCache $cache, int|string $forumId, bool $plainText = true): string
     {
         static $moderatorsArray = null;
 
         if ($moderatorsArray === null) {
-            $cached = method_exists($cache, 'get_value') ? $cache->get_value('forum_moderator_array') : false;
+            $cached = $cache !== null ? $cache->get_value('forum_moderator_array') : false;
             if ($cached !== false && is_array($cached)) {
                 $moderatorsArray = $cached;
             } else {
                 $moderatorsArray = app(\App\Repositories\ForumRepository::class)->getModeratorArray();
-                if (method_exists($cache, 'cache_value')) {
+                if ($cache !== null) {
                     $cache->cache_value('forum_moderator_array', $moderatorsArray, 86200);
                 }
             }
@@ -75,7 +77,7 @@ final class Forum
             $userIds[] = \App\Support\UserDisplay::userIdFromName(trim($user));
         }
 
-        app(\App\Repositories\ForumRepository::class)->replaceModerators($forumId, $userIds, $limit);
+        app(\App\Repositories\ForumRepository::class)->replaceModerators((int) $forumId, $userIds, $limit);
     }
 
     /**
@@ -143,7 +145,7 @@ final class Forum
             $protected = \Nexus\Database\NexusDB::remember('setting_protected_forum', 600, function () {
                 return \App\Repositories\SettingRepository::getByName('misc.protected_forum');
             });
-            $protectedForumIds = $protected ? preg_split('/[,\s]+/', $protected) : [];
+            $protectedForumIds = $protected ? (preg_split('/[,\s]+/', $protected) ?: []) : [];
         }
 
         if ($forumMods === null) {
@@ -183,17 +185,17 @@ final class Forum
      * Mirrors `get_post_row()`.
      */
     /**
-     * @param  mixed  $cache
+     * @param  \App\Support\Cache\LegacyRedisCache|null  $cache
      * @return array<string, mixed>|null
      */
-    public static function postRow(mixed $cache, int|string $postId): ?array
+    public static function postRow(?LegacyRedisCache $cache, int|string $postId): ?array
     {
         $cacheKey = 'post_' . $postId . '_content';
-        $row = method_exists($cache, 'get_value') ? $cache->get_value($cacheKey) : false;
+        $row = $cache !== null ? $cache->get_value($cacheKey) : false;
 
         if ($row === false) {
             $row = \App\Repositories\ForumRepository::findPostArrayById((int) $postId);
-            if (method_exists($cache, 'cache_value')) {
+            if ($cache !== null) {
                 $cache->cache_value($cacheKey, $row, 7200);
             }
         }

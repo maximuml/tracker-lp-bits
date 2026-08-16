@@ -2,6 +2,7 @@
 
 namespace App\Support;
 
+use App\Support\Cache\LegacyRedisCache;
 
 /**
  * Legacy searchbox helper extracted from `include/functions.php`.
@@ -19,17 +20,17 @@ final class SearchBox
      * Mirrors `get_searchbox_value($mode, $item)`.
      */
     /**
-     * @param  mixed  $cache
+     * @param  \App\Support\Cache\LegacyRedisCache|null  $cache
      */
-    public static function value(mixed $cache, int|string $mode, string $item): mixed
+    public static function value(?LegacyRedisCache $cache, int|string $mode, string $item): mixed
     {
         if (self::$rows === null) {
-            $cached = method_exists($cache, 'get_value') ? $cache->get_value('search_box_content') : false;
+            $cached = $cache !== null ? $cache->get_value('search_box_content') : false;
             if ($cached !== false && is_array($cached)) {
                 self::$rows = $cached;
             } else {
                 self::$rows = app(\App\Repositories\SearchBoxRepository::class)->getAllRows();
-                if (method_exists($cache, 'cache_value')) {
+                if ($cache !== null) {
                     $cache->cache_value('search_box_content', self::$rows, 100500);
                 }
             }
@@ -43,15 +44,15 @@ final class SearchBox
      *
      * Mirrors `searchbox_item_list()`.
      *
-     * @param  mixed  $cache
+     * @param  \App\Support\Cache\LegacyRedisCache|null  $cache
      * @return array<int, array<string, mixed>>
      */
-    public static function itemList(mixed $cache, string $table, int|string $mode): array
+    public static function itemList(?LegacyRedisCache $cache, string $table, int|string $mode): array
     {
         $mode = (int) $mode;
         $cacheKey = "{$table}_list_mode_{$mode}";
 
-        if (method_exists($cache, 'get_value')) {
+        if ($cache !== null) {
             $ret = $cache->get_value($cacheKey);
             if ($ret !== false && is_array($ret)) {
                 return $ret;
@@ -64,7 +65,7 @@ final class SearchBox
             $ret = app(\App\Repositories\SearchBoxRepository::class)->getTaxonomyList($table, 0);
         }
 
-        if (method_exists($cache, 'cache_value')) {
+        if ($cache !== null) {
             $cache->cache_value($cacheKey, $ret, 3600);
         }
 
@@ -225,7 +226,9 @@ TD;
             $modelName = \App\Models\SearchBox::$taxonomies[$torrentField]['model'];
             $checkPrefix = $torrentField;
             if (! empty($options['select_unselect'])) {
-                $taxonomyCollection->push(new $modelName(['mode' => -1]));
+                $selectAll = new \stdClass();
+                $selectAll->mode = -1;
+                $taxonomyCollection->push($selectAll);
             }
             $taxonomyChunks = $taxonomyCollection->chunk($searchBox->catsperrow);
 
@@ -309,7 +312,7 @@ TD;
         ];
         $script = \Nexus\Nexus::instance()->getScript();
 
-        return array_map('intval', \Illuminate\Support\Arr::wrap($maps[$script] ?? []));
+        return array_values(array_map('intval', \Illuminate\Support\Arr::wrap($maps[$script] ?? [])));
     }
 
     /**

@@ -369,6 +369,9 @@ class SetlistLookup
 
         $fields = [];
         $lines = preg_split('/\r?\n/', $body);
+        if ($lines === false) {
+            return $fields;
+        }
         foreach ($lines as $line) {
             $line = ltrim($line, '| ');
             if (!$line) {
@@ -444,8 +447,8 @@ class SetlistLookup
      */
     private static function isRelevantSetlistUrl(string $url, array $meta): bool
     {
-        $path = parse_url($url, PHP_URL_PATH) ?? '';
-        $artist = preg_replace('/[^a-z0-9]+/', '-', strtolower($meta['artist']));
+        $path = (string) parse_url($url, PHP_URL_PATH);
+        $artist = (string) preg_replace('/[^a-z0-9]+/', '-', strtolower($meta['artist']));
         $artist = trim($artist, '-');
         $artistSlug = str_replace('-', '', $artist); // e.g. "julienk"
 
@@ -461,8 +464,8 @@ class SetlistLookup
         }
 
         // Year should be present in path
-        $year = $meta['year'];
-        if ($year && !preg_match('/\/' . preg_quote($year, '/') . '\//', $path)) {
+        $year = (string) $meta['year'];
+        if ($year !== '' && !preg_match('/\/' . preg_quote($year, '/') . '\//', $path)) {
             return false;
         }
 
@@ -536,7 +539,10 @@ class SetlistLookup
         }
 
         if (preg_match('/(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+\d{1,2}\s+\d{4}/i', $markdown, $m)) {
-            $date = date('Y-m-d', strtotime($m[0]));
+            $timestamp = strtotime($m[0]);
+            if ($timestamp !== false) {
+                $date = date('Y-m-d', $timestamp);
+            }
         } elseif (preg_match('/\b(\d{4}-\d{2}-\d{2})\b/', $markdown, $m)) {
             $date = $m[1];
         }
@@ -605,7 +611,7 @@ class SetlistLookup
 
         // Remove Play Video link
         $rest = self::stripMarkdownLinks($rest);
-        $rest = preg_replace('/\bPlay Video\b/', '', $rest);
+        $rest = (string) preg_replace('/\bPlay Video\b/', '', $rest);
         $rest = trim($rest);
 
         if (!$rest) {
@@ -628,13 +634,13 @@ class SetlistLookup
         }
 
         // Fix missing spaces before "cover" / "song"
-        $note = preg_replace('/([a-zA-Z])(cover|song)\b/', '$1 $2', $note);
+        $note = (string) preg_replace('/([a-zA-Z])(cover|song)\b/', '$1 $2', $note);
 
         if ($isTape) {
             $note = ($note ? 'Song played from tape; ' : 'Song played from tape') . $note;
         }
 
-        $title = trim(preg_replace('/\s+/', ' ', $title));
+        $title = trim((string) preg_replace('/\s+/', ' ', $title));
 
         if (!$title) {
             return null;
@@ -646,8 +652,8 @@ class SetlistLookup
     private static function stripMarkdownLinks(string $text): string
     {
         // [Label](url "title") -> Label, with a trailing space if a word char follows
-        $text = preg_replace('/\[([^\]]+)\]\((?:https?:\/\/[^\s\)"]+)(?:\s+"[^"]*")?\)(?=[a-zA-Z0-9])/', '$1 ', $text);
-        $text = preg_replace('/\[([^\]]+)\]\((?:https?:\/\/[^\s\)"]+)(?:\s+"[^"]*")?\)/', '$1', $text);
+        $text = (string) preg_replace('/\[([^\]]+)\]\((?:https?:\/\/[^\s\)"]+)(?:\s+"[^"]*")?\)(?=[a-zA-Z0-9])/', '$1 ', $text);
+        $text = (string) preg_replace('/\[([^\]]+)\]\((?:https?:\/\/[^\s\)"]+)(?:\s+"[^"]*")?\)/', '$1', $text);
 
         return $text;
     }

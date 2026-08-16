@@ -36,9 +36,9 @@ class GenerateTemporaryInvite implements ShouldQueue
         $this->count = $count;
     }
 
-    public $tries = 1;
+    public int $tries = 1;
 
-    public $timeout = 1800;
+    public int $timeout = 1800;
 
     /**
      * Execute the job.

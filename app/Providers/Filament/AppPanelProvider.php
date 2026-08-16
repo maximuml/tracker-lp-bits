@@ -95,7 +95,7 @@ class AppPanelProvider extends PanelProvider
             ;
     }
 
-    public function boot()
+    public function boot(): void
     {
         Fieldset::configureUsing(fn (Fieldset $fieldset) => $fieldset
             ->columnSpanFull()

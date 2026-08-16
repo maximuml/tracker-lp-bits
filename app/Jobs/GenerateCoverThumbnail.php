@@ -58,11 +58,6 @@ class GenerateCoverThumbnail implements ShouldQueue
 
         $srcWidth = imagesx($src);
         $srcHeight = imagesy($src);
-        if ($srcWidth <= 0 || $srcHeight <= 0) {
-            imagedestroy($src);
-
-            return;
-        }
 
         $scale = min(1.0, $this->maxWidth / $srcWidth, $this->maxHeight / $srcHeight);
         $dstWidth = max(1, (int) floor($srcWidth * $scale));

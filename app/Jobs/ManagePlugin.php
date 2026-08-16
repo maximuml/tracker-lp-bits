@@ -32,9 +32,9 @@ class ManagePlugin implements ShouldQueue, ShouldBeUnique
         $this->action = $action;
     }
 
-    public function uniqueId()
+    public function uniqueId(): string
     {
-        return $this->plugin->id;
+        return (string) $this->plugin->id;
     }
 
     /**

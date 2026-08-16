@@ -35,10 +35,10 @@ class SendLoginNotify implements ShouldQueue
      *
      * @return void
      */
-    public function handle()
+    public function handle(): void
     {
-        /** @var NexusModel $thisLoginLog */
-        $thisLoginLog = LoginLog::query()->findOrFail($this->thisLoginLogId);
+        /** @var LoginLog $thisLoginLog */
+        $thisLoginLog = LoginLog::query()->where('id', $this->thisLoginLogId)->firstOrFail();
         $log = "handling login log: " . $thisLoginLog->toJson();
         if (!$thisLoginLog->country || !$thisLoginLog->city) {
             \App\Support\Logger::writeWithContext((string) "{$log}, this login log no country or city", (string) 'info', (bool) false);
@@ -62,7 +62,8 @@ class SendLoginNotify implements ShouldQueue
             \App\Support\Logger::writeWithContext((string) "{$log}, country and city are equals", (string) 'info', (bool) false);
             return;
         }
-        $user = User::query()->findOrFail($thisLoginLog->uid, User::$commonFields);
+        /** @var User $user */
+        $user = User::query()->where('id', $thisLoginLog->uid)->firstOrFail(User::$commonFields);
         $locale = $user->locale;
         $toolRep = new ToolRepository();
         $subject = \App\Support\Locale::trans('message.login_notify.subject', ['site_name' => \App\Support\Config\SiteConfig::current()->basic->siteName()], $locale);

@@ -41,8 +41,8 @@ class RemoveUserVipStatus
             $message = [];
             $user->vip_added = 'no';
             $user->vip_until = null;
-            if ($user->class <= User::CLASS_VIP) {
-                $user->class = User::CLASS_USER;
+            if ($user->class <= (int) User::CLASS_VIP) {
+                $user->class = (int) User::CLASS_USER;
                 $subject = \App\Support\Locale::trans("cleanup.msg_vip_status_removed", [], $locale);
                 $msg = \App\Support\Locale::trans("cleanup.msg_vip_status_removed_body", [], $locale);
                 $message = [

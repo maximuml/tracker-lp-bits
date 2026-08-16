@@ -9,6 +9,11 @@ parameters:
         - app/Console
         - app/Http
         - app/Repositories
+        - app/Jobs
+        - app/Listeners
+        - app/Providers
+        - app/ValueObjects
+        - app/DTOs
 
     bootstrapFiles:
         - tests/phpstan/bootstrap.php

@@ -5,12 +5,13 @@ namespace App\Listeners;
 use App\Repositories\SearchRepository;
 use App\Repositories\ToolRepository;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Queue\InteractsWithQueue;
 
 class SyncTorrentToElasticsearch implements ShouldQueue
 {
 
-    public $tries = 3;
+    public int $tries = 3;
 
     /**
      * Create the event listener.
@@ -28,9 +29,12 @@ class SyncTorrentToElasticsearch implements ShouldQueue
      * @param  object  $event
      * @return void
      */
-    public function handle($event)
+    public function handle(object $event): void
     {
-        $id = $event->model?->id ?? 0;
+        $id = 0;
+        if (property_exists($event, 'model') && $event->model instanceof Model) {
+            $id = (int) $event->model->getKey();
+        }
         if ($id == 0) {
             \App\Support\Logger::writeWithContext((string) ("event: " . get_class($event) . " no model id"), (string) 'error', (bool) false);
             return;
@@ -47,7 +51,7 @@ class SyncTorrentToElasticsearch implements ShouldQueue
      * @param  object  $event
      * @return void
      */
-    public function failed($event, \Throwable $exception)
+    public function failed(object $event, \Throwable $exception): void
     {
         $toolRep = new ToolRepository();
         $to = \App\Support\Config\SiteConfig::current()->main->siteEmail();

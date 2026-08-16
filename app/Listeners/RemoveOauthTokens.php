@@ -25,17 +25,18 @@ class RemoveOauthTokens implements ShouldQueue
      * @param  object  $event
      * @return void
      */
-    public function handle($event)
+    public function handle(object $event): void
     {
-        $uid = $event->model?->id ?? 0;
+        $uid = 0;
+        if (property_exists($event, 'model') && $event->model instanceof Model) {
+            $uid = (int) $event->model->getKey();
+        }
         $modelNames = [
             Passport::$authCodeModel,
             Passport::$tokenModel,
         ];
         foreach ($modelNames as $name) {
-            /**
-             * @var $model Model
-             */
+            /** @var class-string<Model> $name */
             $model = new $name();
             $model::query()->where("user_id", $uid)->forceDelete();
         }

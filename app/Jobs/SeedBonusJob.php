@@ -142,7 +142,7 @@ class SeedBonusJob implements ShouldQueue
             }
             if ($haremAdditionFactor > 0) {
                 $haremBonus = Bonus::haremAddition($uid);
-                $haremAddition =  $haremBonus * $haremAdditionFactor;
+                $haremAddition = (float) $haremBonus * (float) $haremAdditionFactor;
                 $all_bonus += $haremAddition;
                 $bonusLog .= ", haremAdditionFactor: $haremAdditionFactor, haremBonus: $haremBonus, haremAddition: $haremAddition, all_bonus: $all_bonus";
                 $this->appendBonusLogInsert($bonusLogInsert, $uid, BonusLogs::BUSINESS_TYPE_SEEDING_HAREM_ADDITION, $oldValue, $haremAddition);

@@ -23,12 +23,13 @@ class DeductUserBonusWhenTorrentDeleted implements ShouldQueue
      * @param  object  $event
      * @return void
      */
-    public function handle($event)
+    public function handle(object $event): void
     {
-        /**
-         * Just a test
-         */
+        if (! property_exists($event, 'data') || ! is_array($event->data)) {
+            \App\Support\Logger::writeWithContext((string) 'DeductUserBonusWhenTorrentDeleted: no data', (string) 'error', (bool) false);
+            return;
+        }
         $torrent = $event->data;
-        \App\Support\Logger::writeWithContext((string) sprintf("torrent: %d is deleted, and it's pieces_hash is: %s", $torrent['id'], $torrent['pieces_hash']), (string) 'info', (bool) false);
+        \App\Support\Logger::writeWithContext((string) sprintf("torrent: %d is deleted, and it's pieces_hash is: %s", (int) ($torrent['id'] ?? 0), (string) ($torrent['pieces_hash'] ?? '')), (string) 'info', (bool) false);
     }
 }

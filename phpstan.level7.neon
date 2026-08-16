@@ -1,0 +1,36 @@
+includes:
+    - vendor/larastan/larastan/extension.neon
+    - phpstan-baseline-7.neon
+
+parameters:
+    level: 7
+    paths:
+        - app/Support
+        - app/Models
+        - app/Console
+        - app/Http
+        - app/Repositories
+
+    bootstrapFiles:
+        - tests/phpstan/bootstrap.php
+        - tests/phpstan/constants.stub.php
+        - tests/phpstan/globals.stub.php
+        - bootstrap/app.php
+
+    scanFiles:
+        - config/nexus_constants.php
+
+    scanDirectories:
+        - vendor
+
+    dynamicConstantNames:
+        - IN_NEXUS
+        - IN_TRACKER
+        - RUNNING_IN_OCTANE
+
+    treatPhpDocTypesAsCertain: false
+
+    ignoreErrors:
+
+    universalObjectCratesClasses:
+        - Illuminate\Http\Resources\Json\JsonResource

@@ -1,0 +1,2575 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Parameter \#1 \$content of method Illuminate\\Http\\Client\\PendingRequest\<false\>\:\:withBody\(\) expects Psr\\Http\\Message\\StreamInterface\|string, string\|false given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Console/Commands/CrowdinSync.php
+
+		-
+			message: '#^Parameter \#3 \$subject of function str_replace expects array\<string\>\|string, int\|string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Console/Commands/CrowdinSync.php
+
+		-
+			message: '#^Parameter \#1 \$value of method Carbon\\Carbon\:\:subDays\(\) expects float\|int, int\|string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Console/Commands/DeleteExpiredToken.php
+
+		-
+			message: '#^Parameter \#1 \$callback of function call_user_func_array expects callable\(\)\: mixed, array\{mixed, ''dispatch''\} given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Console/Commands/FireEvent.php
+
+		-
+			message: '#^Parameter \#1 \$callback of function call_user_func_array expects callable\(\)\: mixed, array\{object, ''newInstance''\} given\.$#'
+			identifier: argument.type
+			count: 2
+			path: app/Console/Commands/FireEvent.php
+
+		-
+			message: '#^Parameter \#1 \$callback of function call_user_func expects callable\(\)\: mixed, array\{Nexus\\Plugin\\BasePlugin, ''uninstall''\} given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Console/Commands/Plugin.php
+
+		-
+			message: '#^Parameter \#1 \$json of function json_decode expects string, string\|false given\.$#'
+			identifier: argument.type
+			count: 2
+			path: app/Console/Commands/TranslateLang.php
+
+		-
+			message: '#^Parameter \#3 \$subject of function preg_replace_callback expects array\<float\|int\|string\>\|string, string\|false given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Console/Commands/TranslateLang.php
+
+		-
+			message: '#^Call to an undefined method object\:\:delete_value\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Http/Controllers/AdminController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\AgentAllowController\:\:all\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/AgentAllowController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\AgentAllowController\:\:check\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/AgentAllowController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\AgentAllowController\:\:destroy\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/AgentAllowController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\AgentAllowController\:\:index\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/AgentAllowController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\AgentAllowController\:\:show\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/AgentAllowController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\AgentAllowController\:\:store\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/AgentAllowController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\AgentAllowController\:\:update\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/AgentAllowController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\AgentDenyController\:\:destroy\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/AgentDenyController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\AgentDenyController\:\:index\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/AgentDenyController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\AgentDenyController\:\:show\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/AgentDenyController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\AgentDenyController\:\:store\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/AgentDenyController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\AgentDenyController\:\:update\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/AgentDenyController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\AttendanceController\:\:attend\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/AttendanceController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\AuthenticateController\:\:ammdsApprove\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 2
+			path: app/Http/Controllers/AuthenticateController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\AuthenticateController\:\:challenge\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 2
+			path: app/Http/Controllers/AuthenticateController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\AuthenticateController\:\:login\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/AuthenticateController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\AuthenticateController\:\:logout\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/AuthenticateController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\AuthenticateController\:\:nasToolsApprove\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 2
+			path: app/Http/Controllers/AuthenticateController.php
+
+		-
+			message: '#^Cannot access offset 0 on array\{0\: int\<0, max\>, 1\: int\<0, max\>, 2\: int, 3\: string, mime\: string, channels\?\: int, bits\?\: int\}\|false\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: app/Http/Controllers/BitbucketUploadController.php
+
+		-
+			message: '#^Cannot access offset 1 on array\{0\: int\<0, max\>, 1\: int\<0, max\>, 2\: int, 3\: string, mime\: string, channels\?\: int, bits\?\: int\}\|false\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: app/Http/Controllers/BitbucketUploadController.php
+
+		-
+			message: '#^Cannot access offset 2 on array\{0\: int\<0, max\>, 1\: int\<0, max\>, 2\: int, 3\: string, mime\: string, channels\?\: int, bits\?\: int\}\|false\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: app/Http/Controllers/BitbucketUploadController.php
+
+		-
+			message: '#^Offset ''extension'' might not exist on array\{dirname\?\: string, basename\: string, extension\?\: string, filename\: string\}\.$#'
+			identifier: offsetAccess.notFound
+			count: 1
+			path: app/Http/Controllers/BitbucketUploadController.php
+
+		-
+			message: '#^Parameter \#1 \$width of function imagecreatetruecolor expects int\<1, max\>, int given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Http/Controllers/BitbucketUploadController.php
+
+		-
+			message: '#^Parameter \#2 \$height of function imagecreatetruecolor expects int\<1, max\>, int given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Http/Controllers/BitbucketUploadController.php
+
+		-
+			message: '#^Parameter \#2 \$src_image of function imagecopyresampled expects GdImage, GdImage\|false given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Http/Controllers/BitbucketUploadController.php
+
+		-
+			message: '#^Call to an undefined method object\:\:delete_value\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Http/Controllers/BonusController.php
+
+		-
+			message: '#^Parameter \#2 \$baseTimestamp of function strtotime expects int\|null, int\|false given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Http/Controllers/BonusController.php
+
+		-
+			message: '#^Parameter \#2 \$timestamp of function date expects int\|null, int\|false given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Http/Controllers/BonusController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\BookmarkController\:\:destroy\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/BookmarkController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\BookmarkController\:\:store\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/BookmarkController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\CommentController\:\:index\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/CommentController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\CommentController\:\:store\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/CommentController.php
+
+		-
+			message: '#^Offset ''type'' might not exist on array\{type\?\: mixed, torrent\?\: mixed, text\?\: mixed, ori_text\?\: mixed, offer\?\: mixed, request\?\: mixed, anonymous\?\: mixed\}\.$#'
+			identifier: offsetAccess.notFound
+			count: 1
+			path: app/Http/Controllers/CommentController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\DashboardController\:\:latestTorrent\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/DashboardController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\DashboardController\:\:latestUser\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/DashboardController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\DashboardController\:\:statData\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/DashboardController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\DashboardController\:\:systemInfo\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/DashboardController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ExamController\:\:all\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/ExamController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ExamController\:\:destroy\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/ExamController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ExamController\:\:index\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/ExamController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ExamController\:\:indexes\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/ExamController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ExamController\:\:show\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/ExamController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ExamController\:\:store\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/ExamController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ExamController\:\:update\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/ExamController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ExamUserController\:\:avoid\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/ExamUserController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ExamUserController\:\:destroy\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/ExamUserController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ExamUserController\:\:index\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/ExamUserController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ExamUserController\:\:recover\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/ExamUserController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ExamUserController\:\:store\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/ExamUserController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\FileController\:\:index\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/FileController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ForumController\:\:destroy\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/ForumController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ForumController\:\:index\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/ForumController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ForumController\:\:show\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/ForumController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ForumController\:\:store\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/ForumController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ForumController\:\:update\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/ForumController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\HitAndRunController\:\:destroy\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/HitAndRunController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\HitAndRunController\:\:index\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/HitAndRunController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\HitAndRunController\:\:show\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/HitAndRunController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\HitAndRunController\:\:store\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/HitAndRunController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\HitAndRunController\:\:update\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/HitAndRunController.php
+
+		-
+			message: '#^Call to an undefined method object\:\:delete_value\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: app/Http/Controllers/IndexController.php
+
+		-
+			message: '#^Call to an undefined method object\:\:delete_value\(\)\.$#'
+			identifier: method.notFound
+			count: 3
+			path: app/Http/Controllers/InfoController.php
+
+		-
+			message: '#^Parameter \#1 \$view of function view expects view\-string\|null, string given\.$#'
+			identifier: argument.type
+			count: 3
+			path: app/Http/Controllers/LegacyController.php
+
+		-
+			message: '#^Parameter \#2 \$status of function response expects int, int\<100, max\>\|true given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Http/Controllers/LegacyController.php
+
+		-
+			message: '#^Call to an undefined method object\:\:delete_value\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: app/Http/Controllers/LogController.php
+
+		-
+			message: '#^Parameter \#5 \$editItem of method App\\Http\\Controllers\\LogController\:\:chronicleList\(\) expects array\<string, mixed\>\|null, array\<int\|string, mixed\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Http/Controllers/LogController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\MedalController\:\:destroy\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/MedalController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\MedalController\:\:index\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/MedalController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\MedalController\:\:show\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/MedalController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\MedalController\:\:store\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/MedalController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\MedalController\:\:update\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/MedalController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\MessageController\:\:destroy\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/MessageController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\MessageController\:\:index\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/MessageController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\MessageController\:\:listUnread\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/MessageController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\MessageController\:\:show\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/MessageController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\MessageController\:\:store\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/MessageController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\MessageController\:\:update\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/MessageController.php
+
+		-
+			message: '#^Binary operation "\-" between ''''\|int\<2, 7\> and 1 results in an error\.$#'
+			identifier: binaryOp.invalid
+			count: 1
+			path: app/Http/Controllers/ModerationController.php
+
+		-
+			message: '#^Call to an undefined method object\:\:delete_value\(\)\.$#'
+			identifier: method.notFound
+			count: 3
+			path: app/Http/Controllers/ModerationController.php
+
+		-
+			message: '#^Parameter \#1 \$hostname of function gethostbyname expects string, string\|false given\.$#'
+			identifier: argument.type
+			count: 2
+			path: app/Http/Controllers/ModerationController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\NewsController\:\:destroy\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/NewsController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\NewsController\:\:index\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/NewsController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\NewsController\:\:latest\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/NewsController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\NewsController\:\:show\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/NewsController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\NewsController\:\:store\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/NewsController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\NewsController\:\:update\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/NewsController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\OfferController\:\:index\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/OfferController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\OverForumController\:\:index\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/OverForumController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\PeerController\:\:index\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/PeerController.php
+
+		-
+			message: '#^Call to an undefined method App\\Models\\Poll\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\Poll\>\:\:answers\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Http/Controllers/PollController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\PollController\:\:destroy\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/PollController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\PollController\:\:index\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/PollController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\PollController\:\:latest\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/PollController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\PollController\:\:show\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/PollController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\PollController\:\:store\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/PollController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\PollController\:\:update\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/PollController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\PollController\:\:vote\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/PollController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\PostController\:\:destroy\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/PostController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\PostController\:\:index\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/PostController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\PostController\:\:show\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/PostController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\PostController\:\:store\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/PostController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\PostController\:\:update\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/PostController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\RewardController\:\:index\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/RewardController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\RewardController\:\:store\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/RewardController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\SettingController\:\:index\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/SettingController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\SettingController\:\:store\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/SettingController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ShoutboxController\:\:index\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/ShoutboxController.php
+
+		-
+			message: '#^Parameter \#1 \$shoutIds of static method App\\Support\\Shoutbox\:\:prefetchReactions\(\) expects list\<int\>, array\<int\> given\.$#'
+			identifier: argument.type
+			count: 2
+			path: app/Http/Controllers/ShoutboxController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\SnatchController\:\:index\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/SnatchController.php
+
+		-
+			message: '#^Cannot access offset ''id'' on stdClass\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: app/Http/Controllers/StaffController.php
+
+		-
+			message: '#^Cannot access offset ''name'' on stdClass\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: app/Http/Controllers/StaffController.php
+
+		-
+			message: '#^Call to an undefined method object\:\:delete_value\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: app/Http/Controllers/SupportController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\SupportController\:\:complainReply\(\) should return Illuminate\\Http\\RedirectResponse\|Illuminate\\Http\\Response but returns Illuminate\\Http\\RedirectResponse\|Illuminate\\Routing\\Redirector\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/SupportController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\SupportController\:\:complainToggle\(\) should return Illuminate\\Http\\RedirectResponse\|Illuminate\\Http\\Response but returns Illuminate\\Http\\RedirectResponse\|Illuminate\\Routing\\Redirector\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/SupportController.php
+
+		-
+			message: '#^Binary operation "\-" between int\<0, max\>\|string and 1 results in an error\.$#'
+			identifier: binaryOp.invalid
+			count: 1
+			path: app/Http/Controllers/SystemController.php
+
+		-
+			message: '#^Call to an undefined method object\:\:delete_value\(\)\.$#'
+			identifier: method.notFound
+			count: 3
+			path: app/Http/Controllers/SystemController.php
+
+		-
+			message: '#^Parameter \#3 \.\.\.\$values of function sprintf expects bool\|float\|int\|string\|null, array\<int, string\>\|string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Http/Controllers/SystemController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\TagController\:\:destroy\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/TagController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\TagController\:\:index\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/TagController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\TagController\:\:show\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/TagController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\TagController\:\:store\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/TagController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\TagController\:\:update\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/TagController.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Torrent\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\Torrent\>\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/ThankController.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Torrent\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\Torrent\>\:\:\$owner\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/ThankController.php
+
+		-
+			message: '#^Call to an undefined method App\\Models\\Torrent\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\Torrent\>\:\:checkIsNormal\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Http/Controllers/ThankController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ThankController\:\:index\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/ThankController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ThankController\:\:store\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/ThankController.php
+
+		-
+			message: '#^Parameter \#2 \$columns of method Illuminate\\Database\\Eloquent\\Builder\<App\\Models\\Torrent\>\:\:findOrFail\(\) expects array\<int, Illuminate\\Contracts\\Database\\Query\\Expression\|string\>\|Illuminate\\Contracts\\Database\\Query\\Expression\|string, array\<int\|string, mixed\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Http/Controllers/ThankController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\TokenController\:\:addToken\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 2
+			path: app/Http/Controllers/TokenController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\TokenController\:\:delToken\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 2
+			path: app/Http/Controllers/TokenController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\TopicController\:\:destroy\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/TopicController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\TopicController\:\:index\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/TopicController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\TopicController\:\:show\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/TopicController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\TopicController\:\:store\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/TopicController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\TopicController\:\:update\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/TopicController.php
+
+		-
+			message: '#^Property App\\Models\\Topic\:\:\$hlcolor \(int\<0, max\>\) does not accept int\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: app/Http/Controllers/TopicController.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\User\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\User\>\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Http/Controllers/TorrentActionController.php
+
+		-
+			message: '#^Parameter \#1 \$content of function response expects array\|Illuminate\\Contracts\\View\\View\|string\|null, string\|false given\.$#'
+			identifier: argument.type
+			count: 2
+			path: app/Http/Controllers/TorrentActionController.php
+
+		-
+			message: '#^Parameter \#2 \$currentUser of static method App\\Repositories\\TorrentAjaxRepository\:\:peerList\(\) expects App\\Models\\User\|null, App\\Models\\User\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\User\>\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Http/Controllers/TorrentActionController.php
+
+		-
+			message: '#^Parameter \#2 \$timestamp of function date expects int\|null, int\|false given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Http/Controllers/TorrentActionController.php
+
+		-
+			message: '#^Parameter \#4 \$currentUser of static method App\\Repositories\\TorrentAjaxRepository\:\:userTorrentList\(\) expects App\\Models\\User\|null, App\\Models\\User\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\User\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Http/Controllers/TorrentActionController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\TorrentController\:\:approval\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/TorrentController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\TorrentController\:\:approvalLogs\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/TorrentController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\TorrentController\:\:index\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/TorrentController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\TorrentController\:\:queryByPiecesHash\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/TorrentController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\TorrentController\:\:searchBox\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/TorrentController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\TorrentController\:\:show\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/TorrentController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\TorrentController\:\:store\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/TorrentController.php
+
+		-
+			message: '#^Parameter \#2 \$columns of method Illuminate\\Database\\Eloquent\\Builder\<App\\Models\\Torrent\>\:\:findOrFail\(\) expects array\<int, Illuminate\\Contracts\\Database\\Query\\Expression\|string\>\|Illuminate\\Contracts\\Database\\Query\\Expression\|string, array\<int\|string, mixed\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Http/Controllers/TorrentController.php
+
+		-
+			message: '#^Parameter \#1 \$bdInfo of class Nexus\\Torrent\\BdInfoExtra constructor expects string, array\<mixed\>\|string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Http/Controllers/TorrentDetailsController.php
+
+		-
+			message: '#^Parameter \#1 \$mediaInfo of class Nexus\\Torrent\\TechnicalInformation constructor expects string, array\<mixed\>\|string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Http/Controllers/TorrentDetailsController.php
+
+		-
+			message: '#^Parameter \#1 \$str of function strtok expects string, array\<mixed\>\|string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Http/Controllers/TorrentDetailsController.php
+
+		-
+			message: '#^Parameter \#1 \$torrent of static method App\\Support\\TorrentAccess\:\:hrImage\(\) expects array\<string, mixed\>, array\<int\|string, mixed\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Http/Controllers/TorrentDetailsController.php
+
+		-
+			message: '#^Binary operation "\." between array\<string, string\>\|string and ''\?passkey\='' results in an error\.$#'
+			identifier: binaryOp.invalid
+			count: 1
+			path: app/Http/Controllers/TorrentDownloadController.php
+
+		-
+			message: '#^Cannot cast float\|int\|list\<string\>\|string to string\.$#'
+			identifier: cast.string
+			count: 1
+			path: app/Http/Controllers/TorrentEditController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\UploadController\:\:sections\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/UploadController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\UserController\:\:base\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/UserController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\UserController\:\:classes\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/UserController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\UserController\:\:disable\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/UserController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\UserController\:\:enable\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/UserController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\UserController\:\:index\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/UserController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\UserController\:\:inviteInfo\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/UserController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\UserController\:\:matchExams\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/UserController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\UserController\:\:me\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/UserController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\UserController\:\:modComment\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/UserController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\UserController\:\:resetPassword\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/UserController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\UserController\:\:show\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/UserController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\UserController\:\:store\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/UserController.php
+
+		-
+			message: '#^Parameter \#1 \$user of static method App\\Support\\Bonus\:\:buildBonusTableForUser\(\) expects array\<string, mixed\>, array\<int\|string, mixed\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Http/Controllers/UserDetailController.php
+
+		-
+			message: '#^Call to an undefined method App\\Models\\UserMedal\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\UserMedal\>\:\:delete\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Http/Controllers/UserMedalController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\UserMedalController\:\:destroy\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/UserMedalController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\UserMedalController\:\:index\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/UserMedalController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\UserMedalController\:\:show\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/UserMedalController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\UserMedalController\:\:store\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/UserMedalController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\UserMedalController\:\:update\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/UserMedalController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\UsercpController\:\:forum\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/UsercpController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\UsercpController\:\:security\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/UsercpController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\UsercpController\:\:settings\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 2
+			path: app/Http/Controllers/UsercpController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\UsercpController\:\:tracker\(\) should return array\<string, mixed\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/UsercpController.php
+
+		-
+			message: '#^Parameter \#2 \$currentUser of static method App\\Repositories\\SearchPageRepository\:\:dataForSearch\(\) expects App\\Models\\User, App\\Models\\User\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\User\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Http/Controllers/UtilityController.php
+
+		-
+			message: '#^Parameter \#2 \$status of function response expects int, int\<100, max\>\|true given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Http/Controllers/UtilityController.php
+
+		-
+			message: '#^Cannot cast float\|int\|list\<string\>\|string\|null to string\.$#'
+			identifier: cast.string
+			count: 4
+			path: app/Http/Controllers/WebCommentController.php
+
+		-
+			message: '#^Parameter \#1 \$quote of method App\\Http\\Controllers\\WebCommentController\:\:buildQuote\(\) expects array\<string, mixed\>, array\<int\|string, mixed\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Http/Controllers/WebCommentController.php
+
+		-
+			message: '#^Cannot call method format\(\) on DateTime\|false\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Models/AnnounceLog.php
+
+		-
+			message: '#^Cannot call method setTimezone\(\) on DateTime\|false\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Models/AnnounceLog.php
+
+		-
+			message: '#^Parameter \#1 \$attributes of method Illuminate\\Database\\Eloquent\\Builder\<App\\Models\\Message\>\:\:create\(\) expects array\<string, mixed\>, array\<int\|string, mixed\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Models/Message.php
+
+		-
+			message: '#^Parameter \#1 \$key of method App\\Support\\Config\\MainConfig\:\:category\(\) expects string, int\|string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Models/SearchBox.php
+
+		-
+			message: '#^Method App\\Models\\Setting\:\:getBonusRewardOptions\(\) should return array\<int\|string, mixed\> but returns list\<string\>\|false\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Models/Setting.php
+
+		-
+			message: '#^Argument of an invalid type list\<string\>\|false supplied for foreach, only iterables are supported\.$#'
+			identifier: foreach.nonIterable
+			count: 1
+			path: app/Models/Torrent.php
+
+		-
+			message: '#^Parameter \#1 \$attributes of method Illuminate\\Database\\Eloquent\\Builder\<App\\Models\\TorrentOperationLog\>\:\:create\(\) expects array\<string, mixed\>, array\<int\|string, mixed\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Models/TorrentOperationLog.php
+
+		-
+			message: '#^Parameter \#1 \$callback of function call_user_func_array expects callable\(\)\: mixed, array\{Redis, string\} given\.$#'
+			identifier: argument.type
+			count: 2
+			path: app/Models/TrackerUrl.php
+
+		-
+			message: '#^Call to an undefined method App\\Models\\AgentAllow\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\AgentAllow\>\:\:delete\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Repositories/AgentAllowRepository.php
+
+		-
+			message: '#^Call to an undefined method App\\Models\\AgentAllow\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\AgentAllow\>\:\:denies\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Repositories/AgentAllowRepository.php
+
+		-
+			message: '#^Call to an undefined method App\\Models\\AgentAllow\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\AgentAllow\>\:\:update\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Repositories/AgentAllowRepository.php
+
+		-
+			message: '#^Parameter \#1 \$attributes of method Illuminate\\Database\\Eloquent\\Builder\<App\\Models\\AgentAllow\>\:\:create\(\) expects array\<string, mixed\>, array\<int\|string, mixed\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Repositories/AgentAllowRepository.php
+
+		-
+			message: '#^Parameter \#1 \$hex_string of function hexdec expects string, float\|int\|string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Repositories/AgentAllowRepository.php
+
+		-
+			message: '#^Call to an undefined method App\\Models\\AgentDeny\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\AgentDeny\>\:\:delete\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Repositories/AgentDenyRepository.php
+
+		-
+			message: '#^Call to an undefined method App\\Models\\AgentDeny\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\AgentDeny\>\:\:update\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Repositories/AgentDenyRepository.php
+
+		-
+			message: '#^Parameter \#1 \$attributes of method Illuminate\\Database\\Eloquent\\Builder\<App\\Models\\AgentDeny\>\:\:create\(\) expects array\<string, mixed\>, array\<int\|string, mixed\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Repositories/AgentDenyRepository.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\User\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\User\>\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Repositories/AuthenticateRepository.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\User\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\User\>\:\:\$passkey\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Repositories/AuthenticateRepository.php
+
+		-
+			message: '#^Call to an undefined method App\\Models\\User\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\User\>\:\:checkIsNormal\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: app/Repositories/AuthenticateRepository.php
+
+		-
+			message: '#^Call to an undefined method App\\Models\\User\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\User\>\:\:tokens\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Repositories/AuthenticateRepository.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\HitAndRun\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\HitAndRun\>\:\:\$comment\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Repositories/BonusRepository.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\HitAndRun\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\HitAndRun\>\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Repositories/BonusRepository.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\HitAndRun\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\HitAndRun\>\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Repositories/BonusRepository.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\HitAndRun\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\HitAndRun\>\:\:\$uid\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Repositories/BonusRepository.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Medal\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\Medal\>\:\:\$duration\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Repositories/BonusRepository.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Medal\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\Medal\>\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 7
+			path: app/Repositories/BonusRepository.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Medal\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\Medal\>\:\:\$inventory\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Repositories/BonusRepository.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Medal\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\Medal\>\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 3
+			path: app/Repositories/BonusRepository.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Medal\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\Medal\>\:\:\$price\.$#'
+			identifier: property.notFound
+			count: 4
+			path: app/Repositories/BonusRepository.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Torrent\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\Torrent\>\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 3
+			path: app/Repositories/BonusRepository.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Torrent\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\Torrent\>\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Repositories/BonusRepository.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Torrent\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\Torrent\>\:\:\$price\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Repositories/BonusRepository.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Torrent\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\Torrent\>\:\:\$user\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Repositories/BonusRepository.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\User\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\User\>\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 6
+			path: app/Repositories/BonusRepository.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\User\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\User\>\:\:\$locale\.$#'
+			identifier: property.notFound
+			count: 10
+			path: app/Repositories/BonusRepository.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\User\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\User\>\:\:\$username\.$#'
+			identifier: property.notFound
+			count: 3
+			path: app/Repositories/BonusRepository.php
+
+		-
+			message: '#^Call to an undefined method App\\Models\\HitAndRun\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\HitAndRun\>\:\:update\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Repositories/BonusRepository.php
+
+		-
+			message: '#^Call to an undefined method App\\Models\\Medal\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\Medal\>\:\:checkCanBeBuy\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: app/Repositories/BonusRepository.php
+
+		-
+			message: '#^Call to an undefined method App\\Models\\User\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\User\>\:\:medals\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Repositories/BonusRepository.php
+
+		-
+			message: '#^Call to an undefined method App\\Models\\User\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\User\>\:\:valid_medals\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: app/Repositories/BonusRepository.php
+
+		-
+			message: '#^Parameter \#1 \$user of method App\\Repositories\\MedalRepository\:\:userAttachMedal\(\) expects App\\Models\\User, App\\Models\\User\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\User\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Repositories/BonusRepository.php
+
+		-
+			message: '#^Parameter \#1 \$values of method Illuminate\\Database\\Query\\Builder\:\:update\(\) expects array\<string, mixed\>, array\<int\|string, mixed\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Repositories/BonusRepository.php
+
+		-
+			message: '#^Parameter \#2 \$columns of method Illuminate\\Database\\Eloquent\\Builder\<App\\Models\\Torrent\>\:\:findOrFail\(\) expects array\<int, Illuminate\\Contracts\\Database\\Query\\Expression\|string\>\|Illuminate\\Contracts\\Database\\Query\\Expression\|string, array\<int\|string, mixed\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Repositories/BonusRepository.php
+
+		-
+			message: '#^Parameter \#2 \$medal of method App\\Repositories\\MedalRepository\:\:userAttachMedal\(\) expects App\\Models\\Medal, App\\Models\\Medal\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\Medal\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Repositories/BonusRepository.php
+
+		-
+			message: '#^Parameter \#2 \$num2 of function bcsub expects numeric\-string, string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Repositories/BonusRepository.php
+
+		-
+			message: '#^Call to an undefined method App\\Models\\Torrent\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\Torrent\>\:\:checkIsNormal\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Repositories/BookmarkRepository.php
+
+		-
+			message: '#^Call to an undefined method object\:\:delete_value\(\)\.$#'
+			identifier: method.notFound
+			count: 6
+			path: app/Repositories/CategoryRepository.php
+
+		-
+			message: '#^Binary operation "\+" between int\|non\-falsy\-string and int\<2, max\> results in an error\.$#'
+			identifier: binaryOp.invalid
+			count: 1
+			path: app/Repositories/CleanupRepository.php
+
+		-
+			message: '#^Parameter \#3 \$lastTime of static method App\\Repositories\\CleanupRepository\:\:getAlarmEmailBodyForCleanup\(\) expects int, int\|string given\.$#'
+			identifier: argument.type
+			count: 2
+			path: app/Repositories/CleanupRepository.php
+
+		-
+			message: '#^Cannot call method toArray\(\) on App\\Models\\Offer\|App\\Models\\Torrent\|stdClass\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Repositories/CommentRepository.php
+
+		-
+			message: '#^Parameter \#1 \$bytes of static method App\\Support\\Format\:\:size\(\) expects float\|int, float\|int\|string given\.$#'
+			identifier: argument.type
+			count: 3
+			path: app/Repositories/DashboardRepository.php
+
+		-
+			message: '#^Parameter \#1 \$columns of method Illuminate\\Database\\Eloquent\\Builder\<App\\Models\\Torrent\>\:\:get\(\) expects array\<int, Illuminate\\Contracts\\Database\\Query\\Expression\|string\>\|Illuminate\\Contracts\\Database\\Query\\Expression\|string, array\<int\|string, mixed\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Repositories/DashboardRepository.php
+
+		-
+			message: '#^Parameter \#2 \$array of function implode expects array, list\<float\>\|false given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Repositories/DashboardRepository.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Exam\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\Exam\>\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Repositories/ExamRepository.php
+
+		-
+			message: '#^Call to an undefined method App\\Models\\Exam\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\Exam\>\:\:delete\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Repositories/ExamRepository.php
+
+		-
+			message: '#^Call to an undefined method App\\Models\\Exam\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\Exam\>\:\:update\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Repositories/ExamRepository.php
+
+		-
+			message: '#^Cannot access property \$begin on App\\Models\\ExamUser\|bool\.$#'
+			identifier: property.nonObject
+			count: 3
+			path: app/Repositories/ExamRepository.php
+
+		-
+			message: '#^Cannot access property \$end on App\\Models\\ExamUser\|bool\.$#'
+			identifier: property.nonObject
+			count: 3
+			path: app/Repositories/ExamRepository.php
+
+		-
+			message: '#^Cannot access property \$is_done on App\\Models\\ExamUser\|bool\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: app/Repositories/ExamRepository.php
+
+		-
+			message: '#^Cannot access property \$user on App\\Models\\ExamUser\|bool\.$#'
+			identifier: property.nonObject
+			count: 10
+			path: app/Repositories/ExamRepository.php
+
+		-
+			message: '#^Method App\\Repositories\\ExamRepository\:\:listMatchExam\(\) should return Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\Exam\> but returns Illuminate\\Support\\Collection\<int, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Repositories/ExamRepository.php
+
+		-
+			message: '#^Parameter \#1 \$attributes of method Illuminate\\Database\\Eloquent\\Builder\<App\\Models\\Exam\>\:\:create\(\) expects array\<string, mixed\>, array\<int\|string, mixed\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Repositories/ExamRepository.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\HitAndRun\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\HitAndRun\>\:\:\$comment\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Repositories/HitAndRunRepository.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\HitAndRun\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\HitAndRun\>\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Repositories/HitAndRunRepository.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\HitAndRun\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\HitAndRun\>\:\:\$status_text\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Repositories/HitAndRunRepository.php
+
+		-
+			message: '#^Call to an undefined method App\\Models\\HitAndRun\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\HitAndRun\>\:\:delete\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Repositories/HitAndRunRepository.php
+
+		-
+			message: '#^Call to an undefined method App\\Models\\HitAndRun\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\HitAndRun\>\:\:save\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Repositories/HitAndRunRepository.php
+
+		-
+			message: '#^Call to an undefined method App\\Models\\HitAndRun\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\HitAndRun\>\:\:update\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Repositories/HitAndRunRepository.php
+
+		-
+			message: '#^Parameter \#1 \$attributes of method Illuminate\\Database\\Eloquent\\Builder\<App\\Models\\HitAndRun\>\:\:create\(\) expects array\<string, mixed\>, array\<int\|string, mixed\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Repositories/HitAndRunRepository.php
+
+		-
+			message: '#^Parameter \#1 \$hitAndRun of static method App\\Models\\HitAndRun\:\:clearCache\(\) expects App\\Models\\HitAndRun, App\\Models\\HitAndRun\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\HitAndRun\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Repositories/HitAndRunRepository.php
+
+		-
+			message: '#^Parameter \#1 \$num1 of function bcmul expects numeric\-string, string given\.$#'
+			identifier: argument.type
+			count: 2
+			path: app/Repositories/HitAndRunRepository.php
+
+		-
+			message: '#^Parameter \#1 \$values of method Illuminate\\Database\\Query\\Builder\:\:update\(\) expects array\<string, mixed\>, array\<int\|string, mixed\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Repositories/HitAndRunRepository.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Medal\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\Medal\>\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Repositories/MedalRepository.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\UserMedal\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\UserMedal\>\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Repositories/MedalRepository.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\UserMedal\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\UserMedal\>\:\:\$uid\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Repositories/MedalRepository.php
+
+		-
+			message: '#^Call to an undefined method App\\Models\\Medal\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\Medal\>\:\:delete\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Repositories/MedalRepository.php
+
+		-
+			message: '#^Call to an undefined method App\\Models\\Medal\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\Medal\>\:\:update\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Repositories/MedalRepository.php
+
+		-
+			message: '#^Call to an undefined method App\\Models\\UserMedal\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\UserMedal\>\:\:save\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Repositories/MedalRepository.php
+
+		-
+			message: '#^Call to an undefined method App\\Models\\User\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\User\>\:\:wearing_medals\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Repositories/MedalRepository.php
+
+		-
+			message: '#^Parameter \#1 \$attributes of method Illuminate\\Database\\Eloquent\\Builder\<App\\Models\\Medal\>\:\:create\(\) expects array\<string, mixed\>, array\<int\|string, mixed\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Repositories/MedalRepository.php
+
+		-
+			message: '#^Parameter \#1 \$string of function substr expects string, int\|string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Repositories/MeiliSearchRepository.php
+
+		-
+			message: '#^Call to an undefined method App\\Models\\Message\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\Message\>\:\:delete\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Repositories/MessageRepository.php
+
+		-
+			message: '#^Call to an undefined method App\\Models\\Message\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\Message\>\:\:update\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Repositories/MessageRepository.php
+
+		-
+			message: '#^Parameter \#1 \$attributes of method Illuminate\\Database\\Eloquent\\Builder\<App\\Models\\Message\>\:\:create\(\) expects array\<string, mixed\>, array\<int\|string, mixed\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Repositories/MessageRepository.php
+
+		-
+			message: '#^Parameter \#2 \$user of static method App\\Auth\\Permission\:\:can\(\) expects App\\Models\\User\|null, App\\Models\\User\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\User\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Repositories/MessageRepository.php
+
+		-
+			message: '#^Parameter \#1 \$values of method Illuminate\\Database\\Eloquent\\Builder\<App\\Models\\User\>\:\:update\(\) expects array\<string, mixed\>, array\<int\|string, mixed\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Repositories/ModtaskRepository.php
+
+		-
+			message: '#^Parameter \#3 \$extra of method Illuminate\\Database\\Query\\Builder\:\:increment\(\) expects array\<string, mixed\>, array\<int\|string, mixed\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Repositories/ModtaskRepository.php
+
+		-
+			message: '#^Call to an undefined method App\\Models\\News\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\News\>\:\:delete\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Repositories/NewsRepository.php
+
+		-
+			message: '#^Call to an undefined method App\\Models\\News\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\News\>\:\:update\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Repositories/NewsRepository.php
+
+		-
+			message: '#^Parameter \#1 \$attributes of method Illuminate\\Database\\Eloquent\\Builder\<App\\Models\\News\>\:\:create\(\) expects array\<string, mixed\>, array\<int\|string, mixed\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Repositories/NewsRepository.php
+
+		-
+			message: '#^Parameter \#1 \$attributes of method Illuminate\\Database\\Eloquent\\Model\:\:update\(\) expects array\<string, mixed\>, array\<int\|string, mixed\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Repositories/PluginRepository.php
+
+		-
+			message: '#^Parameter \#1 \$string of function trim expects string, array\<int\|string, mixed\>\|string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Repositories/PluginRepository.php
+
+		-
+			message: '#^Call to an undefined method object\:\:delete_value\(\)\.$#'
+			identifier: method.notFound
+			count: 4
+			path: app/Repositories/PollRepository.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Torrent\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\Torrent\>\:\:\$owner\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Repositories/RewardRepository.php
+
+		-
+			message: '#^Call to an undefined method App\\Models\\Reward\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\Reward\>\:\:delete\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Repositories/RewardRepository.php
+
+		-
+			message: '#^Call to an undefined method App\\Models\\Reward\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\Reward\>\:\:update\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Repositories/RewardRepository.php
+
+		-
+			message: '#^Call to an undefined method App\\Models\\Torrent\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\Torrent\>\:\:checkIsNormal\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Repositories/RewardRepository.php
+
+		-
+			message: '#^Parameter \#2 \$columns of method Illuminate\\Database\\Eloquent\\Builder\<App\\Models\\Torrent\>\:\:findOrFail\(\) expects array\<int, Illuminate\\Contracts\\Database\\Query\\Expression\|string\>\|Illuminate\\Contracts\\Database\\Query\\Expression\|string, array\<int\|string, mixed\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Repositories/RewardRepository.php
+
+		-
+			message: '#^Argument of an invalid type App\\Models\\SearchBox\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\SearchBox\> supplied for foreach, only iterables are supported\.$#'
+			identifier: foreach.nonIterable
+			count: 1
+			path: app/Repositories/SearchBoxRepository.php
+
+		-
+			message: '#^Call to an undefined method App\\Models\\SearchBox\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\SearchBox\>\:\:delete\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Repositories/SearchBoxRepository.php
+
+		-
+			message: '#^Call to an undefined method App\\Models\\SearchBox\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\SearchBox\>\:\:update\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Repositories/SearchBoxRepository.php
+
+		-
+			message: '#^Method App\\Repositories\\SearchBoxRepository\:\:getOrderedIds\(\) should return list\<int\> but returns array\<mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Repositories/SearchBoxRepository.php
+
+		-
+			message: '#^Parameter \#1 \$attributes of method Illuminate\\Database\\Eloquent\\Builder\<App\\Models\\SearchBox\>\:\:create\(\) expects array\<string, mixed\>, array\<int\|string, mixed\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Repositories/SearchBoxRepository.php
+
+		-
+			message: '#^Parameter \#1 \$searchBox of method App\\Repositories\\SearchBoxRepository\:\:buildTaxonomyFormSchema\(\) expects App\\Models\\SearchBox, object given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Repositories/SearchBoxRepository.php
+
+		-
+			message: '#^Parameter \#1 \$searchBox of method App\\Repositories\\SearchBoxRepository\:\:buildTaxonomySelect\(\) expects App\\Models\\SearchBox, object given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Repositories/SearchBoxRepository.php
+
+		-
+			message: '#^Parameter \#1 \.\.\.\$arrays of function array_merge expects array, array\<int\|string, mixed\>\|bool given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Repositories/SearchPageRepository.php
+
+		-
+			message: '#^Parameter \#2 \$searchArea of static method App\\Repositories\\SearchPageRepository\:\:buildFallbackQuery\(\) expects int, int\|string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Repositories/SearchPageRepository.php
+
+		-
+			message: '#^Parameter \#2 \$searchArea of static method App\\Repositories\\SearchPageRepository\:\:formatResult\(\) expects int, int\|string given\.$#'
+			identifier: argument.type
+			count: 2
+			path: app/Repositories/SearchPageRepository.php
+
+		-
+			message: '#^Cannot access offset ''found'' on array\<int\|string, mixed\>\|bool\|\(callable\(\)\: mixed\)\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: app/Repositories/SearchRepository.php
+
+		-
+			message: '#^Cannot access offset ''hits'' on Elastic\\Elasticsearch\\Response\\Elasticsearch\|Http\\Promise\\Promise\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: app/Repositories/SearchRepository.php
+
+		-
+			message: '#^Method App\\Repositories\\SearchRepository\:\:getTorrent\(\) should return array\<int\|string, mixed\>\|bool\|\(callable\(\)\: mixed\) but returns Elastic\\Elasticsearch\\Response\\Elasticsearch\|Http\\Promise\\Promise\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Repositories/SearchRepository.php
+
+		-
+			message: '#^Parameter \#1 \$array of function array_slice expects array, list\<string\>\|false given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Repositories/SearchRepository.php
+
+		-
+			message: '#^Parameter \#1 \$params of method Elastic\\Elasticsearch\\Endpoints\\Indices\:\:create\(\) expects array\{index\: string, wait_for_active_shards\?\: string, timeout\?\: int\|string, master_timeout\?\: int\|string, pretty\?\: bool, human\?\: bool, error_trace\?\: bool, source\?\: string, \.\.\.\}\|null, non\-empty\-array\<int\|string, mixed\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Repositories/SearchRepository.php
+
+		-
+			message: '#^Parameter \#1 \$string of function substr expects string, int\|string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Repositories/SearchRepository.php
+
+		-
+			message: '#^Call to an undefined method App\\Models\\SeedBoxRecord\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\SeedBoxRecord\>\:\:update\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Repositories/SeedBoxRepository.php
+
+		-
+			message: '#^Parameter \#1 \$attributes of method Illuminate\\Database\\Eloquent\\Builder\<App\\Models\\SeedBoxRecord\>\:\:create\(\) expects array\<string, mixed\>, array\<int\|string, mixed\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Repositories/SeedBoxRepository.php
+
+		-
+			message: '#^Method App\\Repositories\\ShoutboxRepository\:\:getMyReactions\(\) should return list\<string\> but returns array\<mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Repositories/ShoutboxRepository.php
+
+		-
+			message: '#^Call to an undefined method App\\Models\\Tag\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\Tag\>\:\:delete\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Repositories/TagRepository.php
+
+		-
+			message: '#^Call to an undefined method App\\Models\\Tag\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\Tag\>\:\:update\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Repositories/TagRepository.php
+
+		-
+			message: '#^Parameter \#1 \$attributes of method Illuminate\\Database\\Eloquent\\Builder\<App\\Models\\Tag\>\:\:create\(\) expects array\<string, mixed\>, array\<int\|string, mixed\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Repositories/TagRepository.php
+
+		-
+			message: '#^Cannot access offset ''class'' on array\<string, mixed\>\|false\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: app/Repositories/ToolRepository.php
+
+		-
+			message: '#^Cannot access offset ''ids'' on stdClass\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 2
+			path: app/Repositories/ToolRepository.php
+
+		-
+			message: '#^Cannot access offset ''torrent'' on stdClass\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: app/Repositories/ToolRepository.php
+
+		-
+			message: '#^Cannot access offset ''torrentid'' on stdClass\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: app/Repositories/ToolRepository.php
+
+		-
+			message: '#^Cannot access offset ''userid'' on stdClass\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 2
+			path: app/Repositories/ToolRepository.php
+
+		-
+			message: '#^Parameter \#2 \$replace of static method App\\Support\\Locale\:\:trans\(\) expects array\<string, mixed\>, array\<int\|string, mixed\> given\.$#'
+			identifier: argument.type
+			count: 4
+			path: app/Repositories/ToolRepository.php
+
+		-
+			message: '#^Method App\\Repositories\\ToptenRepository\:\:toArray\(\) should return list\<array\<string, mixed\>\> but returns array\<int, array\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Repositories/ToptenRepository.php
+
+		-
+			message: '#^Cannot access offset ''count'' on stdClass\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: app/Repositories/TorrentAjaxRepository.php
+
+		-
+			message: '#^Cannot access offset ''suggest'' on stdClass\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: app/Repositories/TorrentAjaxRepository.php
+
+		-
+			message: '#^Method App\\Repositories\\TorrentAjaxRepository\:\:searchSuggest\(\) should return array\{string, list\<string\>, list\<int\>\} but returns non\-empty\-array\<mixed, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Repositories/TorrentAjaxRepository.php
+
+		-
+			message: '#^Parameter \#1 \$values of method Illuminate\\Database\\Eloquent\\Builder\<App\\Models\\Torrent\>\:\:update\(\) expects array\<string, mixed\>, array\<int\|string, mixed\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Repositories/TorrentEditRepository.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Category\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\Category\>\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Repositories/TorrentRepository.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Category\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\Category\>\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Repositories/TorrentRepository.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Torrent\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\Torrent\>\:\:\$added\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Repositories/TorrentRepository.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Torrent\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\Torrent\>\:\:\$approval_status\.$#'
+			identifier: property.notFound
+			count: 6
+			path: app/Repositories/TorrentRepository.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Torrent\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\Torrent\>\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 5
+			path: app/Repositories/TorrentRepository.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Torrent\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\Torrent\>\:\:\$promotion_until\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Repositories/TorrentRepository.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Torrent\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\Torrent\>\:\:\$sp_state\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Repositories/TorrentRepository.php
+
+		-
+			message: '#^Call to an undefined method App\\Models\\SearchBox\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\SearchBox\>\:\:categories\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Repositories/TorrentRepository.php
+
+		-
+			message: '#^Call to an undefined method App\\Models\\Torrent\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\Torrent\>\:\:update\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Repositories/TorrentRepository.php
+
+		-
+			message: '#^Parameter \#2 \$columns of method Illuminate\\Database\\Eloquent\\Builder\<App\\Models\\Torrent\>\:\:findOrFail\(\) expects array\<int, Illuminate\\Contracts\\Database\\Query\\Expression\|string\>\|Illuminate\\Contracts\\Database\\Query\\Expression\|string, array\<int\|string, mixed\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Repositories/TorrentRepository.php
+
+		-
+			message: '#^Parameter \#1 \$value of function count expects array\|Countable, array\<int\|string, mixed\>\|string\|null given\.$#'
+			identifier: argument.type
+			count: 2
+			path: app/Repositories/TorrentSearchRepository.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Category\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\Category\>\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Repositories/UploadRepository.php
+
+		-
+			message: '#^Method App\\Repositories\\UploadRepository\:\:getCover\(\) should return string but returns array\<int, string\>\|string\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Repositories/UploadRepository.php
+
+		-
+			message: '#^Parameter \#2 \$category of method App\\Repositories\\UploadRepository\:\:getHitAndRun\(\) expects App\\Models\\Category, App\\Models\\Category\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\Category\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Repositories/UploadRepository.php
+
+		-
+			message: '#^Parameter \#2 \$category of method App\\Repositories\\UploadRepository\:\:getSubCategoriesAndTags\(\) expects App\\Models\\Category, App\\Models\\Category\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\Category\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Repositories/UploadRepository.php
+
+		-
+			message: '#^Parameter \#2 \$category of method App\\Repositories\\UploadRepository\:\:saveCustomFields\(\) expects App\\Models\\Category, App\\Models\\Category\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\Category\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Repositories/UploadRepository.php
+
+		-
+			message: '#^Parameter \#2 \$name of method App\\Repositories\\UploadRepository\:\:getSubCategoryValue\(\) expects string, int\|string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Repositories/UploadRepository.php
+
+		-
+			message: '#^Parameter \#1 \$json of function json_decode expects string, string\|false given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Repositories/UserPasskeyRepository.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\User\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\User\>\:\:\$attendance_card\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Repositories/UserRepository.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\User\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\User\>\:\:\$class\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Repositories/UserRepository.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\User\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\User\>\:\:\$downloaded\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Repositories/UserRepository.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\User\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\User\>\:\:\$enabled\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Repositories/UserRepository.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\User\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\User\>\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 3
+			path: app/Repositories/UserRepository.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\User\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\User\>\:\:\$invites\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Repositories/UserRepository.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\User\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\User\>\:\:\$leechwarn\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Repositories/UserRepository.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\User\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\User\>\:\:\$leechwarnuntil\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Repositories/UserRepository.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\User\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\User\>\:\:\$locale\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Repositories/UserRepository.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\User\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\User\>\:\:\$passkey\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Repositories/UserRepository.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\User\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\User\>\:\:\$seedbonus\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Repositories/UserRepository.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\User\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\User\>\:\:\$two_step_secret\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Repositories/UserRepository.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\User\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\User\>\:\:\$uploaded\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Repositories/UserRepository.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\User\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\User\>\:\:\$username\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Repositories/UserRepository.php
+
+		-
+			message: '#^Call to an undefined method App\\Models\\User\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\User\>\:\:invitee_code\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Repositories/UserRepository.php
+
+		-
+			message: '#^Call to an undefined method App\\Models\\User\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\User\>\:\:save\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: app/Repositories/UserRepository.php
+
+		-
+			message: '#^Call to an undefined method App\\Models\\User\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\User\>\:\:update\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Repositories/UserRepository.php
+
+		-
+			message: '#^Call to an undefined method App\\Models\\User\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\User\>\:\:updateWithModComment\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: app/Repositories/UserRepository.php
+
+		-
+			message: '#^Call to an undefined method App\\Models\\User\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\User\>\:\:usernameChangeLogs\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Repositories/UserRepository.php
+
+		-
+			message: '#^Cannot access offset ''username'' on array\<string, mixed\>\|false\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: app/Repositories/UserRepository.php
+
+		-
+			message: '#^Parameter \#1 \$attributes of method Illuminate\\Database\\Eloquent\\Model\:\:update\(\) expects array\<string, mixed\>, array\<int\|string, mixed\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Repositories/UserRepository.php
+
+		-
+			message: '#^Parameter \#1 \$attributes of method Illuminate\\Database\\Eloquent\\Relations\\HasOneOrMany\<App\\Models\\UserMeta,App\\Models\\User,Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\UserMeta\>\>\:\:create\(\) expects array\<string, mixed\>, array\<int\|string, mixed\> given\.$#'
+			identifier: argument.type
+			count: 2
+			path: app/Repositories/UserRepository.php
+
+		-
+			message: '#^Parameter \#1 \$user of method App\\Repositories\\UserRepository\:\:clearCache\(\) expects App\\Models\\User, App\\Models\\User\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\User\> given\.$#'
+			identifier: argument.type
+			count: 5
+			path: app/Repositories/UserRepository.php
+
+		-
+			message: '#^Parameter \#2 \$model of static method App\\Support\\Events\:\:fire\(\) expects Illuminate\\Database\\Eloquent\\Model, App\\Models\\User\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\User\> given\.$#'
+			identifier: argument.type
+			count: 2
+			path: app/Repositories/UserRepository.php
+
+		-
+			message: '#^Parameter \#2 \$user of method App\\Repositories\\UserRepository\:\:checkPermission\(\) expects App\\Models\\User, App\\Models\\User\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\User\> given\.$#'
+			identifier: argument.type
+			count: 6
+			path: app/Repositories/UserRepository.php
+
+		-
+			message: '#^Parameter \#2 \$timestamp of function date expects int\|null, int\|false given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Repositories/UserSearchRepository.php
+
+		-
+			message: '#^Parameter \#1 \$cookieValue of static method App\\Support\\Locale\:\:folderFromCookie\(\) expects string\|null, array\|string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Repositories/UsercpRepository.php
+
+		-
+			message: '#^Method App\\Support\\Attachment\:\:keyFromUrl\(\) should return string but returns string\|false\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Support/Attachment.php
+
+		-
+			message: '#^Parameter \#7 \$timeText of static method App\\Support\\Attachment\:\:render\(\) expects string, string\|false\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Support/Attachment.php
+
+		-
+			message: '#^Parameter \#2 \$subject of function preg_match_all expects string, string\|false given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Support/Attachment/AttachmentService.php
+
+		-
+			message: '#^Cannot access property \$auth_key on App\\Models\\User\|array\<string, mixed\>\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: app/Support/AuthCookie.php
+
+		-
+			message: '#^Parameter \#1 \$value of method Illuminate\\Encryption\\Encrypter\:\:encryptString\(\) expects string, string\|false given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Support/AuthCookie.php
+
+		-
+			message: '#^Cannot cast array\<mixed\>\|string to string\.$#'
+			identifier: cast.string
+			count: 1
+			path: app/Support/BBCode.php
+
+		-
+			message: '#^Parameter \#2 \$num2 of function bcadd expects numeric\-string, string given\.$#'
+			identifier: argument.type
+			count: 2
+			path: app/Support/Bonus.php
+
+		-
+			message: '#^Parameter \#7 \$haremAddition of static method App\\Support\\Bonus\:\:buildBonusTable\(\) expects float, float\|int\|string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Support/Bonus.php
+
+		-
+			message: '#^Parameter \#2 \$timestamp of function date expects int\|null, int\<0, max\>\|false given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Support/Cache.php
+
+		-
+			message: '#^Parameter \#1 \$db of method Redis\:\:select\(\) expects int, float\|int\|string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Support/Cache/LegacyRedisCache.php
+
+		-
+			message: '#^Parameter \#1 \$num of function is_nan expects float, float\|int\|string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Support/Cache/LegacyRedisCache.php
+
+		-
+			message: '#^Cannot call method cache_value\(\) on class\-string\|object\.$#'
+			identifier: method.nonObject
+			count: 4
+			path: app/Support/Category.php
+
+		-
+			message: '#^Cannot call method get_value\(\) on class\-string\|object\.$#'
+			identifier: method.nonObject
+			count: 4
+			path: app/Support/Category.php
+
+		-
+			message: '#^Parameter \#1 \$ids of static method App\\Repositories\\UserRepository\:\:getByIds\(\) expects list\<int\>, array\<int\<0, max\>, mixed\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Support/Comment.php
+
+		-
+			message: '#^Method App\\Support\\Config\\BonusConfig\:\:attendanceContinuous\(\) should return array\<int, float\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Support/Config/BonusConfig.php
+
+		-
+			message: '#^Method App\\Support\\Config\\MainConfig\:\:enabledSiteLanguages\(\) should return array\<int, string\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Support/Config/MainConfig.php
+
+		-
+			message: '#^Cannot call method cache_value\(\) on class\-string\|object\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Support/Country.php
+
+		-
+			message: '#^Cannot call method get_value\(\) on class\-string\|object\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Support/Country.php
+
+		-
+			message: '#^Argument of an invalid type list\<string\>\|false supplied for foreach, only iterables are supported\.$#'
+			identifier: foreach.nonIterable
+			count: 1
+			path: app/Support/Description.php
+
+		-
+			message: '#^Parameter \#1 \$callback of function call_user_func_array expects callable\(\)\: mixed, array\{mixed, ''dispatch''\} given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Support/Events.php
+
+		-
+			message: '#^Part \$channel \(0\|0\.0\|''''\|''0''\|array\{\}\|false\|null\) of encapsed string cannot be cast to string\.$#'
+			identifier: encapsedStringPart.nonString
+			count: 1
+			path: app/Support/Events.php
+
+		-
+			message: '#^Method App\\Support\\Form\:\:bbcodeEditor\(\) should return string but returns string\|false\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Support/Form.php
+
+		-
+			message: '#^Cannot call method cache_value\(\) on class\-string\|object\.$#'
+			identifier: method.nonObject
+			count: 2
+			path: app/Support/Forum.php
+
+		-
+			message: '#^Cannot call method get_value\(\) on class\-string\|object\.$#'
+			identifier: method.nonObject
+			count: 2
+			path: app/Support/Forum.php
+
+		-
+			message: '#^Parameter \#1 \$forumId of method App\\Repositories\\ForumRepository\:\:replaceModerators\(\) expects int, int\|string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Support/Forum.php
+
+		-
+			message: '#^Parameter \#2 \$haystack of function in_array expects array, array\<int, string\>\|false given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Support/Forum.php
+
+		-
+			message: '#^Method App\\Support\\Json\:\:encode\(\) should return string but returns string\|false\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Support/Json.php
+
+		-
+			message: '#^Method App\\Support\\Locale\:\:available\(\) should return array\<int, string\> but returns array\<int\|string, mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Support/Locale.php
+
+		-
+			message: '#^Parameter \#1 \$string of function substr expects string, string\|false given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Support/Locale.php
+
+		-
+			message: '#^Parameter \#1 \$stream of function fclose expects resource, resource\|false given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Support/Logger.php
+
+		-
+			message: '#^Parameter \#1 \$stream of function fwrite expects resource, resource\|false given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Support/Logger.php
+
+		-
+			message: '#^Call to an undefined method object\:\:cache_value\(\)\.$#'
+			identifier: method.notFound
+			count: 14
+			path: app/Support/PageLayout.php
+
+		-
+			message: '#^Call to an undefined method object\:\:getCacheReadTimes\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Support/PageLayout.php
+
+		-
+			message: '#^Call to an undefined method object\:\:getCacheWriteTimes\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Support/PageLayout.php
+
+		-
+			message: '#^Call to an undefined method object\:\:getKeyHits\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: app/Support/PageLayout.php
+
+		-
+			message: '#^Call to an undefined method object\:\:get_value\(\)\.$#'
+			identifier: method.notFound
+			count: 14
+			path: app/Support/PageLayout.php
+
+		-
+			message: '#^Call to an undefined method object\:\:setLanguage\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Support/PageLayout.php
+
+		-
+			message: '#^Parameter \#1 \$raw of static method App\\Support\\Pagination\:\:resolvePage\(\) expects int\|string\|null, bool\|float\|int\|string\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Support/Pagination.php
+
+		-
+			message: '#^Parameter \#2 \$timestamp of function date expects int\|null, int\|false given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Support/Promotion.php
+
+		-
+			message: '#^Cannot call method cache_value\(\) on class\-string\|object\.$#'
+			identifier: method.nonObject
+			count: 2
+			path: app/Support/SearchBox.php
+
+		-
+			message: '#^Cannot call method get_value\(\) on class\-string\|object\.$#'
+			identifier: method.nonObject
+			count: 2
+			path: app/Support/SearchBox.php
+
+		-
+			message: '#^Method App\\Support\\SearchBox\:\:requiredIds\(\) should return list\<int\> but returns array\<0, int\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Support/SearchBox.php
+
+		-
+			message: '#^Parameter \#1 \.\.\.\$values of method Illuminate\\Support\\Collection\<int,stdClass\>\:\:push\(\) expects stdClass, object given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Support/SearchBox.php
+
+		-
+			message: '#^Argument of an invalid type list\<string\>\|false supplied for foreach, only iterables are supported\.$#'
+			identifier: foreach.nonIterable
+			count: 1
+			path: app/Support/SetlistLookup.php
+
+		-
+			message: '#^Parameter \#1 \$haystack of function str_contains expects string, string\|false given\.$#'
+			identifier: argument.type
+			count: 4
+			path: app/Support/SetlistLookup.php
+
+		-
+			message: '#^Parameter \#2 \$subject of function preg_match expects string, string\|false given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Support/SetlistLookup.php
+
+		-
+			message: '#^Parameter \#2 \$timestamp of function date expects int\|null, int\|false given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Support/SetlistLookup.php
+
+		-
+			message: '#^Method App\\Support\\Shoutbox\:\:formatTime\(\) should return string but returns string\|false\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Support/Shoutbox.php
+
+		-
+			message: '#^Parameter \#1 \$string of function htmlspecialchars expects string, string\|false given\.$#'
+			identifier: argument.type
+			count: 3
+			path: app/Support/Shoutbox.php
+
+		-
+			message: '#^Cannot call method cache_value\(\) on class\-string\|object\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Support/Style.php
+
+		-
+			message: '#^Cannot call method get_value\(\) on class\-string\|object\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Support/Style.php
+
+		-
+			message: '#^Cannot call method cache_value\(\) on class\-string\|object\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Support/TorrentBookmark.php
+
+		-
+			message: '#^Cannot call method get_value\(\) on class\-string\|object\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Support/TorrentBookmark.php
+
+		-
+			message: '#^Binary operation "\." between non\-falsy\-string and 0\|0\.0\|''''\|''0''\|array\{\}\|false\|null results in an error\.$#'
+			identifier: binaryOp.invalid
+			count: 1
+			path: app/Support/TorrentTable.php
+
+		-
+			message: '#^Call to an undefined method object\:\:cache_value\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Support/TorrentTable.php
+
+		-
+			message: '#^Call to an undefined method object\:\:get_value\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Support/TorrentTable.php
+
+		-
+			message: '#^Method App\\Support\\TorrentTable\:\:render\(\) should return string but returns string\|false\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Support/TorrentTable.php
+
+		-
+			message: '#^Parameter \#1 \$num of function number_format expects float, array\|float\|int\|string\|false\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Support/TorrentTable.php
+
+		-
+			message: '#^Parameter \#1 \$num of static method App\\Support\\Palette\:\:seederLink\(\) expects int\|string\|null, array\|float\|int\|string\|false\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Support/TorrentTable.php
+
+		-
+			message: '#^Parameter \#1 \$ids of static method App\\Repositories\\UserRepository\:\:getByIds\(\) expects list\<int\>, non\-empty\-array\<int\<0, max\>, int\<min, \-1\>\|int\<1, max\>\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Support/UserDisplay.php
+
+		-
+			message: '#^Static property App\\Support\\UserDisplay\:\:\$rowCache \(array\<int, array\<string, mixed\>\|false\>\) does not accept non\-empty\-array\<int\|string, mixed\>\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: app/Support/UserDisplay.php

@@ -349,6 +349,9 @@ final class LegacyAuth
         if (empty($row)) {
             return null;
         }
+        if ($row instanceof \App\Models\User) {
+            $row = $row->toArray();
+        }
 
         if (! $row['passkey']) {
             $passkey = md5($row['username'] . date('Y-m-d H:i:s') . $row['passhash']);

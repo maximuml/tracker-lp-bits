@@ -42,6 +42,10 @@ final class Token
      */
     public static function randomHex(int $bytes = 20): string
     {
+        if ($bytes < 1) {
+            throw new \ValueError('Length must be greater than 0');
+        }
+
         return bin2hex(random_bytes($bytes));
     }
 

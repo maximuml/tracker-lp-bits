@@ -53,7 +53,7 @@ final class ScrapeControllerTest extends TestCase
     {
         /** @var ScrapeService&Mockery\MockInterface $service */
         $service = Mockery::mock(ScrapeService::class);
-        $service->shouldReceive('scrape')->once()->andThrow(TrackerException::failure('require passkey'));
+        $service->shouldNotReceive('scrape');
 
         $controller = new ScrapeController($service);
         $request = Request::create('/scrape', 'GET');

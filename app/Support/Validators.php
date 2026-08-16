@@ -58,7 +58,13 @@ final class Validators
      */
     public static function isId(mixed $id): bool
     {
-        return is_numeric($id) && ($id > 0) && (floor($id) == $id);
+        if (! is_numeric($id)) {
+            return false;
+        }
+
+        $value = (float) $id;
+
+        return $value > 0.0 && floor($value) == $value;
     }
 
     /**
@@ -76,10 +82,15 @@ final class Validators
      */
     public static function isUserClass(mixed $class): bool
     {
-        return is_numeric($class)
-            && floor($class) == $class
-            && $class >= self::USER_CLASS_MIN
-            && $class <= self::USER_CLASS_MAX;
+        if (! is_numeric($class)) {
+            return false;
+        }
+
+        $value = (float) $class;
+
+        return floor($value) == $value
+            && $value >= self::USER_CLASS_MIN
+            && $value <= self::USER_CLASS_MAX;
     }
 
     /**

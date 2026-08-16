@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\DTOs\ScrapeRequestDto;
 use App\Exceptions\TrackerException;
 use App\Exceptions\TrackerWarningException;
 use App\Services\ScrapeService;
@@ -18,7 +19,8 @@ class ScrapeController extends Controller
     public function scrape(Request $request): Response
     {
         try {
-            $response = $this->service->scrape($request);
+            $dto = ScrapeRequestDto::fromRequest($request);
+            $response = $this->service->scrape($dto);
         } catch (TrackerException $e) {
             return $this->bencodeResponse(['failure reason' => $e->getMessage()]);
         } catch (TrackerWarningException $e) {

@@ -1,0 +1,195 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Http\Resources\PostResource;
+use App\Models\Post;
+use App\Models\Topic;
+use App\Models\User;
+use App\Repositories\ForumRepository;
+use App\Support\SupportContext;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException;
+
+class PostController extends Controller
+{
+    /**
+     * @return array<string, mixed>
+     */
+    public function index(Request $request, Topic $topic): array
+    {
+        $this->setContextUser();
+
+        $forum = $topic->forum;
+        if (! $this->canRead($forum)) {
+            throw ValidationException::withMessages(['topic' => ['Permission denied.']]);
+        }
+
+        $perPage = max(1, min(100, (int) $request->input('per_page', 20)));
+        $page = max(1, (int) $request->input('page', 1));
+        $offset = ($page - 1) * $perPage;
+
+        $posts = ForumRepository::getTopicPosts((int) $topic->id, null, $offset, $perPage);
+
+        return $this->success(PostResource::collection($posts));
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function store(Request $request, Topic $topic): array
+    {
+        $this->setContextUser();
+
+        $user = Auth::user();
+        if (! $user instanceof User) {
+            abort(401);
+        }
+
+        $forum = $topic->forum;
+        if (! $this->canWrite($forum)) {
+            throw ValidationException::withMessages(['topic' => ['Permission denied.']]);
+        }
+
+        if ($topic->locked === 'yes' && ! $this->canModerate($topic)) {
+            throw ValidationException::withMessages(['topic' => ['Topic is locked.']]);
+        }
+
+        $validated = $request->validate([
+            'body' => 'required|string',
+        ]);
+
+        $date = now()->toDateTimeString();
+        $postId = ForumRepository::createPost((int) $topic->id, (int) $user->id, (string) $validated['body'], $date);
+
+        ForumRepository::setTopicLastPost((int) $topic->id, $postId);
+        ForumRepository::incrementForumPostCount((int) $forum->id);
+        ForumRepository::updateUserLastPost((int) $user->id, $date);
+
+        $post = Post::query()->findOrFail($postId);
+        $post->load('user');
+
+        return $this->success(new PostResource($post), 'Post created');
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function show(Topic $topic, Post $post): array
+    {
+        $this->setContextUser();
+
+        if (! $this->canRead($topic->forum)) {
+            throw ValidationException::withMessages(['topic' => ['Permission denied.']]);
+        }
+
+        $post->load('user');
+
+        return $this->success(new PostResource($post));
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function update(Request $request, Topic $topic, Post $post): array
+    {
+        $this->setContextUser();
+
+        $user = Auth::user();
+        if (! $user instanceof User) {
+            abort(401);
+        }
+
+        if (! $this->canEdit($post, $topic)) {
+            throw ValidationException::withMessages(['post' => ['Permission denied.']]);
+        }
+
+        $validated = $request->validate([
+            'body' => 'required|string',
+            'subject' => 'sometimes|nullable|string|max:255',
+        ]);
+
+        $date = now()->toDateTimeString();
+        ForumRepository::updatePostBody((int) $post->id, (string) $validated['body'], $date, (int) $user->id);
+
+        $postInfo = ForumRepository::getPostEditInfo((int) $post->id);
+        if (! empty($validated['subject']) && ! empty($postInfo['is_first_post'])) {
+            $topic->update(['subject' => (string) $validated['subject']]);
+        }
+
+        $post->refresh()->load('user');
+
+        return $this->success(new PostResource($post), 'Post updated');
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function destroy(Topic $topic, Post $post): array
+    {
+        $this->setContextUser();
+
+        $user = Auth::user();
+        if (! $user instanceof User) {
+            abort(401);
+        }
+
+        if (! $this->canModerate($topic) && (int) $post->userid !== (int) $user->id) {
+            throw ValidationException::withMessages(['post' => ['Permission denied.']]);
+        }
+
+        ForumRepository::deletePost((int) $post->id, (int) $topic->id, (int) $topic->forumid);
+
+        return $this->success(['success' => true], 'Post deleted');
+    }
+
+    private function setContextUser(): void
+    {
+        $user = Auth::user();
+        if ($user instanceof User) {
+            SupportContext::setUser($user->toLegacyArray());
+        }
+    }
+
+    private function canRead(\App\Models\Forum $forum): bool
+    {
+        $user = Auth::user();
+        $class = $user instanceof User ? (int) $user->class : 0;
+
+        return $class >= (int) $forum->minclassread;
+    }
+
+    private function canWrite(\App\Models\Forum $forum): bool
+    {
+        $user = Auth::user();
+        $class = $user instanceof User ? (int) $user->class : 0;
+
+        return $class >= (int) $forum->minclasswrite;
+    }
+
+    private function canModerate(Topic $topic): bool
+    {
+        $user = Auth::user();
+        if (! $user instanceof User) {
+            return false;
+        }
+
+        return \App\Support\Forum::isModerator((int) $topic->id, 'topic')
+            || \App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::POST_MANAGE, $user);
+    }
+
+    private function canEdit(Post $post, Topic $topic): bool
+    {
+        $user = Auth::user();
+        if (! $user instanceof User) {
+            return false;
+        }
+
+        if ($this->canModerate($topic)) {
+            return true;
+        }
+
+        return (int) $post->userid === (int) $user->id && $this->canWrite($topic->forum);
+    }
+}

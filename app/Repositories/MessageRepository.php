@@ -40,7 +40,7 @@ class MessageRepository extends BaseRepository
      */
     public static function getMailboxMessages(int $userId, int $mailbox, string $keyword, string $place, ?string $unread, int $offset, int $perPage): array
     {
-        $query = Message::query();
+        $query = Message::query()->with('send_user');
         if ($keyword !== '') {
             switch ($place) {
                 case 'body':

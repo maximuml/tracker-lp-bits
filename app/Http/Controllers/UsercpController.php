@@ -42,6 +42,22 @@ class UsercpController extends LegacyController
     }
 
     /**
+     * @return array<string, mixed>
+     */
+    public function tracker(Request $request): array
+    {
+        return $this->success($this->repository->updateTracker($request));
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function security(Request $request): array
+    {
+        return $this->success($this->repository->updateSecurityApi($request));
+    }
+
+    /**
      * Serve the legacy usercp.php page from a Laravel view.
      */
     public function legacy(Request $request): View|RedirectResponse

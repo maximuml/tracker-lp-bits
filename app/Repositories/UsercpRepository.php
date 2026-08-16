@@ -18,8 +18,10 @@ use App\Support\Token;
 use App\Support\TwoFactorAuthHelper;
 use App\Support\Url;
 use App\Support\Validators;
+use App\Services\WebAuthService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
+use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Auth;
 use Nexus\Database\NexusDB;
 
@@ -561,5 +563,117 @@ final class UsercpRepository extends BaseRepository
         self::deleteChallenge($user->username);
 
         return $to;
+    }
+
+    /**
+     * Update security settings for the authenticated user via API.
+     *
+     * @return array<string, mixed>
+     */
+    public function updateSecurityApi(Request $request): array
+    {
+        /** @var User $user */
+        $user = Auth::user();
+
+        $validated = $request->validate([
+            'current_password' => 'required|string',
+            'email' => 'sometimes|nullable|email',
+            'new_password' => 'sometimes|nullable|string|min:6|max:40',
+            'new_password_confirmation' => 'sometimes|same:new_password',
+            'privacy' => 'sometimes|in:normal,low,strong',
+            'resetpasskey' => 'sometimes|boolean',
+            'resetauthkey' => 'sometimes|boolean',
+            'two_step_secret' => 'sometimes|nullable|string',
+            'two_step_code' => 'sometimes|nullable|string',
+        ]);
+
+        if (! app(WebAuthService::class)->validatePassword($user, (string) $validated['current_password'])) {
+            throw ValidationException::withMessages(['current_password' => ['Wrong password.']]);
+        }
+
+        $data = [];
+        $changedemail = 0;
+        $resetpasskey = ! empty($validated['resetpasskey']);
+        $resetAuthKey = ! empty($validated['resetauthkey']);
+
+        $newPassword = (string) ($validated['new_password'] ?? '');
+        if ($newPassword !== '') {
+            $sec = Token::randomHex(20);
+            $clientHashedPassword = hash('sha256', $newPassword);
+            $data['secret'] = $sec;
+            $data['passhash'] = hash('sha256', $sec . $clientHashedPassword);
+            $data['auth_key'] = Token::randomHex(20);
+        }
+
+        $email = (string) ($validated['email'] ?? '');
+        $disableEmailChange = (string) SupportContext::getGlobal('disableemailchange', 'no');
+        $smtpType = (string) SupportContext::getGlobal('smtptype', 'none');
+        $siteName = (string) SupportContext::getGlobal('SITENAME', '');
+        $siteEmail = (string) SupportContext::getGlobal('SITEEMAIL', '');
+        $baseUrl = (string) SupportContext::getGlobal('BASEURL', '');
+        $lang = (array) (SupportContext::getGlobal('lang_usercp') ?? []);
+
+        if ($disableEmailChange !== 'no' && $smtpType !== 'none' && $email !== '' && $email !== $user->email) {
+            if (! Validators::isEmail($email)) {
+                throw ValidationException::withMessages(['email' => [$lang['std_wrong_email_address_format'] ?? 'Wrong email format.']]);
+            }
+
+            if (self::emailExistsForOther($email, (int) $user->id)) {
+                throw ValidationException::withMessages(['email' => [$lang['std_email_in_use'] ?? 'Email in use.']]);
+            }
+
+            $sec = Token::randomHex(20);
+            $hash = md5($sec . $email . $sec);
+            $obemail = rawurlencode($email);
+            $data['editsecret'] = $sec;
+            $changedemail = 1;
+
+            $subject = $siteName . ($lang['mail_profile_change_confirmation'] ?? '');
+            $body = ($lang['mail_change_email_one'] ?? '') . $user->username
+                . ($lang['mail_change_email_two'] ?? '') . '(' . $email . ')'
+                . ($lang['mail_change_email_three'] ?? '') . "\n\n"
+                . ($lang['mail_change_email_four'] ?? '') . $request->ip()
+                . ($lang['mail_change_email_five'] ?? '') . "\n\n"
+                . ($lang['mail_change_email_six'] ?? '')
+                . '<b><a href="javascript:void(null)" onclick="window.open(\'http://' . $baseUrl . '/confirmemail.php/' . $user->id . '/' . $hash . '/' . $obemail . '\')">' . ($lang['mail_here'] ?? '') . '</a></b>'
+                . ($lang['mail_change_email_six_1'] ?? '') . '<br />' . "\n"
+                . 'http://' . $baseUrl . '/confirmemail.php/' . $user->id . '/' . $hash . '/' . $obemail . "\n\n"
+                . ($lang['mail_change_email_seven'] ?? '') . "\n\n"
+                . '------' . ($lang['mail_change_email_eight'] ?? '') . "\n"
+                . ($lang['mail_change_email_nine'] ?? '');
+
+            Mail::sentLegacy($email, $siteName, $siteEmail, $subject, str_replace('<br />', '<br />', nl2br($body)), 'profile change', false, false, '', 'UTF-8');
+        }
+
+        if ($resetpasskey) {
+            $data['passkey'] = md5($user->username . date('Y-m-d H:i:s') . $user->passhash);
+        }
+
+        $twoStepSecret = (string) ($validated['two_step_secret'] ?? '');
+        $twoStepCode = (string) ($validated['two_step_code'] ?? '');
+
+        if ($twoStepCode !== '') {
+            $secretToVerify = empty($user->two_step_secret) ? $twoStepSecret : $user->two_step_secret;
+            if ($secretToVerify === '' || ! TwoFactorAuthHelper::verifyCode($secretToVerify, $twoStepCode)) {
+                throw ValidationException::withMessages(['two_step_code' => ['Invalid two step code']]);
+            }
+
+            $data['two_step_secret'] = empty($user->two_step_secret) ? $secretToVerify : '';
+        }
+
+        $privacy = (string) ($validated['privacy'] ?? '');
+        if ($privacy !== '') {
+            if (! in_array($privacy, ['normal', 'low', 'strong'], true)) {
+                $privacy = 'normal';
+            }
+            $data['privacy'] = $privacy;
+        }
+
+        if ($data !== []) {
+            self::updateSecurity((int) $user->id, $data, $resetAuthKey, (array) $request->all());
+            Cache::clearUser($user->id, '');
+        }
+
+        return User::query()->find($user->id)?->toArray() ?? [];
     }
 }

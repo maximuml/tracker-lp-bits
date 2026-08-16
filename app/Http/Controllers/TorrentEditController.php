@@ -68,7 +68,7 @@ class TorrentEditController extends Controller
             'tagIds' => TorrentDetailRepository::getTagIds($id),
             'cats' => Category::listByModeWithContext($sectionmode),
             'returnto' => (string) $request->input('returnto', ''),
-            'requestUri' => (string) $request->server('REQUEST_URI', ''),
+            'requestUri' => is_string($request->server('REQUEST_URI')) ? $request->server('REQUEST_URI') : '',
             'taxonomySelect' => (new SearchBoxRepository())->renderTaxonomySelect($sectionmode, $row),
             'tagCheckbox' => (new TagRepository())->renderCheckbox($sectionmode, (array) TorrentDetailRepository::getTagIds($id)),
             'customFieldsHtml' => (new \Nexus\Field\Field())->renderOnUploadPage($id, $sectionmode),

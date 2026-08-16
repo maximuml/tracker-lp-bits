@@ -22,3 +22,5 @@ parameters:
         - IN_NEXUS
         - IN_TRACKER
         - RUNNING_IN_OCTANE
+
+    treatPhpDocTypesAsCertain: false

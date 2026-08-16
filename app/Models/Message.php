@@ -43,7 +43,7 @@ class Message extends NexusModel
         return $this->belongsTo(User::class, 'receiver');
     }
 
-    /** @param  array<int|string, mixed>  $data */
+    /** @param  array<string, mixed>  $data */
     public static function add(array $data): self
     {
         \App\Support\Cache::clearInboxCount($data["receiver"]);

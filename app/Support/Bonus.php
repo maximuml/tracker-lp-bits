@@ -322,7 +322,7 @@ class Bonus
      *
      * Backs the `build_bonus_table()` helper.
      *
-     * @param  array<string, mixed>  $user
+     * @param  array<int|string, mixed>  $user
      * @param  array<string, mixed>  $bonusResult
      * @param  array<string, mixed>  $options
      * @return array<string, mixed>

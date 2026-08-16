@@ -19,7 +19,7 @@ class CommentResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'text' => \App\Support\Attachment::bbcodeToImg($this->text),
+            'text' => \App\Support\Attachment::bbcodeToImg((string) $this->text),
             'updated_at' => \App\Support\Time::formatDateTime($this->editdate),
             'created_at' => \App\Support\Time::formatDateTime($this->added),
             'create_user' => new UserResource($this->whenLoaded('create_user')),

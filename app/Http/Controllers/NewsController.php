@@ -104,6 +104,9 @@ class NewsController extends Controller
     public function latest()
     {
         $user = Auth::user();
+        if (! $user instanceof \App\Models\User) {
+            return $this->success(new JsonResource(null));
+        }
         $result = News::query()->orderBy('id', 'desc')->first();
         if ($result) {
             $resource = new NewsResource($result);

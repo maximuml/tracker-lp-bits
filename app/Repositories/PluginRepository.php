@@ -231,7 +231,7 @@ class PluginRepository extends BaseRepository
 
     /**
      * @param  \App\Models\Plugin  $plugin
-     * @param  array<int|string, mixed>  $update
+     * @param  array<string, mixed>  $update
      * @return  mixed
      */
     private function updateResult(Plugin $plugin, array $update)
@@ -250,6 +250,9 @@ class PluginRepository extends BaseRepository
         $this->validatePackageName((string) $packageName);
         $command = sprintf('composer info | grep -F %s', escapeshellarg($packageName));
         $result = $this->executeCommand($command);
+        if (! is_string($result)) {
+            return '';
+        }
         $parts = preg_split("/[\s]+/", trim($result));
         $version = $parts[1] ?? '';
         if (str_contains($version, 'dev')) {

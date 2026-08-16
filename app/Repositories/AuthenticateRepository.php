@@ -88,7 +88,7 @@ class AuthenticateRepository extends BaseRepository
         $secret = config('nexus.iyuu_secret');
         $user = User::query()->findOrFail($id, User::$commonFields);
         $user->checkIsNormal();
-        $encryptedResult = md5($token . $id . sha1($user->passkey) . $secret);
+        $encryptedResult = md5($token . $id . sha1((string) $user->passkey) . $secret);
         if ($encryptedResult != $verity) {
             throw new \InvalidArgumentException("Invalid uid or passkey");
         }
@@ -112,7 +112,7 @@ class AuthenticateRepository extends BaseRepository
         Cache::put($cacheKey, 1, 600);
         $user = User::query()->findOrFail((int) $request->uid, User::$commonFields);
         $user->checkIsNormal();
-        $passkeyHash = hash('sha256', $user->passkey);
+        $passkeyHash = hash('sha256', (string) $user->passkey);
         $dataToSign = sprintf("%s%s%s%s", $user->id, $passkeyHash, $request->timestamp, $request->nonce);
         $signatureKey = config('nexus.ammds_secret');
         $serverSignature = hash_hmac('sha256', $dataToSign, $signatureKey);

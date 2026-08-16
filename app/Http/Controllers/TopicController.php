@@ -126,12 +126,12 @@ class TopicController extends Controller
             $topic->sticky = $dto->sticky ? 'yes' : 'no';
         }
         if ($dto->hlcolor !== null) {
-            $topic->hlcolor = $dto->hlcolor;
+            $topic->hlcolor = (int) max(0, $dto->hlcolor);
         }
 
         $topic->save();
 
-        return $this->success(new TopicResource($topic->fresh()->load('user', 'firstPost', 'lastPost')), 'Topic updated');
+        return $this->success(new TopicResource($topic->load('user', 'firstPost', 'lastPost')), 'Topic updated');
     }
 
     /**

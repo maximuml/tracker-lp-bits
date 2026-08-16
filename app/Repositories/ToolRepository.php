@@ -449,8 +449,8 @@ class ToolRepository extends BaseRepository
 
         //un-vote poll
         $total = Poll::query()->count();
-        $userVoteCount = PollAnswer::query()->where('userid', $user->id)->selectRaw('count(distinct(pollid)) as counts')->first()->counts;
-        $result['poll'] = $total - $userVoteCount;
+        $userVoteRow = PollAnswer::query()->where('userid', $user->id)->selectRaw('count(distinct(pollid)) as counts')->first();
+        $result['poll'] = $total - ($userVoteRow === null ? 0 : (int) $userVoteRow->counts);
 
         return $result;
     }

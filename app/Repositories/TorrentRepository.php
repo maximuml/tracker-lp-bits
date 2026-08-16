@@ -44,6 +44,7 @@ use Illuminate\Database\Query\JoinClause;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Hashids\Hashids;
@@ -371,8 +372,9 @@ class TorrentRepository extends BaseRepository
             ->with(['user', 'relative_torrent'])
             ->get()
             ->groupBy('seeder');
-        if ($peers->has(Peer::SEEDER_YES)) {
-            $seederList = $peers->get(Peer::SEEDER_YES)->sort(function ($a, $b) {
+        $seederGroup = $peers->get(Peer::SEEDER_YES);
+        if ($seederGroup instanceof Collection) {
+            $seederList = $seederGroup->sort(function ($a, $b) {
                 $x = $a->uploaded;
                 $y = $b->uploaded;
                 if ($x == $y)
@@ -383,8 +385,9 @@ class TorrentRepository extends BaseRepository
             });
             $seederList = $this->formatPeers($seederList);
         }
-        if ($peers->has(Peer::SEEDER_NO)) {
-            $leecherList = $peers->get(Peer::SEEDER_NO)->sort(function ($a, $b) {
+        $leecherGroup = $peers->get(Peer::SEEDER_NO);
+        if ($leecherGroup instanceof Collection) {
+            $leecherList = $leecherGroup->sort(function ($a, $b) {
                 $x = $a->to_go;
                 $y = $b->to_go;
                 if ($x == $y)
@@ -775,8 +778,11 @@ class TorrentRepository extends BaseRepository
      */
     public function approval($user, array $params): array
     {
-        $user = $this->getUser($user);
+        $user = $this->getUser($user) ?? Auth::user();
         Permission::assertCan(PermissionEnum::TORRENT_APPROVAL, $user);
+        if (! $user instanceof User) {
+            throw new InsufficientPermissionException();
+        }
         $torrentId = (int) $params['torrent_id'];
         $approvalStatus = (int) $params['approval_status'];
         $comment = (string) ($params['comment'] ?? '');

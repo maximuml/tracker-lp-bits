@@ -541,7 +541,7 @@ class SearchRepository extends BaseRepository
             } else {
                 //get user setting
                 $pattern = sprintf("/\[%s([\d]+)\]/", substr((string) $queryField, 0, 3));
-                if (preg_match($pattern, $userSetting, $matches)) {
+                if (preg_match($pattern, (string) $userSetting, $matches)) {
                     if (count($matches) == 2 && !empty($matches[1])) {
                         $match = $matches[1];
                         $mustBoolShould[$torrentField][] = ['match' => [$torrentField => $match]];
@@ -555,8 +555,8 @@ class SearchRepository extends BaseRepository
         if (isset($params['incldead'])) {
             $includeDead = (int)$params['incldead'];
             \App\Support\Logger::writeWithContext((string) "maybe get must for visible from params", (string) 'info', (bool) false);
-        } elseif (preg_match("/\[incldead=([\d]+)\]/", $userSetting, $matches)) {
-            $includeDead = $matches[1];
+        } elseif (preg_match("/\[incldead=([\d]+)\]/", (string) $userSetting, $matches)) {
+            $includeDead = (int) $matches[1];
             \App\Support\Logger::writeWithContext((string) "maybe get must for visible from user setting", (string) 'info', (bool) false);
         }
         if ($includeDead == 1) {
@@ -574,8 +574,8 @@ class SearchRepository extends BaseRepository
         if (isset($params['inclbookmarked'])) {
             $includeBookmarked = (int)$params['inclbookmarked'];
             \App\Support\Logger::writeWithContext((string) "maybe get must or must_not for has_child.bookmark from params", (string) 'info', (bool) false);
-        } elseif (preg_match("/\[inclbookmarked=([\d]+)\]/", $userSetting, $matches)) {
-            $includeBookmarked = $matches[1];
+        } elseif (preg_match("/\[inclbookmarked=([\d]+)\]/", (string) $userSetting, $matches)) {
+            $includeBookmarked = (int) $matches[1];
             \App\Support\Logger::writeWithContext((string) "maybe get must or must_not for has_child.bookmark from user setting", (string) 'info', (bool) false);
         }
         if ($includeBookmarked == 1) {
@@ -593,8 +593,8 @@ class SearchRepository extends BaseRepository
         if (isset($params['spstate'])) {
             $spState = (int)$params['spstate'];
             \App\Support\Logger::writeWithContext((string) "maybe get must for spstate from params", (string) 'info', (bool) false);
-        } elseif (preg_match("/\[spstate=([\d]+)\]/", $userSetting, $matches)) {
-            $spState = $matches[1];
+        } elseif (preg_match("/\[spstate=([\d]+)\]/", (string) $userSetting, $matches)) {
+            $spState = (int) $matches[1];
             \App\Support\Logger::writeWithContext((string) "maybe get must for spstate from user setting", (string) 'info', (bool) false);
         }
         if ($spState > 0) {
@@ -967,9 +967,13 @@ class SearchRepository extends BaseRepository
                 'torrent' => function ($query) {$query->select(['id', 'owner']);}
             ])->findOrFail((int)$bookmark);
         }
+        $torrent = $bookmark->torrent;
+        if (! $torrent) {
+            return false;
+        }
         $log = "[ADD_BOOKMARK]: " . $bookmark->toJson();
         $bulk = ['body' => []];
-        $body = $this->buildBookmarkBody($bookmark->torrent, $bookmark, true);
+        $body = $this->buildBookmarkBody($torrent, $bookmark, true);
         $bulk['body'][] = ['index' => $body['index']];
         $bulk['body'][] = $body['body'];
         $result = $this->getEs()->bulk($bulk);

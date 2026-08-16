@@ -20,8 +20,8 @@ class MessageResource extends JsonResource
             'id' => $this->id,
             'subject' => $this->subject,
             'msg' => htmlspecialchars_decode(\App\Support\Strings::stripAllTags((string) $this->msg)),
-            'added_human' => $this->added->diffForHumans(),
-            'added' => \App\Support\Time::formatDateTime($this->added),
+            'added_human' => $this->added instanceof \Carbon\Carbon ? $this->added->diffForHumans() : '',
+            'added' => $this->added instanceof \Carbon\Carbon ? \App\Support\Time::formatDateTime($this->added) : '',
             'send_user' => new UserResource($this->whenLoaded('send_user')),
         ];
     }

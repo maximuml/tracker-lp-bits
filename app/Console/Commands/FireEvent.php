@@ -66,7 +66,7 @@ class FireEvent extends Command
             $modelOld->setAttribute('id', $modelOldData['id']);
             $params[] = $useArray ? $modelOldData: $modelOld;
         }
-        $result = call_user_func_array([$eventName, "dispatch"], $params);
+        $result = app(\Illuminate\Contracts\Events\Dispatcher::class)->dispatch(new $eventName(...$params));
         $log .= ", success call dispatch, result: " . var_export($result, true);
         \App\Support\Events::publishModel($name, $model->getKey(), "");
         $this->info($log);

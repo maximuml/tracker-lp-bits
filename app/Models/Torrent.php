@@ -558,7 +558,15 @@ class Torrent extends NexusModel
     /** @param  mixed  $field */
     public function getSubCategoryLabel($field): string
     {
-        return $this->basic_category->search_box->getTaxonomyLabel($field);
+        $category = $this->basic_category;
+        if (! $category) {
+            return '';
+        }
+        $searchBox = $category->search_box;
+        if (! $searchBox) {
+            return '';
+        }
+        return $searchBox->getTaxonomyLabel($field);
     }
 
     /** @return  \Illuminate\Database\Eloquent\Relations\HasMany<Bookmark, $this> */

@@ -21,7 +21,9 @@ abstract class LegacyController extends Controller
             return redirect('/' . $page . '.php' . ($qs ? '?' . $qs : ''));
         }
 
-        return view($page . '.index', $data);
+        $view = view()->make($page . '.index', $data);
+        /** @var \Illuminate\View\View $view */
+        return $view;
     }
 
     /**
@@ -35,7 +37,7 @@ abstract class LegacyController extends Controller
             return redirect('/' . $page . '.php' . ($qs ? '?' . $qs : ''));
         }
 
-        $content = view($page . '.index', $data)->render();
+        $content = view()->make($page . '.index', $data)->render();
 
         $headers = headers_list();
         $status = http_response_code();
@@ -63,7 +65,7 @@ abstract class LegacyController extends Controller
             return redirect('/' . $page . '.php' . ($qs ? '?' . $qs : ''));
         }
 
-        $content = view($page . '.index', $data)->render();
+        $content = view()->make($page . '.index', $data)->render();
 
         $headers = headers_list();
         $responseHeaders = [];

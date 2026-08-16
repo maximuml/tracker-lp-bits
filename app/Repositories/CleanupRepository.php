@@ -331,10 +331,7 @@ LUA;
                 \App\Support\Logger::writeWithContext((string) sprintf("level: %s not set cleanup interval", $level), (string) "error", (bool) false);
                 continue;
             }
-            $lastTime = 0;
-            if ($value->value_u) {
-                $lastTime = $value->value_u;
-            }
+            $lastTime = (int) ($value->value_u ?? 0);
             if ($timestamp < $lastTime + $interval * 2) {
                 continue;
             }

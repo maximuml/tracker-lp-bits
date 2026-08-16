@@ -247,7 +247,7 @@ final class UserDisplay
      *
      * Mirrors `is_donor()`.
      *
-     * @param  array<string, mixed>  $userInfo
+     * @param  array<int|string, mixed>  $userInfo
      */
     public static function isDonor(array $userInfo): bool
     {

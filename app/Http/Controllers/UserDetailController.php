@@ -49,6 +49,7 @@ class UserDetailController extends Controller
                 $lang['std_error'] ?? 'Error',
                 $lang['std_no_such_user'] ?? 'No user with this ID!'
             );
+            return redirect('/userdetails.php');
         }
 
         if (($user['status'] ?? '') === 'pending') {

@@ -16,7 +16,7 @@ class BookmarkRepository extends BaseRepository
      */
     public function add(User $user, $torrentId)
     {
-        $torrent = Torrent::query()->find($torrentId);
+        $torrent = Torrent::query()->find((int) $torrentId);
         if (!$torrent) {
             throw new NexusException(\App\Support\Locale::trans('bookmark.torrent_not_exists', ['torrent_id' => $torrentId], null));
         }

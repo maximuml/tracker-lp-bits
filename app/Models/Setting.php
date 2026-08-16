@@ -320,8 +320,9 @@ class Setting extends NexusModel
     public static function getBonusRewardOptions(): array
     {
         $result = self::get("torrent.reward_bonus_options");
-        if (!empty($result)) {
-            return preg_split('/[,，\s]+/', trim($result));
+        if (is_string($result) && trim($result) !== '') {
+            $split = preg_split('/[,，\s]+/', trim($result));
+            return $split === false ? [] : $split;
         }
         return Torrent::BONUS_REWARD_VALUES;
     }

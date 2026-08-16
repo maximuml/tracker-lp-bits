@@ -516,6 +516,6 @@ final class ToptenRepository
      */
     private static function toArray(\Illuminate\Support\Collection $rows): array
     {
-        return $rows->map(fn ($row) => (array) $row)->all();
+        return array_values($rows->map(fn ($row) => (array) $row)->all());
     }
 }

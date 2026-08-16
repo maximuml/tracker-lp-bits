@@ -163,11 +163,13 @@ final class ShoutboxRepository extends BaseRepository
      */
     public static function getMyReactions(int $shoutId, int $currentUserId): array
     {
-        return NexusDB::table('shoutbox_reactions')
+        $values = NexusDB::table('shoutbox_reactions')
             ->where('shoutbox_id', $shoutId)
             ->where('user_id', $currentUserId)
             ->pluck('reaction')
             ->toArray();
+
+        return array_values(array_map('strval', $values));
     }
 
     /**

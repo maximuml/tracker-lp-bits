@@ -89,7 +89,8 @@ class MedalRepository extends BaseRepository
     public function  grantToUser(int $uid, int $medalId, $duration = null)
     {
         $user = User::query()->findOrFail($uid, User::$commonFields);
-        if (Auth::user()->class <= $user->class) {
+        $authUser = Auth::user();
+        if (! $authUser instanceof \App\Models\User || $authUser->class <= $user->class) {
             throw new \LogicException("No permission!");
         }
         $medal = Medal::query()->findOrFail($medalId);

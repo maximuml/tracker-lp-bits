@@ -427,7 +427,8 @@ final class UserSearchRepository
         }
 
         if (checkdate((int) $a[1], (int) $a[2], (int) $a[0])) {
-            return date('Y-m-d', mktime(0, 0, 0, (int) $a[1], (int) $a[2], (int) $a[0]));
+            $timestamp = mktime(0, 0, 0, (int) $a[1], (int) $a[2], (int) $a[0]);
+            return $timestamp === false ? null : date('Y-m-d', $timestamp);
         }
 
         return null;

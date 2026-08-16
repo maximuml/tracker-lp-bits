@@ -50,7 +50,7 @@ class ModtaskRepository
 
     /**
      * @param  int  $userId
-     * @param  array<int|string, mixed>  $data
+     * @param  array<string, mixed>  $data
      */
     public static function updateUser(int $userId, array $data): int
     {
@@ -59,7 +59,7 @@ class ModtaskRepository
 
     /**
      * @param  int  $userId
-     * @param  array<int|string, mixed>  $extra
+     * @param  array<string, mixed>  $extra
      */
     public static function addWarning(int $userId, array $extra): void
     {

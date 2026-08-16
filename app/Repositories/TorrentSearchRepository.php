@@ -629,6 +629,7 @@ if (empty($wherecatina) && !(in_array($inclbookmarked, [1, 2]) && $allsec == 1))
     //require limit in some category
     $wherecatina = $allCategoryId;
 }
+$wherecatina = is_array($wherecatina) ? $wherecatina : [];
 if (count($wherecatina) > 1)
 $wherecatin = implode(",",$wherecatina);
 elseif (count($wherecatina) == 1)

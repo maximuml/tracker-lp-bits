@@ -60,8 +60,9 @@ class CommentController extends Controller
             'anonymous' => $request->anonymous,
         ];
         $data =  array_filter($data);
+        $dataType = $data['type'] ?? '';
         foreach ($allTypes as $type) {
-            if ($data['type'] == $type && empty($data[$type])) {
+            if ($dataType == $type && empty($data[$type])) {
                 throw new \InvalidArgumentException("require {$type}_id");
             }
         }

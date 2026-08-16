@@ -16,7 +16,7 @@ class NewsResource extends JsonResource
      */
     public function toArray($request)
     {
-        $descriptionArr = \App\Support\Description::parse($this->body);
+        $descriptionArr = \App\Support\Description::parse((string) $this->body);
         return [
             'id' => $this->id,
             'title' => $this->title,

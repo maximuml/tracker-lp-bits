@@ -1,49 +1,13 @@
 parameters:
 	ignoreErrors:
 		-
-			message: '#^Parameter \#1 \$content of method Illuminate\\Http\\Client\\PendingRequest\<false\>\:\:withBody\(\) expects Psr\\Http\\Message\\StreamInterface\|string, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Console/Commands/CrowdinSync.php
-
-		-
-			message: '#^Parameter \#1 \$string of function trim expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Console/Commands/CrowdinSync.php
-
-		-
-			message: '#^Parameter \#3 \$subject of function str_replace expects array\<string\>\|string, int\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Console/Commands/CrowdinSync.php
-
-		-
 			message: '#^Parameter \#1 \$value of method Carbon\\Carbon\:\:subDays\(\) expects float\|int, int\|string given\.$#'
 			identifier: argument.type
 			count: 1
 			path: app/Console/Commands/DeleteExpiredToken.php
 
 		-
-			message: '#^Parameter \#1 \$callback of function call_user_func_array expects callable\(\)\: mixed, array\{mixed, ''dispatch''\} given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Console/Commands/FireEvent.php
-
-		-
-			message: '#^Parameter \#1 \$callback of function call_user_func_array expects callable\(\)\: mixed, array\{object, ''newInstance''\} given\.$#'
-			identifier: argument.type
-			count: 2
-			path: app/Console/Commands/FireEvent.php
-
-		-
-			message: '#^Parameter \#1 \$event of static method App\\Support\\Events\:\:publishModel\(\) expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Console/Commands/FireEvent.php
-
-		-
-			message: '#^Parameter \#1 \$haystack of function str_ends_with expects string, string\|null given\.$#'
+			message: '#^Parameter \#1 \$callback of function call_user_func_array expects callable\(\)\: mixed, array\{class\-string, ''dispatch''\} given\.$#'
 			identifier: argument.type
 			count: 1
 			path: app/Console/Commands/FireEvent.php
@@ -55,100 +19,16 @@ parameters:
 			path: app/Console/Commands/Plugin.php
 
 		-
-			message: '#^Method App\\Console\\Commands\\TranslateLang\:\:json_encode_pretty\(\) should return string but returns string\|null\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Console/Commands/TranslateLang.php
-
-		-
-			message: '#^Parameter \#1 \$json of function json_decode expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 2
-			path: app/Console/Commands/TranslateLang.php
-
-		-
-			message: '#^Parameter \#2 \$string of function explode expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Console/Commands/TranslateLang.php
-
-		-
-			message: '#^Parameter \#3 \$subject of function preg_replace_callback expects array\<float\|int\|string\>\|string, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Console/Commands/TranslateLang.php
-
-		-
 			message: '#^Cannot call method getTimestamp\(\) on Carbon\\Carbon\|null\.$#'
 			identifier: method.nonObject
 			count: 1
 			path: app/Http/Controllers/AdminController.php
 
 		-
-			message: '#^Cannot call method getClientOriginalName\(\) on Illuminate\\Http\\UploadedFile\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: app/Http/Controllers/BitbucketUploadController.php
-
-		-
-			message: '#^Cannot call method getPathname\(\) on Illuminate\\Http\\UploadedFile\|null\.$#'
-			identifier: method.nonObject
-			count: 4
-			path: app/Http/Controllers/BitbucketUploadController.php
-
-		-
-			message: '#^Cannot call method getSize\(\) on Illuminate\\Http\\UploadedFile\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: app/Http/Controllers/BitbucketUploadController.php
-
-		-
-			message: '#^Parameter \#2 \$baseTimestamp of function strtotime expects int\|null, int\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Http/Controllers/BonusController.php
-
-		-
-			message: '#^Parameter \#2 \$timestamp of function date expects int\|null, int\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Http/Controllers/BonusController.php
-
-		-
 			message: '#^Offset ''type'' might not exist on array\{type\?\: mixed, torrent\?\: mixed, text\?\: mixed, ori_text\?\: mixed, offer\?\: mixed, request\?\: mixed, anonymous\?\: mixed\}\.$#'
 			identifier: offsetAccess.notFound
 			count: 1
 			path: app/Http/Controllers/CommentController.php
-
-		-
-			message: '#^Parameter \#2 \$user of method App\\Repositories\\HitAndRunRepository\:\:bulkDelete\(\) expects App\\Models\\User, App\\Models\\User\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Http/Controllers/HitAndRunController.php
-
-		-
-			message: '#^Parameter \#2 \$user of method App\\Repositories\\HitAndRunRepository\:\:bulkPardon\(\) expects App\\Models\\User, App\\Models\\User\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Http/Controllers/HitAndRunController.php
-
-		-
-			message: '#^Parameter \#2 \$user of method App\\Repositories\\HitAndRunRepository\:\:pardon\(\) expects App\\Models\\User, App\\Models\\User\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Http/Controllers/HitAndRunController.php
-
-		-
-			message: '#^Cannot call method delete_value\(\) on App\\Support\\Cache\\LegacyRedisCache\|null\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: app/Http/Controllers/IndexController.php
-
-		-
-			message: '#^Offset ''id'' might not exist on array\<string, mixed\>\|null\.$#'
-			identifier: offsetAccess.notFound
-			count: 3
-			path: app/Http/Controllers/IndexController.php
 
 		-
 			message: '#^Parameter \#2 \$model of static method App\\Support\\Events\:\:fire\(\) expects Illuminate\\Database\\Eloquent\\Model, App\\Models\\News\|null given\.$#'
@@ -163,124 +43,16 @@ parameters:
 			path: app/Http/Controllers/LegacyController.php
 
 		-
-			message: '#^Parameter \#2 \$status of function response expects int, int\<100, max\>\|true given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Http/Controllers/LegacyController.php
-
-		-
 			message: '#^Parameter \#5 \$editItem of method App\\Http\\Controllers\\LogController\:\:chronicleList\(\) expects array\<string, mixed\>\|null, array\<int\|string, mixed\> given\.$#'
 			identifier: argument.type
 			count: 1
 			path: app/Http/Controllers/LogController.php
 
 		-
-			message: '#^Binary operation "\-" between ''''\|int\<2, 7\> and 1 results in an error\.$#'
-			identifier: binaryOp.invalid
-			count: 1
-			path: app/Http/Controllers/ModerationController.php
-
-		-
-			message: '#^Parameter \#1 \$hostname of function gethostbyname expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 2
-			path: app/Http/Controllers/ModerationController.php
-
-		-
 			message: '#^Cannot call method update\(\) on App\\Models\\User\|null\.$#'
 			identifier: method.nonObject
 			count: 1
 			path: app/Http/Controllers/NewsController.php
-
-		-
-			message: '#^Call to an undefined method App\\Models\\Poll\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\Poll\>\:\:answers\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: app/Http/Controllers/PollController.php
-
-		-
-			message: '#^Cannot access property \$id on App\\Models\\User\|null\.$#'
-			identifier: property.nonObject
-			count: 2
-			path: app/Http/Controllers/PollController.php
-
-		-
-			message: '#^Cannot access property \$id on App\\Models\\Forum\|null\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: app/Http/Controllers/PostController.php
-
-		-
-			message: '#^Parameter \#1 \$forum of method App\\Http\\Controllers\\PostController\:\:canRead\(\) expects App\\Models\\Forum, App\\Models\\Forum\|null given\.$#'
-			identifier: argument.type
-			count: 2
-			path: app/Http/Controllers/PostController.php
-
-		-
-			message: '#^Parameter \#1 \$forum of method App\\Http\\Controllers\\PostController\:\:canWrite\(\) expects App\\Models\\Forum, App\\Models\\Forum\|null given\.$#'
-			identifier: argument.type
-			count: 2
-			path: app/Http/Controllers/PostController.php
-
-		-
-			message: '#^Parameter \#1 \$shoutIds of static method App\\Support\\Shoutbox\:\:prefetchReactions\(\) expects list\<int\>, array\<int\> given\.$#'
-			identifier: argument.type
-			count: 2
-			path: app/Http/Controllers/ShoutboxController.php
-
-		-
-			message: '#^Cannot access offset ''id'' on stdClass\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: app/Http/Controllers/StaffController.php
-
-		-
-			message: '#^Cannot access offset ''name'' on stdClass\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: app/Http/Controllers/StaffController.php
-
-		-
-			message: '#^Parameter \#1 \$class of static method App\\Support\\UserClass\:\:name\(\) expects int\|string, int\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Http/Controllers/StaffController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\SupportController\:\:complainReply\(\) should return Illuminate\\Http\\RedirectResponse\|Illuminate\\Http\\Response but returns Illuminate\\Http\\RedirectResponse\|Illuminate\\Routing\\Redirector\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/SupportController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\SupportController\:\:complainToggle\(\) should return Illuminate\\Http\\RedirectResponse\|Illuminate\\Http\\Response but returns Illuminate\\Http\\RedirectResponse\|Illuminate\\Routing\\Redirector\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/SupportController.php
-
-		-
-			message: '#^Binary operation "\-" between int\<0, max\>\|string and 1 results in an error\.$#'
-			identifier: binaryOp.invalid
-			count: 1
-			path: app/Http/Controllers/SystemController.php
-
-		-
-			message: '#^Parameter \#3 \.\.\.\$values of function sprintf expects bool\|float\|int\|string\|null, array\<int, string\>\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Http/Controllers/SystemController.php
-
-		-
-			message: '#^Cannot call method createToken\(\) on App\\Models\\User\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: app/Http/Controllers/TokenController.php
-
-		-
-			message: '#^Cannot call method tokens\(\) on App\\Models\\User\|null\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: app/Http/Controllers/TokenController.php
 
 		-
 			message: '#^Cannot call method load\(\) on App\\Models\\Topic\|null\.$#'
@@ -293,48 +65,6 @@ parameters:
 			identifier: assign.propertyType
 			count: 1
 			path: app/Http/Controllers/TopicController.php
-
-		-
-			message: '#^Parameter \#1 \$bdInfo of class Nexus\\Torrent\\BdInfoExtra constructor expects string, array\<mixed\>\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Http/Controllers/TorrentDetailsController.php
-
-		-
-			message: '#^Parameter \#1 \$mediaInfo of class Nexus\\Torrent\\TechnicalInformation constructor expects string, array\<mixed\>\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Http/Controllers/TorrentDetailsController.php
-
-		-
-			message: '#^Parameter \#1 \$str of function strtok expects string, array\<mixed\>\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Http/Controllers/TorrentDetailsController.php
-
-		-
-			message: '#^Parameter \#1 \$torrent of static method App\\Support\\TorrentAccess\:\:hrImage\(\) expects array\<string, mixed\>, array\<int\|string, mixed\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Http/Controllers/TorrentDetailsController.php
-
-		-
-			message: '#^Binary operation "\." between array\<string, string\>\|string and ''\?passkey\='' results in an error\.$#'
-			identifier: binaryOp.invalid
-			count: 1
-			path: app/Http/Controllers/TorrentDownloadController.php
-
-		-
-			message: '#^Parameter \#1 \$datetime of function strtotime expects string, Carbon\\Carbon\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Http/Controllers/TorrentDownloadController.php
-
-		-
-			message: '#^Parameter \#1 \$string of function strlen expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Http/Controllers/TorrentDownloadController.php
 
 		-
 			message: '#^Cannot cast float\|int\|list\<string\>\|string to string\.$#'
@@ -359,30 +89,6 @@ parameters:
 			identifier: method.notFound
 			count: 1
 			path: app/Http/Controllers/UserMedalController.php
-
-		-
-			message: '#^Parameter \#2 \$currentUser of static method App\\Repositories\\SearchPageRepository\:\:dataForSearch\(\) expects App\\Models\\User, App\\Models\\User\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\User\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Http/Controllers/UtilityController.php
-
-		-
-			message: '#^Parameter \#2 \$status of function response expects int, int\<100, max\>\|true given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Http/Controllers/UtilityController.php
-
-		-
-			message: '#^Cannot cast float\|int\|list\<string\>\|string\|null to string\.$#'
-			identifier: cast.string
-			count: 4
-			path: app/Http/Controllers/WebCommentController.php
-
-		-
-			message: '#^Parameter \#1 \$quote of method App\\Http\\Controllers\\WebCommentController\:\:buildQuote\(\) expects array\<string, mixed\>, array\<int\|string, mixed\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Http/Controllers/WebCommentController.php
 
 		-
 			message: '#^Cannot access property \$uploadpos on App\\Models\\User\|null\.$#'

@@ -50,7 +50,7 @@ class IndexController extends Controller
         }
 
         $poll = IndexRepository::getCurrentPoll();
-        if (! $poll) {
+        if (! is_array($poll) || ! isset($poll['id']) || ! is_array($user)) {
             return redirect('/index.php');
         }
 
@@ -63,8 +63,10 @@ class IndexController extends Controller
         IndexRepository::recordPollVote($pollId, $user['id'], (int) $choice);
 
         $cache = SupportContext::getCache();
-        $cache->delete_value('current_poll_content');
-        $cache->delete_value('current_poll_result', true);
+        if ($cache !== null) {
+            $cache->delete_value('current_poll_content');
+            $cache->delete_value('current_poll_result', true);
+        }
 
         $pollvoteBonus = (float) SupportContext::getGlobal('pollvote_bonus', 0);
         if ($pollvoteBonus > 0) {

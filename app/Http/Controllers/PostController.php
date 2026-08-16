@@ -6,6 +6,7 @@ use App\DTOs\Forum\ListPostsDto;
 use App\DTOs\Forum\StorePostDto;
 use App\DTOs\Forum\UpdatePostDto;
 use App\Http\Resources\PostResource;
+use App\Models\Forum;
 use App\Models\Post;
 use App\Models\Topic;
 use App\Models\User;
@@ -25,7 +26,7 @@ class PostController extends Controller
         $this->setContextUser();
 
         $forum = $topic->forum;
-        if (! $this->canRead($forum)) {
+        if (! $forum instanceof Forum || ! $this->canRead($forum)) {
             throw ValidationException::withMessages(['topic' => ['Permission denied.']]);
         }
 
@@ -48,7 +49,7 @@ class PostController extends Controller
         }
 
         $forum = $topic->forum;
-        if (! $this->canWrite($forum)) {
+        if (! $forum instanceof Forum || ! $this->canWrite($forum)) {
             throw ValidationException::withMessages(['topic' => ['Permission denied.']]);
         }
 
@@ -78,7 +79,8 @@ class PostController extends Controller
     {
         $this->setContextUser();
 
-        if (! $this->canRead($topic->forum)) {
+        $forum = $topic->forum;
+        if (! $forum instanceof Forum || ! $this->canRead($forum)) {
             throw ValidationException::withMessages(['topic' => ['Permission denied.']]);
         }
 
@@ -185,6 +187,8 @@ class PostController extends Controller
             return true;
         }
 
-        return (int) $post->userid === (int) $user->id && $this->canWrite($topic->forum);
+        $forum = $topic->forum;
+
+        return (int) $post->userid === (int) $user->id && $forum instanceof Forum && $this->canWrite($forum);
     }
 }

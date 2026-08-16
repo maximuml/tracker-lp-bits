@@ -57,7 +57,7 @@ final class TorrentAccess
      * Mirrors `get_hr_img()`.
      */
     /**
-     * @param  array<string, mixed>  $torrent
+     * @param  array<int|string, mixed>  $torrent
      */
     public static function hrImage(array $torrent, int|string $searchBoxId): string
     {

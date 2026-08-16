@@ -30,33 +30,45 @@ class FireEvent extends Command
      */
     public function handle()
     {
-        $name = $this->option('name');
-        $idKey = $this->option('idKey');
-        $idKeyOld = $this->option('idKeyOld');
+        $name = (string) $this->option('name');
+        $idKey = (string) $this->option('idKey');
+        $idKeyOld = (string) $this->option('idKeyOld');
         $log = "FireEvent, name: $name, idKey: $idKey, idKeyOld: $idKeyOld";
         $this->info("$log, begin ...");
-        if (isset(ModelEventEnum::$eventMaps[$name])) {
-            $eventName = ModelEventEnum::$eventMaps[$name]['event'];
-            $modelClassName = ModelEventEnum::$eventMaps[$name]['model'];
-            $modelBasic = new $modelClassName();
-            $modelData = unserialize(NexusDB::cache_get($idKey));
-            $useArray = str_ends_with($name, '_deleted');
-            $model = call_user_func_array([$modelBasic, "newInstance"], [$modelData, true]);
-            //由于 id 不属于 fillable，初始化新对象时是没有值的
-            $model->id = $modelData['id'];
-            $params = [$useArray ? $modelData: $model];
-            if ($idKeyOld) {
-                $modelOldData = unserialize(NexusDB::cache_get($idKeyOld));
-                $modelOld = call_user_func_array([$modelBasic, "newInstance"], [$modelOldData, true]);
-                $modelOld->id = $modelOldData['id'];
-                $params[] = $useArray ? $modelOldData: $modelOld;
-            }
-            $result = call_user_func_array([$eventName, "dispatch"], $params);
-            $log .= ", success call dispatch, result: " . var_export($result, true);
-            \App\Support\Events::publishModel($name, $model->id, "");
-        } else {
-            $log .= ", no event match this name";
+        if ($name === '' || !isset(ModelEventEnum::$eventMaps[$name])) {
+            $this->warn("$log, no event match this name");
+            return CommandAlias::FAILURE;
         }
+        $eventName = ModelEventEnum::$eventMaps[$name]['event'];
+        /** @var class-string $eventName */
+        /** @var class-string<\Illuminate\Database\Eloquent\Model> $modelClassName */
+        $modelClassName = ModelEventEnum::$eventMaps[$name]['model'];
+        $modelBasic = new $modelClassName();
+        $rawData = NexusDB::cache_get($idKey);
+        $modelData = is_string($rawData) ? unserialize($rawData) : $rawData;
+        if (!is_array($modelData)) {
+            $this->error("$log, invalid modelData");
+            return CommandAlias::FAILURE;
+        }
+        $useArray = str_ends_with($name, '_deleted');
+        $model = $modelBasic->newInstance($modelData, true);
+        //由于 id 不属于 fillable，初始化新对象时是没有值的
+        $model->setAttribute('id', $modelData['id']);
+        $params = [$useArray ? $modelData: $model];
+        if ($idKeyOld !== '') {
+            $rawOldData = NexusDB::cache_get($idKeyOld);
+            $modelOldData = is_string($rawOldData) ? unserialize($rawOldData) : $rawOldData;
+            if (!is_array($modelOldData)) {
+                $this->error("$log, invalid modelOldData");
+                return CommandAlias::FAILURE;
+            }
+            $modelOld = $modelBasic->newInstance($modelOldData, true);
+            $modelOld->setAttribute('id', $modelOldData['id']);
+            $params[] = $useArray ? $modelOldData: $modelOld;
+        }
+        $result = call_user_func_array([$eventName, "dispatch"], $params);
+        $log .= ", success call dispatch, result: " . var_export($result, true);
+        \App\Support\Events::publishModel($name, $model->getKey(), "");
         $this->info($log);
         \App\Support\Logger::writeWithContext((string) $log, (string) 'info', (bool) false);
         return CommandAlias::SUCCESS;

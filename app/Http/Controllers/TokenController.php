@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Exceptions\NexusException;
+use App\Models\User;
 use App\Repositories\TokenRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -21,6 +22,9 @@ class TokenController extends Controller
                 'permissions' => 'required|array|min:1',
             ]);
             $user = Auth::user();
+            if (!$user instanceof User) {
+                return $this->fail(false, 'Unauthenticated');
+            }
             $count = $user->tokens()->count();
             if ($count >= 5) {
                 throw new NexusException(\App\Support\Locale::trans("token.maximum_allow_number_reached", [], null));
@@ -51,6 +55,9 @@ class TokenController extends Controller
                 'id' => 'required|integer',
             ]);
             $user = Auth::user();
+            if (!$user instanceof User) {
+                return $this->fail(false, 'Unauthenticated');
+            }
             $user->tokens()->where("id", $request->id)->delete();
             return $this->success(true);
         } catch (\Exception $exception) {

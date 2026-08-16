@@ -76,6 +76,7 @@ class BitbucketUploadController extends Controller
         if (! $file instanceof UploadedFile || ! $file->isValid()) {
             LegacyResponse::abort($lang['std_upload_failed'] ?? '', $lang['std_nothing_received'] ?? '', false);
         }
+        assert($file instanceof UploadedFile);
 
         if ($file->getSize() > 256 * 1024) {
             LegacyResponse::abort($lang['std_upload_failed'] ?? '', $lang['std_file_too_large'] ?? '', false);

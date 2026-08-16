@@ -55,7 +55,7 @@ class TranslateLang extends Command
         $target = $this->argument('target');
         $filename = $this->argument('filename');
         $runEnv = $this->runEnv = $this->argument('runEnv');
-        $this->ignoreKeys = array_filter(explode(',', $this->option('ignore')));
+        $this->ignoreKeys = array_filter(explode(',', (string) $this->option('ignore')));
         $this->cachePath = storage_path("framework/lang-translate-cache.{$source}.{$target}.json");
 
         $this->loadCache();
@@ -162,7 +162,12 @@ class TranslateLang extends Command
     {
 //        $targetFile = resource_path("lang/{$targetLang}.json");
         $targetFile = $this->langPath . "/{$targetLang}/{$jsonFile}";
-        $content = json_decode(file_get_contents($jsonFile), true);
+        $raw = file_get_contents($jsonFile);
+        if ($raw === false) {
+            $this->error("Failed to read {$jsonFile}");
+            return;
+        }
+        $content = json_decode($raw, true);
         $translated = [];
 
         foreach ($content as $key => $value) {
@@ -264,7 +269,8 @@ class TranslateLang extends Command
     protected function loadCache()
     {
         if (file_exists($this->cachePath)) {
-            $this->cache = json_decode(file_get_contents($this->cachePath), true);
+            $raw = file_get_contents($this->cachePath);
+            $this->cache = $raw === false ? [] : json_decode($raw, true);
         }
     }
 
@@ -272,7 +278,7 @@ class TranslateLang extends Command
     protected function saveCache()
     {
         if (!$this->option('dry-run')) {
-            file_put_contents($this->cachePath, json_encode($this->cache, JSON_UNESCAPED_UNICODE));
+            file_put_contents($this->cachePath, json_encode($this->cache, JSON_UNESCAPED_UNICODE) ?: '{}');
         }
     }
 
@@ -284,6 +290,9 @@ class TranslateLang extends Command
     {
         // 默认格式化（PHP 默认是 2 空格）
         $json = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+        if ($json === false) {
+            return '';
+        }
 
         // 自定义缩进
         $indentChar = str_repeat(' ', $indentSize);
@@ -294,7 +303,7 @@ class TranslateLang extends Command
             return str_repeat($indentChar, (int)$level);
         }, $json);
 
-        return $formatted;
+        return (string) $formatted;
     }
 
     /** @param  mixed  $lang */

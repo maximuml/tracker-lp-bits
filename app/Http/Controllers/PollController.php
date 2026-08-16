@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Resources\PollResource;
 use App\Models\Poll;
 use App\Models\PollAnswer;
+use App\Models\User;
 use App\Repositories\PollRepository;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -109,7 +110,7 @@ class PollController extends Controller
         if ($poll) {
             $baseAnswerQuery = $poll->answers()->where('selection', '<=', Poll::MAX_OPTION_INDEX);
             $poll->answers_count = (clone $baseAnswerQuery)->count();
-            $answer = $poll->answers()->where('userid', $user->id)->first();
+            $answer = $user instanceof User ? $poll->answers()->where('userid', $user->id)->first() : null;
             $options = [];
             for ($i = 0; $i <= Poll::MAX_OPTION_INDEX; $i++) {
                 $field = "option{$i}";
@@ -154,9 +155,12 @@ class PollController extends Controller
             'poll_id' => 'required',
             'selection' => 'required|integer|min:0|max:255',
         ]);
-        $pollId = $request->poll_id;
-        $selection = $request->selection;
+        $pollId = (int) $request->poll_id;
+        $selection = (int) $request->selection;
         $user = Auth::user();
+        if (!$user instanceof User) {
+            return $this->success(['result' => false], 'Unauthenticated');
+        }
         $poll = Poll::query()->findOrFail($pollId);
         $data = [
             'userid' => $user->id,

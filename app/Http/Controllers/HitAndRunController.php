@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\HitAndRunResource;
 use App\Models\HitAndRun;
+use App\Models\User;
 use App\Repositories\HitAndRunRepository;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -106,7 +107,11 @@ class HitAndRunController extends Controller
      */
     public function pardon(int $id): array
     {
-        $result = $this->repository->pardon($id, Auth::user());
+        $user = Auth::user();
+        if (!$user instanceof User) {
+            return $this->success(['result' => false], 'Unauthenticated');
+        }
+        $result = $this->repository->pardon($id, $user);
         return $this->success($result);
     }
 
@@ -116,7 +121,11 @@ class HitAndRunController extends Controller
      */
     public function bulkPardon(Request $request): array
     {
-        $result = $this->repository->bulkPardon($request->all(), Auth::user());
+        $user = Auth::user();
+        if (!$user instanceof User) {
+            return $this->success(['result' => false], 'Unauthenticated');
+        }
+        $result = $this->repository->bulkPardon($request->all(), $user);
         return $this->success(['result' => $result],"Affected: " . intval($result));
     }
 
@@ -126,7 +135,11 @@ class HitAndRunController extends Controller
      */
     public function bulkDelete(Request $request): array
     {
-        $result = $this->repository->bulkDelete($request->all(), Auth::user());
+        $user = Auth::user();
+        if (!$user instanceof User) {
+            return $this->success(['result' => false], 'Unauthenticated');
+        }
+        $result = $this->repository->bulkDelete($request->all(), $user);
         return $this->success(['result' => $result],"Affected: " . intval($result));
     }
 }

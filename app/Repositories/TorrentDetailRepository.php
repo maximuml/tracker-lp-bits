@@ -13,7 +13,7 @@ class TorrentDetailRepository
 {
     /**
      * @param  int  $id
-     * @return  ?array<int|string, mixed>
+     * @return  ?array<string, mixed>
      */
     public static function getTorrent(int $id): ?array
     {

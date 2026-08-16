@@ -107,7 +107,7 @@ class WebCommentController extends Controller
         $headTitle = $this->lang('head_edit_comment_to') . $arr['name'];
         $pageTitle = $this->lang('text_edit_comment_to') . '<a href="' . e($returnUrl) . '">' . e($arr['name']) . '</a>';
         $formAction = $this->legacyAction('edit', ['type' => $type, 'cid' => $commentId]);
-        $returnto = $this->safeReturnUrl((string) $request->server('HTTP_REFERER'), $returnUrl);
+        $returnto = $this->safeReturnUrl((string) ($request->headers->get('referer') ?? ''), $returnUrl);
         $body = (string) $arr['text'];
         $composeType = 'edit';
 
@@ -153,7 +153,7 @@ class WebCommentController extends Controller
 
         $sure = $request->input('sure');
         if ((string) $sure !== '1') {
-            $referer = (string) $request->server('HTTP_REFERER');
+            $referer = (string) ($request->headers->get('referer') ?? '');
             $query = ['type' => $type, 'cid' => $commentId, 'sure' => 1];
             if ($referer !== '') {
                 $query['returnto'] = $referer;
@@ -181,7 +181,7 @@ class WebCommentController extends Controller
         $defaultUrl = $this->buildScript($type, $parentId);
         $returnto = (string) $request->input('returnto', '');
         if ($returnto === '') {
-            $returnto = (string) $request->server('HTTP_REFERER');
+            $returnto = (string) ($request->headers->get('referer') ?? '');
         }
 
         return redirect($this->safeReturnUrl($returnto, $defaultUrl));
@@ -203,7 +203,7 @@ class WebCommentController extends Controller
 
         $parentId = (int) ($arr[$type] ?? 0);
         $defaultUrl = $this->buildScript($type, $parentId);
-        $returnto = $this->safeReturnUrl((string) $request->server('HTTP_REFERER'), $defaultUrl);
+        $returnto = $this->safeReturnUrl((string) ($request->headers->get('referer') ?? ''), $defaultUrl);
         $lang = $this->langComment();
 
         return view('comments.original', compact('arr', 'commentId', 'returnto', 'lang'));
@@ -275,10 +275,10 @@ class WebCommentController extends Controller
         abort(403, $this->lang('std_comment_flooding_denied') . $secs . $this->lang('std_before_posting_another'));
     }
 
-    /** @param array<string, mixed> $quote */
+    /** @param array<int|string, mixed> $quote */
     private function buildQuote(array $quote): string
     {
-        return '[quote=' . ($quote['username'] ?? '') . ']' . ($quote['text'] ?? '') . '[/quote]';
+        return '[quote=' . (string) ($quote['username'] ?? '') . ']' . (string) ($quote['text'] ?? '') . '[/quote]';
     }
 
     private function deleteCache(string $type, int $parentId): void

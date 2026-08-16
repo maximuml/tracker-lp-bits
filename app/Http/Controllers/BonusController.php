@@ -403,9 +403,9 @@ JS;
         }
         $yearNow = (int) date('Y');
 
-        $timeStart = strtotime("{$year}-{$month}-01 00:00:00");
+        $timeStart = strtotime("{$year}-{$month}-01 00:00:00") ?: time();
         $sqlStartTime = date('Y-m-d H:i:s', $timeStart);
-        $timeEnd = strtotime('+1 month', $timeStart);
+        $timeEnd = strtotime('+1 month', $timeStart) ?: time();
         $sqlEndTime = date('Y-m-d H:i:s', $timeEnd);
 
         $uploaders = NexusDB::table('torrents')

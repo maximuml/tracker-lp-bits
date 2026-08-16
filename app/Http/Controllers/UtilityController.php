@@ -33,7 +33,7 @@ class UtilityController extends LegacyController
     public function search(Request $request): View|RedirectResponse
     {
         $curUser = SupportContext::getUser() ?? [];
-        $currentUser = ! empty($curUser) ? User::query()->find($curUser['id'] ?? 0) : null;
+        $currentUser = ! empty($curUser) ? User::query()->find((int) ($curUser['id'] ?? 0)) : null;
         if ($currentUser === null) {
             $qs = $request->getQueryString();
 
@@ -210,7 +210,7 @@ class UtilityController extends LegacyController
 
         ob_start();
         $driver->outputImage($imagehash);
-        $content = ob_get_clean();
+        $content = ob_get_clean() ?: '';
 
         $headers = [];
         $status = http_response_code();
@@ -224,7 +224,7 @@ class UtilityController extends LegacyController
             }
         }
 
-        $responseStatus = ($status >= 100) ? $status : 200;
+        $responseStatus = is_int($status) && $status >= 100 ? $status : 200;
 
         return response($content, $responseStatus, $headers);
     }

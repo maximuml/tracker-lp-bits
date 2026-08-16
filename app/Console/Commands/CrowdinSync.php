@@ -286,7 +286,7 @@ class CrowdinSync extends Command
             'Authorization' => "Bearer {$this->token}",
             'Crowdin-API-FileName' => basename($filePath),
         ])->withBody(
-            file_get_contents($filePath), 'application/octet-stream'
+            file_get_contents($filePath) ?: '', 'application/octet-stream'
         )->post("{$this->apiBaseUrl}/storages");
 
         if ($response->successful()) {
@@ -492,7 +492,7 @@ class CrowdinSync extends Command
                 $langCode = $customMap[$langCode];
             }
             //use underline
-            $targetDir = "{$this->translationsDir}/" . str_replace("-", "_", $langCode);
+            $targetDir = "{$this->translationsDir}/" . str_replace("-", "_", (string) $langCode);
             $this->info("Moving translations to {$targetDir}");
 
             if (!File::exists($targetDir)) {
@@ -641,7 +641,7 @@ class CrowdinSync extends Command
 
         $result = [];
         foreach ($languages as $language) {
-            if (empty(trim($language)) || in_array($language, ['all', '*'])) {
+            if (!is_string($language) || empty(trim($language)) || in_array($language, ['all', '*'])) {
                 continue;
             }
             if (isset($this->customMap[$language])) {

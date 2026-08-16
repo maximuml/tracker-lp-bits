@@ -172,7 +172,7 @@ class SupportController extends LegacyController
             }
         }
 
-        return redirect($request->headers->get('referer', '/complains.php'));
+        return redirect()->to($request->headers->get('referer') ?: '/complains.php');
     }
 
     /**
@@ -198,7 +198,7 @@ class SupportController extends LegacyController
             $cache->delete_value('COMPLAINTS_COUNT_CACHE');
         }
 
-        return redirect($request->headers->get('referer', '/complains.php'));
+        return redirect()->to($request->headers->get('referer') ?: '/complains.php');
     }
 
     /**

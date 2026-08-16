@@ -5,6 +5,9 @@ namespace App\Support;
 use App\Models\Setting;
 use App\Repositories\AuthRepository;
 use App\Services\Captcha\Exceptions\CaptchaValidationException;
+use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Response;
 
 /**
  * Temporary Phase 5 migration shim for legacy authentication / captcha helpers.
@@ -282,9 +285,7 @@ final class LegacyAuth
     {
         if (! $context->isLoggedIn()) {
             if ($context->script === 'ajax') {
-                http_response_code(401);
-                header('Content-Type: application/json');
-                exit(json_encode(Api::fail('Not login!', $context->requestBody, $context->request)));
+                throw new HttpResponseException(new JsonResponse(Api::fail('Not login!', $context->requestBody, $context->request), 401));
             }
 
             if ($mainPage) {
@@ -295,7 +296,6 @@ final class LegacyAuth
                     : '';
                 LegacyResponse::redirect('login.php?returnto=' . $returnTo);
             }
-            exit;
         }
 
         if (($context->user['enabled'] ?? '') !== 'yes' && $context->script !== 'self-enable') {
@@ -341,9 +341,8 @@ final class LegacyAuth
         $nip = ip2long($ip);
 
         if ($nip && app(AuthRepository::class)->isIpBanned($nip)) {
-            header('HTTP/1.1 403 Forbidden');
-            print('<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"></head><body>' . ($lang['text_unauthorized_ip'] ?? '') . "</body></html>\n");
-            die;
+            $html = '<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"></head><body>' . ($lang['text_unauthorized_ip'] ?? '') . "</body></html>\n";
+            throw new HttpResponseException(new Response($html, 403));
         }
 
         $row = AuthCookie::userFromCookie($context->cookies, true);

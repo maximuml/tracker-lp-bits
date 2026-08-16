@@ -2,8 +2,6 @@
 
 namespace App\Support;
 
-use Illuminate\Database\Capsule\Manager as Capsule;
-use Illuminate\Support\Facades\DB;
 use Nexus\Database\NexusDB;
 
 /**
@@ -34,12 +32,7 @@ final class LegacyDb
      */
     public static function lastQuery(bool|string $all = false, string $format = 'json'): mixed
     {
-        $connectionName = NexusDB::getConnectionName();
-        if (defined('IN_NEXUS') && IN_NEXUS) {
-            $connection = Capsule::connection($connectionName);
-        } else {
-            $connection = DB::connection($connectionName);
-        }
+        $connection = NexusDB::eloquentConnection();
 
         if ($all === 'COUNT') {
             return count($connection->getQueryLog());

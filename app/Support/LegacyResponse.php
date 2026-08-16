@@ -38,8 +38,7 @@ final class LegacyResponse
      */
     public static function sqlError(string $file, string $line): void
     {
-        echo \App\Support\Frame::sqlError(\App\Support\LegacyDb::error(), $file, $line);
-        exit;
+        throw new HttpResponseException(new Response(\App\Support\Frame::sqlError(\App\Support\LegacyDb::error(), $file, $line), 500));
     }
 
     public static function abort(
@@ -50,36 +49,49 @@ final class LegacyResponse
         bool $foot = true,
         bool $die = true,
     ): void {
-        if ($die && ! (defined('IN_NEXUS') && IN_NEXUS)) {
-            ob_start();
+        if (! $die) {
             if ($head) {
                 \App\Support\Html::stdhead();
+            } elseif ($foot && PageLayout::getContext() === null) {
+                // Ensure a PageLayout context exists for stdfoot() even when the
+                // caller requested no header (e.g. permission denied before stdhead).
+                ob_start();
+                \App\Support\Html::stdhead();
+                ob_end_clean();
+            }
+            echo Frame::stdMessage($heading, $text, $htmlstrip);
+            if ($foot) {
+                \App\Support\Html::stdfoot();
+            }
+
+            return;
+        }
+
+        $level = ob_get_level();
+        ob_start();
+        try {
+            if ($head) {
+                \App\Support\Html::stdhead();
+            } elseif ($foot && PageLayout::getContext() === null) {
+                // Ensure a PageLayout context exists for stdfoot() even when the
+                // caller requested no header (e.g. permission denied before stdhead).
+                ob_start();
+                \App\Support\Html::stdhead();
+                ob_end_clean();
             }
             echo Frame::stdMessage($heading, $text, $htmlstrip);
             if ($foot) {
                 \App\Support\Html::stdfoot();
             }
             $html = (string) ob_get_clean();
-
-            throw new HttpResponseException(new Response($html));
+        } catch (HttpResponseException $e) {
+            while (ob_get_level() > $level) {
+                ob_end_clean();
+            }
+            throw $e;
         }
 
-        if ($head) {
-            \App\Support\Html::stdhead();
-        } elseif ($foot && PageLayout::getContext() === null) {
-            // Ensure a PageLayout context exists for stdfoot() even when the
-            // caller requested no header (e.g. permission denied before stdhead).
-            ob_start();
-            \App\Support\Html::stdhead();
-            ob_end_clean();
-        }
-        echo Frame::stdMessage($heading, $text, $htmlstrip);
-        if ($foot) {
-            \App\Support\Html::stdfoot();
-        }
-        if ($die) {
-            exit;
-        }
+        throw new HttpResponseException(new Response($html));
     }
 
     /**
@@ -151,19 +163,42 @@ final class LegacyResponse
                 (string) ($lang_functions['std_error'] ?? ''),
                 (string) ($lang_functions['std_invalid_id'] ?? ''),
             );
-        } else {
-            echo '<h2>'.\htmlspecialchars((string) ($lang_functions['std_error'] ?? '')).'</h2>'
-                .'<table width="100%" border="1" cellspacing="0" cellpadding="10"><tr><td class="text">'
-                .\htmlspecialchars((string) ($lang_functions['std_invalid_id'] ?? ''))
-                .'</td></tr></table>';
+
+            return true;
+        }
+
+        $errorHtml = '<h2>'.\htmlspecialchars((string) ($lang_functions['std_error'] ?? '')).'</h2>'
+            .'<table width="100%" border="1" cellspacing="0" cellpadding="10"><tr><td class="text">'
+            .\htmlspecialchars((string) ($lang_functions['std_invalid_id'] ?? ''))
+            .'</td></tr></table>';
+
+        if ($die) {
+            $level = ob_get_level();
+            ob_start();
+            try {
+                if ($stdfoot) {
+                    \App\Support\Html::stdhead();
+                }
+                echo $errorHtml;
+                if ($stdfoot) {
+                    \App\Support\Html::stdfoot();
+                }
+                $html = (string) ob_get_clean();
+            } catch (HttpResponseException $e) {
+                while (ob_get_level() > $level) {
+                    ob_end_clean();
+                }
+                throw $e;
+            }
+
+            throw new HttpResponseException(new Response($html));
         }
 
         if ($stdfoot && \function_exists('stdfoot')) {
             \App\Support\Html::stdfoot();
         }
-        if ($die) {
-            exit;
-        }
+
+        echo $errorHtml;
 
         return true;
     }
@@ -218,11 +253,22 @@ final class LegacyResponse
      */
     public static function bark(string $title, string $message): void
     {
-        \App\Support\Html::stdhead($title);
-        echo '<h1>' . \htmlspecialchars($title) . "</h1>\n";
-        echo '<p>' . \htmlspecialchars($message) . "</p>\n";
-        \App\Support\Html::stdfoot();
-        exit;
+        $level = ob_get_level();
+        ob_start();
+        try {
+            \App\Support\Html::stdhead($title);
+            echo '<h1>' . \htmlspecialchars($title) . "</h1>\n";
+            echo '<p>' . \htmlspecialchars($message) . "</p>\n";
+            \App\Support\Html::stdfoot();
+            $html = (string) ob_get_clean();
+        } catch (HttpResponseException $e) {
+            while (ob_get_level() > $level) {
+                ob_end_clean();
+            }
+            throw $e;
+        }
+
+        throw new HttpResponseException(new Response($html));
     }
 
     /**
@@ -232,9 +278,7 @@ final class LegacyResponse
      */
     public static function notFound(): void
     {
-        header('HTTP/1.1 404 Not found');
-        echo "<h1>Not Found</h1>\n";
-        exit;
+        throw new HttpResponseException(new Response("<h1>Not Found</h1>\n", 404));
     }
 
     /**
@@ -248,15 +292,9 @@ final class LegacyResponse
         }
 
         if (headers_sent()) {
-            echo "<script type=\"text/javascript\">window.location.href = '" . htmlspecialchars($url, ENT_QUOTES) . "';</script>";
-            exit;
+            throw new HttpResponseException(new Response("<script type=\"text/javascript\">window.location.href = '" . htmlspecialchars($url, ENT_QUOTES) . "';</script>"));
         }
 
-        if (! (defined('IN_NEXUS') && IN_NEXUS)) {
-            throw new HttpResponseException(new RedirectResponse($url));
-        }
-
-        header("Location: $url", true, 302);
-        exit;
+        throw new HttpResponseException(new RedirectResponse($url, 302));
     }
 }

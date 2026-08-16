@@ -2,6 +2,9 @@
 
 namespace App\Support;
 
+use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Http\Response;
+
 /**
  * Legacy debug helpers extracted from `include/globalfunctions.php`.
  *
@@ -14,7 +17,7 @@ final class Debug
     {
         echo '[' . date('Y-m-d H:i:s') . "] $line<br />";
         if ($exit) {
-            exit(0);
+            throw new HttpResponseException(new Response(''));
         }
     }
 
@@ -23,11 +26,11 @@ final class Debug
      */
     public static function dumpAndExit(...$vars): void
     {
-        echo '<pre>';
+        $html = '<pre>';
         foreach ($vars as $var) {
-            echo print_r($var, true);
+            $html .= print_r($var, true);
         }
-        echo '</pre>';
-        exit(0);
+        $html .= '</pre>';
+        throw new HttpResponseException(new Response($html));
     }
 }

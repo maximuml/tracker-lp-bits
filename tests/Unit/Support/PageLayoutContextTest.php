@@ -51,6 +51,8 @@ class PageLayoutContextTest extends TestCase
             moderatorClass: 13,
             sysopClass: 15,
             vipClass: 10,
+            menuHtml: '',
+            menuSelected: '',
             userUpdateSet: $userUpdateSet,
         );
     }

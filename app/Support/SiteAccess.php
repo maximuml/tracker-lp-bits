@@ -2,6 +2,9 @@
 
 namespace App\Support;
 
+use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Response;
 use Nexus\Database\NexusDB;
 
 /**
@@ -41,7 +44,7 @@ final class SiteAccess
         $valueKey = "guest_visit_value_$guestVisitType";
         if (empty($setting[$valueKey])) {
             Logger::writeWithContext("setting: security.$valueKey empty");
-            die(0);
+            throw new HttpResponseException(new Response('', 500));
         }
 
         $guestVisitValue = $setting[$valueKey];
@@ -50,19 +53,20 @@ final class SiteAccess
             $pageFile = ROOT_PATH . 'resources/static-pages/' . $guestVisitValue;
             if (! file_exists($pageFile) || ! is_readable($pageFile)) {
                 Logger::writeWithContext("pageFile: $pageFile is not exists or readable");
-                die(0);
+                throw new HttpResponseException(new Response('', 500));
             }
-            die(\file_get_contents($pageFile) ?: '');
+            throw new HttpResponseException(new Response(\file_get_contents($pageFile) ?: '', 200, ['Content-Type' => 'text/html']));
         }
 
         if ($guestVisitType === 'custom_content') {
             $content = \App\Support\Format::formatComment($guestVisitValue);
             View::render('resources/templates/guest-visit-custom-content', ['content' => $content], false, ROOT_PATH);
+
+            return;
         }
 
         if ($guestVisitType === 'redirect') {
-            header('Location: ' . $guestVisitValue);
-            die(0);
+            throw new HttpResponseException(new RedirectResponse($guestVisitValue, 302));
         }
     }
 

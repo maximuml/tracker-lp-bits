@@ -164,8 +164,8 @@ final class CategoryRepository
             return 'Legacy catmanage partial missing.';
         }
 
-        extract(SupportContext::getGlobalsForView());
-        extract($data);
+        extract(SupportContext::getGlobalsForView(), EXTR_SKIP);
+        extract($data, EXTR_SKIP);
 
         ob_start();
         /** @noinspection PhpIncludeInspection */

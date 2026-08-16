@@ -148,7 +148,15 @@ final class AuthCookie
         $expires = self::computeExpires($durationSeconds);
         $token = self::buildToken($userId, null, $expires);
 
-        setcookie(self::COOKIE_NAME, $token, $expires, '/', '', \App\Support\Url::isSecure(), true);
+        $secure = \App\Support\Url::isSecure();
+        $options = [
+            'expires' => $expires,
+            'path' => '/',
+            'secure' => $secure,
+            'httponly' => true,
+            'samesite' => 'Strict',
+        ];
+        setcookie(self::COOKIE_NAME, $token, $options);
 
         $update = ['last_login' => now()];
         $langId = \App\Support\Locale::idFromCookie((string) '');
@@ -166,7 +174,14 @@ final class AuthCookie
      */
     public static function clear(): void
     {
-        setcookie(self::COOKIE_NAME, '', time() - 3600, '/', '', \App\Support\Url::isSecure(), true);
+        $options = [
+            'expires' => time() - 3600,
+            'path' => '/',
+            'secure' => \App\Support\Url::isSecure(),
+            'httponly' => true,
+            'samesite' => 'Strict',
+        ];
+        setcookie(self::COOKIE_NAME, '', $options);
     }
 
     /**

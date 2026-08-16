@@ -170,6 +170,9 @@ class NexusDB
         return "'" . self::getInstance()->escapeString((string) $value) . "'";
     }
 
+    /**
+     * @deprecated Use Eloquent/QueryBuilder instead; raw SQL helpers are a SQL-injection risk.
+     */
     public static function insert($table, $data)
     {
         if (empty($table) || empty($data) || !is_array($data)) {
@@ -185,6 +188,9 @@ class NexusDB
         return self::getInstance()->lastInsertId();
     }
 
+    /**
+     * @deprecated Use Eloquent/QueryBuilder instead; raw SQL helpers are a SQL-injection risk.
+     */
     public static function update($table, $data, $whereStr)
     {
         if (!IN_NEXUS) {
@@ -199,6 +205,9 @@ class NexusDB
         return self::getInstance()->affectedRows();
     }
 
+    /**
+     * @deprecated Use Eloquent/QueryBuilder instead; raw SQL helpers are a SQL-injection risk.
+     */
     public static function delete($table, $whereStr, $limit = null)
     {
         if (!IN_NEXUS) {
@@ -216,6 +225,9 @@ class NexusDB
         return self::getInstance()->affectedRows();
     }
 
+    /**
+     * @deprecated Use Eloquent/QueryBuilder instead; raw SQL helpers are a SQL-injection risk.
+     */
     public static function getOne($table, $whereStr, $fields = '*')
     {
         if (!IN_NEXUS) {
@@ -236,6 +248,9 @@ class NexusDB
         return $res[0] ?? null;
     }
 
+    /**
+     * @deprecated Use Eloquent/QueryBuilder instead; raw SQL helpers are a SQL-injection risk.
+     */
     public static function getAll($table, $whereStr, $fields = '*')
     {
         if (!IN_NEXUS) {

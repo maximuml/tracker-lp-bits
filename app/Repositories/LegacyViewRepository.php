@@ -19,8 +19,8 @@ final class LegacyViewRepository
             return 'Legacy partial missing: '.$partial;
         }
 
-        extract(\App\Support\SupportContext::getGlobalsForView());
-        extract($data);
+        extract(\App\Support\SupportContext::getGlobalsForView(), EXTR_SKIP);
+        extract($data, EXTR_SKIP);
         ob_start();
         include $path;
 

@@ -18,7 +18,7 @@ final class SettingsRepository
      */
     public static function render(array $data = []): string
     {
-        extract($data);
+        extract($data, EXTR_SKIP);
         $partial = base_path('resources/legacy/settings.php');
         if (! File::exists($partial)) {
             return 'Legacy settings partial missing.';

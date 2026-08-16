@@ -413,7 +413,7 @@ final class OfferService
 
         ob_start();
         try {
-            extract(SupportContext::getGlobalsForView());
+            extract(SupportContext::getGlobalsForView(), EXTR_SKIP);
             include $path;
         } catch (HttpResponseException $e) {
             ob_get_clean();

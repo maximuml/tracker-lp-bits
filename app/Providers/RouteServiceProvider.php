@@ -103,5 +103,13 @@ class RouteServiceProvider extends ServiceProvider
         RateLimiter::for('torrents', function (Request $request) {
             return Limit::perMinute(60)->by($request->ip() ?? 'default');
         });
+
+        RateLimiter::for('download', function (Request $request) {
+            return Limit::perMinute(10)->by($request->user()?->id ?: $request->ip() ?? 'default');
+        });
+
+        RateLimiter::for('legacy', function (Request $request) {
+            return Limit::perMinute(120)->by($request->user()?->id ?: $request->ip() ?? 'default');
+        });
     }
 }

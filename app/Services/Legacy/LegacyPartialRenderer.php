@@ -30,8 +30,8 @@ final class LegacyPartialRenderer
 
         ob_start();
         try {
-            extract(SupportContext::getGlobalsForView());
-            extract($data);
+            extract(SupportContext::getGlobalsForView(), EXTR_SKIP);
+            extract($data, EXTR_SKIP);
             include $path;
         } catch (HttpResponseException $e) {
             ob_get_clean();

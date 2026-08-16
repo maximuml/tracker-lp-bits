@@ -76,7 +76,13 @@ class AttachmentLegacyService
 		} else {
 		    $ext = strtolower(substr($origfilename, $ext_l + 1, strlen($origfilename) - ($ext_l + 1)));
 		}
-		$banned_ext = array('exe', 'com', 'bat', 'msi');
+		$banned_ext = array(
+		    'exe', 'com', 'bat', 'msi',
+		    'php', 'php3', 'php4', 'php5', 'phtml', 'phar', 'phtm',
+		    'pl', 'py', 'sh', 'cgi', 'cmd', 'scr', 'vbs', 'wsf',
+		    'html', 'htm', 'xhtml', 'shtml', 'js', 'css',
+		    'htaccess', 'htpasswd', 'ini', 'json', 'log',
+		);
 		$img_ext = \App\Models\Attachment::IMG_EXTENSIONS;
 
 		if ($filesize == 0 || $file["name"] == "") // nothing received

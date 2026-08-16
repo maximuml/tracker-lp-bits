@@ -2,8 +2,10 @@
 
 namespace App\Console;
 
-use App\Jobs\CheckCleanup;
+use App\Jobs\AttendanceJob;
 use App\Jobs\CheckQueueFailedJobs;
+use App\Jobs\CleanupJob;
+use App\Jobs\HrCheckJob;
 use App\Jobs\MaintainPluginState;
 use App\Jobs\ManagePlugin;
 use App\Jobs\RemoveUserDonorStatus;
@@ -41,16 +43,16 @@ class Kernel extends ConsoleKernel
         $schedule->command('exam:checkout_cronjob')->everyFiveMinutes();
         $schedule->command('exam:update_progress --bulk=1')->hourly();
         $schedule->command('backup:cronjob')->everyMinute();
-        $schedule->command('hr:update_status')->everyTenMinutes();
-        $schedule->command('hr:update_status --ignore_time=1')->hourly();
+        $schedule->job(new HrCheckJob())->everyTenMinutes();
+        $schedule->job(new HrCheckJob(null, null, true))->hourly();
         $schedule->command('user:delete_expired_token')->dailyAt('04:00');
         $schedule->command('meilisearch:import')->weeklyOn(1, "03:00");
         $schedule->command('torrent:load_pieces_hash')->dailyAt("01:00");
         $schedule->job(new CheckQueueFailedJobs())->everySixHours();
         $schedule->job(new MaintainPluginState())->everyMinute();
         $schedule->job(new UpdateIsSeedBoxFromUserRecordsCache())->everySixHours();
-        $schedule->command('cleanup:run')->everyFifteenMinutes();
-        $schedule->job(new CheckCleanup())->everyFifteenMinutes();
+        $schedule->job(new CleanupJob())->everyFifteenMinutes();
+        $schedule->job(new AttendanceJob())->dailyAt('01:00');
         $schedule->job(new SaveIpLogCacheToDB())->hourly();
         $schedule->job(new RemoveUserWarning())->everyTwentySeconds();
         $schedule->job(new RemoveUserVipStatus())->everyMinute();

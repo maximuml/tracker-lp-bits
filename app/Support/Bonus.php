@@ -80,7 +80,7 @@ class Bonus
 
     /**
      * Aggregate the per-torrent seeding contributions into the bonus
-     * result array consumed by callers (CalculateUserSeedBonus job,
+     * result array consumed by callers (SeedBonusJob job,
      * TrackerCalculateSeedBonus command, ClaimRepository).
      *
      * @param  array<int, array<string, mixed>>  $torrentRows  Rows with

@@ -561,3 +561,58 @@ Phase 21 combines:
 - `ab` cannot pass cookie values containing `=` using `-C`; use `-H "Cookie: c_secure_pass=<token>"` instead.
 - `composer validate` must be run from `/var/www/html` inside the `php` container.
 
+## Testing Phase 20c/d/e API parity
+
+Use these notes when verifying the new Sanctum API endpoints for `usercp`, `messages`, `topics`, and nested `posts`.
+
+### Creating an API test user
+
+If the sysop account's password is unknown, generate a fresh factory user with `class = User::CLASS_SYSOP` and a Sanctum token with all abilities:
+
+```php
+docker exec -i nexusphp-php php artisan tinker --execute="
+use App\\Models\\User;
+\$u = User::factory()->admin()->create();
+\$t = \$u->createToken('phase20-smoke', ['*'])->plainTextToken;
+echo json_encode(['id' => \$u->id, 'username' => \$u->username, 'token' => \$t]);
+"
+```
+
+The default factory password is `123456`, which validates against `WebAuthService::validatePassword()` because the factory `passhash` is created with the legacy MD5 format and `auth_key` is empty.
+
+### API endpoint request shapes
+
+Send mutation bodies as JSON (`Content-Type: application/json`) to avoid form-data parse issues on `PATCH` requests.
+
+- `GET /api/v1/forums` — returns `{"ret":0,"data":{"data":[...]}}`. Check `X-Queries-Count`.
+- `POST /api/v1/usercp/forum` — sets `topicsperpage` and `postsperpage`.
+- `POST /api/v1/usercp/tracker` — sets `torrentsperpage`, `pmnum`, `sbnum`, `sbrefresh`, etc. It does **not** update `topicsperpage`/`postsperpage`.
+- `POST /api/v1/usercp/security` — requires `current_password` and optionally `privacy`, `resetpasskey`, `new_password`.
+- `POST /api/v1/messages` — create with `receiver`, `subject`, `msg`.
+- `GET /api/v1/messages` — mailbox list (default `mailbox=0` corresponds to the inbox).
+- `GET /api/v1/messages/{id}` — show and auto mark-as-read.
+- `PATCH /api/v1/messages/{id}` — update `unread` (`yes`/`no`) or `location`.
+- `GET /api/v1/messages-unread` — list unread messages.
+- `DELETE /api/v1/messages/{id}` — delete for the authenticated user.
+- `POST /api/v1/topics` — create topic in `forumid` with `subject`/`body`; response `firstPost` and `lastPost` should be equal.
+- `GET /api/v1/topics/{topic}/posts` — list posts.
+- `POST /api/v1/topics/{topic}/posts` — reply.
+- `PATCH /api/v1/topics/{topic}/posts/{post}` — edit body.
+- `DELETE /api/v1/topics/{topic}/posts/{post}` — delete reply.
+- `DELETE /api/v1/topics/{topic}` — delete topic.
+
+### Legacy flow equivalents
+
+- `/usercp.php?action=personal|forum|tracker|security` still render and post to `/usercp.php` with `action=<tab>&type=save`.
+- `/sendmessage.php?receiver=<id>` renders; `POST /takemessage.php` sends PM.
+- `GET /deletemessage.php?id=<id>&type=in` deletes inbox PM.
+- `/forums.php?action=newtopic&forumid=179` renders; `POST /forums.php action=post&id=179&type=new` creates a topic.
+- `POST /forums.php action=post&id=<topicid>&type=reply` replies.
+- `POST /forums.php action=post&id=<postid>&type=edit` edits.
+- `GET /forums.php?action=deletepost&postid=<id>&sure=1` deletes a reply.
+- `GET /forums.php?action=deletetopic&topicid=<id>&sure=1` deletes a topic.
+
+### Devin Secrets Needed
+
+- None beyond the existing test DB credentials and `APP_KEY` (already mounted in the Docker stack).
+

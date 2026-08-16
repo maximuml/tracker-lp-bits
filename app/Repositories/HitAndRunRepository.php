@@ -552,7 +552,9 @@ class HitAndRunRepository extends BaseRepository
             throw new \LogicException("Can't be pardoned due to status is: " . $model->status_text . " !");
         }
         $model->status = HitAndRun::STATUS_PARDONED;
-        $model->comment = $this->getCommentUpdateRaw(addslashes(date('Y-m-d') . ' - Pardon by ' . $user->username));
+        $prefix = date('Y-m-d') . ' - Pardon by ' . $user->username;
+        $existing = (string) $model->comment;
+        $model->comment = $existing === '' ? $prefix : "\n" . $prefix . $existing;
         $model->save();
         return true;
     }
@@ -568,11 +570,13 @@ class HitAndRunRepository extends BaseRepository
         if ($list->isEmpty()) {
             return 0;
         }
-        $update = [
-            'status' => HitAndRun::STATUS_PARDONED,
-            'comment' => $this->getCommentUpdateRaw(addslashes('Pardon by ' . $user->username)),
-        ];
-        $affected =  $baseQuery->update($update);
+        $prefix = 'Pardon by ' . $user->username;
+        $ids = $list->pluck('id')->map('intval')->all();
+        $placeholders = implode(',', array_fill(0, count($ids), '?'));
+        $affected = DB::update(
+            "UPDATE hit_and_runs SET status = ?, updated_at = ?, comment = CASE WHEN comment = '' THEN ? ELSE CONCAT('\\n', ?, comment) END WHERE id IN ({$placeholders})",
+            array_merge([HitAndRun::STATUS_PARDONED, Carbon::now()->toDateTimeString(), $prefix, $prefix], $ids)
+        );
         \App\Support\Logger::writeWithContext((string) sprintf('user: %s bulk pardon by filter: %s, affected: %s', $user->id, json_encode($params), $affected), (string) 'alert', (bool) false);
         if ($affected) {
             foreach ($list as $item) {
@@ -583,15 +587,6 @@ class HitAndRunRepository extends BaseRepository
             }
         }
         return $affected;
-    }
-
-    /**
-     * @param  mixed  $comment
-     * @return  \Illuminate\Database\Query\Expression<string>
-     */
-    private function getCommentUpdateRaw($comment): \Illuminate\Database\Query\Expression
-    {
-        return NexusDB::raw(sprintf("if (comment = '', '%s', concat('\n', '%s', comment))", $comment, $comment));
     }
 
     /** @return  array<int|string, mixed> */

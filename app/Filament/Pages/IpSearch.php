@@ -123,7 +123,7 @@ class IpSearch extends Page implements HasTable
                     DB::raw('MAX(iplog.access) AS ip_last_access'),
                     DB::raw('0 AS ip_count'),
                 ])
-                ->whereRaw("iplog.ip = '{$filters['ip']['ip']}'")
+                ->where('iplog.ip', $filters['ip']['ip'])
             ;
             $total = $query->clone()->distinct()->count('iplog.userid');
             if ($total > 0) {

@@ -44,9 +44,11 @@ class BonusRepository extends BaseRepository
 
             $this->consumeUserBonus($user, $requireBonus, BonusLogs::BUSINESS_TYPE_CANCEL_HIT_AND_RUN, "$comment(H&R ID: {$hitAndRun->id})");
 
+            $existingComment = (string) $hitAndRun->comment;
+            $newComment = $existingComment === '' ? $comment : $comment . "\n" . $existingComment;
             $hitAndRun->update([
                 'status' => HitAndRun::STATUS_PARDONED,
-                'comment' => NexusDB::raw("if(comment = '', '$comment', concat_ws('\n', '$comment', comment))"),
+                'comment' => $newComment,
             ]);
         });
 
@@ -418,7 +420,7 @@ class BonusRepository extends BaseRepository
     public function consumeUserBonusAndIncrementCharity($user, float $requireBonus, int $logBusinessType, string $logComment, float $charityIncrement): void
     {
         $this->consumeUserBonus($user, $requireBonus, $logBusinessType, $logComment, [
-            'charity' => NexusDB::raw("charity + $charityIncrement"),
+            'charity' => NexusDB::raw('charity + ' . (float) $charityIncrement),
         ]);
     }
 
@@ -606,10 +608,13 @@ class BonusRepository extends BaseRepository
 
     public function updateSeedBonus(string $op, float $point, int|string $id): void
     {
+        if (! in_array($op, ['+', '-'], true)) {
+            throw new \InvalidArgumentException('Invalid seedbonus operation: ' . $op);
+        }
         NexusDB::table('users')
             ->where('id', $id)
             ->update([
-                'seedbonus' => NexusDB::raw('seedbonus '.$op.' '.$point),
+                'seedbonus' => NexusDB::raw('seedbonus '.$op.' '.(float) $point),
             ]);
     }
 

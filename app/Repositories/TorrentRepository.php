@@ -73,7 +73,8 @@ class TorrentRepository extends BaseRepository
     private static array $defaultLoadRelationships = [
         'basic_category', 'basic_category.search_box',
         'basic_audiocodec', 'basic_codec', 'basic_medium',
-        'basic_source', 'basic_processing', 'basic_standard', ];
+        'basic_source', 'basic_processing', 'basic_standard',
+        'user', 'tags', ];
 
     /** @var  array<int|string, mixed> */
     /** @var  array<int|string, mixed> */

@@ -705,7 +705,9 @@ class ForumRepository extends BaseRepository
         }
 
         $count = (int) $query->count();
-        $rows = $query->orderBy('sticky', 'desc')->orderBy($column, $direction)->offset($offset)->limit($perPage)->get();
+        $rows = $query->orderBy('sticky', 'desc')->orderBy($column, $direction)->offset($offset)->limit($perPage)
+            ->with(['user', 'forum', 'firstPost.user', 'lastPost.user'])
+            ->get();
 
         return ['count' => $count, 'rows' => $rows];
     }
@@ -720,7 +722,7 @@ class ForumRepository extends BaseRepository
             $query->where('lastpost', '<', $beforePostId);
         }
 
-        return $query->orderByDesc('lastpost')->limit($limit)->get();
+        return $query->orderByDesc('lastpost')->with(['user', 'forum', 'lastPost.user'])->limit($limit)->get();
     }
 
     /**

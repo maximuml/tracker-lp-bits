@@ -79,34 +79,10 @@ parameters:
 			path: app/Console/Commands/TranslateLang.php
 
 		-
-			message: '#^Call to an undefined method object\:\:delete_value\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: app/Http/Controllers/AdminController.php
-
-		-
 			message: '#^Cannot call method getTimestamp\(\) on Carbon\\Carbon\|null\.$#'
 			identifier: method.nonObject
 			count: 1
 			path: app/Http/Controllers/AdminController.php
-
-		-
-			message: '#^Cannot access offset 0 on array\{0\: int\<0, max\>, 1\: int\<0, max\>, 2\: int, 3\: string, mime\: string, channels\?\: int, bits\?\: int\}\|false\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: app/Http/Controllers/BitbucketUploadController.php
-
-		-
-			message: '#^Cannot access offset 1 on array\{0\: int\<0, max\>, 1\: int\<0, max\>, 2\: int, 3\: string, mime\: string, channels\?\: int, bits\?\: int\}\|false\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: app/Http/Controllers/BitbucketUploadController.php
-
-		-
-			message: '#^Cannot access offset 2 on array\{0\: int\<0, max\>, 1\: int\<0, max\>, 2\: int, 3\: string, mime\: string, channels\?\: int, bits\?\: int\}\|false\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: app/Http/Controllers/BitbucketUploadController.php
 
 		-
 			message: '#^Cannot call method getClientOriginalName\(\) on Illuminate\\Http\\UploadedFile\|null\.$#'
@@ -127,48 +103,6 @@ parameters:
 			path: app/Http/Controllers/BitbucketUploadController.php
 
 		-
-			message: '#^Offset ''extension'' might not exist on array\{dirname\?\: string, basename\: string, extension\?\: string, filename\: string\}\.$#'
-			identifier: offsetAccess.notFound
-			count: 1
-			path: app/Http/Controllers/BitbucketUploadController.php
-
-		-
-			message: '#^Parameter \#1 \$path of function pathinfo expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Http/Controllers/BitbucketUploadController.php
-
-		-
-			message: '#^Parameter \#1 \$string of function htmlspecialchars expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Http/Controllers/BitbucketUploadController.php
-
-		-
-			message: '#^Parameter \#1 \$width of function imagecreatetruecolor expects int\<1, max\>, int given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Http/Controllers/BitbucketUploadController.php
-
-		-
-			message: '#^Parameter \#2 \$height of function imagecreatetruecolor expects int\<1, max\>, int given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Http/Controllers/BitbucketUploadController.php
-
-		-
-			message: '#^Parameter \#2 \$src_image of function imagecopyresampled expects GdImage, GdImage\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Http/Controllers/BitbucketUploadController.php
-
-		-
-			message: '#^Call to an undefined method object\:\:delete_value\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: app/Http/Controllers/BonusController.php
-
-		-
 			message: '#^Parameter \#2 \$baseTimestamp of function strtotime expects int\|null, int\|false given\.$#'
 			identifier: argument.type
 			count: 1
@@ -187,7 +121,7 @@ parameters:
 			path: app/Http/Controllers/CommentController.php
 
 		-
-			message: '#^Cannot call method delete_value\(\) on object\|null\.$#'
+			message: '#^Cannot call method delete_value\(\) on App\\Support\\Cache\\LegacyRedisCache\|null\.$#'
 			identifier: method.nonObject
 			count: 2
 			path: app/Http/Controllers/IndexController.php
@@ -197,12 +131,6 @@ parameters:
 			identifier: offsetAccess.notFound
 			count: 3
 			path: app/Http/Controllers/IndexController.php
-
-		-
-			message: '#^Call to an undefined method object\:\:delete_value\(\)\.$#'
-			identifier: method.notFound
-			count: 3
-			path: app/Http/Controllers/InfoController.php
 
 		-
 			message: '#^Parameter \#2 \$model of static method App\\Support\\Events\:\:fire\(\) expects Illuminate\\Database\\Eloquent\\Model, App\\Models\\News\|null given\.$#'
@@ -223,12 +151,6 @@ parameters:
 			path: app/Http/Controllers/LegacyController.php
 
 		-
-			message: '#^Call to an undefined method object\:\:delete_value\(\)\.$#'
-			identifier: method.notFound
-			count: 2
-			path: app/Http/Controllers/LogController.php
-
-		-
 			message: '#^Parameter \#5 \$editItem of method App\\Http\\Controllers\\LogController\:\:chronicleList\(\) expects array\<string, mixed\>\|null, array\<int\|string, mixed\> given\.$#'
 			identifier: argument.type
 			count: 1
@@ -238,12 +160,6 @@ parameters:
 			message: '#^Binary operation "\-" between ''''\|int\<2, 7\> and 1 results in an error\.$#'
 			identifier: binaryOp.invalid
 			count: 1
-			path: app/Http/Controllers/ModerationController.php
-
-		-
-			message: '#^Call to an undefined method object\:\:delete_value\(\)\.$#'
-			identifier: method.notFound
-			count: 3
 			path: app/Http/Controllers/ModerationController.php
 
 		-
@@ -313,12 +229,6 @@ parameters:
 			path: app/Http/Controllers/StaffController.php
 
 		-
-			message: '#^Call to an undefined method object\:\:delete_value\(\)\.$#'
-			identifier: method.notFound
-			count: 2
-			path: app/Http/Controllers/SupportController.php
-
-		-
 			message: '#^Method App\\Http\\Controllers\\SupportController\:\:complainReply\(\) should return Illuminate\\Http\\RedirectResponse\|Illuminate\\Http\\Response but returns Illuminate\\Http\\RedirectResponse\|Illuminate\\Routing\\Redirector\.$#'
 			identifier: return.type
 			count: 1
@@ -334,12 +244,6 @@ parameters:
 			message: '#^Binary operation "\-" between int\<0, max\>\|string and 1 results in an error\.$#'
 			identifier: binaryOp.invalid
 			count: 1
-			path: app/Http/Controllers/SystemController.php
-
-		-
-			message: '#^Call to an undefined method object\:\:delete_value\(\)\.$#'
-			identifier: method.notFound
-			count: 3
 			path: app/Http/Controllers/SystemController.php
 
 		-
@@ -835,12 +739,6 @@ parameters:
 			path: app/Repositories/BookmarkRepository.php
 
 		-
-			message: '#^Call to an undefined method object\:\:delete_value\(\)\.$#'
-			identifier: method.notFound
-			count: 6
-			path: app/Repositories/CategoryRepository.php
-
-		-
 			message: '#^Binary operation "\+" between int\|non\-falsy\-string and int\<2, max\> results in an error\.$#'
 			identifier: binaryOp.invalid
 			count: 1
@@ -1181,12 +1079,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: app/Repositories/PluginRepository.php
-
-		-
-			message: '#^Call to an undefined method object\:\:delete_value\(\)\.$#'
-			identifier: method.notFound
-			count: 4
-			path: app/Repositories/PollRepository.php
 
 		-
 			message: '#^Access to an undefined property App\\Models\\Torrent\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\Torrent\>\:\:\$owner\.$#'
@@ -1957,39 +1849,9 @@ parameters:
 			path: app/Support/Logger.php
 
 		-
-			message: '#^Call to an undefined method object\:\:setLanguage\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: app/Support/PageLayout.php
-
-		-
-			message: '#^Cannot call method cache_value\(\) on object\|null\.$#'
-			identifier: method.nonObject
-			count: 14
-			path: app/Support/PageLayout.php
-
-		-
-			message: '#^Cannot call method getCacheReadTimes\(\) on object\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: app/Support/PageLayout.php
-
-		-
-			message: '#^Cannot call method getCacheWriteTimes\(\) on object\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: app/Support/PageLayout.php
-
-		-
-			message: '#^Cannot call method getKeyHits\(\) on object\|null\.$#'
-			identifier: method.nonObject
+			message: '#^Argument of an invalid type array\<string, int\>\|null supplied for foreach, only iterables are supported\.$#'
+			identifier: foreach.nonIterable
 			count: 2
-			path: app/Support/PageLayout.php
-
-		-
-			message: '#^Cannot call method get_value\(\) on object\|null\.$#'
-			identifier: method.nonObject
-			count: 14
 			path: app/Support/PageLayout.php
 
 		-
@@ -2133,18 +1995,6 @@ parameters:
 		-
 			message: '#^Binary operation "\." between non\-falsy\-string and 0\|0\.0\|''''\|''0''\|array\{\}\|false\|null results in an error\.$#'
 			identifier: binaryOp.invalid
-			count: 1
-			path: app/Support/TorrentTable.php
-
-		-
-			message: '#^Cannot call method cache_value\(\) on object\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: app/Support/TorrentTable.php
-
-		-
-			message: '#^Cannot call method get_value\(\) on object\|null\.$#'
-			identifier: method.nonObject
 			count: 1
 			path: app/Support/TorrentTable.php
 

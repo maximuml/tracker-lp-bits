@@ -172,7 +172,7 @@ class UtilityController extends LegacyController
         NexusDB::table('attachments')->where('id', $id)->increment('downloads');
 
         $cache = SupportContext::getCache();
-        if ($cache !== null && method_exists($cache, 'delete_value')) {
+        if ($cache !== null) {
             $cache->delete_value('attachment_' . $dlkey . '_content');
         }
 

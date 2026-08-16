@@ -82,7 +82,7 @@ class BitbucketUploadController extends Controller
         }
 
         $filename = $file->getClientOriginalName();
-        $filename = preg_replace('/[\x00-\x1F\x7F]/', '', $filename);
+        $filename = (string) preg_replace('/[\x00-\x1F\x7F]/', '', $filename);
         $pp = pathinfo($filename);
         if ($pp['basename'] !== $filename) {
             LegacyResponse::abort($lang['std_upload_failed'] ?? '', $lang['std_bad_file_name'] ?? '', false);
@@ -102,6 +102,7 @@ class BitbucketUploadController extends Controller
         if ($size === false) {
             LegacyResponse::abort($lang['std_error'] ?? '', $lang['std_invalid_image_format'] ?? '', false);
         }
+        assert($size !== false);
 
         $height = (int) $size[1];
         $width = (int) $size[0];
@@ -109,7 +110,7 @@ class BitbucketUploadController extends Controller
         $imgtypes = [null, 'gif', 'jpg', 'png'];
         $typeName = $imgtypes[$it] ?? null;
 
-        if ($typeName === null || $typeName !== strtolower($pp['extension'])) {
+        if ($typeName === null || $typeName !== strtolower($pp['extension'] ?? '')) {
             LegacyResponse::abort($lang['std_error'] ?? '', $lang['std_invalid_image_format'] ?? '', false);
         }
 
@@ -118,8 +119,8 @@ class BitbucketUploadController extends Controller
         $hscale = $height / $scaleh;
         $wscale = $width / $scalew;
         $scale = ($hscale < 1 && $wscale < 1) ? 1 : (($hscale > $wscale) ? $hscale : $wscale);
-        $newwidth = (int) floor($width / $scale);
-        $newheight = (int) floor($height / $scale);
+        $newwidth = max(1, (int) floor($width / $scale));
+        $newheight = max(1, (int) floor($height / $scale));
 
         $orig = match ($it) {
             1 => @imagecreatefromgif($file->getPathname()),
@@ -134,8 +135,17 @@ class BitbucketUploadController extends Controller
                 false,
             );
         }
+        assert($orig !== false);
 
         $thumb = imagecreatetruecolor($newwidth, $newheight);
+        if ($thumb === false) {
+            LegacyResponse::abort(
+                $lang['std_image_processing_failed'] ?? '',
+                ($lang['std_sorry_the_uploaded'] ?? '') . ($typeName ?? '') . ($lang['std_failed_processing'] ?? ''),
+                false,
+            );
+        }
+        assert($thumb !== false);
         imagecopyresampled($thumb, $orig, 0, 0, 0, 0, $newwidth, $newheight, $width, $height);
 
         match ($it) {

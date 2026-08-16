@@ -15,6 +15,9 @@ final class TorrentTable
 
 
 	$cache = SupportContext::getCache();
+	if ($cache === null) {
+	    throw new \RuntimeException('Cache not initialized');
+	}
 	$lang_functions = SupportContext::getLangFunctions();
 	$user = SupportContext::getUser() ?? [];
 	$waitsystem = (string) SupportContext::getGlobal('waitsystem', '');

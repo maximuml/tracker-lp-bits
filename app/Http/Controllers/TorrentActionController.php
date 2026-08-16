@@ -77,7 +77,7 @@ class TorrentActionController extends LegacyController
         }
 
         $cache = SupportContext::getCache();
-        if ($cache !== null && method_exists($cache, 'delete_value')) {
+        if ($cache !== null) {
             $cache->delete_value('user_' . $userId . '_bookmark_array');
         }
 

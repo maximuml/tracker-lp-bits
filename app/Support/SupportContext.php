@@ -2,6 +2,7 @@
 
 namespace App\Support;
 
+use App\Support\Cache\LegacyRedisCache;
 use Illuminate\Http\Request;
 
 /**
@@ -94,12 +95,12 @@ final class SupportContext
         return self::context()->getLangShoutbox();
     }
 
-    public static function setCache(?object $cache): void
+    public static function setCache(?LegacyRedisCache $cache): void
     {
         self::context()->setCache($cache);
     }
 
-    public static function getCache(): ?object
+    public static function getCache(): ?LegacyRedisCache
     {
         return self::context()->getCache();
     }

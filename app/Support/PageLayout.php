@@ -243,19 +243,19 @@ class PageLayout
             $datum["minutes"] = sprintf("%02.0f", $datum["minutes"]);
             $ratio = \App\Support\Ratio::forUserId($context->user['id']);
             //// check every 15 minutes //////////////////
-            $messages = $context->cache->get_value('user_' . $context->user["id"] . '_inbox_count');
+            $messages = $context->cache?->get_value('user_' . $context->user["id"] . '_inbox_count');
             if ($messages == "") {
                 $messages = app(PageLayoutRepository::class)->getInboxCount((int) $context->user["id"]);
-                $context->cache->cache_value('user_' . $context->user["id"] . '_inbox_count', $messages, 900);
+                $context->cache?->cache_value('user_' . $context->user["id"] . '_inbox_count', $messages, 900);
             }
-            $outmessages = $context->cache->get_value('user_' . $context->user["id"] . '_outbox_count');
+            $outmessages = $context->cache?->get_value('user_' . $context->user["id"] . '_outbox_count');
             if ($outmessages == "") {
                 $outmessages = app(PageLayoutRepository::class)->getOutboxCount((int) $context->user["id"]);
-                $context->cache->cache_value('user_' . $context->user["id"] . '_outbox_count', $outmessages, 900);
+                $context->cache?->cache_value('user_' . $context->user["id"] . '_outbox_count', $outmessages, 900);
             }
-            if (!$connect = $context->cache->get_value('user_' . $context->user["id"] . '_connect')) {
+            if (!$connect = $context->cache?->get_value('user_' . $context->user["id"] . '_connect')) {
                 $connect = app(PageLayoutRepository::class)->getConnectable((int) $context->user["id"]);
-                $context->cache->cache_value('user_' . $context->user["id"] . '_connect', $connect, 900);
+                $context->cache?->cache_value('user_' . $context->user["id"] . '_connect', $connect, 900);
             }
             if ($connect == "yes") {
                 $connectable = "<b><font color=\"green\">" . $context->lang['text_yes'] . "</font></b>";
@@ -265,20 +265,20 @@ class PageLayout
                 $connectable = $context->lang['text_unknown'];
             }
             //// check every 60 seconds //////////////////
-            $activeseed = $context->cache->get_value('user_' . $context->user["id"] . '_active_seed_count');
+            $activeseed = $context->cache?->get_value('user_' . $context->user["id"] . '_active_seed_count');
             if ($activeseed == "") {
                 $activeseed = app(PageLayoutRepository::class)->getActiveSeedCount((int) $context->user["id"]);
-                $context->cache->cache_value('user_' . $context->user["id"] . '_active_seed_count', $activeseed, 60);
+                $context->cache?->cache_value('user_' . $context->user["id"] . '_active_seed_count', $activeseed, 60);
             }
-            $activeleech = $context->cache->get_value('user_' . $context->user["id"] . '_active_leech_count');
+            $activeleech = $context->cache?->get_value('user_' . $context->user["id"] . '_active_leech_count');
             if ($activeleech == "") {
                 $activeleech = app(PageLayoutRepository::class)->getActiveLeechCount((int) $context->user["id"]);
-                $context->cache->cache_value('user_' . $context->user["id"] . '_active_leech_count', $activeleech, 60);
+                $context->cache?->cache_value('user_' . $context->user["id"] . '_active_leech_count', $activeleech, 60);
             }
-            $unread = $context->cache->get_value('user_' . $context->user["id"] . '_unread_message_count');
+            $unread = $context->cache?->get_value('user_' . $context->user["id"] . '_unread_message_count');
             if ($unread == "") {
                 $unread = app(PageLayoutRepository::class)->getUnreadMessageCount((int) $context->user["id"]);
-                $context->cache->cache_value('user_' . $context->user["id"] . '_unread_message_count', $unread, 60);
+                $context->cache?->cache_value('user_' . $context->user["id"] . '_unread_message_count', $unread, 60);
             }
             $inboxpic = "<img class=\"" . ($unread ? "inboxnew" : "inbox") . "\" src=\"pic/trans.gif\" alt=\"inbox\" title=\"" . ($unread ? $context->lang['title_inbox_new_messages'] : $context->lang['title_inbox_no_new_messages']) . "\" />";
             //    $attend_desk = new Attendance($context->user['id']);
@@ -429,15 +429,15 @@ class PageLayout
 	<td class="bottom" align="right"><span class="medium">
 <?php 
             if (Permissions::userCan('staffmem', false, (int) ($context->user['id'] ?? 0))) {
-                $totalreports = $context->cache->get_value('staff_report_count');
+                $totalreports = $context->cache?->get_value('staff_report_count');
                 if ($totalreports == "") {
                     $totalreports = app(PageLayoutRepository::class)->getTotalReports();
-                    $context->cache->cache_value('staff_report_count', $totalreports, 900);
+                    $context->cache?->cache_value('staff_report_count', $totalreports, 900);
                 }
-                $totalcheaters = $context->cache->get_value('staff_cheater_count');
+                $totalcheaters = $context->cache?->get_value('staff_cheater_count');
                 if ($totalcheaters == "") {
                     $totalcheaters = app(PageLayoutRepository::class)->getTotalCheaters();
-                    $context->cache->cache_value('staff_cheater_count', $totalcheaters, 900);
+                    $context->cache?->cache_value('staff_cheater_count', $totalcheaters, 900);
                 }
                 print "<a href=\"cheaterbox.php\"><img class=\"cheaterbox\" alt=\"cheaterbox\" title=\"" . $context->lang['title_cheaterbox'] . "\" src=\"pic/trans.gif\" />  </a>" . $totalcheaters . "  <a href=\"reports.php\"><img class=\"reportbox\" alt=\"reportbox\" title=\"" . $context->lang['title_reportbox'] . "\" src=\"pic/trans.gif\" />  </a>" . $totalreports;
             }
@@ -446,11 +446,11 @@ class PageLayout
             print '<br/>';
             //echo $context->lang['text_the_time_is_now'].$datum['hours'].":".$datum['minutes'] . '<br />';
             //	$cacheKey = "staff_message_count_" . $context->user['id'];
-            //    $totalsm = $context->cache->get_value($cacheKey);
+            //    $totalsm = $context->cache?->get_value($cacheKey);
             $totalsm = \App\Repositories\MessageRepository::getStaffMessageCountCache($context->user['id'], 'total');
             if ($totalsm === false) {
                 $totalsm = \App\Repositories\MessageRepository::countStaffMessage($context->user['id']);
-                //        $context->cache->cache_value($cacheKey, $totalsm, 900);
+                //        $context->cache?->cache_value($cacheKey, $totalsm, 900);
                 \App\Repositories\MessageRepository::updateStaffMessageCountCache($context->user['id'], 'total', $totalsm);
             }
             if ($totalsm > 0) {
@@ -526,10 +526,10 @@ class PageLayout
                 }
                 \App\Utils\MsgAlert::getInstance()->render();
                 /*
-                	$pending_invitee = $context->cache->get_value('user_'.$context->user["id"].'_pending_invitee_count');
+                	$pending_invitee = $context->cache?->get_value('user_'.$context->user["id"].'_pending_invitee_count');
                 	if ($pending_invitee == ""){
                 		$pending_invitee = get_row_count("users","WHERE status = 'pending' AND invited_by = ".\App\Support\LegacyDb::escape($context->user['id']));
-                		$context->cache->cache_value('user_'.$context->user["id"].'_pending_invitee_count', $pending_invitee, 900);
+                		$context->cache?->cache_value('user_'.$context->user["id"].'_pending_invitee_count', $pending_invitee, 900);
                 	}
                 	if ($pending_invitee > 0)
                 	{
@@ -538,11 +538,11 @@ class PageLayout
                 	}*/
                 $settings_script_name = $context->scriptFileName;
                 if (!preg_match("/index/i", $settings_script_name)) {
-                    $new_news = $context->cache->get_value('user_' . $context->user["id"] . '_unread_news_count');
+                    $new_news = $context->cache?->get_value('user_' . $context->user["id"] . '_unread_news_count');
                     if ($new_news == "") {
                         $lastHome = $context->user['last_home'] ?? null;
                         $new_news = app(PageLayoutRepository::class)->getUnreadNewsCount($lastHome);
-                        $context->cache->cache_value('user_' . $context->user["id"] . '_unread_news_count', $new_news, 300);
+                        $context->cache?->cache_value('user_' . $context->user["id"] . '_unread_news_count', $new_news, 300);
                     }
                     if ($new_news > 0) {
                         $text = $context->lang['text_there_is'] . Strings::isOrAre($new_news) . $new_news . $context->lang['text_new_news'];
@@ -551,11 +551,11 @@ class PageLayout
                 }
                 //Staff message, not only staff member
                 //    $cacheKey = 'staff_new_message_count_' . $context->user['id'];
-                //    $nummessages = $context->cache->get_value($cacheKey);
+                //    $nummessages = $context->cache?->get_value($cacheKey);
                 $nummessages = \App\Repositories\MessageRepository::getStaffMessageCountCache($context->user['id'], 'new');
                 if ($nummessages === false) {
                     $nummessages = \App\Repositories\MessageRepository::countStaffMessage($context->user['id'], 0);
-                    //        $context->cache->cache_value($cacheKey, $nummessages, 900);
+                    //        $context->cache?->cache_value($cacheKey, $nummessages, 900);
                     \App\Repositories\MessageRepository::updateStaffMessageCountCache($context->user['id'], 'new', $nummessages);
                 }
                 if ($nummessages > 0) {
@@ -565,7 +565,7 @@ class PageLayout
                 //torrent approval
                 if (Permissions::userCan('torrent-approval', false, (int) ($context->user['id'] ?? 0)) && Settings::get('torrent.approval_status_none_visible') == 'no') {
                     $cacheKey = 'TORRENT_APPROVAL_NONE';
-                    $toApprovalCounts = $context->cache->get_value($cacheKey);
+                    $toApprovalCounts = $context->cache?->get_value($cacheKey);
                     if ($toApprovalCounts === false) {
                         $toApprovalCounts = app(PageLayoutRepository::class)->getTorrentApprovalNoneCount();
                         $context->cache->cache_value($cacheKey, $toApprovalCounts, 60);
@@ -577,7 +577,7 @@ class PageLayout
                 //seed box approval
                 if ($context->userClass() >= \App\Models\User::CLASS_ADMINISTRATOR && Settings::get('seed_box.enabled') == 'yes') {
                     $cacheKey = \App\Repositories\SeedBoxRepository::APPROVAL_COUNT_CACHE_KEY;
-                    $toApprovalCounts = $context->cache->get_value($cacheKey);
+                    $toApprovalCounts = $context->cache?->get_value($cacheKey);
                     if ($toApprovalCounts === false) {
                         $toApprovalCounts = app(PageLayoutRepository::class)->getSeedBoxApprovalCount();
                         $context->cache->cache_value($cacheKey, $toApprovalCounts, 60);
@@ -587,26 +587,26 @@ class PageLayout
                     }
                 }
                 if (Permissions::userCan('staffmem', false, (int) ($context->user['id'] ?? 0))) {
-                    if (($complaints = $context->cache->get_value('COMPLAINTS_COUNT_CACHE')) === false) {
+                    if (($complaints = $context->cache?->get_value('COMPLAINTS_COUNT_CACHE')) === false) {
                         $complaints = app(PageLayoutRepository::class)->getOpenComplaintsCount();
                         $context->cache->cache_value('COMPLAINTS_COUNT_CACHE', $complaints, 600);
                     }
                     if ($complaints) {
                         \App\Support\Html::messageAlertVoid('complains.php?action=list', sprintf($context->lang['text_complains'], Strings::isOrAre($complaints), $complaints, Strings::addS($complaints)), 'darkred');
                     }
-                    $numreports = $context->cache->get_value('staff_new_report_count');
+                    $numreports = $context->cache?->get_value('staff_new_report_count');
                     if ($numreports == "") {
                         $numreports = app(PageLayoutRepository::class)->getOpenReportsCount();
-                        $context->cache->cache_value('staff_new_report_count', $numreports, 900);
+                        $context->cache?->cache_value('staff_new_report_count', $numreports, 900);
                     }
                     if ($numreports) {
                         $text = $context->lang['text_there_is'] . Strings::isOrAre($numreports) . $numreports . $context->lang['text_new_report'] . Strings::addS($numreports);
                         \App\Support\Html::messageAlertVoid("reports.php", $text, "blue");
                     }
-                    $numcheaters = $context->cache->get_value('staff_new_cheater_count');
+                    $numcheaters = $context->cache?->get_value('staff_new_cheater_count');
                     if ($numcheaters == "") {
                         $numcheaters = app(PageLayoutRepository::class)->getOpenCheatersCount();
-                        $context->cache->cache_value('staff_new_cheater_count', $numcheaters, 900);
+                        $context->cache?->cache_value('staff_new_cheater_count', $numcheaters, 900);
                     }
                     if ($numcheaters) {
                         $text = $context->lang['text_there_is'] . Strings::isOrAre($numcheaters) . $numcheaters . $context->lang['text_new_suspected_cheater'] . Strings::addS($numcheaters);
@@ -655,7 +655,7 @@ class PageLayout
             $query_name_laravel = [];
             $dbQueryCount = count($context->queryName) + \App\Support\LegacyDb::lastQuery('COUNT', 'json');
         }
-        print " with <b>" . $dbQueryCount . "</b> db queries, <b>" . $context->cache->getCacheReadTimes() . "</b> reads and <b>" . $context->cache->getCacheWriteTimes() . "</b> writes of Redis and <b>" . \App\Support\Format::size(memory_get_usage()) . "</b> ram]";
+        print " with <b>" . $dbQueryCount . "</b> db queries, <b>" . $context->cache?->getCacheReadTimes() . "</b> reads and <b>" . $context->cache?->getCacheWriteTimes() . "</b> writes of Redis and <b>" . \App\Support\Format::size(memory_get_usage()) . "</b> ram]";
         print "</div>\n";
         if ($debugQuery) {
             print "<div id=\"sql_debug\" style='text-align: left;'>SQL query list: <ul>";
@@ -667,12 +667,12 @@ class PageLayout
             }
             print "</ul>";
             print "Redis key read: <ul>";
-            foreach ($context->cache->getKeyHits('read') as $keyName => $hits) {
+            foreach ($context->cache?->getKeyHits('read') as $keyName => $hits) {
                 print "<li>" . htmlspecialchars($keyName) . " : " . $hits . "</li>";
             }
             print "</ul>";
             print "Redis key write: <ul>";
-            foreach ($context->cache->getKeyHits('write') as $keyName => $hits) {
+            foreach ($context->cache?->getKeyHits('write') as $keyName => $hits) {
                 print "<li>" . htmlspecialchars($keyName) . " : " . $hits . "</li>";
             }
             print "</ul>";

@@ -2,6 +2,8 @@
 
 namespace App\Support;
 
+use App\Support\Cache\LegacyRedisCache;
+
 /**
  * Context bundle for the legacy page header/footer (`PageLayout`).
  *
@@ -26,7 +28,7 @@ final class PageLayoutContext
     /**
      * @param  array<string, mixed>|null  $user  Current user row.
      * @param  array<string, string>  $lang  Loaded language strings.
-     * @param  object|null  $cache  Legacy Redis cache wrapper.
+     * @param  LegacyRedisCache|null  $cache  Legacy Redis cache wrapper.
      * @param  array<string, mixed>  $queryName  Legacy SQL debug query list.
      * @param  int  $defaultStylesheet  Default stylesheet id.
      * @param  array<string, mixed>  $userUpdateSet  Mutable user update set.
@@ -34,7 +36,7 @@ final class PageLayoutContext
     public function __construct(
         public ?array $user,
         public array $lang,
-        public ?object $cache,
+        public ?LegacyRedisCache $cache,
         public int $defaultStylesheet,
         public string $langDir,
         public string $siteName,

@@ -8,20 +8,24 @@ use App\Events\TorrentDeleted;
 use App\Events\TorrentUpdated;
 use App\Events\UserDeleted;
 use App\Events\UserDisabled;
+use App\Listeners\AppendQueryCountHeader;
 use App\Listeners\ClearTorrentCache;
 use App\Listeners\DeductUserBonusWhenTorrentDeleted;
 use App\Listeners\RemoveOauthTokens;
 use App\Listeners\RemoveSeedBoxRecordCache;
+use App\Listeners\ResetNexus;
+use App\Listeners\ResetQueryLog;
 use App\Listeners\SendEmailNotificationWhenTorrentCreated;
 use App\Listeners\SyncTorrentToElasticsearch;
-use App\Listeners\ResetNexus;
 use App\Listeners\SyncTorrentToMeilisearch;
 use App\Listeners\TestTorrentUpdated;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
+use Illuminate\Foundation\Http\Events\RequestHandled;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 use Illuminate\Queue\Events\JobProcessing;
 use Illuminate\Queue\Events\Looping;
+use Illuminate\Routing\Events\RouteMatched;
 use Illuminate\Support\Facades\Event;
 
 class EventServiceProvider extends ServiceProvider
@@ -68,6 +72,12 @@ class EventServiceProvider extends ServiceProvider
         ],
         'Laravel\Octane\Events\TickReceived' => [
             ResetNexus::class,
+        ],
+        RouteMatched::class => [
+            ResetQueryLog::class,
+        ],
+        RequestHandled::class => [
+            AppendQueryCountHeader::class,
         ],
     ];
 

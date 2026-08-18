@@ -423,59 +423,6 @@ class EditSetting extends Page implements HasForms
         return \App\Support\Hooks::applyFilter("hit_and_run_setting_schema", $default);
     }
 
-    /**
-     * @return array<Component>
-     */
-    private function getRequireSeedSectionSchema(): array
-    {
-        return [
-            Radio::make('require_seed_section.enabled')->options(self::$yesOrNo)->label(__('label.enabled'))->helperText(__('label.setting.require_seed_section.enabled_help')),
-            TextInput::make('require_seed_section.menu_title')->label(__('label.setting.require_seed_section.menu_title'))->helperText(__('label.setting.require_seed_section.menu_title_help')),
-            TextInput::make('require_seed_section.seeder_lte')->label(__('label.setting.require_seed_section.seeder_lte'))->helperText(__('label.setting.require_seed_section.seeder_lte_help'))->integer(),
-            TextInput::make('require_seed_section.seeder_gte')->label(__('label.setting.require_seed_section.seeder_gte'))->helperText(__('label.setting.require_seed_section.seeder_gte_help'))->integer(),
-            CheckboxList::make('require_seed_section.require_tags')->label(__('label.setting.require_seed_section.require_tags'))->helperText(__('label.setting.require_seed_section.require_tags_help'))->options(Tag::query()->pluck('name', 'id'))->columns(4),
-            Select::make('require_seed_section.promotion_state')->label(__('label.setting.require_seed_section.promotion_state'))->helperText(__('label.setting.require_seed_section.promotion_state_help'))->options(Torrent::listPromotionTypes(true)),
-            TextInput::make('require_seed_section.daily_seed_time_min')->label(__('label.setting.require_seed_section.daily_seed_time_min'))->helperText(__('label.setting.require_seed_section.daily_seed_time_min_help'))->integer(),
-            TextInput::make('require_seed_section.torrent_count_max')->label(__('label.setting.require_seed_section.torrent_count_max'))->helperText(__('label.setting.require_seed_section.torrent_count_max_help'))->integer(),
-            Repeater::make('require_seed_section.bonus_reward')
-                ->label(__('label.setting.require_seed_section.bonus_reward'))
-                ->helperText(__('label.setting.require_seed_section.bonus_reward_help'))
-                ->schema([
-                    TextInput::make('seeders')
-                        ->label(__('label.setting.require_seed_section.seeders'))
-                        ->required()
-                        ->integer()
-                        ->columnSpan(2)
-                    ,
-                    Repeater::make('seed_time_reward')
-                        ->label(__('label.setting.require_seed_section.seed_time_reward'))
-                        ->schema([
-                            TextInput::make('begin')->label(__('label.setting.require_seed_section.seed_time_reward_begin'))->helperText(__('label.setting.require_seed_section.seed_time_reward_begin_help')),
-                            TextInput::make('end')->label(__('label.setting.require_seed_section.seed_time_reward_end'))->helperText(__('label.setting.require_seed_section.seed_time_reward_end_help')),
-                            TextInput::make('window')->label(__('label.setting.require_seed_section.seed_time_reward_window'))->helperText(__('label.setting.require_seed_section.seed_time_reward_window_help')),
-                            TextInput::make('reward')->label(__('label.setting.require_seed_section.seed_time_reward_reward'))->helperText(__('label.setting.require_seed_section.seed_time_reward_reward_help')),
-                        ])
-                        ->columns(4)
-                        ->columnSpan(5)
-                    ,
-                    Repeater::make('data_traffic_reward')
-                        ->label(__('label.setting.require_seed_section.data_traffic_reward'))
-                        ->schema([
-                            TextInput::make('begin')->label(__('label.setting.require_seed_section.data_traffic_reward_begin'))->helperText(__('label.setting.require_seed_section.data_traffic_reward_begin_help')),
-                            TextInput::make('end')->label(__('label.setting.require_seed_section.data_traffic_reward_end'))->helperText(__('label.setting.require_seed_section.data_traffic_reward_end_help')),
-                            TextInput::make('window')->label(__('label.setting.require_seed_section.data_traffic_reward_window'))->helperText(__('label.setting.require_seed_section.data_traffic_reward_window_help')),
-                            TextInput::make('reward')->label(__('label.setting.require_seed_section.data_traffic_reward_reward'))->helperText(__('label.setting.require_seed_section.data_traffic_reward_reward_help')),
-                        ])
-                        ->columns(4)
-                        ->columnSpan(5)
-                ])
-                ->columns(12)
-                ->columnSpanFull()
-                ->defaultItems(3)
-                ->reorderable(false)
-        ];
-    }
-
     /** @return array<Component> */
     private function getTabMeilisearchSchema(string $id): array
     {

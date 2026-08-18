@@ -16,6 +16,7 @@ class StatTable extends Widget
         return '';
     }
 
+    /** @return array<int|string, array<string, mixed>> */
     protected function getTableRows(): array
     {
         return [];

@@ -21,6 +21,7 @@ class ListAudioCodecs extends PageList
         ];
     }
 
+    /** @return Builder<AudioCodec> */
     protected function getTableQuery(): Builder
     {
         return AudioCodec::query()->with('search_box')->orderBy('mode', 'asc');

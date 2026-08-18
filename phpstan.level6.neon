@@ -21,6 +21,7 @@ parameters:
         - app/Exceptions
         - app/Logging
         - app/Policies
+        - app/Filament
 
     excludePaths:
         analyse:

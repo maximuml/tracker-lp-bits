@@ -29,7 +29,7 @@ class ListUsers extends PageList implements HasActions
 //    }
 
 
-    protected function getTableFiltersLayout(): ?string
+    protected function getTableFiltersLayout(): FiltersLayout
     {
         return FiltersLayout::AboveContent;
     }

@@ -106,6 +106,10 @@ class IpSearch extends Page implements HasTable
             ;
     }
 
+    /**
+     * @param  array<string, mixed>  $filters
+     * @return  LengthAwarePaginator<int, array<string, mixed>>
+     */
     private static function getRecords(array $filters, int $page, int $recordsPerPage): LengthAwarePaginator
     {
         $total = 0;
@@ -137,13 +141,14 @@ class IpSearch extends Page implements HasTable
                     ->whereIn('userid', $userIdArr)
                     ->selectRaw('userid, COUNT(distinct ip) AS count')
                     ->groupBy('userid')
-                    ->get()
-                    ->pluck('count', 'userid')
-                    ->toArray();
-                ;
+                    ->pluck('count', 'userid');
                 foreach ($records as $record) {
-                    $item = json_decode(json_encode($record), true);
-                    $item['ip_count'] = $ipCountResult[$item['userid']] ?? 0;
+                    $item = json_decode((string) json_encode($record), true);
+                    if (! is_array($item)) {
+                        continue;
+                    }
+                    /** @var array<string, mixed> $item */
+                    $item['ip_count'] = $ipCountResult[$item['userid'] ?? ''] ?? 0;
                     $results[] = $item;
                 }
             }

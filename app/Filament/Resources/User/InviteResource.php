@@ -122,7 +122,8 @@ class InviteResource extends Resource
         ];
     }
 
-    private static function getFilters()
+    /** @return array<Filter|SelectFilter> */
+    private static function getFilters(): array
     {
         $filters = [];
         $filters[] = Filter::make('inviter')

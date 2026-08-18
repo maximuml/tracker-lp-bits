@@ -70,6 +70,7 @@ class TrackerUrlResource extends Resource
             ]);
     }
 
+    /** @return Builder<TrackerUrl> */
     public static function getEloquentQuery(): Builder
     {
         return TrackerUrl::query()

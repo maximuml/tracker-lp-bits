@@ -12,11 +12,7 @@ use Illuminate\Support\Facades\Cookie;
 
 class Locale
 {
-    /** @var  array<int|string, mixed> */
-    /** @var  array<int|string, mixed> */
-    /** @var  array<int|string, mixed> */
-    /** @var  array<int|string, mixed> */
-    /** @var  array<int|string, mixed> */
+    /** @var array<string, string> */
     public static array $languageMaps = [
         'en' => 'en',
     ];

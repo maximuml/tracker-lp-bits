@@ -18,12 +18,11 @@ use App\Filament\Resources\Section\CategoryResource\Pages;
 use App\Filament\Resources\Section\CategoryResource\RelationManagers;
 use App\Models\Category;
 use App\Models\Icon;
-use App\Models\NexusModel;
 use App\Models\SearchBox;
 use App\Models\Torrent;
 use App\Repositories\SearchBoxRepository;
-use Filament\Facades\Filament;
 use Filament\Forms;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables\Table;
 use Filament\Tables;
@@ -117,12 +116,12 @@ class CategoryResource extends Resource
             ])
             ->recordActions([
                 EditAction::make(),
-                DeleteAction::make()->using(function (NexusModel $record) {
+                DeleteAction::make()->using(function (Category $record) {
                     try {
                         $rep = new SearchBoxRepository();
                         $rep->deleteCategory($record->id);
                     } catch (Exception $exception) {
-                        Filament::notify('danger', $exception->getMessage() ?: class_basename($exception));
+                        Notification::make()->danger()->body($exception->getMessage() ?: class_basename($exception))->send();
                     }
                 }),
             ])
@@ -132,7 +131,7 @@ class CategoryResource extends Resource
                         $rep = new SearchBoxRepository();
                         $rep->deleteCategory($records->pluck('id')->toArray());
                     } catch (Exception $exception) {
-                        Filament::notify('danger', $exception->getMessage() ?: class_basename($exception));
+                        Notification::make()->danger()->body($exception->getMessage() ?: class_basename($exception))->send();
                     }
                 }),
             ]);

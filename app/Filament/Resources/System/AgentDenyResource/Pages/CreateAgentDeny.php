@@ -10,7 +10,7 @@ class CreateAgentDeny extends CreateRecord
 {
     protected static string $resource = AgentDenyResource::class;
 
-    public function afterCreate()
+    public function afterCreate(): void
     {
         \App\Support\Cache::clearAgentAllowDeny();
     }

@@ -123,6 +123,7 @@ class TagResource extends Resource
         ];
     }
 
+    /** @return array<Action> */
     private static function getActions(): array
     {
         $actions = [];

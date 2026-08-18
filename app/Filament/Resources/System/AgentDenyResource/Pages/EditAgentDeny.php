@@ -11,6 +11,7 @@ class EditAgentDeny extends EditRecord
 {
     protected static string $resource = AgentDenyResource::class;
 
+    /** @return array<DeleteAction> */
     protected function getHeaderActions(): array
     {
         return [
@@ -22,7 +23,7 @@ class EditAgentDeny extends EditRecord
         ];
     }
 
-    public function afterSave()
+    public function afterSave(): void
     {
         \App\Support\Cache::clearAgentAllowDeny();
     }

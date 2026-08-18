@@ -21,6 +21,7 @@ class ListSecondIcons extends PageList
         ];
     }
 
+    /** @return Builder<SecondIcon> */
     protected function getTableQuery(): Builder
     {
         return SecondIcon::query()->with('search_box');

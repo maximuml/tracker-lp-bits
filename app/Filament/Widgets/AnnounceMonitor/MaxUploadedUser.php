@@ -35,6 +35,7 @@ class MaxUploadedUser extends BaseWidget implements HasActions
             ]);
     }
 
+    /** @return Collection<int, AnnounceLog> */
     public function getTableRecords(): Collection|Paginator|CursorPaginator
     {
         $rep = new AnnounceLogRepository();
@@ -42,7 +43,7 @@ class MaxUploadedUser extends BaseWidget implements HasActions
         $items = [];
         foreach ($list as $index => $item) {
             $record = new AnnounceLog($item);
-            $record->request_id = $index;
+            $record->request_id = (string) $index;
             $items[] = $record;
         }
         return new Collection($items);

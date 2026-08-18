@@ -16,6 +16,7 @@ class UserStat extends StatTable
         return \App\Support\Locale::trans('dashboard.user.page_title', [], null);
     }
 
+    /** @return array<int|string, array<string, mixed>> */
     protected function getTableRows(): array
     {
         $dashboardRep = new DashboardRepository();

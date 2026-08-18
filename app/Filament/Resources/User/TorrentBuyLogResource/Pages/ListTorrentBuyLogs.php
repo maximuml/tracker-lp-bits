@@ -20,6 +20,7 @@ class ListTorrentBuyLogs extends PageList
         ];
     }
 
+    /** @return Builder<TorrentBuyLog> */
     protected function getTableQuery(): Builder
     {
         return TorrentBuyLog::query()->with(['user', 'torrent']);

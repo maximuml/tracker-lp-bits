@@ -32,8 +32,8 @@ class SecondIcon extends NexusModel
     ];
 
     /**
-     * @param  array<int|string, mixed>  $data
-     * @return  array<int|string, mixed>
+     * @param  array<string, mixed>  $data
+     * @return  array<string, mixed>
      */
     public static function formatFormData(array $data): array
     {

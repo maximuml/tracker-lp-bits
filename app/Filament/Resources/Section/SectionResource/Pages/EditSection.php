@@ -12,6 +12,7 @@ class EditSection extends EditRecord
 {
     protected static string $resource = SectionResource::class;
 
+    /** @return array<DeleteAction> */
     protected function getHeaderActions(): array
     {
         return [
@@ -19,16 +20,24 @@ class EditSection extends EditRecord
         ];
     }
 
+    /**
+     * @param  array<string, mixed>  $data
+     * @return  array<string, mixed>
+     */
     protected function mutateFormDataBeforeSave(array $data): array
     {
         return SearchBox::formatTaxonomyExtra($data);
     }
 
-    protected function afterSave()
+    protected function afterSave(): void
     {
         \App\Support\Cache::clearSearchBox();
     }
 
+    /**
+     * @param  array<string, mixed>  $data
+     * @return  array<string, mixed>
+     */
     protected function mutateFormDataBeforeFill(array $data): array
     {
         foreach (SearchBox::$extras as $field => $text) {

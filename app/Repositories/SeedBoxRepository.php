@@ -120,9 +120,9 @@ class SeedBoxRepository extends BaseRepository
     }
 
     /**
-     * @param  array<int|string, mixed>  $params
-     * @param  mixed  $id
-     * @return  mixed
+     * @param  array<string, mixed>  $params
+     * @param  int  $id
+     * @return  SeedBoxRecord
      */
     public function update(array $params, $id)
     {

@@ -11,6 +11,10 @@ class CreateSection extends CreateRecord
 {
     protected static string $resource = SectionResource::class;
 
+    /**
+     * @param  array<string, mixed>  $data
+     * @return  array<string, mixed>
+     */
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         return SearchBox::formatTaxonomyExtra($data);

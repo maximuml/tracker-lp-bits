@@ -22,6 +22,7 @@ class ListProcessings extends PageList
         ];
     }
 
+    /** @return Builder<Processing> */
     protected function getTableQuery(): Builder
     {
         return Processing::query()->with('search_box')->orderBy('mode', 'asc');

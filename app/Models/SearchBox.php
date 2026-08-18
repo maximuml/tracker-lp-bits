@@ -96,7 +96,7 @@ class SearchBox extends NexusModel
     const EXTRA_DISPLAY_COVER_ON_TORRENT_LIST = 'display_cover_on_torrent_list';
     const EXTRA_DISPLAY_SEED_BOX_ICON_ON_TORRENT_LIST = 'display_seed_box_icon_on_torrent_list';
 
-    /** @var  array<int|string, mixed> */
+    /** @var array<string, array<string, string>> */
     public static array $taxonomies = [
         'source' => ['table' => 'sources', 'model' => Source::class],
         'medium' => ['table' => 'media', 'model' => Media::class],
@@ -106,7 +106,7 @@ class SearchBox extends NexusModel
         'processing' => ['table' => 'processings', 'model' => Processing::class],
     ];
 
-    /** @var  array<int|string, mixed> */
+    /** @var array<string, array<string, string>> */
     public static array $extras = [
         self::EXTRA_DISPLAY_COVER_ON_TORRENT_LIST => ['text' => 'Display cover on torrent list'],
         self::EXTRA_DISPLAY_SEED_BOX_ICON_ON_TORRENT_LIST => ['text' => 'Display seed box icon on torrent list'],
@@ -114,7 +114,7 @@ class SearchBox extends NexusModel
 
     /**
      * @param  mixed  $fullName
-     * @return  array<int|string, mixed>
+     * @return  array<string, string>
      */
     public static function listExtraText($fullName = false): array
     {
@@ -131,8 +131,8 @@ class SearchBox extends NexusModel
     }
 
     /**
-     * @param  array<int|string, mixed>  $data
-     * @return  array<int|string, mixed>
+     * @param  array<string, mixed>  $data
+     * @return  array<string, mixed>
      */
     public static function formatTaxonomyExtra(array $data): array
     {

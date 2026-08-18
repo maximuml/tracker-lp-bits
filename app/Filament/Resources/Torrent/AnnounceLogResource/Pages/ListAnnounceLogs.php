@@ -19,12 +19,15 @@ class ListAnnounceLogs extends PageListSingle
 {
     protected static string $resource = AnnounceLogResource::class;
 
+    /**
+     * @return Collection<int, AnnounceLog>|Paginator<int, AnnounceLog>|CursorPaginator<int, AnnounceLog>|LengthAwarePaginator<int, AnnounceLog>
+     */
     public function getTableRecords(): Collection|Paginator|CursorPaginator
     {
         if (config('clickhouse.connection.host') == '') {
             $request = request();
-            $page = $request->get('page', 1);
-            $perPage = $request->get('per_page', 10);
+            $page = (int) $request->get('page', 1);
+            $perPage = (int) $request->get('per_page', 10);
             return new LengthAwarePaginator([], 0, $perPage, $page);
         }
 
@@ -50,8 +53,8 @@ class ListAnnounceLogs extends PageListSingle
                 }
             }
         }
-        $page = $request->get('page', 1);
-        $perPage = $request->get('per_page', 10);
+        $page = (int) $request->get('page', 1);
+        $perPage = (int) $request->get('per_page', 10);
         $sortColumn = null;
         $sortDirection = null;
         $sortColumnFromQuery = $request->get("tableSortColumn");
@@ -64,8 +67,18 @@ class ListAnnounceLogs extends PageListSingle
         }
 
         $sorts = [];
-        foreach ($request->input('components', []) as $component) {
+        $components = $request->input('components', []);
+        if (! is_array($components)) {
+            $components = [];
+        }
+        foreach ($components as $component) {
+            if (! is_array($component) || ! is_string($component['snapshot'] ?? null)) {
+                continue;
+            }
             $snapshot = json_decode($component['snapshot'], true);
+            if (! is_array($snapshot)) {
+                continue;
+            }
 //            do_log("snapshot: " . $component['snapshot']);
             if (isset($snapshot['data']['tableRecordsPerPage'])) {
                 $perPage = $snapshot['data']['tableRecordsPerPage'];
@@ -141,16 +154,24 @@ class ListAnnounceLogs extends PageListSingle
             }
         }
         foreach ($filters as $field => $value) {
-            if (!isset($filterableColumns[$field]) || !call_user_func($filterableColumns[$field], $value)) {
+            if (! call_user_func($filterableColumns[$field], $value)) {
                 unset($filters[$field]);
             }
         }
+        $page = (int) $page;
+        $perPage = (int) $perPage;
+
         $rep = new AnnounceLogRepository();
         $result = $rep->listAll($filters, $page, $perPage, $sortColumn, $sortDirection);
+        if (! is_array($result) || ! isset($result['data'], $result['total'])) {
+            return new LengthAwarePaginator([], 0, $perPage, $page);
+        }
 
         // 转换数据格式以适配 Filament 表格
         $items = [];
-        foreach ($result['data'] as $announceLog) {
+        /** @var array<int, array<string, mixed>> $data */
+        $data = $result['data'];
+        foreach ($data as $announceLog) {
             $model = new AnnounceLog($announceLog);
             $items[] = $model;
         }

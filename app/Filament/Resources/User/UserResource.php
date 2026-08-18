@@ -54,11 +54,20 @@ class UserResource extends Resource
 
     protected static ?int $navigationSort = 1;
 
-    private static $rep;
+    private static ?UserRepository $rep = null;
+
+    private static function currentUser(): User
+    {
+        $user = Auth::user();
+        if (! $user instanceof User) {
+            throw new \RuntimeException('Expected an authenticated user.');
+        }
+        return $user;
+    }
 
     private static function getRep(): UserRepository
     {
-        if (!self::$rep) {
+        if (self::$rep === null) {
             self::$rep = new UserRepository();
         }
         return self::$rep;
@@ -83,7 +92,7 @@ class UserResource extends Resource
                 TextInput::make('password')->password()->required()->visibleOn(CreateUser::class),
                 TextInput::make('password_confirmation')->password()->required()->same('password')->visibleOn(CreateUser::class),
                 TextInput::make('id')->integer(),
-                Select::make('class')->options(User::listClass(User::CLASS_PEASANT, Auth::user()->class - 1)),
+                Select::make('class')->options(User::listClass(User::CLASS_PEASANT, self::currentUser()->class - 1)),
             ]);
     }
 
@@ -97,13 +106,13 @@ class UserResource extends Resource
                     ->formatStateUsing(fn ($record) => new HtmlString(\App\Support\UserDisplay::username($record->id, false, true, true, true))),
                 TextColumn::make('email')->searchable()->label(__("label.email")),
                 TextColumn::make('class')->label('Class')
-                    ->formatStateUsing(fn(Column $column) => $column->getRecord()->classText)
+                    ->formatStateUsing(fn(Column $column) => ($record = $column->getRecord()) instanceof User ? $record->classText : '')
                     ->sortable()->label(__("label.user.class")),
                 TextColumn::make('uploaded')->label('Uploaded')
-                    ->formatStateUsing(fn(Column $column) => $column->getRecord()->uploadedText)
+                    ->formatStateUsing(fn(Column $column) => ($record = $column->getRecord()) instanceof User ? $record->uploadedText : '')
                     ->sortable()->label(__("label.uploaded")),
                 TextColumn::make('downloaded')->label('Downloaded')
-                    ->formatStateUsing(fn(Column $column) => $column->getRecord()->downloadedText)
+                    ->formatStateUsing(fn(Column $column) => ($record = $column->getRecord()) instanceof User ? $record->downloadedText : '')
                     ->sortable()->label(__("label.downloaded")),
                 TextColumn::make('status')->badge()->colors(['success' => 'confirmed', 'warning' => 'pending'])->label(__("label.user.status")),
                 TextColumn::make('enabled')->badge()->colors($yesNoOptions)->label(__("label.user.enabled")),
@@ -139,7 +148,9 @@ class UserResource extends Resource
                     ->label(__('label.user.is_donating'))
                     ->query(function (Builder $query, array $data) {
                         if ($data['value'] === 'yes') {
-                            return $query->donating();
+                            return $query->where('donor', 'yes')->where(function ($query) {
+                                return $query->whereNull('donoruntil')->orWhere('donoruntil', '>=', now());
+                            });
                         } else if ($data['value'] === 'no') {
                             return $query->where('donor', 'no');
                         }
@@ -228,10 +239,10 @@ class UserResource extends Resource
         return Action::make("changeClass")
             ->label(__('label.change'))
             ->button()
-            ->visible(fn (User $record): bool => (Auth::user()->class > $record->class))
+            ->visible(fn (User $record): bool => (self::currentUser()->class > $record->class))
             ->schema([
                 Select::make('class')
-                    ->options(User::listClass(User::CLASS_PEASANT, Auth::user()->class - 1))
+                    ->options(User::listClass(User::CLASS_PEASANT, self::currentUser()->class - 1))
                     ->default(fn (User $record) => $record->class)
                     ->label(__('user.labels.class'))
                     ->required()
@@ -258,7 +269,7 @@ class UserResource extends Resource
             ->action(function (User $record, array $data) {
                 $userRep = self::getRep();
                 try {
-                    $userRep->changeClass(Auth::user(), $record, $data['class'], $data['reason'], $data);
+                    $userRep->changeClass(self::currentUser(), $record, $data['class'], $data['reason'], $data);
                     \App\Support\Admin::successNotification("");
                 } catch (Exception $exception) {
                     \App\Support\Admin::failNotification($exception->getMessage());
@@ -271,12 +282,12 @@ class UserResource extends Resource
         return Action::make(__('admin.resources.user.actions.confirm_btn'))
             ->modalHeading(__('admin.resources.user.actions.confirm_btn'))
             ->requiresConfirmation()
-            ->visible(fn (User $record): bool => (Auth::user()->class > $record->class))
+            ->visible(fn (User $record): bool => (self::currentUser()->class > $record->class))
             ->button()
             ->color('success')
             ->visible(fn ($record) => $record->status == User::STATUS_PENDING)
             ->action(function (User $record) {
-                if (Auth::user()->class <= $record->class) {
+                if (self::currentUser()->class <= $record->class) {
                     \App\Support\Admin::failNotification("No Permission!");
                     return;
                 }
@@ -293,7 +304,7 @@ class UserResource extends Resource
             ->label(fn (User $record) => $record->enabled == 'yes' ? __('admin.resources.user.actions.disable_modal_btn') : __('admin.resources.user.actions.enable_modal_btn'))
             ->modalHeading(fn (User $record) => $record->enabled == 'yes' ? __('admin.resources.user.actions.disable_modal_title') : __('admin.resources.user.actions.enable_modal_title'))
             ->button()
-            ->visible(fn (User $record): bool => (Auth::user()->class > $record->class))
+            ->visible(fn (User $record): bool => (self::currentUser()->class > $record->class))
             ->schema([
                 TextInput::make('reason')->label(__('admin.resources.user.actions.enable_disable_reason'))->placeholder(__('admin.resources.user.actions.enable_disable_reason_placeholder')),
                 Hidden::make('action')->default(fn (User $record) => $record->enabled == 'yes' ? 'disable' : 'enable'),
@@ -303,9 +314,9 @@ class UserResource extends Resource
                 $userRep = self::getRep();
                 try {
                     if ($data['action'] == 'enable') {
-                        $userRep->enableUser(Auth::user(), $data['uid'], $data['reason']);
+                        $userRep->enableUser(self::currentUser(), $data['uid'], $data['reason']);
                     } elseif ($data['action'] == 'disable') {
-                        $userRep->disableUser(Auth::user(), $data['uid'], $data['reason']);
+                        $userRep->disableUser(self::currentUser(), $data['uid'], $data['reason']);
                     }
                     \App\Support\Admin::successNotification("");
                 } catch (Exception $exception) {
@@ -320,11 +331,11 @@ class UserResource extends Resource
             ->label(fn (User $record) => $record->downloadpos == 'yes' ? __('admin.resources.user.actions.disable_download_privileges_btn') : __('admin.resources.user.actions.enable_download_privileges_btn'))
             ->button()
             ->requiresConfirmation()
-            ->visible(fn (User $record): bool => (Auth::user()->class > $record->class))
+            ->visible(fn (User $record): bool => (self::currentUser()->class > $record->class))
             ->action(function (User $record) {
                 $userRep = self::getRep();
                 try {
-                    $userRep->updateDownloadPrivileges(Auth::user(), $record->id, $record->downloadpos == 'yes' ? 'no' : 'yes');
+                    $userRep->updateDownloadPrivileges(self::currentUser(), $record->id, $record->downloadpos == 'yes' ? 'no' : 'yes');
                     \App\Support\Admin::successNotification("");
                 } catch (Exception $exception) {
                     \App\Support\Admin::failNotification($exception->getMessage());
@@ -341,10 +352,10 @@ class UserResource extends Resource
             ->visible(fn (User $record) => $record->two_step_secret != "")
             ->modalHeading(__('admin.resources.user.actions.disable_two_step_authentication'))
             ->requiresConfirmation()
-            ->action(function (user $record) {
+            ->action(function (User $record) {
                 $userRep = self::getRep();
                 try {
-                    $userRep->removeTwoStepAuthentication(Auth::user(), $record->id);
+                    $userRep->removeTwoStepAuthentication(self::currentUser(), $record->id);
                     \App\Support\Admin::successNotification("");
                 } catch (Exception $exception) {
                     \App\Support\Admin::failNotification($exception->getMessage());
@@ -371,10 +382,11 @@ class UserResource extends Resource
         ];
     }
 
+    /** @return array<BulkAction> */
     public static function getBulkActions(): array
     {
         $actions = [];
-        if (filament()->auth()->user()->class >= User::CLASS_SYSOP) {
+        if (self::currentUser()->class >= User::CLASS_SYSOP) {
             $actions[] = BulkAction::make('confirm')
                 ->label(__('admin.resources.user.actions.confirm_bulk'))
                 ->requiresConfirmation()

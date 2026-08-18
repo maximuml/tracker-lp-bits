@@ -115,8 +115,12 @@ class HitAndRunResource extends Resource
             ->groupedBulkActions([
                 BulkAction::make('Pardon')->action(function (Collection $records) {
                     $idArr = $records->pluck('id')->toArray();
+                    $user = Auth::user();
+                    if (! $user instanceof User) {
+                        throw new \RuntimeException('Expected an authenticated user.');
+                    }
                     $rep = new HitAndRunRepository();
-                    $rep->bulkPardon(['id' => $idArr], Auth::user());
+                    $rep->bulkPardon(['id' => $idArr], $user);
                 })
                 ->deselectRecordsAfterCompletion()
                 ->label(__('admin.resources.hit_and_run.bulk_action_pardon'))

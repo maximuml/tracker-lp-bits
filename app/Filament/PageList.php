@@ -6,7 +6,6 @@ use Filament\Support\Enums\Width;
 use Closure;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Resources\Pages\ListRecords;
-use Filament\Tables\Filters\Layout;
 use Illuminate\Database\Eloquent\Model;
 
 class PageList extends ListRecords
@@ -20,7 +19,7 @@ class PageList extends ListRecords
         };
     }
 
-    protected function getTableFiltersLayout(): ?string
+    protected function getTableFiltersLayout(): FiltersLayout
     {
         return FiltersLayout::AboveContent;
     }

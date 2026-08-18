@@ -20,6 +20,7 @@ class ManageTorrentOperationLogs extends PageListSingle
         ];
     }
 
+    /** @return Builder<TorrentOperationLog> */
     protected function getTableQuery(): Builder
     {
         return TorrentOperationLog::query()->with(['torrent', 'user']);

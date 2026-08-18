@@ -4,14 +4,13 @@ namespace App\Filament\Resources\System\AgentAllowResource\Pages;
 
 use Filament\Actions\DeleteAction;
 use App\Filament\Resources\System\AgentAllowResource;
-use App\Models\NexusModel;
-use Filament\Pages\Actions;
 use Filament\Resources\Pages\EditRecord;
 
 class EditAgentAllow extends EditRecord
 {
     protected static string $resource = AgentAllowResource::class;
 
+    /** @return array<DeleteAction> */
     protected function getHeaderActions(): array
     {
         return [
@@ -23,7 +22,7 @@ class EditAgentAllow extends EditRecord
         ];
     }
 
-    public function afterSave()
+    public function afterSave(): void
     {
         \App\Support\Cache::clearAgentAllowDeny();
     }

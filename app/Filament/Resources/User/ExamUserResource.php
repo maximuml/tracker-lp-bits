@@ -23,7 +23,9 @@ use App\Filament\Resources\User\ExamUserResource\Pages;
 use App\Filament\Resources\User\ExamUserResource\RelationManagers;
 use App\Models\Exam;
 use App\Models\ExamUser;
+use App\Models\User;
 use App\Repositories\ExamRepository;
+use Illuminate\Support\Facades\Auth;
 use App\Repositories\HitAndRunRepository;
 use Carbon\Carbon;
 use Filament\Forms;
@@ -34,7 +36,6 @@ use Filament\Tables;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\HtmlString;
 use Filament\Infolists;
 use Filament\Infolists\Components;
@@ -122,8 +123,12 @@ class ExamUserResource extends Resource
             ->groupedBulkActions([
                 BulkAction::make('Avoid')->action(function (Collection $records) {
                     $idArr = $records->pluck('id')->toArray();
+                    $user = Auth::user();
+                    if (! $user instanceof User) {
+                        throw new \RuntimeException('Expected an authenticated user.');
+                    }
                     $rep = new ExamRepository();
-                    $rep->avoidExamUserBulk(['id' => $idArr], Auth::user());
+                    $rep->avoidExamUserBulk(['id' => $idArr], $user);
                 })
                 ->deselectRecordsAfterCompletion()
                 ->requiresConfirmation()

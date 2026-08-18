@@ -7,22 +7,31 @@ use Exception;
 use Filament\Actions\DeleteAction;
 use App\Filament\Resources\User\HitAndRunResource;
 use App\Models\HitAndRun;
+use App\Models\User;
 use App\Repositories\HitAndRunRepository;
-use Filament\Pages\Actions;
 use Filament\Resources\Pages\ViewRecord;
-use Filament\Forms;
 use Illuminate\Support\Facades\Auth;
 
 class ViewHitAndRun extends ViewRecord
 {
     protected static string $resource = HitAndRunResource::class;
 
-//    protected static string $view = 'filament.detail-card';
+    private function getHitAndRunRecord(): HitAndRun
+    {
+        $record = $this->record;
+        if (! $record instanceof HitAndRun) {
+            throw new \RuntimeException('Expected a HitAndRun record.');
+        }
+        return $record;
+    }
 
+    /**
+     * @return  array<int, array<string, mixed>>
+     */
     private function getDetailCardData(): array
     {
         $data = [];
-        $record = $this->record;
+        $record = $this->getHitAndRunRecord();
         $data[] = [
             'label' => 'ID',
             'value' => $record->id,
@@ -39,17 +48,18 @@ class ViewHitAndRun extends ViewRecord
             'label' => __('label.torrent.label'),
             'value' => $record->torrent->name,
         ];
+        $snatch = $record->snatch;
         $data[] = [
             'label' => __('label.uploaded'),
-            'value' => $record->snatch->uploadedText,
+            'value' => $snatch instanceof \App\Models\Snatch ? $snatch->uploadedText : '',
         ];
         $data[] = [
             'label' => __('label.downloaded'),
-            'value' => $record->snatch->downloadedText,
+            'value' => $snatch instanceof \App\Models\Snatch ? $snatch->downloadedText : '',
         ];
         $data[] = [
             'label' => __('label.ratio'),
-            'value' => $record->snatch->shareRatio,
+            'value' => $snatch instanceof \App\Models\Snatch ? $snatch->shareRatio : '',
         ];
         $data[] = [
             'label' => __('label.seed_time_required'),
@@ -84,15 +94,20 @@ class ViewHitAndRun extends ViewRecord
     protected function getHeaderActions(): array
     {
         $actions = [];
-        if (in_array($this->record->status, HitAndRun::CAN_PARDON_STATUS)) {
+        $record = $this->getHitAndRunRecord();
+        if (in_array($record->status, HitAndRun::CAN_PARDON_STATUS)) {
             $actions[] = Action::make('Pardon')
                 ->requiresConfirmation()
                 ->action(function () {
                     $hitAndRunRep = new HitAndRunRepository();
+                    $user = Auth::user();
+                    if (! $user instanceof User) {
+                        throw new \RuntimeException('Expected an authenticated user.');
+                    }
                     try {
-                        $hitAndRunRep->pardon($this->record->id, Auth::user());
+                        $hitAndRunRep->pardon($this->getHitAndRunRecord()->id, $user);
                         \App\Support\Admin::successNotification("");
-                        $this->record = $this->resolveRecord($this->record->id);
+                        $this->record = $this->resolveRecord($this->getHitAndRunRecord()->id);
                     } catch (Exception $exception) {
                         \App\Support\Admin::failNotification($exception->getMessage());
                     }

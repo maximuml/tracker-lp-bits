@@ -73,7 +73,7 @@ class AnnounceLogRepository extends BaseRepository
 
     /**
      * @param  int  $hours
-     * @return  mixed
+     * @return  array<int, array<string, mixed>>
      */
     public function listMaxUploadedUser(int $hours)
     {

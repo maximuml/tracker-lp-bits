@@ -10,24 +10,31 @@ use Filament\Forms\Components\Textarea;
 use Filament\Actions\DeleteAction;
 use App\Filament\Resources\User\ExamUserResource;
 use App\Models\Exam;
+use App\Models\ExamUser;
 use App\Repositories\ExamRepository;
 use Carbon\Carbon;
-use Filament\Pages\Actions;
 use Filament\Resources\Pages\ViewRecord;
-use Filament\Tables\Table;
-use Filament\Forms;
 
 class ViewExamUser extends ViewRecord
 {
     protected static string $resource = ExamUserResource::class;
 
-//    protected static string $view = 'filament.resources.user.exam-user-resource.pages.detail';
+    private function getExamUserRecord(): ExamUser
+    {
+        $record = $this->record;
+        if (! $record instanceof ExamUser) {
+            throw new \RuntimeException('Expected an ExamUser record.');
+        }
+        return $record;
+    }
 
+    /**
+     * @return  array<int, array<string, mixed>>
+     */
     private function getDetailCardData(): array
     {
-//        dd($this->record);
         $data = [];
-        $record = $this->record;
+        $record = $this->getExamUserRecord();
         $data[] = [
             'label' => 'ID',
             'value' => $record->id,
@@ -69,8 +76,7 @@ class ViewExamUser extends ViewRecord
 
     protected function getViewData(): array
     {
-        /** @var Exam $exam */
-        $exam = $this->record->exam;
+        $exam = $this->getExamUserRecord()->exam;
         return [
             'cardData' => $this->getDetailCardData(),
             'result_pass_trans_key' => $exam->getPassResultTransKey('pass'),
@@ -86,9 +92,9 @@ class ViewExamUser extends ViewRecord
                 ->action(function () {
                     $examRep = new ExamRepository();
                     try {
-                        $examRep->avoidExamUser($this->record->id);
+                        $examRep->avoidExamUser($this->getExamUserRecord()->id);
                         \App\Support\Admin::successNotification("");
-                        $this->record = $this->resolveRecord($this->record->id);
+                        $this->record = $this->resolveRecord($this->getExamUserRecord()->id);
                     } catch (Exception $exception) {
                         \App\Support\Admin::failNotification($exception->getMessage());
                     }
@@ -97,7 +103,7 @@ class ViewExamUser extends ViewRecord
 
             Action::make('UpdateEnd')
                 ->mountUsing(fn (Schema $schema) => $schema->fill([
-                    'end' => $this->record->end,
+                    'end' => $this->getExamUserRecord()->end,
                 ]))
                 ->schema([
                     DateTimePicker::make('end')
@@ -111,9 +117,9 @@ class ViewExamUser extends ViewRecord
                 ->action(function (array $data) {
                     $examRep = new ExamRepository();
                     try {
-                        $examRep->updateExamUserEnd($this->record, Carbon::parse($data['end']), $data['reason'] ?? "");
+                        $examRep->updateExamUserEnd($this->getExamUserRecord(), Carbon::parse($data['end']), $data['reason'] ?? "");
                         \App\Support\Admin::successNotification("");
-                        $this->record = $this->resolveRecord($this->record->id);
+                        $this->record = $this->resolveRecord($this->getExamUserRecord()->id);
                     } catch (Exception $exception) {
                         \App\Support\Admin::failNotification($exception->getMessage());
                     }

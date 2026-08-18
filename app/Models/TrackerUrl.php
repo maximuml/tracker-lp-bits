@@ -100,7 +100,9 @@ class TrackerUrl extends NexusModel
      */
     private static function getFromRedisWithRetry(\Redis $redis, string $command, array $params, string $notFoundFlagKey)
     {
-        $result = call_user_func_array([$redis, $command], $params);
+        /** @var callable $callable */
+        $callable = [$redis, $command];
+        $result = $callable(...$params);
         if ($result !== false) {
             return $result;
         }
@@ -114,7 +116,9 @@ class TrackerUrl extends NexusModel
         }
         try {
             self::saveUrlCache();
-            $result = call_user_func_array([$redis, $command], $params);
+            /** @var callable $callable */
+        $callable = [$redis, $command];
+        $result = $callable(...$params);
             if ($result !== false) {
                 return $result;
             }

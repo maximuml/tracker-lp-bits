@@ -318,7 +318,7 @@ class User extends Authenticatable implements FilamentUser, HasName
 
     public function getClassTextAttribute(): string
     {
-        return self::getClassText($this->class);
+        return self::getClassText((int) $this->class);
     }
 
     /**
@@ -376,7 +376,7 @@ class User extends Authenticatable implements FilamentUser, HasName
 
     public function getFilamentName(): string
     {
-        return $this->username;
+        return (string) $this->username;
     }
 
     /**
@@ -940,9 +940,10 @@ class User extends Authenticatable implements FilamentUser, HasName
     public function isDonating(): bool
     {
         $rawDonorUntil = $this->getRawOriginal('donoruntil');
+        $donorUntil = $this->donoruntil;
         if (
             $this->donor == 'yes'
-            && ($rawDonorUntil === null || $rawDonorUntil == '0000-00-00 00:00:00' || $this->donoruntil->gte(Carbon::now()))
+            && ($rawDonorUntil === null || $rawDonorUntil == '0000-00-00 00:00:00' || ($donorUntil instanceof \Carbon\Carbon && $donorUntil->gte(Carbon::now())))
         ) {
             return true;
         }
@@ -953,7 +954,7 @@ class User extends Authenticatable implements FilamentUser, HasName
 
     public function acceptNotification($name): bool
     {
-        return is_null($this->original['notifs']) || str_contains($this->notifs, "[{$name}]");
+        return is_null($this->original['notifs']) || str_contains((string) $this->notifs, "[{$name}]");
     }
 
     public function tokenCan(string $ability): bool

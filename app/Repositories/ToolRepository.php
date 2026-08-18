@@ -449,8 +449,8 @@ class ToolRepository extends BaseRepository
 
         //un-vote poll
         $total = Poll::query()->count();
-        $userVoteCount = PollAnswer::query()->where('userid', $user->id)->selectRaw('count(distinct(pollid)) as counts')->first()->counts;
-        $result['poll'] = $total - $userVoteCount;
+        $userVoteRow = PollAnswer::query()->where('userid', $user->id)->selectRaw('count(distinct(pollid)) as counts')->first();
+        $result['poll'] = $total - ($userVoteRow === null ? 0 : (int) $userVoteRow->counts);
 
         return $result;
     }
@@ -483,6 +483,10 @@ class ToolRepository extends BaseRepository
         }
         $log = "uid: $uid";
         $userInfo = \App\Support\UserDisplay::row($uid);
+        if (!is_array($userInfo)) {
+            \App\Support\Logger::writeWithContext((string) "{$log}, user not found", (string) 'warn', (bool) false);
+            return [];
+        }
         $class = $userInfo['class'];
 
         //Class permission
@@ -552,6 +556,7 @@ class ToolRepository extends BaseRepository
             }
             \App\Support\Logger::writeWithContext((string) ("[DELETE_DUPLICATED_SNATCH], count: " . count($snatchRes)), (string) 'info', (bool) false);
             foreach ($snatchRes as $snatchRow) {
+                $snatchRow = (array) $snatchRow;
                 $torrentId = $snatchRow['torrentid'];
                 $userId = $snatchRow['userid'];
                 $idArr = explode(',', $snatchRow['ids']);
@@ -592,6 +597,7 @@ class ToolRepository extends BaseRepository
             }
             \App\Support\Logger::writeWithContext((string) ("[DELETE_DUPLICATED_PEERS], count: " . count($results)), (string) 'info', (bool) false);
             foreach ($results as $row) {
+                $row = (array) $row;
                 $torrentId = $row['torrent'];
                 $userId = $row['userid'];
                 $idArr = explode(',', $row['ids']);
@@ -613,19 +619,23 @@ class ToolRepository extends BaseRepository
      */
     public function sendAlarmEmail(string $subjectTransKey, array $subjectTransContext, string $msgTransKey, array $msgTransContext): void
     {
+        /** @var array<string, mixed> $subjectContext */
+        $subjectContext = $subjectTransContext;
+        /** @var array<string, mixed> $msgContext */
+        $msgContext = $msgTransContext;
         $receiverUid = \App\Support\Config\SiteConfig::current()->system->alarmEmailReceiver();
         if (empty($receiverUid)) {
             $locale = Locale::getDefault();
-            $subject = \App\Support\Locale::trans($subjectTransKey, $subjectTransContext, $locale);
-            $msg = \App\Support\Locale::trans($msgTransKey, $msgTransContext, $locale);
+            $subject = \App\Support\Locale::trans($subjectTransKey, $subjectContext, $locale);
+            $msg = \App\Support\Locale::trans($msgTransKey, $msgContext, $locale);
             \App\Support\Logger::writeWithContext((string) sprintf("%s - %s", $subject, $msg), (string) "error", (bool) false);
         } else {
             $receiverUidArr = preg_split("/[\r\n\s,，]+/", $receiverUid);
             $users = User::query()->whereIn("id", $receiverUidArr)->get(User::$commonFields);
             foreach ($users as $user) {
                 $locale = $user->locale;
-                $subject = \App\Support\Locale::trans($subjectTransKey, $subjectTransContext, $locale);
-                $msg = \App\Support\Locale::trans($msgTransKey, $msgTransContext, $locale);
+                $subject = \App\Support\Locale::trans($subjectTransKey, $subjectContext, $locale);
+                $msg = \App\Support\Locale::trans($msgTransKey, $msgContext, $locale);
                 $result = $this->sendMail($user->email, $subject, $msg);
                 \App\Support\Logger::writeWithContext((string) sprintf("send msg: %s result: %s", $msg, var_export($result, true)), (string) ($result ? "info" : "error"), (bool) false);
             }

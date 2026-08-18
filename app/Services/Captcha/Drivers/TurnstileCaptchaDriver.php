@@ -9,8 +9,12 @@ class TurnstileCaptchaDriver implements CaptchaDriverInterface
 {
     protected static bool $scriptInjected = false;
 
+    /** @var array<string, mixed> */
     protected array $config;
 
+    /**
+     * @param array<string, mixed> $config
+     */
     public function __construct(array $config = [])
     {
         $this->config = $config;
@@ -21,6 +25,9 @@ class TurnstileCaptchaDriver implements CaptchaDriverInterface
         return !empty($this->config['site_key']) && !empty($this->config['secret_key']);
     }
 
+    /**
+     * @param array<string, mixed> $context
+     */
     public function render(array $context = []): string
     {
         if (!$this->isEnabled()) {
@@ -41,8 +48,8 @@ class TurnstileCaptchaDriver implements CaptchaDriverInterface
 
         $attributes = sprintf(
             'class="cf-turnstile" data-sitekey="%s" data-theme="%s"%s',
-            htmlspecialchars($this->config['site_key'], ENT_QUOTES, 'UTF-8'),
-            htmlspecialchars($theme, ENT_QUOTES, 'UTF-8'),
+            htmlspecialchars((string) $this->config['site_key'], ENT_QUOTES, 'UTF-8'),
+            htmlspecialchars((string) $theme, ENT_QUOTES, 'UTF-8'),
             $size === 'auto' ? '' : sprintf(' data-size="%s"', htmlspecialchars($size, ENT_QUOTES, 'UTF-8'))
         );
 
@@ -58,15 +65,20 @@ class TurnstileCaptchaDriver implements CaptchaDriverInterface
         return $markup;
     }
 
+    /**
+     * @param array<string, mixed> $payload
+     * @param array<string, mixed> $context
+     */
     public function verify(array $payload, array $context = []): bool
     {
-        $token = trim((string) ($payload['request']['cf-turnstile-response'] ?? ''));
+        $requestPayload = is_array($payload['request'] ?? null) ? $payload['request'] : [];
+        $token = trim((string) ($requestPayload['cf-turnstile-response'] ?? ''));
 
         if ($token === '') {
             throw new CaptchaValidationException('Captcha verification token is missing.');
         }
 
-        $secret = $this->config['secret_key'] ?? '';
+        $secret = (string) ($this->config['secret_key'] ?? '');
 
         if ($secret === '') {
             throw new CaptchaValidationException('Captcha secret key is not configured.');
@@ -92,6 +104,10 @@ class TurnstileCaptchaDriver implements CaptchaDriverInterface
         return true;
     }
 
+    /**
+     * @param array<string, mixed> $data
+     * @return array<string, mixed>
+     */
     protected function sendVerificationRequest(string $url, array $data): array
     {
         $payload = http_build_query($data);
@@ -108,7 +124,7 @@ class TurnstileCaptchaDriver implements CaptchaDriverInterface
 
             $response = curl_exec($ch);
 
-            if ($response === false) {
+            if (! is_string($response) || $response === '') {
                 $error = curl_error($ch);
                 curl_close($ch);
                 throw new CaptchaValidationException('Captcha verification request failed: ' . $error);
@@ -127,7 +143,7 @@ class TurnstileCaptchaDriver implements CaptchaDriverInterface
 
             $response = file_get_contents($url, false, $context);
 
-            if ($response === false) {
+            if (! is_string($response) || $response === '') {
                 throw new CaptchaValidationException('Captcha verification request failed.');
             }
         }

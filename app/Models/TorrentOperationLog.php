@@ -64,7 +64,7 @@ class TorrentOperationLog extends NexusModel
 
 
     /**
-     * @param  array<int|string, mixed>  $params
+     * @param  array<string, mixed>  $params
      * @param  mixed  $notifyUser
      * @return  mixed
      */

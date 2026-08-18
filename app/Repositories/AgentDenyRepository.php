@@ -25,6 +25,7 @@ class AgentDenyRepository extends BaseRepository
      */
     public function store(array $params)
     {
+        /** @var array<string, mixed> $params */
         $model = AgentDeny::query()->create($params);
         return $model;
     }
@@ -36,7 +37,8 @@ class AgentDenyRepository extends BaseRepository
      */
     public function update(array $params, $id)
     {
-        $model = AgentDeny::query()->findOrFail($id);
+        $model = AgentDeny::query()->findOrFail((int) $id);
+        /** @var array<string, mixed> $params */
         $model->update($params);
         return $model;
     }
@@ -47,7 +49,7 @@ class AgentDenyRepository extends BaseRepository
      */
     public function getDetail($id)
     {
-        $model = AgentDeny::query()->findOrFail($id);
+        $model = AgentDeny::query()->findOrFail((int) $id);
         return $model;
     }
 
@@ -57,7 +59,7 @@ class AgentDenyRepository extends BaseRepository
      */
     public function delete($id)
     {
-        $model = AgentDeny::query()->findOrFail($id);
+        $model = AgentDeny::query()->findOrFail((int) $id);
         $result = $model->delete();
         return $result;
     }

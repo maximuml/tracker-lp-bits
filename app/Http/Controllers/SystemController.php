@@ -118,7 +118,7 @@ class SystemController extends LegacyController
         if ($currentUserIsModerator && $currentClass > (defined('UC_POWER_USER') ? \constant('UC_POWER_USER') : 0)) {
             $classOptions[] = ['value' => $currentClass, 'label' => UserClass::name($currentClass, false, true, true), 'selected' => true];
         } else {
-            $maxClass = UserDisplay::currentClass() - 1;
+            $maxClass = (int) UserDisplay::currentClass() - 1;
             for ($i = 0; $i <= $maxClass; $i++) {
                 $selected = ($curUser['class'] ?? 0) == $i;
                 $classOptions[] = ['value' => $i, 'label' => UserClass::name($i, false, true, true), 'selected' => $selected];
@@ -717,7 +717,8 @@ class SystemController extends LegacyController
             if ($isTypeTmpInvite) {
                 $command = sprintf('invite:tmp %s %s %s', $idRedisKey, $duration, $amount);
                 $output = Environment::run($command, 'string', true, true);
-                Log::writeWithContext((string) sprintf('command: %s, output: %s', $command, $output), 'info');
+                $outputStr = is_array($output) ? implode("\n", $output) : (string) $output;
+                Log::writeWithContext((string) sprintf('command: %s, output: %s', $command, $outputStr), 'info');
             } else {
                 NexusDB::table('users')->whereIn('id', $idArr)->increment($type, $amount);
             }

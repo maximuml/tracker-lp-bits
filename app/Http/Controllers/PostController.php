@@ -2,7 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\DTOs\Forum\ListPostsDto;
+use App\DTOs\Forum\StorePostDto;
+use App\DTOs\Forum\UpdatePostDto;
 use App\Http\Resources\PostResource;
+use App\Models\Forum;
 use App\Models\Post;
 use App\Models\Topic;
 use App\Models\User;
@@ -22,15 +26,12 @@ class PostController extends Controller
         $this->setContextUser();
 
         $forum = $topic->forum;
-        if (! $this->canRead($forum)) {
+        if (! $forum instanceof Forum || ! $this->canRead($forum)) {
             throw ValidationException::withMessages(['topic' => ['Permission denied.']]);
         }
 
-        $perPage = max(1, min(100, (int) $request->input('per_page', 20)));
-        $page = max(1, (int) $request->input('page', 1));
-        $offset = ($page - 1) * $perPage;
-
-        $posts = ForumRepository::getTopicPosts((int) $topic->id, null, $offset, $perPage);
+        $dto = ListPostsDto::fromRequest($request);
+        $posts = ForumRepository::getTopicPosts((int) $topic->id, null, $dto->offset(), $dto->perPage);
 
         return $this->success(PostResource::collection($posts));
     }
@@ -48,7 +49,7 @@ class PostController extends Controller
         }
 
         $forum = $topic->forum;
-        if (! $this->canWrite($forum)) {
+        if (! $forum instanceof Forum || ! $this->canWrite($forum)) {
             throw ValidationException::withMessages(['topic' => ['Permission denied.']]);
         }
 
@@ -56,12 +57,10 @@ class PostController extends Controller
             throw ValidationException::withMessages(['topic' => ['Topic is locked.']]);
         }
 
-        $validated = $request->validate([
-            'body' => 'required|string',
-        ]);
+        $dto = StorePostDto::fromRequest($request);
 
         $date = now()->toDateTimeString();
-        $postId = ForumRepository::createPost((int) $topic->id, (int) $user->id, (string) $validated['body'], $date);
+        $postId = ForumRepository::createPost((int) $topic->id, (int) $user->id, $dto->body, $date);
 
         ForumRepository::setTopicLastPost((int) $topic->id, $postId);
         ForumRepository::incrementForumPostCount((int) $forum->id);
@@ -80,7 +79,8 @@ class PostController extends Controller
     {
         $this->setContextUser();
 
-        if (! $this->canRead($topic->forum)) {
+        $forum = $topic->forum;
+        if (! $forum instanceof Forum || ! $this->canRead($forum)) {
             throw ValidationException::withMessages(['topic' => ['Permission denied.']]);
         }
 
@@ -105,17 +105,14 @@ class PostController extends Controller
             throw ValidationException::withMessages(['post' => ['Permission denied.']]);
         }
 
-        $validated = $request->validate([
-            'body' => 'required|string',
-            'subject' => 'sometimes|nullable|string|max:255',
-        ]);
+        $dto = UpdatePostDto::fromRequest($request);
 
         $date = now()->toDateTimeString();
-        ForumRepository::updatePostBody((int) $post->id, (string) $validated['body'], $date, (int) $user->id);
+        ForumRepository::updatePostBody((int) $post->id, $dto->body, $date, (int) $user->id);
 
         $postInfo = ForumRepository::getPostEditInfo((int) $post->id);
-        if (! empty($validated['subject']) && ! empty($postInfo['is_first_post'])) {
-            $topic->update(['subject' => (string) $validated['subject']]);
+        if ($dto->subject !== null && $dto->subject !== '' && ! empty($postInfo['is_first_post'])) {
+            $topic->update(['subject' => $dto->subject]);
         }
 
         $post->refresh()->load('user');
@@ -190,6 +187,8 @@ class PostController extends Controller
             return true;
         }
 
-        return (int) $post->userid === (int) $user->id && $this->canWrite($topic->forum);
+        $forum = $topic->forum;
+
+        return (int) $post->userid === (int) $user->id && $forum instanceof Forum && $this->canWrite($forum);
     }
 }

@@ -194,7 +194,7 @@ class SearchBox extends NexusModel
         $result = [];
         foreach (self::$sections as $key => $value) {
             $value['text'] = \App\Support\Locale::trans("searchbox.sections.{$key}", [], null);
-            $value['mode'] = \App\Support\Config\SiteConfig::current()->main->category($key);
+            $value['mode'] = \App\Support\Config\SiteConfig::current()->main->category((string) $key);
             if ($field !== null && isset($value[$field])) {
                 $result[$key] = $value[$field];
             } else {

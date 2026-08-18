@@ -100,6 +100,9 @@ final class Description
         }, $description);
 
         $descriptionArr = preg_split("/[$delimiter]+/", $description);
+        if ($descriptionArr === false) {
+            $descriptionArr = [];
+        }
         $results = [];
         foreach ($descriptionArr as $item) {
             if (preg_match('/\[attach\](.*)\[\/attach\]/isU', $item, $matches)) {

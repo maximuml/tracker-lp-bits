@@ -57,7 +57,7 @@ final class AuthCookie
             'expires' => $expires,
         ];
 
-        return self::encrypter()->encryptString(json_encode($tokenData));
+        return self::encrypter()->encryptString((string) json_encode($tokenData));
     }
 
     /**
@@ -378,8 +378,12 @@ final class AuthCookie
             return null;
         }
 
-        $authKey = $isArray ? $row['auth_key'] : $row->auth_key;
-        if (self::verifyToken($token, (string) $authKey) === null) {
+        if (is_array($row)) {
+            $authKey = (string) ($row['auth_key'] ?? '');
+        } else {
+            $authKey = (string) $row->auth_key;
+        }
+        if (self::verifyToken($token, $authKey) === null) {
             Logger::writeWithContext("$log, !hash_equals");
             return null;
         }

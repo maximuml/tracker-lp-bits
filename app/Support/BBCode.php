@@ -202,7 +202,8 @@ final class BBCode
         if (is_string($queryString)) {
             parse_str($queryString, $parameters);
         }
-        $videoId = (string) ($parameters['v'] ?? '');
+        $videoIdValue = $parameters['v'] ?? '';
+        $videoId = is_scalar($videoIdValue) ? (string) $videoIdValue : '';
 
         return sprintf(
             '<iframe width="%s" height="%s" src="https://www.youtube.com/embed/%s" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>',
@@ -326,11 +327,11 @@ final class BBCode
             }
         }
 
-        $text = preg_replace('/\[quote\]/i', '<fieldset><legend> '.$quoteLabel.' </legend><br />', $text);
-        $text = preg_replace('/\[quote=(.+?)\]/i', '<fieldset><legend> '.$quoteLabel.': \\1 </legend><br />', $text);
-        $text = preg_replace('/\[\/quote\]/i', '</fieldset><br />', $text);
+        $text = (string) preg_replace('/\[quote\]/i', '<fieldset><legend> '.$quoteLabel.' </legend><br />', $text);
+        $text = (string) preg_replace('/\[quote=(.+?)\]/i', '<fieldset><legend> '.$quoteLabel.': \\1 </legend><br />', $text);
+        $text = (string) preg_replace('/\[\/quote\]/i', '</fieldset><br />', $text);
 
-        return (string) $text;
+        return $text;
     }
 
     /**

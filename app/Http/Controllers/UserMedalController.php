@@ -94,7 +94,7 @@ class UserMedalController extends Controller
      */
     public function destroy($id)
     {
-        $userMedal = UserMedal::query()->findOrFail($id);
+        $userMedal = UserMedal::query()->findOrFail((int) $id);
         $result = $userMedal->delete();
         return $this->success($result, 'Remove user medal success!');
     }

@@ -79,7 +79,7 @@ class DashboardRepository extends BaseRepository
         $result[$name] = [
             'name' => $name,
             'text' => \App\Support\Locale::trans("dashboard.system_info.{$name}", [], null),
-            'value' =>  function_exists('sys_getloadavg') ? implode(', ', sys_getloadavg()) : 'N/A',
+            'value' =>  function_exists('sys_getloadavg') ? (($load = sys_getloadavg()) === false ? 'N/A' : implode(', ', $load)) : 'N/A',
         ];
         return $result;
     }
@@ -259,14 +259,14 @@ class DashboardRepository extends BaseRepository
         $result[$name] = [
             'name' => $name,
             'text' => \App\Support\Locale::trans("dashboard.torrent.{$name}", [], null),
-            'value' => number_format(Peer::query()->selectRaw('count(distinct(userid)) as counts')->first()->counts),
+            'value' => number_format((float) (($peer = Peer::query()->selectRaw('count(distinct(userid)) as counts')->first()) ? (int) $peer->counts : 0)),
         ];
 
         $name = 'total_torrent_size';
         $result[$name] = [
             'name' => $name,
             'text' => \App\Support\Locale::trans("dashboard.torrent.{$name}", [], null),
-            'value' => \App\Support\Format::size(Torrent::query()->sum('size')),
+            'value' => \App\Support\Format::size((float) (Torrent::query()->sum('size') ?? 0)),
         ];
 
         $total_uploaded_byte = User::query()->sum('uploaded');
@@ -277,19 +277,19 @@ class DashboardRepository extends BaseRepository
         $result[$name] = [
             'name' => $name,
             'text' => \App\Support\Locale::trans("dashboard.torrent.{$name}", [], null),
-            'value' => \App\Support\Format::size($total_uploaded_byte),
+            'value' => \App\Support\Format::size((float) $total_uploaded_byte),
         ];
         $name = 'total_downloaded';
         $result[$name] = [
             'name' => $name,
             'text' => \App\Support\Locale::trans("dashboard.torrent.{$name}", [], null),
-            'value' => \App\Support\Format::size($total_downloaded_byte),
+            'value' => \App\Support\Format::size((float) $total_downloaded_byte),
         ];
         $name = 'total_uploaded_downloaded';
         $result[$name] = [
             'name' => $name,
             'text' => \App\Support\Locale::trans("dashboard.torrent.{$name}", [], null),
-            'value' => \App\Support\Format::size($total_byte),
+            'value' => \App\Support\Format::size((float) $total_byte),
         ];
 
         return $result;

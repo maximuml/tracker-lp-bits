@@ -19,10 +19,10 @@ class SyncTorrentToMeilisearch implements ShouldQueue
     /**
      * Handle the event.
      */
-    public function handle($event): void
+    public function handle(object $event): void
     {
-        $torrent = $event->model ?? null;
-        if (!$torrent instanceof Torrent) {
+        $torrent = property_exists($event, 'model') && $event->model instanceof Torrent ? $event->model : null;
+        if (! $torrent instanceof Torrent) {
             \App\Support\Logger::writeWithContext((string) ("event: " . get_class($event) . " no torrent model"), (string) 'error', (bool) false);
             return;
         }

@@ -2,6 +2,7 @@
 
 namespace App\Support;
 
+use App\Support\Cache\LegacyRedisCache;
 use App\Support\Config\SiteConfig;
 use Illuminate\Http\Request;
 
@@ -25,7 +26,7 @@ final class NexusContext
     /** @var array<string, string> */
     public array $langShoutbox = [];
 
-    public ?object $cache = null;
+    public ?LegacyRedisCache $cache = null;
 
     public string $bonusTweak = '';
 
@@ -179,13 +180,13 @@ final class NexusContext
         return $this->langShoutbox;
     }
 
-    public function setCache(?object $cache): void
+    public function setCache(?LegacyRedisCache $cache): void
     {
         $this->cache = $cache;
         $this->globals['Cache'] = $cache;
     }
 
-    public function getCache(): ?object
+    public function getCache(): ?LegacyRedisCache
     {
         return $this->cache;
     }

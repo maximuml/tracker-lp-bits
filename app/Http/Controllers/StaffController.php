@@ -92,7 +92,7 @@ class StaffController extends LegacyController
             return $this->legacyAbortResponse('Error', 'Bad user ID or class ID.');
         }
         if (UserDisplay::currentClass() <= $class) {
-            return $this->legacyAbortResponse('Error', "You have no permission to change user's class to " . UserClass::name($class, false, false, true) . '. BTW, how do you get here?');
+            return $this->legacyAbortResponse('Error', "You have no permission to change user's class to " . UserClass::name((int) $class, false, false, true) . '. BTW, how do you get here?');
         }
 
         $arr = ModtaskRepository::getUserArray($userId);
@@ -423,7 +423,7 @@ class StaffController extends LegacyController
                 ->where('fm.userid', $userId)
                 ->get(['f.id', 'f.name']);
             foreach ($forumRows as $forumRow) {
-                $forums[] = '<a href=forums.php?action=viewforum&forumid=' . (int) $forumRow['id'] . '>' . htmlspecialchars((string) $forumRow['name']) . '</a>';
+                $forums[] = '<a href=forums.php?action=viewforum&forumid=' . (int) $forumRow->id . '>' . htmlspecialchars($forumRow->name) . '</a>';
             }
             $base = $buildUserRow($arr, '');
             $base['forums_html'] = implode(', ', $forums);

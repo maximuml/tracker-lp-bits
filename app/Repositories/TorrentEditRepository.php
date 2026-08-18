@@ -75,7 +75,9 @@ class TorrentEditRepository extends BaseRepository
             }
         }
 
+        /** @var array<string, mixed> $updateset */
         $updateset = [];
+        /** @var array<string, mixed> $extraUpdate */
         $extraUpdate = [];
 
         $updateset['anonymous'] = $request->input('anonymous') ? 'yes' : 'no';
@@ -114,7 +116,8 @@ class TorrentEditRepository extends BaseRepository
                 $promotionUntil = null;
             } elseif ($request->input('promotion_time_type') == 2) {
                 $promotionUntil = $request->input('promotionuntil');
-                if (!empty($promotionUntil) && strtotime($torrentOld->added) <= strtotime($promotionUntil)) {
+                $addedTime = $torrentOld->added instanceof \Carbon\Carbon ? strtotime($torrentOld->added->toDateTimeString()) : 0;
+                if (!empty($promotionUntil) && $addedTime !== false && $addedTime <= strtotime((string) $promotionUntil)) {
                     $promotionTimeType = 2;
                 } else {
                     $promotionTimeType = 0;
@@ -152,6 +155,7 @@ class TorrentEditRepository extends BaseRepository
         $updateset['cover'] = $this->uploadRepository->getCover($request);
 
         $torrentNew = DB::transaction(function () use ($id, $updateset, $extraUpdate, $request, $category, $tagIdArr) {
+            /** @var array<string, mixed> $updateset */
             Torrent::query()->where('id', $id)->update($updateset);
             $torrentNew = Torrent::query()->findOrFail($id);
             $torrentNew->extra()->updateOrCreate(['torrent_id' => $id], $extraUpdate);

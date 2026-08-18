@@ -186,7 +186,15 @@ final class Promotion
             $config = self::PROMOTION_CONFIG[$promotion];
             $expire = (int) ($expires[$config['expire']] ?? 0);
             if ($showTimeLeft && (($expire && $promotionTimeType == 0) || $promotionTimeType == 2)) {
-                $futureTime = $promotionTimeType == 2 ? strtotime($promotionUntil) : strtotime($added) + $expire * 86400;
+                if ($promotionTimeType == 2) {
+                    $futureTime = strtotime($promotionUntil);
+                    if ($futureTime === false) {
+                        $futureTime = null;
+                    }
+                } else {
+                    $baseTime = strtotime($added);
+                    $futureTime = ($baseTime === false ? 0 : $baseTime) + $expire * 86400;
+                }
                 $timeout = \App\Support\Time::format(date('Y-m-d H:i:s', $futureTime), false, false, true, false, true);
                 if ($timeout) {
                     $text = $labels[$config['text']] ?? '';

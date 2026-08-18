@@ -68,8 +68,10 @@ final class Logger
             $log,
             PHP_EOL
         );
-        fwrite($fd, $content);
-        fclose($fd);
+        if (is_resource($fd)) {
+            fwrite($fd, $content);
+            fclose($fd);
+        }
         if ($echo) {
             echo $content . PHP_EOL;
         }

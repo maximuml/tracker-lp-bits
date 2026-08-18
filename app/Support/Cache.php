@@ -123,7 +123,9 @@ final class Cache
         if (self::isFresh($cachefile, $cachetime)) {
             include $cachefile;
             if ($endpage) {
-                echo '<p align="center"><font class="small">' . ($lang['text_page_last_updated'] ?? '') . date('Y-m-d H:i:s', filemtime($cachefile)) . '</font></p>';
+                $cacheMtime = filemtime($cachefile);
+            $cacheMtime = $cacheMtime === false ? null : $cacheMtime;
+            echo '<p align="center"><font class="small">' . ($lang['text_page_last_updated'] ?? '') . date('Y-m-d H:i:s', $cacheMtime) . '</font></p>';
                 \App\Support\Frame::mainFrameClose();
                 \App\Support\Html::stdfoot();
                 exit;

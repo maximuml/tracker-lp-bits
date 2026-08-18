@@ -28,7 +28,6 @@ final class PeerLifecycle
     /** @var array<string, mixed> */
     private array $params;
     private string $peerId = '';
-    private string $infoHash = '';
     private string $ip = '';
     private ?string $ipv4 = null;
     private ?string $ipv6 = null;
@@ -48,6 +47,10 @@ final class PeerLifecycle
     /** @var array<string, mixed> */
     private array $torrentUpdate = [];
 
+    /**
+     * @param array<string, mixed> $torrent
+     * @param array<string, mixed> $user
+     */
     public function __construct(AnnounceRequestDto $dto, array $torrent, array $user, bool $isIPSeedBox, string $dt)
     {
         $this->dto = $dto;
@@ -58,7 +61,6 @@ final class PeerLifecycle
 
         $this->params = $dto->toParams();
         $this->peerId = $dto->peerId->toBinary();
-        $this->infoHash = $dto->infoHash->toBinary();
         $this->ip = $dto->ip;
         $this->ipv4 = $dto->ipv4;
         $this->ipv6 = $dto->ipv6;
@@ -70,6 +72,9 @@ final class PeerLifecycle
         $this->torrentId = (int) ($torrent['id'] ?? 0);
     }
 
+    /**
+     * @param array<string, mixed>|false $snatchInfo
+     */
     public function setSnatchInfo(array|false $snatchInfo): void
     {
         $this->snatchInfo = $snatchInfo;
@@ -89,6 +94,9 @@ final class PeerLifecycle
     }
 
 
+    /**
+     * @return array<string, mixed>|null
+     */
     public function findSelf(): ?array
     {
         $selfRecord = NexusDB::table('peers')
@@ -237,7 +245,7 @@ final class PeerLifecycle
             'uploaded'    => (int) $this->params['uploaded'],
             'downloaded'  => (int) $this->params['downloaded'],
             'to_go'       => $this->left,
-            'prev_action' => $this->self['last_action'],
+            'prev_action' => (string) ($this->self['last_action'] ?? ''),
             'last_action' => $this->dt,
             'seeder'      => $this->seeder,
             'agent'       => $this->agent,
@@ -255,10 +263,10 @@ final class PeerLifecycle
 
         $peerUpdate = array_merge($peerUpdate, $peerIPUpdate);
 
-        $peerAffected = NexusDB::table('peers')->where('id', (int) $this->self['id'])->update($peerUpdate);
+        $peerAffected = NexusDB::table('peers')->where('id', (int) ($this->self['id'] ?? 0))->update($peerUpdate);
 
         if ($peerAffected > 0) {
-            if ($this->seeder !== $this->self['seeder']) {
+            if ($this->seeder !== (string) ($this->self['seeder'] ?? 'no')) {
                 if ($this->seeder === 'yes') {
                     $this->torrentUpdate['seeders'] = NexusDB::raw('seeders + 1');
                     $this->torrentUpdate['leechers'] = NexusDB::raw('leechers - 1');
@@ -280,10 +288,10 @@ final class PeerLifecycle
     {
         $snatchUpdate = $this->buildSnatchUpdate($upthis, $downthis, $snatchTimeColumn, $snatchTimeIncrement, $leechTimeNoSeederIncrement);
 
-        $deleted = NexusDB::table('peers')->where('id', (int) $this->self['id'])->delete();
+        $deleted = NexusDB::table('peers')->where('id', (int) ($this->self['id'] ?? 0))->delete();
         if ($deleted) {
-            $this->torrentUpdate[$this->self['seeder'] === 'yes' ? 'seeders' : 'leechers'] = NexusDB::raw(
-                $this->self['seeder'] === 'yes' ? 'seeders - 1' : 'leechers - 1'
+            $this->torrentUpdate[((string) ($this->self['seeder'] ?? 'no')) === 'yes' ? 'seeders' : 'leechers'] = NexusDB::raw(
+                ((string) ($this->self['seeder'] ?? 'no')) === 'yes' ? 'seeders - 1' : 'leechers - 1'
             );
 
             if (!empty($this->snatchInfo)) {
@@ -306,7 +314,7 @@ final class PeerLifecycle
             return;
         }
 
-        if (\App\Support\Config\SiteConfig::current()->main->waitSystem() && is_array($this->torrent)) {
+        if (\App\Support\Config\SiteConfig::current()->main->waitSystem()) {
             $elapsed = TIMENOW - (int) ($this->torrent['ts'] ?? 0);
             $wait = match (true) {
                 $ratio < 0.4  => 24,
@@ -350,6 +358,9 @@ final class PeerLifecycle
     }
 
 
+    /**
+     * @return array<string, mixed>
+     */
     private function buildSnatchUpdate(int $upthis, int $downthis, string $snatchTimeColumn, int $snatchTimeIncrement, int $leechTimeNoSeederIncrement): array
     {
         $snatchUpdate = [

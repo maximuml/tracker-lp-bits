@@ -24,9 +24,9 @@ use Illuminate\Http\Response;
 final class ForumService
 {
     /**
-     * @return array<string, mixed>|RedirectResponse
+     * @return array<string, mixed>|Response|RedirectResponse
      */
-    public function legacy(Request $request): array|RedirectResponse
+    public function legacy(Request $request): array|Response|RedirectResponse
     {
         $action = (string) $request->input('action', $request->query('action', ''));
 
@@ -85,7 +85,7 @@ final class ForumService
     private function cacheDelete(string $key): void
     {
         $cache = SupportContext::getCache();
-        if ($cache !== null && method_exists($cache, 'delete_value')) {
+        if ($cache !== null) {
             $cache->delete_value($key);
         }
     }
@@ -93,7 +93,7 @@ final class ForumService
     private function cacheGet(string $key): mixed
     {
         $cache = SupportContext::getCache();
-        if ($cache !== null && method_exists($cache, 'get_value')) {
+        if ($cache !== null) {
             return $cache->get_value($key);
         }
 
@@ -219,6 +219,10 @@ final class ForumService
                 )
             ) {
                 LegacyResponse::permissionDenied();
+            }
+
+            if ($postInfo === null || $topicInfo === null) {
+                return $this->redirectTo('/forums.php');
             }
 
             if ($hassubject) {
@@ -372,7 +376,7 @@ final class ForumService
         }
 
         $postCount = ForumRepository::countTopicPosts($topicid);
-        ForumRepository::moveTopic($topicid, $forumid, $postCount, $oldForumid);
+        ForumRepository::moveTopic($topicid, $forumid, $postCount, (int) $oldForumid);
 
         if ($oldForumid !== $forumid) {
             $todayDate = date('Y-m-d');
@@ -449,9 +453,10 @@ final class ForumService
         if ($post === null) {
             LegacyResponse::abort($lang['std_error'] ?? 'Error', $lang['std_post_not_found'] ?? 'Post not found.');
         }
+        assert($post !== null);
 
-        $topicid = (int) $post['topicid'];
-        $targetUserid = (int) $post['userid'];
+        $topicid = $post['topicid'];
+        $targetUserid = $post['userid'];
         $prevPostId = ForumRepository::getPreviousPostId($topicid, $postid);
 
         if ($prevPostId === null || $prevPostId === 0) {

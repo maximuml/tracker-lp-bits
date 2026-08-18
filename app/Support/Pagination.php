@@ -168,8 +168,10 @@ final class Pagination
     {
         $pages = (int) ceil($count / $rpp);
         $rawPage = SupportContext::getQuery($pagename);
-        if (! is_scalar($rawPage)) {
+        if (! is_scalar($rawPage) || is_bool($rawPage)) {
             $rawPage = null;
+        } elseif (is_float($rawPage)) {
+            $rawPage = (int) $rawPage;
         }
         $page = self::resolvePage($rawPage, $count, $rpp, ! empty($opts['lastpagedefault']));
 

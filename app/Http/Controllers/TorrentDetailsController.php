@@ -63,6 +63,9 @@ class TorrentDetailsController extends Controller
         }
 
         $row = \App\Support\Hooks::applyFilter('torrent_detail', $row);
+        if (! is_array($row)) {
+            abort(404);
+        }
 
         $currentUser = SupportContext::getUser() ?? $user->toLegacyArray();
         SupportContext::setUser($currentUser);
@@ -195,10 +198,11 @@ class TorrentDetailsController extends Controller
 
         $technicalInfoResult = null;
         if (\App\Support\Config\SiteConfig::current()->main->enableTechnicalInfo() && ! empty($row['technical_info'])) {
-            $technicalData = Strings::escapeHtml((string) $row['technical_info']);
+            $escaped = Strings::escapeHtml((string) $row['technical_info']);
+            $technicalData = is_string($escaped) ? $escaped : '';
             $isBdInfo = false;
             if (! empty($technicalData)) {
-                $firstLine = strtok($technicalData, "\n");
+                $firstLine = (string) strtok($technicalData, "\n");
                 if (
                     strpos($firstLine, 'DISC INFO') !== false
                     || strpos($firstLine, 'Disc Title') !== false

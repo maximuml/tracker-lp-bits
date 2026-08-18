@@ -35,6 +35,7 @@ class TagRepository extends BaseRepository
      */
     public function store(array $params)
     {
+        /** @var array<string, mixed> $params */
         $model = Tag::query()->create($params);
         return $model;
     }
@@ -46,7 +47,8 @@ class TagRepository extends BaseRepository
      */
     public function update(array $params, $id)
     {
-        $model = Tag::query()->findOrFail($id);
+        $model = Tag::query()->findOrFail((int) $id);
+        /** @var array<string, mixed> $params */
         $model->update($params);
         return $model;
     }
@@ -57,7 +59,7 @@ class TagRepository extends BaseRepository
      */
     public function getDetail($id)
     {
-        $model = Tag::query()->findOrFail($id);
+        $model = Tag::query()->findOrFail((int) $id);
         return $model;
     }
 
@@ -67,7 +69,7 @@ class TagRepository extends BaseRepository
      */
     public function delete($id)
     {
-        $model = Tag::query()->findOrFail($id);
+        $model = Tag::query()->findOrFail((int) $id);
         $result = $model->delete();
         return $result;
     }

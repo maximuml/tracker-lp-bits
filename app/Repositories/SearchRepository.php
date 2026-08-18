@@ -55,11 +55,7 @@ class SearchRepository extends BaseRepository
 
 
 
-    /** @var  array<int|string, mixed> */
-    /** @var  array<int|string, mixed> */
-    /** @var  array<int|string, mixed> */
-    /** @var  array<int|string, mixed> */
-    /** @var  array<int|string, mixed> */
+    /** @var  array{index: string, body: array<string, mixed>} */
     private array $indexSetting = [
         'index' => self::INDEX_NAME,
         'body' => [
@@ -101,11 +97,7 @@ class SearchRepository extends BaseRepository
     ];
 
     //cat401=1&source1=1&medium1=1&codec1=1&audiocodec1=1&standard1=1&processing1=1&incldead=1&spstate=2&inclbookmarked=1&search=tr&search_area=1&search_mode=1
-    /** @var  array<int|string, mixed> */
-    /** @var  array<int|string, mixed> */
-    /** @var  array<int|string, mixed> */
-    /** @var  array<int|string, mixed> */
-    /** @var  array<int|string, mixed> */
+    /** @var  array<string, string> */
     private static array $queryFieldToTorrentFieldMaps = [
         'cat' => 'category',
         'source' => 'source',
@@ -116,11 +108,7 @@ class SearchRepository extends BaseRepository
         'processing' => 'processing',
     ];
 
-    /** @var  array<int|string, mixed> */
-    /** @var  array<int|string, mixed> */
-    /** @var  array<int|string, mixed> */
-    /** @var  array<int|string, mixed> */
-    /** @var  array<int|string, mixed> */
+    /** @var  array<int, string> */
     private static array $sortFieldMaps = [
         '1' => 'name',
         '2' => 'numfiles',
@@ -501,6 +489,9 @@ class SearchRepository extends BaseRepository
      */
     private function isEsResponseError($esResponse)
     {
+        if ($esResponse instanceof \Elastic\Elasticsearch\Response\Elasticsearch) {
+            $esResponse = $esResponse->asArray();
+        }
         if (isset($esResponse['error'])) {
             return true;
         }
@@ -549,8 +540,8 @@ class SearchRepository extends BaseRepository
                 }
             } else {
                 //get user setting
-                $pattern = sprintf("/\[%s([\d]+)\]/", substr($queryField, 0, 3));
-                if (preg_match($pattern, $userSetting, $matches)) {
+                $pattern = sprintf("/\[%s([\d]+)\]/", substr((string) $queryField, 0, 3));
+                if (preg_match($pattern, (string) $userSetting, $matches)) {
                     if (count($matches) == 2 && !empty($matches[1])) {
                         $match = $matches[1];
                         $mustBoolShould[$torrentField][] = ['match' => [$torrentField => $match]];
@@ -564,8 +555,8 @@ class SearchRepository extends BaseRepository
         if (isset($params['incldead'])) {
             $includeDead = (int)$params['incldead'];
             \App\Support\Logger::writeWithContext((string) "maybe get must for visible from params", (string) 'info', (bool) false);
-        } elseif (preg_match("/\[incldead=([\d]+)\]/", $userSetting, $matches)) {
-            $includeDead = $matches[1];
+        } elseif (preg_match("/\[incldead=([\d]+)\]/", (string) $userSetting, $matches)) {
+            $includeDead = (int) $matches[1];
             \App\Support\Logger::writeWithContext((string) "maybe get must for visible from user setting", (string) 'info', (bool) false);
         }
         if ($includeDead == 1) {
@@ -583,8 +574,8 @@ class SearchRepository extends BaseRepository
         if (isset($params['inclbookmarked'])) {
             $includeBookmarked = (int)$params['inclbookmarked'];
             \App\Support\Logger::writeWithContext((string) "maybe get must or must_not for has_child.bookmark from params", (string) 'info', (bool) false);
-        } elseif (preg_match("/\[inclbookmarked=([\d]+)\]/", $userSetting, $matches)) {
-            $includeBookmarked = $matches[1];
+        } elseif (preg_match("/\[inclbookmarked=([\d]+)\]/", (string) $userSetting, $matches)) {
+            $includeBookmarked = (int) $matches[1];
             \App\Support\Logger::writeWithContext((string) "maybe get must or must_not for has_child.bookmark from user setting", (string) 'info', (bool) false);
         }
         if ($includeBookmarked == 1) {
@@ -602,8 +593,8 @@ class SearchRepository extends BaseRepository
         if (isset($params['spstate'])) {
             $spState = (int)$params['spstate'];
             \App\Support\Logger::writeWithContext((string) "maybe get must for spstate from params", (string) 'info', (bool) false);
-        } elseif (preg_match("/\[spstate=([\d]+)\]/", $userSetting, $matches)) {
-            $spState = $matches[1];
+        } elseif (preg_match("/\[spstate=([\d]+)\]/", (string) $userSetting, $matches)) {
+            $spState = (int) $matches[1];
             \App\Support\Logger::writeWithContext((string) "maybe get must for spstate from user setting", (string) 'info', (bool) false);
         }
         if ($spState > 0) {
@@ -621,9 +612,12 @@ class SearchRepository extends BaseRepository
             $searchMode = isset($params['search_mode']) && isset(self::SEARCH_MODES[$params['search_mode']]) ? $params['search_mode'] : self::SEARCH_MODE_AND;
             if (in_array($searchMode, [self::SEARCH_MODE_AND, self::SEARCH_MODE_OR])) {
                 //and, or
-                $keywordsArr = preg_split("/[\.\s]+/", trim($params['search']));
+                $keywordsArr = preg_split("/[\.\s]+/", trim((string) $params['search']));
             } else {
-                $keywordsArr = [trim($params['search'])];
+                $keywordsArr = [trim((string) $params['search'])];
+            }
+            if ($keywordsArr === false) {
+                $keywordsArr = [];
             }
             $keywordsArr = array_slice($keywordsArr, 0, 10);
             $searchArea = isset($params['search_area']) && isset(self::SEARCH_AREAS[$params['search_area']]) ? $params['search_area'] : self::SEARCH_AREA_TITLE;
@@ -736,6 +730,14 @@ class SearchRepository extends BaseRepository
             'body' => $query,
         ];
         $response = $this->getEs()->search($esParams);
+        if (!$response instanceof \Elastic\Elasticsearch\Response\Elasticsearch) {
+            \App\Support\Logger::writeWithContext((string) "ES search response is not Elasticsearch", (string) 'error', (bool) false);
+            return [
+                'total' => 0,
+                'data' => [],
+            ];
+        }
+        $response = $response->asArray();
         $result = [
             'total' => 0,
             'data' => [],
@@ -790,7 +792,7 @@ class SearchRepository extends BaseRepository
             \App\Support\Logger::writeWithContext((string) ("{$log}, fail: " . \App\Support\Json::encode($result)), (string) 'error', (bool) false);
             return false;
         }
-        if ($result['found'] === false) {
+        if (!is_array($result) || !($result['found'] ?? false)) {
             \App\Support\Logger::writeWithContext((string) "{$log}, not exists, do insert", (string) 'info', (bool) false);
             return $this->addTorrent($id);
         }
@@ -834,10 +836,10 @@ class SearchRepository extends BaseRepository
     }
 
     /**
-     * @param  mixed  $id
-     * @return  callable|bool|array<int|string, mixed>
+     * @param  int  $id
+     * @return  array<int|string, mixed>|bool
      */
-    public function getTorrent($id): callable|bool|array
+    public function getTorrent(int $id): array|bool
     {
         if (!$this->enabled) {
             return false;
@@ -846,7 +848,11 @@ class SearchRepository extends BaseRepository
             'index' => self::INDEX_NAME,
             'id' => $this->getTorrentId($id),
         ];
-        return $this->getEs()->get($params);
+        $response = $this->getEs()->get($params);
+        if (!$response instanceof \Elastic\Elasticsearch\Response\Elasticsearch) {
+            return false;
+        }
+        return $response->asArray();
     }
 
     /** @param  int  $id */
@@ -961,9 +967,13 @@ class SearchRepository extends BaseRepository
                 'torrent' => function ($query) {$query->select(['id', 'owner']);}
             ])->findOrFail((int)$bookmark);
         }
+        $torrent = $bookmark->torrent;
+        if (! $torrent) {
+            return false;
+        }
         $log = "[ADD_BOOKMARK]: " . $bookmark->toJson();
         $bulk = ['body' => []];
-        $body = $this->buildBookmarkBody($bookmark->torrent, $bookmark, true);
+        $body = $this->buildBookmarkBody($torrent, $bookmark, true);
         $bulk['body'][] = ['index' => $body['index']];
         $bulk['body'][] = $body['body'];
         $result = $this->getEs()->bulk($bulk);

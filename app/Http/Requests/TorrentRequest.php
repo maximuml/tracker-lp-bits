@@ -13,7 +13,7 @@ class TorrentRequest extends FormRequest
     public function authorize()
     {
         $user = $this->user();
-        return $user->uploadpos == "yes";
+        return $user instanceof \App\Models\User && $user->uploadpos == "yes";
     }
 
     /**

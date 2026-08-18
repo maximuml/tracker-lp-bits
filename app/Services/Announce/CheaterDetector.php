@@ -52,6 +52,7 @@ final class CheaterDetector
     }
 
     /**
+     * @param array<string, mixed>|null $self
      * @param array<string, mixed> $user
      * @param array<string, mixed> $torrent
      */
@@ -65,7 +66,7 @@ final class CheaterDetector
         int $torrentId,
         string $dt,
     ): void {
-        if ($self === null || $self['announcetime'] <= 10) {
+        if ($self === null || (int) ($self['announcetime'] ?? 0) <= 10) {
             return;
         }
 

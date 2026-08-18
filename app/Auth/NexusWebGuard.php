@@ -27,10 +27,10 @@ class NexusWebGuard implements StatefulGuard
      * Create a new authentication guard.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \Illuminate\Contracts\Auth\UserProvider|null  $provider
+     * @param  \Illuminate\Contracts\Auth\UserProvider  $provider
      * @return void
      */
-    public function __construct(Request $request, ?UserProvider $provider = null)
+    public function __construct(Request $request, UserProvider $provider)
     {
         $this->request = $request;
         $this->provider = $provider;
@@ -47,7 +47,7 @@ class NexusWebGuard implements StatefulGuard
             return $this->user;
         }
 
-        $credentials = $this->request->cookie();
+        $credentials = $this->request->cookies->all();
 
         if ($this->validate($credentials)) {
             $user = $this->provider->retrieveByCredentials($credentials);
@@ -64,10 +64,9 @@ class NexusWebGuard implements StatefulGuard
     /**
      * Validate a user's credentials.
      *
-     * @param  array  $credentials
-     * @return bool
+     * @param array<string, mixed> $credentials
      */
-    public function validate(array $credentials = [])
+    public function validate(array $credentials = []): bool
     {
         $required = ['c_secure_pass'];
         foreach ($required as $value) {
@@ -78,7 +77,10 @@ class NexusWebGuard implements StatefulGuard
         return true;
     }
 
-    public function attempt(array $credentials = [], $remember = false)
+    /**
+     * @param array<string, mixed> $credentials
+     */
+    public function attempt(array $credentials = [], $remember = false): bool
     {
         $username = trim((string) ($credentials['username'] ?? ''));
         $password = (string) ($credentials['password'] ?? '');
@@ -108,7 +110,10 @@ class NexusWebGuard implements StatefulGuard
         return true;
     }
 
-    public function once(array $credentials = [])
+    /**
+     * @param array<string, mixed> $credentials
+     */
+    public function once(array $credentials = []): bool
     {
         $username = trim((string) ($credentials['username'] ?? ''));
         $password = (string) ($credentials['password'] ?? '');
@@ -138,7 +143,7 @@ class NexusWebGuard implements StatefulGuard
         return true;
     }
 
-    public function login(Authenticatable $user, $remember = false)
+    public function login(Authenticatable $user, $remember = false): void
     {
         if (! $user instanceof User) {
             return;
@@ -152,7 +157,7 @@ class NexusWebGuard implements StatefulGuard
         SupportContext::setUser($user->toArray());
     }
 
-    public function loginUsingId($id, $remember = false)
+    public function loginUsingId($id, $remember = false): Authenticatable|false
     {
         $user = User::find($id);
 
@@ -162,10 +167,10 @@ class NexusWebGuard implements StatefulGuard
 
         $this->login($user, $remember);
 
-        return true;
+        return $user;
     }
 
-    public function onceUsingId($id)
+    public function onceUsingId($id): Authenticatable|false
     {
         $user = User::find($id);
 
@@ -175,10 +180,10 @@ class NexusWebGuard implements StatefulGuard
 
         $this->setUser($user);
 
-        return true;
+        return $user;
     }
 
-    public function viaRemember()
+    public function viaRemember(): bool
     {
         return false;
     }

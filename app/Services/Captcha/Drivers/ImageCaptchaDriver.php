@@ -8,8 +8,12 @@ use App\Services\Captcha\Exceptions\CaptchaValidationException;
 
 class ImageCaptchaDriver implements CaptchaDriverInterface
 {
+    /** @var array<string, mixed> */
     protected array $config;
 
+    /**
+     * @param array<string, mixed> $config
+     */
     public function __construct(array $config = [])
     {
         $this->config = $config;
@@ -20,6 +24,9 @@ class ImageCaptchaDriver implements CaptchaDriverInterface
         return true;
     }
 
+    /**
+     * @param array<string, mixed> $context
+     */
     public function render(array $context = []): string
     {
         $labels = $context['labels'] ?? [];
@@ -28,7 +35,7 @@ class ImageCaptchaDriver implements CaptchaDriverInterface
         $secret = $context['secret'] ?? '';
 
         $imagehash = $this->issue();
-        $imageUrl = htmlspecialchars(sprintf('image.php?action=regimage&imagehash=%s&secret=%s', $imagehash, $secret ?? ''), ENT_QUOTES, 'UTF-8');
+        $imageUrl = htmlspecialchars(sprintf('image.php?action=regimage&imagehash=%s&secret=%s', $imagehash, $secret), ENT_QUOTES, 'UTF-8');
 
         return implode("\n", [
             sprintf('<tr><td class="rowhead">%s</td><td align="left"><img src="%s" border="0" alt="CAPTCHA" /></td></tr>', htmlspecialchars($imageLabel, ENT_QUOTES, 'UTF-8'), $imageUrl),
@@ -36,6 +43,10 @@ class ImageCaptchaDriver implements CaptchaDriverInterface
         ]);
     }
 
+    /**
+     * @param array<string, mixed> $payload
+     * @param array<string, mixed> $context
+     */
     public function verify(array $payload, array $context = []): bool
     {
         $imagehash = trim((string) ($payload['imagehash'] ?? ''));
@@ -74,9 +85,9 @@ class ImageCaptchaDriver implements CaptchaDriverInterface
 
     public function outputImage(string $imagehash): void
     {
-        $imagestring = RegImage::query()
+        $imagestring = (string) (RegImage::query()
             ->where('imagehash', $imagehash)
-            ->value('imagestring') ?? '';
+            ->value('imagestring') ?? '');
 
         if ($imagestring === '') {
             $this->renderFallback();
@@ -104,6 +115,10 @@ class ImageCaptchaDriver implements CaptchaDriverInterface
         }
 
         $im = imagecreatefrompng($imagePath);
+        if ($im === false) {
+            $this->renderFallback();
+            return;
+        }
         $imgheight = imagesy($im);
         $imgwidth = imagesx($im);
         $textposh = (int) floor(($imgwidth - $textwidth) / 2);
@@ -111,10 +126,17 @@ class ImageCaptchaDriver implements CaptchaDriverInterface
 
         $dots = (int) floor($imgheight * $imgwidth / 35);
         for ($i = 1; $i <= $dots; $i++) {
-            imagesetpixel($im, rand(0, $imgwidth - 1), rand(0, $imgheight - 1), imagecolorallocate($im, rand(0, 255), rand(0, 255), rand(0, 255)));
+            $color = imagecolorallocate($im, rand(0, 255), rand(0, 255), rand(0, 255));
+            if ($color === false) {
+                continue;
+            }
+            imagesetpixel($im, rand(0, $imgwidth - 1), rand(0, $imgheight - 1), $color);
         }
 
         $textcolor = imagecolorallocate($im, 0, 0, 0);
+        if ($textcolor === false) {
+            $textcolor = 0;
+        }
         imagestring($im, 5, $textposh, $textposv, $characters, $textcolor);
 
         header('Content-type: image/png');

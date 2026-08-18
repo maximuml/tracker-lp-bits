@@ -36,6 +36,9 @@ final readonly class AnnounceRequestDto
         public string $userAgent,
     ) {}
 
+    /**
+     * @param  array<string, mixed>  $params
+     */
     public static function fromRequest(Request $request, array $params): self
     {
         SupportContext::fromRequest($request);

@@ -50,8 +50,8 @@ class AppServiceProvider extends ServiceProvider
         DB::connection(config('database.default'))->enableQueryLog();
 
         Model::preventLazyLoading(! app()->isProduction());
-        $forceScheme = strtolower(env('FORCE_SCHEME'));
-        if (env('APP_ENV') == "production" && in_array($forceScheme, ['https', 'http'])) {
+        $forceScheme = strtolower((string) \App\Support\Env::get('FORCE_SCHEME', ''));
+        if (app()->environment('production') && in_array($forceScheme, ['https', 'http'], true)) {
             URL::forceScheme($forceScheme);
         }
         $this->customScheduleTask();

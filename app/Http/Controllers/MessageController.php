@@ -2,18 +2,22 @@
 
 namespace App\Http\Controllers;
 
+use App\DTOs\Message\ListUnreadDto;
+use App\DTOs\Message\MessageListDto;
+use App\DTOs\Message\StoreMessageDto;
+use App\DTOs\Message\UpdateMessageDto;
 use App\Http\Resources\MessageResource;
 use App\Models\Message;
 use App\Models\User;
 use App\Repositories\MessageRepository;
 use App\Services\Legacy\MessageService;
+use App\Support\SupportContext;
+use App\Support\UserDisplay;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
-use App\Support\SupportContext;
-use App\Support\UserDisplay;
 
 class MessageController extends LegacyController
 {
@@ -117,27 +121,23 @@ class MessageController extends LegacyController
      */
     public function index(Request $request): array
     {
-        $userId = (int) Auth::id();
-        $mailbox = (int) $request->input('mailbox', 0);
-        $unread = $request->input('unread');
-        if ($unread !== null && ! in_array((string) $unread, ['yes', 'no'], true)) {
-            $unread = null;
-        }
+        $dto = MessageListDto::fromRequest($request, (int) Auth::id());
 
-        $keyword = (string) $request->input('keyword', '');
-        $place = (string) $request->input('place', '');
-
-        $perPage = max(1, min(100, (int) $request->input('per_page', 20)));
-        $page = max(1, (int) $request->input('page', 1));
-        $offset = ($page - 1) * $perPage;
-
-        $result = MessageRepository::getMailboxMessages($userId, $mailbox, $keyword, $place, $unread === null ? null : (string) $unread, $offset, $perPage);
+        $result = MessageRepository::getMailboxMessages(
+            $dto->userId,
+            $dto->mailbox,
+            $dto->keyword,
+            $dto->place,
+            $dto->unread,
+            $dto->offset(),
+            $dto->perPage
+        );
 
         $paginator = new \Illuminate\Pagination\LengthAwarePaginator(
             $result['messages'],
             $result['count'],
-            $perPage,
-            $page,
+            $dto->perPage,
+            $dto->page,
             ['path' => $request->url()]
         );
 
@@ -149,19 +149,7 @@ class MessageController extends LegacyController
      */
     public function store(Request $request): array
     {
-        $validated = $request->validate([
-            'receiver' => 'required|integer|exists:users,id',
-            'subject' => 'required|string|max:255',
-            'msg' => 'required|string',
-        ]);
-
-        $validated['sender'] = Auth::id();
-        $validated['added'] = now();
-        $validated['unread'] = 'yes';
-        $validated['location'] = 0;
-        $validated['saved'] = 'no';
-
-        $message = $this->repository->store($validated);
+        $message = $this->repository->store(StoreMessageDto::fromRequest($request));
         $message->load('send_user');
 
         return $this->success(new MessageResource($message), 'Message sent');
@@ -202,19 +190,16 @@ class MessageController extends LegacyController
             abort(404);
         }
 
-        $validated = $request->validate([
-            'unread' => 'sometimes|in:yes,no',
-            'location' => 'sometimes|integer',
-        ]);
+        $dto = UpdateMessageDto::fromRequest($request);
 
-        if (isset($validated['unread'])) {
+        if ($dto->unread !== null) {
             Message::query()->where('id', (int) $message->id)->where(function ($q) use ($userId) {
                 $q->where('receiver', $userId)->orWhere('sender', $userId);
-            })->update(['unread' => (string) $validated['unread']]);
+            })->update(['unread' => $dto->unread]);
         }
 
-        if (isset($validated['location'])) {
-            MessageRepository::moveMessages([(int) $message->id], $userId, (int) $validated['location']);
+        if ($dto->location !== null) {
+            MessageRepository::moveMessages([(int) $message->id], $userId, $dto->location);
         }
 
         $message->refresh()->load('send_user');
@@ -241,14 +226,14 @@ class MessageController extends LegacyController
      */
     public function listUnread(Request $request): array
     {
-        $perPage = max(1, min(100, (int) $request->input('per_page', 20)));
+        $dto = ListUnreadDto::fromRequest($request);
 
         $messages = Message::query()
             ->where('receiver', Auth::id())
             ->where('unread', 'yes')
             ->with('send_user')
             ->orderByDesc('id')
-            ->paginate($perPage);
+            ->paginate($dto->perPage);
 
         return $this->success(MessageResource::collection($messages));
     }

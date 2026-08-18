@@ -15,6 +15,9 @@ final class TorrentTable
 
 
 	$cache = SupportContext::getCache();
+	if ($cache === null) {
+	    throw new \RuntimeException('Cache not initialized');
+	}
 	$lang_functions = SupportContext::getLangFunctions();
 	$user = SupportContext::getUser() ?? [];
 	$waitsystem = (string) SupportContext::getGlobal('waitsystem', '');
@@ -117,7 +120,7 @@ if (Permission::canManageTorrent()) { ?>
 </tr>
 <?php
 $caticonrow = \App\Support\Category::iconRowWithContext($user['caticon']);
-if ($caticonrow['secondicon'] == 'yes')
+if (is_array($caticonrow) && ($caticonrow['secondicon'] ?? '') == 'yes')
 $has_secondicon = true;
 else $has_secondicon = false;
 $counter = 0;
@@ -235,7 +238,8 @@ foreach ($rows as $row)
 
 	$nl = "<br />";
 	if (!$row["comments"]) {
-		print("<a href=\"comment.php?action=add&amp;pid=".$id."&amp;type=torrent\" title=\"".$lang_functions['title_add_comments']."\">" . $row["comments"] .  "</a>");
+		$commentCount = is_scalar($row["comments"]) ? (string) $row["comments"] : '0';
+		print("<a href=\"comment.php?action=add&amp;pid=".$id."&amp;type=torrent\" title=\"".$lang_functions['title_add_comments']."\">" . $commentCount .  "</a>");
 	} else {
 		if ($enabletooltip_tweak == 'yes' && $user['showlastcom'] != 'no')
 		{
@@ -279,8 +283,10 @@ foreach ($rows as $row)
 			print("<td class=\"rowfollow\" align=\"center\"><b><a href=\"details.php?id=".$id."&amp;hit=1&amp;dllist=1#seeders\">".($ratiocolor ? "<font color=\"" .
 			$ratiocolor . "\">" . number_format($row["seeders"]) . "</font>" : number_format($row["seeders"]))."</a></b></td>\n");
 	}
-	else
-		print("<td class=\"rowfollow\"><span class=\"" . \App\Support\Palette::seederLink($row["seeders"]) . "\">" . number_format($row["seeders"]) . "</span></td>\n");
+	else {
+		$seederCount = (int) ($row["seeders"] ?? 0);
+		print("<td class=\"rowfollow\"><span class=\"" . \App\Support\Palette::seederLink($seederCount) . "\">" . number_format($seederCount) . "</span></td>\n");
+	}
 
 	if ($row["leechers"]) {
 		print("<td class=\"rowfollow\"><b><a href=\"details.php?id=".$id."&amp;hit=1&amp;dllist=1#leechers\">" .
@@ -329,6 +335,6 @@ if($enabletooltip_tweak == 'yes' && (empty($user) || ($user['showlastcom'] ?? ''
 echo \App\Support\Html::tooltipContainer($lastcom_tooltip, 400);
 echo \App\Support\Html::tooltipContainer($torrent_tooltip, 500);
 
-        return ob_get_clean();
+        return (string) ob_get_clean();
     }
 }

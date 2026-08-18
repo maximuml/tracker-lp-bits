@@ -21,9 +21,9 @@ class AuthenticateRepository extends BaseRepository
     public function login($username, $password)
     {
         $user = User::query()
-            ->where('username', $username)
+            ->where('username', (string) $username)
             ->first(array_merge(User::$commonFields, ['class', 'secret', 'passhash', 'auth_key']));
-        if (!$user || !app(WebAuthService::class)->validatePassword($user, $password)) {
+        if (!$user instanceof User || !app(WebAuthService::class)->validatePassword($user, $password)) {
             throw new \InvalidArgumentException('Username or password invalid.');
         }
 //        if (nexus()->isPlatformAdmin() && !$user->canAccessAdmin()) {
@@ -42,10 +42,10 @@ class AuthenticateRepository extends BaseRepository
     }
 
     /**
-     * @param  mixed  $id
+     * @param  int  $id
      * @return  mixed
      */
-    public function logout($id)
+    public function logout(int $id)
     {
         $user = User::query()->findOrFail($id, ['id']);
         $result = $user->tokens()->delete();
@@ -66,11 +66,11 @@ class AuthenticateRepository extends BaseRepository
             throw new \InvalidArgumentException("Invalid data format.");
         }
         $user = User::query()
-            ->where('id', $data['uid'])
-            ->where('passkey', $data['passkey'])
+            ->where('id', (int) $data['uid'])
+            ->where('passkey', (string) $data['passkey'])
             ->first()
         ;
-        if (!$user) {
+        if (!$user instanceof User) {
             throw new \InvalidArgumentException("Invalid uid or passkey.");
         }
         $user->checkIsNormal();
@@ -79,16 +79,16 @@ class AuthenticateRepository extends BaseRepository
 
     /**
      * @param  mixed  $token
-     * @param  mixed  $id
+     * @param  int  $id
      * @param  mixed  $verity
      * @return  mixed
      */
-    public function iyuuApprove($token, $id, $verity)
+    public function iyuuApprove($token, int $id, $verity)
     {
         $secret = config('nexus.iyuu_secret');
         $user = User::query()->findOrFail($id, User::$commonFields);
         $user->checkIsNormal();
-        $encryptedResult = md5($token . $id . sha1($user->passkey) . $secret);
+        $encryptedResult = md5($token . $id . sha1((string) $user->passkey) . $secret);
         if ($encryptedResult != $verity) {
             throw new \InvalidArgumentException("Invalid uid or passkey");
         }
@@ -110,9 +110,9 @@ class AuthenticateRepository extends BaseRepository
             throw new \InvalidArgumentException("duplicate.");
         }
         Cache::put($cacheKey, 1, 600);
-        $user = User::query()->findOrFail($request->uid, User::$commonFields);
+        $user = User::query()->findOrFail((int) $request->uid, User::$commonFields);
         $user->checkIsNormal();
-        $passkeyHash = hash('sha256', $user->passkey);
+        $passkeyHash = hash('sha256', (string) $user->passkey);
         $dataToSign = sprintf("%s%s%s%s", $user->id, $passkeyHash, $request->timestamp, $request->nonce);
         $signatureKey = config('nexus.ammds_secret');
         $serverSignature = hash_hmac('sha256', $dataToSign, $signatureKey);

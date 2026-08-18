@@ -122,7 +122,8 @@ class Bonus
         $timenow = time();
         $sectoweek = 7 * 24 * 60 * 60;
 
-        $A = $official_a = $size = $official_size = 0;
+        $A = $official_a = 0;
+        $size = $official_size = '0';
         $count = $torrent_peer_count = $official_torrent_peer_count = 0;
         $last_action = '';
         $ip_arr = [];
@@ -134,14 +135,15 @@ class Bonus
             if (! empty($torrent['ip']) && ! isset($ip_arr[$torrent['ip']])) {
                 $ip_arr[$torrent['ip']] = $torrent['ip'];
             }
-            $size = bcadd((string) $size, (string) $torrent['size']);
-            $weeks_alive = ($timenow - strtotime($torrent['added'])) / $sectoweek;
-            $gb_size_raw = $torrent['size'] / 1073741824;
+            $torrentSize = (string) ($torrent['size'] ?? 0);
+            $size = bcadd($size, is_numeric($torrentSize) ? $torrentSize : '0');
+            $weeks_alive = ($timenow - strtotime((string) $torrent['added'])) / $sectoweek;
+            $gb_size_raw = (float) $torrent['size'] / 1073741824;
             $gb_size = $gb_size_raw;
             if ($zeroBonusTag && isset($tagGrouped[$torrent['id']][$zeroBonusTag]) && is_numeric($zeroBonusFactor)) {
-                $gb_size = $gb_size * $zeroBonusFactor;
+                $gb_size = $gb_size * (float) $zeroBonusFactor;
             }
-            $temp = (1 - exp($valueone * $weeks_alive)) * $gb_size * (1 + $sqrtof2 * exp($valuethree * ($torrent['seeders'] - 1)));
+            $temp = (1 - exp($valueone * $weeks_alive)) * $gb_size * (1 + $sqrtof2 * exp($valuethree * ((int) $torrent['seeders'] - 1)));
             $A += $temp;
             $count++;
             $torrent_peer_count++;
@@ -149,7 +151,7 @@ class Bonus
             if ($officialTag && isset($tagGrouped[$torrent['id']][$officialTag])) {
                 $officialAIncrease = $temp;
                 $official_torrent_peer_count++;
-                $official_size = bcadd((string) $official_size, (string) $torrent['size']);
+                $official_size = bcadd($official_size, is_numeric($torrentSize) ? $torrentSize : '0');
             }
             $official_a += $officialAIncrease;
 
@@ -320,7 +322,7 @@ class Bonus
      *
      * Backs the `build_bonus_table()` helper.
      *
-     * @param  array<string, mixed>  $user
+     * @param  array<int|string, mixed>  $user
      * @param  array<string, mixed>  $bonusResult
      * @param  array<string, mixed>  $options
      * @return array<string, mixed>
@@ -334,7 +336,7 @@ class Bonus
         $officialTag = (string) \App\Support\Config\SiteConfig::current()->bonus->officialTag();
         $officialAdditionalFactor = (float) \App\Support\Config\SiteConfig::current()->bonus->officialAddition(0);
         $haremFactor = (float) \App\Support\Config\SiteConfig::current()->bonus->haremAddition();
-        $haremAddition = self::haremAddition((int) ($user['id'] ?? 0));
+        $haremAddition = (float) self::haremAddition((int) ($user['id'] ?? 0));
         $isDonor = \App\Support\UserDisplay::isDonor($user);
         $donortimesBonus = (float) \App\Support\Config\SiteConfig::current()->bonus->donorTimes();
 

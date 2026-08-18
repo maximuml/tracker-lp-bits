@@ -25,7 +25,10 @@ class CommentRepository
             default => NexusDB::table('requests')->where('id', $parentId)->selectRaw('request as name, userid as owner')->first(),
         };
 
-        return $row === null ? null : $row->toArray();
+        if ($row === null) {
+            return null;
+        }
+        return $row instanceof \Illuminate\Database\Eloquent\Model ? $row->toArray() : (array) $row;
     }
 
     /**

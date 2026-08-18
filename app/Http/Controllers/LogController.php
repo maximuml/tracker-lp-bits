@@ -143,7 +143,7 @@ class LogController extends LegacyController
 
     /**
      * @param  array<string, mixed>  $langLog
-     * @param  array<string, mixed>|null  $editItem
+     * @param  array<int|string, mixed>|null  $editItem
      */
     private function chronicleList(Request $request, string $q, bool $canManage, array $langLog, ?array $editItem): View|RedirectResponse
     {

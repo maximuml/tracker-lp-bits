@@ -35,9 +35,9 @@ class ExamRepository extends BaseRepository
 
     /**
      * @param  array<int|string, mixed>  $params
-     * @return  mixed
+     * @return  \App\Models\Exam
      */
-    public function store(array $params)
+    public function store(array $params): Exam
     {
         $diffInHours = $this->checkBeginEnd($params);
         $this->checkIndexes($params, $diffInHours);
@@ -50,16 +50,19 @@ class ExamRepository extends BaseRepository
 //        if ($valid->isNotEmpty() && $params['status'] == Exam::STATUS_ENABLED) {
 //            throw new NexusException("Enabled and discovered exam already exists.");
 //        }
-        $exam = Exam::query()->create($this->formatParams($params));
+        $formatted = $this->formatParams($params);
+        /** @var array<string, mixed> $data */
+        $data = $formatted;
+        $exam = Exam::query()->create($data);
         return $exam;
     }
 
     /**
      * @param  array<int|string, mixed>  $params
-     * @param  mixed  $id
-     * @return  mixed
+     * @param  int  $id
+     * @return  \App\Models\Exam
      */
-    public function update(array $params, $id)
+    public function update(array $params, int $id): Exam
     {
         $diffInHours = $this->checkBeginEnd($params);
         $this->checkIndexes($params, $diffInHours);
@@ -73,7 +76,10 @@ class ExamRepository extends BaseRepository
 //            throw new NexusException("Enabled and discovered exam already exists.");
 //        }
         $exam = Exam::query()->findOrFail($id);
-        $exam->update($this->formatParams($params));
+        $formatted = $this->formatParams($params);
+        /** @var array<string, mixed> $data */
+        $data = $formatted;
+        $exam->update($data);
         return $exam;
     }
 
@@ -244,10 +250,10 @@ class ExamRepository extends BaseRepository
     }
 
     /**
-     * @param  mixed  $id
-     * @return  mixed
+     * @param  int  $id
+     * @return  \App\Models\Exam
      */
-    public function getDetail($id)
+    public function getDetail(int $id): Exam
     {
         $exam = Exam::query()->findOrFail($id);
         return $exam;
@@ -255,10 +261,10 @@ class ExamRepository extends BaseRepository
 
     /**
      * delete an exam task, also will delete all exam user and progress.
-     * @param  mixed  $id
+     * @param  int  $id
      * @return  bool
      */
-    public function delete($id)
+    public function delete(int $id)
     {
         $exam = Exam::query()->findOrFail($id);
         DB::transaction(function () use ($exam) {
@@ -331,31 +337,31 @@ class ExamRepository extends BaseRepository
 
     /**
      * list user match exams
-     * @param  mixed  $uid
-     * @return  \Illuminate\Database\Eloquent\Collection<int, Exam>
+     * @param  int  $uid
+     * @return  \Illuminate\Support\Collection<int, Exam>
      */
-    public function listMatchExam($uid)
+    public function listMatchExam(int $uid)
     {
         $exams = $this->listValid(null, null, Exam::TYPE_EXAM);
         return $this->filterForUser($exams, $uid);
     }
 
     /**
-     * @param  mixed  $uid
-     * @return  mixed
+     * @param  int  $uid
+     * @return  \Illuminate\Support\Collection<int, Exam>
      */
-    public function listMatchTask($uid)
+    public function listMatchTask(int $uid)
     {
         $exams = $this->listValid(null, null, Exam::TYPE_TASK);
         return $this->filterForUser($exams, $uid);
     }
 
     /**
-     * @param  \Illuminate\Support\Collection<int, mixed>  $exams
-     * @param  mixed  $uid
-     * @return  \Illuminate\Support\Collection<int, mixed>
+     * @param  \Illuminate\Support\Collection<int, Exam>  $exams
+     * @param  int  $uid
+     * @return  \Illuminate\Support\Collection<int, Exam>
      */
-    private function filterForUser(Collection $exams, $uid): Collection
+    private function filterForUser(Collection $exams, int $uid): Collection
     {
         $userInfo = User::query()->findOrFail($uid, User::$commonFields);
         return $exams->filter(function (Exam $exam) use ($userInfo) {
@@ -366,9 +372,9 @@ class ExamRepository extends BaseRepository
 
     /**
      * @param  \App\Models\Exam  $exam
-     * @param  mixed  $user
+     * @param  \App\Models\User|int  $user
      */
-    private function isExamMatchUser(Exam $exam, $user): bool
+    private function isExamMatchUser(Exam $exam, User|int $user): bool
     {
         if (!$user instanceof User) {
             $user = User::query()->findOrFail(intval($user), ['id', 'username', 'added', 'class']);
@@ -624,6 +630,9 @@ class ExamRepository extends BaseRepository
             return true;
         }
         $examProgress = $this->calculateProgress($examUser);
+        if (! is_array($examProgress)) {
+            $examProgress = [];
+        }
         $examProgressFormatted = $this->getProgressFormatted($exam, $examProgress);
         $examNotPassed = array_filter($examProgressFormatted, function ($item) {
             return !$item['passed'];
@@ -677,6 +686,12 @@ class ExamRepository extends BaseRepository
         $exam = $examUser->exam;
         if (!$user instanceof User) {
             $user = $examUser->user()->select(['id', 'uploaded', 'downloaded', 'seedtime', 'leechtime', 'seedbonus', 'seed_points'])->first();
+        }
+        if (!$user instanceof User) {
+            throw new \InvalidArgumentException("examUser: {$examUser->id} no user.");
+        }
+        if (!$exam instanceof \App\Models\Exam) {
+            throw new \InvalidArgumentException("examUser: {$examUser->id} no exam.");
         }
         $attributes = [
             'exam_user_id' => $examUser->id,
@@ -884,12 +899,12 @@ class ExamRepository extends BaseRepository
 
         $index = Exam::INDEX_SEED_TIME_AVERAGE;
         if (isset($progressSum[$index])) {
-            $torrentCount = $examUser->progresses()
+            $torrentCountRow = $examUser->progresses()
                 ->where('index', $index)
                 ->where('torrent_id', '>=', 0)
                 ->selectRaw('count(distinct(torrent_id)) as torrent_count')
-                ->first()
-                ->torrent_count;
+                ->first();
+            $torrentCount = $torrentCountRow instanceof \App\Models\ExamProgress ? (int) $torrentCountRow->torrent_count : 0;
             $progressSum[$index] = intval($progressSum[$index] / $torrentCount);
             $logPrefix .= ", index: INDEX_SEED_TIME_AVERAGE, get torrent count: $torrentCount, from query: " . \App\Support\LegacyDb::lastQuery(false, 'json');
         }
@@ -1270,6 +1285,9 @@ class ExamRepository extends BaseRepository
                 }
                 //update to the newest progress
                 $examUser = $this->updateProgress($examUser, $examUser->user);
+                if (!$examUser instanceof ExamUser) {
+                    continue;
+                }
                 $locale = $examUser->user->locale;
                 if ($examUser->is_done) {
                     \App\Support\Logger::writeWithContext((string) "{$currentLogPrefix}, [is_done]", (string) 'info', (bool) false);
@@ -1307,7 +1325,10 @@ class ExamRepository extends BaseRepository
                     if ($exam->isTypeExam()) {
                         //ban user
                         \App\Support\Logger::writeWithContext((string) "{$currentLogPrefix}, [will be banned]", (string) 'info', (bool) false);
-                        \App\Support\Cache::clearUser($examUser->user->id, $examUser->user->passkey);
+                        $clearUser = $examUser->user;
+                        if ($clearUser instanceof User) {
+                            \App\Support\Cache::clearUser($clearUser->id, (string) $clearUser->passkey);
+                        }
                         $uidToDisable[] = $uid;
                         $userModcomment = \App\Support\Locale::trans('exam.ban_user_modcomment', ['exam_name' => $exam->name, 'begin' => $examUser->begin, 'end' => $examUser->end], $locale);
 //                        $userModcomment = sprintf('%s - %s', date('Y-m-d'), $userModcomment);

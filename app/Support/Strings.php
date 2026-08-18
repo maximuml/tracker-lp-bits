@@ -156,7 +156,7 @@ final class Strings
      */
     public static function normalizeSearchTerm(string $s): string
     {
-        return preg_replace(
+        return (string) preg_replace(
             ['/[^a-z0-9]/si', '/^\s*/s', '/\s*$/s', '/\s+/s'],
             [' ', '', '', ' '],
             $s,
@@ -298,7 +298,7 @@ final class Strings
      * on every string leaf.
      *
      * @param  string|array<array-key, mixed>  $data
-     * @return string|array<array-key, string>
+     * @return array<array-key, mixed>|string
      */
     public static function escapeHtml(array|string $data): array|string
     {

@@ -13,7 +13,7 @@ class UserDetailRepository
 {
     /**
      * @param  int  $id
-     * @return  ?array<int|string, mixed>
+     * @return  ?array<string, mixed>
      */
     public static function getUser(int $id): ?array
     {
@@ -138,7 +138,7 @@ class UserDetailRepository
             ->orderBy('id', 'desc')
             ->limit(20)
             ->get()
-            ->map(fn ($item) => sprintf('[%s] %s', $item->created_at->format('Y-m-d'), $item->content))
+            ->map(fn ($item) => sprintf('[%s] %s', $item->created_at instanceof \Carbon\Carbon ? $item->created_at->format('Y-m-d') : '', $item->content))
             ->implode("\n");
     }
 

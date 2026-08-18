@@ -42,10 +42,10 @@ class Plugin extends Command
             $this->error($exception->getMessage());
             return 1;
         }
-        if ($action == 'install') {
-            call_user_func([$mainClass, 'install']);
-        } elseif ($action == 'uninstall') {
-            call_user_func([$mainClass, 'uninstall']);
+        $callable = [$mainClass, $action];
+        /** @var callable $callable */
+        if (in_array($action, ['install', 'uninstall'], true)) {
+            call_user_func($callable);
         } else {
             $this->error("Not support action: $action");
             return 1;

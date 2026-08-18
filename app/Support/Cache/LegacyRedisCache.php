@@ -65,7 +65,7 @@ class LegacyRedisCache
         if ($connectResult) {
             $this->redis = $redis;
             if (is_numeric($config['database'])) {
-                $redis->select($config['database']);
+                $redis->select((int) $config['database']);
             }
         } else {
             throw new \RuntimeException("Redis connect fail.");
@@ -192,6 +192,9 @@ class LegacyRedisCache
     }
 
     function unlock(string $Key): void {
+        if ($this->redis === null) {
+            return;
+        }
 //        $this->delete('lock_'.$Key);
         $this->redis->del('lock_'.$Key);
     }
@@ -215,7 +218,7 @@ class LegacyRedisCache
 
     // Wrapper for Memcache::set, with the zlib option removed and default duration of 1 hour
     function cache_value(string $Key, mixed $Value, int $Duration = 3600): void {
-        if (!$this->getIsEnabled()) {
+        if (!$this->getIsEnabled() || $this->redis === null) {
             return;
         }
         $Value = $this->serialize($Value);
@@ -289,6 +292,9 @@ class LegacyRedisCache
             sleep(2);
         }*/
 
+        if ($this->redis === null) {
+            return false;
+        }
         $Return = $this->redis->get($Key);
         $Return = ! is_null($Return) ? $this->unserialize($Return) : null;
         $this->cacheReadTimes++;
@@ -298,7 +304,7 @@ class LegacyRedisCache
 
     // Wrapper for Memcache::delete. For a reason, see above.
     function delete_value(string $Key, bool $AllLang = false): int {
-        if (!$this->getIsEnabled()) {
+        if (!$this->getIsEnabled() || $this->redis === null) {
             return 0;
         }
         $deleted = $this->redis->del($Key);
@@ -332,7 +338,7 @@ class LegacyRedisCache
      */
     protected function serialize($value)
     {
-        return is_numeric($value) && ! in_array($value, [INF, -INF]) && ! is_nan($value) ? $value : serialize($value);
+        return is_numeric($value) && ! in_array($value, [INF, -INF]) && ! is_nan((float) $value) ? $value : serialize($value);
     }
 
     /**

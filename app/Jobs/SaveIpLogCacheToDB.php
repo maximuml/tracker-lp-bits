@@ -10,7 +10,7 @@ class SaveIpLogCacheToDB implements ShouldQueue
 {
     use Queueable;
 
-    public $tries = 1;
+    public int $tries = 1;
 
     /**
      * Create a new job instance.

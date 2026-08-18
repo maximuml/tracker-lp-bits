@@ -65,10 +65,10 @@ class ExamController extends Controller
 
     /**
      * Display the specified resource.
-     * @param  mixed  $id
+     * @param  int  $id
      * @return  array<string, mixed>
      */
-    public function show($id)
+    public function show(int $id)
     {
         $result = $this->repository->getDetail($id);
         $resource = new ExamResource($result);
@@ -78,10 +78,10 @@ class ExamController extends Controller
     /**
      * Update the specified resource in storage.
      * @param  \Illuminate\Http\Request  $request
-     * @param  mixed  $id
+     * @param  int  $id
      * @return  array<string, mixed>
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, int $id)
     {
         $rules = [
             'name' => 'required|string',
@@ -99,10 +99,10 @@ class ExamController extends Controller
 
     /**
      * Remove the specified resource from storage.
-     * @param  mixed  $id
+     * @param  int  $id
      * @return  array<string, mixed>
      */
-    public function destroy($id)
+    public function destroy(int $id)
     {
         $result = $this->repository->delete($id);
         return $this->success($result, 'Delete exam success!');

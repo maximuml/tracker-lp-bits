@@ -57,6 +57,9 @@ final class ThirdPartyJob {
         }
     }
 
+    /**
+     * @param array<string, mixed> $params
+     */
     private static function enqueueJobBuyTorrent(array $params): void
     {
         if (!empty($params['user_id']) && !empty($params['torrent_id'])) {

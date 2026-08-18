@@ -57,7 +57,7 @@ class AuthServiceProvider extends ServiceProvider
     {
         //some plugin use this guard
         Auth::viaRequest('nexus-cookie', function (Request $request) {
-            return \App\Support\AuthCookie::userFromCookie($request->cookie(), (bool) false);
+            return \App\Support\AuthCookie::userFromCookie($request->cookies->all(), (bool) false);
         });
 
         Auth::extend('nexus-web', function ($app, $name, array $config) {

@@ -78,7 +78,7 @@ class ShoutboxController extends LegacyController
         Shoutbox::applyTypeFilter($query, $where, $currentUser ?: null);
         $rows = $query->get();
 
-        $shoutIds = $rows->pluck('id')->map(fn ($id) => (int) $id)->all();
+        $shoutIds = array_values($rows->pluck('id')->map(fn ($id) => (int) $id)->all());
         $reactionData = Shoutbox::prefetchReactions($shoutIds, $currentUserId);
 
         $userIds = array_filter(array_unique($rows->pluck('userid')->map(fn ($id) => (int) $id)->all()));
@@ -133,7 +133,7 @@ class ShoutboxController extends LegacyController
             'currentUserId' => $currentUserId,
             'isStaff' => \App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::SB_MANAGE),
             'csrfToken' => \App\Support\Shoutbox::csrfToken($currentUserId),
-            'reactionData' => \App\Support\Shoutbox::prefetchReactions($shoutIds, $currentUserId),
+            'reactionData' => \App\Support\Shoutbox::prefetchReactions(array_values($shoutIds), $currentUserId),
             'userDisplayMap' => $userDisplayMap,
         ]);
     }

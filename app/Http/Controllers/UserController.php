@@ -70,10 +70,13 @@ class UserController extends Controller
     public function show($id = null)
     {
         $currentUser = Auth::user();
+        if (!$currentUser instanceof \App\Models\User) {
+            throw new \RuntimeException("unauthenticated");
+        }
         if ($id === null) {
             $id = $currentUser->id;
         }
-        $result = $this->repository->getDetail($id, $currentUser);
+        $result = $this->repository->getDetail((int) $id, $currentUser);
         $resource = new UserResource($result);
         return $this->success($resource);
     }
@@ -115,7 +118,7 @@ class UserController extends Controller
             'password_confirmation' => 'required|same:password',
         ];
         $request->validate($rules);
-        $result = $this->repository->resetPassword($request->uid, $request->password, $request->password_confirmation);
+        $result = $this->repository->resetPassword((int) $request->uid, $request->password, $request->password_confirmation);
         return $this->success($result, 'Reset password success!');
     }
 
@@ -129,7 +132,7 @@ class UserController extends Controller
     /** @return  array<string, mixed> */
     public function base()
     {
-        $id = Auth::id();
+        $id = (int) Auth::id();
         $result = $this->repository->getBase($id);
         $resource = new UserResource($result);
         return $this->success($resource);
@@ -145,7 +148,7 @@ class UserController extends Controller
             'uid' => 'required',
         ]);
         $examRepository = new ExamRepository();
-        $result = $examRepository->listMatchExam($request->uid);
+        $result = $examRepository->listMatchExam((int) $request->uid);
         $resource = ExamResource::collection($result);
         return $this->success($resource);
     }
@@ -160,7 +163,11 @@ class UserController extends Controller
             'uid' => 'required',
             'reason' => 'required',
         ]);
-        $result = $this->repository->disableUser(Auth::user(), $request->uid, $request->reason);
+        $user = Auth::user();
+        if (!$user instanceof \App\Models\User) {
+            throw new \RuntimeException("unauthenticated");
+        }
+        $result = $this->repository->disableUser($user, (int) $request->uid, $request->reason);
         return $this->success($result, 'Disable user success!');
     }
 
@@ -173,7 +180,11 @@ class UserController extends Controller
         $request->validate([
             'uid' => 'required',
         ]);
-        $result = $this->repository->enableUser(Auth::user(), $request->uid);
+        $user = Auth::user();
+        if (!$user instanceof \App\Models\User) {
+            throw new \RuntimeException("unauthenticated");
+        }
+        $result = $this->repository->enableUser($user, (int) $request->uid);
         return $this->success($result, 'Enable user success!');
     }
 
@@ -186,7 +197,7 @@ class UserController extends Controller
         $request->validate([
             'uid' => 'required',
         ]);
-        $result = $this->repository->getInviteInfo($request->uid);
+        $result = $this->repository->getInviteInfo((int) $request->uid);
         $resource = $result ? (new InviteResource($result)) : null;
         return $this->success($resource);
     }
@@ -200,7 +211,7 @@ class UserController extends Controller
         $request->validate([
             'uid' => 'required',
         ]);
-        $result = $this->repository->getModComment($request->uid);
+        $result = $this->repository->getModComment((int) $request->uid);
         return $this->success($result);
     }
 
@@ -208,6 +219,9 @@ class UserController extends Controller
     public function me()
     {
         $user = Auth::user();
+        if (!$user instanceof \App\Models\User) {
+            throw new \RuntimeException("unauthenticated");
+        }
 
         $resource = $this->getUserProfile($user->id);
 //
@@ -232,10 +246,10 @@ class UserController extends Controller
     }
 
     /**
-     * @param  mixed  $id
+     * @param  int  $id
      * @return  mixed
      */
-    private function getUserProfile($id)
+    private function getUserProfile(int $id)
     {
         $user = User::query()->withCount([
             'comments', 'posts', 'seeding_torrents', 'leeching_torrents',
@@ -254,6 +268,9 @@ class UserController extends Controller
     public function publishTorrent(Request $request)
     {
         $user = Auth::user();
+        if (!$user instanceof \App\Models\User) {
+            throw new \RuntimeException("unauthenticated");
+        }
 
         $result = $user->torrents()->orderBy('id', 'desc')->paginate();
 
@@ -270,6 +287,9 @@ class UserController extends Controller
     public function seedingTorrent(Request $request)
     {
         $user = Auth::user();
+        if (!$user instanceof \App\Models\User) {
+            throw new \RuntimeException("unauthenticated");
+        }
 
         $result = $user->peers_torrents()->where('seeder', Peer::SEEDER_YES)->orderBy('torrent', 'desc')->paginate();
 
@@ -286,6 +306,9 @@ class UserController extends Controller
     public function leechingTorrent(Request $request)
     {
         $user = Auth::user();
+        if (!$user instanceof \App\Models\User) {
+            throw new \RuntimeException("unauthenticated");
+        }
 
         $result = $user->peers_torrents()->where('seeder', Peer::SEEDER_NO)->orderBy('torrent', 'desc')->paginate();
 
@@ -302,6 +325,9 @@ class UserController extends Controller
     public function finishedTorrent(Request $request)
     {
         $user = Auth::user();
+        if (!$user instanceof \App\Models\User) {
+            throw new \RuntimeException("unauthenticated");
+        }
 
         $result = $user->snatched_torrents()
             ->where('owner', '<>', $user->id)
@@ -322,6 +348,9 @@ class UserController extends Controller
     public function notFinishedTorrent(Request $request)
     {
         $user = Auth::user();
+        if (!$user instanceof \App\Models\User) {
+            throw new \RuntimeException("unauthenticated");
+        }
 
         $result = $user->snatched_torrents()
             ->where('owner', '<>', $user->id)

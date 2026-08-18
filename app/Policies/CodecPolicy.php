@@ -97,7 +97,7 @@ class CodecPolicy extends BasePolicy
         return false;
     }
 
-    private function can(User $user)
+    private function can(User $user): bool
     {
         if ($user->class >= User::CLASS_SYSOP) {
             return true;

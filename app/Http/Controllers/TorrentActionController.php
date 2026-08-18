@@ -77,7 +77,7 @@ class TorrentActionController extends LegacyController
         }
 
         $cache = SupportContext::getCache();
-        if ($cache !== null && method_exists($cache, 'delete_value')) {
+        if ($cache !== null) {
             $cache->delete_value('user_' . $userId . '_bookmark_array');
         }
 
@@ -216,7 +216,7 @@ class TorrentActionController extends LegacyController
         }
 
         $curUser = SupportContext::getUser() ?? [];
-        $currentUser = ! empty($curUser) ? User::query()->find($curUser['id'] ?? 0) : null;
+        $currentUser = ! empty($curUser) ? User::query()->find((int) ($curUser['id'] ?? 0)) : null;
 
         $headers = [
             'Expires' => 'Mon, 26 Jul 1997 05:00:00 GMT',
@@ -347,7 +347,7 @@ class TorrentActionController extends LegacyController
         }
 
         $curUser = SupportContext::getUser() ?? [];
-        $currentUser = ! empty($curUser) ? User::query()->find($curUser['id'] ?? 0) : null;
+        $currentUser = ! empty($curUser) ? User::query()->find((int) ($curUser['id'] ?? 0)) : null;
 
         if ($currentUser === null || (! Permissions::userCan(PermissionEnum::TORRENT_HISTORY->value, false, $currentUser->id) && $currentUser->id !== $targetUserId)) {
             return response('', 403, ['Content-Type' => 'text/html; charset=utf-8']);
@@ -370,11 +370,11 @@ class TorrentActionController extends LegacyController
     {
         $searchstr = (string) $request->input('q', '');
         if ($searchstr === '') {
-            return response(json_encode([], JSON_UNESCAPED_UNICODE), 200, ['Content-Type' => 'application/json; charset=utf-8']);
+            return response((string) json_encode([], JSON_UNESCAPED_UNICODE), 200, ['Content-Type' => 'application/json; charset=utf-8']);
         }
 
         return response(
-            json_encode(TorrentAjaxRepository::searchSuggest($searchstr), JSON_UNESCAPED_UNICODE),
+            (string) json_encode(TorrentAjaxRepository::searchSuggest($searchstr), JSON_UNESCAPED_UNICODE),
             200,
             ['Content-Type' => 'application/x-suggestions+json; charset=utf-8']
         );
@@ -652,7 +652,7 @@ class TorrentActionController extends LegacyController
             <comments><![CDATA[' . $baseUrl . '/details.php?id=' . (int) ($row['id'] ?? 0) . '&cmtpage=0#startcomments]]></comments>
             <enclosure url="' . $itemdlurl . '" length="' . (int) ($row['size'] ?? 0) . '" type="application/x-bittorrent" />
             <guid isPermaLink="false">' . preg_replace_callback('/./s', $hexEsc, Strings::padHash((string) ($row['info_hash'] ?? ''))) . '</guid>
-            <pubDate>' . date('r', strtotime((string) ($row['added'] ?? 'now'))) . '</pubDate>
+            <pubDate>' . date('r', strtotime((string) ($row['added'] ?? 'now')) ?: time()) . '</pubDate>
         </item>
 ';
         }

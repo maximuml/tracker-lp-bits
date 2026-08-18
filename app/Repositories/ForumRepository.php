@@ -641,7 +641,7 @@ class ForumRepository extends BaseRepository
     }
 
     /**
-     * @return  array<string, int>|null
+     * @return  array{topicid: int, userid: int}|null
      */
     public static function getPostTopicAndUser(int $postid): ?array
     {

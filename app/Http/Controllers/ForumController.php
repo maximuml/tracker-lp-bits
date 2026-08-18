@@ -2,15 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\DTOs\Forum\StoreForumDto;
+use App\DTOs\Forum\UpdateForumDto;
 use App\Enums\Permission\PermissionEnum;
 use App\Http\Resources\ForumResource;
 use App\Models\Forum;
+use App\Repositories\CommentRepository;
+use App\Repositories\ForumRepository;
 use App\Services\Legacy\ForumService;
 use App\Support\Forum as SupportForum;
 use App\Support\Permissions;
 use App\Support\SupportContext;
-use App\Repositories\CommentRepository;
-use App\Repositories\ForumRepository;
 use App\Support\UserClass;
 use App\Support\UserDisplay;
 use Illuminate\Http\RedirectResponse;
@@ -32,14 +34,14 @@ class ForumController extends LegacyController
      * and is included by forum/index.blade.php so the original HTML/PHP
      * interleaving is preserved as closely as possible.
      */
-    public function legacy(Request $request): View|RedirectResponse
+    public function legacy(Request $request): View|Response|RedirectResponse
     {
         if (SupportContext::getUser() === null) {
             return redirect('/forums.php?' . $request->getQueryString());
         }
 
         $result = $this->service->legacy($request);
-        if ($result instanceof RedirectResponse) {
+        if (! is_array($result)) {
             return $result;
         }
 
@@ -299,14 +301,7 @@ class ForumController extends LegacyController
      */
     public function store(Request $request): array
     {
-        $forum = Forum::query()->create($request->validate([
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'forid' => 'required|integer',
-            'minclassread' => 'required|integer',
-            'minclasswrite' => 'required|integer',
-            'minclasscreate' => 'required|integer',
-        ]));
+        $forum = Forum::query()->create(StoreForumDto::fromRequest($request)->toArray());
 
         return $this->success(new ForumResource($forum), 'Forum created');
     }
@@ -327,14 +322,7 @@ class ForumController extends LegacyController
      */
     public function update(Request $request, Forum $forum): array
     {
-        $forum->update($request->validate([
-            'name' => 'sometimes|string|max:255',
-            'description' => 'sometimes|nullable|string',
-            'forid' => 'sometimes|integer',
-            'minclassread' => 'sometimes|integer',
-            'minclasswrite' => 'sometimes|integer',
-            'minclasscreate' => 'sometimes|integer',
-        ]));
+        $forum->update(UpdateForumDto::fromRequest($request)->toArray());
 
         return $this->success(new ForumResource($forum->fresh()), 'Forum updated');
     }

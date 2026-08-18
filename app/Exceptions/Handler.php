@@ -20,7 +20,7 @@ class Handler extends ExceptionHandler
     /**
      * A list of the exception types that are not reported.
      *
-     * @var array
+     * @var array<int, class-string<\Throwable>>
      */
     protected $dontReport = [
         //
@@ -29,7 +29,7 @@ class Handler extends ExceptionHandler
     /**
      * A list of the inputs that are never flashed for validation exceptions.
      *
-     * @var array
+     * @var array<int, string>
      */
     protected $dontFlash = [
         'current_password',
@@ -78,7 +78,7 @@ class Handler extends ExceptionHandler
 
         //Other Only handle in json request
         if (!$request->expectsJson() && !$request->ajax()) {
-            $this->renderable(function (NexusException $e) use ($request) {
+            $this->renderable(function (NexusException $e) {
                 return redirect(url('/error?error=' . urlencode($e->getMessage())));
             });
             return;
@@ -94,7 +94,7 @@ class Handler extends ExceptionHandler
 
         $this->renderable(function (ValidationException $exception) {
             $errors = $exception->errors();
-            $msg = Arr::first(Arr::first($errors));
+            $msg = (string) Arr::first(array_merge(...array_values($errors)));
             return response()->json(\App\Support\Api::failWithContext($msg, $errors));
         });
 
@@ -130,14 +130,14 @@ class Handler extends ExceptionHandler
         return new JsonResponse(
             \App\Support\Api::failWithContext($msg, $data),
             $httpStatusCode,
-            $this->isHttpException($e) ? $e->getHeaders() : [],
+            $e instanceof \Symfony\Component\HttpKernel\Exception\HttpExceptionInterface ? $e->getHeaders() : [],
             JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES
         );
     }
 
-    protected function getHttpStatusCode(Throwable $e)
+    protected function getHttpStatusCode(Throwable $e): int
     {
-        if ($this->isHttpException($e)) {
+        if ($e instanceof \Symfony\Component\HttpKernel\Exception\HttpExceptionInterface) {
             return $e->getStatusCode();
         }
 

@@ -51,7 +51,7 @@ class DeleteExpiredToken extends Command
         $this->info($log);
         \App\Support\Logger::writeWithContext((string) $log, (string) 'info', (bool) false);
 
-        $query->where('last_used_at', '<', Carbon::now()->subDays($days));
+        $query->where('last_used_at', '<', Carbon::now()->subDays((int) $days));
         $result = $query->delete();
         $log = sprintf('[%s], %s, result: %s, query: %s', \Nexus\Nexus::instance()->getRequestId(), __METHOD__, var_export($result, true), \App\Support\LegacyDb::lastQuery(false, 'json'));
         $this->info($log);

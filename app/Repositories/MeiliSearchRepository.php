@@ -402,7 +402,7 @@ class MeiliSearchRepository extends BaseRepository
                 }
             } else {
                 //get user setting
-                $pattern = sprintf("/\[%s([\d]+)\]/", substr($queryField, 0, 3));
+                $pattern = sprintf("/\[%s([\d]+)\]/", substr((string) $queryField, 0, 3));
                 if (preg_match($pattern, $userSetting, $matches)) {
                     if (count($matches) == 2 && !empty($matches[1])) {
                         $match = $matches[1];

@@ -7,7 +7,8 @@ server {
     ssl_certificate_key /certs/private.key;
 
     location / {
-        proxy_pass http://phpmyadmin:80;
+        set $phpmyadmin_url "http://phpmyadmin:80";
+        proxy_pass $phpmyadmin_url;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
     }

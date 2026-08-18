@@ -34,37 +34,41 @@ class MedalRepository extends BaseRepository
      */
     public function store(array $params)
     {
-        return Medal::query()->create($params);
+        /** @var array<string, mixed> $data */
+        $data = $params;
+        return Medal::query()->create($data);
     }
 
     /**
      * @param  array<int|string, mixed>  $params
-     * @param  mixed  $id
+     * @param  int  $id
      * @return  mixed
      */
-    public function update(array $params, $id)
+    public function update(array $params, int $id)
     {
         $medal = Medal::query()->findOrFail($id);
-        $medal->update($params);
+        /** @var array<string, mixed> $data */
+        $data = $params;
+        $medal->update($data);
         return $medal;
     }
 
 
     /**
-     * @param  mixed  $id
+     * @param  int  $id
      * @return  mixed
      */
-    public function getDetail($id)
+    public function getDetail(int $id)
     {
         return Medal::query()->findOrFail($id);
     }
 
     /**
      * delete a medal, also will delete all user medal.
-     * @param  mixed  $id
+     * @param  int  $id
      * @return  bool
      */
-    public function delete($id): bool
+    public function delete(int $id): bool
     {
         $medal = Medal::query()->findOrFail($id);
         NexusDB::transaction(function () use ($medal) {
@@ -85,7 +89,8 @@ class MedalRepository extends BaseRepository
     public function  grantToUser(int $uid, int $medalId, $duration = null)
     {
         $user = User::query()->findOrFail($uid, User::$commonFields);
-        if (Auth::user()->class <= $user->class) {
+        $authUser = Auth::user();
+        if (! $authUser instanceof \App\Models\User || $authUser->class <= $user->class) {
             throw new \LogicException("No permission!");
         }
         $medal = Medal::query()->findOrFail($medalId);
@@ -122,11 +127,11 @@ class MedalRepository extends BaseRepository
     }
 
     /**
-     * @param  mixed  $id
-     * @param  mixed  $userId
+     * @param  int  $id
+     * @param  int  $userId
      * @return  mixed
      */
-    public function toggleUserMedalStatus($id, $userId)
+    public function toggleUserMedalStatus(int $id, int $userId)
     {
         $userMedal = UserMedal::query()->findOrFail($id);
         if ($userMedal->uid != $userId) {

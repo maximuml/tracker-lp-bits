@@ -2,6 +2,7 @@
 namespace App\Repositories;
 
 use App\Auth\Permission;
+use App\DTOs\Message\StoreMessageDto;
 use App\Enums\Permission\PermissionEnum;
 use App\Models\Message;
 use App\Models\Setting;
@@ -219,14 +220,9 @@ class MessageRepository extends BaseRepository
         return $query->paginate();
     }
 
-    /**
-     * @param  array<int|string, mixed>  $params
-     * @return  mixed
-     */
-    public function store(array $params)
+    public function store(StoreMessageDto $dto): Message
     {
-        $model = Message::query()->create($params);
-        return $model;
+        return Message::query()->create($dto->toArray());
     }
 
     /**
@@ -236,7 +232,8 @@ class MessageRepository extends BaseRepository
      */
     public function update(array $params, $id)
     {
-        $model = Message::query()->findOrFail($id);
+        $model = Message::query()->findOrFail((int) $id);
+        /** @var array<string, mixed> $params */
         $model->update($params);
         return $model;
     }
@@ -247,7 +244,7 @@ class MessageRepository extends BaseRepository
      */
     public function getDetail($id)
     {
-        $model = Message::query()->findOrFail($id);
+        $model = Message::query()->findOrFail((int) $id);
         return $model;
     }
 
@@ -257,7 +254,7 @@ class MessageRepository extends BaseRepository
      */
     public function delete($id)
     {
-        $model = Message::query()->findOrFail($id);
+        $model = Message::query()->findOrFail((int) $id);
         $result = $model->delete();
         return $result;
     }
@@ -282,7 +279,7 @@ class MessageRepository extends BaseRepository
         if ($answered !== null) {
             $query->where('answered', $answered);
         }
-        if (!Permission::can(PermissionEnum::STAFF_MEMBER, User::findOrFail($uid))) {
+        if (!Permission::can(PermissionEnum::STAFF_MEMBER, User::findOrFail((int) $uid))) {
             //Not staff member only can see authorized
             $permissions = ToolRepository::listUserAllPermissions($uid);
             $query->whereIn('permission', $permissions);

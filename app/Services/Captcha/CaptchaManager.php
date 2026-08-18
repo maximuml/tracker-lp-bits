@@ -10,6 +10,7 @@ class CaptchaManager
     /** @var array<string, CaptchaDriverInterface> */
     protected array $drivers = [];
 
+    /** @var array<string, mixed>|null */
     protected ?array $config = null;
 
     public function driver(?string $name = null): CaptchaDriverInterface
@@ -25,11 +26,18 @@ class CaptchaManager
         return $driver;
     }
 
+    /**
+     * @param array<string, mixed> $context
+     */
     public function render(array $context = []): string
     {
         return $this->driver()->render($context);
     }
 
+    /**
+     * @param array<string, mixed> $payload
+     * @param array<string, mixed> $context
+     */
     public function verify(array $payload, array $context = []): bool
     {
         try {
@@ -88,7 +96,11 @@ class CaptchaManager
         return (string) $this->getConfigValue('default', 'image');
     }
 
-    protected function getConfigValue(string $key, $default = null)
+    /**
+     * @param mixed $default
+     * @return mixed
+     */
+    protected function getConfigValue(string $key, $default = null): mixed
     {
         if ($this->config === null) {
             $config = null;
@@ -116,7 +128,7 @@ class CaptchaManager
 
             try {
                 $settings = \App\Support\Config\SiteConfig::current()->captcha->toArray();
-                if (is_array($settings) && !empty($settings)) {
+                if (!empty($settings)) {
                     $this->config = array_replace_recursive($this->config, $settings);
                 }
             } catch (\Throwable $exception) {

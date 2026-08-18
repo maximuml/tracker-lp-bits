@@ -435,7 +435,7 @@ class ModerationController extends LegacyController
             $baseQuery->where('class', '<', $class - 1);
         }
         if ($ratio > 1) {
-            $baseQuery->whereRaw('(uploaded / downloaded) > ?', [$ratio - 1]);
+            $baseQuery->whereRaw('(uploaded / downloaded) > ?', [(int) $ratio - 1]);
         }
 
         $agg = (clone $baseQuery)->selectRaw('COUNT(*) as cnt, MIN(cheat) as minc, MAX(cheat) as maxc')->first();
@@ -550,10 +550,11 @@ class ModerationController extends LegacyController
             $ipshow = '';
             if ($ip) {
                 $dom = @gethostbyaddr($ip);
-                if ($dom === $ip || @gethostbyname($dom) !== $ip) {
+                $hostname = is_string($dom) ? $dom : '';
+                if ($hostname === '' || $hostname === $ip || @gethostbyname($hostname) !== $ip) {
                     $addr = $langIphistory['text_not_available'] ?? 'N/A';
                 } else {
-                    $addr = $dom;
+                    $addr = $hostname;
                 }
 
                 $usersIp = $repo->getUserIdsByIp($ip);
@@ -669,8 +670,9 @@ class ModerationController extends LegacyController
         if ($ip !== '') {
             if ($singleIp) {
                 $dom = @gethostbyaddr($ip);
-                if ($dom !== $ip && @gethostbyname($dom) === $ip) {
-                    $addr = $dom;
+                $hostname = is_string($dom) ? $dom : '';
+                if ($hostname !== '' && $hostname !== $ip && @gethostbyname($hostname) === $ip) {
+                    $addr = $hostname;
                 }
             } else {
                 $regex = "/^(((1?\d{1,2})|(2[0-4]\d)|(25[0-5]))(\.\b|$)){4}$/";

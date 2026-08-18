@@ -212,7 +212,9 @@ final class MainConfig extends Config
      */
     public function enabledSiteLanguages(array $default = ['en']): array
     {
-        return $this->array('site_language_enabled', $default);
+        /** @var array<int, string> $value */
+        $value = $this->array('site_language_enabled', $default);
+        return array_values(array_map('strval', $value));
     }
 
     public function torrentsPerPageNullable(?string $default = null): ?string

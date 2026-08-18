@@ -19,11 +19,12 @@ class PersonalAccessToken extends SanctumPersonalAccessToken
 {
     public function getAbilitiesTextAttribute(): string
     {
-        if (in_array('*', $this->abilities)) {
+        $abilities = $this->abilities ?? [];
+        if (in_array('*', $abilities)) {
             return 'ALL';
         }
         $result = [];
-        foreach ($this->abilities as $ability) {
+        foreach ($abilities as $ability) {
             if ($ability != '*') {
                 $result[] = \App\Support\Locale::trans("route-permission.{$ability}.text", [], null);
             }

@@ -855,7 +855,10 @@ EOD;
             return $this->legacyPage($request, 'self-enable', true, $viewData);
         }
 
-        $elapsedDay = (int) ceil((time() - $latestBanLog->created_at->getTimestamp()) / 86400);
+        $latestBanLogCreatedAt = $latestBanLog->created_at;
+        $elapsedDay = $latestBanLogCreatedAt instanceof \Carbon\Carbon
+            ? (int) ceil((time() - $latestBanLogCreatedAt->getTimestamp()) / 86400)
+            : 0;
         $total = $unit * $elapsedDay;
         $isUserBonusEnough = (float) ($curUser['seedbonus'] ?? 0) >= $total;
         $insufficientMessage = Locale::trans('self-enable.bonus_not_enough', ['bonus' => $curUser['seedbonus'] ?? 0], null);

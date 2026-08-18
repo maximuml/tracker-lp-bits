@@ -93,7 +93,7 @@ class TorrentDownloadController extends Controller
 
         Gate::forUser($user)->authorize('download', $torrent);
 
-        if (strlen($user->passkey) != 32) {
+        if (strlen((string) $user->passkey) != 32) {
             $passkey = md5($user->username . date('Y-m-d H:i:s') . $user->passhash);
             User::query()->where('id', $user->id)->update(['passkey' => $passkey]);
             $user->passkey = $passkey;
@@ -106,11 +106,15 @@ class TorrentDownloadController extends Controller
         }
 
         $dict = TorrentFile::load($fn);
+        $trackerHost = Tracker::schemaAndHost((int) $user->tracker_url_id, true);
+        if (is_array($trackerHost)) {
+            $trackerHost = ($trackerHost['scheme'] ?? '') . '://' . ($trackerHost['host'] ?? '');
+        }
         $dict->cleanRootFields()
-            ->setAnnounce(Tracker::schemaAndHost($user->tracker_url_id, true) . '?passkey=' . $user->passkey)
+            ->setAnnounce($trackerHost . '?passkey=' . (string) $user->passkey)
             ->setComment(Url::schemeAndHost(true) . '/details.php?id=' . $torrent->id)
             ->setCreatedBy(\App\Support\Config\SiteConfig::current()->basic->siteName())
-            ->setCreationDate(strtotime($torrent->added));
+            ->setCreationDate($torrent->added?->getTimestamp() ?? time());
 
         $torrent->increment('hits');
 

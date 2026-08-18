@@ -26,10 +26,29 @@ final class TrafficAccountant
             return new TrafficResult(0, 0, null, 0, 0, 0, 0);
         }
 
-        $upthis = max(0, (int) \bcsub((string) $params['uploaded'], (string) $self['uploaded']));
-        $downthis = max(0, (int) \bcsub((string) $params['downloaded'], (string) $self['downloaded']));
-        $snatchTimeColumn = $self['seeder'] === 'yes' ? 'seedtime' : 'leechtime';
-        $snatchTimeIncrement = max(0, (int) $self['announcetime']);
+        $snatchTimeColumn = ($self['seeder'] ?? '') === 'yes' ? 'seedtime' : 'leechtime';
+        $snatchTimeIncrement = max(0, (int) ($self['announcetime'] ?? 0));
+
+        $rawUploaded = $params['uploaded'] ?? 0;
+        $rawSelfUploaded = $self['uploaded'] ?? 0;
+        $rawDownloaded = $params['downloaded'] ?? 0;
+        $rawSelfDownloaded = $self['downloaded'] ?? 0;
+
+        if (! is_numeric($rawUploaded) || ! is_numeric($rawSelfUploaded) || ! is_numeric($rawDownloaded) || ! is_numeric($rawSelfDownloaded)) {
+            return new TrafficResult(0, 0, $snatchTimeColumn, $snatchTimeIncrement, 0, 0, 0);
+        }
+
+        /** @var numeric-string $uploaded */
+        $uploaded = (string) $rawUploaded;
+        /** @var numeric-string $selfUploaded */
+        $selfUploaded = (string) $rawSelfUploaded;
+        /** @var numeric-string $downloaded */
+        $downloaded = (string) $rawDownloaded;
+        /** @var numeric-string $selfDownloaded */
+        $selfDownloaded = (string) $rawSelfDownloaded;
+
+        $upthis = max(0, (int) \bcsub($uploaded, $selfUploaded));
+        $downthis = max(0, (int) \bcsub($downloaded, $selfDownloaded));
 
         $leechTimeNoSeederIncrement = 0;
         if ((int) $torrent['seeders'] <= 0 && $seeder === 'no' && $snatchTimeIncrement > 0) {

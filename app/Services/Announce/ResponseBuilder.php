@@ -14,12 +14,18 @@ final class ResponseBuilder
 {
     private int $realAnnounceInterval = MIN_ANNOUNCE_WAIT_SECOND;
 
+    /**
+     * @param array<string, mixed>|null $torrent
+     */
     public function __construct(
         private readonly AnnounceRequestDto $dto,
         private readonly ?array $torrent = null,
         private readonly int $baseInterval = MIN_ANNOUNCE_WAIT_SECOND,
     ) {}
 
+    /**
+     * @param array<string, mixed> $torrent
+     */
     public function withTorrent(array $torrent): self
     {
         return new self($this->dto, $torrent, $this->baseInterval);
@@ -63,6 +69,9 @@ final class ResponseBuilder
         return new InitialResponseResult($response, $this->realAnnounceInterval, $autocleanIntervalOne);
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function peerList(int $torrentId, int $userId, string $seeder): array
     {
         $counts = $this->countPeers($torrentId) ?: (object) ['seeders' => 0, 'leechers' => 0];

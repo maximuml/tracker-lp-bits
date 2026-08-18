@@ -103,7 +103,7 @@ class Torrent extends NexusModel
         'info_hash',
     ];
 
-    /** @var  array<int|string, mixed> */
+    /** @var  list<string> */
     public static $commentFields = [
         'id', 'name', 'added', 'visible', 'banned', 'owner', 'sp_state', 'promotion_time_type', 'promotion_until', 'pos_state',
         'hr', 'last_action', 'leechers', 'seeders', 'times_completed', 'views', 'size', 'cover', 'anonymous',
@@ -365,12 +365,13 @@ class Torrent extends NexusModel
 
     /**
      * @param  mixed  $appendTableName
-     * @return  array<int|string, mixed>|bool
+     * @return  list<string>
      */
-    public static function getFieldsForList($appendTableName = false): array|bool
+    public static function getFieldsForList($appendTableName = false): array
     {
         $fields = 'id, sp_state, promotion_time_type, promotion_until, banned, pos_state, category, source, medium, codec, standard, processing, audiocodec, leechers, seeders, name, times_completed, size, added, comments,anonymous,owner,url,cache_stamp, hr, approval_status, cover, price';
-        $fields = preg_split('/[,\s]+/', $fields);
+        $split = preg_split('/[,\s]+/', $fields);
+        $fields = $split === false ? [] : $split;
         if ($appendTableName) {
             foreach ($fields as &$value) {
                 $value = "torrents." . $value;
@@ -557,7 +558,15 @@ class Torrent extends NexusModel
     /** @param  mixed  $field */
     public function getSubCategoryLabel($field): string
     {
-        return $this->basic_category->search_box->getTaxonomyLabel($field);
+        $category = $this->basic_category;
+        if (! $category) {
+            return '';
+        }
+        $searchBox = $category->search_box;
+        if (! $searchBox) {
+            return '';
+        }
+        return $searchBox->getTaxonomyLabel($field);
     }
 
     /** @return  \Illuminate\Database\Eloquent\Relations\HasMany<Bookmark, $this> */

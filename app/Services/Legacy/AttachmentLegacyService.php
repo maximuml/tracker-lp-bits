@@ -121,6 +121,10 @@ class AttachmentLegacyService
                 }
                 $height = (int) $imagesize[1];
                 $width = (int) $imagesize[0];
+                if ($width <= 0 || $height <= 0) {
+                    $warning = $lang['text_invalid_image_file'] ?? 'Invalid image file.';
+                    return compact('warning', 'script', 'count_left');
+                }
             }
             //get driver
             $storageDriver = \App\Support\Config\SiteConfig::current()->imageHosting->driver('local');
@@ -160,8 +164,8 @@ class AttachmentLegacyService
                                 $hscale=$height/$targetheight;
                                 $wscale=$width/$targetwidth;
                                 $scale=($hscale < 1 && $wscale < 1) ? 1 : (( $hscale > $wscale) ? $hscale : $wscale);
-                                $newwidth=(int) floor($width/$scale);
-                                $newheight=(int) floor($height/$scale);
+                                $newwidth = max(1, (int) floor($width/$scale));
+                                $newheight = max(1, (int) floor($height/$scale));
                                 if ($scale != 1){ //thumbnail is needed
                                     if ($it==1)
                                         $orig=@imagecreatefromgif($file["tmp_name"]);
@@ -172,6 +176,10 @@ class AttachmentLegacyService
                                     if ($orig)
                                     {
                                         $thumb = imagecreatetruecolor($newwidth, $newheight);
+                                        if ($thumb === false) {
+                                            $warning = $lang['text_invalid_image_file'] ?? 'Invalid image file.';
+                                            return compact('warning', 'script', 'count_left');
+                                        }
                                         imagecopyresampled($thumb, $orig, 0, 0, 0, 0, $newwidth, $newheight, $width, $height);
                                         if ($thumbnailtype_attachment == 'createthumb'){
                                             $hasthumb = true;
@@ -201,15 +209,27 @@ class AttachmentLegacyService
                                     else
                                     {
                                         $resource=imagecreatetruecolor($width,$height);
+                                        if ($resource === false) {
+                                            $warning = $lang['text_invalid_image_file'] ?? 'Invalid image file.';
+                                            return compact('warning', 'script', 'count_left');
+                                        }
                                         if ($it==1)
                                             $resource_p=@imagecreatefromgif($file["tmp_name"]);
                                         elseif ($it==2)
                                             $resource_p=@imagecreatefromjpeg($file["tmp_name"]);
                                         else
                                             $resource_p=@imagecreatefrompng($file["tmp_name"]);
+                                        if ($resource_p === false) {
+                                            $warning = $lang['text_invalid_image_file'] ?? 'Invalid image file.';
+                                            return compact('warning', 'script', 'count_left');
+                                        }
                                         imagecopy($resource, $resource_p, 0, 0, 0, 0, $width, $height);
                                     }
                                     $watermark = imagecreatefrompng('pic/watermark.png');
+                                    if ($watermark === false) {
+                                        $warning = $lang['text_invalid_image_file'] ?? 'Invalid image file.';
+                                        return compact('warning', 'script', 'count_left');
+                                    }
                                     $watermark_width = imagesx($watermark);
                                     $watermark_height = imagesy($watermark);
                                     //the position of the watermark
@@ -277,6 +297,10 @@ class AttachmentLegacyService
                                 }
                             }
                             if ($maycreatethumb){ // if no watermark is added, create the thumbnail now for the above resized image.
+                                if ($thumb === false) {
+                                    $warning = $lang['text_invalid_image_file'] ?? 'Invalid image file.';
+                                    return compact('warning', 'script', 'count_left');
+                                }
                                 imagejpeg($thumb, $file_location.".".$ext, $thumbquality_attachment);
                                 $filesize = filesize($file_location.".".$ext);
                             }

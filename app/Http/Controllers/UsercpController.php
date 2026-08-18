@@ -2,11 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\DTOs\Usercp\ForumSettingsDto;
+use App\DTOs\Usercp\PersonalSettingsDto;
+use App\DTOs\Usercp\SecuritySettingsDto;
+use App\DTOs\Usercp\TrackerSettingsDto;
 use App\Repositories\UsercpRepository;
 use App\Services\Legacy\LegacyPartialRenderer;
 use App\Support\SupportContext;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\View\View;
 
 class UsercpController extends LegacyController
@@ -27,7 +32,7 @@ class UsercpController extends LegacyController
     public function settings(Request $request): array
     {
         if ($request->isMethod('POST')) {
-            return $this->success($this->repository->updatePersonal($request));
+            return $this->success($this->repository->updatePersonal(PersonalSettingsDto::fromRequest($request)));
         }
 
         return $this->success($this->repository->settings());
@@ -38,7 +43,7 @@ class UsercpController extends LegacyController
      */
     public function forum(Request $request): array
     {
-        return $this->success($this->repository->updateForum($request));
+        return $this->success($this->repository->updateForum(ForumSettingsDto::fromRequest($request)));
     }
 
     /**
@@ -46,7 +51,7 @@ class UsercpController extends LegacyController
      */
     public function tracker(Request $request): array
     {
-        return $this->success($this->repository->updateTracker($request));
+        return $this->success($this->repository->updateTracker(TrackerSettingsDto::fromRequest($request)));
     }
 
     /**
@@ -54,13 +59,13 @@ class UsercpController extends LegacyController
      */
     public function security(Request $request): array
     {
-        return $this->success($this->repository->updateSecurityApi($request));
+        return $this->success($this->repository->updateSecurityApi(SecuritySettingsDto::fromRequest($request)));
     }
 
     /**
      * Serve the legacy usercp.php page from a Laravel view.
      */
-    public function legacy(Request $request): View|RedirectResponse
+    public function legacy(Request $request): View|Response|RedirectResponse
     {
         $user = SupportContext::getUser();
         if ($user === null) {
@@ -74,19 +79,19 @@ class UsercpController extends LegacyController
             $type = (string) $request->input('type');
 
             if ($type === 'save' && $action === 'personal') {
-                $this->repository->updatePersonal($request);
+                $this->repository->updatePersonal(PersonalSettingsDto::fromRequest($request));
 
                 return redirect('/usercp.php?action=personal&type=saved');
             }
 
             if ($type === 'save' && $action === 'forum') {
-                $this->repository->updateForum($request);
+                $this->repository->updateForum(ForumSettingsDto::fromRequest($request));
 
                 return redirect('/usercp.php?action=forum&type=saved');
             }
 
             if ($type === 'save' && $action === 'tracker') {
-                $this->repository->updateTracker($request);
+                $this->repository->updateTracker(TrackerSettingsDto::fromRequest($request));
 
                 return redirect('/usercp.php?action=tracker&type=saved');
             }
@@ -100,7 +105,7 @@ class UsercpController extends LegacyController
 
         $userInfo = $this->repository->getUserById((int) $user['id']);
         $result = $this->renderer->render('usercp', ['tokens' => $this->repository->getUserTokens($userInfo)]);
-        if ($result instanceof RedirectResponse) {
+        if (! is_array($result)) {
             return $result;
         }
 

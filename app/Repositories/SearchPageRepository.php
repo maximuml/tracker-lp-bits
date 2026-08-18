@@ -23,7 +23,7 @@ class SearchPageRepository
         $searchParams = $request->all();
         $searchRaw = is_scalar($searchParams['search'] ?? '') ? trim((string) ($searchParams['search'] ?? '')) : '';
         $search = str_replace('.', ' ', $searchRaw);
-        $searchArea = is_scalar($searchParams['search_area'] ?? '') ? (int) ($searchParams['search_area'] ?? MeiliSearchRepository::SEARCH_AREA_TITLE) : MeiliSearchRepository::SEARCH_AREA_TITLE;
+        $searchArea = is_scalar($searchParams['search_area'] ?? '') ? (int) ($searchParams['search_area'] ?? MeiliSearchRepository::SEARCH_AREA_TITLE) : (int) MeiliSearchRepository::SEARCH_AREA_TITLE;
         if (! in_array((string) $searchArea, [MeiliSearchRepository::SEARCH_AREA_TITLE, MeiliSearchRepository::SEARCH_AREA_DESC, MeiliSearchRepository::SEARCH_AREA_OWNER], true)) {
             $searchArea = (int) MeiliSearchRepository::SEARCH_AREA_TITLE;
         }

@@ -32,12 +32,12 @@ final class Style
     public static function cssRow(mixed $cache, int|string $cssId, int|string $defaultId): ?array
     {
         if (self::$stylesheetRows === null) {
-            $cached = (is_object($cache) || is_string($cache)) && method_exists($cache, 'get_value') ? $cache->get_value('stylesheet_content') : false;
+            $cached = is_object($cache) && method_exists($cache, 'get_value') ? $cache->get_value('stylesheet_content') : false;
             if ($cached !== false) {
                 self::$stylesheetRows = is_array($cached) ? $cached : [];
             } else {
                 self::$stylesheetRows = StyleRepository::all();
-                if ((is_object($cache) || is_string($cache)) && method_exists($cache, 'cache_value')) {
+                if (is_object($cache) && method_exists($cache, 'cache_value')) {
                     $cache->cache_value('stylesheet_content', self::$stylesheetRows, 95400);
                 }
             }

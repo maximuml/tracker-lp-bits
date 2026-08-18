@@ -2,17 +2,21 @@
 namespace App\Logging;
 
 use Monolog\Formatter\LineFormatter;
+use Monolog\Handler\FormattableHandlerInterface;
+use Monolog\Logger;
 
 class NexusFormatter
 {
-    public function __invoke($logger)
+    public function __invoke(Logger $logger): void
     {
         foreach ($logger->getHandlers() as $handler) {
-            $handler->setFormatter($this->formatter());
+            if ($handler instanceof FormattableHandlerInterface) {
+                $handler->setFormatter($this->formatter());
+            }
         }
     }
 
-    protected function formatter()
+    protected function formatter(): LineFormatter
     {
         $id = 'NO_REQUEST_ID';
         if (\Nexus\Nexus::instance()) {

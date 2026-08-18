@@ -317,6 +317,9 @@ final class Time
     public static function millis(bool $withTimeZone = false): string
     {
         $dt = \DateTime::createFromFormat('U.u', sprintf('%.6f', microtime(true)));
+        if ($dt === false) {
+            $dt = new \DateTime();
+        }
         $dt->setTimezone(new \DateTimeZone(Env::get('TIMEZONE', 'UTC')));
         $format = $withTimeZone ? 'Y-m-d\\TH:i:s.vP' : 'Y-m-d H:i:s.v';
 
@@ -326,6 +329,9 @@ final class Time
     public static function micro(bool $withTimeZone = false): string
     {
         $dt = \DateTime::createFromFormat('U.u', sprintf('%.6f', microtime(true)));
+        if ($dt === false) {
+            $dt = new \DateTime();
+        }
         $dt->setTimezone(new \DateTimeZone(Env::get('TIMEZONE', 'UTC')));
         $format = $withTimeZone ? 'Y-m-d\\TH:i:s.uP' : 'Y-m-d H:i:s.u';
 

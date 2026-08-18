@@ -71,7 +71,7 @@ class ExamUser extends NexusModel
     public function getProgressFormattedAttribute(): array
     {
         $examRep = new ExamRepository();
-        return $examRep->getProgressFormatted($this->exam, $this->progress);
+        return $examRep->getProgressFormatted($this->exam, (array) $this->progress);
     }
 
     /**
@@ -111,7 +111,8 @@ class ExamUser extends NexusModel
 
         if ($exam->duration > 0) {
             \App\Support\Logger::writeWithContext((string) sprintf('examUser: %s, begin from self created_at(%s)', $this->id, $this->getRawOriginal('created_at')), (string) 'info', (bool) false);
-            return $this->created_at->toDateTimeString();
+            $createdAt = $this->created_at;
+            return $createdAt instanceof \Illuminate\Support\Carbon ? $createdAt->toDateTimeString() : null;
         }
         return null;
     }
@@ -135,7 +136,8 @@ class ExamUser extends NexusModel
         $duration = $exam->duration;
         if ($duration > 0) {
             \App\Support\Logger::writeWithContext((string) sprintf('examUser: %s, end from self created_at + exam(%s) created_at: %s + %s days', $this->id, $exam->id, $this->getRawOriginal('created_at'), $duration), (string) 'info', (bool) false);
-            return $this->created_at->addDays((int)$duration)->toDateTimeString();
+            $createdAt = $this->created_at;
+            return $createdAt instanceof \Illuminate\Support\Carbon ? $createdAt->addDays((int) $duration)->toDateTimeString() : null;
         }
         return null;
     }

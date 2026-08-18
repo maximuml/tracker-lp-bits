@@ -284,7 +284,7 @@ final class Comment
         $html = Frame::mainOpen('', false, 100, $contentWidth)
             . Frame::open('', false, 10, '100%', 'left');
 
-        $uidArr = array_unique(array_column($rows, 'user'));
+        $uidArr = array_values(array_filter(array_map('intval', array_column($rows, 'user'))));
         $neededColumns = ['id', 'class', 'enabled', 'privacy', 'avatar', 'signature', 'uploaded', 'downloaded', 'last_access', 'username', 'donor', 'leechwarn', 'warned', 'title'];
         $userInfoArr = \App\Repositories\UserRepository::getByIds($uidArr, $neededColumns);
 
@@ -320,7 +320,7 @@ final class Comment
             $actionbar = '<a href="comment.php?action=add&amp;sub=quote&amp;cid=' . $row['id'] . '&amp;pid=' . $parentId . '&amp;type=' . $type . '"><img class="f_quote" src="pic/trans.gif" alt="Quote" title="' . ($lang_functions['title_reply_with_quote'] ?? '') . '" /></a>'
                 . '<a href="comment.php?action=add&amp;pid=' . $parentId . '&amp;type=' . $type . '"><img class="f_reply" src="pic/trans.gif" alt="Add Reply" title="' . ($lang_functions['title_add_reply'] ?? '') . '" /></a>'
                 . (Permission::can(PermissionEnum::COM_MANAGE) ? '<a href="comment.php?action=delete&amp;cid=' . $row['id'] . '&amp;type=' . $type . '"><img class="f_delete" src="pic/trans.gif" alt="Delete" title="' . ($lang_functions['title_delete'] ?? '') . '" /></a>' : '')
-                . (($row['user'] == $CURUSER['id'] || \App\Support\UserDisplay::currentClass() >= $commanage_class) ? '<a href="comment.php?action=edit&amp;cid=' . $row['id'] . '&amp;type=' . $type . '"><img class="f_edit" src="pic/trans.gif" alt="Edit" title="' . ($lang_functions['title_edit'] ?? '') . '" /></a>' : '');
+                . (((is_array($CURUSER) && $row['user'] == ($CURUSER['id'] ?? 0)) || \App\Support\UserDisplay::currentClass() >= $commanage_class) ? '<a href="comment.php?action=edit&amp;cid=' . $row['id'] . '&amp;type=' . $type . '"><img class="f_edit" src="pic/trans.gif" alt="Edit" title="' . ($lang_functions['title_edit'] ?? '') . '" /></a>' : '');
 
             $onlineIcon = ($userRow['last_access'] > $dt)
                 ? '<img class="f_online" src="pic/trans.gif" alt="Online" title="' . ($lang_functions['title_online'] ?? '') . '" />'

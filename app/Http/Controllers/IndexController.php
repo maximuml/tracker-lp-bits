@@ -7,6 +7,7 @@ use App\Services\Legacy\LegacyPartialRenderer;
 use App\Support\SupportContext;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\View\View;
 
 class IndexController extends Controller
@@ -18,7 +19,7 @@ class IndexController extends Controller
         $this->renderer = $renderer;
     }
 
-    public function legacy(Request $request): View|RedirectResponse
+    public function legacy(Request $request): View|Response|RedirectResponse
     {
         $user = SupportContext::getUser();
         if ($user === null) {
@@ -33,7 +34,7 @@ class IndexController extends Controller
         }
 
         $result = $this->renderer->render('index');
-        if ($result instanceof RedirectResponse) {
+        if (! is_array($result)) {
             return $result;
         }
 
@@ -50,7 +51,7 @@ class IndexController extends Controller
         }
 
         $poll = IndexRepository::getCurrentPoll();
-        if (! $poll) {
+        if (! is_array($poll) || ! isset($poll['id']) || ! is_array($user)) {
             return redirect('/index.php');
         }
 
@@ -63,8 +64,10 @@ class IndexController extends Controller
         IndexRepository::recordPollVote($pollId, $user['id'], (int) $choice);
 
         $cache = SupportContext::getCache();
-        $cache->delete_value('current_poll_content');
-        $cache->delete_value('current_poll_result', true);
+        if ($cache !== null) {
+            $cache->delete_value('current_poll_content');
+            $cache->delete_value('current_poll_result', true);
+        }
 
         $pollvoteBonus = (float) SupportContext::getGlobal('pollvote_bonus', 0);
         if ($pollvoteBonus > 0) {

@@ -446,7 +446,11 @@ class InfoController extends LegacyController
                 $cache->delete_value('recent_news', true);
             }
 
-            Events::fire('news_created', News::query()->find($newsId), null);
+            $news = News::query()->find($newsId);
+            if (! $news) {
+                return $this->legacyAbortResponse($langNews['std_error'] ?? 'Error', $langNews['std_something_weird_happened'] ?? 'Something weird happened.');
+            }
+            Events::fire('news_created', $news, null);
 
             return redirect('/');
         }

@@ -203,7 +203,8 @@ class UserPasskeyRepository extends BaseRepository
     public static function getAaguids()
     {
         return NexusDB::remember("aaguids", 60 * 60 * 24 * 14, function () {
-            return json_decode(file_get_contents("https://raw.githubusercontent.com/passkeydeveloper/passkey-authenticator-aaguids/refs/heads/main/combined_aaguid.json"), true);
+            $json = file_get_contents("https://raw.githubusercontent.com/passkeydeveloper/passkey-authenticator-aaguids/refs/heads/main/combined_aaguid.json");
+            return $json === false ? null : json_decode($json, true);
         });
     }
 

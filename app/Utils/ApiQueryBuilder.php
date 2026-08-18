@@ -2,7 +2,6 @@
 
 namespace App\Utils;
 
-use App\Http\Resources\TorrentResource;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -23,16 +22,24 @@ use Illuminate\Database\Eloquent\Builder;
 
 class ApiQueryBuilder
 {
-    protected array $allowedIncludes = [],
-        $requestIncludes = [],
-        $allowedFilters = [],
-        $allowedSorts = [],
-        $requestSorts = [],
-        $allowedIncludeCounts = [],
-        $allowedIncludeFields = [],
-        $requestIncludeFields = []
-    ;
+    /** @var array<int, string> */
+    protected array $allowedIncludes = [];
+    /** @var array<int, string> */
+    protected array $requestIncludes = [];
+    /** @var array<int, string> */
+    protected array $allowedFilters = [];
+    /** @var array<int, string> */
+    protected array $allowedSorts = [];
+    /** @var array<string, string> */
+    protected array $requestSorts = [];
+    /** @var array<int, string> */
+    protected array $allowedIncludeCounts = [];
+    /** @var array<int, string> */
+    protected array $allowedIncludeFields = [];
+    /** @var array<int, string> */
+    protected array $requestIncludeFields = [];
 
+    /** @var array<string, callable> */
     protected array $customFilterCallbacks = [];
 
     const PARAM_NAME_INCLUDES = "includes";
@@ -43,25 +50,40 @@ class ApiQueryBuilder
     const PARAM_NAME_SORTS = "sorts";
 
 
-    public function __construct(protected Request $request, protected Builder $query, protected string $resourceName) {}
+    protected Builder $query;
+
+    public function __construct(protected Request $request, Builder $query, protected string $resourceName)
+    {
+        $this->query = $query;
+    }
 
     public static function for(string $resourceName, Builder $query, ?Request $request = null): self
     {
         return new self($request ?? request(), $query, $resourceName);
     }
 
+    /**
+     * @param array<int, string> $includes
+     */
     public function allowIncludes(array $includes): self
     {
         $this->allowedIncludes = $includes;
-        $requestIncludesStr = $this->request->input(self::PARAM_NAME_INCLUDES);
+        $requestIncludesStr = (string) $this->request->input(self::PARAM_NAME_INCLUDES, '');
         $this->requestIncludes = explode(',', $requestIncludesStr);
         return $this;
     }
+    /**
+     * @param array<int, string> $filters
+     */
     public function allowFilters(array $filters): self { $this->allowedFilters = $filters; return $this; }
+
+    /**
+     * @param array<int, string> $sorts
+     */
     public function allowSorts(array $sorts): self
     {
         $this->allowedSorts = $sorts;
-        $requestSortsStr = $this->request->input(self::PARAM_NAME_SORTS, "");
+        $requestSortsStr = (string) $this->request->input(self::PARAM_NAME_SORTS, "");
         foreach (explode(',', $requestSortsStr) as $sort) {
             $direction = str_starts_with($sort, '-') ? 'desc' : 'asc';
             $field = ltrim($sort, '-');
@@ -69,12 +91,18 @@ class ApiQueryBuilder
         }
         return $this;
     }
+    /**
+     * @param array<int, string> $counts
+     */
     public function allowIncludeCounts(array $counts): self { $this->allowedIncludeCounts = $counts; return $this; }
 
+    /**
+     * @param array<int, string> $fields
+     */
     public function allowIncludeFields(array $fields): self
     {
         $this->allowedIncludeFields = $fields;
-        $requestIncludeFieldsStr = $this->request->input(sprintf("%s.%s", self::PARAM_NAME_INCLUDE_FIELDS, $this->resourceName), "");
+        $requestIncludeFieldsStr = (string) $this->request->input(sprintf("%s.%s", self::PARAM_NAME_INCLUDE_FIELDS, $this->resourceName), "");
         $this->requestIncludeFields = explode(',', $requestIncludeFieldsStr);
         return $this;
     }
@@ -111,17 +139,21 @@ class ApiQueryBuilder
     protected function applyFilters(): void
     {
         $filters = $this->request->input(self::PARAM_NAME_FILTER, []);
+        if (! is_array($filters)) {
+            return;
+        }
 
 //        dd($filters);
 
         foreach ($filters as $field => $value) {
+            $field = (string) $field;
             if (!in_array($field, $this->allowedFilters)) continue;
             if (isset($this->customFilterCallbacks[$field])) continue;
 
             // 如果是复杂条件
             if (is_array($value)) {
                 foreach ($value as $operator => $val) {
-                    $this->applyFilterOperator($field, $operator, $val);
+                    $this->applyFilterOperator($field, (string) $operator, $val);
                 }
             } else {
                 // 简单形式，默认等于
@@ -148,22 +180,25 @@ class ApiQueryBuilder
     {
         $filters = $this->request->input(self::PARAM_NAME_FILTER_ANY, []);
 
-        if (!empty($filters)) {
-            $this->query->where(function ($q) use ($filters) {
-                foreach ($filters as $field => $value) {
+        if (! is_array($filters) || empty($filters)) {
+            return;
+        }
+
+        $this->query->where(function ($q) use ($filters) {
+            foreach ($filters as $field => $value) {
+                    $field = (string) $field;
                     if (!in_array($field, $this->allowedFilters)) continue;
                     if (isset($this->customFilterCallbacks[$field])) continue;
 
                     if (is_array($value)) {
                         foreach ($value as $operator => $val) {
-                            $this->applyFilterAnyOperator($q, $field, $operator, $val);
+                            $this->applyFilterAnyOperator($q, $field, (string) $operator, $val);
                         }
                     } else {
                         $q->orWhere($field, '=', $value);
                     }
                 }
             });
-        }
     }
 
     protected function applyFilterAnyOperator(Builder $query, string $field, string $operator, mixed $value): void
@@ -222,6 +257,10 @@ class ApiQueryBuilder
         return $this->hasBoth($this->allowedSorts, array_keys($this->requestSorts), $field);
     }
 
+    /**
+     * @param array<int, string> $dataA
+     * @param array<int, string> $dataB
+     */
     private function hasBoth(array $dataA, array $dataB, mixed $oneKey = null): bool
     {
         $result = array_intersect($dataA, $dataB);

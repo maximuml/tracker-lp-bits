@@ -21,7 +21,9 @@ abstract class LegacyController extends Controller
             return redirect('/' . $page . '.php' . ($qs ? '?' . $qs : ''));
         }
 
-        return view($page . '.index', $data);
+        $view = view()->make($page . '.index', $data);
+        /** @var \Illuminate\View\View $view */
+        return $view;
     }
 
     /**
@@ -35,7 +37,7 @@ abstract class LegacyController extends Controller
             return redirect('/' . $page . '.php' . ($qs ? '?' . $qs : ''));
         }
 
-        $content = view($page . '.index', $data)->render();
+        $content = view()->make($page . '.index', $data)->render();
 
         $headers = headers_list();
         $status = http_response_code();
@@ -43,8 +45,9 @@ abstract class LegacyController extends Controller
             if (stripos($header, 'Location:') === 0) {
                 $url = trim(substr($header, 9));
                 header_remove('Location');
+                $statusCode = is_int($status) && $status >= 300 && $status < 400 ? $status : 302;
 
-                return redirect($url, ($status >= 300 && $status < 400) ? $status : 302);
+                return redirect($url, $statusCode);
             }
         }
 
@@ -62,7 +65,7 @@ abstract class LegacyController extends Controller
             return redirect('/' . $page . '.php' . ($qs ? '?' . $qs : ''));
         }
 
-        $content = view($page . '.index', $data)->render();
+        $content = view()->make($page . '.index', $data)->render();
 
         $headers = headers_list();
         $responseHeaders = [];
@@ -72,7 +75,9 @@ abstract class LegacyController extends Controller
                 $url = trim(substr($header, 9));
                 header_remove('Location');
 
-                return redirect($url, ($status >= 300 && $status < 400) ? $status : 302);
+                $statusCode = is_int($status) && $status >= 300 && $status < 400 ? $status : 302;
+
+                return redirect($url, $statusCode);
             }
 
             $parts = explode(':', $header, 2);
@@ -84,7 +89,7 @@ abstract class LegacyController extends Controller
             }
         }
 
-        $responseStatus = ($status >= 100) ? $status : 200;
+        $responseStatus = is_int($status) && $status >= 100 ? $status : 200;
 
         return response($content, $responseStatus, $responseHeaders);
     }

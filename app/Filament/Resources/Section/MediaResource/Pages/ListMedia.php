@@ -22,6 +22,7 @@ class ListMedia extends PageList
         ];
     }
 
+    /** @return Builder<Media> */
     protected function getTableQuery(): Builder
     {
         return Media::query()->with('search_box')->orderBy('mode', 'asc');

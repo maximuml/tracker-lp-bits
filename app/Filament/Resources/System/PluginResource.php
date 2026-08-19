@@ -20,7 +20,7 @@ use Filament\Tables\Table;
 use Filament\Tables;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-use Illuminate\Support\HtmlString;
+
 
 class PluginResource extends Resource
 {
@@ -80,7 +80,8 @@ class PluginResource extends Resource
         ];
     }
 
-    private static function getActions()
+    /** @return array<Action> */
+    private static function getActions(): array
     {
         $actions = [];
         $actions[] = EditAction::make();
@@ -95,7 +96,7 @@ class PluginResource extends Resource
         return $actions;
     }
 
-    private static function buildInstallAction()
+    private static function buildInstallAction(): Action
     {
         return Action::make('install')
             ->label(__('plugin.actions.install'))
@@ -109,7 +110,7 @@ class PluginResource extends Resource
         ;
     }
 
-    private static function buildUpdateAction()
+    private static function buildUpdateAction(): Action
     {
         return Action::make('update')
             ->label(__('plugin.actions.update'))

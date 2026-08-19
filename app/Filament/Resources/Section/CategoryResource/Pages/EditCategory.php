@@ -25,7 +25,7 @@ class EditCategory extends EditRecord
     /**
      * @see functions.php::get_category_row()
      */
-    protected function afterSave()
+    protected function afterSave(): void
     {
         \App\Support\Cache::clearCategory();
     }

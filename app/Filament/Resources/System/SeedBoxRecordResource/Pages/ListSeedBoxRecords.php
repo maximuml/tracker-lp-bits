@@ -16,8 +16,10 @@ class ListSeedBoxRecords extends PageList
 {
     protected static string $resource = SeedBoxRecordResource::class;
 
+    /** @var array<int|string, mixed>|null */
     protected static ?array $checkResult = null;
 
+    /** @return array<Action> */
     protected function getHeaderActions(): array
     {
         return [

@@ -26,6 +26,7 @@ class LatestUsers extends BaseWidget implements HasActions
         return false;
     }
 
+    /** @return Builder<User> */
     protected function getTableQuery(): Builder
     {
         return User::query()->orderBy('id', 'desc')->limit(5);

@@ -20,6 +20,7 @@ class ListInvites extends PageList
         ];
     }
 
+    /** @return Builder<Invite> */
     protected function getTableQuery(): Builder
     {
         return Invite::query()->with(['inviter_user']);

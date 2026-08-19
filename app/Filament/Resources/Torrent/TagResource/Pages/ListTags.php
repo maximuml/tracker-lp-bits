@@ -22,6 +22,7 @@ class ListTags extends PageList
     }
 
 
+    /** @return Builder<Tag> */
     protected function getTableQuery(): Builder
     {
         return Tag::query()->withCount('torrents')->withSum('torrents', 'size');

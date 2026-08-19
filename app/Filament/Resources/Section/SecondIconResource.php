@@ -25,6 +25,7 @@ use Filament\Tables\Table;
 use Filament\Tables;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Collection;
 use Nexus\Database\NexusDB;
 
 class SecondIconResource extends Resource
@@ -102,7 +103,7 @@ class SecondIconResource extends Resource
         $taxonomyList = self::listTaxonomy();
         foreach (SearchBox::$taxonomies as $torrentField => $taxonomyTableModel) {
             $columns[] = TextColumn::make($torrentField)->formatStateUsing(function ($state) use ($taxonomyList, $torrentField) {
-                 return $taxonomyList[$torrentField]->get($state);
+                 return $taxonomyList[$torrentField]->get($state) ?? '';
             });
         }
         return $table
@@ -119,8 +120,10 @@ class SecondIconResource extends Resource
             ]);
     }
 
-    private static function listTaxonomy()
+    /** @return array<string, Collection<int|string, mixed>> */
+    private static function listTaxonomy(): array
     {
+        /** @var array<string, Collection<int|string, mixed>> $taxonomyList */
         static $taxonomyList = [];
         if (empty($taxonomyList)) {
             foreach (SearchBox::$taxonomies as $torrentField => $taxonomyTableModel) {

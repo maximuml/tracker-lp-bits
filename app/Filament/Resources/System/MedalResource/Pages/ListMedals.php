@@ -21,6 +21,7 @@ class ListMedals extends PageList
         ];
     }
 
+    /** @return Builder<Medal> */
     protected function getTableQuery(): Builder
     {
         return Medal::query()->withCount('users');

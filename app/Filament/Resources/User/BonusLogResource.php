@@ -121,6 +121,10 @@ class BonusLogResource extends Resource
         ];
     }
 
+    /**
+     * @param  array<string, mixed>  $filters
+     * @return  LengthAwarePaginator<int, array<string, mixed>>
+     */
     private static function listRecords(int $page, int $perPage, array $filters = []): LengthAwarePaginator
     {
         $rep = new BonusRepository();

@@ -25,6 +25,7 @@ class LatestTorrents extends BaseWidget implements HasActions
         return false;
     }
 
+    /** @return Builder<Torrent> */
     protected function getTableQuery(): Builder
     {
         return Torrent::query()->orderBy('id', 'desc')->limit(5);

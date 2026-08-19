@@ -21,7 +21,6 @@ use App\Filament\OptionsTrait;
 use App\Filament\Resources\User\UserMedalResource\Pages;
 use App\Filament\Resources\User\UserMedalResource\RelationManagers;
 use App\Models\Medal;
-use App\Models\NexusModel;
 use App\Models\UserMedal;
 use App\Repositories\MedalRepository;
 use Carbon\Carbon;
@@ -136,7 +135,7 @@ class UserMedalResource extends Resource
                 ,
             ])
             ->recordActions([
-                DeleteAction::make()->using(function (NexusModel $record) {
+                DeleteAction::make()->using(function (UserMedal $record) {
                     $record->delete();
                     \App\Support\Cache::clearUser($record->uid, '');
                     \App\Support\Admin::successNotification("");

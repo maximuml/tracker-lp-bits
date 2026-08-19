@@ -19,7 +19,7 @@ class CreateIcon extends CreateRecord
         ];
     }
 
-    public function afterCreate()
+    public function afterCreate(): void
     {
         \App\Support\Cache::clearIcon();
     }

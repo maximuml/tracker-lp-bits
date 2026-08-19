@@ -16,6 +16,7 @@ class SystemInfo extends StatTable
         return \App\Support\Locale::trans('dashboard.system_info.page_title', [], null);
     }
 
+    /** @return array<int|string, array<string, mixed>> */
     protected function getTableRows(): array
     {
         $dashboardRep = new DashboardRepository();

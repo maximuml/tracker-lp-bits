@@ -13,16 +13,15 @@ use App\Filament\Resources\User\UserMetaResource\Pages\CreateUserMeta;
 use App\Filament\Resources\User\UserMetaResource\Pages\EditUserMeta;
 use App\Filament\Resources\User\UserMetaResource\Pages;
 use App\Filament\Resources\User\UserMetaResource\RelationManagers;
-use App\Models\NexusModel;
+use App\Models\User;
 use App\Models\UserMeta;
+use Illuminate\Support\Facades\Auth;
 use Filament\Forms;
 use Filament\Resources\Resource;
 use Filament\Tables\Table;
 use Filament\Tables;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\HtmlString;
 
 class UserMetaResource extends Resource
 {
@@ -91,10 +90,12 @@ class UserMetaResource extends Resource
                 ,
             ])
             ->recordActions([
-                DeleteAction::make()->using(function (NexusModel $record) {
+                DeleteAction::make()->using(function (UserMeta $record) {
                     $record->delete();
                     \App\Support\Cache::clearUser($record->uid, '');
-                    \App\Support\Logger::writeWithContext((string) sprintf("user: %d meta: %s was del by %s", $record->uid, $record->meta_key, Auth::user()->username), (string) 'info', (bool) false);
+                    $user = Auth::user();
+                    $username = $user instanceof User ? $user->username : 'unknown';
+                    \App\Support\Logger::writeWithContext((string) sprintf("user: %d meta: %s was del by %s", $record->uid, $record->meta_key, $username), (string) 'info', (bool) false);
                 }),
             ])
             ->toolbarActions([

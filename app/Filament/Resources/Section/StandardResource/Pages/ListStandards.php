@@ -22,6 +22,7 @@ class ListStandards extends PageList
         ];
     }
 
+    /** @return Builder<Standard> */
     protected function getTableQuery(): Builder
     {
         return Standard::query()->with('search_box')->orderBy('mode', 'asc');

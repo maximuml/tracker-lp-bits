@@ -21,6 +21,7 @@ class ListCategories extends PageList
         ];
     }
 
+    /** @return Builder<Category> */
     protected function getTableQuery(): Builder
     {
         return Category::query()->with('search_box')->orderBy('mode', 'asc');

@@ -21,6 +21,7 @@ class ListSources extends PageList
         ];
     }
 
+    /** @return Builder<Source> */
     protected function getTableQuery(): Builder
     {
         return Source::query()->with('search_box')->orderBy('mode', 'asc');

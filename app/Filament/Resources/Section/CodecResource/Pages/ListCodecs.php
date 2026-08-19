@@ -21,6 +21,7 @@ class ListCodecs extends PageList
         ];
     }
 
+    /** @return Builder<Codec> */
     protected function getTableQuery(): Builder
     {
         return Codec::query()->with('search_box')->orderBy('mode', 'asc');

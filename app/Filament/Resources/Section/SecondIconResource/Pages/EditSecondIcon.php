@@ -23,11 +23,19 @@ class EditSecondIcon extends EditRecord
         ];
     }
 
+    /**
+     * @param  array<string, mixed>  $data
+     * @return  array<string, mixed>
+     */
     protected function mutateFormDataBeforeSave(array $data): array
     {
         return SecondIcon::formatFormData($data);
     }
 
+    /**
+     * @param  array<string, mixed>  $data
+     * @return  array<string, mixed>
+     */
     protected function mutateFormDataBeforeFill(array $data): array
     {
         $mode = $data['mode'];

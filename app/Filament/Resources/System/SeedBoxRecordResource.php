@@ -22,10 +22,8 @@ use App\Filament\Resources\System\SeedBoxRecordResource\Pages\EditSeedBoxRecord;
 use App\Filament\OptionsTrait;
 use App\Filament\Resources\System\SeedBoxRecordResource\Pages;
 use App\Filament\Resources\System\SeedBoxRecordResource\RelationManagers;
-use App\Models\NexusModel;
 use App\Models\SeedBoxRecord;
 use App\Repositories\SeedBoxRepository;
-use Filament\Facades\Filament;
 use Filament\Forms;
 use Filament\Resources\Resource;
 use Filament\Tables\Table;
@@ -146,7 +144,7 @@ class SeedBoxRecordResource extends Resource
                 EditAction::make(),
                 Action::make('audit')
                     ->label(__('admin.resources.seed_box_record.toggle_status'))
-                    ->mountUsing(fn (Schema $schema, NexusModel $record) => $schema->fill([
+                    ->mountUsing(fn (Schema $schema, SeedBoxRecord $record) => $schema->fill([
                         'status' => $record->status,
                     ]))
                     ->schema([

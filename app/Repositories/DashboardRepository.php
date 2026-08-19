@@ -14,7 +14,7 @@ use Nexus\Database\NexusDB;
 
 class DashboardRepository extends BaseRepository
 {
-    /** @return  array<int|string, mixed> */
+    /** @return  array<string, array<string, mixed>> */
     public function getSystemInfo(): array
     {
         $result = [];
@@ -84,8 +84,8 @@ class DashboardRepository extends BaseRepository
         return $result;
     }
 
-    /** @return  array<int|string, mixed> */
-    public function getStatData()
+    /** @return  array<string, array<string, mixed>> */
+    public function getStatData(): array
     {
         return [
             'user_class' => [
@@ -107,8 +107,8 @@ class DashboardRepository extends BaseRepository
         ];
     }
 
-    /** @return  mixed */
-    public function statUserClass()
+    /** @return  array<int|string, array<string, mixed>> */
+    public function statUserClass(): array
     {
         $userClasses = User::query()
             ->groupBy('class')
@@ -129,8 +129,8 @@ class DashboardRepository extends BaseRepository
         return $result;
     }
 
-    /** @return  mixed */
-    public function statUsers()
+    /** @return  array<string, array<string, mixed>> */
+    public function statUsers(): array
     {
         $result = [];
         $now = Carbon::now();
@@ -205,8 +205,8 @@ class DashboardRepository extends BaseRepository
         return $result;
     }
 
-    /** @return  mixed */
-    public function statTorrents()
+    /** @return  array<string, array<string, mixed>> */
+    public function statTorrents(): array
     {
         $now = now();
         $name = 'total';

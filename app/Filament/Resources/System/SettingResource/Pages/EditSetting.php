@@ -17,7 +17,6 @@ use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Section;
-use App\Auth\Permission;
 use App\Filament\OptionsTrait;
 use App\Filament\Resources\System\SettingResource;
 use App\Models\HitAndRun;
@@ -29,12 +28,11 @@ use App\Models\Torrent;
 use App\Models\User;
 use App\Repositories\TokenRepository;
 use App\Repositories\ToolRepository;
-use Filament\Facades\Filament;
-use Filament\Resources\Pages\Page;
 use Filament\Forms;
+use Filament\Resources\Pages\Page;
+use Filament\Schemas\Components\Component;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Arr;
-use Nexus\Database\NexusDB;
 
 class EditSetting extends Page implements HasForms
 {
@@ -42,14 +40,24 @@ class EditSetting extends Page implements HasForms
 
     protected static string $resource = SettingResource::class;
 
+    /** @var array<string, mixed>|null */
     public ?array $data = [];
+
+    private function contentSchema(): Schema
+    {
+        $content = $this->getSchema('content');
+        if (! $content instanceof Schema) {
+            throw new \RuntimeException('Content schema not initialized.');
+        }
+        return $content;
+    }
 
     public function getTitle(): string
     {
         return __('label.setting.nav_text');
     }
 
-    public function mount()
+    public function mount(): void
     {
         static::authorizeResourceAccess();
         $this->fillForm();
@@ -62,7 +70,7 @@ class EditSetting extends Page implements HasForms
             ->statePath('data');
     }
 
-    private function fillForm()
+    private function fillForm(): void
     {
         $settings = Settings::fromDb();
 
@@ -75,11 +83,12 @@ class EditSetting extends Page implements HasForms
         }
         Arr::set($settings, 'captcha.attendance.enabled', $normalized);
 
-        $this->content->fill($settings);
+        $this->contentSchema()->fill($settings);
     }
 
 
 
+    /** @return array<Component|Action> */
     protected function getFormSchema(): array
     {
         return [
@@ -91,11 +100,11 @@ class EditSetting extends Page implements HasForms
         ];
     }
 
-    public function submit()
+    public function submit(): void
     {
         static::authorizeResourceAccess();
 
-        $formData = $this->content->getState();
+        $formData = $this->contentSchema()->getState();
         $notAutoloadNames = ['donation_custom'];
         $data = [];
         foreach ($formData as $prefix => $parts) {
@@ -138,6 +147,7 @@ class EditSetting extends Page implements HasForms
         Setting::updateUserTokenPermissionAllowedCache();
     }
 
+    /** @return array<Tab> */
     private function getTabs(): array
     {
         $tabs = [];
@@ -157,8 +167,8 @@ class EditSetting extends Page implements HasForms
             ->schema([
                 Radio::make('backup.enabled')->options(self::$yesOrNo)->inline(true)->label(__('label.enabled'))->helperText(__('label.setting.backup.enabled_help')),
                 Radio::make('backup.frequency')->options(['daily' => 'daily', 'hourly' => 'hourly'])->inline(true)->label(__('label.setting.backup.frequency'))->helperText(__('label.setting.backup.frequency_help')),
-                Select::make('backup.hour')->options(range(0, 23))->label(__('label.setting.backup.hour'))->helperText(__('label.setting.backup.hour_help')),
-                Select::make('backup.minute')->options(range(0, 59))->label(__('label.setting.backup.minute'))->helperText(__('label.setting.backup.minute_help')),
+                Select::make('backup.hour')->options(array_map(fn (int $hour): string => (string) $hour, range(0, 23)))->label(__('label.setting.backup.hour'))->helperText(__('label.setting.backup.hour_help')),
+                Select::make('backup.minute')->options(array_map(fn (int $minute): string => (string) $minute, range(0, 59)))->label(__('label.setting.backup.minute'))->helperText(__('label.setting.backup.minute_help')),
                 TextInput::make('backup.export_path')->label(__('label.setting.backup.export_path'))->helperText(new HtmlString(__('label.setting.backup.export_path_help', ['default_path' => ToolRepository::getBackupExportPathDefault()]))),
                 TextInput::make('backup.retention_count')->numeric()->label(__('label.setting.backup.retention_count'))->helperText(new HtmlString(__('label.setting.backup.retention_count_help', ['default_count' => ToolRepository::BACKUP_RETENTION_COUNT_DEFAULT]))),
                 Radio::make('backup.via_ftp')->options(self::$yesOrNo)->inline(true)->label(__('label.setting.backup.via_ftp'))->helperText(new HtmlString(__('label.setting.backup.via_ftp_help'))),
@@ -259,6 +269,7 @@ class EditSetting extends Page implements HasForms
         return $tabs;
     }
 
+    /** @return array<Component> */
     private function getTabCaptchaSchema(): array
     {
         $captchaPrefix = 'captcha';
@@ -397,7 +408,8 @@ class EditSetting extends Page implements HasForms
         return $schema;
     }
 
-    private function getHitAndRunSchema()
+    /** @return array<Component> */
+    private function getHitAndRunSchema(): array
     {
         $default = [
             Radio::make('hr.mode')->options(HitAndRun::listModes(true))->inline(true)->label(__('label.setting.hr.mode')),
@@ -411,57 +423,8 @@ class EditSetting extends Page implements HasForms
         return \App\Support\Hooks::applyFilter("hit_and_run_setting_schema", $default);
     }
 
-    private function getRequireSeedSectionSchema(): array
-    {
-        return [
-            Radio::make('require_seed_section.enabled')->options(self::$yesOrNo)->label(__('label.enabled'))->helperText(__('label.setting.require_seed_section.enabled_help')),
-            TextInput::make('require_seed_section.menu_title')->label(__('label.setting.require_seed_section.menu_title'))->helperText(__('label.setting.require_seed_section.menu_title_help')),
-            TextInput::make('require_seed_section.seeder_lte')->label(__('label.setting.require_seed_section.seeder_lte'))->helperText(__('label.setting.require_seed_section.seeder_lte_help'))->integer(),
-            TextInput::make('require_seed_section.seeder_gte')->label(__('label.setting.require_seed_section.seeder_gte'))->helperText(__('label.setting.require_seed_section.seeder_gte_help'))->integer(),
-            CheckboxList::make('require_seed_section.require_tags')->label(__('label.setting.require_seed_section.require_tags'))->helperText(__('label.setting.require_seed_section.require_tags_help'))->options(Tag::query()->pluck('name', 'id'))->columns(4),
-            Select::make('require_seed_section.promotion_state')->label(__('label.setting.require_seed_section.promotion_state'))->helperText(__('label.setting.require_seed_section.promotion_state_help'))->options(Torrent::listPromotionTypes(true)),
-            TextInput::make('require_seed_section.daily_seed_time_min')->label(__('label.setting.require_seed_section.daily_seed_time_min'))->helperText(__('label.setting.require_seed_section.daily_seed_time_min_help'))->integer(),
-            TextInput::make('require_seed_section.torrent_count_max')->label(__('label.setting.require_seed_section.torrent_count_max'))->helperText(__('label.setting.require_seed_section.torrent_count_max_help'))->integer(),
-            Repeater::make('require_seed_section.bonus_reward')
-                ->label(__('label.setting.require_seed_section.bonus_reward'))
-                ->helperText(__('label.setting.require_seed_section.bonus_reward_help'))
-                ->schema([
-                    TextInput::make('seeders')
-                        ->label(__('label.setting.require_seed_section.seeders'))
-                        ->required()
-                        ->integer()
-                        ->columnSpan(2)
-                    ,
-                    Repeater::make('seed_time_reward')
-                        ->label(__('label.setting.require_seed_section.seed_time_reward'))
-                        ->schema([
-                            TextInput::make('begin')->label(__('label.setting.require_seed_section.seed_time_reward_begin'))->helperText(__('label.setting.require_seed_section.seed_time_reward_begin_help')),
-                            TextInput::make('end')->label(__('label.setting.require_seed_section.seed_time_reward_end'))->helperText(__('label.setting.require_seed_section.seed_time_reward_end_help')),
-                            TextInput::make('window')->label(__('label.setting.require_seed_section.seed_time_reward_window'))->helperText(__('label.setting.require_seed_section.seed_time_reward_window_help')),
-                            TextInput::make('reward')->label(__('label.setting.require_seed_section.seed_time_reward_reward'))->helperText(__('label.setting.require_seed_section.seed_time_reward_reward_help')),
-                        ])
-                        ->columns(4)
-                        ->columnSpan(5)
-                    ,
-                    Repeater::make('data_traffic_reward')
-                        ->label(__('label.setting.require_seed_section.data_traffic_reward'))
-                        ->schema([
-                            TextInput::make('begin')->label(__('label.setting.require_seed_section.data_traffic_reward_begin'))->helperText(__('label.setting.require_seed_section.data_traffic_reward_begin_help')),
-                            TextInput::make('end')->label(__('label.setting.require_seed_section.data_traffic_reward_end'))->helperText(__('label.setting.require_seed_section.data_traffic_reward_end_help')),
-                            TextInput::make('window')->label(__('label.setting.require_seed_section.data_traffic_reward_window'))->helperText(__('label.setting.require_seed_section.data_traffic_reward_window_help')),
-                            TextInput::make('reward')->label(__('label.setting.require_seed_section.data_traffic_reward_reward'))->helperText(__('label.setting.require_seed_section.data_traffic_reward_reward_help')),
-                        ])
-                        ->columns(4)
-                        ->columnSpan(5)
-                ])
-                ->columns(12)
-                ->columnSpanFull()
-                ->defaultItems(3)
-                ->reorderable(false)
-        ];
-    }
-
-    private function getTabMeilisearchSchema($id): array
+    /** @return array<Component> */
+    private function getTabMeilisearchSchema(string $id): array
     {
         $schema = [];
 
@@ -492,7 +455,8 @@ class EditSetting extends Page implements HasForms
         return $schema;
     }
 
-    private function getTabImageHostingSchema($id): array
+    /** @return array<Component> */
+    private function getTabImageHostingSchema(string $id): array
     {
         $schema = [];
         $name = "$id.driver";
@@ -547,7 +511,8 @@ class EditSetting extends Page implements HasForms
         return $schema;
     }
 
-    private function getTabPermissionSchema($id): array
+    /** @return array<Component> */
+    private function getTabPermissionSchema(string $id): array
     {
         $schema = [];
 

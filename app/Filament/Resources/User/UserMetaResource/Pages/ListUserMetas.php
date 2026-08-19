@@ -21,6 +21,7 @@ class ListUserMetas extends PageList implements HasActions
         ];
     }
 
+    /** @return Builder<UserMeta> */
     protected function getTableQuery(): Builder
     {
         return UserMeta::query()->whereIn('meta_key', array_keys(UserMeta::$metaKeys));

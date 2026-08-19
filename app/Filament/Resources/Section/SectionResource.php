@@ -59,7 +59,8 @@ class SectionResource extends Resource
         return self::getNavigationLabel();
     }
 
-    private static function buildLocalSchema($name)
+    /** @return array<int, TextInput> */
+    private static function buildLocalSchema(string $name): array
     {
         $localeSchema = [];
         foreach (Locale::$languageMaps as $lang => $locale) {

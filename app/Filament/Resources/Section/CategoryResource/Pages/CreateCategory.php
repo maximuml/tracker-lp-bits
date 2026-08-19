@@ -13,7 +13,7 @@ class CreateCategory extends CreateRecord
 
     protected static string $resource = CategoryResource::class;
 
-    protected function afterCreate()
+    protected function afterCreate(): void
     {
         \App\Support\Cache::clearCategory();
     }

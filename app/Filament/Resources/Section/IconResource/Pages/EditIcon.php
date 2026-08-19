@@ -16,6 +16,7 @@ class EditIcon extends EditRecord
 
 //    protected static string $view = 'filament.resources.system.category-icon-resource.pages.edit-record';
 
+    /** @return array<DeleteAction> */
     protected function getHeaderActions(): array
     {
         return [
@@ -23,6 +24,10 @@ class EditIcon extends EditRecord
         ];
     }
 
+    /**
+     * @param  array<string, mixed>  $data
+     * @return  array<string, mixed>
+     */
     protected function mutateFormDataBeforeFill(array $data): array
     {
         $data['tip'] = \App\Support\Locale::trans('label.icon.desc', [], null);
@@ -36,7 +41,7 @@ class EditIcon extends EditRecord
         ];
     }
 
-    public function afterSave()
+    public function afterSave(): void
     {
         \App\Support\Cache::clearIcon();
     }

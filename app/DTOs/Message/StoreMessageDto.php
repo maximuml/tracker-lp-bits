@@ -22,7 +22,7 @@ final readonly class StoreMessageDto
         public int $sender,
         public string $added,
         public string $unread = 'yes',
-        public int $location = 0,
+        public int $location = 1,
         public string $saved = 'no',
     ) {}
 

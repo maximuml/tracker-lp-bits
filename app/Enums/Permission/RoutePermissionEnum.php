@@ -173,7 +173,6 @@ enum RoutePermissionEnum: string
             self::USER_UPDATE,
             self::USER_DESTROY => PermissionEnum::MANAGE_USER_BASIC_INFO,
             self::COMMENT_STORE => PermissionEnum::POST_MANAGE,
-            self::MESSAGE_STORE => PermissionEnum::SEND_INVITE,
             self::NEWS_MANAGE => PermissionEnum::NEWS_MANAGE,
             self::POLL_MANAGE => PermissionEnum::POLL_MANAGE,
             self::FORUM_MANAGE,

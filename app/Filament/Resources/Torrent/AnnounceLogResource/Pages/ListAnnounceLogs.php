@@ -7,10 +7,8 @@ use App\Filament\Resources\Torrent\AnnounceLogResource;
 use App\Models\AnnounceLog;
 use App\Repositories\AnnounceLogRepository;
 use Filament\Actions;
-use Filament\Resources\Pages\ListRecords;
 use Illuminate\Contracts\Pagination\CursorPaginator;
 use Illuminate\Contracts\Pagination\Paginator;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -28,12 +26,13 @@ class ListAnnounceLogs extends PageListSingle
             $request = request();
             $page = (int) $request->get('page', 1);
             $perPage = (int) $request->get('per_page', 10);
+
             return new LengthAwarePaginator([], 0, $perPage, $page);
         }
 
         $filterableColumns = [
             'user_id' => 'is_numeric',
-            'torrent_id'=> 'is_numeric',
+            'torrent_id' => 'is_numeric',
             'peer_id' => 'is_string',
             'ip' => 'is_string',
             'event' => 'is_string',
@@ -41,10 +40,10 @@ class ListAnnounceLogs extends PageListSingle
         $sortableColumns = ['timestamp', 'uploaded_total', 'uploaded_increment', 'downloaded_total', 'downloaded_increment', 'left', 'announce_time'];
         $sortableDirections = ['asc', 'desc'];
         $request = request();
-//        dd($request->all());
+        //        dd($request->all());
         $filters = [];
         foreach ($request->get('tableFilters', []) as $field => $values) {
-            if (!isset($filterableColumns[$field])) {
+            if (! isset($filterableColumns[$field])) {
                 continue;
             }
             foreach ($values as $k => $v) {
@@ -57,8 +56,8 @@ class ListAnnounceLogs extends PageListSingle
         $perPage = (int) $request->get('per_page', 10);
         $sortColumn = null;
         $sortDirection = null;
-        $sortColumnFromQuery = $request->get("tableSortColumn");
-        $sortDirectionFromQuery = $request->get("tableSortDirection");
+        $sortColumnFromQuery = $request->get('tableSortColumn');
+        $sortDirectionFromQuery = $request->get('tableSortDirection');
         if (in_array($sortColumnFromQuery, $sortableColumns)) {
             $sortColumn = $sortColumnFromQuery;
         }
@@ -79,7 +78,7 @@ class ListAnnounceLogs extends PageListSingle
             if (! is_array($snapshot)) {
                 continue;
             }
-//            do_log("snapshot: " . $component['snapshot']);
+            //            do_log("snapshot: " . $component['snapshot']);
             if (isset($snapshot['data']['tableRecordsPerPage'])) {
                 $perPage = $snapshot['data']['tableRecordsPerPage'];
             }
@@ -100,14 +99,14 @@ class ListAnnounceLogs extends PageListSingle
                 }
             }
             if (isset($snapshot['data']['tableFilters'])) {
-//                dd($snapshot['data']['tableFilters']);
-                foreach ($snapshot['data']['tableFilters'] as  $filterItems) {
+                //                dd($snapshot['data']['tableFilters']);
+                foreach ($snapshot['data']['tableFilters'] as $filterItems) {
                     foreach ($filterItems as $field => $items) {
-                        if (!isset($filterableColumns[$field]) || !is_array($items)) {
+                        if (! isset($filterableColumns[$field]) || ! is_array($items)) {
                             continue;
                         }
                         foreach ($items as $values) {
-                            if (!is_array($values)) {
+                            if (! is_array($values)) {
                                 continue;
                             }
                             foreach ($values as $subField => $value) {
@@ -119,30 +118,30 @@ class ListAnnounceLogs extends PageListSingle
                     }
                 }
             }
-//            do_log("updates: " . json_encode($component['updates'] ?? []));
+            //            do_log("updates: " . json_encode($component['updates'] ?? []));
             if (isset($component['updates']['tableRecordsPerPage'])) {
                 $perPage = $component['updates']['tableRecordsPerPage'];
             }
-//            do_log("calls: " . json_encode($component['calls'] ?? []));
+            //            do_log("calls: " . json_encode($component['calls'] ?? []));
             if (isset($component['calls'])) {
                 foreach ($component['calls'] as $call) {
-                    if ($call['method'] == "gotoPage") {
+                    if ($call['method'] == 'gotoPage') {
                         $page = $call['params'][0];
                     }
-                    if ($call['method'] == "sortTable") {
-                        if (!in_array($call['params'][0], $sortableColumns)) {
+                    if ($call['method'] == 'sortTable') {
+                        if (! in_array($call['params'][0], $sortableColumns)) {
                             continue;
                         }
                         $sortColumn = $call['params'][0];
-                        if (!isset($sorts[$sortColumn])) {
-                            $sortDirection = "asc";
-                        } elseif ($sorts[$sortColumn] == "asc") {
-                            $sortDirection = "desc";
-                        } elseif ($sorts[$sortColumn] == "desc") {
+                        if (! isset($sorts[$sortColumn])) {
+                            $sortDirection = 'asc';
+                        } elseif ($sorts[$sortColumn] == 'asc') {
+                            $sortDirection = 'desc';
+                        } elseif ($sorts[$sortColumn] == 'desc') {
                             $sortDirection = null;
                         }
                     }
-                    if ($call['method'] == "resetTableFiltersForm") {
+                    if ($call['method'] == 'resetTableFiltersForm') {
                         $filters = [];
                     }
                 }
@@ -161,7 +160,7 @@ class ListAnnounceLogs extends PageListSingle
         $page = (int) $page;
         $perPage = (int) $perPage;
 
-        $rep = new AnnounceLogRepository();
+        $rep = new AnnounceLogRepository;
         $result = $rep->listAll($filters, $page, $perPage, $sortColumn, $sortDirection);
         if (! is_array($result) || ! isset($result['data'], $result['total'])) {
             return new LengthAwarePaginator([], 0, $perPage, $page);
@@ -175,13 +174,14 @@ class ListAnnounceLogs extends PageListSingle
             $model = new AnnounceLog($announceLog);
             $items[] = $model;
         }
+
         return new LengthAwarePaginator($items, $result['total'], $perPage, $page);
     }
 
     protected function getHeaderActions(): array
     {
         return [
-//            Actions\CreateAction::make(),
+            //            Actions\CreateAction::make(),
         ];
     }
 
@@ -190,7 +190,8 @@ class ListAnnounceLogs extends PageListSingle
         if (config('clickhouse.connection.host') == '') {
             return null;
         }
-        $rep = new AnnounceLogRepository();
+        $rep = new AnnounceLogRepository;
+
         return $rep->getById($key);
     }
 }

@@ -2,39 +2,33 @@
 
 namespace App\Filament\Resources\Torrent;
 
-use Filament\Schemas\Schema;
-use Filament\Schemas\Components\Tabs;
-use Filament\Schemas\Components\Tabs\Tab;
-use Filament\Schemas\Components\Fieldset;
-use Filament\Infolists\Components\TextEntry;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\Filter;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Select;
-use Filament\Actions\ViewAction;
-use App\Filament\Resources\Torrent\AnnounceLogResource\Pages\ListAnnounceLogs;
 use App\Filament\Resources\Torrent\AnnounceLogResource\Pages;
-use App\Filament\Resources\Torrent\AnnounceLogResource\RelationManagers;
+use App\Filament\Resources\Torrent\AnnounceLogResource\Pages\ListAnnounceLogs;
 use App\Models\AnnounceLog;
 use App\Models\Setting;
 use App\Models\Torrent;
-use Filament\Forms;
-use Filament\Forms\Form;
+use App\Support\Format;
+use Filament\Actions\ViewAction;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Fieldset;
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab;
+use Filament\Schemas\Schema;
 use Filament\Tables;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-use Filament\Infolists;
-
 
 class AnnounceLogResource extends Resource
 {
     protected static ?string $model = AnnounceLog::class;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Tracker';
+    protected static string|\UnitEnum|null $navigationGroup = 'Tracker';
 
     protected static ?int $navigationSort = 5;
 
@@ -48,9 +42,6 @@ class AnnounceLogResource extends Resource
         return self::getNavigationLabel();
     }
 
-    /**
-     * @return bool
-     */
     public static function shouldRegisterNavigation(): bool
     {
         return Setting::getIsRecordAnnounceLog() && config('clickhouse.connection.host') != '';
@@ -69,37 +60,37 @@ class AnnounceLogResource extends Resource
                                         TextEntry::make('timestamp')->label(__('announce-log.timestamp')),
                                         TextEntry::make('user_id')->label(__('announce-log.user_id'))->copyable(),
                                         TextEntry::make('torrent_id')->label(__('announce-log.torrent_id'))->copyable(),
-                                        TextEntry::make('torrent_size')->label(__('announce-log.torrent_size'))->formatStateUsing(fn($state) => \App\Support\Format::size($state)),
+                                        TextEntry::make('torrent_size')->label(__('announce-log.torrent_size'))->formatStateUsing(fn ($state) => Format::size($state)),
                                         TextEntry::make('seeder_count')->label(__('announce-log.seeder_count')),
                                         TextEntry::make('leecher_count')->label(__('announce-log.leecher_count')),
-                                        TextEntry::make('promotion_state')->label(__('announce-log.promotion_state'))->formatStateUsing(fn($state) => Torrent::$promotionTypes[$state]['text'] ?? ''),
+                                        TextEntry::make('promotion_state')->label(__('announce-log.promotion_state'))->formatStateUsing(fn ($state) => Torrent::$promotionTypes[$state]['text'] ?? ''),
                                         TextEntry::make('promotion_state_desc')->label(__('announce-log.promotion_state_desc')),
                                         TextEntry::make('event')->label(__('announce-log.event')),
-                                        TextEntry::make('left')->label(__('announce-log.left'))->formatStateUsing(fn($state) => \App\Support\Format::size($state)),
+                                        TextEntry::make('left')->label(__('announce-log.left'))->formatStateUsing(fn ($state) => Format::size($state)),
                                         TextEntry::make('announce_time')->label(__('announce-log.announce_time')),
-                                        TextEntry::make('speed')->label(__('announce-log.speed'))->formatStateUsing(fn($state) => \App\Support\Format::size($state) . "/s"),
+                                        TextEntry::make('speed')->label(__('announce-log.speed'))->formatStateUsing(fn ($state) => Format::size($state).'/s'),
                                     ])->columns(4),
 
                                 Fieldset::make(__('announce-log.fieldset_uploaded'))
                                     ->schema([
-                                        TextEntry::make('uploaded_offset')->label(__('announce-log.uploaded_offset'))->formatStateUsing(fn($state) => \App\Support\Format::size($state)),
-                                        TextEntry::make('uploaded_total_last')->label(__('announce-log.uploaded_total_last'))->formatStateUsing(fn($state) => \App\Support\Format::size($state)),
-                                        TextEntry::make('uploaded_total')->label(__('announce-log.uploaded_total'))->formatStateUsing(fn($state) => \App\Support\Format::size($state)),
-                                        TextEntry::make('uploaded_increment')->label(__('announce-log.uploaded_increment'))->formatStateUsing(fn($state) => \App\Support\Format::size($state)),
+                                        TextEntry::make('uploaded_offset')->label(__('announce-log.uploaded_offset'))->formatStateUsing(fn ($state) => Format::size($state)),
+                                        TextEntry::make('uploaded_total_last')->label(__('announce-log.uploaded_total_last'))->formatStateUsing(fn ($state) => Format::size($state)),
+                                        TextEntry::make('uploaded_total')->label(__('announce-log.uploaded_total'))->formatStateUsing(fn ($state) => Format::size($state)),
+                                        TextEntry::make('uploaded_increment')->label(__('announce-log.uploaded_increment'))->formatStateUsing(fn ($state) => Format::size($state)),
                                         TextEntry::make('up_factor')->label(__('announce-log.up_factor')),
                                         TextEntry::make('up_factor_desc')->label(__('announce-log.up_factor_desc')),
-                                        TextEntry::make('uploaded_increment_for_user')->label(__('announce-log.uploaded_increment_for_user'))->formatStateUsing(fn($state) => \App\Support\Format::size($state)),
+                                        TextEntry::make('uploaded_increment_for_user')->label(__('announce-log.uploaded_increment_for_user'))->formatStateUsing(fn ($state) => Format::size($state)),
                                     ])->columns(4),
 
                                 Fieldset::make(__('announce-log.fieldset_downloaded'))
                                     ->schema([
-                                        TextEntry::make('downloaded_offset')->label(__('announce-log.downloaded_offset'))->formatStateUsing(fn($state) => \App\Support\Format::size($state)),
-                                        TextEntry::make('downloaded_total_last')->label(__('announce-log.downloaded_total_last'))->formatStateUsing(fn($state) => \App\Support\Format::size($state)),
-                                        TextEntry::make('downloaded_total')->label(__('announce-log.downloaded_total'))->formatStateUsing(fn($state) => \App\Support\Format::size($state)),
-                                        TextEntry::make('downloaded_increment')->label(__('announce-log.downloaded_increment'))->formatStateUsing(fn($state) => \App\Support\Format::size($state)),
+                                        TextEntry::make('downloaded_offset')->label(__('announce-log.downloaded_offset'))->formatStateUsing(fn ($state) => Format::size($state)),
+                                        TextEntry::make('downloaded_total_last')->label(__('announce-log.downloaded_total_last'))->formatStateUsing(fn ($state) => Format::size($state)),
+                                        TextEntry::make('downloaded_total')->label(__('announce-log.downloaded_total'))->formatStateUsing(fn ($state) => Format::size($state)),
+                                        TextEntry::make('downloaded_increment')->label(__('announce-log.downloaded_increment'))->formatStateUsing(fn ($state) => Format::size($state)),
                                         TextEntry::make('down_factor')->label(__('announce-log.down_factor')),
                                         TextEntry::make('down_factor_desc')->label(__('announce-log.down_factor_desc')),
-                                        TextEntry::make('downloaded_increment_for_user')->label(__('announce-log.downloaded_increment_for_user'))->formatStateUsing(fn($state) => \App\Support\Format::size($state)),
+                                        TextEntry::make('downloaded_increment_for_user')->label(__('announce-log.downloaded_increment_for_user'))->formatStateUsing(fn ($state) => Format::size($state)),
                                     ])->columns(4),
                             ]),
                         Tab::make(__('announce-log.tab_secondary'))
@@ -131,7 +122,7 @@ class AnnounceLogResource extends Resource
 
                                     ])->columns(4),
                             ]),
-                    ])->columnSpanFull()
+                    ])->columnSpanFull(),
             ]);
     }
 
@@ -145,40 +136,33 @@ class AnnounceLogResource extends Resource
                 TextColumn::make('peer_id')->label(__('announce-log.peer_id')),
                 TextColumn::make('torrent_size')
                     ->label(__('announce-log.torrent_size'))
-                    ->formatStateUsing(fn ($state): string => \App\Support\Format::size($state))
-                ,
+                    ->formatStateUsing(fn ($state): string => Format::size($state)),
                 TextColumn::make('uploaded_total')
                     ->label(__('announce-log.uploaded_total'))
-                    ->formatStateUsing(fn ($state): string => \App\Support\Format::size($state))
-                    ->sortable()
-                ,
+                    ->formatStateUsing(fn ($state): string => Format::size($state))
+                    ->sortable(),
                 TextColumn::make('uploaded_increment')
                     ->label(__('announce-log.uploaded_increment'))
-                    ->formatStateUsing(fn ($state): string => \App\Support\Format::size($state))
-                    ->sortable()
-                ,
+                    ->formatStateUsing(fn ($state): string => Format::size($state))
+                    ->sortable(),
                 TextColumn::make('downloaded_total')
                     ->label(__('announce-log.downloaded_total'))
-                    ->formatStateUsing(fn ($state): string => \App\Support\Format::size($state))
-                    ->sortable()
-                ,
+                    ->formatStateUsing(fn ($state): string => Format::size($state))
+                    ->sortable(),
                 TextColumn::make('downloaded_increment')
                     ->label(__('announce-log.downloaded_increment'))
-                    ->formatStateUsing(fn ($state): string => \App\Support\Format::size($state))
-                    ->sortable()
-                ,
+                    ->formatStateUsing(fn ($state): string => Format::size($state))
+                    ->sortable(),
                 TextColumn::make('left')
                     ->label(__('announce-log.left'))
-                    ->formatStateUsing(fn ($state): string => \App\Support\Format::size($state))
-                    ->sortable()
-                ,
+                    ->formatStateUsing(fn ($state): string => Format::size($state))
+                    ->sortable(),
                 TextColumn::make('announce_time')
                     ->label(__('announce-log.announce_time'))
-                    ->sortable()
-                ,
+                    ->sortable(),
                 TextColumn::make('event')->label(__('announce-log.event')),
                 TextColumn::make('ip')->label('IP'),
-//                Tables\Columns\TextColumn::make('agent')->label(__('announce-log.agent')),
+                //                Tables\Columns\TextColumn::make('agent')->label(__('announce-log.agent')),
             ])
             ->filters([
                 Filter::make('user_id')
@@ -186,49 +170,39 @@ class AnnounceLogResource extends Resource
                         TextInput::make('user_id')
                             ->label(__('announce-log.user_id'))
                             ->numeric()
-                            ->minValue(1)
-                        ,
-                    ])
-                ,
+                            ->minValue(1),
+                    ]),
                 Filter::make('torrent_id')
                     ->schema([
                         TextInput::make('torrent_id')
                             ->label(__('announce-log.torrent_id'))
                             ->numeric()
-                            ->minValue(1)
-                        ,
-                    ])
-                ,
+                            ->minValue(1),
+                    ]),
                 Filter::make('peer_id')
                     ->schema([
                         TextInput::make('peer_id')
-                            ->label(__('announce-log.peer_id'))
-                        ,
-                    ])
-                ,
+                            ->label(__('announce-log.peer_id')),
+                    ]),
                 Filter::make('ip')
                     ->schema([
                         TextInput::make('ip')
-                            ->label('IP')
-                        ,
-                    ])
-                ,
+                            ->label('IP'),
+                    ]),
                 Filter::make('event')
                     ->schema([
                         Select::make('event')
                             ->label(__('announce-log.event'))
-                            ->options(AnnounceLog::listEvents())
-                        ,
-                    ])
-                ,
+                            ->options(AnnounceLog::listEvents()),
+                    ]),
             ])
             ->recordActions([
                 ViewAction::make()->modalWidth('5xl'),
             ])
             ->toolbarActions([
-//                Tables\Actions\BulkActionGroup::make([
-//                    Tables\Actions\DeleteBulkAction::make(),
-//                ]),
+                //                Tables\Actions\BulkActionGroup::make([
+                //                    Tables\Actions\DeleteBulkAction::make(),
+                //                ]),
             ]);
     }
 
@@ -243,8 +217,8 @@ class AnnounceLogResource extends Resource
     {
         return [
             'index' => ListAnnounceLogs::route('/'),
-//            'create' => Pages\CreateAnnounceLog::route('/create'),
-//            'edit' => Pages\EditAnnounceLog::route('/{record}/edit'),
+            //            'create' => Pages\CreateAnnounceLog::route('/create'),
+            //            'edit' => Pages\EditAnnounceLog::route('/{record}/edit'),
         ];
     }
 }

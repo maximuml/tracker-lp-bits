@@ -2,33 +2,26 @@
 
 namespace App\Filament\Resources\System;
 
-use Filament\Schemas\Schema;
-use Filament\Forms\Components\TextInput;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Actions\DeleteBulkAction;
 use App\Filament\Resources\System\PluginResource\Pages\ManagePlugins;
-use Filament\Actions\EditAction;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\Action;
-use App\Filament\Resources\System\PluginResource\Pages;
-use App\Filament\Resources\System\PluginResource\RelationManagers;
 use App\Jobs\ManagePlugin;
 use App\Models\Plugin;
-use Filament\Forms;
+use Filament\Actions\Action;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Filament\Tables;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-
 
 class PluginResource extends Resource
 {
     protected static ?string $model = Plugin::class;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-plus-circle';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-plus-circle';
 
-    protected static string | \UnitEnum | null $navigationGroup = 'System';
+    protected static string|\UnitEnum|null $navigationGroup = 'System';
 
     protected static ?int $navigationSort = 99;
 
@@ -88,11 +81,12 @@ class PluginResource extends Resource
         $actions[] = self::buildInstallAction();
         $actions[] = self::buildUpdateAction();
         $actions[] = DeleteAction::make('delete')
-            ->hidden(fn ($record) => !in_array($record->status, Plugin::$showDeleteBtnStatus))
+            ->hidden(fn ($record) => ! in_array($record->status, Plugin::$showDeleteBtnStatus))
             ->using(function ($record) {
                 $record->update(['status' => Plugin::STATUS_PRE_DELETE]);
                 ManagePlugin::dispatch($record, 'delete');
             });
+
         return $actions;
     }
 
@@ -102,12 +96,11 @@ class PluginResource extends Resource
             ->label(__('plugin.actions.install'))
             ->icon('heroicon-o-arrow-down')
             ->requiresConfirmation()
-            ->hidden(fn ($record) => !in_array($record->status, Plugin::$showInstallBtnStatus))
+            ->hidden(fn ($record) => ! in_array($record->status, Plugin::$showInstallBtnStatus))
             ->action(function ($record) {
                 $record->update(['status' => Plugin::STATUS_PRE_INSTALL]);
                 ManagePlugin::dispatch($record, 'install');
-            })
-        ;
+            });
     }
 
     private static function buildUpdateAction(): Action
@@ -116,12 +109,10 @@ class PluginResource extends Resource
             ->label(__('plugin.actions.update'))
             ->icon('heroicon-o-arrow-up')
             ->requiresConfirmation()
-            ->hidden(fn ($record) => !in_array($record->status, Plugin::$showUpdateBtnStatus))
+            ->hidden(fn ($record) => ! in_array($record->status, Plugin::$showUpdateBtnStatus))
             ->action(function ($record) {
                 $record->update(['status' => Plugin::STATUS_PRE_UPDATE]);
                 ManagePlugin::dispatch($record, 'update');
-            })
-        ;
+            });
     }
-
 }

@@ -5,7 +5,6 @@ namespace App\Filament\Resources\System\SettingResource\Pages;
 use App\Filament\PageList;
 use App\Filament\Resources\System\SettingResource;
 use Filament\Pages\Actions;
-use Filament\Resources\Pages\ListRecords;
 
 class ListSettings extends PageList
 {
@@ -14,7 +13,7 @@ class ListSettings extends PageList
     protected function getHeaderActions(): array
     {
         return [
-//            Actions\CreateAction::make(),
+            //            Actions\CreateAction::make(),
         ];
     }
 }

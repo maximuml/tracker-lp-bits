@@ -14,7 +14,7 @@ return new class extends Migration
     public function up()
     {
         Schema::table('exams', function (Blueprint $table) {
-            $table->string("background_color")->default("blue");
+            $table->string('background_color')->default('blue');
         });
     }
 
@@ -26,7 +26,7 @@ return new class extends Migration
     public function down()
     {
         Schema::table('exams', function (Blueprint $table) {
-            $table->dropColumn("background_color");
+            $table->dropColumn('background_color');
         });
     }
 };

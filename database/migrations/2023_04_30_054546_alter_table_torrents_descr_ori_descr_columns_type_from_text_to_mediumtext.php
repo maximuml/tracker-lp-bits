@@ -31,4 +31,4 @@ class AlterTableTorrentsDescrOriDescrColumnsTypeFromTextToMediumtext extends Mig
             $table->text('ori_descr')->change();
         });
     }
-};
+}

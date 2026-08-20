@@ -14,7 +14,7 @@ return new class extends Migration
     public function up()
     {
         Schema::table('exams', function (Blueprint $table) {
-            $table->string("recurring")->nullable();
+            $table->string('recurring')->nullable();
         });
     }
 
@@ -26,7 +26,7 @@ return new class extends Migration
     public function down()
     {
         Schema::table('exams', function (Blueprint $table) {
-            $table->dropColumn("recurring");
+            $table->dropColumn('recurring');
         });
     }
 };

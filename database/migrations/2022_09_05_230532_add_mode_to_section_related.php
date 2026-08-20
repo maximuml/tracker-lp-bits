@@ -3,12 +3,14 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Nexus\Database\NexusDB;
 
 return new class extends Migration
 {
     private static array $tables = [
-        'sources', 'media', 'standards', 'codecs', 'audiocodecs', 'processings', 'secondicons'
+        'sources', 'media', 'standards', 'codecs', 'audiocodecs', 'processings', 'secondicons',
     ];
+
     /**
      * Run the migrations.
      *
@@ -17,7 +19,7 @@ return new class extends Migration
     public function up()
     {
         foreach (self::$tables as $table) {
-            if (!\Nexus\Database\NexusDB::hasColumn($table, 'mode')) {
+            if (! NexusDB::hasColumn($table, 'mode')) {
                 Schema::table($table, function (Blueprint $table) {
                     $table->integer('mode')->default(0);
                 });

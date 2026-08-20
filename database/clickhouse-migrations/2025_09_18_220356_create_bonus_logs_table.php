@@ -9,7 +9,7 @@ return new class extends AbstractClickhouseMigration
     public function up(): void
     {
         $this->clickhouseClient->write(
-            <<<SQL
+            <<<'SQL'
 CREATE TABLE bonus_logs
 (
     business_type   UInt32,
@@ -28,5 +28,4 @@ SETTINGS index_granularity = 8192;
 SQL
         );
     }
-
 };

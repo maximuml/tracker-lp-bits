@@ -14,8 +14,8 @@ return new class extends Migration
     public function up()
     {
         Schema::table('invites', function (Blueprint $table) {
-            $table->string("pre_register_email")->nullable();
-            $table->string("pre_register_username")->nullable();
+            $table->string('pre_register_email')->nullable();
+            $table->string('pre_register_username')->nullable();
         });
     }
 
@@ -27,7 +27,7 @@ return new class extends Migration
     public function down()
     {
         Schema::table('invites', function (Blueprint $table) {
-            $table->dropColumn(["pre_register_email", "pre_register_username"]);
+            $table->dropColumn(['pre_register_email', 'pre_register_username']);
         });
     }
 };

@@ -14,7 +14,7 @@ return new class extends Migration
     public function up()
     {
         Schema::table('oauth_clients', function (Blueprint $table) {
-            $table->smallInteger("skips_authorization")->default(false);
+            $table->smallInteger('skips_authorization')->default(false);
         });
     }
 
@@ -26,7 +26,7 @@ return new class extends Migration
     public function down()
     {
         Schema::table('oauth_clients', function (Blueprint $table) {
-            $table->dropColumn("skips_authorization");
+            $table->dropColumn('skips_authorization');
         });
     }
 };

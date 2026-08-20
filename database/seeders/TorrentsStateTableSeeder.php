@@ -7,7 +7,6 @@ use Illuminate\Support\Facades\DB;
 
 class TorrentsStateTableSeeder extends Seeder
 {
-
     /**
      * Auto generated seed file
      *
@@ -15,17 +14,14 @@ class TorrentsStateTableSeeder extends Seeder
      */
     public function run()
     {
-        
 
         DB::table('torrents_state')->delete();
-        
-        DB::table('torrents_state')->insert(array (
-            0 => 
-            array (
+
+        DB::table('torrents_state')->insert([
+            0 => [
                 'global_sp_state' => 1,
-            ),
-        ));
-        
-        
+            ],
+        ]);
+
     }
 }

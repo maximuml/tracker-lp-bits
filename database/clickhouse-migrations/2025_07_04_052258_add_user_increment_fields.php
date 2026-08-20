@@ -9,7 +9,7 @@ return new class extends AbstractClickhouseMigration
     public function up(): void
     {
         $this->clickhouseClient->write(
-            <<<SQL
+            <<<'SQL'
 ALTER TABLE announce_logs
 ADD COLUMN promotion_state   UInt8 after info_hash,
 ADD COLUMN promotion_state_desc   LowCardinality(String) after promotion_state,

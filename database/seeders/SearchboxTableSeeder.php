@@ -8,7 +8,6 @@ use Illuminate\Support\Facades\DB;
 
 class SearchboxTableSeeder extends Seeder
 {
-
     /**
      * Auto generated seed file
      *
@@ -17,12 +16,10 @@ class SearchboxTableSeeder extends Seeder
     public function run()
     {
 
-
         DB::table('searchbox')->delete();
 
-        DB::table('searchbox')->insert(array (
-            0 =>
-            array (
+        DB::table('searchbox')->insert([
+            0 => [
                 'id' => 4,
                 'name' => 'chd',
                 'showsubcat' => 1,
@@ -39,10 +36,9 @@ class SearchboxTableSeeder extends Seeder
                 'custom_fields_display' => '',
                 'extra' => json_encode([
                     SearchBox::EXTRA_DISPLAY_COVER_ON_TORRENT_LIST => 1,
-                ])
-            ),
-        ));
-
+                ]),
+            ],
+        ]);
 
     }
 }

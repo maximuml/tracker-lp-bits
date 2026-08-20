@@ -10,9 +10,10 @@
  * @property string|null $created_at
  * @property string|null $updated_at
  */
+
 namespace App\Models;
 
-use Nexus\Database\NexusDB;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Nexus\Torrent\TechnicalInformation;
 
 /**
@@ -20,26 +21,26 @@ use Nexus\Torrent\TechnicalInformation;
  */
 class TorrentExtra extends NexusModel
 {
-    /** @var  bool */
+    /** @var bool */
     public $timestamps = true;
 
-    /** @var  list<string> */
+    /** @var list<string> */
     protected $fillable = ['torrent_id', 'descr', 'ori_descr', 'media_info', 'nfo'];
 
-    /** @return  \Illuminate\Database\Eloquent\Relations\BelongsTo<Torrent, $this> */
+    /** @return  BelongsTo<Torrent, $this> */
     public function torrent()
     {
         return $this->belongsTo(Torrent::class, 'torrent_id');
     }
 
-    /** @var  list<string> */
+    /** @var list<string> */
     protected $appends = ['media_info_summary'];
 
     /** @return  array<int|string, mixed> */
     public function getMediaInfoSummaryAttribute(): array
     {
         $technicalInfo = new TechnicalInformation($this->media_info ?? '');
+
         return $technicalInfo->getSummaryInfo();
     }
-
 }

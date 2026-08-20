@@ -9,29 +9,32 @@
  * @property string|null $created_at
  * @property string|null $updated_at
  */
+
 namespace App\Models;
 
 use App\Models\Traits\NexusActivityLogTrait;
+use App\Support\Logger;
 use Nexus\Database\NexusDB;
 
 class TrackerUrl extends NexusModel
 {
     use NexusActivityLogTrait;
 
-    /** @var  list<string> */
+    /** @var list<string> */
     protected $fillable = ['url', 'enabled', 'is_default', 'priority'];
 
-    /** @var  bool */
+    /** @var bool */
     public $timestamps = true;
 
-    const TRACKER_URL_CACHE_KEY = "TRACKER_URL";
-    const TRACKER_URL_DEFAULT_CACHE_KEY = "TRACKER_URL_DEFAULT";
+    const TRACKER_URL_CACHE_KEY = 'TRACKER_URL';
+
+    const TRACKER_URL_DEFAULT_CACHE_KEY = 'TRACKER_URL_DEFAULT';
 
     protected static function booted(): void
     {
         static::saved(function (TrackerUrl $model) {
             if ($model->is_default == 1) {
-                self::query()->where("id", "!=", $model->id)->update(["is_default" => 0]);
+                self::query()->where('id', '!=', $model->id)->update(['is_default' => 0]);
             }
             self::saveUrlCache();
         });
@@ -44,7 +47,7 @@ class TrackerUrl extends NexusModel
 
     public static function saveUrlCache(): void
     {
-        //添加 id 与 URL 映射
+        // 添加 id 与 URL 映射
         $redis = NexusDB::redis();
         $redis->unlink(self::TRACKER_URL_CACHE_KEY);
         $list = self::listAll();
@@ -57,7 +60,7 @@ class TrackerUrl extends NexusModel
                 $redis->set(self::TRACKER_URL_DEFAULT_CACHE_KEY, $item->url);
             }
         }
-        if (!$hasDefault && $first) {
+        if (! $hasDefault && $first) {
             $redis->set(self::TRACKER_URL_DEFAULT_CACHE_KEY, $first->url);
         }
     }
@@ -66,15 +69,14 @@ class TrackerUrl extends NexusModel
     public static function listAll()
     {
         return self::query()
-            ->where("enabled", 1)
-            ->orderBy("is_default", "desc")
-            ->orderBy("priority", "desc")
+            ->where('enabled', 1)
+            ->orderBy('is_default', 'desc')
+            ->orderBy('priority', 'desc')
             ->get();
     }
 
     /**
-     * @param  int  $trackerUrlId
-     * @return  mixed
+     * @return mixed
      */
     public static function getById(int $trackerUrlId)
     {
@@ -87,16 +89,14 @@ class TrackerUrl extends NexusModel
         if ($result !== false) {
             return $result;
         }
-        \App\Support\Logger::writeWithContext((string) "No tracker url found for {$trackerUrlId}, try default", (string) 'warning', (bool) false);
+        Logger::writeWithContext((string) "No tracker url found for {$trackerUrlId}, try default", (string) 'warning', (bool) false);
+
         return self::getFromRedisWithRetry($redis, 'get', [self::TRACKER_URL_DEFAULT_CACHE_KEY], $notFoundFlagKey);
     }
 
     /**
-     * @param  \Redis  $redis
-     * @param  string  $command
      * @param  array<int|string, mixed>  $params
-     * @param  string  $notFoundFlagKey
-     * @return  mixed
+     * @return mixed
      */
     private static function getFromRedisWithRetry(\Redis $redis, string $command, array $params, string $notFoundFlagKey)
     {
@@ -106,30 +106,31 @@ class TrackerUrl extends NexusModel
         if ($result !== false) {
             return $result;
         }
-        //有不存在标记，不要再尝试，直接返回 false
+        // 有不存在标记，不要再尝试，直接返回 false
         if ($redis->exists($notFoundFlagKey)) {
             return false;
         }
         $lockKey = "$notFoundFlagKey:lock";
-        if (!$redis->set($lockKey, 1, ["nx", "ex" => 5])) {
+        if (! $redis->set($lockKey, 1, ['nx', 'ex' => 5])) {
             return false;
         }
         try {
             self::saveUrlCache();
             /** @var callable $callable */
-        $callable = [$redis, $command];
-        $result = $callable(...$params);
+            $callable = [$redis, $command];
+            $result = $callable(...$params);
             if ($result !== false) {
                 return $result;
             }
-            //只从 db 拉取一次，仍然没有即标记不存在, 有效期 15 分钟
-            $redis->setex($notFoundFlagKey, 900, date("Y-m-d H:i:s"));
+            // 只从 db 拉取一次，仍然没有即标记不存在, 有效期 15 分钟
+            $redis->setex($notFoundFlagKey, 900, date('Y-m-d H:i:s'));
         } catch (\Throwable $throwable) {
-            \App\Support\Logger::writeWithContext((string) $throwable->getMessage(), (string) 'error', (bool) false);
+            Logger::writeWithContext((string) $throwable->getMessage(), (string) 'error', (bool) false);
         } finally {
             $redis->del($lockKey);
         }
-        \App\Support\Logger::writeWithContext((string) sprintf("redis command %s with args %s no result", $command, json_encode($params)), (string) 'error', (bool) false);
+        Logger::writeWithContext((string) sprintf('redis command %s with args %s no result', $command, json_encode($params)), (string) 'error', (bool) false);
+
         return false;
     }
 }

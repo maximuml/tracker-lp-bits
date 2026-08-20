@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Auth;
 
 use App\Models\User;
@@ -19,15 +20,13 @@ class NexusWebGuard implements StatefulGuard
     /**
      * The request instance.
      *
-     * @var \Illuminate\Http\Request
+     * @var Request
      */
     protected $request;
 
     /**
      * Create a new authentication guard.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Illuminate\Contracts\Auth\UserProvider  $provider
      * @return void
      */
     public function __construct(Request $request, UserProvider $provider)
@@ -38,8 +37,6 @@ class NexusWebGuard implements StatefulGuard
 
     /**
      * Get the currently authenticated user.
-     *
-     * @return User|null
      */
     public function user(): ?User
     {
@@ -54,6 +51,7 @@ class NexusWebGuard implements StatefulGuard
             if ($user instanceof User && $this->provider->validateCredentials($user, $credentials)) {
                 $user->checkIsNormal();
                 $this->user = $user;
+
                 return $user;
             }
         }
@@ -64,7 +62,7 @@ class NexusWebGuard implements StatefulGuard
     /**
      * Validate a user's credentials.
      *
-     * @param array<string, mixed> $credentials
+     * @param  array<string, mixed>  $credentials
      */
     public function validate(array $credentials = []): bool
     {
@@ -74,11 +72,12 @@ class NexusWebGuard implements StatefulGuard
                 return false;
             }
         }
+
         return true;
     }
 
     /**
-     * @param array<string, mixed> $credentials
+     * @param  array<string, mixed>  $credentials
      */
     public function attempt(array $credentials = [], $remember = false): bool
     {
@@ -111,7 +110,7 @@ class NexusWebGuard implements StatefulGuard
     }
 
     /**
-     * @param array<string, mixed> $credentials
+     * @param  array<string, mixed>  $credentials
      */
     public function once(array $credentials = []): bool
     {

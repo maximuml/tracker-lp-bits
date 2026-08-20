@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Console\Commands;
 
 use App\Services\Cleanup\Tasks;
+use App\Support\Logger;
 use Illuminate\Console\Command;
+use Nexus\Database\NexusLock;
 
 final class CleanupTasks extends Command
 {
@@ -31,21 +33,18 @@ final class CleanupTasks extends Command
         'cleanup-class-5' => 'cleanupClass5',
     ];
 
-    /**
-     * @return int
-     */
     public function handle(Tasks $tasks): int
     {
         $task = $this->argument('task');
 
         if (! is_string($task) || ! isset(self::TASKS[$task])) {
-            $this->error("Unknown cleanup task: " . (is_string($task) ? $task : gettype($task)));
+            $this->error('Unknown cleanup task: '.(is_string($task) ? $task : gettype($task)));
 
             return Command::FAILURE;
         }
 
         $lockKey = "cleanup:task:{$task}";
-        $lock = new \Nexus\Database\NexusLock($lockKey, 3600);
+        $lock = new NexusLock($lockKey, 3600);
 
         if (! $lock->acquire()) {
             $this->warn("Task {$task} is already running.");
@@ -58,8 +57,8 @@ final class CleanupTasks extends Command
             $this->info($log);
         } catch (\Throwable $e) {
             $lock->release();
-            $this->error("Task {$task} failed: " . $e->getMessage());
-            \App\Support\Logger::writeWithContext((string) ("cleanup task {$task} failed: " . $e->getMessage()), (string) 'error', (bool) false);
+            $this->error("Task {$task} failed: ".$e->getMessage());
+            Logger::writeWithContext((string) ("cleanup task {$task} failed: ".$e->getMessage()), (string) 'error', (bool) false);
 
             return Command::FAILURE;
         } finally {

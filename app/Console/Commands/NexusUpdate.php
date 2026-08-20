@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Support\Json;
 use Illuminate\Console\Command;
 use Nexus\Install\Update;
 
@@ -21,22 +22,24 @@ class NexusUpdate extends Command
      */
     protected $description = 'Update nexusphp after code updated, remember run `composer update` first. Options: --tag=, --branch, --keep_tmp, --include_composer';
 
-    /** @var  mixed */
+    /** @var mixed */
     private $update;
 
     /**
      * Create a new command instance.
-     * @return  void
+     *
+     * @return void
      */
     public function __construct()
     {
         parent::__construct();
-        $this->update = new Update();
+        $this->update = new Update;
     }
 
     /**
      * Execute the console command.
-     * @return  int
+     *
+     * @return int
      */
     public function handle()
     {
@@ -50,114 +53,118 @@ class NexusUpdate extends Command
             $includes[] = 'composer';
         }
 
-        //Step 1
+        // Step 1
         $step = $this->update->currentStep();
         $log = sprintf('Step %s, %s...', $step, $this->update->getStepName($step));
         $this->doLog($log);
         $requirements = $this->update->listRequirementTableRows();
         $fails = $requirements['fails'];
-        if (!empty($fails)) {
+        if (! empty($fails)) {
             foreach ($fails as $value) {
-                $this->doLog("Error: " . \App\Support\Json::encode($value), 'error');
+                $this->doLog('Error: '.Json::encode($value), 'error');
             }
+
             return 0;
         }
         $this->update->gotoStep(++$step);
 
-        //Download
+        // Download
         if ($tag !== null) {
             if ($tag === 'dev') {
                 if ($branch) {
                     $url = "https://github.com/xiaomlove/nexusphp/archive/refs/heads/{$branch}.zip";
                 } else {
-                    $url = "https://github.com/xiaomlove/nexusphp/archive/refs/heads/php8.zip";
+                    $url = 'https://github.com/xiaomlove/nexusphp/archive/refs/heads/php8.zip';
                 }
             } else {
-                if (!str_starts_with($tag, 'v')) {
+                if (! str_starts_with($tag, 'v')) {
                     $tag = "v$tag";
                 }
                 $url = "https://api.github.com/repos/xiaomlove/nexusphp/tarball/$tag";
             }
-            $this->doLog("Specific tag: '$tag', download from '$url' and extra code, includes: " . implode(', ', $includes));
+            $this->doLog("Specific tag: '$tag', download from '$url' and extra code, includes: ".implode(', ', $includes));
             $tmpPath = $this->update->downAndExtractCode($url, $includes);
-            if (!$keepTmp) {
+            if (! $keepTmp) {
                 $this->doLog("Delete tmp files in: $tmpPath");
-                $this->update->executeCommand("rm -rf " . escapeshellarg(rtrim($tmpPath, '/')));
+                $this->update->executeCommand('rm -rf '.escapeshellarg(rtrim($tmpPath, '/')));
             } else {
                 $this->doLog("Keep tmp files in: $tmpPath");
             }
-            $this->doLog("Code update successfully, run this command without --tag option to run the upgrade please!", 'warn');
+            $this->doLog('Code update successfully, run this command without --tag option to run the upgrade please!', 'warn');
+
             return 0;
         }
-        //Step 2
+        // Step 2
         $log = sprintf('Step %s, %s, cli skip...', $step, $this->update->getStepName($step));
         $this->doLog($log);
         $this->update->gotoStep(++$step);
 
-        //Step 3
+        // Step 3
         $log = sprintf('Step %s, %s, cli skip...', $step, $this->update->getStepName($step));
         $this->doLog($log);
         $this->update->gotoStep(++$step);
 
-        //Step 4
+        // Step 4
         $log = sprintf('Step %s, %s...', $step, $this->update->getStepName($step));
         $this->doLog($log);
         $settingTableRows = $this->update->listSettingTableRows();
-//        $settings = $settingTableRows['settings'];
+        //        $settings = $settingTableRows['settings'];
         $symbolicLinks = $settingTableRows['symbolic_links'];
         $fails = $settingTableRows['fails'];
         $mysqlInfo = $this->update->getDatabaseVersionInfo();
         $redisInfo = $this->update->getRedisVersionInfo();
 
-        if (!empty($fails)) {
+        if (! empty($fails)) {
             foreach ($fails as $value) {
-                $this->doLog("Error: " . \App\Support\Json::encode($value), 'error');
+                $this->doLog('Error: '.Json::encode($value), 'error');
             }
+
             return 0;
         }
-        if (!$mysqlInfo['match']) {
+        if (! $mysqlInfo['match']) {
             $minVersion = $mysqlInfo['minVersion'] ?? '5.7.8';
             $this->doLog("Error: MySQL version: {$mysqlInfo['version']} is too low, please use the newest version of {$minVersion} or above.", 'error');
+
             return 0;
         }
-        if (!$redisInfo['match']) {
+        if (! $redisInfo['match']) {
             $minVersion = $redisInfo['minVersion'] ?? '2.6.12';
             $this->doLog("Error: Redis version: {$mysqlInfo['version']} is too low, please use {$minVersion} or above.", 'error');
+
             return 0;
         }
-        $this->doLog("going to update .env file ...");
+        $this->doLog('going to update .env file ...');
         $this->update->updateEnvFile();
-        $this->doLog("update .env file done!");
+        $this->doLog('update .env file done!');
 
-        $this->doLog("going to createSymbolicLinks...");
+        $this->doLog('going to createSymbolicLinks...');
         $this->update->createSymbolicLinks($symbolicLinks);
-        $this->doLog("createSymbolicLinks done!");
+        $this->doLog('createSymbolicLinks done!');
 
-//        $this->doLog("going to saveSettings...");
-//        $this->update->saveSettings($settings);
-//        $this->doLog("saveSettings done!");
+        //        $this->doLog("going to saveSettings...");
+        //        $this->update->saveSettings($settings);
+        //        $this->doLog("saveSettings done!");
 
-        $this->doLog("going to runExtraQueries...");
+        $this->doLog('going to runExtraQueries...');
         $this->update->runExtraQueries();
-        $this->doLog("runExtraQueries done!");
+        $this->doLog('runExtraQueries done!');
 
-        $this->doLog("going to runMigrate...");
+        $this->doLog('going to runMigrate...');
         $this->update->runMigrate();
-        $this->doLog("runMigrate done!");
+        $this->doLog('runMigrate done!');
 
-        $this->doLog("going to runExtraMigrate...");
+        $this->doLog('going to runExtraMigrate...');
         $this->update->runExtraMigrate();
-        $this->doLog("runExtraMigrate done!");
+        $this->doLog('runExtraMigrate done!');
 
-        $this->doLog("All done!");
+        $this->doLog('All done!');
 
         return 0;
     }
 
     /**
      * @param  mixed  $log
-     * @param  string  $level
-     * @return  mixed
+     * @return mixed
      */
     private function doLog($log, string $level = 'info')
     {

@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Jobs\GenerateTemporaryInvite;
+use App\Support\Logger;
 use Illuminate\Console\Command;
 
 class InviteAddTemporary extends Command
@@ -23,7 +24,8 @@ class InviteAddTemporary extends Command
 
     /**
      * Execute the console command.
-     * @return  int
+     *
+     * @return int
      */
     public function handle()
     {
@@ -32,8 +34,9 @@ class InviteAddTemporary extends Command
         $count = (int) $this->argument('count');
         $log = "idRedisKey: $idRedisKey, days: $days, count: $count";
         $this->info($log);
-        \App\Support\Logger::writeWithContext((string) $log, (string) 'info', (bool) false);
+        Logger::writeWithContext((string) $log, (string) 'info', (bool) false);
         GenerateTemporaryInvite::dispatch($idRedisKey, $days, $count);
+
         return Command::SUCCESS;
     }
 }

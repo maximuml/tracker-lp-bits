@@ -2,18 +2,19 @@
 
 namespace App\Http\Resources;
 
+use App\Models\TorrentExtra;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
- * @mixin \App\Models\TorrentExtra
+ * @mixin TorrentExtra
  */
 class TorrentExtraResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
-     * @param  \Illuminate\Http\Request  $request
-     * @return  array<int|string, mixed>
+     *
+     * @return array<int|string, mixed>
      */
     public function toArray(Request $request): array
     {

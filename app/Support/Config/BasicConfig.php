@@ -20,5 +20,4 @@ final class BasicConfig extends Config
     {
         return $this->string('announce_url', $default);
     }
-
 }

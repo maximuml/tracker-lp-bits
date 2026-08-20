@@ -2,7 +2,9 @@
 
 namespace App\Support;
 
+use App\Support\Cache\LegacyRedisCache;
 use Illuminate\Http\Request;
+use Nexus\Database\NexusDB;
 use Nexus\Nexus;
 use Nexus\Plugin\Hook;
 use Nexus\Plugin\Plugin;
@@ -73,8 +75,8 @@ final class LegacyBootstrap
 
     private static function bootCache(string $rootpath): void
     {
-        $Cache = new \App\Support\Cache\LegacyRedisCache();
-        $Cache->setLanguageFolderArray(\App\Support\Locale::available());
+        $Cache = new LegacyRedisCache;
+        $Cache->setLanguageFolderArray(Locale::available());
         SupportContext::setCache($Cache);
     }
 
@@ -83,14 +85,14 @@ final class LegacyBootstrap
         if (defined('IN_NEXUS') && IN_NEXUS) {
             $dbConfig = Config::get('nexus.database');
             $config = $dbConfig['connections'][$dbConfig['default']];
-            \Nexus\Database\NexusDB::bootEloquent($config);
+            NexusDB::bootEloquent($config);
         }
-        \Nexus\Database\NexusDB::customModel();
+        NexusDB::customModel();
     }
 
     private static function bootTimezone(): void
     {
-        ini_set('date.timezone', \App\Support\Config::get('nexus.timezone', null));
+        ini_set('date.timezone', Config::get('nexus.timezone', null));
     }
 
     private static function bootSettings(): void
@@ -100,12 +102,12 @@ final class LegacyBootstrap
 
     private static function bootLanguage(string $rootpath): void
     {
-        $script = \Nexus\Nexus::instance()->getScript();
+        $script = Nexus::instance()->getScript();
         if (in_array($script, ['announce', 'scrape'], true)) {
             return;
         }
 
-        $langFile = $rootpath . \App\Support\Locale::scriptFilePath((string) 'functions.php', (bool) false, (string) "");
+        $langFile = $rootpath.Locale::scriptFilePath((string) 'functions.php', (bool) false, (string) '');
         $langFunctions = [];
         if (is_file($langFile)) {
             require $langFile;
@@ -122,14 +124,14 @@ final class LegacyBootstrap
             return;
         }
 
-        $script = \Nexus\Nexus::instance()->getScript();
+        $script = Nexus::instance()->getScript();
         if (in_array($script, ['announce', 'scrape', 'torrentrss', 'download'], true)) {
             return;
         }
 
         defined('TIMENOW') || define('TIMENOW', time());
 
-        \App\Support\SiteAccess::checkGuestVisit();
+        SiteAccess::checkGuestVisit();
     }
 
     private static function bootPlugins(string $rootpath): void

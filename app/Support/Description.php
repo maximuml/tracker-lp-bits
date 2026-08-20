@@ -2,6 +2,9 @@
 
 namespace App\Support;
 
+use App\Repositories\AttachmentRepository;
+use Nexus\Attachment\Storage;
+
 /**
  * Description-AST helpers extracted from `include/functions.php`.
  *
@@ -49,14 +52,14 @@ final class Description
         $pattern = '/(\[attach\](.*)\[\/attach\])/isU';
         $matchCount = preg_match_all($pattern, $description, $matches);
         if ($matchCount) {
-            $attachments = \App\Repositories\AttachmentRepository::findByDlkeys($matches[2]);
+            $attachments = AttachmentRepository::findByDlkeys($matches[2]);
             if (! empty($attachments)) {
                 $description = (string) preg_replace_callback($pattern, function ($matches) use ($attachments) {
                     $item = $attachments[$matches[2]] ?? null;
                     if ($item === null) {
                         return $matches[1];
                     }
-                    $url = \Nexus\Attachment\Storage::getDriver($item['driver'])->getImageUrl($item['location']);
+                    $url = Storage::getDriver($item['driver'])->getImageUrl($item['location']);
                     Logger::writeWithContext(sprintf('location: %s, driver: %s, url: %s', $item['location'], $item['driver'], $url));
 
                     return str_replace($matches[2], $url, $matches[1]);
@@ -96,7 +99,7 @@ final class Description
         $splitPattern = "/($attachPattern)|($imgPattern)|($imgPattern2)|($urlPattern)|($quotePattern)/isU";
         $delimiter = '{{{}}}';
         $description = (string) preg_replace_callback($splitPattern, function ($matches) use ($delimiter) {
-            return $delimiter . $matches[0] . $delimiter;
+            return $delimiter.$matches[0].$delimiter;
         }, $description);
 
         $descriptionArr = preg_split("/[$delimiter]+/", $description);
@@ -112,11 +115,11 @@ final class Description
             } elseif (preg_match('/\[img=(.*)\]/isU', $item, $matches)) {
                 $results[] = ['type' => 'image', 'data' => ['url' => $matches[1]]];
             } elseif (preg_match('/\[url=(.*)\](.*)\[\/url\]/isU', $item, $matches)) {
-                $results[] = ['type' => 'url', 'data' => ['url' => $matches[1], 'text' => \App\Support\Strings::stripAllTags($matches[2])]];
+                $results[] = ['type' => 'url', 'data' => ['url' => $matches[1], 'text' => Strings::stripAllTags($matches[2])]];
             } elseif (preg_match('/\[quote=?(.*)\](.*)\[\/quote\]/isU', $item, $matches)) {
-                $results[] = ['type' => 'quote', 'data' => ['quote_text' => $matches[1], 'text' => \App\Support\Strings::stripAllTags($matches[2])]];
+                $results[] = ['type' => 'quote', 'data' => ['quote_text' => $matches[1], 'text' => Strings::stripAllTags($matches[2])]];
             } elseif (! empty($item)) {
-                $results[] = ['type' => 'text', 'data' => ['text' => \App\Support\Strings::stripAllTags($item)]];
+                $results[] = ['type' => 'text', 'data' => ['text' => Strings::stripAllTags($item)]];
             }
         }
 
@@ -155,7 +158,7 @@ final class Description
     public static function imageFromDescription(array $descriptionArr, bool $first = false, bool $useDefault = true): array|string
     {
         if ($first) {
-            $defaultUrl = $useDefault ? Url::schemeAndHost() . '/pic/nophoto.gif' : '';
+            $defaultUrl = $useDefault ? Url::schemeAndHost().'/pic/nophoto.gif' : '';
 
             return self::firstImageUrl($descriptionArr, $defaultUrl);
         }

@@ -24,10 +24,10 @@ final class Html
      */
     public static function quickReply(string $formName, string $textareaName, string $submitLabel): string
     {
-        $html = "<textarea name='" . $textareaName . "' cols=\"100\" rows=\"8\" style=\"width: 450px\" onkeydown=\"ctrlenter(event,'compose','qr')\"></textarea>";
-        $html .= \App\Support\Smilies::quickRow($formName, $textareaName);
+        $html = "<textarea name='".$textareaName."' cols=\"100\" rows=\"8\" style=\"width: 450px\" onkeydown=\"ctrlenter(event,'compose','qr')\"></textarea>";
+        $html .= Smilies::quickRow($formName, $textareaName);
         $html .= '<br />';
-        $html .= '<input type="submit" id="qr" class="btn" value="' . $submitLabel . '" />';
+        $html .= '<input type="submit" id="qr" class="btn" value="'.$submitLabel.'" />';
 
         return $html;
     }
@@ -258,7 +258,7 @@ final class Html
      */
     public static function torrentSelection(string $name, string $selName, string $listName, int $selectedId = 0, int $mode = 0): string
     {
-        $items = \App\Support\SearchBox::itemList(SupportContext::getCache(), $listName, $mode);
+        $items = SearchBox::itemList(SupportContext::getCache(), $listName, $mode);
         $chooseOne = SupportContext::getLangFunctions()['select_choose_one'] ?? '';
 
         return self::torrentSelect($name, $selName, $chooseOne, $selectedId, $items);
@@ -396,7 +396,7 @@ final class Html
      */
     public static function formatUrl(string $url, bool $newWindow = false, string $text = '', string $linkClass = ''): string
     {
-        return \App\Support\Comment::addTempCode(\App\Support\BBCode::url($url, $newWindow, $text, $linkClass));
+        return Comment::addTempCode(BBCode::url($url, $newWindow, $text, $linkClass));
     }
 
     /**
@@ -406,12 +406,12 @@ final class Html
      */
     public static function formatImg(string $src, bool $enableResizer, int $maxWidth, int $maxHeight, string $imgId = ''): string
     {
-        $src = \App\Support\Security::filterSrc($src);
+        $src = Security::filterSrc($src);
         if (empty($src)) {
             return '';
         }
 
-        return \App\Support\Comment::addTempCode(\App\Support\BBCode::img($src, $enableResizer, $maxWidth, $maxHeight, $imgId));
+        return Comment::addTempCode(BBCode::img($src, $enableResizer, $maxWidth, $maxHeight, $imgId));
     }
 
     /**
@@ -421,12 +421,12 @@ final class Html
      */
     public static function formatFlash(string $src, int|string $width, int|string $height): string
     {
-        $src = \App\Support\Security::filterSrc($src);
+        $src = Security::filterSrc($src);
         if (empty($src)) {
             return '';
         }
 
-        return \App\Support\Comment::addTempCode(\App\Support\BBCode::flash($src, $width, $height));
+        return Comment::addTempCode(BBCode::flash($src, $width, $height));
     }
 
     /**
@@ -436,12 +436,12 @@ final class Html
      */
     public static function formatFlv(string $src, int|string $width, int|string $height): string
     {
-        $src = \App\Support\Security::filterSrc($src);
+        $src = Security::filterSrc($src);
         if (empty($src)) {
             return '';
         }
 
-        return \App\Support\Comment::addTempCode(\App\Support\BBCode::flv($src, $width, $height));
+        return Comment::addTempCode(BBCode::flv($src, $width, $height));
     }
 
     /**
@@ -451,12 +451,12 @@ final class Html
      */
     public static function formatYoutube(string $src, int|string $width = '', int|string $height = ''): string
     {
-        $src = \App\Support\Security::filterSrc($src);
+        $src = Security::filterSrc($src);
         if (empty($src)) {
             return '';
         }
 
-        return \App\Support\Comment::addTempCode(\App\Support\BBCode::youtube($src, $width, $height));
+        return Comment::addTempCode(BBCode::youtube($src, $width, $height));
     }
 
     /**
@@ -466,12 +466,12 @@ final class Html
      */
     public static function formatVideo(string $src, int|string $width, int|string $height): string
     {
-        $src = \App\Support\Security::filterSrc($src);
+        $src = Security::filterSrc($src);
         if (empty($src)) {
             return '';
         }
 
-        return \App\Support\Comment::addTempCode(\App\Support\BBCode::video($src, $width, $height));
+        return Comment::addTempCode(BBCode::video($src, $width, $height));
     }
 
     /**
@@ -481,12 +481,12 @@ final class Html
      */
     public static function formatAudio(string $src): string
     {
-        $src = \App\Support\Security::filterSrc($src);
+        $src = Security::filterSrc($src);
         if (empty($src)) {
             return '';
         }
 
-        return \App\Support\Comment::addTempCode(\App\Support\BBCode::audio($src));
+        return Comment::addTempCode(BBCode::audio($src));
     }
 
     /**
@@ -498,17 +498,17 @@ final class Html
     {
         $defaultTitle = SupportContext::getLangFunctions()['spoiler_default_title'] ?? '';
 
-        return \App\Support\Comment::addTempCode(\App\Support\BBCode::spoiler($content, $title, $defaultTitle, $defaultCollapsed));
+        return Comment::addTempCode(BBCode::spoiler($content, $title, $defaultTitle, $defaultCollapsed));
     }
 
     /**
      * Render the page header. Backs the legacy `stdhead()` helper.
      */
-    public static function stdhead(string $title = "", bool $msgalert = true, string $script = "", string $place = ""): void
+    public static function stdhead(string $title = '', bool $msgalert = true, string $script = '', string $place = ''): void
     {
         $context = PageLayoutContext::fromSupportContext();
         PageLayout::setContext($context);
-        \App\Support\PageLayout::header($title, $msgalert, $script, $place);
+        PageLayout::header($title, $msgalert, $script, $place);
     }
 
     /**
@@ -516,15 +516,15 @@ final class Html
      */
     public static function stdfoot(): void
     {
-        \App\Support\PageLayout::footer();
+        PageLayout::footer();
     }
 
     /**
      * Open a framed content block. Backs the legacy `begin_frame()` helper.
      */
-    public static function beginFrame(string $caption = "", bool $center = false, int $padding = 10, string $width = "100%", string $caption_center = "left"): void
+    public static function beginFrame(string $caption = '', bool $center = false, int $padding = 10, string $width = '100%', string $caption_center = 'left'): void
     {
-        echo \App\Support\Frame::open($caption, $center, $padding, $width, $caption_center);
+        echo Frame::open($caption, $center, $padding, $width, $caption_center);
     }
 
     /**
@@ -532,7 +532,7 @@ final class Html
      */
     public static function endFrame(): void
     {
-        echo \App\Support\Frame::CLOSE;
+        echo Frame::CLOSE;
     }
 
     /**
@@ -540,7 +540,7 @@ final class Html
      */
     public static function beginTable(bool $fullwidth = false, int $padding = 5): void
     {
-        echo \App\Support\Frame::tableOpen($fullwidth, $padding);
+        echo Frame::tableOpen($fullwidth, $padding);
     }
 
     /**
@@ -548,7 +548,7 @@ final class Html
      */
     public static function endTable(): void
     {
-        echo \App\Support\Frame::TABLE_CLOSE;
+        echo Frame::TABLE_CLOSE;
     }
 
     /**
@@ -588,7 +588,7 @@ final class Html
      */
     public static function stdMessage(string $heading, string $text, bool $htmlstrip = false): void
     {
-        echo \App\Support\Frame::stdMessage($heading, $text, $htmlstrip);
+        echo Frame::stdMessage($heading, $text, $htmlstrip);
     }
 
     /**
@@ -612,9 +612,9 @@ final class Html
      */
     public static function smiliesFrame(): void
     {
-        $lang = \App\Support\SupportContext::getLangFunctions();
+        $lang = SupportContext::getLangFunctions();
 
-        echo \App\Support\Smilies::framedTable(
+        echo Smilies::framedTable(
             (string) ($lang['text_smilies'] ?? ''),
             (string) ($lang['col_type_something'] ?? ''),
             (string) ($lang['col_to_make_a'] ?? ''),

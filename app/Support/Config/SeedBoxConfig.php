@@ -30,5 +30,4 @@ final class SeedBoxConfig extends Config
     {
         return $this->int('max_uploaded_duration', $default);
     }
-
 }

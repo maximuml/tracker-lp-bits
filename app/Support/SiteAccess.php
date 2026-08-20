@@ -2,10 +2,11 @@
 
 namespace App\Support;
 
+use App\Support\Config\SiteConfig;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Response;
-use Nexus\Database\NexusDB;
+use Nexus\Nexus;
 
 /**
  * Legacy guest-access / login-mode helpers extracted from
@@ -26,18 +27,18 @@ final class SiteAccess
      */
     public static function checkGuestVisit(): void
     {
-        if (\App\Support\LegacyAuth::loginFromContext()) {
+        if (LegacyAuth::loginFromContext()) {
             return;
         }
 
-        $setting = \App\Support\Config\SiteConfig::current()->security->toArray();
+        $setting = SiteConfig::current()->security->toArray();
         $guestVisitType = (string) ($setting['guest_visit_type'] ?? '');
 
         if ($guestVisitType === '' || $guestVisitType === 'normal') {
             return;
         }
 
-        if (in_array(\Nexus\Nexus::instance()->getScript(), ['login', 'takelogin', 'image']) && self::canDoLogin()) {
+        if (in_array(Nexus::instance()->getScript(), ['login', 'takelogin', 'image']) && self::canDoLogin()) {
             return;
         }
 
@@ -50,7 +51,7 @@ final class SiteAccess
         $guestVisitValue = $setting[$valueKey];
 
         if ($guestVisitType === 'static_page') {
-            $pageFile = ROOT_PATH . 'resources/static-pages/' . $guestVisitValue;
+            $pageFile = ROOT_PATH.'resources/static-pages/'.$guestVisitValue;
             if (! file_exists($pageFile) || ! is_readable($pageFile)) {
                 Logger::writeWithContext("pageFile: $pageFile is not exists or readable");
                 throw new HttpResponseException(new Response('', 500));
@@ -59,7 +60,7 @@ final class SiteAccess
         }
 
         if ($guestVisitType === 'custom_content') {
-            $content = \App\Support\Format::formatComment($guestVisitValue);
+            $content = Format::formatComment($guestVisitValue);
             View::render('resources/templates/guest-visit-custom-content', ['content' => $content], false, ROOT_PATH);
 
             return;
@@ -78,7 +79,7 @@ final class SiteAccess
      */
     public static function canDoLogin(): bool
     {
-        $setting = \App\Support\Config\SiteConfig::current()->security->toArray();
+        $setting = SiteConfig::current()->security->toArray();
 
         if (empty($setting['login_type']) || $setting['login_type'] === 'normal') {
             return true;
@@ -89,17 +90,21 @@ final class SiteAccess
         if ($loginType === 'secret') {
             if (empty(SupportContext::getRequestInput('secret'))) {
                 Logger::writeWithContext('no secret');
+
                 return false;
             }
             $secret = SupportContext::getRequestInput('secret');
             if ($secret !== $setting['login_secret']) {
-                Logger::writeWithContext('invlaid secret: ' . $secret);
+                Logger::writeWithContext('invlaid secret: '.$secret);
+
                 return false;
             }
             if ($setting['login_secret_deadline'] < date('Y-m-d H:i:s')) {
                 Logger::writeWithContext("secret: {$secret} expires(deadline: {$setting['login_secret_deadline']})");
+
                 return false;
             }
+
             return true;
         }
 

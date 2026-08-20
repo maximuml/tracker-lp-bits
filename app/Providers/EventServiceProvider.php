@@ -15,7 +15,6 @@ use App\Listeners\RemoveSeedBoxRecordCache;
 use App\Listeners\ResetNexus;
 use App\Listeners\ResetQueryLog;
 use App\Listeners\SendEmailNotificationWhenTorrentCreated;
-use App\Listeners\SyncTorrentToElasticsearch;
 use App\Listeners\SyncTorrentToMeilisearch;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
@@ -41,11 +40,9 @@ class EventServiceProvider extends ServiceProvider
             RemoveSeedBoxRecordCache::class,
         ],
         TorrentUpdated::class => [
-            SyncTorrentToElasticsearch::class,
             SyncTorrentToMeilisearch::class,
         ],
         TorrentCreated::class => [
-            SyncTorrentToElasticsearch::class,
             SyncTorrentToMeilisearch::class,
             SendEmailNotificationWhenTorrentCreated::class,
             ClearTorrentCache::class,

@@ -2,7 +2,7 @@
 
 namespace App\Support;
 
-use App\Repositories\SearchRepository;
+use Nexus\Database\NexusDB;
 
 /**
  * Legacy search-suggestion helper extracted from `include/functions.php`.
@@ -27,6 +27,10 @@ final class SearchSuggest
             return;
         }
 
-        SearchRepository::addSuggestion($keyword, $userId, $preEscaped);
+        NexusDB::table('suggest')->insert([
+            'keywords' => $preEscaped ? stripslashes($keyword) : $keyword,
+            'userid' => $userId,
+            'adddate' => date('Y-m-d H:i:s'),
+        ]);
     }
 }

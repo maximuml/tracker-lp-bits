@@ -76,20 +76,6 @@ return [
         'password' => Env::get('REDIS_PASSWORD', null),
     ],
 
-    'elasticsearch' => [
-        'hosts' => [
-            [
-                'host' => Env::get('ELASTICSEARCH_HOST', 'localhost'),
-                'port' => (int) Env::get('ELASTICSEARCH_PORT', '9200'),
-                'scheme' => Env::get('ELASTICSEARCH_SCHEME', 'https'),
-                'user' => Env::get('ELASTICSEARCH_USER', 'elastic'),
-                'pass' => Env::get('ELASTICSEARCH_PASS', ''),
-            ],
-        ],
-
-        'ssl_verification' => Env::get('ELASTICSEARCH_SSL_VERIFICATION', ''),
-    ],
-
     'meilisearch' => [
         'scheme' => Env::get('MEILISEARCH_SCHEME', 'http'),
         'host' => Env::get('MEILISEARCH_HOST', 'meilisearch'),

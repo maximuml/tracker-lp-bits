@@ -8,7 +8,6 @@ use App\Models\Peer;
 use App\Models\SearchBox;
 use App\Models\Torrent;
 use App\Models\User;
-use App\Repositories\SearchRepository;
 use App\Repositories\TorrentAjaxRepository;
 use App\Repositories\TorrentRepository;
 use App\Support\Bonus;
@@ -61,18 +60,15 @@ class TorrentActionController extends LegacyController
         $userId = (int) $user['id'];
         $bookmark = NexusDB::table('bookmarks')->where('torrentid', $torrentId)->where('userid', $userId)->first();
 
-        $searchRep = new SearchRepository;
         if ($bookmark) {
             $bookmarkId = (int) $bookmark->id;
-            $searchRep->deleteBookmark($bookmarkId);
             NexusDB::table('bookmarks')->where('id', $bookmarkId)->delete();
             $status = 'deleted';
         } else {
-            $bookmarkId = NexusDB::table('bookmarks')->insertGetId([
+            NexusDB::table('bookmarks')->insertGetId([
                 'torrentid' => $torrentId,
                 'userid' => $userId,
             ]);
-            $searchRep->addBookmark($bookmarkId);
             $status = 'added';
         }
 
@@ -124,13 +120,6 @@ class TorrentActionController extends LegacyController
                 ($lang['std_delete_torrent_note'] ?? '')."<a class=altlink href=fastdelete.php?id=$id&sure=1>".($lang['std_here_if_sure'] ?? 'here').'</a>',
                 false
             );
-        }
-
-        $searchRep = new SearchRepository;
-        if ($searchRep->deleteTorrent($id) === false) {
-            $lang = (array) SupportContext::getGlobal('lang_fastdelete', []);
-
-            return $this->legacyAbortResponse($lang['std_delete_failed'] ?? 'Error', 'Delete es fail.');
         }
 
         TorrentOps::deleteTorrents($id, false);
@@ -738,11 +727,6 @@ class TorrentActionController extends LegacyController
                 return $this->legacyAbortResponse($lang['std_delete_failed'] ?? 'Error', $lang['std_enter_reason'] ?? 'Enter reason.');
             }
             $reasonstr = trim($reason[3]);
-        }
-
-        $searchRep = new SearchRepository;
-        if ($searchRep->deleteTorrent($id) === false) {
-            return $this->legacyAbortResponse($lang['std_delete_failed'] ?? 'Error', 'Delete es fail.');
         }
 
         TorrentOps::deleteTorrents($id, false);

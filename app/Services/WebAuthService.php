@@ -5,9 +5,13 @@ namespace App\Services;
 use App\Exceptions\AuthenticationException;
 use App\Models\User;
 use App\Repositories\UserRepository;
+use App\Services\Captcha\Exceptions\CaptchaValidationException;
 use App\Support\AuthCookie;
+use App\Support\Cache;
 use App\Support\Captcha;
+use App\Support\Config\SiteConfig;
 use App\Support\Network;
+use App\Support\PasswordHasher;
 use App\Support\Token;
 use App\Support\TwoFactorAuthHelper;
 use Nexus\Database\NexusDB;
@@ -16,12 +20,12 @@ class WebAuthService
 {
     private static function getMaxLoginAttempts(): int
     {
-        return \App\Support\Config\SiteConfig::fromDb()->security->maxLoginAttempts();
+        return SiteConfig::fromDb()->security->maxLoginAttempts();
     }
 
     private static function isCaptchaRequired(): bool
     {
-        return \App\Support\Config\SiteConfig::fromDb()->security->captchaRequired() && Captcha::manager()->isEnabled();
+        return SiteConfig::fromDb()->security->captchaRequired() && Captcha::manager()->isEnabled();
     }
 
     public function isCaptchaEnabled(): bool
@@ -75,20 +79,40 @@ class WebAuthService
         $secret = (string) ($row['secret'] ?? '');
         $passhash = (string) ($row['passhash'] ?? '');
         $authKey = (string) ($row['auth_key'] ?? '');
-        $passwordHash = hash('sha256', $secret . hash('sha256', $password));
+        $algo = (string) ($row['passhash_algo'] ?? PasswordHasher::ALGO_SHA256);
 
-        if (empty($authKey)) {
-            $oldMd5 = md5($secret . $password . $secret);
-            if (hash_equals($oldMd5, $passhash)) {
-                return true;
-            }
+        // For legacy md5 hashes, only verify if auth_key is empty (very old accounts)
+        if ($algo === PasswordHasher::ALGO_MD5 && empty($authKey)) {
+            return PasswordHasher::verify($password, $passhash, $secret, PasswordHasher::ALGO_MD5);
         }
 
-        $challenge = Token::randomHex();
-        $expected = hash_hmac('sha256', $passhash, $challenge);
-        $response = hash_hmac('sha256', $passwordHash, $challenge);
+        if (! PasswordHasher::verify($password, $passhash, $secret, $algo)) {
+            // Fallback: try legacy sha256 if algo wasn't set (pre-migration)
+            if ($algo !== PasswordHasher::ALGO_SHA256) {
+                return PasswordHasher::verify($password, $passhash, $secret, PasswordHasher::ALGO_SHA256);
+            }
 
-        return hash_equals($expected, $response);
+            return false;
+        }
+
+        // Upgrade legacy hash to argon2id on successful login
+        if (PasswordHasher::needsRehash($algo, $passhash)) {
+            $this->upgradePasswordHash((int) $row['id'], $password);
+        }
+
+        return true;
+    }
+
+    /**
+     * Rehash a user's password to argon2id and update the database.
+     */
+    private function upgradePasswordHash(int $userId, string $password): void
+    {
+        $newHash = PasswordHasher::hash($password);
+        User::query()->where('id', $userId)->update([
+            'passhash' => $newHash,
+            'passhash_algo' => PasswordHasher::ALGO_ARGON2ID,
+        ]);
     }
 
     /**
@@ -112,7 +136,7 @@ class WebAuthService
 
         $user = User::query()
             ->where('username', $username)
-            ->first(['id', 'username', 'passhash', 'secret', 'auth_key', 'enabled', 'status', 'two_step_secret', 'lang']);
+            ->first(['id', 'username', 'passhash', 'passhash_algo', 'secret', 'auth_key', 'enabled', 'status', 'two_step_secret', 'lang']);
 
         if (! $user) {
             $this->recordFailedAttempt($ip);
@@ -127,7 +151,7 @@ class WebAuthService
             throw new AuthenticationException('Account unconfirmed.');
         }
 
-        if ($row['enabled'] === 'no' && (int) \App\Support\Config\SiteConfig::current()->bonus->selfEnable() <= 0) {
+        if ($row['enabled'] === 'no' && (int) SiteConfig::current()->bonus->selfEnable() <= 0) {
             $this->recordFailedAttempt($ip);
             throw new AuthenticationException('Account disabled.');
         }
@@ -147,11 +171,9 @@ class WebAuthService
 
         $row = $user->toArray();
 
+        // Generate auth_key for very old accounts that don't have one
         $update = [];
         if (empty($row['auth_key'])) {
-            $secret = (string) $row['secret'];
-            $passwordHash = hash('sha256', $secret . hash('sha256', $password));
-            $update['passhash'] = $passwordHash;
             $update['auth_key'] = hash('sha256', Token::randomHex(32));
         }
 
@@ -162,9 +184,9 @@ class WebAuthService
         $duration = ! empty($data['logout']) && $data['logout'] === 'yes' ? 900 : 0;
         AuthCookie::setLoginCookie((int) $row['id'], null, $duration);
 
-        (new UserRepository())->saveLoginLog((int) $row['id'], $ip, 'Web', true);
+        (new UserRepository)->saveLoginLog((int) $row['id'], $ip, 'Web', true);
 
-        \App\Support\Cache::clearUser((int) $row['id'], '');
+        Cache::clearUser((int) $row['id'], '');
 
         return $user;
     }
@@ -189,7 +211,7 @@ class WebAuthService
             if (Captcha::manager()->driver()->verify($payload, ['ip' => Network::clientIp()])) {
                 return;
             }
-        } catch (\App\Services\Captcha\Exceptions\CaptchaValidationException $exception) {
+        } catch (CaptchaValidationException $exception) {
             throw new AuthenticationException($exception->getMessage());
         }
 

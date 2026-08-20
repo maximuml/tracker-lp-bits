@@ -12,21 +12,23 @@ use App\Models\Comment;
 use App\Models\Post;
 use App\Models\SeedBoxRecord;
 use App\Models\User;
+use App\Services\WebAuthService;
 use App\Support\AuthCookie;
 use App\Support\Cache;
+use App\Support\Hooks;
 use App\Support\LegacyResponse;
 use App\Support\Locale;
 use App\Support\Mail;
+use App\Support\PasswordHasher;
 use App\Support\SupportContext;
 use App\Support\Token;
 use App\Support\TwoFactorAuthHelper;
 use App\Support\Url;
 use App\Support\Validators;
-use App\Services\WebAuthService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
-use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException;
 use Nexus\Database\NexusDB;
 
 final class UsercpRepository extends BaseRepository
@@ -37,7 +39,7 @@ final class UsercpRepository extends BaseRepository
     }
 
     /**
-     * @return  array<int, array<string, mixed>>
+     * @return array<int, array<string, mixed>>
      */
     public static function getUserTokens(User $user): array
     {
@@ -49,7 +51,7 @@ final class UsercpRepository extends BaseRepository
             } else {
                 $parts = [];
                 foreach ($abilities as $ability) {
-                    $parts[] = \App\Support\Locale::trans("route-permission.{$ability}.text", [], null);
+                    $parts[] = Locale::trans("route-permission.{$ability}.text", [], null);
                 }
                 $abilitiesText = implode(', ', $parts);
             }
@@ -75,7 +77,7 @@ final class UsercpRepository extends BaseRepository
 
     public static function updateLastOffer(int $userId): bool
     {
-        return (bool) User::query()->where('id', $userId)->update(['last_offer' => date("Y-m-d H:i:s")]);
+        return (bool) User::query()->where('id', $userId)->update(['last_offer' => date('Y-m-d H:i:s')]);
     }
 
     public static function emailExistsForOther(string $email, int $userId): bool
@@ -85,12 +87,12 @@ final class UsercpRepository extends BaseRepository
 
     public static function getChallenge(string $username): ?string
     {
-        return \Nexus\Database\NexusDB::cache_get(\App\Support\Token::challengeKey($username));
+        return NexusDB::cache_get(Token::challengeKey($username));
     }
 
     public static function deleteChallenge(string $username): bool
     {
-        return (bool) \Nexus\Database\NexusDB::cache_del(\App\Support\Token::challengeKey($username));
+        return (bool) NexusDB::cache_del(Token::challengeKey($username));
     }
 
     /**
@@ -99,13 +101,13 @@ final class UsercpRepository extends BaseRepository
      */
     public static function updateSecurity(int $userId, array $data, bool $resetAuthKey, array $allPost): bool
     {
-        return (bool) \Nexus\Database\NexusDB::transaction(function () use ($userId, $data, $resetAuthKey, $allPost) {
+        return (bool) NexusDB::transaction(function () use ($userId, $data, $resetAuthKey, $allPost) {
             self::updateUser($userId, $data);
             if ($resetAuthKey) {
-                $torrentRep = new \App\Repositories\TorrentRepository();
+                $torrentRep = new TorrentRepository;
                 $torrentRep->resetTrackerReportAuthKeySecret($userId);
             }
-            \App\Support\Hooks::doAction("usercp_security_update", $allPost);
+            Hooks::doAction('usercp_security_update', $allPost);
 
             return true;
         });
@@ -132,7 +134,7 @@ final class UsercpRepository extends BaseRepository
     }
 
     /**
-     * @return  array<int, int>
+     * @return array<int, int>
      */
     public static function getTableIds(string $table): array
     {
@@ -140,7 +142,7 @@ final class UsercpRepository extends BaseRepository
     }
 
     /**
-     * @return  Collection<int, SeedBoxRecord>
+     * @return Collection<int, SeedBoxRecord>
      */
     public static function getSeedBoxRecords(int $userId): Collection
     {
@@ -151,7 +153,7 @@ final class UsercpRepository extends BaseRepository
     }
 
     /**
-     * @return  array<int, array<string, mixed>>
+     * @return array<int, array<string, mixed>>
      */
     public static function getReadTopics(int $userId, int $limit = 5): array
     {
@@ -164,8 +166,9 @@ final class UsercpRepository extends BaseRepository
             ->map(fn ($row) => (array) $row)
             ->all();
     }
+
     /**
-     * @return  array<int, \stdClass>
+     * @return array<int, \stdClass>
      */
     public static function getCountryOptions(): array
     {
@@ -176,7 +179,7 @@ final class UsercpRepository extends BaseRepository
     }
 
     /**
-     * @return  array<int, \stdClass>
+     * @return array<int, \stdClass>
      */
     public static function getBitbucketOptions(): array
     {
@@ -187,7 +190,7 @@ final class UsercpRepository extends BaseRepository
     }
 
     /**
-     * @return  array<string, int>
+     * @return array<string, int>
      */
     public static function getStylesheetOptions(): array
     {
@@ -196,6 +199,7 @@ final class UsercpRepository extends BaseRepository
             ->pluck('id', 'name')
             ->all();
     }
+
     /**
      * @return array<string, mixed>
      */
@@ -333,8 +337,8 @@ final class UsercpRepository extends BaseRepository
             'audiocodecs' => 'aud',
         ] as $table => $cbname) {
             foreach (self::getTableIds($table) as $id) {
-                if ($dto->notifPreferences[$cbname . $id] ?? false) {
-                    $notifsArr[$cbname . $id] = 1;
+                if ($dto->notifPreferences[$cbname.$id] ?? false) {
+                    $notifsArr[$cbname.$id] = 1;
                 }
             }
         }
@@ -352,7 +356,7 @@ final class UsercpRepository extends BaseRepository
         }
 
         $data = [
-            'notifs' => '[' . implode('][', array_keys($notifsArr)) . ']',
+            'notifs' => '['.implode('][', array_keys($notifsArr)).']',
             'torrentsperpage' => $dto->torrentsperpage,
             'timetype' => $dto->timetype,
             'appendsticky' => $dto->appendsticky,
@@ -379,7 +383,7 @@ final class UsercpRepository extends BaseRepository
             $langFolder = Locale::folderForIdWithContext($dto->sitelanguage);
             $currentFolder = Locale::folderFromCookie($dto->currentLangFolder, false);
             if ($currentFolder !== $langFolder) {
-                Locale::setFolderCookie($langFolder, 0x7fffffff);
+                Locale::setFolderCookie($langFolder, 0x7FFFFFFF);
             }
             $data['lang'] = $dto->sitelanguage;
         }
@@ -409,18 +413,27 @@ final class UsercpRepository extends BaseRepository
         $lang = (array) (SupportContext::getGlobal('lang_usercp') ?? []);
 
         $response = (string) $request->input('response', '');
-        if ($response === '') {
+        $oldPassword = (string) $request->input('oldpassword', '');
+        if ($response === '' && $oldPassword === '') {
             LegacyResponse::abort((string) ($lang['std_error'] ?? 'Error'), (string) ($lang['std_enter_old_password'] ?? 'Please enter old password.'));
         }
 
-        $challenge = self::getChallenge((string) $user->username);
-        if (empty($challenge)) {
-            LegacyResponse::abort((string) ($lang['std_error'] ?? 'Error'), 'expired!');
-        }
+        // For argon2id users, verify via plaintext password (sent over HTTPS)
+        $userAlgo = (string) ($user->passhash_algo ?? PasswordHasher::ALGO_SHA256);
+        if ($oldPassword !== '' && $userAlgo === PasswordHasher::ALGO_ARGON2ID) {
+            if (! password_verify($oldPassword, (string) $user->passhash)) {
+                LegacyResponse::abort((string) ($lang['std_error'] ?? 'Error'), (string) ($lang['std_wrong_password_note'] ?? 'Wrong password.'));
+            }
+        } else {
+            $challenge = self::getChallenge((string) $user->username);
+            if (empty($challenge)) {
+                LegacyResponse::abort((string) ($lang['std_error'] ?? 'Error'), 'expired!');
+            }
 
-        $expectedResponse = hash_hmac('sha256', (string) $user->passhash, (string) $challenge);
-        if (! hash_equals($expectedResponse, $response)) {
-            LegacyResponse::abort((string) ($lang['std_error'] ?? 'Error'), (string) ($lang['std_wrong_password_note'] ?? 'Wrong password.'));
+            $expectedResponse = hash_hmac('sha256', (string) $user->passhash, (string) $challenge);
+            if (! hash_equals($expectedResponse, $response)) {
+                LegacyResponse::abort((string) ($lang['std_error'] ?? 'Error'), (string) ($lang['std_wrong_password_note'] ?? 'Wrong password.'));
+            }
         }
 
         $data = [];
@@ -452,10 +465,9 @@ final class UsercpRepository extends BaseRepository
         }
 
         if ($chpassword !== '') {
-            $sec = Token::randomHex(20);
-            $passhash = hash('sha256', $sec . $chpassword);
-            $data['secret'] = $sec;
+            $passhash = PasswordHasher::hash($chpassword);
             $data['passhash'] = $passhash;
+            $data['passhash_algo'] = PasswordHasher::ALGO_ARGON2ID;
             $authKey = Token::randomHex(20);
             $data['auth_key'] = $authKey;
 
@@ -479,7 +491,7 @@ final class UsercpRepository extends BaseRepository
         }
 
         if ($resetpasskey === 1) {
-            $data['passkey'] = md5($user->username . date('Y-m-d H:i:s') . $user->passhash);
+            $data['passkey'] = md5($user->username.date('Y-m-d H:i:s').$user->passhash);
         }
 
         $siteName = (string) SupportContext::getGlobal('SITENAME', '');
@@ -488,26 +500,26 @@ final class UsercpRepository extends BaseRepository
 
         if ($changedemail === 1) {
             $sec = Token::randomHex(20);
-            $hash = md5($sec . $email . $sec);
+            $hash = md5($sec.$email.$sec);
             $obemail = rawurlencode($email);
             $data['editsecret'] = $sec;
 
-            $subject = $siteName . ($lang['mail_profile_change_confirmation'] ?? '');
+            $subject = $siteName.($lang['mail_profile_change_confirmation'] ?? '');
             $changeEmailOne = sprintf($lang['mail_change_email_one'] ?? '', $siteName);
             $changeEmailNine = sprintf($lang['mail_change_email_nine'] ?? '', $siteName);
 
-            $body = $changeEmailOne . $user->username
-                . ($lang['mail_change_email_two'] ?? '') . '(' . $email . ')'
-                . ($lang['mail_change_email_three'] ?? '') . "\n\n"
-                . ($lang['mail_change_email_four'] ?? '') . $request->ip()
-                . ($lang['mail_change_email_five'] ?? '') . "\n\n"
-                . ($lang['mail_change_email_six'] ?? '')
-                . '<b><a href="javascript:void(null)" onclick="window.open(\'http://' . $baseUrl . '/confirmemail.php/' . $user->id . '/' . $hash . '/' . $obemail . '\')">' . ($lang['mail_here'] ?? '') . '</a></b>'
-                . ($lang['mail_change_email_six_1'] ?? '') . '<br />' . "\n"
-                . 'http://' . $baseUrl . '/confirmemail.php/' . $user->id . '/' . $hash . '/' . $obemail . "\n\n"
-                . ($lang['mail_change_email_seven'] ?? '') . "\n\n"
-                . '------' . ($lang['mail_change_email_eight'] ?? '') . "\n"
-                . $changeEmailNine;
+            $body = $changeEmailOne.$user->username
+                .($lang['mail_change_email_two'] ?? '').'('.$email.')'
+                .($lang['mail_change_email_three'] ?? '')."\n\n"
+                .($lang['mail_change_email_four'] ?? '').$request->ip()
+                .($lang['mail_change_email_five'] ?? '')."\n\n"
+                .($lang['mail_change_email_six'] ?? '')
+                .'<b><a href="javascript:void(null)" onclick="window.open(\'http://'.$baseUrl.'/confirmemail.php/'.$user->id.'/'.$hash.'/'.$obemail.'\')">'.($lang['mail_here'] ?? '').'</a></b>'
+                .($lang['mail_change_email_six_1'] ?? '').'<br />'."\n"
+                .'http://'.$baseUrl.'/confirmemail.php/'.$user->id.'/'.$hash.'/'.$obemail."\n\n"
+                .($lang['mail_change_email_seven'] ?? '')."\n\n"
+                .'------'.($lang['mail_change_email_eight'] ?? '')."\n"
+                .$changeEmailNine;
 
             Mail::sentLegacy($email, $siteName, $siteEmail, $subject, str_replace('<br />', '<br />', nl2br($body)), 'profile change', false, false, '', 'UTF-8');
         }
@@ -566,10 +578,8 @@ final class UsercpRepository extends BaseRepository
         $resetAuthKey = $dto->resetauthkey;
 
         if ($dto->newPassword !== null && $dto->newPassword !== '') {
-            $sec = Token::randomHex(20);
-            $clientHashedPassword = hash('sha256', $dto->newPassword);
-            $data['secret'] = $sec;
-            $data['passhash'] = hash('sha256', $sec . $clientHashedPassword);
+            $data['passhash'] = PasswordHasher::hash($dto->newPassword);
+            $data['passhash_algo'] = PasswordHasher::ALGO_ARGON2ID;
             $data['auth_key'] = Token::randomHex(20);
         }
 
@@ -591,30 +601,30 @@ final class UsercpRepository extends BaseRepository
             }
 
             $sec = Token::randomHex(20);
-            $hash = md5($sec . $email . $sec);
+            $hash = md5($sec.$email.$sec);
             $obemail = rawurlencode($email);
             $data['editsecret'] = $sec;
             $changedemail = 1;
 
-            $subject = $siteName . ($lang['mail_profile_change_confirmation'] ?? '');
-            $body = ($lang['mail_change_email_one'] ?? '') . $user->username
-                . ($lang['mail_change_email_two'] ?? '') . '(' . $email . ')'
-                . ($lang['mail_change_email_three'] ?? '') . "\n\n"
-                . ($lang['mail_change_email_four'] ?? '') . $dto->ip
-                . ($lang['mail_change_email_five'] ?? '') . "\n\n"
-                . ($lang['mail_change_email_six'] ?? '')
-                . '<b><a href="javascript:void(null)" onclick="window.open(\'http://' . $baseUrl . '/confirmemail.php/' . $user->id . '/' . $hash . '/' . $obemail . '\')">' . ($lang['mail_here'] ?? '') . '</a></b>'
-                . ($lang['mail_change_email_six_1'] ?? '') . '<br />' . "\n"
-                . 'http://' . $baseUrl . '/confirmemail.php/' . $user->id . '/' . $hash . '/' . $obemail . "\n\n"
-                . ($lang['mail_change_email_seven'] ?? '') . "\n\n"
-                . '------' . ($lang['mail_change_email_eight'] ?? '') . "\n"
-                . ($lang['mail_change_email_nine'] ?? '');
+            $subject = $siteName.($lang['mail_profile_change_confirmation'] ?? '');
+            $body = ($lang['mail_change_email_one'] ?? '').$user->username
+                .($lang['mail_change_email_two'] ?? '').'('.$email.')'
+                .($lang['mail_change_email_three'] ?? '')."\n\n"
+                .($lang['mail_change_email_four'] ?? '').$dto->ip
+                .($lang['mail_change_email_five'] ?? '')."\n\n"
+                .($lang['mail_change_email_six'] ?? '')
+                .'<b><a href="javascript:void(null)" onclick="window.open(\'http://'.$baseUrl.'/confirmemail.php/'.$user->id.'/'.$hash.'/'.$obemail.'\')">'.($lang['mail_here'] ?? '').'</a></b>'
+                .($lang['mail_change_email_six_1'] ?? '').'<br />'."\n"
+                .'http://'.$baseUrl.'/confirmemail.php/'.$user->id.'/'.$hash.'/'.$obemail."\n\n"
+                .($lang['mail_change_email_seven'] ?? '')."\n\n"
+                .'------'.($lang['mail_change_email_eight'] ?? '')."\n"
+                .($lang['mail_change_email_nine'] ?? '');
 
             Mail::sentLegacy($email, $siteName, $siteEmail, $subject, str_replace('<br />', '<br />', nl2br($body)), 'profile change', false, false, '', 'UTF-8');
         }
 
         if ($resetpasskey) {
-            $data['passkey'] = md5($user->username . date('Y-m-d H:i:s') . $user->passhash);
+            $data['passkey'] = md5($user->username.date('Y-m-d H:i:s').$user->passhash);
         }
 
         if ($dto->twoStepCode !== null && $dto->twoStepCode !== '') {

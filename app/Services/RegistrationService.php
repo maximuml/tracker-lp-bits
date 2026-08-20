@@ -10,17 +10,21 @@ use App\Models\MessageTemplate;
 use App\Models\User;
 use App\Repositories\UserRepository;
 use App\Support\AuthCookie;
+use App\Support\Cache;
 use App\Support\Captcha;
+use App\Support\Config\SiteConfig;
 use App\Support\Email;
+use App\Support\Events;
 use App\Support\Http;
 use App\Support\Locale;
 use App\Support\Mail;
 use App\Support\Network;
+use App\Support\PasswordHasher;
 use App\Support\Strings;
 use App\Support\Token;
+use App\Support\Url;
 use App\Support\Validators;
 use Illuminate\Support\Facades\DB;
-use Nexus\Database\NexusDB;
 
 /**
  * Handles user registration, account confirmation, and confirmation-resend flows.
@@ -28,13 +32,14 @@ use Nexus\Database\NexusDB;
 class RegistrationService
 {
     private const MAX_USERNAME_LENGTH = 12;
+
     private const MIN_PASSWORD_LENGTH = 6;
+
     private const MAX_PASSWORD_LENGTH = 40;
 
     public function __construct(
         private WebAuthService $authService,
-    ) {
-    }
+    ) {}
 
     /**
      * Throw when registration is globally disabled, invite-only mismatch,
@@ -54,25 +59,25 @@ class RegistrationService
         $isInvite = $type === 'invite';
         $isNormal = $type === 'normal';
 
-        if ($isInvite && !\App\Support\Config\SiteConfig::current()->main->inviteSystem()) {
+        if ($isInvite && ! SiteConfig::current()->main->inviteSystem()) {
             throw new AuthenticationException($this->msg($langFunctions, 'std_invite_system_disabled', 'The invite system is currently disabled.'));
         }
 
-        if ($isNormal && !\App\Support\Config\SiteConfig::current()->main->registration()) {
+        if ($isNormal && ! SiteConfig::current()->main->registration()) {
             throw new AuthenticationException($this->msg($langFunctions, 'std_open_registration_disabled', 'Open registration is currently disabled.'));
         }
 
-        $maxUsers = (int) \App\Support\Config\SiteConfig::current()->main->maxUsers(0);
+        $maxUsers = (int) SiteConfig::current()->main->maxUsers(0);
         if ($maxUsers > 0 && User::query()->count() >= $maxUsers) {
             throw new AuthenticationException($this->msg($langFunctions, 'std_account_limit_reached', 'The current user account limit has been reached.'));
         }
 
-        $maxIp = (int) \App\Support\Config\SiteConfig::current()->security->maxIp(0);
+        $maxIp = (int) SiteConfig::current()->security->maxIp(0);
         if ($maxIp > 0 && User::query()->where('ip', $ip)->count() > $maxIp) {
             throw new AuthenticationException(
                 $this->msg($langFunctions, 'std_the_ip', 'The IP ')
-                . '<b>' . htmlspecialchars($ip) . '</b>'
-                . sprintf($this->msg($langFunctions, 'std_used_many_times', ' is already being used on too many accounts. No more accounts allowed at <b>%s</b>.'), \App\Support\Config\SiteConfig::current()->basic->siteName())
+                .'<b>'.htmlspecialchars($ip).'</b>'
+                .sprintf($this->msg($langFunctions, 'std_used_many_times', ' is already being used on too many accounts. No more accounts allowed at <b>%s</b>.'), SiteConfig::current()->basic->siteName())
             );
         }
     }
@@ -101,7 +106,7 @@ class RegistrationService
         if ($isInvite) {
             if ($code === '') {
                 throw new AuthenticationException(
-                    $this->msg($langSignup, 'std_error', 'Error') . ': ' . $this->msg($langSignup, 'std_uninvited', 'Require invitation number.')
+                    $this->msg($langSignup, 'std_error', 'Error').': '.$this->msg($langSignup, 'std_uninvited', 'Require invitation number.')
                 );
             }
 
@@ -116,11 +121,11 @@ class RegistrationService
 
             if ((int) $invite->inviter !== $inviter) {
                 Invite::query()->where('id', $invite->id)->update(['valid' => Invite::VALID_NO]);
-                throw new AuthenticationException(\App\Support\Locale::trans('invite.invalid_inviter', [], $langFolder));
+                throw new AuthenticationException(Locale::trans('invite.invalid_inviter', [], $langFolder));
             }
         }
 
-        $isPreRegister = \App\Support\Config\SiteConfig::current()->system->isInvitePreEmailAndUsername();
+        $isPreRegister = SiteConfig::current()->system->isInvitePreEmailAndUsername();
 
         if ($isInvite && $isPreRegister && ! empty($invite->pre_register_username) && ! empty($invite->pre_register_email)) {
             $username = (string) $invite->pre_register_username;
@@ -165,22 +170,32 @@ class RegistrationService
         if (User::query()->where('email', $email)->exists()) {
             throw new AuthenticationException(
                 $this->msg($langTakesignup, 'std_email_address', 'The e-mail address ')
-                . $email
-                . $this->msg($langTakesignup, 'std_in_use', ' is already in use.')
+                .$email
+                .$this->msg($langTakesignup, 'std_in_use', ' is already in use.')
             );
         }
 
-        $clientHashedPassword = $isClientHashed ? $passwordInput : hash('sha256', $passwordInput);
-        $secret = Token::randomHex();
-        $passhash = hash('sha256', $secret . $clientHashedPassword);
+        // Use argon2id for new passwords. If the client pre-hashed the password
+        // (isClientHashed), we fall back to legacy sha256 since we don't have
+        // the plaintext password to feed to password_hash().
+        if ($isClientHashed) {
+            $secret = Token::randomHex();
+            $passhash = hash('sha256', $secret.$passwordInput);
+            $passhashAlgo = PasswordHasher::ALGO_SHA256;
+        } else {
+            $passhash = PasswordHasher::hash($passwordInput);
+            $secret = Token::randomHex();
+            $passhashAlgo = PasswordHasher::ALGO_ARGON2ID;
+        }
         $authKey = Token::randomHex();
-        $passkey = md5($username . now()->toDateTimeString() . $passhash);
-        $verification = (string) \App\Support\Config\SiteConfig::current()->main->verification('email');
+        $passkey = md5($username.now()->toDateTimeString().$passhash);
+        $verification = (string) SiteConfig::current()->main->verification('email');
         $editsecret = $verification === 'admin' ? '' : $secret;
 
         $userData = [
             'username' => $username,
             'passhash' => $passhash,
+            'passhash_algo' => $passhashAlgo,
             'passkey' => $passkey,
             'secret' => $secret,
             'auth_key' => $authKey,
@@ -189,13 +204,13 @@ class RegistrationService
             'country' => $country,
             'gender' => $gender,
             'status' => 'pending',
-            'class' => \App\Support\Config\SiteConfig::current()->authority->defaultClass((int) User::CLASS_USER),
-            'invites' => (int) \App\Support\Config\SiteConfig::current()->main->inviteCount(0),
+            'class' => SiteConfig::current()->authority->defaultClass((int) User::CLASS_USER),
+            'invites' => (int) SiteConfig::current()->main->inviteCount(0),
             'added' => now()->toDateTimeString(),
             'last_access' => now()->toDateTimeString(),
             'lang' => Locale::idFromFolder($langFolder),
-            'stylesheet' => (int) \App\Support\Config\SiteConfig::current()->main->defStylesheet(1),
-            'uploaded' => max(0, (int) \App\Support\Config\SiteConfig::current()->main->iniUpload(0)),
+            'stylesheet' => (int) SiteConfig::current()->main->defStylesheet(1),
+            'uploaded' => max(0, (int) SiteConfig::current()->main->iniUpload(0)),
             'ip' => $ip,
         ];
 
@@ -208,7 +223,7 @@ class RegistrationService
         $user = User::query()->findOrFail($id);
         $user->makeVisible(['secret']);
 
-        \App\Support\Events::fire(ModelEventEnum::USER_CREATED, $user, null);
+        Events::fire(ModelEventEnum::USER_CREATED, $user, null);
 
         $this->sendWelcomeMessage($user, $langTakesignup);
         $this->maybeAddTemporaryInvite($id);
@@ -258,8 +273,8 @@ class RegistrationService
 
         $user->refresh();
 
-        \App\Support\Events::fire(ModelEventEnum::USER_UPDATED, $user, null);
-        \App\Support\Cache::clearUser($id, '');
+        Events::fire(ModelEventEnum::USER_UPDATED, $user, null);
+        Cache::clearUser($id, '');
         AuthCookie::setLoginCookie($id);
 
         return $user;
@@ -274,7 +289,7 @@ class RegistrationService
      */
     public function resendConfirmation(array $data, string $ip, string $langFolder, array $langConfirmResend, array $langFunctions): string
     {
-        if (\App\Support\Config\SiteConfig::current()->main->verification('email') === 'admin') {
+        if (SiteConfig::current()->main->verification('email') === 'admin') {
             throw new AuthenticationException($this->msg($langConfirmResend, 'std_need_admin_verification', 'Account needs manual verification from administrators.'));
         }
 
@@ -309,13 +324,13 @@ class RegistrationService
         $this->validatePassword($password, $passAgain, (string) $user->username, $langConfirmResend);
 
         $secret = Token::randomHex();
-        $clientHashedPassword = hash('sha256', $password);
-        $passhash = hash('sha256', $secret . $clientHashedPassword);
-        $verification = (string) \App\Support\Config\SiteConfig::current()->main->verification('email');
+        $passhash = PasswordHasher::hash($password);
+        $verification = (string) SiteConfig::current()->main->verification('email');
         $editsecret = $verification === 'admin' ? '' : $secret;
 
         $affected = User::query()->where('id', $user->id)->update([
             'passhash' => $passhash,
+            'passhash_algo' => PasswordHasher::ALGO_ARGON2ID,
             'secret' => $secret,
             'editsecret' => $editsecret,
         ]);
@@ -324,11 +339,11 @@ class RegistrationService
             throw new AuthenticationException($this->msg($langConfirmResend, 'std_database_error', 'Database error. Please contact an administrator about this.'));
         }
 
-        \App\Support\Cache::clearUser($user->id, '');
+        Cache::clearUser($user->id, '');
 
         $this->sendConfirmationEmail((string) $user->username, $email, $user->id, $editsecret, $ip, $langFolder, $langConfirmResend);
 
-        return 'ok.php?type=signup&email=' . rawurlencode($email);
+        return 'ok.php?type=signup&email='.rawurlencode($email);
     }
 
     /**
@@ -432,13 +447,13 @@ class RegistrationService
      */
     private function sendWelcomeMessage(User $user, array $langTakesignup): void
     {
-        $subject = $this->msg($langTakesignup, 'msg_subject', 'Welcome to ') . \App\Support\Config\SiteConfig::current()->basic->siteName() . '!';
+        $subject = $this->msg($langTakesignup, 'msg_subject', 'Welcome to ').SiteConfig::current()->basic->siteName().'!';
         $msg = MessageTemplate::forRegisterWelcome($user->lang, ['username' => $user->username]);
 
         if (empty($msg)) {
             $msg = $this->msg($langTakesignup, 'msg_congratulations', 'Congratulations ')
-                . $user->username
-                . sprintf($this->msg($langTakesignup, 'msg_you_are_a_member', ''), \App\Support\Config\SiteConfig::current()->basic->siteName(), \App\Support\Config\SiteConfig::current()->basic->siteName());
+                .$user->username
+                .sprintf($this->msg($langTakesignup, 'msg_you_are_a_member', ''), SiteConfig::current()->basic->siteName(), SiteConfig::current()->basic->siteName());
         }
 
         Message::add([
@@ -452,12 +467,12 @@ class RegistrationService
 
     private function maybeAddTemporaryInvite(int $userId): void
     {
-        $tmpInviteCount = (int) \App\Support\Config\SiteConfig::current()->main->tmpInviteCount(0);
+        $tmpInviteCount = (int) SiteConfig::current()->main->tmpInviteCount(0);
         if ($tmpInviteCount <= 0) {
             return;
         }
 
-        (new UserRepository())->addTemporaryInvite(null, $userId, 'increment', $tmpInviteCount, 7);
+        (new UserRepository)->addTemporaryInvite(null, $userId, 'increment', $tmpInviteCount, 7);
     }
 
     private function consumeInvite(Invite $invite, int $userId, string $email, string $username): void
@@ -471,10 +486,10 @@ class RegistrationService
 
         $inviter = (int) $invite->inviter;
         $locale = Locale::userLocale($inviter);
-        $subject = \App\Support\Locale::trans('user.msg_invited_user_has_registered', [], $locale);
-        $msg = \App\Support\Locale::trans('user.msg_user_you_invited', [], $locale)
-            . $username
-            . \App\Support\Locale::trans('user.msg_has_registered', [], $locale);
+        $subject = Locale::trans('user.msg_invited_user_has_registered', [], $locale);
+        $msg = Locale::trans('user.msg_user_you_invited', [], $locale)
+            .$username
+            .Locale::trans('user.msg_has_registered', [], $locale);
 
         Message::add([
             'sender' => 0,
@@ -484,7 +499,7 @@ class RegistrationService
             'msg' => $msg,
         ]);
 
-        \App\Support\Cache::clearUser($inviter, '');
+        Cache::clearUser($inviter, '');
     }
 
     /**
@@ -492,9 +507,9 @@ class RegistrationService
      */
     private function resolveSignupRedirect(int $userId, string $secret, User $user, string $verification, string $email, string $langFolder, array $langTakesignup): string
     {
-        $baseUrl = \App\Support\Config\SiteConfig::current()->basic->baseUrl();
+        $baseUrl = SiteConfig::current()->basic->baseUrl();
         if (! str_contains($baseUrl, '://')) {
-            $baseUrl = Http::protocolPrefix(\App\Support\Url::isSecure()) . $baseUrl;
+            $baseUrl = Http::protocolPrefix(Url::isSecure()).$baseUrl;
         }
         $baseUrl = rtrim($baseUrl, '/');
         $type = $user->invited_by ? 'invite' : 'normal';
@@ -505,15 +520,15 @@ class RegistrationService
                 : 'ok.php?type=adminactivate';
         }
 
-        if ($verification === 'automatic' || \App\Support\Config\SiteConfig::current()->smtp->type('none') === 'none') {
+        if ($verification === 'automatic' || SiteConfig::current()->smtp->type('none') === 'none') {
             $psecret = md5(Strings::padHash($secret));
 
-            return $baseUrl . '/confirm.php?id=' . $userId . '&secret=' . $psecret;
+            return $baseUrl.'/confirm.php?id='.$userId.'&secret='.$psecret;
         }
 
         $this->sendConfirmationEmail((string) $user->username, $email, $userId, $secret, Network::clientIp(), $langFolder, $langTakesignup);
 
-        return 'ok.php?type=signup&email=' . rawurlencode($email);
+        return 'ok.php?type=signup&email='.rawurlencode($email);
     }
 
     /**
@@ -528,16 +543,16 @@ class RegistrationService
         string $langFolder,
         array $langMail,
     ): void {
-        $baseUrl = \App\Support\Config\SiteConfig::current()->basic->baseUrl();
+        $baseUrl = SiteConfig::current()->basic->baseUrl();
         if (! str_contains($baseUrl, '://')) {
-            $baseUrl = Http::protocolPrefix(\App\Support\Url::isSecure()) . $baseUrl;
+            $baseUrl = Http::protocolPrefix(Url::isSecure()).$baseUrl;
         }
         $baseUrl = rtrim($baseUrl, '/');
         $psecret = md5(Strings::padHash($secret));
-        $confirmUrl = $baseUrl . '/confirm.php?id=' . $userId . '&secret=' . $psecret;
-        $resendUrl = $baseUrl . '/confirm_resend.php';
-        $siteName = \App\Support\Config\SiteConfig::current()->basic->siteName();
-        $reportEmail = \App\Support\Config\SiteConfig::current()->main->reportEmail('');
+        $confirmUrl = $baseUrl.'/confirm.php?id='.$userId.'&secret='.$psecret;
+        $resendUrl = $baseUrl.'/confirm_resend.php';
+        $siteName = SiteConfig::current()->basic->siteName();
+        $reportEmail = SiteConfig::current()->main->reportEmail('');
 
         $mailOne = $langMail['mail_one'] ?? 'Hi ';
         $mailTwo = sprintf($langMail['mail_two'] ?? ',<br /><br />You have requested a new user account on %s and you have <br />specified this address ', $siteName);
@@ -547,29 +562,29 @@ class RegistrationService
         $mailThisLink = $langMail['mail_this_link'] ?? 'THIS LINK';
         $mailHere = $langMail['mail_here'] ?? 'HERE';
         $mailFive = sprintf($langMail['mail_five'] ?? '', $siteName, $siteName, $reportEmail, $siteName);
-        $title = $siteName . ($langMail['mail_title'] ?? ' User Registration Confirmation');
+        $title = $siteName.($langMail['mail_title'] ?? ' User Registration Confirmation');
 
         $body = $mailOne
-            . htmlspecialchars($username)
-            . $mailTwo
-            . '(' . htmlspecialchars($email) . ')'
-            . $mailThree
-            . htmlspecialchars($ip)
-            . $mailFour
-            . '<b><a href="javascript:void(null)" onclick="window.open(\'' . $confirmUrl . '\')">'
-            . $mailThisLink
-            . '</a></b><br />'
-            . $confirmUrl
-            . $mailFourOne
-            . '<b><a href="javascript:void(null)" onclick="window.open(\'' . $resendUrl . '\')">' . $mailHere . '</a></b><br />'
-            . $resendUrl
-            . '<br />'
-            . $mailFive;
+            .htmlspecialchars($username)
+            .$mailTwo
+            .'('.htmlspecialchars($email).')'
+            .$mailThree
+            .htmlspecialchars($ip)
+            .$mailFour
+            .'<b><a href="javascript:void(null)" onclick="window.open(\''.$confirmUrl.'\')">'
+            .$mailThisLink
+            .'</a></b><br />'
+            .$confirmUrl
+            .$mailFourOne
+            .'<b><a href="javascript:void(null)" onclick="window.open(\''.$resendUrl.'\')">'.$mailHere.'</a></b><br />'
+            .$resendUrl
+            .'<br />'
+            .$mailFive;
 
         Mail::sentLegacy(
             $email,
             $siteName,
-            \App\Support\Config\SiteConfig::current()->main->siteEmail(''),
+            SiteConfig::current()->main->siteEmail(''),
             $title,
             $body,
             'signup',

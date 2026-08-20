@@ -4,11 +4,16 @@ namespace App\Services;
 
 use App\Exceptions\AuthenticationException;
 use App\Models\User;
+use App\Support\Cache;
+use App\Support\Captcha;
+use App\Support\Config\SiteConfig;
 use App\Support\Email;
 use App\Support\Http;
 use App\Support\Mail;
+use App\Support\PasswordHasher;
 use App\Support\Strings;
 use App\Support\Token;
+use App\Support\Url;
 use Nexus\Database\NexusDB;
 
 /**
@@ -17,12 +22,12 @@ use Nexus\Database\NexusDB;
 class PasswordRecoveryService
 {
     private const NEW_PASSWORD_LENGTH = 10;
+
     private const RECOVER_CACHE_TTL = 3600;
 
     public function __construct(
         private WebAuthService $authService,
-    ) {
-    }
+    ) {}
 
     /**
      * Request a password reset email.
@@ -70,9 +75,9 @@ class PasswordRecoveryService
             throw new AuthenticationException($this->msg($langRecover, 'std_database_error', 'Database error. Please contact an administrator about this.'));
         }
 
-        \App\Support\Cache::clearUser((int) $user['id'], '');
+        Cache::clearUser((int) $user['id'], '');
 
-        $hash = md5($sec . $email . $user['passhash'] . $sec);
+        $hash = md5($sec.$email.$user['passhash'].$sec);
 
         NexusDB::cache_put("recover:$hash", now()->toDateTimeString(), self::RECOVER_CACHE_TTL);
 
@@ -99,7 +104,7 @@ class PasswordRecoveryService
         $email = $user->email;
         $sec = Strings::padHash($user->editsecret);
 
-        if ($md5 !== md5($sec . $email . $user->passhash . $sec)) {
+        if ($md5 !== md5($sec.$email.$user->passhash.$sec)) {
             throw new AuthenticationException($this->msg($langRecover, 'std_unable_updating_user_data', 'The reset link is invalid.'));
         }
 
@@ -107,13 +112,14 @@ class PasswordRecoveryService
 
         $newPassword = $this->generateRandomPassword();
         $newSecret = Token::randomHex();
-        $newPasshash = hash('sha256', $newSecret . hash('sha256', $newPassword));
+        $newPasshash = PasswordHasher::hash($newPassword);
         $authKey = Token::randomHex();
 
         $affected = User::query()->where('id', $id)->where('editsecret', $user->editsecret)->update([
             'secret' => $newSecret,
             'editsecret' => '',
             'passhash' => $newPasshash,
+            'passhash_algo' => PasswordHasher::ALGO_ARGON2ID,
             'auth_key' => $authKey,
         ]);
 
@@ -121,7 +127,7 @@ class PasswordRecoveryService
             throw new AuthenticationException($this->msg($langRecover, 'std_unable_updating_user_data', 'Unable to update user data.'));
         }
 
-        \App\Support\Cache::clearUser($id, '');
+        Cache::clearUser($id, '');
 
         $this->sendNewPasswordEmail($user, $newPassword, $langRecover);
 
@@ -133,12 +139,12 @@ class PasswordRecoveryService
      */
     private function sendResetRequestEmail(string $email, int $userId, string $hash, string $ip, array $langRecover): void
     {
-        $baseUrl = \App\Support\Config\SiteConfig::current()->basic->baseUrl();
+        $baseUrl = SiteConfig::current()->basic->baseUrl();
         if (! str_contains($baseUrl, '://')) {
-            $baseUrl = Http::protocolPrefix(\App\Support\Url::isSecure()) . $baseUrl;
+            $baseUrl = Http::protocolPrefix(Url::isSecure()).$baseUrl;
         }
         $baseUrl = rtrim($baseUrl, '/');
-        $siteName = \App\Support\Config\SiteConfig::current()->basic->siteName();
+        $siteName = SiteConfig::current()->basic->siteName();
 
         $mailOne = $langRecover['mail_one'] ?? 'Hi,<br /><br />Someone, hopefully you, requested that the password for the account<br />associated with this email address ';
         $mailTwo = $langRecover['mail_two'] ?? ' be reset.<br /><br />The request originated from ';
@@ -146,22 +152,22 @@ class PasswordRecoveryService
         $mailFour = sprintf($langRecover['mail_four'] ?? '<br />After you do this, your password will be reset and emailed back to you.<br /><br />------<br />Yours,<br />The %s Team.', $siteName);
         $thisLink = $langRecover['mail_this_link'] ?? 'THIS LINK';
 
-        $resetUrl = $baseUrl . '/recover.php?id=' . $userId . '&secret=' . $hash;
+        $resetUrl = $baseUrl.'/recover.php?id='.$userId.'&secret='.$hash;
 
         $body = $mailOne
-            . '(' . htmlspecialchars($email) . ')'
-            . $mailTwo
-            . htmlspecialchars($ip)
-            . $mailThree
-            . '<b><a href="' . $resetUrl . '" target="_blank"> ' . $thisLink . ' </a></b><br />'
-            . $resetUrl
-            . $mailFour;
+            .'('.htmlspecialchars($email).')'
+            .$mailTwo
+            .htmlspecialchars($ip)
+            .$mailThree
+            .'<b><a href="'.$resetUrl.'" target="_blank"> '.$thisLink.' </a></b><br />'
+            .$resetUrl
+            .$mailFour;
 
         Mail::sentLegacy(
             $email,
             $siteName,
-            \App\Support\Config\SiteConfig::current()->main->siteEmail(''),
-            $siteName . $this->msg($langRecover, 'mail_title', ' password reset confirmation'),
+            SiteConfig::current()->main->siteEmail(''),
+            $siteName.$this->msg($langRecover, 'mail_title', ' password reset confirmation'),
             $body,
             'confirmation',
             true,
@@ -176,28 +182,28 @@ class PasswordRecoveryService
      */
     private function sendNewPasswordEmail(User $user, string $newPassword, array $langRecover): void
     {
-        $baseUrl = \App\Support\Config\SiteConfig::current()->basic->baseUrl();
+        $baseUrl = SiteConfig::current()->basic->baseUrl();
         if (! str_contains($baseUrl, '://')) {
-            $baseUrl = Http::protocolPrefix(\App\Support\Url::isSecure()) . $baseUrl;
+            $baseUrl = Http::protocolPrefix(Url::isSecure()).$baseUrl;
         }
         $baseUrl = rtrim($baseUrl, '/');
-        $siteName = \App\Support\Config\SiteConfig::current()->basic->siteName();
+        $siteName = SiteConfig::current()->basic->siteName();
 
         $mailTwoFour = sprintf($langRecover['mail_two_four'] ?? '<br /><br />You may change your password in User CP - Security Settings after logging in.<br />------<br />Yours,<br />The %s Team.', $siteName);
 
         $body = ($langRecover['mail_two_one'] ?? 'Hi,<br /><br />As per your request we have generated a new password for your account.<br /><br />Here is the information we now have on file for this account:<br /><br />User name: ')
-            . (string) $user->username
-            . ($langRecover['mail_two_two'] ?? '<br />Password:  ')
-            . $newPassword
-            . ($langRecover['mail_two_three'] ?? '<br /><br />You may login from ')
-            . '<b><a href="' . $baseUrl . '/login.php">' . ($langRecover['mail_here'] ?? 'HERE') . '</a></b>'
-            . $mailTwoFour;
+            .(string) $user->username
+            .($langRecover['mail_two_two'] ?? '<br />Password:  ')
+            .$newPassword
+            .($langRecover['mail_two_three'] ?? '<br /><br />You may login from ')
+            .'<b><a href="'.$baseUrl.'/login.php">'.($langRecover['mail_here'] ?? 'HERE').'</a></b>'
+            .$mailTwoFour;
 
         Mail::sentLegacy(
             (string) $user->email,
             $siteName,
-            \App\Support\Config\SiteConfig::current()->main->siteEmail(''),
-            $siteName . $this->msg($langRecover, 'mail_two_title', ' account details'),
+            SiteConfig::current()->main->siteEmail(''),
+            $siteName.$this->msg($langRecover, 'mail_two_title', ' account details'),
             $body,
             'details',
             true,
@@ -237,7 +243,7 @@ class PasswordRecoveryService
         ];
 
         try {
-            $verified = \App\Support\Captcha::manager()->driver()->verify($payload, ['ip' => $ip]);
+            $verified = Captcha::manager()->driver()->verify($payload, ['ip' => $ip]);
         } catch (\Throwable $exception) {
             $verified = false;
         }

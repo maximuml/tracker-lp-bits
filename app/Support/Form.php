@@ -2,6 +2,8 @@
 
 namespace App\Support;
 
+use Nexus\Nexus;
+
 /**
  * Legacy form-emitter helpers extracted from `include/functions.php`.
  *
@@ -28,8 +30,8 @@ final class Form
 
         $js = '';
         if (! empty($options['require_files'])) {
-            \Nexus\Nexus::css('vendor/jquery-datetimepicker/jquery.datetimepicker.min.css', 'footer', true);
-            \Nexus\Nexus::js('vendor/jquery-datetimepicker/jquery.datetimepicker.full.min.js', 'footer', true);
+            Nexus::css('vendor/jquery-datetimepicker/jquery.datetimepicker.min.css', 'footer', true);
+            Nexus::js('vendor/jquery-datetimepicker/jquery.datetimepicker.full.min.js', 'footer', true);
             $js = "jQuery.datetimepicker.setLocale('{$lang}');";
         }
 
@@ -45,7 +47,7 @@ final class Form
 
         $format = $options['format'] ?? 'Y-m-d H:i';
         $js .= "jQuery(\"#{$id}\").datetimepicker({ format: '{$format}' })";
-        \Nexus\Nexus::js($js, 'footer', false);
+        Nexus::js($js, 'footer', false);
 
         return $input;
     }
@@ -62,11 +64,11 @@ final class Form
 
         ob_start();
 
-	$editTbodyId = "$form-$text-edit";
-	$previewTbodyId = "$form-$text-preview";
-	$btnEditId = "$form-$text-btn-edit";
-    $btnPreviewId = "$form-$text-btn-preview";
-?>
+        $editTbodyId = "$form-$text-edit";
+        $previewTbodyId = "$form-$text-preview";
+        $btnEditId = "$form-$text-btn-edit";
+        $btnPreviewId = "$form-$text-btn-preview";
+        ?>
 
 <script type="text/javascript">
     let textareaId = <?php echo json_encode($text, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>
@@ -303,10 +305,10 @@ function textBBCodeEdit() {
 <td class="embedded"><input class="codebuttons" style="font-style: italic;font-size:11px;margin-right:3px" type="button" name="i" value="I" onclick="javascript: simpletag('i')" /></td>
 <td class="embedded"><input class="codebuttons" style="text-decoration: underline;font-size:11px;margin-right:3px" type="button" name="u" value="U" onclick="javascript: simpletag('u')" /></td>
 <?php
-print("<td class=\"embedded\"><input class=\"codebuttons\" style=\"font-size:11px;margin-right:3px\" type=\"button\" name='url' value='URL' onclick=\"javascript:tag_url('" . $lang_functions['js_prompt_enter_url'] . "','" . $lang_functions['js_prompt_enter_title'] . "','" . $lang_functions['js_prompt_error'] . "')\" /></td>");
-print("<td class=\"embedded\"><input class=\"codebuttons\" style=\"font-size:11px;margin-right:3px\" type=\"button\" name=\"IMG\" value=\"IMG\" onclick=\"javascript: tag_image('" . $lang_functions['js_prompt_enter_image_url'] . "','" . $lang_functions['js_prompt_error'] . "')\" /></td>");
-print("<td class=\"embedded\"><input type=\"button\" style=\"font-size:11px;margin-right:3px\" name=\"list\" value=\"List\" onclick=\"tag_list('" . addslashes($lang_functions['js_prompt_enter_item']) . "','" . $lang_functions['js_prompt_error'] . "')\" /></td>");
-?>
+        echo "<td class=\"embedded\"><input class=\"codebuttons\" style=\"font-size:11px;margin-right:3px\" type=\"button\" name='url' value='URL' onclick=\"javascript:tag_url('".$lang_functions['js_prompt_enter_url']."','".$lang_functions['js_prompt_enter_title']."','".$lang_functions['js_prompt_error']."')\" /></td>";
+        echo "<td class=\"embedded\"><input class=\"codebuttons\" style=\"font-size:11px;margin-right:3px\" type=\"button\" name=\"IMG\" value=\"IMG\" onclick=\"javascript: tag_image('".$lang_functions['js_prompt_enter_image_url']."','".$lang_functions['js_prompt_error']."')\" /></td>";
+        echo "<td class=\"embedded\"><input type=\"button\" style=\"font-size:11px;margin-right:3px\" name=\"list\" value=\"List\" onclick=\"tag_list('".addslashes($lang_functions['js_prompt_enter_item'])."','".$lang_functions['js_prompt_error']."')\" /></td>";
+        ?>
 <td class="embedded"><input class="codebuttons" style="font-size:11px;margin-right:3px" type="button" name="quote" value="QUOTE" onclick="javascript: simpletag('quote')" /></td>
 <td class="embedded"><input style="font-size:11px;margin-right:3px" type="button" onclick='javascript:closeall();' name='tagcount' value="Close all tags" /></td>
 <td class="embedded"><select class="med codebuttons" style="margin-right:3px" name='color' onchange="alterfont(this.options[this.selectedIndex].value, 'color')">
@@ -392,8 +394,8 @@ print("<td class=\"embedded\"><input type=\"button\" style=\"font-size:11px;marg
 </td>
 </tr>
 <?php
-if ($enableattach_attachment == 'yes'){
-?>
+if ($enableattach_attachment == 'yes') {
+    ?>
 <tr>
 <td colspan="2" valign="middle">
 <iframe src="<?php echo Url::schemeAndHost()?>/attachment.php" width="100%" height="24" frameborder="0" scrolling="no" marginheight="0" marginwidth="0"></iframe>
@@ -401,29 +403,29 @@ if ($enableattach_attachment == 'yes'){
 </tr>
 <?php
 }
-print("<tr>");
-print("<td align=\"left\"><textarea class=\"bbcode\" cols=\"100\" style=\"width: 100%;\" name=\"".$text."\" id=\"".$text."\" rows=\"20\" onkeydown=\"ctrlenter(event,'compose','qr')\">".$content."</textarea>");
-?>
+        echo '<tr>';
+        echo '<td align="left"><textarea class="bbcode" cols="100" style="width: 100%;" name="'.$text.'" id="'.$text."\" rows=\"20\" onkeydown=\"ctrlenter(event,'compose','qr')\">".$content.'</textarea>';
+        ?>
 </td>
 <td align="center" width="">
 <table cellspacing="1" cellpadding="3">
 <tr>
 <?php
-$i = 0;
-$quickSmilies = array(1, 2, 3, 5, 6, 7, 8, 9, 10, 11, 13, 16, 17, 19, 20, 21, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 39, 40, 41);
-foreach ($quickSmilies as $smily) {
-	if ($i%4 == 0 && $i > 0) {
-		print('</tr><tr>');
-	}
-	print("<td class=\"embedded\" style=\"padding: 3px;\">".\App\Support\Smilies::link($form, $text, (int) $smily)."</td>");
-	$i++;
-}
-?>
+        $i = 0;
+        $quickSmilies = [1, 2, 3, 5, 6, 7, 8, 9, 10, 11, 13, 16, 17, 19, 20, 21, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 39, 40, 41];
+        foreach ($quickSmilies as $smily) {
+            if ($i % 4 == 0 && $i > 0) {
+                echo '</tr><tr>';
+            }
+            echo '<td class="embedded" style="padding: 3px;">'.Smilies::link($form, $text, (int) $smily).'</td>';
+            $i++;
+        }
+        ?>
 </tr></table>
 <br />
 <a href="javascript:winop();"><?php echo $lang_functions['text_more_smilies'] ?></a>
 </td></tr></tobdy>
-    <?php if($withPreview) {?>
+    <?php if ($withPreview) {?>
     <tbody id="<?php echo $previewTbodyId?>"></tbody>
     <tbody>
         <tr><td colspan="2" style="text-align: center;border: none">
@@ -434,7 +436,7 @@ foreach ($quickSmilies as $smily) {
     <?php }?>
 </table><?php
 
-        return (string) ob_get_clean();
+                return (string) ob_get_clean();
     }
 
     /**
@@ -469,7 +471,7 @@ if (password.length > 40) {
 JS;
         }
 
-        $formVar = 'jqForm' . md5($formId);
+        $formVar = 'jqForm'.md5($formId);
         $js = <<<JS
 var $formVar = jQuery("#{$formId}");
 $formVar.on("click", "input[type=button]", function() {
@@ -503,8 +505,8 @@ $formVar.on("click", "input[type=button]", function() {
     }
 })
 JS;
-        \Nexus\Nexus::js('js/crypto-js.js', 'footer', true);
-        \Nexus\Nexus::js($js, 'footer', false);
+        Nexus::js('js/crypto-js.js', 'footer', true);
+        Nexus::js($js, 'footer', false);
     }
 
     /**
@@ -514,7 +516,7 @@ JS;
      */
     public static function passwordChallengeJs(string $formId, string $usernameName, string $passwordOriginalClass): void
     {
-        $formVar = 'jqForm' . md5($formId);
+        $formVar = 'jqForm'.md5($formId);
         $js = <<<JS
 var $formVar = jQuery("#{$formId}");
 $formVar.on("click", "input[type=button]", function() {
@@ -546,6 +548,16 @@ async function login(username, password, jqForm) {
             return
         }
 
+        // For argon2id users, send plaintext password (over HTTPS) since
+        // the server-side hash cannot be computed client-side.
+        if (challengeData.data.passhash_algo === 'argon2id') {
+            jqForm.find("input[name=response]").val('')
+            jqForm.find("input[name=oldpassword]").remove()
+            jqForm.append('<input type="hidden" name="oldpassword" value="' + $('<div>').text(password).html() + '">')
+            jqForm.submit()
+            return
+        }
+
         const clientHashedPassword = CryptoJS.SHA256(password).toString();
 
         const serverSideHash = CryptoJS.SHA256(challengeData.data.secret + clientHashedPassword).toString();
@@ -559,8 +571,8 @@ async function login(username, password, jqForm) {
     }
 }
 JS;
-        \Nexus\Nexus::js('vendor/jquery-loading/jquery.loading.min.js', 'footer', true);
-        \Nexus\Nexus::js('js/crypto-js.js', 'footer', true);
-        \Nexus\Nexus::js($js, 'footer', false);
+        Nexus::js('vendor/jquery-loading/jquery.loading.min.js', 'footer', true);
+        Nexus::js('js/crypto-js.js', 'footer', true);
+        Nexus::js($js, 'footer', false);
     }
 }

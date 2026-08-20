@@ -25,6 +25,11 @@ final class Environment
         return php_sapi_name() === 'fpm-fcgi';
     }
 
+    public static function isTesting(): bool
+    {
+        return env('APP_ENV') === 'testing' || class_exists(\PHPUnit\Framework\TestCase::class, false);
+    }
+
     public static function commandExists(string $command): bool
     {
         return trim((string) exec('command -v ' . escapeshellarg($command))) !== '';

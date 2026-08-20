@@ -33,9 +33,13 @@ final class LegacyRequestMiddleware
     /** @var array<int, string> */
     private const PARKED_SCRIPTS = [
         'viewsnatches', 'users', 'forums', 'report', 'cheaterbox', 'upload',
-        'offers', 'comment', 'userdetails', 'checkuser', 'invite', 'bitbucket-upload',
+        'offers', 'comment', 'userdetails', 'checkuser', 'takeconfirm', 'invite', 'bitbucket-upload',
         'mybonus', 'userhistory', 'moresmilies', 'torrents', 'getattachment',
         'sendmessage', 'reports', 'self-enable', 'friends', 'settings', 'topten', 'attendance',
+        'donorlist', 'warned', 'nowarn', 'bans', 'cheaterbox', 'cheaters', 'iphistory', 'ipcheck', 'ipsearch',
+        'staffbox', 'stats', 'allagents',
+        'delacctadmin', 'deletedisabled', 'massmail', 'maxlogin',
+        'catmanage', 'forummanage', 'moforums', 'fields', 'formats', 'videoformats',
     ];
 
     public function handle(Request $request, Closure $next): Response

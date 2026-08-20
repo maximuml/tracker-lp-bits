@@ -2,29 +2,24 @@
 
 namespace App\Filament\Resources\Section;
 
-use Filament\Schemas\Schema;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Select;
-use Filament\Schemas\Components\Section;
-use Filament\Schemas\Components\Utilities\Get;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Actions\EditAction;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\DeleteBulkAction;
-use App\Filament\Resources\Section\SecondIconResource\Pages\ListSecondIcons;
 use App\Filament\Resources\Section\SecondIconResource\Pages\CreateSecondIcon;
 use App\Filament\Resources\Section\SecondIconResource\Pages\EditSecondIcon;
-use App\Filament\Resources\Section\SecondIconResource\Pages;
-use App\Filament\Resources\Section\SecondIconResource\RelationManagers;
+use App\Filament\Resources\Section\SecondIconResource\Pages\ListSecondIcons;
 use App\Models\SearchBox;
 use App\Models\SecondIcon;
 use App\Repositories\SearchBoxRepository;
-use Filament\Forms;
+use App\Support\Config\SiteConfig;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Schema;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Filament\Tables;
-use Illuminate\Database\Query\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Collection;
 use Nexus\Database\NexusDB;
 
@@ -32,9 +27,9 @@ class SecondIconResource extends Resource
 {
     protected static ?string $model = SecondIcon::class;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-ticket';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-ticket';
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Section';
+    protected static string|\UnitEnum|null $navigationGroup = 'Section';
 
     protected static ?int $navigationSort = 11;
 
@@ -50,43 +45,37 @@ class SecondIconResource extends Resource
 
     public static function form(Schema $schema): Schema
     {
-        $searchBoxRep = new SearchBoxRepository();
-        $torrentMode = \App\Support\Config\SiteConfig::current()->main->browseCat();
+        $searchBoxRep = new SearchBoxRepository;
+        $torrentMode = SiteConfig::current()->main->browseCat();
         $torrentTaxonomySchema = $searchBoxRep->listTaxonomyFormSchema($torrentMode);
         $modeOptions = SearchBox::listModeOptions();
+
         return $schema
             ->components([
                 TextInput::make('name')
                     ->label(__('label.name'))
                     ->required()
-                    ->helperText(__('label.second_icon.name_help'))
-                ,
+                    ->helperText(__('label.second_icon.name_help')),
                 TextInput::make('image')
                     ->label(__('label.second_icon.image'))
                     ->required()
-                    ->helperText(__('label.second_icon.image_help'))
-                ,
+                    ->helperText(__('label.second_icon.image_help')),
                 TextInput::make('class_name')
                     ->label(__('label.second_icon.class_name'))
-                    ->helperText(__('label.second_icon.class_name_help'))
-                ,
+                    ->helperText(__('label.second_icon.class_name_help')),
                 Select::make('mode')
                     ->options($modeOptions)
                     ->label(__('label.search_box.taxonomy.mode'))
                     ->helperText(__('label.search_box.taxonomy.mode_help'))
-                    ->reactive()
-                ,
+                    ->reactive(),
                 Section::make(__('label.second_icon.select_section'))
                     ->id("taxonomy_$torrentMode")
                     ->schema($torrentTaxonomySchema)
                     ->columns(4)
-                    ->hidden(fn (Get $get) => $get('mode') != $torrentMode)
-                ,
+                    ->hidden(fn (Get $get) => $get('mode') != $torrentMode),
 
             ]);
     }
-
-
 
     public static function table(Table $table): Table
     {
@@ -94,8 +83,7 @@ class SecondIconResource extends Resource
             TextColumn::make('id'),
             TextColumn::make('search_box.name')
                 ->label(__('label.search_box.label'))
-                ->formatStateUsing(fn ($record) => $record->search_box->name ?? 'All')
-            ,
+                ->formatStateUsing(fn ($record) => $record->search_box->name ?? 'All'),
             TextColumn::make('name')->label(__('label.name')),
             TextColumn::make('image')->label(__('label.second_icon.image')),
             TextColumn::make('class_name')->label(__('label.second_icon.class_name')),
@@ -103,9 +91,10 @@ class SecondIconResource extends Resource
         $taxonomyList = self::listTaxonomy();
         foreach (SearchBox::$taxonomies as $torrentField => $taxonomyTableModel) {
             $columns[] = TextColumn::make($torrentField)->formatStateUsing(function ($state) use ($taxonomyList, $torrentField) {
-                 return $taxonomyList[$torrentField]->get($state) ?? '';
+                return $taxonomyList[$torrentField]->get($state) ?? '';
             });
         }
+
         return $table
             ->columns($columns)
             ->filters([
@@ -130,6 +119,7 @@ class SecondIconResource extends Resource
                 $taxonomyList[$torrentField] = NexusDB::table($taxonomyTableModel['table'])->pluck('name', 'id');
             }
         }
+
         return $taxonomyList;
     }
 

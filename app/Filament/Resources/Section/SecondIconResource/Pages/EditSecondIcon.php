@@ -2,12 +2,11 @@
 
 namespace App\Filament\Resources\Section\SecondIconResource\Pages;
 
-use Filament\Actions\DeleteAction;
 use App\Filament\EditRedirectIndexTrait;
 use App\Filament\Resources\Section\SecondIconResource;
 use App\Models\SearchBox;
 use App\Models\SecondIcon;
-use Filament\Pages\Actions;
+use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 
 class EditSecondIcon extends EditRecord
@@ -25,7 +24,7 @@ class EditSecondIcon extends EditRecord
 
     /**
      * @param  array<string, mixed>  $data
-     * @return  array<string, mixed>
+     * @return array<string, mixed>
      */
     protected function mutateFormDataBeforeSave(array $data): array
     {
@@ -34,7 +33,7 @@ class EditSecondIcon extends EditRecord
 
     /**
      * @param  array<string, mixed>  $data
-     * @return  array<string, mixed>
+     * @return array<string, mixed>
      */
     protected function mutateFormDataBeforeFill(array $data): array
     {
@@ -44,6 +43,7 @@ class EditSecondIcon extends EditRecord
             unset($data[$torrentField]);
             $data[$torrentField][$mode] = $taxonomyValue;
         }
+
         return $data;
     }
 }

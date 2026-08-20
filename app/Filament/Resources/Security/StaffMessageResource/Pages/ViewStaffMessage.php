@@ -2,16 +2,14 @@
 
 namespace App\Filament\Resources\Security\StaffMessageResource\Pages;
 
-use Filament\Actions\Action;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\TextInput;
 use App\Filament\Resources\Security\StaffMessageResource;
 use App\Models\Message;
 use App\Models\StaffMessage;
 use App\Models\User;
-use App\Auth\Permission;
-use App\Enums\Permission\PermissionEnum;
-use App\Repositories\ToolRepository;
+use App\Support\Cache;
+use Filament\Actions\Action;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\ViewRecord;
 use Illuminate\Support\Facades\Auth;
 
@@ -25,6 +23,7 @@ class ViewStaffMessage extends ViewRecord
         if (! $record instanceof StaffMessage) {
             throw new \RuntimeException('Expected a StaffMessage record.');
         }
+
         return $record;
     }
 
@@ -39,7 +38,7 @@ class ViewStaffMessage extends ViewRecord
                 ->label(__('label.staff_message.reply'))
                 ->icon('heroicon-o-reply')
                 ->schema([
-                    TextInput::make('subject')->default('Re: ' . $record->subject)->required(),
+                    TextInput::make('subject')->default('Re: '.$record->subject)->required(),
                     Textarea::make('body')->label(__('label.staff_message.reply_body'))->rows(4)->required(),
                 ])
                 ->action(function (array $data) use ($record, $user) {
@@ -55,7 +54,7 @@ class ViewStaffMessage extends ViewRecord
                         'answered' => 1,
                         'answeredby' => $user->id,
                     ]);
-                    \App\Support\Cache::clearStaffMessage();
+                    Cache::clearStaffMessage();
                 });
         }
 
@@ -63,7 +62,7 @@ class ViewStaffMessage extends ViewRecord
     }
 
     /**
-     * @return  array<int, array<string, mixed>>
+     * @return array<int, array<string, mixed>>
      */
     private function getDetailCardData(): array
     {
@@ -79,6 +78,7 @@ class ViewStaffMessage extends ViewRecord
             $data[] = ['label' => __('label.staff_message.answer'), 'value' => nl2br(e($record->answer))];
         }
         $data[] = ['label' => __('label.added'), 'value' => $record->added];
+
         return $data;
     }
 

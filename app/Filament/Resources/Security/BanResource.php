@@ -2,32 +2,30 @@
 
 namespace App\Filament\Resources\Security;
 
-use Filament\Schemas\Schema;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Textarea;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Actions\EditAction;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\DeleteBulkAction;
-use App\Filament\Resources\Security\BanResource\Pages\ListBans;
 use App\Filament\Resources\Security\BanResource\Pages\CreateBan;
 use App\Filament\Resources\Security\BanResource\Pages\EditBan;
+use App\Filament\Resources\Security\BanResource\Pages\ListBans;
 use App\Models\Ban;
 use App\Models\User;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
 use Filament\Forms;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Filament\Tables;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 
 class BanResource extends Resource
 {
     protected static ?string $model = Ban::class;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-shield-exclamation';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-shield-exclamation';
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Security';
+    protected static string|\UnitEnum|null $navigationGroup = 'Security';
 
     protected static ?int $navigationSort = 1;
 
@@ -44,6 +42,7 @@ class BanResource extends Resource
     public static function canAccess(): bool
     {
         $user = Auth::user();
+
         return $user instanceof User && $user->class >= User::CLASS_ADMINISTRATOR;
     }
 
@@ -57,27 +56,22 @@ class BanResource extends Resource
                     ->ip()
                     ->helperText(__('label.ban.first_ip_help'))
                     ->dehydrateStateUsing(fn ($state) => Ban::ipToLong($state) ?: 0)
-                    ->formatStateUsing(fn ($record) => $record && $record->first > 0 ? Ban::longToIp((int) $record->first) : '')
-                ,
+                    ->formatStateUsing(fn ($record) => $record && $record->first > 0 ? Ban::longToIp((int) $record->first) : ''),
                 TextInput::make('last_ip')
                     ->label(__('label.ban.last_ip'))
                     ->required()
                     ->ip()
                     ->helperText(__('label.ban.last_ip_help'))
                     ->dehydrateStateUsing(fn ($state) => Ban::ipToLong($state) ?: 0)
-                    ->formatStateUsing(fn ($record) => $record && $record->last > 0 ? Ban::longToIp((int) $record->last) : '')
-                ,
+                    ->formatStateUsing(fn ($record) => $record && $record->last > 0 ? Ban::longToIp((int) $record->last) : ''),
                 Textarea::make('comment')
                     ->label(__('label.ban.comment'))
                     ->required()
-                    ->rows(2)
-                ,
+                    ->rows(2),
                 Forms\Components\Hidden::make('addedby')
-                    ->default(fn () => Auth::id() ?? 0)
-                ,
+                    ->default(fn () => Auth::id() ?? 0),
                 Forms\Components\Hidden::make('added')
-                    ->default(fn () => date('Y-m-d H:i:s'))
-                ,
+                    ->default(fn () => date('Y-m-d H:i:s')),
             ]);
     }
 
@@ -88,13 +82,11 @@ class BanResource extends Resource
                 TextColumn::make('id')->sortable(),
                 TextColumn::make('ip_range')
                     ->label(__('label.ban.ip_range'))
-                    ->state(fn ($record) => Ban::longToIp((int) $record->first) . ' - ' . Ban::longToIp((int) $record->last))
-                ,
+                    ->state(fn ($record) => Ban::longToIp((int) $record->first).' - '.Ban::longToIp((int) $record->last)),
                 TextColumn::make('comment')->label(__('label.ban.comment'))->limit(50),
                 TextColumn::make('addedByUser.username')
                     ->label(__('label.ban.addedby'))
-                    ->placeholder('N/A')
-                ,
+                    ->placeholder('N/A'),
                 TextColumn::make('added')->dateTime('Y-m-d H:i')->sortable()->label(__('label.added')),
             ])
             ->defaultSort('id', 'desc')

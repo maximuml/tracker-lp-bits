@@ -2,32 +2,32 @@
 
 namespace App\Filament\Resources\Security;
 
-use Filament\Schemas\Schema;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Columns\BadgeColumn;
+use App\Filament\Resources\Security\CheaterResource\Pages\ListCheaters;
+use App\Models\Cheater;
+use App\Models\User;
+use App\Support\Format;
+use App\Support\SupportContext;
 use Filament\Actions\Action;
 use Filament\Actions\BulkAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
-use App\Filament\Resources\Security\CheaterResource\Pages\ListCheaters;
-use App\Models\Cheater;
-use App\Models\Torrent;
-use App\Models\User;
 use Filament\Forms;
 use Filament\Resources\Resource;
-use Filament\Tables\Table;
+use Filament\Schemas\Schema;
 use Filament\Tables;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
 
 class CheaterResource extends Resource
 {
     protected static ?string $model = Cheater::class;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-exclamation-triangle';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-exclamation-triangle';
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Security';
+    protected static string|\UnitEnum|null $navigationGroup = 'Security';
 
     protected static ?int $navigationSort = 2;
 
@@ -44,6 +44,7 @@ class CheaterResource extends Resource
     public static function canAccess(): bool
     {
         $user = Auth::user();
+
         return $user instanceof User && $user->class >= User::CLASS_MODERATOR;
     }
 
@@ -66,21 +67,17 @@ class CheaterResource extends Resource
                 TextColumn::make('torrent.name')
                     ->label(__('label.cheater.torrent'))
                     ->limit(40)
-                    ->url(fn ($record) => $record->torrentid > 0 ? "/details/{$record->torrentid}" : null)
-                ,
+                    ->url(fn ($record) => $record->torrentid > 0 ? "/details/{$record->torrentid}" : null),
                 TextColumn::make('uploaded')->label(__('label.cheater.uploaded'))
-                    ->formatStateUsing(fn ($record) => \App\Support\Format::size((int) $record->uploaded))
-                ,
+                    ->formatStateUsing(fn ($record) => Format::size((int) $record->uploaded)),
                 TextColumn::make('downloaded')->label(__('label.cheater.downloaded'))
-                    ->formatStateUsing(fn ($record) => \App\Support\Format::size((int) $record->downloaded))
-                ,
+                    ->formatStateUsing(fn ($record) => Format::size((int) $record->downloaded)),
                 TextColumn::make('anctime')->label(__('label.cheater.anctime'))->sortable(),
                 TextColumn::make('dealtwith')
                     ->badge()
                     ->colors(['danger' => 0, 'success' => 1])
                     ->formatStateUsing(fn ($record) => $record->dealtwith ? __('label.cheater.dealt') : __('label.cheater.undealt'))
-                    ->label(__('label.cheater.status'))
-                ,
+                    ->label(__('label.cheater.status')),
                 TextColumn::make('dealtby')->label(__('label.cheater.dealtby'))->placeholder('N/A'),
                 TextColumn::make('added')->dateTime('Y-m-d H:i')->sortable()->label(__('label.added')),
             ])
@@ -102,7 +99,7 @@ class CheaterResource extends Resource
                             'dealtwith' => 1,
                             'dealtby' => Auth::id() ?? 0,
                         ]);
-                        $cache = \App\Support\SupportContext::getCache();
+                        $cache = SupportContext::getCache();
                         $cache?->delete_value('staff_new_cheater_count', true);
                     }),
                 DeleteAction::make(),
@@ -122,7 +119,7 @@ class CheaterResource extends Resource
                                 'dealtby' => Auth::id() ?? 0,
                             ]);
                         });
-                        $cache = \App\Support\SupportContext::getCache();
+                        $cache = SupportContext::getCache();
                         $cache?->delete_value('staff_new_cheater_count', true);
                     }),
             ]);

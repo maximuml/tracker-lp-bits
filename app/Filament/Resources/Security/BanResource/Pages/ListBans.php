@@ -2,10 +2,9 @@
 
 namespace App\Filament\Resources\Security\BanResource\Pages;
 
-use Filament\Actions\CreateAction;
 use App\Filament\PageList;
 use App\Filament\Resources\Security\BanResource;
-use Filament\Resources\Pages\ListRecords;
+use Filament\Actions\CreateAction;
 
 class ListBans extends PageList
 {

@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>План модернизации — tracker-lp-bits</title>
+    <style>
+        :root {
+            --bg: #0f172a;
+            --surface: #1e293b;
+            --surface2: #334155;
+            --border: #475569;
+            --text: #e2e8f0;
+            --text-dim: #94a3b8;
+            --accent: #38bdf8;
+            --accent2: #818cf8;
+            --green: #4ade80;
+            --yellow: #facc15;
+            --red: #f87171;
+            --orange: #fb923c;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+            font-size: 15px;
+        }
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 40px 24px 80px;
+        }
+
+        /* Hero */
+        .hero {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 48px 40px;
+            margin-bottom: 40px;
+            text-align: center;
+        }
+        .hero h1 {
+            font-size: 32px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 12px;
+        }
+        .hero .subtitle {
+            font-size: 18px;
+            color: var(--text-dim);
+            margin-bottom: 24px;
+        }
+        .hero .meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
+        }
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            padding: 6px 16px;
+            font-size: 13px;
+            color: var(--text-dim);
+        }
+        .badge .dot {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background: var(--green);
+        }
+
+        /* Section */
+        section {
+            margin-bottom: 48px;
+        }
+        h2 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        h2 .icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px; height: 36px;
+            border-radius: 10px;
+            font-size: 18px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+        }
+        h3 {
+            font-size: 18px;
+            font-weight: 600;
+            margin: 28px 0 14px;
+            color: var(--accent);
+        }
+        h4 {
+            font-size: 16px;
+            font-weight: 600;
+            margin: 20px 0 10px;
+            color: var(--text);
+        }
+        p {
+            margin-bottom: 14px;
+            color: var(--text);
+        }
+        ul, ol {
+            margin: 0 0 16px 20px;
+        }
+        li {
+            margin-bottom: 6px;
+        }
+        strong { color: #fff; font-weight: 600; }
+        code {
+            font-family: 'Fira Code', 'Cascadia Code', Consolas, monospace;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 2px 7px;
+            font-size: 13px;
+            color: var(--accent);
+        }
+        .code-block {
+            background: #0d1117;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 18px 22px;
+            font-family: 'Fira Code', 'Cascadia Code', Consolas, monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            overflow-x: auto;
+            margin: 16px 0;
+            color: #c9d1d9;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+        }
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+        .info-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+        }
+        .info-card .label {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-dim);
+            margin-bottom: 8px;
+        }
+        .info-card .value {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--accent);
+        }
+        .info-card .desc {
+            font-size: 13px;
+            color: var(--text-dim);
+            margin-top: 4px;
+        }
+
+        /* Tables */
+        .table-wrap {
+            overflow-x: auto;
+            margin: 16px 0;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+        th {
+            background: var(--surface2);
+            text-align: left;
+            padding: 12px 16px;
+            font-weight: 600;
+            color: var(--text);
+            border-bottom: 1px solid var(--border);
+            white-space: nowrap;
+        }
+        td {
+            padding: 10px 16px;
+            border-bottom: 1px solid var(--border);
+            color: var(--text);
+            vertical-align: top;
+        }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: rgba(56, 189, 248, 0.05); }
+
+        /* Status badges */
+        .status {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 3px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        .status-done {
+            background: rgba(74, 222, 128, 0.15);
+            color: var(--green);
+            border: 1px solid rgba(74, 222, 128, 0.3);
+        }
+        .status-pending {
+            background: rgba(148, 163, 184, 0.15);
+            color: var(--text-dim);
+            border: 1px solid rgba(148, 163, 184, 0.3);
+        }
+        .status-progress {
+            background: rgba(250, 204, 21, 0.15);
+            color: var(--yellow);
+            border: 1px solid rgba(250, 204, 21, 0.3);
+        }
+
+        /* Effort badges */
+        .effort {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .effort-low { background: rgba(74, 222, 128, 0.15); color: var(--green); }
+        .effort-medium { background: rgba(250, 204, 21, 0.15); color: var(--yellow); }
+        .effort-high { background: rgba(248, 113, 113, 0.15); color: var(--red); }
+
+        /* Check / Cross lists */
+        .check-list, .cross-list {
+            list-style: none;
+            margin-left: 0;
+        }
+        .check-list li, .cross-list li {
+            padding-left: 28px;
+            position: relative;
+            margin-bottom: 8px;
+        }
+        .check-list li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: var(--green);
+            font-weight: 700;
+        }
+        .cross-list li::before {
+            content: '✗';
+            position: absolute;
+            left: 0;
+            color: var(--red);
+            font-weight: 700;
+        }
+
+        /* Track header */
+        .track-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .track-header h3 {
+            margin: 0;
+        }
+        .track-goal {
+            background: rgba(56, 189, 248, 0.08);
+            border-left: 3px solid var(--accent);
+            padding: 12px 18px;
+            border-radius: 0 8px 8px 0;
+            margin: 12px 0 20px;
+            font-size: 14px;
+        }
+
+        /* Timeline */
+        .timeline {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+        }
+        .timeline-item {
+            display: flex;
+            gap: 16px;
+            padding-bottom: 24px;
+            position: relative;
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: 15px;
+            top: 32px;
+            bottom: 0;
+            width: 2px;
+            background: var(--border);
+        }
+        .timeline-item:last-child::before { display: none; }
+        .timeline-dot {
+            width: 32px; height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 700;
+            flex-shrink: 0;
+            z-index: 1;
+        }
+        .timeline-dot.done { background: rgba(74, 222, 128, 0.2); color: var(--green); border: 2px solid var(--green); }
+        .timeline-dot.pending { background: var(--surface2); color: var(--text-dim); border: 2px solid var(--border); }
+        .timeline-content { flex: 1; }
+        .timeline-content .title { font-weight: 600; font-size: 15px; }
+        .timeline-content .desc { font-size: 13px; color: var(--text-dim); margin-top: 2px; }
+
+        /* Callout */
+        .callout {
+            background: rgba(129, 140, 248, 0.1);
+            border: 1px solid rgba(129, 140, 248, 0.3);
+            border-radius: 10px;
+            padding: 16px 20px;
+            margin: 16px 0;
+            font-size: 14px;
+        }
+        .callout strong { color: var(--accent2); }
+
+        /* Progress bar */
+        .progress-bar {
+            background: var(--surface2);
+            border-radius: 999px;
+            height: 8px;
+            overflow: hidden;
+            margin: 8px 0;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--green), var(--accent));
+            border-radius: 999px;
+            transition: width 0.3s;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 32px;
+            color: var(--text-dim);
+            font-size: 13px;
+            border-top: 1px solid var(--border);
+        }
+
+        /* Phase detail */
+        .phase-detail {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px 20px;
+            margin-bottom: 12px;
+        }
+        .phase-detail .phase-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+        .phase-detail .phase-title {
+            font-weight: 600;
+            font-size: 15px;
+        }
+        .phase-detail .phase-desc {
+            font-size: 13px;
+            color: var(--text-dim);
+        }
+
+        .legend {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin: 12px 0;
+            font-size: 13px;
+            color: var(--text-dim);
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <!-- Hero -->
+    <div class="hero">
+        <h1>План модернизации проекта</h1>
+        <div class="subtitle">tracker-lp-bits — BitTorrent-трекер на Laravel 12 + Filament 5</div>
+        <div class="meta">
+            <span class="badge"><span class="dot"></span> Laravel 12.64</span>
+            <span class="badge"><span class="dot"></span> Filament 5.7</span>
+            <span class="badge"><span class="dot"></span> PHP 8.4+</span>
+            <span class="badge"><span class="dot"></span> PHPUnit 11</span>
+            <span class="badge"><span class="dot"></span> PHPStan 2.2</span>
+            <span class="badge"><span class="dot"></span> Vite 6 + Tailwind 3</span>
+        </div>
+        <div style="margin-top: 20px; font-size: 13px; color: var(--text-dim);">
+            ~108 600 строк PHP-кода · 815 файлов · активный поэтапный переход
+        </div>
+    </div>
+
+    <!-- Текущее состояние -->
+    <section>
+        <h2><span class="icon">📊</span> Текущее состояние проекта</h2>
+
+        <div class="card-grid">
+            <div class="info-card">
+                <div class="label">PHP-код в app/</div>
+                <div class="value">108 626</div>
+                <div class="desc">строк кода</div>
+            </div>
+            <div class="info-card">
+                <div class="label">Legacy _content.php</div>
+                <div class="value">9 298</div>
+                <div class="desc">строк в 9 файлах (без PHPStan)</div>
+            </div>
+            <div class="info-card">
+                <div class="label">Контроллеры</div>
+                <div class="value">14 520</div>
+                <div class="desc">строк, 6 контроллеров &gt;700 строк</div>
+            </div>
+            <div class="info-card">
+                <div class="label">Nexus-ядро</div>
+                <div class="value">6 586</div>
+                <div class="desc">строк процедурного кода</div>
+            </div>
+            <div class="info-card">
+                <div class="label">Filament-ресурсы</div>
+                <div class="value">177</div>
+                <div class="desc">файлов / 11 542 строк</div>
+            </div>
+            <div class="info-card">
+                <div class="label">CSRF-исключения</div>
+                <div class="value">~70</div>
+                <div class="desc">маршрутов без защиты</div>
+            </div>
+        </div>
+
+        <h3>Что уже современно ✓</h3>
+        <div class="card">
+            <ul class="check-list">
+                <li><strong>Laravel 12 + Filament 5</strong> — актуальные мажорные версии</li>
+                <li><strong>PHP 8.4</strong> — строгая типизация в новом коде</li>
+                <li><strong>PHPStan level 8</strong> — enforced в CI для <code>app/</code> (кроме legacy-партиалов)</li>
+                <li><strong>DTO и ValueObjects</strong> — типизированные репозитории для announce-конвейера</li>
+                <li><strong>Redis</strong> — для очередей/кэша/сессий, Horizon для мониторинга</li>
+                <li><strong>Vite 6 + Tailwind 3</strong> — современная сборка фронтенда</li>
+                <li><strong>composer audit + npm audit</strong> — в CI</li>
+                <li><strong>Docker Compose</strong> — MySQL 8 / Redis 7 / MeiliSearch</li>
+                <li><strong>Feature-тесты</strong> — для Phase 20 API, security headers, announce</li>
+            </ul>
+        </div>
+
+        <h3>Что сдерживает проект ✗</h3>
+        <div class="card">
+            <ul class="cross-list">
+                <li><strong>9 298 строк</strong> legacy <code>app/Services/Legacy/*_content.php</code> + <strong>1 826 строк</strong> в <code>partials/</code> — вне PHPStan, без тестов</li>
+                <li><strong>14 520 строк</strong> в контроллерах — несколько &gt;700 строк, смешивают view/DB/логику</li>
+                <li><strong>6 586 строк</strong> в <code>app/Nexus/</code> — процедурное NexusPHP-ядро в PSR-4 обёртке</li>
+                <li><strong>Двойная админка:</strong> Filament (177 файлов) <em>и</em> legacy AdminController/StaffController (3 400+ строк)</li>
+                <li><strong>Три поисковых движка</strong> одновременно (MeiliSearch активен, Elasticsearch + ClickHouse dormant)</li>
+                <li><strong>Две системы auth-токенов</strong> (Passport + Sanctum) без чёткой границы</li>
+                <li><strong>Техдолг безопасности</strong> — CSRF, хеширование паролей (sha256), публичный cron</li>
+            </ul>
+        </div>
+    </section>
+
+    <!-- Дорожная карта -->
+    <section>
+        <h2><span class="icon">🗺️</span> Дорожная карта модернизации</h2>
+        <p>6 независимых направлений. Каждое поставляемо отдельно. Рекомендуемый порядок следует зависимостям, но направления 1–3 могут выполняться параллельно.</p>
+
+        <div class="legend">
+            <span class="legend-item"><span class="status status-done">Готово</span></span>
+            <span class="legend-item"><span class="status status-progress">В работе</span></span>
+            <span class="legend-item"><span class="status status-pending">Запланировано</span></span>
+        </div>
+    </section>
+
+    <!-- Track 1 -->
+    <section>
+        <div class="track-header">
+            <h3>🔒 Направление 1 — Усиление безопасности</h3>
+            <span class="status status-pending">Запланировано · недели 1–2</span>
+        </div>
+        <div class="track-goal">
+            <strong>Цель:</strong> Закрыть критические находки из <code>AUDIT.md</code> до любой функциональной работы.
+        </div>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Шаг</th>
+                        <th>Действие</th>
+                        <th>Файлы</th>
+                        <th>Усилие</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>1.1</strong></td>
+                        <td>Включить CSRF: заменить массовое <code>$except</code> на per-route токены или signed-form middleware. Оставить только <code>tg-webhook/*</code> exempt.</td>
+                        <td><code>VerifyCsrfToken.php</code>, все legacy form views</td>
+                        <td><span class="effort effort-high">Высокое</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>1.2</strong></td>
+                        <td>Защитить <code>/cron</code>: требовать <code>CRON_TOKEN</code> или ограничить loopback через middleware.</td>
+                        <td><code>routes/legacy/public.php</code>, новый <code>CronToken</code> middleware</td>
+                        <td><span class="effort effort-low">Низкое</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>1.3</strong></td>
+                        <td>Мигрировать хеширование паролей на <code>password_hash(PASSWORD_ARGON2ID)</code>. Реализовать <code>rehashPasswordIfRequired()</code> для апгрейда legacy sha256/md5 при логине. Добавить колонку <code>passhash_algo</code>.</td>
+                        <td><code>WebAuthService.php</code>, <code>NexusWebUserProvider.php</code>, <code>RegistrationService.php</code>, миграция</td>
+                        <td><span class="effort effort-medium">Среднее</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>1.4</strong></td>
+                        <td>Перевести passkey-login с GET на POST (одноразовый exchange token).</td>
+                        <td><code>AuthenticateController.php</code>, маршрут</td>
+                        <td><span class="effort effort-low">Низкое</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>1.5</strong></td>
+                        <td>Валидировать email в <code>confirmemail</code>. Очистить <code>.env.example</code> (удалить реальный APP_KEY, placeholder для MeiliSearch, <code>APP_DEBUG=false</code>).</td>
+                        <td><code>UtilityController.php</code>, <code>.env.example</code></td>
+                        <td><span class="effort effort-low">Низкое</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>1.6</strong></td>
+                        <td>Добавить явный whitelist в <code>AjaxService</code> dispatcher.</td>
+                        <td><code>UtilityController.php</code></td>
+                        <td><span class="effort effort-low">Низкое</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="callout">
+            <strong>Критерий завершения:</strong> Все Critical/High находки из AUDIT.md устранены; feature-тесты покрывают CSRF на admin-маршрутах, апгрейд паролей, cron token.
+        </div>
+    </section>
+
+    <!-- Track 2 -->
+    <section>
+        <div class="track-header">
+            <h3>🧹 Направление 2 — Осушение legacy-контента</h3>
+            <span class="status status-pending">Запланировано · недели 1–6</span>
+        </div>
+        <div class="track-goal">
+            <strong>Цель:</strong> Устранить <code>app/Services/Legacy/*_content.php</code> и <code>partials/</code>, извлекая логику в контроллеры, репозитории и Blade-компоненты. Подвести под PHPStan level 8.
+        </div>
+
+        <h4>Стратегия: один content-файл на PR, по образцу Phase 17–24</h4>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Приоритет</th>
+                        <th>Файл</th>
+                        <th>Строк</th>
+                        <th>Замена</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>1</td><td><code>forum_forums_content.php</code></td><td>1 161</td><td>Forum listing → <code>ForumController</code> + <code>ForumRepository</code> + Blade</td></tr>
+                    <tr><td>2</td><td><code>my_bonus_content.php</code></td><td>762</td><td>Bonus shop → <code>BonusController@bonus</code> + <code>BonusRepository</code></td></tr>
+                    <tr><td>3</td><td><code>catmanage_content.php</code></td><td>640</td><td>Category mgmt → Filament <code>SectionResource</code> — удалить legacy</td></tr>
+                    <tr><td>4</td><td><code>usercp_content.php</code></td><td>629</td><td>User CP → <code>UsercpController</code> + DTOs (Phase 23)</td></tr>
+                    <tr><td>5</td><td><code>index_content.php</code></td><td>613</td><td>Homepage → <code>IndexController@legacy</code> + Blade</td></tr>
+                    <tr><td>6</td><td><code>offers_content.php</code></td><td>575</td><td>Offers → <code>OfferController</code> + <code>OfferService</code></td></tr>
+                    <tr><td>7</td><td><code>messages_content.php</code></td><td>424</td><td>PM listing → <code>MessageController</code> + <code>MessageService</code></td></tr>
+                    <tr><td>8</td><td><code>usersearch_content.php</code></td><td>230</td><td>User search → <code>UserSearchRepository</code> + Filament</td></tr>
+                    <tr><td>9</td><td><code>partials/</code> (22 файла)</td><td>1 826</td><td>Inline partials → Blade-компоненты</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h4>Метод для каждого файла:</h4>
+        <ol>
+            <li>Найти контроллер, который вызывает этот content-файл</li>
+            <li>Перенести query/mutation-логику в репозиторий или сервис</li>
+            <li>Перенести рендеринг в Blade-компонент (<code>resources/views/components/</code>)</li>
+            <li>Удалить <code>_content.php</code> файл</li>
+            <li>Добавить feature-тест для маршрута</li>
+            <li>Убрать исключение из <code>phpstan.level8.neon</code></li>
+        </ol>
+
+        <div class="callout">
+            <strong>Критерий завершения:</strong> <code>app/Services/Legacy/</code> содержит только типизированные сервисы — никаких <code>*_content.php</code>. PHPStan level 8 покрывает 100% <code>app/</code>.
+        </div>
+    </section>
+
+    <!-- Track 3 -->
+    <section>
+        <div class="track-header">
+            <h3>🏗️ Направление 3 — Облегчение контроллеров</h3>
+            <span class="status status-pending">Запланировано · недели 2–8</span>
+        </div>
+        <div class="track-goal">
+            <strong>Цель:</strong> Свести контроллеры к оркестрации запрос/ответ; перенести бизнес-логику в сервисы/репозитории; внедрить Form Requests для валидации.
+        </div>
+
+        <h4>3.1 Разделение толстых контроллеров</h4>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr><th>Контроллер</th><th>Строк</th><th>Действие</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>AdminController</code></td><td>1 003</td><td>→ <code>DonorController</code>, <code>StatsController</code>, <code>WarnedUserController</code>, <code>AgentController</code>, <code>CheckUserController</code>. Каждый &lt;300 строк.</td></tr>
+                    <tr><td><code>InfoController</code></td><td>965</td><td>→ <code>FaqController</code>, <code>RulesController</code>, <code>NewsController</code>, <code>InviteController</code>, <code>RssController</code>, <code>PollController</code></td></tr>
+                    <tr><td><code>TorrentActionController</code></td><td>915</td><td>Извлечь bookmark/rss/flush/reseed в сервисы</td></tr>
+                    <tr><td><code>StaffController</code></td><td>911</td><td>Извлечь <code>modtask</code> в <code>UserModerationService</code>. Mass-messaging → <code>MassMessageService</code></td></tr>
+                    <tr><td><code>ModerationController</code></td><td>752</td><td>Извлечь ban/ip-search/cheater в <code>ModerationService</code></td></tr>
+                    <tr><td><code>SystemController</code></td><td>735</td><td>Извлечь backup/massmail/cron в сервисы</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h4>3.2 Внедрение Form Requests</h4>
+        <p>Заменить inline <code>$request->validate()</code> и ручную валидацию типизированными Form Request классами:</p>
+        <ul>
+            <li><code>app/Http/Requests/Moderation/BanRequest.php</code></li>
+            <li><code>app/Http/Requests/Staff/ModtaskRequest.php</code></li>
+            <li><code>app/Http/Requests/Usercp/SettingsRequest.php</code></li>
+            <li>и т.д.</li>
+        </ul>
+
+        <h4>3.3 Замена <code>SupportContext</code></h4>
+        <p><code>SupportContext</code> — god-object, хранящий user, globals, query, post, cache. Постепенно заменить на:</p>
+        <ul>
+            <li><code>Auth::user()</code> для текущего пользователя</li>
+            <li><code>$request->input()</code> / Form Requests для ввода</li>
+            <li><code>SiteConfig::current()</code> для настроек</li>
+            <li>DI-сервисы вместо <code>SupportContext::getGlobal()</code></li>
+        </ul>
+
+        <div class="callout">
+            <strong>Критерий завершения:</strong> Ни один контроллер &gt;400 строк. Вся валидация в Form Request классах. <code>SupportContext</code> сокращён до тонкой обёртки совместимости или удалён.
+        </div>
+    </section>
+
+    <!-- Track 4 -->
+    <section>
+        <div class="track-header">
+            <h3>📦 Направление 4 — Консолидация зависимостей</h3>
+            <span class="status status-pending">Запланировано · недели 3–4</span>
+        </div>
+        <div class="track-goal">
+            <strong>Цель:</strong> Один поисковый движок, одна auth-система, стабильные зависимости.
+        </div>
+
+        <h4>4.1 Удалить Elasticsearch</h4>
+        <p><code>SearchRepository</code> (ES) подключён к <code>TorrentActionController</code>, но <code>SCOUT_DRIVER=meilisearch</code> — единственный активный драйвер. ES-методы короткозамкнуты <code>return true</code> когда отключены.</p>
+        <ul>
+            <li>Удалить <code>elasticsearch/elasticsearch</code> из <code>composer.json</code></li>
+            <li>Удалить <code>SearchRepository.php</code>, ES-листенеры, ES-консольные команды</li>
+            <li>Убрать ES-вызовы из контроллеров и репозиториев</li>
+            <li>Убрать ES env vars из <code>.env.example</code> и конфигов</li>
+        </ul>
+        <div class="callout">
+            <strong>Результат:</strong> ~1 000 строк, 1 мажорная зависимость, 6 консольных команд, 1 event listener.
+        </div>
+
+        <h4>4.2 Оценить ClickHouse</h4>
+        <p>Используется только в <code>BonusRepository</code> для аналитики <code>bonus_logs</code>. Если трафик не оправдывает — перенести в MySQL (таблица уже есть) и убрать <code>cybercog/laravel-clickhouse</code>.</p>
+
+        <h4>4.3 Консолидировать auth: Sanctum ИЛИ Passport</h4>
+        <p>API-маршруты используют <code>auth:sanctum</code>. <code>OauthController</code> использует <code>auth:api</code> (Passport). Оба в <code>composer.json</code>.</p>
+        <p><strong>Рекомендация:</strong> оставить Sanctum (проще, покрывает use case), убрать Passport если нет активного OAuth2-потребителя.</p>
+
+        <h4>4.4 Убрать <code>minimum-stability: dev</code></h4>
+        <p>Установить <code>"minimum-stability": "stable"</code> и починить зависимости, полагающиеся на dev-версии.</p>
+
+        <h4>4.5 Обновить PHP до 8.5</h4>
+        <p>PHP 8.5 — текущий. Обновить platform constraint, протестировать в CI, убрать 8.4-обходы.</p>
+    </section>
+
+    <!-- Track 5 -->
+    <section>
+        <div class="track-header">
+            <h3>⚙️ Направление 5 — Унификация админ-панели</h3>
+            <span class="status status-done">Готово · недели 4–10</span>
+        </div>
+        <div class="track-goal">
+            <strong>Цель:</strong> Сделать Filament каноничной админ-панелью; вывести из эксплуатации legacy admin-страницы.
+        </div>
+
+        <div class="progress-bar">
+            <div class="progress-fill" style="width: 100%;"></div>
+        </div>
+        <p style="font-size: 13px; color: var(--text-dim);">Прогресс: 7/7 фаз завершено · 31 тест пройдено · 89 assertions</p>
+
+        <h4>Фазы миграции:</h4>
+
+        <div class="phase-detail">
+            <div class="phase-header">
+                <span class="phase-title">5.1 — checkuser / takeconfirm → UserResource action</span>
+                <span class="status status-done">Готово</span>
+            </div>
+            <div class="phase-desc">
+                Добавлено действие «Approve user» в <code>UserResource</code>. Legacy-маршруты удалены и заменены redirect'ами.
+                5 тестов.
+            </div>
+        </div>
+
+        <div class="phase-detail">
+            <div class="phase-header">
+                <span class="phase-title">5.2 — donorlist / warned / nowarn → UserResource filters</span>
+                <span class="status status-done">Готово</span>
+            </div>
+            <div class="phase-desc">
+                Добавлены фильтры Donor/Warned + bulk-действия в <code>UserResource</code>. Legacy-маршруты заменены redirect'ами с параметрами фильтра.
+                3 теста.
+            </div>
+        </div>
+
+        <div class="phase-detail">
+            <div class="phase-header">
+                <span class="phase-title">5.3 — bans / cheaters / iphistory / ipsearch / ipcheck → SecurityResource group</span>
+                <span class="status status-done">Готово</span>
+            </div>
+            <div class="phase-desc">
+                Созданы <code>BanResource</code>, <code>CheaterResource</code> под группой Security. Модели <code>Ban</code>, <code>Cheater</code> с отношениями.
+                Удалены legacy-методы из <code>AdminController</code> и <code>ModerationController</code>.
+                7 тестов.
+            </div>
+        </div>
+
+        <div class="phase-detail">
+            <div class="phase-header">
+                <span class="phase-title">5.4 — modtask / staffbox → UserResource edit + StaffMessageResource</span>
+                <span class="status status-done">Готово</span>
+            </div>
+            <div class="phase-desc">
+                Действия warn / enable-disable upload/download / forum post добавлены в <code>UserProfile</code>.
+                Создан <code>StaffMessageResource</code> под группой Security (список, просмотр, reply, mark answered).
+                Методы <code>warnUser()</code>, <code>updateUploadPrivileges()</code>, <code>updateForumPost()</code> в <code>UserRepository</code>.
+                Удалён <code>staffbox()</code> из <code>StaffController</code>.
+                4 теста.
+            </div>
+        </div>
+
+        <div class="phase-detail">
+            <div class="phase-header">
+                <span class="phase-title">5.5 — stats / allagents / donors → Dashboard widgets</span>
+                <span class="status status-done">Готово</span>
+            </div>
+            <div class="phase-desc">
+                Созданы 4 виджета: <code>UploaderActivity</code>, <code>CategoryActivity</code>, <code>PeerAgents</code>, <code>DonorSummary</code>.
+                Методы <code>uploaderActivity()</code>, <code>categoryActivity()</code>, <code>peerAgents()</code>, <code>donorSummary()</code> в <code>DashboardRepository</code>.
+                Удалены <code>stats()</code>, <code>allagents()</code> из <code>AdminController</code>.
+                2 теста.
+            </div>
+        </div>
+
+        <div class="phase-detail">
+            <div class="phase-header">
+                <span class="phase-title">5.6 — delacctadmin / deletedisabled / massmail / maxlogin → Filament</span>
+                <span class="status status-done">Готово</span>
+            </div>
+            <div class="phase-desc">
+                Создана страница <code>SystemActions</code> с формами delete account и mass mail (доступ только SYSOP).
+                Создан <code>LoginAttemptResource</code> под группой Security (ban/unban/delete, bulk-действия, фильтры).
+                Модель <code>LoginAttempt</code>.
+                Удалены <code>delacctadmin()</code>, <code>deletedisabled()</code>, <code>massmail()</code>, <code>maxlogin()</code> из <code>SystemController</code> (~250 строк).
+                4 теста.
+            </div>
+        </div>
+
+        <div class="phase-detail">
+            <div class="phase-header">
+                <span class="phase-title">5.7 — catmanage / forummanage / moforums / fields / formats → Section resources</span>
+                <span class="status status-done">Готово</span>
+            </div>
+            <div class="phase-desc">
+                Созданы <code>ForumResource</code> и <code>OverForumResource</code> под группой Section (CRUD, min class read/write/create, связи).
+                Добавлены отношения <code>overForum()</code> и <code>forums()</code> в моделях.
+                Удалены <code>catmanage()</code>, <code>fields()</code>, <code>formats()</code>, <code>videoformats()</code> из <code>AdminController</code> (~110 строк).
+                Удалены <code>forummanage()</code>, <code>moforums()</code> из <code>ForumController</code> (~210 строк).
+                Существующие ресурсы: Category, Codec, Standard, TorrentCustomField — использованы для redirect'ов.
+                6 тестов.
+            </div>
+        </div>
+
+        <div class="callout">
+            <strong>Критерий завершения:</strong> <code>routes/legacy/auth.php</code> содержит только не-admin аутентифицированные маршруты (usercp, messages, forums, torrents). Все admin-операции через Filament. Legacy admin-контроллеры очищены.
+        </div>
+    </section>
+
+    <!-- Track 6 -->
+    <section>
+        <div class="track-header">
+            <h3>🧪 Направление 6 — Тестирование и CI</h3>
+            <span class="status status-pending">Запланировано · недели 1–12</span>
+        </div>
+        <div class="track-goal">
+            <strong>Цель:</strong> Feature-тесты для критических путей, PHPStan без исключений, Rector + Pint в CI.
+        </div>
+
+        <h4>6.1 Feature-тесты для критических путей</h4>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr><th>Путь</th><th>Тест-файл</th><th>Приоритет</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>Announce (started/completed/stopped)</td><td><code>AnnounceFlowTest.php</code></td><td>Расширить существующий</td></tr>
+                    <tr><td>Torrent download (downhash + passkey + auth)</td><td><code>TorrentDownloadTest.php</code></td><td><span class="effort effort-high">Высокий</span></td></tr>
+                    <tr><td>Login + 2FA + passkey</td><td><code>AuthFlowTest.php</code></td><td><span class="effort effort-high">Высокий</span></td></tr>
+                    <tr><td>Torrent upload + edit</td><td><code>TorrentUploadTest.php</code></td><td><span class="effort effort-medium">Средний</span></td></tr>
+                    <tr><td>Forum topic + post CRUD</td><td><code>ForumFlowTest.php</code></td><td><span class="effort effort-medium">Средний</span></td></tr>
+                    <tr><td>Admin moderation (ban/warn/enable)</td><td><code>ModerationTest.php</code></td><td><span class="effort effort-medium">Средний</span></td></tr>
+                    <tr><td>Shoutbox post/edit/delete/react</td><td><code>ShoutboxTest.php</code></td><td><span class="effort effort-low">Низкий</span></td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h4>6.2 <code>CriticalPathTest</code> в CI</h4>
+        <p>Сейчас пропускается без <code>CRITICAL_PATH_BASE_URL</code>. Подключить к Docker smoke-test job в <code>ci.yml</code>.</p>
+
+        <h4>6.3 PHPStan level 8 для legacy-партиалов</h4>
+        <p>По мере осушения каждого <code>_content.php</code> (Направление 2) убирать его исключение из <code>phpstan.level8.neon</code>. Цель: ноль исключений.</p>
+
+        <h4>6.4 Rector для автоматического рефакторинга</h4>
+        <ul>
+            <li><code>LevelSetList::UP_TO_PHP_84</code></li>
+            <li><code>LaravelSetList::LARAVEL_120</code></li>
+            <li>Кастомные правила для <code>SupportContext::getUser()</code> → <code>Auth::user()</code></li>
+        </ul>
+        <p>Запускать в CI сначала как non-blocking check, затем как auto-fix PR.</p>
+
+        <h4>6.5 Laravel Pint для форматирования</h4>
+        <p>Добавить <code>laravel/pint</code>, настроить <code>.pint.json</code> с PSR-12 + Laravel preset, запускать в CI.</p>
+    </section>
+
+    <!-- Ожидаемый эффект -->
+    <section>
+        <h2><span class="icon">📈</span> Ожидаемый эффект</h2>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr><th>Метрика</th><th>До</th><th>После (цель)</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>PHP LOC в <code>app/</code></td><td>108 626</td><td><strong>~85 000</strong> (−22%)</td></tr>
+                    <tr><td>Legacy <code>_content.php</code></td><td>9 файлов (9 298 LOC)</td><td><strong>0</strong></td></tr>
+                    <tr><td>Legacy <code>partials/</code></td><td>22 файла (1 826 LOC)</td><td><strong>0</strong></td></tr>
+                    <tr><td><code>app/Nexus/</code> LOC</td><td>6 586</td><td><strong>&lt;2 000</strong></td></tr>
+                    <tr><td>Контроллеры &gt;700 LOC</td><td>6</td><td><strong>0</strong></td></tr>
+                    <tr><td>PHPStan level 8 исключения</td><td>2 пути</td><td><strong>0</strong></td></tr>
+                    <tr><td>Feature-тестов</td><td>7</td><td><strong>20+</strong></td></tr>
+                    <tr><td>Поисковых движков</td><td>3</td><td><strong>1</strong> (MeiliSearch)</td></tr>
+                    <tr><td>Auth-систем</td><td>2</td><td><strong>1</strong> (Sanctum)</td></tr>
+                    <tr><td>Админ-панелей</td><td>2 (Filament + legacy)</td><td><strong>1</strong> (Filament)</td></tr>
+                    <tr><td>CSRF-исключений</td><td>~70</td><td><strong>1</strong> (tg-webhook)</td></tr>
+                    <tr><td>Хеширование паролей</td><td>sha256 (слабое)</td><td><strong>argon2id</strong></td></tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- Обновление зависимостей -->
+    <section>
+        <h2><span class="icon">🔄</span> Обновление зависимостей</h2>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr><th>Пакет</th><th>Текущая</th><th>Целевая</th><th>Действие</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>PHP</td><td>8.4</td><td>8.5</td><td>Обновить platform constraint, CI</td></tr>
+                    <tr><td>Laravel Framework</td><td>12.64</td><td>12.x latest</td><td>Уже актуально</td></tr>
+                    <tr><td>Filament</td><td>5.7</td><td>5.x latest</td><td>Уже актуально</td></tr>
+                    <tr><td>PHPUnit</td><td>11.5</td><td>12.x</td><td>Когда Laravel 12 полностью поддержит</td></tr>
+                    <tr><td>PHPStan</td><td>2.2</td><td>2.x latest</td><td>Уже актуально</td></tr>
+                    <tr><td>elasticsearch/elasticsearch</td><td>^9.0</td><td><strong>удалить</strong></td><td>Направление 4.1</td></tr>
+                    <tr><td>cybercog/laravel-clickhouse</td><td>^0.2.1</td><td><strong>удалить или документировать</strong></td><td>Направление 4.2</td></tr>
+                    <tr><td>laravel/passport</td><td>^13.0</td><td><strong>удалить</strong></td><td>Направление 4.3</td></tr>
+                    <tr><td>laravel/sanctum</td><td>^4.0</td><td>оставить</td><td>—</td></tr>
+                    <tr><td>rector/rector</td><td>—</td><td>^2.0</td><td>Направление 6.4</td></tr>
+                    <tr><td>laravel/pint</td><td>—</td><td>^1.20</td><td>Направление 6.5</td></tr>
+                    <tr><td>tailwindcss</td><td>3.4</td><td>4.x</td><td>Будущее (когда стабильная экосистема)</td></tr>
+                    <tr><td>vite</td><td>6.4</td><td>6.x latest</td><td>Уже актуально</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- Последовательность -->
+    <section>
+        <h2><span class="icon">📅</span> Последовательность выполнения</h2>
+        <div class="code-block">
+Неделя 1-2:   Направление 1 (Безопасность) ──────────────────────────&gt;
+Неделя 1-6:   Направление 2 (Legacy drain) ──────────────────────────&gt;
+Неделя 2-8:   Направление 3 (Облегчение контроллеров) ───────────────&gt;
+Неделя 3-4:   Направление 4 (Консолидация зависимостей) ─────────────&gt;
+Неделя 4-10:  Направление 5 (Унификация админки) ─────────────────────&gt; ✅ Готово
+Неделя 1-12:  Направление 6 (Тестирование и CI) ──────────────────────&gt;
+        </div>
+        <p>Направления 1, 2 и 6 стартуют немедленно параллельно. Направление 3 зависит от прогресса 2 (контроллеры нельзя облегчить, пока content-файлы не осушены). Направление 5 зависело от 3 (admin-контроллеры должны быть очищены перед Filament-миграцией). Направление 4 — независимое и быстрое.</p>
+    </section>
+
+    <!-- Риски -->
+    <section>
+        <h2><span class="icon">⚠️</span> Риски и митигация</h2>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr><th>Риск</th><th>Митигация</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Включение CSRF ломает legacy-формы</td>
+                        <td>Деплой за feature flag; тестировать каждую форму перед удалением исключения; руководство по миграции для плагинов</td>
+                    </tr>
+                    <tr>
+                        <td>Миграция хешей паролей блокирует пользователей</td>
+                        <td>Сохранить legacy verifier как fallback; апгрейд при успешном логине; колонка <code>passhash_algo</code>; мониторинг spike failed-login</td>
+                    </tr>
+                    <tr>
+                        <td>Filament-миграция удаляет страницы, нужные пользователям</td>
+                        <td>Держать legacy-маршруты как deprecated redirects один релиз; анонс в release notes; URL mapping</td>
+                    </tr>
+                    <tr>
+                        <td>Rector auto-fix вносит баги</td>
+                        <td>Отдельные PR; human review; полный test suite перед merge</td>
+                    </tr>
+                    <tr>
+                        <td>Удаление Elasticsearch ломает инсталляции</td>
+                        <td>Проверить download/install stats; миграционный скрипт на MeiliSearch; анонс депрекации за релиз</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- С чего начать -->
+    <section>
+        <h2><span class="icon">🚀</span> С чего начать</h2>
+        <p>Низкорисковые, высокоэффективные отправные точки:</p>
+        <div class="timeline">
+            <div class="timeline-item">
+                <div class="timeline-dot pending">1</div>
+                <div class="timeline-content">
+                    <div class="title">Направление 1.2 — cron token</div>
+                    <div class="desc">1 файл, ~30 минут, закрывает High-находку</div>
+                </div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-dot pending">2</div>
+                <div class="timeline-content">
+                    <div class="title">Направление 1.5 — санитизация .env.example</div>
+                    <div class="desc">1 файл, ~15 минут</div>
+                </div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-dot pending">3</div>
+                <div class="timeline-content">
+                    <div class="title">Направление 1.6 — ajax whitelist</div>
+                    <div class="desc">1 файл, ~1 час</div>
+                </div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-dot pending">4</div>
+                <div class="timeline-content">
+                    <div class="title">Направление 4.1 — удалить Elasticsearch</div>
+                    <div class="desc">Хорошо изолировано, ~1 000 строк сокращения</div>
+                </div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-dot pending">5</div>
+                <div class="timeline-content">
+                    <div class="title">Направление 6.5 — добавить Pint</div>
+                    <div class="desc">Zero-risk CI-добавление</div>
+                </div>
+            </div>
+        </div>
+        <p>Могут быть отправлены как отдельные PR на этой неделе, пока планируются более крупные направления.</p>
+    </section>
+
+    <footer>
+        <p>План модернизации <strong>tracker-lp-bits</strong> · Сгенерировано Devin · 2026</p>
+        <p>Направление 5 (Унификация админ-панели) полностью завершено — 7 фаз, 31 тест, 89 assertions</p>
+    </footer>
+
+</div>
+</body>
+</html>

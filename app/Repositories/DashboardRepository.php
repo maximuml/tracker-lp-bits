@@ -359,4 +359,109 @@ class DashboardRepository extends BaseRepository
         return $result;
     }
 
+    /**
+     * Uploader activity table (mirrors legacy stats page uploaders section).
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public function uploaderActivity(): array
+    {
+        $base = NexusDB::table('users as u')
+            ->selectRaw('u.id, u.username AS name, MAX(t.added) AS last, COUNT(DISTINCT t.id) AS n_t, COUNT(p.id) AS n_p')
+            ->leftJoin('torrents as t', 'u.id', '=', 't.owner')
+            ->leftJoin('peers as p', 't.id', '=', 'p.torrent');
+
+        $first = clone $base;
+        $first->where('u.class', 3)->groupBy('u.id');
+
+        $second = clone $base;
+        $second->where('u.class', '>', 3)->groupBy('u.id');
+
+        $rows = $first->union($second)->orderByRaw('name')->get();
+        $result = [];
+        foreach ($rows as $row) {
+            $result[] = [
+                'name' => 'uploader',
+                'text' => $row->name,
+                'value' => sprintf('%s torrents / %s peers / %s', $row->n_t, $row->n_p, $row->last ?? '—'),
+            ];
+        }
+        return $result;
+    }
+
+    /**
+     * Category activity table (mirrors legacy stats page categories section).
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public function categoryActivity(): array
+    {
+        $rows = NexusDB::table('categories as c')
+            ->selectRaw('c.name, MAX(t.added) AS last, COUNT(DISTINCT t.id) AS n_t, COUNT(p.id) AS n_p')
+            ->leftJoin('torrents as t', 't.category', '=', 'c.id')
+            ->leftJoin('peers as p', 't.id', '=', 'p.torrent')
+            ->groupBy('c.id')
+            ->orderByRaw('c.name')
+            ->get();
+
+        $result = [];
+        foreach ($rows as $row) {
+            $result[] = [
+                'name' => 'category',
+                'text' => $row->name,
+                'value' => sprintf('%s torrents / %s peers / %s', $row->n_t, $row->n_p, $row->last ?? '—'),
+            ];
+        }
+        return $result;
+    }
+
+    /**
+     * Peer agents summary (mirrors legacy allagents page).
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public function peerAgents(): array
+    {
+        $rows = NexusDB::table('peers')
+            ->selectRaw('agent, count(*) as counts')
+            ->groupBy('agent')
+            ->orderBy('agent')
+            ->get();
+
+        $result = [];
+        foreach ($rows as $row) {
+            $result[] = [
+                'name' => 'agent',
+                'text' => $row->agent ?: '(unknown)',
+                'value' => number_format((int) $row->counts),
+            ];
+        }
+        return $result;
+    }
+
+    /**
+     * Donor summary (mirrors legacy donorlist page).
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public function donorSummary(): array
+    {
+        $rows = User::query()
+            ->where('donor', 'yes')
+            ->orderByDesc('donated')
+            ->limit(20)
+            ->get(['id', 'username', 'donated', 'donated_cny', 'donoruntil']);
+
+        $result = [];
+        foreach ($rows as $row) {
+            $until = $row->donoruntil ? date('Y-m-d', strtotime((string) $row->donoruntil)) : '—';
+            $result[] = [
+                'name' => 'donor',
+                'text' => $row->username,
+                'value' => sprintf('$%s / ¥%s / until %s', number_format((float) $row->donated, 2), number_format((float) $row->donated_cny, 2), $until),
+            ];
+        }
+        return $result;
+    }
+
 }

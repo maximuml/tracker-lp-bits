@@ -4,8 +4,10 @@ namespace App\Console\Commands;
 
 use App\Models\User;
 use App\Repositories\UserRepository;
+use App\Support\Logger;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
+use Nexus\Nexus;
 
 class UserResetIdAutoIncrement extends Command
 {
@@ -25,7 +27,8 @@ class UserResetIdAutoIncrement extends Command
 
     /**
      * Create a new command instance.
-     * @return  void
+     *
+     * @return void
      */
     public function __construct()
     {
@@ -34,7 +37,8 @@ class UserResetIdAutoIncrement extends Command
 
     /**
      * Execute the console command.
-     * @return  int
+     *
+     * @return int
      */
     public function handle()
     {
@@ -43,10 +47,11 @@ class UserResetIdAutoIncrement extends Command
         foreach ($requires as $option) {
             if (empty($options[$option])) {
                 $this->error("Require --$option");
+
                 return 1;
             }
         }
-        $log = "options: " . json_encode($options);
+        $log = 'options: '.json_encode($options);
         $this->info($log);
 
         $tablesToTruncate = [
@@ -66,11 +71,11 @@ class UserResetIdAutoIncrement extends Command
                 DB::table($tableName)->truncate();
             }
         }
-        $statement = "alter table users auto_increment = " . $options['auto_increment'];
+        $statement = 'alter table users auto_increment = '.$options['auto_increment'];
         $this->info($statement);
         $result = DB::statement($statement);
 
-        $userRep = new UserRepository();
+        $userRep = new UserRepository;
         $insert = [
             'username' => $options['admin'],
             'email' => $options['email'],
@@ -81,9 +86,9 @@ class UserResetIdAutoIncrement extends Command
         ];
         $userRep->store($insert);
 
-        $log = sprintf('[%s], %s, result: %s', \Nexus\Nexus::instance()->getRequestId(), __METHOD__, var_export($result, true));
+        $log = sprintf('[%s], %s, result: %s', Nexus::instance()->getRequestId(), __METHOD__, var_export($result, true));
         $this->info($log);
-        \App\Support\Logger::writeWithContext((string) $log, (string) 'info', (bool) false);
+        Logger::writeWithContext((string) $log, (string) 'info', (bool) false);
 
         return 0;
     }

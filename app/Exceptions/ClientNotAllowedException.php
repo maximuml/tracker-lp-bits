@@ -2,7 +2,4 @@
 
 namespace App\Exceptions;
 
-class ClientNotAllowedException extends NexusException
-{
-
-}
+class ClientNotAllowedException extends NexusException {}

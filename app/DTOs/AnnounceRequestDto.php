@@ -53,7 +53,7 @@ final readonly class AnnounceRequestDto
         $left = (int) $params['left'];
 
         $event = $params['event'] ?? null;
-        if ($event !== null && !in_array($event, ['started', 'completed', 'stopped', 'paused'], true)) {
+        if ($event !== null && ! in_array($event, ['started', 'completed', 'stopped', 'paused'], true)) {
             $event = null;
         }
 
@@ -65,7 +65,7 @@ final readonly class AnnounceRequestDto
             $numWant = 200;
         }
 
-        $compact = !empty($params['compact']);
+        $compact = ! empty($params['compact']);
 
         $ip = Network::clientIp(true);
 
@@ -77,10 +77,10 @@ final readonly class AnnounceRequestDto
             $ipv6 = $ip;
         }
 
-        if ($ipv4 === null && !empty($params['ipv4']) && Network::isIpv4($params['ipv4'])) {
+        if ($ipv4 === null && ! empty($params['ipv4']) && Network::isIpv4($params['ipv4'])) {
             $ipv4 = $params['ipv4'];
         }
-        if ($ipv6 === null && !empty($params['ipv6']) && Network::isIpv6($params['ipv6'])) {
+        if ($ipv6 === null && ! empty($params['ipv6']) && Network::isIpv6($params['ipv6'])) {
             $ipv6 = $params['ipv6'];
         }
 

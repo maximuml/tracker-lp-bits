@@ -2,16 +2,16 @@
 
 namespace App\Enums;
 
-use function PHPUnit\Framework\matches;
+use App\Support\Locale;
 
 enum MessageTemplateNameEnum: string
 {
-    case REGISTER_WELCOME = "register_welcome";
+    case REGISTER_WELCOME = 'register_welcome';
 
     public function label(): string
     {
         return match ($this) {
-            self::REGISTER_WELCOME => \App\Support\Locale::trans("message-template.register_welcome", [], null),
+            self::REGISTER_WELCOME => Locale::trans('message-template.register_welcome', [], null),
             default => '',
         };
     }

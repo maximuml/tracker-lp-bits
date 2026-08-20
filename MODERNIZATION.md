@@ -148,22 +148,35 @@ This centralizes validation rules and makes them testable.
 
 **Action taken:** Documented the decision. No code changes needed. ClickHouse stays as an optional analytics backend.
 
-#### 4.3 Consolidate auth: pick Sanctum OR Passport
+#### 4.3 Consolidate auth: pick Sanctum OR Passport — **DONE (keep Sanctum, remove Passport)**
 
-**Finding:** API routes use `auth:sanctum`. `OauthController::userInfo` uses `auth:api` (Passport). Both ship in `composer.json`.
+**Finding:** API routes use `auth:sanctum`. `OauthController::userInfo` used `auth:api` (Passport). Both shipped in `composer.json`. Passport was not fully configured — `Passport::routes()` was never called, so OAuth2 endpoints (`/oauth/token`, `/oauth/authorize`) were not registered. Passport was only used for:
+- `auth:api` guard on `GET /oauth/user-info`
+- Filament admin resources for oauth tables (clients, access tokens, auth codes, refresh tokens)
+- `RemoveOauthTokens` listener (cleared tokens on user disable)
+- `OauthClient` model extending `Laravel\Passport\Client`
 
-**Action:**
-- If OAuth2 client-credentials flow is needed for third-party apps → keep Passport, drop Sanctum, migrate API routes to `auth:api`
-- If only first-party SPA/mobile tokens are needed → keep Sanctum, drop Passport, migrate `OauthController` to Sanctum
-- Recommended: **keep Sanctum** (simpler, covers the use case), remove Passport unless there's an active OAuth2 consumer
+**Action taken:** Removed Passport entirely, kept Sanctum as the sole token auth system:
+- `config/auth.php`: `api` guard driver `passport` → `sanctum`
+- `routes/web.php`: `oauth/user-info` middleware `auth:api` → `auth:sanctum`
+- `app/Providers/AppServiceProvider.php`: removed `Passport::$clientUuids = false`
+- `app/Nexus/Database/NexusDB.php`: removed `Passport::useClientModel()` from `customModel()`
+- `app/Exceptions/Handler.php`: removed `PassportAuthenticationException` handler
+- `app/Listeners/RemoveOauthTokens.php`: deleted (was Passport-only)
+- `app/Providers/EventServiceProvider.php`: removed `RemoveOauthTokens` from `UserDisabled` listeners
+- `app/Models/OauthClient.php`: deleted (extended `Laravel\Passport\Client`)
+- `app/Filament/Resources/Oauth/`: deleted `AccessTokenResource`, `AuthCodeResource`, `RefreshTokenResource`, `ClientResource` (all Passport model-based). Kept `ProviderResource` (social OAuth providers, not Passport)
+- `composer.json`: removed `laravel/passport` dependency and `passport:keys` post-install script
 
-#### 4.4 Remove `minimum-stability: dev`
+**Note:** OAuth2 database tables (`oauth_access_tokens`, `oauth_auth_codes`, `oauth_refresh_tokens`, `oauth_clients`, `oauth_personal_access_clients`) remain in the database — migrations are not removed. Existing tokens are orphaned but harmless. The `OauthController::redirect/callback` routes (social login) are unaffected — they use `OauthProvider` model, not Passport.
 
-`composer.json` has `"minimum-stability": "dev"`. With `"prefer-stable": true` this is mostly harmless but allows unstable deps to resolve. Set `"minimum-stability": "stable"` and fix any constraints that rely on dev versions.
+#### 4.4 Remove `minimum-stability: dev` — **DONE**
 
-#### 4.5 Upgrade PHP to 8.5
+`composer.json` had `"minimum-stability": "dev"`. With `"prefer-stable": true` this was mostly harmless but allowed unstable deps to resolve. Changed to `"minimum-stability": "stable"`. Verified all 340 locked packages are already stable — no constraints rely on dev versions.
 
-`composer.json` declares `>=8.4 <8.6`. PHP 8.5 is current. Update platform constraint, test in CI, remove any 8.4 workarounds.
+#### 4.5 Upgrade PHP to 8.5 — **DONE**
+
+`composer.json` declares `>=8.4 <8.6` (supports both 8.4 and 8.5). Updated `platform.php` from `8.4.0` to `8.5.0` so Composer resolves dependencies against 8.5 APIs. CI workflow updated from PHP 8.4 to 8.5. Installer `minimumPhpVersion` raised from `8.2.0` to `8.4.0` to match the composer constraint. No 8.4 workarounds were found in the codebase.
 
 **Exit criteria:** Single search engine (MeiliSearch), single auth system, `minimum-stability: stable`, PHP 8.5 supported.
 
@@ -236,14 +249,14 @@ Run in CI as a non-blocking check initially, then as auto-fix PRs.
 
 | Package | Current | Target | Action |
 |---------|---------|--------|--------|
-| PHP | 8.4 | 8.5 | Update platform constraint, CI |
+| PHP | 8.4 | 8.5 | Track 4.5 — platform + CI updated to 8.5 |
 | Laravel Framework | 12.64 | 12.x latest | Already current, keep updated |
 | Filament | 5.7 | 5.x latest | Already current |
 | PHPUnit | 11.5 | 12.x | Upgrade when Laravel 12 fully supports it |
 | PHPStan | 2.2 | 2.x latest | Already current |
 | elasticsearch/elasticsearch | ^9.0 | **remove** | Track 4.1 |
 | cybercog/laravel-clickhouse | ^0.2.1 | **keep** (documented) | Track 4.2 — optional analytics backend for bonus_logs + announce_logs |
-| laravel/passport | ^13.0 | **remove** (if Sanctum sufficient) | Track 4.3 |
+| laravel/passport | ^13.0 | **removed** | Track 4.3 — Sanctum is sole auth system |
 | laravel/sanctum | ^4.0 | keep | — |
 | rector/rector | — | add ^2.0 | Track 6.4 |
 | laravel/pint | — | add ^1.20 | Track 6.5 |

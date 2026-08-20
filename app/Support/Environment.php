@@ -2,6 +2,8 @@
 
 namespace App\Support;
 
+use PHPUnit\Framework\TestCase;
+
 /**
  * Runtime environment helpers extracted from `include/globalfunctions.php`.
  *
@@ -12,12 +14,12 @@ final class Environment
 {
     public static function isConsole(): bool
     {
-        return (!defined('RUNNING_IN_OCTANE') || !RUNNING_IN_OCTANE) && PHP_SAPI === 'cli';
+        return (! defined('RUNNING_IN_OCTANE') || ! RUNNING_IN_OCTANE) && PHP_SAPI === 'cli';
     }
 
     public static function isWindows(): bool
     {
-        return (!defined('RUNNING_IN_OCTANE') || !RUNNING_IN_OCTANE) && strtoupper(substr(PHP_OS, 0, 3)) === 'WIN';
+        return (! defined('RUNNING_IN_OCTANE') || ! RUNNING_IN_OCTANE) && strtoupper(substr(PHP_OS, 0, 3)) === 'WIN';
     }
 
     public static function isFpm(): bool
@@ -27,12 +29,12 @@ final class Environment
 
     public static function isTesting(): bool
     {
-        return env('APP_ENV') === 'testing' || class_exists(\PHPUnit\Framework\TestCase::class, false);
+        return config('app.env') === 'testing' || class_exists(TestCase::class, false);
     }
 
     public static function commandExists(string $command): bool
     {
-        return trim((string) exec('command -v ' . escapeshellarg($command))) !== '';
+        return trim((string) exec('command -v '.escapeshellarg($command))) !== '';
     }
 
     /**
@@ -46,14 +48,14 @@ final class Environment
     public static function run(string $command, string $format = 'string', bool $artisan = false, bool $exception = true): string|array
     {
         $append = ' 2>&1';
-        $needsAppend = !str_ends_with($command, $append);
+        $needsAppend = ! str_ends_with($command, $append);
 
         if ($artisan) {
-            $phpPath = \App\Support\Env::get('PHP_PATH', null) ?: 'php';
+            $phpPath = Env::get('PHP_PATH', null) ?: 'php';
             $webRoot = rtrim(ROOT_PATH, '/');
             $command = escapeshellcmd($command);
             $command = str_replace('`', '\\`', $command);
-            $command = escapeshellarg($phpPath) . ' ' . escapeshellarg($webRoot . '/artisan') . ' ' . $command;
+            $command = escapeshellarg($phpPath).' '.escapeshellarg($webRoot.'/artisan').' '.$command;
         }
 
         if ($needsAppend) {

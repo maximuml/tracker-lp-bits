@@ -10,8 +10,8 @@
  * @property string|null $designer
  * @property string|null $comment
  */
-namespace App\Models;
 
+namespace App\Models;
 
 use App\Models\Traits\NexusActivityLogTrait;
 
@@ -24,9 +24,9 @@ class Icon extends NexusModel
 {
     use NexusActivityLogTrait;
 
-    /** @var  string */
+    /** @var string */
     protected $table = 'caticons';
 
-    /** @var  list<string> */
+    /** @var list<string> */
     protected $fillable = ['name', 'folder', 'cssfile', 'multilang', 'secondicon', 'designer', 'comment'];
 }

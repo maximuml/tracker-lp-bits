@@ -37,7 +37,7 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.4'
+          php-version: '8.5'
           extensions: bcmath, curl, gd, gmp, intl, json, mbstring, mysqli, pdo, pdo_mysql, redis, sqlite3, xml, zip
           coverage: none
 
@@ -83,6 +83,9 @@ jobs:
             -not -path './public/vendor/*' \
             -not -path './storage/*' \
             -print0 | xargs -0 -n1 -P4 php -l
+
+      - name: Run Laravel Pint
+        run: vendor/bin/pint --test
 
       - name: Run PHPStan on all PHP files
         run: vendor/bin/phpstan analyse --no-progress --memory-limit=2G
@@ -141,7 +144,7 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.4'
+          php-version: '8.5'
           extensions: bcmath, curl, gd, gmp, intl, json, mbstring, mysqli, pdo, pdo_mysql, redis, sqlite3, xml, zip
           coverage: none
 

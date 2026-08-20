@@ -20,7 +20,7 @@ final class TorrentUploadControllerTest extends TestCase
 
     public function test_legacy_store_redirects_to_uploaded_details_page(): void
     {
-        $torrent = new Torrent();
+        $torrent = new Torrent;
         $torrent->id = 42;
 
         /** @var UploadRepository&Mockery\MockInterface $repository */
@@ -29,7 +29,7 @@ final class TorrentUploadControllerTest extends TestCase
         $expectation = $repository->shouldReceive('upload');
         $expectation->once()->with(Mockery::type(Request::class))->andReturn($torrent);
 
-        $controller = new TorrentUploadController();
+        $controller = new TorrentUploadController;
         $request = Request::create('/takeupload', 'POST', [
             'name' => 'Test torrent',
             'descr' => 'Description',
@@ -50,7 +50,7 @@ final class TorrentUploadControllerTest extends TestCase
         $expectation = $repository->shouldReceive('upload');
         $expectation->once()->andThrow(new TorrentAlreadyExistsException(99, 'Torrent already exists'));
 
-        $controller = new TorrentUploadController();
+        $controller = new TorrentUploadController;
         $request = Request::create('/takeupload', 'POST', [
             'name' => 'Duplicate',
             'descr' => 'Description',

@@ -2,19 +2,17 @@
 
 namespace App\Http\Resources;
 
-use App\Models\Thank;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
- * @mixin Thank
+ * @mixin \App\Models\Thank
  */
 class ThankResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
-     *
      * @param  mixed  $request
-     * @return array<int|string, mixed>
+     * @return  array<int|string, mixed>
      */
     public function toArray($request)
     {

@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Jobs;
 
 use App\Repositories\AttendanceRepository;
-use App\Support\Logger;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -19,7 +18,7 @@ use Illuminate\Queue\SerializesModels;
  * Replaces the synchronous `attendance:cleanup` artisan command so the
  * daily attendance pruning runs in the Horizon queue.
  */
-final class AttendanceJob implements ShouldBeUnique, ShouldQueue
+final class AttendanceJob implements ShouldQueue, ShouldBeUnique
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -41,7 +40,7 @@ final class AttendanceJob implements ShouldBeUnique, ShouldQueue
     {
         $deleted = $repository->cleanup();
 
-        Logger::writeWithContext(
+        \App\Support\Logger::writeWithContext(
             (string) sprintf('[AttendanceJob] attendance cleanup finished, deleted: %d', $deleted),
             (string) 'info',
             (bool) false,

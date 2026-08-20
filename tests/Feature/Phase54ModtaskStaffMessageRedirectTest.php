@@ -21,7 +21,7 @@ final class Phase54ModtaskStaffMessageRedirectTest extends TestCase
         config(['scout.driver' => 'null', 'app.debug' => false]);
     }
 
-    public function testStaffboxRedirectsToFilamentStaffMessageResource(): void
+    public function test_staffbox_redirects_to_filament_staff_message_resource(): void
     {
         $admin = User::factory()->admin()->create();
         $response = $this->withNexusCookie($admin)->get('/staffbox');
@@ -30,7 +30,7 @@ final class Phase54ModtaskStaffMessageRedirectTest extends TestCase
         $response->assertRedirect('/nexusphp/staff-messages');
     }
 
-    public function testStaffboxPostRedirectsToFilamentStaffMessageResource(): void
+    public function test_staffbox_post_redirects_to_filament_staff_message_resource(): void
     {
         $admin = User::factory()->admin()->create();
         $response = $this->withNexusCookie($admin)->post('/staffbox');
@@ -39,7 +39,7 @@ final class Phase54ModtaskStaffMessageRedirectTest extends TestCase
         $response->assertRedirect('/nexusphp/staff-messages');
     }
 
-    public function testStaffmessRemainsLegacyRoute(): void
+    public function test_staffmess_remains_legacy_route(): void
     {
         $admin = User::factory()->admin()->create();
         $response = $this->withNexusCookie($admin)->get('/staffmess');
@@ -48,7 +48,7 @@ final class Phase54ModtaskStaffMessageRedirectTest extends TestCase
         $this->assertNotEquals(302, $response->getStatusCode());
     }
 
-    public function testContactstaffRemainsLegacyRoute(): void
+    public function test_contactstaff_remains_legacy_route(): void
     {
         $user = User::factory()->create();
         $response = $this->withNexusCookie($user)->get('/contactstaff');

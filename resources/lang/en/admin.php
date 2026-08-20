@@ -111,7 +111,7 @@ return [
                 'grant_prop_btn' => 'Grant prop',
                 'grant_prop_form_prop' => 'Select prop',
                 'grant_prop_form_duration' => 'Duration',
-                'grant_prop_form_duration_help' => 'Unit: days. If left blank, the user has it permanently. Note: There is no time limit for Name Change Card, ignore this value.' ,
+                'grant_prop_form_duration_help' => 'Unit: days. If left blank, the user has it permanently. Note: There is no time limit for Name Change Card, ignore this value.',
                 'confirm_bulk' => 'Bulk confirm',
                 'remove_warning_bulk' => 'Remove warnings',
                 'disable_bulk' => 'Bulk disable',
@@ -119,7 +119,7 @@ return [
                 'change_bonus_etc_duration_label' => 'Duration',
                 'change_bonus_etc_duration_help' => 'Required when adding temporary invitation, in days',
                 'change_class_btn' => 'Change class',
-            ]
+            ],
         ],
         'exam_user' => [
             'bulk_action_avoid_label' => 'Bulk avoid',
@@ -131,7 +131,7 @@ return [
         ],
         'exam' => [
             'index_duplicate' => 'Index：:index duplicate !',
-            'index_seed_time_average_require_value_invalid' => 'The required average seeding time :index_seed_time_average_require_value is greater than the total exam duration :duration. Please modify it!'
+            'index_seed_time_average_require_value_invalid' => 'The required average seeding time :index_seed_time_average_require_value is greater than the total exam duration :duration. Please modify it!',
         ],
         'hit_and_run' => [
             'bulk_action_pardon' => 'Bulk pardon',

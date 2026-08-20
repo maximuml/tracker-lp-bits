@@ -21,7 +21,9 @@ use Tests\TestCase;
 class CriticalPathTest extends TestCase
 {
     private string $baseUrl;
+
     private string $cookieFile;
+
     private string $torrentFile;
 
     protected function setUp(): void
@@ -34,7 +36,7 @@ class CriticalPathTest extends TestCase
         }
 
         $this->baseUrl = rtrim($base, '/');
-        $this->cookieFile = sys_get_temp_dir() . '/critical_path_' . uniqid() . '.txt';
+        $this->cookieFile = sys_get_temp_dir().'/critical_path_'.uniqid().'.txt';
         touch($this->cookieFile);
 
         // Disable CAPTCHA and challenge/response so forms can be submitted
@@ -113,7 +115,7 @@ class CriticalPathTest extends TestCase
      */
     private function request(string $method, string $path, array $data = [], bool $follow = true): array
     {
-        $url = $this->baseUrl . '/' . ltrim($path, '/');
+        $url = $this->baseUrl.'/'.ltrim($path, '/');
         $headers = [];
 
         $ch = curl_init($url);
@@ -154,7 +156,7 @@ class CriticalPathTest extends TestCase
      */
     private function buildTorrentFile(): string
     {
-        $path = sys_get_temp_dir() . '/critical_path_' . uniqid() . '.torrent';
+        $path = sys_get_temp_dir().'/critical_path_'.uniqid().'.torrent';
         $info = [
             'length' => 1234,
             'name' => 'CriticalPathTest',
@@ -162,7 +164,7 @@ class CriticalPathTest extends TestCase
             'pieces' => str_repeat('A', 20),
         ];
         $data = [
-            'announce' => $this->baseUrl . '/announce.php',
+            'announce' => $this->baseUrl.'/announce.php',
             'comment' => 'Critical path feature test torrent',
             'created by' => 'PHPUnit',
             'creation date' => time(),
@@ -174,11 +176,11 @@ class CriticalPathTest extends TestCase
         return $path;
     }
 
-    public function testCriticalPath(): void
+    public function test_critical_path(): void
     {
-        $username = 'crit' . substr(str_replace(['.', '-'], '', uniqid('', true)), -8);
+        $username = 'crit'.substr(str_replace(['.', '-'], '', uniqid('', true)), -8);
         $password = 'Password123!';
-        $email = $username . '@example.com';
+        $email = $username.'@example.com';
 
         // 1. Signup
         $signupToken = $this->fetchSignupToken();
@@ -200,7 +202,7 @@ class CriticalPathTest extends TestCase
         $this->assertStringContainsString('confirm.php', $signup['redirect_url'], 'Signup redirect target is not confirm.php');
 
         // 2. Confirm account (and login)
-        $confirm = $this->request('GET', '/' . ltrim((string) parse_url($signup['redirect_url'], PHP_URL_PATH), '/') . '?' . (string) parse_url($signup['redirect_url'], PHP_URL_QUERY), [], true);
+        $confirm = $this->request('GET', '/'.ltrim((string) parse_url($signup['redirect_url'], PHP_URL_PATH), '/').'?'.(string) parse_url($signup['redirect_url'], PHP_URL_QUERY), [], true);
         $this->assertSame(200, $confirm['status'], "Account confirmation failed: {$confirm['status']}\n{$confirm['body']}");
 
         // 3. Logout and log back in to verify the standalone login flow
@@ -264,7 +266,7 @@ class CriticalPathTest extends TestCase
         // Use a peer id that the allowed-client check will accept. The
         // qBittorrent 4.x family expects a 20-byte id beginning with
         // "-qB4" followed by two version digits.
-        $peerId = '-qB4' . sprintf('%02d', random_int(0, 99)) . random_bytes(14);
+        $peerId = '-qB4'.sprintf('%02d', random_int(0, 99)).random_bytes(14);
         $port = 51413;
         $startParams = [
             'passkey' => $passkey,
@@ -277,7 +279,7 @@ class CriticalPathTest extends TestCase
             'compact' => '1',
             'numwant' => '50',
         ];
-        $startUrl = '/announce.php?' . http_build_query($startParams, '', '&', PHP_QUERY_RFC3986);
+        $startUrl = '/announce.php?'.http_build_query($startParams, '', '&', PHP_QUERY_RFC3986);
         $start = $this->request('GET', $startUrl, [], true);
         $this->assertSame(200, $start['status'], "Start announce failed: {$start['status']}\n{$start['body']}");
 
@@ -306,7 +308,7 @@ class CriticalPathTest extends TestCase
             'compact' => '1',
             'numwant' => '50',
         ];
-        $completedUrl = '/announce.php?' . http_build_query($completedParams, '', '&', PHP_QUERY_RFC3986);
+        $completedUrl = '/announce.php?'.http_build_query($completedParams, '', '&', PHP_QUERY_RFC3986);
         $completed = $this->request('GET', $completedUrl, [], true);
         $this->assertSame(200, $completed['status'], "Completed announce failed: {$completed['status']}\n{$completed['body']}");
 

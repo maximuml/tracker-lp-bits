@@ -5,7 +5,6 @@ namespace App\Jobs;
 use App\Models\TorrentBuyLog;
 use App\Repositories\BonusRepository;
 use App\Repositories\TorrentRepository;
-use App\Support\Logger;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -35,37 +34,35 @@ class BuyTorrent implements ShouldQueue
      * Execute the job.
      *
      * @return void
-     *
      * @throws \Throwable
      */
     public function handle()
     {
-        $logPrefix = sprintf('user: %s, torrent: %s', $this->userId, $this->torrentId);
-        $torrentRep = new TorrentRepository;
+        $logPrefix = sprintf("user: %s, torrent: %s", $this->userId, $this->torrentId);
+        $torrentRep = new TorrentRepository();
         $userId = $this->userId;
         $torrentId = $this->torrentId;
 
         $buyLog = TorrentBuyLog::query()
-            ->where('uid', $userId)
-            ->where('torrent_id', $torrentId)
+            ->where("uid", $userId)
+            ->where("torrent_id", $torrentId)
             ->first();
-
+        ;
         if ($buyLog) {
-            // 标记购买成功
-            Logger::writeWithContext((string) "{$logPrefix}, already bought", (string) 'info', (bool) false);
+            //标记购买成功
+            \App\Support\Logger::writeWithContext((string) "{$logPrefix}, already bought", (string) 'info', (bool) false);
             $torrentRep->addBuySuccessCache($userId, $torrentId, $buyLog->id);
-
             return;
         }
         try {
-            $bonusRep = new BonusRepository;
+            $bonusRep = new BonusRepository();
             $buyLog = $bonusRep->consumeToBuyTorrent($this->userId, $this->torrentId);
-            // 标记购买成功
-            Logger::writeWithContext((string) "{$logPrefix}, buy torrent success", (string) 'info', (bool) false);
+            //标记购买成功
+            \App\Support\Logger::writeWithContext((string) "{$logPrefix}, buy torrent success", (string) 'info', (bool) false);
             $torrentRep->addBuySuccessCache($userId, $torrentId, $buyLog->id);
         } catch (\Throwable $throwable) {
-            // 标记购买失败，缓存 3600 秒，这个时间内不能再次购买
-            Logger::writeWithContext((string) ("{$logPrefix}, buy torrent fail: ".$throwable->getMessage()), (string) 'error', (bool) false);
+            //标记购买失败，缓存 3600 秒，这个时间内不能再次购买
+            \App\Support\Logger::writeWithContext((string) ("{$logPrefix}, buy torrent fail: " . $throwable->getMessage()), (string) "error", (bool) false);
             $torrentRep->addBuyFailCache($userId, $torrentId);
             throw $throwable;
         }

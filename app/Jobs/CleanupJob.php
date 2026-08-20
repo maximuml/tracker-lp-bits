@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Jobs;
 
 use App\Services\CleanupService;
-use App\Support\Logger;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -19,7 +18,7 @@ use Illuminate\Queue\SerializesModels;
  * Replaces the synchronous `cleanup:run` schedule so cleanup runs in the
  * Horizon queue instead of inside the scheduler container.
  */
-final class CleanupJob implements ShouldBeUnique, ShouldQueue
+final class CleanupJob implements ShouldQueue, ShouldBeUnique
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -42,11 +41,11 @@ final class CleanupJob implements ShouldBeUnique, ShouldQueue
         $result = $service->runAll(false, false);
 
         if ($result === false) {
-            Logger::writeWithContext((string) '[CleanupJob] cleanup not triggered.', (string) 'info', (bool) false);
+            \App\Support\Logger::writeWithContext((string) '[CleanupJob] cleanup not triggered.', (string) 'info', (bool) false);
 
             return;
         }
 
-        Logger::writeWithContext((string) '[CleanupJob] cleanup finished.', (string) 'info', (bool) false);
+        \App\Support\Logger::writeWithContext((string) '[CleanupJob] cleanup finished.', (string) 'info', (bool) false);
     }
 }

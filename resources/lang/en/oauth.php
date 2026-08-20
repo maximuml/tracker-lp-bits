@@ -1,4 +1,5 @@
 <?php
+
 return [
     'client' => 'Client',
     'redirect' => 'Redirect URL',

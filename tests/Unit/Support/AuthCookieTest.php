@@ -71,7 +71,7 @@ final class AuthCookieTest extends TestCase
         $json = json_encode(['user_id' => $userId, 'expires' => $expires]);
         $signature = hash_hmac('sha256', $json, $authKey);
 
-        return base64_encode($json . '.' . $signature);
+        return base64_encode($json.'.'.$signature);
     }
 
     public function test_verify_legacy_token_valid(): void

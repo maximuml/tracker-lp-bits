@@ -2,20 +2,17 @@
 
 namespace App\Http\Resources;
 
-use App\Models\TorrentOperationLog;
-use App\Support\Time;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
- * @mixin TorrentOperationLog
+ * @mixin \App\Models\TorrentOperationLog
  */
 class TorrentOperationLogResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
-     *
      * @param  mixed  $request
-     * @return array<int|string, mixed>
+     * @return  array<int|string, mixed>
      */
     public function toArray($request)
     {
@@ -26,7 +23,7 @@ class TorrentOperationLogResource extends JsonResource
             'uid' => $this->uid,
             'username' => $this->user->username,
             'comment' => $this->comment,
-            'created_at' => Time::formatDateTime($this->created_at),
+            'created_at' => \App\Support\Time::formatDateTime($this->created_at)
         ];
     }
 }

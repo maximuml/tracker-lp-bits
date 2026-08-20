@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Bootstrap stub declaring legacy globals for PHPStan.
  *

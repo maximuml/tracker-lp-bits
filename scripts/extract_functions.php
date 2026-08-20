@@ -1,9 +1,10 @@
 <?php
+
 // Extracts global function definitions from a PHP file.
 // Usage: php scripts/extract_functions.php <file>
 
 $file = $argv[1] ?? '';
-if (!$file || !is_readable($file)) {
+if (! $file || ! is_readable($file)) {
     fwrite(STDERR, "Usage: php extract_functions.php <file>\n");
     exit(1);
 }
@@ -19,7 +20,7 @@ $currentFunc = null;
 
 for ($i = 0; $i < $count; $i++) {
     $token = $tokens[$i];
-    if (!is_array($token)) {
+    if (! is_array($token)) {
         $token = [$token, $token, -1];
     }
     $id = $token[0];
@@ -47,19 +48,31 @@ for ($i = 0; $i < $count; $i++) {
             $currentParam = ['name' => null, 'type' => null, 'default' => null];
             for ($k = $openParen + 1; $k < $count; $k++) {
                 $t = $tokens[$k];
-                if ($t === '(') { $pDepth++; continue; }
+                if ($t === '(') {
+                    $pDepth++;
+
+                    continue;
+                }
                 if ($t === ')') {
                     if ($pDepth === 0) {
-                        if ($currentParam['name']) { $params[] = $currentParam; }
+                        if ($currentParam['name']) {
+                            $params[] = $currentParam;
+                        }
                         break;
                     }
                     $pDepth--;
+
                     continue;
                 }
-                if ($pDepth > 0) { continue; }
+                if ($pDepth > 0) {
+                    continue;
+                }
                 if ($t === ',') {
-                    if ($currentParam['name']) { $params[] = $currentParam; }
+                    if ($currentParam['name']) {
+                        $params[] = $currentParam;
+                    }
                     $currentParam = ['name' => null, 'type' => null, 'default' => null];
+
                     continue;
                 }
                 if (is_array($t)) {
@@ -67,17 +80,17 @@ for ($i = 0; $i < $count; $i++) {
                         $currentParam['name'] = substr($t[1], 1);
                     } elseif ($t[0] === T_STRING || $t[0] === T_ARRAY || $t[0] === T_CALLABLE) {
                         if ($currentParam['name'] === null) {
-                            $currentParam['type'] = ($currentParam['type'] ?? '') . $t[1];
+                            $currentParam['type'] = ($currentParam['type'] ?? '').$t[1];
                         } else {
-                            $currentParam['default'] = ($currentParam['default'] ?? '') . $t[1];
+                            $currentParam['default'] = ($currentParam['default'] ?? '').$t[1];
                         }
                     } elseif (in_array(strtolower($t[1] ?? ''), ['null', 'true', 'false'], true) || $t[0] === T_LNUMBER || $t[0] === T_DNUMBER || $t[0] === T_CONSTANT_ENCAPSED_STRING) {
-                        $currentParam['default'] = ($currentParam['default'] ?? '') . $t[1];
+                        $currentParam['default'] = ($currentParam['default'] ?? '').$t[1];
                     } elseif ($t[0] === T_WHITESPACE) {
                         if ($currentParam['type'] !== null && $currentParam['name'] === null) {
                             $currentParam['type'] .= $t[1];
                         } elseif ($currentParam['name'] !== null) {
-                            $currentParam['default'] = ($currentParam['default'] ?? '') . $t[1];
+                            $currentParam['default'] = ($currentParam['default'] ?? '').$t[1];
                         }
                     }
                 }
@@ -89,10 +102,12 @@ for ($i = 0; $i < $count; $i++) {
                 $t = $tokens[$k];
                 if (is_array($t) && in_array($t[0], [T_WHITESPACE, T_COMMENT, T_DOC_COMMENT, T_STRING, T_NAME_QUALIFIED, T_NAME_FULLY_QUALIFIED, T_ARRAY], true)) {
                     $k++;
+
                     continue;
                 }
                 if ($t === ':' || $t === '?') {
                     $k++;
+
                     continue;
                 }
                 break;
@@ -102,8 +117,15 @@ for ($i = 0; $i < $count; $i++) {
                 $bDepth = 1;
                 $bodyStart = $tokens[$k + 1][2] ?? ($line + 1);
                 for ($k = $openBrace + 1; $k < $count; $k++) {
-                    if ($tokens[$k] === '{') { $bDepth++; }
-                    elseif ($tokens[$k] === '}') { $bDepth--; if ($bDepth === 0) { $closeBrace = $k; break; } }
+                    if ($tokens[$k] === '{') {
+                        $bDepth++;
+                    } elseif ($tokens[$k] === '}') {
+                        $bDepth--;
+                        if ($bDepth === 0) {
+                            $closeBrace = $k;
+                            break;
+                        }
+                    }
                 }
                 if (isset($closeBrace)) {
                     $body = '';
@@ -112,19 +134,26 @@ for ($i = 0; $i < $count; $i++) {
                     for ($b = $openBrace + 1; $b < $closeBrace; $b++) {
                         $bt = $tokens[$b];
                         if (is_array($bt)) {
-                            if (in_array($bt[0], [T_COMMENT, T_DOC_COMMENT], true)) { continue; }
+                            if (in_array($bt[0], [T_COMMENT, T_DOC_COMMENT], true)) {
+                                continue;
+                            }
                             if ($bt[0] === T_WHITESPACE) {
-                                if (!$prevWasSpace && $body !== '') {
+                                if (! $prevWasSpace && $body !== '') {
                                     $body .= ' ';
                                     $prevWasSpace = true;
                                 }
+
                                 continue;
                             }
-                            if ($firstToken === null) { $firstToken = token_name($bt[0]) . ':' . $bt[1]; }
+                            if ($firstToken === null) {
+                                $firstToken = token_name($bt[0]).':'.$bt[1];
+                            }
                             $body .= $bt[1];
                             $prevWasSpace = false;
                         } else {
-                            if ($firstToken === null) { $firstToken = $bt; }
+                            if ($firstToken === null) {
+                                $firstToken = $bt;
+                            }
                             $body .= $bt;
                             $prevWasSpace = false;
                         }
@@ -136,7 +165,7 @@ for ($i = 0; $i < $count; $i++) {
                         'line' => $funcLine,
                         'start_line' => $funcLine,
                         'end_line' => $closeLine,
-                        'params' => array_map(fn($p) => ['name' => $p['name'], 'type' => trim($p['type'] ?? ''), 'default' => $p['default']], $params),
+                        'params' => array_map(fn ($p) => ['name' => $p['name'], 'type' => trim($p['type'] ?? ''), 'default' => $p['default']], $params),
                         'body_one_line' => trim(preg_replace('/\s+/', ' ', $body)),
                         'first_token' => $firstToken,
                     ];

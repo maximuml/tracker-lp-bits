@@ -6,6 +6,7 @@ namespace Tests\Unit\Services\Cleanup;
 
 use App\Models\User;
 use App\Services\Cleanup\Tasks;
+use App\Support\Cache;
 use App\Support\Settings;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -21,7 +22,7 @@ final class TasksTest extends TestCase
         parent::setUp();
 
         DB::beginTransaction();
-        \App\Support\Cache::clearSettings();
+        Cache::clearSettings();
 
         $this->tasks = app(Tasks::class);
     }
@@ -29,7 +30,7 @@ final class TasksTest extends TestCase
     protected function tearDown(): void
     {
         DB::rollBack();
-        \App\Support\Cache::clearSettings();
+        Cache::clearSettings();
 
         parent::tearDown();
     }
@@ -150,7 +151,7 @@ final class TasksTest extends TestCase
     private function createAgentFamily(): int
     {
         return (int) DB::table('agent_allowed_family')->insertGetId([
-            'family' => 'test-family-' . Str::random(),
+            'family' => 'test-family-'.Str::random(),
             'start_name' => '',
             'peer_id_pattern' => '',
             'peer_id_match_num' => 0,
@@ -173,8 +174,8 @@ final class TasksTest extends TestCase
         $unique = Str::random();
 
         return (int) DB::table('users')->insertGetId(array_merge([
-            'username' => 'testuser-' . $unique,
-            'email' => $unique . '@example.net',
+            'username' => 'testuser-'.$unique,
+            'email' => $unique.'@example.net',
             'passhash' => md5($unique),
             'secret' => Str::random(),
             'auth_key' => Str::random(),
@@ -198,7 +199,7 @@ final class TasksTest extends TestCase
             'sender' => 0,
             'receiver' => 0,
             'added' => Carbon::now()->toDateTimeString(),
-            'subject' => 'test-' . $unique,
+            'subject' => 'test-'.$unique,
             'msg' => 'test message',
         ], $overrides));
     }
@@ -260,7 +261,7 @@ final class TasksTest extends TestCase
     {
         return (int) DB::table('topics')->insertGetId(array_merge([
             'userid' => 1,
-            'subject' => 'test-topic-' . Str::random(),
+            'subject' => 'test-topic-'.Str::random(),
             'forumid' => 1,
             'firstpost' => 0,
             'lastpost' => 0,
@@ -304,7 +305,7 @@ final class TasksTest extends TestCase
      */
     private function createOAuthAuthCode(array $overrides = []): string
     {
-        $id = 'auth-code-' . Str::random();
+        $id = 'auth-code-'.Str::random();
 
         DB::table('oauth_auth_codes')->insert(array_merge([
             'id' => $id,
@@ -322,7 +323,7 @@ final class TasksTest extends TestCase
      */
     private function createOAuthAccessToken(array $overrides = []): string
     {
-        $id = 'access-token-' . Str::random();
+        $id = 'access-token-'.Str::random();
 
         DB::table('oauth_access_tokens')->insert(array_merge([
             'id' => $id,
@@ -342,7 +343,7 @@ final class TasksTest extends TestCase
      */
     private function createOAuthRefreshToken(string $accessTokenId, array $overrides = []): string
     {
-        $id = 'refresh-token-' . Str::random();
+        $id = 'refresh-token-'.Str::random();
 
         DB::table('oauth_refresh_tokens')->insert(array_merge([
             'id' => $id,

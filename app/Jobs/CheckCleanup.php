@@ -2,9 +2,12 @@
 
 namespace App\Jobs;
 
+use App\Console\Commands\Cleanup;
 use App\Repositories\CleanupRepository;
-use App\Support\Logger;
+use App\Repositories\ToolRepository;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldBeUnique;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
@@ -31,6 +34,6 @@ class CheckCleanup
     public function handle()
     {
         CleanupRepository::checkCleanup();
-        Logger::writeWithContext((string) 'CheckCleanup job run success.', (string) 'info', (bool) false);
+        \App\Support\Logger::writeWithContext((string) "CheckCleanup job run success.", (string) 'info', (bool) false);
     }
 }

@@ -3,8 +3,8 @@
 namespace App\Jobs;
 
 use App\Repositories\CleanupRepository;
-use App\Support\Logger;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
@@ -32,6 +32,6 @@ class CheckQueueFailedJobs implements ShouldQueue
     public function handle()
     {
         CleanupRepository::checkQueueFailedJobs();
-        Logger::writeWithContext((string) 'checkQueueFailedJobs run success.', (string) 'info', (bool) false);
+        \App\Support\Logger::writeWithContext((string) "checkQueueFailedJobs run success.", (string) 'info', (bool) false);
     }
 }

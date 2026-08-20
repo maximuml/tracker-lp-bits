@@ -5,7 +5,6 @@ namespace App\Filament\Resources\User\TokenResource\Pages;
 use App\Filament\PageListSingle;
 use App\Filament\Resources\User\TokenResource;
 use Filament\Actions;
-use Filament\Resources\Pages\ManageRecords;
 
 class ManageTokens extends PageListSingle
 {
@@ -14,7 +13,7 @@ class ManageTokens extends PageListSingle
     protected function getHeaderActions(): array
     {
         return [
-//            Actions\CreateAction::make(),
+            //            Actions\CreateAction::make(),
         ];
     }
 }

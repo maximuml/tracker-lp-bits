@@ -5,7 +5,6 @@ namespace App\Filament\Resources\User\UserMedalResource\Pages;
 use App\Filament\PageList;
 use App\Filament\Resources\User\UserMedalResource;
 use Filament\Pages\Actions;
-use Filament\Resources\Pages\ListRecords;
 
 class ListUserMedals extends PageList
 {
@@ -14,7 +13,7 @@ class ListUserMedals extends PageList
     protected function getHeaderActions(): array
     {
         return [
-//            Actions\CreateAction::make(),
+            //            Actions\CreateAction::make(),
         ];
     }
 }

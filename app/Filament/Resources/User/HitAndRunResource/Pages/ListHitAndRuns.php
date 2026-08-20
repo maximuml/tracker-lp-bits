@@ -5,7 +5,6 @@ namespace App\Filament\Resources\User\HitAndRunResource\Pages;
 use App\Filament\PageList;
 use App\Filament\Resources\User\HitAndRunResource;
 use Filament\Pages\Actions;
-use Filament\Resources\Pages\ListRecords;
 
 class ListHitAndRuns extends PageList
 {
@@ -14,7 +13,7 @@ class ListHitAndRuns extends PageList
     protected function getHeaderActions(): array
     {
         return [
-//            Actions\CreateAction::make(),
+            //            Actions\CreateAction::make(),
         ];
     }
 }

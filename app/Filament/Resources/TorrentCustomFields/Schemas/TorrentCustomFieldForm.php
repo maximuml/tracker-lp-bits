@@ -24,7 +24,7 @@ class TorrentCustomFieldForm
                     ->label(__('label.field.field_label'))
                     ->required(),
                 Select::make('type')
-                    ->options((new Field())->getTypeRadioOptions())
+                    ->options((new Field)->getTypeRadioOptions())
                     ->label(__('label.field.type'))
                     ->required(),
                 Checkbox::make('required')

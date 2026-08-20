@@ -6,7 +6,6 @@ use App\Filament\PageList;
 use App\Filament\Resources\User\InviteResource;
 use App\Models\Invite;
 use Filament\Pages\Actions;
-use Filament\Resources\Pages\ListRecords;
 use Illuminate\Database\Eloquent\Builder;
 
 class ListInvites extends PageList
@@ -16,7 +15,7 @@ class ListInvites extends PageList
     protected function getHeaderActions(): array
     {
         return [
-//            Actions\CreateAction::make(),
+            //            Actions\CreateAction::make(),
         ];
     }
 

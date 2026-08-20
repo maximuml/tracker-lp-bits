@@ -4,6 +4,7 @@ namespace App\Filament\Resources\User;
 
 use App\Filament\Resources\User\UserPasskeyResource\Pages;
 use App\Models\Passkey;
+use App\Support\UserDisplay;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Forms\Components\TextInput;
@@ -17,9 +18,9 @@ class UserPasskeyResource extends Resource
 {
     protected static ?string $model = Passkey::class;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-key';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-key';
 
-    protected static string | \UnitEnum | null $navigationGroup = 'User';
+    protected static string|\UnitEnum|null $navigationGroup = 'User';
 
     protected static ?int $navigationSort = 12;
 
@@ -45,24 +46,18 @@ class UserPasskeyResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('id')->sortable()
-                ,
+                Tables\Columns\TextColumn::make('id')->sortable(),
                 Tables\Columns\TextColumn::make('user_id')
-                    ->formatStateUsing(fn($state) => \App\Support\UserDisplay::adminUsername($state))
-                    ->label(__('label.username'))
-                ,
+                    ->formatStateUsing(fn ($state) => UserDisplay::adminUsername($state))
+                    ->label(__('label.username')),
                 Tables\Columns\TextColumn::make('aaguid')
-                    ->label("AAGUID")
-                ,
+                    ->label('AAGUID'),
                 Tables\Columns\TextColumn::make('credential_id')
-                    ->label(__('passkey.fields.credential_id'))
-                ,
+                    ->label(__('passkey.fields.credential_id')),
                 Tables\Columns\TextColumn::make('counter')
-                    ->label(__('passkey.fields.counter'))
-                ,
+                    ->label(__('passkey.fields.counter')),
                 Tables\Columns\TextColumn::make('created_at')
-                    ->label(__('label.created_at'))
-                ,
+                    ->label(__('label.created_at')),
             ])
             ->defaultSort('id', 'desc')
             ->filters([
@@ -70,22 +65,18 @@ class UserPasskeyResource extends Resource
                     ->form([
                         TextInput::make('uid')
                             ->label(__('label.username'))
-                            ->placeholder('UID')
-                        ,
+                            ->placeholder('UID'),
                     ])->query(function (Builder $query, array $data) {
-                        return $query->when($data['uid'], fn(Builder $query, $value) => $query->where("user_id", $value));
-                    })
-                ,
+                        return $query->when($data['uid'], fn (Builder $query, $value) => $query->where('user_id', $value));
+                    }),
                 Tables\Filters\Filter::make('credential_id')
                     ->form([
                         TextInput::make('credential_id')
                             ->label(__('passkey.fields.credential_id'))
-                            ->placeholder('Credential ID')
-                        ,
+                            ->placeholder('Credential ID'),
                     ])->query(function (Builder $query, array $data) {
-                        return $query->when($data['credential_id'], fn(Builder $query, $value) => $query->where("credential_id", $value));
-                    })
-                ,
+                        return $query->when($data['credential_id'], fn (Builder $query, $value) => $query->where('credential_id', $value));
+                    }),
             ])
             ->recordActions([
                 DeleteAction::make(),

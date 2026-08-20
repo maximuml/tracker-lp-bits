@@ -2,26 +2,24 @@
 
 namespace App\Filament\Resources\User;
 
-use Filament\Schemas\Schema;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Columns\IconColumn;
-use App\Filament\Resources\User\InviteResource\Pages\ListInvites;
+use App\Filament\OptionsTrait;
 use App\Filament\Resources\User\InviteResource\Pages\CreateInvite;
 use App\Filament\Resources\User\InviteResource\Pages\EditInvite;
-use Filament\Tables\Filters\Filter;
-use Filament\Forms\Components\TextInput;
-use Filament\Tables\Filters\SelectFilter;
-use Filament\Forms\Components\DatePicker;
-use App\Filament\OptionsTrait;
-use App\Filament\Resources\User\InviteResource\Pages;
-use App\Filament\Resources\User\InviteResource\RelationManagers;
+use App\Filament\Resources\User\InviteResource\Pages\ListInvites;
 use App\Models\Invite;
-use Filament\Forms;
+use App\Support\Time;
+use App\Support\UserDisplay;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
-use Filament\Tables\Table;
+use Filament\Schemas\Schema;
 use Filament\Tables;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class InviteResource extends Resource
 {
@@ -29,9 +27,9 @@ class InviteResource extends Resource
 
     protected static ?string $model = Invite::class;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-user-plus';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-user-plus';
 
-    protected static string | \UnitEnum | null $navigationGroup = 'User';
+    protected static string|\UnitEnum|null $navigationGroup = 'User';
 
     protected static ?int $navigationSort = 7;
 
@@ -60,49 +58,39 @@ class InviteResource extends Resource
                 TextColumn::make('id')->sortable(),
                 TextColumn::make('inviter')
                     ->label(__('invite.fields.inviter'))
-                    ->formatStateUsing(fn ($state) => \App\Support\UserDisplay::adminUsername($state))
-                ,
+                    ->formatStateUsing(fn ($state) => UserDisplay::adminUsername($state)),
                 TextColumn::make('invitee')
                     ->label(__('invite.fields.invitee'))
-                    ->searchable()
-                ,
-                TextColumn::make('hash')
-                ,
+                    ->searchable(),
+                TextColumn::make('hash'),
                 TextColumn::make('time_invited')
-                    ->label(__('invite.fields.time_invited'))
-                ,
+                    ->label(__('invite.fields.time_invited')),
                 IconColumn::make('valid')
                     ->label(__('invite.fields.valid'))
-                    ->boolean()
-                ,
+                    ->boolean(),
                 TextColumn::make('invitee_register_uid')
                     ->label(__('invite.fields.invitee_register_uid'))
-                    ->searchable()
-                ,
+                    ->searchable(),
                 TextColumn::make('invitee_register_email')
                     ->label(__('invite.fields.invitee_register_email'))
-                    ->searchable()
-                ,
+                    ->searchable(),
                 TextColumn::make('invitee_register_username')
                     ->label(__('invite.fields.invitee_register_username'))
-                    ->searchable()
-                ,
+                    ->searchable(),
                 TextColumn::make('expired_at')
                     ->label(__('invite.fields.expired_at'))
-                    ->formatStateUsing(fn ($state) => \App\Support\Time::formatDateTime($state))
-                ,
+                    ->formatStateUsing(fn ($state) => Time::formatDateTime($state)),
                 TextColumn::make('created_at')
                     ->label(__('label.created_at'))
-                    ->formatStateUsing(fn ($state) => \App\Support\Time::formatDateTime($state))
-                ,
+                    ->formatStateUsing(fn ($state) => Time::formatDateTime($state)),
             ])
             ->defaultSort('id', 'desc')
             ->filters(self::getFilters())
             ->recordActions([
-//                Tables\Actions\EditAction::make(),
+                //                Tables\Actions\EditAction::make(),
             ])
             ->toolbarActions([
-//                Tables\Actions\DeleteBulkAction::make(),
+                //                Tables\Actions\DeleteBulkAction::make(),
             ]);
     }
 
@@ -130,36 +118,30 @@ class InviteResource extends Resource
             ->schema([
                 TextInput::make('inviter')
                     ->label(__('invite.fields.inviter'))
-                    ->placeholder('UID')
-                ,
+                    ->placeholder('UID'),
             ])->query(function (Builder $query, array $data) {
-                return $query->when($data['inviter'], fn (Builder $query, $value) => $query->where("inviter", $value));
-            })
-        ;
+                return $query->when($data['inviter'], fn (Builder $query, $value) => $query->where('inviter', $value));
+            });
         $filters[] = SelectFilter::make('valid')
             ->options(self::getYesNoOptions())
-            ->label(__('invite.fields.valid'))
-        ;
+            ->label(__('invite.fields.valid'));
         $filters[] = Filter::make('time_invited_begin')
             ->schema([
                 DatePicker::make('time_invited_begin')
                     ->maxDate(now())
-                    ->label(__('invite.fields.time_invited_begin'))
-                ,
+                    ->label(__('invite.fields.time_invited_begin')),
             ])->query(function (Builder $query, array $data) {
-                return $query->when($data['time_invited_begin'], fn (Builder $query, $value) => $query->where("time_invited", '>=', $value));
-            })
-        ;
+                return $query->when($data['time_invited_begin'], fn (Builder $query, $value) => $query->where('time_invited', '>=', $value));
+            });
         $filters[] = Filter::make('time_invited_end')
             ->schema([
                 DatePicker::make('time_invited_end')
                     ->maxDate(now())
-                    ->label(__('invite.fields.time_invited_end'))
-                ,
+                    ->label(__('invite.fields.time_invited_end')),
             ])->query(function (Builder $query, array $data) {
-                return $query->when($data['time_invited_end'], fn (Builder $query, $value) => $query->where("time_invited", '<=', $value));
-            })
-        ;
+                return $query->when($data['time_invited_end'], fn (Builder $query, $value) => $query->where('time_invited', '<=', $value));
+            });
+
         return $filters;
     }
 }

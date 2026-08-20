@@ -2,9 +2,8 @@
 
 namespace App\Filament\Resources\User\InviteResource\Pages;
 
-use Filament\Actions\DeleteAction;
 use App\Filament\Resources\User\InviteResource;
-use Filament\Pages\Actions;
+use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 
 class EditInvite extends EditRecord

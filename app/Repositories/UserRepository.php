@@ -489,6 +489,147 @@ class UserRepository extends BaseRepository
         return $result;
     }
 
+    /**
+     * Mirror the legacy modtask uploadpos toggle.
+     *
+     * @param  mixed  $operator
+     * @param  mixed  $user
+     * @param  string  $status  'yes' or 'no'
+     * @return mixed
+     */
+    public function updateUploadPrivileges($operator, $user, string $status)
+    {
+        if (!in_array($status, ['yes', 'no'])) {
+            throw new \InvalidArgumentException("Invalid status: $status");
+        }
+        $targetUser = $this->getUser($user);
+        if ($targetUser === null) {
+            throw new \InvalidArgumentException('Target user not found');
+        }
+        $operator = $this->getUser($operator);
+        $operatorUsername = $operator ? $operator->username : 'System';
+        if ($operator) {
+            $this->checkPermission($operator, $targetUser);
+        }
+        $message = ['added' => now(), 'receiver' => $targetUser->id];
+        if ($status == 'no') {
+            $update = ['uploadpos' => 'no'];
+            $modComment = date('Y-m-d') . " - Upload disable by " . $operatorUsername;
+            $message['subject'] = \App\Support\Locale::trans('message.upload_disable.subject', [], $targetUser->locale);
+            $message['msg'] = \App\Support\Locale::trans('message.upload_disable.body', ['operator' => $operatorUsername], $targetUser->locale);
+        } else {
+            $update = ['uploadpos' => 'yes'];
+            $modComment = date('Y-m-d') . " - Upload enable by " . $operatorUsername;
+            $message['subject'] = \App\Support\Locale::trans('message.upload_enable.subject', [], $targetUser->locale);
+            $message['msg'] = \App\Support\Locale::trans('message.upload_enable.body', ['operator' => $operatorUsername], $targetUser->locale);
+        }
+        $result = NexusDB::transaction(function () use ($targetUser, $update, $modComment, $message) {
+            Message::add($message);
+            return $targetUser->updateWithModComment($update, $modComment);
+        });
+        $this->clearCache($targetUser);
+        return $result;
+    }
+
+    /**
+     * Mirror the legacy modtask forumpost toggle.
+     *
+     * @param  mixed  $operator
+     * @param  mixed  $user
+     * @param  string  $status  'yes' or 'no'
+     * @return mixed
+     */
+    public function updateForumPost($operator, $user, string $status)
+    {
+        if (!in_array($status, ['yes', 'no'])) {
+            throw new \InvalidArgumentException("Invalid status: $status");
+        }
+        $targetUser = $this->getUser($user);
+        if ($targetUser === null) {
+            throw new \InvalidArgumentException('Target user not found');
+        }
+        $operator = $this->getUser($operator);
+        $operatorUsername = $operator ? $operator->username : 'System';
+        if ($operator) {
+            $this->checkPermission($operator, $targetUser);
+        }
+        $message = ['added' => now(), 'receiver' => $targetUser->id];
+        if ($status == 'no') {
+            $update = ['forumpost' => 'no'];
+            $modComment = date('Y-m-d') . " - Forum posting disabled by " . $operatorUsername;
+            $message['subject'] = \App\Support\Locale::trans('message.forumpost_disable.subject', [], $targetUser->locale);
+            $message['msg'] = \App\Support\Locale::trans('message.forumpost_disable.body', ['operator' => $operatorUsername], $targetUser->locale);
+        } else {
+            $update = ['forumpost' => 'yes'];
+            $modComment = date('Y-m-d') . " - Forum posting enabled by " . $operatorUsername;
+            $message['subject'] = \App\Support\Locale::trans('message.forumpost_enable.subject', [], $targetUser->locale);
+            $message['msg'] = \App\Support\Locale::trans('message.forumpost_enable.body', ['operator' => $operatorUsername], $targetUser->locale);
+        }
+        $result = NexusDB::transaction(function () use ($targetUser, $update, $modComment, $message) {
+            Message::add($message);
+            return $targetUser->updateWithModComment($update, $modComment);
+        });
+        $this->clearCache($targetUser);
+        return $result;
+    }
+
+    /**
+     * Warn a user for a given number of weeks (mirrors legacy modtask warnlength).
+     *
+     * @param  mixed  $operator
+     * @param  mixed  $user
+     * @param  int  $weeks  0 = remove warning, 255 = indefinite
+     * @param  string  $reason  PM reason text
+     * @return mixed
+     */
+    public function warnUser($operator, $user, int $weeks, string $reason = '')
+    {
+        $targetUser = $this->getUser($user);
+        if ($targetUser === null) {
+            throw new \InvalidArgumentException('Target user not found');
+        }
+        $operator = $this->getUser($operator);
+        $operatorId = $operator ? $operator->id : 0;
+        $operatorUsername = $operator ? $operator->username : 'System';
+        if ($operator) {
+            $this->checkPermission($operator, $targetUser);
+        }
+        $locale = $targetUser->locale;
+        $update = [];
+        $message = ['added' => now(), 'receiver' => $targetUser->id, 'sender' => 0];
+
+        if ($weeks === 0) {
+            $update['warned'] = 'no';
+            $update['warneduntil'] = null;
+            $message['subject'] = \App\Support\Locale::trans('user.msg_warn_removed', [], $locale);
+            $message['msg'] = \App\Support\Locale::trans('user.msg_your_warning_removed_by', [], $locale) . $operatorUsername . '.';
+        } else {
+            $update['warned'] = 'yes';
+            $update['lastwarned'] = now()->toDateTimeString();
+            $update['warnedby'] = $operatorId;
+            $update['timeswarned'] = new \Illuminate\Database\Query\Expression('timeswarned + 1');
+            if ($weeks == 255) {
+                $update['warneduntil'] = null;
+                $msg = \App\Support\Locale::trans('user.msg_you_are_warned_by', [], $locale) . $operatorUsername . '.' . ($reason ? \App\Support\Locale::trans('user.msg_reason', [], $locale) . $reason : '');
+            } else {
+                $warneduntil = date('Y-m-d H:i:s', strtotime(date('Y-m-d H:i:s')) + $weeks * 604800);
+                $update['warneduntil'] = $warneduntil;
+                $dur = $weeks . \App\Support\Locale::trans('user.msg_week', [], $locale) . ($weeks > 1 ? \App\Support\Locale::trans('user.msg_s', [], $locale) : '');
+                $msg = \App\Support\Locale::trans('user.msg_you_are_warned_for', [], $locale) . $dur . \App\Support\Locale::trans('user.msg_by', [], $locale) . $operatorUsername . '.' . ($reason ? \App\Support\Locale::trans('user.msg_reason', [], $locale) . $reason : '');
+            }
+            $message['subject'] = \App\Support\Locale::trans('user.msg_you_are_warned', [], $locale);
+            $message['msg'] = $msg;
+        }
+
+        $result = NexusDB::transaction(function () use ($targetUser, $update, $message) {
+            Message::add($message);
+            $modComment = date('Y-m-d') . " - Warning updated";
+            return $targetUser->updateWithModComment($update, $modComment);
+        });
+        $this->clearCache($targetUser);
+        return $result;
+    }
+
 
     /**
      * @param  mixed  $operator
@@ -771,16 +912,68 @@ class UserRepository extends BaseRepository
     /** @param  mixed  $id */
     public function confirmUser($id): bool
     {
+        $ids = Arr::wrap($id);
+        $users = User::query()
+            ->whereIn('id', $ids)
+            ->where('status', User::STATUS_PENDING)
+            ->get();
+
+        if ($users->isEmpty()) {
+            return true;
+        }
+
         $update = [
             'status' => User::STATUS_CONFIRMED,
             'editsecret' => '',
         ];
         User::query()
-            ->whereIn('id', Arr::wrap($id))
-            ->where('status', User::STATUS_PENDING)
+            ->whereIn('id', $users->pluck('id'))
             ->update($update);
 
+        foreach ($users as $user) {
+            $user->status = User::STATUS_CONFIRMED;
+            $user->editsecret = '';
+            \App\Support\Events::fire(ModelEventEnum::USER_UPDATED, $user, null);
+        }
+
         return true;
+    }
+
+    /**
+     * Remove warnings from the given user IDs.
+     *
+     * Mirrors the legacy nowarn action: sets warned='no', warneduntil=NULL,
+     * and prepends a modcomment noting who removed the warning.
+     *
+     * @param  \App\Models\User  $operator
+     * @param  array<int>  $userIds
+     * @return void
+     */
+    public function removeWarnings(User $operator, array $userIds): void
+    {
+        $userIds = array_values(array_filter(array_map('intval', $userIds)));
+        if (empty($userIds)) {
+            return;
+        }
+
+        $modcomment = date('Y-m-d') . ' - Warning Removed By ' . $operator->username;
+
+        foreach ($userIds as $uid) {
+            $user = User::query()->find($uid, ['id', 'warned', 'modcomment']);
+            if ($user === null || $user->warned !== 'yes') {
+                continue;
+            }
+            $newModcomment = $user->modcomment === '' || $user->modcomment === null
+                ? $modcomment
+                : $modcomment . "\n" . $user->modcomment;
+
+            $user->warned = 'no';
+            $user->warneduntil = null;
+            $user->modcomment = $newModcomment;
+            $user->save();
+
+            \App\Support\Events::fire(ModelEventEnum::USER_UPDATED, $user, null);
+        }
     }
 
     /**

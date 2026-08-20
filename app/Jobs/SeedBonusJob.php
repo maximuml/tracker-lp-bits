@@ -3,22 +3,21 @@
 namespace App\Jobs;
 
 use App\Models\BonusLogs;
-use App\Models\IpLog;
 use App\Models\User;
 use App\Support\Bonus;
+use App\Support\Config\SiteConfig;
 use App\Support\Json;
 use App\Support\Logger;
+use App\Support\Time;
 use App\Support\UserDisplay;
-use App\Repositories\IpLogRepository;
+use ClickHouseDB\Client;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
 use Nexus\Database\NexusDB;
-use Nexus\Nexus;
 
 class SeedBonusJob implements ShouldQueue
 {
@@ -57,7 +56,7 @@ class SeedBonusJob implements ShouldQueue
     /**
      * 获取任务时，应该通过的中间件。
      *
-     * @return array<int, \Illuminate\Queue\Middleware\WithoutOverlapping>
+     * @return array<int, WithoutOverlapping>
      */
     public function middleware(): array
     {
@@ -77,24 +76,25 @@ class SeedBonusJob implements ShouldQueue
     {
         $beginTimestamp = time();
         $logPrefix = sprintf(
-            "[CLEANUP_CLI_CALCULATE_SEED_BONUS_HANDLE_JOB], commonRequestId: %s, beginUid: %s, endUid: %s, idStr: %s, idRedisKey: %s",
+            '[CLEANUP_CLI_CALCULATE_SEED_BONUS_HANDLE_JOB], commonRequestId: %s, beginUid: %s, endUid: %s, idStr: %s, idRedisKey: %s',
             $this->requestId, $this->beginUid, $this->endUid, $this->idStr, $this->idRedisKey
         );
         Logger::writeWithContext("$logPrefix, job start ...");
 
-        $haremAdditionFactor = \App\Support\Config\SiteConfig::current()->bonus->haremAddition();
-        $officialAdditionFactor = \App\Support\Config\SiteConfig::current()->bonus->officialAddition();
-        $donortimes_bonus = \App\Support\Config\SiteConfig::current()->bonus->donorTimes();
-        $autoclean_interval_one = \App\Support\Config\SiteConfig::current()->main->autocleanIntervalOne();
+        $haremAdditionFactor = SiteConfig::current()->bonus->haremAddition();
+        $officialAdditionFactor = SiteConfig::current()->bonus->officialAddition();
+        $donortimes_bonus = SiteConfig::current()->bonus->donorTimes();
+        $autoclean_interval_one = SiteConfig::current()->main->autocleanIntervalOne();
 
         $idStr = $this->idStr;
         $delIdRedisKey = false;
-        if (empty($idStr) && !empty($this->idRedisKey)) {
+        if (empty($idStr) && ! empty($this->idRedisKey)) {
             $delIdRedisKey = true;
             $idStr = NexusDB::cache_get($this->idRedisKey);
         }
         if (empty($idStr)) {
-            Logger::writeWithContext("$logPrefix, no idStr or idRedisKey", "error");
+            Logger::writeWithContext("$logPrefix, no idStr or idRedisKey", 'error');
+
             return;
         }
         $idArr = array_filter(array_map('intval', explode(',', $idStr)));
@@ -105,22 +105,22 @@ class SeedBonusJob implements ShouldQueue
             ->map(fn ($row) => (array) $row)
             ->all();
         if (empty($results)) {
-            Logger::writeWithContext("$logPrefix, no data from idStr: $idStr", "error");
+            Logger::writeWithContext("$logPrefix, no data from idStr: $idStr", 'error');
+
             return;
         }
-        $logFile = Logger::filePath("seed-bonus-points");
-        Logger::writeWithContext("$logPrefix, [GET_UID_REAL], count: " . count($results) . ", logFile: $logFile");
+        $logFile = Logger::filePath('seed-bonus-points');
+        Logger::writeWithContext("$logPrefix, [GET_UID_REAL], count: ".count($results).", logFile: $logFile");
         $fd = fopen($logFile, 'a');
         $rows = [];
         $nowStr = now()->toDateTimeString();
-        $logStr = "";
+        $logStr = '';
         $bonusLogInsert = [];
-        foreach ($results as $userInfo)
-        {
+        foreach ($results as $userInfo) {
             $uid = $userInfo['id'];
             $isDonor = UserDisplay::isDonor($userInfo);
             $seedBonusResult = Bonus::calculateForUser($uid);
-            $bonusLog = "[CLEANUP_CLI_CALCULATE_SEED_BONUS_HANDLE_USER], user: $uid, seedBonusResult: " . Json::encode($seedBonusResult);
+            $bonusLog = "[CLEANUP_CLI_CALCULATE_SEED_BONUS_HANDLE_USER], user: $uid, seedBonusResult: ".Json::encode($seedBonusResult);
             $all_bonus = $basicBonus = $seedBonusResult['seed_bonus'];
             $oldValue = $userInfo['seedbonus'];
             $bonusLog .= ", all_bonus: $all_bonus";
@@ -155,7 +155,7 @@ class SeedBonusJob implements ShouldQueue
                 $this->appendBonusLogInsert($bonusLogInsert, $uid, BonusLogs::BUSINESS_TYPE_SEEDING_MEDAL_ADDITION, $oldValue, $medalAddition);
                 $oldValue += $medalAddition;
             }
-            \App\Support\Logger::writeWithContext((string) $bonusLog, (string) 'info', (bool) false);
+            Logger::writeWithContext((string) $bonusLog, (string) 'info', (bool) false);
             $dividend = 3600 / $autoclean_interval_one;
             $all_bonus = $all_bonus / $dividend;
             $seed_points = $seedBonusResult['seed_points'] / $dividend;
@@ -173,12 +173,12 @@ class SeedBonusJob implements ShouldQueue
                 $log = sprintf(
                     '%s|%s|%s|%s|%s|%s|%s|%s',
                     date('Y-m-d H:i:s'), $uid,
-                    $userInfo['seed_points'], number_format($seed_points, 1, '.', ''),  number_format($userInfo['seed_points'] + $seed_points, 1, '.', ''),
-                    $userInfo['seedbonus'], number_format($all_bonus, 1, '.', ''),  number_format($userInfo['seedbonus'] + $all_bonus, 1, '.', '')
+                    $userInfo['seed_points'], number_format($seed_points, 1, '.', ''), number_format($userInfo['seed_points'] + $seed_points, 1, '.', ''),
+                    $userInfo['seedbonus'], number_format($all_bonus, 1, '.', ''), number_format($userInfo['seedbonus'] + $all_bonus, 1, '.', '')
                 );
-                $logStr .= $log . PHP_EOL;
+                $logStr .= $log.PHP_EOL;
             } else {
-                \App\Support\Logger::writeWithContext((string) "logFile: {$logFile} is not writeable!", (string) 'error', (bool) false);
+                Logger::writeWithContext((string) "logFile: {$logFile} is not writeable!", (string) 'error', (bool) false);
             }
         }
         $result = NexusDB::table('users')->upsert($rows, ['id'], ['seed_points', 'seed_points_per_hour', 'seed_bonus_per_hour', 'seedbonus', 'seeding_torrent_count', 'seeding_torrent_size', 'seed_points_updated_at']);
@@ -188,24 +188,23 @@ class SeedBonusJob implements ShouldQueue
         if ($fd) {
             fwrite($fd, $logStr);
         }
-        if (!empty($bonusLogInsert)) {
-//            BonusLogs::query()->insert($bonusLogInsert);
+        if (! empty($bonusLogInsert)) {
+            //            BonusLogs::query()->insert($bonusLogInsert);
             $this->insertIntoClickHouseBulk($bonusLogInsert);
         }
         $costTime = time() - $beginTimestamp;
-        \App\Support\Logger::writeWithContext((string) sprintf("{$logPrefix}, [DONE], update user count: %s, result: %s, cost time: %s seconds", count($rows), var_export($result, true), $costTime), (string) 'info', (bool) false);
-        \App\Support\Logger::writeWithContext((string) "{$logPrefix}, upsert users seed bonus done", (string) "debug", (bool) false);
+        Logger::writeWithContext((string) sprintf("{$logPrefix}, [DONE], update user count: %s, result: %s, cost time: %s seconds", count($rows), var_export($result, true), $costTime), (string) 'info', (bool) false);
+        Logger::writeWithContext((string) "{$logPrefix}, upsert users seed bonus done", (string) 'debug', (bool) false);
     }
 
     /**
      * Handle a job failure.
      *
-     * @param  \Throwable  $exception
      * @return void
      */
     public function failed(\Throwable $exception)
     {
-        \App\Support\Logger::writeWithContext((string) ("failed: " . $exception->getMessage() . $exception->getTraceAsString()), (string) 'error', (bool) false);
+        Logger::writeWithContext((string) ('failed: '.$exception->getMessage().$exception->getTraceAsString()), (string) 'error', (bool) false);
     }
 
     /**
@@ -223,7 +222,7 @@ class SeedBonusJob implements ShouldQueue
                 'value' => $delta,
                 'new_total_value' => $oldValue + $delta,
                 'comment' => BonusLogs::$businessTypes[$businessType]['text'] ?? '',
-                'created_at' => \App\Support\Time::micro(),
+                'created_at' => Time::micro(),
             ];
         }
     }
@@ -233,22 +232,24 @@ class SeedBonusJob implements ShouldQueue
      */
     private function insertIntoClickHouseBulk(array $bonusLogInsert): void
     {
-        if (!\App\Support\Config\SiteConfig::current()->system->isRecordSeedingBonusLog()) {
-            \App\Support\Logger::writeWithContext((string) "not enabled", (string) 'info', (bool) false);
+        if (! SiteConfig::current()->system->isRecordSeedingBonusLog()) {
+            Logger::writeWithContext((string) 'not enabled', (string) 'info', (bool) false);
+
             return;
         }
         $host = config('clickhouse.connection.host');
-        if (!$host) {
-            \App\Support\Logger::writeWithContext((string) "clickhouse no host", (string) 'info', (bool) false);
+        if (! $host) {
+            Logger::writeWithContext((string) 'clickhouse no host', (string) 'info', (bool) false);
+
             return;
         }
         try {
-            $client = app(\ClickHouseDB\Client::class);
+            $client = app(Client::class);
             $fields = ['business_type', 'uid', 'old_total_value', 'value', 'new_total_value', 'comment', 'created_at'];
-            $client->insert("bonus_logs", $bonusLogInsert, $fields);
-            \App\Support\Logger::writeWithContext((string) ("insertIntoClickHouseBulk done, created_at: {$bonusLogInsert[0]['created_at']}, count: " . count($bonusLogInsert)), (string) 'info', (bool) false);
+            $client->insert('bonus_logs', $bonusLogInsert, $fields);
+            Logger::writeWithContext((string) ("insertIntoClickHouseBulk done, created_at: {$bonusLogInsert[0]['created_at']}, count: ".count($bonusLogInsert)), (string) 'info', (bool) false);
         } catch (\Exception $e) {
-            \App\Support\Logger::writeWithContext((string) $e->getMessage(), (string) 'error', (bool) false);
+            Logger::writeWithContext((string) $e->getMessage(), (string) 'error', (bool) false);
         }
     }
 }

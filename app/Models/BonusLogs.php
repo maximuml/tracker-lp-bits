@@ -11,72 +11,111 @@
  * @property string $created_at
  * @property string $updated_at
  */
+
 namespace App\Models;
 
-
+use App\Support\Config\SiteConfig;
+use App\Support\Locale;
 use Carbon\Carbon;
 use Illuminate\Support\Arr;
 
 class BonusLogs extends NexusModel
 {
-    /** @var  string */
+    /** @var string */
     protected $table = 'bonus_logs';
 
-    /** @var  list<string> */
+    /** @var list<string> */
     protected $fillable = ['uid', 'business_type', 'old_total_value', 'value', 'new_total_value', 'comment', 'created_at', 'updated_at'];
 
-    /** @var  bool */
+    /** @var bool */
     public $timestamps = true;
+
     const CATEGORY_COMMON = 'common';
+
     const CATEGORY_SEEDING = 'seeding';
 
     const DEFAULT_BONUS_CANCEL_ONE_HIT_AND_RUN = 10000;
+
     const DEFAULT_BONUS_BUY_ATTENDANCE_CARD = 1000;
+
     const DEFAULT_BONUS_BUY_TEMPORARY_INVITE = 500;
+
     const DEFAULT_BONUS_BUY_RAINBOW_ID = 5000;
+
     const DEFAULT_BONUS_BUY_CHANGE_USERNAME_CARD = 100000;
+
     const DEFAULT_BONUS_SELF_ENABLE = 100000;
 
-    //扣除类，1开始
+    // 扣除类，1开始
     const BUSINESS_TYPE_CANCEL_HIT_AND_RUN = 1;
+
     const BUSINESS_TYPE_BUY_MEDAL = 2;
+
     const BUSINESS_TYPE_BUY_ATTENDANCE_CARD = 3;
+
     const BUSINESS_TYPE_STICKY_PROMOTION = 4;
+
     const BUSINESS_TYPE_POST_REWARD = 5;
+
     const BUSINESS_TYPE_EXCHANGE_UPLOAD = 6;
+
     const BUSINESS_TYPE_EXCHANGE_INVITE = 7;
+
     const BUSINESS_TYPE_CUSTOM_TITLE = 8;
+
     const BUSINESS_TYPE_BUY_VIP = 9;
+
     const BUSINESS_TYPE_GIFT_TO_SOMEONE = 10;
+
     const BUSINESS_TYPE_GIFT_TO_LOW_SHARE_RATIO = 12;
+
     const BUSINESS_TYPE_LUCKY_DRAW = 13;
+
     const BUSINESS_TYPE_EXCHANGE_DOWNLOAD = 14;
+
     const BUSINESS_TYPE_BUY_TEMPORARY_INVITE = 15;
+
     const BUSINESS_TYPE_BUY_RAINBOW_ID = 16;
+
     const BUSINESS_TYPE_BUY_CHANGE_USERNAME_CARD = 17;
+
     const BUSINESS_TYPE_GIFT_MEDAL = 18;
+
     const BUSINESS_TYPE_BUY_TORRENT = 19;
+
     const BUSINESS_TYPE_TASK_NOT_PASS_DEDUCT = 20;
+
     const BUSINESS_TYPE_TASK_PASS_REWARD = 21;
+
     const BUSINESS_TYPE_REWARD_TORRENT = 22;
+
     const BUSINESS_TYPE_SELF_ENABLE = 24;
 
-    //获得类，普通获得，1000 起步
+    // 获得类，普通获得，1000 起步
     const BUSINESS_TYPE_ROLE_WORK_SALARY = 1000;
+
     const BUSINESS_TYPE_TORRENT_BE_DOWNLOADED = 1001;
+
     const BUSINESS_TYPE_RECEIVE_REWARD = 1002;
+
     const BUSINESS_TYPE_RECEIVE_GIFT = 1003;
+
     const BUSINESS_TYPE_UPLOAD_TORRENT = 1004;
+
     const BUSINESS_TYPE_TORRENT_BE_REWARD = 1005;
 
-    //获得类，做种获得，10000 起
+    // 获得类，做种获得，10000 起
     const BUSINESS_TYPE_SEEDING_BASIC = 10000;
+
     const BUSINESS_TYPE_SEEDING_DONOR_ADDITION = 10001;
+
     const BUSINESS_TYPE_SEEDING_OFFICIAL_ADDITION = 10002;
+
     const BUSINESS_TYPE_SEEDING_HAREM_ADDITION = 10003;
+
     const BUSINESS_TYPE_SEEDING_MEDAL_ADDITION = 10004;
 
-    /** @var  array<int|string, mixed> */
+    /** @var array<int|string, mixed> */
     public static array $businessTypes = [
         self::BUSINESS_TYPE_CANCEL_HIT_AND_RUN => ['text' => 'Cancel H&R'],
         self::BUSINESS_TYPE_BUY_MEDAL => ['text' => 'Buy medal'],
@@ -115,107 +154,96 @@ class BonusLogs extends NexusModel
         self::BUSINESS_TYPE_SEEDING_MEDAL_ADDITION => ['text' => 'Seeding medal addition'],
     ];
 
-    /** @var  array<int|string, mixed> */
+    /** @var array<int|string, mixed> */
     public static array $businessTypeSeeding = [
         self::BUSINESS_TYPE_SEEDING_BASIC,
         self::BUSINESS_TYPE_SEEDING_DONOR_ADDITION,
         self::BUSINESS_TYPE_SEEDING_OFFICIAL_ADDITION,
         self::BUSINESS_TYPE_SEEDING_HAREM_ADDITION,
-        self::BUSINESS_TYPE_SEEDING_MEDAL_ADDITION
+        self::BUSINESS_TYPE_SEEDING_MEDAL_ADDITION,
     ];
 
     /**
      * @param  mixed  $category
-     * @return  array<int|string, mixed>
+     * @return array<int|string, mixed>
      */
     public static function listBusinessTypeOptions($category = ''): array
     {
         $source = BonusLogs::$businessTypes;
         if ($category == self::CATEGORY_COMMON) {
             $source = Arr::except(BonusLogs::$businessTypes, BonusLogs::$businessTypeSeeding);
-        } else if ($category == self::CATEGORY_SEEDING) {
+        } elseif ($category == self::CATEGORY_SEEDING) {
             $source = Arr::only(BonusLogs::$businessTypes, BonusLogs::$businessTypeSeeding);
         }
+
         return self::listStaticProps($source, 'bonus-log.business_types', true);
     }
 
     /**
-     * @param  bool  $includeSeeding
-     * @return  array<int|string, mixed>
+     * @return array<int|string, mixed>
      */
     public static function listCategoryOptions(bool $includeSeeding): array
     {
         $result = [
-            self::CATEGORY_COMMON => \App\Support\Locale::trans('bonus-log.category_common', [], null)
+            self::CATEGORY_COMMON => Locale::trans('bonus-log.category_common', [], null),
         ];
         if ($includeSeeding) {
-            $result[self::CATEGORY_SEEDING] = \App\Support\Locale::trans('bonus-log.category_seeding', [], null);
+            $result[self::CATEGORY_SEEDING] = Locale::trans('bonus-log.category_seeding', [], null);
         }
+
         return $result;
     }
 
     /** @return  mixed */
     public function getBusinessTypeTextAttribute()
     {
-        return \App\Support\Locale::trans('bonus-log.business_types.' . $this->business_type, [], null);
+        return Locale::trans('bonus-log.business_types.'.$this->business_type, [], null);
     }
 
-    /** @return  float */
     public static function getBonusForCancelHitAndRun(): float
     {
-        return \App\Support\Config\SiteConfig::current()->bonus->cancelHr(self::DEFAULT_BONUS_CANCEL_ONE_HIT_AND_RUN);
+        return SiteConfig::current()->bonus->cancelHr(self::DEFAULT_BONUS_CANCEL_ONE_HIT_AND_RUN);
     }
 
-    /** @return  float */
     public static function getBonusForBuyAttendanceCard(): float
     {
-        return \App\Support\Config\SiteConfig::current()->bonus->attendanceCard(self::DEFAULT_BONUS_BUY_ATTENDANCE_CARD);
+        return SiteConfig::current()->bonus->attendanceCard(self::DEFAULT_BONUS_BUY_ATTENDANCE_CARD);
     }
 
-    /** @return  float */
     public static function getBonusForBuyTemporaryInvite(): float
     {
-        return \App\Support\Config\SiteConfig::current()->bonus->oneTmpInvite(self::DEFAULT_BONUS_BUY_TEMPORARY_INVITE);
+        return SiteConfig::current()->bonus->oneTmpInvite(self::DEFAULT_BONUS_BUY_TEMPORARY_INVITE);
     }
 
-    /** @return  float */
     public static function getBonusForBuyRainbowId(): float
     {
-        return \App\Support\Config\SiteConfig::current()->bonus->rainbowId(self::DEFAULT_BONUS_BUY_RAINBOW_ID);
+        return SiteConfig::current()->bonus->rainbowId(self::DEFAULT_BONUS_BUY_RAINBOW_ID);
     }
 
-    /** @return  float */
     public static function getBonusForBuyChangeUsernameCard(): float
     {
-        return \App\Support\Config\SiteConfig::current()->bonus->changeUsernameCard(self::DEFAULT_BONUS_BUY_CHANGE_USERNAME_CARD);
+        return SiteConfig::current()->bonus->changeUsernameCard(self::DEFAULT_BONUS_BUY_CHANGE_USERNAME_CARD);
     }
 
     /**
-     * @param  int  $userId
-     * @param  float  $old
-     * @param  float  $delta
-     * @param  float  $new
-     * @param  string  $comment
-     * @param  int  $businessType
-     * @return  mixed
+     * @return mixed
      */
     public static function add(int $userId, float $old, float $delta, float $new, string $comment, int $businessType)
     {
-        if (!isset(self::$businessTypes[$businessType])) {
+        if (! isset(self::$businessTypes[$businessType])) {
             throw new \InvalidArgumentException("Invalid business type: $businessType");
         }
         $nowStr = Carbon::now()->toDateTimeString();
+
         return self::query()->create([
             'business_type' => $businessType,
             'uid' => $userId,
             'old_total_value' => $old,
             'value' => $delta,
             'new_total_value' => $new,
-            'comment' => sprintf("[%s]%s", self::$businessTypes[$businessType]['text'], $comment ? " $comment" : ""),
+            'comment' => sprintf('[%s]%s', self::$businessTypes[$businessType]['text'], $comment ? " $comment" : ''),
             'created_at' => $nowStr,
             'updated_at' => $nowStr,
         ]);
     }
-
-
 }

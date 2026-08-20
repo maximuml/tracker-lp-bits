@@ -9,17 +9,17 @@
  * @property string $created_at
  * @property string $updated_at
  */
+
 namespace App\Models;
 
 class AttendanceLog extends NexusModel
 {
-    /** @var  string */
+    /** @var string */
     protected $table = 'attendance_logs';
 
-    /** @var  list<string> */
+    /** @var list<string> */
     protected $fillable = ['uid', 'points', 'date', 'is_retroactive'];
 
-    /** @var  bool */
+    /** @var bool */
     public $timestamps = true;
-
 }

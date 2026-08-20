@@ -9,10 +9,11 @@
  * @property int $sort_index
  * @property int $icon_id
  */
+
 namespace App\Models;
 
-
 use App\Models\Traits\NexusActivityLogTrait;
+use App\Support\Locale;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
@@ -28,25 +29,25 @@ class Category extends NexusModel
 {
     use NexusActivityLogTrait;
 
-    /** @var  string */
+    /** @var string */
     protected $table = 'categories';
 
-    /** @var  list<string> */
+    /** @var list<string> */
     protected $fillable = ['mode', 'name', 'class_name', 'image', 'sort_index', 'icon_id'];
 
     /** @return  mixed */
     public static function getLabelName()
     {
-        return \App\Support\Locale::trans('searchbox.category_label', [], null);
+        return Locale::trans('searchbox.category_label', [], null);
     }
 
-    /** @return  \Illuminate\Database\Eloquent\Relations\BelongsTo<Icon, $this> */
+    /** @return  BelongsTo<Icon, $this> */
     public function icon(): BelongsTo
     {
         return $this->belongsTo(Icon::class, 'icon_id');
     }
 
-    /** @return  \Illuminate\Database\Eloquent\Relations\BelongsTo<SearchBox, $this> */
+    /** @return  BelongsTo<SearchBox, $this> */
     public function search_box(): BelongsTo
     {
         return $this->belongsTo(SearchBox::class, 'mode', 'id');

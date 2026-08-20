@@ -4,13 +4,13 @@ namespace App\Listeners;
 
 use App\Repositories\SearchRepository;
 use App\Repositories\ToolRepository;
+use App\Support\Config\SiteConfig;
+use App\Support\Logger;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Queue\InteractsWithQueue;
 
 class SyncTorrentToElasticsearch implements ShouldQueue
 {
-
     public int $tries = 3;
 
     /**
@@ -25,9 +25,6 @@ class SyncTorrentToElasticsearch implements ShouldQueue
 
     /**
      * Handle the event.
-     *
-     * @param  object  $event
-     * @return void
      */
     public function handle(object $event): void
     {
@@ -36,34 +33,32 @@ class SyncTorrentToElasticsearch implements ShouldQueue
             $id = (int) $event->model->getKey();
         }
         if ($id == 0) {
-            \App\Support\Logger::writeWithContext((string) ("event: " . get_class($event) . " no model id"), (string) 'error', (bool) false);
+            Logger::writeWithContext((string) ('event: '.get_class($event).' no model id'), (string) 'error', (bool) false);
+
             return;
         }
-        $searchRep = new SearchRepository();
+        $searchRep = new SearchRepository;
         $result = $searchRep->updateTorrent($id);
-        \App\Support\Logger::writeWithContext((string) sprintf("updateTorrent: %s result: %s", $id, var_export($result, true)), (string) 'info', (bool) false);
+        Logger::writeWithContext((string) sprintf('updateTorrent: %s result: %s', $id, var_export($result, true)), (string) 'info', (bool) false);
 
     }
 
     /**
      * handle failed
-     *
-     * @param  object  $event
-     * @return void
      */
     public function failed(object $event, \Throwable $exception): void
     {
-        $toolRep = new ToolRepository();
-        $to = \App\Support\Config\SiteConfig::current()->main->siteEmail();
+        $toolRep = new ToolRepository;
+        $to = SiteConfig::current()->main->siteEmail();
         $subject = sprintf('Event: %s listener: %s handle error', get_class($event), __CLASS__);
         $body = sprintf("%s\n%s", $exception->getMessage(), $exception->getTraceAsString());
         try {
             $result = $toolRep->sendMail($to, $subject, $body);
             if ($result === false) {
-                \App\Support\Logger::writeWithContext((string) "{$subject} send mail fail", (string) 'alert', (bool) false);
+                Logger::writeWithContext((string) "{$subject} send mail fail", (string) 'alert', (bool) false);
             }
         } catch (\Throwable $exception) {
-            \App\Support\Logger::writeWithContext((string) ("{$subject} send mail fail: " . $exception->getMessage() . $exception->getTraceAsString()), (string) 'alert', (bool) false);
+            Logger::writeWithContext((string) ("{$subject} send mail fail: ".$exception->getMessage().$exception->getTraceAsString()), (string) 'alert', (bool) false);
         }
     }
 }

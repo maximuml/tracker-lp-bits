@@ -4,7 +4,7 @@ namespace App\Filament\Resources\Section\CategoryResource\Pages;
 
 use App\Filament\CreateRedirectIndexTrait;
 use App\Filament\Resources\Section\CategoryResource;
-use Filament\Pages\Actions;
+use App\Support\Cache;
 use Filament\Resources\Pages\CreateRecord;
 
 class CreateCategory extends CreateRecord
@@ -15,6 +15,6 @@ class CreateCategory extends CreateRecord
 
     protected function afterCreate(): void
     {
-        \App\Support\Cache::clearCategory();
+        Cache::clearCategory();
     }
 }

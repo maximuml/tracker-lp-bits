@@ -5,15 +5,16 @@ namespace App\Filament\Pages;
 use App\Models\User;
 use App\Repositories\UserRepository;
 use App\Support\Mail;
+use App\Support\SupportContext;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
-use Filament\Schemas\Components\Section;
-use Filament\Schemas\Schema;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Auth;
 
 class SystemActions extends Page implements HasForms
@@ -24,9 +25,9 @@ class SystemActions extends Page implements HasForms
 
     protected static string $routePath = 'system-actions';
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-exclamation-circle';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-exclamation-circle';
 
-    protected static string | \UnitEnum | null $navigationGroup = 'System';
+    protected static string|\UnitEnum|null $navigationGroup = 'System';
 
     protected static ?int $navigationSort = 100;
 
@@ -38,10 +39,12 @@ class SystemActions extends Page implements HasForms
     public static function canAccess(): bool
     {
         $user = Auth::user();
+
         return $user instanceof User && $user->class >= User::CLASS_SYSOP;
     }
 
     public ?array $delacctData = [];
+
     public ?array $massmailData = [];
 
     public function mount(): void
@@ -81,6 +84,7 @@ class SystemActions extends Page implements HasForms
 
         if ($userid === '') {
             Notification::make()->title('Error')->body('Please fill out the form correctly.')->danger()->send();
+
             return;
         }
 
@@ -90,11 +94,12 @@ class SystemActions extends Page implements HasForms
         }
         if (! $user) {
             Notification::make()->title('Error')->body('Bad user id or username.')->danger()->send();
+
             return;
         }
 
         $name = $user->username;
-        $userRep = new UserRepository();
+        $userRep = new UserRepository;
         $userRep->destroy((int) $user->id);
 
         Notification::make()
@@ -154,10 +159,12 @@ class SystemActions extends Page implements HasForms
 
         if (! in_array($or, ['<', '>', '=', '<=', '>='], true)) {
             Notification::make()->title('Error')->body('Invalid comparison operator.')->danger()->send();
+
             return;
         }
         if ($messageBody === '') {
             Notification::make()->title('Error')->body('Empty message!')->danger()->send();
+
             return;
         }
 
@@ -167,17 +174,18 @@ class SystemActions extends Page implements HasForms
         $users = User::query()->where('class', $or, $class)->get(['id', 'username', 'email']);
         if ($users->isEmpty()) {
             Notification::make()->title('Error')->body('No users match the selected criteria.')->warning()->send();
+
             return;
         }
 
-        $siteName = (string) \App\Support\SupportContext::getGlobal('SITENAME', '');
-        $siteEmail = (string) \App\Support\SupportContext::getGlobal('SITEEMAIL', '');
+        $siteName = (string) SupportContext::getGlobal('SITENAME', '');
+        $siteEmail = (string) SupportContext::getGlobal('SITEEMAIL', '');
         $sent = false;
         foreach ($users as $userRow) {
             $to = (string) $userRow->email;
-            $message = "Message received from {$siteName} on " . date('Y-m-d H:i:s') . ".\n" .
-                "---------------------------------------------------------------------\n\n" .
-                htmlspecialchars($messageBody) . "\n\n" .
+            $message = "Message received from {$siteName} on ".date('Y-m-d H:i:s').".\n".
+                "---------------------------------------------------------------------\n\n".
+                htmlspecialchars($messageBody)."\n\n".
                 "---------------------------------------------------------------------\n{$siteName}\n";
             $sent = Mail::sentLegacy($to, $siteName, $siteEmail, $subject, $message, 'Mass Mail', false, false, '', 'UTF-8');
         }

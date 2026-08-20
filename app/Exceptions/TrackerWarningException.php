@@ -8,7 +8,7 @@ final class TrackerWarningException extends \Exception
     private array $response;
 
     /**
-     * @param array<string, mixed> $baseResponse
+     * @param  array<string, mixed>  $baseResponse
      */
     public function __construct(string $message, array $baseResponse, int $interval = 7200)
     {

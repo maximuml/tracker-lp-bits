@@ -5,7 +5,6 @@ namespace App\Filament\Resources\Oauth\AuthCodeResource\Pages;
 use App\Filament\PageListSingle;
 use App\Filament\Resources\Oauth\AuthCodeResource;
 use Filament\Pages\Actions;
-use Filament\Resources\Pages\ManageRecords;
 
 class ManageAuthCodes extends PageListSingle
 {
@@ -14,7 +13,7 @@ class ManageAuthCodes extends PageListSingle
     protected function getHeaderActions(): array
     {
         return [
-//            Actions\CreateAction::make(),
+            //            Actions\CreateAction::make(),
         ];
     }
 }

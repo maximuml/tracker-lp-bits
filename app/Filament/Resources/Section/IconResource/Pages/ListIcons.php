@@ -2,11 +2,9 @@
 
 namespace App\Filament\Resources\Section\IconResource\Pages;
 
-use Filament\Actions\CreateAction;
 use App\Filament\PageList;
 use App\Filament\Resources\Section\IconResource;
-use Filament\Pages\Actions;
-use Filament\Resources\Pages\ListRecords;
+use Filament\Actions\CreateAction;
 
 class ListIcons extends PageList
 {

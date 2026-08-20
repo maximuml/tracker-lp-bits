@@ -7,8 +7,8 @@ use App\DTOs\Forum\UpdateForumDto;
 use App\Http\Resources\ForumResource;
 use App\Models\Forum;
 use App\Repositories\CommentRepository;
-use App\Repositories\ForumRepository;
 use App\Services\Legacy\ForumService;
+use App\Support\Pagination;
 use App\Support\SupportContext;
 use App\Support\UserDisplay;
 use Illuminate\Http\RedirectResponse;
@@ -20,8 +20,7 @@ class ForumController extends LegacyController
 {
     public function __construct(
         private readonly ForumService $service,
-    ) {
-    }
+    ) {}
 
     /**
      * Serve the legacy forums.php page from a Laravel view.
@@ -33,7 +32,7 @@ class ForumController extends LegacyController
     public function legacy(Request $request): View|Response|RedirectResponse
     {
         if (SupportContext::getUser() === null) {
-            return redirect('/forums.php?' . $request->getQueryString());
+            return redirect('/forums.php?'.$request->getQueryString());
         }
 
         $result = $this->service->legacy($request);
@@ -49,7 +48,7 @@ class ForumController extends LegacyController
         $perpage = 20;
         $count = CommentRepository::countLatest();
 
-        [$pagertop, $pagerbottom, , $offset, $perpage] = \App\Support\Pagination::pager($perpage, $count, 'latestcomments.php?');
+        [$pagertop, $pagerbottom, , $offset, $perpage] = Pagination::pager($perpage, $count, 'latestcomments.php?');
         $rows = CommentRepository::getLatest($perpage, $offset);
 
         $userIds = array_filter(array_unique(array_column($rows, 'user')));
@@ -70,7 +69,7 @@ class ForumController extends LegacyController
     }
 
     /**
-     * @return  array<string, mixed>
+     * @return array<string, mixed>
      */
     public function index(): array
     {
@@ -80,8 +79,7 @@ class ForumController extends LegacyController
     }
 
     /**
-     * @param  \Illuminate\Http\Request  $request
-     * @return  array<string, mixed>
+     * @return array<string, mixed>
      */
     public function store(Request $request): array
     {
@@ -91,8 +89,7 @@ class ForumController extends LegacyController
     }
 
     /**
-     * @param  \App\Models\Forum  $forum
-     * @return  array<string, mixed>
+     * @return array<string, mixed>
      */
     public function show(Forum $forum): array
     {
@@ -100,9 +97,7 @@ class ForumController extends LegacyController
     }
 
     /**
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Forum  $forum
-     * @return  array<string, mixed>
+     * @return array<string, mixed>
      */
     public function update(Request $request, Forum $forum): array
     {
@@ -112,8 +107,7 @@ class ForumController extends LegacyController
     }
 
     /**
-     * @param  \App\Models\Forum  $forum
-     * @return  array<string, mixed>
+     * @return array<string, mixed>
      */
     public function destroy(Forum $forum): array
     {

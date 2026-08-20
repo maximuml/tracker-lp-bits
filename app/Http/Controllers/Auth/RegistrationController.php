@@ -10,6 +10,7 @@ use App\Models\Invite;
 use App\Services\RegistrationService;
 use App\Services\WebAuthService;
 use App\Support\Captcha;
+use App\Support\Config\SiteConfig;
 use App\Support\Locale;
 use App\Support\Network;
 use Illuminate\Http\RedirectResponse;
@@ -24,8 +25,7 @@ class RegistrationController extends Controller
     public function __construct(
         private RegistrationService $registrationService,
         private WebAuthService $authService,
-    ) {
-    }
+    ) {}
 
     public function showSignup(Request $request): View|RedirectResponse
     {
@@ -43,7 +43,7 @@ class RegistrationController extends Controller
                 $query = $request->query();
                 unset($query['sitelanguage']);
 
-                return Redirect::to('/signup' . (empty($query) ? '' : '?' . http_build_query($query)));
+                return Redirect::to('/signup'.(empty($query) ? '' : '?'.http_build_query($query)));
             }
         }
 
@@ -85,7 +85,7 @@ class RegistrationController extends Controller
             'isInvite' => $isInvite,
             'invite' => $invite,
             'code' => $code,
-            'isPreRegisterEmailAndUsername' => \App\Support\Config\SiteConfig::current()->system->isInvitePreEmailAndUsername(),
+            'isPreRegisterEmailAndUsername' => SiteConfig::current()->system->isInvitePreEmailAndUsername(),
             'countries' => $countries,
             'remaining' => $this->authService->remainingAttempts(Network::clientIp()),
             'maxAttempts' => $this->authService->maxLoginAttempts(),
@@ -154,7 +154,7 @@ class RegistrationController extends Controller
                 $query = $request->query();
                 unset($query['sitelanguage']);
 
-                return Redirect::to('/confirm_resend' . (empty($query) ? '' : '?' . http_build_query($query)));
+                return Redirect::to('/confirm_resend'.(empty($query) ? '' : '?'.http_build_query($query)));
             }
         }
 

@@ -12,6 +12,7 @@ use App\Repositories\TorrentRepository;
 use App\Repositories\UploadRepository;
 use App\Support\Category;
 use App\Support\LegacyResponse;
+use App\Support\Locale;
 use App\Support\SupportContext;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -24,12 +25,12 @@ class TorrentUploadController extends Controller
     public function create(Request $request): View|RedirectResponse
     {
         if (SupportContext::getCache() === null) {
-            return redirect('/upload.php?' . $request->getQueryString());
+            return redirect('/upload.php?'.$request->getQueryString());
         }
 
         $user = Auth::guard('nexus-web')->user();
         if (! $user instanceof User) {
-            return redirect('/login.php?returnto=' . urlencode($request->fullUrl()));
+            return redirect('/login.php?returnto='.urlencode($request->fullUrl()));
         }
 
         $currentUser = SupportContext::getUser() ?? $user->toLegacyArray();
@@ -37,9 +38,9 @@ class TorrentUploadController extends Controller
 
         if (empty(SupportContext::getGlobal('lang_upload')) || empty(SupportContext::getGlobal('lang_edit'))) {
             SupportContext::setServerValue('SCRIPT_NAME', '/upload.php');
-            require base_path(\App\Support\Locale::scriptFilePath((string) "", (bool) false, (string) ""));
+            require base_path(Locale::scriptFilePath((string) '', (bool) false, (string) ''));
             SupportContext::setGlobal('lang_upload', $lang_upload ?? []);
-            require base_path(\App\Support\Locale::scriptFilePath((string) 'edit.php', (bool) false, (string) ""));
+            require base_path(Locale::scriptFilePath((string) 'edit.php', (bool) false, (string) ''));
             SupportContext::setGlobal('lang_edit', $lang_edit ?? []);
         }
 
@@ -81,11 +82,11 @@ class TorrentUploadController extends Controller
             'uploadFreely' => $uploadFreely,
             'allowtorrents' => $allowtorrents,
             'offerRows' => $offerRows,
-            'torrentRep' => new TorrentRepository(),
-            'searchBoxRep' => new SearchBoxRepository(),
-            'tagRep' => new TagRepository(),
-            'customField' => new Field(),
-            'hitAndRunRep' => new HitAndRunRepository(),
+            'torrentRep' => new TorrentRepository,
+            'searchBoxRep' => new SearchBoxRepository,
+            'tagRep' => new TagRepository,
+            'customField' => new Field,
+            'hitAndRunRep' => new HitAndRunRepository,
             'pageTitle' => $lang_upload['head_upload'] ?? '',
             'cats' => Category::listByModeWithContext($browsecatmode),
         ]);
@@ -96,9 +97,9 @@ class TorrentUploadController extends Controller
         try {
             $torrent = $repository->upload($request);
         } catch (TorrentAlreadyExistsException $e) {
-            return redirect('details.php?id=' . $e->getTorrentId() . '&existed=1');
+            return redirect('details.php?id='.$e->getTorrentId().'&existed=1');
         }
 
-        return redirect('details.php?id=' . $torrent->id . '&uploaded=1');
+        return redirect('details.php?id='.$torrent->id.'&uploaded=1');
     }
 }

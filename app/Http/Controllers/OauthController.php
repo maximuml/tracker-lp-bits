@@ -1,25 +1,32 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Exceptions\NexusException;
 use App\Http\Resources\UserResource;
-use App\Models\OauthClient;
 use App\Models\OauthProvider;
 use App\Models\SocialAccount;
 use App\Models\User;
 use App\Repositories\UserRepository;
+use App\Support\AuthCookie;
+use App\Support\Locale;
+use App\Support\Logger;
+use App\Support\Url;
+use Illuminate\Foundation\Application;
+use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Redirector;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
 
 class OauthController extends Controller
 {
     /**
      * client redirect to authorization server, use oauth_providers config
-     * @param  \Illuminate\Http\Request  $request
-     * @param  string  $uuid
-     * @return  \Illuminate\Foundation\Application|\Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
+     *
+     * @return Application|RedirectResponse|Redirector
      */
     public function redirect(Request $request, string $uuid)
     {
@@ -32,7 +39,7 @@ class OauthController extends Controller
             'response_type' => 'code',
             'scope' => '',
             'state' => $state,
-//            'prompt' => 'none', // "none", "consent", or "login"
+            //            'prompt' => 'none', // "none", "consent", or "login"
         ]);
         $authorizationUrl = sprintf(
             '%s%s%s',
@@ -40,11 +47,11 @@ class OauthController extends Controller
             str_contains($provider->authorization_endpoint_url, '?') ? '&' : '?',
             $query
         );
+
         return redirect($authorizationUrl);
 
     }
 
-    /** @param  \App\Models\OauthProvider  $provider */
     private function getCallbackUrl(OauthProvider $provider): string
     {
         return OauthProvider::getCallbackUrl($provider->uuid);
@@ -53,10 +60,10 @@ class OauthController extends Controller
     /**
      * authorization server redirect to this url with auth code after user authorized
      * and then use auth code to request to authorization server token endpoint url to get access token
-     * @param  \Illuminate\Http\Request  $request
-     * @param  string  $uuid
-     * @return  array<int|string, mixed>|mixed
-     * @throws \Illuminate\Http\Client\ConnectionException
+     *
+     * @return array<int|string, mixed>|mixed
+     *
+     * @throws ConnectionException
      * @throws \Throwable
      */
     public function callback(Request $request, string $uuid)
@@ -80,51 +87,52 @@ class OauthController extends Controller
         $response = Http::asForm()->post($provider->token_endpoint_url, $params);
         $tokenInfo = $response->json();
         if (empty($tokenInfo['access_token'])) {
-            \App\Support\Logger::writeWithContext((string) ("Get tokenInfo with: " . json_encode($params) . " error: " . $response->body()), (string) 'error', (bool) false);
-            throw new NexusException(\App\Support\Locale::trans('oauth.get_access_token_error', ['error' => $tokenInfo['error'] ?? ''], null));
+            Logger::writeWithContext((string) ('Get tokenInfo with: '.json_encode($params).' error: '.$response->body()), (string) 'error', (bool) false);
+            throw new NexusException(Locale::trans('oauth.get_access_token_error', ['error' => $tokenInfo['error'] ?? ''], null));
         }
-        //use token get user-info
+        // use token get user-info
         $response = Http::withToken($tokenInfo['access_token'])->get($provider->user_info_endpoint_url);
         $userInfo = $response->json();
-        \App\Support\Logger::writeWithContext((string) ("userInfo: " . $response->body()), (string) 'info', (bool) false);
-        $homeUrl = \App\Support\Url::schemeAndHost(false) . "/index.php";
+        Logger::writeWithContext((string) ('userInfo: '.$response->body()), (string) 'info', (bool) false);
+        $homeUrl = Url::schemeAndHost(false).'/index.php';
         $providerUserId = data_get($userInfo, $provider->id_claim);
         if (empty($providerUserId)) {
-            throw new NexusException(\App\Support\Locale::trans('oauth.get_provider_user_id_error', ['id_claim' => $provider->id_claim], null));
+            throw new NexusException(Locale::trans('oauth.get_provider_user_id_error', ['id_claim' => $provider->id_claim], null));
         }
         $socialAccount = SocialAccount::query()
             ->where('provider_id', $provider->id)
             ->where('provider_user_id', $providerUserId)
             ->first();
         if ($socialAccount) {
-            //already bind, login directly
+            // already bind, login directly
             /**
              * @var User $authUser
              */
             $authUser = $socialAccount->user;
             $authUser->checkIsNormal();
-            \App\Support\AuthCookie::setLoginCookie((int) $authUser->id, (string) $authUser->auth_key, (int) 0);
+            AuthCookie::setLoginCookie((int) $authUser->id, (string) $authUser->auth_key, (int) 0);
+
             return redirect($homeUrl);
         }
         $providerEmail = data_get($userInfo, $provider->email_claim);
         if (empty($providerEmail)) {
-            throw new NexusException(\App\Support\Locale::trans('oauth.get_provider_email_error', ['email_claim' => $provider->email_claim], null));
+            throw new NexusException(Locale::trans('oauth.get_provider_email_error', ['email_claim' => $provider->email_claim], null));
         }
         $sameEmailUser = User::query()->where('email', $providerEmail)->first();
         if ($sameEmailUser) {
-            //login to bind is better, not implement this time
-            throw new NexusException(\App\Support\Locale::trans('oauth.provider_email_already_exists', ['email' => $providerEmail], null));
+            // login to bind is better, not implement this time
+            throw new NexusException(Locale::trans('oauth.provider_email_already_exists', ['email' => $providerEmail], null));
         }
         $providerUsername = data_get($userInfo, $provider->username_claim);
         $providerLevel = data_get($userInfo, $provider->level_claim);
 
         $minLevel = $provider->level_limit;
         if ($minLevel) {
-            if (!$providerLevel) {
-                throw new NexusException(\App\Support\Locale::trans('oauth.get_provider_level_error', ['level_claim' => $provider->level_claim], null));
+            if (! $providerLevel) {
+                throw new NexusException(Locale::trans('oauth.get_provider_level_error', ['level_claim' => $provider->level_claim], null));
             }
             if ($providerLevel < $minLevel) {
-                throw new NexusException(\App\Support\Locale::trans("oauth.provider_level_not_allowed", ['level_limit' => $provider->level_limit], null));
+                throw new NexusException(Locale::trans('oauth.provider_level_not_allowed', ['level_limit' => $provider->level_limit], null));
             }
         }
 
@@ -137,8 +145,9 @@ class OauthController extends Controller
             'provider_email' => $providerEmail,
         ];
         SocialAccount::query()->create($socialAccountData);
-        \App\Support\Logger::writeWithContext((string) sprintf("newUser: %s, socialAccount: %s", json_encode($newUser), json_encode($socialAccountData)), (string) 'info', (bool) false);
-        \App\Support\AuthCookie::setLoginCookie((int) $newUser->id, (string) $newUser->auth_key, (int) 0);
+        Logger::writeWithContext((string) sprintf('newUser: %s, socialAccount: %s', json_encode($newUser), json_encode($socialAccountData)), (string) 'info', (bool) false);
+        AuthCookie::setLoginCookie((int) $newUser->id, (string) $newUser->auth_key, (int) 0);
+
         return redirect($homeUrl);
     }
 
@@ -151,7 +160,7 @@ class OauthController extends Controller
     {
         if ($username) {
             if (User::query()->where('username', $username)->exists()) {
-                //already in use
+                // already in use
                 $username .= Str::random(2);
             }
         } else {
@@ -164,34 +173,33 @@ class OauthController extends Controller
             'password_confirmation' => $password,
             'provider_id' => $providerId,
         ];
-        $userRep = new UserRepository();
+        $userRep = new UserRepository;
         for ($i = 0; $i < 3; $i++) {
             $userData['username'] = $username;
             try {
                 return $userRep->store($userData);
             } catch (\Throwable $e) {
-                \App\Support\Logger::writeWithContext((string) $e->getMessage(), (string) "error", (bool) false);
+                Logger::writeWithContext((string) $e->getMessage(), (string) 'error', (bool) false);
             }
-            $username = Str::random(2) . $username;
+            $username = Str::random(2).$username;
         }
-        throw new NexusException("Unable to create user");
+        throw new NexusException('Unable to create user');
     }
 
     /**
-     * @param  \Illuminate\Http\Request  $request
-     * @return  mixed
+     * @return mixed
      */
     public function debug(Request $request)
     {
         dd($request->all());
     }
 
-
     /** @return  array<int|string, mixed> */
     public function userInfo(): array
     {
         $user = Auth::user();
         $resource = new UserResource($user);
+
         return $resource->response()->getData(true)['data'];
     }
 }

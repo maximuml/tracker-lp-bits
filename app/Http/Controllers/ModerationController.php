@@ -8,8 +8,6 @@ use App\Models\Offer;
 use App\Models\Torrent;
 use App\Models\User;
 use App\Repositories\ModerationRepository;
-use App\Support\LegacyResponse;
-use App\Support\Log;
 use App\Support\Pagination;
 use App\Support\Permissions;
 use App\Support\SupportContext;
@@ -96,11 +94,13 @@ class ModerationController extends LegacyController
             }
             $arr = $userRow->toArray();
             if ((int) $arr['class'] >= $staffmemClass) {
-                $msg = ($langReport['std_cannot_report'] ?? 'Cannot report staff member ') . UserClass::name((int) $arr['class'], false, true, true);
+                $msg = ($langReport['std_cannot_report'] ?? 'Cannot report staff member ').UserClass::name((int) $arr['class'], false, true, true);
+
                 return $this->legacyAbortResponse($langReport['std_sorry'] ?? 'Sorry', $msg);
             }
 
-            $form = ($langReport['text_are_you_sure_user'] ?? 'Are you sure you want to report user ') . UserDisplay::username($user) . ($langReport['text_to_staff'] ?? ' to staff?') . '<br />' . ($langReport['text_not_for_leechers'] ?? '') . '<br />' . ($langReport['text_reason_note'] ?? '') . '<br /><form method=post action=report.php><input type=hidden name=takeuser value="' . htmlspecialchars((string) $user) . '">' . ($langReport['text_reason_is'] ?? 'Reason: ') . '<input type=text style="width: 200px" name=reason><input type=submit value="' . ($langReport['submit_confirm'] ?? 'Confirm') . '"></form>';
+            $form = ($langReport['text_are_you_sure_user'] ?? 'Are you sure you want to report user ').UserDisplay::username($user).($langReport['text_to_staff'] ?? ' to staff?').'<br />'.($langReport['text_not_for_leechers'] ?? '').'<br />'.($langReport['text_reason_note'] ?? '').'<br /><form method=post action=report.php><input type=hidden name=takeuser value="'.htmlspecialchars((string) $user).'">'.($langReport['text_reason_is'] ?? 'Reason: ').'<input type=text style="width: 200px" name=reason><input type=submit value="'.($langReport['submit_confirm'] ?? 'Confirm').'"></form>';
+
             return $this->legacyAbortResponse($langReport['std_are_you_sure'] ?? 'Are you sure?', $form, false);
         }
 
@@ -109,7 +109,8 @@ class ModerationController extends LegacyController
             if (! $name) {
                 return $this->legacyAbortResponse($langReport['std_error'] ?? 'Error', $langReport['std_invalid_torrent_id'] ?? 'Invalid torrent ID.');
             }
-            $form = ($langReport['text_are_you_sure_torrent'] ?? 'Are you sure you want to report torrent ') . '<a href=details.php?id=' . htmlspecialchars((string) $torrent) . '><b>' . htmlspecialchars((string) $name) . '</b></a>' . ($langReport['text_to_staff'] ?? ' to staff?') . '<br />' . ($langReport['text_reason_note'] ?? '') . '<br /><form method=post action=report.php><input type=hidden name=taketorrent value="' . htmlspecialchars((string) $torrent) . '">' . ($langReport['text_reason_is'] ?? 'Reason: ') . '<input type=text style="width: 200px" name=reason><input type=submit value="' . ($langReport['submit_confirm'] ?? 'Confirm') . '"></form>';
+            $form = ($langReport['text_are_you_sure_torrent'] ?? 'Are you sure you want to report torrent ').'<a href=details.php?id='.htmlspecialchars((string) $torrent).'><b>'.htmlspecialchars((string) $name).'</b></a>'.($langReport['text_to_staff'] ?? ' to staff?').'<br />'.($langReport['text_reason_note'] ?? '').'<br /><form method=post action=report.php><input type=hidden name=taketorrent value="'.htmlspecialchars((string) $torrent).'">'.($langReport['text_reason_is'] ?? 'Reason: ').'<input type=text style="width: 200px" name=reason><input type=submit value="'.($langReport['submit_confirm'] ?? 'Confirm').'"></form>';
+
             return $this->legacyAbortResponse($langReport['std_are_you_sure'] ?? 'Are you sure?', $form, false);
         }
 
@@ -118,7 +119,8 @@ class ModerationController extends LegacyController
             if ($arr === null) {
                 return $this->legacyAbortResponse($langReport['std_error'] ?? 'Error', $langReport['std_invalid_post_id'] ?? 'Invalid post ID.');
             }
-            $form = ($langReport['text_are_you_sure_post'] ?? 'Are you sure you want to report post #') . $forumpost . ($langReport['text_of_topic'] ?? ' of topic ') . '<b><a href="forums.php?action=viewtopic&topicid=' . $arr['topicid'] . '&page=p' . htmlspecialchars((string) $forumpost) . '#' . htmlspecialchars((string) $forumpost) . '">' . htmlspecialchars($arr['subject']) . '</a></b>' . ($langReport['text_by'] ?? ' by ') . UserDisplay::username($arr['postuserid']) . ($langReport['text_to_staff'] ?? ' to staff?') . '<br />' . ($langReport['text_reason_note'] ?? '') . '<br /><form method=post action=report.php><input type=hidden name=takeforumpost value="' . htmlspecialchars((string) $forumpost) . '">' . ($langReport['text_reason_is'] ?? 'Reason: ') . '<input type=text style="width: 200px" name=reason><input type=submit value="' . ($langReport['submit_confirm'] ?? 'Confirm') . '"></form>';
+            $form = ($langReport['text_are_you_sure_post'] ?? 'Are you sure you want to report post #').$forumpost.($langReport['text_of_topic'] ?? ' of topic ').'<b><a href="forums.php?action=viewtopic&topicid='.$arr['topicid'].'&page=p'.htmlspecialchars((string) $forumpost).'#'.htmlspecialchars((string) $forumpost).'">'.htmlspecialchars($arr['subject']).'</a></b>'.($langReport['text_by'] ?? ' by ').UserDisplay::username($arr['postuserid']).($langReport['text_to_staff'] ?? ' to staff?').'<br />'.($langReport['text_reason_note'] ?? '').'<br /><form method=post action=report.php><input type=hidden name=takeforumpost value="'.htmlspecialchars((string) $forumpost).'">'.($langReport['text_reason_is'] ?? 'Reason: ').'<input type=text style="width: 200px" name=reason><input type=submit value="'.($langReport['submit_confirm'] ?? 'Confirm').'"></form>';
+
             return $this->legacyAbortResponse($langReport['std_are_you_sure'] ?? 'Are you sure?', $form, false);
         }
 
@@ -130,16 +132,17 @@ class ModerationController extends LegacyController
             $arr = $comment->toArray();
             if ($arr['torrent']) {
                 $name = Torrent::query()->where('id', $arr['torrent'])->value('name');
-                $url = 'details.php?id=' . $arr['torrent'] . '#' . $commentid;
+                $url = 'details.php?id='.$arr['torrent'].'#'.$commentid;
                 $of = $langReport['text_of_torrent'] ?? ' of torrent ';
             } elseif ($arr['offer']) {
                 $name = Offer::query()->where('id', $arr['offer'])->value('name');
-                $url = 'offers.php?id=' . $arr['offer'] . '&off_details=1#' . $commentid;
+                $url = 'offers.php?id='.$arr['offer'].'&off_details=1#'.$commentid;
                 $of = $langReport['text_of_offer'] ?? ' of offer ';
             } else {
                 return $this->legacyAbortResponse($langReport['std_error'] ?? 'Error', $langReport['std_orphaned_comment'] ?? 'Orphaned comment.');
             }
-            $form = ($langReport['text_are_you_sure_comment'] ?? 'Are you sure you want to report comment #') . $commentid . $of . '<b><a href="' . $url . '">' . htmlspecialchars((string) $name) . '</a></b>' . ($langReport['text_by'] ?? ' by ') . UserDisplay::username($arr['user']) . ($langReport['text_to_staff'] ?? ' to staff?') . '<br />' . ($langReport['text_reason_note'] ?? '') . '<br /><form method=post action=report.php><input type=hidden name=takecommentid value="' . htmlspecialchars((string) $commentid) . '">' . ($langReport['text_reason_is'] ?? 'Reason: ') . '<input type=text style="width: 200px" name=reason><input type=submit value="' . ($langReport['submit_confirm'] ?? 'Confirm') . '"></form>';
+            $form = ($langReport['text_are_you_sure_comment'] ?? 'Are you sure you want to report comment #').$commentid.$of.'<b><a href="'.$url.'">'.htmlspecialchars((string) $name).'</a></b>'.($langReport['text_by'] ?? ' by ').UserDisplay::username($arr['user']).($langReport['text_to_staff'] ?? ' to staff?').'<br />'.($langReport['text_reason_note'] ?? '').'<br /><form method=post action=report.php><input type=hidden name=takecommentid value="'.htmlspecialchars((string) $commentid).'">'.($langReport['text_reason_is'] ?? 'Reason: ').'<input type=text style="width: 200px" name=reason><input type=submit value="'.($langReport['submit_confirm'] ?? 'Confirm').'"></form>';
+
             return $this->legacyAbortResponse($langReport['std_are_you_sure'] ?? 'Are you sure?', $form, false);
         }
 
@@ -149,7 +152,8 @@ class ModerationController extends LegacyController
                 return $this->legacyAbortResponse($langReport['std_error'] ?? 'Error', $langReport['std_invalid_offer_id'] ?? 'Invalid offer ID.');
             }
             $arr = $offer->toArray();
-            $form = ($langReport['text_are_you_sure_offer'] ?? 'Are you sure you want to report offer ') . '<a href="offers.php?id=' . $arr['id'] . '&off_details=1"><b>' . htmlspecialchars($arr['name']) . '</b></a>' . ($langReport['text_to_staff'] ?? ' to staff?') . '<br />' . ($langReport['text_reason_note'] ?? '') . '<br /><form method=post action=report.php><input type=hidden name=takereportofferid value="' . htmlspecialchars((string) $reportofferid) . '">' . ($langReport['text_reason_is'] ?? 'Reason: ') . '<input type=text style="width: 200px" name=reason><input type=submit value="' . ($langReport['submit_confirm'] ?? 'Confirm') . '"></form>';
+            $form = ($langReport['text_are_you_sure_offer'] ?? 'Are you sure you want to report offer ').'<a href="offers.php?id='.$arr['id'].'&off_details=1"><b>'.htmlspecialchars($arr['name']).'</b></a>'.($langReport['text_to_staff'] ?? ' to staff?').'<br />'.($langReport['text_reason_note'] ?? '').'<br /><form method=post action=report.php><input type=hidden name=takereportofferid value="'.htmlspecialchars((string) $reportofferid).'">'.($langReport['text_reason_is'] ?? 'Reason: ').'<input type=text style="width: 200px" name=reason><input type=submit value="'.($langReport['submit_confirm'] ?? 'Confirm').'"></form>';
+
             return $this->legacyAbortResponse($langReport['std_are_you_sure'] ?? 'Are you sure?', $form, false);
         }
 
@@ -184,9 +188,9 @@ class ModerationController extends LegacyController
             $row = (array) $reportRow;
 
             if ($row['dealtwith']) {
-                $row['dealtwith_html'] = '<font color=green>' . ($langReports['text_yes'] ?? 'Yes') . '</font> - ' . UserDisplay::username($row['dealtby']);
+                $row['dealtwith_html'] = '<font color=green>'.($langReports['text_yes'] ?? 'Yes').'</font> - '.UserDisplay::username($row['dealtby']);
             } else {
-                $row['dealtwith_html'] = '<font color=red>' . ($langReports['text_no'] ?? 'No') . '</font>';
+                $row['dealtwith_html'] = '<font color=red>'.($langReports['text_no'] ?? 'No').'</font>';
             }
 
             $type = '';
@@ -199,7 +203,7 @@ class ModerationController extends LegacyController
                         $reporting = $langReports['text_torrent_does_not_exist'] ?? 'Torrent does not exist';
                     } else {
                         $arr = $torrent->toArray();
-                        $reporting = '<a href=details.php?id=' . $arr['id'] . '>' . htmlspecialchars($arr['name']) . '</a>';
+                        $reporting = '<a href=details.php?id='.$arr['id'].'>'.htmlspecialchars($arr['name']).'</a>';
                     }
                     break;
                 case 'user':
@@ -218,7 +222,7 @@ class ModerationController extends LegacyController
                         $reporting = $langReports['text_offer_does_not_exist'] ?? 'Offer does not exist';
                     } else {
                         $arr = $offer->toArray();
-                        $reporting = '<a href="offers.php?id=' . $arr['id'] . '&off_details=1">' . htmlspecialchars($arr['name']) . '</a>';
+                        $reporting = '<a href="offers.php?id='.$arr['id'].'&off_details=1">'.htmlspecialchars($arr['name']).'</a>';
                     }
                     break;
                 case 'post':
@@ -227,7 +231,7 @@ class ModerationController extends LegacyController
                     if ($arr === null) {
                         $reporting = $langReports['text_post_does_not_exist'] ?? 'Post does not exist';
                     } else {
-                        $reporting = ($langReports['text_post_id'] ?? 'Post #') . $row['reportid'] . ($langReports['text_of_topic'] ?? ' of topic ') . '<b><a href="forums.php?action=viewtopic&topicid=' . $arr['topicid'] . '&page=p' . htmlspecialchars((string) $row['reportid']) . '#pid' . htmlspecialchars((string) $row['reportid']) . '">' . htmlspecialchars($arr['subject']) . '</a></b>' . ($langReports['text_by'] ?? ' by ') . UserDisplay::username($arr['postuserid']);
+                        $reporting = ($langReports['text_post_id'] ?? 'Post #').$row['reportid'].($langReports['text_of_topic'] ?? ' of topic ').'<b><a href="forums.php?action=viewtopic&topicid='.$arr['topicid'].'&page=p'.htmlspecialchars((string) $row['reportid']).'#pid'.htmlspecialchars((string) $row['reportid']).'">'.htmlspecialchars($arr['subject']).'</a></b>'.($langReports['text_by'] ?? ' by ').UserDisplay::username($arr['postuserid']);
                     }
                     break;
                 case 'comment':
@@ -239,18 +243,18 @@ class ModerationController extends LegacyController
                         $arr = $comment->toArray();
                         if ($arr['torrent']) {
                             $name = Torrent::query()->where('id', $arr['torrent'])->value('name');
-                            $url = 'details.php?id=' . $arr['torrent'] . '#cid' . $row['reportid'];
+                            $url = 'details.php?id='.$arr['torrent'].'#cid'.$row['reportid'];
                             $of = $langReports['text_of_torrent'] ?? ' of torrent ';
                         } elseif ($arr['offer']) {
                             $name = Offer::query()->where('id', $arr['offer'])->value('name');
-                            $url = 'offers.php?id=' . $arr['offer'] . '&off_details=1#cid' . $row['reportid'];
+                            $url = 'offers.php?id='.$arr['offer'].'&off_details=1#cid'.$row['reportid'];
                             $of = $langReports['text_of_offer'] ?? ' of offer ';
                         } else {
                             $name = '';
                             $url = '';
                             $of = 'unknown';
                         }
-                        $reporting = ($langReports['text_comment_id'] ?? 'Comment #') . $row['reportid'] . $of . '<b><a href="' . $url . '">' . htmlspecialchars((string) $name) . '</a></b>' . ($langReports['text_by'] ?? ' by ') . UserDisplay::username($arr['user']);
+                        $reporting = ($langReports['text_comment_id'] ?? 'Comment #').$row['reportid'].$of.'<b><a href="'.$url.'">'.htmlspecialchars((string) $name).'</a></b>'.($langReports['text_by'] ?? ' by ').UserDisplay::username($arr['user']);
                     }
                     break;
             }
@@ -268,5 +272,4 @@ class ModerationController extends LegacyController
         ]);
 
     }
-
 }

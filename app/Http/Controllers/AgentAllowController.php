@@ -10,12 +10,11 @@ use Illuminate\Validation\Rule;
 
 class AgentAllowController extends Controller
 {
-    /** @var  mixed */
+    /** @var mixed */
     private $repository;
 
     /**
-     * @param  \App\Repositories\AgentAllowRepository  $repository
-     * @return  mixed
+     * @return mixed
      */
     public function __construct(AgentAllowRepository $repository)
     {
@@ -43,65 +42,73 @@ class AgentAllowController extends Controller
             'allowhttps' => ['required', Rule::in(['yes', 'no'])],
         ];
     }
+
     /**
      * Display a listing of the resource.
-     * @param  \Illuminate\Http\Request  $request
-     * @return  array<string, mixed>
+     *
+     * @return array<string, mixed>
      */
     public function index(Request $request)
     {
         $result = $this->repository->getList($request->all());
         $resource = AgentAllowResource::collection($result);
+
         return $this->success($resource);
     }
 
     /**
      * Store a newly created resource in storage.
-     * @param  \Illuminate\Http\Request  $request
-     * @return  array<string, mixed>
+     *
+     * @return array<string, mixed>
      */
     public function store(Request $request)
     {
         $request->validate($this->getRules());
         $result = $this->repository->store($request->all());
         $resource = new AgentAllowResource($result);
+
         return $this->success($resource);
     }
 
     /**
      * Display the specified resource.
+     *
      * @param  mixed  $id
-     * @return  array<string, mixed>
+     * @return array<string, mixed>
      */
     public function show($id)
     {
         $result = AgentAllow::query()->findOrFail($id);
         $resource = new AgentAllowResource($result);
+
         return $this->success($resource);
     }
 
     /**
      * Update the specified resource in storage.
-     * @param  \Illuminate\Http\Request  $request
+     *
      * @param  mixed  $id
-     * @return  array<string, mixed>
+     * @return array<string, mixed>
      */
     public function update(Request $request, $id)
     {
         $request->validate($this->getRules());
         $result = $this->repository->update($request->all(), $id);
         $resource = new AgentAllowResource($result);
+
         return $this->success($resource);
     }
 
     /**
      * Remove the specified resource from storage.
+     *
      * @param  mixed  $id
-     * @return  array<string, mixed>
+     * @return array<string, mixed>
      */
     public function destroy($id)
     {
         $result = $this->repository->delete($id);
+
         return $this->success($result);
     }
 
@@ -110,12 +117,12 @@ class AgentAllowController extends Controller
     {
         $result = AgentAllow::query()->orderBy('id', 'desc')->get();
         $resource = AgentAllowResource::collection($result);
+
         return $this->success($resource);
     }
 
     /**
-     * @param  \Illuminate\Http\Request  $request
-     * @return  array<string, mixed>
+     * @return array<string, mixed>
      */
     public function check(Request $request)
     {
@@ -124,6 +131,7 @@ class AgentAllowController extends Controller
             'agent' => 'required|string',
         ]);
         $result = $this->repository->checkClient($request->peer_id, $request->agent, true);
-        return $this->success($result->toArray(), sprintf("Congratulations! the client is allowed by ID: %s", $result->id));
+
+        return $this->success($result->toArray(), sprintf('Congratulations! the client is allowed by ID: %s', $result->id));
     }
 }

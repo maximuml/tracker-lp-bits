@@ -37,7 +37,7 @@ class OfferController extends LegacyController
         if (SupportContext::getUser() === null) {
             $qs = $request->getQueryString();
 
-            return redirect('/offers.php' . ($qs ? '?' . $qs : ''));
+            return redirect('/offers.php'.($qs ? '?'.$qs : ''));
         }
 
         $result = $this->offerService->legacy($request);

@@ -13,8 +13,12 @@ use App\Repositories\UserDetailRepository;
 use App\Repositories\UserRepository;
 use App\Support\Bonus;
 use App\Support\Country;
+use App\Support\Env;
 use App\Support\LegacyResponse;
+use App\Support\Locale;
 use App\Support\Network;
+use App\Support\Permissions;
+use App\Support\Strings;
 use App\Support\SupportContext;
 use App\Support\Url;
 use App\Support\UserDisplay;
@@ -37,7 +41,7 @@ class UserDetailController extends Controller
         }
 
         if (SupportContext::getUser() === null) {
-            return redirect('/userdetails.php?' . $request->getQueryString());
+            return redirect('/userdetails.php?'.$request->getQueryString());
         }
 
         $user = UserDetailRepository::getUser($id);
@@ -49,6 +53,7 @@ class UserDetailController extends Controller
                 $lang['std_error'] ?? 'Error',
                 $lang['std_no_such_user'] ?? 'No user with this ID!'
             );
+
             return redirect('/userdetails.php');
         }
 
@@ -77,8 +82,7 @@ class UserDetailController extends Controller
 
     /**
      * @param  array<int|string, mixed>  $user
-     * @param  ?\App\Models\User  $userModel
-     * @return  array<string, mixed>
+     * @return array<string, mixed>
      */
     private function buildDetailsViewData(int $id, array $user, ?User $userModel): array
     {
@@ -116,7 +120,7 @@ class UserDetailController extends Controller
             $locationInfo = Network::ipLocationWithContext($user['ip']);
         }
 
-        $seedBoxRep = new SeedBoxRepository();
+        $seedBoxRep = new SeedBoxRepository;
         $seedBoxIconCurrentUser = $seedBoxRep->renderIcon($currentUser['ip'] ?? '', $currentUserId);
 
         $peerRows = UserDetailRepository::getPeers($id);
@@ -126,10 +130,10 @@ class UserDetailController extends Controller
             $clientSelectHtml .= "<table border='1' cellspacing='0' cellpadding='5'><tr><td class='colhead'>Agent</td><td class='colhead'>IPV4</td><td class='colhead'>IPV6</td><td class='colhead'>Port</td></tr>";
             foreach ($peerRows as $arr) {
                 $clientSelectHtml .= '<tr>';
-                $clientSelectHtml .= sprintf('<td>%s</td>', \App\Support\Strings::userAgentClient($arr['agent']));
+                $clientSelectHtml .= sprintf('<td>%s</td>', Strings::userAgentClient($arr['agent']));
                 if ($canViewConfidential || $isOwner) {
-                    $v4 = $isOwner ? \App\Support\Strings::hidden($arr['ipv4']) : $arr['ipv4'];
-                    $v6 = $isOwner ? \App\Support\Strings::hidden($arr['ipv6']) : $arr['ipv6'];
+                    $v4 = $isOwner ? Strings::hidden($arr['ipv4']) : $arr['ipv4'];
+                    $v6 = $isOwner ? Strings::hidden($arr['ipv6']) : $arr['ipv6'];
                     foreach ([$arr['ipv4'], $arr['ipv6']] as $ip) {
                         if (! isset($seedBoxIcons[$ip])) {
                             $seedBoxIcons[$ip] = $seedBoxRep->renderIcon($ip, $id);
@@ -151,7 +155,7 @@ class UserDetailController extends Controller
 
         $trueTraffic = UserDetailRepository::getTrueTraffic($id);
 
-        $userManageSystemUrl = sprintf('%s/%s/user/users/%s', Url::schemeAndHost(false), \App\Support\Env::get('FILAMENT_PATH', 'nexusphp'), $user['id']);
+        $userManageSystemUrl = sprintf('%s/%s/user/users/%s', Url::schemeAndHost(false), Env::get('FILAMENT_PATH', 'nexusphp'), $user['id']);
 
         $langDetails = (array) SupportContext::getGlobal('lang_userdetails', []);
 
@@ -175,14 +179,14 @@ class UserDetailController extends Controller
 
         $hrStatusHtml = '';
         if (($isOwner || $canViewHistory) && HitAndRun::getIsEnabled()) {
-            $hrStatusHtml = (new HitAndRunRepository())->getStatusStats($id);
+            $hrStatusHtml = (new HitAndRunRepository)->getStatusStats($id);
         }
 
         $ipHistoryCount = $canViewConfidential ? UserDetailRepository::getIplogCount($id) : 0;
 
-        $claimAllSeedingConfirmation = \App\Support\Locale::trans('claim.claim_all_seeding_confirmation', [], null);
+        $claimAllSeedingConfirmation = Locale::trans('claim.claim_all_seeding_confirmation', [], null);
         $claimJs = '';
-        if ($userModel instanceof User && $userModel->id === $currentUserId && \App\Support\Permissions::hasRoleWorkSeeding($userModel->id)) {
+        if ($userModel instanceof User && $userModel->id === $currentUserId && Permissions::hasRoleWorkSeeding($userModel->id)) {
             $claimJs = <<<JS
 jQuery("body").on("click", "#claim-all-seeding", function (e) {
     layer.confirm("$claimAllSeedingConfirmation", {}, function () {
@@ -198,7 +202,7 @@ jQuery("body").on("click", "#claim-all-seeding", function (e) {
 JS;
         }
 
-        $metas = (new UserRepository())->listMetas($id);
+        $metas = (new UserRepository)->listMetas($id);
         $userPropsHtml = '';
         $consumeChangeUsernameJs = '';
         $consumeChangeUsernameForm = '';

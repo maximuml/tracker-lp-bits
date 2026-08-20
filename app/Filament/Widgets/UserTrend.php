@@ -2,7 +2,6 @@
 
 namespace App\Filament\Widgets;
 
-use App\Models\Torrent;
 use App\Models\User;
 use Carbon\Carbon;
 use Filament\Widgets\LineChartWidget;
@@ -11,7 +10,6 @@ use Flowframe\Trend\TrendValue;
 
 class UserTrend extends LineChartWidget
 {
-
     protected static ?int $sort = 3;
 
     protected ?string $pollingInterval = null;

@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Auth\Permission;
 use App\DTOs\Forum\ListPostsDto;
 use App\DTOs\Forum\StorePostDto;
 use App\DTOs\Forum\UpdatePostDto;
+use App\Enums\Permission\PermissionEnum;
 use App\Http\Resources\PostResource;
 use App\Models\Forum;
 use App\Models\Post;
@@ -149,7 +151,7 @@ class PostController extends Controller
         }
     }
 
-    private function canRead(\App\Models\Forum $forum): bool
+    private function canRead(Forum $forum): bool
     {
         $user = Auth::user();
         $class = $user instanceof User ? (int) $user->class : 0;
@@ -157,7 +159,7 @@ class PostController extends Controller
         return $class >= (int) $forum->minclassread;
     }
 
-    private function canWrite(\App\Models\Forum $forum): bool
+    private function canWrite(Forum $forum): bool
     {
         $user = Auth::user();
         $class = $user instanceof User ? (int) $user->class : 0;
@@ -173,7 +175,7 @@ class PostController extends Controller
         }
 
         return \App\Support\Forum::isModerator((int) $topic->id, 'topic')
-            || \App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::POST_MANAGE, $user);
+            || Permission::can(PermissionEnum::POST_MANAGE, $user);
     }
 
     private function canEdit(Post $post, Topic $topic): bool

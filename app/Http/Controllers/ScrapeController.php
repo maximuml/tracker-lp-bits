@@ -6,15 +6,15 @@ use App\DTOs\ScrapeRequestDto;
 use App\Exceptions\TrackerException;
 use App\Exceptions\TrackerWarningException;
 use App\Services\ScrapeService;
+use App\Support\Json;
+use App\Support\Logger;
 use Illuminate\Http\Request;
 use Rhilip\Bencode\Bencode;
 use Symfony\Component\HttpFoundation\Response;
 
 class ScrapeController extends Controller
 {
-    public function __construct(private ScrapeService $service)
-    {
-    }
+    public function __construct(private ScrapeService $service) {}
 
     public function scrape(Request $request): Response
     {
@@ -35,14 +35,14 @@ class ScrapeController extends Controller
     {
         $logDict = $dict;
         unset($logDict['files']);
-        \App\Support\Logger::writeWithContext((string) \App\Support\Json::encode($logDict), (string) 'info', (bool) false);
+        Logger::writeWithContext((string) Json::encode($logDict), (string) 'info', (bool) false);
 
         return response(
             Bencode::encode($dict),
             200,
             [
                 'Content-Type' => 'text/plain; charset=utf-8',
-                'Pragma'       => 'no-cache',
+                'Pragma' => 'no-cache',
             ]
         );
     }

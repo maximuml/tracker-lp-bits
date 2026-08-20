@@ -387,6 +387,13 @@ XML;
             abort(404);
         }
 
+        $validator = validator(['email' => $email], [
+            'email' => 'required|email|max:255',
+        ]);
+        if ($validator->fails()) {
+            abort(404);
+        }
+
         $user = User::query()->where('id', $id)->first(['editsecret']);
         if (! $user) {
             abort(404);

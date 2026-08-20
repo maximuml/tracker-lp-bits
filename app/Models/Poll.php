@@ -25,10 +25,11 @@
  * @property string $option18
  * @property string $option19
  */
+
 namespace App\Models;
 
-
 use App\Models\Traits\NexusActivityLogTrait;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * @property int $answers_count
@@ -38,20 +39,19 @@ class Poll extends NexusModel
 {
     use NexusActivityLogTrait;
 
-    /** @var  list<string> */
+    /** @var list<string> */
     protected $fillable = ['added', 'question', 'option0', 'option1', 'option2', 'option3', 'option4', 'option5'];
 
-    /** @var  array<string, string> */
+    /** @var array<string, string> */
     protected $casts = [
-        'added' => 'datetime'
+        'added' => 'datetime',
     ];
 
     const MAX_OPTION_INDEX = 19;
 
-    /** @return  \Illuminate\Database\Eloquent\Relations\HasMany<PollAnswer, $this> */
-    public function answers(): \Illuminate\Database\Eloquent\Relations\HasMany
+    /** @return  HasMany<PollAnswer, $this> */
+    public function answers(): HasMany
     {
         return $this->hasMany(PollAnswer::class, 'pollid');
     }
-
 }

@@ -25,4 +25,16 @@ class Cheater extends NexusModel
         'added', 'userid', 'torrentid', 'uploaded', 'downloaded', 'anctime', 'seeders', 'leechers', 'hit',
         'dealtby', 'dealtwith', 'comment',
     ];
+
+    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<Torrent, $this> */
+    public function torrent()
+    {
+        return $this->belongsTo(Torrent::class, 'torrentid');
+    }
+
+    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<User, $this> */
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'userid');
+    }
 }

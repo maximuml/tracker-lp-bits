@@ -11,7 +11,7 @@ class RecaptchaV2CaptchaDriver implements CaptchaDriverInterface
     protected array $config;
 
     /**
-     * @param array<string, mixed> $config
+     * @param  array<string, mixed>  $config
      */
     public function __construct(array $config = [])
     {
@@ -20,15 +20,15 @@ class RecaptchaV2CaptchaDriver implements CaptchaDriverInterface
 
     public function isEnabled(): bool
     {
-        return !empty($this->config['site_key']) && !empty($this->config['secret_key']);
+        return ! empty($this->config['site_key']) && ! empty($this->config['secret_key']);
     }
 
     /**
-     * @param array<string, mixed> $context
+     * @param  array<string, mixed>  $context
      */
     public function render(array $context = []): string
     {
-        if (!$this->isEnabled()) {
+        if (! $this->isEnabled()) {
             return '';
         }
 
@@ -37,7 +37,7 @@ class RecaptchaV2CaptchaDriver implements CaptchaDriverInterface
         $theme = $this->config['theme'] ?? 'light';
         $size = $this->config['size'] ?? 'normal';
         $validSizes = ['compact', 'normal'];
-        if (!in_array($size, $validSizes, true)) {
+        if (! in_array($size, $validSizes, true)) {
             $size = 'normal';
         }
 
@@ -57,8 +57,8 @@ class RecaptchaV2CaptchaDriver implements CaptchaDriverInterface
     }
 
     /**
-     * @param array<string, mixed> $payload
-     * @param array<string, mixed> $context
+     * @param  array<string, mixed>  $payload
+     * @param  array<string, mixed>  $context
      */
     public function verify(array $payload, array $context = []): bool
     {
@@ -82,13 +82,13 @@ class RecaptchaV2CaptchaDriver implements CaptchaDriverInterface
 
         $remoteIp = $context['ip'] ?? null;
 
-        if (!empty($remoteIp)) {
+        if (! empty($remoteIp)) {
             $data['remoteip'] = $remoteIp;
         }
 
         $result = $this->sendVerificationRequest('https://www.recaptcha.net/recaptcha/api/siteverify', $data);
 
-        if (!($result['success'] ?? false)) {
+        if (! ($result['success'] ?? false)) {
             throw new CaptchaValidationException('Captcha verification failed.');
         }
 
@@ -96,7 +96,7 @@ class RecaptchaV2CaptchaDriver implements CaptchaDriverInterface
     }
 
     /**
-     * @param array<string, mixed> $data
+     * @param  array<string, mixed>  $data
      * @return array<string, mixed>
      */
     protected function sendVerificationRequest(string $url, array $data): array
@@ -118,7 +118,7 @@ class RecaptchaV2CaptchaDriver implements CaptchaDriverInterface
             if (! is_string($response) || $response === '') {
                 $error = curl_error($ch);
                 curl_close($ch);
-                throw new CaptchaValidationException('Captcha verification request failed: ' . $error);
+                throw new CaptchaValidationException('Captcha verification request failed: '.$error);
             }
 
             curl_close($ch);
@@ -141,7 +141,7 @@ class RecaptchaV2CaptchaDriver implements CaptchaDriverInterface
 
         $decoded = json_decode($response, true);
 
-        if (!is_array($decoded)) {
+        if (! is_array($decoded)) {
             throw new CaptchaValidationException('Unexpected captcha verification response.');
         }
 

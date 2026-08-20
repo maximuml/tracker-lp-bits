@@ -2,10 +2,12 @@
 
 namespace App\Repositories;
 
-use App\Repositories\IpLogRepository;
+use App\Models\Invite;
+use App\Support\Hooks;
 use App\Support\Menu;
 use App\Support\SupportContext;
 use Nexus\Database\NexusDB;
+use Nexus\Nexus;
 
 class PageLayoutRepository extends BaseRepository
 {
@@ -60,7 +62,7 @@ class PageLayoutRepository extends BaseRepository
     public function getUnreadNewsCount(?string $lastHome): int
     {
         $query = NexusDB::table('news')->where('notify', 'yes');
-        if (!empty($lastHome) && $lastHome !== '0000-00-00 00:00:00') {
+        if (! empty($lastHome) && $lastHome !== '0000-00-00 00:00:00') {
             $query->where('added', '>', $lastHome);
         }
 
@@ -104,7 +106,7 @@ class PageLayoutRepository extends BaseRepository
 
     public function getPendingInviteCount(int $userId): int
     {
-        return (int) \App\Models\Invite::query()
+        return (int) Invite::query()
             ->where('inviter', $userId)
             ->where('invitee', '')
             ->where('expired_at', '>', now())
@@ -128,7 +130,7 @@ class PageLayoutRepository extends BaseRepository
             return;
         }
 
-        $script = \Nexus\Nexus::instance()->getScript();
+        $script = Nexus::instance()->getScript();
         if (in_array($script, ['announce', 'scrape', 'torrentrss', 'download'], true)) {
             return;
         }
@@ -142,7 +144,7 @@ class PageLayoutRepository extends BaseRepository
             $script,
             SupportContext::getLangFunctions(),
             (string) SupportContext::getGlobal('enableoffer', ''),
-            (string) \App\Support\Hooks::applyFilter('nexus_menu') ?: null,
+            (string) Hooks::applyFilter('nexus_menu') ?: null,
             $user,
             SupportContext::getCache(),
             (string) SupportContext::getGlobal('CURLANGDIR', ''),

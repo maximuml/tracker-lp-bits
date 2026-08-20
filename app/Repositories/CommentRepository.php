@@ -7,15 +7,15 @@ use App\Models\Offer;
 use App\Models\Torrent;
 use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Nexus\Database\NexusDB;
 
 class CommentRepository
 {
     /**
-     * @param  int  $parentId
-     * @param  string  $type
-     * @return  ?array<int|string, mixed>
+     * @return ?array<int|string, mixed>
      */
     public static function getParent(int $parentId, string $type): ?array
     {
@@ -28,13 +28,12 @@ class CommentRepository
         if ($row === null) {
             return null;
         }
-        return $row instanceof \Illuminate\Database\Eloquent\Model ? $row->toArray() : (array) $row;
+
+        return $row instanceof Model ? $row->toArray() : (array) $row;
     }
 
     /**
-     * @param  int  $limit
-     * @param  int  $offset
-     * @return  array<int, array<string, mixed>>
+     * @return array<int, array<string, mixed>>
      */
     public static function getLatest(int $limit, int $offset): array
     {
@@ -56,8 +55,7 @@ class CommentRepository
     }
 
     /**
-     * @param  int  $commentId
-     * @return  ?array<int|string, mixed>
+     * @return ?array<int|string, mixed>
      */
     public static function getQuote(int $commentId): ?array
     {
@@ -71,9 +69,7 @@ class CommentRepository
     }
 
     /**
-     * @param  int  $commentId
-     * @param  string  $type
-     * @return  ?array<int|string, mixed>
+     * @return ?array<int|string, mixed>
      */
     public static function getForEdit(int $commentId, string $type): ?array
     {
@@ -99,9 +95,7 @@ class CommentRepository
     }
 
     /**
-     * @param  int  $commentId
-     * @param  string  $type
-     * @return  ?array<int|string, mixed>
+     * @return ?array<int|string, mixed>
      */
     public static function getForDelete(int $commentId, string $type): ?array
     {
@@ -114,9 +108,7 @@ class CommentRepository
     }
 
     /**
-     * @param  int  $commentId
-     * @param  string  $type
-     * @return  ?array<int|string, mixed>
+     * @return ?array<int|string, mixed>
      */
     public static function getForViewOriginal(int $commentId, string $type): ?array
     {
@@ -141,7 +133,6 @@ class CommentRepository
         return $row === null ? null : (array) $row;
     }
 
-    /** @param  int  $userId */
     public static function getCommentPmSetting(int $userId): ?string
     {
         return User::query()->where('id', $userId)->value('commentpm');
@@ -150,7 +141,7 @@ class CommentRepository
     /**
      * Fetch a paginated list of comments for the given parent and type.
      *
-     * @return \Illuminate\Pagination\LengthAwarePaginator<int, Comment>
+     * @return LengthAwarePaginator<int, Comment>
      */
     public static function getList(Request $request, User $user)
     {
@@ -175,12 +166,6 @@ class CommentRepository
         return $query->orderBy('id', 'desc')->paginate((int) $request->input('per_page', 20));
     }
 
-    /**
-     * @param  int  $parentId
-     * @param  string  $type
-     * @param  string  $text
-     * @param  int  $userId
-     */
     public static function create(int $parentId, string $type, string $text, int $userId): int
     {
         $now = Carbon::now();
@@ -220,11 +205,6 @@ class CommentRepository
         return (int) $comment->id;
     }
 
-    /**
-     * @param  int  $commentId
-     * @param  string  $text
-     * @param  int  $editedBy
-     */
     public static function update(int $commentId, string $text, int $editedBy): void
     {
         Comment::query()->where('id', $commentId)->update([
@@ -234,11 +214,6 @@ class CommentRepository
         ]);
     }
 
-    /**
-     * @param  int  $commentId
-     * @param  string  $type
-     * @param  int  $parentId
-     */
     public static function delete(int $commentId, string $type, int $parentId): bool
     {
         $deleted = Comment::query()->where('id', $commentId)->delete();

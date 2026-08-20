@@ -3,6 +3,9 @@
 namespace App\Repositories;
 
 use App\Models\IpLog;
+use App\Support\Environment;
+use App\Support\Logger;
+use App\Support\Network;
 use App\Support\SupportContext;
 use Carbon\Carbon;
 use Nexus\Database\NexusDB;
@@ -17,15 +20,15 @@ class IpLogRepository extends BaseRepository
      * @param  mixed  $userId
      * @param  mixed  $uri
      * @param  mixed  $ipArr
-     * @return  void
      */
     public static function saveToCache($userId, $uri = null, $ipArr = null): void
     {
-        if (!is_numeric($userId) || $userId <= 0) {
-            \App\Support\Logger::writeWithContext((string) "invalid userId: {$userId}", (string) "error", (bool) false);
+        if (! is_numeric($userId) || $userId <= 0) {
+            Logger::writeWithContext((string) "invalid userId: {$userId}", (string) 'error', (bool) false);
+
             return;
         }
-        if (\App\Support\Environment::isTesting()) {
+        if (Environment::isTesting()) {
             return;
         }
         $redis = NexusDB::redis();
@@ -34,13 +37,13 @@ class IpLogRepository extends BaseRepository
             $uri = $parsed_uri['path'] ?? '/';
         }
         if (is_null($ipArr)) {
-            $ipArr = [\App\Support\Network::clientIp()];
+            $ipArr = [Network::clientIp()];
         }
-        $key = sprintf("%s:%s", self::CACHE_KEY_PREFIX, date('Y-m-d-H'));
+        $key = sprintf('%s:%s', self::CACHE_KEY_PREFIX, date('Y-m-d-H'));
         foreach ($ipArr as $ip) {
-            $field = sprintf("%s|%s|%s", $userId, $ip, $uri);
+            $field = sprintf('%s|%s|%s', $userId, $ip, $uri);
             $result = $redis->hincrby($key, $field, 1);
-            \App\Support\Logger::writeWithContext((string) "success hincrby {$key} {$field}, result: {$result}", (string) "debug", (bool) false);
+            Logger::writeWithContext((string) "success hincrby {$key} {$field}, result: {$result}", (string) 'debug', (bool) false);
             if ($result === 1) {
                 $redis->expire($key, self::CACHE_TIME);
             }
@@ -53,45 +56,45 @@ class IpLogRepository extends BaseRepository
         $redis = NexusDB::redis();
         $begin = Carbon::now()->subSeconds(self::CACHE_TIME);
         $end = Carbon::now()->subHours(1);
-        $interval =\DateInterval::createFromDateString("1 hour");
+        $interval = \DateInterval::createFromDateString('1 hour');
         $period = new \DatePeriod($begin->clone(), $interval, $end);
         $size = 2000;
-        \App\Support\Logger::writeWithContext((string) sprintf("begin: %s, end: %s, size: %s", $begin->toDateTimeString(), $end->toDateTimeString(), $size), (string) 'info', (bool) false);
+        Logger::writeWithContext((string) sprintf('begin: %s, end: %s, size: %s', $begin->toDateTimeString(), $end->toDateTimeString(), $size), (string) 'info', (bool) false);
         $redis->setOption(\Redis::OPT_SCAN, \Redis::SCAN_RETRY);
         foreach ($period as $dt) {
-            $key = sprintf("%s:%s", self::CACHE_KEY_PREFIX, $dt->format('Y-m-d-H'));
-            if (!$redis->exists($key)) {
-                \App\Support\Logger::writeWithContext((string) "key: {$key} not found", (string) "debug", (bool) false);
+            $key = sprintf('%s:%s', self::CACHE_KEY_PREFIX, $dt->format('Y-m-d-H'));
+            if (! $redis->exists($key)) {
+                Logger::writeWithContext((string) "key: {$key} not found", (string) 'debug', (bool) false);
+
                 continue;
             }
             if ($redis->hlen($key) == 0) {
-                \App\Support\Logger::writeWithContext((string) "key: {$key} length = 0", (string) "debug", (bool) false);
+                Logger::writeWithContext((string) "key: {$key} length = 0", (string) 'debug', (bool) false);
                 $redis->unlink($key);
             }
-            \App\Support\Logger::writeWithContext((string) "handing key: {$key}", (string) 'info', (bool) false);
-            //遍历hash
-            $it = NULL;
-            while($arr_keys = $redis->hScan($key, $it, "*", $size)) {
+            Logger::writeWithContext((string) "handing key: {$key}", (string) 'info', (bool) false);
+            // 遍历hash
+            $it = null;
+            while ($arr_keys = $redis->hScan($key, $it, '*', $size)) {
                 $insert = [];
                 foreach ($arr_keys as $field => $value) {
-                    list($userId, $ip, $uri) = explode("|", $field);
+                    [$userId, $ip, $uri] = explode('|', $field);
                     $insert[] = [
                         'userid' => $userId,
                         'ip' => $ip,
                         'uri' => $uri,
-                        'access' => date("Y-m-d H:i:s"),
+                        'access' => date('Y-m-d H:i:s'),
                         'count' => intval($value),
                     ];
                 }
-                if (!empty($insert)) {
+                if (! empty($insert)) {
                     IpLog::query()->insert($insert);
                 }
-                \App\Support\Logger::writeWithContext((string) ("key: {$key}, it: {$it}, count: " . count($insert)), (string) 'info', (bool) false);
+                Logger::writeWithContext((string) ("key: {$key}, it: {$it}, count: ".count($insert)), (string) 'info', (bool) false);
             }
             $redis->unlink($key);
-            \App\Support\Logger::writeWithContext((string) "handle key: {$key} done!", (string) 'info', (bool) false);
+            Logger::writeWithContext((string) "handle key: {$key} done!", (string) 'info', (bool) false);
         }
-        \App\Support\Logger::writeWithContext((string) sprintf("all done! cost time: %.3f sec.", microtime(true) - $beginTimestamp), (string) 'info', (bool) false);
+        Logger::writeWithContext((string) sprintf('all done! cost time: %.3f sec.', microtime(true) - $beginTimestamp), (string) 'info', (bool) false);
     }
-
 }

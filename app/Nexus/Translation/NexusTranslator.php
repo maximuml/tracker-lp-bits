@@ -9,13 +9,15 @@ use Illuminate\Translation\Translator;
 class NexusTranslator
 {
     protected Filesystem $filesystem;
+
     protected FileLoader $loader;
+
     protected Translator $translator;
 
     public function __construct(string $defaultLocale = 'en', string $fallbackLocale = 'en', ?string $defaultPath = null)
     {
-        $this->filesystem = new Filesystem();
-        $this->loader = new FileLoader($this->filesystem, $defaultPath ?? ROOT_PATH . 'resources/lang');
+        $this->filesystem = new Filesystem;
+        $this->loader = new FileLoader($this->filesystem, $defaultPath ?? ROOT_PATH.'resources/lang');
 
         // Laravel-style fallback
         $this->translator = new Translator($this->loader, $defaultLocale);

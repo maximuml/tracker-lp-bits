@@ -1,13 +1,15 @@
 <?php
+
 namespace App\Repositories;
 
 use App\Enums\Permission\RoutePermissionEnum;
 use App\Models\Setting;
+use App\Support\Locale;
 
 class TokenRepository extends BaseRepository
 {
     /**
-     * @return  list<string>
+     * @return list<string>
      */
     private static function allUserTokenPermissions(): array
     {
@@ -18,15 +20,15 @@ class TokenRepository extends BaseRepository
     }
 
     /**
-     * @param  bool  $format
-     * @return  array<int|string, mixed>
+     * @return array<int|string, mixed>
      */
     public static function listUserTokenPermissions(bool $format = true): array
     {
         $permissions = self::allUserTokenPermissions();
-        if (!$format) {
+        if (! $format) {
             return $permissions;
         }
+
         return self::formatPermissions($permissions);
     }
 
@@ -38,14 +40,15 @@ class TokenRepository extends BaseRepository
 
     /**
      * @param  array<int|string, mixed>  $permissions
-     * @return  array<int|string, mixed>
+     * @return array<int|string, mixed>
      */
     private static function formatPermissions(array $permissions): array
     {
         $result = [];
         foreach ($permissions as $permission) {
-            $result[$permission] = \App\Support\Locale::trans("route-permission.{$permission}.text", [], null);
+            $result[$permission] = Locale::trans("route-permission.{$permission}.text", [], null);
         }
+
         return $result;
     }
 }

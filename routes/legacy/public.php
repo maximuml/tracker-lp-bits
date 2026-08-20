@@ -28,7 +28,7 @@ Route::match(['get', 'post'], '/suggest', [UtilityController::class, 'suggest'])
 Route::match(['get', 'post'], '/opensearch', [UtilityController::class, 'opensearch'])->name('opensearch.legacy');
 
 Route::match(['get', 'post'], '/confirmemail/{path?}', [UtilityController::class, 'confirmemail'])->where('path', '.*')->name('confirmemail.legacy');
-Route::match(['get', 'post'], '/cron', [SystemController::class, 'cron'])->name('cron.legacy');
+Route::match(['get', 'post'], '/cron', [SystemController::class, 'cron'])->middleware('cron.token')->name('cron.legacy');
 Route::match(['get', 'post'], '/email-gateway', [TorrentActionController::class, 'emailGateway'])->name('email-gateway.legacy');
 Route::match(['get', 'post'], '/ok', [UtilityController::class, 'ok'])->name('ok.legacy');
 

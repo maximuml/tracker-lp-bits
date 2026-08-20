@@ -188,6 +188,20 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Cron Token
+    |--------------------------------------------------------------------------
+    |
+    | A shared secret required to access the /cron endpoint from non-loopback
+    | addresses. When empty, only loopback (127.0.0.1 / ::1) requests are
+    | allowed. Set this in your .env file and pass it as ?token=<value> in
+    | your external cron job URL.
+    |
+    */
+
+    'cron_token' => env('CRON_TOKEN', ''),
+
+    /*
+    |--------------------------------------------------------------------------
     | Autoloaded Service Providers
     |--------------------------------------------------------------------------
     |

@@ -2,6 +2,8 @@
 
 namespace Tests\Feature;
 
+use App\Http\Middleware\CronToken;
+use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;
 
@@ -63,5 +65,38 @@ final class Phase12CronTokenTest extends TestCase
         $response = $this->withServerVariables(['REMOTE_ADDR' => '203.0.113.1'])->get('/cron?token=anything');
 
         $response->assertStatus(403);
+    }
+
+    public function test_cron_token_middleware_is_registered(): void
+    {
+        $kernel = app(Kernel::class);
+        $reflection = new \ReflectionClass($kernel);
+        $property = $reflection->getProperty('routeMiddleware');
+        $property->setAccessible(true);
+        $aliases = $property->getValue($kernel);
+
+        $this->assertArrayHasKey('cron.token', $aliases);
+        $this->assertSame(CronToken::class, $aliases['cron.token']);
+    }
+
+    public function test_cron_route_has_cron_token_middleware(): void
+    {
+        $route = app('router')->getRoutes()->getByName('cron.legacy');
+
+        $this->assertNotNull($route, 'cron.legacy route should exist');
+        $this->assertContains('cron.token', $route->gatherMiddleware());
+    }
+
+    public function test_config_app_has_cron_token_key(): void
+    {
+        $this->assertArrayHasKey('cron_token', config('app'));
+        $this->assertSame('', config('app.cron_token'));
+    }
+
+    public function test_env_example_documents_cron_token(): void
+    {
+        $content = file_get_contents(base_path('.env.example'));
+        $this->assertNotFalse($content);
+        $this->assertStringContainsString('CRON_TOKEN', $content);
     }
 }

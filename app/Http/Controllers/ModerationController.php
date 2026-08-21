@@ -8,8 +8,6 @@ use App\Models\Offer;
 use App\Models\Torrent;
 use App\Models\User;
 use App\Repositories\ModerationRepository;
-use App\Support\LegacyResponse;
-use App\Support\Log;
 use App\Support\Pagination;
 use App\Support\Permissions;
 use App\Support\SupportContext;
@@ -274,5 +272,4 @@ class ModerationController extends LegacyController
         ]);
 
     }
-
 }

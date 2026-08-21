@@ -23,8 +23,8 @@ class Forum extends NexusModel
     /** @var list<string> */
     protected $fillable = ['sort', 'name', 'description', 'minclassread', 'minclasswrite', 'postcount', 'topiccount', 'minclasscreate', 'forid'];
 
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsToMany<User, $this> */
-    public function moderators(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    /** @return BelongsToMany<User, $this> */
+    public function moderators(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'forummods', 'forumid', 'userid');
     }
@@ -35,7 +35,7 @@ class Forum extends NexusModel
         return $this->belongsTo(OverForum::class, 'forid');
     }
 
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<OverForum, $this> */
+    /** @return BelongsTo<OverForum, $this> */
     public function overForum()
     {
         return $this->belongsTo(OverForum::class, 'forid');

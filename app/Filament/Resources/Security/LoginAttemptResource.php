@@ -2,24 +2,22 @@
 
 namespace App\Filament\Resources\Security;
 
-use Filament\Schemas\Schema;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Actions\EditAction;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\Action;
-use Filament\Actions\BulkAction;
-use App\Filament\Resources\Security\LoginAttemptResource\Pages\ListLoginAttempts;
 use App\Filament\Resources\Security\LoginAttemptResource\Pages\EditLoginAttempt;
+use App\Filament\Resources\Security\LoginAttemptResource\Pages\ListLoginAttempts;
 use App\Models\LoginAttempt;
 use App\Models\User;
-use Filament\Forms;
+use Filament\Actions\Action;
+use Filament\Actions\BulkAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
-use Filament\Tables\Table;
+use Filament\Schemas\Schema;
 use Filament\Tables;
-use Illuminate\Database\Eloquent\Builder;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 
@@ -27,9 +25,9 @@ class LoginAttemptResource extends Resource
 {
     protected static ?string $model = LoginAttempt::class;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-key';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-key';
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Security';
+    protected static string|\UnitEnum|null $navigationGroup = 'Security';
 
     protected static ?int $navigationSort = 4;
 
@@ -46,6 +44,7 @@ class LoginAttemptResource extends Resource
     public static function canAccess(): bool
     {
         $user = Auth::user();
+
         return $user instanceof User && $user->class >= User::CLASS_SYSOP;
     }
 
@@ -78,8 +77,7 @@ class LoginAttemptResource extends Resource
                     ->badge()
                     ->colors(['danger' => 'yes', 'success' => 'no'])
                     ->formatStateUsing(fn ($record) => $record->banned === 'yes' ? __('label.login_attempt.banned') : __('label.login_attempt.not_banned'))
-                    ->label(__('label.login_attempt.status'))
-                ,
+                    ->label(__('label.login_attempt.status')),
                 TextColumn::make('added')->dateTime('Y-m-d H:i')->sortable()->label(__('label.added')),
             ])
             ->defaultSort('id', 'desc')

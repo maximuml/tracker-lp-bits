@@ -343,5 +343,5 @@ if (Permission::canManageTorrent()) { ?>
         echo Html::tooltipContainer($torrent_tooltip, 500);
 
         return (string) ob_get_clean();
-}
+    }
 }

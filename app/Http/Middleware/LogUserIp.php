@@ -16,7 +16,7 @@ class LogUserIp
     public function handle(Request $request, Closure $next): Response
     {
         $response = $next($request);
-        if (\App\Support\Environment::isTesting()) {
+        if (Environment::isTesting()) {
             return $response;
         }
         $user = $request->user();

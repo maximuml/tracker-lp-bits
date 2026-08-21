@@ -390,7 +390,7 @@ if (! function_exists('print_sub_category_editor')) {
 </div>
 </div>
 <?php
-}
+    }
 }
 
 $validsubcattype = ['source', 'medium', 'codec', 'standard', 'processing', 'audiocodec'];
@@ -601,7 +601,7 @@ if ($action == 'view') {
                 echo $pagerbottom;
             }
         }
-?>
+    ?>
 </div>
 <?php
 } elseif ($action == 'edit') {

@@ -618,5 +618,4 @@ class AdminController extends LegacyController
         ]);
 
     }
-
 }

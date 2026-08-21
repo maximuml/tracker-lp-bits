@@ -132,7 +132,7 @@ class PageLayout
         if ($context->user) {
             //	$caticonrow = get_category_icon_row($context->user['caticon']);
             //	if($caticonrow['cssfile']){
-            $requireSearchBoxIdAr = \App\Support\SearchBox::requiredIds();
+            $requireSearchBoxIdAr = SearchBox::requiredIds();
             if (! empty($requireSearchBoxIdAr)) {
                 $icons = (new SearchBoxRepository)->listIcon($requireSearchBoxIdAr);
                 foreach ($icons as $icon) {
@@ -424,7 +424,7 @@ class PageLayout
                         </div>
                         <div>
                             <span><?php
-                echo \App\Support\SearchBox::areaSelect($context->requestSearchArea ?? '', ['style' => 'width: 88px']);
+                echo SearchBox::areaSelect($context->requestSearchArea ?? '', ['style' => 'width: 88px']);
                 ?></span>
                         </div>
                     </div>

@@ -2,8 +2,6 @@
 
 namespace App\Support;
 
-use PHPUnit\Framework\TestCase;
-
 /**
  * Runtime environment helpers extracted from `include/globalfunctions.php`.
  *

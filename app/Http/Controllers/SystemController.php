@@ -351,6 +351,7 @@ class SystemController extends LegacyController
         return $this->legacyPage($request, 'increment-bulk', true);
 
     }
+
     public function setlistLookup(Request $request): JsonResponse
     {
         $name = trim((string) $request->input('name', ''));

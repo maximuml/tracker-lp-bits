@@ -474,7 +474,6 @@ class StaffController extends LegacyController
 
     }
 
-
     public function staffmess(Request $request): View|RedirectResponse|Response
     {
         $administratorClass = defined('UC_ADMINISTRATOR') ? \constant('UC_ADMINISTRATOR') : 0;

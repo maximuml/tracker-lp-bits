@@ -518,7 +518,7 @@ class UserRepository extends BaseRepository
      */
     public function updateUploadPrivileges($operator, $user, string $status)
     {
-        if (!in_array($status, ['yes', 'no'])) {
+        if (! in_array($status, ['yes', 'no'])) {
             throw new \InvalidArgumentException("Invalid status: $status");
         }
         $targetUser = $this->getUser($user);
@@ -533,20 +533,22 @@ class UserRepository extends BaseRepository
         $message = ['added' => now(), 'receiver' => $targetUser->id];
         if ($status == 'no') {
             $update = ['uploadpos' => 'no'];
-            $modComment = date('Y-m-d') . " - Upload disable by " . $operatorUsername;
-            $message['subject'] = \App\Support\Locale::trans('message.upload_disable.subject', [], $targetUser->locale);
-            $message['msg'] = \App\Support\Locale::trans('message.upload_disable.body', ['operator' => $operatorUsername], $targetUser->locale);
+            $modComment = date('Y-m-d').' - Upload disable by '.$operatorUsername;
+            $message['subject'] = Locale::trans('message.upload_disable.subject', [], $targetUser->locale);
+            $message['msg'] = Locale::trans('message.upload_disable.body', ['operator' => $operatorUsername], $targetUser->locale);
         } else {
             $update = ['uploadpos' => 'yes'];
-            $modComment = date('Y-m-d') . " - Upload enable by " . $operatorUsername;
-            $message['subject'] = \App\Support\Locale::trans('message.upload_enable.subject', [], $targetUser->locale);
-            $message['msg'] = \App\Support\Locale::trans('message.upload_enable.body', ['operator' => $operatorUsername], $targetUser->locale);
+            $modComment = date('Y-m-d').' - Upload enable by '.$operatorUsername;
+            $message['subject'] = Locale::trans('message.upload_enable.subject', [], $targetUser->locale);
+            $message['msg'] = Locale::trans('message.upload_enable.body', ['operator' => $operatorUsername], $targetUser->locale);
         }
         $result = NexusDB::transaction(function () use ($targetUser, $update, $modComment, $message) {
             Message::add($message);
+
             return $targetUser->updateWithModComment($update, $modComment);
         });
         $this->clearCache($targetUser);
+
         return $result;
     }
 
@@ -560,7 +562,7 @@ class UserRepository extends BaseRepository
      */
     public function updateForumPost($operator, $user, string $status)
     {
-        if (!in_array($status, ['yes', 'no'])) {
+        if (! in_array($status, ['yes', 'no'])) {
             throw new \InvalidArgumentException("Invalid status: $status");
         }
         $targetUser = $this->getUser($user);
@@ -575,20 +577,22 @@ class UserRepository extends BaseRepository
         $message = ['added' => now(), 'receiver' => $targetUser->id];
         if ($status == 'no') {
             $update = ['forumpost' => 'no'];
-            $modComment = date('Y-m-d') . " - Forum posting disabled by " . $operatorUsername;
-            $message['subject'] = \App\Support\Locale::trans('message.forumpost_disable.subject', [], $targetUser->locale);
-            $message['msg'] = \App\Support\Locale::trans('message.forumpost_disable.body', ['operator' => $operatorUsername], $targetUser->locale);
+            $modComment = date('Y-m-d').' - Forum posting disabled by '.$operatorUsername;
+            $message['subject'] = Locale::trans('message.forumpost_disable.subject', [], $targetUser->locale);
+            $message['msg'] = Locale::trans('message.forumpost_disable.body', ['operator' => $operatorUsername], $targetUser->locale);
         } else {
             $update = ['forumpost' => 'yes'];
-            $modComment = date('Y-m-d') . " - Forum posting enabled by " . $operatorUsername;
-            $message['subject'] = \App\Support\Locale::trans('message.forumpost_enable.subject', [], $targetUser->locale);
-            $message['msg'] = \App\Support\Locale::trans('message.forumpost_enable.body', ['operator' => $operatorUsername], $targetUser->locale);
+            $modComment = date('Y-m-d').' - Forum posting enabled by '.$operatorUsername;
+            $message['subject'] = Locale::trans('message.forumpost_enable.subject', [], $targetUser->locale);
+            $message['msg'] = Locale::trans('message.forumpost_enable.body', ['operator' => $operatorUsername], $targetUser->locale);
         }
         $result = NexusDB::transaction(function () use ($targetUser, $update, $modComment, $message) {
             Message::add($message);
+
             return $targetUser->updateWithModComment($update, $modComment);
         });
         $this->clearCache($targetUser);
+
         return $result;
     }
 
@@ -620,35 +624,36 @@ class UserRepository extends BaseRepository
         if ($weeks === 0) {
             $update['warned'] = 'no';
             $update['warneduntil'] = null;
-            $message['subject'] = \App\Support\Locale::trans('user.msg_warn_removed', [], $locale);
-            $message['msg'] = \App\Support\Locale::trans('user.msg_your_warning_removed_by', [], $locale) . $operatorUsername . '.';
+            $message['subject'] = Locale::trans('user.msg_warn_removed', [], $locale);
+            $message['msg'] = Locale::trans('user.msg_your_warning_removed_by', [], $locale).$operatorUsername.'.';
         } else {
             $update['warned'] = 'yes';
             $update['lastwarned'] = now()->toDateTimeString();
             $update['warnedby'] = $operatorId;
-            $update['timeswarned'] = new \Illuminate\Database\Query\Expression('timeswarned + 1');
+            $update['timeswarned'] = new Expression('timeswarned + 1');
             if ($weeks == 255) {
                 $update['warneduntil'] = null;
-                $msg = \App\Support\Locale::trans('user.msg_you_are_warned_by', [], $locale) . $operatorUsername . '.' . ($reason ? \App\Support\Locale::trans('user.msg_reason', [], $locale) . $reason : '');
+                $msg = Locale::trans('user.msg_you_are_warned_by', [], $locale).$operatorUsername.'.'.($reason ? Locale::trans('user.msg_reason', [], $locale).$reason : '');
             } else {
                 $warneduntil = date('Y-m-d H:i:s', strtotime(date('Y-m-d H:i:s')) + $weeks * 604800);
                 $update['warneduntil'] = $warneduntil;
-                $dur = $weeks . \App\Support\Locale::trans('user.msg_week', [], $locale) . ($weeks > 1 ? \App\Support\Locale::trans('user.msg_s', [], $locale) : '');
-                $msg = \App\Support\Locale::trans('user.msg_you_are_warned_for', [], $locale) . $dur . \App\Support\Locale::trans('user.msg_by', [], $locale) . $operatorUsername . '.' . ($reason ? \App\Support\Locale::trans('user.msg_reason', [], $locale) . $reason : '');
+                $dur = $weeks.Locale::trans('user.msg_week', [], $locale).($weeks > 1 ? Locale::trans('user.msg_s', [], $locale) : '');
+                $msg = Locale::trans('user.msg_you_are_warned_for', [], $locale).$dur.Locale::trans('user.msg_by', [], $locale).$operatorUsername.'.'.($reason ? Locale::trans('user.msg_reason', [], $locale).$reason : '');
             }
-            $message['subject'] = \App\Support\Locale::trans('user.msg_you_are_warned', [], $locale);
+            $message['subject'] = Locale::trans('user.msg_you_are_warned', [], $locale);
             $message['msg'] = $msg;
         }
 
         $result = NexusDB::transaction(function () use ($targetUser, $update, $message) {
             Message::add($message);
-            $modComment = date('Y-m-d') . " - Warning updated";
+            $modComment = date('Y-m-d').' - Warning updated';
+
             return $targetUser->updateWithModComment($update, $modComment);
         });
         $this->clearCache($targetUser);
+
         return $result;
     }
-
 
     /**
      * @param  mixed  $operator
@@ -954,7 +959,7 @@ class UserRepository extends BaseRepository
         foreach ($users as $user) {
             $user->status = User::STATUS_CONFIRMED;
             $user->editsecret = '';
-            \App\Support\Events::fire(ModelEventEnum::USER_UPDATED, $user, null);
+            Events::fire(ModelEventEnum::USER_UPDATED, $user, null);
         }
 
         return true;
@@ -966,9 +971,7 @@ class UserRepository extends BaseRepository
      * Mirrors the legacy nowarn action: sets warned='no', warneduntil=NULL,
      * and prepends a modcomment noting who removed the warning.
      *
-     * @param  \App\Models\User  $operator
      * @param  array<int>  $userIds
-     * @return void
      */
     public function removeWarnings(User $operator, array $userIds): void
     {
@@ -977,7 +980,7 @@ class UserRepository extends BaseRepository
             return;
         }
 
-        $modcomment = date('Y-m-d') . ' - Warning Removed By ' . $operator->username;
+        $modcomment = date('Y-m-d').' - Warning Removed By '.$operator->username;
 
         foreach ($userIds as $uid) {
             $user = User::query()->find($uid, ['id', 'warned', 'modcomment']);
@@ -986,19 +989,19 @@ class UserRepository extends BaseRepository
             }
             $newModcomment = $user->modcomment === '' || $user->modcomment === null
                 ? $modcomment
-                : $modcomment . "\n" . $user->modcomment;
+                : $modcomment."\n".$user->modcomment;
 
             $user->warned = 'no';
             $user->warneduntil = null;
             $user->modcomment = $newModcomment;
             $user->save();
 
-            \App\Support\Events::fire(ModelEventEnum::USER_UPDATED, $user, null);
+            Events::fire(ModelEventEnum::USER_UPDATED, $user, null);
         }
     }
 
     /**
-     * @param  \Illuminate\Support\Collection<int, mixed>|int  $id
+     * @param  Collection<int, mixed>|int  $id
      * @param  mixed  $reasonKey
      * @return mixed
      */

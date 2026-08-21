@@ -76,7 +76,7 @@ class LegacyRedisCache
             } catch (\Exception $e) {
                 $connectResult = false;
             }
-            \App\Support\Logger::writeWithContext((string) "redis connect: {$connectResult}", (string) 'debug', (bool) false);
+            Logger::writeWithContext((string) "redis connect: {$connectResult}", (string) 'debug', (bool) false);
         }
         if (! empty($config['password'])) {
             $connectResult = $connectResult && $redis->auth($config['password']);
@@ -87,11 +87,12 @@ class LegacyRedisCache
                 $redis->select((int) $config['database']);
             }
         } else {
-            if (\App\Support\Environment::isTesting()) {
+            if (Environment::isTesting()) {
                 $this->isEnabled = false;
+
                 return false;
             }
-            throw new \RuntimeException("Redis connect fail.");
+            throw new \RuntimeException('Redis connect fail.');
         }
 
         return true;

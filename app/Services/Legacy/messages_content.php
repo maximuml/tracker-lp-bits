@@ -230,7 +230,7 @@ print("</form>");
 <img class="readpm" src="pic/trans.gif" alt="Read" title="<?php echo $lang_messages['title_read'] ?>" /><a href="messages.php?action=viewmailbox&box=<?php echo $mailbox?>&unread=no"><?php echo $lang_messages['text_read_messages'] ?></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 <a href="messages.php?action=editmailboxes"><b><?php echo $lang_messages['text_mailbox_manager'] ?></a></b></div></td></tr></table>
 <?php
-}
+    }
 }
 if ($action == 'viewmessage') {
     $pm_id = (int) SupportContext::getQuery('id');

@@ -31,7 +31,7 @@ class IpLogRepository extends BaseRepository
         if (Environment::isTesting()) {
             return;
         }
-        if (\App\Support\Environment::isTesting()) {
+        if (Environment::isTesting()) {
             return;
         }
         $redis = NexusDB::redis();

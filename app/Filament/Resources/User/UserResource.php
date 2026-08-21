@@ -116,13 +116,13 @@ class UserResource extends Resource
                     ->formatStateUsing(fn (Column $column) => ($record = $column->getRecord()) instanceof User ? $record->uploadedText : '')
                     ->sortable()->label(__('label.uploaded')),
                 TextColumn::make('downloaded')->label('Downloaded')
-                    ->formatStateUsing(fn(Column $column) => ($record = $column->getRecord()) instanceof User ? $record->downloadedText : '')
-                    ->sortable()->label(__("label.downloaded")),
-                TextColumn::make('status')->badge()->colors(['success' => 'confirmed', 'warning' => 'pending'])->label(__("label.user.status")),
-                TextColumn::make('enabled')->badge()->colors($yesNoOptions)->label(__("label.user.enabled")),
-                TextColumn::make('downloadpos')->badge()->colors($yesNoOptions)->label(__("label.user.downloadpos")),
-                TextColumn::make('parked')->badge()->colors($yesNoOptions)->label(__("label.user.parked")),
-                TextColumn::make('warned')->badge()->colors($yesNoOptions)->label(__("label.user.warned")),
+                    ->formatStateUsing(fn (Column $column) => ($record = $column->getRecord()) instanceof User ? $record->downloadedText : '')
+                    ->sortable()->label(__('label.downloaded')),
+                TextColumn::make('status')->badge()->colors(['success' => 'confirmed', 'warning' => 'pending'])->label(__('label.user.status')),
+                TextColumn::make('enabled')->badge()->colors($yesNoOptions)->label(__('label.user.enabled')),
+                TextColumn::make('downloadpos')->badge()->colors($yesNoOptions)->label(__('label.user.downloadpos')),
+                TextColumn::make('parked')->badge()->colors($yesNoOptions)->label(__('label.user.parked')),
+                TextColumn::make('warned')->badge()->colors($yesNoOptions)->label(__('label.user.warned')),
                 TextColumn::make('isDonating')
                     ->state(fn ($record): string => $record->isDonating() ? 'yes' : 'no')
                     ->badge()
@@ -152,6 +152,7 @@ class UserResource extends Resource
                         } elseif ($data['value'] === 'no') {
                             return $query->where('warned', 'no');
                         }
+
                         return $query;
                     }),
                 SelectFilter::make('is_donating')
@@ -197,20 +198,20 @@ class UserResource extends Resource
                         TextEntry::make('country.name')
                             ->label(__('label.user.country'))
                             ->placeholder('N/A'),
-                        TextEntry::make('added')->label(__("label.added")),
-                        TextEntry::make('last_access')->label(__("label.last_access")),
-                        TextEntry::make('inviter.username')->label(__("label.user.invite_by")),
+                        TextEntry::make('added')->label(__('label.added')),
+                        TextEntry::make('last_access')->label(__('label.last_access')),
+                        TextEntry::make('inviter.username')->label(__('label.user.invite_by')),
                         TextEntry::make('ip')
                             ->label(__('label.user.ip'))
                             ->visible(fn (User $record): bool => self::currentUser()->class >= User::CLASS_MODERATOR)
                             ->placeholder('N/A'),
-                        TextEntry::make('parked')->label(__("label.user.parked")),
-                        TextEntry::make('offer_allowed_count')->label(__("label.user.offer_allowed_count")),
-                        TextEntry::make('seed_points')->label(__("label.user.seed_points")),
-                        TextEntry::make('uploadedText')->label(__("label.uploaded")),
-                        TextEntry::make('downloadedText')->label(__("label.downloaded")),
-                        TextEntry::make('seedbonus')->label(__("label.user.seedbonus")),
-                        TextEntry::make('seed_points')->label(__("label.user.seed_points")),
+                        TextEntry::make('parked')->label(__('label.user.parked')),
+                        TextEntry::make('offer_allowed_count')->label(__('label.user.offer_allowed_count')),
+                        TextEntry::make('seed_points')->label(__('label.user.seed_points')),
+                        TextEntry::make('uploadedText')->label(__('label.uploaded')),
+                        TextEntry::make('downloadedText')->label(__('label.downloaded')),
+                        TextEntry::make('seedbonus')->label(__('label.user.seedbonus')),
+                        TextEntry::make('seed_points')->label(__('label.user.seed_points')),
                     ])
                         ->columns(6)
                         ->columnSpan(4),
@@ -310,13 +311,13 @@ class UserResource extends Resource
                 $record->info = null;
                 $record->save();
 
-                \App\Support\Events::fire(\App\Enums\ModelEventEnum::USER_UPDATED, $record, null);
+                Events::fire(ModelEventEnum::USER_UPDATED, $record, null);
 
-                if (!empty($data['send_email']) && $record->email !== '') {
+                if (! empty($data['send_email']) && $record->email !== '') {
                     self::sendConfirmationEmail($record);
                 }
 
-                \App\Support\Admin::successNotification("");
+                Admin::successNotification('');
             });
     }
 
@@ -327,10 +328,10 @@ class UserResource extends Resource
      */
     private static function sendConfirmationEmail(User $user): void
     {
-        $siteName = \App\Support\Config\SiteConfig::current()->basic->siteName('');
-        $baseUrl = \App\Support\Url::schemeAndHost(false);
-        $reportMail = (string) \App\Support\Config\SiteConfig::current()->main->siteEmail('');
-        $siteEmail = (string) \App\Support\Config\SiteConfig::current()->main->siteEmail('');
+        $siteName = SiteConfig::current()->basic->siteName('');
+        $baseUrl = Url::schemeAndHost(false);
+        $reportMail = (string) SiteConfig::current()->main->siteEmail('');
+        $siteEmail = (string) SiteConfig::current()->main->siteEmail('');
 
         $body = sprintf(
             "Your account has been confirmed.\n\n<b><a href=\"javascript:void(null)\" onclick=\"window.open('%s/login')\">Click here to login</a></b><br />\n%s/login\n\nIf you have any questions, please contact %s",
@@ -339,9 +340,9 @@ class UserResource extends Resource
             $reportMail,
         );
 
-        $subject = $siteName . ' - Account Confirmed';
+        $subject = $siteName.' - Account Confirmed';
 
-        \App\Support\Mail::sentLegacy(
+        Mail::sentLegacy(
             (string) $user->email,
             $siteName,
             $siteEmail,
@@ -464,7 +465,7 @@ class UserResource extends Resource
                 ->action(function (Collection $records) {
                     $rep = self::getRep();
                     $rep->removeWarnings(self::currentUser(), $records->pluck('id')->toArray());
-                    \App\Support\Admin::successNotification("");
+                    Admin::successNotification('');
                 });
 
             $actions[] = BulkAction::make('disable')
@@ -482,7 +483,7 @@ class UserResource extends Resource
                             }
                         }
                     }
-                    \App\Support\Admin::successNotification("");
+                    Admin::successNotification('');
                 });
         }
 

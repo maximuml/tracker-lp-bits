@@ -681,14 +681,13 @@ class User extends Authenticatable implements FilamentUser, HasName
         return $this->belongsTo(User::class, 'invited_by');
     }
 
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<Country, $this> */
-
+    /** @return BelongsTo<Country, $this> */
     public function country()
     {
         return $this->belongsTo(Country::class, 'country');
     }
 
-    /** @return \Illuminate\Database\Eloquent\Relations\HasMany<Invite, $this> */
+    /** @return HasMany<Invite, $this> */
 
     /** @return HasMany<Invite, $this> */
     public function temporary_invites()

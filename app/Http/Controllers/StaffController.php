@@ -20,6 +20,7 @@ use App\Support\Log;
 use App\Support\Network;
 use App\Support\Permissions;
 use App\Support\SupportContext;
+use App\Support\Url;
 use App\Support\User as SupportUser;
 use App\Support\UserClass;
 use App\Support\UserDisplay;

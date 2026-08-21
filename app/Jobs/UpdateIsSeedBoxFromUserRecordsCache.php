@@ -2,6 +2,9 @@
 
 namespace App\Jobs;
 
+use App\Enums\SeedBoxRecord\IpAsnEnum;
+use App\Enums\SeedBoxRecord\IsAllowedEnum;
+use App\Repositories\SeedBoxRepository;
 use App\Support\Logger;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;

@@ -352,7 +352,7 @@ class UserResource extends Resource
         $subject = $siteName . ' - Account Confirmed';
 
         \App\Support\Mail::sentLegacy(
-            $user->email,
+            (string) $user->email,
             $siteName,
             $siteEmail,
             $subject,

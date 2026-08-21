@@ -314,7 +314,7 @@ class UserProfile extends ViewRecord implements HasActions
                     );
 
                     \App\Support\Mail::sentLegacy(
-                        $record->email,
+                        (string) $record->email,
                         $siteName,
                         $siteEmail,
                         $siteName . ' - Account Confirmed',

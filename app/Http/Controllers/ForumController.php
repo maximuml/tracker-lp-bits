@@ -8,7 +8,6 @@ use App\Http\Resources\ForumResource;
 use App\Models\Forum;
 use App\Repositories\CommentRepository;
 use App\Services\Legacy\ForumService;
-use App\Support\Pagination;
 use App\Support\SupportContext;
 use App\Support\UserDisplay;
 use Illuminate\Http\RedirectResponse;

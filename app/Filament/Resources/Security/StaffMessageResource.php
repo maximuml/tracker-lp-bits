@@ -2,25 +2,25 @@
 
 namespace App\Filament\Resources\Security;
 
-use App\Auth\Permission;
-use App\Enums\Permission\PermissionEnum;
+use Filament\Schemas\Schema;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Actions\Action;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\BulkAction;
 use App\Filament\Resources\Security\StaffMessageResource\Pages\ListStaffMessages;
 use App\Filament\Resources\Security\StaffMessageResource\Pages\ViewStaffMessage;
 use App\Models\StaffMessage;
 use App\Models\User;
+use App\Auth\Permission;
+use App\Enums\Permission\PermissionEnum;
 use App\Repositories\ToolRepository;
-use App\Support\Cache;
-use Filament\Actions\Action;
-use Filament\Actions\BulkAction;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\DeleteBulkAction;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\TextInput;
+use Filament\Forms;
 use Filament\Resources\Resource;
-use Filament\Schemas\Schema;
-use Filament\Tables;
-use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Filament\Tables;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
@@ -29,9 +29,9 @@ class StaffMessageResource extends Resource
 {
     protected static ?string $model = StaffMessage::class;
 
-    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-envelope-open';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-envelope-open';
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Security';
+    protected static string | \UnitEnum | null $navigationGroup = 'Security';
 
     protected static ?int $navigationSort = 3;
 
@@ -48,7 +48,6 @@ class StaffMessageResource extends Resource
     public static function canAccess(): bool
     {
         $user = Auth::user();
-
         return $user instanceof User && $user->class >= User::CLASS_MODERATOR;
     }
 
@@ -61,7 +60,6 @@ class StaffMessageResource extends Resource
         }
         // Non-staff-member users can only see messages whose permission they hold
         $userPerms = ToolRepository::listUserAllPermissions((int) $user?->id);
-
         return $query->where(function (Builder $q) use ($userPerms) {
             $q->whereNull('permission')->orWhereIn('permission', $userPerms);
         });
@@ -89,7 +87,8 @@ class StaffMessageResource extends Resource
                     ->badge()
                     ->colors(['danger' => 0, 'success' => 1])
                     ->formatStateUsing(fn ($record) => $record->answered ? __('label.staff_message.answered') : __('label.staff_message.unanswered'))
-                    ->label(__('label.staff_message.status')),
+                    ->label(__('label.staff_message.status'))
+                ,
                 TextColumn::make('answer_user.username')->label(__('label.staff_message.answered_by'))->placeholder('N/A'),
                 TextColumn::make('added')->dateTime('Y-m-d H:i')->sortable()->label(__('label.added')),
             ])
@@ -113,14 +112,14 @@ class StaffMessageResource extends Resource
                     ->requiresConfirmation()
                     ->action(function ($record) {
                         $record->update(['answered' => 1, 'answeredby' => Auth::id() ?? 0]);
-                        Cache::clearStaffMessage();
+                        \App\Support\Cache::clearStaffMessage();
                     }),
                 DeleteAction::make()
-                    ->after(fn () => Cache::clearStaffMessage()),
+                    ->after(fn () => \App\Support\Cache::clearStaffMessage()),
             ])
             ->toolbarActions([
                 DeleteBulkAction::make()
-                    ->after(fn () => Cache::clearStaffMessage()),
+                    ->after(fn () => \App\Support\Cache::clearStaffMessage()),
                 BulkAction::make('mark_answered_bulk')
                     ->label(__('label.staff_message.mark_answered_bulk'))
                     ->icon('heroicon-o-check')
@@ -131,7 +130,7 @@ class StaffMessageResource extends Resource
                         $records->where('answered', 0)->each(function ($record) {
                             $record->update(['answered' => 1, 'answeredby' => Auth::id() ?? 0]);
                         });
-                        Cache::clearStaffMessage();
+                        \App\Support\Cache::clearStaffMessage();
                     }),
             ]);
     }

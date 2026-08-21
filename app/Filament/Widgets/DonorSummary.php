@@ -17,6 +17,6 @@ class DonorSummary extends StatTable
     /** @return array<int|string, array<string, mixed>> */
     protected function getTableRows(): array
     {
-        return (new DashboardRepository)->donorSummary();
+        return (new DashboardRepository())->donorSummary();
     }
 }

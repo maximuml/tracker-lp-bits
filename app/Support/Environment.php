@@ -29,7 +29,7 @@ final class Environment
 
     public static function isTesting(): bool
     {
-        return env('APP_ENV') === 'testing' || class_exists(TestCase::class, false);
+        return config('app.env') === 'testing' || app()->runningUnitTests();
     }
 
     public static function commandExists(string $command): bool

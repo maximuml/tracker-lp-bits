@@ -70,10 +70,10 @@ class ViewStaffMessage extends ViewRecord
         $record = $this->getStaffMessageRecord();
         $data[] = ['label' => 'ID', 'value' => $record->id];
         $data[] = ['label' => __('label.staff_message.subject'), 'value' => $record->subject];
-        $data[] = ['label' => __('label.staff_message.sender'), 'value' => $record->send_user?->username ?? 'System'];
+        $data[] = ['label' => __('label.staff_message.sender'), 'value' => $record->send_user->username ?? 'System'];
         $data[] = ['label' => __('label.staff_message.message'), 'value' => nl2br(e($record->msg))];
         $data[] = ['label' => __('label.staff_message.status'), 'value' => $record->answered ? __('label.staff_message.answered') : __('label.staff_message.unanswered')];
-        $data[] = ['label' => __('label.staff_message.answered_by'), 'value' => $record->answer_user?->username ?? 'N/A'];
+        $data[] = ['label' => __('label.staff_message.answered_by'), 'value' => $record->answer_user->username ?? 'N/A'];
         if ($record->answer) {
             $data[] = ['label' => __('label.staff_message.answer'), 'value' => nl2br(e($record->answer))];
         }

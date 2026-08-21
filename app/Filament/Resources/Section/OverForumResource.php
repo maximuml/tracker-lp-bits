@@ -2,31 +2,33 @@
 
 namespace App\Filament\Resources\Section;
 
-use App\Filament\Resources\Section\OverForumResource\Pages\CreateOverForum;
-use App\Filament\Resources\Section\OverForumResource\Pages\EditOverForum;
-use App\Filament\Resources\Section\OverForumResource\Pages\ListOverForums;
-use App\Models\OverForum;
-use App\Models\User;
-use App\Repositories\ForumRepository;
+use Filament\Schemas\Schema;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\Select;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Actions\EditAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\EditAction;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\TextInput;
+use App\Filament\Resources\Section\OverForumResource\Pages\ListOverForums;
+use App\Filament\Resources\Section\OverForumResource\Pages\CreateOverForum;
+use App\Filament\Resources\Section\OverForumResource\Pages\EditOverForum;
+use App\Models\OverForum;
+use App\Models\User;
+use Filament\Forms;
 use Filament\Resources\Resource;
-use Filament\Schemas\Schema;
-use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Filament\Tables;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 
 class OverForumResource extends Resource
 {
     protected static ?string $model = OverForum::class;
 
-    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Section';
+    protected static string | \UnitEnum | null $navigationGroup = 'Section';
 
     protected static ?int $navigationSort = 21;
 
@@ -43,7 +45,6 @@ class OverForumResource extends Resource
     public static function canAccess(): bool
     {
         $user = Auth::user();
-
         return $user instanceof User && $user->class >= User::CLASS_ADMINISTRATOR;
     }
 
@@ -79,7 +80,7 @@ class OverForumResource extends Resource
             ->recordActions([
                 EditAction::make(),
                 DeleteAction::make()
-                    ->using(fn ($record) => app(ForumRepository::class)->deleteOverforum($record->id)),
+                    ->using(fn ($record) => app(\App\Repositories\ForumRepository::class)->deleteOverforum($record->id)),
             ])
             ->toolbarActions([
                 DeleteBulkAction::make(),

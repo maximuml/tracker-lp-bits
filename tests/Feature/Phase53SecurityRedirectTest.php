@@ -20,7 +20,7 @@ final class Phase53SecurityRedirectTest extends TestCase
         config(['scout.driver' => 'null', 'app.debug' => false]);
     }
 
-    public function test_bans_redirects_to_filament_ban_resource(): void
+    public function testBansRedirectsToFilamentBanResource(): void
     {
         $admin = User::factory()->admin()->create();
         $response = $this->withNexusCookie($admin)->get('/bans');
@@ -29,7 +29,7 @@ final class Phase53SecurityRedirectTest extends TestCase
         $response->assertRedirect('/nexusphp/bans');
     }
 
-    public function test_cheaterbox_redirects_to_filament_cheater_resource(): void
+    public function testCheaterboxRedirectsToFilamentCheaterResource(): void
     {
         $admin = User::factory()->admin()->create();
         $response = $this->withNexusCookie($admin)->get('/cheaterbox');
@@ -38,7 +38,7 @@ final class Phase53SecurityRedirectTest extends TestCase
         $response->assertRedirect('/nexusphp/cheaters');
     }
 
-    public function test_cheaters_redirects_to_filament_cheater_resource(): void
+    public function testCheatersRedirectsToFilamentCheaterResource(): void
     {
         $admin = User::factory()->admin()->create();
         $response = $this->withNexusCookie($admin)->get('/cheaters');
@@ -47,7 +47,7 @@ final class Phase53SecurityRedirectTest extends TestCase
         $response->assertRedirect('/nexusphp/cheaters');
     }
 
-    public function test_ipcheck_redirects_to_filament_user_list(): void
+    public function testIpcheckRedirectsToFilamentUserList(): void
     {
         $admin = User::factory()->admin()->create();
         $response = $this->withNexusCookie($admin)->get('/ipcheck');
@@ -56,7 +56,7 @@ final class Phase53SecurityRedirectTest extends TestCase
         $response->assertRedirect('/nexusphp/users');
     }
 
-    public function test_iphistory_with_id_redirects_to_filament_user_view(): void
+    public function testIphistoryWithIdRedirectsToFilamentUserView(): void
     {
         $admin = User::factory()->admin()->create();
         $response = $this->withNexusCookie($admin)->get('/iphistory?id=42');
@@ -65,7 +65,7 @@ final class Phase53SecurityRedirectTest extends TestCase
         $response->assertRedirect('/nexusphp/users/42');
     }
 
-    public function test_iphistory_without_id_redirects_to_filament_user_list(): void
+    public function testIphistoryWithoutIdRedirectsToFilamentUserList(): void
     {
         $admin = User::factory()->admin()->create();
         $response = $this->withNexusCookie($admin)->get('/iphistory');
@@ -74,7 +74,7 @@ final class Phase53SecurityRedirectTest extends TestCase
         $response->assertRedirect('/nexusphp/users');
     }
 
-    public function test_ipsearch_redirects_to_filament_user_list(): void
+    public function testIpsearchRedirectsToFilamentUserList(): void
     {
         $admin = User::factory()->admin()->create();
         $response = $this->withNexusCookie($admin)->get('/ipsearch?ip=1.2.3.4');

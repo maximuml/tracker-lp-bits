@@ -2,32 +2,34 @@
 
 namespace App\Filament\Resources\Section;
 
+use Filament\Schemas\Schema;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\Select;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Actions\EditAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use App\Filament\Resources\Section\ForumResource\Pages\ListForums;
 use App\Filament\Resources\Section\ForumResource\Pages\CreateForum;
 use App\Filament\Resources\Section\ForumResource\Pages\EditForum;
-use App\Filament\Resources\Section\ForumResource\Pages\ListForums;
 use App\Models\Forum;
 use App\Models\OverForum;
 use App\Models\User;
-use App\Repositories\ForumRepository;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\EditAction;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\TextInput;
+use Filament\Forms;
 use Filament\Resources\Resource;
-use Filament\Schemas\Schema;
-use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Filament\Tables;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 
 class ForumResource extends Resource
 {
     protected static ?string $model = Forum::class;
 
-    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-chat-bubble-left-right';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-chat-bubble-left-right';
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Section';
+    protected static string | \UnitEnum | null $navigationGroup = 'Section';
 
     protected static ?int $navigationSort = 20;
 
@@ -44,7 +46,6 @@ class ForumResource extends Resource
     public static function canAccess(): bool
     {
         $user = Auth::user();
-
         return $user instanceof User && $user->class >= User::CLASS_ADMINISTRATOR;
     }
 
@@ -91,7 +92,7 @@ class ForumResource extends Resource
             ->recordActions([
                 EditAction::make(),
                 DeleteAction::make()
-                    ->using(fn ($record) => app(ForumRepository::class)->deleteForum($record->id)),
+                    ->using(fn ($record) => app(\App\Repositories\ForumRepository::class)->deleteForum($record->id)),
             ])
             ->toolbarActions([
                 DeleteBulkAction::make(),

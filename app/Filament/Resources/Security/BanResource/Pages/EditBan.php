@@ -2,9 +2,8 @@
 
 namespace App\Filament\Resources\Security\BanResource\Pages;
 
-use App\Filament\Resources\Security\BanResource;
-use App\Support\Cache;
 use Filament\Actions\DeleteAction;
+use App\Filament\Resources\Security\BanResource;
 use Filament\Resources\Pages\EditRecord;
 
 class EditBan extends EditRecord
@@ -21,6 +20,6 @@ class EditBan extends EditRecord
 
     public function afterSave(): void
     {
-        Cache::clearAgentAllowDeny();
+        \App\Support\Cache::clearAgentAllowDeny();
     }
 }

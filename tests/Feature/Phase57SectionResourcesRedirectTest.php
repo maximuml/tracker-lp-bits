@@ -20,7 +20,7 @@ final class Phase57SectionResourcesRedirectTest extends TestCase
         config(['scout.driver' => 'null', 'app.debug' => false]);
     }
 
-    public function test_catmanage_redirects_to_category_resource(): void
+    public function testCatmanageRedirectsToCategoryResource(): void
     {
         $admin = User::factory()->admin()->create();
         $response = $this->withNexusCookie($admin)->get('/catmanage');
@@ -29,7 +29,7 @@ final class Phase57SectionResourcesRedirectTest extends TestCase
         $response->assertRedirect('/nexusphp/section/categories');
     }
 
-    public function test_forummanage_redirects_to_forum_resource(): void
+    public function testForummanageRedirectsToForumResource(): void
     {
         $admin = User::factory()->admin()->create();
         $response = $this->withNexusCookie($admin)->get('/forummanage');
@@ -38,7 +38,7 @@ final class Phase57SectionResourcesRedirectTest extends TestCase
         $response->assertRedirect('/nexusphp/section/forums');
     }
 
-    public function test_moforums_redirects_to_over_forum_resource(): void
+    public function testMoforumsRedirectsToOverForumResource(): void
     {
         $admin = User::factory()->admin()->create();
         $response = $this->withNexusCookie($admin)->get('/moforums');
@@ -47,7 +47,7 @@ final class Phase57SectionResourcesRedirectTest extends TestCase
         $response->assertRedirect('/nexusphp/section/over-forums');
     }
 
-    public function test_fields_redirects_to_torrent_custom_field_resource(): void
+    public function testFieldsRedirectsToTorrentCustomFieldResource(): void
     {
         $admin = User::factory()->admin()->create();
         $response = $this->withNexusCookie($admin)->get('/fields');
@@ -56,7 +56,7 @@ final class Phase57SectionResourcesRedirectTest extends TestCase
         $response->assertRedirect('/nexusphp/torrent-custom-fields');
     }
 
-    public function test_formats_redirects_to_codec_resource(): void
+    public function testFormatsRedirectsToCodecResource(): void
     {
         $admin = User::factory()->admin()->create();
         $response = $this->withNexusCookie($admin)->get('/formats');
@@ -65,7 +65,7 @@ final class Phase57SectionResourcesRedirectTest extends TestCase
         $response->assertRedirect('/nexusphp/section/codecs');
     }
 
-    public function test_videoformats_redirects_to_standard_resource(): void
+    public function testVideoformatsRedirectsToStandardResource(): void
     {
         $admin = User::factory()->admin()->create();
         $response = $this->withNexusCookie($admin)->get('/videoformats');

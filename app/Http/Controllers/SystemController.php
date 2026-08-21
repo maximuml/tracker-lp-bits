@@ -24,7 +24,6 @@ use App\Support\Mail;
 use App\Support\Permissions;
 use App\Support\SetlistLookup;
 use App\Support\SupportContext;
-use App\Support\Url;
 use App\Support\UserDisplay;
 use App\Support\Validators;
 use Illuminate\Http\JsonResponse;
@@ -352,7 +351,6 @@ class SystemController extends LegacyController
         return $this->legacyPage($request, 'increment-bulk', true);
 
     }
-
     public function setlistLookup(Request $request): JsonResponse
     {
         $name = trim((string) $request->input('name', ''));

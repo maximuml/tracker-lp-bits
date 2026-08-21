@@ -20,7 +20,7 @@ final class Phase56DestructiveActionsRedirectTest extends TestCase
         config(['scout.driver' => 'null', 'app.debug' => false]);
     }
 
-    public function test_delacctadmin_redirects_to_system_actions(): void
+    public function testDelacctadminRedirectsToSystemActions(): void
     {
         $admin = User::factory()->admin()->create();
         $response = $this->withNexusCookie($admin)->get('/delacctadmin');
@@ -29,7 +29,7 @@ final class Phase56DestructiveActionsRedirectTest extends TestCase
         $response->assertRedirect('/nexusphp/system-actions');
     }
 
-    public function test_deletedisabled_redirects_to_system_actions(): void
+    public function testDeletedisabledRedirectsToSystemActions(): void
     {
         $admin = User::factory()->admin()->create();
         $response = $this->withNexusCookie($admin)->get('/deletedisabled');
@@ -38,7 +38,7 @@ final class Phase56DestructiveActionsRedirectTest extends TestCase
         $response->assertRedirect('/nexusphp/system-actions');
     }
 
-    public function test_massmail_redirects_to_system_actions(): void
+    public function testMassmailRedirectsToSystemActions(): void
     {
         $admin = User::factory()->admin()->create();
         $response = $this->withNexusCookie($admin)->get('/massmail');
@@ -47,7 +47,7 @@ final class Phase56DestructiveActionsRedirectTest extends TestCase
         $response->assertRedirect('/nexusphp/system-actions');
     }
 
-    public function test_maxlogin_redirects_to_login_attempt_resource(): void
+    public function testMaxloginRedirectsToLoginAttemptResource(): void
     {
         $admin = User::factory()->admin()->create();
         $response = $this->withNexusCookie($admin)->get('/maxlogin');

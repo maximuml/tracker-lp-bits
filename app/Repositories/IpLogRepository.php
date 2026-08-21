@@ -31,6 +31,9 @@ class IpLogRepository extends BaseRepository
         if (Environment::isTesting()) {
             return;
         }
+        if (\App\Support\Environment::isTesting()) {
+            return;
+        }
         $redis = NexusDB::redis();
         if (is_null($uri)) {
             $parsed_uri = parse_url(SupportContext::getServerValue('REQUEST_URI', ''));

@@ -17,6 +17,10 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Auth;
 
+/**
+ * @property Schema $delacctForm
+ * @property Schema $massmailForm
+ */
 class SystemActions extends Page implements HasForms
 {
     use InteractsWithForms;
@@ -43,8 +47,14 @@ class SystemActions extends Page implements HasForms
         return $user instanceof User && $user->class >= User::CLASS_SYSOP;
     }
 
+    /**
+     * @var array<string, mixed>
+     */
     public ?array $delacctData = [];
 
+    /**
+     * @var array<string, mixed>
+     */
     public ?array $massmailData = [];
 
     public function mount(): void
@@ -53,6 +63,9 @@ class SystemActions extends Page implements HasForms
         $this->massmailForm->fill();
     }
 
+    /**
+     * @return array<int, string>
+     */
     protected function getForms(): array
     {
         return [

@@ -23,13 +23,19 @@ class Forum extends NexusModel
     /** @var list<string> */
     protected $fillable = ['sort', 'name', 'description', 'minclassread', 'minclasswrite', 'postcount', 'topiccount', 'minclasscreate', 'forid'];
 
-    /** @return BelongsToMany<User, $this> */
-    public function moderators(): BelongsToMany
+    /** @return \Illuminate\Database\Eloquent\Relations\BelongsToMany<User, $this> */
+    public function moderators(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
     {
         return $this->belongsToMany(User::class, 'forummods', 'forumid', 'userid');
     }
 
     /** @return BelongsTo<OverForum, $this> */
+    public function overForum()
+    {
+        return $this->belongsTo(OverForum::class, 'forid');
+    }
+
+    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<OverForum, $this> */
     public function overForum()
     {
         return $this->belongsTo(OverForum::class, 'forid');

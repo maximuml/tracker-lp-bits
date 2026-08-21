@@ -17,6 +17,6 @@ class UploaderActivity extends StatTable
     /** @return array<int|string, array<string, mixed>> */
     protected function getTableRows(): array
     {
-        return (new DashboardRepository)->uploaderActivity();
+        return (new DashboardRepository())->uploaderActivity();
     }
 }

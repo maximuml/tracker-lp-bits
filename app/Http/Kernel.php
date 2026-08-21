@@ -92,18 +92,18 @@ class Kernel extends HttpKernel
      * @var array<string, string>
      */
     protected $routeMiddleware = [
-        'auth' => Authenticate::class,
-        'auth.basic' => AuthenticateWithBasicAuth::class,
-        'auth.nexus' => NexusAuth::class,
-        'cache.headers' => SetCacheHeaders::class,
-        'can' => Authorize::class,
-        'guest' => RedirectIfAuthenticated::class,
-        'password.confirm' => RequirePassword::class,
-        'signed' => ValidateSignature::class,
-        'throttle' => ThrottleRequests::class,
-        'verified' => EnsureEmailIsVerified::class,
-        'locale' => Locale::class,
-        'checkUserStatus' => CheckUserStatus::class,
+        'auth' => \App\Http\Middleware\Authenticate::class,
+        'auth.basic' => \Illuminate\Auth\Middleware\AuthenticateWithBasicAuth::class,
+        'auth.nexus' => \App\Http\Middleware\NexusAuth::class,
+        'cache.headers' => \Illuminate\Http\Middleware\SetCacheHeaders::class,
+        'can' => \Illuminate\Auth\Middleware\Authorize::class,
+        'guest' => \App\Http\Middleware\RedirectIfAuthenticated::class,
+        'password.confirm' => \Illuminate\Auth\Middleware\RequirePassword::class,
+        'signed' => \Illuminate\Routing\Middleware\ValidateSignature::class,
+        'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
+        'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
+        'locale' => \App\Http\Middleware\Locale::class,
+        'checkUserStatus' => \App\Http\Middleware\CheckUserStatus::class,
     ];
 
     /** @var array<string, string> */

@@ -20,7 +20,7 @@ final class Phase55DashboardWidgetsRedirectTest extends TestCase
         config(['scout.driver' => 'null', 'app.debug' => false]);
     }
 
-    public function test_stats_redirects_to_filament_dashboard(): void
+    public function testStatsRedirectsToFilamentDashboard(): void
     {
         $admin = User::factory()->admin()->create();
         $response = $this->withNexusCookie($admin)->get('/stats');
@@ -29,7 +29,7 @@ final class Phase55DashboardWidgetsRedirectTest extends TestCase
         $response->assertRedirect('/nexusphp');
     }
 
-    public function test_allagents_redirects_to_filament_dashboard(): void
+    public function testAllagentsRedirectsToFilamentDashboard(): void
     {
         $admin = User::factory()->admin()->create();
         $response = $this->withNexusCookie($admin)->get('/allagents');

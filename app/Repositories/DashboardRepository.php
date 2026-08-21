@@ -391,7 +391,6 @@ class DashboardRepository extends BaseRepository
                 'value' => sprintf('%s torrents / %s peers / %s', $row->n_t, $row->n_p, $row->last ?? '—'),
             ];
         }
-
         return $result;
     }
 
@@ -418,7 +417,6 @@ class DashboardRepository extends BaseRepository
                 'value' => sprintf('%s torrents / %s peers / %s', $row->n_t, $row->n_p, $row->last ?? '—'),
             ];
         }
-
         return $result;
     }
 
@@ -443,7 +441,6 @@ class DashboardRepository extends BaseRepository
                 'value' => number_format((int) $row->counts),
             ];
         }
-
         return $result;
     }
 
@@ -462,14 +459,20 @@ class DashboardRepository extends BaseRepository
 
         $result = [];
         foreach ($rows as $row) {
-            $until = $row->donoruntil ? date('Y-m-d', strtotime((string) $row->donoruntil)) : '—';
+            $until = '—';
+            if ($row->donoruntil) {
+                $timestamp = strtotime((string) $row->donoruntil);
+                if ($timestamp !== false) {
+                    $until = date('Y-m-d', $timestamp);
+                }
+            }
             $result[] = [
                 'name' => 'donor',
                 'text' => $row->username,
                 'value' => sprintf('$%s / ¥%s / until %s', number_format((float) $row->donated, 2), number_format((float) $row->donated_cny, 2), $until),
             ];
         }
-
         return $result;
     }
+
 }

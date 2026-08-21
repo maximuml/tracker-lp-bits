@@ -2,9 +2,10 @@
 
 namespace App\Filament\Resources\Section\ForumResource\Pages;
 
+use Filament\Actions\CreateAction;
 use App\Filament\PageList;
 use App\Filament\Resources\Section\ForumResource;
-use Filament\Actions\CreateAction;
+use Filament\Resources\Pages\ListRecords;
 
 class ListForums extends PageList
 {

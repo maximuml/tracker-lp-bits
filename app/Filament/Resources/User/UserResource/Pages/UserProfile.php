@@ -94,17 +94,17 @@ class UserProfile extends ViewRecord implements HasActions
             $actions[] = $this->buildGrantMedalAction();
             $actions[] = $this->buildAssignExamAction();
             $actions[] = $this->buildChangeBonusEtcAction();
-            //            if ($this->getUserRecord()->two_step_secret) {
-            //                $actions[] = $this->buildDisableTwoStepAuthenticationAction();
-            //            }
+//            if ($this->getUserRecord()->two_step_secret) {
+//                $actions[] = $this->buildDisableTwoStepAuthenticationAction();
+//            }
             $actions[] = $this->buildResetPasswordAction();
             $actions[] = $this->buildEnableDisableAction();
             $actions[] = $this->buildEnableDisableDownloadPrivilegesAction();
             $actions[] = $this->buildEnableDisableUploadPrivilegesAction();
             $actions[] = $this->buildEnableDisableForumPostAction();
-            //            if (user_can('user-change-class')) {
-            //                $actions[] = $this->buildChangeClassAction();
-            //            }
+//            if (user_can('user-change-class')) {
+//                $actions[] = $this->buildChangeClassAction();
+//            }
             if (Permission::can(PermissionEnum::USER_DELETE)) {
                 $actions[] = $this->buildDeleteAction();
             }
@@ -303,12 +303,12 @@ class UserProfile extends ViewRecord implements HasActions
                 $record->info = null;
                 $record->save();
 
-                Events::fire(ModelEventEnum::USER_UPDATED, $record, null);
+                \App\Support\Events::fire(\App\Enums\ModelEventEnum::USER_UPDATED, $record, null);
 
-                if (! empty($data['send_email']) && $record->email !== '') {
-                    $siteName = SiteConfig::current()->basic->siteName('');
-                    $baseUrl = Url::schemeAndHost(false);
-                    $siteEmail = (string) SiteConfig::current()->main->siteEmail('');
+                if (!empty($data['send_email']) && $record->email !== '') {
+                    $siteName = \App\Support\Config\SiteConfig::current()->basic->siteName('');
+                    $baseUrl = \App\Support\Url::schemeAndHost(false);
+                    $siteEmail = (string) \App\Support\Config\SiteConfig::current()->main->siteEmail('');
 
                     $body = sprintf(
                         "Your account has been confirmed.\n\n<b><a href=\"javascript:void(null)\" onclick=\"window.open('%s/login')\">Click here to login</a></b><br />\n%s/login",
@@ -316,11 +316,11 @@ class UserProfile extends ViewRecord implements HasActions
                         $baseUrl,
                     );
 
-                    Mail::sentLegacy(
-                        $record->email,
+                    \App\Support\Mail::sentLegacy(
+                        (string) $record->email,
                         $siteName,
                         $siteEmail,
-                        $siteName.' - Account Confirmed',
+                        $siteName . ' - Account Confirmed',
                         $body,
                         'invite confirm',
                         false,
@@ -383,7 +383,6 @@ class UserProfile extends ViewRecord implements HasActions
     {
         $record = $this->getUserRecord();
         $isWarned = $record->warned === 'yes';
-
         return Action::make($isWarned ? __('admin.resources.user.actions.edit_warning_btn') : __('admin.resources.user.actions.warn_btn'))
             ->icon('heroicon-o-exclamation-triangle')
             ->color($isWarned ? 'danger' : 'warning')
@@ -392,10 +391,10 @@ class UserProfile extends ViewRecord implements HasActions
                     ->label(__('admin.resources.user.actions.warn_duration'))
                     ->options([
                         0 => __('admin.resources.user.actions.warn_remove'),
-                        1 => '1 '.__('admin.resources.user.actions.warn_week'),
-                        2 => '2 '.__('admin.resources.user.actions.warn_weeks'),
-                        4 => '4 '.__('admin.resources.user.actions.warn_weeks'),
-                        8 => '8 '.__('admin.resources.user.actions.warn_weeks'),
+                        1 => '1 ' . __('admin.resources.user.actions.warn_week'),
+                        2 => '2 ' . __('admin.resources.user.actions.warn_weeks'),
+                        4 => '4 ' . __('admin.resources.user.actions.warn_weeks'),
+                        8 => '8 ' . __('admin.resources.user.actions.warn_weeks'),
                         255 => __('admin.resources.user.actions.warn_indefinite'),
                     ])
                     ->default($isWarned ? 0 : 1)

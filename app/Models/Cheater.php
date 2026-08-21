@@ -28,13 +28,13 @@ class Cheater extends NexusModel
         'dealtby', 'dealtwith', 'comment',
     ];
 
-    /** @return BelongsTo<Torrent, $this> */
+    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<Torrent, $this> */
     public function torrent()
     {
         return $this->belongsTo(Torrent::class, 'torrentid');
     }
 
-    /** @return BelongsTo<User, $this> */
+    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<User, $this> */
     public function user()
     {
         return $this->belongsTo(User::class, 'userid');

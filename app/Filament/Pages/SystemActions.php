@@ -11,7 +11,6 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
-use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Schemas\Components\Section;
@@ -19,8 +18,8 @@ use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Auth;
 
 /**
- * @property Form $delacctForm
- * @property Form $massmailForm
+ * @property Schema $delacctForm
+ * @property Schema $massmailForm
  */
 class SystemActions extends Page implements HasForms
 {

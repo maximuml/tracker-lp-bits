@@ -199,6 +199,9 @@ jobs:
       - name: Clear any stale Laravel config cache
         run: docker compose exec -T php php artisan config:clear
 
+      - name: Import MeiliSearch index
+        run: docker compose exec -T php php artisan meilisearch:import
+
       - name: Run Feature tests
         run: |
           docker compose exec -T -e CRITICAL_PATH_BASE_URL=http://openresty php vendor/bin/phpunit --testsuite Feature --no-coverage

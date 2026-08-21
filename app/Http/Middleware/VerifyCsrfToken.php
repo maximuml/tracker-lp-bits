@@ -13,66 +13,21 @@ class VerifyCsrfToken extends Middleware
     /**
      * The URIs that should be excluded from CSRF verification.
      *
+     * Only webhooks and AJAX endpoints that cannot use CSRF tokens
+     * (called via fetch() without CSRF headers, or by external services).
+     * All form-based routes now have CSRF protection via csrf.js auto-injection.
+     *
      * @var array<int, string>
      */
     protected $except = [
         self::TG_WEBHOOK_PREFIX.'/*',
         'web/token/*',
-        'adduser',
         'ajax',
-        'attachment',
-        'bans',
-        'bitbucket-upload',
-        'clearcache',
-        'comment',
-        'comment/*',
-        'complains',
-        'delete',
-        'delacctadmin',
-        'deletemessage',
-        'donated',
-        'downloadnotice',
-        'faqactions',
-        'fastdelete',
-        'forums',
         'getusertorrentlistajax',
-        'magic',
-        'mailtest',
-        'makepoll',
-        'massmail',
-        'maxlogin',
-        'modrules',
-        'modtask',
-        'mybonus',
-        'news',
-        'nowarn',
-        'offers',
-        'polloverview',
-        'preview',
-        'report',
-        'reports',
-        'reset',
-        'self-enable',
-        'setlist_lookup',
-        'settings',
         'shoutbox',
-        'staffbox',
-        'tags',
-        'takeamountupload',
-        'takeconfirm',
-        'takecontact',
-        'takeedit',
-        'takeflush',
-        'takeinvite',
-        'takemessage',
-        'takestaffmess',
-        'takeupdate',
-        'take-increment-bulk',
-        'takereseed',
-        'takeupload',
-        'testip',
+        'preview',
+        'setlist_lookup',
         'thanks',
-        'usercp',
     ];
 
     /**

@@ -3,6 +3,7 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="csrf-token" content="{{ csrf_token() }}" />
     <title>@yield('title', $siteName ?? config('app.name'))</title>
     <style>
         body { font-family: Arial, Helvetica, sans-serif; background: #f5f5f5; margin: 0; padding: 0; }
@@ -21,6 +22,7 @@
         a { color: #06c; }
     </style>
     <script type="text/javascript" src="js/jquery-1.12.4.min.js"></script>
+    <script type="text/javascript" src="js/csrf.js"></script>
     <script type="text/javascript" src="vendor/layer-v3.5.1/layer/layer.js"></script>
     @foreach (\Nexus\Nexus::getAppendHeaders() as $html)
         {!! $html !!}

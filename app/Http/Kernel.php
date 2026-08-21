@@ -5,6 +5,7 @@ namespace App\Http;
 use App\Http\Middleware\Authenticate;
 use App\Http\Middleware\CheckSiteStatus;
 use App\Http\Middleware\CheckUserStatus;
+use App\Http\Middleware\CronToken;
 use App\Http\Middleware\EncryptCookies;
 use App\Http\Middleware\Filament;
 use App\Http\Middleware\LegacyRequestMiddleware;
@@ -104,6 +105,7 @@ class Kernel extends HttpKernel
         'verified' => EnsureEmailIsVerified::class,
         'locale' => Locale::class,
         'checkUserStatus' => CheckUserStatus::class,
+        'cron.token' => CronToken::class,
     ];
 
     /** @var array<string, string> */

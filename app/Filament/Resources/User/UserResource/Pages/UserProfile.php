@@ -80,6 +80,10 @@ class UserProfile extends ViewRecord implements HasActions
         $user = $this->currentUser();
         $record = $this->getUserRecord();
         if ($user->class > $record->class) {
+            if ($record->status == User::STATUS_PENDING) {
+                $actions[] = $this->buildConfirmAction();
+            }
+            $actions[] = $this->buildWarnAction();
             $actions[] = $this->buildGrantPropsAction();
             $actions[] = $this->buildGrantMedalAction();
             $actions[] = $this->buildAssignExamAction();
@@ -87,12 +91,11 @@ class UserProfile extends ViewRecord implements HasActions
 //            if ($this->getUserRecord()->two_step_secret) {
 //                $actions[] = $this->buildDisableTwoStepAuthenticationAction();
 //            }
-//            if ($this->getUserRecord()->status == User::STATUS_PENDING) {
-//                $actions[] = $this->buildConfirmAction();
-//            }
             $actions[] = $this->buildResetPasswordAction();
-//            $actions[] = $this->buildEnableDisableAction();
-//            $actions[] = $this->buildEnableDisableDownloadPrivilegesAction();
+            $actions[] = $this->buildEnableDisableAction();
+            $actions[] = $this->buildEnableDisableDownloadPrivilegesAction();
+            $actions[] = $this->buildEnableDisableUploadPrivilegesAction();
+            $actions[] = $this->buildEnableDisableForumPostAction();
 //            if (user_can('user-change-class')) {
 //                $actions[] = $this->buildChangeClassAction();
 //            }
@@ -280,15 +283,49 @@ class UserProfile extends ViewRecord implements HasActions
     {
         return Action::make(__('admin.resources.user.actions.confirm_btn'))
             ->modalHeading(__('admin.resources.user.actions.confirm_btn'))
-            ->requiresConfirmation()
-            ->action(function () {
+            ->color('success')
+            ->schema([
+                Forms\Components\Checkbox::make('send_email')
+                    ->label(__('admin.resources.user.actions.confirm_send_email'))
+                    ->helperText(__('admin.resources.user.actions.confirm_send_email_help'))
+                    ->default(true),
+            ])
+            ->action(function (array $data) {
                 if ($this->currentUser()->class <= $this->getUserRecord()->class) {
                     \App\Support\Admin::failNotification("No permission!");
                     return;
                 }
-                $this->getUserRecord()->status = User::STATUS_CONFIRMED;
-                $this->getUserRecord()->info= null;
-                $this->getUserRecord()->save();
+                $record = $this->getUserRecord();
+                $record->status = User::STATUS_CONFIRMED;
+                $record->info = null;
+                $record->save();
+
+                \App\Support\Events::fire(\App\Enums\ModelEventEnum::USER_UPDATED, $record, null);
+
+                if (!empty($data['send_email']) && $record->email !== '') {
+                    $siteName = \App\Support\Config\SiteConfig::current()->basic->siteName('');
+                    $baseUrl = \App\Support\Url::schemeAndHost(false);
+                    $siteEmail = (string) \App\Support\Config\SiteConfig::current()->main->siteEmail('');
+
+                    $body = sprintf(
+                        "Your account has been confirmed.\n\n<b><a href=\"javascript:void(null)\" onclick=\"window.open('%s/login')\">Click here to login</a></b><br />\n%s/login",
+                        $baseUrl,
+                        $baseUrl,
+                    );
+
+                    \App\Support\Mail::sentLegacy(
+                        (string) $record->email,
+                        $siteName,
+                        $siteEmail,
+                        $siteName . ' - Account Confirmed',
+                        $body,
+                        'invite confirm',
+                        false,
+                        false,
+                        '',
+                        'UTF-8',
+                    );
+                }
                 $this->sendSuccessNotification();
             });
     }
@@ -303,6 +340,71 @@ class UserProfile extends ViewRecord implements HasActions
                 $userRep = $this->getRep();
                 try {
                     $userRep->updateDownloadPrivileges($this->currentUser(), $this->getUserRecord()->id, $this->getUserRecord()->downloadpos == 'yes' ? 'no' : 'yes');
+                    $this->sendSuccessNotification();
+                } catch (Exception $exception) {
+                    $this->sendFailNotification($exception->getMessage());
+                }
+            });
+    }
+
+    protected function buildEnableDisableUploadPrivilegesAction(): Action
+    {
+        return Action::make($this->getUserRecord()->uploadpos == 'yes' ? __('admin.resources.user.actions.disable_upload_privileges_btn') : __('admin.resources.user.actions.enable_upload_privileges_btn'))
+            ->requiresConfirmation()
+            ->action(function () {
+                $userRep = $this->getRep();
+                try {
+                    $userRep->updateUploadPrivileges($this->currentUser(), $this->getUserRecord()->id, $this->getUserRecord()->uploadpos == 'yes' ? 'no' : 'yes');
+                    $this->sendSuccessNotification();
+                } catch (Exception $exception) {
+                    $this->sendFailNotification($exception->getMessage());
+                }
+            });
+    }
+
+    protected function buildEnableDisableForumPostAction(): Action
+    {
+        return Action::make($this->getUserRecord()->forumpost == 'yes' ? __('admin.resources.user.actions.disable_forumpost_btn') : __('admin.resources.user.actions.enable_forumpost_btn'))
+            ->requiresConfirmation()
+            ->action(function () {
+                $userRep = $this->getRep();
+                try {
+                    $userRep->updateForumPost($this->currentUser(), $this->getUserRecord()->id, $this->getUserRecord()->forumpost == 'yes' ? 'no' : 'yes');
+                    $this->sendSuccessNotification();
+                } catch (Exception $exception) {
+                    $this->sendFailNotification($exception->getMessage());
+                }
+            });
+    }
+
+    protected function buildWarnAction(): Action
+    {
+        $record = $this->getUserRecord();
+        $isWarned = $record->warned === 'yes';
+        return Action::make($isWarned ? __('admin.resources.user.actions.edit_warning_btn') : __('admin.resources.user.actions.warn_btn'))
+            ->icon('heroicon-o-exclamation-triangle')
+            ->color($isWarned ? 'danger' : 'warning')
+            ->schema([
+                Select::make('weeks')
+                    ->label(__('admin.resources.user.actions.warn_duration'))
+                    ->options([
+                        0 => __('admin.resources.user.actions.warn_remove'),
+                        1 => '1 ' . __('admin.resources.user.actions.warn_week'),
+                        2 => '2 ' . __('admin.resources.user.actions.warn_weeks'),
+                        4 => '4 ' . __('admin.resources.user.actions.warn_weeks'),
+                        8 => '8 ' . __('admin.resources.user.actions.warn_weeks'),
+                        255 => __('admin.resources.user.actions.warn_indefinite'),
+                    ])
+                    ->default($isWarned ? 0 : 1)
+                    ->required(),
+                TextInput::make('reason')
+                    ->label(__('admin.resources.user.actions.warn_reason'))
+                    ->placeholder(__('admin.resources.user.actions.warn_reason_placeholder')),
+            ])
+            ->action(function (array $data) {
+                $userRep = $this->getRep();
+                try {
+                    $userRep->warnUser($this->currentUser(), $this->getUserRecord()->id, (int) $data['weeks'], (string) ($data['reason'] ?? ''));
                     $this->sendSuccessNotification();
                 } catch (Exception $exception) {
                     $this->sendFailNotification($exception->getMessage());

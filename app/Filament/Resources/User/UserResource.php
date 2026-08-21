@@ -118,6 +118,7 @@ class UserResource extends Resource
                 TextColumn::make('enabled')->badge()->colors($yesNoOptions)->label(__("label.user.enabled")),
                 TextColumn::make('downloadpos')->badge()->colors($yesNoOptions)->label(__("label.user.downloadpos")),
                 TextColumn::make('parked')->badge()->colors($yesNoOptions)->label(__("label.user.parked")),
+                TextColumn::make('warned')->badge()->colors($yesNoOptions)->label(__("label.user.warned")),
                 TextColumn::make('isDonating')
                     ->state(fn ($record): string => $record->isDonating() ? 'yes' : 'no')
                     ->badge()
@@ -143,6 +144,15 @@ class UserResource extends Resource
                 SelectFilter::make('enabled')->options(self::$yesOrNo)->label(__('label.user.enabled')),
                 SelectFilter::make('downloadpos')->options(self::$yesOrNo)->label(__('label.user.downloadpos')),
                 SelectFilter::make('parked')->options(self::$yesOrNo)->label(__('label.user.parked')),
+                SelectFilter::make('warned')->options(self::$yesOrNo)->label(__('label.user.warned'))
+                    ->query(function (Builder $query, array $data) {
+                        if ($data['value'] === 'yes') {
+                            return $query->where('warned', 'yes');
+                        } elseif ($data['value'] === 'no') {
+                            return $query->where('warned', 'no');
+                        }
+                        return $query;
+                    }),
                 SelectFilter::make('is_donating')
                     ->options(self::$yesOrNo)
                     ->label(__('label.user.is_donating'))
@@ -182,9 +192,19 @@ class UserResource extends Resource
                             ->placeholder("点击复制")
                         ,
                         TextEntry::make('passkey')->limit(10)->copyable(),
+                        TextEntry::make('genderText')
+                            ->label(__('label.user.gender'))
+                            ->placeholder('N/A'),
+                        TextEntry::make('country.name')
+                            ->label(__('label.user.country'))
+                            ->placeholder('N/A'),
                         TextEntry::make('added')->label(__("label.added")),
                         TextEntry::make('last_access')->label(__("label.last_access")),
                         TextEntry::make('inviter.username')->label(__("label.user.invite_by")),
+                        TextEntry::make('ip')
+                            ->label(__('label.user.ip'))
+                            ->visible(fn (User $record): bool => self::currentUser()->class >= User::CLASS_MODERATOR)
+                            ->placeholder('N/A'),
                         TextEntry::make('parked')->label(__("label.user.parked")),
                         TextEntry::make('offer_allowed_count')->label(__("label.user.offer_allowed_count")),
                         TextEntry::make('seed_points')->label(__("label.user.seed_points")),
@@ -281,21 +301,68 @@ class UserResource extends Resource
     {
         return Action::make(__('admin.resources.user.actions.confirm_btn'))
             ->modalHeading(__('admin.resources.user.actions.confirm_btn'))
-            ->requiresConfirmation()
             ->visible(fn (User $record): bool => (self::currentUser()->class > $record->class))
             ->button()
             ->color('success')
             ->visible(fn ($record) => $record->status == User::STATUS_PENDING)
-            ->action(function (User $record) {
+            ->schema([
+                Forms\Components\Checkbox::make('send_email')
+                    ->label(__('admin.resources.user.actions.confirm_send_email'))
+                    ->helperText(__('admin.resources.user.actions.confirm_send_email_help'))
+                    ->default(true),
+            ])
+            ->action(function (User $record, array $data) {
                 if (self::currentUser()->class <= $record->class) {
                     \App\Support\Admin::failNotification("No Permission!");
                     return;
                 }
                 $record->status = User::STATUS_CONFIRMED;
-                $record->info= null;
+                $record->info = null;
                 $record->save();
+
+                \App\Support\Events::fire(\App\Enums\ModelEventEnum::USER_UPDATED, $record, null);
+
+                if (!empty($data['send_email']) && $record->email !== '') {
+                    self::sendConfirmationEmail($record);
+                }
+
                 \App\Support\Admin::successNotification("");
             });
+    }
+
+    /**
+     * Send the confirmation email to a newly-confirmed user.
+     *
+     * Mirrors the legacy takeconfirm email flow.
+     */
+    private static function sendConfirmationEmail(User $user): void
+    {
+        $siteName = \App\Support\Config\SiteConfig::current()->basic->siteName('');
+        $baseUrl = \App\Support\Url::schemeAndHost(false);
+        $reportMail = (string) \App\Support\Config\SiteConfig::current()->main->siteEmail('');
+        $siteEmail = (string) \App\Support\Config\SiteConfig::current()->main->siteEmail('');
+
+        $body = sprintf(
+            "Your account has been confirmed.\n\n<b><a href=\"javascript:void(null)\" onclick=\"window.open('%s/login')\">Click here to login</a></b><br />\n%s/login\n\nIf you have any questions, please contact %s",
+            $baseUrl,
+            $baseUrl,
+            $reportMail,
+        );
+
+        $subject = $siteName . ' - Account Confirmed';
+
+        \App\Support\Mail::sentLegacy(
+            (string) $user->email,
+            $siteName,
+            $siteEmail,
+            $subject,
+            $body,
+            'invite confirm',
+            false,
+            false,
+            '',
+            'UTF-8',
+        );
     }
 
     private static function buildActionEnableDisable(): Action
@@ -386,7 +453,9 @@ class UserResource extends Resource
     public static function getBulkActions(): array
     {
         $actions = [];
-        if (self::currentUser()->class >= User::CLASS_SYSOP) {
+        $currentUser = self::currentUser();
+
+        if ($currentUser->class >= User::CLASS_SYSOP) {
             $actions[] = BulkAction::make('confirm')
                 ->label(__('admin.resources.user.actions.confirm_bulk'))
                 ->requiresConfirmation()
@@ -394,6 +463,36 @@ class UserResource extends Resource
                 ->action(function (Collection $records) {
                     $rep = self::getRep();
                     $rep->confirmUser($records->pluck('id')->toArray());
+                });
+        }
+
+        if ($currentUser->class >= User::CLASS_MODERATOR) {
+            $actions[] = BulkAction::make('remove_warning')
+                ->label(__('admin.resources.user.actions.remove_warning_bulk'))
+                ->requiresConfirmation()
+                ->deselectRecordsAfterCompletion()
+                ->action(function (Collection $records) {
+                    $rep = self::getRep();
+                    $rep->removeWarnings(self::currentUser(), $records->pluck('id')->toArray());
+                    \App\Support\Admin::successNotification("");
+                });
+
+            $actions[] = BulkAction::make('disable')
+                ->label(__('admin.resources.user.actions.disable_bulk'))
+                ->requiresConfirmation()
+                ->deselectRecordsAfterCompletion()
+                ->action(function (Collection $records) {
+                    $rep = self::getRep();
+                    foreach ($records as $record) {
+                        if ($record instanceof User && $record->enabled === 'yes') {
+                            try {
+                                $rep->disableUser(self::currentUser(), $record->id, __('admin.resources.user.actions.disable_bulk_reason'));
+                            } catch (Exception $e) {
+                                // continue with other users
+                            }
+                        }
+                    }
+                    \App\Support\Admin::successNotification("");
                 });
         }
 

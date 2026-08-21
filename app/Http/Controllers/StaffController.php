@@ -8,22 +8,17 @@ use App\Models\Message;
 use App\Models\Setting;
 use App\Models\StaffMessage;
 use App\Models\User;
-use App\Models\UserBanLog;
 use App\Models\UserModifyLog;
 use App\Models\UsernameChangeLog;
-use App\Repositories\MessageRepository;
 use App\Repositories\ModtaskRepository;
-use App\Repositories\ToolRepository;
 use App\Support\Cache;
 use App\Support\Country;
-use App\Support\Format;
 use App\Support\Hooks;
 use App\Support\Locale;
 use App\Support\Log;
 use App\Support\Network;
 use App\Support\Permissions;
 use App\Support\SupportContext;
-use App\Support\Time;
 use App\Support\User as SupportUser;
 use App\Support\UserClass;
 use App\Support\UserDisplay;
@@ -471,173 +466,6 @@ class StaffController extends LegacyController
 
     }
 
-    public function staffbox(Request $request): View|RedirectResponse|Response
-    {
-        $currentUser = SupportContext::getUser() ?? [];
-        $currentUserId = (int) ($currentUser['id'] ?? 0);
-        $langStaffbox = (array) SupportContext::getGlobal('lang_staffbox', []);
-        $langFunctions = SupportContext::getLangFunctions();
-
-        $action = (string) (SupportContext::getQuery('action') ?? '');
-        $queryString = (string) SupportContext::getServerValue('QUERY_STRING');
-        $httpReferer = (string) SupportContext::getServerValue('HTTP_REFERER');
-
-        $canAccessStaffMessage = function (array|int $msg) use ($currentUserId): void {
-            if (Permission::can(PermissionEnum::STAFF_MEMBER, User::findOrFail($currentUserId))) {
-                return;
-            }
-            if (is_numeric($msg)) {
-                $msg = StaffMessage::query()->findOrFail((int) $msg)->toArray();
-            }
-            if (empty($msg['permission']) || ! in_array($msg['permission'], ToolRepository::listUserAllPermissions($currentUserId))) {
-                abort(403, 'Permission denied.');
-            }
-        };
-
-        if ($request->isMethod('post') && $action === 'takeanswer') {
-            $receiver = (int) (SupportContext::getPost('receiver') ?? 0);
-            $answeringto = (int) (SupportContext::getPost('answeringto') ?? 0);
-
-            if (! Validators::isId($receiver)) {
-                return $this->legacyAbortResponse($langStaffbox['std_error'] ?? 'Error', $langStaffbox['std_invalid_id'] ?? 'Invalid ID.');
-            }
-
-            if (! User::query()->find($receiver)) {
-                return $this->legacyAbortResponse($langStaffbox['std_error'] ?? 'Error', $langStaffbox['std_no_user_id'] ?? 'No user with that ID.');
-            }
-
-            $msg = trim((string) SupportContext::getPost('body'));
-            if ($msg === '') {
-                return $this->legacyAbortResponse($langStaffbox['std_error'] ?? 'Error', $langStaffbox['std_body_is_empty'] ?? 'Body is empty.');
-            }
-
-            $canAccessStaffMessage($answeringto);
-            $subject = StaffMessage::query()->findOrFail($answeringto)->value('subject');
-
-            Message::add([
-                'sender' => $currentUserId,
-                'receiver' => $receiver,
-                'subject' => $subject,
-                'added' => now(),
-                'msg' => $msg,
-            ]);
-
-            StaffMessage::query()->where('id', $answeringto)->update(['answer' => $msg, 'answered' => 1, 'answeredby' => $currentUserId]);
-            Cache::clearStaffMessage();
-
-            return redirect('staffbox.php?action=viewpm&pmid=' . $answeringto);
-        }
-
-        if ($action === 'deletestaffmessage') {
-            $id = (int) (SupportContext::getQuery('id') ?? 0);
-            if ($id < 1) {
-                return $this->legacyAbortResponse('Error', 'Invalid id');
-            }
-            $canAccessStaffMessage($id);
-            StaffMessage::query()->where('id', $id)->delete();
-            Cache::clearStaffMessage();
-            $baseUrl = SupportContext::getGlobal('BASEURL', '');
-            return redirect((string) $baseUrl . '/staffbox.php');
-        }
-
-        if ($action === 'setanswered') {
-            $id = (int) (SupportContext::getQuery('id') ?? 0);
-            $canAccessStaffMessage($id);
-            StaffMessage::query()->where('id', $id)->update(['answered' => 1, 'answeredby' => $currentUserId]);
-            Cache::clearStaffMessage();
-            $return = (string) (SupportContext::getQuery('return') ?? '');
-            return redirect('staffbox.php' . ($return !== '' ? '?' . $return : ''));
-        }
-
-        if ($request->isMethod('post') && $action === 'takecontactanswered') {
-            $setAnswered = (array) SupportContext::getPost('setanswered');
-            if (empty($setAnswered)) {
-                return $this->legacyAbortResponse($langStaffbox['std_sorry'] ?? 'Sorry', \App\Support\Locale::trans('nexus.select_one_please', [], null));
-            }
-            $setDealt = SupportContext::getPost('setdealt') !== null;
-            $delete = SupportContext::getPost('delete') !== null;
-
-            $messages = StaffMessage::query()->whereIn('id', $setAnswered)->get();
-            foreach ($messages as $message) {
-                $canAccessStaffMessage($message->toArray());
-                if ($setDealt) {
-                    $message->update(['answered' => 1, 'answeredby' => $currentUserId]);
-                } elseif ($delete) {
-                    $message->delete();
-                }
-            }
-            Cache::clearStaffMessage();
-            return redirect('staffbox.php');
-        }
-
-        if ($action === 'viewpm') {
-            $pmid = (int) (SupportContext::getQuery('pmid') ?? 0);
-            $arr = StaffMessage::query()->findOrFail($pmid)->toArray();
-            $canAccessStaffMessage($arr);
-
-            $sender = Validators::isId($arr['sender']) ? UserDisplay::username($arr['sender']) : ($langStaffbox['text_system'] ?? 'System');
-            $answeredby = UserDisplay::username($arr['answeredby']);
-
-            return $this->legacyPage($request, 'staffbox', true, [
-                'mode' => 'viewpm',
-                'arr' => $arr,
-                'sender' => $sender,
-                'answeredby' => $answeredby,
-                'lang_staffbox' => $langStaffbox,
-            ]);
-        }
-
-        if ($action === 'answermessage') {
-            $answeringto = (int) (SupportContext::getQuery('answeringto') ?? 0);
-            $receiver = (int) (SupportContext::getQuery('receiver') ?? 0);
-
-            if (! Validators::isId($receiver)) {
-                return $this->legacyAbortResponse($langStaffbox['std_error'] ?? 'Error', $langStaffbox['std_invalid_id'] ?? 'Invalid ID.');
-            }
-
-            $user = User::query()->find($receiver);
-            if (! $user) {
-                return $this->legacyAbortResponse($langStaffbox['std_error'] ?? 'Error', $langStaffbox['std_no_user_id'] ?? 'No user with that ID.');
-            }
-
-            $staffmsg = StaffMessage::query()->findOrFail($answeringto)->toArray();
-            $canAccessStaffMessage($staffmsg);
-
-            $returnTo = (string) (SupportContext::getQuery('returnto') ?? $httpReferer);
-
-            return $this->legacyPage($request, 'staffbox', true, [
-                'mode' => 'answermessage',
-                'receiver' => $receiver,
-                'answeringto' => $answeringto,
-                'staffmsg' => $staffmsg,
-                'returnTo' => $returnTo,
-                'lang_staffbox' => $langStaffbox,
-            ]);
-        }
-
-        // default list
-        $query = MessageRepository::buildStaffMessageQuery($currentUserId);
-        $count = (clone $query)->count();
-        $perPage = 20;
-        [$pagertop, $pagerbottom, , $offset, $pageSize] = \App\Support\Pagination::pager($perPage, $count, 'staffbox.php?');
-        $rows = (clone $query)
-            ->offset($offset)
-            ->limit($pageSize)
-            ->orderBy('id', 'desc')
-            ->get()
-            ->toArray();
-
-        return $this->legacyPage($request, 'staffbox', true, [
-            'mode' => 'list',
-            'rows' => $rows,
-            'pagertop' => $pagertop,
-            'pagerbottom' => $pagerbottom,
-            'queryString' => $queryString,
-            'lang_staffbox' => $langStaffbox,
-            'lang_functions' => $langFunctions,
-        ]);
-
-    }
 
     public function staffmess(Request $request): View|RedirectResponse|Response
     {

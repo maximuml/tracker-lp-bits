@@ -2,8 +2,6 @@
 
 namespace App\Support;
 
-use PHPUnit\Framework\TestCase;
-
 /**
  * Runtime environment helpers extracted from `include/globalfunctions.php`.
  *
@@ -29,7 +27,7 @@ final class Environment
 
     public static function isTesting(): bool
     {
-        return config('app.env') === 'testing' || class_exists(TestCase::class, false);
+        return config('app.env') === 'testing' || app()->runningUnitTests();
     }
 
     public static function commandExists(string $command): bool

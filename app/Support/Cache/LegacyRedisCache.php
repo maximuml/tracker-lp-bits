@@ -2,28 +2,43 @@
 
 namespace App\Support\Cache;
 
+use App\Support\Config;
+use App\Support\Environment;
+use App\Support\Logger;
+
 class LegacyRedisCache
 {
     public bool $isEnabled = false;
+
     public int $clearCache = 0;
+
     public string $language = 'en';
+
     /** @var array<int|string, mixed> */
     public array $Page = [];
+
     public int $Row = 1;
+
     public int $Part = 0;
+
     public string $MemKey = '';
+
     public int $Duration = 0;
+
     public int $cacheReadTimes = 0;
+
     public int $cacheWriteTimes = 0;
+
     /** @var array<string, array<string, int>> */
     public array $keyHits = [];
+
     /** @var array<int, string> */
     public array $languageFolderArray = [];
 
-    /** @var \Redis|null */
     public ?\Redis $redis = null;
 
-    function __construct() {
+    public function __construct()
+    {
         $connectResult = $this->connect(); // Connect to Redis
         if ($connectResult) {
             $this->isEnabled = true;
@@ -34,36 +49,36 @@ class LegacyRedisCache
 
     private function connect(): bool
     {
-        $config = \App\Support\Config::get('nexus.redis', null);
-        $redis = new \Redis();
+        $config = Config::get('nexus.redis', null);
+        $redis = new \Redis;
         $params = [
             $config['host'],
         ];
-        if (!empty($config['port'])) {
+        if (! empty($config['port'])) {
             $params[] = $config['port'];
         }
         if (isset($config['timeout']) && is_numeric($config['timeout'])) {
             $params[] = $config['timeout'];
         }
-        if (\App\Support\Environment::isFpm()) {
+        if (Environment::isFpm()) {
             try {
                 $connectResult = $redis->pconnect(...$params);
             } catch (\Exception $e) {
-                \App\Support\Logger::writeWithContext((string) "redis pconnect failed: {$e->getMessage()}, retry one time", (string) 'error', (bool) false);
+                Logger::writeWithContext((string) "redis pconnect failed: {$e->getMessage()}, retry one time", (string) 'error', (bool) false);
                 $redis->close();
-                $redis = new \Redis();
+                $redis = new \Redis;
                 $connectResult = $redis->pconnect(...$params);
             }
-            \App\Support\Logger::writeWithContext((string) "redis pconnect: {$connectResult}", (string) 'debug', (bool) false);
+            Logger::writeWithContext((string) "redis pconnect: {$connectResult}", (string) 'debug', (bool) false);
         } else {
             try {
                 $connectResult = $redis->connect(...$params);
             } catch (\Exception $e) {
                 $connectResult = false;
             }
-            \App\Support\Logger::writeWithContext((string) "redis connect: {$connectResult}", (string) 'debug', (bool) false);
+            Logger::writeWithContext((string) "redis connect: {$connectResult}", (string) 'debug', (bool) false);
         }
-        if (!empty($config['password'])) {
+        if (! empty($config['password'])) {
             $connectResult = $connectResult && $redis->auth($config['password']);
         }
         if ($connectResult) {
@@ -72,79 +87,91 @@ class LegacyRedisCache
                 $redis->select((int) $config['database']);
             }
         } else {
-            if (\App\Support\Environment::isTesting()) {
+            if (Environment::isTesting()) {
                 $this->isEnabled = false;
+
                 return false;
             }
-            throw new \RuntimeException("Redis connect fail.");
+            throw new \RuntimeException('Redis connect fail.');
         }
+
         return true;
     }
 
-    function getIsEnabled(): bool {
+    public function getIsEnabled(): bool
+    {
         return $this->isEnabled;
     }
 
-    function setClearCache(int $isEnabled): void {
+    public function setClearCache(int $isEnabled): void
+    {
         $this->clearCache = $isEnabled;
     }
 
     /** @return array<int, string> */
-    function getLanguageFolderArray(): array {
+    public function getLanguageFolderArray(): array
+    {
         return $this->languageFolderArray;
     }
 
     /** @param array<int, string> $languageFolderArray */
-    function setLanguageFolderArray(array $languageFolderArray): void {
+    public function setLanguageFolderArray(array $languageFolderArray): void
+    {
         $this->languageFolderArray = $languageFolderArray;
     }
 
-    function getClearCache(): int {
+    public function getClearCache(): int
+    {
         return $this->clearCache;
     }
 
-    function setLanguage(string $language): void {
+    public function setLanguage(string $language): void
+    {
         $this->language = $language;
     }
 
-    function getLanguage(): string {
+    public function getLanguage(): string
+    {
         return $this->language;
     }
 
-    function new_page(string $MemKey = '', int $Duration = 3600, bool $Lang = true): void {
+    public function new_page(string $MemKey = '', int $Duration = 3600, bool $Lang = true): void
+    {
         if ($Lang) {
             $language = $this->getLanguage();
-            $this->MemKey = $language."_".$MemKey;
+            $this->MemKey = $language.'_'.$MemKey;
         } else {
             $this->MemKey = $MemKey;
         }
         $this->Duration = $Duration;
         $this->Row = 1;
         $this->Part = 0;
-        $this->Page = array();
+        $this->Page = [];
     }
 
-    function set_key(): void {
+    public function set_key(): void {}
 
-    }
+    // ---------- Adding functions ----------//
 
-    //---------- Adding functions ----------//
-
-    function add_row(): void {
+    public function add_row(): void
+    {
         $this->Part = 0;
-        $this->Page[$this->Row] = array();
+        $this->Page[$this->Row] = [];
     }
 
-    function end_row(): void {
+    public function end_row(): void
+    {
         $this->Row++;
     }
 
-    function add_part(): void {
+    public function add_part(): void
+    {
         ob_start();
     }
 
-    function end_part(): void {
-        $this->Page[$this->Row][$this->Part]=ob_get_clean();
+    public function end_part(): void
+    {
+        $this->Page[$this->Row][$this->Part] = ob_get_clean();
         $this->Part++;
     }
 
@@ -153,9 +180,10 @@ class LegacyRedisCache
     // add_part();
     // You should only use this function if the row is only going to have one part in it (convention),
     // although it will theoretically work with multiple parts.
-    function add_whole_row(): void {
+    public function add_whole_row(): void
+    {
         $this->Part = 0;
-        $this->Page[$this->Row] = array();
+        $this->Page[$this->Row] = [];
         ob_start();
     }
 
@@ -164,54 +192,61 @@ class LegacyRedisCache
     // end_row();
     // You should only use this function if the row is only going to have one part in it (convention),
     // although it will theoretically work with multiple parts.
-    function end_whole_row(): void {
-        $this->Page[$this->Row][$this->Part]=ob_get_clean();
+    public function end_whole_row(): void
+    {
+        $this->Page[$this->Row][$this->Part] = ob_get_clean();
         $this->Row++;
     }
 
     // Set a variable that will only be availabe when the system is on its row
     // This variable is stored in the same way as pages, so don't use an integer for the $Key.
-    function set_row_value(string|int $Key, mixed $Value): void {
+    public function set_row_value(string|int $Key, mixed $Value): void
+    {
         $this->Page[$this->Row][$Key] = $Value;
     }
 
     // Set a variable that will always be available, no matter what row the system is on.
     // This variable is stored in the same way as rows, so don't use an integer for the $Key.
-    function set_constant_value(string|int $Key, mixed $Value): void {
+    public function set_constant_value(string|int $Key, mixed $Value): void
+    {
         $this->Page[$Key] = $Value;
     }
 
     // Inserts a 'false' value into a row, which breaks out of while loops.
     // This is not necessary if the end of $this->Page is also the end of the while loop.
-    function break_loop(): void {
-        if(count($this->Page)>0){
-            $this->Page[$this->Row] = FALSE;
+    public function break_loop(): void
+    {
+        if (count($this->Page) > 0) {
+            $this->Page[$this->Row] = false;
             $this->Row++;
         }
     }
 
-    //---------- Locking functions ----------//
+    // ---------- Locking functions ----------//
 
     // These functions 'lock' a key.
     // Users cannot proceed until it is unlocked.
 
-    function lock(string $Key): void {
+    public function lock(string $Key): void
+    {
         $this->cache_value('lock_'.$Key, 'true', 3600);
     }
 
-    function unlock(string $Key): void {
+    public function unlock(string $Key): void
+    {
         if ($this->redis === null) {
             return;
         }
-//        $this->delete('lock_'.$Key);
+        //        $this->delete('lock_'.$Key);
         $this->redis->del('lock_'.$Key);
     }
 
-    //---------- Caching functions ----------//
+    // ---------- Caching functions ----------//
 
     // Cache $this->Page and resets $this->Row and $this->Part
-    function cache_page(): void {
-        $this->cache_value($this->MemKey,$this->Page, $this->Duration);
+    public function cache_page(): void
+    {
+        $this->cache_value($this->MemKey, $this->Page, $this->Duration);
         $this->Row = 0;
         $this->Part = 0;
     }
@@ -219,66 +254,73 @@ class LegacyRedisCache
     // Exact same as cache_page, but does not store the page in cache
     // This is so that we can use classes that normally cache values in
     // situations where caching is not required
-    function setup_page(): void {
+    public function setup_page(): void
+    {
         $this->Row = 0;
         $this->Part = 0;
     }
 
     // Wrapper for Memcache::set, with the zlib option removed and default duration of 1 hour
-    function cache_value(string $Key, mixed $Value, int $Duration = 3600): void {
-        if (!$this->getIsEnabled() || $this->redis === null) {
+    public function cache_value(string $Key, mixed $Value, int $Duration = 3600): void
+    {
+        if (! $this->getIsEnabled() || $this->redis === null) {
             return;
         }
         $Value = $this->serialize($Value);
-//        $this->set($Key,$Value, 0, $Duration);
+        //        $this->set($Key,$Value, 0, $Duration);
         $this->redis->set($Key, $Value, $Duration);
         $this->cacheWriteTimes++;
-        $this->keyHits['write'][$Key] = !isset($this->keyHits['write'][$Key]) ? 1 : $this->keyHits['write'][$Key]+1;
+        $this->keyHits['write'][$Key] = ! isset($this->keyHits['write'][$Key]) ? 1 : $this->keyHits['write'][$Key] + 1;
     }
 
-    //---------- Getting functions ----------//
+    // ---------- Getting functions ----------//
 
     // Returns the next row in the page
     // If there's only one part in the row, return that part.
-    function next_row(): mixed {
+    public function next_row(): mixed
+    {
         $this->Row++;
         $this->Part = 0;
-        if(!isset($this->Page[$this->Row]) || $this->Page[$this->Row] == false){
+        if (! isset($this->Page[$this->Row]) || $this->Page[$this->Row] == false) {
             return false;
-        }
-        elseif(count($this->Page[$this->Row]) == 1){
+        } elseif (count($this->Page[$this->Row]) == 1) {
             return $this->Page[$this->Row][0];
-        }
-        else {
+        } else {
             return $this->Page[$this->Row];
         }
     }
 
     // Returns the next part in the row
-    function next_part(): mixed {
+    public function next_part(): mixed
+    {
         $Return = $this->Page[$this->Row][$this->Part];
         $this->Part++;
+
         return $Return;
     }
 
     // Returns a 'row value' (a variable that changes for each row - see above).
-    function get_row_value(string|int $Key): mixed {
+    public function get_row_value(string|int $Key): mixed
+    {
         return $this->Page[$this->Row][$Key];
     }
 
     // Returns a 'constant value' (a variable that doesn't change with the rows - see above)
-    function get_constant_value(string|int $Key): mixed {
+    public function get_constant_value(string|int $Key): mixed
+    {
         return $this->Page[$Key];
     }
 
     // If a cached version of the page exists, set $this->Page to it and return true.
     // Otherwise, return false.
-    function get_page(): bool {
+    public function get_page(): bool
+    {
         $Result = $this->get_value($this->MemKey);
-        if($Result){
+        if ($Result) {
             $this->Row = 0;
             $this->Part = 0;
             $this->Page = $Result;
+
             return true;
         } else {
             return false;
@@ -286,12 +328,14 @@ class LegacyRedisCache
     }
 
     // Wrapper for Memcache::get. Why? Because wrappers are cool.
-    function get_value(string $Key): mixed {
-        if (!$this->getIsEnabled()) {
+    public function get_value(string $Key): mixed
+    {
+        if (! $this->getIsEnabled()) {
             return false;
         }
-        if($this->getClearCache()){
+        if ($this->getClearCache()) {
             $this->delete_value($Key);
+
             return false;
         }
         // If we've locked it
@@ -306,35 +350,41 @@ class LegacyRedisCache
         $Return = $this->redis->get($Key);
         $Return = ! is_null($Return) ? $this->unserialize($Return) : null;
         $this->cacheReadTimes++;
-        $this->keyHits['read'][$Key] = !isset($this->keyHits['read'][$Key]) ? 1 : $this->keyHits['read'][$Key]+1;
+        $this->keyHits['read'][$Key] = ! isset($this->keyHits['read'][$Key]) ? 1 : $this->keyHits['read'][$Key] + 1;
+
         return $Return;
     }
 
     // Wrapper for Memcache::delete. For a reason, see above.
-    function delete_value(string $Key, bool $AllLang = false): int {
-        if (!$this->getIsEnabled() || $this->redis === null) {
+    public function delete_value(string $Key, bool $AllLang = false): int
+    {
+        if (! $this->getIsEnabled() || $this->redis === null) {
             return 0;
         }
         $deleted = $this->redis->del($Key);
         if ($AllLang) {
             $langfolder_array = $this->getLanguageFolderArray();
             foreach ($langfolder_array as $lf) {
-                $this->redis->del($lf . "_" . $Key);
+                $this->redis->del($lf.'_'.$Key);
             }
         }
+
         return (int) $deleted;
     }
 
-    function getCacheReadTimes(): int {
+    public function getCacheReadTimes(): int
+    {
         return $this->cacheReadTimes;
     }
 
-    function getCacheWriteTimes(): int {
+    public function getCacheWriteTimes(): int
+    {
         return $this->cacheWriteTimes;
     }
 
     /** @return array<string, int> */
-    function getKeyHits(string $type = 'read'): array {
+    public function getKeyHits(string $type = 'read'): array
+    {
         return $this->keyHits[$type] ?? [];
     }
 
@@ -364,13 +414,13 @@ class LegacyRedisCache
      * get the redis client
      *
      * @date 2021/1/15
-     * @return \Redis|null
      */
     public function getRedis(): ?\Redis
     {
         if ($this->getIsEnabled()) {
             return $this->redis;
         }
+
         return null;
     }
 }

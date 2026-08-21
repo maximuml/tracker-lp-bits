@@ -1,9 +1,15 @@
 <?php
+
 namespace App\Repositories;
 
 use App\Exceptions\ClientNotAllowedException;
 use App\Models\AgentAllow;
 use App\Models\AgentDeny;
+use App\Models\NexusModel;
+use App\Support\Env;
+use App\Support\Json;
+use App\Support\Logger;
+use App\Support\Url;
 use Illuminate\Support\Collection;
 use Nexus\Database\NexusDB;
 
@@ -11,22 +17,23 @@ class AgentAllowRepository extends BaseRepository
 {
     /**
      * @param  array<int|string, mixed>  $params
-     * @return  mixed
+     * @return mixed
      */
     public function getList(array $params)
     {
         $query = AgentAllow::query();
-        if (!empty($params['family'])) {
+        if (! empty($params['family'])) {
             $query->where('family', 'like', "%{$params['family']}%");
         }
-        list($sortField, $sortType) = $this->getSortFieldAndType($params);
+        [$sortField, $sortType] = $this->getSortFieldAndType($params);
         $query->orderBy($sortField, $sortType);
+
         return $query->paginate();
     }
 
     /**
      * @param  array<int|string, mixed>  $params
-     * @return  mixed
+     * @return mixed
      */
     public function store(array $params)
     {
@@ -35,13 +42,13 @@ class AgentAllowRepository extends BaseRepository
         /** @var array<string, mixed> $data */
         $data = $params;
         $model = AgentAllow::query()->create($data);
+
         return $model;
     }
 
     /**
      * @param  array<int|string, mixed>  $params
-     * @param  int  $id
-     * @return  mixed
+     * @return mixed
      */
     public function update(array $params, int $id)
     {
@@ -51,28 +58,29 @@ class AgentAllowRepository extends BaseRepository
         /** @var array<string, mixed> $data */
         $data = $params;
         $model->update($data);
+
         return $model;
     }
 
     /**
-     * @param  int  $id
-     * @return  mixed
+     * @return mixed
      */
     public function getDetail(int $id)
     {
         $model = AgentAllow::query()->findOrFail($id);
+
         return $model;
     }
 
     /**
-     * @param  int  $id
-     * @return  mixed
+     * @return mixed
      */
     public function delete(int $id)
     {
         $model = AgentAllow::query()->findOrFail($id);
         $model->denies()->delete();
         $result = $model->delete();
+
         return $result;
     }
 
@@ -80,18 +88,19 @@ class AgentAllowRepository extends BaseRepository
      * @param  mixed  $pattern
      * @param  mixed  $start
      * @param  mixed  $matchNum
-     * @return  mixed
+     * @return mixed
      */
     public function getPatternMatches($pattern, $start, $matchNum)
     {
-        if (!preg_match($pattern, $start, $matches)) {
+        if (! preg_match($pattern, $start, $matches)) {
             throw new ClientNotAllowedException(sprintf('pattern: %s can not match start: %s', $pattern, $start));
         }
         $matchCount = count($matches) - 1;
-        //due to old data may be matchNum > matchCount
-//        if ($matchNum > $matchCount && !IN_NEXUS) {
-//            throw new ClientNotAllowedException("pattern: $pattern match start: $start got matches count: $matchCount, but require $matchNum.");
-//        }
+
+        // due to old data may be matchNum > matchCount
+        //        if ($matchNum > $matchCount && !IN_NEXUS) {
+        //            throw new ClientNotAllowedException("pattern: $pattern match start: $start got matches count: $matchCount, but require $matchNum.");
+        //        }
         return array_slice($matches, 1, $matchNum);
     }
 
@@ -99,13 +108,14 @@ class AgentAllowRepository extends BaseRepository
      * @param  mixed  $peerId
      * @param  mixed  $agent
      * @param  mixed  $debug
-     * @return  \App\Models\NexusModel|mixed
+     * @return NexusModel|mixed
+     *
      * @throws ClientNotAllowedException
      */
     public function checkClient($peerId, $agent, $debug = false)
     {
-        //check from high version to low version, if high version allow, stop!
-        $cacheKey = \App\Support\Env::get("CACHE_KEY_AGENT_ALLOW", "all_agent_allows") . ":php";
+        // check from high version to low version, if high version allow, stop!
+        $cacheKey = Env::get('CACHE_KEY_AGENT_ALLOW', 'all_agent_allows').':php';
         $allows = NexusDB::remember($cacheKey, 3600, function () {
             return AgentAllow::query()
                 ->orderBy('peer_id_start', 'desc')
@@ -118,7 +128,7 @@ class AgentAllowRepository extends BaseRepository
             $agentAllowId = $agentAllow->id;
             $logPrefix = "[ID: $agentAllowId]";
             $isPeerIdAllowed = $isAgentAllowed = $isPeerIdTooLow = $isAgentTooLow = false;
-            //check peer_id, when handle scrape request, no peer_id, so let it pass
+            // check peer_id, when handle scrape request, no peer_id, so let it pass
             if ($agentAllow->peer_id_pattern == '' || $peerId === null) {
                 $isPeerIdAllowed = true;
             } else {
@@ -129,11 +139,11 @@ class AgentAllowRepository extends BaseRepository
                 try {
                     $peerIdResult = $this->isAllowed($pattern, $start, $matchNum, $matchType, $peerId, $debug, $logPrefix);
                     if ($debug) {
-                        \App\Support\Logger::writeWithContext((string) ("{$logPrefix}, peerIdResult: {$peerIdResult}, with parameters: " . \App\Support\Json::encode(compact('pattern', 'start', 'matchNum', 'matchType', 'peerId'))), (string) 'info', (bool) false);
+                        Logger::writeWithContext((string) ("{$logPrefix}, peerIdResult: {$peerIdResult}, with parameters: ".Json::encode(compact('pattern', 'start', 'matchNum', 'matchType', 'peerId'))), (string) 'info', (bool) false);
                     }
                 } catch (\Exception $exception) {
-                    \App\Support\Logger::writeWithContext((string) ("{$logPrefix}, check peer_id error: " . $exception->getMessage()), (string) 'error', (bool) false);
-                    throw new ClientNotAllowedException("regular expression err for peer_id: " . $start . ", please ask sysop to fix this");
+                    Logger::writeWithContext((string) ("{$logPrefix}, check peer_id error: ".$exception->getMessage()), (string) 'error', (bool) false);
+                    throw new ClientNotAllowedException('regular expression err for peer_id: '.$start.', please ask sysop to fix this');
                 }
                 if ($peerIdResult == 1) {
                     $isPeerIdAllowed = true;
@@ -143,7 +153,7 @@ class AgentAllowRepository extends BaseRepository
                 }
             }
 
-            //check agent
+            // check agent
             if ($agentAllow->agent_pattern == '') {
                 $isAgentAllowed = true;
             } else {
@@ -154,11 +164,11 @@ class AgentAllowRepository extends BaseRepository
                 try {
                     $agentResult = $this->isAllowed($pattern, $start, $matchNum, $matchType, $agent, $debug, $logPrefix);
                     if ($debug) {
-                        \App\Support\Logger::writeWithContext((string) ("{$logPrefix}, agentResult: {$agentResult}, with parameters: " . \App\Support\Json::encode(compact('pattern', 'start', 'matchNum', 'matchType', 'agent'))), (string) 'info', (bool) false);
+                        Logger::writeWithContext((string) ("{$logPrefix}, agentResult: {$agentResult}, with parameters: ".Json::encode(compact('pattern', 'start', 'matchNum', 'matchType', 'agent'))), (string) 'info', (bool) false);
                     }
                 } catch (\Exception $exception) {
-                    \App\Support\Logger::writeWithContext((string) ("{$logPrefix}, check agent error: " . $exception->getMessage()), (string) 'error', (bool) false);
-                    throw new ClientNotAllowedException("regular expression err for agent: " . $start . ", please ask sysop to fix this");
+                    Logger::writeWithContext((string) ("{$logPrefix}, check agent error: ".$exception->getMessage()), (string) 'error', (bool) false);
+                    throw new ClientNotAllowedException('regular expression err for agent: '.$start.', please ask sysop to fix this');
                 }
                 if ($agentResult == 1) {
                     $isAgentAllowed = true;
@@ -168,13 +178,13 @@ class AgentAllowRepository extends BaseRepository
                 }
             }
 
-            //both OK, passed, client is allowed
+            // both OK, passed, client is allowed
             if ($isPeerIdAllowed && $isAgentAllowed) {
                 $agentAllowPassed = $agentAllow;
                 break;
             }
             if ($isPeerIdTooLow && $isAgentTooLow) {
-                $versionTooLowStr = "Your " . $agentAllow->family . " 's version is too low, please update it after " . $agentAllow->start_name;
+                $versionTooLowStr = 'Your '.$agentAllow->family." 's version is too low, please update it after ".$agentAllow->start_name;
             }
         }
 
@@ -182,12 +192,12 @@ class AgentAllowRepository extends BaseRepository
             throw new ClientNotAllowedException($versionTooLowStr);
         }
 
-        if (!$agentAllowPassed) {
-            throw new ClientNotAllowedException("Banned Client, Please goto " . \App\Support\Url::schemeAndHost(false) . "/faq.php#id29 for a list of acceptable clients");
+        if (! $agentAllowPassed) {
+            throw new ClientNotAllowedException('Banned Client, Please goto '.Url::schemeAndHost(false).'/faq.php#id29 for a list of acceptable clients');
         }
 
         if ($debug) {
-            \App\Support\Logger::writeWithContext((string) ("agentAllowPassed: " . $agentAllowPassed->toJson()), (string) 'info', (bool) false);
+            Logger::writeWithContext((string) ('agentAllowPassed: '.$agentAllowPassed->toJson()), (string) 'info', (bool) false);
         }
 
         // check if exclude
@@ -195,18 +205,18 @@ class AgentAllowRepository extends BaseRepository
             $agentDeny = $this->checkIsDenied($peerId, $agent, $agentAllowPassed->id);
             if ($agentDeny) {
                 if ($debug) {
-                    \App\Support\Logger::writeWithContext((string) ("agentDeny: " . $agentDeny->toJson()), (string) 'info', (bool) false);
+                    Logger::writeWithContext((string) ('agentDeny: '.$agentDeny->toJson()), (string) 'info', (bool) false);
                 }
                 throw new ClientNotAllowedException(sprintf(
-                    "[%s-%s]Client: %s is banned due to: %s",
+                    '[%s-%s]Client: %s is banned due to: %s',
                     $agentAllowPassed->id, $agentDeny->id, $agentDeny->name, $agentDeny->comment
                 ));
             }
         }
-        if (\App\Support\Url::isSecure() && $agentAllowPassed->allowhttps != 'yes') {
+        if (Url::isSecure() && $agentAllowPassed->allowhttps != 'yes') {
             throw new ClientNotAllowedException(sprintf(
-                "[%s]This client does not support https well, Please goto %s/faq.php#id29 for a list of proper clients",
-                $agentAllowPassed->id, \App\Support\Url::schemeAndHost(false)
+                '[%s]This client does not support https well, Please goto %s/faq.php#id29 for a list of proper clients',
+                $agentAllowPassed->id, Url::schemeAndHost(false)
             ));
         }
 
@@ -218,18 +228,18 @@ class AgentAllowRepository extends BaseRepository
      * @param  mixed  $peerId
      * @param  mixed  $agent
      * @param  mixed  $familyId
-     * @return  mixed
+     * @return mixed
      */
     private function checkIsDenied($peerId, $agent, $familyId)
     {
-        $cacheKey = \App\Support\Env::get("CACHE_KEY_AGENT_DENY", "all_agent_denies") . ":php";
-        /** @var \Illuminate\Support\Collection<int, mixed> $allDenies */
+        $cacheKey = Env::get('CACHE_KEY_AGENT_DENY', 'all_agent_denies').':php';
+        /** @var Collection<int, mixed> $allDenies */
         $allDenies = NexusDB::remember($cacheKey, 3600, function () {
             return AgentDeny::query()->get()->groupBy('family_id');
         });
         $agentDenies = $allDenies->get($familyId, []);
         foreach ($agentDenies as $agentDeny) {
-            if ($agentDeny->agent == $agent && preg_match("/^" . $agentDeny->peer_id . "/", $peerId)) {
+            if ($agentDeny->agent == $agent && preg_match('/^'.$agentDeny->peer_id.'/', $peerId)) {
                 return $agentDeny;
             }
         }
@@ -240,6 +250,7 @@ class AgentAllowRepository extends BaseRepository
      * 0: not allowed
      * 1: allowed
      * 2: version too low
+     *
      * @param  mixed  $pattern
      * @param  mixed  $start
      * @param  mixed  $matchNum
@@ -247,19 +258,20 @@ class AgentAllowRepository extends BaseRepository
      * @param  mixed  $value
      * @param  mixed  $debug
      * @param  mixed  $logPrefix
-     * @return  int
+     *
      * @throws ClientNotAllowedException
      */
     private function isAllowed($pattern, $start, $matchNum, $matchType, $value, $debug = false, $logPrefix = ''): int
     {
         $matchBench = $this->getPatternMatches($pattern, $start, $matchNum);
         if ($debug) {
-            \App\Support\Logger::writeWithContext((string) ("{$logPrefix}, matchBench: " . \App\Support\Json::encode($matchBench)), (string) 'info', (bool) false);
+            Logger::writeWithContext((string) ("{$logPrefix}, matchBench: ".Json::encode($matchBench)), (string) 'info', (bool) false);
         }
-        if (!preg_match($pattern, $value, $matchTarget)) {
+        if (! preg_match($pattern, $value, $matchTarget)) {
             if ($debug) {
-                \App\Support\Logger::writeWithContext((string) sprintf("{$logPrefix}, pattern: (%s) not match: (%s)", $pattern, $value), (string) 'info', (bool) false);
+                Logger::writeWithContext((string) sprintf("{$logPrefix}, pattern: (%s) not match: (%s)", $pattern, $value), (string) 'info', (bool) false);
             }
+
             return 0;
         }
         if ($matchNum <= 0) {
@@ -267,10 +279,10 @@ class AgentAllowRepository extends BaseRepository
         }
         $matchTarget = array_slice($matchTarget, 1);
         if ($debug) {
-            \App\Support\Logger::writeWithContext((string) ("{$logPrefix}, matchTarget: " . \App\Support\Json::encode($matchTarget)), (string) 'info', (bool) false);
+            Logger::writeWithContext((string) ("{$logPrefix}, matchTarget: ".Json::encode($matchTarget)), (string) 'info', (bool) false);
         }
         for ($i = 0; $i < $matchNum; $i++) {
-            if (!isset($matchBench[$i]) || !isset($matchTarget[$i])) {
+            if (! isset($matchBench[$i]) || ! isset($matchTarget[$i])) {
                 break;
             }
             if ($matchType == 'dec') {
@@ -280,17 +292,17 @@ class AgentAllowRepository extends BaseRepository
                 $matchBench[$i] = hexdec((string) $matchBench[$i]);
                 $matchTarget[$i] = hexdec((string) $matchTarget[$i]);
             } else {
-                throw new ClientNotAllowedException(sprintf("Invalid match type: %s", $matchType));
+                throw new ClientNotAllowedException(sprintf('Invalid match type: %s', $matchType));
             }
             if ($matchTarget[$i] > $matchBench[$i]) {
-                //higher, pass directly
+                // higher, pass directly
                 return 1;
             } elseif ($matchTarget[$i] < $matchBench[$i]) {
                 return 2;
             }
         }
 
-        //NOTE: at last, after all position checked, not [NOT_MATCH] or lower, it is passed!
+        // NOTE: at last, after all position checked, not [NOT_MATCH] or lower, it is passed!
         return 1;
 
     }
@@ -299,12 +311,12 @@ class AgentAllowRepository extends BaseRepository
      * @param  mixed  $peerId
      * @param  mixed  $agent
      * @param  mixed  $debug
-     * @return  mixed
+     * @return mixed
      */
     public function checkClientSimple($peerId, $agent, $debug = false)
     {
-        //check from high version to low version, if high version allow, stop!
-        $cacheKey = \App\Support\Env::get("CACHE_KEY_AGENT_ALLOW", "all_agent_allows") . ":php";
+        // check from high version to low version, if high version allow, stop!
+        $cacheKey = Env::get('CACHE_KEY_AGENT_ALLOW', 'all_agent_allows').':php';
         $allows = NexusDB::remember($cacheKey, 3600, function () {
             return AgentAllow::query()
                 ->orderBy('peer_id_start', 'desc')
@@ -316,32 +328,32 @@ class AgentAllowRepository extends BaseRepository
             $agentAllowId = $agentAllow->id;
             $agentAllowLogPrefix = "[ID: $agentAllowId], peerId: $peerId";
             $pattern = $agentAllow->peer_id_pattern;
-            //check peer_id, when handle scrape request, no peer_id, so let it pass
+            // check peer_id, when handle scrape request, no peer_id, so let it pass
             $isPeerIdAllowed = empty($pattern) || preg_match($pattern, $peerId);
             $agentAllowLogPrefix .= ", peer_id pattern: $pattern, isPeerIdAllowed: $isPeerIdAllowed";
 
-            //check agent, agent must have both announce + scrape
+            // check agent, agent must have both announce + scrape
             $pattern = $agentAllow->agent_pattern;
-            $isAgentAllowed = !empty($pattern) && preg_match($pattern, $agent);
+            $isAgentAllowed = ! empty($pattern) && preg_match($pattern, $agent);
             $agentAllowLogPrefix .= ", agent pattern: $pattern, isAgentAllowed: $isAgentAllowed";
 
-            //both OK, passed, client is allowed
+            // both OK, passed, client is allowed
             if ($isPeerIdAllowed && $isAgentAllowed) {
                 $agentAllowPassed = $agentAllow;
-                \App\Support\Logger::writeWithContext((string) "{$agentAllowLogPrefix}, PASSED", (string) 'debug', (bool) false);
+                Logger::writeWithContext((string) "{$agentAllowLogPrefix}, PASSED", (string) 'debug', (bool) false);
                 break;
             }
             if ($debug) {
-                \App\Support\Logger::writeWithContext((string) "{$agentAllowLogPrefix}, NOT PASSED", (string) 'debug', (bool) false);
+                Logger::writeWithContext((string) "{$agentAllowLogPrefix}, NOT PASSED", (string) 'debug', (bool) false);
             }
         }
 
-        if (!$agentAllowPassed) {
-            throw new ClientNotAllowedException("Banned Client, Please goto " . \App\Support\Url::schemeAndHost(false) . "/faq.php#id29 for a list of acceptable clients");
+        if (! $agentAllowPassed) {
+            throw new ClientNotAllowedException('Banned Client, Please goto '.Url::schemeAndHost(false).'/faq.php#id29 for a list of acceptable clients');
         }
 
         if ($debug) {
-            \App\Support\Logger::writeWithContext((string) ("agentAllowPassed: " . $agentAllowPassed->toJson()), (string) 'debug', (bool) false);
+            Logger::writeWithContext((string) ('agentAllowPassed: '.$agentAllowPassed->toJson()), (string) 'debug', (bool) false);
         }
 
         // check if exclude
@@ -349,23 +361,22 @@ class AgentAllowRepository extends BaseRepository
             $agentDeny = $this->checkIsDenied($peerId, $agent, $agentAllowPassed->id);
             if ($agentDeny) {
                 if ($debug) {
-                    \App\Support\Logger::writeWithContext((string) ("agentDeny: " . $agentDeny->toJson()), (string) 'info', (bool) false);
+                    Logger::writeWithContext((string) ('agentDeny: '.$agentDeny->toJson()), (string) 'info', (bool) false);
                 }
                 throw new ClientNotAllowedException(sprintf(
-                    "[%s-%s]Client: %s is banned due to: %s",
+                    '[%s-%s]Client: %s is banned due to: %s',
                     $agentAllowPassed->id, $agentDeny->id, $agentDeny->name, $agentDeny->comment
                 ));
             }
         }
-        if (\App\Support\Url::isSecure() && $agentAllowPassed->allowhttps != 'yes') {
+        if (Url::isSecure() && $agentAllowPassed->allowhttps != 'yes') {
             throw new ClientNotAllowedException(sprintf(
-                "[%s]This client does not support https well, Please goto %s/faq.php#id29 for a list of proper clients",
-                $agentAllowPassed->id, \App\Support\Url::schemeAndHost(false)
+                '[%s]This client does not support https well, Please goto %s/faq.php#id29 for a list of proper clients',
+                $agentAllowPassed->id, Url::schemeAndHost(false)
             ));
         }
 
         return $agentAllowPassed;
 
     }
-
 }

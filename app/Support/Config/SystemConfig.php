@@ -29,6 +29,7 @@ final class SystemConfig extends Config
     public function accessAdminClassMin(?int $default = null): ?int
     {
         $value = $this->data['access_admin_class_min'] ?? $default;
+
         return $value !== null ? (int) $value : null;
     }
 
@@ -61,5 +62,4 @@ final class SystemConfig extends Config
     {
         return $this->bool('is_record_seeding_bonus_log', $default);
     }
-
 }

@@ -2,7 +2,9 @@
 
 namespace App\Console\Commands;
 
+use App\Support\Logger;
 use Illuminate\Console\Command;
+use Nexus\Nexus;
 use Nexus\Plugin\BasePlugin;
 
 class Plugin extends Command
@@ -23,23 +25,26 @@ class Plugin extends Command
 
     /**
      * Execute the console command.
-     * @return  int
+     *
+     * @return int
      */
     public function handle()
     {
-        $plugin = new \Nexus\Plugin\Plugin();
+        $plugin = new \Nexus\Plugin\Plugin;
         $action = $this->argument('action');
         $name = $this->argument('name');
         /** @var BasePlugin $mainClass */
         $mainClass = $plugin->getMainClass($name);
-        if (!$mainClass) {
+        if (! $mainClass) {
             $this->error("Can not find plugin: $name");
+
             return 1;
         }
         try {
             $mainClass->checkMainApplicationVersion(false);
         } catch (\Exception $exception) {
             $this->error($exception->getMessage());
+
             return 1;
         }
         $callable = [$mainClass, $action];
@@ -48,11 +53,13 @@ class Plugin extends Command
             call_user_func($callable);
         } else {
             $this->error("Not support action: $action");
+
             return 1;
         }
-        $log = sprintf("[%s], %s plugin: %s successfully !", \Nexus\Nexus::instance()->getRequestId(), $action, $name);
+        $log = sprintf('[%s], %s plugin: %s successfully !', Nexus::instance()->getRequestId(), $action, $name);
         $this->info($log);
-        \App\Support\Logger::writeWithContext((string) $log, (string) 'info', (bool) false);
+        Logger::writeWithContext((string) $log, (string) 'info', (bool) false);
+
         return 0;
     }
 }

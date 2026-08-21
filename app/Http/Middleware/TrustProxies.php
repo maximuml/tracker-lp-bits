@@ -36,5 +36,4 @@ class TrustProxies extends Middleware
 
         return $proxies;
     }
-
 }

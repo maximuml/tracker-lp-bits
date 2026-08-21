@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * @property int $id
@@ -26,6 +27,7 @@ class Ban extends Model
     public static function ipToLong(string $ip): int|false
     {
         $long = ip2long($ip);
+
         return $long === false ? false : (int) $long;
     }
 
@@ -37,7 +39,7 @@ class Ban extends Model
         return long2ip($long) ?: '';
     }
 
-    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<User, $this> */
+    /** @return BelongsTo<User, $this> */
     public function addedByUser()
     {
         return $this->belongsTo(User::class, 'addedby');

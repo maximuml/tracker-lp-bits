@@ -1,9 +1,10 @@
 <?php
+
 namespace App\Repositories;
 
 use App\Models\AnnounceLog;
+use App\Support\Logger;
 use ClickHouseDB\Client;
-use Nexus\Database\NexusDB;
 
 class AnnounceLogRepository extends BaseRepository
 {
@@ -11,44 +12,41 @@ class AnnounceLogRepository extends BaseRepository
 
     /**
      * @param  array<int|string, mixed>  $filters
-     * @param  int  $page
-     * @param  int  $perPage
-     * @param  ?string  $sortColumn
-     * @param  ?string  $sortDirection
-     * @return  array<int|string, mixed>
+     * @return array<int|string, mixed>
      */
     public function listAll(array $filters, int $page, int $perPage, ?string $sortColumn, ?string $sortDirection)
     {
         $beginTimestamp = microtime(true);
-        \App\Support\Logger::writeWithContext((string) sprintf("[REQUEST_CLICKHOUSE] [BEGIN], filters: %s, page: %s, perPage: %s, sortColumn: %s, sortDirection: %s", json_encode($filters), $page, $perPage, $sortColumn, $sortDirection), (string) 'info', (bool) false);
-        $totalAlias = "total";
+        Logger::writeWithContext((string) sprintf('[REQUEST_CLICKHOUSE] [BEGIN], filters: %s, page: %s, perPage: %s, sortColumn: %s, sortDirection: %s', json_encode($filters), $page, $perPage, $sortColumn, $sortDirection), (string) 'info', (bool) false);
+        $totalAlias = 'total';
         $offset = ($page - 1) * $perPage;
         $client = $this->getClient();
         $bindFields = $bindValues = [];
         foreach ($filters as $key => $value) {
             $bindFields[] = "$key = :$key";
-            if ($key == "event" && $value == "none") {
-                $value = "";
+            if ($key == 'event' && $value == 'none') {
+                $value = '';
             }
             $bindValues[$key] = $value;
         }
-        $selectPrefix = sprintf("select * from %s", self::TABLE);
-        $countPrefix = sprintf("select count(*) as %s from %s", $totalAlias, self::TABLE);
-        $whereStr = "";
+        $selectPrefix = sprintf('select * from %s', self::TABLE);
+        $countPrefix = sprintf('select count(*) as %s from %s', $totalAlias, self::TABLE);
+        $whereStr = '';
         if (count($bindFields) > 0) {
-            $whereStr = " where " . implode(" and ", $bindFields);
+            $whereStr = ' where '.implode(' and ', $bindFields);
         }
         $selectSql = sprintf(
-            "%s %s order by %s %s limit %d offset %d",
-            $selectPrefix, $whereStr, $sortColumn ?: "timestamp", $sortDirection ?: "desc", $perPage, $offset
+            '%s %s order by %s %s limit %d offset %d',
+            $selectPrefix, $whereStr, $sortColumn ?: 'timestamp', $sortDirection ?: 'desc', $perPage, $offset
         );
-        $countSql = sprintf("%s %s", $countPrefix, $whereStr);
+        $countSql = sprintf('%s %s', $countPrefix, $whereStr);
         $data = $client->select($selectSql, $bindValues);
         $total = $client->select($countSql, $bindValues)->rows()[0][$totalAlias] ?? 0;
-        \App\Support\Logger::writeWithContext((string) sprintf("[REQUEST_CLICKHOUSE] [END], selectSql: %s, binds: %s, costTime: %.3f sec.", $selectSql, json_encode($bindValues), microtime(true) - $beginTimestamp), (string) 'info', (bool) false);
+        Logger::writeWithContext((string) sprintf('[REQUEST_CLICKHOUSE] [END], selectSql: %s, binds: %s, costTime: %.3f sec.', $selectSql, json_encode($bindValues), microtime(true) - $beginTimestamp), (string) 'info', (bool) false);
+
         return [
             'data' => $data->rows(),
-            'total' => (int)$total,
+            'total' => (int) $total,
             'page' => $page,
             'perPage' => $perPage,
         ];
@@ -59,30 +57,29 @@ class AnnounceLogRepository extends BaseRepository
         return app(Client::class);
     }
 
-    /** @param  ?string  $id */
     public function getById(?string $id): ?AnnounceLog
     {
         if (empty($id)) {
             return null;
         }
-        $sql = sprintf("select * from %s where request_id = :id limit 1", self::TABLE);
+        $sql = sprintf('select * from %s where request_id = :id limit 1', self::TABLE);
         $statement = $this->getClient()->select($sql, ['id' => $id]);
         $arr = $statement->fetchOne();
+
         return $arr ? new AnnounceLog($arr) : null;
     }
 
     /**
-     * @param  int  $hours
-     * @return  array<int, array<string, mixed>>
+     * @return array<int, array<string, mixed>>
      */
     public function listMaxUploadedUser(int $hours)
     {
         $sql = sprintf(
-            "select user_id, sum(uploaded_increment) as uploaded_total from %s where timestamp >= now() - INTERVAL %d HOUR group by user_id order by uploaded_total desc limit 5",
+            'select user_id, sum(uploaded_increment) as uploaded_total from %s where timestamp >= now() - INTERVAL %d HOUR group by user_id order by uploaded_total desc limit 5',
             self::TABLE, $hours
         );
         $data = $this->getClient()->select($sql);
+
         return $data->rows();
     }
-
 }

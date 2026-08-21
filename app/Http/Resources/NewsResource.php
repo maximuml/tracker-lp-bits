@@ -2,28 +2,33 @@
 
 namespace App\Http\Resources;
 
+use App\Models\News;
+use App\Support\Description;
+use App\Support\Time;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
- * @mixin \App\Models\News
+ * @mixin News
  */
 class NewsResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
+     *
      * @param  mixed  $request
-     * @return  array<int|string, mixed>
+     * @return array<int|string, mixed>
      */
     public function toArray($request)
     {
-        $descriptionArr = \App\Support\Description::parse((string) $this->body);
+        $descriptionArr = Description::parse((string) $this->body);
+
         return [
             'id' => $this->id,
             'title' => $this->title,
             'body' => $descriptionArr,
-            'images' => \App\Support\Description::imageFromDescription($descriptionArr),
-            'added' => \App\Support\Time::formatDateTime($this->added, 'Y.m.d'),
-            'user' => new UserResource($this->whenLoaded('user'))
+            'images' => Description::imageFromDescription($descriptionArr),
+            'added' => Time::formatDateTime($this->added, 'Y.m.d'),
+            'user' => new UserResource($this->whenLoaded('user')),
         ];
     }
 }

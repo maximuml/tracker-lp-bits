@@ -2,37 +2,32 @@
 
 namespace App\Filament\Resources\System;
 
-use Filament\Schemas\Schema;
-use Filament\Schemas\Components\Section;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Select;
-use Filament\Schemas\Components\Utilities\Get;
-use Filament\Forms\Components\Repeater;
-use Filament\Forms\Components\Hidden;
-use Filament\Forms\Components\Radio;
-use Filament\Forms\Components\DateTimePicker;
-use Filament\Forms\Components\CheckboxList;
-use Filament\Forms\Components\Textarea;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Columns\BooleanColumn;
-use Filament\Tables\Filters\SelectFilter;
-use Filament\Actions\EditAction;
-use Filament\Actions\DeleteAction;
-use App\Filament\Resources\System\ExamResource\Pages\ListExams;
+use App\Filament\OptionsTrait;
 use App\Filament\Resources\System\ExamResource\Pages\CreateExam;
 use App\Filament\Resources\System\ExamResource\Pages\EditExam;
-use App\Filament\OptionsTrait;
-use App\Filament\Resources\System\ExamResource\Pages;
-use App\Filament\Resources\System\ExamResource\RelationManagers;
+use App\Filament\Resources\System\ExamResource\Pages\ListExams;
 use App\Models\Exam;
 use App\Repositories\ExamRepository;
 use App\Repositories\UserRepository;
-use Filament\Forms;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\EditAction;
+use Filament\Forms\Components\CheckboxList;
+use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\Radio;
+use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
-use Filament\Tables\Table;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Schema;
 use Filament\Tables;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Tables\Columns\BooleanColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Table;
 use Illuminate\Validation\Rule;
 
 class ExamResource extends Resource
@@ -41,9 +36,9 @@ class ExamResource extends Resource
 
     protected static ?string $model = Exam::class;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-exclamation-triangle';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-exclamation-triangle';
 
-    protected static string | \UnitEnum | null $navigationGroup = 'System';
+    protected static string|\UnitEnum|null $navigationGroup = 'System';
 
     protected static ?int $navigationSort = 1;
 
@@ -61,7 +56,8 @@ class ExamResource extends Resource
 
     public static function form(Schema $schema): Schema
     {
-        $userRep = new UserRepository();
+        $userRep = new UserRepository;
+
         return $schema
             ->components([
                 Section::make(__('label.exam.section_base_info'))->schema([
@@ -72,27 +68,23 @@ class ExamResource extends Resource
                         ->label(__('exam.type'))
                         ->options(Exam::listTypeOptions())
                         ->helperText(__('exam.type_help'))
-                        ->reactive()
-                    ,
+                        ->reactive(),
                     TextInput::make('success_reward_bonus')
                         ->columnSpanFull()
                         ->required()
                         ->label(__('exam.success_reward_bonus'))
-                        ->hidden(fn (Get $get) => $get('type') != Exam::TYPE_TASK)
-                    ,
+                        ->hidden(fn (Get $get) => $get('type') != Exam::TYPE_TASK),
                     TextInput::make('fail_deduct_bonus')
                         ->columnSpanFull()
                         ->required()
                         ->label(__('exam.fail_deduct_bonus'))
-                        ->hidden(fn (Get $get) => $get('type') != Exam::TYPE_TASK)
-                    ,
+                        ->hidden(fn (Get $get) => $get('type') != Exam::TYPE_TASK),
                     TextInput::make('max_user_count')
                         ->columnSpanFull()
                         ->required()
                         ->numeric()
                         ->label(__('exam.max_user_count'))
-                        ->hidden(fn (Get $get) => $get('type') != Exam::TYPE_TASK)
-                    ,
+                        ->hidden(fn (Get $get) => $get('type') != Exam::TYPE_TASK),
 
                     Repeater::make('indexes')->schema([
                         Select::make('index')
@@ -129,7 +121,7 @@ class ExamResource extends Resource
                     TextInput::make('priority')
                         ->columnSpan(['sm' => 2])
                         ->integer()
-                        ->label(__("label.priority"))
+                        ->label(__('label.priority'))
                         ->helperText(__('label.exam.priority_help')),
                 ])->columns(2),
 
@@ -145,8 +137,7 @@ class ExamResource extends Resource
                         ->options(Exam::listRecurringOptions())
                         ->label(__('exam.recurring'))
                         ->helperText(__('exam.recurring_help'))
-                        ->columnSpan(['sm' => 2])
-                    ,
+                        ->columnSpan(['sm' => 2]),
                 ])->columns(2),
 
                 Section::make(__('label.exam.section_target_user'))->schema([
@@ -154,15 +145,14 @@ class ExamResource extends Resource
                         ->options($userRep->listClass())->columnSpan(['sm' => 2])
                         ->columns(4)
                         ->label(__('label.user.class')),
-                    DateTimePicker::make('filters.register_time_range.0')->label(__("label.exam.register_time_range.begin")),
-                    DateTimePicker::make('filters.register_time_range.1')->label(__("label.exam.register_time_range.end")),
-                    TextInput::make('filters.register_days_range.0')->numeric()->label(__("label.exam.register_days_range.begin")),
-                    TextInput::make('filters.register_days_range.1')->numeric()->label(__("label.exam.register_days_range.end")),
+                    DateTimePicker::make('filters.register_time_range.0')->label(__('label.exam.register_time_range.begin')),
+                    DateTimePicker::make('filters.register_time_range.1')->label(__('label.exam.register_time_range.end')),
+                    TextInput::make('filters.register_days_range.0')->numeric()->label(__('label.exam.register_days_range.begin')),
+                    TextInput::make('filters.register_days_range.1')->numeric()->label(__('label.exam.register_days_range.end')),
                     CheckboxList::make('filters.donate_status')
                         ->options(self::$yesOrNo)
                         ->label(__('label.exam.donated')),
                 ])->columns(2),
-
 
                 Textarea::make('description')->columnSpan(['sm' => 2])->label(__('label.description')),
             ]);
@@ -187,19 +177,19 @@ class ExamResource extends Resource
             ])
             ->defaultSort('id', 'desc')
             ->filters([
-                SelectFilter::make('type')->options(Exam::listTypeOptions())->label(__("exam.type")),
-                SelectFilter::make('is_discovered')->options(self::IS_DISCOVERED_OPTIONS)->label(__("label.exam.is_discovered")),
-                SelectFilter::make('status')->options(self::getEnableDisableOptions())->label(__("label.status")),
+                SelectFilter::make('type')->options(Exam::listTypeOptions())->label(__('exam.type')),
+                SelectFilter::make('is_discovered')->options(self::IS_DISCOVERED_OPTIONS)->label(__('label.exam.is_discovered')),
+                SelectFilter::make('status')->options(self::getEnableDisableOptions())->label(__('label.status')),
             ])
             ->recordActions([
                 EditAction::make(),
                 DeleteAction::make()->using(function ($record) {
-                    $rep = new ExamRepository();
+                    $rep = new ExamRepository;
                     $rep->delete($record->id);
                 }),
             ])
             ->toolbarActions([
-//                Tables\Actions\DeleteBulkAction::make(),
+                //                Tables\Actions\DeleteBulkAction::make(),
             ]);
     }
 

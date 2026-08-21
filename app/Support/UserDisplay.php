@@ -7,6 +7,7 @@ use App\Models\UserMeta;
 use App\Repositories\UserRepository;
 use App\Support\Config\SiteConfig;
 use Illuminate\Support\HtmlString;
+use Nexus\Database\NexusDB;
 
 /**
  * Legacy user display helpers extracted from `include/functions.php`.
@@ -49,7 +50,7 @@ final class UserDisplay
      */
     public static function userIdFromName(string $username): int
     {
-        return \App\Support\LegacyAuth::userIdFromName($username, \App\Support\LegacyAuthContext::fromSupportContext());
+        return LegacyAuth::userIdFromName($username, LegacyAuthContext::fromSupportContext());
     }
 
     /**
@@ -122,7 +123,7 @@ final class UserDisplay
             return self::$rowCache[$id];
         }
 
-        $row = \Nexus\Database\NexusDB::remember("user_{$id}_content", 3600, function () use ($id) {
+        $row = NexusDB::remember("user_{$id}_content", 3600, function () use ($id) {
             $user = UserRepository::findForDisplay($id);
 
             if (! $user) {
@@ -130,7 +131,7 @@ final class UserDisplay
             }
 
             $arr = $user->toArray();
-            $metas = (new UserRepository())->listMetas($id, UserMeta::META_KEY_PERSONALIZED_USERNAME);
+            $metas = (new UserRepository)->listMetas($id, UserMeta::META_KEY_PERSONALIZED_USERNAME);
             $arr['__is_rainbow'] = $metas->isNotEmpty() ? 1 : 0;
             $arr['__is_donor'] = self::isDonor($arr);
 
@@ -140,10 +141,12 @@ final class UserDisplay
         if (is_array($row)) {
             /** @var array<int|string, mixed> $row */
             self::$rowCache[$id] = $row;
+
             return $row;
         }
 
         self::$rowCache[$id] = false;
+
         return false;
     }
 
@@ -266,7 +269,7 @@ final class UserDisplay
      */
     public static function plainUsername(int|string $id): string
     {
-        $row = \App\Support\UserDisplay::row($id);
+        $row = UserDisplay::row($id);
 
         return (string) ($row['username'] ?? '');
     }
@@ -278,7 +281,7 @@ final class UserDisplay
      */
     public static function avatarImage(string $url, string $langFolder): string
     {
-        return '<img src="' . $url . '" alt="avatar" width="150px" onload="check_avatar(this, \'' . $langFolder . '\');" />';
+        return '<img src="'.$url.'" alt="avatar" width="150px" onload="check_avatar(this, \''.$langFolder.'\');" />';
     }
 
     /**
@@ -300,7 +303,7 @@ final class UserDisplay
             return new HtmlString('');
         }
 
-        return new HtmlString(\App\Support\UserDisplay::username($id, false, true, true, true));
+        return new HtmlString(UserDisplay::username($id, false, true, true, true));
     }
 
     /**
@@ -325,7 +328,7 @@ final class UserDisplay
             return self::$usernameCache[$id];
         }
 
-        $arr = \App\Support\UserDisplay::row($id);
+        $arr = UserDisplay::row($id);
         if ($arr) {
             if ($big) {
                 $donorpic = 'starbig';
@@ -350,13 +353,13 @@ final class UserDisplay
             $now = date('Y-m-d H:i:s');
             $donorUntil = $arr['donoruntil'] ?? null;
             $isDonor = $arr['donor'] === 'yes' && ($donorUntil === null || $donorUntil < '1970' || $donorUntil >= $now);
-            $pics = $isDonor ? "<img class=\"" . $donorpic . "\" src=\"/pic/trans.gif\" alt=\"Donor\" " . $style . " />" : '';
+            $pics = $isDonor ? '<img class="'.$donorpic.'" src="/pic/trans.gif" alt="Donor" '.$style.' />' : '';
 
             if ($arr['enabled'] === 'yes') {
-                $pics .= ($arr['leechwarn'] === 'yes' ? "<img class=\"" . $leechwarnpic . "\" src=\"/pic/trans.gif\" alt=\"Leechwarned\" " . $style . " />" : '')
-                    . ($arr['warned'] === 'yes' ? "<img class=\"" . $warnedpic . "\" src=\"/pic/trans.gif\" alt=\"Warned\" " . $style . " />" : '');
+                $pics .= ($arr['leechwarn'] === 'yes' ? '<img class="'.$leechwarnpic.'" src="/pic/trans.gif" alt="Leechwarned" '.$style.' />' : '')
+                    .($arr['warned'] === 'yes' ? '<img class="'.$warnedpic.'" src="/pic/trans.gif" alt="Warned" '.$style.' />' : '');
             } else {
-                $pics .= "<img class=\"" . $disabledpic . "\" src=\"/pic/trans.gif\" alt=\"Disabled\" " . $style . " />\n";
+                $pics .= '<img class="'.$disabledpic.'" src="/pic/trans.gif" alt="Disabled" '.$style." />\n";
             }
 
             $username = $arr['username'];
@@ -391,23 +394,23 @@ final class UserDisplay
                 );
             }
 
-            $href = Url::schemeAndHost() . "/userdetails.php?id=$id";
-            $classNameColored = \App\Support\UserClass::name($arr['class'], true, false, false);
-            $className = \App\Support\UserClass::name($arr['class'], false, true, true, ['with_alias' => true]);
+            $href = Url::schemeAndHost()."/userdetails.php?id=$id";
+            $classNameColored = UserClass::name($arr['class'], true, false, false);
+            $className = UserClass::name($arr['class'], false, true, true, ['with_alias' => true]);
             $title = $arr['title'] ?? '';
 
             $username = ($link
-                ? "<a " . $link_ext . ' href="' . $href . '"' . ($target ? ' target="_blank"' : '') . " class='" . $classNameColored . "_Name'>" . $username . '</a>'
+                ? '<a '.$link_ext.' href="'.$href.'"'.($target ? ' target="_blank"' : '')." class='".$classNameColored."_Name'>".$username.'</a>'
                 : $username)
-                . $pics
-                . ($withtitle
-                    ? ' (' . ($title === '' ? $className : "<span class='" . $classNameColored . "_Name'><b>" . htmlspecialchars($title)) . '</b></span>)'
+                .$pics
+                .($withtitle
+                    ? ' ('.($title === '' ? $className : "<span class='".$classNameColored."_Name'><b>".htmlspecialchars($title)).'</b></span>)'
                     : '');
 
-            $username = '<span class="nowrap">' . ($bracket ? '(' . $username . ')' : $username) . $medalHtml . '</span>';
+            $username = '<span class="nowrap">'.($bracket ? '('.$username.')' : $username).$medalHtml.'</span>';
         } else {
-            $username = '<i>' . Locale::trans('nexus.user_not_exists') . '</i>';
-            $username = '<span class="nowrap">' . ($bracket ? '(' . $username . ')' : $username) . '</span>';
+            $username = '<i>'.Locale::trans('nexus.user_not_exists').'</i>';
+            $username = '<span class="nowrap">'.($bracket ? '('.$username.')' : $username).'</span>';
         }
 
         if (func_num_args() === 1) {

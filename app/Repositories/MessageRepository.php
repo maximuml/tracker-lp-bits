@@ -1,14 +1,15 @@
 <?php
+
 namespace App\Repositories;
 
 use App\Auth\Permission;
 use App\DTOs\Message\StoreMessageDto;
 use App\Enums\Permission\PermissionEnum;
 use App\Models\Message;
-use App\Models\Setting;
 use App\Models\StaffMessage;
 use App\Models\User;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Collection;
 use Nexus\Database\NexusDB;
 
 class MessageRepository extends BaseRepository
@@ -18,9 +19,9 @@ class MessageRepository extends BaseRepository
     const STAFF_MESSAGE_NEW_CACHE_KEY = 'staff_new_message_count';
 
     /**
-     * @return  \Illuminate\Support\Collection<int, \stdClass>
+     * @return Collection<int, \stdClass>
      */
-    public static function getUserMailboxes(int $userId): \Illuminate\Support\Collection
+    public static function getUserMailboxes(int $userId): Collection
     {
         return NexusDB::table('pmboxes')
             ->where('userid', $userId)
@@ -37,7 +38,7 @@ class MessageRepository extends BaseRepository
     }
 
     /**
-     * @return  array{count: int, messages: \Illuminate\Database\Eloquent\Collection<int, Message>}
+     * @return array{count: int, messages: \Illuminate\Database\Eloquent\Collection<int, Message>}
      */
     public static function getMailboxMessages(int $userId, int $mailbox, string $keyword, string $place, ?string $unread, int $offset, int $perPage): array
     {
@@ -53,7 +54,7 @@ class MessageRepository extends BaseRepository
                 default:
                     $query->where(function ($q) use ($keyword) {
                         $q->where('msg', 'like', '%'.$keyword.'%')
-                          ->orWhere('subject', 'like', '%'.$keyword.'%');
+                            ->orWhere('subject', 'like', '%'.$keyword.'%');
                     });
             }
         }
@@ -92,9 +93,9 @@ class MessageRepository extends BaseRepository
             ->where('id', $messageId)
             ->where(function ($q) use ($userId) {
                 $q->where('receiver', $userId)
-                  ->orWhere(function ($sub) use ($userId) {
-                      $sub->where('sender', $userId)->where('saved', 'yes');
-                  });
+                    ->orWhere(function ($sub) use ($userId) {
+                        $sub->where('sender', $userId)->where('saved', 'yes');
+                    });
             })
             ->first();
     }
@@ -126,7 +127,7 @@ class MessageRepository extends BaseRepository
     }
 
     /**
-     * @return  array<string, mixed>|null
+     * @return array<string, mixed>|null
      */
     public static function deleteSingleMessage(int $messageId, int $userId): ?array
     {
@@ -210,13 +211,14 @@ class MessageRepository extends BaseRepository
 
     /**
      * @param  array<int|string, mixed>  $params
-     * @return  mixed
+     * @return mixed
      */
     public function getList(array $params)
     {
         $query = Message::query();
-        list($sortField, $sortType) = $this->getSortFieldAndType($params);
+        [$sortField, $sortType] = $this->getSortFieldAndType($params);
         $query->orderBy($sortField, $sortType);
+
         return $query->paginate();
     }
 
@@ -228,34 +230,37 @@ class MessageRepository extends BaseRepository
     /**
      * @param  array<int|string, mixed>  $params
      * @param  mixed  $id
-     * @return  mixed
+     * @return mixed
      */
     public function update(array $params, $id)
     {
         $model = Message::query()->findOrFail((int) $id);
         /** @var array<string, mixed> $params */
         $model->update($params);
+
         return $model;
     }
 
     /**
      * @param  mixed  $id
-     * @return  mixed
+     * @return mixed
      */
     public function getDetail($id)
     {
         $model = Message::query()->findOrFail((int) $id);
+
         return $model;
     }
 
     /**
      * @param  mixed  $id
-     * @return  mixed
+     * @return mixed
      */
     public function delete($id)
     {
         $model = Message::query()->findOrFail((int) $id);
         $result = $model->delete();
+
         return $result;
     }
 
@@ -271,19 +276,20 @@ class MessageRepository extends BaseRepository
     /**
      * @param  mixed  $uid
      * @param  mixed  $answered
-     * @return  \Illuminate\Database\Eloquent\Builder<StaffMessage>
+     * @return Builder<StaffMessage>
      */
-    public static function buildStaffMessageQuery($uid, $answered = null): \Illuminate\Database\Eloquent\Builder
+    public static function buildStaffMessageQuery($uid, $answered = null): Builder
     {
         $query = StaffMessage::query();
         if ($answered !== null) {
             $query->where('answered', $answered);
         }
-        if (!Permission::can(PermissionEnum::STAFF_MEMBER, User::findOrFail((int) $uid))) {
-            //Not staff member only can see authorized
+        if (! Permission::can(PermissionEnum::STAFF_MEMBER, User::findOrFail((int) $uid))) {
+            // Not staff member only can see authorized
             $permissions = ToolRepository::listUserAllPermissions($uid);
             $query->whereIn('permission', $permissions);
         }
+
         return $query;
     }
 
@@ -291,7 +297,7 @@ class MessageRepository extends BaseRepository
      * @param  mixed  $uid
      * @param  mixed  $type
      * @param  mixed  $value
-     * @return  mixed
+     * @return mixed
      */
     public static function updateStaffMessageCountCache($uid = 0, $type = '', $value = '')
     {
@@ -311,11 +317,12 @@ class MessageRepository extends BaseRepository
     /**
      * @param  mixed  $uid
      * @param  mixed  $type
-     * @return  mixed
+     * @return mixed
      */
     public static function getStaffMessageCountCache($uid = 0, $type = '')
     {
         $redis = NexusDB::redis();
+
         return match ($type) {
             'total' => $redis->hGet(self::STAFF_MESSAGE_TOTAL_CACHE_KEY, $uid),
             'new' => $redis->hGet(self::STAFF_MESSAGE_NEW_CACHE_KEY, $uid),
@@ -345,12 +352,12 @@ class MessageRepository extends BaseRepository
         $notifications = [];
         foreach ($rows as $row) {
             $notifications[] = [
-                'id' => 'pm_' . $row->id,
+                'id' => 'pm_'.$row->id,
                 'type' => 'pm',
                 'title' => 'New message',
                 'body' => $row->subject,
                 'from' => (string) ($row->send_user->username ?? 'System'),
-                'url' => 'messages.php?action=viewmessage&id=' . $row->id,
+                'url' => 'messages.php?action=viewmessage&id='.$row->id,
                 'timestamp' => (int) strtotime((string) $row->added),
             ];
         }

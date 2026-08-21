@@ -17,7 +17,7 @@ final class Env
     public static function get(?string $key = null, mixed $default = null): mixed
     {
         if (self::$env === null) {
-            self::$env = self::load(dirname(__DIR__, 2) . '/.env');
+            self::$env = self::load(dirname(__DIR__, 2).'/.env');
         }
 
         if ($key === null) {
@@ -41,7 +41,7 @@ final class Env
      */
     public static function load(string $envFile): array
     {
-        if (!file_exists($envFile)) {
+        if (! file_exists($envFile)) {
             if (\PHP_SAPI === 'cli') {
                 return [];
             }

@@ -12,5 +12,5 @@ return [
     'reply' => [
         'replied_notify_subject' => 'Your reply has a new reply',
         'replied_notify_body' => 'Your reply to topic：:topic_subject was replied by :replyer.',
-    ]
+    ],
 ];

@@ -2,9 +2,9 @@
 
 namespace App\Listeners;
 
+use App\Support\Logger;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Queue\InteractsWithQueue;
 use Laravel\Passport\Passport;
 
 class RemoveOauthTokens implements ShouldQueue
@@ -21,9 +21,6 @@ class RemoveOauthTokens implements ShouldQueue
 
     /**
      * Handle the event.
-     *
-     * @param  object  $event
-     * @return void
      */
     public function handle(object $event): void
     {
@@ -37,9 +34,9 @@ class RemoveOauthTokens implements ShouldQueue
         ];
         foreach ($modelNames as $name) {
             /** @var class-string<Model> $name */
-            $model = new $name();
-            $model::query()->where("user_id", $uid)->forceDelete();
+            $model = new $name;
+            $model::query()->where('user_id', $uid)->forceDelete();
         }
-        \App\Support\Logger::writeWithContext((string) sprintf("success remove user: %d oauth tokens related.", $uid), (string) 'info', (bool) false);
+        Logger::writeWithContext((string) sprintf('success remove user: %d oauth tokens related.', $uid), (string) 'info', (bool) false);
     }
 }

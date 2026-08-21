@@ -1,29 +1,33 @@
 <?php
+
 namespace Nexus\Plugin;
 
 use App\Repositories\BaseRepository;
+use App\Support\Locale;
+use App\Support\Logger;
 use Illuminate\Support\Facades\Artisan;
 
 abstract class BasePlugin extends BaseRepository
 {
     const ID = '';
+
     const VERSION = '';
 
-    abstract function install();
+    abstract public function install();
 
-    abstract function boot();
+    abstract public function boot();
 
     public function runMigrations($dir, $rollback = false)
     {
-        $command = "migrate";
+        $command = 'migrate';
         if ($rollback) {
-            $command .= ":rollback";
+            $command .= ':rollback';
         }
-        $command .= " --realpath --force";
+        $command .= ' --realpath --force';
         foreach (glob("$dir/*.php") as $file) {
             $file = str_replace('\\', '/', $file);
             $toExecute = "$command --path=$file";
-            \App\Support\Logger::writeWithContext((string) "command: {$toExecute}", (string) 'info', (bool) false);
+            Logger::writeWithContext((string) "command: {$toExecute}", (string) 'info', (bool) false);
             Artisan::call($toExecute);
         }
     }
@@ -31,8 +35,8 @@ abstract class BasePlugin extends BaseRepository
     public static function checkMainApplicationVersion($silent = true): bool
     {
         $constantNameArr = [
-            "static::COMPATIBLE_NP_VERSION",
-            "static::COMPATIBLE_VERSION", //before use
+            'static::COMPATIBLE_NP_VERSION',
+            'static::COMPATIBLE_VERSION', // before use
         ];
         foreach ($constantNameArr as $constantName) {
             if (defined($constantName) && version_compare(VERSION_NUMBER, constant($constantName), '<')) {
@@ -40,11 +44,12 @@ abstract class BasePlugin extends BaseRepository
                     return false;
                 }
                 throw new \RuntimeException(sprintf(
-                    "NexusPHP version: %s is too low, this plugin require: %s",
+                    'NexusPHP version: %s is too low, this plugin require: %s',
                     VERSION_NUMBER, constant($constantName)
                 ));
             }
         }
+
         return true;
     }
 
@@ -52,17 +57,18 @@ abstract class BasePlugin extends BaseRepository
     {
         $reflection = new \ReflectionClass(get_called_class());
         $pluginRoot = dirname($reflection->getFileName(), 2);
-        return $pluginRoot . "/resources/views/" . trim($name, "/");
+
+        return $pluginRoot.'/resources/views/'.trim($name, '/');
     }
 
     public function trans($name): string
     {
-        return \App\Support\Locale::trans($this->getTransKey($name), [], null);
+        return Locale::trans($this->getTransKey($name), [], null);
     }
 
     public function getTransKey($name): string
     {
-        return sprintf("%s::%s", static::ID, $name);
+        return sprintf('%s::%s', static::ID, $name);
     }
 
     public static function getInstance(): static
@@ -72,14 +78,16 @@ abstract class BasePlugin extends BaseRepository
 
     public function getVersion(): string
     {
-        $constantName = "static::VERSION";
+        $constantName = 'static::VERSION';
+
         return defined($constantName) ? constant($constantName) : '';
     }
 
     public function getId(): string
     {
-        $className = str_replace("Repository", "", get_called_class());
-        $plugin = call_user_func([$className, "make"]);
+        $className = str_replace('Repository', '', get_called_class());
+        $plugin = call_user_func([$className, 'make']);
+
         return $plugin->getId();
     }
 }

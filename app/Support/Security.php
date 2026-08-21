@@ -3,6 +3,7 @@
 namespace App\Support;
 
 use App\Models\Attachment;
+use Nexus\Nexus;
 
 /**
  * Legacy security helpers extracted from `include/globalfunctions.php`.
@@ -21,14 +22,14 @@ final class Security
 
         $host = parse_url($src, PHP_URL_HOST);
         $currentHost = parse_url(Url::schemeAndHost(), PHP_URL_HOST);
-        if (!empty($host) && $host != $currentHost) {
+        if (! empty($host) && $host != $currentHost) {
             return $src;
         }
 
         $documentRoot = SupportContext::getServerValue('DOCUMENT_ROOT');
         if ($documentRoot !== null && $documentRoot !== '') {
             $guessScriptFilename = sprintf('%s/%s', $documentRoot, trim($path, '/'));
-            if (!file_exists($guessScriptFilename)) {
+            if (! file_exists($guessScriptFilename)) {
                 return $src;
             }
         }
@@ -46,9 +47,9 @@ final class Security
 
         $dangerScriptsPattern = '/(logout|login|ajax|announce|scrape|adduser|modtask|docleanup|freeleech|take.*)\.php/i';
         if (preg_match($dangerScriptsPattern, $path)) {
-            $msg = sprintf('[DANGER_URL]: %s [%s]', $src, \Nexus\Nexus::instance()->getRequestId());
+            $msg = sprintf('[DANGER_URL]: %s [%s]', $src, Nexus::instance()->getRequestId());
             Logger::writeWithContext($msg, 'alert');
-            \App\Support\Log::writeWithContext($msg, 'mod');
+            Log::writeWithContext($msg, 'mod');
         }
 
         Logger::writeWithContext("[NOT_ALLOW_SRC]: $src with path: $path");

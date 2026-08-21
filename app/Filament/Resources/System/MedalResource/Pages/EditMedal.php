@@ -2,9 +2,8 @@
 
 namespace App\Filament\Resources\System\MedalResource\Pages;
 
-use Filament\Actions\DeleteAction;
 use App\Filament\Resources\System\MedalResource;
-use Filament\Pages\Actions;
+use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 
 class EditMedal extends EditRecord

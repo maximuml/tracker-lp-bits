@@ -7,25 +7,20 @@ use App\Jobs\CheckQueueFailedJobs;
 use App\Jobs\CleanupJob;
 use App\Jobs\HrCheckJob;
 use App\Jobs\MaintainPluginState;
-use App\Jobs\ManagePlugin;
 use App\Jobs\RemoveUserDonorStatus;
 use App\Jobs\RemoveUserVipStatus;
 use App\Jobs\RemoveUserWarning;
 use App\Jobs\SaveIpLogCacheToDB;
 use App\Jobs\UpdateIsSeedBoxFromUserRecordsCache;
-use App\Utils\ThirdPartyJob;
-use Carbon\Carbon;
-use Illuminate\Console\Scheduling\Event;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
-use Illuminate\Support\Facades\Schema;
-use Nexus\Database\NexusDB;
 
 class Kernel extends ConsoleKernel
 {
     /**
      * The Artisan commands provided by your application.
-     * @var  array<int|string, mixed>
+     *
+     * @var array<int|string, mixed>
      */
     protected $commands = [
         //
@@ -33,8 +28,8 @@ class Kernel extends ConsoleKernel
 
     /**
      * Define the application's command schedule.
-     * @param  \Illuminate\Console\Scheduling\Schedule  $schedule
-     * @return  void
+     *
+     * @return void
      */
     protected function schedule(Schedule $schedule)
     {
@@ -43,26 +38,27 @@ class Kernel extends ConsoleKernel
         $schedule->command('exam:checkout_cronjob')->everyFiveMinutes();
         $schedule->command('exam:update_progress --bulk=1')->hourly();
         $schedule->command('backup:cronjob')->everyMinute();
-        $schedule->job(new HrCheckJob())->everyTenMinutes();
+        $schedule->job(new HrCheckJob)->everyTenMinutes();
         $schedule->job(new HrCheckJob(null, null, true))->hourly();
         $schedule->command('user:delete_expired_token')->dailyAt('04:00');
-        $schedule->command('meilisearch:import')->weeklyOn(1, "03:00");
-        $schedule->command('torrent:load_pieces_hash')->dailyAt("01:00");
-        $schedule->job(new CheckQueueFailedJobs())->everySixHours();
-        $schedule->job(new MaintainPluginState())->everyMinute();
-        $schedule->job(new UpdateIsSeedBoxFromUserRecordsCache())->everySixHours();
-        $schedule->job(new CleanupJob())->everyFifteenMinutes();
-        $schedule->job(new AttendanceJob())->dailyAt('01:00');
-        $schedule->job(new SaveIpLogCacheToDB())->hourly();
-        $schedule->job(new RemoveUserWarning())->everyTwentySeconds();
-        $schedule->job(new RemoveUserVipStatus())->everyMinute();
-        $schedule->job(new RemoveUserDonorStatus())->everyMinute();
+        $schedule->command('meilisearch:import')->weeklyOn(1, '03:00');
+        $schedule->command('torrent:load_pieces_hash')->dailyAt('01:00');
+        $schedule->job(new CheckQueueFailedJobs)->everySixHours();
+        $schedule->job(new MaintainPluginState)->everyMinute();
+        $schedule->job(new UpdateIsSeedBoxFromUserRecordsCache)->everySixHours();
+        $schedule->job(new CleanupJob)->everyFifteenMinutes();
+        $schedule->job(new AttendanceJob)->dailyAt('01:00');
+        $schedule->job(new SaveIpLogCacheToDB)->hourly();
+        $schedule->job(new RemoveUserWarning)->everyTwentySeconds();
+        $schedule->job(new RemoveUserVipStatus)->everyMinute();
+        $schedule->job(new RemoveUserDonorStatus)->everyMinute();
 
     }
 
     /**
      * Register the commands for the application.
-     * @return  void
+     *
+     * @return void
      */
     protected function commands()
     {
@@ -70,5 +66,4 @@ class Kernel extends ConsoleKernel
 
         require base_path('routes/console.php');
     }
-
 }

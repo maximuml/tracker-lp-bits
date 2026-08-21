@@ -4,7 +4,4 @@ namespace App\Services\Captcha\Exceptions;
 
 use RuntimeException;
 
-class CaptchaValidationException extends RuntimeException
-{
-}
-
+class CaptchaValidationException extends RuntimeException {}

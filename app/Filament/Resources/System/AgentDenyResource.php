@@ -2,34 +2,29 @@
 
 namespace App\Filament\Resources\System;
 
-use Filament\Schemas\Schema;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Textarea;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Actions\EditAction;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\DeleteBulkAction;
-use App\Filament\Resources\System\AgentDenyResource\Pages\ListAgentDenies;
 use App\Filament\Resources\System\AgentDenyResource\Pages\CreateAgentDeny;
 use App\Filament\Resources\System\AgentDenyResource\Pages\EditAgentDeny;
-use App\Filament\Resources\System\AgentDenyResource\Pages;
-use App\Filament\Resources\System\AgentDenyResource\RelationManagers;
+use App\Filament\Resources\System\AgentDenyResource\Pages\ListAgentDenies;
 use App\Models\AgentDeny;
-use Filament\Forms;
+use App\Support\Cache;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Filament\Tables;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class AgentDenyResource extends Resource
 {
     protected static ?string $model = AgentDeny::class;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-no-symbol';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-no-symbol';
 
-    protected static string | \UnitEnum | null $navigationGroup = 'System';
+    protected static string|\UnitEnum|null $navigationGroup = 'System';
 
     protected static ?int $navigationSort = 5;
 
@@ -74,9 +69,10 @@ class AgentDenyResource extends Resource
                 EditAction::make(),
                 DeleteAction::make()->using(function ($record) {
                     $record->delete();
-                    \App\Support\Cache::clearAgentAllowDeny();
+                    Cache::clearAgentAllowDeny();
+
                     return redirect(self::getUrl());
-                })
+                }),
             ])
             ->toolbarActions([
                 DeleteBulkAction::make(),

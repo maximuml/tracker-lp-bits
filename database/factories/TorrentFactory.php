@@ -29,7 +29,7 @@ class TorrentFactory extends Factory
 
         return [
             'name' => $this->faker->sentence(3),
-            'filename' => $this->faker->uuid() . '.torrent',
+            'filename' => $this->faker->uuid().'.torrent',
             'save_as' => $this->faker->slug(),
             'cover' => '',
             'small_descr' => '',

@@ -7,7 +7,7 @@ namespace App\Services\Announce;
 final readonly class InitialResponseResult
 {
     /**
-     * @param array<string, mixed> $response
+     * @param  array<string, mixed>  $response
      */
     public function __construct(
         public array $response,

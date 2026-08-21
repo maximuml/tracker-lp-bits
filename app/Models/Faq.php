@@ -11,11 +11,11 @@
  * @property int $categ
  * @property int $order
  */
-namespace App\Models;
 
+namespace App\Models;
 
 class Faq extends NexusModel
 {
-    /** @var  string */
+    /** @var string */
     protected $table = 'faq';
 }

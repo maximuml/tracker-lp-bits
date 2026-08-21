@@ -2,26 +2,19 @@
 
 namespace App\Filament\Resources\Oauth;
 
-use Filament\Schemas\Schema;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Radio;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Columns\IconColumn;
-use Filament\Actions\EditAction;
+use App\Filament\OptionsTrait;
+use App\Filament\Resources\Oauth\ClientResource\Pages\ManageClients;
+use App\Models\OauthClient;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
-use App\Filament\Resources\Oauth\ClientResource\Pages\ManageClients;
-use App\Filament\OptionsTrait;
-use App\Filament\PageListSingle;
-use App\Filament\Resources\Oauth\ClientResource\Pages;
-use App\Filament\Resources\Oauth\ClientResource\RelationManagers;
-use App\Models\OauthClient;
-use Filament\Forms;
+use Filament\Actions\EditAction;
+use Filament\Forms\Components\Radio;
+use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Filament\Tables;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class ClientResource extends Resource
 {
@@ -29,9 +22,9 @@ class ClientResource extends Resource
 
     protected static ?string $model = OauthClient::class;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Oauth';
+    protected static string|\UnitEnum|null $navigationGroup = 'Oauth';
 
     protected static ?int $navigationSort = 1;
 
@@ -70,8 +63,7 @@ class ClientResource extends Resource
                 TextColumn::make('redirect')->label(__('oauth.redirect')),
                 IconColumn::make('skips_authorization')
                     ->boolean()
-                    ->label(__('oauth.skips_authorization'))
-                ,
+                    ->label(__('oauth.skips_authorization')),
 
             ])
             ->filters([

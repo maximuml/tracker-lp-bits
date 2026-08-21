@@ -6,7 +6,6 @@ use App\Filament\PageList;
 use App\Filament\Resources\User\TorrentBuyLogResource;
 use App\Models\TorrentBuyLog;
 use Filament\Pages\Actions;
-use Filament\Resources\Pages\ListRecords;
 use Illuminate\Database\Eloquent\Builder;
 
 class ListTorrentBuyLogs extends PageList
@@ -16,7 +15,7 @@ class ListTorrentBuyLogs extends PageList
     protected function getHeaderActions(): array
     {
         return [
-//            Actions\CreateAction::make(),
+            //            Actions\CreateAction::make(),
         ];
     }
 

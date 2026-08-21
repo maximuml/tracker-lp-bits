@@ -14,7 +14,7 @@ final class SettingsRepository
     /**
      * Render the legacy settings page.
      *
-     * @param array<string, mixed> $data
+     * @param  array<string, mixed>  $data
      */
     public static function render(array $data = []): string
     {
@@ -31,6 +31,7 @@ final class SettingsRepository
         };
         ob_start();
         $render();
+
         return (string) ob_get_clean();
     }
 }

@@ -2,9 +2,14 @@
 
 namespace App\Support;
 
-use Illuminate\Contracts\Encryption\DecryptException;
+use App\Models\User;
+use App\Repositories\AuthRepository;
+use App\Repositories\TorrentRepository;
+use App\Support\Config\SiteConfig;
+use Dotenv\Dotenv;
 use Illuminate\Encryption\Encrypter;
 use Nexus\Database\NexusDB;
+use Nexus\Nexus;
 
 /**
  * Auth-cookie helpers extracted from `include/functions.php` (Phase 5
@@ -142,13 +147,13 @@ final class AuthCookie
     public static function setLoginCookie(int $userId, ?string $authKey = null, int $durationSeconds = 0): void
     {
         if ($durationSeconds <= 0) {
-            $durationSeconds = (int) \App\Support\Config\SiteConfig::current()->system->cookieValidDays(365) * 86400;
+            $durationSeconds = (int) SiteConfig::current()->system->cookieValidDays(365) * 86400;
         }
 
         $expires = self::computeExpires($durationSeconds);
         $token = self::buildToken($userId, null, $expires);
 
-        $secure = \App\Support\Url::isSecure();
+        $secure = Url::isSecure();
         $options = [
             'expires' => $expires,
             'path' => '/',
@@ -159,12 +164,12 @@ final class AuthCookie
         setcookie(self::COOKIE_NAME, $token, $options);
 
         $update = ['last_login' => now()];
-        $langId = \App\Support\Locale::idFromCookie((string) '');
+        $langId = Locale::idFromCookie((string) '');
         if ($langId > 0) {
             $update['lang'] = $langId;
         }
 
-        \App\Repositories\AuthRepository::updateLogin($userId, $update);
+        AuthRepository::updateLogin($userId, $update);
     }
 
     /**
@@ -177,7 +182,7 @@ final class AuthCookie
         $options = [
             'expires' => time() - 3600,
             'path' => '/',
-            'secure' => \App\Support\Url::isSecure(),
+            'secure' => Url::isSecure(),
             'httponly' => true,
             'samesite' => 'Lax',
         ];
@@ -237,10 +242,10 @@ final class AuthCookie
 
         // Last resort: parse .env directly when no Laravel container is booted.
         if ($key === '') {
-            $envFile = dirname(__DIR__, 2) . '/.env';
-            if (file_exists($envFile) && class_exists(\Dotenv\Dotenv::class)) {
+            $envFile = dirname(__DIR__, 2).'/.env';
+            if (file_exists($envFile) && class_exists(Dotenv::class)) {
                 try {
-                    $dotenv = \Dotenv\Dotenv::createImmutable(dirname(__DIR__, 2));
+                    $dotenv = Dotenv::createImmutable(dirname(__DIR__, 2));
                     $dotenv->safeLoad();
                     $key = SupportContext::getServerValue('APP_KEY', '');
                 } catch (\Throwable $e) {
@@ -251,6 +256,7 @@ final class AuthCookie
 
         if (str_starts_with($key, 'base64:')) {
             $decoded = base64_decode(substr($key, 7), true);
+
             return $decoded === false ? '' : $decoded;
         }
 
@@ -264,17 +270,18 @@ final class AuthCookie
      */
     public static function passkeyByAuthkey(string $authkey): string
     {
-        return \Nexus\Database\NexusDB::remember("authkey2passkey:$authkey", 3600 * 24, function () use ($authkey) {
+        return NexusDB::remember("authkey2passkey:$authkey", 3600 * 24, function () use ($authkey) {
             $arr = explode('|', $authkey);
             if (count($arr) !== 3) {
                 throw new \InvalidArgumentException("Invalid authkey: $authkey, format error");
             }
             $uid = $arr[1];
-            $decrypted = (new \App\Repositories\TorrentRepository())->checkTrackerReportAuthKey($authkey);
+            $decrypted = (new TorrentRepository)->checkTrackerReportAuthKey($authkey);
             if (empty($decrypted)) {
                 throw new \InvalidArgumentException("Invalid authkey: $authkey");
             }
-            return \App\Repositories\AuthRepository::getPasskeyByUserId((int) $uid) ?? '';
+
+            return AuthRepository::getPasskeyByUserId((int) $uid) ?? '';
         });
     }
 
@@ -288,15 +295,17 @@ final class AuthCookie
      */
     public static function decodeCookie(array $cookie): ?array
     {
-        $log = 'cookie: ' . json_encode($cookie);
+        $log = 'cookie: '.json_encode($cookie);
         if (empty($cookie[self::COOKIE_NAME])) {
             Logger::writeWithContext("$log, param not enough");
+
             return null;
         }
 
         $base64Decoded = base64_decode($cookie[self::COOKIE_NAME]);
         if (empty($base64Decoded)) {
             Logger::writeWithContext("$log, invalid c_secure_pass");
+
             return null;
         }
 
@@ -304,6 +313,7 @@ final class AuthCookie
         $tokenJsonAndSignature = explode('.', $base64Decoded);
         if (count($tokenJsonAndSignature) !== 2) {
             Logger::writeWithContext("$log, invalid c_secure_pass base64_decoded");
+
             return null;
         }
 
@@ -311,16 +321,19 @@ final class AuthCookie
         $signature = $tokenJsonAndSignature[1];
         if (empty($tokenJson) || empty($signature)) {
             Logger::writeWithContext("$log, no tokenJson or signature");
+
             return null;
         }
 
         $tokenData = json_decode($tokenJson, true);
-        if (!isset($tokenData['user_id'])) {
+        if (! isset($tokenData['user_id'])) {
             Logger::writeWithContext("$log, no user_id");
+
             return null;
         }
-        if (!isset($tokenData['expires']) || $tokenData['expires'] < time()) {
+        if (! isset($tokenData['expires']) || $tokenData['expires'] < time()) {
             Logger::writeWithContext("$log, signature expired");
+
             return null;
         }
 
@@ -340,13 +353,14 @@ final class AuthCookie
      * an Eloquent User model is returned.
      *
      * @param  array<string, mixed>  $cookie
-     * @return array<string, mixed>|\App\Models\User|null
+     * @return array<string, mixed>|User|null
      */
-    public static function userFromCookie(array $cookie, bool $isArray = true): array|\App\Models\User|null
+    public static function userFromCookie(array $cookie, bool $isArray = true): array|User|null
     {
-        $log = 'cookie: ' . json_encode($cookie);
+        $log = 'cookie: '.json_encode($cookie);
         if (empty($cookie[self::COOKIE_NAME])) {
             Logger::writeWithContext("$log, param not enough");
+
             return null;
         }
 
@@ -360,6 +374,7 @@ final class AuthCookie
             if ($row !== null && $isArray) {
                 unset($row['auth_key'], $row['passhash']);
             }
+
             return $row;
         }
 
@@ -385,6 +400,7 @@ final class AuthCookie
         }
         if (self::verifyToken($token, $authKey) === null) {
             Logger::writeWithContext("$log, !hash_equals");
+
             return null;
         }
 
@@ -398,29 +414,32 @@ final class AuthCookie
     /**
      * Fetch a user by id with the legacy status/enabled checks.
      *
-     * @param  int  $id
-     * @return array<string, mixed>|\App\Models\User|null
+     * @return array<string, mixed>|User|null
      */
     private static function fetchUser(int $id, bool $isArray, string $log)
     {
-        $isAjax = \Nexus\Nexus::instance()->isAjax();
-        $selfEnableBonus = \App\Support\Config\SiteConfig::current()->bonus->selfEnable();
-        $shouldIgnoreEnabled = defined('IN_NEXUS') && IN_NEXUS && !$isAjax && $selfEnableBonus > 0;
+        $isAjax = Nexus::instance()->isAjax();
+        $selfEnableBonus = SiteConfig::current()->bonus->selfEnable();
+        $shouldIgnoreEnabled = defined('IN_NEXUS') && IN_NEXUS && ! $isAjax && $selfEnableBonus > 0;
 
         if ($isArray) {
-            $row = \App\Repositories\AuthRepository::findUserArrayForCookie($id, $shouldIgnoreEnabled);
+            $row = AuthRepository::findUserArrayForCookie($id, $shouldIgnoreEnabled);
             if ($row === null) {
                 Logger::writeWithContext("$log, user not exists");
+
                 return null;
             }
+
             return $row;
         }
 
-        $row = \App\Repositories\AuthRepository::findUserModelForCookie($id, $shouldIgnoreEnabled);
+        $row = AuthRepository::findUserModelForCookie($id, $shouldIgnoreEnabled);
         if ($row === null) {
             Logger::writeWithContext("$log, user not exists");
+
             return null;
         }
+
         return $row;
     }
 }

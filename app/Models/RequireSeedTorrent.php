@@ -6,15 +6,14 @@
  * @property string|null $created_at
  * @property string|null $updated_at
  */
-namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
+namespace App\Models;
 
 class RequireSeedTorrent extends NexusModel
 {
-    /** @var  list<string> */
+    /** @var list<string> */
     protected $fillable = ['torrent_id'];
 
-    /** @var  bool */
+    /** @var bool */
     public $timestamps = true;
 }

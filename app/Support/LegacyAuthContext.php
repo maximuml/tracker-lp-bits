@@ -2,6 +2,8 @@
 
 namespace App\Support;
 
+use Nexus\Nexus;
+
 /**
  * Context bundle for legacy authentication helpers.
  *
@@ -45,8 +47,7 @@ final class LegacyAuthContext
         public ?string $langFolder,
         public int $moderatorClass,
         public string $script,
-    ) {
-    }
+    ) {}
 
     /**
      * Build a context from the current {@see SupportContext}.
@@ -57,7 +58,7 @@ final class LegacyAuthContext
     {
         $script = '';
         if (\function_exists('nexus')) {
-            $script = \Nexus\Nexus::instance()->getScript();
+            $script = Nexus::instance()->getScript();
         } else {
             $scriptFile = SupportContext::getServerValue('SCRIPT_FILENAME', '');
             $script = basename($scriptFile);
@@ -70,7 +71,7 @@ final class LegacyAuthContext
             user: SupportContext::getUser(),
             lang: SupportContext::getLangFunctions(),
             cache: SupportContext::getCache(),
-            ip: \function_exists('getip') ? \App\Support\Network::clientIp((bool) true) : \App\Support\Network::clientIp(),
+            ip: \function_exists('getip') ? Network::clientIp((bool) true) : Network::clientIp(),
             requestUri: SupportContext::getServerValue('REQUEST_URI'),
             requestBody: SupportContext::allPost(),
             queryParams: SupportContext::allQuery(),

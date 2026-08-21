@@ -1,14 +1,16 @@
 <?php
 
+use App\Models\SeedBoxRecord;
+
 return [
     'type_text' => [
-        \App\Models\SeedBoxRecord::TYPE_USER => 'User',
-        \App\Models\SeedBoxRecord::TYPE_ADMIN => 'Administrator',
+        SeedBoxRecord::TYPE_USER => 'User',
+        SeedBoxRecord::TYPE_ADMIN => 'Administrator',
     ],
     'status_text' => [
-        \App\Models\SeedBoxRecord::STATUS_UNAUDITED => 'Unaudited',
-        \App\Models\SeedBoxRecord::STATUS_ALLOWED => 'Allowed',
-        \App\Models\SeedBoxRecord::STATUS_DENIED => 'Denied',
+        SeedBoxRecord::STATUS_UNAUDITED => 'Unaudited',
+        SeedBoxRecord::STATUS_ALLOWED => 'Allowed',
+        SeedBoxRecord::STATUS_DENIED => 'Denied',
     ],
     'status_change_message' => [
         'subject' => 'SeedBox record status changed',

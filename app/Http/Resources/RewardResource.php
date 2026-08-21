@@ -2,17 +2,20 @@
 
 namespace App\Http\Resources;
 
+use App\Models\Reward;
+use App\Support\Time;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
- * @mixin \App\Models\Reward
+ * @mixin Reward
  */
 class RewardResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
+     *
      * @param  mixed  $request
-     * @return  array<int|string, mixed>
+     * @return array<int|string, mixed>
      */
     public function toArray($request)
     {
@@ -21,9 +24,9 @@ class RewardResource extends JsonResource
             'user_id' => $this->userid,
             'torrent_id' => $this->torrentid,
             'value' => $this->value,
-            'created_at' => \App\Support\Time::formatDateTime($this->created_at),
-            'updated_at' => \App\Support\Time::formatDateTime($this->updated_at),
-            'user' => new UserResource($this->whenLoaded('user'))
+            'created_at' => Time::formatDateTime($this->created_at),
+            'updated_at' => Time::formatDateTime($this->updated_at),
+            'user' => new UserResource($this->whenLoaded('user')),
         ];
     }
 }

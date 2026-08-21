@@ -131,7 +131,7 @@ final class InfoRepository
     }
 
     /**
-     * @return  array<string, mixed>
+     * @return array<string, mixed>
      */
     public static function getUserHistoryPosts(int $userId, int $userClass, int $perpage, string $phpSelf): array
     {
@@ -143,7 +143,7 @@ final class InfoRepository
             ->distinct()
             ->count('p.id');
 
-        [$pagertop, $pagerbottom, , $offset, $perpage] = Pagination::pager($perpage, $postcount, $phpSelf . "?action=viewposts&id=$userId&");
+        [$pagertop, $pagerbottom, , $offset, $perpage] = Pagination::pager($perpage, $postcount, $phpSelf."?action=viewposts&id=$userId&");
 
         $posts = NexusDB::table('posts as p')
             ->leftJoin('topics as t', 'p.topicid', '=', 't.id')
@@ -176,7 +176,7 @@ final class InfoRepository
     }
 
     /**
-     * @return  array<string, mixed>
+     * @return array<string, mixed>
      */
     public static function getUserHistoryComments(int $userId, int $perpage, string $phpSelf): array
     {
@@ -185,7 +185,7 @@ final class InfoRepository
             ->where('c.user', $userId)
             ->count();
 
-        [$pagertop, $pagerbottom, , $offset, $perpage] = Pagination::pager($perpage, $commentcount, $phpSelf . "?action=viewcomments&id=$userId&");
+        [$pagertop, $pagerbottom, , $offset, $perpage] = Pagination::pager($perpage, $commentcount, $phpSelf."?action=viewcomments&id=$userId&");
 
         $comments = NexusDB::table('comments as c')
             ->leftJoin('torrents as t', 'c.torrent', '=', 't.id')
@@ -219,7 +219,7 @@ final class InfoRepository
     }
 
     /**
-     * @return  array{faqCateg: array<string, mixed>, faqOrphaned: array<string, mixed>}
+     * @return array{faqCateg: array<string, mixed>, faqOrphaned: array<string, mixed>}
      */
     public static function faqManageData(): array
     {
@@ -300,16 +300,17 @@ final class InfoRepository
     }
 
     /**
-     * @return  array<string, mixed>|null
+     * @return array<string, mixed>|null
      */
     public static function getFaqById(int $id): ?array
     {
         $arr = (array) NexusDB::table('faq')->where('id', $id)->first();
+
         return empty($arr) ? null : $arr;
     }
 
     /**
-     * @return  array<int, array<string, mixed>>
+     * @return array<int, array<string, mixed>>
      */
     public static function getFaqCategoriesByLang(int $langId): array
     {
@@ -328,7 +329,7 @@ final class InfoRepository
     }
 
     /**
-     * @return  array{maxorder: int, maxlinkid: int}
+     * @return array{maxorder: int, maxlinkid: int}
      */
     public static function getFaqMaxOrderAndLinkId(string $type, int $langId): array
     {

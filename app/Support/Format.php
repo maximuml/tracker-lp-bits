@@ -205,7 +205,7 @@ final class Format
     {
         $lang_functions = SupportContext::getLangFunctions();
 
-        return \App\Support\Time::elapsedSince((int) $ts, (int) TIMENOW, [
+        return Time::elapsedSince((int) $ts, (int) TIMENOW, [
             'year' => $lang_functions['text_year'] ?? '',
             'year_short' => $lang_functions['text_short_year'] ?? '',
             'month' => $lang_functions['text_month'] ?? '',
@@ -225,7 +225,7 @@ final class Format
      */
     public static function getRatioColor(int|float $ratio): string
     {
-        return \App\Support\Ratio::color((float) $ratio);
+        return Ratio::color((float) $ratio);
     }
 
     /**
@@ -243,7 +243,7 @@ final class Format
         int $imagenum = -1,
         int $imageMaxHeight = 0,
     ): string {
-        return \App\Support\Comment::format(
+        return Comment::format(
             $text,
             $stripHtml,
             $xssclean,
@@ -262,7 +262,7 @@ final class Format
      */
     public static function formatUrls(string $text, bool $newWindow = false): string
     {
-        return \App\Support\BBCode::formatUrls($text, $newWindow);
+        return BBCode::formatUrls($text, $newWindow);
     }
 
     /**
@@ -270,7 +270,7 @@ final class Format
      */
     public static function highlight(string $search, string $subject, string $hlstart = '<b><font class="striking">', string $hlend = '</font></b>'): string
     {
-        return \App\Support\Strings::highlight($search, $subject, $hlstart, $hlend);
+        return Strings::highlight($search, $subject, $hlstart, $hlend);
     }
 
     /**
@@ -280,7 +280,7 @@ final class Format
      */
     public static function prettyTimeWithLocale(int|float $s): string
     {
-        $lang_functions = \App\Support\SupportContext::getLangFunctions();
+        $lang_functions = SupportContext::getLangFunctions();
 
         return self::prettyTime($s, (string) ($lang_functions['text_day'] ?? 'day(s)'));
     }

@@ -2,42 +2,43 @@
 
 namespace App\Filament\Resources\User;
 
-use Filament\Schemas\Schema;
-use Filament\Forms\Components\TextInput;
-use App\Filament\Resources\User\UserResource\Pages\CreateUser;
-use Filament\Forms\Components\Select;
-use Filament\Tables\Columns\BadgeColumn;
-use Filament\Tables\Columns\IconColumn;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Columns\Column;
-use Filament\Tables\Filters\Filter;
-use Filament\Tables\Filters\SelectFilter;
-use Filament\Actions\ViewAction;
-use Filament\Schemas\Components\Group;
-use Filament\Infolists\Components\TextEntry;
-use Filament\Forms\Components\Radio;
-use Filament\Schemas\Components\Utilities\Get;
-use Filament\Forms\Components\DateTimePicker;
-use Exception;
-use Filament\Forms\Components\Hidden;
-use App\Filament\Resources\User\UserResource\Pages\ListUsers;
-use App\Filament\Resources\User\UserResource\Pages\UserProfile;
-use Filament\Actions\BulkAction;
+use App\Enums\ModelEventEnum;
 use App\Filament\OptionsTrait;
 use App\Filament\Resources\User\UserResource\Pages;
+use App\Filament\Resources\User\UserResource\Pages\CreateUser;
+use App\Filament\Resources\User\UserResource\Pages\ListUsers;
+use App\Filament\Resources\User\UserResource\Pages\UserProfile;
 use App\Filament\Resources\User\UserResource\RelationManagers;
 use App\Models\User;
 use App\Repositories\UserRepository;
+use App\Support\Admin;
+use App\Support\Config\SiteConfig;
+use App\Support\Events;
+use App\Support\Mail;
+use App\Support\Url;
+use App\Support\UserDisplay;
+use Exception;
 use Filament\Actions\Action;
+use Filament\Actions\BulkAction;
+use Filament\Actions\ViewAction;
 use Filament\Forms;
+use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\Radio;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Group;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Schema;
+use Filament\Tables\Columns\Column;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
-use Filament\Tables;
-use Filament\Infolists;
-use Filament\Infolists\Components;
-
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\HtmlString;
@@ -48,9 +49,9 @@ class UserResource extends Resource
 
     protected static ?string $model = User::class;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-users';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-users';
 
-    protected static string | \UnitEnum | null $navigationGroup = 'User';
+    protected static string|\UnitEnum|null $navigationGroup = 'User';
 
     protected static ?int $navigationSort = 1;
 
@@ -62,14 +63,16 @@ class UserResource extends Resource
         if (! $user instanceof User) {
             throw new \RuntimeException('Expected an authenticated user.');
         }
+
         return $user;
     }
 
     private static function getRep(): UserRepository
     {
         if (self::$rep === null) {
-            self::$rep = new UserRepository();
+            self::$rep = new UserRepository;
         }
+
         return self::$rep;
     }
 
@@ -99,46 +102,44 @@ class UserResource extends Resource
     public static function table(Table $table): Table
     {
         $yesNoOptions = ['success' => 'yes', 'danger' => 'no'];
+
         return $table
             ->columns([
                 TextColumn::make('id')->sortable()->searchable(),
-                TextColumn::make('username')->searchable()->label(__("label.user.username"))
-                    ->formatStateUsing(fn ($record) => new HtmlString(\App\Support\UserDisplay::username($record->id, false, true, true, true))),
-                TextColumn::make('email')->searchable()->label(__("label.email")),
+                TextColumn::make('username')->searchable()->label(__('label.user.username'))
+                    ->formatStateUsing(fn ($record) => new HtmlString(UserDisplay::username($record->id, false, true, true, true))),
+                TextColumn::make('email')->searchable()->label(__('label.email')),
                 TextColumn::make('class')->label('Class')
-                    ->formatStateUsing(fn(Column $column) => ($record = $column->getRecord()) instanceof User ? $record->classText : '')
-                    ->sortable()->label(__("label.user.class")),
+                    ->formatStateUsing(fn (Column $column) => ($record = $column->getRecord()) instanceof User ? $record->classText : '')
+                    ->sortable()->label(__('label.user.class')),
                 TextColumn::make('uploaded')->label('Uploaded')
-                    ->formatStateUsing(fn(Column $column) => ($record = $column->getRecord()) instanceof User ? $record->uploadedText : '')
-                    ->sortable()->label(__("label.uploaded")),
+                    ->formatStateUsing(fn (Column $column) => ($record = $column->getRecord()) instanceof User ? $record->uploadedText : '')
+                    ->sortable()->label(__('label.uploaded')),
                 TextColumn::make('downloaded')->label('Downloaded')
-                    ->formatStateUsing(fn(Column $column) => ($record = $column->getRecord()) instanceof User ? $record->downloadedText : '')
-                    ->sortable()->label(__("label.downloaded")),
-                TextColumn::make('status')->badge()->colors(['success' => 'confirmed', 'warning' => 'pending'])->label(__("label.user.status")),
-                TextColumn::make('enabled')->badge()->colors($yesNoOptions)->label(__("label.user.enabled")),
-                TextColumn::make('downloadpos')->badge()->colors($yesNoOptions)->label(__("label.user.downloadpos")),
-                TextColumn::make('parked')->badge()->colors($yesNoOptions)->label(__("label.user.parked")),
-                TextColumn::make('warned')->badge()->colors($yesNoOptions)->label(__("label.user.warned")),
+                    ->formatStateUsing(fn (Column $column) => ($record = $column->getRecord()) instanceof User ? $record->downloadedText : '')
+                    ->sortable()->label(__('label.downloaded')),
+                TextColumn::make('status')->badge()->colors(['success' => 'confirmed', 'warning' => 'pending'])->label(__('label.user.status')),
+                TextColumn::make('enabled')->badge()->colors($yesNoOptions)->label(__('label.user.enabled')),
+                TextColumn::make('downloadpos')->badge()->colors($yesNoOptions)->label(__('label.user.downloadpos')),
+                TextColumn::make('parked')->badge()->colors($yesNoOptions)->label(__('label.user.parked')),
+                TextColumn::make('warned')->badge()->colors($yesNoOptions)->label(__('label.user.warned')),
                 TextColumn::make('isDonating')
                     ->state(fn ($record): string => $record->isDonating() ? 'yes' : 'no')
                     ->badge()
                     ->colors($yesNoOptions)
-                    ->label(__("label.user.is_donating"))
-                ,
-                TextColumn::make('added')->sortable()->dateTime('Y-m-d H:i')->label(__("label.added")),
-                TextColumn::make('last_access')->dateTime('Y-m-d H:i')->label(__("label.last_access")),
+                    ->label(__('label.user.is_donating')),
+                TextColumn::make('added')->sortable()->dateTime('Y-m-d H:i')->label(__('label.added')),
+                TextColumn::make('last_access')->dateTime('Y-m-d H:i')->label(__('label.last_access')),
             ])
             ->defaultSort('added', 'desc')
             ->filters([
                 Filter::make('id')
                     ->schema([
                         TextInput::make('id')
-                            ->placeholder('UID')
-                        ,
+                            ->placeholder('UID'),
                     ])->query(function (Builder $query, array $data) {
-                        return $query->when($data['id'], fn (Builder $query, $id) => $query->where("id", $id));
-                    })
-                ,
+                        return $query->when($data['id'], fn (Builder $query, $id) => $query->where('id', $id));
+                    }),
                 SelectFilter::make('class')->options(User::listClass())->label(__('label.user.class')),
                 SelectFilter::make('status')->options(['confirmed' => 'confirmed', 'pending' => 'pending'])->label(__('label.user.status')),
                 SelectFilter::make('enabled')->options(self::$yesOrNo)->label(__('label.user.enabled')),
@@ -151,6 +152,7 @@ class UserResource extends Resource
                         } elseif ($data['value'] === 'no') {
                             return $query->where('warned', 'no');
                         }
+
                         return $query;
                     }),
                 SelectFilter::make('is_donating')
@@ -161,12 +163,12 @@ class UserResource extends Resource
                             return $query->where('donor', 'yes')->where(function ($query) {
                                 return $query->whereNull('donoruntil')->orWhere('donoruntil', '>=', now());
                             });
-                        } else if ($data['value'] === 'no') {
+                        } elseif ($data['value'] === 'no') {
                             return $query->where('donor', 'no');
                         }
+
                         return $query;
-                    })
-                ,
+                    }),
             ])
             ->recordActions([
                 ViewAction::make(),
@@ -178,19 +180,17 @@ class UserResource extends Resource
     {
         return $schema
             ->components([
-                \Filament\Schemas\Components\Grid::make(2)->schema([
+                Grid::make(2)->schema([
                     Group::make([
-                        TextEntry::make('id')->label("UID"),
+                        TextEntry::make('id')->label('UID'),
                         TextEntry::make('username')
-                            ->label(__("label.user.username"))
-                            ->formatStateUsing(fn ($record) => \App\Support\UserDisplay::username($record->id, false, true, true, true))
-                            ->html()
-                        ,
+                            ->label(__('label.user.username'))
+                            ->formatStateUsing(fn ($record) => UserDisplay::username($record->id, false, true, true, true))
+                            ->html(),
                         TextEntry::make('email')
-                            ->label(__("label.email"))
+                            ->label(__('label.email'))
                             ->copyable()
-                            ->placeholder("点击复制")
-                        ,
+                            ->placeholder('点击复制'),
                         TextEntry::make('passkey')->limit(10)->copyable(),
                         TextEntry::make('genderText')
                             ->label(__('label.user.gender'))
@@ -198,65 +198,59 @@ class UserResource extends Resource
                         TextEntry::make('country.name')
                             ->label(__('label.user.country'))
                             ->placeholder('N/A'),
-                        TextEntry::make('added')->label(__("label.added")),
-                        TextEntry::make('last_access')->label(__("label.last_access")),
-                        TextEntry::make('inviter.username')->label(__("label.user.invite_by")),
+                        TextEntry::make('added')->label(__('label.added')),
+                        TextEntry::make('last_access')->label(__('label.last_access')),
+                        TextEntry::make('inviter.username')->label(__('label.user.invite_by')),
                         TextEntry::make('ip')
                             ->label(__('label.user.ip'))
                             ->visible(fn (User $record): bool => self::currentUser()->class >= User::CLASS_MODERATOR)
                             ->placeholder('N/A'),
-                        TextEntry::make('parked')->label(__("label.user.parked")),
-                        TextEntry::make('offer_allowed_count')->label(__("label.user.offer_allowed_count")),
-                        TextEntry::make('seed_points')->label(__("label.user.seed_points")),
-                        TextEntry::make('uploadedText')->label(__("label.uploaded")),
-                        TextEntry::make('downloadedText')->label(__("label.downloaded")),
-                        TextEntry::make('seedbonus')->label(__("label.user.seedbonus")),
-                        TextEntry::make('seed_points')->label(__("label.user.seed_points")),
+                        TextEntry::make('parked')->label(__('label.user.parked')),
+                        TextEntry::make('offer_allowed_count')->label(__('label.user.offer_allowed_count')),
+                        TextEntry::make('seed_points')->label(__('label.user.seed_points')),
+                        TextEntry::make('uploadedText')->label(__('label.uploaded')),
+                        TextEntry::make('downloadedText')->label(__('label.downloaded')),
+                        TextEntry::make('seedbonus')->label(__('label.user.seedbonus')),
+                        TextEntry::make('seed_points')->label(__('label.user.seed_points')),
                     ])
                         ->columns(6)
-                        ->columnSpan(4)
-                    ,
+                        ->columnSpan(4),
 
                     Group::make([
                         TextEntry::make('status')
                             ->label(__('label.user.status'))
                             ->badge()
                             ->colors(['success' => User::STATUS_CONFIRMED, 'warning' => User::STATUS_PENDING])
-                            ->hintAction(self::buildActionConfirm())
-                        ,
+                            ->hintAction(self::buildActionConfirm()),
 
                         TextEntry::make('classText')
-                            ->label(__("label.user.class"))
-                            ->hintAction(self::buildActionChangeClass())
-                        ,
+                            ->label(__('label.user.class'))
+                            ->hintAction(self::buildActionChangeClass()),
 
                         TextEntry::make('enabled')
-                            ->label(__("label.user.enabled"))
+                            ->label(__('label.user.enabled'))
                             ->badge()
                             ->colors(['success' => 'yes', 'warning' => 'no'])
-                            ->hintAction(self::buildActionEnableDisable())
-                        ,
+                            ->hintAction(self::buildActionEnableDisable()),
                         TextEntry::make('downloadpos')
-                            ->label(__("label.user.downloadpos"))
+                            ->label(__('label.user.downloadpos'))
                             ->badge()
                             ->colors(['success' => 'yes', 'warning' => 'no'])
-                            ->hintAction(self::buildActionChangeDownloadPos())
-                        ,
+                            ->hintAction(self::buildActionChangeDownloadPos()),
                         TextEntry::make('twoFactorAuthenticationStatus')
-                            ->label(__("label.user.two_step_authentication"))
+                            ->label(__('label.user.two_step_authentication'))
                             ->badge()
                             ->colors(['success' => 'yes', 'warning' => 'no'])
-                            ->hintAction(self::buildActionCancelTwoStepAuthentication())
-                        ,
+                            ->hintAction(self::buildActionCancelTwoStepAuthentication()),
                     ])
-                        ->columnSpan(1)
+                        ->columnSpan(1),
                 ])->columns(5),
             ]);
     }
 
     private static function buildActionChangeClass(): Action
     {
-        return Action::make("changeClass")
+        return Action::make('changeClass')
             ->label(__('label.change'))
             ->button()
             ->visible(fn (User $record): bool => (self::currentUser()->class > $record->class))
@@ -266,33 +260,29 @@ class UserResource extends Resource
                     ->default(fn (User $record) => $record->class)
                     ->label(__('user.labels.class'))
                     ->required()
-                    ->reactive()
-                ,
+                    ->reactive(),
                 Radio::make('vip_added')
                     ->options(self::getYesNoOptions('yes', 'no'))
                     ->default(fn (User $record) => $record->vip_added)
                     ->label(__('user.labels.vip_added'))
                     ->helperText(__('user.labels.vip_added_help'))
-                    ->hidden(fn (Get $get) => $get('class') != User::CLASS_VIP)
-                ,
+                    ->hidden(fn (Get $get) => $get('class') != User::CLASS_VIP),
                 DateTimePicker::make('vip_until')
                     ->default(fn (User $record) => $record->vip_until)
                     ->label(__('user.labels.vip_until'))
                     ->helperText(__('user.labels.vip_until_help'))
-                    ->hidden(fn (Get $get) => $get('class') != User::CLASS_VIP)
-                ,
+                    ->hidden(fn (Get $get) => $get('class') != User::CLASS_VIP),
                 TextInput::make('reason')
                     ->label(__('admin.resources.user.actions.enable_disable_reason'))
-                    ->placeholder(__('admin.resources.user.actions.enable_disable_reason_placeholder'))
-                ,
+                    ->placeholder(__('admin.resources.user.actions.enable_disable_reason_placeholder')),
             ])
             ->action(function (User $record, array $data) {
                 $userRep = self::getRep();
                 try {
                     $userRep->changeClass(self::currentUser(), $record, $data['class'], $data['reason'], $data);
-                    \App\Support\Admin::successNotification("");
+                    Admin::successNotification('');
                 } catch (Exception $exception) {
-                    \App\Support\Admin::failNotification($exception->getMessage());
+                    Admin::failNotification($exception->getMessage());
                 }
             });
     }
@@ -313,20 +303,21 @@ class UserResource extends Resource
             ])
             ->action(function (User $record, array $data) {
                 if (self::currentUser()->class <= $record->class) {
-                    \App\Support\Admin::failNotification("No Permission!");
+                    Admin::failNotification('No Permission!');
+
                     return;
                 }
                 $record->status = User::STATUS_CONFIRMED;
                 $record->info = null;
                 $record->save();
 
-                \App\Support\Events::fire(\App\Enums\ModelEventEnum::USER_UPDATED, $record, null);
+                Events::fire(ModelEventEnum::USER_UPDATED, $record, null);
 
-                if (!empty($data['send_email']) && $record->email !== '') {
+                if (! empty($data['send_email']) && $record->email !== '') {
                     self::sendConfirmationEmail($record);
                 }
 
-                \App\Support\Admin::successNotification("");
+                Admin::successNotification('');
             });
     }
 
@@ -337,10 +328,10 @@ class UserResource extends Resource
      */
     private static function sendConfirmationEmail(User $user): void
     {
-        $siteName = \App\Support\Config\SiteConfig::current()->basic->siteName('');
-        $baseUrl = \App\Support\Url::schemeAndHost(false);
-        $reportMail = (string) \App\Support\Config\SiteConfig::current()->main->siteEmail('');
-        $siteEmail = (string) \App\Support\Config\SiteConfig::current()->main->siteEmail('');
+        $siteName = SiteConfig::current()->basic->siteName('');
+        $baseUrl = Url::schemeAndHost(false);
+        $reportMail = (string) SiteConfig::current()->main->siteEmail('');
+        $siteEmail = (string) SiteConfig::current()->main->siteEmail('');
 
         $body = sprintf(
             "Your account has been confirmed.\n\n<b><a href=\"javascript:void(null)\" onclick=\"window.open('%s/login')\">Click here to login</a></b><br />\n%s/login\n\nIf you have any questions, please contact %s",
@@ -349,9 +340,9 @@ class UserResource extends Resource
             $reportMail,
         );
 
-        $subject = $siteName . ' - Account Confirmed';
+        $subject = $siteName.' - Account Confirmed';
 
-        \App\Support\Mail::sentLegacy(
+        Mail::sentLegacy(
             (string) $user->email,
             $siteName,
             $siteEmail,
@@ -367,7 +358,7 @@ class UserResource extends Resource
 
     private static function buildActionEnableDisable(): Action
     {
-        return Action::make("changeClass")
+        return Action::make('changeClass')
             ->label(fn (User $record) => $record->enabled == 'yes' ? __('admin.resources.user.actions.disable_modal_btn') : __('admin.resources.user.actions.enable_modal_btn'))
             ->modalHeading(fn (User $record) => $record->enabled == 'yes' ? __('admin.resources.user.actions.disable_modal_title') : __('admin.resources.user.actions.enable_modal_title'))
             ->button()
@@ -385,16 +376,16 @@ class UserResource extends Resource
                     } elseif ($data['action'] == 'disable') {
                         $userRep->disableUser(self::currentUser(), $data['uid'], $data['reason']);
                     }
-                    \App\Support\Admin::successNotification("");
+                    Admin::successNotification('');
                 } catch (Exception $exception) {
-                    \App\Support\Admin::failNotification($exception->getMessage());
+                    Admin::failNotification($exception->getMessage());
                 }
             });
     }
 
     private static function buildActionChangeDownloadPos(): Action
     {
-        return Action::make("changeDownloadPos")
+        return Action::make('changeDownloadPos')
             ->label(fn (User $record) => $record->downloadpos == 'yes' ? __('admin.resources.user.actions.disable_download_privileges_btn') : __('admin.resources.user.actions.enable_download_privileges_btn'))
             ->button()
             ->requiresConfirmation()
@@ -403,9 +394,9 @@ class UserResource extends Resource
                 $userRep = self::getRep();
                 try {
                     $userRep->updateDownloadPrivileges(self::currentUser(), $record->id, $record->downloadpos == 'yes' ? 'no' : 'yes');
-                    \App\Support\Admin::successNotification("");
+                    Admin::successNotification('');
                 } catch (Exception $exception) {
-                    \App\Support\Admin::failNotification($exception->getMessage());
+                    Admin::failNotification($exception->getMessage());
                 }
             });
 
@@ -413,19 +404,19 @@ class UserResource extends Resource
 
     private static function buildActionCancelTwoStepAuthentication(): Action
     {
-        return Action::make("twoStepAuthentication")
+        return Action::make('twoStepAuthentication')
             ->label(__('admin.resources.user.actions.disable_two_step_authentication'))
             ->button()
-            ->visible(fn (User $record) => $record->two_step_secret != "")
+            ->visible(fn (User $record) => $record->two_step_secret != '')
             ->modalHeading(__('admin.resources.user.actions.disable_two_step_authentication'))
             ->requiresConfirmation()
             ->action(function (User $record) {
                 $userRep = self::getRep();
                 try {
                     $userRep->removeTwoStepAuthentication(self::currentUser(), $record->id);
-                    \App\Support\Admin::successNotification("");
+                    Admin::successNotification('');
                 } catch (Exception $exception) {
-                    \App\Support\Admin::failNotification($exception->getMessage());
+                    Admin::failNotification($exception->getMessage());
                 }
             });
 
@@ -434,7 +425,7 @@ class UserResource extends Resource
     public static function getRelations(): array
     {
         return [
-//            RelationManagers\MedalsRelationManager::class,
+            //            RelationManagers\MedalsRelationManager::class,
         ];
     }
 
@@ -443,8 +434,8 @@ class UserResource extends Resource
         return [
             'index' => ListUsers::route('/'),
             'create' => CreateUser::route('/create'),
-//            'edit' => Pages\EditUser::route('/{record}/edit'),
-//            'view' => Pages\ViewUser::route('/{record}'),
+            //            'edit' => Pages\EditUser::route('/{record}/edit'),
+            //            'view' => Pages\ViewUser::route('/{record}'),
             'view' => UserProfile::route('/{record}'),
         ];
     }
@@ -474,7 +465,7 @@ class UserResource extends Resource
                 ->action(function (Collection $records) {
                     $rep = self::getRep();
                     $rep->removeWarnings(self::currentUser(), $records->pluck('id')->toArray());
-                    \App\Support\Admin::successNotification("");
+                    Admin::successNotification('');
                 });
 
             $actions[] = BulkAction::make('disable')
@@ -492,11 +483,10 @@ class UserResource extends Resource
                             }
                         }
                     }
-                    \App\Support\Admin::successNotification("");
+                    Admin::successNotification('');
                 });
         }
 
         return $actions;
     }
-
 }

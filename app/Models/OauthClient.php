@@ -31,8 +31,9 @@ class OauthClient extends Client
             $model->secret = Str::random(40);
         });
     }
+
     public function skipsAuthorization(?Authenticatable $user = null, array $scopes = []): bool
     {
-        return (bool)$this->skips_authorization;
+        return (bool) $this->skips_authorization;
     }
 }

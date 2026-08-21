@@ -3,9 +3,7 @@
 namespace App\Filament\Resources\Section\SecondIconResource\Pages;
 
 use App\Filament\Resources\Section\SecondIconResource;
-use App\Models\SearchBox;
 use App\Models\SecondIcon;
-use Filament\Pages\Actions;
 use Filament\Resources\Pages\CreateRecord;
 
 class CreateSecondIcon extends CreateRecord
@@ -14,7 +12,7 @@ class CreateSecondIcon extends CreateRecord
 
     /**
      * @param  array<string, mixed>  $data
-     * @return  array<string, mixed>
+     * @return array<string, mixed>
      */
     protected function mutateFormDataBeforeCreate(array $data): array
     {

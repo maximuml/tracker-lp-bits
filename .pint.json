@@ -1,0 +1,11 @@
+{
+    "preset": "laravel",
+    "exclude": [
+        "app/Services/Legacy/*_content.php",
+        "app/Nexus",
+        "config/nexus_constants.php"
+    ],
+    "rules": {
+        "declare_strict_types": false
+    }
+}

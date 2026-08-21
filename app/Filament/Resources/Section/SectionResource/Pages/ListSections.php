@@ -2,11 +2,9 @@
 
 namespace App\Filament\Resources\Section\SectionResource\Pages;
 
-use Filament\Actions\CreateAction;
 use App\Filament\PageList;
 use App\Filament\Resources\Section\SectionResource;
-use Filament\Pages\Actions;
-use Filament\Resources\Pages\ListRecords;
+use Filament\Actions\CreateAction;
 
 class ListSections extends PageList
 {
@@ -18,6 +16,4 @@ class ListSections extends PageList
             CreateAction::make(),
         ];
     }
-
-
 }

@@ -2,9 +2,9 @@
 
 namespace App\Jobs;
 
+use App\Support\Json;
+use App\Support\Logger;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldBeUnique;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
@@ -33,12 +33,12 @@ class MaintainPluginState
     public function handle()
     {
         $enabled = Plugin::listEnabled();
-        $key = "nexus_plugin_enabled";
+        $key = 'nexus_plugin_enabled';
         NexusDB::redis()->del($key);
         $nowStr = now()->toDateTimeString();
         foreach ($enabled as $name => $value) {
             NexusDB::redis()->hSet($key, $name, $nowStr);
         }
-        \App\Support\Logger::writeWithContext((string) ("{$key}: " . \App\Support\Json::encode($enabled)), (string) 'info', (bool) false);
+        Logger::writeWithContext((string) ("{$key}: ".Json::encode($enabled)), (string) 'info', (bool) false);
     }
 }

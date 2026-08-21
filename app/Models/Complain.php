@@ -9,10 +9,7 @@
  * @property int $answered
  * @property string|null $ip
  */
+
 namespace App\Models;
 
-
-class Complain extends NexusModel
-{
-
-}
+class Complain extends NexusModel {}

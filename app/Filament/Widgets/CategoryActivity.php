@@ -17,6 +17,6 @@ class CategoryActivity extends StatTable
     /** @return array<int|string, array<string, mixed>> */
     protected function getTableRows(): array
     {
-        return (new DashboardRepository())->categoryActivity();
+        return (new DashboardRepository)->categoryActivity();
     }
 }

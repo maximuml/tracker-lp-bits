@@ -3,9 +3,10 @@
 namespace App\Listeners;
 
 use App\Events\TorrentCreated;
+use App\Models\Torrent;
 use App\Repositories\UploadRepository;
+use App\Support\Logger;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Queue\InteractsWithQueue;
 
 class SendEmailNotificationWhenTorrentCreated implements ShouldQueue
 {
@@ -23,12 +24,13 @@ class SendEmailNotificationWhenTorrentCreated implements ShouldQueue
     public function handle(TorrentCreated $event): void
     {
         $torrent = $event->model;
-        if (! $torrent instanceof \App\Models\Torrent) {
-            \App\Support\Logger::writeWithContext((string) 'SendEmailNotificationWhenTorrentCreated: no torrent model', (string) 'error', (bool) false);
+        if (! $torrent instanceof Torrent) {
+            Logger::writeWithContext((string) 'SendEmailNotificationWhenTorrentCreated: no torrent model', (string) 'error', (bool) false);
+
             return;
         }
-        $uploadRepo = new UploadRepository();
+        $uploadRepo = new UploadRepository;
         $result = $uploadRepo->sendEmailNotification($torrent);
-        \App\Support\Logger::writeWithContext((string) ("torrent: {$torrent->id}, sendEmailNotification result: " . var_export($result, true)), (string) 'info', (bool) false);
+        Logger::writeWithContext((string) ("torrent: {$torrent->id}, sendEmailNotification result: ".var_export($result, true)), (string) 'info', (bool) false);
     }
 }

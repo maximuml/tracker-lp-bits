@@ -22,7 +22,7 @@ final class Captcha
     public static function manager(): CaptchaManager
     {
         if (self::$manager === null) {
-            self::$manager = new CaptchaManager();
+            self::$manager = new CaptchaManager;
         }
 
         return self::$manager;
@@ -92,7 +92,7 @@ final class Captcha
         bool $maxattemptlog = false,
         bool $head = true,
     ): bool {
-        return LegacyAuth::checkCode($imagehash, $imagestring, $where, $maxattemptlog, $head, \App\Support\LegacyAuthContext::fromSupportContext());
+        return LegacyAuth::checkCode($imagehash, $imagestring, $where, $maxattemptlog, $head, LegacyAuthContext::fromSupportContext());
     }
 
     /**

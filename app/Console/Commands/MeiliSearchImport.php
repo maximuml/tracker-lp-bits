@@ -23,14 +23,16 @@ class MeiliSearchImport extends Command
 
     /**
      * Execute the console command.
-     * @return  int
+     *
+     * @return int
      */
     public function handle()
     {
-        $rep = new MeiliSearchRepository();
-        $this->info("going to import torrents...");
+        $rep = new MeiliSearchRepository;
+        $this->info('going to import torrents...');
         $total = $rep->import();
         $this->info("import $total torrents.");
+
         return Command::SUCCESS;
     }
 }

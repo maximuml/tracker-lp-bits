@@ -2,7 +2,8 @@
 
 namespace App\Enums\SeedBoxRecord;
 
-enum IsAllowedEnum: int {
+enum IsAllowedEnum: int
+{
     case YES = 1;
 
     case NO = 0;

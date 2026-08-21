@@ -5,7 +5,6 @@ namespace App\Filament\Resources\Oauth\AccessTokenResource\Pages;
 use App\Filament\PageListSingle;
 use App\Filament\Resources\Oauth\AccessTokenResource;
 use Filament\Pages\Actions;
-use Filament\Resources\Pages\ManageRecords;
 
 class ManageAccessTokens extends PageListSingle
 {
@@ -14,7 +13,7 @@ class ManageAccessTokens extends PageListSingle
     protected function getHeaderActions(): array
     {
         return [
-//            Actions\CreateAction::make(),
+            //            Actions\CreateAction::make(),
         ];
     }
 }

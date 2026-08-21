@@ -7,7 +7,6 @@ use Illuminate\Support\Facades\DB;
 
 class AudiocodecsTableSeeder extends Seeder
 {
-
     /**
      * Auto generated seed file
      *
@@ -15,62 +14,53 @@ class AudiocodecsTableSeeder extends Seeder
      */
     public function run()
     {
-        
 
         DB::table('audiocodecs')->delete();
-        
-        DB::table('audiocodecs')->insert(array (
-            0 => 
-            array (
+
+        DB::table('audiocodecs')->insert([
+            0 => [
                 'id' => 1,
                 'name' => 'FLAC',
                 'image' => '',
                 'sort_index' => 0,
-            ),
-            1 => 
-            array (
+            ],
+            1 => [
                 'id' => 2,
                 'name' => 'APE',
                 'image' => '',
                 'sort_index' => 0,
-            ),
-            2 => 
-            array (
+            ],
+            2 => [
                 'id' => 3,
                 'name' => 'DTS',
                 'image' => '',
                 'sort_index' => 0,
-            ),
-            3 => 
-            array (
+            ],
+            3 => [
                 'id' => 4,
                 'name' => 'MP3',
                 'image' => '',
                 'sort_index' => 0,
-            ),
-            4 => 
-            array (
+            ],
+            4 => [
                 'id' => 5,
                 'name' => 'OGG',
                 'image' => '',
                 'sort_index' => 0,
-            ),
-            5 => 
-            array (
+            ],
+            5 => [
                 'id' => 6,
                 'name' => 'AAC',
                 'image' => '',
                 'sort_index' => 0,
-            ),
-            6 => 
-            array (
+            ],
+            6 => [
                 'id' => 7,
                 'name' => 'Other',
                 'image' => '',
                 'sort_index' => 0,
-            ),
-        ));
-        
-        
+            ],
+        ]);
+
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Support;
 
 use App\Support\Cache\LegacyRedisCache;
+use Nexus\Nexus;
 
 /**
  * Context bundle for the legacy page header/footer (`PageLayout`).
@@ -85,7 +86,7 @@ final class PageLayoutContext
 
         $script = '';
         if (\function_exists('nexus')) {
-            $script = \Nexus\Nexus::instance()->getScript();
+            $script = Nexus::instance()->getScript();
         } else {
             $scriptFile = SupportContext::getServerValue('SCRIPT_FILENAME', '');
             $script = basename($scriptFile);
@@ -125,7 +126,7 @@ final class PageLayoutContext
             scriptFileName: SupportContext::getServerValue('SCRIPT_FILENAME', ''),
             script: $script,
             enableOffer: (string) SupportContext::getGlobal('enableoffer', ''),
-            customMenu: (string) \App\Support\Hooks::applyFilter('nexus_menu') ?: null,
+            customMenu: (string) Hooks::applyFilter('nexus_menu') ?: null,
             maxdlSystem: (string) SupportContext::getGlobal('maxdlsystem', ''),
             whereTweak: (string) SupportContext::getGlobal('where_tweak', ''),
             menuHtml: (string) SupportContext::getGlobal('nexus_menu_html', ''),

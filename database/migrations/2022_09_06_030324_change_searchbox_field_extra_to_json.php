@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Nexus\Database\NexusDB;
 
 return new class extends Migration
 {
@@ -14,7 +15,7 @@ return new class extends Migration
     public function up()
     {
         Schema::table('searchbox', function (Blueprint $table) {
-            if (\Nexus\Database\NexusDB::isMysql()) {
+            if (NexusDB::isMysql()) {
                 $table->json('extra')->nullable()->change();
             }
             $table->string('custom_fields_display_name')->nullable(true)->default('')->change();

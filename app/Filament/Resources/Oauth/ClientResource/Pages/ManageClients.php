@@ -2,11 +2,9 @@
 
 namespace App\Filament\Resources\Oauth\ClientResource\Pages;
 
-use Filament\Actions\CreateAction;
 use App\Filament\PageListSingle;
 use App\Filament\Resources\Oauth\ClientResource;
-use Filament\Pages\Actions;
-use Filament\Resources\Pages\ManageRecords;
+use Filament\Actions\CreateAction;
 
 class ManageClients extends PageListSingle
 {

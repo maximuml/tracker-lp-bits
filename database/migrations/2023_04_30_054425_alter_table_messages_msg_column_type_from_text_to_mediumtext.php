@@ -29,4 +29,4 @@ class AlterTableMessagesMsgColumnTypeFromTextToMediumtext extends Migration
             $table->text('msg')->change();
         });
     }
-};
+}

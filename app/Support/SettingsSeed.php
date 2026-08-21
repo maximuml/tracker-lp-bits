@@ -2,6 +2,8 @@
 
 namespace App\Support;
 
+use App\Models\Attendance;
+use App\Models\User;
 use App\Repositories\SearchBoxRepository;
 use App\Repositories\StyleRepository;
 
@@ -15,7 +17,7 @@ final class SettingsSeed
 {
     public static function seed(): void
     {
-        //load settings from database
+        // load settings from database
         $settings = Settings::get();
         foreach ($settings as $name => $value) {
             SupportContext::setGlobal(strtoupper($name), $value);
@@ -33,20 +35,19 @@ final class SettingsSeed
         $TORRENT = SupportContext::getGlobal('TORRENT', []);
         $TWEAK = SupportContext::getGlobal('TWEAK', []);
 
-
         SupportContext::setGlobal('SITENAME', $BASIC['SITENAME']);
         SupportContext::setGlobal('BASEURL', $BASIC['BASEURL'] ?: (SupportContext::getServerValue('HTTP_HOST', 'localhost')));
         $BASEURL = SupportContext::getGlobal('BASEURL', '');
         $announce_urls = [];
-        $announce_urls[] = $BASIC['announce_url'] ?: ($BASEURL . DEFAULT_TRACKER_URI);
+        $announce_urls[] = $BASIC['announce_url'] ?: ($BASEURL.DEFAULT_TRACKER_URI);
 
         SupportContext::setGlobal('SITE_ONLINE', $MAIN['site_online']);
-        SupportContext::setGlobal('max_torrent_size', (int)$MAIN['max_torrent_size']);
-        SupportContext::setGlobal('announce_interval', (int)$MAIN['announce_interval']);
-        SupportContext::setGlobal('annintertwoage', (int)$MAIN['annintertwoage']);
-        SupportContext::setGlobal('annintertwo', (int)$MAIN['annintertwo']);
-        SupportContext::setGlobal('anninterthreeage', (int)$MAIN['anninterthreeage']);
-        SupportContext::setGlobal('anninterthree', (int)$MAIN['anninterthree']);
+        SupportContext::setGlobal('max_torrent_size', (int) $MAIN['max_torrent_size']);
+        SupportContext::setGlobal('announce_interval', (int) $MAIN['announce_interval']);
+        SupportContext::setGlobal('annintertwoage', (int) $MAIN['annintertwoage']);
+        SupportContext::setGlobal('annintertwo', (int) $MAIN['annintertwo']);
+        SupportContext::setGlobal('anninterthreeage', (int) $MAIN['anninterthreeage']);
+        SupportContext::setGlobal('anninterthree', (int) $MAIN['anninterthree']);
         SupportContext::setGlobal('signup_timeout', $MAIN['signup_timeout']);
         SupportContext::setGlobal('minoffervotes', $MAIN['minoffervotes']);
         SupportContext::setGlobal('offervotetimeout_main', $MAIN['offervotetimeout']);
@@ -55,13 +56,13 @@ final class SettingsSeed
         SupportContext::setGlobal('maxnewsnum_main', $MAIN['maxnewsnum']);
         SupportContext::setGlobal('forumpostsperpage', $MAIN['postsperpage']);
         SupportContext::setGlobal('forumtopicsperpage_main', $MAIN['topicsperpage']);
-        SupportContext::setGlobal('torrentsperpage_main', (int)$MAIN['torrentsperpage']);
+        SupportContext::setGlobal('torrentsperpage_main', (int) $MAIN['torrentsperpage']);
         SupportContext::setGlobal('max_dead_torrent_time', $MAIN['max_dead_torrent_time']);
-        SupportContext::setGlobal('maxusers', (int)$MAIN['maxusers']);
+        SupportContext::setGlobal('maxusers', (int) $MAIN['maxusers']);
         SupportContext::setGlobal('torrent_dir', $MAIN['torrent_dir']);
         SupportContext::setGlobal('iniupload_main', $MAIN['iniupload']);
         SupportContext::setGlobal('SITEEMAIL', $MAIN['SITEEMAIL']);
-        SupportContext::setGlobal('ACCOUNTANTID', (int)$MAIN['ACCOUNTANTID']);
+        SupportContext::setGlobal('ACCOUNTANTID', (int) $MAIN['ACCOUNTANTID']);
         SupportContext::setGlobal('ALIPAYACCOUNT', $MAIN['ALIPAYACCOUNT']);
         SupportContext::setGlobal('PAYPALACCOUNT', $MAIN['PAYPALACCOUNT']);
         SupportContext::setGlobal('SLOGAN', $MAIN['SLOGAN']);
@@ -103,7 +104,6 @@ final class SettingsSeed
         SupportContext::setGlobal('seeding_leeching_time_calc_start', $MAIN['seeding_leeching_time_calc_start']);
         SupportContext::setGlobal('logo_main', $MAIN['logo']);
 
-
         SupportContext::setGlobal('emailnotify_smtp', $SMTP['emailnotify']);
         SupportContext::setGlobal('smtptype', $SMTP['smtptype']);
         SupportContext::setGlobal('smtp_host', $SMTP['smtp_host']);
@@ -125,7 +125,7 @@ final class SettingsSeed
         SupportContext::setGlobal('cheaterdet_security', $SECURITY['cheaterdet']);
         SupportContext::setGlobal('nodetect_security', $SECURITY['nodetect']);
 
-        SupportContext::setGlobal('defaultclass_class', isset(\App\Models\User::$classes[$AUTHORITY['defaultclass']]) ? $AUTHORITY['defaultclass'] : \App\Models\User::CLASS_USER);
+        SupportContext::setGlobal('defaultclass_class', isset(User::$classes[$AUTHORITY['defaultclass']]) ? $AUTHORITY['defaultclass'] : User::CLASS_USER);
         SupportContext::setGlobal('staffmem_class', $AUTHORITY['staffmem']);
         SupportContext::setGlobal('newsmanage_class', $AUTHORITY['newsmanage']);
         SupportContext::setGlobal('sbmanage_class', $AUTHORITY['sbmanage']);
@@ -211,8 +211,6 @@ final class SettingsSeed
         SupportContext::setGlobal('altthumbwidth_attachment', $ATTACHMENT['altthumbwidth']);
         SupportContext::setGlobal('altthumbheight_attachment', $ATTACHMENT['altthumbheight']);
 
-
-
         SupportContext::setGlobal('mainversion_code', $CODE['mainversion']);
         SupportContext::setGlobal('subversion_code', $CODE['subversion']);
         SupportContext::setGlobal('releasedate_code', $CODE['releasedate']);
@@ -248,10 +246,10 @@ final class SettingsSeed
         SupportContext::setGlobal('bonusgift_bonus', $BONUS['bonusgift'] ?? 0);
         SupportContext::setGlobal('basictax_bonus', $BONUS['basictax'] ?? 0);
         SupportContext::setGlobal('taxpercentage_bonus', $BONUS['taxpercentage'] ?? 0);
-        SupportContext::setGlobal('attendance_initial_bonus', isset($BONUS['attendance_initial']) ? (int) $BONUS['attendance_initial'] : \App\Models\Attendance::INITIAL_BONUS);
-        SupportContext::setGlobal('attendance_step_bonus', isset($BONUS['attendance_step']) ? (int) $BONUS['attendance_step'] : \App\Models\Attendance::STEP_BONUS);
-        SupportContext::setGlobal('attendance_max_bonus', isset($BONUS['attendance_max']) ? (int) $BONUS['attendance_max'] : \App\Models\Attendance::MAX_BONUS);
-        SupportContext::setGlobal('attendance_continuous_bonus', isset($BONUS['attendance_continuous']) && is_array($BONUS['attendance_continuous']) ? $BONUS['attendance_continuous'] : \App\Models\Attendance::CONTINUOUS_BONUS);
+        SupportContext::setGlobal('attendance_initial_bonus', isset($BONUS['attendance_initial']) ? (int) $BONUS['attendance_initial'] : Attendance::INITIAL_BONUS);
+        SupportContext::setGlobal('attendance_step_bonus', isset($BONUS['attendance_step']) ? (int) $BONUS['attendance_step'] : Attendance::STEP_BONUS);
+        SupportContext::setGlobal('attendance_max_bonus', isset($BONUS['attendance_max']) ? (int) $BONUS['attendance_max'] : Attendance::MAX_BONUS);
+        SupportContext::setGlobal('attendance_continuous_bonus', isset($BONUS['attendance_continuous']) && is_array($BONUS['attendance_continuous']) ? $BONUS['attendance_continuous'] : Attendance::CONTINUOUS_BONUS);
 
         SupportContext::setGlobal('neverdelete_account', $ACCOUNT['neverdelete']);
         SupportContext::setGlobal('neverdeletepacked_account', $ACCOUNT['neverdeletepacked']);
@@ -311,7 +309,7 @@ final class SettingsSeed
         SupportContext::setGlobal('randomtwoupfree_torrent', $TORRENT['randomtwoupfree']);
         SupportContext::setGlobal('randomtwouphalfdown_torrent', $TORRENT['randomtwouphalfdown']);
         SupportContext::setGlobal('randomthirtypercentdown_torrent', $TORRENT['randomthirtypercentdown']);
-        SupportContext::setGlobal('largesize_torrent', (int)$TORRENT['largesize']);
+        SupportContext::setGlobal('largesize_torrent', (int) $TORRENT['largesize']);
         SupportContext::setGlobal('largepro_torrent', $TORRENT['largepro']);
         SupportContext::setGlobal('expirehalfleech_torrent', $TORRENT['expirehalfleech']);
         SupportContext::setGlobal('expirefree_torrent', $TORRENT['expirefree']);
@@ -332,19 +330,19 @@ final class SettingsSeed
         SupportContext::setGlobal('uploaderdouble_torrent', $TORRENT['uploaderdouble']);
         SupportContext::setGlobal('deldeadtorrent_torrent', $TORRENT['deldeadtorrent']);
 
-        //Directory for subs
-        SupportContext::setGlobal('SUBSPATH', "subs");
-        //Whether clean-up is triggered by cron, instead of the default browser clicks.
-        //Set this to true ONLY if you have setup other method to schedule the clean-up process.
-        //e.g. cron on *nix, add the following line (without "") in your crontab file
-        //"*/5 * * * * wget -O - -q -t 1 https://nexusphp.org/cron.php"
-        //NOTE:
-        //Make sure you have wget installed on your OS
-        //replace "https://nexusphp.org/" with your own site address
+        // Directory for subs
+        SupportContext::setGlobal('SUBSPATH', 'subs');
+        // Whether clean-up is triggered by cron, instead of the default browser clicks.
+        // Set this to true ONLY if you have setup other method to schedule the clean-up process.
+        // e.g. cron on *nix, add the following line (without "") in your crontab file
+        // "*/5 * * * * wget -O - -q -t 1 https://nexusphp.org/cron.php"
+        // NOTE:
+        // Make sure you have wget installed on your OS
+        // replace "https://nexusphp.org/" with your own site address
 
         SupportContext::setGlobal('useCronTriggerCleanUp', true);
-        //some promotion rules
-        //$promotionrules_torrent = array(0 => array("mediumid" => array(1), "promotion" => 5), 1 => array("mediumid" => array(3), "promotion" => 5), 2 => array("catid" => array(402), "standardid" => array(3), "promotion" => 4), 3 => array("catid" => array(403), "standardid" => array(3), "promotion" => 4));
+        // some promotion rules
+        // $promotionrules_torrent = array(0 => array("mediumid" => array(1), "promotion" => 5), 1 => array("mediumid" => array(3), "promotion" => 5), 2 => array("catid" => array(402), "standardid" => array(3), "promotion" => 4), 3 => array("catid" => array(403), "standardid" => array(3), "promotion" => 4));
         SupportContext::setGlobal('promotionrules_torrent', []);
         SupportContext::setGlobal('announce_urls', $announce_urls);
         SupportContext::setGlobal('https_announce_urls', $https_announce_urls);

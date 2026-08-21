@@ -2,29 +2,27 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Resources\PeerResource;
 use App\Http\Resources\SnatchResource;
-use App\Models\Peer;
 use App\Models\Snatch;
 use App\Repositories\TorrentRepository;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 
 class SnatchController extends Controller
 {
-    /** @var  mixed */
+    /** @var mixed */
     private $repository;
 
     /**
-     * @param  \App\Repositories\TorrentRepository  $repository
-     * @return  mixed
+     * @return mixed
      */
     public function __construct(TorrentRepository $repository)
     {
         $this->repository = $repository;
     }
+
     /**
-     * @param  \Illuminate\Http\Request  $request
-     * @return  array<string, mixed>
+     * @return array<string, mixed>
      */
     public function index(Request $request)
     {
@@ -33,60 +31,62 @@ class SnatchController extends Controller
         ]);
         $snatches = $this->repository->listSnatches($request->torrent_id);
         $resource = SnatchResource::collection($snatches);
-//        $resource->additional([
-//            'card_titles' => Snatch::$cardTitles,
-//            'page_title' => nexus_trans('snatch.index.page_title'),
-//        ]);
+        //        $resource->additional([
+        //            'card_titles' => Snatch::$cardTitles,
+        //            'page_title' => nexus_trans('snatch.index.page_title'),
+        //        ]);
 
         return $this->success($resource);
     }
 
     /**
      * Store a newly created resource in storage.
-     * @param  \Illuminate\Http\Request  $request
-     * @return  \Illuminate\Http\Response
+     *
+     * @return Response
      */
     public function store(Request $request)
     {
         //
-    
-        return new \Illuminate\Http\Response('');
+
+        return new Response('');
     }
 
     /**
      * Display the specified resource.
+     *
      * @param  mixed  $id
-     * @return  \Illuminate\Http\Response
+     * @return Response
      */
     public function show($id)
     {
         //
-    
-        return new \Illuminate\Http\Response('');
+
+        return new Response('');
     }
 
     /**
      * Update the specified resource in storage.
-     * @param  \Illuminate\Http\Request  $request
+     *
      * @param  mixed  $id
-     * @return  \Illuminate\Http\Response
+     * @return Response
      */
     public function update(Request $request, $id)
     {
         //
-    
-        return new \Illuminate\Http\Response('');
+
+        return new Response('');
     }
 
     /**
      * Remove the specified resource from storage.
+     *
      * @param  mixed  $id
-     * @return  \Illuminate\Http\Response
+     * @return Response
      */
     public function destroy($id)
     {
         //
-    
-        return new \Illuminate\Http\Response('');
+
+        return new Response('');
     }
 }

@@ -3,9 +3,10 @@
 namespace App\Listeners;
 
 use App\Models\Torrent;
+use App\Support\Cache;
+use App\Support\Logger;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Queue\InteractsWithQueue;
 
 class ClearTorrentCache implements ShouldQueue
 {
@@ -28,10 +29,10 @@ class ClearTorrentCache implements ShouldQueue
         }
         if ($torrentId > 0) {
             $infoHash = (string) Torrent::query()->where('id', $torrentId)->value('info_hash');
-            \App\Support\Cache::clearTorrent($infoHash);
-            \App\Support\Logger::writeWithContext((string) ("success clear torrent: {$torrentId} cache with info_hash: " . rawurlencode($infoHash)), (string) 'info', (bool) false);
+            Cache::clearTorrent($infoHash);
+            Logger::writeWithContext((string) ("success clear torrent: {$torrentId} cache with info_hash: ".rawurlencode($infoHash)), (string) 'info', (bool) false);
         } else {
-            \App\Support\Logger::writeWithContext((string) "no torrent id", (string) 'error', (bool) false);
+            Logger::writeWithContext((string) 'no torrent id', (string) 'error', (bool) false);
         }
     }
 }

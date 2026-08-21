@@ -2,13 +2,12 @@
 
 namespace App\Filament\Resources\System\SeedBoxRecordResource\Pages;
 
-use Exception;
 use App\Filament\Resources\System\SeedBoxRecordResource;
 use App\Models\SeedBoxRecord;
 use App\Repositories\SeedBoxRepository;
-use Filament\Pages\Actions;
+use App\Support\Admin;
+use Exception;
 use Filament\Resources\Pages\CreateRecord;
-use Illuminate\Database\Eloquent\Model;
 
 class CreateSeedBoxRecord extends CreateRecord
 {
@@ -20,10 +19,10 @@ class CreateSeedBoxRecord extends CreateRecord
         $data['uid'] = auth()->id();
         $data['type'] = SeedBoxRecord::TYPE_ADMIN;
         $data['status'] = SeedBoxRecord::STATUS_ALLOWED;
-        $rep = new SeedBoxRepository();
+        $rep = new SeedBoxRepository;
         try {
             $this->record = $rep->store($data);
-            \App\Support\Admin::successNotification("");
+            Admin::successNotification('');
             if ($another) {
                 // Ensure that the form record is anonymized so that relationships aren't loaded.
                 $this->form->model($this->record::class);
@@ -35,7 +34,7 @@ class CreateSeedBoxRecord extends CreateRecord
             }
             $this->redirect($this->getResource()::getUrl('index'));
         } catch (Exception $exception) {
-            \App\Support\Admin::failNotification($exception->getMessage());
+            Admin::failNotification($exception->getMessage());
         }
     }
 }

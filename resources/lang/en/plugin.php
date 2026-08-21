@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\Plugin;
+
 return [
     'actions' => [
         'install' => 'install',
@@ -13,19 +15,19 @@ return [
         'updated_at' => 'last_executed_action',
     ],
     'status' => [
-        \App\Models\Plugin::STATUS_NORMAL => 'Normal',
-        \App\Models\Plugin::STATUS_NOT_INSTALLED => 'Not installed',
+        Plugin::STATUS_NORMAL => 'Normal',
+        Plugin::STATUS_NOT_INSTALLED => 'Not installed',
 
-        \App\Models\Plugin::STATUS_PRE_INSTALL => 'Ready to install',
-        \App\Models\Plugin::STATUS_INSTALLING => 'Installing',
-        \App\Models\Plugin::STATUS_INSTALL_FAILED => 'Install fail',
+        Plugin::STATUS_PRE_INSTALL => 'Ready to install',
+        Plugin::STATUS_INSTALLING => 'Installing',
+        Plugin::STATUS_INSTALL_FAILED => 'Install fail',
 
-        \App\Models\Plugin::STATUS_PRE_UPDATE => 'Ready to upgrade',
-        \App\Models\Plugin::STATUS_UPDATING => 'Upgrading',
-        \App\Models\Plugin::STATUS_UPDATE_FAILED => 'Upgrade fail',
+        Plugin::STATUS_PRE_UPDATE => 'Ready to upgrade',
+        Plugin::STATUS_UPDATING => 'Upgrading',
+        Plugin::STATUS_UPDATE_FAILED => 'Upgrade fail',
 
-        \App\Models\Plugin::STATUS_PRE_DELETE => 'Ready to remove',
-        \App\Models\Plugin::STATUS_DELETING => 'Removing',
-        \App\Models\Plugin::STATUS_DELETE_FAILED => 'Remove fail',
+        Plugin::STATUS_PRE_DELETE => 'Ready to remove',
+        Plugin::STATUS_DELETING => 'Removing',
+        Plugin::STATUS_DELETE_FAILED => 'Remove fail',
     ],
 ];

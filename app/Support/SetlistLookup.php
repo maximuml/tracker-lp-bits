@@ -5,12 +5,12 @@ namespace App\Support;
 class SetlistLookup
 {
     private const JINA_BASE = 'https://r.jina.ai/http://';
+
     private const LINKINPEDIA_API = 'https://linkinpedia.com/api.php';
 
     /**
      * Try to build a structured setlist from a torrent name.
      *
-     * @param string $torrentName
      * @return array<string, mixed>
      */
     public static function fromTorrentName(string $torrentName): array
@@ -30,7 +30,7 @@ class SetlistLookup
         // 2. Fallback to setlist.fm search
         $queries = self::buildSearchQueries($meta);
         foreach ($queries as $query) {
-            $searchUrl = 'www.setlist.fm/search?query=' . urlencode($query);
+            $searchUrl = 'www.setlist.fm/search?query='.urlencode($query);
             $searchMarkdown = self::fetchJina($searchUrl);
             $setlistUrl = $searchMarkdown ? self::extractFirstSetlistUrl($searchMarkdown) : null;
             if ($setlistUrl && self::isRelevantSetlistUrl($setlistUrl, $meta)) {
@@ -41,20 +41,19 @@ class SetlistLookup
             }
         }
 
-        return ['success' => false, 'error' => 'No setlist found for: ' . $torrentName];
+        return ['success' => false, 'error' => 'No setlist found for: '.$torrentName];
     }
 
     /**
      * Fetch and parse a setlist.fm (or any compatible) URL.
      *
-     * @param string $url
-     * @param array<string, string> $meta
+     * @param  array<string, string>  $meta
      * @return array<string, mixed>
      */
     public static function fromUrl(string $url, array $meta = []): array
     {
         $host = strtolower(parse_url($url, PHP_URL_HOST) ?: '');
-        if (!in_array($host, ['www.setlist.fm', 'setlist.fm'], true)) {
+        if (! in_array($host, ['www.setlist.fm', 'setlist.fm'], true)) {
             return ['success' => false, 'error' => 'Only setlist.fm URLs are supported.'];
         }
 
@@ -66,7 +65,7 @@ class SetlistLookup
 
         $data = self::parseSetlistMarkdown($markdown);
 
-        if (!$data) {
+        if (! $data) {
             return ['success' => false, 'error' => 'Could not parse setlist from page.'];
         }
 
@@ -77,7 +76,7 @@ class SetlistLookup
     }
 
     /**
-     * @param array<string, string> $meta
+     * @param  array<string, string>  $meta
      * @return array<int, string>
      */
     private static function buildSearchQueries(array $meta): array
@@ -108,7 +107,7 @@ class SetlistLookup
     }
 
     /**
-     * @param array<string, string> $meta
+     * @param  array<string, string>  $meta
      * @return array<string, mixed>
      */
     private static function fromLinkinpedia(array $meta): array
@@ -123,13 +122,13 @@ class SetlistLookup
             return ['success' => false, 'error' => 'No full date for Linkinpedia lookup.'];
         }
         [$year, $month, $day] = $parts;
-        $pageBase = $year . $month . $day;
+        $pageBase = $year.$month.$day;
 
         // Some dates have multiple shows (a, b, c...)
         $suffixes = ['', 'a', 'b', 'c', 'd'];
 
         foreach ($suffixes as $suffix) {
-            $page = 'Live:' . $pageBase . $suffix;
+            $page = 'Live:'.$pageBase.$suffix;
             $wikitext = self::fetchLinkinpediaWikitext($page);
             if ($wikitext === null) {
                 // Linkinpedia show pages are sequential; a missing page means no more shows.
@@ -138,16 +137,16 @@ class SetlistLookup
 
             $tourdate = self::parseTemplate($wikitext, 'Tourdate');
             $pageArtist = $tourdate['Performing Act'] ?? $tourdate['Artist'] ?? '';
-            if (!$pageArtist || !self::artistsMatch($pageArtist, $meta['artist'])) {
+            if (! $pageArtist || ! self::artistsMatch($pageArtist, $meta['artist'])) {
                 continue;
             }
 
             $data = self::parseLinkinpediaWikitext($wikitext, $meta, $tourdate);
-            if (!$data || empty($data['sets'])) {
+            if (! $data || empty($data['sets'])) {
                 continue;
             }
 
-            $data['source'] = 'https://linkinpedia.com/wiki/' . $page;
+            $data['source'] = 'https://linkinpedia.com/wiki/'.$page;
             $data['meta'] = $meta;
 
             return ['success' => true, 'data' => $data, 'text' => self::formatForDescription($data)];
@@ -158,13 +157,13 @@ class SetlistLookup
 
     private static function fetchLinkinpediaWikitext(string $page): ?string
     {
-        $url = self::LINKINPEDIA_API . '?action=parse&page=' . urlencode($page) . '&prop=wikitext&format=json';
+        $url = self::LINKINPEDIA_API.'?action=parse&page='.urlencode($page).'&prop=wikitext&format=json';
         $ctx = stream_context_create([
             'http' => ['timeout' => 5, 'follow_location' => true],
         ]);
 
         $json = @file_get_contents($url, false, $ctx);
-        if (!$json) {
+        if (! $json) {
             return null;
         }
 
@@ -174,18 +173,13 @@ class SetlistLookup
         }
         $wikitext = $data['parse']['wikitext']['*'] ?? null;
 
-        if (!is_string($wikitext) || $wikitext === '') {
+        if (! is_string($wikitext) || $wikitext === '') {
             return null;
         }
 
         return $wikitext;
     }
 
-    /**
-     * @param string $a
-     * @param string $b
-     * @return bool
-     */
     private static function artistsMatch(string $a, string $b): bool
     {
         $a = preg_replace('/[^a-z0-9]/', '', strtolower($a));
@@ -221,9 +215,8 @@ class SetlistLookup
     }
 
     /**
-     * @param string $wikitext
-     * @param array<string, string> $meta
-     * @param array<string, string> $tourdate
+     * @param  array<string, string>  $meta
+     * @param  array<string, string>  $tourdate
      * @return array<string, mixed>|null
      */
     private static function parseLinkinpediaWikitext(string $wikitext, array $meta, array $tourdate): ?array
@@ -236,7 +229,7 @@ class SetlistLookup
         $event = $tourdate['Event'] ?? $meta['event'] ?? $venue;
 
         // Some Linkinpedia pages include the state in the City field (e.g. "Tempe, AZ")
-        if ($state && (str_ends_with($city, ', ' . $state) || str_ends_with($city, ', ' . strtoupper($state)))) {
+        if ($state && (str_ends_with($city, ', '.$state) || str_ends_with($city, ', '.strtoupper($state)))) {
             $state = '';
         }
 
@@ -260,7 +253,7 @@ class SetlistLookup
         }
 
         $setlistFields = self::parseTemplate($wikitext, 'Setlist');
-        if (!$setlistFields) {
+        if (! $setlistFields) {
             return null;
         }
 
@@ -271,7 +264,7 @@ class SetlistLookup
         foreach ($setlistFields as $key => $value) {
             if (preg_match('/^ActNo(\d+)$/', $key, $m)) {
                 $idx = (int) $m[1];
-                $acts[$idx] = $setlistFields['ActName' . $idx] ?? ('Act ' . $value);
+                $acts[$idx] = $setlistFields['ActName'.$idx] ?? ('Act '.$value);
             }
             if (preg_match('/^Break(\d+)$/', $key, $m)) {
                 $breaks[(int) $m[1]] = $value;
@@ -283,24 +276,24 @@ class SetlistLookup
 
         for ($i = 1; $i <= 99; $i++) {
             $key = "Song$i";
-            if (!isset($setlistFields[$key])) {
+            if (! isset($setlistFields[$key])) {
                 continue;
             }
 
             $song = trim($setlistFields[$key]);
-            if (!$song) {
+            if (! $song) {
                 continue;
             }
 
             // New act / break before this song?
             $prevIdx = $i - 1;
             if (isset($breaks[$prevIdx]) && strtolower($breaks[$prevIdx]) === 'encore') {
-                if (!empty($current['songs'])) {
+                if (! empty($current['songs'])) {
                     $sets[] = $current;
                 }
                 $current = ['name' => 'Encore', 'songs' => []];
             } elseif (isset($acts[$prevIdx])) {
-                if (!empty($current['songs'])) {
+                if (! empty($current['songs'])) {
                     $sets[] = $current;
                 }
                 $current = ['name' => $acts[$prevIdx], 'songs' => []];
@@ -336,16 +329,16 @@ class SetlistLookup
             ];
         }
 
-        if (!empty($current['songs'])) {
+        if (! empty($current['songs'])) {
             $sets[] = $current;
         }
 
-        if (!$sets) {
+        if (! $sets) {
             return null;
         }
 
         return [
-            'title' => $artist . ' - ' . $venueString,
+            'title' => $artist.' - '.$venueString,
             'artist' => $artist,
             'venue' => $venueString,
             'date' => $date,
@@ -356,8 +349,6 @@ class SetlistLookup
     /**
      * Parse a MediaWiki template from wikitext, handling nested {{...}} blocks.
      *
-     * @param string $wikitext
-     * @param string $templateName
      * @return array<string, string>
      */
     private static function parseTemplate(string $wikitext, string $templateName): array
@@ -374,7 +365,7 @@ class SetlistLookup
         }
         foreach ($lines as $line) {
             $line = ltrim($line, '| ');
-            if (!$line) {
+            if (! $line) {
                 continue;
             }
             if (preg_match('/^([^=]+?)\s*=\s*(.*)$/', $line, $m2)) {
@@ -387,14 +378,10 @@ class SetlistLookup
 
     /**
      * Extract the inner body of a MediaWiki template with balanced braces.
-     *
-     * @param string $wikitext
-     * @param string $templateName
-     * @return string|null
      */
     private static function extractTemplate(string $wikitext, string $templateName): ?string
     {
-        if (preg_match('/\{\{\s*' . preg_quote($templateName, '/') . '(?:\s*\n|\s*\|)?/s', $wikitext, $m, PREG_OFFSET_CAPTURE) !== 1) {
+        if (preg_match('/\{\{\s*'.preg_quote($templateName, '/').'(?:\s*\n|\s*\|)?/s', $wikitext, $m, PREG_OFFSET_CAPTURE) !== 1) {
             return null;
         }
 
@@ -408,11 +395,13 @@ class SetlistLookup
             if ($two === '{{') {
                 $depth++;
                 $pos += 2;
+
                 continue;
             }
             if ($two === '}}') {
                 $depth--;
                 $pos += 2;
+
                 continue;
             }
             $pos++;
@@ -441,9 +430,7 @@ class SetlistLookup
     }
 
     /**
-     * @param string $url
-     * @param array<string, string> $meta
-     * @return bool
+     * @param  array<string, string>  $meta
      */
     private static function isRelevantSetlistUrl(string $url, array $meta): bool
     {
@@ -453,9 +440,9 @@ class SetlistLookup
         $artistSlug = str_replace('-', '', $artist); // e.g. "julienk"
 
         // Artist slug must appear in path
-        if (str_contains($path, '/' . $artist . '/') || str_contains($path, $artist . '/')) {
+        if (str_contains($path, '/'.$artist.'/') || str_contains($path, $artist.'/')) {
             // good
-        } elseif (str_contains($path, $artistSlug . '/')) {
+        } elseif (str_contains($path, $artistSlug.'/')) {
             // e.g. "julienk/"
         } elseif ($meta['artist'] === 'Fort Minor' && str_contains($path, '/fort-minor/')) {
             // ok
@@ -465,7 +452,7 @@ class SetlistLookup
 
         // Year should be present in path
         $year = (string) $meta['year'];
-        if ($year !== '' && !preg_match('/\/' . preg_quote($year, '/') . '\//', $path)) {
+        if ($year !== '' && ! preg_match('/\/'.preg_quote($year, '/').'\//', $path)) {
             return false;
         }
 
@@ -477,15 +464,15 @@ class SetlistLookup
         $parsed = parse_url($url);
         $host = $parsed['host'] ?? 'www.setlist.fm';
         $path = $parsed['path'] ?? '/';
-        $query = isset($parsed['query']) ? '?' . $parsed['query'] : '';
-        $fetchUrl = $host . $path . $query;
+        $query = isset($parsed['query']) ? '?'.$parsed['query'] : '';
+        $fetchUrl = $host.$path.$query;
 
         return self::fetchJina($fetchUrl);
     }
 
     private static function fetchJina(string $urlPath): ?string
     {
-        $fullUrl = self::JINA_BASE . ltrim($urlPath, '/');
+        $fullUrl = self::JINA_BASE.ltrim($urlPath, '/');
 
         $ctx = stream_context_create([
             'http' => [
@@ -516,7 +503,6 @@ class SetlistLookup
     }
 
     /**
-     * @param string $markdown
      * @return array<string, mixed>|null
      */
     private static function parseSetlistMarkdown(string $markdown): ?array
@@ -547,7 +533,7 @@ class SetlistLookup
             $date = $m[1];
         }
 
-        if (!preg_match('/## Setlist\s*\n(.*)(?=\n## |\n\[I was there\]|\n## Songs on Albums|$)/s', $markdown, $m)) {
+        if (! preg_match('/## Setlist\s*\n(.*)(?=\n## |\n\[I was there\]|\n## Songs on Albums|$)/s', $markdown, $m)) {
             return null;
         }
 
@@ -557,7 +543,7 @@ class SetlistLookup
 
         foreach (explode("\n", $setlistBlock) as $line) {
             $line = trim($line);
-            if (!$line) {
+            if (! $line) {
                 continue;
             }
 
@@ -567,10 +553,11 @@ class SetlistLookup
 
             // Section marker: "3.   Act I" or "30.   Encore:"
             if (preg_match('/^\d+\.\s*(Act [IV]+|Encore:?)$/i', $line, $m)) {
-                if (!empty($current['songs'])) {
+                if (! empty($current['songs'])) {
                     $sets[] = $current;
                 }
                 $current = ['name' => rtrim($m[1], ':'), 'songs' => []];
+
                 continue;
             }
 
@@ -580,7 +567,7 @@ class SetlistLookup
             }
         }
 
-        if (!empty($current['songs'])) {
+        if (! empty($current['songs'])) {
             $sets[] = $current;
         }
 
@@ -598,12 +585,11 @@ class SetlistLookup
     }
 
     /**
-     * @param string $line
      * @return array<string, string>|null
      */
     private static function parseSetlistSongLine(string $line): ?array
     {
-        if (!preg_match('/^\d+\.\s+(.*)$/', $line, $m)) {
+        if (! preg_match('/^\d+\.\s+(.*)$/', $line, $m)) {
             return null;
         }
 
@@ -614,7 +600,7 @@ class SetlistLookup
         $rest = (string) preg_replace('/\bPlay Video\b/', '', $rest);
         $rest = trim($rest);
 
-        if (!$rest) {
+        if (! $rest) {
             return null;
         }
 
@@ -637,12 +623,12 @@ class SetlistLookup
         $note = (string) preg_replace('/([a-zA-Z])(cover|song)\b/', '$1 $2', $note);
 
         if ($isTape) {
-            $note = ($note ? 'Song played from tape; ' : 'Song played from tape') . $note;
+            $note = ($note ? 'Song played from tape; ' : 'Song played from tape').$note;
         }
 
         $title = trim((string) preg_replace('/\s+/', ' ', $title));
 
-        if (!$title) {
+        if (! $title) {
             return null;
         }
 
@@ -659,34 +645,33 @@ class SetlistLookup
     }
 
     /**
-     * @param array<string, mixed> $data
-     * @return string
+     * @param  array<string, mixed>  $data
      */
     private static function formatForDescription(array $data): string
     {
         $lines = [];
 
-        if (!empty($data['artist'])) {
-            $lines[] = '[b]Artist:[/b] ' . $data['artist'];
+        if (! empty($data['artist'])) {
+            $lines[] = '[b]Artist:[/b] '.$data['artist'];
         }
-        if (!empty($data['venue'])) {
-            $lines[] = '[b]Venue:[/b] ' . $data['venue'];
+        if (! empty($data['venue'])) {
+            $lines[] = '[b]Venue:[/b] '.$data['venue'];
         }
-        if (!empty($data['date'])) {
-            $lines[] = '[b]Date:[/b] ' . $data['date'];
+        if (! empty($data['date'])) {
+            $lines[] = '[b]Date:[/b] '.$data['date'];
         }
-        if (!empty($data['source'])) {
-            $lines[] = '[b]Source:[/b] ' . $data['source'];
+        if (! empty($data['source'])) {
+            $lines[] = '[b]Source:[/b] '.$data['source'];
         }
         $lines[] = '';
 
         foreach ($data['sets'] as $set) {
-            $lines[] = '[b]' . $set['name'] . '[/b]';
+            $lines[] = '[b]'.$set['name'].'[/b]';
             $counter = 1;
             foreach ($set['songs'] as $song) {
-                $line = $counter . '. ' . $song['name'];
-                if (!empty($song['note'])) {
-                    $line .= ' (' . $song['note'] . ')';
+                $line = $counter.'. '.$song['name'];
+                if (! empty($song['note'])) {
+                    $line .= ' ('.$song['note'].')';
                 }
                 $lines[] = $line;
                 $counter++;

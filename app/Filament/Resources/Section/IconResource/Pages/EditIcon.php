@@ -2,10 +2,11 @@
 
 namespace App\Filament\Resources\Section\IconResource\Pages;
 
-use Filament\Actions\DeleteAction;
 use App\Filament\EditRedirectIndexTrait;
 use App\Filament\Resources\Section\IconResource;
-use Filament\Pages\Actions;
+use App\Support\Cache;
+use App\Support\Locale;
+use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 
 class EditIcon extends EditRecord
@@ -14,7 +15,7 @@ class EditIcon extends EditRecord
 
     protected static string $resource = IconResource::class;
 
-//    protected static string $view = 'filament.resources.system.category-icon-resource.pages.edit-record';
+    //    protected static string $view = 'filament.resources.system.category-icon-resource.pages.edit-record';
 
     /** @return array<DeleteAction> */
     protected function getHeaderActions(): array
@@ -26,23 +27,24 @@ class EditIcon extends EditRecord
 
     /**
      * @param  array<string, mixed>  $data
-     * @return  array<string, mixed>
+     * @return array<string, mixed>
      */
     protected function mutateFormDataBeforeFill(array $data): array
     {
-        $data['tip'] = \App\Support\Locale::trans('label.icon.desc', [], null);
+        $data['tip'] = Locale::trans('label.icon.desc', [], null);
+
         return $data;
     }
 
     protected function getViewData(): array
     {
         return [
-            'desc' => \App\Support\Locale::trans('label.icon.desc', [], null)
+            'desc' => Locale::trans('label.icon.desc', [], null),
         ];
     }
 
     public function afterSave(): void
     {
-        \App\Support\Cache::clearIcon();
+        Cache::clearIcon();
     }
 }

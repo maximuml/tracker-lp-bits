@@ -2,7 +2,6 @@
 
 namespace App\Console\Commands;
 
-use App\Jobs\GenerateTemporaryInvite;
 use App\Jobs\SendLoginNotify;
 use Illuminate\Console\Command;
 
@@ -24,17 +23,20 @@ class UserLoginNotify extends Command
 
     /**
      * Execute the console command.
-     * @return  int
+     *
+     * @return int
      */
     public function handle()
     {
         $thisId = (int) $this->option('this_id');
         $this->info("thisId: $thisId");
-        if (!$thisId) {
-            $this->error("require option --this_id=?");
+        if (! $thisId) {
+            $this->error('require option --this_id=?');
+
             return Command::FAILURE;
         }
         SendLoginNotify::dispatch($thisId);
+
         return Command::SUCCESS;
     }
 }

@@ -3,7 +3,9 @@
 namespace App\Console\Commands;
 
 use App\Repositories\SearchRepository;
+use App\Support\Logger;
 use Illuminate\Console\Command;
+use Nexus\Nexus;
 
 class EsInfo extends Command
 {
@@ -23,15 +25,17 @@ class EsInfo extends Command
 
     /**
      * Execute the console command.
-     * @return  int
+     *
+     * @return int
      */
     public function handle()
     {
-        $rep = new SearchRepository();
+        $rep = new SearchRepository;
         $result = $rep->getEsInfo();
-        $log = sprintf("[%s], %s, result: \n%s", \Nexus\Nexus::instance()->getRequestId(), __METHOD__, var_export($result, true));
+        $log = sprintf("[%s], %s, result: \n%s", Nexus::instance()->getRequestId(), __METHOD__, var_export($result, true));
         $this->info($log);
-        \App\Support\Logger::writeWithContext((string) $log, (string) 'info', (bool) false);
+        Logger::writeWithContext((string) $log, (string) 'info', (bool) false);
+
         return 0;
     }
 }

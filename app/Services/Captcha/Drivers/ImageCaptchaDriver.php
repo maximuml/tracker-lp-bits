@@ -5,6 +5,7 @@ namespace App\Services\Captcha\Drivers;
 use App\Models\RegImage;
 use App\Services\Captcha\CaptchaDriverInterface;
 use App\Services\Captcha\Exceptions\CaptchaValidationException;
+use App\Support\Strings;
 
 class ImageCaptchaDriver implements CaptchaDriverInterface
 {
@@ -12,7 +13,7 @@ class ImageCaptchaDriver implements CaptchaDriverInterface
     protected array $config;
 
     /**
-     * @param array<string, mixed> $config
+     * @param  array<string, mixed>  $config
      */
     public function __construct(array $config = [])
     {
@@ -25,7 +26,7 @@ class ImageCaptchaDriver implements CaptchaDriverInterface
     }
 
     /**
-     * @param array<string, mixed> $context
+     * @param  array<string, mixed>  $context
      */
     public function render(array $context = []): string
     {
@@ -44,8 +45,8 @@ class ImageCaptchaDriver implements CaptchaDriverInterface
     }
 
     /**
-     * @param array<string, mixed> $payload
-     * @param array<string, mixed> $context
+     * @param  array<string, mixed>  $payload
+     * @param  array<string, mixed>  $context
      */
     public function verify(array $payload, array $context = []): bool
     {
@@ -72,7 +73,7 @@ class ImageCaptchaDriver implements CaptchaDriverInterface
 
     public function issue(): string
     {
-        $random = \App\Support\Strings::randomCode((int) 6);
+        $random = Strings::randomCode((int) 6);
         $imagehash = md5($random);
         $dateline = time();
         RegImage::query()->insert([
@@ -80,6 +81,7 @@ class ImageCaptchaDriver implements CaptchaDriverInterface
             'dateline' => $dateline,
             'imagestring' => $random,
         ]);
+
         return $imagehash;
     }
 
@@ -91,32 +93,36 @@ class ImageCaptchaDriver implements CaptchaDriverInterface
 
         if ($imagestring === '') {
             $this->renderFallback();
+
             return;
         }
 
         $characters = implode(' ', str_split($imagestring));
 
-        if (!function_exists('imagecreatefrompng')) {
+        if (! function_exists('imagecreatefrompng')) {
             $this->renderFallback();
+
             return;
         }
 
-        $fontwidth = imageFontWidth(5);
-        $fontheight = imageFontHeight(5);
+        $fontwidth = imagefontwidth(5);
+        $fontheight = imagefontheight(5);
         $textwidth = $fontwidth * strlen($characters);
         $textheight = $fontheight;
 
         $randimg = rand(1, 5);
-        $imagePath = ROOT_PATH . "public/pic/regimages/reg{$randimg}.png";
+        $imagePath = ROOT_PATH."public/pic/regimages/reg{$randimg}.png";
 
-        if (!is_file($imagePath)) {
+        if (! is_file($imagePath)) {
             $this->renderFallback();
+
             return;
         }
 
         $im = imagecreatefrompng($imagePath);
         if ($im === false) {
             $this->renderFallback();
+
             return;
         }
         $imgheight = imagesy($im);

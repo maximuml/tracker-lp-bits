@@ -20,7 +20,7 @@ final class Phase52DonorWarnedRedirectTest extends TestCase
         config(['scout.driver' => 'null', 'app.debug' => false]);
     }
 
-    public function testDonorlistRedirectsToFilamentUserListWithDonorFilter(): void
+    public function test_donorlist_redirects_to_filament_user_list_with_donor_filter(): void
     {
         $admin = User::factory()->admin()->create();
         $response = $this->withNexusCookie($admin)->get('/donorlist');
@@ -29,7 +29,7 @@ final class Phase52DonorWarnedRedirectTest extends TestCase
         $response->assertRedirect('/nexusphp/users?tableFilters[is_donating][value]=yes');
     }
 
-    public function testWarnedRedirectsToFilamentUserListWithWarnedFilter(): void
+    public function test_warned_redirects_to_filament_user_list_with_warned_filter(): void
     {
         $admin = User::factory()->admin()->create();
         $response = $this->withNexusCookie($admin)->get('/warned');
@@ -38,7 +38,7 @@ final class Phase52DonorWarnedRedirectTest extends TestCase
         $response->assertRedirect('/nexusphp/users?tableFilters[warned][value]=yes');
     }
 
-    public function testNowarnPostRedirectsToFilamentUserListWithWarnedFilter(): void
+    public function test_nowarn_post_redirects_to_filament_user_list_with_warned_filter(): void
     {
         $admin = User::factory()->admin()->create();
         $response = $this->withNexusCookie($admin)->post('/nowarn', ['usernw' => [1, 2]]);

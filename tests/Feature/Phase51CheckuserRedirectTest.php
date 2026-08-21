@@ -20,7 +20,7 @@ final class Phase51CheckuserRedirectTest extends TestCase
         config(['scout.driver' => 'null', 'app.debug' => false]);
     }
 
-    public function testCheckuserWithIdRedirectsToFilamentUserView(): void
+    public function test_checkuser_with_id_redirects_to_filament_user_view(): void
     {
         $admin = User::factory()->admin()->create();
         $response = $this->withNexusCookie($admin)->get('/checkuser?id=42');
@@ -29,7 +29,7 @@ final class Phase51CheckuserRedirectTest extends TestCase
         $response->assertRedirect('/nexusphp/users/42');
     }
 
-    public function testCheckuserWithoutIdRedirectsToFilamentUserList(): void
+    public function test_checkuser_without_id_redirects_to_filament_user_list(): void
     {
         $admin = User::factory()->admin()->create();
         $response = $this->withNexusCookie($admin)->get('/checkuser');
@@ -38,7 +38,7 @@ final class Phase51CheckuserRedirectTest extends TestCase
         $response->assertRedirect('/nexusphp/users');
     }
 
-    public function testTakeconfirmPostWithIdRedirectsToFilamentUserView(): void
+    public function test_takeconfirm_post_with_id_redirects_to_filament_user_view(): void
     {
         $admin = User::factory()->admin()->create();
         $response = $this->withNexusCookie($admin)->post('/takeconfirm', ['id' => 99]);
@@ -47,7 +47,7 @@ final class Phase51CheckuserRedirectTest extends TestCase
         $response->assertRedirect('/nexusphp/users/99');
     }
 
-    public function testTakeconfirmPostWithoutIdRedirectsToFilamentUserList(): void
+    public function test_takeconfirm_post_without_id_redirects_to_filament_user_list(): void
     {
         $admin = User::factory()->admin()->create();
         $response = $this->withNexusCookie($admin)->post('/takeconfirm', []);
@@ -56,7 +56,7 @@ final class Phase51CheckuserRedirectTest extends TestCase
         $response->assertRedirect('/nexusphp/users');
     }
 
-    public function testCheckuserWithInvalidIdRedirectsToList(): void
+    public function test_checkuser_with_invalid_id_redirects_to_list(): void
     {
         $admin = User::factory()->admin()->create();
         $response = $this->withNexusCookie($admin)->get('/checkuser?id=0');

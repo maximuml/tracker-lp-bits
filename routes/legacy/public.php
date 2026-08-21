@@ -1,13 +1,12 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-
 use App\Http\Controllers\InfoController;
 use App\Http\Controllers\ShoutboxController;
 use App\Http\Controllers\SupportController;
 use App\Http\Controllers\SystemController;
 use App\Http\Controllers\TorrentActionController;
 use App\Http\Controllers\UtilityController;
+use Illuminate\Support\Facades\Route;
 
 Route::match(['get', 'post'], '/aboutnexus', [InfoController::class, 'aboutNexus'])->name('aboutnexus.legacy');
 Route::match(['get', 'post'], '/rules', [InfoController::class, 'rules'])->name('rules.legacy');

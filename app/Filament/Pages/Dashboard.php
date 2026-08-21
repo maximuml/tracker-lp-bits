@@ -1,7 +1,7 @@
 <?php
+
 namespace App\Filament\Pages;
 
-use Filament\Support\Enums\Width;
 use App\Filament\Widgets\AccountInfo;
 use App\Filament\Widgets\CategoryActivity;
 use App\Filament\Widgets\DonorSummary;
@@ -15,6 +15,7 @@ use App\Filament\Widgets\UploaderActivity;
 use App\Filament\Widgets\UserClassStat;
 use App\Filament\Widgets\UserStat;
 use App\Filament\Widgets\UserTrend;
+use Filament\Support\Enums\Width;
 
 class Dashboard extends \Filament\Pages\Dashboard
 {

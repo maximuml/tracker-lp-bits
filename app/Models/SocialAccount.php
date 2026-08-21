@@ -10,22 +10,24 @@
  * @property string|null $created_at
  * @property string|null $updated_at
  */
+
 namespace App\Models;
+
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class SocialAccount extends NexusModel
 {
-    /** @var  list<string> */
+    /** @var list<string> */
     protected $fillable = [
         'user_id', 'provider_id', 'provider_user_id', 'provider_username', 'provider_email',
     ];
 
-    /** @var  bool */
+    /** @var bool */
     public $timestamps = true;
 
-    /** @return  \Illuminate\Database\Eloquent\Relations\BelongsTo<User, $this> */
-    public function user(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    /** @return  BelongsTo<User, $this> */
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
     }
-
 }

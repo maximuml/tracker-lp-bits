@@ -2,10 +2,9 @@
 
 namespace App\Filament\Resources\Section\OverForumResource\Pages;
 
-use Filament\Actions\CreateAction;
 use App\Filament\PageList;
 use App\Filament\Resources\Section\OverForumResource;
-use Filament\Resources\Pages\ListRecords;
+use Filament\Actions\CreateAction;
 
 class ListOverForums extends PageList
 {

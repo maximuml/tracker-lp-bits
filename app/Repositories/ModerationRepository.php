@@ -22,7 +22,7 @@ class ModerationRepository extends BaseRepository
     }
 
     /**
-     * @return  array<string, mixed>|null
+     * @return array<string, mixed>|null
      */
     public function getForumPost(int $postId): ?array
     {
@@ -40,7 +40,7 @@ class ModerationRepository extends BaseRepository
     }
 
     /**
-     * @return  array<int, array<string, mixed>>
+     * @return array<int, array<string, mixed>>
      */
     public function getReports(int $offset, int $limit): array
     {
@@ -66,7 +66,7 @@ class ModerationRepository extends BaseRepository
     }
 
     /**
-     * @return  array<int, array<string, mixed>>
+     * @return array<int, array<string, mixed>>
      */
     public function getBans(): array
     {
@@ -78,7 +78,7 @@ class ModerationRepository extends BaseRepository
     }
 
     /**
-     * @return  array<int, array<string, mixed>>
+     * @return array<int, array<string, mixed>>
      */
     public function findMatchingBans(int $nip): array
     {
@@ -96,7 +96,7 @@ class ModerationRepository extends BaseRepository
     }
 
     /**
-     * @return  array<int, array<string, mixed>>
+     * @return array<int, array<string, mixed>>
      */
     public function getIphistoryRows(int $userId, int $offset, int $limit): array
     {
@@ -118,7 +118,7 @@ class ModerationRepository extends BaseRepository
     }
 
     /**
-     * @return  array<int>
+     * @return array<int>
      */
     public function getUserIdsByIp(string $ip): array
     {
@@ -126,7 +126,7 @@ class ModerationRepository extends BaseRepository
     }
 
     /**
-     * @return  array<int>
+     * @return array<int>
      */
     public function getIplogUserIdsByIp(string $ip): array
     {
@@ -134,7 +134,7 @@ class ModerationRepository extends BaseRepository
     }
 
     /**
-     * @return  array<int, array<string, mixed>>
+     * @return array<int, array<string, mixed>>
      */
     public function getDuplicateIps(): array
     {
@@ -152,7 +152,7 @@ class ModerationRepository extends BaseRepository
     }
 
     /**
-     * @return  array<int, int>
+     * @return array<int, int>
      */
     public function getPeerCountsByIp(string $ip): array
     {
@@ -166,7 +166,7 @@ class ModerationRepository extends BaseRepository
     }
 
     /**
-     * @return  array<int, array<string, mixed>>
+     * @return array<int, array<string, mixed>>
      */
     public function getIpsearchRows(string $ip, string $mask, bool $singleIp, string $order, int $offset, int $limit): array
     {

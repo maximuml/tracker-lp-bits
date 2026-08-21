@@ -2,28 +2,25 @@
 
 namespace App\Filament\Resources\User;
 
+use App\Filament\Resources\User\LoginLogResource\Pages\ManageLoginLogs;
+use App\Models\LoginLog;
+use App\Support\UserDisplay;
+use Filament\Forms\Components\TextInput;
+use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
+use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
-use Filament\Forms\Components\TextInput;
-use App\Filament\Resources\User\LoginLogResource\Pages\ManageLoginLogs;
-use App\Filament\Resources\User\LoginLogResource\Pages;
-use App\Filament\Resources\User\LoginLogResource\RelationManagers;
-use App\Models\LoginLog;
-use Filament\Forms;
-use Filament\Resources\Resource;
 use Filament\Tables\Table;
-use Filament\Tables;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class LoginLogResource extends Resource
 {
     protected static ?string $model = LoginLog::class;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    protected static string | \UnitEnum | null $navigationGroup = 'User';
+    protected static string|\UnitEnum|null $navigationGroup = 'User';
 
     protected static ?int $navigationSort = 9;
 
@@ -51,9 +48,8 @@ class LoginLogResource extends Resource
             ->columns([
                 TextColumn::make('id')->sortable(),
                 TextColumn::make('uid')
-                    ->formatStateUsing(fn ($state) => \App\Support\UserDisplay::adminUsername($state))
-                    ->label(__('label.username'))
-                ,
+                    ->formatStateUsing(fn ($state) => UserDisplay::adminUsername($state))
+                    ->label(__('label.username')),
                 TextColumn::make('ip')->searchable(),
                 TextColumn::make('country')->label(__('label.country'))->searchable(),
                 TextColumn::make('city')->label(__('label.city'))->searchable(),
@@ -66,19 +62,17 @@ class LoginLogResource extends Resource
                     ->schema([
                         TextInput::make('uid')
                             ->label(__('label.username'))
-                            ->placeholder('UID')
-                        ,
+                            ->placeholder('UID'),
                     ])->query(function (Builder $query, array $data) {
-                        return $query->when($data['uid'], fn (Builder $query, $value) => $query->where("uid", $value));
-                    })
-                ,
+                        return $query->when($data['uid'], fn (Builder $query, $value) => $query->where('uid', $value));
+                    }),
             ])
             ->recordActions([
-//                Tables\Actions\EditAction::make(),
-//                Tables\Actions\DeleteAction::make(),
+                //                Tables\Actions\EditAction::make(),
+                //                Tables\Actions\DeleteAction::make(),
             ])
             ->toolbarActions([
-//                Tables\Actions\DeleteBulkAction::make(),
+                //                Tables\Actions\DeleteBulkAction::make(),
             ]);
     }
 

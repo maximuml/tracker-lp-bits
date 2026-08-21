@@ -58,11 +58,11 @@ return [
             'password' => env('FTP_PASSWORD'),
 
             // Optional FTP Settings...
-            'port' => (int)env('FTP_PORT', 21),
+            'port' => (int) env('FTP_PORT', 21),
             'root' => env('FTP_ROOT'),
-            'passive' => (bool)env('FTP_PASSIVE', false),
-            'ssl' => (bool)env('FTP_SSL', false),
-            'timeout' => (int)env('FTP_TIMEOUT', 30),
+            'passive' => (bool) env('FTP_PASSIVE', false),
+            'ssl' => (bool) env('FTP_SSL', false),
+            'timeout' => (int) env('FTP_TIMEOUT', 30),
         ],
         'sftp' => [
             'driver' => 'sftp',
@@ -76,9 +76,9 @@ return [
             'privateKey' => env('SFTP_PRIVATE_KEY'),
 
             // Optional SFTP Settings...
-            'port' => (int)env('SFTP_PORT', 22),
+            'port' => (int) env('SFTP_PORT', 22),
             'root' => env('SFTP_ROOT', ''),
-            'timeout' => (int)env('SFTP_TIMEOUT', 30),
+            'timeout' => (int) env('SFTP_TIMEOUT', 30),
         ],
     ],
 

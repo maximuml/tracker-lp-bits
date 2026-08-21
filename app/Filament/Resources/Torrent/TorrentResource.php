@@ -2,49 +2,46 @@
 
 namespace App\Filament\Resources\Torrent;
 
-use Filament\Schemas\Schema;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Columns\IconColumn;
-use Filament\Tables\Columns\BadgeColumn;
-use App\Filament\Resources\Torrent\TorrentResource\Pages\ListTorrents;
+use App\Auth\Permission;
+use App\Filament\OptionsTrait;
 use App\Filament\Resources\Torrent\TorrentResource\Pages\CreateTorrent;
 use App\Filament\Resources\Torrent\TorrentResource\Pages\EditTorrent;
-use Filament\Actions\BulkAction;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\DateTimePicker;
-use Exception;
-use Filament\Forms\Components\Radio;
-use Filament\Forms\Components\Checkbox;
-use Filament\Forms\Components\CheckboxList;
-use Filament\Actions\DeleteBulkAction;
-use Filament\Forms\Components\Textarea;
-use Filament\Actions\DeleteAction;
-use Filament\Schemas\Components\Utilities\Get;
-use Filament\Tables\Filters\Filter;
-use Filament\Forms\Components\TextInput;
-use Filament\Tables\Filters\SelectFilter;
-use Filament\Forms\Components\DatePicker;
-use App\Auth\Permission;
-use App\Enums\Permission\PermissionEnum;
-use App\Filament\OptionsTrait;
-use App\Filament\Resources\Torrent\TorrentResource\Pages;
-use App\Filament\Resources\Torrent\TorrentResource\RelationManagers;
+use App\Filament\Resources\Torrent\TorrentResource\Pages\ListTorrents;
 use App\Models\Category;
 use App\Models\SearchBox;
 use App\Models\Setting;
 use App\Models\Torrent;
-use App\Models\TorrentTag;
 use App\Repositories\TagRepository;
 use App\Repositories\TorrentRepository;
+use App\Support\Format;
+use App\Support\Logger;
+use App\Support\TorrentAccess;
+use App\Support\TorrentOps;
+use App\Support\UserDisplay;
+use Exception;
 use Filament\Actions\Action;
-use Filament\Forms;
+use Filament\Actions\BulkAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Forms\Components\Checkbox;
+use Filament\Forms\Components\CheckboxList;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\Radio;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Schema;
+use Filament\Tables\Columns\BadgeColumn;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
-use Filament\Tables;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Nexus\Database\NexusDB;
@@ -55,9 +52,9 @@ class TorrentResource extends Resource
 
     protected static ?string $model = Torrent::class;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Torrent';
+    protected static string|\UnitEnum|null $navigationGroup = 'Torrent';
 
     protected static ?int $navigationSort = 1;
 
@@ -84,34 +81,34 @@ class TorrentResource extends Resource
     public static function getRep(): TorrentRepository
     {
         if (self::$rep === null) {
-            self::$rep = new TorrentRepository();
+            self::$rep = new TorrentRepository;
         }
+
         return self::$rep;
     }
 
     public static function table(Table $table): Table
     {
         $showApproval = self::shouldShowApproval();
+
         return $table
             ->columns([
                 TextColumn::make('id')->sortable(),
                 TextColumn::make('basic_category.name')->label(__('label.torrent.category')),
-                TextColumn::make('name')->formatStateUsing(fn ($record) => \App\Support\TorrentAccess::adminName($record, true))
+                TextColumn::make('name')->formatStateUsing(fn ($record) => TorrentAccess::adminName($record, true))
                     ->label(__('label.name'))
                     ->searchable(query: function (Builder $query, string $search) {
-                        return $query->where("name", "like", "%{$search}%");
+                        return $query->where('name', 'like', "%{$search}%");
                     }),
                 TextColumn::make('posStateText')->label(__('label.torrent.pos_state')),
                 TextColumn::make('spStateText')->label(__('label.torrent.sp_state')),
                 IconColumn::make('hr')
                     ->label(__('label.torrent.hr'))
-                    ->boolean()
-                ,
+                    ->boolean(),
                 TextColumn::make('size')
                     ->label(__('label.torrent.size'))
-                    ->formatStateUsing(fn ($state) => \App\Support\Format::size($state))
-                    ->sortable()
-                ,
+                    ->formatStateUsing(fn ($state) => Format::size($state))
+                    ->sortable(),
                 TextColumn::make('seeders')->label(__('label.torrent.seeders'))->sortable(),
                 TextColumn::make('leechers')->label(__('label.torrent.leechers'))->sortable(),
                 BadgeColumn::make('approval_status')
@@ -122,14 +119,12 @@ class TorrentResource extends Resource
                 TextColumn::make('added')->label(__('label.added'))->dateTime(),
                 TextColumn::make('user.username')
                     ->label(__('label.torrent.owner'))
-                    ->formatStateUsing(fn ($record) => \App\Support\UserDisplay::adminUsername($record->owner))
-                ,
+                    ->formatStateUsing(fn ($record) => UserDisplay::adminUsername($record->owner)),
             ])
             ->defaultSort('id', 'desc')
             ->filters(self::getFilters())
             ->recordActions(self::getActions())
-            ->toolbarActions(self::getBulkActions())
-        ;
+            ->toolbarActions(self::getBulkActions());
 
     }
 
@@ -165,20 +160,18 @@ class TorrentResource extends Resource
                     Select::make('pos_state')
                         ->label(__('label.torrent.pos_state'))
                         ->options(Torrent::listPosStates(true))
-                        ->required()
-                    ,
+                        ->required(),
                     DateTimePicker::make('pos_state_until')
-                        ->label(__('label.deadline'))
-                    ,
+                        ->label(__('label.deadline')),
                 ])
                 ->icon('heroicon-o-arrow-up-circle')
                 ->action(function (Collection $records, array $data) {
                     $idArr = $records->pluck('id')->toArray();
                     try {
-                        $torrentRep = new TorrentRepository();
+                        $torrentRep = new TorrentRepository;
                         $torrentRep->setPosState($idArr, $data['pos_state'], $data['pos_state_until']);
                     } catch (Exception $exception) {
-                        \App\Support\Logger::writeWithContext((string) ($exception->getMessage() . $exception->getTraceAsString()), (string) 'error', (bool) false);
+                        Logger::writeWithContext((string) ($exception->getMessage().$exception->getTraceAsString()), (string) 'error', (bool) false);
                         Notification::make()->danger()->body(class_basename($exception))->send();
                     }
                 })
@@ -192,25 +185,22 @@ class TorrentResource extends Resource
                     Select::make('sp_state')
                         ->label(__('label.torrent.sp_state'))
                         ->options(Torrent::listPromotionTypes(true))
-                        ->required()
-                    ,
+                        ->required(),
                     Select::make('promotion_time_type')
                         ->label(__('label.torrent.promotion_time_type'))
                         ->options(Torrent::listPromotionTimeTypes(true))
-                        ->required()
-                    ,
+                        ->required(),
                     DateTimePicker::make('promotion_until')
-                        ->label(__('label.deadline'))
-                    ,
+                        ->label(__('label.deadline')),
                 ])
                 ->icon('heroicon-o-megaphone')
                 ->action(function (Collection $records, array $data) {
                     $idArr = $records->pluck('id')->toArray();
                     try {
-                        $torrentRep = new TorrentRepository();
+                        $torrentRep = new TorrentRepository;
                         $torrentRep->setSpState($idArr, $data['sp_state'], $data['promotion_time_type'], $data['promotion_until']);
                     } catch (Exception $exception) {
-                        \App\Support\Logger::writeWithContext((string) ($exception->getMessage() . $exception->getTraceAsString()), (string) 'error', (bool) false);
+                        Logger::writeWithContext((string) ($exception->getMessage().$exception->getTraceAsString()), (string) 'error', (bool) false);
                         Notification::make()->danger()->body($exception->getMessage())->send();
                     }
                 })
@@ -225,10 +215,10 @@ class TorrentResource extends Resource
                 ->action(function (Collection $records) {
                     $idArr = $records->pluck('id')->toArray();
                     try {
-                        $torrentRep = new TorrentRepository();
+                        $torrentRep = new TorrentRepository;
                         $torrentRep->syncTags($idArr);
                     } catch (Exception $exception) {
-                        \App\Support\Logger::writeWithContext((string) ($exception->getMessage() . $exception->getTraceAsString()), (string) 'error', (bool) false);
+                        Logger::writeWithContext((string) ($exception->getMessage().$exception->getTraceAsString()), (string) 'error', (bool) false);
                         Notification::make()->danger()->body(class_basename($exception))->send();
                     }
                 })
@@ -252,10 +242,10 @@ class TorrentResource extends Resource
                     }
                     $idArr = $records->pluck('id')->toArray();
                     try {
-                        $torrentRep = new TorrentRepository();
+                        $torrentRep = new TorrentRepository;
                         $torrentRep->syncTags($idArr, $data['tags'], $data['remove'] ?? false);
                     } catch (Exception $exception) {
-                        \App\Support\Logger::writeWithContext((string) ($exception->getMessage() . $exception->getTraceAsString()), (string) 'error', (bool) false);
+                        Logger::writeWithContext((string) ($exception->getMessage().$exception->getTraceAsString()), (string) 'error', (bool) false);
                         Notification::make()->danger()->body(class_basename($exception))->send();
                     }
                 })
@@ -273,27 +263,28 @@ class TorrentResource extends Resource
                 ])
                 ->icon('heroicon-o-sparkles')
                 ->action(function (Collection $records, array $data) {
-                    if (!isset($data['hr'])) {
+                    if (! isset($data['hr'])) {
                         return;
                     }
                     $idArr = $records->pluck('id')->toArray();
                     try {
-                        $torrentRep = new TorrentRepository();
+                        $torrentRep = new TorrentRepository;
                         $torrentRep->setHr($idArr, $data['hr']);
                     } catch (Exception $exception) {
-                        \App\Support\Logger::writeWithContext((string) ($exception->getMessage() . $exception->getTraceAsString()), (string) 'error', (bool) false);
+                        Logger::writeWithContext((string) ($exception->getMessage().$exception->getTraceAsString()), (string) 'error', (bool) false);
                         Notification::make()->danger()->body(class_basename($exception))->send();
                     }
                 })
                 ->deselectRecordsAfterCompletion();
         }
-//        $actions[] = self::getBulkActionChangeCategory();
+        //        $actions[] = self::getBulkActionChangeCategory();
 
         if (Permission::canDeleteTorrent()) {
             $actions[] = DeleteBulkAction::make('bulk-delete')->using(function (Collection $records) {
-                \App\Support\TorrentOps::deleteTorrents($records->pluck('id')->toArray(), (bool) false);
+                TorrentOps::deleteTorrents($records->pluck('id')->toArray(), (bool) false);
             });
         }
+
         return $actions;
     }
 
@@ -309,33 +300,33 @@ class TorrentResource extends Resource
                         ->label(__('label.torrent.approval_status'))
                         ->inline()
                         ->required()
-                        ->options(Torrent::listApprovalStatus(true))
-                    ,
+                        ->options(Torrent::listApprovalStatus(true)),
                     Textarea::make('comment')->label(__('label.comment')),
                 ])
                 ->action(function (Torrent $record, array $data) {
-                    $torrentRep = new TorrentRepository();
+                    $torrentRep = new TorrentRepository;
                     try {
                         $data['torrent_id'] = $record->id;
                         $torrentRep->approval(Auth::user(), $data);
                     } catch (Exception $exception) {
-                        \App\Support\Logger::writeWithContext((string) $exception->getMessage(), (string) 'error', (bool) false);
+                        Logger::writeWithContext((string) $exception->getMessage(), (string) 'error', (bool) false);
                     }
                 });
 
         }
         if (Permission::canDeleteTorrent()) {
             $actions[] = DeleteAction::make('delete')->using(function ($record) {
-                \App\Support\TorrentOps::deleteTorrents($record->id, (bool) false);
+                TorrentOps::deleteTorrents($record->id, (bool) false);
             });
         }
+
         return $actions;
     }
 
     private static function shouldShowApproval(): bool
     {
         return false;
-//        return Setting::get('torrent.approval_status_none_visible') == 'no' || Setting::get('torrent.approval_status_icon_enabled') == 'yes';
+        //        return Setting::get('torrent.approval_status_none_visible') == 'no' || Setting::get('torrent.approval_status_icon_enabled') == 'yes';
     }
 
     /** @return array<Filter|SelectFilter> */
@@ -346,104 +337,84 @@ class TorrentResource extends Resource
                 ->schema([
                     TextInput::make('owner')
                         ->label(__('label.torrent.owner'))
-                        ->placeholder('UID')
-                    ,
+                        ->placeholder('UID'),
                 ])->query(function (Builder $query, array $data) {
-                    return $query->when($data['owner'], fn (Builder $query, $owner) => $query->where("owner", $owner));
-                })
-            ,
+                    return $query->when($data['owner'], fn (Builder $query, $owner) => $query->where('owner', $owner));
+                }),
 
             SelectFilter::make('visible')
                 ->options(self::$yesOrNo)
-                ->label(__('label.torrent.visible'))
-            ,
+                ->label(__('label.torrent.visible')),
             SelectFilter::make('hr')
                 ->options(self::getYesNoOptions())
-                ->label(__('label.torrent.hr'))
-            ,
+                ->label(__('label.torrent.hr')),
 
             SelectFilter::make('pos_state')
                 ->options(Torrent::listPosStates(true))
                 ->label(__('label.torrent.pos_state'))
-                ->multiple()
-            ,
+                ->multiple(),
 
             SelectFilter::make('sp_state')
                 ->options(Torrent::listPromotionTypes(true))
                 ->label(__('label.torrent.sp_state'))
-                ->multiple()
-            ,
+                ->multiple(),
 
             SelectFilter::make('approval_status')
                 ->options(Torrent::listApprovalStatus(true))
                 ->label(__('label.torrent.approval_status'))
-                ->multiple()
-            ,
+                ->multiple(),
 
             SelectFilter::make('tags')
                 ->relationship('tags', 'name')
                 ->label(__('label.tag.label'))
-                ->multiple()
-            ,
+                ->multiple(),
             SelectFilter::make('category')
                 ->options(Category::query()->pluck('name', 'id')->toArray())
                 ->label(__('label.torrent.category'))
-                ->multiple()
-            ,
+                ->multiple(),
         ];
         foreach (SearchBox::$taxonomies as $torrentField => $tableModel) {
             $filters[] = SelectFilter::make((string) $torrentField)
                 ->options(NexusDB::table((string) $tableModel['table'])->orderBy('sort_index')->orderBy('id')->pluck('name', 'id'))
-                ->multiple()
-            ;
+                ->multiple();
         }
 
         $filters[] = Filter::make('added_begin')
             ->schema([
                 DatePicker::make('added_begin')
                     ->maxDate(now())
-                    ->label(__('label.torrent.added_begin'))
-                ,
+                    ->label(__('label.torrent.added_begin')),
             ])->query(function (Builder $query, array $data) {
-                return $query->when($data['added_begin'], fn (Builder $query, $value) => $query->where("added", '>=', $value));
-            })
-        ;
+                return $query->when($data['added_begin'], fn (Builder $query, $value) => $query->where('added', '>=', $value));
+            });
         $filters[] = Filter::make('added_end')
             ->schema([
                 DatePicker::make('added_end')
                     ->maxDate(now())
-                    ->label(__('label.torrent.added_end'))
-                ,
+                    ->label(__('label.torrent.added_end')),
             ])->query(function (Builder $query, array $data) {
-                return $query->when($data['added_end'], fn (Builder $query, $value) => $query->where("added", '<=', $value));
-            })
-        ;
+                return $query->when($data['added_end'], fn (Builder $query, $value) => $query->where('added', '<=', $value));
+            });
         $filters[] = Filter::make('size_begin')
             ->schema([
                 TextInput::make('size_begin')
                     ->numeric()
                     ->placeholder('GB')
-                    ->label(__('label.torrent.size_begin'))
-                ,
+                    ->label(__('label.torrent.size_begin')),
             ])->query(function (Builder $query, array $data) {
-                return $query->when($data['size_begin'], fn (Builder $query, $value) => $query->where("size", '>=', $value * 1024 * 1024 * 1024));
-            })
-        ;
+                return $query->when($data['size_begin'], fn (Builder $query, $value) => $query->where('size', '>=', $value * 1024 * 1024 * 1024));
+            });
         $filters[] = Filter::make('size_end')
             ->schema([
                 TextInput::make('size_end')
                     ->numeric()
                     ->placeholder('GB')
-                    ->label(__('label.torrent.size_end'))
-                ,
+                    ->label(__('label.torrent.size_end')),
             ])->query(function (Builder $query, array $data) {
-                return $query->when($data['size_end'], fn (Builder $query, $value) => $query->where("size", '<=', $value * 1024 * 1024 * 1024));
-            })
-        ;
-
+                return $query->when($data['size_end'], fn (Builder $query, $value) => $query->where('size', '<=', $value * 1024 * 1024 * 1024));
+            });
 
         return $filters;
 
     }
-
 }

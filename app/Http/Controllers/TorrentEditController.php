@@ -9,11 +9,13 @@ use App\Repositories\TagRepository;
 use App\Repositories\TorrentDetailRepository;
 use App\Repositories\TorrentEditRepository;
 use App\Support\Category;
+use App\Support\Locale;
 use App\Support\SupportContext;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
+use Nexus\Field\Field;
 
 class TorrentEditController extends Controller
 {
@@ -21,7 +23,8 @@ class TorrentEditController extends Controller
     {
         if (SupportContext::getUser() === null) {
             $qs = $request->getQueryString();
-            return redirect('/edit.php' . ($qs ? '?' . $qs : ''));
+
+            return redirect('/edit.php'.($qs ? '?'.$qs : ''));
         }
 
         $id = (int) $request->input('id', 0);
@@ -43,14 +46,14 @@ class TorrentEditController extends Controller
 
         $user = Auth::guard('nexus-web')->user();
         if ($user === null) {
-            return redirect('/login.php?returnto=' . urlencode($request->fullUrl()));
+            return redirect('/login.php?returnto='.urlencode($request->fullUrl()));
         }
 
         if (empty(SupportContext::getGlobal('lang_edit')) || empty(SupportContext::getGlobal('lang_functions'))) {
             SupportContext::setServerValue('SCRIPT_NAME', '/edit.php');
-            require base_path(\App\Support\Locale::scriptFilePath((string) 'functions.php', (bool) false, (string) ""));
+            require base_path(Locale::scriptFilePath((string) 'functions.php', (bool) false, (string) ''));
             SupportContext::setGlobal('lang_functions', $lang_functions ?? []);
-            require base_path(\App\Support\Locale::scriptFilePath((string) "", (bool) false, (string) ""));
+            require base_path(Locale::scriptFilePath((string) '', (bool) false, (string) ''));
             SupportContext::setGlobal('lang_edit', $lang_edit ?? []);
         }
 
@@ -58,7 +61,7 @@ class TorrentEditController extends Controller
         SupportContext::setUser($currentUser);
 
         $langEdit = SupportContext::getGlobal('lang_edit') ?? [];
-        $headTitle = ($langEdit['head_edit_torrent'] ?? '') . '"' . $row['name'] . '"';
+        $headTitle = ($langEdit['head_edit_torrent'] ?? '').'"'.$row['name'].'"';
 
         return view('torrent.edit', [
             'torrentId' => $id,
@@ -69,10 +72,10 @@ class TorrentEditController extends Controller
             'cats' => Category::listByModeWithContext($sectionmode),
             'returnto' => (string) $request->input('returnto', ''),
             'requestUri' => is_string($request->server('REQUEST_URI')) ? $request->server('REQUEST_URI') : '',
-            'taxonomySelect' => (new SearchBoxRepository())->renderTaxonomySelect($sectionmode, $row),
-            'tagCheckbox' => (new TagRepository())->renderCheckbox($sectionmode, (array) TorrentDetailRepository::getTagIds($id)),
-            'customFieldsHtml' => (new \Nexus\Field\Field())->renderOnUploadPage($id, $sectionmode),
-            'hitAndRunHtml' => (new HitAndRunRepository())->renderOnUploadPage($row['hr'] ?? 0, $sectionmode),
+            'taxonomySelect' => (new SearchBoxRepository)->renderTaxonomySelect($sectionmode, $row),
+            'tagCheckbox' => (new TagRepository)->renderCheckbox($sectionmode, (array) TorrentDetailRepository::getTagIds($id)),
+            'customFieldsHtml' => (new Field)->renderOnUploadPage($id, $sectionmode),
+            'hitAndRunHtml' => (new HitAndRunRepository)->renderOnUploadPage($row['hr'] ?? 0, $sectionmode),
         ]);
     }
 
@@ -95,7 +98,7 @@ class TorrentEditController extends Controller
         }
 
         $parsed = parse_url($returl);
-        if (!empty($parsed['scheme']) || !empty($parsed['host']) || str_starts_with($returl, '//')) {
+        if (! empty($parsed['scheme']) || ! empty($parsed['host']) || str_starts_with($returl, '//')) {
             return $defaultUrl;
         }
 

@@ -2,17 +2,19 @@
 
 namespace App\Http\Resources;
 
+use App\Models\Topic;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
- * @mixin \App\Models\Topic
+ * @mixin Topic
  */
 class TopicResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
+     *
      * @param  mixed  $request
-     * @return  array<int|string, mixed>
+     * @return array<int|string, mixed>
      */
     public function toArray($request)
     {

@@ -5,14 +5,14 @@ namespace App\Http\Controllers;
 use App\Exceptions\NexusException;
 use App\Models\User;
 use App\Repositories\TokenRepository;
+use App\Support\Locale;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class TokenController extends Controller
 {
     /**
-     * @param  \Illuminate\Http\Request  $request
-     * @return  array<string, mixed>
+     * @return array<string, mixed>
      */
     public function addToken(Request $request)
     {
@@ -22,22 +22,23 @@ class TokenController extends Controller
                 'permissions' => 'required|array|min:1',
             ]);
             $user = Auth::user();
-            if (!$user instanceof User) {
+            if (! $user instanceof User) {
                 return $this->fail(false, 'Unauthenticated');
             }
             $count = $user->tokens()->count();
             if ($count >= 5) {
-                throw new NexusException(\App\Support\Locale::trans("token.maximum_allow_number_reached", [], null));
+                throw new NexusException(Locale::trans('token.maximum_allow_number_reached', [], null));
             }
             $allowed = TokenRepository::listUserTokenPermissionAllowed();
             foreach ($request->permissions as $permission) {
-                if (!isset($allowed[$permission])) {
-                    throw new NexusException(\App\Support\Locale::trans("token.permission_not_allowed", ['permission_text' => \App\Support\Locale::trans("route-permission.{$permission}.text", [], null)], null));
+                if (! isset($allowed[$permission])) {
+                    throw new NexusException(Locale::trans('token.permission_not_allowed', ['permission_text' => Locale::trans("route-permission.{$permission}.text", [], null)], null));
                 }
             }
             $newAccessToken = $user->createToken($request->name, $request->permissions);
             $tokenText = $newAccessToken->plainTextToken;
-            $msg = \App\Support\Locale::trans("token.create_success_tip", ['token' => $tokenText], null);
+            $msg = Locale::trans('token.create_success_tip', ['token' => $tokenText], null);
+
             return $this->success(['token' => $tokenText], $msg);
         } catch (\Exception $exception) {
             return $this->fail(false, $exception->getMessage());
@@ -45,8 +46,7 @@ class TokenController extends Controller
     }
 
     /**
-     * @param  \Illuminate\Http\Request  $request
-     * @return  array<string, mixed>
+     * @return array<string, mixed>
      */
     public function delToken(Request $request)
     {
@@ -55,15 +55,14 @@ class TokenController extends Controller
                 'id' => 'required|integer',
             ]);
             $user = Auth::user();
-            if (!$user instanceof User) {
+            if (! $user instanceof User) {
                 return $this->fail(false, 'Unauthenticated');
             }
-            $user->tokens()->where("id", $request->id)->delete();
+            $user->tokens()->where('id', $request->id)->delete();
+
             return $this->success(true);
         } catch (\Exception $exception) {
             return $this->fail(false, $exception->getMessage());
         }
     }
-
-
 }

@@ -6,14 +6,14 @@
  * @property string $filename
  * @property int $size
  */
-namespace App\Models;
 
+namespace App\Models;
 
 class File extends NexusModel
 {
-    /** @var  string */
+    /** @var string */
     protected $table = 'files';
 
-    /** @var  list<string> */
+    /** @var list<string> */
     protected $fillable = ['torrent', 'filename', 'size'];
 }

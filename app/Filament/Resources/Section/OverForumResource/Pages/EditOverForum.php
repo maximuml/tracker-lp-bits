@@ -2,8 +2,9 @@
 
 namespace App\Filament\Resources\Section\OverForumResource\Pages;
 
-use Filament\Actions\DeleteAction;
 use App\Filament\Resources\Section\OverForumResource;
+use App\Repositories\ForumRepository;
+use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 
 class EditOverForum extends EditRecord
@@ -15,7 +16,7 @@ class EditOverForum extends EditRecord
     {
         return [
             DeleteAction::make()
-                ->using(fn ($record) => app(\App\Repositories\ForumRepository::class)->deleteOverforum($record->id)),
+                ->using(fn ($record) => app(ForumRepository::class)->deleteOverforum($record->id)),
         ];
     }
 }

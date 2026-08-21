@@ -198,13 +198,6 @@ class TorrentEditRepository extends BaseRepository
         Events::fire(ModelEventEnum::TORRENT_UPDATED, $torrentNew, $torrentOld);
 
         try {
-            $searchRep = new SearchRepository;
-            $searchRep->updateTorrent($torrentOld->id);
-        } catch (\Throwable $e) {
-            Logger::writeWithContext((string) ('Search repository update on edit failed: '.$e->getMessage()), (string) 'error', (bool) false);
-        }
-
-        try {
             $meiliSearch = new MeiliSearchRepository;
             $meiliSearch->doImportFromDatabase($torrentOld->id);
         } catch (\Throwable $e) {

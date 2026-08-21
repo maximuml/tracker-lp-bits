@@ -70,15 +70,15 @@ class VerifyCsrfToken extends Middleware
     ];
 
     /**
-     * Determine if the request should pass CSRF verification.
+     * Determine if the request has a URI that should be excluded from CSRF.
      *
      * Excludes the dynamic passkey-login URI (configured via the
      * `login_secret` setting) so that external tools can POST to it
      * without a CSRF token.
      */
-    protected function shouldPassThrough($request): bool
+    protected function inExceptArray($request): bool
     {
-        if (parent::shouldPassThrough($request)) {
+        if (parent::inExceptArray($request)) {
             return true;
         }
 

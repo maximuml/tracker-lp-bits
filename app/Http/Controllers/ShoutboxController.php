@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Auth\Permission;
 use App\Enums\Permission\PermissionEnum;
 use App\Repositories\LegacyViewRepository;
 use App\Repositories\ShoutboxRepository;
@@ -15,6 +16,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\View\View;
 use Nexus\Database\NexusDB;
+use Nexus\Database\NexusLock;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -52,7 +54,7 @@ class ShoutboxController extends LegacyController
                 return response('Message too long', 400, ['Content-Type' => 'text/plain; charset=utf-8']);
             }
 
-            $lock = new \Nexus\Database\NexusLock("shoutbox:{$currentUserId}", 60);
+            $lock = new NexusLock("shoutbox:{$currentUserId}", 60);
             if (! $lock->acquire()) {
                 return response('speaking too often', 429, ['Content-Type' => 'text/plain; charset=utf-8']);
             }
@@ -120,7 +122,7 @@ class ShoutboxController extends LegacyController
         $userDisplayMap = [];
         foreach ($userIds as $uid) {
             if ($uid > 0) {
-                $userDisplayMap[$uid] = \App\Support\UserDisplay::username($uid, false, true, true, true, false, false, '', true);
+                $userDisplayMap[$uid] = UserDisplay::username($uid, false, true, true, true, false, false, '', true);
             }
         }
 
@@ -131,9 +133,9 @@ class ShoutboxController extends LegacyController
             'perPage' => (int) ($result['per_page'] ?? 50),
             'filters' => (array) ($result['filters'] ?? []),
             'currentUserId' => $currentUserId,
-            'isStaff' => \App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::SB_MANAGE),
-            'csrfToken' => \App\Support\Shoutbox::csrfToken($currentUserId),
-            'reactionData' => \App\Support\Shoutbox::prefetchReactions(array_values($shoutIds), $currentUserId),
+            'isStaff' => Permission::can(PermissionEnum::SB_MANAGE),
+            'csrfToken' => Shoutbox::csrfToken($currentUserId),
+            'reactionData' => Shoutbox::prefetchReactions(array_values($shoutIds), $currentUserId),
             'userDisplayMap' => $userDisplayMap,
         ]);
     }
@@ -171,7 +173,7 @@ class ShoutboxController extends LegacyController
                 return;
             }
 
-            $userLock = new \Nexus\Database\NexusLock('shoutbox_sse:' . $userId, $ttl);
+            $userLock = new NexusLock('shoutbox_sse:'.$userId, $ttl);
             if (! $userLock->acquire()) {
                 try {
                     $redis->decr($globalKey);
@@ -220,9 +222,9 @@ class ShoutboxController extends LegacyController
                 $rows = $query->get();
                 if (! $rows->isEmpty()) {
                     $maxId = (int) $rows->last()->id;
-                    echo "id: " . $maxId . "\n";
+                    echo 'id: '.$maxId."\n";
                     echo "event: refresh\n";
-                    echo "data: " . json_encode(['count' => $rows->count()]) . "\n\n";
+                    echo 'data: '.json_encode(['count' => $rows->count()])."\n\n";
                     $this->flushSseOutput();
                     $lastId = $maxId;
                     $query = $buildQuery($type, $lastId);

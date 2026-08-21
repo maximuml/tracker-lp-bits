@@ -4,14 +4,17 @@ declare(strict_types=1);
 
 namespace App\Services\Announce;
 
+use App\Support\Hooks;
+use App\Support\TorrentOps;
+
 final class TrafficAccountant
 {
     /**
-     * @param array<string, mixed> $params
-     * @param array<string, mixed> $torrent
-     * @param array<string, mixed> $user
-     * @param array<string, mixed>|null $self
-     * @param array<string, mixed>|false $snatchInfo
+     * @param  array<string, mixed>  $params
+     * @param  array<string, mixed>  $torrent
+     * @param  array<string, mixed>  $user
+     * @param  array<string, mixed>|null  $self
+     * @param  array<string, mixed>|false  $snatchInfo
      */
     public function calculate(
         ?array $self,
@@ -60,8 +63,8 @@ final class TrafficAccountant
         if ($upthis > 0 || $downthis > 0) {
             $queries = $params;
             $queries['ip'] = $ip;
-            $promotionInfo = \App\Support\Hooks::applyFilter('torrent_promotion', $torrent);
-            $dataTraffic = \App\Support\TorrentOps::dataTraffic($torrent, $queries, $user, $self, $snatchInfo ?: [], $promotionInfo);
+            $promotionInfo = Hooks::applyFilter('torrent_promotion', $torrent);
+            $dataTraffic = TorrentOps::dataTraffic($torrent, $queries, $user, $self, $snatchInfo ?: [], $promotionInfo);
             $uploadedIncrementForUser = (int) $dataTraffic['uploaded_increment_for_user'];
             $downloadedIncrementForUser = (int) $dataTraffic['downloaded_increment_for_user'];
         }

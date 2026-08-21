@@ -4,10 +4,13 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
     public function up(): void
     {
-        if (Schema::hasTable('user_passkeys')) return;
+        if (Schema::hasTable('user_passkeys')) {
+            return;
+        }
         Schema::create('user_passkeys', function (Blueprint $table) {
             $table->id();
             $table->unsignedMediumInteger('user_id');

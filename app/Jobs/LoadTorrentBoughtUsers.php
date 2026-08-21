@@ -3,8 +3,8 @@
 namespace App\Jobs;
 
 use App\Repositories\TorrentRepository;
+use App\Support\Logger;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
@@ -37,19 +37,18 @@ class LoadTorrentBoughtUsers implements ShouldQueue
      */
     public function handle()
     {
-        $rep = new TorrentRepository();
+        $rep = new TorrentRepository;
         $result = $rep->loadBoughtUser($this->torrentId);
-        \App\Support\Logger::writeWithContext((string) "result: {$result}", (string) 'info', (bool) false);
+        Logger::writeWithContext((string) "result: {$result}", (string) 'info', (bool) false);
     }
 
     /**
      * Handle a job failure.
      *
-     * @param  \Throwable  $exception
      * @return void
      */
     public function failed(\Throwable $exception)
     {
-        \App\Support\Logger::writeWithContext((string) ("failed: " . $exception->getMessage() . $exception->getTraceAsString()), (string) 'error', (bool) false);
+        Logger::writeWithContext((string) ('failed: '.$exception->getMessage().$exception->getTraceAsString()), (string) 'error', (bool) false);
     }
 }

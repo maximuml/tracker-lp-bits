@@ -6,7 +6,6 @@ use App\Filament\PageListSingle;
 use App\Filament\Resources\Torrent\TorrentOperationLogResource;
 use App\Models\TorrentOperationLog;
 use Filament\Pages\Actions;
-use Filament\Resources\Pages\ManageRecords;
 use Illuminate\Database\Eloquent\Builder;
 
 class ManageTorrentOperationLogs extends PageListSingle
@@ -16,7 +15,7 @@ class ManageTorrentOperationLogs extends PageListSingle
     protected function getHeaderActions(): array
     {
         return [
-//            Actions\CreateAction::make(),
+            //            Actions\CreateAction::make(),
         ];
     }
 

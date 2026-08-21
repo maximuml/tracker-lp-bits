@@ -2,6 +2,9 @@
 
 namespace App\Support;
 
+use App\Services\CleanupService;
+use Nexus\Database\NexusDB;
+
 /**
  * Legacy bootstrap/cleanup helpers drained out of `include/functions.php`.
  *
@@ -24,10 +27,10 @@ final class Bootstrap
 
         $useCronTriggerCleanUp = (bool) SupportContext::getGlobal('useCronTriggerCleanUp', false);
 
-        \Nexus\Database\NexusDB::getInstance()->autoConnect();
+        NexusDB::getInstance()->autoConnect();
 
         if ($doLogin) {
-            \App\Support\LegacyAuth::loginFromContext();
+            LegacyAuth::loginFromContext();
         }
 
         if (! $useCronTriggerCleanUp && $autoclean) {
@@ -42,6 +45,6 @@ final class Bootstrap
      */
     public static function autoClean(bool $printProgress = false): string|bool
     {
-        return app(\App\Services\CleanupService::class)->runAll(false, $printProgress);
+        return app(CleanupService::class)->runAll(false, $printProgress);
     }
 }

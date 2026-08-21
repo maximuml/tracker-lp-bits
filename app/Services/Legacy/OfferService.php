@@ -138,13 +138,13 @@ final class OfferService
             if (! preg_match('/^https?:\/\/[^\s\'"<>]+\.(jpg|gif|png)$/i', $picture)) {
                 $this->abort($this->lang('std_error'), $this->lang('std_wrong_image_format'));
             }
-            $pic = '[img]' . $picture . "[/img]\n";
+            $pic = '[img]'.$picture."[/img]\n";
         }
 
-        $descr = $pic . $descrmain;
+        $descr = $pic.$descrmain;
 
         if (OfferRepository::offerNameExists($name)) {
-            $this->abort($this->lang('std_error'), $this->lang('std_offer_exists') . '<a class=altlink href=offers.php>' . $this->lang('text_view_all_offers') . '</a>', false);
+            $this->abort($this->lang('std_error'), $this->lang('std_offer_exists').'<a class=altlink href=offers.php>'.$this->lang('text_view_all_offers').'</a>', false);
         }
 
         $id = OfferRepository::createOffer([
@@ -165,7 +165,7 @@ final class OfferService
 
         OfferRepository::addStaffMessage($userId, (string) ($curuser['username'] ?? ''), $name, $id);
         Cache::clearStaffMessage();
-        Log::writeWithContext("offer {$name} was added by " . ($curuser['username'] ?? ''), 'normal');
+        Log::writeWithContext("offer {$name} was added by ".($curuser['username'] ?? ''), 'normal');
 
         return redirect("/offers.php?id={$id}&off_details=1");
     }
@@ -198,14 +198,14 @@ final class OfferService
 
         if ($offeruptimeout) {
             $timeouthour = (int) floor($offeruptimeout / 3600);
-            $timeoutnote = Locale::trans('offer.msg_you_must_upload_in', [], $locale) . $timeouthour . Locale::trans('offer.msg_hours_otherwise', [], $locale);
+            $timeoutnote = Locale::trans('offer.msg_you_must_upload_in', [], $locale).$timeouthour.Locale::trans('offer.msg_hours_otherwise', [], $locale);
         } else {
             $timeoutnote = '';
         }
 
         $curuser = $this->curUser();
-        $url = $this->protocolPrefix() . $this->baseUrl() . "/offers.php?id={$offid}&off_details=1";
-        $msg = ($curuser['username'] ?? '') . Locale::trans('offer.msg_has_allowed', [], $locale) . "[b][url={$url}]" . $arr['name'] . "[/url][/b]. " . Locale::trans('offer.msg_find_offer_option', [], $locale) . $timeoutnote;
+        $url = $this->protocolPrefix().$this->baseUrl()."/offers.php?id={$offid}&off_details=1";
+        $msg = ($curuser['username'] ?? '').Locale::trans('offer.msg_has_allowed', [], $locale)."[b][url={$url}]".$arr['name'].'[/url][/b]. '.Locale::trans('offer.msg_find_offer_option', [], $locale).$timeoutnote;
         $subject = Locale::trans('offer.msg_your_offer_allowed', [], $locale);
         $allowedtime = date('Y-m-d H:i:s');
 
@@ -218,7 +218,7 @@ final class OfferService
         ]);
 
         OfferRepository::allowOffer($offid, $allowedtime);
-        Log::writeWithContext(($curuser['username'] ?? '') . " allowed offer {$arr['name']}", 'normal');
+        Log::writeWithContext(($curuser['username'] ?? '')." allowed offer {$arr['name']}", 'normal');
 
         return redirect("/offers.php?id={$offid}&off_details=1");
     }
@@ -256,25 +256,25 @@ final class OfferService
         $no = (int) $voteCounts['against'];
 
         if ($yes === 0 && $no === 0) {
-            $this->abort($this->lang('std_sorry'), $this->lang('std_no_votes_yet') . "<a href=offers.php?id={$offid}&off_details=1>" . $this->lang('std_back_to_offer_detail') . '</a>', false);
+            $this->abort($this->lang('std_sorry'), $this->lang('std_no_votes_yet')."<a href=offers.php?id={$offid}&off_details=1>".$this->lang('std_back_to_offer_detail').'</a>', false);
         }
 
         $finishvotetime = date('Y-m-d H:i:s');
-        $url = $this->protocolPrefix() . $this->baseUrl() . "/offers.php?id={$offid}&off_details=1";
+        $url = $this->protocolPrefix().$this->baseUrl()."/offers.php?id={$offid}&off_details=1";
 
         if (($yes - $no) >= $minoffervotes) {
             if ($offeruptimeout) {
                 $timeouthour = (int) floor($offeruptimeout / 3600);
-                $timeoutnote = Locale::trans('offer.msg_you_must_upload_in', [], $locale) . $timeouthour . Locale::trans('offer.msg_hours_otherwise', [], $locale);
+                $timeoutnote = Locale::trans('offer.msg_you_must_upload_in', [], $locale).$timeouthour.Locale::trans('offer.msg_hours_otherwise', [], $locale);
             } else {
                 $timeoutnote = '';
             }
 
-            $msg = Locale::trans('offer.msg_offer_voted_on', [], $locale) . "[b][url={$url}]" . $arr['name'] . "[/url][/b]." . Locale::trans('offer.msg_find_offer_option', [], $locale) . $timeoutnote;
+            $msg = Locale::trans('offer.msg_offer_voted_on', [], $locale)."[b][url={$url}]".$arr['name'].'[/url][/b].'.Locale::trans('offer.msg_find_offer_option', [], $locale).$timeoutnote;
             $subject = Locale::trans('offer.msg_your_offer_allowed', [], $locale);
             OfferRepository::allowOffer($offid, $finishvotetime);
         } elseif (($no - $yes) >= $minoffervotes) {
-            $msg = Locale::trans('offer.msg_offer_voted_off', [], $locale) . "[b][url={$url}]" . $arr['name'] . "[/url][/b]." . Locale::trans('offer.msg_offer_deleted', [], $locale);
+            $msg = Locale::trans('offer.msg_offer_voted_off', [], $locale)."[b][url={$url}]".$arr['name'].'[/url][/b].'.Locale::trans('offer.msg_offer_deleted', [], $locale);
             $subject = Locale::trans('offer.msg_offer_deleted', [], $locale);
             OfferRepository::denyOffer($offid);
         } else {
@@ -290,7 +290,7 @@ final class OfferService
         ]);
 
         $curuser = $this->curUser();
-        Log::writeWithContext(($curuser['username'] ?? '') . " closed poll {$arr['name']}", 'normal');
+        Log::writeWithContext(($curuser['username'] ?? '')." closed poll {$arr['name']}", 'normal');
 
         return redirect("/offers.php?id={$offid}&off_details=1");
     }
@@ -326,7 +326,7 @@ final class OfferService
         }
 
         if ($sure === 0) {
-            $this->abort($this->lang('std_delete_offer'), $this->lang('std_delete_offer_note') . "<br /><form method=post action=offers.php?id={$offerId}&del_offer=1&sure=1>" . $this->lang('text_reason_is') . "<input type=text style=\"width: 200px\" name=reason><input type=submit value=\"" . $this->lang('submit_confirm') . "\"></form>", false);
+            $this->abort($this->lang('std_delete_offer'), $this->lang('std_delete_offer_note')."<br /><form method=post action=offers.php?id={$offerId}&del_offer=1&sure=1>".$this->lang('text_reason_is').'<input type=text style="width: 200px" name=reason><input type=submit value="'.$this->lang('submit_confirm').'"></form>', false);
         }
 
         $reason = (string) $request->input('reason');
@@ -337,7 +337,7 @@ final class OfferService
         if ($userId !== (int) $num['userid']) {
             $locale = Locale::userLocale((int) $num['userid']);
             $subject = Locale::trans('offer.msg_offer_deleted', [], $locale);
-            $msg = Locale::trans('offer.msg_your_offer', [], $locale) . $num['name'] . Locale::trans('offer.msg_was_deleted_by', [], $locale) . "[url=userdetails.php?id={$userId}]" . ($curuser['username'] ?? '') . "[/url]" . Locale::trans('offer.msg_blank', [], $locale) . ($reason !== '' ? Locale::trans('offer.msg_reason_is', [], $locale) . $reason : '');
+            $msg = Locale::trans('offer.msg_your_offer', [], $locale).$num['name'].Locale::trans('offer.msg_was_deleted_by', [], $locale)."[url=userdetails.php?id={$userId}]".($curuser['username'] ?? '').'[/url]'.Locale::trans('offer.msg_blank', [], $locale).($reason !== '' ? Locale::trans('offer.msg_reason_is', [], $locale).$reason : '');
 
             Message::add([
                 'sender' => 0,
@@ -348,7 +348,7 @@ final class OfferService
             ]);
         }
 
-        Log::writeWithContext("Offer: {$offerId} ({$num['name']}) was deleted by " . ($curuser['username'] ?? '') . ($reason !== '' ? " ({$reason})" : ''), 'normal');
+        Log::writeWithContext("Offer: {$offerId} ({$num['name']}) was deleted by ".($curuser['username'] ?? '').($reason !== '' ? " ({$reason})" : ''), 'normal');
 
         return redirect('/offers.php');
     }
@@ -381,10 +381,10 @@ final class OfferService
             if (! preg_match('/^https?:\/\/[^\s\'"<>]+\.(jpg|gif|png)$/i', $picture)) {
                 $this->abort($this->lang('std_error'), $this->lang('std_wrong_image_format'));
             }
-            $pic = '[img]' . $picture . "[/img]\n";
+            $pic = '[img]'.$picture."[/img]\n";
         }
 
-        $descr = $pic . (string) Input::unescape($request->input('body'));
+        $descr = $pic.(string) Input::unescape($request->input('body'));
         if ($name === '') {
             $this->abort($this->lang('std_error'), $this->lang('std_must_enter_name'));
         }
@@ -408,7 +408,7 @@ final class OfferService
 
     private function renderOffers(): Response|RedirectResponse
     {
-        $path = __DIR__ . '/offers_content.php';
+        $path = __DIR__.'/offers_content.php';
 
         if (! file_exists($path)) {
             return response('Legacy content missing: offers', 500);

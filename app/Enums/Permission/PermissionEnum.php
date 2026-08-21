@@ -2,7 +2,8 @@
 
 namespace App\Enums\Permission;
 
-enum PermissionEnum: string {
+enum PermissionEnum: string
+{
     case BE_ANONYMOUS = 'beanonymous';
     case TORRENT_SET_HR = 'torrent_hr';
     case TORRENT_SET_PRICE = 'torrent-set-price';
@@ -30,11 +31,11 @@ enum PermissionEnum: string {
     case COM_MANAGE = 'commanage';
     case SB_MANAGE = 'sbmanage';
     case VIEW_USER_LIST = 'viewuserlist';
-    case MANAGE_USER_BASIC_INFO = "prfmanage";
-    case MANAGE_USER_CONFIDENTIAL_INFO = "cruprfmanage";
-    case VIEW_USER_CONFIDENTIAL_INFO = "userprofile";
+    case MANAGE_USER_BASIC_INFO = 'prfmanage';
+    case MANAGE_USER_CONFIDENTIAL_INFO = 'cruprfmanage';
+    case VIEW_USER_CONFIDENTIAL_INFO = 'userprofile';
     case CONFIDENTIAL_LOG = 'confilog';
-    case VIEW_USER_HISTORY = "viewhistory";
+    case VIEW_USER_HISTORY = 'viewhistory';
     case VIEW_ANONYMOUS = 'viewanonymous';
     case VIEW_INVITE = 'viewinvite';
     case USER_CHANGE_CLASS = 'user-change-class';
@@ -43,6 +44,6 @@ enum PermissionEnum: string {
     case TOP_TEN = 'topten';
     case LOG = 'log';
     case STAFF_MEMBER = 'staffmem';
-    case TORRENT_VIEW_BANNED = "seebanned";
+    case TORRENT_VIEW_BANNED = 'seebanned';
 
 }

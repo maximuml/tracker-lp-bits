@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Console\Commands;
 
 use App\Services\CleanupService;
+use App\Support\Logger;
 use Illuminate\Console\Command;
 
 final class CleanupRun extends Command
@@ -15,9 +16,6 @@ final class CleanupRun extends Command
     /** @var string */
     protected $description = 'Run periodic cleanup tasks (peers, visibility, forum/offers, users, dead torrents).';
 
-    /**
-     * @return int
-     */
     public function handle(CleanupService $service): int
     {
         $lockFile = sprintf('%s/nexus_cleanup_cli.lock', sys_get_temp_dir());
@@ -49,7 +47,7 @@ final class CleanupRun extends Command
         $this->output->write((string) $output, false);
 
         $log = sprintf('[CLEANUP_RUN] DONE, cost time: %d seconds', $cost);
-        \App\Support\Logger::writeWithContext((string) $log, (string) 'info', (bool) false);
+        Logger::writeWithContext((string) $log, (string) 'info', (bool) false);
         $this->info($log);
 
         return Command::SUCCESS;

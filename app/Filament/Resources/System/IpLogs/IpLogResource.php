@@ -29,7 +29,7 @@ class IpLogResource extends Resource
 
     protected static ?int $navigationSort = 3;
 
-    protected static string | UnitEnum | null $navigationGroup = 'System';
+    protected static string|UnitEnum|null $navigationGroup = 'System';
 
     public static function getLabel(): ?string
     {
@@ -49,27 +49,20 @@ class IpLogResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('userid')
-                    ->label('UID')
-                ,
+                    ->label('UID'),
                 TextColumn::make('usernameForAdmin')
-                    ->label(__('label.username'))
-                ,
+                    ->label(__('label.username')),
                 TextColumn::make('ip')
-                    ->label('IP')
-                ,
+                    ->label('IP'),
                 TextColumn::make('ipLocation')
-                    ->label(__('ip-log.ip_location'))
-                ,
+                    ->label(__('ip-log.ip_location')),
                 TextColumn::make('uri')
-                    ->label(__('ip-log.uri'))
-                ,
+                    ->label(__('ip-log.uri')),
                 TextColumn::make('count')
-                    ->label(__('ip-log.count'))
-                ,
+                    ->label(__('ip-log.count')),
                 TextColumn::make('access')
                     ->label(__('ip-log.access'))
-                    ->tooltip(__('ip-log.access_tooltip'))
-                ,
+                    ->tooltip(__('ip-log.access_tooltip')),
             ])
             ->defaultSort('id', 'desc')
             ->filters([
@@ -119,13 +112,13 @@ class IpLogResource extends Resource
                     }),
             ])
             ->recordActions([
-//                ViewAction::make(),
-//                EditAction::make(),
-//                DeleteAction::make(),
+                //                ViewAction::make(),
+                //                EditAction::make(),
+                //                DeleteAction::make(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-//                    DeleteBulkAction::make(),
+                    //                    DeleteBulkAction::make(),
                 ]),
             ]);
     }

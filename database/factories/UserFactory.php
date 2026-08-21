@@ -3,12 +3,14 @@
 namespace Database\Factories;
 
 use App\Models\User;
+use App\Support\Config\SiteConfig;
+use App\Support\PasswordHasher;
 use App\Support\Token;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class UserFactory extends Factory
 {
-    private static string $defaultStyleSheet = "";
+    private static string $defaultStyleSheet = '';
 
     private static int $sequence = 1;
 
@@ -33,14 +35,14 @@ class UserFactory extends Factory
 
     public function definition(): array
     {
-        $password = "123456";
-        $secret = \App\Support\Token::randomHex((int) 20);
-        $passhash = md5($secret . $password . $secret);
-        if (self::$defaultStyleSheet == "") {
-            self::$defaultStyleSheet = \App\Support\Config\SiteConfig::current()->main->defStylesheet();
+        $password = '123456';
+        $secret = Token::randomHex((int) 20);
+        $passhash = md5($secret.$password.$secret);
+        if (self::$defaultStyleSheet == '') {
+            self::$defaultStyleSheet = SiteConfig::current()->main->defStylesheet();
         }
-        $username = sprintf("%s_%s", microtime(true), self::$sequence);
-        $email = sprintf("%s@example.net", $username);
+        $username = sprintf('%s_%s', microtime(true), self::$sequence);
+        $email = sprintf('%s@example.net', $username);
         self::$sequence++;
         $randNum = random_int(1, 10);
         if ($randNum >= 8) {
@@ -48,12 +50,14 @@ class UserFactory extends Factory
         } else {
             $class = User::CLASS_USER;
         }
+
         return [
             'username' => $username,
             'email' => $email,
             'secret' => $secret,
-            'editsecret' => "",
+            'editsecret' => '',
             'passhash' => $passhash,
+            'passhash_algo' => PasswordHasher::ALGO_MD5,
             'passkey' => Token::randomHex(16),
             'stylesheet' => self::$defaultStyleSheet,
             'added' => now()->toDateTimeString(),

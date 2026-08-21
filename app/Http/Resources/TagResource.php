@@ -2,17 +2,20 @@
 
 namespace App\Http\Resources;
 
+use App\Models\Tag;
+use App\Support\Time;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
- * @mixin \App\Models\Tag
+ * @mixin Tag
  */
 class TagResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
+     *
      * @param  mixed  $request
-     * @return  array<int|string, mixed>
+     * @return array<int|string, mixed>
      */
     public function toArray($request)
     {
@@ -26,8 +29,8 @@ class TagResource extends JsonResource
             'margin' => $this->margin,
             'border_radius' => $this->border_radius,
             'priority' => $this->priority,
-            'created_at' => \App\Support\Time::formatDateTime($this->created_at),
-            'updated_at' => \App\Support\Time::formatDateTime($this->updated_at),
+            'created_at' => Time::formatDateTime($this->created_at),
+            'updated_at' => Time::formatDateTime($this->updated_at),
         ];
     }
 }

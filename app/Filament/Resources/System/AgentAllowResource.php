@@ -2,28 +2,23 @@
 
 namespace App\Filament\Resources\System;
 
-use Filament\Schemas\Schema;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Radio;
-use Filament\Forms\Components\Textarea;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Actions\EditAction;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\DeleteBulkAction;
-use App\Filament\Resources\System\AgentAllowResource\RelationManagers\DeniesRelationManager;
-use App\Filament\Resources\System\AgentAllowResource\Pages\ListAgentAllows;
+use App\Filament\OptionsTrait;
 use App\Filament\Resources\System\AgentAllowResource\Pages\CreateAgentAllow;
 use App\Filament\Resources\System\AgentAllowResource\Pages\EditAgentAllow;
-use App\Filament\OptionsTrait;
-use App\Filament\Resources\System\AgentAllowResource\Pages;
-use App\Filament\Resources\System\AgentAllowResource\RelationManagers;
+use App\Filament\Resources\System\AgentAllowResource\Pages\ListAgentAllows;
+use App\Filament\Resources\System\AgentAllowResource\RelationManagers\DeniesRelationManager;
 use App\Models\AgentAllow;
-use Filament\Forms;
+use App\Support\Cache;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Forms\Components\Radio;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Filament\Tables;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class AgentAllowResource extends Resource
 {
@@ -31,9 +26,9 @@ class AgentAllowResource extends Resource
 
     protected static ?string $model = AgentAllow::class;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-check';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-check';
 
-    protected static string | \UnitEnum | null $navigationGroup = 'System';
+    protected static string|\UnitEnum|null $navigationGroup = 'System';
 
     protected static ?int $navigationSort = 4;
 
@@ -46,7 +41,6 @@ class AgentAllowResource extends Resource
     {
         return self::getNavigationLabel();
     }
-
 
     public static function form(Schema $schema): Schema
     {
@@ -87,9 +81,10 @@ class AgentAllowResource extends Resource
                 EditAction::make(),
                 DeleteAction::make()->using(function ($record) {
                     $record->delete();
-                    \App\Support\Cache::clearAgentAllowDeny();
+                    Cache::clearAgentAllowDeny();
+
                     return redirect(self::getUrl());
-                })
+                }),
             ])
             ->toolbarActions([
                 DeleteBulkAction::make(),

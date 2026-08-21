@@ -4,6 +4,8 @@ namespace App\Support;
 
 use App\Auth\Permission;
 use App\Models\User;
+use App\Repositories\TorrentRepository;
+use App\Support\Config\SiteConfig;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\Response;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -38,7 +40,7 @@ final class LegacyResponse
      */
     public static function sqlError(string $file, string $line): void
     {
-        throw new HttpResponseException(new Response(\App\Support\Frame::sqlError(\App\Support\LegacyDb::error(), $file, $line), 500));
+        throw new HttpResponseException(new Response(Frame::sqlError(LegacyDb::error(), $file, $line), 500));
     }
 
     public static function abort(
@@ -51,17 +53,17 @@ final class LegacyResponse
     ): void {
         if (! $die) {
             if ($head) {
-                \App\Support\Html::stdhead();
+                Html::stdhead();
             } elseif ($foot && PageLayout::getContext() === null) {
                 // Ensure a PageLayout context exists for stdfoot() even when the
                 // caller requested no header (e.g. permission denied before stdhead).
                 ob_start();
-                \App\Support\Html::stdhead();
+                Html::stdhead();
                 ob_end_clean();
             }
             echo Frame::stdMessage($heading, $text, $htmlstrip);
             if ($foot) {
-                \App\Support\Html::stdfoot();
+                Html::stdfoot();
             }
 
             return;
@@ -71,17 +73,17 @@ final class LegacyResponse
         ob_start();
         try {
             if ($head) {
-                \App\Support\Html::stdhead();
+                Html::stdhead();
             } elseif ($foot && PageLayout::getContext() === null) {
                 // Ensure a PageLayout context exists for stdfoot() even when the
                 // caller requested no header (e.g. permission denied before stdhead).
                 ob_start();
-                \App\Support\Html::stdhead();
+                Html::stdhead();
                 ob_end_clean();
             }
             echo Frame::stdMessage($heading, $text, $htmlstrip);
             if ($foot) {
-                \App\Support\Html::stdfoot();
+                Html::stdfoot();
             }
             $html = (string) ob_get_clean();
         } catch (HttpResponseException $e) {
@@ -114,7 +116,7 @@ final class LegacyResponse
             (string) ($lang_functions['std_sorry'] ?? ''),
             (string) ($lang_functions['std_permission_denied_only'] ?? '')
                 .UserClass::name($allowMinimumClass, false, true, true)
-                .\sprintf((string) ($lang_functions['std_or_above_can_view'] ?? ''), \App\Support\Config\SiteConfig::current()->basic->siteName()),
+                .\sprintf((string) ($lang_functions['std_or_above_can_view'] ?? ''), SiteConfig::current()->basic->siteName()),
             false,
         );
     }
@@ -149,10 +151,10 @@ final class LegacyResponse
 
         $msg = 'Invalid ID Attempt: Username: '.($CURUSER['username'] ?? '')
             .' - UserID: '.($CURUSER['id'] ?? '')
-            .' - UserIP : '.(\App\Support\Network::clientIp());
+            .' - UserIP : '.(Network::clientIp());
 
         if ($log && \function_exists('write_log')) {
-            \App\Support\Log::writeWithContext($msg, 'mod');
+            Log::writeWithContext($msg, 'mod');
         }
         if (\function_exists('do_log')) {
             Logger::writeWithContext($msg, 'error');
@@ -177,11 +179,11 @@ final class LegacyResponse
             ob_start();
             try {
                 if ($stdfoot) {
-                    \App\Support\Html::stdhead();
+                    Html::stdhead();
                 }
                 echo $errorHtml;
                 if ($stdfoot) {
-                    \App\Support\Html::stdfoot();
+                    Html::stdfoot();
                 }
                 $html = (string) ob_get_clean();
             } catch (HttpResponseException $e) {
@@ -195,7 +197,7 @@ final class LegacyResponse
         }
 
         if ($stdfoot && \function_exists('stdfoot')) {
-            \App\Support\Html::stdfoot();
+            Html::stdfoot();
         }
 
         echo $errorHtml;
@@ -218,8 +220,8 @@ final class LegacyResponse
             return false;
         }
 
-        $uploadDenyApprovalDenyCount = (int) \App\Support\Config\SiteConfig::current()->main->uploadDenyApprovalDenyCount();
-        $approvalDenyCount = \App\Repositories\TorrentRepository::getApprovalDenyCount((int) ($CURUSER['id'] ?? 0));
+        $uploadDenyApprovalDenyCount = (int) SiteConfig::current()->main->uploadDenyApprovalDenyCount();
+        $approvalDenyCount = TorrentRepository::getApprovalDenyCount((int) ($CURUSER['id'] ?? 0));
 
         if ($uploadDenyApprovalDenyCount > 0 && $approvalDenyCount >= $uploadDenyApprovalDenyCount) {
             self::abort(
@@ -230,14 +232,14 @@ final class LegacyResponse
         }
 
         if ($where === 'torrents') {
-            $offerSkipApprovedCount = (int) \App\Support\Config\SiteConfig::current()->main->offerSkipApprovedCount();
+            $offerSkipApprovedCount = (int) SiteConfig::current()->main->offerSkipApprovedCount();
             if (($CURUSER['offer_allowed_count'] ?? 0) >= $offerSkipApprovedCount) {
                 return true;
             }
             if (Permission::canUploadToNormalSection()) {
                 return true;
             }
-            if (Time::isWeekendUploadOpen(\App\Support\Config\SiteConfig::current()->main->isUploadOpenAtWeekend(), \time())) {
+            if (Time::isWeekendUploadOpen(SiteConfig::current()->main->isUploadOpenAtWeekend(), \time())) {
                 return true;
             }
         }
@@ -256,10 +258,10 @@ final class LegacyResponse
         $level = ob_get_level();
         ob_start();
         try {
-            \App\Support\Html::stdhead($title);
-            echo '<h1>' . \htmlspecialchars($title) . "</h1>\n";
-            echo '<p>' . \htmlspecialchars($message) . "</p>\n";
-            \App\Support\Html::stdfoot();
+            Html::stdhead($title);
+            echo '<h1>'.\htmlspecialchars($title)."</h1>\n";
+            echo '<p>'.\htmlspecialchars($message)."</p>\n";
+            Html::stdfoot();
             $html = (string) ob_get_clean();
         } catch (HttpResponseException $e) {
             while (ob_get_level() > $level) {
@@ -288,11 +290,11 @@ final class LegacyResponse
     public static function redirect(string $url): void
     {
         if (substr($url, 0, 4) != 'http') {
-            $url = Url::schemeAndHost() . '/' . trim($url, '/');
+            $url = Url::schemeAndHost().'/'.trim($url, '/');
         }
 
         if (headers_sent()) {
-            throw new HttpResponseException(new Response("<script type=\"text/javascript\">window.location.href = '" . htmlspecialchars($url, ENT_QUOTES) . "';</script>"));
+            throw new HttpResponseException(new Response("<script type=\"text/javascript\">window.location.href = '".htmlspecialchars($url, ENT_QUOTES)."';</script>"));
         }
 
         throw new HttpResponseException(new RedirectResponse($url, 302));

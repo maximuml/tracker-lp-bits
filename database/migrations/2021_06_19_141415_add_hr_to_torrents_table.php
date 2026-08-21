@@ -14,7 +14,7 @@ class AddHrToTorrentsTable extends Migration
     public function up()
     {
         Schema::table('torrents', function (Blueprint $table) {
-            if (!Schema::hasColumn('torrents', 'hr')) {
+            if (! Schema::hasColumn('torrents', 'hr')) {
                 $table->tinyInteger('hr')->default(0);
             }
         });

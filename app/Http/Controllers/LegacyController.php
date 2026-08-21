@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Support\LegacyResponse;
 use App\Support\SupportContext;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -18,11 +19,12 @@ abstract class LegacyController extends Controller
         if ($auth && SupportContext::getUser() === null) {
             $qs = $request->getQueryString();
 
-            return redirect('/' . $page . '.php' . ($qs ? '?' . $qs : ''));
+            return redirect('/'.$page.'.php'.($qs ? '?'.$qs : ''));
         }
 
-        $view = view()->make($page . '.index', $data);
-        /** @var \Illuminate\View\View $view */
+        $view = view()->make($page.'.index', $data);
+
+        /** @var View $view */
         return $view;
     }
 
@@ -34,10 +36,10 @@ abstract class LegacyController extends Controller
         if ($auth && SupportContext::getUser() === null) {
             $qs = $request->getQueryString();
 
-            return redirect('/' . $page . '.php' . ($qs ? '?' . $qs : ''));
+            return redirect('/'.$page.'.php'.($qs ? '?'.$qs : ''));
         }
 
-        $content = view()->make($page . '.index', $data)->render();
+        $content = view()->make($page.'.index', $data)->render();
 
         $headers = headers_list();
         $status = http_response_code();
@@ -62,10 +64,10 @@ abstract class LegacyController extends Controller
         if ($auth && SupportContext::getUser() === null) {
             $qs = $request->getQueryString();
 
-            return redirect('/' . $page . '.php' . ($qs ? '?' . $qs : ''));
+            return redirect('/'.$page.'.php'.($qs ? '?'.$qs : ''));
         }
 
-        $content = view()->make($page . '.index', $data)->render();
+        $content = view()->make($page.'.index', $data)->render();
 
         $headers = headers_list();
         $responseHeaders = [];
@@ -84,7 +86,7 @@ abstract class LegacyController extends Controller
             if (count($parts) === 2) {
                 $name = trim($parts[0]);
                 $value = trim($parts[1]);
-                $responseHeaders[$name] = ($responseHeaders[$name] ?? '') !== '' ? $responseHeaders[$name] . ', ' . $value : $value;
+                $responseHeaders[$name] = ($responseHeaders[$name] ?? '') !== '' ? $responseHeaders[$name].', '.$value : $value;
                 header_remove($name);
             }
         }
@@ -97,7 +99,8 @@ abstract class LegacyController extends Controller
     protected function legacyAbortResponse(string $heading, string $text, bool $htmlstrip = true): Response
     {
         ob_start();
-        \App\Support\LegacyResponse::abort($heading, $text, $htmlstrip, true, true, false);
+        LegacyResponse::abort($heading, $text, $htmlstrip, true, true, false);
+
         return response((string) ob_get_clean());
     }
 }

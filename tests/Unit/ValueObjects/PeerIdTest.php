@@ -35,7 +35,7 @@ final class PeerIdTest extends TestCase
     {
         $binary = "\x00\x01UT3231-0123456789";
         // pad to 20 bytes
-        $binary = substr($binary . str_repeat("\x00", PeerId::LENGTH), 0, PeerId::LENGTH);
+        $binary = substr($binary.str_repeat("\x00", PeerId::LENGTH), 0, PeerId::LENGTH);
         $peerId = PeerId::fromBinary($binary);
 
         $this->assertSame('..UT3231-0123456789.', substr($peerId->toPrintable(), 0, 21));

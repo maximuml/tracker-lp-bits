@@ -3,19 +3,18 @@
 namespace App\Http\Resources;
 
 use App\Models\Exam;
-use App\Models\User;
-use Carbon\Carbon;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
- * @mixin \App\Models\Exam
+ * @mixin Exam
  */
 class ExamResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
+     *
      * @param  mixed  $request
-     * @return  array<int|string, mixed>
+     * @return array<int|string, mixed>
      */
     public function toArray($request)
     {
@@ -40,18 +39,17 @@ class ExamResource extends JsonResource
     }
 
     /**
-     * @param  \App\Models\Exam  $exam
-     * @return  mixed
+     * @return mixed
      */
     private function normalizeFilters(Exam $exam)
     {
         $filters = $exam->filters;
         foreach (Exam::$filters as $key => $value) {
-            if (!isset($filters[$key])) {
+            if (! isset($filters[$key])) {
                 $filters[$key] = [];
             }
         }
+
         return $filters;
     }
-
 }

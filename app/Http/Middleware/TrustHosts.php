@@ -8,7 +8,8 @@ class TrustHosts extends Middleware
 {
     /**
      * Get the host patterns that should be trusted.
-     * @return  array<int|string, mixed>
+     *
+     * @return array<int|string, mixed>
      */
     public function hosts()
     {

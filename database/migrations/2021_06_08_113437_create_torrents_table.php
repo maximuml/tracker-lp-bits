@@ -56,12 +56,12 @@ class CreateTorrentsTable extends Migration
             $table->unsignedTinyInteger('cache_stamp')->default(0);
             $table->dateTime('last_reseed')->nullable();
             $table->text('technical_info')->nullable();
-            $table->index(['visible', 'pos_state', 'id'] );
+            $table->index(['visible', 'pos_state', 'id']);
             $table->index(['category', 'visible', 'banned']);
             $table->index(['visible', 'banned', 'pos_state', 'id']);
         });
-//        $sql = 'alter table torrents add column `info_hash` binary(20) NOT NULL after id, add unique info_hash(`info_hash`)';
-//        \Illuminate\Support\Facades\DB::statement($sql);
+        //        $sql = 'alter table torrents add column `info_hash` binary(20) NOT NULL after id, add unique info_hash(`info_hash`)';
+        //        \Illuminate\Support\Facades\DB::statement($sql);
     }
 
     /**

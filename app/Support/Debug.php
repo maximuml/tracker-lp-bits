@@ -15,7 +15,7 @@ final class Debug
 {
     public static function printLine(string $line, bool $exit = false): void
     {
-        echo '[' . date('Y-m-d H:i:s') . "] $line<br />";
+        echo '['.date('Y-m-d H:i:s')."] $line<br />";
         if ($exit) {
             throw new HttpResponseException(new Response(''));
         }

@@ -2,6 +2,7 @@
 
 namespace App\Repositories;
 
+use Illuminate\Database\Query\Builder;
 use Nexus\Database\NexusDB;
 
 class UserListingRepository
@@ -25,9 +26,7 @@ class UserListingRepository
 
     /**
      * @param  array<int|string, mixed>  $filters
-     * @param  int  $offset
-     * @param  int  $perPage
-     * @return  array<int|string, mixed>
+     * @return array<int|string, mixed>
      */
     public static function listUsers(array $filters, int $offset, int $perPage): array
     {
@@ -44,9 +43,8 @@ class UserListingRepository
 
     /**
      * @param  array<int|string, mixed>  $filters
-     * @return  \Illuminate\Database\Query\Builder
      */
-    private static function buildUserQuery(array $filters): \Illuminate\Database\Query\Builder
+    private static function buildUserQuery(array $filters): Builder
     {
         $search = trim($filters['search'] ?? '');
         $class = $filters['class'] ?? '-';
@@ -75,7 +73,7 @@ class UserListingRepository
     /**
      * @param  array<int>  $userIds
      * @param  array<int|string, string>  $ips
-     * @return  array<string, mixed>
+     * @return array<string, mixed>
      */
     public static function getSearchExtraStats(array $userIds, array $ips, int $minClassRead): array
     {

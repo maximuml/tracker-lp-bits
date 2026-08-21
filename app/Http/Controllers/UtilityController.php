@@ -9,9 +9,16 @@ use App\Repositories\SearchPageRepository;
 use App\Services\Legacy\AjaxService;
 use App\Services\Legacy\AttachmentLegacyService;
 use App\Services\Legacy\LegacyPartialRenderer;
+use App\Support\Api;
 use App\Support\Attachment\AttachmentService;
+use App\Support\Captcha;
+use App\Support\Http;
+use App\Support\LegacyAuth;
+use App\Support\Logger;
+use App\Support\Strings;
 use App\Support\Style;
 use App\Support\SupportContext;
+use App\Support\Url;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -37,7 +44,7 @@ class UtilityController extends LegacyController
         if ($currentUser === null) {
             $qs = $request->getQueryString();
 
-            return redirect('/search.php' . ($qs ? '?' . $qs : ''));
+            return redirect('/search.php'.($qs ? '?'.$qs : ''));
         }
 
         $data = SearchPageRepository::dataForSearch($request, $currentUser);
@@ -60,7 +67,7 @@ class UtilityController extends LegacyController
         if (SupportContext::getCache() === null) {
             $qs = $request->getQueryString();
 
-            return redirect('/ajax.php' . ($qs ? '?' . $qs : ''));
+            return redirect('/ajax.php'.($qs ? '?'.$qs : ''));
         }
 
         $action = (string) $request->input('action', '');
@@ -68,23 +75,24 @@ class UtilityController extends LegacyController
 
         $passkeyActions = ['getPasskeyGetArgs', 'processPasskeyGet'];
         if (! in_array($action, $passkeyActions, true)) {
-            \App\Support\LegacyAuth::requireLoginFromContext();
+            LegacyAuth::requireLoginFromContext();
+        }
+
+        if (! in_array($action, AjaxService::ALLOWED_ACTIONS, true)) {
+            $currentUser = SupportContext::getUser() ?? [];
+            Logger::writeWithContext((string) ('hacking attempt made by '.($currentUser['username'] ?? 'guest').',uid '.($currentUser['id'] ?? 0)), (string) 'error', (bool) false);
+
+            return response()->json(Api::call(1, "Invalid action: {$action}", $request->all()));
         }
 
         try {
-            if (! method_exists(AjaxService::class, $action)) {
-                $currentUser = SupportContext::getUser() ?? [];
-                \App\Support\Logger::writeWithContext((string) ("hacking attempt made by " . ($currentUser['username'] ?? 'guest') . ",uid " . ($currentUser['id'] ?? 0)), (string) 'error', (bool) false);
-                throw new \RuntimeException("Invalid action: {$action}");
-            }
-
             $result = AjaxService::{$action}($params);
 
-            return response()->json(\App\Support\Api::successWithContext($result));
+            return response()->json(Api::successWithContext($result));
         } catch (\Throwable $exception) {
-            \App\Support\Logger::writeWithContext((string) ($exception->getMessage() . $exception->getTraceAsString()), (string) 'error', (bool) false);
+            Logger::writeWithContext((string) ($exception->getMessage().$exception->getTraceAsString()), (string) 'error', (bool) false);
 
-            return response()->json(\App\Support\Api::failWithContext($exception->getMessage(), $request->all()));
+            return response()->json(Api::failWithContext($exception->getMessage(), $request->all()));
         }
     }
 
@@ -156,7 +164,7 @@ class UtilityController extends LegacyController
 
         $httpdirectory = (string) SupportContext::getGlobal('httpdirectory_attachment', '');
         $basePath = realpath($httpdirectory);
-        $filelocation = $httpdirectory . '/' . $row['location'];
+        $filelocation = $httpdirectory.'/'.$row['location'];
         $realFile = realpath($filelocation);
 
         if ($basePath === false || $realFile === false || ! str_starts_with($realFile, $basePath) || ! is_file($realFile) || ! is_readable($realFile)) {
@@ -173,7 +181,7 @@ class UtilityController extends LegacyController
 
         $cache = SupportContext::getCache();
         if ($cache !== null) {
-            $cache->delete_value('attachment_' . $dlkey . '_content');
+            $cache->delete_value('attachment_'.$dlkey.'_content');
         }
 
         return new StreamedResponse(function () use ($realFile) {
@@ -189,7 +197,7 @@ class UtilityController extends LegacyController
             fclose($f);
         }, 200, [
             'Content-Type' => 'application/octet-stream',
-            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+            'Content-Disposition' => 'attachment; filename="'.$filename.'"',
         ]);
     }
 
@@ -202,7 +210,7 @@ class UtilityController extends LegacyController
             return response('Invalid captcha action', 404);
         }
 
-        $driver = \App\Support\Captcha::manager()->driver('image');
+        $driver = Captcha::manager()->driver('image');
 
         if (! method_exists($driver, 'outputImage')) {
             return response('Captcha driver does not support image rendering', 404);
@@ -219,7 +227,7 @@ class UtilityController extends LegacyController
             if (count($parts) === 2) {
                 $name = trim($parts[0]);
                 $value = trim($parts[1]);
-                $headers[$name] = ($headers[$name] ?? '') !== '' ? $headers[$name] . ', ' . $value : $value;
+                $headers[$name] = ($headers[$name] ?? '') !== '' ? $headers[$name].', '.$value : $value;
                 header_remove($name);
             }
         }
@@ -243,7 +251,7 @@ class UtilityController extends LegacyController
     {
         $headers = [
             'Expires' => 'Mon, 26 Jul 1997 05:00:00 GMT',
-            'Last-Modified' => gmdate('D, d M Y H:i:s') . ' GMT',
+            'Last-Modified' => gmdate('D, d M Y H:i:s').' GMT',
             'Cache-Control' => 'no-cache, must-revalidate',
             'Pragma' => 'no-cache',
             'Content-Type' => 'text/xml; charset=utf-8',
@@ -256,7 +264,7 @@ class UtilityController extends LegacyController
 
         $suggestRows = NexusDB::table('suggest')
             ->selectRaw('keywords AS suggest, COUNT(*) AS count')
-            ->where('keywords', 'like', $q . '%')
+            ->where('keywords', 'like', $q.'%')
             ->groupBy('keywords')
             ->orderByDesc('count')
             ->orderByDesc('keywords')
@@ -270,7 +278,7 @@ class UtilityController extends LegacyController
             if (strlen((string) $suggest['suggest']) > 25) {
                 continue;
             }
-            $result .= ($result === '' ? '' : "\r\n") . $suggest['suggest'] . "\r\n" . $suggest['count'];
+            $result .= ($result === '' ? '' : "\r\n").$suggest['suggest']."\r\n".$suggest['count'];
             $i++;
             if ($i >= 5) {
                 break;
@@ -313,15 +321,15 @@ class UtilityController extends LegacyController
         $dateFounded = (string) (SupportContext::getGlobal('datefounded', '') ?? '');
         $projectName = (string) (SupportContext::getGlobal('PROJECTNAME', '') ?? '');
 
-        $url = \App\Support\Http::protocolPrefix(\App\Support\Url::isSecure()) . $baseUrl;
+        $url = Http::protocolPrefix(Url::isSecure()).$baseUrl;
         $year = substr($dateFounded, 0, 4);
         $yearFounded = $year !== '' ? $year : '2007';
-        $attribution = "Copyright (c) " . $siteName . " " . (date("Y") != $yearFounded ? $yearFounded . "-" : "") . date("Y") . ", all rights reserved";
+        $attribution = 'Copyright (c) '.$siteName.' '.(date('Y') != $yearFounded ? $yearFounded.'-' : '').date('Y').', all rights reserved';
 
         $faviconPath = public_path('favicon.ico');
         $faviconData = is_file($faviconPath)
-            ? 'data:image/x-icon;base64,' . base64_encode((string) file_get_contents($faviconPath))
-            : $url . '/favicon.ico';
+            ? 'data:image/x-icon;base64,'.base64_encode((string) file_get_contents($faviconPath))
+            : $url.'/favicon.ico';
 
         $siteNameEsc = htmlspecialchars($siteName);
         $sloganEsc = htmlspecialchars($slogan);
@@ -366,7 +374,7 @@ XML;
     public function confirmemail(Request $request): Response|RedirectResponse
     {
         $routePath = $request->route('path') ?? '';
-        $pathInfo = $routePath !== '' ? '/' . ltrim((string) $routePath, '/') : '';
+        $pathInfo = $routePath !== '' ? '/'.ltrim((string) $routePath, '/') : '';
         if (! preg_match(':^/(\d{1,10})/([\w]{32})/(.+)$:', $pathInfo, $matches)) {
             abort(404);
         }
@@ -379,13 +387,20 @@ XML;
             abort(404);
         }
 
+        $validator = validator(['email' => $email], [
+            'email' => 'required|email|max:255',
+        ]);
+        if ($validator->fails()) {
+            abort(404);
+        }
+
         $user = User::query()->where('id', $id)->first(['editsecret']);
         if (! $user) {
             abort(404);
         }
 
-        $sec = \App\Support\Strings::padHash($user->editsecret);
-        if (preg_match('/^ *$/s', $sec) || $md5 !== md5($sec . $email . $sec)) {
+        $sec = Strings::padHash($user->editsecret);
+        if (preg_match('/^ *$/s', $sec) || $md5 !== md5($sec.$email.$sec)) {
             abort(404);
         }
 

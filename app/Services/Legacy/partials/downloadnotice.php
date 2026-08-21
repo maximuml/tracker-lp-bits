@@ -1,11 +1,14 @@
 <?php
+
+use App\Support\SupportContext;
+
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
 if (! isset($CURUSER)) {
-    $CURUSER = (array) (\App\Support\SupportContext::getUser() ?? []);
+    $CURUSER = (array) (SupportContext::getUser() ?? []);
 }
 if (! isset($lang_downloadnotice)) {
-    $lang_downloadnotice = (array) (\App\Support\SupportContext::getGlobal('lang_downloadnotice') ?? []);
+    $lang_downloadnotice = (array) (SupportContext::getGlobal('lang_downloadnotice') ?? []);
 }
 
 ?>
@@ -14,9 +17,8 @@ if (! isset($lang_downloadnotice)) {
 <td colspan="2" class="text" align="left"><p><?php echo $note ?? '' ?></p></td></tr>
 <tr>
 <?php
-if (! empty($showrationotice))
-{
-?>
+if (! empty($showrationotice)) {
+    ?>
 <td class="text" align="left" valign="top" <?php echo $tdattr ?? '' ?>>
 <h3><?php echo $lang_downloadnotice['text_this_is_private_tracker'] ?></h3>
 <p><?php echo $lang_downloadnotice['text_private_tracker_note_one'] ?><i>(<?php echo $lang_downloadnotice['text_learn_more'] ?><a class="faqlink" href="<?php echo NEXUSWIKIURL ?>/Private Tracker" target="_blank"><?php echo $lang_downloadnotice['text_nexuswiki'] ?></a>)</i></p>
@@ -27,9 +29,8 @@ if (! empty($showrationotice))
 </td>
 <?php
 }
-if (! empty($showclientnotice))
-{
-?>
+if (! empty($showclientnotice)) {
+    ?>
 <td class="text" align="left" valign="top" <?php echo $tdattr ?? '' ?>>
 <h3><?php echo $lang_downloadnotice['text_use_allowed_clients'] ?></h3>
 <p><?php echo $lang_downloadnotice['text_allowed_clients_note_one'] ?></p>
@@ -60,25 +61,23 @@ if (! empty($showclientnotice))
 ?>
 </tr>
 <?php
-if (! empty($torrentid))
-{
-?>
+if (! empty($torrentid)) {
+    ?>
 <tr>
 <td class="text" colspan="2">
 <form action="?" method="post"><p><?php echo $lang_downloadnotice['text_for_more_information_read'] ?><a class="faqlink" href="rules.php" target="_blank"><?php echo $lang_downloadnotice['text_rules'] ?></a><?php echo $lang_downloadnotice['text_and'] ?><a class="faqlink" href="faq.php" target="_blank"><?php echo $lang_downloadnotice['text_faq'] ?></a><br />
 <input type="hidden" name="id" value="<?php echo $torrentid ?>" />
 <input type="hidden" name="type" value="<?php echo htmlspecialchars((string) ($type ?? 'firsttime')) ?>" />
-<input type="checkbox" name="hidenotice" id="hidenotice" value="1"<?php echo ! empty($forcecheck) ? " disabled=\"disabled\"" : " checked=\"checked\"" ?> /><label for="hidenotice"><?php echo $noticenexttime ?? '' ?></label>
+<input type="checkbox" name="hidenotice" id="hidenotice" value="1"<?php echo ! empty($forcecheck) ? ' disabled="disabled"' : ' checked="checked"' ?> /><label for="hidenotice"><?php echo $noticenexttime ?? '' ?></label>
 <?php
-if (! empty($forcecheck))
-{
-?>
+if (! empty($forcecheck)) {
+    ?>
 <br /><input type="checkbox" name="letmedown" id="letmedown" value="<?php echo htmlspecialchars((string) ($type ?? 'firsttime')) ?>" onclick="if (this.checked) {document.getElementById('continuedownload').disabled = false;}else{document.getElementById('continuedownload').disabled = true;}" /><label for="letmedown"><span class="big"><?php echo $lang_downloadnotice['text_let_me_download'] ?></span></label>
 <?php
 }
-?>
+    ?>
 </p>
-<div><input type="submit" name="submit" id="continuedownload" style="font-size: 20pt; height: 40px;" value="<?php echo $lang_downloadnotice['submit_download_the_torrent'] ?>"<?php echo ! empty($forcecheck) ? " disabled=\"disabled\"" : "" ?> /></div>
+<div><input type="submit" name="submit" id="continuedownload" style="font-size: 20pt; height: 40px;" value="<?php echo $lang_downloadnotice['submit_download_the_torrent'] ?>"<?php echo ! empty($forcecheck) ? ' disabled="disabled"' : '' ?> /></div>
 </form>
 </td>
 </tr>

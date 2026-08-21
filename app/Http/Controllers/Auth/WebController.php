@@ -8,8 +8,8 @@ use App\Http\Requests\Auth\LoginRequest;
 use App\Models\OauthProvider;
 use App\Models\Setting;
 use App\Repositories\UserPasskeyRepository;
-use App\Services\WebAuthService;
 use App\Services\Captcha\Drivers\ImageCaptchaDriver;
+use App\Services\WebAuthService;
 use App\Support\Captcha;
 use App\Support\Locale;
 use App\Support\Network;
@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\View\View;
+use Nexus\Nexus;
 
 class WebController extends Controller
 {
@@ -46,7 +47,7 @@ class WebController extends Controller
                 $query = $request->query();
                 unset($query['sitelanguage']);
 
-                return Redirect::to('/login' . (empty($query) ? '' : '?' . http_build_query($query)));
+                return Redirect::to('/login'.(empty($query) ? '' : '?'.http_build_query($query)));
             }
         }
 
@@ -109,7 +110,7 @@ class WebController extends Controller
             return $this->backWithError($request, $exception->getMessage());
         }
 
-        $validator = Validator::make($request->all(), (new LoginRequest())->rules());
+        $validator = Validator::make($request->all(), (new LoginRequest)->rules());
 
         if ($validator->fails()) {
             $this->authService->recordFailedAttempt($ip);
@@ -186,7 +187,7 @@ class WebController extends Controller
     {
         ob_start();
         UserPasskeyRepository::renderLogin();
-        \Nexus\Nexus::js('js/passkey.js', 'footer', true);
+        Nexus::js('js/passkey.js', 'footer', true);
 
         return (string) ob_get_clean();
     }

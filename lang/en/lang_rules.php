@@ -1,8 +1,6 @@
 <?php
 
-$lang_rules = array
-(
-	'head_rules' => "Rules"
-);
-
-?>
+$lang_rules =
+[
+    'head_rules' => 'Rules',
+];

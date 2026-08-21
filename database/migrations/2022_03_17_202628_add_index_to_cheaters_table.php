@@ -26,8 +26,6 @@ class AddIndexToCheatersTable extends Migration
      */
     public function down()
     {
-        Schema::table('cheaters', function (Blueprint $table) {
-
-        });
+        Schema::table('cheaters', function (Blueprint $table) {});
     }
 }

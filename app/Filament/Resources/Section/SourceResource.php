@@ -2,19 +2,12 @@
 
 namespace App\Filament\Resources\Section;
 
-use Filament\Schemas\Schema;
-use App\Filament\Resources\Section\SourceResource\Pages\ListSources;
 use App\Filament\Resources\Section\SourceResource\Pages\CreateSource;
 use App\Filament\Resources\Section\SourceResource\Pages\EditSource;
-use App\Filament\Resources\Section\SourceResource\Pages;
-use App\Filament\Resources\Section\SourceResource\RelationManagers;
+use App\Filament\Resources\Section\SourceResource\Pages\ListSources;
 use App\Models\Source;
-use Filament\Forms;
-use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
 use Filament\Tables\Table;
-use Filament\Tables;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class SourceResource extends CodecResource
 {
@@ -31,7 +24,6 @@ class SourceResource extends CodecResource
     {
         return parent::table($table);
     }
-
 
     public static function getRelations(): array
     {

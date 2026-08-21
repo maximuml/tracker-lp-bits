@@ -1,7 +1,7 @@
 <?php
 
-$lang_incrementbulk = array
-(
+$lang_incrementbulk =
+[
     'page_title' => 'Batch add bonus/attendance card/invite/uploaded/temporary invite',
     'sent_success' => ' has been added and inform message has been sent',
     'types' => [
@@ -22,6 +22,4 @@ $lang_incrementbulk = array
         'msg_body' => 'message content',
         'operator' => 'Operator',
     ],
-);
-
-?>
+];

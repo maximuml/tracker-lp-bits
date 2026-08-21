@@ -3,17 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Repositories\AttendanceRepository;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class AttendanceController extends Controller
 {
-    /** @var  mixed */
+    /** @var mixed */
     private $repository;
 
     /**
-     * @param  \App\Repositories\AttendanceRepository  $repository
-     * @return  mixed
+     * @return mixed
      */
     public function __construct(AttendanceRepository $repository)
     {
@@ -25,8 +23,7 @@ class AttendanceController extends Controller
     {
         $uid = Auth::id();
         $attendance = $this->repository->attend($uid);
+
         return $this->success($attendance->toArray());
     }
-
-
 }

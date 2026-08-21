@@ -20,5 +20,4 @@ final class MeiliSearchConfig extends Config
     {
         return $this->string('default_search_mode', $default);
     }
-
 }

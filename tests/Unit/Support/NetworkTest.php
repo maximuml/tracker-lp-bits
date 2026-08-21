@@ -64,20 +64,20 @@ class NetworkTest extends TestCase
 
     // ---------- isValid() / isIpv4() / isIpv6() ----------
 
-    public function test_isValid_allows_public_ipv4_and_ipv6(): void
+    public function test_is_valid_allows_public_ipv4_and_ipv6(): void
     {
         $this->assertTrue(Network::isValid('1.2.3.4'));
         $this->assertTrue(Network::isValid('2001:4860:4860::8888'));
     }
 
-    public function test_isValid_rejects_reserved_ipv4_ranges(): void
+    public function test_is_valid_rejects_reserved_ipv4_ranges(): void
     {
         $this->assertFalse(Network::isValid('192.0.2.1'));
         $this->assertFalse(Network::isValid('192.168.1.1'));
         $this->assertFalse(Network::isValid('255.255.255.255'));
     }
 
-    public function test_isIpv4_and_isIpv6_match_filter_var(): void
+    public function test_is_ipv4_and_is_ipv6_match_filter_var(): void
     {
         $this->assertTrue(Network::isIpv4('1.2.3.4'));
         $this->assertFalse(Network::isIpv4('2001:4860:4860::8888'));
@@ -110,7 +110,7 @@ class NetworkTest extends TestCase
         }
     }
 
-    public function test_clientIp_returns_rightmost_non_trusted_forwarded_ip(): void
+    public function test_client_ip_returns_rightmost_non_trusted_forwarded_ip(): void
     {
         Network::setTrustedProxies(['10.0.0.0/8']);
 
@@ -125,7 +125,7 @@ class NetworkTest extends TestCase
         $this->assertSame('1.2.3.4, 203.0.113.5, 10.0.0.2', Network::clientIp(false));
     }
 
-    public function test_clientIp_falls_back_to_client_ip_and_remote_addr(): void
+    public function test_client_ip_falls_back_to_client_ip_and_remote_addr(): void
     {
         Network::setTrustedProxies(['10.0.0.4']);
 
@@ -136,7 +136,7 @@ class NetworkTest extends TestCase
         $this->assertSame('10.0.0.4', Network::clientIp());
     }
 
-    public function test_clientIp_ignores_x_forwarded_for_from_untrusted_remote_addr(): void
+    public function test_client_ip_ignores_x_forwarded_for_from_untrusted_remote_addr(): void
     {
         Network::setTrustedProxies(['127.0.0.1']);
 
@@ -148,7 +148,7 @@ class NetworkTest extends TestCase
         $this->assertSame('5.6.7.8', Network::clientIp());
     }
 
-    public function test_clientIp_respects_cidr_trusted_proxies(): void
+    public function test_client_ip_respects_cidr_trusted_proxies(): void
     {
         Network::setTrustedProxies(['10.0.0.0/8']);
 
@@ -160,7 +160,7 @@ class NetworkTest extends TestCase
         $this->assertSame('203.0.113.5', Network::clientIp());
     }
 
-    public function test_clientIp_empty_trusted_proxies_means_trust_none(): void
+    public function test_client_ip_empty_trusted_proxies_means_trust_none(): void
     {
         Network::setTrustedProxies([]);
 
@@ -172,7 +172,7 @@ class NetworkTest extends TestCase
         $this->assertSame('5.6.7.8', Network::clientIp());
     }
 
-    public function test_clientIp_wildcard_skips_the_trusted_proxy_entry_in_chain(): void
+    public function test_client_ip_wildcard_skips_the_trusted_proxy_entry_in_chain(): void
     {
         Network::setTrustedProxies(['*']);
 
@@ -187,7 +187,7 @@ class NetworkTest extends TestCase
         $this->assertSame('5.6.7.8', Network::clientIp());
     }
 
-    public function test_clientIp_does_not_skip_private_ips_in_forwarded_chain(): void
+    public function test_client_ip_does_not_skip_private_ips_in_forwarded_chain(): void
     {
         Network::setTrustedProxies(['10.0.0.2']);
 
@@ -202,7 +202,7 @@ class NetworkTest extends TestCase
         $this->assertSame('192.168.1.10', Network::clientIp());
     }
 
-    public function test_clientIp_falls_back_to_remote_addr_on_malformed_forwarded_entry(): void
+    public function test_client_ip_falls_back_to_remote_addr_on_malformed_forwarded_entry(): void
     {
         Network::setTrustedProxies(['10.0.0.2']);
 

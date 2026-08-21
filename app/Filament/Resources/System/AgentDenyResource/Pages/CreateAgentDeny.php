@@ -3,7 +3,7 @@
 namespace App\Filament\Resources\System\AgentDenyResource\Pages;
 
 use App\Filament\Resources\System\AgentDenyResource;
-use Filament\Pages\Actions;
+use App\Support\Cache;
 use Filament\Resources\Pages\CreateRecord;
 
 class CreateAgentDeny extends CreateRecord
@@ -12,6 +12,6 @@ class CreateAgentDeny extends CreateRecord
 
     public function afterCreate(): void
     {
-        \App\Support\Cache::clearAgentAllowDeny();
+        Cache::clearAgentAllowDeny();
     }
 }

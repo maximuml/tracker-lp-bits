@@ -14,7 +14,7 @@ class AddIconIdToCategoriesTable extends Migration
     public function up()
     {
         Schema::table('categories', function (Blueprint $table) {
-            if (!Schema::hasColumn('categories', 'icon_id')) {
+            if (! Schema::hasColumn('categories', 'icon_id')) {
                 $table->integer('icon_id')->default(0);
             }
         });

@@ -5,6 +5,7 @@ namespace App\Jobs;
 use App\Enums\SeedBoxRecord\IpAsnEnum;
 use App\Enums\SeedBoxRecord\IsAllowedEnum;
 use App\Repositories\SeedBoxRepository;
+use App\Support\Logger;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 
@@ -25,15 +26,15 @@ class UpdateIsSeedBoxFromUserRecordsCache implements ShouldQueue
      */
     public function handle(): void
     {
-        $rep = new SeedBoxRepository();
+        $rep = new SeedBoxRepository;
         foreach (IpAsnEnum::cases() as $field) {
             foreach (IsAllowedEnum::cases() as $isAllowed) {
                 $rep->updateUserCacheCronjob($isAllowed, $field);
-                \App\Support\Logger::writeWithContext((string) "SeedBoxRepository::updateUserCacheCronjob isAllowed: {$isAllowed->name}, field: {$field->name} success", (string) 'info', (bool) false);
+                Logger::writeWithContext((string) "SeedBoxRepository::updateUserCacheCronjob isAllowed: {$isAllowed->name}, field: {$field->name} success", (string) 'info', (bool) false);
                 $rep->updateAdminCacheCronjob($isAllowed, $field);
-                \App\Support\Logger::writeWithContext((string) "SeedBoxRepository::updateAdminCacheCronjob isAllowed: {$isAllowed->name}, field: {$field->name} success", (string) 'info', (bool) false);
+                Logger::writeWithContext((string) "SeedBoxRepository::updateAdminCacheCronjob isAllowed: {$isAllowed->name}, field: {$field->name} success", (string) 'info', (bool) false);
             }
         }
-        \App\Support\Logger::writeWithContext((string) "UpdateIsSeedBoxFromUserRecordsCache done!", (string) 'info', (bool) false);
+        Logger::writeWithContext((string) 'UpdateIsSeedBoxFromUserRecordsCache done!', (string) 'info', (bool) false);
     }
 }

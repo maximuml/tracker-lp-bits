@@ -5,11 +5,11 @@ namespace App\Policies;
 use App\Models\IpLog;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
-use Illuminate\Auth\Access\Response;
 
 class IpLogPolicy extends BasePolicy
 {
     use HandlesAuthorization;
+
     /**
      * Determine whether the user can view any models.
      */
@@ -71,6 +71,7 @@ class IpLogPolicy extends BasePolicy
         if ($user->class >= User::CLASS_SYSOP) {
             return true;
         }
+
         return false;
     }
 }

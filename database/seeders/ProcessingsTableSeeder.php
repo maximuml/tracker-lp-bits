@@ -7,7 +7,6 @@ use Illuminate\Support\Facades\DB;
 
 class ProcessingsTableSeeder extends Seeder
 {
-
     /**
      * Auto generated seed file
      *
@@ -15,25 +14,21 @@ class ProcessingsTableSeeder extends Seeder
      */
     public function run()
     {
-        
 
         DB::table('processings')->delete();
-        
-        DB::table('processings')->insert(array (
-            0 => 
-            array (
+
+        DB::table('processings')->insert([
+            0 => [
                 'id' => 1,
                 'name' => 'Raw',
                 'sort_index' => 0,
-            ),
-            1 => 
-            array (
+            ],
+            1 => [
                 'id' => 2,
                 'name' => 'Encode',
                 'sort_index' => 0,
-            ),
-        ));
-        
-        
+            ],
+        ]);
+
     }
 }

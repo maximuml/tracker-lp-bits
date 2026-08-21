@@ -12,7 +12,7 @@ final class HooksTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        SupportContext::setGlobal('hook', new Hook());
+        SupportContext::setGlobal('hook', new Hook);
     }
 
     protected function tearDown(): void
@@ -23,15 +23,15 @@ final class HooksTest extends TestCase
 
     public function test_add_filter_and_apply_filter_modify_value(): void
     {
-        Hooks::addFilter('test.filter', static fn ($value) => $value . ' modified', 10, 1);
+        Hooks::addFilter('test.filter', static fn ($value) => $value.' modified', 10, 1);
 
         $this->assertSame('input modified', Hooks::applyFilter('test.filter', 'input'));
     }
 
     public function test_priority_ordering(): void
     {
-        Hooks::addFilter('test.priority', static fn ($value) => $value . 'A', 20, 1);
-        Hooks::addFilter('test.priority', static fn ($value) => $value . 'B', 10, 1);
+        Hooks::addFilter('test.priority', static fn ($value) => $value.'A', 20, 1);
+        Hooks::addFilter('test.priority', static fn ($value) => $value.'B', 10, 1);
 
         $this->assertSame('startBA', Hooks::applyFilter('test.priority', 'start'));
     }

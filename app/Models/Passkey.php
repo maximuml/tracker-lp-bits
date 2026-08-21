@@ -10,7 +10,10 @@
  * @property string|null $created_at
  * @property string|null $updated_at
  */
+
 namespace App\Models;
+
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * @property int $id
@@ -23,19 +26,19 @@ namespace App\Models;
  */
 class Passkey extends NexusModel
 {
-    /** @var  string */
+    /** @var string */
     protected $table = 'user_passkeys';
 
-    /** @var  bool */
+    /** @var bool */
     public $timestamps = true;
 
-    /** @var  list<string> */
+    /** @var list<string> */
     protected $fillable = [
         'id', 'user_id', 'aaguid', 'credential_id', 'public_key', 'counter',
     ];
 
-    /** @return  \Illuminate\Database\Eloquent\Relations\BelongsTo<User, $this> */
-    public function user(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    /** @return  BelongsTo<User, $this> */
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
     }
@@ -46,6 +49,7 @@ class Passkey extends NexusModel
         if ($guid === '') {
             return '';
         }
+
         return sprintf(
             '%s-%s-%s-%s-%s',
             substr($guid, 0, 8),
@@ -55,5 +59,4 @@ class Passkey extends NexusModel
             substr($guid, 20, 12)
         );
     }
-
 }

@@ -2,7 +2,11 @@
 
 namespace App\Support;
 
+use App\Repositories\SearchBoxRepository;
 use App\Support\Cache\LegacyRedisCache;
+use App\Support\Config\SiteConfig;
+use Illuminate\Support\Arr;
+use Nexus\Nexus;
 
 /**
  * Legacy searchbox helper extracted from `include/functions.php`.
@@ -19,9 +23,6 @@ final class SearchBox
      *
      * Mirrors `get_searchbox_value($mode, $item)`.
      */
-    /**
-     * @param  \App\Support\Cache\LegacyRedisCache|null  $cache
-     */
     public static function value(?LegacyRedisCache $cache, int|string $mode, string $item): mixed
     {
         if (self::$rows === null) {
@@ -29,7 +30,7 @@ final class SearchBox
             if ($cached !== false && is_array($cached)) {
                 self::$rows = $cached;
             } else {
-                self::$rows = app(\App\Repositories\SearchBoxRepository::class)->getAllRows();
+                self::$rows = app(SearchBoxRepository::class)->getAllRows();
                 if ($cache !== null) {
                     $cache->cache_value('search_box_content', self::$rows, 100500);
                 }
@@ -44,7 +45,6 @@ final class SearchBox
      *
      * Mirrors `searchbox_item_list()`.
      *
-     * @param  \App\Support\Cache\LegacyRedisCache|null  $cache
      * @return array<int, array<string, mixed>>
      */
     public static function itemList(?LegacyRedisCache $cache, string $table, int|string $mode): array
@@ -60,9 +60,9 @@ final class SearchBox
         }
 
         if ($mode > 0) {
-            $ret = app(\App\Repositories\SearchBoxRepository::class)->getTaxonomyList($table, $mode);
+            $ret = app(SearchBoxRepository::class)->getTaxonomyList($table, $mode);
         } else {
-            $ret = app(\App\Repositories\SearchBoxRepository::class)->getTaxonomyList($table, 0);
+            $ret = app(SearchBoxRepository::class)->getTaxonomyList($table, 0);
         }
 
         if ($cache !== null) {
@@ -88,7 +88,7 @@ final class SearchBox
                 '<option value="%s"%s>%s</option>',
                 $item,
                 (int) $item === (int) $searchArea ? ' selected' : '',
-                \App\Support\Locale::trans("search.search_area_options.{$item}", [], null)
+                Locale::trans("search.search_area_options.{$item}", [], null)
             );
         }
         $result .= '</select>';
@@ -102,7 +102,6 @@ final class SearchBox
      * Mirrors `build_search_box_category_table()`.
      */
     /**
-     * @param  mixed  $cache
      * @param  array<string, mixed>  $options
      */
     public static function buildCategoryTable(
@@ -121,7 +120,7 @@ final class SearchBox
         $checkedValues = (string) $checkedValues;
 
         parse_str($checkedValues, $checkedValuesArr);
-        $searchBox = \App\Repositories\SearchBoxRepository::findForCategoryTable($mode);
+        $searchBox = SearchBoxRepository::findForCategoryTable($mode);
         $lang = Locale::folderFromCookie(SupportContext::getCookieValue('c_lang_folder'));
         $withTaxonomies = [];
 
@@ -129,14 +128,14 @@ final class SearchBox
             if (! empty($searchBox->extra[\App\Models\SearchBox::EXTRA_TAXONOMY_LABELS])) {
                 foreach ($searchBox->extra[\App\Models\SearchBox::EXTRA_TAXONOMY_LABELS] as $taxonomyLabelInfo) {
                     $torrentField = $taxonomyLabelInfo['torrent_field'];
-                    $showField = 'show' . $torrentField;
+                    $showField = 'show'.$torrentField;
                     if ($searchBox->{$showField}) {
                         $withTaxonomies[$torrentField] = \App\Models\SearchBox::$taxonomies[$torrentField]['table'];
                     }
                 }
             } else {
                 foreach (\App\Models\SearchBox::$taxonomies as $torrentField => $taxonomyTableModel) {
-                    $showField = 'show' . $torrentField;
+                    $showField = 'show'.$torrentField;
                     if ($searchBox->{$showField}) {
                         $withTaxonomies[$torrentField] = $taxonomyTableModel['table'];
                     }
@@ -149,9 +148,9 @@ final class SearchBox
             $html .= sprintf('<caption><font class="big">%s</font></caption>', $searchBox->section_name[$lang] ?? '');
         }
 
-        $html .= sprintf('<tr><td class="embedded" align="left">%s</td></tr>', \App\Support\Locale::trans('label.search_box.category', [], null));
+        $html .= sprintf('<tr><td class="embedded" align="left">%s</td></tr>', Locale::trans('label.search_box.category', [], null));
 
-        $categoryCollection = \App\Repositories\SearchBoxRepository::getCategoriesForTable($searchBox, ! empty($options['select_unselect']));
+        $categoryCollection = SearchBoxRepository::getCategoriesForTable($searchBox, ! empty($options['select_unselect']));
         $categoryChunks = $categoryCollection->chunk($searchBox->catsperrow);
         $checkPrefix = 'cat';
 
@@ -199,11 +198,11 @@ TDCONTENT;
                     $tdContent = sprintf(
                         "<input name=\"%s_check\" value=\"%s\" class=\"btn medium\" type=\"button\" onclick=\"javascript:SetChecked('%s','%s_check','%s','%s',-1,10)\">",
                         $checkPrefix,
-                        \App\Support\Locale::trans('nexus.select_all', [], null),
+                        Locale::trans('nexus.select_all', [], null),
                         $checkPrefix,
                         $checkPrefix,
-                        \App\Support\Locale::trans('nexus.select_all', [], null),
-                        \App\Support\Locale::trans('nexus.unselect_all', [], null)
+                        Locale::trans('nexus.select_all', [], null),
+                        Locale::trans('nexus.unselect_all', [], null)
                     );
                 }
 
@@ -221,12 +220,12 @@ TD;
             $namePrefix = $taxonomyNameLength > 0 ? substr($torrentField, 0, $taxonomyNameLength) : $torrentField;
             $html .= sprintf('<tr><td class="embedded" align="left">%s</td></tr>', $searchBox->getTaxonomyLabel($torrentField));
 
-            $taxonomyCollection = app(\App\Repositories\SearchBoxRepository::class)->getTaxonomyRows($tableName, $mode);
+            $taxonomyCollection = app(SearchBoxRepository::class)->getTaxonomyRows($tableName, $mode);
 
             $modelName = \App\Models\SearchBox::$taxonomies[$torrentField]['model'];
             $checkPrefix = $torrentField;
             if (! empty($options['select_unselect'])) {
-                $selectAll = new \stdClass();
+                $selectAll = new \stdClass;
                 $selectAll->mode = -1;
                 $taxonomyCollection->push($selectAll);
             }
@@ -266,11 +265,11 @@ TDCONTENT;
                         $tdContent = sprintf(
                             "<input name=\"%s_check\" value=\"%s\" class=\"btn medium\" type=\"button\" onclick=\"javascript:SetChecked('%s','%s_check','%s','%s',-1,10)\">",
                             $checkPrefix,
-                            \App\Support\Locale::trans('nexus.select_all', [], null),
+                            Locale::trans('nexus.select_all', [], null),
                             $checkPrefix,
                             $checkPrefix,
-                            \App\Support\Locale::trans('nexus.select_all', [], null),
-                            \App\Support\Locale::trans('nexus.unselect_all', [], null)
+                            Locale::trans('nexus.select_all', [], null),
+                            Locale::trans('nexus.unselect_all', [], null)
                         );
                     }
 
@@ -300,7 +299,7 @@ TD;
      */
     public static function requiredIds(): array
     {
-        $setting = \App\Support\Config\SiteConfig::current()->main->toArray();
+        $setting = SiteConfig::current()->main->toArray();
         $maps = [
             'torrents' => [$setting['browsecat']],
             'usercp' => [$setting['browsecat']],
@@ -310,9 +309,9 @@ TD;
             'details' => [$setting['browsecat']],
             'search' => [$setting['browsecat']],
         ];
-        $script = \Nexus\Nexus::instance()->getScript();
+        $script = Nexus::instance()->getScript();
 
-        return array_values(array_map('intval', \Illuminate\Support\Arr::wrap($maps[$script] ?? [])));
+        return array_values(array_map('intval', Arr::wrap($maps[$script] ?? [])));
     }
 
     /**
@@ -322,7 +321,7 @@ TD;
      */
     public static function valueWithContext(int|string $mode, string $item = 'showsubcat'): mixed
     {
-        return self::value(\App\Support\SupportContext::getCache(), $mode, $item);
+        return self::value(SupportContext::getCache(), $mode, $item);
     }
 
     /**
@@ -334,7 +333,7 @@ TD;
      */
     public static function itemListWithContext(string $table, int|string $mode): array
     {
-        return self::itemList(\App\Support\SupportContext::getCache(), $table, $mode);
+        return self::itemList(SupportContext::getCache(), $table, $mode);
     }
 
     /**
@@ -355,7 +354,7 @@ TD;
         array $options = [],
     ): string {
         return self::buildCategoryTable(
-            \App\Support\SupportContext::getCache(),
+            SupportContext::getCache(),
             $mode,
             $checkboxValue,
             $categoryHrefPrefix,

@@ -54,6 +54,7 @@ final class SmtpConfig extends Config
     public function encryption(): ?string
     {
         $value = $this->data['encryption'] ?? null;
+
         return $value !== null ? (string) $value : null;
     }
 
@@ -61,5 +62,4 @@ final class SmtpConfig extends Config
     {
         return $this->string('smtpname', $default);
     }
-
 }

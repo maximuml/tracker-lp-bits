@@ -6,8 +6,8 @@ use App\Models\Forum;
 use App\Models\Message;
 use App\Models\Torrent;
 use App\Models\User;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
@@ -128,7 +128,7 @@ class UserSocialTest extends TestCase
         $target = User::factory()->create();
 
         $this->withNexusCookie($viewer)
-            ->get('/userdetails?id=' . $target->id)
+            ->get('/userdetails?id='.$target->id)
             ->assertStatus(200)
             ->assertSee($target->username);
     }

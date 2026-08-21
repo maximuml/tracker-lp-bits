@@ -11,8 +11,6 @@ trait OptionsTrait
     private static array $yesOrNo = ['yes' => 'yes', 'no' => 'no'];
 
     /**
-     * @param int|string $enableValue
-     * @param int|string $disableValue
      * @return array<int|string, string>
      */
     private static function getEnableDisableOptions(int|string $enableValue = 0, int|string $disableValue = 1): array
@@ -24,8 +22,6 @@ trait OptionsTrait
     }
 
     /**
-     * @param int|string $yesValue
-     * @param int|string $noValue
      * @return array<int|string, string>
      */
     private static function getYesNoOptions(int|string $yesValue = 1, int|string $noValue = 0): array

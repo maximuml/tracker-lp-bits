@@ -3,8 +3,9 @@
 namespace App\Console\Commands;
 
 use App\Repositories\PluginRepository;
+use App\Support\Logger;
 use Illuminate\Console\Command;
-use Nexus\Plugin\BasePlugin;
+use Nexus\Nexus;
 
 class PluginCronjob extends Command
 {
@@ -24,18 +25,20 @@ class PluginCronjob extends Command
 
     /**
      * Execute the console command.
-     * @return  int
+     *
+     * @return int
      */
     public function handle()
     {
         $action = $this->option('action');
         $id = $this->option('id');
         $force = $this->option('force');
-        $pluginRep = new PluginRepository();
+        $pluginRep = new PluginRepository;
         $pluginRep->cronjob($action, $id, $force);
-        $log = sprintf("[%s], action: %s, id: %s, force: %s run done !", \Nexus\Nexus::instance()->getRequestId(), $action, $id, $force);
+        $log = sprintf('[%s], action: %s, id: %s, force: %s run done !', Nexus::instance()->getRequestId(), $action, $id, $force);
         $this->info($log);
-        \App\Support\Logger::writeWithContext((string) $log, (string) 'info', (bool) false);
+        Logger::writeWithContext((string) $log, (string) 'info', (bool) false);
+
         return 0;
     }
 }

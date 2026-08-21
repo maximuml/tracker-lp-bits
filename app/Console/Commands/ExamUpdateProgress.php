@@ -2,9 +2,9 @@
 
 namespace App\Console\Commands;
 
-use App\Models\ExamUser;
 use App\Repositories\ExamRepository;
 use Illuminate\Console\Command;
+use Nexus\Nexus;
 
 class ExamUpdateProgress extends Command
 {
@@ -24,7 +24,8 @@ class ExamUpdateProgress extends Command
 
     /**
      * Create a new command instance.
-     * @return  void
+     *
+     * @return void
      */
     public function __construct()
     {
@@ -33,26 +34,29 @@ class ExamUpdateProgress extends Command
 
     /**
      * Execute the console command.
-     * @return  int
+     *
+     * @return int
      */
     public function handle()
     {
         $uid = $this->option('uid');
         $bulk = $this->option('bulk');
-        $examRep = new ExamRepository();
+        $examRep = new ExamRepository;
         $log = "uid: $uid, bulk: $bulk";
         $this->info($log);
         if (is_numeric($uid) && $uid) {
-            $log .= ", do updateProgress";
+            $log .= ', do updateProgress';
             $result = $examRep->updateProgress($uid);
         } elseif ($bulk) {
             $result = $examRep->updateProgressBulk();
-            $log .= ", do updateProgressBulk";
+            $log .= ', do updateProgressBulk';
         } else {
-            $this->error("specific uid or bulk.");
+            $this->error('specific uid or bulk.');
+
             return 0;
         }
-        $this->info(\Nexus\Nexus::instance()->getRequestId() . ", $log, result: " . var_export($result, true));
+        $this->info(Nexus::instance()->getRequestId().", $log, result: ".var_export($result, true));
+
         return 0;
     }
 }

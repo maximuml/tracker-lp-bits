@@ -2,6 +2,7 @@
 
 namespace App\Support;
 
+use App\Repositories\TorrentRepository;
 
 /**
  * Legacy torrent-bookmark helpers extracted from `include/functions.php`.
@@ -15,13 +16,12 @@ final class TorrentBookmark
      *
      * Mirrors `return_torrent_bookmark_array()`.
      *
-     * @param  mixed  $cache
      * @return array<int, int>
      */
     public static function bookmarkArray(mixed $cache, int|string $userId): array
     {
         $userId = (int) $userId;
-        $cacheKey = 'user_' . $userId . '_bookmark_array';
+        $cacheKey = 'user_'.$userId.'_bookmark_array';
 
         if (is_object($cache) && method_exists($cache, 'get_value')) {
             $ret = $cache->get_value($cacheKey);
@@ -30,7 +30,7 @@ final class TorrentBookmark
             }
         }
 
-        $ret = app(\App\Repositories\TorrentRepository::class)->getBookmarkTorrentIds($userId);
+        $ret = app(TorrentRepository::class)->getBookmarkTorrentIds($userId);
 
         if (is_object($cache) && method_exists($cache, 'cache_value')) {
             $cache->cache_value($cacheKey, $ret, 132800);
@@ -45,7 +45,6 @@ final class TorrentBookmark
      * Mirrors `get_torrent_bookmark_state()`.
      */
     /**
-     * @param  mixed  $cache
      * @param  array<string, string>  $labels
      */
     public static function stateMarkup(mixed $cache, int|string $userId, int|string $torrentId, bool $text = false, array $labels = []): string
@@ -59,12 +58,12 @@ final class TorrentBookmark
         if (! $bookmarked) {
             return $text
                 ? ($labels['title_bookmark_torrent'] ?? '')
-                : '<img class="delbookmark" src="pic/trans.gif" alt="Unbookmarked" title="' . ($labels['title_bookmark_torrent'] ?? '') . '" />';
+                : '<img class="delbookmark" src="pic/trans.gif" alt="Unbookmarked" title="'.($labels['title_bookmark_torrent'] ?? '').'" />';
         }
 
         return $text
             ? ($labels['title_delbookmark_torrent'] ?? '')
-            : '<img class="bookmark" src="pic/trans.gif" alt="Bookmarked" title="' . ($labels['title_delbookmark_torrent'] ?? '') . '" />';
+            : '<img class="bookmark" src="pic/trans.gif" alt="Bookmarked" title="'.($labels['title_delbookmark_torrent'] ?? '').'" />';
     }
 
     /**
@@ -73,8 +72,8 @@ final class TorrentBookmark
      */
     public static function stateMarkupWithContext(int|string $userId, int|string $torrentId, bool $text = false): string
     {
-        $cache = \App\Support\SupportContext::getCache();
-        $lang = \App\Support\SupportContext::getLangFunctions();
+        $cache = SupportContext::getCache();
+        $lang = SupportContext::getLangFunctions();
 
         return self::stateMarkup($cache, $userId, $torrentId, $text, [
             'title_bookmark_torrent' => $lang['title_bookmark_torrent'] ?? '',

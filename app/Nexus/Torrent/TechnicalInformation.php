@@ -2,6 +2,8 @@
 
 namespace Nexus\Torrent;
 
+use App\Support\Format;
+use App\Support\Locale;
 use App\Support\SupportContext;
 
 class TechnicalInformation
@@ -20,7 +22,7 @@ class TechnicalInformation
     {
         $arr = preg_split('/[\r\n]+/', $mediaInfo);
         $result = [];
-        $parentKey = "";
+        $parentKey = '';
         foreach ($arr as $key => $value) {
             $value = $this->trim($value);
             if (empty($value)) {
@@ -37,6 +39,7 @@ class TechnicalInformation
                 $result[$parentKey][$rowKeyValue[0]] = $rowKeyValue[1];
             }
         }
+
         return $result;
 
     }
@@ -58,29 +61,33 @@ class TechnicalInformation
         $ratio = $this->mediaInfoArr['Video']['Display aspect ratio'] ?? '';
         $result = '';
         if ($width && $height) {
-            $result .= $width . ' x ' . $height;
+            $result .= $width.' x '.$height;
         }
         if ($ratio) {
             $result .= "($ratio)";
         }
+
         return $result;
     }
 
     public function getBitrate()
     {
         $result = $this->mediaInfoArr['Video']['Bit rate'] ?? '';
+
         return $result;
     }
 
     public function getFramerate()
     {
         $result = $this->mediaInfoArr['Video']['Frame rate'] ?? '';
+
         return $result;
     }
 
     public function getProfile()
     {
         $result = $this->mediaInfoArr['Video']['Format profile'] ?? '';
+
         return $result;
     }
 
@@ -91,6 +98,7 @@ class TechnicalInformation
                 return $value;
             }
         }
+
         return '';
     }
 
@@ -103,27 +111,28 @@ class TechnicalInformation
                 continue;
             }
             $audioInfoArr = [];
-            if (!empty($values['Language'])) {
+            if (! empty($values['Language'])) {
                 $audioInfoArr[] = $values['Language'];
             }
-            if (!empty($values['Title'])) {
+            if (! empty($values['Title'])) {
                 $audioInfoArr[] = $values['Title'];
             }
-            if (!empty($values['Format'])) {
+            if (! empty($values['Format'])) {
                 $audioInfoArr[] = $values['Format'];
             }
-            if (!empty($values['Channel(s)'])) {
+            if (! empty($values['Channel(s)'])) {
                 $audioInfoArr[] = $values['Channel(s)'];
             }
-            if (!empty($values['Bit rate'])) {
-                $audioInfoArr[]= "@" . $values['Bit rate'];
+            if (! empty($values['Bit rate'])) {
+                $audioInfoArr[] = '@'.$values['Bit rate'];
             }
-            if (!empty($audioInfoArr)) {
+            if (! empty($audioInfoArr)) {
                 // 使用多语言支持的键名
-                $result[\App\Support\Locale::trans('torrent.technicalinfo_audio', [], null) . $audioIndex] = implode(" ", $audioInfoArr);
+                $result[Locale::trans('torrent.technicalinfo_audio', [], null).$audioIndex] = implode(' ', $audioInfoArr);
                 $audioIndex++;
             }
         }
+
         return $result;
     }
 
@@ -136,21 +145,22 @@ class TechnicalInformation
                 continue;
             }
             $subtitlesInfoArr = [];
-            if (!empty($values['Language'])) {
+            if (! empty($values['Language'])) {
                 $subtitlesInfoArr[] = $values['Language'];
             }
-            if (!empty($values['Title'])) {
+            if (! empty($values['Title'])) {
                 $subtitlesInfoArr[] = $values['Title'];
             }
-            if (!empty($values['Format'])) {
+            if (! empty($values['Format'])) {
                 $subtitlesInfoArr[] = $values['Format'];
             }
-            if (!empty($subtitlesInfoArr)) {
+            if (! empty($subtitlesInfoArr)) {
                 // 使用多语言支持的键名
-                $result[\App\Support\Locale::trans('torrent.technicalinfo_subtitles', [], null) . $subtitleIndex] = implode(" ", $subtitlesInfoArr);
+                $result[Locale::trans('torrent.technicalinfo_subtitles', [], null).$subtitleIndex] = implode(' ', $subtitlesInfoArr);
                 $subtitleIndex++;
             }
         }
+
         return $result;
     }
 
@@ -176,12 +186,13 @@ class TechnicalInformation
             return '';
         }
         $general = $this->getGeneralInfo();
-        $videos  = $this->getVideoInfoDetailed();
-        $audios  = $this->getAudioTracks();
+        $videos = $this->getVideoInfoDetailed();
+        $audios = $this->getAudioTracks();
         if (empty($general) && empty($videos) && empty($audios)) {
             // Parser couldn't pull anything structured — fall back to raw spoiler only.
-            $rawmediaInfo = sprintf('[spoiler=%s][raw]<pre>%s</pre>[/raw][/spoiler]', \App\Support\Locale::trans('torrent.show_hide_media_info', [], null), $this->mediaInfo);
-            return sprintf('<div class="nexus-media-info-raw"><pre>%s</pre></div>', \App\Support\Format::formatComment($rawmediaInfo, false));
+            $rawmediaInfo = sprintf('[spoiler=%s][raw]<pre>%s</pre>[/raw][/spoiler]', Locale::trans('torrent.show_hide_media_info', [], null), $this->mediaInfo);
+
+            return sprintf('<div class="nexus-media-info-raw"><pre>%s</pre></div>', Format::formatComment($rawmediaInfo, false));
         }
 
         $css = '<style>
@@ -202,16 +213,16 @@ class TechnicalInformation
 @media (max-width: 760px) { .nti-grid { grid-template-columns: 1fr; } }
 </style>';
 
-        $html  = $css . '<div class="nti-wrap">';
+        $html = $css.'<div class="nti-wrap">';
         $html .= '<div class="nti-grid">';
 
         // General column
-        if (!empty($general)) {
+        if (! empty($general)) {
             $html .= '<div class="nti-col">';
-            $html .= '<h4>' . htmlspecialchars(\App\Support\Locale::trans('torrent.technicalinfo_section_general', [], null)) . '</h4>';
+            $html .= '<h4>'.htmlspecialchars(Locale::trans('torrent.technicalinfo_section_general', [], null)).'</h4>';
             $html .= $this->renderKvList($general['main'] ?? []);
-            if (!empty($general['extra'])) {
-                $html .= $this->renderColumnSpoiler(\App\Support\Locale::trans('torrent.technicalinfo_more_general', [], null), $general['extra']);
+            if (! empty($general['extra'])) {
+                $html .= $this->renderColumnSpoiler(Locale::trans('torrent.technicalinfo_more_general', [], null), $general['extra']);
             }
             $html .= '</div>';
         } else {
@@ -219,13 +230,13 @@ class TechnicalInformation
         }
 
         // Video column
-        if (!empty($videos)) {
+        if (! empty($videos)) {
             $html .= '<div class="nti-col">';
-            $html .= '<h4>' . htmlspecialchars(\App\Support\Locale::trans('torrent.technicalinfo_section_video', [], null)) . '</h4>';
+            $html .= '<h4>'.htmlspecialchars(Locale::trans('torrent.technicalinfo_section_video', [], null)).'</h4>';
             $html .= $this->renderKvList($videos['main'] ?? []);
-            if (!empty($videos['encoding_settings'])) {
-                $html .= $this->renderColumnSpoiler(\App\Support\Locale::trans('torrent.technicalinfo_encoding_settings', [], null), [
-                    \App\Support\Locale::trans('torrent.technicalinfo_encoding_settings', [], null) => $videos['encoding_settings'],
+            if (! empty($videos['encoding_settings'])) {
+                $html .= $this->renderColumnSpoiler(Locale::trans('torrent.technicalinfo_encoding_settings', [], null), [
+                    Locale::trans('torrent.technicalinfo_encoding_settings', [], null) => $videos['encoding_settings'],
                 ]);
             }
             $html .= '</div>';
@@ -234,24 +245,24 @@ class TechnicalInformation
         }
 
         // Audio column
-        if (!empty($audios)) {
+        if (! empty($audios)) {
             $html .= '<div class="nti-col">';
-            $html .= '<h4>' . htmlspecialchars(\App\Support\Locale::trans('torrent.technicalinfo_section_audio', [], null)) . '</h4>';
+            $html .= '<h4>'.htmlspecialchars(Locale::trans('torrent.technicalinfo_section_audio', [], null)).'</h4>';
             $maxVisible = 3;
             $visible = array_slice($audios, 0, $maxVisible);
             $hidden = array_slice($audios, $maxVisible);
             foreach ($visible as $track) {
                 $html .= $this->renderAudioTrack($track);
             }
-            if (!empty($hidden)) {
+            if (! empty($hidden)) {
                 $hiddenHtml = '';
                 foreach ($hidden as $track) {
                     $hiddenHtml .= $this->renderAudioTrack($track);
                 }
-                $title = \App\Support\Locale::trans('torrent.collapse_show_more_audio', [], null);
+                $title = Locale::trans('torrent.collapse_show_more_audio', [], null);
                 $html .= sprintf(
                     '<div class="nti-more">%s</div>',
-                    \App\Support\Format::formatComment(sprintf('[spoiler=%s][raw]%s[/raw][/spoiler]', $title, $hiddenHtml), false)
+                    Format::formatComment(sprintf('[spoiler=%s][raw]%s[/raw][/spoiler]', $title, $hiddenHtml), false)
                 );
             }
             $html .= '</div>';
@@ -262,10 +273,11 @@ class TechnicalInformation
         $html .= '</div>'; // .nti-grid
 
         // Raw spoiler at the bottom
-        $rawMediaInfo = sprintf('[spoiler=%s][raw]<pre>%s</pre>[/raw][/spoiler]', \App\Support\Locale::trans('torrent.show_hide_media_info', [], null), $this->mediaInfo);
-        $html .= sprintf('<div class="nti-raw nexus-media-info-raw">%s</div>', \App\Support\Format::formatComment($rawMediaInfo, false));
+        $rawMediaInfo = sprintf('[spoiler=%s][raw]<pre>%s</pre>[/raw][/spoiler]', Locale::trans('torrent.show_hide_media_info', [], null), $this->mediaInfo);
+        $html .= sprintf('<div class="nti-raw nexus-media-info-raw">%s</div>', Format::formatComment($rawMediaInfo, false));
 
         $html .= '</div>'; // .nti-wrap
+
         return $html;
     }
 
@@ -280,15 +292,15 @@ class TechnicalInformation
             return [];
         }
         $main = [
-            \App\Support\Locale::trans('torrent.technicalinfo_container', [], null)        => $g['Format'] ?? '',
-            \App\Support\Locale::trans('torrent.technicalinfo_file_size', [], null)        => $g['File size'] ?? '',
-            \App\Support\Locale::trans('torrent.technicalinfo_overall_bit_rate', [], null) => $g['Overall bit rate'] ?? ($g['Overall bit rate mode'] ?? ''),
-            \App\Support\Locale::trans('torrent.technicalinfo_duration', [], null)         => $g['Duration'] ?? '',
-            \App\Support\Locale::trans('torrent.technicalinfo_encoded_date', [], null)     => $g['Encoded date'] ?? '',
-            \App\Support\Locale::trans('torrent.technicalinfo_writing_app', [], null)      => $g['Writing application'] ?? ($g['Encoded application'] ?? ''),
-            \App\Support\Locale::trans('torrent.technicalinfo_writing_lib', [], null)      => $g['Writing library'] ?? '',
+            Locale::trans('torrent.technicalinfo_container', [], null) => $g['Format'] ?? '',
+            Locale::trans('torrent.technicalinfo_file_size', [], null) => $g['File size'] ?? '',
+            Locale::trans('torrent.technicalinfo_overall_bit_rate', [], null) => $g['Overall bit rate'] ?? ($g['Overall bit rate mode'] ?? ''),
+            Locale::trans('torrent.technicalinfo_duration', [], null) => $g['Duration'] ?? '',
+            Locale::trans('torrent.technicalinfo_encoded_date', [], null) => $g['Encoded date'] ?? '',
+            Locale::trans('torrent.technicalinfo_writing_app', [], null) => $g['Writing application'] ?? ($g['Encoded application'] ?? ''),
+            Locale::trans('torrent.technicalinfo_writing_lib', [], null) => $g['Writing library'] ?? '',
         ];
-        $main = array_filter($main, fn($v) => $v !== '' && $v !== null);
+        $main = array_filter($main, fn ($v) => $v !== '' && $v !== null);
 
         // Anything else from [General] goes to the "extra" spoiler so we don't drop info.
         $shownKeys = ['Format', 'File size', 'Overall bit rate', 'Overall bit rate mode',
@@ -304,6 +316,7 @@ class TechnicalInformation
             }
             $extra[$k] = $v;
         }
+
         return ['main' => $main, 'extra' => $extra];
     }
 
@@ -317,9 +330,9 @@ class TechnicalInformation
             return [];
         }
         $format = $v['Format'] ?? '';
-        if (!empty($v['Format profile']) && $format !== '') {
-            $format .= ' / ' . $v['Format profile'];
-        } elseif (empty($format) && !empty($v['Format profile'])) {
+        if (! empty($v['Format profile']) && $format !== '') {
+            $format .= ' / '.$v['Format profile'];
+        } elseif (empty($format) && ! empty($v['Format profile'])) {
             $format = $v['Format profile'];
         }
         $color = $this->joinNonEmpty([
@@ -327,18 +340,19 @@ class TechnicalInformation
             $v['Transfer characteristics'] ?? '',
         ], ' / ');
         $main = [
-            \App\Support\Locale::trans('torrent.technicalinfo_format', [], null)      => $format,
-            \App\Support\Locale::trans('torrent.technicalinfo_resolution', [], null)  => $this->getResolution(),
-            \App\Support\Locale::trans('torrent.technicalinfo_bit_rate', [], null)    => $v['Bit rate'] ?? ($v['Nominal bit rate'] ?? ''),
-            \App\Support\Locale::trans('torrent.technicalinfo_frame_rate', [], null)  => $v['Frame rate'] ?? '',
-            \App\Support\Locale::trans('torrent.technicalinfo_bit_depth', [], null)   => $v['Bit depth'] ?? '',
-            \App\Support\Locale::trans('torrent.technicalinfo_color_space', [], null) => $color,
-            'HDR'                                            => $v['HDR format'] ?? '',
-            \App\Support\Locale::trans('torrent.technicalinfo_scan_type', [], null)   => $v['Scan type'] ?? '',
-            \App\Support\Locale::trans('torrent.technicalinfo_ref_frames', [], null)  => $this->getRefFrame(),
-            \App\Support\Locale::trans('torrent.technicalinfo_encoder', [], null)     => $v['Encoded library'] ?? ($v['Writing library'] ?? ''),
+            Locale::trans('torrent.technicalinfo_format', [], null) => $format,
+            Locale::trans('torrent.technicalinfo_resolution', [], null) => $this->getResolution(),
+            Locale::trans('torrent.technicalinfo_bit_rate', [], null) => $v['Bit rate'] ?? ($v['Nominal bit rate'] ?? ''),
+            Locale::trans('torrent.technicalinfo_frame_rate', [], null) => $v['Frame rate'] ?? '',
+            Locale::trans('torrent.technicalinfo_bit_depth', [], null) => $v['Bit depth'] ?? '',
+            Locale::trans('torrent.technicalinfo_color_space', [], null) => $color,
+            'HDR' => $v['HDR format'] ?? '',
+            Locale::trans('torrent.technicalinfo_scan_type', [], null) => $v['Scan type'] ?? '',
+            Locale::trans('torrent.technicalinfo_ref_frames', [], null) => $this->getRefFrame(),
+            Locale::trans('torrent.technicalinfo_encoder', [], null) => $v['Encoded library'] ?? ($v['Writing library'] ?? ''),
         ];
-        $main = array_filter($main, fn($v) => $v !== '' && $v !== null);
+        $main = array_filter($main, fn ($v) => $v !== '' && $v !== null);
+
         return [
             'main' => $main,
             'encoding_settings' => isset($v['Encoding settings']) && $v['Encoding settings'] !== ''
@@ -367,50 +381,52 @@ class TechnicalInformation
             $format = $values['Format'] ?? '';
             $commercial = $values['Commercial name'] ?? '';
             if ($commercial !== '' && $commercial !== $format) {
-                $format = $format !== '' ? $format . ' (' . $commercial . ')' : $commercial;
+                $format = $format !== '' ? $format.' ('.$commercial.')' : $commercial;
             }
             $channels = $values['Channel(s)'] ?? '';
             $layout = $values['Channel layout'] ?? '';
             if ($layout !== '' && $channels !== '') {
-                $channels .= ' (' . $layout . ')';
+                $channels .= ' ('.$layout.')';
             } elseif ($layout !== '' && $channels === '') {
                 $channels = $layout;
             }
             $bitrate = $values['Bit rate'] ?? '';
             $bitrateMode = $values['Bit rate mode'] ?? '';
             if ($bitrate !== '' && $bitrateMode !== '') {
-                $bitrate .= ' (' . $bitrateMode . ')';
+                $bitrate .= ' ('.$bitrateMode.')';
             }
             $rows = [
-                \App\Support\Locale::trans('torrent.technicalinfo_format', [], null)      => $format,
-                \App\Support\Locale::trans('torrent.technicalinfo_channels', [], null)    => $channels,
-                \App\Support\Locale::trans('torrent.technicalinfo_sample_rate', [], null) => $values['Sampling rate'] ?? '',
-                \App\Support\Locale::trans('torrent.technicalinfo_bit_rate', [], null)    => $bitrate,
-                \App\Support\Locale::trans('torrent.technicalinfo_bit_depth', [], null)   => $values['Bit depth'] ?? '',
-                \App\Support\Locale::trans('torrent.technicalinfo_compression', [], null) => $values['Compression mode'] ?? '',
+                Locale::trans('torrent.technicalinfo_format', [], null) => $format,
+                Locale::trans('torrent.technicalinfo_channels', [], null) => $channels,
+                Locale::trans('torrent.technicalinfo_sample_rate', [], null) => $values['Sampling rate'] ?? '',
+                Locale::trans('torrent.technicalinfo_bit_rate', [], null) => $bitrate,
+                Locale::trans('torrent.technicalinfo_bit_depth', [], null) => $values['Bit depth'] ?? '',
+                Locale::trans('torrent.technicalinfo_compression', [], null) => $values['Compression mode'] ?? '',
             ];
-            $rows = array_filter($rows, fn($v) => $v !== '' && $v !== null);
+            $rows = array_filter($rows, fn ($v) => $v !== '' && $v !== null);
             if (empty($rows)) {
                 continue;
             }
             $tracks[] = [
-                'index'    => $idx,
+                'index' => $idx,
                 'language' => $values['Language'] ?? '',
-                'title'    => $values['Title'] ?? '',
-                'rows'     => $rows,
-                'badges'   => [
+                'title' => $values['Title'] ?? '',
+                'rows' => $rows,
+                'badges' => [
                     'Default' => isset($values['Default']) && strcasecmp($values['Default'], 'yes') === 0,
-                    'Forced'  => isset($values['Forced']) && strcasecmp($values['Forced'], 'yes') === 0,
+                    'Forced' => isset($values['Forced']) && strcasecmp($values['Forced'], 'yes') === 0,
                 ],
             ];
             $idx++;
         }
+
         return $tracks;
     }
 
     private function joinNonEmpty(array $parts, string $glue = ' / '): string
     {
-        $parts = array_filter(array_map([$this, 'trim'], $parts), fn($v) => $v !== '');
+        $parts = array_filter(array_map([$this, 'trim'], $parts), fn ($v) => $v !== '');
+
         return implode($glue, $parts);
     }
 
@@ -421,36 +437,38 @@ class TechnicalInformation
         }
         $html = '<div class="nti-kv">';
         foreach ($items as $k => $v) {
-            $html .= '<div class="nti-row"><span class="nti-k">' . htmlspecialchars((string)$k) . '</span><span class="nti-v">' . htmlspecialchars((string)$v) . '</span></div>';
+            $html .= '<div class="nti-row"><span class="nti-k">'.htmlspecialchars((string) $k).'</span><span class="nti-v">'.htmlspecialchars((string) $v).'</span></div>';
         }
         $html .= '</div>';
+
         return $html;
     }
 
     private function renderAudioTrack(array $track): string
     {
-        $head = '#' . (int)$track['index'];
+        $head = '#'.(int) $track['index'];
         $headParts = [];
-        if (!empty($track['language'])) {
+        if (! empty($track['language'])) {
             $headParts[] = $track['language'];
         }
-        if (!empty($track['title']) && $track['title'] !== ($track['language'] ?? '')) {
+        if (! empty($track['title']) && $track['title'] !== ($track['language'] ?? '')) {
             $headParts[] = $track['title'];
         }
-        if (!empty($headParts)) {
-            $head .= ' · ' . implode(' · ', $headParts);
+        if (! empty($headParts)) {
+            $head .= ' · '.implode(' · ', $headParts);
         }
         $badges = '';
-        if (!empty($track['badges']['Default'])) {
-            $badges .= '<span class="nti-badge">' . htmlspecialchars(\App\Support\Locale::trans('torrent.technicalinfo_default', [], null)) . '</span>';
+        if (! empty($track['badges']['Default'])) {
+            $badges .= '<span class="nti-badge">'.htmlspecialchars(Locale::trans('torrent.technicalinfo_default', [], null)).'</span>';
         }
-        if (!empty($track['badges']['Forced'])) {
-            $badges .= '<span class="nti-badge">' . htmlspecialchars(\App\Support\Locale::trans('torrent.technicalinfo_forced', [], null)) . '</span>';
+        if (! empty($track['badges']['Forced'])) {
+            $badges .= '<span class="nti-badge">'.htmlspecialchars(Locale::trans('torrent.technicalinfo_forced', [], null)).'</span>';
         }
-        $html  = '<div class="nti-track">';
-        $html .= '<div class="nti-track-head">' . htmlspecialchars($head) . $badges . '</div>';
+        $html = '<div class="nti-track">';
+        $html .= '<div class="nti-track-head">'.htmlspecialchars($head).$badges.'</div>';
         $html .= $this->renderKvList($track['rows']);
         $html .= '</div>';
+
         return $html;
     }
 
@@ -461,53 +479,55 @@ class TechnicalInformation
         }
         $body = '';
         foreach ($items as $k => $v) {
-            $body .= '<b>' . htmlspecialchars((string)$k) . ': </b>' . htmlspecialchars((string)$v) . '<br>';
+            $body .= '<b>'.htmlspecialchars((string) $k).': </b>'.htmlspecialchars((string) $v).'<br>';
         }
         $bbcode = sprintf('[spoiler=%s][raw]%s[/raw][/spoiler]', $title, $body);
-        return sprintf('<div class="nti-more">%s</div>', \App\Support\Format::formatComment($bbcode, false));
+
+        return sprintf('<div class="nti-more">%s</div>', Format::formatComment($bbcode, false));
     }
 
     public function getSummaryInfo(): array
     {
         $videos = [
-            \App\Support\Locale::trans('torrent.technicalinfo_duration', [], null) => $this->getRuntime(),
-            \App\Support\Locale::trans('torrent.technicalinfo_resolution', [], null) => $this->getResolution(),
-            \App\Support\Locale::trans('torrent.technicalinfo_bit_rate', [], null) => $this->getBitrate(),
+            Locale::trans('torrent.technicalinfo_duration', [], null) => $this->getRuntime(),
+            Locale::trans('torrent.technicalinfo_resolution', [], null) => $this->getResolution(),
+            Locale::trans('torrent.technicalinfo_bit_rate', [], null) => $this->getBitrate(),
             'HDR' => $this->getHDRFormat(),
-            \App\Support\Locale::trans('torrent.technicalinfo_bit_depth', [], null) => $this->getBitDepth(),
-            \App\Support\Locale::trans('torrent.technicalinfo_frame_rate', [], null) => $this->getFramerate(),
-            \App\Support\Locale::trans('torrent.technicalinfo_profile', [], null) => $this->getProfile(),
-            \App\Support\Locale::trans('torrent.technicalinfo_format', [], null) => $this->getVideoFormat(),
-            \App\Support\Locale::trans('torrent.technicalinfo_ref_frames', [], null) => $this->getRefFrame(),
+            Locale::trans('torrent.technicalinfo_bit_depth', [], null) => $this->getBitDepth(),
+            Locale::trans('torrent.technicalinfo_frame_rate', [], null) => $this->getFramerate(),
+            Locale::trans('torrent.technicalinfo_profile', [], null) => $this->getProfile(),
+            Locale::trans('torrent.technicalinfo_format', [], null) => $this->getVideoFormat(),
+            Locale::trans('torrent.technicalinfo_ref_frames', [], null) => $this->getRefFrame(),
         ];
         $videos = array_filter($videos) ?: null;
         $audios = $this->getAudios() ?: null;
         $subtitles = $this->getSubtitles() ?: null;
+
         return compact('videos', 'audios', 'subtitles');
     }
 
     private function buildTdTable(array $parts)
     {
         $table = '<table style="border: none;"><tbody>';
-        
+
         // 检查是否为音频或字幕数据
         $isAudioOrSubtitle = false;
         $audioOrSubtitleCount = 0;
-        $audioPrefix = \App\Support\Locale::trans('torrent.technicalinfo_audio', [], null);
-        $subtitlePrefix = \App\Support\Locale::trans('torrent.technicalinfo_subtitles', [], null);
+        $audioPrefix = Locale::trans('torrent.technicalinfo_audio', [], null);
+        $subtitlePrefix = Locale::trans('torrent.technicalinfo_subtitles', [], null);
         foreach ($parts as $key => $value) {
             if (strpos($key, $audioPrefix) === 0 || strpos($key, $subtitlePrefix) === 0) {
                 $isAudioOrSubtitle = true;
                 $audioOrSubtitleCount++;
             }
         }
-        
+
         $displayCount = 0;
         $hiddenParts = [];
-        
+
         foreach ($parts as $key => $value) {
             $displayCount++;
-            
+
             // 如果是音频或字幕，且超过3条，则隐藏多余的
             if ($isAudioOrSubtitle && $audioOrSubtitleCount > 3) {
                 if ($displayCount <= 3) {
@@ -526,33 +546,33 @@ class TechnicalInformation
                 $table .= '</tr>';
             }
         }
-        
+
         // 如果有隐藏的部分，添加spoiler
-        if (!empty($hiddenParts)) {
+        if (! empty($hiddenParts)) {
             $hiddenContent = '';
             foreach ($hiddenParts as $key => $value) {
                 $hiddenContent .= sprintf('<b>%s: </b>%s<br>', $key, $value);
             }
             $hiddenContent = rtrim($hiddenContent, '<br>');
-            
-            $spoilerTitle = $isAudioOrSubtitle && strpos(array_keys($parts)[0], $audioPrefix) === 0 
-                ? \App\Support\Locale::trans('torrent.collapse_show_more_audio', [], null) 
-                : \App\Support\Locale::trans('torrent.collapse_show_more_subtitles', [], null);
-            
+
+            $spoilerTitle = $isAudioOrSubtitle && strpos(array_keys($parts)[0], $audioPrefix) === 0
+                ? Locale::trans('torrent.collapse_show_more_audio', [], null)
+                : Locale::trans('torrent.collapse_show_more_subtitles', [], null);
+
             $spoiler = sprintf('[spoiler=%s]%s[/spoiler]', $spoilerTitle, $hiddenContent);
             $table .= '<tr>';
             // 检查format_comment函数是否存在
             if (function_exists('format_comment')) {
-                $table .= sprintf('<td style="border: none; padding-right: 5px;padding-bottom: 5px;">%s</td>', \App\Support\Format::formatComment($spoiler, false));
+                $table .= sprintf('<td style="border: none; padding-right: 5px;padding-bottom: 5px;">%s</td>', Format::formatComment($spoiler, false));
             } else {
                 $table .= sprintf('<td style="border: none; padding-right: 5px;padding-bottom: 5px;">%s</td>', $spoiler);
             }
             $table .= '</tr>';
         }
-        
+
         $table .= '</tbody>';
         $table .= '</table>';
+
         return sprintf('<td style="border: none; padding-right: 5px;padding-bottom: 5px">%s</td>', $table);
     }
-
 }

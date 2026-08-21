@@ -6,8 +6,10 @@ use App\Enums\ModelEventEnum;
 use App\Models\Message;
 use App\Models\User;
 use App\Models\UserModifyLog;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Foundation\Queue\Queueable;
+use App\Support\Cache;
+use App\Support\Events;
+use App\Support\Locale;
+use App\Support\Logger;
 
 class RemoveUserWarning
 {
@@ -35,18 +37,18 @@ class RemoveUserWarning
             $locale = $user->locale;
             $userModifyLogs[] = [
                 'user_id' => $user->id,
-                'content' => "Warning removed by System.",
+                'content' => 'Warning removed by System.',
                 'created_at' => now(),
                 'updated_at' => now(),
             ];
             $user->warned = 'no';
             $user->warneduntil = null;
-            \App\Support\Logger::writeWithContext((string) sprintf("update user %s => %s", $user->id, json_encode($user->getDirty())), (string) 'info', (bool) false);
+            Logger::writeWithContext((string) sprintf('update user %s => %s', $user->id, json_encode($user->getDirty())), (string) 'info', (bool) false);
             $user->save();
-            \App\Support\Cache::clearUser($user->id, '');
-            \App\Support\Events::publishModel(ModelEventEnum::USER_UPDATED, $user->id, "");
-            $subject = \App\Support\Locale::trans("cleanup.msg_warning_removed", [], $locale);
-            $msg = \App\Support\Locale::trans("cleanup.msg_your_warning_removed", [], $locale);
+            Cache::clearUser($user->id, '');
+            Events::publishModel(ModelEventEnum::USER_UPDATED, $user->id, '');
+            $subject = Locale::trans('cleanup.msg_warning_removed', [], $locale);
+            $msg = Locale::trans('cleanup.msg_your_warning_removed', [], $locale);
             Message::add([
                 'sender' => 0,
                 'receiver' => $user->id,
@@ -55,9 +57,9 @@ class RemoveUserWarning
                 'msg' => $msg,
             ]);
         }
-        if (!empty($userModifyLogs)) {
+        if (! empty($userModifyLogs)) {
             UserModifyLog::query()->insert($userModifyLogs);
         }
-        \App\Support\Logger::writeWithContext((string) ("remove warning of users, success handle user count: " . $users->count()), (string) 'info', (bool) false);
+        Logger::writeWithContext((string) ('remove warning of users, success handle user count: '.$users->count()), (string) 'info', (bool) false);
     }
 }

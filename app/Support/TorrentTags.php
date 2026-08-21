@@ -2,6 +2,7 @@
 
 namespace App\Support;
 
+use App\Repositories\TagRepository;
 
 /**
  * Legacy torrent-tag helpers extracted from `include/functions.php`.
@@ -19,7 +20,7 @@ final class TorrentTags
      */
     public static function insert(int|string $torrentId, array $tagIdArr, bool $sync = false): void
     {
-        app(\App\Repositories\TagRepository::class)->syncTorrentTags($torrentId, $tagIdArr, $sync);
+        app(TagRepository::class)->syncTorrentTags($torrentId, $tagIdArr, $sync);
     }
 
     /**

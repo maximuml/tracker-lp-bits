@@ -14,7 +14,7 @@ use Tests\TestCase;
  */
 final class LegacySmokeTest extends TestCase
 {
-    public function testPublicLegacyPagesAreReachable(): void
+    public function test_public_legacy_pages_are_reachable(): void
     {
         $public = [
             '/login',
@@ -24,11 +24,11 @@ final class LegacySmokeTest extends TestCase
 
         foreach ($public as $path) {
             $response = $this->get($path);
-            $response->assertStatus(200, "Expected 200 for {$path}, got " . $response->getStatusCode());
+            $response->assertStatus(200, "Expected 200 for {$path}, got ".$response->getStatusCode());
         }
     }
 
-    public function testUnauthenticatedLegacyPagesRedirectToLogin(): void
+    public function test_unauthenticated_legacy_pages_redirect_to_login(): void
     {
         $protected = [
             '/index',
@@ -46,17 +46,17 @@ final class LegacySmokeTest extends TestCase
             $response = $this->get($path);
             $this->assertTrue(
                 in_array($response->getStatusCode(), [302, 401], true),
-                "Expected redirect or 401 for {$path}, got " . $response->getStatusCode()
+                "Expected redirect or 401 for {$path}, got ".$response->getStatusCode()
             );
         }
     }
 
-    public function testRootRedirects(): void
+    public function test_root_redirects(): void
     {
         $this->get('/')->assertStatus(302);
     }
 
-    public function testHealthEndpoint(): void
+    public function test_health_endpoint(): void
     {
         $this->get('/health')->assertJson(['status' => 'ok']);
     }

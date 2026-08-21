@@ -6,7 +6,9 @@ use App\Auth\Permission;
 use App\Enums\Permission\PermissionEnum;
 use App\Models\Setting;
 use App\Repositories\LogRepository;
+use App\Support\Pagination;
 use App\Support\SupportContext;
+use App\Support\Time;
 use App\Support\UserClass;
 use App\Support\UserDisplay;
 use Illuminate\Http\RedirectResponse;
@@ -22,9 +24,10 @@ class LogController extends LegacyController
 
         if (! Permission::can(PermissionEnum::LOG)) {
             $logClass = (int) SupportContext::getGlobal('log_class', 0);
+
             return $this->legacyAbortResponse(
                 $langLog['std_sorry'] ?? 'Sorry',
-                ($langLog['std_permission_denied_only'] ?? 'Permission denied. ') . UserClass::name($logClass, false, true, true) . sprintf($langLog['std_or_above_can_view'] ?? ' or above can view %s.', Setting::getSiteName()),
+                ($langLog['std_permission_denied_only'] ?? 'Permission denied. ').UserClass::name($logClass, false, true, true).sprintf($langLog['std_or_above_can_view'] ?? ' or above can view %s.', Setting::getSiteName()),
                 false
             );
         }
@@ -59,8 +62,8 @@ class LogController extends LegacyController
         $count = LogRepository::countSiteLog($filters);
 
         $perpage = 50;
-        $base = '?action=dailylog&' . ($search !== '' && $canConfidential ? 'search=' . rawurlencode($search) . '&' : '') . ($q !== '' ? 'query=' . rawurlencode($q) . '&' : '');
-        [$pagertop, $pagerbottom, , $offset] = \App\Support\Pagination::pager($perpage, $count, $base);
+        $base = '?action=dailylog&'.($search !== '' && $canConfidential ? 'search='.rawurlencode($search).'&' : '').($q !== '' ? 'query='.rawurlencode($q).'&' : '');
+        [$pagertop, $pagerbottom, , $offset] = Pagination::pager($perpage, $count, $base);
 
         $logRows = LogRepository::getSiteLog($filters, (int) $offset, $perpage);
 
@@ -103,6 +106,7 @@ class LogController extends LegacyController
                 if ($txt !== '') {
                     LogRepository::addChronicle($userId, $txt);
                 }
+
                 return redirect('/log.php?action=chronicle');
             }
 
@@ -115,6 +119,7 @@ class LogController extends LegacyController
                 if ($txt !== '') {
                     LogRepository::updateChronicle($id, $txt);
                 }
+
                 return redirect('/log.php?action=chronicle');
             }
 
@@ -124,6 +129,7 @@ class LogController extends LegacyController
                     return redirect('/log.php?action=chronicle');
                 }
                 LogRepository::deleteChronicle($id);
+
                 return redirect('/log.php?action=chronicle');
             }
 
@@ -149,8 +155,8 @@ class LogController extends LegacyController
     {
         $count = LogRepository::countChronicle($q);
         $perpage = 50;
-        $base = '?action=chronicle&' . ($q !== '' ? 'query=' . rawurlencode($q) . '&' : '');
-        [$pagertop, $pagerbottom, , $offset] = \App\Support\Pagination::pager($perpage, $count, $base);
+        $base = '?action=chronicle&'.($q !== '' ? 'query='.rawurlencode($q).'&' : '');
+        [$pagertop, $pagerbottom, , $offset] = Pagination::pager($perpage, $count, $base);
 
         $chronicleRows = LogRepository::getChronicle($q, (int) $offset, $perpage);
 
@@ -179,8 +185,8 @@ class LogController extends LegacyController
         $count = LogRepository::countNews($filters);
 
         $perpage = 20;
-        $base = '?action=news&' . ($search !== '' ? 'search=' . rawurlencode($search) . '&' : '') . ($q !== '' ? 'query=' . rawurlencode($q) . '&' : '');
-        [$pagertop, $pagerbottom, , $offset] = \App\Support\Pagination::pager($perpage, $count, $base);
+        $base = '?action=news&'.($search !== '' ? 'search='.rawurlencode($search).'&' : '').($q !== '' ? 'query='.rawurlencode($q).'&' : '');
+        [$pagertop, $pagerbottom, , $offset] = Pagination::pager($perpage, $count, $base);
 
         $newsRows = LogRepository::getNews($filters, (int) $offset, $perpage);
 
@@ -213,7 +219,8 @@ class LogController extends LegacyController
                 return $this->legacyAbortResponse($langLog['std_error'] ?? 'Error', $langLog['std_invalid_poll_id'] ?? 'Invalid poll ID.');
             }
             if ((int) $request->input('sure', 0) !== 1) {
-                $confirm = ($langLog['std_delete_poll_confirmation'] ?? 'Are you sure? ') . "<a href=\"?action=poll&do=delete&pollid=$pollid&returnto=$returnto&sure=1\">" . ($langLog['std_here_if_sure'] ?? 'here') . '</a>';
+                $confirm = ($langLog['std_delete_poll_confirmation'] ?? 'Are you sure? ')."<a href=\"?action=poll&do=delete&pollid=$pollid&returnto=$returnto&sure=1\">".($langLog['std_here_if_sure'] ?? 'here').'</a>';
+
                 return $this->legacyAbortResponse($langLog['std_delete_poll'] ?? 'Delete poll', $confirm, false);
             }
             LogRepository::deletePoll($pollid);
@@ -227,6 +234,7 @@ class LogController extends LegacyController
             if ($returnto === 'main') {
                 return redirect('/');
             }
+
             return redirect('/log.php?action=poll&deleted=1');
         }
 
@@ -262,7 +270,7 @@ class LogController extends LegacyController
 
             $pollData[] = [
                 'poll' => $poll,
-                'added' => \App\Support\Time::format($poll['added'] ?? '', true, false),
+                'added' => Time::format($poll['added'] ?? '', true, false),
                 'totalVotes' => number_format($totalVotes),
                 'options' => $computedOptions,
             ];

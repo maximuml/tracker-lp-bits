@@ -10,18 +10,21 @@
  * @property string|null $created_at
  * @property string|null $updated_at
  */
+
 namespace App\Models;
 
 use App\Models\Traits\NexusActivityLogTrait;
+use App\Support\Locale;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class UserMeta extends NexusModel
 {
     use NexusActivityLogTrait;
 
-    /** @var  list<string> */
+    /** @var list<string> */
     protected $fillable = ['uid', 'meta_key', 'meta_value', 'status', 'deadline'];
 
-    /** @var  bool */
+    /** @var bool */
     public $timestamps = true;
 
     const STATUS_NORMAL = 0;
@@ -30,15 +33,15 @@ class UserMeta extends NexusModel
 
     const META_KEY_CHANGE_USERNAME = 'CHANGE_USERNAME';
 
-    /** @var  list<string> */
+    /** @var list<string> */
     protected $appends = ['meta_key_text'];
 
-    /** @var  array<string, string> */
+    /** @var array<string, string> */
     protected $casts = [
         'deadline' => 'datetime',
     ];
 
-    /** @var  array<int|string, mixed> */
+    /** @var array<int|string, mixed> */
     public static array $metaKeys = [
         self::META_KEY_PERSONALIZED_USERNAME => ['text' => 'PERSONALIZED_USERNAME', 'multiple' => false],
         self::META_KEY_CHANGE_USERNAME => ['text' => 'CHANGE_USERNAME', 'multiple' => false],
@@ -48,15 +51,15 @@ class UserMeta extends NexusModel
     public static function listProps()
     {
         return [
-            self::META_KEY_PERSONALIZED_USERNAME => \App\Support\Locale::trans('label.user_meta.meta_keys.' . self::META_KEY_PERSONALIZED_USERNAME, [], null),
-            self::META_KEY_CHANGE_USERNAME => \App\Support\Locale::trans('label.user_meta.meta_keys.' . self::META_KEY_CHANGE_USERNAME, [], null),
+            self::META_KEY_PERSONALIZED_USERNAME => Locale::trans('label.user_meta.meta_keys.'.self::META_KEY_PERSONALIZED_USERNAME, [], null),
+            self::META_KEY_CHANGE_USERNAME => Locale::trans('label.user_meta.meta_keys.'.self::META_KEY_CHANGE_USERNAME, [], null),
         ];
     }
 
     /** @return  mixed */
     public function getMetaKeyTextAttribute()
     {
-        return \App\Support\Locale::trans('label.user_meta.meta_keys.' . $this->meta_key, [], null);
+        return Locale::trans('label.user_meta.meta_keys.'.$this->meta_key, [], null);
     }
 
     public function isValid(): bool
@@ -64,10 +67,9 @@ class UserMeta extends NexusModel
         return $this->status == self::STATUS_NORMAL && ($this->getRawOriginal('deadline') === null || ($this->deadline && $this->deadline->gte(now())));
     }
 
-    /** @return  \Illuminate\Database\Eloquent\Relations\BelongsTo<User, $this> */
+    /** @return  BelongsTo<User, $this> */
     public function user()
     {
         return $this->belongsTo(User::class, 'uid');
     }
-
 }

@@ -2,13 +2,12 @@
 
 namespace App\Filament\Resources\User\UserResource\Pages;
 
-use Filament\Actions\Contracts\HasActions;
-use Exception;
 use App\Filament\Resources\User\UserResource;
 use App\Repositories\UserRepository;
-use Filament\Pages\Actions;
+use App\Support\Admin;
+use Exception;
+use Filament\Actions\Contracts\HasActions;
 use Filament\Resources\Pages\CreateRecord;
-use Illuminate\Database\Eloquent\Model;
 
 class CreateUser extends CreateRecord implements HasActions
 {
@@ -16,14 +15,14 @@ class CreateUser extends CreateRecord implements HasActions
 
     public function create(bool $another = false): void
     {
-        $userRep = new UserRepository();
+        $userRep = new UserRepository;
         $data = $this->form->getState();
         try {
             $this->record = $userRep->store($data);
-            \App\Support\Admin::successNotification("");
+            Admin::successNotification('');
             $this->redirect($this->getRedirectUrl());
         } catch (Exception $exception) {
-            \App\Support\Admin::failNotification($exception->getMessage());
+            Admin::failNotification($exception->getMessage());
         }
     }
 }

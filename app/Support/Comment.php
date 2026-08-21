@@ -4,6 +4,10 @@ namespace App\Support;
 
 use App\Auth\Permission;
 use App\Enums\Permission\PermissionEnum;
+use App\Models\User;
+use App\Repositories\UserRepository;
+use App\Support\Config\SiteConfig;
+use Nexus\Nexus;
 
 /**
  * Legacy BBCode formatter extracted from `include/functions.php`.
@@ -43,8 +47,8 @@ final class Comment
      * (`formatImg`, `formatYoutube`, `formatUrl`, etc.) are still called
      * because they handle their own `filter_src()` / `addTempCode()` dance.
      *
-     * @param bool $xssclean Unused legacy parameter, kept for call-site compatibility.
-     * @param bool $enableflash Unused legacy parameter, kept for call-site compatibility.
+     * @param  bool  $xssclean  Unused legacy parameter, kept for call-site compatibility.
+     * @param  bool  $enableflash  Unused legacy parameter, kept for call-site compatibility.
      */
     public static function format(
         string $text,
@@ -96,7 +100,7 @@ final class Comment
         ];
         $replaceXhtmlTagArray = [
             Url::schemeAndHost(),
-            \App\Support\Config\SiteConfig::current()->basic->siteName(),
+            SiteConfig::current()->basic->siteName(),
             '&#x2022; ',
             '<b>', '</b>', '<i>', '</i>', '<u>', '</u>', '<s>', '</s>',
             '<pre>', '</pre>', '</span>', '</font>', '</font>', '<hr>',
@@ -123,7 +127,7 @@ final class Comment
             $s = (string) preg_replace_callback(
                 '/\[img\]([^\<\r\n"\']+?)\[\/img\]/i',
                 function (array $m) use ($imageresizer, $imageMaxWidth, $imageMaxHeight): string {
-                    return \App\Support\HtmlRenderer::formatImg($m[1], $imageresizer, $imageMaxWidth, $imageMaxHeight);
+                    return HtmlRenderer::formatImg($m[1], $imageresizer, $imageMaxWidth, $imageMaxHeight);
                 },
                 $s,
                 $imagenum,
@@ -132,7 +136,7 @@ final class Comment
             $s = (string) preg_replace_callback(
                 '/\[img=([^\<\r\n"\']+?)\]/i',
                 function (array $m) use ($imageresizer, $imageMaxWidth, $imageMaxHeight): string {
-                    return \App\Support\HtmlRenderer::formatImg($m[1], $imageresizer, $imageMaxWidth, $imageMaxHeight);
+                    return HtmlRenderer::formatImg($m[1], $imageresizer, $imageMaxWidth, $imageMaxHeight);
                 },
                 $s,
                 ($imagenum != -1 ? max($imagenum - $imgReplaceCount, 0) : -1),
@@ -145,7 +149,7 @@ final class Comment
         if (str_contains($s, '[youtube') && str_contains($s, 'v=')) {
             $s = (string) preg_replace_callback(
                 '/\[youtube(\,([1-9][0-9]*)\,([1-9][0-9]*))?\]((http|https):\/\/[^\s\'"<>]+)\[\/youtube\]/i',
-                static fn (array $m): string => \App\Support\HtmlRenderer::formatYoutube($m[4], $m[2] ?: 0, $m[3] ?: 0),
+                static fn (array $m): string => HtmlRenderer::formatYoutube($m[4], $m[2] ?: 0, $m[3] ?: 0),
                 $s,
             );
         }
@@ -153,7 +157,7 @@ final class Comment
         if (str_contains($s, '[video')) {
             $s = (string) preg_replace_callback(
                 '/\[video(\,([1-9][0-9]*)\,([1-9][0-9]*))?\]((http|https):\/\/[^\s\'"<>]+)\[\/video\]/i',
-                static fn (array $m): string => \App\Support\HtmlRenderer::formatVideo($m[4], $m[2] ?: 0, $m[3] ?: 0),
+                static fn (array $m): string => HtmlRenderer::formatVideo($m[4], $m[2] ?: 0, $m[3] ?: 0),
                 $s,
             );
         }
@@ -161,7 +165,7 @@ final class Comment
         if (str_contains($s, '[audio')) {
             $s = (string) preg_replace_callback(
                 '/\[audio\]((http|https):\/\/[^\s\'"<>]+)\[\/audio\]/i',
-                static fn (array $m): string => \App\Support\HtmlRenderer::formatAudio($m[1]),
+                static fn (array $m): string => HtmlRenderer::formatAudio($m[1]),
                 $s,
             );
         }
@@ -169,7 +173,7 @@ final class Comment
         $s = (string) preg_replace_callback(
             '/\[url=([^\[\s]+?)\](.+?)\[\/url\]/i',
             function (array $m) use ($newtab): string {
-                return \App\Support\HtmlRenderer::formatUrl($m[1], $newtab, $m[2], 'faqlink');
+                return HtmlRenderer::formatUrl($m[1], $newtab, $m[2], 'faqlink');
             },
             $s,
         );
@@ -177,33 +181,33 @@ final class Comment
         $s = (string) preg_replace_callback(
             '/\[url\]([^\[\s]+?)\[\/url\]/i',
             function (array $m) use ($newtab): string {
-                return \App\Support\HtmlRenderer::formatUrl($m[1], $newtab, '', 'faqlink');
+                return HtmlRenderer::formatUrl($m[1], $newtab, '', 'faqlink');
             },
             $s,
         );
 
         $s = (string) preg_replace_callback(
             '/\[left\](.*)\[\/left\]/isU',
-            static fn (array $m): string => \App\Support\HtmlRenderer::formatTextAlign($m[1], 'left'),
+            static fn (array $m): string => HtmlRenderer::formatTextAlign($m[1], 'left'),
             $s,
         );
         $s = (string) preg_replace_callback(
             '/\[center\](.*)\[\/center\]/isU',
-            static fn (array $m): string => \App\Support\HtmlRenderer::formatTextAlign($m[1], 'center'),
+            static fn (array $m): string => HtmlRenderer::formatTextAlign($m[1], 'center'),
             $s,
         );
         $s = (string) preg_replace_callback(
             '/\[right\](.*)\[\/right\]/isU',
-            static fn (array $m): string => \App\Support\HtmlRenderer::formatTextAlign($m[1], 'right'),
+            static fn (array $m): string => HtmlRenderer::formatTextAlign($m[1], 'right'),
             $s,
         );
         $s = (string) preg_replace_callback(
             '/\[hide\](.*)\[\/hide\]/isU',
-            static fn (array $m): string => \App\Support\HtmlRenderer::formatHidden($m[1]),
+            static fn (array $m): string => HtmlRenderer::formatHidden($m[1]),
             $s,
         );
 
-        $s = \App\Support\Format::formatUrls($s, $newtab);
+        $s = Format::formatUrls($s, $newtab);
 
         if (strpos($s, '[quote') !== false && strpos($s, '[/quote]') !== false) {
             $s = BBCode::quotes($s, Locale::trans('label.text_quote'));
@@ -212,7 +216,8 @@ final class Comment
         $s = (string) preg_replace_callback(
             '/\[em([1-9][0-9]*)\]/i',
             static function (array $m): string {
-                $smile = \App\Support\Smilies::pathFor((int) (int) $m[1]);
+                $smile = Smilies::pathFor((int) (int) $m[1]);
+
                 return $smile ? '<img src="'.$smile.'" alt="[em'.$m[1].']" />' : '[em'.$m[1].']';
             },
             $s,
@@ -222,23 +227,23 @@ final class Comment
             $s = (string) preg_replace_callback(
                 '/\[spoiler(=(.*))?\](.*)\[\/spoiler\]/isU',
                 function (array $m): string {
-                    return \App\Support\HtmlRenderer::formatSpoiler(
+                    return HtmlRenderer::formatSpoiler(
                         $m[3],
                         $m[2],
-                        \Nexus\Nexus::instance()->getScript() != 'preview',
+                        Nexus::instance()->getScript() != 'preview',
                     );
                 },
                 $s,
             );
         }
 
-        $enableattach_attachment = \App\Support\Config\SiteConfig::current()->attachment->enableAttach();
+        $enableattach_attachment = SiteConfig::current()->attachment->enableAttach();
         if ($enableattach_attachment && $imagenum != 1) {
             $limit = 20;
             $s = (string) preg_replace_callback(
                 '/\[attach\]([0-9a-zA-z][0-9a-zA-z]*)\[\/attach\]/is',
                 function (array $m) use ($enableimage, $imageresizer): string {
-                    return \App\Support\Attachment::renderByKey((string) $m[1], (bool) $enableimage, (bool) $imageresizer);
+                    return Attachment::renderByKey((string) $m[1], (bool) $enableimage, (bool) $imageresizer);
                 },
                 $s,
                 $limit,
@@ -282,56 +287,56 @@ final class Comment
 
         $contentWidth = \defined('CONTENT_WIDTH') ? (int) CONTENT_WIDTH : 100;
         $html = Frame::mainOpen('', false, 100, $contentWidth)
-            . Frame::open('', false, 10, '100%', 'left');
+            .Frame::open('', false, 10, '100%', 'left');
 
         $uidArr = array_values(array_filter(array_map('intval', array_column($rows, 'user'))));
         $neededColumns = ['id', 'class', 'enabled', 'privacy', 'avatar', 'signature', 'uploaded', 'downloaded', 'last_access', 'username', 'donor', 'leechwarn', 'warned', 'title'];
-        $userInfoArr = \App\Repositories\UserRepository::getByIds($uidArr, $neededColumns);
+        $userInfoArr = UserRepository::getByIds($uidArr, $neededColumns);
 
         foreach ($rows as $row) {
-            $userInfo = $userInfoArr->get($row['user'], \App\Models\User::defaultUser());
+            $userInfo = $userInfoArr->get($row['user'], User::defaultUser());
             $userRow = $userInfo->toArray();
 
-            $html .= '<div style="margin-top: 8pt; margin-bottom: 8pt;"><table id="cid' . $row['id'] . '" border="0" cellspacing="0" cellpadding="0" width="100%"><tr><td class="embedded" width="99%">#' . $row['id'] . '&nbsp;&nbsp;<font color="gray">' . ($lang_functions['text_by'] ?? '') . '</font>';
-            $html .= \App\Support\UserDisplay::username($row['user'], false, true, true, false, false, true);
-            $html .= '&nbsp;&nbsp;<font color="gray">' . ($lang_functions['text_at'] ?? '') . '</font>' . \App\Support\Time::format($row['added'])
-                . ($row['editedby'] && Permission::can(PermissionEnum::COM_MANAGE) ? ' - [<a href="comment.php?action=vieworiginal&amp;cid=' . $row['id'] . '&amp;type=' . $type . '">' . ($lang_functions['text_view_original'] ?? '') . '</a>]' : '')
-                . '</td><td class="embedded nowrap" width="1%"><a href="#top"><img class="top" src="pic/trans.gif" alt="Top" title="Top" /></a>&nbsp;&nbsp;</td></tr></table></div>';
+            $html .= '<div style="margin-top: 8pt; margin-bottom: 8pt;"><table id="cid'.$row['id'].'" border="0" cellspacing="0" cellpadding="0" width="100%"><tr><td class="embedded" width="99%">#'.$row['id'].'&nbsp;&nbsp;<font color="gray">'.($lang_functions['text_by'] ?? '').'</font>';
+            $html .= UserDisplay::username($row['user'], false, true, true, false, false, true);
+            $html .= '&nbsp;&nbsp;<font color="gray">'.($lang_functions['text_at'] ?? '').'</font>'.Time::format($row['added'])
+                .($row['editedby'] && Permission::can(PermissionEnum::COM_MANAGE) ? ' - [<a href="comment.php?action=vieworiginal&amp;cid='.$row['id'].'&amp;type='.$type.'">'.($lang_functions['text_view_original'] ?? '').'</a>]' : '')
+                .'</td><td class="embedded nowrap" width="1%"><a href="#top"><img class="top" src="pic/trans.gif" alt="Top" title="Top" /></a>&nbsp;&nbsp;</td></tr></table></div>';
 
             $avatar = ($CURUSER['avatars'] ?? '') === 'yes' ? \htmlspecialchars(trim($userRow['avatar'])) : '';
             if (! $avatar) {
                 $avatar = 'pic/default_avatar.png';
             }
-            $text = \App\Support\Format::formatComment($row['text']);
+            $text = Format::formatComment($row['text']);
             $textEditby = '';
             if ($row['editedby']) {
-                $lastedittime = \App\Support\Time::format($row['editdate'], true, false);
-                $textEditby = '<br /><p><font class="small">' . ($lang_functions['text_last_edited_by'] ?? '') . \App\Support\UserDisplay::username($row['editedby']) . ($lang_functions['text_edited_at'] ?? '') . $lastedittime . "</font></p>\n";
+                $lastedittime = Time::format($row['editdate'], true, false);
+                $textEditby = '<br /><p><font class="small">'.($lang_functions['text_last_edited_by'] ?? '').UserDisplay::username($row['editedby']).($lang_functions['text_edited_at'] ?? '').$lastedittime."</font></p>\n";
             }
 
-            $html .= '<table class="main" width="100%" border="0" cellspacing="0" cellpadding="5">' . "\n";
+            $html .= '<table class="main" width="100%" border="0" cellspacing="0" cellpadding="5">'."\n";
             $secs = 900;
             $dt = date('Y-m-d H:i:s', TIMENOW - $secs);
-            $html .= '<tr>' . "\n";
-            $html .= '<td class="rowfollow" width="150" valign="top" style="padding: 0px;">' . UserDisplay::avatarImageWithContext($avatar) . '</td>' . "\n";
-            $html .= '<td class="rowfollow word-break-all" valign="top"><br />' . $text . $textEditby . '</td>' . "\n";
-            $html .= '</tr>' . "\n";
+            $html .= '<tr>'."\n";
+            $html .= '<td class="rowfollow" width="150" valign="top" style="padding: 0px;">'.UserDisplay::avatarImageWithContext($avatar).'</td>'."\n";
+            $html .= '<td class="rowfollow word-break-all" valign="top"><br />'.$text.$textEditby.'</td>'."\n";
+            $html .= '</tr>'."\n";
 
-            $actionbar = '<a href="comment.php?action=add&amp;sub=quote&amp;cid=' . $row['id'] . '&amp;pid=' . $parentId . '&amp;type=' . $type . '"><img class="f_quote" src="pic/trans.gif" alt="Quote" title="' . ($lang_functions['title_reply_with_quote'] ?? '') . '" /></a>'
-                . '<a href="comment.php?action=add&amp;pid=' . $parentId . '&amp;type=' . $type . '"><img class="f_reply" src="pic/trans.gif" alt="Add Reply" title="' . ($lang_functions['title_add_reply'] ?? '') . '" /></a>'
-                . (Permission::can(PermissionEnum::COM_MANAGE) ? '<a href="comment.php?action=delete&amp;cid=' . $row['id'] . '&amp;type=' . $type . '"><img class="f_delete" src="pic/trans.gif" alt="Delete" title="' . ($lang_functions['title_delete'] ?? '') . '" /></a>' : '')
-                . (((is_array($CURUSER) && $row['user'] == ($CURUSER['id'] ?? 0)) || \App\Support\UserDisplay::currentClass() >= $commanage_class) ? '<a href="comment.php?action=edit&amp;cid=' . $row['id'] . '&amp;type=' . $type . '"><img class="f_edit" src="pic/trans.gif" alt="Edit" title="' . ($lang_functions['title_edit'] ?? '') . '" /></a>' : '');
+            $actionbar = '<a href="comment.php?action=add&amp;sub=quote&amp;cid='.$row['id'].'&amp;pid='.$parentId.'&amp;type='.$type.'"><img class="f_quote" src="pic/trans.gif" alt="Quote" title="'.($lang_functions['title_reply_with_quote'] ?? '').'" /></a>'
+                .'<a href="comment.php?action=add&amp;pid='.$parentId.'&amp;type='.$type.'"><img class="f_reply" src="pic/trans.gif" alt="Add Reply" title="'.($lang_functions['title_add_reply'] ?? '').'" /></a>'
+                .(Permission::can(PermissionEnum::COM_MANAGE) ? '<a href="comment.php?action=delete&amp;cid='.$row['id'].'&amp;type='.$type.'"><img class="f_delete" src="pic/trans.gif" alt="Delete" title="'.($lang_functions['title_delete'] ?? '').'" /></a>' : '')
+                .(((is_array($CURUSER) && $row['user'] == ($CURUSER['id'] ?? 0)) || UserDisplay::currentClass() >= $commanage_class) ? '<a href="comment.php?action=edit&amp;cid='.$row['id'].'&amp;type='.$type.'"><img class="f_edit" src="pic/trans.gif" alt="Edit" title="'.($lang_functions['title_edit'] ?? '').'" /></a>' : '');
 
             $onlineIcon = ($userRow['last_access'] > $dt)
-                ? '<img class="f_online" src="pic/trans.gif" alt="Online" title="' . ($lang_functions['title_online'] ?? '') . '" />'
-                : '<img class="f_offline" src="pic/trans.gif" alt="Offline" title="' . ($lang_functions['title_offline'] ?? '') . '" />';
+                ? '<img class="f_online" src="pic/trans.gif" alt="Online" title="'.($lang_functions['title_online'] ?? '').'" />'
+                : '<img class="f_offline" src="pic/trans.gif" alt="Offline" title="'.($lang_functions['title_offline'] ?? '').'" />';
 
-            $html .= '<tr><td class="toolbox"> ' . $onlineIcon . '<a href="sendmessage.php?receiver=' . \htmlspecialchars(trim($row['user'])) . '"><img class="f_pm" src="pic/trans.gif" alt="PM" title="' . ($lang_functions['title_send_message_to'] ?? '') . \htmlspecialchars($userRow['username']) . '" /></a><a href="report.php?commentid=' . \htmlspecialchars(trim($row['id'])) . '"><img class="f_report" src="pic/trans.gif" alt="Report" title="' . ($lang_functions['title_report_this_comment'] ?? '') . '" /></a></td><td class="toolbox" align="right">' . $actionbar . '</td>';
+            $html .= '<tr><td class="toolbox"> '.$onlineIcon.'<a href="sendmessage.php?receiver='.\htmlspecialchars(trim($row['user'])).'"><img class="f_pm" src="pic/trans.gif" alt="PM" title="'.($lang_functions['title_send_message_to'] ?? '').\htmlspecialchars($userRow['username']).'" /></a><a href="report.php?commentid='.\htmlspecialchars(trim($row['id'])).'"><img class="f_report" src="pic/trans.gif" alt="Report" title="'.($lang_functions['title_report_this_comment'] ?? '').'" /></a></td><td class="toolbox" align="right">'.$actionbar.'</td>';
 
-            $html .= '</tr></table>' . "\n";
+            $html .= '</tr></table>'."\n";
         }
 
-        $html .= Frame::CLOSE . Frame::CLOSE;
+        $html .= Frame::CLOSE.Frame::CLOSE;
 
         return $html;
     }

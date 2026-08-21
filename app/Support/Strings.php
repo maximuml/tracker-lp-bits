@@ -2,6 +2,8 @@
 
 namespace App\Support;
 
+use Illuminate\Support\Str;
+
 /**
  * Stateless string helpers extracted from `include/functions.php`.
  *
@@ -211,7 +213,7 @@ final class Strings
 
         static $emoji = null;
         if (is_null($emoji)) {
-            $emoji = \App\Support\Config::get('emoji', null);
+            $emoji = Config::get('emoji', null);
         }
         $text = (string) preg_replace_callback('/\[em([1-9][0-9]*)\]/isU', function ($matches) use ($emoji) {
             return $emoji[$matches[1]] ?? '';
@@ -268,10 +270,10 @@ final class Strings
      */
     public static function filamentAlias(string $class): string
     {
-        return \Illuminate\Support\Str::of($class)
+        return Str::of($class)
             ->replace(['/', '\\'], '.')
             ->explode('.')
-            ->map([\Illuminate\Support\Str::class, 'kebab'])
+            ->map([Str::class, 'kebab'])
             ->implode('.');
     }
 

@@ -2,9 +2,8 @@
 
 namespace App\Filament\Resources\Torrent\TagResource\Pages;
 
-use Filament\Actions\DeleteAction;
 use App\Filament\Resources\Torrent\TagResource;
-use Filament\Pages\Actions;
+use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 
 class EditTag extends EditRecord
@@ -28,7 +27,7 @@ class EditTag extends EditRecord
         if ($data['mode'] === null) {
             $data['mode'] = 0;
         }
+
         return $data;
     }
-
 }

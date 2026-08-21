@@ -2,6 +2,8 @@
 
 namespace App\Support;
 
+use App\Support\Config\SiteConfig;
+
 /**
  * Legacy site-information helper extracted from `include/globalfunctions.php`.
  *
@@ -16,7 +18,7 @@ final class Site
     public static function info(): array
     {
         return [
-            'site_name' => \App\Support\Config\SiteConfig::current()->basic->siteName(),
+            'site_name' => SiteConfig::current()->basic->siteName(),
             'base_url' => Url::schemeAndHost(),
         ];
     }

@@ -3,8 +3,10 @@
 namespace App\Support;
 
 use App\Enums\TorrentPromotion;
+use App\Models\Torrent;
+use App\Models\User;
 use App\Repositories\TorrentRepository;
-
+use App\Support\Config\SiteConfig;
 
 /**
  * Legacy torrent operations helpers extracted from `include/functions.php`.
@@ -97,7 +99,7 @@ final class TorrentOps
         $snatch,
         $promotionInfo,
     ): array {
-        if (!isset($user['__is_donor'])) {
+        if (! isset($user['__is_donor'])) {
             throw new \InvalidArgumentException("user no '__is_donor' field");
         }
 
@@ -106,14 +108,14 @@ final class TorrentOps
             $torrent['id'], $torrent['owner'], $user['id'], $peer['uploaded'] ?? '', $peer['downloaded'] ?? '', $queries['uploaded'], $queries['downloaded'],
         );
 
-        if (!empty($peer)) {
+        if (! empty($peer)) {
             $realUploaded = max((int) \bcsub($queries['uploaded'], $peer['uploaded']), 0);
             $realDownloaded = max((int) \bcsub($queries['downloaded'], $peer['downloaded']), 0);
             $log .= ", [PEER_EXISTS], realUploaded: $realUploaded, realDownloaded: $realDownloaded, [SP_STATE]";
 
             $spStateGlobal = Promotion::globalSpecialState();
-            $spStateNormal = \App\Models\Torrent::PROMOTION_NORMAL;
-            if (!empty($promotionInfo) && isset($promotionInfo['__ignore_global_sp_state'])) {
+            $spStateNormal = Torrent::PROMOTION_NORMAL;
+            if (! empty($promotionInfo) && isset($promotionInfo['__ignore_global_sp_state'])) {
                 $log .= ', use promotionInfo';
                 $spStateReal = $promotionInfo['sp_state'];
             } elseif ($spStateGlobal != $spStateNormal) {
@@ -127,7 +129,7 @@ final class TorrentOps
             $promotion = TorrentPromotion::fromIntSafe((int) $spStateReal);
             $log .= ", spStateReal = $spStateReal, promotion: {$promotion->label()}";
 
-            $uploaderRatio = \App\Support\Config\SiteConfig::current()->torrent->uploaderdouble();
+            $uploaderRatio = SiteConfig::current()->torrent->uploaderdouble();
             $log .= ", uploaderRatio: $uploaderRatio";
             if ($torrent['owner'] == $user['id'] && $uploaderRatio != 1) {
                 $upRatio = max($uploaderRatio, $promotion->upMultiplier());
@@ -137,7 +139,7 @@ final class TorrentOps
                 $log .= ", [IS_NOT_UPLOADER] || uploaderRatio == 1, upRatio: $upRatio";
             }
 
-            if ($user['class'] == \App\Models\User::CLASS_VIP) {
+            if ($user['class'] == User::CLASS_VIP) {
                 $downRatio = 0;
                 $log .= ", [IS_VIP], downRatio: $downRatio";
             } else {
@@ -156,28 +158,28 @@ final class TorrentOps
         $downloadedIncrementForUser = $realDownloaded * $downRatio;
         $log .= ", uploadedIncrementForUser: $uploadedIncrementForUser, downloadedIncrementForUser: $downloadedIncrementForUser";
 
-        $isSeedBoxRuleEnabled = \App\Support\Config\SiteConfig::current()->seedBox->enabled();
+        $isSeedBoxRuleEnabled = SiteConfig::current()->seedBox->enabled();
         $log .= ", isSeedBoxRuleEnabled: $isSeedBoxRuleEnabled, user class: {$user['class']}, __is_donor: {$user['__is_donor']}";
-        if ($isSeedBoxRuleEnabled && $torrent['owner'] != $user['id'] && !($user['class'] >= \App\Models\User::CLASS_VIP || $user['__is_donor'])) {
-            $isIPSeedBox = \App\Support\Network::isSeedBox((string) $queries['ip'], (int) $user['id']);
-            $log .= ", isIPSeedBox: " . ($isIPSeedBox ? 'true' : 'false');
+        if ($isSeedBoxRuleEnabled && $torrent['owner'] != $user['id'] && ! ($user['class'] >= User::CLASS_VIP || $user['__is_donor'])) {
+            $isIPSeedBox = Network::isSeedBox((string) $queries['ip'], (int) $user['id']);
+            $log .= ', isIPSeedBox: '.($isIPSeedBox ? 'true' : 'false');
             if ($isIPSeedBox) {
-                $isSeedBoxNoPromotion = \App\Support\Config\SiteConfig::current()->seedBox->noPromotion();
-                $log .= ", isSeedBoxNoPromotion: " . ($isSeedBoxNoPromotion ? 'true' : 'false');
+                $isSeedBoxNoPromotion = SiteConfig::current()->seedBox->noPromotion();
+                $log .= ', isSeedBoxNoPromotion: '.($isSeedBoxNoPromotion ? 'true' : 'false');
                 if ($isSeedBoxNoPromotion) {
                     $uploadedIncrementForUser = $realUploaded;
                     $downloadedIncrementForUser = $realDownloaded;
                     $log .= ', isIPSeedBox && isSeedBoxNoPromotion, increment for user = real';
                 }
 
-                $maxUploadedTimes = \App\Support\Config\SiteConfig::current()->seedBox->maxUploaded();
-                $maxUploadedDurationSeconds = \App\Support\Config\SiteConfig::current()->seedBox->maxUploadedDuration(0) * 3600;
+                $maxUploadedTimes = SiteConfig::current()->seedBox->maxUploaded();
+                $maxUploadedDurationSeconds = SiteConfig::current()->seedBox->maxUploadedDuration(0) * 3600;
                 $torrentTTL = time() - strtotime($torrent['added']);
                 $timeRangeValid = ($maxUploadedDurationSeconds == 0) || ($torrentTTL < $maxUploadedDurationSeconds);
-                $log .= ", maxUploadedTimes: $maxUploadedTimes, maxUploadedDurationSeconds: $maxUploadedDurationSeconds, timeRangeValid: " . ($timeRangeValid ? 'true' : 'false');
+                $log .= ", maxUploadedTimes: $maxUploadedTimes, maxUploadedDurationSeconds: $maxUploadedDurationSeconds, timeRangeValid: ".($timeRangeValid ? 'true' : 'false');
                 if ($maxUploadedTimes > 0 && $timeRangeValid) {
                     $log .= ', [LIMIT_UPLOADED]';
-                    if (!empty($snatch) && isset($torrent['size']) && $snatch['uploaded'] >= $torrent['size'] * $maxUploadedTimes) {
+                    if (! empty($snatch) && isset($torrent['size']) && $snatch['uploaded'] >= $torrent['size'] * $maxUploadedTimes) {
                         $log .= ", snatchUploaded({$snatch['uploaded']}) >= torrentSize({$torrent['size']}) * times($maxUploadedTimes), uploadedIncrementForUser = 0";
                         $uploadedIncrementForUser = 0;
                     } else {
@@ -195,7 +197,7 @@ final class TorrentOps
             'downloaded_increment' => $realDownloaded,
             'downloaded_increment_for_user' => $downloadedIncrementForUser,
         ];
-        Logger::writeWithContext("$log, result: " . Json::encode($result), 'info');
+        Logger::writeWithContext("$log, result: ".Json::encode($result), 'info');
 
         return $result;
     }

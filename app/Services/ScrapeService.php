@@ -9,7 +9,9 @@ use App\Exceptions\TrackerException;
 use App\Exceptions\TrackerWarningException;
 use App\Models\Torrent;
 use App\Models\User;
+use App\Support\Config\SiteConfig;
 use App\ValueObjects\InfoHash;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Cache;
 use Nexus\Database\NexusDB;
 
@@ -52,7 +54,7 @@ class ScrapeService
 
         if (empty($user)) {
             NexusDB::redis()->set("passkey_invalid:{$passkey}", TIMENOW, ['ex' => 24 * 3600]);
-            throw TrackerException::failure('Invalid passkey! Re-download the .torrent from ' . \App\Support\Config\SiteConfig::current()->basic->baseUrl());
+            throw TrackerException::failure('Invalid passkey! Re-download the .torrent from '.SiteConfig::current()->basic->baseUrl());
         }
 
         if ($user['enabled'] === 'no') {
@@ -85,7 +87,7 @@ class ScrapeService
             /** @var string $hash */
             $hash = $torrent->getAttribute('info_hash');
             $files[$hash] = [
-                'complete'   => (int) $torrent->seeders,
+                'complete' => (int) $torrent->seeders,
                 'downloaded' => (int) $torrent->times_completed,
                 'incomplete' => (int) $torrent->leechers,
             ];
@@ -96,7 +98,7 @@ class ScrapeService
 
     /**
      * @param  list<InfoHash>  $infoHashes
-     * @return \Illuminate\Database\Eloquent\Collection<int, Torrent>
+     * @return Collection<int, Torrent>
      */
     private function queryTorrents(array $infoHashes)
     {
@@ -123,7 +125,7 @@ class ScrapeService
      */
     private function cacheKey(array $infoHashes): string
     {
-        return 'scrape:' . md5(http_build_query(array_map(
+        return 'scrape:'.md5(http_build_query(array_map(
             static fn (InfoHash $h) => $h->toBinary(),
             $infoHashes
         )));

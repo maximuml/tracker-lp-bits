@@ -19,14 +19,14 @@ final class TorrentEditControllerTest extends TestCase
 
     public function test_legacy_update_redirects_to_edited_details_page(): void
     {
-        $torrent = new Torrent();
+        $torrent = new Torrent;
         $torrent->id = 42;
 
         /** @var TorrentEditRepository&Mockery\MockInterface $repository */
         $repository = Mockery::mock(TorrentEditRepository::class);
         $repository->shouldReceive('update')->once()->with(Mockery::type(Request::class))->andReturn($torrent);
 
-        $controller = new TorrentEditController();
+        $controller = new TorrentEditController;
         $request = Request::create('/takeedit', 'POST', [
             'id' => 42,
             'name' => 'Updated torrent',
@@ -42,14 +42,14 @@ final class TorrentEditControllerTest extends TestCase
 
     public function test_legacy_update_honors_returnto(): void
     {
-        $torrent = new Torrent();
+        $torrent = new Torrent;
         $torrent->id = 42;
 
         /** @var TorrentEditRepository&Mockery\MockInterface $repository */
         $repository = Mockery::mock(TorrentEditRepository::class);
         $repository->shouldReceive('update')->once()->andReturn($torrent);
 
-        $controller = new TorrentEditController();
+        $controller = new TorrentEditController;
         $request = Request::create('/takeedit', 'POST', [
             'id' => 42,
             'name' => 'Updated torrent',
@@ -66,14 +66,14 @@ final class TorrentEditControllerTest extends TestCase
 
     public function test_legacy_update_rejects_external_returnto(): void
     {
-        $torrent = new Torrent();
+        $torrent = new Torrent;
         $torrent->id = 42;
 
         /** @var TorrentEditRepository&Mockery\MockInterface $repository */
         $repository = Mockery::mock(TorrentEditRepository::class);
         $repository->shouldReceive('update')->once()->andReturn($torrent);
 
-        $controller = new TorrentEditController();
+        $controller = new TorrentEditController;
         $request = Request::create('/takeedit', 'POST', [
             'id' => 42,
             'name' => 'Updated torrent',

@@ -2,12 +2,10 @@
 
 namespace App\Filament\Resources\System\MedalResource\Pages;
 
-use Filament\Actions\CreateAction;
 use App\Filament\PageList;
 use App\Filament\Resources\System\MedalResource;
 use App\Models\Medal;
-use Filament\Pages\Actions;
-use Filament\Resources\Pages\ListRecords;
+use Filament\Actions\CreateAction;
 use Illuminate\Database\Eloquent\Builder;
 
 class ListMedals extends PageList

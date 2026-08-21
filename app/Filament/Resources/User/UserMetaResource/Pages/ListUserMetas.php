@@ -2,12 +2,11 @@
 
 namespace App\Filament\Resources\User\UserMetaResource\Pages;
 
-use Filament\Actions\Contracts\HasActions;
 use App\Filament\PageList;
 use App\Filament\Resources\User\UserMetaResource;
 use App\Models\UserMeta;
+use Filament\Actions\Contracts\HasActions;
 use Filament\Pages\Actions;
-use Filament\Resources\Pages\ListRecords;
 use Illuminate\Database\Eloquent\Builder;
 
 class ListUserMetas extends PageList implements HasActions
@@ -17,7 +16,7 @@ class ListUserMetas extends PageList implements HasActions
     protected function getHeaderActions(): array
     {
         return [
-//            Actions\CreateAction::make(),
+            //            Actions\CreateAction::make(),
         ];
     }
 
@@ -26,6 +25,4 @@ class ListUserMetas extends PageList implements HasActions
     {
         return UserMeta::query()->whereIn('meta_key', array_keys(UserMeta::$metaKeys));
     }
-
-
 }

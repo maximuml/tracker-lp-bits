@@ -2,10 +2,9 @@
 
 namespace App\Filament\Resources\User\UserResource\Pages;
 
+use App\Filament\Resources\User\UserResource;
 use Filament\Actions\Contracts\HasActions;
 use Filament\Actions\DeleteAction;
-use App\Filament\Resources\User\UserResource;
-use Filament\Pages\Actions;
 use Filament\Resources\Pages\EditRecord;
 
 class EditUser extends EditRecord implements HasActions

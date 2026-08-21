@@ -8,9 +8,11 @@
  * @property string $updated_at
  * @property string $autoload
  */
+
 namespace App\Models;
 
 use App\Models\Traits\NexusActivityLogTrait;
+use App\Support\Locale;
 use App\Support\SupportContext;
 use Illuminate\Support\Arr;
 use Nexus\Database\NexusDB;
@@ -19,46 +21,45 @@ class Setting extends NexusModel
 {
     use NexusActivityLogTrait;
 
-    /** @var  list<string> */
+    /** @var list<string> */
     protected $fillable = ['name', 'value', 'autoload'];
 
-    /** @var  bool */
+    /** @var bool */
     public $timestamps = true;
 
     const PERMISSION_NO_CLASS = 100;
 
-    /** @var  array<int|string, mixed> */
+    /** @var array<int|string, mixed> */
     public static array $permissionMustHaveClass = ['defaultclass', 'staffmem'];
 
     const DIRECT_PERMISSION_CACHE_KEY_PREFIX = 'nexus_direct_permissions_';
+
     const ROLE_PERMISSION_CACHE_KEY_PREFIX = 'nexus_role_permissions_';
 
     const TORRENT_GLOBAL_STATE_CACHE_KEY = 'global_promotion_state';
+
     const USER_TOKEN_PERMISSION_ALLOWED_CACHE_KRY = 'user_token_permission_allowed';
 
     /**
      * get setting autoload = yes with cache
-     * @param  ?string  $name
-     * @param  mixed  $default
      */
     public static function get(?string $name = null, mixed $default = null): mixed
     {
         static $settings = null;
         if (is_null($settings)) {
-            $settings = NexusDB::remember("nexus_settings_in_laravel", 600, function () {
+            $settings = NexusDB::remember('nexus_settings_in_laravel', 600, function () {
                 return self::getFromDb();
             });
         }
         if (is_null($name)) {
             return $settings;
         }
+
         return Arr::get($settings, $name, $default);
     }
 
     /**
      * get setting autoload = yes without cache
-     * @param  ?string  $name
-     * @param  mixed  $default
      */
     public static function getFromDb(?string $name = null, mixed $default = null): mixed
     {
@@ -71,13 +72,12 @@ class Setting extends NexusModel
         if (is_null($name)) {
             return $result;
         }
+
         return Arr::get($result, $name, $default);
     }
 
     /**
      * get from db by name, generally used for `autoload` = 'no'
-     * @param  string  $name
-     * @param  mixed  $default
      */
     public static function getByName(string $name, mixed $default = null): mixed
     {
@@ -85,12 +85,12 @@ class Setting extends NexusModel
         if ($result) {
             return self::normalizeValue($result);
         }
+
         return $default;
     }
 
     /**
-     * @param  string  $pattern
-     * @return  array<int|string, mixed>
+     * @return array<int|string, mixed>
      */
     public static function getByNameLike(string $pattern): array
     {
@@ -99,22 +99,23 @@ class Setting extends NexusModel
         foreach ($list as $value) {
             Arr::set($result, $value->name, self::normalizeValue($value));
         }
+
         return $result;
     }
 
     /**
-     * @param  Setting  $setting
-     * @return  mixed
+     * @return mixed
      */
     public static function normalizeValue(Setting $setting)
     {
         $value = $setting->value;
-        if (!is_null($value)) {
+        if (! is_null($value)) {
             $arr = json_decode($value, true);
             if (is_array($arr)) {
                 $value = $arr;
             }
         }
+
         return $value;
     }
 
@@ -124,100 +125,98 @@ class Setting extends NexusModel
         $redis = NexusDB::redis();
         $key = self::USER_TOKEN_PERMISSION_ALLOWED_CACHE_KRY;
         $redis->unlink($key);
-        //must not use cache
+        // must not use cache
         if (empty($allowed)) {
-            $allowed = self::getFromDb("permission.user_token_allowed");
+            $allowed = self::getFromDb('permission.user_token_allowed');
         }
-        if (!empty($allowed)) {
+        if (! empty($allowed)) {
             $redis->sAdd($key, ...$allowed);
         }
     }
 
     public static function getDefaultLang(): string
     {
-        return (string) (self::get("main.defaultlang") ?: 'en');
+        return (string) (self::get('main.defaultlang') ?: 'en');
     }
 
     public static function getIsUseChallengeResponseAuthentication(): bool
     {
-        return self::get("security.use_challenge_response_authentication") == "yes";
+        return self::get('security.use_challenge_response_authentication') == 'yes';
     }
 
     public static function getUploadTorrentMaxSize(): int
     {
-        return intval(self::get("main.max_torrent_size"));
+        return intval(self::get('main.max_torrent_size'));
     }
 
     public static function getUploadTorrentMaxPrice(): int
     {
-        return intval(self::get("torrent.max_price"));
+        return intval(self::get('torrent.max_price'));
     }
 
     public static function getIsPaidTorrentEnabled(): bool
     {
-        return self::get("torrent.paid_torrent_enabled") == "yes";
+        return self::get('torrent.paid_torrent_enabled') == 'yes';
     }
 
     public static function getUploadDenyApprovalDenyCount(): int
     {
-        return intval(self::get("main.upload_deny_approval_deny_count"));
+        return intval(self::get('main.upload_deny_approval_deny_count'));
     }
 
     public static function getOfferSkipApprovedCount(): int
     {
-        return intval(self::get("main.offer_skip_approved_count"));
+        return intval(self::get('main.offer_skip_approved_count'));
     }
 
     public static function getLargeTorrentSize(): int
     {
-        return intval(self::get("torrent.largesize"));
+        return intval(self::get('torrent.largesize'));
     }
 
     public static function getLargeTorrentSpState(): int
     {
-        return intval(self::get("torrent.largepro"));
+        return intval(self::get('torrent.largepro'));
     }
 
     public static function getUploadTorrentHalfDownProbability(): int
     {
-        return intval(self::get("torrent.randomhalfleech"));
+        return intval(self::get('torrent.randomhalfleech'));
     }
 
     public static function getUploadTorrentFreeProbability(): int
     {
-        return intval(self::get("torrent.randomfree"));
+        return intval(self::get('torrent.randomfree'));
     }
 
     public static function getUploadTorrentTwoTimesUpProbability(): int
     {
-        return intval(self::get("torrent.randomtwoup"));
+        return intval(self::get('torrent.randomtwoup'));
     }
 
     public static function getUploadTorrentFreeTwoTimesUpProbability(): int
     {
-        return intval(self::get("torrent.randomtwoupfree"));
+        return intval(self::get('torrent.randomtwoupfree'));
     }
 
     public static function getUploadTorrentHalfDownTwoTimesUpProbability(): int
     {
-        return intval(self::get("torrent.randomtwouphalfdown"));
+        return intval(self::get('torrent.randomtwouphalfdown'));
     }
 
     public static function getUploadTorrentOneThirdDownProbability(): int
     {
-        return intval(self::get("torrent.randomthirtypercentdown"));
+        return intval(self::get('torrent.randomthirtypercentdown'));
     }
 
     public static function getUploadTorrentRewardBonus(): int
     {
-        return intval(self::get("bonus.uploadtorrent"));
+        return intval(self::get('bonus.uploadtorrent'));
     }
-
-
 
     public static function getIsUploadOpenAtWeekend(): bool
     {
-        return self::get("main.sptime") == "yes";
+        return self::get('main.sptime') == 'yes';
     }
 
     public static function getIsComplainEnabled(): bool
@@ -236,100 +235,103 @@ class Setting extends NexusModel
         if (empty($result)) {
             $result = SupportContext::getServerValue('HTTP_HOST', 'localhost');
         }
+
         return rtrim($result, '/');
     }
 
     public static function getSiteName(): string
     {
-        return self::get("basic.SITENAME");
+        return self::get('basic.SITENAME');
     }
 
     public static function getTorrentSaveDir(): string
     {
-        return self::get("main.torrent_dir");
+        return self::get('main.torrent_dir');
     }
 
     public static function getSmtpType(): string
     {
-        return self::get("smtp.smtptype");
+        return self::get('smtp.smtptype');
     }
 
     /** @return  array<int|string, mixed> */
     public static function getPermissionUserTokenAllowed(): array
     {
-        return self::get("permission.user_token_allowed");
+        return self::get('permission.user_token_allowed');
     }
 
-    public static function getBackupExportPath(): string|null
+    public static function getBackupExportPath(): ?string
     {
-        return self::get("backup.export_path");
+        return self::get('backup.export_path');
     }
 
     public static function getBackupRetentionCount(): int
     {
-        return (int)self::get("backup.retention_count");
+        return (int) self::get('backup.retention_count');
     }
 
     public static function getIsRequireSeedSectionEnabled(): bool
     {
-        return self::get("require_seed_section.enabled") == "yes";
+        return self::get('require_seed_section.enabled') == 'yes';
     }
 
     public static function getRequireSeedSectionSeederGte(): int
     {
-        return (int)self::get("require_seed_section.seeder_gte");
+        return (int) self::get('require_seed_section.seeder_gte');
     }
 
     public static function getRequireSeedSectionSeederLte(): int
     {
-        return (int)self::get("require_seed_section.seeder_lte");
+        return (int) self::get('require_seed_section.seeder_lte');
     }
 
     public static function getRequireSeedSectionMenuTitle(): string
     {
-        return self::get("require_seed_section.menu_title", \App\Support\Locale::trans("torrent.require_seed_section_menu_title", [], null));
+        return self::get('require_seed_section.menu_title', Locale::trans('torrent.require_seed_section_menu_title', [], null));
     }
 
     public static function getRequireSeedSectionPromotionState(): int
     {
-        return self::get("require_seed_section.promotion_state", Torrent::REQUIRE_SEED_SECTION_DEFAULT_PROMOTION_STATE);
+        return self::get('require_seed_section.promotion_state', Torrent::REQUIRE_SEED_SECTION_DEFAULT_PROMOTION_STATE);
     }
 
     public static function getRequireSeedSectionBonusAdditionFactor(): float
     {
-        return self::get("require_seed_section.bonus_addition_factor", Torrent::REQUIRE_SEED_SECTION_DEFAULT_BONUS_ADDITION_FACTOR);
+        return self::get('require_seed_section.bonus_addition_factor', Torrent::REQUIRE_SEED_SECTION_DEFAULT_BONUS_ADDITION_FACTOR);
     }
 
     /** @return  array<int|string, mixed> */
     public static function getRequireSeedSectionTags(): array
     {
-        return self::get("require_seed_section.require_tags", []);
+        return self::get('require_seed_section.require_tags', []);
     }
 
     public static function getRequireSeedSectionTorrentCountMax(): int
     {
-        return self::get("require_seed_section.torrent_count_max", Torrent::REQUIRE_SEED_SECTION_DEFAULT_TORRENT_COUNT_MAX);
+        return self::get('require_seed_section.torrent_count_max', Torrent::REQUIRE_SEED_SECTION_DEFAULT_TORRENT_COUNT_MAX);
     }
 
     public static function getBonusMinSize(): int
     {
-        return (int)self::get("bonus.min_size");
+        return (int) self::get('bonus.min_size');
     }
 
     /** @return  array<int|string, mixed> */
     public static function getBonusRewardOptions(): array
     {
-        $result = self::get("torrent.reward_bonus_options");
+        $result = self::get('torrent.reward_bonus_options');
         if (is_string($result) && trim($result) !== '') {
             $split = preg_split('/[,，\s]+/', trim($result));
+
             return $split === false ? [] : $split;
         }
+
         return Torrent::BONUS_REWARD_VALUES;
     }
 
     public static function getBonusRewardTimesLimit(): int
     {
-        return (int)self::get("torrent.reward_times_limit", 0);
+        return (int) self::get('torrent.reward_times_limit', 0);
     }
 
     public static function getIsRecordAnnounceLog(): bool
@@ -344,7 +346,7 @@ class Setting extends NexusModel
 
     public static function getSelfEnableBonus(): int
     {
-        return (int)self::get("bonus.self_enable", BonusLogs::DEFAULT_BONUS_SELF_ENABLE);
+        return (int) self::get('bonus.self_enable', BonusLogs::DEFAULT_BONUS_SELF_ENABLE);
     }
 
     public static function getIsSiteOnline(): bool

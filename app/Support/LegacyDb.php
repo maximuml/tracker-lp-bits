@@ -2,6 +2,7 @@
 
 namespace App\Support;
 
+use App\Repositories\TorrentRepository;
 use Nexus\Database\NexusDB;
 
 /**
@@ -42,11 +43,12 @@ final class LegacyDb
         $queries = array_map(static function (array $log) use ($grammar) {
             $bindings = array_map(static function ($binding) {
                 if (is_string($binding) && preg_match('//u', $binding) === false) {
-                    return '<binary:' . bin2hex($binding) . '>';
+                    return '<binary:'.bin2hex($binding).'>';
                 }
                 if (is_resource($binding) || gettype($binding) === 'resource (closed)') {
                     return '<resource>';
                 }
+
                 return $binding;
             }, $log['bindings']);
 
@@ -80,6 +82,6 @@ final class LegacyDb
      */
     public static function snatchInfo(int|string $torrentId, int|string $userId): array|false
     {
-        return \App\Repositories\TorrentRepository::getSnatchInfo($torrentId, $userId);
+        return TorrentRepository::getSnatchInfo($torrentId, $userId);
     }
 }

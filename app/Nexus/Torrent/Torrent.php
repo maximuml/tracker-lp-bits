@@ -2,6 +2,7 @@
 
 namespace Nexus\Torrent;
 
+use Nexus\Database\DatabaseException;
 use Nexus\Database\NexusDB;
 
 class Torrent
@@ -9,23 +10,22 @@ class Torrent
     /**
      * get torrent seeding or leeching status, download progress of someone
      *
-     * @param int $uid
-     * @param array $torrentIdArr
      * @return array
-     * @throws \Nexus\Database\DatabaseException
+     *
+     * @throws DatabaseException
      */
     public function listLeechingSeedingStatus(int $uid, array $torrentIdArr)
     {
         if (empty($torrentIdArr)) {
             return [];
         }
-        //seeding or leeching, from peers
+        // seeding or leeching, from peers
         $peerList = NexusDB::table('peers')
             ->where('userid', $uid)
             ->whereIn('torrent', $torrentIdArr)
             ->pluck('to_go', 'torrent')
             ->toArray();
-        //download progress, from snatched
+        // download progress, from snatched
         $snatchedList = [];
         $res = NexusDB::table('snatched')
             ->join('torrents', 'snatched.torrentid', '=', 'torrents.id')
@@ -57,6 +57,7 @@ class Torrent
                 'active_status' => $activeStatus,
             ];
         }
+
         return $snatchedList;
     }
 
@@ -68,12 +69,12 @@ class Torrent
         } elseif ($activeStatus == 'leeching') {
             $color = 'blue';
         }
-        $progress = ($progress * 100) . '%';
+        $progress = ($progress * 100).'%';
         $result = sprintf(
             '<div style="padding: 1px;margin-top: 2px;border: 1px solid #838383" title="%s"><div style="width: %s;background-color: %s;height: 2px"></div></div>',
-            $activeStatus . " $progress", $progress, $color
+            $activeStatus." $progress", $progress, $color
         );
+
         return $result;
     }
-
 }

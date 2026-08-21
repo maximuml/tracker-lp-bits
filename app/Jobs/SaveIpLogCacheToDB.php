@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\Repositories\IpLogRepository;
+use App\Support\Logger;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 
@@ -26,6 +27,6 @@ class SaveIpLogCacheToDB implements ShouldQueue
     public function handle(): void
     {
         IpLogRepository::saveToDB();
-        \App\Support\Logger::writeWithContext((string) "done", (string) 'info', (bool) false);
+        Logger::writeWithContext((string) 'done', (string) 'info', (bool) false);
     }
 }

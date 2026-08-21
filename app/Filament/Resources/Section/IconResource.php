@@ -2,28 +2,22 @@
 
 namespace App\Filament\Resources\Section;
 
-use Filament\Schemas\Schema;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Radio;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Actions\EditAction;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\DeleteBulkAction;
-use App\Filament\Resources\Section\IconResource\Pages\ListIcons;
+use App\Filament\OptionsTrait;
 use App\Filament\Resources\Section\IconResource\Pages\CreateIcon;
 use App\Filament\Resources\Section\IconResource\Pages\EditIcon;
-use App\Filament\OptionsTrait;
-use App\Filament\EditRedirectIndexTrait;
-use App\Filament\Resources\Section\IconResource\Pages;
-use App\Filament\Resources\Section\IconResource\RelationManagers;
+use App\Filament\Resources\Section\IconResource\Pages\ListIcons;
 use App\Models\Icon;
-use Filament\Forms;
+use App\Support\Locale;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Forms\Components\Radio;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Filament\Tables;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class IconResource extends Resource
 {
@@ -31,9 +25,9 @@ class IconResource extends Resource
 
     protected static ?string $model = Icon::class;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-ticket';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-ticket';
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Section';
+    protected static string|\UnitEnum|null $navigationGroup = 'Section';
 
     protected static ?int $navigationSort = 10;
 
@@ -52,32 +46,27 @@ class IconResource extends Resource
         return $schema
             ->components([
                 Textarea::make('tip')
-                    ->default(\App\Support\Locale::trans('label.icon.desc', [], null))
+                    ->default(Locale::trans('label.icon.desc', [], null))
                     ->disabled()
                     ->columnSpanFull()
-                    ->rows(18)
-                ,
+                    ->rows(18),
                 TextInput::make('name')
                     ->label(__('label.name'))
-                    ->required()
-                ,
+                    ->required(),
                 TextInput::make('folder')
                     ->label(__('label.icon.folder'))
                     ->required()
-                    ->helperText(__('label.icon.folder_help'))
-                ,
+                    ->helperText(__('label.icon.folder_help')),
                 Radio::make('multilang')
                     ->label(__('label.icon.multilang'))
                     ->options(self::$yesOrNo)
                     ->required()
-                    ->helperText(__('label.icon.multilang_help'))
-                ,
+                    ->helperText(__('label.icon.multilang_help')),
                 Radio::make('secondicon')
                     ->label(__('label.icon.secondicon'))
                     ->options(self::$yesOrNo)
                     ->required()
-                    ->helperText(__('label.icon.secondicon_help'))
-                ,
+                    ->helperText(__('label.icon.secondicon_help')),
                 TextInput::make('cssfile')->label(__('label.icon.cssfile'))->helperText(__('label.icon.cssfile_help')),
                 TextInput::make('designer')->label(__('label.icon.designer'))->helperText(__('label.icon.designer_help')),
                 Textarea::make('comment')->label(__('label.icon.comment'))->helperText(__('label.icon.comment_help')),

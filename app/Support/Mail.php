@@ -4,6 +4,7 @@ namespace App\Support;
 
 use App\Models\Setting;
 use App\Repositories\ToolRepository;
+use App\Support\Config\SiteConfig;
 use Illuminate\Support\Facades\Request;
 
 /**
@@ -22,7 +23,7 @@ final class Mail
      *
      * Backs the `sent_mail()` helper.
      *
-     * @param string|array<int, string> $multipleMail
+     * @param  string|array<int, string>  $multipleMail
      */
     public static function sentLegacy(
         string $to,
@@ -51,13 +52,13 @@ final class Mail
             $multipleMail,
             $hdrEncoding,
             [
-                'site_name' => (string) \App\Support\Config\SiteConfig::current()->basic->siteName(''),
-                'site_email' => (string) \App\Support\Config\SiteConfig::current()->main->siteEmail(''),
-                'smtp_type' => (string) \App\Support\Config\SiteConfig::current()->smtp->type('none'),
-                'smtp' => (string) \App\Support\Config\SiteConfig::current()->smtp->smtp(''),
-                'smtp_host' => (string) \App\Support\Config\SiteConfig::current()->smtp->host(''),
-                'smtp_port' => (string) \App\Support\Config\SiteConfig::current()->smtp->port(''),
-                'smtp_from' => (string) \App\Support\Config\SiteConfig::current()->smtp->from(''),
+                'site_name' => (string) SiteConfig::current()->basic->siteName(''),
+                'site_email' => (string) SiteConfig::current()->main->siteEmail(''),
+                'smtp_type' => (string) SiteConfig::current()->smtp->type('none'),
+                'smtp' => (string) SiteConfig::current()->smtp->smtp(''),
+                'smtp_host' => (string) SiteConfig::current()->smtp->host(''),
+                'smtp_port' => (string) SiteConfig::current()->smtp->port(''),
+                'smtp_from' => (string) SiteConfig::current()->smtp->from(''),
             ]
         );
     }
@@ -114,17 +115,17 @@ final class Mail
         }
 
         if ($smtpType === 'advanced') {
-            $mid = md5(Network::clientIp() . $fromName);
+            $mid = md5(Network::clientIp().$fromName);
             $name = (string) Request::server('SERVER_NAME', $siteName);
             $headers = '';
             $headers .= "From: $fromName <$fromEmail>".$eol;
             $headers .= "Reply-To: $fromName <$fromEmail>".$eol;
             $headers .= "Return-Path: $fromName <$fromEmail>".$eol;
             $headers .= "Message-ID: <$mid thesystem@$name>".$eol;
-            $headers .= "X-Mailer: PHP v".phpversion().$eol;
-            $headers .= "MIME-Version: 1.0".$eol;
-            $headers .= "Content-type: text/html; charset=".$hdrEncoding.$eol;
-            $headers .= "X-Sender: PHP".$eol;
+            $headers .= 'X-Mailer: PHP v'.phpversion().$eol;
+            $headers .= 'MIME-Version: 1.0'.$eol;
+            $headers .= 'Content-type: text/html; charset='.$hdrEncoding.$eol;
+            $headers .= 'X-Sender: PHP'.$eol;
 
             if ($multiple) {
                 $bccMultipleMail = '';
@@ -133,7 +134,7 @@ final class Mail
                     if ($toemail === '') {
                         continue;
                     }
-                    $bccMultipleMail = $bccMultipleMail . ($bccMultipleMail !== '' ? ',' : '') . $toemail;
+                    $bccMultipleMail = $bccMultipleMail.($bccMultipleMail !== '' ? ',' : '').$toemail;
                 }
                 $headers .= "Bcc: $bccMultipleMail".$eol;
             }
@@ -163,7 +164,7 @@ final class Mail
         }
 
         if ($smtpType === 'external') {
-            $toolRep = new ToolRepository();
+            $toolRep = new ToolRepository;
 
             return (bool) $toolRep->sendMail($to, $subject, $body);
         }

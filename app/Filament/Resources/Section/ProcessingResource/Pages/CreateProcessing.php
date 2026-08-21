@@ -2,10 +2,8 @@
 
 namespace App\Filament\Resources\Section\ProcessingResource\Pages;
 
-use App\Filament\Resources\Section\ProcessingResource;
-use Filament\Pages\Actions;
-use Filament\Resources\Pages\CreateRecord;
 use App\Filament\Resources\Section\CodecResource\Pages\CreateCodec;
+use App\Filament\Resources\Section\ProcessingResource;
 
 class CreateProcessing extends CreateCodec
 {

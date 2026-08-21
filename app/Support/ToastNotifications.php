@@ -32,7 +32,7 @@ final class ToastNotifications
         $notifications = MessageRepository::getUnreadPmNotifications($userId, $lastPmId, self::LIMIT_PM);
         foreach (ShoutboxRepository::getMentions($userId, $lastShoutId) as $mention) {
             $notifications[] = [
-                'id' => 'shout_' . $mention['id'],
+                'id' => 'shout_'.$mention['id'],
                 'type' => 'shoutbox-mention',
                 'title' => 'Shoutbox mention',
                 'body' => self::truncate((string) $mention['text']),
@@ -65,6 +65,6 @@ final class ToastNotifications
             return $text;
         }
 
-        return mb_substr($text, 0, $length - 1) . '…';
+        return mb_substr($text, 0, $length - 1).'…';
     }
 }

@@ -7,7 +7,6 @@ use Illuminate\Support\Facades\DB;
 
 class LanguageTableSeeder extends Seeder
 {
-
     /**
      * Auto generated seed file
      *
@@ -15,13 +14,11 @@ class LanguageTableSeeder extends Seeder
      */
     public function run()
     {
-        
 
         DB::table('language')->delete();
-        
-        DB::table('language')->insert(array (
-            0 => 
-            array (
+
+        DB::table('language')->insert([
+            0 => [
                 'id' => 6,
                 'lang_name' => 'English',
                 'flagpic' => 'uk.gif',
@@ -30,9 +27,8 @@ class LanguageTableSeeder extends Seeder
                 'site_lang' => 1,
                 'site_lang_folder' => 'en',
                 'trans_state' => 'up-to-date',
-            ),
-        ));
-        
-        
+            ],
+        ]);
+
     }
 }

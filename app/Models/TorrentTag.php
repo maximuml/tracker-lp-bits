@@ -7,17 +7,16 @@
  * @property string|null $created_at
  * @property string|null $updated_at
  */
+
 namespace App\Models;
 
 class TorrentTag extends NexusModel
 {
-    /** @var  bool */
+    /** @var bool */
     public $timestamps = true;
 
-    /** @var  list<string> */
+    /** @var list<string> */
     protected $fillable = [
-        'torrent_id', 'tag_id', 'priority'
+        'torrent_id', 'tag_id', 'priority',
     ];
-
-
 }

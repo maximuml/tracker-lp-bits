@@ -112,13 +112,14 @@ final class BonusConfig extends Config
     }
 
     /**
-     * @param array<int|float, float> $default
+     * @param  array<int|float, float>  $default
      * @return array<int|float, float>
      */
     public function attendanceContinuous(array $default = []): array
     {
         /** @var array<int|float, float> $value */
         $value = $this->array('attendance_continuous', $default);
+
         return array_map('floatval', $value);
     }
 

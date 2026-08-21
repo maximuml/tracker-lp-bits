@@ -1,16 +1,23 @@
 <?php
+
+use App\Support\SupportContext;
+
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
-if (!isset($CURUSER)) $CURUSER = (array) (\App\Support\SupportContext::getUser() ?? []);
-if (!isset($lang_donated)) $lang_donated = (array) (\App\Support\SupportContext::getGlobal('lang_donated') ?? []);
+if (! isset($CURUSER)) {
+    $CURUSER = (array) (SupportContext::getUser() ?? []);
+}
+if (! isset($lang_donated)) {
+    $lang_donated = (array) (SupportContext::getGlobal('lang_donated') ?? []);
+}
 
 $error = (string) ($error ?? '');
 ?>
 
 <h1>Update Users Donated Amounts</h1>
-<?php if ($error !== ''): ?>
+<?php if ($error !== '') { ?>
     <p align="center"><font class="striking"><?php echo htmlspecialchars($error); ?></font></p>
-<?php endif; ?>
+<?php } ?>
 <form method="post" action="donated.php">
 <?php echo csrf_field(); ?>
 <table border="1" cellspacing="0" cellpadding="5">

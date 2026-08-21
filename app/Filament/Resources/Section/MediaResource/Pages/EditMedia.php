@@ -2,11 +2,9 @@
 
 namespace App\Filament\Resources\Section\MediaResource\Pages;
 
-use Filament\Actions\DeleteAction;
-use App\Filament\Resources\Section\MediaResource;
-use Filament\Pages\Actions;
-use Filament\Resources\Pages\EditRecord;
 use App\Filament\Resources\Section\CodecResource\Pages\EditCodec;
+use App\Filament\Resources\Section\MediaResource;
+use Filament\Actions\DeleteAction;
 
 class EditMedia extends EditCodec
 {

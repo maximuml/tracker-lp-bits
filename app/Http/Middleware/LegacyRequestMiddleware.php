@@ -3,7 +3,10 @@
 namespace App\Http\Middleware;
 
 use App\Repositories\PageLayoutRepository;
+use App\Support\Bootstrap;
+use App\Support\LegacyAuth;
 use App\Support\LegacyBootstrap;
+use App\Support\Locale;
 use App\Support\SupportContext;
 use Closure;
 use Illuminate\Http\Request;
@@ -33,9 +36,13 @@ final class LegacyRequestMiddleware
     /** @var array<int, string> */
     private const PARKED_SCRIPTS = [
         'viewsnatches', 'users', 'forums', 'report', 'cheaterbox', 'upload',
-        'offers', 'comment', 'userdetails', 'checkuser', 'invite', 'bitbucket-upload',
+        'offers', 'comment', 'userdetails', 'checkuser', 'takeconfirm', 'invite', 'bitbucket-upload',
         'mybonus', 'userhistory', 'moresmilies', 'torrents', 'getattachment',
         'sendmessage', 'reports', 'self-enable', 'friends', 'settings', 'topten', 'attendance',
+        'donorlist', 'warned', 'nowarn', 'bans', 'cheaterbox', 'cheaters', 'iphistory', 'ipcheck', 'ipsearch',
+        'staffbox', 'stats', 'allagents',
+        'delacctadmin', 'deletedisabled', 'massmail', 'maxlogin',
+        'catmanage', 'forummanage', 'moforums', 'fields', 'formats', 'videoformats',
     ];
 
     public function handle(Request $request, Closure $next): Response
@@ -48,7 +55,7 @@ final class LegacyRequestMiddleware
         // before the legacy bootstrap runs (Nexus/SupportContext read from it).
         $this->bindRequest($request);
 
-        $rootpath = base_path() . '/';
+        $rootpath = base_path().'/';
         LegacyBootstrap::boot($request, $rootpath);
 
         $script = $this->detectScript($request);
@@ -56,7 +63,7 @@ final class LegacyRequestMiddleware
         $this->loadScriptLanguage($script, $rootpath);
 
         if (in_array($script, self::PARKED_SCRIPTS, true)) {
-            \App\Support\LegacyAuth::parkedFromContext();
+            LegacyAuth::parkedFromContext();
         }
 
         app(PageLayoutRepository::class)->prepareAccess();
@@ -69,7 +76,7 @@ final class LegacyRequestMiddleware
         app(PageLayoutRepository::class)->flushAccess();
 
         if ($this->detectScript($request) === 'index') {
-            \App\Support\Bootstrap::autoClean((bool) false);
+            Bootstrap::autoClean((bool) false);
         }
     }
 
@@ -122,7 +129,7 @@ final class LegacyRequestMiddleware
             $page = preg_replace('/\.php$/', '', $executedScript) ?? '';
             $page = preg_replace('/[^a-zA-Z0-9_-]/', '', $page) ?? '';
 
-            if ($page !== '' && preg_match('#^/' . preg_quote($executedScript, '#') . '(/.*)$#', $requestPath, $matches)) {
+            if ($page !== '' && preg_match('#^/'.preg_quote($executedScript, '#').'(/.*)$#', $requestPath, $matches)) {
                 $pathInfo = $matches[1];
             }
         }
@@ -132,14 +139,14 @@ final class LegacyRequestMiddleware
                 $routePath = '/';
                 $pathInfo = '';
             } elseif (preg_match('#^/([a-zA-Z0-9_-]+)(?:\.php)?(/.*)?$#', $requestPath, $matches)) {
-                $routePath = '/' . $matches[1];
+                $routePath = '/'.$matches[1];
                 $pathInfo = $matches[2] ?? '';
             } else {
                 $routePath = $requestPath;
                 $pathInfo = (string) ($server['PATH_INFO'] ?? '');
             }
         } else {
-            $routePath = '/' . $page;
+            $routePath = '/'.$page;
             if ($pathInfo !== '') {
                 $server['PATH_INFO'] = $pathInfo;
             } elseif (isset($server['PATH_INFO'])) {
@@ -164,7 +171,7 @@ final class LegacyRequestMiddleware
         // the /confirmemail/{path?} route). The controller reads the remainder
         // from the request path info / route parameter instead.
         if ($script === 'confirmemail' && $pathInfo !== '') {
-            $routePath = '/confirmemail' . $pathInfo;
+            $routePath = '/confirmemail'.$pathInfo;
             $pathInfo = '';
             if (isset($server['PATH_INFO'])) {
                 unset($server['PATH_INFO']);
@@ -176,17 +183,17 @@ final class LegacyRequestMiddleware
 
         if ($script === 'details' || $script === 'torrent') {
             if (isset($query['id'])) {
-                $routePath = '/details/' . (int) $query['id'];
+                $routePath = '/details/'.(int) $query['id'];
                 unset($query['id']);
             } elseif ($pathInfo !== '') {
-                $routePath = '/details' . $pathInfo;
+                $routePath = '/details'.$pathInfo;
             }
         } elseif ($script === 'comment') {
             $commentAction = (string) ($query['action'] ?? '');
             $commentId = (int) ($query['cid'] ?? 0);
             if (in_array($commentAction, ['edit', 'delete', 'vieworiginal'], true)) {
                 unset($query['action'], $query['cid']);
-                $routePath = '/comment/' . $commentId . '/' . $commentAction;
+                $routePath = '/comment/'.$commentId.'/'.$commentAction;
             } elseif ($commentAction === 'add' && $method === 'GET') {
                 unset($query['action']);
                 $routePath = '/comment/add';
@@ -199,13 +206,13 @@ final class LegacyRequestMiddleware
         }
 
         $queryString = http_build_query($query, '', '&', PHP_QUERY_RFC3986);
-        $uri = $routePath . ($queryString !== '' ? '?' . $queryString : '');
+        $uri = $routePath.($queryString !== '' ? '?'.$queryString : '');
 
         $server['REQUEST_URI'] = $uri;
         $server['REQUEST_METHOD'] = $method;
-        $server['SCRIPT_NAME'] = '/' . $script . '.php';
-        $server['SCRIPT_FILENAME'] = public_path($script . '.php');
-        $server['PHP_SELF'] = '/' . $script . '.php' . $pathInfo;
+        $server['SCRIPT_NAME'] = '/'.$script.'.php';
+        $server['SCRIPT_FILENAME'] = public_path($script.'.php');
+        $server['PHP_SELF'] = '/'.$script.'.php'.$pathInfo;
 
         if ($pathInfo !== '') {
             $server['PATH_INFO'] = $pathInfo;
@@ -221,7 +228,7 @@ final class LegacyRequestMiddleware
     private function isLaravelOnlyPath(string $requestPath): bool
     {
         foreach (self::LARAVEL_ONLY_PREFIXES as $prefix) {
-            if ($requestPath === '/' . $prefix || str_starts_with($requestPath, '/' . $prefix)) {
+            if ($requestPath === '/'.$prefix || str_starts_with($requestPath, '/'.$prefix)) {
                 return true;
             }
         }
@@ -267,12 +274,12 @@ final class LegacyRequestMiddleware
     private function loadScriptLanguage(string $script, string $rootpath): void
     {
         $scriptLangFiles = array_unique(array_merge(
-            [$script . '.php'],
+            [$script.'.php'],
             self::EXTRA_LANG_FILES[$script] ?? []
         ));
 
         foreach ($scriptLangFiles as $scriptLangFile) {
-            $langPath = $rootpath . \App\Support\Locale::scriptFilePath((string) $scriptLangFile, (bool) false, (string) "");
+            $langPath = $rootpath.Locale::scriptFilePath((string) $scriptLangFile, (bool) false, (string) '');
             if (! is_file($langPath)) {
                 continue;
             }

@@ -22,11 +22,11 @@ final class Tracker
      */
     public static function schemaAndHost(int $trackerUrlId, bool $combine = false): array|string
     {
-        $log = "tracker_url_id: $trackerUrlId, combine: " . ($combine ? 'true' : 'false');
+        $log = "tracker_url_id: $trackerUrlId, combine: ".($combine ? 'true' : 'false');
         $url = TrackerUrl::getById($trackerUrlId);
 
         if (empty($url)) {
-            $ssl_torrent = \App\Support\Url::isSecure() ? 'https://' : 'http://';
+            $ssl_torrent = Url::isSecure() ? 'https://' : 'http://';
             $base_announce_url = sprintf(
                 '%s/%s',
                 trim(Setting::getBaseUrl(), '/'),
@@ -34,7 +34,7 @@ final class Tracker
             );
             $log .= ', ById no value';
         } else {
-            $ssl_torrent = parse_url($url, PHP_URL_SCHEME) . '://';
+            $ssl_torrent = parse_url($url, PHP_URL_SCHEME).'://';
             $base_announce_url = substr($url, strlen($ssl_torrent));
             $log .= ', ById has value';
         }
@@ -42,7 +42,7 @@ final class Tracker
         Logger::writeWithContext("$log, ssl_torrent: $ssl_torrent, base_announce_url: $base_announce_url");
 
         if ($combine) {
-            return $ssl_torrent . $base_announce_url;
+            return $ssl_torrent.$base_announce_url;
         }
 
         return compact('ssl_torrent', 'base_announce_url');

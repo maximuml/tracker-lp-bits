@@ -1,5 +1,8 @@
 <?php
+
 namespace Nexus\Plugin;
+
+use App\Support\Logger;
 
 class Plugin
 {
@@ -12,10 +15,10 @@ class Plugin
 
     private static bool $started = false;
 
-//    public function __construct()
-//    {
-//        $this->start();
-//    }
+    //    public function __construct()
+    //    {
+    //        $this->start();
+    //    }
 
     public function start(): void
     {
@@ -30,20 +33,21 @@ class Plugin
 
     public static function enabled($name): bool
     {
-        return !empty(self::$providers[$name]['providers']);
+        return ! empty(self::$providers[$name]['providers']);
     }
 
     public static function listEnabled(): array
     {
         $result = [];
-        //plugins are more exactly
+        // plugins are more exactly
         foreach (self::$plugins as $id => $plugin) {
             $result[$id] = $plugin->getVersion();
         }
+
         return $result;
     }
 
-    public static function getById($id) :BasePlugin|null
+    public static function getById($id): ?BasePlugin
     {
         return self::$plugins[$id] ?? null;
     }
@@ -57,13 +61,14 @@ class Plugin
                 return new $className;
             }
         }
+
         return null;
     }
 
     private function bootPlugins()
     {
         foreach (self::$providers as $providers) {
-            if (!isset($providers['providers'])) {
+            if (! isset($providers['providers'])) {
                 continue;
             }
             $provider = $providers['providers'][0];
@@ -73,17 +78,18 @@ class Plugin
                 if (class_exists($className)) {
                     $constantName = "$className::COMPATIBLE_NP_VERSION";
                     if (defined($constantName) && version_compare(VERSION_NUMBER, constant($constantName), '<')) {
-                        \App\Support\Logger::writeWithContext((string) sprintf("class: %s require NP_VERSION: %s > current: %s", $className, constant($constantName), VERSION_NUMBER), (string) "error", (bool) false);
+                        Logger::writeWithContext((string) sprintf('class: %s require NP_VERSION: %s > current: %s', $className, constant($constantName), VERSION_NUMBER), (string) 'error', (bool) false);
+
                         continue;
                     }
                     /**
                      * @var BasePlugin $className
                      */
                     $plugin = new $className;
-//                    $pluginIdName = "$className::ID";
-//                    if (defined($pluginIdName)) {
-//                        self::$plugins[constant($pluginIdName)] = $plugin;
-//                    }
+                    //                    $pluginIdName = "$className::ID";
+                    //                    if (defined($pluginIdName)) {
+                    //                        self::$plugins[constant($pluginIdName)] = $plugin;
+                    //                    }
                     self::$plugins[$plugin->getId()] = $plugin;
                     call_user_func([$plugin, 'boot']);
                 }
@@ -94,7 +100,7 @@ class Plugin
     private function loadProviders()
     {
         if (is_null(self::$providers)) {
-            $path = ROOT_PATH . 'bootstrap/cache/packages.php';
+            $path = ROOT_PATH.'bootstrap/cache/packages.php';
             if (file_exists($path)) {
                 self::$providers = require $path;
             } else {
@@ -102,8 +108,4 @@ class Plugin
             }
         }
     }
-
-
-
-
 }

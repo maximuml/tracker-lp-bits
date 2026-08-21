@@ -3,9 +3,10 @@
 namespace App\Policies;
 
 use App\Auth\Permission;
-use App\Models\Setting;
 use App\Models\Torrent;
 use App\Models\User;
+use App\Support\Config\SiteConfig;
+use App\Support\Logger;
 use App\Support\TorrentAccess;
 
 class TorrentPolicy extends BasePolicy
@@ -15,6 +16,7 @@ class TorrentPolicy extends BasePolicy
         if ($ability === 'download') {
             return null;
         }
+
         return parent::before($user, $ability);
     }
 
@@ -25,11 +27,11 @@ class TorrentPolicy extends BasePolicy
 
     public function view(User $user, Torrent $torrent): bool
     {
-        if ($torrent->banned === 'yes' && !Permission::canViewBannedTorrent($user) && $torrent->owner != $user->id) {
+        if ($torrent->banned === 'yes' && ! Permission::canViewBannedTorrent($user) && $torrent->owner != $user->id) {
             return false;
         }
 
-        if (!TorrentAccess::canAccess($torrent->id, $user->id) && $torrent->owner != $user->id) {
+        if (! TorrentAccess::canAccess($torrent->id, $user->id) && $torrent->owner != $user->id) {
             return false;
         }
 
@@ -73,15 +75,16 @@ class TorrentPolicy extends BasePolicy
         }
 
         $approvalNotAllowed = $torrent->approval_status != Torrent::APPROVAL_STATUS_ALLOW
-            && !\App\Support\Config\SiteConfig::current()->torrent->approvalStatusNoneVisible();
+            && ! SiteConfig::current()->torrent->approvalStatusNoneVisible();
         $allowOwnerDownload = $torrent->owner == $user->id;
         $canSeedBanned = Permission::canViewBannedTorrent($user);
         $canAccessTorrent = TorrentAccess::canAccess($torrent->id, $user->id);
 
-        if ((($torrent->banned == 'yes' || ($approvalNotAllowed && !$allowOwnerDownload)) && !$canSeedBanned)
-            || !$canAccessTorrent
+        if ((($torrent->banned == 'yes' || ($approvalNotAllowed && ! $allowOwnerDownload)) && ! $canSeedBanned)
+            || ! $canAccessTorrent
         ) {
-            \App\Support\Logger::writeWithContext((string) sprintf("[DENY_DOWNLOAD], user: %s, approvalNotAllowed: %s, allowOwnerDownload: %s, canSeedBanned: %s, canAccessTorrent: %s", $user->id, $approvalNotAllowed ? 'true' : 'false', $allowOwnerDownload ? 'true' : 'false', $canSeedBanned ? 'true' : 'false', $canAccessTorrent ? 'true' : 'false'), (string) 'error', (bool) false);
+            Logger::writeWithContext((string) sprintf('[DENY_DOWNLOAD], user: %s, approvalNotAllowed: %s, allowOwnerDownload: %s, canSeedBanned: %s, canAccessTorrent: %s', $user->id, $approvalNotAllowed ? 'true' : 'false', $allowOwnerDownload ? 'true' : 'false', $canSeedBanned ? 'true' : 'false', $canAccessTorrent ? 'true' : 'false'), (string) 'error', (bool) false);
+
             return false;
         }
 

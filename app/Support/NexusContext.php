@@ -5,6 +5,7 @@ namespace App\Support;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\Config\SiteConfig;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 /**
  * Per-request value object that holds all legacy runtime state.
@@ -75,7 +76,7 @@ final class NexusContext
 
     public static function fromRequest(Request $request): self
     {
-        $context = new self();
+        $context = new self;
         $context->setFromRequest($request);
 
         return $context;
@@ -107,7 +108,7 @@ final class NexusContext
         foreach ($files as $key => $value) {
             if (is_array($value)) {
                 $normalized[$key] = $this->normalizeFiles($value);
-            } elseif ($value instanceof \Symfony\Component\HttpFoundation\File\UploadedFile) {
+            } elseif ($value instanceof UploadedFile) {
                 $normalized[$key] = [
                     'name' => $value->getClientOriginalName(),
                     'type' => $value->getClientMimeType(),

@@ -2,11 +2,10 @@
 
 namespace App\Filament;
 
-use Filament\Support\Enums\Width;
-use Filament\Tables\Enums\FiltersLayout;
 use Closure;
 use Filament\Resources\Pages\ManageRecords;
-use Illuminate\Database\Eloquent\Model;
+use Filament\Support\Enums\Width;
+use Filament\Tables\Enums\FiltersLayout;
 
 class PageListSingle extends ManageRecords
 {

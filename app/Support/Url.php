@@ -2,7 +2,7 @@
 
 namespace App\Support;
 
-use App\Models\Setting;
+use App\Support\Config\SiteConfig;
 use Nexus\Nexus;
 
 /**
@@ -16,7 +16,7 @@ final class Url
     public static function isSecure(): bool
     {
         if (Environment::isConsole()) {
-            return \App\Support\Config\SiteConfig::current()->security->secureLogin();
+            return SiteConfig::current()->security->secureLogin();
         }
 
         return Nexus::instance()->getRequestSchema() === 'https';
@@ -25,19 +25,19 @@ final class Url
     public static function schemeAndHost(bool $fromConfig = false): string
     {
         if (Environment::isConsole() || $fromConfig) {
-            $host = (string) \App\Support\Config\SiteConfig::current()->basic->baseUrl();
+            $host = (string) SiteConfig::current()->basic->baseUrl();
         } else {
             $host = Nexus::instance()->getRequestHost();
         }
 
-        return (self::isSecure() ? 'https' : 'http') . '://' . $host;
+        return (self::isSecure() ? 'https' : 'http').'://'.$host;
     }
 
     public static function baseUrl(): string
     {
         $url = self::schemeAndHost();
 
-        if (!Environment::isConsole()) {
+        if (! Environment::isConsole()) {
             $requestUri = SupportContext::getServerValue('REQUEST_URI', '');
             $pos = strpos($requestUri, '?');
             $url .= $pos !== false ? substr($requestUri, 0, $pos) : $requestUri;

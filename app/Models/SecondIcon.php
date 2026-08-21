@@ -13,27 +13,28 @@
  * @property string $image
  * @property int $mode
  */
+
 namespace App\Models;
 
-
 use App\Models\Traits\NexusActivityLogTrait;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class SecondIcon extends NexusModel
 {
     use NexusActivityLogTrait;
 
-    /** @var  string */
+    /** @var string */
     protected $table = 'secondicons';
 
-    /** @var  list<string> */
+    /** @var list<string> */
     protected $fillable = [
         'name', 'class_name', 'image', 'mode',
-        'source', 'medium', 'codec', 'audiocodec', 'standard', 'processing'
+        'source', 'medium', 'codec', 'audiocodec', 'standard', 'processing',
     ];
 
     /**
      * @param  array<string, mixed>  $data
-     * @return  array<string, mixed>
+     * @return array<string, mixed>
      */
     public static function formatFormData(array $data): array
     {
@@ -48,10 +49,11 @@ class SecondIcon extends NexusModel
         if ($data['mode'] === null) {
             $data['mode'] = 0;
         }
+
         return $data;
     }
 
-    /** @return  \Illuminate\Database\Eloquent\Relations\BelongsTo<SearchBox, $this> */
+    /** @return  BelongsTo<SearchBox, $this> */
     public function search_box()
     {
         return $this->belongsTo(SearchBox::class, 'mode', 'id');

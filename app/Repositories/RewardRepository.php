@@ -1,42 +1,42 @@
 <?php
+
 namespace App\Repositories;
 
 use App\Models\Reward;
 use App\Models\Torrent;
 use App\Models\User;
-use Google\Service\ToolResults\StepLabelsEntry;
+use App\Support\LegacyDb;
+use App\Support\Logger;
 use Illuminate\Support\Facades\DB;
 
 class RewardRepository extends BaseRepository
 {
     /**
      * @param  array<int|string, mixed>  $params
-     * @return  mixed
+     * @return mixed
      */
     public function getList(array $params)
     {
         $query = Reward::query()->with(['user']);
-        if (!empty($params['torrent_id'])) {
+        if (! empty($params['torrent_id'])) {
             $query->where('torrentid', (int) $params['torrent_id']);
         }
-        list($sortField, $sortType) = $this->getSortFieldAndType($params);
+        [$sortField, $sortType] = $this->getSortFieldAndType($params);
         $query->orderBy($sortField, $sortType);
+
         return $query->paginate();
     }
 
     /**
-     * @param  int  $torrentId
-     * @param  float  $value
-     * @param  \App\Models\User  $user
-     * @return  mixed
+     * @return mixed
      */
     public function store(int $torrentId, float $value, User $user)
     {
         if ($user->seedbonus < $value) {
-            throw new \LogicException("your bonus not enough.");
+            throw new \LogicException('your bonus not enough.');
         }
         if ($user->reward_torrent_logs()->where('torrentid', $torrentId)->exists()) {
-            throw new \LogicException("you already reward this torrent.");
+            throw new \LogicException('you already reward this torrent.');
         }
         $torrent = Torrent::query()->findOrFail($torrentId, Torrent::$commentFields);
         $torrent->checkIsNormal();
@@ -45,6 +45,7 @@ class RewardRepository extends BaseRepository
             throw new \LogicException("you can't reward to yourself.");
         }
         $torrentOwner->checkIsNormal();
+
         return DB::transaction(function () use ($torrentId, $value, $user, $torrentOwner) {
             $model = $user->reward_torrent_logs()->create([
                 'torrentid' => $torrentId,
@@ -55,25 +56,25 @@ class RewardRepository extends BaseRepository
                 ->where('seedbonus', $user->seedbonus)
                 ->decrement('seedbonus', $value);
             if ($affectedRows != 1) {
-                \App\Support\Logger::writeWithContext((string) ("affectedRows: {$affectedRows}, query: " . \App\Support\LegacyDb::lastQuery(false, 'json')), (string) 'error', (bool) false);
-                throw new \RuntimeException("decrement user bonus fail.");
+                Logger::writeWithContext((string) ("affectedRows: {$affectedRows}, query: ".LegacyDb::lastQuery(false, 'json')), (string) 'error', (bool) false);
+                throw new \RuntimeException('decrement user bonus fail.');
             }
             $affectedRows = User::query()
                 ->where('id', $torrentOwner->id)
                 ->where('seedbonus', $torrentOwner->seedbonus)
                 ->increment('seedbonus', $value);
             if ($affectedRows != 1) {
-                \App\Support\Logger::writeWithContext((string) ("affectedRows: {$affectedRows}, query: " . \App\Support\LegacyDb::lastQuery(false, 'json')), (string) 'error', (bool) false);
-                throw new \RuntimeException("increment owner bonus fail.");
+                Logger::writeWithContext((string) ("affectedRows: {$affectedRows}, query: ".LegacyDb::lastQuery(false, 'json')), (string) 'error', (bool) false);
+                throw new \RuntimeException('increment owner bonus fail.');
             }
+
             return $model;
         });
     }
 
     /**
      * @param  array<int|string, mixed>  $params
-     * @param  int  $id
-     * @return  mixed
+     * @return mixed
      */
     public function update(array $params, int $id)
     {
@@ -81,27 +82,28 @@ class RewardRepository extends BaseRepository
         /** @var array<string, mixed> $data */
         $data = $params;
         $model->update($data);
+
         return $model;
     }
 
     /**
-     * @param  int  $id
-     * @return  mixed
+     * @return mixed
      */
     public function getDetail(int $id)
     {
         $model = Reward::query()->findOrFail($id);
+
         return $model;
     }
 
     /**
-     * @param  int  $id
-     * @return  mixed
+     * @return mixed
      */
     public function delete(int $id)
     {
         $model = Reward::query()->findOrFail($id);
         $result = $model->delete();
+
         return $result;
     }
 }

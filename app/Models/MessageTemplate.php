@@ -8,6 +8,7 @@
  * @property string|null $created_at
  * @property string|null $updated_at
  */
+
 namespace App\Models;
 
 use App\Enums\MessageTemplateNameEnum;
@@ -18,13 +19,13 @@ class MessageTemplate extends NexusModel
 {
     use NexusActivityLogTrait;
 
-    /** @var  list<string> */
+    /** @var list<string> */
     protected $fillable = ['name', 'content', 'language_id'];
 
-    /** @var  bool */
+    /** @var bool */
     public $timestamps = true;
 
-    /** @var  array<string, string> */
+    /** @var array<string, string> */
     protected $casts = [
         'name' => MessageTemplateNameEnum::class,
     ];
@@ -36,10 +37,11 @@ class MessageTemplate extends NexusModel
         foreach (MessageTemplateNameEnum::cases() as $messageTemplate) {
             $result[$messageTemplate->value] = $messageTemplate->label();
         }
+
         return $result;
     }
 
-    /** @return  \Illuminate\Database\Eloquent\Relations\BelongsTo<Language, $this> */
+    /** @return  BelongsTo<Language, $this> */
     public function language(): BelongsTo
     {
         return $this->belongsTo(Language::class);
@@ -49,24 +51,28 @@ class MessageTemplate extends NexusModel
      * @param  mixed  $languageId
      * @param  array<int|string, mixed>  $placeholders
      */
-    public static function forRegisterWelcome($languageId, array $placeholders): null|string
+    public static function forRegisterWelcome($languageId, array $placeholders): ?string
     {
-        $result = self::query()->where("language_id", $languageId)
+        $result = self::query()->where('language_id', $languageId)
             ->where('name', MessageTemplateNameEnum::REGISTER_WELCOME->value)
             ->first();
+
         return self::format($result, $placeholders);
     }
 
     /**
-     * @param  self|null  $template
      * @param  array<int|string, mixed>  $placeholders
      */
-    private static function format(self|null $template, array $placeholders): null|string
+    private static function format(?self $template, array $placeholders): ?string
     {
         if ($template && $template->content) {
-            $search = array_map(function ($value) {return ":$value";}, array_keys($placeholders));
+            $search = array_map(function ($value) {
+                return ":$value";
+            }, array_keys($placeholders));
+
             return str_replace($search, array_values($placeholders), $template->content);
         }
+
         return null;
     }
 }

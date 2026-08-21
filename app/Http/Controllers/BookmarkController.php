@@ -3,20 +3,19 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\BookmarkResource;
-use App\Http\Resources\TorrentResource;
-use App\Models\Torrent;
 use App\Repositories\BookmarkRepository;
+use App\Support\Locale;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 
 class BookmarkController extends Controller
 {
-    /** @var  mixed */
+    /** @var mixed */
     private $repository;
 
     /**
-     * @param  \App\Repositories\BookmarkRepository  $repository
-     * @return  mixed
+     * @return mixed
      */
     public function __construct(BookmarkRepository $repository)
     {
@@ -24,17 +23,14 @@ class BookmarkController extends Controller
     }
 
     /**
-     * @param  \Illuminate\Http\Request  $request
-     * @return  mixed
+     * @return mixed
      */
-    public function index(Request $request)
-    {
-    }
+    public function index(Request $request) {}
 
     /**
      * Store a newly created resource in storage.
-     * @param  \Illuminate\Http\Request  $request
-     * @return  array<string, mixed>
+     *
+     * @return array<string, mixed>
      */
     public function store(Request $request)
     {
@@ -43,37 +39,39 @@ class BookmarkController extends Controller
         ]);
         $result = $this->repository->add(Auth::user(), $request->torrent_id);
         $resource = new BookmarkResource($result);
-        return $this->success($resource, \App\Support\Locale::trans('bookmark.actions.store_success', [], null));
+
+        return $this->success($resource, Locale::trans('bookmark.actions.store_success', [], null));
     }
 
     /**
      * Display the specified resource.
+     *
      * @param  mixed  $id
-     * @return  \Illuminate\Http\Response
+     * @return Response
      */
     public function show($id)
     {
-    
-        return new \Illuminate\Http\Response('');
+
+        return new Response('');
     }
 
     /**
      * Update the specified resource in storage.
-     * @param  \Illuminate\Http\Request  $request
+     *
      * @param  mixed  $id
-     * @return  \Illuminate\Http\Response
+     * @return Response
      */
     public function update(Request $request, $id)
     {
         //
-    
-        return new \Illuminate\Http\Response('');
+
+        return new Response('');
     }
 
     /**
      * Remove the specified resource from storage.
-     * @param  \Illuminate\Http\Request  $request
-     * @return  array<string, mixed>
+     *
+     * @return array<string, mixed>
      */
     public function destroy(Request $request)
     {
@@ -81,7 +79,7 @@ class BookmarkController extends Controller
             'torrent_id' => 'required|integer',
         ]);
         $result = $this->repository->remove(Auth::user(), $request->torrent_id);
-        return $this->success(true, \App\Support\Locale::trans('bookmark.actions.delete_success', [], null));
-    }
 
+        return $this->success(true, Locale::trans('bookmark.actions.delete_success', [], null));
+    }
 }

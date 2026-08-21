@@ -688,6 +688,8 @@ class User extends Authenticatable implements FilamentUser, HasName
     }
 
     /** @return HasMany<Invite, $this> */
+
+    /** @return HasMany<Invite, $this> */
     public function temporary_invites()
     {
         return $this->hasMany(Invite::class, 'inviter')

@@ -7,7 +7,6 @@ use Illuminate\Support\Facades\DB;
 
 class SecondiconsTableSeeder extends Seeder
 {
-
     /**
      * Auto generated seed file
      *
@@ -15,13 +14,11 @@ class SecondiconsTableSeeder extends Seeder
      */
     public function run()
     {
-        
 
         DB::table('secondicons')->delete();
-        
-        DB::table('secondicons')->insert(array (
-            0 => 
-            array (
+
+        DB::table('secondicons')->insert([
+            0 => [
                 'id' => 1,
                 'source' => 0,
                 'medium' => 1,
@@ -30,11 +27,10 @@ class SecondiconsTableSeeder extends Seeder
                 'processing' => 0,
                 'audiocodec' => 0,
                 'name' => 'Blu-ray/H.264',
-                'class_name' => NULL,
+                'class_name' => null,
                 'image' => 'bdh264.png',
-            ),
-            1 => 
-            array (
+            ],
+            1 => [
                 'id' => 2,
                 'source' => 0,
                 'medium' => 1,
@@ -43,11 +39,10 @@ class SecondiconsTableSeeder extends Seeder
                 'processing' => 0,
                 'audiocodec' => 0,
                 'name' => 'Blu-ray/VC-1',
-                'class_name' => NULL,
+                'class_name' => null,
                 'image' => 'bdvc1.png',
-            ),
-            2 => 
-            array (
+            ],
+            2 => [
                 'id' => 3,
                 'source' => 0,
                 'medium' => 1,
@@ -56,11 +51,10 @@ class SecondiconsTableSeeder extends Seeder
                 'processing' => 0,
                 'audiocodec' => 0,
                 'name' => 'Blu-ray/MPEG-2',
-                'class_name' => NULL,
+                'class_name' => null,
                 'image' => 'bdmpeg2.png',
-            ),
-            3 => 
-            array (
+            ],
+            3 => [
                 'id' => 4,
                 'source' => 0,
                 'medium' => 2,
@@ -69,11 +63,10 @@ class SecondiconsTableSeeder extends Seeder
                 'processing' => 0,
                 'audiocodec' => 0,
                 'name' => 'HD DVD/H.264',
-                'class_name' => NULL,
+                'class_name' => null,
                 'image' => 'hddvdh264.png',
-            ),
-            4 => 
-            array (
+            ],
+            4 => [
                 'id' => 5,
                 'source' => 0,
                 'medium' => 2,
@@ -82,11 +75,10 @@ class SecondiconsTableSeeder extends Seeder
                 'processing' => 0,
                 'audiocodec' => 0,
                 'name' => 'HD DVD/VC-1',
-                'class_name' => NULL,
+                'class_name' => null,
                 'image' => 'hddvdvc1.png',
-            ),
-            5 => 
-            array (
+            ],
+            5 => [
                 'id' => 6,
                 'source' => 0,
                 'medium' => 2,
@@ -95,11 +87,10 @@ class SecondiconsTableSeeder extends Seeder
                 'processing' => 0,
                 'audiocodec' => 0,
                 'name' => 'HD DVD/MPEG-2',
-                'class_name' => NULL,
+                'class_name' => null,
                 'image' => 'hddvdmpeg2.png',
-            ),
-            6 => 
-            array (
+            ],
+            6 => [
                 'id' => 7,
                 'source' => 0,
                 'medium' => 3,
@@ -108,11 +99,10 @@ class SecondiconsTableSeeder extends Seeder
                 'processing' => 0,
                 'audiocodec' => 0,
                 'name' => 'Remux/H.264',
-                'class_name' => NULL,
+                'class_name' => null,
                 'image' => 'remuxh264.png',
-            ),
-            7 => 
-            array (
+            ],
+            7 => [
                 'id' => 8,
                 'source' => 0,
                 'medium' => 3,
@@ -121,11 +111,10 @@ class SecondiconsTableSeeder extends Seeder
                 'processing' => 0,
                 'audiocodec' => 0,
                 'name' => 'Remux/VC-1',
-                'class_name' => NULL,
+                'class_name' => null,
                 'image' => 'remuxvc1.png',
-            ),
-            8 => 
-            array (
+            ],
+            8 => [
                 'id' => 9,
                 'source' => 0,
                 'medium' => 3,
@@ -134,11 +123,10 @@ class SecondiconsTableSeeder extends Seeder
                 'processing' => 0,
                 'audiocodec' => 0,
                 'name' => 'Remux/MPEG-2',
-                'class_name' => NULL,
+                'class_name' => null,
                 'image' => 'remuxmpeg2.png',
-            ),
-            9 => 
-            array (
+            ],
+            9 => [
                 'id' => 10,
                 'source' => 0,
                 'medium' => 4,
@@ -147,11 +135,10 @@ class SecondiconsTableSeeder extends Seeder
                 'processing' => 0,
                 'audiocodec' => 0,
                 'name' => 'AVCHD',
-                'class_name' => NULL,
+                'class_name' => null,
                 'image' => 'avchd.png',
-            ),
-            10 => 
-            array (
+            ],
+            10 => [
                 'id' => 11,
                 'source' => 0,
                 'medium' => 5,
@@ -160,11 +147,10 @@ class SecondiconsTableSeeder extends Seeder
                 'processing' => 0,
                 'audiocodec' => 0,
                 'name' => 'HDTV/H.264',
-                'class_name' => NULL,
+                'class_name' => null,
                 'image' => 'hdtvh264.png',
-            ),
-            11 => 
-            array (
+            ],
+            11 => [
                 'id' => 12,
                 'source' => 0,
                 'medium' => 5,
@@ -173,11 +159,10 @@ class SecondiconsTableSeeder extends Seeder
                 'processing' => 0,
                 'audiocodec' => 0,
                 'name' => 'HDTV/MPEG-2',
-                'class_name' => NULL,
+                'class_name' => null,
                 'image' => 'hdtvmpeg2.png',
-            ),
-            12 => 
-            array (
+            ],
+            12 => [
                 'id' => 13,
                 'source' => 0,
                 'medium' => 6,
@@ -186,11 +171,10 @@ class SecondiconsTableSeeder extends Seeder
                 'processing' => 0,
                 'audiocodec' => 0,
                 'name' => 'DVDR',
-                'class_name' => NULL,
+                'class_name' => null,
                 'image' => 'dvdr.png',
-            ),
-            13 => 
-            array (
+            ],
+            13 => [
                 'id' => 14,
                 'source' => 0,
                 'medium' => 7,
@@ -199,11 +183,10 @@ class SecondiconsTableSeeder extends Seeder
                 'processing' => 0,
                 'audiocodec' => 0,
                 'name' => 'Rip/H.264',
-                'class_name' => NULL,
+                'class_name' => null,
                 'image' => 'riph264.png',
-            ),
-            14 => 
-            array (
+            ],
+            14 => [
                 'id' => 15,
                 'source' => 0,
                 'medium' => 7,
@@ -212,11 +195,10 @@ class SecondiconsTableSeeder extends Seeder
                 'processing' => 0,
                 'audiocodec' => 0,
                 'name' => 'Rip/Xvid',
-                'class_name' => NULL,
+                'class_name' => null,
                 'image' => 'ripxvid.png',
-            ),
-            15 => 
-            array (
+            ],
+            15 => [
                 'id' => 16,
                 'source' => 0,
                 'medium' => 8,
@@ -225,11 +207,10 @@ class SecondiconsTableSeeder extends Seeder
                 'processing' => 0,
                 'audiocodec' => 0,
                 'name' => 'CD/FLAC',
-                'class_name' => NULL,
+                'class_name' => null,
                 'image' => 'cdflac.png',
-            ),
-            16 => 
-            array (
+            ],
+            16 => [
                 'id' => 17,
                 'source' => 0,
                 'medium' => 8,
@@ -238,11 +219,10 @@ class SecondiconsTableSeeder extends Seeder
                 'processing' => 0,
                 'audiocodec' => 0,
                 'name' => 'CD/APE',
-                'class_name' => NULL,
+                'class_name' => null,
                 'image' => 'cdape.png',
-            ),
-            17 => 
-            array (
+            ],
+            17 => [
                 'id' => 18,
                 'source' => 0,
                 'medium' => 8,
@@ -251,11 +231,10 @@ class SecondiconsTableSeeder extends Seeder
                 'processing' => 0,
                 'audiocodec' => 0,
                 'name' => 'CD/DTS',
-                'class_name' => NULL,
+                'class_name' => null,
                 'image' => 'cddts.png',
-            ),
-            18 => 
-            array (
+            ],
+            18 => [
                 'id' => 19,
                 'source' => 0,
                 'medium' => 8,
@@ -264,11 +243,10 @@ class SecondiconsTableSeeder extends Seeder
                 'processing' => 0,
                 'audiocodec' => 0,
                 'name' => 'CD/Other',
-                'class_name' => NULL,
+                'class_name' => null,
                 'image' => 'cdother.png',
-            ),
-            19 => 
-            array (
+            ],
+            19 => [
                 'id' => 20,
                 'source' => 0,
                 'medium' => 9,
@@ -277,11 +255,10 @@ class SecondiconsTableSeeder extends Seeder
                 'processing' => 0,
                 'audiocodec' => 0,
                 'name' => 'Extract/FLAC',
-                'class_name' => NULL,
+                'class_name' => null,
                 'image' => 'extractflac.png',
-            ),
-            20 => 
-            array (
+            ],
+            20 => [
                 'id' => 21,
                 'source' => 0,
                 'medium' => 9,
@@ -290,11 +267,10 @@ class SecondiconsTableSeeder extends Seeder
                 'processing' => 0,
                 'audiocodec' => 0,
                 'name' => 'Extract/DTS',
-                'class_name' => NULL,
+                'class_name' => null,
                 'image' => 'extractdts.png',
-            ),
-            21 => 
-            array (
+            ],
+            21 => [
                 'id' => 22,
                 'source' => 0,
                 'medium' => 9,
@@ -303,11 +279,10 @@ class SecondiconsTableSeeder extends Seeder
                 'processing' => 0,
                 'audiocodec' => 0,
                 'name' => 'Extract/AC-3',
-                'class_name' => NULL,
+                'class_name' => null,
                 'image' => 'extractac3.png',
-            ),
-        ));
-        
-        
+            ],
+        ]);
+
     }
 }

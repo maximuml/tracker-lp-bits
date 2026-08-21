@@ -31,5 +31,4 @@ class NexusHorizonServiceProvider extends HorizonApplicationServiceProvider
             return $user && $user->class >= User::CLASS_SYSOP;
         });
     }
-
 }

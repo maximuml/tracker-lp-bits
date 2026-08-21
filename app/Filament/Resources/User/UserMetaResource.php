@@ -2,34 +2,33 @@
 
 namespace App\Filament\Resources\User;
 
+use App\Filament\Resources\User\UserMetaResource\Pages\CreateUserMeta;
+use App\Filament\Resources\User\UserMetaResource\Pages\EditUserMeta;
+use App\Filament\Resources\User\UserMetaResource\Pages\ListUserMetas;
+use App\Models\User;
+use App\Models\UserMeta;
+use App\Support\Cache;
+use App\Support\Logger;
+use App\Support\Time;
+use App\Support\UserDisplay;
+use Filament\Actions\DeleteAction;
+use Filament\Forms\Components\TextInput;
+use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
-use Filament\Forms\Components\TextInput;
 use Filament\Tables\Filters\SelectFilter;
-use Filament\Actions\DeleteAction;
-use App\Filament\Resources\User\UserMetaResource\Pages\ListUserMetas;
-use App\Filament\Resources\User\UserMetaResource\Pages\CreateUserMeta;
-use App\Filament\Resources\User\UserMetaResource\Pages\EditUserMeta;
-use App\Filament\Resources\User\UserMetaResource\Pages;
-use App\Filament\Resources\User\UserMetaResource\RelationManagers;
-use App\Models\User;
-use App\Models\UserMeta;
-use Illuminate\Support\Facades\Auth;
-use Filament\Forms;
-use Filament\Resources\Resource;
 use Filament\Tables\Table;
-use Filament\Tables;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Facades\Auth;
 
 class UserMetaResource extends Resource
 {
     protected static ?string $model = UserMeta::class;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    protected static string | \UnitEnum | null $navigationGroup = 'User';
+    protected static string|\UnitEnum|null $navigationGroup = 'User';
 
     protected static ?int $navigationSort = 8;
 
@@ -59,18 +58,14 @@ class UserMetaResource extends Resource
                 TextColumn::make('uid')
                     ->searchable()
                     ->label(__('label.username'))
-                    ->formatStateUsing(fn ($state) => \App\Support\UserDisplay::adminUsername($state))
-                ,
+                    ->formatStateUsing(fn ($state) => UserDisplay::adminUsername($state)),
                 TextColumn::make('meta_key_text')
-                    ->label(__('label.name'))
-                ,
+                    ->label(__('label.name')),
                 TextColumn::make('deadline')
-                    ->label(__('label.deadline'))
-                ,
+                    ->label(__('label.deadline')),
                 TextColumn::make('created_at')
                     ->label(__('label.created_at'))
-                    ->formatStateUsing(fn ($state) => \App\Support\Time::formatDateTime($state))
-                ,
+                    ->formatStateUsing(fn ($state) => Time::formatDateTime($state)),
             ])
             ->defaultSort('id', 'desc')
             ->filters([
@@ -78,24 +73,21 @@ class UserMetaResource extends Resource
                     ->schema([
                         TextInput::make('uid')
                             ->label(__('label.username'))
-                            ->placeholder('UID')
-                        ,
+                            ->placeholder('UID'),
                     ])->query(function (Builder $query, array $data) {
-                        return $query->when($data['uid'], fn (Builder $query, $value) => $query->where("uid", $value));
-                    })
-                ,
+                        return $query->when($data['uid'], fn (Builder $query, $value) => $query->where('uid', $value));
+                    }),
                 SelectFilter::make('meta_key')
                     ->options(UserMeta::listProps())
-                    ->label(__('label.name'))
-                ,
+                    ->label(__('label.name')),
             ])
             ->recordActions([
                 DeleteAction::make()->using(function (UserMeta $record) {
                     $record->delete();
-                    \App\Support\Cache::clearUser($record->uid, '');
+                    Cache::clearUser($record->uid, '');
                     $user = Auth::user();
                     $username = $user instanceof User ? $user->username : 'unknown';
-                    \App\Support\Logger::writeWithContext((string) sprintf("user: %d meta: %s was del by %s", $record->uid, $record->meta_key, $username), (string) 'info', (bool) false);
+                    Logger::writeWithContext((string) sprintf('user: %d meta: %s was del by %s', $record->uid, $record->meta_key, $username), (string) 'info', (bool) false);
                 }),
             ])
             ->toolbarActions([

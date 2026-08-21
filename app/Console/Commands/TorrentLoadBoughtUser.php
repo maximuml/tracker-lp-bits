@@ -3,7 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Jobs\LoadTorrentBoughtUsers;
-use App\Repositories\TorrentRepository;
+use App\Support\Logger;
 use Illuminate\Console\Command;
 
 class TorrentLoadBoughtUser extends Command
@@ -24,13 +24,15 @@ class TorrentLoadBoughtUser extends Command
 
     /**
      * Execute the console command.
-     * @return  int
+     *
+     * @return int
      */
     public function handle()
     {
         $torrentId = (int) $this->argument('torrent_id');
         LoadTorrentBoughtUsers::dispatch($torrentId);
-        \App\Support\Logger::writeWithContext((string) "torrentId: {$torrentId}", (string) 'info', (bool) false);
+        Logger::writeWithContext((string) "torrentId: {$torrentId}", (string) 'info', (bool) false);
+
         return Command::SUCCESS;
     }
 }

@@ -11,28 +11,27 @@ use App\Models\Setting;
 use App\Models\User;
 use App\Repositories\AttendanceRepository;
 use App\Repositories\InfoRepository;
-use App\Repositories\InviteRepository;
 use App\Repositories\LegacyViewRepository;
 use App\Repositories\PollRepository;
 use App\Repositories\UserRepository;
 use App\Support\Captcha;
+use App\Support\Category;
 use App\Support\Config\SiteConfig;
 use App\Support\Events;
-use App\Support\LegacyAuthContext;
-use App\Support\Category;
 use App\Support\Format;
-use App\Support\Frame;
 use App\Support\Html;
 use App\Support\Http;
 use App\Support\LegacyResponse;
-use App\Support\SearchBox;
 use App\Support\Locale;
-use App\Support\Validators;
-use Carbon\Carbon;
+use App\Support\Pagination;
 use App\Support\Permissions;
+use App\Support\SearchBox;
+use App\Support\Strings;
 use App\Support\SupportContext;
 use App\Support\Url;
 use App\Support\UserDisplay;
+use App\Support\Validators;
+use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -144,8 +143,8 @@ class InfoController extends LegacyController
 
         $brcats = Category::listByModeWithContext($browsecatmode);
         foreach ($brcats as $cat) {
-            if ($request->filled('cat' . $cat['id'])) {
-                $query['cat' . $cat['id']] = 1;
+            if ($request->filled('cat'.$cat['id'])) {
+                $query['cat'.$cat['id']] = 1;
             }
         }
 
@@ -172,8 +171,8 @@ class InfoController extends LegacyController
                 ];
                 $key = $subcatKeyMap[$table];
                 foreach (SearchBox::itemListWithContext($table, $browsecatmode) as $item) {
-                    if ($request->filled($key . $item['id'])) {
-                        $query[$key . $item['id']] = 1;
+                    if ($request->filled($key.$item['id'])) {
+                        $query[$key.$item['id']] = 1;
                     }
                 }
             }
@@ -216,12 +215,12 @@ class InfoController extends LegacyController
         $inclbookmarked = (int) $request->input('inclbookmarked', 0);
         $addinclbm = '';
         if (in_array($inclbookmarked, [0, 1], true)) {
-            $addinclbm = '&inclbookmarked=' . $inclbookmarked;
+            $addinclbm = '&inclbookmarked='.$inclbookmarked;
         }
 
-        $link = Http::protocolPrefix(Url::isSecure()) . $baseUrl . '/torrentrss.php?' . http_build_query($query) . $addinclbm;
-        $msg = ($lang_getrss['std_use_following_url'] ?? 'Use the following URL:') . "\n" . $link . "\n\n"
-            . ($lang_getrss['std_utorrent_feed_url'] ?? 'uTorrent feed URL:') . "\n" . $link . '&linktype=dl' . $addinclbm;
+        $link = Http::protocolPrefix(Url::isSecure()).$baseUrl.'/torrentrss.php?'.http_build_query($query).$addinclbm;
+        $msg = ($lang_getrss['std_use_following_url'] ?? 'Use the following URL:')."\n".$link."\n\n"
+            .($lang_getrss['std_utorrent_feed_url'] ?? 'uTorrent feed URL:')."\n".$link.'&linktype=dl'.$addinclbm;
 
         return $this->getrssMessageResponse($lang_getrss['std_done'] ?? 'Done', Format::formatComment($msg), $lang_getrss['head_rss_feeds'] ?? 'RSS Feeds');
     }
@@ -241,7 +240,8 @@ class InfoController extends LegacyController
         $curUser = SupportContext::getUser();
         if ($curUser === null) {
             $qs = $request->getQueryString();
-            return redirect('/userhistory.php' . ($qs ? '?' . $qs : ''));
+
+            return redirect('/userhistory.php'.($qs ? '?'.$qs : ''));
         }
 
         $userid = (int) SupportContext::getQuery('id');
@@ -255,7 +255,7 @@ class InfoController extends LegacyController
         $action = htmlspecialchars((string) SupportContext::getQuery('action'));
         $perpage = 15;
         $phpSelf = SupportContext::getServerValue('PHP_SELF');
-        $subject = \App\Support\UserDisplay::username($userid);
+        $subject = UserDisplay::username($userid);
 
         $data = [
             'action' => $action,
@@ -293,7 +293,7 @@ class InfoController extends LegacyController
         $enabled = (string) $request->input('enabled', '');
         $status = (string) $request->input('status', '');
         $sent = (string) $request->input('sent', '');
-        $userRep = new UserRepository();
+        $userRep = new UserRepository;
         $SITENAME = Setting::getSiteName();
         $invitesystem = SiteConfig::current()->main->inviteSystem() ? 'yes' : 'no';
 
@@ -318,7 +318,7 @@ class InfoController extends LegacyController
             'enabled' => $enabled,
             'status' => $status,
             'sent' => $sent,
-            'UC_SYSOP' => (int) \App\Models\User::CLASS_SYSOP,
+            'UC_SYSOP' => (int) User::CLASS_SYSOP,
         ];
 
         if ($type === 'new') {
@@ -354,7 +354,7 @@ class InfoController extends LegacyController
             $invitation_body = sprintf($langInvite['text_invitation_body'], $SITENAME).$currentUser['username'];
             $preUsernameTr = '';
             if (SiteConfig::current()->system->isInvitePreEmailAndUsername()) {
-                $preUsernameTr = "<tr><td class=\"rowhead nowrap\" valign=\"top\" align=\"right\">".Locale::trans("invite.pre_register_username", [], null)."</td><td align=left><input type=text size=40 name=pre_register_username><br /><font align=left class=small>".Locale::trans("invite.pre_register_username_help", [], null)."</font></td></tr>";
+                $preUsernameTr = '<tr><td class="rowhead nowrap" valign="top" align="right">'.Locale::trans('invite.pre_register_username', [], null).'</td><td align=left><input type=text size=40 name=pre_register_username><br /><font align=left class=small>'.Locale::trans('invite.pre_register_username_help', [], null).'</font></td></tr>';
             }
             $_s = ((int) ($inv['invites'] ?? 0) !== 1) ? ($langInvite['text_s'] ?? 's') : '';
 
@@ -393,7 +393,8 @@ class InfoController extends LegacyController
                 : htmlspecialchars((string) $request->headers->get('referer', ''));
 
             if ((int) $request->input('sure', 0) !== 1) {
-                $confirm = ($langNews['std_are_you_sure'] ?? 'Are you sure? ') . "<a class=altlink href=\"?action=delete&newsid={$newsid}&returnto=" . urlencode($returnto) . "&sure=1\">" . ($langNews['std_here'] ?? 'here') . "</a>" . ($langNews['std_if_sure'] ?? '.');
+                $confirm = ($langNews['std_are_you_sure'] ?? 'Are you sure? ')."<a class=altlink href=\"?action=delete&newsid={$newsid}&returnto=".urlencode($returnto).'&sure=1">'.($langNews['std_here'] ?? 'here').'</a>'.($langNews['std_if_sure'] ?? '.');
+
                 return $this->legacyAbortResponse($langNews['std_delete_news_item'] ?? 'Delete news item', $confirm, false);
             }
 
@@ -463,7 +464,7 @@ class InfoController extends LegacyController
 
             $news = News::query()->where('id', $newsid)->first();
             if (! $news) {
-                return $this->legacyAbortResponse($langNews['std_error'] ?? 'Error', $langNews['std_invalid_news_id'] . $newsid);
+                return $this->legacyAbortResponse($langNews['std_error'] ?? 'Error', $langNews['std_invalid_news_id'].$newsid);
             }
 
             if ($request->isMethod('post')) {
@@ -508,6 +509,7 @@ class InfoController extends LegacyController
 
         // Default: show compose form
         $composeTitle = $langNews['text_submit_news_item'] ?? 'Submit news item';
+
         return $this->legacyPageRaw($request, 'news', true, [
             'mode' => 'add',
             'title' => $composeTitle,
@@ -555,7 +557,7 @@ class InfoController extends LegacyController
             if ($returnto === 'main') {
                 return redirect(url('/'));
             } elseif ($pollid > 0) {
-                return redirect('/log.php?action=poll#' . $newId);
+                return redirect('/log.php?action=poll#'.$newId);
             }
 
             return redirect('/');
@@ -569,11 +571,11 @@ class InfoController extends LegacyController
                 $days = (int) floor($hours / 24);
                 $lang = (array) (SupportContext::getGlobal('lang_makepoll') ?? []);
                 if ($days >= 1) {
-                    $t = $days . ($lang['text_day'] ?? ' day') . \App\Support\Strings::addS($days);
+                    $t = $days.($lang['text_day'] ?? ' day').Strings::addS($days);
                 } else {
-                    $t = $hours . ($lang['text_hour'] ?? ' hour') . \App\Support\Strings::addS($hours);
+                    $t = $hours.($lang['text_hour'] ?? ' hour').Strings::addS($hours);
                 }
-                $ageWarning = ($lang['text_current_poll'] ?? 'Current poll ') . '(<i>' . htmlspecialchars((string) $lastPoll['question']) . '</i>)' . ($lang['text_is_only'] ?? ' is only ') . $t . ($lang['text_old'] ?? ' old.');
+                $ageWarning = ($lang['text_current_poll'] ?? 'Current poll ').'(<i>'.htmlspecialchars((string) $lastPoll['question']).'</i>)'.($lang['text_is_only'] ?? ' is only ').$t.($lang['text_old'] ?? ' old.');
             }
         }
 
@@ -593,6 +595,7 @@ class InfoController extends LegacyController
             $poll = PollRepository::findWithOptions($pollid);
             if (! $poll) {
                 $lang = (array) (SupportContext::getGlobal('lang_polloverview') ?? []);
+
                 return $this->legacyAbortResponse($lang['std_error'] ?? 'Error', $lang['text_no_poll_id'] ?? 'Invalid poll ID.');
             }
 
@@ -604,7 +607,7 @@ class InfoController extends LegacyController
 
             if ($count > 0) {
                 $perpage = 100;
-                [$pagertop, $pagerbottom, , $offset, $perpage] = \App\Support\Pagination::pager($perpage, $count, "?id={$pollid}&");
+                [$pagertop, $pagerbottom, , $offset, $perpage] = Pagination::pager($perpage, $count, "?id={$pollid}&");
                 $answers = PollRepository::answers($pollid, $offset, $perpage);
                 $userDisplayMap = PollRepository::userDisplayMap($answers);
             }
@@ -741,7 +744,7 @@ class InfoController extends LegacyController
                 } else {
                     User::query()->where('id', $user->id)->update(['donated' => $donated]);
 
-                    return redirect('/userdetails.php?id=' . $user->id);
+                    return redirect('/userdetails.php?id='.$user->id);
                 }
             }
         }
@@ -771,12 +774,13 @@ class InfoController extends LegacyController
         }
 
         $baseUrl = (string) SupportContext::getGlobal('BASEURL', '');
-        $redirectBase = Http::protocolPrefix(Url::isSecure()) . $baseUrl;
+        $redirectBase = Http::protocolPrefix(Url::isSecure()).$baseUrl;
         $action = (string) (SupportContext::getQuery('action') ?? '');
 
         if ($action === 'reorder' && $request->isMethod('post')) {
             InfoRepository::reorderFaq((array) SupportContext::getPost('order'));
-            return redirect($redirectBase . '/faqmanage.php');
+
+            return redirect($redirectBase.'/faqmanage.php');
         }
 
         if ($action === 'edititem' && $request->isMethod('post')) {
@@ -786,7 +790,8 @@ class InfoController extends LegacyController
                 'flag' => (int) SupportContext::getPost('flag'),
                 'categ' => (int) SupportContext::getPost('categ'),
             ]);
-            return redirect($redirectBase . '/faqmanage.php');
+
+            return redirect($redirectBase.'/faqmanage.php');
         }
 
         if ($action === 'editsect' && $request->isMethod('post')) {
@@ -796,15 +801,18 @@ class InfoController extends LegacyController
                 'flag' => (int) SupportContext::getPost('flag'),
                 'categ' => 0,
             ]);
-            return redirect($redirectBase . '/faqmanage.php');
+
+            return redirect($redirectBase.'/faqmanage.php');
         }
 
         if ($action === 'delete') {
             $id = (int) (SupportContext::getQuery('id') ?? 0);
             if (SupportContext::getQuery('confirm') === 'yes') {
                 InfoRepository::deleteFaq($id);
-                return redirect($redirectBase . '/faqmanage.php');
+
+                return redirect($redirectBase.'/faqmanage.php');
             }
+
             return $this->legacyPage($request, 'faqactions', true, [
                 'mode' => 'confirm_delete',
                 'id' => $id,
@@ -825,7 +833,8 @@ class InfoController extends LegacyController
                 'categ' => $categ,
                 'order' => $max['maxorder'] + 1,
             ]);
-            return redirect($redirectBase . '/faqmanage.php');
+
+            return redirect($redirectBase.'/faqmanage.php');
         }
 
         if ($action === 'addnewsect' && $request->isMethod('post')) {
@@ -841,7 +850,8 @@ class InfoController extends LegacyController
                 'categ' => 0,
                 'order' => $max['maxorder'] + 1,
             ]);
-            return redirect($redirectBase . '/faqmanage.php');
+
+            return redirect($redirectBase.'/faqmanage.php');
         }
 
         if ($action === 'edit') {
@@ -870,6 +880,7 @@ class InfoController extends LegacyController
         if ($action === 'additem') {
             $inId = (int) (SupportContext::getQuery('inid') ?? 0);
             $langId = (int) (SupportContext::getQuery('langid') ?? 0);
+
             return $this->legacyPage($request, 'faqactions', true, [
                 'mode' => 'additem',
                 'inid' => $inId,
@@ -880,6 +891,7 @@ class InfoController extends LegacyController
         if ($action === 'addsection') {
             $languages = Locale::languageList('rule_lang', null);
             $defLang = SupportContext::getGlobal('deflang', '');
+
             return $this->legacyPage($request, 'faqactions', true, [
                 'mode' => 'addsection',
                 'languages' => $languages,
@@ -887,7 +899,7 @@ class InfoController extends LegacyController
             ]);
         }
 
-        return redirect($redirectBase . '/faqmanage.php');
+        return redirect($redirectBase.'/faqmanage.php');
     }
 
     public function bitbucketlog(Request $request): Response|RedirectResponse|View
@@ -905,10 +917,10 @@ class InfoController extends LegacyController
         if ($currentClass >= (defined('UC_MODERATOR') ? \constant('UC_MODERATOR') : 0) && $delete > 0) {
             $bitbucket = NexusDB::table('bitbucket')->where('id', $delete)->first(['name', 'owner']);
             if ($bitbucket) {
-                $file = $bucketPath . '/' . $bitbucket->name;
+                $file = $bucketPath.'/'.$bitbucket->name;
                 NexusDB::table('bitbucket')->where('id', $delete)->delete();
                 if (file_exists($file) && ! unlink($file)) {
-                    return $this->legacyAbortResponse('Warning', "Unable to unlink file: <b>" . htmlspecialchars((string) $bitbucket->name) . "</b>. You should contact an administrator about this error.", false);
+                    return $this->legacyAbortResponse('Warning', 'Unable to unlink file: <b>'.htmlspecialchars((string) $bitbucket->name).'</b>. You should contact an administrator about this error.', false);
                 }
             }
 
@@ -917,7 +929,7 @@ class InfoController extends LegacyController
 
         $count = (int) NexusDB::table('bitbucket')->count();
         $perpage = 10;
-        [$pagertop, $pagerbottom, , $offset, $perpage] = \App\Support\Pagination::pager($perpage, $count, 'bitbucketlog.php?');
+        [$pagertop, $pagerbottom, , $offset, $perpage] = Pagination::pager($perpage, $count, 'bitbucketlog.php?');
         $bitbucketRows = NexusDB::table('bitbucket')->orderByDesc('added')->offset($offset)->limit($perpage)->get();
 
         $userIds = [];
@@ -937,7 +949,7 @@ class InfoController extends LegacyController
 
         $imageDimensions = [];
         foreach ($rows as $row) {
-            $file = $bucketPath . '/' . $row['name'];
+            $file = $bucketPath.'/'.$row['name'];
             if (file_exists($file)) {
                 $size = @getimagesize($file);
                 $imageDimensions[$row['id']] = [

@@ -119,11 +119,11 @@ return [
     ],
     'torrenthistory' => [
         'text' => "View User's Torrent History",
-        'desc' => "View user's torrent history, e.g. downloaded torrents.Valid only when user's setting for privacy level is not 'strong'"
+        'desc' => "View user's torrent history, e.g. downloaded torrents.Valid only when user's setting for privacy level is not 'strong'",
     ],
     'prfmanage' => [
         'text' => "User's General Profile Management",
-        'desc' => " Change user's profile, excluding crucial ones e.g. email, username, uploaded and downloaded amount, bonus"
+        'desc' => " Change user's profile, excluding crucial ones e.g. email, username, uploaded and downloaded amount, bonus",
     ],
     'cruprfmanage' => [
         'text' => "User's Crucial Profile Management",

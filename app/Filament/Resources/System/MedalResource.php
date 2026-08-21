@@ -2,38 +2,34 @@
 
 namespace App\Filament\Resources\System;
 
-use Filament\Schemas\Schema;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Radio;
-use Filament\Forms\Components\Toggle;
-use Filament\Forms\Components\DateTimePicker;
-use Filament\Forms\Components\Textarea;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Columns\ImageColumn;
-use Filament\Tables\Columns\IconColumn;
-use Filament\Actions\EditAction;
-use Filament\Actions\DeleteBulkAction;
-use App\Filament\Resources\System\MedalResource\Pages\ListMedals;
 use App\Filament\Resources\System\MedalResource\Pages\CreateMedal;
 use App\Filament\Resources\System\MedalResource\Pages\EditMedal;
-use App\Filament\Resources\System\MedalResource\Pages;
-use App\Filament\Resources\System\MedalResource\RelationManagers;
+use App\Filament\Resources\System\MedalResource\Pages\ListMedals;
 use App\Models\Medal;
-use Filament\Forms;
+use App\Support\Locale;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\Radio;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\ImageColumn;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Filament\Tables;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\HtmlString;
 
 class MedalResource extends Resource
 {
     protected static ?string $model = Medal::class;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-check-badge';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-check-badge';
 
-    protected static string | \UnitEnum | null $navigationGroup = 'System';
+    protected static string|\UnitEnum|null $navigationGroup = 'System';
 
     protected static ?int $navigationSort = 2;
 
@@ -47,7 +43,6 @@ class MedalResource extends Resource
         return self::getNavigationLabel();
     }
 
-
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -60,59 +55,48 @@ class MedalResource extends Resource
                     ->options(Medal::listGetTypes(true))
                     ->inline()
                     ->label(__('label.medal.get_type'))
-                    ->required()
-                ,
+                    ->required(),
                 Toggle::make('display_on_medal_page')
                     ->label(__('label.medal.display_on_medal_page'))
-                    ->required()
-                ,
+                    ->required(),
                 TextInput::make('duration')
                     ->integer()
                     ->label(__('label.medal.duration'))
-                    ->helperText(__('label.medal.duration_help'))
-                ,
+                    ->helperText(__('label.medal.duration_help')),
                 TextInput::make('inventory')
                     ->integer()
                     ->label(__('medal.fields.inventory'))
-                    ->helperText(__('medal.fields.inventory_help'))
-                ,
+                    ->helperText(__('medal.fields.inventory_help')),
                 DateTimePicker::make('sale_begin_time')
                     ->label(__('medal.fields.sale_begin_time'))
-                    ->helperText(__('medal.fields.sale_begin_time_help'))
-                ,
+                    ->helperText(__('medal.fields.sale_begin_time_help')),
                 DateTimePicker::make('sale_end_time')
                     ->label(__('medal.fields.sale_end_time'))
-                    ->helperText(__('medal.fields.sale_end_time_help'))
-                ,
+                    ->helperText(__('medal.fields.sale_end_time_help')),
                 TextInput::make('bonus_addition_factor')
                     ->label(__('medal.fields.bonus_addition_factor'))
                     ->helperText(__('medal.fields.bonus_addition_factor_help'))
                     ->numeric()
                     ->minValue(0)
-                    ->default(0)
-                ,
+                    ->default(0),
                 TextInput::make('bonus_addition_duration')
                     ->label(__('medal.fields.bonus_addition_duration'))
                     ->helperText(__('medal.fields.bonus_addition_duration_help'))
                     ->numeric()
                     ->minValue(0)
-                    ->default(0)
-                ,
+                    ->default(0),
                 TextInput::make('gift_fee_factor')
                     ->label(__('medal.fields.gift_fee_factor'))
                     ->helperText(__('medal.fields.gift_fee_factor_help'))
                     ->numeric()
-                    ->default(0)
-                ,
+                    ->default(0),
                 TextInput::make('priority')
                     ->label(__('label.priority'))
                     ->helperText(__('label.priority_help'))
                     ->numeric()
-                    ->default(0)
-                ,
+                    ->default(0),
                 Textarea::make('description')
-                    ->label(__('label.description'))
-                ,
+                    ->label(__('label.description')),
             ]);
     }
 
@@ -127,8 +111,7 @@ class MedalResource extends Resource
                 IconColumn::make('display_on_medal_page')->label(__('label.medal.display_on_medal_page'))->boolean(),
                 TextColumn::make('sale_begin_end_time')
                     ->label(__('medal.fields.sale_begin_end_time'))
-                    ->formatStateUsing(fn ($record) => new HtmlString(sprintf('%s ~<br/>%s', $record->sale_begin_time ?? \App\Support\Locale::trans('nexus.no_limit', [], null), $record->sale_end_time ?? \App\Support\Locale::trans('nexus.no_limit', [], null))))
-                ,
+                    ->formatStateUsing(fn ($record) => new HtmlString(sprintf('%s ~<br/>%s', $record->sale_begin_time ?? Locale::trans('nexus.no_limit', [], null), $record->sale_end_time ?? Locale::trans('nexus.no_limit', [], null)))),
                 TextColumn::make('bonus_addition_factor')->label(__('medal.fields.bonus_addition_factor')),
                 TextColumn::make('bonus_addition_duration')->label(__('medal.fields.bonus_addition_duration')),
                 TextColumn::make('gift_fee_factor')->label(__('medal.fields.gift_fee_factor')),
@@ -137,8 +120,7 @@ class MedalResource extends Resource
                 TextColumn::make('duration')->label(__('label.medal.duration')),
 
                 TextColumn::make('inventoryText')
-                    ->label(__('medal.fields.inventory'))
-                ,
+                    ->label(__('medal.fields.inventory')),
                 TextColumn::make('users_count')->label(__('medal.fields.users_count')),
                 TextColumn::make('priority')->label(__('label.priority')),
             ])
@@ -151,8 +133,7 @@ class MedalResource extends Resource
             ->toolbarActions([
                 DeleteBulkAction::make(),
             ])
-            ->modifyQueryUsing(fn (Builder $query) => $query->orderBy("priority", 'desc')->orderBy('id', 'desc'))
-            ;
+            ->modifyQueryUsing(fn (Builder $query) => $query->orderBy('priority', 'desc')->orderBy('id', 'desc'));
     }
 
     public static function getRelations(): array

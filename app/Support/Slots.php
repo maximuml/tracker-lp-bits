@@ -2,6 +2,8 @@
 
 namespace App\Support;
 
+use App\Models\User;
+
 /**
  * Stateless helper for the legacy download-slot ("max slots") tier.
  *
@@ -72,8 +74,8 @@ final class Slots
      * Return the legacy `<font class="color_slots">` HTML fragment for
      * a user's max-slots line. Mirrors `maxslots()`.
      *
-     * @param int $vipClass The UC_VIP constant value; injected so the
-     *                      helper does not depend on `uc.php`.
+     * @param  int  $vipClass  The UC_VIP constant value; injected so the
+     *                         helper does not depend on `uc.php`.
      */
     public static function display(
         int|float $uploaded,
@@ -111,7 +113,7 @@ final class Slots
             (float) ($user['downloaded'] ?? 0),
             (string) SupportContext::getGlobal('maxdlsystem', ''),
             (int) ($user['class'] ?? 0),
-            (int) \App\Models\User::CLASS_VIP,
+            (int) User::CLASS_VIP,
             (string) ($lang['text_slots'] ?? ''),
             (string) ($lang['text_unlimited'] ?? '')
         );

@@ -8,6 +8,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
 trait NexusActivityLogTrait
 {
     use LogsActivity;
+
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()

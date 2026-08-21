@@ -3,7 +3,6 @@
 namespace App\Console\Commands;
 
 use App\Models\User;
-use Database\Factories\UserFactory;
 use Illuminate\Console\Command;
 
 class UserGenerate extends Command
@@ -24,14 +23,16 @@ class UserGenerate extends Command
 
     /**
      * Execute the console command.
-     * @return  int
+     *
+     * @return int
      */
     public function handle()
     {
-        $num = (int) $this->option("num");
+        $num = (int) $this->option('num');
         $log = "num: $num";
-        if (!$num) {
+        if (! $num) {
             $this->error("$log, no num!");
+
             return Command::SUCCESS;
         }
         $size = 1000;
@@ -46,8 +47,9 @@ class UserGenerate extends Command
             User::factory($size)->create();
             $total += $size;
             $this->info("$log, success create $size !");
-        } while($total < $num);
+        } while ($total < $num);
         $this->info("$log, total: $total, ALL DONE!");
+
         return Command::SUCCESS;
     }
 }

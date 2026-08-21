@@ -9,7 +9,7 @@ return new class extends AbstractClickhouseMigration
     public function up(): void
     {
         $this->clickhouseClient->write(
-            <<<SQL
+            <<<'SQL'
 CREATE TABLE announce_logs
 (
     timestamp         DateTime64(6),

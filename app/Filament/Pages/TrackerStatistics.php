@@ -13,11 +13,11 @@ class TrackerStatistics extends Dashboard
 {
     protected Width|string|null $maxContentWidth = 'full';
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-chart-pie';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-chart-pie';
 
     protected static string $routePath = 'tracker-statistics';
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Tracker';
+    protected static string|\UnitEnum|null $navigationGroup = 'Tracker';
 
     protected static ?int $navigationSort = 14;
 

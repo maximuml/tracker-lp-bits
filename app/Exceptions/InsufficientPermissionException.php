@@ -2,8 +2,4 @@
 
 namespace App\Exceptions;
 
-class InsufficientPermissionException extends NexusException
-{
-
-}
-
+class InsufficientPermissionException extends NexusException {}

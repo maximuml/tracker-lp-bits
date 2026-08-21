@@ -2,9 +2,8 @@
 
 namespace App\Filament\Resources\Torrent\AnnounceLogResource\Pages;
 
-use Filament\Actions\DeleteAction;
 use App\Filament\Resources\Torrent\AnnounceLogResource;
-use Filament\Actions;
+use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 
 class EditAnnounceLog extends EditRecord

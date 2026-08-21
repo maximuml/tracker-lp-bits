@@ -2,6 +2,7 @@
 
 namespace Tests\Unit\Exceptions;
 
+use App\Exceptions\NexusException;
 use App\Exceptions\TorrentAlreadyExistsException;
 use PHPUnit\Framework\TestCase;
 
@@ -12,7 +13,7 @@ final class TorrentAlreadyExistsExceptionTest extends TestCase
         $e = new TorrentAlreadyExistsException(123, 'Torrent already exists');
 
         $this->assertSame(123, $e->getTorrentId());
-        $this->assertInstanceOf(\App\Exceptions\NexusException::class, $e);
+        $this->assertInstanceOf(NexusException::class, $e);
         $this->assertSame('Torrent already exists', $e->getMessage());
     }
 }

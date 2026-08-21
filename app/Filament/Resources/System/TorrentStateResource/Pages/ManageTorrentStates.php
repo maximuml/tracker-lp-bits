@@ -21,5 +21,4 @@ class ManageTorrentStates extends ManageRecords
     {
         return false;
     }
-
 }

@@ -48,20 +48,21 @@ final class CategoryRepository
         $dbtablename = self::tableNameForType($type);
 
         if (in_array($type, self::VALID_SUBCAT_TYPES, true)) {
-            $cache?->delete_value($dbtablename . '_list');
+            $cache?->delete_value($dbtablename.'_list');
         } elseif ($type === 'searchbox') {
             $cache?->delete_value('searchbox_content');
         } elseif ($type === 'caticon') {
             $cache?->delete_value('category_icon_content');
         } elseif ($type === 'secondicon') {
-            $cache?->delete_value('secondicon_' . $row['source'] . '_' . $row['medium'] . '_' . $row['codec'] . '_' . $row['standard'] . '_' . $row['processing'] . '_' . $row['audiocodec'] . '_content');
+            $cache?->delete_value('secondicon_'.$row['source'].'_'.$row['medium'].'_'.$row['codec'].'_'.$row['standard'].'_'.$row['processing'].'_'.$row['audiocodec'].'_content');
         } elseif ($type === 'category') {
             $cache?->delete_value('category_content');
-            $cache?->delete_value('category_list_mode_' . $row['mode']);
+            $cache?->delete_value('category_list_mode_'.$row['mode']);
         }
     }
+
     /**
-     * @return  array<int, array<string, mixed>>
+     * @return array<int, array<string, mixed>>
      */
     public static function getSearchboxOptions(): array
     {
@@ -73,7 +74,7 @@ final class CategoryRepository
     }
 
     /**
-     * @return  array<int, array<string, mixed>>
+     * @return array<int, array<string, mixed>>
      */
     public static function getCaticonOptions(): array
     {
@@ -90,7 +91,7 @@ final class CategoryRepository
     }
 
     /**
-     * @return  array<string, mixed>|null
+     * @return array<string, mixed>|null
      */
     public static function getRecord(string $table, int $id): ?array
     {
@@ -106,7 +107,7 @@ final class CategoryRepository
 
     /**
      * @param  'asc'|'desc'  $direction
-     * @return  array<int, array<string, mixed>>
+     * @return array<int, array<string, mixed>>
      */
     public static function listByTable(string $table, int $offset, int $perPage, string $sort = 'id', string $direction = 'desc'): array
     {
@@ -120,7 +121,7 @@ final class CategoryRepository
     }
 
     /**
-     * @return  array<int, array<string, mixed>>
+     * @return array<int, array<string, mixed>>
      */
     public static function getCategoryList(int $offset, int $perPage): array
     {
@@ -138,7 +139,7 @@ final class CategoryRepository
     }
 
     /**
-     * @return  array<string, array<int|string, string>>
+     * @return array<string, array<int|string, string>>
      */
     public static function getSecondiconLookups(): array
     {
@@ -155,11 +156,11 @@ final class CategoryRepository
     /**
      * Render the legacy catmanage page.
      *
-     * @param array<string, mixed> $data
+     * @param  array<string, mixed>  $data
      */
     public static function render(array $data = []): string
     {
-        $partial = __DIR__ . '/../Services/Legacy/catmanage_content.php';
+        $partial = __DIR__.'/../Services/Legacy/catmanage_content.php';
         if (! is_file($partial)) {
             return 'Legacy catmanage partial missing.';
         }

@@ -17,7 +17,7 @@ class CreateUsersTable extends Migration
             return;
         }
         $uidStarts = env('UID_STARTS');
-        if (!is_numeric($uidStarts) || $uidStarts < 1) {
+        if (! is_numeric($uidStarts) || $uidStarts < 1) {
             $uidStarts = 10001;
         }
         Schema::create('users', function (Blueprint $table) use ($uidStarts) {

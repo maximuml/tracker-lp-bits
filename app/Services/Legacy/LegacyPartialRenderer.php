@@ -22,10 +22,10 @@ final class LegacyPartialRenderer
      */
     public function render(string $name, array $data = []): array|Response|RedirectResponse
     {
-        $path = __DIR__ . '/' . $name . '_content.php';
+        $path = __DIR__.'/'.$name.'_content.php';
 
         if (! file_exists($path)) {
-            return response('Legacy content missing: ' . $name, 500);
+            return response('Legacy content missing: '.$name, 500);
         }
 
         ob_start();

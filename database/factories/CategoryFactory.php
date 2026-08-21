@@ -24,7 +24,7 @@ class CategoryFactory extends Factory
     {
         return [
             'mode' => SearchBox::factory(),
-            'class_name' => 'c_' . $this->faker->regexify('[a-z]{8}'),
+            'class_name' => 'c_'.$this->faker->regexify('[a-z]{8}'),
             'name' => $this->faker->unique()->word(),
             'image' => 'catsprites.png',
             'sort_index' => $this->faker->numberBetween(0, 20),

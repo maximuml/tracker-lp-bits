@@ -8,21 +8,19 @@
  * @property string $created_at
  * @property string $updated_at
  */
-namespace App\Models;
 
-use Nexus\Database\NexusDB;
+namespace App\Models;
 
 class TorrentCustomFieldValue extends NexusModel
 {
-    /** @var  string */
+    /** @var string */
     protected $table = 'torrents_custom_field_values';
 
-    /** @var  list<string> */
+    /** @var list<string> */
     protected $fillable = [
         'torrent_id', 'custom_field_id', 'custom_field_value',
     ];
 
-    /** @var  bool */
+    /** @var bool */
     public $timestamps = true;
-
 }

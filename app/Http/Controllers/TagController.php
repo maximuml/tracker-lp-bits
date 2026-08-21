@@ -10,12 +10,11 @@ use Illuminate\Validation\Rule;
 
 class TagController extends Controller
 {
-    /** @var  mixed */
+    /** @var mixed */
     private $repository;
 
     /**
-     * @param  \App\Repositories\TagRepository  $repository
-     * @return  mixed
+     * @return mixed
      */
     public function __construct(TagRepository $repository)
     {
@@ -24,7 +23,7 @@ class TagController extends Controller
 
     /**
      * @param  mixed  $id
-     * @return  array<int|string, mixed>
+     * @return array<int|string, mixed>
      */
     private function getRules($id = null): array
     {
@@ -33,10 +32,11 @@ class TagController extends Controller
             'color' => 'required|string',
         ];
     }
+
     /**
      * Display a listing of the resource.
-     * @param  \Illuminate\Http\Request  $request
-     * @return  array<string, mixed>
+     *
+     * @return array<string, mixed>
      */
     public function index(Request $request)
     {
@@ -48,8 +48,8 @@ class TagController extends Controller
 
     /**
      * Store a newly created resource in storage.
-     * @param  \Illuminate\Http\Request  $request
-     * @return  array<string, mixed>
+     *
+     * @return array<string, mixed>
      */
     public function store(Request $request)
     {
@@ -57,26 +57,29 @@ class TagController extends Controller
         $data = array_filter($request->all());
         $result = $this->repository->store($data);
         $resource = new TagResource($result);
+
         return $this->success($resource);
     }
 
     /**
      * Display the specified resource.
+     *
      * @param  mixed  $id
-     * @return  array<string, mixed>
+     * @return array<string, mixed>
      */
     public function show($id)
     {
         $result = Tag::query()->findOrFail($id);
         $resource = new TagResource($result);
+
         return $this->success($resource);
     }
 
     /**
      * Update the specified resource in storage.
-     * @param  \Illuminate\Http\Request  $request
+     *
      * @param  mixed  $id
-     * @return  array<string, mixed>
+     * @return array<string, mixed>
      */
     public function update(Request $request, $id)
     {
@@ -87,17 +90,20 @@ class TagController extends Controller
         }
         $result = $this->repository->update($data, $id);
         $resource = new TagResource($result);
+
         return $this->success($resource);
     }
 
     /**
      * Remove the specified resource from storage.
+     *
      * @param  mixed  $id
-     * @return  array<string, mixed>
+     * @return array<string, mixed>
      */
     public function destroy($id)
     {
         $result = $this->repository->delete($id);
+
         return $this->success($result);
     }
 }

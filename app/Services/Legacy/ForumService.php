@@ -9,8 +9,10 @@ use App\Enums\Permission\PermissionEnum;
 use App\Models\Message;
 use App\Repositories\ForumRepository;
 use App\Support\Bonus;
+use App\Support\Forum;
 use App\Support\LegacyResponse;
 use App\Support\Locale;
+use App\Support\Palette;
 use App\Support\SupportContext;
 use App\Support\UserDisplay;
 use App\Support\Validators;
@@ -63,8 +65,7 @@ final class ForumService
     public function __construct(
         private readonly LegacyPartialRenderer $renderer,
         private readonly ForumRepository $repository,
-    ) {
-    }
+    ) {}
 
     /**
      * @return array<string, mixed>
@@ -103,7 +104,7 @@ final class ForumService
     private function redirectTo(string $path): RedirectResponse
     {
         if (str_starts_with($path, '?')) {
-            return redirect('/forums.php' . $path);
+            return redirect('/forums.php'.$path);
         }
 
         return redirect($path);
@@ -200,7 +201,7 @@ final class ForumService
             if (
                 $locked === 'yes'
                 && ! Permission::can(PermissionEnum::POST_MANAGE)
-                && ! \App\Support\Forum::isModerator($topicid, 'topic')
+                && ! Forum::isModerator($topicid, 'topic')
             ) {
                 LegacyResponse::abort($lang['std_error'] ?? 'Error', $lang['std_topic_locked'] ?? 'Topic locked.');
             }
@@ -214,7 +215,7 @@ final class ForumService
                 || $topicInfo === null
                 || (
                     $postInfo->userid !== $user['id']
-                    && ! \App\Support\Forum::isModerator($postid, 'post')
+                    && ! Forum::isModerator($postid, 'post')
                     && ! Permission::can(PermissionEnum::POST_MANAGE)
                 )
             ) {
@@ -227,14 +228,14 @@ final class ForumService
 
             if ($hassubject) {
                 ForumRepository::updateTopicSubject($topicid, $subject);
-                $cached = $this->cacheGet('forum_' . $forumid . '_last_replied_topic_content');
+                $cached = $this->cacheGet('forum_'.$forumid.'_last_replied_topic_content');
                 if (is_array($cached) && ($cached['id'] ?? null) == $topicid) {
-                    $this->cacheDelete('forum_' . $forumid . '_last_replied_topic_content');
+                    $this->cacheDelete('forum_'.$forumid.'_last_replied_topic_content');
                 }
             }
 
             ForumRepository::updatePostBody($postid, $body, $date, $userid);
-            $this->cacheDelete('post_' . $postid . '_content');
+            $this->cacheDelete('post_'.$postid.'_content');
 
             $postUrl = sprintf('[url=/forums.php?action=viewtopic&topicid=%s&page=p%s#pid%s]%s[/url]', $topicid, $postid, $postid, $topicInfo->subject ?? '');
             if ($postInfo->userid > 0 && $postInfo->userid !== $userid) {
@@ -251,9 +252,9 @@ final class ForumService
                 }
             }
 
-            $headerstr = '/forums.php?action=viewtopic&topicid=' . $topicid;
+            $headerstr = '/forums.php?action=viewtopic&topicid='.$topicid;
 
-            return $this->redirectTo($headerstr . '&page=p' . $postid . '#pid' . $postid);
+            return $this->redirectTo($headerstr.'&page=p'.$postid.'#pid'.$postid);
         }
 
         if (! Permission::can(PermissionEnum::POST_MANAGE)) {
@@ -261,7 +262,7 @@ final class ForumService
             $timenow = defined('TIMENOW') ? (int) constant('TIMENOW') : time();
             if (strtotime($lastPost) > ($timenow - 10)) {
                 $secs = 10 - ($timenow - strtotime($lastPost));
-                LegacyResponse::abort($lang['std_error'] ?? 'Error', ($lang['std_post_flooding'] ?? '') . $secs . ($lang['std_seconds_before_making'] ?? ''), false);
+                LegacyResponse::abort($lang['std_error'] ?? 'Error', ($lang['std_post_flooding'] ?? '').$secs.($lang['std_seconds_before_making'] ?? ''), false);
             }
         }
 
@@ -327,11 +328,11 @@ final class ForumService
         }
 
         $todayDate = date('Y-m-d');
-        $this->cacheDelete('forum_' . $forumid . '_post_' . $todayDate . '_count');
-        $this->cacheDelete('today_' . $todayDate . '_posts_count');
-        $this->cacheDelete('forum_' . $forumid . '_last_replied_topic_content');
-        $this->cacheDelete('topic_' . $topicid . '_post_count');
-        $this->cacheDelete('user_' . $userid . '_post_count');
+        $this->cacheDelete('forum_'.$forumid.'_post_'.$todayDate.'_count');
+        $this->cacheDelete('today_'.$todayDate.'_posts_count');
+        $this->cacheDelete('forum_'.$forumid.'_last_replied_topic_content');
+        $this->cacheDelete('topic_'.$topicid.'_post_count');
+        $this->cacheDelete('user_'.$userid.'_post_count');
 
         if ($type === 'new') {
             ForumRepository::updateTopicFirstLastPost($topicid, $newPostId);
@@ -341,9 +342,9 @@ final class ForumService
 
         ForumRepository::updateUserLastPost($userid, $date);
 
-        $headerstr = '/forums.php?action=viewtopic&topicid=' . $topicid;
+        $headerstr = '/forums.php?action=viewtopic&topicid='.$topicid;
 
-        return $this->redirectTo($headerstr . '&page=last#pid' . $newPostId);
+        return $this->redirectTo($headerstr.'&page=last#pid'.$newPostId);
     }
 
     private function handleMoveTopic(Request $request): RedirectResponse
@@ -351,7 +352,7 @@ final class ForumService
         $lang = $this->lang();
         $forumid = (int) $request->input('forumid');
         $topicid = (int) $request->query('topicid');
-        $ismod = \App\Support\Forum::isModerator($topicid, 'topic');
+        $ismod = Forum::isModerator($topicid, 'topic');
 
         if (
             ! Validators::isId($forumid)
@@ -380,13 +381,13 @@ final class ForumService
 
         if ($oldForumid !== $forumid) {
             $todayDate = date('Y-m-d');
-            $this->cacheDelete('forum_' . $oldForumid . '_post_' . $todayDate . '_count');
-            $this->cacheDelete('forum_' . $oldForumid . '_last_replied_topic_content');
-            $this->cacheDelete('forum_' . $forumid . '_post_' . $todayDate . '_count');
-            $this->cacheDelete('forum_' . $forumid . '_last_replied_topic_content');
+            $this->cacheDelete('forum_'.$oldForumid.'_post_'.$todayDate.'_count');
+            $this->cacheDelete('forum_'.$oldForumid.'_last_replied_topic_content');
+            $this->cacheDelete('forum_'.$forumid.'_post_'.$todayDate.'_count');
+            $this->cacheDelete('forum_'.$forumid.'_last_replied_topic_content');
         }
 
-        return $this->redirectTo('?action=viewforum&forumid=' . $forumid);
+        return $this->redirectTo('?action=viewforum&forumid='.$forumid);
     }
 
     private function handleDeleteTopic(Request $request): RedirectResponse
@@ -402,7 +403,7 @@ final class ForumService
 
         $forumid = (int) $topic['forumid'];
         $targetUserid = (int) $topic['userid'];
-        $ismod = \App\Support\Forum::isModerator($topicid, 'topic');
+        $ismod = Forum::isModerator($topicid, 'topic');
 
         if (
             ! Validators::isId($topicid)
@@ -413,17 +414,17 @@ final class ForumService
 
         $sure = (int) $request->query('sure', 0);
         if ($sure !== 1) {
-            LegacyResponse::abort($lang['std_delete_topic'] ?? 'Delete topic', ($lang['std_delete_topic_note'] ?? '') . "<a class=altlink href=?action=deletetopic&topicid={$topicid}&sure=1>" . ($lang['std_here_if_sure'] ?? ''), false);
+            LegacyResponse::abort($lang['std_delete_topic'] ?? 'Delete topic', ($lang['std_delete_topic_note'] ?? '')."<a class=altlink href=?action=deletetopic&topicid={$topicid}&sure=1>".($lang['std_here_if_sure'] ?? ''), false);
         }
 
         $postCount = ForumRepository::countTopicPosts($topicid);
         ForumRepository::deleteTopic($topicid, $forumid, $postCount);
 
         $todayDate = date('Y-m-d');
-        $this->cacheDelete('forum_' . $forumid . '_post_' . $todayDate . '_count');
-        $cached = $this->cacheGet('forum_' . $forumid . '_last_replied_topic_content');
+        $this->cacheDelete('forum_'.$forumid.'_post_'.$todayDate.'_count');
+        $cached = $this->cacheGet('forum_'.$forumid.'_last_replied_topic_content');
         if (is_array($cached) && ($cached['id'] ?? null) == $topicid) {
-            $this->cacheDelete('forum_' . $forumid . '_last_replied_topic_content');
+            $this->cacheDelete('forum_'.$forumid.'_last_replied_topic_content');
         }
 
         $starttopicBonus = (float) (SupportContext::getGlobal('starttopic_bonus') ?? 0);
@@ -431,7 +432,7 @@ final class ForumService
             Bonus::updatePoints('-', $starttopicBonus, $targetUserid);
         }
 
-        return $this->redirectTo('?action=viewforum&forumid=' . $forumid);
+        return $this->redirectTo('?action=viewforum&forumid='.$forumid);
     }
 
     private function handleDeletePost(Request $request): RedirectResponse
@@ -440,7 +441,7 @@ final class ForumService
         $lang = $this->lang();
         $postid = (int) $request->query('postid');
         $sure = (int) $request->query('sure', 0);
-        $ismod = \App\Support\Forum::isModerator($postid, 'post');
+        $ismod = Forum::isModerator($postid, 'post');
 
         if (
             (! Permission::can(PermissionEnum::POST_MANAGE) && ! $ismod)
@@ -460,25 +461,25 @@ final class ForumService
         $prevPostId = ForumRepository::getPreviousPostId($topicid, $postid);
 
         if ($prevPostId === null || $prevPostId === 0) {
-            LegacyResponse::abort($lang['std_error'] ?? 'Error', ($lang['std_cannot_delete_post'] ?? '') . "<a class=altlink href=?action=deletetopic&topicid={$topicid}&sure=1>" . ($lang['std_delete_topic_instead'] ?? ''), false);
+            LegacyResponse::abort($lang['std_error'] ?? 'Error', ($lang['std_cannot_delete_post'] ?? '')."<a class=altlink href=?action=deletetopic&topicid={$topicid}&sure=1>".($lang['std_delete_topic_instead'] ?? ''), false);
         }
 
         if ($sure !== 1) {
-            LegacyResponse::abort($lang['std_delete_post'] ?? 'Delete post', ($lang['std_delete_post_note'] ?? '') . "<a class=altlink href=?action=deletepost&postid={$postid}&sure=1>" . ($lang['std_here_if_sure'] ?? ''), false);
+            LegacyResponse::abort($lang['std_delete_post'] ?? 'Delete post', ($lang['std_delete_post_note'] ?? '')."<a class=altlink href=?action=deletepost&postid={$postid}&sure=1>".($lang['std_here_if_sure'] ?? ''), false);
         }
 
-        $redirtopost = '&page=p' . $prevPostId . '#pid' . $prevPostId;
+        $redirtopost = '&page=p'.$prevPostId.'#pid'.$prevPostId;
         $forumid = ForumRepository::getTopicForumId($topicid) ?? 0;
         if ($forumid === 0) {
             return $this->redirectTo('/forums.php');
         }
 
         ForumRepository::deletePost($postid, $topicid, $forumid);
-        $this->cacheDelete('user_' . $targetUserid . '_post_count');
-        $this->cacheDelete('topic_' . $topicid . '_post_count');
-        $cached = $this->cacheGet('forum_' . $forumid . '_last_replied_topic_content');
+        $this->cacheDelete('user_'.$targetUserid.'_post_count');
+        $this->cacheDelete('topic_'.$topicid.'_post_count');
+        $cached = $this->cacheGet('forum_'.$forumid.'_last_replied_topic_content');
         if (is_array($cached) && ($cached['lastpost'] ?? null) == $postid) {
-            $this->cacheDelete('forum_' . $forumid . '_last_replied_topic_content');
+            $this->cacheDelete('forum_'.$forumid.'_last_replied_topic_content');
         }
         ForumRepository::updateTopicLastPost($topicid);
 
@@ -487,13 +488,13 @@ final class ForumService
             Bonus::updatePoints('-', $makepostBonus, $targetUserid);
         }
 
-        return $this->redirectTo('?action=viewtopic&topicid=' . $topicid . $redirtopost);
+        return $this->redirectTo('?action=viewtopic&topicid='.$topicid.$redirtopost);
     }
 
     private function handleSetLocked(Request $request): RedirectResponse
     {
         $topicid = (int) $request->input('topicid');
-        $ismod = \App\Support\Forum::isModerator($topicid, 'topic');
+        $ismod = Forum::isModerator($topicid, 'topic');
 
         if (
             ! $topicid
@@ -511,7 +512,7 @@ final class ForumService
     private function handleHighlightTopic(Request $request): RedirectResponse
     {
         $topicid = (int) $request->query('topicid');
-        $ismod = \App\Support\Forum::isModerator($topicid, 'topic');
+        $ismod = Forum::isModerator($topicid, 'topic');
 
         if (
             ! $topicid
@@ -521,15 +522,15 @@ final class ForumService
         }
 
         $color = (int) $request->input('color');
-        if ($color === 0 || \App\Support\Palette::forumHighlight($color)) {
+        if ($color === 0 || Palette::forumHighlight($color)) {
             ForumRepository::updateTopicHighlight($topicid, $color);
         }
 
         $forumid = ForumRepository::getTopicForumId($topicid) ?? 0;
         if ($forumid > 0) {
-            $cached = $this->cacheGet('forum_' . $forumid . '_last_replied_topic_content');
+            $cached = $this->cacheGet('forum_'.$forumid.'_last_replied_topic_content');
             if (is_array($cached) && ($cached['id'] ?? null) == $topicid) {
-                $this->cacheDelete('forum_' . $forumid . '_last_replied_topic_content');
+                $this->cacheDelete('forum_'.$forumid.'_last_replied_topic_content');
             }
         }
 
@@ -539,7 +540,7 @@ final class ForumService
     private function handleSetSticky(Request $request): RedirectResponse
     {
         $topicid = (int) $request->input('topicid');
-        $ismod = \App\Support\Forum::isModerator($topicid, 'topic');
+        $ismod = Forum::isModerator($topicid, 'topic');
 
         if (
             ! $topicid

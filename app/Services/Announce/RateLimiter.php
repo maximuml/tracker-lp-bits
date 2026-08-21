@@ -22,6 +22,7 @@ use Nexus\Database\NexusDB;
 final class RateLimiter
 {
     private const RE_ANNOUNCE_INTERVAL = 5;
+
     private const FREQUENCY_INTERVAL = 30;
 
     public function check(AnnounceRequestDto $dto): RateLimitResult
@@ -37,8 +38,8 @@ final class RateLimiter
         }
 
         $lockParams = ['info_hash' => $infoHashBinary, 'passkey' => $passkey];
-        $reAnnounceKey = 'isReAnnounce:' . md5(http_build_query($lockParams));
-        $isReAnnounce = !$redis->set($reAnnounceKey, TIMENOW, ['nx', 'ex' => self::RE_ANNOUNCE_INTERVAL]);
+        $reAnnounceKey = 'isReAnnounce:'.md5(http_build_query($lockParams));
+        $isReAnnounce = ! $redis->set($reAnnounceKey, TIMENOW, ['nx', 'ex' => self::RE_ANNOUNCE_INTERVAL]);
 
         if ($redis->get("torrent_not_exists:{$infoHashBinary}")) {
             throw TrackerException::failure('torrent not registered with this tracker');
@@ -48,9 +49,9 @@ final class RateLimiter
         $isStoppedOrCompleted = $dto->isStoppedOrCompleted();
 
         if (
-            !$isStoppedOrCompleted
-            && !$isReAnnounce
-            && !$redis->set($frequencyKey, TIMENOW, ['nx', 'ex' => self::FREQUENCY_INTERVAL])
+            ! $isStoppedOrCompleted
+            && ! $isReAnnounce
+            && ! $redis->set($frequencyKey, TIMENOW, ['nx', 'ex' => self::FREQUENCY_INTERVAL])
         ) {
             $this->warn($dto, 'Request too frequent(h)', 300);
         }
@@ -73,12 +74,12 @@ final class RateLimiter
     private function emptyBase(AnnounceRequestDto $dto): array
     {
         $base = [
-            'interval'     => MIN_ANNOUNCE_WAIT_SECOND,
+            'interval' => MIN_ANNOUNCE_WAIT_SECOND,
             'min interval' => MIN_ANNOUNCE_WAIT_SECOND,
-            'complete'     => 0,
-            'incomplete'   => 0,
-            'downloaded'   => 0,
-            'peers'        => $dto->compact ? '' : [],
+            'complete' => 0,
+            'incomplete' => 0,
+            'downloaded' => 0,
+            'peers' => $dto->compact ? '' : [],
         ];
 
         if ($dto->compact) {

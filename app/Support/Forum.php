@@ -2,7 +2,12 @@
 
 namespace App\Support;
 
+use App\Models\Topic;
+use App\Models\User;
+use App\Repositories\ForumRepository;
+use App\Repositories\SettingRepository;
 use App\Support\Cache\LegacyRedisCache;
+use Nexus\Database\NexusDB;
 
 /**
  * Legacy forum helpers extracted from `include/functions.php`.
@@ -19,7 +24,7 @@ final class Forum
      */
     public static function picFolder(string $langFolder): string
     {
-        return 'pic/forum_pic/' . $langFolder;
+        return 'pic/forum_pic/'.$langFolder;
     }
 
     /**
@@ -35,9 +40,6 @@ final class Forum
      *
      * Mirrors `get_forum_moderators()`.
      */
-    /**
-     * @param  \App\Support\Cache\LegacyRedisCache|null  $cache
-     */
     public static function moderators(?LegacyRedisCache $cache, int|string $forumId, bool $plainText = true): string
     {
         static $moderatorsArray = null;
@@ -47,7 +49,7 @@ final class Forum
             if ($cached !== false && is_array($cached)) {
                 $moderatorsArray = $cached;
             } else {
-                $moderatorsArray = app(\App\Repositories\ForumRepository::class)->getModeratorArray();
+                $moderatorsArray = app(ForumRepository::class)->getModeratorArray();
                 if ($cache !== null) {
                     $cache->cache_value('forum_moderator_array', $moderatorsArray, 86200);
                 }
@@ -57,7 +59,7 @@ final class Forum
         $userIds = $moderatorsArray[$forumId] ?? [];
         $names = [];
         foreach ($userIds as $userId) {
-            $names[] = $plainText ? \App\Support\UserDisplay::plainUsername($userId) : \App\Support\UserDisplay::username($userId);
+            $names[] = $plainText ? UserDisplay::plainUsername($userId) : UserDisplay::username($userId);
         }
 
         return rtrim(implode(', ', $names), ', ');
@@ -74,10 +76,10 @@ final class Forum
         $users = explode(',', $name);
         $userIds = [];
         foreach ($users as $user) {
-            $userIds[] = \App\Support\UserDisplay::userIdFromName(trim($user));
+            $userIds[] = UserDisplay::userIdFromName(trim($user));
         }
 
-        app(\App\Repositories\ForumRepository::class)->replaceModerators((int) $forumId, $userIds, $limit);
+        app(ForumRepository::class)->replaceModerators((int) $forumId, $userIds, $limit);
     }
 
     /**
@@ -90,7 +92,7 @@ final class Forum
     {
         $CURUSER = SupportContext::getUser() ?? [];
 
-        $forumRep = app(\App\Repositories\ForumRepository::class);
+        $forumRep = app(ForumRepository::class);
         $userId = (int) ($CURUSER['id'] ?? 0);
 
         switch ($in) {
@@ -99,6 +101,7 @@ final class Forum
                 if ($topicId !== null) {
                     return self::isModerator($topicId, 'topic');
                 }
+
                 return false;
 
             case 'topic':
@@ -122,7 +125,7 @@ final class Forum
      */
     public static function canViewPost(int|string $uid, array|int|string $post): bool
     {
-        /** @var array<int, \App\Models\Topic> $topics */
+        /** @var array<int, Topic> $topics */
         static $topics = [];
         /** @var array<int, string>|null $protectedForumIds */
         static $protectedForumIds = null;
@@ -130,33 +133,33 @@ final class Forum
         static $forumMods = null;
 
         if (! is_array($post)) {
-            $post = \App\Repositories\ForumRepository::getPostArrayById((int) $post);
+            $post = ForumRepository::getPostArrayById((int) $post);
         }
 
         $topicId = $post['topicid'];
         if (! isset($topics[$topicId])) {
-            $topics[$topicId] = \App\Repositories\ForumRepository::getTopicById($topicId);
+            $topics[$topicId] = ForumRepository::getTopicById($topicId);
         }
-        /** @var \App\Models\Topic $topicInfo */
+        /** @var Topic $topicInfo */
         $topicInfo = $topics[$topicId];
         $forumId = $topicInfo->forumid;
 
         if ($protectedForumIds === null) {
-            $protected = \Nexus\Database\NexusDB::remember('setting_protected_forum', 600, function () {
-                return \App\Repositories\SettingRepository::getByName('misc.protected_forum');
+            $protected = NexusDB::remember('setting_protected_forum', 600, function () {
+                return SettingRepository::getByName('misc.protected_forum');
             });
             $protectedForumIds = $protected ? (preg_split('/[,\s]+/', $protected) ?: []) : [];
         }
 
         if ($forumMods === null) {
-            $forumMods = \App\Repositories\ForumRepository::getForumMods();
+            $forumMods = ForumRepository::getForumMods();
         }
 
         $isForumMod = isset($forumMods[$forumId]) && $forumMods[$forumId] == $uid;
         $log = sprintf(
             'uid: %s, class: %s, post: %s, forumId: %s, protectedForumIdArr: %s, forumMods: %s, isForumMod: %s',
             $uid,
-            \App\Support\UserDisplay::currentClass(),
+            UserDisplay::currentClass(),
             $post['id'],
             $forumId,
             json_encode($protectedForumIds),
@@ -166,16 +169,18 @@ final class Forum
 
         if (
             in_array($forumId, $protectedForumIds)
-            && \App\Support\UserDisplay::currentClass() < \App\Models\User::CLASS_ADMINISTRATOR
+            && UserDisplay::currentClass() < User::CLASS_ADMINISTRATOR
             && $uid != $post['userid']
             && $uid != $topicInfo->userid
             && ! $isForumMod
         ) {
             Logger::writeWithContext("$log, FALSE");
+
             return false;
         }
 
         Logger::writeWithContext("$log, TRUE");
+
         return true;
     }
 
@@ -185,16 +190,15 @@ final class Forum
      * Mirrors `get_post_row()`.
      */
     /**
-     * @param  \App\Support\Cache\LegacyRedisCache|null  $cache
      * @return array<string, mixed>|null
      */
     public static function postRow(?LegacyRedisCache $cache, int|string $postId): ?array
     {
-        $cacheKey = 'post_' . $postId . '_content';
+        $cacheKey = 'post_'.$postId.'_content';
         $row = $cache !== null ? $cache->get_value($cacheKey) : false;
 
         if ($row === false) {
-            $row = \App\Repositories\ForumRepository::findPostArrayById((int) $postId);
+            $row = ForumRepository::findPostArrayById((int) $postId);
             if ($cache !== null) {
                 $cache->cache_value($cacheKey, $row, 7200);
             }

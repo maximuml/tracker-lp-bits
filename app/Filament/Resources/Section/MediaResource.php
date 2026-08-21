@@ -2,19 +2,12 @@
 
 namespace App\Filament\Resources\Section;
 
-use Filament\Schemas\Schema;
-use App\Filament\Resources\Section\MediaResource\Pages\ListMedia;
 use App\Filament\Resources\Section\MediaResource\Pages\CreateMedia;
 use App\Filament\Resources\Section\MediaResource\Pages\EditMedia;
-use App\Filament\Resources\Section\MediaResource\Pages;
-use App\Filament\Resources\Section\MediaResource\RelationManagers;
+use App\Filament\Resources\Section\MediaResource\Pages\ListMedia;
 use App\Models\Media;
-use Filament\Forms;
-use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
 use Filament\Tables\Table;
-use Filament\Tables;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class MediaResource extends CodecResource
 {

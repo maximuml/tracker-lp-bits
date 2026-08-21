@@ -1,21 +1,22 @@
 <?php
+
 namespace App\Filament\Pages;
 
-use Filament\Pages\Dashboard;
-use Filament\Support\Enums\Width;
 use App\Filament\Widgets\AnnounceMonitor\MaxUploadedUser;
 use App\Models\Setting;
+use Filament\Pages\Dashboard;
+use Filament\Support\Enums\Width;
 use Illuminate\Contracts\Support\Htmlable;
 
 class AnnounceMonitor extends Dashboard
 {
     protected Width|string|null $maxContentWidth = 'full';
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-archive-box';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-archive-box';
 
     protected static string $routePath = 'announce-monitor';
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Tracker';
+    protected static string|\UnitEnum|null $navigationGroup = 'Tracker';
 
     protected static ?int $navigationSort = 15;
 
@@ -29,9 +30,6 @@ class AnnounceMonitor extends Dashboard
         return __('admin.sidebar.announce_monitor');
     }
 
-    /**
-     * @return bool
-     */
     public static function shouldRegisterNavigation(): bool
     {
         return Setting::getIsRecordAnnounceLog() && config('clickhouse.connection.host') != '';

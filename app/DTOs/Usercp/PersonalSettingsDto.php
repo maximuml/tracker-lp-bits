@@ -97,6 +97,6 @@ final readonly class PersonalSettingsDto
             }
         }
 
-        return $active === [] ? '' : '[' . implode('][', array_keys($active)) . ']';
+        return $active === [] ? '' : '['.implode('][', array_keys($active)).']';
     }
 }

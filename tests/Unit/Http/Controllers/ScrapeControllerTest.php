@@ -2,14 +2,12 @@
 
 namespace Tests\Unit\Http\Controllers;
 
-use App\Exceptions\TrackerException;
 use App\Exceptions\TrackerWarningException;
 use App\Http\Controllers\ScrapeController;
 use App\Services\ScrapeService;
 use Illuminate\Http\Request;
 use Mockery;
 use Rhilip\Bencode\Bencode;
-use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
 
 final class ScrapeControllerTest extends TestCase

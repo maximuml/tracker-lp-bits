@@ -3,6 +3,8 @@
 namespace App\Services\Captcha;
 
 use App\Services\Captcha\Exceptions\CaptchaValidationException;
+use App\Support\Config;
+use App\Support\Config\SiteConfig;
 use Illuminate\Support\Arr;
 
 class CaptchaManager
@@ -19,7 +21,7 @@ class CaptchaManager
 
         $driver = $this->getDriverInstance($name);
 
-        if ($name !== 'image' && !$driver->isEnabled()) {
+        if ($name !== 'image' && ! $driver->isEnabled()) {
             return $this->driver('image');
         }
 
@@ -27,7 +29,7 @@ class CaptchaManager
     }
 
     /**
-     * @param array<string, mixed> $context
+     * @param  array<string, mixed>  $context
      */
     public function render(array $context = []): string
     {
@@ -35,8 +37,8 @@ class CaptchaManager
     }
 
     /**
-     * @param array<string, mixed> $payload
-     * @param array<string, mixed> $context
+     * @param  array<string, mixed>  $payload
+     * @param  array<string, mixed>  $context
      */
     public function verify(array $payload, array $context = []): bool
     {
@@ -54,7 +56,7 @@ class CaptchaManager
 
     protected function getDriverInstance(string $name): CaptchaDriverInterface
     {
-        if (!isset($this->drivers[$name])) {
+        if (! isset($this->drivers[$name])) {
             try {
                 $this->drivers[$name] = $this->resolveDriver($name);
             } catch (\InvalidArgumentException $exception) {
@@ -72,20 +74,20 @@ class CaptchaManager
     {
         $config = $this->getConfigValue("drivers.$name", []);
 
-        if (!is_array($config) || empty($config)) {
+        if (! is_array($config) || empty($config)) {
             throw new \InvalidArgumentException("Captcha driver [$name] is not defined.");
         }
 
         $driverClass = Arr::get($config, 'class');
 
-        if (!$driverClass || !class_exists($driverClass)) {
+        if (! $driverClass || ! class_exists($driverClass)) {
             throw new \InvalidArgumentException("Captcha driver class for [$name] is invalid.");
         }
 
         $driver = new $driverClass($config);
 
-        if (!$driver instanceof CaptchaDriverInterface) {
-            throw new \InvalidArgumentException("Captcha driver [$name] must implement " . CaptchaDriverInterface::class);
+        if (! $driver instanceof CaptchaDriverInterface) {
+            throw new \InvalidArgumentException("Captcha driver [$name] must implement ".CaptchaDriverInterface::class);
         }
 
         return $driver;
@@ -97,8 +99,7 @@ class CaptchaManager
     }
 
     /**
-     * @param mixed $default
-     * @return mixed
+     * @param  mixed  $default
      */
     protected function getConfigValue(string $key, $default = null): mixed
     {
@@ -115,20 +116,20 @@ class CaptchaManager
                 }
             }
 
-            if (!is_array($config) && function_exists('nexus_config')) {
-                $config = \App\Support\Config::get('captcha', []);
+            if (! is_array($config) && function_exists('nexus_config')) {
+                $config = Config::get('captcha', []);
             }
 
-            if (!is_array($config)) {
-                $path = (defined('ROOT_PATH') ? ROOT_PATH : dirname(__DIR__, 3) . DIRECTORY_SEPARATOR) . 'config/captcha.php';
+            if (! is_array($config)) {
+                $path = (defined('ROOT_PATH') ? ROOT_PATH : dirname(__DIR__, 3).DIRECTORY_SEPARATOR).'config/captcha.php';
                 $config = is_file($path) ? require $path : [];
             }
 
             $this->config = is_array($config) ? $config : [];
 
             try {
-                $settings = \App\Support\Config\SiteConfig::current()->captcha->toArray();
-                if (!empty($settings)) {
+                $settings = SiteConfig::current()->captcha->toArray();
+                if (! empty($settings)) {
                     $this->config = array_replace_recursive($this->config, $settings);
                 }
             } catch (\Throwable $exception) {

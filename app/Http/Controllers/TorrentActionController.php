@@ -3,23 +3,22 @@
 namespace App\Http\Controllers;
 
 use App\Enums\Permission\PermissionEnum;
-use App\Models\Invite;
 use App\Models\Message;
 use App\Models\Peer;
 use App\Models\SearchBox;
 use App\Models\Torrent;
 use App\Models\User;
-use App\Repositories\SearchRepository;
 use App\Repositories\TorrentAjaxRepository;
 use App\Repositories\TorrentRepository;
 use App\Support\Bonus;
+use App\Support\Config\SiteConfig;
 use App\Support\Format;
 use App\Support\Hooks;
 use App\Support\Http;
-use App\Support\Config\SiteConfig;
 use App\Support\LegacyResponse;
 use App\Support\Locale;
 use App\Support\Log;
+use App\Support\Path;
 use App\Support\Permissions;
 use App\Support\Strings;
 use App\Support\SupportContext;
@@ -42,7 +41,7 @@ class TorrentActionController extends LegacyController
     {
         $headers = [
             'Expires' => 'Mon, 26 Jul 1997 05:00:00 GMT',
-            'Last-Modified' => gmdate('D, d M Y H:i:s') . ' GMT',
+            'Last-Modified' => gmdate('D, d M Y H:i:s').' GMT',
             'Cache-Control' => 'no-cache, must-revalidate',
             'Pragma' => 'no-cache',
             'Content-Type' => 'text/xml; charset=utf-8',
@@ -61,24 +60,21 @@ class TorrentActionController extends LegacyController
         $userId = (int) $user['id'];
         $bookmark = NexusDB::table('bookmarks')->where('torrentid', $torrentId)->where('userid', $userId)->first();
 
-        $searchRep = new SearchRepository();
         if ($bookmark) {
             $bookmarkId = (int) $bookmark->id;
-            $searchRep->deleteBookmark($bookmarkId);
             NexusDB::table('bookmarks')->where('id', $bookmarkId)->delete();
             $status = 'deleted';
         } else {
-            $bookmarkId = NexusDB::table('bookmarks')->insertGetId([
+            NexusDB::table('bookmarks')->insertGetId([
                 'torrentid' => $torrentId,
                 'userid' => $userId,
             ]);
-            $searchRep->addBookmark($bookmarkId);
             $status = 'added';
         }
 
         $cache = SupportContext::getCache();
         if ($cache !== null) {
-            $cache->delete_value('user_' . $userId . '_bookmark_array');
+            $cache->delete_value('user_'.$userId.'_bookmark_array');
         }
 
         return response($status, 200, $headers);
@@ -89,7 +85,8 @@ class TorrentActionController extends LegacyController
         $curUser = SupportContext::getUser();
         if ($curUser === null) {
             $qs = $request->getQueryString();
-            return redirect('/fastdelete.php' . ($qs ? '?' . $qs : ''));
+
+            return redirect('/fastdelete.php'.($qs ? '?'.$qs : ''));
         }
 
         $currentUserId = (int) ($curUser['id'] ?? 0);
@@ -97,12 +94,14 @@ class TorrentActionController extends LegacyController
         $id = (int) SupportContext::getRequestInput('id');
         if ($id <= 0) {
             $lang = (array) SupportContext::getGlobal('lang_fastdelete', []);
+
             return $this->legacyAbortResponse($lang['std_delete_failed'] ?? 'Error', $lang['std_missing_form_data'] ?? 'Invalid id.');
         }
 
         if (! Permissions::userCan(PermissionEnum::TORRENT_MANAGE->value, false, $currentUserId)
             || ! Permissions::userCan(PermissionEnum::TORRENT_DELETE->value, false, $currentUserId)) {
             $lang = (array) SupportContext::getGlobal('lang_fastdelete', []);
+
             return $this->legacyAbortResponse($lang['std_delete_failed'] ?? 'Error', $lang['text_no_permission'] ?? 'No permission.');
         }
 
@@ -115,17 +114,12 @@ class TorrentActionController extends LegacyController
         $sure = SupportContext::getQuery('sure');
         if (empty($sure)) {
             $lang = (array) SupportContext::getGlobal('lang_fastdelete', []);
+
             return $this->legacyAbortResponse(
                 $lang['std_delete_torrent'] ?? 'Delete torrent',
-                ($lang['std_delete_torrent_note'] ?? '') . "<a class=altlink href=fastdelete.php?id=$id&sure=1>" . ($lang['std_here_if_sure'] ?? 'here') . '</a>',
+                ($lang['std_delete_torrent_note'] ?? '')."<a class=altlink href=fastdelete.php?id=$id&sure=1>".($lang['std_here_if_sure'] ?? 'here').'</a>',
                 false
             );
-        }
-
-        $searchRep = new SearchRepository();
-        if ($searchRep->deleteTorrent($id) === false) {
-            $lang = (array) SupportContext::getGlobal('lang_fastdelete', []);
-            return $this->legacyAbortResponse($lang['std_delete_failed'] ?? 'Error', 'Delete es fail.');
         }
 
         TorrentOps::deleteTorrents($id, false);
@@ -144,8 +138,8 @@ class TorrentActionController extends LegacyController
             $dt = date('Y-m-d H:i:s');
             $subject = Locale::trans('torrent.msg_torrent_deleted', [], $locale);
             $msg = Locale::trans('torrent.msg_the_torrent_you_uploaded', [], $locale)
-                . $row['name']
-                . Locale::trans('torrent.msg_was_deleted_by', ['admin' => $curUser['username']], $locale);
+                .$row['name']
+                .Locale::trans('torrent.msg_was_deleted_by', ['admin' => $curUser['username']], $locale);
             Message::add([
                 'sender' => 0,
                 'receiver' => $row['owner'],
@@ -176,8 +170,8 @@ class TorrentActionController extends LegacyController
             abort(403);
         }
 
-        $torrentDir = \App\Support\Config\SiteConfig::current()->main->torrentDir();
-        $filePath = \App\Support\Path::resolve("{$torrentDir}/{$id}.torrent", \ROOT_PATH);
+        $torrentDir = SiteConfig::current()->main->torrentDir();
+        $filePath = Path::resolve("{$torrentDir}/{$id}.torrent", \ROOT_PATH);
         if (! is_file($filePath) || ! is_readable($filePath)) {
             abort(404);
         }
@@ -201,7 +195,7 @@ class TorrentActionController extends LegacyController
 
         return response()->view('viewfilelist.index', ['files' => $files], 200, [
             'Expires' => 'Mon, 26 Jul 1997 05:00:00 GMT',
-            'Last-Modified' => gmdate('D, d M Y H:i:s') . ' GMT',
+            'Last-Modified' => gmdate('D, d M Y H:i:s').' GMT',
             'Cache-Control' => 'no-cache, must-revalidate',
             'Pragma' => 'no-cache',
             'Content-Type' => 'text/html; charset=utf-8',
@@ -220,7 +214,7 @@ class TorrentActionController extends LegacyController
 
         $headers = [
             'Expires' => 'Mon, 26 Jul 1997 05:00:00 GMT',
-            'Last-Modified' => gmdate('D, d M Y H:i:s') . ' GMT',
+            'Last-Modified' => gmdate('D, d M Y H:i:s').' GMT',
             'Cache-Control' => 'no-cache, must-revalidate',
             'Pragma' => 'no-cache',
             'Content-Type' => 'text/html; charset=utf-8',
@@ -259,7 +253,7 @@ class TorrentActionController extends LegacyController
 
             return $this->legacyAbortResponse(
                 $lang['std_success'] ?? 'Success',
-                $effected . ' ' . ($lang['std_ghost_torrents_cleaned'] ?? 'ghost torrent(s) cleaned.')
+                $effected.' '.($lang['std_ghost_torrents_cleaned'] ?? 'ghost torrent(s) cleaned.')
             );
         }
 
@@ -274,12 +268,14 @@ class TorrentActionController extends LegacyController
         $curUser = SupportContext::getUser();
         if ($curUser === null) {
             $qs = $request->getQueryString();
-            return redirect('/takereseed.php' . ($qs ? '?' . $qs : ''));
+
+            return redirect('/takereseed.php'.($qs ? '?'.$qs : ''));
         }
 
         $currentUserId = (int) ($curUser['id'] ?? 0);
         if (! Permissions::userCan(PermissionEnum::ASK_RESEED->value, false, $currentUserId)) {
             $lang = (array) SupportContext::getGlobal('lang_takereseed', []);
+
             return $this->legacyAbortResponse($lang['std_error'] ?? 'Error', $lang['std_permission_denied'] ?? 'Permission denied.');
         }
 
@@ -314,10 +310,10 @@ class TorrentActionController extends LegacyController
             $locale = Locale::userLocale((int) $snatchRow['userid']);
             $rsSubject = Locale::trans('torrent.msg_reseed_request', [], $locale);
             $pnMsg = Locale::trans('torrent.msg_reseed_user', [], $locale)
-                . $curUser['username']
-                . Locale::trans('torrent.msg_ask_reseed', [], $locale)
-                . '[url=' . Http::protocolPrefix(Url::isSecure()) . $baseUrl . '/details.php?id=' . $reseedid . ']' . $snatchRow['torrent_name'] . '[/url]'
-                . Locale::trans('torrent.msg_thank_you', [], $locale);
+                .$curUser['username']
+                .Locale::trans('torrent.msg_ask_reseed', [], $locale)
+                .'[url='.Http::protocolPrefix(Url::isSecure()).$baseUrl.'/details.php?id='.$reseedid.']'.$snatchRow['torrent_name'].'[/url]'
+                .Locale::trans('torrent.msg_thank_you', [], $locale);
             Message::add([
                 'sender' => 0,
                 'receiver' => $snatchRow['userid'],
@@ -357,7 +353,7 @@ class TorrentActionController extends LegacyController
 
         $headers = [
             'Expires' => 'Mon, 26 Jul 1997 05:00:00 GMT',
-            'Last-Modified' => gmdate('D, d M Y H:i:s') . ' GMT',
+            'Last-Modified' => gmdate('D, d M Y H:i:s').' GMT',
             'Cache-Control' => 'no-cache, must-revalidate',
             'Pragma' => 'no-cache',
             'Content-Type' => 'text/html; charset=utf-8',
@@ -412,6 +408,7 @@ class TorrentActionController extends LegacyController
         foreach ($request->query->all() as $key => $value) {
             if (in_array($key, $exactParams, true)) {
                 $filteredQuery[$key] = $value;
+
                 continue;
             }
             if (preg_match('/^(cat|sou|med|cod|sta|pro|tea|aud)\d+$/', $key)) {
@@ -419,7 +416,7 @@ class TorrentActionController extends LegacyController
             }
         }
 
-        $cacheKey = 'nexus_rss:' . $passkey . ':' . md5(http_build_query($filteredQuery));
+        $cacheKey = 'nexus_rss:'.$passkey.':'.md5(http_build_query($filteredQuery));
         $cacheData = NexusDB::cache_get($cacheKey);
         if ($cacheData && config('app.env') !== 'local') {
             Log::writeWithContext('rss get from cache', 'info');
@@ -444,7 +441,7 @@ class TorrentActionController extends LegacyController
 
         $dllink = false;
         $inclbookmarked = 0;
-        $rssUser = (array) NexusDB::remember('user_passkey_' . $passkey . '_rss', 3600, function () use ($passkey) {
+        $rssUser = (array) NexusDB::remember('user_passkey_'.$passkey.'_rss', 3600, function () use ($passkey) {
             $row = NexusDB::table('users')->where('passkey', $passkey)->first(['id', 'enabled', 'parked', 'passkey']);
 
             return $row ? (array) $row : [];
@@ -490,7 +487,7 @@ class TorrentActionController extends LegacyController
             $items = \App\Support\SearchBox::itemListWithContext($tablename, 0);
             $ids = [];
             foreach ($items as $item) {
-                if ($request->input($getname . $item['id']) !== null) {
+                if ($request->input($getname.$item['id']) !== null) {
                     $ids[] = $item['id'];
                 }
             }
@@ -546,7 +543,7 @@ class TorrentActionController extends LegacyController
                 $normalQuery->where('torrents.pos_state', Torrent::POS_STATE_STICKY_NONE);
             }
             $normalSql = $normalQuery->toSql();
-            $normalCacheKey = sprintf('nexus_rss:normal:%s', md5($normalSql . ':' . $showrows));
+            $normalCacheKey = sprintf('nexus_rss:normal:%s', md5($normalSql.':'.$showrows));
             $normalRows = NexusDB::remember($normalCacheKey, 300, function () use ($normalQuery, $showrows) {
                 return $normalQuery->orderBy('torrents.id', 'desc')->limit($showrows)->get()->map(fn ($row) => (array) $row)->all();
             });
@@ -556,9 +553,9 @@ class TorrentActionController extends LegacyController
             $prependIdStr = implode(',', array_map('intval', $prependIdArr));
             $prependQuery = clone $baseQuery;
             $prependQuery->whereIn('torrents.id', $prependIdArr);
-            $prependCacheKey = sprintf('nexus_rss:prepend:%s', md5($prependQuery->toSql() . ':' . $prependIdStr));
+            $prependCacheKey = sprintf('nexus_rss:prepend:%s', md5($prependQuery->toSql().':'.$prependIdStr));
             $prependRows = NexusDB::remember($prependCacheKey, 300, function () use ($prependQuery, $prependIdStr) {
-                return $prependQuery->orderByRaw('FIELD(torrents.id, ' . $prependIdStr . ')')->get()->map(fn ($row) => (array) $row)->all();
+                return $prependQuery->orderByRaw('FIELD(torrents.id, '.$prependIdStr.')')->get()->map(fn ($row) => (array) $row)->all();
             });
         }
 
@@ -572,8 +569,8 @@ class TorrentActionController extends LegacyController
             }
         }
 
-        $torrentRep = new TorrentRepository();
-        $baseUrl = Http::protocolPrefix(Url::isSecure()) . (string) SupportContext::getGlobal('BASEURL', '');
+        $torrentRep = new TorrentRepository;
+        $baseUrl = Http::protocolPrefix(Url::isSecure()).(string) SupportContext::getGlobal('BASEURL', '');
         $siteName = (string) SupportContext::getGlobal('SITENAME', '');
         $slogan = (string) SupportContext::getGlobal('SLOGAN', '');
         $siteEmail = (string) SupportContext::getGlobal('SITEEMAIL', '');
@@ -581,7 +578,7 @@ class TorrentActionController extends LegacyController
         $dateFounded = (string) SupportContext::getGlobal('datefounded', '');
         $year = substr($dateFounded, 0, 4);
         $yearFounded = $year !== '' ? $year : '2007';
-        $copyright = 'Copyright (c) ' . $siteName . ' ' . (date('Y') !== $yearFounded ? $yearFounded . '-' : '') . date('Y') . ', all rights reserved';
+        $copyright = 'Copyright (c) '.$siteName.' '.(date('Y') !== $yearFounded ? $yearFounded.'-' : '').date('Y').', all rights reserved';
         $httpHost = (string) $request->server->get('HTTP_HOST', 'localhost');
 
         $hexEsc = function ($matches) {
@@ -591,24 +588,24 @@ class TorrentActionController extends LegacyController
         $xml = '<?xml version="1.0" encoding="utf-8"?>';
         $xml .= '<rss version="2.0">';
         $xml .= '<channel>
-        <title>' . addslashes($siteName . ' Torrents') . '</title>
-        <link><![CDATA[' . $baseUrl . ']]></link>
-        <description><![CDATA[' . addslashes('Latest torrents from ' . $siteName . ' - ' . htmlspecialchars($slogan)) . ']]></description>
+        <title>'.addslashes($siteName.' Torrents').'</title>
+        <link><![CDATA['.$baseUrl.']]></link>
+        <description><![CDATA['.addslashes('Latest torrents from '.$siteName.' - '.htmlspecialchars($slogan)).']]></description>
         <language>zh-cn</language>
-        <copyright>' . $copyright . '</copyright>
-        <managingEditor>' . $siteEmail . ' (' . $siteName . ' Admin)</managingEditor>
-        <webMaster>' . $siteEmail . ' (' . $siteName . ' Webmaster)</webMaster>
-        <pubDate>' . date('r') . '</pubDate>
-        <generator>' . $projectName . ' RSS Generator</generator>
+        <copyright>'.$copyright.'</copyright>
+        <managingEditor>'.$siteEmail.' ('.$siteName.' Admin)</managingEditor>
+        <webMaster>'.$siteEmail.' ('.$siteName.' Webmaster)</webMaster>
+        <pubDate>'.date('r').'</pubDate>
+        <generator>'.$projectName.' RSS Generator</generator>
         <docs><![CDATA[http://www.rssboard.org/rss-specification]]></docs>
         <ttl>60</ttl>
         <image>
-            <url><![CDATA[' . $baseUrl . '/pic/rss_logo.jpg]]></url>
-            <title>' . addslashes($siteName . ' Torrents') . '</title>
-            <link><![CDATA[' . $baseUrl . ']]></link>
+            <url><![CDATA['.$baseUrl.'/pic/rss_logo.jpg]]></url>
+            <title>'.addslashes($siteName.' Torrents').'</title>
+            <link><![CDATA['.$baseUrl.']]></link>
             <width>100</width>
             <height>100</height>
-            <description>' . addslashes($siteName . ' Torrents') . '</description>
+            <description>'.addslashes($siteName.' Torrents').'</description>
         </image>';
 
         foreach ($list as $row) {
@@ -622,37 +619,37 @@ class TorrentActionController extends LegacyController
                 }
             }
 
-            $itemurl = $baseUrl . '/details.php?id=' . (int) ($row['id'] ?? 0);
+            $itemurl = $baseUrl.'/details.php?id='.(int) ($row['id'] ?? 0);
             if ($dllink) {
                 $itemdlurl = $torrentRep->getDownloadUrl((int) ($row['id'] ?? 0), $rssUser);
             } else {
-                $itemdlurl = $baseUrl . '/download.php?id=' . (int) ($row['id'] ?? 0);
+                $itemdlurl = $baseUrl.'/download.php?id='.(int) ($row['id'] ?? 0);
             }
 
             $title = '';
             if ($request->input('icat') !== null) {
-                $title .= '[' . ($row['category_name'] ?? '') . ']';
+                $title .= '['.($row['category_name'] ?? '').']';
             }
             $title .= $row['name'] ?? '';
             if ($request->input('isize') !== null) {
-                $title .= '[' . Format::size((int) ($row['size'] ?? 0)) . ']';
+                $title .= '['.Format::size((int) ($row['size'] ?? 0)).']';
             }
             if ($request->input('iuplder') !== null) {
-                $title .= '[' . $author . ']';
+                $title .= '['.$author.']';
             }
 
             $content = Format::formatComment((string) ($row['descr'] ?? ''), true, false, false, false);
 
             $xml .= '<item>
-            <title><![CDATA[' . $title . ']]></title>
-            <link>' . $itemurl . '</link>
-            <description><![CDATA[' . $content . ']]></description>
-            <author>' . $author . '@' . $httpHost . ' (' . $author . ')</author>
-            <category domain="' . $baseUrl . '/torrents.php?cat=' . (int) ($row['category'] ?? 0) . '">' . ($row['category_name'] ?? '') . '</category>
-            <comments><![CDATA[' . $baseUrl . '/details.php?id=' . (int) ($row['id'] ?? 0) . '&cmtpage=0#startcomments]]></comments>
-            <enclosure url="' . $itemdlurl . '" length="' . (int) ($row['size'] ?? 0) . '" type="application/x-bittorrent" />
-            <guid isPermaLink="false">' . preg_replace_callback('/./s', $hexEsc, Strings::padHash((string) ($row['info_hash'] ?? ''))) . '</guid>
-            <pubDate>' . date('r', strtotime((string) ($row['added'] ?? 'now')) ?: time()) . '</pubDate>
+            <title><![CDATA['.$title.']]></title>
+            <link>'.$itemurl.'</link>
+            <description><![CDATA['.$content.']]></description>
+            <author>'.$author.'@'.$httpHost.' ('.$author.')</author>
+            <category domain="'.$baseUrl.'/torrents.php?cat='.(int) ($row['category'] ?? 0).'">'.($row['category_name'] ?? '').'</category>
+            <comments><![CDATA['.$baseUrl.'/details.php?id='.(int) ($row['id'] ?? 0).'&cmtpage=0#startcomments]]></comments>
+            <enclosure url="'.$itemdlurl.'" length="'.(int) ($row['size'] ?? 0).'" type="application/x-bittorrent" />
+            <guid isPermaLink="false">'.preg_replace_callback('/./s', $hexEsc, Strings::padHash((string) ($row['info_hash'] ?? ''))).'</guid>
+            <pubDate>'.date('r', strtotime((string) ($row['added'] ?? 'now')) ?: time()).'</pubDate>
         </item>
 ';
         }
@@ -671,7 +668,8 @@ class TorrentActionController extends LegacyController
         $curUser = SupportContext::getUser();
         if ($curUser === null) {
             $qs = $request->getQueryString();
-            return redirect('/delete.php' . ($qs ? '?' . $qs : ''));
+
+            return redirect('/delete.php'.($qs ? '?'.$qs : ''));
         }
 
         $currentUserId = (int) ($curUser['id'] ?? 0);
@@ -708,32 +706,27 @@ class TorrentActionController extends LegacyController
 
         $rt = (int) SupportContext::getPost('reasontype');
         if ($rt < 1 || $rt > 5) {
-            return $this->legacyAbortResponse($lang['std_delete_failed'] ?? 'Error', ($lang['std_invalid_reason'] ?? 'Invalid reason: ') . $rt . '.');
+            return $this->legacyAbortResponse($lang['std_delete_failed'] ?? 'Error', ($lang['std_invalid_reason'] ?? 'Invalid reason: ').$rt.'.');
         }
 
         $reason = (array) SupportContext::getPost('reason');
         if ($rt == 1) {
             $reasonstr = 'Dead: 0 seeders, 0 leechers = 0 peers total';
         } elseif ($rt == 2) {
-            $reasonstr = 'Dupe' . (! empty($reason[0]) ? ': ' . trim($reason[0]) : '!');
+            $reasonstr = 'Dupe'.(! empty($reason[0]) ? ': '.trim($reason[0]) : '!');
         } elseif ($rt == 3) {
-            $reasonstr = 'Nuked' . (! empty($reason[1]) ? ': ' . trim($reason[1]) : '!');
+            $reasonstr = 'Nuked'.(! empty($reason[1]) ? ': '.trim($reason[1]) : '!');
         } elseif ($rt == 4) {
             if (empty($reason[2])) {
                 return $this->legacyAbortResponse($lang['std_delete_failed'] ?? 'Error', $lang['std_describe_violated_rule'] ?? 'Describe violated rule.');
             }
             $siteName = (string) SupportContext::getGlobal('SITENAME', '');
-            $reasonstr = $siteName . ' rules broken: ' . trim($reason[2]);
+            $reasonstr = $siteName.' rules broken: '.trim($reason[2]);
         } else {
             if (empty($reason[3])) {
                 return $this->legacyAbortResponse($lang['std_delete_failed'] ?? 'Error', $lang['std_enter_reason'] ?? 'Enter reason.');
             }
             $reasonstr = trim($reason[3]);
-        }
-
-        $searchRep = new SearchRepository();
-        if ($searchRep->deleteTorrent($id) === false) {
-            return $this->legacyAbortResponse($lang['std_delete_failed'] ?? 'Error', 'Delete es fail.');
         }
 
         TorrentOps::deleteTorrents($id, false);
@@ -752,11 +745,11 @@ class TorrentActionController extends LegacyController
             $locale = Locale::userLocale((int) $row['owner']);
             $subject = Locale::trans('torrent.msg_torrent_deleted', [], $locale);
             $msg = Locale::trans('torrent.msg_the_torrent_you_uploaded', [], $locale)
-                . $row['name']
-                . Locale::trans('torrent.msg_was_deleted_by', [], $locale)
-                . "[url=userdetails.php?id=$currentUserId]{$curUser['username']}[/url]"
-                . Locale::trans('torrent.msg_reason_is', [], $locale)
-                . $reasonstr;
+                .$row['name']
+                .Locale::trans('torrent.msg_was_deleted_by', [], $locale)
+                ."[url=userdetails.php?id=$currentUserId]{$curUser['username']}[/url]"
+                .Locale::trans('torrent.msg_reason_is', [], $locale)
+                .$reasonstr;
             Message::add([
                 'sender' => 0,
                 'receiver' => $row['owner'],
@@ -768,9 +761,9 @@ class TorrentActionController extends LegacyController
 
         $returnto = (string) SupportContext::getPost('returnto');
         if ($returnto !== '') {
-            $ret = '<a href="' . htmlspecialchars($returnto) . '">' . ($lang['text_go_back'] ?? 'Go back') . '</a>';
+            $ret = '<a href="'.htmlspecialchars($returnto).'">'.($lang['text_go_back'] ?? 'Go back').'</a>';
         } else {
-            $ret = '<a href="index.php">' . ($lang['text_back_to_index'] ?? 'Back to index') . '</a>';
+            $ret = '<a href="index.php">'.($lang['text_back_to_index'] ?? 'Back to index').'</a>';
         }
 
         return $this->legacyPage($request, 'delete', true, [
@@ -784,7 +777,8 @@ class TorrentActionController extends LegacyController
         $curUser = SupportContext::getUser();
         if ($curUser === null) {
             $qs = $request->getQueryString();
-            return redirect('/downloadnotice.php' . ($qs ? '?' . $qs : ''));
+
+            return redirect('/downloadnotice.php'.($qs ? '?'.$qs : ''));
         }
 
         if ($request->isMethod('POST')) {
@@ -808,7 +802,7 @@ class TorrentActionController extends LegacyController
                 }
             }
 
-            return redirect('/download?id=' . $torrentid . '&letdown=1');
+            return redirect('/download?id='.$torrentid.'&letdown=1');
         }
 
         $torrentid = (int) $request->input('torrentid');
@@ -829,8 +823,8 @@ class TorrentActionController extends LegacyController
                 $leechwarnuntiltime = strtotime((string) ($curUser['leechwarnuntil'] ?? ''));
                 $note = '';
                 if ($leechwarnuntiltime && $timenow < $leechwarnuntiltime) {
-                    $kicktimeout = \App\Support\Time::format($curUser['leechwarnuntil'], false, false, true);
-                    $note = ($lang['text_low_ratio_note_one'] ?? '') . $kicktimeout . ($lang['text_low_ratio_note_two'] ?? '');
+                    $kicktimeout = Time::format($curUser['leechwarnuntil'], false, false, true);
+                    $note = ($lang['text_low_ratio_note_one'] ?? '').$kicktimeout.($lang['text_low_ratio_note_two'] ?? '');
                 }
                 $title = $lang['text_low_ratio_notice'] ?? '';
                 $noticenexttime = $lang['text_notice_always_show'] ?? '';
@@ -873,20 +867,20 @@ class TorrentActionController extends LegacyController
     public function thanks(Request $request): Response|RedirectResponse
     {
         if (SupportContext::getUser() === null) {
-            return redirect('/thanks.php' . ($request->getQueryString() ? '?' . $request->getQueryString() : ''));
+            return redirect('/thanks.php'.($request->getQueryString() ? '?'.$request->getQueryString() : ''));
         }
 
         $curUser = SupportContext::getUser();
         $userid = (int) ($curUser['id'] ?? 0);
 
         if ($request->query('id') !== null) {
-            \App\Support\LegacyResponse::abort('Party is over!', "This trick doesn't work anymore. You need to click the button!");
+            LegacyResponse::abort('Party is over!', "This trick doesn't work anymore. You need to click the button!");
         }
 
         $torrentid = (int) SupportContext::getPost('id');
         $torrentowner = Torrent::query()->where('id', $torrentid)->value('owner');
         if (! $torrentowner) {
-            \App\Support\LegacyResponse::abort('Error', 'Invalid torrent id!');
+            LegacyResponse::abort('Error', 'Invalid torrent id!');
         }
 
         $existing = NexusDB::table('thanks')
@@ -894,7 +888,7 @@ class TorrentActionController extends LegacyController
             ->where('userid', $userid)
             ->count();
         if ($existing != 0) {
-            \App\Support\LegacyResponse::abort('Error', 'You already said thanks!');
+            LegacyResponse::abort('Error', 'You already said thanks!');
         }
 
         NexusDB::table('thanks')->insert([

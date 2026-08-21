@@ -41,12 +41,14 @@ final class AccountConfig extends Config
     public function neverdelete(?int $default = null): int
     {
         $value = $this->data['neverdelete'] ?? $default ?? User::CLASS_VIP;
+
         return (int) $value;
     }
 
     public function neverdeletepacked(?int $default = null): int
     {
         $value = $this->data['neverdeletepacked'] ?? $default ?? User::CLASS_VIP;
+
         return (int) $value;
     }
 
@@ -101,7 +103,7 @@ final class AccountConfig extends Config
     }
 
     /**
-     * @param array<int|string, mixed> $default
+     * @param  array<int|string, mixed>  $default
      * @return array<int|string, mixed>
      */
     public function getInvitesByPromotion(array $default = []): array
@@ -113,6 +115,7 @@ final class AccountConfig extends Config
     {
         $key = "{$class}_alias";
         $value = $this->data[$key] ?? null;
+
         return $value !== null ? (string) $value : null;
     }
 
@@ -120,6 +123,7 @@ final class AccountConfig extends Config
     {
         $key = "{$class}_min_seed_points";
         $value = $this->data[$key] ?? null;
+
         return $value !== null ? (int) $value : null;
     }
 
@@ -127,11 +131,12 @@ final class AccountConfig extends Config
     {
         $key = "{$class}_invite";
         $value = $this->data[$key] ?? null;
+
         return $value !== null ? (int) $value : null;
     }
 
     /**
-     * @return array{string, int}  [$metricKey, $default]
+     * @return array{string, int} [$metricKey, $default]
      */
     private function promotionKeyAndDefault(int|string $class, string $metric): array
     {
@@ -155,24 +160,28 @@ final class AccountConfig extends Config
             'time' => 0,
             default => 0,
         };
+
         return ["{$prefix}{$metric}", $default];
     }
 
     public function promotionDl(int|string $class, int $default = 0): int
     {
         [$key, $fallback] = $this->promotionKeyAndDefault($class, 'dl');
+
         return $this->int($key ?: 'never', $default ?: $fallback);
     }
 
     public function promotionRatio(int|string $class, float $default = 0.0): float
     {
         [$key, $fallback] = $this->promotionKeyAndDefault($class, 'prratio');
+
         return $this->float($key ?: 'never', $default ?: $fallback);
     }
 
     public function promotionTime(int|string $class, int $default = 0): int
     {
         [$key, $fallback] = $this->promotionKeyAndDefault($class, 'time');
+
         return $this->int($key ?: 'never', $default ?: $fallback);
     }
 
@@ -189,7 +198,7 @@ final class AccountConfig extends Config
             '9' => 'nmderatio',
         ];
         $key = $map[(string) $class] ?? null;
+
         return $key !== null ? $this->float($key, $default) : $default;
     }
-
 }

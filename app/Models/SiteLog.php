@@ -7,15 +7,15 @@
  * @property string $security_level
  * @property int $uid
  */
-namespace App\Models;
 
+namespace App\Models;
 
 class SiteLog extends NexusModel
 {
-    /** @var  string */
+    /** @var string */
     protected $table = 'sitelog';
 
-    /** @var  list<string> */
+    /** @var list<string> */
     protected $fillable = ['added', 'txt', 'security_level', 'uid'];
 
     /**
@@ -32,5 +32,4 @@ class SiteLog extends NexusModel
             'added' => now(),
         ]);
     }
-
 }

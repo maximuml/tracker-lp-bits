@@ -2,7 +2,7 @@
 
 namespace App\Support;
 
-use App\Models\SiteLog;
+use App\Repositories\SiteLogRepository;
 
 /**
  * Legacy site-log helper extracted from `include/functions.php`.
@@ -15,12 +15,12 @@ final class Log
 {
     public static function write(string $text, string $security = 'normal', ?int $userId = null): void
     {
-        \App\Repositories\SiteLogRepository::create($text, $security, $userId);
+        SiteLogRepository::create($text, $security, $userId);
     }
 
     public static function writeWithContext(string $text, string $security = 'normal'): void
     {
-        $user = \App\Support\SupportContext::getUser() ?? [];
+        $user = SupportContext::getUser() ?? [];
 
         self::write($text, $security, (int) ($user['id'] ?? 0));
     }

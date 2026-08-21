@@ -207,20 +207,21 @@ final class MainConfig extends Config
     }
 
     /**
-     * @param array<int, string> $default
+     * @param  array<int, string>  $default
      * @return array<int, string>
      */
     public function enabledSiteLanguages(array $default = ['en']): array
     {
         /** @var array<int, string> $value */
         $value = $this->array('site_language_enabled', $default);
+
         return array_values(array_map('strval', $value));
     }
 
     public function torrentsPerPageNullable(?string $default = null): ?string
     {
         $value = $this->data['torrentsperpage'] ?? $default;
+
         return $value !== null ? (string) $value : null;
     }
-
 }

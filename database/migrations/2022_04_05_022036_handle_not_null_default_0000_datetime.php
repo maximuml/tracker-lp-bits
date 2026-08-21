@@ -1,8 +1,9 @@
 <?php
 
+use App\Repositories\UpgradeRepository;
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
+use Nexus\Database\NexusDB;
 
 return new class extends Migration
 {
@@ -13,23 +14,23 @@ return new class extends Migration
      */
     public function up()
     {
-        if (\Nexus\Database\NexusDB::isPgsql()) {
-            //fresh install no need
+        if (NexusDB::isPgsql()) {
+            // fresh install no need
             return;
         }
-        $tableFields = \App\Repositories\UpgradeRepository::DATETIME_INVALID_VALUE_FIELDS;
+        $tableFields = UpgradeRepository::DATETIME_INVALID_VALUE_FIELDS;
 
         foreach ($tableFields as $table => $fields) {
-            $columnInfo = \Nexus\Database\NexusDB::getMysqlColumnInfo($table);
+            $columnInfo = NexusDB::getMysqlColumnInfo($table);
             $modifies = [];
             foreach ($fields as $field) {
                 if (isset($columnInfo[$field]) && $columnInfo[$field]['COLUMN_DEFAULT'] == '0000-00-00 00:00:00') {
                     $modifies[] = sprintf('modify `%s` datetime default null', $field);
                 }
             }
-            if (!empty($modifies)) {
-                $sql = sprintf("alter table `%s` %s", $table, implode(', ', $modifies));
-                \Illuminate\Support\Facades\DB::statement($sql);
+            if (! empty($modifies)) {
+                $sql = sprintf('alter table `%s` %s', $table, implode(', ', $modifies));
+                DB::statement($sql);
             }
         }
 

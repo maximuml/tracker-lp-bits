@@ -2,12 +2,10 @@
 
 namespace App\Filament\Resources\Section\SecondIconResource\Pages;
 
-use Filament\Actions\CreateAction;
 use App\Filament\PageList;
 use App\Filament\Resources\Section\SecondIconResource;
 use App\Models\SecondIcon;
-use Filament\Pages\Actions;
-use Filament\Resources\Pages\ListRecords;
+use Filament\Actions\CreateAction;
 use Illuminate\Database\Eloquent\Builder;
 
 class ListSecondIcons extends PageList

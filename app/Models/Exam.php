@@ -176,7 +176,7 @@ class Exam extends NexusModel
     {
         $options = self::listRecurringOptions();
 
-        return $options[$this->recurring] ?? '';
+        return $options[(string) $this->recurring] ?? '';
     }
 
     public function getStatusTextAttribute(): string

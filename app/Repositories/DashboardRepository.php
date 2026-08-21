@@ -454,7 +454,13 @@ class DashboardRepository extends BaseRepository
 
         $result = [];
         foreach ($rows as $row) {
-            $until = $row->donoruntil ? date('Y-m-d', strtotime((string) $row->donoruntil)) : '—';
+            $until = '—';
+            if ($row->donoruntil) {
+                $timestamp = strtotime((string) $row->donoruntil);
+                if ($timestamp !== false) {
+                    $until = date('Y-m-d', $timestamp);
+                }
+            }
             $result[] = [
                 'name' => 'donor',
                 'text' => $row->username,

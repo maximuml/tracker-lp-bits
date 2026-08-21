@@ -108,7 +108,7 @@ if (! Environment::isConsole()) {
 }
 
 Route::group(['prefix' => 'oauth'], function () {
-    Route::get('user-info', [OauthController::class, 'userInfo'])->name('oauth.user_info')->middleware('auth:api');
+    Route::get('user-info', [OauthController::class, 'userInfo'])->name('oauth.user_info')->middleware('auth:sanctum');
     Route::get('redirect/{uuid}', [OauthController::class, 'redirect']);
     Route::get('callback/{uuid}', [OauthController::class, 'callback']);
 });

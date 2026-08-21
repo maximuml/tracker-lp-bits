@@ -15,7 +15,6 @@ use Illuminate\Support\Arr;
 use Illuminate\Validation\UnauthorizedException;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\ViewException;
-use Laravel\Passport\Exceptions\AuthenticationException as PassportAuthenticationException;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Throwable;
@@ -76,9 +75,6 @@ class Handler extends ExceptionHandler
             }
 
             return null;
-        });
-        $this->renderable(function (PassportAuthenticationException $e) use ($request) {
-            return response()->redirectTo(sprintf('%s/login.php?returnto=%s', $request->getSchemeAndHttpHost(), urlencode($request->fullUrl())));
         });
 
         // Other Only handle in json request

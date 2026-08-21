@@ -6,11 +6,9 @@ use App\Events\SeedBoxRecordUpdated;
 use App\Events\TorrentCreated;
 use App\Events\TorrentDeleted;
 use App\Events\TorrentUpdated;
-use App\Events\UserDisabled;
 use App\Listeners\AppendQueryCountHeader;
 use App\Listeners\ClearTorrentCache;
 use App\Listeners\DeductUserBonusWhenTorrentDeleted;
-use App\Listeners\RemoveOauthTokens;
 use App\Listeners\RemoveSeedBoxRecordCache;
 use App\Listeners\ResetNexus;
 use App\Listeners\ResetQueryLog;
@@ -49,9 +47,6 @@ class EventServiceProvider extends ServiceProvider
         ],
         TorrentDeleted::class => [
             DeductUserBonusWhenTorrentDeleted::class,
-        ],
-        UserDisabled::class => [
-            RemoveOauthTokens::class,
         ],
         Looping::class => [
             ResetNexus::class,

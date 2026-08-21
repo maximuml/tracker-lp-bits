@@ -16,7 +16,6 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
-use Laravel\Passport\Passport;
 use Nexus\Database\NexusDB;
 use Nexus\Plugin\Hook;
 use Nexus\Plugin\Plugin;
@@ -53,8 +52,6 @@ class AppServiceProvider extends ServiceProvider
             URL::forceScheme($forceScheme);
         }
         $this->customScheduleTask();
-
-        Passport::$clientUuids = false;
 
         Filament::serving(function () {
             Filament::registerNavigationGroups([

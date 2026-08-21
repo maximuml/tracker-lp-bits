@@ -2,7 +2,6 @@
 
 namespace Nexus\Database;
 
-use App\Models\OauthClient;
 use App\Models\PersonalAccessToken;
 use App\Support\Config;
 use App\Support\Locale;
@@ -17,7 +16,6 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Facades\Schema;
-use Laravel\Passport\Passport;
 use Laravel\Sanctum\Sanctum;
 
 class NexusDB
@@ -413,9 +411,6 @@ class NexusDB
 
     public static function customModel(): void
     {
-        if (class_exists(Passport::class)) {
-            Passport::useClientModel(OauthClient::class);
-        }
         if (class_exists(Sanctum::class)) {
             Sanctum::usePersonalAccessTokenModel(PersonalAccessToken::class);
         }

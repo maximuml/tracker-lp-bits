@@ -943,7 +943,7 @@ class TorrentSearchRepository
                     'offset' => $offset,
                     'limit' => $size,
                 ]));
-            $rows = Hooks::applyFilter('torrent_list', $rows, $page ?? 0, $sectiontype, $searchstr_raw);
+            $rows = Hooks::applyFilter('torrent_list', $rows, $page, $sectiontype, $searchstr_raw);
         }
 
         if (isset($searchstr)) {

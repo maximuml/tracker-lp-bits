@@ -2,11 +2,10 @@
 
 namespace App\Filament\Resources\User\UserModifyLogResource\Pages;
 
-use Filament\Actions\Contracts\HasActions;
 use App\Filament\PageListSingle;
 use App\Filament\Resources\User\UserModifyLogResource;
 use Filament\Actions;
-use Filament\Resources\Pages\ManageRecords;
+use Filament\Actions\Contracts\HasActions;
 
 class ManageUserModifyLogs extends PageListSingle implements HasActions
 {
@@ -15,7 +14,7 @@ class ManageUserModifyLogs extends PageListSingle implements HasActions
     protected function getHeaderActions(): array
     {
         return [
-//            Actions\CreateAction::make(),
+            //            Actions\CreateAction::make(),
         ];
     }
 }

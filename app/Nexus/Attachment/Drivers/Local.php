@@ -1,21 +1,24 @@
 <?php
+
 namespace Nexus\Attachment\Drivers;
 
+use App\Support\Config\SiteConfig;
+use App\Support\Url;
 use Nexus\Attachment\Storage;
 
-class Local extends Storage {
-
-    function upload(string $filepath): string
+class Local extends Storage
+{
+    public function upload(string $filepath): string
     {
-        throw new \RuntimeException("Not implemented");
+        throw new \RuntimeException('Not implemented');
     }
 
-    function getBaseUrl(): string
+    public function getBaseUrl(): string
     {
-        return sprintf("%s/%s", \App\Support\Url::schemeAndHost(false), trim(\App\Support\Config\SiteConfig::current()->attachment->httpDirectory(), '/'));
+        return sprintf('%s/%s', Url::schemeAndHost(false), trim(SiteConfig::current()->attachment->httpDirectory(), '/'));
     }
 
-    function getDriverName(): string
+    public function getDriverName(): string
     {
         return static::DRIVER_LOCAL;
     }

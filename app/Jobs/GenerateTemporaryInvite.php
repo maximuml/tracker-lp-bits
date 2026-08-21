@@ -4,14 +4,13 @@ namespace App\Jobs;
 
 use App\Models\Invite;
 use App\Repositories\ToolRepository;
+use App\Support\Logger;
 use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Str;
 use Nexus\Database\NexusDB;
 
 class GenerateTemporaryInvite implements ShouldQueue
@@ -48,24 +47,25 @@ class GenerateTemporaryInvite implements ShouldQueue
     public function handle()
     {
         $beginTimestamp = microtime(true);
-        $toolRep = new ToolRepository();
+        $toolRep = new ToolRepository;
         $idStr = NexusDB::cache_get($this->idRedisKey);
-        $logPrefix = "idRedisKey: " . $this->idRedisKey;
+        $logPrefix = 'idRedisKey: '.$this->idRedisKey;
         if (empty($idStr)) {
-            \App\Support\Logger::writeWithContext((string) "{$logPrefix}, no idStr...", (string) 'info', (bool) false);
+            Logger::writeWithContext((string) "{$logPrefix}, no idStr...", (string) 'info', (bool) false);
+
             return;
         }
-        $idArr = explode(",", $idStr);
+        $idArr = explode(',', $idStr);
         $count = count($idArr);
         $logPrefix .= ", count: $count";
-        \App\Support\Logger::writeWithContext((string) "{$logPrefix}, going to handle...", (string) 'info', (bool) false);
+        Logger::writeWithContext((string) "{$logPrefix}, going to handle...", (string) 'info', (bool) false);
         $now = Carbon::now();
         $expiredAt = Carbon::now()->addDays($this->days);
         foreach ($idArr as $uid) {
             try {
                 $hashArr = $toolRep->generateUniqueInviteHash([], $this->count, $this->count);
                 $data = [];
-                foreach($hashArr as $hash) {
+                foreach ($hashArr as $hash) {
                     $data[] = [
                         'inviter' => $uid,
                         'invitee' => '',
@@ -75,27 +75,25 @@ class GenerateTemporaryInvite implements ShouldQueue
                         'created_at' => $now,
                     ];
                 }
-                if (!empty($data)) {
+                if (! empty($data)) {
                     Invite::query()->insert($data);
                 }
-                \App\Support\Logger::writeWithContext((string) "{$logPrefix}, success add {$this->count} temporary invite ({$this->days} days) to {$uid}", (string) 'info', (bool) false);
+                Logger::writeWithContext((string) "{$logPrefix}, success add {$this->count} temporary invite ({$this->days} days) to {$uid}", (string) 'info', (bool) false);
             } catch (\Exception $exception) {
-                \App\Support\Logger::writeWithContext((string) ("{$logPrefix}, fail add {$this->count} temporary invite ({$this->days} days) to {$uid}: " . $exception->getMessage()), (string) 'error', (bool) false);
+                Logger::writeWithContext((string) ("{$logPrefix}, fail add {$this->count} temporary invite ({$this->days} days) to {$uid}: ".$exception->getMessage()), (string) 'error', (bool) false);
             }
         }
         NexusDB::cache_del($this->idRedisKey);
-        \App\Support\Logger::writeWithContext((string) ("{$logPrefix}, handle done, cost time: " . (microtime(true) - $beginTimestamp) . " seconds."), (string) 'info', (bool) false);
+        Logger::writeWithContext((string) ("{$logPrefix}, handle done, cost time: ".(microtime(true) - $beginTimestamp).' seconds.'), (string) 'info', (bool) false);
     }
 
     /**
      * Handle a job failure.
      *
-     * @param  \Throwable  $exception
      * @return void
      */
     public function failed(\Throwable $exception)
     {
-        \App\Support\Logger::writeWithContext((string) ("failed: " . $exception->getMessage() . $exception->getTraceAsString()), (string) 'error', (bool) false);
+        Logger::writeWithContext((string) ('failed: '.$exception->getMessage().$exception->getTraceAsString()), (string) 'error', (bool) false);
     }
-
 }

@@ -5,7 +5,6 @@ namespace App\Filament\Resources\User\ExamUserResource\Pages;
 use App\Filament\PageList;
 use App\Filament\Resources\User\ExamUserResource;
 use Filament\Pages\Actions;
-use Filament\Resources\Pages\ListRecords;
 
 class ListExamUsers extends PageList
 {
@@ -14,7 +13,7 @@ class ListExamUsers extends PageList
     protected function getHeaderActions(): array
     {
         return [
-//            Actions\CreateAction::make(),
+            //            Actions\CreateAction::make(),
         ];
     }
 }

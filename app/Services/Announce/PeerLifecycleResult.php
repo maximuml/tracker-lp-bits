@@ -22,6 +22,5 @@ final readonly class PeerLifecycleResult
         public array $torrentUpdate,
         public array|false $snatchInfo,
         public ?array $self,
-    ) {
-    }
+    ) {}
 }

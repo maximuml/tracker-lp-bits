@@ -31,7 +31,7 @@ final class View
         }
 
         if (! file_exists($view)) {
-            $view = $rootPath . $view;
+            $view = $rootPath.$view;
         }
 
         if (substr($view, -4) !== '.php') {

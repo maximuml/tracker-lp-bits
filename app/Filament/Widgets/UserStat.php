@@ -4,8 +4,7 @@ namespace App\Filament\Widgets;
 
 use App\Filament\Custom\Widgets\StatTable;
 use App\Repositories\DashboardRepository;
-use Illuminate\Contracts\View\View;
-use Nexus\Database\NexusDB;
+use App\Support\Locale;
 
 class UserStat extends StatTable
 {
@@ -13,15 +12,14 @@ class UserStat extends StatTable
 
     protected function getHeader(): string
     {
-        return \App\Support\Locale::trans('dashboard.user.page_title', [], null);
+        return Locale::trans('dashboard.user.page_title', [], null);
     }
 
     /** @return array<int|string, array<string, mixed>> */
     protected function getTableRows(): array
     {
-        $dashboardRep = new DashboardRepository();
+        $dashboardRep = new DashboardRepository;
 
         return $dashboardRep->statUsers();
     }
-
 }

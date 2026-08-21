@@ -37,7 +37,7 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.4'
+          php-version: '8.5'
           extensions: bcmath, curl, gd, gmp, intl, json, mbstring, mysqli, pdo, pdo_mysql, redis, sqlite3, xml, zip
           coverage: none
 
@@ -83,6 +83,9 @@ jobs:
             -not -path './public/vendor/*' \
             -not -path './storage/*' \
             -print0 | xargs -0 -n1 -P4 php -l
+
+      - name: Run Laravel Pint
+        run: vendor/bin/pint --test
 
       - name: Run PHPStan on all PHP files
         run: vendor/bin/phpstan analyse --no-progress --memory-limit=2G
@@ -141,7 +144,7 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.4'
+          php-version: '8.5'
           extensions: bcmath, curl, gd, gmp, intl, json, mbstring, mysqli, pdo, pdo_mysql, redis, sqlite3, xml, zip
           coverage: none
 
@@ -151,6 +154,9 @@ jobs:
           sed -i 's|DB_HOST=127.0.0.1|DB_HOST=mysql|g' .env
           sed -i 's|REDIS_HOST=127.0.0.1|REDIS_HOST=redis|g' .env
           sed -i 's|LOG_FILE=.*|LOG_FILE=php://stdout|g' .env
+          # .env.example leaves MEILISEARCH_MASTER_KEY empty so users must set
+          # their own. For the smoke-test stack, restore the compose default.
+          sed -i 's|^MEILISEARCH_MASTER_KEY=.*|MEILISEARCH_MASTER_KEY=nexusphp_default_key|' .env
 
       - name: Cache Composer dependencies
         uses: actions/cache@v4
@@ -195,6 +201,9 @@ jobs:
 
       - name: Clear any stale Laravel config cache
         run: docker compose exec -T php php artisan config:clear
+
+      - name: Import MeiliSearch index
+        run: docker compose exec -T php php artisan meilisearch:import
 
       - name: Run Feature tests
         run: |

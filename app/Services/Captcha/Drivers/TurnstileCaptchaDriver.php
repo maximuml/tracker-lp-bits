@@ -13,7 +13,7 @@ class TurnstileCaptchaDriver implements CaptchaDriverInterface
     protected array $config;
 
     /**
-     * @param array<string, mixed> $config
+     * @param  array<string, mixed>  $config
      */
     public function __construct(array $config = [])
     {
@@ -22,15 +22,15 @@ class TurnstileCaptchaDriver implements CaptchaDriverInterface
 
     public function isEnabled(): bool
     {
-        return !empty($this->config['site_key']) && !empty($this->config['secret_key']);
+        return ! empty($this->config['site_key']) && ! empty($this->config['secret_key']);
     }
 
     /**
-     * @param array<string, mixed> $context
+     * @param  array<string, mixed>  $context
      */
     public function render(array $context = []): string
     {
-        if (!$this->isEnabled()) {
+        if (! $this->isEnabled()) {
             return '';
         }
 
@@ -42,7 +42,7 @@ class TurnstileCaptchaDriver implements CaptchaDriverInterface
             $size = strtolower($size);
         }
         $validSizes = ['compact', 'normal', 'flexible'];
-        if (!in_array($size, $validSizes, true)) {
+        if (! in_array($size, $validSizes, true)) {
             $size = 'auto';
         }
 
@@ -66,8 +66,8 @@ class TurnstileCaptchaDriver implements CaptchaDriverInterface
     }
 
     /**
-     * @param array<string, mixed> $payload
-     * @param array<string, mixed> $context
+     * @param  array<string, mixed>  $payload
+     * @param  array<string, mixed>  $context
      */
     public function verify(array $payload, array $context = []): bool
     {
@@ -91,13 +91,13 @@ class TurnstileCaptchaDriver implements CaptchaDriverInterface
 
         $remoteIp = $context['ip'] ?? null;
 
-        if (!empty($remoteIp)) {
+        if (! empty($remoteIp)) {
             $data['remoteip'] = $remoteIp;
         }
 
         $result = $this->sendVerificationRequest('https://challenges.cloudflare.com/turnstile/v0/siteverify', $data);
 
-        if (!($result['success'] ?? false)) {
+        if (! ($result['success'] ?? false)) {
             throw new CaptchaValidationException('Captcha verification failed.');
         }
 
@@ -105,7 +105,7 @@ class TurnstileCaptchaDriver implements CaptchaDriverInterface
     }
 
     /**
-     * @param array<string, mixed> $data
+     * @param  array<string, mixed>  $data
      * @return array<string, mixed>
      */
     protected function sendVerificationRequest(string $url, array $data): array
@@ -127,7 +127,7 @@ class TurnstileCaptchaDriver implements CaptchaDriverInterface
             if (! is_string($response) || $response === '') {
                 $error = curl_error($ch);
                 curl_close($ch);
-                throw new CaptchaValidationException('Captcha verification request failed: ' . $error);
+                throw new CaptchaValidationException('Captcha verification request failed: '.$error);
             }
 
             curl_close($ch);
@@ -150,7 +150,7 @@ class TurnstileCaptchaDriver implements CaptchaDriverInterface
 
         $decoded = json_decode($response, true);
 
-        if (!is_array($decoded)) {
+        if (! is_array($decoded)) {
             throw new CaptchaValidationException('Unexpected captcha verification response.');
         }
 

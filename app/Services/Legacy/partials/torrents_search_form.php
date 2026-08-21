@@ -1,11 +1,25 @@
 <?php
+
+use App\Models\Torrent;
+use App\Repositories\TorrentListingRepository;
+use App\Support\Form;
+use App\Support\Html;
+use App\Support\SearchBox;
+use App\Support\SupportContext;
+
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
 // Auto-generated legacy bridge shims
-if (!isset($CURUSER)) $CURUSER = (array) (\App\Support\SupportContext::getUser() ?? []);
-if (!isset($Cache)) $Cache = \App\Support\SupportContext::getCache();
-if (!isset($lang_torrents)) $lang_torrents = (array) (\App\Support\SupportContext::getGlobal('lang_torrents') ?? []);
-$__server_QUERY_STRING = \App\Support\SupportContext::getServerValue('QUERY_STRING');
+if (! isset($CURUSER)) {
+    $CURUSER = (array) (SupportContext::getUser() ?? []);
+}
+if (! isset($Cache)) {
+    $Cache = SupportContext::getCache();
+}
+if (! isset($lang_torrents)) {
+    $lang_torrents = (array) (SupportContext::getGlobal('lang_torrents') ?? []);
+}
+$__server_QUERY_STRING = SupportContext::getServerValue('QUERY_STRING');
 $searchBoxRightTdStyle = 'padding: 1px;padding-left: 10px;white-space: nowrap';
 ?>
 <form method="get" name="searchbox" action="?">
@@ -52,9 +66,9 @@ $searchBoxRightTdStyle = 'padding: 1px;padding-left: 10px;white-space: nowrap';
 //						if ($showprocessing)
 //							printcat($lang_torrents['text_processing'], $processings, "processing", $whereprocessingina, "processing_check");
 //					}
-//					?>
+//?>
 <!--				</table>-->
-                <?php echo \App\Support\SearchBox::buildCategoryTableWithContext($sectiontype, '1', '?', '?', 0, $__server_QUERY_STRING, ['select_unselect' => true, 'user_notifs' => $CURUSER['notifs']])?>
+                <?php echo SearchBox::buildCategoryTableWithContext($sectiontype, '1', '?', '?', 0, $__server_QUERY_STRING, ['select_unselect' => true, 'user_notifs' => $CURUSER['notifs']])?>
 			</td>
 
 			<td class="rowfollow" valign="middle">
@@ -68,8 +82,8 @@ $searchBoxRightTdStyle = 'padding: 1px;padding-left: 10px;white-space: nowrap';
 						<td class="bottom" style="padding: 1px;padding-left: 10px">
 							<select class="med" name="incldead" style="width: 100px;">
 								<option value="0"><?php echo $lang_torrents['select_including_dead'] ?></option>
-								<option value="1"<?php print($include_dead == 1 ? " selected=\"selected\"" : ""); ?>><?php echo $lang_torrents['select_active'] ?> </option>
-								<option value="2"<?php print($include_dead == 2 ? " selected=\"selected\"" : ""); ?>><?php echo $lang_torrents['select_dead'] ?></option>
+								<option value="1"<?php echo $include_dead == 1 ? ' selected="selected"' : ''; ?>><?php echo $lang_torrents['select_active'] ?> </option>
+								<option value="2"<?php echo $include_dead == 2 ? ' selected="selected"' : ''; ?>><?php echo $lang_torrents['select_dead'] ?></option>
 							</select>
 						</td>
 				 	</tr>
@@ -82,7 +96,7 @@ $searchBoxRightTdStyle = 'padding: 1px;padding-left: 10px;white-space: nowrap';
 						<td class="bottom" style="padding: 1px;padding-left: 10px">
 							<select class="med" name="spstate" style="width: 100px;">
 								<option value="0"><?php echo $lang_torrents['select_all'] ?></option>
-<?php echo \App\Support\Html::promotionSelection($special_state, 0)?>
+<?php echo Html::promotionSelection($special_state, 0)?>
 							</select>
 						</td>
 					</tr>
@@ -95,8 +109,8 @@ $searchBoxRightTdStyle = 'padding: 1px;padding-left: 10px;white-space: nowrap';
 						<td class="bottom" style="padding: 1px;padding-left: 10px">
 							<select class="med" name="inclbookmarked" style="width: 100px;">
 								<option value="0"><?php echo $lang_torrents['select_all'] ?></option>
-								<option value="1"<?php print($inclbookmarked == 1 ? " selected=\"selected\"" : ""); ?>><?php echo $lang_torrents['select_bookmarked'] ?></option>
-								<option value="2"<?php print($inclbookmarked == 2 ? " selected=\"selected\"" : ""); ?>><?php echo $lang_torrents['select_bookmarked_exclude'] ?></option>
+								<option value="1"<?php echo $inclbookmarked == 1 ? ' selected="selected"' : ''; ?>><?php echo $lang_torrents['select_bookmarked'] ?></option>
+								<option value="2"<?php echo $inclbookmarked == 2 ? ' selected="selected"' : ''; ?>><?php echo $lang_torrents['select_bookmarked_exclude'] ?></option>
 							</select>
 						</td>
 					</tr>
@@ -111,10 +125,10 @@ $searchBoxRightTdStyle = 'padding: 1px;padding-left: 10px;white-space: nowrap';
                             <select class="med" name="approval_status" style="width: 100px;">
                                 <option value=""><?php echo $lang_torrents['select_all'] ?></option>
                                 <?php
-                                foreach (\App\Models\Torrent::listApprovalStatus(true) as $key => $value) {
-                                    printf('<option value="%s"%s>%s</option>', $key, (isset($approvalStatus)) && (string)$approvalStatus === (string)$key ? ' selected' : '', $value);
+                                foreach (Torrent::listApprovalStatus(true) as $key => $value) {
+                                    printf('<option value="%s"%s>%s</option>', $key, (isset($approvalStatus)) && (string) $approvalStatus === (string) $key ? ' selected' : '', $value);
                                 }
-                                ?>
+                        ?>
                             </select>
                         </td>
                     </tr>
@@ -126,7 +140,7 @@ $searchBoxRightTdStyle = 'padding: 1px;padding-left: 10px;white-space: nowrap';
                     </tr>
                     <tr>
                         <td class="bottom" style="<?php echo $searchBoxRightTdStyle ?>">
-                            <input type="number" min="1" name="size_begin" style="width: <?php echo $filterInputWidth?>px" value="<?php echo htmlspecialchars(\App\Support\SupportContext::getQuery('size_begin') ?? '') ?>"/> ~ <input type="number" min="1" name="size_end" style="width: <?php echo $filterInputWidth?>px" value="<?php echo htmlspecialchars(\App\Support\SupportContext::getQuery('size_end') ?? '') ?>"/>
+                            <input type="number" min="1" name="size_begin" style="width: <?php echo $filterInputWidth?>px" value="<?php echo htmlspecialchars(SupportContext::getQuery('size_begin') ?? '') ?>"/> ~ <input type="number" min="1" name="size_end" style="width: <?php echo $filterInputWidth?>px" value="<?php echo htmlspecialchars(SupportContext::getQuery('size_end') ?? '') ?>"/>
                         </td>
                     </tr>
 
@@ -137,7 +151,7 @@ $searchBoxRightTdStyle = 'padding: 1px;padding-left: 10px;white-space: nowrap';
                     </tr>
                     <tr>
                         <td class="bottom" style="<?php echo $searchBoxRightTdStyle ?>">
-                            <input type="number" min="1" name="seeders_begin" style="width: <?php echo $filterInputWidth?>px" value="<?php echo htmlspecialchars(\App\Support\SupportContext::getQuery('seeders_begin') ?? '') ?>"/> ~ <input type="number" min="1" name="seeders_end" style="width: <?php echo $filterInputWidth?>px" value="<?php echo htmlspecialchars(\App\Support\SupportContext::getQuery('seeders_end') ?? '') ?>"/>
+                            <input type="number" min="1" name="seeders_begin" style="width: <?php echo $filterInputWidth?>px" value="<?php echo htmlspecialchars(SupportContext::getQuery('seeders_begin') ?? '') ?>"/> ~ <input type="number" min="1" name="seeders_end" style="width: <?php echo $filterInputWidth?>px" value="<?php echo htmlspecialchars(SupportContext::getQuery('seeders_end') ?? '') ?>"/>
                         </td>
                     </tr>
 
@@ -148,7 +162,7 @@ $searchBoxRightTdStyle = 'padding: 1px;padding-left: 10px;white-space: nowrap';
                     </tr>
                     <tr>
                         <td class="bottom" style="<?php echo $searchBoxRightTdStyle ?>">
-                            <input type="number" min="1" name="leechers_begin" style="width: <?php echo $filterInputWidth?>px" value="<?php echo htmlspecialchars(\App\Support\SupportContext::getQuery('leechers_begin') ?? '') ?>"/> ~ <input type="number" min="1" name="leechers_end" style="width: <?php echo $filterInputWidth?>px" value="<?php echo htmlspecialchars(\App\Support\SupportContext::getQuery('leechers_end') ?? '') ?>"/>
+                            <input type="number" min="1" name="leechers_begin" style="width: <?php echo $filterInputWidth?>px" value="<?php echo htmlspecialchars(SupportContext::getQuery('leechers_begin') ?? '') ?>"/> ~ <input type="number" min="1" name="leechers_end" style="width: <?php echo $filterInputWidth?>px" value="<?php echo htmlspecialchars(SupportContext::getQuery('leechers_end') ?? '') ?>"/>
                         </td>
                     </tr>
 
@@ -159,7 +173,7 @@ $searchBoxRightTdStyle = 'padding: 1px;padding-left: 10px;white-space: nowrap';
                     </tr>
                     <tr>
                         <td class="bottom" style="<?php echo $searchBoxRightTdStyle ?>">
-                            <input type="number" min="1" name="times_completed_begin" style="width: <?php echo $filterInputWidth?>px" value="<?php echo htmlspecialchars(\App\Support\SupportContext::getQuery('times_completed_begin') ?? '') ?>"/> ~ <input type="number" min="1" name="times_completed_end" style="width: <?php echo $filterInputWidth?>px" value="<?php echo htmlspecialchars(\App\Support\SupportContext::getQuery('times_completed_end') ?? '') ?>"/>
+                            <input type="number" min="1" name="times_completed_begin" style="width: <?php echo $filterInputWidth?>px" value="<?php echo htmlspecialchars(SupportContext::getQuery('times_completed_begin') ?? '') ?>"/> ~ <input type="number" min="1" name="times_completed_end" style="width: <?php echo $filterInputWidth?>px" value="<?php echo htmlspecialchars(SupportContext::getQuery('times_completed_end') ?? '') ?>"/>
                         </td>
                     </tr>
 
@@ -172,8 +186,8 @@ $searchBoxRightTdStyle = 'padding: 1px;padding-left: 10px;white-space: nowrap';
                         <td class="bottom" style="<?php echo $searchBoxRightTdStyle ?>">
                             <?php echo sprintf(
                                 '%s ~ %s',
-                                \App\Support\Form::datetimepickerInput('added_begin', htmlspecialchars(\App\Support\SupportContext::getQuery('added_begin') ?? ''), '', ['require_files' => true, 'format' => 'Y-m-d', 'style' => 'width: '.$filterInputWidth.'px']),
-                                \App\Support\Form::datetimepickerInput('added_end', htmlspecialchars(\App\Support\SupportContext::getQuery('added_end') ?? ''), '', ['require_files' => false, 'format' => 'Y-m-d', 'style' => 'width: '.$filterInputWidth.'px']),
+                                Form::datetimepickerInput('added_begin', htmlspecialchars(SupportContext::getQuery('added_begin') ?? ''), '', ['require_files' => true, 'format' => 'Y-m-d', 'style' => 'width: '.$filterInputWidth.'px']),
+                                Form::datetimepickerInput('added_end', htmlspecialchars(SupportContext::getQuery('added_end') ?? ''), '', ['require_files' => false, 'format' => 'Y-m-d', 'style' => 'width: '.$filterInputWidth.'px']),
                             ) ?>
                         </td>
                     </tr>
@@ -194,25 +208,25 @@ $searchBoxRightTdStyle = 'padding: 1px;padding-left: 10px;white-space: nowrap';
 							<table>
 								<tr>
 									<td class="embedded">
-										<input id="searchinput" name="search" type="text" value="<?php echo  $searchstr_ori ?>" autocomplete="off" style="width: 200px" oninput="meiliSuggestInput(this.value)" onkeydown="meiliSuggestKey(event)"/>
+										<input id="searchinput" name="search" type="text" value="<?php echo $searchstr_ori ?>" autocomplete="off" style="width: 200px" oninput="meiliSuggestInput(this.value)" onkeydown="meiliSuggestKey(event)"/>
 										<script src="js/meili_autocomplete.js" type="text/javascript"></script>
 									</td>
 								</tr>
 							</table>
 						</td>
 						<td class="embedded">
-							<?php echo "&nbsp;" . $lang_torrents['text_in'] ?>
+							<?php echo '&nbsp;'.$lang_torrents['text_in'] ?>
 
 							<select name="search_area">
 								<option value="0"><?php echo $lang_torrents['select_title'] ?></option>
-								<option value="1"<?php print(((\App\Support\SupportContext::getQuery("search_area") !== null)) && \App\Support\SupportContext::getQuery("search_area") == 1 ? " selected=\"selected\"" : ""); ?>><?php echo $lang_torrents['select_description'] ?></option>
-								<option value="3"<?php print(((\App\Support\SupportContext::getQuery("search_area") !== null)) && \App\Support\SupportContext::getQuery("search_area") == 3 ? " selected=\"selected\"" : ""); ?>><?php echo $lang_torrents['select_uploader'] ?></option>
+								<option value="1"<?php echo (SupportContext::getQuery('search_area') !== null) && SupportContext::getQuery('search_area') == 1 ? ' selected="selected"' : ''; ?>><?php echo $lang_torrents['select_description'] ?></option>
+								<option value="3"<?php echo (SupportContext::getQuery('search_area') !== null) && SupportContext::getQuery('search_area') == 3 ? ' selected="selected"' : ''; ?>><?php echo $lang_torrents['select_uploader'] ?></option>
 							</select>
 
 							<?php echo $lang_torrents['text_with'] ?>
 
 							<select name="search_mode" style="width: 60px;">
-                                <?php echo \App\Models\SearchBox::listSelectModeOptions(\App\Support\SupportContext::getQuery("search_mode") ?? "")?>
+                                <?php echo App\Models\SearchBox::listSelectModeOptions(SupportContext::getQuery('search_mode') ?? '')?>
 							</select>
 
 							<?php echo $lang_torrents['text_mode'] ?>
@@ -220,28 +234,29 @@ $searchBoxRightTdStyle = 'padding: 1px;padding-left: 10px;white-space: nowrap';
 					</tr>
 <?php
 $Cache->new_page('hot_search', 3670, true);
-if (!$Cache->get_page()){
-    \App\Repositories\TorrentListingRepository::cleanupSuggest();
-    $searchres = \App\Repositories\TorrentListingRepository::getHotSearch();
+if (! $Cache->get_page()) {
+    TorrentListingRepository::cleanupSuggest();
+    $searchres = TorrentListingRepository::getHotSearch();
     $hotcount = 0;
-    $hotsearch = "";
-    foreach ($searchres as $searchrow)
-    {
-        $hotsearch .= "<a href=\"".htmlspecialchars("?search=" . rawurlencode($searchrow["keywords"]) . "&notnewword=1")."\"><u>" . htmlspecialchars($searchrow["keywords"]) . "</u></a>&nbsp;&nbsp;";
-        $hotcount += mb_strlen($searchrow["keywords"],"UTF-8");
-        if ($hotcount > 60)
+    $hotsearch = '';
+    foreach ($searchres as $searchrow) {
+        $hotsearch .= '<a href="'.htmlspecialchars('?search='.rawurlencode($searchrow['keywords']).'&notnewword=1').'"><u>'.htmlspecialchars($searchrow['keywords']).'</u></a>&nbsp;&nbsp;';
+        $hotcount += mb_strlen($searchrow['keywords'], 'UTF-8');
+        if ($hotcount > 60) {
             break;
+        }
     }
     $Cache->add_whole_row();
-    if ($hotsearch)
-    print("<tr><td class=\"embedded\" colspan=\"3\">&nbsp;&nbsp;".$hotsearch."</td></tr>");
+    if ($hotsearch) {
+        echo '<tr><td class="embedded" colspan="3">&nbsp;&nbsp;'.$hotsearch.'</td></tr>';
+    }
     $Cache->end_whole_row();
     $Cache->cache_page();
 }
 echo $Cache->next_row();
 
 if ($allTags->isNotEmpty()) {
-    echo '<tr><td colspan="3" class="embedded" style="padding-top: 4px">' . $tagRep->renderSpan($sectiontype, ['*'], true) . '</td></tr>';
+    echo '<tr><td colspan="3" class="embedded" style="padding-top: 4px">'.$tagRep->renderSpan($sectiontype, ['*'], true).'</td></tr>';
 }
 
 ?>

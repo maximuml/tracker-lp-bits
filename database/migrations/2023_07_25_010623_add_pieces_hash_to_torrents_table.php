@@ -14,7 +14,7 @@ return new class extends Migration
     public function up()
     {
         Schema::table('torrents', function (Blueprint $table) {
-            $table->char("pieces_hash", 40)->default("")->index();
+            $table->char('pieces_hash', 40)->default('')->index();
         });
     }
 
@@ -26,7 +26,7 @@ return new class extends Migration
     public function down()
     {
         Schema::table('torrents', function (Blueprint $table) {
-            $table->dropColumn("pieces_hash");
+            $table->dropColumn('pieces_hash');
         });
     }
 };

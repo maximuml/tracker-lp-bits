@@ -5,9 +5,9 @@ namespace Tests\Feature;
 use App\Models\Category;
 use App\Models\Forum;
 use App\Models\Language;
-use App\Models\Message;
 use App\Models\Topic;
 use App\Models\User;
+use App\Services\WebAuthService;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
@@ -118,7 +118,7 @@ class Phase20ApiParityTest extends TestCase
             'incldead' => 0,
             'spstate' => '1',
             'inclbookmarked' => 'yes',
-            'cat' . (Category::query()->value('id') ?? 1) => 'yes',
+            'cat'.(Category::query()->value('id') ?? 1) => 'yes',
             'stylesheet' => $style,
             'sitelanguage' => $language,
         ])
@@ -154,7 +154,7 @@ class Phase20ApiParityTest extends TestCase
 
         $this->assertNotEquals($oldPasskey, $user->passkey);
         $this->assertTrue(
-            app(\App\Services\WebAuthService::class)->validatePassword($user, 'newpass123')
+            app(WebAuthService::class)->validatePassword($user, 'newpass123')
         );
     }
 
@@ -188,13 +188,13 @@ class Phase20ApiParityTest extends TestCase
             ->assertJsonPath('ret', 0)
             ->assertJsonPath('data.data.0.id', $messageId);
 
-        $this->getJson('/api/v1/messages/' . $messageId)
+        $this->getJson('/api/v1/messages/'.$messageId)
             ->assertStatus(200)
             ->assertJsonPath('ret', 0)
             ->assertJsonPath('data.data.id', $messageId)
             ->assertJsonPath('data.data.msg', 'World');
 
-        $this->patchJson('/api/v1/messages/' . $messageId, [
+        $this->patchJson('/api/v1/messages/'.$messageId, [
             'unread' => 'no',
             'location' => 2,
         ])
@@ -207,7 +207,7 @@ class Phase20ApiParityTest extends TestCase
             'location' => 2,
         ]);
 
-        $this->deleteJson('/api/v1/messages/' . $messageId)
+        $this->deleteJson('/api/v1/messages/'.$messageId)
             ->assertStatus(200)
             ->assertJsonPath('ret', 0)
             ->assertJsonPath('data.success', true);
@@ -235,7 +235,7 @@ class Phase20ApiParityTest extends TestCase
 
         $forumId = $createResponse->json('data.data.id');
 
-        $this->getJson('/api/v1/forums/' . $forumId)
+        $this->getJson('/api/v1/forums/'.$forumId)
             ->assertStatus(200)
             ->assertJsonPath('ret', 0)
             ->assertJsonPath('data.data.id', $forumId);
@@ -245,14 +245,14 @@ class Phase20ApiParityTest extends TestCase
             ->assertJsonPath('ret', 0)
             ->assertJsonPath('data.data.0.id', static fn ($id) => $id > 0);
 
-        $this->patchJson('/api/v1/forums/' . $forumId, [
+        $this->patchJson('/api/v1/forums/'.$forumId, [
             'name' => 'Updated Forum',
         ])
             ->assertStatus(200)
             ->assertJsonPath('ret', 0)
             ->assertJsonPath('data.data.name', 'Updated Forum');
 
-        $this->deleteJson('/api/v1/forums/' . $forumId)
+        $this->deleteJson('/api/v1/forums/'.$forumId)
             ->assertStatus(200)
             ->assertJsonPath('ret', 0)
             ->assertJsonPath('data.success', true);
@@ -278,24 +278,24 @@ class Phase20ApiParityTest extends TestCase
 
         $topic = Topic::findOrFail($topicId);
 
-        $this->getJson('/api/v1/topics?forum_id=' . $forum->id)
+        $this->getJson('/api/v1/topics?forum_id='.$forum->id)
             ->assertStatus(200)
             ->assertJsonPath('ret', 0)
             ->assertJsonPath('data.data.0.id', $topicId);
 
-        $this->getJson('/api/v1/topics/' . $topicId)
+        $this->getJson('/api/v1/topics/'.$topicId)
             ->assertStatus(200)
             ->assertJsonPath('ret', 0)
             ->assertJsonPath('data.data.id', $topicId);
 
-        $this->patchJson('/api/v1/topics/' . $topicId, [
+        $this->patchJson('/api/v1/topics/'.$topicId, [
             'subject' => 'Updated Topic',
         ])
             ->assertStatus(200)
             ->assertJsonPath('ret', 0)
             ->assertJsonPath('data.data.subject', 'Updated Topic');
 
-        $this->deleteJson('/api/v1/topics/' . $topicId)
+        $this->deleteJson('/api/v1/topics/'.$topicId)
             ->assertStatus(200)
             ->assertJsonPath('ret', 0)
             ->assertJsonPath('data.success', true);
@@ -323,7 +323,7 @@ class Phase20ApiParityTest extends TestCase
 
         Sanctum::actingAs($user, ['topic:list']);
 
-        $postResponse = $this->postJson('/api/v1/topics/' . $topicId . '/posts', [
+        $postResponse = $this->postJson('/api/v1/topics/'.$topicId.'/posts', [
             'body' => 'Reply body',
         ])
             ->assertStatus(200)
@@ -332,24 +332,24 @@ class Phase20ApiParityTest extends TestCase
 
         $postId = $postResponse->json('data.data.id');
 
-        $this->getJson('/api/v1/topics/' . $topicId . '/posts')
+        $this->getJson('/api/v1/topics/'.$topicId.'/posts')
             ->assertStatus(200)
             ->assertJsonPath('ret', 0)
             ->assertJsonPath('data.data.1.id', $postId);
 
-        $this->getJson('/api/v1/topics/' . $topicId . '/posts/' . $postId)
+        $this->getJson('/api/v1/topics/'.$topicId.'/posts/'.$postId)
             ->assertStatus(200)
             ->assertJsonPath('ret', 0)
             ->assertJsonPath('data.data.id', $postId);
 
-        $this->patchJson('/api/v1/topics/' . $topicId . '/posts/' . $postId, [
+        $this->patchJson('/api/v1/topics/'.$topicId.'/posts/'.$postId, [
             'body' => 'Updated reply body',
         ])
             ->assertStatus(200)
             ->assertJsonPath('ret', 0)
             ->assertJsonPath('data.data.body', 'Updated reply body');
 
-        $this->deleteJson('/api/v1/topics/' . $topicId . '/posts/' . $postId)
+        $this->deleteJson('/api/v1/topics/'.$topicId.'/posts/'.$postId)
             ->assertStatus(200)
             ->assertJsonPath('ret', 0)
             ->assertJsonPath('data.success', true);
@@ -357,7 +357,7 @@ class Phase20ApiParityTest extends TestCase
         $this->assertDatabaseMissing('posts', ['id' => $postId]);
 
         Sanctum::actingAs($admin, ['topic:manage', 'topic:list']);
-        $this->deleteJson('/api/v1/topics/' . $topicId)
+        $this->deleteJson('/api/v1/topics/'.$topicId)
             ->assertStatus(200);
     }
 

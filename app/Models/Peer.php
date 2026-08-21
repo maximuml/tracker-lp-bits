@@ -24,29 +24,29 @@
  * @property string $ipv6
  * @property int $is_seed_box
  */
+
 namespace App\Models;
 
-
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\Cache;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * @property int $counts
  */
 class Peer extends NexusModel
 {
-    /** @var  list<string> */
+    /** @var list<string> */
     protected $fillable = [
         'torrent', 'peer_id', 'ip', 'port', 'uploaded', 'downloaded', 'to_go', 'seeder', 'started', 'last_action',
         'prev_action', 'connectable', 'userid', 'agent', 'finishedat', 'downloadoffset', 'uploadedoffset', 'passkey',
-        'ipv4', 'ipv6', 'is_seed_box'
+        'ipv4', 'ipv6', 'is_seed_box',
     ];
 
     const CONNECTABLE_YES = 'yes';
 
     const CONNECTABLE_NO = 'no';
 
-    /** @var  array<string, string> */
+    /** @var array<string, string> */
     protected $casts = [
         'started' => 'datetime',
         'last_action' => 'datetime',
@@ -54,7 +54,7 @@ class Peer extends NexusModel
         'finishedat' => 'datetime:U',
     ];
 
-    /** @var  array<int|string, mixed> */
+    /** @var array<int|string, mixed> */
     public static $connectableText = [
         self::CONNECTABLE_YES => '是',
         self::CONNECTABLE_NO => '否',
@@ -64,7 +64,7 @@ class Peer extends NexusModel
 
     const SEEDER_NO = 'no';
 
-    /** @var  array<int|string, mixed> */
+    /** @var array<int|string, mixed> */
     public static $cardTitles = [
         'upload_text' => '上传',
         'download_text' => '下载',
@@ -82,8 +82,8 @@ class Peer extends NexusModel
     }
 
     /**
-     * @param  \Illuminate\Database\Eloquent\Builder<Peer>  $builder
-     * @return  mixed
+     * @param  Builder<Peer>  $builder
+     * @return mixed
      */
     public function scopeIsSeeder(Builder $builder)
     {
@@ -91,8 +91,8 @@ class Peer extends NexusModel
     }
 
     /**
-     * @param  \Illuminate\Database\Eloquent\Builder<Peer>  $builder
-     * @return  mixed
+     * @param  Builder<Peer>  $builder
+     * @return mixed
      */
     public function scopeIsNotSeeder(Builder $builder)
     {
@@ -111,14 +111,14 @@ class Peer extends NexusModel
         return $this->seeder == self::SEEDER_NO;
     }
 
-    /** @return  \Illuminate\Database\Eloquent\Relations\BelongsTo<User, $this> */
-    public function user(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    /** @return  BelongsTo<User, $this> */
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'userid');
     }
 
-    /** @return  \Illuminate\Database\Eloquent\Relations\BelongsTo<Torrent, $this> */
-    public function relative_torrent(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    /** @return  BelongsTo<Torrent, $this> */
+    public function relative_torrent(): BelongsTo
     {
         return $this->belongsTo(Torrent::class, 'torrent');
     }

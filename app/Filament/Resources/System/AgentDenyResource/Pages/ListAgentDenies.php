@@ -2,11 +2,9 @@
 
 namespace App\Filament\Resources\System\AgentDenyResource\Pages;
 
-use Filament\Actions\CreateAction;
 use App\Filament\PageList;
 use App\Filament\Resources\System\AgentDenyResource;
-use Filament\Pages\Actions;
-use Filament\Resources\Pages\ListRecords;
+use Filament\Actions\CreateAction;
 
 class ListAgentDenies extends PageList
 {

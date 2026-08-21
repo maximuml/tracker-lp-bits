@@ -1,16 +1,21 @@
 <?php
+
 namespace App\Filament\Pages;
 
-use Filament\Support\Enums\Width;
 use App\Filament\Widgets\AccountInfo;
+use App\Filament\Widgets\CategoryActivity;
+use App\Filament\Widgets\DonorSummary;
 use App\Filament\Widgets\LatestTorrents;
 use App\Filament\Widgets\LatestUsers;
+use App\Filament\Widgets\PeerAgents;
 use App\Filament\Widgets\SystemInfo;
 use App\Filament\Widgets\TorrentStat;
 use App\Filament\Widgets\TorrentTrend;
+use App\Filament\Widgets\UploaderActivity;
 use App\Filament\Widgets\UserClassStat;
 use App\Filament\Widgets\UserStat;
 use App\Filament\Widgets\UserTrend;
+use Filament\Support\Enums\Width;
 
 class Dashboard extends \Filament\Pages\Dashboard
 {
@@ -27,6 +32,10 @@ class Dashboard extends \Filament\Pages\Dashboard
             UserStat::class,
             UserClassStat::class,
             TorrentStat::class,
+            UploaderActivity::class,
+            CategoryActivity::class,
+            PeerAgents::class,
+            DonorSummary::class,
             SystemInfo::class,
         ];
     }

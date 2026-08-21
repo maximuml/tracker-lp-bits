@@ -4,6 +4,8 @@ namespace App\Repositories;
 
 use App\Support\Settings;
 use App\Support\SupportContext;
+use Illuminate\Database\Query\Builder;
+use Illuminate\Support\Collection;
 use Nexus\Database\NexusDB;
 
 final class ToptenRepository
@@ -118,7 +120,7 @@ final class ToptenRepository
         return $sections;
     }
 
-    private static function userBaseQuery(): \Illuminate\Database\Query\Builder
+    private static function userBaseQuery(): Builder
     {
         if (NexusDB::isMysql()) {
             $speedStr = 'uploaded / (UNIX_TIMESTAMP(NOW()) - UNIX_TIMESTAMP(added)) AS upspeed, downloaded / (UNIX_TIMESTAMP(NOW()) - UNIX_TIMESTAMP(added)) AS downspeed';
@@ -501,20 +503,20 @@ final class ToptenRepository
 
     private static function caption(string $topPrefix, int $limit, string $label, ?string $note = null): string
     {
-        $html = $topPrefix . $limit . ' ' . $label;
+        $html = $topPrefix.$limit.' '.$label;
 
         if ($note !== null && $note !== '') {
-            $html .= '<font class="small">' . $note . '</font>';
+            $html .= '<font class="small">'.$note.'</font>';
         }
 
         return $html;
     }
 
     /**
-     * @param  \Illuminate\Support\Collection<int, \stdClass>  $rows
+     * @param  Collection<int, \stdClass>  $rows
      * @return list<array<string, mixed>>
      */
-    private static function toArray(\Illuminate\Support\Collection $rows): array
+    private static function toArray(Collection $rows): array
     {
         return array_values($rows->map(fn ($row) => (array) $row)->all());
     }

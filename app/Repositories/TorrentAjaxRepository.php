@@ -3,11 +3,18 @@
 namespace App\Repositories;
 
 use App\Enums\Permission\PermissionEnum;
+use App\Models\Snatch;
 use App\Models\Torrent;
 use App\Models\User;
+use App\Support\Config\SiteConfig;
+use App\Support\Hooks;
+use App\Support\Logger;
+use App\Support\Network;
 use App\Support\Pagination;
 use App\Support\Permissions;
 use App\Support\SupportContext;
+use App\Support\UserDisplay;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Meilisearch\Exceptions\ApiException;
@@ -39,7 +46,7 @@ final class TorrentAjaxRepository
 
         $perPage = 25;
         $scriptName = SupportContext::getServerValue('SCRIPT_NAME');
-        $href = is_string($scriptName) ? $scriptName . '?id=' . $torrentId . '&' : '?id=' . $torrentId . '&';
+        $href = is_string($scriptName) ? $scriptName.'?id='.$torrentId.'&' : '?id='.$torrentId.'&';
         $pager = Pagination::pager($perPage, $count, $href);
 
         $offset = (int) $pager[3];
@@ -55,7 +62,7 @@ final class TorrentAjaxRepository
 
         $snatchUserIds = $snatchedRows->pluck('userid')->filter()->unique()->map('intval')->toArray();
         if ($snatchUserIds !== []) {
-            \App\Support\UserDisplay::preload($snatchUserIds);
+            UserDisplay::preload($snatchUserIds);
         }
 
         return [
@@ -79,7 +86,7 @@ final class TorrentAjaxRepository
             return $result;
         }
 
-        $cacheKey = 'searchsuggest_' . md5($searchstr);
+        $cacheKey = 'searchsuggest_'.md5($searchstr);
         $cached = Cache::get($cacheKey);
         if (is_array($cached) && count($cached) === 3) {
             return [
@@ -91,7 +98,7 @@ final class TorrentAjaxRepository
 
         $rows = NexusDB::table('suggest')
             ->selectRaw('keywords AS suggest, COUNT(*) AS count')
-            ->where('keywords', 'like', $searchstr . '%')
+            ->where('keywords', 'like', $searchstr.'%')
             ->groupBy('keywords')
             ->orderByDesc('count')
             ->orderByDesc('keywords')
@@ -118,7 +125,7 @@ final class TorrentAjaxRepository
         }
 
         try {
-            $torrents = (new MeiliSearchRepository())->autocomplete($query, 10, $user);
+            $torrents = (new MeiliSearchRepository)->autocomplete($query, 10, $user);
         } catch (ApiException) {
             $torrents = [];
         }
@@ -134,11 +141,11 @@ final class TorrentAjaxRepository
         $torrent = Torrent::query()->findOrFail($torrentId, ['id', 'owner', 'size', 'anonymous', 'seeders', 'leechers']);
         $torrentArr = $torrent->toArray();
 
-        $seedersAndLeechers = \App\Support\Hooks::applyFilter("torrent_seeder_leecher_list", [], $torrentId);
+        $seedersAndLeechers = Hooks::applyFilter('torrent_seeder_leecher_list', [], $torrentId);
         if (is_array($seedersAndLeechers) && isset($seedersAndLeechers['seeders'], $seedersAndLeechers['leechers'])) {
             $seeders = (array) $seedersAndLeechers['seeders'];
             $leechers = (array) $seedersAndLeechers['leechers'];
-            \App\Support\Logger::writeWithContext("SEEDER_LEECHER_FROM_FILTER: torrent_seeder_leecher_list", 'info', false);
+            Logger::writeWithContext('SEEDER_LEECHER_FROM_FILTER: torrent_seeder_leecher_list', 'info', false);
         } else {
             $startedField = NexusDB::unixTimestampField('started');
             $lastActionField = NexusDB::unixTimestampField('last_action');
@@ -168,7 +175,7 @@ final class TorrentAjaxRepository
         if (($torrentArr['seeders'] ?? 0) != $seedersCount || ($torrentArr['leechers'] ?? 0) != $leechersCount) {
             $update = ['seeders' => $seedersCount, 'leechers' => $leechersCount];
             $torrent->update($update);
-            \App\Support\Logger::writeWithContext("[UPDATE_TORRENT_SEEDERS_LEECHERS], torrent: {$torrentId}, original: " . $torrent->toJson() . ", update: " . json_encode($update), 'info', false);
+            Logger::writeWithContext("[UPDATE_TORRENT_SEEDERS_LEECHERS], torrent: {$torrentId}, original: ".$torrent->toJson().', update: '.json_encode($update), 'info', false);
             $torrentArr = array_merge($torrentArr, $update);
         }
 
@@ -176,16 +183,16 @@ final class TorrentAjaxRepository
         $userIds = array_unique(array_filter(array_column($allPeers, 'userid')));
 
         if ($userIds !== []) {
-            \App\Support\UserDisplay::preload($userIds);
+            UserDisplay::preload($userIds);
         }
 
         $privacyData = [];
         foreach ($userIds as $uid) {
-            $row = \App\Support\UserDisplay::row((int) $uid);
+            $row = UserDisplay::row((int) $uid);
             $privacyData[$uid] = is_array($row) ? (string) ($row['privacy'] ?? '') : '';
         }
 
-        $seedBoxRep = new SeedBoxRepository();
+        $seedBoxRep = new SeedBoxRepository;
         $isSeedBoxMap = [];
         $caseWhens = [];
         foreach ($allPeers as $peer) {
@@ -211,7 +218,7 @@ final class TorrentAjaxRepository
             $peerIpInfo[$peerId] = [];
             foreach ($ips as $ip) {
                 if (! isset($locationMap[$ip])) {
-                    $locationMap[$ip] = \App\Support\Network::ipLocationWithContext($ip);
+                    $locationMap[$ip] = Network::ipLocationWithContext($ip);
                 }
                 [$locPub, $locMod] = $locationMap[$ip];
                 $peerIpInfo[$peerId][] = [
@@ -225,16 +232,16 @@ final class TorrentAjaxRepository
 
         $usernameHtmlMap = [];
         foreach ($userIds as $uid) {
-            $usernameHtmlMap[(int) $uid] = \App\Support\UserDisplay::username((int) $uid, false, true, true, true);
+            $usernameHtmlMap[(int) $uid] = UserDisplay::username((int) $uid, false, true, true, true);
         }
 
-        if (! empty($caseWhens) && \App\Support\Config\SiteConfig::current()->seedBox->enabled()) {
+        if (! empty($caseWhens) && SiteConfig::current()->seedBox->enabled()) {
             $caseSql = sprintf('case id %s end', implode(' ', array_values($caseWhens)));
-            \App\Support\Logger::writeWithContext("[IS_SEED_BOX], caseSql: {$caseSql}, ids: " . implode(',', array_keys($caseWhens)), 'info', false);
+            Logger::writeWithContext("[IS_SEED_BOX], caseSql: {$caseSql}, ids: ".implode(',', array_keys($caseWhens)), 'info', false);
             NexusDB::table('peers')->whereIn('id', array_keys($caseWhens))->update(['is_seed_box' => NexusDB::raw($caseSql)]);
         }
 
-        $enablelocationTweak = \App\Support\SupportContext::getGlobal('enablelocation_tweak');
+        $enablelocationTweak = SupportContext::getGlobal('enablelocation_tweak');
         $showLocationColumn = $enablelocationTweak === 'yes' || ($currentUser !== null && Permissions::userCan(PermissionEnum::VIEW_USER_CONFIDENTIAL_INFO->value, false, $currentUser->id));
 
         return [
@@ -287,7 +294,7 @@ final class TorrentAjaxRepository
         $seedTimeAndUploaded = collect();
         if ($type === 'uploaded' && ! empty($rows)) {
             $torrentIds = array_column($rows, 'torrent');
-            $seedTimeAndUploaded = \App\Models\Snatch::query()
+            $seedTimeAndUploaded = Snatch::query()
                 ->where('userid', $targetUserId)
                 ->whereIn('torrentid', $torrentIds)
                 ->select(['seedtime', 'uploaded', 'torrentid'])
@@ -303,16 +310,13 @@ final class TorrentAjaxRepository
             'total_size' => $totalSize,
             'pagertop' => (string) $pager[0],
             'pagerbottom' => (string) $pager[1],
-            'torrentRep' => new TorrentRepository(),
-            'seedBoxRep' => new SeedBoxRepository(),
+            'torrentRep' => new TorrentRepository,
+            'seedBoxRep' => new SeedBoxRepository,
             'seedTimeAndUploaded' => $seedTimeAndUploaded,
         ];
     }
 
-    /**
-     * @return \Illuminate\Database\Query\Builder
-     */
-    private static function buildUserTorrentQuery(int $targetUserId, string $type, ?User $currentUser = null): \Illuminate\Database\Query\Builder
+    private static function buildUserTorrentQuery(int $targetUserId, string $type, ?User $currentUser = null): Builder
     {
         switch ($type) {
             case 'uploaded':

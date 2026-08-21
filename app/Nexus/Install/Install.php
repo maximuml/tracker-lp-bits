@@ -7,6 +7,13 @@ use App\Models\TrackerUrl;
 use App\Models\User;
 use App\Repositories\SearchBoxRepository;
 use App\Repositories\UserRepository;
+use App\Support\Config\SiteConfig;
+use App\Support\Env;
+use App\Support\Environment;
+use App\Support\LegacyResponse;
+use App\Support\Path;
+use App\Support\Settings;
+use App\Support\Url;
 use Illuminate\Support\Str;
 use Nexus\Database\NexusDB;
 
@@ -14,7 +21,7 @@ class Install
 {
     protected $currentStep;
 
-    protected $minimumPhpVersion = '8.2.0';
+    protected $minimumPhpVersion = '8.4.0';
 
     protected $progressKeyPrefix = '__step';
 
@@ -42,12 +49,14 @@ class Install
     protected array $conflictExtensions = [
         'mysql',
     ];
+
     protected array $optionalExtensions = [
-//        ['name' => 'swoole', 'desc' => "If use swoole for Octane, make sure 'current' shows 1"],
+        //        ['name' => 'swoole', 'desc' => "If use swoole for Octane, make sure 'current' shows 1"],
     ];
+
     protected array $requiredFunctions = [
         'symlink', 'putenv', 'proc_open', 'proc_get_status', 'exec',
-        'pcntl_signal', 'pcntl_alarm', 'pcntl_async_signals'
+        'pcntl_signal', 'pcntl_alarm', 'pcntl_async_signals',
     ];
 
     const INSTALL_LOCK_FILE = 'dont_delete_install.lock';
@@ -56,10 +65,10 @@ class Install
 
     public function __construct()
     {
-        if (!session_id()) {
+        if (! session_id()) {
             session_start();
         }
-        if (!$this->runningInConsole()) {
+        if (! $this->runningInConsole()) {
             $this->checkLock();
         }
         $this->currentStep = min(intval($_REQUEST['step'] ?? 1) ?: 1, count($this->steps) + 1);
@@ -84,12 +93,14 @@ class Install
     {
         for ($i = 1; $i < $step; $i++) {
             $progressKey = $this->getProgressKey($i);
-            if (!isset($_SESSION[$progressKey])) {
-                $this->doLog("check step: $i, session doesn't have: " . json_encode($_SESSION));
+            if (! isset($_SESSION[$progressKey])) {
+                $this->doLog("check step: $i, session doesn't have: ".json_encode($_SESSION));
+
                 return false;
             }
         }
-        $this->doLog("check step: $step, can access" );
+        $this->doLog("check step: $step, can access");
+
         return true;
     }
 
@@ -102,7 +113,7 @@ class Install
 
     private function getProgressKey($step)
     {
-        return $this->progressKeyPrefix . $step;
+        return $this->progressKeyPrefix.$step;
     }
 
     public function getLogFile()
@@ -112,7 +123,7 @@ class Install
 
     public function getInsallDirectory()
     {
-        return ROOT_PATH . 'public/install';
+        return ROOT_PATH.'public/install';
     }
 
     public function doLog($log)
@@ -124,7 +135,7 @@ class Install
     public function listAllTableCreate($sqlFile = '')
     {
         if (empty($sqlFile)) {
-            $sqlFile = ROOT_PATH . '_db/dbstructure_v1.6.sql';
+            $sqlFile = ROOT_PATH.'_db/dbstructure_v1.6.sql';
         }
         $pattern = '/CREATE TABLE `(.*)`.*;/isU';
         $string = file_get_contents($sqlFile);
@@ -135,35 +146,38 @@ class Install
         if ($count == 0) {
             return [];
         }
+
         return array_column($matches, 0, 1);
     }
 
     public function listAllTableCreateFromMigrations()
     {
         $tables = [];
-        foreach (glob(ROOT_PATH . "database/migrations/*.php") as $path) {
+        foreach (glob(ROOT_PATH.'database/migrations/*.php') as $path) {
             $filename = basename($path);
             $count = preg_match('/create_(.*)_table.php/', $filename, $matches);
             if ($count) {
                 $tableName = $matches[1];
-                //Special treatment
-                $tableName = str_replace("seedbox_records", "seed_box_records", $tableName);
+                // Special treatment
+                $tableName = str_replace('seedbox_records', 'seed_box_records', $tableName);
                 $tables[$tableName] = "database/migrations/$filename";
             }
         }
+
         return $tables;
     }
 
     public function listExistsTable()
     {
         if (NexusDB::isMysql()) {
-            $schema = \App\Support\Env::get('DB_DATABASE', null);
-        } else if (NexusDB::isPgsql()) {
+            $schema = Env::get('DB_DATABASE', null);
+        } elseif (NexusDB::isPgsql()) {
             $schema = 'public';
         } else {
             throw new \RuntimeException('Invalid DB_CONNECTION');
         }
-        return \Nexus\Database\NexusDB::table('information_schema.tables')
+
+        return NexusDB::table('information_schema.tables')
             ->where('table_schema', $schema)
             ->pluck('table_name')
             ->all();
@@ -173,7 +187,7 @@ class Install
     {
         $gdInfo = function_exists('gd_info') ? gd_info() : [];
         $tableRows = [];
-        $phpVersionRequire = '>= ' . $this->minimumPhpVersion;
+        $phpVersionRequire = '>= '.$this->minimumPhpVersion;
         $tableRows[] = [
             'label' => 'PHP version',
             'required' => $phpVersionRequire,
@@ -183,16 +197,16 @@ class Install
 
         $disabledFunctions = [];
         foreach ($this->requiredFunctions as $fn) {
-            if (str_starts_with($fn, "pcntl_") && function_exists('exec')) {
+            if (str_starts_with($fn, 'pcntl_') && function_exists('exec')) {
                 $output = [];
                 $command = "php -r 'var_export(function_exists(\"$fn\"));'";
                 $result = exec($command, $output, $result_code);
                 $lastFourChars = substr(trim($output[0]), -4);
                 $exists = $lastFourChars == 'true';
-                if (!$exists) {
+                if (! $exists) {
                     $disabledFunctions[] = $fn;
                 }
-            } elseif (!function_exists($fn)) {
+            } elseif (! function_exists($fn)) {
                 $disabledFunctions[] = $fn;
             }
         }
@@ -200,7 +214,7 @@ class Install
         $tableRows[] = [
             'label' => 'Required functions',
             'required' => 'true',
-            'current' => empty($disabledFunctions) ? '1' : "These functions are Disabled: " . implode(',', $disabledFunctions),
+            'current' => empty($disabledFunctions) ? '1' : 'These functions are Disabled: '.implode(',', $disabledFunctions),
             'result' => $this->yesOrNo(empty($disabledFunctions)),
         ];
 
@@ -209,7 +223,7 @@ class Install
             $tableRows[] = [
                 'label' => "PHP extension $extension",
                 'required' => 'disabled',
-                'current' => (int)$loaded,
+                'current' => (int) $loaded,
                 'result' => $loaded ? 'NO' : 'YES',
             ];
         }
@@ -217,7 +231,7 @@ class Install
         foreach ($this->requiredExtensions as $extension) {
             if ($extension == 'pcntl' && function_exists('exec')) {
                 $output = [];
-                $result = exec("php -m", $output, $result_code);
+                $result = exec('php -m', $output, $result_code);
                 $outputString = implode("\n", $output);
                 $loadedStr = $outputString;
                 $loadedArr = preg_split("/[\r\n]+/", $loadedStr);
@@ -228,7 +242,7 @@ class Install
             $tableRows[] = [
                 'label' => "PHP extension $extension",
                 'required' => 'enabled',
-                'current' => (int)$loaded,
+                'current' => (int) $loaded,
                 'result' => $this->yesOrNo($loaded),
             ];
         }
@@ -254,9 +268,9 @@ class Install
 
         foreach ($this->optionalExtensions as $extension) {
             $tableRows[] = [
-                'label' => "PHP extension " . $extension['name'],
+                'label' => 'PHP extension '.$extension['name'],
                 'required' => 'enabled',
-                'current' => (int)extension_loaded($extension['name']),
+                'current' => (int) extension_loaded($extension['name']),
                 'result' => $extension['desc'],
             ];
         }
@@ -265,6 +279,7 @@ class Install
             return in_array($value['required'], ['true', 'enabled', $phpVersionRequire]) && $value['result'] == 'NO';
         });
         $pass = empty($fails);
+
         return [
             'table_rows' => $tableRows,
             'fails' => $fails,
@@ -274,12 +289,12 @@ class Install
 
     public function listSettingTableRows()
     {
-        $defaultSettingsFile = __DIR__ . '/settings.default.php';
-        $originalConfigFile = ROOT_PATH . 'config/allconfig.php';
-        if (!file_exists($defaultSettingsFile)) {
+        $defaultSettingsFile = __DIR__.'/settings.default.php';
+        $originalConfigFile = ROOT_PATH.'config/allconfig.php';
+        if (! file_exists($defaultSettingsFile)) {
             throw new \RuntimeException("default setting file: $defaultSettingsFile not exists.");
         }
-        if (!file_exists($originalConfigFile)) {
+        if (! file_exists($originalConfigFile)) {
             throw new \RuntimeException("original setting file: $originalConfigFile not exists.");
         }
         $tableRows = [
@@ -287,35 +302,35 @@ class Install
                 'label' => basename($defaultSettingsFile),
                 'required' => 'exists && readable',
                 'current' => $defaultSettingsFile,
-                'result' =>  $this->yesOrNo(file_exists($defaultSettingsFile) && is_readable($defaultSettingsFile)),
+                'result' => $this->yesOrNo(file_exists($defaultSettingsFile) && is_readable($defaultSettingsFile)),
             ],
             [
                 'label' => basename($originalConfigFile),
                 'required' => 'exists && readable',
                 'current' => $originalConfigFile,
-                'result' =>  $this->yesOrNo(file_exists($originalConfigFile) && is_readable($originalConfigFile)),
+                'result' => $this->yesOrNo(file_exists($originalConfigFile) && is_readable($originalConfigFile)),
             ],
         ];
         $requireDirs = [
-            'main' => ['bitbucket', ],
-            'attachment' => ['savedirectory', ],
+            'main' => ['bitbucket'],
+            'attachment' => ['savedirectory'],
         ];
         $symbolicLinks = [];
         require $originalConfigFile;
         $settings = require $defaultSettingsFile;
         $settingsFromDb = [];
         if (NexusDB::hasTable('settings') && Setting::query()->count() > 0) {
-            if (!NexusDB::hasColumn('settings', 'autoload')) {
+            if (! NexusDB::hasColumn('settings', 'autoload')) {
                 $this->runMigrate('database/migrations/2022_05_06_191830_add_autoload_to_settings_table.php');
             }
-            $settingsFromDb = \App\Support\Config\SiteConfig::fromDb()->toArray();
+            $settingsFromDb = SiteConfig::fromDb()->toArray();
         }
-        $this->doLog("settings form db: " . json_encode($settingsFromDb));
+        $this->doLog('settings form db: '.json_encode($settingsFromDb));
         foreach ($settings as $prefix => &$group) {
             $prefixUpperCase = strtoupper($prefix);
             $oldGroupValues = $$prefixUpperCase ?? null;
             foreach ($group as $key => &$value) {
-                //merge original config or db config to default setting, exclude code part
+                // merge original config or db config to default setting, exclude code part
                 if ($prefix != 'code') {
                     if (isset($settingsFromDb[$prefix][$key])) {
                         $this->doLog(sprintf(
@@ -337,7 +352,7 @@ class Install
                     $value = '';
                 }
                 if (isset($requireDirs[$prefix]) && in_array($key, $requireDirs[$prefix])) {
-                    $dir = \App\Support\Path::resolve($value, \ROOT_PATH);
+                    $dir = Path::resolve($value, \ROOT_PATH);
                     $tableRows[] = [
                         'label' => "{$prefix}.{$key}",
                         'required' => 'exists && readable',
@@ -348,8 +363,11 @@ class Install
                 }
             }
         }
-        $fails = array_filter($tableRows, function ($value) {return $value['required'] == 'true' && $value['result'] == 'NO';});
+        $fails = array_filter($tableRows, function ($value) {
+            return $value['required'] == 'true' && $value['result'] == 'NO';
+        });
         $pass = empty($fails);
+
         return [
             'table_rows' => $tableRows,
             'symbolic_links' => $symbolicLinks,
@@ -370,8 +388,8 @@ class Install
         if ($this->runningInConsole()) {
             $this->currentStep = $step;
         } else {
-            \App\Support\LegacyResponse::redirect(\App\Support\Url::baseUrl() . "?step=$step");
-            die(0);
+            LegacyResponse::redirect(Url::baseUrl()."?step=$step");
+            exit(0);
         }
 
     }
@@ -381,10 +399,12 @@ class Install
         return count($this->steps);
     }
 
-    public function yesOrNo($condition) {
+    public function yesOrNo($condition)
+    {
         if ($condition) {
             return 'YES';
         }
+
         return 'NO';
     }
 
@@ -394,7 +414,7 @@ class Install
         $table .= '<div class="table-row-group">';
         $table .= '<div class="table-row">';
         foreach ($header as $text) {
-            $table .= '<div class="table-cell bg-gray-400 text-gray-700 px-4 py-2">' . $text . '</div>';
+            $table .= '<div class="table-cell bg-gray-400 text-gray-700 px-4 py-2">'.$text.'</div>';
         }
         $table .= '</div>';
         foreach ($data as $value) {
@@ -404,7 +424,7 @@ class Install
                 if ($name == 'result' && in_array($value[$name], ['YES', 'NO'])) {
                     $color = $value[$name] == 'YES' ? 'green' : 'red';
                 }
-                $table .= '<div class="table-cell bg-gray-200 text-' . $color . '-700 px-4 py-2 text-sm">' . $value[$name] . '</div>';
+                $table .= '<div class="table-cell bg-gray-200 text-'.$color.'-700 px-4 py-2 text-sm">'.$value[$name].'</div>';
             }
             $table .= '</div>';
         }
@@ -417,7 +437,7 @@ class Install
 
     public function renderForm($formControls, $formWidth = '1/2', $labelWidth = '1/3', $valueWidth = '2/3')
     {
-        $form = '<div class="inline-block w-' . $formWidth . '">';
+        $form = '<div class="inline-block w-'.$formWidth.'">';
         foreach ($formControls as $value) {
             $form .= '<div class="flex mt-2">';
             $form .= sprintf('<div class="w-%s flex justify-end items-center pr-10"><span>%s</span></div>', $labelWidth, $value['label']);
@@ -442,6 +462,7 @@ class Install
             $form .= '</div>';
         }
         $form .= '</div>';
+
         return $form;
     }
 
@@ -456,18 +477,19 @@ class Install
             $steps .= '</div>';
         }
         $steps .= '</div>';
+
         return $steps;
     }
 
     public function listEnvFormControls()
     {
-        $envExampleFile = ROOT_PATH . ".env.example";
-        $envExampleData = \App\Support\Env::load($envExampleFile);
-        $envFile = ROOT_PATH . '.env';
+        $envExampleFile = ROOT_PATH.'.env.example';
+        $envExampleData = Env::load($envExampleFile);
+        $envFile = ROOT_PATH.'.env';
         $envData = [];
         if (file_exists($envFile) && is_readable($envFile)) {
-            //already exists, read it ,and merge
-            $envData = \App\Support\Env::load($envFile);
+            // already exists, read it ,and merge
+            $envData = Env::load($envFile);
         }
         $mergeData = array_merge($envExampleData, $envData);
         $formControls = [];
@@ -481,7 +503,7 @@ class Install
                 'options' => [],
                 'label' => $name,
                 'name' => $name,
-                'value' => $value
+                'value' => $value,
             ];
             if ($name == 'TIMEZONE') {
                 $item['type'] = 'select';
@@ -502,7 +524,7 @@ class Install
         $class = User::CLASS_STAFF_LEADER;
         $count = User::query()->where('class', $class)->count();
         if ($count > 0) {
-            throw new \InvalidArgumentException("Administrator already exists");
+            throw new \InvalidArgumentException('Administrator already exists');
         }
         $data = [
             'username' => $username,
@@ -512,29 +534,30 @@ class Install
             'class' => $class,
             'id' => 1,
         ];
-        $user = (new UserRepository())->store($data);
-        $this->doLog("[CREATE ADMINISTRATOR] " . $user->toJson());
+        $user = (new UserRepository)->store($data);
+        $this->doLog('[CREATE ADMINISTRATOR] '.$user->toJson());
+
         return $user;
     }
 
     public function createEnvFile($data, $scene = 'install')
     {
-        $envExampleFile = ROOT_PATH . ".env.example";
-        $envExampleData = \App\Support\Env::load($envExampleFile);
-        $envFile = ROOT_PATH . ".env";
+        $envExampleFile = ROOT_PATH.'.env.example';
+        $envExampleData = Env::load($envExampleFile);
+        $envFile = ROOT_PATH.'.env';
         $newData = [];
         if (file_exists($envFile) && is_readable($envFile)) {
-            //already exists, read it ,and merge post data
-            $newData = \App\Support\Env::load($envFile);
-            $this->doLog("[CREATE ENV] .env exists, data: " . json_encode($newData));
+            // already exists, read it ,and merge post data
+            $newData = Env::load($envFile);
+            $this->doLog('[CREATE ENV] .env exists, data: '.json_encode($newData));
         }
-        $this->doLog("[CREATE ENV] newData: " . json_encode($newData));
+        $this->doLog('[CREATE ENV] newData: '.json_encode($newData));
         foreach ($envExampleData as $key => $value) {
             if (isset($data[$key])) {
                 $value = trim($data[$key]);
                 $this->doLog("[CREATE ENV] key: $key, new value: $value from post.");
                 $newData[$key] = $value;
-            } elseif (!isset($newData[$key])) {
+            } elseif (! isset($newData[$key])) {
                 $this->doLog("[CREATE ENV] key: $key, new value: $value from example.");
                 $newData[$key] = $value;
             }
@@ -544,7 +567,7 @@ class Install
             if ($key == 'QUEUE_CONNECTION') {
                 $newData[$key] = 'redis';
             }
-            if ($scene == 'install' || !file_exists($envFile)) {
+            if ($scene == 'install' || ! file_exists($envFile)) {
                 if ($key == 'APP_ENV') {
                     $newData[$key] = 'production';
                 }
@@ -556,32 +579,33 @@ class Install
                 }
             }
         }
-        $this->doLog("[CREATE ENV] final newData: " . json_encode($newData));
+        $this->doLog('[CREATE ENV] final newData: '.json_encode($newData));
         unset($key, $value);
-        //check
-        \Nexus\Database\NexusDB::getInstance()->connect($newData['DB_HOST'], $newData['DB_USERNAME'], $newData['DB_PASSWORD'], $newData['DB_DATABASE'], (int)$newData['DB_PORT'], $newData['DB_CONNECTION']);
-        $redis = new \Redis();
+        // check
+        NexusDB::getInstance()->connect($newData['DB_HOST'], $newData['DB_USERNAME'], $newData['DB_PASSWORD'], $newData['DB_DATABASE'], (int) $newData['DB_PORT'], $newData['DB_CONNECTION']);
+        $redis = new \Redis;
         $redis->connect($newData['REDIS_HOST'], $newData['REDIS_PORT'] ?: 6379);
-        if (!empty($data['REDIS_PASSWORD'])) {
+        if (! empty($data['REDIS_PASSWORD'])) {
             $redis->auth($data['REDIS_PASSWORD']);
         }
         if (isset($newData['REDIS_DB'])) {
-            if (!ctype_digit($newData['REDIS_DB']) || $newData['REDIS_DB'] < 0 || $newData['REDIS_DB'] > 15) {
-                throw new \InvalidArgumentException("invalid redis database: " . $newData['REDIS_DB']);
+            if (! ctype_digit($newData['REDIS_DB']) || $newData['REDIS_DB'] < 0 || $newData['REDIS_DB'] > 15) {
+                throw new \InvalidArgumentException('invalid redis database: '.$newData['REDIS_DB']);
             }
             $redis->select($newData['REDIS_DB']);
         }
-        $content = "";
+        $content = '';
         foreach ($newData as $key => $value) {
             $content .= "{$key}={$value}\n";
         }
         $fp = @fopen($envFile, 'w');
         if ($fp === false) {
-            throw new \RuntimeException("can't create env file, make sure php has permission to create file at: " . ROOT_PATH);
+            throw new \RuntimeException("can't create env file, make sure php has permission to create file at: ".ROOT_PATH);
         }
         fwrite($fp, $content);
         fclose($fp);
         $this->doLog("[CREATE ENV] $envFile with content: $content");
+
         return true;
     }
 
@@ -596,6 +620,7 @@ class Install
             }
             $shouldCreateTable[$table] = $sql;
         }
+
         return $shouldCreateTable;
     }
 
@@ -603,22 +628,23 @@ class Install
     {
         foreach ($createTable as $table => $sql) {
             $this->doLog("[CREATE TABLE] $table \n $sql");
-            \Nexus\Database\NexusDB::getInstance()->query($sql);
+            NexusDB::getInstance()->query($sql);
         }
+
         return true;
     }
 
     public function saveSettings($settings)
     {
-        if (!NexusDB::hasTable('settings')) {
+        if (! NexusDB::hasTable('settings')) {
             $this->runMigrate('database/migrations/2021_06_08_113437_create_settings_table.php');
         }
-        if (!NexusDB::hasColumn('settings', 'autoload')) {
+        if (! NexusDB::hasColumn('settings', 'autoload')) {
             $this->runMigrate('database/migrations/2022_05_06_191830_add_autoload_to_settings_table.php');
         }
         foreach ($settings as $prefix => $group) {
-            $this->doLog("[SAVE SETTING], prefix: $prefix, nameAndValues: " . json_encode($group));
-            \App\Support\Settings::saveBatch($prefix, $group, 'yes');
+            $this->doLog("[SAVE SETTING], prefix: $prefix, nameAndValues: ".json_encode($group));
+            Settings::saveBatch($prefix, $group, 'yes');
         }
 
     }
@@ -626,13 +652,14 @@ class Install
     public function createSymbolicLinks($symbolicLinks)
     {
         foreach ($symbolicLinks as $path) {
-            $linkName = ROOT_PATH . 'public/' . basename($path);
+            $linkName = ROOT_PATH.'public/'.basename($path);
             if (is_link($linkName) || is_file($linkName)) {
                 $delResult = unlink($linkName);
-                $this->doLog("path: $linkName already exits, try to delete it, delResult: " . var_export($delResult, true));
+                $this->doLog("path: $linkName already exits, try to delete it, delResult: ".var_export($delResult, true));
             }
             if (is_dir($linkName)) {
                 $this->doLog("path: $linkName already exits, skip create symbolic link $linkName -> $path");
+
                 continue;
             }
             $linkResult = symlink($path, $linkName);
@@ -641,82 +668,85 @@ class Install
             }
             $this->doLog("[CREATE SYMBOLIC LINK] success make symbolic link: $linkName -> $path");
         }
+
         return true;
     }
 
     public function importInitialData($sqlFile = '')
     {
         if (empty($sqlFile)) {
-            $sqlFile = ROOT_PATH . '_db/dbstructure_v1.6.sql';
+            $sqlFile = ROOT_PATH.'_db/dbstructure_v1.6.sql';
         }
         $string = file_get_contents($sqlFile);
         if ($string === false) {
             throw new \RuntimeException("can't not read dbstructure file: $sqlFile");
         }
-        //@todo test in php 7.3
+        // @todo test in php 7.3
         $pattern = "/INSERT INTO `(\w+)` VALUES \(.*\);/i";
         preg_match_all($pattern, $string, $matches, PREG_SET_ORDER);
-        $this->doLog("[IMPORT DATA] matches count: " . count($matches));
+        $this->doLog('[IMPORT DATA] matches count: '.count($matches));
         foreach ($matches as $match) {
             $table = $match[1];
             $sql = trim($match[0]);
-            if (!in_array($table, $this->initializeTables)) {
+            if (! in_array($table, $this->initializeTables)) {
                 continue;
             }
-            //if table not empty, skip
+            // if table not empty, skip
             $count = NexusDB::table($table)->count();
             if ($count > 0) {
                 $this->doLog("[IMPORT DATA] $table, not empty, skip");
+
                 continue;
             }
             $this->doLog("[IMPORT DATA] $table, $sql");
-            \Nexus\Database\NexusDB::table($table)->truncate();
-            \Nexus\Database\NexusDB::getInstance()->query($sql);
+            NexusDB::table($table)->truncate();
+            NexusDB::getInstance()->query($sql);
         }
+
         return true;
     }
 
     public function runMigrate($path = null)
     {
-        if (!WITH_LARAVEL) {
+        if (! WITH_LARAVEL) {
             throw new \RuntimeException('Laravel is not available.');
         }
-        $command = "php " . ROOT_PATH . "artisan migrate";
-        if (!is_null($path)) {
-            foreach ((array)$path as $key => $value) {
+        $command = 'php '.ROOT_PATH.'artisan migrate';
+        if (! is_null($path)) {
+            foreach ((array) $path as $key => $value) {
                 $command .= " --path=$value";
             }
         }
-        $command .= " --force";
+        $command .= ' --force';
         $this->executeCommand($command);
-        $this->doLog("[MIGRATE] success.");
+        $this->doLog('[MIGRATE] success.');
     }
 
     public function executeCommand($command)
     {
-        \App\Support\Environment::run($command, 'string', (bool) false, (bool) true);
-//        $this->doLog("command: $command");
-//        $result = exec($command, $output, $result_code);
-//        $this->doLog(sprintf('result_code: %s, result: %s', $result_code, $result));
-//        $this->doLog("output: " . json_encode($output));
-//        if ($result_code != 0) {
-//            throw new \RuntimeException(json_encode($output));
-//        }
+        Environment::run($command, 'string', (bool) false, (bool) true);
+        //        $this->doLog("command: $command");
+        //        $result = exec($command, $output, $result_code);
+        //        $this->doLog(sprintf('result_code: %s, result: %s', $result_code, $result));
+        //        $this->doLog("output: " . json_encode($output));
+        //        if ($result_code != 0) {
+        //            throw new \RuntimeException(json_encode($output));
+        //        }
     }
 
     public function runDatabaseSeeder()
     {
-        if (!WITH_LARAVEL) {
+        if (! WITH_LARAVEL) {
             throw new \RuntimeException('Laravel is not available.');
         }
-        $command = "php " . ROOT_PATH . "artisan db:seed --force";
+        $command = 'php '.ROOT_PATH.'artisan db:seed --force';
         $result = exec($command, $output, $result_code);
         $this->doLog(sprintf('command: %s, result_code: %s, result: %s', $command, $result_code, $result));
-        $this->doLog("output: " . json_encode($output));
+        $this->doLog('output: '.json_encode($output));
         if ($result_code != 0) {
             throw new \RuntimeException(json_encode($output));
         } else {
-            $this->doLog("[DATABASE_SEED] success.");
+            $this->doLog('[DATABASE_SEED] success.');
         }
     }
 
@@ -725,6 +755,7 @@ class Install
         $results = \DateTimeZone::listIdentifiers(\DateTimeZone::ALL);
         $utc = array_pop($results);
         array_unshift($results, $utc);
+
         return $results;
     }
 
@@ -740,22 +771,23 @@ class Install
         $version = $result['redis_version'];
         $minVersion = '4.0.0';
         $match = version_compare($version, $minVersion, '>=');
+
         return compact('version', 'match', 'minVersion');
     }
 
     public function checkLock()
     {
-        $fullFilename = ROOT_PATH . $this->lockFile;
+        $fullFilename = ROOT_PATH.$this->lockFile;
         if (file_exists($fullFilename)) {
-            die("Locked! Delete .lock file first");
+            exit('Locked! Delete .lock file first');
         }
     }
 
     public function setLock()
     {
-        $fullFilename = ROOT_PATH . $this->lockFile;
-        $res = file_put_contents($fullFilename, "Lock at: " . date('Y-m-d H:i:s'));
-        $this->doLog("set lock at: $fullFilename, result: " . var_export($res, true));
+        $fullFilename = ROOT_PATH.$this->lockFile;
+        $res = file_put_contents($fullFilename, 'Lock at: '.date('Y-m-d H:i:s'));
+        $this->doLog("set lock at: $fullFilename, result: ".var_export($res, true));
     }
 
     public function getStepName($step): string
@@ -765,41 +797,39 @@ class Install
 
     public function migrateSearchBoxModeRelated()
     {
-        $this->doLog("[migrateSearchBoxModeRelated]");
-        $searchBoxRep = new SearchBoxRepository();
+        $this->doLog('[migrateSearchBoxModeRelated]');
+        $searchBoxRep = new SearchBoxRepository;
         $searchBoxRep->migrateToModeRelated();
     }
 
     /**
      * 初始化，注意这里不能使用 get_tracker_schema_and_host()。里面会调用 TrackerUrl， 这本来就是要往里面插入数据
      *
-     * @param string $scene install or update
-     * @return void
+     * @param  string  $scene  install or update
      */
     public function initTrackerUrl(string $scene): void
     {
-        if ($scene == "update") {
-            $announceUrl = \App\Support\Config\SiteConfig::current()->security->httpsAnnounceUrl();
+        if ($scene == 'update') {
+            $announceUrl = SiteConfig::current()->security->httpsAnnounceUrl();
             if (empty($announceUrl)) {
-                $announceUrl = \App\Support\Config\SiteConfig::current()->basic->announceUrl();
+                $announceUrl = SiteConfig::current()->basic->announceUrl();
             }
         }
         if (empty($announceUrl)) {
             $announceUrl = sprintf(
-                "%s/%s",
+                '%s/%s',
                 trim($_SERVER['HTTP_HOST'], '/'), trim(DEFAULT_TRACKER_URI, '/')
             );
         }
-        if (!str_starts_with($announceUrl, "http")) {
-            $announceUrl = (\App\Support\Url::isSecure() ? "https://" : "http://"). $announceUrl;
+        if (! str_starts_with($announceUrl, 'http')) {
+            $announceUrl = (Url::isSecure() ? 'https://' : 'http://').$announceUrl;
         }
         TrackerUrl::query()->create([
-            "url" => $announceUrl,
-            "enabled" => 1,
-            "is_default" => 1,
+            'url' => $announceUrl,
+            'enabled' => 1,
+            'is_default' => 1,
         ]);
         TrackerUrl::saveUrlCache();
         $this->doLog("[initTrackerUrl] $announceUrl success.");
     }
-
 }

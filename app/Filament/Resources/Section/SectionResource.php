@@ -2,35 +2,28 @@
 
 namespace App\Filament\Resources\Section;
 
-use Filament\Forms\Components\TextInput;
-use Filament\Schemas\Schema;
-use Filament\Forms\Components\CheckboxList;
-use Filament\Forms\Components\Textarea;
-use Filament\Schemas\Components\Section;
-use Filament\Forms\Components\Toggle;
-use Filament\Forms\Components\Repeater;
-use Filament\Forms\Components\Select;
-use Closure;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Columns\BooleanColumn;
-use Filament\Actions\EditAction;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\DeleteBulkAction;
-use App\Filament\Resources\Section\SectionResource\Pages\ListSections;
 use App\Filament\Resources\Section\SectionResource\Pages\CreateSection;
 use App\Filament\Resources\Section\SectionResource\Pages\EditSection;
-use App\Filament\Resources\Section\SectionResource\Pages;
-use App\Filament\Resources\Section\SectionResource\RelationManagers;
+use App\Filament\Resources\Section\SectionResource\Pages\ListSections;
 use App\Http\Middleware\Locale;
-use App\Models\Forum;
 use App\Models\SearchBox;
 use App\Models\TorrentCustomField;
-use Filament\Forms;
+use Closure;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Forms\Components\CheckboxList;
+use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
+use Filament\Tables\Columns\BooleanColumn;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Filament\Tables;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Validation\Rule;
 
 class SectionResource extends Resource
@@ -43,9 +36,9 @@ class SectionResource extends Resource
 
     protected static ?string $label = 'Section';
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-view-columns';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-view-columns';
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Section';
+    protected static string|\UnitEnum|null $navigationGroup = 'Section';
 
     protected static ?int $navigationSort = 1;
 
@@ -66,6 +59,7 @@ class SectionResource extends Resource
         foreach (Locale::$languageMaps as $lang => $locale) {
             $localeSchema[] = TextInput::make("$name.$lang")->required()->label($lang);
         }
+
         return $localeSchema;
     }
 
@@ -73,6 +67,7 @@ class SectionResource extends Resource
     {
         $displayTextLocalSchema = self::buildLocalSchema('display_text');
         $sectionNameLocalSchema = self::buildLocalSchema('section_name');
+
         return $schema
             ->components([
                 TextInput::make('name')
@@ -81,49 +76,41 @@ class SectionResource extends Resource
                         return [
                             'required',
                             'alpha_dash:ascii',
-                            Rule::unique('searchbox', 'name')->ignore($record?->id)
+                            Rule::unique('searchbox', 'name')->ignore($record?->id),
                         ];
-                    })
-                ,
+                    }),
                 TextInput::make('catsperrow')
                     ->label(__('label.search_box.catsperrow'))
                     ->helperText(__('label.search_box.catsperrow_help'))
                     ->integer()
                     ->required()
-                    ->default(8)
-                ,
+                    ->default(8),
                 TextInput::make('catpadding')
                     ->label(__('label.search_box.catpadding'))
                     ->helperText(__('label.search_box.catpadding_help'))
                     ->integer()
                     ->required()
-                    ->default(3)
-                ,
+                    ->default(3),
                 CheckboxList::make('custom_fields')
                     ->options(TorrentCustomField::getCheckboxOptions())
                     ->label(__('label.search_box.custom_fields'))
-                    ->columns(4)
-                ,
+                    ->columns(4),
                 TextInput::make('custom_fields_display_name')
-                    ->label(__('label.search_box.custom_fields_display_name'))
-                ,
+                    ->label(__('label.search_box.custom_fields_display_name')),
                 Textarea::make('custom_fields_display')
                     ->label(__('label.search_box.custom_fields_display'))
-                    ->helperText(__('label.search_box.custom_fields_display_help'))
-                ,
+                    ->helperText(__('label.search_box.custom_fields_display_help')),
                 CheckboxList::make('other')
                     ->options(SearchBox::listExtraText())
                     ->columns(2)
-                    ->label(__('label.search_box.other'))
-                ,
+                    ->label(__('label.search_box.other')),
 
                 Section::make(__('label.search_box.section_name'))
                     ->schema($sectionNameLocalSchema)
-                    ->columns(count($sectionNameLocalSchema))
-                ,
+                    ->columns(count($sectionNameLocalSchema)),
                 Toggle::make('showsubcat')->label(__('label.search_box.showsubcat'))->columnSpan(['sm' => 'full']),
                 Section::make(__('label.search_box.showsubcat'))->schema([
-                    Repeater::make('extra.' . SearchBox::EXTRA_TAXONOMY_LABELS)
+                    Repeater::make('extra.'.SearchBox::EXTRA_TAXONOMY_LABELS)
                         ->schema([
                             Select::make('torrent_field')->options(SearchBox::getSubCatOptions())->label(__('label.search_box.torrent_field')),
                             Section::make(__('label.search_box.taxonomy_display_text'))->schema($displayTextLocalSchema)->columns(count($displayTextLocalSchema)),
@@ -134,16 +121,15 @@ class SectionResource extends Resource
                                 return function (string $attribute, $value, Closure $fail) {
                                     $fields = [];
                                     foreach ($value as $item) {
-                                        if (!in_array($item['torrent_field'], $fields)) {
+                                        if (! in_array($item['torrent_field'], $fields)) {
                                             $fields[] = $item['torrent_field'];
                                         } else {
                                             $fail(__('label.search_box.torrent_field_duplicate', ['field' => $item['torrent_field']]));
                                         }
                                     }
                                 };
-                            }
-                        ])
-                    ,
+                            },
+                        ]),
                 ]),
             ]);
     }

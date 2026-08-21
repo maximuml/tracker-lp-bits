@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->string("passhash", 255)->default("")->nullable(false)->change();
+            $table->string('passhash', 255)->default('')->nullable(false)->change();
         });
     }
 

@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Repositories;
 
 use App\Http\Middleware\Locale;
@@ -6,26 +7,31 @@ use App\Jobs\SeedBonusJob;
 use App\Jobs\UpdateTorrentSeedersEtc;
 use App\Jobs\UpdateUserSeedingLeechingTime;
 use App\Models\Avp;
-use App\Models\NexusModel;
-use App\Models\Setting;
 use App\Models\User;
+use App\Support\Config;
+use App\Support\Config\SiteConfig;
+use App\Support\Format;
+use App\Support\Logger;
+use App\Support\Time;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
 use Nexus\Database\NexusDB;
 
 class CleanupRepository extends BaseRepository
 {
-    const USER_SEED_BONUS_BATCH_KEY = "batch_key:user_seed_bonus";
-    const USER_SEEDING_LEECHING_TIME_BATCH_KEY = "batch_key:user_seeding_leeching_time";
-    const TORRENT_SEEDERS_ETC_BATCH_KEY = "batch_key:torrent_seeders_etc";
+    const USER_SEED_BONUS_BATCH_KEY = 'batch_key:user_seed_bonus';
 
-    const IDS_KEY_PREFIX = "cleanup_batch_job_ids:";
+    const USER_SEEDING_LEECHING_TIME_BATCH_KEY = 'batch_key:user_seeding_leeching_time';
 
-    /** @var  array<int|string, mixed> */
-    /** @var  array<int|string, mixed> */
-    /** @var  array<int|string, mixed> */
-    /** @var  array<int|string, mixed> */
-    /** @var  array<int|string, mixed> */
+    const TORRENT_SEEDERS_ETC_BATCH_KEY = 'batch_key:torrent_seeders_etc';
+
+    const IDS_KEY_PREFIX = 'cleanup_batch_job_ids:';
+
+    /** @var array<int|string, mixed> */
+    /** @var array<int|string, mixed> */
+    /** @var array<int|string, mixed> */
+    /** @var array<int|string, mixed> */
+    /** @var array<int|string, mixed> */
     private static array $batchKeyActionsMap = [
         self::USER_SEED_BONUS_BATCH_KEY => [
             'action' => 'seed_bonus',
@@ -41,32 +47,16 @@ class CleanupRepository extends BaseRepository
         ],
     ];
 
-    /** @var  int */
-    /** @var  int */
-    /** @var  int */
-    /** @var  int */
-    /** @var  int */
     private static int $totalTask = 3;
 
-    /** @var  float|int */
-    /** @var  float|int */
-    /** @var  float|int */
-    /** @var  float|int */
-    /** @var  float|int */
     private static float|int $oneTaskSeconds = 0;
 
-    /** @var  int */
-    /** @var  int */
-    /** @var  int */
-    /** @var  int */
-    /** @var  int */
     private static int $scanSize = 500;
 
     /**
-     * @param  \Redis  $redis
      * @param  mixed  $uid
      * @param  mixed  $torrentId
-     * @return  mixed
+     * @return mixed
      */
     public static function recordBatch(\Redis $redis, $uid, $torrentId)
     {
@@ -74,17 +64,17 @@ class CleanupRepository extends BaseRepository
             self::USER_SEED_BONUS_BATCH_KEY, self::USER_SEEDING_LEECHING_TIME_BATCH_KEY, self::TORRENT_SEEDERS_ETC_BATCH_KEY,
             $uid, $uid, $torrentId, self::getHashKeySuffix(), self::getCacheKeyLifeTime(), time(),
         ];
-        $result  = $redis->eval(self::getAddRecordLuaScript(), $args, 3);
+        $result = $redis->eval(self::getAddRecordLuaScript(), $args, 3);
         $err = $redis->getLastError();
         if ($err) {
-            \App\Support\Logger::writeWithContext((string) "[REDIS_LUA_ERROR]: {$err}", (string) "error", (bool) false);
+            Logger::writeWithContext((string) "[REDIS_LUA_ERROR]: {$err}", (string) 'error', (bool) false);
         }
+
         return $result;
     }
 
     /**
-     * @param  string  $requestId
-     * @return  mixed
+     * @return mixed
      */
     public static function runBatchJobCalculateUserSeedBonus(string $requestId)
     {
@@ -92,8 +82,7 @@ class CleanupRepository extends BaseRepository
     }
 
     /**
-     * @param  string  $requestId
-     * @return  mixed
+     * @return mixed
      */
     public static function runBatchJobUpdateUserSeedingLeechingTime(string $requestId)
     {
@@ -101,8 +90,7 @@ class CleanupRepository extends BaseRepository
     }
 
     /**
-     * @param  string  $requestId
-     * @return  mixed
+     * @return mixed
      */
     public static function runBatchJobUpdateTorrentSeedersEtc(string $requestId)
     {
@@ -112,55 +100,57 @@ class CleanupRepository extends BaseRepository
     /**
      * @param  mixed  $batchKey
      * @param  mixed  $requestId
-     * @return  mixed
+     * @return mixed
      */
     private static function runBatchJob($batchKey, $requestId)
     {
         $redis = NexusDB::redis();
         $logPrefix = sprintf("[$batchKey], commonRequestId: %s", $requestId);
         $beginTimestamp = time();
-        if (!isset(self::$batchKeyActionsMap[$batchKey])) {
-            \App\Support\Logger::writeWithContext((string) "{$logPrefix}, batchKey: {$batchKey} invalid", (string) 'error', (bool) false);
+        if (! isset(self::$batchKeyActionsMap[$batchKey])) {
+            Logger::writeWithContext((string) "{$logPrefix}, batchKey: {$batchKey} invalid", (string) 'error', (bool) false);
+
             return;
         }
         $batchKeyInfo = self::$batchKeyActionsMap[$batchKey];
 
         $batch = self::getBatch($redis, $batchKey);
-        if (!$batch) {
-            \App\Support\Logger::writeWithContext((string) "{$logPrefix}, batchKey: {$batchKey} no batch...", (string) 'error', (bool) false);
+        if (! $batch) {
+            Logger::writeWithContext((string) "{$logPrefix}, batchKey: {$batchKey} no batch...", (string) 'error', (bool) false);
+
             return;
         }
-        //update the batch key
-        //用户魔力部分不更新，避免用户保旧种汇报时间过长影响魔力增加
+        // update the batch key
+        // 用户魔力部分不更新，避免用户保旧种汇报时间过长影响魔力增加
         if ($batchKey != self::USER_SEED_BONUS_BATCH_KEY) {
-            $newBatch = $batchKey . ":" . self::getHashKeySuffix();
+            $newBatch = $batchKey.':'.self::getHashKeySuffix();
             $lifeTime = self::getCacheKeyLifeTime();
             $redis->set($batchKey, $newBatch, ['ex' => $lifeTime]);
             $redis->hSetNx($newBatch, -1, 1);
             $redis->expire($newBatch, $lifeTime);
         }
 
-        $userSeedBonusDeadline = \App\Support\Time::deadThreshold(\App\Support\Config\SiteConfig::current()->main->anninterthree());
+        $userSeedBonusDeadline = Time::deadThreshold(SiteConfig::current()->main->anninterthree());
         $count = 0;
-        $it = NULL;
+        $it = null;
         $length = $redis->hLen($batch);
         $page = 0;
         /* Don't ever return an empty array until we're done iterating */
         $redis->setOption(\Redis::OPT_SCAN, \Redis::SCAN_RETRY);
-        while($arr_keys = $redis->hScan($batch, $it, "*", self::$scanSize)) {
+        while ($arr_keys = $redis->hScan($batch, $it, '*', self::$scanSize)) {
             $delay = self::getDelay($batchKeyInfo['task_index'], $length, $page);
             $toRemoveFields = $validFields = [];
             foreach ($arr_keys as $field => $value) {
                 if ($batchKey == self::USER_SEED_BONUS_BATCH_KEY && $value < $userSeedBonusDeadline) {
-                    //dead, should remove
+                    // dead, should remove
                     $toRemoveFields[] = $field;
                 } else {
                     $validFields[] = $field;
                 }
             }
-            if (!empty($validFields)) {
-                $idStr = implode(",", $validFields);
-                $idRedisKey = self::IDS_KEY_PREFIX . Str::random();
+            if (! empty($validFields)) {
+                $idStr = implode(',', $validFields);
+                $idRedisKey = self::IDS_KEY_PREFIX.Str::random();
                 NexusDB::cache_put($idRedisKey, $idStr);
                 $action = $batchKeyInfo['action'];
                 $delaySeconds = (int) $delay;
@@ -171,48 +161,47 @@ class CleanupRepository extends BaseRepository
                 } elseif ($action === 'seeders_etc') {
                     UpdateTorrentSeedersEtc::dispatch(0, 0, '', $idRedisKey, $requestId)->delay($delaySeconds);
                 }
-                \App\Support\Logger::writeWithContext((string) sprintf('[runBatchJob] dispatched %s job, idRedisKey: %s', $action, $idRedisKey), (string) 'info', (bool) false);
+                Logger::writeWithContext((string) sprintf('[runBatchJob] dispatched %s job, idRedisKey: %s', $action, $idRedisKey), (string) 'info', (bool) false);
                 $count += count($validFields);
             }
-            if (!empty($toRemoveFields)) {
+            if (! empty($toRemoveFields)) {
                 $redis->hDel($batch, ...$toRemoveFields);
             }
             $page++;
         }
 
-        //remove this batch
+        // remove this batch
         if ($batchKey != self::USER_SEED_BONUS_BATCH_KEY) {
             $redis->unlink($batch);
         }
         $endTimestamp = time();
-        \App\Support\Logger::writeWithContext((string) sprintf("{$logPrefix}, [DONE], batch: {$batch}, count: {$count}, cost time: %d seconds", $endTimestamp - $beginTimestamp), (string) 'info', (bool) false);
+        Logger::writeWithContext((string) sprintf("{$logPrefix}, [DONE], batch: {$batch}, count: {$count}, cost time: %d seconds", $endTimestamp - $beginTimestamp), (string) 'info', (bool) false);
     }
 
-
-
     /**
-     * @param  \Redis  $redis
      * @param  mixed  $batchKey
-     * @return  mixed
+     * @return mixed
      */
     private static function getBatch(\Redis $redis, $batchKey)
     {
         $batch = $redis->get($batchKey);
         if ($batch === false) {
-            \App\Support\Logger::writeWithContext((string) "batchKey: {$batchKey}, no batch...", (string) 'error', (bool) false);
+            Logger::writeWithContext((string) "batchKey: {$batchKey}, no batch...", (string) 'error', (bool) false);
+
             return false;
         }
-        if (!$redis->exists($batch)) {
-            \App\Support\Logger::writeWithContext((string) "batch: {$batch}, not exists...", (string) 'error', (bool) false);
+        if (! $redis->exists($batch)) {
+            Logger::writeWithContext((string) "batch: {$batch}, not exists...", (string) 'error', (bool) false);
+
             return false;
         }
+
         return $batch;
     }
 
     /**
      * USER_SEED_BONUS, USER_SEEDING_LEECHING_TIME, TORRENT_SEEDERS_ETC,
      * uid, uid, torrentId, timeStr, cacheLifeTime, nowTimestamp
-     * @return  string
      */
     private static function getAddRecordLuaScript(): string
     {
@@ -255,11 +244,12 @@ LUA;
     private static function getOneTaskSeconds(): float|int
     {
         if (self::$oneTaskSeconds == 0) {
-            //最低间隔，要在这个时间内执行掉全部任务
-            $totalSeconds = \App\Support\Config\SiteConfig::current()->main->autocleanIntervalOne();
-            //每个任务能分到的秒数，不能到顶，任务数+1计算
+            // 最低间隔，要在这个时间内执行掉全部任务
+            $totalSeconds = SiteConfig::current()->main->autocleanIntervalOne();
+            // 每个任务能分到的秒数，不能到顶，任务数+1计算
             self::$oneTaskSeconds = floor($totalSeconds / (self::$totalTask + 1));
         }
+
         return self::$oneTaskSeconds;
     }
 
@@ -269,22 +259,17 @@ LUA;
         return self::getOneTaskSeconds() * $taskIndex;
     }
 
-    /**
-     * @param  int  $taskIndex
-     * @param  int  $length
-     * @param  int  $page
-     */
     private static function getDelay(int $taskIndex, int $length, int $page): float
     {
-        //超始基数
+        // 超始基数
         $base = self::getDelayBase($taskIndex);
-        //一共有这么多时间可以使用
+        // 一共有这么多时间可以使用
         $totalSeconds = self::getOneTaskSeconds();
-        //分几份
+        // 分几份
         $totalPage = ceil($length / self::$scanSize);
-        //每份多长
+        // 每份多长
         $perPage = floor($totalSeconds / $totalPage);
-        //page 从 0 开始
+        // page 从 0 开始
         $offset = $page * $perPage;
 
         return floor($base + $offset);
@@ -292,143 +277,134 @@ LUA;
 
     private static function getCacheKeyLifeTime(): int
     {
-        $four = self::getInterval("four");
-        $three = self::getInterval("three");
-        $one = self::getInterval("one");
+        $four = self::getInterval('four');
+        $three = self::getInterval('three');
+        $one = self::getInterval('one');
+
         return intval($four) + intval($three) + intval($one);
     }
 
     /** @param  mixed  $level */
     private static function getInterval($level): int
     {
-        return \App\Support\Config\SiteConfig::current()->main->autocleanInterval((string) $level);
+        return SiteConfig::current()->main->autocleanInterval((string) $level);
     }
 
-    /** @return  void */
     public static function checkCleanup(): void
     {
         $now = Carbon::now();
         $timestamp = $now->getTimestamp();
-        $toolRep = new ToolRepository();
+        $toolRep = new ToolRepository;
         $arvToLevel = [
-            "lastcleantime" => "one",
-            "lastcleantime2" => "two",
-            "lastcleantime3" => "three",
-            "lastcleantime4" => "four",
-            "lastcleantime5" => "five",
+            'lastcleantime' => 'one',
+            'lastcleantime2' => 'two',
+            'lastcleantime3' => 'three',
+            'lastcleantime4' => 'four',
+            'lastcleantime5' => 'five',
         ];
-        $avps = Avp::query()->get()->keyBy("arg");
+        $avps = Avp::query()->get()->keyBy('arg');
         if ($avps->isEmpty()) {
             return;
         }
         foreach ($arvToLevel as $arg => $level) {
             $value = $avps->get($arg);
-            if (!$value instanceof Avp) {
+            if (! $value instanceof Avp) {
                 continue;
             }
             $interval = self::getInterval($level);
             if ($interval <= 0) {
-                \App\Support\Logger::writeWithContext((string) sprintf("level: %s not set cleanup interval", $level), (string) "error", (bool) false);
+                Logger::writeWithContext((string) sprintf('level: %s not set cleanup interval', $level), (string) 'error', (bool) false);
+
                 continue;
             }
             $lastTime = (int) ($value->value_u ?? 0);
             if ($timestamp < $lastTime + $interval * 2) {
                 continue;
             }
-            $receiverUid = \App\Support\Config\SiteConfig::current()->system->alarmEmailReceiver();
-            \App\Support\Logger::writeWithContext((string) "receiverUid: {$receiverUid}", (string) 'info', (bool) false);
+            $receiverUid = SiteConfig::current()->system->alarmEmailReceiver();
+            Logger::writeWithContext((string) "receiverUid: {$receiverUid}", (string) 'info', (bool) false);
             if (empty($receiverUid)) {
                 $locale = Locale::getDefault();
                 $subject = self::getAlarmEmailSubjectForCleanup($locale);
                 $msg = self::getAlarmEmailBodyForCleanup($now, $level, $lastTime, $interval, $locale);
-                \App\Support\Logger::writeWithContext((string) sprintf("%s - %s", $subject, $msg), (string) "error", (bool) false);
+                Logger::writeWithContext((string) sprintf('%s - %s', $subject, $msg), (string) 'error', (bool) false);
             } else {
                 $receiverUidArr = preg_split("/\s+/", $receiverUid);
-                $users = User::query()->whereIn("id", $receiverUidArr)->get(User::$commonFields);
+                $users = User::query()->whereIn('id', $receiverUidArr)->get(User::$commonFields);
                 foreach ($users as $user) {
                     $locale = $user->locale;
                     $subject = self::getAlarmEmailSubjectForCleanup($locale);
                     $msg = self::getAlarmEmailBodyForCleanup($now, $level, $lastTime, $interval, $locale);
                     $result = $toolRep->sendMail($user->email, $subject, $msg);
-                    \App\Support\Logger::writeWithContext((string) sprintf("send msg: %s result: %s", $msg, var_export($result, true)), (string) ($result ? "info" : "error"), (bool) false);
+                    Logger::writeWithContext((string) sprintf('send msg: %s result: %s', $msg, var_export($result, true)), (string) ($result ? 'info' : 'error'), (bool) false);
                 }
             }
+
             return;
         }
     }
 
     /**
-     * @param  string|null  $locale
-     * @return  mixed
+     * @return mixed
      */
-    private static function getAlarmEmailSubjectForCleanup(string|null $locale = null)
+    private static function getAlarmEmailSubjectForCleanup(?string $locale = null)
     {
-        return \App\Support\Locale::trans("cleanup.alarm_email_subject", ["site_name" => \App\Support\Config\SiteConfig::current()->basic->siteName()], $locale);
+        return \App\Support\Locale::trans('cleanup.alarm_email_subject', ['site_name' => SiteConfig::current()->basic->siteName()], $locale);
     }
 
     /**
-     * @param  \Carbon\Carbon  $now
-     * @param  string  $level
-     * @param  int  $lastTime
-     * @param  int  $interval
-     * @param  string|null  $locale
-     * @return  mixed
+     * @return mixed
      */
-    private static function getAlarmEmailBodyForCleanup(Carbon $now, string $level, int $lastTime, int $interval, string|null $locale = null)
+    private static function getAlarmEmailBodyForCleanup(Carbon $now, string $level, int $lastTime, int $interval, ?string $locale = null)
     {
-        return  \App\Support\Locale::trans("cleanup.alarm_email_body", ["now_time" => $now->toDateTimeString(), "level" => $level, "last_time" => $lastTime > 0 ? Carbon::createFromTimestamp($lastTime)->toDateTimeString() : "", "elapsed_seconds" => $lastTime > 0 ? $now->getTimestamp() - $lastTime : "", "elapsed_seconds_human" => $lastTime > 0 ? \App\Support\Format::prettyTimeWithLocale($now->getTimestamp() - $lastTime) : "", "interval" => $interval, "interval_human" => \App\Support\Format::prettyTimeWithLocale($interval)], $locale);
+        return \App\Support\Locale::trans('cleanup.alarm_email_body', ['now_time' => $now->toDateTimeString(), 'level' => $level, 'last_time' => $lastTime > 0 ? Carbon::createFromTimestamp($lastTime)->toDateTimeString() : '', 'elapsed_seconds' => $lastTime > 0 ? $now->getTimestamp() - $lastTime : '', 'elapsed_seconds_human' => $lastTime > 0 ? Format::prettyTimeWithLocale($now->getTimestamp() - $lastTime) : '', 'interval' => $interval, 'interval_human' => Format::prettyTimeWithLocale($interval)], $locale);
     }
 
-    /** @return  void */
     public static function checkQueueFailedJobs(): void
     {
         $now = Carbon::now();
         $since = $now->subHours(6)->toDateTimeString();
-        $failedJobsTable = \App\Support\Config::get("queue.failed.table", null);
-        $failedJobsCount = NexusDB::table($failedJobsTable)->where("failed_at", ">=", $since)->count();
+        $failedJobsTable = Config::get('queue.failed.table', null);
+        $failedJobsCount = NexusDB::table($failedJobsTable)->where('failed_at', '>=', $since)->count();
         if ($failedJobsCount == 0) {
-            \App\Support\Logger::writeWithContext((string) sprintf("no failed jobs since: %s", $since), (string) 'info', (bool) false);
+            Logger::writeWithContext((string) sprintf('no failed jobs since: %s', $since), (string) 'info', (bool) false);
+
             return;
         }
-        $receiverUid = \App\Support\Config\SiteConfig::current()->system->alarmEmailReceiver();
-        \App\Support\Logger::writeWithContext((string) "receiverUid: {$receiverUid}", (string) 'info', (bool) false);
-        $toolRep = new ToolRepository();
+        $receiverUid = SiteConfig::current()->system->alarmEmailReceiver();
+        Logger::writeWithContext((string) "receiverUid: {$receiverUid}", (string) 'info', (bool) false);
+        $toolRep = new ToolRepository;
         if (empty($receiverUid)) {
             $locale = Locale::getDefault();
             $subject = self::getAlarmEmailSubjectForQueueFailedJobs($locale);
             $msg = self::getAlarmEmailBodyForQueueFailedJobs($since, $failedJobsCount, $failedJobsTable, $locale);
-            \App\Support\Logger::writeWithContext((string) sprintf("%s - %s", $subject, $msg), (string) "error", (bool) false);
+            Logger::writeWithContext((string) sprintf('%s - %s', $subject, $msg), (string) 'error', (bool) false);
         } else {
             $receiverUidArr = preg_split("/\s+/", $receiverUid);
-            $users = User::query()->whereIn("id", $receiverUidArr)->get(User::$commonFields);
+            $users = User::query()->whereIn('id', $receiverUidArr)->get(User::$commonFields);
             foreach ($users as $user) {
                 $locale = $user->locale;
                 $subject = self::getAlarmEmailSubjectForQueueFailedJobs($locale);
                 $msg = self::getAlarmEmailBodyForQueueFailedJobs($since, $failedJobsCount, $failedJobsTable, $locale);
                 $result = $toolRep->sendMail($user->email, $subject, $msg);
-                \App\Support\Logger::writeWithContext((string) sprintf("send msg: %s result: %s", $msg, var_export($result, true)), (string) ($result ? "info" : "error"), (bool) false);
+                Logger::writeWithContext((string) sprintf('send msg: %s result: %s', $msg, var_export($result, true)), (string) ($result ? 'info' : 'error'), (bool) false);
             }
         }
     }
 
     /**
-     * @param  string|null  $locale
-     * @return  mixed
+     * @return mixed
      */
-    private static function getAlarmEmailSubjectForQueueFailedJobs(string|null $locale = null)
+    private static function getAlarmEmailSubjectForQueueFailedJobs(?string $locale = null)
     {
-        return \App\Support\Locale::trans("cleanup.alarm_email_subject_for_queue_failed_jobs", ["site_name" => \App\Support\Config\SiteConfig::current()->basic->siteName()], $locale);
+        return \App\Support\Locale::trans('cleanup.alarm_email_subject_for_queue_failed_jobs', ['site_name' => SiteConfig::current()->basic->siteName()], $locale);
     }
 
     /**
-     * @param  string  $since
-     * @param  int  $count
-     * @param  string  $failedJobTable
-     * @param  string|null  $locale
-     * @return  mixed
+     * @return mixed
      */
-    private static function getAlarmEmailBodyForQueueFailedJobs(string $since, int $count, string $failedJobTable, string|null $locale = null)
+    private static function getAlarmEmailBodyForQueueFailedJobs(string $since, int $count, string $failedJobTable, ?string $locale = null)
     {
-        return  \App\Support\Locale::trans("cleanup.alarm_email_body_for_queue_failed_jobs", ["since" => $since, "count" => $count, "failed_job_table" => $failedJobTable], $locale);
+        return \App\Support\Locale::trans('cleanup.alarm_email_body_for_queue_failed_jobs', ['since' => $since, 'count' => $count, 'failed_job_table' => $failedJobTable], $locale);
     }
 }

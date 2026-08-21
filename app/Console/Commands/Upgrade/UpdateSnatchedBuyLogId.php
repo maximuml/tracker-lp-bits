@@ -23,10 +23,11 @@ class UpdateSnatchedBuyLogId extends Command
 
     /**
      * Execute the console command.
-     * @return  mixed
+     *
+     * @return mixed
      */
     public function handle()
     {
-        NexusDB::statement("UPDATE snatched INNER JOIN torrent_buy_logs ON snatched.userid = torrent_buy_logs.uid AND snatched.torrentid = torrent_buy_logs.torrent_id SET snatched.buy_log_id = torrent_buy_logs.id");
+        NexusDB::statement('UPDATE snatched INNER JOIN torrent_buy_logs ON snatched.userid = torrent_buy_logs.uid AND snatched.torrentid = torrent_buy_logs.torrent_id SET snatched.buy_log_id = torrent_buy_logs.id');
     }
 }

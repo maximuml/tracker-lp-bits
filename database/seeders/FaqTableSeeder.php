@@ -7,7 +7,6 @@ use Illuminate\Support\Facades\DB;
 
 class FaqTableSeeder extends Seeder
 {
-
     /**
      * Auto generated seed file
      *
@@ -15,13 +14,11 @@ class FaqTableSeeder extends Seeder
      */
     public function run()
     {
-        
 
         DB::table('faq')->delete();
-        
-        DB::table('faq')->insert(array (
-              0 => 
-              array (
+
+        DB::table('faq')->insert([
+            0 => [
                 'id' => 401,
                 'link_id' => 1,
                 'lang_id' => 6,
@@ -31,9 +28,8 @@ class FaqTableSeeder extends Seeder
                 'flag' => 1,
                 'categ' => 0,
                 'order' => 1,
-              ),
-              1 => 
-              array (
+            ],
+            1 => [
                 'id' => 402,
                 'link_id' => 2,
                 'lang_id' => 6,
@@ -43,9 +39,8 @@ class FaqTableSeeder extends Seeder
                 'flag' => 1,
                 'categ' => 0,
                 'order' => 2,
-              ),
-              2 => 
-              array (
+            ],
+            2 => [
                 'id' => 403,
                 'link_id' => 3,
                 'lang_id' => 6,
@@ -55,9 +50,8 @@ class FaqTableSeeder extends Seeder
                 'flag' => 1,
                 'categ' => 0,
                 'order' => 3,
-              ),
-              3 => 
-              array (
+            ],
+            3 => [
                 'id' => 404,
                 'link_id' => 4,
                 'lang_id' => 6,
@@ -67,9 +61,8 @@ class FaqTableSeeder extends Seeder
                 'flag' => 1,
                 'categ' => 0,
                 'order' => 4,
-              ),
-              4 => 
-              array (
+            ],
+            4 => [
                 'id' => 405,
                 'link_id' => 5,
                 'lang_id' => 6,
@@ -79,9 +72,8 @@ class FaqTableSeeder extends Seeder
                 'flag' => 1,
                 'categ' => 0,
                 'order' => 5,
-              ),
-              5 => 
-              array (
+            ],
+            5 => [
                 'id' => 406,
                 'link_id' => 6,
                 'lang_id' => 6,
@@ -91,9 +83,8 @@ class FaqTableSeeder extends Seeder
                 'flag' => 1,
                 'categ' => 0,
                 'order' => 6,
-              ),
-              6 => 
-              array (
+            ],
+            6 => [
                 'id' => 407,
                 'link_id' => 7,
                 'lang_id' => 6,
@@ -103,9 +94,8 @@ class FaqTableSeeder extends Seeder
                 'flag' => 1,
                 'categ' => 0,
                 'order' => 7,
-              ),
-              7 => 
-              array (
+            ],
+            7 => [
                 'id' => 408,
                 'link_id' => 8,
                 'lang_id' => 6,
@@ -115,9 +105,8 @@ class FaqTableSeeder extends Seeder
                 'flag' => 1,
                 'categ' => 0,
                 'order' => 8,
-              ),
-              8 => 
-              array (
+            ],
+            8 => [
                 'id' => 409,
                 'link_id' => 9,
                 'lang_id' => 6,
@@ -127,9 +116,8 @@ class FaqTableSeeder extends Seeder
                 'flag' => 1,
                 'categ' => 0,
                 'order' => 9,
-              ),
-              9 => 
-              array (
+            ],
+            9 => [
                 'id' => 410,
                 'link_id' => 10,
                 'lang_id' => 6,
@@ -139,9 +127,8 @@ class FaqTableSeeder extends Seeder
                 'flag' => 1,
                 'categ' => 1,
                 'order' => 1,
-              ),
-              10 => 
-              array (
+            ],
+            10 => [
                 'id' => 411,
                 'link_id' => 11,
                 'lang_id' => 6,
@@ -151,9 +138,8 @@ class FaqTableSeeder extends Seeder
                 'flag' => 1,
                 'categ' => 1,
                 'order' => 2,
-              ),
-              11 => 
-              array (
+            ],
+            11 => [
                 'id' => 412,
                 'link_id' => 12,
                 'lang_id' => 6,
@@ -164,9 +150,8 @@ class FaqTableSeeder extends Seeder
                 'flag' => 1,
                 'categ' => 1,
                 'order' => 3,
-              ),
-              12 => 
-              array (
+            ],
+            12 => [
                 'id' => 413,
                 'link_id' => 13,
                 'lang_id' => 6,
@@ -177,9 +162,8 @@ class FaqTableSeeder extends Seeder
                 'flag' => 1,
                 'categ' => 2,
                 'order' => 1,
-              ),
-              13 => 
-              array (
+            ],
+            13 => [
                 'id' => 414,
                 'link_id' => 14,
                 'lang_id' => 6,
@@ -189,9 +173,8 @@ class FaqTableSeeder extends Seeder
                 'flag' => 1,
                 'categ' => 2,
                 'order' => 2,
-              ),
-              14 => 
-              array (
+            ],
+            14 => [
                 'id' => 415,
                 'link_id' => 15,
                 'lang_id' => 6,
@@ -201,9 +184,8 @@ class FaqTableSeeder extends Seeder
                 'flag' => 1,
                 'categ' => 2,
                 'order' => 3,
-              ),
-              15 => 
-              array (
+            ],
+            15 => [
                 'id' => 416,
                 'link_id' => 16,
                 'lang_id' => 6,
@@ -213,9 +195,8 @@ class FaqTableSeeder extends Seeder
                 'flag' => 1,
                 'categ' => 2,
                 'order' => 4,
-              ),
-              16 => 
-              array (
+            ],
+            16 => [
                 'id' => 417,
                 'link_id' => 17,
                 'lang_id' => 6,
@@ -234,9 +215,8 @@ class FaqTableSeeder extends Seeder
                 'flag' => 1,
                 'categ' => 2,
                 'order' => 5,
-              ),
-              17 => 
-              array (
+            ],
+            17 => [
                 'id' => 418,
                 'link_id' => 18,
                 'lang_id' => 6,
@@ -246,9 +226,8 @@ class FaqTableSeeder extends Seeder
                 'flag' => 1,
                 'categ' => 2,
                 'order' => 6,
-              ),
-              18 => 
-              array (
+            ],
+            18 => [
                 'id' => 421,
                 'link_id' => 21,
                 'lang_id' => 6,
@@ -265,9 +244,8 @@ class FaqTableSeeder extends Seeder
                 'flag' => 1,
                 'categ' => 2,
                 'order' => 9,
-              ),
-              19 => 
-              array (
+            ],
+            19 => [
                 'id' => 422,
                 'link_id' => 22,
                 'lang_id' => 6,
@@ -374,9 +352,8 @@ class FaqTableSeeder extends Seeder
                 'flag' => 1,
                 'categ' => 2,
                 'order' => 10,
-              ),
-              20 => 
-              array (
+            ],
+            20 => [
                 'id' => 423,
                 'link_id' => 23,
                 'lang_id' => 6,
@@ -475,9 +452,8 @@ class FaqTableSeeder extends Seeder
                 'flag' => 0,
                 'categ' => 2,
                 'order' => 11,
-              ),
-              21 => 
-              array (
+            ],
+            21 => [
                 'id' => 425,
                 'link_id' => 25,
                 'lang_id' => 6,
@@ -488,9 +464,8 @@ class FaqTableSeeder extends Seeder
                 'flag' => 1,
                 'categ' => 2,
                 'order' => 13,
-              ),
-              22 => 
-              array (
+            ],
+            22 => [
                 'id' => 426,
                 'link_id' => 26,
                 'lang_id' => 6,
@@ -502,9 +477,8 @@ class FaqTableSeeder extends Seeder
                 'flag' => 1,
                 'categ' => 2,
                 'order' => 14,
-              ),
-              23 => 
-              array (
+            ],
+            23 => [
                 'id' => 427,
                 'link_id' => 27,
                 'lang_id' => 6,
@@ -517,9 +491,8 @@ class FaqTableSeeder extends Seeder
                 'flag' => 1,
                 'categ' => 3,
                 'order' => 1,
-              ),
-              24 => 
-              array (
+            ],
+            24 => [
                 'id' => 428,
                 'link_id' => 28,
                 'lang_id' => 6,
@@ -533,9 +506,8 @@ class FaqTableSeeder extends Seeder
                 'flag' => 1,
                 'categ' => 3,
                 'order' => 2,
-              ),
-              25 => 
-              array (
+            ],
+            25 => [
                 'id' => 429,
                 'link_id' => 29,
                 'lang_id' => 6,
@@ -583,9 +555,8 @@ class FaqTableSeeder extends Seeder
                 'flag' => 1,
                 'categ' => 5,
                 'order' => 3,
-              ),
-              26 => 
-              array (
+            ],
+            26 => [
                 'id' => 430,
                 'link_id' => 30,
                 'lang_id' => 6,
@@ -595,9 +566,8 @@ class FaqTableSeeder extends Seeder
                 'flag' => 1,
                 'categ' => 3,
                 'order' => 4,
-              ),
-              27 => 
-              array (
+            ],
+            27 => [
                 'id' => 431,
                 'link_id' => 31,
                 'lang_id' => 6,
@@ -607,9 +577,8 @@ class FaqTableSeeder extends Seeder
                 'flag' => 1,
                 'categ' => 3,
                 'order' => 5,
-              ),
-              28 => 
-              array (
+            ],
+            28 => [
                 'id' => 433,
                 'link_id' => 33,
                 'lang_id' => 6,
@@ -620,9 +589,8 @@ class FaqTableSeeder extends Seeder
                 'flag' => 1,
                 'categ' => 3,
                 'order' => 7,
-              ),
-              29 => 
-              array (
+            ],
+            29 => [
                 'id' => 436,
                 'link_id' => 36,
                 'lang_id' => 6,
@@ -632,9 +600,8 @@ class FaqTableSeeder extends Seeder
                 'flag' => 1,
                 'categ' => 4,
                 'order' => 1,
-              ),
-              30 => 
-              array (
+            ],
+            30 => [
                 'id' => 437,
                 'link_id' => 37,
                 'lang_id' => 6,
@@ -657,9 +624,8 @@ class FaqTableSeeder extends Seeder
                 'flag' => 1,
                 'categ' => 4,
                 'order' => 2,
-              ),
-              31 => 
-              array (
+            ],
+            31 => [
                 'id' => 438,
                 'link_id' => 38,
                 'lang_id' => 6,
@@ -674,9 +640,8 @@ class FaqTableSeeder extends Seeder
                 'flag' => 1,
                 'categ' => 4,
                 'order' => 3,
-              ),
-              32 => 
-              array (
+            ],
+            32 => [
                 'id' => 439,
                 'link_id' => 39,
                 'lang_id' => 6,
@@ -686,9 +651,8 @@ class FaqTableSeeder extends Seeder
                 'flag' => 1,
                 'categ' => 5,
                 'order' => 1,
-              ),
-              33 => 
-              array (
+            ],
+            33 => [
                 'id' => 440,
                 'link_id' => 40,
                 'lang_id' => 6,
@@ -698,9 +662,8 @@ class FaqTableSeeder extends Seeder
                 'flag' => 1,
                 'categ' => 5,
                 'order' => 2,
-              ),
-              34 => 
-              array (
+            ],
+            34 => [
                 'id' => 441,
                 'link_id' => 41,
                 'lang_id' => 6,
@@ -714,9 +677,8 @@ class FaqTableSeeder extends Seeder
                 'flag' => 1,
                 'categ' => 5,
                 'order' => 3,
-              ),
-              35 => 
-              array (
+            ],
+            35 => [
                 'id' => 442,
                 'link_id' => 42,
                 'lang_id' => 6,
@@ -726,9 +688,8 @@ class FaqTableSeeder extends Seeder
                 'flag' => 1,
                 'categ' => 5,
                 'order' => 4,
-              ),
-              36 => 
-              array (
+            ],
+            36 => [
                 'id' => 443,
                 'link_id' => 43,
                 'lang_id' => 6,
@@ -738,9 +699,8 @@ class FaqTableSeeder extends Seeder
                 'flag' => 1,
                 'categ' => 5,
                 'order' => 5,
-              ),
-              37 => 
-              array (
+            ],
+            37 => [
                 'id' => 444,
                 'link_id' => 44,
                 'lang_id' => 6,
@@ -752,9 +712,8 @@ class FaqTableSeeder extends Seeder
                 'flag' => 1,
                 'categ' => 5,
                 'order' => 6,
-              ),
-              38 => 
-              array (
+            ],
+            38 => [
                 'id' => 445,
                 'link_id' => 45,
                 'lang_id' => 6,
@@ -764,9 +723,8 @@ class FaqTableSeeder extends Seeder
                 'flag' => 1,
                 'categ' => 5,
                 'order' => 7,
-              ),
-              39 => 
-              array (
+            ],
+            39 => [
                 'id' => 446,
                 'link_id' => 46,
                 'lang_id' => 6,
@@ -808,9 +766,8 @@ class FaqTableSeeder extends Seeder
                 'flag' => 0,
                 'categ' => 5,
                 'order' => 8,
-              ),
-              40 => 
-              array (
+            ],
+            40 => [
                 'id' => 447,
                 'link_id' => 47,
                 'lang_id' => 6,
@@ -861,9 +818,8 @@ class FaqTableSeeder extends Seeder
                 'flag' => 1,
                 'categ' => 5,
                 'order' => 9,
-              ),
-              41 => 
-              array (
+            ],
+            41 => [
                 'id' => 448,
                 'link_id' => 48,
                 'lang_id' => 6,
@@ -876,9 +832,8 @@ class FaqTableSeeder extends Seeder
                 'flag' => 1,
                 'categ' => 5,
                 'order' => 10,
-              ),
-              42 => 
-              array (
+            ],
+            42 => [
                 'id' => 450,
                 'link_id' => 50,
                 'lang_id' => 6,
@@ -890,9 +845,8 @@ class FaqTableSeeder extends Seeder
                 'flag' => 1,
                 'categ' => 6,
                 'order' => 1,
-              ),
-              43 => 
-              array (
+            ],
+            43 => [
                 'id' => 451,
                 'link_id' => 51,
                 'lang_id' => 6,
@@ -909,9 +863,8 @@ class FaqTableSeeder extends Seeder
                 'flag' => 1,
                 'categ' => 6,
                 'order' => 2,
-              ),
-              44 => 
-              array (
+            ],
+            44 => [
                 'id' => 452,
                 'link_id' => 52,
                 'lang_id' => 6,
@@ -921,9 +874,8 @@ class FaqTableSeeder extends Seeder
                 'flag' => 1,
                 'categ' => 6,
                 'order' => 3,
-              ),
-              45 => 
-              array (
+            ],
+            45 => [
                 'id' => 453,
                 'link_id' => 53,
                 'lang_id' => 6,
@@ -933,9 +885,8 @@ class FaqTableSeeder extends Seeder
                 'flag' => 1,
                 'categ' => 6,
                 'order' => 4,
-              ),
-              46 => 
-              array (
+            ],
+            46 => [
                 'id' => 454,
                 'link_id' => 54,
                 'lang_id' => 6,
@@ -945,9 +896,8 @@ class FaqTableSeeder extends Seeder
                 'flag' => 1,
                 'categ' => 6,
                 'order' => 5,
-              ),
-              47 => 
-              array (
+            ],
+            47 => [
                 'id' => 455,
                 'link_id' => 55,
                 'lang_id' => 6,
@@ -959,9 +909,8 @@ class FaqTableSeeder extends Seeder
                 'flag' => 1,
                 'categ' => 6,
                 'order' => 6,
-              ),
-              48 => 
-              array (
+            ],
+            48 => [
                 'id' => 456,
                 'link_id' => 56,
                 'lang_id' => 6,
@@ -1001,9 +950,8 @@ class FaqTableSeeder extends Seeder
                 'flag' => 1,
                 'categ' => 7,
                 'order' => 1,
-              ),
-              49 => 
-              array (
+            ],
+            49 => [
                 'id' => 457,
                 'link_id' => 57,
                 'lang_id' => 6,
@@ -1013,9 +961,8 @@ class FaqTableSeeder extends Seeder
                 'flag' => 1,
                 'categ' => 7,
                 'order' => 2,
-              ),
-              50 => 
-              array (
+            ],
+            50 => [
                 'id' => 475,
                 'link_id' => 75,
                 'lang_id' => 6,
@@ -1025,9 +972,8 @@ class FaqTableSeeder extends Seeder
                 'flag' => 1,
                 'categ' => 7,
                 'order' => 3,
-              ),
-              51 => 
-              array (
+            ],
+            51 => [
                 'id' => 462,
                 'link_id' => 62,
                 'lang_id' => 6,
@@ -1039,9 +985,8 @@ class FaqTableSeeder extends Seeder
                 'flag' => 1,
                 'categ' => 8,
                 'order' => 1,
-              ),
-              52 => 
-              array (
+            ],
+            52 => [
                 'id' => 463,
                 'link_id' => 63,
                 'lang_id' => 6,
@@ -1055,9 +1000,8 @@ class FaqTableSeeder extends Seeder
                 'flag' => 1,
                 'categ' => 8,
                 'order' => 2,
-              ),
-              53 => 
-              array (
+            ],
+            53 => [
                 'id' => 465,
                 'link_id' => 65,
                 'lang_id' => 6,
@@ -1071,9 +1015,8 @@ class FaqTableSeeder extends Seeder
                 'flag' => 1,
                 'categ' => 9,
                 'order' => 1,
-              ),
-              54 => 
-              array (
+            ],
+            54 => [
                 'id' => 466,
                 'link_id' => 66,
                 'lang_id' => 6,
@@ -1125,9 +1068,8 @@ class FaqTableSeeder extends Seeder
                 'flag' => 0,
                 'categ' => 5,
                 'order' => 12,
-              ),
-              55 => 
-              array (
+            ],
+            55 => [
                 'id' => 467,
                 'link_id' => 67,
                 'lang_id' => 6,
@@ -1138,9 +1080,8 @@ class FaqTableSeeder extends Seeder
                 'flag' => 1,
                 'categ' => 5,
                 'order' => 13,
-              ),
-              56 => 
-              array (
+            ],
+            56 => [
                 'id' => 468,
                 'link_id' => 68,
                 'lang_id' => 6,
@@ -1151,9 +1092,8 @@ class FaqTableSeeder extends Seeder
                 'flag' => 1,
                 'categ' => 5,
                 'order' => 14,
-              ),
-              57 => 
-              array (
+            ],
+            57 => [
                 'id' => 469,
                 'link_id' => 69,
                 'lang_id' => 6,
@@ -1164,9 +1104,8 @@ class FaqTableSeeder extends Seeder
                 'flag' => 1,
                 'categ' => 5,
                 'order' => 15,
-              ),
-              58 => 
-              array (
+            ],
+            58 => [
                 'id' => 470,
                 'link_id' => 70,
                 'lang_id' => 6,
@@ -1178,9 +1117,8 @@ class FaqTableSeeder extends Seeder
                 'flag' => 1,
                 'categ' => 5,
                 'order' => 16,
-              ),
-              59 => 
-              array (
+            ],
+            59 => [
                 'id' => 471,
                 'link_id' => 71,
                 'lang_id' => 6,
@@ -1190,9 +1128,8 @@ class FaqTableSeeder extends Seeder
                 'flag' => 1,
                 'categ' => 1,
                 'order' => 8,
-              ),
-              60 => 
-              array (
+            ],
+            60 => [
                 'id' => 472,
                 'link_id' => 72,
                 'lang_id' => 6,
@@ -1205,9 +1142,8 @@ class FaqTableSeeder extends Seeder
                 'flag' => 1,
                 'categ' => 71,
                 'order' => 1,
-              ),
-              61 => 
-              array (
+            ],
+            61 => [
                 'id' => 473,
                 'link_id' => 73,
                 'lang_id' => 6,
@@ -1236,9 +1172,8 @@ class FaqTableSeeder extends Seeder
                 'flag' => 1,
                 'categ' => 71,
                 'order' => 2,
-              ),
-              62 => 
-              array (
+            ],
+            62 => [
                 'id' => 474,
                 'link_id' => 74,
                 'lang_id' => 6,
@@ -1249,9 +1184,8 @@ class FaqTableSeeder extends Seeder
                 'flag' => 1,
                 'categ' => 5,
                 'order' => 17,
-              ),
-        ));
-        
-        
+            ],
+        ]);
+
     }
 }

@@ -4,7 +4,6 @@ namespace App\Repositories;
 
 use App\Support\SupportContext;
 use App\Support\UserDisplay;
-use Illuminate\Support\Facades\Cache;
 use Nexus\Database\NexusDB;
 
 class PollRepository
@@ -18,6 +17,7 @@ class PollRepository
             return null;
         }
         $row = NexusDB::table('polls')->where('id', $id)->first();
+
         return $row ? (array) $row : null;
     }
 
@@ -27,6 +27,7 @@ class PollRepository
     public static function lastPoll(): ?array
     {
         $row = NexusDB::table('polls')->orderByDesc('added')->first(['question', 'added']);
+
         return $row ? (array) $row : null;
     }
 
@@ -76,6 +77,7 @@ class PollRepository
     public static function findWithOptions(int $id): ?array
     {
         $row = NexusDB::table('polls')->where('id', $id)->first();
+
         return $row ? (array) $row : null;
     }
 

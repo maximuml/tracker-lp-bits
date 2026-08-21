@@ -2,6 +2,10 @@
 
 namespace App\Support;
 
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
+use Nexus\Nexus;
+
 /**
  * Legacy file-log helpers extracted from `include/globalfunctions.php`.
  *
@@ -11,6 +15,7 @@ namespace App\Support;
 final class Logger
 {
     private static ?string $logLevel = null;
+
     private static ?string $appEnv = null;
 
     /** @var array<string, string> */
@@ -42,16 +47,16 @@ final class Logger
         $logFile = self::filePath();
         if (($fd = fopen($logFile, 'a')) === false) {
             $log .= "--------Can not open $logFile";
-            $fd = fopen(sys_get_temp_dir() . '/nexus.log', 'a');
+            $fd = fopen(sys_get_temp_dir().'/nexus.log', 'a');
         }
 
         $uid = $user['id'] ?? 0;
         $passkey = $passkey ?? '';
 
         $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
-        $nexus = \Nexus\Nexus::instance();
+        $nexus = Nexus::instance();
         $content = sprintf(
-            "[%s] [%s] [%s] [%s] [%s] [%s] %s.%s %s:%s %s%s%s %s%s",
+            '[%s] [%s] [%s] [%s] [%s] [%s] %s.%s %s:%s %s%s%s %s%s',
             Time::millis(true),
             $nexus ? $nexus->getRequestId() : 'NO_REQUEST_ID',
             $nexus ? $nexus->getLogSequence() : 0,
@@ -73,7 +78,7 @@ final class Logger
             fclose($fd);
         }
         if ($echo) {
-            echo $content . PHP_EOL;
+            echo $content.PHP_EOL;
         }
         if ($nexus) {
             $nexus->incrementLogSequence();
@@ -100,8 +105,8 @@ final class Logger
             }
         } else {
             try {
-                $authUser = \Illuminate\Support\Facades\Auth::user();
-                if ($authUser instanceof \Illuminate\Database\Eloquent\Model) {
+                $authUser = Auth::user();
+                if ($authUser instanceof Model) {
                     $user = $authUser->getAttributes();
                     $passkey = (string) ($authUser->getAttribute('passkey') ?? '');
                 }
@@ -133,12 +138,12 @@ final class Logger
         }
 
         $logFileFromDotEnv = Env::get('LOG_FILE');
-        if (!$fromEnv && $logFileFromDotEnv && in_array($logFileFromDotEnv, $std, true)) {
+        if (! $fromEnv && $logFileFromDotEnv && in_array($logFileFromDotEnv, $std, true)) {
             return self::$filePaths[$append] = $logFileFromDotEnv;
         }
 
-        $logFile = rtrim($path, '/') . '/nexus.log';
-        if (!$fromEnv && $logFileFromDotEnv) {
+        $logFile = rtrim($path, '/').'/nexus.log';
+        if (! $fromEnv && $logFileFromDotEnv) {
             $logFile = $logFileFromDotEnv;
         }
 
@@ -158,12 +163,12 @@ final class Logger
 
         if (Environment::isConsole()) {
             $scriptUserInfo = posix_getpwuid(posix_getuid());
-            $name .= sprintf("-cli-%s", $scriptUserInfo['name'] ?? 'unknown');
+            $name .= sprintf('-cli-%s', $scriptUserInfo['name'] ?? 'unknown');
         }
 
-        $name .= '-' . date('Y-m-d');
+        $name .= '-'.date('Y-m-d');
 
-        return self::$filePaths[$append] = $name . $suffix;
+        return self::$filePaths[$append] = $name.$suffix;
     }
 
     /**

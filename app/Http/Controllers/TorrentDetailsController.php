@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Auth\Permission;
+use App\Enums\Permission\PermissionEnum;
+use App\Models\Setting;
 use App\Models\Torrent;
 use App\Models\TorrentBuyLog;
 use App\Models\TorrentOperationLog;
@@ -10,9 +13,12 @@ use App\Repositories\SearchBoxRepository;
 use App\Repositories\TagRepository;
 use App\Repositories\TorrentDetailRepository;
 use App\Repositories\TorrentRepository;
+use App\Support\Config\SiteConfig;
 use App\Support\Format;
+use App\Support\Hooks;
+use App\Support\Locale;
+use App\Support\Logger;
 use App\Support\Promotion;
-use App\Models\Setting;
 use App\Support\Strings;
 use App\Support\SupportContext;
 use App\Support\TorrentAccess;
@@ -38,7 +44,7 @@ class TorrentDetailsController extends Controller
 
         $user = Auth::guard('nexus-web')->user();
         if (! $user instanceof User) {
-            return redirect('/login.php?returnto=' . urlencode($request->fullUrl()));
+            return redirect('/login.php?returnto='.urlencode($request->fullUrl()));
         }
 
         $torrent = Torrent::query()->find($id);
@@ -52,17 +58,17 @@ class TorrentDetailsController extends Controller
             $query = $request->query->all();
             unset($query['id']);
 
-            return redirect('/details.php?id=' . $id . ($query ? '&' . http_build_query($query) : ''));
+            return redirect('/details.php?id='.$id.($query ? '&'.http_build_query($query) : ''));
         }
 
         $row = TorrentDetailRepository::getTorrent($id);
         if (empty($row)) {
-            \App\Support\Logger::writeWithContext((string) "TorrentDetailsRepository getTorrent empty: {$id}", (string) 'info', (bool) false);
+            Logger::writeWithContext((string) "TorrentDetailsRepository getTorrent empty: {$id}", (string) 'info', (bool) false);
             error_log("TorrentDetailsRepository getTorrent empty: $id");
             abort(404);
         }
 
-        $row = \App\Support\Hooks::applyFilter('torrent_detail', $row);
+        $row = Hooks::applyFilter('torrent_detail', $row);
         if (! is_array($row)) {
             abort(404);
         }
@@ -72,16 +78,16 @@ class TorrentDetailsController extends Controller
 
         if (empty(SupportContext::getGlobal('lang_functions')) || empty(SupportContext::getGlobal('lang_details'))) {
             SupportContext::setServerValue('SCRIPT_NAME', '/details.php');
-            require base_path(\App\Support\Locale::scriptFilePath((string) 'functions.php', (bool) false, (string) ""));
+            require base_path(Locale::scriptFilePath((string) 'functions.php', (bool) false, (string) ''));
             SupportContext::setGlobal('lang_functions', $lang_functions ?? []);
-            require base_path(\App\Support\Locale::scriptFilePath((string) "", (bool) false, (string) ""));
+            require base_path(Locale::scriptFilePath((string) '', (bool) false, (string) ''));
             SupportContext::setGlobal('lang_details', $lang_details ?? []);
         }
 
         $langDetails = SupportContext::getGlobal('lang_details') ?? [];
         $headTitle = empty($request->input('cmtpage'))
-            ? ($langDetails['head_details_for_torrent'] ?? '') . '"' . $row['name'] . '"'
-            : ($langDetails['head_comments_for_torrent'] ?? '') . '"' . $row['name'] . '"';
+            ? ($langDetails['head_details_for_torrent'] ?? '').'"'.$row['name'].'"'
+            : ($langDetails['head_comments_for_torrent'] ?? '').'"'.$row['name'].'"';
 
         $denyLog = $row['approval_status'] == Torrent::APPROVAL_STATUS_DENY
             ? TorrentDetailRepository::getLatestApprovalDenyLog($id)
@@ -117,7 +123,7 @@ class TorrentDetailsController extends Controller
             'torrentRow' => $row,
             'user' => $user,
             'currentUser' => $currentUser,
-            'customField' => new Field(),
+            'customField' => new Field,
             'headTitle' => $headTitle,
             'tagIds' => $tagIds,
             'denyLog' => $denyLog,
@@ -127,10 +133,10 @@ class TorrentDetailsController extends Controller
     }
 
     /**
-     * @param array<int|string, mixed> $row
-     * @param array<int|string, mixed> $currentUser
-     * @param array<int, int> $tagIds
-     * @param array<string, mixed> $requestFlags
+     * @param  array<int|string, mixed>  $row
+     * @param  array<int|string, mixed>  $currentUser
+     * @param  array<int, int>  $tagIds
+     * @param  array<string, mixed>  $requestFlags
      * @return array<string, mixed>
      */
     private function buildDetailsViewData(int $id, array $row, array $currentUser, User $user, ?TorrentOperationLog $denyLog, bool $hasBuy, array $tagIds, array $requestFlags): array
@@ -138,13 +144,13 @@ class TorrentDetailsController extends Controller
         $langFunctions = SupportContext::getGlobal('lang_functions') ?? [];
         $langDetails = SupportContext::getGlobal('lang_details') ?? [];
 
-        $torrentRep = new TorrentRepository();
-        $searchBoxRep = new SearchBoxRepository();
-        $tagRep = new TagRepository();
-        $customField = new Field();
+        $torrentRep = new TorrentRepository;
+        $searchBoxRep = new SearchBoxRepository;
+        $tagRep = new TagRepository;
+        $customField = new Field;
 
         $bannedTorrent = ($row['banned'] ?? '') === 'yes'
-            ? " <b>(<font class=\"striking\">" . ($langFunctions['text_banned'] ?? '') . "</font>)</b>"
+            ? ' <b>(<font class="striking">'.($langFunctions['text_banned'] ?? '').'</font>)</b>'
             : '';
 
         $spTorrent = Promotion::appendWithContext(
@@ -158,30 +164,30 @@ class TorrentDetailsController extends Controller
         );
 
         $torrentTopHtml = htmlspecialchars((string) $row['name'])
-            . $bannedTorrent
-            . $torrentRep->getPaidIcon($row, 20)
-            . ($spTorrent ? '&nbsp;&nbsp;&nbsp;' . $spTorrent : '')
-            . $spTorrentSub
-            . TorrentAccess::hrImage($row, (int) ($row['search_box_id'] ?? 0))
-            . $torrentRep->renderApprovalStatus($row['approval_status'] ?? null);
+            .$bannedTorrent
+            .$torrentRep->getPaidIcon($row, 20)
+            .($spTorrent ? '&nbsp;&nbsp;&nbsp;'.$spTorrent : '')
+            .$spTorrentSub
+            .TorrentAccess::hrImage($row, (int) ($row['search_box_id'] ?? 0))
+            .$torrentRep->renderApprovalStatus($row['approval_status'] ?? null);
 
         $editUrl = "edit.php?id={$id}";
         if ($requestFlags['returnto'] ?? '') {
-            $editUrl .= '&returnto=' . rawurlencode($requestFlags['returnto']);
+            $editUrl .= '&returnto='.rawurlencode($requestFlags['returnto']);
         }
 
-        $canViewAnonymous = \App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::VIEW_ANONYMOUS);
+        $canViewAnonymous = Permission::can(PermissionEnum::VIEW_ANONYMOUS);
         $isOwner = (int) $currentUser['id'] === (int) ($row['owner'] ?? 0);
         if (($row['anonymous'] ?? '') === 'yes') {
             if (! $canViewAnonymous && ! $isOwner) {
-                $uprow = '<i>' . ($langDetails['text_anonymous'] ?? '') . '</i>';
+                $uprow = '<i>'.($langDetails['text_anonymous'] ?? '').'</i>';
             } else {
-                $uprow = '<i>' . ($langDetails['text_anonymous'] ?? '') . '</i> (' . UserDisplay::username((int) ($row['owner'] ?? 0), false, true, true, false, false, true) . ')';
+                $uprow = '<i>'.($langDetails['text_anonymous'] ?? '').'</i> ('.UserDisplay::username((int) ($row['owner'] ?? 0), false, true, true, false, false, true).')';
             }
         } else {
             $uprow = isset($row['owner'])
                 ? UserDisplay::username((int) $row['owner'], false, true, true, false, false, true)
-                : '<i>' . ($langDetails['text_unknown'] ?? '') . '</i>';
+                : '<i>'.($langDetails['text_unknown'] ?? '').'</i>';
         }
 
         $bookmarkMarkup = TorrentBookmark::stateMarkupWithContext((int) $currentUser['id'], $id, false);
@@ -197,7 +203,7 @@ class TorrentDetailsController extends Controller
         $customFieldsHtml = $customField->renderOnTorrentDetailsPage($id, (int) ($row['search_box_id'] ?? 0));
 
         $technicalInfoResult = null;
-        if (\App\Support\Config\SiteConfig::current()->main->enableTechnicalInfo() && ! empty($row['technical_info'])) {
+        if (SiteConfig::current()->main->enableTechnicalInfo() && ! empty($row['technical_info'])) {
             $escaped = Strings::escapeHtml((string) $row['technical_info']);
             $technicalData = is_string($escaped) ? $escaped : '';
             $isBdInfo = false;

@@ -2,24 +2,24 @@
 
 namespace App\Repositories;
 
-use App\Auth\Permission;
 use App\Exceptions\InsufficientPermissionException;
 use App\Http\Middleware\Locale;
 use App\Models\Category;
 use App\Models\Icon;
-use App\Models\NexusModel;
 use App\Models\SearchBox;
-use App\Models\SecondIcon;
-use App\Models\Setting;
 use App\Models\Torrent;
 use App\Models\User;
-use Illuminate\Database\Query\Builder;
-use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Auth;
-use Nexus\Database\NexusDB;
+use App\Support\Cache;
+use App\Support\SupportContext;
+use App\Support\UserDisplay;
 use Filament\Forms;
 use Filament\Schemas\Components\Fieldset;
 use Filament\Schemas\Components\Section;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Query\Builder;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
+use Nexus\Database\NexusDB;
 
 class SearchBoxRepository extends BaseRepository
 {
@@ -48,9 +48,7 @@ class SearchBoxRepository extends BaseRepository
     /**
      * Fetch taxonomy rows for a search-box mode.
      *
-     * @param  string  $tableName
-     * @param  int  $mode
-     * @return \Illuminate\Support\Collection<int, \stdClass>
+     * @return Collection<int, \stdClass>
      */
     public function getTaxonomyRows(string $tableName, int $mode)
     {
@@ -65,8 +63,6 @@ class SearchBoxRepository extends BaseRepository
     /**
      * Fetch taxonomy rows as an array for legacy item list.
      *
-     * @param  string  $tableName
-     * @param  int  $mode
      * @return array<int, array<string, mixed>>
      */
     public function getTaxonomyList(string $tableName, int $mode): array
@@ -76,32 +72,33 @@ class SearchBoxRepository extends BaseRepository
 
     /**
      * @param  array<int|string, mixed>  $params
-     * @return  \Illuminate\Contracts\Pagination\LengthAwarePaginator<int, SearchBox>
+     * @return LengthAwarePaginator<int, SearchBox>
      */
-    public function getList(array $params): \Illuminate\Contracts\Pagination\LengthAwarePaginator
+    public function getList(array $params): LengthAwarePaginator
     {
         $query = SearchBox::query();
-        list($sortField, $sortType) = $this->getSortFieldAndType($params);
+        [$sortField, $sortType] = $this->getSortFieldAndType($params);
         $query->orderBy($sortField, $sortType);
+
         return $query->paginate();
     }
 
     /**
      * @param  array<int|string, mixed>  $params
-     * @return  mixed
+     * @return mixed
      */
     public function store(array $params)
     {
         /** @var array<string, mixed> $data */
         $data = $params;
         $result = SearchBox::query()->create($data);
+
         return $result;
     }
 
     /**
      * @param  array<int|string, mixed>  $params
-     * @param  int  $id
-     * @return  mixed
+     * @return mixed
      */
     public function update(array $params, int $id)
     {
@@ -109,33 +106,34 @@ class SearchBoxRepository extends BaseRepository
         /** @var array<string, mixed> $data */
         $data = $params;
         $result->update($data);
+
         return $result;
     }
 
     /**
-     * @param  int  $id
-     * @return  mixed
+     * @return mixed
      */
     public function getDetail(int $id)
     {
         $result = SearchBox::query()->findOrFail($id);
+
         return $result;
     }
 
     /**
-     * @param  int  $id
-     * @return  mixed
+     * @return mixed
      */
     public function delete(int $id)
     {
         $result = SearchBox::query()->findOrFail($id);
         $success = $result->delete();
+
         return $success;
     }
 
     /**
      * @param  array<int|string, mixed>  $idArr
-     * @return  mixed
+     * @return mixed
      */
     public function listIcon(array $idArr)
     {
@@ -147,11 +145,12 @@ class SearchBoxRepository extends BaseRepository
         foreach ($searchBoxList as $value) {
             foreach ($value->categories as $category) {
                 $iconId = $category->icon_id;
-                if (!isset($iconIdArr[$iconId])) {
+                if (! isset($iconIdArr[$iconId])) {
                     $iconIdArr[$iconId] = $iconId;
                 }
             }
         }
+
         return Icon::query()->find(array_keys($iconIdArr));
     }
 
@@ -162,7 +161,7 @@ class SearchBoxRepository extends BaseRepository
         foreach ($searchBoxList as $searchBox) {
             $taxonomies = [];
             foreach (SearchBox::$taxonomies as $torrentField => $taxonomyTableModel) {
-                $searchBoxField = "show" . $torrentField;
+                $searchBoxField = 'show'.$torrentField;
                 if ($searchBox->showsubcat && $searchBox->{$searchBoxField}) {
                     $taxonomies[] = [
                         'torrent_field' => $torrentField,
@@ -172,10 +171,10 @@ class SearchBoxRepository extends BaseRepository
                     ];
                 }
             }
-            if (!empty($taxonomies)) {
-                $searchBox->update(["extra->" . SearchBox::EXTRA_TAXONOMY_LABELS => $taxonomies]);
+            if (! empty($taxonomies)) {
+                $searchBox->update(['extra->'.SearchBox::EXTRA_TAXONOMY_LABELS => $taxonomies]);
             }
-            \App\Support\Cache::clearSearchBox();
+            Cache::clearSearchBox();
         }
     }
 
@@ -185,15 +184,15 @@ class SearchBoxRepository extends BaseRepository
      */
     public function renderTaxonomySelect($searchBox, array $torrentInfo = []): string
     {
-        if (!$searchBox instanceof SearchBox) {
+        if (! $searchBox instanceof SearchBox) {
             $searchBox = SearchBox::get(intval($searchBox));
         }
-        if (!$searchBox instanceof SearchBox) {
+        if (! $searchBox instanceof SearchBox) {
             return '';
         }
         $results = [];
-        //Keep the order
-        if (!empty($searchBox->extra[SearchBox::EXTRA_TAXONOMY_LABELS])) {
+        // Keep the order
+        if (! empty($searchBox->extra[SearchBox::EXTRA_TAXONOMY_LABELS])) {
             foreach ($searchBox->extra[SearchBox::EXTRA_TAXONOMY_LABELS] as $taxonomy) {
                 $select = $this->buildTaxonomySelect($searchBox, $taxonomy['torrent_field'], $torrentInfo);
                 if ($select) {
@@ -215,19 +214,19 @@ class SearchBoxRepository extends BaseRepository
     /**
      * @param  mixed  $searchBox
      * @param  array<int|string, mixed>  $torrentWithTaxonomy
-     * @return  array<int|string, mixed>
+     * @return array<int|string, mixed>
      */
     public function listTaxonomyInfo($searchBox, array $torrentWithTaxonomy): array
     {
-        if (!$searchBox instanceof SearchBox) {
+        if (! $searchBox instanceof SearchBox) {
             $searchBox = SearchBox::get(intval($searchBox));
         }
-        if (!$searchBox instanceof SearchBox) {
+        if (! $searchBox instanceof SearchBox) {
             return [];
         }
         $results = [];
-        //Keep the order
-        if (!empty($searchBox->extra[SearchBox::EXTRA_TAXONOMY_LABELS])) {
+        // Keep the order
+        if (! empty($searchBox->extra[SearchBox::EXTRA_TAXONOMY_LABELS])) {
             foreach ($searchBox->extra[SearchBox::EXTRA_TAXONOMY_LABELS] as $item) {
                 $taxonomy = $this->getTaxonomyInfo($searchBox, $torrentWithTaxonomy, $item['torrent_field']);
                 if ($taxonomy) {
@@ -242,49 +241,49 @@ class SearchBoxRepository extends BaseRepository
                 }
             }
         }
+
         return $results;
     }
 
     /**
-     * @param  \App\Models\SearchBox  $searchBox
      * @param  array<int|string, mixed>  $torrentWithTaxonomy
      * @param  mixed  $torrentField
-     * @return  array<int|string, mixed>|null
+     * @return array<int|string, mixed>|null
      */
     private function getTaxonomyInfo(SearchBox $searchBox, array $torrentWithTaxonomy, $torrentField)
     {
-        if (!isset(SearchBox::$taxonomies[$torrentField])) {
+        if (! isset(SearchBox::$taxonomies[$torrentField])) {
             return null;
         }
-        $searchBoxField = "show" . $torrentField;
-        $torrentTaxonomyField = $torrentField . "_name";
-        if ($searchBox->showsubcat && $searchBox->{$searchBoxField} && !empty($torrentWithTaxonomy[$torrentTaxonomyField])) {
+        $searchBoxField = 'show'.$torrentField;
+        $torrentTaxonomyField = $torrentField.'_name';
+        if ($searchBox->showsubcat && $searchBox->{$searchBoxField} && ! empty($torrentWithTaxonomy[$torrentTaxonomyField])) {
             return [
                 'field' => $torrentField,
                 'label' => $searchBox->getTaxonomyLabel($torrentField),
                 'value' => $torrentWithTaxonomy[$torrentTaxonomyField],
             ];
         }
+
         return null;
     }
 
     /**
-     * @param  \App\Models\SearchBox  $searchBox
      * @param  mixed  $torrentField
      * @param  array<int|string, mixed>  $torrentInfo
-     * @return  mixed
+     * @return mixed
      */
     private function buildTaxonomySelect(SearchBox $searchBox, $torrentField, array $torrentInfo)
     {
-        if (!isset(SearchBox::$taxonomies[$torrentField])) {
+        if (! isset(SearchBox::$taxonomies[$torrentField])) {
             return '';
         }
         $searchBoxId = $searchBox->id;
-        $searchBoxField = "show" . $torrentField;
+        $searchBoxField = 'show'.$torrentField;
         if ($searchBox->showsubcat && $searchBox->{$searchBoxField}) {
             $table = SearchBox::$taxonomies[$torrentField]['table'];
-            $select = sprintf("<b>%s: </b>", $searchBox->getTaxonomyLabel($torrentField));
-            $select .= sprintf('<select name="%s_sel[%s]" data-mode="%s_%s">',$torrentField, $searchBoxId, $torrentField, $searchBoxId);
+            $select = sprintf('<b>%s: </b>', $searchBox->getTaxonomyLabel($torrentField));
+            $select .= sprintf('<select name="%s_sel[%s]" data-mode="%s_%s">', $torrentField, $searchBoxId, $torrentField, $searchBoxId);
             $select .= sprintf('<option value="%s">%s</option>', 0, \App\Support\Locale::trans('nexus.select_one_please', [], null));
             $list = NexusDB::table($table)->where(function (Builder $query) use ($searchBox) {
                 return $query->where('mode', $searchBox->id)->orWhere('mode', 0);
@@ -292,30 +291,31 @@ class SearchBoxRepository extends BaseRepository
             foreach ($list as $item) {
                 $selected = '';
                 if (isset($torrentInfo[$torrentField]) && $torrentInfo[$torrentField] == $item->id) {
-                    $selected = " selected";
+                    $selected = ' selected';
                 }
                 $select .= sprintf('<option value="%s"%s>%s</option>', $item->id, $selected, $item->name);
             }
             $select .= '</select>';
+
             return $select;
         }
     }
 
     /**
      * @param  mixed  $searchBox
-     * @return  array<int|string, mixed>
+     * @return array<int|string, mixed>
      */
     public function listTaxonomyFormSchema($searchBox): array
     {
-        if (!$searchBox instanceof SearchBox) {
+        if (! $searchBox instanceof SearchBox) {
             $searchBox = SearchBox::get(intval($searchBox));
         }
-        if (!$searchBox instanceof SearchBox) {
+        if (! $searchBox instanceof SearchBox) {
             return [];
         }
         $results = [];
-        //Keep the order
-        if (!empty($searchBox->extra[SearchBox::EXTRA_TAXONOMY_LABELS])) {
+        // Keep the order
+        if (! empty($searchBox->extra[SearchBox::EXTRA_TAXONOMY_LABELS])) {
             foreach ($searchBox->extra[SearchBox::EXTRA_TAXONOMY_LABELS] as $taxonomy) {
                 $select = $this->buildTaxonomyFormSchema($searchBox, $taxonomy['torrent_field']);
                 if ($select) {
@@ -330,24 +330,25 @@ class SearchBoxRepository extends BaseRepository
                 }
             }
         }
+
         return $results;
     }
 
     /**
-     * @param  \App\Models\SearchBox  $searchBox
      * @param  mixed  $torrentField
-     * @return  mixed
+     * @return mixed
      */
     private function buildTaxonomyFormSchema(SearchBox $searchBox, $torrentField)
     {
-        if (!isset(SearchBox::$taxonomies[$torrentField])) {
+        if (! isset(SearchBox::$taxonomies[$torrentField])) {
             return null;
         }
         $searchBoxId = $searchBox->id;
-        $searchBoxField = "show" . $torrentField;
+        $searchBoxField = 'show'.$torrentField;
         $name = sprintf('%s.%s', $torrentField, $searchBoxId);
         if ($searchBox->showsubcat && $searchBox->{$searchBoxField}) {
             $items = SearchBox::listTaxonomyItems($searchBox, $torrentField);
+
             return Forms\Components\Select::make($name)
                 ->options($items->pluck('name', 'id')->toArray())
                 ->label($searchBox->getTaxonomyLabel($torrentField));
@@ -356,27 +357,28 @@ class SearchBoxRepository extends BaseRepository
 
     /**
      * @param  mixed  $id
-     * @return  mixed
+     * @return mixed
      */
     public function deleteCategory($id)
     {
-        if (\App\Support\UserDisplay::currentClass() < User::CLASS_SYSOP) {
-            throw new InsufficientPermissionException();
+        if (UserDisplay::currentClass() < User::CLASS_SYSOP) {
+            throw new InsufficientPermissionException;
         }
         $idArr = Arr::wrap($id);
         $exists = Torrent::query()->whereHas('basic_category', function (\Illuminate\Database\Eloquent\Builder $query) use ($idArr) {
             return $query->whereIn('id', $idArr);
         })->exists();
         if ($exists) {
-            throw new \RuntimeException("There are torrents that belong to this category and cannot be deleted!");
+            throw new \RuntimeException('There are torrents that belong to this category and cannot be deleted!');
         }
+
         return Category::query()->whereIn('id', $idArr)->delete();
     }
 
     /**
      * @param  array<int>|int  $id
      * @param  bool  $withCategoryAndTags
-     * @return  \Illuminate\Database\Eloquent\Collection<int, SearchBox>
+     * @return \Illuminate\Database\Eloquent\Collection<int, SearchBox>
      */
     public function listSections($id, $withCategoryAndTags = true)
     {
@@ -389,26 +391,21 @@ class SearchBoxRepository extends BaseRepository
                 $searchBox->loadTags();
             }
         }
+
         return $searchBoxList;
     }
 
-    /**
-     * @param  \App\Models\SearchBox  $searchBox
-     * @param  string  $namePrefix
-     */
     public function buildSearchBoxFormSchema(SearchBox $searchBox, string $namePrefix): Section
     {
-        $lang = \App\Support\Locale::folderFromCookie(\App\Support\SupportContext::getCookieValue('c_lang_folder', ''), (bool) false);
+        $lang = \App\Support\Locale::folderFromCookie(SupportContext::getCookieValue('c_lang_folder', ''), (bool) false);
         $heading = $searchBox->section_name[$lang] ?? \App\Support\Locale::trans('searchbox.sections.browse', [], null);
+
         return Section::make($heading)
             ->schema($this->buildCategoryTaxonomyTagSchema($searchBox, false, $namePrefix));
     }
 
     /**
-     * @param  \App\Models\SearchBox  $searchBox
-     * @param  bool  $multiple
-     * @param  string  $namePrefix
-     * @return  array<int|string, mixed>
+     * @return array<int|string, mixed>
      */
     public function buildCategoryTaxonomyTagSchema(SearchBox $searchBox, bool $multiple, string $namePrefix): array
     {
@@ -429,49 +426,45 @@ class SearchBoxRepository extends BaseRepository
 
         $fieldset = Fieldset::make(\App\Support\Locale::trans('searchbox.sub_categories_label', [], null));
         $fieldsetSchema = [];
-        //Keep the order
-        if (!empty($searchBox->extra[SearchBox::EXTRA_TAXONOMY_LABELS])) {
+        // Keep the order
+        if (! empty($searchBox->extra[SearchBox::EXTRA_TAXONOMY_LABELS])) {
             foreach ($searchBox->extra[SearchBox::EXTRA_TAXONOMY_LABELS] as $taxonomy) {
                 $torrentField = $taxonomy['torrent_field'];
-                $showField = "show" . $torrentField;
+                $showField = 'show'.$torrentField;
                 if ($searchBox->showsubcat && $searchBox->{$showField} && isset(SearchBox::$taxonomies[$torrentField])) {
                     if ($multiple) {
                         $fieldsetSchema[] = Forms\Components\CheckboxList::make("$namePrefix.$torrentField")
                             ->options($this->listTaxonomies($torrentField, $mode))
                             ->label($searchBox->getTaxonomyLabel($torrentField))
-                            ->columns(6)
-                        ;
+                            ->columns(6);
                     } else {
                         $fieldsetSchema[] = Forms\Components\Radio::make("$namePrefix.$torrentField")
                             ->options($this->listTaxonomies($torrentField, $mode))
                             ->label($searchBox->getTaxonomyLabel($torrentField))
-                            ->columns(6)
-                        ;
+                            ->columns(6);
                     }
                 }
             }
         } else {
             foreach (SearchBox::$taxonomies as $torrentField => $taxonomyTableModel) {
-                $showField = "show" . $torrentField;
+                $showField = 'show'.$torrentField;
                 if ($searchBox->showsubcat && $searchBox->{$showField}) {
                     $fieldsetSchema[] = Forms\Components\CheckboxList::make("$namePrefix.$torrentField")
                         ->options($this->listTaxonomies($torrentField, $mode))
                         ->label($searchBox->getTaxonomyLabel($torrentField))
-                        ->columns(6)
-                    ;
+                        ->columns(6);
                 }
             }
         }
         $fieldset->schema($fieldsetSchema)->columns(1);
         $schema[] = $fieldset;
 
-        $tagRep = new TagRepository();
+        $tagRep = new TagRepository;
         $tags = $tagRep->listAll($searchBox->id);
         $schema[] = Forms\Components\CheckboxList::make("$namePrefix.tag")
             ->options($tags->pluck('name', 'id'))
             ->label(\App\Support\Locale::trans('label.tag.label', [], null))
-            ->columns(6)
-        ;
+            ->columns(6);
 
         return $schema;
     }
@@ -479,22 +472,22 @@ class SearchBoxRepository extends BaseRepository
     /**
      * @param  mixed  $torrentField
      * @param  mixed  $mode
-     * @return  \Illuminate\Support\Collection<int, mixed>
+     * @return Collection<int, mixed>
      */
     private function listTaxonomies($torrentField, $mode)
     {
-        if (!isset(SearchBox::$taxonomies[$torrentField])) {
+        if (! isset(SearchBox::$taxonomies[$torrentField])) {
             return collect();
         }
         $tableName = SearchBox::$taxonomies[$torrentField]['table'];
+
         return NexusDB::table($tableName)
-            ->where(function (\Illuminate\Database\Query\Builder $query) use ($mode) {
+            ->where(function (Builder $query) use ($mode) {
                 return $query->where('mode', $mode)->orWhere('mode', 0);
             })
             ->orderBy('sort_index', 'desc')
             ->orderBy('id', 'desc')
-            ->pluck('name', 'id')
-            ;
+            ->pluck('name', 'id');
     }
 
     /**
@@ -522,6 +515,4 @@ class SearchBoxRepository extends BaseRepository
 
         return $categories;
     }
-
-
 }

@@ -2,25 +2,21 @@
 
 namespace App\Filament\Resources\User;
 
-use Filament\Schemas\Schema;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Columns\IconColumn;
-use Filament\Tables\Filters\Filter;
-use Filament\Forms\Components\TextInput;
-use Filament\Tables\Filters\SelectFilter;
-use Filament\Forms\Components\DatePicker;
-use App\Filament\Resources\User\AttendanceLogResource\Pages\ManageAttendanceLogs;
 use App\Filament\OptionsTrait;
-use App\Filament\Resources\User\AttendanceLogResource\Pages;
-use App\Filament\Resources\User\AttendanceLogResource\RelationManagers;
+use App\Filament\Resources\User\AttendanceLogResource\Pages\ManageAttendanceLogs;
 use App\Models\AttendanceLog;
+use App\Support\UserDisplay;
 use Carbon\Carbon;
-use Filament\Forms;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
-use Filament\Tables;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class AttendanceLogResource extends Resource
 {
@@ -28,9 +24,9 @@ class AttendanceLogResource extends Resource
 
     protected static ?string $model = AttendanceLog::class;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-pencil-square';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-pencil-square';
 
-    protected static string | \UnitEnum | null $navigationGroup = 'User';
+    protected static string|\UnitEnum|null $navigationGroup = 'User';
 
     protected static ?int $navigationSort = 11;
 
@@ -57,13 +53,12 @@ class AttendanceLogResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('id')->sortable(),
-                TextColumn::make('uid')->formatStateUsing(fn ($state) => \App\Support\UserDisplay::adminUsername($state)),
+                TextColumn::make('uid')->formatStateUsing(fn ($state) => UserDisplay::adminUsername($state)),
                 TextColumn::make('date')->label(__('attendance.fields.date'))->sortable(),
                 TextColumn::make('points')->label(__('attendance.fields.points')),
                 IconColumn::make('is_retroactive')
                     ->label(__('attendance.fields.is_retroactive'))
-                    ->boolean(true)
-                ,
+                    ->boolean(true),
                 TextColumn::make('created_at')->label(__('label.created_at')),
             ])
             ->defaultSort('id', 'desc')
@@ -71,39 +66,33 @@ class AttendanceLogResource extends Resource
                 Filter::make('id')
                     ->schema([
                         TextInput::make('id')
-                            ->placeholder('UID')
-                        ,
+                            ->placeholder('UID'),
                     ])->query(function (Builder $query, array $data) {
-                        return $query->when($data['id'], fn (Builder $query, $value) => $query->where("uid", $value));
-                    })
-                ,
+                        return $query->when($data['id'], fn (Builder $query, $value) => $query->where('uid', $value));
+                    }),
                 SelectFilter::make('is_retroactive')
                     ->options(self::getYesNoOptions())
-                    ->label(__('attendance.fields.is_retroactive'))
-                ,
+                    ->label(__('attendance.fields.is_retroactive')),
                 Filter::make('date')
                     ->schema([
                         DatePicker::make('date')
                             ->maxDate(now())
-                            ->label(__('attendance.fields.date'))
-                        ,
+                            ->label(__('attendance.fields.date')),
                     ])->query(function (Builder $query, array $data) {
-                        return $query->when($data['date'], fn (Builder $query, $value) => $query->where("date", $value));
-                    })
-                ,
+                        return $query->when($data['date'], fn (Builder $query, $value) => $query->where('date', $value));
+                    }),
                 Filter::make('created_at')
                     ->schema([
                         DatePicker::make('created_at')
-                            ->label(__('label.created_at'))
-                        ,
+                            ->label(__('label.created_at')),
                     ])->query(function (Builder $query, array $data) {
                         return $query->when($data['created_at'], function (Builder $query, $value) {
                             $begin = Carbon::parse($value)->startOfDay();
                             $end = Carbon::parse($value)->endOfDay();
-                            return $query->where("created_at", ">=", $begin)->where('created_at', '<=', $end);
+
+                            return $query->where('created_at', '>=', $begin)->where('created_at', '<=', $end);
                         });
-                    })
-                ,
+                    }),
             ])
             ->recordActions([
             ])

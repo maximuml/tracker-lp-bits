@@ -2,12 +2,11 @@
 
 namespace App\Filament\Widgets;
 
-use Filament\Actions\Contracts\HasActions;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Columns\BadgeColumn;
 use App\Models\User;
-use Closure;
-use Filament\Tables;
+use App\Support\UserDisplay;
+use Filament\Actions\Contracts\HasActions;
+use Filament\Tables\Columns\BadgeColumn;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Widgets\TableWidget as BaseWidget;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Builder;
@@ -16,7 +15,7 @@ class LatestUsers extends BaseWidget implements HasActions
 {
     protected static ?int $sort = 1;
 
-    protected function getTableHeading(): string | Htmlable | null
+    protected function getTableHeading(): string|Htmlable|null
     {
         return __('dashboard.latest_user.page_title');
     }
@@ -37,8 +36,7 @@ class LatestUsers extends BaseWidget implements HasActions
         return [
             TextColumn::make('id')
                 ->label(__('label.user.username'))
-                ->formatStateUsing(fn ($state) => \App\Support\UserDisplay::adminUsername($state))
-            ,
+                ->formatStateUsing(fn ($state) => UserDisplay::adminUsername($state)),
             TextColumn::make('email')->label(__('label.email')),
             BadgeColumn::make('status')->colors(['success' => 'confirmed', 'danger' => 'pending'])->label(__('label.status')),
             TextColumn::make('added')->dateTime()->label(__('label.added')),

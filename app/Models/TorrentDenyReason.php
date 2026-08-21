@@ -8,22 +8,21 @@
  * @property string|null $created_at
  * @property string|null $updated_at
  */
+
 namespace App\Models;
 
 use App\Models\Traits\NexusActivityLogTrait;
-use Nexus\Database\NexusDB;
 
 class TorrentDenyReason extends NexusModel
 {
     use NexusActivityLogTrait;
 
-    /** @var  string */
+    /** @var string */
     protected $table = 'torrent_deny_reasons';
 
-    /** @var  bool */
+    /** @var bool */
     public $timestamps = true;
 
-    /** @var  list<string> */
-    protected $fillable = ['name', 'hits', 'priority',];
-
+    /** @var list<string> */
+    protected $fillable = ['name', 'hits', 'priority'];
 }

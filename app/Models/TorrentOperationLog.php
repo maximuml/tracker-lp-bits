@@ -9,8 +9,11 @@
  * @property string|null $created_at
  * @property string|null $updated_at
  */
+
 namespace App\Models;
 
+use App\Support\Locale;
+use App\Support\Logger;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Nexus\Database\NexusDB;
 
@@ -20,22 +23,26 @@ use Nexus\Database\NexusDB;
  */
 class TorrentOperationLog extends NexusModel
 {
-    /** @var  string */
+    /** @var string */
     protected $table = 'torrent_operation_logs';
 
-    /** @var  bool */
+    /** @var bool */
     public $timestamps = true;
 
-    /** @var  list<string> */
+    /** @var list<string> */
     protected $fillable = ['uid', 'torrent_id', 'action_type', 'comment'];
 
     const ACTION_TYPE_APPROVAL_NONE = 'approval_none';
+
     const ACTION_TYPE_APPROVAL_ALLOW = 'approval_allow';
+
     const ACTION_TYPE_APPROVAL_DENY = 'approval_deny';
+
     const ACTION_TYPE_EDIT = 'edit';
+
     const ACTION_TYPE_DELETE = 'delete';
 
-    /** @var  array<int|string, mixed> */
+    /** @var array<int|string, mixed> */
     public static array $actionTypes = [
         self::ACTION_TYPE_APPROVAL_NONE => ['text' => 'Approval none'],
         self::ACTION_TYPE_APPROVAL_ALLOW => ['text' => 'Approval allow'],
@@ -47,26 +54,25 @@ class TorrentOperationLog extends NexusModel
     /** @return  mixed */
     public function getActionTypeTextAttribute()
     {
-        return \App\Support\Locale::trans("torrent.operation_log.{$this->action_type}.type_text", [], null);
+        return Locale::trans("torrent.operation_log.{$this->action_type}.type_text", [], null);
     }
 
-    /** @return  \Illuminate\Database\Eloquent\Relations\BelongsTo<User, $this> */
+    /** @return  BelongsTo<User, $this> */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'uid')->select(User::$commonFields);
     }
 
-    /** @return  \Illuminate\Database\Eloquent\Relations\BelongsTo<Torrent, $this> */
+    /** @return  BelongsTo<Torrent, $this> */
     public function torrent(): BelongsTo
     {
         return $this->belongsTo(Torrent::class, 'torrent_id')->select(Torrent::$commentFields);
     }
 
-
     /**
      * @param  array<string, mixed>  $params
      * @param  mixed  $notifyUser
-     * @return  mixed
+     * @return mixed
      */
     public static function add(array $params, $notifyUser = false)
     {
@@ -74,20 +80,20 @@ class TorrentOperationLog extends NexusModel
         if ($notifyUser) {
             self::notifyUser($log);
         }
+
         return $log;
     }
 
     /**
-     * @param  self  $torrentOperationLog
-     * @return  mixed
+     * @return mixed
      */
     private static function notifyUser(self $torrentOperationLog)
     {
         $actionType = $torrentOperationLog->action_type;
         $receiver = $torrentOperationLog->torrent->user;
         $locale = $receiver->locale;
-        $subject = \App\Support\Locale::trans("torrent.operation_log.{$actionType}.notify_subject", [], $locale);
-        $msg = \App\Support\Locale::trans("torrent.operation_log.{$actionType}.notify_msg", ['torrent_name' => $torrentOperationLog->torrent->name, 'detail_url' => sprintf('details.php?id=%s', $torrentOperationLog->torrent_id), 'operator' => $torrentOperationLog->user->username, 'reason' => $torrentOperationLog->comment], $locale);
+        $subject = Locale::trans("torrent.operation_log.{$actionType}.notify_subject", [], $locale);
+        $msg = Locale::trans("torrent.operation_log.{$actionType}.notify_msg", ['torrent_name' => $torrentOperationLog->torrent->name, 'detail_url' => sprintf('details.php?id=%s', $torrentOperationLog->torrent_id), 'operator' => $torrentOperationLog->user->username, 'reason' => $torrentOperationLog->comment], $locale);
         $message = [
             'sender' => 0,
             'receiver' => $receiver->id,
@@ -98,6 +104,6 @@ class TorrentOperationLog extends NexusModel
         Message::query()->insert($message);
         NexusDB::cache_del("user_{$receiver->id}_unread_message_count");
         NexusDB::cache_del("user_{$receiver->id}_inbox_count");
-        \App\Support\Logger::writeWithContext((string) "notify user: {$receiver->id}, {$subject}", (string) 'info', (bool) false);
+        Logger::writeWithContext((string) "notify user: {$receiver->id}, {$subject}", (string) 'info', (bool) false);
     }
 }

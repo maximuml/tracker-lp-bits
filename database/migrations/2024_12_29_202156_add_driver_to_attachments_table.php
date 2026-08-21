@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('attachments', function (Blueprint $table) {
-            $table->string('driver')->default("local");
+            $table->string('driver')->default('local');
         });
     }
 

@@ -3,7 +3,9 @@
 namespace App\Console\Commands;
 
 use App\Repositories\UserRepository;
+use App\Support\Logger;
 use Illuminate\Console\Command;
+use Nexus\Nexus;
 
 class UserResetPassword extends Command
 {
@@ -23,7 +25,8 @@ class UserResetPassword extends Command
 
     /**
      * Create a new command instance.
-     * @return  void
+     *
+     * @return void
      */
     public function __construct()
     {
@@ -32,7 +35,8 @@ class UserResetPassword extends Command
 
     /**
      * Execute the console command.
-     * @return  int
+     *
+     * @return int
      */
     public function handle()
     {
@@ -41,14 +45,14 @@ class UserResetPassword extends Command
         $passwordConfirmation = $this->argument('password_confirmation');
         $log = "uid: $uid, password: $password, passwordConfirmation: $passwordConfirmation";
         $this->info($log);
-        \App\Support\Logger::writeWithContext((string) $log, (string) 'info', (bool) false);
+        Logger::writeWithContext((string) $log, (string) 'info', (bool) false);
 
-        $rep = new UserRepository();
+        $rep = new UserRepository;
         $result = $rep->resetPassword($uid, $password, $passwordConfirmation);
-        $log = sprintf('[%s], %s, result: %s', \Nexus\Nexus::instance()->getRequestId(), __METHOD__, var_export($result, true));
+        $log = sprintf('[%s], %s, result: %s', Nexus::instance()->getRequestId(), __METHOD__, var_export($result, true));
         $this->info($log);
-        \App\Support\Logger::writeWithContext((string) $log, (string) 'info', (bool) false);
-    
+        Logger::writeWithContext((string) $log, (string) 'info', (bool) false);
+
         return 0;
     }
 }

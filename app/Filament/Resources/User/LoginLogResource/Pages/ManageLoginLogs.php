@@ -5,7 +5,6 @@ namespace App\Filament\Resources\User\LoginLogResource\Pages;
 use App\Filament\PageListSingle;
 use App\Filament\Resources\User\LoginLogResource;
 use Filament\Pages\Actions;
-use Filament\Resources\Pages\ManageRecords;
 
 class ManageLoginLogs extends PageListSingle
 {
@@ -14,7 +13,7 @@ class ManageLoginLogs extends PageListSingle
     protected function getHeaderActions(): array
     {
         return [
-//            Actions\CreateAction::make(),
+            //            Actions\CreateAction::make(),
         ];
     }
 }

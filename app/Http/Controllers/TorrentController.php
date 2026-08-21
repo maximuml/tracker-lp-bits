@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Auth\Permission;
 use App\Enums\Permission\PermissionEnum;
 use App\Http\Requests\TorrentRequest;
-use App\Http\Resources\RewardResource;
 use App\Http\Resources\TorrentOperationLogResource;
 use App\Http\Resources\TorrentResource;
 use App\Models\Setting;
@@ -15,20 +14,19 @@ use App\Models\TorrentOperationLog;
 use App\Models\User;
 use App\Repositories\TorrentRepository;
 use App\Repositories\UploadRepository;
+use App\Support\Logger;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
-use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 
 class TorrentController extends Controller
 {
-    /** @var  mixed */
+    /** @var mixed */
     private $repository;
 
     /**
-     * @param  \App\Repositories\TorrentRepository  $repository
-     * @return  mixed
+     * @return mixed
      */
     public function __construct(TorrentRepository $repository)
     {
@@ -36,47 +34,47 @@ class TorrentController extends Controller
     }
 
     /**
-     * @param  \Illuminate\Http\Request  $request
-     * @param  string  $section
-     * @return  array<string, mixed>
+     * @return array<string, mixed>
      */
     public function index(Request $request, ?string $section = null)
     {
-        \App\Support\Logger::writeWithContext((string) "controller torrent index entry", (string) 'info', (bool) false);
+        Logger::writeWithContext((string) 'controller torrent index entry', (string) 'info', (bool) false);
         $result = $this->repository->getList($request, Auth::user(), $section);
-        \App\Support\Logger::writeWithContext((string) "controller torrent index getList", (string) 'info', (bool) false);
+        Logger::writeWithContext((string) 'controller torrent index getList', (string) 'info', (bool) false);
         $resource = TorrentResource::collection($result);
-        \App\Support\Logger::writeWithContext((string) "controller torrent index prepare resource", (string) 'info', (bool) false);
+        Logger::writeWithContext((string) 'controller torrent index prepare resource', (string) 'info', (bool) false);
+
         return $this->success($resource);
     }
 
     /**
      * Store a newly created resource in storage.
-     * @param  \App\Http\Requests\TorrentRequest  $request
-     * @return  array<string, mixed>
+     *
+     * @return array<string, mixed>
      */
     public function store(TorrentRequest $request)
     {
-        $uploadRep = new UploadRepository();
+        $uploadRep = new UploadRepository;
         $newTorrent = $uploadRep->upload($request);
-        $resource = new JsonResource(["id" => $newTorrent->id]);
+        $resource = new JsonResource(['id' => $newTorrent->id]);
+
         return $this->success($resource);
     }
 
     /**
      * Display the specified resource.
-     * @param  int  $id
-     * @return  array<string, mixed>
+     *
+     * @return array<string, mixed>
      */
     public function show(int $id)
     {
-        \App\Support\Logger::writeWithContext((string) "controller torrent show entry", (string) 'info', (bool) false);
+        Logger::writeWithContext((string) 'controller torrent show entry', (string) 'info', (bool) false);
         /**
          * @var User
          */
         $user = Auth::user();
         $torrent = $this->repository->getDetail($id, $user);
-        \App\Support\Logger::writeWithContext((string) "controller torrent show getDetail", (string) 'info', (bool) false);
+        Logger::writeWithContext((string) 'controller torrent show getDetail', (string) 'info', (bool) false);
         $resource = new TorrentResource($torrent);
         $additional = [];
         if ($this->hasExtraField('bonus_reward_values')) {
@@ -84,15 +82,16 @@ class TorrentController extends Controller
         }
         $this->appendExtraSettings($additional, []);
         $resource->additional($additional);
-        \App\Support\Logger::writeWithContext((string) "controller torrent show prepare resource", (string) 'info', (bool) false);
+        Logger::writeWithContext((string) 'controller torrent show prepare resource', (string) 'info', (bool) false);
+
         return $this->success($resource);
     }
 
     /**
      * Update the specified resource in storage.
-     * @param  \Illuminate\Http\Request  $request
+     *
      * @param  mixed  $id
-     * @return  \Illuminate\Http\Response
+     * @return Response
      */
     public function update(Request $request, $id)
     {
@@ -101,8 +100,9 @@ class TorrentController extends Controller
 
     /**
      * Remove the specified resource from storage.
+     *
      * @param  mixed  $id
-     * @return  \Illuminate\Http\Response
+     * @return Response
      */
     public function destroy($id)
     {
@@ -118,8 +118,7 @@ class TorrentController extends Controller
     }
 
     /**
-     * @param  \Illuminate\Http\Request  $request
-     * @return  mixed
+     * @return mixed
      */
     public function approvalPage(Request $request)
     {
@@ -128,12 +127,12 @@ class TorrentController extends Controller
         $torrentId = $request->torrent_id;
         $torrent = Torrent::query()->findOrFail($torrentId, Torrent::$commentFields);
         $denyReasons = TorrentDenyReason::query()->orderBy('priority', 'desc')->get();
+
         return view('torrent/approval', compact('torrent', 'denyReasons'));
     }
 
     /**
-     * @param  \Illuminate\Http\Request  $request
-     * @return  array<string, mixed>
+     * @return array<string, mixed>
      */
     public function approvalLogs(Request $request)
     {
@@ -158,8 +157,7 @@ class TorrentController extends Controller
     }
 
     /**
-     * @param  \Illuminate\Http\Request  $request
-     * @return  array<string, mixed>
+     * @return array<string, mixed>
      */
     public function approval(Request $request)
     {
@@ -170,12 +168,12 @@ class TorrentController extends Controller
         ]);
         $params = $request->all();
         $this->repository->approval(Auth::user(), $params);
+
         return $this->success($params);
     }
 
     /**
-     * @param  \Illuminate\Http\Request  $request
-     * @return  array<string, mixed>
+     * @return array<string, mixed>
      */
     public function queryByPiecesHash(Request $request)
     {
@@ -183,7 +181,7 @@ class TorrentController extends Controller
             'pieces_hash' => 'required|array',
         ]);
         $result = $this->repository->getPiecesHashCache($request->pieces_hash);
-        return $this->success($result ?: (object)[]);
-    }
 
+        return $this->success($result ?: (object) []);
+    }
 }

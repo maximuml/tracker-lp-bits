@@ -2,25 +2,29 @@
 
 namespace App\Http\Resources;
 
+use App\Models\Poll;
+use App\Support\Time;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
- * @mixin \App\Models\Poll
+ * @mixin Poll
  */
 class PollResource extends JsonResource
 {
-    /** @var  bool */
+    /** @var bool */
     public $preserveKeys = true;
+
     /**
      * Transform the resource into an array.
+     *
      * @param  mixed  $request
-     * @return  array<int|string, mixed>
+     * @return array<int|string, mixed>
      */
     public function toArray($request)
     {
         $out = [
             'id' => $this->id,
-            'added' => \App\Support\Time::formatDateTime($this->added),
+            'added' => Time::formatDateTime($this->added),
             'question' => $this->question,
             'answers_count' => $this->answers_count,
             'options' => $this->options,

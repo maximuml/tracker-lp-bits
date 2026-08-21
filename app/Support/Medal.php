@@ -2,8 +2,8 @@
 
 namespace App\Support;
 
-use Illuminate\Support\Collection;
 use App\Models\UserMedal;
+use Illuminate\Support\Collection;
 
 /**
  * Legacy medal image helper extracted from `include/functions.php`.
@@ -39,11 +39,11 @@ final class Medal
                 $html .= sprintf(
                     '<div style="display: flex;flex-direction: column;align-items:flex-start"><span>%s: %s</span><span>%s: %s</span><span>%s: %s</span><label>%s: <input type="number" name="priority_%s" value="%s" style="width: 50px" placeholder="%s"></label>',
                     Locale::trans('label.expire_at'),
-                    $medal->pivot->expire_at ? \App\Support\Time::formatDateTime($medal->pivot->expire_at) : Locale::trans('label.permanent'),
+                    $medal->pivot->expire_at ? Time::formatDateTime($medal->pivot->expire_at) : Locale::trans('label.permanent'),
                     Locale::trans('medal.fields.bonus_addition_factor'),
                     $medal->bonus_addition_factor ?? 0,
                     Locale::trans('medal.bonus_addition_expire_at'),
-                    $medal->pivot->bonus_addition_expire_at ? \App\Support\Time::formatDateTime($medal->pivot->bonus_addition_expire_at) : Locale::trans('label.permanent'),
+                    $medal->pivot->bonus_addition_expire_at ? Time::formatDateTime($medal->pivot->bonus_addition_expire_at) : Locale::trans('label.permanent'),
                     Locale::trans('label.priority'),
                     $medal->pivot->id,
                     $medal->pivot->priority ?? 0,
@@ -63,9 +63,9 @@ final class Medal
         }
 
         if ($withActions) {
-            $medalImages[] = sprintf('<div style="display: flex;flex-direction: column;justify-content: space-between;margin-right: 10px"><div></div><div><input type="button" id="save-user-medal-btn" value="%s"/></div></div>', \App\Support\Locale::trans('label.save', [], null));
+            $medalImages[] = sprintf('<div style="display: flex;flex-direction: column;justify-content: space-between;margin-right: 10px"><div></div><div><input type="button" id="save-user-medal-btn" value="%s"/></div></div>', Locale::trans('label.save', [], null));
         }
 
-        return $wrapBefore . implode('', $medalImages) . $wrapAfter;
+        return $wrapBefore.implode('', $medalImages).$wrapAfter;
     }
 }

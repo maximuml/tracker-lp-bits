@@ -2,11 +2,9 @@
 
 namespace App\Filament\Resources\User\AttendanceLogResource\Pages;
 
-use Filament\Actions\CreateAction;
 use App\Filament\PageListSingle;
 use App\Filament\Resources\User\AttendanceLogResource;
-use Filament\Pages\Actions;
-use Filament\Resources\Pages\ManageRecords;
+use Filament\Actions\CreateAction;
 
 class ManageAttendanceLogs extends PageListSingle
 {

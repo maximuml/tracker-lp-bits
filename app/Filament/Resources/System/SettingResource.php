@@ -2,24 +2,20 @@
 
 namespace App\Filament\Resources\System;
 
-use Filament\Schemas\Schema;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Textarea;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Columns\BadgeColumn;
-use Filament\Tables\Filters\SelectFilter;
-use Filament\Actions\EditAction;
-use App\Filament\Resources\System\SettingResource\Pages\EditSetting;
 use App\Filament\OptionsTrait;
 use App\Filament\Resources\System\SettingResource\Pages;
-use App\Filament\Resources\System\SettingResource\RelationManagers;
+use App\Filament\Resources\System\SettingResource\Pages\EditSetting;
 use App\Models\Setting;
-use Filament\Forms;
+use Filament\Actions\EditAction;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
-use Filament\Tables\Table;
+use Filament\Schemas\Schema;
 use Filament\Tables;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Tables\Columns\BadgeColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Table;
 
 class SettingResource extends Resource
 {
@@ -27,9 +23,9 @@ class SettingResource extends Resource
 
     protected static ?string $model = Setting::class;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-cog';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-cog';
 
-    protected static string | \UnitEnum | null $navigationGroup = 'System';
+    protected static string|\UnitEnum|null $navigationGroup = 'System';
 
     protected static ?int $navigationSort = 1000;
 
@@ -43,7 +39,6 @@ class SettingResource extends Resource
         return self::getNavigationLabel();
     }
 
-
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -55,7 +50,7 @@ class SettingResource extends Resource
                         if (is_array($arr)) {
                             $component->disabled();
                         }
-                    })
+                    }),
             ]);
     }
 
@@ -76,7 +71,7 @@ class SettingResource extends Resource
                 EditAction::make(),
             ])
             ->toolbarActions([
-//                Tables\Actions\DeleteBulkAction::make(),
+                //                Tables\Actions\DeleteBulkAction::make(),
             ]);
     }
 
@@ -90,8 +85,8 @@ class SettingResource extends Resource
     public static function getPages(): array
     {
         return [
-//            'index' => Pages\ListSettings::route('/'),
-//            'create' => Pages\CreateSetting::route('/create'),
+            //            'index' => Pages\ListSettings::route('/'),
+            //            'create' => Pages\CreateSetting::route('/create'),
             'index' => EditSetting::route('/'),
         ];
     }

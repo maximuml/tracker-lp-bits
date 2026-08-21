@@ -7,7 +7,6 @@ use Illuminate\Support\Facades\DB;
 
 class RulesTableSeeder extends Seeder
 {
-
     /**
      * Auto generated seed file
      *
@@ -15,13 +14,11 @@ class RulesTableSeeder extends Seeder
      */
     public function run()
     {
-        
 
         DB::table('rules')->delete();
-        
-        DB::table('rules')->insert(array (
-              0 => 
-              array (
+
+        DB::table('rules')->insert([
+            0 => [
                 'id' => 21,
                 'lang_id' => 6,
                 'title' => 'General rules - <font class=striking>Breaking these rules can and will get you banned!</font>',
@@ -37,18 +34,16 @@ class RulesTableSeeder extends Seeder
             [*]Possession of multiple [site] accounts will result in a ban!
             [*]Do not upload our torrents to other trackers! (See the [url=faq.php#38]FAQ[/url] for details.)
             [*]Disruptive behavior in the forums or on the server will result in a warning. You will only get [b]one[/b] warning! After that it\'s bye bye Kansas!',
-              ),
-              1 => 
-              array (
+            ],
+            1 => [
                 'id' => 25,
                 'lang_id' => 6,
                 'title' => 'Commenting Guidelines - <font class=striking>Always respect uploaders no matter what!</font>',
                 'text' => '[*]Always respect uploaders no matter what!
             [*]All rules of forum posting apply to commenting, too.
             [*]Do not post negative comments about torrents that you don\'t plan to download.',
-              ),
-              3 => 
-              array (
+            ],
+            3 => [
                 'id' => 22,
                 'lang_id' => 6,
                 'title' => 'Downloading rules - <font class=striking>By not following these rules you will lose download privileges!</font>',
@@ -70,9 +65,8 @@ class RulesTableSeeder extends Seeder
             [*]ALL the torrents will be [color=#aaaaaa][b]2X up[/b][/color] forever when they are on the site for over 1 month.
             [*]On special occasions, we would set the whole site [color=#f0cc00][b]Free Leech[/b][/color]. Grab as much as you can. :mml:  :mml:  :mml:
             [*]You may [b]only[/b] use allowed bittorrent clients at [site]. See [url=faq.php#29]FAQ[/url].',
-              ),
-              4 => 
-              array (
+            ],
+            4 => [
                 'id' => 24,
                 'lang_id' => 6,
                 'title' => 'General Forum Guidelines - <font class=stiking>Please follow these guidelines or else you might end up with a warning!</font>',
@@ -86,18 +80,16 @@ class RulesTableSeeder extends Seeder
             [*]No double posting.
             [*]Please ensure all questions are posted in the correct section!
             [*]Topics without new reply in 365 days would be locked automatically by system.',
-              ),
-              5 => 
-              array (
+            ],
+            5 => [
                 'id' => 26,
                 'lang_id' => 6,
                 'title' => 'Avatar Guidelines - <font class=striking>Please try to follow these guidelines</font>',
                 'text' => '[*]The allowed formats are .gif, .jpg and .png.
             [*]Be considerate. Resize your images to a width of 150 px and a size of no more than 150 KB. (Browsers will rescale them anyway: smaller images will be expanded and will not look good; larger images will just waste bandwidth and CPU cycles.)
             [*]Do not use potentially offensive material involving porn, religious material, animal / human cruelty or ideologically charged images. Staff members have wide discretion on what is acceptable. If in doubt PM one. ',
-              ),
-              6 => 
-              array (
+            ],
+            6 => [
                 'id' => 23,
                 'lang_id' => 6,
                 'title' => 'Uploading rules - <font class=striking>Torrents violating these rules may be deleted without notice</font>',
@@ -216,9 +208,8 @@ class RulesTableSeeder extends Seeder
             [*]Torrents without required information can be deleted, depending on how they meet the standard.
             [*]The original torrent information can be used if it basically meets the standard.
             ',
-              ),
-              7 => 
-              array (
+            ],
+            7 => [
                 'id' => 28,
                 'lang_id' => 6,
                 'title' => 'Moderating Rules - <font class=striking>Use your better judgement!</font>',
@@ -234,9 +225,8 @@ class RulesTableSeeder extends Seeder
             [*]Before you disable a user account, send him/her a PM and if they reply, put them on a 2 week trial.
             [*]Don\'t disable a user account until he or she has been a member for at least 4 weeks.
             [*]Convince people by reasoning rather than authority.',
-              ),
-              8 => 
-              array (
+            ],
+            8 => [
                 'id' => 50,
                 'lang_id' => 6,
                 'title' => 'Rules for Subtitles - <font class=striking>Subtitles violating these rules will be deleted</font>',
@@ -267,9 +257,8 @@ class RulesTableSeeder extends Seeder
             [*]Improper subtitles will be deleted and the corresponding uploader will be fined 100 karma points in each case.
             [*]Users who recklessly uploading improper subtitles for karma points or other purposes, or users who maliciously report, will be fined karma points or warned depending on the seriousness of the case.
             ',
-              ),
-              9 => 
-              array (
+            ],
+            9 => [
                 'id' => 53,
                 'lang_id' => 6,
                 'title' => 'Staff\'s retirement benefits',
@@ -289,9 +278,8 @@ class RulesTableSeeder extends Seeder
             [b]for [color=#4b0082]Administrators[/color] and above: [/b]
             You can join [color=#1cc6d5][b]Retiree[/b][/color] [b]unconditionally[/b].
             ',
-              ),
-        ));
-        
-        
+            ],
+        ]);
+
     }
 }

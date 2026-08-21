@@ -23,10 +23,11 @@ class MigrateSnatchedHitAndRunId extends Command
 
     /**
      * Execute the console command.
-     * @return  mixed
+     *
+     * @return mixed
      */
     public function handle()
     {
-        NexusDB::statement("update snatched inner join hit_and_runs on snatched.userid = hit_and_runs.uid and snatched.torrentid = hit_and_runs.torrent_id set snatched.hit_and_run_id = hit_and_runs.id");
+        NexusDB::statement('update snatched inner join hit_and_runs on snatched.userid = hit_and_runs.uid and snatched.torrentid = hit_and_runs.torrent_id set snatched.hit_and_run_id = hit_and_runs.id');
     }
 }

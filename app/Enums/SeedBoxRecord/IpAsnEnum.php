@@ -2,9 +2,9 @@
 
 namespace App\Enums\SeedBoxRecord;
 
-enum IpAsnEnum: string {
+enum IpAsnEnum: string
+{
+    case IP = 'IP';
 
-    case IP = "IP";
-
-    case ASN = "ASN";
+    case ASN = 'ASN';
 }

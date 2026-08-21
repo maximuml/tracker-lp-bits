@@ -1,5 +1,7 @@
 <?php
 
+use App\Logging\NexusFormatter;
+use App\Support\Logger;
 use Monolog\Handler\NullHandler;
 use Monolog\Handler\StreamHandler;
 use Monolog\Handler\SyslogUdpHandler;
@@ -43,18 +45,18 @@ return [
 
         'single' => [
             'driver' => 'single',
-            'tap' => [\App\Logging\NexusFormatter::class],
-            'path' => \App\Support\Logger::filePath(''),
+            'tap' => [NexusFormatter::class],
+            'path' => Logger::filePath(''),
             'level' => env('LOG_LEVEL', 'debug'),
             'ignore_exceptions' => false,
         ],
 
         'daily' => [
             'driver' => 'daily',
-//            'path' => env('LOG_FILE', '/tmp/nexus.log'),
-            'path' => \App\Support\Logger::filePath(''),
+            //            'path' => env('LOG_FILE', '/tmp/nexus.log'),
+            'path' => Logger::filePath(''),
             'level' => env('LOG_LEVEL', 'debug'),
-            'tap' => [\App\Logging\NexusFormatter::class],
+            'tap' => [NexusFormatter::class],
             'days' => 14,
             'ignore_exceptions' => false,
         ],
@@ -83,7 +85,7 @@ return [
             'handler' => StreamHandler::class,
             'formatter' => env('LOG_STDERR_FORMATTER'),
             'ignore_exceptions' => false,
-            'tap' => [\App\Logging\NexusFormatter::class],
+            'tap' => [NexusFormatter::class],
             'with' => [
                 'stream' => 'php://stderr',
             ],
@@ -105,8 +107,8 @@ return [
         ],
 
         'emergency' => [
-//            'path' => env('LOG_FILE', '/tmp/nexus.log'),
-            'path' => \App\Support\Logger::filePath(''),
+            //            'path' => env('LOG_FILE', '/tmp/nexus.log'),
+            'path' => Logger::filePath(''),
         ],
     ],
 

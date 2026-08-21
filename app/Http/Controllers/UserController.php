@@ -10,21 +10,18 @@ use App\Models\Peer;
 use App\Models\Snatch;
 use App\Models\User;
 use App\Repositories\ExamRepository;
-use App\Repositories\TorrentRepository;
 use App\Repositories\UserRepository;
 use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
-use League\OAuth2\Server\Grant\AuthCodeGrant;
 
 class UserController extends Controller
 {
-    /** @var  mixed */
+    /** @var mixed */
     private $repository;
 
     /**
-     * @param  \App\Repositories\UserRepository  $repository
-     * @return  mixed
+     * @return mixed
      */
     public function __construct(UserRepository $repository)
     {
@@ -33,20 +30,21 @@ class UserController extends Controller
 
     /**
      * Display a listing of the resource.
-     * @param  \Illuminate\Http\Request  $request
-     * @return  array<string, mixed>
+     *
+     * @return array<string, mixed>
      */
     public function index(Request $request)
     {
         $result = $this->repository->getList($request->all());
         $resource = UserResource::collection($result);
+
         return $this->success($resource);
     }
 
     /**
      * Store a newly created resource in storage.
-     * @param  \Illuminate\Http\Request  $request
-     * @return  array<string, mixed>
+     *
+     * @return array<string, mixed>
      */
     public function store(Request $request)
     {
@@ -54,61 +52,64 @@ class UserController extends Controller
             'username' => 'required|string',
             'email' => 'required|email|unique:users',
             'password' => 'required|string|min:6|max:40',
-            'password_confirmation' => 'required|string|same:password'
+            'password_confirmation' => 'required|string|same:password',
         ];
         $request->validate($rules);
         $result = $this->repository->store($request->all());
         $resource = new UserResource($result);
+
         return $this->success($resource);
     }
 
     /**
      * Display the specified resource.
+     *
      * @param  mixed  $id
-     * @return  array<string, mixed>
+     * @return array<string, mixed>
      */
     public function show($id = null)
     {
         $currentUser = Auth::user();
-        if (!$currentUser instanceof \App\Models\User) {
-            throw new \RuntimeException("unauthenticated");
+        if (! $currentUser instanceof User) {
+            throw new \RuntimeException('unauthenticated');
         }
         if ($id === null) {
             $id = $currentUser->id;
         }
         $result = $this->repository->getDetail((int) $id, $currentUser);
         $resource = new UserResource($result);
+
         return $this->success($resource);
     }
 
     /**
      * Update the specified resource in storage.
-     * @param  \Illuminate\Http\Request  $request
+     *
      * @param  mixed  $id
-     * @return  \Illuminate\Http\Response
+     * @return Response
      */
     public function update(Request $request, $id)
     {
         //
-    
-        return new \Illuminate\Http\Response('');
+
+        return new Response('');
     }
 
     /**
      * Remove the specified resource from storage.
+     *
      * @param  mixed  $id
-     * @return  \Illuminate\Http\Response
+     * @return Response
      */
     public function destroy($id)
     {
         //
-    
-        return new \Illuminate\Http\Response('');
+
+        return new Response('');
     }
 
     /**
-     * @param  \Illuminate\Http\Request  $request
-     * @return  array<string, mixed>
+     * @return array<string, mixed>
      */
     public function resetPassword(Request $request)
     {
@@ -119,6 +120,7 @@ class UserController extends Controller
         ];
         $request->validate($rules);
         $result = $this->repository->resetPassword((int) $request->uid, $request->password, $request->password_confirmation);
+
         return $this->success($result, 'Reset password success!');
     }
 
@@ -126,6 +128,7 @@ class UserController extends Controller
     public function classes()
     {
         $result = $this->repository->listClass();
+
         return $this->success($result);
     }
 
@@ -135,27 +138,27 @@ class UserController extends Controller
         $id = (int) Auth::id();
         $result = $this->repository->getBase($id);
         $resource = new UserResource($result);
+
         return $this->success($resource);
     }
 
     /**
-     * @param  \Illuminate\Http\Request  $request
-     * @return  array<string, mixed>
+     * @return array<string, mixed>
      */
     public function matchExams(Request $request)
     {
         $request->validate([
             'uid' => 'required',
         ]);
-        $examRepository = new ExamRepository();
+        $examRepository = new ExamRepository;
         $result = $examRepository->listMatchExam((int) $request->uid);
         $resource = ExamResource::collection($result);
+
         return $this->success($resource);
     }
 
     /**
-     * @param  \Illuminate\Http\Request  $request
-     * @return  array<string, mixed>
+     * @return array<string, mixed>
      */
     public function disable(Request $request)
     {
@@ -164,16 +167,16 @@ class UserController extends Controller
             'reason' => 'required',
         ]);
         $user = Auth::user();
-        if (!$user instanceof \App\Models\User) {
-            throw new \RuntimeException("unauthenticated");
+        if (! $user instanceof User) {
+            throw new \RuntimeException('unauthenticated');
         }
         $result = $this->repository->disableUser($user, (int) $request->uid, $request->reason);
+
         return $this->success($result, 'Disable user success!');
     }
 
     /**
-     * @param  \Illuminate\Http\Request  $request
-     * @return  array<string, mixed>
+     * @return array<string, mixed>
      */
     public function enable(Request $request)
     {
@@ -181,16 +184,16 @@ class UserController extends Controller
             'uid' => 'required',
         ]);
         $user = Auth::user();
-        if (!$user instanceof \App\Models\User) {
-            throw new \RuntimeException("unauthenticated");
+        if (! $user instanceof User) {
+            throw new \RuntimeException('unauthenticated');
         }
         $result = $this->repository->enableUser($user, (int) $request->uid);
+
         return $this->success($result, 'Enable user success!');
     }
 
     /**
-     * @param  \Illuminate\Http\Request  $request
-     * @return  array<string, mixed>
+     * @return array<string, mixed>
      */
     public function inviteInfo(Request $request)
     {
@@ -199,12 +202,12 @@ class UserController extends Controller
         ]);
         $result = $this->repository->getInviteInfo((int) $request->uid);
         $resource = $result ? (new InviteResource($result)) : null;
+
         return $this->success($resource);
     }
 
     /**
-     * @param  \Illuminate\Http\Request  $request
-     * @return  array<string, mixed>
+     * @return array<string, mixed>
      */
     public function modComment(Request $request)
     {
@@ -212,6 +215,7 @@ class UserController extends Controller
             'uid' => 'required',
         ]);
         $result = $this->repository->getModComment((int) $request->uid);
+
         return $this->success($result);
     }
 
@@ -219,57 +223,62 @@ class UserController extends Controller
     public function me()
     {
         $user = Auth::user();
-        if (!$user instanceof \App\Models\User) {
-            throw new \RuntimeException("unauthenticated");
+        if (! $user instanceof User) {
+            throw new \RuntimeException('unauthenticated');
         }
 
         $resource = $this->getUserProfile($user->id);
-//
-//        $rows = [
-//            [
-//                ['icon' => 'icon-user', 'label' => '种子评论', 'name' => 'comments_count'],
-//                ['icon' => 'icon-user', 'label' => '论坛帖子', 'name' => 'posts_count'],
-//            ],[
-//                ['icon' => 'icon-user', 'label' => '发布种子', 'name' => 'torrents_count'],
-//                ['icon' => 'icon-user', 'label' => '当前做种', 'name' => 'seeding_torrents_count'],
-//                ['icon' => 'icon-user', 'label' => '当前下载', 'name' => 'leeching_torrents_count'],
-//                ['icon' => 'icon-user', 'label' => '完成种子', 'name' => 'completed_torrents_count'],
-//                ['icon' => 'icon-user', 'label' => '未完成种子', 'name' => 'incomplete_torrents_count'],
-//            ]
-//        ];
-//        $resource->additional([
-//            'card_titles' => User::$cardTitles,
-//            'rows' => $rows
-//        ]);
+        //
+        //        $rows = [
+        //            [
+        //                ['icon' => 'icon-user', 'label' => '种子评论', 'name' => 'comments_count'],
+        //                ['icon' => 'icon-user', 'label' => '论坛帖子', 'name' => 'posts_count'],
+        //            ],[
+        //                ['icon' => 'icon-user', 'label' => '发布种子', 'name' => 'torrents_count'],
+        //                ['icon' => 'icon-user', 'label' => '当前做种', 'name' => 'seeding_torrents_count'],
+        //                ['icon' => 'icon-user', 'label' => '当前下载', 'name' => 'leeching_torrents_count'],
+        //                ['icon' => 'icon-user', 'label' => '完成种子', 'name' => 'completed_torrents_count'],
+        //                ['icon' => 'icon-user', 'label' => '未完成种子', 'name' => 'incomplete_torrents_count'],
+        //            ]
+        //        ];
+        //        $resource->additional([
+        //            'card_titles' => User::$cardTitles,
+        //            'rows' => $rows
+        //        ]);
 
         return $this->success($resource);
     }
 
     /**
-     * @param  int  $id
-     * @return  mixed
+     * @return mixed
      */
     private function getUserProfile(int $id)
     {
         $user = User::query()->withCount([
             'comments', 'posts', 'seeding_torrents', 'leeching_torrents',
-            'torrents' => function ($query) {$query->whereHas('snatches');},
-            'completed_torrents' => function ($query) use ($id) {$query->where('torrents.owner', '!=', $id);},
-            'incomplete_torrents' => function ($query) use ($id) {$query->where('torrents.owner', '!=', $id);},
+            'torrents' => function ($query) {
+                $query->whereHas('snatches');
+            },
+            'completed_torrents' => function ($query) use ($id) {
+                $query->where('torrents.owner', '!=', $id);
+            },
+            'incomplete_torrents' => function ($query) use ($id) {
+                $query->where('torrents.owner', '!=', $id);
+            },
         ])->findOrFail($id);
         $resource = new UserResource($user);
+
         return $resource;
     }
 
     /**
-     * @param  \Illuminate\Http\Request  $request
-     * @return  mixed
+     * @return mixed
      */
     public function publishTorrent(Request $request)
     {
         $user = Auth::user();
-        if (!$user instanceof \App\Models\User) {
-            throw new \RuntimeException("unauthenticated");
+        if (! $user instanceof User) {
+            throw new \RuntimeException('unauthenticated');
         }
 
         $result = $user->torrents()->orderBy('id', 'desc')->paginate();
@@ -281,14 +290,13 @@ class UserController extends Controller
     }
 
     /**
-     * @param  \Illuminate\Http\Request  $request
-     * @return  mixed
+     * @return mixed
      */
     public function seedingTorrent(Request $request)
     {
         $user = Auth::user();
-        if (!$user instanceof \App\Models\User) {
-            throw new \RuntimeException("unauthenticated");
+        if (! $user instanceof User) {
+            throw new \RuntimeException('unauthenticated');
         }
 
         $result = $user->peers_torrents()->where('seeder', Peer::SEEDER_YES)->orderBy('torrent', 'desc')->paginate();
@@ -300,14 +308,13 @@ class UserController extends Controller
     }
 
     /**
-     * @param  \Illuminate\Http\Request  $request
-     * @return  mixed
+     * @return mixed
      */
     public function leechingTorrent(Request $request)
     {
         $user = Auth::user();
-        if (!$user instanceof \App\Models\User) {
-            throw new \RuntimeException("unauthenticated");
+        if (! $user instanceof User) {
+            throw new \RuntimeException('unauthenticated');
         }
 
         $result = $user->peers_torrents()->where('seeder', Peer::SEEDER_NO)->orderBy('torrent', 'desc')->paginate();
@@ -319,14 +326,13 @@ class UserController extends Controller
     }
 
     /**
-     * @param  \Illuminate\Http\Request  $request
-     * @return  mixed
+     * @return mixed
      */
     public function finishedTorrent(Request $request)
     {
         $user = Auth::user();
-        if (!$user instanceof \App\Models\User) {
-            throw new \RuntimeException("unauthenticated");
+        if (! $user instanceof User) {
+            throw new \RuntimeException('unauthenticated');
         }
 
         $result = $user->snatched_torrents()
@@ -342,14 +348,13 @@ class UserController extends Controller
     }
 
     /**
-     * @param  \Illuminate\Http\Request  $request
-     * @return  mixed
+     * @return mixed
      */
     public function notFinishedTorrent(Request $request)
     {
         $user = Auth::user();
-        if (!$user instanceof \App\Models\User) {
-            throw new \RuntimeException("unauthenticated");
+        if (! $user instanceof User) {
+            throw new \RuntimeException('unauthenticated');
         }
 
         $result = $user->snatched_torrents()
@@ -365,8 +370,7 @@ class UserController extends Controller
     }
 
     /**
-     * @param  \Illuminate\Http\Request  $request
-     * @return  array<int|string, mixed>
+     * @return array<int|string, mixed>
      */
     public function incrementDecrement(Request $request): array
     {
@@ -378,12 +382,12 @@ class UserController extends Controller
             'value' => 'required|numeric',
         ]);
         $result = $this->repository->incrementDecrement($user, $request->uid, $request->action, $request->field, $request->value, $request->reason);
+
         return $this->success(['success' => $result]);
     }
 
     /**
-     * @param  \Illuminate\Http\Request  $request
-     * @return  array<int|string, mixed>
+     * @return array<int|string, mixed>
      */
     public function removeTwoStepAuthentication(Request $request): array
     {
@@ -391,8 +395,8 @@ class UserController extends Controller
         $request->validate([
             'uid' => 'required',
         ]);
-        $result = $this->repository->removeTwoStepAuthentication($user, $request->uid, );
+        $result = $this->repository->removeTwoStepAuthentication($user, $request->uid);
+
         return $this->success(['success' => $result]);
     }
-
 }

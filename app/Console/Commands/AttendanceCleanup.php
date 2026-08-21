@@ -2,9 +2,10 @@
 
 namespace App\Console\Commands;
 
-use App\Models\Attendance;
 use App\Repositories\AttendanceRepository;
+use App\Support\Logger;
 use Illuminate\Console\Command;
+use Nexus\Nexus;
 
 class AttendanceCleanup extends Command
 {
@@ -24,7 +25,8 @@ class AttendanceCleanup extends Command
 
     /**
      * Create a new command instance.
-     * @return  void
+     *
+     * @return void
      */
     public function __construct()
     {
@@ -33,17 +35,18 @@ class AttendanceCleanup extends Command
 
     /**
      * Execute the console command.
-     * @return  mixed
+     *
+     * @return mixed
      */
     public function handle()
     {
-        $rep = new AttendanceRepository();
+        $rep = new AttendanceRepository;
         $result = $rep->cleanup();
         $log = sprintf(
             '[%s], %s, result: %s',
-            \Nexus\Nexus::instance()->getRequestId(), __METHOD__, var_export($result, true)
+            Nexus::instance()->getRequestId(), __METHOD__, var_export($result, true)
         );
         $this->info($log);
-        \App\Support\Logger::writeWithContext((string) $log, (string) 'info', (bool) false);
+        Logger::writeWithContext((string) $log, (string) 'info', (bool) false);
     }
 }

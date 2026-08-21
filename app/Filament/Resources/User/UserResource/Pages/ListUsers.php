@@ -2,15 +2,11 @@
 
 namespace App\Filament\Resources\User\UserResource\Pages;
 
+use App\Filament\PageList;
+use App\Filament\Resources\User\UserResource;
 use Filament\Actions\Contracts\HasActions;
 use Filament\Actions\CreateAction;
 use Filament\Tables\Enums\FiltersLayout;
-use App\Filament\PageList;
-use App\Filament\Resources\User\UserResource;
-use Filament\Pages\Actions;
-use Filament\Resources\Pages\ListRecords;
-use Illuminate\Database\Eloquent\Model;
-use Filament\Tables\Filters\Layout;
 
 class ListUsers extends PageList implements HasActions
 {
@@ -23,15 +19,13 @@ class ListUsers extends PageList implements HasActions
         ];
     }
 
-//    public function isTableSearchable(): bool
-//    {
-//        return true;
-//    }
-
+    //    public function isTableSearchable(): bool
+    //    {
+    //        return true;
+    //    }
 
     protected function getTableFiltersLayout(): FiltersLayout
     {
         return FiltersLayout::AboveContent;
     }
-
 }

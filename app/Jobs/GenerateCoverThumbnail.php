@@ -21,11 +21,8 @@ class GenerateCoverThumbnail implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     /**
-     * @param string $sourceUrl   Remote cover URL (http/https).
-     * @param string $absolutePath Destination filesystem path for the JPEG thumbnail.
-     * @param int    $maxWidth
-     * @param int    $maxHeight
-     * @param int    $quality
+     * @param  string  $sourceUrl  Remote cover URL (http/https).
+     * @param  string  $absolutePath  Destination filesystem path for the JPEG thumbnail.
      */
     public function __construct(
         public readonly string $sourceUrl,
@@ -33,8 +30,7 @@ class GenerateCoverThumbnail implements ShouldQueue
         public readonly int $maxWidth = 240,
         public readonly int $maxHeight = 360,
         public readonly int $quality = 82,
-    ) {
-    }
+    ) {}
 
     public function handle(): void
     {
@@ -166,7 +162,7 @@ class GenerateCoverThumbnail implements ShouldQueue
     }
 
     /**
-     * @param string $ip IPv4 or IPv6 address (must not be bracketed).
+     * @param  string  $ip  IPv4 or IPv6 address (must not be bracketed).
      */
     private static function isPublicIp(string $ip): bool
     {

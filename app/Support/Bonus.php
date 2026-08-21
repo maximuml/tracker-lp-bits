@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\Support;
 
+use App\Repositories\BonusRepository;
+use App\Support\Config\SiteConfig;
+
 /**
  * Seeding-bonus helpers drained out of `include/functions.php` as part of
  * Phase 5 of the legacy migration.
@@ -31,12 +34,12 @@ class Bonus
     public static function calculateForUser(int|string $uid, ?array $torrentIdArr = null): array
     {
         $uid = (int) $uid;
-        $settingBonus = \App\Support\Config\SiteConfig::current()->bonus->toArray();
+        $settingBonus = SiteConfig::current()->bonus->toArray();
         $minSize = $settingBonus['min_size'] ?? 0;
         $nowStr = date('Y-m-d H:i:s');
-        $logPrefix = "[CALCULATE_SEED_BONUS], uid: $uid, torrentIdArr: " . json_encode($torrentIdArr);
+        $logPrefix = "[CALCULATE_SEED_BONUS], uid: $uid, torrentIdArr: ".json_encode($torrentIdArr);
 
-        $bonusRep = app(\App\Repositories\BonusRepository::class);
+        $bonusRep = app(BonusRepository::class);
         $torrentData = $bonusRep->getTorrentRowsForBonusCalculation($uid, $torrentIdArr, $minSize);
         $sql = $torrentData['sql'];
         $torrentResult = $torrentData['torrentResult'];
@@ -47,14 +50,14 @@ class Bonus
             $tagGrouped = $bonusRep->getTagGrouped($torrentIdArrReal);
         }
 
-        $officialTag = \App\Support\Config\SiteConfig::current()->bonus->officialTag();
-        $officialAdditionalFactor = \App\Support\Config\SiteConfig::current()->bonus->officialAddition();
-        $zeroBonusTag = \App\Support\Config\SiteConfig::current()->bonus->zeroBonusTag();
-        $zeroBonusFactor = \App\Support\Config\SiteConfig::current()->bonus->zeroBonusFactor();
+        $officialTag = SiteConfig::current()->bonus->officialTag();
+        $officialAdditionalFactor = SiteConfig::current()->bonus->officialAddition();
+        $zeroBonusTag = SiteConfig::current()->bonus->zeroBonusTag();
+        $zeroBonusFactor = SiteConfig::current()->bonus->zeroBonusFactor();
 
         $medalAdditionalFactor = $bonusRep->getMedalAdditionalFactor($uid, $nowStr);
 
-        Logger::writeWithContext("$logPrefix, sql: $sql, count: " . count($torrentResult) . ", officialTag: $officialTag, officialAdditionalFactor: $officialAdditionalFactor, zeroBonusTag: $zeroBonusTag, zeroBonusFactor: $zeroBonusFactor, medalAdditionalFactor: $medalAdditionalFactor");
+        Logger::writeWithContext("$logPrefix, sql: $sql, count: ".count($torrentResult).", officialTag: $officialTag, officialAdditionalFactor: $officialAdditionalFactor, zeroBonusTag: $zeroBonusTag, zeroBonusFactor: $zeroBonusFactor, medalAdditionalFactor: $medalAdditionalFactor");
 
         $result = self::aggregateSeedBonus(
             $torrentResult,
@@ -73,7 +76,7 @@ class Bonus
             },
         );
 
-        Logger::writeWithContext("$logPrefix, result: " . json_encode($result));
+        Logger::writeWithContext("$logPrefix, result: ".json_encode($result));
 
         return $result;
     }
@@ -89,9 +92,9 @@ class Bonus
      * @param  array<int|string, array<int|string, int>>  $tagGrouped
      *                                                                 Map of torrent_id => [tag_id => 1].
      * @param  \Closure(array<string, mixed>, float, float, float, float, float): void|null  $debugLog
-     *                                                                 Optional callback invoked for each torrent with the
-     *                                                                 per-torrent debug values used by the legacy
-     *                                                                 `calculate_seed_bonus()` diagnostic log line.
+     *                                                                                                  Optional callback invoked for each torrent with the
+     *                                                                                                  per-torrent debug values used by the legacy
+     *                                                                                                  `calculate_seed_bonus()` diagnostic log line.
      * @return array<string, mixed>
      */
     public static function aggregateSeedBonus(
@@ -231,19 +234,19 @@ class Bonus
 
         $table = sprintf('<table cellpadding="5" style="%s">', $options['table_style'] ?? '');
         $table .= '<tr>';
-        $table .= sprintf('<td class="colhead">%s</td>', \App\Support\Locale::trans('bonus.table_thead.reward_type', [], null));
-        $table .= sprintf('<td class="colhead">%s</td>', \App\Support\Locale::trans('bonus.table_thead.count', [], null));
-        $table .= sprintf('<td class="colhead">%s</td>', \App\Support\Locale::trans('bonus.table_thead.size', [], null));
-        $table .= sprintf('<td class="colhead">%s</td>', \App\Support\Locale::trans('bonus.table_thead.a_value', [], null));
-        $table .= sprintf('<td class="colhead">%s</td>', \App\Support\Locale::trans('bonus.table_thead.bonus_base', [], null));
-        $table .= sprintf('<td class="colhead">%s</td>', \App\Support\Locale::trans('bonus.table_thead.factor', [], null));
-        $table .= sprintf('<td class="colhead">%s</td>', \App\Support\Locale::trans('bonus.table_thead.got_bonus', [], null));
-        $table .= sprintf('<td class="colhead">%s</td>', \App\Support\Locale::trans('bonus.table_thead.total', [], null));
+        $table .= sprintf('<td class="colhead">%s</td>', Locale::trans('bonus.table_thead.reward_type', [], null));
+        $table .= sprintf('<td class="colhead">%s</td>', Locale::trans('bonus.table_thead.count', [], null));
+        $table .= sprintf('<td class="colhead">%s</td>', Locale::trans('bonus.table_thead.size', [], null));
+        $table .= sprintf('<td class="colhead">%s</td>', Locale::trans('bonus.table_thead.a_value', [], null));
+        $table .= sprintf('<td class="colhead">%s</td>', Locale::trans('bonus.table_thead.bonus_base', [], null));
+        $table .= sprintf('<td class="colhead">%s</td>', Locale::trans('bonus.table_thead.factor', [], null));
+        $table .= sprintf('<td class="colhead">%s</td>', Locale::trans('bonus.table_thead.got_bonus', [], null));
+        $table .= sprintf('<td class="colhead">%s</td>', Locale::trans('bonus.table_thead.total', [], null));
         $table .= '</tr>';
 
         $table .= sprintf(
             '<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td rowspan="%s">%s</td></tr>',
-            \App\Support\Locale::trans('bonus.reward_types.basic', [], null),
+            Locale::trans('bonus.reward_types.basic', [], null),
             $bonusResult['torrent_peer_count'],
             Format::size((float) $bonusResult['size']),
             number_format($bonusResult['A'], 3),
@@ -256,7 +259,7 @@ class Bonus
         if ($hasMedalAddition) {
             $table .= sprintf(
                 '<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>',
-                \App\Support\Locale::trans('bonus.reward_types.medal_addition', [], null),
+                Locale::trans('bonus.reward_types.medal_addition', [], null),
                 $bonusResult['torrent_peer_count'],
                 Format::size((float) $bonusResult['size']),
                 number_format($bonusResult['A'], 3),
@@ -269,7 +272,7 @@ class Bonus
         if ($hasOfficialAddition) {
             $table .= sprintf(
                 '<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>',
-                \App\Support\Locale::trans('bonus.reward_types.official_addition', [], null),
+                Locale::trans('bonus.reward_types.official_addition', [], null),
                 $bonusResult['official_torrent_peer_count'],
                 Format::size((float) $bonusResult['official_size']),
                 number_format($bonusResult['official_a'], 3),
@@ -282,7 +285,7 @@ class Bonus
         if ($hasHaremAddition) {
             $table .= sprintf(
                 '<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>',
-                \App\Support\Locale::trans('bonus.reward_types.harem_addition', [], null),
+                Locale::trans('bonus.reward_types.harem_addition', [], null),
                 '--',
                 '--',
                 '--',
@@ -312,7 +315,7 @@ class Bonus
      */
     public static function haremAddition(int|string $uid): float|int|string
     {
-        return app(\App\Repositories\BonusRepository::class)->getHaremAddition($uid);
+        return app(BonusRepository::class)->getHaremAddition($uid);
     }
 
     /**
@@ -333,12 +336,12 @@ class Bonus
             $bonusResult = self::calculateForUser((int) ($user['id'] ?? 0));
         }
 
-        $officialTag = (string) \App\Support\Config\SiteConfig::current()->bonus->officialTag();
-        $officialAdditionalFactor = (float) \App\Support\Config\SiteConfig::current()->bonus->officialAddition(0);
-        $haremFactor = (float) \App\Support\Config\SiteConfig::current()->bonus->haremAddition();
+        $officialTag = (string) SiteConfig::current()->bonus->officialTag();
+        $officialAdditionalFactor = (float) SiteConfig::current()->bonus->officialAddition(0);
+        $haremFactor = (float) SiteConfig::current()->bonus->haremAddition();
         $haremAddition = (float) self::haremAddition((int) ($user['id'] ?? 0));
-        $isDonor = \App\Support\UserDisplay::isDonor($user);
-        $donortimesBonus = (float) \App\Support\Config\SiteConfig::current()->bonus->donorTimes();
+        $isDonor = UserDisplay::isDonor($user);
+        $donortimesBonus = (float) SiteConfig::current()->bonus->donorTimes();
 
         return self::buildBonusTable(
             $bonusResult,
@@ -375,6 +378,6 @@ class Bonus
 
         $op = $type === '-' ? '-' : '+';
 
-        app(\App\Repositories\BonusRepository::class)->updateSeedBonus($op, $point, $id);
+        app(BonusRepository::class)->updateSeedBonus($op, $point, $id);
     }
 }

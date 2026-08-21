@@ -24,6 +24,7 @@ final class SecurityConfig extends Config
     public function loginSecretDeadline(?string $default = null): ?string
     {
         $value = $this->data['login_secret_deadline'] ?? $default;
+
         return $value !== null ? (string) $value : null;
     }
 
@@ -45,6 +46,7 @@ final class SecurityConfig extends Config
     public function guestVisitType(): ?string
     {
         $value = $this->data['guest_visit_type'] ?? null;
+
         return $value !== null ? (string) $value : null;
     }
 
@@ -52,12 +54,14 @@ final class SecurityConfig extends Config
     {
         $key = "guest_visit_value_{$type}";
         $value = $this->data[$key] ?? null;
+
         return $value !== null ? (string) $value : null;
     }
 
     public function loginType(): ?string
     {
         $value = $this->data['login_type'] ?? null;
+
         return $value !== null ? (string) $value : null;
     }
 
@@ -70,5 +74,4 @@ final class SecurityConfig extends Config
     {
         return $this->string('https_announce_url', $default);
     }
-
 }

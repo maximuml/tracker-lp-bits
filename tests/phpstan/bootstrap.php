@@ -12,7 +12,6 @@
  * differs between web (true) and console (false) contexts and the
  * code under analysis branches on it.
  */
-
-if (!defined('IN_TRACKER')) {
+if (! defined('IN_TRACKER')) {
     define('IN_TRACKER', true);
 }

@@ -2,19 +2,12 @@
 
 namespace App\Filament\Resources\Section;
 
-use Filament\Schemas\Schema;
-use App\Filament\Resources\Section\StandardResource\Pages\ListStandards;
 use App\Filament\Resources\Section\StandardResource\Pages\CreateStandard;
 use App\Filament\Resources\Section\StandardResource\Pages\EditStandard;
-use App\Filament\Resources\Section\StandardResource\Pages;
-use App\Filament\Resources\Section\StandardResource\RelationManagers;
+use App\Filament\Resources\Section\StandardResource\Pages\ListStandards;
 use App\Models\Standard;
-use Filament\Forms;
-use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
 use Filament\Tables\Table;
-use Filament\Tables;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class StandardResource extends CodecResource
 {

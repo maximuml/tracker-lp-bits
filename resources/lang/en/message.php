@@ -17,11 +17,11 @@ return [
     ],
     'download_disable_upload_over_speed' => [
         'subject' => 'Download permission canceled',
-        'body' => 'Your download permission has been cancelled due to excessive upload speed, please file if you are a seed box user.' ,
+        'body' => 'Your download permission has been cancelled due to excessive upload speed, please file if you are a seed box user.',
     ],
     'download_disable_announce_paid_torrent_too_many_times' => [
         'subject' => 'Download permission canceled',
-        'body' => 'Your download permission has been cancelled due to announce to paid torrent too many times, please make sure you have enough bonus.' ,
+        'body' => 'Your download permission has been cancelled due to announce to paid torrent too many times, please make sure you have enough bonus.',
     ],
     'download_disable_fake_announce' => [
         'subject' => 'Download permission canceled',
@@ -41,7 +41,7 @@ return [
     ],
     'login_notify' => [
         'subject' => ':site_name Offsite login alert',
-        'body' => <<<BODY
+        'body' => <<<'BODY'
 You logged in at::this_login_time, IP::this_ip, location::this_location.<br/>
 Last login time::last_login_time, IP::last_ip, location::last_location.<br/>
 If it is not your own operation, the account password may have been leaked, please change it in time!
@@ -56,17 +56,17 @@ BODY,
         'body' => 'The end time of your in-progress exam :exam_name has changed from :old_end_time to :new_end_time. admin: :operator, reason: :reason.',
     ],
 
-    'mail_dear' => "Dear ",
-    'mail_you_received_a_pm' => "You have received a PM.",
-    'mail_sender' => "Sender	",
-    'mail_subject' => "Subject	",
-    'mail_date' => "Date		",
-    'mail_use_following_url' => "You can click&nbsp;",
-    'mail_use_following_url_1' => "&nbsp;to view the message (you may have to login).",
-    'mail_yours' => "<br />Yours,",
-    'mail_the_site_team' => "The %s Team.",
-    'mail_received_pm_from' => "You have received a PM from ",
-    'mail_here' => "HERE",
-    'msg_system' => "System",
-    'msg_original_message_from' => "Original Message from ",
+    'mail_dear' => 'Dear ',
+    'mail_you_received_a_pm' => 'You have received a PM.',
+    'mail_sender' => 'Sender	',
+    'mail_subject' => 'Subject	',
+    'mail_date' => 'Date		',
+    'mail_use_following_url' => 'You can click&nbsp;',
+    'mail_use_following_url_1' => '&nbsp;to view the message (you may have to login).',
+    'mail_yours' => '<br />Yours,',
+    'mail_the_site_team' => 'The %s Team.',
+    'mail_received_pm_from' => 'You have received a PM from ',
+    'mail_here' => 'HERE',
+    'msg_system' => 'System',
+    'msg_original_message_from' => 'Original Message from ',
 ];

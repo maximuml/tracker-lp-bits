@@ -136,11 +136,17 @@ This centralizes validation rules and makes them testable.
 
 **Reduces:** ~1 000 LOC, 1 major dependency, 6 console commands, 1 event listener.
 
-#### 4.2 Evaluate ClickHouse usage
+#### 4.2 Evaluate ClickHouse usage — **DECISION: KEEP**
 
-**Finding:** `ClickHouse::count()` / `ClickHouse::list()` used only in `BonusRepository` for `bonus_logs` analytics. If traffic doesn't justify ClickHouse, move `bonus_logs` to MySQL (already has `bonus_logs` table) and drop `cybercog/laravel-clickhouse`.
+**Finding:** ClickHouse is used for two high-volume log tables:
 
-**Action:** Check if `bonus_logs` MySQL table is the source of truth. If yes → remove ClickHouse. If bonus_logs volume is genuinely high → keep but document the decision.
+1. **`bonus_logs` (seeding category)** — `SeedBonusJob::insertIntoClickHouseBulk()` writes bulk seeding-bonus records every cron cycle. `BonusRepository::getCount()/getList()` reads them for `CATEGORY_SEEDING`. The MySQL `bonus_logs` table handles `CATEGORY_COMMON` (manual transactions like buying medals, cancelling H&R). The two categories are split by `business_type` — seeding types (10001–10005) go to ClickHouse, everything else to MySQL.
+
+2. **`announce_logs`** — `AnnounceLogRepository` reads from ClickHouse for the admin Announce Logs page (`AnnounceLogResource`) and Announce Monitor dashboard (`AnnounceMonitor`). Writes come from the tracker itself. TTL 90 days, `MergeTree` engine partitioned by day.
+
+**Decision rationale:** Both tables are write-heavy log tables with 90-day TTL and daily partitioning — exactly ClickHouse's sweet spot. Moving them to MySQL would create large hot tables that degrade InnoDB performance. The code already gracefully handles ClickHouse being absent (`config('clickhouse.connection.host') == ''` → empty results, `SeedBonusJob` skips insert), so ClickHouse remains **optional** — deployments without it simply don't see seeding bonus logs or announce logs.
+
+**Action taken:** Documented the decision. No code changes needed. ClickHouse stays as an optional analytics backend.
 
 #### 4.3 Consolidate auth: pick Sanctum OR Passport
 
@@ -236,7 +242,7 @@ Run in CI as a non-blocking check initially, then as auto-fix PRs.
 | PHPUnit | 11.5 | 12.x | Upgrade when Laravel 12 fully supports it |
 | PHPStan | 2.2 | 2.x latest | Already current |
 | elasticsearch/elasticsearch | ^9.0 | **remove** | Track 4.1 |
-| cybercog/laravel-clickhouse | ^0.2.1 | **remove or document** | Track 4.2 |
+| cybercog/laravel-clickhouse | ^0.2.1 | **keep** (documented) | Track 4.2 — optional analytics backend for bonus_logs + announce_logs |
 | laravel/passport | ^13.0 | **remove** (if Sanctum sufficient) | Track 4.3 |
 | laravel/sanctum | ^4.0 | keep | — |
 | rector/rector | — | add ^2.0 | Track 6.4 |

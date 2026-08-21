@@ -4,7 +4,6 @@ namespace App\Filament\Widgets\TrackerStatistics;
 
 use App\Filament\Custom\Widgets\StatTable;
 use App\Repositories\DashboardRepository;
-use Illuminate\Contracts\View\View;
 
 class TrackerOverview extends StatTable
 {
@@ -20,7 +19,7 @@ class TrackerOverview extends StatTable
      */
     protected function getTableRows(): array
     {
-        $dashboardRep = new DashboardRepository();
+        $dashboardRep = new DashboardRepository;
 
         return $dashboardRep->statTracker();
     }

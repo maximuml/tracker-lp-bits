@@ -1,35 +1,21 @@
 <?php
 
-use App\Http\Controllers\Auth\RegistrationController;
 use App\Http\Controllers\Auth\RecoveryController;
+use App\Http\Controllers\Auth\RegistrationController;
 use App\Http\Controllers\Auth\WebController as AuthWebController;
-use App\Http\Controllers\BitbucketUploadController;
-use App\Http\Controllers\OfferController;
-use App\Http\Controllers\TorrentActionController;
-use App\Http\Controllers\TorrentDetailsController;
-use App\Http\Controllers\WebCommentController;
+use App\Http\Controllers\AuthenticateController;
+use App\Http\Controllers\ForumController;
+use App\Http\Controllers\OauthController;
+use App\Http\Controllers\TokenController;
+use App\Http\Controllers\ToolController;
+use App\Http\Controllers\TorrentController;
 use App\Http\Controllers\TorrentDownloadController;
 use App\Http\Controllers\TorrentEditController;
-use App\Http\Controllers\ForumController;
-use App\Http\Controllers\FriendsController;
-use App\Http\Controllers\MessageController;
-use App\Http\Controllers\MyController;
-use App\Http\Controllers\ShoutboxController;
-use App\Http\Controllers\TorrentListingController;
 use App\Http\Controllers\TorrentUploadController;
-use App\Http\Controllers\UserDetailController;
 use App\Http\Controllers\UsercpController;
-use App\Http\Controllers\ToptenController;
-use App\Http\Controllers\LogController;
-use App\Http\Controllers\InfoController;
-use App\Http\Controllers\UtilityController;
-use App\Http\Controllers\AdminController;
-use App\Http\Controllers\BonusController;
-use App\Http\Controllers\ModerationController;
-use App\Http\Controllers\StaffController;
-use App\Http\Controllers\SupportController;
-use App\Http\Controllers\SystemController;
-use App\Http\Controllers\IndexController;
+use App\Http\Controllers\UserDetailController;
+use App\Support\Config\SiteConfig;
+use App\Support\Environment;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -72,7 +58,7 @@ Route::match(['get', 'post'], '/recover', [RecoveryController::class, 'recover']
     ->middleware('throttle:login')
     ->name('recover');
 
-Route::get("/error", [\App\Http\Controllers\ToolController::class, "error"]);
+Route::get('/error', [ToolController::class, 'error']);
 
 Route::post('/takeupload', [TorrentUploadController::class, 'legacyStore'])
     ->middleware(['auth.nexus:nexus-web', 'throttle:upload'])
@@ -89,7 +75,6 @@ Route::post('/takeedit', [TorrentEditController::class, 'legacyUpdate'])
 Route::get('/download', [TorrentDownloadController::class, 'download'])
     ->middleware('throttle:download')
     ->name('torrents.download');
-
 
 Route::middleware(['web', 'locale', 'throttle:legacy'])->group(base_path('routes/legacy/public.php'));
 
@@ -108,22 +93,22 @@ Route::match(['get', 'post'], '/usercp', [UsercpController::class, 'legacy'])
     ->name('usercp.legacy');
 
 Route::group(['prefix' => 'web', 'middleware' => ['auth.nexus:nexus-web', 'throttle:legacy']], function () {
-    Route::get('torrent-approval-page', [\App\Http\Controllers\TorrentController::class, 'approvalPage']);
-    Route::get('torrent-approval-logs', [\App\Http\Controllers\TorrentController::class, 'approvalLogs']);
-    Route::post('torrent-approval', [\App\Http\Controllers\TorrentController::class, 'approval']);
-    Route::post('token/add', [\App\Http\Controllers\TokenController::class, 'addToken']);
-    Route::post('token/del', [\App\Http\Controllers\TokenController::class, 'delToken']);
+    Route::get('torrent-approval-page', [TorrentController::class, 'approvalPage']);
+    Route::get('torrent-approval-logs', [TorrentController::class, 'approvalLogs']);
+    Route::post('torrent-approval', [TorrentController::class, 'approval']);
+    Route::post('token/add', [TokenController::class, 'addToken']);
+    Route::post('token/del', [TokenController::class, 'delToken']);
 });
 
-if (!\App\Support\Environment::isConsole()) {
-    $passkeyLoginUri = \App\Support\Config\SiteConfig::current()->security->loginSecret();
-    if (!empty($passkeyLoginUri) && \App\Support\Config\SiteConfig::current()->security->loginType() === 'passkey') {
-        Route::get("$passkeyLoginUri/{passkey}", [\App\Http\Controllers\AuthenticateController::class, 'passkeyLogin']);
+if (! Environment::isConsole()) {
+    $passkeyLoginUri = SiteConfig::current()->security->loginSecret();
+    if (! empty($passkeyLoginUri) && SiteConfig::current()->security->loginType() === 'passkey') {
+        Route::post($passkeyLoginUri, [AuthenticateController::class, 'passkeyLogin']);
     }
 }
 
 Route::group(['prefix' => 'oauth'], function () {
-    Route::get("user-info", [\App\Http\Controllers\OauthController::class, 'userInfo'])->name("oauth.user_info")->middleware('auth:api');
-    Route::get('redirect/{uuid}', [\App\Http\Controllers\OauthController::class, 'redirect']);
-    Route::get('callback/{uuid}', [\App\Http\Controllers\OauthController::class, 'callback']);
+    Route::get('user-info', [OauthController::class, 'userInfo'])->name('oauth.user_info')->middleware('auth:sanctum');
+    Route::get('redirect/{uuid}', [OauthController::class, 'redirect']);
+    Route::get('callback/{uuid}', [OauthController::class, 'callback']);
 });

@@ -6,14 +6,12 @@ use App\Models\Comment;
 use App\Models\Torrent;
 use App\Models\TorrentOperationLog;
 use App\Models\TorrentTag;
-use Illuminate\Database\Eloquent\Collection;
 use Nexus\Database\NexusDB;
 
 class TorrentDetailRepository
 {
     /**
-     * @param  int  $id
-     * @return  ?array<string, mixed>
+     * @return ?array<string, mixed>
      */
     public static function getTorrent(int $id): ?array
     {
@@ -51,9 +49,7 @@ class TorrentDetailRepository
     }
 
     /**
-     * @param  int  $torrentId
-     * @param  int  $currentUserId
-     * @return  array<int|string, mixed>
+     * @return array<int|string, mixed>
      */
     public static function getMagicInfo(int $torrentId, int $currentUserId): array
     {
@@ -86,9 +82,7 @@ class TorrentDetailRepository
     }
 
     /**
-     * @param  int  $torrentId
-     * @param  int  $currentUserId
-     * @return  array<int|string, mixed>
+     * @return array<int|string, mixed>
      */
     public static function getThanksInfo(int $torrentId, int $currentUserId): array
     {
@@ -120,17 +114,13 @@ class TorrentDetailRepository
         ];
     }
 
-    /** @param  int  $torrentId */
     public static function getCommentCount(int $torrentId): int
     {
         return Comment::query()->where('torrent', $torrentId)->count();
     }
 
     /**
-     * @param  int  $torrentId
-     * @param  int  $offset
-     * @param  int  $limit
-     * @return  array<int|string, mixed>
+     * @return array<int|string, mixed>
      */
     public static function getComments(int $torrentId, int $offset, int $limit): array
     {
@@ -143,15 +133,13 @@ class TorrentDetailRepository
             ->toArray();
     }
 
-    /** @param  int  $id */
     public static function incrementViews(int $id): void
     {
         Torrent::query()->where('id', $id)->increment('views');
     }
 
     /**
-     * @param  int  $torrentId
-     * @return  array<int, int>
+     * @return array<int, int>
      */
     public static function getTagIds(int $torrentId): array
     {
@@ -164,10 +152,6 @@ class TorrentDetailRepository
         );
     }
 
-    /**
-     * @param  int  $torrentId
-     * @return  ?TorrentOperationLog
-     */
     public static function getLatestApprovalDenyLog(int $torrentId): ?TorrentOperationLog
     {
         return TorrentOperationLog::query()

@@ -71,7 +71,7 @@ class UsercpController extends LegacyController
         if ($user === null) {
             $qs = $request->getQueryString();
 
-            return redirect('/usercp.php' . ($qs ? '?' . $qs : ''));
+            return redirect('/usercp.php'.($qs ? '?'.$qs : ''));
         }
 
         if ($request->isMethod('POST')) {

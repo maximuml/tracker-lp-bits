@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use Carbon\Carbon;
+use Illuminate\Database\Query\Builder;
 use Nexus\Database\NexusDB;
 
 class TorrentListingRepository
@@ -17,7 +18,7 @@ class TorrentListingRepository
 
     /**
      * @param  array<int|string, mixed>  $options
-     * @return  array<int|string, mixed>
+     * @return array<int|string, mixed>
      */
     public static function getList(array $options): array
     {
@@ -36,9 +37,8 @@ class TorrentListingRepository
 
     /**
      * @param  array<int|string, mixed>  $options
-     * @return  \Illuminate\Database\Query\Builder
      */
-    private static function buildBaseQuery(array $options): \Illuminate\Database\Query\Builder
+    private static function buildBaseQuery(array $options): Builder
     {
         $query = NexusDB::table('torrents');
 
@@ -67,8 +67,7 @@ class TorrentListingRepository
     }
 
     /**
-     * @param  int  $secondsBack
-     * @return  array<int|string, mixed>
+     * @return array<int|string, mixed>
      */
     public static function getHotSearch(int $secondsBack = 259200): array
     {
@@ -84,7 +83,6 @@ class TorrentListingRepository
             ->all();
     }
 
-    /** @param  int  $secondsBack */
     public static function cleanupSuggest(int $secondsBack = 518400): void
     {
         NexusDB::table('suggest')

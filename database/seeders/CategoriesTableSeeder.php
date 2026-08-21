@@ -7,7 +7,6 @@ use Illuminate\Support\Facades\DB;
 
 class CategoriesTableSeeder extends Seeder
 {
-
     /**
      * Auto generated seed file
      *
@@ -16,12 +15,10 @@ class CategoriesTableSeeder extends Seeder
     public function run()
     {
 
-
         DB::table('categories')->delete();
 
-        DB::table('categories')->insert(array (
-            0 =>
-            array (
+        DB::table('categories')->insert([
+            0 => [
                 'id' => 401,
                 'mode' => 4,
                 'class_name' => 'c_movies',
@@ -29,9 +26,8 @@ class CategoriesTableSeeder extends Seeder
                 'image' => 'catsprites.png',
                 'sort_index' => 8,
                 'icon_id' => 1,
-            ),
-            1 =>
-            array (
+            ],
+            1 => [
                 'id' => 402,
                 'mode' => 4,
                 'class_name' => 'c_tvseries',
@@ -39,9 +35,8 @@ class CategoriesTableSeeder extends Seeder
                 'image' => 'catsprites.png',
                 'sort_index' => 7,
                 'icon_id' => 1,
-            ),
-            2 =>
-            array (
+            ],
+            2 => [
                 'id' => 403,
                 'mode' => 4,
                 'class_name' => 'c_tvshows',
@@ -49,9 +44,8 @@ class CategoriesTableSeeder extends Seeder
                 'image' => 'catsprites.png',
                 'sort_index' => 6,
                 'icon_id' => 1,
-            ),
-            3 =>
-            array (
+            ],
+            3 => [
                 'id' => 404,
                 'mode' => 4,
                 'class_name' => 'c_doc',
@@ -59,9 +53,8 @@ class CategoriesTableSeeder extends Seeder
                 'image' => 'catsprites.png',
                 'sort_index' => 5,
                 'icon_id' => 1,
-            ),
-            4 =>
-            array (
+            ],
+            4 => [
                 'id' => 405,
                 'mode' => 4,
                 'class_name' => 'c_anime',
@@ -69,9 +62,8 @@ class CategoriesTableSeeder extends Seeder
                 'image' => 'catsprites.png',
                 'sort_index' => 4,
                 'icon_id' => 1,
-            ),
-            5 =>
-            array (
+            ],
+            5 => [
                 'id' => 406,
                 'mode' => 4,
                 'class_name' => 'c_mv',
@@ -79,9 +71,8 @@ class CategoriesTableSeeder extends Seeder
                 'image' => 'catsprites.png',
                 'sort_index' => 3,
                 'icon_id' => 1,
-            ),
-            6 =>
-            array (
+            ],
+            6 => [
                 'id' => 407,
                 'mode' => 4,
                 'class_name' => 'c_sports',
@@ -89,9 +80,8 @@ class CategoriesTableSeeder extends Seeder
                 'image' => 'catsprites.png',
                 'sort_index' => 2,
                 'icon_id' => 1,
-            ),
-            7 =>
-            array (
+            ],
+            7 => [
                 'id' => 408,
                 'mode' => 4,
                 'class_name' => 'c_hqaudio',
@@ -99,9 +89,8 @@ class CategoriesTableSeeder extends Seeder
                 'image' => 'catsprites.png',
                 'sort_index' => 1,
                 'icon_id' => 1,
-            ),
-            8 =>
-            array (
+            ],
+            8 => [
                 'id' => 409,
                 'mode' => 4,
                 'class_name' => 'c_misc',
@@ -109,9 +98,8 @@ class CategoriesTableSeeder extends Seeder
                 'image' => 'catsprites.png',
                 'sort_index' => 0,
                 'icon_id' => 1,
-            ),
-        ));
-
+            ],
+        ]);
 
     }
 }

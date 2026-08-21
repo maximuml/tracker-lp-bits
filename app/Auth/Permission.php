@@ -17,14 +17,15 @@ class Permission
 
     public static function assertCan(PermissionEnum $permission, ?User $user = null): void
     {
-        if (!self::can($permission, $user)) {
-            throw new InsufficientPermissionException();
+        if (! self::can($permission, $user)) {
+            throw new InsufficientPermissionException;
         }
     }
 
     public static function canUploadToNormalSection(?User $user = null): bool
     {
         $user = self::user($user);
+
         return $user instanceof User && $user->uploadpos == 'yes' && self::userCan($user, PermissionEnum::UPLOAD);
     }
 
@@ -66,6 +67,7 @@ class Permission
     public static function canPickTorrent(?User $user = null): bool
     {
         $user = self::user($user);
+
         return $user instanceof User && ($user->picker == 'yes' && self::canManageTorrent($user) || $user->class >= User::CLASS_SYSOP);
     }
 

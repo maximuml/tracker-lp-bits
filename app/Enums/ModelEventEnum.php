@@ -33,32 +33,46 @@ use App\Models\StaffMessage;
 use App\Models\Torrent;
 use App\Models\User;
 
-final class ModelEventEnum {
+final class ModelEventEnum
+{
     const TORRENT_CREATED = 'torrent_created';
+
     const TORRENT_UPDATED = 'torrent_updated';
+
     const TORRENT_DELETED = 'torrent_deleted';
 
     const USER_CREATED = 'user_created';
+
     const USER_UPDATED = 'user_updated';
+
     const USER_DELETED = 'user_deleted';
+
     const USER_ENABLED = 'user_enabled';
+
     const USER_DISABLED = 'user_disabled';
 
     const NEWS_CREATED = 'news_created';
 
     const HIT_AND_RUN_CREATED = 'hit_and_run_created';
+
     const HIT_AND_RUN_UPDATED = 'hit_and_run_updated';
+
     const HIT_AND_RUN_DELETED = 'hit_and_run_deleted';
 
     const AGENT_ALLOW_CREATED = 'agent_allow_created';
+
     const AGENT_ALLOW_UPDATED = 'agent_allow_updated';
+
     const AGENT_ALLOW_DELETED = 'agent_allow_deleted';
 
     const AGENT_DENY_CREATED = 'agent_deny_created';
+
     const AGENT_DENY_UPDATED = 'agent_deny_updated';
+
     const AGENT_DENY_DELETED = 'agent_deny_deleted';
 
     const SNATCHED_UPDATED = 'snatched_updated';
+
     const MESSAGE_CREATED = 'message_created';
 
     const STAFF_MESSAGE_CREATED = 'staff_message_created';

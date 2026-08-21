@@ -2,6 +2,10 @@
 
 namespace App\Support;
 
+use App\Exceptions\SeedBoxYesException;
+use App\Repositories\SeedBoxRepository;
+use GeoIp2\Database\Reader;
+use Nexus\Database\NexusDB;
 use Symfony\Component\HttpFoundation\IpUtils;
 
 /**
@@ -29,10 +33,10 @@ final class Network
     public static function isValid(?string $ip): bool
     {
         $ip = (string) $ip;
-        if (!ip2long($ip)) {
+        if (! ip2long($ip)) {
             return true;
         }
-        if (!empty($ip) && $ip == long2ip(ip2long($ip))) {
+        if (! empty($ip) && $ip == long2ip(ip2long($ip))) {
             $reservedIps = [
                 ['192.0.2.0', '192.0.2.255'],
                 ['192.168.0.0', '192.168.255.255'],
@@ -46,8 +50,10 @@ final class Network
                     return false;
                 }
             }
+
             return true;
         }
+
         return false;
     }
 
@@ -64,7 +70,7 @@ final class Network
         $remoteAddr = self::serverVar('REMOTE_ADDR');
         $trusted = self::getTrustedProxies();
 
-        if (!self::isIpTrusted($remoteAddr, $trusted)) {
+        if (! self::isIpTrusted($remoteAddr, $trusted)) {
             return self::normalizeIp($remoteAddr, $real);
         }
 
@@ -72,7 +78,7 @@ final class Network
 
         if ($forwarded = self::serverVar('HTTP_X_FORWARDED_FOR')) {
             $ip = self::resolveForwardedClientIp($forwarded, $real, $chainTrusted) ?? $remoteAddr;
-        } elseif (($client = self::serverVar('HTTP_CLIENT_IP')) && self::isValidIpFormat($client) && !self::isIpTrusted($client, $chainTrusted)) {
+        } elseif (($client = self::serverVar('HTTP_CLIENT_IP')) && self::isValidIpFormat($client) && ! self::isIpTrusted($client, $chainTrusted)) {
             $ip = $client;
         } else {
             $ip = $remoteAddr;
@@ -110,7 +116,7 @@ final class Network
             return self::$trustedProxies;
         }
 
-        $config = \App\Support\Env::get('TRUSTED_PROXIES', '10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,127.0.0.1,::1');
+        $config = Env::get('TRUSTED_PROXIES', '10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,127.0.0.1,::1');
         if ($config === '*') {
             return ['*'];
         }
@@ -168,7 +174,7 @@ final class Network
 
             // Reject malformed chain entries rather than skipping them; skipping
             // could allow an attacker-controlled entry further left to be chosen.
-            if (!self::isValidIpFormat($candidate)) {
+            if (! self::isValidIpFormat($candidate)) {
                 return null;
             }
 
@@ -266,9 +272,9 @@ final class Network
     public static function isValidIpv4Format(string $ip): int|false
     {
         $pattern = '/\b(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.'
-            . '(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.'
-            . '(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.'
-            . '(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b/';
+            .'(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.'
+            .'(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.'
+            .'(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b/';
 
         return preg_match($pattern, $ip);
     }
@@ -303,8 +309,8 @@ final class Network
      */
     public static function geoIpInfo(string $ip): array|false
     {
-        $locationInfo = \Nexus\Database\NexusDB::remember("locations_{$ip}", 864000, function () use ($ip) {
-            $lang = \App\Support\Locale::folderFromCookie(\App\Support\SupportContext::getCookieValue('c_lang_folder', ''), (bool) false);
+        $locationInfo = NexusDB::remember("locations_{$ip}", 864000, function () use ($ip) {
+            $lang = Locale::folderFromCookie(SupportContext::getCookieValue('c_lang_folder', ''), (bool) false);
             $langMap = [
                 'chs' => 'zh-CN',
                 'cht' => 'zh-CN',
@@ -322,7 +328,7 @@ final class Network
             ];
 
             try {
-                $database = \App\Support\Env::get('GEOIP2_DATABASE', null);
+                $database = Env::get('GEOIP2_DATABASE', null);
                 if (empty($database)) {
                     Logger::writeWithContext('no geoip2 database.');
 
@@ -334,7 +340,7 @@ final class Network
                     return false;
                 }
 
-                $reader = new \GeoIp2\Database\Reader($database);
+                $reader = new Reader($database);
                 $record = $reader->city($ip);
                 $countryName = $record->country->names[$locale] ?? $record->country->names['en'] ?? '';
                 $cityName = $record->city->names[$locale] ?? $record->city->names['en'] ?? '';
@@ -353,19 +359,19 @@ final class Network
                 $info['continent'] = $continentName;
                 $info['continent_en'] = $record->continent->names['en'] ?? '';
             } catch (\Exception $exception) {
-                Logger::writeWithContext($exception->getMessage() . ', trace: ' . $exception->getTraceAsString(), 'error');
+                Logger::writeWithContext($exception->getMessage().', trace: '.$exception->getTraceAsString(), 'error');
             }
 
             return $info;
         });
 
-        Logger::writeWithContext('ip: ' . $ip . ', result: ' . Json::encode($locationInfo));
+        Logger::writeWithContext('ip: '.$ip.', result: '.Json::encode($locationInfo));
 
         if ($locationInfo === false) {
             return false;
         }
 
-        $name = sprintf('%s[v%s]', $locationInfo['city'] ? ($locationInfo['city'] . '·' . $locationInfo['country']) : $locationInfo['country'], $locationInfo['version']);
+        $name = sprintf('%s[v%s]', $locationInfo['city'] ? ($locationInfo['city'].'·'.$locationInfo['country']) : $locationInfo['country'], $locationInfo['version']);
 
         return [
             'name' => $name,
@@ -390,21 +396,22 @@ final class Network
      */
     public static function isSeedBoxFromASN(string $ip, bool $exceptionWhenYes = false): bool
     {
-        $redis = \Nexus\Database\NexusDB::redis();
+        $redis = NexusDB::redis();
         $key = 'nexus_asn';
         $notFoundCacheValue = '__NOT_FOUND__';
         $id = null;
 
         try {
-            $database = \App\Support\Env::get('GEOIP2_ASN_DATABASE', null);
-            if (!file_exists($database) || !is_readable($database)) {
+            $database = Env::get('GEOIP2_ASN_DATABASE', null);
+            if (! file_exists($database) || ! is_readable($database)) {
                 Logger::writeWithContext("GEOIP2_ASN_DATABASE: $database not exists or not readable", 'debug');
+
                 return false;
             }
 
             static $reader;
             if (is_null($reader)) {
-                $reader = new \GeoIp2\Database\Reader($database);
+                $reader = new Reader($database);
             }
 
             $asnObj = $reader->asn($ip);
@@ -418,14 +425,14 @@ final class Network
                 return $cacheResult !== $notFoundCacheValue;
             }
 
-            $id = \App\Repositories\SeedBoxRepository::findIdByAsn($asn);
+            $id = SeedBoxRepository::findIdByAsn($asn);
             if ($id !== null) {
                 $redis->hSet($key, $asn, $id);
             } else {
                 $redis->hSet($key, $asn, $notFoundCacheValue);
             }
         } catch (\Throwable $throwable) {
-            Logger::writeWithContext("ip: $ip, " . $throwable->getMessage());
+            Logger::writeWithContext("ip: $ip, ".$throwable->getMessage());
             if (isset($asn)) {
                 $redis->hSet($key, $asn, $notFoundCacheValue);
             }
@@ -433,7 +440,7 @@ final class Network
 
         $result = $id !== null;
         if ($result && $exceptionWhenYes) {
-            throw new \App\Exceptions\SeedBoxYesException($id);
+            throw new SeedBoxYesException($id);
         }
 
         return $result;
@@ -446,7 +453,7 @@ final class Network
      */
     public static function isSeedBox(string $ip, int $uid): bool
     {
-        return \App\Repositories\SeedBoxRepository::isSeedBoxFromUserRecords($uid, $ip)['result'];
+        return SeedBoxRepository::isSeedBoxFromUserRecords($uid, $ip)['result'];
     }
 
     /**
@@ -478,7 +485,7 @@ final class Network
      */
     public static function ipLocationWithContext(string $ip): array
     {
-        $lang_functions = \App\Support\SupportContext::getLangFunctions();
+        $lang_functions = SupportContext::getLangFunctions();
 
         return self::ipLocation(
             $ip,

@@ -5,13 +5,14 @@
  * @property int $forumid
  * @property int $userid
  */
+
 namespace App\Models;
+
 class ForumMod extends NexusModel
 {
-    /** @var  string */
+    /** @var string */
     protected $table = 'forummods';
 
-    /** @var  list<string> */
+    /** @var list<string> */
     protected $fillable = ['forumid', 'userid'];
-
 }

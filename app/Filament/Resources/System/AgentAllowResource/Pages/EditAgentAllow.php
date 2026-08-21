@@ -2,8 +2,9 @@
 
 namespace App\Filament\Resources\System\AgentAllowResource\Pages;
 
-use Filament\Actions\DeleteAction;
 use App\Filament\Resources\System\AgentAllowResource;
+use App\Support\Cache;
+use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 
 class EditAgentAllow extends EditRecord
@@ -16,14 +17,15 @@ class EditAgentAllow extends EditRecord
         return [
             DeleteAction::make()->using(function ($record) {
                 $record->delete();
-                \App\Support\Cache::clearAgentAllowDeny();
+                Cache::clearAgentAllowDeny();
+
                 return redirect(AgentAllowResource::getUrl());
-            })
+            }),
         ];
     }
 
     public function afterSave(): void
     {
-        \App\Support\Cache::clearAgentAllowDeny();
+        Cache::clearAgentAllowDeny();
     }
 }

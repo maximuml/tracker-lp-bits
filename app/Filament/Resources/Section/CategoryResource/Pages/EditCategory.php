@@ -2,12 +2,11 @@
 
 namespace App\Filament\Resources\Section\CategoryResource\Pages;
 
-use Filament\Actions\DeleteAction;
 use App\Filament\EditRedirectIndexTrait;
 use App\Filament\Resources\Section\CategoryResource;
-use Filament\Pages\Actions;
+use App\Support\Cache;
+use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
-use Nexus\Database\NexusDB;
 
 class EditCategory extends EditRecord
 {
@@ -27,6 +26,6 @@ class EditCategory extends EditRecord
      */
     protected function afterSave(): void
     {
-        \App\Support\Cache::clearCategory();
+        Cache::clearCategory();
     }
 }

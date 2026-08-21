@@ -2,6 +2,7 @@
 
 namespace App\Repositories;
 
+use App\Http\Middleware\Locale;
 use App\Models\Language;
 use Nexus\Database\NexusDB;
 
@@ -54,7 +55,7 @@ class LanguageRepository extends BaseRepository
      */
     public function getLanguageList(string $type, ?bool $enabled = null): array
     {
-        $cacheKey = $type . '_lang_list';
+        $cacheKey = $type.'_lang_list';
 
         return NexusDB::remember($cacheKey, 600, function () use ($type, $enabled) {
             $query = Language::query()->where($type, 1);
@@ -88,6 +89,6 @@ class LanguageRepository extends BaseRepository
             return 'en';
         }
 
-        return \App\Http\Middleware\Locale::$languageMaps[$folder] ?? $folder;
+        return Locale::$languageMaps[$folder] ?? $folder;
     }
 }

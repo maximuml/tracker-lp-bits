@@ -22,7 +22,7 @@ class LoggerTest extends TestCase
         if ($this->originalLogDir === false) {
             putenv('NEXUS_LOG_DIR');
         } else {
-            putenv('NEXUS_LOG_DIR=' . $this->originalLogDir);
+            putenv('NEXUS_LOG_DIR='.$this->originalLogDir);
         }
         $this->resetLoggerStaticState();
         parent::tearDown();
@@ -45,21 +45,21 @@ class LoggerTest extends TestCase
     public function test_file_path_uses_nexus_log_dir_env(): void
     {
         $dir = sys_get_temp_dir();
-        putenv('NEXUS_LOG_DIR=' . $dir);
+        putenv('NEXUS_LOG_DIR='.$dir);
 
         $path = Logger::filePath('unit');
 
-        $this->assertStringStartsWith($dir . '/nexus', $path);
+        $this->assertStringStartsWith($dir.'/nexus', $path);
         $this->assertStringContainsString('-unit-', $path);
         $this->assertStringEndsWith('.log', $path);
     }
 
     public function test_write_uses_passed_user_and_passkey(): void
     {
-        $dir = sys_get_temp_dir() . '/nexus-logger-test-' . uniqid();
+        $dir = sys_get_temp_dir().'/nexus-logger-test-'.uniqid();
         mkdir($dir, 0777, true);
 
-        putenv('NEXUS_LOG_DIR=' . $dir);
+        putenv('NEXUS_LOG_DIR='.$dir);
         putenv('LOG_LEVEL=debug');
         putenv('APP_ENV=testing');
 
@@ -84,10 +84,10 @@ class LoggerTest extends TestCase
 
     public function test_write_defaults_to_zero_and_empty_passkey(): void
     {
-        $dir = sys_get_temp_dir() . '/nexus-logger-test-' . uniqid();
+        $dir = sys_get_temp_dir().'/nexus-logger-test-'.uniqid();
         mkdir($dir, 0777, true);
 
-        putenv('NEXUS_LOG_DIR=' . $dir);
+        putenv('NEXUS_LOG_DIR='.$dir);
         putenv('LOG_LEVEL=debug');
         putenv('APP_ENV=testing');
 

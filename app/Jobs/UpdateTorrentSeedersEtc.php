@@ -2,11 +2,8 @@
 
 namespace App\Jobs;
 
-use App\Models\Setting;
-use App\Models\User;
-use App\Repositories\CleanupRepository;
+use App\Support\Logger;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
@@ -51,7 +48,7 @@ class UpdateTorrentSeedersEtc implements ShouldQueue
     /**
      * 获取任务时，应该通过的中间件。
      *
-     * @return array<int, \Illuminate\Queue\Middleware\WithoutOverlapping>
+     * @return array<int, WithoutOverlapping>
      */
     public function middleware(): array
     {
@@ -67,62 +64,66 @@ class UpdateTorrentSeedersEtc implements ShouldQueue
     {
         $beginTimestamp = time();
         $logPrefix = sprintf(
-            "[CLEANUP_CLI_UPDATE_TORRENT_SEEDERS_ETC_HANDLE_JOB], commonRequestId: %s, beginTorrentId: %s, endTorrentId: %s, idStr: %s, idRedisKey: %s",
+            '[CLEANUP_CLI_UPDATE_TORRENT_SEEDERS_ETC_HANDLE_JOB], commonRequestId: %s, beginTorrentId: %s, endTorrentId: %s, idStr: %s, idRedisKey: %s',
             $this->requestId, $this->beginTorrentId, $this->endTorrentId, $this->idStr, $this->idRedisKey
         );
-        \App\Support\Logger::writeWithContext((string) "{$logPrefix}, job start ...", (string) 'info', (bool) false);
+        Logger::writeWithContext((string) "{$logPrefix}, job start ...", (string) 'info', (bool) false);
 
         $idStr = $this->idStr;
         $delIdRedisKey = false;
-        if (empty($idStr) && !empty($this->idRedisKey)) {
+        if (empty($idStr) && ! empty($this->idRedisKey)) {
             $delIdRedisKey = true;
             $idStr = NexusDB::cache_get($this->idRedisKey);
         }
         if (empty($idStr)) {
-            \App\Support\Logger::writeWithContext((string) "{$logPrefix}, no idStr or idRedisKey", (string) "error", (bool) false);
+            Logger::writeWithContext((string) "{$logPrefix}, no idStr or idRedisKey", (string) 'error', (bool) false);
+
             return;
         }
-        $torrentIdArr = array_filter(array_map('intval', explode(",", $idStr)));
+        $torrentIdArr = array_filter(array_map('intval', explode(',', $idStr)));
         if (empty($torrentIdArr)) {
-            \App\Support\Logger::writeWithContext((string) "{$logPrefix}, empty idStr", (string) "error", (bool) false);
+            Logger::writeWithContext((string) "{$logPrefix}, empty idStr", (string) 'error', (bool) false);
+
             return;
         }
-        //批量取，简单化
-        $torrents = array();
-//        $res = sql_query("SELECT torrent, seeder, COUNT(*) AS c FROM peers GROUP BY torrent, seeder where torrent in ($idStr)");
-        $res = NexusDB::table("peers")
-            ->selectRaw("torrent, seeder, COUNT(*) AS c")
+        // 批量取，简单化
+        $torrents = [];
+        //        $res = sql_query("SELECT torrent, seeder, COUNT(*) AS c FROM peers GROUP BY torrent, seeder where torrent in ($idStr)");
+        $res = NexusDB::table('peers')
+            ->selectRaw('torrent, seeder, COUNT(*) AS c')
             ->whereIn('torrent', $torrentIdArr)
             ->groupBy(['torrent', 'seeder'])
             ->get();
         if ($res->isEmpty()) {
-            \App\Support\Logger::writeWithContext((string) "{$logPrefix}, no data from idStr: {$idStr}", (string) "error", (bool) false);
+            Logger::writeWithContext((string) "{$logPrefix}, no data from idStr: {$idStr}", (string) 'error', (bool) false);
+
             return;
         }
         foreach ($res as $row) {
-            if ($row->seeder == "yes")
-            $key = "seeders";
-            else
-            $key = "leechers";
+            if ($row->seeder == 'yes') {
+                $key = 'seeders';
+            } else {
+                $key = 'leechers';
+            }
             $torrents[$row->torrent][$key] = $row->c;
         }
 
-//        $res = sql_query("SELECT torrent, COUNT(*) AS c FROM comments GROUP BY torrent where torrent in ($idStr)");
-        $res = NexusDB::table("comments")
-            ->selectRaw("torrent, COUNT(*) AS c")
+        //        $res = sql_query("SELECT torrent, COUNT(*) AS c FROM comments GROUP BY torrent where torrent in ($idStr)");
+        $res = NexusDB::table('comments')
+            ->selectRaw('torrent, COUNT(*) AS c')
             ->whereIn('torrent', $torrentIdArr)
             ->groupBy(['torrent'])
             ->get();
-       foreach ($res as $row) {
-            $torrents[$row->torrent]["comments"] = $row->c;
+        foreach ($res as $row) {
+            $torrents[$row->torrent]['comments'] = $row->c;
         }
         $rows = [];
         foreach ($torrentIdArr as $id) {
             $rows[] = [
                 'id' => $id,
-                'seeders' => $torrents[$id]["seeders"] ?? 0,
-                'leechers' => $torrents[$id]["leechers"] ?? 0,
-                'comments' => $torrents[$id]["comments"] ?? 0,
+                'seeders' => $torrents[$id]['seeders'] ?? 0,
+                'leechers' => $torrents[$id]['leechers'] ?? 0,
+                'comments' => $torrents[$id]['comments'] ?? 0,
             ];
         }
         $result = NexusDB::table('torrents')->upsert($rows, ['id'], ['seeders', 'leechers', 'comments']);
@@ -130,18 +131,17 @@ class UpdateTorrentSeedersEtc implements ShouldQueue
             NexusDB::cache_del($this->idRedisKey);
         }
         $costTime = time() - $beginTimestamp;
-        \App\Support\Logger::writeWithContext((string) sprintf("{$logPrefix}, [DONE], update torrent count: %s, result: %s, cost time: %s seconds", count($torrentIdArr), var_export($result, true), $costTime), (string) 'info', (bool) false);
-        \App\Support\Logger::writeWithContext((string) "{$logPrefix}, upsert torrents seeders/leechers/comments done", (string) "debug", (bool) false);
+        Logger::writeWithContext((string) sprintf("{$logPrefix}, [DONE], update torrent count: %s, result: %s, cost time: %s seconds", count($torrentIdArr), var_export($result, true), $costTime), (string) 'info', (bool) false);
+        Logger::writeWithContext((string) "{$logPrefix}, upsert torrents seeders/leechers/comments done", (string) 'debug', (bool) false);
     }
 
     /**
      * Handle a job failure.
      *
-     * @param  \Throwable  $exception
      * @return void
      */
     public function failed(\Throwable $exception)
     {
-        \App\Support\Logger::writeWithContext((string) ("failed: " . $exception->getMessage() . $exception->getTraceAsString()), (string) 'error', (bool) false);
+        Logger::writeWithContext((string) ('failed: '.$exception->getMessage().$exception->getTraceAsString()), (string) 'error', (bool) false);
     }
 }

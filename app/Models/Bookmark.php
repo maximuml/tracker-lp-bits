@@ -5,29 +5,33 @@
  * @property int $torrentid
  * @property int $userid
  */
+
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Bookmark extends NexusModel
 {
-    /** @var  string */
+    /** @var string */
     protected $table = 'bookmarks';
 
-    /** @var  list<string> */
+    /** @var list<string> */
     protected $fillable = ['userid', 'torrentid'];
 
     const FILTER_IGNORE = '0';
+
     const FILTER_INCLUDE = '1';
+
     const FILTER_EXCLUDE = '2';
 
-    /** @return  \Illuminate\Database\Eloquent\Relations\BelongsTo<Torrent, $this> */
-    public function torrent(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    /** @return  BelongsTo<Torrent, $this> */
+    public function torrent(): BelongsTo
     {
         return $this->belongsTo(Torrent::class, 'torrentid');
     }
 
-    /** @return  \Illuminate\Database\Eloquent\Relations\BelongsTo<User, $this> */
-    public function user(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    /** @return  BelongsTo<User, $this> */
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'userid');
     }

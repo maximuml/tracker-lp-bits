@@ -1,22 +1,25 @@
 <?php
+
 namespace App\Utils;
 
+use App\Support\Html;
+use App\Support\UserDisplay;
 use Nexus\Database\NexusDB;
 
-final class MsgAlert {
-
+final class MsgAlert
+{
     private static ?self $instance = null;
 
     /** @var array<string, array<string, mixed>> */
     private static array $alerts = [];
 
-    private string $redisKeyPrefix = "nexus_alerts";
+    private string $redisKeyPrefix = 'nexus_alerts';
 
     private function __construct()
     {
         $redis = NexusDB::redis();
         $result = $redis->lRange($this->getListKey(), 0, 10);
-        if (!empty($result)) {
+        if (! empty($result)) {
             $nowTimestamp = time();
             $valid = [];
             foreach ($result as $item) {
@@ -31,24 +34,20 @@ final class MsgAlert {
         }
     }
 
-    private function __clone()
-    {
-
-    }
+    private function __clone() {}
 
     public static function getInstance(): MsgAlert
     {
         if (isset(self::$instance)) {
             return self::$instance;
         }
+
         return self::$instance = new self;
     }
 
-
-
-    public  function add(string $name, int $deadline, string $text, string $url = "", string $color = "red"): void
+    public function add(string $name, int $deadline, string $text, string $url = '', string $color = 'red'): void
     {
-        if (!isset(self::$alerts[$name])) {
+        if (! isset(self::$alerts[$name])) {
             $params = compact('name', 'deadline', 'text', 'url', 'color');
             self::$alerts[$name] = $params;
             NexusDB::redis()->rPush($this->getListKey(), json_encode($params));
@@ -57,16 +56,15 @@ final class MsgAlert {
 
     private function getListKey(): string
     {
-        return sprintf("%s:%s", $this->redisKeyPrefix, \App\Support\UserDisplay::currentId());
+        return sprintf('%s:%s', $this->redisKeyPrefix, UserDisplay::currentId());
     }
-
 
     public static function render(): void
     {
         $nowTimestamp = time();
         foreach (self::$alerts as $item) {
             if ($item['deadline'] > $nowTimestamp) {
-                \App\Support\Html::messageAlertVoid($item['url'] ?: '', $item['text'], $item['color'] ?: 'red');
+                Html::messageAlertVoid($item['url'] ?: '', $item['text'], $item['color'] ?: 'red');
             }
         }
     }
@@ -80,7 +78,4 @@ final class MsgAlert {
             }
         }
     }
-
-
-
 }

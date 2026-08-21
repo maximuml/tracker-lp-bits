@@ -13,9 +13,11 @@ use App\Repositories\MessageRepository;
 use App\Services\Legacy\MessageService;
 use App\Support\SupportContext;
 use App\Support\UserDisplay;
+use App\Support\Validators;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 
@@ -51,7 +53,7 @@ class MessageController extends LegacyController
         }
 
         $replyto = $request->input('replyto');
-        if ($replyto !== null && $replyto !== '' && ! \App\Support\Validators::isId($replyto)) {
+        if ($replyto !== null && $replyto !== '' && ! Validators::isId($replyto)) {
             return $this->legacyAbortResponse($langSendmessage['std_error'] ?? 'Error', $langSendmessage['std_permission_denied'] ?? 'Permission denied.');
         }
         $replyto = $replyto !== null && $replyto !== '' ? (int) $replyto : 0;
@@ -73,16 +75,16 @@ class MessageController extends LegacyController
             if ((int) ($msga['receiver'] ?? 0) !== (int) ($currentUser['id'] ?? 0)) {
                 return $this->legacyAbortResponse($langSendmessage['std_error'] ?? 'Error', $langSendmessage['std_permission_denied'] ?? 'Permission denied.');
             }
-            $body .= $msga['msg'] . "\n\n-------- [url=userdetails.php?id=" . $currentUser['id'] . "]" . $currentUser['username'] . "[/url][i] Wrote at " . date("Y-m-d H:i:s") . ":[/i] --------\n";
+            $body .= $msga['msg']."\n\n-------- [url=userdetails.php?id=".$currentUser['id'].']'.$currentUser['username'].'[/url][i] Wrote at '.date('Y-m-d H:i:s').":[/i] --------\n";
             $subject = (string) $msga['subject'];
             if (preg_match('/^Re:\\s/', $subject)) {
                 $subject = preg_replace('/^Re:\\s(.*)$/', 'Re(2): \\1', $subject) ?? $subject;
             } elseif (preg_match('/^Re\\([0-9]*\\):\\s/', $subject)) {
                 $replycount = (int) preg_replace('/^Re\\(([0-9]*)\\):\\s/', '\\1', $subject);
                 $replycount++;
-                $subject = preg_replace('/^Re\\(([0-9]*)\\):\\s(.*)$/', 'Re(' . $replycount . '): \\2', $subject) ?? $subject;
+                $subject = preg_replace('/^Re\\(([0-9]*)\\):\\s(.*)$/', 'Re('.$replycount.'): \\2', $subject) ?? $subject;
             } else {
-                $subject = 'Re: ' . $subject;
+                $subject = 'Re: '.$subject;
             }
             $subject = htmlspecialchars($subject);
         }
@@ -94,7 +96,7 @@ class MessageController extends LegacyController
             $returnto = htmlspecialchars((string) $request->headers->get('referer'));
         }
 
-        $title = ($langSendmessage['text_message_to'] ?? 'Message to ') . UserDisplay::username($receiver);
+        $title = ($langSendmessage['text_message_to'] ?? 'Message to ').UserDisplay::username($receiver);
 
         return $this->legacyPageRaw($request, 'sendmessage', true, [
             'receiver' => $receiver,
@@ -117,7 +119,7 @@ class MessageController extends LegacyController
     }
 
     /**
-     * @return  array<string, mixed>
+     * @return array<string, mixed>
      */
     public function index(Request $request): array
     {
@@ -133,7 +135,7 @@ class MessageController extends LegacyController
             $dto->perPage
         );
 
-        $paginator = new \Illuminate\Pagination\LengthAwarePaginator(
+        $paginator = new LengthAwarePaginator(
             $result['messages'],
             $result['count'],
             $dto->perPage,
@@ -145,7 +147,7 @@ class MessageController extends LegacyController
     }
 
     /**
-     * @return  array<string, mixed>
+     * @return array<string, mixed>
      */
     public function store(Request $request): array
     {
@@ -156,8 +158,7 @@ class MessageController extends LegacyController
     }
 
     /**
-     * @param  \App\Models\Message  $message
-     * @return  array<string, mixed>
+     * @return array<string, mixed>
      */
     public function show(Message $message): array
     {
@@ -178,9 +179,7 @@ class MessageController extends LegacyController
     }
 
     /**
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Message  $message
-     * @return  array<string, mixed>
+     * @return array<string, mixed>
      */
     public function update(Request $request, Message $message): array
     {
@@ -208,8 +207,7 @@ class MessageController extends LegacyController
     }
 
     /**
-     * @param  \App\Models\Message  $message
-     * @return  array<string, mixed>
+     * @return array<string, mixed>
      */
     public function destroy(Message $message): array
     {
@@ -222,7 +220,7 @@ class MessageController extends LegacyController
     }
 
     /**
-     * @return  array<string, mixed>
+     * @return array<string, mixed>
      */
     public function listUnread(Request $request): array
     {

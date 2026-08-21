@@ -1,14 +1,17 @@
 <?php
+
 namespace App\Auth;
 
 use App\Models\User;
+use App\Support\AuthCookie;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Contracts\Auth\UserProvider;
+use Illuminate\Database\Eloquent\Builder;
 
 class NexusWebUserProvider implements UserProvider
 {
     /**
-     * @var \Illuminate\Database\Eloquent\Builder<User>
+     * @var Builder<User>
      */
     protected $query;
 
@@ -16,25 +19,26 @@ class NexusWebUserProvider implements UserProvider
     {
         $this->query = User::query();
     }
+
     /**
      * Retrieve a user by their unique identifier.
      *
      * @param  mixed  $identifier
-     * @return \Illuminate\Contracts\Auth\Authenticatable|null
+     * @return Authenticatable|null
      */
     public function retrieveById($identifier)
     {
         $user = $this->query->where('id', $identifier)->first();
+
         return $user instanceof User ? $user : null;
     }
-
 
     /**
      * Retrieve a user by their unique identifier and "remember me" token.
      *
      * @param  mixed  $identifier
      * @param  string  $token
-     * @return \Illuminate\Contracts\Auth\Authenticatable|null
+     * @return Authenticatable|null
      */
     public function retrieveByToken($identifier, $token)
     {
@@ -44,32 +48,27 @@ class NexusWebUserProvider implements UserProvider
     /**
      * Update the "remember me" token for the given user in storage.
      *
-     * @param  \Illuminate\Contracts\Auth\Authenticatable  $user
      * @param  string  $token
      * @return void
      */
-    public function updateRememberToken(Authenticatable $user, $token)
-    {
-
-    }
-
+    public function updateRememberToken(Authenticatable $user, $token) {}
 
     /**
      * Retrieve a user by the given credentials.
      *
      * @param  array<string, mixed>  $credentials
-     * @return \Illuminate\Contracts\Auth\Authenticatable|null
+     * @return Authenticatable|null
      */
     public function retrieveByCredentials(array $credentials)
     {
-        $user = \App\Support\AuthCookie::userFromCookie($credentials, false);
+        $user = AuthCookie::userFromCookie($credentials, false);
+
         return $user instanceof User ? $user : null;
     }
 
     /**
      * Validate a user against the given credentials.
      *
-     * @param  \Illuminate\Contracts\Auth\Authenticatable  $user
      * @param  array<string, mixed>  $credentials
      * @return bool
      */
@@ -79,7 +78,7 @@ class NexusWebUserProvider implements UserProvider
             return false;
         }
 
-        $payload = \App\Support\AuthCookie::verifyToken(
+        $payload = AuthCookie::verifyToken(
             (string) ($credentials['c_secure_pass'] ?? ''),
             (string) $user->auth_key,
         );

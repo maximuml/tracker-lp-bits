@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Support\Network;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
 use Illuminate\Http\Request;
@@ -69,7 +70,7 @@ class RouteServiceProvider extends ServiceProvider
         });
 
         RateLimiter::for('third-party', function (Request $request) {
-            return Limit::perMinute(10)->by(\App\Support\Network::clientIp());
+            return Limit::perMinute(10)->by(Network::clientIp());
         });
 
         RateLimiter::for('tracker', function (Request $request) {

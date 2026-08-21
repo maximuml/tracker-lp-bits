@@ -12,9 +12,12 @@
  * @property string|null $created_at
  * @property string|null $updated_at
  */
+
 namespace App\Models;
 
+use App\Support\Locale;
 use Laravel\Sanctum\PersonalAccessToken as SanctumPersonalAccessToken;
+
 class PersonalAccessToken extends SanctumPersonalAccessToken
 {
     public function getAbilitiesTextAttribute(): string
@@ -26,9 +29,10 @@ class PersonalAccessToken extends SanctumPersonalAccessToken
         $result = [];
         foreach ($abilities as $ability) {
             if ($ability != '*') {
-                $result[] = \App\Support\Locale::trans("route-permission.{$ability}.text", [], null);
+                $result[] = Locale::trans("route-permission.{$ability}.text", [], null);
             }
         }
+
         return implode(', ', $result);
     }
 }

@@ -20,13 +20,13 @@ class AnnounceServiceTest extends TestCase
     public function test_tracker_warning_exception_includes_message_and_interval(): void
     {
         $base = [
-            'interval'     => 1800,
+            'interval' => 1800,
             'min interval' => 300,
-            'complete'     => 1,
-            'incomplete'   => 2,
-            'downloaded'   => 3,
-            'peers'        => '',
-            'peers6'       => '',
+            'complete' => 1,
+            'incomplete' => 2,
+            'downloaded' => 3,
+            'peers' => '',
+            'peers6' => '',
         ];
 
         $e = new TrackerWarningException('port 6881 is blacklisted', $base, 7200);

@@ -23,12 +23,14 @@ class MeiliSearchStats extends Command
 
     /**
      * Execute the console command.
-     * @return  int
+     *
+     * @return int
      */
     public function handle()
     {
-        $rep = new MeiliSearchRepository();
+        $rep = new MeiliSearchRepository;
         dump($rep->getClient()->stats());
+
         return Command::SUCCESS;
     }
 }

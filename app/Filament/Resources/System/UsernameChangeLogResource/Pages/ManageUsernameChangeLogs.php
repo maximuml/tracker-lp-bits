@@ -5,7 +5,6 @@ namespace App\Filament\Resources\System\UsernameChangeLogResource\Pages;
 use App\Filament\PageListSingle;
 use App\Filament\Resources\System\UsernameChangeLogResource;
 use Filament\Pages\Actions;
-use Filament\Resources\Pages\ManageRecords;
 
 class ManageUsernameChangeLogs extends PageListSingle
 {
@@ -14,7 +13,7 @@ class ManageUsernameChangeLogs extends PageListSingle
     protected function getHeaderActions(): array
     {
         return [
-//            Actions\CreateAction::make(),
+            //            Actions\CreateAction::make(),
         ];
     }
 }

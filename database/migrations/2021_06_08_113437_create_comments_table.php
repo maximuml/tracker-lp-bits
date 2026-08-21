@@ -28,8 +28,8 @@ class CreateCommentsTable extends Migration
             $table->unsignedMediumInteger('offer')->default(0);
             $table->integer('request')->default(0);
             $table->enum('anonymous', ['yes', 'no'])->default('no');
-            $table->index(['torrent', 'id'], );
-            $table->index(['offer', 'id'], );
+            $table->index(['torrent', 'id']);
+            $table->index(['offer', 'id']);
         });
     }
 

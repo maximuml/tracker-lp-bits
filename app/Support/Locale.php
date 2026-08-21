@@ -5,6 +5,8 @@ namespace App\Support;
 use App\Http\Middleware\Locale as LocaleMiddleware;
 use App\Models\Language;
 use App\Models\Setting;
+use App\Repositories\LanguageRepository;
+use Nexus\Nexus;
 
 /**
  * Legacy locale helpers extracted from `include/functions.php`.
@@ -70,7 +72,7 @@ final class Locale
      */
     public static function userFolder(int|string $userId): string
     {
-        return app(\App\Repositories\LanguageRepository::class)->getUserFolder((int) $userId);
+        return app(LanguageRepository::class)->getUserFolder((int) $userId);
     }
 
     /**
@@ -81,7 +83,7 @@ final class Locale
      */
     public static function folderForId(int|string $langId, string $default = 'en'): string
     {
-        return app(\App\Repositories\LanguageRepository::class)->getFolderForId((int) $langId, $default);
+        return app(LanguageRepository::class)->getFolderForId((int) $langId, $default);
     }
 
     /**
@@ -121,7 +123,7 @@ final class Locale
             $scriptName = substr((string) strrchr($serverScriptName, '/'), 1) ?: '';
         }
 
-        return 'lang/' . $folder . '/lang_' . $scriptName;
+        return 'lang/'.$folder.'/lang_'.$scriptName;
     }
 
     /**
@@ -129,13 +131,13 @@ final class Locale
      *
      * Mirrors `set_langfolder_cookie()`.
      */
-    public static function setFolderCookie(string $folder, int $expires = 0x7fffffff): void
+    public static function setFolderCookie(string $folder, int $expires = 0x7FFFFFFF): void
     {
-        if ($expires !== 0x7fffffff) {
+        if ($expires !== 0x7FFFFFFF) {
             $expires = time() + $expires;
         }
 
-        setcookie('c_lang_folder', $folder, $expires, '/', '', \App\Support\Url::isSecure(), true);
+        setcookie('c_lang_folder', $folder, $expires, '/', '', Url::isSecure(), true);
     }
 
     /**
@@ -158,7 +160,7 @@ final class Locale
      */
     public static function idFromFolder(string $lang): int
     {
-        return app(\App\Repositories\LanguageRepository::class)->getIdFromFolder($lang);
+        return app(LanguageRepository::class)->getIdFromFolder($lang);
     }
 
     /**
@@ -171,7 +173,7 @@ final class Locale
      */
     public static function languageList(string $type, ?bool $enabled = null): array
     {
-        return app(\App\Repositories\LanguageRepository::class)->getLanguageList($type, $enabled);
+        return app(LanguageRepository::class)->getLanguageList($type, $enabled);
     }
 
     /**
@@ -182,7 +184,7 @@ final class Locale
      */
     public static function guestId(string $langFolder): int
     {
-        return app(\App\Repositories\LanguageRepository::class)->getGuestId($langFolder);
+        return app(LanguageRepository::class)->getGuestId($langFolder);
     }
 
     /**
@@ -200,7 +202,7 @@ final class Locale
      */
     public static function trans(string $key, array $replace = [], ?string $locale = null): string
     {
-        return \Nexus\Nexus::trans($key, $replace, $locale);
+        return Nexus::trans($key, $replace, $locale);
     }
 
     /**
@@ -210,6 +212,6 @@ final class Locale
      */
     public static function userLocale(int $uid): string
     {
-        return app(\App\Repositories\LanguageRepository::class)->getUserLocale($uid);
+        return app(LanguageRepository::class)->getUserLocale($uid);
     }
 }

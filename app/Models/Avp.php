@@ -6,6 +6,7 @@
  * @property int $value_i
  * @property int $value_u
  */
+
 namespace App\Models;
 
 use App\Models\Traits\NexusActivityLogTrait;

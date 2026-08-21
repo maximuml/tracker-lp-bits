@@ -2,7 +2,4 @@
 
 namespace App\Exceptions;
 
-class NexusException extends \Exception
-{
-
-}
+class NexusException extends \Exception {}

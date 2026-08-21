@@ -2,31 +2,35 @@
 
 namespace App\Http\Requests;
 
+use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 
 class TorrentRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
-     * @return  bool
+     *
+     * @return bool
      */
     public function authorize()
     {
         $user = $this->user();
-        return $user instanceof \App\Models\User && $user->uploadpos == "yes";
+
+        return $user instanceof User && $user->uploadpos == 'yes';
     }
 
     /**
      * Get the validation rules that apply to the request.
-     * @return  array<int|string, mixed>
+     *
+     * @return array<int|string, mixed>
      */
     public function rules()
     {
         return [
-            "descr" => "required",
-            "type" => "required",
-            "name" => "required",
-            "file" => "required|file",
+            'descr' => 'required',
+            'type' => 'required',
+            'name' => 'required',
+            'file' => 'required|file',
         ];
     }
 }

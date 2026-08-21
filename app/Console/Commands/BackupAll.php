@@ -3,7 +3,9 @@
 namespace App\Console\Commands;
 
 use App\Repositories\ToolRepository;
+use App\Support\Logger;
 use Illuminate\Console\Command;
+use Nexus\Nexus;
 
 class BackupAll extends Command
 {
@@ -23,7 +25,8 @@ class BackupAll extends Command
 
     /**
      * Create a new command instance.
-     * @return  void
+     *
+     * @return void
      */
     public function __construct()
     {
@@ -32,21 +35,22 @@ class BackupAll extends Command
 
     /**
      * Execute the console command.
-     * @return  int
+     *
+     * @return int
      */
     public function handle()
     {
         $method = $this->option('method');
         $this->info("method: $method");
-        $rep = new ToolRepository();
+        $rep = new ToolRepository;
         $result = $rep->backupAll($method);
         $log = sprintf(
             '[%s], %s, result: %s',
-            \Nexus\Nexus::instance()->getRequestId(), __METHOD__, var_export($result, true)
+            Nexus::instance()->getRequestId(), __METHOD__, var_export($result, true)
         );
         $this->info($log);
-        \App\Support\Logger::writeWithContext((string) $log, (string) 'info', (bool) false);
-    
+        Logger::writeWithContext((string) $log, (string) 'info', (bool) false);
+
         return 0;
     }
 }

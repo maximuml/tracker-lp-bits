@@ -1,14 +1,15 @@
 <?php
+
 defined('VERSION_NUMBER') || define('VERSION_NUMBER', '1.10.3');
 defined('RELEASE_DATE') || define('RELEASE_DATE', '2026-06-28');
 defined('IN_TRACKER') || define('IN_TRACKER', false);
-defined('PROJECTNAME') || define("PROJECTNAME","NexusPHP");
-defined('NEXUSPHPURL') || define("NEXUSPHPURL","https://nexusphp.org");
-defined('NEXUSWIKIURL') || define("NEXUSWIKIURL","https://doc.nexusphp.org");
-defined('VERSION') || define("VERSION","Powered by <a href=\"aboutnexus.php\">".PROJECTNAME."</a>");
-defined('THISTRACKER') || define("THISTRACKER","General");
-defined('CONTENT_WIDTH') || define("CONTENT_WIDTH", 1200);
-defined('ROOT_PATH') || define('ROOT_PATH', dirname(__DIR__) . '/');
+defined('PROJECTNAME') || define('PROJECTNAME', 'NexusPHP');
+defined('NEXUSPHPURL') || define('NEXUSPHPURL', 'https://nexusphp.org');
+defined('NEXUSWIKIURL') || define('NEXUSWIKIURL', 'https://doc.nexusphp.org');
+defined('VERSION') || define('VERSION', 'Powered by <a href="aboutnexus.php">'.PROJECTNAME.'</a>');
+defined('THISTRACKER') || define('THISTRACKER', 'General');
+defined('CONTENT_WIDTH') || define('CONTENT_WIDTH', 1200);
+defined('ROOT_PATH') || define('ROOT_PATH', dirname(__DIR__).'/');
 defined('DEFAULT_TRACKER_URI') || define('DEFAULT_TRACKER_URI', '/announce.php');
 defined('MIN_ANNOUNCE_WAIT_SECOND') || define('MIN_ANNOUNCE_WAIT_SECOND', 300);
 
@@ -33,7 +34,7 @@ defined('UC_ADMINISTRATOR') || define('UC_ADMINISTRATOR', 14);
 defined('UC_SYSOP') || define('UC_SYSOP', 15);
 defined('UC_STAFFLEADER') || define('UC_STAFFLEADER', 16);
 
-if (!defined('RUNNING_IN_OCTANE')) {
+if (! defined('RUNNING_IN_OCTANE')) {
     $runningInOctane = false;
     foreach (($_SERVER['argv'] ?? []) as $command) {
         if (preg_match('/swoole|roadrunner/i', $command)) {

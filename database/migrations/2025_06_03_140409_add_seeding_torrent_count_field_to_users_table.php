@@ -12,9 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->integer("seeding_torrent_count")->default(0);
-            $table->bigInteger("seeding_torrent_size")->default(0);
-            $table->dateTime("last_announce_at")->nullable();
+            $table->integer('seeding_torrent_count')->default(0);
+            $table->bigInteger('seeding_torrent_size')->default(0);
+            $table->dateTime('last_announce_at')->nullable();
         });
     }
 
@@ -24,7 +24,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn("seeding_torrent_count", "seeding_torrent_size", "last_announce_at");
+            $table->dropColumn('seeding_torrent_count', 'seeding_torrent_size', 'last_announce_at');
         });
     }
 };

@@ -3,19 +3,30 @@
 namespace Nexus\Field;
 
 use App\Models\SearchBox;
-use App\Models\Tag;
 use App\Models\TorrentCustomField;
 use App\Models\TorrentCustomFieldValue;
+use App\Support\Format;
+use App\Support\Html;
+use App\Support\HtmlRenderer;
+use App\Support\Locale;
+use App\Support\Logger;
+use App\Support\Pagination;
 use App\Support\SupportContext;
+use App\Support\Url;
 use Nexus\Database\NexusDB;
 
 class Field
 {
     const TYPE_TEXT = 'text';
+
     const TYPE_TEXTAREA = 'textarea';
+
     const TYPE_RADIO = 'radio';
+
     const TYPE_CHECKBOX = 'checkbox';
+
     const TYPE_SELECT = 'select';
+
     const TYPE_IMAGE = 'image';
 
     public static $types = [
@@ -56,13 +67,14 @@ class Field
     public function getTypeHuman($type)
     {
         $map = [
-            self::TYPE_TEXT => \App\Support\Locale::trans('field.type.text', [], null),
-            self::TYPE_TEXTAREA => \App\Support\Locale::trans('field.type.textarea', [], null),
-            self::TYPE_RADIO => \App\Support\Locale::trans('field.type.radio', [], null),
-            self::TYPE_CHECKBOX => \App\Support\Locale::trans('field.type.checkbox', [], null),
-            self::TYPE_SELECT => \App\Support\Locale::trans('field.type.select', [], null),
-            self::TYPE_IMAGE => \App\Support\Locale::trans('field.type.image', [], null),
+            self::TYPE_TEXT => Locale::trans('field.type.text', [], null),
+            self::TYPE_TEXTAREA => Locale::trans('field.type.textarea', [], null),
+            self::TYPE_RADIO => Locale::trans('field.type.radio', [], null),
+            self::TYPE_CHECKBOX => Locale::trans('field.type.checkbox', [], null),
+            self::TYPE_SELECT => Locale::trans('field.type.select', [], null),
+            self::TYPE_IMAGE => Locale::trans('field.type.image', [], null),
         ];
+
         return $map[$type] ?? '';
     }
 
@@ -72,9 +84,9 @@ class Field
         foreach (self::$types as $key => $value) {
             $out[$key] = sprintf('%s(%s)', $value['text'], $this->getTypeHuman($key));
         }
+
         return $out;
     }
-
 
     public function radio($name, $options, $current = null)
     {
@@ -82,26 +94,27 @@ class Field
         foreach ($options as $value => $label) {
             $arr[] = sprintf(
                 '<label style="margin-right: 4px;"><input type="radio" name="%s" value="%s"%s />%s</label>',
-                $name, $value, (string)$current === (string)$value ? ' checked' : '', $label
+                $name, $value, (string) $current === (string) $value ? ' checked' : '', $label
             );
         }
+
         return implode('', $arr);
     }
 
-    function buildFieldForm(array $row = [])
+    public function buildFieldForm(array $row = [])
     {
         $lang_functions = SupportContext::getLangFunctions();
         $lang_fields = (array) SupportContext::getGlobal('lang_fields', []);
         $lang_catmanage = (array) SupportContext::getGlobal('lang_catmanage', []);
-        $trName = \App\Support\Html::tr($lang_fields['col_name'] . '<font color="red">*</font>', '<input type="text" name="name" value="' . ($row['name'] ?? '') . '" style="width: 300px" />&nbsp;&nbsp;' . $lang_fields['col_name_help'], 1, '', true);
-        $trLabel = \App\Support\Html::tr($lang_fields['col_label'] . '<font color="red">*</font>', '<input type="text" name="label" value="' . ($row['label'] ?? '') . '"  style="width: 300px" />', 1, '', true);
-        $trType = \App\Support\Html::tr($lang_fields['col_type'] . '<font color="red">*</font>', $this->radio('type', $this->getTypeRadioOptions(), $row['type'] ?? null), 1, '', true);
-        $trRequired = \App\Support\Html::tr($lang_fields['col_required'] . '<font color="red">*</font>', $this->radio('required', ['0' => $lang_functions['text_no'], '1' => $lang_functions['text_yes']], $row['required'] ?? null), 1, '', true);
-        $trHelp = \App\Support\Html::tr($lang_fields['col_help'], '<textarea name="help" rows="4" cols="80">' . ($row['help'] ?? '') . '</textarea>', 1, '', true);
-        $trOptions = \App\Support\Html::tr($lang_fields['col_options'], '<textarea name="options" rows="6" cols="80">' . ($row['options'] ?? '') . '</textarea><br/>' . $lang_fields['col_options_help'], 1, '', true);
-        $trIsSingleRow = \App\Support\Html::tr($lang_fields['col_is_single_row'] . '<font color="red">*</font>', $this->radio('is_single_row', ['0' => $lang_functions['text_no'], '1' => $lang_functions['text_yes']], $row['is_single_row'] ?? null), 1, '', true);
-        $trPriority = \App\Support\Html::tr(\App\Support\Locale::trans('label.priority', [], null) . '<font color="red">*</font>', '<input type="number" name="priority" value="' . ($row['priority'] ?? '0') . '" style="width: 300px" />', 1, '', true);
-        $trDisplay = \App\Support\Html::tr($lang_fields['col_display'], '<textarea name="display" rows="4" cols="80">' . ($row['display'] ?? '') . '</textarea><br/>' . $lang_catmanage['row_custom_field_display_help'], 1, '', true);
+        $trName = Html::tr($lang_fields['col_name'].'<font color="red">*</font>', '<input type="text" name="name" value="'.($row['name'] ?? '').'" style="width: 300px" />&nbsp;&nbsp;'.$lang_fields['col_name_help'], 1, '', true);
+        $trLabel = Html::tr($lang_fields['col_label'].'<font color="red">*</font>', '<input type="text" name="label" value="'.($row['label'] ?? '').'"  style="width: 300px" />', 1, '', true);
+        $trType = Html::tr($lang_fields['col_type'].'<font color="red">*</font>', $this->radio('type', $this->getTypeRadioOptions(), $row['type'] ?? null), 1, '', true);
+        $trRequired = Html::tr($lang_fields['col_required'].'<font color="red">*</font>', $this->radio('required', ['0' => $lang_functions['text_no'], '1' => $lang_functions['text_yes']], $row['required'] ?? null), 1, '', true);
+        $trHelp = Html::tr($lang_fields['col_help'], '<textarea name="help" rows="4" cols="80">'.($row['help'] ?? '').'</textarea>', 1, '', true);
+        $trOptions = Html::tr($lang_fields['col_options'], '<textarea name="options" rows="6" cols="80">'.($row['options'] ?? '').'</textarea><br/>'.$lang_fields['col_options_help'], 1, '', true);
+        $trIsSingleRow = Html::tr($lang_fields['col_is_single_row'].'<font color="red">*</font>', $this->radio('is_single_row', ['0' => $lang_functions['text_no'], '1' => $lang_functions['text_yes']], $row['is_single_row'] ?? null), 1, '', true);
+        $trPriority = Html::tr(Locale::trans('label.priority', [], null).'<font color="red">*</font>', '<input type="number" name="priority" value="'.($row['priority'] ?? '0').'" style="width: 300px" />', 1, '', true);
+        $trDisplay = Html::tr($lang_fields['col_display'], '<textarea name="display" rows="4" cols="80">'.($row['display'] ?? '').'</textarea><br/>'.$lang_catmanage['row_custom_field_display_help'], 1, '', true);
 
         $id = $row['id'] ?? 0;
         $form = <<<HTML
@@ -128,16 +141,17 @@ class Field
 </form>
 </div>
 HTML;
+
         return $form;
     }
 
-    function buildFieldTable()
+    public function buildFieldTable()
     {
         $lang_functions = SupportContext::getLangFunctions();
         $lang_fields = (array) SupportContext::getGlobal('lang_fields', []);
         $perPage = 10;
         $total = NexusDB::table('torrents_custom_fields')->count();
-        list($paginationTop, $paginationBottom, , $offset, $rpp) = \App\Support\Pagination::pager($perPage, $total, "?");
+        [$paginationTop, $paginationBottom, , $offset, $rpp] = Pagination::pager($perPage, $total, '?');
         $res = NexusDB::table('torrents_custom_fields')
             ->orderBy('priority', 'desc')
             ->offset($offset)
@@ -150,11 +164,12 @@ HTML;
             'type_text' => $lang_fields['col_type'],
             'required_text' => $lang_fields['col_required'],
             'is_single_row_text' => $lang_fields['col_is_single_row'],
-            'priority' => \App\Support\Locale::trans('label.priority', [], null),
+            'priority' => Locale::trans('label.priority', [], null),
             'action' => $lang_fields['col_action'],
         ];
         $rows = [];
-        foreach ($res as $row) { $row = (array) $row;
+        foreach ($res as $row) {
+            $row = (array) $row;
             $row['required_text'] = $row['required'] ? $lang_functions['text_yes'] : $lang_functions['text_no'];
             $row['is_single_row_text'] = $row['is_single_row'] ? $lang_functions['text_yes'] : $lang_functions['text_no'];
             $row['type_text'] = sprintf('%s(%s)', $this->getTypeHuman($row['type']), $row['type']);
@@ -173,7 +188,8 @@ HTML;
 </div>
 HEAD;
         $table = $this->buildTable($header, $rows);
-        return $head . $table . $paginationBottom;
+
+        return $head.$table.$paginationBottom;
     }
 
     public function save($data)
@@ -184,7 +200,7 @@ HEAD;
         if (empty($data['name'])) {
             throw new \InvalidArgumentException("{$lang_fields['col_name']} {$lang_functions['text_required']}");
         }
-        if (!preg_match('/^\w+$/', $data['name'])) {
+        if (! preg_match('/^\w+$/', $data['name'])) {
             throw new \InvalidArgumentException("{$lang_fields['col_name']} {$lang_functions['text_invalid']}");
         }
         $attributes['name'] = $data['name'];
@@ -197,23 +213,23 @@ HEAD;
         if (empty($data['type'])) {
             throw new \InvalidArgumentException("{$lang_fields['col_type']} {$lang_functions['text_required']}");
         }
-        if (!isset(self::$types[$data['type']])) {
+        if (! isset(self::$types[$data['type']])) {
             throw new \InvalidArgumentException("{$lang_fields['col_type']} {$lang_functions['text_invalid']}");
         }
         $attributes['type'] = $data['type'];
 
-        if (!isset($data['required'])) {
+        if (! isset($data['required'])) {
             throw new \InvalidArgumentException("{$lang_fields['col_required']} {$lang_functions['text_required']}");
         }
-        if (!in_array($data['required'], ["0", "1"], true)) {
+        if (! in_array($data['required'], ['0', '1'], true)) {
             throw new \InvalidArgumentException("{$lang_fields['col_name']} {$lang_functions['text_invalid']}");
         }
         $attributes['required'] = $data['required'];
 
-        if (!isset($data['is_single_row'])) {
+        if (! isset($data['is_single_row'])) {
             throw new \InvalidArgumentException("{$lang_fields['col_is_single_row']} {$lang_functions['text_required']}");
         }
-        if (!in_array($data['is_single_row'], ["0", "1"], true)) {
+        if (! in_array($data['is_single_row'], ['0', '1'], true)) {
             throw new \InvalidArgumentException("{$lang_fields['col_is_single_row']} {$lang_functions['text_invalid']}");
         }
         $attributes['is_single_row'] = $data['is_single_row'];
@@ -225,12 +241,13 @@ HEAD;
         $now = date('Y-m-d H:i:s');
         $attributes['updated_at'] = $now;
         $table = 'torrents_custom_fields';
-        if (!empty($data['id'])) {
+        if (! empty($data['id'])) {
             $result = NexusDB::table($table)->where('id', (int) $data['id'])->update($attributes);
         } else {
             $attributes['created_at'] = $now;
             $result = NexusDB::table($table)->insertGetId($attributes);
         }
+
         return $result;
     }
 
@@ -249,23 +266,26 @@ HEAD;
             $table .= '</tr>';
         }
         $table .= '</tbody></table>';
+
         return $table;
     }
 
     public function buildFieldCheckbox($name, $current = [])
     {
         $res = NexusDB::table('torrents_custom_fields')->orderBy('priority', 'desc')->get();
-        if (!is_array($current)) {
+        if (! is_array($current)) {
             $current = explode(',', $current);
         }
         $checkbox = '';
-        foreach ($res as $row) { $row = (array) $row;
+        foreach ($res as $row) {
+            $row = (array) $row;
             $checkbox .= sprintf(
                 '<label style="margin-right: 4px;"><input type="checkbox" name="%s" value="%s"%s>%s</label>',
                 $name, $row['id'], in_array($row['id'], $current) ? ' checked' : '', "{$row['name']}[{$row['label']}]"
             );
         }
         $checkbox .= '';
+
         return $checkbox;
 
     }
@@ -283,54 +303,55 @@ HEAD;
             ->orderBy('priority', 'desc')
             ->get();
         $html = '';
-        foreach ($res as $row) { $row = (array) $row;
+        foreach ($res as $row) {
+            $row = (array) $row;
             $name = "custom_fields[$searchBoxId][{$row['id']}]";
             $currentValue = $customValues[$row['id']]['custom_field_value'] ?? '';
             $requireText = '';
             if ($row['required']) {
-                $requireText = "<font color=\"red\">*</font>";
+                $requireText = '<font color="red">*</font>';
             }
-            $trLabel = $row['label'] . $requireText;
+            $trLabel = $row['label'].$requireText;
             $trRelation = "mode_$searchBoxId";
             if ($row['type'] == self::TYPE_TEXT) {
-                $html .= \App\Support\Html::tr($trLabel, sprintf('<input type="text" name="%s" value="%s" style="width: %s"/>', $name, $currentValue, '99%'), 1, $trRelation);
+                $html .= Html::tr($trLabel, sprintf('<input type="text" name="%s" value="%s" style="width: %s"/>', $name, $currentValue, '99%'), 1, $trRelation);
             } elseif ($row['type'] == self::TYPE_TEXTAREA) {
-                $html .= \App\Support\Html::tr($trLabel, sprintf('<textarea name="%s" rows="4" style="width: %s">%s</textarea>', $name, '99%', $currentValue), 1, $trRelation);
+                $html .= Html::tr($trLabel, sprintf('<textarea name="%s" rows="4" style="width: %s">%s</textarea>', $name, '99%', $currentValue), 1, $trRelation);
             } elseif ($row['type'] == self::TYPE_RADIO || $row['type'] == self::TYPE_CHECKBOX) {
                 if ($row['type'] == self::TYPE_CHECKBOX) {
                     $name .= '[]';
                 }
-                $part = "";
+                $part = '';
                 foreach (preg_split('/[\r\n]+/', trim($row['options'])) as $option) {
                     if (empty($option) || ($pos = strpos($option, '|')) === false) {
                         continue;
                     }
                     $value = substr($option, 0, $pos);
                     $label = substr($option, $pos + 1);
-                    $checked = "";
-                    if ($row['type'] == self::TYPE_RADIO && (string)$currentValue === (string)$value) {
-                        $checked = " checked";
+                    $checked = '';
+                    if ($row['type'] == self::TYPE_RADIO && (string) $currentValue === (string) $value) {
+                        $checked = ' checked';
                     }
-                    if ($row['type'] == self::TYPE_CHECKBOX && in_array($value, (array)$currentValue)) {
-                        $checked = " checked";
+                    if ($row['type'] == self::TYPE_CHECKBOX && in_array($value, (array) $currentValue)) {
+                        $checked = ' checked';
                     }
                     $part .= sprintf(
                         '<label style="margin-right: 4px"><input type="%s" name="%s" value="%s"%s />%s</label>',
                         $row['type'], $name, $value, $checked, $label
                     );
                 }
-                $html .= \App\Support\Html::tr($trLabel, $part, 1, $trRelation);
+                $html .= Html::tr($trLabel, $part, 1, $trRelation);
             } elseif ($row['type'] == self::TYPE_SELECT) {
-                $part = '<select name="' . $name . '">';
+                $part = '<select name="'.$name.'">';
                 foreach (preg_split('/[\r\n]+/', trim($row['options'])) as $option) {
                     if (empty($option) || ($pos = strpos($option, '|')) === false) {
                         continue;
                     }
                     $value = substr($option, 0, $pos);
                     $label = substr($option, $pos + 1);
-                    $selected = "";
-                    if (in_array($value, (array)$currentValue)) {
-                        $selected = " selected";
+                    $selected = '';
+                    if (in_array($value, (array) $currentValue)) {
+                        $selected = ' selected';
                     }
                     $part .= sprintf(
                         '<option value="%s"%s>%s</option>',
@@ -338,21 +359,21 @@ HEAD;
                     );
                 }
                 $part .= '</select>';
-                $html .= \App\Support\Html::tr($trLabel, $part, 1, $trRelation);
+                $html .= Html::tr($trLabel, $part, 1, $trRelation);
             } elseif ($row['type'] == self::TYPE_IMAGE) {
-                $callbackFunc = "preview_custom_field_image_" . $row['id'];
+                $callbackFunc = 'preview_custom_field_image_'.$row['id'];
                 $iframeId = "iframe_$callbackFunc";
                 $inputId = "input_$callbackFunc";
-                $imgId = "attach" . $row['id'];
+                $imgId = 'attach'.$row['id'];
                 $previewBoxId = "preview_$callbackFunc";
-                $y = '<iframe id="' . $iframeId . '" src="' . \App\Support\Url::schemeAndHost(false) . '/attachment.php?callback_func=' . $callbackFunc . '" width="100%" height="24" frameborder="0" scrolling="no" marginheight="0" marginwidth="0"></iframe>';
+                $y = '<iframe id="'.$iframeId.'" src="'.Url::schemeAndHost(false).'/attachment.php?callback_func='.$callbackFunc.'" width="100%" height="24" frameborder="0" scrolling="no" marginheight="0" marginwidth="0"></iframe>';
                 $y .= sprintf('<input id="%s" type="text" name="%s" value="%s" style="width: %s;margin: 10px 0">', $inputId, $name, $currentValue, '99%');
-                $y .= '<div id="' . $previewBoxId . '">';
-                if (!empty($currentValue)) {
+                $y .= '<div id="'.$previewBoxId.'">';
+                if (! empty($currentValue)) {
                     if (substr($currentValue, 0, 4) == 'http') {
-                        $y .= \App\Support\HtmlRenderer::formatImg($currentValue, true, 700, 0, $imgId);
+                        $y .= HtmlRenderer::formatImg($currentValue, true, 700, 0, $imgId);
                     } else {
-                        $y .= \App\Support\Format::formatComment($currentValue);
+                        $y .= Format::formatComment($currentValue);
                     }
                 }
                 $y .= '</div>';
@@ -377,18 +398,19 @@ HEAD;
     }
 </script>
 JS;
-                $html .= \App\Support\Html::tr($trLabel, $y, 1, $trRelation, true);
+                $html .= Html::tr($trLabel, $y, 1, $trRelation, true);
             }
         }
+
         return $html;
     }
 
     public function listTorrentCustomField($torrentId, $searchBoxId)
     {
-        //suppose torrentId is array
+        // suppose torrentId is array
         $isArray = true;
         $torrentIdArr = $torrentId;
-        if (!is_array($torrentId)) {
+        if (! is_array($torrentId)) {
             $isArray = false;
             $torrentIdArr = [$torrentId];
         }
@@ -411,7 +433,8 @@ JS;
             ->get();
         $values = [];
         $result = [];
-        foreach ($res as $row) { $row = (array) $row;
+        foreach ($res as $row) {
+            $row = (array) $row;
             $typeInfo = self::$types[$row['type']];
             if ($typeInfo['has_option']) {
                 $options = preg_split('/[\r\n]+/', trim($row['options']));
@@ -436,6 +459,7 @@ JS;
                 $field['custom_field_value'] = $values[$tid][$field['id']];
             }
         }
+
         return $isArray ? $result : ($result[$torrentId] ?? []);
     }
 
@@ -448,9 +472,10 @@ JS;
         $shouldRenderMixRow = false;
         foreach ($customFields as $field) {
             if (empty($field['custom_field_value'])) {
-                //No value, remove special tags
+                // No value, remove special tags
                 $mixedRowContent = str_replace("<%{$field['name']}.label%>", '', $mixedRowContent);
                 $mixedRowContent = str_replace("<%{$field['name']}.value%>", '', $mixedRowContent);
+
                 continue;
             }
             $shouldRenderMixRow = true;
@@ -458,26 +483,25 @@ JS;
             $mixedRowContent = str_replace("<%{$field['name']}.label%>", $field['label'], $mixedRowContent);
             $mixedRowContent = str_replace("<%{$field['name']}.value%>", $contentNotFormatted, $mixedRowContent);
             if ($field['is_single_row']) {
-                if (!empty($field['display'])) {
+                if (! empty($field['display'])) {
                     $customFieldDisplay = $field['display'];
                     $customFieldDisplay = str_replace("<%{$field['name']}.label%>", $field['label'], $customFieldDisplay);
                     $customFieldDisplay = str_replace("<%{$field['name']}.value%>", $contentNotFormatted, $customFieldDisplay);
-                    $rowByRowHtml .= \App\Support\Html::tr($field['label'], \App\Support\Format::formatComment($customFieldDisplay), 1);
+                    $rowByRowHtml .= Html::tr($field['label'], Format::formatComment($customFieldDisplay), 1);
                 } else {
                     $contentFormatted = $this->formatCustomFieldValue($field, true);
-                    $rowByRowHtml .= \App\Support\Html::tr($field['label'], $contentFormatted, 1);
+                    $rowByRowHtml .= Html::tr($field['label'], $contentFormatted, 1);
                 }
             }
         }
 
         $result = $rowByRowHtml;
         if ($shouldRenderMixRow && $mixedRowContent) {
-            $result .= \App\Support\Html::tr($displayName, \App\Support\Format::formatComment($mixedRowContent), 1);
+            $result .= Html::tr($displayName, Format::formatComment($mixedRowContent), 1);
         }
+
         return $result;
     }
-
-
 
     protected function formatCustomFieldValue(array $customFieldWithValue, $doFormatComment = false): string
     {
@@ -486,20 +510,20 @@ JS;
         switch ($customFieldWithValue['type']) {
             case self::TYPE_TEXT:
             case self::TYPE_TEXTAREA:
-                $result .= $doFormatComment ? \App\Support\Format::formatComment($fieldValue) : $fieldValue;
+                $result .= $doFormatComment ? Format::formatComment($fieldValue) : $fieldValue;
                 break;
             case self::TYPE_IMAGE:
                 if (substr($fieldValue, 0, 4) == 'http') {
-                    $result .= $doFormatComment ? \App\Support\HtmlRenderer::formatImg($fieldValue, true, 700, 0, "attach{$customFieldWithValue['id']}") : $fieldValue;
+                    $result .= $doFormatComment ? HtmlRenderer::formatImg($fieldValue, true, 700, 0, "attach{$customFieldWithValue['id']}") : $fieldValue;
                 } else {
-                    $result .= $doFormatComment ? \App\Support\Format::formatComment($fieldValue) : $fieldValue;
+                    $result .= $doFormatComment ? Format::formatComment($fieldValue) : $fieldValue;
                 }
                 break;
             case self::TYPE_RADIO:
             case self::TYPE_CHECKBOX:
-            case self::TYPE_SELECT;
+            case self::TYPE_SELECT:
                 $fieldContent = [];
-                foreach ((array)$fieldValue as $item) {
+                foreach ((array) $fieldValue as $item) {
                     $fieldContent[] = $customFieldWithValue['options'][$item] ?? '';
                 }
                 $result .= implode(' ', $fieldContent);
@@ -507,6 +531,7 @@ JS;
             default:
                 break;
         }
+
         return $result;
     }
 
@@ -518,9 +543,9 @@ JS;
         if (is_null($fieldName)) {
             return $this->preparedTorrentCustomFieldValues[$torrentId] ?? [];
         }
+
         return $this->preparedTorrentCustomFieldValues[$torrentId][$fieldName] ?? '';
     }
-
 
     public function saveFieldValues($searchBoxId, $torrentId, array $data)
     {
@@ -531,9 +556,10 @@ JS;
         foreach ($enabledFields as $field) {
             if (empty($data[$field->id])) {
                 if ($field->required) {
-//                    throw new \InvalidArgumentException(nexus_trans("nexus.require_argument", ['argument' => $field->label]));
-                    \App\Support\Logger::writeWithContext((string) "Field: {$field->label} required, but empty", (string) 'info', (bool) false);
+                    //                    throw new \InvalidArgumentException(nexus_trans("nexus.require_argument", ['argument' => $field->label]));
+                    Logger::writeWithContext((string) "Field: {$field->label} required, but empty", (string) 'info', (bool) false);
                 }
+
                 continue;
             }
             $insert[] = [
@@ -547,7 +573,4 @@ JS;
         TorrentCustomFieldValue::query()->where('torrent_id', $torrentId)->delete();
         TorrentCustomFieldValue::query()->insert($insert);
     }
-
-
-
 }

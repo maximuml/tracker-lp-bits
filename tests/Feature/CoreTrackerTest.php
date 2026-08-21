@@ -4,12 +4,13 @@ namespace Tests\Feature;
 
 use App\Models\Category;
 use App\Models\Comment;
+use App\Models\SearchBox;
 use App\Models\Torrent;
 use App\Models\User;
 use App\ValueObjects\InfoHash;
 use App\ValueObjects\PeerId;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Laravel\Sanctum\Sanctum;
 use Rhilip\Bencode\Bencode;
 use Tests\TestCase;
@@ -33,7 +34,7 @@ class CoreTrackerTest extends TestCase
 
         Sanctum::actingAs($user, ['torrent:view']);
 
-        $this->getJson('/api/v1/detail/' . $torrent->id)
+        $this->getJson('/api/v1/detail/'.$torrent->id)
             ->assertStatus(200)
             ->assertJsonPath('ret', 0)
             ->assertJsonPath('data.data.name', $torrent->name);
@@ -42,7 +43,7 @@ class CoreTrackerTest extends TestCase
     public function test_api_torrents_listing_returns_results(): void
     {
         $user = User::factory()->create();
-        $category = Category::where('mode', \App\Models\SearchBox::getBrowseMode())->first()
+        $category = Category::where('mode', SearchBox::getBrowseMode())->first()
             ?? Category::factory()->create();
 
         Torrent::factory()->owner($user)->category($category->id)->create();
@@ -63,7 +64,7 @@ class CoreTrackerTest extends TestCase
 
         Sanctum::actingAs($user, ['torrent:view']);
 
-        $this->getJson('/api/v1/comments?parent_id=' . $torrent->id . '&type=torrent')
+        $this->getJson('/api/v1/comments?parent_id='.$torrent->id.'&type=torrent')
             ->assertStatus(200)
             ->assertJsonPath('ret', 0)
             ->assertJsonPath('data.data.0.id', $comment->id);
@@ -86,7 +87,7 @@ class CoreTrackerTest extends TestCase
         $torrent = Torrent::factory()->owner($user)->create();
 
         $this->withNexusCookie($user)
-            ->get('/details/' . $torrent->id)
+            ->get('/details/'.$torrent->id)
             ->assertStatus(200)
             ->assertSee($torrent->name);
     }
@@ -123,8 +124,8 @@ class CoreTrackerTest extends TestCase
         $this->assertSame(20, strlen($infoHash));
 
         $response = $this->get(
-            '/scrape?passkey=' . $user->passkey
-            . '&info_hash=' . rawurlencode($infoHash),
+            '/scrape?passkey='.$user->passkey
+            .'&info_hash='.rawurlencode($infoHash),
             ['User-Agent' => 'qBittorrent/4.5.2']
         );
 
@@ -140,18 +141,18 @@ class CoreTrackerTest extends TestCase
         $torrent = Torrent::factory()->owner($user)->create();
 
         $infoHash = InfoHash::fromBinary($torrent->info_hash)->toBinary();
-        $peerId = '-qB4' . sprintf('%02d', random_int(0, 99)) . random_bytes(14);
+        $peerId = '-qB4'.sprintf('%02d', random_int(0, 99)).random_bytes(14);
         $peerId = PeerId::fromBinary($peerId)->toBinary();
 
         $response = $this->get(
-            '/announce?passkey=' . $user->passkey
-            . '&info_hash=' . rawurlencode($infoHash)
-            . '&peer_id=' . rawurlencode($peerId)
-            . '&port=12345'
-            . '&uploaded=0'
-            . '&downloaded=0'
-            . '&left=0'
-            . '&event=started',
+            '/announce?passkey='.$user->passkey
+            .'&info_hash='.rawurlencode($infoHash)
+            .'&peer_id='.rawurlencode($peerId)
+            .'&port=12345'
+            .'&uploaded=0'
+            .'&downloaded=0'
+            .'&left=0'
+            .'&event=started',
             ['User-Agent' => 'qBittorrent/4.5.2']
         );
 

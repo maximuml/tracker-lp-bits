@@ -1,10 +1,11 @@
 <?php
+
 // Returns method signature as JSON for a static method like "App\\Support\\Network::isValid".
 
-require __DIR__ . '/../vendor/autoload.php';
+require __DIR__.'/../vendor/autoload.php';
 
 $spec = $argv[1] ?? '';
-if (!str_contains($spec, '::')) {
+if (! str_contains($spec, '::')) {
     echo json_encode(null);
     exit(0);
 }
@@ -47,7 +48,7 @@ function typeToString(?ReflectionType $type): string
         return 'mixed';
     }
 
-    if ($nullable && !in_array('null', $types, true)) {
+    if ($nullable && ! in_array('null', $types, true)) {
         $types[] = 'null';
     }
 

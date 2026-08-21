@@ -11,8 +11,8 @@ if (preg_match('#^/(?:announce|scrape)(?:\.php)?(?:/|$|\?)#', $requestUri)) {
     defined('IN_TRACKER') || define('IN_TRACKER', true);
 }
 
-$rootpath = dirname(__DIR__) . '/';
-set_include_path(get_include_path() . PATH_SEPARATOR . $rootpath);
+$rootpath = dirname(__DIR__).'/';
+set_include_path(get_include_path().PATH_SEPARATOR.$rootpath);
 
 if (file_exists(__DIR__.'/../storage/framework/maintenance.php')) {
     require __DIR__.'/../storage/framework/maintenance.php';

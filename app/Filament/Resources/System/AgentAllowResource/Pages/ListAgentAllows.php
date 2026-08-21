@@ -2,16 +2,14 @@
 
 namespace App\Filament\Resources\System\AgentAllowResource\Pages;
 
-use Filament\Actions\CreateAction;
-use Filament\Actions\Action;
-use Filament\Forms\Components\TextInput;
-use Exception;
 use App\Filament\PageList;
 use App\Filament\Resources\System\AgentAllowResource;
 use App\Repositories\AgentAllowRepository;
-use Filament\Pages\Actions;
-use Filament\Resources\Pages\ListRecords;
-use Filament\Forms;
+use App\Support\Admin;
+use Exception;
+use Filament\Actions\Action;
+use Filament\Actions\CreateAction;
+use Filament\Forms\Components\TextInput;
 
 class ListAgentAllows extends PageList
 {
@@ -29,16 +27,15 @@ class ListAgentAllows extends PageList
                 ])
                 ->modalHeading(__('admin.resources.agent_allow.check_modal_header'))
                 ->action(function ($data) {
-                    $agentAllowRep = new AgentAllowRepository();
+                    $agentAllowRep = new AgentAllowRepository;
                     try {
                         $result = $agentAllowRep->checkClient($data['peer_id'], $data['agent']);
-                        \App\Support\Admin::successNotification(__('admin.resources.agent_allow.check_pass_msg', ['id' => $result->id]));
+                        Admin::successNotification(__('admin.resources.agent_allow.check_pass_msg', ['id' => $result->id]));
                     } catch (Exception $exception) {
-                        \App\Support\Admin::failNotification($exception->getMessage());
+                        Admin::failNotification($exception->getMessage());
                     }
-                })
+                }),
 
         ];
     }
-
 }

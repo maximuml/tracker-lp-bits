@@ -2,30 +2,24 @@
 
 namespace App\Filament\Resources\Torrent;
 
-use Filament\Schemas\Schema;
-use Filament\Forms\Components\TextInput;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Actions\EditAction;
+use App\Filament\Resources\Torrent\TorrentDenyReasonResource\Pages\ManageTorrentDenyReasons;
+use App\Models\TorrentDenyReason;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
-use App\Filament\Resources\Torrent\TorrentDenyReasonResource\Pages\ManageTorrentDenyReasons;
-use App\Filament\Resources\Torrent\TorrentDenyReasonResource\Pages;
-use App\Filament\Resources\Torrent\TorrentDenyReasonResource\RelationManagers;
-use App\Models\TorrentDenyReason;
-use Filament\Forms;
+use Filament\Actions\EditAction;
+use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Filament\Tables;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class TorrentDenyReasonResource extends Resource
 {
     protected static ?string $model = TorrentDenyReason::class;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-no-symbol';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-no-symbol';
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Torrent';
+    protected static string|\UnitEnum|null $navigationGroup = 'Torrent';
 
     protected static ?int $navigationSort = 3;
 

@@ -2,11 +2,8 @@
 
 namespace App\Jobs;
 
-use App\Models\Setting;
-use App\Repositories\CleanupRepository;
-use Carbon\Carbon;
+use App\Support\Logger;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
@@ -51,7 +48,7 @@ class UpdateUserSeedingLeechingTime implements ShouldQueue
     /**
      * 获取任务时，应该通过的中间件。
      *
-     * @return array<int, \Illuminate\Queue\Middleware\WithoutOverlapping>
+     * @return array<int, WithoutOverlapping>
      */
     public function middleware(): array
     {
@@ -67,35 +64,38 @@ class UpdateUserSeedingLeechingTime implements ShouldQueue
     {
         $beginTimestamp = time();
         $logPrefix = sprintf(
-            "[CLEANUP_CLI_UPDATE_SEEDING_LEECHING_TIME_HANDLE_JOB], commonRequestId: %s, beginUid: %s, endUid: %s, idStr: %s, idRedisKey: %s",
+            '[CLEANUP_CLI_UPDATE_SEEDING_LEECHING_TIME_HANDLE_JOB], commonRequestId: %s, beginUid: %s, endUid: %s, idStr: %s, idRedisKey: %s',
             $this->requestId, $this->beginUid, $this->endUid, $this->idStr, $this->idRedisKey,
         );
-        \App\Support\Logger::writeWithContext((string) "{$logPrefix}, job start ...", (string) 'info', (bool) false);
+        Logger::writeWithContext((string) "{$logPrefix}, job start ...", (string) 'info', (bool) false);
 
         $idStr = $this->idStr;
         $delIdRedisKey = false;
-        if (empty($idStr) && !empty($this->idRedisKey)) {
+        if (empty($idStr) && ! empty($this->idRedisKey)) {
             $delIdRedisKey = true;
             $idStr = NexusDB::cache_get($this->idRedisKey);
         }
         if (empty($idStr)) {
-            \App\Support\Logger::writeWithContext((string) "{$logPrefix}, no idStr or idRedisKey", (string) "error", (bool) false);
+            Logger::writeWithContext((string) "{$logPrefix}, no idStr or idRedisKey", (string) 'error', (bool) false);
+
             return;
         }
-        $userIdArr = array_filter(array_map('intval', explode(",", $idStr)));
+        $userIdArr = array_filter(array_map('intval', explode(',', $idStr)));
         if (empty($userIdArr)) {
-            \App\Support\Logger::writeWithContext((string) "{$logPrefix}, empty idStr", (string) "error", (bool) false);
+            Logger::writeWithContext((string) "{$logPrefix}, empty idStr", (string) 'error', (bool) false);
+
             return;
         }
-        //批量取，简单化
-//        $res = sql_query("select userid, sum(seedtime) as seedtime_sum, sum(leechtime) as leechtime_sum from snatched group by userid where userid in ($idStr)");
-        $res = NexusDB::table("snatched")
-            ->selectRaw("userid, sum(seedtime) as seedtime_sum, sum(leechtime) as leechtime_sum")
+        // 批量取，简单化
+        //        $res = sql_query("select userid, sum(seedtime) as seedtime_sum, sum(leechtime) as leechtime_sum from snatched group by userid where userid in ($idStr)");
+        $res = NexusDB::table('snatched')
+            ->selectRaw('userid, sum(seedtime) as seedtime_sum, sum(leechtime) as leechtime_sum')
             ->whereIn('userid', $userIdArr)
-            ->groupBy("userid")
+            ->groupBy('userid')
             ->get();
         if ($res->isEmpty()) {
-            \App\Support\Logger::writeWithContext((string) "{$logPrefix}, no data from idStr: {$idStr}", (string) "error", (bool) false);
+            Logger::writeWithContext((string) "{$logPrefix}, no data from idStr: {$idStr}", (string) 'error', (bool) false);
+
             return;
         }
         $snatchedMap = [];
@@ -120,18 +120,17 @@ class UpdateUserSeedingLeechingTime implements ShouldQueue
             NexusDB::cache_del($this->idRedisKey);
         }
         $costTime = time() - $beginTimestamp;
-        \App\Support\Logger::writeWithContext((string) sprintf("{$logPrefix}, [DONE], update user count: %s, result: %s, cost time: %s seconds", count($rows), var_export($result, true), $costTime), (string) 'info', (bool) false);
-        \App\Support\Logger::writeWithContext((string) "{$logPrefix}, upsert users seedtime/leechtime done", (string) "debug", (bool) false);
+        Logger::writeWithContext((string) sprintf("{$logPrefix}, [DONE], update user count: %s, result: %s, cost time: %s seconds", count($rows), var_export($result, true), $costTime), (string) 'info', (bool) false);
+        Logger::writeWithContext((string) "{$logPrefix}, upsert users seedtime/leechtime done", (string) 'debug', (bool) false);
     }
 
     /**
      * Handle a job failure.
      *
-     * @param  \Throwable  $exception
      * @return void
      */
     public function failed(\Throwable $exception)
     {
-        \App\Support\Logger::writeWithContext((string) ("failed: " . $exception->getMessage() . $exception->getTraceAsString()), (string) 'error', (bool) false);
+        Logger::writeWithContext((string) ('failed: '.$exception->getMessage().$exception->getTraceAsString()), (string) 'error', (bool) false);
     }
 }

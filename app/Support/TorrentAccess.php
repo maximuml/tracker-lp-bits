@@ -3,6 +3,8 @@
 namespace App\Support;
 
 use App\Enums\HitAndRunMode;
+use App\Models\HitAndRun;
+use App\Models\Torrent;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
 
@@ -31,7 +33,7 @@ final class TorrentAccess
      *
      * Mirrors `torrent_name_for_admin()`.
      */
-    public static function adminName(\App\Models\Torrent|null $torrent, bool $withTags = false, int $length = 40): HtmlString
+    public static function adminName(?Torrent $torrent, bool $withTags = false, int $length = 40): HtmlString
     {
         if (empty($torrent)) {
             return new HtmlString('');
@@ -48,7 +50,7 @@ final class TorrentAccess
             $tags = sprintf('&nbsp;<div>%s</div>', $torrent->tagsFormatted);
         }
 
-        return new HtmlString('<div style="display:flex">' . $name . $tags . '</div>');
+        return new HtmlString('<div style="display:flex">'.$name.$tags.'</div>');
     }
 
     /**
@@ -62,12 +64,12 @@ final class TorrentAccess
     public static function hrImage(array $torrent, int|string $searchBoxId): string
     {
         $mode = HitAndRunMode::fromStringSafe(
-            is_string($value = \App\Models\HitAndRun::getConfig('mode', $searchBoxId)) ? $value : null
+            is_string($value = HitAndRun::getConfig('mode', $searchBoxId)) ? $value : null
         );
 
         if (
             $mode === HitAndRunMode::GLOBAL
-            || ($mode === HitAndRunMode::MANUAL && isset($torrent['hr']) && $torrent['hr'] == \App\Models\Torrent::HR_YES)
+            || ($mode === HitAndRunMode::MANUAL && isset($torrent['hr']) && $torrent['hr'] == Torrent::HR_YES)
         ) {
             return '<img class="hitandrun" src="pic/trans.gif" alt="H&R" title="H&R" />';
         }

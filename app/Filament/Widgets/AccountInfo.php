@@ -8,5 +8,5 @@ class AccountInfo extends Widget
 {
     protected string $view = 'filament.widgets.account-info';
 
-    protected int | string | array $columnSpan = 'full';
+    protected int|string|array $columnSpan = 'full';
 }

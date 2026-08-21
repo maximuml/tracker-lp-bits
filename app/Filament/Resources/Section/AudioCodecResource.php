@@ -2,19 +2,12 @@
 
 namespace App\Filament\Resources\Section;
 
-use Filament\Schemas\Schema;
-use App\Filament\Resources\Section\AudioCodecResource\Pages\ListAudioCodecs;
 use App\Filament\Resources\Section\AudioCodecResource\Pages\CreateAudioCodec;
 use App\Filament\Resources\Section\AudioCodecResource\Pages\EditAudioCodec;
-use App\Filament\Resources\Section\AudioCodecResource\Pages;
-use App\Filament\Resources\Section\AudioCodecResource\RelationManagers;
+use App\Filament\Resources\Section\AudioCodecResource\Pages\ListAudioCodecs;
 use App\Models\AudioCodec;
-use Filament\Forms;
-use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
 use Filament\Tables\Table;
-use Filament\Tables;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class AudioCodecResource extends CodecResource
 {

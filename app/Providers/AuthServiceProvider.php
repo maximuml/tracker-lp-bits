@@ -20,6 +20,7 @@ use App\Models\TorrentCustomField;
 use App\Models\User;
 use App\Policies\CodecPolicy;
 use App\Policies\TorrentPolicy;
+use App\Support\AuthCookie;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -55,14 +56,14 @@ class AuthServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        //some plugin use this guard
+        // some plugin use this guard
         Auth::viaRequest('nexus-cookie', function (Request $request) {
-            return \App\Support\AuthCookie::userFromCookie($request->cookies->all(), (bool) false);
+            return AuthCookie::userFromCookie($request->cookies->all(), (bool) false);
         });
 
         Auth::extend('nexus-web', function ($app, $name, array $config) {
             // 返回 Illuminate\Contracts\Auth\Guard 的实例 ...
-            return new NexusWebGuard($app['request'], new NexusWebUserProvider());
+            return new NexusWebGuard($app['request'], new NexusWebUserProvider);
         });
 
         Auth::viaRequest('passkey', function (Request $request) {
@@ -70,9 +71,9 @@ class AuthServiceProvider extends ServiceProvider
             if (strlen($passkey) != 32) {
                 return null;
             }
+
             return User::query()->where('passkey', $passkey)->first();
         });
 
     }
-
 }

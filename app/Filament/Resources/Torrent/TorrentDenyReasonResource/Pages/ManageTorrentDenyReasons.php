@@ -2,11 +2,10 @@
 
 namespace App\Filament\Resources\Torrent\TorrentDenyReasonResource\Pages;
 
-use Filament\Support\Enums\Width;
-use Filament\Actions\CreateAction;
 use App\Filament\Resources\Torrent\TorrentDenyReasonResource;
-use Filament\Pages\Actions;
+use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ManageRecords;
+use Filament\Support\Enums\Width;
 
 class ManageTorrentDenyReasons extends ManageRecords
 {

@@ -9,10 +9,10 @@ class AddEditedToShoutboxTable extends Migration
     public function up()
     {
         Schema::table('shoutbox', function (Blueprint $table) {
-            if (!Schema::hasColumn('shoutbox', 'edited_by')) {
+            if (! Schema::hasColumn('shoutbox', 'edited_by')) {
                 $table->unsignedInteger('edited_by')->default(0)->after('date');
             }
-            if (!Schema::hasColumn('shoutbox', 'edited_at')) {
+            if (! Schema::hasColumn('shoutbox', 'edited_at')) {
                 $table->unsignedInteger('edited_at')->default(0)->after('edited_by');
             }
         });

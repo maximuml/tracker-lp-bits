@@ -8,12 +8,13 @@ class AddPtGenTagsTechnicalInfoToTorrentsTable extends Migration
 {
     /**
      * Run the migrations.
+     *
      * @return void
      */
     public function up()
     {
         Schema::table('torrents', function (Blueprint $table) {
-            if (!Schema::hasColumn('torrents', 'technical_info')) {
+            if (! Schema::hasColumn('torrents', 'technical_info')) {
                 $table->text('technical_info')->nullable();
             }
 

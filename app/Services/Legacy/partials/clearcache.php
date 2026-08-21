@@ -1,20 +1,27 @@
 <?php
+
+use App\Support\SupportContext;
+
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
-if (!isset($CURUSER)) $CURUSER = (array) (\App\Support\SupportContext::getUser() ?? []);
-if (!isset($lang_clearcache)) $lang_clearcache = (array) (\App\Support\SupportContext::getGlobal('lang_clearcache') ?? []);
+if (! isset($CURUSER)) {
+    $CURUSER = (array) (SupportContext::getUser() ?? []);
+}
+if (! isset($lang_clearcache)) {
+    $lang_clearcache = (array) (SupportContext::getGlobal('lang_clearcache') ?? []);
+}
 
 $done = (bool) ($done ?? false);
 $error = (string) ($error ?? '');
 ?>
 
 <h1>Clear cache</h1>
-<?php if ($done): ?>
+<?php if ($done) { ?>
     <p align="center"><font class="striking">Cache cleared</font></p>
-<?php endif; ?>
-<?php if ($error !== ''): ?>
+<?php } ?>
+<?php if ($error !== '') { ?>
     <p align="center"><font class="striking"><?php echo htmlspecialchars($error); ?></font></p>
-<?php endif; ?>
+<?php } ?>
 
 <form method="post" action="clearcache.php">
 <?php echo csrf_field(); ?>

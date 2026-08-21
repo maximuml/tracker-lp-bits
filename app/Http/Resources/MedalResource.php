@@ -2,17 +2,20 @@
 
 namespace App\Http\Resources;
 
+use App\Models\Medal;
+use App\Support\Locale;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
- * @mixin \App\Models\Medal
+ * @mixin Medal
  */
 class MedalResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
+     *
      * @param  mixed  $request
-     * @return  array<int|string, mixed>
+     * @return array<int|string, mixed>
      */
     public function toArray($request)
     {
@@ -27,11 +30,17 @@ class MedalResource extends JsonResource
             'price_human' => number_format($this->price),
             'duration' => $this->duration,
             'description' => $this->description,
-            'expire_at' => $this->whenPivotLoaded('user_medals', function () {return $this->pivot->expire_at;}),
-            'user_medal_id' => $this->whenPivotLoaded('user_medals', function () {return $this->pivot->id;}),
-            'wearing_status' => $this->whenPivotLoaded('user_medals', function () {return $this->pivot->status;}),
+            'expire_at' => $this->whenPivotLoaded('user_medals', function () {
+                return $this->pivot->expire_at;
+            }),
+            'user_medal_id' => $this->whenPivotLoaded('user_medals', function () {
+                return $this->pivot->id;
+            }),
+            'wearing_status' => $this->whenPivotLoaded('user_medals', function () {
+                return $this->pivot->status;
+            }),
             'wearing_status_text' => $this->whenPivotLoaded('user_medals', function () {
-                return \App\Support\Locale::trans("medal.wearing_status_text." . $this->pivot->status, [], null);
+                return Locale::trans('medal.wearing_status_text.'.$this->pivot->status, [], null);
             }),
         ];
     }

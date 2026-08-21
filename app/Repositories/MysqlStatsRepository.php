@@ -9,9 +9,12 @@ final class MysqlStatsRepository
 {
     /** @var list<string> */
     private static array $byteUnits = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB'];
+
     private static string $datefmt = '%B %d, %Y at %I:%M %p';
+
     /** @var list<string> */
     private static array $month = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
     /** @var list<string> */
     private static array $dayOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
@@ -110,7 +113,7 @@ final class MysqlStatsRepository
             $seconds -= $minutes * 60;
         }
 
-        return (string) $days . ' Days ' . (string) $hours . ' Hours ' . (string) $minutes . ' Minutes ' . (string) $seconds . ' Seconds ';
+        return (string) $days.' Days '.(string) $hours.' Hours '.(string) $minutes.' Minutes '.(string) $seconds.' Seconds ';
     }
 
     public static function localisedDate(int $timestamp = -1, string $format = ''): string
@@ -123,7 +126,7 @@ final class MysqlStatsRepository
             $timestamp = time();
         }
 
-        $dt = new DateTime();
+        $dt = new DateTime;
         $dt->setTimestamp($timestamp);
 
         $result = '';
@@ -170,6 +173,7 @@ final class MysqlStatsRepository
                 if ($replacement !== null) {
                     $result .= $replacement;
                     $i++;
+
                     continue;
                 }
             }

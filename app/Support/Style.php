@@ -26,7 +26,6 @@ final class Style
      * Mirrors `get_css_row()`.
      */
     /**
-     * @param  mixed  $cache
      * @return array<string, mixed>|null
      */
     public static function cssRow(mixed $cache, int|string $cssId, int|string $defaultId): ?array
@@ -52,15 +51,12 @@ final class Style
      *
      * Mirrors `get_css_uri()`.
      */
-    /**
-     * @param  mixed  $cache
-     */
     public static function cssUri(mixed $cache, int|string $cssId, int|string $defaultId, string $file = ''): string
     {
         $row = self::cssRow($cache, $cssId, $defaultId);
         $uri = $row['uri'] ?? StyleRepository::uri($defaultId);
 
-        return $file === '' ? (string) $uri : (string) $uri . $file;
+        return $file === '' ? (string) $uri : (string) $uri.$file;
     }
 
     /**
@@ -76,16 +72,13 @@ final class Style
             default => 'mediumfont.css',
         };
 
-        return 'styles/' . $file;
+        return 'styles/'.$file;
     }
 
     /**
      * Return the extra CSS (`addicode`) for the current stylesheet row.
      *
      * Mirrors `get_style_addicode()`.
-     */
-    /**
-     * @param  mixed  $cache
      */
     public static function addiCode(mixed $cache, int|string $cssId, int|string $defaultId): string
     {

@@ -12,8 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('snatched', function (Blueprint $table) {
-            $table->bigInteger("hit_and_run_id")->default(0);
-            $table->bigInteger("buy_log_id")->default(0);
+            $table->bigInteger('hit_and_run_id')->default(0);
+            $table->bigInteger('buy_log_id')->default(0);
         });
     }
 
@@ -23,7 +23,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('snatched', function (Blueprint $table) {
-            $table->dropColumn("hit_and_run_id", "buy_log_id");
+            $table->dropColumn('hit_and_run_id', 'buy_log_id');
         });
     }
 };

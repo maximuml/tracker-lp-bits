@@ -9,7 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('torrents_state', function (Blueprint $table) {
-            if (!Schema::hasColumn('torrents_state', 'notice_days')) {
+            if (! Schema::hasColumn('torrents_state', 'notice_days')) {
                 $table->integer('notice_days')->default(0)->after('remark');
             }
         });

@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Repositories;
 
 class UpgradeRepository extends BaseRepository

@@ -14,7 +14,7 @@ class AddTotalDaysToAttendanceTable extends Migration
     public function up()
     {
         Schema::table('attendance', function (Blueprint $table) {
-            if (!Schema::hasColumn('attendance', 'total_days')) {
+            if (! Schema::hasColumn('attendance', 'total_days')) {
                 $table->integer('total_days')->default(0);
             }
         });

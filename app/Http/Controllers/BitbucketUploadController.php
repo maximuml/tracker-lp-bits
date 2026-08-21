@@ -3,8 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Support\Http;
 use App\Support\LegacyResponse;
+use App\Support\Locale;
+use App\Support\Path;
 use App\Support\SupportContext;
+use App\Support\Url;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -17,12 +21,12 @@ class BitbucketUploadController extends Controller
     public function create(Request $request): View|RedirectResponse
     {
         if (SupportContext::getCache() === null) {
-            return redirect('/bitbucket-upload.php?' . $request->getQueryString());
+            return redirect('/bitbucket-upload.php?'.$request->getQueryString());
         }
 
         $user = Auth::guard('nexus-web')->user();
         if (! $user instanceof User) {
-            return redirect('/login.php?returnto=' . urlencode($request->fullUrl()));
+            return redirect('/login.php?returnto='.urlencode($request->fullUrl()));
         }
 
         $currentUser = SupportContext::getUser() ?? $user->toLegacyArray();
@@ -55,7 +59,7 @@ class BitbucketUploadController extends Controller
 
         $user = Auth::guard('nexus-web')->user();
         if (! $user instanceof User) {
-            return redirect('/login.php?returnto=' . urlencode($request->fullUrl()));
+            return redirect('/login.php?returnto='.urlencode($request->fullUrl()));
         }
 
         $currentUser = SupportContext::getUser() ?? $user->toLegacyArray();
@@ -90,11 +94,11 @@ class BitbucketUploadController extends Controller
         }
 
         $bitbucket = (string) SupportContext::getGlobal('bitbucket', 'bitbucket');
-        $tgtfile = \App\Support\Path::resolve("{$bitbucket}/{$filename}", \ROOT_PATH);
+        $tgtfile = Path::resolve("{$bitbucket}/{$filename}", \ROOT_PATH);
         if (file_exists($tgtfile)) {
             LegacyResponse::abort(
                 $lang['std_upload_failed'] ?? '',
-                ($lang['std_file_already_exists'] ?? '') . htmlspecialchars($filename) . ($lang['std_already_exists'] ?? ''),
+                ($lang['std_file_already_exists'] ?? '').htmlspecialchars($filename).($lang['std_already_exists'] ?? ''),
                 false,
             );
         }
@@ -132,7 +136,7 @@ class BitbucketUploadController extends Controller
         if (! $orig) {
             LegacyResponse::abort(
                 $lang['std_image_processing_failed'] ?? '',
-                ($lang['std_sorry_the_uploaded'] ?? '') . ($typeName ?? '') . ($lang['std_failed_processing'] ?? ''),
+                ($lang['std_sorry_the_uploaded'] ?? '').($typeName ?? '').($lang['std_failed_processing'] ?? ''),
                 false,
             );
         }
@@ -142,7 +146,7 @@ class BitbucketUploadController extends Controller
         if ($thumb === false) {
             LegacyResponse::abort(
                 $lang['std_image_processing_failed'] ?? '',
-                ($lang['std_sorry_the_uploaded'] ?? '') . ($typeName ?? '') . ($lang['std_failed_processing'] ?? ''),
+                ($lang['std_sorry_the_uploaded'] ?? '').($typeName ?? '').($lang['std_failed_processing'] ?? ''),
                 false,
             );
         }
@@ -156,7 +160,7 @@ class BitbucketUploadController extends Controller
         };
 
         $baseUrl = (string) SupportContext::getGlobal('BASEURL', '');
-        $url = str_replace(' ', '%20', htmlspecialchars(\App\Support\Http::protocolPrefix(\App\Support\Url::isSecure()) . "{$baseUrl}/bitbucket/{$filename}"));
+        $url = str_replace(' ', '%20', htmlspecialchars(Http::protocolPrefix(Url::isSecure())."{$baseUrl}/bitbucket/{$filename}"));
         $public = $request->input('public') === 'yes' ? '1' : '0';
 
         NexusDB::table('bitbucket')->insert([
@@ -184,7 +188,7 @@ class BitbucketUploadController extends Controller
     {
         if (empty(SupportContext::getGlobal('lang_bitbucketupload'))) {
             SupportContext::setServerValue('SCRIPT_NAME', '/bitbucket-upload.php');
-            require base_path(\App\Support\Locale::scriptFilePath((string) "", (bool) false, (string) ""));
+            require base_path(Locale::scriptFilePath((string) '', (bool) false, (string) ''));
             SupportContext::setGlobal('lang_bitbucketupload', $lang_bitbucketupload ?? []);
         }
 

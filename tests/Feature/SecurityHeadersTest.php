@@ -6,7 +6,7 @@ use Tests\TestCase;
 
 final class SecurityHeadersTest extends TestCase
 {
-    public function testPublicPageHasBaselineSecurityHeaders(): void
+    public function test_public_page_has_baseline_security_headers(): void
     {
         $response = $this->get('/login');
 
@@ -15,7 +15,7 @@ final class SecurityHeadersTest extends TestCase
         $response->assertHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
     }
 
-    public function testApiEndpointDoesNotLeakFrameworkCookies(): void
+    public function test_api_endpoint_does_not_leak_framework_cookies(): void
     {
         $response = $this->get('/health');
 

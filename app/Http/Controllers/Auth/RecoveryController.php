@@ -22,8 +22,7 @@ class RecoveryController extends Controller
     public function __construct(
         private PasswordRecoveryService $recoveryService,
         private WebAuthService $authService,
-    ) {
-    }
+    ) {}
 
     public function recover(Request $request): View|RedirectResponse
     {
@@ -41,7 +40,7 @@ class RecoveryController extends Controller
                 $query = $request->query();
                 unset($query['sitelanguage']);
 
-                return Redirect::to('/recover' . (empty($query) ? '' : '?' . http_build_query($query)));
+                return Redirect::to('/recover'.(empty($query) ? '' : '?'.http_build_query($query)));
             }
         }
 
@@ -49,7 +48,7 @@ class RecoveryController extends Controller
         $langFunctions = $this->langFunctions($langFolder);
 
         if ($request->isMethod('post')) {
-            $validator = Validator::make($request->all(), (new \App\Http\Requests\Auth\RecoverRequest())->rules());
+            $validator = Validator::make($request->all(), (new RecoverRequest)->rules());
 
             if ($validator->fails()) {
                 return $this->backWithError($request, $validator->errors()->first());

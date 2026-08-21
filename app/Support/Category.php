@@ -2,6 +2,7 @@
 
 namespace App\Support;
 
+use App\Repositories\CategoryRepository;
 use App\Support\Cache\LegacyRedisCache;
 
 /**
@@ -14,6 +15,7 @@ final class Category
 {
     /** @var array<int, array<string, mixed>>|null */
     private static ?array $iconRows = null;
+
     /** @var array<int, array<string, mixed>>|null */
     private static ?array $categoryRows = null;
 
@@ -23,7 +25,6 @@ final class Category
      * Mirrors `get_category_icon_row()`.
      */
     /**
-     * @param  \App\Support\Cache\LegacyRedisCache|null  $cache
      * @return array<string, mixed>|null
      */
     public static function iconRow(?LegacyRedisCache $cache, int|string $typeId): ?array
@@ -35,7 +36,7 @@ final class Category
             if ($cached !== false && is_array($cached)) {
                 self::$iconRows = $cached;
             } else {
-                self::$iconRows = \App\Repositories\CategoryRepository::getIconRows();
+                self::$iconRows = CategoryRepository::getIconRows();
                 if ($cache !== null) {
                     $cache->cache_value('category_icon_content', self::$iconRows, 156400);
                 }
@@ -50,7 +51,6 @@ final class Category
      *
      * Mirrors `get_category_row($catid)`.
      *
-     * @param  \App\Support\Cache\LegacyRedisCache|null  $cache
      * @return array<string, mixed>|null
      */
     public static function row(?LegacyRedisCache $cache, int|string|null $catId = null): ?array
@@ -60,7 +60,7 @@ final class Category
             if ($cached !== false && is_array($cached)) {
                 self::$categoryRows = $cached;
             } else {
-                self::$categoryRows = \App\Repositories\CategoryRepository::getCategoryRows();
+                self::$categoryRows = CategoryRepository::getCategoryRows();
                 if ($cache !== null) {
                     $cache->cache_value('category_content', self::$categoryRows, 126400);
                 }
@@ -110,7 +110,6 @@ final class Category
      * Mirrors `get_second_icon()`.
      */
     /**
-     * @param  \App\Support\Cache\LegacyRedisCache|null  $cache
      * @param  array<string, mixed>  $row
      */
     public static function secondIcon(?LegacyRedisCache $cache, array $row, string $catFolder): string
@@ -123,11 +122,11 @@ final class Category
         $audiocodec = $row['audiocodec'] ?? '';
         $mode = $row['search_box_id'] ?? 0;
 
-        $cacheKey = 'secondicon_' . $source . '_' . $medium . '_' . $codec . '_' . $standard . '_' . $processing . '_' . $audiocodec . '_content';
+        $cacheKey = 'secondicon_'.$source.'_'.$medium.'_'.$codec.'_'.$standard.'_'.$processing.'_'.$audiocodec.'_content';
         $sirow = $cache !== null ? $cache->get_value($cacheKey) : false;
 
         if ($sirow === false) {
-            $sirowData = \App\Repositories\CategoryRepository::findSecondIcon($row);
+            $sirowData = CategoryRepository::findSecondIcon($row);
             $sirow = $sirowData ?? 'not allowed';
             if ($cache !== null) {
                 $cache->cache_value($cacheKey, $sirow, 600);
@@ -135,10 +134,10 @@ final class Category
         }
 
         if ($sirow === 'not allowed') {
-            return '<img src="pic/cattrans.gif" style="background-image: url(pic/' . $catFolder . '/additional/notallowed.png);" title="Not Allowed" alt="Not Allowed" />';
+            return '<img src="pic/cattrans.gif" style="background-image: url(pic/'.$catFolder.'/additional/notallowed.png);" title="Not Allowed" alt="Not Allowed" />';
         }
 
-        return '<img' . ($sirow['class_name'] ? ' class="' . $sirow['class_name'] . '"' : '') . ' src="pic/cattrans.gif" style="background-image: url(pic/' . $catFolder . '/additional/' . $sirow['image'] . ');" alt="' . $sirow['name'] . '" title="' . $sirow['name'] . '" />';
+        return '<img'.($sirow['class_name'] ? ' class="'.$sirow['class_name'].'"' : '').' src="pic/cattrans.gif" style="background-image: url(pic/'.$catFolder.'/additional/'.$sirow['image'].');" alt="'.$sirow['name'].'" title="'.$sirow['name'].'" />';
     }
 
     /**
@@ -149,8 +148,8 @@ final class Category
      */
     public static function secondIconWithContext(array $row): string
     {
-        $cache = \App\Support\SupportContext::getCache();
-        $catFolder = \App\Support\Path::categoryFolderForIdWithContext($row['category'] ?? '');
+        $cache = SupportContext::getCache();
+        $catFolder = Path::categoryFolderForIdWithContext($row['category'] ?? '');
 
         return self::secondIcon($cache, $row, $catFolder);
     }
@@ -163,13 +162,12 @@ final class Category
      * @return array<int, array<string, mixed>>
      */
     /**
-     * @param  \App\Support\Cache\LegacyRedisCache|null  $cache
      * @return array<int, array<string, mixed>>
      */
     public static function listByMode(?LegacyRedisCache $cache, int|string $catmode = 1): array
     {
         $catmode = (int) $catmode;
-        $cacheKey = 'category_list_mode_' . $catmode;
+        $cacheKey = 'category_list_mode_'.$catmode;
 
         if ($cache !== null) {
             $ret = $cache->get_value($cacheKey);
@@ -178,7 +176,7 @@ final class Category
             }
         }
 
-        $ret = \App\Repositories\CategoryRepository::getCategoriesByMode($catmode);
+        $ret = CategoryRepository::getCategoriesByMode($catmode);
 
         if ($cache !== null) {
             $cache->cache_value($cacheKey, $ret, 3600);
@@ -203,17 +201,17 @@ final class Category
 
         if (! isset($cache[$categoryId])) {
             $categoryRow = self::rowWithContext($categoryId);
-            $catImgUrl = \App\Support\Path::categoryFolderForIdWithContext($categoryId);
+            $catImgUrl = Path::categoryFolderForIdWithContext($categoryId);
             $className = (string) ($categoryRow['class_name'] ?? '');
             $name = (string) ($categoryRow['name'] ?? '');
             $image = (string) ($categoryRow['image'] ?? '');
-            $cache[$categoryId] = '<img' . ($className ? ' class="' . $className . '"' : '') . ' src="pic/cattrans.gif" alt="' . $name . '" title="' . $name . '" style="background-image: url(pic/' . $catImgUrl . '/' . $image . ');" />';
+            $cache[$categoryId] = '<img'.($className ? ' class="'.$className.'"' : '').' src="pic/cattrans.gif" alt="'.$name.'" title="'.$name.'" style="background-image: url(pic/'.$catImgUrl.'/'.$image.');" />';
         }
 
         $catImg = $cache[$categoryId];
 
         if ($link !== '') {
-            $catImg = '<a href="' . $link . 'cat=' . $categoryId . '">' . $catImg . '</a>';
+            $catImg = '<a href="'.$link.'cat='.$categoryId.'">'.$catImg.'</a>';
         }
 
         return $catImg;

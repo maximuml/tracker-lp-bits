@@ -24,7 +24,7 @@ class AnnounceRequest extends FormRequest
     public static function announceRules(): array
     {
         return [
-            'passkey'    => [
+            'passkey' => [
                 'required',
                 'string',
                 static function (string $attribute, mixed $value, callable $fail) {
@@ -33,7 +33,7 @@ class AnnounceRequest extends FormRequest
                     }
                 },
             ],
-            'info_hash'  => [
+            'info_hash' => [
                 'required',
                 'string',
                 static function (string $attribute, mixed $value, callable $fail) {
@@ -42,7 +42,7 @@ class AnnounceRequest extends FormRequest
                     }
                 },
             ],
-            'peer_id'    => [
+            'peer_id' => [
                 'required',
                 'string',
                 static function (string $attribute, mixed $value, callable $fail) {
@@ -51,16 +51,16 @@ class AnnounceRequest extends FormRequest
                     }
                 },
             ],
-            'port'       => 'required|integer|between:1,65535',
-            'uploaded'   => 'required|integer|min:0',
+            'port' => 'required|integer|between:1,65535',
+            'uploaded' => 'required|integer|min:0',
             'downloaded' => 'required|integer|min:0',
-            'left'       => 'required|integer|min:0',
-            'event'      => 'nullable|string|max:20',
-            'numwant'    => 'nullable|string',
-            'num_want'   => 'nullable|string',
-            'ipv4'       => 'nullable|string',
-            'ipv6'       => 'nullable|string',
-            'compact'    => 'nullable|boolean',
+            'left' => 'required|integer|min:0',
+            'event' => 'nullable|string|max:20',
+            'numwant' => 'nullable|string',
+            'num_want' => 'nullable|string',
+            'ipv4' => 'nullable|string',
+            'ipv6' => 'nullable|string',
+            'compact' => 'nullable|boolean',
         ];
     }
 }

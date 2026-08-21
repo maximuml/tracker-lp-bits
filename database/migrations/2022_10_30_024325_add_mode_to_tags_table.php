@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Nexus\Database\NexusDB;
 
 return new class extends Migration
 {
@@ -13,7 +14,7 @@ return new class extends Migration
      */
     public function up()
     {
-        if (!\Nexus\Database\NexusDB::hasColumn('tags', 'mode')) {
+        if (! NexusDB::hasColumn('tags', 'mode')) {
             Schema::table('tags', function (Blueprint $table) {
                 $table->integer('mode')->default(0);
             });

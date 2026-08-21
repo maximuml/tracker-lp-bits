@@ -2,6 +2,4 @@
 
 namespace App\Repositories;
 
-class LangRepository extends BaseRepository
-{
-}
+class LangRepository extends BaseRepository {}

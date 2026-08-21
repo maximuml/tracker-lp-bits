@@ -34,10 +34,4 @@ class Forum extends NexusModel
     {
         return $this->belongsTo(OverForum::class, 'forid');
     }
-
-    /** @return BelongsTo<OverForum, $this> */
-    public function overForum()
-    {
-        return $this->belongsTo(OverForum::class, 'forid');
-    }
 }

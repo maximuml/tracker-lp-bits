@@ -465,7 +465,14 @@ if ($CURUSER['avatar']) {
 Html::trSmall($lang_usercp['row_passkey'], Strings::hidden($CURUSER['passkey']), 1);
 $loginSecretDeadline = SiteConfig::current()->security->loginSecretDeadline();
 if (SiteConfig::current()->security->loginType() === 'passkey' && $loginSecretDeadline !== null && $loginSecretDeadline > date('Y-m-d H:i:s')) {
-    Html::trSmall($lang_usercp['row_passkey_login_url'], sprintf('%s/%s/%s', Url::schemeAndHost(false), SiteConfig::current()->security->loginSecret(), $CURUSER['passkey']), 1);
+    $passkeyLoginForm = sprintf(
+        '<form method="POST" action="%s/%s" style="display:inline"><input type="hidden" name="passkey" value="%s"><button type="submit" class="btn" style="font-size:inherit;padding:0 4px">%s</button></form>',
+        Url::schemeAndHost(false),
+        SiteConfig::current()->security->loginSecret(),
+        htmlspecialchars($CURUSER['passkey'], ENT_QUOTES),
+        $lang_usercp['text_passkey_login'] ?? 'Login'
+    );
+    Html::trSmall($lang_usercp['row_passkey_login_url'], $passkeyLoginForm, 1);
 }
 Html::trSmall($lang_usercp['row_invitations'], $CURUSER['invites'].' [<a href="invite.php?id='.$CURUSER['id'].'" title="'.$lang_usercp['link_send_invitation'].'">'.$lang_usercp['text_send'].'</a>]', 1);
 Html::trSmall($lang_usercp['row_karma_points'], $CURUSER['seedbonus'].' [<a href="mybonus.php" title="'.$lang_usercp['link_use_karma_points'].'">'.$lang_usercp['text_use'].'</a>]', 1);

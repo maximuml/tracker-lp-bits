@@ -103,7 +103,7 @@ Route::group(['prefix' => 'web', 'middleware' => ['auth.nexus:nexus-web', 'throt
 if (! Environment::isConsole()) {
     $passkeyLoginUri = SiteConfig::current()->security->loginSecret();
     if (! empty($passkeyLoginUri) && SiteConfig::current()->security->loginType() === 'passkey') {
-        Route::get("$passkeyLoginUri/{passkey}", [AuthenticateController::class, 'passkeyLogin']);
+        Route::post($passkeyLoginUri, [AuthenticateController::class, 'passkeyLogin']);
     }
 }
 

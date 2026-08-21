@@ -62,11 +62,15 @@ class AuthenticateController extends Controller
     }
 
     /**
-     * @param  mixed  $passkey
      * @return mixed
      */
-    public function passkeyLogin($passkey)
+    public function passkeyLogin(Request $request)
     {
+        $request->validate([
+            'passkey' => 'required|string|size:32',
+        ]);
+        $passkey = $request->input('passkey');
+
         $deadline = SiteConfig::current()->security->loginSecretDeadline();
         if ($deadline && $deadline > now()->toDateTimeString()) {
             $user = User::query()->where('passkey', $passkey)->first(['id', 'passhash', 'secret', 'auth_key']);

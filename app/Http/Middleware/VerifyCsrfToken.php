@@ -2,6 +2,8 @@
 
 namespace App\Http\Middleware;
 
+use App\Support\Config\SiteConfig;
+use App\Support\Environment;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken as Middleware;
 
 class VerifyCsrfToken extends Middleware
@@ -72,4 +74,27 @@ class VerifyCsrfToken extends Middleware
         'thanks',
         'usercp',
     ];
+
+    /**
+     * Determine if the request has a URI that should be excluded from CSRF.
+     *
+     * Excludes the dynamic passkey-login URI (configured via the
+     * `login_secret` setting) so that external tools can POST to it
+     * without a CSRF token.
+     */
+    protected function inExceptArray($request): bool
+    {
+        if (parent::inExceptArray($request)) {
+            return true;
+        }
+
+        if (! Environment::isConsole()) {
+            $passkeyLoginUri = SiteConfig::current()->security->loginSecret();
+            if (! empty($passkeyLoginUri) && $request->is($passkeyLoginUri)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }

@@ -11,42 +11,42 @@
  * @property string|null $answer
  * @property string $permission
  */
+
 namespace App\Models;
 
 use App\Enums\ModelEventEnum;
+use App\Support\Events;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class StaffMessage extends NexusModel
 {
-    /** @var  string */
+    /** @var string */
     protected $table = 'staffmessages';
 
-    /** @var  list<string> */
+    /** @var list<string> */
     protected $fillable = [
         'sender', 'added', 'subject', 'msg', 'answeredby', 'answered', 'answer', 'permission',
     ];
 
-    /** @var  array<string, string> */
+    /** @var array<string, string> */
     protected $casts = [
         'added' => 'datetime',
     ];
 
-    /** @return  \Illuminate\Database\Eloquent\Relations\BelongsTo<User, $this> */
+    /** @return  BelongsTo<User, $this> */
     public function send_user()
     {
         return $this->belongsTo(User::class, 'sender')->withDefault(['id' => 0, 'username' => 'System']);
     }
 
-    /** @return  \Illuminate\Database\Eloquent\Relations\BelongsTo<User, $this> */
+    /** @return  BelongsTo<User, $this> */
     public function answer_user()
     {
         return $this->belongsTo(User::class, 'answeredby');
     }
 
     /**
-     * @param  int  $sender
-     * @param  string  $subject
-     * @param  string  $msg
-     * @return  mixed
+     * @return mixed
      */
     public static function add(int $sender, string $subject, string $msg)
     {
@@ -56,8 +56,8 @@ class StaffMessage extends NexusModel
             'msg' => $msg,
             'added' => now(),
         ]);
-        \App\Support\Events::fire(ModelEventEnum::STAFF_MESSAGE_CREATED, $record, null);
+        Events::fire(ModelEventEnum::STAFF_MESSAGE_CREATED, $record, null);
+
         return $record;
     }
-
 }

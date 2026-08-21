@@ -8,8 +8,7 @@ use Nexus\Database\NexusDB;
 class InviteRepository
 {
     /**
-     * @param  int  $id
-     * @return  ?array<int|string, mixed>
+     * @return ?array<int|string, mixed>
      */
     public static function getUserArray(int $id): ?array
     {
@@ -18,7 +17,6 @@ class InviteRepository
         return $user === null ? null : $user->toArray();
     }
 
-    /** @param  int  $inviterId */
     public static function countPendingInvitees(int $inviterId): int
     {
         return User::query()
@@ -28,17 +26,16 @@ class InviteRepository
     }
 
     /**
-     * @param  int  $inviterId
      * @param  array<int|string, mixed>  $filters
      */
     public static function countInvitees(int $inviterId, array $filters): int
     {
         $query = NexusDB::table('users as u')->where('u.invited_by', $inviterId);
 
-        if (!empty($filters['status'])) {
+        if (! empty($filters['status'])) {
             $query->where('u.status', $filters['status']);
         }
-        if (!empty($filters['enabled'])) {
+        if (! empty($filters['enabled'])) {
             $query->where('u.enabled', $filters['enabled']);
         }
 
@@ -46,11 +43,8 @@ class InviteRepository
     }
 
     /**
-     * @param  int  $inviterId
      * @param  array<int|string, mixed>  $filters
-     * @param  int  $offset
-     * @param  int  $perPage
-     * @return  array<int|string, mixed>
+     * @return array<int|string, mixed>
      */
     public static function getInvitees(int $inviterId, array $filters, int $offset, int $perPage): array
     {
@@ -58,10 +52,10 @@ class InviteRepository
             ->where('u.invited_by', $inviterId)
             ->leftJoin('torrents as t', 't.owner', '=', 'u.id');
 
-        if (!empty($filters['status'])) {
+        if (! empty($filters['status'])) {
             $query->where('u.status', $filters['status']);
         }
-        if (!empty($filters['enabled'])) {
+        if (! empty($filters['enabled'])) {
             $query->where('u.enabled', $filters['enabled']);
         }
 
@@ -80,10 +74,6 @@ class InviteRepository
             ->all();
     }
 
-    /**
-     * @param  int  $inviterId
-     * @param  string  $type
-     */
     public static function countInvites(int $inviterId, string $type): int
     {
         $query = NexusDB::table('invites')->where('inviter', $inviterId);
@@ -98,11 +88,7 @@ class InviteRepository
     }
 
     /**
-     * @param  int  $inviterId
-     * @param  string  $type
-     * @param  int  $offset
-     * @param  int  $perPage
-     * @return  array<int|string, mixed>
+     * @return array<int|string, mixed>
      */
     public static function getInvites(int $inviterId, string $type, int $offset, int $perPage): array
     {

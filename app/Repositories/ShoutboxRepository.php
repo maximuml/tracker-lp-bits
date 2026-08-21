@@ -66,7 +66,7 @@ final class ShoutboxRepository extends BaseRepository
         }
 
         if ($filters['search'] !== '') {
-            $like = '%' . $filters['search'] . '%';
+            $like = '%'.$filters['search'].'%';
             $query->where('text', 'like', $like);
             $countQuery->where('text', 'like', $like);
         }
@@ -84,7 +84,7 @@ final class ShoutboxRepository extends BaseRepository
     }
 
     /**
-     * @param list<int> $shoutIds
+     * @param  list<int>  $shoutIds
      * @return array{counts: array<int, array<string, int>>, mine: array<int, list<string>>, users: array<int, array<string, list<string>>>}
      */
     public static function prefetchReactions(array $shoutIds, int $currentUserId): array
@@ -183,8 +183,8 @@ final class ShoutboxRepository extends BaseRepository
             return [];
         }
 
-        $like = '%@' . strtolower($username) . '%';
-        $pattern = '/(?<![\w\-\[\]\(\)])@' . preg_quote($username, '/') . '(?![\w\-\[\]\(\)])/ui';
+        $like = '%@'.strtolower($username).'%';
+        $pattern = '/(?<![\w\-\[\]\(\)])@'.preg_quote($username, '/').'(?![\w\-\[\]\(\)])/ui';
 
         $query = NexusDB::table('shoutbox')
             ->leftJoin('users', 'shoutbox.userid', '=', 'users.id')
@@ -236,8 +236,8 @@ final class ShoutboxRepository extends BaseRepository
     }
 
     /**
-     * @param Builder $query
-     * @param array<string, mixed>|object|null $user
+     * @param  Builder  $query
+     * @param  array<string, mixed>|object|null  $user
      */
     public static function applyTypeFilter($query, string $type, $user = null): void
     {

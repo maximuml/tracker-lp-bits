@@ -7,19 +7,19 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
- * @mixin \App\Models\SearchBox
+ * @mixin SearchBox
  */
 class SearchBoxResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
-     * @param  \Illuminate\Http\Request  $request
-     * @return  array<int|string, mixed>
+     *
+     * @return array<int|string, mixed>
      */
     public function toArray(Request $request): array
     {
         $searchBox = $this->resource;
-        if (!$searchBox instanceof SearchBox) {
+        if (! $searchBox instanceof SearchBox) {
             return [];
         }
         $out = [
@@ -42,10 +42,11 @@ class SearchBoxResource extends JsonResource
                     ];
                 }
             }
-            if (!empty($subCategories)) {
+            if (! empty($subCategories)) {
                 $out['sub_categories'] = $subCategories;
             }
         }
+
         return $out;
     }
 }

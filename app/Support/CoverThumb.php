@@ -2,6 +2,9 @@
 
 namespace App\Support;
 
+use App\Jobs\GenerateCoverThumbnail;
+use Nexus\Nexus;
+
 /**
  * Cover-thumbnail URL resolver extracted from `include/functions.php`.
  *
@@ -34,12 +37,12 @@ final class CoverThumb
             return $url;
         }
 
-        $key = md5($url . '|' . $maxWidth . 'x' . $maxHeight);
-        $relativeDir = 'covers/' . substr($key, 0, 2);
-        $filename = $key . '.jpg';
-        $absoluteDir = Path::makeFolder($saveDir . '/', $relativeDir, $rootPath);
-        $absolutePath = rtrim($absoluteDir, '/') . '/' . $filename;
-        $publicUrl = $httpDir . '/' . $relativeDir . '/' . $filename;
+        $key = md5($url.'|'.$maxWidth.'x'.$maxHeight);
+        $relativeDir = 'covers/'.substr($key, 0, 2);
+        $filename = $key.'.jpg';
+        $absoluteDir = Path::makeFolder($saveDir.'/', $relativeDir, $rootPath);
+        $absolutePath = rtrim($absoluteDir, '/').'/'.$filename;
+        $publicUrl = $httpDir.'/'.$relativeDir.'/'.$filename;
 
         if (is_file($absolutePath) && filesize($absolutePath) > 0) {
             return $publicUrl;
@@ -84,12 +87,12 @@ final class CoverThumb
     ): void {
         $lockSet = false;
         if ($cache !== null && property_exists($cache, 'redis')) {
-            $lockKey = 'cover_thumb:' . $absolutePath;
+            $lockKey = 'cover_thumb:'.$absolutePath;
             $lockSet = (bool) $cache->redis->set($lockKey, 1, ['nx', 'ex' => 300]);
         }
 
         if ($lockSet) {
-            \Nexus\Nexus::dispatchQueueJob(new \App\Jobs\GenerateCoverThumbnail($url, $absolutePath, $maxWidth, $maxHeight, $quality));
+            Nexus::dispatchQueueJob(new GenerateCoverThumbnail($url, $absolutePath, $maxWidth, $maxHeight, $quality));
         }
     }
 
@@ -102,7 +105,7 @@ final class CoverThumb
         string $rootPath,
         string $publicUrl,
     ): string {
-        $localPath = $rootPath . ltrim($url, '/');
+        $localPath = $rootPath.ltrim($url, '/');
         if (! is_file($localPath)) {
             return $url;
         }

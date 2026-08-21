@@ -14,10 +14,10 @@ return new class extends Migration
     public function up()
     {
         Schema::table('magic', function (Blueprint $table) {
-            if (!Schema::hasColumn('magic', 'created_at')) {
+            if (! Schema::hasColumn('magic', 'created_at')) {
                 $table->dateTime('created_at')->useCurrent();
             }
-            if (!Schema::hasColumn('magic', 'updated_at')) {
+            if (! Schema::hasColumn('magic', 'updated_at')) {
                 $table->dateTime('updated_at')->useCurrent()->useCurrentOnUpdate();
             }
         });

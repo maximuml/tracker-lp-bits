@@ -14,7 +14,7 @@ return new class extends Migration
     public function up()
     {
         Schema::table('seed_box_records', function (Blueprint $table) {
-            $table->integer("asn")->default(0)->index();
+            $table->integer('asn')->default(0)->index();
         });
     }
 
@@ -26,7 +26,7 @@ return new class extends Migration
     public function down()
     {
         Schema::table('seed_box_records', function (Blueprint $table) {
-            $table->dropColumn("asn");
+            $table->dropColumn('asn');
         });
     }
 };

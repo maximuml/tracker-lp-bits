@@ -21,17 +21,17 @@ final class Progress
 
         $progress = '';
         if ($p == 0) {
-            $progress = '<img class="progbarrest" src="pic/trans.gif" style="width: ' . $maxpx . 'px;" alt="" />';
+            $progress = '<img class="progbarrest" src="pic/trans.gif" style="width: '.$maxpx.'px;" alt="" />';
         } elseif ($p == 100) {
-            $progress = '<img class="progbargreen" src="pic/trans.gif" style="width: ' . $maxpx . 'px;" alt="" />';
+            $progress = '<img class="progbargreen" src="pic/trans.gif" style="width: '.$maxpx.'px;" alt="" />';
         } elseif ($p >= 1 && $p <= 30) {
-            $progress = '<img class="progbarred" src="pic/trans.gif" style="width: ' . ($p * ($maxpx / 100)) . 'px;" alt="" /><img class="progbarrest" src="pic/trans.gif" style="width: ' . ((100 - $p) * ($maxpx / 100)) . 'px;" alt="" />';
+            $progress = '<img class="progbarred" src="pic/trans.gif" style="width: '.($p * ($maxpx / 100)).'px;" alt="" /><img class="progbarrest" src="pic/trans.gif" style="width: '.((100 - $p) * ($maxpx / 100)).'px;" alt="" />';
         } elseif ($p >= 31 && $p <= 65) {
-            $progress = '<img class="progbaryellow" src="pic/trans.gif" style="width: ' . ($p * ($maxpx / 100)) . 'px;" alt="" /><img class="progbarrest" src="pic/trans.gif" style="width: ' . ((100 - $p) * ($maxpx / 100)) . 'px;" alt="" />';
+            $progress = '<img class="progbaryellow" src="pic/trans.gif" style="width: '.($p * ($maxpx / 100)).'px;" alt="" /><img class="progbarrest" src="pic/trans.gif" style="width: '.((100 - $p) * ($maxpx / 100)).'px;" alt="" />';
         } elseif ($p >= 66 && $p <= 99) {
-            $progress = '<img class="progbargreen" src="pic/trans.gif" style="width: ' . ($p * ($maxpx / 100)) . 'px;" alt="" /><img class="progbarrest" src="pic/trans.gif" style="width: ' . ((100 - $p) * ($maxpx / 100)) . 'px;" alt="" />';
+            $progress = '<img class="progbargreen" src="pic/trans.gif" style="width: '.($p * ($maxpx / 100)).'px;" alt="" /><img class="progbarrest" src="pic/trans.gif" style="width: '.((100 - $p) * ($maxpx / 100)).'px;" alt="" />';
         }
 
-        return '<img class="bar_left" src="pic/trans.gif" alt="" />' . $progress . '<img class="bar_right" src="pic/trans.gif" alt="" />';
+        return '<img class="bar_left" src="pic/trans.gif" alt="" />'.$progress.'<img class="bar_right" src="pic/trans.gif" alt="" />';
     }
 }

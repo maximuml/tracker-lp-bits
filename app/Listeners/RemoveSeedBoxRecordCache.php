@@ -3,7 +3,6 @@
 namespace App\Listeners;
 
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Queue\InteractsWithQueue;
 use Nexus\Database\NexusDB;
 
 class RemoveSeedBoxRecordCache implements ShouldQueue
@@ -26,6 +25,6 @@ class RemoveSeedBoxRecordCache implements ShouldQueue
      */
     public function handle($event)
     {
-        NexusDB::cache_del_by_pattern("nexus_is_ip_seed_box:ip:*");
+        NexusDB::cache_del_by_pattern('nexus_is_ip_seed_box:ip:*');
     }
 }

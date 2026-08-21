@@ -27,8 +27,8 @@ class CreateTopicsTable extends Migration
             $table->enum('sticky', ['no', 'yes'])->default('no');
             $table->unsignedTinyInteger('hlcolor')->default(0);
             $table->unsignedInteger('views')->default(0);
-            $table->index(['forumid', 'lastpost'], );
-            $table->index(['forumid', 'sticky', 'lastpost'], );
+            $table->index(['forumid', 'lastpost']);
+            $table->index(['forumid', 'sticky', 'lastpost']);
         });
     }
 

@@ -4,12 +4,11 @@
  * PHPStan stub for legacy constants that are defined at runtime
  * in include/core.php and other bootstrap files.
  */
-
-if (!defined('TIMENOW')) {
+if (! defined('TIMENOW')) {
     define('TIMENOW', 0);
 }
 
-if (!defined('UC_PEASANT')) {
+if (! defined('UC_PEASANT')) {
     define('UC_PEASANT', 0);
     define('UC_USER', 1);
     define('UC_POWER_USER', 2);

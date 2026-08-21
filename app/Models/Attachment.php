@@ -15,6 +15,7 @@
  * @property int $thumb
  * @property string $driver
  */
+
 namespace App\Models;
 
 class Attachment extends NexusModel

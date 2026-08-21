@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->string("auth_key", 255)->default("")->nullable(false)->after("secret");
+            $table->string('auth_key', 255)->default('')->nullable(false)->after('secret');
         });
     }
 
@@ -22,7 +22,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn("auth_key");
+            $table->dropColumn('auth_key');
         });
     }
 };

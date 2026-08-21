@@ -2,28 +2,24 @@
 
 namespace App\Filament\Resources\Oauth;
 
-use Filament\Schemas\Schema;
-use Filament\Tables\Columns\TextColumn;
+use App\Filament\Resources\Oauth\AuthCodeResource\Pages\ManageAuthCodes;
+use App\Support\UserDisplay;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
-use App\Filament\Resources\Oauth\AuthCodeResource\Pages\ManageAuthCodes;
-use App\Filament\Resources\Oauth\AuthCodeResource\Pages;
-use App\Filament\Resources\Oauth\AuthCodeResource\RelationManagers;
-use Laravel\Passport\AuthCode;
-use Filament\Forms;
 use Filament\Resources\Resource;
-use Filament\Tables\Table;
+use Filament\Schemas\Schema;
 use Filament\Tables;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
+use Laravel\Passport\AuthCode;
 
 class AuthCodeResource extends Resource
 {
     protected static ?string $model = AuthCode::class;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Oauth';
+    protected static string|\UnitEnum|null $navigationGroup = 'Oauth';
 
     protected static ?int $navigationSort = 2;
 
@@ -52,17 +48,17 @@ class AuthCodeResource extends Resource
                 TextColumn::make('id'),
                 TextColumn::make('user_id')
                     ->label(__('label.username'))
-                    ->formatStateUsing(fn ($record) => \App\Support\UserDisplay::adminUsername($record->user_id)),
+                    ->formatStateUsing(fn ($record) => UserDisplay::adminUsername($record->user_id)),
                 TextColumn::make('client.name')
                     ->label(__('oauth.client')),
                 TextColumn::make('expires_at')
-                    ->label(__('label.expire_at'))
+                    ->label(__('label.expire_at')),
             ])
             ->filters([
                 //
             ])
             ->recordActions([
-//                Tables\Actions\EditAction::make(),
+                //                Tables\Actions\EditAction::make(),
                 DeleteAction::make(),
             ])
             ->toolbarActions([

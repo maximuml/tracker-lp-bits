@@ -13,7 +13,6 @@ class TorrentNameParser
      *   Linkin Park - Hamburg, Germany, Volksparkstadion (03.06.2026)
      *   Fort Minor - Hamburg, Germany, Docks (16.11.2005)
      *
-     * @param string $name
      * @return array<string, string>
      */
     public static function parse(string $name): array
@@ -23,7 +22,7 @@ class TorrentNameParser
         // 1. Extract and normalize date DD.MM.YYYY -> YYYY-MM-DD
         $date = '';
         if (preg_match('/\((\d{2})\.(\d{2})\.(\d{4})\)/', $name, $m)) {
-            $date = $m[3] . '-' . $m[2] . '-' . $m[1];
+            $date = $m[3].'-'.$m[2].'-'.$m[1];
         } elseif (preg_match('/(\d{4}-\d{2}-\d{2})/', $name, $m)) {
             $date = $m[1];
         } elseif (preg_match('/\b(\d{4})\b/', $name, $m)) {
@@ -98,10 +97,6 @@ class TorrentNameParser
         ];
     }
 
-    /**
-     * @param string $value
-     * @return bool
-     */
     private static function isCountry(string $value): bool
     {
         $countries = [
@@ -124,10 +119,6 @@ class TorrentNameParser
         return in_array(strtolower($value), $countries, true);
     }
 
-    /**
-     * @param string $value
-     * @return bool
-     */
     private static function isUsState(string $value): bool
     {
         $states = [

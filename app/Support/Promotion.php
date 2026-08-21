@@ -7,6 +7,7 @@ namespace App\Support;
 use App\Enums\TorrentPromotion;
 use App\Models\Torrent;
 use App\Models\TorrentState;
+use App\Support\Config\SiteConfig;
 
 /**
  * Pure promotion (special-state) presentation helpers, drained out of
@@ -65,10 +66,10 @@ final class Promotion
         }
 
         if (is_null($sphighlight)) {
-            $torrentSettings = \App\Support\Config\SiteConfig::current()->torrent->toArray();
-            if ($posState === \App\Models\Torrent::POS_STATE_STICKY_FIRST && ! empty($torrentSettings['sticky_first_level_background_color'])) {
+            $torrentSettings = SiteConfig::current()->torrent->toArray();
+            if ($posState === Torrent::POS_STATE_STICKY_FIRST && ! empty($torrentSettings['sticky_first_level_background_color'])) {
                 $sphighlight = sprintf(' style="background-color: %s"', $torrentSettings['sticky_first_level_background_color']);
-            } elseif ($posState === \App\Models\Torrent::POS_STATE_STICKY_SECOND && ! empty($torrentSettings['sticky_second_level_background_color'])) {
+            } elseif ($posState === Torrent::POS_STATE_STICKY_SECOND && ! empty($torrentSettings['sticky_second_level_background_color'])) {
                 $sphighlight = sprintf(' style="background-color: %s"', $torrentSettings['sticky_second_level_background_color']);
             }
         }
@@ -84,7 +85,7 @@ final class Promotion
      */
     public static function backgroundStyleWithContext(int $promotion, ?string $posState = '', ?array $torrent = []): string
     {
-        $user = \App\Support\SupportContext::getUser() ?? [];
+        $user = SupportContext::getUser() ?? [];
 
         return self::backgroundStyle(
             $promotion,
@@ -178,7 +179,7 @@ final class Promotion
             $globalSpState = 1;
             $log .= ', [IGNORE_GLOBAL]';
         }
-        $log .= ', globalSpState == ' . $globalSpState;
+        $log .= ', globalSpState == '.$globalSpState;
 
         $mode = $forceMode !== '' ? $forceMode : $appendPromotion;
 
@@ -195,16 +196,16 @@ final class Promotion
                     $baseTime = strtotime($added);
                     $futureTime = ($baseTime === false ? 0 : $baseTime) + $expire * 86400;
                 }
-                $timeout = \App\Support\Time::format(date('Y-m-d H:i:s', $futureTime), false, false, true, false, true);
+                $timeout = Time::format(date('Y-m-d H:i:s', $futureTime), false, false, true, false, true);
                 if ($timeout) {
                     $text = $labels[$config['text']] ?? '';
                     if ($sub) {
                         $color = $config['subColor'];
                         $onmouseover = $color
-                            ? " <font color=\"$color\">" . ($labels['text_will_end_in'] ?? '') . $timeout . '</font>'
-                            : ' ' . ($labels['text_will_end_in'] ?? '') . $timeout;
+                            ? " <font color=\"$color\">".($labels['text_will_end_in'] ?? '').$timeout.'</font>'
+                            : ' '.($labels['text_will_end_in'] ?? '').$timeout;
                     } else {
-                        $onmouseover = " onmouseover=\"domTT_activate(this, event, 'content', '" . htmlspecialchars("<b><font class=\"{$config['class']}\">$text</font></b>" . ($labels['text_will_end_in'] ?? '') . "<b>$timeout</b>") . "', 'trail', false, 'delay',500,'lifetime',3000,'fade','both','styleClass','niceTitle', 'fadeMax',87, 'maxWidth', 300);\"";
+                        $onmouseover = " onmouseover=\"domTT_activate(this, event, 'content', '".htmlspecialchars("<b><font class=\"{$config['class']}\">$text</font></b>".($labels['text_will_end_in'] ?? '')."<b>$timeout</b>")."', 'trail', false, 'delay',500,'lifetime',3000,'fade','both','styleClass','niceTitle', 'fadeMax',87, 'maxWidth', 300);\"";
                     }
                 } else {
                     $promotion = 1;
@@ -224,7 +225,7 @@ final class Promotion
             } elseif ($mode === 'word') {
                 $spTorrent = " <b>[<font class='{$config['class']}' $onmouseover>$text</font>]</b>";
             } else {
-                $attr = $onmouseover ?: 'title="' . $text . '"';
+                $attr = $onmouseover ?: 'title="'.$text.'"';
                 $spTorrent = " <img class=\"{$config['icon']}\" src=\"pic/trans.gif\" alt=\"{$config['alt']}\" $attr />";
             }
         }
@@ -247,7 +248,7 @@ final class Promotion
         ?string $promotionUntil,
         bool $ignoreGlobal,
     ): string {
-        $user = \App\Support\SupportContext::getUser() ?? [];
+        $user = SupportContext::getUser() ?? [];
         $expires = self::expireTorrentGlobals();
 
         return self::append(
@@ -259,7 +260,7 @@ final class Promotion
             $promotionUntil,
             $ignoreGlobal,
             (string) ($user['appendpromotion'] ?? ''),
-            \App\Support\SupportContext::getLangFunctions(),
+            SupportContext::getLangFunctions(),
             $expires,
         );
     }
@@ -277,7 +278,7 @@ final class Promotion
         ?string $promotionUntil,
         bool $ignoreGlobal,
     ): string {
-        $user = \App\Support\SupportContext::getUser() ?? [];
+        $user = SupportContext::getUser() ?? [];
         $expires = self::expireTorrentGlobals();
 
         return self::appendSub(
@@ -289,7 +290,7 @@ final class Promotion
             $promotionUntil,
             $ignoreGlobal,
             (string) ($user['appendpromotion'] ?? ''),
-            \App\Support\SupportContext::getLangFunctions(),
+            SupportContext::getLangFunctions(),
             $expires,
         );
     }
@@ -302,12 +303,12 @@ final class Promotion
     private static function expireTorrentGlobals(): array
     {
         return [
-            'expirefree_torrent' => (int) \App\Support\SupportContext::getGlobal('expirefree_torrent', 0),
-            'expiretwoup_torrent' => (int) \App\Support\SupportContext::getGlobal('expiretwoup_torrent', 0),
-            'expiretwoupfree_torrent' => (int) \App\Support\SupportContext::getGlobal('expiretwoupfree_torrent', 0),
-            'expirehalfleech_torrent' => (int) \App\Support\SupportContext::getGlobal('expirehalfleech_torrent', 0),
-            'expiretwouphalfleech_torrent' => (int) \App\Support\SupportContext::getGlobal('expiretwouphalfleech_torrent', 0),
-            'expirethirtypercentleech_torrent' => (int) \App\Support\SupportContext::getGlobal('expirethirtypercentleech_torrent', 0),
+            'expirefree_torrent' => (int) SupportContext::getGlobal('expirefree_torrent', 0),
+            'expiretwoup_torrent' => (int) SupportContext::getGlobal('expiretwoup_torrent', 0),
+            'expiretwoupfree_torrent' => (int) SupportContext::getGlobal('expiretwoupfree_torrent', 0),
+            'expirehalfleech_torrent' => (int) SupportContext::getGlobal('expirehalfleech_torrent', 0),
+            'expiretwouphalfleech_torrent' => (int) SupportContext::getGlobal('expiretwouphalfleech_torrent', 0),
+            'expirethirtypercentleech_torrent' => (int) SupportContext::getGlobal('expirethirtypercentleech_torrent', 0),
         ];
     }
 

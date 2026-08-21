@@ -6,6 +6,8 @@ use App\Exceptions\TrackerException;
 use App\Exceptions\TrackerWarningException;
 use App\Http\Requests\AnnounceRequest;
 use App\Services\AnnounceService;
+use App\Support\Json;
+use App\Support\Logger;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Rhilip\Bencode\Bencode;
@@ -13,9 +15,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class AnnounceController extends Controller
 {
-    public function __construct(private AnnounceService $service)
-    {
-    }
+    public function __construct(private AnnounceService $service) {}
 
     public function announce(Request $request): Response
     {
@@ -23,7 +23,7 @@ class AnnounceController extends Controller
             $validated = $request->validate(AnnounceRequest::announceRules());
 
             $validEvents = ['started', 'completed', 'stopped', 'paused'];
-            if (empty($validated['event']) || !in_array($validated['event'], $validEvents, true)) {
+            if (empty($validated['event']) || ! in_array($validated['event'], $validEvents, true)) {
                 $validated['event'] = null;
             }
 
@@ -46,14 +46,14 @@ class AnnounceController extends Controller
     {
         $logDict = $dict;
         unset($logDict['peers'], $logDict['peers6']);
-        \App\Support\Logger::writeWithContext((string) \App\Support\Json::encode($logDict), (string) 'info', (bool) false);
+        Logger::writeWithContext((string) Json::encode($logDict), (string) 'info', (bool) false);
 
         return response(
             Bencode::encode($dict),
             200,
             [
                 'Content-Type' => 'text/plain; charset=utf-8',
-                'Pragma'       => 'no-cache',
+                'Pragma' => 'no-cache',
             ]
         );
     }

@@ -15,9 +15,14 @@
  * @property string|null $description
  * @property int $mode
  */
+
 namespace App\Models;
 
 use App\Models\Traits\NexusActivityLogTrait;
+use App\Support\Config\SiteConfig;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * @property int $id
@@ -34,14 +39,14 @@ class Tag extends NexusModel
 {
     use NexusActivityLogTrait;
 
-    /** @var  bool */
+    /** @var bool */
     public $timestamps = true;
 
-    /** @var  list<string> */
+    /** @var list<string> */
     protected $fillable = [
         'id', 'name', 'color', 'priority', 'created_at', 'updated_at',
         'font_size', 'font_color', 'padding', 'margin', 'border_radius',
-        'mode', 'description'
+        'mode', 'description',
     ];
 
     const DEFAULTS = [
@@ -85,7 +90,7 @@ class Tag extends NexusModel
     /** @return  array<int|string, mixed> */
     public static function listSpecial(): array
     {
-        $config = \App\Support\Config\SiteConfig::current()->bonus;
+        $config = SiteConfig::current()->bonus;
 
         return array_filter([
             $config->officialTag(),
@@ -93,24 +98,21 @@ class Tag extends NexusModel
         ]);
     }
 
-    /** @return  \Illuminate\Database\Eloquent\Relations\BelongsToMany<Torrent, $this> */
-    public function torrents(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    /** @return  BelongsToMany<Torrent, $this> */
+    public function torrents(): BelongsToMany
     {
         return $this->belongsToMany(Torrent::class, 'torrent_tags', 'tag_id', 'torrent_id');
     }
 
-    /** @return  \Illuminate\Database\Eloquent\Relations\HasMany<TorrentTag, $this> */
-    public function torrent_tags(): \Illuminate\Database\Eloquent\Relations\HasMany
+    /** @return  HasMany<TorrentTag, $this> */
+    public function torrent_tags(): HasMany
     {
         return $this->hasMany(TorrentTag::class, 'tag_id');
     }
 
-    /** @return  \Illuminate\Database\Eloquent\Relations\BelongsTo<SearchBox, $this> */
-    public function search_box(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    /** @return  BelongsTo<SearchBox, $this> */
+    public function search_box(): BelongsTo
     {
         return $this->belongsTo(SearchBox::class, 'mode', 'id');
     }
-
-
-
 }

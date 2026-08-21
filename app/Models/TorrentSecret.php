@@ -8,10 +8,11 @@
  * @property string $created_at
  * @property string $updated_at
  */
+
 namespace App\Models;
 
 class TorrentSecret extends NexusModel
 {
-    /** @var  list<string> */
+    /** @var list<string> */
     protected $fillable = ['uid', 'torrent_id', 'secret'];
 }

@@ -1,17 +1,17 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Support\Facades\Schema;
+use Nexus\Database\NexusDB;
 
 class FixShoutboxReactionsEmojiCollation extends Migration
 {
     public function up()
     {
-        if (\Nexus\Database\NexusDB::isMysql()) {
-            \Nexus\Database\NexusDB::statement(
-                "ALTER TABLE `shoutbox_reactions` MODIFY COLUMN `reaction` VARCHAR(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL"
+        if (NexusDB::isMysql()) {
+            NexusDB::statement(
+                'ALTER TABLE `shoutbox_reactions` MODIFY COLUMN `reaction` VARCHAR(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL'
             );
-        } elseif (\Nexus\Database\NexusDB::isPgsql()) {
+        } elseif (NexusDB::isPgsql()) {
             // Postgres uses byte-exact string comparison by default; no change needed.
         }
     }

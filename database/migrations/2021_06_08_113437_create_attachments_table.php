@@ -30,7 +30,7 @@ class CreateAttachmentsTable extends Migration
             $table->smallInteger('isimage')->unsigned()->default(0);
             $table->smallInteger('thumb')->unsigned()->default(0);
             $table->index(['userid', 'id'], 'pid');
-            $table->index(['added', 'isimage', 'downloads'], );
+            $table->index(['added', 'isimage', 'downloads']);
         });
     }
 

@@ -4,10 +4,11 @@ namespace App\Repositories;
 
 use App\Auth\Permission;
 use App\Enums\Permission\PermissionEnum;
-use App\Models\Setting;
 use App\Models\Torrent;
 use App\Models\User;
-use Illuminate\Encryption\Encrypter;
+use App\Support\Environment;
+use App\Support\Locale;
+use App\Support\Logger;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -15,49 +16,48 @@ class BaseRepository
 {
     /**
      * @param  array<int|string, mixed>  $params
-     * @return  array<int|string, mixed>
+     * @return array<int|string, mixed>
      */
     protected function getSortFieldAndType(array $params): array
     {
-        $field = !empty($params['sort_field']) ? $params['sort_field'] : 'id';
+        $field = ! empty($params['sort_field']) ? $params['sort_field'] : 'id';
         $type = 'desc';
-        if (!empty($params['sort_type']) && Str::startsWith($params['sort_type'], 'asc')) {
+        if (! empty($params['sort_type']) && Str::startsWith($params['sort_type'], 'asc')) {
             $type = 'asc';
         }
+
         return [$field, $type];
     }
 
     /**
-     * @param  \Illuminate\Http\Request  $request
-     * @return  mixed
+     * @return mixed
      */
     protected function getPerPageFromRequest(Request $request)
     {
-        $perPage =  $request->get('per_page');
+        $perPage = $request->get('per_page');
         if ($perPage && $perPage > 100) {
-            \App\Support\Logger::writeWithContext((string) "per_page: {$perPage} > 100", (string) "warning", (bool) false);
+            Logger::writeWithContext((string) "per_page: {$perPage} > 100", (string) 'warning', (bool) false);
             $perPage = 100;
         }
+
         return $perPage;
     }
 
     /**
      * @param  mixed  $username
      * @param  mixed  $user
-     * @param  \App\Models\User  $authenticator
-     * @param  ?\App\Models\Torrent  $torrent
-     * @return  mixed
+     * @return mixed
      */
     protected function handleAnonymous($username, $user, User $authenticator, ?Torrent $torrent = null)
     {
-        if (!$user) {
-            return "";
+        if (! $user) {
+            return '';
         }
-        if($user->privacy == "strong" || ($torrent && $torrent->anonymous == 'yes' && $user->id == $torrent->owner)) {
-            //用户强私密，或者种子作者匿名而当前项作者刚好为种子作者
-            $anonymousText = \App\Support\Locale::trans('label.anonymous', [], null);
-            if(Permission::can(PermissionEnum::VIEW_ANONYMOUS, $authenticator) || $user->id == $authenticator->id) {
-                //但当前用户权限可以查看匿名者，或当前用户查看自己的数据，显示个匿名，后边加真实用户名
+        if ($user->privacy == 'strong' || ($torrent && $torrent->anonymous == 'yes' && $user->id == $torrent->owner)) {
+            // 用户强私密，或者种子作者匿名而当前项作者刚好为种子作者
+            $anonymousText = Locale::trans('label.anonymous', [], null);
+            if (Permission::can(PermissionEnum::VIEW_ANONYMOUS, $authenticator) || $user->id == $authenticator->id) {
+                // 但当前用户权限可以查看匿名者，或当前用户查看自己的数据，显示个匿名，后边加真实用户名
                 return sprintf('%s(%s)', $anonymousText, $username);
             } else {
                 return $anonymousText;
@@ -70,9 +70,8 @@ class BaseRepository
     /**
      * @param  mixed  $user
      * @param  mixed  $fields
-     * @return  User|null
      */
-    protected function getUser($user, $fields = null): User|null
+    protected function getUser($user, $fields = null): ?User
     {
         if ($user === null) {
             return null;
@@ -83,17 +82,17 @@ class BaseRepository
         if ($fields === null) {
             $fields = User::$commonFields;
         }
+
         return User::query()->findOrFail(intval($user), $fields);
     }
 
     /**
      * @param  mixed  $command
      * @param  mixed  $format
-     * @return  string|array<int|string, mixed>
+     * @return string|array<int|string, mixed>
      */
     protected function executeCommand($command, $format = 'string'): string|array
     {
-        return \App\Support\Environment::run($command, $format, (bool) false, (bool) true);
+        return Environment::run($command, $format, (bool) false, (bool) true);
     }
-
 }

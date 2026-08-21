@@ -1,13 +1,12 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-
 use App\Http\Controllers\InfoController;
 use App\Http\Controllers\ShoutboxController;
 use App\Http\Controllers\SupportController;
 use App\Http\Controllers\SystemController;
 use App\Http\Controllers\TorrentActionController;
 use App\Http\Controllers\UtilityController;
+use Illuminate\Support\Facades\Route;
 
 Route::match(['get', 'post'], '/aboutnexus', [InfoController::class, 'aboutNexus'])->name('aboutnexus.legacy');
 Route::match(['get', 'post'], '/rules', [InfoController::class, 'rules'])->name('rules.legacy');
@@ -29,7 +28,7 @@ Route::match(['get', 'post'], '/suggest', [UtilityController::class, 'suggest'])
 Route::match(['get', 'post'], '/opensearch', [UtilityController::class, 'opensearch'])->name('opensearch.legacy');
 
 Route::match(['get', 'post'], '/confirmemail/{path?}', [UtilityController::class, 'confirmemail'])->where('path', '.*')->name('confirmemail.legacy');
-Route::match(['get', 'post'], '/cron', [SystemController::class, 'cron'])->name('cron.legacy');
+Route::match(['get', 'post'], '/cron', [SystemController::class, 'cron'])->middleware('cron.token')->name('cron.legacy');
 Route::match(['get', 'post'], '/email-gateway', [TorrentActionController::class, 'emailGateway'])->name('email-gateway.legacy');
 Route::match(['get', 'post'], '/ok', [UtilityController::class, 'ok'])->name('ok.legacy');
 

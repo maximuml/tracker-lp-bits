@@ -56,6 +56,6 @@ final class Token
      */
     public static function challengeKey(string $challenge): string
     {
-        return 'challenge:' . $challenge;
+        return 'challenge:'.$challenge;
     }
 }

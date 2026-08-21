@@ -2,6 +2,12 @@
 
 namespace App\Support;
 
+use App\Repositories\AttachmentRepository;
+use App\Support\Config\SiteConfig;
+use Illuminate\Support\Str;
+use Nexus\Attachment\Storage;
+use Nexus\Database\NexusDB;
+
 /**
  * Attachment HTML emitter extracted from `include/functions.php`.
  *
@@ -12,9 +18,9 @@ namespace App\Support;
 final class Attachment
 {
     /**
-     * @param  array<string, mixed>  $row         Attachment row from the DB.
-     * @param  array<string, string> $labels      Localised labels:
-     *                                            'size', 'downloads'.
+     * @param  array<string, mixed>  $row  Attachment row from the DB.
+     * @param  array<string, string>  $labels  Localised labels:
+     *                                         'size', 'downloads'.
      */
     public static function render(
         array $row,
@@ -80,12 +86,12 @@ final class Attachment
      */
     public static function rowAndUrlByKey(string $dlkey): array
     {
-        $httpdirectory = \App\Support\Config\SiteConfig::current()->attachment->httpDirectory();
-        $row = \Nexus\Database\NexusDB::cache_get('attachment_' . $dlkey . '_content');
+        $httpdirectory = SiteConfig::current()->attachment->httpDirectory();
+        $row = NexusDB::cache_get('attachment_'.$dlkey.'_content');
 
         if (empty($row) && strlen($dlkey) == 32) {
-            $row = \App\Repositories\AttachmentRepository::findByDlkey($dlkey);
-            \Nexus\Database\NexusDB::cache_put('attachment_' . $dlkey . '_content', $row, 86400);
+            $row = AttachmentRepository::findByDlkey($dlkey);
+            NexusDB::cache_put('attachment_'.$dlkey.'_content', $row, 86400);
         }
 
         if (empty($row)) {
@@ -95,12 +101,12 @@ final class Attachment
         $driver = $row['driver'] ?? 'local';
         if ($driver == 'local') {
             if (($row['thumb'] ?? 0) == 1) {
-                $url = $httpdirectory . '/' . $row['location'] . '.thumb.jpg';
+                $url = $httpdirectory.'/'.$row['location'].'.thumb.jpg';
             } else {
-                $url = $httpdirectory . '/' . $row['location'];
+                $url = $httpdirectory.'/'.$row['location'];
             }
         } else {
-            $url = \Nexus\Attachment\Storage::getDriver($driver)->getImageUrl($row['location']);
+            $url = Storage::getDriver($driver)->getImageUrl($row['location']);
         }
 
         Logger::writeWithContext(sprintf('driver: %s, location: %s, url: %s', $driver, $row['location'], $url));
@@ -118,7 +124,7 @@ final class Attachment
         [$row, $url] = self::rowAndUrlByKey($dlkey);
 
         if (empty($row)) {
-            return '<div style="text-decoration: line-through; font-size: 7pt">' . Locale::trans('attachment.text_key') . $dlkey . Locale::trans('attachment.not_found') . '</div>';
+            return '<div style="text-decoration: line-through; font-size: 7pt">'.Locale::trans('attachment.text_key').$dlkey.Locale::trans('attachment.not_found').'</div>';
         }
 
         return self::render(
@@ -127,8 +133,8 @@ final class Attachment
             $enableImage,
             $imageResizer,
             $url,
-            \App\Support\Format::size($row['filesize']),
-            (string) \App\Support\Time::format($row['added']),
+            Format::size($row['filesize']),
+            (string) Time::format($row['added']),
             [
                 'size' => Locale::trans('attachment.size'),
                 'downloads' => Locale::trans('attachment.downloads'),
@@ -158,9 +164,10 @@ final class Attachment
             'cloudinary' => (function () use ($parsed) {
                 $parts = explode('/', $parsed['path'] ?? '');
                 $key = (string) end($parts);
-                if (\Illuminate\Support\Str::contains($key, '.')) {
+                if (Str::contains($key, '.')) {
                     $key = (string) strstr($key, '.', true);
                 }
+
                 return $key;
             })(),
             default => throw new \RuntimeException('不支持的云盘驱动'),
@@ -188,28 +195,29 @@ final class Attachment
 
         return (string) preg_replace_callback($pattern, function ($matches) {
             $dlkey = $matches[1];
-            $httpdirectory = \App\Support\Config\SiteConfig::current()->attachment->httpDirectory();
-            $cached = \Nexus\Database\NexusDB::cache_get('attachment_' . $dlkey . '_content');
-            $row = is_array($cached) ? $cached : (\App\Repositories\AttachmentRepository::findByDlkey($dlkey) ?? []);
-            \Nexus\Database\NexusDB::cache_put('attachment_' . $dlkey . '_content', $row, 86400);
+            $httpdirectory = SiteConfig::current()->attachment->httpDirectory();
+            $cached = NexusDB::cache_get('attachment_'.$dlkey.'_content');
+            $row = is_array($cached) ? $cached : (AttachmentRepository::findByDlkey($dlkey) ?? []);
+            NexusDB::cache_put('attachment_'.$dlkey.'_content', $row, 86400);
 
             if (empty($row) || ($row['isimage'] ?? 0) != 1) {
                 Logger::writeWithContext(sprintf('dlkey: %s get attachment %s not exists or not image', $dlkey, Json::encode($row)));
+
                 return $matches[0];
             }
 
             $driver = $row['driver'] ?? 'local';
             if ($driver === 'local') {
-                $url = $httpdirectory . '/' . $row['location'];
+                $url = $httpdirectory.'/'.$row['location'];
                 if (($row['thumb'] ?? 0) == 1) {
                     $url .= '.thumb.jpg';
                 }
                 $url = sprintf('%s/%s', Url::schemeAndHost(true), trim($url, '/'));
             } else {
-                $url = \Nexus\Attachment\Storage::getDriver($driver)->getImageUrl($row['location']);
+                $url = Storage::getDriver($driver)->getImageUrl($row['location']);
             }
 
-            return '[img]' . $url . '[/img]';
+            return '[img]'.$url.'[/img]';
         }, $text, 20);
     }
 

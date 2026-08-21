@@ -2,26 +2,24 @@
 
 namespace App\Providers;
 
-use App\Http\Middleware\Locale;
+use App\Support\Env;
+use App\Support\Environment;
+use App\Support\Hooks;
 use App\Support\SupportContext;
-use Carbon\Carbon;
+use Filament\Facades\Filament;
 use Filament\Support\Assets\Css;
 use Filament\Support\Facades\FilamentAsset;
-use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Console\Events\ScheduledTaskStarting;
+use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Http\Resources\Json\JsonResource;
 use Laravel\Passport\Passport;
 use Nexus\Database\NexusDB;
-use Nexus\Nexus;
 use Nexus\Plugin\Hook;
 use Nexus\Plugin\Plugin;
-use Filament\Facades\Filament;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -32,10 +30,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->app->singleton(Hook::class, static fn () => SupportContext::getGlobal('hook') ?? new Hook());
-        $this->app->singleton(Plugin::class, static fn () => SupportContext::getGlobal('plugin') ?? new Plugin());
+        $this->app->singleton(Hook::class, static fn () => SupportContext::getGlobal('hook') ?? new Hook);
+        $this->app->singleton(Plugin::class, static fn () => SupportContext::getGlobal('plugin') ?? new Plugin);
 
-        \App\Support\Hooks::doAction('nexus_register');
+        Hooks::doAction('nexus_register');
     }
 
     /**
@@ -50,7 +48,7 @@ class AppServiceProvider extends ServiceProvider
         DB::connection(config('database.default'))->enableQueryLog();
 
         Model::preventLazyLoading(! app()->isProduction());
-        $forceScheme = strtolower((string) \App\Support\Env::get('FORCE_SCHEME', ''));
+        $forceScheme = strtolower((string) Env::get('FORCE_SCHEME', ''));
         if (app()->environment('production') && in_array($forceScheme, ['https', 'http'], true)) {
             URL::forceScheme($forceScheme);
         }
@@ -72,8 +70,8 @@ class AppServiceProvider extends ServiceProvider
         });
 
         FilamentAsset::register([
-            Css::make("sprites", asset('styles/sprites.css')),
-            Css::make("admin", asset('styles/admin.css')),
+            Css::make('sprites', asset('styles/sprites.css')),
+            Css::make('admin', asset('styles/admin.css')),
         ]);
 
         // Pass the legacy global context into every view as individual variables
@@ -88,12 +86,12 @@ class AppServiceProvider extends ServiceProvider
             $view->with('context', $context);
         });
 
-        \App\Support\Hooks::doAction('nexus_boot');
+        Hooks::doAction('nexus_boot');
     }
 
     private function customScheduleTask(): void
     {
-        if (!\App\Support\Environment::isConsole()) {
+        if (! Environment::isConsole()) {
             return;
         }
         /** @var Dispatcher $eventDispatcher */
@@ -106,8 +104,8 @@ class AppServiceProvider extends ServiceProvider
                 // When we are using stterr as output for logs then schedule tasks will not output
                 // any logs  due the /dev/null usage. Let's fix this by appending the output to
                 // the docker process.
-                if (getenv("RUNNING_IN_DOCKER") == "1" && $event->task->output === $event->task->getDefaultOutput()) {
-                    $event->task->appendOutputTo("/proc/1/fd/1");
+                if (getenv('RUNNING_IN_DOCKER') == '1' && $event->task->output === $event->task->getDefaultOutput()) {
+                    $event->task->appendOutputTo('/proc/1/fd/1');
                 }
             }
         );

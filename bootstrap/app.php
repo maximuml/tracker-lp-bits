@@ -1,14 +1,24 @@
 <?php
+
+use App\Exceptions\Handler;
+use App\Http\Kernel;
+use App\Support\SupportContext;
+use Illuminate\Contracts\Debug\ExceptionHandler;
+use Illuminate\Foundation\Application;
+use Nexus\Nexus;
+use Nexus\Plugin\Hook;
+use Nexus\Plugin\Plugin;
+
 defined('LARAVEL_START') || define('LARAVEL_START', microtime(true));
 defined('IN_NEXUS') || define('IN_NEXUS', false);
-if (!RUNNING_IN_OCTANE) {
-    \Nexus\Nexus::boot();
+if (! RUNNING_IN_OCTANE) {
+    Nexus::boot();
 }
-$hook = new \Nexus\Plugin\Hook();
-$plugin = new \Nexus\Plugin\Plugin();
-if (class_exists(\App\Support\SupportContext::class)) {
-    \App\Support\SupportContext::setGlobal('hook', $hook);
-    \App\Support\SupportContext::setGlobal('plugin', $plugin);
+$hook = new Hook;
+$plugin = new Plugin;
+if (class_exists(SupportContext::class)) {
+    SupportContext::setGlobal('hook', $hook);
+    SupportContext::setGlobal('plugin', $plugin);
 }
 
 // Legacy pages define this in include/core.php, but Laravel-routed endpoints
@@ -26,7 +36,7 @@ defined('TIMENOW') || define('TIMENOW', time());
 |
 */
 
-$app = new Illuminate\Foundation\Application(
+$app = new Application(
     $_ENV['APP_BASE_PATH'] ?? dirname(__DIR__)
 );
 
@@ -43,7 +53,7 @@ $app = new Illuminate\Foundation\Application(
 
 $app->singleton(
     Illuminate\Contracts\Http\Kernel::class,
-    App\Http\Kernel::class
+    Kernel::class
 );
 
 $app->singleton(
@@ -52,8 +62,8 @@ $app->singleton(
 );
 
 $app->singleton(
-    Illuminate\Contracts\Debug\ExceptionHandler::class,
-    App\Exceptions\Handler::class
+    ExceptionHandler::class,
+    Handler::class
 );
 
 /*

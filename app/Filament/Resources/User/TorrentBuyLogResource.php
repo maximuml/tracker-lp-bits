@@ -2,30 +2,29 @@
 
 namespace App\Filament\Resources\User;
 
-use Filament\Schemas\Schema;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\Filter;
-use Filament\Forms\Components\TextInput;
-use App\Filament\Resources\User\TorrentBuyLogResource\Pages\ListTorrentBuyLogs;
 use App\Filament\Resources\User\TorrentBuyLogResource\Pages\CreateTorrentBuyLog;
 use App\Filament\Resources\User\TorrentBuyLogResource\Pages\EditTorrentBuyLog;
-use App\Filament\Resources\User\TorrentBuyLogResource\Pages;
-use App\Filament\Resources\User\TorrentBuyLogResource\RelationManagers;
+use App\Filament\Resources\User\TorrentBuyLogResource\Pages\ListTorrentBuyLogs;
 use App\Models\TorrentBuyLog;
-use Filament\Forms;
+use App\Support\Time;
+use App\Support\TorrentAccess;
+use App\Support\UserDisplay;
+use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
-use Filament\Tables\Table;
+use Filament\Schemas\Schema;
 use Filament\Tables;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class TorrentBuyLogResource extends Resource
 {
     protected static ?string $model = TorrentBuyLog::class;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    protected static string | \UnitEnum | null $navigationGroup = 'User';
+    protected static string|\UnitEnum|null $navigationGroup = 'User';
 
     protected static ?int $navigationSort = 10;
 
@@ -53,50 +52,42 @@ class TorrentBuyLogResource extends Resource
             ->columns([
                 TextColumn::make('id')->sortable(),
                 TextColumn::make('uid')
-                    ->formatStateUsing(fn ($state) => \App\Support\UserDisplay::adminUsername($state))
-                    ->label(__('label.username'))
-                ,
+                    ->formatStateUsing(fn ($state) => UserDisplay::adminUsername($state))
+                    ->label(__('label.username')),
                 TextColumn::make('torrent_id')
-                    ->formatStateUsing(fn ($record) => \App\Support\TorrentAccess::adminName($record->torrent))
-                    ->label(__('label.torrent.label'))
-                ,
+                    ->formatStateUsing(fn ($record) => TorrentAccess::adminName($record->torrent))
+                    ->label(__('label.torrent.label')),
                 TextColumn::make('price')
                     ->formatStateUsing(fn ($state) => number_format($state))
-                    ->label(__('label.price'))
-                ,
+                    ->label(__('label.price')),
                 TextColumn::make('created_at')
-                    ->formatStateUsing(fn ($state) => \App\Support\Time::formatDateTime($state))
-                    ->label(__('label.created_at'))
-                ,
+                    ->formatStateUsing(fn ($state) => Time::formatDateTime($state))
+                    ->label(__('label.created_at')),
             ])
-            ->defaultSort('id','desc')
+            ->defaultSort('id', 'desc')
             ->filters([
                 Filter::make('uid')
                     ->schema([
                         TextInput::make('uid')
                             ->label(__('label.username'))
-                            ->placeholder('UID')
-                        ,
+                            ->placeholder('UID'),
                     ])->query(function (Builder $query, array $data) {
-                        return $query->when($data['uid'], fn (Builder $query, $value) => $query->where("uid", $value));
-                    })
-                ,
+                        return $query->when($data['uid'], fn (Builder $query, $value) => $query->where('uid', $value));
+                    }),
                 Filter::make('torrent_id')
                     ->schema([
                         TextInput::make('torrent_id')
                             ->label(__('label.torrent.label'))
-                            ->placeholder('Torrent ID')
-                        ,
+                            ->placeholder('Torrent ID'),
                     ])->query(function (Builder $query, array $data) {
-                        return $query->when($data['torrent_id'], fn (Builder $query, $value) => $query->where("torrent_id", $value));
-                    })
-                ,
+                        return $query->when($data['torrent_id'], fn (Builder $query, $value) => $query->where('torrent_id', $value));
+                    }),
             ])
             ->recordActions([
-//                Tables\Actions\EditAction::make(),
+                //                Tables\Actions\EditAction::make(),
             ])
             ->toolbarActions([
-//                Tables\Actions\DeleteBulkAction::make(),
+                //                Tables\Actions\DeleteBulkAction::make(),
             ]);
     }
 

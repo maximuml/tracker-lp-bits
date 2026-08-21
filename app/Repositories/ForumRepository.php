@@ -3,9 +3,11 @@
 namespace App\Repositories;
 
 use App\Models\Forum;
+use App\Models\ForumMod;
 use App\Models\Post;
 use App\Models\Topic;
 use App\Models\User;
+use Illuminate\Support\Collection;
 use Nexus\Database\NexusDB;
 
 class ForumRepository extends BaseRepository
@@ -60,7 +62,7 @@ class ForumRepository extends BaseRepository
     }
 
     /**
-     * @return  array<int, array<string, mixed>>
+     * @return array<int, array<string, mixed>>
      */
     public function getOverforums(): array
     {
@@ -80,6 +82,7 @@ class ForumRepository extends BaseRepository
     public function getForumRow(int $id): ?array
     {
         $row = (array) NexusDB::table('forums')->where('id', $id)->first();
+
         return empty($row) ? null : $row;
     }
 
@@ -123,11 +126,12 @@ class ForumRepository extends BaseRepository
     public function getOverforumRow(int $id): ?array
     {
         $row = (array) NexusDB::table('overforums')->where('id', $id)->first();
+
         return empty($row) ? null : $row;
     }
 
     /**
-     * @return  array<int, array<string, mixed>>
+     * @return array<int, array<string, mixed>>
      */
     public function getAllOverforums(): array
     {
@@ -135,7 +139,7 @@ class ForumRepository extends BaseRepository
     }
 
     /**
-     * @return  array<int, array<string, mixed>>
+     * @return array<int, array<string, mixed>>
      */
     public static function getOverforumsList(): array
     {
@@ -176,7 +180,8 @@ class ForumRepository extends BaseRepository
 
     public function getTopicIdByPost(int $postId): ?int
     {
-        $topicId = \App\Models\Post::query()->where('id', $postId)->value('topicid');
+        $topicId = Post::query()->where('id', $postId)->value('topicid');
+
         return $topicId === null ? null : (int) $topicId;
     }
 
@@ -192,7 +197,7 @@ class ForumRepository extends BaseRepository
 
     public function isModeratorOfForum(int $forumId, int $userId): bool
     {
-        return \App\Models\ForumMod::query()
+        return ForumMod::query()
             ->where('forumid', $forumId)
             ->where('userid', $userId)
             ->exists();
@@ -201,7 +206,7 @@ class ForumRepository extends BaseRepository
     public static function getActiveForumUserCount(): int
     {
         $secs = 900;
-        $dt = date("Y-m-d H:i:s", (time() - $secs));
+        $dt = date('Y-m-d H:i:s', (time() - $secs));
 
         return (int) User::query()->where('forum_access', '>=', $dt)->count();
     }
@@ -218,7 +223,7 @@ class ForumRepository extends BaseRepository
 
     public static function getTodayPostsCount(string $todayDate): int
     {
-        return (int) Post::query()->where('added', '>', date("Y-m-d"))->count();
+        return (int) Post::query()->where('added', '>', date('Y-m-d'))->count();
     }
 
     public static function clearReadPosts(int $userId): void
@@ -261,7 +266,7 @@ class ForumRepository extends BaseRepository
     {
         $postId = Post::query()->where('topicid', $topicId)->orderByDesc('id')->value('id');
 
-        if (!$postId) {
+        if (! $postId) {
             return false;
         }
 
@@ -269,7 +274,7 @@ class ForumRepository extends BaseRepository
     }
 
     /**
-     * @return  array<int, array<string, mixed>>
+     * @return array<int, array<string, mixed>>
      */
     public static function getForumsList(): array
     {
@@ -277,7 +282,7 @@ class ForumRepository extends BaseRepository
     }
 
     /**
-     * @return  array<int, int>|null
+     * @return array<int, int>|null
      */
     public static function getLastReadPosts(int $userId): ?array
     {
@@ -306,12 +311,12 @@ class ForumRepository extends BaseRepository
     }
 
     /**
-     * @return  array<string, mixed>|null
+     * @return array<string, mixed>|null
      */
     public static function getPostForQuote(int $id): ?array
     {
         $post = Post::query()->where('id', $id)->first(['topicid', 'body', 'userid']);
-        if (!$post) {
+        if (! $post) {
             return null;
         }
         $topic = Topic::query()->where('id', $post->topicid)->first(['subject']);
@@ -327,12 +332,12 @@ class ForumRepository extends BaseRepository
     }
 
     /**
-     * @return  array<string, mixed>|null
+     * @return array<string, mixed>|null
      */
     public static function getPostForEdit(int $id): ?array
     {
         $post = Post::query()->where('id', $id)->first(['topicid', 'body']);
-        if (!$post) {
+        if (! $post) {
             return null;
         }
         $topicid = (int) $post->topicid;
@@ -349,12 +354,12 @@ class ForumRepository extends BaseRepository
     }
 
     /**
-     * @return  array<string, mixed>|null
+     * @return array<string, mixed>|null
      */
     public static function getPostWithTopic(int $postid): ?array
     {
         $post = Post::query()->where('id', $postid)->first(['userid', 'topicid']);
-        if (!$post) {
+        if (! $post) {
             return null;
         }
         $topic = Topic::query()->where('id', $post->topicid)->first(['locked']);
@@ -372,12 +377,12 @@ class ForumRepository extends BaseRepository
     }
 
     /**
-     * @return  array<string, mixed>|null
+     * @return array<string, mixed>|null
      */
     public static function getPostEditInfo(int $postid): ?array
     {
         $post = Post::query()->where('id', $postid)->first(['topicid']);
-        if (!$post) {
+        if (! $post) {
             return null;
         }
         $topicid = (int) $post->topicid;
@@ -499,7 +504,7 @@ class ForumRepository extends BaseRepository
     }
 
     /**
-     * @return  array<int>
+     * @return array<int>
      */
     public static function getTopicPostIds(int $topicid, ?int $authorId = null): array
     {
@@ -512,7 +517,7 @@ class ForumRepository extends BaseRepository
     }
 
     /**
-     * @return  \Illuminate\Database\Eloquent\Collection<int, \App\Models\Post>
+     * @return \Illuminate\Database\Eloquent\Collection<int, Post>
      */
     public static function getTopicPosts(int $topicid, ?int $authorId, int $offset, int $perPage): \Illuminate\Database\Eloquent\Collection
     {
@@ -525,11 +530,11 @@ class ForumRepository extends BaseRepository
     }
 
     /**
-     * @param  array<int> $ids
-     * @param  list<string> $columns
-     * @return \Illuminate\Support\Collection<int, \App\Models\User>
+     * @param  array<int>  $ids
+     * @param  list<string>  $columns
+     * @return Collection<int, User>
      */
-    public static function getUsersByIds(array $ids, array $columns): \Illuminate\Support\Collection
+    public static function getUsersByIds(array $ids, array $columns): Collection
     {
         return User::query()->find($ids, $columns)->keyBy('id');
     }
@@ -571,7 +576,7 @@ class ForumRepository extends BaseRepository
             ->where('topicid', $topicId)
             ->first();
 
-        if (!$readPost) {
+        if (! $readPost) {
             return (bool) NexusDB::table('readposts')->insert([
                 'userid' => $userId,
                 'topicid' => $topicId,
@@ -617,7 +622,7 @@ class ForumRepository extends BaseRepository
     }
 
     /**
-     * @return  array<string, int>|null
+     * @return array<string, int>|null
      */
     public static function getTopicForumAndUser(int $topicid): ?array
     {
@@ -641,7 +646,7 @@ class ForumRepository extends BaseRepository
     }
 
     /**
-     * @return  array{topicid: int, userid: int}|null
+     * @return array{topicid: int, userid: int}|null
      */
     public static function getPostTopicAndUser(int $postid): ?array
     {
@@ -691,7 +696,7 @@ class ForumRepository extends BaseRepository
     }
 
     /**
-     * @return  array{count: int, rows: \Illuminate\Support\Collection<int, \App\Models\Topic>}
+     * @return array{count: int, rows: Collection<int, Topic>}
      */
     public static function getTopicsByForum(int $forumid, string $search, string $sortColumn, string $direction, int $offset, int $perPage): array
     {
@@ -713,9 +718,9 @@ class ForumRepository extends BaseRepository
     }
 
     /**
-     * @return  \Illuminate\Support\Collection<int, \App\Models\Topic>
+     * @return Collection<int, Topic>
      */
-    public static function getUnreadTopics(int $lastCatchup, ?int $beforePostId, int $limit): \Illuminate\Support\Collection
+    public static function getUnreadTopics(int $lastCatchup, ?int $beforePostId, int $limit): Collection
     {
         $query = Topic::query()->where('lastpost', '>', $lastCatchup);
         if ($beforePostId) {
@@ -726,7 +731,7 @@ class ForumRepository extends BaseRepository
     }
 
     /**
-     * @return  array{hits: int, rows: \Illuminate\Support\Collection<int, \stdClass>}
+     * @return array{hits: int, rows: Collection<int, \stdClass>}
      */
     public static function searchForumPosts(string $keywords, int $minClass, int $offset, int $perPage): array
     {
@@ -785,7 +790,7 @@ class ForumRepository extends BaseRepository
     public static function getForumMods(): array
     {
         $mods = [];
-        foreach (\App\Models\ForumMod::query()->get() as $item) {
+        foreach (ForumMod::query()->get() as $item) {
             $mods[(int) $item->forumid] = (int) $item->userid;
         }
 

@@ -14,10 +14,10 @@ return new class extends Migration
     public function up()
     {
         Schema::table('peers', function (Blueprint $table) {
-            if (!Schema::hasColumn('peers', 'ipv4')) {
+            if (! Schema::hasColumn('peers', 'ipv4')) {
                 $table->string('ipv4', 64)->default('');
             }
-            if (!Schema::hasColumn('peers', 'ipv6')) {
+            if (! Schema::hasColumn('peers', 'ipv6')) {
                 $table->string('ipv6', 64)->default('');
             }
         });

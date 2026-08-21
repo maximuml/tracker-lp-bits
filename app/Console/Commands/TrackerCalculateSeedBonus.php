@@ -25,7 +25,8 @@ class TrackerCalculateSeedBonus extends Command
 
     /**
      * Execute the console command.
-     * @return  int
+     *
+     * @return int
      */
     public function handle()
     {
@@ -37,6 +38,7 @@ class TrackerCalculateSeedBonus extends Command
         );
         $this->info($log);
         Logger::writeWithContext($log);
+
         return 0;
     }
 }

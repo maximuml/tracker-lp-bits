@@ -1,10 +1,11 @@
 <?php
+
 namespace App\Repositories;
 
-use App\Exceptions\NexusException;
 use App\Models\Setting;
-use App\Models\User;
-use Illuminate\Database\Eloquent\Builder;
+use App\Support\Cache;
+use App\Support\Hooks;
+use App\Support\Logger;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Nexus\Database\NexusDB;
@@ -26,7 +27,7 @@ class SettingRepository extends BaseRepository
 
     /**
      * @param  array<int|string, mixed>  $params
-     * @return  array<int|string, mixed>
+     * @return array<int|string, mixed>
      */
     public function getList(array $params)
     {
@@ -35,24 +36,27 @@ class SettingRepository extends BaseRepository
         if ($prefix) {
             return [$prefix => Arr::get($results, $prefix, [])];
         }
+
         return $results;
     }
 
     /**
      * @param  array<int|string, mixed>  $params
-     * @return  mixed
+     * @return mixed
      */
     public function store(array $params)
     {
-        $settingModel = new Setting();
+        $settingModel = new Setting;
         $values = [];
         foreach ($params as $prefix => $nameValues) {
-            if (!is_array($nameValues)) {
-                throw new \InvalidArgumentException("Unsupported parameter format.");
+            if (! is_array($nameValues)) {
+                throw new \InvalidArgumentException('Unsupported parameter format.');
             }
             foreach ($nameValues as $name => $value) {
                 $valueArr = Arr::wrap($value);
-                array_walk_recursive($valueArr, function ($item) {return addslashes($item);});
+                array_walk_recursive($valueArr, function ($item) {
+                    return addslashes($item);
+                });
                 if (is_array($value)) {
                     $valueStr = json_encode($valueArr);
                 } else {
@@ -62,7 +66,8 @@ class SettingRepository extends BaseRepository
             }
         }
         if (empty($values)) {
-            \App\Support\Logger::writeWithContext((string) "no values", (string) 'info', (bool) false);
+            Logger::writeWithContext((string) 'no values', (string) 'info', (bool) false);
+
             return true;
         }
         $sql = sprintf(
@@ -70,10 +75,11 @@ class SettingRepository extends BaseRepository
             $settingModel->getTable(), implode(', ', $values), NexusDB::upsertField(['name'], ['value'])
         );
         $result = DB::insert($sql);
-        \App\Support\Logger::writeWithContext((string) "sql: {$sql}, result: {$result}", (string) 'info', (bool) false);
-        NexusDB::cache_del("nexus_settings_in_laravel");
-        NexusDB::cache_del("nexus_settings_in_nexus");
+        Logger::writeWithContext((string) "sql: {$sql}, result: {$result}", (string) 'info', (bool) false);
+        NexusDB::cache_del('nexus_settings_in_laravel');
+        NexusDB::cache_del('nexus_settings_in_nexus');
         NexusDB::cache_del('setting_protected_forum');
+
         return $result;
     }
 
@@ -103,8 +109,7 @@ class SettingRepository extends BaseRepository
             Setting::query()->upsert($records, ['name'], ['value', 'updated_at']);
         }
 
-        \App\Support\Cache::clearSettings();
-        \App\Support\Hooks::doAction('nexus_setting_update');
+        Cache::clearSettings();
+        Hooks::doAction('nexus_setting_update');
     }
-
 }

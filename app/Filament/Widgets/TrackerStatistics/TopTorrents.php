@@ -3,9 +3,10 @@
 namespace App\Filament\Widgets\TrackerStatistics;
 
 use App\Models\Torrent;
+use App\Support\Format;
+use App\Support\TorrentAccess;
 use Filament\Actions\Contracts\HasActions;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Builder;
@@ -15,7 +16,7 @@ class TopTorrents extends BaseWidget implements HasActions
 {
     protected static ?int $sort = 20;
 
-    protected function getTableHeading(): string | Htmlable | null
+    protected function getTableHeading(): string|Htmlable|null
     {
         return __('dashboard.tracker.top_torrents');
     }
@@ -50,13 +51,11 @@ class TopTorrents extends BaseWidget implements HasActions
                     /** @var Torrent $record */
                     $record = $column->getRecord();
 
-                    return \App\Support\TorrentAccess::adminName($record, false, 50);
-                })
-            ,
+                    return TorrentAccess::adminName($record, false, 50);
+                }),
             TextColumn::make('size')
                 ->label(__('label.torrent.size'))
-                ->formatStateUsing(fn ($state) => \App\Support\Format::size($state))
-            ,
+                ->formatStateUsing(fn ($state) => Format::size($state)),
             TextColumn::make('seeders')->label(__('label.torrent.seeders')),
             TextColumn::make('leechers')->label(__('label.torrent.leechers')),
             TextColumn::make('times_completed')->label(__('label.torrent.snatched')),

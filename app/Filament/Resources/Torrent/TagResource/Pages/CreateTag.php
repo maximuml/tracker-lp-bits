@@ -3,7 +3,6 @@
 namespace App\Filament\Resources\Torrent\TagResource\Pages;
 
 use App\Filament\Resources\Torrent\TagResource;
-use Filament\Pages\Actions;
 use Filament\Resources\Pages\CreateRecord;
 
 class CreateTag extends CreateRecord
@@ -20,6 +19,7 @@ class CreateTag extends CreateRecord
         if ($data['mode'] === null) {
             $data['mode'] = 0;
         }
+
         return $data;
     }
 }

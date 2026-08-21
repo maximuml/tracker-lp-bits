@@ -87,6 +87,7 @@ final readonly class TrackerSettingsDto
     private static function intId(mixed $value): ?int
     {
         $id = (int) $value;
+
         return Validators::isId($id) ? $id : null;
     }
 

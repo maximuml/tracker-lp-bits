@@ -2,41 +2,36 @@
 
 namespace App\Filament\Resources\Section;
 
-use Filament\Schemas\Schema;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\SelectFilter;
-use Filament\Actions\EditAction;
-use Filament\Actions\DeleteAction;
-use Exception;
-use Filament\Actions\DeleteBulkAction;
-use App\Filament\Resources\Section\CategoryResource\Pages\ListCategories;
 use App\Filament\Resources\Section\CategoryResource\Pages\CreateCategory;
 use App\Filament\Resources\Section\CategoryResource\Pages\EditCategory;
-use App\Filament\Resources\Section\CategoryResource\Pages;
-use App\Filament\Resources\Section\CategoryResource\RelationManagers;
+use App\Filament\Resources\Section\CategoryResource\Pages\ListCategories;
 use App\Models\Category;
 use App\Models\Icon;
 use App\Models\SearchBox;
 use App\Models\Torrent;
 use App\Repositories\SearchBoxRepository;
-use Filament\Forms;
+use App\Support\Logger;
+use Exception;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
-use Filament\Tables;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Collection;
 
 class CategoryResource extends Resource
 {
     protected static ?string $model = Category::class;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Section';
+    protected static string|\UnitEnum|null $navigationGroup = 'Section';
 
     protected static ?int $navigationSort = 2;
 
@@ -61,36 +56,31 @@ class CategoryResource extends Resource
                         'required',
                         function () {
                             return function ($attribute, $value, $fail) {
-                                //@todo how to get the editing record ?
+                                // @todo how to get the editing record ?
                                 $exists = Torrent::query()->where('category', $value)->exists();
-                                \App\Support\Logger::writeWithContext((string) "check {$attribute}: {$value} torrent if exists: {$exists}", (string) 'info', (bool) false);
-//                                if ($exists) {
-//                                    $fail("There are torrents belonging to this category that cannot be changed!");
-//                                }
+                                Logger::writeWithContext((string) "check {$attribute}: {$value} torrent if exists: {$exists}", (string) 'info', (bool) false);
+                                //                                if ($exists) {
+                                //                                    $fail("There are torrents belonging to this category that cannot be changed!");
+                                //                                }
                             };
-                        }
-                    ])
-                ,
+                        },
+                    ]),
                 TextInput::make('name')->required()->label(__('label.search_box.taxonomy.name'))->required(),
                 TextInput::make('image')
                     ->label(__('label.search_box.taxonomy.image'))
                     ->helperText(__('label.search_box.taxonomy.image_help'))
-                    ->required()
-                ,
+                    ->required(),
                 Select::make('icon_id')
                     ->options(Icon::query()->pluck('name', 'id')->toArray())
                     ->label(__('label.search_box.taxonomy.icon_id'))
-                    ->required()
-                ,
+                    ->required(),
                 TextInput::make('class_name')
                     ->label(__('label.search_box.taxonomy.class_name'))
-                    ->helperText(__('label.search_box.taxonomy.class_name_help'))
-                ,
+                    ->helperText(__('label.search_box.taxonomy.class_name_help')),
                 TextInput::make('sort_index')
                     ->default(0)
                     ->label(__('label.priority'))
-                    ->helperText(__('label.priority_help'))
-                ,
+                    ->helperText(__('label.priority_help')),
 
             ]);
     }
@@ -111,14 +101,13 @@ class CategoryResource extends Resource
             ->filters([
                 SelectFilter::make('mode')
                     ->options(SearchBox::query()->pluck('name', 'id')->toArray())
-                    ->label(__('label.search_box.label'))
-                ,
+                    ->label(__('label.search_box.label')),
             ])
             ->recordActions([
                 EditAction::make(),
                 DeleteAction::make()->using(function (Category $record) {
                     try {
-                        $rep = new SearchBoxRepository();
+                        $rep = new SearchBoxRepository;
                         $rep->deleteCategory($record->id);
                     } catch (Exception $exception) {
                         Notification::make()->danger()->body($exception->getMessage() ?: class_basename($exception))->send();
@@ -128,7 +117,7 @@ class CategoryResource extends Resource
             ->toolbarActions([
                 DeleteBulkAction::make()->using(function (Collection $records) {
                     try {
-                        $rep = new SearchBoxRepository();
+                        $rep = new SearchBoxRepository;
                         $rep->deleteCategory($records->pluck('id')->toArray());
                     } catch (Exception $exception) {
                         Notification::make()->danger()->body($exception->getMessage() ?: class_basename($exception))->send();

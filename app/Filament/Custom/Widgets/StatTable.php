@@ -2,7 +2,6 @@
 
 namespace App\Filament\Custom\Widgets;
 
-use Filament\Widgets\TableWidget;
 use Filament\Widgets\Widget;
 
 class StatTable extends Widget
@@ -12,7 +11,6 @@ class StatTable extends Widget
     protected function getHeader(): string
     {
 
-    
         return '';
     }
 

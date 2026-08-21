@@ -6,7 +6,11 @@ use App\Http\Resources\ThankResource;
 use App\Models\Thank;
 use App\Models\Torrent;
 use App\Models\User;
+use App\Support\Config\SiteConfig;
+use App\Support\LegacyDb;
+use App\Support\Logger;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -14,8 +18,8 @@ class ThankController extends Controller
 {
     /**
      * Display a listing of the resource.
-     * @param  \Illuminate\Http\Request  $request
-     * @return  array<string, mixed>
+     *
+     * @return array<string, mixed>
      */
     public function index(Request $request)
     {
@@ -26,23 +30,23 @@ class ThankController extends Controller
             ->with(['user'])
             ->paginate();
         $resource = ThankResource::collection($thanks);
-//        $resource->additional([
-//            'page_title' => nexus_trans('thank.index.page_title'),
-//        ]);
+        //        $resource->additional([
+        //            'page_title' => nexus_trans('thank.index.page_title'),
+        //        ]);
 
         return $this->success($resource);
     }
 
     /**
      * Store a newly created resource in storage.
-     * @param  \Illuminate\Http\Request  $request
-     * @return  array<string, mixed>
+     *
+     * @return array<string, mixed>
      */
     public function store(Request $request)
     {
         $user = Auth::user();
-        if (!$user instanceof User) {
-            throw new \RuntimeException("unauthenticated");
+        if (! $user instanceof User) {
+            throw new \RuntimeException('unauthenticated');
         }
         $request->validate(['torrent_id' => 'required']);
         $torrentId = (int) $request->torrent_id;
@@ -54,21 +58,21 @@ class ThankController extends Controller
         }
         $torrentOwner->checkIsNormal();
         if ($user->thank_torrent_logs()->where('torrentid', $torrentId)->exists()) {
-            throw new \LogicException("you already thank this torrent");
+            throw new \LogicException('you already thank this torrent');
         }
 
         $result = DB::transaction(function () use ($user, $torrentOwner, $torrent) {
             $thank = $user->thank_torrent_logs()->create(['torrentid' => $torrent->id]);
-            $sayThanksBonus = \App\Support\Config\SiteConfig::current()->bonus->sayThanks();
-            $receiveThanksBonus = \App\Support\Config\SiteConfig::current()->bonus->receiveThanks();
+            $sayThanksBonus = SiteConfig::current()->bonus->sayThanks();
+            $receiveThanksBonus = SiteConfig::current()->bonus->receiveThanks();
             if ($sayThanksBonus > 0) {
                 $affectedRows = User::query()
                     ->where('id', $user->id)
                     ->where('seedbonus', $user->seedbonus)
                     ->increment('seedbonus', $sayThanksBonus);
                 if ($affectedRows != 1) {
-                    \App\Support\Logger::writeWithContext((string) ("affectedRows: {$affectedRows}, query: " . \App\Support\LegacyDb::lastQuery(false, 'json')), (string) 'error', (bool) false);
-                    throw new \RuntimeException("increment user bonus fail.");
+                    Logger::writeWithContext((string) ("affectedRows: {$affectedRows}, query: ".LegacyDb::lastQuery(false, 'json')), (string) 'error', (bool) false);
+                    throw new \RuntimeException('increment user bonus fail.');
                 }
             }
             if ($receiveThanksBonus > 0) {
@@ -77,50 +81,54 @@ class ThankController extends Controller
                     ->where('seedbonus', $torrentOwner->seedbonus)
                     ->increment('seedbonus', $receiveThanksBonus);
                 if ($affectedRows != 1) {
-                    \App\Support\Logger::writeWithContext((string) ("affectedRows: {$affectedRows}, query: " . \App\Support\LegacyDb::lastQuery(false, 'json')), (string) 'error', (bool) false);
-                    throw new \RuntimeException("increment owner bonus fail.");
+                    Logger::writeWithContext((string) ("affectedRows: {$affectedRows}, query: ".LegacyDb::lastQuery(false, 'json')), (string) 'error', (bool) false);
+                    throw new \RuntimeException('increment owner bonus fail.');
                 }
             }
+
             return $thank;
         });
         $resource = new ThankResource($result);
+
         return $this->success($resource, '说谢谢成功！');
     }
 
     /**
      * Display the specified resource.
+     *
      * @param  mixed  $id
-     * @return  \Illuminate\Http\Response
+     * @return Response
      */
     public function show($id)
     {
         //
-    
-        return new \Illuminate\Http\Response('');
+
+        return new Response('');
     }
 
     /**
      * Update the specified resource in storage.
-     * @param  \Illuminate\Http\Request  $request
+     *
      * @param  mixed  $id
-     * @return  \Illuminate\Http\Response
+     * @return Response
      */
     public function update(Request $request, $id)
     {
         //
-    
-        return new \Illuminate\Http\Response('');
+
+        return new Response('');
     }
 
     /**
      * Remove the specified resource from storage.
+     *
      * @param  mixed  $id
-     * @return  \Illuminate\Http\Response
+     * @return Response
      */
     public function destroy($id)
     {
         //
-    
-        return new \Illuminate\Http\Response('');
+
+        return new Response('');
     }
 }

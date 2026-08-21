@@ -17,4 +17,3 @@ class SeedBoxYesException extends NexusException
         return $this->id;
     }
 }
-

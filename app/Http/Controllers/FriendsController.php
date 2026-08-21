@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Auth\Permission;
+use App\Enums\Permission\PermissionEnum;
 use App\Repositories\FriendsRepository;
+use App\Support\Locale;
 use App\Support\SupportContext;
 use App\Support\UserClass;
 use App\Support\UserDisplay;
@@ -21,7 +24,7 @@ class FriendsController extends LegacyController
 
         $userid = (int) ($request->input('id') ?? $currentUser['id'] ?? 0);
         if ($userid <= 0 || ! Validators::isId($userid)) {
-            return $this->legacyAbortResponse($langFriends['std_error'] ?? 'Error', ($langFriends['std_invalid_id'] ?? 'Invalid ID ') . $userid . '.');
+            return $this->legacyAbortResponse($langFriends['std_error'] ?? 'Error', ($langFriends['std_invalid_id'] ?? 'Invalid ID ').$userid.'.');
         }
 
         $action = (string) ($request->input('action') ?? '');
@@ -59,7 +62,7 @@ class FriendsController extends LegacyController
             $friendsList[] = $friend;
         }
 
-        $canViewUserList = \App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::VIEW_USER_LIST);
+        $canViewUserList = Permission::can(PermissionEnum::VIEW_USER_LIST);
 
         return $this->legacyPageRaw($request, 'friends', true, [
             'userid' => $userid,
@@ -80,23 +83,23 @@ class FriendsController extends LegacyController
         $type = (string) ($request->input('type') ?? '');
 
         if (! Validators::isId($targetid)) {
-            return $this->legacyAbortResponse($langFriends['std_error'] ?? 'Error', ($langFriends['std_invalid_id'] ?? 'Invalid ID ') . $targetid . '.');
+            return $this->legacyAbortResponse($langFriends['std_error'] ?? 'Error', ($langFriends['std_invalid_id'] ?? 'Invalid ID ').$targetid.'.');
         }
         $targetid = (int) $targetid;
 
         [$tableIs, $frag, $fieldIs] = $this->resolveType($type);
         if ($tableIs === '') {
-            return $this->legacyAbortResponse($langFriends['std_error'] ?? 'Error', ($langFriends['std_unknown_type'] ?? 'Unknown type ') . $type);
+            return $this->legacyAbortResponse($langFriends['std_error'] ?? 'Error', ($langFriends['std_unknown_type'] ?? 'Unknown type ').$type);
         }
 
         if (FriendsRepository::exists($userid, $type, $targetid)) {
-            return $this->legacyAbortResponse($langFriends['std_error'] ?? 'Error', ($langFriends['std_user_id'] ?? 'User ') . $targetid . ($langFriends['std_already_in'] ?? ' is already in ') . $tableIs . ($langFriends['std_list'] ?? ' list.'));
+            return $this->legacyAbortResponse($langFriends['std_error'] ?? 'Error', ($langFriends['std_user_id'] ?? 'User ').$targetid.($langFriends['std_already_in'] ?? ' is already in ').$tableIs.($langFriends['std_list'] ?? ' list.'));
         }
 
         FriendsRepository::add($userid, $type, $targetid);
         $this->purgeNeighborsCache();
 
-        return redirect('/friends.php?id=' . $userid . '#' . $frag);
+        return redirect('/friends.php?id='.$userid.'#'.$frag);
     }
 
     /**
@@ -110,31 +113,33 @@ class FriendsController extends LegacyController
 
         [$tableIs, $frag] = $this->resolveType($type);
         if ($tableIs === '') {
-            return $this->legacyAbortResponse($langFriends['std_error'] ?? 'Error', ($langFriends['std_unknown_type'] ?? 'Unknown type ') . $type);
+            return $this->legacyAbortResponse($langFriends['std_error'] ?? 'Error', ($langFriends['std_unknown_type'] ?? 'Unknown type ').$type);
         }
 
         $typename = $type === 'friend' ? ($langFriends['text_friend'] ?? 'friend') : ($langFriends['text_block'] ?? 'block');
 
         if (! Validators::isId($targetid)) {
-            return $this->legacyAbortResponse($langFriends['std_error'] ?? 'Error', ($langFriends['std_invalid_id'] ?? 'Invalid ID ') . $userid . '.');
+            return $this->legacyAbortResponse($langFriends['std_error'] ?? 'Error', ($langFriends['std_invalid_id'] ?? 'Invalid ID ').$userid.'.');
         }
         $targetid = (int) $targetid;
 
         if (! $sure) {
-            $confirm = ($langFriends['std_delete_note'] ?? 'Delete note ') . $typename . ($langFriends['std_click'] ?? ' click ') .
-                "<a href=\"?id=$userid&action=delete&type=$type&targetid=$targetid&sure=1\">" . ($langFriends['std_here_if_sure'] ?? 'here if sure') . '</a>';
-            return $this->legacyAbortResponse(($langFriends['std_delete'] ?? 'Delete ') . $type, $confirm, false);
+            $confirm = ($langFriends['std_delete_note'] ?? 'Delete note ').$typename.($langFriends['std_click'] ?? ' click ').
+                "<a href=\"?id=$userid&action=delete&type=$type&targetid=$targetid&sure=1\">".($langFriends['std_here_if_sure'] ?? 'here if sure').'</a>';
+
+            return $this->legacyAbortResponse(($langFriends['std_delete'] ?? 'Delete ').$type, $confirm, false);
         }
 
         $deleted = FriendsRepository::delete($userid, $type, $targetid);
         if ($deleted === 0) {
             $notFoundKey = $type === 'friend' ? 'std_no_friend_found' : 'std_no_block_found';
-            return $this->legacyAbortResponse($langFriends['std_error'] ?? 'Error', ($langFriends[$notFoundKey] ?? 'Not found ') . $targetid);
+
+            return $this->legacyAbortResponse($langFriends['std_error'] ?? 'Error', ($langFriends[$notFoundKey] ?? 'Not found ').$targetid);
         }
 
         $this->purgeNeighborsCache();
 
-        return redirect('/friends.php?id=' . $userid . '#' . $frag);
+        return redirect('/friends.php?id='.$userid.'#'.$frag);
     }
 
     /**
@@ -152,7 +157,7 @@ class FriendsController extends LegacyController
     private function purgeNeighborsCache(): void
     {
         $currentUser = (array) (SupportContext::getUser() ?? []);
-        $cachefile = 'cache/' . \App\Support\Locale::folderFromCookie(\App\Support\SupportContext::getCookieValue('c_lang_folder', ''), false) . '/neighbors/' . ($currentUser['id'] ?? 0) . '.html';
+        $cachefile = 'cache/'.Locale::folderFromCookie(SupportContext::getCookieValue('c_lang_folder', ''), false).'/neighbors/'.($currentUser['id'] ?? 0).'.html';
         if (file_exists($cachefile)) {
             unlink($cachefile);
         }

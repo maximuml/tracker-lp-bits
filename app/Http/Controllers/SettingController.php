@@ -4,20 +4,17 @@ namespace App\Http\Controllers;
 
 use App\Models\HitAndRun;
 use App\Repositories\SettingRepository;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 
 class SettingController extends Controller
 {
-    /** @var  mixed */
+    /** @var mixed */
     private $repository;
 
     /**
-     * @param  \App\Repositories\SettingRepository  $repository
-     * @return  mixed
+     * @return mixed
      */
     public function __construct(SettingRepository $repository)
     {
@@ -26,19 +23,20 @@ class SettingController extends Controller
 
     /**
      * Display a listing of the resource.
-     * @param  \Illuminate\Http\Request  $request
-     * @return  array<string, mixed>
+     *
+     * @return array<string, mixed>
      */
     public function index(Request $request)
     {
         $result = $this->repository->getList($request->all());
+
         return $this->success($result);
     }
 
     /**
      * Store a newly created resource in storage.
-     * @param  \Illuminate\Http\Request  $request
-     * @return  array<string, mixed>
+     *
+     * @return array<string, mixed>
      */
     public function store(Request $request)
     {
@@ -46,49 +44,49 @@ class SettingController extends Controller
         $prefix = Arr::first(array_keys($data));
         $request->validate($this->getRules($prefix));
         $result = $this->repository->store($data);
+
         return $this->success($result, 'Save setting success!');
     }
 
     /**
      * Display the specified resource.
+     *
      * @param  mixed  $id
-     * @return  array<int|string, mixed>
+     * @return array<int|string, mixed>
      */
     public function show($id)
     {
 
-    
         return [];
     }
 
     /**
      * Update the specified resource in storage.
-     * @param  \Illuminate\Http\Request  $request
+     *
      * @param  mixed  $id
-     * @return  array<int|string, mixed>
+     * @return array<int|string, mixed>
      */
     public function update(Request $request, $id)
     {
 
-    
         return [];
     }
 
     /**
      * Remove the specified resource from storage.
+     *
      * @param  mixed  $id
-     * @return  array<int|string, mixed>
+     * @return array<int|string, mixed>
      */
     public function destroy($id)
     {
 
-    
         return [];
     }
 
     /**
      * @param  mixed  $prefix
-     * @return  array<int|string, mixed>
+     * @return array<int|string, mixed>
      */
     private function getRules($prefix): array
     {
@@ -111,7 +109,7 @@ class SettingController extends Controller
                 $result["$prefix.$key"] = $value;
             }
         }
+
         return $result;
     }
-
 }

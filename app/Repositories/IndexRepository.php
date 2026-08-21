@@ -11,15 +11,14 @@ use App\Models\Torrent;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\Collection as SupportCollection;
 use Illuminate\Support\Facades\Cache;
 
 class IndexRepository
 {
     /**
      * Fetch the latest visible torrents with their category.
-     * @param  int  $limit
-     * @return  \Illuminate\Database\Eloquent\Collection<int, Torrent>
+     *
+     * @return Collection<int, Torrent>
      */
     public static function getLatestTorrents(int $limit = 9): Collection
     {
@@ -41,14 +40,13 @@ class IndexRepository
      */
     private static function cacheKey(string $name, array $parts): string
     {
-        return 'index_repo:' . $name . ':' . implode(':', $parts);
+        return 'index_repo:'.$name.':'.implode(':', $parts);
     }
 
     /**
      * Fetch top uploaders ordered by uploaded torrent count.
-     * @param  int  $limit
-     * @param  ?int  $days
-     * @return  \Illuminate\Database\Eloquent\Collection<int, User>
+     *
+     * @return Collection<int, User>
      */
     public static function getTopUploaders(int $limit = 10, ?int $days = null): Collection
     {
@@ -154,10 +152,6 @@ class IndexRepository
         });
     }
 
-    /**
-     * @param  int  $pollId
-     * @param  int  $userId
-     */
     public static function hasVoted(int $pollId, int $userId): bool
     {
         return (bool) Cache::remember(
@@ -167,10 +161,6 @@ class IndexRepository
         );
     }
 
-    /**
-     * @param  int  $pollId
-     * @param  int  $userId
-     */
     public static function getUserVote(int $pollId, int $userId): ?int
     {
         return Cache::remember(
@@ -184,11 +174,6 @@ class IndexRepository
         );
     }
 
-    /**
-     * @param  int  $pollId
-     * @param  int  $userId
-     * @param  int  $choice
-     */
     public static function recordPollVote(int $pollId, int $userId, int $choice): bool
     {
         PollAnswer::create([
@@ -205,8 +190,7 @@ class IndexRepository
     }
 
     /**
-     * @param  int  $pollId
-     * @return  array<int|string, mixed>
+     * @return array<int|string, mixed>
      */
     public static function getPollResults(int $pollId): array
     {
@@ -226,7 +210,7 @@ class IndexRepository
 
                 $poll = Poll::find($pollId);
                 $items = [];
-                for ($i = 0; $i <= Poll::MAX_OPTION_INDEX; ++$i) {
+                for ($i = 0; $i <= Poll::MAX_OPTION_INDEX; $i++) {
                     $option = $poll ? $poll->getAttribute("option{$i}") : '';
                     if ($option) {
                         $items[] = [
@@ -254,7 +238,7 @@ class IndexRepository
     }
 
     /**
-     * @return  array<int, array<string, mixed>>
+     * @return array<int, array<string, mixed>>
      */
     public static function getLatestNews(int $limit): array
     {
@@ -273,7 +257,7 @@ class IndexRepository
     }
 
     /**
-     * @return  array<int, array<string, mixed>>
+     * @return array<int, array<string, mixed>>
      */
     public static function getLatestForumPosts(int $limit, int $minClassRead): array
     {

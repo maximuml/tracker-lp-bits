@@ -14,21 +14,20 @@
  * @property string $created_at
  * @property string $updated_at
  */
-namespace App\Models;
 
-use Nexus\Database\NexusDB;
+namespace App\Models;
 
 class TorrentCustomField extends NexusModel
 {
-    /** @var  string */
+    /** @var string */
     protected $table = 'torrents_custom_fields';
 
-    /** @var  bool */
+    /** @var bool */
     public $timestamps = true;
 
-    /** @var  list<string> */
+    /** @var list<string> */
     protected $fillable = [
-        'name', 'label', 'type', 'required', 'is_single_row', 'options', 'help', 'display', 'priority'
+        'name', 'label', 'type', 'required', 'is_single_row', 'options', 'help', 'display', 'priority',
     ];
 
     /** @return  array<int|string, mixed> */
@@ -39,7 +38,7 @@ class TorrentCustomField extends NexusModel
         foreach ($records as $value) {
             $result[$value->id] = sprintf('%s[%s]', $value->name, $value->label);
         }
+
         return $result;
     }
-
 }

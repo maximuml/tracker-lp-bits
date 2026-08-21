@@ -5,8 +5,6 @@ namespace App\Filament\Resources\Torrent\TorrentResource\Pages;
 use App\Filament\PageList;
 use App\Filament\Resources\Torrent\TorrentResource;
 use Filament\Pages\Actions;
-use Filament\Resources\Pages\ListRecords;
-
 
 class ListTorrents extends PageList
 {
@@ -15,9 +13,7 @@ class ListTorrents extends PageList
     protected function getHeaderActions(): array
     {
         return [
-//            Actions\CreateAction::make(),
+            //            Actions\CreateAction::make(),
         ];
     }
-
-
 }

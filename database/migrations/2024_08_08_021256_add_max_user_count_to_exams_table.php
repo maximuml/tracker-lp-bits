@@ -14,7 +14,7 @@ return new class extends Migration
     public function up()
     {
         Schema::table('exams', function (Blueprint $table) {
-            $table->integer("max_user_count")->default(0);
+            $table->integer('max_user_count')->default(0);
         });
     }
 
@@ -26,7 +26,7 @@ return new class extends Migration
     public function down()
     {
         Schema::table('exams', function (Blueprint $table) {
-            $table->dropColumn("max_user_count");
+            $table->dropColumn('max_user_count');
         });
     }
 };

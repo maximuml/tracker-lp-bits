@@ -13,7 +13,7 @@ class AddTwoStepSecretToUsersTable extends Migration
      */
     public function up()
     {
-        if (Schema::hasColumns('users',['two_step_secret', ])) {
+        if (Schema::hasColumns('users', ['two_step_secret'])) {
             return;
         }
         Schema::table('users', function (Blueprint $table) {

@@ -10,7 +10,7 @@ use App\Models\Torrent;
 use App\Models\User;
 use App\Repositories\CommentRepository;
 use App\Support\Bonus;
-use App\Support\Frame;
+use App\Support\Config\SiteConfig;
 use App\Support\Http;
 use App\Support\Locale;
 use App\Support\Permissions;
@@ -33,7 +33,7 @@ class WebCommentController extends Controller
         $this->authorizeComment($type, $parentId);
 
         $parent = CommentRepository::getParent($parentId, $type);
-        if (!$parent) {
+        if (! $parent) {
             abort(404, $this->lang('std_no_torrent_id'));
         }
 
@@ -45,7 +45,7 @@ class WebCommentController extends Controller
                 abort(404, $this->lang('std_no_comment_id'));
             }
             $quote = CommentRepository::getQuote($commentId);
-            if (!$quote) {
+            if (! $quote) {
                 abort(404, $this->lang('std_no_comment_id'));
             }
             $body = $this->buildQuote($quote);
@@ -53,8 +53,8 @@ class WebCommentController extends Controller
         }
 
         $returnUrl = $this->buildScript($type, $parentId);
-        $headTitle = $this->lang('head_add_comment_to') . $parent['name'];
-        $pageTitle = $this->lang('text_add_comment_to') . '<a href="' . e($returnUrl) . '">' . e($parent['name']) . '</a>';
+        $headTitle = $this->lang('head_add_comment_to').$parent['name'];
+        $pageTitle = $this->lang('text_add_comment_to').'<a href="'.e($returnUrl).'">'.e($parent['name']).'</a>';
         $formAction = $this->legacyAction('add', ['type' => $type]);
 
         return view('comments.create', compact('headTitle', 'pageTitle', 'formAction', 'composeType', 'body', 'parentId'));
@@ -76,7 +76,7 @@ class WebCommentController extends Controller
         $this->assertNotFlood($user);
 
         $parent = CommentRepository::getParent($parentId, $type);
-        if (!$parent) {
+        if (! $parent) {
             abort(404, $this->lang('std_no_torrent_id'));
         }
 
@@ -85,7 +85,7 @@ class WebCommentController extends Controller
         $this->sendCommentPm($type, $parentId, (int) $parent['owner'], (string) $parent['name'], (int) $user->id);
         $this->applyBonus('+', (int) $user->id);
 
-        return redirect($this->buildScript($type, $parentId) . '#' . $newId);
+        return redirect($this->buildScript($type, $parentId).'#'.$newId);
     }
 
     public function edit(Request $request, int $commentId): View
@@ -93,19 +93,19 @@ class WebCommentController extends Controller
         $type = $this->type($request);
 
         $arr = CommentRepository::getForEdit($commentId, $type);
-        if (!$arr) {
+        if (! $arr) {
             abort(404, $this->lang('std_invalid_id'));
         }
 
         $user = $this->currentUser();
-        if ((int) $arr['user'] !== (int) $user->id && !Permissions::userCan('commanage', false, (int) $user->id)) {
+        if ((int) $arr['user'] !== (int) $user->id && ! Permissions::userCan('commanage', false, (int) $user->id)) {
             abort(403, $this->lang('std_permission_denied'));
         }
 
         $parentId = (int) $arr['parent_id'];
         $returnUrl = $this->buildScript($type, $parentId);
-        $headTitle = $this->lang('head_edit_comment_to') . $arr['name'];
-        $pageTitle = $this->lang('text_edit_comment_to') . '<a href="' . e($returnUrl) . '">' . e($arr['name']) . '</a>';
+        $headTitle = $this->lang('head_edit_comment_to').$arr['name'];
+        $pageTitle = $this->lang('text_edit_comment_to').'<a href="'.e($returnUrl).'">'.e($arr['name']).'</a>';
         $formAction = $this->legacyAction('edit', ['type' => $type, 'cid' => $commentId]);
         $returnto = $this->safeReturnUrl((string) ($request->headers->get('referer') ?? ''), $returnUrl);
         $body = (string) $arr['text'];
@@ -126,10 +126,10 @@ class WebCommentController extends Controller
         $user = $this->currentUser();
 
         $arr = CommentRepository::getForEdit($commentId, $type);
-        if (!$arr) {
+        if (! $arr) {
             abort(404, $this->lang('std_invalid_id'));
         }
-        if ((int) $arr['user'] !== (int) $user->id && !Permissions::userCan('commanage', false, (int) $user->id)) {
+        if ((int) $arr['user'] !== (int) $user->id && ! Permissions::userCan('commanage', false, (int) $user->id)) {
             abort(403, $this->lang('std_permission_denied'));
         }
 
@@ -147,7 +147,7 @@ class WebCommentController extends Controller
         $type = $this->type($request);
 
         $user = $this->currentUser();
-        if (!Permissions::userCan('commanage', false, (int) $user->id)) {
+        if (! Permissions::userCan('commanage', false, (int) $user->id)) {
             abort(403, $this->lang('std_permission_denied'));
         }
 
@@ -160,13 +160,13 @@ class WebCommentController extends Controller
             }
             $confirmUrl = $this->legacyAction('delete', $query);
             $heading = $this->lang('std_delete_comment');
-            $message = $this->lang('std_delete_comment_note') . '<a href="' . $confirmUrl . '">' . ltrim($this->lang('std_here_if_sure'), '>') . '</a>';
+            $message = $this->lang('std_delete_comment_note').'<a href="'.$confirmUrl.'">'.ltrim($this->lang('std_here_if_sure'), '>').'</a>';
 
             return view('comments.delete', compact('heading', 'message'));
         }
 
         $arr = CommentRepository::getForDelete($commentId, $type);
-        if (!$arr) {
+        if (! $arr) {
             abort(404, $this->lang('std_invalid_id'));
         }
 
@@ -192,12 +192,12 @@ class WebCommentController extends Controller
         $type = $this->type($request);
 
         $user = $this->currentUser();
-        if (!Permissions::userCan('commanage', false, (int) $user->id)) {
+        if (! Permissions::userCan('commanage', false, (int) $user->id)) {
             abort(403, $this->lang('std_permission_denied'));
         }
 
         $arr = CommentRepository::getForViewOriginal($commentId, $type);
-        if (!$arr) {
+        if (! $arr) {
             abort(404, $this->lang('std_invalid_id'));
         }
 
@@ -212,7 +212,7 @@ class WebCommentController extends Controller
     private function currentUser(): User
     {
         $user = Auth::guard('nexus-web')->user();
-        if (!$user instanceof User) {
+        if (! $user instanceof User) {
             abort(403, $this->lang('std_permission_denied'));
         }
 
@@ -222,7 +222,7 @@ class WebCommentController extends Controller
     private function type(Request $request): string
     {
         $type = $request->input('type');
-        if (!in_array($type, ['torrent', 'offer'], true)) {
+        if (! in_array($type, ['torrent', 'offer'], true)) {
             abort(404, $this->lang('std_unknown_action'));
         }
 
@@ -248,7 +248,7 @@ class WebCommentController extends Controller
 
         if ($type === 'torrent') {
             $torrent = Torrent::find($parentId);
-            if (!$torrent) {
+            if (! $torrent) {
                 abort(404, $this->lang('std_no_torrent_id'));
             }
             Gate::authorize('comment', $torrent);
@@ -272,23 +272,23 @@ class WebCommentController extends Controller
         }
 
         $secs = 10 - (TIMENOW - $ts);
-        abort(403, $this->lang('std_comment_flooding_denied') . $secs . $this->lang('std_before_posting_another'));
+        abort(403, $this->lang('std_comment_flooding_denied').$secs.$this->lang('std_before_posting_another'));
     }
 
     /** @param array<int|string, mixed> $quote */
     private function buildQuote(array $quote): string
     {
-        return '[quote=' . (string) ($quote['username'] ?? '') . ']' . (string) ($quote['text'] ?? '') . '[/quote]';
+        return '[quote='.(string) ($quote['username'] ?? '').']'.(string) ($quote['text'] ?? '').'[/quote]';
     }
 
     private function deleteCache(string $type, int $parentId): void
     {
-        NexusDB::cache_del($type . '_' . $parentId . '_last_comment_content');
+        NexusDB::cache_del($type.'_'.$parentId.'_last_comment_content');
     }
 
     private function applyBonus(string $sign, int $userId): void
     {
-        $points = \App\Support\Config\SiteConfig::current()->bonus->addComment();
+        $points = SiteConfig::current()->bonus->addComment();
         if ($points != 0) {
             Bonus::updatePoints($sign, $points, $userId);
         }
@@ -305,10 +305,10 @@ class WebCommentController extends Controller
         }
 
         $locale = Locale::userLocale($ownerId);
-        $subject = \App\Support\Locale::trans('comment.msg_new_comment', [], $locale);
-        $messageKey = 'comment.msg_' . $type . '_receive_comment';
-        $message = \App\Support\Locale::trans($messageKey, [], $locale)
-            . ' [url=' . Http::protocolPrefix(Url::isSecure()) . rtrim((string) \App\Support\Config\SiteConfig::current()->basic->baseUrl(), '/') . '/' . $this->buildScript($type, $parentId) . '] ' . $name . '[/url].';
+        $subject = Locale::trans('comment.msg_new_comment', [], $locale);
+        $messageKey = 'comment.msg_'.$type.'_receive_comment';
+        $message = Locale::trans($messageKey, [], $locale)
+            .' [url='.Http::protocolPrefix(Url::isSecure()).rtrim((string) SiteConfig::current()->basic->baseUrl(), '/').'/'.$this->buildScript($type, $parentId).'] '.$name.'[/url].';
 
         Message::add([
             'sender' => 0,
@@ -331,7 +331,7 @@ class WebCommentController extends Controller
     {
         $query = ['action' => $action] + $query;
 
-        return 'comment.php?' . http_build_query($query, '', '&', PHP_QUERY_RFC3986);
+        return 'comment.php?'.http_build_query($query, '', '&', PHP_QUERY_RFC3986);
     }
 
     private function safeReturnUrl(string $returl, string $defaultUrl): string
@@ -342,7 +342,7 @@ class WebCommentController extends Controller
         }
 
         $parsed = parse_url($returl);
-        if ($parsed === false || !empty($parsed['scheme']) || !empty($parsed['host']) || str_starts_with($returl, '//')) {
+        if ($parsed === false || ! empty($parsed['scheme']) || ! empty($parsed['host']) || str_starts_with($returl, '//')) {
             return $defaultUrl;
         }
 

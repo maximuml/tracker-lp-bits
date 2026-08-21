@@ -8,20 +8,21 @@
  * @property string|null $uri
  * @property int $count
  */
+
 namespace App\Models;
 
-
+use App\Support\Network;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 
 class IpLog extends NexusModel
 {
-    /** @var  string */
+    /** @var string */
     protected $table = 'iplog';
 
-    /** @var  list<string> */
+    /** @var list<string> */
     protected $fillable = ['ip', 'userid', 'access', 'uri', 'count'];
 
-    /** @return  \Illuminate\Database\Eloquent\Casts\Attribute<mixed, mixed> */
+    /** @return  Attribute<mixed, mixed> */
     protected function ipLocation(): Attribute
     {
         return new Attribute(
@@ -30,26 +31,26 @@ class IpLog extends NexusModel
     }
 
     /**
-     * @param  string  $ip
-     * @return  mixed
+     * @return mixed
      */
     private function getIpLocation(string $ip)
     {
-        $result = \App\Support\Network::geoIpInfo($ip) ?: [];
+        $result = Network::geoIpInfo($ip) ?: [];
         $out = $result['name'] ?? '';
         $suffix = [];
-        if (!empty($result['city_en'])) {
+        if (! empty($result['city_en'])) {
             $suffix[] = $result['city_en'];
         }
-        if (!empty($result['country_en'])) {
+        if (! empty($result['country_en'])) {
             $suffix[] = $result['country_en'];
         }
-        if (!empty($result['continent_en'])) {
+        if (! empty($result['continent_en'])) {
             $suffix[] = $result['continent_en'];
         }
-        if (!empty($suffix)) {
-            $out .= " " . implode(', ', $suffix);
+        if (! empty($suffix)) {
+            $out .= ' '.implode(', ', $suffix);
         }
+
         return $out;
     }
 }

@@ -2,6 +2,8 @@
 
 namespace App\Support;
 
+use App\Repositories\CountryRepository;
+
 /**
  * Legacy country helper extracted from `include/functions.php`.
  *
@@ -15,16 +17,15 @@ final class Country
      * Mirrors `get_country_row()`.
      */
     /**
-     * @param  mixed  $cache
      * @return array<string, mixed>|null
      */
     public static function row(mixed $cache, int|string $id): ?array
     {
-        $cacheKey = 'country_' . $id . '_content';
+        $cacheKey = 'country_'.$id.'_content';
         $row = is_object($cache) && method_exists($cache, 'get_value') ? $cache->get_value($cacheKey) : false;
 
         if ($row === false) {
-            $row = \App\Repositories\CountryRepository::findById($id);
+            $row = CountryRepository::findById($id);
             if (is_object($cache) && method_exists($cache, 'cache_value')) {
                 $cache->cache_value($cacheKey, $row, 86400);
             }

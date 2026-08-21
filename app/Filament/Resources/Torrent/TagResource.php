@@ -2,36 +2,33 @@
 
 namespace App\Filament\Resources\Torrent;
 
-use Filament\Schemas\Schema;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Textarea;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\SelectFilter;
-use Filament\Actions\DeleteBulkAction;
-use App\Filament\Resources\Torrent\TagResource\Pages\ListTags;
 use App\Filament\Resources\Torrent\TagResource\Pages\CreateTag;
 use App\Filament\Resources\Torrent\TagResource\Pages\EditTag;
-use Filament\Actions\Action;
-use Filament\Actions\EditAction;
-use App\Filament\Resources\Torrent\TagResource\Pages;
-use App\Filament\Resources\Torrent\TagResource\RelationManagers;
+use App\Filament\Resources\Torrent\TagResource\Pages\ListTags;
 use App\Models\SearchBox;
 use App\Models\Tag;
-use Filament\Forms;
+use App\Support\Format;
+use Filament\Actions\Action;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
-use Filament\Tables\Table;
+use Filament\Schemas\Schema;
 use Filament\Tables;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class TagResource extends Resource
 {
     protected static ?string $model = Tag::class;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-tag';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-tag';
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Torrent';
+    protected static string|\UnitEnum|null $navigationGroup = 'Torrent';
 
     protected static ?int $navigationSort = 2;
 
@@ -60,8 +57,7 @@ class TagResource extends Resource
                 Select::make('mode')
                     ->options(SearchBox::query()->pluck('name', 'id')->toArray())
                     ->label(__('label.search_box.taxonomy.mode'))
-                    ->helperText(__('label.search_box.taxonomy.mode_help'))
-                ,
+                    ->helperText(__('label.search_box.taxonomy.mode_help')),
                 Textarea::make('description')->label(__('label.description')),
             ]);
     }
@@ -73,8 +69,7 @@ class TagResource extends Resource
                 TextColumn::make('id'),
                 TextColumn::make('search_box.name')
                     ->label(__('label.search_box.label'))
-                    ->formatStateUsing(fn ($record) => $record->search_box->name ?? 'All')
-                ,
+                    ->formatStateUsing(fn ($record) => $record->search_box->name ?? 'All'),
                 TextColumn::make('name')->label(__('label.name'))->searchable(),
                 TextColumn::make('color')->label(__('label.tag.color')),
                 TextColumn::make('font_color')->label(__('label.tag.font_color')),
@@ -84,8 +79,8 @@ class TagResource extends Resource
                 TextColumn::make('border_radius')->label(__('label.tag.border_radius')),
                 TextColumn::make('priority')->label(__('label.priority'))->sortable(),
                 TextColumn::make('torrents_count')->label(__('label.tag.torrents_count')),
-                TextColumn::make('torrents_sum_size')->label(__('label.tag.torrents_sum_size'))->formatStateUsing(fn ($state) => \App\Support\Format::size($state)),
-//                Tables\Columns\TextColumn::make('updated_at')->dateTime()->label(__('label.updated_at')),
+                TextColumn::make('torrents_sum_size')->label(__('label.tag.torrents_sum_size'))->formatStateUsing(fn ($state) => Format::size($state)),
+                //                Tables\Columns\TextColumn::make('updated_at')->dateTime()->label(__('label.updated_at')),
             ])
             ->defaultSort('priority', 'desc')
             ->filters([
@@ -98,8 +93,7 @@ class TagResource extends Resource
                                 return $query->where('mode', $value)->orWhere('mode', 0);
                             });
                         });
-                    })
-                ,
+                    }),
             ])
             ->recordActions(self::getActions())
             ->toolbarActions([
@@ -134,6 +128,7 @@ class TagResource extends Resource
                 $record->torrent_tags()->delete();
             });
         $actions[] = EditAction::make();
+
         return $actions;
     }
 }

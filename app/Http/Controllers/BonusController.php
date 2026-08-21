@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Auth\Permission;
+use App\Enums\Permission\PermissionEnum;
 use App\Models\BonusLogs;
 use App\Models\Exam;
 use App\Models\Medal;
@@ -9,16 +11,21 @@ use App\Models\Reward;
 use App\Models\Setting;
 use App\Models\Torrent;
 use App\Models\User;
+use App\Repositories\BonusRepository;
 use App\Support\Api;
 use App\Support\Bonus;
+use App\Support\Locale;
+use App\Support\Pagination;
 use App\Support\SupportContext;
 use App\Support\UserDisplay;
+use App\Support\Validators;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\View\View;
 use Nexus\Database\NexusDB;
+use Nexus\Nexus;
 
 class BonusController extends LegacyController
 {
@@ -27,7 +34,7 @@ class BonusController extends LegacyController
         $curUser = SupportContext::getUser() ?? [];
         $uid = (int) (SupportContext::getRequestInput('uid') ?? $curUser['id'] ?? 0);
 
-        if (! \App\Support\Validators::isId($uid)) {
+        if (! Validators::isId($uid)) {
             return $this->legacyAbortResponse('Error', 'Invalid uid.');
         }
 
@@ -37,7 +44,7 @@ class BonusController extends LegacyController
         }
 
         if ($uid != ($curUser['id'] ?? 0)) {
-            $allowed = \App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::VIEW_USER_HISTORY, $user);
+            $allowed = Permission::can(PermissionEnum::VIEW_USER_HISTORY, $user);
             if (! $allowed) {
                 return $this->legacyAbortResponse('Error', 'Permission denied.');
             }
@@ -57,13 +64,13 @@ class BonusController extends LegacyController
             return $this->legacyAbortResponse('Error', "Invalid business_type: {$businessType}");
         }
 
-        $title = \App\Support\Locale::trans('bonus-log.title_for_user', [], null);
+        $title = Locale::trans('bonus-log.title_for_user', [], null);
         $pagerParam = "?uid={$uid}&category={$category}&business_type={$businessType}";
-        $textSelectOnePlease = \App\Support\Locale::trans('nexus.select_one_please', [], null);
-        $resetText = \App\Support\Locale::trans('label.reset', [], null);
-        $submitText = \App\Support\Locale::trans('label.submit', [], null);
-        $categoryText = \App\Support\Locale::trans('bonus-log.category', [], null);
-        $businessTypeText = \App\Support\Locale::trans('bonus-log.fields.business_type', [], null);
+        $textSelectOnePlease = Locale::trans('nexus.select_one_please', [], null);
+        $resetText = Locale::trans('label.reset', [], null);
+        $submitText = Locale::trans('label.submit', [], null);
+        $categoryText = Locale::trans('bonus-log.category', [], null);
+        $businessTypeText = Locale::trans('bonus-log.fields.business_type', [], null);
 
         $categoryOptionsHtml = '';
         foreach ($categoryOptions as $name => $text) {
@@ -77,9 +84,9 @@ class BonusController extends LegacyController
             $businessTypeOptionsHtml .= sprintf('<option value="%s"%s>%s</option>', htmlspecialchars((string) $name), $selected, htmlspecialchars($text));
         }
 
-        $rep = new \App\Repositories\BonusRepository();
+        $rep = new BonusRepository;
         $total = $rep->getCount($category, $uid, $businessType);
-        [$pagertop, $pagerbottom, , , $pageSize, $page] = \App\Support\Pagination::pager(50, $total, "{$pagerParam}&");
+        [$pagertop, $pagerbottom, , , $pageSize, $page] = Pagination::pager(50, $total, "{$pagerParam}&");
         $list = $rep->getList($category, $uid, $businessType, $page + 1, $pageSize);
 
         $rows = [];
@@ -91,7 +98,7 @@ class BonusController extends LegacyController
             $rows[] = [
                 'businessTypeText' => $r['businessTypeText'] ?? '',
                 'old_formatted' => $old > 0 ? number_format($old, 1) : '-',
-                'value_formatted' => ($old < $new ? '+' : '-') . number_format($value, 1),
+                'value_formatted' => ($old < $new ? '+' : '-').number_format($value, 1),
                 'new_formatted' => $new > 0 ? number_format($new, 1) : '-',
                 'comment' => $r['comment'] ?? '',
                 'created_at' => $r['created_at'] ?? '',
@@ -104,7 +111,7 @@ jQuery("#reset").on('click', function () {
     jQuery("select[name=business_type]").val('')
 })
 JS;
-        \Nexus\Nexus::js($resetJs, 'footer', false);
+        Nexus::js($resetJs, 'footer', false);
 
         return $this->legacyPage($request, 'bonus-log', true, [
             'title' => $title,
@@ -146,7 +153,7 @@ JS;
 
         $total = (clone $query)->count();
         $perPage = 20;
-        [$pagertop, $pagerbottom, , $offset, $pageSize] = \App\Support\Pagination::pager($perPage, $total, '?');
+        [$pagertop, $pagerbottom, , $offset, $pageSize] = Pagination::pager($perPage, $total, '?');
         $medalRows = (clone $query)->offset($offset)->take($pageSize)->orderBy('id', 'desc')->get();
 
         $user = User::query()->findOrFail($currentUserId);
@@ -160,20 +167,20 @@ JS;
             try {
                 $row->checkCanBeBuy();
                 if ($userMedals->has($row->id)) {
-                    $buyBtnText = \App\Support\Locale::trans('medal.buy_already', [], null);
+                    $buyBtnText = Locale::trans('medal.buy_already', [], null);
                 } elseif ($seedbonus < $row->price) {
-                    $buyBtnText = \App\Support\Locale::trans('medal.require_more_bonus', [], null);
+                    $buyBtnText = Locale::trans('medal.require_more_bonus', [], null);
                 } else {
-                    $buyBtnText = \App\Support\Locale::trans('medal.buy_btn', [], null);
+                    $buyBtnText = Locale::trans('medal.buy_btn', [], null);
                     $buyDisabled = '';
                     $buyClass = 'buy';
                 }
 
                 $giftCost = $row->price * (1 + ($row->gift_fee_factor ?? 0));
                 if ($seedbonus < $giftCost) {
-                    $giftBtnText = \App\Support\Locale::trans('medal.require_more_bonus', [], null);
+                    $giftBtnText = Locale::trans('medal.require_more_bonus', [], null);
                 } else {
-                    $giftBtnText = \App\Support\Locale::trans('medal.gift_btn', [], null);
+                    $giftBtnText = Locale::trans('medal.gift_btn', [], null);
                     $giftDisabled = '';
                     $giftClass = 'gift';
                 }
@@ -186,21 +193,21 @@ JS;
                 'image_large' => $row->image_large,
                 'name' => $row->name,
                 'description' => $row->description,
-                'sale_begin_time' => $row->sale_begin_time ?? \App\Support\Locale::trans('nexus.no_limit', [], null),
-                'sale_end_time' => $row->sale_end_time ?? \App\Support\Locale::trans('nexus.no_limit', [], null),
+                'sale_begin_time' => $row->sale_begin_time ?? Locale::trans('nexus.no_limit', [], null),
+                'sale_end_time' => $row->sale_end_time ?? Locale::trans('nexus.no_limit', [], null),
                 'durationText' => $row->durationText,
                 'bonus_addition_factor' => ($row->bonus_addition_factor ?? 0) * 100,
                 'gift_fee_factor' => ($row->gift_fee_factor ?? 0) * 100,
                 'price' => $row->price,
-                'inventory' => $row->inventory ?? \App\Support\Locale::trans('label.infinite', [], null),
+                'inventory' => $row->inventory ?? Locale::trans('label.infinite', [], null),
                 'buy_action' => sprintf('<input type="button" class="%s" data-id="%s" value="%s"%s>', $buyClass, $row->id, htmlspecialchars($buyBtnText), $buyDisabled),
-                'gift_action' => sprintf('<input type="number" class="uid" %s style="width: 60px" placeholder="UID"><input type="button" class="%s" data-id="%s" value="%s"%s><span class="nowrap">%s: %s</span>', $giftDisabled, $giftClass, $row->id, htmlspecialchars($giftBtnText), $giftDisabled, \App\Support\Locale::trans('medal.fields.gift_fee', [], null), (($row->gift_fee_factor ?? 0) * 100) . '%'),
+                'gift_action' => sprintf('<input type="number" class="uid" %s style="width: 60px" placeholder="UID"><input type="button" class="%s" data-id="%s" value="%s"%s><span class="nowrap">%s: %s</span>', $giftDisabled, $giftClass, $row->id, htmlspecialchars($giftBtnText), $giftDisabled, Locale::trans('medal.fields.gift_fee', [], null), (($row->gift_fee_factor ?? 0) * 100).'%'),
             ];
         }
 
-        $title = \App\Support\Locale::trans('medal.label', [], null);
-        $confirmBuyMsg = \App\Support\Locale::trans('medal.confirm_to_buy', [], null);
-        $confirmGiftMsg = \App\Support\Locale::trans('medal.confirm_to_gift', [], null);
+        $title = Locale::trans('medal.label', [], null);
+        $confirmBuyMsg = Locale::trans('medal.confirm_to_buy', [], null);
+        $confirmGiftMsg = Locale::trans('medal.confirm_to_gift', [], null);
 
         $js = <<<JS
 jQuery('.buy').on('click', function (e) {
@@ -245,7 +252,7 @@ jQuery('.gift').on('click', function (e) {
     })
 })
 JS;
-        \Nexus\Nexus::js($js, 'footer', false);
+        Nexus::js($js, 'footer', false);
 
         return $this->legacyPage($request, 'medal', true, [
             'title' => $title,
@@ -253,16 +260,16 @@ JS;
             'pagertop' => $pagertop,
             'pagerbottom' => $pagerbottom,
             'rows' => $rows,
-            'columnImageLargeLabel' => \App\Support\Locale::trans('medal.fields.image_large', [], null),
-            'columnDescriptionLabel' => \App\Support\Locale::trans('medal.fields.description', [], null),
-            'columnSaleBeginEndTimeLabel' => \App\Support\Locale::trans('medal.fields.sale_begin_end_time', [], null),
-            'columnDurationLabel' => \App\Support\Locale::trans('medal.fields.duration', [], null),
-            'columnBonusAdditionLabel' => \App\Support\Locale::trans('medal.fields.bonus_addition', [], null),
-            'columnPriceLabel' => \App\Support\Locale::trans('medal.fields.price', [], null),
-            'columnInventoryLabel' => \App\Support\Locale::trans('medal.fields.inventory', [], null),
-            'columnBuyLabel' => \App\Support\Locale::trans('medal.buy_btn', [], null),
-            'columnGiftLabel' => \App\Support\Locale::trans('medal.gift_btn', [], null),
-            'columnGiftFeeLabel' => \App\Support\Locale::trans('medal.fields.gift_fee', [], null),
+            'columnImageLargeLabel' => Locale::trans('medal.fields.image_large', [], null),
+            'columnDescriptionLabel' => Locale::trans('medal.fields.description', [], null),
+            'columnSaleBeginEndTimeLabel' => Locale::trans('medal.fields.sale_begin_end_time', [], null),
+            'columnDurationLabel' => Locale::trans('medal.fields.duration', [], null),
+            'columnBonusAdditionLabel' => Locale::trans('medal.fields.bonus_addition', [], null),
+            'columnPriceLabel' => Locale::trans('medal.fields.price', [], null),
+            'columnInventoryLabel' => Locale::trans('medal.fields.inventory', [], null),
+            'columnBuyLabel' => Locale::trans('medal.buy_btn', [], null),
+            'columnGiftLabel' => Locale::trans('medal.gift_btn', [], null),
+            'columnGiftFeeLabel' => Locale::trans('medal.fields.gift_fee', [], null),
         ]);
 
     }
@@ -278,7 +285,7 @@ JS;
 
         $total = (clone $query)->count();
         $perPage = 20;
-        [$pagertop, $pagerbottom, , $offset, $pageSize] = \App\Support\Pagination::pager($perPage, $total, '?');
+        [$pagertop, $pagerbottom, , $offset, $pageSize] = Pagination::pager($perPage, $total, '?');
 
         $examRows = (clone $query)
             ->offset($offset)
@@ -313,9 +320,9 @@ JS;
             ];
         }
 
-        $title = \App\Support\Locale::trans('exam.type_task', [], null);
-        $confirmBuyMsg = \App\Support\Locale::trans('exam.confirm_to_claim', [], null);
-        $confirmGiftMsg = \App\Support\Locale::trans('medal.confirm_to_gift', [], null);
+        $title = Locale::trans('exam.type_task', [], null);
+        $confirmBuyMsg = Locale::trans('exam.confirm_to_claim', [], null);
+        $confirmGiftMsg = Locale::trans('medal.confirm_to_gift', [], null);
 
         $js = <<<JS
 jQuery('.claim').on('click', function (e) {
@@ -342,27 +349,27 @@ jQuery('.claim').on('click', function (e) {
     })
 })
 JS;
-        \Nexus\Nexus::js('vendor/jquery-loading/jquery.loading.min.js', 'footer', true);
-        \Nexus\Nexus::js($js, 'footer', false);
+        Nexus::js('vendor/jquery-loading/jquery.loading.min.js', 'footer', true);
+        Nexus::js($js, 'footer', false);
 
         return $this->legacyPage($request, 'task', true, [
             'title' => $title,
             'pagertop' => $pagertop,
             'pagerbottom' => $pagerbottom,
             'rows' => $rows,
-            'claimBtnText' => \App\Support\Locale::trans('exam.action_claim_task', [], null),
-            'claimedText' => \App\Support\Locale::trans('exam.claimed_already', [], null),
-            'infiniteText' => \App\Support\Locale::trans('label.infinite', [], null),
-            'columnNameLabel' => \App\Support\Locale::trans('label.name', [], null),
-            'columnIndexLabel' => \App\Support\Locale::trans('exam.index', [], null),
-            'columnBeginTimeLabel' => \App\Support\Locale::trans('label.begin', [], null),
-            'columnEndTimeLabel' => \App\Support\Locale::trans('label.end', [], null),
-            'columnTargetUserLabel' => \App\Support\Locale::trans('label.exam.filter_formatted', [], null),
-            'columnSuccessRewardLabel' => \App\Support\Locale::trans('exam.success_reward_bonus', [], null),
-            'columnFailDeductLabel' => \App\Support\Locale::trans('exam.fail_deduct_bonus', [], null),
-            'columnClaimedUserCountLabel' => \App\Support\Locale::trans('exam.claimed_user_count', [], null),
-            'columnDescLabel' => \App\Support\Locale::trans('label.description', [], null),
-            'columnClaimLabel' => \App\Support\Locale::trans('exam.action_claim_task', [], null),
+            'claimBtnText' => Locale::trans('exam.action_claim_task', [], null),
+            'claimedText' => Locale::trans('exam.claimed_already', [], null),
+            'infiniteText' => Locale::trans('label.infinite', [], null),
+            'columnNameLabel' => Locale::trans('label.name', [], null),
+            'columnIndexLabel' => Locale::trans('exam.index', [], null),
+            'columnBeginTimeLabel' => Locale::trans('label.begin', [], null),
+            'columnEndTimeLabel' => Locale::trans('label.end', [], null),
+            'columnTargetUserLabel' => Locale::trans('label.exam.filter_formatted', [], null),
+            'columnSuccessRewardLabel' => Locale::trans('exam.success_reward_bonus', [], null),
+            'columnFailDeductLabel' => Locale::trans('exam.fail_deduct_bonus', [], null),
+            'columnClaimedUserCountLabel' => Locale::trans('exam.claimed_user_count', [], null),
+            'columnDescLabel' => Locale::trans('label.description', [], null),
+            'columnClaimLabel' => Locale::trans('exam.action_claim_task', [], null),
         ]);
 
     }
@@ -472,12 +479,12 @@ JS;
         $yearOptions = '';
         for ($i = $yearFounded; $i <= $yearNow; $i++) {
             $selected = $i == $year ? ' selected="selected"' : '';
-            $yearOptions .= '<option value="' . $i . '"' . $selected . '>' . $i . '</option>';
+            $yearOptions .= '<option value="'.$i.'"'.$selected.'>'.$i.'</option>';
         }
         $monthOptions = '';
         for ($i = 1; $i <= 12; $i++) {
             $selected = $i == $month ? ' selected="selected"' : '';
-            $monthOptions .= '<option value="' . $i . '"' . $selected . '>' . $i . '</option>';
+            $monthOptions .= '<option value="'.$i.'"'.$selected.'>'.$i.'</option>';
         }
 
         return $this->legacyPage($request, 'uploaders', true, [
@@ -525,6 +532,7 @@ JS;
         if (isset($stateMap[$action])) {
             NexusDB::table('torrents_state')->update(['global_sp_state' => $stateMap[$action]]);
             SupportContext::getCache()?->delete_value('global_promotion_state');
+
             return $this->legacyAbortResponse('Success', $messages[$action]);
         }
 
@@ -539,7 +547,7 @@ JS;
 
         $message = '';
         foreach ($links as $key => $label) {
-            $message .= 'Click <a class=altlink href=freeleech.php?action=' . $key . '>here</a> to ' . $label . '..<br />';
+            $message .= 'Click <a class=altlink href=freeleech.php?action='.$key.'>here</a> to '.$label.'..<br />';
         }
 
         return $this->legacyAbortResponse('Select action', $message, false);
@@ -600,5 +608,4 @@ JS;
         return response()->json(Api::successWithContext('OK', $request->all()));
 
     }
-
 }

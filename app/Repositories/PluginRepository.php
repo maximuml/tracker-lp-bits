@@ -1,7 +1,10 @@
 <?php
+
 namespace App\Repositories;
 
 use App\Models\Plugin;
+use App\Support\Logger;
+use Nexus\Nexus;
 
 class PluginRepository extends BaseRepository
 {
@@ -9,7 +12,7 @@ class PluginRepository extends BaseRepository
      * @param  mixed  $action
      * @param  mixed  $id
      * @param  mixed  $force
-     * @return  mixed
+     * @return mixed
      */
     public function cronjob($action = null, $id = null, $force = false)
     {
@@ -30,20 +33,21 @@ class PluginRepository extends BaseRepository
      * @param  mixed  $force
      * @param  mixed  $preStatus
      * @param  mixed  $doingStatus
-     * @return  void
+     * @return void
      */
     private function doCronjob($action, $id, $force, $preStatus, $doingStatus)
     {
         $query = Plugin::query();
-        if (!$force) {
+        if (! $force) {
             $query->where('status', $preStatus);
         }
         if ($id !== null) {
-            $query->where("id", $id);
+            $query->where('id', $id);
         }
         $list = $query->get();
         if ($list->isEmpty()) {
-            \App\Support\Logger::writeWithContext((string) "No plugin need to be {$action}...", (string) 'info', (bool) false);
+            Logger::writeWithContext((string) "No plugin need to be {$action}...", (string) 'info', (bool) false);
+
             return;
         }
         $idArr = $list->pluck('id')->toArray();
@@ -59,8 +63,7 @@ class PluginRepository extends BaseRepository
     }
 
     /**
-     * @param  \App\Models\Plugin  $plugin
-     * @return  mixed
+     * @return mixed
      */
     public function doInstall(Plugin $plugin)
     {
@@ -71,18 +74,18 @@ class PluginRepository extends BaseRepository
             $this->execComposerRequire($plugin);
             $output = $this->execPluginInstall($plugin);
             $version = $this->getInstalledVersion($packageName);
-            \App\Support\Logger::writeWithContext((string) "success install plugin: {$packageName} version: {$version}", (string) 'info', (bool) false);
+            Logger::writeWithContext((string) "success install plugin: {$packageName} version: {$version}", (string) 'info', (bool) false);
             $update = [
                 'status' => Plugin::STATUS_NORMAL,
                 'status_result' => $output,
-                'installed_version' => $version
+                'installed_version' => $version,
             ];
         } catch (\Throwable $throwable) {
             $update = [
                 'status' => Plugin::STATUS_INSTALL_FAILED,
-                'status_result' => $throwable->getMessage()
+                'status_result' => $throwable->getMessage(),
             ];
-            \App\Support\Logger::writeWithContext((string) ("fail install plugin: " . $packageName), (string) 'info', (bool) false);
+            Logger::writeWithContext((string) ('fail install plugin: '.$packageName), (string) 'info', (bool) false);
         } finally {
             $this->updateResult($plugin, $update);
         }
@@ -90,8 +93,7 @@ class PluginRepository extends BaseRepository
     }
 
     /**
-     * @param  \App\Models\Plugin  $plugin
-     * @return  mixed
+     * @return mixed
      */
     public function doDelete(Plugin $plugin)
     {
@@ -100,7 +102,7 @@ class PluginRepository extends BaseRepository
         $removeSuccess = true;
         try {
             $output = $this->execComposerRemove($plugin);
-            \App\Support\Logger::writeWithContext((string) "success remove plugin: {$packageName}", (string) 'info', (bool) false);
+            Logger::writeWithContext((string) "success remove plugin: {$packageName}", (string) 'info', (bool) false);
             $update = [
                 'status' => Plugin::STATUS_NOT_INSTALLED,
                 'status_result' => $output,
@@ -109,10 +111,10 @@ class PluginRepository extends BaseRepository
         } catch (\Throwable $throwable) {
             $update = [
                 'status' => Plugin::STATUS_DELETE_FAILED,
-                'status_result' => $throwable->getMessage()
+                'status_result' => $throwable->getMessage(),
             ];
             $removeSuccess = false;
-            \App\Support\Logger::writeWithContext((string) ("fail remove plugin: " . $packageName), (string) 'info', (bool) false);
+            Logger::writeWithContext((string) ('fail remove plugin: '.$packageName), (string) 'info', (bool) false);
         } finally {
             if ($removeSuccess) {
                 $plugin->delete();
@@ -124,8 +126,7 @@ class PluginRepository extends BaseRepository
     }
 
     /**
-     * @param  \App\Models\Plugin  $plugin
-     * @return  mixed
+     * @return mixed
      */
     public function doUpdate(Plugin $plugin)
     {
@@ -135,7 +136,7 @@ class PluginRepository extends BaseRepository
             $output = $this->execComposerUpdate($plugin);
             $this->execPluginInstall($plugin);
             $version = $this->getInstalledVersion($packageName);
-            \App\Support\Logger::writeWithContext((string) "success update plugin: {$packageName} to version: {$version}", (string) 'info', (bool) false);
+            Logger::writeWithContext((string) "success update plugin: {$packageName} to version: {$version}", (string) 'info', (bool) false);
             $update = [
                 'status' => Plugin::STATUS_NORMAL,
                 'status_result' => $output,
@@ -144,9 +145,9 @@ class PluginRepository extends BaseRepository
         } catch (\Throwable $throwable) {
             $update = [
                 'status' => Plugin::STATUS_UPDATE_FAILED,
-                'status_result' => $throwable->getMessage()
+                'status_result' => $throwable->getMessage(),
             ];
-            \App\Support\Logger::writeWithContext((string) ("fail update plugin: " . $packageName), (string) 'info', (bool) false);
+            Logger::writeWithContext((string) ('fail update plugin: '.$packageName), (string) 'info', (bool) false);
         } finally {
             $this->updateResult($plugin, $update);
         }
@@ -154,96 +155,94 @@ class PluginRepository extends BaseRepository
     }
 
     /**
-     * @param  \App\Models\Plugin  $plugin
-     * @return  mixed
+     * @return mixed
      */
     private function getRepositoryKey(Plugin $plugin)
     {
-        return str_replace("xiaomlove/nexusphp-", "", $plugin->package_name);
+        return str_replace('xiaomlove/nexusphp-', '', $plugin->package_name);
     }
 
     private function validatePackageName(string $packageName): void
     {
-        if (!preg_match('/^[a-z0-9_.-]+\/[a-z0-9_.-]+$/i', $packageName)) {
+        if (! preg_match('/^[a-z0-9_.-]+\/[a-z0-9_.-]+$/i', $packageName)) {
             throw new \InvalidArgumentException("Invalid composer package name: $packageName");
         }
     }
 
     /**
-     * @param  \App\Models\Plugin  $plugin
-     * @return  mixed
+     * @return mixed
      */
     private function execComposerConfig(Plugin $plugin)
     {
         $this->validatePackageName($plugin->package_name);
-        $command = sprintf("composer config repositories.%s git %s", $this->getRepositoryKey($plugin), escapeshellarg((string) $plugin->remote_url));
-        \App\Support\Logger::writeWithContext((string) "[COMPOSER_CONFIG]: {$command}", (string) 'info', (bool) false);
+        $command = sprintf('composer config repositories.%s git %s', $this->getRepositoryKey($plugin), escapeshellarg((string) $plugin->remote_url));
+        Logger::writeWithContext((string) "[COMPOSER_CONFIG]: {$command}", (string) 'info', (bool) false);
+
         return $this->executeCommand($command);
     }
 
     /**
-     * @param  \App\Models\Plugin  $plugin
-     * @return  mixed
+     * @return mixed
      */
     private function execComposerRequire(Plugin $plugin)
     {
         $this->validatePackageName($plugin->package_name);
-        $command = sprintf("composer require %s", escapeshellarg($plugin->package_name));
-        \App\Support\Logger::writeWithContext((string) "[COMPOSER_REQUIRE]: {$command}", (string) 'info', (bool) false);
+        $command = sprintf('composer require %s', escapeshellarg($plugin->package_name));
+        Logger::writeWithContext((string) "[COMPOSER_REQUIRE]: {$command}", (string) 'info', (bool) false);
+
         return $this->executeCommand($command);
     }
 
     /**
-     * @param  \App\Models\Plugin  $plugin
-     * @return  mixed
+     * @return mixed
      */
     private function execComposerRemove(Plugin $plugin)
     {
         $this->validatePackageName($plugin->package_name);
-        $command = sprintf("composer remove %s", escapeshellarg($plugin->package_name));
-        \App\Support\Logger::writeWithContext((string) "[COMPOSER_REMOVE]: {$command}", (string) 'info', (bool) false);
+        $command = sprintf('composer remove %s', escapeshellarg($plugin->package_name));
+        Logger::writeWithContext((string) "[COMPOSER_REMOVE]: {$command}", (string) 'info', (bool) false);
+
         return $this->executeCommand($command);
     }
 
     /**
-     * @param  \App\Models\Plugin  $plugin
-     * @return  mixed
+     * @return mixed
      */
     private function execComposerUpdate(Plugin $plugin)
     {
         $this->validatePackageName($plugin->package_name);
-        $command = sprintf("composer update %s", escapeshellarg($plugin->package_name));
-        \App\Support\Logger::writeWithContext((string) "[COMPOSER_UPDATE]: {$command}", (string) 'info', (bool) false);
+        $command = sprintf('composer update %s', escapeshellarg($plugin->package_name));
+        Logger::writeWithContext((string) "[COMPOSER_UPDATE]: {$command}", (string) 'info', (bool) false);
+
         return $this->executeCommand($command);
     }
 
     /**
-     * @param  \App\Models\Plugin  $plugin
-     * @return  mixed
+     * @return mixed
      */
     private function execPluginInstall(Plugin $plugin)
     {
         $this->validatePackageName($plugin->package_name);
-        $command = sprintf("php artisan plugin install %s", escapeshellarg($plugin->package_name));
-        \App\Support\Logger::writeWithContext((string) "[PLUGIN_INSTALL]: {$command}", (string) 'info', (bool) false);
+        $command = sprintf('php artisan plugin install %s', escapeshellarg($plugin->package_name));
+        Logger::writeWithContext((string) "[PLUGIN_INSTALL]: {$command}", (string) 'info', (bool) false);
+
         return $this->executeCommand($command);
     }
 
     /**
-     * @param  \App\Models\Plugin  $plugin
      * @param  array<string, mixed>  $update
-     * @return  mixed
+     * @return mixed
      */
     private function updateResult(Plugin $plugin, array $update)
     {
-        $update['status_result'] = $update['status_result'] . "\n\nREQUEST_ID: " . \Nexus\Nexus::instance()->getRequestId();
-        \App\Support\Logger::writeWithContext((string) ("[UPDATE]: " . json_encode($update)), (string) 'info', (bool) false);
+        $update['status_result'] = $update['status_result']."\n\nREQUEST_ID: ".Nexus::instance()->getRequestId();
+        Logger::writeWithContext((string) ('[UPDATE]: '.json_encode($update)), (string) 'info', (bool) false);
         $plugin->update($update);
     }
 
     /**
      * @param  mixed  $packageName
-     * @return  mixed
+     * @return mixed
      */
     public function getInstalledVersion($packageName)
     {
@@ -256,10 +255,9 @@ class PluginRepository extends BaseRepository
         $parts = preg_split("/[\s]+/", trim($result));
         $version = $parts[1] ?? '';
         if (str_contains($version, 'dev')) {
-            $version .= " " . ($parts[2] ?? '');
+            $version .= ' '.($parts[2] ?? '');
         }
+
         return $version;
     }
-
-
 }

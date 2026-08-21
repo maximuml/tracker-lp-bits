@@ -2,10 +2,11 @@
 
 namespace App\Console\Commands;
 
-use App\Models\User;
 use App\Repositories\TagRepository;
-use Carbon\Carbon;
+use App\Support\LegacyDb;
+use App\Support\Logger;
 use Illuminate\Console\Command;
+use Nexus\Nexus;
 
 class MigrateTorrentTag extends Command
 {
@@ -25,7 +26,8 @@ class MigrateTorrentTag extends Command
 
     /**
      * Create a new command instance.
-     * @return  void
+     *
+     * @return void
      */
     public function __construct()
     {
@@ -34,15 +36,17 @@ class MigrateTorrentTag extends Command
 
     /**
      * Execute the console command.
-     * @return  int
+     *
+     * @return int
      */
     public function handle()
     {
-        $rep = new TagRepository();
+        $rep = new TagRepository;
         $result = $rep->migrateTorrentTag();
-        $log = sprintf('[%s], %s, result: %s, query: %s', \Nexus\Nexus::instance()->getRequestId(), __METHOD__, var_export($result, true), \App\Support\LegacyDb::lastQuery(false, 'json'));
+        $log = sprintf('[%s], %s, result: %s, query: %s', Nexus::instance()->getRequestId(), __METHOD__, var_export($result, true), LegacyDb::lastQuery(false, 'json'));
         $this->info($log);
-        \App\Support\Logger::writeWithContext((string) $log, (string) 'info', (bool) false);
+        Logger::writeWithContext((string) $log, (string) 'info', (bool) false);
+
         return 0;
     }
 }

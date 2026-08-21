@@ -6,7 +6,6 @@ use App\Events\SeedBoxRecordUpdated;
 use App\Events\TorrentCreated;
 use App\Events\TorrentDeleted;
 use App\Events\TorrentUpdated;
-use App\Events\UserDeleted;
 use App\Events\UserDisabled;
 use App\Listeners\AppendQueryCountHeader;
 use App\Listeners\ClearTorrentCache;
@@ -16,9 +15,7 @@ use App\Listeners\RemoveSeedBoxRecordCache;
 use App\Listeners\ResetNexus;
 use App\Listeners\ResetQueryLog;
 use App\Listeners\SendEmailNotificationWhenTorrentCreated;
-use App\Listeners\SyncTorrentToElasticsearch;
 use App\Listeners\SyncTorrentToMeilisearch;
-use App\Listeners\TestTorrentUpdated;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Http\Events\RequestHandled;
@@ -43,11 +40,9 @@ class EventServiceProvider extends ServiceProvider
             RemoveSeedBoxRecordCache::class,
         ],
         TorrentUpdated::class => [
-            SyncTorrentToElasticsearch::class,
             SyncTorrentToMeilisearch::class,
         ],
         TorrentCreated::class => [
-            SyncTorrentToElasticsearch::class,
             SyncTorrentToMeilisearch::class,
             SendEmailNotificationWhenTorrentCreated::class,
             ClearTorrentCache::class,

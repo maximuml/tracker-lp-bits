@@ -71,7 +71,7 @@ final class Phase12CronTokenTest extends TestCase
     {
         $kernel = app(Kernel::class);
         $reflection = new \ReflectionClass($kernel);
-        $property = $reflection->getProperty('middlewareAliases');
+        $property = $reflection->getProperty('routeMiddleware');
         $property->setAccessible(true);
         $aliases = $property->getValue($kernel);
 

@@ -154,6 +154,9 @@ jobs:
           sed -i 's|DB_HOST=127.0.0.1|DB_HOST=mysql|g' .env
           sed -i 's|REDIS_HOST=127.0.0.1|REDIS_HOST=redis|g' .env
           sed -i 's|LOG_FILE=.*|LOG_FILE=php://stdout|g' .env
+          # .env.example leaves MEILISEARCH_MASTER_KEY empty so users must set
+          # their own. For the smoke-test stack, restore the compose default.
+          sed -i 's|^MEILISEARCH_MASTER_KEY=.*|MEILISEARCH_MASTER_KEY=nexusphp_default_key|' .env
 
       - name: Cache Composer dependencies
         uses: actions/cache@v4
@@ -198,6 +201,9 @@ jobs:
 
       - name: Clear any stale Laravel config cache
         run: docker compose exec -T php php artisan config:clear
+
+      - name: Import MeiliSearch index
+        run: docker compose exec -T php php artisan meilisearch:import
 
       - name: Run Feature tests
         run: |

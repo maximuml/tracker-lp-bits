@@ -221,6 +221,7 @@ class CriticalPathTest extends TestCase
         $catid = '401';
         $catmod = '4';
         $upload = $this->request('POST', '/takeupload.php', [
+            '_token' => $loginToken,
             'name' => 'CriticalPathTest',
             'descr' => 'Critical path feature test upload.',
             'type' => $catid,

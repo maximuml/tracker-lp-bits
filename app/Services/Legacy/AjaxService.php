@@ -25,6 +25,46 @@ use Nexus\Database\NexusLock;
 
 final class AjaxService
 {
+    /**
+     * Explicit whitelist of actions that may be dispatched via the /ajax endpoint.
+     *
+     * The controller checks `in_array($action, self::ALLOWED_ACTIONS)` before
+     * calling the method. This prevents any new public method on this class
+     * from being accidentally exposed as an AJAX endpoint without an explicit
+     * registration here.
+     *
+     * @var array<int, string>
+     */
+    public const ALLOWED_ACTIONS = [
+        'toggleUserMedalStatus',
+        'attendanceRetroactive',
+        'removeUserLeechWarn',
+        'getOffer',
+        'approvalModal',
+        'approval',
+        'addSeedBoxRecord',
+        'removeSeedBoxRecord',
+        'removeHitAndRun',
+        'consumeBenefit',
+        'clearShoutBox',
+        'shoutboxEdit',
+        'shoutboxDelete',
+        'shoutboxReact',
+        'buyMedal',
+        'giftMedal',
+        'saveUserMedal',
+        'claimTask',
+        'addToken',
+        'removeToken',
+        'getPasskeyCreateArgs',
+        'processPasskeyCreate',
+        'deletePasskey',
+        'getPasskeyList',
+        'getPasskeyGetArgs',
+        'processPasskeyGet',
+        'getToastNotifications',
+    ];
+
     /** @param array<string, mixed> $params */
     public static function toggleUserMedalStatus(array $params): mixed
     {

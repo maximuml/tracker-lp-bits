@@ -78,13 +78,14 @@ class UtilityController extends LegacyController
             LegacyAuth::requireLoginFromContext();
         }
 
-        try {
-            if (! method_exists(AjaxService::class, $action)) {
-                $currentUser = SupportContext::getUser() ?? [];
-                Logger::writeWithContext((string) ('hacking attempt made by '.($currentUser['username'] ?? 'guest').',uid '.($currentUser['id'] ?? 0)), (string) 'error', (bool) false);
-                throw new \RuntimeException("Invalid action: {$action}");
-            }
+        if (! in_array($action, AjaxService::ALLOWED_ACTIONS, true)) {
+            $currentUser = SupportContext::getUser() ?? [];
+            Logger::writeWithContext((string) ('hacking attempt made by '.($currentUser['username'] ?? 'guest').',uid '.($currentUser['id'] ?? 0)), (string) 'error', (bool) false);
 
+            return response()->json(Api::call(1, "Invalid action: {$action}", $request->all()));
+        }
+
+        try {
             $result = AjaxService::{$action}($params);
 
             return response()->json(Api::successWithContext($result));

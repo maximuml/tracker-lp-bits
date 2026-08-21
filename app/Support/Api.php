@@ -3,6 +3,7 @@
 namespace App\Support;
 
 use Illuminate\Http\Resources\Json\JsonResource;
+use Nexus\Nexus;
 
 /**
  * Legacy API response helpers extracted from `include/globalfunctions.php`.
@@ -24,7 +25,6 @@ final class Api
      *   - `msg` is a short human-readable string,
      *   - `data` is the payload.
      *
-     * @param  mixed  $data
      * @param  array<string, mixed>  $request
      * @return array<string, mixed>
      */
@@ -38,7 +38,7 @@ final class Api
 
         Logger::write('api after prepare data', 'info');
 
-        $nexus = \Nexus\Nexus::instance();
+        $nexus = Nexus::instance();
         $time = (float) number_format(microtime(true) - ($nexus ? $nexus->getStartTimestamp() : 0), 3);
         $count = null;
         $resultKey = 'ret';
@@ -71,7 +71,7 @@ final class Api
             $results['recordsFiltered'] = $count;
         }
 
-        if (!(defined('IN_NEXUS') && IN_NEXUS) && Config::get('app.debug')) {
+        if (! (defined('IN_NEXUS') && IN_NEXUS) && Config::get('app.debug')) {
             $results['queries'] = LegacyDb::lastQuery(true);
         }
 
@@ -85,7 +85,6 @@ final class Api
      *
      * Mirrors `success($msg = 'OK', $data = [])`.
      *
-     * @param  mixed  $data
      * @param  array<string, mixed>  $request
      * @return array<string, mixed>
      */
@@ -101,7 +100,6 @@ final class Api
      *
      * Mirrors `fail($msg = 'ERROR', $data = [])`.
      *
-     * @param  mixed  $data
      * @param  array<string, mixed>  $request
      * @return array<string, mixed>
      */

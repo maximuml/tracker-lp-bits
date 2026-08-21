@@ -5,8 +5,11 @@ namespace App\Services;
 use App\Exceptions\AuthenticationException;
 use App\Models\User;
 use App\Repositories\UserRepository;
+use App\Services\Captcha\Exceptions\CaptchaValidationException;
 use App\Support\AuthCookie;
+use App\Support\Cache;
 use App\Support\Captcha;
+use App\Support\Config\SiteConfig;
 use App\Support\Network;
 use App\Support\Token;
 use App\Support\TwoFactorAuthHelper;
@@ -16,12 +19,12 @@ class WebAuthService
 {
     private static function getMaxLoginAttempts(): int
     {
-        return \App\Support\Config\SiteConfig::fromDb()->security->maxLoginAttempts();
+        return SiteConfig::fromDb()->security->maxLoginAttempts();
     }
 
     private static function isCaptchaRequired(): bool
     {
-        return \App\Support\Config\SiteConfig::fromDb()->security->captchaRequired() && Captcha::manager()->isEnabled();
+        return SiteConfig::fromDb()->security->captchaRequired() && Captcha::manager()->isEnabled();
     }
 
     public function isCaptchaEnabled(): bool
@@ -75,10 +78,10 @@ class WebAuthService
         $secret = (string) ($row['secret'] ?? '');
         $passhash = (string) ($row['passhash'] ?? '');
         $authKey = (string) ($row['auth_key'] ?? '');
-        $passwordHash = hash('sha256', $secret . hash('sha256', $password));
+        $passwordHash = hash('sha256', $secret.hash('sha256', $password));
 
         if (empty($authKey)) {
-            $oldMd5 = md5($secret . $password . $secret);
+            $oldMd5 = md5($secret.$password.$secret);
             if (hash_equals($oldMd5, $passhash)) {
                 return true;
             }
@@ -127,7 +130,7 @@ class WebAuthService
             throw new AuthenticationException('Account unconfirmed.');
         }
 
-        if ($row['enabled'] === 'no' && (int) \App\Support\Config\SiteConfig::current()->bonus->selfEnable() <= 0) {
+        if ($row['enabled'] === 'no' && (int) SiteConfig::current()->bonus->selfEnable() <= 0) {
             $this->recordFailedAttempt($ip);
             throw new AuthenticationException('Account disabled.');
         }
@@ -150,7 +153,7 @@ class WebAuthService
         $update = [];
         if (empty($row['auth_key'])) {
             $secret = (string) $row['secret'];
-            $passwordHash = hash('sha256', $secret . hash('sha256', $password));
+            $passwordHash = hash('sha256', $secret.hash('sha256', $password));
             $update['passhash'] = $passwordHash;
             $update['auth_key'] = hash('sha256', Token::randomHex(32));
         }
@@ -162,9 +165,9 @@ class WebAuthService
         $duration = ! empty($data['logout']) && $data['logout'] === 'yes' ? 900 : 0;
         AuthCookie::setLoginCookie((int) $row['id'], null, $duration);
 
-        (new UserRepository())->saveLoginLog((int) $row['id'], $ip, 'Web', true);
+        (new UserRepository)->saveLoginLog((int) $row['id'], $ip, 'Web', true);
 
-        \App\Support\Cache::clearUser((int) $row['id'], '');
+        Cache::clearUser((int) $row['id'], '');
 
         return $user;
     }
@@ -189,7 +192,7 @@ class WebAuthService
             if (Captcha::manager()->driver()->verify($payload, ['ip' => Network::clientIp()])) {
                 return;
             }
-        } catch (\App\Services\Captcha\Exceptions\CaptchaValidationException $exception) {
+        } catch (CaptchaValidationException $exception) {
             throw new AuthenticationException($exception->getMessage());
         }
 

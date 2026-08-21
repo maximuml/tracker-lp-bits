@@ -7,7 +7,6 @@ use Illuminate\Support\Facades\DB;
 
 class CaticonsTableSeeder extends Seeder
 {
-
     /**
      * Auto generated seed file
      *
@@ -15,13 +14,11 @@ class CaticonsTableSeeder extends Seeder
      */
     public function run()
     {
-        
 
         DB::table('caticons')->delete();
-        
-        DB::table('caticons')->insert(array (
-            0 => 
-            array (
+
+        DB::table('caticons')->insert([
+            0 => [
                 'id' => 1,
                 'name' => 'SceneTorrents mod',
                 'folder' => 'scenetorrents/',
@@ -30,9 +27,8 @@ class CaticonsTableSeeder extends Seeder
                 'secondicon' => 'no',
                 'designer' => 'NexusPHP',
                 'comment' => 'Modified from SceneTorrents',
-            ),
-        ));
-        
-        
+            ],
+        ]);
+
     }
 }

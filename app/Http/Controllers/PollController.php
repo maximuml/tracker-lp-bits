@@ -7,19 +7,18 @@ use App\Models\Poll;
 use App\Models\PollAnswer;
 use App\Models\User;
 use App\Repositories\PollRepository;
+use App\Support\Site;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Validation\Rule;
 
 class PollController extends Controller
 {
-    /** @var  mixed */
+    /** @var mixed */
     private $repository;
 
     /**
-     * @param  \App\Repositories\PollRepository  $repository
-     * @return  mixed
+     * @return mixed
      */
     public function __construct(PollRepository $repository)
     {
@@ -38,65 +37,73 @@ class PollController extends Controller
 
         ];
     }
+
     /**
      * Display a listing of the resource.
-     * @param  \Illuminate\Http\Request  $request
-     * @return  array<string, mixed>
+     *
+     * @return array<string, mixed>
      */
     public function index(Request $request)
     {
         $result = $this->repository->getList($request->all());
         $resource = PollResource::collection($result);
+
         return $this->success($resource);
     }
 
     /**
      * Store a newly created resource in storage.
-     * @param  \Illuminate\Http\Request  $request
-     * @return  array<string, mixed>
+     *
+     * @return array<string, mixed>
      */
     public function store(Request $request)
     {
         $request->validate($this->getRules());
         $result = $this->repository->store($request->all());
         $resource = new PollResource($result);
+
         return $this->success($resource);
     }
 
     /**
      * Display the specified resource.
+     *
      * @param  mixed  $id
-     * @return  array<string, mixed>
+     * @return array<string, mixed>
      */
     public function show($id)
     {
         $result = Poll::query()->findOrFail($id);
         $resource = new PollResource($result);
+
         return $this->success($resource);
     }
 
     /**
      * Update the specified resource in storage.
-     * @param  \Illuminate\Http\Request  $request
+     *
      * @param  mixed  $id
-     * @return  array<string, mixed>
+     * @return array<string, mixed>
      */
     public function update(Request $request, $id)
     {
         $request->validate($this->getRules());
         $result = $this->repository->update($request->all(), $id);
         $resource = new PollResource($result);
+
         return $this->success($resource);
     }
 
     /**
      * Remove the specified resource from storage.
+     *
      * @param  mixed  $id
-     * @return  array<string, mixed>
+     * @return array<string, mixed>
      */
     public function destroy($id)
     {
         $result = $this->repository->delete($id);
+
         return $this->success($result);
     }
 
@@ -122,15 +129,15 @@ class PollController extends Controller
             if ($answer instanceof PollAnswer) {
                 $selection = $answer->selection;
             } else {
-                $options["255"] = "弃权(我想偷看结果！)";
+                $options['255'] = '弃权(我想偷看结果！)';
             }
             $poll->options = $options;
 
             $answerStats = (clone $baseAnswerQuery)
-                ->selectRaw("selection, count(*) as count")->groupBy("selection")
+                ->selectRaw('selection, count(*) as count')->groupBy('selection')
                 ->get()->pluck('count', 'selection')->toArray();
             foreach ($answerStats as $index => &$value) {
-                $value = number_format(($value / $poll->answers_count) * 100, 1) . '%';
+                $value = number_format(($value / $poll->answers_count) * 100, 1).'%';
             }
             $resource = new PollResource($poll);
         } else {
@@ -140,14 +147,14 @@ class PollController extends Controller
         $resource->additional([
             'selection' => $selection,
             'answer_stats' => $answerStats,
-            'site_info' => \App\Support\Site::info(),
+            'site_info' => Site::info(),
         ]);
+
         return $this->success($resource);
     }
 
     /**
-     * @param  \Illuminate\Http\Request  $request
-     * @return  array<string, mixed>
+     * @return array<string, mixed>
      */
     public function vote(Request $request)
     {
@@ -158,7 +165,7 @@ class PollController extends Controller
         $pollId = (int) $request->poll_id;
         $selection = (int) $request->selection;
         $user = Auth::user();
-        if (!$user instanceof User) {
+        if (! $user instanceof User) {
             return $this->success(['result' => false], 'Unauthenticated');
         }
         $poll = Poll::query()->findOrFail($pollId);
@@ -167,7 +174,7 @@ class PollController extends Controller
             'selection' => $selection,
         ];
         $answer = $poll->answers()->create($data);
+
         return $this->success($answer->toArray());
     }
-
 }

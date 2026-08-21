@@ -2,11 +2,9 @@
 
 namespace App\Filament\Resources\System\MessageTemplateResource\Pages;
 
-use Filament\Actions\CreateAction;
 use App\Filament\PageListSingle;
 use App\Filament\Resources\System\MessageTemplateResource;
-use Filament\Actions;
-use Filament\Resources\Pages\ManageRecords;
+use Filament\Actions\CreateAction;
 
 class ManageMessageTemplates extends PageListSingle
 {

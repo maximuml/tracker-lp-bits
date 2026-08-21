@@ -7,15 +7,21 @@ namespace App\Services\Cleanup;
 use App\Enums\ModelEventEnum;
 use App\Models\Torrent;
 use App\Models\User;
+use App\Models\UserBanLog;
+use App\Models\UserModifyLog;
+use App\Repositories\UserRepository;
+use App\Support\Config\SiteConfig;
 use App\Support\Events;
 use App\Support\Locale;
 use App\Support\Log;
+use App\Support\Logger;
+use App\Support\SupportContext;
 use App\Support\Time;
 use App\Support\TorrentOps;
 use App\Support\UserOps;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Collection;
 use Nexus\Database\NexusDB;
 
 /**
@@ -33,7 +39,7 @@ final class Tasks
     public function prunePeers(): string
     {
         $deadtime = date('Y-m-d H:i:s', Time::deadThreshold(
-            (int) \App\Support\Config\SiteConfig::current()->main->anninterthree(3600),
+            (int) SiteConfig::current()->main->anninterthree(3600),
             time()
         ));
 
@@ -48,7 +54,7 @@ final class Tasks
      */
     public function resetSeedBonusCounters(): string
     {
-        $interval = (int) \App\Support\Config\SiteConfig::current()->main->autocleanIntervalOne(900);
+        $interval = (int) SiteConfig::current()->main->autocleanIntervalOne(900);
         $cutoff = Carbon::now()->subSeconds(2 * $interval)->toDateTimeString();
 
         NexusDB::table('users')
@@ -69,8 +75,8 @@ final class Tasks
      */
     public function updateTorrentVisibility(): string
     {
-        $maxDeadTime = (int) \App\Support\Config\SiteConfig::current()->main->maxDeadTorrentTime(21600);
-        $deadtime = Time::deadThreshold((int) \App\Support\Config\SiteConfig::current()->main->anninterthree(3600), time()) - $maxDeadTime;
+        $maxDeadTime = (int) SiteConfig::current()->main->maxDeadTorrentTime(21600);
+        $deadtime = Time::deadThreshold((int) SiteConfig::current()->main->anninterthree(3600), time()) - $maxDeadTime;
         $lastActionDeadTime = date('Y-m-d H:i:s', $deadtime);
 
         NexusDB::table('torrents')
@@ -96,7 +102,7 @@ final class Tasks
 
             foreach ($topicIds as $topicId) {
                 $postcount += (int) NexusDB::table('posts')->where('topicid', $topicId)->count();
-                ++$topiccount;
+                $topiccount++;
             }
 
             NexusDB::table('forums')
@@ -104,7 +110,7 @@ final class Tasks
                 ->update(['postcount' => $postcount, 'topiccount' => $topiccount]);
         }
 
-        $cache = \App\Support\SupportContext::getCache();
+        $cache = SupportContext::getCache();
         if ($cache !== null) {
             $cache->delete_value('forums_list');
         }
@@ -118,7 +124,7 @@ final class Tasks
      */
     public function pruneOffers(): string
     {
-        $offerVoteTimeout = (int) \App\Support\Config\SiteConfig::current()->main->offerVoteTimeout(259200);
+        $offerVoteTimeout = (int) SiteConfig::current()->main->offerVoteTimeout(259200);
         if ($offerVoteTimeout > 0) {
             $dt = date('Y-m-d H:i:s', time() - $offerVoteTimeout);
             $offerIds = NexusDB::table('offers')
@@ -130,7 +136,7 @@ final class Tasks
             $this->deleteOffers($offerIds, 'vote timeout');
         }
 
-        $offerUploadTimeout = (int) \App\Support\Config\SiteConfig::current()->main->offerUploadTimeout(86400);
+        $offerUploadTimeout = (int) SiteConfig::current()->main->offerUploadTimeout(86400);
         if ($offerUploadTimeout > 0) {
             $dt = date('Y-m-d H:i:s', time() - $offerUploadTimeout);
             $offerIds = NexusDB::table('offers')
@@ -151,45 +157,45 @@ final class Tasks
     public function expireTorrentPromotions(): string
     {
         $this->expirePromotionType(
-            (int) \App\Support\Config\SiteConfig::current()->torrent->expireHalfleech(0),
+            (int) SiteConfig::current()->torrent->expireHalfleech(0),
             Torrent::PROMOTION_HALF_DOWN,
-            (int) \App\Support\Config\SiteConfig::current()->torrent->halfleechbecome(Torrent::PROMOTION_NORMAL),
+            (int) SiteConfig::current()->torrent->halfleechbecome(Torrent::PROMOTION_NORMAL),
         );
 
         $this->expirePromotionType(
-            (int) \App\Support\Config\SiteConfig::current()->torrent->expireFree(0),
+            (int) SiteConfig::current()->torrent->expireFree(0),
             Torrent::PROMOTION_FREE,
-            (int) \App\Support\Config\SiteConfig::current()->torrent->freebecome(Torrent::PROMOTION_NORMAL),
+            (int) SiteConfig::current()->torrent->freebecome(Torrent::PROMOTION_NORMAL),
         );
 
         $this->expirePromotionType(
-            (int) \App\Support\Config\SiteConfig::current()->torrent->expireTwoup(0),
+            (int) SiteConfig::current()->torrent->expireTwoup(0),
             Torrent::PROMOTION_TWO_TIMES_UP,
-            (int) \App\Support\Config\SiteConfig::current()->torrent->twoupbecome(Torrent::PROMOTION_NORMAL),
+            (int) SiteConfig::current()->torrent->twoupbecome(Torrent::PROMOTION_NORMAL),
         );
 
         $this->expirePromotionType(
-            (int) \App\Support\Config\SiteConfig::current()->torrent->expireTwoupfree(0),
+            (int) SiteConfig::current()->torrent->expireTwoupfree(0),
             Torrent::PROMOTION_FREE_TWO_TIMES_UP,
-            (int) \App\Support\Config\SiteConfig::current()->torrent->twoupfreebecome(Torrent::PROMOTION_NORMAL),
+            (int) SiteConfig::current()->torrent->twoupfreebecome(Torrent::PROMOTION_NORMAL),
         );
 
         $this->expirePromotionType(
-            (int) \App\Support\Config\SiteConfig::current()->torrent->expireTwouphalfleech(0),
+            (int) SiteConfig::current()->torrent->expireTwouphalfleech(0),
             Torrent::PROMOTION_HALF_DOWN_TWO_TIMES_UP,
-            (int) \App\Support\Config\SiteConfig::current()->torrent->twouphalfleechbecome(Torrent::PROMOTION_NORMAL),
+            (int) SiteConfig::current()->torrent->twouphalfleechbecome(Torrent::PROMOTION_NORMAL),
         );
 
         $this->expirePromotionType(
-            (int) \App\Support\Config\SiteConfig::current()->torrent->expireThirtypercentleech(0),
+            (int) SiteConfig::current()->torrent->expireThirtypercentleech(0),
             Torrent::PROMOTION_ONE_THIRD_DOWN,
-            (int) \App\Support\Config\SiteConfig::current()->torrent->thirtypercentleechbecome(Torrent::PROMOTION_NORMAL),
+            (int) SiteConfig::current()->torrent->thirtypercentleechbecome(Torrent::PROMOTION_NORMAL),
         );
 
         $this->expirePromotionType(
-            (int) \App\Support\Config\SiteConfig::current()->torrent->expireNormal(0),
+            (int) SiteConfig::current()->torrent->expireNormal(0),
             Torrent::PROMOTION_NORMAL,
-            (int) \App\Support\Config\SiteConfig::current()->torrent->normalbecome(Torrent::PROMOTION_NORMAL),
+            (int) SiteConfig::current()->torrent->normalbecome(Torrent::PROMOTION_NORMAL),
         );
 
         $this->expireIndividualPromotions();
@@ -275,7 +281,7 @@ final class Tasks
     // ------------------------------------------------------------------------
 
     /**
-     * @param array<string, mixed> $offerIds
+     * @param  array<string, mixed>  $offerIds
      */
     private function deleteOffers(array $offerIds, string $reason): void
     {
@@ -374,7 +380,7 @@ final class Tasks
 
     private function deleteUnconfirmedAccounts(): void
     {
-        $signupTimeout = (int) \App\Support\Config\SiteConfig::current()->main->signupTimeout(259200);
+        $signupTimeout = (int) SiteConfig::current()->main->signupTimeout(259200);
         $deadtime = time() - $signupTimeout;
 
         User::query()
@@ -398,7 +404,7 @@ final class Tasks
 
     private function deleteOldInviteCodes(): void
     {
-        $inviteTimeout = (int) \App\Support\Config\SiteConfig::current()->main->inviteTimeout(7);
+        $inviteTimeout = (int) SiteConfig::current()->main->inviteTimeout(7);
         $secs = $inviteTimeout * 24 * 60 * 60;
         $dt = date('Y-m-d H:i:s', time() - $secs);
         $nowStr = Carbon::now()->toDateTimeString();
@@ -428,7 +434,7 @@ final class Tasks
 
     private function disableNoTransferByLastAccess(): void
     {
-        $days = (int) \App\Support\Config\SiteConfig::current()->account->deleteNoTransfer(0);
+        $days = (int) SiteConfig::current()->account->deleteNoTransfer(0);
         if ($days <= 0) {
             return;
         }
@@ -436,7 +442,7 @@ final class Tasks
         $secs = $days * 86400;
         $dt = date('Y-m-d H:i:s', time() - $secs);
         $maxclass = $this->neverDeleteClass();
-        $iniupload = \App\Support\Config\SiteConfig::current()->main->iniUpload(0);
+        $iniupload = SiteConfig::current()->main->iniUpload(0);
 
         $query = User::query()
             ->where('parked', 'no')
@@ -453,7 +459,7 @@ final class Tasks
 
     private function disableNoTransferByRegisterTime(): void
     {
-        $days = (int) \App\Support\Config\SiteConfig::current()->account->deleteNoTransferTwo(0);
+        $days = (int) SiteConfig::current()->account->deleteNoTransferTwo(0);
         if ($days <= 0) {
             return;
         }
@@ -461,7 +467,7 @@ final class Tasks
         $secs = $days * 86400;
         $dt = date('Y-m-d H:i:s', time() - $secs);
         $maxclass = $this->neverDeleteClass();
-        $iniupload = \App\Support\Config\SiteConfig::current()->main->iniUpload(0);
+        $iniupload = SiteConfig::current()->main->iniUpload(0);
 
         $query = User::query()
             ->where('parked', 'no')
@@ -478,7 +484,7 @@ final class Tasks
 
     private function disableNotParked(): void
     {
-        $days = (int) \App\Support\Config\SiteConfig::current()->account->deleteUnpacked(0);
+        $days = (int) SiteConfig::current()->account->deleteUnpacked(0);
         if ($days <= 0) {
             return;
         }
@@ -498,7 +504,7 @@ final class Tasks
 
     private function disableParked(): void
     {
-        $days = (int) \App\Support\Config\SiteConfig::current()->account->deletePacked(0);
+        $days = (int) SiteConfig::current()->account->deletePacked(0);
         if ($days <= 0) {
             return;
         }
@@ -518,7 +524,7 @@ final class Tasks
 
     private function destroyDisabledAccounts(): void
     {
-        $destroyDisabledDays = (int) \App\Support\Config\SiteConfig::current()->account->destroyDisabled(0);
+        $destroyDisabledDays = (int) SiteConfig::current()->account->destroyDisabled(0);
         if ($destroyDisabledDays <= 0) {
             return;
         }
@@ -526,30 +532,30 @@ final class Tasks
         $secs = $destroyDisabledDays * 86400;
         $dt = date('Y-m-d H:i:s', time() - $secs);
 
-        $userRep = new \App\Repositories\UserRepository();
+        $userRep = new UserRepository;
 
         User::query()
             ->where('enabled', User::ENABLED_NO)
             ->where('last_access', '<', $dt)
             ->select(['id', 'username', 'lang'])
             ->orderBy('id', 'asc')
-            ->chunk(2000, function (\Illuminate\Support\Collection $users) use ($userRep): void {
+            ->chunk(2000, function (Collection $users) use ($userRep): void {
                 $userRep->destroy($users, 'cleanup.destroy_disabled_account');
             });
     }
 
     private function neverDeleteClass(): int
     {
-        return min(\App\Support\Config\SiteConfig::current()->account->neverdelete(), (int) User::CLASS_VIP);
+        return min(SiteConfig::current()->account->neverdelete(), (int) User::CLASS_VIP);
     }
 
     private function neverDeleteParkedClass(): int
     {
-        return \App\Support\Config\SiteConfig::current()->account->neverdeletepacked();
+        return SiteConfig::current()->account->neverdeletepacked();
     }
 
     /**
-     * @param Builder<User> $query
+     * @param  Builder<User>  $query
      */
     private function disableUsers(Builder $query, string $reasonKey): void
     {
@@ -568,7 +574,8 @@ final class Tasks
             $uid = $user->id;
             $enableCacheResult = NexusDB::cache_get(User::getUserEnableLatelyCacheKey($uid));
             if ($enableCacheResult) {
-                \App\Support\Logger::writeWithContext((string) sprintf("user: %s just enable at: %s, skip", $uid, $enableCacheResult), (string) 'info', (bool) false);
+                Logger::writeWithContext((string) sprintf('user: %s just enable at: %s, skip', $uid, $enableCacheResult), (string) 'info', (bool) false);
+
                 continue;
             }
 
@@ -594,10 +601,10 @@ final class Tasks
         }
 
         User::query()->whereIn('id', $uidArr)->update(['enabled' => User::ENABLED_NO]);
-        \App\Models\UserBanLog::query()->insert($userBanLogData);
-        \App\Models\UserModifyLog::query()->insert($userModifyLogs);
+        UserBanLog::query()->insert($userBanLogData);
+        UserModifyLog::query()->insert($userModifyLogs);
 
-        \App\Support\Logger::writeWithContext((string) ("[DISABLE_USER]({$reasonKey}): " . implode(', ', $uidArr)), (string) 'info', (bool) false);
+        Logger::writeWithContext((string) ("[DISABLE_USER]({$reasonKey}): ".implode(', ', $uidArr)), (string) 'info', (bool) false);
 
         foreach ($uidArr as $uid) {
             Events::publishModel(ModelEventEnum::USER_DISABLED, $uid);
@@ -611,33 +618,33 @@ final class Tasks
     private function promotePeasantsToUsers(): void
     {
         $this->peasantToUser(
-            (int) \App\Support\Config\SiteConfig::current()->account->psdlfive(0),
+            (int) SiteConfig::current()->account->psdlfive(0),
             0,
-            (float) \App\Support\Config\SiteConfig::current()->account->psratiofive(0),
+            (float) SiteConfig::current()->account->psratiofive(0),
         );
 
         $this->peasantToUser(
-            (int) \App\Support\Config\SiteConfig::current()->account->psdlfour(0),
-            (int) \App\Support\Config\SiteConfig::current()->account->psdlfive(0),
-            (float) \App\Support\Config\SiteConfig::current()->account->psratiofour(0),
+            (int) SiteConfig::current()->account->psdlfour(0),
+            (int) SiteConfig::current()->account->psdlfive(0),
+            (float) SiteConfig::current()->account->psratiofour(0),
         );
 
         $this->peasantToUser(
-            (int) \App\Support\Config\SiteConfig::current()->account->psdlthree(0),
-            (int) \App\Support\Config\SiteConfig::current()->account->psdlfour(0),
-            (float) \App\Support\Config\SiteConfig::current()->account->psratiothree(0),
+            (int) SiteConfig::current()->account->psdlthree(0),
+            (int) SiteConfig::current()->account->psdlfour(0),
+            (float) SiteConfig::current()->account->psratiothree(0),
         );
 
         $this->peasantToUser(
-            (int) \App\Support\Config\SiteConfig::current()->account->psdltwo(0),
-            (int) \App\Support\Config\SiteConfig::current()->account->psdlthree(0),
-            (float) \App\Support\Config\SiteConfig::current()->account->psratiotwo(0),
+            (int) SiteConfig::current()->account->psdltwo(0),
+            (int) SiteConfig::current()->account->psdlthree(0),
+            (float) SiteConfig::current()->account->psratiotwo(0),
         );
 
         $this->peasantToUser(
-            (int) \App\Support\Config\SiteConfig::current()->account->psdlone(0),
-            (int) \App\Support\Config\SiteConfig::current()->account->psdltwo(0),
-            (float) \App\Support\Config\SiteConfig::current()->account->psratioone(0),
+            (int) SiteConfig::current()->account->psdlone(0),
+            (int) SiteConfig::current()->account->psdltwo(0),
+            (float) SiteConfig::current()->account->psratioone(0),
         );
     }
 
@@ -692,7 +699,7 @@ final class Tasks
 
     private function promoteUsersByClass(): void
     {
-        $getInvitesByPromotion = \App\Support\Config\SiteConfig::current()->account->getInvitesByPromotion([]);
+        $getInvitesByPromotion = SiteConfig::current()->account->getInvitesByPromotion([]);
 
         $promotions = [
             User::CLASS_POWER_USER,
@@ -708,9 +715,9 @@ final class Tasks
         foreach ($promotions as $class) {
             $this->promoteUsers(
                 $class,
-                \App\Support\Config\SiteConfig::current()->account->promotionDl($class, 0),
-                \App\Support\Config\SiteConfig::current()->account->promotionRatio($class, 0.0),
-                \App\Support\Config\SiteConfig::current()->account->promotionTime($class, 0),
+                SiteConfig::current()->account->promotionDl($class, 0),
+                SiteConfig::current()->account->promotionRatio($class, 0.0),
+                SiteConfig::current()->account->promotionTime($class, 0),
                 (int) ($getInvitesByPromotion[(int) $class] ?? 0),
             );
         }
@@ -740,7 +747,7 @@ final class Tasks
             ->where('added', '<', $maxdt)
             ->get(['id', 'max_class_once']);
 
-        \App\Support\Logger::writeWithContext((string) ("match user count: " . $res->count()), (string) 'info', (bool) false);
+        Logger::writeWithContext((string) ('match user count: '.$res->count()), (string) 'info', (bool) false);
 
         if ($res->isEmpty()) {
             return;
@@ -753,20 +760,20 @@ final class Tasks
             $locale = Locale::userLocale($uid);
             $className = \App\Support\User::getUserClassName($class, false, false, false);
 
-            $subject = Locale::trans('cleanup.msg_promoted_to', [], $locale) . $className;
+            $subject = Locale::trans('cleanup.msg_promoted_to', [], $locale).$className;
             $msg = Locale::trans('cleanup.msg_now_you_are', [], $locale)
-                . $className
-                . Locale::trans('cleanup.msg_see_faq', [], $locale);
+                .$className
+                .Locale::trans('cleanup.msg_see_faq', [], $locale);
 
             if ((int) $class <= (int) $arr->max_class_once) {
-                \App\Support\Logger::writeWithContext((string) sprintf('user: %s upgrade to class: %s', $uid, $class), (string) 'info', (bool) false);
+                Logger::writeWithContext((string) sprintf('user: %s upgrade to class: %s', $uid, $class), (string) 'info', (bool) false);
                 User::query()->where('id', $uid)->update(['class' => $class]);
             } else {
-                \App\Support\Logger::writeWithContext((string) sprintf('user: %s upgrade to class: %s, and add invites: %s', $uid, $class, $addInvite), (string) 'info', (bool) false);
+                Logger::writeWithContext((string) sprintf('user: %s upgrade to class: %s, and add invites: %s', $uid, $class, $addInvite), (string) 'info', (bool) false);
                 User::query()->where('id', $uid)->update([
                     'class' => $class,
                     'max_class_once' => $class,
-                    'invites' => NexusDB::raw('invites + ' . $addInvite),
+                    'invites' => NexusDB::raw('invites + '.$addInvite),
                 ]);
             }
 
@@ -796,7 +803,7 @@ final class Tasks
         ];
 
         foreach ($demotions as $class) {
-            $this->demoteUsers($class, \App\Support\Config\SiteConfig::current()->account->demotionRatio($class, 0.0));
+            $this->demoteUsers($class, SiteConfig::current()->account->demotionRatio($class, 0.0));
         }
     }
 
@@ -813,7 +820,7 @@ final class Tasks
             ->whereRaw('uploaded < downloaded * ?', [$deRatio])
             ->get(['id']);
 
-        \App\Support\Logger::writeWithContext((string) ("match user count: " . $res->count()), (string) 'info', (bool) false);
+        Logger::writeWithContext((string) ('match user count: '.$res->count()), (string) 'info', (bool) false);
 
         if ($res->isEmpty()) {
             return;
@@ -827,13 +834,13 @@ final class Tasks
             $className = \App\Support\User::getUserClassName($class, false, false, false);
             $newClassName = \App\Support\User::getUserClassName((string) $newclass, false, false, false);
 
-            $subject = Locale::trans('cleanup.msg_demoted_to', [], $locale) . $newClassName;
+            $subject = Locale::trans('cleanup.msg_demoted_to', [], $locale).$newClassName;
             $msg = Locale::trans('cleanup.msg_demoted_from', [], $locale)
-                . $className
-                . Locale::trans('cleanup.msg_to', [], $locale)
-                . $newClassName
-                . Locale::trans('cleanup.msg_because_ratio_drop_below', [], $locale)
-                . $deRatio . ".\n";
+                .$className
+                .Locale::trans('cleanup.msg_to', [], $locale)
+                .$newClassName
+                .Locale::trans('cleanup.msg_because_ratio_drop_below', [], $locale)
+                .$deRatio.".\n";
 
             User::query()->where('id', $uid)->update(['class' => (string) $newclass]);
 
@@ -852,11 +859,11 @@ final class Tasks
     private function demoteUsersToPeasant(): void
     {
         $configs = [
-            [\App\Support\Config\SiteConfig::current()->account->psdlone(0), \App\Support\Config\SiteConfig::current()->account->psratioone(0.0)],
-            [\App\Support\Config\SiteConfig::current()->account->psdltwo(0), \App\Support\Config\SiteConfig::current()->account->psratiotwo(0.0)],
-            [\App\Support\Config\SiteConfig::current()->account->psdlthree(0), \App\Support\Config\SiteConfig::current()->account->psratiothree(0.0)],
-            [\App\Support\Config\SiteConfig::current()->account->psdlfour(0), \App\Support\Config\SiteConfig::current()->account->psratiofour(0.0)],
-            [\App\Support\Config\SiteConfig::current()->account->psdlfive(0), \App\Support\Config\SiteConfig::current()->account->psratiofive(0.0)],
+            [SiteConfig::current()->account->psdlone(0), SiteConfig::current()->account->psratioone(0.0)],
+            [SiteConfig::current()->account->psdltwo(0), SiteConfig::current()->account->psratiotwo(0.0)],
+            [SiteConfig::current()->account->psdlthree(0), SiteConfig::current()->account->psratiothree(0.0)],
+            [SiteConfig::current()->account->psdlfour(0), SiteConfig::current()->account->psratiofour(0.0)],
+            [SiteConfig::current()->account->psdlfive(0), SiteConfig::current()->account->psratiofive(0.0)],
         ];
 
         foreach ($configs as [$downFloorGb, $minRatio]) {
@@ -870,7 +877,7 @@ final class Tasks
             return;
         }
 
-        $deletepeasantAccount = (int) \App\Support\Config\SiteConfig::current()->account->deletePeasant(30);
+        $deletepeasantAccount = (int) SiteConfig::current()->account->deletePeasant(30);
         $length = $deletepeasantAccount * 86400;
         $until = date('Y-m-d H:i:s', time() + $length);
         $downlimitFloor = $downFloorGb * 1024 * 1024 * 1024;
@@ -892,10 +899,10 @@ final class Tasks
             $locale = Locale::userLocale($uid);
             $peasantName = \App\Support\User::getUserClassName(User::CLASS_PEASANT, false, false, false);
 
-            $subject = Locale::trans('cleanup.msg_demoted_to', [], $locale) . $peasantName;
+            $subject = Locale::trans('cleanup.msg_demoted_to', [], $locale).$peasantName;
             $msg = Locale::trans('cleanup.msg_must_fix_ratio_within', [], $locale)
-                . $deletepeasantAccount
-                . Locale::trans('cleanup.msg_days_or_get_banned', [], $locale);
+                .$deletepeasantAccount
+                .Locale::trans('cleanup.msg_days_or_get_banned', [], $locale);
 
             UserOps::logModify($uid, 'Leech Warned by System - Low Ratio.');
 
@@ -950,15 +957,15 @@ final class Tasks
 
             $comment = 'Banned by System because of Leech Warning expired.';
             if (! empty($user->modcomment)) {
-                $comment .= ' ' . $user->modcomment;
+                $comment .= ' '.$user->modcomment;
             }
             UserOps::logModify($uid, $comment);
         }
 
         User::query()->whereIn('id', $uidArr)->update(['enabled' => User::ENABLED_NO]);
-        \App\Models\UserBanLog::query()->insert($userBanLogData);
+        UserBanLog::query()->insert($userBanLogData);
 
-        \App\Support\Logger::writeWithContext((string) ('ban user: ' . implode(', ', $uidArr)), (string) 'info', (bool) false);
+        Logger::writeWithContext((string) ('ban user: '.implode(', ', $uidArr)), (string) 'info', (bool) false);
 
         foreach ($uidArr as $uid) {
             Events::publishModel(ModelEventEnum::USER_UPDATED, $uid);
@@ -971,7 +978,7 @@ final class Tasks
 
     private function deleteDeadTorrents(): void
     {
-        $days = (int) \App\Support\Config\SiteConfig::current()->torrent->delDeadTorrent(0);
+        $days = (int) SiteConfig::current()->torrent->delDeadTorrent(0);
         if ($days <= 0) {
             return;
         }
@@ -994,7 +1001,7 @@ final class Tasks
 
             TorrentOps::deleteTorrents((int) $arr['id']);
 
-            if (!empty($arr['uid'])) {
+            if (! empty($arr['uid'])) {
                 $locale = Locale::userLocale((int) $arr['owner']);
 
                 NexusDB::table('messages')->insert([
@@ -1003,8 +1010,8 @@ final class Tasks
                     'added' => $dt,
                     'subject' => Locale::trans('cleanup.msg_your_torrent_deleted', [], $locale),
                     'msg' => Locale::trans('cleanup.msg_your_torrent', [], $locale)
-                        . '[i]' . $arr['name'] . '[/i]'
-                        . Locale::trans('cleanup.msg_was_deleted_because_dead', [], $locale),
+                        .'[i]'.$arr['name'].'[/i]'
+                        .Locale::trans('cleanup.msg_was_deleted_because_dead', [], $locale),
                 ]);
 
                 Log::write("Torrent {$arr['id']} ({$arr['name']}) is deleted by system because of being dead for a long time.", 'normal');

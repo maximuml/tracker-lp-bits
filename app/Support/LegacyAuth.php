@@ -3,6 +3,7 @@
 namespace App\Support;
 
 use App\Models\Setting;
+use App\Models\User;
 use App\Repositories\AuthRepository;
 use App\Services\Captcha\Exceptions\CaptchaValidationException;
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -294,7 +295,7 @@ final class LegacyAuth
                 $returnTo = $context->requestUri !== null && $context->requestUri !== ''
                     ? rawurlencode(basename($context->requestUri))
                     : '';
-                LegacyResponse::redirect('login.php?returnto=' . $returnTo);
+                LegacyResponse::redirect('login.php?returnto='.$returnTo);
             }
         }
 
@@ -341,7 +342,7 @@ final class LegacyAuth
         $nip = ip2long($ip);
 
         if ($nip && app(AuthRepository::class)->isIpBanned($nip)) {
-            $html = '<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"></head><body>' . ($lang['text_unauthorized_ip'] ?? '') . "</body></html>\n";
+            $html = '<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"></head><body>'.($lang['text_unauthorized_ip'] ?? '')."</body></html>\n";
             throw new HttpResponseException(new Response($html, 403));
         }
 
@@ -349,12 +350,12 @@ final class LegacyAuth
         if (empty($row)) {
             return null;
         }
-        if ($row instanceof \App\Models\User) {
+        if ($row instanceof User) {
             $row = $row->toArray();
         }
 
         if (! $row['passkey']) {
-            $passkey = md5($row['username'] . date('Y-m-d H:i:s') . $row['passhash']);
+            $passkey = md5($row['username'].date('Y-m-d H:i:s').$row['passhash']);
             app(AuthRepository::class)->updateUserPasskey((int) $row['id'], $passkey);
         }
 

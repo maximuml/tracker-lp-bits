@@ -17,7 +17,7 @@ final class HtmlRenderer
         return Html::formatUrl($url, $newWindow, $text, $linkClass);
     }
 
-    public static function formatImg(string $src, bool $enableImageResizer, int $image_max_width, int $image_max_height, string $imgId = ""): string
+    public static function formatImg(string $src, bool $enableImageResizer, int $image_max_width, int $image_max_height, string $imgId = ''): string
     {
         return Html::formatImg($src, $enableImageResizer, $image_max_width, $image_max_height, $imgId);
     }

@@ -169,7 +169,7 @@ final class Frame
         $lang = SupportContext::getLangFunctions();
 
         return self::composeOpen($title, $type, $hasSubject, $subject, $maxSubjectLength, $lang)
-            . \App\Support\Form::bbcodeEditor('compose', 'body', $body, false, 130, false);
+            .Form::bbcodeEditor('compose', 'body', $body, false, 130, false);
     }
 
     /**

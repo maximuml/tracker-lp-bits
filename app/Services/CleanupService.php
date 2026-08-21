@@ -6,8 +6,14 @@ namespace App\Services;
 
 use App\Repositories\CleanupRepository;
 use App\Services\Cleanup\Tasks;
+use App\Support\Config\SiteConfig;
+use App\Support\Logger;
 use App\Support\SupportContext;
+use App\Support\Time;
+use App\Support\UserDisplay;
 use Nexus\Database\NexusDB;
+use Nexus\Database\NexusLock;
+use Nexus\Nexus;
 
 /**
  * Cleanup orchestrator. Replaces the monolithic `docleanup()` with discrete,
@@ -64,7 +70,7 @@ final class CleanupService
             return "Clean-up not triggered.\n";
         }
 
-        return (string) $result . "\n";
+        return (string) $result."\n";
     }
 
     /**
@@ -75,15 +81,15 @@ final class CleanupService
      */
     public function runFull(bool $forceAll = false, bool $printProgress = true): string
     {
-        if (! \app()->runningInConsole() && \App\Support\UserDisplay::currentClass() < \constant('UC_SYSOP')) {
+        if (! \app()->runningInConsole() && UserDisplay::currentClass() < \constant('UC_SYSOP')) {
             return 'forbidden';
         }
 
-        $tstart = \App\Support\Time::microtimeFloat();
+        $tstart = Time::microtimeFloat();
 
         $progress = $this->runAll($forceAll, $printProgress);
 
-        $tend = \App\Support\Time::microtimeFloat();
+        $tend = Time::microtimeFloat();
 
         $html = '<html><head><title>Do Clean-up</title></head><body>';
         $html .= '<p>clean-up in progress...please wait<br />';
@@ -107,26 +113,26 @@ final class CleanupService
     public function runAll(bool $forceAll = false, bool $printProgress = false): string|bool
     {
         $now = time();
-        $requestId = \Nexus\Nexus::instance()->getRequestId();
+        $requestId = Nexus::instance()->getRequestId();
         $output = '';
 
         foreach (self::CLASSES as $level => $taskList) {
             $arg = $this->getLastCleanArg($level);
-            $interval = (int) \App\Support\Config\SiteConfig::current()->main->autocleanInterval($this->intervalName($level), 0);
+            $interval = (int) SiteConfig::current()->main->autocleanInterval($this->intervalName($level), 0);
 
             if (! $forceAll) {
                 $ts = (int) NexusDB::table('avps')->where('arg', $arg)->value('value_u');
 
                 if ($ts === 0) {
                     NexusDB::table('avps')->insertOrIgnore(['arg' => $arg, 'value_u' => $now]);
-                    \App\Support\Logger::writeWithContext((string) "no value for arg: '{$arg}', return", (string) 'info', (bool) false);
+                    Logger::writeWithContext((string) "no value for arg: '{$arg}', return", (string) 'info', (bool) false);
 
                     return false;
                 }
 
                 if ($ts + $interval > $now) {
-                    $log = "Cleanup ends at Priority Class " . ($level - 1);
-                    \App\Support\Logger::writeWithContext((string) "{$log}, {$ts} + {$interval} > {$now}", (string) 'info', (bool) false);
+                    $log = 'Cleanup ends at Priority Class '.($level - 1);
+                    Logger::writeWithContext((string) "{$log}, {$ts} + {$interval} > {$now}", (string) 'info', (bool) false);
 
                     return $log;
                 }
@@ -137,7 +143,7 @@ final class CleanupService
                     ->update(['value_u' => $now]);
 
                 if ($claimed === 0) {
-                    \App\Support\Logger::writeWithContext((string) "cleanup class {$level} already claimed by another runner", (string) 'info', (bool) false);
+                    Logger::writeWithContext((string) "cleanup class {$level} already claimed by another runner", (string) 'info', (bool) false);
 
                     return false;
                 }
@@ -154,7 +160,7 @@ final class CleanupService
     }
 
     /**
-     * @param array<int, array<string, string>> $taskList
+     * @param  array<int, array<string, string>>  $taskList
      */
     private function runClass(int $level, array $taskList, string $requestId, string $output, bool $printProgress): string
     {
@@ -162,15 +168,16 @@ final class CleanupService
             $task = $item['task'];
             $method = $item['method'];
             $lockKey = "cleanup:task:{$task}";
-            $lockTtl = max(60, (int) \App\Support\Config\SiteConfig::current()->main->autocleanInterval($this->intervalName($level), 3600));
-            $lock = new \Nexus\Database\NexusLock($lockKey, $lockTtl);
+            $lockTtl = max(60, (int) SiteConfig::current()->main->autocleanInterval($this->intervalName($level), 3600));
+            $lock = new NexusLock($lockKey, $lockTtl);
 
             if (! $lock->acquire()) {
                 $msg = "Task {$task} is already running.";
-                \App\Support\Logger::writeWithContext((string) $msg, (string) 'warning', (bool) false);
+                Logger::writeWithContext((string) $msg, (string) 'warning', (bool) false);
                 if ($printProgress) {
-                    $output .= $msg . "\n";
+                    $output .= $msg."\n";
                 }
+
                 continue;
             }
 
@@ -179,13 +186,14 @@ final class CleanupService
                 if ($printProgress) {
                     $output .= $this->formatProgress($log);
                 }
-                \App\Support\Logger::writeWithContext((string) $log, (string) 'info', (bool) false);
+                Logger::writeWithContext((string) $log, (string) 'info', (bool) false);
             } catch (\Throwable $e) {
                 $lock->release();
-                \App\Support\Logger::writeWithContext((string) ("cleanup task {$task} failed: " . $e->getMessage()), (string) 'error', (bool) false);
+                Logger::writeWithContext((string) ("cleanup task {$task} failed: ".$e->getMessage()), (string) 'error', (bool) false);
                 if ($printProgress) {
-                    $output .= "Task {$task} failed: " . $e->getMessage() . "\n";
+                    $output .= "Task {$task} failed: ".$e->getMessage()."\n";
                 }
+
                 continue;
             } finally {
                 $lock->release();
@@ -223,6 +231,6 @@ final class CleanupService
 
     private function formatProgress(string $message): string
     {
-        return sprintf("[%s] [%s] %s ... done!\n", date('Y-m-d H:i:s'), \Nexus\Nexus::instance()->getRequestId(), $message);
+        return sprintf("[%s] [%s] %s ... done!\n", date('Y-m-d H:i:s'), Nexus::instance()->getRequestId(), $message);
     }
 }

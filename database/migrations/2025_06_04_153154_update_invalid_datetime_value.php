@@ -1,8 +1,9 @@
 <?php
 
+use App\Repositories\UpgradeRepository;
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
+use Nexus\Database\NexusDB;
 
 return new class extends Migration
 {
@@ -11,22 +12,22 @@ return new class extends Migration
      */
     public function up(): void
     {
-        if (\Nexus\Database\NexusDB::isPgsql()) {
+        if (NexusDB::isPgsql()) {
             return;
         }
-        $tableFields = \App\Repositories\UpgradeRepository::DATETIME_INVALID_VALUE_FIELDS;
+        $tableFields = UpgradeRepository::DATETIME_INVALID_VALUE_FIELDS;
 
         foreach ($tableFields as $table => $fields) {
-            $columnInfo = \Nexus\Database\NexusDB::getMysqlColumnInfo($table);
+            $columnInfo = NexusDB::getMysqlColumnInfo($table);
             foreach ($fields as $field) {
                 if (isset($columnInfo[$field]) && $columnInfo[$field]['DATA_TYPE'] == 'datetime') {
-                    \Illuminate\Support\Facades\DB::statement("update $table set $field = null where $field = '0000-00-00 00:00:00'");
+                    DB::statement("update $table set $field = null where $field = '0000-00-00 00:00:00'");
                 }
             }
         }
-        $columnInfo = \Nexus\Database\NexusDB::getMysqlColumnInfo("snatched");
-        if (isset($columnInfo["finish_ip"])) {
-            \Illuminate\Support\Facades\DB::statement("alter table snatched drop column finish_ip");
+        $columnInfo = NexusDB::getMysqlColumnInfo('snatched');
+        if (isset($columnInfo['finish_ip'])) {
+            DB::statement('alter table snatched drop column finish_ip');
         }
     }
 

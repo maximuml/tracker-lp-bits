@@ -2,14 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\Permission\PermissionEnum;
 use App\Models\HitAndRun;
 use App\Models\User;
 use App\Services\Legacy\LegacyPartialRenderer;
+use App\Support\Config\SiteConfig;
 use App\Support\LegacyResponse;
 use App\Support\Pagination;
 use App\Support\Permissions;
 use App\Support\SupportContext;
-use App\Enums\Permission\PermissionEnum;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -28,7 +29,8 @@ class MyController extends Controller
     {
         if (SupportContext::getUser() === null) {
             $qs = $request->getQueryString();
-            return redirect('/mybonus.php' . ($qs ? '?' . $qs : ''));
+
+            return redirect('/mybonus.php'.($qs ? '?'.$qs : ''));
         }
 
         $result = $this->renderer->render('my_bonus');
@@ -44,7 +46,8 @@ class MyController extends Controller
         $curUser = SupportContext::getUser();
         if ($curUser === null) {
             $qs = $request->getQueryString();
-            return redirect('/myhr.php' . ($qs ? '?' . $qs : ''));
+
+            return redirect('/myhr.php'.($qs ? '?'.$qs : ''));
         }
 
         $viewerId = (int) ($curUser['id'] ?? 0);
@@ -87,10 +90,14 @@ class MyController extends Controller
         if ($rescount > 0) {
             $query = (clone $baseQuery)
                 ->with([
-                    'torrent' => function ($query) {$query->select(['id', 'size', 'name', 'category']);},
+                    'torrent' => function ($query) {
+                        $query->select(['id', 'size', 'name', 'category']);
+                    },
                     'torrent.basic_category',
                     'snatch',
-                    'user' => function ($query) {$query->select(['id', 'lang']);},
+                    'user' => function ($query) {
+                        $query->select(['id', 'lang']);
+                    },
                     'user.language',
                 ])
                 ->offset($offset)
@@ -102,7 +109,7 @@ class MyController extends Controller
             $list = $query->get();
         }
 
-        $cancelHrBonus = \App\Support\Config\SiteConfig::current()->bonus->cancelHr();
+        $cancelHrBonus = SiteConfig::current()->bonus->cancelHr();
 
         return view('my.hr', [
             'CURUSER' => $curUser,

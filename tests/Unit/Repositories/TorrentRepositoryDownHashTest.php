@@ -4,7 +4,6 @@ namespace Tests\Unit\Repositories;
 
 use App\Repositories\TorrentRepository;
 use Firebase\JWT\JWT;
-use Firebase\JWT\Key;
 use PHPUnit\Framework\TestCase;
 
 class TorrentRepositoryDownHashTest extends TestCase
@@ -14,7 +13,7 @@ class TorrentRepositoryDownHashTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->repository = new TorrentRepository();
+        $this->repository = new TorrentRepository;
     }
 
     public function test_hkdf_downhash_roundtrip(): void
@@ -30,7 +29,7 @@ class TorrentRepositoryDownHashTest extends TestCase
     public function test_legacy_md5_downhash_still_decrypts(): void
     {
         $user = ['id' => 42, 'passkey' => 'abc123def456ghi789jkl012mno345pq'];
-        $legacyKey = md5($user['passkey'] . date('Ymd') . $user['id']);
+        $legacyKey = md5($user['passkey'].date('Ymd').$user['id']);
         $legacyHash = JWT::encode(['id' => 456, 'exp' => time() + 3600], $legacyKey, 'HS256');
 
         $this->assertSame([456], $this->repository->decryptDownHash($legacyHash, $user));
@@ -39,7 +38,7 @@ class TorrentRepositoryDownHashTest extends TestCase
     public function test_downhash_fails_after_passkey_change(): void
     {
         $oldUser = ['id' => 42, 'passkey' => 'oldpasskey1234567890123456789012'];
-        $legacyKey = md5($oldUser['passkey'] . date('Ymd') . $oldUser['id']);
+        $legacyKey = md5($oldUser['passkey'].date('Ymd').$oldUser['id']);
         $legacyHash = JWT::encode(['id' => 789, 'exp' => time() + 3600], $legacyKey, 'HS256');
 
         $newUser = ['id' => 42, 'passkey' => 'newpasskey1234567890123456789012'];
@@ -52,7 +51,7 @@ class TorrentRepositoryDownHashTest extends TestCase
         $user = ['id' => 42, 'passkey' => 'abc123def456ghi789jkl012mno345pq'];
         $hash = $this->repository->encryptDownHash(123, $user);
 
-        $tampered = substr($hash, 0, -4) . 'xxxx';
+        $tampered = substr($hash, 0, -4).'xxxx';
 
         $this->assertSame([], $this->repository->decryptDownHash($tampered, $user));
     }

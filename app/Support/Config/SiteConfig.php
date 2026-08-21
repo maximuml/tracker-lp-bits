@@ -9,19 +9,33 @@ use App\Support\Settings;
 final class SiteConfig
 {
     public readonly MainConfig $main;
+
     public readonly TorrentConfig $torrent;
+
     public readonly AccountConfig $account;
+
     public readonly SecurityConfig $security;
+
     public readonly SystemConfig $system;
+
     public readonly SeedBoxConfig $seedBox;
+
     public readonly MeiliSearchConfig $meiliSearch;
+
     public readonly BasicConfig $basic;
+
     public readonly BonusConfig $bonus;
+
     public readonly AttachmentConfig $attachment;
+
     public readonly SmtpConfig $smtp;
+
     public readonly BackupConfig $backup;
+
     public readonly CaptchaConfig $captcha;
+
     public readonly AuthorityConfig $authority;
+
     public readonly ImageHostingConfig $imageHosting;
 
     /** @param array<string, mixed> $data */
@@ -43,10 +57,10 @@ final class SiteConfig
         $this->authority = new AuthorityConfig($data['authority'] ?? []);
 
         $imageHostingData = $data['image_hosting'] ?? [];
-        if (!empty($data['image_hosting_chevereto'])) {
+        if (! empty($data['image_hosting_chevereto'])) {
             $imageHostingData['chevereto'] = $data['image_hosting_chevereto'];
         }
-        if (!empty($data['image_hosting_lsky'])) {
+        if (! empty($data['image_hosting_lsky'])) {
             $imageHostingData['lsky'] = $data['image_hosting_lsky'];
         }
         $this->imageHosting = new ImageHostingConfig($imageHostingData);

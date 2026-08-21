@@ -2,25 +2,30 @@
 
 namespace App\Exceptions;
 
+use App\Support\Api;
+use App\Support\LegacyResponse;
+use App\Support\Logger;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\UnauthorizedException;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\ViewException;
+use Laravel\Passport\Exceptions\AuthenticationException as PassportAuthenticationException;
+use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Throwable;
-use Laravel\Passport\Exceptions\AuthenticationException as PassportAuthenticationException;
 
 class Handler extends ExceptionHandler
 {
     /**
      * A list of the exception types that are not reported.
      *
-     * @var array<int, class-string<\Throwable>>
+     * @var array<int, class-string<Throwable>>
      */
     protected $dontReport = [
         //
@@ -50,10 +55,10 @@ class Handler extends ExceptionHandler
         $request = request();
         $permissionDenied = function (InsufficientPermissionException $e) use ($request) {
             if ($request->expectsJson()) {
-                return response()->json(\App\Support\Api::failWithContext($e->getMessage(), $request->all()), 403);
+                return response()->json(Api::failWithContext($e->getMessage(), $request->all()), 403);
             }
             try {
-                \App\Support\LegacyResponse::permissionDenied();
+                LegacyResponse::permissionDenied();
             } catch (HttpResponseException $hre) {
                 return $hre->getResponse();
             }
@@ -73,36 +78,39 @@ class Handler extends ExceptionHandler
             return null;
         });
         $this->renderable(function (PassportAuthenticationException $e) use ($request) {
-            return response()->redirectTo(sprintf("%s/login.php?returnto=%s", $request->getSchemeAndHttpHost(), urlencode($request->fullUrl())));
+            return response()->redirectTo(sprintf('%s/login.php?returnto=%s', $request->getSchemeAndHttpHost(), urlencode($request->fullUrl())));
         });
 
-        //Other Only handle in json request
-        if (!$request->expectsJson() && !$request->ajax()) {
+        // Other Only handle in json request
+        if (! $request->expectsJson() && ! $request->ajax()) {
             $this->renderable(function (NexusException $e) {
-                return redirect(url('/error?error=' . urlencode($e->getMessage())));
+                return redirect(url('/error?error='.urlencode($e->getMessage())));
             });
+
             return;
         }
 
         $this->renderable(function (AuthenticationException $e) {
-            return response()->json(\App\Support\Api::failWithContext($e->getMessage(), ['guards' => $e->guards()]), 401);
+            return response()->json(Api::failWithContext($e->getMessage(), ['guards' => $e->guards()]), 401);
         });
 
         $this->renderable(function (UnauthorizedException $e) {
-            return response()->json(\App\Support\Api::failWithContext($e->getMessage(), request()->all()), 403);
+            return response()->json(Api::failWithContext($e->getMessage(), request()->all()), 403);
         });
 
         $this->renderable(function (ValidationException $exception) {
             $errors = $exception->errors();
             $msg = (string) Arr::first(array_merge(...array_values($errors)));
-            return response()->json(\App\Support\Api::failWithContext($msg, $errors));
+
+            return response()->json(Api::failWithContext($msg, $errors));
         });
 
         $this->renderable(function (NotFoundHttpException $e) {
             if ($e->getPrevious() && $e->getPrevious() instanceof ModelNotFoundException) {
                 $exception = $e->getPrevious();
-                \App\Support\Logger::writeWithContext((string) sprintf("NotFoundHttpException: %s, trace: %s", $exception->getMessage(), $exception->getTraceAsString()), (string) 'error', (bool) false);
-                return response()->json(\App\Support\Api::failWithContext($exception->getMessage(), request()->all()));
+                Logger::writeWithContext((string) sprintf('NotFoundHttpException: %s, trace: %s', $exception->getMessage(), $exception->getTraceAsString()), (string) 'error', (bool) false);
+
+                return response()->json(Api::failWithContext($exception->getMessage(), request()->all()));
             }
         });
     }
@@ -110,9 +118,8 @@ class Handler extends ExceptionHandler
     /**
      * Prepare a JSON response for the given exception.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Throwable  $e
-     * @return \Illuminate\Http\JsonResponse
+     * @param  Request  $request
+     * @return JsonResponse
      */
     protected function prepareJsonResponse($request, Throwable $e)
     {
@@ -123,21 +130,22 @@ class Handler extends ExceptionHandler
         if (config('app.debug')) {
             $data['trace'] = $trace;
         }
-//        dd($e);
+        //        dd($e);
         if ($e instanceof \Error || $e instanceof \ErrorException) {
-            \App\Support\Logger::writeWithContext((string) sprintf(get_class($e) . ": %s, trace: %s", $msg, $e->getTraceAsString()), (string) "error", (bool) false);
+            Logger::writeWithContext((string) sprintf(get_class($e).': %s, trace: %s', $msg, $e->getTraceAsString()), (string) 'error', (bool) false);
         }
+
         return new JsonResponse(
-            \App\Support\Api::failWithContext($msg, $data),
+            Api::failWithContext($msg, $data),
             $httpStatusCode,
-            $e instanceof \Symfony\Component\HttpKernel\Exception\HttpExceptionInterface ? $e->getHeaders() : [],
+            $e instanceof HttpExceptionInterface ? $e->getHeaders() : [],
             JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES
         );
     }
 
     protected function getHttpStatusCode(Throwable $e): int
     {
-        if ($e instanceof \Symfony\Component\HttpKernel\Exception\HttpExceptionInterface) {
+        if ($e instanceof HttpExceptionInterface) {
             return $e->getStatusCode();
         }
 
@@ -152,6 +160,4 @@ class Handler extends ExceptionHandler
 
         return 500;
     }
-
-
 }

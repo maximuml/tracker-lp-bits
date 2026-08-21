@@ -15,8 +15,9 @@ use App\Support\LegacyResponse;
 use App\Support\Locale;
 use App\Support\Mail;
 use App\Support\SupportContext;
-use App\Support\UserDisplay;
 use App\Support\Url;
+use App\Support\UserDisplay;
+use App\Support\Validators;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -113,12 +114,12 @@ final class MessageService
                 ? Locale::trans('message.msg_system', [], $locale)
                 : '[url=userdetails.php?id='.$origmsgRecord->sender.']'.UserDisplay::plainUsername($origmsgRecord->sender).'[/url]';
 
-            $body = "-------- ".Locale::trans('message.msg_original_message_from', [], $locale).$origSenderName." --------\n"
+            $body = '-------- '.Locale::trans('message.msg_original_message_from', [], $locale).$origSenderName." --------\n"
                 .$origmsgRecord->msg."\n\n"
-                .($body ? "-------- [url=userdetails.php?id=".$sender->id."]".$sender->username."[/url][i] Wrote at ".date('Y-m-d H:i:s').":[/i] --------\n".$body : '');
+                .($body ? '-------- [url=userdetails.php?id='.$sender->id.']'.$sender->username.'[/url][i] Wrote at '.date('Y-m-d H:i:s').":[/i] --------\n".$body : '');
         } else {
             $receiver = (int) $request->input('receiver', 0);
-            if ($receiver <= 0 || ($origmsg > 0 && ! \App\Support\Validators::isId($origmsg))) {
+            if ($receiver <= 0 || ($origmsg > 0 && ! Validators::isId($origmsg))) {
                 LegacyResponse::abort($lang['std_error'] ?? 'Error', $lang['std_invalid_id'] ?? 'Invalid ID.');
             }
 
@@ -301,8 +302,8 @@ final class MessageService
             Locale::trans('message.mail_date', [], $locale).': '.date('Y-m-d H:i:s')."\n\n".
             Locale::trans('message.mail_use_following_url', [], $locale).
             "<b><a href=\"javascript:void(null)\" onclick=\"window.open('".$messageUrl."')\">".
-            Locale::trans('message.mail_here', [], $locale)."</a></b>".
-            Locale::trans('message.mail_use_following_url_1', [], $locale)."<br />".
+            Locale::trans('message.mail_here', [], $locale).'</a></b>'.
+            Locale::trans('message.mail_use_following_url_1', [], $locale).'<br />'.
             $messageUrl."\n\n".
             '------'.Locale::trans('message.mail_yours', [], $locale)."\n".
             sprintf(Locale::trans('message.mail_the_site_team', [], $locale), $siteName);
@@ -397,7 +398,7 @@ final class MessageService
                 LegacyResponse::abort((string) ($lang['std_error'] ?? 'Error'), (string) ($lang['std_cannot_move_messages'] ?? 'Cannot move messages.'));
             }
             Cache::clearInboxCount($userId);
-            NexusDB::cache_del('user_' . $userId . '_outbox_count');
+            NexusDB::cache_del('user_'.$userId.'_outbox_count');
 
             return redirect("/messages.php?action=viewmailbox&box={$pmBox}");
         }
@@ -413,7 +414,7 @@ final class MessageService
                 $deletedCount = MessageRepository::deleteMultipleMessages($pmMessages, $userId);
             }
             Cache::clearInboxCount($userId);
-            NexusDB::cache_del('user_' . $userId . '_outbox_count');
+            NexusDB::cache_del('user_'.$userId.'_outbox_count');
             if ($deletedCount == 0) {
                 $lang = (array) (SupportContext::getGlobal('lang_messages') ?? []);
                 LegacyResponse::abort((string) ($lang['std_error'] ?? 'Error'), (string) ($lang['std_cannot_delete_messages'] ?? 'Cannot delete messages.'));
@@ -456,7 +457,7 @@ final class MessageService
                 LegacyResponse::abort((string) ($lang['std_error'] ?? 'Error'), (string) ($lang['text_no_mailboxes_to_edit'] ?? 'No mailboxes to edit.'));
             }
             foreach ($pmBoxes as $pmBox) {
-                $newValue = (string) ($request->input('edit' . $pmBox->id) ?? '');
+                $newValue = (string) ($request->input('edit'.$pmBox->id) ?? '');
                 if ($newValue !== '' && $newValue !== $pmBox->name) {
                     MessageRepository::updateMailbox($userId, (int) $pmBox->id, $newValue);
                 } elseif ($newValue === '') {
@@ -490,14 +491,14 @@ final class MessageService
         assert($message !== null);
 
         Cache::clearInboxCount($userId);
-        NexusDB::cache_del('user_' . $userId . '_outbox_count');
+        NexusDB::cache_del('user_'.$userId.'_outbox_count');
 
-        return redirect('/messages.php?action=viewmailbox&id=' . (int) ($message['location'] ?? 0));
+        return redirect('/messages.php?action=viewmailbox&id='.(int) ($message['location'] ?? 0));
     }
 
     private function renderMessages(): Response|RedirectResponse
     {
-        $path = __DIR__ . '/messages_content.php';
+        $path = __DIR__.'/messages_content.php';
 
         if (! file_exists($path)) {
             return response('Legacy content missing: messages', 500);
@@ -528,10 +529,10 @@ final class MessageService
 
     private function renderPartial(string $name): Response|RedirectResponse
     {
-        $path = __DIR__ . '/partials/' . $name . '.php';
+        $path = __DIR__.'/partials/'.$name.'.php';
 
         if (! file_exists($path)) {
-            return response('Legacy partial missing: ' . $name, 500);
+            return response('Legacy partial missing: '.$name, 500);
         }
 
         ob_start();

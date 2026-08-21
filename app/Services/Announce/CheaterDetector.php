@@ -6,7 +6,11 @@ namespace App\Services\Announce;
 
 use App\Exceptions\TrackerException;
 use App\Models\User;
+use App\Models\UserBanLog;
 use App\Repositories\UserRepository;
+use App\Support\Config\SiteConfig;
+use App\Support\Format;
+use App\Support\Logger;
 use Nexus\Database\NexusDB;
 
 final class CheaterDetector
@@ -16,8 +20,8 @@ final class CheaterDetector
     ) {}
 
     /**
-     * @param array<string, mixed> $self
-     * @param array<string, mixed> $user
+     * @param  array<string, mixed>  $self
+     * @param  array<string, mixed>  $user
      */
     public function checkSpeed(
         int $upthis,
@@ -27,7 +31,7 @@ final class CheaterDetector
         bool $isDonor,
         bool $isIPSeedBox,
     ): void {
-        if ($self === null || $self['announcetime'] <= 0 || !\App\Support\Config\SiteConfig::current()->seedBox->enabled()) {
+        if ($self === null || $self['announcetime'] <= 0 || ! SiteConfig::current()->seedBox->enabled()) {
             return;
         }
 
@@ -35,26 +39,26 @@ final class CheaterDetector
             return;
         }
 
-        $notSeedBoxMaxSpeedMbps = (float) \App\Support\Config\SiteConfig::current()->seedBox->notSeedBoxMaxSpeed(0);
+        $notSeedBoxMaxSpeedMbps = (float) SiteConfig::current()->seedBox->notSeedBoxMaxSpeed(0);
         if ($notSeedBoxMaxSpeedMbps <= 0) {
             return;
         }
 
         $upSpeed = ($upthis / $self['announcetime'] / 1024 / 1024) * 8;
         $upSpeedMbps = number_format($upSpeed, 2, '.', '');
-        \App\Support\Logger::writeWithContext((string) "notSeedBoxMaxSpeedMbps: {$notSeedBoxMaxSpeedMbps}, upSpeedMbps: {$upSpeedMbps}", (string) 'info', (bool) false);
+        Logger::writeWithContext((string) "notSeedBoxMaxSpeedMbps: {$notSeedBoxMaxSpeedMbps}, upSpeedMbps: {$upSpeedMbps}", (string) 'info', (bool) false);
 
         if ($upSpeed > $notSeedBoxMaxSpeedMbps) {
-            (new UserRepository())->updateDownloadPrivileges(null, $userId, 'no', 'upload_over_speed');
-            \App\Support\Logger::writeWithContext((string) "user: {$userId} downloading privileges have been disabled! (over speed), upSpeedMbps: {$upSpeedMbps} > notSeedBoxMaxSpeedMbps: {$notSeedBoxMaxSpeedMbps}", (string) 'error', (bool) false);
+            (new UserRepository)->updateDownloadPrivileges(null, $userId, 'no', 'upload_over_speed');
+            Logger::writeWithContext((string) "user: {$userId} downloading privileges have been disabled! (over speed), upSpeedMbps: {$upSpeedMbps} > notSeedBoxMaxSpeedMbps: {$notSeedBoxMaxSpeedMbps}", (string) 'error', (bool) false);
             $this->responseBuilder->warn('Your downloading privileges have been disabled! (over speed)', 300);
         }
     }
 
     /**
-     * @param array<string, mixed>|null $self
-     * @param array<string, mixed> $user
-     * @param array<string, mixed> $torrent
+     * @param  array<string, mixed>|null  $self
+     * @param  array<string, mixed>  $user
+     * @param  array<string, mixed>  $torrent
      */
     public function checkCheating(
         int $upthis,
@@ -70,12 +74,12 @@ final class CheaterDetector
             return;
         }
 
-        $cheaterdetSecurity = (int) \App\Support\Config\SiteConfig::current()->security->cheaterdet(0);
-        if (!$cheaterdetSecurity) {
+        $cheaterdetSecurity = (int) SiteConfig::current()->security->cheaterdet(0);
+        if (! $cheaterdetSecurity) {
             return;
         }
 
-        $nodetectSecurity = (int) \App\Support\Config\SiteConfig::current()->security->noDetect(0);
+        $nodetectSecurity = (int) SiteConfig::current()->security->noDetect(0);
         if ((int) $user['class'] >= $nodetectSecurity) {
             return;
         }
@@ -84,8 +88,8 @@ final class CheaterDetector
     }
 
     /**
-     * @param array<string, mixed> $self
-     * @param array<string, mixed> $user
+     * @param  array<string, mixed>  $self
+     * @param  array<string, mixed>  $user
      */
     private function doCheaterCheck(
         int $uploaded,
@@ -100,28 +104,28 @@ final class CheaterDetector
         string $time,
     ): void {
         $upspeed = $uploaded > 0 ? $uploaded / $self['announcetime'] : 0;
-        $mustBeCheaterSpeed = (int) \App\Support\Config\SiteConfig::current()->system->maximumUploadSpeed(8000) * 1024 * 1024 / 8;
+        $mustBeCheaterSpeed = (int) SiteConfig::current()->system->maximumUploadSpeed(8000) * 1024 * 1024 / 8;
         $mayBeCheaterSpeed = $mustBeCheaterSpeed / 2;
 
         if ($uploaded > 1073741824 && $upspeed > ($mustBeCheaterSpeed / $cheaterdetSecurity)) {
             NexusDB::transaction(function () use ($time, $uploaded, $downloaded, $seeders, $leechers, $upspeed, $self, $user, $userId, $torrentId) {
                 $comment = 'User account was automatically disabled by system';
                 NexusDB::table('cheaters')->insert([
-                    'added'       => $time,
-                    'userid'      => $userId,
-                    'torrentid'   => $torrentId,
-                    'uploaded'    => $uploaded,
-                    'downloaded'  => $downloaded,
-                    'anctime'     => $self['announcetime'],
-                    'seeders'     => $seeders,
-                    'leechers'    => $leechers,
-                    'comment'     => $comment,
+                    'added' => $time,
+                    'userid' => $userId,
+                    'torrentid' => $torrentId,
+                    'uploaded' => $uploaded,
+                    'downloaded' => $downloaded,
+                    'anctime' => $self['announcetime'],
+                    'seeders' => $seeders,
+                    'leechers' => $leechers,
+                    'comment' => $comment,
                 ]);
                 NexusDB::table('users')->where('id', $userId)->update(['enabled' => 'no']);
-                \App\Models\UserBanLog::query()->insert([
-                    'uid'      => $userId,
+                UserBanLog::query()->insert([
+                    'uid' => $userId,
                     'username' => $user['username'],
-                    'reason'   => "$comment(Upload speed:" . \App\Support\Format::size($upspeed) . '/s)',
+                    'reason' => "$comment(Upload speed:".Format::size($upspeed).'/s)',
                 ]);
             });
 
@@ -130,11 +134,13 @@ final class CheaterDetector
 
         if ($uploaded > 1073741824 && $upspeed > ($mayBeCheaterSpeed / $cheaterdetSecurity)) {
             $this->insertOrUpdateCheater($time, $uploaded, $downloaded, $seeders, $leechers, 'Abnormally high uploading rate', $self, $userId, $torrentId);
+
             return;
         }
 
         if ($cheaterdetSecurity > 1 && $uploaded > 1073741824 && $upspeed > 1048576 && $leechers < (2 * $cheaterdetSecurity)) {
             $this->insertOrUpdateCheater($time, $uploaded, $downloaded, $seeders, $leechers, 'User is uploading fast when there is few leechers', $self, $userId, $torrentId);
+
             return;
         }
 
@@ -144,7 +150,7 @@ final class CheaterDetector
     }
 
     /**
-     * @param array<string, mixed> $self
+     * @param  array<string, mixed>  $self
      */
     private function insertOrUpdateCheater(
         string $time,
@@ -168,20 +174,20 @@ final class CheaterDetector
 
         if (empty($cheaterId)) {
             NexusDB::table('cheaters')->insert([
-                'added'      => $time,
-                'userid'     => $userId,
-                'torrentid'  => $torrentId,
-                'uploaded'   => $uploaded,
+                'added' => $time,
+                'userid' => $userId,
+                'torrentid' => $torrentId,
+                'uploaded' => $uploaded,
                 'downloaded' => $downloaded,
-                'anctime'    => $self['announcetime'],
-                'seeders'    => $seeders,
-                'leechers'   => $leechers,
-                'hit'        => 1,
-                'comment'    => $comment,
+                'anctime' => $self['announcetime'],
+                'seeders' => $seeders,
+                'leechers' => $leechers,
+                'hit' => 1,
+                'comment' => $comment,
             ]);
         } else {
             NexusDB::table('cheaters')->where('id', $cheaterId)->update([
-                'hit'       => NexusDB::raw('hit + 1'),
+                'hit' => NexusDB::raw('hit + 1'),
                 'dealtwith' => 0,
             ]);
         }

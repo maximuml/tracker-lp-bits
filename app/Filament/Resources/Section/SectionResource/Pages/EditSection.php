@@ -2,10 +2,10 @@
 
 namespace App\Filament\Resources\Section\SectionResource\Pages;
 
-use Filament\Actions\DeleteAction;
 use App\Filament\Resources\Section\SectionResource;
 use App\Models\SearchBox;
-use Filament\Pages\Actions;
+use App\Support\Cache;
+use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 
 class EditSection extends EditRecord
@@ -22,7 +22,7 @@ class EditSection extends EditRecord
 
     /**
      * @param  array<string, mixed>  $data
-     * @return  array<string, mixed>
+     * @return array<string, mixed>
      */
     protected function mutateFormDataBeforeSave(array $data): array
     {
@@ -31,22 +31,22 @@ class EditSection extends EditRecord
 
     protected function afterSave(): void
     {
-        \App\Support\Cache::clearSearchBox();
+        Cache::clearSearchBox();
     }
 
     /**
      * @param  array<string, mixed>  $data
-     * @return  array<string, mixed>
+     * @return array<string, mixed>
      */
     protected function mutateFormDataBeforeFill(array $data): array
     {
         foreach (SearchBox::$extras as $field => $text) {
-            if (!empty($data['extra'][$field])) {
+            if (! empty($data['extra'][$field])) {
                 $data['other'][] = $field;
             }
             unset($data['extra'][$field]);
         }
+
         return $data;
     }
-
 }

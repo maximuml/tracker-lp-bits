@@ -2,7 +2,6 @@
 
 namespace Tests\Feature;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class ExampleTest extends TestCase
@@ -12,7 +11,7 @@ class ExampleTest extends TestCase
      *
      * @return void
      */
-    public function testRootRedirectsToIndex()
+    public function test_root_redirects_to_index()
     {
         $response = $this->get('/');
 

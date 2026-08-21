@@ -2,16 +2,19 @@
 
 namespace App\Http\Controllers;
 
+use App\Auth\Permission;
+use App\Enums\Permission\PermissionEnum;
 use App\Models\Complain;
 use App\Models\Setting;
 use App\Models\User;
 use App\Repositories\ToolRepository;
 use App\Support\Captcha;
-use App\Support\Format;
-use App\Support\Html;
+use App\Support\Config\SiteConfig;
+use App\Support\Logger;
 use App\Support\Network;
+use App\Support\Pagination;
 use App\Support\SupportContext;
-use App\Support\Time;
+use App\Support\Url;
 use App\Support\UserDisplay;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -26,7 +29,7 @@ class SupportController extends LegacyController
     {
         $currentUser = (array) (SupportContext::getUser() ?? []);
         $uid = (int) ($currentUser['id'] ?? 0);
-        $isAdmin = \App\Auth\Permission::can(\App\Enums\Permission\PermissionEnum::STAFF_MEMBER);
+        $isAdmin = Permission::can(PermissionEnum::STAFF_MEMBER);
         $langComplains = (array) (SupportContext::getGlobal('lang_complains') ?? []);
         $langFunctions = (array) (SupportContext::getGlobal('lang_functions') ?? []);
 
@@ -90,7 +93,7 @@ class SupportController extends LegacyController
         }
 
         try {
-            NexusLock::lockOrFail('complains:lock:' . Network::clientIp(), 10);
+            NexusLock::lockOrFail('complains:lock:'.Network::clientIp(), 10);
         } catch (\Throwable $e) {
             return $this->legacyAbortResponse($langFunctions['std_error'] ?? 'Error', $langComplains['text_new_failure'] ?? 'Unable to process request.');
         }
@@ -102,7 +105,7 @@ class SupportController extends LegacyController
         }
 
         try {
-            NexusLock::lockOrFail('complains:lock:' . $email, 600);
+            NexusLock::lockOrFail('complains:lock:'.$email, 600);
         } catch (\Throwable $e) {
             return $this->legacyAbortResponse($langFunctions['std_error'] ?? 'Error', $langComplains['text_new_failure'] ?? 'Unable to process request.');
         }
@@ -127,7 +130,7 @@ class SupportController extends LegacyController
 
         $uuid = (string) Complain::query()->where('id', $complainId)->value('uuid');
 
-        return redirect('/complains.php?action=view&id=' . urlencode($uuid));
+        return redirect('/complains.php?action=view&id='.urlencode($uuid));
     }
 
     /**
@@ -157,18 +160,18 @@ class SupportController extends LegacyController
 
         if ($uid > 0) {
             try {
-                $toolRep = new ToolRepository();
+                $toolRep = new ToolRepository;
                 $toolRep->sendMail(
                     $complain->email,
                     $langComplains['reply_notify_subject'] ?? 'Reply to your complain',
                     sprintf(
                         $langComplains['reply_notify_body'] ?? '',
-                        \App\Support\Config\SiteConfig::current()->basic->siteName(),
-                        \App\Support\Url::schemeAndHost(false) . '/complains.php?action=view&id=' . $complain->uuid
+                        SiteConfig::current()->basic->siteName(),
+                        Url::schemeAndHost(false).'/complains.php?action=view&id='.$complain->uuid
                     )
                 );
             } catch (\Throwable $exception) {
-                \App\Support\Logger::writeWithContext((string) $exception->getMessage(), 'error', false);
+                Logger::writeWithContext((string) $exception->getMessage(), 'error', false);
             }
         }
 
@@ -221,7 +224,7 @@ class SupportController extends LegacyController
         }
 
         $count = (int) NexusDB::table('complains')->where('answered', 1)->count();
-        [$pagertop, $pagerbottom, , $offset, $rpp] = \App\Support\Pagination::pager(20, $count, '?action=list&');
+        [$pagertop, $pagerbottom, , $offset, $rpp] = Pagination::pager(20, $count, '?action=list&');
         $processedRows = NexusDB::table('complains')
             ->where('answered', 1)
             ->orderByDesc('id')

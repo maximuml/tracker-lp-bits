@@ -5,16 +5,15 @@ namespace App\Http\Controllers;
 use App\Http\Resources\TorrentResource;
 use App\Http\Resources\UserResource;
 use App\Repositories\DashboardRepository;
-use Illuminate\Http\Request;
+use App\Support\Locale;
 
 class DashboardController extends Controller
 {
-    /** @var  mixed */
+    /** @var mixed */
     private $repository;
 
     /**
-     * @param  \App\Repositories\DashboardRepository  $repository
-     * @return  mixed
+     * @return mixed
      */
     public function __construct(DashboardRepository $repository)
     {
@@ -25,6 +24,7 @@ class DashboardController extends Controller
     public function systemInfo()
     {
         $result = $this->repository->getSystemInfo();
+
         return $this->success($result);
     }
 
@@ -32,6 +32,7 @@ class DashboardController extends Controller
     public function statData()
     {
         $result = $this->repository->getStatData();
+
         return $this->success($result);
     }
 
@@ -41,8 +42,9 @@ class DashboardController extends Controller
         $result = $this->repository->latestUser();
         $resource = UserResource::collection($result);
         $resource->additional([
-            'page_title' => \App\Support\Locale::trans('dashboard.latest_user.page_title', [], null),
+            'page_title' => Locale::trans('dashboard.latest_user.page_title', [], null),
         ]);
+
         return $this->success($resource);
     }
 
@@ -52,8 +54,9 @@ class DashboardController extends Controller
         $result = $this->repository->latestTorrent();
         $resource = TorrentResource::collection($result);
         $resource->additional([
-            'page_title' => \App\Support\Locale::trans('dashboard.latest_torrent.page_title', [], null),
+            'page_title' => Locale::trans('dashboard.latest_torrent.page_title', [], null),
         ]);
+
         return $this->success($resource);
     }
 }

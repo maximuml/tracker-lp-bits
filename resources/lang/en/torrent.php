@@ -1,5 +1,8 @@
 <?php
 
+use App\Models\Torrent;
+use App\Models\TorrentOperationLog;
+
 return [
     'pos_state_normal' => 'Normal',
     'pos_state_sticky' => 'Sticky first',
@@ -33,31 +36,31 @@ return [
     ],
     'no_snatch' => 'Never download this torrent yet',
     'operation_log' => [
-        \App\Models\TorrentOperationLog::ACTION_TYPE_APPROVAL_DENY => [
+        TorrentOperationLog::ACTION_TYPE_APPROVAL_DENY => [
             'type_text' => 'Allowed',
             'notify_subject' => 'Torrent was allowed',
             'notify_msg' => 'Your torrent：[url=:detail_url]:torrent_name[/url] was allowed by :operator, Reason: :reason',
         ],
-        \App\Models\TorrentOperationLog::ACTION_TYPE_APPROVAL_ALLOW => [
+        TorrentOperationLog::ACTION_TYPE_APPROVAL_ALLOW => [
             'type_text' => 'Denied',
             'notify_subject' => 'Torrent was denied',
             'notify_msg' => 'Your torrent: [url=:detail_url]:torrent_name[/url] denied by :operator',
         ],
-        \App\Models\TorrentOperationLog::ACTION_TYPE_APPROVAL_NONE => [
+        TorrentOperationLog::ACTION_TYPE_APPROVAL_NONE => [
             'type_text' => 'Not reviewed',
             'notify_subject' => 'Torrent was mark as not reviewed',
             'notify_msg' => 'Your torrent: [url=:detail_url]:torrent_name[/url] was mark as not reviewed by :operator',
         ],
-        \App\Models\TorrentOperationLog::ACTION_TYPE_EDIT => [
+        TorrentOperationLog::ACTION_TYPE_EDIT => [
             'type_text' => 'Edit',
             'notify_subject' => 'Torrent was edited',
             'notify_msg' => 'Your torrent: [url=:detail_url]:torrent_name[/url] was edited by :operator',
         ],
-        \App\Models\TorrentOperationLog::ACTION_TYPE_DELETE => [
+        TorrentOperationLog::ACTION_TYPE_DELETE => [
             'type_text' => 'Delete',
             'notify_subject' => 'Torrent was deleted',
             'notify_msg' => 'Your torrent: :torrent_name was deleted by :operator',
-        ]
+        ],
     ],
     'owner_update_torrent_subject' => 'Denied torrent have been updated',
     'owner_update_torrent_msg' => 'Torrent：[url=:detail_url]:torrent_name[/url] has been updated by the owner, you can check if it meets the requirements and allow',
@@ -66,12 +69,12 @@ return [
         'status_label' => 'Approval status',
         'comment_label' => 'Comment(optional)',
         'status_text' => [
-            \App\Models\Torrent::APPROVAL_STATUS_NONE => 'Not reviewed',
-            \App\Models\Torrent::APPROVAL_STATUS_ALLOW => 'Allowed',
-            \App\Models\Torrent::APPROVAL_STATUS_DENY => 'Denied',
+            Torrent::APPROVAL_STATUS_NONE => 'Not reviewed',
+            Torrent::APPROVAL_STATUS_ALLOW => 'Allowed',
+            Torrent::APPROVAL_STATUS_DENY => 'Denied',
         ],
         'deny_comment_show' => 'Denied, reason: :reason',
-        'logs_label' => 'Approval logs'
+        'logs_label' => 'Approval logs',
     ],
     'show_hide_media_info' => 'Show/Hide raw MediaInfo',
     'show_hide_bd_info' => 'Show/Hide raw BDInfo',
@@ -108,25 +111,25 @@ return [
     'technicalinfo_forced' => 'Forced',
     'technicalinfo_more_general' => 'More General',
     'promotion_time_types' => [
-        \App\Models\Torrent::PROMOTION_TIME_TYPE_GLOBAL => 'Global',
-        \App\Models\Torrent::PROMOTION_TIME_TYPE_PERMANENT => 'Permanent',
-        \App\Models\Torrent::PROMOTION_TIME_TYPE_DEADLINE => 'Until',
+        Torrent::PROMOTION_TIME_TYPE_GLOBAL => 'Global',
+        Torrent::PROMOTION_TIME_TYPE_PERMANENT => 'Permanent',
+        Torrent::PROMOTION_TIME_TYPE_DEADLINE => 'Until',
     ],
     'paid_torrent' => 'Paid torrent',
-    'msg_torrent_deleted' => "Your torrent was deleted",
+    'msg_torrent_deleted' => 'Your torrent was deleted',
     'msg_the_torrent_you_uploaded' => "The torrent you uploaded '",
     'msg_was_deleted_by' => "'was deleted by :admin",
-    'msg_reason_is' => ". The reason: ",
-    'msg_reseed_request' => "Reseed Request",
-    'msg_reseed_user' => "User ",
-    'msg_ask_reseed' => " asked for a reseed on torrent ",
+    'msg_reason_is' => '. The reason: ',
+    'msg_reseed_request' => 'Reseed Request',
+    'msg_reseed_user' => 'User ',
+    'msg_ask_reseed' => ' asked for a reseed on torrent ',
     'msg_thank_you' => " !\nThank You!",
 
-    'msg_offer_you_voted' => "The Offer you voted for: ",
-    'msg_was_uploaded_by' => " was uploaded by ",
+    'msg_offer_you_voted' => 'The Offer you voted for: ',
+    'msg_was_uploaded_by' => ' was uploaded by ',
     'msg_you_can_download' => ".\nYou can Download the Torrent",
-    'msg_here' => " [b]here[/b]",
-    'msg_offer' => "Offer ",
-    'msg_blank' => ".",
+    'msg_here' => ' [b]here[/b]',
+    'msg_offer' => 'Offer ',
+    'msg_blank' => '.',
     'require_seed_section_menu_title' => 'Require Seed',
 ];

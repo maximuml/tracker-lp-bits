@@ -2,6 +2,9 @@
 
 namespace App\Support;
 
+use App\Support\Cache\LegacyRedisCache;
+use Nexus\Nexus;
+
 /**
  * Legacy main-menu helper extracted from `include/functions.php`.
  *
@@ -17,7 +20,6 @@ final class Menu
      *
      * @param  array<string, string>  $langFunctions
      * @param  array<string, mixed>|null  $user
-     * @param  \App\Support\Cache\LegacyRedisCache|null  $cache
      * @return array{html: string, selected: string}
      */
     public static function render(
@@ -26,14 +28,14 @@ final class Menu
         string $enableOffer,
         ?string $customMenu,
         ?array $user = null,
-        ?\App\Support\Cache\LegacyRedisCache $cache = null,
+        ?LegacyRedisCache $cache = null,
         string $langDir = '',
     ): array {
         $selected = self::selectedItem($scriptName);
 
         if ($customMenu !== null && $customMenu !== '') {
             return [
-                'html' => '<div id="nav">' . $customMenu . '</div>',
+                'html' => '<div id="nav">'.$customMenu.'</div>',
                 'selected' => $selected,
             ];
         }
@@ -64,7 +66,7 @@ final class Menu
         }
         $items[] = self::item($selected, 'contactstaff', 'contactstaff.php', $langFunctions['text_contactstaff'] ?? 'Contact Staff');
 
-        $html = '<div id="nav"><ul id="mainmenu" class="menu">' . implode('', $items) . '</ul></div>';
+        $html = '<div id="nav"><ul id="mainmenu" class="menu">'.implode('', $items).'</ul></div>';
 
         return ['html' => $html, 'selected' => $selected];
     }
@@ -76,10 +78,10 @@ final class Menu
      */
     public static function outputWithContext(string $selected = 'home'): void
     {
-        $customMenu = (string) \App\Support\Hooks::applyFilter('nexus_menu');
+        $customMenu = (string) Hooks::applyFilter('nexus_menu');
 
         $result = self::render(
-            \function_exists('nexus') ? \Nexus\Nexus::instance()->getScript() : '',
+            \function_exists('nexus') ? Nexus::instance()->getScript() : '',
             SupportContext::getLangFunctions(),
             (string) SupportContext::getGlobal('enableoffer', ''),
             $customMenu !== '' ? $customMenu : null,
@@ -120,6 +122,6 @@ final class Menu
     {
         $class = $selected === $key ? ' class="selected"' : '';
 
-        return '<li' . $class . '><a href="' . $href . '"' . ($attrs ? ' ' . $attrs : '') . '>' . $label . '</a></li>';
+        return '<li'.$class.'><a href="'.$href.'"'.($attrs ? ' '.$attrs : '').'>'.$label.'</a></li>';
     }
 }

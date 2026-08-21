@@ -2,6 +2,8 @@
 
 namespace App\Exceptions;
 
+use App\Support\Locale;
+
 class TorrentAlreadyExistsException extends NexusException
 {
     private int $torrentId;
@@ -9,7 +11,7 @@ class TorrentAlreadyExistsException extends NexusException
     public function __construct(int $torrentId, ?string $message = null)
     {
         if ($message === null) {
-            $message = \App\Support\Locale::trans('upload.torrent_existed', ['id' => $torrentId], null);
+            $message = Locale::trans('upload.torrent_existed', ['id' => $torrentId], null);
         }
         parent::__construct($message, 0, null);
         $this->torrentId = $torrentId;

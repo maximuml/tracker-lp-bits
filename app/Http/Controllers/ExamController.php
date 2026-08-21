@@ -3,24 +3,19 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\ExamResource;
-use App\Http\Resources\ExamUserResource;
-use App\Http\Resources\UserResource;
 use App\Models\Exam;
 use App\Repositories\ExamRepository;
-use App\Repositories\UserRepository;
+use App\Support\Locale;
 use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\JsonResource;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 
 class ExamController extends Controller
 {
-    /** @var  mixed */
+    /** @var mixed */
     private $repository;
 
     /**
-     * @param  \App\Repositories\ExamRepository  $repository
-     * @return  mixed
+     * @return mixed
      */
     public function __construct(ExamRepository $repository)
     {
@@ -29,23 +24,24 @@ class ExamController extends Controller
 
     /**
      * Display a listing of the resource.
-     * @param  \Illuminate\Http\Request  $request
-     * @return  array<string, mixed>
+     *
+     * @return array<string, mixed>
      */
     public function index(Request $request)
     {
         $result = $this->repository->getList($request->all());
         $resource = ExamResource::collection($result);
         $resource->additional([
-            'page_title' => \App\Support\Locale::trans('exam.admin.list.page_title', [], null),
+            'page_title' => Locale::trans('exam.admin.list.page_title', [], null),
         ]);
+
         return $this->success($resource);
     }
 
     /**
      * Store a newly created resource in storage.
-     * @param  \Illuminate\Http\Request  $request
-     * @return  array<string, mixed>
+     *
+     * @return array<string, mixed>
      */
     public function store(Request $request)
     {
@@ -55,31 +51,32 @@ class ExamController extends Controller
             'indexes.*.index' => ['required', Rule::in(array_keys(Exam::$indexes))],
             'indexes.*.require_value' => 'nullable|numeric',
             'status' => 'required|in:0,1',
-            'duration' => 'nullable|numeric'
+            'duration' => 'nullable|numeric',
         ];
         $request->validate($rules);
         $result = $this->repository->store($request->all());
         $resource = new ExamResource($result);
+
         return $this->success($resource);
     }
 
     /**
      * Display the specified resource.
-     * @param  int  $id
-     * @return  array<string, mixed>
+     *
+     * @return array<string, mixed>
      */
     public function show(int $id)
     {
         $result = $this->repository->getDetail($id);
         $resource = new ExamResource($result);
+
         return $this->success($resource);
     }
 
     /**
      * Update the specified resource in storage.
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return  array<string, mixed>
+     *
+     * @return array<string, mixed>
      */
     public function update(Request $request, int $id)
     {
@@ -89,22 +86,24 @@ class ExamController extends Controller
             'indexes.*.index' => ['required', Rule::in(array_keys(Exam::$indexes))],
             'indexes.*.require_value' => 'nullable|numeric',
             'status' => 'required|in:0,1',
-            'duration' => 'nullable|numeric'
+            'duration' => 'nullable|numeric',
         ];
         $request->validate($rules);
         $result = $this->repository->update($request->all(), $id);
         $resource = new ExamResource($result);
+
         return $this->success($resource);
     }
 
     /**
      * Remove the specified resource from storage.
-     * @param  int  $id
-     * @return  array<string, mixed>
+     *
+     * @return array<string, mixed>
      */
     public function destroy(int $id)
     {
         $result = $this->repository->delete($id);
+
         return $this->success($result, 'Delete exam success!');
     }
 
@@ -112,6 +111,7 @@ class ExamController extends Controller
     public function indexes()
     {
         $result = $this->repository->listIndexes();
+
         return $this->success($result);
     }
 
@@ -120,7 +120,7 @@ class ExamController extends Controller
     {
         $result = Exam::query()->orderBy('id', 'desc')->get();
         $resource = ExamResource::collection($result);
+
         return $this->success($resource);
     }
-
 }

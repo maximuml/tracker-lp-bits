@@ -2,24 +2,27 @@
 
 namespace App\Http\Resources;
 
+use App\Models\File;
+use App\Support\Format;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
- * @mixin \App\Models\File
+ * @mixin File
  */
 class FileResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
+     *
      * @param  mixed  $request
-     * @return  array<int|string, mixed>
+     * @return array<int|string, mixed>
      */
     public function toArray($request)
     {
         return [
             'id' => $this->id,
             'filename' => $this->filename,
-            'size_human' => \App\Support\Format::size($this->size),
+            'size_human' => Format::size($this->size),
         ];
     }
 }

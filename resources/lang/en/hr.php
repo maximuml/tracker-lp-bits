@@ -1,19 +1,21 @@
 <?php
 
-return [
-    'status_' . \App\Models\HitAndRun::STATUS_INSPECTING => 'Inspecting',
-    'status_' . \App\Models\HitAndRun::STATUS_REACHED => 'Reached',
-    'status_' . \App\Models\HitAndRun::STATUS_UNREACHED => 'Unreached',
-    'status_' . \App\Models\HitAndRun::STATUS_PARDONED => 'Pardoned',
+use App\Models\HitAndRun;
 
-    'mode_' . \App\Models\HitAndRun::MODE_DISABLED => 'Disabled',
-    'mode_' . \App\Models\HitAndRun::MODE_MANUAL => 'Manual',
-    'mode_' . \App\Models\HitAndRun::MODE_GLOBAL => 'Global',
+return [
+    'status_'.HitAndRun::STATUS_INSPECTING => 'Inspecting',
+    'status_'.HitAndRun::STATUS_REACHED => 'Reached',
+    'status_'.HitAndRun::STATUS_UNREACHED => 'Unreached',
+    'status_'.HitAndRun::STATUS_PARDONED => 'Pardoned',
+
+    'mode_'.HitAndRun::MODE_DISABLED => 'Disabled',
+    'mode_'.HitAndRun::MODE_MANUAL => 'Manual',
+    'mode_'.HitAndRun::MODE_GLOBAL => 'Global',
 
     'reached_by_seed_time_comment' => 'Up to：:now，seed time: :seed_time Hour(s) reached :seed_time_minimum Hour(s)',
     'reached_by_leech_time_comment' => 'Up to：:now，leech time: :leech_time Hour(s) reached :leech_time_minimum Hour(s)',
     'reached_by_share_ratio_comment' => "Up to：:now \nseed time: :seed_time Hour(s) Unreached :seed_time_minimum Hour(s) \nShare ratio: :share_ratio reached standard：:ignore_when_ratio_reach",
-    'reached_by_special_user_class_comment' => "Your user class: :user_class_text or donated user, ignore this H&R",
+    'reached_by_special_user_class_comment' => 'Your user class: :user_class_text or donated user, ignore this H&R',
     'reached_message_subject' => 'H&R(ID: :hit_and_run_id) reached!',
     'reached_message_content' => 'Congratulation! The torrent: :torrent_name(ID: :torrent_id) you download at: :completed_at has reach the requirement.',
 

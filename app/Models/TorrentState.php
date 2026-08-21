@@ -8,15 +8,15 @@
  * @property int $notice_days
  * @property string|null $begin
  */
+
 namespace App\Models;
 
-
 use App\Models\Traits\NexusActivityLogTrait;
-use App\Models\Setting;
+use App\Support\Events;
+use App\Support\Logger;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Request;
 use Illuminate\Validation\ValidationException;
 use Nexus\Database\NexusDB;
 
@@ -25,15 +25,16 @@ class TorrentState extends NexusModel
     use NexusActivityLogTrait;
 
     public const NOTICE_NONE = 0;
+
     public const NOTICE_UNLIMITED = -1;
 
-    /** @var  list<string> */
+    /** @var list<string> */
     protected $fillable = ['global_sp_state', 'deadline', 'begin', 'remark', 'notice_days'];
 
-    /** @var  string */
+    /** @var string */
     protected $table = 'torrents_state';
 
-    /** @var  array<string, string> */
+    /** @var array<string, string> */
     protected $casts = [
         'begin' => 'datetime',
         'deadline' => 'datetime',
@@ -71,9 +72,8 @@ class TorrentState extends NexusModel
     }
 
     /**
-     * @param  \Illuminate\Database\Eloquent\Builder<TorrentState>  $query
-     * @param  ?Carbon  $moment
-     * @return  \Illuminate\Database\Eloquent\Builder<TorrentState>
+     * @param  Builder<TorrentState>  $query
+     * @return Builder<TorrentState>
      */
     public function scopeActive(Builder $query, ?Carbon $moment = null): Builder
     {
@@ -92,9 +92,8 @@ class TorrentState extends NexusModel
     }
 
     /**
-     * @param  \Illuminate\Database\Eloquent\Builder<TorrentState>  $query
-     * @param  ?Carbon  $moment
-     * @return  \Illuminate\Database\Eloquent\Builder<TorrentState>
+     * @param  Builder<TorrentState>  $query
+     * @return Builder<TorrentState>
      */
     public function scopeUpcoming(Builder $query, ?Carbon $moment = null): Builder
     {
@@ -108,13 +107,11 @@ class TorrentState extends NexusModel
             ->orderBy('id');
     }
 
-    /** @param  ?Carbon  $moment */
     public static function current(?Carbon $moment = null): ?self
     {
         return self::query()->active($moment)->first();
     }
 
-    /** @param  ?Carbon  $moment */
     public static function next(?Carbon $moment = null): ?self
     {
         return self::query()->upcoming($moment)->first();
@@ -136,15 +133,14 @@ class TorrentState extends NexusModel
 
     public static function flushCache(): void
     {
-        \App\Support\Logger::writeWithContext((string) ("cache_del: " . Setting::TORRENT_GLOBAL_STATE_CACHE_KEY), (string) 'info', (bool) false);
+        Logger::writeWithContext((string) ('cache_del: '.Setting::TORRENT_GLOBAL_STATE_CACHE_KEY), (string) 'info', (bool) false);
         NexusDB::cache_del(Setting::TORRENT_GLOBAL_STATE_CACHE_KEY);
-        \App\Support\Logger::writeWithContext((string) "publish_model_event: global_promotion_state_updated", (string) 'info', (bool) false);
-        \App\Support\Events::publishModel("global_promotion_state_updated", 0, "");
+        Logger::writeWithContext((string) 'publish_model_event: global_promotion_state_updated', (string) 'info', (bool) false);
+        Events::publishModel('global_promotion_state_updated', 0, '');
     }
 
     /**
-     * @param  ?Carbon  $moment
-     * @return  array<int|string, mixed>
+     * @return array<int|string, mixed>
      */
     public static function resolveTimeline(?Carbon $moment = null): array
     {
@@ -156,24 +152,26 @@ class TorrentState extends NexusModel
         foreach ($states as $state) {
             $begin = self::parseDateTimeValue($state['begin'] ?? null);
             $deadline = self::parseDateTimeValue($state['deadline'] ?? null);
-            $noticeDays = (int)($state['notice_days'] ?? self::NOTICE_NONE);
+            $noticeDays = (int) ($state['notice_days'] ?? self::NOTICE_NONE);
 
-            $hasBegun = !$begin || $begin->lessThanOrEqualTo($moment);
-            $notExpired = !$deadline || $deadline->greaterThanOrEqualTo($moment);
+            $hasBegun = ! $begin || $begin->lessThanOrEqualTo($moment);
+            $notExpired = ! $deadline || $deadline->greaterThanOrEqualTo($moment);
 
             if ($hasBegun && $notExpired) {
-                if (!$current) {
+                if (! $current) {
                     $current = $state;
                 }
+
                 continue;
             }
 
             if ($begin && $begin->greaterThan($moment)) {
-                if (!self::isWithinNoticeWindow($begin, $noticeDays, $moment)) {
+                if (! self::isWithinNoticeWindow($begin, $noticeDays, $moment)) {
                     continue;
                 }
-                if (!$upcoming) {
+                if (! $upcoming) {
                     $upcoming = $state;
+
                     continue;
                 }
                 $upcomingBegin = self::parseDateTimeValue($upcoming['begin'] ?? null);
@@ -207,8 +205,7 @@ class TorrentState extends NexusModel
     }
 
     /**
-     * @param  TorrentState  $state
-     * @return  array<int|string, mixed>
+     * @return array<int|string, mixed>
      */
     protected function getRangeForComparison(TorrentState $state): array
     {
@@ -225,7 +222,6 @@ class TorrentState extends NexusModel
         ];
     }
 
-    /** @param  mixed  $value */
     protected static function parseDateTimeValue(mixed $value): ?Carbon
     {
         if ($value instanceof Carbon) {
@@ -241,7 +237,6 @@ class TorrentState extends NexusModel
 
     /**
      * @param  array<int|string, mixed>  $attributes
-     * @param  ?int  $ignoreId
      */
     public static function validateNoOverlap(array $attributes, ?int $ignoreId = null): void
     {
@@ -259,16 +254,19 @@ class TorrentState extends NexusModel
 
         $beginConflict = $conflicts->first(function (TorrentState $state) use ($range) {
             $other = $state->getRangeForComparison($state);
+
             return $range['begin']->greaterThanOrEqualTo($other['begin']) && $range['begin']->lessThanOrEqualTo($other['end']);
         });
 
         $endConflict = $conflicts->first(function (TorrentState $state) use ($range) {
             $other = $state->getRangeForComparison($state);
+
             return $range['end']->greaterThanOrEqualTo($other['begin']) && $range['end']->lessThanOrEqualTo($other['end']);
         });
 
         $coverageConflict = $conflicts->first(function (TorrentState $state) use ($range) {
             $other = $state->getRangeForComparison($state);
+
             return $range['begin']->lt($other['begin']) && $range['end']->gt($other['end']);
         });
 
@@ -301,7 +299,7 @@ class TorrentState extends NexusModel
 
     /**
      * @param  array<int|string, mixed>  $attributes
-     * @return  array<int|string, mixed>
+     * @return array<int|string, mixed>
      */
     protected static function getRangeForArray(array $attributes): array
     {
@@ -317,15 +315,13 @@ class TorrentState extends NexusModel
         ];
     }
 
-    /** @param  string  $field */
     protected static function errorFieldKey(string $field): string
     {
         $prefix = 'mountedActions.0.data.';
 
-        return $prefix . $field;
+        return $prefix.$field;
     }
 
-    /** @param  TorrentState  $conflict */
     protected static function buildOverlapMessage(TorrentState $conflict): string
     {
         $begin = self::parseDateTimeValue($conflict->begin);
@@ -355,14 +351,9 @@ class TorrentState extends NexusModel
         ];
     }
 
-    /**
-     * @param  ?Carbon  $begin
-     * @param  int  $noticeDays
-     * @param  Carbon  $now
-     */
     protected static function isWithinNoticeWindow(?Carbon $begin, int $noticeDays, Carbon $now): bool
     {
-        if (!$begin) {
+        if (! $begin) {
             return true;
         }
         if ($noticeDays === self::NOTICE_NONE) {
@@ -371,6 +362,7 @@ class TorrentState extends NexusModel
         if ($noticeDays === self::NOTICE_UNLIMITED) {
             return true;
         }
+
         return $begin->copy()->subDays($noticeDays)->lessThanOrEqualTo($now);
     }
 }

@@ -2,21 +2,11 @@
 
 namespace App\Filament\Resources\User\UserResource\Pages;
 
-use Filament\Actions\Contracts\HasActions;
-use Filament\Actions\Action;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Hidden;
-use Exception;
-use Filament\Forms\Components\Radio;
-use Filament\Schemas\Components\Utilities\Get;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\DateTimePicker;
-use Filament\Actions\DeleteAction;
 use App\Auth\Permission;
+use App\Enums\ModelEventEnum;
 use App\Enums\Permission\PermissionEnum;
 use App\Filament\OptionsTrait;
 use App\Filament\Resources\User\UserResource;
-use App\Models\Exam;
 use App\Models\Invite;
 use App\Models\Medal;
 use App\Models\User;
@@ -24,34 +14,49 @@ use App\Models\UserMeta;
 use App\Repositories\ExamRepository;
 use App\Repositories\MedalRepository;
 use App\Repositories\UserRepository;
+use App\Support\Admin;
+use App\Support\Config\SiteConfig;
+use App\Support\Events;
+use App\Support\Hooks;
+use App\Support\Mail;
+use App\Support\Url;
 use Carbon\Carbon;
+use Exception;
+use Filament\Actions;
+use Filament\Actions\Action;
+use Filament\Actions\Contracts\HasActions;
+use Filament\Actions\DeleteAction;
+use Filament\Forms;
+use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\Radio;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\Concerns\HasRelationManagers;
 use Filament\Resources\Pages\Concerns\InteractsWithRecord;
-use Filament\Resources\Pages\Page;
-use Filament\Actions;
-use Filament\Forms;
 use Filament\Resources\Pages\ViewRecord;
+use Filament\Schemas\Components\Utilities\Get;
 use Illuminate\Support\Facades\Auth;
-use Nexus\Database\NexusDB;
 
 class UserProfile extends ViewRecord implements HasActions
 {
-    use InteractsWithRecord;
     use HasRelationManagers;
+    use InteractsWithRecord;
     use OptionsTrait;
 
     private static ?UserRepository $rep = null;
 
     protected static string $resource = UserResource::class;
 
-//    protected static string $view = 'filament.resources.user.user-resource.pages.user-profile';
+    //    protected static string $view = 'filament.resources.user.user-resource.pages.user-profile';
 
     private function getRep(): UserRepository
     {
-        if (!self::$rep) {
-            self::$rep = new UserRepository();
+        if (! self::$rep) {
+            self::$rep = new UserRepository;
         }
+
         return self::$rep;
     }
 
@@ -61,6 +66,7 @@ class UserProfile extends ViewRecord implements HasActions
         if (! $user instanceof User) {
             throw new \RuntimeException('Expected an authenticated user.');
         }
+
         return $user;
     }
 
@@ -70,9 +76,9 @@ class UserProfile extends ViewRecord implements HasActions
         if (! $record instanceof User) {
             throw new \RuntimeException('Expected a user record.');
         }
+
         return $record;
     }
-
 
     protected function getHeaderActions(): array
     {
@@ -80,27 +86,31 @@ class UserProfile extends ViewRecord implements HasActions
         $user = $this->currentUser();
         $record = $this->getUserRecord();
         if ($user->class > $record->class) {
+            if ($record->status == User::STATUS_PENDING) {
+                $actions[] = $this->buildConfirmAction();
+            }
+            $actions[] = $this->buildWarnAction();
             $actions[] = $this->buildGrantPropsAction();
             $actions[] = $this->buildGrantMedalAction();
             $actions[] = $this->buildAssignExamAction();
             $actions[] = $this->buildChangeBonusEtcAction();
-//            if ($this->getUserRecord()->two_step_secret) {
-//                $actions[] = $this->buildDisableTwoStepAuthenticationAction();
-//            }
-//            if ($this->getUserRecord()->status == User::STATUS_PENDING) {
-//                $actions[] = $this->buildConfirmAction();
-//            }
+            //            if ($this->getUserRecord()->two_step_secret) {
+            //                $actions[] = $this->buildDisableTwoStepAuthenticationAction();
+            //            }
             $actions[] = $this->buildResetPasswordAction();
-//            $actions[] = $this->buildEnableDisableAction();
-//            $actions[] = $this->buildEnableDisableDownloadPrivilegesAction();
-//            if (user_can('user-change-class')) {
-//                $actions[] = $this->buildChangeClassAction();
-//            }
+            $actions[] = $this->buildEnableDisableAction();
+            $actions[] = $this->buildEnableDisableDownloadPrivilegesAction();
+            $actions[] = $this->buildEnableDisableUploadPrivilegesAction();
+            $actions[] = $this->buildEnableDisableForumPostAction();
+            //            if (user_can('user-change-class')) {
+            //                $actions[] = $this->buildChangeClassAction();
+            //            }
             if (Permission::can(PermissionEnum::USER_DELETE)) {
                 $actions[] = $this->buildDeleteAction();
             }
-            $actions = \App\Support\Hooks::applyFilter('user_profile_actions', $actions);
+            $actions = Hooks::applyFilter('user_profile_actions', $actions);
         }
+
         return $actions;
     }
 
@@ -163,30 +173,25 @@ class UserProfile extends ViewRecord implements HasActions
                     ->label(__('admin.resources.user.actions.change_bonus_etc_field_label'))
                     ->inline()
                     ->required()
-                    ->reactive()
-                ,
+                    ->reactive(),
                 Radio::make('action')->options([
-                    'Increment' => __("admin.resources.user.actions.change_bonus_etc_action_increment"),
-                    'Decrement' => __("admin.resources.user.actions.change_bonus_etc_action_decrement"),
+                    'Increment' => __('admin.resources.user.actions.change_bonus_etc_action_increment'),
+                    'Decrement' => __('admin.resources.user.actions.change_bonus_etc_action_decrement'),
                 ])
                     ->label(__('admin.resources.user.actions.change_bonus_etc_action_label'))
                     ->inline()
-                    ->required()
-                ,
+                    ->required(),
                 TextInput::make('value')->integer()->required()
                     ->label(__('admin.resources.user.actions.change_bonus_etc_value_label'))
-                    ->helperText(__('admin.resources.user.actions.change_bonus_etc_value_help'))
-                ,
+                    ->helperText(__('admin.resources.user.actions.change_bonus_etc_value_help')),
 
                 TextInput::make('duration')->integer()
                     ->label(__('admin.resources.user.actions.change_bonus_etc_duration_label'))
                     ->helperText(__('admin.resources.user.actions.change_bonus_etc_duration_help'))
-                    ->hidden(fn (Get $get) => $get('field') != 'tmp_invites')
-                ,
+                    ->hidden(fn (Get $get) => $get('field') != 'tmp_invites'),
 
                 TextInput::make('reason')
-                    ->label(__('admin.resources.user.actions.change_bonus_etc_reason_label'))
-                ,
+                    ->label(__('admin.resources.user.actions.change_bonus_etc_reason_label')),
             ])
             ->action(function ($data) {
                 $userRep = $this->getRep();
@@ -231,7 +236,7 @@ class UserProfile extends ViewRecord implements HasActions
             ->modalHeading(__('admin.resources.user.actions.assign_exam_btn'))
             ->schema([
                 Select::make('exam_id')
-                    ->options((new ExamRepository())->listMatchExam($this->getUserRecord()->id)->pluck('name', 'id'))
+                    ->options((new ExamRepository)->listMatchExam($this->getUserRecord()->id)->pluck('name', 'id'))
                     ->label(__('admin.resources.user.actions.assign_exam_exam_label'))->required(),
                 DateTimePicker::make('begin')->label(__('admin.resources.user.actions.assign_exam_begin_label')),
                 DateTimePicker::make('end')->label(__('admin.resources.user.actions.assign_exam_end_label'))
@@ -239,7 +244,7 @@ class UserProfile extends ViewRecord implements HasActions
 
             ])
             ->action(function ($data) {
-                $examRep = new ExamRepository();
+                $examRep = new ExamRepository;
                 try {
                     $examRep->assignToUser($this->getUserRecord()->id, $data['exam_id'], $data['begin'], $data['end']);
                     $this->sendSuccessNotification();
@@ -266,7 +271,7 @@ class UserProfile extends ViewRecord implements HasActions
 
             ])
             ->action(function ($data) {
-                $medalRep = new MedalRepository();
+                $medalRep = new MedalRepository;
                 try {
                     $medalRep->grantToUser($this->getUserRecord()->id, $data['medal_id'], $data['duration']);
                     $this->sendSuccessNotification();
@@ -280,19 +285,53 @@ class UserProfile extends ViewRecord implements HasActions
     {
         return Action::make(__('admin.resources.user.actions.confirm_btn'))
             ->modalHeading(__('admin.resources.user.actions.confirm_btn'))
-            ->requiresConfirmation()
-            ->action(function () {
+            ->color('success')
+            ->schema([
+                Forms\Components\Checkbox::make('send_email')
+                    ->label(__('admin.resources.user.actions.confirm_send_email'))
+                    ->helperText(__('admin.resources.user.actions.confirm_send_email_help'))
+                    ->default(true),
+            ])
+            ->action(function (array $data) {
                 if ($this->currentUser()->class <= $this->getUserRecord()->class) {
-                    \App\Support\Admin::failNotification("No permission!");
+                    Admin::failNotification('No permission!');
+
                     return;
                 }
-                $this->getUserRecord()->status = User::STATUS_CONFIRMED;
-                $this->getUserRecord()->info= null;
-                $this->getUserRecord()->save();
+                $record = $this->getUserRecord();
+                $record->status = User::STATUS_CONFIRMED;
+                $record->info = null;
+                $record->save();
+
+                Events::fire(ModelEventEnum::USER_UPDATED, $record, null);
+
+                if (! empty($data['send_email']) && $record->email !== '') {
+                    $siteName = SiteConfig::current()->basic->siteName('');
+                    $baseUrl = Url::schemeAndHost(false);
+                    $siteEmail = (string) SiteConfig::current()->main->siteEmail('');
+
+                    $body = sprintf(
+                        "Your account has been confirmed.\n\n<b><a href=\"javascript:void(null)\" onclick=\"window.open('%s/login')\">Click here to login</a></b><br />\n%s/login",
+                        $baseUrl,
+                        $baseUrl,
+                    );
+
+                    Mail::sentLegacy(
+                        (string) $record->email,
+                        $siteName,
+                        $siteEmail,
+                        $siteName.' - Account Confirmed',
+                        $body,
+                        'invite confirm',
+                        false,
+                        false,
+                        '',
+                        'UTF-8',
+                    );
+                }
                 $this->sendSuccessNotification();
             });
     }
-
 
     protected function buildEnableDisableDownloadPrivilegesAction(): Action
     {
@@ -303,6 +342,72 @@ class UserProfile extends ViewRecord implements HasActions
                 $userRep = $this->getRep();
                 try {
                     $userRep->updateDownloadPrivileges($this->currentUser(), $this->getUserRecord()->id, $this->getUserRecord()->downloadpos == 'yes' ? 'no' : 'yes');
+                    $this->sendSuccessNotification();
+                } catch (Exception $exception) {
+                    $this->sendFailNotification($exception->getMessage());
+                }
+            });
+    }
+
+    protected function buildEnableDisableUploadPrivilegesAction(): Action
+    {
+        return Action::make($this->getUserRecord()->uploadpos == 'yes' ? __('admin.resources.user.actions.disable_upload_privileges_btn') : __('admin.resources.user.actions.enable_upload_privileges_btn'))
+            ->requiresConfirmation()
+            ->action(function () {
+                $userRep = $this->getRep();
+                try {
+                    $userRep->updateUploadPrivileges($this->currentUser(), $this->getUserRecord()->id, $this->getUserRecord()->uploadpos == 'yes' ? 'no' : 'yes');
+                    $this->sendSuccessNotification();
+                } catch (Exception $exception) {
+                    $this->sendFailNotification($exception->getMessage());
+                }
+            });
+    }
+
+    protected function buildEnableDisableForumPostAction(): Action
+    {
+        return Action::make($this->getUserRecord()->forumpost == 'yes' ? __('admin.resources.user.actions.disable_forumpost_btn') : __('admin.resources.user.actions.enable_forumpost_btn'))
+            ->requiresConfirmation()
+            ->action(function () {
+                $userRep = $this->getRep();
+                try {
+                    $userRep->updateForumPost($this->currentUser(), $this->getUserRecord()->id, $this->getUserRecord()->forumpost == 'yes' ? 'no' : 'yes');
+                    $this->sendSuccessNotification();
+                } catch (Exception $exception) {
+                    $this->sendFailNotification($exception->getMessage());
+                }
+            });
+    }
+
+    protected function buildWarnAction(): Action
+    {
+        $record = $this->getUserRecord();
+        $isWarned = $record->warned === 'yes';
+
+        return Action::make($isWarned ? __('admin.resources.user.actions.edit_warning_btn') : __('admin.resources.user.actions.warn_btn'))
+            ->icon('heroicon-o-exclamation-triangle')
+            ->color($isWarned ? 'danger' : 'warning')
+            ->schema([
+                Select::make('weeks')
+                    ->label(__('admin.resources.user.actions.warn_duration'))
+                    ->options([
+                        0 => __('admin.resources.user.actions.warn_remove'),
+                        1 => '1 '.__('admin.resources.user.actions.warn_week'),
+                        2 => '2 '.__('admin.resources.user.actions.warn_weeks'),
+                        4 => '4 '.__('admin.resources.user.actions.warn_weeks'),
+                        8 => '8 '.__('admin.resources.user.actions.warn_weeks'),
+                        255 => __('admin.resources.user.actions.warn_indefinite'),
+                    ])
+                    ->default($isWarned ? 0 : 1)
+                    ->required(),
+                TextInput::make('reason')
+                    ->label(__('admin.resources.user.actions.warn_reason'))
+                    ->placeholder(__('admin.resources.user.actions.warn_reason_placeholder')),
+            ])
+            ->action(function (array $data) {
+                $userRep = $this->getRep();
+                try {
+                    $userRep->warnUser($this->currentUser(), $this->getUserRecord()->id, (int) $data['weeks'], (string) ($data['reason'] ?? ''));
                     $this->sendSuccessNotification();
                 } catch (Exception $exception) {
                     $this->sendFailNotification($exception->getMessage());
@@ -337,6 +442,7 @@ class UserProfile extends ViewRecord implements HasActions
     {
         return DeleteAction::make()->using(function () {
             $this->getRep()->destroy($this->getUserRecord()->id);
+
             return redirect(self::$resource::getUrl('index'));
         });
     }
@@ -345,7 +451,7 @@ class UserProfile extends ViewRecord implements HasActions
     {
         return [
             'props' => $this->listUserProps(),
-            'temporary_invite_count' => $this->countTemporaryInvite()
+            'temporary_invite_count' => $this->countTemporaryInvite(),
         ];
     }
 
@@ -371,6 +477,7 @@ class UserProfile extends ViewRecord implements HasActions
             }
             $props[] = "<div>{$text}</div>";
         }
+
         return $props;
     }
 
@@ -393,25 +500,21 @@ class UserProfile extends ViewRecord implements HasActions
                     ->default($this->getUserRecord()->class)
                     ->label(__('user.labels.class'))
                     ->required()
-                    ->reactive()
-                ,
+                    ->reactive(),
                 Radio::make('vip_added')
                     ->options(self::getYesNoOptions('yes', 'no'))
                     ->default($this->getUserRecord()->vip_added)
                     ->label(__('user.labels.vip_added'))
                     ->helperText(__('user.labels.vip_added_help'))
-                    ->hidden(fn (Get $get) => $get('class') != User::CLASS_VIP)
-                ,
+                    ->hidden(fn (Get $get) => $get('class') != User::CLASS_VIP),
                 DateTimePicker::make('vip_until')
                     ->default($this->getUserRecord()->vip_until)
                     ->label(__('user.labels.vip_until'))
                     ->helperText(__('user.labels.vip_until_help'))
-                    ->hidden(fn (Get $get) => $get('class') != User::CLASS_VIP)
-                ,
+                    ->hidden(fn (Get $get) => $get('class') != User::CLASS_VIP),
                 TextInput::make('reason')
                     ->label(__('admin.resources.user.actions.enable_disable_reason'))
-                    ->placeholder(__('admin.resources.user.actions.enable_disable_reason_placeholder'))
-                ,
+                    ->placeholder(__('admin.resources.user.actions.enable_disable_reason_placeholder')),
             ])
             ->action(function ($data) {
                 $userRep = $this->getRep();
@@ -424,21 +527,19 @@ class UserProfile extends ViewRecord implements HasActions
             });
     }
 
-    private function sendSuccessNotification(string $msg = ""): void
+    private function sendSuccessNotification(string $msg = ''): void
     {
         Notification::make()
             ->success()
-            ->title($msg ?: "Success!")
-            ->send()
-        ;
+            ->title($msg ?: 'Success!')
+            ->send();
     }
 
-    private function sendFailNotification(string $msg = ""): void
+    private function sendFailNotification(string $msg = ''): void
     {
         Notification::make()
             ->danger()
-            ->title($msg ?: "Fail!")
-            ->send()
-        ;
+            ->title($msg ?: 'Fail!')
+            ->send();
     }
 }

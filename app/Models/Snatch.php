@@ -19,12 +19,14 @@
  * @property int $buy_log_id
  * @property int $leech_time_no_seeder
  */
+
 namespace App\Models;
 
-
+use App\Support\Format;
+use App\Support\Locale;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
-use JetBrains\PhpStorm\Pure;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * @property int $id
@@ -34,23 +36,23 @@ use JetBrains\PhpStorm\Pure;
  */
 class Snatch extends NexusModel
 {
-    /** @var  string */
+    /** @var string */
     protected $table = 'snatched';
 
-    /** @var  list<string> */
+    /** @var list<string> */
     protected $fillable = [
         'torrentid', 'userid', 'ip', 'port', 'uploaded', 'downloaded', 'to_go', 'seedtime', 'leechtime',
         'last_action', 'startdat', 'completedat', 'finished', 'hit_and_run_id', 'buy_log_id',
     ];
 
-    /** @var  array<string, string> */
+    /** @var array<string, string> */
     protected $casts = [
         'last_action' => 'datetime',
         'startdat' => 'datetime',
         'completedat' => 'datetime',
     ];
 
-    /** @var  array<int|string, mixed> */
+    /** @var array<int|string, mixed> */
     public static $cardTitles = [
         'upload_text' => '上传',
         'download_text' => '下载',
@@ -65,68 +67,72 @@ class Snatch extends NexusModel
     const FINISHED_NO = 'no';
 
     /**
-     * @return  \Illuminate\Database\Eloquent\Casts\Attribute<mixed, mixed>
+     * @return Attribute<mixed, mixed>
+     *
      * @deprecated Use uploadedText instead
      */
     protected function uploadText(): Attribute
     {
         return new Attribute(
-            get: fn($value, $attributes) => sprintf('%s@%s', \App\Support\Format::size($attributes['uploaded']), $this->getUploadSpeed())
+            get: fn ($value, $attributes) => sprintf('%s@%s', Format::size($attributes['uploaded']), $this->getUploadSpeed())
         );
     }
 
     /**
-     * @return  \Illuminate\Database\Eloquent\Casts\Attribute<mixed, mixed>
+     * @return Attribute<mixed, mixed>
+     *
      * @deprecated Use downloadedText instead
      */
     protected function downloadText(): Attribute
     {
         return new Attribute(
-            get: fn($value, $attributes) => sprintf('%s@%s', \App\Support\Format::size($attributes['downloaded']), $this->getDownloadSpeed())
+            get: fn ($value, $attributes) => sprintf('%s@%s', Format::size($attributes['downloaded']), $this->getDownloadSpeed())
         );
     }
 
-    /** @return  \Illuminate\Database\Eloquent\Casts\Attribute<mixed, mixed> */
+    /** @return  Attribute<mixed, mixed> */
     protected function uploadedText(): Attribute
     {
         return new Attribute(
-            get: fn($value, $attributes) => sprintf('%s@%s', \App\Support\Format::size($attributes['uploaded']), $this->getUploadSpeed())
+            get: fn ($value, $attributes) => sprintf('%s@%s', Format::size($attributes['uploaded']), $this->getUploadSpeed())
         );
     }
 
-    /** @return  \Illuminate\Database\Eloquent\Casts\Attribute<mixed, mixed> */
+    /** @return  Attribute<mixed, mixed> */
     protected function downloadedText(): Attribute
     {
         return new Attribute(
-            get: fn($value, $attributes) => sprintf('%s@%s', \App\Support\Format::size($attributes['downloaded']), $this->getDownloadSpeed())
+            get: fn ($value, $attributes) => sprintf('%s@%s', Format::size($attributes['downloaded']), $this->getDownloadSpeed())
         );
     }
 
-    /** @return  \Illuminate\Database\Eloquent\Casts\Attribute<mixed, mixed> */
+    /** @return  Attribute<mixed, mixed> */
     protected function shareRatio(): Attribute
     {
         return new Attribute(
-            get: fn($value, $attributes) => $this->getShareRatio()
+            get: fn ($value, $attributes) => $this->getShareRatio()
         );
     }
 
     public function getUploadSpeed(): string
     {
         if ($this->seedtime <= 0) {
-            $speed =  \App\Support\Format::size(0);
+            $speed = Format::size(0);
         } else {
-            $speed = \App\Support\Format::size($this->uploaded / ($this->seedtime + $this->leechtime));
+            $speed = Format::size($this->uploaded / ($this->seedtime + $this->leechtime));
         }
+
         return "$speed/s";
     }
 
     public function getDownloadSpeed(): string
     {
         if ($this->leechtime <= 0) {
-            $speed = \App\Support\Format::size(0);
+            $speed = Format::size(0);
         } else {
-            $speed = \App\Support\Format::size($this->downloaded / $this->leechtime);
+            $speed = Format::size($this->downloaded / $this->leechtime);
         }
+
         return "$speed/s";
     }
 
@@ -136,16 +142,17 @@ class Snatch extends NexusModel
         if ($this->downloaded) {
             $ratio = floor(($this->uploaded / $this->downloaded) * 1000) / 1000;
         } elseif ($this->uploaded) {
-            $ratio = \App\Support\Locale::trans('snatch.share_ratio_infinity', [], null);
+            $ratio = Locale::trans('snatch.share_ratio_infinity', [], null);
         } else {
             $ratio = '---';
         }
+
         return $ratio;
     }
 
     /**
-     * @param  \Illuminate\Database\Eloquent\Builder<Snatch>  $builder
-     * @return  mixed
+     * @param  Builder<Snatch>  $builder
+     * @return mixed
      */
     public function scopeIsFinished(Builder $builder)
     {
@@ -153,22 +160,22 @@ class Snatch extends NexusModel
     }
 
     /**
-     * @param  \Illuminate\Database\Eloquent\Builder<Snatch>  $builder
-     * @return  mixed
+     * @param  Builder<Snatch>  $builder
+     * @return mixed
      */
     public function scopeIsNotFinished(Builder $builder)
     {
         return $builder->where('finished', self::FINISHED_NO);
     }
 
-    /** @return  \Illuminate\Database\Eloquent\Relations\BelongsTo<Torrent, $this> */
-    public function torrent(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    /** @return  BelongsTo<Torrent, $this> */
+    public function torrent(): BelongsTo
     {
         return $this->belongsTo(Torrent::class, 'torrentid');
     }
 
-    /** @return  \Illuminate\Database\Eloquent\Relations\BelongsTo<User, $this> */
-    public function user(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    /** @return  BelongsTo<User, $this> */
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'userid');
     }

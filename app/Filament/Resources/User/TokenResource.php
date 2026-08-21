@@ -2,30 +2,25 @@
 
 namespace App\Filament\Resources\User;
 
-use Filament\Schemas\Schema;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteBulkAction;
 use App\Filament\Resources\User\TokenResource\Pages\ManageTokens;
-use App\Filament\Resources\User\TokenResource\Pages;
-use App\Filament\Resources\User\TokenResource\RelationManagers;
 use App\Models\PersonalAccessToken;
-use Filament\Forms;
+use App\Support\UserDisplay;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
 use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
 use Filament\Tables;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-use Illuminate\Support\HtmlString;
 
 class TokenResource extends Resource
 {
     protected static ?string $model = PersonalAccessToken::class;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    protected static string | \UnitEnum | null $navigationGroup = 'User';
+    protected static string|\UnitEnum|null $navigationGroup = 'User';
 
     protected static ?int $navigationSort = 6;
 
@@ -55,13 +50,11 @@ class TokenResource extends Resource
                 TextColumn::make('name')->label(__('label.name')),
                 TextColumn::make('abilities')
                     ->label(__('token.permission'))
-                    ->formatStateUsing(fn ($record): string => $record->abilitiesText)
-                ,
+                    ->formatStateUsing(fn ($record): string => $record->abilitiesText),
                 TextColumn::make('token')->label(__('token.token')),
                 TextColumn::make('tokenable_id')
                     ->label(__('label.username'))
-                    ->formatStateUsing(fn ($state) => \App\Support\UserDisplay::adminUsername($state))
-                ,
+                    ->formatStateUsing(fn ($state) => UserDisplay::adminUsername($state)),
                 TextColumn::make('last_used_at')->label(__('token.last_used_at')),
                 TextColumn::make('expires_at')->label(__('label.expire_at')),
                 TextColumn::make('created_at')->label(__('label.created_at')),
@@ -70,7 +63,7 @@ class TokenResource extends Resource
                 //
             ])
             ->recordActions([
-//                Tables\Actions\EditAction::make(),
+                //                Tables\Actions\EditAction::make(),
                 DeleteAction::make(),
             ])
             ->toolbarActions([

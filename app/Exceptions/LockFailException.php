@@ -13,6 +13,7 @@ class LockFailException extends NexusException
     {
         return $this->lockName;
     }
+
     public function getLockOwner(): string
     {
         return $this->lockOwner;

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Repositories\IndexRepository;
 use App\Services\Legacy\LegacyPartialRenderer;
+use App\Support\Bonus;
 use App\Support\SupportContext;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -24,7 +25,8 @@ class IndexController extends Controller
         $user = SupportContext::getUser();
         if ($user === null) {
             $qs = $request->getQueryString();
-            return redirect('/index.php' . ($qs ? '?' . $qs : ''));
+
+            return redirect('/index.php'.($qs ? '?'.$qs : ''));
         }
 
         IndexRepository::touchLastHome((int) $user['id']);
@@ -71,7 +73,7 @@ class IndexController extends Controller
 
         $pollvoteBonus = (float) SupportContext::getGlobal('pollvote_bonus', 0);
         if ($pollvoteBonus > 0) {
-            \App\Support\Bonus::updatePoints((string) '+', (float) $pollvoteBonus, $user['id']);
+            Bonus::updatePoints((string) '+', (float) $pollvoteBonus, $user['id']);
         }
 
         return redirect('/');

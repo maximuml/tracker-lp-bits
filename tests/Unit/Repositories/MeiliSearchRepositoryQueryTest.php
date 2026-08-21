@@ -33,7 +33,7 @@ final class MeiliSearchRepositoryQueryTest extends TestCase
 
     public function test_get_query_handles_array_search_input(): void
     {
-        $repo = new MeiliSearchRepository();
+        $repo = new MeiliSearchRepository;
         $method = new \ReflectionMethod($repo, 'getQuery');
         $method->setAccessible(true);
 
@@ -44,7 +44,7 @@ final class MeiliSearchRepositoryQueryTest extends TestCase
 
     public function test_get_query_trims_scalar_search_in_and_mode(): void
     {
-        $repo = new MeiliSearchRepository();
+        $repo = new MeiliSearchRepository;
         $method = new \ReflectionMethod($repo, 'getQuery');
         $method->setAccessible(true);
 
@@ -55,7 +55,7 @@ final class MeiliSearchRepositoryQueryTest extends TestCase
 
     public function test_get_query_wraps_scalar_search_in_exact_mode(): void
     {
-        $repo = new MeiliSearchRepository();
+        $repo = new MeiliSearchRepository;
         $method = new \ReflectionMethod($repo, 'getQuery');
         $method->setAccessible(true);
 
@@ -66,7 +66,7 @@ final class MeiliSearchRepositoryQueryTest extends TestCase
 
     public function test_get_search_area_defaults_on_array_input(): void
     {
-        $repo = new MeiliSearchRepository();
+        $repo = new MeiliSearchRepository;
         $method = new \ReflectionMethod($repo, 'getSearchArea');
         $method->setAccessible(true);
 
@@ -77,7 +77,7 @@ final class MeiliSearchRepositoryQueryTest extends TestCase
 
     public function test_get_search_area_returns_valid_scalar_value(): void
     {
-        $repo = new MeiliSearchRepository();
+        $repo = new MeiliSearchRepository;
         $method = new \ReflectionMethod($repo, 'getSearchArea');
         $method->setAccessible(true);
 

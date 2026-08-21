@@ -11,7 +11,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 
-class ManagePlugin implements ShouldQueue, ShouldBeUnique
+class ManagePlugin implements ShouldBeUnique, ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -48,7 +48,7 @@ class ManagePlugin implements ShouldQueue, ShouldBeUnique
             'install' => $pluginRepository->doInstall($this->plugin),
             'update' => $pluginRepository->doUpdate($this->plugin),
             'delete' => $pluginRepository->doDelete($this->plugin),
-            default => throw new \InvalidArgumentException("Invalid action: " . $this->action)
+            default => throw new \InvalidArgumentException('Invalid action: '.$this->action)
         };
     }
 }

@@ -17,7 +17,7 @@ final class Config
 
     public static function get(string $key, mixed $default = null): mixed
     {
-        if (!(defined('IN_NEXUS') && IN_NEXUS)) {
+        if (! (defined('IN_NEXUS') && IN_NEXUS)) {
             return config($key, $default);
         }
 
@@ -30,12 +30,12 @@ final class Config
 
     private static function loadLegacyConfigs(): void
     {
-        $root = defined('ROOT_PATH') ? ROOT_PATH : dirname(__DIR__, 2) . '/';
+        $root = defined('ROOT_PATH') ? ROOT_PATH : dirname(__DIR__, 2).'/';
         $files = ['nexus', 'emoji', 'captcha', 'clickhouse'];
 
         foreach ($files as $prefix) {
-            $file = $root . 'config/' . $prefix . '.php';
-            if (!file_exists($file)) {
+            $file = $root.'config/'.$prefix.'.php';
+            if (! file_exists($file)) {
                 continue;
             }
             self::$configs[$prefix] = require $file;

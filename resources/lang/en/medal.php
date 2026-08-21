@@ -1,16 +1,18 @@
 <?php
 
+use App\Models\Medal;
+
 return [
     'label' => 'Medal',
     'action_wearing' => 'Wear',
     'admin' => [
         'list' => [
-            'page_title' => 'Medal list'
-        ]
+            'page_title' => 'Medal list',
+        ],
     ],
     'get_types' => [
-        \App\Models\Medal::GET_TYPE_EXCHANGE => 'Exchange',
-        \App\Models\Medal::GET_TYPE_GRANT => 'Grant',
+        Medal::GET_TYPE_EXCHANGE => 'Exchange',
+        Medal::GET_TYPE_GRANT => 'Grant',
     ],
     'fields' => [
         'get_type' => 'Get type',
@@ -48,7 +50,7 @@ return [
     'max_allow_wearing' => 'A maximum of :count medals can be worn at the same time',
     'wearing_status_text' => [
         0 => 'Wearing',
-        1 => 'Not wearing'
+        1 => 'Not wearing',
     ],
     'bonus_addition_expire_at' => 'Bonus addition Expiration Time',
     'is_expired' => 'Is Expired',

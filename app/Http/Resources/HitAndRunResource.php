@@ -2,17 +2,21 @@
 
 namespace App\Http\Resources;
 
+use App\Models\HitAndRun;
+use App\Support\Time;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Nexus\Nexus;
 
 /**
- * @mixin \App\Models\HitAndRun
+ * @mixin HitAndRun
  */
 class HitAndRunResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
+     *
      * @param  mixed  $request
-     * @return  array<int|string, mixed>
+     * @return array<int|string, mixed>
      */
     public function toArray($request)
     {
@@ -27,14 +31,15 @@ class HitAndRunResource extends JsonResource
             'status' => $this->status,
             'status_text' => $this->status_text,
             'comment' => $this->comment,
-            'created_at' => \App\Support\Time::formatDateTime($this->created_at),
-            'updated_at' => \App\Support\Time::formatDateTime($this->updated_at),
+            'created_at' => Time::formatDateTime($this->created_at),
+            'updated_at' => Time::formatDateTime($this->updated_at),
             'seed_time_required' => $this->seedTimeRequired,
             'inspect_time_left' => $this->inspectTimeLeft,
         ];
-        if (\Nexus\Nexus::instance()->isPlatformAdmin()) {
+        if (Nexus::instance()->isPlatformAdmin()) {
             $out['comment'] = nl2br(trim($out['comment']));
         }
+
         return $out;
     }
 }

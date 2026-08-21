@@ -7,10 +7,12 @@ use App\Models\SearchBox;
 use App\Models\Torrent;
 use App\Models\User;
 use App\Support\Config\SiteConfig;
+use App\Support\Logger;
 use App\Support\Pagination;
 use App\Support\Permissions;
+use App\Support\SupportContext;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Http\Request;
-use Meilisearch\Exceptions\ApiException;
 use Nexus\Database\NexusDB;
 
 class SearchPageRepository
@@ -30,7 +32,7 @@ class SearchPageRepository
 
         $torrentsperpage = (int) ($currentUser->torrentsperpage ?: 0);
         if ($torrentsperpage <= 0) {
-            $torrentsperpage = (int) (\App\Support\SupportContext::getGlobal('torrentsperpage_main', 50) ?: 50);
+            $torrentsperpage = (int) (SupportContext::getGlobal('torrentsperpage_main', 50) ?: 50);
         }
 
         $approvalStatus = null;
@@ -49,7 +51,7 @@ class SearchPageRepository
         $meiliResult = ['total' => 0, 'list' => []];
 
         if ($shouldUseMeili) {
-            $meiliParams = \App\Support\SupportContext::allQuery();
+            $meiliParams = SupportContext::allQuery();
             $meiliParams['search'] = $searchRaw;
             $meiliParams['search_area'] = $searchArea;
             $meiliParams['mode'] = $modeArr;
@@ -62,10 +64,10 @@ class SearchPageRepository
             }
 
             try {
-                $searchRep = new MeiliSearchRepository();
+                $searchRep = new MeiliSearchRepository;
                 $meiliResult = $searchRep->search($meiliParams, $currentUser->id);
             } catch (\Throwable $e) {
-                \App\Support\Logger::writeWithContext('MeiliSearch search failed, falling back to SQL: ' . $e->getMessage(), 'error', false);
+                Logger::writeWithContext('MeiliSearch search failed, falling back to SQL: '.$e->getMessage(), 'error', false);
                 $shouldUseMeili = false;
             }
         }
@@ -89,10 +91,10 @@ class SearchPageRepository
 
             $ascdesc = ((string) $searchParams['type'] === 'asc') ? 'ASC' : 'DESC';
             $linkascdesc = ((string) $searchParams['type'] === 'asc') ? 'asc' : 'desc';
-            $pagerSortParam = 'sort=' . intval($searchParams['sort']) . '&type=' . $linkascdesc . '&';
+            $pagerSortParam = 'sort='.intval($searchParams['sort']).'&type='.$linkascdesc.'&';
         }
 
-        $addparam = '?search=' . urlencode($searchRaw) . '&search_area=' . $searchArea . '&' . $pagerSortParam;
+        $addparam = '?search='.urlencode($searchRaw).'&search_area='.$searchArea.'&'.$pagerSortParam;
 
         if ($shouldUseMeili) {
             $count = (int) ($meiliResult['total'] ?? 0);
@@ -129,11 +131,8 @@ class SearchPageRepository
 
     /**
      * @param  array<int, mixed>  $modeArr
-     * @param  int|null  $approvalStatus
-     * @param  string|null  $banned
-     * @return \Illuminate\Database\Query\Builder
      */
-    private static function buildFallbackQuery(string $search, int $searchArea, array $modeArr, ?int $approvalStatus, ?string $banned, int $currentUserId): \Illuminate\Database\Query\Builder
+    private static function buildFallbackQuery(string $search, int $searchArea, array $modeArr, ?int $approvalStatus, ?string $banned, int $currentUserId): Builder
     {
         $tableTorrent = 'torrents';
         $tableCategory = 'categories';
@@ -147,23 +146,23 @@ class SearchPageRepository
 
         if ($searchArea == (int) MeiliSearchRepository::SEARCH_AREA_TITLE) {
             foreach ($searchArr as $queryString) {
-                $q = '%' . addcslashes($queryString, '%_\\') . '%';
+                $q = '%'.addcslashes($queryString, '%_\\').'%';
                 $query->where("{$tableTorrent}.name", 'like', $q);
             }
         } elseif ($searchArea == (int) MeiliSearchRepository::SEARCH_AREA_DESC) {
             foreach ($searchArr as $queryString) {
-                $q = '%' . addcslashes($queryString, '%_\\') . '%';
+                $q = '%'.addcslashes($queryString, '%_\\').'%';
                 $query->where("{$tableTorrent}.descr", 'like', $q);
             }
         } elseif ($searchArea == (int) MeiliSearchRepository::SEARCH_AREA_OWNER) {
             $query->join($tableUser, "{$tableTorrent}.owner", '=', "{$tableUser}.id");
             foreach ($searchArr as $queryString) {
-                $q = '%' . addcslashes($queryString, '%_\\') . '%';
+                $q = '%'.addcslashes($queryString, '%_\\').'%';
                 $query->where("{$tableUser}.username", 'like', $q);
             }
         } else {
             foreach ($searchArr as $queryString) {
-                $q = '%' . addcslashes($queryString, '%_\\') . '%';
+                $q = '%'.addcslashes($queryString, '%_\\').'%';
                 $query->where("{$tableTorrent}.name", 'like', $q);
             }
         }

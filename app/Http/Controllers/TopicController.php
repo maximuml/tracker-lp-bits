@@ -7,7 +7,6 @@ use App\DTOs\Forum\ListTopicsDto;
 use App\DTOs\Forum\StoreTopicDto;
 use App\DTOs\Forum\UpdateTopicDto;
 use App\Enums\Permission\PermissionEnum;
-use App\Http\Resources\ForumResource;
 use App\Http\Resources\TopicResource;
 use App\Models\Forum;
 use App\Models\Topic;
@@ -16,7 +15,6 @@ use App\Repositories\ForumRepository;
 use App\Support\Forum as SupportForum;
 use App\Support\SupportContext;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 
@@ -24,8 +22,8 @@ class TopicController extends Controller
 {
     /**
      * Display a listing of the resource.
-     * @param  \Illuminate\Http\Request  $request
-     * @return  array<string, mixed>
+     *
+     * @return array<string, mixed>
      */
     public function index(Request $request)
     {
@@ -38,13 +36,14 @@ class TopicController extends Controller
         }
         $list = $query->get();
         $resource = TopicResource::collection($list);
+
         return $this->success($resource);
     }
 
     /**
      * Store a newly created resource in storage.
-     * @param  \Illuminate\Http\Request  $request
-     * @return  array<string, mixed>
+     *
+     * @return array<string, mixed>
      */
     public function store(Request $request)
     {
@@ -78,8 +77,8 @@ class TopicController extends Controller
 
     /**
      * Display the specified resource.
-     * @param  \App\Models\Topic  $topic
-     * @return  array<string, mixed>
+     *
+     * @return array<string, mixed>
      */
     public function show(Topic $topic)
     {
@@ -90,9 +89,8 @@ class TopicController extends Controller
 
     /**
      * Update the specified resource in storage.
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Topic  $topic
-     * @return  array<string, mixed>
+     *
+     * @return array<string, mixed>
      */
     public function update(Request $request, Topic $topic)
     {
@@ -136,8 +134,8 @@ class TopicController extends Controller
 
     /**
      * Remove the specified resource from storage.
-     * @param  \App\Models\Topic  $topic
-     * @return  array<string, mixed>
+     *
+     * @return array<string, mixed>
      */
     public function destroy(Topic $topic)
     {

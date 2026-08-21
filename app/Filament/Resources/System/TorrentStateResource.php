@@ -2,19 +2,19 @@
 
 namespace App\Filament\Resources\System;
 
-use Filament\Schemas\Schema;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\DateTimePicker;
-use Filament\Forms\Components\Textarea;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Actions\EditAction;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\DeleteBulkAction;
 use App\Filament\Resources\System\TorrentStateResource\Pages\ManageTorrentStates;
 use App\Models\Torrent;
 use App\Models\TorrentState;
 use Carbon\Carbon;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
 use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -22,9 +22,9 @@ class TorrentStateResource extends Resource
 {
     protected static ?string $model = TorrentState::class;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-megaphone';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-megaphone';
 
-    protected static string | \UnitEnum | null $navigationGroup = 'System';
+    protected static string|\UnitEnum|null $navigationGroup = 'System';
 
     protected static ?int $navigationSort = 9;
 
@@ -46,6 +46,7 @@ class TorrentStateResource extends Resource
                     ->options(function () {
                         $options = Torrent::listPromotionTypes(true);
                         unset($options[Torrent::PROMOTION_NORMAL]);
+
                         return $options;
                     })
                     ->label(__('label.torrent_state.global_sp_state'))
@@ -95,6 +96,7 @@ class TorrentStateResource extends Resource
                         if ($begin && $begin->gt($now)) {
                             return 'upcoming';
                         }
+
                         return 'ongoing';
                     })
                     ->formatStateUsing(function (string $state) {
@@ -107,6 +109,7 @@ class TorrentStateResource extends Resource
                     ->badge()
                     ->sortable(query: function (Builder $query, string $direction): Builder {
                         $now = Carbon::now()->toDateTimeString();
+
                         // expired=0, ongoing=1, upcoming=2
                         return $query->orderByRaw(
                             "CASE

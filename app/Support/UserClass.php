@@ -4,6 +4,7 @@ namespace App\Support;
 
 use App\Models\Setting;
 use App\Models\User;
+use App\Support\Config\SiteConfig;
 
 /**
  * Stateless mapping helpers for the legacy user-class ladder.
@@ -204,7 +205,6 @@ final class UserClass
      * the coloured `<b class="..._Name">` tag.
      */
     /**
-     * @param  int|string  $class
      * @param  array<string, mixed>  $options
      */
     public static function name(
@@ -224,17 +224,17 @@ final class UserClass
         $lang_functions = [];
 
         if ($enLangFunctions === null) {
-            require \App\Support\Locale::scriptFilePath((string) 'functions.php', (bool) false, (string) 'en');
+            require Locale::scriptFilePath((string) 'functions.php', (bool) false, (string) 'en');
             $enLangFunctions = $lang_functions;
         }
 
         if ($settingAccount === null) {
-            $settingAccount = \App\Support\Config\SiteConfig::current()->account->toArray();
+            $settingAccount = SiteConfig::current()->account->toArray();
         }
 
         if ($I18N) {
             if ($currentLangFunctions === null) {
-                require \App\Support\Locale::scriptFilePath((string) 'functions.php', (bool) false, (string) "");
+                require Locale::scriptFilePath((string) 'functions.php', (bool) false, (string) '');
                 $currentLangFunctions = $lang_functions;
             }
             $thisLangFunctions = $currentLangFunctions;
@@ -284,7 +284,7 @@ final class UserClass
         array $labels = [],
     ): string {
         $disabledText = $disabled ? ' disabled = "disabled"' : '';
-        $list = "<select name=\"" . $selectName . "\"" . $disabledText . ">";
+        $list = '<select name="'.$selectName.'"'.$disabledText.'>';
 
         if ($includeNoClass) {
             $list .= sprintf(
@@ -296,10 +296,11 @@ final class UserClass
 
         for ($i = $minClass; $i <= $maxClass; $i++) {
             $selectedAttr = (int) $selected === $i ? ' selected="selected"' : '';
-            $list .= "<option value=\"" . $i . "\"" . $selectedAttr . ">" . self::name($i, false, false, true) . "</option>\n";
+            $list .= '<option value="'.$i.'"'.$selectedAttr.'>'.self::name($i, false, false, true)."</option>\n";
         }
 
-        $list .= "</select>";
+        $list .= '</select>';
+
         return $list;
     }
 
@@ -316,7 +317,7 @@ final class UserClass
         bool $includeNoClass = false,
         bool $disabled = false,
     ): string {
-        $lang = \App\Support\SupportContext::getLangFunctions();
+        $lang = SupportContext::getLangFunctions();
 
         return self::classSelect(
             $selectName,

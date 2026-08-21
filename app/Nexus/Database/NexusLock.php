@@ -3,21 +3,23 @@
 namespace Nexus\Database;
 
 use App\Exceptions\LockFailException;
+use App\Support\Logger;
 use Illuminate\Cache\LuaScripts;
 use Illuminate\Cache\RedisLock;
 
 class NexusLock extends RedisLock
 {
-
     /**
      * @var \Redis
      */
     protected $redis;
+
     /**
      * NexusLock constructor.
-     * @param string $name
-     * @param int $seconds
-     * @param null $owner
+     *
+     * @param  string  $name
+     * @param  int  $seconds
+     * @param  null  $owner
      */
     public function __construct($name, $seconds, $owner = null)
     {
@@ -54,11 +56,11 @@ class NexusLock extends RedisLock
     public static function lockOrFail($name, $seconds, $owner = null): NexusLock
     {
         $lock = new self($name, $seconds, $owner);
-        if (!$lock->acquire()) {
-            \App\Support\Logger::writeWithContext((string) "{$name} failed to acquire lock", (string) 'error', (bool) false);
+        if (! $lock->acquire()) {
+            Logger::writeWithContext((string) "{$name} failed to acquire lock", (string) 'error', (bool) false);
             throw new LockFailException($name, $lock->owner());
         }
+
         return $lock;
     }
-
 }

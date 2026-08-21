@@ -3,6 +3,11 @@
 namespace App\Repositories;
 
 use App\Models\Passkey;
+use App\Support\AuthCookie;
+use App\Support\Config\SiteConfig;
+use App\Support\Locale;
+use App\Support\Network;
+use App\Support\Time;
 use Exception;
 use lbuchs\WebAuthn\WebAuthn;
 use Nexus\Database\NexusDB;
@@ -11,13 +16,13 @@ use RuntimeException;
 
 class UserPasskeyRepository extends BaseRepository
 {
-
     /** @return  mixed */
     public static function createWebAuthn()
     {
         $formats = ['android-key', 'android-safetynet', 'apple', 'fido-u2f', 'packed', 'tpm', 'none'];
-        $rpId = explode(':', \Nexus\Nexus::instance()->getRequestHost())[0];
-        return new WebAuthn(\App\Support\Config\SiteConfig::current()->basic->siteName(), $rpId, $formats);
+        $rpId = explode(':', Nexus::instance()->getRequestHost())[0];
+
+        return new WebAuthn(SiteConfig::current()->basic->siteName(), $rpId, $formats);
     }
 
     /** @param  mixed  $challenge */
@@ -25,27 +30,29 @@ class UserPasskeyRepository extends BaseRepository
     {
         $challengeId = bin2hex(random_bytes(32));
         NexusDB::cache_put("passkey_challenge_{$challengeId}", $challenge, 120);
+
         return $challengeId;
     }
 
     /**
      * @param  mixed  $challengeId
-     * @return  mixed
+     * @return mixed
      */
     private static function getChallenge($challengeId)
     {
         $challenge = NexusDB::cache_get("passkey_challenge_{$challengeId}") ?? null;
         if ($challenge == null) {
-            throw new RuntimeException(\App\Support\Locale::trans('passkey.passkey_timeout', [], null));
+            throw new RuntimeException(Locale::trans('passkey.passkey_timeout', [], null));
         }
         NexusDB::cache_del("passkey_challenge_{$challengeId}");
+
         return $challenge;
     }
 
     /**
      * @param  mixed  $userId
      * @param  mixed  $userName
-     * @return  array<int|string, mixed>
+     * @return array<int|string, mixed>
      */
     public static function getCreateArgs($userId, $userName)
     {
@@ -71,13 +78,13 @@ class UserPasskeyRepository extends BaseRepository
      * @param  mixed  $challengeId
      * @param  mixed  $clientDataJSON
      * @param  mixed  $attestationObject
-     * @return  mixed
+     * @return mixed
      */
     public static function processCreate($userId, $challengeId, $clientDataJSON, $attestationObject)
     {
         $challenge = self::getChallenge($challengeId);
-        $clientDataJSON = !empty($clientDataJSON) ? base64_decode($clientDataJSON) : null;
-        $attestationObject = !empty($attestationObject) ? base64_decode($attestationObject) : null;
+        $clientDataJSON = ! empty($clientDataJSON) ? base64_decode($clientDataJSON) : null;
+        $attestationObject = ! empty($attestationObject) ? base64_decode($attestationObject) : null;
 
         $WebAuthn = self::createWebAuthn();
 
@@ -114,7 +121,7 @@ class UserPasskeyRepository extends BaseRepository
      * @param  mixed  $credentialId
      * @param  mixed  $publicKey
      * @param  mixed  $counter
-     * @return  mixed
+     * @return mixed
      */
     public static function insertUserPasskey($userId, $AAGUID, $credentialId, $publicKey, $counter)
     {
@@ -135,55 +142,56 @@ class UserPasskeyRepository extends BaseRepository
      * @param  mixed  $authenticatorData
      * @param  mixed  $signature
      * @param  mixed  $userHandle
-     * @return  mixed
+     * @return mixed
      */
     public static function processGet($challengeId, $id, $clientDataJSON, $authenticatorData, $signature, $userHandle)
     {
         $challenge = self::getChallenge($challengeId);
-        $clientDataJSON = !empty($clientDataJSON) ? base64_decode($clientDataJSON) : null;
-        $id = !empty($id) ? base64_decode($id) : null;
-        if (!is_string($id) || $id === '') {
-            throw new RuntimeException(\App\Support\Locale::trans('passkey.passkey_invalid', [], null));
+        $clientDataJSON = ! empty($clientDataJSON) ? base64_decode($clientDataJSON) : null;
+        $id = ! empty($id) ? base64_decode($id) : null;
+        if (! is_string($id) || $id === '') {
+            throw new RuntimeException(Locale::trans('passkey.passkey_invalid', [], null));
         }
-        $authenticatorData = !empty($authenticatorData) ? base64_decode($authenticatorData) : null;
-        $signature = !empty($signature) ? base64_decode($signature) : null;
-        $userHandle = !empty($userHandle) ? base64_decode($userHandle) : null;
+        $authenticatorData = ! empty($authenticatorData) ? base64_decode($authenticatorData) : null;
+        $signature = ! empty($signature) ? base64_decode($signature) : null;
+        $userHandle = ! empty($userHandle) ? base64_decode($userHandle) : null;
 
         $WebAuthn = self::createWebAuthn();
 
         $passkey = Passkey::query()->where('credential_id', '=', bin2hex($id))->first();
         if ($passkey === null) {
-            throw new RuntimeException(\App\Support\Locale::trans('passkey.passkey_unknown', [], null));
+            throw new RuntimeException(Locale::trans('passkey.passkey_unknown', [], null));
         }
 
-        if ($userHandle !== bin2hex((string)$passkey->user_id)) {
-            throw new RuntimeException(\App\Support\Locale::trans('passkey.passkey_invalid', [], null));
+        if ($userHandle !== bin2hex((string) $passkey->user_id)) {
+            throw new RuntimeException(Locale::trans('passkey.passkey_invalid', [], null));
         }
 
         try {
             $WebAuthn->processGet($clientDataJSON, $authenticatorData, $signature, $passkey->public_key, $challenge, null, false, true);
         } catch (Exception $e) {
-            throw new RuntimeException(\App\Support\Locale::trans('passkey.passkey_error', [], null) . "\n" . $e->getMessage());
+            throw new RuntimeException(Locale::trans('passkey.passkey_error', [], null)."\n".$e->getMessage());
         }
 
         $user = $passkey->user;
-        if (!$user) {
-            throw new RuntimeException(\App\Support\Locale::trans('passkey.passkey_user_not_found', [], null));
+        if (! $user) {
+            throw new RuntimeException(Locale::trans('passkey.passkey_user_not_found', [], null));
         }
         $user->checkIsNormal();
 
-        $ip = \App\Support\Network::clientIp();
-        $userRep = new UserRepository();
+        $ip = Network::clientIp();
+        $userRep = new UserRepository;
         $userRep->saveLoginLog($user->id, $ip, 'Web', true);
 
-        \App\Support\AuthCookie::setLoginCookie((int) $user->id, (string) $user->auth_key, (int) 0);
+        AuthCookie::setLoginCookie((int) $user->id, (string) $user->auth_key, (int) 0);
+
         return true;
     }
 
     /**
      * @param  mixed  $userId
      * @param  mixed  $credentialId
-     * @return  mixed
+     * @return mixed
      */
     public static function delete($userId, $credentialId)
     {
@@ -192,7 +200,7 @@ class UserPasskeyRepository extends BaseRepository
 
     /**
      * @param  mixed  $userId
-     * @return  mixed
+     * @return mixed
      */
     public static function getList($userId)
     {
@@ -202,19 +210,20 @@ class UserPasskeyRepository extends BaseRepository
     /** @return  mixed */
     public static function getAaguids()
     {
-        return NexusDB::remember("aaguids", 60 * 60 * 24 * 14, function () {
-            $json = file_get_contents("https://raw.githubusercontent.com/passkeydeveloper/passkey-authenticator-aaguids/refs/heads/main/combined_aaguid.json");
+        return NexusDB::remember('aaguids', 60 * 60 * 24 * 14, function () {
+            $json = file_get_contents('https://raw.githubusercontent.com/passkeydeveloper/passkey-authenticator-aaguids/refs/heads/main/combined_aaguid.json');
+
             return $json === false ? null : json_decode($json, true);
         });
     }
 
-    /** @var  string */
+    /** @var string */
     private static $passkeyvg = 'data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20216%20216%22%20xml%3Aspace%3D%22preserve%22%3E%3Cg%2F%3E%3Cpath%20style%3D%22fill%3Anone%22%20d%3D%22M0%200h216v216H0z%22%2F%3E%3Cpath%20d%3D%22M172.32%2096.79c0%2013.78-8.48%2025.5-20.29%2029.78l7.14%2011.83-10.57%2013%2010.57%2012.71-17.04%2022.87-12.01-12.82V125.7c-10.68-4.85-18.15-15.97-18.15-28.91%200-17.4%2013.51-31.51%2030.18-31.51%2016.66%200%2030.17%2014.11%2030.17%2031.51m-30.18%204.82c4.02%200%207.28-3.4%207.28-7.6s-3.26-7.61-7.28-7.61-7.28%203.4-7.28%207.61c-.01%204.2%203.26%207.6%207.28%207.6%22%20style%3D%22fill-rule%3Aevenodd%3Bclip-rule%3Aevenodd%3Bfill%3A%23353535%22%2F%3E%3Cpath%20d%3D%22M172.41%2096.88c0%2013.62-8.25%2025.23-19.83%2029.67l6.58%2011.84-9.73%2013%209.73%2012.71-17.03%2023.05v-85.54c4.02%200%207.28-3.41%207.28-7.6%200-4.2-3.26-7.61-7.28-7.61V65.28c16.73%200%2030.28%2014.15%2030.28%2031.6m-52.17%2034.55c-9.75-8-16.3-20.3-17.2-34.27H50.8c-10.96%200-19.84%209.01-19.84%2020.13v25.17c0%205.56%204.44%2010.07%209.92%2010.07h69.44c5.48%200%209.92-4.51%209.92-10.07z%22%20style%3D%22fill-rule%3Aevenodd%3Bclip-rule%3Aevenodd%22%2F%3E%3Cpath%20d%3D%22M73.16%2091.13c-2.42-.46-4.82-.89-7.11-1.86-8.65-3.63-13.69-10.32-15.32-19.77-1.12-6.47-.59-12.87%202.03-18.92%203.72-8.6%2010.39-13.26%2019.15-14.84%205.24-.94%2010.46-.73%2015.5%201.15%207.59%202.82%2012.68%208.26%2015.03%2016.24%202.38%208.05%202.03%2016.1-1.56%2023.72-3.72%207.96-10.21%2012.23-18.42%2013.9-.68.14-1.37.27-2.05.41-2.41-.03-4.83-.03-7.25-.03%22%20style%3D%22fill%3A%23141313%22%2F%3E%3C%2Fsvg%3E';
 
     /** @return  void */
     public static function renderLogin()
     {
-        printf('<p id="passkey_box"><button type="button" id="passkey_login"><img style="width:32px" src="%s" alt="%s"><br>%s</button></p>', self::$passkeyvg, \App\Support\Locale::trans('passkey.passkey', [], null), \App\Support\Locale::trans('passkey.passkey', [], null));
+        printf('<p id="passkey_box"><button type="button" id="passkey_login"><img style="width:32px" src="%s" alt="%s"><br>%s</button></p>', self::$passkeyvg, Locale::trans('passkey.passkey', [], null), Locale::trans('passkey.passkey', [], null));
         ?>
         <script>
             document.addEventListener("DOMContentLoaded", function () {
@@ -225,7 +234,7 @@ class UserPasskeyRepository extends BaseRepository
                 }
                 document.getElementById('passkey_login').addEventListener('click', () => {
                     if (!Passkey.supported()) {
-                        layer.alert('<?php echo \App\Support\Locale::trans('passkey.passkey_not_supported', [], null); ?>');
+                        layer.alert('<?php echo Locale::trans('passkey.passkey_not_supported', [], null); ?>');
                     } else {
                         startPasskeyLogin(false);
                     }
@@ -256,17 +265,17 @@ class UserPasskeyRepository extends BaseRepository
 
     /**
      * @param  mixed  $id
-     * @return  mixed
+     * @return mixed
      */
     public static function renderList($id)
     {
         $passkeys = self::getList($id);
-        printf('<button type="button" id="passkey_create">%s</button><br>%s', \App\Support\Locale::trans('passkey.passkey_create', [], null), \App\Support\Locale::trans('passkey.passkey_desc', [], null));
+        printf('<button type="button" id="passkey_create">%s</button><br>%s', Locale::trans('passkey.passkey_create', [], null), Locale::trans('passkey.passkey_desc', [], null));
         ?>
         <table>
             <?php
             if (empty($passkeys)) {
-                printf('<tr><td>%s</td></tr>', \App\Support\Locale::trans('passkey.passkey_empty', [], null));
+                printf('<tr><td>%s</td></tr>', Locale::trans('passkey.passkey_empty', [], null));
             } else {
                 $AAGUIDS = self::getAaguids();
                 foreach ($passkeys as $passkey) {
@@ -276,14 +285,14 @@ class UserPasskeyRepository extends BaseRepository
                             <div style="display:flex;align-items:center;padding:4px">
                                 <?php
                                 $meta = $AAGUIDS[$passkey->getAaguidFormatted()];
-                                if (isset($meta)) {
-                                    printf('<img style="width: 32px" src="%s" alt="%s" /><div style="margin-right:4px"><b>%s</b> (%s)', $meta['icon_dark'], $meta['name'], $meta['name'], $passkey->credential_id);
-                                } else {
-                                    printf('<img style="width: 32px" src="%s" alt="%s" /><div style="margin-right:4px"><b>%s</b>', self::$passkeyvg, $passkey->credential_id, $passkey->credential_id);
-                                }
-                                printf('<br><b>%s</b>%s</div>', \App\Support\Locale::trans('passkey.passkey_created_at', [], null), \App\Support\Time::format($passkey->created_at));
-                                printf('<button type="button" style="margin-left:auto" data-passkey-id="%s">%s</button>', $passkey->credential_id, \App\Support\Locale::trans('passkey.passkey_delete', [], null))
-                                ?>
+                    if (isset($meta)) {
+                        printf('<img style="width: 32px" src="%s" alt="%s" /><div style="margin-right:4px"><b>%s</b> (%s)', $meta['icon_dark'], $meta['name'], $meta['name'], $passkey->credential_id);
+                    } else {
+                        printf('<img style="width: 32px" src="%s" alt="%s" /><div style="margin-right:4px"><b>%s</b>', self::$passkeyvg, $passkey->credential_id, $passkey->credential_id);
+                    }
+                    printf('<br><b>%s</b>%s</div>', Locale::trans('passkey.passkey_created_at', [], null), Time::format($passkey->created_at));
+                    printf('<button type="button" style="margin-left:auto" data-passkey-id="%s">%s</button>', $passkey->credential_id, Locale::trans('passkey.passkey_delete', [], null))
+                    ?>
                             </div>
                         </td>
                     </tr>
@@ -295,7 +304,7 @@ class UserPasskeyRepository extends BaseRepository
             document.addEventListener("DOMContentLoaded", function () {
                 document.getElementById('passkey_create').addEventListener('click', () => {
                     if (!Passkey.supported()) {
-                        layer.alert('<?php echo \App\Support\Locale::trans('passkey.passkey_not_supported', [], null); ?>');
+                        layer.alert('<?php echo Locale::trans('passkey.passkey_not_supported', [], null); ?>');
                     } else {
                         layer.load(2, {shade: 0.3});
                         Passkey.createRegistration().then(() => {
@@ -310,7 +319,7 @@ class UserPasskeyRepository extends BaseRepository
                 document.querySelectorAll('button[data-passkey-id]').forEach((button) => {
                     button.addEventListener('click', () => {
                         const credentialId = button.getAttribute('data-passkey-id');
-                        layer.confirm('<?php echo \App\Support\Locale::trans('passkey.passkey_delete_confirm', [], null); ?>', {}, function () {
+                        layer.confirm('<?php echo Locale::trans('passkey.passkey_delete_confirm', [], null); ?>', {}, function () {
                             layer.load(2, {shade: 0.3});
                             Passkey.deleteRegistration(credentialId).then(() => {
                                 location.reload();

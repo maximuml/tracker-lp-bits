@@ -10,24 +10,26 @@
  * @property int $editedby
  * @property string|null $editdate
  */
+
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Post extends NexusModel
 {
-    /** @var  list<string> */
+    /** @var list<string> */
     protected $fillable = [
         'topicid', 'userid', 'added', 'body', 'ori_body', 'editedby', 'editdate',
     ];
 
-    /** @var  array<string, string> */
+    /** @var array<string, string> */
     protected $casts = [
         'added' => 'datetime',
         'editdate' => 'datetime',
     ];
 
-    /** @return  \Illuminate\Database\Eloquent\Relations\BelongsTo<User, $this> */
-    public function user(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    /** @return  BelongsTo<User, $this> */
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'userid');
     }

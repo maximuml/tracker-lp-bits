@@ -16,7 +16,7 @@ return new class extends Migration
                 $table->dropColumn('modcomment');
             }
             if (Schema::hasColumn('users', 'bonuscomment')) {
-                $table->dropColumn("bonuscomment");
+                $table->dropColumn('bonuscomment');
             }
         });
     }

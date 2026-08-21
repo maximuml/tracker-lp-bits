@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Repositories\TorrentRepository;
 use Illuminate\Console\Command;
+use Nexus\Nexus;
 
 class TorrentLoadPiecesHash extends Command
 {
@@ -23,16 +24,18 @@ class TorrentLoadPiecesHash extends Command
 
     /**
      * Execute the console command.
-     * @return  int
+     *
+     * @return int
      */
     public function handle()
     {
         $begin = time();
         $id = $this->option('id');
-        $rep = new TorrentRepository();
+        $rep = new TorrentRepository;
         $this->info("id: $id, going to load pieces hash...");
         $result = $rep->loadPiecesHashCache($id);
-        $this->info(sprintf("%s, result: %s, cost time: %s seconds.", \Nexus\Nexus::instance()->getRequestId(), json_encode($result), time() - $begin));
+        $this->info(sprintf('%s, result: %s, cost time: %s seconds.', Nexus::instance()->getRequestId(), json_encode($result), time() - $begin));
+
         return Command::SUCCESS;
     }
 }

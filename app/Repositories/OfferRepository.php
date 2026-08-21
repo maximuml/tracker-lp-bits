@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace App\Repositories;
 
 use App\Models\Comment;
-use App\Models\Message;
 use App\Models\Offer;
 use App\Models\StaffMessage;
 use App\Models\User;
+use App\Support\Locale;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -50,7 +50,7 @@ final class OfferRepository extends BaseRepository
     }
 
     /**
-     * @return  array{yeah: int, against: int}
+     * @return array{yeah: int, against: int}
      */
     public static function getVoteCounts(int $offerId): array
     {
@@ -78,7 +78,7 @@ final class OfferRepository extends BaseRepository
     }
 
     /**
-     * @return  \Illuminate\Support\Collection<int, \stdClass>
+     * @return Collection<int, \stdClass>
      */
     public static function getVoteRows(int $offerId, int $offset, int $perPage): Collection
     {
@@ -143,7 +143,7 @@ final class OfferRepository extends BaseRepository
     }
 
     /**
-     * @return  array<string, mixed>|null
+     * @return array<string, mixed>|null
      */
     public static function getLastComment(int $offerId): ?array
     {
@@ -158,7 +158,7 @@ final class OfferRepository extends BaseRepository
     }
 
     /**
-     * @return  \Illuminate\Database\Eloquent\Collection<int, Comment>
+     * @return \Illuminate\Database\Eloquent\Collection<int, Comment>
      */
     public static function getComments(int $offerId, int $offset, int $perPage): \Illuminate\Database\Eloquent\Collection
     {
@@ -174,8 +174,8 @@ final class OfferRepository extends BaseRepository
     {
         StaffMessage::query()->insert([
             'sender' => $senderId,
-            'subject' => \App\Support\Locale::trans('offer.msg_new_offer_subject', [], null),
-            'msg' => \App\Support\Locale::trans('offer.msg_new_offer_msg', ['username' => "[url=userdetails.php?id={$senderId}]{$senderName}[/url]", 'offername' => "[url=offers.php?id={$offerId}&off_details=1]{$offerName}[/url]"], null),
+            'subject' => Locale::trans('offer.msg_new_offer_subject', [], null),
+            'msg' => Locale::trans('offer.msg_new_offer_msg', ['username' => "[url=userdetails.php?id={$senderId}]{$senderName}[/url]", 'offername' => "[url=offers.php?id={$offerId}&off_details=1]{$offerName}[/url]"], null),
             'added' => now(),
         ]);
     }
@@ -186,7 +186,7 @@ final class OfferRepository extends BaseRepository
     }
 
     /**
-     * @return  array{count: int, rows: \Illuminate\Support\Collection<int, \stdClass>}
+     * @return array{count: int, rows: Collection<int, \stdClass>}
      */
     public static function getLegacyList(int $category, int $offerorId, string $search, string $sort, string $direction, int $offset, int $perPage): array
     {
@@ -204,7 +204,7 @@ final class OfferRepository extends BaseRepository
         }
 
         if ($search !== '') {
-            $query->where('offers.name', 'like', '%' . $search . '%');
+            $query->where('offers.name', 'like', '%'.$search.'%');
         }
 
         $count = (int) $query->count('offers.id');
@@ -274,7 +274,7 @@ final class OfferRepository extends BaseRepository
         }
 
         if ($search !== '') {
-            $query->where('offers.name', 'like', '%' . $search . '%');
+            $query->where('offers.name', 'like', '%'.$search.'%');
         }
 
         $count = (int) $query->count('offers.id');

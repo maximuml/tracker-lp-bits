@@ -3,9 +3,12 @@
 namespace App\Console\Commands;
 
 use App\Models\User;
+use App\Support\LegacyDb;
+use App\Support\Logger;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Laravel\Sanctum\PersonalAccessToken;
+use Nexus\Nexus;
 
 class DeleteExpiredToken extends Command
 {
@@ -25,7 +28,8 @@ class DeleteExpiredToken extends Command
 
     /**
      * Create a new command instance.
-     * @return  void
+     *
+     * @return void
      */
     public function __construct()
     {
@@ -34,13 +38,14 @@ class DeleteExpiredToken extends Command
 
     /**
      * Execute the console command.
-     * @return  int
+     *
+     * @return int
      */
     public function handle()
     {
         $uid = $this->option('uid');
         $days = $this->option('days');
-        if (!is_numeric($days)) {
+        if (! is_numeric($days)) {
             $days = 60;
         }
         $query = PersonalAccessToken::query()->where('tokenable_type', User::class);
@@ -49,13 +54,14 @@ class DeleteExpiredToken extends Command
         }
         $log = sprintf('uid: %s, days: %s', $uid, $days);
         $this->info($log);
-        \App\Support\Logger::writeWithContext((string) $log, (string) 'info', (bool) false);
+        Logger::writeWithContext((string) $log, (string) 'info', (bool) false);
 
         $query->where('last_used_at', '<', Carbon::now()->subDays((int) $days));
         $result = $query->delete();
-        $log = sprintf('[%s], %s, result: %s, query: %s', \Nexus\Nexus::instance()->getRequestId(), __METHOD__, var_export($result, true), \App\Support\LegacyDb::lastQuery(false, 'json'));
+        $log = sprintf('[%s], %s, result: %s, query: %s', Nexus::instance()->getRequestId(), __METHOD__, var_export($result, true), LegacyDb::lastQuery(false, 'json'));
         $this->info($log);
-        \App\Support\Logger::writeWithContext((string) $log, (string) 'info', (bool) false);
+        Logger::writeWithContext((string) $log, (string) 'info', (bool) false);
+
         return 0;
     }
 }

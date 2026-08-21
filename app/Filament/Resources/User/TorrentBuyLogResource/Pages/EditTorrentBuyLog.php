@@ -2,9 +2,8 @@
 
 namespace App\Filament\Resources\User\TorrentBuyLogResource\Pages;
 
-use Filament\Actions\DeleteAction;
 use App\Filament\Resources\User\TorrentBuyLogResource;
-use Filament\Pages\Actions;
+use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 
 class EditTorrentBuyLog extends EditRecord

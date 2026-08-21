@@ -10,17 +10,16 @@
  * @property string|null $created_at
  * @property string|null $updated_at
  */
+
 namespace App\Models;
 
 class LoginLog extends NexusModel
 {
-    /** @var  bool */
+    /** @var bool */
     public $timestamps = true;
 
-    /** @var  list<string> */
+    /** @var list<string> */
     protected $fillable = [
-        'uid', 'ip', 'country', 'city', 'client'
+        'uid', 'ip', 'country', 'city', 'client',
     ];
-
-
 }

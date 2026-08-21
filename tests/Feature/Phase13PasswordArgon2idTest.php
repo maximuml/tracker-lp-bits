@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Support\PasswordHasher;
 use App\Support\Token;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
 /**
@@ -75,7 +76,7 @@ final class Phase13PasswordArgon2idTest extends TestCase
     public function test_migration_adds_passhash_algo_column(): void
     {
         $this->assertTrue(
-            \Schema::hasColumn('users', 'passhash_algo'),
+            Schema::hasColumn('users', 'passhash_algo'),
             'users table should have passhash_algo column after migration'
         );
     }

@@ -29,6 +29,7 @@ use App\Support\Json;
 use App\Support\Locale;
 use App\Support\Logger;
 use App\Support\Network;
+use App\Support\PasswordHasher;
 use App\Support\Token;
 use App\Support\UserDisplay;
 use App\Support\Validators;
@@ -180,11 +181,12 @@ class UserRepository extends BaseRepository
         }
         $setting = SiteConfig::current()->main->toArray();
         $secret = Token::randomHex((int) 20);
-        $passhash = hash('sha256', $secret.hash('sha256', $password));
+        $passhash = PasswordHasher::hash($password);
         $data = [
             'username' => $username,
             'email' => $email,
             'secret' => $secret,
+            'passhash_algo' => PasswordHasher::ALGO_ARGON2ID,
             'auth_key' => Token::randomHex((int) 20),
             'editsecret' => '',
             'passhash' => $passhash,
@@ -232,10 +234,11 @@ class UserRepository extends BaseRepository
             $this->checkPermission($operator, $user);
         }
         $secret = Token::randomHex((int) 20);
-        $passhash = hash('sha256', $secret.hash('sha256', $password));
+        $passhash = PasswordHasher::hash($password);
         $update = [
             'secret' => $secret,
             'passhash' => $passhash,
+            'passhash_algo' => PasswordHasher::ALGO_ARGON2ID,
             'auth_key' => Token::randomHex((int) 20),
         ];
         $user->update($update);

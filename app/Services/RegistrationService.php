@@ -19,6 +19,7 @@ use App\Support\Http;
 use App\Support\Locale;
 use App\Support\Mail;
 use App\Support\Network;
+use App\Support\PasswordHasher;
 use App\Support\Strings;
 use App\Support\Token;
 use App\Support\Url;
@@ -174,9 +175,18 @@ class RegistrationService
             );
         }
 
-        $clientHashedPassword = $isClientHashed ? $passwordInput : hash('sha256', $passwordInput);
-        $secret = Token::randomHex();
-        $passhash = hash('sha256', $secret.$clientHashedPassword);
+        // Use argon2id for new passwords. If the client pre-hashed the password
+        // (isClientHashed), we fall back to legacy sha256 since we don't have
+        // the plaintext password to feed to password_hash().
+        if ($isClientHashed) {
+            $secret = Token::randomHex();
+            $passhash = hash('sha256', $secret.$passwordInput);
+            $passhashAlgo = PasswordHasher::ALGO_SHA256;
+        } else {
+            $passhash = PasswordHasher::hash($passwordInput);
+            $secret = Token::randomHex();
+            $passhashAlgo = PasswordHasher::ALGO_ARGON2ID;
+        }
         $authKey = Token::randomHex();
         $passkey = md5($username.now()->toDateTimeString().$passhash);
         $verification = (string) SiteConfig::current()->main->verification('email');
@@ -185,6 +195,7 @@ class RegistrationService
         $userData = [
             'username' => $username,
             'passhash' => $passhash,
+            'passhash_algo' => $passhashAlgo,
             'passkey' => $passkey,
             'secret' => $secret,
             'auth_key' => $authKey,
@@ -313,13 +324,13 @@ class RegistrationService
         $this->validatePassword($password, $passAgain, (string) $user->username, $langConfirmResend);
 
         $secret = Token::randomHex();
-        $clientHashedPassword = hash('sha256', $password);
-        $passhash = hash('sha256', $secret.$clientHashedPassword);
+        $passhash = PasswordHasher::hash($password);
         $verification = (string) SiteConfig::current()->main->verification('email');
         $editsecret = $verification === 'admin' ? '' : $secret;
 
         $affected = User::query()->where('id', $user->id)->update([
             'passhash' => $passhash,
+            'passhash_algo' => PasswordHasher::ALGO_ARGON2ID,
             'secret' => $secret,
             'editsecret' => $editsecret,
         ]);

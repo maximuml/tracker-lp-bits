@@ -180,11 +180,12 @@ class AuthenticateController extends Controller
             $username = $request->username;
             $challenge = Token::randomHex((int) 20);
             NexusDB::cache_put(Token::challengeKey($username), $challenge, 300);
-            $user = User::query()->where('username', $username)->first(['secret']);
+            $user = User::query()->where('username', $username)->first(['secret', 'passhash_algo']);
 
             return $this->success([
                 'challenge' => $challenge,
                 'secret' => $user->secret ?? Token::randomHex((int) 20),
+                'passhash_algo' => $user->passhash_algo ?? 'sha256',
             ]);
         } catch (\Exception $exception) {
             $msg = $exception->getMessage();

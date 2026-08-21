@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use App\Models\User;
 use App\Support\Config\SiteConfig;
+use App\Support\PasswordHasher;
 use App\Support\Token;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -56,6 +57,7 @@ class UserFactory extends Factory
             'secret' => $secret,
             'editsecret' => '',
             'passhash' => $passhash,
+            'passhash_algo' => PasswordHasher::ALGO_MD5,
             'passkey' => Token::randomHex(16),
             'stylesheet' => self::$defaultStyleSheet,
             'added' => now()->toDateTimeString(),

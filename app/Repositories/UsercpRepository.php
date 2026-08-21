@@ -19,6 +19,7 @@ use App\Support\Hooks;
 use App\Support\LegacyResponse;
 use App\Support\Locale;
 use App\Support\Mail;
+use App\Support\PasswordHasher;
 use App\Support\SupportContext;
 use App\Support\Token;
 use App\Support\TwoFactorAuthHelper;
@@ -412,18 +413,27 @@ final class UsercpRepository extends BaseRepository
         $lang = (array) (SupportContext::getGlobal('lang_usercp') ?? []);
 
         $response = (string) $request->input('response', '');
-        if ($response === '') {
+        $oldPassword = (string) $request->input('oldpassword', '');
+        if ($response === '' && $oldPassword === '') {
             LegacyResponse::abort((string) ($lang['std_error'] ?? 'Error'), (string) ($lang['std_enter_old_password'] ?? 'Please enter old password.'));
         }
 
-        $challenge = self::getChallenge((string) $user->username);
-        if (empty($challenge)) {
-            LegacyResponse::abort((string) ($lang['std_error'] ?? 'Error'), 'expired!');
-        }
+        // For argon2id users, verify via plaintext password (sent over HTTPS)
+        $userAlgo = (string) ($user->passhash_algo ?? PasswordHasher::ALGO_SHA256);
+        if ($oldPassword !== '' && $userAlgo === PasswordHasher::ALGO_ARGON2ID) {
+            if (! password_verify($oldPassword, (string) $user->passhash)) {
+                LegacyResponse::abort((string) ($lang['std_error'] ?? 'Error'), (string) ($lang['std_wrong_password_note'] ?? 'Wrong password.'));
+            }
+        } else {
+            $challenge = self::getChallenge((string) $user->username);
+            if (empty($challenge)) {
+                LegacyResponse::abort((string) ($lang['std_error'] ?? 'Error'), 'expired!');
+            }
 
-        $expectedResponse = hash_hmac('sha256', (string) $user->passhash, (string) $challenge);
-        if (! hash_equals($expectedResponse, $response)) {
-            LegacyResponse::abort((string) ($lang['std_error'] ?? 'Error'), (string) ($lang['std_wrong_password_note'] ?? 'Wrong password.'));
+            $expectedResponse = hash_hmac('sha256', (string) $user->passhash, (string) $challenge);
+            if (! hash_equals($expectedResponse, $response)) {
+                LegacyResponse::abort((string) ($lang['std_error'] ?? 'Error'), (string) ($lang['std_wrong_password_note'] ?? 'Wrong password.'));
+            }
         }
 
         $data = [];
@@ -455,10 +465,9 @@ final class UsercpRepository extends BaseRepository
         }
 
         if ($chpassword !== '') {
-            $sec = Token::randomHex(20);
-            $passhash = hash('sha256', $sec.$chpassword);
-            $data['secret'] = $sec;
+            $passhash = PasswordHasher::hash($chpassword);
             $data['passhash'] = $passhash;
+            $data['passhash_algo'] = PasswordHasher::ALGO_ARGON2ID;
             $authKey = Token::randomHex(20);
             $data['auth_key'] = $authKey;
 
@@ -569,10 +578,8 @@ final class UsercpRepository extends BaseRepository
         $resetAuthKey = $dto->resetauthkey;
 
         if ($dto->newPassword !== null && $dto->newPassword !== '') {
-            $sec = Token::randomHex(20);
-            $clientHashedPassword = hash('sha256', $dto->newPassword);
-            $data['secret'] = $sec;
-            $data['passhash'] = hash('sha256', $sec.$clientHashedPassword);
+            $data['passhash'] = PasswordHasher::hash($dto->newPassword);
+            $data['passhash_algo'] = PasswordHasher::ALGO_ARGON2ID;
             $data['auth_key'] = Token::randomHex(20);
         }
 

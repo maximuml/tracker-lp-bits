@@ -4,6 +4,7 @@ namespace App\Auth;
 
 use App\Models\User;
 use App\Support\AuthCookie;
+use App\Support\PasswordHasher;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Contracts\Auth\UserProvider;
 use Illuminate\Database\Eloquent\Builder;
@@ -91,6 +92,24 @@ class NexusWebUserProvider implements UserProvider
      */
     public function rehashPasswordIfRequired(Authenticatable $user, #[\SensitiveParameter] array $credentials, bool $force = false)
     {
-        // TODO: Implement rehashPasswordIfRequired() method.
+        if (! $user instanceof User) {
+            return;
+        }
+
+        $password = (string) ($credentials['password'] ?? '');
+        if ($password === '') {
+            return;
+        }
+
+        $algo = (string) ($user->passhash_algo ?? PasswordHasher::ALGO_SHA256);
+        $passhash = (string) $user->passhash;
+
+        if ($force || PasswordHasher::needsRehash($algo, $passhash)) {
+            $user->makeVisible(['passhash']);
+            User::query()->where('id', $user->id)->update([
+                'passhash' => PasswordHasher::hash($password),
+                'passhash_algo' => PasswordHasher::ALGO_ARGON2ID,
+            ]);
+        }
     }
 }

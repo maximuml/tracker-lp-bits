@@ -548,6 +548,16 @@ async function login(username, password, jqForm) {
             return
         }
 
+        // For argon2id users, send plaintext password (over HTTPS) since
+        // the server-side hash cannot be computed client-side.
+        if (challengeData.data.passhash_algo === 'argon2id') {
+            jqForm.find("input[name=response]").val('')
+            jqForm.find("input[name=oldpassword]").remove()
+            jqForm.append('<input type="hidden" name="oldpassword" value="' + $('<div>').text(password).html() + '">')
+            jqForm.submit()
+            return
+        }
+
         const clientHashedPassword = CryptoJS.SHA256(password).toString();
 
         const serverSideHash = CryptoJS.SHA256(challengeData.data.secret + clientHashedPassword).toString();

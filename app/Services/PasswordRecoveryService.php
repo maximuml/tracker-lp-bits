@@ -10,6 +10,7 @@ use App\Support\Config\SiteConfig;
 use App\Support\Email;
 use App\Support\Http;
 use App\Support\Mail;
+use App\Support\PasswordHasher;
 use App\Support\Strings;
 use App\Support\Token;
 use App\Support\Url;
@@ -111,13 +112,14 @@ class PasswordRecoveryService
 
         $newPassword = $this->generateRandomPassword();
         $newSecret = Token::randomHex();
-        $newPasshash = hash('sha256', $newSecret.hash('sha256', $newPassword));
+        $newPasshash = PasswordHasher::hash($newPassword);
         $authKey = Token::randomHex();
 
         $affected = User::query()->where('id', $id)->where('editsecret', $user->editsecret)->update([
             'secret' => $newSecret,
             'editsecret' => '',
             'passhash' => $newPasshash,
+            'passhash_algo' => PasswordHasher::ALGO_ARGON2ID,
             'auth_key' => $authKey,
         ]);
 

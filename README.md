@@ -24,6 +24,8 @@ This is a streamlined fork focused on the core tracker/forum/community experienc
   - Required extensions: `bcmath`, `ctype`, `curl`, `fileinfo`, `json`, `mbstring`, `openssl`, `pdo_mysql`, `tokenizer`, `xml`, `mysqli`, `gd`, `redis`, `pcntl`, `sockets`, `posix`, `gmp`, `opcache`, `zip`, `intl`, `pdo_sqlite`, `sqlite3`, `pdo_pgsql`
 - **Database** — MySQL 5.7+ or PostgreSQL 16+
 - **Redis** — 4.0+
+- **MeiliSearch** — 1.6+ (torrent search index)
+- **ClickHouse** (optional) — analytics backend for announce logs and bonus logs
 - **Other** — supervisor, cron, rsync
 
 ## Quick Start with Docker

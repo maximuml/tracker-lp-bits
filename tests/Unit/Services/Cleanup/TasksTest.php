@@ -84,13 +84,6 @@ final class TasksTest extends TestCase
             'dealtwith' => 1,
         ]);
 
-        $expiredAuthCodeId = $this->createOAuthAuthCode(['expires_at' => Carbon::now()->subDay()]);
-        $validAuthCodeId = $this->createOAuthAuthCode(['expires_at' => Carbon::now()->addDay()]);
-        $expiredAccessTokenId = $this->createOAuthAccessToken(['expires_at' => Carbon::now()->subDay()]);
-        $validAccessTokenId = $this->createOAuthAccessToken(['expires_at' => Carbon::now()->addDay()]);
-        $expiredRefreshTokenId = $this->createOAuthRefreshToken($expiredAccessTokenId, ['expires_at' => Carbon::now()->subDay()]);
-        $validRefreshTokenId = $this->createOAuthRefreshToken($validAccessTokenId, ['expires_at' => Carbon::now()->addDay()]);
-
         $result = $this->tasks->cleanupClass5();
 
         $this->assertSame('cleanup class 5', $result);
@@ -118,13 +111,6 @@ final class TasksTest extends TestCase
 
         $this->assertNull(DB::table('reports')->find($oldReportId));
         $this->assertNotNull(DB::table('reports')->find($newReportId));
-
-        $this->assertNull(DB::table('oauth_auth_codes')->find($expiredAuthCodeId));
-        $this->assertNotNull(DB::table('oauth_auth_codes')->find($validAuthCodeId));
-        $this->assertNull(DB::table('oauth_access_tokens')->find($expiredAccessTokenId));
-        $this->assertNotNull(DB::table('oauth_access_tokens')->find($validAccessTokenId));
-        $this->assertNull(DB::table('oauth_refresh_tokens')->find($expiredRefreshTokenId));
-        $this->assertNotNull(DB::table('oauth_refresh_tokens')->find($validRefreshTokenId));
     }
 
     public function test_cleanup_dead_torrents_and_ip_logs_purges_stale_failed_jobs(): void
@@ -298,60 +284,5 @@ final class TasksTest extends TestCase
             'exception' => 'test',
             'failed_at' => Carbon::now()->toDateTimeString(),
         ], $overrides));
-    }
-
-    /**
-     * @param  array<string, mixed>  $overrides
-     */
-    private function createOAuthAuthCode(array $overrides = []): string
-    {
-        $id = 'auth-code-'.Str::random();
-
-        DB::table('oauth_auth_codes')->insert(array_merge([
-            'id' => $id,
-            'user_id' => 1,
-            'client_id' => 1,
-            'revoked' => 0,
-            'expires_at' => Carbon::now()->toDateTimeString(),
-        ], $overrides));
-
-        return $id;
-    }
-
-    /**
-     * @param  array<string, mixed>  $overrides
-     */
-    private function createOAuthAccessToken(array $overrides = []): string
-    {
-        $id = 'access-token-'.Str::random();
-
-        DB::table('oauth_access_tokens')->insert(array_merge([
-            'id' => $id,
-            'user_id' => 1,
-            'client_id' => 1,
-            'revoked' => 0,
-            'created_at' => Carbon::now()->toDateTimeString(),
-            'updated_at' => Carbon::now()->toDateTimeString(),
-            'expires_at' => Carbon::now()->toDateTimeString(),
-        ], $overrides));
-
-        return $id;
-    }
-
-    /**
-     * @param  array<string, mixed>  $overrides
-     */
-    private function createOAuthRefreshToken(string $accessTokenId, array $overrides = []): string
-    {
-        $id = 'refresh-token-'.Str::random();
-
-        DB::table('oauth_refresh_tokens')->insert(array_merge([
-            'id' => $id,
-            'access_token_id' => $accessTokenId,
-            'revoked' => 0,
-            'expires_at' => Carbon::now()->toDateTimeString(),
-        ], $overrides));
-
-        return $id;
     }
 }

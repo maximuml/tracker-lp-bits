@@ -1033,8 +1033,6 @@ class UserRepository extends BaseRepository
             'attendance' => 'uid',
             'attendance_logs' => 'uid',
             'login_logs' => 'uid',
-            'oauth_access_tokens' => 'user_id',
-            'oauth_auth_codes' => 'user_id',
             'seed_box_records' => 'uid',
             'user_modify_logs' => 'user_id',
             'messages' => 'receiver',

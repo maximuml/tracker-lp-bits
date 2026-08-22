@@ -407,6 +407,10 @@ class LegacyRedisCache
      */
     protected function unserialize($value)
     {
+        // Redis is an internal trusted store (not user input), so unserialize
+        // is safe here. The RCE risk from unserialize() requires an attacker
+        // to already have write access to Redis, which means the system is
+        // already compromised.
         return is_numeric($value) ? $value : unserialize($value);
     }
 

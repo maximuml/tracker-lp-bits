@@ -176,8 +176,9 @@ class RegistrationService
         }
 
         // Use argon2id for new passwords. If the client pre-hashed the password
-        // (isClientHashed), we fall back to legacy sha256 since we don't have
-        // the plaintext password to feed to password_hash().
+        // (isClientHashed, legacy), we fall back to legacy sha256 since we don't have
+        // the plaintext password to feed to password_hash(). New clients send
+        // plaintext so argon2id is always used.
         if ($isClientHashed) {
             $secret = Token::randomHex();
             $passhash = hash('sha256', $secret.$passwordInput);

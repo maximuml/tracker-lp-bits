@@ -390,7 +390,7 @@ final class UsercpRepository extends BaseRepository
 
         $showTooltip = (string) SupportContext::getGlobal('enabletooltip_tweak', '') === 'yes';
         if ($showTooltip) {
-            $data['tooltip'] = $dto->tooltip ?? '';
+            $data['tooltip'] = $dto->tooltip ?? 'off';
             $data['showlastcom'] = $dto->showlastcom ?? 'no';
         }
 

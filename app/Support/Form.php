@@ -489,16 +489,9 @@ $formVar.on("click", "input[type=button]", function() {
         return
     }
     if (password !== "") {
-        const passwordHashed = CryptoJS.SHA256(password).toString()
-        $formVar.find("input[name={$passwordHashedName}]").val(passwordHashed)
-        const hashedMarkerName = "{$passwordHashedName}_hashed"
-        let jqHashedMarker = $formVar.find("input[name=" + hashedMarkerName + "]")
-        if (jqHashedMarker.length === 0) {
-            jqHashedMarker = jQuery('<input type="hidden" name="{$passwordHashedName}_hashed" value="1" />')
-            $formVar.append(jqHashedMarker)
-        } else {
-            jqHashedMarker.val("1")
-        }
+        // Send plaintext password over HTTPS so the server can use argon2id.
+        // Client-side SHA256 hashing prevented argon2id upgrades.
+        $formVar.find("input[name={$passwordHashedName}]").val(password)
         $formVar.submit()
     } else {
         $formVar.submit()

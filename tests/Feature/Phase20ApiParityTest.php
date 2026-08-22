@@ -96,7 +96,7 @@ class Phase20ApiParityTest extends TestCase
 
         Sanctum::actingAs($user, ['usercp:settings']);
 
-        $this->postJson('/api/v1/usercp/tracker', [
+        $response = $this->postJson('/api/v1/usercp/tracker', [
             'torrentsperpage' => 30,
             'pmnum' => 5,
             'sbnum' => 20,
@@ -104,7 +104,7 @@ class Phase20ApiParityTest extends TestCase
             'timetype' => 'timeadded',
             'appendsticky' => 'yes',
             'appendnew' => 'yes',
-            'appendpromotion' => 'yes',
+            'appendpromotion' => 'icon',
             'appendpicked' => 'yes',
             'dlicon' => 'yes',
             'bmicon' => 'yes',

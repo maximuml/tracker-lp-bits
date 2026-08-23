@@ -588,7 +588,8 @@ if ($showstats_main == 'yes') {
 
 // ------------- start: tracker load ------------------//
 if ($showtrackerload == 'yes') {
-    $uptimeresult = exec('uptime');
+    $loadAvg = sys_getloadavg();
+    $uptimeresult = sprintf('load average: %.2f, %.2f, %.2f', $loadAvg[0], $loadAvg[1], $loadAvg[2]);
     if ($uptimeresult) {
         ?>
 <h2><?php echo $lang_index['text_tracker_load'] ?></h2>

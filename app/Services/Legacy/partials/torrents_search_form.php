@@ -31,43 +31,6 @@ $searchBoxRightTdStyle = 'padding: 1px;padding-left: 10px;white-space: nowrap';
 		<tbody id="ksearchboxmain" style="display:none">
 		<tr>
 			<td class="rowfollow" align="left">
-<!--				<table>-->
-<!--					--><?php
-//						function printcat($name, $listarray, $cbname, $wherelistina, $btname, $showimg = false)
-//						{
-//							global $catpadding,$catsperrow,$lang_torrents,$CURUSER,$CURLANGDIR,$catimgurl;
-//
-//							print("<tr><td class=\"embedded\" colspan=\"".$catsperrow."\" align=\"left\"><b>".$name."</b></td></tr><tr>");
-//							$i = 0;
-//							foreach($listarray as $list){
-//								if ($i && $i % $catsperrow == 0){
-//									print("</tr><tr>");
-//								}
-//								print("<td align=\"left\" class=\"bottom\" style=\"padding-bottom: 4px; padding-left: ".$catpadding."px;\"><input type=\"checkbox\" id=\"".$cbname.$list['id']."\" name=\"".$cbname.$list['id']."\"" . (in_array($list['id'],$wherelistina) ? " checked=\"checked\"" : "") . " value=\"1\" />".($showimg ? return_category_image($list['id'], "?") : "<a title=\"" .$list['name'] . "\" href=\"?".$cbname."=".$list['id']."\">".$list['name']."</a>")."</td>\n");
-//								$i++;
-//							}
-//							$checker = "<input name=\"".$btname."\" value='" .  $lang_torrents['input_check_all'] . "' class=\"btn medium\" type=\"button\" onclick=\"javascript:SetChecked('".$cbname."','".$btname."','". $lang_torrents['input_check_all'] ."','" . $lang_torrents['input_uncheck_all'] . "',-1,10)\" />";
-//							print("<td colspan=\"2\" class=\"bottom\" align=\"left\" style=\"padding-left: 15px\">".$checker."</td>\n");
-//							print("</tr>");
-//						}
-//					printcat($lang_torrents['text_category'],$cats,"cat",$wherecatina,"cat_check",true);
-//
-//					if ($showsubcat){
-//						if ($showsource)
-//							printcat($lang_torrents['text_source'], $sources, "source", $wheresourceina, "source_check");
-//						if ($showmedium)
-//							printcat($lang_torrents['text_medium'], $media, "medium", $wheremediumina, "medium_check");
-//						if ($showcodec)
-//							printcat($lang_torrents['text_codec'], $codecs, "codec", $wherecodecina, "codec_check");
-//						if ($showaudiocodec)
-//							printcat($lang_torrents['text_audio_codec'], $audiocodecs, "audiocodec", $whereaudiocodecina, "audiocodec_check");
-//						if ($showstandard)
-//							printcat($lang_torrents['text_standard'], $standards, "standard", $wherestandardina, "standard_check");
-//						if ($showprocessing)
-//							printcat($lang_torrents['text_processing'], $processings, "processing", $whereprocessingina, "processing_check");
-//					}
-//?>
-<!--				</table>-->
                 <?php echo SearchBox::buildCategoryTableWithContext($sectiontype, '1', '?', '?', 0, $__server_QUERY_STRING, ['select_unselect' => true, 'user_notifs' => $CURUSER['notifs']])?>
 			</td>
 

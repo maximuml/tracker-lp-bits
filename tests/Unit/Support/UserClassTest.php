@@ -3,6 +3,7 @@
 namespace Tests\Unit\Support;
 
 use App\Support\UserClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 class UserClassTest extends TestCase
@@ -37,9 +38,7 @@ class UserClassTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider tierProvider
-     */
+    #[DataProvider('tierProvider')]
     public function test_lang_key_maps_each_tier_to_its_legacy_key(int $class, string $expected): void
     {
         $this->assertSame($expected, UserClass::langKey($class));

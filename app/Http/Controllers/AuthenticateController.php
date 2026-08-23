@@ -12,6 +12,8 @@ use App\Support\Json;
 use App\Support\Logger;
 use App\Support\Network;
 use App\Support\Token;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Auth;
@@ -34,7 +36,7 @@ class AuthenticateController extends Controller
     /**
      * @return array<string, mixed>
      */
-    public function login(Request $request)
+    public function login(Request $request): array
     {
         $request->validate([
             'username' => 'required',
@@ -54,7 +56,7 @@ class AuthenticateController extends Controller
     /**
      * @return array<string, mixed>
      */
-    public function logout(Request $request)
+    public function logout(Request $request): array
     {
         $result = $this->repository->logout(Auth::id());
 
@@ -70,10 +72,8 @@ class AuthenticateController extends Controller
      * - signature: hmac_sha256(passkey + timestamp, login_secret)
      *
      * The timestamp must be within ±5 minutes of server time.
-     *
-     * @return mixed
      */
-    public function passkeyLogin(Request $request)
+    public function passkeyLogin(Request $request): RedirectResponse
     {
         $request->validate([
             'passkey' => 'required|string|size:32',
@@ -121,7 +121,7 @@ class AuthenticateController extends Controller
     /**
      * @return array<string, mixed>
      */
-    public function nasToolsApprove(Request $request)
+    public function nasToolsApprove(Request $request): array
     {
         $request->validate([
             'data' => 'required|string',
@@ -142,9 +142,9 @@ class AuthenticateController extends Controller
     }
 
     /**
-     * @return mixed
+     * @return array<string, mixed>
      */
-    private function polyfillArray(JsonResource $resource, Request $request)
+    private function polyfillArray(JsonResource $resource, Request $request): array
     {
         $data = $resource->response($request)->getData(true)['data'];
         $result = $data;
@@ -153,10 +153,7 @@ class AuthenticateController extends Controller
         return $result;
     }
 
-    /**
-     * @return mixed
-     */
-    public function iyuuApprove(Request $request)
+    public function iyuuApprove(Request $request): JsonResponse
     {
         try {
             $request->validate([
@@ -176,7 +173,7 @@ class AuthenticateController extends Controller
     /**
      * @return array<string, mixed>
      */
-    public function ammdsApprove(Request $request)
+    public function ammdsApprove(Request $request): array
     {
         try {
             $request->validate([
@@ -202,7 +199,7 @@ class AuthenticateController extends Controller
     /**
      * @return array<string, mixed>
      */
-    public function challenge(Request $request)
+    public function challenge(Request $request): array
     {
         try {
             $request->validate([

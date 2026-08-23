@@ -681,7 +681,6 @@ class Install
         if ($string === false) {
             throw new \RuntimeException("can't not read dbstructure file: $sqlFile");
         }
-        // @todo test in php 7.3
         $pattern = "/INSERT INTO `(\w+)` VALUES \(.*\);/i";
         preg_match_all($pattern, $string, $matches, PREG_SET_ORDER);
         $this->doLog('[IMPORT DATA] matches count: '.count($matches));
@@ -725,13 +724,6 @@ class Install
     public function executeCommand($command)
     {
         Environment::run($command, 'string', (bool) false, (bool) true);
-        //        $this->doLog("command: $command");
-        //        $result = exec($command, $output, $result_code);
-        //        $this->doLog(sprintf('result_code: %s, result: %s', $result_code, $result));
-        //        $this->doLog("output: " . json_encode($output));
-        //        if ($result_code != 0) {
-        //            throw new \RuntimeException(json_encode($output));
-        //        }
     }
 
     public function runDatabaseSeeder()

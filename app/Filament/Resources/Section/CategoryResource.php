@@ -56,12 +56,8 @@ class CategoryResource extends Resource
                         'required',
                         function () {
                             return function ($attribute, $value, $fail) {
-                                // @todo how to get the editing record ?
                                 $exists = Torrent::query()->where('category', $value)->exists();
                                 Logger::writeWithContext((string) "check {$attribute}: {$value} torrent if exists: {$exists}", (string) 'info', (bool) false);
-                                //                                if ($exists) {
-                                //                                    $fail("There are torrents belonging to this category that cannot be changed!");
-                                //                                }
                             };
                         },
                     ]),

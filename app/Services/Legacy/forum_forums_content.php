@@ -542,17 +542,6 @@ if ($action == 'viewtopic') {
     $pn = 0;
     $lpr = get_last_read_post_id($topicid);
 
-    // check if privacy protection enabled in this forum
-    //	$protected_forums = Nexus\Database\NexusDB::remember("setting_protected_forum", 600, function () {
-    //		return \App\Models\Setting::getByName('misc.protected_forum');
-    //	});
-    //
-    //	if ($protected_forums and in_array(strval($forumid),explode(",",$protected_forums))){
-    //		$protected_enabled=true;
-    //	}else{
-    //		$protected_enabled=false;
-    //	}
-
     foreach ($allPosts as $arr) {
         $pn++;
 
@@ -563,7 +552,6 @@ if ($action == 'viewtopic') {
 
         // ---- Get poster details
 
-        //		$arr2 = get_user_row($posterid);
         $userInfo = $userInfoArr->get($posterid) ?: User::defaultUser();
 
         $arr2 = $userInfo->toArray();
@@ -613,7 +601,6 @@ if ($action == 'viewtopic') {
 
         $body = '<div id="pid'.$postid.'body" style="word-break: break-all;">';
         // hidden content applied to second or higher floor post (for whose user class below Ad , not poster , not mods ,not reply's author)
-        //		if ($protected_enabled && $pn+$offset>1 && get_user_class()<UC_ADMINISTRATOR && $userid != $base_posterid && $posterid!=$userid && !$is_forummod){
         if ($pn + $offset > 1 && ! Forum::canViewPost($userid, $arr)) {
             // enable content protection
             $bodyContent = Format::formatComment($lang_forums['text_post_protected']);

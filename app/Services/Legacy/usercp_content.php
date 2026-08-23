@@ -253,18 +253,6 @@ if ($action) {
                     $stylesheets .= "<option value=$ss_id$ss>$ss_name</option>\n";
                 }
                 Html::trSmall($lang_usercp['row_stylesheet'], "<select name=stylesheet>\n$stylesheets\n</select>&nbsp;&nbsp;<font class=small>".$lang_usercp['text_stylesheet_note'].'<a href="aboutnexus.php#stylesheet" ><b>'.$lang_usercp['text_stylesheet_link'].'</b></a></font>.', 1);
-                /**
-                 * make no sense, should no exists!
-                 *
-                 * @since v1.6.0
-                 */
-                //			$cires = sql_query("SELECT * FROM caticons ORDER BY name") or return;
-                //			while($caticon = mysql_fetch_array($cires)){
-                //				if ($caticon['id'] == $CURUSER['caticon']) $sl = " selected"; else $sl = "";
-                //				$categoryicons .= "<option value=".$caticon['id'].$sl.">".$caticon['name']."</option>\n";
-                //			}
-                //			tr_small($lang_usercp['row_category_icons'], "<select name=caticon>".$categoryicons."</select>",1);
-
                 Html::trSmall($lang_usercp['row_font_size'], '<select name=fontsize><option value=small '.($CURUSER['fontsize'] == 'small' ? ' selected' : '').'>'.$lang_usercp['select_small'].'</option><option value=medium '.($CURUSER['fontsize'] == 'medium' ? ' selected' : '').'>'.$lang_usercp['select_medium'].'</option><option value=large '.($CURUSER['fontsize'] == 'large' ? ' selected' : '').'>'.$lang_usercp['select_large'].'</option></select>', 1);
 
                 $s = "<select name=\"sitelanguage\">\n";
@@ -483,8 +471,6 @@ if (SiteConfig::current()->seedBox->enabled()) {
     $seedBox = '';
     $columnOperator = Locale::trans('label.seed_box_record.operator', [], null);
     $columnBandwidth = Locale::trans('label.seed_box_record.bandwidth', [], null);
-    //    $columnIPBegin = nexus_trans('label.seed_box_record.ip_begin');
-    //    $columnIPEnd = nexus_trans('label.seed_box_record.ip_end');
     $columnIP = Locale::trans('label.seed_box_record.ip', [], null);
     $columnIPHelp = Locale::trans('label.seed_box_record.ip_help', [], null);
     $columnComment = Locale::trans('label.comment', [], null);

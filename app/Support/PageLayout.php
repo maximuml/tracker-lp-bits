@@ -50,14 +50,8 @@ class PageLayout
         $cssupdatedate = $context->cssDateTweak;
         // Insert old ip into iplog
         if ($context->user) {
-            //		if ($iplog1 == "yes") {
-            //			if (($oldip != $context->user["ip"]) && $context->user["ip"])
-            //			sql_query("INSERT INTO iplog (ip, userid, access) VALUES (" . sqlesc($context->user['ip']) . ", " . $context->user['id'] . ", '" . $context->user['last_access'] . "')");
-            //		}
             // Per-request access tracking is handled by PageLayoutRepository::prepareAccess().
         }
-        // header("Content-Type: text/html; charset=utf-8; Cache-control:private");
-        // header("Pragma: No-cache");
         if ($title == '') {
             $title = $context->siteName;
         } else {
@@ -130,8 +124,6 @@ class PageLayout
         ?>" type="text/css" />
 <?php
         if ($context->user) {
-            //	$caticonrow = get_category_icon_row($context->user['caticon']);
-            //	if($caticonrow['cssfile']){
             $requireSearchBoxIdAr = SearchBox::requiredIds();
             if (! empty($requireSearchBoxIdAr)) {
                 $icons = (new SearchBoxRepository)->listIcon($requireSearchBoxIdAr);
@@ -292,8 +284,6 @@ class PageLayout
                 $context->cache?->cache_value('user_'.$context->user['id'].'_unread_message_count', $unread, 60);
             }
             $inboxpic = '<img class="'.($unread ? 'inboxnew' : 'inbox').'" src="pic/trans.gif" alt="inbox" title="'.($unread ? $context->lang['title_inbox_new_messages'] : $context->lang['title_inbox_no_new_messages']).'" />';
-            //    $attend_desk = new Attendance($context->user['id']);
-            //    $attendance = $attend_desk->check();
             $attendanceRep = new AttendanceRepository;
             $attendance = $attendanceRep->getAttendance($context->user['id'], date('Ymd'));
             ?>
@@ -455,13 +445,9 @@ class PageLayout
             echo ' <a href="friends.php"><img class="buddylist" alt="Buddylist" title="'.$context->lang['title_buddylist'].'" src="pic/trans.gif" /></a>';
             echo ' <a href="getrss.php"><img class="rss" alt="RSS" title="'.$context->lang['title_get_rss'].'" src="pic/trans.gif" /></a>';
             echo '<br/>';
-            // echo $context->lang['text_the_time_is_now'].$datum['hours'].":".$datum['minutes'] . '<br />';
-            //	$cacheKey = "staff_message_count_" . $context->user['id'];
-            //    $totalsm = $context->cache?->get_value($cacheKey);
             $totalsm = MessageRepository::getStaffMessageCountCache($context->user['id'], 'total');
             if ($totalsm === false) {
                 $totalsm = MessageRepository::countStaffMessage($context->user['id']);
-                //        $context->cache?->cache_value($cacheKey, $totalsm, 900);
                 MessageRepository::updateStaffMessageCountCache($context->user['id'], 'total', $totalsm);
             }
             if ($totalsm > 0) {
@@ -561,12 +547,9 @@ class PageLayout
                     }
                 }
                 // Staff message, not only staff member
-                //    $cacheKey = 'staff_new_message_count_' . $context->user['id'];
-                //    $nummessages = $context->cache?->get_value($cacheKey);
                 $nummessages = MessageRepository::getStaffMessageCountCache($context->user['id'], 'new');
                 if ($nummessages === false) {
                     $nummessages = MessageRepository::countStaffMessage($context->user['id'], 0);
-                    //        $context->cache?->cache_value($cacheKey, $nummessages, 900);
                     MessageRepository::updateStaffMessageCountCache($context->user['id'], 'new', $nummessages);
                 }
                 if ($nummessages > 0) {

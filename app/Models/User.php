@@ -904,10 +904,6 @@ class User extends Authenticatable implements FilamentUser, HasName
         if (! $this->exists) {
             throw new \RuntimeException('This method only works when user exists !');
         }
-        // @todo how to do prepare bindings here ?
-        //        $comment = addslashes($comment);
-        //        do_log("update: " . json_encode($update) . ", $commentField: $comment", 'notice');
-        //        $update[$commentField] = NexusDB::raw("if($commentField = '', '$comment', concat_ws('\n', '$comment', $commentField))");
 
         if ($commentField != 'modcomment') {
             throw new \RuntimeException("unsupported commentField: $commentField !");

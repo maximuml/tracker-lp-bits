@@ -1048,7 +1048,6 @@ final class Tasks
         $this->deleteOldSiteLog();
         $this->lockOldTopics();
         $this->deleteOldReports();
-        $this->deleteExpiredOAuthTokens();
 
         return 'cleanup class 5';
     }
@@ -1138,14 +1137,5 @@ final class Tasks
             ->where('dealtwith', 1)
             ->where('added', '<', $until)
             ->delete();
-    }
-
-    private function deleteExpiredOAuthTokens(): void
-    {
-        $now = now();
-
-        NexusDB::table('oauth_auth_codes')->where('expires_at', '<=', $now)->delete();
-        NexusDB::table('oauth_access_tokens')->where('expires_at', '<=', $now)->delete();
-        NexusDB::table('oauth_refresh_tokens')->where('expires_at', '<=', $now)->delete();
     }
 }

@@ -2,28 +2,64 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Attendance;
 use App\Repositories\AttendanceRepository;
-use Illuminate\Support\Facades\Auth;
+use App\Support\Captcha;
+use App\Support\Config\SiteConfig;
+use App\Support\LegacyResponse;
+use App\Support\SupportContext;
+use Carbon\Carbon;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use Illuminate\View\View;
 
-class AttendanceController extends Controller
+class AttendanceController extends LegacyController
 {
-    /** @var mixed */
-    private $repository;
-
-    /**
-     * @return mixed
-     */
-    public function __construct(AttendanceRepository $repository)
+    public function attendance(Request $request, AttendanceRepository $repository): View|RedirectResponse|Response
     {
-        $this->repository = $repository;
-    }
+        $curUser = SupportContext::getUser();
+        if ($curUser === null) {
+            return redirect('/attendance.php');
+        }
 
-    /** @return  array<string, mixed> */
-    public function attend()
-    {
-        $uid = Auth::id();
-        $attendance = $this->repository->attend($uid);
+        $uid = (int) ($curUser['id'] ?? 0);
+        $captchaEnabled = SiteConfig::current()->captcha->attendanceEnabled((bool) config('captcha.attendance.enabled', true));
 
-        return $this->success($attendance->toArray());
+        if ($request->isMethod('post')) {
+            if ($captchaEnabled && SupportContext::getGlobal('iv', '') === 'yes') {
+                Captcha::checkCode(
+                    (string) (SupportContext::getPost('imagehash') ?? ''),
+                    (string) (SupportContext::getPost('imagestring') ?? ''),
+                    'attendance.php',
+                    false,
+                    true
+                );
+            }
+            $attendance = $repository->attend($uid);
+            $langAttendance = (array) (SupportContext::getGlobal('lang_attendance') ?? []);
+            if (! $attendance->is_updated) {
+                LegacyResponse::abort($langAttendance['sorry'] ?? '', $langAttendance['already_attended'] ?? '');
+            }
+        } else {
+            $attendance = $repository->getAttendance($uid);
+            if (! $captchaEnabled && ! ($attendance && $attendance->added && $attendance->added->isSameDay(Carbon::today()))) {
+                $attendance = $repository->attend($uid);
+            }
+        }
+
+        if (! $attendance) {
+            $attendance = new Attendance([
+                'uid' => $uid,
+                'points' => 0,
+                'days' => 0,
+                'total_days' => 0,
+            ]);
+        }
+
+        $data = $repository->buildViewData($attendance, $uid);
+        $data['attendanceCaptchaEnabled'] = $captchaEnabled;
+
+        return $this->legacyPage($request, 'attendance', true, $data);
     }
 }

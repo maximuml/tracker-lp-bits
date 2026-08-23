@@ -2,179 +2,130 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Resources\PollResource;
-use App\Models\Poll;
-use App\Models\PollAnswer;
-use App\Models\User;
 use App\Repositories\PollRepository;
-use App\Support\Site;
+use App\Support\Pagination;
+use App\Support\Strings;
+use App\Support\SupportContext;
+use App\Support\UserDisplay;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\JsonResource;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Response;
+use Illuminate\View\View;
 
-class PollController extends Controller
+class PollController extends LegacyController
 {
-    /** @var mixed */
-    private $repository;
-
-    /**
-     * @return mixed
-     */
-    public function __construct(PollRepository $repository)
+    public function makepoll(Request $request): Response|RedirectResponse|View
     {
-        $this->repository = $repository;
-    }
+        $administratorClass = defined('UC_ADMINISTRATOR') ? \constant('UC_ADMINISTRATOR') : 0;
+        if (UserDisplay::currentClass() < $administratorClass) {
+            return $this->legacyAbortResponse('Error', 'Permission denied.');
+        }
 
-    /** @return  array<int|string, mixed> */
-    private function getRules(): array
-    {
-        return [
-            'family_id' => 'required|numeric',
-            'name' => 'required|string',
-            'peer_id' => 'required|string',
-            'agent' => 'required|string',
-            'comment' => 'required|string',
+        $action = (string) $request->input('action', '');
+        $pollid = (int) $request->input('pollid', 0);
+        $poll = [];
 
-        ];
-    }
+        if ($action === 'edit') {
+            if ($pollid <= 0) {
+                return $this->legacyAbortResponse('Error', 'Invalid poll id.');
+            }
+            $poll = PollRepository::findForEdit($pollid);
+            if (! $poll) {
+                return $this->legacyAbortResponse('Error', 'No poll with that ID.');
+            }
+        }
 
-    /**
-     * Display a listing of the resource.
-     *
-     * @return array<string, mixed>
-     */
-    public function index(Request $request)
-    {
-        $result = $this->repository->getList($request->all());
-        $resource = PollResource::collection($result);
+        if ($request->isMethod('post')) {
+            $pollid = (int) $request->input('pollid', 0);
+            $question = htmlspecialchars((string) $request->input('question', ''));
+            $returnto = htmlspecialchars((string) $request->input('returnto', ''));
 
-        return $this->success($resource);
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @return array<string, mixed>
-     */
-    public function store(Request $request)
-    {
-        $request->validate($this->getRules());
-        $result = $this->repository->store($request->all());
-        $resource = new PollResource($result);
-
-        return $this->success($resource);
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  mixed  $id
-     * @return array<string, mixed>
-     */
-    public function show($id)
-    {
-        $result = Poll::query()->findOrFail($id);
-        $resource = new PollResource($result);
-
-        return $this->success($resource);
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  mixed  $id
-     * @return array<string, mixed>
-     */
-    public function update(Request $request, $id)
-    {
-        $request->validate($this->getRules());
-        $result = $this->repository->update($request->all(), $id);
-        $resource = new PollResource($result);
-
-        return $this->success($resource);
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  mixed  $id
-     * @return array<string, mixed>
-     */
-    public function destroy($id)
-    {
-        $result = $this->repository->delete($id);
-
-        return $this->success($result);
-    }
-
-    /** @return  array<string, mixed> */
-    public function latest()
-    {
-        $user = Auth::user();
-        $poll = Poll::query()->orderBy('id', 'desc')->first();
-        $selection = null;
-        $answerStats = [];
-        if ($poll) {
-            $baseAnswerQuery = $poll->answers()->where('selection', '<=', Poll::MAX_OPTION_INDEX);
-            $poll->answers_count = (clone $baseAnswerQuery)->count();
-            $answer = $user instanceof User ? $poll->answers()->where('userid', $user->id)->first() : null;
             $options = [];
-            for ($i = 0; $i <= Poll::MAX_OPTION_INDEX; $i++) {
-                $field = "option{$i}";
-                $value = $poll->{$field};
-                if ($value !== '') {
-                    $options[$i] = $value;
-                }
+            for ($i = 0; $i <= 19; $i++) {
+                $options["option{$i}"] = htmlspecialchars((string) $request->input("option{$i}", ''));
             }
-            if ($answer instanceof PollAnswer) {
-                $selection = $answer->selection;
-            } else {
-                $options['255'] = '弃权(我想偷看结果！)';
-            }
-            $poll->options = $options;
 
-            $answerStats = (clone $baseAnswerQuery)
-                ->selectRaw('selection, count(*) as count')->groupBy('selection')
-                ->get()->pluck('count', 'selection')->toArray();
-            foreach ($answerStats as $index => &$value) {
-                $value = number_format(($value / $poll->answers_count) * 100, 1).'%';
+            if ($question === '' || $options['option0'] === '' || $options['option1'] === '') {
+                return $this->legacyAbortResponse('Error', 'Missing form data.');
             }
-            $resource = new PollResource($poll);
-        } else {
-            $resource = new JsonResource(null);
+
+            $data = array_merge(['question' => $question], $options);
+            $newId = PollRepository::createOrUpdate($data, $pollid > 0 ? $pollid : null);
+
+            if ($returnto === 'main') {
+                return redirect(url('/'));
+            } elseif ($pollid > 0) {
+                return redirect('/log.php?action=poll#'.$newId);
+            }
+
+            return redirect('/');
         }
 
-        $resource->additional([
-            'selection' => $selection,
-            'answer_stats' => $answerStats,
-            'site_info' => Site::info(),
-        ]);
+        $ageWarning = '';
+        if ($pollid <= 0) {
+            $lastPoll = PollRepository::lastPoll();
+            if (! empty($lastPoll)) {
+                $hours = (int) floor((time() - strtotime((string) $lastPoll['added'])) / 3600);
+                $days = (int) floor($hours / 24);
+                $lang = (array) (SupportContext::getGlobal('lang_makepoll') ?? []);
+                if ($days >= 1) {
+                    $t = $days.($lang['text_day'] ?? ' day').Strings::addS($days);
+                } else {
+                    $t = $hours.($lang['text_hour'] ?? ' hour').Strings::addS($hours);
+                }
+                $ageWarning = ($lang['text_current_poll'] ?? 'Current poll ').'(<i>'.htmlspecialchars((string) $lastPoll['question']).'</i>)'.($lang['text_is_only'] ?? ' is only ').$t.($lang['text_old'] ?? ' old.');
+            }
+        }
 
-        return $this->success($resource);
+        return $this->legacyPage($request, 'makepoll', true, [
+            'poll' => $poll,
+            'pollid' => $poll['id'] ?? $pollid,
+            'returnto' => htmlspecialchars((string) ($request->input('returnto') ?? $request->headers->get('referer') ?? '')),
+            'ageWarning' => $ageWarning,
+        ]);
     }
 
-    /**
-     * @return array<string, mixed>
-     */
-    public function vote(Request $request)
+    public function polloverview(Request $request): View|RedirectResponse|Response
     {
-        $request->validate([
-            'poll_id' => 'required',
-            'selection' => 'required|integer|min:0|max:255',
-        ]);
-        $pollId = (int) $request->poll_id;
-        $selection = (int) $request->selection;
-        $user = Auth::user();
-        if (! $user instanceof User) {
-            return $this->success(['result' => false], 'Unauthenticated');
-        }
-        $poll = Poll::query()->findOrFail($pollId);
-        $data = [
-            'userid' => $user->id,
-            'selection' => $selection,
-        ];
-        $answer = $poll->answers()->create($data);
+        $pollid = (int) $request->input('id', 0);
 
-        return $this->success($answer->toArray());
+        if ($pollid > 0) {
+            $poll = PollRepository::findWithOptions($pollid);
+            if (! $poll) {
+                $lang = (array) (SupportContext::getGlobal('lang_polloverview') ?? []);
+
+                return $this->legacyAbortResponse($lang['std_error'] ?? 'Error', $lang['text_no_poll_id'] ?? 'Invalid poll ID.');
+            }
+
+            $count = PollRepository::countAnswers($pollid);
+            $answers = [];
+            $pagertop = '';
+            $pagerbottom = '';
+            $userDisplayMap = [];
+
+            if ($count > 0) {
+                $perpage = 100;
+                [$pagertop, $pagerbottom, , $offset, $perpage] = Pagination::pager($perpage, $count, "?id={$pollid}&");
+                $answers = PollRepository::answers($pollid, $offset, $perpage);
+                $userDisplayMap = PollRepository::userDisplayMap($answers);
+            }
+
+            return $this->legacyPage($request, 'polloverview', true, [
+                'mode' => 'detail',
+                'poll' => $poll,
+                'count' => $count,
+                'answers' => $answers,
+                'pagertop' => $pagertop,
+                'pagerbottom' => $pagerbottom,
+                'userDisplayMap' => $userDisplayMap,
+            ]);
+        }
+
+        $polls = PollRepository::listAll();
+
+        return $this->legacyPage($request, 'polloverview', true, [
+            'mode' => 'list',
+            'polls' => $polls,
+        ]);
     }
 }

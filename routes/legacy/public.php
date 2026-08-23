@@ -1,6 +1,8 @@
 <?php
 
+use App\Http\Controllers\FaqController;
 use App\Http\Controllers\InfoController;
+use App\Http\Controllers\RulesController;
 use App\Http\Controllers\ShoutboxController;
 use App\Http\Controllers\SupportController;
 use App\Http\Controllers\SystemController;
@@ -8,10 +10,10 @@ use App\Http\Controllers\TorrentActionController;
 use App\Http\Controllers\UtilityController;
 use Illuminate\Support\Facades\Route;
 
-Route::match(['get', 'post'], '/aboutnexus', [InfoController::class, 'aboutNexus'])->name('aboutnexus.legacy');
-Route::match(['get', 'post'], '/rules', [InfoController::class, 'rules'])->name('rules.legacy');
-Route::match(['get', 'post'], '/useragreement', [InfoController::class, 'userAgreement'])->name('useragreement.legacy');
-Route::match(['get', 'post'], '/faq', [InfoController::class, 'faq'])->name('faq.legacy');
+Route::match(['get', 'post'], '/aboutnexus', [RulesController::class, 'aboutNexus'])->name('aboutnexus.legacy');
+Route::match(['get', 'post'], '/rules', [RulesController::class, 'rules'])->name('rules.legacy');
+Route::match(['get', 'post'], '/useragreement', [RulesController::class, 'userAgreement'])->name('useragreement.legacy');
+Route::match(['get', 'post'], '/faq', [FaqController::class, 'faq'])->name('faq.legacy');
 Route::match(['get', 'post'], '/donate', [InfoController::class, 'donate'])->name('donate.legacy');
 Route::match(['get', 'post'], '/getusertorrentlistajax', [TorrentActionController::class, 'getUserTorrentListAjax'])->name('getusertorrentlistajax.legacy');
 Route::match(['get', 'post'], '/searchsuggest', [TorrentActionController::class, 'searchSuggest'])->name('searchsuggest.legacy');

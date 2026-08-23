@@ -1,0 +1,101 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Torrent;
+use App\Support\Bonus;
+use App\Support\LegacyResponse;
+use App\Support\SupportContext;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use Nexus\Database\NexusDB;
+
+class TorrentBookmarkController extends LegacyController
+{
+    public function bookmark(Request $request): Response
+    {
+        $headers = [
+            'Expires' => 'Mon, 26 Jul 1997 05:00:00 GMT',
+            'Last-Modified' => gmdate('D, d M Y H:i:s').' GMT',
+            'Cache-Control' => 'no-cache, must-revalidate',
+            'Pragma' => 'no-cache',
+            'Content-Type' => 'text/xml; charset=utf-8',
+        ];
+
+        $user = SupportContext::getUser();
+        if ($user === null) {
+            return response('failed', 200, $headers);
+        }
+
+        $torrentId = (int) $request->input('torrentid', 0);
+        if ($torrentId <= 0) {
+            return response('failed', 200, $headers);
+        }
+
+        $userId = (int) $user['id'];
+        $bookmark = NexusDB::table('bookmarks')->where('torrentid', $torrentId)->where('userid', $userId)->first();
+
+        if ($bookmark) {
+            $bookmarkId = (int) $bookmark->id;
+            NexusDB::table('bookmarks')->where('id', $bookmarkId)->delete();
+            $status = 'deleted';
+        } else {
+            NexusDB::table('bookmarks')->insertGetId([
+                'torrentid' => $torrentId,
+                'userid' => $userId,
+            ]);
+            $status = 'added';
+        }
+
+        $cache = SupportContext::getCache();
+        if ($cache !== null) {
+            $cache->delete_value('user_'.$userId.'_bookmark_array');
+        }
+
+        return response($status, 200, $headers);
+    }
+
+    public function thanks(Request $request): Response|RedirectResponse
+    {
+        if (SupportContext::getUser() === null) {
+            return redirect('/thanks.php'.($request->getQueryString() ? '?'.$request->getQueryString() : ''));
+        }
+
+        $curUser = SupportContext::getUser();
+        $userid = (int) ($curUser['id'] ?? 0);
+
+        if ($request->query('id') !== null) {
+            LegacyResponse::abort('Party is over!', "This trick doesn't work anymore. You need to click the button!");
+        }
+
+        $torrentid = (int) SupportContext::getPost('id');
+        $torrentowner = Torrent::query()->where('id', $torrentid)->value('owner');
+        if (! $torrentowner) {
+            LegacyResponse::abort('Error', 'Invalid torrent id!');
+        }
+
+        $existing = NexusDB::table('thanks')
+            ->where('torrentid', $torrentid)
+            ->where('userid', $userid)
+            ->count();
+        if ($existing != 0) {
+            LegacyResponse::abort('Error', 'You already said thanks!');
+        }
+
+        NexusDB::table('thanks')->insert([
+            'torrentid' => $torrentid,
+            'userid' => $userid,
+        ]);
+
+        $saythanksBonus = (float) SupportContext::getGlobal('saythanks_bonus', 0);
+        $receivethanksBonus = (float) SupportContext::getGlobal('receivethanks_bonus', 0);
+        Bonus::updatePoints('+', $saythanksBonus, $userid);
+        Bonus::updatePoints('+', $receivethanksBonus, (int) $torrentowner);
+
+        return $this->legacyPageRaw($request, 'thanks', true, [
+            'torrentid' => $torrentid,
+            'message' => 'Thank you has been recorded.',
+        ]);
+    }
+}

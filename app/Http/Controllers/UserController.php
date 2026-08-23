@@ -230,9 +230,6 @@ class UserController extends Controller
         return $this->success($resource);
     }
 
-    /**
-     * @return mixed
-     */
     private function getUserProfile(int $id): UserResource
     {
         $user = User::query()->withCount([
@@ -252,9 +249,6 @@ class UserController extends Controller
         return $resource;
     }
 
-    /**
-     * @return mixed
-     */
     public function publishTorrent(Request $request): array
     {
         $user = Auth::user();
@@ -270,9 +264,6 @@ class UserController extends Controller
 
     }
 
-    /**
-     * @return mixed
-     */
     public function seedingTorrent(Request $request): array
     {
         $user = Auth::user();
@@ -288,9 +279,6 @@ class UserController extends Controller
 
     }
 
-    /**
-     * @return mixed
-     */
     public function leechingTorrent(Request $request): array
     {
         $user = Auth::user();
@@ -306,9 +294,6 @@ class UserController extends Controller
 
     }
 
-    /**
-     * @return mixed
-     */
     public function finishedTorrent(Request $request): array
     {
         $user = Auth::user();
@@ -328,9 +313,6 @@ class UserController extends Controller
 
     }
 
-    /**
-     * @return mixed
-     */
     public function notFinishedTorrent(Request $request): array
     {
         $user = Auth::user();

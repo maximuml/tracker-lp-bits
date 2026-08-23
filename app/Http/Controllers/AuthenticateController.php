@@ -63,9 +63,6 @@ class AuthenticateController extends Controller
         return $this->success($result);
     }
 
-    /**
-     * @return mixed
-     */
     public function passkeyLogin(Request $request): RedirectResponse
     {
         $request->validate([
@@ -112,9 +109,6 @@ class AuthenticateController extends Controller
         }
     }
 
-    /**
-     * @return mixed
-     */
     private function polyfillArray(JsonResource $resource, Request $request): array
     {
         $data = $resource->response($request)->getData(true)['data'];
@@ -124,9 +118,6 @@ class AuthenticateController extends Controller
         return $result;
     }
 
-    /**
-     * @return mixed
-     */
     public function iyuuApprove(Request $request): JsonResponse
     {
         try {

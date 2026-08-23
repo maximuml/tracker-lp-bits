@@ -33,7 +33,7 @@ class UserController extends Controller
      *
      * @return array<string, mixed>
      */
-    public function index(Request $request)
+    public function index(Request $request): array
     {
         $result = $this->repository->getList($request->all());
         $resource = UserResource::collection($result);
@@ -46,7 +46,7 @@ class UserController extends Controller
      *
      * @return array<string, mixed>
      */
-    public function store(Request $request)
+    public function store(Request $request): array
     {
         $rules = [
             'username' => 'required|string',
@@ -67,7 +67,7 @@ class UserController extends Controller
      * @param  mixed  $id
      * @return array<string, mixed>
      */
-    public function show($id = null)
+    public function show($id = null): array
     {
         $currentUser = Auth::user();
         if (! $currentUser instanceof User) {
@@ -86,9 +86,8 @@ class UserController extends Controller
      * Update the specified resource in storage.
      *
      * @param  mixed  $id
-     * @return Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, $id): Response
     {
         //
 
@@ -99,9 +98,8 @@ class UserController extends Controller
      * Remove the specified resource from storage.
      *
      * @param  mixed  $id
-     * @return Response
      */
-    public function destroy($id)
+    public function destroy($id): Response
     {
         //
 
@@ -111,7 +109,7 @@ class UserController extends Controller
     /**
      * @return array<string, mixed>
      */
-    public function resetPassword(Request $request)
+    public function resetPassword(Request $request): array
     {
         $rules = [
             'uid' => 'required',
@@ -125,7 +123,7 @@ class UserController extends Controller
     }
 
     /** @return  array<string, mixed> */
-    public function classes()
+    public function classes(): array
     {
         $result = $this->repository->listClass();
 
@@ -133,7 +131,7 @@ class UserController extends Controller
     }
 
     /** @return  array<string, mixed> */
-    public function base()
+    public function base(): array
     {
         $id = (int) Auth::id();
         $result = $this->repository->getBase($id);
@@ -145,7 +143,7 @@ class UserController extends Controller
     /**
      * @return array<string, mixed>
      */
-    public function matchExams(Request $request)
+    public function matchExams(Request $request): array
     {
         $request->validate([
             'uid' => 'required',
@@ -160,7 +158,7 @@ class UserController extends Controller
     /**
      * @return array<string, mixed>
      */
-    public function disable(Request $request)
+    public function disable(Request $request): array
     {
         $request->validate([
             'uid' => 'required',
@@ -178,7 +176,7 @@ class UserController extends Controller
     /**
      * @return array<string, mixed>
      */
-    public function enable(Request $request)
+    public function enable(Request $request): array
     {
         $request->validate([
             'uid' => 'required',
@@ -195,7 +193,7 @@ class UserController extends Controller
     /**
      * @return array<string, mixed>
      */
-    public function inviteInfo(Request $request)
+    public function inviteInfo(Request $request): array
     {
         $request->validate([
             'uid' => 'required',
@@ -209,7 +207,7 @@ class UserController extends Controller
     /**
      * @return array<string, mixed>
      */
-    public function modComment(Request $request)
+    public function modComment(Request $request): array
     {
         $request->validate([
             'uid' => 'required',
@@ -220,7 +218,7 @@ class UserController extends Controller
     }
 
     /** @return  array<string, mixed> */
-    public function me()
+    public function me(): array
     {
         $user = Auth::user();
         if (! $user instanceof User) {
@@ -228,23 +226,6 @@ class UserController extends Controller
         }
 
         $resource = $this->getUserProfile($user->id);
-        //
-        //        $rows = [
-        //            [
-        //                ['icon' => 'icon-user', 'label' => '种子评论', 'name' => 'comments_count'],
-        //                ['icon' => 'icon-user', 'label' => '论坛帖子', 'name' => 'posts_count'],
-        //            ],[
-        //                ['icon' => 'icon-user', 'label' => '发布种子', 'name' => 'torrents_count'],
-        //                ['icon' => 'icon-user', 'label' => '当前做种', 'name' => 'seeding_torrents_count'],
-        //                ['icon' => 'icon-user', 'label' => '当前下载', 'name' => 'leeching_torrents_count'],
-        //                ['icon' => 'icon-user', 'label' => '完成种子', 'name' => 'completed_torrents_count'],
-        //                ['icon' => 'icon-user', 'label' => '未完成种子', 'name' => 'incomplete_torrents_count'],
-        //            ]
-        //        ];
-        //        $resource->additional([
-        //            'card_titles' => User::$cardTitles,
-        //            'rows' => $rows
-        //        ]);
 
         return $this->success($resource);
     }
@@ -252,7 +233,7 @@ class UserController extends Controller
     /**
      * @return mixed
      */
-    private function getUserProfile(int $id)
+    private function getUserProfile(int $id): UserResource
     {
         $user = User::query()->withCount([
             'comments', 'posts', 'seeding_torrents', 'leeching_torrents',
@@ -274,7 +255,7 @@ class UserController extends Controller
     /**
      * @return mixed
      */
-    public function publishTorrent(Request $request)
+    public function publishTorrent(Request $request): array
     {
         $user = Auth::user();
         if (! $user instanceof User) {
@@ -292,7 +273,7 @@ class UserController extends Controller
     /**
      * @return mixed
      */
-    public function seedingTorrent(Request $request)
+    public function seedingTorrent(Request $request): array
     {
         $user = Auth::user();
         if (! $user instanceof User) {
@@ -310,7 +291,7 @@ class UserController extends Controller
     /**
      * @return mixed
      */
-    public function leechingTorrent(Request $request)
+    public function leechingTorrent(Request $request): array
     {
         $user = Auth::user();
         if (! $user instanceof User) {
@@ -328,7 +309,7 @@ class UserController extends Controller
     /**
      * @return mixed
      */
-    public function finishedTorrent(Request $request)
+    public function finishedTorrent(Request $request): array
     {
         $user = Auth::user();
         if (! $user instanceof User) {
@@ -350,7 +331,7 @@ class UserController extends Controller
     /**
      * @return mixed
      */
-    public function notFinishedTorrent(Request $request)
+    public function notFinishedTorrent(Request $request): array
     {
         $user = Auth::user();
         if (! $user instanceof User) {

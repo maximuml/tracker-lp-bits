@@ -141,6 +141,9 @@ class AuthenticateController extends Controller
         }
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     private function polyfillArray(JsonResource $resource, Request $request): array
     {
         $data = $resource->response($request)->getData(true)['data'];

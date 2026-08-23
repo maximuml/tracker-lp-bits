@@ -249,6 +249,9 @@ class UserController extends Controller
         return $resource;
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function publishTorrent(Request $request): array
     {
         $user = Auth::user();
@@ -264,6 +267,9 @@ class UserController extends Controller
 
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function seedingTorrent(Request $request): array
     {
         $user = Auth::user();
@@ -279,6 +285,9 @@ class UserController extends Controller
 
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function leechingTorrent(Request $request): array
     {
         $user = Auth::user();
@@ -294,6 +303,9 @@ class UserController extends Controller
 
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function finishedTorrent(Request $request): array
     {
         $user = Auth::user();
@@ -313,6 +325,9 @@ class UserController extends Controller
 
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function notFinishedTorrent(Request $request): array
     {
         $user = Auth::user();

@@ -21,7 +21,10 @@ return new class extends Migration
             $columnInfo = NexusDB::getMysqlColumnInfo($table);
             foreach ($fields as $field) {
                 if (isset($columnInfo[$field]) && $columnInfo[$field]['DATA_TYPE'] == 'datetime') {
-                    DB::statement("update $table set $field = null where $field = '0000-00-00 00:00:00'");
+                    // Use a valid lower-bound date for the comparison. The literal
+                    // '0000-00-00 00:00:00' is rejected under MySQL strict mode, but
+                    // any invalid/zero date in the column will still be < '1000-01-01'.
+                    DB::statement("update $table set $field = null where $field < '1000-01-01 00:00:00'");
                 }
             }
         }

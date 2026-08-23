@@ -41,7 +41,7 @@ class PeerFactory extends Factory
             'prev_action' => now()->toDateTimeString(),
             'connectable' => 'yes',
             'userid' => User::factory(),
-            'agent' => $this->faker->userAgent(),
+            'agent' => substr($this->faker->userAgent(), 0, 60),
             'finishedat' => 0,
             'downloadoffset' => 0,
             'passkey' => Token::randomHex(16),

@@ -62,16 +62,47 @@ class AuthenticateController extends Controller
     }
 
     /**
+     * Authenticate via BitTorrent passkey with HMAC replay protection.
+     *
+     * Required parameters:
+     * - passkey: 32-char hex string (user's BitTorrent passkey)
+     * - timestamp: unix timestamp (seconds)
+     * - signature: hmac_sha256(passkey + timestamp, login_secret)
+     *
+     * The timestamp must be within ±5 minutes of server time.
+     *
      * @return mixed
      */
     public function passkeyLogin(Request $request)
     {
         $request->validate([
             'passkey' => 'required|string|size:32',
+            'timestamp' => 'required|integer',
+            'signature' => 'required|string',
         ]);
         $passkey = $request->input('passkey');
+        $timestamp = (int) $request->input('timestamp');
+        $signature = (string) $request->input('signature');
 
+        $loginSecret = SiteConfig::current()->security->loginSecret();
         $deadline = SiteConfig::current()->security->loginSecretDeadline();
+
+        // Validate HMAC signature to prevent replay attacks
+        $expected = hash_hmac('sha256', $passkey.$timestamp, $loginSecret);
+        if (! hash_equals($expected, $signature)) {
+            Logger::writeWithContext((string) 'passkeyLogin: invalid HMAC signature', (string) 'warning', (bool) false);
+
+            return redirect('index.php');
+        }
+
+        // Validate timestamp is within ±5 minutes
+        $now = time();
+        if (abs($now - $timestamp) > 300) {
+            Logger::writeWithContext((string) sprintf('passkeyLogin: timestamp out of window (server=%d, client=%d)', $now, $timestamp), (string) 'warning', (bool) false);
+
+            return redirect('index.php');
+        }
+
         if ($deadline && $deadline > now()->toDateTimeString()) {
             $user = User::query()->where('passkey', $passkey)->first(['id', 'passhash', 'secret', 'auth_key']);
             if ($user) {

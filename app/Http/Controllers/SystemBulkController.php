@@ -6,9 +6,7 @@ use App\Enums\Permission\PermissionEnum;
 use App\Models\Invite;
 use App\Models\Setting;
 use App\Models\User;
-use App\Repositories\MysqlStatsRepository;
 use App\Repositories\UserRepository;
-use App\Services\CleanupService;
 use App\Support\Config\SiteConfig;
 use App\Support\Email;
 use App\Support\Environment;
@@ -35,7 +33,7 @@ use Illuminate\View\View;
 use Nexus\Database\NexusDB;
 use Nexus\Database\NexusLock;
 
-class SystemController extends LegacyController
+class SystemBulkController extends LegacyController
 {
     public function takeamountupload(Request $request): Response|RedirectResponse|View
     {
@@ -300,50 +298,6 @@ class SystemController extends LegacyController
         }
 
         return redirect('/reports.php');
-    }
-
-    public function docleanup(Request $request): Response
-    {
-
-        return \response(
-            app(CleanupService::class)->runFull($request->boolean('forceall'), true),
-            200,
-            ['Content-Type' => 'text/html; charset=utf-8']
-        );
-
-    }
-
-    public function mailtest(Request $request): View|RedirectResponse|Response
-    {
-
-        return $this->legacyPage($request, 'mailtest', true);
-
-    }
-
-    public function mysqlStats(Request $request): View|RedirectResponse|Response
-    {
-        if (SupportContext::getUser() === null) {
-            $qs = $request->getQueryString();
-
-            return redirect('/mysql_stats.php'.($qs ? '?'.$qs : ''));
-        }
-
-        if (UserDisplay::currentClass() < UC_SYSOP) {
-            abort(403);
-        }
-
-        return $this->legacyPage($request, 'mysql_stats', true, MysqlStatsRepository::status());
-    }
-
-    public function cron(Request $request): Response
-    {
-
-        return \response(
-            app(CleanupService::class)->triggerCron(),
-            200,
-            ['Content-Type' => 'text/plain; charset=utf-8']
-        );
-
     }
 
     public function incrementBulk(Request $request): View|RedirectResponse|Response

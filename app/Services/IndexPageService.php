@@ -13,6 +13,7 @@ use App\Support\Config\SiteConfig;
 use App\Support\CoverThumb;
 use App\Support\Format;
 use App\Support\Hooks;
+use App\Support\Cache\LegacyRedisCache;
 use App\Support\Shoutbox;
 use App\Support\SupportContext;
 use App\Support\UserClass;
@@ -83,8 +84,11 @@ final class IndexPageService
         return $data;
     }
 
-    /** @return array<string, mixed> */
-    private function buildNews(array $lang, bool $canManage, ?object $cache): array
+    /**
+     * @param array<string, mixed> $lang
+     * @return array<string, mixed>
+     */
+    private function buildNews(array $lang, bool $canManage, ?LegacyRedisCache $cache): array
     {
         $maxNews = (int) SupportContext::getGlobal('maxnewsnum_main', 0);
 
@@ -100,7 +104,10 @@ final class IndexPageService
         ];
     }
 
-    /** @return array<string, mixed> */
+    /**
+     * @param array<string, mixed> $lang
+     * @return array<string, mixed>
+     */
     private function buildShoutbox(array $lang, bool $canManage, int $userId): array
     {
         $show = SupportContext::getGlobal('showshoutbox_main', '') === 'yes';
@@ -146,7 +153,11 @@ JS;
         ];
     }
 
-    /** @return array<string, mixed> */
+    /**
+     * @param array<string, mixed> $lang
+     * @param array<string, mixed> $curUser
+     * @return array<string, mixed>
+     */
     private function buildForumPosts(array $lang, array $curUser): array
     {
         $show = SupportContext::getGlobal('showlastxforumposts_main', '') === 'yes' && ! empty($curUser);
@@ -169,8 +180,11 @@ JS;
         ];
     }
 
-    /** @return array<string, mixed> */
-    private function buildLatestTorrents(array $lang, ?object $cache): array
+    /**
+     * @param array<string, mixed> $lang
+     * @return array<string, mixed>
+     */
+    private function buildLatestTorrents(array $lang, ?LegacyRedisCache $cache): array
     {
         $show = SupportContext::getGlobal('showlastxtorrents_main', '') === 'yes';
 
@@ -224,7 +238,10 @@ JS;
         return ['show' => true, 'html' => $html];
     }
 
-    /** @return array<string, mixed> */
+    /**
+     * @param array<string, mixed> $lang
+     * @return array<string, mixed>
+     */
     private function buildTopUploaders(array $lang): array
     {
         if (! SiteConfig::current()->main->showTopUploader()) {
@@ -281,8 +298,12 @@ JS;
         ];
     }
 
-    /** @return array<string, mixed> */
-    private function buildPolls(array $lang, array $curUser, bool $canManage, bool $canLog, ?object $cache): array
+    /**
+     * @param array<string, mixed> $lang
+     * @param array<string, mixed> $curUser
+     * @return array<string, mixed>
+     */
+    private function buildPolls(array $lang, array $curUser, bool $canManage, bool $canLog, ?LegacyRedisCache $cache): array
     {
         $show = ! empty($curUser) && SupportContext::getGlobal('showpolls_main', '') === 'yes';
 
@@ -358,8 +379,11 @@ JS;
         return $result;
     }
 
-    /** @return array<string, mixed> */
-    private function buildStats(array $lang, ?object $cache): array
+    /**
+     * @param array<string, mixed> $lang
+     * @return array<string, mixed>
+     */
+    private function buildStats(array $lang, ?LegacyRedisCache $cache): array
     {
         $show = SupportContext::getGlobal('showstats_main', '') === 'yes';
 
@@ -440,7 +464,10 @@ JS;
         ];
     }
 
-    /** @return array<string, mixed> */
+    /**
+     * @param array<string, mixed> $lang
+     * @return array<string, mixed>
+     */
     private function buildTrackerLoad(array $lang): array
     {
         $show = SupportContext::getGlobal('showtrackerload', '') === 'yes';
@@ -450,6 +477,9 @@ JS;
         }
 
         $loadAvg = sys_getloadavg();
+        if ($loadAvg === false) {
+            $loadAvg = [0.0, 0.0, 0.0];
+        }
         $load = sprintf('load average: %.2f, %.2f, %.2f', $loadAvg[0], $loadAvg[1], $loadAvg[2]);
 
         return [
@@ -459,7 +489,10 @@ JS;
         ];
     }
 
-    /** @return array<string, mixed> */
+    /**
+     * @param array<string, mixed> $lang
+     * @return array<string, mixed>
+     */
     private function buildDisclaimer(array $lang): array
     {
         $siteName = Setting::getSiteName();
@@ -471,7 +504,10 @@ JS;
         ];
     }
 
-    /** @return array<string, mixed> */
+    /**
+     * @param array<string, mixed> $lang
+     * @return array<string, mixed>
+     */
     private function buildBrowserNote(array $lang): array
     {
         return [

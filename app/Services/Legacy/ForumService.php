@@ -54,16 +54,12 @@ final class ForumService
             return $this->handleSetSticky($request);
         }
 
-        $result = $this->renderer->render('forum_forums');
-        if ($result instanceof RedirectResponse) {
-            return $result;
-        }
-
-        return $result;
+        // Read-only actions are rendered by ForumPageService in the
+        // controller. Signal "handled as read" with an empty array.
+        return [];
     }
 
     public function __construct(
-        private readonly LegacyPartialRenderer $renderer,
         private readonly ForumRepository $repository,
     ) {}
 

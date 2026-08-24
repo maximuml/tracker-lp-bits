@@ -17,7 +17,7 @@ class RemovedFeaturesTest extends TestCase
         foreach ([
             base_path('resources/views/usercp/index.blade.php'),
             base_path('resources/views/my/bonus.blade.php'),
-            base_path('resources/views/my/_bonus.blade.php'),
+            base_path('resources/views/my/sections/bonus.blade.php'),
             base_path('resources/views/topten/index.blade.php'),
             base_path('resources/views/topten/_topten.blade.php'),
         ] as $file) {

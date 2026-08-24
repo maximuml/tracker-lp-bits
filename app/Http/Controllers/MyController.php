@@ -5,7 +5,8 @@ namespace App\Http\Controllers;
 use App\Enums\Permission\PermissionEnum;
 use App\Models\HitAndRun;
 use App\Models\User;
-use App\Services\Legacy\LegacyPartialRenderer;
+use App\Services\BonusPageService;
+use App\Services\Legacy\BonusService;
 use App\Support\Config\SiteConfig;
 use App\Support\LegacyResponse;
 use App\Support\Pagination;
@@ -18,11 +19,14 @@ use Illuminate\View\View;
 
 class MyController extends Controller
 {
-    private LegacyPartialRenderer $renderer;
+    private BonusPageService $bonusPageService;
 
-    public function __construct(LegacyPartialRenderer $renderer)
+    private BonusService $bonusService;
+
+    public function __construct(BonusPageService $bonusPageService, BonusService $bonusService)
     {
-        $this->renderer = $renderer;
+        $this->bonusPageService = $bonusPageService;
+        $this->bonusService = $bonusService;
     }
 
     public function bonus(Request $request): View|Response|RedirectResponse
@@ -33,12 +37,20 @@ class MyController extends Controller
             return redirect('/mybonus.php'.($qs ? '?'.$qs : ''));
         }
 
-        $result = $this->renderer->render('my_bonus');
-        if (! is_array($result)) {
-            return $result;
+        $data = $this->bonusPageService->build($request);
+
+        $actionRedirect = $this->bonusService->handleExchangeActionPublic(
+            $request,
+            $data['allBonus'],
+            $data['curUser'],
+            $data['lang'],
+            $data['lockText']
+        );
+        if ($actionRedirect instanceof RedirectResponse) {
+            return $actionRedirect;
         }
 
-        return view('my.bonus', $result);
+        return view('my.bonus', $data);
     }
 
     public function hr(Request $request): View|RedirectResponse

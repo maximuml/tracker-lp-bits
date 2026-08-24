@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Models\User;
 use App\Repositories\UserListingRepository;
 use App\Repositories\UserSearchRepository;
 use App\Support\Format;
@@ -89,7 +90,8 @@ final class UsersearchPageService
 
         // Build class select options
         $classOptions = "<option value='1'>(any)</option>\n";
-        for ($i = 2; ; $i++) {
+        $maxClass = max(array_map('intval', array_keys(User::$classes)));
+        for ($i = 2; $i - 2 <= $maxClass; $i++) {
             if ($c = UserClass::name($i - 2, false, true, true)) {
                 $classOptions .= '<option value='.$i.($class && $class == $i ? ' selected' : '').">$c</option>\n";
             } else {

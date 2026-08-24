@@ -23,7 +23,13 @@ class ModtaskRepository
     {
         $user = User::query()->find($userId);
 
-        return $user === null ? null : $user->toArray();
+        if ($user === null) {
+            return null;
+        }
+
+        // passhash is in $hidden on the User model, but the modtask
+        // controller needs it for Cache::clearUser() and passkey reset.
+        return $user->makeVisible(['passhash'])->toArray();
     }
 
     public static function addFund(int $userId, float $usd, float $cny, string $memo): void

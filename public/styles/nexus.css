@@ -102,3 +102,29 @@ details[open] summary {
 .hidden-text:hover {
     filter: blur(0);
 }
+
+/* Accessibility: skip-link visible on focus */
+.skip-link:focus {
+    left: 0 !important;
+    width: auto !important;
+    height: auto !important;
+    padding: 8px 12px;
+    background: #4d6c99;
+    color: #fff;
+    z-index: 9999;
+    border-radius: 0 0 4px 0;
+}
+
+/* Mobile: prevent horizontal overflow from fixed-width legacy tables */
+@media (max-width: 768px) {
+    table.head, table.main {
+        width: 100% !important;
+        max-width: 100% !important;
+        overflow-x: auto;
+        display: block;
+    }
+    #main-content {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+}

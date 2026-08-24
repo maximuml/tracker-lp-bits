@@ -73,6 +73,7 @@ class PageLayout
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <?php
         if ($context->metaKeywordsTweak) {
             ?>
@@ -180,6 +181,7 @@ class PageLayout
         ?>"></script>
 </head>
 <body>
+<a href="#main-content" class="skip-link" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;" onfocus="this.style.left='0';this.style.width='auto';this.style.height='auto';" onblur="this.style.left='-9999px';this.style.width='1px';this.style.height='1px';">Skip to main content</a>
 <table class="head" cellspacing="0" cellpadding="0" align="center" style="width: <?php
         echo $context->user !== null ? CONTENT_WIDTH + 28.66 : CONTENT_WIDTH;
         ?>px">

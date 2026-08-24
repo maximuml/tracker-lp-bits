@@ -256,6 +256,7 @@ final class TorrentAjaxRepository
             'usernameHtmlMap' => $usernameHtmlMap,
             'enablelocationTweak' => $enablelocationTweak,
             'currentUser' => $currentUser,
+            'CURUSER' => $currentUser !== null ? $currentUser->toArray() : [],
         ];
     }
 

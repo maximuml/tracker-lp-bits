@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Repositories\IndexRepository;
-use App\Services\Legacy\LegacyPartialRenderer;
+use App\Services\IndexPageService;
 use App\Support\Bonus;
 use App\Support\SupportContext;
 use Illuminate\Http\RedirectResponse;
@@ -13,11 +13,11 @@ use Illuminate\View\View;
 
 class IndexController extends Controller
 {
-    private LegacyPartialRenderer $renderer;
+    private IndexPageService $pageService;
 
-    public function __construct(LegacyPartialRenderer $renderer)
+    public function __construct(IndexPageService $pageService)
     {
-        $this->renderer = $renderer;
+        $this->pageService = $pageService;
     }
 
     public function legacy(Request $request): View|Response|RedirectResponse
@@ -35,12 +35,9 @@ class IndexController extends Controller
             return $this->handlePollVote($request);
         }
 
-        $result = $this->renderer->render('index');
-        if (! is_array($result)) {
-            return $result;
-        }
+        $data = $this->pageService->build();
 
-        return view('index.index', $result);
+        return view('index.index', $data);
     }
 
     private function handlePollVote(Request $request): RedirectResponse

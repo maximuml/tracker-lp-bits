@@ -19,5 +19,5 @@ $toastLang = json_encode([
 @section('title', $title ?? $lang_index['head_home'] ?? 'Home')
 
 @section('content')
-@include('index._index')
+{!! $content !!}
 @endsection

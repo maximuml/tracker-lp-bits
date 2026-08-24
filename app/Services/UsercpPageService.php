@@ -11,6 +11,7 @@ use App\Repositories\SeedBoxRepository;
 use App\Repositories\TokenRepository;
 use App\Repositories\UsercpRepository;
 use App\Repositories\UserPasskeyRepository;
+use App\Support\Cache\LegacyRedisCache;
 use App\Support\Config\SiteConfig;
 use App\Support\Form;
 use App\Support\Forum;
@@ -94,7 +95,7 @@ final class UsercpPageService
      * @param  array<string, mixed>  $curUser
      * @return array<string, mixed>
      */
-    private function buildHome(array $lang, array $curUser, ?object $cache, User $userInfo): array
+    private function buildHome(array $lang, array $curUser, ?LegacyRedisCache $cache, User $userInfo): array
     {
         $userId = (int) ($curUser['id'] ?? 0);
 
@@ -280,7 +281,7 @@ final class UsercpPageService
      * @param  array<string, mixed>  $lang
      * @return array<string, mixed>
      */
-    private function buildReadTopics(array $lang, int $userId, ?object $cache): array
+    private function buildReadTopics(array $lang, int $userId, ?LegacyRedisCache $cache): array
     {
         $topicRows = UsercpRepository::getReadTopics($userId);
         $items = [];
@@ -409,7 +410,7 @@ final class UsercpPageService
         }
 
         // Categories table
-        $categories = SearchBox::buildCategoryTableWithContext($browsecatmode, 'yes', 'torrents.php?allsec=1', false, 3, $notifs, ['section_name' => true]);
+        $categories = SearchBox::buildCategoryTableWithContext($browsecatmode, 'yes', 'torrents.php?allsec=1', '', 3, $notifs, ['section_name' => true]);
 
         // Stylesheets
         $ssSa = UsercpRepository::getStylesheetOptions();

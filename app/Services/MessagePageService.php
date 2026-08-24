@@ -27,8 +27,6 @@ use Illuminate\Support\Collection;
  */
 final class MessagePageService
 {
-    private const PM_DELETED = 0;
-
     private const PM_INBOX = 1;
 
     private const PM_SENT_BOX = -1;
@@ -125,7 +123,7 @@ final class MessagePageService
         $count = $countResult['count'];
 
         $pagerHref = '?action=viewmailbox'
-            .($mailbox ? '&box='.$mailbox : '')
+            .'&box='.$mailbox
             .($place ? '&place='.$place : '')
             .($keyword ? '&keyword='.rawurlencode($keyword) : '')
             .($unread ? '&unread='.$unread : '')
@@ -216,6 +214,8 @@ final class MessagePageService
                 (string) ($lang['std_error'] ?? 'Error'),
                 (string) ($lang['std_no_permission'] ?? 'No permission.')
             );
+
+            return [];
         }
 
         $message = $messageModel->toArray();
@@ -301,6 +301,8 @@ final class MessagePageService
                 (string) ($lang['std_error'] ?? 'Error'),
                 (string) ($lang['std_no_permission_forwarding'] ?? 'No permission to forward.')
             );
+
+            return [];
         }
 
         $message = $messageModel->toArray();
@@ -357,9 +359,9 @@ final class MessagePageService
     /**
      * Build the jump-to box options HTML for the search form.
      *
-     * @param  Collection  $pmBoxes
+     * @param  Collection<int, \stdClass>  $pmBoxes
      */
-    private function buildJumpToBoxes($pmBoxes, int $selected): string
+    private function buildJumpToBoxes(Collection $pmBoxes, int $selected): string
     {
         $lang = (array) (SupportContext::getGlobal('lang_messages') ?? []);
         $html = '<option value="1" '.($selected === self::PM_INBOX ? ' selected' : '').'>'.htmlspecialchars((string) ($lang['select_inbox'] ?? 'Inbox'))."</option>\n";

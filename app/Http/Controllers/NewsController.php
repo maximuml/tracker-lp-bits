@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\NewsResource;
 use App\Models\News;
+use App\Repositories\IndexRepository;
 use App\Support\Events;
 use App\Support\SupportContext;
 use Illuminate\Http\RedirectResponse;
@@ -151,5 +153,94 @@ class NewsController extends LegacyController
             'mode' => 'add',
             'title' => $composeTitle,
         ]);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function index(Request $request): array
+    {
+        $perPage = (int) $request->input('limit', 20);
+
+        $news = News::query()->with(['user'])->latest('added')->paginate($perPage);
+
+        return $this->success(NewsResource::collection($news));
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function show(News $news): array
+    {
+        return $this->success(new NewsResource($news->load(['user'])));
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function store(Request $request): array
+    {
+        $data = $request->validate([
+            'title' => 'required|string|max:255',
+            'body' => 'required|string',
+            'notify' => 'in:yes,no',
+        ]);
+
+        $currentUser = (array) (SupportContext::getUser() ?? []);
+        $data['userid'] = (int) ($currentUser['id'] ?? 0);
+        $data['added'] = now()->toDateTimeString();
+        $data['notify'] = $data['notify'] ?? 'no';
+
+        $news = News::query()->create($data);
+        Events::fire('news_created', $news, null);
+
+        $cache = SupportContext::getCache();
+        $cache?->delete_value('recent_news', true);
+
+        return $this->success(new NewsResource($news), 'News created');
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function update(Request $request, News $news): array
+    {
+        $data = $request->validate([
+            'title' => 'sometimes|string|max:255',
+            'body' => 'sometimes|string',
+            'notify' => 'sometimes|in:yes,no',
+        ]);
+
+        $news->update($data);
+
+        $cache = SupportContext::getCache();
+        $cache?->delete_value('recent_news', true);
+
+        return $this->success(new NewsResource($news->fresh()), 'News updated');
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function destroy(News $news): array
+    {
+        $news->delete();
+
+        $cache = SupportContext::getCache();
+        $cache?->delete_value('recent_news', true);
+
+        return $this->success(['success' => true], 'News deleted');
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function latest(): array
+    {
+        $maxNews = (int) SupportContext::getGlobal('maxnewsnum_main', 5);
+
+        $items = IndexRepository::getLatestNews($maxNews);
+
+        return $this->success(NewsResource::collection($items));
     }
 }

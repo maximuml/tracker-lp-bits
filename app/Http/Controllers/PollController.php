@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\PollResource;
+use App\Models\Poll;
+use App\Repositories\IndexRepository;
 use App\Repositories\PollRepository;
 use App\Support\Pagination;
 use App\Support\Strings;
@@ -127,5 +130,113 @@ class PollController extends LegacyController
             'mode' => 'list',
             'polls' => $polls,
         ]);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function index(Request $request): array
+    {
+        $perPage = (int) $request->input('limit', 20);
+
+        $polls = Poll::query()->latest('id')->paginate($perPage);
+
+        return $this->success(PollResource::collection($polls));
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function show(Poll $poll): array
+    {
+        return $this->success(new PollResource($poll));
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function store(Request $request): array
+    {
+        $data = $request->validate(array_merge(
+            ['question' => 'required|string|max:255'],
+            array_fill_keys(array_map(fn ($i) => "option{$i}", range(0, Poll::MAX_OPTION_INDEX)), 'sometimes|string|max:255')
+        ));
+
+        $data['added'] = now()->toDateTimeString();
+
+        $poll = Poll::query()->create($data);
+
+        return $this->success(new PollResource($poll), 'Poll created');
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function update(Request $request, Poll $poll): array
+    {
+        $data = $request->validate(array_merge(
+            ['question' => 'sometimes|string|max:255'],
+            array_fill_keys(array_map(fn ($i) => "option{$i}", range(0, Poll::MAX_OPTION_INDEX)), 'sometimes|string|max:255')
+        ));
+
+        $poll->update($data);
+
+        return $this->success(new PollResource($poll->fresh()), 'Poll updated');
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function destroy(Poll $poll): array
+    {
+        $poll->delete();
+
+        return $this->success(['success' => true], 'Poll deleted');
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function latest(): array
+    {
+        $pollArr = IndexRepository::getCurrentPoll();
+
+        if ($pollArr === null) {
+            return $this->success([], 'No poll');
+        }
+
+        $poll = Poll::query()->find($pollArr['id']);
+
+        return $this->success($poll ? new PollResource($poll) : null);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function vote(Request $request): array
+    {
+        $currentUser = (array) (SupportContext::getUser() ?? []);
+        $userId = (int) ($currentUser['id'] ?? 0);
+
+        $data = $request->validate([
+            'poll_id' => 'required|integer',
+            'choice' => 'required|integer|min:0',
+        ]);
+
+        $pollId = (int) $data['poll_id'];
+        $choice = (int) $data['choice'];
+
+        $poll = Poll::query()->find($pollId);
+        if (! $poll) {
+            return $this->fail([], 'Poll not found');
+        }
+
+        if (IndexRepository::hasVoted($pollId, $userId)) {
+            return $this->fail([], 'Already voted');
+        }
+
+        IndexRepository::recordPollVote($pollId, $userId, $choice);
+
+        return $this->success(['success' => true], 'Vote recorded');
     }
 }

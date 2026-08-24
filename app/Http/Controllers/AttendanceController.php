@@ -62,4 +62,26 @@ class AttendanceController extends LegacyController
 
         return $this->legacyPage($request, 'attendance', true, $data);
     }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function attend(Request $request, AttendanceRepository $repository): array
+    {
+        $curUser = SupportContext::getUser();
+        if ($curUser === null) {
+            return $this->fail([], 'Unauthenticated');
+        }
+
+        $uid = (int) ($curUser['id'] ?? 0);
+        $attendance = $repository->attend($uid);
+
+        return $this->success([
+            'uid' => $attendance->uid,
+            'points' => $attendance->points,
+            'days' => $attendance->days,
+            'total_days' => $attendance->total_days,
+            'is_updated' => $attendance->is_updated,
+        ], 'Attendance recorded');
+    }
 }

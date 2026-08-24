@@ -154,34 +154,6 @@ final class CategoryRepository
     }
 
     /**
-     * Render the legacy catmanage page.
-     *
-     * @param  array<string, mixed>  $data
-     */
-    public static function render(array $data = []): string
-    {
-        $partial = __DIR__.'/../Services/Legacy/catmanage_content.php';
-        if (! is_file($partial)) {
-            return 'Legacy catmanage partial missing.';
-        }
-
-        $__renderer_partial = $partial;
-        $__renderer_data = $data;
-        unset($__renderer_data['__renderer_partial'], $__renderer_data['__renderer_data']);
-        $render = static function () use ($__renderer_partial, $__renderer_data): void {
-            extract(SupportContext::getGlobalsForView(), EXTR_SKIP);
-            extract($__renderer_data);
-            /** @noinspection PhpIncludeInspection */
-            include $__renderer_partial;
-        };
-
-        ob_start();
-        $render();
-
-        return (string) ob_get_clean();
-    }
-
-    /**
      * @return array<int, array<string, mixed>>
      */
     public static function getIconRows(): array

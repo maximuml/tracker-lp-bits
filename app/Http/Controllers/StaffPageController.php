@@ -106,7 +106,6 @@ class StaffPageController extends LegacyController
             if ($currentClass !== $arr['class']) {
                 $currentClass = $arr['class'];
                 $staffRows[] = ['header' => true, 'class_name' => UserClass::name((int) $arr['class'], false, true, true)];
-                $staffRows[] = ['subheader' => true];
             }
             $staffRows[] = $buildUserRow($arr, 'stafffor');
         }

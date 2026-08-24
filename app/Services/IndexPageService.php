@@ -9,11 +9,11 @@ use App\Enums\Permission\PermissionEnum;
 use App\Models\Poll;
 use App\Models\Setting;
 use App\Repositories\IndexRepository;
+use App\Support\Cache\LegacyRedisCache;
 use App\Support\Config\SiteConfig;
 use App\Support\CoverThumb;
 use App\Support\Format;
 use App\Support\Hooks;
-use App\Support\Cache\LegacyRedisCache;
 use App\Support\Shoutbox;
 use App\Support\SupportContext;
 use App\Support\UserClass;
@@ -85,7 +85,7 @@ final class IndexPageService
     }
 
     /**
-     * @param array<string, mixed> $lang
+     * @param  array<string, mixed>  $lang
      * @return array<string, mixed>
      */
     private function buildNews(array $lang, bool $canManage, ?LegacyRedisCache $cache): array
@@ -105,7 +105,7 @@ final class IndexPageService
     }
 
     /**
-     * @param array<string, mixed> $lang
+     * @param  array<string, mixed>  $lang
      * @return array<string, mixed>
      */
     private function buildShoutbox(array $lang, bool $canManage, int $userId): array
@@ -154,8 +154,8 @@ JS;
     }
 
     /**
-     * @param array<string, mixed> $lang
-     * @param array<string, mixed> $curUser
+     * @param  array<string, mixed>  $lang
+     * @param  array<string, mixed>  $curUser
      * @return array<string, mixed>
      */
     private function buildForumPosts(array $lang, array $curUser): array
@@ -181,7 +181,7 @@ JS;
     }
 
     /**
-     * @param array<string, mixed> $lang
+     * @param  array<string, mixed>  $lang
      * @return array<string, mixed>
      */
     private function buildLatestTorrents(array $lang, ?LegacyRedisCache $cache): array
@@ -239,7 +239,7 @@ JS;
     }
 
     /**
-     * @param array<string, mixed> $lang
+     * @param  array<string, mixed>  $lang
      * @return array<string, mixed>
      */
     private function buildTopUploaders(array $lang): array
@@ -299,8 +299,8 @@ JS;
     }
 
     /**
-     * @param array<string, mixed> $lang
-     * @param array<string, mixed> $curUser
+     * @param  array<string, mixed>  $lang
+     * @param  array<string, mixed>  $curUser
      * @return array<string, mixed>
      */
     private function buildPolls(array $lang, array $curUser, bool $canManage, bool $canLog, ?LegacyRedisCache $cache): array
@@ -380,7 +380,7 @@ JS;
     }
 
     /**
-     * @param array<string, mixed> $lang
+     * @param  array<string, mixed>  $lang
      * @return array<string, mixed>
      */
     private function buildStats(array $lang, ?LegacyRedisCache $cache): array
@@ -465,7 +465,7 @@ JS;
     }
 
     /**
-     * @param array<string, mixed> $lang
+     * @param  array<string, mixed>  $lang
      * @return array<string, mixed>
      */
     private function buildTrackerLoad(array $lang): array
@@ -490,7 +490,7 @@ JS;
     }
 
     /**
-     * @param array<string, mixed> $lang
+     * @param  array<string, mixed>  $lang
      * @return array<string, mixed>
      */
     private function buildDisclaimer(array $lang): array
@@ -505,7 +505,7 @@ JS;
     }
 
     /**
-     * @param array<string, mixed> $lang
+     * @param  array<string, mixed>  $lang
      * @return array<string, mixed>
      */
     private function buildBrowserNote(array $lang): array

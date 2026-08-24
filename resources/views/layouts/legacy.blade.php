@@ -8,7 +8,9 @@
 \App\Support\Frame::mainFrameOpen();
 @endphp
 
+<div id="main-content" tabindex="-1">
 @yield('content')
+</div>
 
 @php
 \App\Support\Frame::mainFrameClose();

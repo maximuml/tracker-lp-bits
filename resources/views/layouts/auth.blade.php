@@ -29,7 +29,8 @@
     @endforeach
 </head>
 <body>
-    <div class="container">
+    <a href="#main-content" class="skip-link" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;" onfocus="this.style.left='0';this.style.width='auto';this.style.height='auto';" onblur="this.style.left='-9999px';this.style.width='1px';this.style.height='1px';">Skip to main content</a>
+    <div class="container" id="main-content" tabindex="-1">
         @yield('content')
     </div>
     @foreach (\Nexus\Nexus::getAppendFooters() as $html)

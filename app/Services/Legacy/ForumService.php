@@ -18,7 +18,6 @@ use App\Support\UserDisplay;
 use App\Support\Validators;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 
 /**
  * Temporary bridge for legacy forums.php mutation actions.
@@ -26,9 +25,9 @@ use Illuminate\Http\Response;
 final class ForumService
 {
     /**
-     * @return array<string, mixed>|Response|RedirectResponse
+     * @return array<string, mixed>|RedirectResponse
      */
-    public function legacy(Request $request): array|Response|RedirectResponse
+    public function legacy(Request $request): array|RedirectResponse
     {
         $action = (string) $request->input('action', $request->query('action', ''));
 
@@ -54,16 +53,12 @@ final class ForumService
             return $this->handleSetSticky($request);
         }
 
-        $result = $this->renderer->render('forum_forums');
-        if ($result instanceof RedirectResponse) {
-            return $result;
-        }
-
-        return $result;
+        // Read-only actions are rendered by ForumPageService in the
+        // controller. Signal "handled as read" with an empty array.
+        return [];
     }
 
     public function __construct(
-        private readonly LegacyPartialRenderer $renderer,
         private readonly ForumRepository $repository,
     ) {}
 

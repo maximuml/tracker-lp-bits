@@ -11,6 +11,7 @@ use App\Models\Message;
 use App\Models\User;
 use App\Repositories\MessageRepository;
 use App\Services\Legacy\MessageService;
+use App\Services\MessagePageService;
 use App\Support\SupportContext;
 use App\Support\UserDisplay;
 use App\Support\Validators;
@@ -27,20 +28,25 @@ class MessageController extends LegacyController
 
     private MessageService $legacyService;
 
-    public function __construct(MessageRepository $repository, MessageService $legacyService)
+    private MessagePageService $pageService;
+
+    public function __construct(MessageRepository $repository, MessageService $legacyService, MessagePageService $pageService)
     {
         $this->repository = $repository;
         $this->legacyService = $legacyService;
+        $this->pageService = $pageService;
     }
 
     public function messages(Request $request): View|RedirectResponse
     {
-        $result = $this->legacyService->messages($request);
-        if ($result instanceof RedirectResponse) {
-            return $result;
+        $actionRedirect = $this->legacyService->handleMessagesActionPublic($request);
+        if ($actionRedirect instanceof RedirectResponse) {
+            return $actionRedirect;
         }
 
-        return $this->legacyPage($request, 'messages', true, $result);
+        $data = $this->pageService->build($request);
+
+        return $this->legacyPage($request, 'messages', true, $data);
     }
 
     public function sendmessage(Request $request): Response|RedirectResponse|View

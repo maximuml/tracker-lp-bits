@@ -1,1 +1,0 @@
-@include('getattachment._getattachment')

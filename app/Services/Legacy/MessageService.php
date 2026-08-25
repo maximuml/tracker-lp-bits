@@ -18,46 +18,18 @@ use App\Support\SupportContext;
 use App\Support\Url;
 use App\Support\UserDisplay;
 use App\Support\Validators;
-use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Nexus\Database\NexusDB;
 
 /**
- * Bridge for legacy message pages.
- *
- * The inbox/outbox list still uses `messages_content.php` via the legacy renderer.
- * `takeMessage` and `deletemessage` have been moved into typed service methods so
- * the corresponding action partials no longer contain DB queries or side effects.
+ * Handles message action mutations (takeMessage, deletemessage, moveordel,
+ * editmailboxes2). Page rendering is handled by MessagePageService.
  */
 final class MessageService
 {
-    /**
-     * @return array<string, mixed>|RedirectResponse
-     */
-    public function messages(Request $request): array|RedirectResponse
-    {
-        $actionRedirect = $this->handleMessagesAction($request);
-        if ($actionRedirect instanceof RedirectResponse) {
-            return $actionRedirect;
-        }
-
-        $result = $this->renderMessages();
-        if ($result instanceof RedirectResponse) {
-            return $result;
-        }
-
-        return ['content' => $result->getContent()];
-    }
-
-    public function sendmessage(Request $request): Response|RedirectResponse
-    {
-        return $this->renderPartial('sendmessage');
-    }
-
     public function takeMessage(Request $request): RedirectResponse
     {
         if (! $request->isMethod('POST')) {
@@ -322,6 +294,11 @@ final class MessageService
         );
     }
 
+    public function handleMessagesActionPublic(Request $request): ?RedirectResponse
+    {
+        return $this->handleMessagesAction($request);
+    }
+
     private function handleMessagesAction(Request $request): ?RedirectResponse
     {
         $action = (string) $request->input('action', '');
@@ -494,67 +471,5 @@ final class MessageService
         NexusDB::cache_del('user_'.$userId.'_outbox_count');
 
         return redirect('/messages.php?action=viewmailbox&id='.(int) ($message['location'] ?? 0));
-    }
-
-    private function renderMessages(): Response|RedirectResponse
-    {
-        $path = __DIR__.'/messages_content.php';
-
-        if (! file_exists($path)) {
-            return response('Legacy content missing: messages', 500);
-        }
-
-        ob_start();
-        try {
-            include $path;
-        } catch (HttpResponseException $e) {
-            ob_get_clean();
-
-            throw $e;
-        }
-
-        $content = (string) ob_get_clean();
-
-        foreach (headers_list() as $header) {
-            if (stripos($header, 'Location:') === 0) {
-                $url = trim(substr($header, 9));
-                header_remove('Location');
-
-                return redirect($url);
-            }
-        }
-
-        return response($content);
-    }
-
-    private function renderPartial(string $name): Response|RedirectResponse
-    {
-        $path = __DIR__.'/partials/'.$name.'.php';
-
-        if (! file_exists($path)) {
-            return response('Legacy partial missing: '.$name, 500);
-        }
-
-        ob_start();
-        try {
-            include $path;
-        } catch (HttpResponseException $e) {
-            ob_get_clean();
-
-            throw $e;
-        }
-
-        $content = (string) ob_get_clean();
-
-        foreach (headers_list() as $header) {
-            if (stripos($header, 'Location:') === 0) {
-                $url = trim(substr($header, 9));
-                header_remove('Location');
-
-                return redirect($url);
-            }
-        }
-
-        return response($content);
     }
 }

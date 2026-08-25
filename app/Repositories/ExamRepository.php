@@ -26,7 +26,6 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use Nexus\Database\NexusDB;
 
 class ExamRepository extends BaseRepository
 {
@@ -1270,7 +1269,7 @@ class ExamRepository extends BaseRepository
                         // 因为涉及到列与列的计算，这里需要用 whereRaw，但我们可以针对多数据库做自适应
                         $q->where("$examTable.duration", '>', 0);
 
-                        if (NexusDB::isPgsql()) {
+                        if (DB::connection()->getDriverName() === 'pgsql') {
                             // PG 写法：使用 || 拼接字符串再转为 INTERVAL
                             $q->whereRaw("$examUserTable.created_at + ($examTable.duration || ' day')::INTERVAL < ?", [$now]);
                         } else {

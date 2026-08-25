@@ -23,7 +23,6 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use Nexus\Database\ClickHouse;
-use Nexus\Database\NexusDB;
 
 class BonusRepository extends BaseRepository
 {
@@ -574,9 +573,9 @@ class BonusRepository extends BaseRepository
                     });
             });
 
-        if (NexusDB::isMysql()) {
+        if (DB::connection()->getDriverName() === 'mysql') {
             $medalQuery->selectRaw('round(sum(bonus_addition_factor), 5) as factor');
-        } elseif (NexusDB::isPgsql()) {
+        } elseif (DB::connection()->getDriverName() === 'pgsql') {
             $medalQuery->selectRaw('round(sum(bonus_addition_factor)::numeric, 5) as factor');
         } else {
             throw new \RuntimeException('Not supported database');

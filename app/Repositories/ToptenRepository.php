@@ -7,7 +7,6 @@ use App\Support\SupportContext;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use Nexus\Database\NexusDB;
 
 final class ToptenRepository
 {
@@ -123,9 +122,9 @@ final class ToptenRepository
 
     private static function userBaseQuery(): Builder
     {
-        if (NexusDB::isMysql()) {
+        if (DB::connection()->getDriverName() === 'mysql') {
             $speedStr = 'uploaded / (UNIX_TIMESTAMP(NOW()) - UNIX_TIMESTAMP(added)) AS upspeed, downloaded / (UNIX_TIMESTAMP(NOW()) - UNIX_TIMESTAMP(added)) AS downspeed';
-        } elseif (NexusDB::isPgsql()) {
+        } elseif (DB::connection()->getDriverName() === 'pgsql') {
             $speedStr = 'uploaded::numeric / (EXTRACT(EPOCH FROM NOW()) - EXTRACT(EPOCH FROM added)) AS upspeed, downloaded::numeric / (EXTRACT(EPOCH FROM NOW()) - EXTRACT(EPOCH FROM added)) AS downspeed';
         } else {
             throw new \RuntimeException('Unsupported database driver for top-ten speed calculation.');

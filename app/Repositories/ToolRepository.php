@@ -19,6 +19,7 @@ use Carbon\CarbonInterface;
 use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use League\Flysystem\Filesystem;
@@ -568,9 +569,9 @@ class ToolRepository extends BaseRepository
         $stickyPromotionParticipatorsTable = 'sticky_promotion_participators';
         $claimTable = 'claims';
         $hitAndRunTable = 'hit_and_runs';
-        $stickyPromotionExists = NexusDB::hasTable($stickyPromotionParticipatorsTable);
-        $claimTableExists = NexusDB::hasTable($claimTable);
-        $hitAndRunTableExists = NexusDB::hasTable($hitAndRunTable);
+        $stickyPromotionExists = Schema::hasTable($stickyPromotionParticipatorsTable);
+        $claimTableExists = Schema::hasTable($claimTable);
+        $hitAndRunTableExists = Schema::hasTable($hitAndRunTable);
         $idsField = NexusDB::groupConcatField('id');
         while (true) {
             $snatchRes = DB::table('snatched')

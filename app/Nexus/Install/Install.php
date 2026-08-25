@@ -16,6 +16,7 @@ use App\Support\Settings;
 use App\Support\Url;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use Nexus\Database\NexusDB;
 
@@ -321,8 +322,8 @@ class Install
         require $originalConfigFile;
         $settings = require $defaultSettingsFile;
         $settingsFromDb = [];
-        if (NexusDB::hasTable('settings') && Setting::query()->count() > 0) {
-            if (! NexusDB::hasColumn('settings', 'autoload')) {
+        if (Schema::hasTable('settings') && Setting::query()->count() > 0) {
+            if (! Schema::hasColumn('settings', 'autoload')) {
                 $this->runMigrate('database/migrations/2022_05_06_191830_add_autoload_to_settings_table.php');
             }
             $settingsFromDb = SiteConfig::fromDb()->toArray();
@@ -638,10 +639,10 @@ class Install
 
     public function saveSettings($settings)
     {
-        if (! NexusDB::hasTable('settings')) {
+        if (! Schema::hasTable('settings')) {
             $this->runMigrate('database/migrations/2021_06_08_113437_create_settings_table.php');
         }
-        if (! NexusDB::hasColumn('settings', 'autoload')) {
+        if (! Schema::hasColumn('settings', 'autoload')) {
             $this->runMigrate('database/migrations/2022_05_06_191830_add_autoload_to_settings_table.php');
         }
         foreach ($settings as $prefix => $group) {

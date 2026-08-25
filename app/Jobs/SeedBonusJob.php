@@ -17,6 +17,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Nexus\Database\NexusDB;
 
@@ -91,7 +92,7 @@ class SeedBonusJob implements ShouldQueue
         $delIdRedisKey = false;
         if (empty($idStr) && ! empty($this->idRedisKey)) {
             $delIdRedisKey = true;
-            $idStr = NexusDB::cache_get($this->idRedisKey);
+            $idStr = Cache::get($this->idRedisKey);
         }
         if (empty($idStr)) {
             Logger::writeWithContext("$logPrefix, no idStr or idRedisKey", 'error');

@@ -28,6 +28,7 @@ use App\Support\Validators;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache as CacheFacade;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Nexus\Database\NexusDB;
@@ -88,7 +89,7 @@ final class UsercpRepository extends BaseRepository
 
     public static function getChallenge(string $username): ?string
     {
-        return NexusDB::cache_get(Token::challengeKey($username));
+        return CacheFacade::get(Token::challengeKey($username));
     }
 
     public static function deleteChallenge(string $username): bool

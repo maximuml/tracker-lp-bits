@@ -8,7 +8,7 @@ use App\Support\Logger;
 use Illuminate\Console\Command;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Database\Eloquent\Model;
-use Nexus\Database\NexusDB;
+use Illuminate\Support\Facades\Cache;
 use Symfony\Component\Console\Command\Command as CommandAlias;
 
 class FireEvent extends Command
@@ -49,7 +49,7 @@ class FireEvent extends Command
         /** @var class-string<Model> $modelClassName */
         $modelClassName = ModelEventEnum::$eventMaps[$name]['model'];
         $modelBasic = new $modelClassName;
-        $rawData = NexusDB::cache_get($idKey);
+        $rawData = Cache::get($idKey);
         $modelData = is_string($rawData) ? json_decode($rawData, true) : $rawData;
         if (! is_array($modelData)) {
             $this->error("$log, invalid modelData");
@@ -62,7 +62,7 @@ class FireEvent extends Command
         $model->setAttribute('id', $modelData['id']);
         $params = [$useArray ? $modelData : $model];
         if ($idKeyOld !== '') {
-            $rawOldData = NexusDB::cache_get($idKeyOld);
+            $rawOldData = Cache::get($idKeyOld);
             $modelOldData = is_string($rawOldData) ? json_decode($rawOldData, true) : $rawOldData;
             if (! is_array($modelOldData)) {
                 $this->error("$log, invalid modelOldData");

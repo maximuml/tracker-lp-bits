@@ -22,7 +22,6 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
-use Nexus\Database\NexusDB;
 
 class TorrentRssController extends LegacyController
 {
@@ -50,7 +49,7 @@ class TorrentRssController extends LegacyController
         }
 
         $cacheKey = 'nexus_rss:'.$passkey.':'.md5(http_build_query($filteredQuery));
-        $cacheData = NexusDB::cache_get($cacheKey);
+        $cacheData = Cache::get($cacheKey);
         if ($cacheData && config('app.env') !== 'local') {
             Log::writeWithContext('rss get from cache', 'info');
 
@@ -291,7 +290,7 @@ class TorrentRssController extends LegacyController
 </rss>';
 
         Log::writeWithContext('rss cache generated', 'info');
-        NexusDB::cache_put($cacheKey, $xml, 300);
+        Cache::put($cacheKey, $xml, 300);
 
         return response($xml, 200, ['Content-Type' => 'text/xml; charset=utf-8']);
     }

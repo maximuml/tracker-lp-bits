@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Nexus\Database\NexusDB;
+use Illuminate\Support\Facades\Config;
 
 /**
  * @property int $id
@@ -27,7 +27,7 @@ class NexusModel extends Model
     /** @return  string */
     public function getConnectionName()
     {
-        return NexusDB::getConnectionName();
+        return Config::get('nexus.database.default', null);
     }
 
     /** @return  Attribute<mixed, mixed> */

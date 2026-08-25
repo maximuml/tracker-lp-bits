@@ -350,7 +350,7 @@ final class ForumPageService
             if ($i === false) {
                 $i = 0;
             }
-            $page = floor($i / $perpage);
+            $page = floor((int) $i / $perpage);
         }
         if ($page === 'last') {
             $page = $pages - 1;

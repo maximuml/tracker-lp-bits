@@ -52,6 +52,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Nexus\Database\NexusDB;
@@ -668,13 +669,13 @@ class TorrentRepository extends BaseRepository
      */
     private function getTrackerReportAuthKeySecret($id, $uid, $initializeIfNotExists = false)
     {
-        $secret = NexusDB::remember("torrent_secret_{$uid}_{$id}", 3600, function () use ($id, $uid) {
+        $secret = Cache::remember("torrent_secret_{$uid}_{$id}", 3600, function () use ($id, $uid) {
             return TorrentSecret::query()
                 ->where('uid', $uid)
                 ->whereIn('torrent_id', [0, $id])
                 ->orderBy('torrent_id', 'desc')
                 ->orderBy('id', 'desc')
-                ->first();
+                ->first() ?? false;
         });
 
         if ($secret) {

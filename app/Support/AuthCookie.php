@@ -8,7 +8,7 @@ use App\Repositories\TorrentRepository;
 use App\Support\Config\SiteConfig;
 use Dotenv\Dotenv;
 use Illuminate\Encryption\Encrypter;
-use Nexus\Database\NexusDB;
+use Illuminate\Support\Facades\Cache;
 use Nexus\Nexus;
 
 /**
@@ -270,7 +270,7 @@ final class AuthCookie
      */
     public static function passkeyByAuthkey(string $authkey): string
     {
-        return NexusDB::remember("authkey2passkey:$authkey", 3600 * 24, function () use ($authkey) {
+        return Cache::remember("authkey2passkey:$authkey", 3600 * 24, function () use ($authkey) {
             $arr = explode('|', $authkey);
             if (count($arr) !== 3) {
                 throw new \InvalidArgumentException("Invalid authkey: $authkey, format error");

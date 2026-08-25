@@ -35,6 +35,7 @@ use App\Support\Url;
 use App\Support\UserDisplay;
 use App\Utils\MsgAlert;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Nexus\Database\NexusDB;
 use Nexus\Nexus;
 
@@ -232,7 +233,7 @@ final class AnnounceService
     {
         $passkey = $this->params['passkey'];
 
-        $this->user = NexusDB::remember("user_passkey_{$passkey}_content", 3600, function () use ($passkey) {
+        $this->user = Cache::remember("user_passkey_{$passkey}_content", 3600, function () use ($passkey) {
             $user = User::query()
                 ->select([
                     'id', 'username', 'downloadpos', 'enabled', 'uploaded', 'downloaded',
@@ -311,7 +312,7 @@ final class AnnounceService
     {
         $infoHashHex = bin2hex($this->infoHash);
 
-        $this->torrent = NexusDB::remember("torrent_hash_{$this->infoHash}_content", 350, function () {
+        $torrent = Cache::remember("torrent_hash_{$this->infoHash}_content", 350, function () {
             $tsField = NexusDB::unixTimestampField('added');
             $torrent = NexusDB::table('torrents')
                 ->leftJoin('categories', 'torrents.category', '=', 'categories.id')
@@ -325,8 +326,9 @@ final class AnnounceService
                 ->where('torrents.info_hash', $this->infoHash)
                 ->first();
 
-            return $torrent ? (array) $torrent : null;
+            return $torrent ? (array) $torrent : false;
         });
+        $this->torrent = $torrent === false ? null : $torrent;
 
         if ($this->torrent === null) {
             Logger::writeWithContext((string) ('[TORRENT NOT EXISTS] info_hash: '.$infoHashHex), (string) 'info', (bool) false);

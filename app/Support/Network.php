@@ -5,6 +5,7 @@ namespace App\Support;
 use App\Exceptions\SeedBoxYesException;
 use App\Repositories\SeedBoxRepository;
 use GeoIp2\Database\Reader;
+use Illuminate\Support\Facades\Cache;
 use Nexus\Database\NexusDB;
 use Symfony\Component\HttpFoundation\IpUtils;
 
@@ -302,14 +303,14 @@ final class Network
      * Resolve GeoIP2 data for an IP address.
      *
      * Mirrors `get_ip_location_from_geoip()`. The result is cached for
-     * 10 days via `NexusDB::remember()`. Returns `false` when the GeoIP2
+     * 10 days via `Cache::remember()`. Returns `false` when the GeoIP2
      * database is missing/unreadable.
      *
      * @return array<string, mixed>|false
      */
     public static function geoIpInfo(string $ip): array|false
     {
-        $locationInfo = NexusDB::remember("locations_{$ip}", 864000, function () use ($ip) {
+        $locationInfo = Cache::remember("locations_{$ip}", 864000, function () use ($ip) {
             $lang = Locale::folderFromCookie(SupportContext::getCookieValue('c_lang_folder', ''), (bool) false);
             $langMap = [
                 'chs' => 'zh-CN',

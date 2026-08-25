@@ -24,6 +24,7 @@ namespace App\Models;
 
 use App\Models\Traits\NexusActivityLogTrait;
 use App\Support\Url;
+use Illuminate\Support\Facades\Cache;
 use Nexus\Database\NexusDB;
 use Ramsey\Uuid;
 
@@ -65,7 +66,7 @@ class OauthProvider extends NexusModel
 
     private static function getNewUuid(): string
     {
-        return NexusDB::remember(self::NEW_UUID_CACHE_KEY, 86400 * 365, function () {
+        return Cache::remember(self::NEW_UUID_CACHE_KEY, 86400 * 365, function () {
             return UUid\v4();
         });
     }

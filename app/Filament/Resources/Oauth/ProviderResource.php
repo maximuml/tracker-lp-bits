@@ -15,7 +15,7 @@ use Filament\Schemas\Schema;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Nexus\Database\NexusDB;
+use Illuminate\Support\Facades\Cache;
 use Ramsey\Uuid;
 
 class ProviderResource extends Resource
@@ -92,7 +92,7 @@ class ProviderResource extends Resource
 
     private static function getNewUuid(): string
     {
-        return NexusDB::remember('new_oauth_provider_uuid', 86400 * 365, function () {
+        return Cache::remember('new_oauth_provider_uuid', 86400 * 365, function () {
             return UUid\v4();
         });
     }

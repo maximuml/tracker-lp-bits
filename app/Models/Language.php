@@ -13,8 +13,8 @@
 
 namespace App\Models;
 
+use App\Support\Cache;
 use App\Support\Config\SiteConfig;
-use Nexus\Database\NexusDB;
 
 /**
  * @property int $id
@@ -78,6 +78,6 @@ class Language extends NexusModel
                 'trans_state' => $info['trans_state'],
             ]);
         }
-        NexusDB::cache_del('site_lang_lang_list');
+        Cache::forgetWithLocales('site_lang_lang_list');
     }
 }

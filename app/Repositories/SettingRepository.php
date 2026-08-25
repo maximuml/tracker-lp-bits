@@ -76,9 +76,9 @@ class SettingRepository extends BaseRepository
         );
         $result = DB::insert($sql);
         Logger::writeWithContext((string) "sql: {$sql}, result: {$result}", (string) 'info', (bool) false);
-        NexusDB::cache_del('nexus_settings_in_laravel');
-        NexusDB::cache_del('nexus_settings_in_nexus');
-        NexusDB::cache_del('setting_protected_forum');
+        Cache::forgetWithLocales('nexus_settings_in_laravel');
+        Cache::forgetWithLocales('nexus_settings_in_nexus');
+        Cache::forgetWithLocales('setting_protected_forum');
 
         return $result;
     }

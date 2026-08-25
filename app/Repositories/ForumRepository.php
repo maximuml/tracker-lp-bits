@@ -7,9 +7,9 @@ use App\Models\ForumMod;
 use App\Models\Post;
 use App\Models\Topic;
 use App\Models\User;
+use App\Support\Cache;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use Nexus\Database\NexusDB;
 
 class ForumRepository extends BaseRepository
 {
@@ -165,18 +165,18 @@ class ForumRepository extends BaseRepository
 
     public function clearForumCache(): void
     {
-        NexusDB::cache_del('forums_list');
-        NexusDB::cache_del('forum_moderator_array');
+        Cache::forgetWithLocales('forums_list');
+        Cache::forgetWithLocales('forum_moderator_array');
     }
 
     public function clearOverforumCache(): void
     {
-        NexusDB::cache_del('overforums_list');
+        Cache::forgetWithLocales('overforums_list');
     }
 
     public function clearModeratorCache(): void
     {
-        NexusDB::cache_del('forum_moderator_array');
+        Cache::forgetWithLocales('forum_moderator_array');
     }
 
     public function getTopicIdByPost(int $postId): ?int

@@ -5,6 +5,7 @@ namespace App\Jobs;
 use App\Models\BonusLogs;
 use App\Models\User;
 use App\Support\Bonus;
+use App\Support\Cache as AppCache;
 use App\Support\Config\SiteConfig;
 use App\Support\Json;
 use App\Support\Logger;
@@ -19,7 +20,6 @@ use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
-use Nexus\Database\NexusDB;
 
 class SeedBonusJob implements ShouldQueue
 {
@@ -185,7 +185,7 @@ class SeedBonusJob implements ShouldQueue
         }
         $result = DB::table('users')->upsert($rows, ['id'], ['seed_points', 'seed_points_per_hour', 'seed_bonus_per_hour', 'seedbonus', 'seeding_torrent_count', 'seeding_torrent_size', 'seed_points_updated_at']);
         if ($delIdRedisKey) {
-            NexusDB::cache_del($this->idRedisKey);
+            AppCache::forgetWithLocales($this->idRedisKey);
         }
         if ($fd) {
             fwrite($fd, $logStr);

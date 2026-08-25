@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Support\Cache as AppCache;
 use App\Support\Logger;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -11,7 +12,6 @@ use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
-use Nexus\Database\NexusDB;
 
 class UpdateUserSeedingLeechingTime implements ShouldQueue
 {
@@ -119,7 +119,7 @@ class UpdateUserSeedingLeechingTime implements ShouldQueue
         }
         $result = DB::table('users')->upsert($rows, ['id'], ['seedtime', 'leechtime', 'seed_time_updated_at']);
         if ($delIdRedisKey) {
-            NexusDB::cache_del($this->idRedisKey);
+            AppCache::forgetWithLocales($this->idRedisKey);
         }
         $costTime = time() - $beginTimestamp;
         Logger::writeWithContext((string) sprintf("{$logPrefix}, [DONE], update user count: %s, result: %s, cost time: %s seconds", count($rows), var_export($result, true), $costTime), (string) 'info', (bool) false);

@@ -8,6 +8,7 @@ use App\Enums\Permission\PermissionEnum;
 use App\Models\Message;
 use App\Models\StaffMessage;
 use App\Models\User;
+use App\Support\Cache;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -303,8 +304,8 @@ class MessageRepository extends BaseRepository
     public static function updateStaffMessageCountCache($uid = 0, $type = '', $value = '')
     {
         if ($uid === false) {
-            NexusDB::cache_del(self::STAFF_MESSAGE_NEW_CACHE_KEY);
-            NexusDB::cache_del(self::STAFF_MESSAGE_TOTAL_CACHE_KEY);
+            Cache::forgetWithLocales(self::STAFF_MESSAGE_NEW_CACHE_KEY);
+            Cache::forgetWithLocales(self::STAFF_MESSAGE_TOTAL_CACHE_KEY);
         } else {
             $redis = NexusDB::redis();
             match ($type) {

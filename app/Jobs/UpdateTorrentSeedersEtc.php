@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Support\Cache as AppCache;
 use App\Support\Logger;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -11,7 +12,6 @@ use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
-use Nexus\Database\NexusDB;
 
 class UpdateTorrentSeedersEtc implements ShouldQueue
 {
@@ -130,7 +130,7 @@ class UpdateTorrentSeedersEtc implements ShouldQueue
         }
         $result = DB::table('torrents')->upsert($rows, ['id'], ['seeders', 'leechers', 'comments']);
         if ($delIdRedisKey) {
-            NexusDB::cache_del($this->idRedisKey);
+            AppCache::forgetWithLocales($this->idRedisKey);
         }
         $costTime = time() - $beginTimestamp;
         Logger::writeWithContext((string) sprintf("{$logPrefix}, [DONE], update torrent count: %s, result: %s, cost time: %s seconds", count($torrentIdArr), var_export($result, true), $costTime), (string) 'info', (bool) false);

@@ -16,7 +16,7 @@ use App\Support\Locale;
 use App\Support\SupportContext;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Cache;
-use Nexus\Database\NexusDB;
+use Illuminate\Support\Facades\Redis;
 
 class Setting extends NexusModel
 {
@@ -123,7 +123,7 @@ class Setting extends NexusModel
     /** @param  array<int|string, mixed>  $allowed */
     public static function updateUserTokenPermissionAllowedCache(array $allowed = []): void
     {
-        $redis = NexusDB::redis();
+        $redis = Redis::connection()->client();
         $key = self::USER_TOKEN_PERMISSION_ALLOWED_CACHE_KRY;
         $redis->unlink($key);
         // must not use cache

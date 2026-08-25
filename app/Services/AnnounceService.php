@@ -38,6 +38,7 @@ use App\Utils\MsgAlert;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Redis;
 use Nexus\Database\NexusDB;
 use Nexus\Nexus;
 
@@ -249,7 +250,7 @@ final class AnnounceService
         });
 
         if (! $this->user) {
-            NexusDB::redis()->set("passkey_invalid:{$passkey}", TIMENOW, ['ex' => 24 * 3600]);
+            Redis::connection()->client()->set("passkey_invalid:{$passkey}", TIMENOW, ['ex' => 24 * 3600]);
             throw TrackerException::failure('Invalid passkey! Re-download the .torrent from '.Url::schemeAndHost(true));
         }
 
@@ -334,7 +335,7 @@ final class AnnounceService
 
         if ($this->torrent === null) {
             Logger::writeWithContext((string) ('[TORRENT NOT EXISTS] info_hash: '.$infoHashHex), (string) 'info', (bool) false);
-            NexusDB::redis()->set('torrent_not_exists:'.$this->infoHash, TIMENOW, ['ex' => 24 * 3600]);
+            Redis::connection()->client()->set('torrent_not_exists:'.$this->infoHash, TIMENOW, ['ex' => 24 * 3600]);
             throw TrackerException::failure('torrent not registered with this tracker');
         }
 
@@ -496,7 +497,7 @@ final class AnnounceService
      */
     private function postProcess(array $torrent): void
     {
-        $redis = NexusDB::redis();
+        $redis = Redis::connection()->client();
 
         $lockKey = sprintf('record_batch_lock:%s:%s', $this->userId, $this->torrentId);
         if ($redis->set($lockKey, TIMENOW, ['nx', 'ex' => $this->autocleanIntervalOne])) {

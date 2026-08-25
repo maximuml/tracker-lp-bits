@@ -54,6 +54,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Str;
 use Nexus\Database\NexusDB;
 use Rhilip\Bencode\Bencode;
@@ -1063,7 +1064,7 @@ HTML;
     {
         $size = 500;
         $page = 1;
-        $redis = NexusDB::redis();
+        $redis = Redis::connection()->client();
         $total = 0;
         while (true) {
             $list = TorrentBuyLog::query()->where('torrent_id', $torrentId)->forPage($page, $size)->get(['torrent_id', 'uid']);
@@ -1094,7 +1095,7 @@ HTML;
      */
     public function addBuySuccessCache($uid, $torrentId, $buyLogId): void
     {
-        NexusDB::redis()->set($this->getBoughtUserCacheKey($torrentId, $uid), 1, ['NX', 'EX' => 86400 * 30]);
+        Redis::connection()->client()->set($this->getBoughtUserCacheKey($torrentId, $uid), 1, ['NX', 'EX' => 86400 * 30]);
         $record = Snatch::query()
             ->where('torrentid', $torrentId)
             ->where('userid', $uid)
@@ -1116,7 +1117,7 @@ HTML;
     public function hasBuySuccessCache($uid, $torrentId): bool
     {
         $key = $this->getBoughtUserCacheKey($torrentId, $uid);
-        if (NexusDB::redis()->exists($key)) {
+        if (Redis::connection()->client()->exists($key)) {
             return true;
         }
 
@@ -1177,9 +1178,9 @@ HTML;
     public function addBuyFailCache($uid, $torrentId): void
     {
         $key = $this->getBuyFailCacheKey($uid, $torrentId);
-        $result = NexusDB::redis()->incr($key);
+        $result = Redis::connection()->client()->incr($key);
         if ($result == 1) {
-            NexusDB::redis()->expire($key, 3600);
+            Redis::connection()->client()->expire($key, 3600);
         }
     }
 
@@ -1193,7 +1194,7 @@ HTML;
      */
     public function getBuyFailCache($uid, $torrentId): int
     {
-        return intval(NexusDB::redis()->get($this->getBuyFailCacheKey($uid, $torrentId)));
+        return intval(Redis::connection()->client()->get($this->getBuyFailCacheKey($uid, $torrentId)));
     }
 
     /**
@@ -1221,7 +1222,7 @@ HTML;
     {
         $value = $this->buildPiecesHashCacheValue($torrentId, $piecesHash);
 
-        return NexusDB::redis()->hSet(self::PIECES_HASH_CACHE_KEY, $piecesHash, $value);
+        return Redis::connection()->client()->hSet(self::PIECES_HASH_CACHE_KEY, $piecesHash, $value);
     }
 
     private function buildPiecesHashCacheValue(int $torrentId, string $piecesHash): bool|string
@@ -1231,7 +1232,7 @@ HTML;
 
     public function delPiecesHashCache(string $piecesHash): bool|int|\Redis
     {
-        return NexusDB::redis()->hDel(self::PIECES_HASH_CACHE_KEY, $piecesHash);
+        return Redis::connection()->client()->hDel(self::PIECES_HASH_CACHE_KEY, $piecesHash);
     }
 
     /**
@@ -1247,7 +1248,7 @@ HTML;
         if (count($piecesHash) > $maxCount) {
             throw new \InvalidArgumentException("too many pieces hash, must less then $maxCount");
         }
-        $pipe = NexusDB::redis()->multi(\Redis::PIPELINE);
+        $pipe = Redis::connection()->client()->multi(\Redis::PIPELINE);
         foreach ($piecesHash as $hash) {
             $pipe->hGet(self::PIECES_HASH_CACHE_KEY, $hash);
         }
@@ -1290,7 +1291,7 @@ HTML;
                 Logger::writeWithContext((string) "page: {$page}, size: {$size}, no more data...", (string) 'info', (bool) false);
                 break;
             }
-            $pipe = NexusDB::redis()->multi(\Redis::PIPELINE);
+            $pipe = Redis::connection()->client()->multi(\Redis::PIPELINE);
             $piecesHashRows = [];
             $currentCount = 0;
             foreach ($list as $item) {

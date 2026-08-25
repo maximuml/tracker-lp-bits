@@ -15,6 +15,7 @@ use App\Support\Path;
 use App\Support\Settings;
 use App\Support\Url;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Str;
 use Nexus\Database\NexusDB;
 
@@ -759,7 +760,7 @@ class Install
 
     public function getRedisVersionInfo(): array
     {
-        $redis = NexusDB::redis();
+        $redis = Redis::connection()->client();
         $result = $redis->info();
         $version = $result['redis_version'];
         $minVersion = '4.0.0';

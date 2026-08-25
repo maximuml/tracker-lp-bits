@@ -14,8 +14,8 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Redis;
 use Illuminate\View\View;
-use Nexus\Database\NexusDB;
 use Nexus\Database\NexusLock;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -157,7 +157,7 @@ class ShoutboxController extends LegacyController
         $globalKey = 'shoutbox_sse_global';
 
         $callback = function () use ($type, $lastId, $userId, $maxLoops, $ttl, $maxStreams, $globalKey) {
-            $redis = NexusDB::redis();
+            $redis = Redis::connection()->client();
 
             $active = (int) $redis->incr($globalKey);
             if ($active === 1) {

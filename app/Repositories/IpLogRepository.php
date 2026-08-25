@@ -8,7 +8,7 @@ use App\Support\Logger;
 use App\Support\Network;
 use App\Support\SupportContext;
 use Carbon\Carbon;
-use Nexus\Database\NexusDB;
+use Illuminate\Support\Facades\Redis;
 
 class IpLogRepository extends BaseRepository
 {
@@ -31,7 +31,7 @@ class IpLogRepository extends BaseRepository
         if (Environment::isTesting()) {
             return;
         }
-        $redis = NexusDB::redis();
+        $redis = Redis::connection()->client();
         if (is_null($uri)) {
             $parsed_uri = parse_url(SupportContext::getServerValue('REQUEST_URI', ''));
             $uri = $parsed_uri['path'] ?? '/';
@@ -53,7 +53,7 @@ class IpLogRepository extends BaseRepository
     public static function saveToDB(): void
     {
         $beginTimestamp = microtime(true);
-        $redis = NexusDB::redis();
+        $redis = Redis::connection()->client();
         $begin = Carbon::now()->subSeconds(self::CACHE_TIME);
         $end = Carbon::now()->subHours(1);
         $interval = \DateInterval::createFromDateString('1 hour');

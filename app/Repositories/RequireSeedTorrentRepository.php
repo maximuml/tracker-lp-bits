@@ -8,7 +8,7 @@ use App\Models\Torrent;
 use App\Models\UserRequireSeedTorrent;
 use App\Support\Logger;
 use Illuminate\Support\Collection;
-use Nexus\Database\NexusDB;
+use Illuminate\Support\Facades\Redis;
 
 class RequireSeedTorrentRepository extends BaseRepository
 {
@@ -51,7 +51,7 @@ class RequireSeedTorrentRepository extends BaseRepository
             ->get(['torrents.id']);
         $data = [];
         $nowStr = now()->toDateTimeString();
-        $redis = NexusDB::redis();
+        $redis = Redis::connection()->client();
         $cacheKey = self::getTorrentCacheKey();
         foreach ($list as $item) {
             $data[] = [
@@ -95,7 +95,7 @@ class RequireSeedTorrentRepository extends BaseRepository
     public function doRemove(Collection $torrents): void
     {
         $idArr = [];
-        $redis = NexusDB::redis();
+        $redis = Redis::connection()->client();
         $promotionState = Setting::getRequireSeedSectionPromotionState();
         $ttlInSeconds = 24 * 3600;
         foreach ($torrents as $torrent) {

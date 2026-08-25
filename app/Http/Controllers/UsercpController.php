@@ -7,7 +7,8 @@ use App\DTOs\Usercp\PersonalSettingsDto;
 use App\DTOs\Usercp\SecuritySettingsDto;
 use App\DTOs\Usercp\TrackerSettingsDto;
 use App\Repositories\UsercpRepository;
-use App\Services\Legacy\LegacyPartialRenderer;
+use App\Services\UsercpPageService;
+use App\Support\LegacyResponse;
 use App\Support\SupportContext;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -18,12 +19,12 @@ class UsercpController extends LegacyController
 {
     private UsercpRepository $repository;
 
-    private LegacyPartialRenderer $renderer;
+    private UsercpPageService $pageService;
 
-    public function __construct(UsercpRepository $repository, LegacyPartialRenderer $renderer)
+    public function __construct(UsercpRepository $repository, UsercpPageService $pageService)
     {
         $this->repository = $repository;
-        $this->renderer = $renderer;
+        $this->pageService = $pageService;
     }
 
     /**
@@ -103,12 +104,20 @@ class UsercpController extends LegacyController
             }
         }
 
-        $userInfo = $this->repository->getUserById((int) $user['id']);
-        $result = $this->renderer->render('usercp', ['tokens' => $this->repository->getUserTokens($userInfo)]);
-        if (! is_array($result)) {
-            return $result;
+        $action = (string) $request->input('action', '');
+        $type = (string) $request->input('type', '');
+
+        $allowedActions = ['personal', 'tracker', 'forum', 'security'];
+        if ($action !== '' && ! in_array($action, $allowedActions, true)) {
+            $langUsercp = (array) (SupportContext::getGlobal('lang_usercp') ?? []);
+            LegacyResponse::abort(
+                (string) ($langUsercp['std_error'] ?? 'Error'),
+                (string) ($langUsercp['std_invalid_action'] ?? 'Invalid action.')
+            );
         }
 
-        return $this->legacyPage($request, 'usercp', true, $result);
+        $data = $this->pageService->build($action, $type);
+
+        return $this->legacyPage($request, 'usercp', true, $data);
     }
 }

@@ -44,7 +44,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache as CacheFacade;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
-use Nexus\Database\NexusDB;
 
 class UserRepository extends BaseRepository
 {
@@ -280,7 +279,7 @@ class UserRepository extends BaseRepository
             'operator' => $operator->id,
         ];
         $modCommentText = sprintf('%s - Disable by %s, reason: %s.', now()->format('Y-m-d'), $operator->username, $reason);
-        NexusDB::transaction(function () use ($targetUser, $banLog, $modCommentText) {
+        DB::transaction(function () use ($targetUser, $banLog, $modCommentText) {
             $targetUser->updateWithModComment(['enabled' => User::ENABLED_NO], $modCommentText);
             UserBanLog::query()->create($banLog);
         });
@@ -408,7 +407,7 @@ class UserRepository extends BaseRepository
             'msg' => $msg,
             'added' => Carbon::now(),
         ];
-        NexusDB::transaction(function () use ($uid, $sourceField, $old, $update, $message, $modCommentText) {
+        DB::transaction(function () use ($uid, $sourceField, $old, $update, $message, $modCommentText) {
             $affectedRows = User::query()
                 ->where('id', $uid)
                 ->where($sourceField, $old)
@@ -503,7 +502,7 @@ class UserRepository extends BaseRepository
             $message['subject'] = Locale::trans('message.download_enable.subject', [], $targetUser->locale);
             $message['msg'] = Locale::trans('message.download_enable.body', ['operator' => $operatorUsername], $targetUser->locale);
         }
-        $result = NexusDB::transaction(function () use ($targetUser, $update, $modComment, $message) {
+        $result = DB::transaction(function () use ($targetUser, $update, $modComment, $message) {
             Message::add($message);
 
             return $targetUser->updateWithModComment($update, $modComment);
@@ -547,7 +546,7 @@ class UserRepository extends BaseRepository
             $message['subject'] = Locale::trans('message.upload_enable.subject', [], $targetUser->locale);
             $message['msg'] = Locale::trans('message.upload_enable.body', ['operator' => $operatorUsername], $targetUser->locale);
         }
-        $result = NexusDB::transaction(function () use ($targetUser, $update, $modComment, $message) {
+        $result = DB::transaction(function () use ($targetUser, $update, $modComment, $message) {
             Message::add($message);
 
             return $targetUser->updateWithModComment($update, $modComment);
@@ -591,7 +590,7 @@ class UserRepository extends BaseRepository
             $message['subject'] = Locale::trans('message.forumpost_enable.subject', [], $targetUser->locale);
             $message['msg'] = Locale::trans('message.forumpost_enable.body', ['operator' => $operatorUsername], $targetUser->locale);
         }
-        $result = NexusDB::transaction(function () use ($targetUser, $update, $modComment, $message) {
+        $result = DB::transaction(function () use ($targetUser, $update, $modComment, $message) {
             Message::add($message);
 
             return $targetUser->updateWithModComment($update, $modComment);
@@ -649,7 +648,7 @@ class UserRepository extends BaseRepository
             $message['msg'] = $msg;
         }
 
-        $result = NexusDB::transaction(function () use ($targetUser, $update, $message) {
+        $result = DB::transaction(function () use ($targetUser, $update, $message) {
             Message::add($message);
             $modComment = date('Y-m-d').' - Warning updated';
 
@@ -735,7 +734,7 @@ class UserRepository extends BaseRepository
                     throw new \RuntimeException($msg);
                 }
             }
-            NexusDB::transaction(function () use ($user, $meta, $params) {
+            DB::transaction(function () use ($user, $meta, $params) {
                 $this->changeUsername(
                     $user, UsernameChangeLog::CHANGE_TYPE_USER, $user, $params['username'],
                     SiteConfig::current()->system->changeUsernameCardAllowCharactersOutsideTheAlphabets()
@@ -785,7 +784,7 @@ class UserRepository extends BaseRepository
             'username_old' => $targetUser->username,
             'username_new' => $newUsername,
         ];
-        NexusDB::transaction(function () use ($targetUser, $changeLog) {
+        DB::transaction(function () use ($targetUser, $changeLog) {
             $targetUser->usernameChangeLogs()->create($changeLog);
             $targetUser->username = $changeLog['username_new'];
             $targetUser->save();
@@ -847,7 +846,7 @@ class UserRepository extends BaseRepository
             $userUpdates['vip_until'] = null;
         }
         Logger::writeWithContext((string) ('userUpdates: '.json_encode($userUpdates)), (string) 'info', (bool) false);
-        NexusDB::transaction(function () use ($targetUser, $userUpdates, $message) {
+        DB::transaction(function () use ($targetUser, $userUpdates, $message) {
             $modComment = date('Y-m-d').' - '.$message['msg'];
             if ($targetUser->class != $userUpdates['class']) {
                 $targetUser->updateWithModComment($userUpdates, $modComment);
@@ -1108,7 +1107,7 @@ class UserRepository extends BaseRepository
                 ];
             }
         }
-        NexusDB::transaction(function () use ($uid, $message, $inviteData, $count, $operator) {
+        DB::transaction(function () use ($uid, $message, $inviteData, $count, $operator) {
             if (! empty($inviteData)) {
                 Invite::query()->insert($inviteData);
                 Logger::writeWithContext((string) "[INSERT TEMPORARY INVITE] to {$uid}, count: {$count}", (string) 'info', (bool) false);

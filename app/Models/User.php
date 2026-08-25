@@ -151,6 +151,7 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\DB;
 use Laravel\Sanctum\HasApiTokens;
 use Nexus\Database\NexusDB;
 
@@ -909,7 +910,7 @@ class User extends Authenticatable implements FilamentUser, HasName
             throw new \RuntimeException("unsupported commentField: $commentField !");
         }
 
-        return NexusDB::transaction(function () use ($update, $comment) {
+        return DB::transaction(function () use ($update, $comment) {
             $this->modifyLogs()->create(['content' => $comment]);
 
             return $this->update($update);

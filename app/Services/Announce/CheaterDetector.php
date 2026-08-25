@@ -12,7 +12,6 @@ use App\Support\Config\SiteConfig;
 use App\Support\Format;
 use App\Support\Logger;
 use Illuminate\Support\Facades\DB;
-use Nexus\Database\NexusDB;
 
 final class CheaterDetector
 {
@@ -109,7 +108,7 @@ final class CheaterDetector
         $mayBeCheaterSpeed = $mustBeCheaterSpeed / 2;
 
         if ($uploaded > 1073741824 && $upspeed > ($mustBeCheaterSpeed / $cheaterdetSecurity)) {
-            NexusDB::transaction(function () use ($time, $uploaded, $downloaded, $seeders, $leechers, $upspeed, $self, $user, $userId, $torrentId) {
+            DB::transaction(function () use ($time, $uploaded, $downloaded, $seeders, $leechers, $upspeed, $self, $user, $userId, $torrentId) {
                 $comment = 'User account was automatically disabled by system';
                 DB::table('cheaters')->insert([
                     'added' => $time,

@@ -17,7 +17,6 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Nexus\Database\NexusDB;
 
 class MedalRepository extends BaseRepository
 {
@@ -74,7 +73,7 @@ class MedalRepository extends BaseRepository
     public function delete(int $id): bool
     {
         $medal = Medal::query()->findOrFail($id);
-        NexusDB::transaction(function () use ($medal) {
+        DB::transaction(function () use ($medal) {
             do {
                 $deleted = UserMedal::query()->where('medal_id', $medal->id)->limit(10000)->delete();
             } while ($deleted > 0);

@@ -15,6 +15,7 @@ use App\Models\Traits\NexusActivityLogTrait;
 use App\Support\Locale;
 use App\Support\SupportContext;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Cache;
 use Nexus\Database\NexusDB;
 
 class Setting extends NexusModel
@@ -47,7 +48,7 @@ class Setting extends NexusModel
     {
         static $settings = null;
         if (is_null($settings)) {
-            $settings = NexusDB::remember('nexus_settings_in_laravel', 600, function () {
+            $settings = Cache::remember('nexus_settings_in_laravel', 600, function () {
                 return self::getFromDb();
             });
         }

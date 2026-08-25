@@ -9,6 +9,7 @@ use App\Support\Locale;
 use App\Support\Network;
 use App\Support\Time;
 use Exception;
+use Illuminate\Support\Facades\Cache;
 use lbuchs\WebAuthn\WebAuthn;
 use Nexus\Database\NexusDB;
 use Nexus\Nexus;
@@ -210,10 +211,10 @@ class UserPasskeyRepository extends BaseRepository
     /** @return  mixed */
     public static function getAaguids()
     {
-        return NexusDB::remember('aaguids', 60 * 60 * 24 * 14, function () {
+        return Cache::remember('aaguids', 60 * 60 * 24 * 14, function () {
             $json = file_get_contents('https://raw.githubusercontent.com/passkeydeveloper/passkey-authenticator-aaguids/refs/heads/main/combined_aaguid.json');
 
-            return $json === false ? null : json_decode($json, true);
+            return $json === false ? false : json_decode($json, true);
         });
     }
 

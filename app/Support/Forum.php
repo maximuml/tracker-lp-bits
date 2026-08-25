@@ -7,7 +7,7 @@ use App\Models\User;
 use App\Repositories\ForumRepository;
 use App\Repositories\SettingRepository;
 use App\Support\Cache\LegacyRedisCache;
-use Nexus\Database\NexusDB;
+use Illuminate\Support\Facades\Cache;
 
 /**
  * Legacy forum helpers extracted from `include/functions.php`.
@@ -145,8 +145,8 @@ final class Forum
         $forumId = $topicInfo->forumid;
 
         if ($protectedForumIds === null) {
-            $protected = NexusDB::remember('setting_protected_forum', 600, function () {
-                return SettingRepository::getByName('misc.protected_forum');
+            $protected = Cache::remember('setting_protected_forum', 600, function () {
+                return SettingRepository::getByName('misc.protected_forum') ?? false;
             });
             $protectedForumIds = $protected ? (preg_split('/[,\s]+/', $protected) ?: []) : [];
         }

@@ -4,7 +4,7 @@ namespace App\Repositories;
 
 use App\Http\Middleware\Locale;
 use App\Models\Language;
-use Nexus\Database\NexusDB;
+use Illuminate\Support\Facades\Cache;
 
 class LanguageRepository extends BaseRepository
 {
@@ -57,7 +57,7 @@ class LanguageRepository extends BaseRepository
     {
         $cacheKey = $type.'_lang_list';
 
-        return NexusDB::remember($cacheKey, 600, function () use ($type, $enabled) {
+        return Cache::remember($cacheKey, 600, function () use ($type, $enabled) {
             $query = Language::query()->where($type, 1);
             if ($enabled !== null) {
                 $query->whereIn('site_lang_folder', Language::listEnabled(true));

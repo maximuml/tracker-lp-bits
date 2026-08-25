@@ -20,6 +20,7 @@ use App\Support\Url;
 use App\Support\UserDisplay;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Cache;
 use Nexus\Database\NexusDB;
 
 class TorrentRssController extends LegacyController
@@ -72,7 +73,7 @@ class TorrentRssController extends LegacyController
 
         $dllink = false;
         $inclbookmarked = 0;
-        $rssUser = (array) NexusDB::remember('user_passkey_'.$passkey.'_rss', 3600, function () use ($passkey) {
+        $rssUser = (array) Cache::remember('user_passkey_'.$passkey.'_rss', 3600, function () use ($passkey) {
             $row = NexusDB::table('users')->where('passkey', $passkey)->first(['id', 'enabled', 'parked', 'passkey']);
 
             return $row ? (array) $row : [];
@@ -175,7 +176,7 @@ class TorrentRssController extends LegacyController
             }
             $normalSql = $normalQuery->toSql();
             $normalCacheKey = sprintf('nexus_rss:normal:%s', md5($normalSql.':'.$showrows));
-            $normalRows = NexusDB::remember($normalCacheKey, 300, function () use ($normalQuery, $showrows) {
+            $normalRows = Cache::remember($normalCacheKey, 300, function () use ($normalQuery, $showrows) {
                 return $normalQuery->orderBy('torrents.id', 'desc')->limit($showrows)->get()->map(fn ($row) => (array) $row)->all();
             });
         }
@@ -185,7 +186,7 @@ class TorrentRssController extends LegacyController
             $prependQuery = clone $baseQuery;
             $prependQuery->whereIn('torrents.id', $prependIdArr);
             $prependCacheKey = sprintf('nexus_rss:prepend:%s', md5($prependQuery->toSql().':'.$prependIdStr));
-            $prependRows = NexusDB::remember($prependCacheKey, 300, function () use ($prependQuery, $prependIdStr) {
+            $prependRows = Cache::remember($prependCacheKey, 300, function () use ($prependQuery, $prependIdStr) {
                 return $prependQuery->orderByRaw('FIELD(torrents.id, '.$prependIdStr.')')->get()->map(fn ($row) => (array) $row)->all();
             });
         }

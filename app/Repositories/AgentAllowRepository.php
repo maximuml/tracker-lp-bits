@@ -11,7 +11,7 @@ use App\Support\Json;
 use App\Support\Logger;
 use App\Support\Url;
 use Illuminate\Support\Collection;
-use Nexus\Database\NexusDB;
+use Illuminate\Support\Facades\Cache;
 
 class AgentAllowRepository extends BaseRepository
 {
@@ -116,7 +116,7 @@ class AgentAllowRepository extends BaseRepository
     {
         // check from high version to low version, if high version allow, stop!
         $cacheKey = Env::get('CACHE_KEY_AGENT_ALLOW', 'all_agent_allows').':php';
-        $allows = NexusDB::remember($cacheKey, 3600, function () {
+        $allows = Cache::remember($cacheKey, 3600, function () {
             return AgentAllow::query()
                 ->orderBy('peer_id_start', 'desc')
                 ->orderBy('agent_start', 'desc')
@@ -234,7 +234,7 @@ class AgentAllowRepository extends BaseRepository
     {
         $cacheKey = Env::get('CACHE_KEY_AGENT_DENY', 'all_agent_denies').':php';
         /** @var Collection<int, mixed> $allDenies */
-        $allDenies = NexusDB::remember($cacheKey, 3600, function () {
+        $allDenies = Cache::remember($cacheKey, 3600, function () {
             return AgentDeny::query()->get()->groupBy('family_id');
         });
         $agentDenies = $allDenies->get($familyId, []);
@@ -317,7 +317,7 @@ class AgentAllowRepository extends BaseRepository
     {
         // check from high version to low version, if high version allow, stop!
         $cacheKey = Env::get('CACHE_KEY_AGENT_ALLOW', 'all_agent_allows').':php';
-        $allows = NexusDB::remember($cacheKey, 3600, function () {
+        $allows = Cache::remember($cacheKey, 3600, function () {
             return AgentAllow::query()
                 ->orderBy('peer_id_start', 'desc')
                 ->orderBy('agent_start', 'desc')

@@ -19,6 +19,7 @@ use App\Support\Network;
 use GeoIp2\Database\Reader;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use MaxMind\Db\Reader\InvalidDatabaseException;
 use Nexus\Database\NexusDB;
 use PhpIP\IP;
@@ -381,7 +382,7 @@ class SeedBoxRepository extends BaseRepository
     public static function getAsnFromIp(string $ip): int
     {
         // 虽然 ip 对应的 asn 相对固定，但不宜设置较大的缓存时间，IP 地址较多，容易引起内存膨胀
-        return NexusDB::remember("IP_TO_ASN:$ip", 3600, function () use ($ip) {
+        return Cache::remember("IP_TO_ASN:$ip", 3600, function () use ($ip) {
             $reader = self::getAsnReader();
             if (is_null($reader)) {
                 return 0;

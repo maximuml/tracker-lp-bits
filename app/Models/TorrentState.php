@@ -17,6 +17,7 @@ use App\Support\Logger;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Validation\ValidationException;
 use Nexus\Database\NexusDB;
 
@@ -120,7 +121,7 @@ class TorrentState extends NexusModel
     /** @return  array<int|string, mixed> */
     public static function cachedStates(): array
     {
-        return NexusDB::remember(Setting::TORRENT_GLOBAL_STATE_CACHE_KEY, 600, function () {
+        return Cache::remember(Setting::TORRENT_GLOBAL_STATE_CACHE_KEY, 600, function () {
             return self::query()
                 ->where('global_sp_state', '!=', Torrent::PROMOTION_NORMAL)
                 ->orderByRaw('begin is null')

@@ -12,6 +12,7 @@ use App\Models\User;
 use App\Support\Events;
 use App\Support\LegacyDb;
 use App\Support\Logger;
+use Illuminate\Support\Facades\Cache;
 use Nexus\Database\NexusDB;
 
 final class HitAndRunHandler
@@ -58,10 +59,10 @@ final class HitAndRunHandler
         }
 
         $hrCacheKey = HitAndRun::getCacheKey($userId, $torrentId);
-        $hrExists = NexusDB::remember($hrCacheKey, mt_rand(86400, 86400 * 3), function () use ($userId, $torrentId) {
+        $hrExists = Cache::remember($hrCacheKey, mt_rand(86400, 86400 * 3), function () use ($userId, $torrentId) {
             $record = HitAndRun::query()->where('uid', $userId)->where('torrent_id', $torrentId)->first();
 
-            return $record ? $record->toJson() : null;
+            return $record ? $record->toJson() : false;
         });
 
         if ($hrExists) {

@@ -6,8 +6,8 @@ use App\Models\UserMedal;
 use App\Models\UserMeta;
 use App\Repositories\UserRepository;
 use App\Support\Config\SiteConfig;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\HtmlString;
-use Nexus\Database\NexusDB;
 
 /**
  * Legacy user display helpers extracted from `include/functions.php`.
@@ -123,11 +123,11 @@ final class UserDisplay
             return self::$rowCache[$id];
         }
 
-        $row = NexusDB::remember("user_{$id}_content", 3600, function () use ($id) {
+        $row = Cache::remember("user_{$id}_content", 3600, function () use ($id) {
             $user = UserRepository::findForDisplay($id);
 
             if (! $user) {
-                return null;
+                return false;
             }
 
             $arr = $user->toArray();

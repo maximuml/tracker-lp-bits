@@ -90,7 +90,8 @@ final class UsersearchPageService
 
         // Build class select options
         $classOptions = "<option value='1'>(any)</option>\n";
-        $maxClass = max(array_map('intval', array_keys(User::$classes)));
+        $classKeys = array_map('intval', array_keys(User::$classes));
+        $maxClass = $classKeys !== [] ? max($classKeys) : 0;
         for ($i = 2; $i - 2 <= $maxClass; $i++) {
             if ($c = UserClass::name($i - 2, false, true, true)) {
                 $classOptions .= '<option value='.$i.($class && $class == $i ? ' selected' : '').">$c</option>\n";
@@ -234,22 +235,22 @@ final class UsersearchPageService
             $pul = (float) ($peerTotal['pul'] ?? 0);
             $pdl = (float) ($peerTotal['pdl'] ?? 0);
 
-            $n_posts = $postCounts[(int) $user['id']] ?? 0;
-            $n_comments = $commentCounts[(int) $user['id']] ?? 0;
+            $n_posts = (int) ($postCounts[(int) $user['id']] ?? 0);
+            $n_comments = (int) ($commentCounts[(int) $user['id']] ?? 0);
 
             echo '<tr><td>'.
                   UserDisplay::username((int) $user['id']).'</td>'.
               '<td>'.$this->ratios((float) $user['uploaded'], (float) $user['downloaded']).'</td>
-          <td>'.$ipstr.'</td><td>'.$user['email'].'</td>
-          <td><div align=center>'.$user['added'].'</div></td>
-          <td><div align=center>'.$user['last_access'].'</div></td>
-          <td><div align=center>'.$user['status'].'</div></td>
-          <td><div align=center>'.$user['enabled'].'</div></td>
+          <td>'.$ipstr.'</td><td>'.(string) $user['email'].'</td>
+          <td><div align=center>'.(string) $user['added'].'</div></td>
+          <td><div align=center>'.(string) $user['last_access'].'</div></td>
+          <td><div align=center>'.(string) $user['status'].'</div></td>
+          <td><div align=center>'.(string) $user['enabled'].'</div></td>
           <td><div align=center>'.$this->ratios($pul, $pdl).'</div></td>'.
               '<td><div align=right>'.Format::size($pul).'</div></td>
           <td><div align=right>'.Format::size($pdl).'</div></td>
-          <td><div align=center>'.($n_posts ? '<a href=userhistory.php?action=viewposts&id='.$user['id'].">$n_posts</a>" : $n_posts).
-              '|'.($n_comments ? '<a href=userhistory.php?action=viewcomments&id='.$user['id'].">$n_comments</a>" : $n_comments).
+          <td><div align=center>'.($n_posts ? '<a href=userhistory.php?action=viewposts&id='.(int) $user['id'].">$n_posts</a>" : $n_posts).
+              '|'.($n_comments ? '<a href=userhistory.php?action=viewcomments&id='.(int) $user['id'].">$n_comments</a>" : $n_comments).
               "</div></td></tr>\n";
         }
         echo '</table>';

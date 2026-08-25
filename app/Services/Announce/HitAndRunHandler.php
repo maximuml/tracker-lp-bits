@@ -13,7 +13,7 @@ use App\Support\Events;
 use App\Support\LegacyDb;
 use App\Support\Logger;
 use Illuminate\Support\Facades\Cache;
-use Nexus\Database\NexusDB;
+use Illuminate\Support\Facades\DB;
 
 final class HitAndRunHandler
 {
@@ -85,13 +85,13 @@ final class HitAndRunHandler
                 'updated_at' => $dt,
             ];
 
-            $affectedRows = NexusDB::table('hit_and_runs')->insertOrIgnore($hrRecord);
+            $affectedRows = DB::table('hit_and_runs')->insertOrIgnore($hrRecord);
             Logger::writeWithContext((string) "[HR_LOG] user: {$userId}, torrent: {$torrentId}, total downloaded: {$snatchInfo['downloaded']} >= required: {$requiredDownloaded}, [INSERT_H&R], affectedRows: {$affectedRows}", (string) 'info', (bool) false);
 
             if ($affectedRows > 0) {
                 $hitAndRunRecord = HitAndRun::query()->where('uid', $userId)->where('torrent_id', $torrentId)->first();
                 if ($hitAndRunRecord) {
-                    NexusDB::table('snatched')->where('id', (int) $snatchInfo['id'])->update(['hit_and_run_id' => $hitAndRunRecord->id]);
+                    DB::table('snatched')->where('id', (int) $snatchInfo['id'])->update(['hit_and_run_id' => $hitAndRunRecord->id]);
                     Events::fire(ModelEventEnum::HIT_AND_RUN_CREATED, $hitAndRunRecord, null);
                 }
             }

@@ -9,6 +9,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\DB;
 use Nexus\Database\NexusDB;
 
 class UpdateUserSeedingLeechingTime implements ShouldQueue
@@ -88,7 +89,7 @@ class UpdateUserSeedingLeechingTime implements ShouldQueue
         }
         // 批量取，简单化
         //        $res = sql_query("select userid, sum(seedtime) as seedtime_sum, sum(leechtime) as leechtime_sum from snatched group by userid where userid in ($idStr)");
-        $res = NexusDB::table('snatched')
+        $res = DB::table('snatched')
             ->selectRaw('userid, sum(seedtime) as seedtime_sum, sum(leechtime) as leechtime_sum')
             ->whereIn('userid', $userIdArr)
             ->groupBy('userid')
@@ -115,7 +116,7 @@ class UpdateUserSeedingLeechingTime implements ShouldQueue
                 'seed_time_updated_at' => $nowStr,
             ];
         }
-        $result = NexusDB::table('users')->upsert($rows, ['id'], ['seedtime', 'leechtime', 'seed_time_updated_at']);
+        $result = DB::table('users')->upsert($rows, ['id'], ['seedtime', 'leechtime', 'seed_time_updated_at']);
         if ($delIdRedisKey) {
             NexusDB::cache_del($this->idRedisKey);
         }

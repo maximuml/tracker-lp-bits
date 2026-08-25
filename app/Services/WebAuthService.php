@@ -14,7 +14,7 @@ use App\Support\Network;
 use App\Support\PasswordHasher;
 use App\Support\Token;
 use App\Support\TwoFactorAuthHelper;
-use Nexus\Database\NexusDB;
+use Illuminate\Support\Facades\DB;
 
 class WebAuthService
 {
@@ -40,7 +40,7 @@ class WebAuthService
 
     public function remainingAttempts(string $ip): int
     {
-        $total = (int) NexusDB::table('loginattempts')
+        $total = (int) DB::table('loginattempts')
             ->where('ip', $ip)
             ->sum('attempts');
 
@@ -49,12 +49,12 @@ class WebAuthService
 
     public function assertNotBanned(string $ip): void
     {
-        $total = (int) NexusDB::table('loginattempts')
+        $total = (int) DB::table('loginattempts')
             ->where('ip', $ip)
             ->sum('attempts');
 
         if ($total >= self::getMaxLoginAttempts()) {
-            NexusDB::table('loginattempts')
+            DB::table('loginattempts')
                 ->where('ip', $ip)
                 ->update(['banned' => 'yes']);
 
@@ -220,18 +220,18 @@ class WebAuthService
 
     public function recordFailedAttempt(string $ip): void
     {
-        $count = (int) NexusDB::table('loginattempts')->where('ip', $ip)->count();
+        $count = (int) DB::table('loginattempts')->where('ip', $ip)->count();
 
         if ($count === 0) {
-            NexusDB::table('loginattempts')->insert([
+            DB::table('loginattempts')->insert([
                 'ip' => $ip,
                 'added' => now()->toDateTimeString(),
                 'attempts' => 1,
             ]);
         } else {
-            NexusDB::table('loginattempts')
+            DB::table('loginattempts')
                 ->where('ip', $ip)
-                ->update(['attempts' => NexusDB::raw('attempts + 1')]);
+                ->update(['attempts' => DB::raw('attempts + 1')]);
         }
     }
 }

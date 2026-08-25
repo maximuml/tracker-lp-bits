@@ -135,7 +135,7 @@ final class InfoRepository
      */
     public static function getUserHistoryPosts(int $userId, int $userClass, int $perpage, string $phpSelf): array
     {
-        $postcount = (int) NexusDB::table('posts as p')
+        $postcount = (int) DB::table('posts as p')
             ->leftJoin('topics as t', 'p.topicid', '=', 't.id')
             ->leftJoin('forums as f', 't.forumid', '=', 'f.id')
             ->where('p.userid', $userId)
@@ -145,7 +145,7 @@ final class InfoRepository
 
         [$pagertop, $pagerbottom, , $offset, $perpage] = Pagination::pager($perpage, $postcount, $phpSelf."?action=viewposts&id=$userId&");
 
-        $posts = NexusDB::table('posts as p')
+        $posts = DB::table('posts as p')
             ->leftJoin('topics as t', 'p.topicid', '=', 't.id')
             ->leftJoin('forums as f', 't.forumid', '=', 'f.id')
             ->leftJoin('readposts as r', function ($join) {
@@ -180,14 +180,14 @@ final class InfoRepository
      */
     public static function getUserHistoryComments(int $userId, int $perpage, string $phpSelf): array
     {
-        $commentcount = (int) NexusDB::table('comments as c')
+        $commentcount = (int) DB::table('comments as c')
             ->leftJoin('torrents as t', 'c.torrent', '=', 't.id')
             ->where('c.user', $userId)
             ->count();
 
         [$pagertop, $pagerbottom, , $offset, $perpage] = Pagination::pager($perpage, $commentcount, $phpSelf."?action=viewcomments&id=$userId&");
 
-        $comments = NexusDB::table('comments as c')
+        $comments = DB::table('comments as c')
             ->leftJoin('torrents as t', 'c.torrent', '=', 't.id')
             ->where('c.user', $userId)
             ->orderByDesc('c.id')
@@ -201,7 +201,7 @@ final class InfoRepository
         $countsBefore = [];
         if (! empty($comments)) {
             foreach ($comments as $comment) {
-                $countsBefore[$comment['id']] = (int) NexusDB::table('comments')
+                $countsBefore[$comment['id']] = (int) DB::table('comments')
                     ->where('torrent', $comment['t_id'])
                     ->where('id', '<', $comment['id'])
                     ->count();
@@ -223,7 +223,7 @@ final class InfoRepository
      */
     public static function faqManageData(): array
     {
-        $categRows = NexusDB::table('faq')
+        $categRows = DB::table('faq')
             ->leftJoin('language', 'faq.lang_id', '=', 'language.id')
             ->where('faq.type', 'categ')
             ->orderBy('language.lang_name')
@@ -243,7 +243,7 @@ final class InfoRepository
             ];
         }
 
-        $itemRows = NexusDB::table('faq')
+        $itemRows = DB::table('faq')
             ->where('type', 'item')
             ->orderBy('order')
             ->get(['id', 'question', 'lang_id', 'flag', 'categ', 'order']);
@@ -281,7 +281,7 @@ final class InfoRepository
     public static function reorderFaq(array $order): void
     {
         foreach ($order as $id => $position) {
-            NexusDB::table('faq')->where('id', (int) $id)->update(['order' => (int) $position]);
+            DB::table('faq')->where('id', (int) $id)->update(['order' => (int) $position]);
         }
         NexusDB::cache_del('faq');
     }
@@ -289,13 +289,13 @@ final class InfoRepository
     /** @param  array<string, mixed>  $data */
     public static function updateFaq(int $id, array $data): void
     {
-        NexusDB::table('faq')->where('id', $id)->update($data);
+        DB::table('faq')->where('id', $id)->update($data);
         NexusDB::cache_del('faq');
     }
 
     public static function deleteFaq(int $id): void
     {
-        NexusDB::table('faq')->where('id', $id)->delete();
+        DB::table('faq')->where('id', $id)->delete();
         NexusDB::cache_del('faq');
     }
 
@@ -304,7 +304,7 @@ final class InfoRepository
      */
     public static function getFaqById(int $id): ?array
     {
-        $arr = (array) NexusDB::table('faq')->where('id', $id)->first();
+        $arr = (array) DB::table('faq')->where('id', $id)->first();
 
         return empty($arr) ? null : $arr;
     }
@@ -314,7 +314,7 @@ final class InfoRepository
      */
     public static function getFaqCategoriesByLang(int $langId): array
     {
-        return NexusDB::table('faq')
+        return DB::table('faq')
             ->where('type', 'categ')
             ->where('lang_id', $langId)
             ->orderBy('order')
@@ -325,7 +325,7 @@ final class InfoRepository
 
     public static function getLanguageName(int $langId): string
     {
-        return (string) (NexusDB::table('language')->where('id', $langId)->value('lang_name') ?? '');
+        return (string) (DB::table('language')->where('id', $langId)->value('lang_name') ?? '');
     }
 
     /**
@@ -333,7 +333,7 @@ final class InfoRepository
      */
     public static function getFaqMaxOrderAndLinkId(string $type, int $langId): array
     {
-        $maxRow = (array) NexusDB::table('faq')
+        $maxRow = (array) DB::table('faq')
             ->where('type', $type)
             ->where('lang_id', $langId)
             ->selectRaw('MAX(`order`) AS maxorder, MAX(`link_id`) AS maxlinkid')
@@ -348,7 +348,7 @@ final class InfoRepository
     /** @param  array<string, mixed>  $data */
     public static function insertFaq(array $data): void
     {
-        NexusDB::table('faq')->insert($data);
+        DB::table('faq')->insert($data);
         NexusDB::cache_del('faq');
     }
 }

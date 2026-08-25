@@ -2,7 +2,7 @@
 
 namespace App\Support;
 
-use Nexus\Database\NexusDB;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Legacy search-suggestion helper extracted from `include/functions.php`.
@@ -27,7 +27,7 @@ final class SearchSuggest
             return;
         }
 
-        NexusDB::table('suggest')->insert([
+        DB::table('suggest')->insert([
             'keywords' => $preEscaped ? stripslashes($keyword) : $keyword,
             'userid' => $userId,
             'adddate' => date('Y-m-d H:i:s'),

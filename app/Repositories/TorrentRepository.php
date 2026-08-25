@@ -1316,7 +1316,7 @@ HTML;
             }
             $pipe->exec();
             if (! empty($piecesHashRows)) {
-                NexusDB::table('torrents')->upsert($piecesHashRows, ['id'], ['pieces_hash']);
+                DB::table('torrents')->upsert($piecesHashRows, ['id'], ['pieces_hash']);
             }
             Logger::writeWithContext((string) "success load page: {$page}, size: {$size}, count: {$currentCount}", (string) 'info', (bool) false);
             $page++;
@@ -1412,7 +1412,7 @@ HTML;
      */
     public function getLastComment(int $torrentId): ?array
     {
-        $lastcom = NexusDB::table('comments')->where('torrent', $torrentId)->orderBy('id', 'desc')->first();
+        $lastcom = DB::table('comments')->where('torrent', $torrentId)->orderBy('id', 'desc')->first();
 
         return $lastcom ? array_merge((array) $lastcom, array_values((array) $lastcom)) : null;
     }
@@ -1490,9 +1490,9 @@ HTML;
 
         $torrentDir = SiteConfig::current()->main->torrentDir();
 
-        NexusDB::table('torrents')->whereIn('id', $idArr)->delete();
-        NexusDB::table('torrent_extras')->whereIn('torrent_id', $idArr)->delete();
-        NexusDB::table('snatched')
+        DB::table('torrents')->whereIn('id', $idArr)->delete();
+        DB::table('torrent_extras')->whereIn('torrent_id', $idArr)->delete();
+        DB::table('snatched')
             ->whereIn('torrentid', $idArr)
             ->whereNotExists(function ($query) {
                 $query->selectRaw('1')->from('users')->whereColumn('users.id', '=', 'snatched.userid');
@@ -1500,10 +1500,10 @@ HTML;
             ->delete();
 
         foreach (['peers', 'files', 'comments'] as $x) {
-            NexusDB::table($x)->whereIn('torrent', $idArr)->delete();
+            DB::table($x)->whereIn('torrent', $idArr)->delete();
         }
 
-        NexusDB::table('hit_and_runs')->whereIn('torrent_id', $idArr)->delete();
+        DB::table('hit_and_runs')->whereIn('torrent_id', $idArr)->delete();
 
         foreach ($idArr as $_id) {
             /** @var Torrent|null $torrent */
@@ -1539,14 +1539,14 @@ HTML;
 
     public function touchCacheStamp(int|string $torrentId, string $field = 'cache_stamp'): void
     {
-        NexusDB::table('torrents')
+        DB::table('torrents')
             ->where('id', $torrentId)
             ->update([$field => time()]);
     }
 
     public function resetCacheStamp(int|string $torrentId, string $field = 'cache_stamp'): void
     {
-        NexusDB::table('torrents')
+        DB::table('torrents')
             ->where('id', $torrentId)
             ->update([$field => 0]);
     }
@@ -1564,7 +1564,7 @@ HTML;
      */
     public static function getSnatchInfo(int|string $torrentId, int|string $userId): array|false
     {
-        $record = NexusDB::table('snatched')
+        $record = DB::table('snatched')
             ->where('torrentid', (int) $torrentId)
             ->where('userid', (int) $userId)
             ->orderBy('id', 'desc')

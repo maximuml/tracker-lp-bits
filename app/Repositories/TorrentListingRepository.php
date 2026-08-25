@@ -4,7 +4,7 @@ namespace App\Repositories;
 
 use Carbon\Carbon;
 use Illuminate\Database\Query\Builder;
-use Nexus\Database\NexusDB;
+use Illuminate\Support\Facades\DB;
 
 class TorrentListingRepository
 {
@@ -40,7 +40,7 @@ class TorrentListingRepository
      */
     private static function buildBaseQuery(array $options): Builder
     {
-        $query = NexusDB::table('torrents');
+        $query = DB::table('torrents');
 
         if (! empty($options['join_users'])) {
             $query = $query->leftJoin('users', 'torrents.owner', '=', 'users.id');
@@ -71,7 +71,7 @@ class TorrentListingRepository
      */
     public static function getHotSearch(int $secondsBack = 259200): array
     {
-        return NexusDB::table('suggest')
+        return DB::table('suggest')
             ->select('keywords')
             ->selectRaw('COUNT(DISTINCT userid) as count')
             ->where('adddate', '>', Carbon::createFromTimestamp(TIMENOW - $secondsBack)->format('Y-m-d H:i:s'))
@@ -85,7 +85,7 @@ class TorrentListingRepository
 
     public static function cleanupSuggest(int $secondsBack = 518400): void
     {
-        NexusDB::table('suggest')
+        DB::table('suggest')
             ->where('adddate', '<', Carbon::createFromTimestamp(TIMENOW - $secondsBack)->format('Y-m-d H:i:s'))
             ->delete();
     }

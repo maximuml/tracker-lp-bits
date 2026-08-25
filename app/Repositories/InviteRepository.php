@@ -3,7 +3,7 @@
 namespace App\Repositories;
 
 use App\Models\User;
-use Nexus\Database\NexusDB;
+use Illuminate\Support\Facades\DB;
 
 class InviteRepository
 {
@@ -30,7 +30,7 @@ class InviteRepository
      */
     public static function countInvitees(int $inviterId, array $filters): int
     {
-        $query = NexusDB::table('users as u')->where('u.invited_by', $inviterId);
+        $query = DB::table('users as u')->where('u.invited_by', $inviterId);
 
         if (! empty($filters['status'])) {
             $query->where('u.status', $filters['status']);
@@ -48,7 +48,7 @@ class InviteRepository
      */
     public static function getInvitees(int $inviterId, array $filters, int $offset, int $perPage): array
     {
-        $query = NexusDB::table('users as u')
+        $query = DB::table('users as u')
             ->where('u.invited_by', $inviterId)
             ->leftJoin('torrents as t', 't.owner', '=', 'u.id');
 
@@ -64,7 +64,7 @@ class InviteRepository
                 'u.id', 'u.username', 'u.email', 'u.uploaded', 'u.downloaded',
                 'u.status', 'u.warned', 'u.enabled', 'u.donor',
                 'u.seed_points_per_hour', 'u.seeding_torrent_count', 'u.seeding_torrent_size', 'u.last_announce_at',
-                NexusDB::raw('COUNT(t.id) as torrent_count')
+                DB::raw('COUNT(t.id) as torrent_count')
             )
             ->groupBy('u.id')
             ->offset($offset)
@@ -76,7 +76,7 @@ class InviteRepository
 
     public static function countInvites(int $inviterId, string $type): int
     {
-        $query = NexusDB::table('invites')->where('inviter', $inviterId);
+        $query = DB::table('invites')->where('inviter', $inviterId);
 
         if ($type === 'sent') {
             $query->where('invitee', '!=', '');
@@ -92,7 +92,7 @@ class InviteRepository
      */
     public static function getInvites(int $inviterId, string $type, int $offset, int $perPage): array
     {
-        $query = NexusDB::table('invites')->where('inviter', $inviterId);
+        $query = DB::table('invites')->where('inviter', $inviterId);
 
         if ($type === 'sent') {
             $query->where('invitee', '!=', '');

@@ -9,7 +9,7 @@ use App\Exceptions\TrackerException;
 use App\Exceptions\TrackerWarningException;
 use App\Support\Config\SiteConfig;
 use App\Support\Strings;
-use Nexus\Database\NexusDB;
+use Illuminate\Support\Facades\DB;
 
 final class ResponseBuilder
 {
@@ -75,7 +75,7 @@ final class ResponseBuilder
         $counts = $this->countPeers($torrentId) ?: (object) ['seeders' => 0, 'leechers' => 0];
         $complete = (int) ($counts->seeders ?? 0);
         $incomplete = (int) ($counts->leechers ?? 0);
-        $downloaded = (int) (NexusDB::table('torrents')->where('id', $torrentId)->value('times_completed') ?? 0);
+        $downloaded = (int) (DB::table('torrents')->where('id', $torrentId)->value('times_completed') ?? 0);
 
         $peerIdBinary = $this->dto->peerId->toBinary();
 
@@ -83,7 +83,7 @@ final class ResponseBuilder
         $peers6 = '';
 
         if ($this->dto->event !== 'stopped') {
-            $query = NexusDB::table('peers')
+            $query = DB::table('peers')
                 ->where('torrent', $torrentId)
                 ->where(function ($q) use ($peerIdBinary, $userId) {
                     $q->where('peer_id', '!=', $peerIdBinary)
@@ -132,7 +132,7 @@ final class ResponseBuilder
 
     public function countPeers(int $torrentId): ?\stdClass
     {
-        return NexusDB::table('peers')
+        return DB::table('peers')
             ->where('torrent', $torrentId)
             ->selectRaw("SUM(CASE WHEN seeder = 'yes' THEN 1 ELSE 0 END) as seeders, SUM(CASE WHEN seeder = 'no' THEN 1 ELSE 0 END) as leechers")
             ->first();

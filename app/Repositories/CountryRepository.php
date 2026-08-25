@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
-use Nexus\Database\NexusDB;
+use Illuminate\Support\Facades\DB;
 
 final class CountryRepository
 {
@@ -13,7 +13,7 @@ final class CountryRepository
      */
     public static function findById(int|string $id): ?array
     {
-        $result = NexusDB::table('countries')->where('id', $id)->first();
+        $result = DB::table('countries')->where('id', $id)->first();
 
         return $result ? (array) $result : null;
     }

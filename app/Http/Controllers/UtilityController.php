@@ -23,8 +23,8 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
-use Nexus\Database\NexusDB;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class UtilityController extends LegacyController
@@ -153,7 +153,7 @@ class UtilityController extends LegacyController
             return response('Invalid id or key.', 400, ['Content-Type' => 'text/plain; charset=utf-8']);
         }
 
-        $row = (array) NexusDB::table('attachments')->where('id', $id)->where('dlkey', $dlkey)->first();
+        $row = (array) DB::table('attachments')->where('id', $id)->where('dlkey', $dlkey)->first();
         if (! $row) {
             return response('No attachment found.', 404, ['Content-Type' => 'text/plain; charset=utf-8']);
         }
@@ -173,7 +173,7 @@ class UtilityController extends LegacyController
             $filename = 'attachment';
         }
 
-        NexusDB::table('attachments')->where('id', $id)->increment('downloads');
+        DB::table('attachments')->where('id', $id)->increment('downloads');
 
         $cache = SupportContext::getCache();
         if ($cache !== null) {
@@ -258,7 +258,7 @@ class UtilityController extends LegacyController
             return response('', 200, $headers);
         }
 
-        $suggestRows = NexusDB::table('suggest')
+        $suggestRows = DB::table('suggest')
             ->selectRaw('keywords AS suggest, COUNT(*) AS count')
             ->where('keywords', 'like', $q.'%')
             ->groupBy('keywords')

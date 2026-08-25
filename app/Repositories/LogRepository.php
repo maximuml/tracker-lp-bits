@@ -8,7 +8,7 @@ use App\Models\Poll;
 use App\Models\PollAnswer;
 use Carbon\Carbon;
 use Illuminate\Database\Query\Builder;
-use Nexus\Database\NexusDB;
+use Illuminate\Support\Facades\DB;
 
 class LogRepository
 {
@@ -40,7 +40,7 @@ class LogRepository
      */
     private static function buildSiteLogQuery(array $filters): Builder
     {
-        $query = NexusDB::table('sitelog');
+        $query = DB::table('sitelog');
 
         if (Permission::canViewConfidentialLog()) {
             if (in_array($filters['search'] ?? '', ['mod', 'normal'], true)) {
@@ -59,7 +59,7 @@ class LogRepository
 
     public static function countChronicle(string $queryString): int
     {
-        $query = NexusDB::table('chronicle');
+        $query = DB::table('chronicle');
         if ($queryString !== '') {
             $query->where('txt', 'like', "%{$queryString}%");
         }
@@ -72,7 +72,7 @@ class LogRepository
      */
     public static function getChronicle(string $queryString, int $offset, int $perPage): array
     {
-        $query = NexusDB::table('chronicle');
+        $query = DB::table('chronicle');
         if ($queryString !== '') {
             $query->where('txt', 'like', "%{$queryString}%");
         }
@@ -92,14 +92,14 @@ class LogRepository
      */
     public static function getChronicleById(int $id): ?array
     {
-        $row = NexusDB::table('chronicle')->where('id', $id)->first();
+        $row = DB::table('chronicle')->where('id', $id)->first();
 
         return $row === null ? null : (array) $row;
     }
 
     public static function addChronicle(int $userId, string $txt): void
     {
-        NexusDB::table('chronicle')->insert([
+        DB::table('chronicle')->insert([
             'userid' => $userId,
             'added' => Carbon::now()->toDateTimeString(),
             'txt' => $txt,
@@ -108,12 +108,12 @@ class LogRepository
 
     public static function updateChronicle(int $id, string $txt): int
     {
-        return NexusDB::table('chronicle')->where('id', $id)->update(['txt' => $txt]);
+        return DB::table('chronicle')->where('id', $id)->update(['txt' => $txt]);
     }
 
     public static function deleteChronicle(int $id): int
     {
-        return NexusDB::table('chronicle')->where('id', $id)->delete();
+        return DB::table('chronicle')->where('id', $id)->delete();
     }
 
     /**
@@ -121,7 +121,7 @@ class LogRepository
      */
     public static function getGenericById(string $table, int $id): ?array
     {
-        $row = NexusDB::table($table)->where('id', $id)->first();
+        $row = DB::table($table)->where('id', $id)->first();
 
         return $row === null ? null : (array) $row;
     }

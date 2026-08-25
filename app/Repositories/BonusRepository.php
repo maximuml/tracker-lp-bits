@@ -21,6 +21,7 @@ use App\Support\Locale;
 use App\Support\Logger;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
 use Nexus\Database\ClickHouse;
 use Nexus\Database\NexusDB;
 
@@ -120,7 +121,7 @@ class BonusRepository extends BaseRepository
             $medalRep = new MedalRepository;
             $medalRep->userAttachMedal($user, $medal);
             if ($medal->inventory !== null) {
-                $affectedRows = NexusDB::table('medals')
+                $affectedRows = DB::table('medals')
                     ->where('id', $medal->id)
                     ->where('inventory', $medal->inventory)
                     ->decrement('inventory');
@@ -172,7 +173,7 @@ class BonusRepository extends BaseRepository
             Message::add($msg);
             $toUser->medals()->attach([$medal->id => ['expire_at' => $expireAt, 'status' => UserMedal::STATUS_NOT_WEARING]]);
             if ($medal->inventory !== null) {
-                $affectedRows = NexusDB::table('medals')
+                $affectedRows = DB::table('medals')
                     ->where('id', $medal->id)
                     ->where('inventory', $medal->inventory)
                     ->decrement('inventory');
@@ -388,7 +389,7 @@ class BonusRepository extends BaseRepository
             $log = "user: {$user->id}, requireBonus: $requireBonus, oldUserBonus: $oldUserBonus, newUserBonus: $newUserBonus, logBusinessType: $logBusinessType, logComment: $logComment";
             Logger::writeWithContext((string) $log, (string) 'info', (bool) false);
             $userUpdates['seedbonus'] = $newUserBonus;
-            $affectedRows = NexusDB::table($user->getTable())
+            $affectedRows = DB::table($user->getTable())
                 ->where('id', $user->id)
                 ->where('seedbonus', $oldUserBonus)
                 ->update($userUpdates);
@@ -421,7 +422,7 @@ class BonusRepository extends BaseRepository
     public function consumeUserBonusAndIncrementCharity($user, float $requireBonus, int $logBusinessType, string $logComment, float $charityIncrement): void
     {
         $this->consumeUserBonus($user, $requireBonus, $logBusinessType, $logComment, [
-            'charity' => NexusDB::raw('charity + '.(float) $charityIncrement),
+            'charity' => DB::raw('charity + '.(float) $charityIncrement),
         ]);
     }
 
@@ -516,12 +517,12 @@ class BonusRepository extends BaseRepository
             if (empty($torrentIdArr)) {
                 $torrentIdArr = [-1];
             }
-            $torrentQuery = NexusDB::table('torrents')
+            $torrentQuery = DB::table('torrents')
                 ->whereIn('id', $torrentIdArr)
                 ->where('size', '>=', $minSize)
-                ->select('id', 'added', 'size', 'seeders', NexusDB::raw("'NO_PEER_ID' as peerID"), NexusDB::raw("'' as last_action"), NexusDB::raw("'' as ip"));
+                ->select('id', 'added', 'size', 'seeders', DB::raw("'NO_PEER_ID' as peerID"), DB::raw("'' as last_action"), DB::raw("'' as ip"));
         } else {
-            $torrentQuery = NexusDB::table('torrents')
+            $torrentQuery = DB::table('torrents')
                 ->leftJoin('peers', 'peers.torrent', '=', 'torrents.id')
                 ->where('peers.userid', $uid)
                 ->where('peers.seeder', 'yes')
@@ -547,7 +548,7 @@ class BonusRepository extends BaseRepository
         }
 
         $tagGrouped = [];
-        $tagResult = NexusDB::table('torrent_tags')
+        $tagResult = DB::table('torrent_tags')
             ->whereIn('torrent_id', $torrentIds)
             ->select('torrent_id', 'tag_id')
             ->get();
@@ -560,7 +561,7 @@ class BonusRepository extends BaseRepository
 
     public function getMedalAdditionalFactor(int $uid, string $nowStr): float
     {
-        $medalQuery = NexusDB::table('medals')
+        $medalQuery = DB::table('medals')
             ->whereIn('id', function ($query) use ($uid, $nowStr) {
                 $query->select('medal_id')
                     ->from('user_medals')
@@ -586,7 +587,7 @@ class BonusRepository extends BaseRepository
 
     public function getHaremAddition(int|string $uid): float|int|string
     {
-        $addition = NexusDB::table('users')
+        $addition = DB::table('users')
             ->where('invited_by', $uid)
             ->where('status', User::STATUS_CONFIRMED)
             ->where('enabled', User::ENABLED_YES)
@@ -602,10 +603,10 @@ class BonusRepository extends BaseRepository
         if (! in_array($op, ['+', '-'], true)) {
             throw new \InvalidArgumentException('Invalid seedbonus operation: '.$op);
         }
-        NexusDB::table('users')
+        DB::table('users')
             ->where('id', $id)
             ->update([
-                'seedbonus' => NexusDB::raw('seedbonus '.$op.' '.(float) $point),
+                'seedbonus' => DB::raw('seedbonus '.$op.' '.(float) $point),
             ]);
     }
 }

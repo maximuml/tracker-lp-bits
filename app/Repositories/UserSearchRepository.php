@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Repositories;
 
 use App\Support\Validators;
+use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
-use Nexus\Database\NexusDB;
 
 /**
  * Administrative user search query builder, migrated from usersearch_content.php.
@@ -19,7 +19,7 @@ final class UserSearchRepository
      */
     public static function administrativeSearch(array $params, bool $hasModcomment, int $perPage = 30): array
     {
-        $userQuery = NexusDB::table('users as u');
+        $userQuery = DB::table('users as u');
         $q = '';
         $unit = 1073741824;
 

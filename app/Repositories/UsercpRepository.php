@@ -28,6 +28,7 @@ use App\Support\Validators;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Nexus\Database\NexusDB;
 
@@ -138,7 +139,7 @@ final class UsercpRepository extends BaseRepository
      */
     public static function getTableIds(string $table): array
     {
-        return NexusDB::table($table)->pluck('id')->all();
+        return DB::table($table)->pluck('id')->all();
     }
 
     /**
@@ -157,7 +158,7 @@ final class UsercpRepository extends BaseRepository
      */
     public static function getReadTopics(int $userId, int $limit = 5): array
     {
-        return NexusDB::table('readposts')
+        return DB::table('readposts')
             ->join('topics', 'topics.id', '=', 'readposts.topicid')
             ->where('readposts.userid', $userId)
             ->orderByDesc('readposts.id')
@@ -172,7 +173,7 @@ final class UsercpRepository extends BaseRepository
      */
     public static function getCountryOptions(): array
     {
-        return NexusDB::table('countries')
+        return DB::table('countries')
             ->orderBy('name')
             ->get(['id', 'name'])
             ->all();
@@ -183,7 +184,7 @@ final class UsercpRepository extends BaseRepository
      */
     public static function getBitbucketOptions(): array
     {
-        return NexusDB::table('bitbucket')
+        return DB::table('bitbucket')
             ->where('public', '1')
             ->get()
             ->all();
@@ -194,7 +195,7 @@ final class UsercpRepository extends BaseRepository
      */
     public static function getStylesheetOptions(): array
     {
-        return NexusDB::table('stylesheets')
+        return DB::table('stylesheets')
             ->orderBy('name')
             ->pluck('id', 'name')
             ->all();

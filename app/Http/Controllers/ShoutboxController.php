@@ -13,6 +13,7 @@ use App\Support\Validators;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 use Nexus\Database\NexusDB;
 use Nexus\Database\NexusLock;
@@ -43,8 +44,8 @@ class ShoutboxController extends LegacyController
 
         $del = (int) $request->input('del', 0);
         if ($del > 0 && Validators::isId($del) && Permissions::userCan(PermissionEnum::SB_MANAGE->value, false, $currentUserId)) {
-            NexusDB::table('shoutbox')->where('id', $del)->delete();
-            NexusDB::table('shoutbox_reactions')->where('shoutbox_id', $del)->delete();
+            DB::table('shoutbox')->where('id', $del)->delete();
+            DB::table('shoutbox_reactions')->where('shoutbox_id', $del)->delete();
         }
 
         if ($request->input('sent') === 'yes' && $request->filled('shbox_text') && $currentUserId > 0) {
@@ -58,7 +59,7 @@ class ShoutboxController extends LegacyController
                 return response('speaking too often', 429, ['Content-Type' => 'text/plain; charset=utf-8']);
             }
 
-            NexusDB::table('shoutbox')->insert([
+            DB::table('shoutbox')->insert([
                 'userid' => $currentUserId,
                 'date' => time(),
                 'text' => $text,
@@ -71,11 +72,11 @@ class ShoutboxController extends LegacyController
         $refresh = (int) ($currentUser['sbrefresh'] ?? 120);
         $limit = (int) ($currentUser['sbnum'] ?? 70);
 
-        $lastIdQuery = NexusDB::table('shoutbox');
+        $lastIdQuery = DB::table('shoutbox');
         Shoutbox::applyTypeFilter($lastIdQuery, $where, $currentUser ?: null);
         $lastId = (int) $lastIdQuery->max('id');
 
-        $query = NexusDB::table('shoutbox')->orderByDesc('date')->limit($limit);
+        $query = DB::table('shoutbox')->orderByDesc('date')->limit($limit);
         Shoutbox::applyTypeFilter($query, $where, $currentUser ?: null);
         $rows = $query->get();
 
@@ -195,7 +196,7 @@ class ShoutboxController extends LegacyController
             });
 
             $buildQuery = function (string $type, int $lastId) {
-                $query = NexusDB::table('shoutbox')
+                $query = DB::table('shoutbox')
                     ->orderBy('id')
                     ->where('id', '>', $lastId);
                 Shoutbox::applyTypeFilter($query, $type, SupportContext::getUser());

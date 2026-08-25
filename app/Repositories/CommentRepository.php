@@ -10,7 +10,7 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
-use Nexus\Database\NexusDB;
+use Illuminate\Support\Facades\DB;
 
 class CommentRepository
 {
@@ -22,7 +22,7 @@ class CommentRepository
         $row = match ($type) {
             'torrent' => Torrent::query()->where('id', $parentId)->select(['name', 'owner'])->first(),
             'offer' => Offer::query()->where('id', $parentId)->select(['name', 'userid as owner'])->first(),
-            default => NexusDB::table('requests')->where('id', $parentId)->selectRaw('request as name, userid as owner')->first(),
+            default => DB::table('requests')->where('id', $parentId)->selectRaw('request as name, userid as owner')->first(),
         };
 
         if ($row === null) {
@@ -37,7 +37,7 @@ class CommentRepository
      */
     public static function getLatest(int $limit, int $offset): array
     {
-        return NexusDB::table('comments as c')
+        return DB::table('comments as c')
             ->leftJoin('users as u', 'c.user', '=', 'u.id')
             ->leftJoin('torrents as t', 'c.torrent', '=', 't.id')
             ->leftJoin('offers as o', 'c.offer', '=', 'o.id')
@@ -51,7 +51,7 @@ class CommentRepository
 
     public static function countLatest(): int
     {
-        return (int) NexusDB::table('comments')->count();
+        return (int) DB::table('comments')->count();
     }
 
     /**
@@ -59,7 +59,7 @@ class CommentRepository
      */
     public static function getQuote(int $commentId): ?array
     {
-        $row = NexusDB::table('comments')
+        $row = DB::table('comments')
             ->leftJoin('users', 'comments.user', '=', 'users.id')
             ->where('comments.id', $commentId)
             ->select('comments.text', 'users.username')
@@ -73,7 +73,7 @@ class CommentRepository
      */
     public static function getForEdit(int $commentId, string $type): ?array
     {
-        $query = NexusDB::table('comments as c');
+        $query = DB::table('comments as c');
 
         if ($type == 'torrent') {
             $query = $query->join('torrents as t', 'c.torrent', '=', 't.id')
@@ -99,7 +99,7 @@ class CommentRepository
      */
     public static function getForDelete(int $commentId, string $type): ?array
     {
-        $row = NexusDB::table('comments')
+        $row = DB::table('comments')
             ->where('id', $commentId)
             ->selectRaw("{$type} as pid, user")
             ->first();
@@ -112,7 +112,7 @@ class CommentRepository
      */
     public static function getForViewOriginal(int $commentId, string $type): ?array
     {
-        $query = NexusDB::table('comments as c');
+        $query = DB::table('comments as c');
 
         if ($type == 'torrent') {
             $query = $query->join('torrents as t', 'c.torrent', '=', 't.id')
@@ -189,14 +189,14 @@ class CommentRepository
             ]);
             Offer::query()->where('id', $parentId)->increment('comments');
         } else {
-            $id = (int) NexusDB::table('comments')->insertGetId([
+            $id = (int) DB::table('comments')->insertGetId([
                 'user' => $userId,
                 'request' => $parentId,
                 'added' => $now->toDateTimeString(),
                 'text' => $text,
                 'ori_text' => $text,
             ]);
-            NexusDB::table('requests')->where('id', $parentId)->increment('comments');
+            DB::table('requests')->where('id', $parentId)->increment('comments');
             $comment = (object) ['id' => $id];
         }
 
@@ -224,7 +224,7 @@ class CommentRepository
             } elseif ($type == 'offer') {
                 Offer::query()->where('id', $parentId)->decrement('comments');
             } else {
-                NexusDB::table('requests')->where('id', $parentId)->decrement('comments');
+                DB::table('requests')->where('id', $parentId)->decrement('comments');
             }
         }
 

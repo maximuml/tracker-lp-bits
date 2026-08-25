@@ -13,7 +13,7 @@ use App\Support\Logger;
 use App\Support\Pagination;
 use App\Support\SupportContext;
 use App\Support\Url;
-use Nexus\Database\NexusDB;
+use Illuminate\Support\Facades\DB;
 
 class Field
 {
@@ -150,9 +150,9 @@ HTML;
         $lang_functions = SupportContext::getLangFunctions();
         $lang_fields = (array) SupportContext::getGlobal('lang_fields', []);
         $perPage = 10;
-        $total = NexusDB::table('torrents_custom_fields')->count();
+        $total = DB::table('torrents_custom_fields')->count();
         [$paginationTop, $paginationBottom, , $offset, $rpp] = Pagination::pager($perPage, $total, '?');
-        $res = NexusDB::table('torrents_custom_fields')
+        $res = DB::table('torrents_custom_fields')
             ->orderBy('priority', 'desc')
             ->offset($offset)
             ->limit($rpp)
@@ -242,10 +242,10 @@ HEAD;
         $attributes['updated_at'] = $now;
         $table = 'torrents_custom_fields';
         if (! empty($data['id'])) {
-            $result = NexusDB::table($table)->where('id', (int) $data['id'])->update($attributes);
+            $result = DB::table($table)->where('id', (int) $data['id'])->update($attributes);
         } else {
             $attributes['created_at'] = $now;
-            $result = NexusDB::table($table)->insertGetId($attributes);
+            $result = DB::table($table)->insertGetId($attributes);
         }
 
         return $result;
@@ -272,7 +272,7 @@ HEAD;
 
     public function buildFieldCheckbox($name, $current = [])
     {
-        $res = NexusDB::table('torrents_custom_fields')->orderBy('priority', 'desc')->get();
+        $res = DB::table('torrents_custom_fields')->orderBy('priority', 'desc')->get();
         if (! is_array($current)) {
             $current = explode(',', $current);
         }
@@ -298,7 +298,7 @@ HEAD;
         }
         $customValues = $this->listTorrentCustomField($torrentId, $searchBoxId);
         $customFieldIds = array_filter(array_map('intval', is_array($searchBox->custom_fields) ? $searchBox->custom_fields : explode(',', $searchBox->custom_fields ?? '')));
-        $res = NexusDB::table('torrents_custom_fields')
+        $res = DB::table('torrents_custom_fields')
             ->whereIn('id', $customFieldIds)
             ->orderBy('priority', 'desc')
             ->get();
@@ -424,7 +424,7 @@ JS;
         }
         $torrentIdArr = array_map('intval', $torrentIdArr);
 
-        $res = NexusDB::table('torrents_custom_field_values as v')
+        $res = DB::table('torrents_custom_field_values as v')
             ->join('torrents_custom_fields as f', 'v.custom_field_id', '=', 'f.id')
             ->whereIn('v.torrent_id', $torrentIdArr)
             ->whereIn('f.id', $customFieldIds)

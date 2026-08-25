@@ -8,7 +8,7 @@ use App\Models\Post;
 use App\Models\User;
 use App\Models\UserModifyLog;
 use Carbon\Carbon;
-use Nexus\Database\NexusDB;
+use Illuminate\Support\Facades\DB;
 
 class UserDetailRepository
 {
@@ -24,7 +24,7 @@ class UserDetailRepository
 
     public static function isFriend(int $userId, int $friendId): bool
     {
-        return NexusDB::table('friends')
+        return DB::table('friends')
             ->where('userid', $userId)
             ->where('friendid', $friendId)
             ->exists();
@@ -32,7 +32,7 @@ class UserDetailRepository
 
     public static function isBlocked(int $userId, int $blockId): bool
     {
-        return NexusDB::table('blocks')
+        return DB::table('blocks')
             ->where('userid', $userId)
             ->where('blockid', $blockId)
             ->exists();
@@ -40,7 +40,7 @@ class UserDetailRepository
 
     public static function getIplogCount(int $userId): int
     {
-        return NexusDB::table('iplog')
+        return DB::table('iplog')
             ->where('userid', $userId)
             ->distinct('ip')
             ->count('ip');
@@ -51,7 +51,7 @@ class UserDetailRepository
      */
     public static function getPeers(int $userId): array
     {
-        return NexusDB::table('peers')
+        return DB::table('peers')
             ->where('userid', $userId)
             ->selectRaw('min(peer_id) as peer_id, agent, ipv4, ipv6, port')
             ->groupBy('agent', 'ipv4', 'ipv6', 'port')
@@ -65,7 +65,7 @@ class UserDetailRepository
      */
     public static function getTrueTraffic(int $userId): array
     {
-        $row = NexusDB::table('snatched')
+        $row = DB::table('snatched')
             ->where('userid', $userId)
             ->selectRaw('COALESCE(SUM(uploaded), 0) as uploaded')
             ->selectRaw('COALESCE(SUM(downloaded), 0) as downloaded')

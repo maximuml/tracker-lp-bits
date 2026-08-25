@@ -13,8 +13,8 @@ use App\Support\UserDisplay;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
-use Nexus\Database\NexusDB;
 
 class StaffPageController extends LegacyController
 {
@@ -66,7 +66,7 @@ class StaffPageController extends LegacyController
             ->all();
 
         $forumModRows = [];
-        $forumMods = NexusDB::table('forummods')
+        $forumMods = DB::table('forummods')
             ->leftJoin('users', 'forummods.userid', '=', 'users.id')
             ->orderBy('forummods.forumid')
             ->orderBy('forummods.userid')
@@ -78,7 +78,7 @@ class StaffPageController extends LegacyController
             $arr = (array) $modRow;
             $userId = (int) $arr['userid'];
             $forums = [];
-            $forumRows = NexusDB::table('forums as f')
+            $forumRows = DB::table('forums as f')
                 ->leftJoin('forummods as fm', 'f.id', '=', 'fm.forumid')
                 ->where('fm.userid', $userId)
                 ->get(['f.id', 'f.name']);
@@ -147,13 +147,13 @@ class StaffPageController extends LegacyController
         $adminClass = defined('UC_ADMINISTRATOR') ? \constant('UC_ADMINISTRATOR') : PHP_INT_MAX;
 
         if (UserDisplay::currentClass() >= $sysopClass) {
-            $sysopPanels = NexusDB::table('sysoppanel')->get()->map(fn ($r) => (array) $r)->all();
+            $sysopPanels = DB::table('sysoppanel')->get()->map(fn ($r) => (array) $r)->all();
         }
         if (UserDisplay::currentClass() >= $adminClass) {
-            $adminPanels = NexusDB::table('adminpanel')->get()->map(fn ($r) => (array) $r)->all();
+            $adminPanels = DB::table('adminpanel')->get()->map(fn ($r) => (array) $r)->all();
         }
         if (UserDisplay::currentClass() >= $moderatorClass) {
-            $modPanels = NexusDB::table('modpanel')->get()->map(fn ($r) => (array) $r)->all();
+            $modPanels = DB::table('modpanel')->get()->map(fn ($r) => (array) $r)->all();
         }
 
         return $this->legacyPage($request, 'staffpanel', true, [

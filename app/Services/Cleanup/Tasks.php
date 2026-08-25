@@ -22,6 +22,7 @@ use App\Support\UserOps;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Nexus\Database\NexusDB;
 
 /**
@@ -43,7 +44,7 @@ final class Tasks
             time()
         ));
 
-        NexusDB::table('peers')->where('last_action', '<', $deadtime)->delete();
+        DB::table('peers')->where('last_action', '<', $deadtime)->delete();
 
         return 'update peer status';
     }
@@ -57,7 +58,7 @@ final class Tasks
         $interval = (int) SiteConfig::current()->main->autocleanIntervalOne(900);
         $cutoff = Carbon::now()->subSeconds(2 * $interval)->toDateTimeString();
 
-        NexusDB::table('users')
+        DB::table('users')
             ->where('seed_points_updated_at', '<', $cutoff)
             ->update([
                 'seed_points_per_hour' => 0,
@@ -79,7 +80,7 @@ final class Tasks
         $deadtime = Time::deadThreshold((int) SiteConfig::current()->main->anninterthree(3600), time()) - $maxDeadTime;
         $lastActionDeadTime = date('Y-m-d H:i:s', $deadtime);
 
-        NexusDB::table('torrents')
+        DB::table('torrents')
             ->where('visible', 'yes')
             ->where('last_action', '<', $lastActionDeadTime)
             ->where('seeders', 0)
@@ -93,19 +94,19 @@ final class Tasks
      */
     public function updateForumCounts(): string
     {
-        $forumIds = NexusDB::table('forums')->pluck('id');
+        $forumIds = DB::table('forums')->pluck('id');
 
         foreach ($forumIds as $forumId) {
             $postcount = 0;
             $topiccount = 0;
-            $topicIds = NexusDB::table('topics')->where('forumid', $forumId)->pluck('id');
+            $topicIds = DB::table('topics')->where('forumid', $forumId)->pluck('id');
 
             foreach ($topicIds as $topicId) {
-                $postcount += (int) NexusDB::table('posts')->where('topicid', $topicId)->count();
+                $postcount += (int) DB::table('posts')->where('topicid', $topicId)->count();
                 $topiccount++;
             }
 
-            NexusDB::table('forums')
+            DB::table('forums')
                 ->where('id', $forumId)
                 ->update(['postcount' => $postcount, 'topiccount' => $topiccount]);
         }
@@ -127,7 +128,7 @@ final class Tasks
         $offerVoteTimeout = (int) SiteConfig::current()->main->offerVoteTimeout(259200);
         if ($offerVoteTimeout > 0) {
             $dt = date('Y-m-d H:i:s', time() - $offerVoteTimeout);
-            $offerIds = NexusDB::table('offers')
+            $offerIds = DB::table('offers')
                 ->where('added', '<', $dt)
                 ->where('allowed', '<>', 'allowed')
                 ->pluck('id', 'name')
@@ -139,7 +140,7 @@ final class Tasks
         $offerUploadTimeout = (int) SiteConfig::current()->main->offerUploadTimeout(86400);
         if ($offerUploadTimeout > 0) {
             $dt = date('Y-m-d H:i:s', time() - $offerUploadTimeout);
-            $offerIds = NexusDB::table('offers')
+            $offerIds = DB::table('offers')
                 ->where('allowedtime', '<', $dt)
                 ->where('allowed', 'allowed')
                 ->pluck('id', 'name')
@@ -291,9 +292,9 @@ final class Tasks
 
         $ids = array_values($offerIds);
 
-        NexusDB::table('offervotes')->whereIn('offerid', $ids)->delete();
-        NexusDB::table('comments')->whereIn('offer', $ids)->delete();
-        NexusDB::table('offers')->whereIn('id', $ids)->delete();
+        DB::table('offervotes')->whereIn('offerid', $ids)->delete();
+        DB::table('comments')->whereIn('offer', $ids)->delete();
+        DB::table('offers')->whereIn('id', $ids)->delete();
 
         foreach ($offerIds as $name => $id) {
             Log::write("Offer {$id} ({$name}) was deleted by system ({$reason})", 'normal');
@@ -333,7 +334,7 @@ final class Tasks
         ];
         $become = $becomeMap[$targetState];
 
-        $torrents = NexusDB::table('torrents')
+        $torrents = DB::table('torrents')
             ->where('added', '<', $dt)
             ->where('sp_state', $fromState)
             ->where('promotion_time_type', Torrent::PROMOTION_TIME_TYPE_GLOBAL)
@@ -342,7 +343,7 @@ final class Tasks
         foreach ($torrents as $torrent) {
             $arr = (array) $torrent;
 
-            NexusDB::table('torrents')
+            DB::table('torrents')
                 ->where('id', $arr['id'])
                 ->update(['sp_state' => $targetState]);
 
@@ -396,7 +397,7 @@ final class Tasks
         $secs = 12 * 60 * 60;
         $dt = date('Y-m-d H:i:s', time() - $secs);
 
-        NexusDB::table('loginattempts')
+        DB::table('loginattempts')
             ->where('banned', 'no')
             ->where('added', '<', $dt)
             ->delete();
@@ -409,7 +410,7 @@ final class Tasks
         $dt = date('Y-m-d H:i:s', time() - $secs);
         $nowStr = Carbon::now()->toDateTimeString();
 
-        NexusDB::table('invites')
+        DB::table('invites')
             ->where(function ($query) use ($dt): void {
                 $query->where('time_invited', '<', $dt)
                     ->whereNotNull('time_invited')
@@ -425,7 +426,7 @@ final class Tasks
 
     private function deleteRegimages(): void
     {
-        NexusDB::table('regimages')->delete();
+        DB::table('regimages')->delete();
     }
 
     // ------------------------------------------------------------------------
@@ -685,7 +686,7 @@ final class Tasks
                 'leechwarnuntil' => null,
             ]);
 
-            NexusDB::table('messages')->insert([
+            DB::table('messages')->insert([
                 'sender' => 0,
                 'receiver' => $uid,
                 'added' => $dt,
@@ -773,11 +774,11 @@ final class Tasks
                 User::query()->where('id', $uid)->update([
                     'class' => $class,
                     'max_class_once' => $class,
-                    'invites' => NexusDB::raw('invites + '.$addInvite),
+                    'invites' => DB::raw('invites + '.$addInvite),
                 ]);
             }
 
-            NexusDB::table('messages')->insert([
+            DB::table('messages')->insert([
                 'sender' => 0,
                 'receiver' => $uid,
                 'added' => $dt,
@@ -844,7 +845,7 @@ final class Tasks
 
             User::query()->where('id', $uid)->update(['class' => (string) $newclass]);
 
-            NexusDB::table('messages')->insert([
+            DB::table('messages')->insert([
                 'sender' => 0,
                 'receiver' => $uid,
                 'added' => $dt,
@@ -912,7 +913,7 @@ final class Tasks
                 'leechwarnuntil' => $until,
             ]);
 
-            NexusDB::table('messages')->insert([
+            DB::table('messages')->insert([
                 'sender' => 0,
                 'receiver' => $uid,
                 'added' => $dt,
@@ -987,7 +988,7 @@ final class Tasks
         $until = date('Y-m-d H:i:s', time() - $length);
         $dt = date('Y-m-d H:i:s');
 
-        $res = NexusDB::table('torrents as t')
+        $res = DB::table('torrents as t')
             ->leftJoin('users as u', 't.owner', '=', 'u.id')
             ->where('t.visible', 'no')
             ->where('t.last_action', '<', $until)
@@ -1004,7 +1005,7 @@ final class Tasks
             if (! empty($arr['uid'])) {
                 $locale = Locale::userLocale((int) $arr['owner']);
 
-                NexusDB::table('messages')->insert([
+                DB::table('messages')->insert([
                     'sender' => 0,
                     'receiver' => $arr['owner'],
                     'added' => $dt,
@@ -1024,7 +1025,7 @@ final class Tasks
         $length = 90 * 86400;
         $until = date('Y-m-d H:i:s', time() - $length);
 
-        NexusDB::table('iplog')->where('access', '<', $until)->delete();
+        DB::table('iplog')->where('access', '<', $until)->delete();
     }
 
     private function deleteFailedJobs(): void
@@ -1032,7 +1033,7 @@ final class Tasks
         $length = 10 * 86400;
         $until = date('Y-m-d H:i:s', time() - $length);
 
-        NexusDB::table('failed_jobs')->where('failed_at', '<', $until)->delete();
+        DB::table('failed_jobs')->where('failed_at', '<', $until)->delete();
     }
 
     /**
@@ -1058,11 +1059,11 @@ final class Tasks
 
     private function updateClientPopularity(): void
     {
-        $clientIds = NexusDB::table('agent_allowed_family')->pluck('id');
+        $clientIds = DB::table('agent_allowed_family')->pluck('id');
 
         foreach ($clientIds as $clientId) {
-            $count = NexusDB::table('users')->where('clientselect', $clientId)->count();
-            NexusDB::table('agent_allowed_family')->where('id', $clientId)->update(['hits' => $count]);
+            $count = DB::table('users')->where('clientselect', $clientId)->count();
+            DB::table('agent_allowed_family')->where('id', $clientId)->update(['hits' => $count]);
         }
     }
 
@@ -1071,7 +1072,7 @@ final class Tasks
         $length = 180 * 86400;
         $until = date('Y-m-d H:i:s', time() - $length);
 
-        NexusDB::table('messages')->where('sender', 0)->where('added', '<', $until)->delete();
+        DB::table('messages')->where('sender', 0)->where('added', '<', $until)->delete();
     }
 
     private function deleteOldReadPosts(): void
@@ -1079,14 +1080,14 @@ final class Tasks
         $length = 180 * 86400;
         $until = date('Y-m-d H:i:s', time() - $length);
 
-        $postId = NexusDB::table('posts')
+        $postId = DB::table('posts')
             ->where('added', '<', $until)
             ->orderBy('added', 'desc')
             ->value('id');
 
         if ($postId) {
-            NexusDB::table('users')->where('last_catchup', '<', $postId)->update(['last_catchup' => $postId]);
-            NexusDB::table('readposts')->where('lastpostread', '<', $postId)->delete();
+            DB::table('users')->where('last_catchup', '<', $postId)->update(['last_catchup' => $postId]);
+            DB::table('readposts')->where('lastpostread', '<', $postId)->delete();
         }
     }
 
@@ -1095,7 +1096,7 @@ final class Tasks
         $length = 180 * 86400;
         $until = date('Y-m-d H:i:s', time() - $length);
 
-        NexusDB::table('cheaters')->where('added', '<', $until)->delete();
+        DB::table('cheaters')->where('added', '<', $until)->delete();
     }
 
     private function deleteOldShoutbox(): void
@@ -1103,7 +1104,7 @@ final class Tasks
         $length = 180 * 86400;
         $until = time() - $length;
 
-        NexusDB::table('shoutbox')->where('date', '<', $until)->delete();
+        DB::table('shoutbox')->where('date', '<', $until)->delete();
     }
 
     private function deleteOldSiteLog(): void
@@ -1111,7 +1112,7 @@ final class Tasks
         $length = 180 * 86400;
         $until = date('Y-m-d H:i:s', time() - $length);
 
-        NexusDB::table('sitelog')->where('added', '<', $until)->delete();
+        DB::table('sitelog')->where('added', '<', $until)->delete();
     }
 
     private function lockOldTopics(): void
@@ -1120,7 +1121,7 @@ final class Tasks
         $diff = time() - $length;
         $postAddedField = NexusDB::unixTimestampField('posts.added');
 
-        NexusDB::table('topics')
+        DB::table('topics')
             ->where('sticky', 'no')
             ->whereIn('lastpost', function ($query) use ($postAddedField, $diff): void {
                 $query->select('id')->from('posts')->whereRaw("{$postAddedField} < ?", [$diff]);
@@ -1133,7 +1134,7 @@ final class Tasks
         $length = 4 * 7 * 86400;
         $until = date('Y-m-d H:i:s', time() - $length);
 
-        NexusDB::table('reports')
+        DB::table('reports')
             ->where('dealtwith', 1)
             ->where('added', '<', $until)
             ->delete();

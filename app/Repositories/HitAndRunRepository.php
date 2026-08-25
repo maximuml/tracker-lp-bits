@@ -25,7 +25,6 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
-use Nexus\Database\NexusDB;
 
 class HitAndRunRepository extends BaseRepository
 {
@@ -542,16 +541,16 @@ class HitAndRunRepository extends BaseRepository
     {
         $diffInSection = HitAndRun::diffInSection();
         if ($diffInSection) {
-            $query = NexusDB::table('hit_and_runs')
+            $query = DB::table('hit_and_runs')
                 ->leftJoin('torrents', 'torrents.id', '=', 'hit_and_runs.torrent_id')
                 ->leftJoin('categories', 'categories.id', '=', 'torrents.category')
                 ->where('hit_and_runs.uid', $uid)
-                ->select('hit_and_runs.status', 'categories.mode', NexusDB::raw('count(*) as counts'))
+                ->select('hit_and_runs.status', 'categories.mode', DB::raw('count(*) as counts'))
                 ->groupBy('hit_and_runs.status', 'categories.mode');
         } else {
-            $query = NexusDB::table('hit_and_runs')
+            $query = DB::table('hit_and_runs')
                 ->where('uid', $uid)
-                ->select('status', NexusDB::raw('count(*) as counts'))
+                ->select('status', DB::raw('count(*) as counts'))
                 ->groupBy('status');
         }
         $results = $query->get()->map(fn ($row) => (array) $row)->all();

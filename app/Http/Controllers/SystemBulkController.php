@@ -29,6 +29,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 use Nexus\Database\NexusDB;
 use Nexus\Database\NexusLock;
@@ -81,7 +82,7 @@ class SystemBulkController extends LegacyController
 
         $userIds = User::query()->whereIn('class', $classSet)->pluck('id')->all();
         foreach ($userIds as $userId) {
-            NexusDB::table('messages')->insert([
+            DB::table('messages')->insert([
                 'sender' => $senderId,
                 'receiver' => (int) $userId,
                 'added' => $added,
@@ -286,13 +287,13 @@ class SystemBulkController extends LegacyController
 
         $cache = SupportContext::getCache();
         if (SupportContext::getPost('setdealt')) {
-            NexusDB::table('reports')
+            DB::table('reports')
                 ->whereIn('id', $delreportIds)
                 ->where('dealtwith', 0)
                 ->update(['dealtwith' => 1, 'dealtby' => $currentUserId]);
             $cache?->delete_value('staff_new_report_count', true);
         } elseif (SupportContext::getPost('delete')) {
-            NexusDB::table('reports')->whereIn('id', $delreportIds)->delete();
+            DB::table('reports')->whereIn('id', $delreportIds)->delete();
             $cache?->delete_value('staff_new_report_count', true);
             $cache?->delete_value('staff_report_count', true);
         }
@@ -409,7 +410,7 @@ class SystemBulkController extends LegacyController
             $idArr = [];
             $offset = ($page - 1) * $size;
 
-            $users = NexusDB::table('users')
+            $users = DB::table('users')
                 ->whereRaw("({$whereStr})")
                 ->where('enabled', 'yes')
                 ->where('status', 'confirmed')
@@ -443,11 +444,11 @@ class SystemBulkController extends LegacyController
                 $outputStr = is_array($output) ? implode("\n", $output) : (string) $output;
                 Log::writeWithContext((string) sprintf('command: %s, output: %s', $command, $outputStr), 'info');
             } else {
-                NexusDB::table('users')->whereIn('id', $idArr)->increment($type, $amount);
+                DB::table('users')->whereIn('id', $idArr)->increment($type, $amount);
             }
 
             if (! empty($msgRows)) {
-                NexusDB::table('messages')->insert($msgRows);
+                DB::table('messages')->insert($msgRows);
             }
 
             $page++;

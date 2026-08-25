@@ -3,7 +3,7 @@
 namespace App\Repositories;
 
 use Illuminate\Support\Collection;
-use Nexus\Database\NexusDB;
+use Illuminate\Support\Facades\DB;
 
 final class AdminStatsRepository
 {
@@ -12,8 +12,8 @@ final class AdminStatsRepository
      */
     public static function stats(string $uporder, string $catorder): array
     {
-        $nTor = NexusDB::table('torrents')->count();
-        $nPeers = NexusDB::table('peers')->count();
+        $nTor = DB::table('torrents')->count();
+        $nPeers = DB::table('peers')->count();
 
         return [
             'n_tor' => $nTor,
@@ -37,7 +37,7 @@ final class AdminStatsRepository
             default => 'name',
         };
 
-        $base = NexusDB::table('users as u')
+        $base = DB::table('users as u')
             ->selectRaw('u.id, u.username AS name, MAX(t.added) AS last, COUNT(DISTINCT t.id) AS n_t, COUNT(p.id) AS n_p')
             ->leftJoin('torrents as t', 'u.id', '=', 't.owner')
             ->leftJoin('peers as p', 't.id', '=', 'p.torrent');
@@ -63,7 +63,7 @@ final class AdminStatsRepository
             default => 'c.name',
         };
 
-        return NexusDB::table('categories as c')
+        return DB::table('categories as c')
             ->selectRaw('c.name, MAX(t.added) AS last, COUNT(DISTINCT t.id) AS n_t, COUNT(p.id) AS n_p')
             ->leftJoin('torrents as t', 't.category', '=', 'c.id')
             ->leftJoin('peers as p', 't.id', '=', 'p.torrent')
@@ -77,7 +77,7 @@ final class AdminStatsRepository
      */
     public static function allagents(): Collection
     {
-        return NexusDB::table('peers')
+        return DB::table('peers')
             ->selectRaw('agent, count(*) as counts')
             ->groupBy('agent')
             ->orderBy('agent')

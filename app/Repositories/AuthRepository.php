@@ -3,59 +3,59 @@
 namespace App\Repositories;
 
 use App\Models\User;
-use Nexus\Database\NexusDB;
+use Illuminate\Support\Facades\DB;
 
 class AuthRepository extends BaseRepository
 {
     public function getLoginAttemptsSum(string $ip): int
     {
-        return (int) NexusDB::table('loginattempts')->where('ip', $ip)->sum('attempts');
+        return (int) DB::table('loginattempts')->where('ip', $ip)->sum('attempts');
     }
 
     public function banLoginAttempts(string $ip): void
     {
-        NexusDB::table('loginattempts')->where('ip', $ip)->update(['banned' => 'yes']);
+        DB::table('loginattempts')->where('ip', $ip)->update(['banned' => 'yes']);
     }
 
     public function recordFailedLogin(string $ip, bool $recover): void
     {
-        $count = (int) NexusDB::table('loginattempts')->where('ip', $ip)->count();
+        $count = (int) DB::table('loginattempts')->where('ip', $ip)->count();
 
         if ($count === 0) {
-            NexusDB::table('loginattempts')->insert([
+            DB::table('loginattempts')->insert([
                 'ip' => $ip,
                 'added' => date('Y-m-d H:i:s'),
                 'attempts' => 1,
             ]);
         } else {
-            NexusDB::table('loginattempts')
+            DB::table('loginattempts')
                 ->where('ip', $ip)
-                ->update(['attempts' => NexusDB::raw('attempts + 1')]);
+                ->update(['attempts' => DB::raw('attempts + 1')]);
         }
 
         if ($recover) {
-            NexusDB::table('loginattempts')->where('ip', $ip)->update(['type' => 'recover']);
+            DB::table('loginattempts')->where('ip', $ip)->update(['type' => 'recover']);
         }
     }
 
     public function updateUserLang(int $userId, int $langId): void
     {
-        NexusDB::table('users')->where('id', $userId)->update(['lang' => $langId]);
+        DB::table('users')->where('id', $userId)->update(['lang' => $langId]);
     }
 
     public function countUsers(): int
     {
-        return (int) NexusDB::table('users')->count();
+        return (int) DB::table('users')->count();
     }
 
     public function countUsersByIp(string $ip): int
     {
-        return (int) NexusDB::table('users')->where('ip', $ip)->count();
+        return (int) DB::table('users')->where('ip', $ip)->count();
     }
 
     public function getUserIdByUsername(string $username): ?int
     {
-        $id = NexusDB::table('users')
+        $id = DB::table('users')
             ->whereRaw('LOWER(username) = LOWER(?)', [$username])
             ->value('id');
 
@@ -64,7 +64,7 @@ class AuthRepository extends BaseRepository
 
     public function isIpBanned(int $nip): bool
     {
-        return NexusDB::table('bans')
+        return DB::table('bans')
             ->where('first', '<=', $nip)
             ->where('last', '>=', $nip)
             ->exists();
@@ -72,7 +72,7 @@ class AuthRepository extends BaseRepository
 
     public function updateUserPasskey(int $userId, string $passkey): void
     {
-        NexusDB::table('users')->where('id', $userId)->update(['passkey' => $passkey]);
+        DB::table('users')->where('id', $userId)->update(['passkey' => $passkey]);
     }
 
     /**
@@ -95,7 +95,7 @@ class AuthRepository extends BaseRepository
      */
     public static function findUserArrayForCookie(int $userId, bool $shouldIgnoreEnabled): ?array
     {
-        $query = NexusDB::table('users')
+        $query = DB::table('users')
             ->where('id', $userId)
             ->where('status', 'confirmed');
         if (! $shouldIgnoreEnabled) {

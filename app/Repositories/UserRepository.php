@@ -41,6 +41,7 @@ use Illuminate\Database\Query\Expression;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Nexus\Database\NexusDB;
 
@@ -394,7 +395,7 @@ class UserRepository extends BaseRepository
         Logger::writeWithContext((string) "user: {$uid}, {$modCommentText}", (string) 'alert', (bool) false);
         $update = [
             $sourceField => $new,
-            //            'modcomment' => NexusDB::raw("if(modcomment = '', '$modCommentText', concat_ws('\n', '$modCommentText', modcomment))"),
+            //            'modcomment' => DB::raw("if(modcomment = '', '$modCommentText', concat_ws('\n', '$modCommentText', modcomment))"),
         ];
         $locale = $targetUser->locale;
         $fieldLabel = Locale::trans("user.labels.{$sourceField}", [], $locale);
@@ -1038,7 +1039,7 @@ class UserRepository extends BaseRepository
             'messages' => 'receiver',
         ];
         foreach ($tables as $table => $key) {
-            NexusDB::table($table)->whereIn($key, $uidArr)->delete();
+            DB::table($table)->whereIn($key, $uidArr)->delete();
         }
         Logger::writeWithContext((string) ('[DESTROY_USER]: '.json_encode($uidArr)), (string) 'error', (bool) false);
         $userBanLogs = [];
@@ -1051,7 +1052,7 @@ class UserRepository extends BaseRepository
         }
         UserBanLog::query()->insert($userBanLogs);
         // delete by user, make sure torrent is deleted
-        NexusDB::table('snatched')
+        DB::table('snatched')
             ->whereIn('userid', $uidArr)
             ->whereNotExists(function ($query) {
                 $query->selectRaw('1')->from('torrents')->whereColumn('torrents.id', '=', 'snatched.torrentid');
@@ -1180,7 +1181,7 @@ class UserRepository extends BaseRepository
     private function listUserSeedingLeechingData(array $userIdArr)
     {
         $minSize = SiteConfig::current()->bonus->minSize(0);
-        $data = NexusDB::table('torrents')
+        $data = DB::table('torrents')
             ->leftJoin('peers', 'peers.torrent', '=', 'torrents.id')
             ->select('peers.userid', 'peers.seeder', 'torrents.size')
             ->whereIn('peers.userid', $userIdArr)

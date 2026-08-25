@@ -21,6 +21,7 @@ use App\Support\UserDisplay;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Nexus\Database\NexusDB;
 
 class TorrentRssController extends LegacyController
@@ -66,7 +67,7 @@ class TorrentRssController extends LegacyController
             $paidFilter = (string) $request->input('paid');
         }
 
-        $baseQuery = NexusDB::table('torrents')
+        $baseQuery = DB::table('torrents')
             ->leftJoin('categories', 'torrents.category', '=', 'categories.id')
             ->leftJoin('torrent_extras', 'torrents.id', '=', 'torrent_extras.torrent_id')
             ->select('torrents.id', 'torrents.category', 'torrents.name', 'torrent_extras.descr', 'torrents.info_hash', 'torrents.size', 'torrents.added', 'torrents.anonymous', 'torrents.owner', 'categories.name as category_name');
@@ -74,7 +75,7 @@ class TorrentRssController extends LegacyController
         $dllink = false;
         $inclbookmarked = 0;
         $rssUser = (array) Cache::remember('user_passkey_'.$passkey.'_rss', 3600, function () use ($passkey) {
-            $row = NexusDB::table('users')->where('passkey', $passkey)->first(['id', 'enabled', 'parked', 'passkey']);
+            $row = DB::table('users')->where('passkey', $passkey)->first(['id', 'enabled', 'parked', 'passkey']);
 
             return $row ? (array) $row : [];
         });

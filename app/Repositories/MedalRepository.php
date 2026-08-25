@@ -16,6 +16,7 @@ use Carbon\Carbon;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Nexus\Database\NexusDB;
 
 class MedalRepository extends BaseRepository
@@ -189,7 +190,7 @@ class MedalRepository extends BaseRepository
             return 0;
         }
 
-        return NexusDB::table('user_medals')->upsert($rows, ['id'], ['status', 'priority', 'updated_at']);
+        return DB::table('user_medals')->upsert($rows, ['id'], ['status', 'priority', 'updated_at']);
     }
 
     /**
@@ -199,10 +200,10 @@ class MedalRepository extends BaseRepository
     {
         $this->checkExpireField($field);
         $idArr = $collection->pluck('id')->toArray();
-        $result = NexusDB::table('user_medals')
+        $result = DB::table('user_medals')
             ->whereIn('id', $idArr)
             ->whereNotNull($field)
-            ->update([$field => NexusDB::raw("`$field` + INTERVAL $duration DAY")]);
+            ->update([$field => DB::raw("`$field` + INTERVAL $duration DAY")]);
         Logger::writeWithContext(sprintf(
             "operator: %s, increase records: %s $field + $duration day, result: %s",
             UserDisplay::currentUsername(), implode(', ', $idArr), $result
@@ -216,7 +217,7 @@ class MedalRepository extends BaseRepository
     {
         $this->checkExpireField($field);
         $idArr = $collection->pluck('id')->toArray();
-        $result = NexusDB::table('user_medals')
+        $result = DB::table('user_medals')
             ->whereIn('id', $idArr)
             ->update([$field => $expireAt]);
         Logger::writeWithContext(sprintf(
@@ -232,9 +233,9 @@ class MedalRepository extends BaseRepository
     {
         $this->checkExpireField($field);
         $idArr = $collection->pluck('id')->toArray();
-        $result = NexusDB::table('user_medals')
+        $result = DB::table('user_medals')
             ->whereIn('id', $idArr)
-            ->update([$field => NexusDB::raw('null')]);
+            ->update([$field => DB::raw('null')]);
         Logger::writeWithContext(sprintf(
             "operator: %s, update records: %s $field null, result: %s",
             UserDisplay::currentUsername(), implode(', ', $idArr), $result

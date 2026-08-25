@@ -4,7 +4,7 @@ namespace App\Repositories;
 
 use App\Support\SupportContext;
 use App\Support\UserDisplay;
-use Nexus\Database\NexusDB;
+use Illuminate\Support\Facades\DB;
 
 class PollRepository
 {
@@ -16,7 +16,7 @@ class PollRepository
         if ($id <= 0) {
             return null;
         }
-        $row = NexusDB::table('polls')->where('id', $id)->first();
+        $row = DB::table('polls')->where('id', $id)->first();
 
         return $row ? (array) $row : null;
     }
@@ -26,7 +26,7 @@ class PollRepository
      */
     public static function lastPoll(): ?array
     {
-        $row = NexusDB::table('polls')->orderByDesc('added')->first(['question', 'added']);
+        $row = DB::table('polls')->orderByDesc('added')->first(['question', 'added']);
 
         return $row ? (array) $row : null;
     }
@@ -37,7 +37,7 @@ class PollRepository
     public static function createOrUpdate(array $data, ?int $id = null): int
     {
         if ($id) {
-            NexusDB::table('polls')->where('id', $id)->update($data);
+            DB::table('polls')->where('id', $id)->update($data);
             $cache = SupportContext::getCache();
             if ($cache !== null) {
                 $cache->delete_value('current_poll_content');
@@ -48,7 +48,7 @@ class PollRepository
         }
 
         $data['added'] = now()->toDateTimeString();
-        $newId = (int) NexusDB::table('polls')->insertGetId($data);
+        $newId = (int) DB::table('polls')->insertGetId($data);
 
         $cache = SupportContext::getCache();
         if ($cache !== null) {
@@ -64,7 +64,7 @@ class PollRepository
      */
     public static function listAll(): array
     {
-        return NexusDB::table('polls')
+        return DB::table('polls')
             ->orderByDesc('id')
             ->get(['id', 'added', 'question'])
             ->map(fn ($row) => (array) $row)
@@ -76,14 +76,14 @@ class PollRepository
      */
     public static function findWithOptions(int $id): ?array
     {
-        $row = NexusDB::table('polls')->where('id', $id)->first();
+        $row = DB::table('polls')->where('id', $id)->first();
 
         return $row ? (array) $row : null;
     }
 
     public static function countAnswers(int $pollId): int
     {
-        return (int) NexusDB::table('pollanswers')
+        return (int) DB::table('pollanswers')
             ->where('pollid', $pollId)
             ->where('selection', '<', 20)
             ->count();
@@ -94,7 +94,7 @@ class PollRepository
      */
     public static function answers(int $pollId, int $offset, int $perPage): array
     {
-        return NexusDB::table('pollanswers')
+        return DB::table('pollanswers')
             ->leftJoin('users', 'pollanswers.userid', '=', 'users.id')
             ->where('pollanswers.pollid', $pollId)
             ->where('pollanswers.selection', '<', 20)

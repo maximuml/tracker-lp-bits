@@ -17,6 +17,7 @@ use App\Support\SearchSuggest;
 use App\Support\SupportContext;
 use Carbon\Carbon;
 use Illuminate\Database\Connection;
+use Illuminate\Support\Facades\DB;
 use Nexus\Database\NexusDB;
 use Nexus\Nexus;
 
@@ -838,7 +839,7 @@ class TorrentSearchRepository
         }
 
         /** @var Connection $db */
-        $db = NexusDB::table('torrents')->getConnection();
+        $db = DB::table('torrents')->getConnection();
         $quote = fn ($value) => (string) $db->getPdo()->quote((string) $value);
 
         if (isset($searchParams['added_begin']) && ! empty($searchParams['added_begin'])) {

@@ -8,8 +8,8 @@ use App\Support\Config\SiteConfig;
 use App\Support\Logger;
 use App\Support\Path;
 use App\Support\SupportContext;
+use Illuminate\Support\Facades\DB;
 use Nexus\Attachment\Storage;
-use Nexus\Database\NexusDB;
 
 class AttachmentLegacyService
 {
@@ -323,7 +323,7 @@ class AttachmentLegacyService
             }
             if (! $warning) { // insert into database and add code to editor
                 $dlkey = md5($location.microtime(true));
-                NexusDB::table('attachments')->insert([
+                DB::table('attachments')->insert([
                     'userid' => $CURUSER['id'],
                     'width' => $width,
                     'added' => date('Y-m-d H:i:s'),

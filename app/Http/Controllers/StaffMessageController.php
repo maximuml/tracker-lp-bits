@@ -13,8 +13,8 @@ use App\Support\Validators;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
-use Nexus\Database\NexusDB;
 
 class StaffMessageController extends LegacyController
 {
@@ -84,7 +84,7 @@ class StaffMessageController extends LegacyController
 
         while (true) {
             $offset = ($page - 1) * $size;
-            $rows = NexusDB::table('users')
+            $rows = DB::table('users')
                 ->whereRaw("($whereStr)")
                 ->where('enabled', 'yes')
                 ->where('status', 'confirmed')

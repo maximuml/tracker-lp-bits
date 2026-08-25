@@ -8,20 +8,21 @@ use App\Models\Post;
 use App\Models\Topic;
 use App\Models\User;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Nexus\Database\NexusDB;
 
 class ForumRepository extends BaseRepository
 {
     public function deleteForum(int $id): void
     {
-        $topics = NexusDB::table('topics')->where('forumid', $id)->get(['id']);
+        $topics = DB::table('topics')->where('forumid', $id)->get(['id']);
         foreach ($topics as $topic) {
-            NexusDB::table('posts')->where('topicid', $topic->id)->delete();
+            DB::table('posts')->where('topicid', $topic->id)->delete();
         }
 
-        NexusDB::table('topics')->where('forumid', $id)->delete();
-        NexusDB::table('forums')->where('id', $id)->delete();
-        NexusDB::table('forummods')->where('forumid', $id)->delete();
+        DB::table('topics')->where('forumid', $id)->delete();
+        DB::table('forums')->where('id', $id)->delete();
+        DB::table('forummods')->where('forumid', $id)->delete();
 
         $this->clearForumCache();
     }
@@ -29,14 +30,14 @@ class ForumRepository extends BaseRepository
     /** @param  array<string, mixed>  $data */
     public function updateForum(int $id, array $data): void
     {
-        NexusDB::table('forums')->where('id', $id)->update($data);
+        DB::table('forums')->where('id', $id)->update($data);
         $this->clearForumCache();
     }
 
     /** @param  array<string, mixed>  $data */
     public function createForum(array $data): int
     {
-        $id = (int) NexusDB::table('forums')->insertGetId($data);
+        $id = (int) DB::table('forums')->insertGetId($data);
         $this->clearForumCache();
 
         return $id;
@@ -47,7 +48,7 @@ class ForumRepository extends BaseRepository
      */
     public function replaceModerators(int $forumId, array $userIds, int $limit = 3): void
     {
-        NexusDB::table('forummods')->where('forumid', $forumId)->delete();
+        DB::table('forummods')->where('forumid', $forumId)->delete();
 
         $records = [];
         $max = min($limit, count($userIds));
@@ -55,7 +56,7 @@ class ForumRepository extends BaseRepository
             $records[] = ['forumid' => $forumId, 'userid' => $userIds[$i]];
         }
         if (! empty($records)) {
-            NexusDB::table('forummods')->insert($records);
+            DB::table('forummods')->insert($records);
         }
 
         $this->clearModeratorCache();
@@ -66,7 +67,7 @@ class ForumRepository extends BaseRepository
      */
     public function getOverforums(): array
     {
-        return NexusDB::table('overforums')
+        return DB::table('overforums')
             ->orderBy('sort')
             ->get(['id', 'name'])
             ->map(fn ($r) => (array) $r)
@@ -75,13 +76,13 @@ class ForumRepository extends BaseRepository
 
     public function getMaxForumSort(): int
     {
-        return (int) NexusDB::table('forums')->count();
+        return (int) DB::table('forums')->count();
     }
 
     /** @return  array<string, mixed>|null */
     public function getForumRow(int $id): ?array
     {
-        $row = (array) NexusDB::table('forums')->where('id', $id)->first();
+        $row = (array) DB::table('forums')->where('id', $id)->first();
 
         return empty($row) ? null : $row;
     }
@@ -89,7 +90,7 @@ class ForumRepository extends BaseRepository
     /** @return  array<int, array<string, mixed>> */
     public function getForumsWithOverforum(): array
     {
-        return NexusDB::table('forums')
+        return DB::table('forums')
             ->leftJoin('overforums', 'forums.forid', '=', 'overforums.id')
             ->orderBy('forums.sort')
             ->get(['forums.*', 'overforums.name AS of_name'])
@@ -99,33 +100,33 @@ class ForumRepository extends BaseRepository
 
     public function deleteOverforum(int $id): void
     {
-        NexusDB::table('overforums')->where('id', $id)->delete();
+        DB::table('overforums')->where('id', $id)->delete();
         $this->clearOverforumCache();
     }
 
     /** @param  array<string, mixed>  $data */
     public function updateOverforum(int $id, array $data): void
     {
-        NexusDB::table('overforums')->where('id', $id)->update($data);
+        DB::table('overforums')->where('id', $id)->update($data);
         $this->clearOverforumCache();
     }
 
     /** @param  array<string, mixed>  $data */
     public function createOverforum(array $data): void
     {
-        NexusDB::table('overforums')->insert($data);
+        DB::table('overforums')->insert($data);
         $this->clearOverforumCache();
     }
 
     public function getMaxOverforumSort(): int
     {
-        return (int) NexusDB::table('overforums')->count();
+        return (int) DB::table('overforums')->count();
     }
 
     /** @return  array<string, mixed>|null */
     public function getOverforumRow(int $id): ?array
     {
-        $row = (array) NexusDB::table('overforums')->where('id', $id)->first();
+        $row = (array) DB::table('overforums')->where('id', $id)->first();
 
         return empty($row) ? null : $row;
     }
@@ -143,7 +144,7 @@ class ForumRepository extends BaseRepository
      */
     public static function getOverforumsList(): array
     {
-        return NexusDB::table('overforums')
+        return DB::table('overforums')
             ->orderBy('sort')
             ->get()
             ->map(fn ($r) => (array) $r)
@@ -154,7 +155,7 @@ class ForumRepository extends BaseRepository
     public function getModeratorArray(): array
     {
         $array = [];
-        foreach (NexusDB::table('forummods')->orderBy('forumid')->get(['forumid', 'userid']) as $row) {
+        foreach (DB::table('forummods')->orderBy('forumid')->get(['forumid', 'userid']) as $row) {
             $row = (array) $row;
             $array[$row['forumid']][] = $row['userid'];
         }
@@ -187,7 +188,7 @@ class ForumRepository extends BaseRepository
 
     public function isModeratorOfTopic(int $topicId, int $userId): bool
     {
-        return (int) NexusDB::table('forummods')
+        return (int) DB::table('forummods')
             ->selectRaw('COUNT(forummods.userid) AS count')
             ->leftJoin('topics', 'forummods.forumid', '=', 'topics.forumid')
             ->where('topics.id', $topicId)
@@ -228,7 +229,7 @@ class ForumRepository extends BaseRepository
 
     public static function clearReadPosts(int $userId): void
     {
-        NexusDB::table('readposts')->where('userid', $userId)->delete();
+        DB::table('readposts')->where('userid', $userId)->delete();
     }
 
     public static function getLastPostId(): ?int
@@ -286,7 +287,7 @@ class ForumRepository extends BaseRepository
      */
     public static function getLastReadPosts(int $userId): ?array
     {
-        $rows = NexusDB::table('readposts')->where('userid', $userId)->get(['topicid', 'lastpostread']);
+        $rows = DB::table('readposts')->where('userid', $userId)->get(['topicid', 'lastpostread']);
 
         if ($rows->isEmpty()) {
             return null;
@@ -469,7 +470,7 @@ class ForumRepository extends BaseRepository
 
     public static function createPost(int $topicId, int $userId, string $body, string $date): int
     {
-        return (int) NexusDB::table('posts')->insertGetId([
+        return (int) DB::table('posts')->insertGetId([
             'topicid' => $topicId,
             'userid' => $userId,
             'added' => $date,
@@ -541,7 +542,7 @@ class ForumRepository extends BaseRepository
 
     public static function getReadPost(int $userId, int $topicId): ?\stdClass
     {
-        return NexusDB::table('readposts')
+        return DB::table('readposts')
             ->where('userid', $userId)
             ->where('topicid', $topicId)
             ->first();
@@ -549,7 +550,7 @@ class ForumRepository extends BaseRepository
 
     public static function insertReadPost(int $userId, int $topicId, int $postId): bool
     {
-        return (bool) NexusDB::table('readposts')->insert([
+        return (bool) DB::table('readposts')->insert([
             'userid' => $userId,
             'topicid' => $topicId,
             'lastpostread' => $postId,
@@ -558,7 +559,7 @@ class ForumRepository extends BaseRepository
 
     public static function updateReadPost(int $userId, int $topicId, int $postId): bool
     {
-        return (bool) NexusDB::table('readposts')
+        return (bool) DB::table('readposts')
             ->where('userid', $userId)
             ->where('topicid', $topicId)
             ->update(['lastpostread' => $postId]);
@@ -571,13 +572,13 @@ class ForumRepository extends BaseRepository
 
     public static function markPostRead(int $userId, int $topicId, int $postId, int $lastCatchup): bool
     {
-        $readPost = NexusDB::table('readposts')
+        $readPost = DB::table('readposts')
             ->where('userid', $userId)
             ->where('topicid', $topicId)
             ->first();
 
         if (! $readPost) {
-            return (bool) NexusDB::table('readposts')->insert([
+            return (bool) DB::table('readposts')->insert([
                 'userid' => $userId,
                 'topicid' => $topicId,
                 'lastpostread' => $postId,
@@ -585,7 +586,7 @@ class ForumRepository extends BaseRepository
         }
 
         if ($lastCatchup < $postId) {
-            return (bool) NexusDB::table('readposts')
+            return (bool) DB::table('readposts')
                 ->where('userid', $userId)
                 ->where('topicid', $topicId)
                 ->update(['lastpostread' => $postId]);
@@ -638,7 +639,7 @@ class ForumRepository extends BaseRepository
     {
         Topic::query()->where('id', $topicid)->delete();
         Post::query()->where('topicid', $topicid)->delete();
-        NexusDB::table('readposts')->where('topicid', $topicid)->delete();
+        DB::table('readposts')->where('topicid', $topicid)->delete();
         Forum::query()->where('id', $forumid)->decrement('topiccount');
         Forum::query()->where('id', $forumid)->decrement('postcount', $postCount);
 
@@ -736,7 +737,7 @@ class ForumRepository extends BaseRepository
     public static function searchForumPosts(string $keywords, int $minClass, int $offset, int $perPage): array
     {
         $term = '%'.$keywords.'%';
-        $query = NexusDB::table('posts')
+        $query = DB::table('posts')
             ->leftJoin('topics', 'posts.topicid', '=', 'topics.id')
             ->leftJoin('forums', 'topics.forumid', '=', 'forums.id')
             ->where('forums.minclassread', '<=', $minClass)
@@ -764,7 +765,7 @@ class ForumRepository extends BaseRepository
 
     public static function getForumTodayPostCount(int $forumid, string $todayDate): int
     {
-        return (int) NexusDB::table('posts')
+        return (int) DB::table('posts')
             ->leftJoin('topics', 'posts.topicid', '=', 'topics.id')
             ->where('posts.added', '>', $todayDate)
             ->where('topics.forumid', $forumid)

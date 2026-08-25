@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
-use Nexus\Database\NexusDB;
+use Illuminate\Support\Facades\DB;
 
 final class StyleRepository
 {
@@ -18,7 +18,7 @@ final class StyleRepository
     {
         if (self::$rows === null) {
             $rows = [];
-            foreach (NexusDB::table('stylesheets')->orderBy('id')->get() as $row) {
+            foreach (DB::table('stylesheets')->orderBy('id')->get() as $row) {
                 $row = (array) $row;
                 $rows[(int) $row['id']] = $row;
             }

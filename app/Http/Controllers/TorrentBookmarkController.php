@@ -9,7 +9,7 @@ use App\Support\SupportContext;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Nexus\Database\NexusDB;
+use Illuminate\Support\Facades\DB;
 
 class TorrentBookmarkController extends LegacyController
 {
@@ -34,14 +34,14 @@ class TorrentBookmarkController extends LegacyController
         }
 
         $userId = (int) $user['id'];
-        $bookmark = NexusDB::table('bookmarks')->where('torrentid', $torrentId)->where('userid', $userId)->first();
+        $bookmark = DB::table('bookmarks')->where('torrentid', $torrentId)->where('userid', $userId)->first();
 
         if ($bookmark) {
             $bookmarkId = (int) $bookmark->id;
-            NexusDB::table('bookmarks')->where('id', $bookmarkId)->delete();
+            DB::table('bookmarks')->where('id', $bookmarkId)->delete();
             $status = 'deleted';
         } else {
-            NexusDB::table('bookmarks')->insertGetId([
+            DB::table('bookmarks')->insertGetId([
                 'torrentid' => $torrentId,
                 'userid' => $userId,
             ]);
@@ -75,7 +75,7 @@ class TorrentBookmarkController extends LegacyController
             LegacyResponse::abort('Error', 'Invalid torrent id!');
         }
 
-        $existing = NexusDB::table('thanks')
+        $existing = DB::table('thanks')
             ->where('torrentid', $torrentid)
             ->where('userid', $userid)
             ->count();
@@ -83,7 +83,7 @@ class TorrentBookmarkController extends LegacyController
             LegacyResponse::abort('Error', 'You already said thanks!');
         }
 
-        NexusDB::table('thanks')->insert([
+        DB::table('thanks')->insert([
             'torrentid' => $torrentid,
             'userid' => $userid,
         ]);

@@ -17,6 +17,7 @@ use App\Support\UserDisplay;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Meilisearch\Exceptions\ApiException;
 use Nexus\Database\NexusDB;
 
@@ -27,7 +28,7 @@ final class TorrentAjaxRepository
      */
     public static function fileList(int $torrentId): Collection
     {
-        return NexusDB::table('files')
+        return DB::table('files')
             ->where('torrent', $torrentId)
             ->orderBy('id')
             ->get();
@@ -39,7 +40,7 @@ final class TorrentAjaxRepository
     public static function snatchList(int $torrentId): array
     {
         $torrentName = Torrent::query()->where('id', $torrentId)->value('name') ?? '';
-        $count = NexusDB::table('snatched')
+        $count = DB::table('snatched')
             ->where('finished', 'yes')
             ->where('torrentid', $torrentId)
             ->count();
@@ -52,7 +53,7 @@ final class TorrentAjaxRepository
         $offset = (int) $pager[3];
         $rpp = (int) $pager[4];
 
-        $snatchedRows = NexusDB::table('snatched')
+        $snatchedRows = DB::table('snatched')
             ->where('finished', 'yes')
             ->where('torrentid', $torrentId)
             ->orderByDesc('completedat')
@@ -96,7 +97,7 @@ final class TorrentAjaxRepository
             ];
         }
 
-        $rows = NexusDB::table('suggest')
+        $rows = DB::table('suggest')
             ->selectRaw('keywords AS suggest, COUNT(*) AS count')
             ->where('keywords', 'like', $searchstr.'%')
             ->groupBy('keywords')
@@ -149,7 +150,7 @@ final class TorrentAjaxRepository
         } else {
             $startedField = NexusDB::unixTimestampField('started');
             $lastActionField = NexusDB::unixTimestampField('last_action');
-            $peerRows = NexusDB::table('peers')
+            $peerRows = DB::table('peers')
                 ->where('torrent', $torrentId)
                 ->selectRaw("id, seeder, finishedat, downloadoffset, uploadoffset, ip, ipv4, ipv6, port, uploaded, downloaded, to_go, {$startedField} AS st, connectable, agent, peer_id, {$lastActionField} AS la, userid")
                 ->get()
@@ -238,7 +239,7 @@ final class TorrentAjaxRepository
         if (! empty($caseWhens) && SiteConfig::current()->seedBox->enabled()) {
             $caseSql = sprintf('case id %s end', implode(' ', array_values($caseWhens)));
             Logger::writeWithContext("[IS_SEED_BOX], caseSql: {$caseSql}, ids: ".implode(',', array_keys($caseWhens)), 'info', false);
-            NexusDB::table('peers')->whereIn('id', array_keys($caseWhens))->update(['is_seed_box' => NexusDB::raw($caseSql)]);
+            DB::table('peers')->whereIn('id', array_keys($caseWhens))->update(['is_seed_box' => DB::raw($caseSql)]);
         }
 
         $enablelocationTweak = SupportContext::getGlobal('enablelocation_tweak');
@@ -321,7 +322,7 @@ final class TorrentAjaxRepository
     {
         switch ($type) {
             case 'uploaded':
-                $query = NexusDB::table('torrents')
+                $query = DB::table('torrents')
                     ->leftJoin('categories', 'torrents.category', '=', 'categories.id')
                     ->where('torrents.owner', $targetUserId)
                     ->select([
@@ -339,7 +340,7 @@ final class TorrentAjaxRepository
                 return $query;
 
             case 'seeding':
-                return NexusDB::table('peers')
+                return DB::table('peers')
                     ->leftJoin('torrents', 'peers.torrent', '=', 'torrents.id')
                     ->leftJoin('categories', 'torrents.category', '=', 'categories.id')
                     ->leftJoin('snatched', 'torrents.id', '=', 'snatched.torrentid')
@@ -356,7 +357,7 @@ final class TorrentAjaxRepository
                     ->orderByDesc('peers.id');
 
             case 'leeching':
-                return NexusDB::table('peers')
+                return DB::table('peers')
                     ->leftJoin('torrents', 'peers.torrent', '=', 'torrents.id')
                     ->leftJoin('categories', 'torrents.category', '=', 'categories.id')
                     ->leftJoin('snatched', 'torrents.id', '=', 'snatched.torrentid')
@@ -373,7 +374,7 @@ final class TorrentAjaxRepository
                     ->orderByDesc('peers.id');
 
             case 'completed':
-                return NexusDB::table('torrents')
+                return DB::table('torrents')
                     ->leftJoin('snatched', 'torrents.id', '=', 'snatched.torrentid')
                     ->leftJoin('categories', 'torrents.category', '=', 'categories.id')
                     ->where('snatched.finished', 'yes')
@@ -389,7 +390,7 @@ final class TorrentAjaxRepository
                     ->orderByDesc('snatched.id');
 
             case 'incomplete':
-                return NexusDB::table('torrents')
+                return DB::table('torrents')
                     ->leftJoin('snatched', 'torrents.id', '=', 'snatched.torrentid')
                     ->leftJoin('categories', 'torrents.category', '=', 'categories.id')
                     ->where('snatched.finished', 'no')

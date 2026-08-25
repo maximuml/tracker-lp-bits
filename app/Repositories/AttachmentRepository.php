@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Repositories;
 
 use App\Models\Attachment;
-use Nexus\Database\NexusDB;
+use Illuminate\Support\Facades\DB;
 
 final class AttachmentRepository
 {
@@ -41,7 +41,7 @@ final class AttachmentRepository
     {
         $now = date('Y-m-d H:i:s', time() - 86400);
 
-        return (int) NexusDB::table('attachments')
+        return (int) DB::table('attachments')
             ->where('userid', $userId)
             ->where('added', '>', $now)
             ->count();

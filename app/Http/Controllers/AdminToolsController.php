@@ -13,8 +13,8 @@ use App\Support\Validators;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
-use Nexus\Database\NexusDB;
 
 class AdminToolsController extends LegacyController
 {
@@ -125,7 +125,7 @@ class AdminToolsController extends LegacyController
         $delid = (int) (SupportContext::getQuery('delid') ?? 0);
         if ($sure === 'yes' && $delid > 0) {
             if (Validators::isId($delid)) {
-                NexusDB::table('locations')->where('id', $delid)->delete();
+                DB::table('locations')->where('id', $delid)->delete();
             }
 
             return $this->legacyAbortResponse('Success', 'Location successfully removed, click <a class=altlink href="'.$actionUrl.'">here</a> to go back.', false);
@@ -154,7 +154,7 @@ class AdminToolsController extends LegacyController
             } elseif (ip2long($endIp) <= ip2long($startIp)) {
                 $error = 'The end IP address should be larger than the start one, or equal for single IP check!';
             } elseif (Validators::isId($id)) {
-                NexusDB::table('locations')->where('id', $id)->update([
+                DB::table('locations')->where('id', $id)->update([
                     'name' => $name,
                     'flagpic' => $flagpic,
                     'location_main' => $locationMain,
@@ -173,7 +173,7 @@ class AdminToolsController extends LegacyController
 
         $editid = (int) (SupportContext::getQuery('editid') ?? 0);
         if ($editid > 0) {
-            $editRow = (array) NexusDB::table('locations')->where('id', $editid)->first();
+            $editRow = (array) DB::table('locations')->where('id', $editid)->first();
             if (empty($editRow)) {
                 $error = 'Location not found.';
             } else {
@@ -204,7 +204,7 @@ class AdminToolsController extends LegacyController
             } elseif (ip2long($endIp) <= ip2long($startIp)) {
                 $error = 'The end IP address should be larger than the start one, or equal for single IP check!';
             } else {
-                NexusDB::table('locations')->insert([
+                DB::table('locations')->insert([
                     'name' => $name,
                     'flagpic' => $flagpic,
                     'location_main' => $locationMain,
@@ -232,7 +232,7 @@ class AdminToolsController extends LegacyController
             }
         }
 
-        $baseQuery = NexusDB::table('locations')
+        $baseQuery = DB::table('locations')
             ->when($hasRangeFilter, function ($query) use ($rangeStartIp, $rangeEndIp) {
                 $start = (int) ip2long($rangeStartIp);
                 $end = (int) ip2long($rangeEndIp);

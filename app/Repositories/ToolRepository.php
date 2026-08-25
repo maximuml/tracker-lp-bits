@@ -17,6 +17,7 @@ use App\Support\UserDisplay;
 use Carbon\Carbon;
 use Carbon\CarbonInterface;
 use Illuminate\Filesystem\FilesystemAdapter;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -572,8 +573,8 @@ class ToolRepository extends BaseRepository
         $hitAndRunTableExists = NexusDB::hasTable($hitAndRunTable);
         $idsField = NexusDB::groupConcatField('id');
         while (true) {
-            $snatchRes = NexusDB::table('snatched')
-                ->select('userid', 'torrentid', NexusDB::raw("$idsField as ids"))
+            $snatchRes = DB::table('snatched')
+                ->select('userid', 'torrentid', DB::raw("$idsField as ids"))
                 ->groupBy('userid', 'torrentid')
                 ->havingRaw('count(*) > 1')
                 ->limit($size)
@@ -591,16 +592,16 @@ class ToolRepository extends BaseRepository
                 $remainId = array_pop($idArr);
                 Logger::writeWithContext((string) ("[DELETE_DUPLICATED_SNATCH], torrent: {$torrentId}, user: {$userId}, snatchIdStr: ".implode(',', $idArr)), (string) 'info', (bool) false);
                 if (! empty($idArr)) {
-                    NexusDB::table('snatched')->whereIn('id', $idArr)->delete();
+                    DB::table('snatched')->whereIn('id', $idArr)->delete();
                 }
                 if ($claimTableExists) {
-                    NexusDB::table($claimTable)->where('torrent_id', $torrentId)->where('uid', $userId)->update(['snatched_id' => $remainId]);
+                    DB::table($claimTable)->where('torrent_id', $torrentId)->where('uid', $userId)->update(['snatched_id' => $remainId]);
                 }
                 if ($hitAndRunTableExists) {
-                    NexusDB::table($hitAndRunTable)->where('torrent_id', $torrentId)->where('uid', $userId)->update(['snatched_id' => $remainId]);
+                    DB::table($hitAndRunTable)->where('torrent_id', $torrentId)->where('uid', $userId)->update(['snatched_id' => $remainId]);
                 }
                 if ($stickyPromotionExists) {
-                    NexusDB::table($stickyPromotionParticipatorsTable)->where('torrent_id', $torrentId)->where('uid', $userId)->update(['snatched_id' => $remainId]);
+                    DB::table($stickyPromotionParticipatorsTable)->where('torrent_id', $torrentId)->where('uid', $userId)->update(['snatched_id' => $remainId]);
                 }
             }
         }
@@ -612,8 +613,8 @@ class ToolRepository extends BaseRepository
         $size = 2000;
         $idsField = NexusDB::groupConcatField('id');
         while (true) {
-            $results = NexusDB::table('peers')
-                ->select('torrent', 'userid', NexusDB::raw("$idsField as ids"))
+            $results = DB::table('peers')
+                ->select('torrent', 'userid', DB::raw("$idsField as ids"))
                 ->groupBy('torrent', 'peer_id', 'userid')
                 ->havingRaw('count(*) > 1')
                 ->limit($size)
@@ -632,7 +633,7 @@ class ToolRepository extends BaseRepository
                 $remainId = array_pop($idArr);
                 Logger::writeWithContext((string) ("[DELETE_DUPLICATED_PEERS], torrent: {$torrentId}, user: {$userId}, snatchIdStr: ".implode(',', $idArr)), (string) 'info', (bool) false);
                 if (! empty($idArr)) {
-                    NexusDB::table('peers')->whereIn('id', $idArr)->delete();
+                    DB::table('peers')->whereIn('id', $idArr)->delete();
                 }
             }
         }

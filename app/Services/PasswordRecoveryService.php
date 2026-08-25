@@ -14,6 +14,7 @@ use App\Support\PasswordHasher;
 use App\Support\Strings;
 use App\Support\Token;
 use App\Support\Url;
+use Illuminate\Support\Facades\DB;
 use Nexus\Database\NexusDB;
 
 /**
@@ -53,7 +54,7 @@ class PasswordRecoveryService
             throw new AuthenticationException($this->msg($langRecover, 'std_invalid_email_address', 'Invalid email address!'));
         }
 
-        $user = (array) NexusDB::table('users')
+        $user = (array) DB::table('users')
             ->whereRaw('BINARY email = ?', [$email])
             ->first();
 

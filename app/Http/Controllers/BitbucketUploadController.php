@@ -14,7 +14,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
-use Nexus\Database\NexusDB;
+use Illuminate\Support\Facades\DB;
 
 class BitbucketUploadController extends Controller
 {
@@ -163,7 +163,7 @@ class BitbucketUploadController extends Controller
         $url = str_replace(' ', '%20', htmlspecialchars(Http::protocolPrefix(Url::isSecure())."{$baseUrl}/bitbucket/{$filename}"));
         $public = $request->input('public') === 'yes' ? '1' : '0';
 
-        NexusDB::table('bitbucket')->insert([
+        DB::table('bitbucket')->insert([
             'owner' => $currentUser['id'],
             'name' => $filename,
             'added' => date('Y-m-d H:i:s'),

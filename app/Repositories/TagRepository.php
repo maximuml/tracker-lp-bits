@@ -11,7 +11,7 @@ use App\Support\Locale;
 use App\Support\Logger;
 use App\Support\TorrentTags;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
-use Nexus\Database\NexusDB;
+use Illuminate\Support\Facades\DB;
 
 class TagRepository extends BaseRepository
 {
@@ -184,7 +184,7 @@ class TagRepository extends BaseRepository
             $page++;
         }
         if (! empty($rows)) {
-            NexusDB::table('torrent_tags')->upsert($rows, ['torrent_id', 'tag_id'], ['updated_at']);
+            DB::table('torrent_tags')->upsert($rows, ['torrent_id', 'tag_id'], ['updated_at']);
         }
         Logger::writeWithContext((string) '[MIGRATE_TORRENT_TAG] done!', (string) 'info', (bool) false);
 

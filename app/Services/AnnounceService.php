@@ -36,6 +36,7 @@ use App\Support\UserDisplay;
 use App\Utils\MsgAlert;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Nexus\Database\NexusDB;
 use Nexus\Nexus;
 
@@ -314,14 +315,14 @@ final class AnnounceService
 
         $torrent = Cache::remember("torrent_hash_{$this->infoHash}_content", 350, function () {
             $tsField = NexusDB::unixTimestampField('added');
-            $torrent = NexusDB::table('torrents')
+            $torrent = DB::table('torrents')
                 ->leftJoin('categories', 'torrents.category', '=', 'categories.id')
                 ->select([
                     'torrents.id', 'torrents.size', 'torrents.owner', 'torrents.sp_state',
                     'torrents.seeders', 'torrents.leechers', 'torrents.times_completed',
                     'torrents.banned', 'torrents.hr', 'torrents.approval_status', 'torrents.price',
                     'torrents.visible', 'torrents.last_action', 'categories.mode',
-                    NexusDB::raw("{$tsField} AS ts"),
+                    DB::raw("{$tsField} AS ts"),
                 ])
                 ->where('torrents.info_hash', $this->infoHash)
                 ->first();
@@ -457,7 +458,7 @@ final class AnnounceService
         if (! empty($this->torrentUpdate)) {
             $this->torrentUpdate['visible'] = 'yes';
             $this->torrentUpdate['last_action'] = $this->dt;
-            NexusDB::table('torrents')->where('id', $this->torrentId)->update($this->torrentUpdate);
+            DB::table('torrents')->where('id', $this->torrentId)->update($this->torrentUpdate);
             Logger::writeWithContext((string) ('[ANNOUNCE_UPDATE_TORRENT], '.Json::encode($this->torrentUpdate)), (string) 'info', (bool) false);
         }
 
@@ -473,10 +474,10 @@ final class AnnounceService
         $this->userUpdate['last_announce_at'] = $this->dt;
 
         if ($this->uploadedIncrementForUser > 0) {
-            $this->userUpdate['uploaded'] = NexusDB::raw('uploaded + '.$this->uploadedIncrementForUser);
+            $this->userUpdate['uploaded'] = DB::raw('uploaded + '.$this->uploadedIncrementForUser);
         }
         if ($this->downloadedIncrementForUser > 0) {
-            $this->userUpdate['downloaded'] = NexusDB::raw('downloaded + '.$this->downloadedIncrementForUser);
+            $this->userUpdate['downloaded'] = DB::raw('downloaded + '.$this->downloadedIncrementForUser);
         }
 
         if ((int) $this->user['class'] === (int) User::CLASS_VIP) {

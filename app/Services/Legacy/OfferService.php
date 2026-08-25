@@ -15,20 +15,16 @@ use App\Support\Locale;
 use App\Support\Log;
 use App\Support\SupportContext;
 use App\Support\Validators;
-use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 
 /**
- * Temporary bridge for the legacy offers page.
+ * Handles offer action mutations (create, allow, finish, delete, edit).
+ * Page rendering is handled by OfferPageService.
  */
 final class OfferService
 {
-    /**
-     * @return array<string, mixed>|RedirectResponse
-     */
-    public function legacy(Request $request): array|RedirectResponse
+    public function handleActionPublic(Request $request): ?RedirectResponse
     {
         $action = $this->action($request);
 
@@ -48,12 +44,7 @@ final class OfferService
             return $this->handleEdit($request);
         }
 
-        $result = $this->renderOffers();
-        if ($result instanceof RedirectResponse) {
-            return $result;
-        }
-
-        return ['content' => $result->getContent()];
+        return null;
     }
 
     private function action(Request $request): string
@@ -404,37 +395,5 @@ final class OfferService
         ]);
 
         return redirect("/offers.php?id={$id}&off_details=1");
-    }
-
-    private function renderOffers(): Response|RedirectResponse
-    {
-        $path = __DIR__.'/offers_content.php';
-
-        if (! file_exists($path)) {
-            return response('Legacy content missing: offers', 500);
-        }
-
-        ob_start();
-        try {
-            extract(SupportContext::getGlobalsForView(), EXTR_SKIP);
-            include $path;
-        } catch (HttpResponseException $e) {
-            ob_get_clean();
-
-            throw $e;
-        }
-
-        $content = (string) ob_get_clean();
-
-        foreach (headers_list() as $header) {
-            if (stripos($header, 'Location:') === 0) {
-                $url = trim(substr($header, 9));
-                header_remove('Location');
-
-                return redirect($url);
-            }
-        }
-
-        return response($content);
     }
 }

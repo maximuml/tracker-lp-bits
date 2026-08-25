@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Repositories\OfferRepository;
 use App\Services\Legacy\OfferService;
+use App\Services\OfferPageService;
 use App\Support\SupportContext;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -15,10 +16,13 @@ class OfferController extends LegacyController
 
     private OfferService $offerService;
 
-    public function __construct(OfferRepository $repository, OfferService $offerService)
+    private OfferPageService $pageService;
+
+    public function __construct(OfferRepository $repository, OfferService $offerService, OfferPageService $pageService)
     {
         $this->repository = $repository;
         $this->offerService = $offerService;
+        $this->pageService = $pageService;
     }
 
     /**
@@ -40,11 +44,13 @@ class OfferController extends LegacyController
             return redirect('/offers.php'.($qs ? '?'.$qs : ''));
         }
 
-        $result = $this->offerService->legacy($request);
-        if ($result instanceof RedirectResponse) {
-            return $result;
+        $actionRedirect = $this->offerService->handleActionPublic($request);
+        if ($actionRedirect instanceof RedirectResponse) {
+            return $actionRedirect;
         }
 
-        return $this->legacyPage($request, 'offers', true, $result);
+        $data = $this->pageService->build($request);
+
+        return $this->legacyPage($request, 'offers', true, $data);
     }
 }

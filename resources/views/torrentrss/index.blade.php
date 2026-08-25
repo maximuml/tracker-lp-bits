@@ -1,1 +1,0 @@
-@include('torrentrss._torrentrss')

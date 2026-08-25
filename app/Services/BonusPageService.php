@@ -300,7 +300,7 @@ final class BonusPageService
             if (! Permission::can(PermissionEnum::SEND_INVITE)) {
                 $requireClass = SiteConfig::current()->authority->permission($sendInvitePermission->value);
 
-                return '<td class="rowfollow" align="center"><input type="submit" name="submit" value="'.Locale::trans('invite.send_deny_reasons.no_permission', ['class' => User::getClassText($requireClass)], null).'" disabled="disabled" /></td>';
+                return '<td class="rowfollow" align="center"><input type="submit" name="submit" value="'.Locale::trans('invite.send_deny_reasons.no_permission', ['class' => User::getClassText($requireClass ?? 0)], null).'" disabled="disabled" /></td>';
             }
 
             return '<td class="rowfollow" align="center"><input type="submit" name="submit" value="'.($lang['submit_exchange'] ?? '').'" /></td>';

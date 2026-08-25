@@ -356,4 +356,3 @@ final class BonusService
         return $this->redirect($baseUrl, 'cancel_hr');
     }
 }
-

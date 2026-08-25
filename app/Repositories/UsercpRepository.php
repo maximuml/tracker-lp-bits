@@ -94,7 +94,9 @@ final class UsercpRepository extends BaseRepository
 
     public static function deleteChallenge(string $username): bool
     {
-        return (bool) NexusDB::cache_del(Token::challengeKey($username));
+        Cache::forgetWithLocales(Token::challengeKey($username));
+
+        return true;
     }
 
     /**

@@ -22,7 +22,6 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Nexus\Database\NexusDB;
 
 /**
  * Handles message action mutations (takeMessage, deletemessage, moveordel,
@@ -153,7 +152,7 @@ final class MessageService
 
         $sender->update(['last_pm' => date('Y-m-d H:i:s')]);
         Cache::clearUser($sender->id, $sender->passkey ?? '');
-        NexusDB::cache_del('user_'.$sender->id.'_outbox_count');
+        Cache::forgetWithLocales('user_'.$sender->id.'_outbox_count');
 
         $siteConfig = SiteConfig::current();
         if ($siteConfig->smtp->emailNotify() && $siteConfig->smtp->type() !== 'none') {
@@ -232,7 +231,7 @@ final class MessageService
                 $msg->update(['saved' => 'no']);
             }
 
-            NexusDB::cache_del('user_'.$sender->id.'_outbox_count');
+            Cache::forgetWithLocales('user_'.$sender->id.'_outbox_count');
         } else {
             LegacyResponse::abort($lang['std_error'] ?? 'Error', $lang['std_unknown_pm_type'] ?? 'Unknown PM type.');
         }
@@ -375,7 +374,7 @@ final class MessageService
                 LegacyResponse::abort((string) ($lang['std_error'] ?? 'Error'), (string) ($lang['std_cannot_move_messages'] ?? 'Cannot move messages.'));
             }
             Cache::clearInboxCount($userId);
-            NexusDB::cache_del('user_'.$userId.'_outbox_count');
+            Cache::forgetWithLocales('user_'.$userId.'_outbox_count');
 
             return redirect("/messages.php?action=viewmailbox&box={$pmBox}");
         }
@@ -391,7 +390,7 @@ final class MessageService
                 $deletedCount = MessageRepository::deleteMultipleMessages($pmMessages, $userId);
             }
             Cache::clearInboxCount($userId);
-            NexusDB::cache_del('user_'.$userId.'_outbox_count');
+            Cache::forgetWithLocales('user_'.$userId.'_outbox_count');
             if ($deletedCount == 0) {
                 $lang = (array) (SupportContext::getGlobal('lang_messages') ?? []);
                 LegacyResponse::abort((string) ($lang['std_error'] ?? 'Error'), (string) ($lang['std_cannot_delete_messages'] ?? 'Cannot delete messages.'));
@@ -468,7 +467,7 @@ final class MessageService
         assert($message !== null);
 
         Cache::clearInboxCount($userId);
-        NexusDB::cache_del('user_'.$userId.'_outbox_count');
+        Cache::forgetWithLocales('user_'.$userId.'_outbox_count');
 
         return redirect('/messages.php?action=viewmailbox&id='.(int) ($message['location'] ?? 0));
     }

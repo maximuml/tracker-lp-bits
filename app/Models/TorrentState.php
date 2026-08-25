@@ -12,6 +12,7 @@
 namespace App\Models;
 
 use App\Models\Traits\NexusActivityLogTrait;
+use App\Support\Cache as AppCache;
 use App\Support\Events;
 use App\Support\Logger;
 use Carbon\Carbon;
@@ -19,7 +20,6 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Validation\ValidationException;
-use Nexus\Database\NexusDB;
 
 class TorrentState extends NexusModel
 {
@@ -135,7 +135,7 @@ class TorrentState extends NexusModel
     public static function flushCache(): void
     {
         Logger::writeWithContext((string) ('cache_del: '.Setting::TORRENT_GLOBAL_STATE_CACHE_KEY), (string) 'info', (bool) false);
-        NexusDB::cache_del(Setting::TORRENT_GLOBAL_STATE_CACHE_KEY);
+        AppCache::forgetWithLocales(Setting::TORRENT_GLOBAL_STATE_CACHE_KEY);
         Logger::writeWithContext((string) 'publish_model_event: global_promotion_state_updated', (string) 'info', (bool) false);
         Events::publishModel('global_promotion_state_updated', 0, '');
     }

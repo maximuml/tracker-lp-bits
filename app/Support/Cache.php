@@ -8,6 +8,7 @@ use App\Repositories\SearchBoxRepository;
 use App\Repositories\TorrentRepository;
 use App\Repositories\UserRepository;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Cache as CacheFacade;
 use Nexus\Database\NexusDB;
 
 /**
@@ -196,16 +197,16 @@ final class Cache
     public static function clearUser(int|string $uid, string $passkey = ''): void
     {
         Logger::writeWithContext("clear_user_cache, uid: $uid, passkey: $passkey");
-        NexusDB::cache_del("user_{$uid}_content");
-        NexusDB::cache_del("user_{$uid}_roles");
-        NexusDB::cache_del("announce_user_passkey_$uid");
-        NexusDB::cache_del(Setting::DIRECT_PERMISSION_CACHE_KEY_PREFIX.$uid);
-        NexusDB::cache_del("user_role_ids:$uid");
-        NexusDB::cache_del("direct_permissions:$uid");
+        self::forgetWithLocales("user_{$uid}_content");
+        self::forgetWithLocales("user_{$uid}_roles");
+        self::forgetWithLocales("announce_user_passkey_$uid");
+        self::forgetWithLocales(Setting::DIRECT_PERMISSION_CACHE_KEY_PREFIX.$uid);
+        self::forgetWithLocales("user_role_ids:$uid");
+        self::forgetWithLocales("direct_permissions:$uid");
 
         if ($passkey) {
-            NexusDB::cache_del('user_passkey_'.$passkey.'_content');
-            NexusDB::cache_del('user_passkey_'.$passkey.'_rss');
+            self::forgetWithLocales('user_passkey_'.$passkey.'_content');
+            self::forgetWithLocales('user_passkey_'.$passkey.'_rss');
         }
 
         $userInfo = app(UserRepository::class)->findForCacheClear($uid);
@@ -217,9 +218,9 @@ final class Cache
     public static function clearSettings(): void
     {
         Logger::writeWithContext('clear_setting_cache');
-        NexusDB::cache_del('nexus_settings_in_laravel');
-        NexusDB::cache_del('nexus_settings_in_nexus');
-        NexusDB::cache_del('setting_protected_forum');
+        self::forgetWithLocales('nexus_settings_in_laravel');
+        self::forgetWithLocales('nexus_settings_in_nexus');
+        self::forgetWithLocales('setting_protected_forum');
         $channel = Env::get('CHANNEL_NAME_SETTING');
         if (! empty($channel)) {
             NexusDB::redis()->publish($channel, 'update');
@@ -229,9 +230,9 @@ final class Cache
     public static function clearCategory(): void
     {
         Logger::writeWithContext('clear_category_cache');
-        NexusDB::cache_del('category_content');
+        self::forgetWithLocales('category_content');
         foreach (SearchBoxRepository::getOrderedIds() as $id) {
-            NexusDB::cache_del("category_list_mode_{$id}");
+            self::forgetWithLocales("category_list_mode_{$id}");
         }
     }
 
@@ -239,9 +240,9 @@ final class Cache
     {
         Logger::writeWithContext("clear_taxonomy_cache: $table");
         foreach (SearchBoxRepository::getOrderedIds() as $id) {
-            NexusDB::cache_del("{$table}_list_mode_{$id}");
+            self::forgetWithLocales("{$table}_list_mode_{$id}");
         }
-        NexusDB::cache_del("{$table}_list_mode_0");
+        self::forgetWithLocales("{$table}_list_mode_0");
     }
 
     public static function clearStaffMessage(): void
@@ -253,13 +254,13 @@ final class Cache
     public static function clearSearchBox(): void
     {
         Logger::writeWithContext('clear_search_box_cache');
-        NexusDB::cache_del('search_box_content');
+        self::forgetWithLocales('search_box_content');
     }
 
     public static function clearIcon(): void
     {
         Logger::writeWithContext('clear_icon_cache');
-        NexusDB::cache_del('category_icon_content');
+        self::forgetWithLocales('category_icon_content');
     }
 
     /**
@@ -269,8 +270,8 @@ final class Cache
     {
         Logger::writeWithContext('clear_inbox_count_cache');
         foreach (Arr::wrap($uid) as $id) {
-            NexusDB::cache_del('user_'.$id.'_inbox_count');
-            NexusDB::cache_del('user_'.$id.'_unread_message_count');
+            self::forgetWithLocales('user_'.$id.'_inbox_count');
+            self::forgetWithLocales('user_'.$id.'_unread_message_count');
         }
     }
 
@@ -280,15 +281,30 @@ final class Cache
         $allowCacheKey = Env::get('CACHE_KEY_AGENT_ALLOW', 'all_agent_allows');
         $denyCacheKey = Env::get('CACHE_KEY_AGENT_DENY', 'all_agent_denies');
         foreach (['', ':php', ':go'] as $suffix) {
-            NexusDB::cache_del($allowCacheKey.$suffix);
-            NexusDB::cache_del($denyCacheKey.$suffix);
+            self::forgetWithLocales($allowCacheKey.$suffix);
+            self::forgetWithLocales($denyCacheKey.$suffix);
         }
     }
 
     public static function clearTorrent(string $infoHash): void
     {
         Logger::writeWithContext('clear_torrent_cache');
-        NexusDB::cache_del('torrent_hash_'.$infoHash.'_content');
-        NexusDB::cache_del("torrent_not_exists:$infoHash");
+        self::forgetWithLocales('torrent_hash_'.$infoHash.'_content');
+        self::forgetWithLocales("torrent_not_exists:$infoHash");
+    }
+
+    /**
+     * Forget a cache key and all its locale-prefixed variants.
+     *
+     * Replicates the Laravel-context behaviour of NexusDB::cache_del(),
+     * which deletes both the bare key and every `{lang}_{key}` variant
+     * so that per-language cached pages are invalidated together.
+     */
+    public static function forgetWithLocales(string $key): void
+    {
+        CacheFacade::forget($key);
+        foreach (Locale::available() as $lf) {
+            CacheFacade::forget($lf.'_'.$key);
+        }
     }
 }

@@ -16,7 +16,6 @@ use App\Support\Token;
 use App\Support\Url;
 use Illuminate\Support\Facades\Cache as CacheFacade;
 use Illuminate\Support\Facades\DB;
-use Nexus\Database\NexusDB;
 
 /**
  * Handles the legacy recover.php password reset flow.
@@ -110,7 +109,7 @@ class PasswordRecoveryService
             throw new AuthenticationException($this->msg($langRecover, 'std_unable_updating_user_data', 'The reset link is invalid.'));
         }
 
-        NexusDB::cache_del("recover:$md5");
+        Cache::forgetWithLocales("recover:$md5");
 
         $newPassword = $this->generateRandomPassword();
         $newSecret = Token::randomHex();

@@ -23,9 +23,9 @@
 namespace App\Models;
 
 use App\Models\Traits\NexusActivityLogTrait;
+use App\Support\Cache as AppCache;
 use App\Support\Url;
 use Illuminate\Support\Facades\Cache;
-use Nexus\Database\NexusDB;
 use Ramsey\Uuid;
 
 class OauthProvider extends NexusModel
@@ -55,7 +55,7 @@ class OauthProvider extends NexusModel
             $model->uuid = self::getNewUuid();
         });
         static::created(function (OauthProvider $model) {
-            NexusDB::cache_del(self::NEW_UUID_CACHE_KEY);
+            AppCache::forgetWithLocales(self::NEW_UUID_CACHE_KEY);
         });
     }
 

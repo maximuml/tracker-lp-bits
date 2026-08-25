@@ -22,6 +22,7 @@ use App\Services\Announce\RateLimiter;
 use App\Services\Announce\ResponseBuilder;
 use App\Services\Announce\TrafficAccountant;
 use App\Services\Announce\TrafficResult;
+use App\Support\Cache as AppCache;
 use App\Support\Config\SiteConfig;
 use App\Support\Hooks;
 use App\Support\Json;
@@ -298,14 +299,14 @@ final class AnnounceService
         if ($clicheckRes) {
             if ($this->user['showclienterror'] === 'no') {
                 User::query()->where('id', $this->userId)->update(['showclienterror' => 'yes']);
-                NexusDB::cache_del("user_passkey_{$this->params['passkey']}_content");
+                AppCache::forgetWithLocales("user_passkey_{$this->params['passkey']}_content");
             }
             throw TrackerException::failure($clicheckRes);
         }
 
         if ($this->user['showclienterror'] === 'yes') {
             $this->userUpdate['showclienterror'] = 'no';
-            NexusDB::cache_del("user_passkey_{$this->params['passkey']}_content");
+            AppCache::forgetWithLocales("user_passkey_{$this->params['passkey']}_content");
         }
     }
 

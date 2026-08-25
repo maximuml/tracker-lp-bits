@@ -16,6 +16,7 @@ namespace App\Models;
 
 use App\Enums\HitAndRunMode;
 use App\Enums\ModelEventEnum;
+use App\Support\Cache;
 use App\Support\Config\SiteConfig;
 use App\Support\Events;
 use App\Support\Format;
@@ -26,7 +27,6 @@ use App\Support\Settings;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Nexus\Database\NexusDB;
 
 /**
  * @property-read Torrent $torrent
@@ -99,7 +99,7 @@ class HitAndRun extends NexusModel
 
     public static function clearCache(HitAndRun $hitAndRun, string $event = ModelEventEnum::HIT_AND_RUN_UPDATED): void
     {
-        NexusDB::cache_del(self::getCacheKey($hitAndRun->uid, $hitAndRun->torrent_id));
+        Cache::forgetWithLocales(self::getCacheKey($hitAndRun->uid, $hitAndRun->torrent_id));
         Events::fire($event, $hitAndRun, null);
         Logger::writeWithContext((string) sprintf('userId: %s, torrentId: %s hit and run cache cleared, and trigger event: %s', $hitAndRun->uid, $hitAndRun->torrent_id, $event), (string) 'info', (bool) false);
     }

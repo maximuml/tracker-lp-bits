@@ -5,11 +5,11 @@ namespace App\Repositories;
 use App\Models\Faq;
 use App\Models\Language;
 use App\Models\User;
+use App\Support\Cache;
 use App\Support\Email;
 use App\Support\Pagination;
 use App\Support\Settings;
 use Illuminate\Support\Facades\DB;
-use Nexus\Database\NexusDB;
 
 final class InfoRepository
 {
@@ -283,20 +283,20 @@ final class InfoRepository
         foreach ($order as $id => $position) {
             DB::table('faq')->where('id', (int) $id)->update(['order' => (int) $position]);
         }
-        NexusDB::cache_del('faq');
+        Cache::forgetWithLocales('faq');
     }
 
     /** @param  array<string, mixed>  $data */
     public static function updateFaq(int $id, array $data): void
     {
         DB::table('faq')->where('id', $id)->update($data);
-        NexusDB::cache_del('faq');
+        Cache::forgetWithLocales('faq');
     }
 
     public static function deleteFaq(int $id): void
     {
         DB::table('faq')->where('id', $id)->delete();
-        NexusDB::cache_del('faq');
+        Cache::forgetWithLocales('faq');
     }
 
     /**
@@ -349,6 +349,6 @@ final class InfoRepository
     public static function insertFaq(array $data): void
     {
         DB::table('faq')->insert($data);
-        NexusDB::cache_del('faq');
+        Cache::forgetWithLocales('faq');
     }
 }

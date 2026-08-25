@@ -26,7 +26,6 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
-use Nexus\Database\NexusDB;
 
 class StaffModerationController extends LegacyController
 {
@@ -376,7 +375,7 @@ class StaffModerationController extends LegacyController
                 'text' => $text,
                 'lang_id' => $language,
             ]);
-            NexusDB::cache_del('rules');
+            Cache::forgetWithLocales('rules');
 
             return redirect('modrules.php');
         }
@@ -391,7 +390,7 @@ class StaffModerationController extends LegacyController
                 'text' => $text,
                 'lang_id' => $language,
             ]);
-            NexusDB::cache_del('rules');
+            Cache::forgetWithLocales('rules');
 
             return redirect('modrules.php');
         }
@@ -403,7 +402,7 @@ class StaffModerationController extends LegacyController
                 return $this->legacyAbortResponse('Delete Rule', 'You are about to delete a rule. Click <a class=altlink href=?act=del&id='.$id.'&sure=1>here</a> if you are sure.', false);
             }
             DB::table('rules')->where('id', $id)->delete();
-            NexusDB::cache_del('rules');
+            Cache::forgetWithLocales('rules');
 
             return redirect('modrules.php');
         }

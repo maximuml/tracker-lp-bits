@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Models\Invite;
 use App\Repositories\ToolRepository;
+use App\Support\Cache as AppCache;
 use App\Support\Logger;
 use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
@@ -12,7 +13,6 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Cache;
-use Nexus\Database\NexusDB;
 
 class GenerateTemporaryInvite implements ShouldQueue
 {
@@ -84,7 +84,7 @@ class GenerateTemporaryInvite implements ShouldQueue
                 Logger::writeWithContext((string) ("{$logPrefix}, fail add {$this->count} temporary invite ({$this->days} days) to {$uid}: ".$exception->getMessage()), (string) 'error', (bool) false);
             }
         }
-        NexusDB::cache_del($this->idRedisKey);
+        AppCache::forgetWithLocales($this->idRedisKey);
         Logger::writeWithContext((string) ("{$logPrefix}, handle done, cost time: ".(microtime(true) - $beginTimestamp).' seconds.'), (string) 'info', (bool) false);
     }
 

@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Models\Passkey;
 use App\Support\AuthCookie;
+use App\Support\Cache as AppCache;
 use App\Support\Config\SiteConfig;
 use App\Support\Locale;
 use App\Support\Network;
@@ -11,7 +12,6 @@ use App\Support\Time;
 use Exception;
 use Illuminate\Support\Facades\Cache;
 use lbuchs\WebAuthn\WebAuthn;
-use Nexus\Database\NexusDB;
 use Nexus\Nexus;
 use RuntimeException;
 
@@ -45,7 +45,7 @@ class UserPasskeyRepository extends BaseRepository
         if ($challenge == null) {
             throw new RuntimeException(Locale::trans('passkey.passkey_timeout', [], null));
         }
-        NexusDB::cache_del("passkey_challenge_{$challengeId}");
+        AppCache::forgetWithLocales("passkey_challenge_{$challengeId}");
 
         return $challenge;
     }

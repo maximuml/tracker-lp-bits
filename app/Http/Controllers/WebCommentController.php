@@ -10,6 +10,7 @@ use App\Models\Torrent;
 use App\Models\User;
 use App\Repositories\CommentRepository;
 use App\Support\Bonus;
+use App\Support\Cache;
 use App\Support\Config\SiteConfig;
 use App\Support\Http;
 use App\Support\Locale;
@@ -21,7 +22,6 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
-use Nexus\Database\NexusDB;
 
 class WebCommentController extends Controller
 {
@@ -283,7 +283,7 @@ class WebCommentController extends Controller
 
     private function deleteCache(string $type, int $parentId): void
     {
-        NexusDB::cache_del($type.'_'.$parentId.'_last_comment_content');
+        Cache::forgetWithLocales($type.'_'.$parentId.'_last_comment_content');
     }
 
     private function applyBonus(string $sign, int $userId): void

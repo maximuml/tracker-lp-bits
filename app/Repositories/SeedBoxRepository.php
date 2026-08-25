@@ -10,6 +10,7 @@ use App\Models\Message;
 use App\Models\Poll;
 use App\Models\SeedBoxRecord;
 use App\Models\User;
+use App\Support\Cache as AppCache;
 use App\Support\Config\SiteConfig;
 use App\Support\Env;
 use App\Support\Events;
@@ -238,7 +239,7 @@ class SeedBoxRepository extends BaseRepository
 
     private function clearApprovalCountCache(): void
     {
-        NexusDB::cache_del(self::APPROVAL_COUNT_CACHE_KEY);
+        AppCache::forgetWithLocales(self::APPROVAL_COUNT_CACHE_KEY);
     }
 
     public function updateUserCacheCronjob(IsAllowedEnum $isAllowed, IpAsnEnum $field): void
@@ -308,7 +309,7 @@ class SeedBoxRepository extends BaseRepository
         $list = array_filter($list);
         $key = self::getCacheKey($userId, $isAllowed, $field);
         Logger::writeWithContext((string) ("userId: {$userId}, type: {$type->name}, isAllowed: {$isAllowed->name}, ipOrAsn: {$field->name}, key: {$key}, list: ".json_encode($list)), (string) 'info', (bool) false);
-        NexusDB::cache_del($key);
+        AppCache::forgetWithLocales($key);
         if (! empty($list)) {
             NexusDB::redis()->sadd($key, ...$list);
             NexusDB::redis()->expireAt($key, time() + 86400 * 30);

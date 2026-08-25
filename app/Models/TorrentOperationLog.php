@@ -12,10 +12,10 @@
 
 namespace App\Models;
 
+use App\Support\Cache;
 use App\Support\Locale;
 use App\Support\Logger;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Nexus\Database\NexusDB;
 
 /**
  * @property-read Torrent $torrent
@@ -102,8 +102,8 @@ class TorrentOperationLog extends NexusModel
             'added' => now(),
         ];
         Message::query()->insert($message);
-        NexusDB::cache_del("user_{$receiver->id}_unread_message_count");
-        NexusDB::cache_del("user_{$receiver->id}_inbox_count");
+        Cache::forgetWithLocales("user_{$receiver->id}_unread_message_count");
+        Cache::forgetWithLocales("user_{$receiver->id}_inbox_count");
         Logger::writeWithContext((string) "notify user: {$receiver->id}, {$subject}", (string) 'info', (bool) false);
     }
 }

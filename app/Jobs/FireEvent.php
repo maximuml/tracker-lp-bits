@@ -39,7 +39,8 @@ class FireEvent implements ShouldQueue
             /** @var class-string<Model> $modelClassName */
             $modelBasic = new $modelClassName;
             $rawModelData = NexusDB::cache_get($idKey);
-            if (! is_string($rawModelData) || ($modelData = unserialize($rawModelData)) === false || ! is_array($modelData)) {
+            $modelData = is_string($rawModelData) ? json_decode($rawModelData, true) : $rawModelData;
+            if (! is_array($modelData)) {
                 Logger::writeWithContext((string) "{$log}, invalid model data", (string) 'error', (bool) false);
 
                 return;
@@ -51,7 +52,8 @@ class FireEvent implements ShouldQueue
             $params = [$useArray ? $modelData : $model];
             if ($idKeyOld) {
                 $rawModelOldData = NexusDB::cache_get($idKeyOld);
-                if (is_string($rawModelOldData) && ($modelOldData = unserialize($rawModelOldData)) !== false && is_array($modelOldData)) {
+                $modelOldData = is_string($rawModelOldData) ? json_decode($rawModelOldData, true) : $rawModelOldData;
+                if (is_array($modelOldData)) {
                     $modelOld = $modelBasic->newInstance($modelOldData, true);
                     $modelOld->setAttribute('id', $modelOldData['id'] ?? 0);
                     $params[] = $useArray ? $modelOldData : $modelOld;

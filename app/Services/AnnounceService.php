@@ -178,7 +178,7 @@ final class AnnounceService
         $cheaterDetector->checkSpeed($traffic->upthis, $this->self, $this->user, $this->userId, $this->isDonor, $this->isIPSeedBox);
         $cheaterDetector->checkCheating($traffic->upthis, $traffic->downthis, $this->self, $this->user, $torrent, $this->userId, $this->torrentId, $this->dt);
 
-        $response = NexusDB::transaction(function () use ($peerLifecycle, $traffic) {
+        $response = DB::transaction(function () use ($peerLifecycle, $traffic) {
             return $this->process($peerLifecycle, $traffic);
         });
 

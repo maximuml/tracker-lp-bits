@@ -45,7 +45,7 @@ class BonusRepository extends BaseRepository
             throw new \LogicException("H&R: $hitAndRunId already pardoned.");
         }
         $requireBonus = BonusLogs::getBonusForCancelHitAndRun();
-        NexusDB::transaction(function () use ($user, $hitAndRun, $requireBonus) {
+        DB::transaction(function () use ($user, $hitAndRun, $requireBonus) {
             $comment = Locale::trans('hr.bonus_cancel_comment', ['bonus' => $requireBonus], $user->locale);
             Logger::writeWithContext((string) "comment: {$comment}", (string) 'info', (bool) false);
 
@@ -114,7 +114,7 @@ class BonusRepository extends BaseRepository
         }
         $medal->checkCanBeBuy();
         $requireBonus = $medal->price;
-        NexusDB::transaction(function () use ($user, $medal, $requireBonus) {
+        DB::transaction(function () use ($user, $medal, $requireBonus) {
             $comment = Locale::trans('bonus.comment_buy_medal', ['bonus' => $requireBonus, 'medal_name' => $medal->name], $user->locale);
             Logger::writeWithContext((string) "comment: {$comment}", (string) 'info', (bool) false);
             $this->consumeUserBonus($user, $requireBonus, BonusLogs::BUSINESS_TYPE_BUY_MEDAL, "$comment(medal ID: {$medal->id})");
@@ -154,7 +154,7 @@ class BonusRepository extends BaseRepository
         $medal->checkCanBeBuy();
         $giftFee = $medal->price * ($medal->gift_fee_factor ?? 0);
         $requireBonus = $medal->price + $giftFee;
-        NexusDB::transaction(function () use ($user, $toUser, $medal, $requireBonus, $giftFee) {
+        DB::transaction(function () use ($user, $toUser, $medal, $requireBonus, $giftFee) {
             $comment = Locale::trans('bonus.comment_gift_medal', ['bonus' => $requireBonus, 'medal_name' => $medal->name, 'to_username' => $toUser->username], $user->locale);
             Logger::writeWithContext((string) "comment: {$comment}", (string) 'info', (bool) false);
             $this->consumeUserBonus($user, $requireBonus, BonusLogs::BUSINESS_TYPE_GIFT_MEDAL, "$comment(medal ID: {$medal->id})");
@@ -193,7 +193,7 @@ class BonusRepository extends BaseRepository
     {
         $user = User::query()->findOrFail((int) $uid);
         $requireBonus = BonusLogs::getBonusForBuyAttendanceCard();
-        NexusDB::transaction(function () use ($user, $requireBonus) {
+        DB::transaction(function () use ($user, $requireBonus) {
             $comment = Locale::trans('bonus.comment_buy_attendance_card', ['bonus' => $requireBonus], $user->locale);
             Logger::writeWithContext((string) "comment: {$comment}", (string) 'info', (bool) false);
             $this->consumeUserBonus($user, $requireBonus, BonusLogs::BUSINESS_TYPE_BUY_ATTENDANCE_CARD, $comment);
@@ -217,7 +217,7 @@ class BonusRepository extends BaseRepository
         $user = User::query()->findOrFail((int) $uid);
         $toolRep = new ToolRepository;
         $hashArr = $toolRep->generateUniqueInviteHash([], $count, $count);
-        NexusDB::transaction(function () use ($user, $requireBonus, $hashArr) {
+        DB::transaction(function () use ($user, $requireBonus, $hashArr) {
             $comment = Locale::trans('bonus.comment_buy_temporary_invite', ['bonus' => $requireBonus, 'count' => count($hashArr)], $user->locale);
             Logger::writeWithContext((string) "comment: {$comment}", (string) 'info', (bool) false);
             $this->consumeUserBonus($user, $requireBonus, BonusLogs::BUSINESS_TYPE_BUY_TEMPORARY_INVITE, $comment);
@@ -247,7 +247,7 @@ class BonusRepository extends BaseRepository
     {
         $user = User::query()->findOrFail((int) $uid);
         $requireBonus = BonusLogs::getBonusForBuyRainbowId();
-        NexusDB::transaction(function () use ($user, $requireBonus, $duration) {
+        DB::transaction(function () use ($user, $requireBonus, $duration) {
             $comment = Locale::trans('bonus.comment_buy_rainbow_id', ['bonus' => $requireBonus, 'duration' => $duration], $user->locale);
             Logger::writeWithContext((string) "comment: {$comment}", (string) 'info', (bool) false);
             $this->consumeUserBonus($user, $requireBonus, BonusLogs::BUSINESS_TYPE_BUY_RAINBOW_ID, $comment);
@@ -281,7 +281,7 @@ class BonusRepository extends BaseRepository
         if (UserMeta::query()->where('uid', $uid)->where('meta_key', UserMeta::META_KEY_CHANGE_USERNAME)->exists()) {
             throw new NexusException('user already has change username card');
         }
-        NexusDB::transaction(function () use ($user, $requireBonus) {
+        DB::transaction(function () use ($user, $requireBonus) {
             $comment = Locale::trans('bonus.comment_buy_change_username_card', ['bonus' => $requireBonus], $user->locale);
             Logger::writeWithContext((string) "comment: {$comment}", (string) 'info', (bool) false);
             $this->consumeUserBonus($user, $requireBonus, BonusLogs::BUSINESS_TYPE_BUY_CHANGE_USERNAME_CARD, $comment);
@@ -306,7 +306,7 @@ class BonusRepository extends BaseRepository
         $torrent = Torrent::query()->findOrFail((int) $torrentId, Torrent::$commentFields);
         $requireBonus = $torrent->price;
 
-        return NexusDB::transaction(function () use ($requireBonus, $torrent, $channel, $uid) {
+        return DB::transaction(function () use ($requireBonus, $torrent, $channel, $uid) {
             $userQuery = User::query();
             if ($requireBonus > 0) {
                 $userQuery = $userQuery->lockForUpdate();
@@ -383,7 +383,7 @@ class BonusRepository extends BaseRepository
             Logger::writeWithContext((string) "user: {$user->id}, bonus: {$user->seedbonus} < requireBonus: {$requireBonus}", (string) 'error', (bool) false);
             throw new \LogicException('User bonus not enough.');
         }
-        NexusDB::transaction(function () use ($user, $requireBonus, $logBusinessType, $logComment, $userUpdates) {
+        DB::transaction(function () use ($user, $requireBonus, $logBusinessType, $logComment, $userUpdates) {
             $oldUserBonus = $user->seedbonus;
             $newUserBonus = bcsub((string) $oldUserBonus, (string) $requireBonus);
             $log = "user: {$user->id}, requireBonus: $requireBonus, oldUserBonus: $oldUserBonus, newUserBonus: $newUserBonus, logBusinessType: $logBusinessType, logComment: $logComment";

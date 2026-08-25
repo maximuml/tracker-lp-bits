@@ -31,7 +31,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache as CacheFacade;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
-use Nexus\Database\NexusDB;
 
 final class UsercpRepository extends BaseRepository
 {
@@ -105,7 +104,7 @@ final class UsercpRepository extends BaseRepository
      */
     public static function updateSecurity(int $userId, array $data, bool $resetAuthKey, array $allPost): bool
     {
-        return (bool) NexusDB::transaction(function () use ($userId, $data, $resetAuthKey, $allPost) {
+        return (bool) DB::transaction(function () use ($userId, $data, $resetAuthKey, $allPost) {
             self::updateUser($userId, $data);
             if ($resetAuthKey) {
                 $torrentRep = new TorrentRepository;

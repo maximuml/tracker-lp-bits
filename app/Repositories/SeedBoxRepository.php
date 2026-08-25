@@ -200,7 +200,7 @@ class SeedBoxRepository extends BaseRepository
             'added' => now(),
         ];
 
-        return NexusDB::transaction(function () use ($seedBoxRecord, $status, $message) {
+        return DB::transaction(function () use ($seedBoxRecord, $status, $message) {
             $seedBoxRecord->status = $status;
             $seedBoxRecord->save();
             $this->clearApprovalCountCache();

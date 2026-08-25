@@ -852,7 +852,7 @@ class TorrentRepository extends BaseRepository
             $torrentOperationLog['comment'] = $comment;
         }
 
-        NexusDB::transaction(function () use ($torrent, $torrentOperationLog, $torrentUpdate, $notifyUser) {
+        DB::transaction(function () use ($torrent, $torrentOperationLog, $torrentUpdate, $notifyUser) {
             $log = 'torrent: '.$torrent->id;
             /** @var array<string, mixed> $torrentUpdate */
             $log .= ', [UPDATE_TORRENT]: '.Json::encode($torrentUpdate);
@@ -917,7 +917,7 @@ class TorrentRepository extends BaseRepository
         Permission::assertCan(PermissionEnum::TORRENT_MANAGE);
         $idArr = Arr::wrap($id);
 
-        return NexusDB::transaction(function () use ($idArr, $tagIdArr, $remove) {
+        return DB::transaction(function () use ($idArr, $tagIdArr, $remove) {
             $sql = 'insert into torrent_tags (torrent_id, tag_id, created_at, updated_at) values ';
             $time = now()->toDateTimeString();
             $values = [];
@@ -1396,7 +1396,7 @@ HTML;
                 'uid' => $operatorId,
             ];
         }
-        NexusDB::transaction(function () use ($torrentIdArr, $categoryId, $siteLogArr) {
+        DB::transaction(function () use ($torrentIdArr, $categoryId, $siteLogArr) {
             SiteLog::query()->insert($siteLogArr);
             Torrent::query()->whereIn('id', $torrentIdArr)->update(['category' => $categoryId]);
         });

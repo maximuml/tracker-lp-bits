@@ -14,7 +14,6 @@ use App\Support\Logger;
 use App\Support\SupportContext;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
-use Nexus\Database\NexusDB;
 
 class AttendanceRepository extends BaseRepository
 {
@@ -324,7 +323,7 @@ class AttendanceRepository extends BaseRepository
             throw new \LogicException(Locale::trans('attendance.target_date_can_no_be_retroactive', ['date' => $date->format('Y-m-d')], null));
         }
 
-        return NexusDB::transaction(function () use ($user, $attendance, $date) {
+        return DB::transaction(function () use ($user, $attendance, $date) {
             if (AttendanceLog::query()->where('uid', $user->id)->where('date', $date->format('Y-m-d'))->exists()) {
                 throw new \RuntimeException(Locale::trans('attendance.already_attendance', [], null));
             }

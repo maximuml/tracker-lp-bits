@@ -20,6 +20,7 @@ use GeoIp2\Database\Reader;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use MaxMind\Db\Reader\InvalidDatabaseException;
 use Nexus\Database\NexusDB;
 use PhpIP\IP;
@@ -441,7 +442,7 @@ class SeedBoxRepository extends BaseRepository
 
     public static function findIdByAsn(int $asn): ?int
     {
-        $id = NexusDB::table('seed_box_records')->where('asn', $asn)->value('id');
+        $id = DB::table('seed_box_records')->where('asn', $asn)->value('id');
 
         return $id !== null ? (int) $id : null;
     }

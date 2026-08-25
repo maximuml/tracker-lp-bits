@@ -11,7 +11,7 @@ use App\Support\Logger;
 use App\Support\SupportContext;
 use App\Support\Time;
 use App\Support\UserDisplay;
-use Nexus\Database\NexusDB;
+use Illuminate\Support\Facades\DB;
 use Nexus\Database\NexusLock;
 use Nexus\Nexus;
 
@@ -121,10 +121,10 @@ final class CleanupService
             $interval = (int) SiteConfig::current()->main->autocleanInterval($this->intervalName($level), 0);
 
             if (! $forceAll) {
-                $ts = (int) NexusDB::table('avps')->where('arg', $arg)->value('value_u');
+                $ts = (int) DB::table('avps')->where('arg', $arg)->value('value_u');
 
                 if ($ts === 0) {
-                    NexusDB::table('avps')->insertOrIgnore(['arg' => $arg, 'value_u' => $now]);
+                    DB::table('avps')->insertOrIgnore(['arg' => $arg, 'value_u' => $now]);
                     Logger::writeWithContext((string) "no value for arg: '{$arg}', return", (string) 'info', (bool) false);
 
                     return false;
@@ -137,7 +137,7 @@ final class CleanupService
                     return $log;
                 }
 
-                $claimed = (int) NexusDB::table('avps')
+                $claimed = (int) DB::table('avps')
                     ->where('arg', $arg)
                     ->where('value_u', $ts)
                     ->update(['value_u' => $now]);
@@ -148,7 +148,7 @@ final class CleanupService
                     return false;
                 }
             } else {
-                NexusDB::table('avps')->updateOrInsert(['arg' => $arg], ['value_u' => $now]);
+                DB::table('avps')->updateOrInsert(['arg' => $arg], ['value_u' => $now]);
             }
 
             $output = $this->runClass($level, $taskList, $requestId, $output, $printProgress);

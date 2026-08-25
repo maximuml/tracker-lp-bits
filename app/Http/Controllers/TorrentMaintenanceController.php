@@ -19,8 +19,8 @@ use App\Support\UserDisplay;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
-use Nexus\Database\NexusDB;
 use Rhilip\Bencode\Bencode;
 
 class TorrentMaintenanceController extends LegacyController
@@ -119,7 +119,7 @@ class TorrentMaintenanceController extends LegacyController
             return $this->legacyAbortResponse($lang['std_error'] ?? 'Error', $lang['std_reseed_sent_recently'] ?? 'Reseed request sent recently.');
         }
 
-        $snatchedRows = NexusDB::table('snatched')
+        $snatchedRows = DB::table('snatched')
             ->join('users', 'snatched.userid', '=', 'users.id')
             ->join('torrents', 'snatched.torrentid', '=', 'torrents.id')
             ->where('snatched.finished', 'Yes')

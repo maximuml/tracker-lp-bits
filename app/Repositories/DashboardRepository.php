@@ -12,6 +12,7 @@ use App\Support\SupportContext;
 use Carbon\Carbon;
 use Composer\InstalledVersions;
 use Illuminate\Foundation\Application;
+use Illuminate\Support\Facades\DB;
 use Nexus\Database\NexusDB;
 
 class DashboardRepository extends BaseRepository
@@ -371,7 +372,7 @@ class DashboardRepository extends BaseRepository
      */
     public function uploaderActivity(): array
     {
-        $base = NexusDB::table('users as u')
+        $base = DB::table('users as u')
             ->selectRaw('u.id, u.username AS name, MAX(t.added) AS last, COUNT(DISTINCT t.id) AS n_t, COUNT(p.id) AS n_p')
             ->leftJoin('torrents as t', 'u.id', '=', 't.owner')
             ->leftJoin('peers as p', 't.id', '=', 'p.torrent');
@@ -402,7 +403,7 @@ class DashboardRepository extends BaseRepository
      */
     public function categoryActivity(): array
     {
-        $rows = NexusDB::table('categories as c')
+        $rows = DB::table('categories as c')
             ->selectRaw('c.name, MAX(t.added) AS last, COUNT(DISTINCT t.id) AS n_t, COUNT(p.id) AS n_p')
             ->leftJoin('torrents as t', 't.category', '=', 'c.id')
             ->leftJoin('peers as p', 't.id', '=', 'p.torrent')
@@ -429,7 +430,7 @@ class DashboardRepository extends BaseRepository
      */
     public function peerAgents(): array
     {
-        $rows = NexusDB::table('peers')
+        $rows = DB::table('peers')
             ->selectRaw('agent, count(*) as counts')
             ->groupBy('agent')
             ->orderBy('agent')

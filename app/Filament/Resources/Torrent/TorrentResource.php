@@ -44,7 +44,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
-use Nexus\Database\NexusDB;
+use Illuminate\Support\Facades\DB;
 
 class TorrentResource extends Resource
 {
@@ -375,7 +375,7 @@ class TorrentResource extends Resource
         ];
         foreach (SearchBox::$taxonomies as $torrentField => $tableModel) {
             $filters[] = SelectFilter::make((string) $torrentField)
-                ->options(NexusDB::table((string) $tableModel['table'])->orderBy('sort_index')->orderBy('id')->pluck('name', 'id'))
+                ->options(DB::table((string) $tableModel['table'])->orderBy('sort_index')->orderBy('id')->pluck('name', 'id'))
                 ->multiple();
         }
 

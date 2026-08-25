@@ -17,6 +17,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\DB;
 use Nexus\Database\NexusDB;
 
 class SeedBonusJob implements ShouldQueue
@@ -98,7 +99,7 @@ class SeedBonusJob implements ShouldQueue
             return;
         }
         $idArr = array_filter(array_map('intval', explode(',', $idStr)));
-        $results = NexusDB::table('users')
+        $results = DB::table('users')
             ->whereIn('id', $idArr)
             ->select(User::$commonFields)
             ->get()
@@ -181,7 +182,7 @@ class SeedBonusJob implements ShouldQueue
                 Logger::writeWithContext((string) "logFile: {$logFile} is not writeable!", (string) 'error', (bool) false);
             }
         }
-        $result = NexusDB::table('users')->upsert($rows, ['id'], ['seed_points', 'seed_points_per_hour', 'seed_bonus_per_hour', 'seedbonus', 'seeding_torrent_count', 'seeding_torrent_size', 'seed_points_updated_at']);
+        $result = DB::table('users')->upsert($rows, ['id'], ['seed_points', 'seed_points_per_hour', 'seed_bonus_per_hour', 'seedbonus', 'seeding_torrent_count', 'seeding_torrent_size', 'seed_points_updated_at']);
         if ($delIdRedisKey) {
             NexusDB::cache_del($this->idRedisKey);
         }

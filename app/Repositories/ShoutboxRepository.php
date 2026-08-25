@@ -9,7 +9,6 @@ use App\Models\User;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Nexus\Database\NexusDB;
 
 final class ShoutboxRepository extends BaseRepository
 {
@@ -98,8 +97,8 @@ final class ShoutboxRepository extends BaseRepository
 
         /** @var array<int, array<string, int>> $counts */
         $counts = [];
-        $rawCounts = NexusDB::table('shoutbox_reactions')
-            ->select('shoutbox_id', 'reaction', NexusDB::raw('COUNT(*) as cnt'))
+        $rawCounts = DB::table('shoutbox_reactions')
+            ->select('shoutbox_id', 'reaction', DB::raw('COUNT(*) as cnt'))
             ->whereIn('shoutbox_id', $ids)
             ->groupBy('shoutbox_id', 'reaction')
             ->get();
@@ -111,7 +110,7 @@ final class ShoutboxRepository extends BaseRepository
 
         /** @var array<int, list<string>> $mine */
         $mine = [];
-        $rawMine = NexusDB::table('shoutbox_reactions')
+        $rawMine = DB::table('shoutbox_reactions')
             ->whereIn('shoutbox_id', $ids)
             ->where('user_id', $currentUserId)
             ->get(['shoutbox_id', 'reaction']);
@@ -122,7 +121,7 @@ final class ShoutboxRepository extends BaseRepository
 
         /** @var array<int, array<string, list<string>>> $users */
         $users = [];
-        $rawUsers = NexusDB::table('shoutbox_reactions as sr')
+        $rawUsers = DB::table('shoutbox_reactions as sr')
             ->select('sr.shoutbox_id', 'sr.reaction', 'u.username')
             ->join('users as u', 'u.id', '=', 'sr.user_id')
             ->whereIn('sr.shoutbox_id', $ids)
@@ -150,8 +149,8 @@ final class ShoutboxRepository extends BaseRepository
      */
     public static function getReactionCounts(int $shoutId): array
     {
-        return NexusDB::table('shoutbox_reactions')
-            ->select('reaction', NexusDB::raw('COUNT(*) as cnt'))
+        return DB::table('shoutbox_reactions')
+            ->select('reaction', DB::raw('COUNT(*) as cnt'))
             ->where('shoutbox_id', $shoutId)
             ->groupBy('reaction')
             ->pluck('cnt', 'reaction')
@@ -163,7 +162,7 @@ final class ShoutboxRepository extends BaseRepository
      */
     public static function getMyReactions(int $shoutId, int $currentUserId): array
     {
-        $values = NexusDB::table('shoutbox_reactions')
+        $values = DB::table('shoutbox_reactions')
             ->where('shoutbox_id', $shoutId)
             ->where('user_id', $currentUserId)
             ->pluck('reaction')
@@ -186,7 +185,7 @@ final class ShoutboxRepository extends BaseRepository
         $like = '%@'.strtolower($username).'%';
         $pattern = '/(?<![\w\-\[\]\(\)])@'.preg_quote($username, '/').'(?![\w\-\[\]\(\)])/ui';
 
-        $query = NexusDB::table('shoutbox')
+        $query = DB::table('shoutbox')
             ->leftJoin('users', 'shoutbox.userid', '=', 'users.id')
             ->where('shoutbox.id', '>', $lastShoutId)
             ->where('shoutbox.userid', '!=', $userId)
@@ -217,7 +216,7 @@ final class ShoutboxRepository extends BaseRepository
 
     public static function getLastShoutId(): int
     {
-        return (int) (NexusDB::table('shoutbox')->max('id') ?? 0);
+        return (int) (DB::table('shoutbox')->max('id') ?? 0);
     }
 
     /**

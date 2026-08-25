@@ -13,7 +13,7 @@ use App\Support\Permissions;
 use App\Support\SupportContext;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Http\Request;
-use Nexus\Database\NexusDB;
+use Illuminate\Support\Facades\DB;
 
 class SearchPageRepository
 {
@@ -140,7 +140,7 @@ class SearchPageRepository
 
         $searchArr = preg_split('/[\s]+/', $search, 10, PREG_SPLIT_NO_EMPTY) ?: [];
 
-        $query = NexusDB::table($tableTorrent)
+        $query = DB::table($tableTorrent)
             ->join($tableCategory, "{$tableTorrent}.category", '=', "{$tableCategory}.id")
             ->whereIn("{$tableCategory}.mode", $modeArr);
 

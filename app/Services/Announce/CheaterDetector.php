@@ -11,6 +11,7 @@ use App\Repositories\UserRepository;
 use App\Support\Config\SiteConfig;
 use App\Support\Format;
 use App\Support\Logger;
+use Illuminate\Support\Facades\DB;
 use Nexus\Database\NexusDB;
 
 final class CheaterDetector
@@ -110,7 +111,7 @@ final class CheaterDetector
         if ($uploaded > 1073741824 && $upspeed > ($mustBeCheaterSpeed / $cheaterdetSecurity)) {
             NexusDB::transaction(function () use ($time, $uploaded, $downloaded, $seeders, $leechers, $upspeed, $self, $user, $userId, $torrentId) {
                 $comment = 'User account was automatically disabled by system';
-                NexusDB::table('cheaters')->insert([
+                DB::table('cheaters')->insert([
                     'added' => $time,
                     'userid' => $userId,
                     'torrentid' => $torrentId,
@@ -121,7 +122,7 @@ final class CheaterDetector
                     'leechers' => $leechers,
                     'comment' => $comment,
                 ]);
-                NexusDB::table('users')->where('id', $userId)->update(['enabled' => 'no']);
+                DB::table('users')->where('id', $userId)->update(['enabled' => 'no']);
                 UserBanLog::query()->insert([
                     'uid' => $userId,
                     'username' => $user['username'],
@@ -166,14 +167,14 @@ final class CheaterDetector
         $secs = 24 * 60 * 60;
         $dt = date('Y-m-d H:i:s', strtotime($time) - $secs);
 
-        $cheaterId = NexusDB::table('cheaters')
+        $cheaterId = DB::table('cheaters')
             ->where('userid', $userId)
             ->where('torrentid', $torrentId)
             ->where('added', '>', $dt)
             ->value('id');
 
         if (empty($cheaterId)) {
-            NexusDB::table('cheaters')->insert([
+            DB::table('cheaters')->insert([
                 'added' => $time,
                 'userid' => $userId,
                 'torrentid' => $torrentId,
@@ -186,8 +187,8 @@ final class CheaterDetector
                 'comment' => $comment,
             ]);
         } else {
-            NexusDB::table('cheaters')->where('id', $cheaterId)->update([
-                'hit' => NexusDB::raw('hit + 1'),
+            DB::table('cheaters')->where('id', $cheaterId)->update([
+                'hit' => DB::raw('hit + 1'),
                 'dealtwith' => 0,
             ]);
         }

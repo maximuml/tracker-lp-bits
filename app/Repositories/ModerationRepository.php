@@ -2,13 +2,13 @@
 
 namespace App\Repositories;
 
-use Nexus\Database\NexusDB;
+use Illuminate\Support\Facades\DB;
 
 class ModerationRepository extends BaseRepository
 {
     public function reportExists(int $addedBy, int $reportId, string $type): bool
     {
-        return NexusDB::table('reports')
+        return DB::table('reports')
             ->where('addedby', $addedBy)
             ->where('reportid', $reportId)
             ->where('type', $type)
@@ -18,7 +18,7 @@ class ModerationRepository extends BaseRepository
     /** @param  array<string, mixed>  $data */
     public function createReport(array $data): void
     {
-        NexusDB::table('reports')->insert($data);
+        DB::table('reports')->insert($data);
     }
 
     /**
@@ -26,7 +26,7 @@ class ModerationRepository extends BaseRepository
      */
     public function getForumPost(int $postId): ?array
     {
-        $row = (array) NexusDB::table('topics')
+        $row = (array) DB::table('topics')
             ->leftJoin('posts', 'posts.topicid', '=', 'topics.id')
             ->where('posts.id', $postId)
             ->first(['topics.id AS topicid', 'topics.subject AS subject', 'posts.userid AS postuserid']);
@@ -36,7 +36,7 @@ class ModerationRepository extends BaseRepository
 
     public function countReports(): int
     {
-        return (int) NexusDB::table('reports')->count();
+        return (int) DB::table('reports')->count();
     }
 
     /**
@@ -44,7 +44,7 @@ class ModerationRepository extends BaseRepository
      */
     public function getReports(int $offset, int $limit): array
     {
-        return NexusDB::table('reports')
+        return DB::table('reports')
             ->orderBy('dealtwith')
             ->orderByDesc('id')
             ->offset($offset)
@@ -56,13 +56,13 @@ class ModerationRepository extends BaseRepository
 
     public function deleteBan(int $id): void
     {
-        NexusDB::table('bans')->where('id', $id)->delete();
+        DB::table('bans')->where('id', $id)->delete();
     }
 
     /** @param  array<string, mixed>  $data */
     public function createBan(array $data): void
     {
-        NexusDB::table('bans')->insert($data);
+        DB::table('bans')->insert($data);
     }
 
     /**
@@ -70,7 +70,7 @@ class ModerationRepository extends BaseRepository
      */
     public function getBans(): array
     {
-        return NexusDB::table('bans')
+        return DB::table('bans')
             ->orderByDesc('added')
             ->get()
             ->map(fn ($r) => (array) $r)
@@ -82,7 +82,7 @@ class ModerationRepository extends BaseRepository
      */
     public function findMatchingBans(int $nip): array
     {
-        return NexusDB::table('bans')
+        return DB::table('bans')
             ->where('first', '<=', $nip)
             ->where('last', '>=', $nip)
             ->get(['first', 'last', 'comment'])
@@ -92,7 +92,7 @@ class ModerationRepository extends BaseRepository
 
     public function countIplogDistinct(int $userId): int
     {
-        return (int) NexusDB::table('iplog')->where('userid', $userId)->distinct('access')->count('access');
+        return (int) DB::table('iplog')->where('userid', $userId)->distinct('access')->count('access');
     }
 
     /**
@@ -100,11 +100,11 @@ class ModerationRepository extends BaseRepository
      */
     public function getIphistoryRows(int $userId, int $offset, int $limit): array
     {
-        $userHistory = NexusDB::table('users as u')
+        $userHistory = DB::table('users as u')
             ->select('u.id', 'u.ip as ip', 'last_access as access')
             ->where('u.id', $userId);
 
-        $ipLogHistory = NexusDB::table('iplog')
+        $ipLogHistory = DB::table('iplog')
             ->select('iplog.userid as id', 'iplog.ip as ip', 'iplog.access as access')
             ->where('iplog.userid', $userId);
 
@@ -122,7 +122,7 @@ class ModerationRepository extends BaseRepository
      */
     public function getUserIdsByIp(string $ip): array
     {
-        return NexusDB::table('users')->where('ip', $ip)->pluck('id')->all();
+        return DB::table('users')->where('ip', $ip)->pluck('id')->all();
     }
 
     /**
@@ -130,7 +130,7 @@ class ModerationRepository extends BaseRepository
      */
     public function getIplogUserIdsByIp(string $ip): array
     {
-        return NexusDB::table('iplog')->where('ip', $ip)->pluck('userid')->all();
+        return DB::table('iplog')->where('ip', $ip)->pluck('userid')->all();
     }
 
     /**
@@ -138,7 +138,7 @@ class ModerationRepository extends BaseRepository
      */
     public function getDuplicateIps(): array
     {
-        return NexusDB::table('users')
+        return DB::table('users')
             ->selectRaw('ip, count(*) AS dupl')
             ->where('enabled', 'yes')
             ->where('ip', '!=', '')
@@ -157,7 +157,7 @@ class ModerationRepository extends BaseRepository
     public function getPeerCountsByIp(string $ip): array
     {
         $counts = [];
-        foreach (NexusDB::table('peers')->where('ip', $ip)->pluck('userid') as $uid) {
+        foreach (DB::table('peers')->where('ip', $ip)->pluck('userid') as $uid) {
             $uid = (int) $uid;
             $counts[$uid] = ($counts[$uid] ?? 0) + 1;
         }
@@ -172,14 +172,14 @@ class ModerationRepository extends BaseRepository
     {
         $columns = ['u.id', 'u.username', 'u.ip as ip', 'u.ip as last_ip', 'u.last_access', 'u.last_access as access', 'u.email', 'u.invited_by', 'u.added', 'u.class', 'u.uploaded', 'u.downloaded', 'u.donor', 'u.enabled', 'u.warned'];
 
-        $userQuery = NexusDB::table('users as u')->select($columns);
+        $userQuery = DB::table('users as u')->select($columns);
         if ($singleIp) {
             $userQuery->where('u.ip', $ip);
         } else {
             $userQuery->whereRaw('INET_ATON(u.ip) & INET_ATON(?) = INET_ATON(?) & INET_ATON(?)', [$mask, $ip, $mask]);
         }
 
-        $iplogQuery = NexusDB::table('users as u')
+        $iplogQuery = DB::table('users as u')
             ->rightJoin('iplog', 'u.id', '=', 'iplog.userid')
             ->select($columns);
         if ($singleIp) {
@@ -201,7 +201,7 @@ class ModerationRepository extends BaseRepository
             default => 'access DESC',
         };
 
-        return NexusDB::table(NexusDB::raw("({$unionSql}) as ipsearch"))
+        return DB::table(DB::raw("({$unionSql}) as ipsearch"))
             ->mergeBindings($union)
             ->select('*')
             ->groupBy('id')
@@ -217,14 +217,14 @@ class ModerationRepository extends BaseRepository
     {
         $columns = ['u.id', 'u.username', 'u.ip as ip', 'u.ip as last_ip', 'u.last_access', 'u.last_access as access', 'u.email', 'u.invited_by', 'u.added', 'u.class', 'u.uploaded', 'u.downloaded', 'u.donor', 'u.enabled', 'u.warned'];
 
-        $userQuery = NexusDB::table('users as u')->select($columns);
+        $userQuery = DB::table('users as u')->select($columns);
         if ($singleIp) {
             $userQuery->where('u.ip', $ip);
         } else {
             $userQuery->whereRaw('INET_ATON(u.ip) & INET_ATON(?) = INET_ATON(?) & INET_ATON(?)', [$mask, $ip, $mask]);
         }
 
-        $iplogQuery = NexusDB::table('users as u')
+        $iplogQuery = DB::table('users as u')
             ->rightJoin('iplog', 'u.id', '=', 'iplog.userid')
             ->select($columns);
         if ($singleIp) {
@@ -237,7 +237,7 @@ class ModerationRepository extends BaseRepository
         $union = $userQuery->union($iplogQuery);
         $unionSql = $union->toSql();
 
-        $countRow = (array) NexusDB::table(NexusDB::raw("({$unionSql}) as ipsearch"))
+        $countRow = (array) DB::table(DB::raw("({$unionSql}) as ipsearch"))
             ->mergeBindings($union)
             ->selectRaw('count(DISTINCT id) as c')
             ->first();
@@ -247,6 +247,6 @@ class ModerationRepository extends BaseRepository
 
     public function countIplogDistinctByUser(int $userId): int
     {
-        return (int) NexusDB::table('iplog')->where('userid', $userId)->distinct('ip')->count('ip');
+        return (int) DB::table('iplog')->where('userid', $userId)->distinct('ip')->count('ip');
     }
 }

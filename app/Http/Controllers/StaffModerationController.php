@@ -24,6 +24,7 @@ use Illuminate\Database\Query\Expression;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 use Nexus\Database\NexusDB;
 
@@ -370,7 +371,7 @@ class StaffModerationController extends LegacyController
             $title = (string) SupportContext::getPost('title');
             $text = (string) SupportContext::getPost('text');
             $language = (int) SupportContext::getPost('language');
-            NexusDB::table('rules')->insert([
+            DB::table('rules')->insert([
                 'title' => $title,
                 'text' => $text,
                 'lang_id' => $language,
@@ -385,7 +386,7 @@ class StaffModerationController extends LegacyController
             $title = (string) SupportContext::getPost('title');
             $text = (string) SupportContext::getPost('text');
             $language = (int) SupportContext::getPost('language');
-            NexusDB::table('rules')->where('id', $id)->update([
+            DB::table('rules')->where('id', $id)->update([
                 'title' => $title,
                 'text' => $text,
                 'lang_id' => $language,
@@ -401,7 +402,7 @@ class StaffModerationController extends LegacyController
             if (! $sure) {
                 return $this->legacyAbortResponse('Delete Rule', 'You are about to delete a rule. Click <a class=altlink href=?act=del&id='.$id.'&sure=1>here</a> if you are sure.', false);
             }
-            NexusDB::table('rules')->where('id', $id)->delete();
+            DB::table('rules')->where('id', $id)->delete();
             NexusDB::cache_del('rules');
 
             return redirect('modrules.php');
@@ -420,7 +421,7 @@ class StaffModerationController extends LegacyController
 
         if ($act === 'edit') {
             $id = (int) (SupportContext::getQuery('id') ?? 0);
-            $rule = (array) NexusDB::table('rules')->where('id', $id)->first();
+            $rule = (array) DB::table('rules')->where('id', $id)->first();
             $langs = Locale::languageList('site_lang', null);
 
             return $this->legacyPage($request, 'modrules', true, [
@@ -430,7 +431,7 @@ class StaffModerationController extends LegacyController
             ]);
         }
 
-        $rules = NexusDB::table('rules')
+        $rules = DB::table('rules')
             ->leftJoin('language', 'rules.lang_id', '=', 'language.id')
             ->orderBy('lang_name')
             ->orderBy('rules.id')

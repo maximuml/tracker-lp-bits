@@ -21,7 +21,7 @@ use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Support\Collection;
-use Nexus\Database\NexusDB;
+use Illuminate\Support\Facades\DB;
 
 class SecondIconResource extends Resource
 {
@@ -116,7 +116,7 @@ class SecondIconResource extends Resource
         static $taxonomyList = [];
         if (empty($taxonomyList)) {
             foreach (SearchBox::$taxonomies as $torrentField => $taxonomyTableModel) {
-                $taxonomyList[$torrentField] = NexusDB::table($taxonomyTableModel['table'])->pluck('name', 'id');
+                $taxonomyList[$torrentField] = DB::table($taxonomyTableModel['table'])->pluck('name', 'id');
             }
         }
 

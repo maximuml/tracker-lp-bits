@@ -14,6 +14,7 @@ use App\Support\Format;
 use App\Support\Logger;
 use App\Support\Time;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Nexus\Database\NexusDB;
 
@@ -365,7 +366,7 @@ LUA;
         $now = Carbon::now();
         $since = $now->subHours(6)->toDateTimeString();
         $failedJobsTable = Config::get('queue.failed.table', null);
-        $failedJobsCount = NexusDB::table($failedJobsTable)->where('failed_at', '>=', $since)->count();
+        $failedJobsCount = DB::table($failedJobsTable)->where('failed_at', '>=', $since)->count();
         if ($failedJobsCount == 0) {
             Logger::writeWithContext((string) sprintf('no failed jobs since: %s', $since), (string) 'info', (bool) false);
 

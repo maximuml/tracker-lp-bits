@@ -14,7 +14,7 @@ use App\Support\Hooks;
 use App\Support\LegacyDb;
 use App\Support\Logger;
 use App\Support\Url;
-use Nexus\Database\NexusDB;
+use Illuminate\Support\Facades\DB;
 
 final class PeerLifecycle
 {
@@ -113,7 +113,7 @@ final class PeerLifecycle
      */
     public function findSelf(): ?array
     {
-        $selfRecord = NexusDB::table('peers')
+        $selfRecord = DB::table('peers')
             ->where('torrent', $this->torrentId)
             ->where('userid', $this->userId)
             ->where('peer_id', $this->peerId)
@@ -143,7 +143,7 @@ final class PeerLifecycle
             return;
         }
 
-        $isPeerExist = NexusDB::table('peers')
+        $isPeerExist = DB::table('peers')
             ->where('torrent', $this->torrentId)
             ->where('peer_id', $this->peerId)
             ->where('userid', $this->userId)
@@ -155,7 +155,7 @@ final class PeerLifecycle
             return;
         }
 
-        $sameIPRecord = NexusDB::table('peers')
+        $sameIPRecord = DB::table('peers')
             ->where('torrent', $this->torrentId)
             ->where('userid', $this->userId)
             ->where('ip', $this->ip)
@@ -164,7 +164,7 @@ final class PeerLifecycle
             $this->warn('You cannot seed the same torrent in the same location from more than 1 client.', 300);
         }
 
-        $valid = NexusDB::table('peers')
+        $valid = DB::table('peers')
             ->where('torrent', $this->torrentId)
             ->where('userid', $this->userId)
             ->count();
@@ -207,18 +207,18 @@ final class PeerLifecycle
         Logger::writeWithContext((string) ("[INSERT PEER] peer not exists for torrent: {$this->torrentId}, user: {$this->userId}, peer_id: ".bin2hex($this->peerId)), (string) 'info', (bool) false);
 
         try {
-            NexusDB::table('peers')->insert($peerInsert);
-            $this->torrentUpdate[$this->seeder === 'yes' ? 'seeders' : 'leechers'] = NexusDB::raw(
+            DB::table('peers')->insert($peerInsert);
+            $this->torrentUpdate[$this->seeder === 'yes' ? 'seeders' : 'leechers'] = DB::raw(
                 $this->seeder === 'yes' ? 'seeders + 1' : 'leechers + 1'
             );
 
-            $existingSnatchId = NexusDB::table('snatched')
+            $existingSnatchId = DB::table('snatched')
                 ->where('torrentid', $this->torrentId)
                 ->where('userid', $this->userId)
                 ->value('id');
 
             if ($existingSnatchId) {
-                NexusDB::table('snatched')->where('id', (int) $existingSnatchId)->update([
+                DB::table('snatched')->where('id', (int) $existingSnatchId)->update([
                     'to_go' => $this->left,
                     'last_action' => $this->dt,
                 ]);
@@ -235,7 +235,7 @@ final class PeerLifecycle
                     'startdat' => $this->dt,
                     'last_action' => $this->dt,
                 ];
-                NexusDB::table('snatched')->insert($snatchInsert);
+                DB::table('snatched')->insert($snatchInsert);
                 $this->snatchInfo = LegacyDb::snatchInfo($this->torrentId, $this->userId);
             }
         } catch (\Exception $exception) {
@@ -272,26 +272,26 @@ final class PeerLifecycle
             $peerUpdate['finishedat'] = TIMENOW;
             $snatchUpdate['completedat'] = $this->dt;
             $snatchUpdate['finished'] = 'yes';
-            $this->torrentUpdate['times_completed'] = NexusDB::raw('times_completed + 1');
+            $this->torrentUpdate['times_completed'] = DB::raw('times_completed + 1');
         }
 
         $peerUpdate = array_merge($peerUpdate, $peerIPUpdate);
 
-        $peerAffected = NexusDB::table('peers')->where('id', (int) ($this->self['id'] ?? 0))->update($peerUpdate);
+        $peerAffected = DB::table('peers')->where('id', (int) ($this->self['id'] ?? 0))->update($peerUpdate);
 
         if ($peerAffected > 0) {
             if ($this->seeder !== (string) ($this->self['seeder'] ?? 'no')) {
                 if ($this->seeder === 'yes') {
-                    $this->torrentUpdate['seeders'] = NexusDB::raw('seeders + 1');
-                    $this->torrentUpdate['leechers'] = NexusDB::raw('leechers - 1');
+                    $this->torrentUpdate['seeders'] = DB::raw('seeders + 1');
+                    $this->torrentUpdate['leechers'] = DB::raw('leechers - 1');
                 } else {
-                    $this->torrentUpdate['seeders'] = NexusDB::raw('seeders - 1');
-                    $this->torrentUpdate['leechers'] = NexusDB::raw('leechers + 1');
+                    $this->torrentUpdate['seeders'] = DB::raw('seeders - 1');
+                    $this->torrentUpdate['leechers'] = DB::raw('leechers + 1');
                 }
             }
 
             if (! empty($this->snatchInfo)) {
-                NexusDB::table('snatched')->where('id', (int) $this->snatchInfo['id'])->update($snatchUpdate);
+                DB::table('snatched')->where('id', (int) $this->snatchInfo['id'])->update($snatchUpdate);
                 Hooks::doAction('snatched_saved', $this->torrent, $this->snatchInfo);
             }
         }
@@ -301,14 +301,14 @@ final class PeerLifecycle
     {
         $snatchUpdate = $this->buildSnatchUpdate($upthis, $downthis, $snatchTimeColumn, $snatchTimeIncrement, $leechTimeNoSeederIncrement);
 
-        $deleted = NexusDB::table('peers')->where('id', (int) ($this->self['id'] ?? 0))->delete();
+        $deleted = DB::table('peers')->where('id', (int) ($this->self['id'] ?? 0))->delete();
         if ($deleted) {
-            $this->torrentUpdate[((string) ($this->self['seeder'] ?? 'no')) === 'yes' ? 'seeders' : 'leechers'] = NexusDB::raw(
+            $this->torrentUpdate[((string) ($this->self['seeder'] ?? 'no')) === 'yes' ? 'seeders' : 'leechers'] = DB::raw(
                 ((string) ($this->self['seeder'] ?? 'no')) === 'yes' ? 'seeders - 1' : 'leechers - 1'
             );
 
             if (! empty($this->snatchInfo)) {
-                NexusDB::table('snatched')->where('id', (int) $this->snatchInfo['id'])->update($snatchUpdate);
+                DB::table('snatched')->where('id', (int) $this->snatchInfo['id'])->update($snatchUpdate);
             }
         }
     }
@@ -355,7 +355,7 @@ final class PeerLifecycle
             };
 
             if ($max > 0) {
-                $leechingCount = NexusDB::table('peers')
+                $leechingCount = DB::table('peers')
                     ->where('userid', $this->userId)
                     ->where('seeder', 'no')
                     ->count();
@@ -375,15 +375,15 @@ final class PeerLifecycle
     private function buildSnatchUpdate(int $upthis, int $downthis, string $snatchTimeColumn, int $snatchTimeIncrement, int $leechTimeNoSeederIncrement): array
     {
         $snatchUpdate = [
-            'uploaded' => NexusDB::raw('uploaded + '.$upthis),
-            'downloaded' => NexusDB::raw('downloaded + '.$downthis),
+            'uploaded' => DB::raw('uploaded + '.$upthis),
+            'downloaded' => DB::raw('downloaded + '.$downthis),
             'to_go' => $this->left,
-            $snatchTimeColumn => NexusDB::raw("{$snatchTimeColumn} + ".$snatchTimeIncrement),
+            $snatchTimeColumn => DB::raw("{$snatchTimeColumn} + ".$snatchTimeIncrement),
             'last_action' => $this->dt,
         ];
 
         if ($leechTimeNoSeederIncrement > 0) {
-            $snatchUpdate['leech_time_no_seeder'] = NexusDB::raw('leech_time_no_seeder + '.$leechTimeNoSeederIncrement);
+            $snatchUpdate['leech_time_no_seeder'] = DB::raw('leech_time_no_seeder + '.$leechTimeNoSeederIncrement);
         }
 
         return $snatchUpdate;

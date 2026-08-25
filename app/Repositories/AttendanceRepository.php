@@ -13,6 +13,7 @@ use App\Support\Locale;
 use App\Support\Logger;
 use App\Support\SupportContext;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 use Nexus\Database\NexusDB;
 
 class AttendanceRepository extends BaseRepository
@@ -147,7 +148,7 @@ class AttendanceRepository extends BaseRepository
         while (true) {
             $logPrefix = "[MIGRATE_ATTENDANCE], page: $page, size: $size";
             // as soon as possible, don't use eloquent
-            $result = NexusDB::table($table)
+            $result = DB::table($table)
                 ->groupBy(['uid'])
                 ->selectRaw('uid, max(id) as id, count(*) as counts')
                 ->forPage($page, $size)
@@ -170,9 +171,9 @@ class AttendanceRepository extends BaseRepository
             return 0;
         }
         $caseWhenStr = sprintf('case id %s end', implode(' ', $caseWhens));
-        $result = NexusDB::table($table)
+        $result = DB::table($table)
             ->whereIn('id', $idArr)
-            ->update(['total_days' => NexusDB::raw($caseWhenStr)]);
+            ->update(['total_days' => DB::raw($caseWhenStr)]);
 
         Logger::writeWithContext((string) ("[MIGRATE_ATTENDANCE] DONE! {$caseWhenStr}, result: ".var_export($result, true)), (string) 'info', (bool) false);
 
@@ -265,7 +266,7 @@ class AttendanceRepository extends BaseRepository
 
             return 0;
         }
-        NexusDB::table('attendance_logs')->upsert($rows, ['uid', 'date'], ['points', 'updated_at']);
+        DB::table('attendance_logs')->upsert($rows, ['uid', 'date'], ['points', 'updated_at']);
         $insertCount = count($rows);
         Logger::writeWithContext((string) ('[MIGRATE_ATTENDANCE_LOGS] DONE! insert count: '.$insertCount), (string) 'info', (bool) Environment::isConsole());
 
@@ -337,8 +338,8 @@ class AttendanceRepository extends BaseRepository
             $log .= ", points: $points";
             Logger::writeWithContext((string) $log, (string) 'info', (bool) false);
             $userUpdates = [
-                'attendance_card' => NexusDB::raw('attendance_card - 1'),
-                'seedbonus' => NexusDB::raw("seedbonus + $points"),
+                'attendance_card' => DB::raw('attendance_card - 1'),
+                'seedbonus' => DB::raw("seedbonus + $points"),
             ];
             $affectedRows = User::query()
                 ->where('id', $user->id)
@@ -359,7 +360,7 @@ class AttendanceRepository extends BaseRepository
             $attendanceLog = AttendanceLog::query()->create($insert);
             // Increment total days and update days.
             $attendance->update([
-                'total_days' => NexusDB::raw('total_days + 1'),
+                'total_days' => DB::raw('total_days + 1'),
                 'days' => $this->getContinuousDays($attendance, Carbon::today()),
             ]);
 

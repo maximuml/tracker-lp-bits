@@ -9,6 +9,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\DB;
 use Nexus\Database\NexusDB;
 
 class UpdateTorrentSeedersEtc implements ShouldQueue
@@ -89,7 +90,7 @@ class UpdateTorrentSeedersEtc implements ShouldQueue
         // 批量取，简单化
         $torrents = [];
         //        $res = sql_query("SELECT torrent, seeder, COUNT(*) AS c FROM peers GROUP BY torrent, seeder where torrent in ($idStr)");
-        $res = NexusDB::table('peers')
+        $res = DB::table('peers')
             ->selectRaw('torrent, seeder, COUNT(*) AS c')
             ->whereIn('torrent', $torrentIdArr)
             ->groupBy(['torrent', 'seeder'])
@@ -109,7 +110,7 @@ class UpdateTorrentSeedersEtc implements ShouldQueue
         }
 
         //        $res = sql_query("SELECT torrent, COUNT(*) AS c FROM comments GROUP BY torrent where torrent in ($idStr)");
-        $res = NexusDB::table('comments')
+        $res = DB::table('comments')
             ->selectRaw('torrent, COUNT(*) AS c')
             ->whereIn('torrent', $torrentIdArr)
             ->groupBy(['torrent'])
@@ -126,7 +127,7 @@ class UpdateTorrentSeedersEtc implements ShouldQueue
                 'comments' => $torrents[$id]['comments'] ?? 0,
             ];
         }
-        $result = NexusDB::table('torrents')->upsert($rows, ['id'], ['seeders', 'leechers', 'comments']);
+        $result = DB::table('torrents')->upsert($rows, ['id'], ['seeders', 'leechers', 'comments']);
         if ($delIdRedisKey) {
             NexusDB::cache_del($this->idRedisKey);
         }

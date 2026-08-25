@@ -2,8 +2,8 @@
 
 namespace Nexus\Torrent;
 
+use Illuminate\Support\Facades\DB;
 use Nexus\Database\DatabaseException;
-use Nexus\Database\NexusDB;
 
 class Torrent
 {
@@ -20,14 +20,14 @@ class Torrent
             return [];
         }
         // seeding or leeching, from peers
-        $peerList = NexusDB::table('peers')
+        $peerList = DB::table('peers')
             ->where('userid', $uid)
             ->whereIn('torrent', $torrentIdArr)
             ->pluck('to_go', 'torrent')
             ->toArray();
         // download progress, from snatched
         $snatchedList = [];
-        $res = NexusDB::table('snatched')
+        $res = DB::table('snatched')
             ->join('torrents', 'snatched.torrentid', '=', 'torrents.id')
             ->select('snatched.to_go', 'snatched.torrentid', 'torrents.size')
             ->where('snatched.userid', $uid)

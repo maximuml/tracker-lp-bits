@@ -6,7 +6,7 @@ use App\Models\Comment;
 use App\Models\Torrent;
 use App\Models\TorrentOperationLog;
 use App\Models\TorrentTag;
-use Nexus\Database\NexusDB;
+use Illuminate\Support\Facades\DB;
 
 class TorrentDetailRepository
 {
@@ -15,7 +15,7 @@ class TorrentDetailRepository
      */
     public static function getTorrent(int $id): ?array
     {
-        $torrent = NexusDB::table('torrents')
+        $torrent = DB::table('torrents')
             ->leftJoin('categories', 'torrents.category', '=', 'categories.id')
             ->leftJoin('sources', 'torrents.source', '=', 'sources.id')
             ->leftJoin('media', 'torrents.medium', '=', 'media.id')
@@ -53,7 +53,7 @@ class TorrentDetailRepository
      */
     public static function getMagicInfo(int $torrentId, int $currentUserId): array
     {
-        $givers = NexusDB::table('magic')
+        $givers = DB::table('magic')
             ->where('torrentid', $torrentId)
             ->orderByDesc('id')
             ->get(['userid', 'value']);
@@ -71,7 +71,7 @@ class TorrentDetailRepository
 
         return [
             'givers' => $givers,
-            'count_user_number' => NexusDB::table('magic')
+            'count_user_number' => DB::table('magic')
                 ->where('torrentid', $torrentId)
                 ->distinct()
                 ->count('userid'),
@@ -86,7 +86,7 @@ class TorrentDetailRepository
      */
     public static function getThanksInfo(int $torrentId, int $currentUserId): array
     {
-        $thanks = NexusDB::table('thanks')
+        $thanks = DB::table('thanks')
             ->where('torrentid', $torrentId)
             ->orderByDesc('id')
             ->limit(20)
@@ -101,7 +101,7 @@ class TorrentDetailRepository
         }
 
         if (! $hasThanked) {
-            $hasThanked = NexusDB::table('thanks')
+            $hasThanked = DB::table('thanks')
                 ->where('torrentid', $torrentId)
                 ->where('userid', $currentUserId)
                 ->exists();
@@ -109,7 +109,7 @@ class TorrentDetailRepository
 
         return [
             'thanks' => $thanks,
-            'count' => NexusDB::table('thanks')->where('torrentid', $torrentId)->count(),
+            'count' => DB::table('thanks')->where('torrentid', $torrentId)->count(),
             'has_thanked' => $hasThanked,
         ];
     }

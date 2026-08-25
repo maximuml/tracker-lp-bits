@@ -5,7 +5,7 @@ namespace App\Repositories;
 use App\Models\Category;
 use App\Models\Torrent;
 use App\Models\User;
-use Nexus\Database\NexusDB;
+use Illuminate\Support\Facades\DB;
 
 class TorrentUploadRepository
 {
@@ -16,7 +16,7 @@ class TorrentUploadRepository
 
     public static function allowedOfferCount(int $userId): int
     {
-        return NexusDB::table('offers')
+        return DB::table('offers')
             ->where('allowed', 'allowed')
             ->where('userid', $userId)
             ->count();
@@ -24,7 +24,7 @@ class TorrentUploadRepository
 
     public static function isAllowedOffer(int $offerId, int $userId): bool
     {
-        return NexusDB::table('offers')
+        return DB::table('offers')
             ->where('id', $offerId)
             ->where('allowed', 'allowed')
             ->where('userid', $userId)
@@ -41,7 +41,7 @@ class TorrentUploadRepository
      */
     public static function syncFiles(int $torrentId, array $fileList): void
     {
-        NexusDB::table('files')->where('torrent', $torrentId)->delete();
+        DB::table('files')->where('torrent', $torrentId)->delete();
 
         $inserts = [];
         foreach ($fileList as $file) {
@@ -53,7 +53,7 @@ class TorrentUploadRepository
         }
 
         if (! empty($inserts)) {
-            NexusDB::table('files')->insert($inserts);
+            DB::table('files')->insert($inserts);
         }
     }
 
@@ -62,7 +62,7 @@ class TorrentUploadRepository
      */
     public static function getOfferVoterIds(int $offerId, int $uploaderId): array
     {
-        return NexusDB::table('offervotes')
+        return DB::table('offervotes')
             ->where('offerid', $offerId)
             ->where('userid', '!=', $uploaderId)
             ->where('vote', 'yeah')
@@ -72,9 +72,9 @@ class TorrentUploadRepository
 
     public static function finalizeOffer(int $offerId, int $uploaderId): void
     {
-        NexusDB::table('offers')->where('id', $offerId)->delete();
-        NexusDB::table('offervotes')->where('offerid', $offerId)->delete();
-        NexusDB::table('comments')->where('offer', $offerId)->delete();
+        DB::table('offers')->where('id', $offerId)->delete();
+        DB::table('offervotes')->where('offerid', $offerId)->delete();
+        DB::table('comments')->where('offer', $offerId)->delete();
         User::query()->where('id', $uploaderId)->increment('offer_allowed_count');
     }
 }

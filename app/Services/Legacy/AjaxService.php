@@ -20,7 +20,7 @@ use App\Repositories\UserRepository;
 use App\Support\Shoutbox;
 use App\Support\SupportContext;
 use App\Support\ToastNotifications;
-use Nexus\Database\NexusDB;
+use Illuminate\Support\Facades\DB;
 use Nexus\Database\NexusLock;
 
 final class AjaxService
@@ -170,8 +170,8 @@ final class AjaxService
         if (! $user instanceof User || ! Permission::can(PermissionEnum::SB_MANAGE, $user)) {
             throw new \RuntimeException('No permission');
         }
-        NexusDB::table('shoutbox')->delete();
-        NexusDB::table('shoutbox_reactions')->delete();
+        DB::table('shoutbox')->delete();
+        DB::table('shoutbox_reactions')->delete();
 
         return true;
     }
@@ -188,7 +188,7 @@ final class AjaxService
         if (mb_strlen($text) > Shoutbox::MAX_MESSAGE_LENGTH) {
             throw new \InvalidArgumentException('Message too long');
         }
-        $msg = NexusDB::table('shoutbox')->where('id', $id)->first();
+        $msg = DB::table('shoutbox')->where('id', $id)->first();
         if (! $msg) {
             throw new \RuntimeException('Message not found');
         }
@@ -205,7 +205,7 @@ final class AjaxService
             throw new \RuntimeException('Editing too often');
         }
         try {
-            NexusDB::table('shoutbox')->where('id', $id)->update([
+            DB::table('shoutbox')->where('id', $id)->update([
                 'text' => $text,
                 'edited_by' => $CURUSER['id'],
                 'edited_at' => time(),
@@ -225,7 +225,7 @@ final class AjaxService
         if ($id <= 0) {
             throw new \InvalidArgumentException('Invalid input');
         }
-        $msg = NexusDB::table('shoutbox')->where('id', $id)->first();
+        $msg = DB::table('shoutbox')->where('id', $id)->first();
         if (! $msg) {
             return true;
         }
@@ -242,8 +242,8 @@ final class AjaxService
             throw new \RuntimeException('Deleting too often');
         }
         try {
-            NexusDB::table('shoutbox')->where('id', $id)->delete();
-            NexusDB::table('shoutbox_reactions')->where('shoutbox_id', $id)->delete();
+            DB::table('shoutbox')->where('id', $id)->delete();
+            DB::table('shoutbox_reactions')->where('shoutbox_id', $id)->delete();
 
             return true;
         } finally {
@@ -265,7 +265,7 @@ final class AjaxService
             throw new \RuntimeException('Reacting too often');
         }
         try {
-            $table = NexusDB::table('shoutbox_reactions');
+            $table = DB::table('shoutbox_reactions');
             $existing = $table->where('shoutbox_id', $id)->where('user_id', $CURUSER['id'])->where('reaction', $reaction)->first();
             if ($existing) {
                 $table->where('id', $existing->id)->delete();

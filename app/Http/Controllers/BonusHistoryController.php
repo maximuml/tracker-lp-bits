@@ -21,8 +21,8 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
-use Nexus\Database\NexusDB;
 use Nexus\Nexus;
 
 class BonusHistoryController extends LegacyController
@@ -155,8 +155,8 @@ JS;
         }
 
         $sortColumn = match ($order) {
-            'torrent_size' => NexusDB::raw('SUM(torrents.size)'),
-            'torrent_count' => NexusDB::raw('COUNT(torrents.id)'),
+            'torrent_size' => DB::raw('SUM(torrents.size)'),
+            'torrent_count' => DB::raw('COUNT(torrents.id)'),
             default => 'users.username',
         };
         $sortDirection = $order === 'username' ? 'ASC' : 'DESC';
@@ -173,7 +173,7 @@ JS;
         $timeEnd = strtotime('+1 month', $timeStart) ?: time();
         $sqlEndTime = date('Y-m-d H:i:s', $timeEnd);
 
-        $uploaders = NexusDB::table('torrents')
+        $uploaders = DB::table('torrents')
             ->leftJoin('users', 'torrents.owner', '=', 'users.id')
             ->where('users.class', '>=', $uploaderClass)
             ->where('torrents.added', '>', $sqlStartTime)
@@ -183,15 +183,15 @@ JS;
             ->get([
                 'users.id AS userid',
                 'users.username AS username',
-                NexusDB::raw('COUNT(torrents.id) AS torrent_count'),
-                NexusDB::raw('SUM(torrents.size) AS torrent_size'),
+                DB::raw('COUNT(torrents.id) AS torrent_count'),
+                DB::raw('SUM(torrents.size) AS torrent_size'),
             ]);
 
         $hasUpUserIds = [];
         $rows = [];
         foreach ($uploaders as $uploader) {
             $row = (array) $uploader;
-            $lastTorrent = NexusDB::table('torrents')
+            $lastTorrent = DB::table('torrents')
                 ->where('owner', (int) $row['userid'])
                 ->orderByDesc('id')
                 ->first(['id', 'name', 'added']);
@@ -218,7 +218,7 @@ JS;
 
         foreach ($nonUploaderQuery as $nonUploader) {
             $row = (array) $nonUploader->getAttributes();
-            $lastTorrent = NexusDB::table('torrents')
+            $lastTorrent = DB::table('torrents')
                 ->where('owner', (int) $row['userid'])
                 ->orderByDesc('id')
                 ->first(['id', 'name', 'added']);
@@ -281,7 +281,7 @@ JS;
             return response()->json(Api::failWithContext('You are giving magic to yourself.', $request->all()));
         }
 
-        $alreadyMagic = NexusDB::table('magic')->where('torrentid', $torrentId)->where('userid', $userId)->count();
+        $alreadyMagic = DB::table('magic')->where('torrentid', $torrentId)->where('userid', $userId)->count();
         if ($alreadyMagic != 0) {
             return response()->json(Api::failWithContext('You already gave the magic value!', $request->all()));
         }
@@ -298,7 +298,7 @@ JS;
             return response()->json(Api::failWithContext('Invalid torrent owner!', $request->all()));
         }
 
-        NexusDB::table('magic')->insert([
+        DB::table('magic')->insert([
             'torrentid' => $torrentId,
             'userid' => $userId,
             'value' => $value,

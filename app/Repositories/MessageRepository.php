@@ -10,6 +10,7 @@ use App\Models\StaffMessage;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Nexus\Database\NexusDB;
 
 class MessageRepository extends BaseRepository
@@ -23,7 +24,7 @@ class MessageRepository extends BaseRepository
      */
     public static function getUserMailboxes(int $userId): Collection
     {
-        return NexusDB::table('pmboxes')
+        return DB::table('pmboxes')
             ->where('userid', $userId)
             ->orderBy('boxnumber')
             ->get(['id', 'boxnumber', 'name']);
@@ -31,7 +32,7 @@ class MessageRepository extends BaseRepository
 
     public static function getMailboxName(int $userId, int $mailbox): ?string
     {
-        return NexusDB::table('pmboxes')
+        return DB::table('pmboxes')
             ->where('userid', $userId)
             ->where('boxnumber', $mailbox)
             ->value('name');
@@ -169,7 +170,7 @@ class MessageRepository extends BaseRepository
 
     public static function getNextMailboxNumber(int $userId): int
     {
-        $max = (int) NexusDB::table('pmboxes')->where('userid', $userId)->max('boxnumber');
+        $max = (int) DB::table('pmboxes')->where('userid', $userId)->max('boxnumber');
 
         return max(1, $max);
     }
@@ -186,18 +187,18 @@ class MessageRepository extends BaseRepository
                 continue;
             }
             $box++;
-            NexusDB::table('pmboxes')->insert(['userid' => $userId, 'name' => $name, 'boxnumber' => $box]);
+            DB::table('pmboxes')->insert(['userid' => $userId, 'name' => $name, 'boxnumber' => $box]);
         }
     }
 
     public static function updateMailbox(int $userId, int $boxId, string $newName): void
     {
-        NexusDB::table('pmboxes')->where('id', $boxId)->where('userid', $userId)->update(['name' => $newName]);
+        DB::table('pmboxes')->where('id', $boxId)->where('userid', $userId)->update(['name' => $newName]);
     }
 
     public static function deleteMailbox(int $userId, int $boxId, int $boxNumber): void
     {
-        NexusDB::table('pmboxes')->where('id', $boxId)->where('userid', $userId)->delete();
+        DB::table('pmboxes')->where('id', $boxId)->where('userid', $userId)->delete();
         Message::query()->where('saved', 'yes')->where('location', $boxNumber)->where('receiver', $userId)->update(['location' => 0]);
         Message::query()->where('saved', 'yes')->where('sender', $userId)->update(['saved' => 'no']);
         Message::query()->where('saved', 'no')->where('location', $boxNumber)->where('receiver', $userId)->delete();

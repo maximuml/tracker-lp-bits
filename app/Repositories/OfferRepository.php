@@ -12,7 +12,6 @@ use App\Support\Locale;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use Nexus\Database\NexusDB;
 
 final class OfferRepository extends BaseRepository
 {
@@ -55,8 +54,8 @@ final class OfferRepository extends BaseRepository
     public static function getVoteCounts(int $offerId): array
     {
         return [
-            'yeah' => (int) NexusDB::table('offervotes')->where('vote', 'yeah')->where('offerid', $offerId)->count(),
-            'against' => (int) NexusDB::table('offervotes')->where('vote', 'against')->where('offerid', $offerId)->count(),
+            'yeah' => (int) DB::table('offervotes')->where('vote', 'yeah')->where('offerid', $offerId)->count(),
+            'against' => (int) DB::table('offervotes')->where('vote', 'against')->where('offerid', $offerId)->count(),
         ];
     }
 
@@ -74,7 +73,7 @@ final class OfferRepository extends BaseRepository
 
     public static function getVoteCount(int $offerId): int
     {
-        return (int) NexusDB::table('offervotes')->where('offerid', $offerId)->count();
+        return (int) DB::table('offervotes')->where('offerid', $offerId)->count();
     }
 
     /**
@@ -82,7 +81,7 @@ final class OfferRepository extends BaseRepository
      */
     public static function getVoteRows(int $offerId, int $offset, int $perPage): Collection
     {
-        return NexusDB::table('offervotes')
+        return DB::table('offervotes')
             ->where('offerid', $offerId)
             ->orderBy('id')
             ->offset($offset)
@@ -92,12 +91,12 @@ final class OfferRepository extends BaseRepository
 
     public static function userVoted(int $offerId, int $userId): bool
     {
-        return (bool) NexusDB::table('offervotes')->where('offerid', $offerId)->where('userid', $userId)->exists();
+        return (bool) DB::table('offervotes')->where('offerid', $offerId)->where('userid', $userId)->exists();
     }
 
     public static function recordVote(int $offerId, int $userId, string $vote): void
     {
-        NexusDB::table('offervotes')->insert([
+        DB::table('offervotes')->insert([
             'offerid' => $offerId,
             'userid' => $userId,
             'vote' => $vote,
@@ -134,7 +133,7 @@ final class OfferRepository extends BaseRepository
 
     public static function deleteOfferVotes(int $offerId): int
     {
-        return NexusDB::table('offervotes')->where('offerid', $offerId)->delete();
+        return DB::table('offervotes')->where('offerid', $offerId)->delete();
     }
 
     public static function deleteOfferComments(int $offerId): int

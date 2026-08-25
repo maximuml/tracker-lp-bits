@@ -14,6 +14,7 @@ use App\Support\LegacyResponse;
 use App\Support\Path;
 use App\Support\Settings;
 use App\Support\Url;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Nexus\Database\NexusDB;
 
@@ -177,7 +178,7 @@ class Install
             throw new \RuntimeException('Invalid DB_CONNECTION');
         }
 
-        return NexusDB::table('information_schema.tables')
+        return DB::table('information_schema.tables')
             ->where('table_schema', $schema)
             ->pluck('table_name')
             ->all();
@@ -691,14 +692,14 @@ class Install
                 continue;
             }
             // if table not empty, skip
-            $count = NexusDB::table($table)->count();
+            $count = DB::table($table)->count();
             if ($count > 0) {
                 $this->doLog("[IMPORT DATA] $table, not empty, skip");
 
                 continue;
             }
             $this->doLog("[IMPORT DATA] $table, $sql");
-            NexusDB::table($table)->truncate();
+            DB::table($table)->truncate();
             NexusDB::getInstance()->query($sql);
         }
 

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Repositories;
 
 use App\Support\SupportContext;
-use Nexus\Database\NexusDB;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Bridge for legacy category management pages until full Blade migration.
@@ -66,7 +66,7 @@ final class CategoryRepository
      */
     public static function getSearchboxOptions(): array
     {
-        return NexusDB::table('searchbox')
+        return DB::table('searchbox')
             ->orderBy('id')
             ->get(['id', 'name'])
             ->map(fn ($row) => (array) $row)
@@ -78,7 +78,7 @@ final class CategoryRepository
      */
     public static function getCaticonOptions(): array
     {
-        return NexusDB::table('caticons')
+        return DB::table('caticons')
             ->orderBy('id')
             ->get(['id', 'name'])
             ->map(fn ($row) => (array) $row)
@@ -87,7 +87,7 @@ final class CategoryRepository
 
     public static function countByTable(string $table): int
     {
-        return (int) NexusDB::table($table)->count();
+        return (int) DB::table($table)->count();
     }
 
     /**
@@ -95,14 +95,14 @@ final class CategoryRepository
      */
     public static function getRecord(string $table, int $id): ?array
     {
-        $row = NexusDB::table($table)->where('id', $id)->first();
+        $row = DB::table($table)->where('id', $id)->first();
 
         return $row ? (array) $row : null;
     }
 
     public static function deleteRecord(string $table, int $id): bool
     {
-        return (bool) NexusDB::table($table)->where('id', $id)->delete();
+        return (bool) DB::table($table)->where('id', $id)->delete();
     }
 
     /**
@@ -111,7 +111,7 @@ final class CategoryRepository
      */
     public static function listByTable(string $table, int $offset, int $perPage, string $sort = 'id', string $direction = 'desc'): array
     {
-        return NexusDB::table($table)
+        return DB::table($table)
             ->orderBy($sort, $direction)
             ->offset($offset)
             ->limit($perPage)
@@ -125,7 +125,7 @@ final class CategoryRepository
      */
     public static function getCategoryList(int $offset, int $perPage): array
     {
-        return NexusDB::table('categories')
+        return DB::table('categories')
             ->select(['categories.*', 'searchbox.name as catmodename', 'caticons.name as icon_name'])
             ->leftJoin('searchbox', 'categories.mode', '=', 'searchbox.id')
             ->leftJoin('caticons', 'caticons.id', '=', 'categories.icon_id')
@@ -144,12 +144,12 @@ final class CategoryRepository
     public static function getSecondiconLookups(): array
     {
         return [
-            'source' => NexusDB::table('sources')->pluck('name', 'id')->all(),
-            'media' => NexusDB::table('media')->pluck('name', 'id')->all(),
-            'codec' => NexusDB::table('codecs')->pluck('name', 'id')->all(),
-            'standard' => NexusDB::table('standards')->pluck('name', 'id')->all(),
-            'processing' => NexusDB::table('processings')->pluck('name', 'id')->all(),
-            'audiocodec' => NexusDB::table('audiocodecs')->pluck('name', 'id')->all(),
+            'source' => DB::table('sources')->pluck('name', 'id')->all(),
+            'media' => DB::table('media')->pluck('name', 'id')->all(),
+            'codec' => DB::table('codecs')->pluck('name', 'id')->all(),
+            'standard' => DB::table('standards')->pluck('name', 'id')->all(),
+            'processing' => DB::table('processings')->pluck('name', 'id')->all(),
+            'audiocodec' => DB::table('audiocodecs')->pluck('name', 'id')->all(),
         ];
     }
 
@@ -159,7 +159,7 @@ final class CategoryRepository
     public static function getIconRows(): array
     {
         $rows = [];
-        foreach (NexusDB::table('caticons')->orderBy('id')->get() as $row) {
+        foreach (DB::table('caticons')->orderBy('id')->get() as $row) {
             $row = (array) $row;
             $rows[(int) $row['id']] = $row;
         }
@@ -173,7 +173,7 @@ final class CategoryRepository
     public static function getCategoryRows(): array
     {
         $rows = [];
-        foreach (NexusDB::table('categories')->leftJoin('searchbox', 'categories.mode', '=', 'searchbox.id')->select('categories.*', 'searchbox.name as catmodename')->get() as $row) {
+        foreach (DB::table('categories')->leftJoin('searchbox', 'categories.mode', '=', 'searchbox.id')->select('categories.*', 'searchbox.name as catmodename')->get() as $row) {
             $row = (array) $row;
             $rows[(int) $row['id']] = $row;
         }
@@ -195,7 +195,7 @@ final class CategoryRepository
         $audiocodec = $row['audiocodec'] ?? '';
         $mode = $row['search_box_id'] ?? 0;
 
-        $sirow = NexusDB::table('secondicons')
+        $sirow = DB::table('secondicons')
             ->where(function ($query) use ($mode) {
                 $query->where('mode', $mode)->orWhere('mode', 0);
             })
@@ -227,7 +227,7 @@ final class CategoryRepository
      */
     public static function getCategoriesByMode(int $catmode): array
     {
-        return NexusDB::table('categories')
+        return DB::table('categories')
             ->where('mode', $catmode)
             ->orderBy('sort_index', 'desc')
             ->get()

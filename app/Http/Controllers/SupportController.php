@@ -19,8 +19,8 @@ use App\Support\UserDisplay;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
-use Nexus\Database\NexusDB;
 use Nexus\Database\NexusLock;
 
 class SupportController extends LegacyController
@@ -115,8 +115,8 @@ class SupportController extends LegacyController
             return $this->legacyAbortResponse($langFunctions['std_error'] ?? 'Error', $langComplains['text_new_failure'] ?? 'Unable to find disabled account.');
         }
 
-        $complainId = (int) NexusDB::table('complains')->insertGetId([
-            'uuid' => NexusDB::raw('UUID()'),
+        $complainId = (int) DB::table('complains')->insertGetId([
+            'uuid' => DB::raw('UUID()'),
             'email' => $email,
             'body' => $body,
             'added' => now()->toDateTimeString(),
@@ -150,7 +150,7 @@ class SupportController extends LegacyController
             return $this->legacyAbortResponse($langFunctions['std_error'] ?? 'Error', 'Complain not found.');
         }
 
-        NexusDB::table('complain_replies')->insert([
+        DB::table('complain_replies')->insert([
             'complain' => $id,
             'userid' => $uid,
             'added' => now()->toDateTimeString(),
@@ -192,7 +192,7 @@ class SupportController extends LegacyController
             return $this->legacyAbortResponse($langComplains['std_error'] ?? 'Error', 'Permission denied.');
         }
 
-        NexusDB::table('complains')->where('id', $id)->update([
+        DB::table('complains')->where('id', $id)->update([
             'answered' => $action === 'answered' ? 1 : 0,
         ]);
 
@@ -215,7 +215,7 @@ class SupportController extends LegacyController
 
         $pendingRows = [];
         if ($request->input('page') === null) {
-            $pendingRows = NexusDB::table('complains')
+            $pendingRows = DB::table('complains')
                 ->where('answered', 0)
                 ->orderByDesc('id')
                 ->get(['added', 'uuid', 'email'])
@@ -223,9 +223,9 @@ class SupportController extends LegacyController
                 ->all();
         }
 
-        $count = (int) NexusDB::table('complains')->where('answered', 1)->count();
+        $count = (int) DB::table('complains')->where('answered', 1)->count();
         [$pagertop, $pagerbottom, , $offset, $rpp] = Pagination::pager(20, $count, '?action=list&');
-        $processedRows = NexusDB::table('complains')
+        $processedRows = DB::table('complains')
             ->where('answered', 1)
             ->orderByDesc('id')
             ->offset($offset)
@@ -257,14 +257,14 @@ class SupportController extends LegacyController
             return $this->legacyAbortResponse($langComplains['std_error'] ?? 'Error', 'Permission denied.');
         }
 
-        $complain = (array) NexusDB::table('complains')->where('uuid', $uuid)->first();
+        $complain = (array) DB::table('complains')->where('uuid', $uuid)->first();
         if (empty($complain)) {
             return $this->legacyAbortResponse($langComplains['std_error'] ?? 'Error', 'Complain not found.');
         }
 
         $user = User::query()->where('email', (string) ($complain['email'] ?? ''))->first(['id', 'username']);
 
-        $replyRows = NexusDB::table('complain_replies')
+        $replyRows = DB::table('complain_replies')
             ->where('complain', (int) ($complain['id'] ?? 0))
             ->orderByDesc('id')
             ->get()

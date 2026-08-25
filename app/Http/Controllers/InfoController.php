@@ -13,8 +13,8 @@ use App\Support\UserDisplay;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
-use Nexus\Database\NexusDB;
 
 class InfoController extends LegacyController
 {
@@ -106,10 +106,10 @@ class InfoController extends LegacyController
 
         $delete = (int) $request->input('delete', 0);
         if ($currentClass >= (defined('UC_MODERATOR') ? \constant('UC_MODERATOR') : 0) && $delete > 0) {
-            $bitbucket = NexusDB::table('bitbucket')->where('id', $delete)->first(['name', 'owner']);
+            $bitbucket = DB::table('bitbucket')->where('id', $delete)->first(['name', 'owner']);
             if ($bitbucket) {
                 $file = $bucketPath.'/'.$bitbucket->name;
-                NexusDB::table('bitbucket')->where('id', $delete)->delete();
+                DB::table('bitbucket')->where('id', $delete)->delete();
                 if (file_exists($file) && ! unlink($file)) {
                     return $this->legacyAbortResponse('Warning', 'Unable to unlink file: <b>'.htmlspecialchars((string) $bitbucket->name).'</b>. You should contact an administrator about this error.', false);
                 }
@@ -118,10 +118,10 @@ class InfoController extends LegacyController
             return redirect($request->url());
         }
 
-        $count = (int) NexusDB::table('bitbucket')->count();
+        $count = (int) DB::table('bitbucket')->count();
         $perpage = 10;
         [$pagertop, $pagerbottom, , $offset, $perpage] = Pagination::pager($perpage, $count, 'bitbucketlog.php?');
-        $bitbucketRows = NexusDB::table('bitbucket')->orderByDesc('added')->offset($offset)->limit($perpage)->get();
+        $bitbucketRows = DB::table('bitbucket')->orderByDesc('added')->offset($offset)->limit($perpage)->get();
 
         $userIds = [];
         $rows = [];

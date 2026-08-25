@@ -25,6 +25,7 @@ use App\Support\Logger;
 use Carbon\Carbon;
 use GuzzleHttp\Client;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use Nexus\Database\NexusDB;
@@ -111,14 +112,14 @@ class Update extends Install
         // custom field menu
         $url = 'fields.php';
         $table = 'adminpanel';
-        $count = NexusDB::table($table)->where('url', $url)->count();
+        $count = DB::table($table)->where('url', $url)->count();
         if ($count == 0) {
             $insert = [
                 'name' => 'Custom Field Manage',
                 'url' => $url,
                 'info' => 'Manage custom fields',
             ];
-            $id = NexusDB::table($table)->insertGetId($insert);
+            $id = DB::table($table)->insertGetId($insert);
             $this->doLog('[ADD CUSTOM FIELD MENU] insert: '.json_encode($insert)." to table: $table, id: $id");
         }
         // since beta8
@@ -216,9 +217,9 @@ class Update extends Install
         ];
         $table = 'modpanel';
         foreach ($menus as $menu) {
-            $count = NexusDB::table($table)->where('url', $menu['url'])->count();
+            $count = DB::table($table)->where('url', $menu['url'])->count();
             if ($count == 0) {
-                $id = NexusDB::table($table)->insertGetId($menu);
+                $id = DB::table($table)->insertGetId($menu);
                 $this->doLog('[ADD MENU] insert: '.json_encode($menu)." to table: $table, id: $id");
             }
         }
@@ -397,9 +398,9 @@ class Update extends Install
     private function addMenu($table, array $menus)
     {
         foreach ($menus as $menu) {
-            $count = NexusDB::table($table)->where('url', $menu['url'])->count();
+            $count = DB::table($table)->where('url', $menu['url'])->count();
             if ($count == 0) {
-                $id = NexusDB::table($table)->insertGetId($menu);
+                $id = DB::table($table)->insertGetId($menu);
                 $this->doLog('[ADD MENU] insert: '.json_encode($menu)." to table: $table, id: $id");
             }
         }
@@ -412,7 +413,7 @@ class Update extends Install
             return;
         }
         foreach ($tables as $table) {
-            NexusDB::table($table)->whereIn('url', $menus)->delete();
+            DB::table($table)->whereIn('url', $menus)->delete();
         }
     }
 
@@ -526,11 +527,11 @@ class Update extends Install
         $tableName = (new User)->getTable();
         $result = 0;
         do {
-            $affectedRows = NexusDB::table($tableName)
+            $affectedRows = DB::table($tableName)
                 ->whereNull('seed_points')
                 ->limit($size)
                 ->update([
-                    'seed_points' => NexusDB::raw('seedbonus'),
+                    'seed_points' => DB::raw('seedbonus'),
                 ]);
             $result += $affectedRows;
             $this->doLog("affectedRows: $affectedRows, query: ".LegacyDb::lastQuery(false, 'json'));

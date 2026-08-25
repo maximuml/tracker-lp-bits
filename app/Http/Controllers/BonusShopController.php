@@ -12,8 +12,8 @@ use App\Support\UserDisplay;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
-use Nexus\Database\NexusDB;
 use Nexus\Nexus;
 
 class BonusShopController extends LegacyController
@@ -287,7 +287,7 @@ JS;
         ];
 
         if (isset($stateMap[$action])) {
-            NexusDB::table('torrents_state')->update(['global_sp_state' => $stateMap[$action]]);
+            DB::table('torrents_state')->update(['global_sp_state' => $stateMap[$action]]);
             SupportContext::getCache()?->delete_value('global_promotion_state');
 
             return $this->legacyAbortResponse('Success', $messages[$action]);

@@ -19,7 +19,7 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
-use Nexus\Database\NexusDB;
+use Illuminate\Support\Facades\DB;
 
 class SearchBoxRepository extends BaseRepository
 {
@@ -31,7 +31,7 @@ class SearchBoxRepository extends BaseRepository
     public function getAllRows(): array
     {
         $rows = [];
-        foreach (NexusDB::table('searchbox')->orderBy('id')->get() as $row) {
+        foreach (DB::table('searchbox')->orderBy('id')->get() as $row) {
             $row = (array) $row;
             if (isset($row['extra'])) {
                 $row['extra'] = json_decode($row['extra'], true);
@@ -52,7 +52,7 @@ class SearchBoxRepository extends BaseRepository
      */
     public function getTaxonomyRows(string $tableName, int $mode)
     {
-        return NexusDB::table($tableName)
+        return DB::table($tableName)
             ->where(function (Builder $query) use ($mode) {
                 return $query->whereIn('mode', [$mode, 0]);
             })
@@ -285,7 +285,7 @@ class SearchBoxRepository extends BaseRepository
             $select = sprintf('<b>%s: </b>', $searchBox->getTaxonomyLabel($torrentField));
             $select .= sprintf('<select name="%s_sel[%s]" data-mode="%s_%s">', $torrentField, $searchBoxId, $torrentField, $searchBoxId);
             $select .= sprintf('<option value="%s">%s</option>', 0, \App\Support\Locale::trans('nexus.select_one_please', [], null));
-            $list = NexusDB::table($table)->where(function (Builder $query) use ($searchBox) {
+            $list = DB::table($table)->where(function (Builder $query) use ($searchBox) {
                 return $query->where('mode', $searchBox->id)->orWhere('mode', 0);
             })->orderBy('sort_index', 'desc')->get();
             foreach ($list as $item) {
@@ -481,7 +481,7 @@ class SearchBoxRepository extends BaseRepository
         }
         $tableName = SearchBox::$taxonomies[$torrentField]['table'];
 
-        return NexusDB::table($tableName)
+        return DB::table($tableName)
             ->where(function (Builder $query) use ($mode) {
                 return $query->where('mode', $mode)->orWhere('mode', 0);
             })

@@ -4,7 +4,7 @@ namespace App\Repositories;
 
 use App\Models\User;
 use Carbon\Carbon;
-use Nexus\Database\NexusDB;
+use Illuminate\Support\Facades\DB;
 
 class ModtaskRepository
 {
@@ -34,7 +34,7 @@ class ModtaskRepository
 
     public static function addFund(int $userId, float $usd, float $cny, string $memo): void
     {
-        NexusDB::table('funds')->insert([
+        DB::table('funds')->insert([
             'usd' => $usd,
             'cny' => $cny,
             'user' => $userId,
@@ -56,7 +56,7 @@ class ModtaskRepository
      */
     public static function addWarning(int $userId, array $extra): void
     {
-        NexusDB::table('users')
+        DB::table('users')
             ->where('id', $userId)
             ->increment('timeswarned', 1, $extra);
     }

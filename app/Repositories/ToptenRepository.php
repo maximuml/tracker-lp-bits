@@ -6,6 +6,7 @@ use App\Support\Settings;
 use App\Support\SupportContext;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Nexus\Database\NexusDB;
 
 final class ToptenRepository
@@ -130,7 +131,7 @@ final class ToptenRepository
             throw new \RuntimeException('Unsupported database driver for top-ten speed calculation.');
         }
 
-        return NexusDB::table('users')
+        return DB::table('users')
             ->selectRaw("id as userid, username, added, uploaded, downloaded, {$speedStr}")
             ->where('enabled', 'yes');
     }
@@ -141,7 +142,7 @@ final class ToptenRepository
      */
     private static function torrentSections(int $limit, ?string $subtype, array $lang): array
     {
-        $base = NexusDB::table('torrents as t')
+        $base = DB::table('torrents as t')
             ->leftJoin('peers as p', 't.id', '=', 'p.torrent')
             ->selectRaw('t.*, (t.size * t.times_completed + SUM(p.downloaded)) AS data')
             ->where('p.seeder', 'no')
@@ -193,7 +194,7 @@ final class ToptenRepository
             $sections[] = [
                 'renderer' => '_torrenttable',
                 'data' => self::toArray(
-                    NexusDB::table('torrents as t')
+                    DB::table('torrents as t')
                         ->selectRaw('t.*, (t.size * t.times_completed) AS data')
                         ->where('leechers', '>', 0)
                         ->where('times_completed', '>', 0)
@@ -222,9 +223,9 @@ final class ToptenRepository
             $sections[] = [
                 'renderer' => 'countriestable',
                 'data' => self::toArray(
-                    NexusDB::table('countries')
+                    DB::table('countries')
                         ->leftJoin('users', 'users.country', '=', 'countries.id')
-                        ->select('countries.name', 'countries.flagpic', NexusDB::raw('COUNT(users.country) as num'))
+                        ->select('countries.name', 'countries.flagpic', DB::raw('COUNT(users.country) as num'))
                         ->groupBy('countries.name', 'countries.flagpic')
                         ->orderByRaw('num DESC')
                         ->limit($limit)
@@ -241,9 +242,9 @@ final class ToptenRepository
             $sections[] = [
                 'renderer' => 'countriestable',
                 'data' => self::toArray(
-                    NexusDB::table('users as u')
+                    DB::table('users as u')
                         ->leftJoin('countries as c', 'u.country', '=', 'c.id')
-                        ->select('c.name', 'c.flagpic', NexusDB::raw('sum(u.uploaded) AS ul'))
+                        ->select('c.name', 'c.flagpic', DB::raw('sum(u.uploaded) AS ul'))
                         ->where('u.enabled', 'yes')
                         ->groupBy('c.name')
                         ->orderByRaw('ul DESC')
@@ -261,9 +262,9 @@ final class ToptenRepository
             $sections[] = [
                 'renderer' => 'countriestable',
                 'data' => self::toArray(
-                    NexusDB::table('users as u')
+                    DB::table('users as u')
                         ->leftJoin('countries as c', 'u.country', '=', 'c.id')
-                        ->select('c.name', 'c.flagpic', NexusDB::raw('sum(u.uploaded)/count(u.id) AS ul_avg'))
+                        ->select('c.name', 'c.flagpic', DB::raw('sum(u.uploaded)/count(u.id) AS ul_avg'))
                         ->where('u.enabled', 'yes')
                         ->groupBy('c.name')
                         ->havingRaw('sum(u.uploaded) > 1099511627776 AND count(u.id) >= 100')
@@ -282,9 +283,9 @@ final class ToptenRepository
             $sections[] = [
                 'renderer' => 'countriestable',
                 'data' => self::toArray(
-                    NexusDB::table('users as u')
+                    DB::table('users as u')
                         ->leftJoin('countries as c', 'u.country', '=', 'c.id')
-                        ->select('c.name', 'c.flagpic', NexusDB::raw('sum(u.uploaded)/sum(u.downloaded) AS r'))
+                        ->select('c.name', 'c.flagpic', DB::raw('sum(u.uploaded)/sum(u.downloaded) AS r'))
                         ->where('u.enabled', 'yes')
                         ->groupBy('c.name')
                         ->havingRaw('sum(u.uploaded) > 1099511627776 AND sum(u.downloaded) > 1099511627776 AND count(u.id) >= 100')
@@ -310,10 +311,10 @@ final class ToptenRepository
     {
         $sections = [];
 
-        $postBase = NexusDB::table('users as u')
+        $postBase = DB::table('users as u')
             ->leftJoin('topics', 'u.id', '=', 'topics.userid')
             ->leftJoin('posts', 'u.id', '=', 'posts.userid')
-            ->select('u.id as userid', NexusDB::raw('COUNT(DISTINCT topics.id) as usertopics'), NexusDB::raw('COUNT(DISTINCT posts.id) as userposts'))
+            ->select('u.id as userid', DB::raw('COUNT(DISTINCT topics.id) as usertopics'), DB::raw('COUNT(DISTINCT posts.id) as userposts'))
             ->groupBy('u.id');
 
         if ($limit === 10 || $subtype === 'mtop') {
@@ -340,9 +341,9 @@ final class ToptenRepository
             $sections[] = [
                 'renderer' => 'cmttable',
                 'data' => self::toArray(
-                    NexusDB::table('users')
+                    DB::table('users')
                         ->leftJoin('comments', 'users.id', '=', 'comments.user')
-                        ->select('users.id as userid', NexusDB::raw('COUNT(comments.id) as num'))
+                        ->select('users.id as userid', DB::raw('COUNT(comments.id) as num'))
                         ->groupBy('users.id')
                         ->orderByRaw('num DESC')
                         ->limit($limit)
@@ -359,10 +360,10 @@ final class ToptenRepository
             $sections[] = [
                 'renderer' => 'bigtopic_table',
                 'data' => self::toArray(
-                    NexusDB::table('topics as tp')
+                    DB::table('topics as tp')
                         ->leftJoin('posts', 'tp.id', '=', 'posts.topicid')
                         ->leftJoin('forums', 'tp.forumid', '=', 'forums.id')
-                        ->select('tp.id as topicid', 'tp.subject as topicsubject', NexusDB::raw('COUNT(posts.id) as postnum'), 'tp.forumid', 'forums.id as forumid')
+                        ->select('tp.id as topicid', 'tp.subject as topicsubject', DB::raw('COUNT(posts.id) as postnum'), 'tp.forumid', 'forums.id as forumid')
                         ->where('forums.minclassread', '<=', 1)
                         ->orWhereNull('forums.id')
                         ->groupBy('tp.id', 'tp.subject', 'tp.forumid', 'forums.id')
@@ -390,7 +391,7 @@ final class ToptenRepository
         if ($limit === 10 || $subtype === 'bo') {
             $sections[] = [
                 'renderer' => 'bonustable',
-                'data' => self::toArray(NexusDB::table('users')->select('id', 'seedbonus')->orderBy('seedbonus', 'desc')->limit($limit)->get()),
+                'data' => self::toArray(DB::table('users')->select('id', 'seedbonus')->orderBy('seedbonus', 'desc')->limit($limit)->get()),
                 'caption' => self::caption($lang['text_top'] ?? 'Top ', $limit, $lang['text_most_bonuses'] ?? 'Bonuses'),
                 'limits' => [100, 250],
                 'subtype' => 'bo',
@@ -400,7 +401,7 @@ final class ToptenRepository
         if ($limit === 10 || $subtype === 'charity') {
             $sections[] = [
                 'renderer' => 'charityTable',
-                'data' => self::toArray(NexusDB::table('users')->select('id', 'charity')->orderBy('charity', 'desc')->limit($limit)->get()),
+                'data' => self::toArray(DB::table('users')->select('id', 'charity')->orderBy('charity', 'desc')->limit($limit)->get()),
                 'caption' => self::caption($lang['text_top'] ?? 'Top ', $limit, $lang['text_charity_giver'] ?? 'Charity Givers'),
                 'limits' => [100, 250],
                 'subtype' => 'charity',
@@ -412,7 +413,7 @@ final class ToptenRepository
                 $sections[] = [
                     'renderer' => 'donortable',
                     'data' => self::toArray(
-                        NexusDB::table('users')
+                        DB::table('users')
                             ->select('id', 'donated', 'donated_cny')
                             ->where('donated', '>', 0)
                             ->orderByRaw('donated DESC, donated_cny DESC')
@@ -429,7 +430,7 @@ final class ToptenRepository
                 $sections[] = [
                     'renderer' => 'donortable',
                     'data' => self::toArray(
-                        NexusDB::table('users')
+                        DB::table('users')
                             ->select('id', 'donated', 'donated_cny')
                             ->where('donated_cny', '>', 0)
                             ->orderByRaw('donated DESC, donated_cny DESC')
@@ -447,9 +448,9 @@ final class ToptenRepository
             $sections[] = [
                 'renderer' => 'clienttable',
                 'data' => self::toArray(
-                    NexusDB::table('users')
+                    DB::table('users')
                         ->rightJoin('agent_allowed_family', 'users.clientselect', '=', 'agent_allowed_family.id')
-                        ->select('agent_allowed_family.family as client_name', NexusDB::raw('COUNT(users.id) as client_num'))
+                        ->select('agent_allowed_family.family as client_name', DB::raw('COUNT(users.id) as client_num'))
                         ->groupBy('users.clientselect', 'agent_allowed_family.family')
                         ->orderByRaw('client_num DESC')
                         ->limit($limit)
@@ -465,9 +466,9 @@ final class ToptenRepository
             $sections[] = [
                 'renderer' => 'stylesheettable',
                 'data' => self::toArray(
-                    NexusDB::table('users')
+                    DB::table('users')
                         ->join('stylesheets', 'users.stylesheet', '=', 'stylesheets.id')
-                        ->select('stylesheets.name as stylesheet_name', NexusDB::raw('COUNT(users.id) as stylesheet_num'))
+                        ->select('stylesheets.name as stylesheet_name', DB::raw('COUNT(users.id) as stylesheet_num'))
                         ->groupBy('users.stylesheet', 'stylesheets.name')
                         ->orderByRaw('stylesheet_num DESC')
                         ->limit($limit)
@@ -483,9 +484,9 @@ final class ToptenRepository
             $sections[] = [
                 'renderer' => 'languagetable',
                 'data' => self::toArray(
-                    NexusDB::table('users')
+                    DB::table('users')
                         ->join('language', 'users.lang', '=', 'language.id')
-                        ->select('language.lang_name as lang_name', NexusDB::raw('COUNT(users.id) as lang_num'))
+                        ->select('language.lang_name as lang_name', DB::raw('COUNT(users.id) as lang_num'))
                         ->where('language.site_lang', 1)
                         ->groupBy('users.lang', 'language.lang_name')
                         ->orderByRaw('lang_num DESC')

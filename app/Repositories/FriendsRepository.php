@@ -2,7 +2,7 @@
 
 namespace App\Repositories;
 
-use Nexus\Database\NexusDB;
+use Illuminate\Support\Facades\DB;
 
 class FriendsRepository
 {
@@ -11,7 +11,7 @@ class FriendsRepository
      */
     public static function getFriends(int $userId): array
     {
-        return NexusDB::table('friends as f')
+        return DB::table('friends as f')
             ->leftJoin('users as u', 'f.friendid', '=', 'u.id')
             ->where('f.userid', $userId)
             ->select('f.friendid as id', 'u.last_access', 'u.class', 'u.avatar', 'u.title')
@@ -26,7 +26,7 @@ class FriendsRepository
      */
     public static function getBlocks(int $userId): array
     {
-        return NexusDB::table('blocks')
+        return DB::table('blocks')
             ->where('userid', $userId)
             ->select('blockid as id')
             ->orderBy('id')
@@ -39,7 +39,7 @@ class FriendsRepository
     {
         [$table, $field] = self::resolveTable($type);
 
-        return NexusDB::table($table)
+        return DB::table($table)
             ->where('userid', $userId)
             ->where($field, $targetId)
             ->exists();
@@ -49,7 +49,7 @@ class FriendsRepository
     {
         [$table, $field] = self::resolveTable($type);
 
-        NexusDB::table($table)->insert([
+        DB::table($table)->insert([
             'userid' => $userId,
             $field => $targetId,
         ]);
@@ -59,7 +59,7 @@ class FriendsRepository
     {
         [$table, $field] = self::resolveTable($type);
 
-        return (int) NexusDB::table($table)
+        return (int) DB::table($table)
             ->where('userid', $userId)
             ->where($field, $targetId)
             ->delete();

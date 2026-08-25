@@ -8,7 +8,7 @@ use App\Repositories\LegacyViewRepository;
 use App\Repositories\SearchPageRepository;
 use App\Services\Legacy\AjaxService;
 use App\Services\Legacy\AttachmentLegacyService;
-use App\Services\Legacy\LegacyPartialRenderer;
+use App\Services\UsersearchPageService;
 use App\Support\Api;
 use App\Support\Attachment\AttachmentService;
 use App\Support\Captcha;
@@ -30,11 +30,11 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class UtilityController extends LegacyController
 {
-    private LegacyPartialRenderer $renderer;
+    private UsersearchPageService $usersearchPageService;
 
-    public function __construct(LegacyPartialRenderer $renderer)
+    public function __construct(UsersearchPageService $usersearchPageService)
     {
-        $this->renderer = $renderer;
+        $this->usersearchPageService = $usersearchPageService;
     }
 
     public function search(Request $request): View|RedirectResponse
@@ -54,12 +54,9 @@ class UtilityController extends LegacyController
 
     public function usersearch(Request $request): View|Response|RedirectResponse
     {
-        $result = $this->renderer->render('usersearch');
-        if (! is_array($result)) {
-            return $result;
-        }
+        $data = $this->usersearchPageService->build($request);
 
-        return $this->legacyPage($request, 'usersearch', true, $result);
+        return $this->legacyPage($request, 'usersearch', true, $data);
     }
 
     public function ajax(Request $request): JsonResponse|RedirectResponse

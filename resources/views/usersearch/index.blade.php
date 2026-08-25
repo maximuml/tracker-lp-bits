@@ -6,5 +6,5 @@ $title = $title ?? 'Administrative User Search';
 @section('title', $title)
 
 @section('content')
-@include('usersearch._usersearch')
+@include('usersearch.sections.usersearch')
 @endsection

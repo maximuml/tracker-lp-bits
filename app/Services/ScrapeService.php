@@ -13,8 +13,8 @@ use App\Support\Config\SiteConfig;
 use App\ValueObjects\InfoHash;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
-use Nexus\Database\NexusDB;
 
 class ScrapeService
 {
@@ -108,7 +108,7 @@ class ScrapeService
 
         $query = Torrent::query()->select(['info_hash', 'times_completed', 'seeders', 'leechers']);
 
-        if (NexusDB::isPgsql()) {
+        if (DB::connection()->getDriverName() === 'pgsql') {
             $query->where(function ($q) use ($infoHashes) {
                 foreach ($infoHashes as $hash) {
                     $q->orWhereRaw("info_hash = decode(?, 'hex')", [$hash->toHex()]);

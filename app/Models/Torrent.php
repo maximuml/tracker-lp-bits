@@ -60,10 +60,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Facades\DB;
 use Laravel\Scout\ModelObserver;
 use Laravel\Scout\Searchable;
 use Laravel\Scout\SearchableScope;
-use Nexus\Database\NexusDB;
 
 /**
  * @property int $id
@@ -284,12 +284,12 @@ class Torrent extends NexusModel
      */
     public function scopeWhereInfoHash($query, string $binaryHash)
     {
-        if (NexusDB::isPgsql()) {
+        if (DB::connection()->getDriverName() === 'pgsql') {
             return $query->whereRaw(
                 "info_hash = decode(?, 'hex')",
                 [bin2hex($binaryHash)]
             );
-        } elseif (NexusDB::isMysql()) {
+        } elseif (DB::connection()->getDriverName() === 'mysql') {
             return $query->where('info_hash', $binaryHash);
         }
         throw new \RuntimeException('Not supported database');
@@ -751,9 +751,9 @@ class Torrent extends NexusModel
     public function tags(): BelongsToMany
     {
         $idsString = TagRepository::getOrderByFieldIdString();
-        if (NexusDB::isPgsql()) {
+        if (DB::connection()->getDriverName() === 'pgsql') {
             $orderByRaw = "array_position(ARRAY[$idsString]::int[], tags.id)";
-        } elseif (NexusDB::isMysql()) {
+        } elseif (DB::connection()->getDriverName() === 'mysql') {
             $orderByRaw = "FIELD(tags.id, $idsString)";
         } else {
             throw new \RuntimeException('Unsupported database');

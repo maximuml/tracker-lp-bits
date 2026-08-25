@@ -172,9 +172,9 @@ class Install
 
     public function listExistsTable()
     {
-        if (NexusDB::isMysql()) {
+        if (DB::connection()->getDriverName() === 'mysql') {
             $schema = Env::get('DB_DATABASE', null);
-        } elseif (NexusDB::isPgsql()) {
+        } elseif (DB::connection()->getDriverName() === 'pgsql') {
             $schema = 'public';
         } else {
             throw new \RuntimeException('Invalid DB_CONNECTION');

@@ -156,6 +156,8 @@ final class UsersearchPageService
 
     /**
      * Build <option> tags for a select, marking the selected value.
+     *
+     * @param  array<int, string>  $options
      */
     private function selectOptions(array $options, string $selected): string
     {

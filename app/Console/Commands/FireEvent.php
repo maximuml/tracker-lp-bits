@@ -50,7 +50,7 @@ class FireEvent extends Command
         $modelClassName = ModelEventEnum::$eventMaps[$name]['model'];
         $modelBasic = new $modelClassName;
         $rawData = NexusDB::cache_get($idKey);
-        $modelData = is_string($rawData) ? unserialize($rawData) : $rawData;
+        $modelData = is_string($rawData) ? json_decode($rawData, true) : $rawData;
         if (! is_array($modelData)) {
             $this->error("$log, invalid modelData");
 
@@ -63,7 +63,7 @@ class FireEvent extends Command
         $params = [$useArray ? $modelData : $model];
         if ($idKeyOld !== '') {
             $rawOldData = NexusDB::cache_get($idKeyOld);
-            $modelOldData = is_string($rawOldData) ? unserialize($rawOldData) : $rawOldData;
+            $modelOldData = is_string($rawOldData) ? json_decode($rawOldData, true) : $rawOldData;
             if (! is_array($modelOldData)) {
                 $this->error("$log, invalid modelOldData");
 

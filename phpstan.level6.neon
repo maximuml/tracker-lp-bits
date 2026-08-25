@@ -25,7 +25,7 @@ parameters:
 
     excludePaths:
         analyse:
-            - app/Services/Legacy/partials
+            - app/Services/Legacy/partials (?)
             - app/Services/Legacy/*_content.php
 
     bootstrapFiles:

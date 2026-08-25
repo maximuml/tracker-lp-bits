@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Setting;
 use App\Models\User;
-use App\Repositories\LegacyViewRepository;
 use App\Repositories\SearchPageRepository;
 use App\Services\Legacy\AjaxService;
 use App\Services\Legacy\AttachmentLegacyService;
@@ -127,7 +126,7 @@ class UtilityController extends LegacyController
             $count_left = (int) ($result['count_left'] ?? $count_left);
         }
 
-        $content = LegacyViewRepository::render('attachment', [
+        $content = view('attachment.index', [
             'CURUSER' => $currentUser,
             'lang_attachment' => (array) (SupportContext::getGlobal('lang_attachment') ?? []),
             'Attach' => $Attach,
@@ -140,7 +139,7 @@ class UtilityController extends LegacyController
             'callback_func' => $callback_func,
             'warning' => $warning,
             'script' => $script,
-        ]);
+        ])->render();
 
         return response($content, 200, ['Content-Type' => 'text/html; charset=utf-8']);
     }

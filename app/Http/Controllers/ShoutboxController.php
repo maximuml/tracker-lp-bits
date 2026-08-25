@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Auth\Permission;
 use App\Enums\Permission\PermissionEnum;
-use App\Repositories\LegacyViewRepository;
 use App\Repositories\ShoutboxRepository;
 use App\Support\Permissions;
 use App\Support\Shoutbox;
@@ -93,7 +92,7 @@ class ShoutboxController extends LegacyController
         $langShoutbox = (array) (SupportContext::getGlobal('lang_shoutbox') ?? []);
         $isStaff = Permissions::userCan(PermissionEnum::SB_MANAGE->value, false, $currentUserId);
 
-        $content = LegacyViewRepository::render('shoutbox', [
+        $content = view('shoutbox.index', [
             'CURUSER' => $currentUser,
             'lang_shoutbox' => $langShoutbox,
             'isAjax' => $isAjax,
@@ -104,7 +103,7 @@ class ShoutboxController extends LegacyController
             'currentUserId' => $currentUserId,
             'isStaff' => $isStaff,
             'reactionData' => $reactionData,
-        ]);
+        ])->render();
 
         return response($content, 200, ['Content-Type' => 'text/html; charset=utf-8']);
     }

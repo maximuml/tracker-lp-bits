@@ -152,6 +152,38 @@ final class Shoutbox
     }
 
     /**
+     * Build a small role badge for staff/VIP-tier classes.
+     * Returns empty string for regular users.
+     */
+    public static function classBadge(int $class): string
+    {
+        static $map = null;
+        if ($map === null) {
+            $map = [
+                UC_VIP => ['VIP', '#9c27b0'],
+                UC_RETIREE => ['RET', '#607d8b'],
+                UC_UPLOADER => ['UPL', '#1976d2'],
+                UC_MODERATOR => ['MOD', '#388e3c'],
+                UC_ADMINISTRATOR => ['ADM', '#d32f2f'],
+                UC_SYSOP => ['SYS', '#b71c1c'],
+                UC_STAFFLEADER => ['CHIEF', '#e65100'],
+            ];
+        }
+        $class = (int) $class;
+        if (! isset($map[$class])) {
+            return '';
+        }
+        $label = $map[$class][0];
+        $color = $map[$class][1];
+        $tooltip = '';
+        if (function_exists('get_user_class_name')) {
+            $tooltip = (string) UserClass::name($class, false, false, true);
+        }
+
+        return '<span class="shout-class-badge" style="background:'.$color.'" title="'.htmlspecialchars($tooltip, ENT_QUOTES).'">'.$label.'</span>';
+    }
+
+    /**
      * Build the [edit]/[delete] action links for a single message.
      *
      * @param  array<string, mixed>  $message  Shoutbox row

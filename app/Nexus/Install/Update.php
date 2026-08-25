@@ -26,6 +26,7 @@ use Carbon\Carbon;
 use GuzzleHttp\Client;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use Nexus\Database\NexusDB;
@@ -98,7 +99,7 @@ class Update extends Install
         $this->runMigrate('database/migrations/2025_10_05_030402_add_batch_uuid_column_to_activity_log_table.php');
 
         $toolRep = new ToolRepository;
-        $redis = NexusDB::redis();
+        $redis = Redis::connection()->client();
         /**
          * @since 1.7.13
          */

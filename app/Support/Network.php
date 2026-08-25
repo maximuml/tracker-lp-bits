@@ -6,7 +6,7 @@ use App\Exceptions\SeedBoxYesException;
 use App\Repositories\SeedBoxRepository;
 use GeoIp2\Database\Reader;
 use Illuminate\Support\Facades\Cache;
-use Nexus\Database\NexusDB;
+use Illuminate\Support\Facades\Redis;
 use Symfony\Component\HttpFoundation\IpUtils;
 
 /**
@@ -397,7 +397,7 @@ final class Network
      */
     public static function isSeedBoxFromASN(string $ip, bool $exceptionWhenYes = false): bool
     {
-        $redis = NexusDB::redis();
+        $redis = Redis::connection()->client();
         $key = 'nexus_asn';
         $notFoundCacheValue = '__NOT_FOUND__';
         $id = null;

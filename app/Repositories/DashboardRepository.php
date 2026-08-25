@@ -13,6 +13,7 @@ use Carbon\Carbon;
 use Composer\InstalledVersions;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Redis;
 use Nexus\Database\NexusDB;
 
 class DashboardRepository extends BaseRepository
@@ -68,7 +69,7 @@ class DashboardRepository extends BaseRepository
         $result[$name] = [
             'name' => $name,
             'text' => Locale::trans("dashboard.system_info.{$name}", [], null),
-            'value' => NexusDB::redis()->info()['redis_version'],
+            'value' => Redis::connection()->client()->info()['redis_version'],
         ];
 
         $name = 'server_software';

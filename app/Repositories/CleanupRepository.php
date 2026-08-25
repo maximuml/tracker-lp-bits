@@ -16,8 +16,8 @@ use App\Support\Time;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Str;
-use Nexus\Database\NexusDB;
 
 class CleanupRepository extends BaseRepository
 {
@@ -106,7 +106,7 @@ class CleanupRepository extends BaseRepository
      */
     private static function runBatchJob($batchKey, $requestId)
     {
-        $redis = NexusDB::redis();
+        $redis = Redis::connection()->client();
         $logPrefix = sprintf("[$batchKey], commonRequestId: %s", $requestId);
         $beginTimestamp = time();
         if (! isset(self::$batchKeyActionsMap[$batchKey])) {

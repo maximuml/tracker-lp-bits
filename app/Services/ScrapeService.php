@@ -13,6 +13,7 @@ use App\Support\Config\SiteConfig;
 use App\ValueObjects\InfoHash;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Redis;
 use Nexus\Database\NexusDB;
 
 class ScrapeService
@@ -53,7 +54,7 @@ class ScrapeService
         });
 
         if (empty($user)) {
-            NexusDB::redis()->set("passkey_invalid:{$passkey}", TIMENOW, ['ex' => 24 * 3600]);
+            Redis::connection()->client()->set("passkey_invalid:{$passkey}", TIMENOW, ['ex' => 24 * 3600]);
             throw TrackerException::failure('Invalid passkey! Re-download the .torrent from '.SiteConfig::current()->basic->baseUrl());
         }
 

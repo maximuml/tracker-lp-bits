@@ -22,6 +22,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Redis;
 use MaxMind\Db\Reader\InvalidDatabaseException;
 use Nexus\Database\NexusDB;
 use PhpIP\IP;
@@ -311,8 +312,8 @@ class SeedBoxRepository extends BaseRepository
         Logger::writeWithContext((string) ("userId: {$userId}, type: {$type->name}, isAllowed: {$isAllowed->name}, ipOrAsn: {$field->name}, key: {$key}, list: ".json_encode($list)), (string) 'info', (bool) false);
         AppCache::forgetWithLocales($key);
         if (! empty($list)) {
-            NexusDB::redis()->sadd($key, ...$list);
-            NexusDB::redis()->expireAt($key, time() + 86400 * 30);
+            Redis::connection()->client()->sadd($key, ...$list);
+            Redis::connection()->client()->expireAt($key, time() + 86400 * 30);
         }
     }
 
@@ -322,7 +323,7 @@ class SeedBoxRepository extends BaseRepository
     public static function isSeedBoxFromUserRecords(int $userId, string $ip): array
     {
         $logPrefix = "userId: $userId, ip: $ip";
-        $redis = NexusDB::redis();
+        $redis = Redis::connection()->client();
         // first check from asn field
         $asn = self::getAsnFromIp($ip);
         $uidArr = [0, $userId];

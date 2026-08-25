@@ -6,6 +6,7 @@ use App\Exceptions\LockFailException;
 use App\Support\Logger;
 use Illuminate\Cache\LuaScripts;
 use Illuminate\Cache\RedisLock;
+use Illuminate\Support\Facades\Redis;
 
 class NexusLock extends RedisLock
 {
@@ -23,7 +24,7 @@ class NexusLock extends RedisLock
      */
     public function __construct($name, $seconds, $owner = null)
     {
-        parent::__construct(NexusDB::redis(), $name, $seconds, $owner);
+        parent::__construct(Redis::connection()->client(), $name, $seconds, $owner);
     }
 
     /**

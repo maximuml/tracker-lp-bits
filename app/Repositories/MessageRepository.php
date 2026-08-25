@@ -12,7 +12,7 @@ use App\Support\Cache;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use Nexus\Database\NexusDB;
+use Illuminate\Support\Facades\Redis;
 
 class MessageRepository extends BaseRepository
 {
@@ -307,7 +307,7 @@ class MessageRepository extends BaseRepository
             Cache::forgetWithLocales(self::STAFF_MESSAGE_NEW_CACHE_KEY);
             Cache::forgetWithLocales(self::STAFF_MESSAGE_TOTAL_CACHE_KEY);
         } else {
-            $redis = NexusDB::redis();
+            $redis = Redis::connection()->client();
             match ($type) {
                 'total' => $redis->hSet(self::STAFF_MESSAGE_TOTAL_CACHE_KEY, $uid, $value),
                 'new' => $redis->hSet(self::STAFF_MESSAGE_NEW_CACHE_KEY, $uid, $value),
@@ -323,7 +323,7 @@ class MessageRepository extends BaseRepository
      */
     public static function getStaffMessageCountCache($uid = 0, $type = '')
     {
-        $redis = NexusDB::redis();
+        $redis = Redis::connection()->client();
 
         return match ($type) {
             'total' => $redis->hGet(self::STAFF_MESSAGE_TOTAL_CACHE_KEY, $uid),

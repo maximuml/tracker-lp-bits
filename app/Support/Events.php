@@ -7,8 +7,8 @@ use App\Jobs\FireEvent;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Str;
-use Nexus\Database\NexusDB;
 use Nexus\Nexus;
 
 /**
@@ -71,7 +71,7 @@ final class Events
     {
         $channel = Env::get('CHANNEL_NAME_MODEL_EVENT', null);
         if (! empty($channel)) {
-            NexusDB::redis()->publish($channel, json_encode(['event' => $event, 'id' => $id, 'json' => $json]));
+            Redis::connection()->client()->publish($channel, json_encode(['event' => $event, 'id' => $id, 'json' => $json]));
         } else {
             Logger::writeWithContext("event: $event, id: $id, channel: ".(is_scalar($channel) ? (string) $channel : '').', channel is empty!', 'error');
         }

@@ -9,7 +9,7 @@ use App\Repositories\TorrentRepository;
 use App\Repositories\UserRepository;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Cache as CacheFacade;
-use Nexus\Database\NexusDB;
+use Illuminate\Support\Facades\Redis;
 
 /**
  * Stateless filesystem-cache helpers extracted from `include/functions.php`.
@@ -223,7 +223,7 @@ final class Cache
         self::forgetWithLocales('setting_protected_forum');
         $channel = Env::get('CHANNEL_NAME_SETTING');
         if (! empty($channel)) {
-            NexusDB::redis()->publish($channel, 'update');
+            Redis::connection()->client()->publish($channel, 'update');
         }
     }
 

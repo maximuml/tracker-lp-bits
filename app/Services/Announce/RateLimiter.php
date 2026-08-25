@@ -7,7 +7,7 @@ namespace App\Services\Announce;
 use App\DTOs\AnnounceRequestDto;
 use App\Exceptions\TrackerException;
 use App\Exceptions\TrackerWarningException;
-use Nexus\Database\NexusDB;
+use Illuminate\Support\Facades\Redis;
 
 /**
  * Announce rate limiting / deduplication checks.
@@ -27,7 +27,7 @@ final class RateLimiter
 
     public function check(AnnounceRequestDto $dto): RateLimitResult
     {
-        $redis = NexusDB::redis();
+        $redis = Redis::connection()->client();
 
         $passkey = $dto->passkey->toString();
         $infoHashBinary = $dto->infoHash->toBinary();

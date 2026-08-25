@@ -6,7 +6,7 @@ use App\Jobs\BuyTorrent;
 use App\Support\Logger;
 use App\Support\Strings;
 use Illuminate\Support\Facades\Queue;
-use Nexus\Database\NexusDB;
+use Illuminate\Support\Facades\Redis;
 use Nexus\Database\NexusLock;
 
 final class ThirdPartyJob
@@ -26,7 +26,7 @@ final class ThirdPartyJob
 
             return;
         }
-        $list = NexusDB::redis()->lRange(self::$queueKey, 0, self::$size);
+        $list = Redis::connection()->client()->lRange(self::$queueKey, 0, self::$size);
         $successCount = 0;
         foreach ($list as $item) {
             $data = json_decode($item, true);
@@ -39,7 +39,7 @@ final class ThirdPartyJob
             } else {
                 Logger::writeWithContext((string) sprintf('%s no name, skip', $item), (string) 'error', (bool) false);
             }
-            NexusDB::redis()->lRem(self::$queueKey, $item);
+            Redis::connection()->client()->lRem(self::$queueKey, $item);
         }
         Logger::writeWithContext((string) sprintf('success dispatch %s jobs', $successCount), (string) 'info', (bool) false);
         $lock->release();
@@ -48,13 +48,13 @@ final class ThirdPartyJob
     public static function addBuyTorrent(int $userId, int $torrentId): void
     {
         $key = sprintf('%s:%s_%s', self::$queueKey, $userId, $torrentId);
-        if (NexusDB::redis()->set($key, now()->toDateTimeString(), ['nx', 'ex' => 3600])) {
+        if (Redis::connection()->client()->set($key, now()->toDateTimeString(), ['nx', 'ex' => 3600])) {
             $value = [
                 'name' => self::JOB_BUY_TORRENT,
                 'user_id' => $userId,
                 'torrent_id' => $torrentId,
             ];
-            NexusDB::redis()->rPush(self::$queueKey, json_encode($value));
+            Redis::connection()->client()->rPush(self::$queueKey, json_encode($value));
             Logger::writeWithContext((string) "success addBuyTorrent: {$key}", (string) 'debug', (bool) false);
         } else {
             Logger::writeWithContext((string) "no need to addBuyTorrent: {$key}", (string) 'debug', (bool) false);

@@ -14,7 +14,7 @@ namespace App\Models;
 
 use App\Models\Traits\NexusActivityLogTrait;
 use App\Support\Logger;
-use Nexus\Database\NexusDB;
+use Illuminate\Support\Facades\Redis;
 
 class TrackerUrl extends NexusModel
 {
@@ -48,7 +48,7 @@ class TrackerUrl extends NexusModel
     public static function saveUrlCache(): void
     {
         // 添加 id 与 URL 映射
-        $redis = NexusDB::redis();
+        $redis = Redis::connection()->client();
         $redis->unlink(self::TRACKER_URL_CACHE_KEY);
         $list = self::listAll();
         $first = $list->first();
@@ -80,7 +80,7 @@ class TrackerUrl extends NexusModel
      */
     public static function getById(int $trackerUrlId)
     {
-        $redis = NexusDB::redis();
+        $redis = Redis::connection()->client();
         $notFoundFlagKey = "TRACKER_URL_NOT_FOUND:$trackerUrlId";
         if ($trackerUrlId == 0) {
             return self::getFromRedisWithRetry($redis, 'get', [self::TRACKER_URL_DEFAULT_CACHE_KEY], $notFoundFlagKey);

@@ -4,7 +4,7 @@ namespace App\Utils;
 
 use App\Support\Html;
 use App\Support\UserDisplay;
-use Nexus\Database\NexusDB;
+use Illuminate\Support\Facades\Redis;
 
 final class MsgAlert
 {
@@ -17,7 +17,7 @@ final class MsgAlert
 
     private function __construct()
     {
-        $redis = NexusDB::redis();
+        $redis = Redis::connection()->client();
         $result = $redis->lRange($this->getListKey(), 0, 10);
         if (! empty($result)) {
             $nowTimestamp = time();
@@ -50,7 +50,7 @@ final class MsgAlert
         if (! isset(self::$alerts[$name])) {
             $params = compact('name', 'deadline', 'text', 'url', 'color');
             self::$alerts[$name] = $params;
-            NexusDB::redis()->rPush($this->getListKey(), json_encode($params));
+            Redis::connection()->client()->rPush($this->getListKey(), json_encode($params));
         }
     }
 
@@ -74,7 +74,7 @@ final class MsgAlert
         foreach (self::$alerts as $item) {
             if ($item['name'] == $name) {
                 unset(self::$alerts[$name]);
-                NexusDB::redis()->lRem($this->getListKey(), json_encode($item));
+                Redis::connection()->client()->lRem($this->getListKey(), json_encode($item));
             }
         }
     }

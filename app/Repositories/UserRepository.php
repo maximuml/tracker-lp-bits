@@ -41,6 +41,7 @@ use Illuminate\Database\Query\Expression;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache as CacheFacade;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Nexus\Database\NexusDB;
@@ -326,7 +327,7 @@ class UserRepository extends BaseRepository
 
     private function setEnableLatelyCache(int $userId): void
     {
-        NexusDB::cache_put(User::getUserEnableLatelyCacheKey($userId), now()->toDateTimeString(), 86400);
+        CacheFacade::put(User::getUserEnableLatelyCacheKey($userId), now()->toDateTimeString(), 86400);
     }
 
     /**

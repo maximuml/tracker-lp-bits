@@ -22,6 +22,7 @@ use App\Support\UserOps;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Nexus\Database\NexusDB;
 
@@ -573,7 +574,7 @@ final class Tasks
 
         foreach ($results as $user) {
             $uid = $user->id;
-            $enableCacheResult = NexusDB::cache_get(User::getUserEnableLatelyCacheKey($uid));
+            $enableCacheResult = Cache::get(User::getUserEnableLatelyCacheKey($uid));
             if ($enableCacheResult) {
                 Logger::writeWithContext((string) sprintf('user: %s just enable at: %s, skip', $uid, $enableCacheResult), (string) 'info', (bool) false);
 

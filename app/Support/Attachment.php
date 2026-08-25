@@ -4,9 +4,9 @@ namespace App\Support;
 
 use App\Repositories\AttachmentRepository;
 use App\Support\Config\SiteConfig;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 use Nexus\Attachment\Storage;
-use Nexus\Database\NexusDB;
 
 /**
  * Attachment HTML emitter extracted from `include/functions.php`.
@@ -87,11 +87,11 @@ final class Attachment
     public static function rowAndUrlByKey(string $dlkey): array
     {
         $httpdirectory = SiteConfig::current()->attachment->httpDirectory();
-        $row = NexusDB::cache_get('attachment_'.$dlkey.'_content');
+        $row = Cache::get('attachment_'.$dlkey.'_content');
 
         if (empty($row) && strlen($dlkey) == 32) {
             $row = AttachmentRepository::findByDlkey($dlkey);
-            NexusDB::cache_put('attachment_'.$dlkey.'_content', $row, 86400);
+            Cache::put('attachment_'.$dlkey.'_content', $row, 86400);
         }
 
         if (empty($row)) {
@@ -196,9 +196,9 @@ final class Attachment
         return (string) preg_replace_callback($pattern, function ($matches) {
             $dlkey = $matches[1];
             $httpdirectory = SiteConfig::current()->attachment->httpDirectory();
-            $cached = NexusDB::cache_get('attachment_'.$dlkey.'_content');
+            $cached = Cache::get('attachment_'.$dlkey.'_content');
             $row = is_array($cached) ? $cached : (AttachmentRepository::findByDlkey($dlkey) ?? []);
-            NexusDB::cache_put('attachment_'.$dlkey.'_content', $row, 86400);
+            Cache::put('attachment_'.$dlkey.'_content', $row, 86400);
 
             if (empty($row) || ($row['isimage'] ?? 0) != 1) {
                 Logger::writeWithContext(sprintf('dlkey: %s get attachment %s not exists or not image', $dlkey, Json::encode($row)));

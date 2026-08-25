@@ -30,7 +30,7 @@ class UserPasskeyRepository extends BaseRepository
     private static function putChallenge($challenge): string
     {
         $challengeId = bin2hex(random_bytes(32));
-        NexusDB::cache_put("passkey_challenge_{$challengeId}", $challenge, 120);
+        Cache::put("passkey_challenge_{$challengeId}", $challenge, 120);
 
         return $challengeId;
     }
@@ -41,7 +41,7 @@ class UserPasskeyRepository extends BaseRepository
      */
     private static function getChallenge($challengeId)
     {
-        $challenge = NexusDB::cache_get("passkey_challenge_{$challengeId}") ?? null;
+        $challenge = Cache::get("passkey_challenge_{$challengeId}") ?? null;
         if ($challenge == null) {
             throw new RuntimeException(Locale::trans('passkey.passkey_timeout', [], null));
         }

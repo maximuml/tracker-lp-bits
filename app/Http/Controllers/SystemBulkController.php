@@ -29,9 +29,9 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
-use Nexus\Database\NexusDB;
 use Nexus\Database\NexusLock;
 
 class SystemBulkController extends LegacyController
@@ -436,7 +436,7 @@ class SystemBulkController extends LegacyController
 
             $idStr = implode(',', $idArr);
             $idRedisKey = sprintf('temporary_invite:%s', microtime(true));
-            NexusDB::cache_put($idRedisKey, $idStr);
+            Cache::put($idRedisKey, $idStr);
 
             if ($isTypeTmpInvite) {
                 $command = sprintf('invite:tmp %s %s %s', $idRedisKey, $duration, $amount);

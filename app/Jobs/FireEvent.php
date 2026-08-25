@@ -9,7 +9,7 @@ use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Queue\Queueable;
-use Nexus\Database\NexusDB;
+use Illuminate\Support\Facades\Cache;
 
 class FireEvent implements ShouldQueue
 {
@@ -38,7 +38,7 @@ class FireEvent implements ShouldQueue
             $modelClassName = ModelEventEnum::$eventMaps[$name]['model'];
             /** @var class-string<Model> $modelClassName */
             $modelBasic = new $modelClassName;
-            $rawModelData = NexusDB::cache_get($idKey);
+            $rawModelData = Cache::get($idKey);
             $modelData = is_string($rawModelData) ? json_decode($rawModelData, true) : $rawModelData;
             if (! is_array($modelData)) {
                 Logger::writeWithContext((string) "{$log}, invalid model data", (string) 'error', (bool) false);
@@ -51,7 +51,7 @@ class FireEvent implements ShouldQueue
             $model->setAttribute('id', $modelData['id'] ?? 0);
             $params = [$useArray ? $modelData : $model];
             if ($idKeyOld) {
-                $rawModelOldData = NexusDB::cache_get($idKeyOld);
+                $rawModelOldData = Cache::get($idKeyOld);
                 $modelOldData = is_string($rawModelOldData) ? json_decode($rawModelOldData, true) : $rawModelOldData;
                 if (is_array($modelOldData)) {
                     $modelOld = $modelBasic->newInstance($modelOldData, true);

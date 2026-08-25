@@ -14,6 +14,7 @@ use App\Support\Format;
 use App\Support\Logger;
 use App\Support\Time;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Nexus\Database\NexusDB;
@@ -152,7 +153,7 @@ class CleanupRepository extends BaseRepository
             if (! empty($validFields)) {
                 $idStr = implode(',', $validFields);
                 $idRedisKey = self::IDS_KEY_PREFIX.Str::random();
-                NexusDB::cache_put($idRedisKey, $idStr);
+                Cache::put($idRedisKey, $idStr);
                 $action = $batchKeyInfo['action'];
                 $delaySeconds = (int) $delay;
                 if ($action === 'seed_bonus') {

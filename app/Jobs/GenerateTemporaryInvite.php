@@ -11,6 +11,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Cache;
 use Nexus\Database\NexusDB;
 
 class GenerateTemporaryInvite implements ShouldQueue
@@ -48,7 +49,7 @@ class GenerateTemporaryInvite implements ShouldQueue
     {
         $beginTimestamp = microtime(true);
         $toolRep = new ToolRepository;
-        $idStr = NexusDB::cache_get($this->idRedisKey);
+        $idStr = Cache::get($this->idRedisKey);
         $logPrefix = 'idRedisKey: '.$this->idRedisKey;
         if (empty($idStr)) {
             Logger::writeWithContext((string) "{$logPrefix}, no idStr...", (string) 'info', (bool) false);

@@ -6,6 +6,7 @@ use App\Enums\ModelEventEnum;
 use App\Jobs\FireEvent;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 use Nexus\Database\NexusDB;
 use Nexus\Nexus;
@@ -34,10 +35,10 @@ final class Events
             $prefix = 'fire_event:';
             $idKey = $prefix.Str::random();
             $idKeyOld = '';
-            NexusDB::cache_put($idKey, json_encode($model->toArray(), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), 3600 * 24 * 30);
+            Cache::put($idKey, json_encode($model->toArray(), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), 3600 * 24 * 30);
             if ($oldModel) {
                 $idKeyOld = $prefix.Str::random();
-                NexusDB::cache_put($idKeyOld, json_encode($oldModel->toArray(), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), 3600 * 24 * 30);
+                Cache::put($idKeyOld, json_encode($oldModel->toArray(), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), 3600 * 24 * 30);
             }
             Nexus::dispatchQueueJob(new FireEvent($name, $idKey, $idKeyOld));
             Logger::writeWithContext("success fire_event in nexus, name: $name, idKey: $idKey, idKeyOld: $idKeyOld");

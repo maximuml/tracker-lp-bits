@@ -14,6 +14,7 @@ use App\Support\PasswordHasher;
 use App\Support\Strings;
 use App\Support\Token;
 use App\Support\Url;
+use Illuminate\Support\Facades\Cache as CacheFacade;
 use Illuminate\Support\Facades\DB;
 use Nexus\Database\NexusDB;
 
@@ -80,7 +81,7 @@ class PasswordRecoveryService
 
         $hash = md5($sec.$email.$user['passhash'].$sec);
 
-        NexusDB::cache_put("recover:$hash", now()->toDateTimeString(), self::RECOVER_CACHE_TTL);
+        CacheFacade::put("recover:$hash", now()->toDateTimeString(), self::RECOVER_CACHE_TTL);
 
         $this->sendResetRequestEmail($email, (int) $user['id'], $hash, $ip, $langRecover);
     }
@@ -92,7 +93,7 @@ class PasswordRecoveryService
      */
     public function resetPassword(int $id, string $md5, array $langRecover): string
     {
-        if (! NexusDB::cache_get("recover:$md5")) {
+        if (! CacheFacade::get("recover:$md5")) {
             throw new AuthenticationException($this->msg($langRecover, 'std_unable_updating_user_data', 'The reset link is expired or invalid.'));
         }
 

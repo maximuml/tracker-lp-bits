@@ -17,8 +17,8 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Validation\Rule;
-use Nexus\Database\NexusDB;
 
 class AuthenticateController extends Controller
 {
@@ -207,7 +207,7 @@ class AuthenticateController extends Controller
             ]);
             $username = $request->username;
             $challenge = Token::randomHex((int) 20);
-            NexusDB::cache_put(Token::challengeKey($username), $challenge, 300);
+            Cache::put(Token::challengeKey($username), $challenge, 300);
             $user = User::query()->where('username', $username)->first(['secret', 'passhash_algo']);
 
             return $this->success([

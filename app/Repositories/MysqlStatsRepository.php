@@ -3,7 +3,7 @@
 namespace App\Repositories;
 
 use DateTime;
-use Nexus\Database\NexusDB;
+use Illuminate\Support\Facades\DB;
 
 final class MysqlStatsRepository
 {
@@ -24,7 +24,8 @@ final class MysqlStatsRepository
     public static function status(): array
     {
         $serverStatus = [];
-        foreach (NexusDB::select('SHOW STATUS') as $row) {
+        foreach (DB::select('SHOW STATUS') as $row) {
+            $row = (array) $row;
             $serverStatus[$row['Variable_name']] = $row['Value'];
         }
 

@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Repositories\SearchBoxRepository;
 use App\Repositories\UserRepository;
 use App\Support\Config\SiteConfig;
+use App\Support\Database;
 use App\Support\Env;
 use App\Support\Environment;
 use App\Support\LegacyResponse;
@@ -756,7 +757,7 @@ class Install
 
     public function getDatabaseVersionInfo(): array
     {
-        return NexusDB::getDatabaseVersionInfo();
+        return Database::versionInfo();
     }
 
     public function getRedisVersionInfo(): array

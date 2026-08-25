@@ -6,6 +6,7 @@ use App\Models\Peer;
 use App\Models\Torrent;
 use App\Models\User;
 use App\Support\Config\SiteConfig;
+use App\Support\Database;
 use App\Support\Format;
 use App\Support\Locale;
 use App\Support\SupportContext;
@@ -14,7 +15,6 @@ use Composer\InstalledVersions;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
-use Nexus\Database\NexusDB;
 
 class DashboardRepository extends BaseRepository
 {
@@ -53,7 +53,7 @@ class DashboardRepository extends BaseRepository
             'value' => PHP_VERSION,
         ];
         $name = 'mysql_version';
-        $databaseInfo = NexusDB::getDatabaseVersionInfo();
+        $databaseInfo = Database::versionInfo();
         $result[$name] = [
             'name' => $name,
             'text' => Locale::trans("dashboard.system_info.{$name}", [], null),

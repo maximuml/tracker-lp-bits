@@ -7,6 +7,7 @@ use App\DTOs\Forum\UpdateForumDto;
 use App\Http\Resources\ForumResource;
 use App\Models\Forum;
 use App\Repositories\CommentRepository;
+use App\Services\ForumPageService;
 use App\Services\Legacy\ForumService;
 use App\Support\Pagination;
 use App\Support\SupportContext;
@@ -20,14 +21,16 @@ class ForumController extends LegacyController
 {
     public function __construct(
         private readonly ForumService $service,
+        private readonly ForumPageService $pageService,
     ) {}
 
     /**
      * Serve the legacy forums.php page from a Laravel view.
      *
-     * The real markup lives in resources/views/forum/_forums_legacy.php
-     * and is included by forum/index.blade.php so the original HTML/PHP
-     * interleaving is preserved as closely as possible.
+     * Mutation actions (post, movetopic, deletetopic, deletepost,
+     * setlocked, setsticky, hltopic) are handled by ForumService and
+     * produce redirects. Read-only actions are rendered via
+     * ForumPageService + Blade partials under resources/views/forum/.
      */
     public function legacy(Request $request): View|Response|RedirectResponse
     {
@@ -40,7 +43,9 @@ class ForumController extends LegacyController
             return $result;
         }
 
-        return $this->legacyPage($request, 'forum', true, $result);
+        $data = $this->pageService->build($request);
+
+        return $this->legacyPage($request, 'forum', true, $data);
     }
 
     public function latestcomments(Request $request): View|RedirectResponse|Response

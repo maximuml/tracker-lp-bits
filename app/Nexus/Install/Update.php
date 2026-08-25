@@ -124,7 +124,7 @@ class Update extends Install
             $this->doLog('[ADD CUSTOM FIELD MENU] insert: '.json_encode($insert)." to table: $table, id: $id");
         }
         // since beta8
-        if (WITH_LARAVEL && ! NexusDB::hasColumn('categories', 'icon_id')) {
+        if (WITH_LARAVEL && ! Schema::hasColumn('categories', 'icon_id')) {
             $this->doLog('[INIT CATEGORY ICON_ID]');
             $this->runMigrate('database/migrations/2022_03_08_040415_add_icon_id_to_categories_table.php');
             $icon = Icon::query()->orderBy('id', 'asc')->first();
@@ -133,7 +133,7 @@ class Update extends Install
             }
         }
         // fix base url, since beta8
-        if (WITH_LARAVEL && NexusDB::hasTable('settings')) {
+        if (WITH_LARAVEL && Schema::hasTable('settings')) {
             $settingBasic = SiteConfig::current()->basic->toArray();
             if (isset($settingBasic['BASEURL']) && Str::startsWith($settingBasic['BASEURL'], 'localhost')) {
                 $this->doLog('[RESET CONFIG basic.BASEURL]');
@@ -162,11 +162,11 @@ class Update extends Install
          * attendance change, do migrate
          */
         if (WITH_LARAVEL) {
-            if (! NexusDB::hasTable('attendance')) {
+            if (! Schema::hasTable('attendance')) {
                 // no table yet, no need to migrate
                 $this->runMigrate('database/migrations/2021_06_08_113437_create_attendance_table.php');
             }
-            if (! NexusDB::hasColumn('attendance', 'total_days')) {
+            if (! Schema::hasColumn('attendance', 'total_days')) {
                 $this->runMigrate('database/migrations/2021_06_13_215440_add_total_days_to_attendance_table.php');
                 $attendanceRep = new AttendanceRepository;
                 $count = $attendanceRep->migrateAttendance();
@@ -179,7 +179,7 @@ class Update extends Install
          *
          * add seed points to user
          */
-        if (WITH_LARAVEL && ! NexusDB::hasColumn('users', 'seed_points')) {
+        if (WITH_LARAVEL && ! Schema::hasColumn('users', 'seed_points')) {
             $this->runMigrate('database/migrations/2021_06_24_013107_add_seed_points_to_users_table.php');
             // Don't do this, initial seed points = 0;
             //            $result = $this->initSeedPoints();
@@ -191,7 +191,7 @@ class Update extends Install
          *
          * add id to agent_allowed_exception
          */
-        if (WITH_LARAVEL && ! NexusDB::hasColumn('agent_allowed_exception', 'id')) {
+        if (WITH_LARAVEL && ! Schema::hasColumn('agent_allowed_exception', 'id')) {
             $this->runMigrate('database/migrations/2022_02_25_021356_add_id_to_agent_allowed_exception_table.php');
             $this->doLog('[ADD_ID_TO_AGENT_ALLOWED_EXCEPTION]');
         }
@@ -201,7 +201,7 @@ class Update extends Install
          *
          * init tag
          */
-        if (WITH_LARAVEL && ! NexusDB::hasTable('tags')) {
+        if (WITH_LARAVEL && ! Schema::hasTable('tags')) {
             $this->runMigrate('database/migrations/2022_03_07_012545_create_tags_table.php');
             $this->initTag();
             $this->doLog('[INIT_TAG]');
@@ -230,7 +230,7 @@ class Update extends Install
          *
          * add attendance_card to users
          */
-        if (WITH_LARAVEL && ! NexusDB::hasColumn('users', 'attendance_card')) {
+        if (WITH_LARAVEL && ! Schema::hasColumn('users', 'attendance_card')) {
             $this->runMigrate('database/migrations/2022_04_02_163930_create_attendance_logs_table.php');
             $this->runMigrate('database/migrations/2022_04_03_041642_add_attendance_card_to_users_table.php');
             $rep = new AttendanceRepository;
@@ -259,7 +259,7 @@ class Update extends Install
         /**
          * @since 1.7.24
          */
-        if (! NexusDB::hasColumn('searchbox', 'extra')) {
+        if (! Schema::hasColumn('searchbox', 'extra')) {
             $this->runMigrate('database/migrations/2022_09_02_031539_add_extra_to_searchbox_table.php');
             SearchBox::query()->update(['extra' => [
                 SearchBox::EXTRA_DISPLAY_COVER_ON_TORRENT_LIST => 1,
@@ -271,7 +271,7 @@ class Update extends Install
          * @since 1.8.0
          */
         $shouldMigrateSearchBox = false;
-        if (! NexusDB::hasColumn('searchbox', 'section_name')) {
+        if (! Schema::hasColumn('searchbox', 'section_name')) {
             $shouldMigrateSearchBox = true;
             $searchBoxLog = 'no section_name field';
         } else {
@@ -295,7 +295,7 @@ class Update extends Install
         }
         $this->removeMenu(['catmanage.php']);
 
-        if (! NexusDB::hasColumn('users', 'seed_points_updated_at')) {
+        if (! Schema::hasColumn('users', 'seed_points_updated_at')) {
             $this->runMigrate('database/migrations/2022_11_23_042152_add_seed_points_seed_times_update_time_to_users_table.php');
             foreach (User::$notificationOptions as $option) {
                 $sql = "update users set notifs = concat(notifs, '[$option]') where instr(notifs, '[$option]') = 0";
@@ -318,7 +318,7 @@ class Update extends Install
         /**
          * @since 1.8.3
          */
-        $hasTableSetting = NexusDB::hasTable('settings');
+        $hasTableSetting = Schema::hasTable('settings');
         if ($hasTableSetting) {
             $updateSettings = [];
             if (SiteConfig::current()->system->meilisearchEnabled()) {
@@ -378,7 +378,7 @@ class Update extends Install
 
             return;
         }
-        if (NexusDB::hasColumn('torrents', 'tags')) {
+        if (Schema::hasColumn('torrents', 'tags')) {
             if (Torrent::query()->where('tags', '>', 0)->count() > 0 && TorrentTag::query()->count() == 0) {
                 $this->doLog('[MIGRATE_TORRENT_TAG]...');
                 $tagRep = new TagRepository;

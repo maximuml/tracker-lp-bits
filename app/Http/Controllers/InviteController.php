@@ -7,16 +7,19 @@ use App\Enums\Permission\PermissionEnum;
 use App\Models\Invite;
 use App\Models\Setting;
 use App\Models\User;
-use App\Repositories\LegacyViewRepository;
+use App\Repositories\InviteRepository;
 use App\Repositories\UserRepository;
 use App\Support\Config\SiteConfig;
 use App\Support\Locale;
+use App\Support\Pagination;
 use App\Support\SupportContext;
+use App\Support\UserDisplay;
 use App\Support\Validators;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\View\View;
+use Nexus\Nexus;
 
 class InviteController extends LegacyController
 {
@@ -44,12 +47,6 @@ class InviteController extends LegacyController
         $userRep = new UserRepository;
         $SITENAME = Setting::getSiteName();
         $invitesystem = SiteConfig::current()->main->inviteSystem() ? 'yes' : 'no';
-
-        // Globals required by the legacy inviteMenu helper.
-        SupportContext::setGlobal('id', $id);
-        SupportContext::setGlobal('lang_invite', $langInvite);
-        SupportContext::setGlobal('userRep', $userRep);
-        SupportContext::setGlobal('invitesystem', $invitesystem);
 
         $data = [
             'id' => $id,
@@ -116,10 +113,130 @@ class InviteController extends LegacyController
                 'preUsernameTr' => $preUsernameTr,
                 '_s' => $_s,
             ]);
+        } else {
+            // invitee / sent / tmp modes — fetch data in the controller
+            $data = array_merge($data, $this->inviteMenuData($id, $menuSelected, $currentUserId, $langInvite, $userRep));
+
+            if ($menuSelected === 'invitee') {
+                $data = array_merge($data, $this->inviteeData($id, $enabled, $status, $currentUserId, $langInvite, $request->getRequestUri()));
+            } elseif (in_array($menuSelected, ['sent', 'tmp'], true)) {
+                $data = array_merge($data, $this->sentTmpData($id, $menuSelected, $langInvite, $langFunctions = (array) (SupportContext::getGlobal('lang_functions') ?? [])));
+            }
         }
 
-        $content = LegacyViewRepository::render('invite', $data);
+        return $this->legacyPage($request, 'invite', true, $data);
+    }
 
-        return response($content, 200, ['Content-Type' => 'text/html; charset=utf-8']);
+    /**
+     * Build the invite menu button data (send button text / disabled state).
+     *
+     * @param  array<string, mixed>  $langInvite
+     * @return array<string, mixed>
+     */
+    private function inviteMenuData(int $id, string $menuSelected, int $currentUserId, array $langInvite, UserRepository $userRep): array
+    {
+        $sendBtnText = '';
+        $sendBtnDisabled = '';
+        if ($currentUserId === $id) {
+            try {
+                $sendBtnText = $userRep->getInviteBtnText($currentUserId);
+            } catch (\Exception $exception) {
+                $sendBtnText = $exception->getMessage();
+                $sendBtnDisabled = ' disabled';
+            }
+        }
+
+        return [
+            'sendBtnText' => $sendBtnText,
+            'sendBtnDisabled' => $sendBtnDisabled,
+        ];
+    }
+
+    /**
+     * Fetch invitee list data for the "invitee" menu tab.
+     *
+     * @param  array<string, mixed>  $langInvite
+     * @return array<string, mixed>
+     */
+    private function inviteeData(int $id, string $enabled, string $status, int $currentUserId, array $langInvite, string $requestUri): array
+    {
+        $filters = ['status' => $status, 'enabled' => $enabled];
+        $number = InviteRepository::countInvitees($id, $filters);
+        $pageSize = 50;
+
+        $enabledOptions = '';
+        foreach (['yes', 'no'] as $item) {
+            $enabledOptions .= sprintf('<option value="%s"%s>%s</option>', $item, ($enabled !== '' && $enabled == $item) ? ' selected' : '', strtoupper($item));
+        }
+        $statusOptions = '';
+        foreach (['pending' => $langInvite['text_pending'] ?? 'Pending', 'confirmed' => $langInvite['text_confirmed'] ?? 'Confirmed'] as $name => $text) {
+            $statusOptions .= sprintf('<option value="%s"%s>%s</option>', $name, ($status !== '' && $status == $name) ? ' selected' : '', $text);
+        }
+
+        $inviteRows = [];
+        $pagertop = '';
+        $pagerbottom = '';
+        $haremAdditionFactor = SiteConfig::current()->bonus->haremAddition();
+        $pendingCount = 0;
+
+        if ($number > 0) {
+            [$pagertop, $pagerbottom, , $offset] = Pagination::pager($pageSize, $number, "?id=$id&menu=invitee&");
+            $inviteRows = InviteRepository::getInvitees($id, $filters, (int) $offset, $pageSize);
+        }
+
+        if ($currentUserId === $id || UserDisplay::currentClass() >= (int) User::CLASS_SYSOP) {
+            $pendingCount = InviteRepository::countPendingInvitees($currentUserId);
+        }
+
+        // Register reset JS
+        $resetJs = <<<'JS'
+jQuery("#reset").on('click', function () {
+    jQuery("select[name=status]").val('')
+    jQuery("select[name=enabled]").val('')
+})
+JS;
+        Nexus::js($resetJs, 'footer', false);
+
+        return [
+            'inviteeCount' => $number,
+            'inviteeRows' => $inviteRows,
+            'inviteePagertop' => $pagertop,
+            'inviteePagerbottom' => $pagerbottom,
+            'inviteeEnabledOptions' => $enabledOptions,
+            'inviteeStatusOptions' => $statusOptions,
+            'haremAdditionFactor' => $haremAdditionFactor,
+            'pendingCount' => $pendingCount,
+            'textSelectOnePlease' => Locale::trans('nexus.select_one_please', [], null),
+            'resetText' => Locale::trans('label.reset', [], null),
+            'submitText' => Locale::trans('label.submit', [], null),
+        ];
+    }
+
+    /**
+     * Fetch sent/tmp invite data.
+     *
+     * @param  array<string, mixed>  $langInvite
+     * @param  array<string, mixed>  $langFunctions
+     * @return array<string, mixed>
+     */
+    private function sentTmpData(int $id, string $menuSelected, array $langInvite, array $langFunctions): array
+    {
+        $number = InviteRepository::countInvites($id, $menuSelected);
+        $pageSize = 50;
+        $inviteRows = [];
+        $pagertop = '';
+        $pagerbottom = '';
+
+        if ($number > 0) {
+            [$pagertop, $pagerbottom, , $offset] = Pagination::pager($pageSize, $number, "?id=$id&menu=$menuSelected&");
+            $inviteRows = InviteRepository::getInvites($id, $menuSelected, (int) $offset, $pageSize);
+        }
+
+        return [
+            'sentTmpCount' => $number,
+            'sentTmpRows' => $inviteRows,
+            'sentTmpPagertop' => $pagertop,
+            'sentTmpPagerbottom' => $pagerbottom,
+        ];
     }
 }

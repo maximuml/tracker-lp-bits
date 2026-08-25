@@ -176,6 +176,8 @@ final class ForumPageService
                 if (! $post) {
                     ob_get_clean();
                     LegacyResponse::abort($lang['std_error'] ?? '', $lang['std_no_post_id'] ?? '');
+
+                    return ['title' => '', 'body' => ''];
                 }
                 $topicid = $post['topicid'];
                 $topicname = $post['topic_subject'] ?? '';
@@ -269,6 +271,8 @@ final class ForumPageService
         $post = ForumRepository::getPostWithTopic((int) $postid);
         if (! $post) {
             LegacyResponse::abort($lang['std_error'] ?? '', $lang['std_no_post_id'] ?? '');
+
+            return ['title' => '', 'body' => ''];
         }
 
         $locked = $post['locked'] == 'yes';
@@ -304,6 +308,8 @@ final class ForumPageService
         $topic = ForumRepository::getTopic((int) $topicid);
         if (! $topic) {
             LegacyResponse::abort($lang['std_forum_error'] ?? '', $lang['std_topic_not_found'] ?? '');
+
+            return [];
         }
         $arr = $topic->toArray();
 
@@ -336,7 +342,7 @@ final class ForumPageService
 
         $postcount = ForumRepository::countTopicPosts((int) $topicid, $authorid ?: null);
         if (! $authorid) {
-            $Cache->cache_value('topic_'.$topicid.'_post_count', $postcount, 3600);
+            $Cache?->cache_value('topic_'.$topicid.'_post_count', $postcount, 3600);
         }
 
         $pagerarr = [];
@@ -455,9 +461,9 @@ final class ForumPageService
             $downloaded = Format::size($arr2['downloaded']);
             $ratio = Ratio::forUserId((int) $arr2['id']);
 
-            if (! $forumposts = $Cache->get_value('user_'.$posterid.'_post_count')) {
+            if (! $forumposts = $Cache?->get_value('user_'.$posterid.'_post_count')) {
                 $forumposts = ForumRepository::countUserPosts((int) $posterid);
-                $Cache->cache_value('user_'.$posterid.'_post_count', $forumposts, 3600);
+                $Cache?->cache_value('user_'.$posterid.'_post_count', $forumposts, 3600);
             }
 
             $signature = (($curUser['signatures'] ?? '') == 'yes' ? ($arr2['signature'] ?? '') : '');
@@ -474,7 +480,7 @@ final class ForumPageService
                 echo "<span id=\"last\"></span>\n";
                 if ($postid > $lpr) {
                     ForumRepository::markPostRead((int) $userId, (int) $topicid, (int) $postid, (int) ($curUser['last_catchup'] ?? 0));
-                    $Cache->delete_value('user_'.($curUser['id'] ?? 0).'_last_read_post_list');
+                    $Cache?->delete_value('user_'.($curUser['id'] ?? 0).'_last_read_post_list');
                 }
             }
 
@@ -560,7 +566,7 @@ final class ForumPageService
             echo '<input type="submit" class="medium" value="'.($lang['submit_delete_topic'] ?? '')."\" /></form></td>\n";
             echo '<td class="embedded"><form method="post" action="'.htmlspecialchars('?action=movetopic&topicid='.$topicid)."\">\n".'&nbsp;'.($lang['text_move_thread_to'] ?? '').'&nbsp;<select class="med" name="forumid">';
             $forums = $this->getForumRow(0);
-            foreach ($forums as $arr) {
+            foreach ($forums ?? [] as $arr) {
                 if ($arr['id'] != $forumid && UserDisplay::currentClass() >= (int) $arr['minclasswrite']) {
                     echo '<option value="'.$arr['id'].'">'.htmlspecialchars((string) $arr['name'])."</option>\n";
                 }
@@ -710,9 +716,9 @@ final class ForumPageService
                 $sticky = $topicarr['sticky'] == 'yes';
                 $hlcolor = (int) $topicarr['hlcolor'];
 
-                if (! $posts = $Cache->get_value('topic_'.$topicid.'_post_count')) {
+                if (! $posts = $Cache?->get_value('topic_'.$topicid.'_post_count')) {
                     $posts = ForumRepository::countTopicPosts((int) $topicid);
-                    $Cache->cache_value('topic_'.$topicid.'_post_count', $posts, 3600);
+                    $Cache?->cache_value('topic_'.$topicid.'_post_count', $posts, 3600);
                 }
 
                 $replies = max(0, $posts - 1);
@@ -1009,9 +1015,9 @@ final class ForumPageService
         echo '<p align="center"><a href="?action=search"><b>'.($lang['text_search'] ?? '').'</b></a> | <a href="?action=viewunread"><b>'.($lang['text_view_unread'] ?? '').'</b></a> | <a href="?catchup=1"><b>'.($lang['text_catch_up'] ?? '').'</b></a> '.(Permission::can(PermissionEnum::FORUM_MANAGE) ? '| <a href="forummanage.php"><b>'.($lang['text_forum_manager'] ?? '').'</b></a>' : '').'</p>';
         echo "<table border=\"1\" cellspacing=\"0\" cellpadding=\"5\" width=\"100%\">\n";
 
-        if (! $overforums = $Cache->get_value('overforums_list')) {
+        if (! $overforums = $Cache?->get_value('overforums_list')) {
             $overforums = ForumRepository::getOverforumsList();
-            $Cache->cache_value('overforums_list', $overforums, 86400);
+            $Cache?->cache_value('overforums_list', $overforums, 86400);
         }
         foreach ($overforums as $a) {
             if (UserDisplay::currentClass() < (int) ($a['minclassview'] ?? 0)) {
@@ -1025,7 +1031,7 @@ final class ForumPageService
             '<td align="left" class="colhead">'.($lang['col_last_post'] ?? '').'</td><td class="colhead" align="left">'.($lang['col_moderator'] ?? '')."</td></tr>\n";
 
             $forums = $this->getForumRow(0);
-            foreach ($forums as $forums_arr) {
+            foreach ($forums ?? [] as $forums_arr) {
                 if ((int) $forums_arr['forid'] != $forid) {
                     continue;
                 }
@@ -1045,10 +1051,10 @@ final class ForumPageService
                 $topiccount = number_format((int) $forums_arr['topiccount']);
                 $postcount = number_format((int) $forums_arr['postcount']);
 
-                if (! $arr = $Cache->get_value('forum_'.$forumid.'_last_replied_topic_content')) {
+                if (! $arr = $Cache?->get_value('forum_'.$forumid.'_last_replied_topic_content')) {
                     $lastTopic = ForumRepository::getLastTopicByForum((int) $forumid);
                     $arr = $lastTopic ? $lastTopic->toArray() : false;
-                    $Cache->cache_value('forum_'.$forumid.'_last_replied_topic_content', $arr, 900);
+                    $Cache?->cache_value('forum_'.$forumid.'_last_replied_topic_content', $arr, 900);
                 }
 
                 if ($arr) {
@@ -1079,10 +1085,10 @@ final class ForumPageService
                     $lastpost = 'N/A';
                     $img = $this->getTopicImage('read', $lang);
                 }
-                $posttodaycount = $Cache->get_value('forum_'.$forumid.'_post_'.$todayDate.'_count');
+                $posttodaycount = $Cache?->get_value('forum_'.$forumid.'_post_'.$todayDate.'_count');
                 if ($posttodaycount == '') {
                     $posttodaycount = ForumRepository::getForumTodayPostCount((int) $forumid, date('Y-m-d'));
-                    $Cache->cache_value('forum_'.$forumid.'_post_'.$todayDate.'_count', $posttodaycount, 1800);
+                    $Cache?->cache_value('forum_'.$forumid.'_post_'.$todayDate.'_count', $posttodaycount, 1800);
                 }
                 if ($posttodaycount > 0) {
                     $posttoday = '&nbsp;&nbsp;('.($lang['text_today'] ?? '').'<b><font class="new">'.$posttodaycount.'</font></b>)';
@@ -1111,9 +1117,9 @@ final class ForumPageService
     {
         $Cache = SupportContext::getCache();
 
-        if (! $activeforumuser_num = $Cache->get_value('active_forum_user_count')) {
+        if (! $activeforumuser_num = $Cache?->get_value('active_forum_user_count')) {
             $activeforumuser_num = ForumRepository::getActiveForumUserCount();
-            $Cache->cache_value('active_forum_user_count', $activeforumuser_num, 300);
+            $Cache?->cache_value('active_forum_user_count', $activeforumuser_num, 300);
         }
         if ($activeforumuser_num) {
             $forumusers = ($lang['text_there'] ?? '').Strings::isOrAre((int) $activeforumuser_num).'<b>'.$activeforumuser_num.'</b>'.($lang['text_online_user'] ?? '').Strings::addS((int) $activeforumuser_num).($lang['text_in_forum_now'] ?? '');
@@ -1126,17 +1132,17 @@ final class ForumPageService
 <h2 align="left"><?php echo $lang['text_stats'] ?? '' ?></h2>
 <table width="100%"><tr><td class="text">
 <?php
-        if (! $postcount = $Cache->get_value('total_posts_count')) {
+        if (! $postcount = $Cache?->get_value('total_posts_count')) {
             $postcount = ForumRepository::getTotalPostsCount();
-            $Cache->cache_value('total_posts_count', $postcount, 96400);
+            $Cache?->cache_value('total_posts_count', $postcount, 96400);
         }
-        if (! $topiccount = $Cache->get_value('total_topics_count')) {
+        if (! $topiccount = $Cache?->get_value('total_topics_count')) {
             $topiccount = ForumRepository::getTotalTopicsCount();
-            $Cache->cache_value('total_topics_count', $topiccount, 96500);
+            $Cache?->cache_value('total_topics_count', $topiccount, 96500);
         }
-        if (! $todaypostcount = $Cache->get_value('today_'.$todayDate.'_posts_count')) {
+        if (! $todaypostcount = $Cache?->get_value('today_'.$todayDate.'_posts_count')) {
             $todaypostcount = ForumRepository::getTodayPostsCount($todayDate);
-            $Cache->cache_value('today_'.$todayDate.'_posts_count', $todaypostcount, 700);
+            $Cache?->cache_value('today_'.$todayDate.'_posts_count', $todaypostcount, 700);
         }
         echo ($lang['text_our_members_have'] ?? '').'<b>'.$postcount.'</b>'.($lang['text_posts_in_topics'] ?? '').'<b>'.$topiccount.'</b>'.($lang['text_in_topics'] ?? '').'<b><font class="new">'.$todaypostcount.'</font></b>'.($lang['text_new_post'] ?? '').Strings::addS((int) $todaypostcount).($lang['text_posts_today'] ?? '').'<br /><br />';
         echo $forumusers;
@@ -1158,7 +1164,7 @@ final class ForumPageService
             return;
         }
         ForumRepository::clearReadPosts((int) $CURUSER['id']);
-        $Cache->delete_value('user_'.$CURUSER['id'].'_last_read_post_list');
+        $Cache?->delete_value('user_'.$CURUSER['id'].'_last_read_post_list');
         $lastpostid = ForumRepository::getLastPostId();
         if ($lastpostid) {
             $CURUSER['last_catchup'] = $lastpostid;
@@ -1203,9 +1209,9 @@ final class ForumPageService
     private function getForumRow(int $forumid = 0): ?array
     {
         $Cache = SupportContext::getCache();
-        if (! $forums = $Cache->get_value('forums_list')) {
+        if (! $forums = $Cache?->get_value('forums_list')) {
             $forums = ForumRepository::getForumsList();
-            $Cache->cache_value('forums_list', $forums, 86400);
+            $Cache?->cache_value('forums_list', $forums, 86400);
         }
         if (! $forumid) {
             return $forums;
@@ -1221,12 +1227,12 @@ final class ForumPageService
     {
         $Cache = SupportContext::getCache();
         static $ret = null;
-        if (! $ret && ! $ret = $Cache->get_value('user_'.($curUser['id'] ?? 0).'_last_read_post_list')) {
+        if (! $ret && ! $ret = $Cache?->get_value('user_'.($curUser['id'] ?? 0).'_last_read_post_list')) {
             $ret = ForumRepository::getLastReadPosts((int) ($curUser['id'] ?? 0));
             if ($ret !== null) {
-                $Cache->cache_value('user_'.($curUser['id'] ?? 0).'_last_read_post_list', $ret, 900);
+                $Cache?->cache_value('user_'.($curUser['id'] ?? 0).'_last_read_post_list', $ret, 900);
             } else {
-                $Cache->cache_value('user_'.($curUser['id'] ?? 0).'_last_read_post_list', 'no record', 900);
+                $Cache?->cache_value('user_'.($curUser['id'] ?? 0).'_last_read_post_list', 'no record', 900);
             }
         }
         if (is_array($ret) && (isset($ret[$topicid])) && (int) ($curUser['last_catchup'] ?? 0) < (int) $ret[$topicid]) {

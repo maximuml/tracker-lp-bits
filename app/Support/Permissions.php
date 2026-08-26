@@ -25,6 +25,12 @@ final class Permissions
 
     private static int $sequence = 0;
 
+    public static function resetState(): void
+    {
+        self::$userCanCache = [];
+        self::$sequence = 0;
+    }
+
     /**
      * Check whether a user has a named permission.
      *

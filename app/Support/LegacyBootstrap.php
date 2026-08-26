@@ -67,6 +67,10 @@ final class LegacyBootstrap
     private static function bootNexus(): void
     {
         if (defined('RUNNING_IN_OCTANE') && RUNNING_IN_OCTANE) {
+            // ResetNexus listener already flushed state; just re-boot
+            // the instance with fresh request-scoped data.
+            Nexus::boot();
+
             return;
         }
 

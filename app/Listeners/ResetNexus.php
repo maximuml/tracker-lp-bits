@@ -2,7 +2,11 @@
 
 namespace App\Listeners;
 
+use App\Support\CurrentUser;
+use App\Support\PageLayout;
+use App\Support\Permissions;
 use App\Support\SupportContext;
+use App\Utils\MsgAlert;
 use Nexus\Nexus;
 
 class ResetNexus
@@ -16,6 +20,10 @@ class ResetNexus
     public function handle($event): void
     {
         SupportContext::reset();
+        app(CurrentUser::class)->reset();
         Nexus::flush();
+        PageLayout::resetState();
+        Permissions::resetState();
+        MsgAlert::resetState();
     }
 }

@@ -36,6 +36,12 @@ final class MsgAlert
 
     private function __clone() {}
 
+    public static function resetState(): void
+    {
+        self::$instance = null;
+        self::$alerts = [];
+    }
+
     public static function getInstance(): MsgAlert
     {
         if (isset(self::$instance)) {

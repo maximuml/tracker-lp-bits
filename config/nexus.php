@@ -29,7 +29,7 @@ return [
                 'strict' => false,
                 'engine' => null,
                 'options' => extension_loaded('pdo_mysql') ? array_filter([
-                    PDO::MYSQL_ATTR_SSL_CA => Env::get('MYSQL_ATTR_SSL_CA', null),
+                    1009, // PDO::MYSQL_ATTR_SSL_CA (deprecated in PHP 8.5) => Env::get('MYSQL_ATTR_SSL_CA', null),
                 ]) : [],
             ],
             'pgsql' => [
@@ -65,7 +65,7 @@ return [
         'strict' => false,
         'engine' => null,
         'options' => extension_loaded('pdo_mysql') ? array_filter([
-            PDO::MYSQL_ATTR_SSL_CA => Env::get('MYSQL_ATTR_SSL_CA', null),
+            1009, // PDO::MYSQL_ATTR_SSL_CA (deprecated in PHP 8.5) => Env::get('MYSQL_ATTR_SSL_CA', null),
         ]) : [],
     ],
 

@@ -83,7 +83,6 @@ jobs:
       - name: Cache Laravel bootstrap files
         run: |
           php artisan storage:link --force
-          php artisan route:cache
           php artisan view:cache
           php artisan icons:cache
           php artisan filament:cache-components
@@ -93,20 +92,22 @@ jobs:
           # Start RoadRunner Octane server in background
           php artisan octane:start --server=roadrunner --host=127.0.0.1 --port=8000 --workers=2 --max-requests=50 &
 
-          # Wait for server to be ready (any response means it's up)
-          for i in $(seq 1 30); do
-            STATUS=$(curl -sL --max-time 5 -o /dev/null -w "%{http_code}" http://127.0.0.1:8000/ 2>/dev/null || echo "000")
-            [ "$STATUS" != "000" ] && break
+          # Wait for server to be ready — retry until we get any HTTP response
+          for i in $(seq 1 60); do
+            STATUS=$(curl -sL --max-time 3 -o /dev/null -w "%{http_code}" http://127.0.0.1:8000/ 2>/dev/null || true)
+            if [ -n "$STATUS" ] && [ "$STATUS" != "000" ]; then
+              echo "Server responded with $STATUS after $i attempts"
+              break
+            fi
             sleep 1
           done
 
-          # Verify server is up (any non-000 response means the server is listening)
-          STATUS=$(curl -sL --max-time 10 -o /dev/null -w "%{http_code}" http://127.0.0.1:8000/ 2>/dev/null || echo "000")
-          [ "$STATUS" != "000" ] || {
+          # Verify server is up
+          if [ -z "$STATUS" ] || [ "$STATUS" = "000" ]; then
             echo "Octane server failed to start"
             exit 1
-          }
-          echo "Octane server is running (root returned $STATUS)"
+          fi
+          echo "Octane server is running"
 
       - name: Smoke test public pages
         run: |

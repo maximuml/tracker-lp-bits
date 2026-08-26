@@ -5,6 +5,7 @@ namespace App\Logging;
 use Illuminate\Log\Logger as IlluminateLogger;
 use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\FormattableHandlerInterface;
+use Monolog\Logger;
 use Nexus\Nexus;
 
 class NexusFormatter
@@ -12,6 +13,9 @@ class NexusFormatter
     public function __invoke(IlluminateLogger $logger): void
     {
         $monolog = $logger->getLogger();
+        if (! $monolog instanceof Logger) {
+            return;
+        }
         foreach ($monolog->getHandlers() as $handler) {
             if ($handler instanceof FormattableHandlerInterface) {
                 $handler->setFormatter($this->formatter());

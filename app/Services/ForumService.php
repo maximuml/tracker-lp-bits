@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Services\Legacy;
+namespace App\Services;
 
 use App\Auth\Permission;
 use App\Enums\Permission\PermissionEnum;
@@ -22,7 +22,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
 /**
- * Temporary bridge for legacy forums.php mutation actions.
+ * Handles forum mutation actions (post, move, delete, lock, sticky, highlight).
  */
 final class ForumService
 {

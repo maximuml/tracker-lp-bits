@@ -8,7 +8,7 @@ use App\Http\Resources\ForumResource;
 use App\Models\Forum;
 use App\Repositories\CommentRepository;
 use App\Services\ForumPageService;
-use App\Services\Legacy\ForumService;
+use App\Services\ForumService;
 use App\Support\CurrentUser;
 use App\Support\Pagination;
 use App\Support\UserDisplay;

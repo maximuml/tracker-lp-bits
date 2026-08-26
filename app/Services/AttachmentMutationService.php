@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\Legacy;
+namespace App\Services;
 
 use App\Models\Attachment;
 use App\Support\Attachment\AttachmentService;
@@ -11,7 +11,7 @@ use App\Support\Path;
 use Illuminate\Support\Facades\DB;
 use Nexus\Attachment\Storage;
 
-class AttachmentLegacyService
+class AttachmentMutationService
 {
     /**
      * @param  array<string, mixed>  $CURUSER

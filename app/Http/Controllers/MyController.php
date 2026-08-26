@@ -6,7 +6,7 @@ use App\Enums\Permission\PermissionEnum;
 use App\Models\HitAndRun;
 use App\Models\User;
 use App\Services\BonusPageService;
-use App\Services\Legacy\BonusService;
+use App\Services\BonusService;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\Globals;

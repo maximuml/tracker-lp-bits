@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Services\Legacy;
+namespace App\Services;
 
 use App\Auth\Permission;
 use App\Enums\Permission\PermissionEnum;

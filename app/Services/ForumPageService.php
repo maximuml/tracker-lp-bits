@@ -8,6 +8,7 @@ use App\Auth\Permission;
 use App\Enums\Permission\PermissionEnum;
 use App\Models\User;
 use App\Repositories\ForumRepository;
+use App\Support\Cache\LegacyRedisCache;
 use App\Support\Format;
 use App\Support\Forum;
 use App\Support\Frame;
@@ -293,7 +294,7 @@ final class ForumPageService
      */
     private function buildViewTopic(array $lang, array $curUser, int $userId, Request $request, int $postsperpage): array
     {
-        $Cache = SupportContext::getCache();
+        $Cache = app(LegacyRedisCache::class);
         $highlight = htmlspecialchars(trim((string) (SupportContext::getQuery('highlight') ?? '')));
         $topicid = (int) (SupportContext::getQuery('topicid') ?? 0);
         LegacyResponse::assertId($topicid, true);
@@ -617,7 +618,7 @@ final class ForumPageService
      */
     private function buildViewForum(array $lang, array $curUser, Request $request, int $topicsperpage, int $postsperpage): array
     {
-        $Cache = SupportContext::getCache();
+        $Cache = app(LegacyRedisCache::class);
         $forumid = (int) (SupportContext::getQuery('forumid') ?? 0);
         LegacyResponse::assertId($forumid, true);
         $userid = (int) ($curUser['id'] ?? 0);
@@ -1000,7 +1001,7 @@ final class ForumPageService
      */
     private function buildForumsIndex(array $lang, array $curUser, int $userId): array
     {
-        $Cache = SupportContext::getCache();
+        $Cache = app(LegacyRedisCache::class);
         $todayDate = date('Y-m-d');
 
         if ($curUser) {
@@ -1115,7 +1116,7 @@ final class ForumPageService
      */
     private function forumStats(array $lang, string $todayDate): string
     {
-        $Cache = SupportContext::getCache();
+        $Cache = app(LegacyRedisCache::class);
 
         if (! $activeforumuser_num = $Cache?->get_value('active_forum_user_count')) {
             $activeforumuser_num = ForumRepository::getActiveForumUserCount();
@@ -1158,7 +1159,7 @@ final class ForumPageService
     private function catchUp(): void
     {
         $CURUSER = (array) (SupportContext::getUser() ?? []);
-        $Cache = SupportContext::getCache();
+        $Cache = app(LegacyRedisCache::class);
 
         if (! $CURUSER) {
             return;
@@ -1208,7 +1209,7 @@ final class ForumPageService
      */
     private function getForumRow(int $forumid = 0): ?array
     {
-        $Cache = SupportContext::getCache();
+        $Cache = app(LegacyRedisCache::class);
         if (! $forums = $Cache?->get_value('forums_list')) {
             $forums = ForumRepository::getForumsList();
             $Cache?->cache_value('forums_list', $forums, 86400);
@@ -1225,7 +1226,7 @@ final class ForumPageService
      */
     private function getLastReadPostId(int $topicid, array $curUser): int
     {
-        $Cache = SupportContext::getCache();
+        $Cache = app(LegacyRedisCache::class);
         static $ret = null;
         if (! $ret && ! $ret = $Cache?->get_value('user_'.($curUser['id'] ?? 0).'_last_read_post_list')) {
             $ret = ForumRepository::getLastReadPosts((int) ($curUser['id'] ?? 0));

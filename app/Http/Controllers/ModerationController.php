@@ -8,6 +8,7 @@ use App\Models\Offer;
 use App\Models\Torrent;
 use App\Models\User;
 use App\Repositories\ModerationRepository;
+use App\Support\Cache\LegacyRedisCache;
 use App\Support\Pagination;
 use App\Support\Permissions;
 use App\Support\SupportContext;
@@ -29,7 +30,7 @@ class ModerationController extends LegacyController
         $staffmemClass = defined('UC_STAFFMEM') ? \constant('UC_STAFFMEM') : (defined('UC_MODERATOR') ? \constant('UC_MODERATOR') : 0);
 
         $langReport = (array) SupportContext::getGlobal('lang_report', []);
-        $cache = SupportContext::getCache();
+        $cache = app(LegacyRedisCache::class);
 
         $reportofferid = (int) (SupportContext::getQuery('reportofferid') ?? 0);
         $user = (int) (SupportContext::getQuery('user') ?? 0);

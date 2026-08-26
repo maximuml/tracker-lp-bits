@@ -2,6 +2,7 @@
 
 namespace App\Support;
 
+use App\Support\Cache\LegacyRedisCache;
 use Nexus\Nexus;
 
 /**
@@ -70,7 +71,7 @@ final class LegacyAuthContext
         return new self(
             user: SupportContext::getUser(),
             lang: SupportContext::getLangFunctions(),
-            cache: SupportContext::getCache(),
+            cache: app(LegacyRedisCache::class),
             ip: \function_exists('getip') ? Network::clientIp((bool) true) : Network::clientIp(),
             requestUri: SupportContext::getServerValue('REQUEST_URI'),
             requestBody: SupportContext::allPost(),

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Repositories\IndexRepository;
 use App\Services\IndexPageService;
 use App\Support\Bonus;
+use App\Support\Cache\LegacyRedisCache;
 use App\Support\SupportContext;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -59,7 +60,7 @@ class IndexController extends Controller
 
         IndexRepository::recordPollVote($pollId, $user['id'], (int) $choice);
 
-        $cache = SupportContext::getCache();
+        $cache = app(LegacyRedisCache::class);
         if ($cache !== null) {
             $cache->delete_value('current_poll_content');
             $cache->delete_value('current_poll_result', true);

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Repositories\TorrentSearchRepository;
+use App\Support\Cache\LegacyRedisCache;
 use App\Support\SupportContext;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -14,7 +15,7 @@ class TorrentListingController extends Controller
 {
     public function index(Request $request): View|RedirectResponse
     {
-        if (SupportContext::getCache() === null) {
+        if (app(LegacyRedisCache::class) === null) {
             return redirect('/torrents.php?'.http_build_query($request->query->all()));
         }
 

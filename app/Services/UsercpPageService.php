@@ -51,7 +51,7 @@ final class UsercpPageService
     {
         $curUser = (array) (SupportContext::getUser() ?? []);
         $lang = (array) (SupportContext::getGlobal('lang_usercp') ?? []);
-        $cache = SupportContext::getCache();
+        $cache = app(LegacyRedisCache::class);
         $userInfo = UsercpRepository::getUserById((int) ($curUser['id'] ?? 0));
         $siteName = Setting::getSiteName();
 

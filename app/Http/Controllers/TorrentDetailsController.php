@@ -13,6 +13,7 @@ use App\Repositories\SearchBoxRepository;
 use App\Repositories\TagRepository;
 use App\Repositories\TorrentDetailRepository;
 use App\Repositories\TorrentRepository;
+use App\Support\Cache\LegacyRedisCache;
 use App\Support\Config\SiteConfig;
 use App\Support\Format;
 use App\Support\Hooks;
@@ -54,7 +55,7 @@ class TorrentDetailsController extends Controller
 
         Gate::forUser($user)->authorize('view', $torrent);
 
-        if (SupportContext::getCache() === null) {
+        if (app(LegacyRedisCache::class) === null) {
             $query = $request->query->all();
             unset($query['id']);
 

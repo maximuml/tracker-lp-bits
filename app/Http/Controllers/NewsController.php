@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Resources\NewsResource;
 use App\Models\News;
 use App\Repositories\IndexRepository;
+use App\Support\Cache\LegacyRedisCache;
 use App\Support\Events;
 use App\Support\SupportContext;
 use Illuminate\Http\RedirectResponse;
@@ -38,7 +39,7 @@ class NewsController extends LegacyController
             }
 
             News::query()->where('id', $newsid)->delete();
-            $cache = SupportContext::getCache();
+            $cache = app(LegacyRedisCache::class);
             if ($cache !== null) {
                 $cache->delete_value('recent_news', true);
             }
@@ -81,7 +82,7 @@ class NewsController extends LegacyController
                 return $this->legacyAbortResponse($langNews['std_error'] ?? 'Error', $langNews['std_something_weird_happened'] ?? 'Something weird happened.');
             }
 
-            $cache = SupportContext::getCache();
+            $cache = app(LegacyRedisCache::class);
             if ($cache !== null) {
                 $cache->delete_value('recent_news', true);
             }
@@ -123,7 +124,7 @@ class NewsController extends LegacyController
                     'notify' => $notify,
                 ]);
 
-                $cache = SupportContext::getCache();
+                $cache = app(LegacyRedisCache::class);
                 if ($cache !== null) {
                     $cache->delete_value('recent_news', true);
                 }
@@ -194,7 +195,7 @@ class NewsController extends LegacyController
         $news = News::query()->create($data);
         Events::fire('news_created', $news, null);
 
-        $cache = SupportContext::getCache();
+        $cache = app(LegacyRedisCache::class);
         $cache?->delete_value('recent_news', true);
 
         return $this->success(new NewsResource($news), 'News created');
@@ -213,7 +214,7 @@ class NewsController extends LegacyController
 
         $news->update($data);
 
-        $cache = SupportContext::getCache();
+        $cache = app(LegacyRedisCache::class);
         $cache?->delete_value('recent_news', true);
 
         return $this->success(new NewsResource($news->fresh()), 'News updated');
@@ -226,7 +227,7 @@ class NewsController extends LegacyController
     {
         $news->delete();
 
-        $cache = SupportContext::getCache();
+        $cache = app(LegacyRedisCache::class);
         $cache?->delete_value('recent_news', true);
 
         return $this->success(['success' => true], 'News deleted');

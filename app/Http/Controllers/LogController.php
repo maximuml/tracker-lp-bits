@@ -6,6 +6,7 @@ use App\Auth\Permission;
 use App\Enums\Permission\PermissionEnum;
 use App\Models\Setting;
 use App\Repositories\LogRepository;
+use App\Support\Cache\LegacyRedisCache;
 use App\Support\Pagination;
 use App\Support\SupportContext;
 use App\Support\Time;
@@ -225,7 +226,7 @@ class LogController extends LegacyController
             }
             LogRepository::deletePoll($pollid);
 
-            $cache = SupportContext::getCache();
+            $cache = app(LegacyRedisCache::class);
             if ($cache !== null) {
                 $cache->delete_value('current_poll_content');
                 $cache->delete_value('current_poll_result', true);

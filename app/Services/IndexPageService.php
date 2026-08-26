@@ -31,7 +31,7 @@ final class IndexPageService
     {
         $curUser = (array) (SupportContext::getUser() ?? []);
         $lang = (array) (SupportContext::getGlobal('lang_index') ?? []);
-        $cache = SupportContext::getCache();
+        $cache = app(LegacyRedisCache::class);
 
         $data = [
             'lang' => $lang,

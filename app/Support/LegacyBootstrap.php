@@ -76,9 +76,10 @@ final class LegacyBootstrap
 
     private static function bootCache(string $rootpath): void
     {
-        $Cache = new LegacyRedisCache;
-        $Cache->setLanguageFolderArray(Locale::available());
-        SupportContext::setCache($Cache);
+        // LegacyRedisCache is now registered as a singleton in
+        // AppServiceProvider::register(). Just resolve it to trigger
+        // the connection + language folder setup.
+        app(LegacyRedisCache::class);
     }
 
     private static function bootDatabase(): void

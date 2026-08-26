@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Models\Invite;
+use App\Support\Cache\LegacyRedisCache;
 use App\Support\Hooks;
 use App\Support\Menu;
 use App\Support\SupportContext;
@@ -146,7 +147,7 @@ class PageLayoutRepository extends BaseRepository
             (string) SupportContext::getGlobal('enableoffer', ''),
             (string) Hooks::applyFilter('nexus_menu') ?: null,
             $user,
-            SupportContext::getCache(),
+            app(LegacyRedisCache::class),
             (string) SupportContext::getGlobal('CURLANGDIR', ''),
         );
 

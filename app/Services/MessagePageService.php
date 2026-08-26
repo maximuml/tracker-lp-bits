@@ -6,6 +6,7 @@ namespace App\Services;
 
 use App\Models\Message;
 use App\Repositories\MessageRepository;
+use App\Support\Cache\LegacyRedisCache;
 use App\Support\Format;
 use App\Support\LegacyResponse;
 use App\Support\Pagination;
@@ -254,7 +255,7 @@ final class MessagePageService
 
         // Mark message as read
         MessageRepository::markAsRead($pmId, $userId);
-        $cache = SupportContext::getCache();
+        $cache = app(LegacyRedisCache::class);
         if ($cache !== null) {
             $cache->delete_value('user_'.$userId.'_unread_message_count');
         }

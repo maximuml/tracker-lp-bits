@@ -2,9 +2,11 @@
 
 namespace App\Providers;
 
+use App\Support\Cache\LegacyRedisCache;
 use App\Support\Env;
 use App\Support\Environment;
 use App\Support\Hooks;
+use App\Support\Locale;
 use App\Support\SupportContext;
 use Filament\Facades\Filament;
 use Filament\Support\Assets\Css;
@@ -32,6 +34,12 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->app->singleton(Hook::class, static fn () => SupportContext::getGlobal('hook') ?? new Hook);
         $this->app->singleton(Plugin::class, static fn () => SupportContext::getGlobal('plugin') ?? new Plugin);
+        $this->app->singleton(LegacyRedisCache::class, static function (): LegacyRedisCache {
+            $cache = new LegacyRedisCache;
+            $cache->setLanguageFolderArray(Locale::available());
+
+            return $cache;
+        });
 
         Hooks::doAction('nexus_register');
     }

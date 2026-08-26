@@ -6,6 +6,7 @@ use App\Enums\Permission\PermissionEnum;
 use App\Models\SearchBox;
 use App\Models\Torrent;
 use App\Repositories\TorrentRepository;
+use App\Support\Cache\LegacyRedisCache;
 use App\Support\Config\SiteConfig;
 use App\Support\Format;
 use App\Support\Hooks;
@@ -27,7 +28,7 @@ class TorrentRssController extends LegacyController
 {
     public function torrentrss(Request $request): Response
     {
-        $cache = SupportContext::getCache();
+        $cache = app(LegacyRedisCache::class);
         $currentUser = SupportContext::getUser() ?? [];
         $passkey = (string) ($request->input('passkey') ?? $currentUser['passkey'] ?? '');
 

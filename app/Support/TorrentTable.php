@@ -6,6 +6,7 @@ use App\Auth\Permission;
 use App\Repositories\SeedBoxRepository;
 use App\Repositories\TagRepository;
 use App\Repositories\TorrentRepository;
+use App\Support\Cache\LegacyRedisCache;
 use App\Support\Config\SiteConfig;
 use Nexus\Torrent\Torrent;
 
@@ -18,7 +19,7 @@ final class TorrentTable
     {
         ob_start();
 
-        $cache = SupportContext::getCache();
+        $cache = app(LegacyRedisCache::class);
         if ($cache === null) {
             throw new \RuntimeException('Cache not initialized');
         }

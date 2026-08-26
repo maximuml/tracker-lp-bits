@@ -3,6 +3,7 @@
 namespace App\Support;
 
 use App\Jobs\GenerateCoverThumbnail;
+use App\Support\Cache\LegacyRedisCache;
 use Nexus\Nexus;
 
 /**
@@ -73,7 +74,7 @@ final class CoverThumb
             $saveDirectory ?: 'attachments',
             $httpDirectory ?: 'attachments',
             defined('ROOT_PATH') ? (string) ROOT_PATH : '',
-            SupportContext::getCache() ?? null,
+            app(LegacyRedisCache::class) ?? null,
         );
     }
 

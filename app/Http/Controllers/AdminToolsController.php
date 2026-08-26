@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\UserBanLog;
 use App\Repositories\ModerationRepository;
+use App\Support\Cache\LegacyRedisCache;
 use App\Support\Html;
 use App\Support\Network;
 use App\Support\Pagination;
@@ -81,7 +82,7 @@ class AdminToolsController extends LegacyController
                 $error = 'You must fill in cache name.';
             } else {
                 $multilang = $request->input('multilang') === 'yes';
-                $cache = SupportContext::getCache();
+                $cache = app(LegacyRedisCache::class);
                 if ($cache !== null) {
                     $cache->delete_value($cachename, $multilang);
                 }

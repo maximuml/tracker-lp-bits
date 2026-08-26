@@ -8,6 +8,7 @@ use App\Models\Complain;
 use App\Models\Setting;
 use App\Models\User;
 use App\Repositories\ToolRepository;
+use App\Support\Cache\LegacyRedisCache;
 use App\Support\Captcha;
 use App\Support\Config\SiteConfig;
 use App\Support\Logger;
@@ -123,7 +124,7 @@ class SupportController extends LegacyController
             'ip' => Network::clientIp(),
         ]);
 
-        $cache = SupportContext::getCache();
+        $cache = app(LegacyRedisCache::class);
         if ($cache !== null) {
             $cache->delete_value('COMPLAINTS_COUNT_CACHE');
         }
@@ -196,7 +197,7 @@ class SupportController extends LegacyController
             'answered' => $action === 'answered' ? 1 : 0,
         ]);
 
-        $cache = SupportContext::getCache();
+        $cache = app(LegacyRedisCache::class);
         if ($cache !== null) {
             $cache->delete_value('COMPLAINTS_COUNT_CACHE');
         }

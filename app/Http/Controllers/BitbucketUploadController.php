@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Support\Cache\LegacyRedisCache;
 use App\Support\Http;
 use App\Support\LegacyResponse;
 use App\Support\Locale;
@@ -20,7 +21,7 @@ class BitbucketUploadController extends Controller
 {
     public function create(Request $request): View|RedirectResponse
     {
-        if (SupportContext::getCache() === null) {
+        if (app(LegacyRedisCache::class) === null) {
             return redirect('/bitbucket-upload.php?'.$request->getQueryString());
         }
 
@@ -53,7 +54,7 @@ class BitbucketUploadController extends Controller
 
     public function store(Request $request): View|RedirectResponse
     {
-        if (SupportContext::getCache() === null) {
+        if (app(LegacyRedisCache::class) === null) {
             return redirect('/bitbucket-upload.php', 307);
         }
 

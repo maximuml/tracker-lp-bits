@@ -7,6 +7,7 @@ use App\Models\Invite;
 use App\Models\Setting;
 use App\Models\User;
 use App\Repositories\UserRepository;
+use App\Support\Cache\LegacyRedisCache;
 use App\Support\Config\SiteConfig;
 use App\Support\Email;
 use App\Support\Environment;
@@ -285,7 +286,7 @@ class SystemBulkController extends LegacyController
             return $this->legacyAbortResponse('Error', 'Invalid report ids.');
         }
 
-        $cache = SupportContext::getCache();
+        $cache = app(LegacyRedisCache::class);
         if (SupportContext::getPost('setdealt')) {
             DB::table('reports')
                 ->whereIn('id', $delreportIds)

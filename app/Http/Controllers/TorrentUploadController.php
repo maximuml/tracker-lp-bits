@@ -10,6 +10,7 @@ use App\Repositories\SearchBoxRepository;
 use App\Repositories\TagRepository;
 use App\Repositories\TorrentRepository;
 use App\Repositories\UploadRepository;
+use App\Support\Cache\LegacyRedisCache;
 use App\Support\Category;
 use App\Support\LegacyResponse;
 use App\Support\Locale;
@@ -24,7 +25,7 @@ class TorrentUploadController extends Controller
 {
     public function create(Request $request): View|RedirectResponse
     {
-        if (SupportContext::getCache() === null) {
+        if (app(LegacyRedisCache::class) === null) {
             return redirect('/upload.php?'.$request->getQueryString());
         }
 

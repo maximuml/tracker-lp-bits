@@ -10,6 +10,7 @@ use App\Services\Legacy\AttachmentLegacyService;
 use App\Services\UsersearchPageService;
 use App\Support\Api;
 use App\Support\Attachment\AttachmentService;
+use App\Support\Cache\LegacyRedisCache;
 use App\Support\Captcha;
 use App\Support\Http;
 use App\Support\LegacyAuth;
@@ -60,7 +61,7 @@ class UtilityController extends LegacyController
 
     public function ajax(Request $request): JsonResponse|RedirectResponse
     {
-        if (SupportContext::getCache() === null) {
+        if (app(LegacyRedisCache::class) === null) {
             $qs = $request->getQueryString();
 
             return redirect('/ajax.php'.($qs ? '?'.$qs : ''));
@@ -175,7 +176,7 @@ class UtilityController extends LegacyController
 
         DB::table('attachments')->where('id', $id)->increment('downloads');
 
-        $cache = SupportContext::getCache();
+        $cache = app(LegacyRedisCache::class);
         if ($cache !== null) {
             $cache->delete_value('attachment_'.$dlkey.'_content');
         }

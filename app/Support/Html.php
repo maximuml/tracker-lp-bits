@@ -2,6 +2,8 @@
 
 namespace App\Support;
 
+use App\Support\Cache\LegacyRedisCache;
+
 /**
  * Stateless HTML-string emitters extracted from `include/functions.php`
  * (Phase 5 of the legacy migration — see `docs/legacy-strategy.md`
@@ -258,7 +260,7 @@ final class Html
      */
     public static function torrentSelection(string $name, string $selName, string $listName, int $selectedId = 0, int $mode = 0): string
     {
-        $items = SearchBox::itemList(SupportContext::getCache(), $listName, $mode);
+        $items = SearchBox::itemList(app(LegacyRedisCache::class), $listName, $mode);
         $chooseOne = SupportContext::getLangFunctions()['select_choose_one'] ?? '';
 
         return self::torrentSelect($name, $selName, $chooseOne, $selectedId, $items);

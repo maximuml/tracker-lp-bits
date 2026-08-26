@@ -214,7 +214,7 @@ final class Forum
      */
     public static function postRowWithContext(int|string $postId): ?array
     {
-        return self::postRow(SupportContext::getCache(), $postId);
+        return self::postRow(app(LegacyRedisCache::class), $postId);
     }
 
     /**
@@ -222,6 +222,6 @@ final class Forum
      */
     public static function moderatorsWithContext(int|string $forumId, bool $plainText = true): string
     {
-        return self::moderators(SupportContext::getCache(), $forumId, $plainText);
+        return self::moderators(app(LegacyRedisCache::class), $forumId, $plainText);
     }
 }

@@ -86,7 +86,7 @@ final class Menu
             (string) SupportContext::getGlobal('enableoffer', ''),
             $customMenu !== '' ? $customMenu : null,
             SupportContext::getUser(),
-            SupportContext::getCache(),
+            app(LegacyRedisCache::class),
             (string) SupportContext::getGlobal('CURLANGDIR', ''),
         );
 

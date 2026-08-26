@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Exam;
 use App\Models\Medal;
 use App\Models\User;
+use App\Support\Cache\LegacyRedisCache;
 use App\Support\Locale;
 use App\Support\Pagination;
 use App\Support\SupportContext;
@@ -288,7 +289,7 @@ JS;
 
         if (isset($stateMap[$action])) {
             DB::table('torrents_state')->update(['global_sp_state' => $stateMap[$action]]);
-            SupportContext::getCache()?->delete_value('global_promotion_state');
+            app(LegacyRedisCache::class)?->delete_value('global_promotion_state');
 
             return $this->legacyAbortResponse('Success', $messages[$action]);
         }

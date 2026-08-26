@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Torrent;
 use App\Support\Bonus;
+use App\Support\Cache\LegacyRedisCache;
 use App\Support\LegacyResponse;
 use App\Support\SupportContext;
 use Illuminate\Http\RedirectResponse;
@@ -48,7 +49,7 @@ class TorrentBookmarkController extends LegacyController
             $status = 'added';
         }
 
-        $cache = SupportContext::getCache();
+        $cache = app(LegacyRedisCache::class);
         if ($cache !== null) {
             $cache->delete_value('user_'.$userId.'_bookmark_array');
         }

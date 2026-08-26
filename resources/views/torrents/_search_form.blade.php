@@ -1,7 +1,7 @@
 @php
 $lang_torrents = (array) (\App\Support\SupportContext::getGlobal('lang_torrents') ?? []);
 $CURUSER = (array) (\App\Support\SupportContext::getUser() ?? []);
-$Cache = \App\Support\SupportContext::getCache();
+$Cache = \app(\App\Support\Cache\LegacyRedisCache::class);
 $__server_QUERY_STRING = \App\Support\SupportContext::getServerValue('QUERY_STRING');
 $searchBoxRightTdStyle = 'padding: 1px;padding-left: 10px;white-space: nowrap';
 $sectiontype = $sectiontype ?? 0;

@@ -321,7 +321,7 @@ TD;
      */
     public static function valueWithContext(int|string $mode, string $item = 'showsubcat'): mixed
     {
-        return self::value(SupportContext::getCache(), $mode, $item);
+        return self::value(app(LegacyRedisCache::class), $mode, $item);
     }
 
     /**
@@ -333,7 +333,7 @@ TD;
      */
     public static function itemListWithContext(string $table, int|string $mode): array
     {
-        return self::itemList(SupportContext::getCache(), $table, $mode);
+        return self::itemList(app(LegacyRedisCache::class), $table, $mode);
     }
 
     /**
@@ -354,7 +354,7 @@ TD;
         array $options = [],
     ): string {
         return self::buildCategoryTable(
-            SupportContext::getCache(),
+            app(LegacyRedisCache::class),
             $mode,
             $checkboxValue,
             $categoryHrefPrefix,

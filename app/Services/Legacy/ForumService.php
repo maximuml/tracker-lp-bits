@@ -9,6 +9,7 @@ use App\Enums\Permission\PermissionEnum;
 use App\Models\Message;
 use App\Repositories\ForumRepository;
 use App\Support\Bonus;
+use App\Support\Cache\LegacyRedisCache;
 use App\Support\Forum;
 use App\Support\LegacyResponse;
 use App\Support\Locale;
@@ -80,7 +81,7 @@ final class ForumService
 
     private function cacheDelete(string $key): void
     {
-        $cache = SupportContext::getCache();
+        $cache = app(LegacyRedisCache::class);
         if ($cache !== null) {
             $cache->delete_value($key);
         }
@@ -88,7 +89,7 @@ final class ForumService
 
     private function cacheGet(string $key): mixed
     {
-        $cache = SupportContext::getCache();
+        $cache = app(LegacyRedisCache::class);
         if ($cache !== null) {
             return $cache->get_value($key);
         }

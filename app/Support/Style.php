@@ -3,6 +3,7 @@
 namespace App\Support;
 
 use App\Repositories\StyleRepository;
+use App\Support\Cache\LegacyRedisCache;
 
 /**
  * Legacy stylesheet helpers extracted from `include/functions.php`.
@@ -117,7 +118,7 @@ final class Style
         $user = SupportContext::getUser() ?? [];
         $defaultId = (int) SupportContext::getGlobal('defcss', 0);
 
-        return self::cssRow(SupportContext::getCache(), $user ? $user['stylesheet'] : $defaultId, $defaultId);
+        return self::cssRow(app(LegacyRedisCache::class), $user ? $user['stylesheet'] : $defaultId, $defaultId);
     }
 
     /**
@@ -129,7 +130,7 @@ final class Style
         $user = SupportContext::getUser() ?? [];
         $defaultId = (int) SupportContext::getGlobal('defcss', 0);
 
-        return self::cssUri(SupportContext::getCache(), $user ? $user['stylesheet'] : $defaultId, $defaultId, $file);
+        return self::cssUri(app(LegacyRedisCache::class), $user ? $user['stylesheet'] : $defaultId, $defaultId, $file);
     }
 
     /**
@@ -152,7 +153,7 @@ final class Style
         $user = SupportContext::getUser() ?? [];
         $defaultId = (int) SupportContext::getGlobal('defcss', 0);
 
-        return self::addiCode(SupportContext::getCache(), $user ? $user['stylesheet'] : $defaultId, $defaultId);
+        return self::addiCode(app(LegacyRedisCache::class), $user ? $user['stylesheet'] : $defaultId, $defaultId);
     }
 
     /**

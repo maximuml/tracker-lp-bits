@@ -8,6 +8,7 @@ use App\Auth\Permission;
 use App\Enums\Permission\PermissionEnum;
 use App\Repositories\OfferRepository;
 use App\Repositories\UsercpRepository;
+use App\Support\Cache\LegacyRedisCache;
 use App\Support\Category;
 use App\Support\Comment;
 use App\Support\Config\SiteConfig;
@@ -478,7 +479,7 @@ final class OfferPageService
 
             $i = 0;
             $lastcom_tooltip = [];
-            $Cache = SupportContext::getCache();
+            $Cache = app(LegacyRedisCache::class);
             foreach ($offerRows as $row) {
                 $arr = (array) $row;
                 $addedby = UserDisplay::username((int) ($arr['userid'] ?? 0));

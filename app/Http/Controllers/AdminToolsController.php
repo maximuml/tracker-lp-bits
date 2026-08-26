@@ -97,11 +97,10 @@ class AdminToolsController extends LegacyController
         ]);
     }
 
-    public function settings(Request $request): RedirectResponse|Response
+    public function settings(Request $request): RedirectResponse
     {
-
-        return $this->legacyPageWithRedirect($request, 'settings', true);
-
+        // Legacy settings partial was removed; settings are managed via Filament.
+        return redirect()->route('filament.admin.resources.system.settings.index');
     }
 
     public function location(Request $request): View|RedirectResponse|Response

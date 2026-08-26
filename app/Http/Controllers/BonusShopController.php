@@ -26,7 +26,7 @@ class BonusShopController extends LegacyController
         $currentUserId = (int) ($curUser['id'] ?? 0);
         $seedbonus = (float) ($curUser['seedbonus'] ?? 0);
 
-        $q = htmlspecialchars(trim((string) (SupportContext::getRequestInput('q') ?? '')));
+        $q = htmlspecialchars(trim((string) (request()->input('q') ?? '')));
 
         $query = Medal::query()
             ->where('display_on_medal_page', 1)
@@ -267,7 +267,7 @@ JS;
             return $this->legacyAbortResponse('Error', 'Access denied.');
         }
 
-        $action = trim((string) (SupportContext::getPost('action') ?? SupportContext::getQuery('action') ?? 'main'));
+        $action = trim((string) (request()->post('action') ?? request()->query('action') ?? 'main'));
         $action = htmlspecialchars($action);
 
         $stateMap = [

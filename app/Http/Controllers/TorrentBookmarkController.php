@@ -72,7 +72,7 @@ class TorrentBookmarkController extends LegacyController
             LegacyResponse::abort('Party is over!', "This trick doesn't work anymore. You need to click the button!");
         }
 
-        $torrentid = (int) SupportContext::getPost('id');
+        $torrentid = (int) request()->post('id');
         $torrentowner = Torrent::query()->where('id', $torrentid)->value('owner');
         if (! $torrentowner) {
             LegacyResponse::abort('Error', 'Invalid torrent id!');

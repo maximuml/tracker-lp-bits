@@ -68,7 +68,7 @@ class MyController extends Controller
         $userid = $viewerId;
         $pagerParams = [];
 
-        $requestedUserId = SupportContext::getQuery('userid');
+        $requestedUserId = request()->query('userid');
         if (! empty($requestedUserId)) {
             if (! Permissions::userCan(PermissionEnum::VIEW_USER_HISTORY->value, false, $viewerId) && (int) $requestedUserId != $viewerId) {
                 LegacyResponse::permissionDenied();
@@ -82,7 +82,7 @@ class MyController extends Controller
             LegacyResponse::abort('Error', 'User not exists.');
         }
 
-        $status = SupportContext::getQuery('status') ?? HitAndRun::STATUS_INSPECTING;
+        $status = request()->query('status') ?? HitAndRun::STATUS_INSPECTING;
         $allStatus = HitAndRun::listStatus();
         $pagerParams['status'] = $status;
         $filterParams = $pagerParams;
@@ -93,7 +93,7 @@ class MyController extends Controller
             $headerFilters[] = sprintf('<a href="?%s" class="%s"><b>%s</b></a>', http_build_query($filterParams), $key == $status ? 'faqlink' : '', $value['text']);
         }
 
-        $q = htmlspecialchars((string) (SupportContext::getQuery('q') ?? ''));
+        $q = htmlspecialchars((string) (request()->query('q') ?? ''));
         $lang_myhr = (array) app(Globals::class)->get('lang_myhr', []);
 
         $baseQuery = HitAndRun::query()->where('uid', $userid)->where('status', $status);

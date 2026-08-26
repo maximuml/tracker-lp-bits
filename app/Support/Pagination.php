@@ -167,7 +167,7 @@ final class Pagination
     public static function pager(int $rpp, int $count, string $href, array $opts = [], string $pagename = 'page'): array
     {
         $pages = (int) ceil($count / $rpp);
-        $rawPage = SupportContext::getQuery($pagename);
+        $rawPage = request()->query($pagename);
         if (! is_scalar($rawPage) || is_bool($rawPage)) {
             $rawPage = null;
         } elseif (is_float($rawPage)) {

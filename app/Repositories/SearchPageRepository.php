@@ -52,7 +52,7 @@ class SearchPageRepository
         $meiliResult = ['total' => 0, 'list' => []];
 
         if ($shouldUseMeili) {
-            $meiliParams = SupportContext::allQuery();
+            $meiliParams = request()->query();
             $meiliParams['search'] = $searchRaw;
             $meiliParams['search_area'] = $searchArea;
             $meiliParams['mode'] = $modeArr;

@@ -1,7 +1,7 @@
 <?php
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
-$action = \App\Support\SupportContext::getQuery('action') ?? '';
-$imagehash = \App\Support\SupportContext::getQuery('imagehash') ?? '';
+$action = \request()->query('action') ?? '';
+$imagehash = \request()->query('imagehash') ?? '';
 
 if ($action !== 'regimage') {
     http_response_code(404);

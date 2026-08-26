@@ -58,7 +58,7 @@ class TorrentSearchRepository
         $tagRep = new TagRepository;
         $allTags = $tagRep->listAll($sectiontype);
         $filterInputWidth = 62;
-        $searchParams = $query ?: SupportContext::allQuery();
+        $searchParams = $query ?: request()->query();
         $hasSearchParams = ! empty($searchParams);
         $searchParams['mode'] = $sectiontype;
 

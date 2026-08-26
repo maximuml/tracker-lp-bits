@@ -46,11 +46,11 @@ class StaffModerationController extends LegacyController
             return $this->legacyAbortResponse('Error', 'Permission denied. For security reason, we logged this action');
         }
 
-        $action = (string) SupportContext::getPost('action');
+        $action = (string) request()->post('action');
 
         if ($action === 'confirmuser') {
-            $userId = (int) SupportContext::getPost('userid');
-            $confirm = (string) SupportContext::getPost('confirm');
+            $userId = (int) request()->post('userid');
+            $confirm = (string) request()->post('confirm');
             ModtaskRepository::confirmUser($userId, $confirm);
 
             return redirect(Http::protocolPrefix(Url::isSecure()).$baseUrl.'/unco.php?status=1');
@@ -60,30 +60,30 @@ class StaffModerationController extends LegacyController
             return $this->legacyAbortResponse('Error', 'Invalid action.');
         }
 
-        $userId = (int) SupportContext::getPost('userid');
+        $userId = (int) request()->post('userid');
         $userInfo = User::query()->findOrFail($userId);
 
         $class = $userInfo->class;
         $vipAdded = $userInfo->vip_added;
         $vipUntil = $userInfo->vip_until;
 
-        $warned = (string) (SupportContext::getPost('warned') ?? '');
-        $warnLength = (int) (SupportContext::getPost('warnlength') ?? 0);
-        $warnPm = (string) (SupportContext::getPost('warnpm') ?? '');
-        $title = (string) (SupportContext::getPost('title') ?? '');
-        $avatar = (string) (SupportContext::getPost('avatar') ?? '');
-        $signature = (string) (SupportContext::getPost('signature') ?? '');
-        $enabled = (string) (SupportContext::getPost('enabled') ?? 'yes');
-        $uploadpos = (string) (SupportContext::getPost('uploadpos') ?? 'yes');
-        $downloadpos = (string) (SupportContext::getPost('downloadpos') ?? 'yes');
-        $privacy = (string) (SupportContext::getPost('privacy') ?? 'normal');
-        $forumpost = (string) (SupportContext::getPost('forumpost') ?? 'yes');
-        $supportlang = (string) (SupportContext::getPost('supportlang') ?? '');
-        $support = (string) (SupportContext::getPost('support') ?? 'no');
-        $supportfor = (string) (SupportContext::getPost('supportfor') ?? '');
-        $moviepicker = (string) (SupportContext::getPost('moviepicker') ?? 'no');
-        $pickfor = (string) (SupportContext::getPost('pickfor') ?? '');
-        $stafffor = (string) (SupportContext::getPost('staffduties') ?? '');
+        $warned = (string) (request()->post('warned') ?? '');
+        $warnLength = (int) (request()->post('warnlength') ?? 0);
+        $warnPm = (string) (request()->post('warnpm') ?? '');
+        $title = (string) (request()->post('title') ?? '');
+        $avatar = (string) (request()->post('avatar') ?? '');
+        $signature = (string) (request()->post('signature') ?? '');
+        $enabled = (string) (request()->post('enabled') ?? 'yes');
+        $uploadpos = (string) (request()->post('uploadpos') ?? 'yes');
+        $downloadpos = (string) (request()->post('downloadpos') ?? 'yes');
+        $privacy = (string) (request()->post('privacy') ?? 'normal');
+        $forumpost = (string) (request()->post('forumpost') ?? 'yes');
+        $supportlang = (string) (request()->post('supportlang') ?? '');
+        $support = (string) (request()->post('support') ?? 'no');
+        $supportfor = (string) (request()->post('supportfor') ?? '');
+        $moviepicker = (string) (request()->post('moviepicker') ?? 'no');
+        $pickfor = (string) (request()->post('pickfor') ?? '');
+        $stafffor = (string) (request()->post('staffduties') ?? '');
 
         if (! Validators::isId($userId) || ! SupportUser::isValidUserClass($class)) {
             return $this->legacyAbortResponse('Error', 'Bad user ID or class ID.');
@@ -129,12 +129,12 @@ class StaffModerationController extends LegacyController
 
         if (Permission::can(PermissionEnum::MANAGE_USER_CONFIDENTIAL_INFO, User::findOrFail($currentUserId))) {
             $locale = Locale::userLocale($userId);
-            $email = (string) (SupportContext::getPost('email') ?? '');
-            $username = (string) (SupportContext::getPost('username') ?? '');
-            $downloaded = (float) (SupportContext::getPost('downloaded') ?? 0);
-            $uploaded = (float) (SupportContext::getPost('uploaded') ?? 0);
-            $bonus = (float) (SupportContext::getPost('bonus') ?? 0);
-            $invites = (int) (SupportContext::getPost('invites') ?? 0);
+            $email = (string) (request()->post('email') ?? '');
+            $username = (string) (request()->post('username') ?? '');
+            $downloaded = (float) (request()->post('downloaded') ?? 0);
+            $uploaded = (float) (request()->post('uploaded') ?? 0);
+            $bonus = (float) (request()->post('bonus') ?? 0);
+            $invites = (int) (request()->post('invites') ?? 0);
 
             if ($arr['email'] !== $email) {
                 $updateset['email'] = $email;
@@ -177,13 +177,13 @@ class StaffModerationController extends LegacyController
         $staffleaderClass = defined('UC_STAFFLEADER') ? \constant('UC_STAFFLEADER') : 0;
         if (UserDisplay::currentClass() == $staffleaderClass) {
             $locale = Locale::userLocale($userId);
-            $donor = (string) SupportContext::getPost('donor');
-            $donoruntil = SupportContext::getPost('donoruntil') ?: null;
-            $donated = (float) (SupportContext::getPost('donated') ?? 0);
-            $donatedCny = (float) (SupportContext::getPost('donated_cny') ?? 0);
+            $donor = (string) request()->post('donor');
+            $donoruntil = request()->post('donoruntil') ?: null;
+            $donated = (float) (request()->post('donated') ?? 0);
+            $donatedCny = (float) (request()->post('donated_cny') ?? 0);
             $thisDonatedUsd = $donated - (float) $arr['donated'];
             $thisDonatedCny = $donatedCny - (float) $arr['donated_cny'];
-            $memo = htmlspecialchars((string) SupportContext::getPost('donation_memo'));
+            $memo = htmlspecialchars((string) request()->post('donation_memo'));
 
             if ($donated != (float) $arr['donated'] || $donatedCny != (float) $arr['donated_cny']) {
                 ModtaskRepository::addFund($userId, $thisDonatedUsd, $thisDonatedCny, $memo);
@@ -272,7 +272,7 @@ class StaffModerationController extends LegacyController
             $updateset['privacy'] = $privacy;
         }
 
-        if (SupportContext::getPost('resetkey') !== null && SupportContext::getPost('resetkey') === 'yes') {
+        if (request()->post('resetkey') !== null && request()->post('resetkey') === 'yes') {
             $updateset['passkey'] = md5($arr['username'].date('Y-m-d H:i:s').$arr['passhash']);
         }
 
@@ -353,7 +353,7 @@ class StaffModerationController extends LegacyController
 
         Cache::clearUser($userId, $arr['passhash']);
 
-        $returnto = (string) SupportContext::getPost('returnto');
+        $returnto = (string) request()->post('returnto');
         $prefix = Http::protocolPrefix(Url::isSecure());
 
         return redirect($prefix.$baseUrl.'/'.($returnto !== '' ? $returnto : 'userdetails.php?id='.$userId));
@@ -366,12 +366,12 @@ class StaffModerationController extends LegacyController
             return $this->legacyAbortResponse('Error', 'Only Administrators and above can modify the Rules, sorry.');
         }
 
-        $act = (string) (SupportContext::getQuery('act') ?? 'list');
+        $act = (string) (request()->query('act') ?? 'list');
 
         if ($act === 'addsect' && $request->isMethod('post')) {
-            $title = (string) SupportContext::getPost('title');
-            $text = (string) SupportContext::getPost('text');
-            $language = (int) SupportContext::getPost('language');
+            $title = (string) request()->post('title');
+            $text = (string) request()->post('text');
+            $language = (int) request()->post('language');
             DB::table('rules')->insert([
                 'title' => $title,
                 'text' => $text,
@@ -383,10 +383,10 @@ class StaffModerationController extends LegacyController
         }
 
         if ($act === 'edited' && $request->isMethod('post')) {
-            $id = (int) (SupportContext::getPost('id') ?? 0);
-            $title = (string) SupportContext::getPost('title');
-            $text = (string) SupportContext::getPost('text');
-            $language = (int) SupportContext::getPost('language');
+            $id = (int) (request()->post('id') ?? 0);
+            $title = (string) request()->post('title');
+            $text = (string) request()->post('text');
+            $language = (int) request()->post('language');
             DB::table('rules')->where('id', $id)->update([
                 'title' => $title,
                 'text' => $text,
@@ -398,8 +398,8 @@ class StaffModerationController extends LegacyController
         }
 
         if ($act === 'del') {
-            $id = (int) (SupportContext::getQuery('id') ?? 0);
-            $sure = (int) (SupportContext::getQuery('sure') ?? 0);
+            $id = (int) (request()->query('id') ?? 0);
+            $sure = (int) (request()->query('sure') ?? 0);
             if (! $sure) {
                 return $this->legacyAbortResponse('Delete Rule', 'You are about to delete a rule. Click <a class=altlink href=?act=del&id='.$id.'&sure=1>here</a> if you are sure.', false);
             }
@@ -421,7 +421,7 @@ class StaffModerationController extends LegacyController
         }
 
         if ($act === 'edit') {
-            $id = (int) (SupportContext::getQuery('id') ?? 0);
+            $id = (int) (request()->query('id') ?? 0);
             $rule = (array) DB::table('rules')->where('id', $id)->first();
             $langs = Locale::languageList('site_lang', null);
 

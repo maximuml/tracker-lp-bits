@@ -28,7 +28,7 @@ class InfoController extends LegacyController
             return redirect('/userhistory.php'.($qs ? '?'.$qs : ''));
         }
 
-        $userid = (int) SupportContext::getQuery('id');
+        $userid = (int) request()->query('id');
         LegacyResponse::assertId($userid, true);
 
         $viewerId = (int) ($curUser['id'] ?? 0);
@@ -36,7 +36,7 @@ class InfoController extends LegacyController
             LegacyResponse::permissionDenied();
         }
 
-        $action = htmlspecialchars((string) SupportContext::getQuery('action'));
+        $action = htmlspecialchars((string) request()->query('action'));
         $perpage = 15;
         $phpSelf = SupportContext::getServerValue('PHP_SELF');
         $subject = UserDisplay::username($userid);

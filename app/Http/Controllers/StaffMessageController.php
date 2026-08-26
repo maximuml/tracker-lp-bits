@@ -32,10 +32,10 @@ class StaffMessageController extends LegacyController
 
         return $this->legacyPage($request, 'staffmess', true, [
             'classes' => $classes,
-            'body' => htmlspecialchars((string) SupportContext::getQuery('body')),
-            'receiver' => (int) (SupportContext::getQuery('receiver') ?? 0),
+            'body' => htmlspecialchars((string) request()->query('body')),
+            'receiver' => (int) (request()->query('receiver') ?? 0),
             'username' => htmlspecialchars((string) ($currentUser['username'] ?? '')),
-            'sent' => (int) (SupportContext::getQuery('sent') ?? 0),
+            'sent' => (int) (request()->query('sent') ?? 0),
         ]);
     }
 
@@ -51,15 +51,15 @@ class StaffMessageController extends LegacyController
         }
 
         $currentUser = app(CurrentUser::class)->get() ?? [];
-        $senderId = SupportContext::getPost('sender') === 'system' ? 0 : (int) ($currentUser['id'] ?? 0);
-        $subject = trim((string) SupportContext::getPost('subject'));
-        $msg = trim((string) SupportContext::getPost('msg'));
+        $senderId = request()->post('sender') === 'system' ? 0 : (int) ($currentUser['id'] ?? 0);
+        $subject = trim((string) request()->post('subject'));
+        $msg = trim((string) request()->post('msg'));
 
         if ($msg === '') {
             return $this->legacyAbortResponse('Error', "Don't leave any fields blank.");
         }
 
-        $selectedClasses = (array) SupportContext::getPost('classes');
+        $selectedClasses = (array) request()->post('classes');
         if (empty($selectedClasses)) {
             return $this->legacyAbortResponse('Error', 'No valid filter');
         }
@@ -76,7 +76,7 @@ class StaffMessageController extends LegacyController
         $conditions = [];
         $classIds = array_map('intval', $selectedClasses);
         $conditions[] = 'class IN ('.implode(', ', $classIds).')';
-        $conditions = Hooks::applyFilter('role_query_conditions', $conditions, SupportContext::allPost());
+        $conditions = Hooks::applyFilter('role_query_conditions', $conditions, request()->post());
         if (empty($conditions)) {
             return $this->legacyAbortResponse('Error', 'No valid filter');
         }
@@ -132,8 +132,8 @@ class StaffMessageController extends LegacyController
             return $this->legacyAbortResponse($langTakecontact['std_error'] ?? 'Error', $langTakecontact['std_method'] ?? 'Method not allowed.');
         }
 
-        $msg = trim((string) SupportContext::getPost('body'));
-        $subject = trim((string) SupportContext::getPost('subject'));
+        $msg = trim((string) request()->post('body'));
+        $subject = trim((string) request()->post('subject'));
 
         if ($msg === '') {
             return $this->legacyAbortResponse($langTakecontact['std_error'] ?? 'Error', $langTakecontact['std_please_enter_something'] ?? 'Please enter something.');
@@ -163,7 +163,7 @@ class StaffMessageController extends LegacyController
         User::query()->where('id', $currentUserId)->update(['last_staffmsg' => date('Y-m-d H:i:s')]);
         Cache::clearStaffMessage();
 
-        $returnto = (string) SupportContext::getPost('returnto');
+        $returnto = (string) request()->post('returnto');
         if ($returnto !== '') {
             return redirect($returnto);
         }

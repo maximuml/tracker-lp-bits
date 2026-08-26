@@ -101,7 +101,7 @@ final class Logger
                 $passkey = (string) ($curUser['passkey'] ?? '');
             }
             if ($passkey === '') {
-                $passkey = (string) (SupportContext::getRequestInput('passkey') ?? SupportContext::getRequestInput('authkey') ?? '');
+                $passkey = (string) (request()->input('passkey') ?? request()->input('authkey') ?? '');
             }
         } else {
             try {

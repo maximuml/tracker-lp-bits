@@ -32,7 +32,7 @@ class TorrentDeleteController extends LegacyController
 
         $currentUserId = (int) ($curUser['id'] ?? 0);
 
-        $id = (int) SupportContext::getRequestInput('id');
+        $id = (int) request()->input('id');
         if ($id <= 0) {
             $lang = (array) app(Globals::class)->get('lang_fastdelete', []);
 
@@ -52,7 +52,7 @@ class TorrentDeleteController extends LegacyController
         }
         $row = $torrent->toArray();
 
-        $sure = SupportContext::getQuery('sure');
+        $sure = request()->query('sure');
         if (empty($sure)) {
             $lang = (array) app(Globals::class)->get('lang_fastdelete', []);
 
@@ -108,7 +108,7 @@ class TorrentDeleteController extends LegacyController
             return $this->legacyAbortResponse('Party is over!', "This trick doesn't work anymore. You need to click the button!");
         }
 
-        $id = SupportContext::getPost('id');
+        $id = request()->post('id');
         $lang = (array) app(Globals::class)->get('lang_delete', []);
 
         if ($id === null) {
@@ -134,12 +134,12 @@ class TorrentDeleteController extends LegacyController
             return $this->legacyAbortResponse($lang['std_delete_failed'] ?? 'Error', $lang['std_not_owner'] ?? 'Not owner.');
         }
 
-        $rt = (int) SupportContext::getPost('reasontype');
+        $rt = (int) request()->post('reasontype');
         if ($rt < 1 || $rt > 5) {
             return $this->legacyAbortResponse($lang['std_delete_failed'] ?? 'Error', ($lang['std_invalid_reason'] ?? 'Invalid reason: ').$rt.'.');
         }
 
-        $reason = (array) SupportContext::getPost('reason');
+        $reason = (array) request()->post('reason');
         if ($rt == 1) {
             $reasonstr = 'Dead: 0 seeders, 0 leechers = 0 peers total';
         } elseif ($rt == 2) {
@@ -189,7 +189,7 @@ class TorrentDeleteController extends LegacyController
             ]);
         }
 
-        $returnto = (string) SupportContext::getPost('returnto');
+        $returnto = (string) request()->post('returnto');
         if ($returnto !== '') {
             $ret = '<a href="'.htmlspecialchars($returnto).'">'.($lang['text_go_back'] ?? 'Go back').'</a>';
         } else {

@@ -95,7 +95,7 @@ $browsecatmode = $browsecatmode ?? 0;
                     </tr>
                     <tr>
                         <td class="bottom" style="{{ $searchBoxRightTdStyle }}">
-                            <input type="number" min="1" name="size_begin" style="width: {{ $filterInputWidth }}px" value="{{ htmlspecialchars(\App\Support\SupportContext::getQuery('size_begin') ?? '') }}"/> ~ <input type="number" min="1" name="size_end" style="width: {{ $filterInputWidth }}px" value="{{ htmlspecialchars(\App\Support\SupportContext::getQuery('size_end') ?? '') }}"/>
+                            <input type="number" min="1" name="size_begin" style="width: {{ $filterInputWidth }}px" value="{{ htmlspecialchars(\request()->query('size_begin') ?? '') }}"/> ~ <input type="number" min="1" name="size_end" style="width: {{ $filterInputWidth }}px" value="{{ htmlspecialchars(\request()->query('size_end') ?? '') }}"/>
                         </td>
                     </tr>
 
@@ -106,7 +106,7 @@ $browsecatmode = $browsecatmode ?? 0;
                     </tr>
                     <tr>
                         <td class="bottom" style="{{ $searchBoxRightTdStyle }}">
-                            <input type="number" min="1" name="seeders_begin" style="width: {{ $filterInputWidth }}px" value="{{ htmlspecialchars(\App\Support\SupportContext::getQuery('seeders_begin') ?? '') }}"/> ~ <input type="number" min="1" name="seeders_end" style="width: {{ $filterInputWidth }}px" value="{{ htmlspecialchars(\App\Support\SupportContext::getQuery('seeders_end') ?? '') }}"/>
+                            <input type="number" min="1" name="seeders_begin" style="width: {{ $filterInputWidth }}px" value="{{ htmlspecialchars(\request()->query('seeders_begin') ?? '') }}"/> ~ <input type="number" min="1" name="seeders_end" style="width: {{ $filterInputWidth }}px" value="{{ htmlspecialchars(\request()->query('seeders_end') ?? '') }}"/>
                         </td>
                     </tr>
 
@@ -117,7 +117,7 @@ $browsecatmode = $browsecatmode ?? 0;
                     </tr>
                     <tr>
                         <td class="bottom" style="{{ $searchBoxRightTdStyle }}">
-                            <input type="number" min="1" name="leechers_begin" style="width: {{ $filterInputWidth }}px" value="{{ htmlspecialchars(\App\Support\SupportContext::getQuery('leechers_begin') ?? '') }}"/> ~ <input type="number" min="1" name="leechers_end" style="width: {{ $filterInputWidth }}px" value="{{ htmlspecialchars(\App\Support\SupportContext::getQuery('leechers_end') ?? '') }}"/>
+                            <input type="number" min="1" name="leechers_begin" style="width: {{ $filterInputWidth }}px" value="{{ htmlspecialchars(\request()->query('leechers_begin') ?? '') }}"/> ~ <input type="number" min="1" name="leechers_end" style="width: {{ $filterInputWidth }}px" value="{{ htmlspecialchars(\request()->query('leechers_end') ?? '') }}"/>
                         </td>
                     </tr>
 
@@ -128,7 +128,7 @@ $browsecatmode = $browsecatmode ?? 0;
                     </tr>
                     <tr>
                         <td class="bottom" style="{{ $searchBoxRightTdStyle }}">
-                            <input type="number" min="1" name="times_completed_begin" style="width: {{ $filterInputWidth }}px" value="{{ htmlspecialchars(\App\Support\SupportContext::getQuery('times_completed_begin') ?? '') }}"/> ~ <input type="number" min="1" name="times_completed_end" style="width: {{ $filterInputWidth }}px" value="{{ htmlspecialchars(\App\Support\SupportContext::getQuery('times_completed_end') ?? '') }}"/>
+                            <input type="number" min="1" name="times_completed_begin" style="width: {{ $filterInputWidth }}px" value="{{ htmlspecialchars(\request()->query('times_completed_begin') ?? '') }}"/> ~ <input type="number" min="1" name="times_completed_end" style="width: {{ $filterInputWidth }}px" value="{{ htmlspecialchars(\request()->query('times_completed_end') ?? '') }}"/>
                         </td>
                     </tr>
 
@@ -141,8 +141,8 @@ $browsecatmode = $browsecatmode ?? 0;
                         <td class="bottom" style="{{ $searchBoxRightTdStyle }}">
                             {!! sprintf(
                                 '%s ~ %s',
-                                \App\Support\Form::datetimepickerInput('added_begin', htmlspecialchars(\App\Support\SupportContext::getQuery('added_begin') ?? ''), '', ['require_files' => true, 'format' => 'Y-m-d', 'style' => 'width: '.$filterInputWidth.'px']),
-                                \App\Support\Form::datetimepickerInput('added_end', htmlspecialchars(\App\Support\SupportContext::getQuery('added_end') ?? ''), '', ['require_files' => false, 'format' => 'Y-m-d', 'style' => 'width: '.$filterInputWidth.'px']),
+                                \App\Support\Form::datetimepickerInput('added_begin', htmlspecialchars(\request()->query('added_begin') ?? ''), '', ['require_files' => true, 'format' => 'Y-m-d', 'style' => 'width: '.$filterInputWidth.'px']),
+                                \App\Support\Form::datetimepickerInput('added_end', htmlspecialchars(\request()->query('added_end') ?? ''), '', ['require_files' => false, 'format' => 'Y-m-d', 'style' => 'width: '.$filterInputWidth.'px']),
                             ) !!}
                         </td>
                     </tr>
@@ -174,14 +174,14 @@ $browsecatmode = $browsecatmode ?? 0;
 
 							<select name="search_area">
 								<option value="0">{{ $lang_torrents['select_title'] ?? '' }}</option>
-								<option value="1"@if (\App\Support\SupportContext::getQuery('search_area') !== null && \App\Support\SupportContext::getQuery('search_area') == 1) selected="selected"@endif>{{ $lang_torrents['select_description'] ?? '' }}</option>
-								<option value="3"@if (\App\Support\SupportContext::getQuery('search_area') !== null && \App\Support\SupportContext::getQuery('search_area') == 3) selected="selected"@endif>{{ $lang_torrents['select_uploader'] ?? '' }}</option>
+								<option value="1"@if (\request()->query('search_area') !== null && \request()->query('search_area') == 1) selected="selected"@endif>{{ $lang_torrents['select_description'] ?? '' }}</option>
+								<option value="3"@if (\request()->query('search_area') !== null && \request()->query('search_area') == 3) selected="selected"@endif>{{ $lang_torrents['select_uploader'] ?? '' }}</option>
 							</select>
 
 							{{ $lang_torrents['text_with'] ?? '' }}
 
 							<select name="search_mode" style="width: 60px;">
-                                {!! \App\Models\SearchBox::listSelectModeOptions(\App\Support\SupportContext::getQuery('search_mode') ?? '') !!}
+                                {!! \App\Models\SearchBox::listSelectModeOptions(\request()->query('search_mode') ?? '') !!}
 							</select>
 
 							{{ $lang_torrents['text_mode'] ?? '' }}

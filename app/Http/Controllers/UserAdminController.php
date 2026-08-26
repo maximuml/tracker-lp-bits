@@ -36,10 +36,10 @@ class UserAdminController extends LegacyController
         }
 
         $langUsers = (array) app(Globals::class)->get('lang_users', []);
-        $search = trim((string) (SupportContext::getQuery('search') ?? ''));
-        $class = (string) (SupportContext::getQuery('class') ?? '-');
-        $country = (int) (SupportContext::getQuery('country') ?? 0);
-        $letter = trim((string) (SupportContext::getQuery('letter') ?? ''));
+        $search = trim((string) (request()->query('search') ?? ''));
+        $class = (string) (request()->query('class') ?? '-');
+        $country = (int) (request()->query('country') ?? 0);
+        $letter = trim((string) (request()->query('letter') ?? ''));
 
         if (strlen($letter) > 1) {
             return $this->legacyAbortResponse('Error', 'Invalid letter.');
@@ -125,9 +125,9 @@ class UserAdminController extends LegacyController
         $message = '';
 
         if ($request->isMethod('post')) {
-            $username = trim((string) SupportContext::getPost('username'));
-            $newpassword = trim((string) SupportContext::getPost('newpassword'));
-            $newpasswordagain = trim((string) SupportContext::getPost('newpasswordagain'));
+            $username = trim((string) request()->post('username'));
+            $newpassword = trim((string) request()->post('newpassword'));
+            $newpasswordagain = trim((string) request()->post('newpasswordagain'));
 
             if ($username === '' || $newpassword === '' || $newpasswordagain === '') {
                 return $this->legacyAbortResponse('Error', "Don't leave any fields blank.");
@@ -218,7 +218,7 @@ class UserAdminController extends LegacyController
         $isUserBonusEnough = (float) ($curUser['seedbonus'] ?? 0) >= $total;
         $insufficientMessage = Locale::trans('self-enable.bonus_not_enough', ['bonus' => $curUser['seedbonus'] ?? 0], null);
 
-        if (! empty(SupportContext::getPost('submit'))) {
+        if (! empty(request()->post('submit'))) {
             if (! $isUserBonusEnough) {
                 $viewData['latestBanLog'] = $latestBanLog;
                 $viewData['elapsedDay'] = $elapsedDay;
@@ -258,7 +258,7 @@ class UserAdminController extends LegacyController
             return redirect('/unco.php'.($qs ? '?'.$qs : ''));
         }
 
-        $status = SupportContext::getQuery('status');
+        $status = request()->query('status');
         if ($status) {
             LegacyResponse::assertId($status, true);
         }
@@ -287,10 +287,10 @@ class UserAdminController extends LegacyController
             $userRep = new UserRepository;
             try {
                 $newUser = $userRep->store([
-                    'username' => SupportContext::getPost('username'),
-                    'email' => SupportContext::getPost('email'),
-                    'password' => SupportContext::getPost('password'),
-                    'password_confirmation' => SupportContext::getPost('password2'),
+                    'username' => request()->post('username'),
+                    'email' => request()->post('email'),
+                    'password' => request()->post('password'),
+                    'password_confirmation' => request()->post('password2'),
                 ]);
             } catch (\Exception $e) {
                 return $this->legacyAbortResponse('ERROR', $e->getMessage());

@@ -107,6 +107,6 @@ final class Captcha
             'row_security_image' => $lang_functions['row_security_image'] ?? '',
             'row_security_challenge' => $lang_functions['row_security_challenge'] ?? '',
             'row_security_code' => $lang_functions['row_security_code'] ?? '',
-        ], (string) SupportContext::getQuery('secret', ''));
+        ], (string) request()->query('secret', ''));
     }
 }

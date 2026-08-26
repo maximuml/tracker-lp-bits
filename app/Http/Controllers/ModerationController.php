@@ -34,18 +34,18 @@ class ModerationController extends LegacyController
         $langReport = (array) app(Globals::class)->get('lang_report', []);
         $cache = app(LegacyRedisCache::class);
 
-        $reportofferid = (int) (SupportContext::getQuery('reportofferid') ?? 0);
-        $user = (int) (SupportContext::getQuery('user') ?? 0);
-        $commentid = (int) (SupportContext::getQuery('commentid') ?? 0);
-        $torrent = (int) (SupportContext::getQuery('torrent') ?? 0);
-        $forumpost = (int) (SupportContext::getQuery('forumpost') ?? 0);
+        $reportofferid = (int) (request()->query('reportofferid') ?? 0);
+        $user = (int) (request()->query('user') ?? 0);
+        $commentid = (int) (request()->query('commentid') ?? 0);
+        $torrent = (int) (request()->query('torrent') ?? 0);
+        $forumpost = (int) (request()->query('forumpost') ?? 0);
 
-        $takeuser = (int) (SupportContext::getPost('takeuser') ?? 0);
-        $takecommentid = (int) (SupportContext::getPost('takecommentid') ?? 0);
-        $taketorrent = (int) (SupportContext::getPost('taketorrent') ?? 0);
-        $takeforumpost = (int) (SupportContext::getPost('takeforumpost') ?? 0);
-        $takereportofferid = (int) (SupportContext::getPost('takereportofferid') ?? 0);
-        $takereason = trim((string) SupportContext::getPost('reason'));
+        $takeuser = (int) (request()->post('takeuser') ?? 0);
+        $takecommentid = (int) (request()->post('takecommentid') ?? 0);
+        $taketorrent = (int) (request()->post('taketorrent') ?? 0);
+        $takeforumpost = (int) (request()->post('takeforumpost') ?? 0);
+        $takereportofferid = (int) (request()->post('takereportofferid') ?? 0);
+        $takereason = trim((string) request()->post('reason'));
 
         $repo = app(ModerationRepository::class);
         $doTakeReport = function (int $reportid, string $type, string $reason) use ($currentUserId, $langReport, $cache, $repo): Response {

@@ -11,6 +11,7 @@ use App\Models\UserBanLog;
 use App\Models\UserModifyLog;
 use App\Repositories\UserRepository;
 use App\Support\Config\SiteConfig;
+use App\Support\Database;
 use App\Support\Events;
 use App\Support\Locale;
 use App\Support\Log;
@@ -24,7 +25,6 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
-use Nexus\Database\NexusDB;
 
 /**
  * Idempotent cleanup task implementations drained from the legacy `docleanup()`.
@@ -1120,7 +1120,7 @@ final class Tasks
     {
         $length = 365 * 86400;
         $diff = time() - $length;
-        $postAddedField = NexusDB::unixTimestampField('posts.added');
+        $postAddedField = Database::unixTimestampField('posts.added');
 
         DB::table('topics')
             ->where('sticky', 'no')

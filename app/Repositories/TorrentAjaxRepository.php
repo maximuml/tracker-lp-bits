@@ -7,6 +7,7 @@ use App\Models\Snatch;
 use App\Models\Torrent;
 use App\Models\User;
 use App\Support\Config\SiteConfig;
+use App\Support\Database;
 use App\Support\Hooks;
 use App\Support\Logger;
 use App\Support\Network;
@@ -19,7 +20,6 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Meilisearch\Exceptions\ApiException;
-use Nexus\Database\NexusDB;
 
 final class TorrentAjaxRepository
 {
@@ -148,8 +148,8 @@ final class TorrentAjaxRepository
             $leechers = (array) $seedersAndLeechers['leechers'];
             Logger::writeWithContext('SEEDER_LEECHER_FROM_FILTER: torrent_seeder_leecher_list', 'info', false);
         } else {
-            $startedField = NexusDB::unixTimestampField('started');
-            $lastActionField = NexusDB::unixTimestampField('last_action');
+            $startedField = Database::unixTimestampField('started');
+            $lastActionField = Database::unixTimestampField('last_action');
             $peerRows = DB::table('peers')
                 ->where('torrent', $torrentId)
                 ->selectRaw("id, seeder, finishedat, downloadoffset, uploadoffset, ip, ipv4, ipv6, port, uploaded, downloaded, to_go, {$startedField} AS st, connectable, agent, peer_id, {$lastActionField} AS la, userid")

@@ -27,6 +27,7 @@ use App\Models\TorrentSecret;
 use App\Models\TorrentTag;
 use App\Models\User;
 use App\Support\Config\SiteConfig;
+use App\Support\Database;
 use App\Support\Description;
 use App\Support\Env;
 use App\Support\Events;
@@ -56,7 +57,6 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Str;
-use Nexus\Database\NexusDB;
 use Rhilip\Bencode\Bencode;
 
 class TorrentRepository extends BaseRepository
@@ -926,7 +926,7 @@ class TorrentRepository extends BaseRepository
                     $values[] = sprintf("(%s, %s, '%s', '%s')", $torrentId, $tagId, $time, $time);
                 }
             }
-            $sql .= implode(', ', $values).' '.NexusDB::upsertField(['torrent_id', 'tag_id'], ['updated_at']);
+            $sql .= implode(', ', $values).' '.Database::upsertField(['torrent_id', 'tag_id'], ['updated_at']);
             if ($remove) {
                 TorrentTag::query()->whereIn('torrent_id', $idArr)->delete();
             }

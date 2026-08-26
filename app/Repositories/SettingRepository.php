@@ -4,11 +4,11 @@ namespace App\Repositories;
 
 use App\Models\Setting;
 use App\Support\Cache;
+use App\Support\Database;
 use App\Support\Hooks;
 use App\Support\Logger;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
-use Nexus\Database\NexusDB;
 
 class SettingRepository extends BaseRepository
 {
@@ -72,7 +72,7 @@ class SettingRepository extends BaseRepository
         }
         $sql = sprintf(
             'insert into %s (name, "value") values %s %s',
-            $settingModel->getTable(), implode(', ', $values), NexusDB::upsertField(['name'], ['value'])
+            $settingModel->getTable(), implode(', ', $values), Database::upsertField(['name'], ['value'])
         );
         $result = DB::insert($sql);
         Logger::writeWithContext((string) "sql: {$sql}, result: {$result}", (string) 'info', (bool) false);

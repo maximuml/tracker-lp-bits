@@ -6,7 +6,10 @@ use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 
 /**
- * Database introspection helpers extracted from `NexusDB`.
+ * Database introspection and SQL-dialect helpers extracted from `NexusDB`.
+ *
+ * The helpers here mirror the driver-aware behaviour of `NexusDB`'s static
+ * methods, branching on the configured connection driver (`mysql` or `pgsql`).
  */
 final class Database
 {
@@ -30,5 +33,87 @@ final class Database
         $match = version_compare($version, $minVersion, '>=');
 
         return compact('version', 'match', 'minVersion', 'dbType');
+    }
+
+    /**
+     * Build a SQL fragment that converts a datetime column to a unix timestamp.
+     *
+     * Mirrors `NexusDB::unixTimestampField()`.
+     */
+    public static function unixTimestampField(string $field): string
+    {
+        return match (self::driverName()) {
+            'mysql' => sprintf('UNIX_TIMESTAMP(%s)', $field),
+            'pgsql' => sprintf('EXTRACT(EPOCH FROM %s)', $field),
+            default => throw new \RuntimeException('Not supported database.'),
+        };
+    }
+
+    /**
+     * Build a SQL fragment that converts a unix timestamp to a datetime.
+     *
+     * Mirrors `NexusDB::fromUnixTimestampField()`.
+     */
+    public static function fromUnixTimestampField(int $timestamp): string
+    {
+        return match (self::driverName()) {
+            'mysql' => sprintf('FROM_UNIXTIME(%d)', $timestamp),
+            'pgsql' => sprintf('to_timestamp(%d)', $timestamp),
+            default => throw new \RuntimeException('Not supported database.'),
+        };
+    }
+
+    /**
+     * Build the upsert suffix for a raw INSERT statement.
+     *
+     * Mirrors `NexusDB::upsertField()`.
+     *
+     * @param  list<string>  $uniqueFields
+     * @param  list<string>  $updateFields
+     */
+    public static function upsertField(array $uniqueFields, array $updateFields = []): string
+    {
+        return match (self::driverName()) {
+            'mysql' => sprintf(
+                'ON DUPLICATE KEY UPDATE %s',
+                implode(', ', array_map(
+                    static fn (string $field): string => "`$field` = VALUES(`$field`)",
+                    $updateFields ?: ['id'],
+                )),
+            ),
+            'pgsql' => sprintf(
+                'ON CONFLICT (%s) DO %s',
+                implode(', ', $uniqueFields),
+                empty($updateFields)
+                    ? 'NOTHING'
+                    : 'UPDATE SET '.implode(', ', array_map(
+                        static fn (string $field): string => "$field = EXCLUDED.$field",
+                        $updateFields,
+                    )),
+            ),
+            default => throw new \RuntimeException('Not supported database.'),
+        };
+    }
+
+    /**
+     * Build a SQL fragment that aggregates a column into a comma-separated list.
+     *
+     * Mirrors `NexusDB::groupConcatField()`.
+     */
+    public static function groupConcatField(string $field): string
+    {
+        return match (self::driverName()) {
+            'mysql' => sprintf('group_concat(%s)', $field),
+            'pgsql' => sprintf("string_agg(%s::text, ',')", $field),
+            default => throw new \RuntimeException('Not supported database.'),
+        };
+    }
+
+    /**
+     * Return the configured database driver name.
+     */
+    private static function driverName(): string
+    {
+        return (string) DB::connection()->getDriverName();
     }
 }

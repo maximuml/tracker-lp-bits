@@ -2,10 +2,10 @@
 
 namespace App\Console\Commands\Upgrade;
 
+use App\Support\Database;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
-use Nexus\Database\NexusDB;
 
 class MigrateTorrentsTableTextColumn extends Command
 {
@@ -31,7 +31,7 @@ class MigrateTorrentsTableTextColumn extends Command
     public function handle()
     {
         if (Schema::hasTable('torrent_extras') && Schema::hasColumn('torrents', 'descr')) {
-            DB::statement('insert into torrent_extras (torrent_id, descr, media_info, nfo, created_at) select id, descr, technical_info, nfo, now() from torrents '.NexusDB::upsertField(['torrent_id'], ['torrent_id']));
+            DB::statement('insert into torrent_extras (torrent_id, descr, media_info, nfo, created_at) select id, descr, technical_info, nfo, now() from torrents '.Database::upsertField(['torrent_id'], ['torrent_id']));
         }
         $columns = ['ori_descr', 'descr', 'nfo', 'technical_info'];
         $sql = 'alter table torrents ';

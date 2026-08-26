@@ -104,7 +104,7 @@ class Update extends Install
          * @since 1.7.13
          */
         foreach (['adminpanel', 'modpanel', 'sysoppanel'] as $table) {
-            $columnInfo = NexusDB::getMysqlColumnInfo($table, 'id');
+            $columnInfo = $this->getMysqlColumnInfo($table, 'id');
             if ($columnInfo['DATA_TYPE'] == 'tinyint' || empty($columnInfo['EXTRA']) || $columnInfo['EXTRA'] != 'auto_increment') {
                 NexusDB::getInstance()->query("alter table $table modify id int(11) unsigned not null AUTO_INCREMENT");
             }
@@ -147,7 +147,7 @@ class Update extends Install
 
         // torrent support sticky second level
         if (WITH_LARAVEL) {
-            $columnInfo = NexusDB::getMysqlColumnInfo('torrents', 'pos_state');
+            $columnInfo = $this->getMysqlColumnInfo('torrents', 'pos_state');
             $this->doLog('[TORRENT POS_STATE], column info: '.json_encode($columnInfo));
             if ($columnInfo['DATA_TYPE'] == 'enum') {
                 $sql = "alter table torrents modify `pos_state` varchar(32) NOT NULL DEFAULT 'normal'";
@@ -275,7 +275,7 @@ class Update extends Install
             $shouldMigrateSearchBox = true;
             $searchBoxLog = 'no section_name field';
         } else {
-            $columnInfo = NexusDB::getMysqlColumnInfo('searchbox', 'section_name');
+            $columnInfo = $this->getMysqlColumnInfo('searchbox', 'section_name');
             $searchBoxLog = 'has section_name, searchbox.section DATA_TYPE: '.$columnInfo['DATA_TYPE'];
             if ($columnInfo['DATA_TYPE'] != 'json') {
                 $searchBoxLog .= ', not json';
@@ -299,7 +299,7 @@ class Update extends Install
             $this->runMigrate('database/migrations/2022_11_23_042152_add_seed_points_seed_times_update_time_to_users_table.php');
             foreach (User::$notificationOptions as $option) {
                 $sql = "update users set notifs = concat(notifs, '[$option]') where instr(notifs, '[$option]') = 0";
-                NexusDB::statement($sql);
+                DB::statement($sql);
             }
         }
 
@@ -309,7 +309,7 @@ class Update extends Install
             $this->doLog('removeDuplicateSnatch and migrate 2023_03_29_021950_handle_snatched_user_torrent_unique');
         }
 
-        if (! NexusDB::hasIndex('peers', 'unique_torrent_peer_user')) {
+        if (! $this->tableHasIndex('peers', 'unique_torrent_peer_user')) {
             $toolRep->removeDuplicatePeer();
             $this->runMigrate('database/migrations/2023_04_01_005409_add_unique_torrent_peer_user_to_peers_table.php');
             $this->doLog('removeDuplicatePeer and migrate 2023_04_01_005409_add_unique_torrent_peer_user_to_peers_table');
@@ -577,6 +577,35 @@ class Update extends Install
         }
 
         return false;
+    }
+
+    private function tableHasIndex(string $table, string $indexName): bool
+    {
+        $indexes = Schema::getIndexes($table);
+        foreach ($indexes as $index) {
+            if (($index['name'] ?? null) === $indexName) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    private function getMysqlColumnInfo(string $table, string $column): ?array
+    {
+        $database = DB::connection()->getDatabaseName();
+        $rows = DB::select(
+            'select * from information_schema.columns where table_schema = ? and table_name = ? and column_name = ?',
+            [$database, $table, $column]
+        );
+        if (empty($rows)) {
+            return null;
+        }
+
+        return (array) $rows[0];
     }
 
     public function updateEnvFile()

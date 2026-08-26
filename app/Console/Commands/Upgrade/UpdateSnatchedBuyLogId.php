@@ -3,7 +3,7 @@
 namespace App\Console\Commands\Upgrade;
 
 use Illuminate\Console\Command;
-use Nexus\Database\NexusDB;
+use Illuminate\Support\Facades\DB;
 
 class UpdateSnatchedBuyLogId extends Command
 {
@@ -28,6 +28,6 @@ class UpdateSnatchedBuyLogId extends Command
      */
     public function handle()
     {
-        NexusDB::statement('UPDATE snatched INNER JOIN torrent_buy_logs ON snatched.userid = torrent_buy_logs.uid AND snatched.torrentid = torrent_buy_logs.torrent_id SET snatched.buy_log_id = torrent_buy_logs.id');
+        DB::statement('UPDATE snatched INNER JOIN torrent_buy_logs ON snatched.userid = torrent_buy_logs.uid AND snatched.torrentid = torrent_buy_logs.torrent_id SET snatched.buy_log_id = torrent_buy_logs.id');
     }
 }

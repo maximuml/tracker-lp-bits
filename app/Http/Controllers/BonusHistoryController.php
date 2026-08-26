@@ -30,7 +30,7 @@ class BonusHistoryController extends LegacyController
     public function bonusLog(Request $request): View|RedirectResponse|Response
     {
         $curUser = SupportContext::getUser() ?? [];
-        $uid = (int) (SupportContext::getRequestInput('uid') ?? $curUser['id'] ?? 0);
+        $uid = (int) (request()->input('uid') ?? $curUser['id'] ?? 0);
 
         if (! Validators::isId($uid)) {
             return $this->legacyAbortResponse('Error', 'Invalid uid.');
@@ -50,13 +50,13 @@ class BonusHistoryController extends LegacyController
 
         $isRecordSeedingBonusLog = Setting::getIsRecordSeedingBonusLog();
         $defaultCategory = BonusLogs::CATEGORY_COMMON;
-        $category = SupportContext::getRequestInput('category') ?? $defaultCategory;
+        $category = request()->input('category') ?? $defaultCategory;
         $categoryOptions = BonusLogs::listCategoryOptions($isRecordSeedingBonusLog);
         if (! isset($categoryOptions[$category])) {
             return $this->legacyAbortResponse('Error', "Invalid category: {$category}");
         }
 
-        $businessType = (int) (SupportContext::getRequestInput('business_type') ?? 0);
+        $businessType = (int) (request()->input('business_type') ?? 0);
         $businessTypeOptions = BonusLogs::listBusinessTypeOptions($isRecordSeedingBonusLog ? '' : $defaultCategory);
         if ($businessType && ! isset($businessTypeOptions[$businessType])) {
             return $this->legacyAbortResponse('Error', "Invalid business_type: {$businessType}");
@@ -72,13 +72,13 @@ class BonusHistoryController extends LegacyController
 
         $categoryOptionsHtml = '';
         foreach ($categoryOptions as $name => $text) {
-            $selected = (SupportContext::getRequestInput('category') ?? '') == $name ? ' selected' : '';
+            $selected = (request()->input('category') ?? '') == $name ? ' selected' : '';
             $categoryOptionsHtml .= sprintf('<option value="%s"%s>%s</option>', htmlspecialchars((string) $name), $selected, htmlspecialchars($text));
         }
 
         $businessTypeOptionsHtml = '';
         foreach ($businessTypeOptions as $name => $text) {
-            $selected = (SupportContext::getRequestInput('business_type') ?? '') == $name ? ' selected' : '';
+            $selected = (request()->input('business_type') ?? '') == $name ? ' selected' : '';
             $businessTypeOptionsHtml .= sprintf('<option value="%s"%s>%s</option>', htmlspecialchars((string) $name), $selected, htmlspecialchars($text));
         }
 
@@ -141,15 +141,15 @@ JS;
 
         $langUploaders = (array) SupportContext::getGlobal('lang_uploaders', []);
 
-        $year = (int) (SupportContext::getQuery('year') ?? 0);
+        $year = (int) (request()->query('year') ?? 0);
         if (! $year || $year < 2000) {
             $year = (int) date('Y');
         }
-        $month = (int) (SupportContext::getQuery('month') ?? 0);
+        $month = (int) (request()->query('month') ?? 0);
         if (! $month || $month <= 0 || $month > 12) {
             $month = (int) date('m');
         }
-        $order = (string) (SupportContext::getQuery('order') ?? '');
+        $order = (string) (request()->query('order') ?? '');
         if (! in_array($order, ['username', 'torrent_size', 'torrent_count'])) {
             $order = 'username';
         }

@@ -2,11 +2,11 @@
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
 
 
-if (!empty(\App\Support\SupportContext::getRequestInput('view'))) {
-    $view = trim(\App\Support\SupportContext::getRequestInput('view'), "/.");
+if (!empty(\request()->input('view'))) {
+    $view = trim(\request()->input('view'), "/.");
     $view = str_replace(".", "/", $view);
-    if (!empty(\App\Support\SupportContext::getRequestInput('plugin'))) {
-        $pluginId = \App\Support\SupportContext::getRequestInput('plugin');
+    if (!empty(\request()->input('plugin'))) {
+        $pluginId = \request()->input('plugin');
         $plugin = \Nexus\Plugin\Plugin::getById($pluginId);
         $viewFile = $plugin->getNexusView($view);
     } else {
@@ -19,12 +19,12 @@ if (!empty(\App\Support\SupportContext::getRequestInput('view'))) {
     if (file_exists($viewFile)) {
         require $viewFile;
     } else {
-        $msg = "viewFile: $viewFile not exists, _REQUEST: " . json_encode(\App\Support\SupportContext::allRequest());
+        $msg = "viewFile: $viewFile not exists, _REQUEST: " . json_encode(\request()->all());
         \App\Support\Logger::writeWithContext((string) $msg, (string) "error", (bool) false);
         throw new \RuntimeException($msg);
     }
 } else {
-    $msg = "require view parameter, _REQUEST: " . json_encode(\App\Support\SupportContext::allRequest());
+    $msg = "require view parameter, _REQUEST: " . json_encode(\request()->all());
     \App\Support\Logger::writeWithContext((string) $msg, (string) "error", (bool) false);
     abort(400, 'require view parameter');
 }

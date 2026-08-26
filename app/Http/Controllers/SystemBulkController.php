@@ -44,7 +44,7 @@ class SystemBulkController extends LegacyController
         }
 
         if ($request->isMethod('get')) {
-            if (SupportContext::getQuery('sent') == '1') {
+            if (request()->query('sent') == '1') {
                 Html::stdhead('Add Upload');
                 Html::stdMessage('Success', 'Upload amount has been added successfully.');
                 Html::stdfoot();
@@ -56,10 +56,10 @@ class SystemBulkController extends LegacyController
         }
 
         $curUser = SupportContext::getUser() ?? [];
-        $senderId = SupportContext::getPost('sender') === 'system' ? 0 : (int) ($curUser['id'] ?? 0);
+        $senderId = request()->post('sender') === 'system' ? 0 : (int) ($curUser['id'] ?? 0);
         $added = date('Y-m-d H:i:s');
-        $msg = trim((string) SupportContext::getPost('msg'));
-        $amount = SupportContext::getPost('amount');
+        $msg = trim((string) request()->post('msg'));
+        $amount = request()->post('amount');
 
         if ($msg === '' || $amount === null || $amount === '') {
             return $this->legacyAbortResponse('Error', 'Don\'t leave any fields blank.');
@@ -68,14 +68,14 @@ class SystemBulkController extends LegacyController
             return $this->legacyAbortResponse('Error', 'amount must be numeric');
         }
 
-        $classSet = (array) SupportContext::getPost('clases');
+        $classSet = (array) request()->post('clases');
         foreach ($classSet as $class) {
             if (! Validators::isId($class) && $class != 0) {
                 return $this->legacyAbortResponse('Error', 'Invalid Class');
             }
         }
 
-        $subject = trim((string) SupportContext::getPost('subject'));
+        $subject = trim((string) request()->post('subject'));
         $bytes = Format::bytesFromUnit($amount, 'G');
 
         User::query()->whereIn('class', $classSet)->increment('uploaded', $bytes);
@@ -125,9 +125,9 @@ class SystemBulkController extends LegacyController
                 return $this->legacyAbortResponse($lang['std_error'] ?? 'Error', $exception->getMessage());
             }
 
-            $email = Input::unescape(htmlspecialchars(trim((string) SupportContext::getPost('email'))));
+            $email = Input::unescape(htmlspecialchars(trim((string) request()->post('email'))));
             $email = Email::sanitizeForDisplay($email);
-            $preRegisterUsername = (string) SupportContext::getPost('pre_register_username');
+            $preRegisterUsername = (string) request()->post('pre_register_username');
             $isPreRegisterEmailAndUsername = SiteConfig::current()->system->isInvitePreEmailAndUsername();
             $lang = (array) SupportContext::getGlobal('lang_takeinvite', []);
 
@@ -141,7 +141,7 @@ class SystemBulkController extends LegacyController
                 return $this->legacyAbortResponse($lang['head_invitation_failed'] ?? 'Error', $lang['std_invalid_email_address'] ?? 'Invalid email.');
             }
 
-            $body = str_replace('<br />', '<br />', nl2br(trim(strip_tags((string) SupportContext::getPost('body')))));
+            $body = str_replace('<br />', '<br />', nl2br(trim(strip_tags((string) request()->post('body')))));
             if (! $body) {
                 return $this->legacyAbortResponse($lang['head_invitation_failed'] ?? 'Error', $lang['std_must_enter_personal_message'] ?? 'Enter a message.');
             }
@@ -174,7 +174,7 @@ class SystemBulkController extends LegacyController
                 return $this->legacyAbortResponse($lang['head_invitation_failed'] ?? 'Error', $lang['std_invitation_already_sent_to'].htmlspecialchars($email).$lang['std_await_user_registeration']);
             }
 
-            $hashPost = (string) SupportContext::getPost('hash');
+            $hashPost = (string) request()->post('hash');
             if ($hashPost === '') {
                 return $this->legacyAbortResponse($lang['head_invitation_failed'] ?? 'Error', $lang['std_must_select_invite'] ?? 'Select an invite.');
             }
@@ -273,7 +273,7 @@ class SystemBulkController extends LegacyController
             return $this->legacyAbortResponse('Error', 'Permission denied.');
         }
 
-        $delreport = (array) SupportContext::getPost('delreport');
+        $delreport = (array) request()->post('delreport');
         if (empty($delreport)) {
             $langFunctions = (array) SupportContext::getGlobal('lang_functions', []);
 
@@ -286,13 +286,13 @@ class SystemBulkController extends LegacyController
         }
 
         $cache = SupportContext::getCache();
-        if (SupportContext::getPost('setdealt')) {
+        if (request()->post('setdealt')) {
             DB::table('reports')
                 ->whereIn('id', $delreportIds)
                 ->where('dealtwith', 0)
                 ->update(['dealtwith' => 1, 'dealtby' => $currentUserId]);
             $cache?->delete_value('staff_new_report_count', true);
-        } elseif (SupportContext::getPost('delete')) {
+        } elseif (request()->post('delete')) {
             DB::table('reports')->whereIn('id', $delreportIds)->delete();
             $cache?->delete_value('staff_new_report_count', true);
             $cache?->delete_value('staff_report_count', true);

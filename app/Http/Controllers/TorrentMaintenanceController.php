@@ -103,7 +103,7 @@ class TorrentMaintenanceController extends LegacyController
             return $this->legacyAbortResponse($lang['std_error'] ?? 'Error', $lang['std_permission_denied'] ?? 'Permission denied.');
         }
 
-        $reseedid = (int) (SupportContext::getQuery('reseedid') ?? SupportContext::getQuery('id') ?? 0);
+        $reseedid = (int) (request()->query('reseedid') ?? request()->query('id') ?? 0);
         $torrent = Torrent::query()->find($reseedid);
         $row = $torrent instanceof Torrent ? $torrent->toArray() : null;
 

@@ -44,7 +44,7 @@ final class UsersearchPageService
         }
 
         $highlight = ' bgcolor=#BBAF9B';
-        $showHelp = ! empty(SupportContext::getQuery('h'));
+        $showHelp = ! empty(request()->query('h'));
 
         // Build form field values and highlight state
         $form = $this->buildFormFields($highlight);
@@ -53,7 +53,7 @@ final class UsersearchPageService
         $resultsHtml = '';
         $resultsError = '';
         $hasResults = false;
-        if (count(SupportContext::allQuery()) > 0 && empty(SupportContext::getQuery('h'))) {
+        if (count(request()->query()) > 0 && empty(request()->query('h'))) {
             $hasResults = true;
             try {
                 $resultsHtml = $this->buildResults($curUser, $hasModcomment, $requestUri);
@@ -81,7 +81,7 @@ final class UsersearchPageService
      */
     private function buildFormFields(string $highlight): array
     {
-        $q = SupportContext::getQuery(...);
+        $q = static fn (string $key): ?string => is_string($val = request()->query($key)) ? $val : null;
 
         $class = $q('c');
         if (! Validators::isId($class)) {
@@ -177,7 +177,7 @@ final class UsersearchPageService
      */
     private function buildResults(array $curUser, bool $hasModcomment, string $requestUri): string
     {
-        $searchResult = UserSearchRepository::administrativeSearch((array) SupportContext::allQuery(), $hasModcomment, 30);
+        $searchResult = UserSearchRepository::administrativeSearch((array) request()->query(), $hasModcomment, 30);
         $count = (int) $searchResult['count'];
         $q = (string) $searchResult['q'];
         $perpage = 30;

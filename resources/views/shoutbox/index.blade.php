@@ -1,7 +1,7 @@
 @php
 $lang_shoutbox = (array) (\App\Support\SupportContext::getGlobal('lang_shoutbox') ?? []);
 $CURUSER = (array) (\App\Support\SupportContext::getUser() ?? []);
-$isAjax = (bool) ($isAjax ?? ! empty(\App\Support\SupportContext::getQuery('ajax')));
+$isAjax = (bool) ($isAjax ?? ! empty(\request()->query('ajax')));
 $where = (string) ($where ?? 'shoutbox');
 $refresh = (int) ($refresh ?? ($CURUSER['sbrefresh'] ?? 120));
 $lastId = (int) ($lastId ?? 0);

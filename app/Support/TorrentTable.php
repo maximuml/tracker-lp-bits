@@ -89,18 +89,18 @@ final class TorrentTable
 <tr>
 <?php
         $queryParams = [];
-        foreach (SupportContext::allQuery() as $get_name => $get_value) {
+        foreach (request()->query() as $get_name => $get_value) {
             if (is_array($get_value) || in_array($get_name, ['sort', 'type'], true)) {
                 continue;
             }
             $queryParams[(string) $get_name] = (string) $get_value;
         }
         $oldlink = $queryParams ? str_replace('&', '&amp;', http_build_query($queryParams, '', '&')).'&amp;' : '';
-        $sort = SupportContext::getQuery('sort', '');
+        $sort = request()->query('sort', '');
         $link = [];
         for ($i = 1; $i <= 9; $i++) {
             if ($sort == $i) {
-                $link[$i] = (SupportContext::getQuery('type') == 'desc' ? 'asc' : 'desc');
+                $link[$i] = (request()->query('type') == 'desc' ? 'asc' : 'desc');
             } else {
                 $link[$i] = ($i == 1 ? 'asc' : 'desc');
             }

@@ -7,7 +7,7 @@ if (\App\Support\UserDisplay::currentClass() < UC_SYSOP)
     \App\Support\LegacyResponse::abort("Sorry", "Access denied.");
 
 $validTypeMap = $lang_incrementbulk['types'];
-$type = \App\Support\SupportContext::getRequestInput('type') ?? '';
+$type = \request()->input('type') ?? '';
 $classes = array_chunk(\App\Models\User::listClass(), 4, true);
 ?>
     <table class=main width=737 border=0 cellspacing=0 cellpadding=0><tr><td class=embedded>
@@ -16,16 +16,16 @@ $classes = array_chunk(\App\Models\User::listClass(), 4, true);
                     <form method=post action=take-increment-bulk.php>
                         <?php
 
-                        if (((\App\Support\SupportContext::getQuery("returnto") !== null)) || $__server_HTTP_REFERER)
+                        if (((\request()->query("returnto") !== null)) || $__server_HTTP_REFERER)
                         {
                             ?>
-                            <input type=hidden name=returnto value="<?php echo htmlspecialchars(\App\Support\SupportContext::getQuery("returnto")) ? htmlspecialchars(\App\Support\SupportContext::getQuery("returnto")) : htmlspecialchars($__server_HTTP_REFERER)?>">
+                            <input type=hidden name=returnto value="<?php echo htmlspecialchars(\request()->query("returnto")) ? htmlspecialchars(\request()->query("returnto")) : htmlspecialchars($__server_HTTP_REFERER)?>">
                             <?php
                         }
                         ?>
                         <table cellspacing=0 cellpadding=5>
                             <?php
-                            if (((\App\Support\SupportContext::getQuery("sent") !== null)) && \App\Support\SupportContext::getQuery("sent") == 1) {
+                            if (((\request()->query("sent") !== null)) && \request()->query("sent") == 1) {
                                 echo '<tr><td colspan=2 class="text" align="center"><font color=red><b> '. ($validTypeMap[$type] ?? '') . $lang_incrementbulk['sent_success'] .'</font></b></tr></td>';
                             }
                             ?>

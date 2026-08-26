@@ -12,9 +12,9 @@ $httpReferer = (string) \App\Support\SupportContext::getServerValue('HTTP_REFERE
 <form method=post action="takestaffmess.php">
 @csrf
 <?php
-if (\App\Support\SupportContext::getQuery('returnto') || $httpReferer) {
+if (\request()->query('returnto') || $httpReferer) {
     ?>
-    <input type=hidden name=returnto value="<?php echo htmlspecialchars((string) (\App\Support\SupportContext::getQuery('returnto') ?? $httpReferer)); ?>">
+    <input type=hidden name=returnto value="<?php echo htmlspecialchars((string) (\request()->query('returnto') ?? $httpReferer)); ?>">
     <?php
 }
 ?>

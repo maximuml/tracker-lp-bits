@@ -1,6 +1,6 @@
 @php
-$form = \App\Support\SupportContext::getQuery('form');
-$text = \App\Support\SupportContext::getQuery('text');
+$form = \request()->query('form');
+$text = \request()->query('text');
 @endphp
 <html><head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">

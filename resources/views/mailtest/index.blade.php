@@ -8,12 +8,12 @@ if (\App\Support\UserDisplay::currentClass() < UC_SYSOP) {
     \App\Support\LegacyResponse::permissionDenied();
 }
 
-$action = (\App\Support\SupportContext::getPost('action') !== null)
-    ? htmlspecialchars(\App\Support\SupportContext::getPost('action'))
+$action = (\request()->post('action') !== null)
+    ? htmlspecialchars(\request()->post('action'))
     : '';
 
 if ($action == 'sendmail') {
-    $email = htmlspecialchars(trim(\App\Support\SupportContext::getPost('email')));
+    $email = htmlspecialchars(trim(\request()->post('email')));
     $email = \App\Support\Email::sanitizeForDisplay((string) $email);
     if (! \App\Support\Email::isWellFormed((string) $email)) {
         \App\Support\LegacyResponse::abort($lang_mailtest['std_error'], $lang_mailtest['std_invalid_email_address']);

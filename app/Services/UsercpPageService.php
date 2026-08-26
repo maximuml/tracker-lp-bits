@@ -162,6 +162,9 @@ final class UsercpPageService
         }
 
         // Passkey login form (if passkey login enabled and deadline in future)
+        // The form embeds a server-generated HMAC signature (passkey + timestamp,
+        // signed with login_secret) so the passkeyLogin controller can verify
+        // authenticity without exposing the secret to the client.
         $passkeyLoginForm = '';
         $siteConfig = SiteConfig::current();
         $loginSecretDeadline = $siteConfig->security->loginSecretDeadline();
@@ -169,11 +172,16 @@ final class UsercpPageService
             && $loginSecretDeadline !== null
             && $loginSecretDeadline > date('Y-m-d H:i:s')
         ) {
+            $passkey = (string) ($curUser['passkey'] ?? '');
+            $timestamp = time();
+            $signature = hash_hmac('sha256', $passkey.$timestamp, $siteConfig->security->loginSecret());
             $passkeyLoginForm = sprintf(
-                '<form method="POST" action="%s/%s" style="display:inline"><input type="hidden" name="passkey" value="%s"><button type="submit" class="btn" style="font-size:inherit;padding:0 4px">%s</button></form>',
+                '<form method="POST" action="%s/%s" style="display:inline"><input type="hidden" name="passkey" value="%s"><input type="hidden" name="timestamp" value="%d"><input type="hidden" name="signature" value="%s"><button type="submit" class="btn" style="font-size:inherit;padding:0 4px">%s</button></form>',
                 Url::schemeAndHost(false),
                 $siteConfig->security->loginSecret(),
-                htmlspecialchars((string) ($curUser['passkey'] ?? ''), ENT_QUOTES),
+                htmlspecialchars($passkey, ENT_QUOTES),
+                $timestamp,
+                htmlspecialchars($signature, ENT_QUOTES),
                 $lang['text_passkey_login'] ?? 'Login'
             );
         }

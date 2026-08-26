@@ -35,6 +35,8 @@ final class Nexus
 
     private static array $appendFooters = [];
 
+    private static array $translations = [];
+
     private static ?NexusTranslator $translator = null;
 
     private static ?Manager $queueManager = null;

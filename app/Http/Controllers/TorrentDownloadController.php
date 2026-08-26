@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Repositories\IpLogRepository;
 use App\Repositories\TorrentRepository;
 use App\Support\Config\SiteConfig;
+use App\Support\CurrentUser;
 use App\Support\Http;
 use App\Support\Json;
 use App\Support\Logger;
@@ -134,7 +135,7 @@ class TorrentDownloadController extends LegacyController
 
     public function downloadnotice(Request $request): Response|RedirectResponse|View
     {
-        $curUser = SupportContext::getUser();
+        $curUser = app(CurrentUser::class)->get();
         if ($curUser === null) {
             $qs = $request->getQueryString();
 

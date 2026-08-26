@@ -5,8 +5,8 @@ namespace App\Http\Controllers;
 use App\Enums\Permission\PermissionEnum;
 use App\Models\User;
 use App\Repositories\TorrentAjaxRepository;
+use App\Support\CurrentUser;
 use App\Support\Permissions;
-use App\Support\SupportContext;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -40,7 +40,7 @@ class TorrentAjaxController extends LegacyController
             return response('', 400, ['Content-Type' => 'text/html; charset=utf-8']);
         }
 
-        $curUser = SupportContext::getUser() ?? [];
+        $curUser = app(CurrentUser::class)->get() ?? [];
         $currentUser = ! empty($curUser) ? User::query()->find((int) ($curUser['id'] ?? 0)) : null;
 
         $headers = [
@@ -73,7 +73,7 @@ class TorrentAjaxController extends LegacyController
             return response('', 400, ['Content-Type' => 'text/html; charset=utf-8']);
         }
 
-        $curUser = SupportContext::getUser() ?? [];
+        $curUser = app(CurrentUser::class)->get() ?? [];
         $currentUser = ! empty($curUser) ? User::query()->find((int) ($curUser['id'] ?? 0)) : null;
 
         if ($currentUser === null || (! Permissions::userCan(PermissionEnum::TORRENT_HISTORY->value, false, $currentUser->id) && $currentUser->id !== $targetUserId)) {
@@ -114,7 +114,7 @@ class TorrentAjaxController extends LegacyController
             return response()->json(['torrents' => []]);
         }
 
-        $userId = (int) (SupportContext::getUser()['id'] ?? 0);
+        $userId = (int) (app(CurrentUser::class)->get()['id'] ?? 0);
         $user = User::query()->find($userId);
 
         if ($user === null) {

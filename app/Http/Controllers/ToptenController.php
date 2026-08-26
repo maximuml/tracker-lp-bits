@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Auth\Permission;
 use App\Enums\Permission\PermissionEnum;
 use App\Repositories\ToptenRepository;
+use App\Support\CurrentUser;
 use App\Support\SupportContext;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -15,7 +16,7 @@ class ToptenController extends Controller
 {
     public function legacy(Request $request): Response|RedirectResponse
     {
-        if (SupportContext::getUser() === null) {
+        if (app(CurrentUser::class)->get() === null) {
             $qs = $request->getQueryString();
 
             return redirect('/topten.php'.($qs ? '?'.$qs : ''));

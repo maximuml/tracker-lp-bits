@@ -9,6 +9,7 @@ use App\Models\Torrent;
 use App\Models\User;
 use App\Repositories\ModerationRepository;
 use App\Support\Cache\LegacyRedisCache;
+use App\Support\CurrentUser;
 use App\Support\Pagination;
 use App\Support\Permissions;
 use App\Support\SupportContext;
@@ -25,7 +26,7 @@ class ModerationController extends LegacyController
 {
     public function report(Request $request): View|RedirectResponse|Response
     {
-        $curUser = SupportContext::getUser() ?? [];
+        $curUser = app(CurrentUser::class)->get() ?? [];
         $currentUserId = (int) ($curUser['id'] ?? 0);
         $staffmemClass = defined('UC_STAFFMEM') ? \constant('UC_STAFFMEM') : (defined('UC_MODERATOR') ? \constant('UC_MODERATOR') : 0);
 
@@ -164,7 +165,7 @@ class ModerationController extends LegacyController
 
     public function reports(Request $request): View|RedirectResponse|Response
     {
-        $curUser = SupportContext::getUser() ?? [];
+        $curUser = app(CurrentUser::class)->get() ?? [];
         $currentUserId = (int) ($curUser['id'] ?? 0);
 
         if (! Permissions::userCan(PermissionEnum::STAFF_MEMBER->value, false, $currentUserId)) {

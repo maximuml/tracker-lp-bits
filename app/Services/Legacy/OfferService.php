@@ -9,6 +9,7 @@ use App\Enums\Permission\PermissionEnum;
 use App\Models\Message;
 use App\Repositories\OfferRepository;
 use App\Support\Cache;
+use App\Support\CurrentUser;
 use App\Support\Input;
 use App\Support\LegacyResponse;
 use App\Support\Locale;
@@ -70,7 +71,7 @@ final class OfferService
      */
     private function curUser(): array
     {
-        return (array) (SupportContext::getUser() ?? []);
+        return (array) (app(CurrentUser::class)->get() ?? []);
     }
 
     private function baseUrl(): string

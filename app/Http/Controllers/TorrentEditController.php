@@ -9,6 +9,7 @@ use App\Repositories\TagRepository;
 use App\Repositories\TorrentDetailRepository;
 use App\Repositories\TorrentEditRepository;
 use App\Support\Category;
+use App\Support\CurrentUser;
 use App\Support\Locale;
 use App\Support\SupportContext;
 use Illuminate\Http\RedirectResponse;
@@ -21,7 +22,7 @@ class TorrentEditController extends Controller
 {
     public function legacy(Request $request): View|RedirectResponse
     {
-        if (SupportContext::getUser() === null) {
+        if (app(CurrentUser::class)->get() === null) {
             $qs = $request->getQueryString();
 
             return redirect('/edit.php'.($qs ? '?'.$qs : ''));
@@ -57,8 +58,8 @@ class TorrentEditController extends Controller
             SupportContext::setGlobal('lang_edit', $lang_edit ?? []);
         }
 
-        $currentUser = SupportContext::getUser();
-        SupportContext::setUser($currentUser);
+        $currentUser = app(CurrentUser::class)->get();
+        app(CurrentUser::class)->set($currentUser);
 
         $langEdit = SupportContext::getGlobal('lang_edit') ?? [];
         $headTitle = ($langEdit['head_edit_torrent'] ?? '').'"'.$row['name'].'"';

@@ -24,7 +24,7 @@ final class TorrentTable
             throw new \RuntimeException('Cache not initialized');
         }
         $lang_functions = SupportContext::getLangFunctions();
-        $user = SupportContext::getUser() ?? [];
+        $user = app(CurrentUser::class)->get() ?? [];
         $waitsystem = (string) SupportContext::getGlobal('waitsystem', '');
         $enabletooltip_tweak = (string) SupportContext::getGlobal('enabletooltip_tweak', '');
 

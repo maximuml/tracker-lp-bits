@@ -15,6 +15,7 @@ use App\Repositories\TorrentDetailRepository;
 use App\Repositories\TorrentRepository;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\Config\SiteConfig;
+use App\Support\CurrentUser;
 use App\Support\Format;
 use App\Support\Hooks;
 use App\Support\Locale;
@@ -74,8 +75,8 @@ class TorrentDetailsController extends Controller
             abort(404);
         }
 
-        $currentUser = SupportContext::getUser() ?? $user->toLegacyArray();
-        SupportContext::setUser($currentUser);
+        $currentUser = app(CurrentUser::class)->get() ?? $user->toLegacyArray();
+        app(CurrentUser::class)->set($currentUser);
 
         if (empty(SupportContext::getGlobal('lang_functions')) || empty(SupportContext::getGlobal('lang_details'))) {
             SupportContext::setServerValue('SCRIPT_NAME', '/details.php');

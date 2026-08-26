@@ -96,7 +96,7 @@ final class PageLayoutContext
         }
 
         return new self(
-            user: SupportContext::getUser(),
+            user: app(CurrentUser::class)->get(),
             lang: SupportContext::getLangFunctions(),
             cache: app(LegacyRedisCache::class),
             defaultStylesheet: (int) SupportContext::getGlobal('defcss', 0),

@@ -8,6 +8,7 @@ use App\Models\Torrent;
 use App\Repositories\TorrentRepository;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\Config\SiteConfig;
+use App\Support\CurrentUser;
 use App\Support\Format;
 use App\Support\Hooks;
 use App\Support\Http;
@@ -29,7 +30,7 @@ class TorrentRssController extends LegacyController
     public function torrentrss(Request $request): Response
     {
         $cache = app(LegacyRedisCache::class);
-        $currentUser = SupportContext::getUser() ?? [];
+        $currentUser = app(CurrentUser::class)->get() ?? [];
         $passkey = (string) ($request->input('passkey') ?? $currentUser['passkey'] ?? '');
 
         if ($passkey === '') {

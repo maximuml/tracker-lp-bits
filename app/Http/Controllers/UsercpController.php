@@ -8,6 +8,7 @@ use App\DTOs\Usercp\SecuritySettingsDto;
 use App\DTOs\Usercp\TrackerSettingsDto;
 use App\Repositories\UsercpRepository;
 use App\Services\UsercpPageService;
+use App\Support\CurrentUser;
 use App\Support\LegacyResponse;
 use App\Support\SupportContext;
 use Illuminate\Http\RedirectResponse;
@@ -68,7 +69,7 @@ class UsercpController extends LegacyController
      */
     public function legacy(Request $request): View|Response|RedirectResponse
     {
-        $user = SupportContext::getUser();
+        $user = app(CurrentUser::class)->get();
         if ($user === null) {
             $qs = $request->getQueryString();
 

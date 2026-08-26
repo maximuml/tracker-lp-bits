@@ -6,6 +6,7 @@ use App\Models\Attendance;
 use App\Repositories\AttendanceRepository;
 use App\Support\Captcha;
 use App\Support\Config\SiteConfig;
+use App\Support\CurrentUser;
 use App\Support\LegacyResponse;
 use App\Support\SupportContext;
 use Carbon\Carbon;
@@ -18,7 +19,7 @@ class AttendanceController extends LegacyController
 {
     public function attendance(Request $request, AttendanceRepository $repository): View|RedirectResponse|Response
     {
-        $curUser = SupportContext::getUser();
+        $curUser = app(CurrentUser::class)->get();
         if ($curUser === null) {
             return redirect('/attendance.php');
         }
@@ -68,7 +69,7 @@ class AttendanceController extends LegacyController
      */
     public function attend(Request $request, AttendanceRepository $repository): array
     {
-        $curUser = SupportContext::getUser();
+        $curUser = app(CurrentUser::class)->get();
         if ($curUser === null) {
             return $this->fail([], 'Unauthenticated');
         }

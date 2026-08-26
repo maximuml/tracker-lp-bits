@@ -13,6 +13,7 @@ use App\Repositories\UsercpRepository;
 use App\Repositories\UserPasskeyRepository;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\Config\SiteConfig;
+use App\Support\CurrentUser;
 use App\Support\Form;
 use App\Support\Forum;
 use App\Support\Hooks;
@@ -49,7 +50,7 @@ final class UsercpPageService
      */
     public function build(string $action, string $type): array
     {
-        $curUser = (array) (SupportContext::getUser() ?? []);
+        $curUser = (array) (app(CurrentUser::class)->get() ?? []);
         $lang = (array) (SupportContext::getGlobal('lang_usercp') ?? []);
         $cache = app(LegacyRedisCache::class);
         $userInfo = UsercpRepository::getUserById((int) ($curUser['id'] ?? 0));

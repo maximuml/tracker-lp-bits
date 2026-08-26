@@ -12,6 +12,7 @@ use App\Repositories\TorrentRepository;
 use App\Repositories\UploadRepository;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\Category;
+use App\Support\CurrentUser;
 use App\Support\LegacyResponse;
 use App\Support\Locale;
 use App\Support\SupportContext;
@@ -34,8 +35,8 @@ class TorrentUploadController extends Controller
             return redirect('/login.php?returnto='.urlencode($request->fullUrl()));
         }
 
-        $currentUser = SupportContext::getUser() ?? $user->toLegacyArray();
-        SupportContext::setUser($currentUser);
+        $currentUser = app(CurrentUser::class)->get() ?? $user->toLegacyArray();
+        app(CurrentUser::class)->set($currentUser);
 
         if (empty(SupportContext::getGlobal('lang_upload')) || empty(SupportContext::getGlobal('lang_edit'))) {
             SupportContext::setServerValue('SCRIPT_NAME', '/upload.php');

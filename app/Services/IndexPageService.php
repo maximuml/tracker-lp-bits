@@ -12,6 +12,7 @@ use App\Repositories\IndexRepository;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\Config\SiteConfig;
 use App\Support\CoverThumb;
+use App\Support\CurrentUser;
 use App\Support\Format;
 use App\Support\Hooks;
 use App\Support\Shoutbox;
@@ -29,7 +30,7 @@ final class IndexPageService
     /** @return array<string, mixed> */
     public function build(): array
     {
-        $curUser = (array) (SupportContext::getUser() ?? []);
+        $curUser = (array) (app(CurrentUser::class)->get() ?? []);
         $lang = (array) (SupportContext::getGlobal('lang_index') ?? []);
         $cache = app(LegacyRedisCache::class);
 

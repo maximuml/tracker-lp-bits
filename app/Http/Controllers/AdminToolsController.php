@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\UserBanLog;
 use App\Repositories\ModerationRepository;
 use App\Support\Cache\LegacyRedisCache;
+use App\Support\CurrentUser;
 use App\Support\Html;
 use App\Support\Network;
 use App\Support\Pagination;
@@ -28,7 +29,7 @@ class AdminToolsController extends LegacyController
 
     public function userBanLog(Request $request): View|RedirectResponse|Response
     {
-        if (SupportContext::getUser() === null) {
+        if (app(CurrentUser::class)->get() === null) {
             $qs = $request->getQueryString();
 
             return redirect('/user-ban-log.php'.($qs ? '?'.$qs : ''));

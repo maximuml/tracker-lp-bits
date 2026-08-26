@@ -85,7 +85,7 @@ final class Promotion
      */
     public static function backgroundStyleWithContext(int $promotion, ?string $posState = '', ?array $torrent = []): string
     {
-        $user = SupportContext::getUser() ?? [];
+        $user = app(CurrentUser::class)->get() ?? [];
 
         return self::backgroundStyle(
             $promotion,
@@ -248,7 +248,7 @@ final class Promotion
         ?string $promotionUntil,
         bool $ignoreGlobal,
     ): string {
-        $user = SupportContext::getUser() ?? [];
+        $user = app(CurrentUser::class)->get() ?? [];
         $expires = self::expireTorrentGlobals();
 
         return self::append(
@@ -278,7 +278,7 @@ final class Promotion
         ?string $promotionUntil,
         bool $ignoreGlobal,
     ): string {
-        $user = SupportContext::getUser() ?? [];
+        $user = app(CurrentUser::class)->get() ?? [];
         $expires = self::expireTorrentGlobals();
 
         return self::appendSub(

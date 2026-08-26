@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Models\Invite;
 use App\Support\Cache\LegacyRedisCache;
+use App\Support\CurrentUser;
 use App\Support\Hooks;
 use App\Support\Menu;
 use App\Support\SupportContext;
@@ -126,7 +127,7 @@ class PageLayoutRepository extends BaseRepository
      */
     public function prepareAccess(): void
     {
-        $user = SupportContext::getUser();
+        $user = app(CurrentUser::class)->get();
         if ($user === null || empty($user['id'])) {
             return;
         }
@@ -164,7 +165,7 @@ class PageLayoutRepository extends BaseRepository
      */
     public function flushAccess(): void
     {
-        $user = SupportContext::getUser();
+        $user = app(CurrentUser::class)->get();
         if ($user === null || empty($user['id'])) {
             return;
         }

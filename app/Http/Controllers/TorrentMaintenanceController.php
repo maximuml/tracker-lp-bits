@@ -8,6 +8,7 @@ use App\Models\Peer;
 use App\Models\Torrent;
 use App\Models\User;
 use App\Support\Config\SiteConfig;
+use App\Support\CurrentUser;
 use App\Support\Http;
 use App\Support\Locale;
 use App\Support\Path;
@@ -37,7 +38,7 @@ class TorrentMaintenanceController extends LegacyController
             abort(404);
         }
 
-        $curUser = SupportContext::getUser() ?? [];
+        $curUser = app(CurrentUser::class)->get() ?? [];
         $currentUserId = (int) ($curUser['id'] ?? 0);
         if (! Permissions::userCan(PermissionEnum::TORRENT_STRUCTURE->value, false, $currentUserId)) {
             abort(403);
@@ -64,7 +65,7 @@ class TorrentMaintenanceController extends LegacyController
             return $this->legacyAbortResponse('Error', 'Invalid ID.');
         }
 
-        $currentUser = SupportContext::getUser() ?? [];
+        $currentUser = app(CurrentUser::class)->get() ?? [];
         $currentUserId = (int) ($currentUser['id'] ?? 0);
         $currentClass = (int) UserDisplay::currentClass();
 
@@ -89,7 +90,7 @@ class TorrentMaintenanceController extends LegacyController
 
     public function takeReseed(Request $request): View|RedirectResponse|Response
     {
-        $curUser = SupportContext::getUser();
+        $curUser = app(CurrentUser::class)->get();
         if ($curUser === null) {
             $qs = $request->getQueryString();
 

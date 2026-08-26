@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use App\Repositories\PageLayoutRepository;
 use App\Support\Bootstrap;
+use App\Support\CurrentUser;
 use App\Support\LegacyAuth;
 use App\Support\LegacyBootstrap;
 use App\Support\Locale;
@@ -54,6 +55,10 @@ final class LegacyRequestMiddleware
         // Make the rewritten request available to the container and URL generator
         // before the legacy bootstrap runs (Nexus/SupportContext read from it).
         $this->bindRequest($request);
+
+        // Reset the per-request CurrentUser cache so it re-reads from Auth
+        // on each request (Octane/test compatibility).
+        app(CurrentUser::class)->reset();
 
         $rootpath = base_path().'/';
         LegacyBootstrap::boot($request, $rootpath);

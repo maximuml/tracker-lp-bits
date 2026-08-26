@@ -6,6 +6,7 @@ use App\Models\Message;
 use App\Models\StaffMessage;
 use App\Models\User;
 use App\Support\Cache;
+use App\Support\CurrentUser;
 use App\Support\Hooks;
 use App\Support\SupportContext;
 use App\Support\UserDisplay;
@@ -25,7 +26,7 @@ class StaffMessageController extends LegacyController
             return $this->legacyAbortResponse('Sorry', 'Access denied.');
         }
 
-        $currentUser = SupportContext::getUser() ?? [];
+        $currentUser = app(CurrentUser::class)->get() ?? [];
         $classes = array_chunk(User::$classes, 4, true);
 
         return $this->legacyPage($request, 'staffmess', true, [
@@ -48,7 +49,7 @@ class StaffMessageController extends LegacyController
             return $this->legacyAbortResponse('Error', 'Permission denied.');
         }
 
-        $currentUser = SupportContext::getUser() ?? [];
+        $currentUser = app(CurrentUser::class)->get() ?? [];
         $senderId = SupportContext::getPost('sender') === 'system' ? 0 : (int) ($currentUser['id'] ?? 0);
         $subject = trim((string) SupportContext::getPost('subject'));
         $msg = trim((string) SupportContext::getPost('msg'));
@@ -123,7 +124,7 @@ class StaffMessageController extends LegacyController
 
     public function takecontact(Request $request): View|RedirectResponse|Response
     {
-        $curUser = SupportContext::getUser() ?? [];
+        $curUser = app(CurrentUser::class)->get() ?? [];
         $langTakecontact = (array) SupportContext::getGlobal('lang_takecontact', []);
 
         if (! $request->isMethod('post')) {

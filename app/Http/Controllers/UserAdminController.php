@@ -10,6 +10,7 @@ use App\Models\UserBanLog;
 use App\Repositories\BonusRepository;
 use App\Repositories\UserListingRepository;
 use App\Repositories\UserRepository;
+use App\Support\CurrentUser;
 use App\Support\LegacyResponse;
 use App\Support\Locale;
 use App\Support\Log;
@@ -29,7 +30,7 @@ class UserAdminController extends LegacyController
 {
     public function users(Request $request): View|RedirectResponse|Response
     {
-        if (! Permissions::userCan(PermissionEnum::VIEW_USER_LIST->value, false, (int) (SupportContext::getUser()['id'] ?? 0))) {
+        if (! Permissions::userCan(PermissionEnum::VIEW_USER_LIST->value, false, (int) (app(CurrentUser::class)->get()['id'] ?? 0))) {
             return $this->legacyAbortResponse('Error', 'Permission denied.');
         }
 
@@ -116,7 +117,7 @@ class UserAdminController extends LegacyController
             return $this->legacyAbortResponse('Error', 'Permission denied, Administrator Only.');
         }
 
-        $curUser = SupportContext::getUser() ?? [];
+        $curUser = app(CurrentUser::class)->get() ?? [];
         $currentUsername = (string) ($curUser['username'] ?? '');
 
         $success = false;
@@ -174,7 +175,7 @@ class UserAdminController extends LegacyController
 
     public function selfEnable(Request $request): View|RedirectResponse|Response
     {
-        $curUser = SupportContext::getUser() ?? [];
+        $curUser = app(CurrentUser::class)->get() ?? [];
         $currentUserId = (int) ($curUser['id'] ?? 0);
         $currentUsername = (string) ($curUser['username'] ?? '');
 
@@ -250,7 +251,7 @@ class UserAdminController extends LegacyController
 
     public function unco(Request $request): View|RedirectResponse|Response
     {
-        if (SupportContext::getUser() === null) {
+        if (app(CurrentUser::class)->get() === null) {
             $qs = $request->getQueryString();
 
             return redirect('/unco.php'.($qs ? '?'.$qs : ''));

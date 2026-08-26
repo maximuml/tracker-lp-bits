@@ -6,6 +6,7 @@ use App\Models\Exam;
 use App\Models\Medal;
 use App\Models\User;
 use App\Support\Cache\LegacyRedisCache;
+use App\Support\CurrentUser;
 use App\Support\Locale;
 use App\Support\Pagination;
 use App\Support\SupportContext;
@@ -21,7 +22,7 @@ class BonusShopController extends LegacyController
 {
     public function medal(Request $request): View|RedirectResponse|Response
     {
-        $curUser = SupportContext::getUser() ?? [];
+        $curUser = app(CurrentUser::class)->get() ?? [];
         $currentUserId = (int) ($curUser['id'] ?? 0);
         $seedbonus = (float) ($curUser['seedbonus'] ?? 0);
 
@@ -161,7 +162,7 @@ JS;
 
     public function task(Request $request): View|RedirectResponse|Response
     {
-        $curUser = SupportContext::getUser() ?? [];
+        $curUser = app(CurrentUser::class)->get() ?? [];
         $currentUserId = (int) ($curUser['id'] ?? 0);
 
         $query = Exam::query()

@@ -7,6 +7,7 @@ namespace App\Services;
 use App\Models\User;
 use App\Repositories\UserListingRepository;
 use App\Repositories\UserSearchRepository;
+use App\Support\CurrentUser;
 use App\Support\Format;
 use App\Support\Frame;
 use App\Support\LegacyResponse;
@@ -35,7 +36,7 @@ final class UsersearchPageService
      */
     public function build(Request $request): array
     {
-        $curUser = (array) (SupportContext::getUser() ?? []);
+        $curUser = (array) (app(CurrentUser::class)->get() ?? []);
         $requestUri = (string) SupportContext::getServerValue('REQUEST_URI');
         $hasModcomment = Schema::hasColumn('users', 'modcomment');
 

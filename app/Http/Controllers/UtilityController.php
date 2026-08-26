@@ -12,6 +12,7 @@ use App\Support\Api;
 use App\Support\Attachment\AttachmentService;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\Captcha;
+use App\Support\CurrentUser;
 use App\Support\Http;
 use App\Support\LegacyAuth;
 use App\Support\Logger;
@@ -39,7 +40,7 @@ class UtilityController extends LegacyController
 
     public function search(Request $request): View|RedirectResponse
     {
-        $curUser = SupportContext::getUser() ?? [];
+        $curUser = app(CurrentUser::class)->get() ?? [];
         $currentUser = ! empty($curUser) ? User::query()->find((int) ($curUser['id'] ?? 0)) : null;
         if ($currentUser === null) {
             $qs = $request->getQueryString();
@@ -76,7 +77,7 @@ class UtilityController extends LegacyController
         }
 
         if (! in_array($action, AjaxService::ALLOWED_ACTIONS, true)) {
-            $currentUser = SupportContext::getUser() ?? [];
+            $currentUser = app(CurrentUser::class)->get() ?? [];
             Logger::writeWithContext((string) ('hacking attempt made by '.($currentUser['username'] ?? 'guest').',uid '.($currentUser['id'] ?? 0)), (string) 'error', (bool) false);
 
             return response()->json(Api::call(1, "Invalid action: {$action}", $request->all()));
@@ -95,7 +96,7 @@ class UtilityController extends LegacyController
 
     public function attachment(Request $request): Response
     {
-        $currentUser = SupportContext::getUser() ?? [];
+        $currentUser = app(CurrentUser::class)->get() ?? [];
         $Attach = new AttachmentService((int) ($currentUser['id'] ?? 0));
 
         $count_limit = (int) $Attach->get_count_limit();
@@ -432,7 +433,7 @@ XML;
             'email' => $email,
             'title' => $title,
             'siteName' => Setting::getSiteName(),
-            'CURUSER' => SupportContext::getUser(),
+            'CURUSER' => app(CurrentUser::class)->get(),
         ]);
     }
 }

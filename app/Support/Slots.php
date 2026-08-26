@@ -105,7 +105,7 @@ final class Slots
      */
     public static function displayWithContext(): string
     {
-        $user = SupportContext::getUser() ?? [];
+        $user = app(CurrentUser::class)->get() ?? [];
         $lang = SupportContext::getLangFunctions();
 
         return self::display(

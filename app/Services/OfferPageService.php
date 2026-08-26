@@ -12,6 +12,7 @@ use App\Support\Cache\LegacyRedisCache;
 use App\Support\Category;
 use App\Support\Comment;
 use App\Support\Config\SiteConfig;
+use App\Support\CurrentUser;
 use App\Support\Form;
 use App\Support\Format;
 use App\Support\Frame;
@@ -45,7 +46,7 @@ final class OfferPageService
      */
     public function build(Request $request): array
     {
-        $curUser = (array) (SupportContext::getUser() ?? []);
+        $curUser = (array) (app(CurrentUser::class)->get() ?? []);
         $lang = (array) (SupportContext::getGlobal('lang_offers') ?? []);
         $userId = (int) ($curUser['id'] ?? 0);
 

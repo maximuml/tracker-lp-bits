@@ -24,6 +24,7 @@ use App\Services\Announce\TrafficAccountant;
 use App\Services\Announce\TrafficResult;
 use App\Support\Cache as AppCache;
 use App\Support\Config\SiteConfig;
+use App\Support\CurrentUser;
 use App\Support\Database;
 use App\Support\Hooks;
 use App\Support\Json;
@@ -31,7 +32,6 @@ use App\Support\LegacyDb;
 use App\Support\Logger;
 use App\Support\Network;
 use App\Support\Permissions;
-use App\Support\SupportContext;
 use App\Support\Tracker;
 use App\Support\Url;
 use App\Support\UserDisplay;
@@ -255,7 +255,7 @@ final class AnnounceService
         }
 
         $this->userId = (int) $this->user['id'];
-        SupportContext::setUser($this->user);
+        app(CurrentUser::class)->set($this->user);
 
         if ($this->user['enabled'] === 'no') {
             throw TrackerException::failure('Your account is disabled!');

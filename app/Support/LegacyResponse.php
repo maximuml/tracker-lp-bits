@@ -146,7 +146,7 @@ final class LegacyResponse
             return true;
         }
 
-        $CURUSER = SupportContext::getUser() ?? [];
+        $CURUSER = app(CurrentUser::class)->get() ?? [];
         $lang_functions = SupportContext::getLangFunctions();
 
         $msg = 'Invalid ID Attempt: Username: '.($CURUSER['username'] ?? '')
@@ -213,7 +213,7 @@ final class LegacyResponse
      */
     public static function canUpload(string $where = 'torrents'): bool
     {
-        $CURUSER = SupportContext::getUser() ?? [];
+        $CURUSER = app(CurrentUser::class)->get() ?? [];
         $lang_functions = SupportContext::getLangFunctions();
 
         if (($CURUSER['uploadpos'] ?? '') != 'yes') {

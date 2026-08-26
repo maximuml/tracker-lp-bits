@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Torrent;
 use App\Support\Bonus;
 use App\Support\Cache\LegacyRedisCache;
+use App\Support\CurrentUser;
 use App\Support\LegacyResponse;
 use App\Support\SupportContext;
 use Illuminate\Http\RedirectResponse;
@@ -24,7 +25,7 @@ class TorrentBookmarkController extends LegacyController
             'Content-Type' => 'text/xml; charset=utf-8',
         ];
 
-        $user = SupportContext::getUser();
+        $user = app(CurrentUser::class)->get();
         if ($user === null) {
             return response('failed', 200, $headers);
         }
@@ -59,11 +60,11 @@ class TorrentBookmarkController extends LegacyController
 
     public function thanks(Request $request): Response|RedirectResponse
     {
-        if (SupportContext::getUser() === null) {
+        if (app(CurrentUser::class)->get() === null) {
             return redirect('/thanks.php'.($request->getQueryString() ? '?'.$request->getQueryString() : ''));
         }
 
-        $curUser = SupportContext::getUser();
+        $curUser = app(CurrentUser::class)->get();
         $userid = (int) ($curUser['id'] ?? 0);
 
         if ($request->query('id') !== null) {

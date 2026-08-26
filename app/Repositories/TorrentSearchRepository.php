@@ -6,6 +6,7 @@ use App\Auth\Permission;
 use App\Models\Torrent;
 use App\Support\Category;
 use App\Support\Config\SiteConfig;
+use App\Support\CurrentUser;
 use App\Support\Hooks;
 use App\Support\LegacyResponse;
 use App\Support\Log;
@@ -28,7 +29,7 @@ class TorrentSearchRepository
      */
     public static function getListingData(array $query = []): array
     {
-        $CURUSER = SupportContext::getUser() ?? [];
+        $CURUSER = app(CurrentUser::class)->get() ?? [];
         $lang_torrents = SupportContext::getGlobal('lang_torrents', []);
         $browsecatmode = (int) SupportContext::getGlobal('browsecatmode', 1);
         $torrentsperpage_main = (int) SupportContext::getGlobal('torrentsperpage_main', 0);

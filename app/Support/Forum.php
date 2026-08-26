@@ -90,7 +90,7 @@ final class Forum
      */
     public static function isModerator(int|string $id, string $in = 'post'): bool
     {
-        $CURUSER = SupportContext::getUser() ?? [];
+        $CURUSER = app(CurrentUser::class)->get() ?? [];
 
         $forumRep = app(ForumRepository::class);
         $userId = (int) ($CURUSER['id'] ?? 0);

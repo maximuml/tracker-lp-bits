@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Support\Category;
+use App\Support\CurrentUser;
 use App\Support\Format;
 use App\Support\Html;
 use App\Support\Http;
@@ -23,7 +24,7 @@ class RssController extends LegacyController
             return $this->handleGetrssPost($request);
         }
 
-        $curUser = SupportContext::getUser();
+        $curUser = app(CurrentUser::class)->get();
         if ($curUser === null) {
             return redirect('/getrss.php');
         }
@@ -100,7 +101,7 @@ class RssController extends LegacyController
 
     private function handleGetrssPost(Request $request): Response|RedirectResponse
     {
-        $curUser = SupportContext::getUser();
+        $curUser = app(CurrentUser::class)->get();
         if ($curUser === null) {
             return redirect('/getrss.php');
         }

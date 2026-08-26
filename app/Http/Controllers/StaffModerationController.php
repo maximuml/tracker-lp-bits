@@ -10,6 +10,7 @@ use App\Models\UserModifyLog;
 use App\Models\UsernameChangeLog;
 use App\Repositories\ModtaskRepository;
 use App\Support\Cache;
+use App\Support\CurrentUser;
 use App\Support\Http;
 use App\Support\Locale;
 use App\Support\Log;
@@ -31,7 +32,7 @@ class StaffModerationController extends LegacyController
 {
     public function modtask(Request $request): Response|RedirectResponse
     {
-        $currentUser = SupportContext::getUser() ?? [];
+        $currentUser = app(CurrentUser::class)->get() ?? [];
         $currentUserId = (int) ($currentUser['id'] ?? 0);
         $baseUrl = (string) SupportContext::getGlobal('BASEURL', '');
 

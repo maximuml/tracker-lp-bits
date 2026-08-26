@@ -243,7 +243,7 @@ final class Time
         }
 
         $lang_functions = SupportContext::getLangFunctions();
-        $CURUSER = SupportContext::getUser();
+        $CURUSER = app(CurrentUser::class)->get();
         $TIMENOW = defined('TIMENOW') ? (int) TIMENOW : time();
 
         if (isset($CURUSER) && ($CURUSER['timetype'] ?? '') != 'timealive' && ! $forceago) {

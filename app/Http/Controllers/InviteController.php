@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Repositories\InviteRepository;
 use App\Repositories\UserRepository;
 use App\Support\Config\SiteConfig;
+use App\Support\CurrentUser;
 use App\Support\Locale;
 use App\Support\Pagination;
 use App\Support\SupportContext;
@@ -25,7 +26,7 @@ class InviteController extends LegacyController
 {
     public function invite(Request $request): View|RedirectResponse|Response
     {
-        $currentUser = SupportContext::getUser() ?? [];
+        $currentUser = app(CurrentUser::class)->get() ?? [];
         $currentUserId = (int) ($currentUser['id'] ?? 0);
         $id = $request->input('id') !== null ? (int) $request->input('id') : $currentUserId;
         $langInvite = (array) (SupportContext::getGlobal('lang_invite') ?? []);

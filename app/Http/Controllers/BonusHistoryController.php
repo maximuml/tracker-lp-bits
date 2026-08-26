@@ -12,6 +12,7 @@ use App\Models\User;
 use App\Repositories\BonusRepository;
 use App\Support\Api;
 use App\Support\Bonus;
+use App\Support\CurrentUser;
 use App\Support\Locale;
 use App\Support\Pagination;
 use App\Support\SupportContext;
@@ -29,7 +30,7 @@ class BonusHistoryController extends LegacyController
 {
     public function bonusLog(Request $request): View|RedirectResponse|Response
     {
-        $curUser = SupportContext::getUser() ?? [];
+        $curUser = app(CurrentUser::class)->get() ?? [];
         $uid = (int) (SupportContext::getRequestInput('uid') ?? $curUser['id'] ?? 0);
 
         if (! Validators::isId($uid)) {
@@ -261,7 +262,7 @@ JS;
 
     public function magic(Request $request): JsonResponse|Response
     {
-        $curUser = SupportContext::getUser() ?? [];
+        $curUser = app(CurrentUser::class)->get() ?? [];
         $userId = (int) ($curUser['id'] ?? 0);
         $torrentId = (int) ($request->input('id') ?? 0);
         $value = (int) abs((float) ($request->input('value') ?? 0));

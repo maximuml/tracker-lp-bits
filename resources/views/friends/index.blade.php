@@ -1,6 +1,6 @@
 @php
 $lang_friends = (array) (\App\Support\SupportContext::getGlobal('lang_friends') ?? []);
-$CURUSER = (array) (\App\Support\SupportContext::getUser() ?? []);
+$CURUSER = (array) (\app(\App\Support\CurrentUser::class)->get() ?? []);
 $userid = (int) ($userid ?? 0);
 $friendsList = (array) ($friendsList ?? []);
 $blockRows = (array) ($blockRows ?? []);

@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Repositories\UserRepository;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\Config\SiteConfig;
+use App\Support\CurrentUser;
 use App\Support\Email;
 use App\Support\Environment;
 use App\Support\Format;
@@ -56,7 +57,7 @@ class SystemBulkController extends LegacyController
             return $this->legacyAbortResponse('Error', 'Permission denied!');
         }
 
-        $curUser = SupportContext::getUser() ?? [];
+        $curUser = app(CurrentUser::class)->get() ?? [];
         $senderId = SupportContext::getPost('sender') === 'system' ? 0 : (int) ($curUser['id'] ?? 0);
         $added = date('Y-m-d H:i:s');
         $msg = trim((string) SupportContext::getPost('msg'));
@@ -98,7 +99,7 @@ class SystemBulkController extends LegacyController
 
     public function takeinvite(Request $request): Response|RedirectResponse
     {
-        $curUser = SupportContext::getUser();
+        $curUser = app(CurrentUser::class)->get();
         if ($curUser === null) {
             $qs = $request->getQueryString();
 
@@ -262,7 +263,7 @@ class SystemBulkController extends LegacyController
 
     public function takeupdate(Request $request): Response|RedirectResponse
     {
-        $curUser = SupportContext::getUser();
+        $curUser = app(CurrentUser::class)->get();
         if ($curUser === null) {
             $qs = $request->getQueryString();
 
@@ -350,7 +351,7 @@ class SystemBulkController extends LegacyController
         $lang = (array) (SupportContext::getGlobal('lang_incrementbulk') ?? []);
         $validTypeMap = (array) ($lang['types'] ?? []);
 
-        $currentUser = SupportContext::getUser() ?? [];
+        $currentUser = app(CurrentUser::class)->get() ?? [];
         $senderId = $request->input('sender') === 'system' ? 0 : ((int) ($currentUser['id'] ?? 0));
         $added = date('Y-m-d H:i:s');
         $msg = trim((string) $request->input('msg', ''));

@@ -7,6 +7,7 @@ use App\Models\Message;
 use App\Models\Torrent;
 use App\Models\User;
 use App\Support\Bonus;
+use App\Support\CurrentUser;
 use App\Support\Locale;
 use App\Support\Log;
 use App\Support\Permissions;
@@ -21,7 +22,7 @@ class TorrentDeleteController extends LegacyController
 {
     public function fastDelete(Request $request): Response|RedirectResponse
     {
-        $curUser = SupportContext::getUser();
+        $curUser = app(CurrentUser::class)->get();
         if ($curUser === null) {
             $qs = $request->getQueryString();
 
@@ -93,7 +94,7 @@ class TorrentDeleteController extends LegacyController
 
     public function delete(Request $request): View|RedirectResponse|Response
     {
-        $curUser = SupportContext::getUser();
+        $curUser = app(CurrentUser::class)->get();
         if ($curUser === null) {
             $qs = $request->getQueryString();
 

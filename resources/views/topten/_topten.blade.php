@@ -1,6 +1,6 @@
 <?php
 $lang_topten = (array) (\App\Support\SupportContext::getGlobal('lang_topten') ?? []);
-$CURUSER = \App\Support\SupportContext::getUser() ?? [];
+$CURUSER = \app(\App\Support\CurrentUser::class)->get() ?? [];
 
 if (!function_exists('usershare_table')) { function usershare_table($res, $frame_caption)
 {
@@ -335,7 +335,7 @@ $lang_topten = (array) (\App\Support\SupportContext::getGlobal('lang_topten') ??
 if (!function_exists('supply_snatchtable')) { function supply_snatchtable($res, $frame_caption)
 {
 $lang_topten = (array) (\App\Support\SupportContext::getGlobal('lang_topten') ?? []);
-$CURUSER = \App\Support\SupportContext::getUser() ?? [];
+$CURUSER = \app(\App\Support\CurrentUser::class)->get() ?? [];
 	\App\Support\Html::beginFrame($frame_caption, true);
 	\App\Support\Html::beginTable();
 ?>

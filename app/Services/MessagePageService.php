@@ -7,6 +7,7 @@ namespace App\Services;
 use App\Models\Message;
 use App\Repositories\MessageRepository;
 use App\Support\Cache\LegacyRedisCache;
+use App\Support\CurrentUser;
 use App\Support\Format;
 use App\Support\LegacyResponse;
 use App\Support\Pagination;
@@ -39,7 +40,7 @@ final class MessagePageService
      */
     public function build(Request $request): array
     {
-        $curUser = (array) (SupportContext::getUser() ?? []);
+        $curUser = (array) (app(CurrentUser::class)->get() ?? []);
         $lang = (array) (SupportContext::getGlobal('lang_messages') ?? []);
         $userId = (int) ($curUser['id'] ?? 0);
 

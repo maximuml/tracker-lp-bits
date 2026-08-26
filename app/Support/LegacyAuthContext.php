@@ -69,7 +69,7 @@ final class LegacyAuthContext
         }
 
         return new self(
-            user: SupportContext::getUser(),
+            user: app(CurrentUser::class)->get(),
             lang: SupportContext::getLangFunctions(),
             cache: app(LegacyRedisCache::class),
             ip: \function_exists('getip') ? Network::clientIp((bool) true) : Network::clientIp(),

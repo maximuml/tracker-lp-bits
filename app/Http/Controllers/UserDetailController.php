@@ -13,6 +13,7 @@ use App\Repositories\UserDetailRepository;
 use App\Repositories\UserRepository;
 use App\Support\Bonus;
 use App\Support\Country;
+use App\Support\CurrentUser;
 use App\Support\Env;
 use App\Support\LegacyResponse;
 use App\Support\Locale;
@@ -33,14 +34,14 @@ class UserDetailController extends Controller
         $id = (int) $request->input('id', 0);
 
         if ($id <= 0) {
-            $currentUser = SupportContext::getUser();
+            $currentUser = app(CurrentUser::class)->get();
             $id = (int) ($currentUser['id'] ?? 0);
             if ($id <= 0) {
                 abort(404);
             }
         }
 
-        if (SupportContext::getUser() === null) {
+        if (app(CurrentUser::class)->get() === null) {
             return redirect('/userdetails.php?'.$request->getQueryString());
         }
 
@@ -86,7 +87,7 @@ class UserDetailController extends Controller
      */
     private function buildDetailsViewData(int $id, array $user, ?User $userModel): array
     {
-        $currentUser = SupportContext::getUser() ?? [];
+        $currentUser = app(CurrentUser::class)->get() ?? [];
         $currentUserId = (int) ($currentUser['id'] ?? 0);
         $isOwner = $currentUserId === $id;
 

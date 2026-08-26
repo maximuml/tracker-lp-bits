@@ -85,12 +85,12 @@ final class Menu
             SupportContext::getLangFunctions(),
             (string) SupportContext::getGlobal('enableoffer', ''),
             $customMenu !== '' ? $customMenu : null,
-            SupportContext::getUser(),
+            app(CurrentUser::class)->get(),
             app(LegacyRedisCache::class),
             (string) SupportContext::getGlobal('CURLANGDIR', ''),
         );
 
-        $user = SupportContext::getUser();
+        $user = app(CurrentUser::class)->get();
         if ($user && SupportContext::getGlobal('where_tweak', '') === 'yes') {
             SupportContext::addUserUpdate('page', $result['selected']);
         }

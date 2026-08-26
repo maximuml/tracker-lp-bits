@@ -6,6 +6,7 @@ use App\Repositories\IndexRepository;
 use App\Services\IndexPageService;
 use App\Support\Bonus;
 use App\Support\Cache\LegacyRedisCache;
+use App\Support\CurrentUser;
 use App\Support\SupportContext;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -20,7 +21,7 @@ class IndexController extends Controller
 
     public function legacy(Request $request): View|Response|RedirectResponse
     {
-        $user = SupportContext::getUser();
+        $user = app(CurrentUser::class)->get();
         if ($user === null) {
             $qs = $request->getQueryString();
 
@@ -41,7 +42,7 @@ class IndexController extends Controller
     private function handlePollVote(Request $request): RedirectResponse
     {
         $choice = $request->input('choice');
-        $user = SupportContext::getUser();
+        $user = app(CurrentUser::class)->get();
 
         if ($choice === null || $choice === '' || $choice >= 256 || $choice != floor($choice)) {
             return redirect('/index.php');

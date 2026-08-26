@@ -7,6 +7,7 @@ use App\Enums\Permission\PermissionEnum;
 use App\Models\Setting;
 use App\Repositories\LogRepository;
 use App\Support\Cache\LegacyRedisCache;
+use App\Support\CurrentUser;
 use App\Support\Pagination;
 use App\Support\SupportContext;
 use App\Support\Time;
@@ -33,7 +34,7 @@ class LogController extends LegacyController
             );
         }
 
-        $currentUser = (array) (SupportContext::getUser() ?? []);
+        $currentUser = (array) (app(CurrentUser::class)->get() ?? []);
         $userId = (int) ($currentUser['id'] ?? 0);
 
         $action = (string) ($request->input('action', 'dailylog'));

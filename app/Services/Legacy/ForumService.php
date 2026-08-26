@@ -10,6 +10,7 @@ use App\Models\Message;
 use App\Repositories\ForumRepository;
 use App\Support\Bonus;
 use App\Support\Cache\LegacyRedisCache;
+use App\Support\CurrentUser;
 use App\Support\Forum;
 use App\Support\LegacyResponse;
 use App\Support\Locale;
@@ -68,7 +69,7 @@ final class ForumService
      */
     private function user(): array
     {
-        return (array) (SupportContext::getUser() ?? []);
+        return (array) (app(CurrentUser::class)->get() ?? []);
     }
 
     /**

@@ -12,6 +12,7 @@ use App\Models\User;
 use App\Repositories\BonusRepository;
 use App\Support\Bonus;
 use App\Support\Config\SiteConfig;
+use App\Support\CurrentUser;
 use App\Support\Format;
 use App\Support\LegacyResponse;
 use App\Support\Locale;
@@ -45,7 +46,7 @@ final class BonusPageService
      */
     public function build(Request $request): array
     {
-        $curUser = (array) (SupportContext::getUser() ?? []);
+        $curUser = (array) (app(CurrentUser::class)->get() ?? []);
         $lang = (array) (SupportContext::getGlobal('lang_mybonus') ?? []);
         $userId = (int) ($curUser['id'] ?? 0);
 

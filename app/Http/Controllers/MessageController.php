@@ -12,6 +12,7 @@ use App\Models\User;
 use App\Repositories\MessageRepository;
 use App\Services\Legacy\MessageService;
 use App\Services\MessagePageService;
+use App\Support\CurrentUser;
 use App\Support\SupportContext;
 use App\Support\UserDisplay;
 use App\Support\Validators;
@@ -77,7 +78,7 @@ class MessageController extends LegacyController
                 return $this->legacyAbortResponse($langSendmessage['std_error'] ?? 'Error', $langSendmessage['std_permission_denied'] ?? 'Permission denied.');
             }
             $msga = $msg->toArray();
-            $currentUser = (array) (SupportContext::getUser() ?? []);
+            $currentUser = (array) (app(CurrentUser::class)->get() ?? []);
             if ((int) ($msga['receiver'] ?? 0) !== (int) ($currentUser['id'] ?? 0)) {
                 return $this->legacyAbortResponse($langSendmessage['std_error'] ?? 'Error', $langSendmessage['std_permission_denied'] ?? 'Permission denied.');
             }

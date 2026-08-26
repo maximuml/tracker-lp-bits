@@ -9,6 +9,7 @@ use App\Enums\Permission\PermissionEnum;
 use App\Models\User;
 use App\Repositories\ForumRepository;
 use App\Support\Cache\LegacyRedisCache;
+use App\Support\CurrentUser;
 use App\Support\Format;
 use App\Support\Forum;
 use App\Support\Frame;
@@ -49,7 +50,7 @@ final class ForumPageService
      */
     public function build(Request $request): array
     {
-        $curUser = (array) (SupportContext::getUser() ?? []);
+        $curUser = (array) (app(CurrentUser::class)->get() ?? []);
         $lang = (array) (SupportContext::getGlobal('lang_forums') ?? []);
         $userId = (int) ($curUser['id'] ?? 0);
 
@@ -151,7 +152,7 @@ final class ForumPageService
     private function buildComposeFrame(int $id, string $type, array $lang): array
     {
         $maxsubjectlength = (int) SupportContext::getGlobal('maxsubjectlength');
-        $CURUSER = (array) (SupportContext::getUser() ?? []);
+        $CURUSER = (array) (app(CurrentUser::class)->get() ?? []);
         $hassubject = false;
         $subject = '';
         $body = '';
@@ -1158,7 +1159,7 @@ final class ForumPageService
      */
     private function catchUp(): void
     {
-        $CURUSER = (array) (SupportContext::getUser() ?? []);
+        $CURUSER = (array) (app(CurrentUser::class)->get() ?? []);
         $Cache = app(LegacyRedisCache::class);
 
         if (! $CURUSER) {

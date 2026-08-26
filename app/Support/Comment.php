@@ -282,7 +282,7 @@ final class Comment
     public static function table(array $rows, string $type, int|string $parentId, bool $review = false): string
     {
         $lang_functions = SupportContext::getLangFunctions();
-        $CURUSER = SupportContext::getUser();
+        $CURUSER = app(CurrentUser::class)->get();
         $commanage_class = (int) SupportContext::getGlobal('commanage_class', 0);
 
         $contentWidth = \defined('CONTENT_WIDTH') ? (int) CONTENT_WIDTH : 100;

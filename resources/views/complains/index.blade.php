@@ -1,7 +1,7 @@
 @php
 $lang_complains = (array) (\App\Support\SupportContext::getGlobal('lang_complains') ?? []);
 $lang_functions = (array) (\App\Support\SupportContext::getGlobal('lang_functions') ?? []);
-$CURUSER = (array) (\App\Support\SupportContext::getUser() ?? []);
+$CURUSER = (array) (\app(\App\Support\CurrentUser::class)->get() ?? []);
 $mode = (string) ($mode ?? 'compose');
 $isAdmin = (bool) ($isAdmin ?? false);
 $isLogin = (bool) ($isLogin ?? false);

@@ -6,6 +6,7 @@ use App\Enums\Permission\PermissionEnum;
 use App\Models\Setting;
 use App\Models\User;
 use App\Support\Country;
+use App\Support\CurrentUser;
 use App\Support\Permissions;
 use App\Support\SupportContext;
 use App\Support\UserClass;
@@ -20,7 +21,7 @@ class StaffPageController extends LegacyController
 {
     public function staff(Request $request): View|RedirectResponse|Response
     {
-        $curUser = SupportContext::getUser() ?? [];
+        $curUser = app(CurrentUser::class)->get() ?? [];
         $currentUserId = (int) ($curUser['id'] ?? 0);
 
         if (! Permissions::userCan(PermissionEnum::STAFF_MEMBER->value, false, $currentUserId)) {

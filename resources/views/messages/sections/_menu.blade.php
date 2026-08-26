@@ -2,7 +2,7 @@
 /** @var int $selected */
 $lang_messages = (array) (\App\Support\SupportContext::getGlobal('lang_messages') ?? []);
 $BASEURL = (string) (\App\Support\SupportContext::getGlobal('BASEURL', ''));
-$CURUSER = (array) (\App\Support\SupportContext::getUser() ?? []);
+$CURUSER = (array) (\app(\App\Support\CurrentUser::class)->get() ?? []);
 $pmBoxes = \App\Repositories\MessageRepository::getUserMailboxes((int) ($CURUSER['id'] ?? 0));
 @endphp
 <div id="pmboxnav"><ul id="pmboxmenu" class="menu">

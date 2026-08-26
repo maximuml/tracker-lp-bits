@@ -31,7 +31,7 @@ final class UserDisplay
      */
     public static function currentClass(): string|int
     {
-        $user = SupportContext::getUser();
+        $user = app(CurrentUser::class)->get();
         if (defined('IN_NEXUS') && IN_NEXUS) {
             return $user['class'] ?? '';
         }
@@ -60,7 +60,7 @@ final class UserDisplay
      */
     public static function currentId(): int
     {
-        $user = SupportContext::getUser();
+        $user = app(CurrentUser::class)->get();
         if (defined('IN_NEXUS') && IN_NEXUS) {
             return (int) ($user['id'] ?? 0);
         }
@@ -79,7 +79,7 @@ final class UserDisplay
      */
     public static function currentPasskey(): string
     {
-        $user = SupportContext::getUser();
+        $user = app(CurrentUser::class)->get();
         if (defined('IN_NEXUS') && IN_NEXUS) {
             return $user['passkey'] ?? '';
         }
@@ -98,7 +98,7 @@ final class UserDisplay
      */
     public static function currentUsername(): string
     {
-        $user = SupportContext::getUser();
+        $user = app(CurrentUser::class)->get();
         if (defined('IN_NEXUS') && IN_NEXUS) {
             return $user['username'] ?? '';
         }

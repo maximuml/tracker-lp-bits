@@ -95,7 +95,7 @@ final class Logger
         $passkey = '';
 
         if (defined('IN_NEXUS') && IN_NEXUS) {
-            $curUser = SupportContext::getUser();
+            $curUser = app(CurrentUser::class)->get();
             if (is_array($curUser) && ! empty($curUser)) {
                 $user = $curUser;
                 $passkey = (string) ($curUser['passkey'] ?? '');

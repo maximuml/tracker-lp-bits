@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Support\Cache\LegacyRedisCache;
+use App\Support\CurrentUser;
 use App\Support\Env;
 use App\Support\Environment;
 use App\Support\Hooks;
@@ -40,6 +41,7 @@ class AppServiceProvider extends ServiceProvider
 
             return $cache;
         });
+        $this->app->singleton(CurrentUser::class);
 
         Hooks::doAction('nexus_register');
     }

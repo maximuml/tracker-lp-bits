@@ -6,6 +6,7 @@ use App\Http\Resources\NewsResource;
 use App\Models\News;
 use App\Repositories\IndexRepository;
 use App\Support\Cache\LegacyRedisCache;
+use App\Support\CurrentUser;
 use App\Support\Events;
 use App\Support\SupportContext;
 use Illuminate\Http\RedirectResponse;
@@ -69,7 +70,7 @@ class NewsController extends LegacyController
             }
             $notify = $request->input('notify') === 'yes' ? 'yes' : 'no';
 
-            $currentUser = (array) (SupportContext::getUser() ?? []);
+            $currentUser = (array) (app(CurrentUser::class)->get() ?? []);
             $newsId = (int) News::query()->insertGetId([
                 'userid' => (int) ($currentUser['id'] ?? 0),
                 'added' => $added,
@@ -187,7 +188,7 @@ class NewsController extends LegacyController
             'notify' => 'in:yes,no',
         ]);
 
-        $currentUser = (array) (SupportContext::getUser() ?? []);
+        $currentUser = (array) (app(CurrentUser::class)->get() ?? []);
         $data['userid'] = (int) ($currentUser['id'] ?? 0);
         $data['added'] = now()->toDateTimeString();
         $data['notify'] = $data['notify'] ?? 'no';

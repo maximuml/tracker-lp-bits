@@ -1,7 +1,7 @@
 <?php
 
 $__server_REQUEST_URI = (string) ($requestUri ?? \App\Support\SupportContext::getServerValue('REQUEST_URI'));
-$CURUSER = (array) ($CURUSER ?? \App\Support\SupportContext::getUser() ?? []);
+$CURUSER = (array) ($CURUSER ?? \app(\App\Support\CurrentUser::class)->get() ?? []);
 $userInfo = $userInfo ?? null;
 $userid = (int) ($userid ?? $CURUSER['id'] ?? 0);
 $status = $status ?? \App\Models\HitAndRun::STATUS_INSPECTING;

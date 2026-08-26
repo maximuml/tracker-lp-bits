@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Auth\Permission;
 use App\Enums\Permission\PermissionEnum;
 use App\Repositories\ShoutboxRepository;
+use App\Support\CurrentUser;
 use App\Support\Permissions;
 use App\Support\Shoutbox;
 use App\Support\SupportContext;
@@ -39,7 +40,7 @@ class ShoutboxController extends LegacyController
 
     public function shoutbox(Request $request): Response
     {
-        $currentUser = SupportContext::getUser() ?? [];
+        $currentUser = app(CurrentUser::class)->get() ?? [];
         $currentUserId = (int) ($currentUser['id'] ?? 0);
 
         $del = (int) $request->input('del', 0);
@@ -113,7 +114,7 @@ class ShoutboxController extends LegacyController
     {
         $result = $this->repository->history($request);
 
-        $currentUser = SupportContext::getUser() ?? [];
+        $currentUser = app(CurrentUser::class)->get() ?? [];
         $currentUserId = (int) ($currentUser['id'] ?? 0);
         $rows = (array) ($result['data'] ?? []);
         $shoutIds = array_map(fn ($r) => (int) ($r['id'] ?? 0), $rows);
@@ -142,7 +143,7 @@ class ShoutboxController extends LegacyController
 
     public function shoutboxSse(Request $request): SymfonyResponse
     {
-        $user = SupportContext::getUser();
+        $user = app(CurrentUser::class)->get();
         if ($user === null) {
             return new SymfonyResponse('', 403);
         }
@@ -199,7 +200,7 @@ class ShoutboxController extends LegacyController
                 $query = DB::table('shoutbox')
                     ->orderBy('id')
                     ->where('id', '>', $lastId);
-                Shoutbox::applyTypeFilter($query, $type, SupportContext::getUser());
+                Shoutbox::applyTypeFilter($query, $type, app(CurrentUser::class)->get());
 
                 return $query;
             };

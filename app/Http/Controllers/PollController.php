@@ -6,6 +6,7 @@ use App\Http\Resources\PollResource;
 use App\Models\Poll;
 use App\Repositories\IndexRepository;
 use App\Repositories\PollRepository;
+use App\Support\CurrentUser;
 use App\Support\Pagination;
 use App\Support\Strings;
 use App\Support\SupportContext;
@@ -215,7 +216,7 @@ class PollController extends LegacyController
      */
     public function vote(Request $request): array
     {
-        $currentUser = (array) (SupportContext::getUser() ?? []);
+        $currentUser = (array) (app(CurrentUser::class)->get() ?? []);
         $userId = (int) ($currentUser['id'] ?? 0);
 
         $data = $request->validate([

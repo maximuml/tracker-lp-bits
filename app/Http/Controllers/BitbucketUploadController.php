@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Support\Cache\LegacyRedisCache;
+use App\Support\CurrentUser;
 use App\Support\Http;
 use App\Support\LegacyResponse;
 use App\Support\Locale;
@@ -30,8 +31,8 @@ class BitbucketUploadController extends Controller
             return redirect('/login.php?returnto='.urlencode($request->fullUrl()));
         }
 
-        $currentUser = SupportContext::getUser() ?? $user->toLegacyArray();
-        SupportContext::setUser($currentUser);
+        $currentUser = app(CurrentUser::class)->get() ?? $user->toLegacyArray();
+        app(CurrentUser::class)->set($currentUser);
 
         $lang = $this->loadLang();
 
@@ -63,8 +64,8 @@ class BitbucketUploadController extends Controller
             return redirect('/login.php?returnto='.urlencode($request->fullUrl()));
         }
 
-        $currentUser = SupportContext::getUser() ?? $user->toLegacyArray();
-        SupportContext::setUser($currentUser);
+        $currentUser = app(CurrentUser::class)->get() ?? $user->toLegacyArray();
+        app(CurrentUser::class)->set($currentUser);
 
         $lang = $this->loadLang();
 

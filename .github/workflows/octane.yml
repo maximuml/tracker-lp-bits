@@ -54,6 +54,8 @@ jobs:
         run: composer dump-autoload --no-interaction --no-scripts
 
       - name: Download RoadRunner binary
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: ./vendor/bin/rr get-binary
 
       - name: Prepare environment

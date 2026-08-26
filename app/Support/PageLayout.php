@@ -39,6 +39,11 @@ class PageLayout
         return self::$context;
     }
 
+    public static function resetState(): void
+    {
+        self::$context = null;
+    }
+
     public static function header(string $title = '', bool $msgalert = true, string $script = '', string $place = ''): void
     {
         $context = self::getContext();

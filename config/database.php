@@ -57,7 +57,7 @@ return [
             'strict' => true,
             'engine' => null,
             'options' => extension_loaded('pdo_mysql') ? array_filter([
-                PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
+                1009, // PDO::MYSQL_ATTR_SSL_CA (deprecated in PHP 8.5) => env('MYSQL_ATTR_SSL_CA'),
             ]) : [],
             'read' => [
                 'host' => [env('DB_READ_HOST', env('DB_HOST', '127.0.0.1'))],

@@ -39,3 +39,9 @@ attachments
 /public/attachments
 /public/bitbucket
 /torrents/*.torrent
+
+**/caddy
+frankenphp
+frankenphp-worker.php
+rr
+.rr.yaml

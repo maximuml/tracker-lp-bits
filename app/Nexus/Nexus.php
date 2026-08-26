@@ -238,6 +238,11 @@ final class Nexus
     public static function flush()
     {
         self::$booted = false;
+        self::$instance = null;
+        self::$appendHeaders = [];
+        self::$appendFooters = [];
+        self::$translator = null;
+        self::$queueManager = null;
     }
 
     private function setRequestId()
